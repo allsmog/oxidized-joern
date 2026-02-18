@@ -75,4 +75,32 @@ class NamespaceBlockTests extends KotlinCode2CpgFixture(withOssDataflow = false)
       nsb.fullName shouldBe "android.webkit.WebView"
     }
   }
+
+  "CPG for multiple Kotlin files in the same package" should {
+    val cpg = code(
+      """
+        |package mypkg
+        |
+        |fun first() = 1
+        |""".stripMargin,
+      "First.kt"
+    ).moreCode(
+      """
+        |package mypkg
+        |
+        |fun second() = 2
+        |""".stripMargin,
+      "Second.kt"
+    )
+
+    "should keep fake global TYPE_DECL full names unique" in {
+      val fakeGlobalTypeDeclFullNames = cpg.typeDecl.nameExact("<global>").filename(".*\\.kt").fullName.l
+      fakeGlobalTypeDeclFullNames.size shouldBe fakeGlobalTypeDeclFullNames.distinct.size
+    }
+
+    "should keep fake global METHOD full names unique" in {
+      val fakeGlobalMethodFullNames = cpg.method.nameExact("<global>").filename(".*\\.kt").fullName.l
+      fakeGlobalMethodFullNames.size shouldBe fakeGlobalMethodFullNames.distinct.size
+    }
+  }
 }

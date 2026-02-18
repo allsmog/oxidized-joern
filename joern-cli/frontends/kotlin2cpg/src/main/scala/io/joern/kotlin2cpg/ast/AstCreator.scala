@@ -366,14 +366,25 @@ class AstCreator(
       }
     methodAstParentStack.push(node)
 
-    val name     = NamespaceTraversal.globalNamespaceName
-    val fullName = node.fullName
+    val name                       = NamespaceTraversal.globalNamespaceName
+    val fullName                   = node.fullName
+    val fakeGlobalTypeDeclFullName = s"$relativizedPath:$fullName"
+    val fakeGlobalMethodFullName   = s"$fakeGlobalTypeDeclFullName.global"
     val fakeGlobalTypeDecl =
-      typeDeclNode(ktFile, name, fullName, relativizedPath, name, NodeTypes.NAMESPACE_BLOCK, fullName)
+      typeDeclNode(ktFile, name, fakeGlobalTypeDeclFullName, relativizedPath, name, NodeTypes.NAMESPACE_BLOCK, fullName)
     methodAstParentStack.push(fakeGlobalTypeDecl)
 
     val fakeGlobalMethod =
-      methodNode(ktFile, name, name, fullName, None, relativizedPath, Option(NodeTypes.TYPE_DECL), Option(fullName))
+      methodNode(
+        ktFile,
+        name,
+        name,
+        fakeGlobalMethodFullName,
+        None,
+        relativizedPath,
+        Option(NodeTypes.TYPE_DECL),
+        Option(fakeGlobalTypeDeclFullName)
+      )
     methodAstParentStack.push(fakeGlobalMethod)
     scope.pushNewScope(fakeGlobalMethod)
 
