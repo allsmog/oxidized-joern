@@ -344,15 +344,19 @@ trait AstForExpressionsCreator(implicit withSchemaValidation: ValidationMode) {
         },
         argIdx
       ).argumentName(argNameMaybe)
-    val receiverNode =
-      if (argAsts.sizeIs == 1 && argAsts.head.root.get.isInstanceOf[NewMethodRef]) argAsts.head.root.get
-      else receiverAst.root.get
+
+    val (receiverNode, argumentNodes) = argAsts match {
+      case List(methodRefAst) if methodRefAst.root.exists(_.isInstanceOf[NewMethodRef]) =>
+        (methodRefAst.root.get, Seq.empty)
+      case _ =>
+        (receiverAst.root.get, argAsts.map(_.root.get))
+    }
 
     Ast(node)
       .withChild(receiverAst)
       .withArgEdge(node, receiverNode)
       .withChildren(argAsts)
-      .withArgEdges(node, argAsts.map(_.root.get))
+      .withArgEdges(node, argumentNodes)
       .withReceiverEdge(node, receiverNode)
   }
 
