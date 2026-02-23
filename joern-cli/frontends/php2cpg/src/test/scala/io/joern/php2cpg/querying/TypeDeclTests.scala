@@ -52,6 +52,12 @@ class TypeDeclTests extends PhpCode2CpgFixture {
         }
       }
     }
+
+    "not inherit from the enclosing type for the synthetic method type decl" in {
+      inside(cpg.typeDecl.name("foo").l) { case List(fooMethodTypeDecl) =>
+        fooMethodTypeDecl.inheritsFromTypeFullName shouldBe empty
+      }
+    }
   }
 
   "class methods" should {
@@ -85,6 +91,12 @@ class TypeDeclTests extends PhpCode2CpgFixture {
           fooMethod.name shouldBe "foo"
           fooMethod.fullName shouldBe "Foo.foo"
         }
+      }
+    }
+
+    "not inherit from the enclosing type for the synthetic method type decl" in {
+      inside(cpg.typeDecl.name("foo").l) { case List(fooMethodTypeDecl) =>
+        fooMethodTypeDecl.inheritsFromTypeFullName shouldBe empty
       }
     }
 

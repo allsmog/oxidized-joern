@@ -198,7 +198,6 @@ trait AstForFunctionsCreator(implicit withSchemaValidation: ValidationMode) { th
     parameters: List[Ast]
   ): Unit = {
     val methodTypeDecl = typeDeclNode(decl, method.name, method.fullName, method.filename, code = method.name)
-    scope.getEnclosingTypeDeclTypeFullName.foreach(tfn => methodTypeDecl.inheritsFromTypeFullName(tfn :: Nil))
 
     val binding = NewBinding().name(NameConstants.Invoke).signature("")
     val methodTypeDeclAst = Ast(methodTypeDecl)
