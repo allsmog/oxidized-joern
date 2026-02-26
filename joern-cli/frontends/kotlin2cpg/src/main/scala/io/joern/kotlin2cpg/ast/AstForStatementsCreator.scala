@@ -21,6 +21,7 @@ import org.jetbrains.kotlin.psi.KtIfExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtProperty
 import org.jetbrains.kotlin.psi.KtPsiUtil
+import org.jetbrains.kotlin.psi.KtThrowExpression
 import org.jetbrains.kotlin.psi.KtTryExpression
 import org.jetbrains.kotlin.psi.KtWhenConditionWithExpression
 import org.jetbrains.kotlin.psi.KtWhenEntry
@@ -520,6 +521,17 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) {
   def astForContinue(expr: KtContinueExpression): Ast = {
     val node = controlStructureNode(expr, ControlStructureTypes.CONTINUE, expr.getText)
     Ast(node)
+  }
+
+  def astForThrowExpression(
+    expr: KtThrowExpression,
+    argIdxMaybe: Option[Int],
+    argNameMaybe: Option[String],
+    annotations: Seq[KtAnnotationEntry] = Seq()
+  ): Ast = {
+    val thrownValue = astsForExpression(expr.getThrownExpression, None)
+    val node        = controlStructureNode(expr, ControlStructureTypes.THROW, expr.getText)
+    Ast(node).withChildren(thrownValue)
   }
 
   def astForBlock(
