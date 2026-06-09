@@ -60,6 +60,10 @@ pub struct Project {
     /// incrementally so the edit path never scans the graph for methods.
     method_fqns_by_file: HashMap<FileId, HashSet<String>>,
     node_of_fqn: HashMap<String, NodeId>,
+    /// name -> method nodes, handed to passes via PassContext so call
+    /// resolution never rebuilds a global index.
+    method_nodes_by_name: HashMap<String, Vec<NodeId>>,
+    method_nodes_by_file: HashMap<FileId, Vec<(String, NodeId)>>,
     /// Call names appearing in each file (to unhook the reverse index on edit).
     call_names_by_file: HashMap<FileId, HashSet<String>>,
     /// Reverse dependency index: callee name -> files containing such a call.
@@ -84,6 +88,8 @@ impl Project {
             methods_by_file: HashMap::new(),
             method_fqns_by_file: HashMap::new(),
             node_of_fqn: HashMap::new(),
+            method_nodes_by_name: HashMap::new(),
+            method_nodes_by_file: HashMap::new(),
             call_names_by_file: HashMap::new(),
             callers_of_name: HashMap::new(),
         }
@@ -125,7 +131,10 @@ impl Project {
         let parse_build = t0.elapsed();
 
         let t1 = std::time::Instant::now();
-        self.pipeline.run_all(&mut self.cpg, &ids);
+        let ctx = cpg_analysis::PassContext {
+            methods_by_name: Some(&self.method_nodes_by_name),
+        };
+        self.pipeline.run_all(&mut self.cpg, &ids, &ctx);
         let passes = t1.elapsed();
 
         let t2 = std::time::Instant::now();
@@ -170,7 +179,10 @@ impl Project {
         }
 
         let files: Vec<FileId> = to_reanalyse.iter().copied().collect();
-        self.pipeline.run_all(&mut self.cpg, &files);
+        let ctx = cpg_analysis::PassContext {
+            methods_by_name: Some(&self.method_nodes_by_name),
+        };
+        self.pipeline.run_all(&mut self.cpg, &files, &ctx);
 
         // Directly-changed methods: every method living in a re-analysed file
         // (served by the per-file index, no graph scan).
@@ -189,19 +201,32 @@ impl Project {
     }
 
     fn record_methods(&mut self, file: FileId) {
-        // Unhook the file's previous fqns from the global index, then re-index.
+        // Unhook the file's previous entries from the global indices.
         if let Some(old) = self.method_fqns_by_file.remove(&file) {
             for fqn in old {
                 self.node_of_fqn.remove(&fqn);
             }
         }
+        if let Some(old) = self.method_nodes_by_file.remove(&file) {
+            for (name, node) in old {
+                if let Some(v) = self.method_nodes_by_name.get_mut(&name) {
+                    v.retain(|&m| m != node);
+                }
+            }
+        }
         let mut names: HashSet<String> = HashSet::new();
         let mut fqns: HashSet<String> = HashSet::new();
+        let mut named_nodes: Vec<(String, NodeId)> = Vec::new();
         let nodes: Vec<NodeId> = self.cpg.nodes_in_file(file).to_vec();
         for n in nodes {
             if self.cpg.is_live(n) && self.cpg.kind_of(n) == NodeKind::Method {
                 if let Some(name) = self.cpg.name_of(n) {
                     names.insert(name.to_string());
+                    named_nodes.push((name.to_string(), n));
+                    self.method_nodes_by_name
+                        .entry(name.to_string())
+                        .or_default()
+                        .push(n);
                 }
                 if let Some(fqn) = self.cpg.full_name_of(n) {
                     fqns.insert(fqn.to_string());
@@ -211,6 +236,7 @@ impl Project {
         }
         self.methods_by_file.insert(file, names);
         self.method_fqns_by_file.insert(file, fqns);
+        self.method_nodes_by_file.insert(file, named_nodes);
     }
 
     /// Refresh the reverse-dependency index for one file: unhook its previous

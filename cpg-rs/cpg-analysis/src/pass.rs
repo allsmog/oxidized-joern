@@ -10,8 +10,24 @@
 //!    discussion flagged as the single highest-value lever and the one neither
 //!    Joern nor Fraunhofer's CPG currently has.
 
-use cpg_core::{Cpg, FileId, Layer};
+use cpg_core::{Cpg, FileId, Layer, NodeId};
 use std::collections::{HashMap, HashSet, VecDeque};
+
+/// Shared lookups handed to passes by the driver. Indices the project already
+/// maintains incrementally are *borrowed* here, so a pass that needs e.g. the
+/// global method-name index doesn't rebuild it (O(methods)) on every pipeline
+/// run — the difference between an O(project) and an O(affected) edit path.
+#[derive(Default)]
+pub struct PassContext<'a> {
+    /// Method name -> defining method nodes, project-wide.
+    pub methods_by_name: Option<&'a HashMap<String, Vec<NodeId>>>,
+}
+
+impl PassContext<'_> {
+    pub fn empty() -> Self {
+        Self::default()
+    }
+}
 
 pub trait Pass {
     fn name(&self) -> &'static str;
@@ -23,15 +39,15 @@ pub trait Pass {
         None
     }
     /// Re-derive this pass's output for a single file's subgraph.
-    fn run_file(&self, cpg: &mut Cpg, file: FileId);
+    fn run_file(&self, cpg: &mut Cpg, file: FileId, ctx: &PassContext);
 
     /// Run over many files at once. The default loops `run_file`, but passes
     /// with expensive shared setup (e.g. a global symbol index) override this
     /// to build that state once instead of once per file — the difference
     /// between O(files × methods) and O(files + methods) on a full build.
-    fn run_batch(&self, cpg: &mut Cpg, files: &[FileId]) {
+    fn run_batch(&self, cpg: &mut Cpg, files: &[FileId], ctx: &PassContext) {
         for &f in files {
-            self.run_file(cpg, f);
+            self.run_file(cpg, f, ctx);
         }
     }
 }
@@ -107,24 +123,24 @@ impl PassManager {
 
     /// Run the full pipeline over every given file. Idempotent: clears each
     /// pass's prior output for a file before recomputing it.
-    pub fn run_all(&self, cpg: &mut Cpg, files: &[FileId]) {
+    pub fn run_all(&self, cpg: &mut Cpg, files: &[FileId], ctx: &PassContext) {
         for &p in &self.ordered() {
             for &f in files {
                 self.clear_output(cpg, f, p);
             }
-            self.passes[p].run_batch(cpg, files);
+            self.passes[p].run_batch(cpg, files, ctx);
         }
     }
 
     /// Run the pipeline over only the changed files. Returns the set of layers
     /// that were rewritten, so downstream consumers (e.g. the summary cache)
     /// know what to invalidate.
-    pub fn run_incremental(&self, cpg: &mut Cpg, changed: &[FileId]) -> HashSet<Layer> {
+    pub fn run_incremental(&self, cpg: &mut Cpg, changed: &[FileId], ctx: &PassContext) -> HashSet<Layer> {
         let mut dirtied = HashSet::new();
         for &p in &self.ordered() {
             for &f in changed {
                 self.clear_output(cpg, f, p);
-                self.passes[p].run_file(cpg, f);
+                self.passes[p].run_file(cpg, f, ctx);
             }
             dirtied.extend(self.passes[p].writes().iter().copied());
         }

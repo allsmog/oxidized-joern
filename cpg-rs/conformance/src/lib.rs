@@ -68,7 +68,7 @@ pub fn run_suite(fixture: &mut LangFixture, cases: &[ConformanceCase]) -> Vec<Ca
         let path = format!("case_{}.src", case.name);
         let file = cpg.file_id(&path);
         fixture.frontend.build_file(&mut cpg, &path, src);
-        cpg_analysis::standard_pipeline().run_all(&mut cpg, &[file]);
+        cpg_analysis::standard_pipeline().run_all(&mut cpg, &[file], &cpg_analysis::PassContext::empty());
         results.push(CaseResult {
             language: fixture.language.to_string(),
             case: case.name.to_string(),
