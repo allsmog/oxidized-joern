@@ -57,6 +57,10 @@ pub struct SummaryStore {
     summaries: HashMap<String, FunctionSummary>,
     /// fqn -> set of callee fqns its summary depended on (the invalidation web).
     deps: HashMap<String, HashSet<String>>,
+    /// Reverse web: callee fqn -> caller fqns whose summaries used it. Lets
+    /// transitive invalidation run as a worklist BFS over the affected region
+    /// instead of scanning every summary's deps.
+    rdeps: HashMap<String, HashSet<String>>,
     /// External summaries loaded from JSON; never invalidated by source edits.
     external: HashMap<String, FunctionSummary>,
     /// Diagnostic: how many method summaries were (re)computed in the last call.
@@ -99,6 +103,29 @@ impl SummaryStore {
         Ok(n)
     }
 
+    /// Replace `fqn`'s dependency set, keeping the reverse web consistent.
+    fn set_deps(&mut self, fqn: &str, deps: HashSet<String>) {
+        self.unhook_deps(fqn);
+        for callee in &deps {
+            self.rdeps
+                .entry(callee.clone())
+                .or_default()
+                .insert(fqn.to_string());
+        }
+        self.deps.insert(fqn.to_string(), deps);
+    }
+
+    /// Remove `fqn`'s dependency entries from both webs.
+    fn unhook_deps(&mut self, fqn: &str) {
+        if let Some(old) = self.deps.remove(fqn) {
+            for callee in old {
+                if let Some(set) = self.rdeps.get_mut(&callee) {
+                    set.remove(fqn);
+                }
+            }
+        }
+    }
+
     /// Compute summaries for every user method from scratch (fixpoint, so a
     /// caller benefits from its callee's summary regardless of file order).
     pub fn compute_all(&mut self, cpg: &Cpg) {
@@ -106,50 +133,38 @@ impl SummaryStore {
         self.recompute(cpg, &all);
     }
 
-    /// Incremental update: invalidate summaries for methods in `changed_files`
-    /// plus every transitive caller that depended on them, then recompute only
-    /// the invalidated set. Returns the number recomputed (cache hits = total −
-    /// this). This is the cacheable+invalidatable property end-to-end.
-    pub fn update_for_changed_files(
+    /// Incremental update: invalidate summaries for the directly-changed
+    /// methods plus every transitive caller that depended on them, then
+    /// recompute only the invalidated set; everything else is a cache hit.
+    /// `node_of_fqn` is the caller-maintained method index, so this never
+    /// scans the graph — the whole edit path stays O(affected).
+    pub fn update_for_changed_methods(
         &mut self,
         cpg: &Cpg,
-        changed_files: &HashSet<cpg_core::FileId>,
+        directly_changed: HashSet<String>,
+        node_of_fqn: &HashMap<String, NodeId>,
     ) {
-        // 1. Directly invalidated: methods living in a changed file.
-        let mut invalid: HashSet<String> = HashSet::new();
-        let mut node_of_fqn: HashMap<String, NodeId> = HashMap::new();
-        for m in cpg.nodes_of_kind(NodeKind::Method) {
-            if let Some(fqn) = cpg.full_name_of(m) {
-                node_of_fqn.insert(fqn.to_string(), m);
-                if changed_files.contains(&cpg.file_of(m)) {
-                    invalid.insert(fqn.to_string());
+        let mut invalid: HashSet<String> = directly_changed;
+        // Transitively invalidate callers whose summary used an invalid fqn:
+        // worklist BFS over the reverse-dependency web, O(affected region).
+        let mut worklist: Vec<String> = invalid.iter().cloned().collect();
+        while let Some(fqn) = worklist.pop() {
+            if let Some(callers) = self.rdeps.get(&fqn) {
+                let newly: Vec<String> = callers
+                    .iter()
+                    .filter(|c| !invalid.contains(*c))
+                    .cloned()
+                    .collect();
+                for c in newly {
+                    invalid.insert(c.clone());
+                    worklist.push(c);
                 }
             }
         }
-        // 2. Transitively invalidate callers whose summary used an invalid fqn.
-        loop {
-            let mut grew = false;
-            let newly: Vec<String> = self
-                .deps
-                .iter()
-                .filter(|(caller, callees)| {
-                    !invalid.contains(*caller) && callees.iter().any(|c| invalid.contains(c))
-                })
-                .map(|(caller, _)| caller.clone())
-                .collect();
-            for c in newly {
-                if invalid.insert(c) {
-                    grew = true;
-                }
-            }
-            if !grew {
-                break;
-            }
-        }
-        // 3. Drop invalidated entries, recompute only those nodes that still exist.
+        // Drop invalidated entries, recompute only those nodes that still exist.
         for fqn in &invalid {
             self.summaries.remove(fqn);
-            self.deps.remove(fqn);
+            self.unhook_deps(fqn);
         }
         let to_recompute: Vec<NodeId> = invalid
             .iter()
@@ -180,7 +195,7 @@ impl SummaryStore {
                 if prev.map(|p| &p.flows) != Some(&summary.flows) {
                     changed = true;
                 }
-                self.deps.insert(fqn.clone(), deps);
+                self.set_deps(&fqn, deps);
                 self.last_recomputed.insert(fqn.clone());
                 self.summaries.insert(fqn, summary);
             }
