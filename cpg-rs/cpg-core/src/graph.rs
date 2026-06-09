@@ -295,39 +295,52 @@ impl Cpg {
         }
 
         // Donor ids are dense (freshly built, no tombstones), so a flat Vec
-        // remap beats a HashMap by a wide margin on large merges.
+        // remap beats a HashMap by a wide margin on large merges. The same
+        // applies to strings: the donor's interner already deduped them, so we
+        // hash each *distinct* donor string once into a sym→sym memo instead of
+        // re-hashing per node occurrence.
         let donor_nodes: Vec<NodeId> = donor.nodes().collect();
         let cap = donor.kind.len();
         let mut node_map: Vec<NodeId> = vec![NodeId(u32::MAX); cap];
+        let mut sym_map: Vec<Option<Sym>> = vec![None; donor.strings.len()];
         for &n in &donor_nodes {
-            let f = file_map[&donor.file_of(n)];
-            let nn = self.add_node(donor.kind_of(n), f);
-            if let Some(s) = donor.name_of(n) {
-                let s = self.intern(s);
+            let i = n.0 as usize;
+            let f = file_map[&donor.file[i]];
+            let nn = self.add_node(donor.kind[i], f);
+            let mut map_sym = |slf: &mut Self, s: Sym| -> Sym {
+                if let Some(m) = sym_map[s.0 as usize] {
+                    return m;
+                }
+                let m = slf.strings.intern(donor.strings.resolve(s));
+                sym_map[s.0 as usize] = Some(m);
+                m
+            };
+            if let Some(s) = donor.name[i] {
+                let s = map_sym(self, s);
                 self.set_name(nn, s);
             }
-            if let Some(s) = donor.full_name_of(n) {
-                let s = self.intern(s);
+            if let Some(s) = donor.full_name[i] {
+                let s = map_sym(self, s);
                 self.set_full_name(nn, s);
             }
-            if let Some(s) = donor.code_of(n) {
-                let s = self.intern(s);
+            if let Some(s) = donor.code[i] {
+                let s = map_sym(self, s);
                 self.set_code(nn, s);
             }
-            if let Some(s) = donor.type_full_name_of(n) {
-                let s = self.intern(s);
+            if let Some(s) = donor.type_full_name[i] {
+                let s = map_sym(self, s);
                 self.set_type_full_name(nn, s);
             }
-            if let Some(s) = donor.signature_of(n) {
-                let s = self.intern(s);
+            if let Some(s) = donor.signature[i] {
+                let s = map_sym(self, s);
                 self.set_signature(nn, s);
             }
-            if let Some(l) = donor.line_of(n) {
+            if let Some(l) = donor.line[i] {
                 self.set_line(nn, l);
             }
-            self.set_order(nn, donor.order_of(n));
-            self.set_argument_index(nn, donor.argument_index_of(n));
-            node_map[n.0 as usize] = nn;
+            self.set_order(nn, donor.order[i]);
+            self.set_argument_index(nn, donor.argument_index[i]);
+            node_map[i] = nn;
         }
         // Out-edges only; add_edge mirrors the in-edge.
         for &n in &donor_nodes {

@@ -13,7 +13,7 @@
 //! This is the property the architecture review flagged as the highest-value
 //! lever and the one neither Joern nor Fraunhofer's CPG has today.
 
-use cpg_core::{Cpg, FileId, NodeKind, Query};
+use cpg_core::{Cpg, FileId, NodeId, NodeKind};
 use cpg_analysis::{PassManager, SummaryStore};
 use cpg_frontend::Frontend;
 use std::collections::hash_map::DefaultHasher;
@@ -56,6 +56,10 @@ pub struct Project {
     pub summaries: SummaryStore,
     file_hashes: HashMap<String, u64>,
     methods_by_file: HashMap<FileId, HashSet<String>>,
+    /// Per-file method fqns + the global fqn -> node index, both maintained
+    /// incrementally so the edit path never scans the graph for methods.
+    method_fqns_by_file: HashMap<FileId, HashSet<String>>,
+    node_of_fqn: HashMap<String, NodeId>,
     /// Call names appearing in each file (to unhook the reverse index on edit).
     call_names_by_file: HashMap<FileId, HashSet<String>>,
     /// Reverse dependency index: callee name -> files containing such a call.
@@ -78,6 +82,8 @@ impl Project {
             summaries: SummaryStore::new(),
             file_hashes: HashMap::new(),
             methods_by_file: HashMap::new(),
+            method_fqns_by_file: HashMap::new(),
+            node_of_fqn: HashMap::new(),
             call_names_by_file: HashMap::new(),
             callers_of_name: HashMap::new(),
         }
@@ -165,7 +171,16 @@ impl Project {
 
         let files: Vec<FileId> = to_reanalyse.iter().copied().collect();
         self.pipeline.run_all(&mut self.cpg, &files);
-        self.summaries.update_for_changed_files(&self.cpg, &to_reanalyse);
+
+        // Directly-changed methods: every method living in a re-analysed file
+        // (served by the per-file index, no graph scan).
+        let directly_changed: HashSet<String> = files
+            .iter()
+            .filter_map(|f| self.method_fqns_by_file.get(f))
+            .flat_map(|s| s.iter().cloned())
+            .collect();
+        self.summaries
+            .update_for_changed_methods(&self.cpg, directly_changed, &self.node_of_fqn);
 
         UpdateOutcome::Rebuilt {
             files_reanalysed: files.len(),
@@ -174,14 +189,28 @@ impl Project {
     }
 
     fn record_methods(&mut self, file: FileId) {
-        let names: HashSet<String> = self
-            .cpg
-            .nodes_in_file(file)
-            .iter()
-            .filter(|&&n| self.cpg.is_live(n) && self.cpg.kind_of(n) == NodeKind::Method)
-            .filter_map(|&n| self.cpg.name_of(n).map(|s| s.to_string()))
-            .collect();
+        // Unhook the file's previous fqns from the global index, then re-index.
+        if let Some(old) = self.method_fqns_by_file.remove(&file) {
+            for fqn in old {
+                self.node_of_fqn.remove(&fqn);
+            }
+        }
+        let mut names: HashSet<String> = HashSet::new();
+        let mut fqns: HashSet<String> = HashSet::new();
+        let nodes: Vec<NodeId> = self.cpg.nodes_in_file(file).to_vec();
+        for n in nodes {
+            if self.cpg.is_live(n) && self.cpg.kind_of(n) == NodeKind::Method {
+                if let Some(name) = self.cpg.name_of(n) {
+                    names.insert(name.to_string());
+                }
+                if let Some(fqn) = self.cpg.full_name_of(n) {
+                    fqns.insert(fqn.to_string());
+                    self.node_of_fqn.insert(fqn.to_string(), n);
+                }
+            }
+        }
         self.methods_by_file.insert(file, names);
+        self.method_fqns_by_file.insert(file, fqns);
     }
 
     /// Refresh the reverse-dependency index for one file: unhook its previous

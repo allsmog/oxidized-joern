@@ -11,10 +11,10 @@ invariant.
 It implements, end-to-end and with passing tests, the four-item roadmap from the
 discussion:
 
-1. **Incremental CPG construction on one frontend, end-to-end** — `cpg-incremental` + `cpg-lang-c`
-2. **A cross-language conformance suite** — `conformance`
+1. **Incremental CPG construction, end-to-end** — `cpg-incremental`, proven on two frontends
+2. **A cross-language conformance suite** — `conformance`, passed identically by C and Python
 3. **Cacheable, invalidatable dataflow summaries** — `cpg-analysis::summaries`
-4. **A query surface that can back a server** — `cpg-core::traversal` (the server binary is the documented next step)
+4. **A language-agnostic query server** — `cpg-cli` (`cpg serve`), JSON-over-stdio with live incremental updates
 
 ## Why these design choices
 
@@ -40,6 +40,8 @@ cpg-analysis     pass framework (layer deps) + CFG/symbol/call-graph passes
 cpg-incremental  the driver: parallel build, then per-edit: hash → delete
                  subgraph → rebuild → re-run only affected files/passes →
                  invalidate only affected summaries
+cpg-cli          `cpg serve <dir> [--lang c|python]`: JSON-over-stdio query
+                 server with live incremental updates (the `update` command)
 conformance      cross-language schema conformance harness + standard cases
 ```
 
@@ -70,10 +72,16 @@ Dependency direction is strictly downward: frontends and passes depend on
 
 The full build is parallel: workers parse and build standalone per-file
 subgraphs concurrently (each with its own frontend instance), and the driver
-absorbs them with a flat-array id/string remap (`Cpg::absorb`). The summary
-fixpoint is also parallel (Jacobi rounds against a store snapshot). Edit-impact
-analysis is served by a reverse-dependency index (callee name → caller files),
-so finding affected files is O(affected), not a graph scan.
+absorbs them with flat-array id remaps and a per-donor string-sym memo
+(`Cpg::absorb` — donor interners already deduped, so each distinct string is
+hashed once, not per occurrence). The summary fixpoint is also parallel
+(Jacobi rounds against a store snapshot).
+
+The edit path never scans the graph. Three incrementally-maintained indices
+serve it: callee name → caller files (which files does this edit affect),
+fqn → method node, and the summary store's reverse-dependency web
+(callee fqn → caller fqns), over which transitive invalidation runs as a
+worklist BFS that touches only the affected region.
 
 Measured on a synthetic 1M-LOC / 200k-function project, 4 cores
 (`FILES=8000 FNS=25 cargo run --release -p cpg-incremental --example scale`):
@@ -83,22 +91,23 @@ Measured on a synthetic 1M-LOC / 200k-function project, 4 cores
 functions:        200001
 approx LOC:       1000001
 live nodes:       2808007
-build time:       ~7.1s        (~28,000 functions/sec)
+build time:       ~5.6s        (~35,000 functions/sec)
   parallel parse+build  ~2.0s
-  serial merge          ~2.3s
-  passes                ~1.4s
-  summaries (parallel)  ~1.4s
+  serial merge          ~1.4s
+  passes                ~1.1s
+  summaries (parallel)  ~1.1s
 
 == incremental edit (1 file of 8001) ==
 files re-analysed:     1
 summaries recomputed:  26   (out of 200002)
-incremental time:      ~340ms
+incremental time:      ~160ms
 ```
 
 A one-file edit recomputes 26 of 200,002 summaries. That ratio — not the
 absolute time — is the point: edit cost tracks the change, not the codebase.
-(Before the parallel build and the batch call-graph index, the same 500k-LOC
-build took 275s; it is now ~3s — a ~90× cumulative improvement.)
+(The first working serial build of a 500k-LOC project took 275s; the same
+build is now ~2.8s — a ~100× cumulative improvement from the batch call-graph
+index, parallel build, and merge optimisations.)
 
 ## Dataflow summaries (roadmap #3)
 
@@ -135,31 +144,44 @@ cd cpg-rs
 cargo test                                             # all crates
 cargo run --release -p cpg-incremental --example scale # the benchmark
 FILES=8000 FNS=25 cargo run --release -p cpg-incremental --example scale
+
+# the query server (one JSON request per stdin line):
+cargo run --release -p cpg-cli -- serve path/to/project --lang c
+# {"cmd":"stats"}
+# {"cmd":"methods","name":"main"}
+# {"cmd":"calls","name":"strcpy"}
+# {"cmd":"summary","fqn":"wrap"}
+# {"cmd":"update","path":"a.c","source":"int f(){...}"}   <- incremental
 ```
+
+The `update` command demonstrates the whole architecture in one round-trip:
+it rebuilds one file's subgraph, re-runs passes on the affected files only,
+invalidates the affected summaries through the dependency web, and answers —
+a subsequent `summary` query reflects the edit (e.g. a callee that stops
+returning its parameter removes the caller's derived flow).
 
 ## Honest status — what's built vs. what's next
 
 **Built and tested:** the columnar store with incremental delete/rebuild and
-parallel merge (`absorb`); the trait-based frontend contract with **two**
+sym-memoised merge (`absorb`); the trait-based frontend contract with **two**
 conforming tree-sitter frontends (C and Python, ~300 lines each, tolerant of
 uncompilable code); CFG/symbol/call-graph passes on the layer-dependency
 framework with batch entry points; parallel summaries-first dataflow with a
-precise invalidation cache and a JSON external-summary loader; a reverse
-dependency index on the edit path; the cross-language conformance harness run
-against both frontends; and a 1M-LOC benchmark.
+reverse-dependency invalidation web and a JSON external-summary loader; an
+edit path served entirely by incrementally-maintained indices; the
+cross-language conformance harness run against both frontends; a JSON-over-
+stdio query server with live incremental updates; and a 1M-LOC benchmark.
 
 **Deliberately simplified, and where to go next** (in priority order):
 
-1. **Parallelise the merge and passes.** The serial `absorb` merge is now the
-   largest single-threaded chunk (~2.3s of the 7.1s build). Options: pre-size
-   the columnar arrays from donor totals and copy ranges in parallel, or shard
-   the graph by file groups. Passes mutate the graph and currently run
-   serially; CFG/symbol resolution are per-method and shardable.
-2. **Make the edit path fully O(affected).** Summary invalidation still builds
-   an fqn→node map by scanning all methods, and the call-graph pass rebuilds
-   its name index per update — both O(project) with small constants (the 1M-LOC
-   edit is ~340ms; ~146ms at 500k). Persistent, incrementally-maintained
-   indices remove the remaining scans.
+1. **Parallelise the merge and passes.** The serial `absorb` merge is still
+   ~1.4s of the 5.6s build; pre-sizing the columnar arrays from donor totals
+   and copying ranges in parallel would shrink it further. Passes mutate the
+   graph and run serially; CFG/symbol resolution are per-method and shardable.
+2. **Persistent call-graph index.** The call-graph pass still rebuilds its
+   name→method index per pipeline run (O(methods), the bulk of the remaining
+   ~160ms edit latency at 1M LOC). A pass-context carrying project-maintained
+   indices removes it.
 3. **`freeze()` to CSR.** Mutable adjacency lists are right for editing but a
    quiescent graph served to many read-only queries wants a compacted CSR
    layout. Freeze on first query, invalidate on edit.
@@ -167,9 +189,9 @@ against both frontends; and a 1M-LOC benchmark.
    each validated by the conformance suite — and grow the case set (control
    flow shape, field accesses, method overloading guarded by traits) as the
    real specification.
-5. **Server.** Wrap `cpg-core::traversal` in a request/response API with
-   non-Scala clients (the roadmap's item #4). The query surface is already
-   separable from construction.
+5. **Richer queries + transports.** The stdio server proves the decoupling;
+   add path-level taint queries (source→sink over summaries) and, if wanted,
+   a TCP/HTTP transport around the same loop.
 
 The CFG pass is a source-order linearisation, symbol resolution is intra-method
 by name, and the dataflow taint is name-based rather than SSA/IFDS — all chosen
