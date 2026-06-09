@@ -410,6 +410,42 @@ mod tests {
     }
 
     #[test]
+    fn cross_file_interprocedural_taint() {
+        // The passthrough function lives in a different file from the sink.
+        // This exercises cross-file call resolution + interprocedural summaries
+        // + taint together — the core of the tool.
+        let mut p = project();
+        p.build(&[
+            ("util.c", "char* passthrough(char* p){ return p; }"),
+            (
+                "main.c",
+                r#"
+                    void run() {
+                        char* data = getenv("DATA");
+                        system(passthrough(data));
+                    }
+                "#,
+            ),
+        ]);
+        let findings = p.find_taint(&["getenv"], &["system"]);
+        assert_eq!(findings.len(), 1, "cross-file flow not found: {findings:?}");
+        assert_eq!(findings[0].origin, "getenv");
+
+        // Now redefine passthrough (in its own file) to NOT return its arg.
+        // Cross-file invalidation must propagate to the caller's taint result.
+        p.update_file("util.c", "char* passthrough(char* p){ return \"\"; }");
+        assert_eq!(
+            p.find_taint(&["getenv"], &["system"]).len(),
+            0,
+            "editing util.c should break the flow in main.c"
+        );
+
+        // Restore it; the flow must come back.
+        p.update_file("util.c", "char* passthrough(char* p){ return p; }");
+        assert_eq!(p.find_taint(&["getenv"], &["system"]).len(), 1);
+    }
+
+    #[test]
     fn python_summaries_through_shared_engine() {
         // The identical driver + dataflow engine, fed by the Python frontend:
         // wrap(y) returns ident(y), so Param(0) -> Return must be derived
