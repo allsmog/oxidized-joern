@@ -122,6 +122,54 @@ pub fn standard_cases() -> Vec<ConformanceCase> {
                 }
             },
         },
+        ConformanceCase {
+            // `outer(inner(x))`: the inner call must be an argument of the outer
+            // call, so both exist and `inner` sits in `outer`'s argument subtree.
+            name: "nested_call_is_argument",
+            assert: |cpg| {
+                let outer = cpg.calls_named("outer");
+                let inner = cpg.calls_named("inner");
+                if outer.len() != 1 || inner.len() != 1 {
+                    return Err(format!(
+                        "expected one `outer` and one `inner` call, found {} and {}",
+                        outer.len(),
+                        inner.len()
+                    ));
+                }
+                let args = cpg.arguments_of(outer[0]);
+                if args.contains(&inner[0]) {
+                    Ok(())
+                } else {
+                    Err("`inner` is not an argument of `outer`".into())
+                }
+            },
+        },
+        ConformanceCase {
+            // A call nested inside a control structure must still be discovered
+            // (branches don't hide calls from the graph).
+            name: "call_inside_branch",
+            assert: |cpg| {
+                let cs = cpg.calls_named("guarded");
+                if cs.len() == 1 {
+                    Ok(())
+                } else {
+                    Err(format!("expected 1 `guarded` call inside branch, found {}", cs.len()))
+                }
+            },
+        },
+        ConformanceCase {
+            // Two top-level methods, both present and distinct.
+            name: "two_methods",
+            assert: |cpg| {
+                let a = cpg.method_named("alpha").len();
+                let b = cpg.method_named("beta").len();
+                if a == 1 && b == 1 {
+                    Ok(())
+                } else {
+                    Err(format!("expected methods alpha(×1) and beta(×1), found {a} and {b}"))
+                }
+            },
+        },
     ]
 }
 
@@ -144,6 +192,15 @@ mod tests {
                 "intraprocedural_call_resolves",
                 "int target(int x){ return x; } void f(){ target(3); }",
             )
+            .with_source("nested_call_is_argument", "void f(){ outer(inner(1)); }")
+            .with_source(
+                "call_inside_branch",
+                "void f(int c){ if (c) { guarded(c); } }",
+            )
+            .with_source(
+                "two_methods",
+                "void alpha(){} void beta(){}",
+            )
     }
 
     #[test]
@@ -158,7 +215,7 @@ mod tests {
             "C frontend failed conformance: {:#?}",
             failures
         );
-        assert_eq!(results.len(), 3);
+        assert_eq!(results.len(), standard_cases().len());
     }
 
     // The second frontend: same assertions, different language. This is the
@@ -176,6 +233,12 @@ mod tests {
                 "intraprocedural_call_resolves",
                 "def target(x):\n    return x\n\ndef f():\n    target(3)\n",
             )
+            .with_source("nested_call_is_argument", "def f():\n    outer(inner(1))\n")
+            .with_source(
+                "call_inside_branch",
+                "def f(c):\n    if c:\n        guarded(c)\n",
+            )
+            .with_source("two_methods", "def alpha():\n    pass\n\ndef beta():\n    pass\n")
     }
 
     #[test]
