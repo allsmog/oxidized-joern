@@ -357,6 +357,11 @@ mod tests {
         assert_eq!(findings.len(), 1, "expected one source->sink flow: {findings:?}");
         assert_eq!(findings[0].sink, "system");
         assert_eq!(findings[0].origin, "getenv");
+        // The witness path runs from the getenv source to the system sink.
+        let path = &findings[0].path;
+        assert!(path.len() >= 2, "expected a multi-step witness: {path:?}");
+        assert!(path.first().unwrap().code.contains("getenv"));
+        assert!(path.last().unwrap().code.contains("system"));
     }
 
     #[test]

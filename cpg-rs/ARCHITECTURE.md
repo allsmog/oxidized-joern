@@ -139,12 +139,19 @@ the server:
 
 ```
 {"cmd":"taint","sources":["getenv"],"sinks":["system"]}
-  → {"findings":[{"method":"handle","sink":"system","line":4,"origin":"getenv"}]}
+  → {"findings":[{"method":"handle","sink":"system","line":4,"origin":"getenv",
+      "path":[{"code":"getenv(\"USER\")","line":3},
+              {"code":"t = getenv(\"USER\")","line":3},
+              {"code":"wrap(t)","line":4},
+              {"code":"system(wrap(t))","line":4}]}]}
 {"cmd":"update","path":"v.c","source":"...wrap now returns a constant..."}
   → {"updated":true,"filesReanalysed":1,"summariesRecomputed":2}
 {"cmd":"taint","sources":["getenv"],"sinks":["system"]}
   → {"findings":[]}      # the fix invalidated wrap's summary; the flow is gone
 ```
+
+Each finding carries a **witness path** — the chain of expressions from source
+to sink with line numbers — so it is actionable, not just a yes/no.
 
 ## Conformance suite (roadmap #2)
 
@@ -204,9 +211,10 @@ stdio query server with live incremental updates; and a 1M-LOC benchmark.
    each validated by the conformance suite — and grow the case set (control
    flow shape, field accesses, method overloading guarded by traits) as the
    real specification.
-4. **Richer queries + transports.** Source→sink taint over summaries is in
-   (`taint` command); next are path *witnesses* (the statement chain, not just
-   the finding) and a TCP/HTTP transport around the same request loop.
+4. **Transports + cross-procedure witnesses.** Source→sink taint with witness
+   paths is in (`taint` command). Next: extend witnesses across the callee
+   boundary (currently the call hop is shown, not the callee's internal path),
+   and add a TCP/HTTP transport around the same request loop.
 
 The CFG pass is a source-order linearisation, symbol resolution is intra-method
 by name, and the dataflow taint is name-based rather than SSA/IFDS — all chosen

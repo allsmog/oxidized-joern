@@ -170,11 +170,17 @@ fn handle(p: &mut Project, req: &Value) -> Value {
                 .find_taint(&src_refs, &sink_refs)
                 .iter()
                 .map(|f| {
+                    let path: Vec<Value> = f
+                        .path
+                        .iter()
+                        .map(|s| json!({"code": s.code, "line": s.line}))
+                        .collect();
                     json!({
                         "method": f.method,
                         "sink": f.sink,
                         "line": f.sink_line,
                         "origin": f.origin,
+                        "path": path,
                     })
                 })
                 .collect();
