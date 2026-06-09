@@ -12,7 +12,7 @@ pub mod symbols;
 
 pub use callgraph::CallGraphPass;
 pub use cfg::CfgPass;
-pub use pass::{Pass, PassManager};
+pub use pass::{Pass, PassContext, PassManager};
 pub use summaries::{Flow, FunctionSummary, Point, SummaryStore};
 pub use symbols::SymbolResolutionPass;
 
