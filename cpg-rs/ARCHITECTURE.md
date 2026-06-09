@@ -33,13 +33,20 @@ discussion:
 ```
 cpg-core         columnar graph, schema, interner, builder, query traversal
 cpg-frontend     Language + LanguageTraits + Frontend traits (the contract)
-cpg-lang-c       C frontend on tree-sitter (the proof-of-concept frontend)
+cpg-lang-c       C frontend on tree-sitter (335 lines)
+cpg-lang-python  Python frontend on tree-sitter (307 lines)
 cpg-analysis     pass framework (layer deps) + CFG/symbol/call-graph passes
                  + summaries-first dataflow with a precise invalidation cache
-cpg-incremental  the driver: hash → delete subgraph → rebuild → re-run only
-                 affected files/passes → invalidate only affected summaries
+cpg-incremental  the driver: parallel build, then per-edit: hash → delete
+                 subgraph → rebuild → re-run only affected files/passes →
+                 invalidate only affected summaries
 conformance      cross-language schema conformance harness + standard cases
 ```
+
+Both frontends pass the **identical** conformance suite and are served by the
+same passes, dataflow engine, and incremental driver with zero engine changes —
+each frontend is ~300 lines of grammar mapping. That is the consolidation
+contract demonstrated, versus the 20–30k LOC per frontend it replaces.
 
 Dependency direction is strictly downward: frontends and passes depend on
 `cpg-core` and nothing depends on a frontend except the driver/tests.
@@ -61,24 +68,37 @@ Dependency direction is strictly downward: frontends and passes depend on
    that depended on them (`SummaryStore::update_for_changed_files`), then
    recompute only those. Everything else is served from cache.
 
-Measured on a synthetic 500k-LOC / 100k-function project (`cargo run --release
--p cpg-incremental --example scale`):
+The full build is parallel: workers parse and build standalone per-file
+subgraphs concurrently (each with its own frontend instance), and the driver
+absorbs them with a flat-array id/string remap (`Cpg::absorb`). The summary
+fixpoint is also parallel (Jacobi rounds against a store snapshot). Edit-impact
+analysis is served by a reverse-dependency index (callee name → caller files),
+so finding affected files is O(affected), not a graph scan.
+
+Measured on a synthetic 1M-LOC / 200k-function project, 4 cores
+(`FILES=8000 FNS=25 cargo run --release -p cpg-incremental --example scale`):
 
 ```
 == full build ==
-functions:        100001
-approx LOC:       500001
-live nodes:       1404007
-build time:       ~5.2s        (19,300 functions/sec)
+functions:        200001
+approx LOC:       1000001
+live nodes:       2808007
+build time:       ~7.1s        (~28,000 functions/sec)
+  parallel parse+build  ~2.0s
+  serial merge          ~2.3s
+  passes                ~1.4s
+  summaries (parallel)  ~1.4s
 
-== incremental edit (1 file of 4001) ==
+== incremental edit (1 file of 8001) ==
 files re-analysed:     1
-summaries recomputed:  26   (out of 100002)
-incremental time:      ~176ms
+summaries recomputed:  26   (out of 200002)
+incremental time:      ~340ms
 ```
 
-A one-file edit recomputes 26 of 100,002 summaries. That ratio — not the
+A one-file edit recomputes 26 of 200,002 summaries. That ratio — not the
 absolute time — is the point: edit cost tracks the change, not the codebase.
+(Before the parallel build and the batch call-graph index, the same 500k-LOC
+build took 275s; it is now ~3s — a ~90× cumulative improvement.)
 
 ## Dataflow summaries (roadmap #3)
 
@@ -119,31 +139,34 @@ FILES=8000 FNS=25 cargo run --release -p cpg-incremental --example scale
 
 ## Honest status — what's built vs. what's next
 
-**Built and tested:** the columnar store with incremental delete/rebuild; the
-trait-based frontend contract; a real tree-sitter C frontend (tolerant of
+**Built and tested:** the columnar store with incremental delete/rebuild and
+parallel merge (`absorb`); the trait-based frontend contract with **two**
+conforming tree-sitter frontends (C and Python, ~300 lines each, tolerant of
 uncompilable code); CFG/symbol/call-graph passes on the layer-dependency
-framework; summaries-first dataflow with a precise invalidation cache and a
-JSON external-summary loader; the cross-language conformance harness; and a
-500k-LOC benchmark.
+framework with batch entry points; parallel summaries-first dataflow with a
+precise invalidation cache and a JSON external-summary loader; a reverse
+dependency index on the edit path; the cross-language conformance harness run
+against both frontends; and a 1M-LOC benchmark.
 
 **Deliberately simplified, and where to go next** (in priority order):
 
-1. **Parallel full build (highest perf lever left).** Parsing and per-file
-   building are embarrassingly parallel and the file partitioning already
-   isolates them. The clean design is per-thread subgraphs merged with id
-   remapping (rayon is already a workspace dependency). This is the path from
-   ~19k to ~100k+ functions/sec and into the multi-million-LOC range.
-2. **`freeze()` to CSR.** Mutable adjacency lists are right for editing but a
+1. **Parallelise the merge and passes.** The serial `absorb` merge is now the
+   largest single-threaded chunk (~2.3s of the 7.1s build). Options: pre-size
+   the columnar arrays from donor totals and copy ranges in parallel, or shard
+   the graph by file groups. Passes mutate the graph and currently run
+   serially; CFG/symbol resolution are per-method and shardable.
+2. **Make the edit path fully O(affected).** Summary invalidation still builds
+   an fqn→node map by scanning all methods, and the call-graph pass rebuilds
+   its name index per update — both O(project) with small constants (the 1M-LOC
+   edit is ~340ms; ~146ms at 500k). Persistent, incrementally-maintained
+   indices remove the remaining scans.
+3. **`freeze()` to CSR.** Mutable adjacency lists are right for editing but a
    quiescent graph served to many read-only queries wants a compacted CSR
    layout. Freeze on first query, invalidate on edit.
-3. **Reverse-dependency index for edits.** `update_file` currently scans all
-   calls to find affected callers (`O(calls)`); a `name → caller files` index
-   makes that `O(affected)` and removes the last whole-graph scan from the edit
-   path.
-4. **More frontends behind the same contract.** Java/Python/TS via tree-sitter,
-   each validated by the conformance suite. This is where the trait contract
-   pays off — and where the simplified C CFG/return-detection should grow into
-   precise, trait-parameterised control flow.
+4. **More frontends behind the same contract.** Java/TS/Go via tree-sitter,
+   each validated by the conformance suite — and grow the case set (control
+   flow shape, field accesses, method overloading guarded by traits) as the
+   real specification.
 5. **Server.** Wrap `cpg-core::traversal` in a request/response API with
    non-Scala clients (the roadmap's item #4). The query surface is already
    separable from construction.
