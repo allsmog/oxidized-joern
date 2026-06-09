@@ -270,7 +270,7 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
 }
 
 /// The variable name an lvalue identifier refers to.
-fn lhs_name(cpg: &Cpg, node: NodeId) -> Option<String> {
+pub(crate) fn lhs_name(cpg: &Cpg, node: NodeId) -> Option<String> {
     if cpg.kind_of(node) == NodeKind::Identifier {
         return cpg.name_of(node).map(|s| s.to_string());
     }
@@ -330,7 +330,7 @@ fn expr_taint(
     }
 }
 
-fn is_operator(name: &str) -> bool {
+pub(crate) fn is_operator(name: &str) -> bool {
     name.chars()
         .next()
         .map(|c| !c.is_alphabetic() && c != '_')
