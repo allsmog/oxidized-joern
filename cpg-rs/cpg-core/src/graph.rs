@@ -22,8 +22,11 @@
 //!   grow unbounded.
 
 use crate::intern::{Interner, Sym};
+use crate::persist::{ByteReader, ByteWriter, DecodeError};
 use crate::schema::{EdgeKind, NodeKind};
 use std::collections::HashMap;
+
+const MAGIC: &[u8; 4] = b"CPG1";
 
 /// Stable handle to a node. Index into the columnar arrays.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
@@ -271,6 +274,11 @@ impl Cpg {
             .filter(move |n| self.live[n.0 as usize])
     }
 
+    /// All registered file ids.
+    pub fn files(&self) -> Vec<FileId> {
+        self.path_of_file.keys().copied().collect()
+    }
+
     pub fn nodes_in_file(&self, file: FileId) -> &[NodeId] {
         self.nodes_of_file
             .get(&file)
@@ -281,6 +289,168 @@ impl Cpg {
     /// Count of live nodes (diagnostics / tests).
     pub fn live_count(&self) -> usize {
         self.live.iter().filter(|&&l| l).count()
+    }
+
+    /// Serialise the whole graph to bytes (see `persist` for the format).
+    /// In-edges, per-file node lists and the free list are derived structures
+    /// and are rebuilt on load rather than stored.
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut w = ByteWriter::new();
+        w.buf.extend_from_slice(MAGIC);
+
+        // String table.
+        w.u64(self.strings.len() as u64);
+        for i in 0..self.strings.len() {
+            w.bytes(self.strings.resolve(Sym(i as u32)).as_bytes());
+        }
+
+        // Node columns.
+        let n = self.kind.len();
+        w.u64(n as u64);
+        for i in 0..n {
+            w.u8(self.kind[i].to_u8());
+        }
+        for i in 0..n {
+            w.u32(self.file[i].0);
+        }
+        for col in [
+            &self.name,
+            &self.full_name,
+            &self.code,
+            &self.type_full_name,
+            &self.signature,
+        ] {
+            for v in col {
+                w.opt_u32(v.map(|s| s.0));
+            }
+        }
+        for v in &self.line {
+            w.opt_u32(*v);
+        }
+        for v in &self.order {
+            w.i32(*v);
+        }
+        for v in &self.argument_index {
+            w.i32(*v);
+        }
+        for v in &self.live {
+            w.u8(*v as u8);
+        }
+
+        // Out-edges (in-edges are rebuilt from these).
+        for i in 0..n {
+            w.u32(self.out_edges[i].len() as u32);
+            for e in &self.out_edges[i] {
+                w.u8(e.kind.to_u8());
+                w.u32(e.other.0);
+            }
+        }
+
+        // File table.
+        w.u32(self.next_file);
+        w.u64(self.path_of_file.len() as u64);
+        for (id, path) in &self.path_of_file {
+            w.u32(id.0);
+            w.bytes(path.as_bytes());
+        }
+        w.buf
+    }
+
+    /// Reconstruct a graph from `to_bytes` output.
+    pub fn from_bytes(data: &[u8]) -> Result<Cpg, DecodeError> {
+        let mut r = ByteReader::new(data);
+        let magic = (0..4).map(|_| r.u8()).collect::<Result<Vec<_>, _>>()?;
+        if magic.as_slice() != MAGIC {
+            return Err(DecodeError("bad magic; not a CPG1 file".into()));
+        }
+        let mut cpg = Cpg::new();
+
+        let str_count = r.u64()? as usize;
+        for _ in 0..str_count {
+            let b = r.bytes()?;
+            let s = std::str::from_utf8(b).map_err(|e| DecodeError(e.to_string()))?;
+            cpg.strings.intern(s);
+        }
+
+        let n = r.u64()? as usize;
+        let read_col_u8 = |r: &mut ByteReader, n: usize| -> Result<Vec<u8>, DecodeError> {
+            (0..n).map(|_| r.u8()).collect()
+        };
+        cpg.kind = read_col_u8(&mut r, n)?
+            .into_iter()
+            .map(NodeKind::from_u8)
+            .collect();
+        cpg.file = (0..n).map(|_| r.u32().map(FileId)).collect::<Result<_, _>>()?;
+        let mut sym_col = || -> Result<Vec<Option<Sym>>, DecodeError> {
+            (0..n).map(|_| r.opt_u32().map(|o| o.map(Sym))).collect()
+        };
+        // Order matches the write side: name, full_name, code, type_full_name, signature.
+        cpg.name = sym_col()?;
+        cpg.full_name = sym_col()?;
+        cpg.code = sym_col()?;
+        cpg.type_full_name = sym_col()?;
+        cpg.signature = sym_col()?;
+        cpg.line = (0..n).map(|_| r.opt_u32()).collect::<Result<_, _>>()?;
+        cpg.order = (0..n).map(|_| r.i32()).collect::<Result<_, _>>()?;
+        cpg.argument_index = (0..n).map(|_| r.i32()).collect::<Result<_, _>>()?;
+        cpg.live = (0..n).map(|_| Ok(r.u8()? != 0)).collect::<Result<_, DecodeError>>()?;
+
+        cpg.out_edges = Vec::with_capacity(n);
+        cpg.in_edges = vec![Vec::new(); n];
+        for _ in 0..n {
+            let m = r.u32()? as usize;
+            let mut outs = Vec::with_capacity(m);
+            for _ in 0..m {
+                let kind = EdgeKind::from_u8(r.u8()?);
+                let other = NodeId(r.u32()?);
+                outs.push(HalfEdge { kind, other });
+            }
+            cpg.out_edges.push(outs);
+        }
+        // Rebuild in-edges as the mirror of out-edges.
+        for src in 0..n {
+            for e in cpg.out_edges[src].clone() {
+                cpg.in_edges[e.other.0 as usize].push(HalfEdge {
+                    kind: e.kind,
+                    other: NodeId(src as u32),
+                });
+            }
+        }
+
+        // File table.
+        cpg.next_file = r.u32()?;
+        let file_count = r.u64()? as usize;
+        for _ in 0..file_count {
+            let id = FileId(r.u32()?);
+            let path = std::str::from_utf8(r.bytes()?)
+                .map_err(|e| DecodeError(e.to_string()))?
+                .to_string();
+            cpg.path_of_file.insert(id, path.clone());
+            cpg.file_of_path.insert(path, id);
+            cpg.nodes_of_file.insert(id, Vec::new());
+        }
+
+        // Rebuild per-file node lists and the free list from liveness.
+        for i in 0..n {
+            let node = NodeId(i as u32);
+            if cpg.live[i] {
+                cpg.nodes_of_file.entry(cpg.file[i]).or_default().push(node);
+            } else {
+                cpg.free_list.push(node);
+            }
+        }
+        Ok(cpg)
+    }
+
+    /// Save to a file path.
+    pub fn save(&self, path: &str) -> std::io::Result<()> {
+        std::fs::write(path, self.to_bytes())
+    }
+
+    /// Load from a file path.
+    pub fn load(path: &str) -> std::io::Result<Cpg> {
+        let data = std::fs::read(path)?;
+        Cpg::from_bytes(&data).map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.0))
     }
 
     /// Merge another graph into this one, remapping node ids, file ids and
