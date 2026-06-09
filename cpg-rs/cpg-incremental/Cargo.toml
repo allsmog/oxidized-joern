@@ -1,0 +1,13 @@
+[package]
+name = "cpg-incremental"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+cpg-core.workspace = true
+cpg-frontend.workspace = true
+cpg-analysis.workspace = true
+
+[dev-dependencies]
+cpg-lang-c.workspace = true

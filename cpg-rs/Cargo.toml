@@ -1,0 +1,30 @@
+[workspace]
+resolver = "2"
+members = [
+    "cpg-core",
+    "cpg-frontend",
+    "cpg-lang-c",
+    "cpg-analysis",
+    "cpg-incremental",
+    "conformance",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[workspace.dependencies]
+cpg-core = { path = "cpg-core" }
+cpg-frontend = { path = "cpg-frontend" }
+cpg-lang-c = { path = "cpg-lang-c" }
+cpg-analysis = { path = "cpg-analysis" }
+cpg-incremental = { path = "cpg-incremental" }
+tree-sitter = "0.26.9"
+tree-sitter-c = "0.24.2"
+rayon = "1.12.0"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+panic = "abort"
