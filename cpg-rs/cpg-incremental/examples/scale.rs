@@ -45,13 +45,17 @@ fn main() {
 
     let refs: Vec<(&str, &str)> = sources.iter().map(|(p, s)| (p.as_str(), s.as_str())).collect();
 
-    let mut p = Project::new(Box::new(CFrontend::new()), standard_pipeline());
+    let mut p = Project::new(|| Box::new(CFrontend::new()), standard_pipeline());
 
     let t0 = Instant::now();
-    p.build(&refs);
+    let stats = p.build(&refs);
     let build = t0.elapsed();
 
     println!("== full build ==");
+    println!("phase parse+build: {:?}  (parallel {:?} + merge {:?})",
+        stats.parse_build, stats.parallel_frontend, stats.merge);
+    println!("phase passes:      {:?}", stats.passes);
+    println!("phase summaries:   {:?}", stats.summaries);
     println!("files:            {}", refs.len());
     println!("functions:        {}", total_fns);
     println!("approx LOC:       {}", approx_lines);

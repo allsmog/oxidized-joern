@@ -8,6 +8,8 @@ license.workspace = true
 cpg-core.workspace = true
 cpg-frontend.workspace = true
 cpg-analysis.workspace = true
+rayon.workspace = true
 
 [dev-dependencies]
 cpg-lang-c.workspace = true
+cpg-lang-python.workspace = true

@@ -229,6 +229,9 @@ impl Cpg {
     pub fn type_full_name_of(&self, n: NodeId) -> Option<&str> {
         self.type_full_name[n.0 as usize].map(|s| self.strings.resolve(s))
     }
+    pub fn signature_of(&self, n: NodeId) -> Option<&str> {
+        self.signature[n.0 as usize].map(|s| self.strings.resolve(s))
+    }
     pub fn line_of(&self, n: NodeId) -> Option<u32> {
         self.line[n.0 as usize]
     }
@@ -278,5 +281,59 @@ impl Cpg {
     /// Count of live nodes (diagnostics / tests).
     pub fn live_count(&self) -> usize {
         self.live.iter().filter(|&&l| l).count()
+    }
+
+    /// Merge another graph into this one, remapping node ids, file ids and
+    /// interned strings. This is the join step of the parallel build: workers
+    /// build standalone per-file graphs concurrently, then the driver absorbs
+    /// them serially (the merge is cheap relative to parsing+building).
+    pub fn absorb(&mut self, donor: Cpg) {
+        // Remap donor files onto this graph's file table by path.
+        let mut file_map: HashMap<FileId, FileId> = HashMap::new();
+        for (donor_file, path) in &donor.path_of_file {
+            file_map.insert(*donor_file, self.file_id(path));
+        }
+
+        // Donor ids are dense (freshly built, no tombstones), so a flat Vec
+        // remap beats a HashMap by a wide margin on large merges.
+        let donor_nodes: Vec<NodeId> = donor.nodes().collect();
+        let cap = donor.kind.len();
+        let mut node_map: Vec<NodeId> = vec![NodeId(u32::MAX); cap];
+        for &n in &donor_nodes {
+            let f = file_map[&donor.file_of(n)];
+            let nn = self.add_node(donor.kind_of(n), f);
+            if let Some(s) = donor.name_of(n) {
+                let s = self.intern(s);
+                self.set_name(nn, s);
+            }
+            if let Some(s) = donor.full_name_of(n) {
+                let s = self.intern(s);
+                self.set_full_name(nn, s);
+            }
+            if let Some(s) = donor.code_of(n) {
+                let s = self.intern(s);
+                self.set_code(nn, s);
+            }
+            if let Some(s) = donor.type_full_name_of(n) {
+                let s = self.intern(s);
+                self.set_type_full_name(nn, s);
+            }
+            if let Some(s) = donor.signature_of(n) {
+                let s = self.intern(s);
+                self.set_signature(nn, s);
+            }
+            if let Some(l) = donor.line_of(n) {
+                self.set_line(nn, l);
+            }
+            self.set_order(nn, donor.order_of(n));
+            self.set_argument_index(nn, donor.argument_index_of(n));
+            node_map[n.0 as usize] = nn;
+        }
+        // Out-edges only; add_edge mirrors the in-edge.
+        for &n in &donor_nodes {
+            for e in donor.out(n) {
+                self.add_edge(node_map[n.0 as usize], node_map[e.other.0 as usize], e.kind);
+            }
+        }
     }
 }
