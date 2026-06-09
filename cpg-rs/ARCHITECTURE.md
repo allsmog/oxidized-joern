@@ -185,6 +185,12 @@ becomes: register a fixture, reuse `standard_cases()`. Passing the suite proves
 the new frontend's graph shape is compatible with every shared pass and query —
 which is exactly what de-risks consolidating frontend logic.
 
+The current cases cover method/parameter shape, call arguments, intraprocedural
+call resolution, nested calls as arguments, calls inside control structures, and
+multiple top-level methods. Both C and Python pass all six. Growing this set
+(field access, overloading guarded by traits, loop/branch CFG shape) is how the
+spec hardens as more frontends land.
+
 ## Running it
 
 ```bash
