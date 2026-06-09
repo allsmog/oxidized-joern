@@ -40,8 +40,8 @@ cpg-analysis     pass framework (layer deps) + CFG/symbol/call-graph passes
 cpg-incremental  the driver: parallel build, then per-edit: hash → delete
                  subgraph → rebuild → re-run only affected files/passes →
                  invalidate only affected summaries
-cpg-cli          `cpg serve <dir> [--lang c|python]`: JSON-over-stdio query
-                 server with live incremental updates (the `update` command)
+cpg-cli          `cpg build` (persist) / `cpg serve` (build-or-reopen + query):
+                 JSON-over-stdio with live incremental updates + taint queries
 conformance      cross-language schema conformance harness + standard cases
 ```
 
@@ -111,6 +111,28 @@ edit cost tracks the change, not the codebase. (The first working serial
 build of a 500k-LOC project took 275s and its edit path 460ms; cumulative
 improvements: ~100× on builds, ~9× on edits.)
 
+## Persistence
+
+The columnar layout serialises almost as-is (`cpg-core::persist`): a
+length-prefixed string table followed by each property column and the
+out-edge adjacency as contiguous runs (in-edges, per-file node lists and the
+free list are derived structures, rebuilt on load). This is the on-disk
+corollary of the in-memory design — the same columns that keep the graph small
+make it cheap to save and reopen, so a tool builds the CPG once and reopens it
+for incremental work instead of reparsing cold every run.
+
+```bash
+cpg build src/ -o project.cpg     # parse + analyse once, persist
+cpg serve --load project.cpg      # reopen with no parsing, then query/update
+```
+
+On the 1M-LOC graph (3.6M nodes): ~184 MB on disk (~53 bytes/node,
+uncompressed), ~0.47s to save, ~1.4s to load — versus ~5.6s for a cold build
+with parsing. A reopened graph already carries every pass-produced edge
+(CFG/refs/calls); only summaries are recomputed on load (they live outside the
+graph). Compression and persisting summaries are obvious, clearly-scoped
+extensions.
+
 ## Dataflow summaries (roadmap #3)
 
 A `FunctionSummary` records flows between signature endpoints (`Param(i)`,
@@ -177,7 +199,12 @@ cargo run --release -p cpg-cli -- serve path/to/project --lang c
 # {"cmd":"methods","name":"main"}
 # {"cmd":"calls","name":"strcpy"}
 # {"cmd":"summary","fqn":"wrap"}
+# {"cmd":"taint","sources":["getenv"],"sinks":["system"]}
 # {"cmd":"update","path":"a.c","source":"int f(){...}"}   <- incremental
+
+# persist once, reopen without reparsing:
+cargo run --release -p cpg-cli -- build path/to/project -o project.cpg --lang c
+cargo run --release -p cpg-cli -- serve --load project.cpg
 ```
 
 The `update` command demonstrates the whole architecture in one round-trip:
@@ -204,9 +231,10 @@ stdio query server with live incremental updates; and a 1M-LOC benchmark.
    ~1.4s of the 5.6s build; pre-sizing the columnar arrays from donor totals
    and copying ranges in parallel would shrink it further. Passes mutate the
    graph and run serially; CFG/symbol resolution are per-method and shardable.
-2. **`freeze()` to CSR.** Mutable adjacency lists are right for editing but a
-   quiescent graph served to many read-only queries wants a compacted CSR
-   layout. Freeze on first query, invalidate on edit.
+2. **`freeze()` to CSR + on-disk compression.** Mutable adjacency lists are
+   right for editing but a quiescent graph served to many read-only queries
+   wants a compacted CSR layout; the persistence format is uncompressed and
+   would shrink substantially with it. Freeze on first query, invalidate on edit.
 3. **More frontends behind the same contract.** Java/TS/Go via tree-sitter,
    each validated by the conformance suite — and grow the case set (control
    flow shape, field accesses, method overloading guarded by traits) as the
