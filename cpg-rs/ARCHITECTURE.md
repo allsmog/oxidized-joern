@@ -67,7 +67,7 @@ Dependency direction is strictly downward: frontends and passes depend on
    project. Each pass clears its prior output edges for those files first, so
    re-runs are idempotent (no duplicate edges).
 5. **Invalidate summaries** for the changed methods and every transitive caller
-   that depended on them (`SummaryStore::update_for_changed_files`), then
+   that depended on them (`SummaryStore::update_for_changed_methods`), then
    recompute only those. Everything else is served from cache.
 
 The full build is parallel: workers parse and build standalone per-file
@@ -77,11 +77,13 @@ absorbs them with flat-array id remaps and a per-donor string-sym memo
 hashed once, not per occurrence). The summary fixpoint is also parallel
 (Jacobi rounds against a store snapshot).
 
-The edit path never scans the graph. Three incrementally-maintained indices
+The edit path never scans the graph. Four incrementally-maintained indices
 serve it: callee name → caller files (which files does this edit affect),
-fqn → method node, and the summary store's reverse-dependency web
-(callee fqn → caller fqns), over which transitive invalidation runs as a
-worklist BFS that touches only the affected region.
+fqn → method node, method name → defining nodes (handed to the call-graph
+pass via a borrowed `PassContext`, so call resolution never rebuilds a global
+index), and the summary store's reverse-dependency web (callee fqn → caller
+fqns), over which transitive invalidation runs as a worklist BFS that touches
+only the affected region.
 
 Measured on a synthetic 1M-LOC / 200k-function project, 4 cores
 (`FILES=8000 FNS=25 cargo run --release -p cpg-incremental --example scale`):
@@ -100,14 +102,14 @@ build time:       ~5.6s        (~35,000 functions/sec)
 == incremental edit (1 file of 8001) ==
 files re-analysed:     1
 summaries recomputed:  26   (out of 200002)
-incremental time:      ~160ms
+incremental time:      ~50ms
 ```
 
-A one-file edit recomputes 26 of 200,002 summaries. That ratio — not the
-absolute time — is the point: edit cost tracks the change, not the codebase.
-(The first working serial build of a 500k-LOC project took 275s; the same
-build is now ~2.8s — a ~100× cumulative improvement from the batch call-graph
-index, parallel build, and merge optimisations.)
+At 2M LOC / 400k functions the same edit still re-analyses 1 file and 26
+summaries (~100ms). The work *ratio* — not the absolute time — is the point:
+edit cost tracks the change, not the codebase. (The first working serial
+build of a 500k-LOC project took 275s and its edit path 460ms; cumulative
+improvements: ~100× on builds, ~9× on edits.)
 
 ## Dataflow summaries (roadmap #3)
 
@@ -178,18 +180,14 @@ stdio query server with live incremental updates; and a 1M-LOC benchmark.
    ~1.4s of the 5.6s build; pre-sizing the columnar arrays from donor totals
    and copying ranges in parallel would shrink it further. Passes mutate the
    graph and run serially; CFG/symbol resolution are per-method and shardable.
-2. **Persistent call-graph index.** The call-graph pass still rebuilds its
-   name→method index per pipeline run (O(methods), the bulk of the remaining
-   ~160ms edit latency at 1M LOC). A pass-context carrying project-maintained
-   indices removes it.
-3. **`freeze()` to CSR.** Mutable adjacency lists are right for editing but a
+2. **`freeze()` to CSR.** Mutable adjacency lists are right for editing but a
    quiescent graph served to many read-only queries wants a compacted CSR
    layout. Freeze on first query, invalidate on edit.
-4. **More frontends behind the same contract.** Java/TS/Go via tree-sitter,
+3. **More frontends behind the same contract.** Java/TS/Go via tree-sitter,
    each validated by the conformance suite — and grow the case set (control
    flow shape, field accesses, method overloading guarded by traits) as the
    real specification.
-5. **Richer queries + transports.** The stdio server proves the decoupling;
+4. **Richer queries + transports.** The stdio server proves the decoupling;
    add path-level taint queries (source→sink over summaries) and, if wanted,
    a TCP/HTTP transport around the same loop.
 

@@ -6,7 +6,7 @@
 //! point of the trait contract — the resolution policy is parameterised rather
 //! than re-written per language.
 
-use crate::pass::{ast_descendants, Pass};
+use crate::pass::{ast_descendants, Pass, PassContext};
 use cpg_core::{Cpg, EdgeKind, FileId, NodeId, NodeKind};
 use std::collections::HashMap;
 
@@ -25,7 +25,7 @@ impl Pass for SymbolResolutionPass {
     fn output_edge(&self) -> Option<EdgeKind> {
         Some(EdgeKind::Ref)
     }
-    fn run_file(&self, cpg: &mut Cpg, file: FileId) {
+    fn run_file(&self, cpg: &mut Cpg, file: FileId, _ctx: &PassContext) {
         let methods: Vec<NodeId> = cpg
             .nodes_in_file(file)
             .iter()
