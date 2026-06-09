@@ -183,11 +183,25 @@ fn build_stmt(b: &mut cpg_core::CpgBuilder, parent: NodeId, node: Node, src: &[u
             }
         }
         "init_declarator" => {
-            // `x = <init>`: build the initialiser value (the interesting part).
-            if let Some(v) = node.child_by_field_name("value") {
-                if let Some(e) = build_expr(b, v, src) {
-                    b.ast_child(parent, e);
+            // `T x = <init>`: model as an assignment `=`(x, init) so dataflow
+            // and taint see the binding, mirroring how assignment_expression is
+            // handled. Without this, a declaration's initialiser would not taint
+            // the declared variable.
+            let value = node.child_by_field_name("value").and_then(|v| build_expr(b, v, src));
+            let name = node
+                .child_by_field_name("declarator")
+                .map(|d| innermost_identifier(d, src))
+                .unwrap_or("");
+            match (value, name.is_empty()) {
+                (Some(v), false) => {
+                    let assign = b.call("=", text(node, src), line(node));
+                    let lhs = b.identifier(name, line(node));
+                    b.add_argument(assign, lhs, 1);
+                    b.add_argument(assign, v, 2);
+                    b.ast_child(parent, assign);
                 }
+                (Some(v), true) => b.ast_child(parent, v),
+                _ => {}
             }
         }
         "expression_statement" => {

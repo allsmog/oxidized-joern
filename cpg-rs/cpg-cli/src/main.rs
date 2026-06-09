@@ -15,6 +15,7 @@
 //!     {"cmd":"methods","name":"main"}            (name optional)
 //!     {"cmd":"calls","name":"strcpy"}            (name optional)
 //!     {"cmd":"summary","fqn":"wrap"}
+//!     {"cmd":"taint","sources":["getenv"],"sinks":["system"]}
 //!     {"cmd":"update","path":"a.c","source":"int f(){}"}   (incremental!)
 //!     {"cmd":"quit"}
 
@@ -154,6 +155,31 @@ fn handle(p: &mut Project, req: &Value) -> Value {
                 None => json!({"error": format!("no summary for {fqn}")}),
             }
         }
+        Some("taint") => {
+            let parse = |key: &str| -> Vec<String> {
+                req.get(key)
+                    .and_then(|v| v.as_array())
+                    .map(|a| a.iter().filter_map(|x| x.as_str().map(String::from)).collect())
+                    .unwrap_or_default()
+            };
+            let sources = parse("sources");
+            let sinks = parse("sinks");
+            let src_refs: Vec<&str> = sources.iter().map(|s| s.as_str()).collect();
+            let sink_refs: Vec<&str> = sinks.iter().map(|s| s.as_str()).collect();
+            let findings: Vec<Value> = p
+                .find_taint(&src_refs, &sink_refs)
+                .iter()
+                .map(|f| {
+                    json!({
+                        "method": f.method,
+                        "sink": f.sink,
+                        "line": f.sink_line,
+                        "origin": f.origin,
+                    })
+                })
+                .collect();
+            json!({"findings": findings})
+        }
         Some("update") => {
             let (Some(path), Some(source)) = (
                 req.get("path").and_then(|v| v.as_str()),
@@ -171,7 +197,7 @@ fn handle(p: &mut Project, req: &Value) -> Value {
             }
         }
         Some("quit") => json!({"quit": true}),
-        _ => json!({"error": "unknown cmd; one of stats|methods|calls|summary|update|quit"}),
+        _ => json!({"error": "unknown cmd; one of stats|methods|calls|summary|taint|update|quit"}),
     }
 }
 

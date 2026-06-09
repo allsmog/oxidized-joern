@@ -9,12 +9,14 @@ pub mod cfg;
 pub mod pass;
 pub mod summaries;
 pub mod symbols;
+pub mod taint;
 
 pub use callgraph::CallGraphPass;
 pub use cfg::CfgPass;
 pub use pass::{Pass, PassContext, PassManager};
 pub use summaries::{Flow, FunctionSummary, Point, SummaryStore};
 pub use symbols::SymbolResolutionPass;
+pub use taint::{find_flows, Finding, TaintSpec};
 
 /// Build the standard pass pipeline. Order is derived from layer dependencies,
 /// so the sequence here is irrelevant — the manager sorts it.
