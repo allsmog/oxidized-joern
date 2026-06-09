@@ -34,15 +34,39 @@ impl TaintSpec {
     }
 }
 
-/// A source→sink flow found in one method.
+/// One step along a taint witness (a tainted expression and where it occurs).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Step {
+    pub code: String,
+    pub line: Option<u32>,
+}
+
+/// The provenance of a tainted value: where it originated and the chain of
+/// expressions that carried it. Cloned as taint propagates.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Trace {
+    pub origin: String,
+    pub steps: Vec<Step>,
+}
+
+impl Trace {
+    fn extend(&self, code: &str, line: Option<u32>) -> Trace {
+        let mut steps = self.steps.clone();
+        steps.push(Step { code: code.to_string(), line });
+        Trace { origin: self.origin.clone(), steps }
+    }
+}
+
+/// A source→sink flow found in one method, with a witness path.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Finding {
     pub method: String,
     pub sink: String,
     pub sink_line: Option<u32>,
-    /// The source that tainted the value (a source call name, or a parameter
-    /// name when taint entered through the method's own parameters).
+    /// The source that tainted the value.
     pub origin: String,
+    /// The witness: source expression → … → sink, each with its line.
+    pub path: Vec<Step>,
 }
 
 /// Run the taint query across every method, returning all findings.
@@ -63,8 +87,8 @@ fn analyse_method(
 ) {
     let method_name = cpg.full_name_of(method).unwrap_or("<anon>").to_string();
 
-    // Tainted variable names, each carrying the origin that tainted it.
-    let mut taint: HashMap<String, String> = HashMap::new();
+    // Tainted variable names, each carrying the provenance that tainted it.
+    let mut taint: HashMap<String, Trace> = HashMap::new();
 
     let mut stmts: Vec<NodeId> = crate::pass::ast_descendants(cpg, method)
         .into_iter()
@@ -77,9 +101,10 @@ fn analyse_method(
         if cpg.kind_of(n) == NodeKind::Call && cpg.name_of(n) == Some("=") {
             let args = cpg.arguments_of(n);
             if args.len() == 2 {
-                if let Some(origin) = expr_taint(cpg, summaries, spec, args[1], &taint) {
+                if let Some(trace) = expr_taint(cpg, summaries, spec, args[1], &taint) {
                     if let Some(name) = lhs_name(cpg, args[0]) {
-                        taint.insert(name, origin);
+                        let trace = trace.extend(cpg.code_of(n).unwrap_or(&name), cpg.line_of(n));
+                        taint.insert(name, trace);
                     }
                 } else if let Some(name) = lhs_name(cpg, args[0]) {
                     taint.remove(&name); // reassignment clears taint
@@ -97,7 +122,7 @@ fn check_sinks(
     summaries: &SummaryStore,
     spec: &TaintSpec,
     node: NodeId,
-    taint: &HashMap<String, String>,
+    taint: &HashMap<String, Trace>,
     method_name: &str,
     out: &mut Vec<Finding>,
 ) {
@@ -107,12 +132,16 @@ fn check_sinks(
     let name = cpg.name_of(node).unwrap_or("");
     if spec.sinks.contains(name) {
         for arg in cpg.arguments_of(node) {
-            if let Some(origin) = expr_taint(cpg, summaries, spec, arg, taint) {
+            if let Some(trace) = expr_taint(cpg, summaries, spec, arg, taint) {
+                let path = trace
+                    .extend(cpg.code_of(node).unwrap_or(name), cpg.line_of(node))
+                    .steps;
                 out.push(Finding {
                     method: method_name.to_string(),
                     sink: name.to_string(),
                     sink_line: cpg.line_of(node),
-                    origin,
+                    origin: trace.origin,
+                    path,
                 });
                 break;
             }
@@ -124,14 +153,14 @@ fn check_sinks(
     }
 }
 
-/// Returns `Some(origin)` if the expression is tainted, else `None`.
+/// Returns `Some(trace)` describing provenance if the expression is tainted.
 fn expr_taint(
     cpg: &Cpg,
     summaries: &SummaryStore,
     spec: &TaintSpec,
     node: NodeId,
-    taint: &HashMap<String, String>,
-) -> Option<String> {
+    taint: &HashMap<String, Trace>,
+) -> Option<Trace> {
     match cpg.kind_of(node) {
         NodeKind::Identifier => cpg.name_of(node).and_then(|n| taint.get(n).cloned()),
         NodeKind::Literal => None,
@@ -139,24 +168,30 @@ fn expr_taint(
             let name = cpg.name_of(node).unwrap_or("");
             let args = cpg.arguments_of(node);
             if spec.sources.contains(name) {
-                return Some(name.to_string());
+                return Some(Trace {
+                    origin: name.to_string(),
+                    steps: vec![Step {
+                        code: cpg.code_of(node).unwrap_or(name).to_string(),
+                        line: cpg.line_of(node),
+                    }],
+                });
             }
             if is_operator(name) {
                 // Operators taint their result if any operand is tainted.
                 for a in &args {
-                    if let Some(o) = expr_taint(cpg, summaries, spec, *a, taint) {
-                        return Some(o);
+                    if let Some(t) = expr_taint(cpg, summaries, spec, *a, taint) {
+                        return Some(t);
                     }
                 }
                 return None;
             }
             // Named callee: result is tainted iff a tainted argument flows to
-            // the return per the callee's summary.
+            // the return per the callee's summary. Record the call as a hop.
             if let Some(summary) = summaries.get(name) {
                 for k in summary.flows_to_return() {
                     if let Some(a) = args.get(k) {
-                        if let Some(o) = expr_taint(cpg, summaries, spec, *a, taint) {
-                            return Some(o);
+                        if let Some(t) = expr_taint(cpg, summaries, spec, *a, taint) {
+                            return Some(t.extend(cpg.code_of(node).unwrap_or(name), cpg.line_of(node)));
                         }
                     }
                 }
@@ -165,8 +200,8 @@ fn expr_taint(
         }
         _ => {
             for c in cpg.out_kind(node, cpg_core::EdgeKind::Ast) {
-                if let Some(o) = expr_taint(cpg, summaries, spec, c, taint) {
-                    return Some(o);
+                if let Some(t) = expr_taint(cpg, summaries, spec, c, taint) {
+                    return Some(t);
                 }
             }
             None
