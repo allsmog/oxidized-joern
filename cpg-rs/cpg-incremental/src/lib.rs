@@ -20,6 +20,19 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 
+/// Per-phase timings for a full build.
+#[derive(Debug, Clone, Copy)]
+pub struct BuildStats {
+    /// Total frontend phase (parallel workers + serial merge).
+    pub parse_build: std::time::Duration,
+    /// Parallel portion: parse + per-file subgraph construction.
+    pub parallel_frontend: std::time::Duration,
+    /// Serial portion: absorbing per-file subgraphs into the main graph.
+    pub merge: std::time::Duration,
+    pub passes: std::time::Duration,
+    pub summaries: std::time::Duration,
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum UpdateOutcome {
     /// Content hash matched; no work done.
@@ -31,24 +44,42 @@ pub enum UpdateOutcome {
     },
 }
 
+/// Creates fresh frontend instances. Each parallel build worker needs its own
+/// parser state, so the project holds a factory rather than a single frontend.
+pub type FrontendFactory = Box<dyn Fn() -> Box<dyn Frontend> + Send + Sync>;
+
 pub struct Project {
     pub cpg: Cpg,
+    factory: FrontendFactory,
     frontend: Box<dyn Frontend>,
     pipeline: PassManager,
     pub summaries: SummaryStore,
     file_hashes: HashMap<String, u64>,
     methods_by_file: HashMap<FileId, HashSet<String>>,
+    /// Call names appearing in each file (to unhook the reverse index on edit).
+    call_names_by_file: HashMap<FileId, HashSet<String>>,
+    /// Reverse dependency index: callee name -> files containing such a call.
+    /// Makes "which files does this edit affect?" O(affected), removing the
+    /// last whole-graph scan from the edit path.
+    callers_of_name: HashMap<String, HashSet<FileId>>,
 }
 
 impl Project {
-    pub fn new(frontend: Box<dyn Frontend>, pipeline: PassManager) -> Self {
+    pub fn new(
+        factory: impl Fn() -> Box<dyn Frontend> + Send + Sync + 'static,
+        pipeline: PassManager,
+    ) -> Self {
+        let frontend = factory();
         Project {
             cpg: Cpg::new(),
+            factory: Box::new(factory),
             frontend,
             pipeline,
             summaries: SummaryStore::new(),
             file_hashes: HashMap::new(),
             methods_by_file: HashMap::new(),
+            call_names_by_file: HashMap::new(),
+            callers_of_name: HashMap::new(),
         }
     }
 
@@ -57,18 +88,51 @@ impl Project {
         self.summaries.load_external_json(json)
     }
 
-    /// Initial bulk build of a whole project.
-    pub fn build(&mut self, files: &[(&str, &str)]) {
+    /// Initial bulk build of a whole project. Parsing+building is the dominant
+    /// phase (~70% of a cold build) and is embarrassingly parallel: each worker
+    /// builds a standalone per-file graph with its own frontend instance, then
+    /// the driver absorbs them serially (id/string remapping is cheap relative
+    /// to parsing). Returns per-phase timings so perf work stays
+    /// evidence-driven.
+    pub fn build(&mut self, files: &[(&str, &str)]) -> BuildStats {
+        use rayon::prelude::*;
+        let t0 = std::time::Instant::now();
+        let donors: Vec<Cpg> = files
+            .par_iter()
+            .map(|(path, src)| {
+                let mut fe = (self.factory)();
+                let mut g = Cpg::new();
+                fe.build_file(&mut g, path, src);
+                g
+            })
+            .collect();
+        let parallel_done = t0.elapsed();
         let mut ids = Vec::new();
-        for (path, src) in files {
+        for ((path, src), donor) in files.iter().zip(donors) {
+            self.cpg.absorb(donor);
             let id = self.cpg.file_id(path);
-            self.frontend.build_file(&mut self.cpg, path, src);
             self.file_hashes.insert((*path).to_string(), hash(src));
             ids.push(id);
             self.record_methods(id);
+            self.record_calls(id);
         }
+        let parse_build = t0.elapsed();
+
+        let t1 = std::time::Instant::now();
         self.pipeline.run_all(&mut self.cpg, &ids);
+        let passes = t1.elapsed();
+
+        let t2 = std::time::Instant::now();
         self.summaries.compute_all(&self.cpg);
+        let summaries = t2.elapsed();
+
+        BuildStats {
+            parse_build,
+            parallel_frontend: parallel_done,
+            merge: parse_build - parallel_done,
+            passes,
+            summaries,
+        }
     }
 
     /// Apply an edit to a single file and re-analyse the minimum needed.
@@ -86,17 +150,16 @@ impl Project {
         self.frontend.build_file(&mut self.cpg, path, source);
         self.file_hashes.insert(path.to_string(), h);
         self.record_methods(file);
+        self.record_calls(file);
         let new_methods = self.methods_by_file.get(&file).cloned().unwrap_or_default();
 
         // Files whose call resolution might be affected: callers of any method
-        // name that appeared or disappeared in this file.
-        let affected_names: HashSet<&String> = old_methods.union(&new_methods).collect();
+        // name that appeared or disappeared in this file. Served by the reverse
+        // index — O(affected), no graph scan.
         let mut to_reanalyse: HashSet<FileId> = HashSet::from([file]);
-        for c in self.cpg.calls() {
-            if let Some(name) = self.cpg.name_of(c) {
-                if affected_names.contains(&name.to_string()) {
-                    to_reanalyse.insert(self.cpg.file_of(c));
-                }
+        for name in old_methods.union(&new_methods) {
+            if let Some(callers) = self.callers_of_name.get(name) {
+                to_reanalyse.extend(callers.iter().copied());
             }
         }
 
@@ -121,6 +184,32 @@ impl Project {
         self.methods_by_file.insert(file, names);
     }
 
+    /// Refresh the reverse-dependency index for one file: unhook its previous
+    /// call names, then register the current ones.
+    fn record_calls(&mut self, file: FileId) {
+        if let Some(old) = self.call_names_by_file.remove(&file) {
+            for name in old {
+                if let Some(set) = self.callers_of_name.get_mut(&name) {
+                    set.remove(&file);
+                }
+            }
+        }
+        let names: HashSet<String> = self
+            .cpg
+            .nodes_in_file(file)
+            .iter()
+            .filter(|&&n| self.cpg.is_live(n) && self.cpg.kind_of(n) == NodeKind::Call)
+            .filter_map(|&n| self.cpg.name_of(n).map(|s| s.to_string()))
+            .collect();
+        for name in &names {
+            self.callers_of_name
+                .entry(name.clone())
+                .or_default()
+                .insert(file);
+        }
+        self.call_names_by_file.insert(file, names);
+    }
+
     /// Convenience: does tainted data reach `sink` from any parameter of any
     /// method, using the computed summaries? (A tiny demonstration query.)
     pub fn summary_of(&self, fqn: &str) -> Option<&cpg_analysis::FunctionSummary> {
@@ -141,7 +230,7 @@ mod tests {
     use cpg_lang_c::CFrontend;
 
     fn project() -> Project {
-        Project::new(Box::new(CFrontend::new()), standard_pipeline())
+        Project::new(|| Box::new(CFrontend::new()), standard_pipeline())
     }
 
     #[test]
@@ -185,6 +274,21 @@ mod tests {
             }
             _ => panic!("expected rebuild"),
         }
+    }
+
+    #[test]
+    fn python_summaries_through_shared_engine() {
+        // The identical driver + dataflow engine, fed by the Python frontend:
+        // wrap(y) returns ident(y), so Param(0) -> Return must be derived
+        // through ident's summary. No engine changes for the new language.
+        use cpg_lang_python::PythonFrontend;
+        let mut p = Project::new(|| Box::new(PythonFrontend::new()), standard_pipeline());
+        p.build(&[(
+            "m.py",
+            "def ident(x):\n    return x\n\ndef wrap(y):\n    return ident(y)\n",
+        )]);
+        let wrap = p.summary_of("wrap").expect("wrap summarised");
+        assert!(wrap.flows.iter().any(|f| f.from == Point::Param(0) && f.to == Point::Return));
     }
 
     #[test]

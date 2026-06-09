@@ -161,12 +161,34 @@ mod tests {
         assert_eq!(results.len(), 3);
     }
 
-    // When a second frontend lands, the test is literally:
-    //
-    //   let mut fx = LangFixture::new("Java", Box::new(JavaFrontend::new()))
-    //       .with_source("method_with_two_params", "int two_params(int a,int b){return a;}")
-    //       ...;
-    //   assert all run_suite(&mut fx, &standard_cases()) pass;
-    //
-    // Same assertions, new language. That is the consolidation contract.
+    // The second frontend: same assertions, different language. This is the
+    // consolidation contract in action — Python passes the identical suite
+    // with zero changes to the cases or the shared passes.
+    fn python_fixture() -> LangFixture {
+        use cpg_lang_python::PythonFrontend;
+        LangFixture::new("Python", Box::new(PythonFrontend::new()))
+            .with_source(
+                "method_with_two_params",
+                "def two_params(a, b):\n    return a\n",
+            )
+            .with_source("call_with_two_args", "def f():\n    callee(1, 2)\n")
+            .with_source(
+                "intraprocedural_call_resolves",
+                "def target(x):\n    return x\n\ndef f():\n    target(3)\n",
+            )
+    }
+
+    #[test]
+    fn python_conforms_to_standard_cases() {
+        let cases = standard_cases();
+        let mut fx = python_fixture();
+        let results = run_suite(&mut fx, &cases);
+        let failures: Vec<&CaseResult> =
+            results.iter().filter(|r| r.outcome.is_err()).collect();
+        assert!(
+            failures.is_empty(),
+            "Python frontend failed conformance: {:#?}",
+            failures
+        );
+    }
 }

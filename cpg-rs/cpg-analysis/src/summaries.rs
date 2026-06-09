@@ -158,16 +158,23 @@ impl SummaryStore {
         self.recompute(cpg, &to_recompute);
     }
 
-    /// Fixpoint recomputation over `targets` only.
+    /// Fixpoint recomputation over `targets` only. Each round computes all
+    /// targets in parallel against a snapshot of the store (Jacobi iteration),
+    /// then applies updates serially; rounds repeat until no summary changes.
+    /// Convergence needs one round per level of the call-dependency chain.
     fn recompute(&mut self, cpg: &Cpg, targets: &[NodeId]) {
+        use rayon::prelude::*;
         self.last_recomputed.clear();
         let mut changed = true;
         let mut iterations = 0;
         while changed && iterations < targets.len() + 2 {
             changed = false;
             iterations += 1;
-            for &m in targets {
-                let (summary, deps) = compute_method(cpg, m, self);
+            let results: Vec<(FunctionSummary, HashSet<String>)> = targets
+                .par_iter()
+                .map(|&m| compute_method(cpg, m, self))
+                .collect();
+            for (summary, deps) in results {
                 let fqn = summary.fqn.clone();
                 let prev = self.summaries.get(&fqn);
                 if prev.map(|p| &p.flows) != Some(&summary.flows) {
