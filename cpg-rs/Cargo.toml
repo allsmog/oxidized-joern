@@ -7,6 +7,7 @@ members = [
     "cpg-lang-python",
     "cpg-analysis",
     "cpg-incremental",
+    "cpg-cli",
     "conformance",
 ]
 
