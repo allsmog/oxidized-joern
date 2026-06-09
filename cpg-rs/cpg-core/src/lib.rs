@@ -8,6 +8,7 @@
 pub mod builder;
 pub mod graph;
 pub mod intern;
+pub mod persist;
 pub mod schema;
 pub mod traversal;
 
@@ -50,5 +51,44 @@ mod tests {
             let _ = b.method("main", "main", "int(void)", Some(1));
         }
         assert_eq!(cpg.methods().len(), 1);
+    }
+
+    #[test]
+    fn persistence_round_trips() {
+        let mut cpg = Cpg::new();
+        let f = cpg.file_id("a.c");
+        {
+            let mut b = CpgBuilder::new(&mut cpg, f);
+            let file = b.file_node("a.c");
+            let m = b.method("main", "main", "int(void)", Some(1));
+            b.contains(file, m);
+            let p = b.parameter("argc", "int", 1);
+            b.ast_child(m, p);
+            let call = b.call("puts", "puts(\"hi\")", Some(2));
+            b.contains(m, call);
+            let lit = b.literal("\"hi\"", Some(2));
+            b.add_argument(call, lit, 1);
+        }
+        // Create a tombstone so the free-list path is exercised too.
+        let g = cpg.file_id("gone.c");
+        {
+            let mut b = CpgBuilder::new(&mut cpg, g);
+            let _ = b.method("dead", "dead", "()", None);
+        }
+        cpg.remove_file(g);
+
+        let bytes = cpg.to_bytes();
+        let restored = Cpg::from_bytes(&bytes).expect("decode");
+
+        assert_eq!(restored.live_count(), cpg.live_count());
+        assert_eq!(restored.methods().len(), 1);
+        let m = restored.method_named("main")[0];
+        assert_eq!(restored.parameters_of(m).len(), 1);
+        let call = restored.calls_named("puts")[0];
+        assert_eq!(restored.arguments_of(call).len(), 1);
+        // In-edges were rebuilt: the literal knows its incident Argument edge.
+        let lit = restored.arguments_of(call)[0];
+        assert_eq!(restored.in_kind(lit, EdgeKind::Argument).count(), 1);
+        assert_eq!(restored.path_of(f), Some("a.c"));
     }
 }

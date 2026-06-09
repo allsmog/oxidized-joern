@@ -100,6 +100,29 @@ impl Project {
         self.summaries.load_external_json(json)
     }
 
+    /// Adopt a graph loaded from disk: the persisted graph already holds all
+    /// pass-produced edges (CFG/refs/calls), so we only rebuild the in-memory
+    /// indices and recompute summaries (which are not persisted). Parsing is
+    /// skipped entirely — the point of persistence. Per-file source hashes are
+    /// not restored, so the first edit to any file always rebuilds it.
+    pub fn reopen(&mut self, cpg: Cpg) {
+        self.cpg = cpg;
+        self.file_hashes.clear();
+        self.methods_by_file.clear();
+        self.method_fqns_by_file.clear();
+        self.node_of_fqn.clear();
+        self.method_nodes_by_name.clear();
+        self.method_nodes_by_file.clear();
+        self.call_names_by_file.clear();
+        self.callers_of_name.clear();
+        for f in self.cpg.files() {
+            self.record_methods(f);
+            self.record_calls(f);
+        }
+        self.summaries = SummaryStore::new();
+        self.summaries.compute_all(&self.cpg);
+    }
+
     /// Initial bulk build of a whole project. Parsing+building is the dominant
     /// phase (~70% of a cold build) and is embarrassingly parallel: each worker
     /// builds a standalone per-file graph with its own frontend instance, then

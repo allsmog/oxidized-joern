@@ -68,6 +68,23 @@ fn main() {
         total_fns as f64 / build.as_secs_f64()
     );
 
+    // Persist and reload the columnar graph.
+    let path = std::env::temp_dir().join("scale.cpg");
+    let path = path.to_str().unwrap();
+    let ts = Instant::now();
+    p.cpg.save(path).unwrap();
+    let save = ts.elapsed();
+    let size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
+    let tl = Instant::now();
+    let reloaded = cpg_core::Cpg::load(path).unwrap();
+    let load = tl.elapsed();
+    println!("\n== persistence ==");
+    println!("on-disk size:     {} MB", size / (1024 * 1024));
+    println!("bytes/node:       {}", size / node_count(&p).max(1) as u64);
+    println!("save time:        {save:?}");
+    println!("load time:        {load:?}  ({} nodes, no parsing)", reloaded.live_count());
+    let _ = std::fs::remove_file(path);
+
     // Now edit ONE file and measure.
     let edited = gen_file(0, fns_per_file) + "\nint extra(int z){ return z; }\n";
     let t1 = Instant::now();

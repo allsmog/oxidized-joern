@@ -46,6 +46,34 @@ pub enum NodeKind {
     Unknown,
 }
 
+impl NodeKind {
+    pub fn to_u8(self) -> u8 {
+        self as u8
+    }
+    pub fn from_u8(b: u8) -> NodeKind {
+        use NodeKind::*;
+        match b {
+            0 => File,
+            1 => Namespace,
+            2 => TypeDecl,
+            3 => Member,
+            4 => Method,
+            5 => MethodParameterIn,
+            6 => MethodReturn,
+            7 => Block,
+            8 => Call,
+            9 => Identifier,
+            10 => Literal,
+            11 => Local,
+            12 => FieldIdentifier,
+            13 => ControlStructure,
+            14 => Return,
+            15 => MethodRef,
+            _ => Unknown,
+        }
+    }
+}
+
 /// Kinds of directed edge between nodes.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[repr(u8)]
@@ -69,6 +97,13 @@ pub enum EdgeKind {
 }
 
 impl EdgeKind {
+    pub fn to_u8(self) -> u8 {
+        self as u8
+    }
+    pub fn from_u8(b: u8) -> EdgeKind {
+        EdgeKind::ALL[b as usize]
+    }
+
     pub const ALL: [EdgeKind; 8] = [
         EdgeKind::Ast,
         EdgeKind::Cfg,

@@ -19,27 +19,21 @@
 //!     {"cmd":"update","path":"a.c","source":"int f(){}"}   (incremental!)
 //!     {"cmd":"quit"}
 
-use cpg_core::Query;
+use cpg_core::{Cpg, Query};
 use cpg_analysis::standard_pipeline;
 use cpg_incremental::{Project, UpdateOutcome};
 use serde_json::{json, Value};
 use std::io::{BufRead, Write};
 
-fn main() {
-    let args: Vec<String> = std::env::args().collect();
-    if args.len() < 3 || args[1] != "serve" {
-        eprintln!("usage: cpg serve <dir> [--lang c|python]");
-        std::process::exit(2);
-    }
-    let dir = &args[2];
-    let lang = args
-        .iter()
-        .position(|a| a == "--lang")
+fn flag<'a>(args: &'a [String], name: &str) -> Option<&'a str> {
+    args.iter()
+        .position(|a| a == name)
         .and_then(|i| args.get(i + 1))
         .map(|s| s.as_str())
-        .unwrap_or("c");
+}
 
-    let (mut project, exts): (Project, &[&str]) = match lang {
+fn make_project(lang: &str) -> (Project, &'static [&'static str]) {
+    match lang {
         "python" => (
             Project::new(
                 || Box::new(cpg_lang_python::PythonFrontend::new()),
@@ -48,29 +42,93 @@ fn main() {
             &["py"],
         ),
         _ => (
-            Project::new(
-                || Box::new(cpg_lang_c::CFrontend::new()),
-                standard_pipeline(),
-            ),
+            Project::new(|| Box::new(cpg_lang_c::CFrontend::new()), standard_pipeline()),
             &["c", "h"],
         ),
-    };
+    }
+}
 
-    // Collect sources.
+fn build_project(dir: &str, lang: &str) -> Project {
+    let (mut project, exts) = make_project(lang);
     let mut sources: Vec<(String, String)> = Vec::new();
     collect_sources(std::path::Path::new(dir), exts, &mut sources);
-    let refs: Vec<(&str, &str)> = sources
-        .iter()
-        .map(|(p, s)| (p.as_str(), s.as_str()))
-        .collect();
+    let refs: Vec<(&str, &str)> = sources.iter().map(|(p, s)| (p.as_str(), s.as_str())).collect();
     let stats = project.build(&refs);
     eprintln!(
-        "built {} files in {:?} (parallel {:?}, merge {:?}); serving on stdin",
+        "built {} files in {:?} (parallel {:?}, merge {:?})",
         refs.len(),
         stats.parse_build + stats.passes + stats.summaries,
         stats.parallel_frontend,
         stats.merge
     );
+    project
+}
+
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    let cmd = args.get(1).map(|s| s.as_str()).unwrap_or("");
+    match cmd {
+        "serve" => serve(&args),
+        "build" => build_and_save(&args),
+        _ => {
+            eprintln!(
+                "usage:\n  \
+                 cpg build <dir> -o <graph.cpg> [--lang c|python]   build and persist a CPG\n  \
+                 cpg serve <dir> [--lang c|python]                  build then serve queries\n  \
+                 cpg serve --load <graph.cpg>                       reopen a saved CPG and serve"
+            );
+            std::process::exit(2);
+        }
+    }
+}
+
+/// `cpg build <dir> -o <out>`: build a CPG and persist it to disk.
+fn build_and_save(args: &[String]) {
+    let Some(dir) = args.get(2) else {
+        eprintln!("usage: cpg build <dir> -o <graph.cpg> [--lang c|python]");
+        std::process::exit(2);
+    };
+    let out = flag(args, "-o").unwrap_or("graph.cpg");
+    let lang = flag(args, "--lang").unwrap_or("c");
+    let project = build_project(dir, lang);
+    match project.cpg.save(out) {
+        Ok(()) => {
+            let size = std::fs::metadata(out).map(|m| m.len()).unwrap_or(0);
+            eprintln!("saved {} nodes to {out} ({size} bytes)", project.cpg.live_count());
+        }
+        Err(e) => {
+            eprintln!("save failed: {e}");
+            std::process::exit(1);
+        }
+    }
+}
+
+/// `cpg serve`: either build from a directory or reopen a saved graph, then
+/// answer JSON queries on stdin. A reopened graph skips parsing entirely —
+/// the persistence payoff for a long-lived analysis service.
+fn serve(args: &[String]) {
+    let lang = flag(args, "--lang").unwrap_or("c");
+    let mut project = if let Some(load) = flag(args, "--load") {
+        let (mut p, _) = make_project(lang);
+        match Cpg::load(load) {
+            Ok(cpg) => {
+                p.reopen(cpg);
+                eprintln!("loaded {} nodes from {load}", p.cpg.live_count());
+            }
+            Err(e) => {
+                eprintln!("load failed: {e}");
+                std::process::exit(1);
+            }
+        }
+        p
+    } else {
+        let Some(dir) = args.get(2).filter(|d| !d.starts_with("--")) else {
+            eprintln!("usage: cpg serve <dir> [--lang c|python]  |  cpg serve --load <graph.cpg>");
+            std::process::exit(2);
+        };
+        build_project(dir, lang)
+    };
+    eprintln!("serving on stdin");
 
     let stdin = std::io::stdin();
     let stdout = std::io::stdout();
