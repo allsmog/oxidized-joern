@@ -265,10 +265,16 @@ impl Project {
         self.call_names_by_file.insert(file, names);
     }
 
-    /// Convenience: does tainted data reach `sink` from any parameter of any
-    /// method, using the computed summaries? (A tiny demonstration query.)
     pub fn summary_of(&self, fqn: &str) -> Option<&cpg_analysis::FunctionSummary> {
         self.summaries.get(fqn)
+    }
+
+    /// Interprocedural source→sink taint query over the current summaries.
+    /// Because it reads the (incrementally-maintained) summary cache, results
+    /// reflect the latest edits without any extra recomputation here.
+    pub fn find_taint(&self, sources: &[&str], sinks: &[&str]) -> Vec<cpg_analysis::Finding> {
+        let spec = cpg_analysis::TaintSpec::new(sources, sinks);
+        cpg_analysis::find_flows(&self.cpg, &self.summaries, &spec)
     }
 }
 
@@ -329,6 +335,50 @@ mod tests {
             }
             _ => panic!("expected rebuild"),
         }
+    }
+
+    #[test]
+    fn interprocedural_taint_source_to_sink() {
+        // tainted = getenv("X"); system(wrap(tainted));  where wrap returns its
+        // arg. The flow getenv -> wrap(...) -> system must be found through the
+        // summary of wrap (interprocedural), not just direct argument matching.
+        let mut p = project();
+        p.build(&[(
+            "v.c",
+            r#"
+                char* wrap(char* s) { return s; }
+                void handle() {
+                    char* tainted = getenv("X");
+                    system(wrap(tainted));
+                }
+            "#,
+        )]);
+        let findings = p.find_taint(&["getenv"], &["system"]);
+        assert_eq!(findings.len(), 1, "expected one source->sink flow: {findings:?}");
+        assert_eq!(findings[0].sink, "system");
+        assert_eq!(findings[0].origin, "getenv");
+    }
+
+    #[test]
+    fn taint_finding_clears_after_fix() {
+        // Editing wrap to stop returning its argument should break the flow —
+        // the summary invalidation must propagate to the taint query.
+        let mut p = project();
+        p.build(&[(
+            "v.c",
+            "char* wrap(char* s){ return s; } void h(){ system(wrap(getenv(\"X\"))); }",
+        )]);
+        assert_eq!(p.find_taint(&["getenv"], &["system"]).len(), 1);
+
+        p.update_file(
+            "v.c",
+            "char* wrap(char* s){ return \"safe\"; } void h(){ system(wrap(getenv(\"X\"))); }",
+        );
+        assert_eq!(
+            p.find_taint(&["getenv"], &["system"]).len(),
+            0,
+            "flow should be gone after wrap no longer returns its arg"
+        );
     }
 
     #[test]
