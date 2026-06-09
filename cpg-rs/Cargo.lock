@@ -43,6 +43,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "cpg-cli"
+version = "0.1.0"
+dependencies = [
+ "cpg-analysis",
+ "cpg-core",
+ "cpg-frontend",
+ "cpg-incremental",
+ "cpg-lang-c",
+ "cpg-lang-python",
+ "serde_json",
+]
+
+[[package]]
 name = "cpg-core"
 version = "0.1.0"
 
