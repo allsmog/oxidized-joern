@@ -129,6 +129,23 @@ The cache tracks a dependency web (`caller fqn → callee fqns used`) so
 invalidation is precise: changing a leaf function re-summarises only its
 transitive callers.
 
+**Source→sink taint queries** (`cpg-analysis::taint`) run on top of the cache:
+given source and sink function names, the analysis does intraprocedural taint
+within each method and lifts it interprocedurally through callee summaries (a
+call propagates taint to its result iff the callee's summary maps that argument
+to its return). Because it reads the incrementally-maintained summaries, a
+query reflects the latest edits with no extra recomputation. End-to-end through
+the server:
+
+```
+{"cmd":"taint","sources":["getenv"],"sinks":["system"]}
+  → {"findings":[{"method":"handle","sink":"system","line":4,"origin":"getenv"}]}
+{"cmd":"update","path":"v.c","source":"...wrap now returns a constant..."}
+  → {"updated":true,"filesReanalysed":1,"summariesRecomputed":2}
+{"cmd":"taint","sources":["getenv"],"sinks":["system"]}
+  → {"findings":[]}      # the fix invalidated wrap's summary; the flow is gone
+```
+
 ## Conformance suite (roadmap #2)
 
 `conformance` expresses assertions against the **language-independent schema**
@@ -187,9 +204,9 @@ stdio query server with live incremental updates; and a 1M-LOC benchmark.
    each validated by the conformance suite — and grow the case set (control
    flow shape, field accesses, method overloading guarded by traits) as the
    real specification.
-4. **Richer queries + transports.** The stdio server proves the decoupling;
-   add path-level taint queries (source→sink over summaries) and, if wanted,
-   a TCP/HTTP transport around the same loop.
+4. **Richer queries + transports.** Source→sink taint over summaries is in
+   (`taint` command); next are path *witnesses* (the statement chain, not just
+   the finding) and a TCP/HTTP transport around the same request loop.
 
 The CFG pass is a source-order linearisation, symbol resolution is intra-method
 by name, and the dataflow taint is name-based rather than SSA/IFDS — all chosen
