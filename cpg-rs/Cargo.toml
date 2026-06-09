@@ -4,6 +4,7 @@ members = [
     "cpg-core",
     "cpg-frontend",
     "cpg-lang-c",
+    "cpg-lang-python",
     "cpg-analysis",
     "cpg-incremental",
     "conformance",
@@ -18,10 +19,12 @@ license = "Apache-2.0"
 cpg-core = { path = "cpg-core" }
 cpg-frontend = { path = "cpg-frontend" }
 cpg-lang-c = { path = "cpg-lang-c" }
+cpg-lang-python = { path = "cpg-lang-python" }
 cpg-analysis = { path = "cpg-analysis" }
 cpg-incremental = { path = "cpg-incremental" }
 tree-sitter = "0.26.9"
 tree-sitter-c = "0.24.2"
+tree-sitter-python = "0.25"
 rayon = "1.12.0"
 
 [profile.release]
