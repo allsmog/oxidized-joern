@@ -202,3 +202,14 @@ pins it, so a regression shows up as a diff.
   `#include` becomes an IMPORT slot, pushing the file-global TYPE_DECL's
   ORDER to 1 + #includes; directive names and dropped #ifdef branches never
   produce phantoms.
+- **musl string-fn pins** (`corpus/memcmp.c`, `corpus/strcmp.c`):
+  multi-declarator initialisers emit ALL LOCALs before any assignment
+  (`const unsigned char *l=vl, *r=vr;` -> LOCAL l, LOCAL r, then the two
+  assignments, CODE = raw init-declarator text `*l=vl`); an empty for-init
+  clause is a CODE-less ANY BLOCK placeholder that still receives FOR_INIT;
+  a comma update is a BLOCK, so for-clause identity is positional; a
+  body-less `for (...);` branches its condition root straight to the update
+  entry; `unsigned char` keeps its space in TYPE_FULL_NAME (unlike
+  `longunsigned`), and a declaration ALSO registers its decl-specifier type
+  — `unsigned char c` registers bare `unsigned`, `const char *p` registers
+  `char` (CDT's typeForDeclSpecifier path).

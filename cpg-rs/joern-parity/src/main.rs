@@ -1503,6 +1503,18 @@ impl Ctx<'_> {
             ..Default::default()
         });
         let mut co = 1i64;
+        if init.is_none() {
+            // Empty init clause: a CODE-less ANY BLOCK placeholder, which
+            // still receives the FOR_INIT edge.
+            let pi = self.line_no;
+            self.line(depth + 1, "BLOCK", P {
+                tfn: Some("ANY".into()),
+                order: Some(co),
+                ..Default::default()
+            });
+            self.edge("FOR_INIT", self.at(cs), self.at(pi));
+            co += 1;
+        }
         if let Some(i) = init {
             if i.kind() == "declaration" {
                 let before = self.line_no;
@@ -1543,6 +1555,10 @@ impl Ctx<'_> {
     /// `<operator>.assignment` CALL — exactly as c2cpg lowers it.
     fn emit_declaration(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize, assign_arg: Option<i64>) {
         let ty = normalize_type(&n.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into()));
+        // CDT registers the decl-SPECIFIER type separately from the declared
+        // type: `unsigned char c` also registers bare `unsigned` (pinned by
+        // musl memcmp.c); a pointer decl registers its base.
+        self.types.insert(specifier_type(&ty));
         // LOCAL CODE is rebuilt per declarator: the decl-specifier source text
         // (keeps `const`/`struct`/`unsigned ...` spellings the type drops)
         // plus that declarator alone — so `int a, b = 1;` yields `int a`,`int b`.
@@ -1551,116 +1567,111 @@ impl Ctx<'_> {
             let spec = std::str::from_utf8(&b[n.start_byte()..spec_end]).unwrap_or("");
             esc(&format!("{spec} {}", text(d, b)))
         };
+        // Pass 1: all LOCALs (musl memcmp pins that `T *a=x, *b=y;` emits
+        // both LOCALs before any assignment).
+        struct DeclItem<'t> {
+            decl: Node<'t>,
+            outer: Node<'t>,
+            init: Option<Node<'t>>,
+            name: String,
+            full_ty: String,
+        }
+        let mut items: Vec<DeclItem> = Vec::new();
         for d in named_children(n) {
-            match d.kind() {
-                "init_declarator" => {
-                    let name_node = d.child_by_field_name("declarator");
-                    let name = name_node.map(|x| innermost_id(x, b)).unwrap_or_default();
-                    // LOCAL CODE keeps the source declarator form (`int *q`),
-                    // while TYPE_FULL_NAME normalises pointers to `int*`.
-                    let full_ty = format!("{ty}{}", name_node.map(|x| decl_suffix(x, b)).unwrap_or_default());
-                    self.symbols.insert(name.clone(), full_ty.clone());
-                    let lo = *order;
-                    *order += 1;
-                    self.line(depth, "LOCAL", P {
-                        name: Some(name.clone()),
-                        code: name_node.map(decl_code),
-                        tfn: Some(full_ty.clone()),
-                        order: Some(lo),
-                        ..Default::default()
-                    });
-                    // The assignment call.
-                    let ao = *order;
-                    *order += 1;
-                    self.note_call("<operator>.assignment", 2);
-                    self.line(depth, "CALL", P {
-                        name: Some("<operator>.assignment".into()),
-                        code: Some(esc(text(d, b))),
-                        tfn: Some("void".into()),
-                        mfn: Some("<operator>.assignment".into()),
-                        order: Some(ao),
-                        arg: assign_arg,
-                        dispatch: Some("STATIC_DISPATCH".into()),
-                        ..Default::default()
-                    });
-                    // lhs identifier (arg 1), rhs value (arg 2).
-                    self.line(depth + 1, "IDENTIFIER", P {
-                        name: Some(name.clone()),
-                        code: Some(name.clone()),
-                        tfn: Some(full_ty),
-                        order: Some(1),
-                        arg: Some(1),
-                        ..Default::default()
-                    });
-                    if let Some(v) = d.child_by_field_name("value") {
-                        self.emit_expr(v, b, depth + 1, 2, Some(2));
-                    }
+            let (decl, init) = match d.kind() {
+                "init_declarator" => (d.child_by_field_name("declarator"), d.child_by_field_name("value")),
+                "identifier" | "pointer_declarator" | "array_declarator" => (Some(d), None),
+                _ => (None, None),
+            };
+            let Some(decl) = decl else { continue };
+            let name = innermost_id(decl, b);
+            let full_ty = format!("{ty}{}", decl_suffix(decl, b));
+            self.symbols.insert(name.clone(), full_ty.clone());
+            let lo = *order;
+            *order += 1;
+            self.line(depth, "LOCAL", P {
+                name: Some(name.clone()),
+                code: Some(decl_code(decl)),
+                tfn: Some(full_ty.clone()),
+                order: Some(lo),
+                ..Default::default()
+            });
+            items.push(DeclItem { decl, outer: d, init, name, full_ty });
+        }
+        // Pass 2: initialiser assignments / alloc lowerings, in order.
+        for it in items {
+            if let Some(v) = it.init {
+                let ao = *order;
+                *order += 1;
+                self.note_call("<operator>.assignment", 2);
+                self.line(depth, "CALL", P {
+                    name: Some("<operator>.assignment".into()),
+                    // CODE is the raw init_declarator text (`*l=vl`, `b = 1`).
+                    code: Some(esc(text(it.outer, b))),
+                    tfn: Some("void".into()),
+                    mfn: Some("<operator>.assignment".into()),
+                    order: Some(ao),
+                    arg: assign_arg,
+                    dispatch: Some("STATIC_DISPATCH".into()),
+                    ..Default::default()
+                });
+                self.line(depth + 1, "IDENTIFIER", P {
+                    name: Some(it.name.clone()),
+                    code: Some(it.name.clone()),
+                    tfn: Some(it.full_ty.clone()),
+                    order: Some(1),
+                    arg: Some(1),
+                    ..Default::default()
+                });
+                self.emit_expr(v, b, depth + 1, 2, Some(2));
+                continue;
+            }
+            let sizes = array_sizes(it.decl);
+            if !sizes.is_empty() {
+                let ao = *order;
+                *order += 1;
+                self.note_call("<operator>.assignment", 2);
+                self.note_call("<operator>.alloc", sizes.len() + 1);
+                self.line(depth, "CALL", P {
+                    name: Some("<operator>.assignment".into()),
+                    code: Some(esc(text(it.decl, b))),
+                    tfn: Some("void".into()),
+                    mfn: Some("<operator>.assignment".into()),
+                    order: Some(ao),
+                    arg: assign_arg,
+                    dispatch: Some("STATIC_DISPATCH".into()),
+                    ..Default::default()
+                });
+                self.line(depth + 1, "IDENTIFIER", P {
+                    name: Some(it.name.clone()),
+                    code: Some(it.name),
+                    tfn: Some(it.full_ty.clone()),
+                    order: Some(1),
+                    arg: Some(1),
+                    ..Default::default()
+                });
+                self.line(depth + 1, "CALL", P {
+                    name: Some("<operator>.alloc".into()),
+                    code: Some(esc(text(it.decl, b))),
+                    tfn: Some(it.full_ty.clone()),
+                    mfn: Some("<operator>.alloc".into()),
+                    order: Some(2),
+                    arg: Some(2),
+                    dispatch: Some("STATIC_DISPATCH".into()),
+                    ..Default::default()
+                });
+                self.line(depth + 2, "IDENTIFIER", P {
+                    name: Some(it.full_ty.clone()),
+                    code: Some(it.full_ty.clone()),
+                    tfn: Some(it.full_ty),
+                    order: Some(1),
+                    arg: Some(1),
+                    ..Default::default()
+                });
+                for (i, sz) in sizes.into_iter().enumerate() {
+                    let k = (i + 2) as i64;
+                    self.emit_expr(sz, b, depth + 2, k, Some(k));
                 }
-                "identifier" | "pointer_declarator" | "array_declarator" => {
-                    let name = innermost_id(d, b);
-                    let full_ty = format!("{ty}{}", decl_suffix(d, b));
-                    self.symbols.insert(name.clone(), full_ty.clone());
-                    let lo = *order;
-                    *order += 1;
-                    self.line(depth, "LOCAL", P {
-                        name: Some(name.clone()),
-                        code: Some(decl_code(d)),
-                        tfn: Some(full_ty.clone()),
-                        order: Some(lo),
-                        ..Default::default()
-                    });
-                    // A sized-array local lowers to `<operator>.alloc`:
-                    // grid = alloc(int[2][3], 2, 3) — CODE on both calls is
-                    // the declarator text, the type appears as an IDENTIFIER.
-                    let sizes = array_sizes(d);
-                    if !sizes.is_empty() {
-                        let ao = *order;
-                        *order += 1;
-                        self.note_call("<operator>.assignment", 2);
-                        self.note_call("<operator>.alloc", sizes.len() + 1);
-                        self.line(depth, "CALL", P {
-                            name: Some("<operator>.assignment".into()),
-                            code: Some(esc(text(d, b))),
-                            tfn: Some("void".into()),
-                            mfn: Some("<operator>.assignment".into()),
-                            order: Some(ao),
-                            arg: assign_arg,
-                            dispatch: Some("STATIC_DISPATCH".into()),
-                            ..Default::default()
-                        });
-                        self.line(depth + 1, "IDENTIFIER", P {
-                            name: Some(name.clone()),
-                            code: Some(name),
-                            tfn: Some(full_ty.clone()),
-                            order: Some(1),
-                            arg: Some(1),
-                            ..Default::default()
-                        });
-                        self.line(depth + 1, "CALL", P {
-                            name: Some("<operator>.alloc".into()),
-                            code: Some(esc(text(d, b))),
-                            tfn: Some(full_ty.clone()),
-                            mfn: Some("<operator>.alloc".into()),
-                            order: Some(2),
-                            arg: Some(2),
-                            dispatch: Some("STATIC_DISPATCH".into()),
-                            ..Default::default()
-                        });
-                        self.line(depth + 2, "IDENTIFIER", P {
-                            name: Some(full_ty.clone()),
-                            code: Some(full_ty.clone()),
-                            tfn: Some(full_ty),
-                            order: Some(1),
-                            arg: Some(1),
-                            ..Default::default()
-                        });
-                        for (i, sz) in sizes.into_iter().enumerate() {
-                            let k = (i + 2) as i64;
-                            self.emit_expr(sz, b, depth + 2, k, Some(k));
-                        }
-                    }
-                }
-                _ => {}
             }
         }
     }
@@ -2222,6 +2233,15 @@ fn assignment_name(op: &str) -> String {
 /// CDT renders multi-keyword primitive types reordered and unspaced
 /// (`unsigned long` → `longunsigned`, pinned by corpus/exprs.c). Extend this
 /// table only with oracle-pinned combinations.
+/// CDT's typeForDeclSpecifier rendering, where it diverges from the declared
+/// type: `unsigned char` -> `unsigned`. Extend only with oracle pins.
+fn specifier_type(normalized: &str) -> String {
+    match normalized {
+        "unsigned char" => "unsigned".into(),
+        t => t.into(),
+    }
+}
+
 fn normalize_type(base: &str) -> String {
     let t = base.trim();
     // CDT inconsistency: `struct X`/`enum X` strip the keyword but `union X`
@@ -2688,20 +2708,18 @@ impl CfgBuilder<'_> {
             "for" => {
                 self.breaks.push(Vec::new());
                 self.continues.push(Vec::new());
-                let body = block_child(self);
-                // init = the ARGUMENT_INDEX=1 expression; the remaining two
-                // expression children in order are condition and update.
-                let init = kids.iter().copied().find(|&c| self.arena[c].has_arg && self.arena[c].label != "BLOCK");
+                // Positional after skipping LOCALs: [init, cond, update,
+                // body?] — empty clauses are placeholder BLOCKs, and a comma
+                // update is itself a BLOCK, so positions are the only truth.
                 let rest: Vec<usize> = kids
                     .iter()
                     .copied()
-                    .filter(|&c| {
-                        Some(c) != init
-                            && Some(c) != body
-                            && !matches!(self.arena[c].label.as_str(), "LOCAL" | "BLOCK")
-                    })
+                    .filter(|&c| self.arena[c].label != "LOCAL")
                     .collect();
-                let (cond, update) = (rest.first().copied(), rest.get(1).copied());
+                let init = rest.first().copied();
+                let cond = rest.get(1).copied();
+                let update = rest.get(2).copied();
+                let body = rest.get(3).copied();
                 let (ie, io) = init.map(|i| self.build(i)).unwrap_or((None, vec![]));
                 let (ce, co) = cond.map(|c| self.build(c)).unwrap_or((None, vec![]));
                 let (ue, uo) = update.map(|u| self.build(u)).unwrap_or((None, vec![]));
@@ -2710,8 +2728,11 @@ impl CfgBuilder<'_> {
                     self.connect(&io, ce);
                     self.connect(&uo, ce);
                 }
-                if let Some(be) = &be {
-                    self.connect(&co, be);
+                // True branch: body if present, else straight to the update
+                // (musl `for (...);` empty-body loops), else the cond itself.
+                if let Some(t) = be.as_ref().or(ue.as_ref()).or(ce.as_ref()) {
+                    let t = t.clone();
+                    self.connect(&co, &t);
                 }
                 if let Some(ue) = &ue {
                     self.connect(&bo, ue);
