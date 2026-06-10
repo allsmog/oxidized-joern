@@ -142,8 +142,28 @@ impl Ctx<'_> {
     /// A block-level statement. `order` is the running 1-based child position.
     fn emit_stmt(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
         match n.kind() {
-            "declaration" => self.emit_declaration(n, b, order, depth),
+            "declaration" => self.emit_declaration(n, b, order, depth, None),
             "if_statement" => self.emit_if(n, b, order, depth),
+            "for_statement" => self.emit_for(n, b, order, depth),
+            "do_statement" => {
+                let o = *order;
+                *order += 1;
+                // c2cpg quirk: a do-while's CODE is the entire statement,
+                // trailing semicolon included (unlike while, header only).
+                self.line(depth, "CONTROL_STRUCTURE", P {
+                    code: Some(esc(text(n, b))),
+                    order: Some(o),
+                    ..Default::default()
+                });
+                if let Some(body) = n.child_by_field_name("body") {
+                    if body.kind() == "compound_statement" {
+                        self.emit_block(body, b, 1, depth + 1);
+                    }
+                }
+                if let Some(cond) = n.child_by_field_name("condition") {
+                    self.emit_expr(unwrap_paren(cond), b, depth + 1, 2, None);
+                }
+            }
             "while_statement" => {
                 let o = *order;
                 *order += 1;
@@ -219,22 +239,69 @@ impl Ctx<'_> {
         }
     }
 
+    /// A `for` → CONTROL_STRUCTURE whose CODE is rebuilt as
+    /// `for (init;cond;update)` — no space after the semicolons (c2cpg quirk) —
+    /// with the init declaration flattened into the structure's children and
+    /// its assignment carrying ARGUMENT_INDEX=1 (another quirk; the condition,
+    /// update, and body carry none).
+    fn emit_for(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
+        let init = n.child_by_field_name("initializer");
+        let cond = n.child_by_field_name("condition");
+        let update = n.child_by_field_name("update");
+        let part = |x: Option<Node>| {
+            x.map(|c| text(c, b).trim_end_matches(';').trim().to_string()).unwrap_or_default()
+        };
+        let o = *order;
+        *order += 1;
+        self.line(depth, "CONTROL_STRUCTURE", P {
+            code: Some(esc(&format!("for ({};{};{})", part(init), part(cond), part(update)))),
+            order: Some(o),
+            ..Default::default()
+        });
+        let mut co = 1i64;
+        if let Some(i) = init {
+            if i.kind() == "declaration" {
+                self.emit_declaration(i, b, &mut co, depth + 1, Some(1));
+            } else {
+                self.emit_expr(i, b, depth + 1, co, Some(1));
+                co += 1;
+            }
+        }
+        if let Some(c) = cond {
+            self.emit_expr(c, b, depth + 1, co, None);
+            co += 1;
+        }
+        if let Some(u) = update {
+            self.emit_expr(u, b, depth + 1, co, None);
+            co += 1;
+        }
+        if let Some(body) = n.child_by_field_name("body") {
+            if body.kind() == "compound_statement" {
+                self.emit_block(body, b, co, depth + 1);
+            }
+        }
+    }
+
     /// A C declaration `T x = init;` → a LOCAL plus, if initialised, an
     /// `<operator>.assignment` CALL — exactly as c2cpg lowers it.
-    fn emit_declaration(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
+    fn emit_declaration(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize, assign_arg: Option<i64>) {
         let ty = n.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into());
         for d in named_children(n) {
             match d.kind() {
                 "init_declarator" => {
                     let name_node = d.child_by_field_name("declarator");
                     let name = name_node.map(|x| innermost_id(x, b)).unwrap_or_default();
-                    self.symbols.insert(name.clone(), ty.clone());
+                    // LOCAL CODE keeps the source declarator form (`int *q`),
+                    // while TYPE_FULL_NAME normalises pointers to `int*`.
+                    let decl_code = name_node.map(|x| text(x, b).to_string()).unwrap_or(name.clone());
+                    let full_ty = format!("{ty}{}", name_node.map(pointer_suffix).unwrap_or_default());
+                    self.symbols.insert(name.clone(), full_ty.clone());
                     let lo = *order;
                     *order += 1;
                     self.line(depth, "LOCAL", P {
                         name: Some(name.clone()),
-                        code: Some(esc(&format!("{ty} {name}"))),
-                        tfn: Some(ty.clone()),
+                        code: Some(esc(&format!("{ty} {decl_code}"))),
+                        tfn: Some(full_ty.clone()),
                         order: Some(lo),
                         ..Default::default()
                     });
@@ -247,6 +314,7 @@ impl Ctx<'_> {
                         tfn: Some("void".into()),
                         mfn: Some("<operator>.assignment".into()),
                         order: Some(ao),
+                        arg: assign_arg,
                         dispatch: Some("STATIC_DISPATCH".into()),
                         ..Default::default()
                     });
@@ -254,7 +322,7 @@ impl Ctx<'_> {
                     self.line(depth + 1, "IDENTIFIER", P {
                         name: Some(name.clone()),
                         code: Some(name.clone()),
-                        tfn: Some(ty.clone()),
+                        tfn: Some(full_ty),
                         order: Some(1),
                         arg: Some(1),
                         ..Default::default()
@@ -265,13 +333,14 @@ impl Ctx<'_> {
                 }
                 "identifier" | "pointer_declarator" | "array_declarator" => {
                     let name = innermost_id(d, b);
-                    self.symbols.insert(name.clone(), ty.clone());
+                    let full_ty = format!("{ty}{}", pointer_suffix(d));
+                    self.symbols.insert(name.clone(), full_ty.clone());
                     let lo = *order;
                     *order += 1;
                     self.line(depth, "LOCAL", P {
                         name: Some(name.clone()),
-                        code: Some(esc(&format!("{ty} {name}"))),
-                        tfn: Some(ty.clone()),
+                        code: Some(esc(&format!("{ty} {}", text(d, b)))),
+                        tfn: Some(full_ty),
                         order: Some(lo),
                         ..Default::default()
                     });
@@ -324,6 +393,68 @@ impl Ctx<'_> {
                 }
                 if let Some(r) = n.child_by_field_name("right") {
                     self.emit_expr(r, b, depth + 1, 2, Some(2));
+                }
+            }
+            "unary_expression" | "pointer_expression" => {
+                let op = n.child(0).map(|o| text(o, b)).unwrap_or("?");
+                let name = unary_name(op);
+                self.line(depth, "CALL", P {
+                    name: Some(name.clone()),
+                    code: Some(esc(text(n, b))),
+                    tfn: Some("ANY".into()),
+                    mfn: Some(name),
+                    order: Some(order),
+                    arg,
+                    dispatch: Some("STATIC_DISPATCH".into()),
+                    ..Default::default()
+                });
+                if let Some(a) = n.child_by_field_name("argument") {
+                    self.emit_expr(a, b, depth + 1, 1, Some(1));
+                }
+            }
+            "update_expression" => {
+                let arg_node = n.child_by_field_name("argument");
+                let op_node = n.child_by_field_name("operator");
+                let op = op_node.map(|o| text(o, b)).unwrap_or("++");
+                let prefix = match (op_node, arg_node) {
+                    (Some(o), Some(a)) => o.start_byte() < a.start_byte(),
+                    _ => false,
+                };
+                let name = format!(
+                    "<operator>.{}{}",
+                    if prefix { "pre" } else { "post" },
+                    if op == "++" { "Increment" } else { "Decrement" }
+                );
+                self.line(depth, "CALL", P {
+                    name: Some(name.clone()),
+                    code: Some(esc(text(n, b))),
+                    tfn: Some("ANY".into()),
+                    mfn: Some(name),
+                    order: Some(order),
+                    arg,
+                    dispatch: Some("STATIC_DISPATCH".into()),
+                    ..Default::default()
+                });
+                if let Some(a) = arg_node {
+                    self.emit_expr(a, b, depth + 1, 1, Some(1));
+                }
+            }
+            "conditional_expression" => {
+                self.line(depth, "CALL", P {
+                    name: Some("<operator>.conditional".into()),
+                    code: Some(esc(text(n, b))),
+                    tfn: Some("ANY".into()),
+                    mfn: Some("<operator>.conditional".into()),
+                    order: Some(order),
+                    arg,
+                    dispatch: Some("STATIC_DISPATCH".into()),
+                    ..Default::default()
+                });
+                for (i, field) in ["condition", "consequence", "alternative"].iter().enumerate() {
+                    if let Some(c) = n.child_by_field_name(*field) {
+                        let k = (i + 1) as i64;
+                        self.emit_expr(c, b, depth + 1, k, Some(k));
+                    }
                 }
             }
             "call_expression" => {
@@ -396,11 +527,10 @@ fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
     if let Some(pl) = fd.child_by_field_name("parameters") {
         for p in named_children(pl) {
             if p.kind() == "parameter_declaration" {
-                let ty = p.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into());
-                let name = p
-                    .child_by_field_name("declarator")
-                    .map(|d| innermost_id(d, b))
-                    .unwrap_or_default();
+                let base = p.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into());
+                let decl = p.child_by_field_name("declarator");
+                let ty = format!("{base}{}", decl.map(pointer_suffix).unwrap_or_default());
+                let name = decl.map(|d| innermost_id(d, b)).unwrap_or_default();
                 if !name.is_empty() {
                     params.push(Param { name, ty, code: text(p, b).to_string() });
                 }
@@ -424,6 +554,34 @@ fn unwrap_paren(n: Node) -> Node {
         }
     }
     n
+}
+
+/// Unary/pointer operator → Joern operator name.
+fn unary_name(op: &str) -> String {
+    let n = match op {
+        "-" => "minus",
+        "+" => "plus",
+        "!" => "logicalNot",
+        "~" => "not",
+        "*" => "indirection",
+        "&" => "addressOf",
+        _ => "unknown",
+    };
+    format!("<operator>.{n}")
+}
+
+/// `*` suffix for each pointer_declarator level (Joern renders `int *p` as `int*`).
+fn pointer_suffix(n: Node) -> String {
+    let mut stars = 0;
+    let mut cur = n;
+    while cur.kind() == "pointer_declarator" {
+        stars += 1;
+        match cur.child_by_field_name("declarator") {
+            Some(c) => cur = c,
+            None => break,
+        }
+    }
+    "*".repeat(stars)
 }
 
 /// Assignment operator → Joern operator name (`=` → assignment, `+=` → …).
