@@ -3035,6 +3035,9 @@ fn is_assignment(name: &str) -> bool {
 fn node_var(d: &DNode) -> String {
     if d.label == "METHOD_PARAMETER_IN" || d.label == "METHOD_PARAMETER_OUT" {
         d.name.clone()
+    } else if d.label == "BLOCK" && d.fullcode.is_empty() {
+        // An empty expression block's `code` property renders as "<empty>".
+        "<empty>".to_string()
     } else {
         d.fullcode.clone()
     }
@@ -3199,6 +3202,10 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
 
     // --- dataflow fixpoint over the CFG ---
     let cfg = cfg_index_edges(block, text, n);
+    // Nodes that are part of this method's CFG (the reaching-def flow graph's
+    // node set). Used to tell an EXPRESSION block (comma operator — in the CFG)
+    // from a statement / INLINED-macro / stub body block (not in the CFG).
+    let cfg_nodes: HashSet<usize> = cfg.iter().flat_map(|&(s, d)| [s, d]).collect();
     let mut preds: Vec<Vec<usize>> = vec![Vec::new(); n];
     for &(s, d) in &cfg {
         preds[d].push(s);
@@ -3282,11 +3289,16 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // method-return (exit) index
     let exit = (0..n).find(|&i| arena[i].label == "METHOD_RETURN");
 
-    let is_ddg = |i: usize| {
-        matches!(
-            arena[i].label.as_str(),
-            "CALL" | "IDENTIFIER" | "LITERAL" | "RETURN" | "METHOD_PARAMETER_IN" | "METHOD_REF" | "TYPE_REF"
-        )
+    // isDdgNode: everything EXCEPT Method, ControlStructure, FieldIdentifier,
+    // JumpTarget, MethodReturn. A BLOCK is a ddg node only when it is itself a
+    // CFG node — i.e. an EXPRESSION block used as a call argument (the
+    // comma-operator `(b++, b+1)`); statement blocks (method/loop bodies) are
+    // not in the CFG and never get def-use edges.
+    let is_ddg = |i: usize| match arena[i].label.as_str() {
+        "CALL" | "IDENTIFIER" | "LITERAL" | "RETURN" | "METHOD_PARAMETER_IN" | "METHOD_REF"
+        | "TYPE_REF" => true,
+        "BLOCK" => cfg_nodes.contains(&i),
+        _ => false,
     };
 
     // usedIncomingDefs(node): map use -> defs in in(node) it uses.
@@ -3382,6 +3394,40 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
                 if valid {
                     push(node_var(&arena[u]), u, gnode, &mut flows);
                 }
+            }
+        }
+        // addEdgeForBlock: a block argument (a comma-operator/expression block)
+        // routes its VALUE — its last AST child — into the enclosing call. If the
+        // last child is an identifier, the defs it uses flow into the block, then
+        // block -> call; if it is a call, that call -> block, then block -> call.
+        for b in args_of(c) {
+            if arena[b].label != "BLOCK" || !cfg_nodes.contains(&b) {
+                continue;
+            }
+            let Some(&last) = arena[b].children.last() else { continue };
+            match arena[last].label.as_str() {
+                "IDENTIFIER" => {
+                    let ins = in_of(b);
+                    let mut ds: Vec<usize> = ins
+                        .iter()
+                        .copied()
+                        .filter(|&d| is_using(last, d))
+                        .filter(|&d| matches!(arena[d].label.as_str(), "IDENTIFIER" | "CALL"))
+                        .collect();
+                    ds.sort();
+                    let any = !ds.is_empty();
+                    for d in ds {
+                        push(node_var(&arena[d]), d, b, &mut flows);
+                    }
+                    if any {
+                        push(String::new(), b, c, &mut flows);
+                    }
+                }
+                "CALL" => {
+                    push(node_var(&arena[last]), last, b, &mut flows);
+                    push(String::new(), b, c, &mut flows);
+                }
+                _ => {}
             }
         }
     }
