@@ -9,6 +9,7 @@ members = [
     "cpg-analysis",
     "cpg-incremental",
     "cpg-cli",
+    "joern-parity",
     "conformance",
 ]
 
