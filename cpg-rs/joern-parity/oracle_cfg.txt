@@ -134,27 +134,11 @@ AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
 AST|
-AST|METHOD NAME=<operator>.logicalAnd FULL_NAME=<operator>.logicalAnd ORDER=0
-AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
-AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
-AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
-AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
-AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
-AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
-AST|
 AST|METHOD NAME=<operator>.logicalNot FULL_NAME=<operator>.logicalNot ORDER=0
 AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
 AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
 AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
-AST|
-AST|METHOD NAME=<operator>.logicalOr FULL_NAME=<operator>.logicalOr ORDER=0
-AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
-AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
-AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
-AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
-AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
-AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
 AST|
 AST|METHOD NAME=<operator>.minus FULL_NAME=<operator>.minus ORDER=0
 AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
@@ -629,194 +613,6 @@ AST|        IDENTIFIER NAME=v CODE=v TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
 AST|        IDENTIFIER NAME=gcounter CODE=<global> gcounter TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
 AST|
-AST|METHOD NAME=logic CODE=int logic(int a, int b) {\n    int r = 0;\n    if (a > 0 && b > 0) {\n        r = 1;\n    }\n    if (a < 0 || b < 0) {\n        r = -1;\n    }\n    for (int i = 0; i < a; i++) {\n        for (int j = 0; j < b; j++) {\n            if (j == 3) {\n                continue;\n            }\n            if (j == 5) {\n                break;\n            }\n            r = r + 1;\n        }\n    }\n    switch (a) {\n        case 1:\n            r = 10;\n        case 2:\n            r = 20;\n            break;\n    }\n    return r;\n} FULL_NAME=logic SIGNATURE=int(int,int) ORDER=1
-AST|  METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
-AST|  METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
-AST|  METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
-AST|  METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
-AST|  BLOCK CODE={\n    int r = 0;\n    if (a > 0 && b > 0) {\n        r = 1;\n    }\n    if (a < 0 || b < 0) {\n        r = -1;\n    }\n    for (int i = 0; i < a; i++) {\n        for (int j = 0; j < b; j++) {\n            if (j == 3) {\n                continue;\n            }\n            if (j == 5) {\n                break;\n            }\n            r = r + 1;\n        }\n    }\n    switch (a) {\n        case 1:\n            r = 10;\n        case 2:\n            r = 20;\n            break;\n    }\n    return r;\n} TYPE_FULL_NAME=void ORDER=3
-AST|    LOCAL NAME=r CODE=int r TYPE_FULL_NAME=int ORDER=1
-AST|    CALL NAME=<operator>.assignment CODE=r = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
-AST|      IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|    CONTROL_STRUCTURE CODE=if (a > 0 && b > 0) {\n        r = 1;\n    } ORDER=3
-AST|      CALL NAME=<operator>.logicalAnd CODE=a > 0 && b > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalAnd ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|        CALL NAME=<operator>.greaterThan CODE=a > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|        CALL NAME=<operator>.greaterThan CODE=b > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|      BLOCK CODE={\n        r = 1;\n    } TYPE_FULL_NAME=void ORDER=2
-AST|        CALL NAME=<operator>.assignment CODE=r = 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|    CONTROL_STRUCTURE CODE=if (a < 0 || b < 0) {\n        r = -1;\n    } ORDER=4
-AST|      CALL NAME=<operator>.logicalOr CODE=a < 0 || b < 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalOr ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|        CALL NAME=<operator>.lessThan CODE=a < 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|        CALL NAME=<operator>.lessThan CODE=b < 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|      BLOCK CODE={\n        r = -1;\n    } TYPE_FULL_NAME=void ORDER=2
-AST|        CALL NAME=<operator>.assignment CODE=r = -1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|          CALL NAME=<operator>.minus CODE=-1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
-AST|            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|    CONTROL_STRUCTURE CODE=for (int i = 0;i < a;i++) ORDER=5
-AST|      LOCAL NAME=i CODE=int i TYPE_FULL_NAME=int ORDER=1
-AST|      CALL NAME=<operator>.assignment CODE=i = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|        IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|      CALL NAME=<operator>.lessThan CODE=i < a TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
-AST|        IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|      CALL NAME=<operator>.postIncrement CODE=i++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
-AST|        IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|      BLOCK CODE={\n        for (int j = 0; j < b; j++) {\n            if (j == 3) {\n                continue;\n            }\n            if (j == 5) {\n                break;\n            }\n            r = r + 1;\n        }\n    } TYPE_FULL_NAME=void ORDER=5
-AST|        CONTROL_STRUCTURE CODE=for (int j = 0;j < b;j++) ORDER=1
-AST|          LOCAL NAME=j CODE=int j TYPE_FULL_NAME=int ORDER=1
-AST|          CALL NAME=<operator>.assignment CODE=j = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|            IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|          CALL NAME=<operator>.lessThan CODE=j < b TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
-AST|            IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|          CALL NAME=<operator>.postIncrement CODE=j++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
-AST|            IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|          BLOCK CODE={\n            if (j == 3) {\n                continue;\n            }\n            if (j == 5) {\n                break;\n            }\n            r = r + 1;\n        } TYPE_FULL_NAME=void ORDER=5
-AST|            CONTROL_STRUCTURE CODE=if (j == 3) {\n                continue;\n            } ORDER=1
-AST|              CALL NAME=<operator>.equals CODE=j == 3 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|                IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|                LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|              BLOCK CODE={\n                continue;\n            } TYPE_FULL_NAME=void ORDER=2
-AST|                CONTROL_STRUCTURE CODE=continue; ORDER=1
-AST|            CONTROL_STRUCTURE CODE=if (j == 5) {\n                break;\n            } ORDER=2
-AST|              CALL NAME=<operator>.equals CODE=j == 5 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|                IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|                LITERAL CODE=5 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|              BLOCK CODE={\n                break;\n            } TYPE_FULL_NAME=void ORDER=2
-AST|                CONTROL_STRUCTURE CODE=break; ORDER=1
-AST|            CALL NAME=<operator>.assignment CODE=r = r + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
-AST|              IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|              CALL NAME=<operator>.addition CODE=r + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
-AST|                IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|                LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|    CONTROL_STRUCTURE CODE=switch (a) {\n        case 1:\n            r = 10;\n        case 2:\n            r = 20;\n            break;\n    } ORDER=6
-AST|      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
-AST|      BLOCK CODE={\n        case 1:\n            r = 10;\n        case 2:\n            r = 20;\n            break;\n    } TYPE_FULL_NAME=void ORDER=2
-AST|        JUMP_TARGET NAME=case CODE=case 1: ORDER=1
-AST|        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2
-AST|        CALL NAME=<operator>.assignment CODE=r = 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|          LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|        JUMP_TARGET NAME=case CODE=case 2: ORDER=4
-AST|        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=5
-AST|        CALL NAME=<operator>.assignment CODE=r = 20 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|          LITERAL CODE=20 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|        CONTROL_STRUCTURE CODE=break; ORDER=7
-AST|    RETURN CODE=return r; ORDER=7
-AST|      IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1
-AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
-AST|
-AST|METHOD NAME=<global> CODE=<global> FULL_NAME=logic.c:<global> ORDER=1
-AST|  METHOD NAME=logic CODE=int logic(int a, int b) {\n    int r = 0;\n    if (a > 0 && b > 0) {\n        r = 1;\n    }\n    if (a < 0 || b < 0) {\n        r = -1;\n    }\n    for (int i = 0; i < a; i++) {\n        for (int j = 0; j < b; j++) {\n            if (j == 3) {\n                continue;\n            }\n            if (j == 5) {\n                break;\n            }\n            r = r + 1;\n        }\n    }\n    switch (a) {\n        case 1:\n            r = 10;\n        case 2:\n            r = 20;\n            break;\n    }\n    return r;\n} FULL_NAME=logic SIGNATURE=int(int,int) ORDER=1
-AST|    METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
-AST|    METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
-AST|    METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
-AST|    METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
-AST|    BLOCK CODE={\n    int r = 0;\n    if (a > 0 && b > 0) {\n        r = 1;\n    }\n    if (a < 0 || b < 0) {\n        r = -1;\n    }\n    for (int i = 0; i < a; i++) {\n        for (int j = 0; j < b; j++) {\n            if (j == 3) {\n                continue;\n            }\n            if (j == 5) {\n                break;\n            }\n            r = r + 1;\n        }\n    }\n    switch (a) {\n        case 1:\n            r = 10;\n        case 2:\n            r = 20;\n            break;\n    }\n    return r;\n} TYPE_FULL_NAME=void ORDER=3
-AST|      LOCAL NAME=r CODE=int r TYPE_FULL_NAME=int ORDER=1
-AST|      CALL NAME=<operator>.assignment CODE=r = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
-AST|        IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|      CONTROL_STRUCTURE CODE=if (a > 0 && b > 0) {\n        r = 1;\n    } ORDER=3
-AST|        CALL NAME=<operator>.logicalAnd CODE=a > 0 && b > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalAnd ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          CALL NAME=<operator>.greaterThan CODE=a > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|            IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|          CALL NAME=<operator>.greaterThan CODE=b > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
-AST|            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|        BLOCK CODE={\n        r = 1;\n    } TYPE_FULL_NAME=void ORDER=2
-AST|          CALL NAME=<operator>.assignment CODE=r = 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|            IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|      CONTROL_STRUCTURE CODE=if (a < 0 || b < 0) {\n        r = -1;\n    } ORDER=4
-AST|        CALL NAME=<operator>.logicalOr CODE=a < 0 || b < 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalOr ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          CALL NAME=<operator>.lessThan CODE=a < 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|            IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|          CALL NAME=<operator>.lessThan CODE=b < 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
-AST|            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|        BLOCK CODE={\n        r = -1;\n    } TYPE_FULL_NAME=void ORDER=2
-AST|          CALL NAME=<operator>.assignment CODE=r = -1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|            IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|            CALL NAME=<operator>.minus CODE=-1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
-AST|              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|      CONTROL_STRUCTURE CODE=for (int i = 0;i < a;i++) ORDER=5
-AST|        LOCAL NAME=i CODE=int i TYPE_FULL_NAME=int ORDER=1
-AST|        CALL NAME=<operator>.assignment CODE=i = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|        CALL NAME=<operator>.lessThan CODE=i < a TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|          IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|        CALL NAME=<operator>.postIncrement CODE=i++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
-AST|          IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|        BLOCK CODE={\n        for (int j = 0; j < b; j++) {\n            if (j == 3) {\n                continue;\n            }\n            if (j == 5) {\n                break;\n            }\n            r = r + 1;\n        }\n    } TYPE_FULL_NAME=void ORDER=5
-AST|          CONTROL_STRUCTURE CODE=for (int j = 0;j < b;j++) ORDER=1
-AST|            LOCAL NAME=j CODE=int j TYPE_FULL_NAME=int ORDER=1
-AST|            CALL NAME=<operator>.assignment CODE=j = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|              IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|            CALL NAME=<operator>.lessThan CODE=j < b TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
-AST|              IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|            CALL NAME=<operator>.postIncrement CODE=j++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
-AST|              IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|            BLOCK CODE={\n            if (j == 3) {\n                continue;\n            }\n            if (j == 5) {\n                break;\n            }\n            r = r + 1;\n        } TYPE_FULL_NAME=void ORDER=5
-AST|              CONTROL_STRUCTURE CODE=if (j == 3) {\n                continue;\n            } ORDER=1
-AST|                CALL NAME=<operator>.equals CODE=j == 3 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|                  IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|                  LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|                BLOCK CODE={\n                continue;\n            } TYPE_FULL_NAME=void ORDER=2
-AST|                  CONTROL_STRUCTURE CODE=continue; ORDER=1
-AST|              CONTROL_STRUCTURE CODE=if (j == 5) {\n                break;\n            } ORDER=2
-AST|                CALL NAME=<operator>.equals CODE=j == 5 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
-AST|                  IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|                  LITERAL CODE=5 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|                BLOCK CODE={\n                break;\n            } TYPE_FULL_NAME=void ORDER=2
-AST|                  CONTROL_STRUCTURE CODE=break; ORDER=1
-AST|              CALL NAME=<operator>.assignment CODE=r = r + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
-AST|                IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|                CALL NAME=<operator>.addition CODE=r + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
-AST|                  IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|                  LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|      CONTROL_STRUCTURE CODE=switch (a) {\n        case 1:\n            r = 10;\n        case 2:\n            r = 20;\n            break;\n    } ORDER=6
-AST|        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
-AST|        BLOCK CODE={\n        case 1:\n            r = 10;\n        case 2:\n            r = 20;\n            break;\n    } TYPE_FULL_NAME=void ORDER=2
-AST|          JUMP_TARGET NAME=case CODE=case 1: ORDER=1
-AST|          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2
-AST|          CALL NAME=<operator>.assignment CODE=r = 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
-AST|            IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|            LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|          JUMP_TARGET NAME=case CODE=case 2: ORDER=4
-AST|          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=5
-AST|          CALL NAME=<operator>.assignment CODE=r = 20 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
-AST|            IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
-AST|            LITERAL CODE=20 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
-AST|          CONTROL_STRUCTURE CODE=break; ORDER=7
-AST|      RETURN CODE=return r; ORDER=7
-AST|        IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1
-AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
-AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
-AST|    METHOD_REF CODE=logic TYPE_FULL_NAME=logic METHOD_FULL_NAME=logic ORDER=1
-AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
-AST|
 AST|METHOD NAME=<global> CODE=<global> FULL_NAME=loop.c:<global> ORDER=1
 AST|  METHOD NAME=sum CODE=int sum(int n) {\n    int total = 0;\n    int i = 0;\n    while (i < n) {\n        total = total + i;\n        i = i + 1;\n    }\n    return total;\n} FULL_NAME=sum SIGNATURE=int(int) ORDER=1
 AST|    METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
@@ -1272,7 +1068,6 @@ NODES|FILE NAME=<unknown> ORDER=0
 NODES|FILE NAME=add.c ORDER=0
 NODES|FILE NAME=exprs.c ORDER=0
 NODES|FILE NAME=forloop.c ORDER=0
-NODES|FILE NAME=logic.c ORDER=0
 NODES|FILE NAME=loop.c ORDER=0
 NODES|FILE NAME=ops.c ORDER=0
 NODES|FILE NAME=order.c ORDER=0
@@ -1284,7 +1079,6 @@ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<incl
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=exprs.c:<global> FILENAME=exprs.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=forloop.c:<global> FILENAME=forloop.c ORDER=1
-NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=logic.c:<global> FILENAME=logic.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=loop.c:<global> FILENAME=loop.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=ops.c:<global> FILENAME=ops.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=order.c:<global> FILENAME=order.c ORDER=1
@@ -1310,8 +1104,6 @@ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE
 NODES|TYPE_DECL NAME=int* FULL_NAME=int* CODE=int* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=int[4] FULL_NAME=int[4] CODE=int[4] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=int[] FULL_NAME=int[] CODE=int[] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
-NODES|TYPE_DECL NAME=logic FULL_NAME=logic CODE=logic AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=logic.c:<global> FILENAME=logic.c ORDER=1
-NODES|TYPE_DECL NAME=<global> FULL_NAME=logic.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=logic.c:<global> FILENAME=logic.c ORDER=1
 NODES|TYPE_DECL NAME=long FULL_NAME=long CODE=long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=longunsigned FULL_NAME=longunsigned CODE=longunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=<global> FULL_NAME=loop.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=loop.c:<global> FILENAME=loop.c ORDER=1
@@ -1345,7 +1137,6 @@ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
 NODES|TYPE NAME=int* FULL_NAME=int* TYPE_DECL_FULL_NAME=int*
 NODES|TYPE NAME=int[4] FULL_NAME=int[4] TYPE_DECL_FULL_NAME=int[4]
 NODES|TYPE NAME=int[] FULL_NAME=int[] TYPE_DECL_FULL_NAME=int[]
-NODES|TYPE NAME=logic FULL_NAME=logic TYPE_DECL_FULL_NAME=logic
 NODES|TYPE NAME=long FULL_NAME=long TYPE_DECL_FULL_NAME=long
 NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
 NODES|TYPE NAME=main FULL_NAME=main TYPE_DECL_FULL_NAME=main
@@ -1465,48 +1256,6 @@ EDGES|ARGUMENT first#6 -> first#8
 EDGES|ARGUMENT helper#5 -> helper#6
 EDGES|ARGUMENT helper#6 -> helper#7
 EDGES|ARGUMENT helper#6 -> helper#8
-EDGES|ARGUMENT logic#11 -> logic#12
-EDGES|ARGUMENT logic#11 -> logic#15
-EDGES|ARGUMENT logic#12 -> logic#13
-EDGES|ARGUMENT logic#12 -> logic#14
-EDGES|ARGUMENT logic#15 -> logic#16
-EDGES|ARGUMENT logic#15 -> logic#17
-EDGES|ARGUMENT logic#19 -> logic#20
-EDGES|ARGUMENT logic#19 -> logic#21
-EDGES|ARGUMENT logic#23 -> logic#24
-EDGES|ARGUMENT logic#23 -> logic#27
-EDGES|ARGUMENT logic#24 -> logic#25
-EDGES|ARGUMENT logic#24 -> logic#26
-EDGES|ARGUMENT logic#27 -> logic#28
-EDGES|ARGUMENT logic#27 -> logic#29
-EDGES|ARGUMENT logic#31 -> logic#32
-EDGES|ARGUMENT logic#31 -> logic#33
-EDGES|ARGUMENT logic#33 -> logic#34
-EDGES|ARGUMENT logic#37 -> logic#38
-EDGES|ARGUMENT logic#37 -> logic#39
-EDGES|ARGUMENT logic#40 -> logic#41
-EDGES|ARGUMENT logic#40 -> logic#42
-EDGES|ARGUMENT logic#43 -> logic#44
-EDGES|ARGUMENT logic#48 -> logic#49
-EDGES|ARGUMENT logic#48 -> logic#50
-EDGES|ARGUMENT logic#51 -> logic#52
-EDGES|ARGUMENT logic#51 -> logic#53
-EDGES|ARGUMENT logic#54 -> logic#55
-EDGES|ARGUMENT logic#58 -> logic#59
-EDGES|ARGUMENT logic#58 -> logic#60
-EDGES|ARGUMENT logic#64 -> logic#65
-EDGES|ARGUMENT logic#64 -> logic#66
-EDGES|ARGUMENT logic#69 -> logic#70
-EDGES|ARGUMENT logic#69 -> logic#71
-EDGES|ARGUMENT logic#7 -> logic#8
-EDGES|ARGUMENT logic#7 -> logic#9
-EDGES|ARGUMENT logic#71 -> logic#72
-EDGES|ARGUMENT logic#71 -> logic#73
-EDGES|ARGUMENT logic#79 -> logic#80
-EDGES|ARGUMENT logic#79 -> logic#81
-EDGES|ARGUMENT logic#84 -> logic#85
-EDGES|ARGUMENT logic#84 -> logic#86
-EDGES|ARGUMENT logic#88 -> logic#89
 EDGES|ARGUMENT main#3 -> main#4
 EDGES|ARGUMENT main#3 -> main#5
 EDGES|ARGUMENT main#5 -> main#6
@@ -1629,28 +1378,6 @@ EDGES|CALL exprs#65 -> <operator>.addition#0
 EDGES|CALL exprs#7 -> <operator>.assignmentPlus#0
 EDGES|CALL first#6 -> <operator>.addition#0
 EDGES|CALL helper#6 -> <operator>.addition#0
-EDGES|CALL logic#11 -> <operator>.logicalAnd#0
-EDGES|CALL logic#12 -> <operator>.greaterThan#0
-EDGES|CALL logic#15 -> <operator>.greaterThan#0
-EDGES|CALL logic#19 -> <operator>.assignment#0
-EDGES|CALL logic#23 -> <operator>.logicalOr#0
-EDGES|CALL logic#24 -> <operator>.lessThan#0
-EDGES|CALL logic#27 -> <operator>.lessThan#0
-EDGES|CALL logic#31 -> <operator>.assignment#0
-EDGES|CALL logic#33 -> <operator>.minus#0
-EDGES|CALL logic#37 -> <operator>.assignment#0
-EDGES|CALL logic#40 -> <operator>.lessThan#0
-EDGES|CALL logic#43 -> <operator>.postIncrement#0
-EDGES|CALL logic#48 -> <operator>.assignment#0
-EDGES|CALL logic#51 -> <operator>.lessThan#0
-EDGES|CALL logic#54 -> <operator>.postIncrement#0
-EDGES|CALL logic#58 -> <operator>.equals#0
-EDGES|CALL logic#64 -> <operator>.equals#0
-EDGES|CALL logic#69 -> <operator>.assignment#0
-EDGES|CALL logic#7 -> <operator>.assignment#0
-EDGES|CALL logic#71 -> <operator>.addition#0
-EDGES|CALL logic#79 -> <operator>.assignment#0
-EDGES|CALL logic#84 -> <operator>.assignment#0
 EDGES|CALL main#3 -> <operator>.assignment#0
 EDGES|CALL main#5 -> add#0
 EDGES|CALL order.c:<global>#37 -> <operator>.assignment#0
@@ -1707,9 +1434,7 @@ EDGES|CFG <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#5
 EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
 EDGES|CFG <operator>.indirection#0 -> <operator>.indirection#4
 EDGES|CFG <operator>.lessThan#0 -> <operator>.lessThan#5
-EDGES|CFG <operator>.logicalAnd#0 -> <operator>.logicalAnd#5
 EDGES|CFG <operator>.logicalNot#0 -> <operator>.logicalNot#4
-EDGES|CFG <operator>.logicalOr#0 -> <operator>.logicalOr#5
 EDGES|CFG <operator>.minus#0 -> <operator>.minus#4
 EDGES|CFG <operator>.multiplication#0 -> <operator>.multiplication#5
 EDGES|CFG <operator>.not#0 -> <operator>.not#4
@@ -1892,86 +1617,6 @@ EDGES|CFG helper#5 -> helper#9
 EDGES|CFG helper#6 -> helper#5
 EDGES|CFG helper#7 -> helper#8
 EDGES|CFG helper#8 -> helper#6
-EDGES|CFG logic#0 -> logic#8
-EDGES|CFG logic#11 -> logic#20
-EDGES|CFG logic#11 -> logic#25
-EDGES|CFG logic#12 -> logic#11
-EDGES|CFG logic#12 -> logic#16
-EDGES|CFG logic#13 -> logic#14
-EDGES|CFG logic#14 -> logic#12
-EDGES|CFG logic#15 -> logic#11
-EDGES|CFG logic#16 -> logic#17
-EDGES|CFG logic#17 -> logic#15
-EDGES|CFG logic#19 -> logic#25
-EDGES|CFG logic#20 -> logic#21
-EDGES|CFG logic#21 -> logic#19
-EDGES|CFG logic#23 -> logic#32
-EDGES|CFG logic#23 -> logic#38
-EDGES|CFG logic#24 -> logic#23
-EDGES|CFG logic#24 -> logic#28
-EDGES|CFG logic#25 -> logic#26
-EDGES|CFG logic#26 -> logic#24
-EDGES|CFG logic#27 -> logic#23
-EDGES|CFG logic#28 -> logic#29
-EDGES|CFG logic#29 -> logic#27
-EDGES|CFG logic#31 -> logic#38
-EDGES|CFG logic#32 -> logic#34
-EDGES|CFG logic#33 -> logic#31
-EDGES|CFG logic#34 -> logic#33
-EDGES|CFG logic#37 -> logic#41
-EDGES|CFG logic#38 -> logic#39
-EDGES|CFG logic#39 -> logic#37
-EDGES|CFG logic#40 -> logic#49
-EDGES|CFG logic#40 -> logic#75
-EDGES|CFG logic#41 -> logic#42
-EDGES|CFG logic#42 -> logic#40
-EDGES|CFG logic#43 -> logic#41
-EDGES|CFG logic#44 -> logic#43
-EDGES|CFG logic#48 -> logic#52
-EDGES|CFG logic#49 -> logic#50
-EDGES|CFG logic#50 -> logic#48
-EDGES|CFG logic#51 -> logic#44
-EDGES|CFG logic#51 -> logic#59
-EDGES|CFG logic#52 -> logic#53
-EDGES|CFG logic#53 -> logic#51
-EDGES|CFG logic#54 -> logic#52
-EDGES|CFG logic#55 -> logic#54
-EDGES|CFG logic#58 -> logic#62
-EDGES|CFG logic#58 -> logic#65
-EDGES|CFG logic#59 -> logic#60
-EDGES|CFG logic#60 -> logic#58
-EDGES|CFG logic#62 -> logic#55
-EDGES|CFG logic#64 -> logic#68
-EDGES|CFG logic#64 -> logic#70
-EDGES|CFG logic#65 -> logic#66
-EDGES|CFG logic#66 -> logic#64
-EDGES|CFG logic#68 -> logic#44
-EDGES|CFG logic#69 -> logic#55
-EDGES|CFG logic#7 -> logic#13
-EDGES|CFG logic#70 -> logic#72
-EDGES|CFG logic#71 -> logic#69
-EDGES|CFG logic#72 -> logic#73
-EDGES|CFG logic#73 -> logic#71
-EDGES|CFG logic#75 -> logic#77
-EDGES|CFG logic#75 -> logic#82
-EDGES|CFG logic#75 -> logic#89
-EDGES|CFG logic#77 -> logic#78
-EDGES|CFG logic#78 -> logic#80
-EDGES|CFG logic#79 -> logic#82
-EDGES|CFG logic#8 -> logic#9
-EDGES|CFG logic#80 -> logic#81
-EDGES|CFG logic#81 -> logic#79
-EDGES|CFG logic#82 -> logic#83
-EDGES|CFG logic#83 -> logic#85
-EDGES|CFG logic#84 -> logic#87
-EDGES|CFG logic#85 -> logic#86
-EDGES|CFG logic#86 -> logic#84
-EDGES|CFG logic#87 -> logic#89
-EDGES|CFG logic#88 -> logic#90
-EDGES|CFG logic#89 -> logic#88
-EDGES|CFG logic#9 -> logic#7
-EDGES|CFG logic.c:<global>#0 -> logic.c:<global>#93
-EDGES|CFG logic.c:<global>#93 -> logic.c:<global>#94
 EDGES|CFG loop.c:<global>#0 -> loop.c:<global>#32
 EDGES|CFG loop.c:<global>#1 -> sum#6
 EDGES|CFG loop.c:<global>#32 -> loop.c:<global>#33
@@ -2114,13 +1759,6 @@ EDGES|CFG unary.c:<global>#49 -> unary.c:<global>#50
 EDGES|CONDITION classify#8 -> classify#9
 EDGES|CONDITION count#24 -> count#28
 EDGES|CONDITION count#8 -> count#13
-EDGES|CONDITION logic#10 -> logic#11
-EDGES|CONDITION logic#22 -> logic#23
-EDGES|CONDITION logic#35 -> logic#40
-EDGES|CONDITION logic#46 -> logic#51
-EDGES|CONDITION logic#57 -> logic#58
-EDGES|CONDITION logic#63 -> logic#64
-EDGES|CONDITION logic#74 -> logic#75
 EDGES|CONDITION pick#29 -> pick#30
 EDGES|CONDITION pick#34 -> pick#35
 EDGES|CONDITION pick#40 -> pick#41
@@ -2144,9 +1782,7 @@ EDGES|CONTAINS <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAcces
 EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
 EDGES|CONTAINS <operator>.indirection#0 -> <operator>.indirection#2
 EDGES|CONTAINS <operator>.lessThan#0 -> <operator>.lessThan#2
-EDGES|CONTAINS <operator>.logicalAnd#0 -> <operator>.logicalAnd#2
 EDGES|CONTAINS <operator>.logicalNot#0 -> <operator>.logicalNot#2
-EDGES|CONTAINS <operator>.logicalOr#0 -> <operator>.logicalOr#2
 EDGES|CONTAINS <operator>.minus#0 -> <operator>.minus#2
 EDGES|CONTAINS <operator>.multiplication#0 -> <operator>.multiplication#2
 EDGES|CONTAINS <operator>.not#0 -> <operator>.not#2
@@ -2168,8 +1804,6 @@ EDGES|CONTAINS D:exprs.c:<global> -> D:exprs
 EDGES|CONTAINS D:exprs.c:<global> -> exprs.c:<global>#0
 EDGES|CONTAINS D:forloop.c:<global> -> D:count
 EDGES|CONTAINS D:forloop.c:<global> -> forloop.c:<global>#0
-EDGES|CONTAINS D:logic.c:<global> -> D:logic
-EDGES|CONTAINS D:logic.c:<global> -> logic.c:<global>#0
 EDGES|CONTAINS D:loop.c:<global> -> D:sum
 EDGES|CONTAINS D:loop.c:<global> -> loop.c:<global>#0
 EDGES|CONTAINS D:ops.c:<global> -> D:classify
@@ -2201,7 +1835,6 @@ EDGES|CONTAINS F:<includes> -> D:void
 EDGES|CONTAINS F:add.c -> D:add.c:<global>
 EDGES|CONTAINS F:exprs.c -> D:exprs.c:<global>
 EDGES|CONTAINS F:forloop.c -> D:forloop.c:<global>
-EDGES|CONTAINS F:logic.c -> D:logic.c:<global>
 EDGES|CONTAINS F:loop.c -> D:loop.c:<global>
 EDGES|CONTAINS F:ops.c -> D:ops.c:<global>
 EDGES|CONTAINS F:order.c -> D:order.c:<global>
@@ -2391,91 +2024,6 @@ EDGES|CONTAINS helper#0 -> helper#5
 EDGES|CONTAINS helper#0 -> helper#6
 EDGES|CONTAINS helper#0 -> helper#7
 EDGES|CONTAINS helper#0 -> helper#8
-EDGES|CONTAINS logic#0 -> logic#10
-EDGES|CONTAINS logic#0 -> logic#11
-EDGES|CONTAINS logic#0 -> logic#12
-EDGES|CONTAINS logic#0 -> logic#13
-EDGES|CONTAINS logic#0 -> logic#14
-EDGES|CONTAINS logic#0 -> logic#15
-EDGES|CONTAINS logic#0 -> logic#16
-EDGES|CONTAINS logic#0 -> logic#17
-EDGES|CONTAINS logic#0 -> logic#18
-EDGES|CONTAINS logic#0 -> logic#19
-EDGES|CONTAINS logic#0 -> logic#20
-EDGES|CONTAINS logic#0 -> logic#21
-EDGES|CONTAINS logic#0 -> logic#22
-EDGES|CONTAINS logic#0 -> logic#23
-EDGES|CONTAINS logic#0 -> logic#24
-EDGES|CONTAINS logic#0 -> logic#25
-EDGES|CONTAINS logic#0 -> logic#26
-EDGES|CONTAINS logic#0 -> logic#27
-EDGES|CONTAINS logic#0 -> logic#28
-EDGES|CONTAINS logic#0 -> logic#29
-EDGES|CONTAINS logic#0 -> logic#30
-EDGES|CONTAINS logic#0 -> logic#31
-EDGES|CONTAINS logic#0 -> logic#32
-EDGES|CONTAINS logic#0 -> logic#33
-EDGES|CONTAINS logic#0 -> logic#34
-EDGES|CONTAINS logic#0 -> logic#35
-EDGES|CONTAINS logic#0 -> logic#37
-EDGES|CONTAINS logic#0 -> logic#38
-EDGES|CONTAINS logic#0 -> logic#39
-EDGES|CONTAINS logic#0 -> logic#40
-EDGES|CONTAINS logic#0 -> logic#41
-EDGES|CONTAINS logic#0 -> logic#42
-EDGES|CONTAINS logic#0 -> logic#43
-EDGES|CONTAINS logic#0 -> logic#44
-EDGES|CONTAINS logic#0 -> logic#45
-EDGES|CONTAINS logic#0 -> logic#46
-EDGES|CONTAINS logic#0 -> logic#48
-EDGES|CONTAINS logic#0 -> logic#49
-EDGES|CONTAINS logic#0 -> logic#5
-EDGES|CONTAINS logic#0 -> logic#50
-EDGES|CONTAINS logic#0 -> logic#51
-EDGES|CONTAINS logic#0 -> logic#52
-EDGES|CONTAINS logic#0 -> logic#53
-EDGES|CONTAINS logic#0 -> logic#54
-EDGES|CONTAINS logic#0 -> logic#55
-EDGES|CONTAINS logic#0 -> logic#56
-EDGES|CONTAINS logic#0 -> logic#57
-EDGES|CONTAINS logic#0 -> logic#58
-EDGES|CONTAINS logic#0 -> logic#59
-EDGES|CONTAINS logic#0 -> logic#60
-EDGES|CONTAINS logic#0 -> logic#61
-EDGES|CONTAINS logic#0 -> logic#62
-EDGES|CONTAINS logic#0 -> logic#63
-EDGES|CONTAINS logic#0 -> logic#64
-EDGES|CONTAINS logic#0 -> logic#65
-EDGES|CONTAINS logic#0 -> logic#66
-EDGES|CONTAINS logic#0 -> logic#67
-EDGES|CONTAINS logic#0 -> logic#68
-EDGES|CONTAINS logic#0 -> logic#69
-EDGES|CONTAINS logic#0 -> logic#7
-EDGES|CONTAINS logic#0 -> logic#70
-EDGES|CONTAINS logic#0 -> logic#71
-EDGES|CONTAINS logic#0 -> logic#72
-EDGES|CONTAINS logic#0 -> logic#73
-EDGES|CONTAINS logic#0 -> logic#74
-EDGES|CONTAINS logic#0 -> logic#75
-EDGES|CONTAINS logic#0 -> logic#76
-EDGES|CONTAINS logic#0 -> logic#77
-EDGES|CONTAINS logic#0 -> logic#78
-EDGES|CONTAINS logic#0 -> logic#79
-EDGES|CONTAINS logic#0 -> logic#8
-EDGES|CONTAINS logic#0 -> logic#80
-EDGES|CONTAINS logic#0 -> logic#81
-EDGES|CONTAINS logic#0 -> logic#82
-EDGES|CONTAINS logic#0 -> logic#83
-EDGES|CONTAINS logic#0 -> logic#84
-EDGES|CONTAINS logic#0 -> logic#85
-EDGES|CONTAINS logic#0 -> logic#86
-EDGES|CONTAINS logic#0 -> logic#87
-EDGES|CONTAINS logic#0 -> logic#88
-EDGES|CONTAINS logic#0 -> logic#89
-EDGES|CONTAINS logic#0 -> logic#9
-EDGES|CONTAINS logic.c:<global>#0 -> logic#0
-EDGES|CONTAINS logic.c:<global>#0 -> logic.c:<global>#92
-EDGES|CONTAINS logic.c:<global>#0 -> logic.c:<global>#93
 EDGES|CONTAINS loop.c:<global>#0 -> loop.c:<global>#1
 EDGES|CONTAINS loop.c:<global>#0 -> loop.c:<global>#31
 EDGES|CONTAINS loop.c:<global>#0 -> loop.c:<global>#32
@@ -2725,22 +2273,10 @@ EDGES|EVAL_TYPE <operator>.lessThan#3 -> T:ANY
 EDGES|EVAL_TYPE <operator>.lessThan#4 -> T:ANY
 EDGES|EVAL_TYPE <operator>.lessThan#5 -> T:ANY
 EDGES|EVAL_TYPE <operator>.lessThan#6 -> T:ANY
-EDGES|EVAL_TYPE <operator>.logicalAnd#1 -> T:ANY
-EDGES|EVAL_TYPE <operator>.logicalAnd#2 -> T:ANY
-EDGES|EVAL_TYPE <operator>.logicalAnd#3 -> T:ANY
-EDGES|EVAL_TYPE <operator>.logicalAnd#4 -> T:ANY
-EDGES|EVAL_TYPE <operator>.logicalAnd#5 -> T:ANY
-EDGES|EVAL_TYPE <operator>.logicalAnd#6 -> T:ANY
 EDGES|EVAL_TYPE <operator>.logicalNot#1 -> T:ANY
 EDGES|EVAL_TYPE <operator>.logicalNot#2 -> T:ANY
 EDGES|EVAL_TYPE <operator>.logicalNot#3 -> T:ANY
 EDGES|EVAL_TYPE <operator>.logicalNot#4 -> T:ANY
-EDGES|EVAL_TYPE <operator>.logicalOr#1 -> T:ANY
-EDGES|EVAL_TYPE <operator>.logicalOr#2 -> T:ANY
-EDGES|EVAL_TYPE <operator>.logicalOr#3 -> T:ANY
-EDGES|EVAL_TYPE <operator>.logicalOr#4 -> T:ANY
-EDGES|EVAL_TYPE <operator>.logicalOr#5 -> T:ANY
-EDGES|EVAL_TYPE <operator>.logicalOr#6 -> T:ANY
 EDGES|EVAL_TYPE <operator>.minus#1 -> T:ANY
 EDGES|EVAL_TYPE <operator>.minus#2 -> T:ANY
 EDGES|EVAL_TYPE <operator>.minus#3 -> T:ANY
@@ -3015,86 +2551,6 @@ EDGES|EVAL_TYPE helper#6 -> T:ANY
 EDGES|EVAL_TYPE helper#7 -> T:int
 EDGES|EVAL_TYPE helper#8 -> T:int
 EDGES|EVAL_TYPE helper#9 -> T:int
-EDGES|EVAL_TYPE logic#1 -> T:int
-EDGES|EVAL_TYPE logic#11 -> T:ANY
-EDGES|EVAL_TYPE logic#12 -> T:ANY
-EDGES|EVAL_TYPE logic#13 -> T:int
-EDGES|EVAL_TYPE logic#14 -> T:int
-EDGES|EVAL_TYPE logic#15 -> T:ANY
-EDGES|EVAL_TYPE logic#16 -> T:int
-EDGES|EVAL_TYPE logic#17 -> T:int
-EDGES|EVAL_TYPE logic#18 -> T:void
-EDGES|EVAL_TYPE logic#19 -> T:ANY
-EDGES|EVAL_TYPE logic#2 -> T:int
-EDGES|EVAL_TYPE logic#20 -> T:int
-EDGES|EVAL_TYPE logic#21 -> T:int
-EDGES|EVAL_TYPE logic#23 -> T:ANY
-EDGES|EVAL_TYPE logic#24 -> T:ANY
-EDGES|EVAL_TYPE logic#25 -> T:int
-EDGES|EVAL_TYPE logic#26 -> T:int
-EDGES|EVAL_TYPE logic#27 -> T:ANY
-EDGES|EVAL_TYPE logic#28 -> T:int
-EDGES|EVAL_TYPE logic#29 -> T:int
-EDGES|EVAL_TYPE logic#3 -> T:int
-EDGES|EVAL_TYPE logic#30 -> T:void
-EDGES|EVAL_TYPE logic#31 -> T:ANY
-EDGES|EVAL_TYPE logic#32 -> T:int
-EDGES|EVAL_TYPE logic#33 -> T:ANY
-EDGES|EVAL_TYPE logic#34 -> T:int
-EDGES|EVAL_TYPE logic#36 -> T:int
-EDGES|EVAL_TYPE logic#37 -> T:void
-EDGES|EVAL_TYPE logic#38 -> T:int
-EDGES|EVAL_TYPE logic#39 -> T:int
-EDGES|EVAL_TYPE logic#4 -> T:int
-EDGES|EVAL_TYPE logic#40 -> T:ANY
-EDGES|EVAL_TYPE logic#41 -> T:int
-EDGES|EVAL_TYPE logic#42 -> T:int
-EDGES|EVAL_TYPE logic#43 -> T:ANY
-EDGES|EVAL_TYPE logic#44 -> T:int
-EDGES|EVAL_TYPE logic#45 -> T:void
-EDGES|EVAL_TYPE logic#47 -> T:int
-EDGES|EVAL_TYPE logic#48 -> T:void
-EDGES|EVAL_TYPE logic#49 -> T:int
-EDGES|EVAL_TYPE logic#5 -> T:void
-EDGES|EVAL_TYPE logic#50 -> T:int
-EDGES|EVAL_TYPE logic#51 -> T:ANY
-EDGES|EVAL_TYPE logic#52 -> T:int
-EDGES|EVAL_TYPE logic#53 -> T:int
-EDGES|EVAL_TYPE logic#54 -> T:ANY
-EDGES|EVAL_TYPE logic#55 -> T:int
-EDGES|EVAL_TYPE logic#56 -> T:void
-EDGES|EVAL_TYPE logic#58 -> T:ANY
-EDGES|EVAL_TYPE logic#59 -> T:int
-EDGES|EVAL_TYPE logic#6 -> T:int
-EDGES|EVAL_TYPE logic#60 -> T:int
-EDGES|EVAL_TYPE logic#61 -> T:void
-EDGES|EVAL_TYPE logic#64 -> T:ANY
-EDGES|EVAL_TYPE logic#65 -> T:int
-EDGES|EVAL_TYPE logic#66 -> T:int
-EDGES|EVAL_TYPE logic#67 -> T:void
-EDGES|EVAL_TYPE logic#69 -> T:ANY
-EDGES|EVAL_TYPE logic#7 -> T:void
-EDGES|EVAL_TYPE logic#70 -> T:int
-EDGES|EVAL_TYPE logic#71 -> T:ANY
-EDGES|EVAL_TYPE logic#72 -> T:int
-EDGES|EVAL_TYPE logic#73 -> T:int
-EDGES|EVAL_TYPE logic#75 -> T:int
-EDGES|EVAL_TYPE logic#76 -> T:void
-EDGES|EVAL_TYPE logic#78 -> T:int
-EDGES|EVAL_TYPE logic#79 -> T:ANY
-EDGES|EVAL_TYPE logic#8 -> T:int
-EDGES|EVAL_TYPE logic#80 -> T:int
-EDGES|EVAL_TYPE logic#81 -> T:int
-EDGES|EVAL_TYPE logic#83 -> T:int
-EDGES|EVAL_TYPE logic#84 -> T:ANY
-EDGES|EVAL_TYPE logic#85 -> T:int
-EDGES|EVAL_TYPE logic#86 -> T:int
-EDGES|EVAL_TYPE logic#89 -> T:int
-EDGES|EVAL_TYPE logic#9 -> T:int
-EDGES|EVAL_TYPE logic#90 -> T:int
-EDGES|EVAL_TYPE logic.c:<global>#92 -> T:ANY
-EDGES|EVAL_TYPE logic.c:<global>#93 -> T:logic
-EDGES|EVAL_TYPE logic.c:<global>#94 -> T:ANY
 EDGES|EVAL_TYPE loop.c:<global>#31 -> T:ANY
 EDGES|EVAL_TYPE loop.c:<global>#32 -> T:sum
 EDGES|EVAL_TYPE loop.c:<global>#33 -> T:ANY
@@ -3258,14 +2714,8 @@ EDGES|EVAL_TYPE unary.c:<global>#49 -> T:ptr
 EDGES|EVAL_TYPE unary.c:<global>#50 -> T:ANY
 EDGES|FALSE_BODY classify#8 -> classify#18
 EDGES|FOR_BODY count#8 -> count#18
-EDGES|FOR_BODY logic#35 -> logic#45
-EDGES|FOR_BODY logic#46 -> logic#56
 EDGES|FOR_INIT count#8 -> count#10
-EDGES|FOR_INIT logic#35 -> logic#37
-EDGES|FOR_INIT logic#46 -> logic#48
 EDGES|FOR_UPDATE count#8 -> count#16
-EDGES|FOR_UPDATE logic#35 -> logic#43
-EDGES|FOR_UPDATE logic#46 -> logic#54
 EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
 EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
 EDGES|PARAMETER_LINK <operator>.addressOf#1 -> <operator>.addressOf#3
@@ -3298,11 +2748,7 @@ EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectInde
 EDGES|PARAMETER_LINK <operator>.indirection#1 -> <operator>.indirection#3
 EDGES|PARAMETER_LINK <operator>.lessThan#1 -> <operator>.lessThan#3
 EDGES|PARAMETER_LINK <operator>.lessThan#4 -> <operator>.lessThan#6
-EDGES|PARAMETER_LINK <operator>.logicalAnd#1 -> <operator>.logicalAnd#3
-EDGES|PARAMETER_LINK <operator>.logicalAnd#4 -> <operator>.logicalAnd#6
 EDGES|PARAMETER_LINK <operator>.logicalNot#1 -> <operator>.logicalNot#3
-EDGES|PARAMETER_LINK <operator>.logicalOr#1 -> <operator>.logicalOr#3
-EDGES|PARAMETER_LINK <operator>.logicalOr#4 -> <operator>.logicalOr#6
 EDGES|PARAMETER_LINK <operator>.minus#1 -> <operator>.minus#3
 EDGES|PARAMETER_LINK <operator>.multiplication#1 -> <operator>.multiplication#3
 EDGES|PARAMETER_LINK <operator>.multiplication#4 -> <operator>.multiplication#6
@@ -3335,8 +2781,6 @@ EDGES|PARAMETER_LINK exprs#1 -> exprs#2
 EDGES|PARAMETER_LINK exprs#3 -> exprs#4
 EDGES|PARAMETER_LINK first#1 -> first#2
 EDGES|PARAMETER_LINK helper#1 -> helper#2
-EDGES|PARAMETER_LINK logic#1 -> logic#2
-EDGES|PARAMETER_LINK logic#3 -> logic#4
 EDGES|PARAMETER_LINK pick#1 -> pick#2
 EDGES|PARAMETER_LINK ptr#1 -> ptr#2
 EDGES|PARAMETER_LINK second#1 -> second#2
@@ -3347,7 +2791,6 @@ EDGES|REF NB:<includes>:<global> -> NS:<global>
 EDGES|REF NB:add.c:<global> -> NS:<global>
 EDGES|REF NB:exprs.c:<global> -> NS:<global>
 EDGES|REF NB:forloop.c:<global> -> NS:<global>
-EDGES|REF NB:logic.c:<global> -> NS:<global>
 EDGES|REF NB:loop.c:<global> -> NS:<global>
 EDGES|REF NB:ops.c:<global> -> NS:<global>
 EDGES|REF NB:order.c:<global> -> NS:<global>
@@ -3369,7 +2812,6 @@ EDGES|REF T:int -> D:int
 EDGES|REF T:int* -> D:int*
 EDGES|REF T:int[4] -> D:int[4]
 EDGES|REF T:int[] -> D:int[]
-EDGES|REF T:logic -> D:logic
 EDGES|REF T:long -> D:long
 EDGES|REF T:longunsigned -> D:longunsigned
 EDGES|REF T:main -> D:main
@@ -3453,30 +2895,6 @@ EDGES|REF first#8 -> first#4
 EDGES|REF forloop.c:<global>#45 -> count#0
 EDGES|REF helper#7 -> helper#1
 EDGES|REF helper#8 -> helper#4
-EDGES|REF logic#13 -> logic#1
-EDGES|REF logic#16 -> logic#3
-EDGES|REF logic#20 -> logic#6
-EDGES|REF logic#25 -> logic#1
-EDGES|REF logic#28 -> logic#3
-EDGES|REF logic#32 -> logic#6
-EDGES|REF logic#38 -> logic#36
-EDGES|REF logic#41 -> logic#36
-EDGES|REF logic#42 -> logic#1
-EDGES|REF logic#44 -> logic#36
-EDGES|REF logic#49 -> logic#47
-EDGES|REF logic#52 -> logic#47
-EDGES|REF logic#53 -> logic#3
-EDGES|REF logic#55 -> logic#47
-EDGES|REF logic#59 -> logic#47
-EDGES|REF logic#65 -> logic#47
-EDGES|REF logic#70 -> logic#6
-EDGES|REF logic#72 -> logic#6
-EDGES|REF logic#75 -> logic#1
-EDGES|REF logic#8 -> logic#6
-EDGES|REF logic#80 -> logic#6
-EDGES|REF logic#85 -> logic#6
-EDGES|REF logic#89 -> logic#6
-EDGES|REF logic.c:<global>#93 -> logic#0
 EDGES|REF loop.c:<global>#32 -> loop.c:<global>#1
 EDGES|REF main#4 -> main#2
 EDGES|REF main#9 -> main#2
@@ -3545,8 +2963,6 @@ EDGES|SOURCE_FILE D:int -> F:<includes>
 EDGES|SOURCE_FILE D:int* -> F:<includes>
 EDGES|SOURCE_FILE D:int[4] -> F:<includes>
 EDGES|SOURCE_FILE D:int[] -> F:<includes>
-EDGES|SOURCE_FILE D:logic -> F:logic.c
-EDGES|SOURCE_FILE D:logic.c:<global> -> F:logic.c
 EDGES|SOURCE_FILE D:long -> F:<includes>
 EDGES|SOURCE_FILE D:longunsigned -> F:<includes>
 EDGES|SOURCE_FILE D:loop.c:<global> -> F:loop.c
@@ -3568,7 +2984,6 @@ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
 EDGES|SOURCE_FILE NB:add.c:<global> -> F:add.c
 EDGES|SOURCE_FILE NB:exprs.c:<global> -> F:exprs.c
 EDGES|SOURCE_FILE NB:forloop.c:<global> -> F:forloop.c
-EDGES|SOURCE_FILE NB:logic.c:<global> -> F:logic.c
 EDGES|SOURCE_FILE NB:loop.c:<global> -> F:loop.c
 EDGES|SOURCE_FILE NB:ops.c:<global> -> F:ops.c
 EDGES|SOURCE_FILE NB:order.c:<global> -> F:order.c
@@ -3586,8 +3001,6 @@ EDGES|SOURCE_FILE exprs.c:<global>#0 -> F:exprs.c
 EDGES|SOURCE_FILE first#0 -> F:order.c
 EDGES|SOURCE_FILE forloop.c:<global>#0 -> F:forloop.c
 EDGES|SOURCE_FILE helper#0 -> F:structs.c
-EDGES|SOURCE_FILE logic#0 -> F:logic.c
-EDGES|SOURCE_FILE logic.c:<global>#0 -> F:logic.c
 EDGES|SOURCE_FILE loop.c:<global>#0 -> F:loop.c
 EDGES|SOURCE_FILE loop.c:<global>#1 -> F:loop.c
 EDGES|SOURCE_FILE ops.c:<global>#0 -> F:ops.c
@@ -3603,11 +3016,6 @@ EDGES|SOURCE_FILE switch.c:<global>#0 -> F:switch.c
 EDGES|SOURCE_FILE unary#0 -> F:unary.c
 EDGES|SOURCE_FILE unary.c:<global>#0 -> F:unary.c
 EDGES|TRUE_BODY classify#8 -> classify#12
-EDGES|TRUE_BODY logic#10 -> logic#18
-EDGES|TRUE_BODY logic#22 -> logic#30
-EDGES|TRUE_BODY logic#57 -> logic#61
-EDGES|TRUE_BODY logic#63 -> logic#67
-EDGES|TRUE_BODY logic#74 -> logic#76
 EDGES|TRUE_BODY pick#29 -> pick#33
 EDGES|TRUE_BODY pick#34 -> pick#38
 EDGES|TRUE_BODY pick#40 -> pick#44

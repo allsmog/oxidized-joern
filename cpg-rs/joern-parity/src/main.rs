@@ -202,8 +202,8 @@ fn main() {
 
     dumps.sort_by(|a, b| a.0.cmp(&b.0));
     let mut out = String::new();
-    for (_, d) in dumps {
-        out.push_str(&d);
+    for (_, d) in &dumps {
+        out.push_str(d);
         out.push('\n');
     }
 
@@ -263,6 +263,15 @@ fn main() {
     }
 
     // ---- EDGES section ----
+    // CFG: built from the dump blocks themselves (nested METHOD/TYPE_DECL
+    // subtrees are transparent there, so each CFG is generated exactly once,
+    // from its home block).
+    for (key, text) in &dumps {
+        for (s, d) in cfg_edges_for_block(key, text) {
+            edges.push(("CFG".into(), s, d));
+        }
+    }
+
     // TYPE -> its TYPE_DECL (struct decls are walk-addressed, rest are D:).
     for t in &used_types {
         let dst = if struct_tags.contains(&t) {
@@ -1755,4 +1764,376 @@ fn innermost_id(n: Node, b: &[u8]) -> String {
         }
     }
     String::new()
+}
+
+// ---- CFG construction (M4 part 2) -------------------------------------
+// Joern's CfgCreationPass semantics, reconstructed from the oracle and run
+// over our own emitted dump blocks (which are byte-identical to Joern's, so
+// line indices are shared addresses). Rules pinned by corpus/:
+// - Evaluation order: call arguments in order, then the call node itself.
+//   Leaves are IDENTIFIER/LITERAL/FIELD_IDENTIFIER/METHOD_REF/TYPE_REF.
+// - Statement BLOCKs are transparent; an expression BLOCK (child of a CALL,
+//   i.e. the comma operator) is itself a CFG node after its children.
+// - LOCALs, params, MODIFIERs, JUMP-less constructs are invisible.
+// - if/while/for/do: the condition's root branches; back-edges target the
+//   condition's first leaf. switch: cond root -> every JUMP_TARGET (plus the
+//   continuation when there is no default); case values chain after their
+//   JUMP_TARGET; fallthrough is natural chaining.
+// - break -> after the innermost loop/switch; continue -> loop re-entry
+//   (cond for while/do, update for for-loops).
+// - <operator>.conditional and the short-circuit operators branch:
+//   cond/lhs root -> arm entries (or past them), arms -> the call node.
+// - RETURN -> METHOD_RETURN; METHOD -> first node (src uses the symbolic
+//   M:<full> address so first-wins resolution applies).
+
+struct DNode {
+    label: String,
+    name: String,
+    code1: String,
+    full: String,
+    has_arg: bool,
+    children: Vec<usize>,
+    parent: Option<usize>,
+    idx: usize,
+}
+
+fn parse_dump_block(text: &str) -> Vec<DNode> {
+    let mut arena: Vec<DNode> = Vec::new();
+    let mut stack: Vec<(usize, usize)> = Vec::new(); // (depth, arena id)
+    for (idx, line) in text.lines().enumerate() {
+        if line.trim().is_empty() {
+            continue;
+        }
+        let depth = (line.len() - line.trim_start().len()) / 2;
+        let rest = line.trim_start();
+        let label = rest.split(' ').next().unwrap_or("").to_string();
+        let grab = |key: &str| -> String {
+            rest.find(key)
+                .map(|i| rest[i + key.len()..].split(' ').next().unwrap_or("").to_string())
+                .unwrap_or_default()
+        };
+        let id = arena.len();
+        while stack.last().is_some_and(|t| t.0 >= depth) {
+            stack.pop();
+        }
+        let parent = stack.last().map(|(_, pid)| *pid);
+        if let Some(pid) = parent {
+            arena[pid].children.push(id);
+        }
+        arena.push(DNode {
+            label,
+            name: grab(" NAME="),
+            code1: grab(" CODE="),
+            full: grab(" FULL_NAME="),
+            has_arg: rest.contains(" ARGUMENT_INDEX="),
+            children: Vec::new(),
+            parent,
+            idx,
+        });
+        stack.push((depth, id));
+    }
+    arena
+}
+
+struct CfgBuilder<'a> {
+    arena: &'a [DNode],
+    block: &'a str,
+    mret: String,
+    edges: Vec<(String, String)>,
+    breaks: Vec<Vec<String>>,    // per breakable construct
+    continues: Vec<Vec<String>>, // per loop
+}
+
+impl CfgBuilder<'_> {
+    fn addr(&self, id: usize) -> String {
+        let n = &self.arena[id];
+        if n.idx == 0 {
+            format!("M:{}", n.full)
+        } else {
+            format!("{}#{}", self.block, n.idx)
+        }
+    }
+
+    fn connect(&mut self, srcs: &[String], dst: &str) {
+        for s in srcs {
+            self.edges.push((s.clone(), dst.to_string()));
+        }
+    }
+
+    /// Sequence children as statements: pending outs flow into the next
+    /// construct's entry; transparent children pass outs through.
+    fn seq(&mut self, ids: &[usize]) -> (Option<String>, Vec<String>) {
+        let mut entry: Option<String> = None;
+        let mut pending: Vec<String> = Vec::new();
+        for &c in ids {
+            let (e, o) = self.build(c);
+            if let Some(e) = e {
+                self.connect(&pending, &e);
+                if entry.is_none() {
+                    entry = Some(e);
+                }
+                pending = o;
+            }
+        }
+        (entry, pending)
+    }
+
+    fn build(&mut self, id: usize) -> (Option<String>, Vec<String>) {
+        let n = &self.arena[id];
+        let me = self.addr(id);
+        let kids = n.children.clone();
+        match n.label.as_str() {
+            "IDENTIFIER" | "LITERAL" | "FIELD_IDENTIFIER" | "METHOD_REF" | "TYPE_REF"
+            | "UNKNOWN" | "JUMP_TARGET" => (Some(me.clone()), vec![me]),
+            "CALL" => match self.arena[id].name.as_str() {
+                "<operator>.conditional" => {
+                    let (e1, o1) = self.build(kids[0]);
+                    let (e2, o2) = self.build(kids[1]);
+                    let (e3, o3) = self.build(kids[2]);
+                    if let Some(e2) = &e2 {
+                        self.connect(&o1, e2);
+                    }
+                    if let Some(e3) = &e3 {
+                        self.connect(&o1, e3);
+                    }
+                    self.connect(&o2, &me);
+                    self.connect(&o3, &me);
+                    (e1, vec![me])
+                }
+                "<operator>.logicalAnd" | "<operator>.logicalOr" => {
+                    // Short-circuit: the lhs root branches to the rhs entry
+                    // and directly past it to the call node.
+                    let (e1, o1) = self.build(kids[0]);
+                    let (e2, o2) = self.build(kids[1]);
+                    if let Some(e2) = &e2 {
+                        self.connect(&o1, e2);
+                    }
+                    self.connect(&o1, &me);
+                    self.connect(&o2, &me);
+                    (e1, vec![me])
+                }
+                _ => {
+                    let (entry, outs) = self.seq(&kids);
+                    self.connect(&outs, &me);
+                    (entry.or(Some(me.clone())), vec![me])
+                }
+            },
+            "BLOCK" => {
+                // An expression block (comma operator) is a child of a CALL;
+                // statement blocks (incl. stub bodies, which carry a spurious
+                // ARGUMENT_INDEX) are transparent.
+                let is_expr = n.parent.is_some_and(|p| self.arena[p].label == "CALL");
+                let (entry, outs) = self.seq(&kids);
+                if is_expr {
+                    self.connect(&outs, &me);
+                    (entry.or(Some(me.clone())), vec![me])
+                } else {
+                    (entry, outs)
+                }
+            }
+            "RETURN" => {
+                let (entry, outs) = self.seq(&kids);
+                self.connect(&outs, &me);
+                let mret = self.mret.clone();
+                self.edges.push((me.clone(), mret));
+                (entry.or(Some(me)), vec![])
+            }
+            "CONTROL_STRUCTURE" => self.build_control(id, me, &kids),
+            _ => (None, vec![]), // LOCAL, MODIFIER, METHOD, TYPE_DECL, params, ...
+        }
+    }
+
+    fn build_control(&mut self, id: usize, me: String, kids: &[usize]) -> (Option<String>, Vec<String>) {
+        let kind = self.arena[id].code1.split(['(', ';', ' ']).next().unwrap_or("").to_string();
+        let block_child = |b: &Self| kids.iter().copied().find(|&c| b.arena[c].label == "BLOCK");
+        match kind.as_str() {
+            "if" => {
+                let (ce, co) = self.build(kids[0]);
+                let then = block_child(self);
+                let els = kids
+                    .iter()
+                    .copied()
+                    .find(|&c| self.arena[c].label == "CONTROL_STRUCTURE" && self.arena[c].code1 == "else");
+                let mut outs = Vec::new();
+                if let Some(t) = then {
+                    let (te, to) = self.build(t);
+                    if let Some(te) = &te {
+                        self.connect(&co, te);
+                    }
+                    outs.extend(to);
+                }
+                if let Some(e) = els {
+                    let eb = self.arena[e].children.iter().copied().find(|&c| self.arena[c].label == "BLOCK");
+                    if let Some(eb) = eb {
+                        let (ee, eo) = self.build(eb);
+                        if let Some(ee) = &ee {
+                            self.connect(&co, ee);
+                        }
+                        outs.extend(eo);
+                    }
+                } else {
+                    outs.extend(co);
+                }
+                (ce, outs)
+            }
+            "while" => {
+                self.breaks.push(Vec::new());
+                self.continues.push(Vec::new());
+                let (ce, co) = self.build(kids[0]);
+                let body = block_child(self);
+                if let Some(b) = body {
+                    let (be, bo) = self.build(b);
+                    if let Some(be) = &be {
+                        self.connect(&co, be);
+                    }
+                    if let Some(ce) = &ce {
+                        self.connect(&bo, ce);
+                    }
+                }
+                let brs = self.breaks.pop().unwrap();
+                let conts = self.continues.pop().unwrap();
+                if let Some(ce) = &ce {
+                    self.connect(&conts, ce);
+                }
+                let mut outs = co;
+                outs.extend(brs);
+                (ce, outs)
+            }
+            "do" => {
+                self.breaks.push(Vec::new());
+                self.continues.push(Vec::new());
+                let body = block_child(self);
+                let cond = kids.iter().copied().find(|&c| self.arena[c].label != "BLOCK");
+                let (be, bo) = body.map(|b| self.build(b)).unwrap_or((None, vec![]));
+                let (ce, co) = cond.map(|c| self.build(c)).unwrap_or((None, vec![]));
+                if let Some(ce) = &ce {
+                    self.connect(&bo, ce);
+                }
+                if let Some(be) = &be {
+                    self.connect(&co, be);
+                }
+                let brs = self.breaks.pop().unwrap();
+                let conts = self.continues.pop().unwrap();
+                if let Some(ce) = &ce {
+                    self.connect(&conts, ce);
+                }
+                let mut outs = co;
+                outs.extend(brs);
+                (be.or(ce), outs)
+            }
+            "for" => {
+                self.breaks.push(Vec::new());
+                self.continues.push(Vec::new());
+                let body = block_child(self);
+                // init = the ARGUMENT_INDEX=1 expression; the remaining two
+                // expression children in order are condition and update.
+                let init = kids.iter().copied().find(|&c| self.arena[c].has_arg && self.arena[c].label != "BLOCK");
+                let rest: Vec<usize> = kids
+                    .iter()
+                    .copied()
+                    .filter(|&c| {
+                        Some(c) != init
+                            && Some(c) != body
+                            && !matches!(self.arena[c].label.as_str(), "LOCAL" | "BLOCK")
+                    })
+                    .collect();
+                let (cond, update) = (rest.first().copied(), rest.get(1).copied());
+                let (ie, io) = init.map(|i| self.build(i)).unwrap_or((None, vec![]));
+                let (ce, co) = cond.map(|c| self.build(c)).unwrap_or((None, vec![]));
+                let (ue, uo) = update.map(|u| self.build(u)).unwrap_or((None, vec![]));
+                let (be, bo) = body.map(|b| self.build(b)).unwrap_or((None, vec![]));
+                if let Some(ce) = &ce {
+                    self.connect(&io, ce);
+                    self.connect(&uo, ce);
+                }
+                if let Some(be) = &be {
+                    self.connect(&co, be);
+                }
+                if let Some(ue) = &ue {
+                    self.connect(&bo, ue);
+                }
+                let brs = self.breaks.pop().unwrap();
+                let conts = self.continues.pop().unwrap();
+                if let Some(ue) = &ue {
+                    self.connect(&conts, ue);
+                }
+                let mut outs = co;
+                outs.extend(brs);
+                (ie.or(ce), outs)
+            }
+            "switch" => {
+                self.breaks.push(Vec::new());
+                let (ce, co) = self.build(kids[0]);
+                let body = block_child(self);
+                let mut outs = Vec::new();
+                let mut has_default = false;
+                if let Some(b) = body {
+                    let bkids = self.arena[b].children.clone();
+                    for &c in &bkids {
+                        if self.arena[c].label == "JUMP_TARGET" {
+                            let jt = self.addr(c);
+                            self.connect(&co, &jt);
+                            if self.arena[c].name == "default" {
+                                has_default = true;
+                            }
+                        }
+                    }
+                    // Natural chaining inside the body = fallthrough; the
+                    // dispatch edges above are the only entries.
+                    let (_, bo) = self.seq(&bkids);
+                    outs.extend(bo);
+                }
+                if !has_default {
+                    outs.extend(co.clone());
+                }
+                outs.extend(self.breaks.pop().unwrap());
+                (ce, outs)
+            }
+            "break" => {
+                if let Some(b) = self.breaks.last_mut() {
+                    b.push(me.clone());
+                }
+                (Some(me), vec![])
+            }
+            "continue" => {
+                if let Some(c) = self.continues.last_mut() {
+                    c.push(me.clone());
+                }
+                (Some(me), vec![])
+            }
+            _ => (None, vec![]), // else (handled by if), goto/label: TODO
+        }
+    }
+}
+
+/// CFG edges for one dump block (a method subtree).
+fn cfg_edges_for_block(block: &str, text: &str) -> Vec<(String, String)> {
+    let arena = parse_dump_block(text);
+    if arena.is_empty() || arena[0].label != "METHOD" {
+        return Vec::new();
+    }
+    let root_kids = arena[0].children.clone();
+    let mret = root_kids
+        .iter()
+        .copied()
+        .find(|&c| arena[c].label == "METHOD_RETURN" );
+    let body = root_kids.iter().copied().find(|&c| arena[c].label == "BLOCK");
+    let Some(mret) = mret else { return Vec::new() };
+    let mut b = CfgBuilder {
+        arena: &arena,
+        block,
+        mret: format!("{block}#{}", arena[mret].idx),
+        edges: Vec::new(),
+        breaks: Vec::new(),
+        continues: Vec::new(),
+    };
+    let m_addr = format!("M:{}", arena[0].full);
+    let mret_addr = b.mret.clone();
+    let (entry, outs) = body.map(|x| b.build(x)).unwrap_or((None, vec![]));
+    match entry {
+        Some(e) => b.edges.push((m_addr, e)),
+        None => b.edges.push((m_addr, mret_addr.clone())),
+    }
+    b.connect(&outs, &mret_addr);
+    b.edges
 }
