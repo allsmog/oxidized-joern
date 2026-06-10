@@ -2923,6 +2923,28 @@ fn is_field_access(name: &str) -> bool {
     )
 }
 
+fn is_access_like(name: &str) -> bool {
+    matches!(
+        name,
+        "<operator>.indirection" | "<operator>.addressOf" | "<operator>.cast"
+    )
+}
+
+/// Strip one access wrapper from a variable string to its base: `*l`->`l`,
+/// `&v`->`v`, `(T)x`->`x`. Returns the input unchanged if not an access form.
+fn strip_access(v: &str) -> String {
+    let t = v.trim();
+    if let Some(rest) = t.strip_prefix('*').or_else(|| t.strip_prefix('&')) {
+        return rest.trim().to_string();
+    }
+    if t.starts_with('(') {
+        if let Some(close) = t.find(')') {
+            return t[close + 1..].trim().to_string();
+        }
+    }
+    t.to_string()
+}
+
 fn is_assignment(name: &str) -> bool {
     name.starts_with("<operator>.assignment")
         || name.starts_with("<operators>.assignment")
@@ -3015,10 +3037,15 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     for &c in &calls {
         let mut g = vec![c];
         def_var.insert(c, node_var(&arena[c]));
-        for a in args_of(c) {
-            if is_gen_arg(a) {
-                def_var.insert(a, node_var(&arena[a]));
-                g.push(a);
+        // Access-like calls (indirection/addressOf/cast) define only their own
+        // value; their operand is a read, not a fresh def (so `*l` does not
+        // make the inner `l` a definition).
+        if !is_access_like(&arena[c].name) {
+            for a in args_of(c) {
+                if is_gen_arg(a) {
+                    def_var.insert(a, node_var(&arena[a]));
+                    g.push(a);
+                }
             }
         }
         gen.insert(c, g);
@@ -3083,10 +3110,12 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     let is_using = |use_i: usize, def_i: usize| -> bool {
         let uv = match arena[use_i].label.as_str() {
             "IDENTIFIER" => arena[use_i].name.clone(),
-            "CALL" => arena[use_i].fullcode.clone(),
             _ => arena[use_i].fullcode.clone(),
         };
-        def_var.get(&def_i).map(|v| *v == uv).unwrap_or(false)
+        match def_var.get(&def_i) {
+            Some(dv) => *dv == uv || strip_access(dv) == uv,
+            None => false,
+        }
     };
 
     let mut flows: Vec<(String, String, String)> = Vec::new();
