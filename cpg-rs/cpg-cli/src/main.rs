@@ -33,13 +33,31 @@ fn flag<'a>(args: &'a [String], name: &str) -> Option<&'a str> {
 }
 
 fn make_project(lang: &str) -> (Project, &'static [&'static str]) {
+    use cpg_lang_ts::TsFrontend;
     match lang {
         "python" => (
-            Project::new(
-                || Box::new(cpg_lang_python::PythonFrontend::new()),
-                standard_pipeline(),
-            ),
+            Project::new(|| Box::new(TsFrontend::python()), standard_pipeline()),
             &["py"],
+        ),
+        "java" => (
+            Project::new(|| Box::new(TsFrontend::java()), standard_pipeline()),
+            &["java"],
+        ),
+        "go" => (
+            Project::new(|| Box::new(TsFrontend::go()), standard_pipeline()),
+            &["go"],
+        ),
+        "javascript" | "js" => (
+            Project::new(|| Box::new(TsFrontend::javascript()), standard_pipeline()),
+            &["js", "mjs", "cjs"],
+        ),
+        "ruby" | "rb" => (
+            Project::new(|| Box::new(TsFrontend::ruby()), standard_pipeline()),
+            &["rb"],
+        ),
+        "rust" | "rs" => (
+            Project::new(|| Box::new(TsFrontend::rust()), standard_pipeline()),
+            &["rs"],
         ),
         _ => (
             Project::new(|| Box::new(cpg_lang_c::CFrontend::new()), standard_pipeline()),
@@ -72,10 +90,10 @@ fn main() {
         "build" => build_and_save(&args),
         _ => {
             eprintln!(
-                "usage:\n  \
-                 cpg build <dir> -o <graph.cpg> [--lang c|python]   build and persist a CPG\n  \
-                 cpg serve <dir> [--lang c|python]                  build then serve queries\n  \
-                 cpg serve --load <graph.cpg>                       reopen a saved CPG and serve"
+                "usage (langs: c|python|java|go|javascript|ruby|rust):\n  \
+                 cpg build <dir> -o <graph.cpg> [--lang L]   build and persist a CPG\n  \
+                 cpg serve <dir> [--lang L]                   build then serve queries\n  \
+                 cpg serve --load <graph.cpg>                 reopen a saved CPG and serve"
             );
             std::process::exit(2);
         }

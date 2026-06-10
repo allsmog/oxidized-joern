@@ -33,22 +33,33 @@ discussion:
 ```
 cpg-core         columnar graph, schema, interner, builder, query traversal
 cpg-frontend     Language + LanguageTraits + Frontend traits (the contract)
-cpg-lang-c       C frontend on tree-sitter (335 lines)
-cpg-lang-python  Python frontend on tree-sitter (307 lines)
+cpg-lang-c       C frontend on tree-sitter (hand-written reference, 335 lines)
+cpg-lang-python  Python frontend on tree-sitter (hand-written, 307 lines)
+cpg-lang-ts      ONE generic tree-sitter engine + 6 declarative language specs:
+                 Java, Go, JavaScript, Ruby, Rust, Python
 cpg-analysis     pass framework (layer deps) + CFG/symbol/call-graph passes
                  + summaries-first dataflow with a precise invalidation cache
 cpg-incremental  the driver: parallel build, then per-edit: hash → delete
                  subgraph → rebuild → re-run only affected files/passes →
                  invalidate only affected summaries
 cpg-cli          `cpg build` (persist) / `cpg serve` (build-or-reopen + query):
-                 JSON-over-stdio with live incremental updates + taint queries
+                 JSON-over-stdio, all 7 languages, incremental updates + taint
 conformance      cross-language schema conformance harness + standard cases
 ```
 
-Both frontends pass the **identical** conformance suite and are served by the
-same passes, dataflow engine, and incremental driver with zero engine changes —
-each frontend is ~300 lines of grammar mapping. That is the consolidation
-contract demonstrated, versus the 20–30k LOC per frontend it replaces.
+**The language contract, stressed to its limit.** Seven languages —
+C (hand-written), and Java, Go, JavaScript, Ruby, Rust, Python through a single
+generic engine — pass the **identical** conformance suite and are served by the
+same passes, dataflow engine, and incremental driver with **zero engine
+changes**. In `cpg-lang-ts`, a new language is a struct literal: the node-kind
+names for functions/calls/literals, the field names for callees and parameters,
+the assignment shapes, and one `implicit_return` flag (Rust/Ruby). One mapping
+engine of ~400 lines absorbs six grammars as different as Ruby and Rust. The
+shared summaries-first taint engine then finds an interprocedural source→sink
+flow — through a passthrough function, with a full witness path — in all six,
+including Rust/Ruby tail-expression returns. That is the consolidation argument
+proven, not asserted: versus the 10–30k LOC per frontend it replaces, the
+per-language cost here is a few dozen lines of data.
 
 Dependency direction is strictly downward: frontends and passes depend on
 `cpg-core` and nothing depends on a frontend except the driver/tests.
