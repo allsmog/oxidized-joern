@@ -119,3 +119,23 @@ pins it, so a regression shows up as a diff.
   file-global BLOCK exactly like a method-body declaration — LOCAL slot, then
   a void-typed assignment CALL slot — and the lhs IDENTIFIER there is plain
   `g`, while references inside methods use CODE `<global> g`.
+- **Edge addressing** (oracle design, pinned): nodes are addressed
+  `<homeMethod>#<dumpLineIndex>`; METHOD nodes resolve first-wins across
+  method walks sorted by fullName, so a method whose file-global sorts first
+  is addressed inside it (`main` = `add.c:<global>#12`) while one that sorts
+  earlier is its own `#0` (`add`).
+- **CONTAINS** (`corpus/*`): sources are METHOD, TYPE_DECL, and FILE;
+  destinations exclude LOCAL, parameters, METHOD_RETURN, MODIFIER, MEMBER.
+  The per-file `<global>` TYPE_DECL contains the file-global METHOD and the
+  file's method TYPE_DECLs; `F:<includes>` contains the includes-global
+  method and every external TYPE_DECL.
+- **REF resolution** (`corpus/structs.c`, `corpus/order.c`): identifiers REF
+  the phantom ORDER=0 LOCAL (not the file-global LOCAL); `q.x` fieldAccess
+  CALLs REF the struct MEMBER for value receivers, but `p->y` through a
+  pointer stays unresolved (CDT quirk); every TYPE REFs its TYPE_DECL; every
+  NAMESPACE_BLOCK REFs NS:<global> and SOURCE_FILEs its file.
+- **Misc edge shapes**: ARGUMENT edges come from CALLs AND RETURNs to all
+  direct children; while/switch bodies use TRUE_BODY (no WHILE_BODY/
+  SWITCH_BODY kinds); FOR_INIT targets the init assignment CALL, not the
+  LOCAL; EVAL_TYPE exists for exactly the nodes that carry TYPE_FULL_NAME
+  (stub params/blocks included).

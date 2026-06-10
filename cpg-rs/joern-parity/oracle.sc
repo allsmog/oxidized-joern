@@ -1,5 +1,7 @@
 import scala.jdk.CollectionConverters._
-import io.shiftleft.codepropertygraph.generated.nodes.AstNode
+import io.shiftleft.codepropertygraph.generated.nodes
+import io.shiftleft.codepropertygraph.generated.nodes.{AstNode, Method, StoredNode}
+import scala.collection.mutable
 
 @main def exec(inputPath: String) = {
   importCode(inputPath, "proj")
@@ -31,4 +33,43 @@ import io.shiftleft.codepropertygraph.generated.nodes.AstNode
     println("NODES|TYPE_DECL " + nprops(t, List("NAME","FULL_NAME","CODE","IS_EXTERNAL","AST_PARENT_TYPE","AST_PARENT_FULL_NAME","FILENAME","ORDER"))))
   cpg.typ.sortBy(_.fullName).foreach(t =>
     println("NODES|TYPE " + nprops(t, List("NAME","FULL_NAME","TYPE_DECL_FULL_NAME"))))
+
+  // --- EDGES section. Every node is addressed <homeMethodFullName>#<idx>,
+  // where home = nearest enclosing METHOD (itself for methods) and idx = the
+  // node's line index within that method's dump block (deterministic on both
+  // sides since the AST dumps are byte-identical). Non-AST-walk nodes use
+  // T:/F:/NB:/NS:/D: label prefixes.
+  val addr = mutable.Map[Long, String]()
+  cpg.method.sortBy(_.fullName).toList.foreach { m =>
+    var idx = 0
+    def rec(n: AstNode, insideNested: Boolean): Unit = {
+      if (!insideNested && !addr.contains(n.id)) addr(n.id) = s"${m.fullName}#$idx"
+      idx += 1
+      val nested = insideNested || (n.isInstanceOf[Method] && (n.id != m.id))
+      n.astChildren.toList.sortBy(_.order).foreach(c => rec(c, nested))
+    }
+    rec(m, false)
+  }
+  def address(n: StoredNode): Option[String] = n match {
+    case t: nodes.Type => Some(s"T:" + t.fullName)
+    case f: nodes.File => Some(s"F:" + f.name)
+    case nb: nodes.NamespaceBlock => Some(s"NB:" + nb.fullName)
+    case ns: nodes.Namespace => Some(s"NS:" + ns.name)
+    case td: nodes.TypeDecl if !addr.contains(td.id) => Some(s"D:" + td.fullName)
+    case other => addr.get(other.id)
+  }
+  val kinds = Set("ARGUMENT","CALL","CONDITION","CONTAINS","DO_BODY","EVAL_TYPE",
+                  "FALSE_BODY","FOR_BODY","FOR_INIT","FOR_UPDATE","PARAMETER_LINK",
+                  "REF","SOURCE_FILE","TRUE_BODY")
+  val lines = mutable.SortedSet[String]()
+  cpg.all.foreach { n =>
+    n.outE.foreach { e =>
+      if (kinds(e.label)) {
+        for (s <- address(e.src.asInstanceOf[StoredNode]);
+             d <- address(e.dst.asInstanceOf[StoredNode]))
+          lines += s"${e.label} $s -> $d"
+      }
+    }
+  }
+  lines.foreach(l => println("EDGES|" + l))
 }
