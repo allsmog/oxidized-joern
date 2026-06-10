@@ -45,3 +45,34 @@ pins it, so a regression shows up as a diff.
   ORDER=2.
 - **Ternary** (`corpus/forloop.c`): `<operator>.conditional` with three
   children at ORDER/ARGUMENT_INDEX 1,2,3.
+- **switch flattening** (`corpus/switch.c`): the switch body BLOCK holds, as
+  flat siblings: JUMP_TARGET (NAME=`case`/`default`, CODE `case 1:` /
+  `default:`), then for `case` the value as a bare child with ORDER but NO
+  ARGUMENT_INDEX, then the statements. `break;`/`continue;` are childless
+  CONTROL_STRUCTUREs whose CODE includes the semicolon. The switch condition
+  is unwrapped (no parens) at ORDER=1; body BLOCK ORDER=2.
+- **Signed literals** (`corpus/switch.c`): CDT lowers `-1` to
+  `<operator>.minus` applied to LITERAL `1` (tree-sitter folds the sign in).
+- **Plural `<operators>.`** (`corpus/exprs.c`): assignmentModulo, ShiftLeft,
+  ArithmeticShiftRight, And, Or, Xor use prefix `<operators>.` while
+  assignmentPlus/Minus/Multiplication/Division use `<operator>.`.
+- **Type renderings** (`corpus/exprs.c`, `corpus/structs.c`):
+  `unsigned long` → `longunsigned`; `struct point` → `point` (tag dropped,
+  const dropped); arrays → `int[]`; CODE keeps source spellings.
+- **Phantom ORDER=0 LOCALs** (`corpus/exprs.c`, `corpus/structs.c`): atop the
+  method body BLOCK, one LOCAL per sizeof(T) type name (NAME=CODE=TYPE=T) and
+  per referenced unshadowed global (CODE `<global> name`). A global's
+  IDENTIFIER also gets CODE `<global> name`.
+- **cast/sizeof/comma** (`corpus/exprs.c`): `(T)e` → `<operator>.cast` typed T
+  with TYPE_REF arg 1; `sizeof(T)` → `<operator>.sizeOf` with T as an
+  IDENTIFIER typed as itself; `(a, b)` → a CODE-less BLOCK typed ANY whose
+  children carry ORDER but no ARGUMENT_INDEX.
+- **Literal typing** (`corpus/exprs.c`): `1.5` → double, `'x'` → char,
+  `"hi"` → char*.
+- **Field/array access** (`corpus/structs.c`): `.` → `<operator>.fieldAccess`,
+  `->` → `<operator>.indirectFieldAccess`, member as FIELD_IDENTIFIER with
+  CODE only (no NAME); `a[i]` → `<operator>.indirectIndexAccess` (c2cpg does
+  not emit plain indexAccess here).
+- **Multi-declarator CODE** (`corpus/structs.c`): `int a, b = 1;` yields
+  LOCALs with rebuilt CODE `int a` and `int b` (decl-specifier + that
+  declarator only), then the `b = 1` assignment as a separate sibling.

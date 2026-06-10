@@ -18,13 +18,40 @@ fn main() {
     let tree = parser.parse(&src, None).unwrap();
     let bytes = src.as_bytes();
 
-    // Pass 1: index free functions by name -> return type (for call typing).
+    // Pass 1: index free functions (name -> return type) and file-level
+    // object declarations (globals: name -> type), skipping prototypes.
     let mut functions: HashMap<String, String> = HashMap::new();
+    let mut globals: HashMap<String, String> = HashMap::new();
     for f in named_children(tree.root_node()) {
-        if f.kind() == "function_definition" {
-            if let Some((name, ret, _)) = fn_header(f, bytes) {
-                functions.insert(name, ret);
+        match f.kind() {
+            "function_definition" => {
+                if let Some((name, ret, _)) = fn_header(f, bytes) {
+                    functions.insert(name, ret);
+                }
             }
+            "declaration" => {
+                let base = normalize_type(
+                    &f.child_by_field_name("type").map(|t| text(t, bytes).to_string()).unwrap_or("ANY".into()),
+                );
+                for d in named_children(f) {
+                    let decl = if d.kind() == "init_declarator" {
+                        d.child_by_field_name("declarator")
+                    } else if matches!(d.kind(), "identifier" | "pointer_declarator" | "array_declarator") {
+                        Some(d)
+                    } else {
+                        None
+                    };
+                    if let Some(decl) = decl {
+                        if find_function_declarator(decl).is_none() {
+                            let name = innermost_id(decl, bytes);
+                            if !name.is_empty() {
+                                globals.insert(name, format!("{base}{}", decl_suffix(decl)));
+                            }
+                        }
+                    }
+                }
+            }
+            _ => {}
         }
     }
 
@@ -37,7 +64,7 @@ fn main() {
 
     let mut out = String::new();
     for f in funcs {
-        let mut ctx = Ctx { functions: &functions, symbols: HashMap::new(), out: &mut out };
+        let mut ctx = Ctx { functions: &functions, globals: &globals, symbols: HashMap::new(), phantoms: Vec::new(), out: &mut out };
         ctx.emit_method(f, bytes);
         out.push('\n');
     }
@@ -47,8 +74,19 @@ fn main() {
 /// Per-function emission context.
 struct Ctx<'a> {
     functions: &'a HashMap<String, String>,
+    globals: &'a HashMap<String, String>,
     symbols: HashMap<String, String>, // local/param name -> type
+    // Joern's local-creation pass materialises a LOCAL at ORDER=0 atop the
+    // method body BLOCK for each referenced global (CODE `<global> name`)
+    // and each type name used as a sizeof(T) argument.
+    phantoms: Vec<Phantom>,
     out: &'a mut String,
+}
+
+struct Phantom {
+    name: String,
+    code: String,
+    ty: String,
 }
 
 /// Properties in Joern's canonical print order; only `Some` fields are emitted.
@@ -115,6 +153,7 @@ impl Ctx<'_> {
         // Body block, then the synthetic method return.
         let block_order = (params.len() + 1) as i64;
         if let Some(body) = f.child_by_field_name("body") {
+            self.collect_phantoms(body, b);
             self.emit_block(body, b, block_order, 1);
         }
         self.line(1, "METHOD_RETURN", P {
@@ -125,6 +164,48 @@ impl Ctx<'_> {
         });
     }
 
+    /// Pre-scan the method body for names that Joern's local-creation pass
+    /// materialises as ORDER=0 LOCALs: referenced globals (unless shadowed by
+    /// a param or body declaration) and sizeof(T) type names.
+    fn collect_phantoms(&mut self, body: Node, b: &[u8]) {
+        let mut shadowed: Vec<String> = self.symbols.keys().cloned().collect();
+        collect_decl_names(body, b, &mut shadowed);
+        let mut seen: Vec<String> = Vec::new();
+        let mut stack = vec![body];
+        while let Some(n) = stack.pop() {
+            match n.kind() {
+                "identifier" => {
+                    let name = text(n, b).to_string();
+                    if !shadowed.contains(&name) && !seen.contains(&name) {
+                        if let Some(ty) = self.globals.get(&name) {
+                            seen.push(name.clone());
+                            self.phantoms.push(Phantom {
+                                code: format!("<global> {name}"),
+                                ty: ty.clone(),
+                                name,
+                            });
+                        }
+                    }
+                }
+                "sizeof_expression" => {
+                    if let Some(t) = n.child_by_field_name("type") {
+                        let ts = text(t, b).to_string();
+                        if !seen.contains(&ts) {
+                            seen.push(ts.clone());
+                            self.phantoms.push(Phantom { name: ts.clone(), code: ts.clone(), ty: ts });
+                        }
+                    }
+                }
+                _ => {}
+            }
+            let mut cs = named_children(n);
+            cs.reverse(); // stack pop order = document order
+            for c in cs {
+                stack.push(c);
+            }
+        }
+    }
+
     /// Emit a BLOCK node and its statements, with a fresh child ORDER sequence.
     fn emit_block(&mut self, body: Node, b: &[u8], order: i64, depth: usize) {
         self.line(depth, "BLOCK", P {
@@ -133,6 +214,15 @@ impl Ctx<'_> {
             order: Some(order),
             ..Default::default()
         });
+        for ph in std::mem::take(&mut self.phantoms) {
+            self.line(depth + 1, "LOCAL", P {
+                name: Some(ph.name),
+                code: Some(ph.code),
+                tfn: Some(ph.ty),
+                order: Some(0),
+                ..Default::default()
+            });
+        }
         let mut so = 1i64;
         for s in named_children(body) {
             self.emit_stmt(s, b, &mut so, depth + 1);
@@ -145,6 +235,58 @@ impl Ctx<'_> {
             "declaration" => self.emit_declaration(n, b, order, depth, None),
             "if_statement" => self.emit_if(n, b, order, depth),
             "for_statement" => self.emit_for(n, b, order, depth),
+            "break_statement" | "continue_statement" => {
+                let o = *order;
+                *order += 1;
+                self.line(depth, "CONTROL_STRUCTURE", P {
+                    code: Some(esc(text(n, b))),
+                    order: Some(o),
+                    ..Default::default()
+                });
+            }
+            "switch_statement" => {
+                let o = *order;
+                *order += 1;
+                self.line(depth, "CONTROL_STRUCTURE", P {
+                    code: Some(esc(text(n, b))),
+                    order: Some(o),
+                    ..Default::default()
+                });
+                if let Some(cond) = n.child_by_field_name("condition") {
+                    self.emit_expr(unwrap_paren(cond), b, depth + 1, 1, None);
+                }
+                if let Some(body) = n.child_by_field_name("body") {
+                    self.emit_block(body, b, 2, depth + 1);
+                }
+            }
+            // Cases are flattened into the switch body's BLOCK: a JUMP_TARGET,
+            // then (for `case`) the value as a bare child with no
+            // ARGUMENT_INDEX, then the statements — all as siblings.
+            "case_statement" => {
+                let value = n.child_by_field_name("value");
+                let (name, code) = match value {
+                    Some(v) => ("case", format!("case {}:", text(v, b))),
+                    None => ("default", "default:".to_string()),
+                };
+                let o = *order;
+                *order += 1;
+                self.line(depth, "JUMP_TARGET", P {
+                    name: Some(name.into()),
+                    code: Some(esc(&code)),
+                    order: Some(o),
+                    ..Default::default()
+                });
+                if let Some(v) = value {
+                    let vo = *order;
+                    *order += 1;
+                    self.emit_expr(v, b, depth, vo, None);
+                }
+                for s in named_children(n) {
+                    if Some(s.id()) != value.map(|v| v.id()) {
+                        self.emit_stmt(s, b, order, depth);
+                    }
+                }
+            }
             "do_statement" => {
                 let o = *order;
                 *order += 1;
@@ -285,7 +427,15 @@ impl Ctx<'_> {
     /// A C declaration `T x = init;` → a LOCAL plus, if initialised, an
     /// `<operator>.assignment` CALL — exactly as c2cpg lowers it.
     fn emit_declaration(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize, assign_arg: Option<i64>) {
-        let ty = n.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into());
+        let ty = normalize_type(&n.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into()));
+        // LOCAL CODE is rebuilt per declarator: the decl-specifier source text
+        // (keeps `const`/`struct`/`unsigned ...` spellings the type drops)
+        // plus that declarator alone — so `int a, b = 1;` yields `int a`,`int b`.
+        let spec_end = n.child_by_field_name("type").map(|t| t.end_byte()).unwrap_or(n.start_byte());
+        let decl_code = |d: Node| {
+            let spec = std::str::from_utf8(&b[n.start_byte()..spec_end]).unwrap_or("");
+            esc(&format!("{spec} {}", text(d, b)))
+        };
         for d in named_children(n) {
             match d.kind() {
                 "init_declarator" => {
@@ -293,14 +443,13 @@ impl Ctx<'_> {
                     let name = name_node.map(|x| innermost_id(x, b)).unwrap_or_default();
                     // LOCAL CODE keeps the source declarator form (`int *q`),
                     // while TYPE_FULL_NAME normalises pointers to `int*`.
-                    let decl_code = name_node.map(|x| text(x, b).to_string()).unwrap_or(name.clone());
-                    let full_ty = format!("{ty}{}", name_node.map(pointer_suffix).unwrap_or_default());
+                    let full_ty = format!("{ty}{}", name_node.map(decl_suffix).unwrap_or_default());
                     self.symbols.insert(name.clone(), full_ty.clone());
                     let lo = *order;
                     *order += 1;
                     self.line(depth, "LOCAL", P {
                         name: Some(name.clone()),
-                        code: Some(esc(&format!("{ty} {decl_code}"))),
+                        code: name_node.map(decl_code),
                         tfn: Some(full_ty.clone()),
                         order: Some(lo),
                         ..Default::default()
@@ -333,13 +482,13 @@ impl Ctx<'_> {
                 }
                 "identifier" | "pointer_declarator" | "array_declarator" => {
                     let name = innermost_id(d, b);
-                    let full_ty = format!("{ty}{}", pointer_suffix(d));
+                    let full_ty = format!("{ty}{}", decl_suffix(d));
                     self.symbols.insert(name.clone(), full_ty.clone());
                     let lo = *order;
                     *order += 1;
                     self.line(depth, "LOCAL", P {
                         name: Some(name.clone()),
-                        code: Some(esc(&format!("{ty} {}", text(d, b)))),
+                        code: Some(decl_code(d)),
                         tfn: Some(full_ty),
                         order: Some(lo),
                         ..Default::default()
@@ -457,6 +606,55 @@ impl Ctx<'_> {
                     }
                 }
             }
+            "field_expression" => {
+                // `.` → fieldAccess, `->` → indirectFieldAccess; the member is
+                // a FIELD_IDENTIFIER child with CODE only (no NAME).
+                let op = n.child_by_field_name("operator").map(|o| text(o, b)).unwrap_or(".");
+                let name = if op == "->" {
+                    "<operator>.indirectFieldAccess".to_string()
+                } else {
+                    "<operator>.fieldAccess".to_string()
+                };
+                self.line(depth, "CALL", P {
+                    name: Some(name.clone()),
+                    code: Some(esc(text(n, b))),
+                    tfn: Some("ANY".into()),
+                    mfn: Some(name),
+                    order: Some(order),
+                    arg,
+                    dispatch: Some("STATIC_DISPATCH".into()),
+                    ..Default::default()
+                });
+                if let Some(a) = n.child_by_field_name("argument") {
+                    self.emit_expr(a, b, depth + 1, 1, Some(1));
+                }
+                if let Some(f) = n.child_by_field_name("field") {
+                    self.line(depth + 1, "FIELD_IDENTIFIER", P {
+                        code: Some(text(f, b).to_string()),
+                        order: Some(2),
+                        arg: Some(2),
+                        ..Default::default()
+                    });
+                }
+            }
+            "subscript_expression" => {
+                self.line(depth, "CALL", P {
+                    name: Some("<operator>.indirectIndexAccess".into()),
+                    code: Some(esc(text(n, b))),
+                    tfn: Some("ANY".into()),
+                    mfn: Some("<operator>.indirectIndexAccess".into()),
+                    order: Some(order),
+                    arg,
+                    dispatch: Some("STATIC_DISPATCH".into()),
+                    ..Default::default()
+                });
+                if let Some(a) = n.child_by_field_name("argument") {
+                    self.emit_expr(a, b, depth + 1, 1, Some(1));
+                }
+                if let Some(i) = n.child_by_field_name("index") {
+                    self.emit_expr(i, b, depth + 1, 2, Some(2));
+                }
+            }
             "call_expression" => {
                 let callee = n.child_by_field_name("function");
                 let name = callee.map(|c| text(c, b).to_string()).unwrap_or("<anon>".into());
@@ -480,10 +678,16 @@ impl Ctx<'_> {
             }
             "identifier" => {
                 let name = text(n, b).to_string();
-                let ty = self.symbols.get(&name).cloned().unwrap_or("ANY".into());
+                let (code, ty) = if let Some(t) = self.symbols.get(&name) {
+                    (name.clone(), t.clone())
+                } else if let Some(t) = self.globals.get(&name) {
+                    (format!("<global> {name}"), t.clone())
+                } else {
+                    (name.clone(), "ANY".to_string())
+                };
                 self.line(depth, "IDENTIFIER", P {
-                    name: Some(name.clone()),
-                    code: Some(name),
+                    name: Some(name),
+                    code: Some(code),
                     tfn: Some(ty),
                     order: Some(order),
                     arg,
@@ -491,13 +695,133 @@ impl Ctx<'_> {
                 });
             }
             "number_literal" => {
+                // tree-sitter folds a leading sign into the literal; Joern
+                // (CDT) lowers `-1` to <operator>.minus applied to `1`.
+                let t = text(n, b).to_string();
+                if let Some(rest) = t.strip_prefix('-').or_else(|| t.strip_prefix('+')) {
+                    let name = unary_name(&t[..1]);
+                    self.line(depth, "CALL", P {
+                        name: Some(name.clone()),
+                        code: Some(t.clone()),
+                        tfn: Some("ANY".into()),
+                        mfn: Some(name),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    });
+                    self.line(depth + 1, "LITERAL", P {
+                        code: Some(rest.to_string()),
+                        tfn: Some("int".into()),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    });
+                } else {
+                    let tfn = if t.starts_with("0x") || t.starts_with("0X") {
+                        "int"
+                    } else if t.ends_with('f') || t.ends_with('F') {
+                        "float"
+                    } else if t.contains('.') || t.contains('e') || t.contains('E') {
+                        "double"
+                    } else {
+                        "int"
+                    };
+                    self.line(depth, "LITERAL", P {
+                        code: Some(t),
+                        tfn: Some(tfn.into()),
+                        order: Some(order),
+                        arg,
+                        ..Default::default()
+                    });
+                }
+            }
+            "char_literal" => {
                 self.line(depth, "LITERAL", P {
                     code: Some(text(n, b).to_string()),
-                    tfn: Some("int".into()),
+                    tfn: Some("char".into()),
                     order: Some(order),
                     arg,
                     ..Default::default()
                 });
+            }
+            "string_literal" => {
+                self.line(depth, "LITERAL", P {
+                    code: Some(esc(text(n, b))),
+                    tfn: Some("char*".into()),
+                    order: Some(order),
+                    arg,
+                    ..Default::default()
+                });
+            }
+            "cast_expression" => {
+                // `(T)e` → <operator>.cast typed T, with a TYPE_REF arg 1.
+                let ty = n
+                    .child_by_field_name("type")
+                    .map(|t| normalize_type(text(t, b)))
+                    .unwrap_or("ANY".into());
+                self.line(depth, "CALL", P {
+                    name: Some("<operator>.cast".into()),
+                    code: Some(esc(text(n, b))),
+                    tfn: Some(ty.clone()),
+                    mfn: Some("<operator>.cast".into()),
+                    order: Some(order),
+                    arg,
+                    dispatch: Some("STATIC_DISPATCH".into()),
+                    ..Default::default()
+                });
+                self.line(depth + 1, "TYPE_REF", P {
+                    code: Some(ty.clone()),
+                    tfn: Some(ty),
+                    order: Some(1),
+                    arg: Some(1),
+                    ..Default::default()
+                });
+                if let Some(v) = n.child_by_field_name("value") {
+                    self.emit_expr(v, b, depth + 1, 2, Some(2));
+                }
+            }
+            "sizeof_expression" => {
+                self.line(depth, "CALL", P {
+                    name: Some("<operator>.sizeOf".into()),
+                    code: Some(esc(text(n, b))),
+                    tfn: Some("ANY".into()),
+                    mfn: Some("<operator>.sizeOf".into()),
+                    order: Some(order),
+                    arg,
+                    dispatch: Some("STATIC_DISPATCH".into()),
+                    ..Default::default()
+                });
+                if let Some(t) = n.child_by_field_name("type") {
+                    // sizeof(T): the type name appears as an IDENTIFIER typed
+                    // as itself (and spawns the ORDER=0 phantom LOCAL).
+                    let ts = text(t, b).to_string();
+                    self.line(depth + 1, "IDENTIFIER", P {
+                        name: Some(ts.clone()),
+                        code: Some(ts.clone()),
+                        tfn: Some(ts),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    });
+                } else if let Some(v) = n.child_by_field_name("value") {
+                    self.emit_expr(unwrap_paren(v), b, depth + 1, 1, Some(1));
+                }
+            }
+            "comma_expression" => {
+                // `(a, b)` → a CODE-less BLOCK typed ANY whose children carry
+                // ORDER but no ARGUMENT_INDEX.
+                self.line(depth, "BLOCK", P {
+                    tfn: Some("ANY".into()),
+                    order: Some(order),
+                    arg,
+                    ..Default::default()
+                });
+                let mut parts = Vec::new();
+                flatten_comma(n, &mut parts);
+                for (i, part) in parts.into_iter().enumerate() {
+                    self.emit_expr(part, b, depth + 1, (i + 1) as i64, None);
+                }
             }
             "parenthesized_expression" => {
                 if let Some(inner) = named_children(n).into_iter().next() {
@@ -527,9 +851,9 @@ fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
     if let Some(pl) = fd.child_by_field_name("parameters") {
         for p in named_children(pl) {
             if p.kind() == "parameter_declaration" {
-                let base = p.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into());
+                let base = normalize_type(&p.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into()));
                 let decl = p.child_by_field_name("declarator");
-                let ty = format!("{base}{}", decl.map(pointer_suffix).unwrap_or_default());
+                let ty = format!("{base}{}", decl.map(decl_suffix).unwrap_or_default());
                 let name = decl.map(|d| innermost_id(d, b)).unwrap_or_default();
                 if !name.is_empty() {
                     params.push(Param { name, ty, code: text(p, b).to_string() });
@@ -570,37 +894,59 @@ fn unary_name(op: &str) -> String {
     format!("<operator>.{n}")
 }
 
-/// `*` suffix for each pointer_declarator level (Joern renders `int *p` as `int*`).
-fn pointer_suffix(n: Node) -> String {
-    let mut stars = 0;
+/// Type suffix from declarator nesting: `*` per pointer level, `[]` per array
+/// level (Joern renders `int *p` as `int*` and `int vals[]` as `int[]`).
+fn decl_suffix(n: Node) -> String {
+    let mut s = String::new();
     let mut cur = n;
-    while cur.kind() == "pointer_declarator" {
-        stars += 1;
+    loop {
+        match cur.kind() {
+            "pointer_declarator" => s.push('*'),
+            "array_declarator" => s.push_str("[]"),
+            _ => break,
+        }
         match cur.child_by_field_name("declarator") {
             Some(c) => cur = c,
             None => break,
         }
     }
-    "*".repeat(stars)
+    s
 }
 
-/// Assignment operator → Joern operator name (`=` → assignment, `+=` → …).
+/// Assignment operator → Joern operator name. Joern inconsistency, pinned by
+/// corpus/exprs.c: +=/-=/*=//= use the `<operator>.` prefix but the other six
+/// compound assignments use plural `<operators>.`.
 fn assignment_name(op: &str) -> String {
-    let n = match op {
-        "=" => "assignment",
-        "+=" => "assignmentPlus",
-        "-=" => "assignmentMinus",
-        "*=" => "assignmentMultiplication",
-        "/=" => "assignmentDivision",
-        "%=" => "assignmentModulo",
-        "&=" => "assignmentAnd",
-        "|=" => "assignmentOr",
-        "^=" => "assignmentXor",
-        "<<=" => "assignmentShiftLeft",
-        ">>=" => "assignmentArithmeticShiftRight",
-        _ => "assignment",
-    };
-    format!("<operator>.{n}")
+    match op {
+        "=" => "<operator>.assignment".into(),
+        "+=" => "<operator>.assignmentPlus".into(),
+        "-=" => "<operator>.assignmentMinus".into(),
+        "*=" => "<operator>.assignmentMultiplication".into(),
+        "/=" => "<operator>.assignmentDivision".into(),
+        "%=" => "<operators>.assignmentModulo".into(),
+        "&=" => "<operators>.assignmentAnd".into(),
+        "|=" => "<operators>.assignmentOr".into(),
+        "^=" => "<operators>.assignmentXor".into(),
+        "<<=" => "<operators>.assignmentShiftLeft".into(),
+        ">>=" => "<operators>.assignmentArithmeticShiftRight".into(),
+        _ => "<operator>.assignment".into(),
+    }
+}
+
+/// CDT renders multi-keyword primitive types reordered and unspaced
+/// (`unsigned long` → `longunsigned`, pinned by corpus/exprs.c). Extend this
+/// table only with oracle-pinned combinations.
+fn normalize_type(base: &str) -> String {
+    let t = base.trim();
+    for tag in ["struct ", "union ", "enum "] {
+        if let Some(rest) = t.strip_prefix(tag) {
+            return rest.trim().into();
+        }
+    }
+    match t {
+        "unsigned long" => "longunsigned".into(),
+        t => t.into(),
+    }
 }
 
 // --- C operator → Joern operator name ---
@@ -627,6 +973,33 @@ fn operator_name(op: &str) -> String {
         _ => "unknown",
     };
     format!("<operator>.{n}")
+}
+
+fn flatten_comma<'t>(n: Node<'t>, out: &mut Vec<Node<'t>>) {
+    if n.kind() == "comma_expression" {
+        if let Some(l) = n.child_by_field_name("left") {
+            flatten_comma(l, out);
+        }
+        if let Some(r) = n.child_by_field_name("right") {
+            flatten_comma(r, out);
+        }
+    } else {
+        out.push(n);
+    }
+}
+
+fn collect_decl_names(n: Node, b: &[u8], out: &mut Vec<String>) {
+    if n.kind() == "declaration" {
+        for d in named_children(n) {
+            let name = innermost_id(d, b);
+            if !name.is_empty() {
+                out.push(name);
+            }
+        }
+    }
+    for c in named_children(n) {
+        collect_decl_names(c, b, out);
+    }
 }
 
 // --- tree helpers ---
