@@ -84,6 +84,8 @@ fn main() {
     let mut stub_uses: HashMap<String, usize> = HashMap::new();
     let mut edges: Vec<(String, String, String)> = Vec::new();
     let mut placements: HashMap<String, Vec<(String, usize)>> = HashMap::new();
+    let mut used_macros: std::collections::BTreeMap<String, (String, String, usize, String)> =
+        std::collections::BTreeMap::new();
 
     for u in &units {
         let b = u.src.as_bytes();
@@ -92,6 +94,34 @@ fn main() {
         // Per-file tables (c2cpg resolves within the translation unit).
         let mut functions: HashMap<String, String> = HashMap::new();
         let mut globals: HashMap<String, String> = HashMap::new();
+        let mut macros: HashMap<String, MacroDef> = HashMap::new();
+        for f in named_children(root) {
+            match f.kind() {
+                "preproc_def" => {
+                    let name = f.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                    let body = f.child_by_field_name("value").map(|x| text(x, b).to_string()).unwrap_or_default();
+                    macros.insert(name, MacroDef {
+                        params: None,
+                        body,
+                        directive: text(f, b).trim_end().to_string(),
+                    });
+                }
+                "preproc_function_def" => {
+                    let name = f.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                    let params = f
+                        .child_by_field_name("parameters")
+                        .map(|ps| named_children(ps).iter().map(|p| text(*p, b).to_string()).collect())
+                        .unwrap_or_default();
+                    let body = f.child_by_field_name("value").map(|x| text(x, b).to_string()).unwrap_or_default();
+                    macros.insert(name, MacroDef {
+                        params: Some(params),
+                        body,
+                        directive: text(f, b).trim_end().to_string(),
+                    });
+                }
+                _ => {}
+            }
+        }
         let mut enumerators: Vec<String> = Vec::new();
         for f in named_children(root) {
             if f.kind() == "enum_specifier" {
@@ -143,6 +173,9 @@ fn main() {
             functions: &functions,
             globals: &globals,
             enumerators: &enumerators,
+            macros: &macros,
+            file: u.file.clone(),
+            used_macros: &mut used_macros,
             symbols: HashMap::new(),
             phantoms: Vec::new(),
             stubs: &mut stub_uses,
@@ -197,10 +230,14 @@ fn main() {
     let empty_globals: HashMap<String, String> = HashMap::new();
     let mut stub_uses2: HashMap<String, usize> = HashMap::new();
     let empty_enums: Vec<String> = Vec::new();
+    let empty_macros: HashMap<String, MacroDef> = HashMap::new();
     let mut sctx = Ctx {
         functions: &empty_fns,
         globals: &empty_globals,
         enumerators: &empty_enums,
+        macros: &empty_macros,
+        file: String::new(),
+        used_macros: &mut used_macros,
         symbols: HashMap::new(),
         phantoms: Vec::new(),
         stubs: &mut stub_uses2,
@@ -225,6 +262,16 @@ fn main() {
         sctx.begin_block(&name);
         sctx.emit_stub(&name, arity);
         dumps.push((name, std::mem::take(&mut sctx.out)));
+    }
+    let macro_methods: Vec<(String, (String, String, usize, String))> = sctx
+        .used_macros
+        .iter()
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect();
+    for (full, (name, directive, nparams, ret)) in macro_methods {
+        sctx.begin_block(&full);
+        sctx.emit_macro_method(&full, &name, &directive, nparams, &ret);
+        dumps.push((full, std::mem::take(&mut sctx.out)));
     }
     sctx.begin_block("<includes>:<global>");
     sctx.emit_includes_global();
@@ -322,6 +369,14 @@ fn main() {
         edges.push(("REF".into(), format!("NB:{f}:<global>"), "NS:<global>".into()));
         edges.push(("SOURCE_FILE".into(), format!("NB:{f}:<global>"), format!("F:{f}")));
     }
+    // Macro methods: SOURCE_FILE to their defining file and CONTAINS from the
+    // file-global TYPE_DECL.
+    for full in used_macros.keys() {
+        if let Some(file) = full.split(':').next() {
+            edges.push(("SOURCE_FILE".into(), format!("M:{full}"), format!("F:{file}")));
+            edges.push(("CONTAINS".into(), format!("D:{file}:<global>"), format!("M:{full}")));
+        }
+    }
     // The per-file <global> TYPE_DECL CONTAINS the file-global METHOD and the
     // method TYPE_DECLs of that file; each FILE contains its <global>
     // TYPE_DECL, and <includes> contains its method + external TYPE_DECLs.
@@ -393,11 +448,23 @@ fn count_members(n: Node) -> i64 {
         .sum()
 }
 
+/// An in-file #define. CDT expands these; invocations become INLINED calls
+/// and each *used* macro also gets a METHOD whose CODE is the directive.
+struct MacroDef {
+    params: Option<Vec<String>>, // None = object-like
+    body: String,
+    directive: String,
+}
+
 /// Per-function emission context.
 struct Ctx<'a> {
     functions: &'a HashMap<String, String>,
     globals: &'a HashMap<String, String>,
     enumerators: &'a Vec<String>,
+    macros: &'a HashMap<String, MacroDef>,
+    file: String,
+    // used macros: full_name -> (name, directive, nparams, ret type)
+    used_macros: &'a mut std::collections::BTreeMap<String, (String, String, usize, String)>,
     symbols: HashMap<String, String>, // local/param name -> type
     // Joern's local-creation pass materialises a LOCAL at ORDER=0 atop the
     // method body BLOCK for each referenced global (CODE `<global> name`)
@@ -416,7 +483,7 @@ struct Ctx<'a> {
     line_no: usize,
     suppress_below: Option<usize>, // depth of a nested METHOD whose interior is foreign
     ctx_stack: Vec<(usize, String)>, // CONTAINS contexts: (depth, src addr)
-    parent_stack: Vec<(usize, String, String)>, // (depth, label, addr) for ARGUMENT
+    parent_stack: Vec<(usize, String, String, bool)>, // (depth, label, addr, inlined)
     sym_line: HashMap<String, usize>, // LOCAL/param name -> defining line idx
     param_in_line: HashMap<String, usize>,
     edges: &'a mut Vec<(String, String, String)>,
@@ -505,9 +572,12 @@ impl Ctx<'_> {
                     self.edges.push(("CONTAINS".into(), src, my_addr.clone()));
                 }
             }
-            if let Some((_, plabel, paddr)) = self.parent_stack.last() {
-                // Receivers (pointerCall arg without ARGUMENT_INDEX) get none.
-                if (plabel == "CALL" && p.arg.is_some()) || plabel == "RETURN" {
+            if let Some((_, plabel, paddr, pinlined)) = self.parent_stack.last() {
+                // Receivers (no ARGUMENT_INDEX) and the expansion BLOCK of an
+                // INLINED macro call get no ARGUMENT edge.
+                let is_expansion = *pinlined && label == "BLOCK";
+                if ((plabel == "CALL" && p.arg.is_some() && !is_expansion) || plabel == "RETURN")
+                {
                     let paddr = paddr.clone();
                     self.edges.push(("ARGUMENT".into(), paddr, my_addr.clone()));
                 }
@@ -525,7 +595,13 @@ impl Ctx<'_> {
                     self.edges.push(("REF".into(), my_addr.clone(), format!("M:{mfn}")));
                 }
             }
-            if label == "IDENTIFIER" {
+            // CDT quirk: the *arguments* of an INLINED macro call carry no
+            // REF edge (identifiers inside the expansion do).
+            let under_inlined_call = self
+                .parent_stack
+                .last()
+                .is_some_and(|(_, pl, _, pi)| *pi && pl == "CALL");
+            if label == "IDENTIFIER" && !under_inlined_call {
                 if let Some(n) = &p.name {
                     if let Some(i) = self.sym_line.get(n) {
                         let dst = format!("{}#{}", self.block, i);
@@ -549,7 +625,8 @@ impl Ctx<'_> {
         if label == "METHOD" || label == "TYPE_DECL" {
             self.ctx_stack.push((depth, my_addr.clone()));
         }
-        self.parent_stack.push((depth, label.to_string(), my_addr));
+        let inlined = p.dispatch.as_deref() == Some("INLINED");
+        self.parent_stack.push((depth, label.to_string(), my_addr, inlined));
         self.line_no += 1;
         let mut s = format!("{}{label}", "  ".repeat(depth));
         let mut kv = |k: &str, v: &str| s.push_str(&format!(" {k}={v}"));
@@ -933,6 +1010,112 @@ impl Ctx<'_> {
         });
     }
 
+    /// An INLINED macro invocation: CALL (NAME = macro, CODE = the original
+    /// invocation text, MFN = <file>:<name>:<ret>(<nparams>), SIGNATURE too),
+    /// arguments in order, then a BLOCK (ANY, ORDER/INDEX = n+1) wrapping the
+    /// expansion parsed from the substituted macro body.
+    #[allow(clippy::too_many_arguments)]
+    fn emit_macro_call(
+        &mut self,
+        name: &str,
+        code: &str,
+        arg_nodes: &[Node],
+        _site: Node,
+        b: &[u8],
+        depth: usize,
+        order: i64,
+        arg: Option<i64>,
+    ) {
+        let (params, body, directive) = {
+            let m = &self.macros[name];
+            (m.params.clone().unwrap_or_default(), m.body.clone(), m.directive.clone())
+        };
+        let arg_texts: Vec<String> = arg_nodes.iter().map(|a| text(*a, b).to_string()).collect();
+        let expansion = substitute(&body, &params, &arg_texts);
+        let ret = expansion_type(&expansion, &self.symbols, self.functions);
+        let full = format!("{}:{name}:{ret}({})", self.file, params.len());
+        self.used_macros
+            .entry(full.clone())
+            .or_insert((name.to_string(), directive, params.len(), ret.clone()));
+        self.line(depth, "CALL", P {
+            name: Some(name.to_string()),
+            code: Some(code.to_string()),
+            tfn: Some(ret),
+            mfn: Some(full),
+            sig: Some(format!("{}({})", expansion_type(&expansion, &self.symbols, self.functions), params.len())),
+            order: Some(order),
+            arg,
+            dispatch: Some("INLINED".into()),
+            ..Default::default()
+        });
+        for (i, a) in arg_nodes.iter().enumerate() {
+            let k = (i + 1) as i64;
+            self.emit_expr(*a, b, depth + 1, k, Some(k));
+        }
+        let bk = (arg_nodes.len() + 1) as i64;
+        self.line(depth + 1, "BLOCK", P {
+            tfn: Some("ANY".into()),
+            order: Some(bk),
+            arg: Some(bk),
+            ..Default::default()
+        });
+        self.emit_expansion(&expansion, depth + 2);
+    }
+
+    /// Parse a macro expansion as an expression and emit it (ORDER=1, no
+    /// ARGUMENT_INDEX), exactly as CDT inlines it.
+    fn emit_expansion(&mut self, expansion: &str, depth: usize) {
+        let src = format!("void __m() {{ {expansion}; }}");
+        let mut parser = Parser::new();
+        parser.set_language(&tree_sitter_c::LANGUAGE.into()).unwrap();
+        let Some(tree) = parser.parse(&src, None) else { return };
+        let b = src.as_bytes();
+        let Some(expr) = expansion_expr_node(tree.root_node()) else { return };
+        self.emit_expr(expr, b, depth, 1, None);
+    }
+
+    /// METHOD for a used macro: CODE is the #define directive, params p1..pn,
+    /// an empty ANY BLOCK after the params (no ARGUMENT_INDEX), RET typed as
+    /// the expansion.
+    fn emit_macro_method(&mut self, full: &str, name: &str, directive: &str, nparams: usize, ret: &str) {
+        self.line(0, "METHOD", P {
+            name: Some(name.to_string()),
+            code: Some(esc(directive)),
+            full: Some(full.to_string()),
+            sig: Some(format!("{ret}({nparams})")),
+            order: Some(1),
+            ..Default::default()
+        });
+        for k in 1..=nparams {
+            let pk = P {
+                name: Some(format!("p{k}")),
+                code: Some(format!("p{k}")),
+                tfn: Some("ANY".into()),
+                order: Some(k as i64),
+                ..Default::default()
+            };
+            self.line(1, "METHOD_PARAMETER_IN", P { ..pk });
+            self.line(1, "METHOD_PARAMETER_OUT", P {
+                name: Some(format!("p{k}")),
+                code: Some(format!("p{k}")),
+                tfn: Some("ANY".into()),
+                order: Some(k as i64),
+                ..Default::default()
+            });
+        }
+        self.line(1, "BLOCK", P {
+            tfn: Some("ANY".into()),
+            order: Some((nparams + 1) as i64),
+            ..Default::default()
+        });
+        self.line(1, "METHOD_RETURN", P {
+            code: Some("RET".into()),
+            tfn: Some(ret.to_string()),
+            order: Some((nparams + 2) as i64),
+            ..Default::default()
+        });
+    }
+
     /// Pre-scan the method body for names that Joern's local-creation pass
     /// materialises as ORDER=0 LOCALs: referenced globals (unless shadowed by
     /// a param or body declaration) and sizeof(T) type names.
@@ -1013,6 +1196,28 @@ impl Ctx<'_> {
             "declaration" => self.emit_declaration(n, b, order, depth, None),
             "if_statement" => self.emit_if(n, b, order, depth),
             "for_statement" => self.emit_for(n, b, order, depth),
+            "preproc_ifdef" => {
+                // #ifdef/#ifndef: CDT keeps or drops the guarded statements;
+                // they splice into the surrounding block when kept.
+                let neg = n.child(0).map(|t| text(t, b) == "#ifndef").unwrap_or(false);
+                let name = n.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                let defined = self.macros.contains_key(&name);
+                let take = defined != neg;
+                for c in named_children(n) {
+                    match c.kind() {
+                        "identifier" => {}
+                        "preproc_else" => {
+                            if !take {
+                                for e in named_children(c) {
+                                    self.emit_stmt(e, b, order, depth);
+                                }
+                            }
+                        }
+                        _ if take => self.emit_stmt(c, b, order, depth),
+                        _ => {}
+                    }
+                }
+            }
             "labeled_statement" => {
                 // A label flattens like a switch case: JUMP_TARGET (CODE is
                 // the whole labeled statement) then the statement as sibling.
@@ -1571,6 +1776,12 @@ impl Ctx<'_> {
                 let name = callee.map(|c| text(c, b).to_string()).unwrap_or("<anon>".into());
                 let args = n.child_by_field_name("arguments");
                 let argc = args.map(|a| named_children(a).len()).unwrap_or(0);
+                if self.macros.get(&name).is_some_and(|m| m.params.is_some()) {
+                    let arg_nodes: Vec<Node> = args.map(|a| named_children(a)).unwrap_or_default();
+                    let code = esc(text(n, b));
+                    self.emit_macro_call(&name, &code, &arg_nodes, n, b, depth, order, arg);
+                    return;
+                }
                 if !self.functions.contains_key(&name)
                     && (self.symbols.contains_key(&name) || self.globals.contains_key(&name))
                 {
@@ -1620,6 +1831,10 @@ impl Ctx<'_> {
             }
             "identifier" => {
                 let name = text(n, b).to_string();
+                if self.macros.get(&name).is_some_and(|m| m.params.is_none()) {
+                    self.emit_macro_call(&name, &name, &[], n, b, depth, order, arg);
+                    return;
+                }
                 let (code, ty) = if let Some(t) = self.symbols.get(&name) {
                     (name.clone(), t.clone())
                 } else if let Some(t) = self.globals.get(&name) {
@@ -1976,6 +2191,77 @@ fn needs_clinit(n: Node, _b: &[u8]) -> bool {
     })
 }
 
+/// Whole-word substitution of macro parameters with argument source text.
+fn substitute(body: &str, params: &[String], args: &[String]) -> String {
+    let mut out = String::new();
+    let bytes = body.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        let c = bytes[i] as char;
+        if c.is_alphabetic() || c == '_' {
+            let start = i;
+            while i < bytes.len() && ((bytes[i] as char).is_alphanumeric() || bytes[i] == b'_') {
+                i += 1;
+            }
+            let word = &body[start..i];
+            match params.iter().position(|p| p == word) {
+                Some(k) if k < args.len() => out.push_str(&args[k]),
+                _ => out.push_str(word),
+            }
+        } else {
+            out.push(c);
+            i += 1;
+        }
+    }
+    out
+}
+
+/// The expression node of a parsed expansion (`void __m() { <exp>; }`).
+fn expansion_expr_node(root: Node) -> Option<Node> {
+    let f = named_children(root).into_iter().find(|n| n.kind() == "function_definition")?;
+    let body = f.child_by_field_name("body")?;
+    let stmt = named_children(body).into_iter().next()?;
+    named_children(stmt).into_iter().next()
+}
+
+/// Type CDT assigns to a macro expansion root (drives MFN/SIGNATURE/TYPE).
+fn expansion_type(
+    expansion: &str,
+    symbols: &HashMap<String, String>,
+    functions: &HashMap<String, String>,
+) -> String {
+    let src = format!("void __m() {{ {expansion}; }}");
+    let mut parser = Parser::new();
+    parser.set_language(&tree_sitter_c::LANGUAGE.into()).unwrap();
+    let Some(tree) = parser.parse(&src, None) else { return "ANY".into() };
+    let Some(mut e) = expansion_expr_node(tree.root_node()) else { return "ANY".into() };
+    let b = src.as_bytes();
+    while e.kind() == "parenthesized_expression" {
+        match named_children(e).into_iter().next() {
+            Some(inner) => e = inner,
+            None => break,
+        }
+    }
+    match e.kind() {
+        "number_literal" => {
+            let t = text(e, b);
+            if t.contains('.') || t.contains('e') || t.contains('E') {
+                "double".into()
+            } else {
+                "int".into()
+            }
+        }
+        "char_literal" => "char".into(),
+        "string_literal" => "char*".into(),
+        "identifier" => symbols.get(text(e, b)).cloned().unwrap_or("ANY".into()),
+        "call_expression" => {
+            let name = e.child_by_field_name("function").map(|c| text(c, b).to_string()).unwrap_or_default();
+            functions.get(&name).cloned().unwrap_or("ANY".into())
+        }
+        _ => "ANY".into(),
+    }
+}
+
 fn collect_decl_names(n: Node, b: &[u8], out: &mut Vec<String>) {
     if n.kind() == "declaration" {
         for d in named_children(n) {
@@ -2040,6 +2326,7 @@ struct DNode {
     code1: String,
     full: String,
     has_arg: bool,
+    inlined: bool,
     code2: String,
     children: Vec<usize>,
     parent: Option<usize>,
@@ -2083,6 +2370,7 @@ fn parse_dump_block(text: &str) -> Vec<DNode> {
             code1: grab(" CODE="),
             full: grab(" FULL_NAME="),
             has_arg: rest.contains(" ARGUMENT_INDEX="),
+            inlined: rest.contains(" DISPATCH_TYPE=INLINED"),
             code2,
             children: Vec::new(),
             parent,
@@ -2170,6 +2458,24 @@ impl CfgBuilder<'_> {
                     self.connect(&o1, &me);
                     self.connect(&o2, &me);
                     (e1, vec![me])
+                }
+                _ if self.arena[id].inlined => {
+                    // INLINED macro call: args -> call -> expansion content;
+                    // both the call and the expansion exit flow onward, and
+                    // the expansion BLOCK itself is invisible.
+                    let (split, _) = kids.split_at(kids.len().saturating_sub(1));
+                    let (ae, ao) = self.seq(split);
+                    self.connect(&ao, &me);
+                    let mut outs = vec![me.clone()];
+                    if let Some(&blk) = kids.last() {
+                        let bkids = self.arena[blk].children.clone();
+                        let (xe, xo) = self.seq(&bkids);
+                        if let Some(xe) = &xe {
+                            self.connect(&[me.clone()], xe);
+                        }
+                        outs.extend(xo);
+                    }
+                    (ae.or(Some(me)), outs)
                 }
                 _ => {
                     let (entry, outs) = self.seq(&kids);
