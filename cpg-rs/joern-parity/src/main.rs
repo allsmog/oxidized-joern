@@ -3084,10 +3084,20 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         entry_gen.push(p);
     }
     // calls
+    // All call nodes are processed by the call-site routines (Joern runs
+    // addEdgesToCallSite for every Call). But GEN excludes field-access calls
+    // (Joern's defsForCalls.filterNot(isFieldAccess)): such a call defines no
+    // value of its own — it only becomes a def when it is itself an argument
+    // of a non-field-access parent (handled by the parent's gen below).
     let calls: Vec<usize> = (0..n)
-        .filter(|&i| own.contains(&i) && arena[i].label == "CALL" && !is_field_access(&arena[i].name))
+        .filter(|&i| own.contains(&i) && arena[i].label == "CALL")
         .collect();
-    for &c in &calls {
+    let gen_calls: Vec<usize> = calls
+        .iter()
+        .copied()
+        .filter(|&c| !is_field_access(&arena[c].name))
+        .collect();
+    for &c in &gen_calls {
         let mut g = vec![c];
         def_var.insert(c, node_var(&arena[c]));
         // Access-like calls (indirection/addressOf/cast) define only their own
@@ -3104,7 +3114,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     }
     // kill(call) = other defs of the variables in gen(call)
     let mut kill: HashMap<usize, Vec<usize>> = HashMap::new();
-    for &c in &calls {
+    for &c in &gen_calls {
         let vars: HashSet<String> = gen[&c].iter().map(|&d| def_var[&d].clone()).collect();
         let g: HashSet<usize> = gen[&c].iter().copied().collect();
         let k: Vec<usize> = def_var
