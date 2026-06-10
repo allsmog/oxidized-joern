@@ -445,6 +445,75 @@ mod tests {
         assert_eq!(p.find_taint(&["getenv"], &["system"]).len(), 1);
     }
 
+    /// The shared summaries-first dataflow + taint engine, driven by the
+    /// generic tree-sitter frontend, must find a source→sink flow that passes
+    /// through an interprocedural passthrough — in every language. This stresses
+    /// the contract at its deepest: not just graph shape, but that summaries and
+    /// taint compute identically across six grammars (including Rust/Ruby
+    /// implicit returns).
+    #[test]
+    fn taint_through_summary_in_every_language() {
+        use cpg_lang_ts::TsFrontend;
+        type FeFactory = fn() -> Box<dyn cpg_frontend::Frontend>;
+        // (language label, builder, file path, source code with wrap()=passthrough)
+        let cases: Vec<(&str, FeFactory, &str, &str)> = vec![
+            (
+                "Java",
+                || Box::new(TsFrontend::java()),
+                "C.java",
+                "class C { static int wrap(int s){ return s; } static void run(){ int t = source(); sink(wrap(t)); } }",
+            ),
+            (
+                "Go",
+                || Box::new(TsFrontend::go()),
+                "m.go",
+                "package m\nfunc wrap(s int) int { return s }\nfunc run(){ t := source(); sink(wrap(t)) }",
+            ),
+            (
+                "JavaScript",
+                || Box::new(TsFrontend::javascript()),
+                "m.js",
+                "function wrap(s){ return s; } function run(){ let t = source(); sink(wrap(t)); }",
+            ),
+            (
+                "Ruby",
+                || Box::new(TsFrontend::ruby()),
+                "m.rb",
+                "def wrap(s)\n  s\nend\ndef run\n  t = source()\n  sink(wrap(t))\nend",
+            ),
+            (
+                "Rust",
+                || Box::new(TsFrontend::rust()),
+                "m.rs",
+                "fn wrap(s: i32) -> i32 { s } fn run(){ let t = source(); sink(wrap(t)); }",
+            ),
+            (
+                "Python",
+                || Box::new(TsFrontend::python()),
+                "m.py",
+                "def wrap(s):\n    return s\n\ndef run():\n    t = source()\n    sink(wrap(t))\n",
+            ),
+        ];
+
+        for (lang, factory, path, code) in cases {
+            let mut p = Project::new(factory, standard_pipeline());
+            p.build(&[(path, code)]);
+            // wrap must summarise as Param(0) -> Return.
+            let wrap = p
+                .summary_of("wrap")
+                .unwrap_or_else(|| panic!("{lang}: wrap not summarised"));
+            assert!(
+                wrap.flows.iter().any(|f| f.from == Point::Param(0) && f.to == Point::Return),
+                "{lang}: wrap should flow param0 -> return, got {:?}",
+                wrap.flows
+            );
+            // The interprocedural source->sink flow must be found.
+            let findings = p.find_taint(&["source"], &["sink"]);
+            assert_eq!(findings.len(), 1, "{lang}: expected one flow, got {findings:?}");
+            assert_eq!(findings[0].origin, "source", "{lang}: wrong origin");
+        }
+    }
+
     #[test]
     fn python_summaries_through_shared_engine() {
         // The identical driver + dataflow engine, fed by the Python frontend:
