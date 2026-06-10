@@ -78,6 +78,21 @@ Next, in preference order:
 
 ## Done
 
+- **M7/Track B — flow-graph routing partially implemented, 82->65 (2026-06-10):**
+  Implemented the exit-routing fix (exit/param_out in-set = out(lastActualCfgNode)
+  = earliest cfg-pred of METHOD_RETURN, not the union of all returns). Dropped
+  the bypass-return param defs: 82->65, no regressions. REMAINING ~30 (bsearch
+  /strcmp/memcmp): branch-defs (e.g. `nel/=2`, a unique-var call never killed)
+  reach the exit via the loop back-edge in a raw-CFG fixpoint, but Joern's probe
+  shows in(return-try) excludes them. So the body-internal liveness ALSO needs
+  Joern's ReachingDefFlowGraph, not just the exit routing. FINISH = build the
+  full ReachingDefFlowGraph (decompiled initPred/initSucc: param chain
+  method->p1..->body; body cfg; returns/lastNodeOfBody->paramOut chain->exit;
+  param-in killed by identifier-uses) and run the fixpoint over it, validating
+  every node's in/out against rd_solver_probe.sc. Plus the ~14 residual access
+  cases (field/index substring is in; indirection `*l` def-use still needs the
+  exact isUsing). Tooling ready: rd_solver_probe.sc dumps Joern's per-node
+  in/out; /tmp/dfx has the decompiled classes.
 - **M7/Track B — loop-liveness ROOT CAUSE found (2026-06-10):** The blocker is
   NOT irreducible. By scripting Joern (rd_solver_probe.sc — constructs
   ReachingDefProblem + DataFlowSolver and dumps in/out per node) I obtained the
