@@ -2954,6 +2954,28 @@ fn is_indirection_access(name: &str) -> bool {
     matches!(name, "<operator>.addressOf" | "<operator>.indirection")
 }
 
+// Joern `MemberAccess.isGenericMemberAccessName` — the predicate
+// `ReachingDefTransferFunction.initKill` uses to SKIP kill-set computation. A
+// call matching it kills nothing (e.g. `&v` / addressOf does not redefine v).
+// Differs from isFieldAccess: this set has addressOf + pointerShift but no sizeOf.
+fn is_generic_member_access(name: &str) -> bool {
+    matches!(
+        name,
+        "<operator>.memberAccess"
+            | "<operator>.indirectComputedMemberAccess"
+            | "<operator>.indirectMemberAccess"
+            | "<operator>.computedMemberAccess"
+            | "<operator>.indirection"
+            | "<operator>.addressOf"
+            | "<operator>.fieldAccess"
+            | "<operator>.indirectFieldAccess"
+            | "<operator>.indexAccess"
+            | "<operator>.indirectIndexAccess"
+            | "<operator>.pointerShift"
+            | "<operator>.getElementPtr"
+    )
+}
+
 /// Joern v4.0.555 DefaultSemantics operator flow mappings: (srcArgIdx,
 /// dstArgIdx), dst -1 = return value. `None` = no explicit semantics
 /// (pass-through: all flows valid). `Some(vec![])` = sizeOf (no flows).
@@ -3187,9 +3209,14 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
             }
         }
     }
-    // kill(call) = other defs of the variables in gen(call)
+    // kill(call) = other defs of the variables in gen(call). initKill skips
+    // calls matching isGenericMemberAccessName (addressOf/pointerShift and the
+    // member accesses): `&v` gens a def of v but kills no prior v def.
     let mut kill: HashMap<usize, Vec<usize>> = HashMap::new();
     for &c in &gen_calls {
+        if is_generic_member_access(&arena[c].name) {
+            continue;
+        }
         let vars: HashSet<String> = gen[&c].iter().map(|&d| def_var[&d].clone()).collect();
         let g: HashSet<usize> = gen[&c].iter().copied().collect();
         let k: Vec<usize> = def_var
