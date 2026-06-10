@@ -10,6 +10,48 @@ METHOD NAME=add CODE=int add(int a, int b) {\n    return a + b;\n} FULL_NAME=add
         IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
 
+METHOD NAME=agg CODE=int agg(struct point *p, int vals[]) {\n    struct point q;\n    q.x = vals[0];\n    q.y = p->y;\n    int a, b = 1;\n    a = q.x + b;\n    gcounter = a;\n    return helper(a);\n} FULL_NAME=agg SIGNATURE=int(point*,int[]) ORDER=1
+  METHOD_PARAMETER_IN NAME=p CODE=struct point *p TYPE_FULL_NAME=point* ORDER=1
+  METHOD_PARAMETER_OUT NAME=p CODE=struct point *p TYPE_FULL_NAME=point* ORDER=1
+  METHOD_PARAMETER_IN NAME=vals CODE=int vals[] TYPE_FULL_NAME=int[] ORDER=2
+  METHOD_PARAMETER_OUT NAME=vals CODE=int vals[] TYPE_FULL_NAME=int[] ORDER=2
+  BLOCK CODE={\n    struct point q;\n    q.x = vals[0];\n    q.y = p->y;\n    int a, b = 1;\n    a = q.x + b;\n    gcounter = a;\n    return helper(a);\n} TYPE_FULL_NAME=void ORDER=3
+    LOCAL NAME=gcounter CODE=<global> gcounter TYPE_FULL_NAME=int ORDER=0
+    LOCAL NAME=q CODE=struct point q TYPE_FULL_NAME=point ORDER=1
+    CALL NAME=<operator>.assignment CODE=q.x = vals[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.fieldAccess CODE=q.x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=point ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=x ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.indirectIndexAccess CODE=vals[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=vals CODE=vals TYPE_FULL_NAME=int[] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=q.y = p->y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.fieldAccess CODE=q.y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=point ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=y ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.indirectFieldAccess CODE=p->y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=point* ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=y ORDER=2 ARGUMENT_INDEX=2
+    LOCAL NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=4
+    LOCAL NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=5
+    CALL NAME=<operator>.assignment CODE=b = 1 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=a = q.x + b TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.addition CODE=q.x + b TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.fieldAccess CODE=q.x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=point ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=x ORDER=2 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=gcounter = a TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=8 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=gcounter CODE=<global> gcounter TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return helper(a); ORDER=9
+      CALL NAME=helper CODE=helper(a) TYPE_FULL_NAME=int METHOD_FULL_NAME=helper ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
 METHOD NAME=classify CODE=int classify(int n) {\n    int r = 0;\n    if (n > 10) {\n        r = n - 1;\n    } else {\n        r = n * 2;\n    }\n    return r;\n} FULL_NAME=classify SIGNATURE=int(int) ORDER=1
   METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
   METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
@@ -83,6 +125,89 @@ METHOD NAME=count CODE=int count(int n) {\n    int t = 0;\n    for (int i = 0; i
       IDENTIFIER NAME=m CODE=m TYPE_FULL_NAME=int ORDER=1
   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
 
+METHOD NAME=exprs CODE=int exprs(int a, int b) {\n    a += b;\n    a -= 2;\n    a *= b;\n    a /= 2;\n    a %= 3;\n    a <<= 1;\n    a >>= 1;\n    a &= b;\n    a |= b;\n    a ^= b;\n    long w = (long)a;\n    unsigned long s = sizeof(int);\n    double f = 1.5;\n    char c = 'x';\n    const char *msg = "hi";\n    a = (b++, b + 1);\n    return a;\n} FULL_NAME=exprs SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={\n    a += b;\n    a -= 2;\n    a *= b;\n    a /= 2;\n    a %= 3;\n    a <<= 1;\n    a >>= 1;\n    a &= b;\n    a |= b;\n    a ^= b;\n    long w = (long)a;\n    unsigned long s = sizeof(int);\n    double f = 1.5;\n    char c = 'x';\n    const char *msg = "hi";\n    a = (b++, b + 1);\n    return a;\n} TYPE_FULL_NAME=void ORDER=3
+    LOCAL NAME=int CODE=int TYPE_FULL_NAME=int ORDER=0
+    CALL NAME=<operator>.assignmentPlus CODE=a += b TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignmentPlus ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignmentMinus CODE=a -= 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignmentMinus ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignmentMultiplication CODE=a *= b TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignmentMultiplication ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignmentDivision CODE=a /= 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignmentDivision ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operators>.assignmentModulo CODE=a %= 3 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentModulo ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operators>.assignmentShiftLeft CODE=a <<= 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentShiftLeft ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operators>.assignmentArithmeticShiftRight CODE=a >>= 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentArithmeticShiftRight ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operators>.assignmentAnd CODE=a &= b TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentAnd ORDER=8 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operators>.assignmentOr CODE=a |= b TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentOr ORDER=9 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operators>.assignmentXor CODE=a ^= b TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentXor ORDER=10 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    LOCAL NAME=w CODE=long w TYPE_FULL_NAME=long ORDER=11
+    CALL NAME=<operator>.assignment CODE=w = (long)a TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=12 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=w CODE=w TYPE_FULL_NAME=long ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.cast CODE=(long)a TYPE_FULL_NAME=long METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        TYPE_REF CODE=long TYPE_FULL_NAME=long ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    LOCAL NAME=s CODE=unsigned long s TYPE_FULL_NAME=longunsigned ORDER=13
+    CALL NAME=<operator>.assignment CODE=s = sizeof(int) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=14 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.sizeOf CODE=sizeof(int) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=int CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    LOCAL NAME=f CODE=double f TYPE_FULL_NAME=double ORDER=15
+    CALL NAME=<operator>.assignment CODE=f = 1.5 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=16 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=f CODE=f TYPE_FULL_NAME=double ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=1.5 TYPE_FULL_NAME=double ORDER=2 ARGUMENT_INDEX=2
+    LOCAL NAME=c CODE=char c TYPE_FULL_NAME=char ORDER=17
+    CALL NAME=<operator>.assignment CODE=c = 'x' TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=18 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=c CODE=c TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE='x' TYPE_FULL_NAME=char ORDER=2 ARGUMENT_INDEX=2
+    LOCAL NAME=msg CODE=const char *msg TYPE_FULL_NAME=char* ORDER=19
+    CALL NAME=<operator>.assignment CODE=*msg = "hi" TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=20 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=msg CODE=msg TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE="hi" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=a = (b++, b + 1) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=21 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.postIncrement CODE=b++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.addition CODE=b + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return a; ORDER=22
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=helper CODE=int helper(int v) {\n    return v + gcounter;\n} FULL_NAME=helper SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=v CODE=int v TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=v CODE=int v TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n    return v + gcounter;\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=gcounter CODE=<global> gcounter TYPE_FULL_NAME=int ORDER=0
+    RETURN CODE=return v + gcounter; ORDER=1
+      CALL NAME=<operator>.addition CODE=v + gcounter TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=v CODE=v TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=gcounter CODE=<global> gcounter TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
 METHOD NAME=main CODE=int main() {\n    int x = add(1, 2);\n    return x;\n} FULL_NAME=main SIGNATURE=int() ORDER=1
   BLOCK CODE={\n    int x = add(1, 2);\n    return x;\n} TYPE_FULL_NAME=void ORDER=1
     LOCAL NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
@@ -94,6 +219,58 @@ METHOD NAME=main CODE=int main() {\n    int x = add(1, 2);\n    return x;\n} FUL
     RETURN CODE=return x; ORDER=3
       IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+
+METHOD NAME=pick CODE=int pick(int k) {\n    int r = 0;\n    switch (k) {\n        case 1:\n            r = 10;\n            break;\n        case 2:\n            r = 20;\n            break;\n        default:\n            r = -1;\n            break;\n    }\n    while (r > 0) {\n        if (r == 5) {\n            break;\n        }\n        if (r == 7) {\n            continue;\n        }\n        r--;\n    }\n    return r;\n} FULL_NAME=pick SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=k CODE=int k TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=k CODE=int k TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n    int r = 0;\n    switch (k) {\n        case 1:\n            r = 10;\n            break;\n        case 2:\n            r = 20;\n            break;\n        default:\n            r = -1;\n            break;\n    }\n    while (r > 0) {\n        if (r == 5) {\n            break;\n        }\n        if (r == 7) {\n            continue;\n        }\n        r--;\n    }\n    return r;\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=r CODE=int r TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=r = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CONTROL_STRUCTURE CODE=switch (k) {\n        case 1:\n            r = 10;\n            break;\n        case 2:\n            r = 20;\n            break;\n        default:\n            r = -1;\n            break;\n    } ORDER=3
+      IDENTIFIER NAME=k CODE=k TYPE_FULL_NAME=int ORDER=1
+      BLOCK CODE={\n        case 1:\n            r = 10;\n            break;\n        case 2:\n            r = 20;\n            break;\n        default:\n            r = -1;\n            break;\n    } TYPE_FULL_NAME=void ORDER=2
+        JUMP_TARGET NAME=case CODE=case 1: ORDER=1
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2
+        CALL NAME=<operator>.assignment CODE=r = 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CONTROL_STRUCTURE CODE=break; ORDER=4
+        JUMP_TARGET NAME=case CODE=case 2: ORDER=5
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=6
+        CALL NAME=<operator>.assignment CODE=r = 20 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=20 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CONTROL_STRUCTURE CODE=break; ORDER=8
+        JUMP_TARGET NAME=default CODE=default: ORDER=9
+        CALL NAME=<operator>.assignment CODE=r = -1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=10 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.minus CODE=-1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CONTROL_STRUCTURE CODE=break; ORDER=11
+    CONTROL_STRUCTURE CODE=while (r > 0) ORDER=4
+      CALL NAME=<operator>.greaterThan CODE=r > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={\n        if (r == 5) {\n            break;\n        }\n        if (r == 7) {\n            continue;\n        }\n        r--;\n    } TYPE_FULL_NAME=void ORDER=2
+        CONTROL_STRUCTURE CODE=if (r == 5) {\n            break;\n        } ORDER=1
+          CALL NAME=<operator>.equals CODE=r == 5 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=5 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          BLOCK CODE={\n            break;\n        } TYPE_FULL_NAME=void ORDER=2
+            CONTROL_STRUCTURE CODE=break; ORDER=1
+        CONTROL_STRUCTURE CODE=if (r == 7) {\n            continue;\n        } ORDER=2
+          CALL NAME=<operator>.equals CODE=r == 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          BLOCK CODE={\n            continue;\n        } TYPE_FULL_NAME=void ORDER=2
+            CONTROL_STRUCTURE CODE=continue; ORDER=1
+        CALL NAME=<operator>.postDecrement CODE=r-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    RETURN CODE=return r; ORDER=5
+      IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
 
 METHOD NAME=ptr CODE=int ptr(int *p) {\n    int v = *p;\n    int *q = &v;\n    return *q + v;\n} FULL_NAME=ptr SIGNATURE=int(int*) ORDER=1
   METHOD_PARAMETER_IN NAME=p CODE=int *p TYPE_FULL_NAME=int* ORDER=1
