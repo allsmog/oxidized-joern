@@ -3091,8 +3091,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         let mut g = vec![c];
         def_var.insert(c, node_var(&arena[c]));
         // Access-like calls (indirection/addressOf/cast) define only their own
-        // value; their operand is a read, not a fresh def (so `*l` does not
-        // make the inner `l` a definition).
+        // value here; their operand is folded by the access-path isUsing logic.
         if !is_access_like(&arena[c].name) {
             for a in args_of(c) {
                 if is_gen_arg(a) {
