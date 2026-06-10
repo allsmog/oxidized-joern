@@ -2913,7 +2913,33 @@ fn cfg_index_edges(block: &str, text: &str, n: usize) -> Vec<(usize, usize)> {
         .collect()
 }
 
+// Joern v4.0.555 `MemberAccess.isFieldAccess` — the predicate
+// `ReachingDefTransferFunction.initGen` uses to EXCLUDE calls from the GEN set.
+// It is far broader than literal fieldAccess: it covers every member-access
+// operator plus `indirection`, `getElementPtr` and `sizeOf`. A call matching
+// this generates NO definition (not even itself); it only becomes a def when
+// it is an argument of a non-field-access parent call (gen'd there).
 fn is_field_access(name: &str) -> bool {
+    matches!(
+        name,
+        "<operator>.memberAccess"
+            | "<operator>.indirectComputedMemberAccess"
+            | "<operator>.indirectMemberAccess"
+            | "<operator>.computedMemberAccess"
+            | "<operator>.indirection"
+            | "<operator>.fieldAccess"
+            | "<operator>.indirectFieldAccess"
+            | "<operator>.indexAccess"
+            | "<operator>.indirectIndexAccess"
+            | "<operator>.getElementPtr"
+            | "<operator>.sizeOf"
+    )
+}
+
+// The UsageAnalyzer `containerSet`: the narrow set of access operators whose
+// isContainer/isPart base relationships are tracked. (Distinct from the broad
+// `isFieldAccess` GEN filter above.)
+fn is_container_access(name: &str) -> bool {
     matches!(
         name,
         "<operator>.fieldAccess"
@@ -2921,6 +2947,11 @@ fn is_field_access(name: &str) -> bool {
             | "<operator>.indexAccess"
             | "<operator>.indirectIndexAccess"
     )
+}
+
+// The UsageAnalyzer `indirectionAccessSet`.
+fn is_indirection_access(name: &str) -> bool {
+    matches!(name, "<operator>.addressOf" | "<operator>.indirection")
 }
 
 /// Joern v4.0.555 DefaultSemantics operator flow mappings: (srcArgIdx,
@@ -3094,19 +3125,62 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         .filter(|&c| !is_field_access(&arena[c].name))
         .collect();
     for &c in &gen_calls {
+        // super.initGen: gen(call) = {call} ++ {Call|Identifier arguments}.
+        // (Faithful to ReachingDefTransferFunction.initGen — no per-operator
+        // arg exclusion; indirection etc. are already filtered out of gen_calls
+        // by the broad isFieldAccess above.)
         let mut g = vec![c];
         def_var.insert(c, node_var(&arena[c]));
-        // Access-like calls (indirection/addressOf/cast) define only their own
-        // value here; their operand is folded by the access-path isUsing logic.
-        if !is_access_like(&arena[c].name) {
-            for a in args_of(c) {
-                if is_gen_arg(a) {
-                    def_var.insert(a, node_var(&arena[a]));
-                    g.push(a);
-                }
+        for a in args_of(c) {
+            if is_gen_arg(a) {
+                def_var.insert(a, node_var(&arena[a]));
+                g.push(a);
             }
         }
         gen.insert(c, g);
+    }
+    // OptimizedReachingDefTransferFunction.withoutLoneIdentifiers: an identifier
+    // ARGUMENT whose name is (a) not a parameter or local, (b) not used in any
+    // return, and (c) unique by name across all call arguments in the method, is
+    // a "lone identifier" (e.g. the type operand `int[2][3]` of `<operator>.alloc`,
+    // or a bare type name). Such a def is REMOVED from its call's gen set.
+    {
+        let mut name_excluded: HashSet<String> =
+            params.iter().map(|&p| arena[p].name.clone()).collect();
+        for i in 0..n {
+            if own.contains(&i) && arena[i].label == "LOCAL" {
+                name_excluded.insert(arena[i].name.clone());
+            }
+        }
+        for i in 0..n {
+            if own.contains(&i) && arena[i].label == "RETURN" {
+                let mut stack = vec![i];
+                while let Some(x) = stack.pop() {
+                    if arena[x].label == "IDENTIFIER" {
+                        name_excluded.insert(arena[x].name.clone());
+                    }
+                    for &c in &arena[x].children {
+                        stack.push(c);
+                    }
+                }
+            }
+        }
+        let mut by_name: HashMap<String, Vec<(usize, usize)>> = HashMap::new();
+        for &c in &calls {
+            for a in args_of(c) {
+                if arena[a].label == "IDENTIFIER" && !name_excluded.contains(&arena[a].name) {
+                    by_name.entry(arena[a].name.clone()).or_default().push((c, a));
+                }
+            }
+        }
+        for occ in by_name.values() {
+            if occ.len() == 1 {
+                let (c, a) = occ[0];
+                if let Some(g) = gen.get_mut(&c) {
+                    g.retain(|&x| x != a);
+                }
+            }
+        }
     }
     // kill(call) = other defs of the variables in gen(call)
     let mut kill: HashMap<usize, Vec<usize>> = HashMap::new();
@@ -3186,48 +3260,12 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         .map(|la| out[la].clone())
         .unwrap_or_default();
 
-    // isUsing(use, def): variable match (sameVariable). Container/part/alias
-    // handling deferred until the diff demands it.
-    // sameVariable: exact, plus substring containment when the USE is a
-    // field/index access (`p->y` uses `p`, `vals[0]` uses `vals`, `q.x` uses
-    // `q`). Indirection/cast uses are NOT widened this way (they over-match).
-    let field_use = |u: usize| matches!(arena[u].name.as_str(),
-        "<operator>.fieldAccess"|"<operator>.indirectFieldAccess"
-        |"<operator>.indexAccess"|"<operator>.indirectIndexAccess");
+    // isUsing(use, inElem) — faithful port of UsageAnalyzer.isUsing =
+    // sameVariable || isContainer || isPart || isAlias. Joern compares
+    // `nodeToString(use)` (NAME for identifier/param, CODE for expression)
+    // against a target string via `Option.contains`, i.e. EXACT equality.
     let is_using = |use_i: usize, def_i: usize| -> bool {
-        let uv = match arena[use_i].label.as_str() {
-            "IDENTIFIER" => arena[use_i].name.clone(),
-            _ => arena[use_i].fullcode.clone(),
-        };
-        let container_def = |d: usize| matches!(arena[d].name.as_str(),
-            "<operator>.fieldAccess"|"<operator>.indirectFieldAccess"
-            |"<operator>.indexAccess"|"<operator>.indirectIndexAccess");
-        match def_var.get(&def_i) {
-            Some(dv) => {
-                if *dv == uv
-                    || strip_access(dv) == uv
-                    || (field_use(use_i) && !dv.is_empty() && uv.contains(dv.as_str()))
-                {
-                    return true;
-                }
-                // isContainer: a container-access def (q.x) is used by a use
-                // whose string equals the access's base operand (q).
-                if container_def(def_i) {
-                    if let Some(&base) = rd_args(&arena, def_i).first() {
-                        let bs = if arena[base].label == "IDENTIFIER" {
-                            arena[base].name.clone()
-                        } else {
-                            arena[base].fullcode.clone()
-                        };
-                        if bs == uv {
-                            return true;
-                        }
-                    }
-                }
-                false
-            }
-            None => false,
-        }
+        rd_is_using(&arena, use_i, def_i)
     };
 
     let mut flows: Vec<(String, String, String)> = Vec::new();
@@ -3373,11 +3411,15 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         if let Some(&pin) = params.iter().find(|&&p| arena[p].name == arena[i].name) {
             push(arena[pin].name.clone(), pin, i, &mut flows);
         }
-        // param_out reads the defs live at method exit (param-out chain).
-        let pvar = arena[i].name.clone();
+        // addEdgesToMethodParameterOut: usedIncomingDefs(paramOut) — the defs
+        // live at method exit (param-out chain) that the paramOut isUsing. The
+        // paramOut's own "use" is itself, so the match is isUsing(paramOut, d):
+        // e.g. `*l` (indirection of l) is used by the paramOut of l, and `q.x`
+        // (a write through q) by the paramOut of q.
         let mut ds: Vec<usize> = exit_in
-            .iter().copied()
-            .filter(|&d| def_var.get(&d).map(|v| *v == pvar).unwrap_or(false))
+            .iter()
+            .copied()
+            .filter(|&d| is_using(i, d))
             .collect();
         ds.sort();
         for d in ds {
@@ -3395,6 +3437,106 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     }
 
     flows
+}
+
+// ---- UsageAnalyzer.isUsing (v4.0.555) ----
+// nodeToString: Identifier/ParamIn/ParamOut -> NAME; Expression -> CODE; else None.
+fn rd_node_str(arena: &[DNode], i: usize) -> Option<String> {
+    match arena[i].label.as_str() {
+        "IDENTIFIER" | "METHOD_PARAMETER_IN" | "METHOD_PARAMETER_OUT" => {
+            Some(arena[i].name.clone())
+        }
+        "METHOD" | "METHOD_RETURN" | "CONTROL_STRUCTURE" | "JUMP_TARGET" => None,
+        _ => Some(arena[i].fullcode.clone()),
+    }
+}
+// call.argument with a given ARGUMENT_INDEX (argumentOption(idx)).
+fn rd_arg_at(arena: &[DNode], c: usize, idx: i64) -> Option<usize> {
+    arena[c]
+        .children
+        .iter()
+        .copied()
+        .find(|&k| arena[k].has_arg && arena[k].arg_index == idx)
+}
+// call.argument headOption (lowest argument index; the base of an access).
+fn rd_head_arg(arena: &[DNode], c: usize) -> Option<usize> {
+    arena[c]
+        .children
+        .iter()
+        .copied()
+        .filter(|&k| arena[k].has_arg)
+        .min_by_key(|&k| arena[k].arg_index)
+}
+// sameVariable(use, inElement): nodeToString(use) == { param.name | indirection
+// operand code | call code | identifier name }, depending on inElement type.
+fn rd_same_var(arena: &[DNode], use_i: usize, in_i: usize) -> bool {
+    let us = rd_node_str(arena, use_i);
+    match arena[in_i].label.as_str() {
+        "METHOD_PARAMETER_IN" | "IDENTIFIER" => us.as_deref() == Some(arena[in_i].name.as_str()),
+        "CALL" => {
+            if is_indirection_access(&arena[in_i].name) {
+                match rd_arg_at(arena, in_i, 1) {
+                    Some(op) => us.as_deref() == Some(arena[op].fullcode.as_str()),
+                    None => false,
+                }
+            } else {
+                us.as_deref() == Some(arena[in_i].fullcode.as_str())
+            }
+        }
+        _ => false,
+    }
+}
+// isContainer(use, inElement): inElement is a container access (q.x) and its
+// base equals the use (q): nodeToString(use) == nodeToString(base).
+fn rd_is_container(arena: &[DNode], use_i: usize, in_i: usize) -> bool {
+    if arena[in_i].label == "CALL" && is_container_access(&arena[in_i].name) {
+        if let Some(base) = rd_head_arg(arena, in_i) {
+            return rd_node_str(arena, use_i) == rd_node_str(arena, base);
+        }
+    }
+    false
+}
+// isPart(use, inElement): use is a container access (q.x) and its base equals
+// inElement (a param or identifier named q).
+fn rd_is_part(arena: &[DNode], use_i: usize, in_i: usize) -> bool {
+    if arena[use_i].label == "CALL" && is_container_access(&arena[use_i].name) {
+        if let Some(base) = rd_head_arg(arena, use_i) {
+            let bs = rd_node_str(arena, base);
+            return match arena[in_i].label.as_str() {
+                "METHOD_PARAMETER_IN" | "IDENTIFIER" => {
+                    bs.as_deref() == Some(arena[in_i].name.as_str())
+                }
+                _ => false,
+            };
+        }
+    }
+    false
+}
+// Access-path operators: expressions whose `toTrackedBaseAndAccessPathSimple`
+// yields a named base + access path (so two of them can be aliases).
+fn is_access_path_call(name: &str) -> bool {
+    is_container_access(name)
+        || is_indirection_access(name)
+        || matches!(name, "<operator>.pointerShift" | "<operator>.getElementPtr")
+}
+// isAlias(use, inElement): both are access-path calls with the same tracked
+// base and an EXACT-matching access path — i.e. the same access expression
+// (`*l` aliases `*l`, `p->y` aliases `p->y`). Approximated by equal node code.
+fn rd_is_alias(arena: &[DNode], use_i: usize, in_i: usize) -> bool {
+    if arena[use_i].label == "CALL"
+        && arena[in_i].label == "CALL"
+        && is_access_path_call(&arena[use_i].name)
+        && is_access_path_call(&arena[in_i].name)
+    {
+        return rd_node_str(arena, use_i) == rd_node_str(arena, in_i);
+    }
+    false
+}
+fn rd_is_using(arena: &[DNode], use_i: usize, in_i: usize) -> bool {
+    rd_same_var(arena, use_i, in_i)
+        || rd_is_container(arena, use_i, in_i)
+        || rd_is_part(arena, use_i, in_i)
+        || rd_is_alias(arena, use_i, in_i)
 }
 
 // ---- EdgeValidator.isValidEdge (v4.0.555) ----
