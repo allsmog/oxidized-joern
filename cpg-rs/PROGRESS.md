@@ -8,7 +8,11 @@ Single source of truth across sessions. Update in the same commit as the work.
   EVAL_TYPE, CONTAINS, SOURCE_FILE)
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` fetches latest; if the version
   drifts and output changes, record it here and in QUIRKS.md)
-- **Gate:** `joern-parity/check.sh` — green, 57/57 blocks byte-identical:
+- **Gate:** `joern-parity/check.sh` — green, 71/71 blocks byte-identical:
+  56 method blocks + scaffolding-nodes section + 14 structural edge kinds
+  (1,531 edges: ARGUMENT 177, CALL 90, CONDITION 8, CONTAINS 408, EVAL_TYPE
+  539, PARAMETER_LINK 70, REF 158, SOURCE_FILE 71, control-structure body
+  edges 10). Previously:
   13 user methods + pair.<clinit> + 9 file-globals + <includes>:<global> +
   32 operator stubs + the scaffolding-nodes section (FILE, NAMESPACE_BLOCK,
   NAMESPACE, META_DATA, TYPE_DECL incl. IS_EXTERNAL entries, TYPE). Corpus:
@@ -34,23 +38,44 @@ M2, in this order — one corpus file + diff-to-zero per line:
 - [x] multiple declarators, globals (phantom ORDER=0 LOCALs), prototypes
   (corpus/structs.c)
 
-**M2 COMPLETE. M3 COMPLETE.** M4 next — edge parity:
+**M2 COMPLETE. M3 COMPLETE. M4 part 1 (structural edges) COMPLETE.**
 
-1. Extend `oracle.sc` with an `EDGES|` section. Suggested canonical form: for
-   each method (sorted by FULL_NAME), dump CFG edges as
-   `EDGES|CFG <methodFullName> <srcLabel>:<srcCode>@<order-path> -> <dst...>`
-   or simpler: assign each AST node its dump line index within the method
-   block and print edges as index pairs — deterministic on both sides since
-   the AST dumps are already byte-identical.
-2. Drive edge kinds to zero one at a time, in this order: CONTAINS,
-   SOURCE_FILE, REF (locals/params), ARGUMENT, CALL, EVAL_TYPE, then CFG
-   (port Joern's CfgCreationPass semantics: statement chaining, short-circuit
-   &&/||, loop back-edges, switch fallthrough, break/continue targets).
-3. New corpus cases as needed: short-circuit conditions, nested loops with
-   break/continue, goto/label (also closes the M2 goto gap).
+M4 remaining — CFG:
+
+1. Add "CFG" to the `kinds` set in `oracle.sc`, regenerate, and port Joern's
+   CfgCreationPass semantics to the Rust emitter: statement chaining through
+   expression evaluation order (post-order: operands before operator),
+   METHOD -> first expr, last -> METHOD_RETURN, branch out of conditions,
+   loop back-edges, do-while, for (init -> cond -> body -> update -> cond),
+   switch dispatch to JUMP_TARGETs + fallthrough, break/continue targets.
+   Addressing infrastructure is already in place (line indices + symbolic
+   M:/TD:/MB: resolution) — emit CFG edges from a per-method post-pass over
+   the emitted statement structure, or track (predecessor-set -> next) during
+   emission the way the Scala pass does.
+2. New corpus cases alongside: short-circuit `&&`/`||` (lazy evaluation
+   produces distinctive CFG diamonds), nested loops with break/continue,
+   goto/label (closes the M2 goto gap), `if` without else, return-in-branch.
+3. Then M5 (real-world corpus) or M7 dataflow oracle (REACHING_DEF, CDG,
+   DOMINATE/POST_DOMINATE are already in the graph — same harness, new kinds).
 
 ## Done
 
+- **M4 part 1 (2026-06-10):** Structural edge parity, 71/71. EDGES| oracle
+  section with deterministic addressing: every node = <homeMethod>#<dumpLineIdx>;
+  METHOD/TYPE_DECL/MEMBER addresses resolve first-wins across sorted method
+  walks (so `main` = add.c:<global>#12 but `add` = add#0 — pinned oracle
+  behaviour); T:/F:/NB:/NS:/D: prefixes for non-walk nodes. Rust line-writer
+  instrumented to emit ARGUMENT (CALL/RETURN -> children), CALL (-> callee
+  incl. stubs), EVAL_TYPE (exactly the TYPE_FULL_NAME emissions), CONTAINS
+  (ContainsEdgePass destination list — LOCALs/params/MODIFIER/MEMBER excluded;
+  sources METHOD/TYPE_DECL/FILE), REF (identifiers -> phantom locals/params;
+  METHOD_REFs -> methods; fieldAccess -> MEMBER for value receivers only —
+  p->y stays unresolved, a CDT quirk; TYPE -> TYPE_DECL; NB -> NS),
+  PARAMETER_LINK, SOURCE_FILE (methods, TYPE_DECL population, NBs),
+  CONDITION/TRUE_BODY/FALSE_BODY/DO_BODY/FOR_INIT/FOR_BODY/FOR_UPDATE
+  (while/switch bodies are TRUE_BODY; FOR_INIT targets the init assignment).
+  Stubs/<includes>:<global> now emitted through the instrumented writer.
+  check.sh diffs each edge kind as its own block.
 - **M3 part 2 (2026-06-10):** Non-method scaffolding parity + new pins, 57/57.
   NODES| oracle section (META_DATA, FILE incl. <includes>/<unknown>,
   NAMESPACE_BLOCK, NAMESPACE, TYPE_DECL — internal structs with EMPTY
