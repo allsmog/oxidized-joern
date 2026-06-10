@@ -3168,13 +3168,23 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
 
     // isUsing(use, def): variable match (sameVariable). Container/part/alias
     // handling deferred until the diff demands it.
+    // sameVariable: exact, plus substring containment when the USE is a
+    // field/index access (`p->y` uses `p`, `vals[0]` uses `vals`, `q.x` uses
+    // `q`). Indirection/cast uses are NOT widened this way (they over-match).
+    let field_use = |u: usize| matches!(arena[u].name.as_str(),
+        "<operator>.fieldAccess"|"<operator>.indirectFieldAccess"
+        |"<operator>.indexAccess"|"<operator>.indirectIndexAccess");
     let is_using = |use_i: usize, def_i: usize| -> bool {
         let uv = match arena[use_i].label.as_str() {
             "IDENTIFIER" => arena[use_i].name.clone(),
             _ => arena[use_i].fullcode.clone(),
         };
         match def_var.get(&def_i) {
-            Some(dv) => *dv == uv || strip_access(dv) == uv,
+            Some(dv) => {
+                *dv == uv
+                    || strip_access(dv) == uv
+                    || (field_use(use_i) && !dv.is_empty() && uv.contains(dv.as_str()))
+            }
             None => false,
         }
     };
