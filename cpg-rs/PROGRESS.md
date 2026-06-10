@@ -4,14 +4,16 @@ Single source of truth across sessions. Update in the same commit as the work.
 
 ## Current state
 
-- **Milestone:** M3 — full node-set parity (scaffolding: <global> methods,
-  <operator> stubs, TYPE_DECL/TYPE/NAMESPACE_BLOCK/FILE/META_DATA, METHOD_REF)
+- **Milestone:** M4 — edge parity beyond AST (CFG, REF, CALL, ARGUMENT,
+  EVAL_TYPE, CONTAINS, SOURCE_FILE)
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` fetches latest; if the version
   drifts and output changes, record it here and in QUIRKS.md)
-- **Gate:** `joern-parity/check.sh` — green, 51/51 methods byte-identical
-  (11 user methods + 8 file-globals + <includes>:<global> + 31 operator
-  stubs; corpus: add.c, ops.c, loop.c, unary.c, forloop.c, switch.c,
-  exprs.c, structs.c)
+- **Gate:** `joern-parity/check.sh` — green, 57/57 blocks byte-identical:
+  13 user methods + pair.<clinit> + 9 file-globals + <includes>:<global> +
+  32 operator stubs + the scaffolding-nodes section (FILE, NAMESPACE_BLOCK,
+  NAMESPACE, META_DATA, TYPE_DECL incl. IS_EXTERNAL entries, TYPE). Corpus:
+  add.c, ops.c, loop.c, unary.c, forloop.c, switch.c, exprs.c, structs.c,
+  order.c
 
 ## Next task (start here)
 
@@ -32,26 +34,36 @@ M2, in this order — one corpus file + diff-to-zero per line:
 - [x] multiple declarators, globals (phantom ORDER=0 LOCALs), prototypes
   (corpus/structs.c)
 
-**M2 COMPLETE.** M3 progress:
+**M2 COMPLETE. M3 COMPLETE.** M4 next — edge parity:
 
-- [x] Widened `oracle.sc` (all methods, scaffolding included); 51/51 green:
-  `<includes>:<global>`, per-file `<global>` wrappers (nested METHOD dumps,
-  TYPE_REF/LOCAL/METHOD_REF slot BLOCK), all 31 `<operator>`/`<operators>`
-  stub methods (arity = max use; stable-sort child layout).
-- [x] TYPE_DECL + MEMBER under the file-global (struct point pinned).
-- [x] METHOD_REF bindings under the file-global BLOCK.
-- [ ] Non-method scaffolding nodes: NAMESPACE_BLOCK / FILE / META_DATA / TYPE
-  nodes are NOT covered by the method-walk oracle. Add a second dump section
-  to oracle.sc (e.g. `NODES|` lines for cpg.file, cpg.namespaceBlock,
-  cpg.typeDecl not under a method, cpg.typ, cpg.metaData with
-  AST_PARENT_TYPE/AST_PARENT_FULL_NAME/FILENAME keys), extend check.sh to
-  diff that section, then emit it from the Rust side.
-- [ ] Pin underdetermined cases while here: TYPE_DECL ORDER with a struct
-  declared *between* functions; multi-declarator globals; global with
-  initialiser (`int g = 5;`); struct member pointers/arrays.
+1. Extend `oracle.sc` with an `EDGES|` section. Suggested canonical form: for
+   each method (sorted by FULL_NAME), dump CFG edges as
+   `EDGES|CFG <methodFullName> <srcLabel>:<srcCode>@<order-path> -> <dst...>`
+   or simpler: assign each AST node its dump line index within the method
+   block and print edges as index pairs — deterministic on both sides since
+   the AST dumps are already byte-identical.
+2. Drive edge kinds to zero one at a time, in this order: CONTAINS,
+   SOURCE_FILE, REF (locals/params), ARGUMENT, CALL, EVAL_TYPE, then CFG
+   (port Joern's CfgCreationPass semantics: statement chaining, short-circuit
+   &&/||, loop back-edges, switch fallthrough, break/continue targets).
+3. New corpus cases as needed: short-circuit conditions, nested loops with
+   break/continue, goto/label (also closes the M2 goto gap).
 
 ## Done
 
+- **M3 part 2 (2026-06-10):** Non-method scaffolding parity + new pins, 57/57.
+  NODES| oracle section (META_DATA, FILE incl. <includes>/<unknown>,
+  NAMESPACE_BLOCK, NAMESPACE, TYPE_DECL — internal structs with EMPTY
+  AST_PARENT_* strings, per-method TYPE_DECLs parented TYPE_DECL-><file
+  global>, per-file <global> ones, IS_EXTERNAL=true entries under
+  <includes>:<global> with no ORDER — and TYPE, exactly the set of
+  TYPE_FULL_NAME strings emitted anywhere). order.c pinned: struct between
+  functions (source-order slots), global with initialiser (LOCAL + void
+  assignment in the global BLOCK, plain `g` CODE there vs `<global> g` inside
+  methods), MEMBER CODE = declarator text (`*ptr`, `arr[4]`), sized arrays
+  type as `int[4]`, and the `<clinit>` synthetic method
+  (pair.<clinit>:pair(): property-less BLOCK + <operator>.arrayInitializer
+  per sized member + two bare MODIFIERs + RET typed as the struct).
 - **M3 part 1 (2026-06-10):** Method-set scaffolding parity, 51/51. Emitter
   restructured: multi-file invocation, per-method dump buffers sorted by
   FULL_NAME, project-wide stub tracking (called-but-undefined, max arity),
