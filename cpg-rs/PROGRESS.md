@@ -7,9 +7,11 @@ Single source of truth across sessions. Update in the same commit as the work.
 - **Milestone:** M5 (real-world corpus) / M7 (dataflow oracle) — M1-M4 done
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` fetches latest; if the version
   drifts and output changes, record it here and in QUIRKS.md)
-- **Gate:** `joern-parity/check.sh` — green, 84/84 blocks byte-identical
-  (corpus adds gotos.c and types2.c: goto/label, typedef, enum + <clinit>,
-  union, static, function pointers/pointerCall, multi-dim arrays/alloc).
+- **Gate:** `joern-parity/check.sh` — green, 88/88 blocks byte-identical
+  (corpus adds macros.c: object/function-like #define expansion as INLINED
+  calls + macro METHODs + #ifdef evaluation). Previously 84/84 with gotos.c
+  and types2.c (goto/label, typedef, enum + <clinit>, union, static,
+  function pointers/pointerCall, multi-dim arrays/alloc).
   Previously 76/76 with logic.c (short-circuit &&/||, if-without-else,
   nested break/continue, switch fallthrough). Previously:
   13 user methods + pair.<clinit> + 9 file-globals + <includes>:<global> +
@@ -41,16 +43,14 @@ M2, in this order — one corpus file + diff-to-zero per line:
 
 Next, in preference order:
 
-1. **M5 — real-world corpus.** Long-tail synthetic pins are now DONE
-   (goto/label, typedef, enum/union, static, function pointers, multi-dim
-   arrays — see gotos.c/types2.c). Next: vendor a real C file and triage.
-   THE structural gap for real code is the PREPROCESSOR: CDT expands in-file
-   #define macros and evaluates #if blocks; tree-sitter does not. Plan:
-   start with a low-macro real file, then implement in-file object-like +
-   function-like macro expansion in the Rust frontend (a bounded, pinnable
-   subproject). Also still unpinned: varargs, extern declarations, calls to
-   undefined functions (printf-style stub shape), struct definitions inside
-   functions, initializer lists `{1,2}`.
+1. **M5 — real-world corpus.** The preprocessor gap is CLOSED for in-file
+   macros (macros.c: INLINED calls, expansion parsing with parameter
+   substitution, macro METHODs, #ifdef/#ifndef). NEXT SESSION: vendor a real
+   C file (musl bsearch.c or zlib adler32.c) and triage. Expect to need:
+   #if expression evaluation, #include handling (ignore + <unknown> types),
+   nested/recursive macro expansion, token pasting/stringizing (defer?),
+   varargs, extern, calls to undefined functions (printf stub shape),
+   initializer lists `{1,2}`, struct defs inside functions.
 2. **M7 — dataflow oracle.** Add REACHING_DEF, CDG, DOMINATE, POST_DOMINATE
    to oracle kinds (they're already in the importCode graph; the addressing
    scheme works as-is). DOMINATE/POST_DOMINATE are computable from our
@@ -62,6 +62,22 @@ Next, in preference order:
 
 ## Done
 
+- **M5 preprocessor (2026-06-10):** In-file macro parity, 88/88. CDT model
+  pinned by corpus/macros.c: an invocation is a CALL with DISPATCH=INLINED,
+  NAME = macro, CODE = original invocation text, MFN/SIGNATURE =
+  <file>:<name>:<retType>(<nparams>) where retType is the expansion root's
+  type; arguments first (ORDER/INDEX 1..n), then an ANY BLOCK (ORDER/INDEX
+  n+1) wrapping the expansion parsed from the parameter-substituted body
+  (whole-word textual substitution, re-parsed with tree-sitter). Each USED
+  macro also becomes a METHOD whose CODE is the #define directive (params
+  p1..pn, empty ANY BLOCK, RET typed as expansion) — unused macros get
+  nothing. #ifdef/#ifndef evaluated against the macro table, guarded
+  statements spliced or dropped. Quirks: INLINED call arguments carry NO REF
+  edge (expansion identifiers do); the expansion BLOCK gets no ARGUMENT edge
+  despite its index, and is CFG-invisible; CFG threads args -> call ->
+  expansion content with BOTH the call and the expansion exit flowing onward;
+  macro methods get SOURCE_FILE + CONTAINS from the file-global TYPE_DECL
+  but no TYPE_DECL of their own.
 - **M5 prep (2026-06-10):** Long-tail language pins, 84/84. gotos.c: labels
   flatten like switch cases (JUMP_TARGET CODE = whole labeled stmt, then the
   stmt as sibling), goto = childless CONTROL_STRUCTURE with CFG edge to its

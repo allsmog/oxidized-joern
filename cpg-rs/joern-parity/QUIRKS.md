@@ -178,3 +178,17 @@ pins it, so a regression shows up as a diff.
   void assignment whose CODE is the declarator text, wrapping
   `<operator>.alloc` typed `int[2][3]` with the TYPE NAME AS AN IDENTIFIER
   argument (no phantom local) followed by the dimension literals.
+- **Macros** (`corpus/macros.c`): an invocation is an INLINED CALL — NAME =
+  macro name, CODE = the original invocation text, METHOD_FULL_NAME and
+  SIGNATURE = `<file>:<name>:<retType>(<nparams>)` with retType inferred
+  from the expansion root; arguments first, then an ANY BLOCK (ORDER/INDEX =
+  n+1) wrapping the expansion with parameters substituted. Each USED macro
+  becomes a METHOD whose CODE is the `#define` directive itself (ORDER=1,
+  params p1..pn, empty ANY BLOCK without ARGUMENT_INDEX, RET typed as the
+  expansion); unused macros produce nothing. `#ifdef`/`#ifndef` content is
+  spliced or dropped at parse level. Edge quirks: INLINED arguments carry no
+  REF edge (expansion identifiers do); the expansion BLOCK gets no ARGUMENT
+  edge and is CFG-invisible; CFG runs args -> call -> expansion content with
+  both the call node and the expansion exit flowing to the continuation;
+  macro methods get SOURCE_FILE and CONTAINS-from-file-global-TYPE_DECL but
+  no method TYPE_DECL.
