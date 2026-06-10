@@ -3180,8 +3180,12 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     };
 
     let mut flows: Vec<(String, String, String)> = Vec::new();
-    let mut push = |var: String, s: usize, d: usize, flows: &mut Vec<(String, String, String)>| {
-        flows.push((var, addr(s), addr(d)));
+    // Gate every candidate edge addEdge(from=s, to=d) through
+    // isValidEdge(child=d, parent=s), exactly as DdgGenerator.addEdge does.
+    let push = |var: String, s: usize, d: usize, flows: &mut Vec<(String, String, String)>| {
+        if rd_valid_edge(&arena, d, s) {
+            flows.push((var, addr(s), addr(d)));
+        }
     };
 
     // method-return (exit) index
@@ -3334,4 +3338,66 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     }
 
     flows
+}
+
+// ---- EdgeValidator.isValidEdge (v4.0.555) ----
+fn rd_args(arena: &[DNode], c: usize) -> Vec<usize> {
+    let mut v: Vec<usize> = arena[c].children.iter().copied()
+        .filter(|&k| arena[k].has_arg && arena[k].label != "FIELD_IDENTIFIER").collect();
+    v.sort_by_key(|&k| arena[k].arg_index);
+    v
+}
+fn rd_in_call(arena: &[DNode], node: usize) -> Option<usize> {
+    arena[node].parent.filter(|&p| arena[p].label == "CALL")
+}
+fn rd_is_expr(arena: &[DNode], node: usize) -> bool {
+    matches!(arena[node].label.as_str(),
+        "CALL"|"IDENTIFIER"|"LITERAL"|"BLOCK"|"FIELD_IDENTIFIER"|"METHOD_REF"|"TYPE_REF")
+}
+fn rd_sem(arena: &[DNode], c: usize) -> Option<Vec<(i64,i64)>> {
+    if arena[c].label == "CALL" { operator_semantics(&arena[c].name) } else { None }
+}
+fn rd_is_call_retval(arena: &[DNode], node: usize) -> bool {
+    if arena[node].label != "CALL" { return false; }
+    match rd_sem(arena, node) { Some(m) => !m.iter().any(|&(_,d)| d == -1), None => false }
+}
+fn rd_is_used(arena: &[DNode], e: usize) -> bool {
+    match rd_in_call(arena, e).and_then(|c| rd_sem(arena, c)) {
+        Some(m) => m.iter().any(|&(s,_)| s == arena[e].arg_index), None => true }
+}
+fn rd_is_defined(arena: &[DNode], e: usize) -> bool {
+    match rd_in_call(arena, e).and_then(|c| rd_sem(arena, c)) {
+        Some(m) => m.iter().any(|&(_,d)| d == arena[e].arg_index), None => true }
+}
+fn rd_has_flow(arena: &[DNode], parent: usize, child: usize) -> bool {
+    match rd_in_call(arena, parent).and_then(|c| rd_sem(arena, c)) {
+        Some(m) => m.contains(&(arena[parent].arg_index, arena[child].arg_index)), None => true }
+}
+fn rd_same_call(arena: &[DNode], a: usize, b: usize) -> bool {
+    let ca = rd_in_call(arena, a); ca.is_some() && ca == rd_in_call(arena, b)
+}
+fn rd_valid_to_expr(arena: &[DNode], par: usize, cur: usize) -> bool {
+    if rd_is_expr(arena, par) {
+        let same = rd_same_call(arena, par, cur);
+        (same && rd_is_used(arena, par) && rd_is_defined(arena, cur)) || (!same && rd_is_used(arena, cur))
+    } else { rd_is_used(arena, cur) }
+}
+fn rd_valid_edge(arena: &[DNode], child: usize, parent: usize) -> bool {
+    if rd_is_expr(arena, child) && (rd_is_call_retval(arena, parent) || !rd_valid_to_expr(arena, parent, child)) {
+        return false;
+    }
+    if arena[child].label == "CALL" && rd_is_expr(arena, parent)
+        && rd_is_call_retval(arena, child) && rd_args(arena, child).contains(&parent) {
+        return false;
+    }
+    if rd_is_expr(arena, child) {
+        if rd_is_expr(arena, parent) {
+            if rd_same_call(arena, parent, child) && rd_is_defined(arena, child) && rd_is_used(arena, parent) {
+                return rd_has_flow(arena, parent, child);
+            }
+            return true;
+        }
+        return rd_is_used(arena, child);
+    }
+    !rd_is_call_retval(arena, parent)
 }
