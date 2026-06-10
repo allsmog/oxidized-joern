@@ -7,7 +7,7 @@
 //! simple type resolution — all emitted in Joern's canonical AST-dump format so
 //! the output diffs cleanly against the oracle.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use tree_sitter::{Node, Parser};
 
 fn main() {
@@ -364,6 +364,14 @@ fn main() {
         }
     }
 
+    // REACHING_DEF flows (the FLOWS| section).
+    let mut flows: Vec<(String, String, String)> = Vec::new();
+    for (key, text) in &dumps {
+        for (var, s, d) in reaching_def_flows(key, text) {
+            flows.push((var, s, d));
+        }
+    }
+
     // TYPE -> its TYPE_DECL (struct decls are walk-addressed, rest are D:).
     for t in &used_types {
         let dst = if struct_tags.contains(&t) {
@@ -442,6 +450,15 @@ fn main() {
     }
     for l in &edge_lines {
         out.push_str(&format!("EDGES|{l}\n"));
+    }
+    let mut flow_lines: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+    for (var, src, dst) in &flows {
+        if let (Some(s), Some(d)) = (resolve(src), resolve(dst)) {
+            flow_lines.insert(format!("REACHING_DEF[{var}] {s} -> {d}"));
+        }
+    }
+    for l in &flow_lines {
+        out.push_str(&format!("FLOWS|{l}\n"));
     }
     print!("{out}");
 }
@@ -2443,13 +2460,39 @@ struct DNode {
     label: String,
     name: String,
     code1: String,
+    fullcode: String,
     full: String,
     has_arg: bool,
+    arg_index: i64,
     inlined: bool,
     code2: String,
     children: Vec<usize>,
     parent: Option<usize>,
     idx: usize,
+}
+
+/// Full CODE= property value: everything between `CODE=` and the next
+/// ` UPPERCASE_KEY=` property (CODE values are C code — lowercase/operators —
+/// so an uppercase-keyed `=` reliably marks the boundary).
+fn extract_code(rest: &str) -> String {
+    let Some(start) = rest.find(" CODE=").map(|i| i + 6) else { return String::new() };
+    let tail = &rest[start..];
+    let bytes = tail.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b' ' {
+            // look ahead for KEY=
+            let mut j = i + 1;
+            while j < bytes.len() && (bytes[j].is_ascii_uppercase() || bytes[j] == b'_') {
+                j += 1;
+            }
+            if j > i + 1 && j < bytes.len() && bytes[j] == b'=' {
+                break;
+            }
+        }
+        i += 1;
+    }
+    tail[..i].to_string()
 }
 
 fn parse_dump_block(text: &str) -> Vec<DNode> {
@@ -2483,12 +2526,19 @@ fn parse_dump_block(text: &str) -> Vec<DNode> {
                 it.next().unwrap_or("").trim_end_matches(';').to_string()
             })
             .unwrap_or_default();
+        let arg_index = rest
+            .find(" ARGUMENT_INDEX=")
+            .and_then(|i| rest[i + 16..].split(' ').next())
+            .and_then(|s| s.parse::<i64>().ok())
+            .unwrap_or(0);
         arena.push(DNode {
             label,
             name: grab(" NAME="),
             code1: grab(" CODE="),
+            fullcode: extract_code(rest),
             full: grab(" FULL_NAME="),
             has_arg: rest.contains(" ARGUMENT_INDEX="),
+            arg_index,
             inlined: rest.contains(" DISPATCH_TYPE=INLINED"),
             code2,
             children: Vec::new(),
@@ -2835,4 +2885,343 @@ fn cfg_edges_for_block(block: &str, text: &str) -> Vec<(String, String)> {
     }
     b.connect(&outs, &mret_addr);
     b.edges
+}
+
+// ---- Reaching definitions (M7) -----------------------------------------
+// Port of Joern's ReachingDefPass + DdgGenerator, validated against the
+// FLOWS| oracle section. GEN: parameters define themselves at method entry;
+// a non-field-access CALL defines {itself} ∪ {its Call/Identifier arguments}.
+// KILL: a call's gen kills other defs of the same variables. The dataflow is
+// solved over the (already byte-identical) CFG; edges are then added by the
+// six DdgGenerator routines. Exact entry/cross-arg rules are pinned by diff.
+
+/// Index-level CFG for a block, recovered from the address-level CFG (node 0
+/// is the METHOD, addressed M:full; others are `block#idx`).
+fn cfg_index_edges(block: &str, text: &str, n: usize) -> Vec<(usize, usize)> {
+    let prefix = format!("{block}#");
+    let to_idx = |a: &str| -> Option<usize> {
+        if a.starts_with("M:") {
+            Some(0)
+        } else {
+            a.strip_prefix(&prefix).and_then(|s| s.parse::<usize>().ok())
+        }
+    };
+    cfg_edges_for_block(block, text)
+        .iter()
+        .filter_map(|(s, d)| Some((to_idx(s)?, to_idx(d)?)))
+        .filter(|&(s, d)| s < n && d < n)
+        .collect()
+}
+
+fn is_field_access(name: &str) -> bool {
+    matches!(
+        name,
+        "<operator>.fieldAccess"
+            | "<operator>.indirectFieldAccess"
+            | "<operator>.indexAccess"
+            | "<operator>.indirectIndexAccess"
+    )
+}
+
+fn is_assignment(name: &str) -> bool {
+    name.starts_with("<operator>.assignment")
+        || name.starts_with("<operators>.assignment")
+}
+
+/// The variable string a node defines/uses (DdgGenerator.nodeToEdgeLabel):
+/// parameters use their name, everything else its code.
+fn node_var(d: &DNode) -> String {
+    if d.label == "METHOD_PARAMETER_IN" || d.label == "METHOD_PARAMETER_OUT" {
+        d.name.clone()
+    } else {
+        d.fullcode.clone()
+    }
+}
+
+/// REACHING_DEF flows for one method block: (variable, srcIdxAddr, dstIdxAddr)
+/// where addresses are `block#idx` or `M:full` for the method node.
+fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> {
+    let arena = parse_dump_block(text);
+    let n = arena.len();
+    if n == 0 || arena[0].label != "METHOD" {
+        return Vec::new();
+    }
+    let method_addr = format!("M:{}", arena[0].full);
+    let addr = |i: usize| -> String {
+        if i == 0 { method_addr.clone() } else { format!("{block}#{i}") }
+    };
+
+    // Own nodes only: a file-global/`<clinit>` dump embeds the full nested
+    // method dumps, but reaching-def is per method — descend from the root but
+    // never into a nested METHOD subtree (and exclude the nested METHOD node
+    // itself; it is a separate method addressed via first-wins elsewhere).
+    let own: HashSet<usize> = {
+        let mut set = HashSet::new();
+        let mut stack = vec![0usize];
+        while let Some(i) = stack.pop() {
+            set.insert(i);
+            for &c in &arena[i].children {
+                if arena[c].label == "METHOD" {
+                    continue; // nested method: separate, skip whole subtree
+                }
+                stack.push(c);
+            }
+        }
+        set
+    };
+
+    // --- arguments / uses helpers ---
+    let args_of = |c: usize| -> Vec<usize> {
+        // call.argument = AST children with ARGUMENT_INDEX, minus FieldIdentifier.
+        let mut v: Vec<usize> = arena[c]
+            .children
+            .iter()
+            .copied()
+            .filter(|&k| arena[k].has_arg && arena[k].label != "FIELD_IDENTIFIER")
+            .collect();
+        v.sort_by_key(|&k| arena[k].arg_index);
+        v
+    };
+    let uses_of = |i: usize| -> Vec<usize> {
+        match arena[i].label.as_str() {
+            "CALL" => args_of(i),
+            "RETURN" => arena[i].children.clone(),
+            "METHOD_PARAMETER_OUT" => vec![i],
+            _ => Vec::new(),
+        }
+    };
+    let is_gen_arg = |k: usize| matches!(arena[k].label.as_str(), "CALL" | "IDENTIFIER");
+
+    // --- GEN / KILL ---
+    // def id == node index. Each def carries a variable.
+    let mut def_var: HashMap<usize, String> = HashMap::new();
+    let mut gen: HashMap<usize, Vec<usize>> = HashMap::new(); // node -> defs generated
+    // parameters
+    let params: Vec<usize> = arena[0]
+        .children
+        .iter()
+        .copied()
+        .filter(|&k| arena[k].label == "METHOD_PARAMETER_IN")
+        .collect();
+    let mut entry_gen: Vec<usize> = Vec::new();
+    for &p in &params {
+        def_var.insert(p, node_var(&arena[p]));
+        entry_gen.push(p);
+    }
+    // calls
+    let calls: Vec<usize> = (0..n)
+        .filter(|&i| own.contains(&i) && arena[i].label == "CALL" && !is_field_access(&arena[i].name))
+        .collect();
+    for &c in &calls {
+        let mut g = vec![c];
+        def_var.insert(c, node_var(&arena[c]));
+        for a in args_of(c) {
+            if is_gen_arg(a) {
+                def_var.insert(a, node_var(&arena[a]));
+                g.push(a);
+            }
+        }
+        gen.insert(c, g);
+    }
+    // kill(call) = other defs of the variables in gen(call)
+    let mut kill: HashMap<usize, Vec<usize>> = HashMap::new();
+    for &c in &calls {
+        let vars: HashSet<String> = gen[&c].iter().map(|&d| def_var[&d].clone()).collect();
+        let g: HashSet<usize> = gen[&c].iter().copied().collect();
+        let k: Vec<usize> = def_var
+            .iter()
+            .filter(|(d, v)| !g.contains(d) && vars.contains(*v))
+            .map(|(d, _)| *d)
+            .collect();
+        kill.insert(c, k);
+    }
+
+    // --- dataflow fixpoint over the CFG ---
+    let cfg = cfg_index_edges(block, text, n);
+    let mut preds: Vec<Vec<usize>> = vec![Vec::new(); n];
+    for &(s, d) in &cfg {
+        preds[d].push(s);
+    }
+    let mut out: Vec<HashSet<usize>> = vec![HashSet::new(); n];
+    out[0] = entry_gen.iter().copied().collect();
+    let empty: Vec<usize> = Vec::new();
+    let mut changed = true;
+    while changed {
+        changed = false;
+        for i in 0..n {
+            let mut in_set: HashSet<usize> = HashSet::new();
+            for &p in &preds[i] {
+                in_set.extend(&out[p]);
+            }
+            let g = gen.get(&i).unwrap_or(&empty);
+            let k = kill.get(&i).unwrap_or(&empty);
+            let mut new_out: HashSet<usize> = in_set
+                .iter()
+                .copied()
+                .filter(|d| !k.contains(d))
+                .collect();
+            new_out.extend(g.iter().copied());
+            if i == 0 {
+                new_out.extend(entry_gen.iter().copied());
+            }
+            if new_out != out[i] {
+                out[i] = new_out;
+                changed = true;
+            }
+        }
+    }
+    let in_of = |i: usize| -> HashSet<usize> {
+        let mut s = HashSet::new();
+        for &p in &preds[i] {
+            s.extend(&out[p]);
+        }
+        s
+    };
+
+    // isUsing(use, def): variable match (sameVariable). Container/part/alias
+    // handling deferred until the diff demands it.
+    let is_using = |use_i: usize, def_i: usize| -> bool {
+        let uv = match arena[use_i].label.as_str() {
+            "IDENTIFIER" => arena[use_i].name.clone(),
+            "CALL" => arena[use_i].fullcode.clone(),
+            _ => arena[use_i].fullcode.clone(),
+        };
+        def_var.get(&def_i).map(|v| *v == uv).unwrap_or(false)
+    };
+
+    let mut flows: Vec<(String, String, String)> = Vec::new();
+    let mut push = |var: String, s: usize, d: usize, flows: &mut Vec<(String, String, String)>| {
+        flows.push((var, addr(s), addr(d)));
+    };
+
+    // method-return (exit) index
+    let exit = (0..n).find(|&i| arena[i].label == "METHOD_RETURN");
+
+    let is_ddg = |i: usize| {
+        matches!(
+            arena[i].label.as_str(),
+            "CALL" | "IDENTIFIER" | "LITERAL" | "RETURN" | "METHOD_PARAMETER_IN" | "METHOD_REF" | "TYPE_REF"
+        )
+    };
+
+    // usedIncomingDefs(node): map use -> defs in in(node) it uses.
+    let used_incoming = |i: usize| -> Vec<(usize, Vec<usize>)> {
+        let ins = in_of(i);
+        uses_of(i)
+            .into_iter()
+            .map(|u| {
+                let ds: Vec<usize> = ins.iter().copied().filter(|&d| is_using(u, d)).collect();
+                (u, ds)
+            })
+            .collect()
+    };
+
+    // The LHS (arg1) of an assignment is a write target, not a read, so it
+    // receives no entry edge.
+    let assign_lhs: HashSet<usize> = calls
+        .iter()
+        .filter(|&&c| is_assignment(&arena[c].name))
+        .filter_map(|&c| args_of(c).first().copied())
+        .collect();
+
+    // 1. addEdgesFromEntryNode: ddg node with empty uses -> method->n, "".
+    for i in 0..n {
+        if i == 0 || !own.contains(&i) || !is_ddg(i) || assign_lhs.contains(&i) {
+            continue;
+        }
+        if uses_of(i).is_empty() {
+            push(String::new(), 0, i, &mut flows);
+        }
+    }
+
+    // 2. call sites
+    for &c in &calls {
+        let g_set: Vec<usize> = gen.get(&c).cloned().unwrap_or_default();
+        let is_gen_arg_node = |x: usize| g_set.contains(&x) && x != c;
+        // first loop: reaching defs into each arg use (the assignment LHS is a
+        // pure write target, not a use, so it is excluded).
+        for (u, ds) in used_incoming(c) {
+            if assign_lhs.contains(&u) {
+                continue;
+            }
+            for d in ds {
+                if d != u {
+                    push(node_var(&arena[d]), d, u, &mut flows);
+                }
+            }
+        }
+        // second loop (args taint outputs): every arg -> the call; a non-gen
+        // arg (literal) additionally taints each sibling gen-arg.
+        for u in args_of(c) {
+            for &gnode in &g_set {
+                if u == gnode {
+                    continue;
+                }
+                // a gen-arg only flows to the call itself, not to sibling gen-args.
+                if is_gen_arg_node(u) && gnode != c {
+                    continue;
+                }
+                push(node_var(&arena[u]), u, gnode, &mut flows);
+            }
+        }
+        // assignment: RHS (arg2) -> LHS (arg1)
+        if is_assignment(&arena[c].name) {
+            let a = args_of(c);
+            if a.len() == 2 {
+                push(node_var(&arena[a[1]]), a[1], a[0], &mut flows);
+            }
+        }
+    }
+
+    // 3. returns
+    for i in 0..n {
+        if arena[i].label != "RETURN" || !own.contains(&i) {
+            continue;
+        }
+        for (u, ins) in used_incoming(i) {
+            push(arena[*&u].fullcode.clone(), u, i, &mut flows);
+            for d in ins {
+                if d != u {
+                    push(node_var(&arena[d]), d, u, &mut flows);
+                }
+            }
+        }
+        if let Some(e) = exit {
+            push("<RET>".into(), i, e, &mut flows);
+        }
+    }
+
+    // 4. method parameter out
+    for i in 0..n {
+        if arena[i].label != "METHOD_PARAMETER_OUT" || !own.contains(&i) {
+            continue;
+        }
+        // paramIn -> paramOut, name
+        if let Some(&pin) = params.iter().find(|&&p| arena[p].name == arena[i].name) {
+            push(arena[pin].name.clone(), pin, i, &mut flows);
+        }
+        // param_out reads the defs live at method exit (it is not in the CFG).
+        let exit_in = exit.map(in_of).unwrap_or_default();
+        let pvar = arena[i].name.clone();
+        let mut ds: Vec<usize> = exit_in
+            .into_iter()
+            .filter(|&d| def_var.get(&d).map(|v| *v == pvar).unwrap_or(false))
+            .collect();
+        ds.sort();
+        for d in ds {
+            push(node_var(&arena[d]), d, i, &mut flows);
+        }
+    }
+
+    // 5. exit node: every def in in(exit) -> exit
+    if let Some(e) = exit {
+        let ins = in_of(e);
+        let mut v: Vec<usize> = ins.into_iter().collect();
+        v.sort();
+        for d in v {
+            push(node_var(&arena[d]), d, e, &mut flows);
+        }
+    }
+
+    flows
 }
