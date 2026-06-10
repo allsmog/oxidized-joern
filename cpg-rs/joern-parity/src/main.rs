@@ -2923,6 +2923,59 @@ fn is_field_access(name: &str) -> bool {
     )
 }
 
+/// Joern v4.0.555 DefaultSemantics operator flow mappings: (srcArgIdx,
+/// dstArgIdx), dst -1 = return value. `None` = no explicit semantics
+/// (pass-through: all flows valid). `Some(vec![])` = sizeOf (no flows).
+/// Verbatim from the decompiled DefaultSemantics.operatorFlows().
+fn operator_semantics(name: &str) -> Option<Vec<(i64, i64)>> {
+    let compound = vec![(2, 1), (1, 1), (2, -1)];
+    let access1 = vec![(1, -1)];
+    let incdec = vec![(1, 1), (1, -1)];
+    let v: Vec<(i64, i64)> = match name {
+        "<operator>.addition" => vec![(1, -1), (2, -1)],
+        "<operator>.addressOf" => access1,
+        "<operator>.assignment" => vec![(2, 1), (2, -1)],
+        "<operators>.assignmentAnd"
+        | "<operators>.assignmentArithmeticShiftRight"
+        | "<operator>.assignmentDivision"
+        | "<operators>.assignmentExponentiation"
+        | "<operators>.assignmentLogicalShiftRight"
+        | "<operator>.assignmentMinus"
+        | "<operators>.assignmentModulo"
+        | "<operator>.assignmentMultiplication"
+        | "<operators>.assignmentOr"
+        | "<operator>.assignmentPlus"
+        | "<operators>.assignmentShiftLeft"
+        | "<operators>.assignmentXor" => compound,
+        "<operator>.cast" => vec![(1, -1), (2, -1)],
+        "<operator>.computedMemberAccess" => access1,
+        "<operator>.conditional" => vec![(2, -1), (3, -1)],
+        "<operator>.elvis" => vec![(1, -1), (2, -1)],
+        "<operator>.notNullAssert" => access1,
+        "<operator>.fieldAccess" => access1,
+        "<operator>.getElementPtr" => access1,
+        "<operator>.incBy" => vec![(1, 1), (2, 1), (3, 1), (4, 1)],
+        "<operator>.indexAccess" => access1,
+        "<operator>.indirectComputedMemberAccess" => access1,
+        "<operator>.indirectFieldAccess" => access1,
+        "<operator>.indirectIndexAccess" => vec![(1, -1), (2, 1)],
+        "<operator>.indirectMemberAccess" => access1,
+        "<operator>.indirection" => access1,
+        "<operator>.memberAccess" => access1,
+        "<operator>.pointerShift" => access1,
+        "<operator>.postDecrement"
+        | "<operator>.postIncrement"
+        | "<operator>.preDecrement"
+        | "<operator>.preIncrement" => incdec,
+        "<operator>.sizeOf" => vec![],
+        // modulo, arrayInitializer, the literals: PTF (pass-through) — and any
+        // operator not listed (subtraction, multiplication, comparisons,
+        // logicalAnd/Or, …) — get no explicit semantics: pass-through.
+        _ => return None,
+    };
+    Some(v)
+}
+
 fn is_access_like(name: &str) -> bool {
     matches!(
         name,
@@ -3145,13 +3198,24 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
             .collect()
     };
 
-    // The LHS (arg1) of an assignment is a write target, not a read, so it
-    // receives no entry edge.
-    let assign_lhs: HashSet<usize> = calls
-        .iter()
-        .filter(|&&c| is_assignment(&arena[c].name))
-        .filter_map(|&c| args_of(c).first().copied())
-        .collect();
+    // Write-only args: an argument that is a definition target but not a read
+    // under its call's semantics (e.g. the LHS of plain `=`, which has flow
+    // (2->1) but no (1->_)). Such args get no entry edge and are not first-loop
+    // uses. A compound-assignment LHS (`a += b`, flow includes (1->1)) IS read,
+    // so it is NOT write-only.
+    let mut assign_lhs: HashSet<usize> = HashSet::new();
+    for &c in &calls {
+        if let Some(maps) = operator_semantics(&arena[c].name) {
+            for a in args_of(c) {
+                let idx = arena[a].arg_index;
+                let used = maps.iter().any(|&(s, _)| s == idx);
+                let defined = maps.iter().any(|&(_, d)| d == idx);
+                if defined && !used {
+                    assign_lhs.insert(a);
+                }
+            }
+        }
+    }
 
     // 1. addEdgesFromEntryNode: ddg node with empty uses -> method->n, "".
     for i in 0..n {
@@ -3179,32 +3243,34 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
                 }
             }
         }
-        // second loop (args taint outputs). Every arg -> the call. Cross-arg
-        // edges (arg -> sibling gen-arg) appear when: the source is a non-gen
-        // arg (literal); or both source and sibling are CALLs; or the call is
-        // a CONTROL_STRUCTURE condition (then identifier siblings cross too).
-        let is_cond = arena[c].parent.is_some_and(|p| arena[p].label == "CONTROL_STRUCTURE");
+        // second loop: every arg use -> every gen member, then filtered by
+        // the call's flow SEMANTICS (Joern's EdgeValidator.isValidEdge). For a
+        // call with explicit semantics, an arg->arg edge is valid iff there is
+        // a flow mapping (srcArgIdx -> dstArgIdx) and arg->return iff
+        // (srcArgIdx -> -1). Operators with no semantics are pass-through
+        // (all edges valid); `sizeOf` has empty semantics (no flows).
+        let _ = is_gen_arg_node;
+        let sem = operator_semantics(&arena[c].name);
         for u in args_of(c) {
+            if !is_ddg(u) {
+                continue;
+            }
+            let u_idx = arena[u].arg_index;
             for &gnode in &g_set {
                 if u == gnode {
                     continue;
                 }
-                let to_call = gnode == c;
-                let cross_ok = !is_gen_arg_node(u) // literal/non-gen source
-                    || (arena[u].label == "CALL" && arena[gnode].label == "CALL")
-                    || (is_cond
-                        && arena[u].label == "IDENTIFIER"
-                        && arena[gnode].label == "IDENTIFIER");
-                if to_call || cross_ok {
+                // An argument always taints its call's output node. An
+                // argument -> sibling-argument edge is gated by the call's
+                // flow semantics (pass-through when the operator has none).
+                let valid = gnode == c
+                    || match &sem {
+                        None => true,
+                        Some(maps) => maps.contains(&(u_idx, arena[gnode].arg_index)),
+                    };
+                if valid {
                     push(node_var(&arena[u]), u, gnode, &mut flows);
                 }
-            }
-        }
-        // assignment: RHS (arg2) -> LHS (arg1)
-        if is_assignment(&arena[c].name) {
-            let a = args_of(c);
-            if a.len() == 2 {
-                push(node_var(&arena[a[1]]), a[1], a[0], &mut flows);
             }
         }
     }
