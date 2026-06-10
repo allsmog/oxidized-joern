@@ -86,6 +86,18 @@ fn main() {
     let mut placements: HashMap<String, Vec<(String, usize)>> = HashMap::new();
     let mut used_macros: std::collections::BTreeMap<String, (String, String, usize, String)> =
         std::collections::BTreeMap::new();
+    // #include directives become IMPORT nodes that consume earlier sibling
+    // slots: the file-global TYPE_DECL's ORDER is 1 + #includes.
+    let include_counts: HashMap<String, usize> = units
+        .iter()
+        .map(|u| {
+            let n = named_children(u.tree.root_node())
+                .iter()
+                .filter(|f| f.kind() == "preproc_include")
+                .count();
+            (u.file.clone(), n)
+        })
+        .collect();
 
     for u in &units {
         let b = u.src.as_bytes();
@@ -321,8 +333,9 @@ fn main() {
         )));
     }
     for f in &files {
+        let ord = 1 + include_counts.get(f.as_str()).copied().unwrap_or(0);
         tds.push((format!("{f}:<global>"), format!(
-            "NODES|TYPE_DECL NAME=<global> FULL_NAME={f}:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME={f}:<global> FILENAME={f} ORDER=1\n"
+            "NODES|TYPE_DECL NAME=<global> FULL_NAME={f}:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME={f}:<global> FILENAME={f} ORDER={ord}\n"
         )));
     }
     for t in &used_types {
@@ -1145,7 +1158,26 @@ impl Ctx<'_> {
                                 ty: "ANY".into(),
                                 name,
                             });
+                        } else if !self.macros.contains_key(&name) && !self.functions.contains_key(&name) {
+                            // Fully unresolved identifier: phantom LOCAL with
+                            // CODE `<unknown> name` (e.g. NULL).
+                            seen.push(name.clone());
+                            self.phantoms.push(Phantom {
+                                code: format!("<unknown> {name}"),
+                                ty: "ANY".into(),
+                                name,
+                            });
                         }
+                    }
+                }
+                "null" => {
+                    if !seen.contains(&"NULL".to_string()) {
+                        seen.push("NULL".into());
+                        self.phantoms.push(Phantom {
+                            name: "NULL".into(),
+                            code: "<unknown> NULL".into(),
+                            ty: "ANY".into(),
+                        });
                     }
                 }
                 "sizeof_expression" => {
@@ -1157,6 +1189,33 @@ impl Ctx<'_> {
                         }
                     }
                 }
+                // Preprocessor structure: only KEPT #ifdef branches contribute
+                // (and directive name identifiers never do).
+                "preproc_ifdef" => {
+                    let neg = n.child(0).map(|t| text(t, b) == "#ifndef").unwrap_or(false);
+                    let pname = n.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                    let take = self.macros.contains_key(&pname) != neg;
+                    let mut cs = named_children(n);
+                    cs.reverse();
+                    for c in cs {
+                        match c.kind() {
+                            "identifier" => {}
+                            "preproc_else" => {
+                                if !take {
+                                    let mut es = named_children(c);
+                                    es.reverse();
+                                    for e in es {
+                                        stack.push(e);
+                                    }
+                                }
+                            }
+                            _ if take => stack.push(c),
+                            _ => {}
+                        }
+                    }
+                    continue;
+                }
+                "preproc_def" | "preproc_function_def" | "preproc_include" => continue,
                 _ => {}
             }
             let mut cs = named_children(n);
@@ -1409,6 +1468,16 @@ impl Ctx<'_> {
             self.edge("FALSE_BODY", self.at(cs), self.at(ei));
             if let Some(body) = named_children(alt).into_iter().find(|c| c.kind() == "compound_statement") {
                 self.emit_block(body, b, 1, depth + 2);
+            } else if let Some(stmt) = named_children(alt).into_iter().next() {
+                // `else if`: a synthetic CODE-less ANY BLOCK wraps the
+                // nested statement.
+                self.line(depth + 2, "BLOCK", P {
+                    tfn: Some("ANY".into()),
+                    order: Some(1),
+                    ..Default::default()
+                });
+                let mut so = 1i64;
+                self.emit_stmt(stmt, b, &mut so, depth + 3);
             }
         }
     }
@@ -1839,8 +1908,11 @@ impl Ctx<'_> {
                     (name.clone(), t.clone())
                 } else if let Some(t) = self.globals.get(&name) {
                     (format!("<global> {name}"), t.clone())
-                } else {
+                } else if self.enumerators.contains(&name) {
                     (name.clone(), "ANY".to_string())
+                } else {
+                    // Fully unresolved (e.g. NULL with unresolved includes).
+                    (format!("<unknown> {name}"), "ANY".to_string())
                 };
                 self.line(depth, "IDENTIFIER", P {
                     name: Some(name),
@@ -1913,11 +1985,15 @@ impl Ctx<'_> {
                 });
             }
             "cast_expression" => {
-                // `(T)e` → <operator>.cast typed T, with a TYPE_REF arg 1.
-                let ty = n
-                    .child_by_field_name("type")
+                // `(T)e` → <operator>.cast. CDT quirk: the type is the BASE
+                // type only — `(char *)x` types as `char` — while the
+                // TYPE_REF CODE keeps the raw descriptor text (`char *`).
+                let desc = n.child_by_field_name("type");
+                let raw = desc.map(|t| text(t, b).to_string()).unwrap_or("ANY".into());
+                let ty = desc
+                    .and_then(|t| t.child_by_field_name("type"))
                     .map(|t| normalize_type(text(t, b)))
-                    .unwrap_or("ANY".into());
+                    .unwrap_or_else(|| normalize_type(&raw));
                 self.note_call("<operator>.cast", 2);
                 self.line(depth, "CALL", P {
                     name: Some("<operator>.cast".into()),
@@ -1930,7 +2006,7 @@ impl Ctx<'_> {
                     ..Default::default()
                 });
                 self.line(depth + 1, "TYPE_REF", P {
-                    code: Some(ty.clone()),
+                    code: Some(esc(&raw)),
                     tfn: Some(ty),
                     order: Some(1),
                     arg: Some(1),
@@ -1983,6 +2059,18 @@ impl Ctx<'_> {
                     self.emit_expr(part, b, depth + 1, (i + 1) as i64, None);
                 }
             }
+            "null" => {
+                // tree-sitter parses NULL as its own node kind; with
+                // unresolved includes CDT sees an unresolved identifier.
+                self.line(depth, "IDENTIFIER", P {
+                    name: Some("NULL".into()),
+                    code: Some("<unknown> NULL".into()),
+                    tfn: Some("ANY".into()),
+                    order: Some(order),
+                    arg,
+                    ..Default::default()
+                });
+            }
             "parenthesized_expression" => {
                 if let Some(inner) = named_children(n).into_iter().next() {
                     self.emit_expr(inner, b, depth, order, arg);
@@ -2003,8 +2091,19 @@ struct Param {
 
 /// (name, return type, params) for a function_definition.
 fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
-    let ret = f.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into());
+    let base = f.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into());
     let decl = f.child_by_field_name("declarator")?;
+    // `void *bsearch(...)`: pointer levels wrap the function declarator.
+    let mut stars = 0;
+    let mut cur = decl;
+    while cur.kind() == "pointer_declarator" {
+        stars += 1;
+        match cur.child_by_field_name("declarator") {
+            Some(c) => cur = c,
+            None => break,
+        }
+    }
+    let ret = format!("{}{}", normalize_type(&base), "*".repeat(stars));
     let fd = find_function_declarator(decl)?;
     let name = fd.child_by_field_name("declarator").map(|d| innermost_id(d, b))?;
     let mut params = Vec::new();

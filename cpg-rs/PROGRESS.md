@@ -7,9 +7,10 @@ Single source of truth across sessions. Update in the same commit as the work.
 - **Milestone:** M5 (real-world corpus) / M7 (dataflow oracle) — M1-M4 done
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` fetches latest; if the version
   drifts and output changes, record it here and in QUIRKS.md)
-- **Gate:** `joern-parity/check.sh` — green, 88/88 blocks byte-identical
-  (corpus adds macros.c: object/function-like #define expansion as INLINED
-  calls + macro METHODs + #ifdef evaluation). Previously 84/84 with gotos.c
+- **Gate:** `joern-parity/check.sh` — green, 91/91 blocks byte-identical.
+  Corpus now includes REAL-WORLD code: musl's bsearch.c, unmodified —
+  AST, nodes, and all 15 edge kinds incl. CFG. Previously 88/88 with
+  macros.c (#define expansion as INLINED calls + #ifdef). Previously 84/84 with gotos.c
   and types2.c (goto/label, typedef, enum + <clinit>, union, static,
   function pointers/pointerCall, multi-dim arrays/alloc).
   Previously 76/76 with logic.c (short-circuit &&/||, if-without-else,
@@ -43,14 +44,14 @@ M2, in this order — one corpus file + diff-to-zero per line:
 
 Next, in preference order:
 
-1. **M5 — real-world corpus.** The preprocessor gap is CLOSED for in-file
-   macros (macros.c: INLINED calls, expansion parsing with parameter
-   substitution, macro METHODs, #ifdef/#ifndef). NEXT SESSION: vendor a real
-   C file (musl bsearch.c or zlib adler32.c) and triage. Expect to need:
-   #if expression evaluation, #include handling (ignore + <unknown> types),
-   nested/recursive macro expansion, token pasting/stringizing (defer?),
-   varargs, extern, calls to undefined functions (printf stub shape),
-   initializer lists `{1,2}`, struct defs inside functions.
+1. **M5 — real-world corpus, continued.** First real file (musl bsearch.c)
+   is GREEN, unmodified. Scale up: vendor the next real files (musl
+   memcmp.c/strcmp.c are low-macro; then a macro-heavy one like zlib
+   adler32.c to stress nested expansion and #if evaluation). Still
+   unpinned: #if/#elif expression evaluation, nested macro expansion,
+   token pasting/stringizing, varargs, extern, calls to undefined
+   functions (printf stub shape), initializer lists `{1,2}`, struct defs
+   inside functions, single-statement (braceless) if/loop bodies.
 2. **M7 — dataflow oracle.** Add REACHING_DEF, CDG, DOMINATE, POST_DOMINATE
    to oracle kinds (they're already in the importCode graph; the addressing
    scheme works as-is). DOMINATE/POST_DOMINATE are computable from our
@@ -62,6 +63,17 @@ Next, in preference order:
 
 ## Done
 
+- **M5 first real file (2026-06-10):** musl bsearch.c byte-identical, 91/91.
+  New pins from real code: pointer return types (`void *bsearch` ->
+  SIGNATURE void*(...), ret from pointer levels above the function
+  declarator); NULL (tree-sitter `null` node) -> IDENTIFIER with CODE
+  `<unknown> NULL` + phantom ORDER=0 LOCAL (general rule: fully unresolved
+  identifiers phantom with `<unknown>` CODE); cast quirk — `(char *)x` types
+  as the BASE type `char` only while TYPE_REF CODE keeps `char *`; else-if
+  wraps the nested if in a synthetic CODE-less ANY BLOCK; #include
+  directives become IMPORT slots so the file-global TYPE_DECL's ORDER is
+  1 + #includes; phantom scanning is preprocessor-aware (directive names and
+  dropped #ifdef branches contribute nothing).
 - **M5 preprocessor (2026-06-10):** In-file macro parity, 88/88. CDT model
   pinned by corpus/macros.c: an invocation is a CALL with DISPATCH=INLINED,
   NAME = macro, CODE = original invocation text, MFN/SIGNATURE =
