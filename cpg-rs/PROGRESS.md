@@ -4,9 +4,42 @@ Single source of truth across sessions. Update in the same commit as the work.
 
 ## Current state
 
-- **Milestone:** M5 (real-world corpus) + M7 (dataflow, now STARTED) — M1-M4 done.
+- **Milestone:** M5 (real-world corpus) + M7 (dataflow REACHING_DEF — **DONE,
+  byte-zero**) — M1-M4 done.
   Goal reframed (see /root/.claude/plans/ + GOAL): self-hosted IRIS on cpg-rs.
   Two parallel tracks: A = byte-parity expansion (gate), B = dataflow + IRIS loop.
+- **M7/Track B (2026-06-10): REACHING_DEF byte-parity COMPLETE — all 1,458
+  FLOWS facts byte-identical to Joern v4.0.555, AST/NODES/EDGES unchanged.**
+  The reaching-def engine in `reaching_def_flows` is now a verbatim port of the
+  decompiled v4.0.555 internals. Load-bearing facts pinned this session
+  (progression 31→19→11→10→9→7→4→2→1→0):
+  - `MemberAccess.isFieldAccess` (the GEN exclusion in `initGen`) is BROAD:
+    memberAccess + all variants + `indirection` + `getElementPtr` + `sizeOf`.
+    So indirection calls have **empty gen** (a def only via their parent).
+  - `MemberAccess.isGenericMemberAccessName` (the KILL skip in `initKill`):
+    same set but with `addressOf`+`pointerShift`, no `sizeOf`. `&v` gens a v
+    def but kills no prior v def.
+  - `UsageAnalyzer.isUsing` = sameVariable ∥ isContainer ∥ isPart ∥ isAlias,
+    all via `nodeToString` (NAME for ident/param, CODE for expr) with
+    `Option.contains` = **exact** equality (not substring). isAlias =
+    same-access-path expressions (`*l`~`*l`).
+  - `OptimizedReachingDefTransferFunction.loneIdentifiers`: an identifier arg
+    that is not a param/local, not used in a return, and unique by name (e.g.
+    `int[2][3]` operand of `alloc`) is removed from gen AND gets a direct
+    lone→exit edge (`addEdgesFromLoneIdentifiersToExit`).
+  - `addEdgesToMethodParameterOut` filters in(paramOut) by isUsing, so `*l`
+    (indirection of l) reaches paramOut l.
+  - `addEdgeForBlock`: a comma-operator/expression BLOCK argument (a CFG node,
+    unlike statement/INLINED/stub blocks) routes its last child into the call;
+    BLOCK is an `isDdgNode`. Empty block `code` renders `<empty>`.
+  - exit/exit_in must be the method's OWN METHOD_RETURN (the `<global>` dump
+    embeds nested methods whose returns precede it).
+  - `addEdgesToCapturedIdentifiersAndParameters`: a `<global>` identifier (a
+    global) links to its first same-name usage in each method-ref-captured
+    method (`g` → `first#8`) — the only interprocedural edge.
+  - Tooling: `rd_probe2.sc`/`rd_probe3.sc` dump Joern's actual gen/in/lone for
+    ground truth; decompiled sources in /tmp (Ddg, EV2, UA, RDTF, OPT,
+    MemberAccess) via CFR.
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` fetches latest; if the version
   drifts and output changes, record it here and in QUIRKS.md)
 - **Gate:** `joern-parity/check.sh` — green, 95/95 blocks byte-identical.
