@@ -18,7 +18,7 @@ if [ -x "$JOERN/joern" ]; then
   TMP_ORACLE="$(mktemp)"
   if (cd "$JOERN" && rm -rf workspace && ./joern --script "$HERE/oracle.sc" \
        --param inputPath="$HERE/corpus" 2>/dev/null) \
-       | grep '^AST|' | sed 's/^AST|//' > "$TMP_ORACLE" && [ -s "$TMP_ORACLE" ]; then
+       | grep -E '^(AST|NODES)\|' > "$TMP_ORACLE" && [ -s "$TMP_ORACLE" ]; then
     mv "$TMP_ORACLE" "$ORACLE"
   else
     rm -f "$TMP_ORACLE"
@@ -29,6 +29,13 @@ fi
 # Build mine: one run over the whole corpus (stubs/globals are project-wide).
 MINE="$(mktemp)"
 cargo run -q --manifest-path "$ROOT/Cargo.toml" -p joern-parity -- corpus/*.c > "$MINE"
+
+# Each side splits into the method walk (AST) and scaffolding nodes (NODES).
+OAST="$(mktemp)"; ONODES="$(mktemp)"; MAST="$(mktemp)"; MNODES="$(mktemp)"
+sed -n 's/^AST|//p' "$ORACLE" > "$OAST"
+sed -n 's/^NODES|//p' "$ORACLE" > "$ONODES"
+grep -v '^NODES|' "$MINE" > "$MAST" || true
+sed -n 's/^NODES|//p' "$MINE" > "$MNODES"
 
 # Split a dump file into per-method blocks keyed by FULL_NAME (NAME collides:
 # every file has a <global> method).
@@ -44,10 +51,16 @@ split_methods() { # $1 = file, $2 = outdir
 }
 
 OD=$(mktemp -d); MD=$(mktemp -d)
-split_methods "$ORACLE" "$OD"
-split_methods "$MINE" "$MD"
+split_methods "$OAST" "$OD"
+split_methods "$MAST" "$MD"
 
 fail=0; total=0
+total=$((total+1))
+if diff -q "$ONODES" "$MNODES" >/dev/null; then
+  echo "PASS  (scaffolding nodes: FILE/NAMESPACE/TYPE_DECL/TYPE/META_DATA)"
+else
+  echo "FAIL  (scaffolding nodes)"; diff "$ONODES" "$MNODES" | sed 's/^/      /' | head -40; fail=$((fail+1))
+fi
 for m in "$MD"/*; do
   name=$(basename "$m"); total=$((total+1))
   if [ ! -f "$OD/$name" ]; then echo "NO ORACLE for $name"; fail=$((fail+1)); continue; fi
@@ -59,5 +72,5 @@ for m in "$MD"/*; do
 done
 echo "----"
 echo "$((total-fail))/$total methods byte-identical to Joern"
-rm -rf "$MINE" "$OD" "$MD"
+rm -rf "$MINE" "$OD" "$MD" "$OAST" "$ONODES" "$MAST" "$MNODES"
 exit $fail
