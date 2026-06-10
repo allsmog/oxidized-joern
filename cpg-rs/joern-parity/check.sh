@@ -8,15 +8,22 @@
 # otherwise reuses the committed oracle_all.txt. Exits non-zero on any mismatch.
 set -uo pipefail
 cd "$(dirname "$0")"
+HERE="$(pwd)"
 ROOT=".."
 JOERN="${JOERN:-/tmp/joern-cli-dist/joern-cli}"
 
 ORACLE="oracle_all.txt"
 if [ -x "$JOERN/joern" ]; then
   echo "regenerating oracle from $JOERN ..."
-  (cd "$JOERN" && rm -rf workspace && ./joern --script "$(pwd)/../../../home/user/joern/cpg-rs/joern-parity/oracle.sc" \
-     --param inputPath="$(cd "$OLDPWD" && pwd)/corpus" 2>/dev/null) \
-     | grep '^AST|' | sed 's/^AST|//' > "$ORACLE" || echo "  (oracle regen failed; using committed $ORACLE)"
+  TMP_ORACLE="$(mktemp)"
+  if (cd "$JOERN" && rm -rf workspace && ./joern --script "$HERE/oracle.sc" \
+       --param inputPath="$HERE/corpus" 2>/dev/null) \
+       | grep '^AST|' | sed 's/^AST|//' > "$TMP_ORACLE" && [ -s "$TMP_ORACLE" ]; then
+    mv "$TMP_ORACLE" "$ORACLE"
+  else
+    rm -f "$TMP_ORACLE"
+    echo "  (oracle regen failed or empty; using committed $ORACLE)"
+  fi
 fi
 
 # Build mine: run joern-parity on every corpus file, concatenate.
