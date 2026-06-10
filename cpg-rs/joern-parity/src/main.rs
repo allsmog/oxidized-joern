@@ -371,6 +371,12 @@ fn main() {
             flows.push((var, s, d));
         }
     }
+    // Cross-method captured-identifier edges (DdgGenerator
+    // .addEdgesToCapturedIdentifiersAndParameters): a global's identifier links
+    // to its first usage in each method that captures the global scope.
+    for f in captured_identifier_flows(&dumps) {
+        flows.push(f);
+    }
 
     // TYPE -> its TYPE_DECL (struct decls are walk-addressed, rest are D:).
     for t in &used_types {
@@ -3029,29 +3035,6 @@ fn operator_semantics(name: &str) -> Option<Vec<(i64, i64)>> {
     Some(v)
 }
 
-fn is_access_like(name: &str) -> bool {
-    // indirection/addressOf operands are reads, not defs; a cast's operand
-    // IS a def (pinned: `l` inside `(uc*)l` reaches exit/param_out).
-    matches!(name, "<operator>.indirection" | "<operator>.addressOf")
-}
-
-/// Strip one access wrapper from a variable string to its base: `*l`->`l`,
-/// `&v`->`v`, `(T)x`->`x`. Returns the input unchanged if not an access form.
-fn strip_access(v: &str) -> String {
-    let t = v.trim();
-    // Strip a leading deref/addressOf only. NOT a cast: a cast def `(T)n` is a
-    // distinct value and must not match plain `n` uses.
-    if let Some(rest) = t.strip_prefix('*').or_else(|| t.strip_prefix('&')) {
-        return rest.trim().to_string();
-    }
-    t.to_string()
-}
-
-fn is_assignment(name: &str) -> bool {
-    name.starts_with("<operator>.assignment")
-        || name.starts_with("<operators>.assignment")
-}
-
 /// The variable string a node defines/uses (DdgGenerator.nodeToEdgeLabel):
 /// parameters use their name, everything else its code.
 fn node_var(d: &DNode) -> String {
@@ -3522,6 +3505,66 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     }
 
     flows
+}
+
+// DdgGenerator.addEdgesToCapturedIdentifiersAndParameters (the captured part):
+// `method._identifierViaContainsOut.flatMap(identifierToFirstUsages)`. For a
+// method that holds method-refs (a file `<global>`), each of its own
+// identifiers (e.g. the global `g` in `g = 5`) is linked to the FIRST usage of
+// the same name in every referenced (captured) method.
+fn captured_identifier_flows(dumps: &[(String, String)]) -> Vec<(String, String, String)> {
+    let parsed: Vec<(String, Vec<DNode>)> = dumps
+        .iter()
+        .map(|(k, t)| (k.clone(), parse_dump_block(t)))
+        .collect();
+    let mut out: Vec<(String, String, String)> = Vec::new();
+    for (key, arena) in &parsed {
+        if arena.is_empty() || arena[0].label != "METHOD" {
+            continue;
+        }
+        // own nodes (do not descend into nested METHOD subtrees).
+        let mut own: Vec<usize> = Vec::new();
+        let mut stack = vec![0usize];
+        while let Some(i) = stack.pop() {
+            own.push(i);
+            for &c in &arena[i].children {
+                if arena[c].label != "METHOD" {
+                    stack.push(c);
+                }
+            }
+        }
+        // methods captured via method-refs held directly by this method.
+        let refs: Vec<String> = own
+            .iter()
+            .filter(|&&i| arena[i].label == "METHOD_REF")
+            .map(|&i| arena[i].fullcode.clone())
+            .collect();
+        if refs.is_empty() {
+            continue;
+        }
+        own.sort();
+        for &i in &own {
+            if arena[i].label != "IDENTIFIER" {
+                continue;
+            }
+            let nm = &arena[i].name;
+            for r in &refs {
+                if let Some((rkey, rarena)) = parsed.iter().find(|(k, _)| k == r) {
+                    // first identifier of the same name (source/AST order).
+                    if let Some(j) = (0..rarena.len())
+                        .find(|&j| rarena[j].label == "IDENTIFIER" && rarena[j].name == *nm)
+                    {
+                        out.push((
+                            node_var(&arena[i]),
+                            format!("{key}#{i}"),
+                            format!("{rkey}#{j}"),
+                        ));
+                    }
+                }
+            }
+        }
+    }
+    out
 }
 
 // ---- UsageAnalyzer.isUsing (v4.0.555) ----
