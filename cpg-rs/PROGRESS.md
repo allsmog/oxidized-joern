@@ -7,19 +7,19 @@ Single source of truth across sessions. Update in the same commit as the work.
 - **Milestone:** M2 — full C statement/expression coverage (AST layer)
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` fetches latest; if the version
   drifts and output changes, record it here and in QUIRKS.md)
-- **Gate:** `joern-parity/check.sh` — green, 4/4 methods byte-identical
-  (corpus: add.c, ops.c, loop.c)
+- **Gate:** `joern-parity/check.sh` — green, 7/7 methods byte-identical
+  (corpus: add.c, ops.c, loop.c, unary.c, forloop.c)
 
 ## Next task (start here)
 
 M2, in this order — one corpus file + diff-to-zero per line:
 
-- [ ] unary operators: `-x !x ~x` → `<operator>.minus/.logicalNot/.not`
-- [ ] postfix/prefix inc/dec: `x++ x-- ++x --x`
-- [ ] pointer ops: `*p` (indirection), `&x` (addressOf), pointer decl types
-- [ ] `for` loop (check Joern's CODE convention — `while` was header-only)
-- [ ] `do`-while
-- [ ] ternary `?:` → `<operator>.conditional`
+- [x] unary operators (corpus/unary.c)
+- [x] postfix/prefix inc/dec (corpus/unary.c)
+- [x] pointer ops: indirection/addressOf, pointer decl/param types (corpus/unary.c)
+- [x] `for` loop (corpus/forloop.c)
+- [x] `do`-while (corpus/forloop.c)
+- [x] ternary `?:` → `<operator>.conditional` (corpus/forloop.c)
 - [ ] `switch`/`case`/`break`/`continue`
 - [ ] compound assignment ops (`+=` etc. — assignment_name() exists, unpinned)
 - [ ] casts, sizeof, comma operator
