@@ -139,3 +139,15 @@ pins it, so a regression shows up as a diff.
   SWITCH_BODY kinds); FOR_INIT targets the init assignment CALL, not the
   LOCAL; EVAL_TYPE exists for exactly the nodes that carry TYPE_FULL_NAME
   (stub params/blocks included).
+- **CFG shapes** (`corpus/*`, `corpus/logic.c`): evaluation order is args
+  then call; METHOD -> first leaf; RETURN -> METHOD_RETURN. Statement BLOCKs
+  are invisible but a comma BLOCK (child of a CALL) is a CFG node after its
+  children — while stub method bodies, despite carrying ARGUMENT_INDEX=1,
+  are invisible (stubs are METHOD -> METHOD_RETURN direct). Condition roots
+  branch to both arm entries; back-edges target the condition's FIRST LEAF;
+  do-while enters at the body; for-loop continue -> update entry; switch
+  dispatches cond root -> every JUMP_TARGET (plus the continuation iff no
+  default), case-value LITERALs are CFG nodes chained after their
+  JUMP_TARGET, and fallthrough is natural chaining. Ternary: cond root ->
+  arm entries, arms -> the conditional CALL. &&/||: lhs root -> rhs entry
+  AND directly -> the call (short-circuit), rhs -> call.
