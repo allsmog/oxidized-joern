@@ -78,6 +78,24 @@ Next, in preference order:
 
 ## Done
 
+- **M7/Track B faithful isValidEdge + liveness wall (2026-06-10):** Added the
+  decompiled v4.0.555 EdgeValidator.isValidEdge as a push-filter on every edge
+  (rd_valid_edge in main.rs): 94->85. Cast operands generate defs (pinned: `l`
+  in `(uc*)l` reaches exit) while indirection/addressOf operands don't: 107->94.
+  Field/index-access substring isUsing (`p->y` uses `p`): 85->82. 11 methods
+  byte-exact. Flow diff now 82/1458 (~94%). Track A green.
+  IRREDUCIBLE REMAINDER (~44 of 82): loop-exit liveness in bsearch/strcmp/
+  memcmp. CHARACTERIZED precisely: Joern's def live at METHOD_RETURN for each
+  variable is its FIRST-loop-body use (base@25, width@27, nel@29 — the loop's
+  first statement), NEVER the parameter nor the branch reassignments (53,42,…).
+  Standard reaching-def over the byte-identical CFG keeps param + branch defs
+  live on the loop-bypass / last-iteration-exit path, so our fixpoint emits
+  them; Joern's DataFlowSolver merge kills them. This is a non-standard solver
+  behaviour not derivable from the oracle — needs replicating Joern's actual
+  DataFlowSolver worklist/merge (the .class is staged at /tmp/dfx). The
+  remaining ~38 are residual access def-use (agg q.x container, macros). NOTE:
+  plain/indirection-gated substring isUsing OVER-produces strcmp `*l` uses
+  without an even more exact isValidEdge — field/index gating is the safe subset.
 - **M7/Track B breakthrough — semantics-gated edges (2026-06-10):** Decompiled
   the v4.0.555 dataflow classes (CFR; staged in /tmp/dfx, /tmp/dsem) and found
   the REAL mechanism: every REACHING_DEF edge is gated by EdgeValidator.
