@@ -78,6 +78,27 @@ Next, in preference order:
 
 ## Done
 
+- **M7/Track B breakthrough — semantics-gated edges (2026-06-10):** Decompiled
+  the v4.0.555 dataflow classes (CFR; staged in /tmp/dfx, /tmp/dsem) and found
+  the REAL mechanism: every REACHING_DEF edge is gated by EdgeValidator.
+  isValidEdge using Joern's DefaultSemantics flow mappings. Extracted the exact
+  operator flow table (operator_semantics() in main.rs, verbatim from
+  DefaultSemantics.operatorFlows). Rules now PRINCIPLED, not heuristic:
+  arg->call always valid; arg->sibling-arg valid iff (srcIdx->dstIdx) is in the
+  operator's flow mappings (pass-through when the operator has no semantics);
+  write-only args (defined-not-used, e.g. plain-= LHS) derived from semantics.
+  This resolved the long-standing mystery (addition has semantics -> no
+  arg->arg cross; subtraction/comparison have none -> cross allowed; assignment
+  (2->1) -> RHS->LHS only). Flow diff 165 -> 111; 10 methods byte-exact (add,
+  main, classify, pick, unary, sum, logic, gotos, helper, order). Track A green.
+  REMAINING ~111: pointer-code loop-exit liveness (which l/r defs are live at
+  METHOD_RETURN after a loop) and isUsing's access-path container/part/alias
+  (for fieldAccess `q.x`/indexAccess `vals[0]`/indirection `*l` def-use across
+  statements). The decompiled isUsing (sameVariable via `contains`, isContainer,
+  isPart, isAlias over access paths) is in /tmp/Ddg.java + my notes; the
+  fieldAccess gen nuance (fieldAccess calls excluded from defsForCalls but
+  included as Call-args in the parent's gen) is the agg/struct gap. These are a
+  faithful-port finish, not more heuristics.
 - **M7/Track B reaching-def engine (2026-06-10):** Built a full reaching-def
   engine in joern-parity (parse_dump_block -> index CFG -> GEN/KILL fixpoint ->
   DdgGenerator edge routines) emitting the FLOWS| section. Drove the diff vs
