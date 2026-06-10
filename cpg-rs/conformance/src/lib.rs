@@ -254,4 +254,122 @@ mod tests {
             failures
         );
     }
+
+    // --- the six-language stress test ---
+    //
+    // Java, Go, JavaScript, Ruby and Rust are all served by the SAME generic
+    // tree-sitter engine (cpg-lang-ts), differing only by a declarative spec.
+    // Each supplies its own source for the identical case set. If they all pass,
+    // the language contract holds under maximum stress: one engine, one schema,
+    // one set of shared passes, six very different grammars.
+
+    use cpg_lang_ts::TsFrontend;
+
+    fn java_fixture() -> LangFixture {
+        LangFixture::new("Java", Box::new(TsFrontend::java()))
+            .with_source(
+                "method_with_two_params",
+                "class C { int two_params(int a, int b){ return a; } }",
+            )
+            .with_source("call_with_two_args", "class C { void f(){ callee(1, 2); } }")
+            .with_source(
+                "intraprocedural_call_resolves",
+                "class C { int target(int x){ return x; } void f(){ target(3); } }",
+            )
+            .with_source("nested_call_is_argument", "class C { void f(){ outer(inner(1)); } }")
+            .with_source(
+                "call_inside_branch",
+                "class C { void f(int c){ if (c > 0) { guarded(c); } } }",
+            )
+            .with_source("two_methods", "class C { void alpha(){} void beta(){} }")
+    }
+
+    fn go_fixture() -> LangFixture {
+        LangFixture::new("Go", Box::new(TsFrontend::go()))
+            .with_source(
+                "method_with_two_params",
+                "package m\nfunc two_params(a int, b int) int { return a }",
+            )
+            .with_source("call_with_two_args", "package m\nfunc f(){ callee(1, 2) }")
+            .with_source(
+                "intraprocedural_call_resolves",
+                "package m\nfunc target(x int) int { return x }\nfunc f(){ target(3) }",
+            )
+            .with_source("nested_call_is_argument", "package m\nfunc f(){ outer(inner(1)) }")
+            .with_source(
+                "call_inside_branch",
+                "package m\nfunc f(c int){ if c > 0 { guarded(c) } }",
+            )
+            .with_source("two_methods", "package m\nfunc alpha(){}\nfunc beta(){}")
+    }
+
+    fn javascript_fixture() -> LangFixture {
+        LangFixture::new("JavaScript", Box::new(TsFrontend::javascript()))
+            .with_source("method_with_two_params", "function two_params(a, b){ return a; }")
+            .with_source("call_with_two_args", "function f(){ callee(1, 2); }")
+            .with_source(
+                "intraprocedural_call_resolves",
+                "function target(x){ return x; } function f(){ target(3); }",
+            )
+            .with_source("nested_call_is_argument", "function f(){ outer(inner(1)); }")
+            .with_source("call_inside_branch", "function f(c){ if (c) { guarded(c); } }")
+            .with_source("two_methods", "function alpha(){} function beta(){}")
+    }
+
+    fn ruby_fixture() -> LangFixture {
+        LangFixture::new("Ruby", Box::new(TsFrontend::ruby()))
+            .with_source("method_with_two_params", "def two_params(a, b)\n  a\nend")
+            .with_source("call_with_two_args", "def f\n  callee(1, 2)\nend")
+            .with_source(
+                "intraprocedural_call_resolves",
+                "def target(x)\n  x\nend\ndef f\n  target(3)\nend",
+            )
+            .with_source("nested_call_is_argument", "def f\n  outer(inner(1))\nend")
+            .with_source(
+                "call_inside_branch",
+                "def f(c)\n  if c\n    guarded(c)\n  end\nend",
+            )
+            .with_source("two_methods", "def alpha\nend\ndef beta\nend")
+    }
+
+    fn rust_fixture() -> LangFixture {
+        LangFixture::new("Rust", Box::new(TsFrontend::rust()))
+            .with_source("method_with_two_params", "fn two_params(a: i32, b: i32) -> i32 { a }")
+            .with_source("call_with_two_args", "fn f(){ callee(1, 2); }")
+            .with_source(
+                "intraprocedural_call_resolves",
+                "fn target(x: i32) -> i32 { x } fn f(){ target(3); }",
+            )
+            .with_source("nested_call_is_argument", "fn f(){ outer(inner(1)); }")
+            .with_source("call_inside_branch", "fn f(c: bool){ if c { guarded(c); } }")
+            .with_source("two_methods", "fn alpha(){} fn beta(){}")
+    }
+
+    /// Every language must pass every case. One assert covers all six.
+    #[test]
+    fn all_languages_conform() {
+        let cases = standard_cases();
+        let mut fixtures = vec![
+            c_fixture(),
+            python_fixture(),
+            java_fixture(),
+            go_fixture(),
+            javascript_fixture(),
+            ruby_fixture(),
+            rust_fixture(),
+        ];
+        let mut all_failures: Vec<CaseResult> = Vec::new();
+        for fx in &mut fixtures {
+            for r in run_suite(fx, &cases) {
+                if r.outcome.is_err() {
+                    all_failures.push(r);
+                }
+            }
+        }
+        assert!(
+            all_failures.is_empty(),
+            "language contract failures:\n{:#?}",
+            all_failures
+        );
+    }
 }

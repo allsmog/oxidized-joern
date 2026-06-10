@@ -18,9 +18,12 @@ cargo run --release -p cpg-cli -- serve --load p.cpg             # reopen + quer
 
 ## What it does
 
-- **Parses** C and Python (tree-sitter, tolerant of uncompilable code) into one
-  language-independent graph. Each frontend is ~300 lines of grammar mapping;
-  everything else is shared.
+- **Parses seven languages** — C, Java, Go, JavaScript, Ruby, Rust, Python
+  (tree-sitter, tolerant of uncompilable code) — into one language-independent
+  graph. Java/Go/JS/Ruby/Rust/Python all run through a *single* generic engine
+  (`cpg-lang-ts`, ~350 lines) driven by a per-language spec that is a struct
+  literal; adding a language is writing data, not a frontend. All seven pass the
+  identical conformance suite and the shared dataflow/taint engine, unchanged.
 - **Analyses** control flow, symbol/call resolution, and summary-first
   interprocedural dataflow, then answers **source→sink taint queries with
   witness paths**.
