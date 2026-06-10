@@ -3130,6 +3130,17 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     for &(s, d) in &cfg {
         preds[d].push(s);
     }
+    // ReachingDefFlowGraph quirk (decompiled initPred): the FIRST body node's
+    // predecessor is the param-chain entry (method), REPLACING its CFG preds.
+    // When the loop condition is the first body node (no statements precede the
+    // loop, e.g. bsearch), this drops the loop back-edges into it — so loop-body
+    // defs don't flow back to the condition. The method node (0) points to the
+    // first body node.
+    for &(s, d) in &cfg {
+        if s == 0 {
+            preds[d] = vec![0];
+        }
+    }
     let mut out: Vec<HashSet<usize>> = vec![HashSet::new(); n];
     out[0] = entry_gen.iter().copied().collect();
     let empty: Vec<usize> = Vec::new();
