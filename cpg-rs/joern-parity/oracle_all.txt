@@ -5477,3 +5477,1461 @@ EDGES|TRUE_BODY pick#34 -> pick#38
 EDGES|TRUE_BODY pick#40 -> pick#44
 EDGES|TRUE_BODY pick#8 -> pick#10
 EDGES|TRUE_BODY sum#12 -> sum#16
+FLOWS|REACHING_DEF[!a] unary#12 -> unary#10
+FLOWS|REACHING_DEF[!a] unary#12 -> unary#11
+FLOWS|REACHING_DEF[!a] unary#12 -> unary#25
+FLOWS|REACHING_DEF["hi"] exprs#59 -> exprs#57
+FLOWS|REACHING_DEF["hi"] exprs#59 -> exprs#58
+FLOWS|REACHING_DEF[&v] ptr#12 -> ptr#10
+FLOWS|REACHING_DEF[&v] ptr#12 -> ptr#11
+FLOWS|REACHING_DEF[&v] ptr#12 -> ptr#18
+FLOWS|REACHING_DEF[&v] ptr#12 -> ptr#19
+FLOWS|REACHING_DEF['x'] exprs#55 -> exprs#53
+FLOWS|REACHING_DEF['x'] exprs#55 -> exprs#54
+FLOWS|REACHING_DEF[(char *)base + width*(nel/2)] bsearch#22 -> bsearch#20
+FLOWS|REACHING_DEF[(char *)base + width*(nel/2)] bsearch#22 -> bsearch#21
+FLOWS|REACHING_DEF[(char *)base + width*(nel/2)] bsearch#22 -> bsearch#72
+FLOWS|REACHING_DEF[(char *)base] bsearch#23 -> bsearch#22
+FLOWS|REACHING_DEF[(char *)base] bsearch#23 -> bsearch#72
+FLOWS|REACHING_DEF[(char *)try + width] bsearch#54 -> bsearch#52
+FLOWS|REACHING_DEF[(char *)try + width] bsearch#54 -> bsearch#53
+FLOWS|REACHING_DEF[(char *)try] bsearch#55 -> bsearch#54
+FLOWS|REACHING_DEF[(long)a] exprs#40 -> exprs#38
+FLOWS|REACHING_DEF[(long)a] exprs#40 -> exprs#39
+FLOWS|REACHING_DEF[(long)a] exprs#40 -> exprs#70
+FLOWS|REACHING_DEF[(n) * (n)] macros#15 -> macros#27
+FLOWS|REACHING_DEF[(uint_t)n] use#8 -> use#41
+FLOWS|REACHING_DEF[(uint_t)n] use#8 -> use#6
+FLOWS|REACHING_DEF[(uint_t)n] use#8 -> use#7
+FLOWS|REACHING_DEF[(unsigned char *)l] strcmp#24 -> strcmp#31
+FLOWS|REACHING_DEF[(unsigned char *)r] strcmp#28 -> strcmp#31
+FLOWS|REACHING_DEF[*(unsigned char *)l - *(unsigned char *)r] strcmp#22 -> strcmp#21
+FLOWS|REACHING_DEF[*(unsigned char *)l - *(unsigned char *)r] strcmp#22 -> strcmp#31
+FLOWS|REACHING_DEF[*(unsigned char *)l] strcmp#23 -> strcmp#22
+FLOWS|REACHING_DEF[*(unsigned char *)l] strcmp#23 -> strcmp#27
+FLOWS|REACHING_DEF[*(unsigned char *)l] strcmp#23 -> strcmp#31
+FLOWS|REACHING_DEF[*(unsigned char *)r] strcmp#27 -> strcmp#22
+FLOWS|REACHING_DEF[*(unsigned char *)r] strcmp#27 -> strcmp#23
+FLOWS|REACHING_DEF[*(unsigned char *)r] strcmp#27 -> strcmp#31
+FLOWS|REACHING_DEF[*l == *r] memcmp#20 -> memcmp#18
+FLOWS|REACHING_DEF[*l == *r] memcmp#20 -> memcmp#19
+FLOWS|REACHING_DEF[*l == *r] memcmp#20 -> memcmp#41
+FLOWS|REACHING_DEF[*l-*r] memcmp#35 -> memcmp#33
+FLOWS|REACHING_DEF[*l-*r] memcmp#35 -> memcmp#41
+FLOWS|REACHING_DEF[*l==*r && *l] strcmp#8 -> strcmp#31
+FLOWS|REACHING_DEF[*l==*r] strcmp#9 -> strcmp#14
+FLOWS|REACHING_DEF[*l==*r] strcmp#9 -> strcmp#31
+FLOWS|REACHING_DEF[*l==*r] strcmp#9 -> strcmp#8
+FLOWS|REACHING_DEF[*l=vl] memcmp#10 -> memcmp#41
+FLOWS|REACHING_DEF[*l] memcmp#21 -> memcmp#20
+FLOWS|REACHING_DEF[*l] memcmp#21 -> memcmp#22
+FLOWS|REACHING_DEF[*l] memcmp#21 -> memcmp#23
+FLOWS|REACHING_DEF[*l] memcmp#21 -> memcmp#29
+FLOWS|REACHING_DEF[*l] memcmp#21 -> memcmp#36
+FLOWS|REACHING_DEF[*l] memcmp#21 -> memcmp#37
+FLOWS|REACHING_DEF[*l] memcmp#21 -> memcmp#41
+FLOWS|REACHING_DEF[*l] memcmp#36 -> memcmp#35
+FLOWS|REACHING_DEF[*l] memcmp#36 -> memcmp#38
+FLOWS|REACHING_DEF[*l] memcmp#36 -> memcmp#41
+FLOWS|REACHING_DEF[*l] strcmp#10 -> strcmp#12
+FLOWS|REACHING_DEF[*l] strcmp#10 -> strcmp#14
+FLOWS|REACHING_DEF[*l] strcmp#10 -> strcmp#15
+FLOWS|REACHING_DEF[*l] strcmp#10 -> strcmp#9
+FLOWS|REACHING_DEF[*l] strcmp#14 -> strcmp#18
+FLOWS|REACHING_DEF[*l] strcmp#14 -> strcmp#2
+FLOWS|REACHING_DEF[*l] strcmp#14 -> strcmp#26
+FLOWS|REACHING_DEF[*l] strcmp#14 -> strcmp#31
+FLOWS|REACHING_DEF[*l] strcmp#14 -> strcmp#8
+FLOWS|REACHING_DEF[*l] strcmp#14 -> strcmp#9
+FLOWS|REACHING_DEF[*msg = "hi"] exprs#57 -> exprs#70
+FLOWS|REACHING_DEF[*p] ptr#7 -> ptr#19
+FLOWS|REACHING_DEF[*p] ptr#7 -> ptr#2
+FLOWS|REACHING_DEF[*p] ptr#7 -> ptr#5
+FLOWS|REACHING_DEF[*p] ptr#7 -> ptr#6
+FLOWS|REACHING_DEF[*q + v] ptr#15 -> ptr#14
+FLOWS|REACHING_DEF[*q + v] ptr#15 -> ptr#19
+FLOWS|REACHING_DEF[*q = &v] ptr#10 -> ptr#19
+FLOWS|REACHING_DEF[*q] ptr#16 -> ptr#15
+FLOWS|REACHING_DEF[*q] ptr#16 -> ptr#19
+FLOWS|REACHING_DEF[*r=vr] memcmp#13 -> memcmp#41
+FLOWS|REACHING_DEF[*r] memcmp#23 -> memcmp#20
+FLOWS|REACHING_DEF[*r] memcmp#23 -> memcmp#21
+FLOWS|REACHING_DEF[*r] memcmp#23 -> memcmp#24
+FLOWS|REACHING_DEF[*r] memcmp#23 -> memcmp#31
+FLOWS|REACHING_DEF[*r] memcmp#23 -> memcmp#38
+FLOWS|REACHING_DEF[*r] memcmp#23 -> memcmp#39
+FLOWS|REACHING_DEF[*r] memcmp#23 -> memcmp#41
+FLOWS|REACHING_DEF[*r] memcmp#38 -> memcmp#35
+FLOWS|REACHING_DEF[*r] memcmp#38 -> memcmp#36
+FLOWS|REACHING_DEF[*r] memcmp#38 -> memcmp#41
+FLOWS|REACHING_DEF[*r] strcmp#12 -> strcmp#10
+FLOWS|REACHING_DEF[*r] strcmp#12 -> strcmp#20
+FLOWS|REACHING_DEF[*r] strcmp#12 -> strcmp#30
+FLOWS|REACHING_DEF[*r] strcmp#12 -> strcmp#31
+FLOWS|REACHING_DEF[*r] strcmp#12 -> strcmp#4
+FLOWS|REACHING_DEF[*r] strcmp#12 -> strcmp#9
+FLOWS|REACHING_DEF[--b] unary#21 -> unary#25
+FLOWS|REACHING_DEF[-1] logic#33 -> logic#31
+FLOWS|REACHING_DEF[-1] logic#33 -> logic#32
+FLOWS|REACHING_DEF[-1] logic#33 -> logic#90
+FLOWS|REACHING_DEF[-1] pick#26 -> pick#24
+FLOWS|REACHING_DEF[-1] pick#26 -> pick#25
+FLOWS|REACHING_DEF[-1] pick#26 -> pick#50
+FLOWS|REACHING_DEF[-a] unary#7 -> unary#25
+FLOWS|REACHING_DEF[-a] unary#7 -> unary#5
+FLOWS|REACHING_DEF[-a] unary#7 -> unary#6
+FLOWS|REACHING_DEF[0] bsearch#18 -> bsearch#16
+FLOWS|REACHING_DEF[0] bsearch#18 -> bsearch#17
+FLOWS|REACHING_DEF[0] bsearch#40 -> bsearch#38
+FLOWS|REACHING_DEF[0] bsearch#40 -> bsearch#39
+FLOWS|REACHING_DEF[0] bsearch#50 -> bsearch#48
+FLOWS|REACHING_DEF[0] bsearch#50 -> bsearch#49
+FLOWS|REACHING_DEF[0] classify#7 -> classify#5
+FLOWS|REACHING_DEF[0] classify#7 -> classify#6
+FLOWS|REACHING_DEF[0] count#12 -> count#10
+FLOWS|REACHING_DEF[0] count#12 -> count#11
+FLOWS|REACHING_DEF[0] count#37 -> count#36
+FLOWS|REACHING_DEF[0] count#39 -> count#34
+FLOWS|REACHING_DEF[0] count#7 -> count#5
+FLOWS|REACHING_DEF[0] count#7 -> count#6
+FLOWS|REACHING_DEF[0] gotos#22 -> gotos#20
+FLOWS|REACHING_DEF[0] gotos#22 -> gotos#21
+FLOWS|REACHING_DEF[0] gotos#7 -> gotos#5
+FLOWS|REACHING_DEF[0] gotos#7 -> gotos#6
+FLOWS|REACHING_DEF[0] logic#14 -> logic#12
+FLOWS|REACHING_DEF[0] logic#14 -> logic#13
+FLOWS|REACHING_DEF[0] logic#17 -> logic#15
+FLOWS|REACHING_DEF[0] logic#17 -> logic#16
+FLOWS|REACHING_DEF[0] logic#26 -> logic#24
+FLOWS|REACHING_DEF[0] logic#26 -> logic#25
+FLOWS|REACHING_DEF[0] logic#29 -> logic#27
+FLOWS|REACHING_DEF[0] logic#29 -> logic#28
+FLOWS|REACHING_DEF[0] logic#39 -> logic#37
+FLOWS|REACHING_DEF[0] logic#39 -> logic#38
+FLOWS|REACHING_DEF[0] logic#50 -> logic#48
+FLOWS|REACHING_DEF[0] logic#50 -> logic#49
+FLOWS|REACHING_DEF[0] logic#9 -> logic#7
+FLOWS|REACHING_DEF[0] logic#9 -> logic#8
+FLOWS|REACHING_DEF[0] macros#26 -> macros#25
+FLOWS|REACHING_DEF[0] memcmp#40 -> memcmp#33
+FLOWS|REACHING_DEF[0] pick#32 -> pick#30
+FLOWS|REACHING_DEF[0] pick#32 -> pick#31
+FLOWS|REACHING_DEF[0] pick#7 -> pick#5
+FLOWS|REACHING_DEF[0] pick#7 -> pick#6
+FLOWS|REACHING_DEF[0] sum#11 -> sum#10
+FLOWS|REACHING_DEF[0] sum#11 -> sum#9
+FLOWS|REACHING_DEF[0] sum#7 -> sum#5
+FLOWS|REACHING_DEF[0] sum#7 -> sum#6
+FLOWS|REACHING_DEF[1.5] exprs#51 -> exprs#49
+FLOWS|REACHING_DEF[1.5] exprs#51 -> exprs#50
+FLOWS|REACHING_DEF[100] count#30 -> count#28
+FLOWS|REACHING_DEF[100] count#30 -> count#29
+FLOWS|REACHING_DEF[10] classify#11 -> classify#10
+FLOWS|REACHING_DEF[10] classify#11 -> classify#9
+FLOWS|REACHING_DEF[10] logic#81 -> logic#79
+FLOWS|REACHING_DEF[10] logic#81 -> logic#80
+FLOWS|REACHING_DEF[10] pick#15 -> pick#13
+FLOWS|REACHING_DEF[10] pick#15 -> pick#14
+FLOWS|REACHING_DEF[1] agg#26 -> agg#24
+FLOWS|REACHING_DEF[1] agg#26 -> agg#25
+FLOWS|REACHING_DEF[1] bsearch#65 -> bsearch#61
+FLOWS|REACHING_DEF[1] classify#17 -> classify#15
+FLOWS|REACHING_DEF[1] classify#17 -> classify#16
+FLOWS|REACHING_DEF[1] exprs#24 -> exprs#22
+FLOWS|REACHING_DEF[1] exprs#24 -> exprs#23
+FLOWS|REACHING_DEF[1] exprs#27 -> exprs#25
+FLOWS|REACHING_DEF[1] exprs#27 -> exprs#26
+FLOWS|REACHING_DEF[1] exprs#67 -> exprs#65
+FLOWS|REACHING_DEF[1] gotos#18 -> gotos#16
+FLOWS|REACHING_DEF[1] gotos#18 -> gotos#17
+FLOWS|REACHING_DEF[1] logic#21 -> logic#19
+FLOWS|REACHING_DEF[1] logic#21 -> logic#20
+FLOWS|REACHING_DEF[1] logic#34 -> logic#33
+FLOWS|REACHING_DEF[1] logic#73 -> logic#71
+FLOWS|REACHING_DEF[1] main#6 -> main#5
+FLOWS|REACHING_DEF[1] pick#27 -> pick#26
+FLOWS|REACHING_DEF[1] second#12 -> second#11
+FLOWS|REACHING_DEF[1] sum#26 -> sum#24
+FLOWS|REACHING_DEF[20] logic#86 -> logic#84
+FLOWS|REACHING_DEF[20] logic#86 -> logic#85
+FLOWS|REACHING_DEF[20] pick#21 -> pick#19
+FLOWS|REACHING_DEF[20] pick#21 -> pick#20
+FLOWS|REACHING_DEF[2] bsearch#30 -> bsearch#28
+FLOWS|REACHING_DEF[2] bsearch#30 -> bsearch#29
+FLOWS|REACHING_DEF[2] bsearch#44 -> bsearch#42
+FLOWS|REACHING_DEF[2] bsearch#44 -> bsearch#43
+FLOWS|REACHING_DEF[2] bsearch#64 -> bsearch#62
+FLOWS|REACHING_DEF[2] bsearch#64 -> bsearch#63
+FLOWS|REACHING_DEF[2] classify#24 -> classify#22
+FLOWS|REACHING_DEF[2] classify#24 -> classify#23
+FLOWS|REACHING_DEF[2] exprs#12 -> exprs#10
+FLOWS|REACHING_DEF[2] exprs#12 -> exprs#11
+FLOWS|REACHING_DEF[2] exprs#18 -> exprs#16
+FLOWS|REACHING_DEF[2] exprs#18 -> exprs#17
+FLOWS|REACHING_DEF[2] gotos#29 -> gotos#27
+FLOWS|REACHING_DEF[2] gotos#29 -> gotos#28
+FLOWS|REACHING_DEF[2] main#7 -> main#5
+FLOWS|REACHING_DEF[2] use#26 -> use#24
+FLOWS|REACHING_DEF[3] exprs#21 -> exprs#19
+FLOWS|REACHING_DEF[3] exprs#21 -> exprs#20
+FLOWS|REACHING_DEF[3] logic#60 -> logic#58
+FLOWS|REACHING_DEF[3] logic#60 -> logic#59
+FLOWS|REACHING_DEF[3] use#27 -> use#24
+FLOWS|REACHING_DEF[4] pair.<clinit>:pair()#3 -> pair.<clinit>:pair()#2
+FLOWS|REACHING_DEF[5] color.<clinit>:color()#5 -> color.<clinit>:color()#3
+FLOWS|REACHING_DEF[5] color.<clinit>:color()#5 -> color.<clinit>:color()#4
+FLOWS|REACHING_DEF[5] logic#66 -> logic#64
+FLOWS|REACHING_DEF[5] logic#66 -> logic#65
+FLOWS|REACHING_DEF[5] order.c:<global>#39 -> order.c:<global>#37
+FLOWS|REACHING_DEF[5] order.c:<global>#39 -> order.c:<global>#38
+FLOWS|REACHING_DEF[5] pick#37 -> pick#35
+FLOWS|REACHING_DEF[5] pick#37 -> pick#36
+FLOWS|REACHING_DEF[7] pick#43 -> pick#41
+FLOWS|REACHING_DEF[7] pick#43 -> pick#42
+FLOWS|REACHING_DEF[<RET>] add#6 -> add#10
+FLOWS|REACHING_DEF[<RET>] agg#37 -> agg#40
+FLOWS|REACHING_DEF[<RET>] apply#6 -> apply#11
+FLOWS|REACHING_DEF[<RET>] bsearch#68 -> bsearch#72
+FLOWS|REACHING_DEF[<RET>] bsearch#70 -> bsearch#72
+FLOWS|REACHING_DEF[<RET>] classify#25 -> classify#27
+FLOWS|REACHING_DEF[<RET>] count#40 -> count#42
+FLOWS|REACHING_DEF[<RET>] exprs#68 -> exprs#70
+FLOWS|REACHING_DEF[<RET>] first#5 -> first#9
+FLOWS|REACHING_DEF[<RET>] gotos#31 -> gotos#33
+FLOWS|REACHING_DEF[<RET>] helper#5 -> helper#9
+FLOWS|REACHING_DEF[<RET>] logic#88 -> logic#90
+FLOWS|REACHING_DEF[<RET>] macros#11 -> macros#27
+FLOWS|REACHING_DEF[<RET>] macros#25 -> macros#27
+FLOWS|REACHING_DEF[<RET>] main#8 -> main#10
+FLOWS|REACHING_DEF[<RET>] memcmp#32 -> memcmp#41
+FLOWS|REACHING_DEF[<RET>] pick#48 -> pick#50
+FLOWS|REACHING_DEF[<RET>] ptr#14 -> ptr#19
+FLOWS|REACHING_DEF[<RET>] second#4 -> second#13
+FLOWS|REACHING_DEF[<RET>] strcmp#21 -> strcmp#31
+FLOWS|REACHING_DEF[<RET>] sum#27 -> sum#29
+FLOWS|REACHING_DEF[<RET>] unary#23 -> unary#25
+FLOWS|REACHING_DEF[<RET>] use#35 -> use#41
+FLOWS|REACHING_DEF[<empty>] exprs#62 -> exprs#60
+FLOWS|REACHING_DEF[<empty>] exprs#62 -> exprs#61
+FLOWS|REACHING_DEF[<global> g] first#8 -> first#6
+FLOWS|REACHING_DEF[<global> g] first#8 -> first#9
+FLOWS|REACHING_DEF[<global> gcounter] agg#35 -> agg#34
+FLOWS|REACHING_DEF[<global> gcounter] agg#35 -> agg#40
+FLOWS|REACHING_DEF[<global> gcounter] helper#8 -> helper#6
+FLOWS|REACHING_DEF[<global> gcounter] helper#8 -> helper#9
+FLOWS|REACHING_DEF[<unknown> NULL] bsearch#71 -> bsearch#70
+FLOWS|REACHING_DEF[GREEN = 5] color.<clinit>:color()#3 -> color.<clinit>:color()#8
+FLOWS|REACHING_DEF[GREEN] color.<clinit>:color()#4 -> color.<clinit>:color()#3
+FLOWS|REACHING_DEF[GREEN] color.<clinit>:color()#4 -> color.<clinit>:color()#8
+FLOWS|REACHING_DEF[GREEN] use#14 -> use#12
+FLOWS|REACHING_DEF[GREEN] use#14 -> use#13
+FLOWS|REACHING_DEF[GREEN] use#14 -> use#41
+FLOWS|REACHING_DEF[LIMIT] macros#22 -> macros#20
+FLOWS|REACHING_DEF[LIMIT] macros#7 -> macros#27
+FLOWS|REACHING_DEF[LIMIT] macros#7 -> macros#5
+FLOWS|REACHING_DEF[LIMIT] macros#7 -> macros#6
+FLOWS|REACHING_DEF[SQR(n)] macros#12 -> macros#11
+FLOWS|REACHING_DEF[SQR(n)] macros#12 -> macros#27
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.addressOf#0 -> <operator>.addressOf#1
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#1
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#4
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#7
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.assignmentDivision#0 -> <operator>.assignmentDivision#1
+FLOWS|REACHING_DEF[] <operator>.assignmentDivision#0 -> <operator>.assignmentDivision#4
+FLOWS|REACHING_DEF[] <operator>.assignmentMinus#0 -> <operator>.assignmentMinus#1
+FLOWS|REACHING_DEF[] <operator>.assignmentMinus#0 -> <operator>.assignmentMinus#4
+FLOWS|REACHING_DEF[] <operator>.assignmentMultiplication#0 -> <operator>.assignmentMultiplication#1
+FLOWS|REACHING_DEF[] <operator>.assignmentMultiplication#0 -> <operator>.assignmentMultiplication#4
+FLOWS|REACHING_DEF[] <operator>.assignmentPlus#0 -> <operator>.assignmentPlus#1
+FLOWS|REACHING_DEF[] <operator>.assignmentPlus#0 -> <operator>.assignmentPlus#4
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#1
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#4
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#7
+FLOWS|REACHING_DEF[] <operator>.division#0 -> <operator>.division#1
+FLOWS|REACHING_DEF[] <operator>.division#0 -> <operator>.division#4
+FLOWS|REACHING_DEF[] <operator>.equals#0 -> <operator>.equals#1
+FLOWS|REACHING_DEF[] <operator>.equals#0 -> <operator>.equals#4
+FLOWS|REACHING_DEF[] <operator>.fieldAccess#0 -> <operator>.fieldAccess#1
+FLOWS|REACHING_DEF[] <operator>.fieldAccess#0 -> <operator>.fieldAccess#4
+FLOWS|REACHING_DEF[] <operator>.greaterThan#0 -> <operator>.greaterThan#1
+FLOWS|REACHING_DEF[] <operator>.greaterThan#0 -> <operator>.greaterThan#4
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] <operator>.indirection#0 -> <operator>.indirection#1
+FLOWS|REACHING_DEF[] <operator>.lessThan#0 -> <operator>.lessThan#1
+FLOWS|REACHING_DEF[] <operator>.lessThan#0 -> <operator>.lessThan#4
+FLOWS|REACHING_DEF[] <operator>.logicalAnd#0 -> <operator>.logicalAnd#1
+FLOWS|REACHING_DEF[] <operator>.logicalAnd#0 -> <operator>.logicalAnd#4
+FLOWS|REACHING_DEF[] <operator>.logicalNot#0 -> <operator>.logicalNot#1
+FLOWS|REACHING_DEF[] <operator>.logicalOr#0 -> <operator>.logicalOr#1
+FLOWS|REACHING_DEF[] <operator>.logicalOr#0 -> <operator>.logicalOr#4
+FLOWS|REACHING_DEF[] <operator>.minus#0 -> <operator>.minus#1
+FLOWS|REACHING_DEF[] <operator>.multiplication#0 -> <operator>.multiplication#1
+FLOWS|REACHING_DEF[] <operator>.multiplication#0 -> <operator>.multiplication#4
+FLOWS|REACHING_DEF[] <operator>.not#0 -> <operator>.not#1
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[] <operator>.postDecrement#0 -> <operator>.postDecrement#1
+FLOWS|REACHING_DEF[] <operator>.postIncrement#0 -> <operator>.postIncrement#1
+FLOWS|REACHING_DEF[] <operator>.preDecrement#0 -> <operator>.preDecrement#1
+FLOWS|REACHING_DEF[] <operator>.sizeOf#0 -> <operator>.sizeOf#1
+FLOWS|REACHING_DEF[] <operator>.subtraction#0 -> <operator>.subtraction#1
+FLOWS|REACHING_DEF[] <operator>.subtraction#0 -> <operator>.subtraction#4
+FLOWS|REACHING_DEF[] <operators>.assignmentAnd#0 -> <operators>.assignmentAnd#1
+FLOWS|REACHING_DEF[] <operators>.assignmentAnd#0 -> <operators>.assignmentAnd#4
+FLOWS|REACHING_DEF[] <operators>.assignmentArithmeticShiftRight#0 -> <operators>.assignmentArithmeticShiftRight#1
+FLOWS|REACHING_DEF[] <operators>.assignmentArithmeticShiftRight#0 -> <operators>.assignmentArithmeticShiftRight#4
+FLOWS|REACHING_DEF[] <operators>.assignmentModulo#0 -> <operators>.assignmentModulo#1
+FLOWS|REACHING_DEF[] <operators>.assignmentModulo#0 -> <operators>.assignmentModulo#4
+FLOWS|REACHING_DEF[] <operators>.assignmentOr#0 -> <operators>.assignmentOr#1
+FLOWS|REACHING_DEF[] <operators>.assignmentOr#0 -> <operators>.assignmentOr#4
+FLOWS|REACHING_DEF[] <operators>.assignmentShiftLeft#0 -> <operators>.assignmentShiftLeft#1
+FLOWS|REACHING_DEF[] <operators>.assignmentShiftLeft#0 -> <operators>.assignmentShiftLeft#4
+FLOWS|REACHING_DEF[] <operators>.assignmentXor#0 -> <operators>.assignmentXor#1
+FLOWS|REACHING_DEF[] <operators>.assignmentXor#0 -> <operators>.assignmentXor#4
+FLOWS|REACHING_DEF[] add#0 -> add#1
+FLOWS|REACHING_DEF[] add#0 -> add#3
+FLOWS|REACHING_DEF[] add#0 -> add#8
+FLOWS|REACHING_DEF[] add#0 -> add#9
+FLOWS|REACHING_DEF[] add.c:<global>#0 -> add.c:<global>#24
+FLOWS|REACHING_DEF[] add.c:<global>#0 -> add.c:<global>#25
+FLOWS|REACHING_DEF[] add.c:<global>#12 -> main#6
+FLOWS|REACHING_DEF[] add.c:<global>#12 -> main#7
+FLOWS|REACHING_DEF[] add.c:<global>#12 -> main#9
+FLOWS|REACHING_DEF[] agg#0 -> agg#1
+FLOWS|REACHING_DEF[] agg#0 -> agg#10
+FLOWS|REACHING_DEF[] agg#0 -> agg#13
+FLOWS|REACHING_DEF[] agg#0 -> agg#14
+FLOWS|REACHING_DEF[] agg#0 -> agg#17
+FLOWS|REACHING_DEF[] agg#0 -> agg#20
+FLOWS|REACHING_DEF[] agg#0 -> agg#26
+FLOWS|REACHING_DEF[] agg#0 -> agg#3
+FLOWS|REACHING_DEF[] agg#0 -> agg#31
+FLOWS|REACHING_DEF[] agg#0 -> agg#33
+FLOWS|REACHING_DEF[] agg#0 -> agg#36
+FLOWS|REACHING_DEF[] agg#0 -> agg#39
+FLOWS|REACHING_DEF[] apply#0 -> apply#1
+FLOWS|REACHING_DEF[] apply#0 -> apply#10
+FLOWS|REACHING_DEF[] apply#0 -> apply#3
+FLOWS|REACHING_DEF[] apply#0 -> apply#8
+FLOWS|REACHING_DEF[] apply#0 -> apply#9
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#1
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#17
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#18
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#24
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#25
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#27
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#29
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#3
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#30
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#34
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#35
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#36
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#39
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#40
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#43
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#44
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#49
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#5
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#50
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#56
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#57
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#58
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#60
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#63
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#64
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#65
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#69
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#7
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#70
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#71
+FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#9
+FLOWS|REACHING_DEF[] bsearch.c:<global>#0 -> bsearch.c:<global>#75
+FLOWS|REACHING_DEF[] classify#0 -> classify#1
+FLOWS|REACHING_DEF[] classify#0 -> classify#10
+FLOWS|REACHING_DEF[] classify#0 -> classify#11
+FLOWS|REACHING_DEF[] classify#0 -> classify#16
+FLOWS|REACHING_DEF[] classify#0 -> classify#17
+FLOWS|REACHING_DEF[] classify#0 -> classify#23
+FLOWS|REACHING_DEF[] classify#0 -> classify#24
+FLOWS|REACHING_DEF[] classify#0 -> classify#26
+FLOWS|REACHING_DEF[] classify#0 -> classify#7
+FLOWS|REACHING_DEF[] color.<clinit>:color()#0 -> color.<clinit>:color()#5
+FLOWS|REACHING_DEF[] count#0 -> count#1
+FLOWS|REACHING_DEF[] count#0 -> count#12
+FLOWS|REACHING_DEF[] count#0 -> count#14
+FLOWS|REACHING_DEF[] count#0 -> count#15
+FLOWS|REACHING_DEF[] count#0 -> count#17
+FLOWS|REACHING_DEF[] count#0 -> count#22
+FLOWS|REACHING_DEF[] count#0 -> count#23
+FLOWS|REACHING_DEF[] count#0 -> count#27
+FLOWS|REACHING_DEF[] count#0 -> count#29
+FLOWS|REACHING_DEF[] count#0 -> count#30
+FLOWS|REACHING_DEF[] count#0 -> count#36
+FLOWS|REACHING_DEF[] count#0 -> count#37
+FLOWS|REACHING_DEF[] count#0 -> count#38
+FLOWS|REACHING_DEF[] count#0 -> count#39
+FLOWS|REACHING_DEF[] count#0 -> count#41
+FLOWS|REACHING_DEF[] count#0 -> count#7
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#1
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#11
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#12
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#14
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#15
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#17
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#18
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#20
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#21
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#23
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#24
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#26
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#27
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#29
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#3
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#30
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#32
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#33
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#35
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#36
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#41
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#42
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#51
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#55
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#59
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#62
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#64
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#66
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#67
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#69
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#8
+FLOWS|REACHING_DEF[] exprs#0 -> exprs#9
+FLOWS|REACHING_DEF[] exprs#62 -> exprs#60
+FLOWS|REACHING_DEF[] exprs.c:<global>#0 -> exprs.c:<global>#73
+FLOWS|REACHING_DEF[] first#0 -> first#1
+FLOWS|REACHING_DEF[] first#0 -> first#7
+FLOWS|REACHING_DEF[] first#0 -> first#8
+FLOWS|REACHING_DEF[] forloop.c:<global>#0 -> forloop.c:<global>#45
+FLOWS|REACHING_DEF[] gotos#0 -> gotos#1
+FLOWS|REACHING_DEF[] gotos#0 -> gotos#12
+FLOWS|REACHING_DEF[] gotos#0 -> gotos#13
+FLOWS|REACHING_DEF[] gotos#0 -> gotos#17
+FLOWS|REACHING_DEF[] gotos#0 -> gotos#18
+FLOWS|REACHING_DEF[] gotos#0 -> gotos#21
+FLOWS|REACHING_DEF[] gotos#0 -> gotos#22
+FLOWS|REACHING_DEF[] gotos#0 -> gotos#28
+FLOWS|REACHING_DEF[] gotos#0 -> gotos#29
+FLOWS|REACHING_DEF[] gotos#0 -> gotos#32
+FLOWS|REACHING_DEF[] gotos#0 -> gotos#7
+FLOWS|REACHING_DEF[] gotos.c:<global>#0 -> gotos.c:<global>#36
+FLOWS|REACHING_DEF[] helper#0 -> helper#1
+FLOWS|REACHING_DEF[] helper#0 -> helper#7
+FLOWS|REACHING_DEF[] helper#0 -> helper#8
+FLOWS|REACHING_DEF[] logic#0 -> logic#1
+FLOWS|REACHING_DEF[] logic#0 -> logic#13
+FLOWS|REACHING_DEF[] logic#0 -> logic#14
+FLOWS|REACHING_DEF[] logic#0 -> logic#16
+FLOWS|REACHING_DEF[] logic#0 -> logic#17
+FLOWS|REACHING_DEF[] logic#0 -> logic#21
+FLOWS|REACHING_DEF[] logic#0 -> logic#25
+FLOWS|REACHING_DEF[] logic#0 -> logic#26
+FLOWS|REACHING_DEF[] logic#0 -> logic#28
+FLOWS|REACHING_DEF[] logic#0 -> logic#29
+FLOWS|REACHING_DEF[] logic#0 -> logic#3
+FLOWS|REACHING_DEF[] logic#0 -> logic#34
+FLOWS|REACHING_DEF[] logic#0 -> logic#39
+FLOWS|REACHING_DEF[] logic#0 -> logic#41
+FLOWS|REACHING_DEF[] logic#0 -> logic#42
+FLOWS|REACHING_DEF[] logic#0 -> logic#44
+FLOWS|REACHING_DEF[] logic#0 -> logic#50
+FLOWS|REACHING_DEF[] logic#0 -> logic#52
+FLOWS|REACHING_DEF[] logic#0 -> logic#53
+FLOWS|REACHING_DEF[] logic#0 -> logic#55
+FLOWS|REACHING_DEF[] logic#0 -> logic#59
+FLOWS|REACHING_DEF[] logic#0 -> logic#60
+FLOWS|REACHING_DEF[] logic#0 -> logic#65
+FLOWS|REACHING_DEF[] logic#0 -> logic#66
+FLOWS|REACHING_DEF[] logic#0 -> logic#72
+FLOWS|REACHING_DEF[] logic#0 -> logic#73
+FLOWS|REACHING_DEF[] logic#0 -> logic#75
+FLOWS|REACHING_DEF[] logic#0 -> logic#78
+FLOWS|REACHING_DEF[] logic#0 -> logic#81
+FLOWS|REACHING_DEF[] logic#0 -> logic#83
+FLOWS|REACHING_DEF[] logic#0 -> logic#86
+FLOWS|REACHING_DEF[] logic#0 -> logic#89
+FLOWS|REACHING_DEF[] logic#0 -> logic#9
+FLOWS|REACHING_DEF[] logic.c:<global>#0 -> logic.c:<global>#93
+FLOWS|REACHING_DEF[] loop.c:<global>#0 -> loop.c:<global>#32
+FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#1
+FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#11
+FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#14
+FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#15
+FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#20
+FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#21
+FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#25
+FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#26
+FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#28
+FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#7
+FLOWS|REACHING_DEF[] macros#0 -> macros#1
+FLOWS|REACHING_DEF[] macros#0 -> macros#13
+FLOWS|REACHING_DEF[] macros#0 -> macros#16
+FLOWS|REACHING_DEF[] macros#0 -> macros#17
+FLOWS|REACHING_DEF[] macros#0 -> macros#21
+FLOWS|REACHING_DEF[] macros#0 -> macros#22
+FLOWS|REACHING_DEF[] macros#0 -> macros#24
+FLOWS|REACHING_DEF[] macros#0 -> macros#25
+FLOWS|REACHING_DEF[] macros#0 -> macros#26
+FLOWS|REACHING_DEF[] macros#0 -> macros#6
+FLOWS|REACHING_DEF[] macros#0 -> macros#7
+FLOWS|REACHING_DEF[] macros#0 -> macros#9
+FLOWS|REACHING_DEF[] macros.c:<global>#0 -> macros.c:<global>#30
+FLOWS|REACHING_DEF[] macros.c:SQR:ANY(1)#0 -> macros.c:SQR:ANY(1)#1
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#1
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#12
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#15
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#19
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#22
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#24
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#27
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#29
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#3
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#31
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#37
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#39
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#40
+FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#5
+FLOWS|REACHING_DEF[] memcmp.c:<global>#0 -> memcmp.c:<global>#44
+FLOWS|REACHING_DEF[] ops.c:<global>#0 -> ops.c:<global>#30
+FLOWS|REACHING_DEF[] order.c:<global>#0 -> order.c:<global>#39
+FLOWS|REACHING_DEF[] order.c:<global>#0 -> order.c:<global>#40
+FLOWS|REACHING_DEF[] order.c:<global>#0 -> order.c:<global>#41
+FLOWS|REACHING_DEF[] order.c:<global>#0 -> order.c:<global>#42
+FLOWS|REACHING_DEF[] order.c:<global>#14 -> pair.<clinit>:pair()#3
+FLOWS|REACHING_DEF[] order.c:<global>#21 -> second#1
+FLOWS|REACHING_DEF[] order.c:<global>#21 -> second#10
+FLOWS|REACHING_DEF[] order.c:<global>#21 -> second#12
+FLOWS|REACHING_DEF[] order.c:<global>#21 -> second#8
+FLOWS|REACHING_DEF[] pick#0 -> pick#1
+FLOWS|REACHING_DEF[] pick#0 -> pick#12
+FLOWS|REACHING_DEF[] pick#0 -> pick#15
+FLOWS|REACHING_DEF[] pick#0 -> pick#18
+FLOWS|REACHING_DEF[] pick#0 -> pick#21
+FLOWS|REACHING_DEF[] pick#0 -> pick#27
+FLOWS|REACHING_DEF[] pick#0 -> pick#31
+FLOWS|REACHING_DEF[] pick#0 -> pick#32
+FLOWS|REACHING_DEF[] pick#0 -> pick#36
+FLOWS|REACHING_DEF[] pick#0 -> pick#37
+FLOWS|REACHING_DEF[] pick#0 -> pick#42
+FLOWS|REACHING_DEF[] pick#0 -> pick#43
+FLOWS|REACHING_DEF[] pick#0 -> pick#47
+FLOWS|REACHING_DEF[] pick#0 -> pick#49
+FLOWS|REACHING_DEF[] pick#0 -> pick#7
+FLOWS|REACHING_DEF[] pick#0 -> pick#9
+FLOWS|REACHING_DEF[] ptr#0 -> ptr#1
+FLOWS|REACHING_DEF[] ptr#0 -> ptr#13
+FLOWS|REACHING_DEF[] ptr#0 -> ptr#17
+FLOWS|REACHING_DEF[] ptr#0 -> ptr#18
+FLOWS|REACHING_DEF[] ptr#0 -> ptr#8
+FLOWS|REACHING_DEF[] strcmp#0 -> strcmp#1
+FLOWS|REACHING_DEF[] strcmp#0 -> strcmp#11
+FLOWS|REACHING_DEF[] strcmp#0 -> strcmp#13
+FLOWS|REACHING_DEF[] strcmp#0 -> strcmp#15
+FLOWS|REACHING_DEF[] strcmp#0 -> strcmp#18
+FLOWS|REACHING_DEF[] strcmp#0 -> strcmp#20
+FLOWS|REACHING_DEF[] strcmp#0 -> strcmp#25
+FLOWS|REACHING_DEF[] strcmp#0 -> strcmp#26
+FLOWS|REACHING_DEF[] strcmp#0 -> strcmp#29
+FLOWS|REACHING_DEF[] strcmp#0 -> strcmp#3
+FLOWS|REACHING_DEF[] strcmp#0 -> strcmp#30
+FLOWS|REACHING_DEF[] strcmp.c:<global>#0 -> strcmp.c:<global>#34
+FLOWS|REACHING_DEF[] structs.c:<global>#0 -> structs.c:<global>#56
+FLOWS|REACHING_DEF[] structs.c:<global>#0 -> structs.c:<global>#58
+FLOWS|REACHING_DEF[] structs.c:<global>#0 -> structs.c:<global>#59
+FLOWS|REACHING_DEF[] switch.c:<global>#0 -> switch.c:<global>#53
+FLOWS|REACHING_DEF[] types2.c:<global>#0 -> types2.c:<global>#73
+FLOWS|REACHING_DEF[] types2.c:<global>#0 -> types2.c:<global>#74
+FLOWS|REACHING_DEF[] types2.c:<global>#0 -> types2.c:<global>#76
+FLOWS|REACHING_DEF[] types2.c:<global>#0 -> types2.c:<global>#77
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#1
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#10
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#14
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#18
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#20
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#25
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#26
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#27
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#31
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#32
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#33
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#34
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#37
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#39
+FLOWS|REACHING_DEF[] types2.c:<global>#29 -> use#9
+FLOWS|REACHING_DEF[] unary#0 -> unary#1
+FLOWS|REACHING_DEF[] unary#0 -> unary#13
+FLOWS|REACHING_DEF[] unary#0 -> unary#18
+FLOWS|REACHING_DEF[] unary#0 -> unary#20
+FLOWS|REACHING_DEF[] unary#0 -> unary#22
+FLOWS|REACHING_DEF[] unary#0 -> unary#24
+FLOWS|REACHING_DEF[] unary#0 -> unary#8
+FLOWS|REACHING_DEF[] unary.c:<global>#0 -> unary.c:<global>#48
+FLOWS|REACHING_DEF[] unary.c:<global>#0 -> unary.c:<global>#49
+FLOWS|REACHING_DEF[a %= 3] exprs#19 -> exprs#70
+FLOWS|REACHING_DEF[a &= b] exprs#28 -> exprs#70
+FLOWS|REACHING_DEF[a *= b] exprs#13 -> exprs#70
+FLOWS|REACHING_DEF[a + b] add#7 -> add#10
+FLOWS|REACHING_DEF[a + b] add#7 -> add#6
+FLOWS|REACHING_DEF[a + g] first#6 -> first#5
+FLOWS|REACHING_DEF[a + g] first#6 -> first#9
+FLOWS|REACHING_DEF[a += b] exprs#7 -> exprs#70
+FLOWS|REACHING_DEF[a -= 2] exprs#10 -> exprs#70
+FLOWS|REACHING_DEF[a /= 2] exprs#16 -> exprs#70
+FLOWS|REACHING_DEF[a < 0 || b < 0] logic#23 -> logic#90
+FLOWS|REACHING_DEF[a < 0] logic#24 -> logic#23
+FLOWS|REACHING_DEF[a < 0] logic#24 -> logic#27
+FLOWS|REACHING_DEF[a < 0] logic#24 -> logic#90
+FLOWS|REACHING_DEF[a <<= 1] exprs#22 -> exprs#70
+FLOWS|REACHING_DEF[a = (b++, b + 1)] exprs#60 -> exprs#70
+FLOWS|REACHING_DEF[a = q.x + b] agg#27 -> agg#40
+FLOWS|REACHING_DEF[a > 0 && b > 0] logic#11 -> logic#90
+FLOWS|REACHING_DEF[a > 0] logic#12 -> logic#11
+FLOWS|REACHING_DEF[a > 0] logic#12 -> logic#15
+FLOWS|REACHING_DEF[a > 0] logic#12 -> logic#90
+FLOWS|REACHING_DEF[a >>= 1] exprs#25 -> exprs#70
+FLOWS|REACHING_DEF[a ^= b] exprs#34 -> exprs#70
+FLOWS|REACHING_DEF[a |= b] exprs#31 -> exprs#70
+FLOWS|REACHING_DEF[a++] unary#19 -> unary#25
+FLOWS|REACHING_DEF[a] add#1 -> add#2
+FLOWS|REACHING_DEF[a] add#1 -> add#8
+FLOWS|REACHING_DEF[a] add#8 -> add#10
+FLOWS|REACHING_DEF[a] add#8 -> add#2
+FLOWS|REACHING_DEF[a] add#8 -> add#7
+FLOWS|REACHING_DEF[a] agg#28 -> agg#27
+FLOWS|REACHING_DEF[a] agg#28 -> agg#36
+FLOWS|REACHING_DEF[a] agg#36 -> agg#34
+FLOWS|REACHING_DEF[a] agg#36 -> agg#35
+FLOWS|REACHING_DEF[a] agg#36 -> agg#39
+FLOWS|REACHING_DEF[a] agg#39 -> agg#38
+FLOWS|REACHING_DEF[a] agg#39 -> agg#40
+FLOWS|REACHING_DEF[a] exprs#1 -> exprs#2
+FLOWS|REACHING_DEF[a] exprs#1 -> exprs#8
+FLOWS|REACHING_DEF[a] exprs#11 -> exprs#10
+FLOWS|REACHING_DEF[a] exprs#11 -> exprs#14
+FLOWS|REACHING_DEF[a] exprs#14 -> exprs#13
+FLOWS|REACHING_DEF[a] exprs#14 -> exprs#17
+FLOWS|REACHING_DEF[a] exprs#17 -> exprs#16
+FLOWS|REACHING_DEF[a] exprs#17 -> exprs#20
+FLOWS|REACHING_DEF[a] exprs#20 -> exprs#19
+FLOWS|REACHING_DEF[a] exprs#20 -> exprs#23
+FLOWS|REACHING_DEF[a] exprs#23 -> exprs#22
+FLOWS|REACHING_DEF[a] exprs#23 -> exprs#26
+FLOWS|REACHING_DEF[a] exprs#26 -> exprs#25
+FLOWS|REACHING_DEF[a] exprs#26 -> exprs#29
+FLOWS|REACHING_DEF[a] exprs#29 -> exprs#28
+FLOWS|REACHING_DEF[a] exprs#29 -> exprs#32
+FLOWS|REACHING_DEF[a] exprs#32 -> exprs#31
+FLOWS|REACHING_DEF[a] exprs#32 -> exprs#35
+FLOWS|REACHING_DEF[a] exprs#35 -> exprs#34
+FLOWS|REACHING_DEF[a] exprs#35 -> exprs#42
+FLOWS|REACHING_DEF[a] exprs#42 -> exprs#40
+FLOWS|REACHING_DEF[a] exprs#61 -> exprs#2
+FLOWS|REACHING_DEF[a] exprs#61 -> exprs#60
+FLOWS|REACHING_DEF[a] exprs#61 -> exprs#69
+FLOWS|REACHING_DEF[a] exprs#61 -> exprs#70
+FLOWS|REACHING_DEF[a] exprs#69 -> exprs#68
+FLOWS|REACHING_DEF[a] exprs#8 -> exprs#11
+FLOWS|REACHING_DEF[a] exprs#8 -> exprs#7
+FLOWS|REACHING_DEF[a] first#1 -> first#2
+FLOWS|REACHING_DEF[a] first#1 -> first#7
+FLOWS|REACHING_DEF[a] first#7 -> first#2
+FLOWS|REACHING_DEF[a] first#7 -> first#6
+FLOWS|REACHING_DEF[a] first#7 -> first#9
+FLOWS|REACHING_DEF[a] logic#1 -> logic#13
+FLOWS|REACHING_DEF[a] logic#1 -> logic#2
+FLOWS|REACHING_DEF[a] logic#13 -> logic#12
+FLOWS|REACHING_DEF[a] logic#13 -> logic#25
+FLOWS|REACHING_DEF[a] logic#25 -> logic#24
+FLOWS|REACHING_DEF[a] logic#25 -> logic#42
+FLOWS|REACHING_DEF[a] logic#42 -> logic#2
+FLOWS|REACHING_DEF[a] logic#42 -> logic#40
+FLOWS|REACHING_DEF[a] logic#42 -> logic#41
+FLOWS|REACHING_DEF[a] logic#42 -> logic#90
+FLOWS|REACHING_DEF[a] unary#1 -> unary#2
+FLOWS|REACHING_DEF[a] unary#1 -> unary#8
+FLOWS|REACHING_DEF[a] unary#13 -> unary#12
+FLOWS|REACHING_DEF[a] unary#13 -> unary#18
+FLOWS|REACHING_DEF[a] unary#18 -> unary#17
+FLOWS|REACHING_DEF[a] unary#18 -> unary#20
+FLOWS|REACHING_DEF[a] unary#20 -> unary#19
+FLOWS|REACHING_DEF[a] unary#20 -> unary#2
+FLOWS|REACHING_DEF[a] unary#20 -> unary#25
+FLOWS|REACHING_DEF[a] unary#8 -> unary#13
+FLOWS|REACHING_DEF[a] unary#8 -> unary#7
+FLOWS|REACHING_DEF[add(1, 2)] main#5 -> main#10
+FLOWS|REACHING_DEF[add(1, 2)] main#5 -> main#3
+FLOWS|REACHING_DEF[add(1, 2)] main#5 -> main#4
+FLOWS|REACHING_DEF[arr[4]] pair.<clinit>:pair()#2 -> pair.<clinit>:pair()#6
+FLOWS|REACHING_DEF[b + 1] exprs#65 -> exprs#62
+FLOWS|REACHING_DEF[b + 1] exprs#65 -> exprs#70
+FLOWS|REACHING_DEF[b < 0] logic#27 -> logic#23
+FLOWS|REACHING_DEF[b < 0] logic#27 -> logic#24
+FLOWS|REACHING_DEF[b < 0] logic#27 -> logic#90
+FLOWS|REACHING_DEF[b = -a] unary#5 -> unary#25
+FLOWS|REACHING_DEF[b = 1] agg#24 -> agg#40
+FLOWS|REACHING_DEF[b > 0] logic#15 -> logic#11
+FLOWS|REACHING_DEF[b > 0] logic#15 -> logic#12
+FLOWS|REACHING_DEF[b > 0] logic#15 -> logic#90
+FLOWS|REACHING_DEF[b++] exprs#63 -> exprs#70
+FLOWS|REACHING_DEF[b] add#3 -> add#4
+FLOWS|REACHING_DEF[b] add#3 -> add#9
+FLOWS|REACHING_DEF[b] add#9 -> add#10
+FLOWS|REACHING_DEF[b] add#9 -> add#4
+FLOWS|REACHING_DEF[b] add#9 -> add#7
+FLOWS|REACHING_DEF[b] agg#25 -> agg#24
+FLOWS|REACHING_DEF[b] agg#25 -> agg#33
+FLOWS|REACHING_DEF[b] agg#33 -> agg#29
+FLOWS|REACHING_DEF[b] agg#33 -> agg#40
+FLOWS|REACHING_DEF[b] exprs#15 -> exprs#13
+FLOWS|REACHING_DEF[b] exprs#15 -> exprs#14
+FLOWS|REACHING_DEF[b] exprs#15 -> exprs#30
+FLOWS|REACHING_DEF[b] exprs#3 -> exprs#4
+FLOWS|REACHING_DEF[b] exprs#3 -> exprs#9
+FLOWS|REACHING_DEF[b] exprs#30 -> exprs#28
+FLOWS|REACHING_DEF[b] exprs#30 -> exprs#29
+FLOWS|REACHING_DEF[b] exprs#30 -> exprs#33
+FLOWS|REACHING_DEF[b] exprs#33 -> exprs#31
+FLOWS|REACHING_DEF[b] exprs#33 -> exprs#32
+FLOWS|REACHING_DEF[b] exprs#33 -> exprs#36
+FLOWS|REACHING_DEF[b] exprs#36 -> exprs#34
+FLOWS|REACHING_DEF[b] exprs#36 -> exprs#35
+FLOWS|REACHING_DEF[b] exprs#36 -> exprs#64
+FLOWS|REACHING_DEF[b] exprs#64 -> exprs#63
+FLOWS|REACHING_DEF[b] exprs#64 -> exprs#66
+FLOWS|REACHING_DEF[b] exprs#66 -> exprs#4
+FLOWS|REACHING_DEF[b] exprs#66 -> exprs#65
+FLOWS|REACHING_DEF[b] exprs#66 -> exprs#70
+FLOWS|REACHING_DEF[b] exprs#9 -> exprs#15
+FLOWS|REACHING_DEF[b] exprs#9 -> exprs#7
+FLOWS|REACHING_DEF[b] exprs#9 -> exprs#8
+FLOWS|REACHING_DEF[b] logic#16 -> logic#15
+FLOWS|REACHING_DEF[b] logic#16 -> logic#28
+FLOWS|REACHING_DEF[b] logic#16 -> logic#4
+FLOWS|REACHING_DEF[b] logic#16 -> logic#53
+FLOWS|REACHING_DEF[b] logic#16 -> logic#90
+FLOWS|REACHING_DEF[b] logic#28 -> logic#27
+FLOWS|REACHING_DEF[b] logic#28 -> logic#4
+FLOWS|REACHING_DEF[b] logic#28 -> logic#53
+FLOWS|REACHING_DEF[b] logic#28 -> logic#90
+FLOWS|REACHING_DEF[b] logic#3 -> logic#16
+FLOWS|REACHING_DEF[b] logic#3 -> logic#28
+FLOWS|REACHING_DEF[b] logic#3 -> logic#4
+FLOWS|REACHING_DEF[b] logic#3 -> logic#53
+FLOWS|REACHING_DEF[b] logic#3 -> logic#90
+FLOWS|REACHING_DEF[b] logic#53 -> logic#4
+FLOWS|REACHING_DEF[b] logic#53 -> logic#51
+FLOWS|REACHING_DEF[b] logic#53 -> logic#52
+FLOWS|REACHING_DEF[b] logic#53 -> logic#90
+FLOWS|REACHING_DEF[b] unary#22 -> unary#21
+FLOWS|REACHING_DEF[b] unary#22 -> unary#24
+FLOWS|REACHING_DEF[b] unary#22 -> unary#25
+FLOWS|REACHING_DEF[b] unary#24 -> unary#23
+FLOWS|REACHING_DEF[b] unary#6 -> unary#22
+FLOWS|REACHING_DEF[b] unary#6 -> unary#5
+FLOWS|REACHING_DEF[base] bsearch#25 -> bsearch#23
+FLOWS|REACHING_DEF[base] bsearch#25 -> bsearch#4
+FLOWS|REACHING_DEF[base] bsearch#25 -> bsearch#72
+FLOWS|REACHING_DEF[base] bsearch#3 -> bsearch#25
+FLOWS|REACHING_DEF[base] bsearch#3 -> bsearch#4
+FLOWS|REACHING_DEF[base] bsearch#53 -> bsearch#52
+FLOWS|REACHING_DEF[c + v.i] use#36 -> use#35
+FLOWS|REACHING_DEF[c + v.i] use#36 -> use#41
+FLOWS|REACHING_DEF[c = !a] unary#10 -> unary#25
+FLOWS|REACHING_DEF[c = 'x'] exprs#53 -> exprs#70
+FLOWS|REACHING_DEF[c = GREEN] use#12 -> use#41
+FLOWS|REACHING_DEF[c] exprs#54 -> exprs#53
+FLOWS|REACHING_DEF[c] exprs#54 -> exprs#70
+FLOWS|REACHING_DEF[c] unary#11 -> unary#10
+FLOWS|REACHING_DEF[c] unary#11 -> unary#25
+FLOWS|REACHING_DEF[c] use#13 -> use#12
+FLOWS|REACHING_DEF[c] use#13 -> use#37
+FLOWS|REACHING_DEF[c] use#37 -> use#36
+FLOWS|REACHING_DEF[c] use#37 -> use#41
+FLOWS|REACHING_DEF[char *] bsearch#24 -> bsearch#23
+FLOWS|REACHING_DEF[char *] bsearch#56 -> bsearch#55
+FLOWS|REACHING_DEF[cmp(key, try)] bsearch#33 -> bsearch#31
+FLOWS|REACHING_DEF[cmp(key, try)] bsearch#33 -> bsearch#32
+FLOWS|REACHING_DEF[cmp(key, try)] bsearch#33 -> bsearch#72
+FLOWS|REACHING_DEF[cmp] bsearch#9 -> bsearch#10
+FLOWS|REACHING_DEF[cmp] bsearch#9 -> bsearch#72
+FLOWS|REACHING_DEF[d = ~a] unary#15 -> unary#25
+FLOWS|REACHING_DEF[d] unary#16 -> unary#15
+FLOWS|REACHING_DEF[d] unary#16 -> unary#25
+FLOWS|REACHING_DEF[f = 1.5] exprs#49 -> exprs#70
+FLOWS|REACHING_DEF[f] exprs#50 -> exprs#49
+FLOWS|REACHING_DEF[f] exprs#50 -> exprs#70
+FLOWS|REACHING_DEF[first(1)] second#11 -> second#13
+FLOWS|REACHING_DEF[first(1)] second#11 -> second#5
+FLOWS|REACHING_DEF[fn(x, x)] apply#7 -> apply#11
+FLOWS|REACHING_DEF[fn(x, x)] apply#7 -> apply#6
+FLOWS|REACHING_DEF[fn] apply#1 -> apply#11
+FLOWS|REACHING_DEF[fn] apply#1 -> apply#2
+FLOWS|REACHING_DEF[g = 5] order.c:<global>#37 -> order.c:<global>#43
+FLOWS|REACHING_DEF[g] order.c:<global>#38 -> first#8
+FLOWS|REACHING_DEF[g] order.c:<global>#38 -> order.c:<global>#37
+FLOWS|REACHING_DEF[g] order.c:<global>#38 -> order.c:<global>#43
+FLOWS|REACHING_DEF[gcounter = a] agg#34 -> agg#40
+FLOWS|REACHING_DEF[grid[1][2] = n] use#28 -> use#41
+FLOWS|REACHING_DEF[grid[1][2]] use#29 -> use#28
+FLOWS|REACHING_DEF[grid[1][2]] use#29 -> use#41
+FLOWS|REACHING_DEF[grid[2][3]] use#22 -> use#41
+FLOWS|REACHING_DEF[grid[2][3]] use#24 -> use#22
+FLOWS|REACHING_DEF[grid[2][3]] use#24 -> use#23
+FLOWS|REACHING_DEF[grid[2][3]] use#24 -> use#41
+FLOWS|REACHING_DEF[grid] use#23 -> use#22
+FLOWS|REACHING_DEF[grid] use#23 -> use#30
+FLOWS|REACHING_DEF[grid] use#23 -> use#31
+FLOWS|REACHING_DEF[grid] use#23 -> use#41
+FLOWS|REACHING_DEF[helper(a)] agg#38 -> agg#37
+FLOWS|REACHING_DEF[helper(a)] agg#38 -> agg#40
+FLOWS|REACHING_DEF[i + 1] sum#24 -> sum#22
+FLOWS|REACHING_DEF[i + 1] sum#24 -> sum#23
+FLOWS|REACHING_DEF[i + 1] sum#24 -> sum#29
+FLOWS|REACHING_DEF[i < a] logic#40 -> logic#90
+FLOWS|REACHING_DEF[i < n] count#13 -> count#42
+FLOWS|REACHING_DEF[i < n] sum#13 -> sum#29
+FLOWS|REACHING_DEF[i = 0] count#10 -> count#42
+FLOWS|REACHING_DEF[i = 0] logic#37 -> logic#90
+FLOWS|REACHING_DEF[i = 0] sum#9 -> sum#29
+FLOWS|REACHING_DEF[i = i + 1] sum#22 -> sum#29
+FLOWS|REACHING_DEF[i++] count#16 -> count#42
+FLOWS|REACHING_DEF[i++] logic#43 -> logic#90
+FLOWS|REACHING_DEF[i] count#11 -> count#10
+FLOWS|REACHING_DEF[i] count#11 -> count#14
+FLOWS|REACHING_DEF[i] count#14 -> count#13
+FLOWS|REACHING_DEF[i] count#14 -> count#15
+FLOWS|REACHING_DEF[i] count#14 -> count#23
+FLOWS|REACHING_DEF[i] count#14 -> count#42
+FLOWS|REACHING_DEF[i] count#17 -> count#14
+FLOWS|REACHING_DEF[i] count#17 -> count#16
+FLOWS|REACHING_DEF[i] count#23 -> count#17
+FLOWS|REACHING_DEF[i] count#23 -> count#21
+FLOWS|REACHING_DEF[i] logic#38 -> logic#37
+FLOWS|REACHING_DEF[i] logic#38 -> logic#41
+FLOWS|REACHING_DEF[i] logic#41 -> logic#40
+FLOWS|REACHING_DEF[i] logic#41 -> logic#42
+FLOWS|REACHING_DEF[i] logic#41 -> logic#44
+FLOWS|REACHING_DEF[i] logic#41 -> logic#90
+FLOWS|REACHING_DEF[i] logic#44 -> logic#41
+FLOWS|REACHING_DEF[i] logic#44 -> logic#43
+FLOWS|REACHING_DEF[i] sum#10 -> sum#14
+FLOWS|REACHING_DEF[i] sum#10 -> sum#9
+FLOWS|REACHING_DEF[i] sum#14 -> sum#13
+FLOWS|REACHING_DEF[i] sum#14 -> sum#15
+FLOWS|REACHING_DEF[i] sum#14 -> sum#21
+FLOWS|REACHING_DEF[i] sum#14 -> sum#29
+FLOWS|REACHING_DEF[i] sum#21 -> sum#19
+FLOWS|REACHING_DEF[i] sum#21 -> sum#25
+FLOWS|REACHING_DEF[i] sum#23 -> sum#14
+FLOWS|REACHING_DEF[i] sum#23 -> sum#22
+FLOWS|REACHING_DEF[i] sum#25 -> sum#24
+FLOWS|REACHING_DEF[int[2][3]] use#25 -> use#24
+FLOWS|REACHING_DEF[int[2][3]] use#25 -> use#41
+FLOWS|REACHING_DEF[j < b] logic#51 -> logic#90
+FLOWS|REACHING_DEF[j = 0] logic#48 -> logic#90
+FLOWS|REACHING_DEF[j == 3] logic#58 -> logic#90
+FLOWS|REACHING_DEF[j == 5] logic#64 -> logic#90
+FLOWS|REACHING_DEF[j++] logic#54 -> logic#90
+FLOWS|REACHING_DEF[j] logic#49 -> logic#48
+FLOWS|REACHING_DEF[j] logic#49 -> logic#52
+FLOWS|REACHING_DEF[j] logic#52 -> logic#51
+FLOWS|REACHING_DEF[j] logic#52 -> logic#53
+FLOWS|REACHING_DEF[j] logic#52 -> logic#59
+FLOWS|REACHING_DEF[j] logic#52 -> logic#90
+FLOWS|REACHING_DEF[j] logic#55 -> logic#52
+FLOWS|REACHING_DEF[j] logic#55 -> logic#54
+FLOWS|REACHING_DEF[j] logic#59 -> logic#55
+FLOWS|REACHING_DEF[j] logic#59 -> logic#58
+FLOWS|REACHING_DEF[j] logic#59 -> logic#65
+FLOWS|REACHING_DEF[j] logic#65 -> logic#55
+FLOWS|REACHING_DEF[j] logic#65 -> logic#64
+FLOWS|REACHING_DEF[j] logic#65 -> logic#90
+FLOWS|REACHING_DEF[k] pick#1 -> pick#2
+FLOWS|REACHING_DEF[k] pick#1 -> pick#50
+FLOWS|REACHING_DEF[key] bsearch#1 -> bsearch#2
+FLOWS|REACHING_DEF[key] bsearch#1 -> bsearch#35
+FLOWS|REACHING_DEF[key] bsearch#35 -> bsearch#2
+FLOWS|REACHING_DEF[key] bsearch#35 -> bsearch#33
+FLOWS|REACHING_DEF[key] bsearch#35 -> bsearch#36
+FLOWS|REACHING_DEF[key] bsearch#35 -> bsearch#72
+FLOWS|REACHING_DEF[l++] memcmp#28 -> memcmp#41
+FLOWS|REACHING_DEF[l] memcmp#11 -> memcmp#10
+FLOWS|REACHING_DEF[l] memcmp#11 -> memcmp#22
+FLOWS|REACHING_DEF[l] memcmp#11 -> memcmp#29
+FLOWS|REACHING_DEF[l] memcmp#11 -> memcmp#37
+FLOWS|REACHING_DEF[l] memcmp#11 -> memcmp#41
+FLOWS|REACHING_DEF[l] memcmp#29 -> memcmp#22
+FLOWS|REACHING_DEF[l] memcmp#29 -> memcmp#28
+FLOWS|REACHING_DEF[l] memcmp#29 -> memcmp#37
+FLOWS|REACHING_DEF[l] memcmp#29 -> memcmp#41
+FLOWS|REACHING_DEF[l] strcmp#1 -> strcmp#11
+FLOWS|REACHING_DEF[l] strcmp#1 -> strcmp#15
+FLOWS|REACHING_DEF[l] strcmp#1 -> strcmp#18
+FLOWS|REACHING_DEF[l] strcmp#1 -> strcmp#2
+FLOWS|REACHING_DEF[l] strcmp#1 -> strcmp#26
+FLOWS|REACHING_DEF[l] strcmp#18 -> strcmp#17
+FLOWS|REACHING_DEF[l] strcmp#26 -> strcmp#2
+FLOWS|REACHING_DEF[l] strcmp#26 -> strcmp#24
+FLOWS|REACHING_DEF[l] strcmp#26 -> strcmp#31
+FLOWS|REACHING_DEF[long] exprs#41 -> exprs#40
+FLOWS|REACHING_DEF[m = t > 0 ? t : 0] count#32 -> count#42
+FLOWS|REACHING_DEF[m] count#33 -> count#32
+FLOWS|REACHING_DEF[m] count#33 -> count#41
+FLOWS|REACHING_DEF[m] count#33 -> count#42
+FLOWS|REACHING_DEF[m] count#41 -> count#40
+FLOWS|REACHING_DEF[msg] exprs#58 -> exprs#57
+FLOWS|REACHING_DEF[msg] exprs#58 -> exprs#70
+FLOWS|REACHING_DEF[n && *l == *r] memcmp#18 -> memcmp#41
+FLOWS|REACHING_DEF[n * 2] classify#22 -> classify#20
+FLOWS|REACHING_DEF[n * 2] classify#22 -> classify#21
+FLOWS|REACHING_DEF[n * 2] classify#22 -> classify#27
+FLOWS|REACHING_DEF[n + LIMIT] macros#20 -> macros#18
+FLOWS|REACHING_DEF[n + LIMIT] macros#20 -> macros#19
+FLOWS|REACHING_DEF[n - 1] classify#15 -> classify#13
+FLOWS|REACHING_DEF[n - 1] classify#15 -> classify#14
+FLOWS|REACHING_DEF[n - 1] classify#15 -> classify#27
+FLOWS|REACHING_DEF[n - 1] gotos#16 -> gotos#14
+FLOWS|REACHING_DEF[n - 1] gotos#16 -> gotos#15
+FLOWS|REACHING_DEF[n - 1] gotos#16 -> gotos#33
+FLOWS|REACHING_DEF[n = n - 1] gotos#14 -> gotos#33
+FLOWS|REACHING_DEF[n > 0] gotos#20 -> gotos#33
+FLOWS|REACHING_DEF[n > 10] classify#9 -> classify#27
+FLOWS|REACHING_DEF[n > LIMIT] macros#5 -> macros#27
+FLOWS|REACHING_DEF[n ? *l-*r : 0] memcmp#33 -> memcmp#32
+FLOWS|REACHING_DEF[n ? *l-*r : 0] memcmp#33 -> memcmp#41
+FLOWS|REACHING_DEF[n--] memcmp#26 -> memcmp#41
+FLOWS|REACHING_DEF[n] classify#1 -> classify#10
+FLOWS|REACHING_DEF[n] classify#1 -> classify#2
+FLOWS|REACHING_DEF[n] classify#10 -> classify#16
+FLOWS|REACHING_DEF[n] classify#10 -> classify#23
+FLOWS|REACHING_DEF[n] classify#10 -> classify#9
+FLOWS|REACHING_DEF[n] classify#16 -> classify#15
+FLOWS|REACHING_DEF[n] classify#16 -> classify#2
+FLOWS|REACHING_DEF[n] classify#16 -> classify#27
+FLOWS|REACHING_DEF[n] classify#23 -> classify#2
+FLOWS|REACHING_DEF[n] classify#23 -> classify#22
+FLOWS|REACHING_DEF[n] classify#23 -> classify#27
+FLOWS|REACHING_DEF[n] count#1 -> count#15
+FLOWS|REACHING_DEF[n] count#1 -> count#2
+FLOWS|REACHING_DEF[n] count#15 -> count#13
+FLOWS|REACHING_DEF[n] count#15 -> count#14
+FLOWS|REACHING_DEF[n] count#15 -> count#2
+FLOWS|REACHING_DEF[n] count#15 -> count#42
+FLOWS|REACHING_DEF[n] gotos#1 -> gotos#13
+FLOWS|REACHING_DEF[n] gotos#1 -> gotos#2
+FLOWS|REACHING_DEF[n] gotos#13 -> gotos#11
+FLOWS|REACHING_DEF[n] gotos#13 -> gotos#17
+FLOWS|REACHING_DEF[n] gotos#15 -> gotos#14
+FLOWS|REACHING_DEF[n] gotos#15 -> gotos#21
+FLOWS|REACHING_DEF[n] gotos#17 -> gotos#16
+FLOWS|REACHING_DEF[n] gotos#21 -> gotos#13
+FLOWS|REACHING_DEF[n] gotos#21 -> gotos#2
+FLOWS|REACHING_DEF[n] gotos#21 -> gotos#20
+FLOWS|REACHING_DEF[n] gotos#21 -> gotos#33
+FLOWS|REACHING_DEF[n] macros#1 -> macros#2
+FLOWS|REACHING_DEF[n] macros#1 -> macros#6
+FLOWS|REACHING_DEF[n] macros#13 -> macros#12
+FLOWS|REACHING_DEF[n] macros#13 -> macros#16
+FLOWS|REACHING_DEF[n] macros#13 -> macros#17
+FLOWS|REACHING_DEF[n] macros#13 -> macros#2
+FLOWS|REACHING_DEF[n] macros#13 -> macros#27
+FLOWS|REACHING_DEF[n] macros#16 -> macros#15
+FLOWS|REACHING_DEF[n] macros#16 -> macros#17
+FLOWS|REACHING_DEF[n] macros#16 -> macros#2
+FLOWS|REACHING_DEF[n] macros#16 -> macros#27
+FLOWS|REACHING_DEF[n] macros#17 -> macros#15
+FLOWS|REACHING_DEF[n] macros#17 -> macros#16
+FLOWS|REACHING_DEF[n] macros#17 -> macros#2
+FLOWS|REACHING_DEF[n] macros#17 -> macros#27
+FLOWS|REACHING_DEF[n] macros#19 -> macros#18
+FLOWS|REACHING_DEF[n] macros#21 -> macros#20
+FLOWS|REACHING_DEF[n] macros#6 -> macros#13
+FLOWS|REACHING_DEF[n] macros#6 -> macros#21
+FLOWS|REACHING_DEF[n] macros#6 -> macros#5
+FLOWS|REACHING_DEF[n] macros#6 -> macros#7
+FLOWS|REACHING_DEF[n] memcmp#19 -> memcmp#18
+FLOWS|REACHING_DEF[n] memcmp#19 -> memcmp#20
+FLOWS|REACHING_DEF[n] memcmp#19 -> memcmp#27
+FLOWS|REACHING_DEF[n] memcmp#27 -> memcmp#19
+FLOWS|REACHING_DEF[n] memcmp#27 -> memcmp#26
+FLOWS|REACHING_DEF[n] memcmp#34 -> memcmp#33
+FLOWS|REACHING_DEF[n] memcmp#34 -> memcmp#41
+FLOWS|REACHING_DEF[n] memcmp#34 -> memcmp#6
+FLOWS|REACHING_DEF[n] memcmp#5 -> memcmp#19
+FLOWS|REACHING_DEF[n] memcmp#5 -> memcmp#6
+FLOWS|REACHING_DEF[n] sum#1 -> sum#15
+FLOWS|REACHING_DEF[n] sum#1 -> sum#2
+FLOWS|REACHING_DEF[n] sum#15 -> sum#13
+FLOWS|REACHING_DEF[n] sum#15 -> sum#14
+FLOWS|REACHING_DEF[n] sum#15 -> sum#2
+FLOWS|REACHING_DEF[n] sum#15 -> sum#29
+FLOWS|REACHING_DEF[n] use#1 -> use#10
+FLOWS|REACHING_DEF[n] use#1 -> use#2
+FLOWS|REACHING_DEF[n] use#10 -> use#20
+FLOWS|REACHING_DEF[n] use#10 -> use#8
+FLOWS|REACHING_DEF[n] use#20 -> use#16
+FLOWS|REACHING_DEF[n] use#20 -> use#17
+FLOWS|REACHING_DEF[n] use#20 -> use#34
+FLOWS|REACHING_DEF[n] use#34 -> use#2
+FLOWS|REACHING_DEF[n] use#34 -> use#28
+FLOWS|REACHING_DEF[n] use#34 -> use#29
+FLOWS|REACHING_DEF[n] use#34 -> use#41
+FLOWS|REACHING_DEF[nel > 0] bsearch#16 -> bsearch#72
+FLOWS|REACHING_DEF[nel/2+1] bsearch#61 -> bsearch#59
+FLOWS|REACHING_DEF[nel/2+1] bsearch#61 -> bsearch#60
+FLOWS|REACHING_DEF[nel/2] bsearch#28 -> bsearch#26
+FLOWS|REACHING_DEF[nel/2] bsearch#28 -> bsearch#27
+FLOWS|REACHING_DEF[nel/2] bsearch#28 -> bsearch#72
+FLOWS|REACHING_DEF[nel/2] bsearch#62 -> bsearch#61
+FLOWS|REACHING_DEF[nel] bsearch#17 -> bsearch#16
+FLOWS|REACHING_DEF[nel] bsearch#17 -> bsearch#29
+FLOWS|REACHING_DEF[nel] bsearch#29 -> bsearch#28
+FLOWS|REACHING_DEF[nel] bsearch#29 -> bsearch#43
+FLOWS|REACHING_DEF[nel] bsearch#29 -> bsearch#6
+FLOWS|REACHING_DEF[nel] bsearch#29 -> bsearch#63
+FLOWS|REACHING_DEF[nel] bsearch#29 -> bsearch#72
+FLOWS|REACHING_DEF[nel] bsearch#43 -> bsearch#42
+FLOWS|REACHING_DEF[nel] bsearch#5 -> bsearch#17
+FLOWS|REACHING_DEF[nel] bsearch#5 -> bsearch#6
+FLOWS|REACHING_DEF[nel] bsearch#60 -> bsearch#59
+FLOWS|REACHING_DEF[nel] bsearch#63 -> bsearch#60
+FLOWS|REACHING_DEF[nel] bsearch#63 -> bsearch#62
+FLOWS|REACHING_DEF[p->y] agg#19 -> agg#15
+FLOWS|REACHING_DEF[p->y] agg#19 -> agg#16
+FLOWS|REACHING_DEF[p->y] agg#19 -> agg#2
+FLOWS|REACHING_DEF[p->y] agg#19 -> agg#40
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.addressOf#1 -> <operator>.addressOf#3
+FLOWS|REACHING_DEF[p1] <operator>.addressOf#1 -> <operator>.addressOf#4
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#3
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.assignmentDivision#1 -> <operator>.assignmentDivision#3
+FLOWS|REACHING_DEF[p1] <operator>.assignmentDivision#1 -> <operator>.assignmentDivision#5
+FLOWS|REACHING_DEF[p1] <operator>.assignmentMinus#1 -> <operator>.assignmentMinus#3
+FLOWS|REACHING_DEF[p1] <operator>.assignmentMinus#1 -> <operator>.assignmentMinus#5
+FLOWS|REACHING_DEF[p1] <operator>.assignmentMultiplication#1 -> <operator>.assignmentMultiplication#3
+FLOWS|REACHING_DEF[p1] <operator>.assignmentMultiplication#1 -> <operator>.assignmentMultiplication#5
+FLOWS|REACHING_DEF[p1] <operator>.assignmentPlus#1 -> <operator>.assignmentPlus#3
+FLOWS|REACHING_DEF[p1] <operator>.assignmentPlus#1 -> <operator>.assignmentPlus#5
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#3
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p1] <operator>.division#1 -> <operator>.division#3
+FLOWS|REACHING_DEF[p1] <operator>.division#1 -> <operator>.division#5
+FLOWS|REACHING_DEF[p1] <operator>.equals#1 -> <operator>.equals#3
+FLOWS|REACHING_DEF[p1] <operator>.equals#1 -> <operator>.equals#5
+FLOWS|REACHING_DEF[p1] <operator>.fieldAccess#1 -> <operator>.fieldAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.fieldAccess#1 -> <operator>.fieldAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.greaterThan#1 -> <operator>.greaterThan#3
+FLOWS|REACHING_DEF[p1] <operator>.greaterThan#1 -> <operator>.greaterThan#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.indirection#1 -> <operator>.indirection#3
+FLOWS|REACHING_DEF[p1] <operator>.indirection#1 -> <operator>.indirection#4
+FLOWS|REACHING_DEF[p1] <operator>.lessThan#1 -> <operator>.lessThan#3
+FLOWS|REACHING_DEF[p1] <operator>.lessThan#1 -> <operator>.lessThan#5
+FLOWS|REACHING_DEF[p1] <operator>.logicalAnd#1 -> <operator>.logicalAnd#3
+FLOWS|REACHING_DEF[p1] <operator>.logicalAnd#1 -> <operator>.logicalAnd#5
+FLOWS|REACHING_DEF[p1] <operator>.logicalNot#1 -> <operator>.logicalNot#3
+FLOWS|REACHING_DEF[p1] <operator>.logicalNot#1 -> <operator>.logicalNot#4
+FLOWS|REACHING_DEF[p1] <operator>.logicalOr#1 -> <operator>.logicalOr#3
+FLOWS|REACHING_DEF[p1] <operator>.logicalOr#1 -> <operator>.logicalOr#5
+FLOWS|REACHING_DEF[p1] <operator>.minus#1 -> <operator>.minus#3
+FLOWS|REACHING_DEF[p1] <operator>.minus#1 -> <operator>.minus#4
+FLOWS|REACHING_DEF[p1] <operator>.multiplication#1 -> <operator>.multiplication#3
+FLOWS|REACHING_DEF[p1] <operator>.multiplication#1 -> <operator>.multiplication#5
+FLOWS|REACHING_DEF[p1] <operator>.not#1 -> <operator>.not#3
+FLOWS|REACHING_DEF[p1] <operator>.not#1 -> <operator>.not#4
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#5
+FLOWS|REACHING_DEF[p1] <operator>.postDecrement#1 -> <operator>.postDecrement#3
+FLOWS|REACHING_DEF[p1] <operator>.postDecrement#1 -> <operator>.postDecrement#4
+FLOWS|REACHING_DEF[p1] <operator>.postIncrement#1 -> <operator>.postIncrement#3
+FLOWS|REACHING_DEF[p1] <operator>.postIncrement#1 -> <operator>.postIncrement#4
+FLOWS|REACHING_DEF[p1] <operator>.preDecrement#1 -> <operator>.preDecrement#3
+FLOWS|REACHING_DEF[p1] <operator>.preDecrement#1 -> <operator>.preDecrement#4
+FLOWS|REACHING_DEF[p1] <operator>.sizeOf#1 -> <operator>.sizeOf#3
+FLOWS|REACHING_DEF[p1] <operator>.sizeOf#1 -> <operator>.sizeOf#4
+FLOWS|REACHING_DEF[p1] <operator>.subtraction#1 -> <operator>.subtraction#3
+FLOWS|REACHING_DEF[p1] <operator>.subtraction#1 -> <operator>.subtraction#5
+FLOWS|REACHING_DEF[p1] <operators>.assignmentAnd#1 -> <operators>.assignmentAnd#3
+FLOWS|REACHING_DEF[p1] <operators>.assignmentAnd#1 -> <operators>.assignmentAnd#5
+FLOWS|REACHING_DEF[p1] <operators>.assignmentArithmeticShiftRight#1 -> <operators>.assignmentArithmeticShiftRight#3
+FLOWS|REACHING_DEF[p1] <operators>.assignmentArithmeticShiftRight#1 -> <operators>.assignmentArithmeticShiftRight#5
+FLOWS|REACHING_DEF[p1] <operators>.assignmentModulo#1 -> <operators>.assignmentModulo#3
+FLOWS|REACHING_DEF[p1] <operators>.assignmentModulo#1 -> <operators>.assignmentModulo#5
+FLOWS|REACHING_DEF[p1] <operators>.assignmentOr#1 -> <operators>.assignmentOr#3
+FLOWS|REACHING_DEF[p1] <operators>.assignmentOr#1 -> <operators>.assignmentOr#5
+FLOWS|REACHING_DEF[p1] <operators>.assignmentShiftLeft#1 -> <operators>.assignmentShiftLeft#3
+FLOWS|REACHING_DEF[p1] <operators>.assignmentShiftLeft#1 -> <operators>.assignmentShiftLeft#5
+FLOWS|REACHING_DEF[p1] <operators>.assignmentXor#1 -> <operators>.assignmentXor#3
+FLOWS|REACHING_DEF[p1] <operators>.assignmentXor#1 -> <operators>.assignmentXor#5
+FLOWS|REACHING_DEF[p1] macros.c:SQR:ANY(1)#1 -> macros.c:SQR:ANY(1)#2
+FLOWS|REACHING_DEF[p1] macros.c:SQR:ANY(1)#1 -> macros.c:SQR:ANY(1)#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#6
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.assignmentDivision#4 -> <operator>.assignmentDivision#5
+FLOWS|REACHING_DEF[p2] <operator>.assignmentDivision#4 -> <operator>.assignmentDivision#6
+FLOWS|REACHING_DEF[p2] <operator>.assignmentMinus#4 -> <operator>.assignmentMinus#5
+FLOWS|REACHING_DEF[p2] <operator>.assignmentMinus#4 -> <operator>.assignmentMinus#6
+FLOWS|REACHING_DEF[p2] <operator>.assignmentMultiplication#4 -> <operator>.assignmentMultiplication#5
+FLOWS|REACHING_DEF[p2] <operator>.assignmentMultiplication#4 -> <operator>.assignmentMultiplication#6
+FLOWS|REACHING_DEF[p2] <operator>.assignmentPlus#4 -> <operator>.assignmentPlus#5
+FLOWS|REACHING_DEF[p2] <operator>.assignmentPlus#4 -> <operator>.assignmentPlus#6
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#6
+FLOWS|REACHING_DEF[p2] <operator>.division#4 -> <operator>.division#5
+FLOWS|REACHING_DEF[p2] <operator>.division#4 -> <operator>.division#6
+FLOWS|REACHING_DEF[p2] <operator>.equals#4 -> <operator>.equals#5
+FLOWS|REACHING_DEF[p2] <operator>.equals#4 -> <operator>.equals#6
+FLOWS|REACHING_DEF[p2] <operator>.fieldAccess#4 -> <operator>.fieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.fieldAccess#4 -> <operator>.fieldAccess#6
+FLOWS|REACHING_DEF[p2] <operator>.greaterThan#4 -> <operator>.greaterThan#5
+FLOWS|REACHING_DEF[p2] <operator>.greaterThan#4 -> <operator>.greaterThan#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[p2] <operator>.lessThan#4 -> <operator>.lessThan#5
+FLOWS|REACHING_DEF[p2] <operator>.lessThan#4 -> <operator>.lessThan#6
+FLOWS|REACHING_DEF[p2] <operator>.logicalAnd#4 -> <operator>.logicalAnd#5
+FLOWS|REACHING_DEF[p2] <operator>.logicalAnd#4 -> <operator>.logicalAnd#6
+FLOWS|REACHING_DEF[p2] <operator>.logicalOr#4 -> <operator>.logicalOr#5
+FLOWS|REACHING_DEF[p2] <operator>.logicalOr#4 -> <operator>.logicalOr#6
+FLOWS|REACHING_DEF[p2] <operator>.multiplication#4 -> <operator>.multiplication#5
+FLOWS|REACHING_DEF[p2] <operator>.multiplication#4 -> <operator>.multiplication#6
+FLOWS|REACHING_DEF[p2] <operator>.pointerCall#4 -> <operator>.pointerCall#5
+FLOWS|REACHING_DEF[p2] <operator>.pointerCall#4 -> <operator>.pointerCall#6
+FLOWS|REACHING_DEF[p2] <operator>.subtraction#4 -> <operator>.subtraction#5
+FLOWS|REACHING_DEF[p2] <operator>.subtraction#4 -> <operator>.subtraction#6
+FLOWS|REACHING_DEF[p2] <operators>.assignmentAnd#4 -> <operators>.assignmentAnd#5
+FLOWS|REACHING_DEF[p2] <operators>.assignmentAnd#4 -> <operators>.assignmentAnd#6
+FLOWS|REACHING_DEF[p2] <operators>.assignmentArithmeticShiftRight#4 -> <operators>.assignmentArithmeticShiftRight#5
+FLOWS|REACHING_DEF[p2] <operators>.assignmentArithmeticShiftRight#4 -> <operators>.assignmentArithmeticShiftRight#6
+FLOWS|REACHING_DEF[p2] <operators>.assignmentModulo#4 -> <operators>.assignmentModulo#5
+FLOWS|REACHING_DEF[p2] <operators>.assignmentModulo#4 -> <operators>.assignmentModulo#6
+FLOWS|REACHING_DEF[p2] <operators>.assignmentOr#4 -> <operators>.assignmentOr#5
+FLOWS|REACHING_DEF[p2] <operators>.assignmentOr#4 -> <operators>.assignmentOr#6
+FLOWS|REACHING_DEF[p2] <operators>.assignmentShiftLeft#4 -> <operators>.assignmentShiftLeft#5
+FLOWS|REACHING_DEF[p2] <operators>.assignmentShiftLeft#4 -> <operators>.assignmentShiftLeft#6
+FLOWS|REACHING_DEF[p2] <operators>.assignmentXor#4 -> <operators>.assignmentXor#5
+FLOWS|REACHING_DEF[p2] <operators>.assignmentXor#4 -> <operators>.assignmentXor#6
+FLOWS|REACHING_DEF[p3] <operator>.alloc#7 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p3] <operator>.alloc#7 -> <operator>.alloc#8
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#8
+FLOWS|REACHING_DEF[p] agg#1 -> agg#19
+FLOWS|REACHING_DEF[p] agg#1 -> agg#2
+FLOWS|REACHING_DEF[p] agg#1 -> agg#20
+FLOWS|REACHING_DEF[p] agg#1 -> agg#40
+FLOWS|REACHING_DEF[p] ptr#1 -> ptr#19
+FLOWS|REACHING_DEF[p] ptr#1 -> ptr#2
+FLOWS|REACHING_DEF[p] ptr#1 -> ptr#8
+FLOWS|REACHING_DEF[pr.arr[0] + first(1)] second#5 -> second#13
+FLOWS|REACHING_DEF[pr.arr[0] + first(1)] second#5 -> second#4
+FLOWS|REACHING_DEF[pr.arr[0]] second#6 -> second#13
+FLOWS|REACHING_DEF[pr.arr[0]] second#6 -> second#5
+FLOWS|REACHING_DEF[pr] second#1 -> second#13
+FLOWS|REACHING_DEF[pr] second#1 -> second#2
+FLOWS|REACHING_DEF[pr] second#1 -> second#7
+FLOWS|REACHING_DEF[pr] second#1 -> second#8
+FLOWS|REACHING_DEF[q.x + b] agg#29 -> agg#27
+FLOWS|REACHING_DEF[q.x + b] agg#29 -> agg#28
+FLOWS|REACHING_DEF[q.x + b] agg#29 -> agg#40
+FLOWS|REACHING_DEF[q.x = vals[0]] agg#8 -> agg#40
+FLOWS|REACHING_DEF[q.x] agg#30 -> agg#29
+FLOWS|REACHING_DEF[q.x] agg#30 -> agg#40
+FLOWS|REACHING_DEF[q.x] agg#9 -> agg#17
+FLOWS|REACHING_DEF[q.x] agg#9 -> agg#30
+FLOWS|REACHING_DEF[q.x] agg#9 -> agg#31
+FLOWS|REACHING_DEF[q.x] agg#9 -> agg#8
+FLOWS|REACHING_DEF[q.y = p->y] agg#15 -> agg#40
+FLOWS|REACHING_DEF[q.y] agg#16 -> agg#15
+FLOWS|REACHING_DEF[q.y] agg#16 -> agg#31
+FLOWS|REACHING_DEF[q.y] agg#16 -> agg#40
+FLOWS|REACHING_DEF[q] ptr#11 -> ptr#10
+FLOWS|REACHING_DEF[q] ptr#11 -> ptr#17
+FLOWS|REACHING_DEF[q] ptr#11 -> ptr#19
+FLOWS|REACHING_DEF[r * 2] gotos#27 -> gotos#25
+FLOWS|REACHING_DEF[r * 2] gotos#27 -> gotos#26
+FLOWS|REACHING_DEF[r * 2] gotos#27 -> gotos#33
+FLOWS|REACHING_DEF[r + 1] logic#71 -> logic#69
+FLOWS|REACHING_DEF[r + 1] logic#71 -> logic#70
+FLOWS|REACHING_DEF[r + 1] logic#71 -> logic#90
+FLOWS|REACHING_DEF[r + n] gotos#11 -> gotos#10
+FLOWS|REACHING_DEF[r + n] gotos#11 -> gotos#33
+FLOWS|REACHING_DEF[r + n] gotos#11 -> gotos#9
+FLOWS|REACHING_DEF[r = -1] logic#31 -> logic#90
+FLOWS|REACHING_DEF[r = -1] pick#24 -> pick#50
+FLOWS|REACHING_DEF[r = 0] classify#5 -> classify#27
+FLOWS|REACHING_DEF[r = 0] gotos#5 -> gotos#33
+FLOWS|REACHING_DEF[r = 0] logic#7 -> logic#90
+FLOWS|REACHING_DEF[r = 0] pick#5 -> pick#50
+FLOWS|REACHING_DEF[r = 10] logic#79 -> logic#90
+FLOWS|REACHING_DEF[r = 10] pick#13 -> pick#50
+FLOWS|REACHING_DEF[r = 1] logic#19 -> logic#90
+FLOWS|REACHING_DEF[r = 20] logic#84 -> logic#90
+FLOWS|REACHING_DEF[r = 20] pick#19 -> pick#50
+FLOWS|REACHING_DEF[r = n * 2] classify#20 -> classify#27
+FLOWS|REACHING_DEF[r = n - 1] classify#13 -> classify#27
+FLOWS|REACHING_DEF[r = r * 2] gotos#25 -> gotos#33
+FLOWS|REACHING_DEF[r = r + 1] logic#69 -> logic#90
+FLOWS|REACHING_DEF[r = r + n] gotos#9 -> gotos#33
+FLOWS|REACHING_DEF[r == 5] pick#35 -> pick#50
+FLOWS|REACHING_DEF[r == 7] pick#41 -> pick#50
+FLOWS|REACHING_DEF[r > 0] pick#30 -> pick#50
+FLOWS|REACHING_DEF[r++] memcmp#30 -> memcmp#41
+FLOWS|REACHING_DEF[r--] pick#46 -> pick#50
+FLOWS|REACHING_DEF[r] classify#14 -> classify#13
+FLOWS|REACHING_DEF[r] classify#14 -> classify#26
+FLOWS|REACHING_DEF[r] classify#14 -> classify#27
+FLOWS|REACHING_DEF[r] classify#21 -> classify#20
+FLOWS|REACHING_DEF[r] classify#21 -> classify#26
+FLOWS|REACHING_DEF[r] classify#21 -> classify#27
+FLOWS|REACHING_DEF[r] classify#26 -> classify#25
+FLOWS|REACHING_DEF[r] classify#6 -> classify#5
+FLOWS|REACHING_DEF[r] gotos#10 -> gotos#12
+FLOWS|REACHING_DEF[r] gotos#10 -> gotos#28
+FLOWS|REACHING_DEF[r] gotos#10 -> gotos#9
+FLOWS|REACHING_DEF[r] gotos#12 -> gotos#11
+FLOWS|REACHING_DEF[r] gotos#26 -> gotos#25
+FLOWS|REACHING_DEF[r] gotos#26 -> gotos#32
+FLOWS|REACHING_DEF[r] gotos#26 -> gotos#33
+FLOWS|REACHING_DEF[r] gotos#28 -> gotos#27
+FLOWS|REACHING_DEF[r] gotos#32 -> gotos#31
+FLOWS|REACHING_DEF[r] gotos#6 -> gotos#12
+FLOWS|REACHING_DEF[r] gotos#6 -> gotos#5
+FLOWS|REACHING_DEF[r] logic#20 -> logic#19
+FLOWS|REACHING_DEF[r] logic#20 -> logic#72
+FLOWS|REACHING_DEF[r] logic#20 -> logic#89
+FLOWS|REACHING_DEF[r] logic#20 -> logic#90
+FLOWS|REACHING_DEF[r] logic#32 -> logic#31
+FLOWS|REACHING_DEF[r] logic#32 -> logic#72
+FLOWS|REACHING_DEF[r] logic#32 -> logic#89
+FLOWS|REACHING_DEF[r] logic#32 -> logic#90
+FLOWS|REACHING_DEF[r] logic#70 -> logic#69
+FLOWS|REACHING_DEF[r] logic#70 -> logic#72
+FLOWS|REACHING_DEF[r] logic#70 -> logic#89
+FLOWS|REACHING_DEF[r] logic#70 -> logic#90
+FLOWS|REACHING_DEF[r] logic#72 -> logic#71
+FLOWS|REACHING_DEF[r] logic#8 -> logic#7
+FLOWS|REACHING_DEF[r] logic#8 -> logic#72
+FLOWS|REACHING_DEF[r] logic#8 -> logic#89
+FLOWS|REACHING_DEF[r] logic#8 -> logic#90
+FLOWS|REACHING_DEF[r] logic#80 -> logic#79
+FLOWS|REACHING_DEF[r] logic#85 -> logic#84
+FLOWS|REACHING_DEF[r] logic#85 -> logic#89
+FLOWS|REACHING_DEF[r] logic#85 -> logic#90
+FLOWS|REACHING_DEF[r] logic#89 -> logic#88
+FLOWS|REACHING_DEF[r] memcmp#14 -> memcmp#13
+FLOWS|REACHING_DEF[r] memcmp#14 -> memcmp#24
+FLOWS|REACHING_DEF[r] memcmp#14 -> memcmp#31
+FLOWS|REACHING_DEF[r] memcmp#14 -> memcmp#39
+FLOWS|REACHING_DEF[r] memcmp#14 -> memcmp#41
+FLOWS|REACHING_DEF[r] memcmp#31 -> memcmp#24
+FLOWS|REACHING_DEF[r] memcmp#31 -> memcmp#30
+FLOWS|REACHING_DEF[r] memcmp#31 -> memcmp#39
+FLOWS|REACHING_DEF[r] memcmp#31 -> memcmp#41
+FLOWS|REACHING_DEF[r] pick#14 -> pick#13
+FLOWS|REACHING_DEF[r] pick#14 -> pick#31
+FLOWS|REACHING_DEF[r] pick#20 -> pick#19
+FLOWS|REACHING_DEF[r] pick#20 -> pick#31
+FLOWS|REACHING_DEF[r] pick#25 -> pick#24
+FLOWS|REACHING_DEF[r] pick#25 -> pick#31
+FLOWS|REACHING_DEF[r] pick#31 -> pick#30
+FLOWS|REACHING_DEF[r] pick#31 -> pick#36
+FLOWS|REACHING_DEF[r] pick#31 -> pick#49
+FLOWS|REACHING_DEF[r] pick#31 -> pick#50
+FLOWS|REACHING_DEF[r] pick#36 -> pick#35
+FLOWS|REACHING_DEF[r] pick#36 -> pick#42
+FLOWS|REACHING_DEF[r] pick#36 -> pick#49
+FLOWS|REACHING_DEF[r] pick#36 -> pick#50
+FLOWS|REACHING_DEF[r] pick#42 -> pick#31
+FLOWS|REACHING_DEF[r] pick#42 -> pick#41
+FLOWS|REACHING_DEF[r] pick#42 -> pick#47
+FLOWS|REACHING_DEF[r] pick#47 -> pick#31
+FLOWS|REACHING_DEF[r] pick#47 -> pick#46
+FLOWS|REACHING_DEF[r] pick#49 -> pick#48
+FLOWS|REACHING_DEF[r] pick#6 -> pick#5
+FLOWS|REACHING_DEF[r] strcmp#20 -> strcmp#19
+FLOWS|REACHING_DEF[r] strcmp#3 -> strcmp#13
+FLOWS|REACHING_DEF[r] strcmp#3 -> strcmp#20
+FLOWS|REACHING_DEF[r] strcmp#3 -> strcmp#30
+FLOWS|REACHING_DEF[r] strcmp#3 -> strcmp#4
+FLOWS|REACHING_DEF[r] strcmp#30 -> strcmp#28
+FLOWS|REACHING_DEF[r] strcmp#30 -> strcmp#31
+FLOWS|REACHING_DEF[r] strcmp#30 -> strcmp#4
+FLOWS|REACHING_DEF[s = sizeof(int)] exprs#44 -> exprs#70
+FLOWS|REACHING_DEF[s] exprs#45 -> exprs#44
+FLOWS|REACHING_DEF[s] exprs#45 -> exprs#70
+FLOWS|REACHING_DEF[sign < 0] bsearch#38 -> bsearch#72
+FLOWS|REACHING_DEF[sign = cmp(key, try)] bsearch#31 -> bsearch#72
+FLOWS|REACHING_DEF[sign > 0] bsearch#48 -> bsearch#72
+FLOWS|REACHING_DEF[sign] bsearch#32 -> bsearch#31
+FLOWS|REACHING_DEF[sign] bsearch#32 -> bsearch#39
+FLOWS|REACHING_DEF[sign] bsearch#39 -> bsearch#38
+FLOWS|REACHING_DEF[sign] bsearch#39 -> bsearch#49
+FLOWS|REACHING_DEF[sign] bsearch#49 -> bsearch#48
+FLOWS|REACHING_DEF[sign] bsearch#49 -> bsearch#72
+FLOWS|REACHING_DEF[t + i] count#21 -> count#19
+FLOWS|REACHING_DEF[t + i] count#21 -> count#20
+FLOWS|REACHING_DEF[t + i] count#21 -> count#42
+FLOWS|REACHING_DEF[t = 0] count#5 -> count#42
+FLOWS|REACHING_DEF[t = t + i] count#19 -> count#42
+FLOWS|REACHING_DEF[t > 0 ? t : 0] count#34 -> count#32
+FLOWS|REACHING_DEF[t > 0 ? t : 0] count#34 -> count#33
+FLOWS|REACHING_DEF[t > 0 ? t : 0] count#34 -> count#42
+FLOWS|REACHING_DEF[t > 0] count#35 -> count#34
+FLOWS|REACHING_DEF[t > 0] count#35 -> count#42
+FLOWS|REACHING_DEF[t > 100] count#28 -> count#42
+FLOWS|REACHING_DEF[t--] count#26 -> count#42
+FLOWS|REACHING_DEF[t] count#20 -> count#19
+FLOWS|REACHING_DEF[t] count#20 -> count#22
+FLOWS|REACHING_DEF[t] count#20 -> count#27
+FLOWS|REACHING_DEF[t] count#22 -> count#21
+FLOWS|REACHING_DEF[t] count#27 -> count#26
+FLOWS|REACHING_DEF[t] count#27 -> count#29
+FLOWS|REACHING_DEF[t] count#29 -> count#27
+FLOWS|REACHING_DEF[t] count#29 -> count#28
+FLOWS|REACHING_DEF[t] count#29 -> count#36
+FLOWS|REACHING_DEF[t] count#36 -> count#38
+FLOWS|REACHING_DEF[t] count#38 -> count#34
+FLOWS|REACHING_DEF[t] count#38 -> count#42
+FLOWS|REACHING_DEF[t] count#6 -> count#22
+FLOWS|REACHING_DEF[t] count#6 -> count#27
+FLOWS|REACHING_DEF[t] count#6 -> count#5
+FLOWS|REACHING_DEF[total + i] sum#19 -> sum#17
+FLOWS|REACHING_DEF[total + i] sum#19 -> sum#18
+FLOWS|REACHING_DEF[total + i] sum#19 -> sum#29
+FLOWS|REACHING_DEF[total = 0] sum#5 -> sum#29
+FLOWS|REACHING_DEF[total = total + i] sum#17 -> sum#29
+FLOWS|REACHING_DEF[total] sum#18 -> sum#17
+FLOWS|REACHING_DEF[total] sum#18 -> sum#20
+FLOWS|REACHING_DEF[total] sum#18 -> sum#28
+FLOWS|REACHING_DEF[total] sum#18 -> sum#29
+FLOWS|REACHING_DEF[total] sum#20 -> sum#19
+FLOWS|REACHING_DEF[total] sum#28 -> sum#27
+FLOWS|REACHING_DEF[total] sum#6 -> sum#20
+FLOWS|REACHING_DEF[total] sum#6 -> sum#28
+FLOWS|REACHING_DEF[total] sum#6 -> sum#29
+FLOWS|REACHING_DEF[total] sum#6 -> sum#5
+FLOWS|REACHING_DEF[try = (char *)base + width*(nel/2)] bsearch#20 -> bsearch#72
+FLOWS|REACHING_DEF[try] bsearch#21 -> bsearch#20
+FLOWS|REACHING_DEF[try] bsearch#21 -> bsearch#36
+FLOWS|REACHING_DEF[try] bsearch#36 -> bsearch#33
+FLOWS|REACHING_DEF[try] bsearch#36 -> bsearch#35
+FLOWS|REACHING_DEF[try] bsearch#36 -> bsearch#57
+FLOWS|REACHING_DEF[try] bsearch#36 -> bsearch#69
+FLOWS|REACHING_DEF[try] bsearch#36 -> bsearch#72
+FLOWS|REACHING_DEF[try] bsearch#57 -> bsearch#55
+FLOWS|REACHING_DEF[try] bsearch#69 -> bsearch#68
+FLOWS|REACHING_DEF[u = (uint_t)n] use#6 -> use#41
+FLOWS|REACHING_DEF[u] use#7 -> use#41
+FLOWS|REACHING_DEF[u] use#7 -> use#6
+FLOWS|REACHING_DEF[uint_t] use#9 -> use#8
+FLOWS|REACHING_DEF[unsigned char *] strcmp#25 -> strcmp#24
+FLOWS|REACHING_DEF[unsigned char *] strcmp#29 -> strcmp#28
+FLOWS|REACHING_DEF[v + gcounter] helper#6 -> helper#5
+FLOWS|REACHING_DEF[v + gcounter] helper#6 -> helper#9
+FLOWS|REACHING_DEF[v = *p] ptr#5 -> ptr#19
+FLOWS|REACHING_DEF[v.i = n] use#16 -> use#41
+FLOWS|REACHING_DEF[v.i] use#17 -> use#16
+FLOWS|REACHING_DEF[v.i] use#17 -> use#38
+FLOWS|REACHING_DEF[v.i] use#17 -> use#39
+FLOWS|REACHING_DEF[v.i] use#38 -> use#36
+FLOWS|REACHING_DEF[v.i] use#38 -> use#41
+FLOWS|REACHING_DEF[v] helper#1 -> helper#2
+FLOWS|REACHING_DEF[v] helper#1 -> helper#7
+FLOWS|REACHING_DEF[v] helper#7 -> helper#2
+FLOWS|REACHING_DEF[v] helper#7 -> helper#6
+FLOWS|REACHING_DEF[v] helper#7 -> helper#9
+FLOWS|REACHING_DEF[v] ptr#13 -> ptr#12
+FLOWS|REACHING_DEF[v] ptr#13 -> ptr#18
+FLOWS|REACHING_DEF[v] ptr#18 -> ptr#15
+FLOWS|REACHING_DEF[v] ptr#18 -> ptr#19
+FLOWS|REACHING_DEF[v] ptr#6 -> ptr#13
+FLOWS|REACHING_DEF[v] ptr#6 -> ptr#18
+FLOWS|REACHING_DEF[v] ptr#6 -> ptr#5
+FLOWS|REACHING_DEF[vals[0]] agg#12 -> agg#4
+FLOWS|REACHING_DEF[vals[0]] agg#12 -> agg#40
+FLOWS|REACHING_DEF[vals[0]] agg#12 -> agg#8
+FLOWS|REACHING_DEF[vals[0]] agg#12 -> agg#9
+FLOWS|REACHING_DEF[vals] agg#3 -> agg#12
+FLOWS|REACHING_DEF[vals] agg#3 -> agg#13
+FLOWS|REACHING_DEF[vals] agg#3 -> agg#4
+FLOWS|REACHING_DEF[vals] agg#3 -> agg#40
+FLOWS|REACHING_DEF[vl] memcmp#1 -> memcmp#12
+FLOWS|REACHING_DEF[vl] memcmp#1 -> memcmp#2
+FLOWS|REACHING_DEF[vl] memcmp#12 -> memcmp#10
+FLOWS|REACHING_DEF[vl] memcmp#12 -> memcmp#11
+FLOWS|REACHING_DEF[vl] memcmp#12 -> memcmp#2
+FLOWS|REACHING_DEF[vl] memcmp#12 -> memcmp#41
+FLOWS|REACHING_DEF[vr] memcmp#15 -> memcmp#13
+FLOWS|REACHING_DEF[vr] memcmp#15 -> memcmp#14
+FLOWS|REACHING_DEF[vr] memcmp#15 -> memcmp#4
+FLOWS|REACHING_DEF[vr] memcmp#15 -> memcmp#41
+FLOWS|REACHING_DEF[vr] memcmp#3 -> memcmp#15
+FLOWS|REACHING_DEF[vr] memcmp#3 -> memcmp#4
+FLOWS|REACHING_DEF[w = (long)a] exprs#38 -> exprs#70
+FLOWS|REACHING_DEF[w] exprs#39 -> exprs#38
+FLOWS|REACHING_DEF[w] exprs#39 -> exprs#70
+FLOWS|REACHING_DEF[width*(nel/2)] bsearch#26 -> bsearch#22
+FLOWS|REACHING_DEF[width*(nel/2)] bsearch#26 -> bsearch#72
+FLOWS|REACHING_DEF[width] bsearch#27 -> bsearch#26
+FLOWS|REACHING_DEF[width] bsearch#27 -> bsearch#28
+FLOWS|REACHING_DEF[width] bsearch#27 -> bsearch#58
+FLOWS|REACHING_DEF[width] bsearch#27 -> bsearch#72
+FLOWS|REACHING_DEF[width] bsearch#27 -> bsearch#8
+FLOWS|REACHING_DEF[width] bsearch#58 -> bsearch#54
+FLOWS|REACHING_DEF[width] bsearch#7 -> bsearch#27
+FLOWS|REACHING_DEF[width] bsearch#7 -> bsearch#8
+FLOWS|REACHING_DEF[x = add(1, 2)] main#3 -> main#10
+FLOWS|REACHING_DEF[x] apply#10 -> apply#11
+FLOWS|REACHING_DEF[x] apply#10 -> apply#4
+FLOWS|REACHING_DEF[x] apply#10 -> apply#7
+FLOWS|REACHING_DEF[x] apply#10 -> apply#9
+FLOWS|REACHING_DEF[x] apply#3 -> apply#10
+FLOWS|REACHING_DEF[x] apply#3 -> apply#4
+FLOWS|REACHING_DEF[x] apply#3 -> apply#9
+FLOWS|REACHING_DEF[x] apply#9 -> apply#10
+FLOWS|REACHING_DEF[x] apply#9 -> apply#11
+FLOWS|REACHING_DEF[x] apply#9 -> apply#4
+FLOWS|REACHING_DEF[x] apply#9 -> apply#7
+FLOWS|REACHING_DEF[x] main#4 -> main#10
+FLOWS|REACHING_DEF[x] main#4 -> main#3
+FLOWS|REACHING_DEF[x] main#4 -> main#9
+FLOWS|REACHING_DEF[x] main#9 -> main#8
+FLOWS|REACHING_DEF[~a] unary#17 -> unary#15
+FLOWS|REACHING_DEF[~a] unary#17 -> unary#16
+FLOWS|REACHING_DEF[~a] unary#17 -> unary#25
