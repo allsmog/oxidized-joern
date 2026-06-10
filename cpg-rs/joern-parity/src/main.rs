@@ -3150,18 +3150,25 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
                 }
             }
         }
-        // second loop (args taint outputs): every arg -> the call; a non-gen
-        // arg (literal) additionally taints each sibling gen-arg.
+        // second loop (args taint outputs). Every arg -> the call. Cross-arg
+        // edges (arg -> sibling gen-arg) appear when: the source is a non-gen
+        // arg (literal); or both source and sibling are CALLs; or the call is
+        // a CONTROL_STRUCTURE condition (then identifier siblings cross too).
+        let is_cond = arena[c].parent.is_some_and(|p| arena[p].label == "CONTROL_STRUCTURE");
         for u in args_of(c) {
             for &gnode in &g_set {
                 if u == gnode {
                     continue;
                 }
-                // a gen-arg only flows to the call itself, not to sibling gen-args.
-                if is_gen_arg_node(u) && gnode != c {
-                    continue;
+                let to_call = gnode == c;
+                let cross_ok = !is_gen_arg_node(u) // literal/non-gen source
+                    || (arena[u].label == "CALL" && arena[gnode].label == "CALL")
+                    || (is_cond
+                        && arena[u].label == "IDENTIFIER"
+                        && arena[gnode].label == "IDENTIFIER");
+                if to_call || cross_ok {
+                    push(node_var(&arena[u]), u, gnode, &mut flows);
                 }
-                push(node_var(&arena[u]), u, gnode, &mut flows);
             }
         }
         // assignment: RHS (arg2) -> LHS (arg1)
