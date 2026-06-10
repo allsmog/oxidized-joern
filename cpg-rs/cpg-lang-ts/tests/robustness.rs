@@ -14,6 +14,20 @@ fn build(mut fe: TsFrontend, path: &str, code: &str) -> Cpg {
     cpg
 }
 
+/// Assert a method's parameters are named exactly `expected` (in order). This
+/// guards the subtle bug where a typed parameter's *type* (itself a
+/// `*_identifier` in some grammars) gets picked up as the name.
+fn assert_param_names(cpg: &Cpg, method: &str, expected: &[&str], lang: &str) {
+    let m = cpg.method_named(method);
+    assert_eq!(m.len(), 1, "{lang}: method `{method}` not found");
+    let got: Vec<&str> = cpg
+        .parameters_of(m[0])
+        .iter()
+        .filter_map(|&p| cpg.name_of(p))
+        .collect();
+    assert_eq!(got, expected, "{lang}: `{method}` parameter names");
+}
+
 /// Helper: assert a method and a call (often a member call) are present.
 fn assert_has(cpg: &Cpg, methods: &[&str], calls: &[&str], lang: &str) {
     for m in methods {
@@ -52,7 +66,9 @@ fn java_rich() {
     );
     // `save` is a member call; `add`/`total` are methods.
     assert_has(&cpg, &["total", "add"], &["add", "save"], "Java");
-    assert_eq!(cpg.parameters_of(cpg.method_named("add")[0]).len(), 2);
+    // `total(List<Integer> xs)` — the param is `xs`, not the type `List`.
+    assert_param_names(&cpg, "total", &["xs"], "Java");
+    assert_param_names(&cpg, "add", &["a", "b"], "Java");
 }
 
 #[test]
@@ -72,7 +88,8 @@ fn go_rich() {
     );
     // method with a receiver + a member call (Printf) + a free function.
     assert_has(&cpg, &["Handle", "compute"], &["compute", "Printf"], "Go");
-    assert_eq!(cpg.parameters_of(cpg.method_named("Handle")[0]).len(), 2);
+    // Typed params must keep their names, not their types (string/int).
+    assert_param_names(&cpg, "Handle", &["name", "n"], "Go");
 }
 
 #[test]
@@ -136,6 +153,9 @@ fn rust_rich() {
     // impl method, macro call (println! args via token_tree), member call,
     // tail-expression method call, free fn.
     assert_has(&cpg, &["run", "sanitize"], &["sanitize", "println", "process"], "Rust");
+    // `sanitize(s: String)` — the param is `s`, not the type `String`.
+    assert_param_names(&cpg, "sanitize", &["s"], "Rust");
+    assert_param_names(&cpg, "run", &["input"], "Rust");
     // The macro's argument `cleaned` must be captured from the token_tree.
     let println = cpg.calls_named("println");
     assert!(
