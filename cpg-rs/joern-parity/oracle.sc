@@ -12,8 +12,8 @@ import io.shiftleft.codepropertygraph.generated.nodes.AstNode
     println("AST|" + "  "*depth + n.label + " " + props)
     n.astChildren.toList.sortBy(_.order).foreach(c => dump(c, depth+1))
   }
-  // Only real user-defined methods (exclude <global> and <operator>.* scaffolding).
-  cpg.method.filterNot(_.name.startsWith("<")).sortBy(_.fullName).toList.foreach { m =>
+  // All methods, scaffolding included (<global> wrappers, <operator>.* stubs).
+  cpg.method.sortBy(_.fullName).toList.foreach { m =>
     dump(m, 0); println("AST|")
   }
 }
