@@ -78,6 +78,25 @@ Next, in preference order:
 
 ## Done
 
+- **M7/Track B — loop-liveness ROOT CAUSE found (2026-06-10):** The blocker is
+  NOT irreducible. By scripting Joern (rd_solver_probe.sc — constructs
+  ReachingDefProblem + DataFlowSolver and dumps in/out per node) I obtained the
+  ground-truth solver state for bsearch. ROOT CAUSE: Joern's reaching-def runs
+  over ReachingDefFlowGraph, NOT the raw CFG. Two structural differences:
+  (1) params are a chain method->p1->..->pN->body (and each param is killed by
+  its own identifier-use, e.g. param nel killed by `nel` in `nel>0`);
+  (2) the EXIT's predecessor chain is return->paramOut_1->..->paramOut_N->exit,
+  and ONLY the loop-internal `return try` (the lastActualCfgNode) feeds it — the
+  post-loop `return NULL` does NOT connect to the exit in the flow graph. So the
+  zero-iteration bypass param defs that a raw-CFG fixpoint propagates to the exit
+  simply don't exist in Joern's graph. THE FIX (implementable, validated by the
+  probe): build ReachingDefFlowGraph (param chain + paramOut chain + return
+  routing per the decompiled initPred/initSucc) and run the fixpoint over it
+  instead of cfg_index_edges. Captured in(exit) for bsearch =
+  {5,8,13,14,15,16,18,19,20,21,24,25,26,27,30,31,33} (flow-graph def numbers;
+  rerun the probe for the mapping). This + the residual access-substring cases
+  (~38, gated to field/index uses) closes the remaining 82. Decompiled classes
+  staged in /tmp/dfx (re-extract via cfr from the dataflowengineoss jar).
 - **M7/Track B faithful isValidEdge + liveness wall (2026-06-10):** Added the
   decompiled v4.0.555 EdgeValidator.isValidEdge as a push-filter on every edge
   (rd_valid_edge in main.rs): 94->85. Cast operands generate defs (pinned: `l`
