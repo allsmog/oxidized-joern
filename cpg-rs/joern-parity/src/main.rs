@@ -3144,6 +3144,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // return, and (c) unique by name across all call arguments in the method, is
     // a "lone identifier" (e.g. the type operand `int[2][3]` of `<operator>.alloc`,
     // or a bare type name). Such a def is REMOVED from its call's gen set.
+    let mut lone_idents: Vec<usize> = Vec::new();
     {
         let mut name_excluded: HashSet<String> =
             params.iter().map(|&p| arena[p].name.clone()).collect();
@@ -3176,6 +3177,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         for occ in by_name.values() {
             if occ.len() == 1 {
                 let (c, a) = occ[0];
+                lone_idents.push(a);
                 if let Some(g) = gen.get_mut(&c) {
                     g.retain(|&x| x != a);
                 }
@@ -3430,6 +3432,16 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // 5. exit node: every def in in(exit) -> exit
     if let Some(e) = exit {
         let mut v: Vec<usize> = exit_in.iter().copied().collect();
+        v.sort();
+        for d in v {
+            push(node_var(&arena[d]), d, e, &mut flows);
+        }
+    }
+
+    // 6. addEdgesFromLoneIdentifiersToExit: a lone identifier (dropped from gen
+    // above) gets a direct edge to the method exit.
+    if let Some(e) = exit {
+        let mut v = lone_idents.clone();
         v.sort();
         for d in v {
             push(node_var(&arena[d]), d, e, &mut flows);
