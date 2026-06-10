@@ -967,6 +967,78 @@ AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
 AST|    METHOD_REF CODE=sum TYPE_FULL_NAME=sum METHOD_FULL_NAME=sum ORDER=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|
+AST|METHOD NAME=macros CODE=int macros(int n) {\n    if (n > LIMIT) {\n        return SQR(n);\n    }\n#ifdef UNUSED_FLAG\n    n = n + LIMIT;\n#endif\n#ifdef NOT_DEFINED\n    n = 999;\n#endif\n    return 0;\n} FULL_NAME=macros SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    if (n > LIMIT) {\n        return SQR(n);\n    }\n#ifdef UNUSED_FLAG\n    n = n + LIMIT;\n#endif\n#ifdef NOT_DEFINED\n    n = 999;\n#endif\n    return 0;\n} TYPE_FULL_NAME=void ORDER=2
+AST|    CONTROL_STRUCTURE CODE=if (n > LIMIT) {\n        return SQR(n);\n    } ORDER=1
+AST|      CALL NAME=<operator>.greaterThan CODE=n > LIMIT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=LIMIT CODE=LIMIT TYPE_FULL_NAME=int METHOD_FULL_NAME=macros.c:LIMIT:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=1
+AST|      BLOCK CODE={\n        return SQR(n);\n    } TYPE_FULL_NAME=void ORDER=2
+AST|        RETURN CODE=return SQR(n); ORDER=1
+AST|          CALL NAME=SQR CODE=SQR(n) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=macros.c:SQR:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|            IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|              CALL NAME=<operator>.multiplication CODE=(n) * (n) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.multiplication ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    CALL NAME=<operator>.assignment CODE=n = n + LIMIT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.addition CODE=n + LIMIT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=LIMIT CODE=LIMIT TYPE_FULL_NAME=int METHOD_FULL_NAME=macros.c:LIMIT:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=1
+AST|    RETURN CODE=return 0; ORDER=3
+AST|      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=macros.c:<global> ORDER=1
+AST|  METHOD NAME=macros CODE=int macros(int n) {\n    if (n > LIMIT) {\n        return SQR(n);\n    }\n#ifdef UNUSED_FLAG\n    n = n + LIMIT;\n#endif\n#ifdef NOT_DEFINED\n    n = 999;\n#endif\n    return 0;\n} FULL_NAME=macros SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    if (n > LIMIT) {\n        return SQR(n);\n    }\n#ifdef UNUSED_FLAG\n    n = n + LIMIT;\n#endif\n#ifdef NOT_DEFINED\n    n = 999;\n#endif\n    return 0;\n} TYPE_FULL_NAME=void ORDER=2
+AST|      CONTROL_STRUCTURE CODE=if (n > LIMIT) {\n        return SQR(n);\n    } ORDER=1
+AST|        CALL NAME=<operator>.greaterThan CODE=n > LIMIT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=LIMIT CODE=LIMIT TYPE_FULL_NAME=int METHOD_FULL_NAME=macros.c:LIMIT:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=1
+AST|        BLOCK CODE={\n        return SQR(n);\n    } TYPE_FULL_NAME=void ORDER=2
+AST|          RETURN CODE=return SQR(n); ORDER=1
+AST|            CALL NAME=SQR CODE=SQR(n) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=macros.c:SQR:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|              IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|              BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|                CALL NAME=<operator>.multiplication CODE=(n) * (n) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.multiplication ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                  IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      CALL NAME=<operator>.assignment CODE=n = n + LIMIT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.addition CODE=n + LIMIT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=LIMIT CODE=LIMIT TYPE_FULL_NAME=int METHOD_FULL_NAME=macros.c:LIMIT:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=1
+AST|      RETURN CODE=return 0; ORDER=3
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=macros TYPE_FULL_NAME=macros METHOD_FULL_NAME=macros ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=LIMIT CODE=#define LIMIT 10 FULL_NAME=macros.c:LIMIT:int(0) SIGNATURE=int(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+AST|
+AST|METHOD NAME=SQR CODE=#define SQR(x) ((x) * (x)) FULL_NAME=macros.c:SQR:ANY(1) SIGNATURE=ANY(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+AST|
 AST|METHOD NAME=main CODE=int main() {\n    int x = add(1, 2);\n    return x;\n} FULL_NAME=main SIGNATURE=int() ORDER=1
 AST|  BLOCK CODE={\n    int x = add(1, 2);\n    return x;\n} TYPE_FULL_NAME=void ORDER=1
 AST|    LOCAL NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
@@ -1513,6 +1585,7 @@ NODES|FILE NAME=forloop.c ORDER=0
 NODES|FILE NAME=gotos.c ORDER=0
 NODES|FILE NAME=logic.c ORDER=0
 NODES|FILE NAME=loop.c ORDER=0
+NODES|FILE NAME=macros.c ORDER=0
 NODES|FILE NAME=ops.c ORDER=0
 NODES|FILE NAME=order.c ORDER=0
 NODES|FILE NAME=structs.c ORDER=0
@@ -1527,6 +1600,7 @@ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=forloop.c:<global> FILENAME=forloo
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=gotos.c:<global> FILENAME=gotos.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=logic.c:<global> FILENAME=logic.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=loop.c:<global> FILENAME=loop.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=macros.c:<global> FILENAME=macros.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=ops.c:<global> FILENAME=ops.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=order.c:<global> FILENAME=order.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=structs.c:<global> FILENAME=structs.c ORDER=1
@@ -1563,6 +1637,8 @@ NODES|TYPE_DECL NAME=<global> FULL_NAME=logic.c:<global> CODE=<global> AST_PAREN
 NODES|TYPE_DECL NAME=long FULL_NAME=long CODE=long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=longunsigned FULL_NAME=longunsigned CODE=longunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=<global> FULL_NAME=loop.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=loop.c:<global> FILENAME=loop.c ORDER=1
+NODES|TYPE_DECL NAME=macros FULL_NAME=macros CODE=macros AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=macros.c:<global> FILENAME=macros.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=macros.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=macros.c:<global> FILENAME=macros.c ORDER=1
 NODES|TYPE_DECL NAME=main FULL_NAME=main CODE=main AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=ops.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=ops.c:<global> FILENAME=ops.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=order.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=order.c:<global> FILENAME=order.c ORDER=1
@@ -1607,6 +1683,7 @@ NODES|TYPE NAME=int[] FULL_NAME=int[] TYPE_DECL_FULL_NAME=int[]
 NODES|TYPE NAME=logic FULL_NAME=logic TYPE_DECL_FULL_NAME=logic
 NODES|TYPE NAME=long FULL_NAME=long TYPE_DECL_FULL_NAME=long
 NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
+NODES|TYPE NAME=macros FULL_NAME=macros TYPE_DECL_FULL_NAME=macros
 NODES|TYPE NAME=main FULL_NAME=main TYPE_DECL_FULL_NAME=main
 NODES|TYPE NAME=pair FULL_NAME=pair TYPE_DECL_FULL_NAME=pair
 NODES|TYPE NAME=pick FULL_NAME=pick TYPE_DECL_FULL_NAME=pick
@@ -1793,6 +1870,17 @@ EDGES|ARGUMENT logic#79 -> logic#81
 EDGES|ARGUMENT logic#84 -> logic#85
 EDGES|ARGUMENT logic#84 -> logic#86
 EDGES|ARGUMENT logic#88 -> logic#89
+EDGES|ARGUMENT macros#11 -> macros#12
+EDGES|ARGUMENT macros#12 -> macros#13
+EDGES|ARGUMENT macros#15 -> macros#16
+EDGES|ARGUMENT macros#15 -> macros#17
+EDGES|ARGUMENT macros#18 -> macros#19
+EDGES|ARGUMENT macros#18 -> macros#20
+EDGES|ARGUMENT macros#20 -> macros#21
+EDGES|ARGUMENT macros#20 -> macros#22
+EDGES|ARGUMENT macros#25 -> macros#26
+EDGES|ARGUMENT macros#5 -> macros#6
+EDGES|ARGUMENT macros#5 -> macros#7
 EDGES|ARGUMENT main#3 -> main#4
 EDGES|ARGUMENT main#3 -> main#5
 EDGES|ARGUMENT main#5 -> main#6
@@ -1972,6 +2060,13 @@ EDGES|CALL logic#7 -> <operator>.assignment#0
 EDGES|CALL logic#71 -> <operator>.addition#0
 EDGES|CALL logic#79 -> <operator>.assignment#0
 EDGES|CALL logic#84 -> <operator>.assignment#0
+EDGES|CALL macros#12 -> macros.c:SQR:ANY(1)#0
+EDGES|CALL macros#15 -> <operator>.multiplication#0
+EDGES|CALL macros#18 -> <operator>.assignment#0
+EDGES|CALL macros#20 -> <operator>.addition#0
+EDGES|CALL macros#22 -> macros.c:LIMIT:int(0)#0
+EDGES|CALL macros#5 -> <operator>.greaterThan#0
+EDGES|CALL macros#7 -> macros.c:LIMIT:int(0)#0
 EDGES|CALL main#3 -> <operator>.assignment#0
 EDGES|CALL main#5 -> add#0
 EDGES|CALL order.c:<global>#37 -> <operator>.assignment#0
@@ -2350,6 +2445,33 @@ EDGES|CFG logic.c:<global>#93 -> logic.c:<global>#94
 EDGES|CFG loop.c:<global>#0 -> loop.c:<global>#32
 EDGES|CFG loop.c:<global>#1 -> sum#6
 EDGES|CFG loop.c:<global>#32 -> loop.c:<global>#33
+EDGES|CFG macros#0 -> macros#6
+EDGES|CFG macros#11 -> macros#27
+EDGES|CFG macros#12 -> macros#11
+EDGES|CFG macros#12 -> macros#16
+EDGES|CFG macros#13 -> macros#12
+EDGES|CFG macros#15 -> macros#11
+EDGES|CFG macros#16 -> macros#17
+EDGES|CFG macros#17 -> macros#15
+EDGES|CFG macros#18 -> macros#26
+EDGES|CFG macros#19 -> macros#21
+EDGES|CFG macros#20 -> macros#18
+EDGES|CFG macros#21 -> macros#22
+EDGES|CFG macros#22 -> macros#20
+EDGES|CFG macros#22 -> macros#24
+EDGES|CFG macros#24 -> macros#20
+EDGES|CFG macros#25 -> macros#27
+EDGES|CFG macros#26 -> macros#25
+EDGES|CFG macros#5 -> macros#13
+EDGES|CFG macros#5 -> macros#19
+EDGES|CFG macros#6 -> macros#7
+EDGES|CFG macros#7 -> macros#5
+EDGES|CFG macros#7 -> macros#9
+EDGES|CFG macros#9 -> macros#5
+EDGES|CFG macros.c:<global>#0 -> macros.c:<global>#30
+EDGES|CFG macros.c:<global>#30 -> macros.c:<global>#31
+EDGES|CFG macros.c:LIMIT:int(0)#0 -> macros.c:LIMIT:int(0)#2
+EDGES|CFG macros.c:SQR:ANY(1)#0 -> macros.c:SQR:ANY(1)#4
 EDGES|CFG main#3 -> main#9
 EDGES|CFG main#4 -> main#6
 EDGES|CFG main#5 -> main#3
@@ -2535,6 +2657,7 @@ EDGES|CONDITION logic#46 -> logic#51
 EDGES|CONDITION logic#57 -> logic#58
 EDGES|CONDITION logic#63 -> logic#64
 EDGES|CONDITION logic#74 -> logic#75
+EDGES|CONDITION macros#4 -> macros#5
 EDGES|CONDITION pick#29 -> pick#30
 EDGES|CONDITION pick#34 -> pick#35
 EDGES|CONDITION pick#40 -> pick#41
@@ -2590,6 +2713,10 @@ EDGES|CONTAINS D:logic.c:<global> -> D:logic
 EDGES|CONTAINS D:logic.c:<global> -> logic.c:<global>#0
 EDGES|CONTAINS D:loop.c:<global> -> D:sum
 EDGES|CONTAINS D:loop.c:<global> -> loop.c:<global>#0
+EDGES|CONTAINS D:macros.c:<global> -> D:macros
+EDGES|CONTAINS D:macros.c:<global> -> macros.c:<global>#0
+EDGES|CONTAINS D:macros.c:<global> -> macros.c:LIMIT:int(0)#0
+EDGES|CONTAINS D:macros.c:<global> -> macros.c:SQR:ANY(1)#0
 EDGES|CONTAINS D:ops.c:<global> -> D:classify
 EDGES|CONTAINS D:ops.c:<global> -> ops.c:<global>#0
 EDGES|CONTAINS D:order.c:<global> -> D:first
@@ -2629,6 +2756,7 @@ EDGES|CONTAINS F:forloop.c -> D:forloop.c:<global>
 EDGES|CONTAINS F:gotos.c -> D:gotos.c:<global>
 EDGES|CONTAINS F:logic.c -> D:logic.c:<global>
 EDGES|CONTAINS F:loop.c -> D:loop.c:<global>
+EDGES|CONTAINS F:macros.c -> D:macros.c:<global>
 EDGES|CONTAINS F:ops.c -> D:ops.c:<global>
 EDGES|CONTAINS F:order.c -> D:order.c:<global>
 EDGES|CONTAINS F:structs.c -> D:structs.c:<global>
@@ -2972,6 +3100,35 @@ EDGES|CONTAINS loop.c:<global>#1 -> sum#5
 EDGES|CONTAINS loop.c:<global>#1 -> sum#6
 EDGES|CONTAINS loop.c:<global>#1 -> sum#7
 EDGES|CONTAINS loop.c:<global>#1 -> sum#9
+EDGES|CONTAINS macros#0 -> macros#10
+EDGES|CONTAINS macros#0 -> macros#11
+EDGES|CONTAINS macros#0 -> macros#12
+EDGES|CONTAINS macros#0 -> macros#13
+EDGES|CONTAINS macros#0 -> macros#14
+EDGES|CONTAINS macros#0 -> macros#15
+EDGES|CONTAINS macros#0 -> macros#16
+EDGES|CONTAINS macros#0 -> macros#17
+EDGES|CONTAINS macros#0 -> macros#18
+EDGES|CONTAINS macros#0 -> macros#19
+EDGES|CONTAINS macros#0 -> macros#20
+EDGES|CONTAINS macros#0 -> macros#21
+EDGES|CONTAINS macros#0 -> macros#22
+EDGES|CONTAINS macros#0 -> macros#23
+EDGES|CONTAINS macros#0 -> macros#24
+EDGES|CONTAINS macros#0 -> macros#25
+EDGES|CONTAINS macros#0 -> macros#26
+EDGES|CONTAINS macros#0 -> macros#3
+EDGES|CONTAINS macros#0 -> macros#4
+EDGES|CONTAINS macros#0 -> macros#5
+EDGES|CONTAINS macros#0 -> macros#6
+EDGES|CONTAINS macros#0 -> macros#7
+EDGES|CONTAINS macros#0 -> macros#8
+EDGES|CONTAINS macros#0 -> macros#9
+EDGES|CONTAINS macros.c:<global>#0 -> macros#0
+EDGES|CONTAINS macros.c:<global>#0 -> macros.c:<global>#29
+EDGES|CONTAINS macros.c:<global>#0 -> macros.c:<global>#30
+EDGES|CONTAINS macros.c:LIMIT:int(0)#0 -> macros.c:LIMIT:int(0)#1
+EDGES|CONTAINS macros.c:SQR:ANY(1)#0 -> macros.c:SQR:ANY(1)#3
 EDGES|CONTAINS ops.c:<global>#0 -> classify#0
 EDGES|CONTAINS ops.c:<global>#0 -> ops.c:<global>#29
 EDGES|CONTAINS ops.c:<global>#0 -> ops.c:<global>#30
@@ -3671,6 +3828,39 @@ EDGES|EVAL_TYPE logic.c:<global>#94 -> T:ANY
 EDGES|EVAL_TYPE loop.c:<global>#31 -> T:ANY
 EDGES|EVAL_TYPE loop.c:<global>#32 -> T:sum
 EDGES|EVAL_TYPE loop.c:<global>#33 -> T:ANY
+EDGES|EVAL_TYPE macros#1 -> T:int
+EDGES|EVAL_TYPE macros#10 -> T:void
+EDGES|EVAL_TYPE macros#12 -> T:ANY
+EDGES|EVAL_TYPE macros#13 -> T:int
+EDGES|EVAL_TYPE macros#14 -> T:ANY
+EDGES|EVAL_TYPE macros#15 -> T:ANY
+EDGES|EVAL_TYPE macros#16 -> T:int
+EDGES|EVAL_TYPE macros#17 -> T:int
+EDGES|EVAL_TYPE macros#18 -> T:ANY
+EDGES|EVAL_TYPE macros#19 -> T:int
+EDGES|EVAL_TYPE macros#2 -> T:int
+EDGES|EVAL_TYPE macros#20 -> T:ANY
+EDGES|EVAL_TYPE macros#21 -> T:int
+EDGES|EVAL_TYPE macros#22 -> T:int
+EDGES|EVAL_TYPE macros#23 -> T:ANY
+EDGES|EVAL_TYPE macros#24 -> T:int
+EDGES|EVAL_TYPE macros#26 -> T:int
+EDGES|EVAL_TYPE macros#27 -> T:int
+EDGES|EVAL_TYPE macros#3 -> T:void
+EDGES|EVAL_TYPE macros#5 -> T:ANY
+EDGES|EVAL_TYPE macros#6 -> T:int
+EDGES|EVAL_TYPE macros#7 -> T:int
+EDGES|EVAL_TYPE macros#8 -> T:ANY
+EDGES|EVAL_TYPE macros#9 -> T:int
+EDGES|EVAL_TYPE macros.c:<global>#29 -> T:ANY
+EDGES|EVAL_TYPE macros.c:<global>#30 -> T:macros
+EDGES|EVAL_TYPE macros.c:<global>#31 -> T:ANY
+EDGES|EVAL_TYPE macros.c:LIMIT:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE macros.c:LIMIT:int(0)#2 -> T:int
+EDGES|EVAL_TYPE macros.c:SQR:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE macros.c:SQR:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE macros.c:SQR:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE macros.c:SQR:ANY(1)#4 -> T:ANY
 EDGES|EVAL_TYPE main#1 -> T:void
 EDGES|EVAL_TYPE main#10 -> T:int
 EDGES|EVAL_TYPE main#2 -> T:int
@@ -3968,6 +4158,8 @@ EDGES|PARAMETER_LINK gotos#1 -> gotos#2
 EDGES|PARAMETER_LINK helper#1 -> helper#2
 EDGES|PARAMETER_LINK logic#1 -> logic#2
 EDGES|PARAMETER_LINK logic#3 -> logic#4
+EDGES|PARAMETER_LINK macros#1 -> macros#2
+EDGES|PARAMETER_LINK macros.c:SQR:ANY(1)#1 -> macros.c:SQR:ANY(1)#2
 EDGES|PARAMETER_LINK pick#1 -> pick#2
 EDGES|PARAMETER_LINK ptr#1 -> ptr#2
 EDGES|PARAMETER_LINK second#1 -> second#2
@@ -3982,6 +4174,7 @@ EDGES|REF NB:forloop.c:<global> -> NS:<global>
 EDGES|REF NB:gotos.c:<global> -> NS:<global>
 EDGES|REF NB:logic.c:<global> -> NS:<global>
 EDGES|REF NB:loop.c:<global> -> NS:<global>
+EDGES|REF NB:macros.c:<global> -> NS:<global>
 EDGES|REF NB:ops.c:<global> -> NS:<global>
 EDGES|REF NB:order.c:<global> -> NS:<global>
 EDGES|REF NB:structs.c:<global> -> NS:<global>
@@ -4011,6 +4204,7 @@ EDGES|REF T:int[] -> D:int[]
 EDGES|REF T:logic -> D:logic
 EDGES|REF T:long -> D:long
 EDGES|REF T:longunsigned -> D:longunsigned
+EDGES|REF T:macros -> D:macros
 EDGES|REF T:main -> D:main
 EDGES|REF T:pair -> order.c:<global>#11
 EDGES|REF T:pick -> D:pick
@@ -4137,6 +4331,12 @@ EDGES|REF logic#85 -> logic#6
 EDGES|REF logic#89 -> logic#6
 EDGES|REF logic.c:<global>#93 -> logic#0
 EDGES|REF loop.c:<global>#32 -> loop.c:<global>#1
+EDGES|REF macros#16 -> macros#1
+EDGES|REF macros#17 -> macros#1
+EDGES|REF macros#19 -> macros#1
+EDGES|REF macros#21 -> macros#1
+EDGES|REF macros#6 -> macros#1
+EDGES|REF macros.c:<global>#30 -> macros#0
 EDGES|REF main#4 -> main#2
 EDGES|REF main#9 -> main#2
 EDGES|REF ops.c:<global>#30 -> classify#0
@@ -4227,6 +4427,8 @@ EDGES|SOURCE_FILE D:logic.c:<global> -> F:logic.c
 EDGES|SOURCE_FILE D:long -> F:<includes>
 EDGES|SOURCE_FILE D:longunsigned -> F:<includes>
 EDGES|SOURCE_FILE D:loop.c:<global> -> F:loop.c
+EDGES|SOURCE_FILE D:macros -> F:macros.c
+EDGES|SOURCE_FILE D:macros.c:<global> -> F:macros.c
 EDGES|SOURCE_FILE D:main -> F:add.c
 EDGES|SOURCE_FILE D:ops.c:<global> -> F:ops.c
 EDGES|SOURCE_FILE D:order.c:<global> -> F:order.c
@@ -4252,6 +4454,7 @@ EDGES|SOURCE_FILE NB:forloop.c:<global> -> F:forloop.c
 EDGES|SOURCE_FILE NB:gotos.c:<global> -> F:gotos.c
 EDGES|SOURCE_FILE NB:logic.c:<global> -> F:logic.c
 EDGES|SOURCE_FILE NB:loop.c:<global> -> F:loop.c
+EDGES|SOURCE_FILE NB:macros.c:<global> -> F:macros.c
 EDGES|SOURCE_FILE NB:ops.c:<global> -> F:ops.c
 EDGES|SOURCE_FILE NB:order.c:<global> -> F:order.c
 EDGES|SOURCE_FILE NB:structs.c:<global> -> F:structs.c
@@ -4277,6 +4480,10 @@ EDGES|SOURCE_FILE logic#0 -> F:logic.c
 EDGES|SOURCE_FILE logic.c:<global>#0 -> F:logic.c
 EDGES|SOURCE_FILE loop.c:<global>#0 -> F:loop.c
 EDGES|SOURCE_FILE loop.c:<global>#1 -> F:loop.c
+EDGES|SOURCE_FILE macros#0 -> F:macros.c
+EDGES|SOURCE_FILE macros.c:<global>#0 -> F:macros.c
+EDGES|SOURCE_FILE macros.c:LIMIT:int(0)#0 -> F:macros.c
+EDGES|SOURCE_FILE macros.c:SQR:ANY(1)#0 -> F:macros.c
 EDGES|SOURCE_FILE ops.c:<global>#0 -> F:ops.c
 EDGES|SOURCE_FILE order.c:<global>#0 -> F:order.c
 EDGES|SOURCE_FILE order.c:<global>#11 -> F:order.c
@@ -4301,6 +4508,7 @@ EDGES|TRUE_BODY logic#22 -> logic#30
 EDGES|TRUE_BODY logic#57 -> logic#61
 EDGES|TRUE_BODY logic#63 -> logic#67
 EDGES|TRUE_BODY logic#74 -> logic#76
+EDGES|TRUE_BODY macros#4 -> macros#10
 EDGES|TRUE_BODY pick#29 -> pick#33
 EDGES|TRUE_BODY pick#34 -> pick#38
 EDGES|TRUE_BODY pick#40 -> pick#44
