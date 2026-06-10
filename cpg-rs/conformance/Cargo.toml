@@ -12,3 +12,4 @@ cpg-analysis.workspace = true
 [dev-dependencies]
 cpg-lang-c.workspace = true
 cpg-lang-python.workspace = true
+cpg-lang-ts.workspace = true
