@@ -514,6 +514,53 @@ mod tests {
         }
     }
 
+    /// The generic frontends must work through the *full* machinery — parallel
+    /// build, cross-file call resolution, interprocedural summaries, and
+    /// incremental invalidation — not just single-file analysis. Proven here for
+    /// Go and Java with a two-file project, an edit that breaks the flow, and a
+    /// restore that brings it back (the negative case rules out pattern-matching).
+    #[test]
+    fn cross_file_incremental_taint_generic_languages() {
+        use cpg_lang_ts::TsFrontend;
+
+        // Go: passthrough in util.go, the source→sink flow in main.go.
+        {
+            let mut p = Project::new(|| Box::new(TsFrontend::go()), standard_pipeline());
+            p.build(&[
+                ("util.go", "package m\nfunc passthrough(p string) string { return p }"),
+                (
+                    "main.go",
+                    "package m\nfunc run(){ t := source(); sink(passthrough(t)) }",
+                ),
+            ]);
+            assert_eq!(p.find_taint(&["source"], &["sink"]).len(), 1, "Go: initial flow");
+
+            // Break it: passthrough no longer returns its argument.
+            p.update_file("util.go", "package m\nfunc passthrough(p string) string { return \"\" }");
+            assert_eq!(p.find_taint(&["source"], &["sink"]).len(), 0, "Go: flow after fix");
+
+            // Restore it.
+            p.update_file("util.go", "package m\nfunc passthrough(p string) string { return p }");
+            assert_eq!(p.find_taint(&["source"], &["sink"]).len(), 1, "Go: flow restored");
+        }
+
+        // Java: same shape across two files/classes.
+        {
+            let mut p = Project::new(|| Box::new(TsFrontend::java()), standard_pipeline());
+            p.build(&[
+                ("Util.java", "class Util { static String pass(String p){ return p; } }"),
+                (
+                    "Main.java",
+                    "class Main { static void run(){ String t = source(); sink(Util.pass(t)); } }",
+                ),
+            ]);
+            assert_eq!(p.find_taint(&["source"], &["sink"]).len(), 1, "Java: initial flow");
+
+            p.update_file("Util.java", "class Util { static String pass(String p){ return \"\"; } }");
+            assert_eq!(p.find_taint(&["source"], &["sink"]).len(), 0, "Java: flow after fix");
+        }
+    }
+
     #[test]
     fn python_summaries_through_shared_engine() {
         // The identical driver + dataflow engine, fed by the Python frontend:

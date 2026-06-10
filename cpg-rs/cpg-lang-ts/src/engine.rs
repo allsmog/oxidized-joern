@@ -58,7 +58,16 @@ fn build_method(spec: &TsLangSpec, b: &mut CpgBuilder, file: NodeId, node: Node,
     if let Some(params) = params {
         let mut idx = 1;
         for p in named_children(params) {
-            let pname = innermost_identifier(p, src);
+            // Prefer the explicit name/pattern field: in several grammars (e.g.
+            // Java `String p`) the *type* is itself a `*_identifier` and precedes
+            // the name in child order, so a blind first-identifier scan would
+            // pick the type. Fall back to a scan only for bare-identifier params.
+            let pname = p
+                .child_by_field_name("name")
+                .or_else(|| p.child_by_field_name("pattern"))
+                .map(|n| innermost_identifier(n, src))
+                .filter(|s| !s.is_empty())
+                .unwrap_or_else(|| innermost_identifier(p, src));
             if pname.is_empty() || pname == "self" {
                 continue;
             }
