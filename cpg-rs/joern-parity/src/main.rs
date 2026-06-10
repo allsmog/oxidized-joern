@@ -2986,13 +2986,10 @@ fn is_access_like(name: &str) -> bool {
 /// `&v`->`v`, `(T)x`->`x`. Returns the input unchanged if not an access form.
 fn strip_access(v: &str) -> String {
     let t = v.trim();
+    // Strip a leading deref/addressOf only. NOT a cast: a cast def `(T)n` is a
+    // distinct value and must not match plain `n` uses.
     if let Some(rest) = t.strip_prefix('*').or_else(|| t.strip_prefix('&')) {
         return rest.trim().to_string();
-    }
-    if t.starts_with('(') {
-        if let Some(close) = t.find(')') {
-            return t[close + 1..].trim().to_string();
-        }
     }
     t.to_string()
 }
