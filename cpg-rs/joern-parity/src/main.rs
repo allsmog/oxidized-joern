@@ -2977,10 +2977,9 @@ fn operator_semantics(name: &str) -> Option<Vec<(i64, i64)>> {
 }
 
 fn is_access_like(name: &str) -> bool {
-    matches!(
-        name,
-        "<operator>.indirection" | "<operator>.addressOf" | "<operator>.cast"
-    )
+    // indirection/addressOf operands are reads, not defs; a cast's operand
+    // IS a def (pinned: `l` inside `(uc*)l` reaches exit/param_out).
+    matches!(name, "<operator>.indirection" | "<operator>.addressOf")
 }
 
 /// Strip one access wrapper from a variable string to its base: `*l`->`l`,
