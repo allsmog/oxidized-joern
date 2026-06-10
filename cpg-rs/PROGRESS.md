@@ -4,7 +4,9 @@ Single source of truth across sessions. Update in the same commit as the work.
 
 ## Current state
 
-- **Milestone:** M5 (real-world corpus) / M7 (dataflow oracle) — M1-M4 done
+- **Milestone:** M5 (real-world corpus) + M7 (dataflow, now STARTED) — M1-M4 done.
+  Goal reframed (see /root/.claude/plans/ + GOAL): self-hosted IRIS on cpg-rs.
+  Two parallel tracks: A = byte-parity expansion (gate), B = dataflow + IRIS loop.
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` fetches latest; if the version
   drifts and output changes, record it here and in QUIRKS.md)
 - **Gate:** `joern-parity/check.sh` — green, 95/95 blocks byte-identical.
@@ -51,17 +53,39 @@ Next, in preference order:
    token pasting/stringizing, varargs, extern, calls to undefined
    functions (printf stub shape), initializer lists `{1,2}`, struct defs
    inside functions, braceless if/while bodies (for-with-; is pinned).
-2. **M7 — dataflow oracle.** Add REACHING_DEF, CDG, DOMINATE, POST_DOMINATE
-   to oracle kinds (they're already in the importCode graph; the addressing
-   scheme works as-is). DOMINATE/POST_DOMINATE are computable from our
-   now-identical CFG (standard dominator tree); CDG from post-dominance
-   frontiers; REACHING_DEF is the big one (Joern's ReachingDefPass: def-use
-   over the CFG with its specific gen/kill conventions).
+2. **M7 / Track B — dataflow + IRIS (STARTED).** FLOWS| oracle section now
+   live (REACHING_DEF with VARIABLE property); addressing confirmed to carry
+   over (1458 flow facts on the corpus). NEXT, in order:
+   (a) Implement reaching-definitions in joern-parity to byte-match the
+       FLOWS| section — reuse the CfgBuilder's CFG (already correct) + Joern's
+       ReachingDefPass gen/kill. Observed conventions to reproduce (from
+       add.c): params flow from METHOD entry (`add#0 -> add#1`, var `[]` or
+       name); a def reaches uses tagged with the VARIABLE (`[a]`, `[a + b]`);
+       `<RET>` variable flows the returned expr -> METHOD_RETURN
+       (`add#6 -> add#10`); interprocedural flows go file-global#callsite ->
+       callee param-use. Extend check.sh with a FLOWS diff block (per-method,
+       like edges).
+   (b) reachableBy = transitive closure over REACHING_DEF (+ summaries for
+       interproc). Validate against a Joern reachableBy probe.
+   (c) Port validated CFG + reaching-defs from joern-parity into cpg-core
+       passes (replace the placeholder linear CfgPass in cpg-analysis/cfg.rs;
+       populate the existing-but-empty Ddg edge slot). Wire taint.rs onto it.
+   (d) IRIS driver on cpg-cli: LLM CWE->sources/sinks/sanitizers (extend
+       TaintSpec), run taint, LLM triage, SARIF out.
+   (e) Evaluate on Juliet C/C++ subset: precision/recall vs engine-alone.
 3. **M6 — real graph output** (fold onto cpg-core schema + binary export
    loadable by joern) can proceed in parallel with either.
 
 ## Done
 
+- **M7/Track B start (2026-06-10):** Reframed toward self-hosted IRIS on
+  cpg-rs (see plan). Added the FLOWS| oracle section to oracle.sc:
+  REACHING_DEF edges dumped with their VARIABLE property via the existing
+  `#`-addressing, which resolves them with ZERO new addressing work (the
+  plan's flagged risk is retired). 1458 flow facts captured on the corpus;
+  Track A byte-parity gate stays green at 95/95 (FLOWS is additive — check.sh
+  only diffs AST/NODES/EDGES). This is the "get the oracle first" foundation;
+  reaching-def implementation in joern-parity is the next unit.
 - **M5 musl string fns (2026-06-10):** memcmp.c + strcmp.c byte-identical,
   95/95. New pins: multi-declarator initialisers emit ALL LOCALs first, then
   all assignments (`T *l=vl, *r=vr;`); empty for-init clause becomes a
