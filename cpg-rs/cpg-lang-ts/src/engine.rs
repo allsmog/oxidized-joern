@@ -33,6 +33,18 @@ fn build_method(spec: &TsLangSpec, b: &mut CpgBuilder, file: NodeId, node: Node,
         .child_by_field_name("name")
         .map(|n| innermost_identifier(n, src))
         .filter(|s| !s.is_empty())
+        // Anonymous function (e.g. a JS arrow): borrow the name of the binding
+        // it is assigned to, so `const g = () => …` is the method `g`.
+        .or_else(|| {
+            let p = node.parent()?;
+            let target = p.child_by_field_name("name").or_else(|| p.child_by_field_name("left"))?;
+            let n = innermost_identifier(target, src);
+            if n.is_empty() {
+                None
+            } else {
+                Some(n)
+            }
+        })
         .unwrap_or("<anon>");
     let method = b.method(name, name, &format!("{name}()"), line(node));
     b.contains(file, method);
@@ -213,7 +225,13 @@ fn build_call(spec: &TsLangSpec, b: &mut CpgBuilder, node: Node, src: &[u8]) -> 
     let name = callee.map(|c| callee_name(c, src)).unwrap_or_else(|| "<anon>".into());
     let call = b.call(&name, text(node, src), line(node));
 
-    if let Some(args) = node.child_by_field_name("arguments") {
+    // Arguments: the `arguments` field for normal calls, or a Rust macro's
+    // `token_tree` child (println!/format!/… carry their args there as an
+    // unnamed child, not in a field).
+    let args = node
+        .child_by_field_name("arguments")
+        .or_else(|| named_children(node).into_iter().find(|c| c.kind() == "token_tree"));
+    if let Some(args) = args {
         let mut idx = 1;
         for a in named_children(args) {
             if let Some(arg) = build_expr(spec, b, a, src) {
