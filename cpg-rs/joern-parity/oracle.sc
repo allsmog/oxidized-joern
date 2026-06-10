@@ -58,7 +58,7 @@ import scala.collection.mutable
     case td: nodes.TypeDecl if !addr.contains(td.id) => Some(s"D:" + td.fullName)
     case other => addr.get(other.id)
   }
-  val kinds = Set("ARGUMENT","CALL","CONDITION","CONTAINS","DO_BODY","EVAL_TYPE",
+  val kinds = Set("ARGUMENT","CALL","CFG","CONDITION","CONTAINS","DO_BODY","EVAL_TYPE",
                   "FALSE_BODY","FOR_BODY","FOR_INIT","FOR_UPDATE","PARAMETER_LINK",
                   "REF","SOURCE_FILE","TRUE_BODY")
   val lines = mutable.SortedSet[String]()
