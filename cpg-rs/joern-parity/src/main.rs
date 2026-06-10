@@ -3166,6 +3166,18 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         s
     };
 
+    // Joern's reaching-def runs over ReachingDefFlowGraph, not the raw CFG: the
+    // exit and the METHOD_PARAMETER_OUTs are fed by a param-out chain whose
+    // source is the single `lastActualCfgNode` (the earliest cfg-predecessor of
+    // METHOD_RETURN) — NOT the union of all returns. So a post-loop `return`
+    // never contributes its (bypass) param defs to the exit. For a
+    // single-return method this is identical to the union.
+    let exit_in: HashSet<usize> = (0..n)
+        .find(|&i| arena[i].label == "METHOD_RETURN")
+        .and_then(|e| preds[e].iter().copied().filter(|&p| p < n).min())
+        .map(|la| out[la].clone())
+        .unwrap_or_default();
+
     // isUsing(use, def): variable match (sameVariable). Container/part/alias
     // handling deferred until the diff demands it.
     // sameVariable: exact, plus substring containment when the USE is a
@@ -3324,11 +3336,10 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         if let Some(&pin) = params.iter().find(|&&p| arena[p].name == arena[i].name) {
             push(arena[pin].name.clone(), pin, i, &mut flows);
         }
-        // param_out reads the defs live at method exit (it is not in the CFG).
-        let exit_in = exit.map(in_of).unwrap_or_default();
+        // param_out reads the defs live at method exit (param-out chain).
         let pvar = arena[i].name.clone();
         let mut ds: Vec<usize> = exit_in
-            .into_iter()
+            .iter().copied()
             .filter(|&d| def_var.get(&d).map(|v| *v == pvar).unwrap_or(false))
             .collect();
         ds.sort();
@@ -3339,8 +3350,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
 
     // 5. exit node: every def in in(exit) -> exit
     if let Some(e) = exit {
-        let ins = in_of(e);
-        let mut v: Vec<usize> = ins.into_iter().collect();
+        let mut v: Vec<usize> = exit_in.iter().copied().collect();
         v.sort();
         for d in v {
             push(node_var(&arena[d]), d, e, &mut flows);
