@@ -90,6 +90,14 @@ AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
 AST|  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
 AST|  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
 AST|
+AST|METHOD NAME=<operator>.division FULL_NAME=<operator>.division ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
 AST|METHOD NAME=<operator>.equals FULL_NAME=<operator>.equals ORDER=0
 AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
 AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
@@ -368,6 +376,158 @@ AST|        IDENTIFIER NAME=fn CODE=fn TYPE_FULL_NAME=int ORDER=1
 AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
 AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=3 ARGUMENT_INDEX=2
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|
+AST|METHOD NAME=bsearch CODE=void *bsearch(const void *key, const void *base, size_t nel, size_t width, int (*cmp)(const void *, const void *))\n{\n	void *try;\n	int sign;\n	while (nel > 0) {\n		try = (char *)base + width*(nel/2);\n		sign = cmp(key, try);\n		if (sign < 0) {\n			nel /= 2;\n		} else if (sign > 0) {\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} else {\n			return try;\n		}\n	}\n	return NULL;\n} FULL_NAME=bsearch SIGNATURE=void*(void*,void*,size_t,size_t,int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=key CODE=const void *key TYPE_FULL_NAME=void* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=key CODE=const void *key TYPE_FULL_NAME=void* ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=base CODE=const void *base TYPE_FULL_NAME=void* ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=base CODE=const void *base TYPE_FULL_NAME=void* ORDER=2
+AST|  METHOD_PARAMETER_IN NAME=nel CODE=size_t nel TYPE_FULL_NAME=size_t ORDER=3
+AST|  METHOD_PARAMETER_OUT NAME=nel CODE=size_t nel TYPE_FULL_NAME=size_t ORDER=3
+AST|  METHOD_PARAMETER_IN NAME=width CODE=size_t width TYPE_FULL_NAME=size_t ORDER=4
+AST|  METHOD_PARAMETER_OUT NAME=width CODE=size_t width TYPE_FULL_NAME=size_t ORDER=4
+AST|  METHOD_PARAMETER_IN NAME=cmp CODE=int (*cmp)(const void *, const void *) TYPE_FULL_NAME=int ORDER=5
+AST|  METHOD_PARAMETER_OUT NAME=cmp CODE=int (*cmp)(const void *, const void *) TYPE_FULL_NAME=int ORDER=5
+AST|  BLOCK CODE={\n	void *try;\n	int sign;\n	while (nel > 0) {\n		try = (char *)base + width*(nel/2);\n		sign = cmp(key, try);\n		if (sign < 0) {\n			nel /= 2;\n		} else if (sign > 0) {\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} else {\n			return try;\n		}\n	}\n	return NULL;\n} TYPE_FULL_NAME=void ORDER=6
+AST|    LOCAL NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=0
+AST|    LOCAL NAME=try CODE=void *try TYPE_FULL_NAME=void* ORDER=1
+AST|    LOCAL NAME=sign CODE=int sign TYPE_FULL_NAME=int ORDER=2
+AST|    CONTROL_STRUCTURE CODE=while (nel > 0) ORDER=3
+AST|      CALL NAME=<operator>.greaterThan CODE=nel > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=nel CODE=nel TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      BLOCK CODE={\n		try = (char *)base + width*(nel/2);\n		sign = cmp(key, try);\n		if (sign < 0) {\n			nel /= 2;\n		} else if (sign > 0) {\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} else {\n			return try;\n		}\n	} TYPE_FULL_NAME=void ORDER=2
+AST|        CALL NAME=<operator>.assignment CODE=try = (char *)base + width*(nel/2) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=try CODE=try TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.addition CODE=(char *)base + width*(nel/2) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.cast CODE=(char *)base TYPE_FULL_NAME=char METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=char * TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=base CODE=base TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=<operator>.multiplication CODE=width*(nel/2) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.multiplication ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=width CODE=width TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|              CALL NAME=<operator>.division CODE=nel/2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.division ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                IDENTIFIER NAME=nel CODE=nel TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|                LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        CALL NAME=<operator>.assignment CODE=sign = cmp(key, try) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=sign CODE=sign TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.pointerCall CODE=cmp(key, try) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+AST|            IDENTIFIER NAME=cmp CODE=cmp TYPE_FULL_NAME=int ORDER=1
+AST|            IDENTIFIER NAME=key CODE=key TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=1
+AST|            IDENTIFIER NAME=try CODE=try TYPE_FULL_NAME=void* ORDER=3 ARGUMENT_INDEX=2
+AST|        CONTROL_STRUCTURE CODE=if (sign < 0) {\n			nel /= 2;\n		} else if (sign > 0) {\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} else {\n			return try;\n		} ORDER=3
+AST|          CALL NAME=<operator>.lessThan CODE=sign < 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=sign CODE=sign TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|          BLOCK CODE={\n			nel /= 2;\n		} TYPE_FULL_NAME=void ORDER=2
+AST|            CALL NAME=<operator>.assignmentDivision CODE=nel /= 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignmentDivision ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=nel CODE=nel TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|          CONTROL_STRUCTURE CODE=else ORDER=3
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|              CONTROL_STRUCTURE CODE=if (sign > 0) {\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} else {\n			return try;\n		} ORDER=1
+AST|                CALL NAME=<operator>.greaterThan CODE=sign > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  IDENTIFIER NAME=sign CODE=sign TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                  LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|                BLOCK CODE={\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} TYPE_FULL_NAME=void ORDER=2
+AST|                  CALL NAME=<operator>.assignment CODE=base = (char *)try + width TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                    IDENTIFIER NAME=base CODE=base TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|                    CALL NAME=<operator>.addition CODE=(char *)try + width TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                      CALL NAME=<operator>.cast CODE=(char *)try TYPE_FULL_NAME=char METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                        TYPE_REF CODE=char * TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+AST|                        IDENTIFIER NAME=try CODE=try TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|                      IDENTIFIER NAME=width CODE=width TYPE_FULL_NAME=size_t ORDER=2 ARGUMENT_INDEX=2
+AST|                  CALL NAME=<operator>.assignmentMinus CODE=nel -= nel/2+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignmentMinus ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                    IDENTIFIER NAME=nel CODE=nel TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|                    CALL NAME=<operator>.addition CODE=nel/2+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                      CALL NAME=<operator>.division CODE=nel/2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.division ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                        IDENTIFIER NAME=nel CODE=nel TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|                        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|                      LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|                CONTROL_STRUCTURE CODE=else ORDER=3
+AST|                  BLOCK CODE={\n			return try;\n		} TYPE_FULL_NAME=void ORDER=1
+AST|                    RETURN CODE=return try; ORDER=1
+AST|                      IDENTIFIER NAME=try CODE=try TYPE_FULL_NAME=void* ORDER=1
+AST|    RETURN CODE=return NULL; ORDER=4
+AST|      IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=7
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=bsearch.c:<global> ORDER=1
+AST|  METHOD NAME=bsearch CODE=void *bsearch(const void *key, const void *base, size_t nel, size_t width, int (*cmp)(const void *, const void *))\n{\n	void *try;\n	int sign;\n	while (nel > 0) {\n		try = (char *)base + width*(nel/2);\n		sign = cmp(key, try);\n		if (sign < 0) {\n			nel /= 2;\n		} else if (sign > 0) {\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} else {\n			return try;\n		}\n	}\n	return NULL;\n} FULL_NAME=bsearch SIGNATURE=void*(void*,void*,size_t,size_t,int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=key CODE=const void *key TYPE_FULL_NAME=void* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=key CODE=const void *key TYPE_FULL_NAME=void* ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=base CODE=const void *base TYPE_FULL_NAME=void* ORDER=2
+AST|    METHOD_PARAMETER_OUT NAME=base CODE=const void *base TYPE_FULL_NAME=void* ORDER=2
+AST|    METHOD_PARAMETER_IN NAME=nel CODE=size_t nel TYPE_FULL_NAME=size_t ORDER=3
+AST|    METHOD_PARAMETER_OUT NAME=nel CODE=size_t nel TYPE_FULL_NAME=size_t ORDER=3
+AST|    METHOD_PARAMETER_IN NAME=width CODE=size_t width TYPE_FULL_NAME=size_t ORDER=4
+AST|    METHOD_PARAMETER_OUT NAME=width CODE=size_t width TYPE_FULL_NAME=size_t ORDER=4
+AST|    METHOD_PARAMETER_IN NAME=cmp CODE=int (*cmp)(const void *, const void *) TYPE_FULL_NAME=int ORDER=5
+AST|    METHOD_PARAMETER_OUT NAME=cmp CODE=int (*cmp)(const void *, const void *) TYPE_FULL_NAME=int ORDER=5
+AST|    BLOCK CODE={\n	void *try;\n	int sign;\n	while (nel > 0) {\n		try = (char *)base + width*(nel/2);\n		sign = cmp(key, try);\n		if (sign < 0) {\n			nel /= 2;\n		} else if (sign > 0) {\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} else {\n			return try;\n		}\n	}\n	return NULL;\n} TYPE_FULL_NAME=void ORDER=6
+AST|      LOCAL NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=0
+AST|      LOCAL NAME=try CODE=void *try TYPE_FULL_NAME=void* ORDER=1
+AST|      LOCAL NAME=sign CODE=int sign TYPE_FULL_NAME=int ORDER=2
+AST|      CONTROL_STRUCTURE CODE=while (nel > 0) ORDER=3
+AST|        CALL NAME=<operator>.greaterThan CODE=nel > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=nel CODE=nel TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        BLOCK CODE={\n		try = (char *)base + width*(nel/2);\n		sign = cmp(key, try);\n		if (sign < 0) {\n			nel /= 2;\n		} else if (sign > 0) {\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} else {\n			return try;\n		}\n	} TYPE_FULL_NAME=void ORDER=2
+AST|          CALL NAME=<operator>.assignment CODE=try = (char *)base + width*(nel/2) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=try CODE=try TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|            CALL NAME=<operator>.addition CODE=(char *)base + width*(nel/2) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              CALL NAME=<operator>.cast CODE=(char *)base TYPE_FULL_NAME=char METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                TYPE_REF CODE=char * TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+AST|                IDENTIFIER NAME=base CODE=base TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|              CALL NAME=<operator>.multiplication CODE=width*(nel/2) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.multiplication ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                IDENTIFIER NAME=width CODE=width TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|                CALL NAME=<operator>.division CODE=nel/2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.division ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  IDENTIFIER NAME=nel CODE=nel TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|                  LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=<operator>.assignment CODE=sign = cmp(key, try) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=sign CODE=sign TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            CALL NAME=<operator>.pointerCall CODE=cmp(key, try) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+AST|              IDENTIFIER NAME=cmp CODE=cmp TYPE_FULL_NAME=int ORDER=1
+AST|              IDENTIFIER NAME=key CODE=key TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=try CODE=try TYPE_FULL_NAME=void* ORDER=3 ARGUMENT_INDEX=2
+AST|          CONTROL_STRUCTURE CODE=if (sign < 0) {\n			nel /= 2;\n		} else if (sign > 0) {\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} else {\n			return try;\n		} ORDER=3
+AST|            CALL NAME=<operator>.lessThan CODE=sign < 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=sign CODE=sign TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|            BLOCK CODE={\n			nel /= 2;\n		} TYPE_FULL_NAME=void ORDER=2
+AST|              CALL NAME=<operator>.assignmentDivision CODE=nel /= 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignmentDivision ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                IDENTIFIER NAME=nel CODE=nel TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|                LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|            CONTROL_STRUCTURE CODE=else ORDER=3
+AST|              BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|                CONTROL_STRUCTURE CODE=if (sign > 0) {\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} else {\n			return try;\n		} ORDER=1
+AST|                  CALL NAME=<operator>.greaterThan CODE=sign > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                    IDENTIFIER NAME=sign CODE=sign TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                    LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|                  BLOCK CODE={\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} TYPE_FULL_NAME=void ORDER=2
+AST|                    CALL NAME=<operator>.assignment CODE=base = (char *)try + width TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                      IDENTIFIER NAME=base CODE=base TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|                      CALL NAME=<operator>.addition CODE=(char *)try + width TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                        CALL NAME=<operator>.cast CODE=(char *)try TYPE_FULL_NAME=char METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                          TYPE_REF CODE=char * TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+AST|                          IDENTIFIER NAME=try CODE=try TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|                        IDENTIFIER NAME=width CODE=width TYPE_FULL_NAME=size_t ORDER=2 ARGUMENT_INDEX=2
+AST|                    CALL NAME=<operator>.assignmentMinus CODE=nel -= nel/2+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignmentMinus ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                      IDENTIFIER NAME=nel CODE=nel TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|                      CALL NAME=<operator>.addition CODE=nel/2+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                        CALL NAME=<operator>.division CODE=nel/2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.division ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                          IDENTIFIER NAME=nel CODE=nel TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|                          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|                        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|                  CONTROL_STRUCTURE CODE=else ORDER=3
+AST|                    BLOCK CODE={\n			return try;\n		} TYPE_FULL_NAME=void ORDER=1
+AST|                      RETURN CODE=return try; ORDER=1
+AST|                        IDENTIFIER NAME=try CODE=try TYPE_FULL_NAME=void* ORDER=1
+AST|      RETURN CODE=return NULL; ORDER=4
+AST|        IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=7
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=bsearch TYPE_FULL_NAME=bsearch METHOD_FULL_NAME=bsearch ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|
 AST|METHOD NAME=classify CODE=int classify(int n) {\n    int r = 0;\n    if (n > 10) {\n        r = n - 1;\n    } else {\n        r = n * 2;\n    }\n    return r;\n} FULL_NAME=classify SIGNATURE=int(int) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
@@ -1580,6 +1740,7 @@ NODES|META_DATA LANGUAGE=NEWC
 NODES|FILE NAME=<includes> ORDER=1
 NODES|FILE NAME=<unknown> ORDER=0
 NODES|FILE NAME=add.c ORDER=0
+NODES|FILE NAME=bsearch.c ORDER=0
 NODES|FILE NAME=exprs.c ORDER=0
 NODES|FILE NAME=forloop.c ORDER=0
 NODES|FILE NAME=gotos.c ORDER=0
@@ -1595,6 +1756,7 @@ NODES|FILE NAME=unary.c ORDER=0
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=bsearch.c:<global> FILENAME=bsearch.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=exprs.c:<global> FILENAME=exprs.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=forloop.c:<global> FILENAME=forloop.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=gotos.c:<global> FILENAME=gotos.c ORDER=1
@@ -1613,6 +1775,8 @@ NODES|TYPE_DECL NAME=add FULL_NAME=add CODE=add AST_PARENT_TYPE=TYPE_DECL AST_PA
 NODES|TYPE_DECL NAME=<global> FULL_NAME=add.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
 NODES|TYPE_DECL NAME=agg FULL_NAME=agg CODE=agg AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=structs.c:<global> FILENAME=structs.c ORDER=1
 NODES|TYPE_DECL NAME=apply FULL_NAME=apply CODE=apply AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types2.c:<global> FILENAME=types2.c ORDER=1
+NODES|TYPE_DECL NAME=bsearch FULL_NAME=bsearch CODE=bsearch AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=bsearch.c:<global> FILENAME=bsearch.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=bsearch.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=bsearch.c:<global> FILENAME=bsearch.c ORDER=2
 NODES|TYPE_DECL NAME=char FULL_NAME=char CODE=char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=classify FULL_NAME=classify CODE=classify AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ops.c:<global> FILENAME=ops.c ORDER=1
@@ -1648,6 +1812,7 @@ NODES|TYPE_DECL NAME=point FULL_NAME=point CODE=struct point {\n    int x;\n    
 NODES|TYPE_DECL NAME=point* FULL_NAME=point* CODE=point* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=ptr FULL_NAME=ptr CODE=ptr AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=unary.c:<global> FILENAME=unary.c ORDER=1
 NODES|TYPE_DECL NAME=second FULL_NAME=second CODE=second AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=order.c:<global> FILENAME=order.c ORDER=1
+NODES|TYPE_DECL NAME=size_t FULL_NAME=size_t CODE=size_t IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=<global> FULL_NAME=structs.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=structs.c:<global> FILENAME=structs.c ORDER=1
 NODES|TYPE_DECL NAME=sum FULL_NAME=sum CODE=sum AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=loop.c:<global> FILENAME=loop.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=switch.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=switch.c:<global> FILENAME=switch.c ORDER=1
@@ -1660,10 +1825,12 @@ NODES|TYPE_DECL NAME=unsigned int FULL_NAME=unsigned int CODE=unsigned int IS_EX
 NODES|TYPE_DECL NAME=use FULL_NAME=use CODE=use AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types2.c:<global> FILENAME=types2.c ORDER=1
 NODES|TYPE_DECL NAME=value FULL_NAME=value CODE=union value {\n    int i;\n    float f;\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=types2.c ORDER=1
 NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
 NODES|TYPE NAME=add FULL_NAME=add TYPE_DECL_FULL_NAME=add
 NODES|TYPE NAME=agg FULL_NAME=agg TYPE_DECL_FULL_NAME=agg
 NODES|TYPE NAME=apply FULL_NAME=apply TYPE_DECL_FULL_NAME=apply
+NODES|TYPE NAME=bsearch FULL_NAME=bsearch TYPE_DECL_FULL_NAME=bsearch
 NODES|TYPE NAME=char FULL_NAME=char TYPE_DECL_FULL_NAME=char
 NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
 NODES|TYPE NAME=classify FULL_NAME=classify TYPE_DECL_FULL_NAME=classify
@@ -1691,6 +1858,7 @@ NODES|TYPE NAME=point FULL_NAME=point TYPE_DECL_FULL_NAME=point
 NODES|TYPE NAME=point* FULL_NAME=point* TYPE_DECL_FULL_NAME=point*
 NODES|TYPE NAME=ptr FULL_NAME=ptr TYPE_DECL_FULL_NAME=ptr
 NODES|TYPE NAME=second FULL_NAME=second TYPE_DECL_FULL_NAME=second
+NODES|TYPE NAME=size_t FULL_NAME=size_t TYPE_DECL_FULL_NAME=size_t
 NODES|TYPE NAME=sum FULL_NAME=sum TYPE_DECL_FULL_NAME=sum
 NODES|TYPE NAME=uint_t FULL_NAME=uint_t TYPE_DECL_FULL_NAME=uint_t
 NODES|TYPE NAME=unary FULL_NAME=unary TYPE_DECL_FULL_NAME=unary
@@ -1699,6 +1867,7 @@ NODES|TYPE NAME=unsigned int FULL_NAME=unsigned int TYPE_DECL_FULL_NAME=unsigned
 NODES|TYPE NAME=use FULL_NAME=use TYPE_DECL_FULL_NAME=use
 NODES|TYPE NAME=value FULL_NAME=value TYPE_DECL_FULL_NAME=value
 NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
 EDGES|ARGUMENT add#6 -> add#7
 EDGES|ARGUMENT add#7 -> add#8
 EDGES|ARGUMENT add#7 -> add#9
@@ -1729,6 +1898,42 @@ EDGES|ARGUMENT agg#9 -> agg#11
 EDGES|ARGUMENT apply#6 -> apply#7
 EDGES|ARGUMENT apply#7 -> apply#10
 EDGES|ARGUMENT apply#7 -> apply#9
+EDGES|ARGUMENT bsearch#16 -> bsearch#17
+EDGES|ARGUMENT bsearch#16 -> bsearch#18
+EDGES|ARGUMENT bsearch#20 -> bsearch#21
+EDGES|ARGUMENT bsearch#20 -> bsearch#22
+EDGES|ARGUMENT bsearch#22 -> bsearch#23
+EDGES|ARGUMENT bsearch#22 -> bsearch#26
+EDGES|ARGUMENT bsearch#23 -> bsearch#24
+EDGES|ARGUMENT bsearch#23 -> bsearch#25
+EDGES|ARGUMENT bsearch#26 -> bsearch#27
+EDGES|ARGUMENT bsearch#26 -> bsearch#28
+EDGES|ARGUMENT bsearch#28 -> bsearch#29
+EDGES|ARGUMENT bsearch#28 -> bsearch#30
+EDGES|ARGUMENT bsearch#31 -> bsearch#32
+EDGES|ARGUMENT bsearch#31 -> bsearch#33
+EDGES|ARGUMENT bsearch#33 -> bsearch#35
+EDGES|ARGUMENT bsearch#33 -> bsearch#36
+EDGES|ARGUMENT bsearch#38 -> bsearch#39
+EDGES|ARGUMENT bsearch#38 -> bsearch#40
+EDGES|ARGUMENT bsearch#42 -> bsearch#43
+EDGES|ARGUMENT bsearch#42 -> bsearch#44
+EDGES|ARGUMENT bsearch#48 -> bsearch#49
+EDGES|ARGUMENT bsearch#48 -> bsearch#50
+EDGES|ARGUMENT bsearch#52 -> bsearch#53
+EDGES|ARGUMENT bsearch#52 -> bsearch#54
+EDGES|ARGUMENT bsearch#54 -> bsearch#55
+EDGES|ARGUMENT bsearch#54 -> bsearch#58
+EDGES|ARGUMENT bsearch#55 -> bsearch#56
+EDGES|ARGUMENT bsearch#55 -> bsearch#57
+EDGES|ARGUMENT bsearch#59 -> bsearch#60
+EDGES|ARGUMENT bsearch#59 -> bsearch#61
+EDGES|ARGUMENT bsearch#61 -> bsearch#62
+EDGES|ARGUMENT bsearch#61 -> bsearch#65
+EDGES|ARGUMENT bsearch#62 -> bsearch#63
+EDGES|ARGUMENT bsearch#62 -> bsearch#64
+EDGES|ARGUMENT bsearch#68 -> bsearch#69
+EDGES|ARGUMENT bsearch#70 -> bsearch#71
 EDGES|ARGUMENT classify#13 -> classify#14
 EDGES|ARGUMENT classify#13 -> classify#15
 EDGES|ARGUMENT classify#15 -> classify#16
@@ -1990,6 +2195,22 @@ EDGES|CALL agg#34 -> <operator>.assignment#0
 EDGES|CALL agg#38 -> helper#0
 EDGES|CALL agg#8 -> <operator>.assignment#0
 EDGES|CALL agg#9 -> <operator>.fieldAccess#0
+EDGES|CALL bsearch#16 -> <operator>.greaterThan#0
+EDGES|CALL bsearch#20 -> <operator>.assignment#0
+EDGES|CALL bsearch#22 -> <operator>.addition#0
+EDGES|CALL bsearch#23 -> <operator>.cast#0
+EDGES|CALL bsearch#26 -> <operator>.multiplication#0
+EDGES|CALL bsearch#28 -> <operator>.division#0
+EDGES|CALL bsearch#31 -> <operator>.assignment#0
+EDGES|CALL bsearch#38 -> <operator>.lessThan#0
+EDGES|CALL bsearch#42 -> <operator>.assignmentDivision#0
+EDGES|CALL bsearch#48 -> <operator>.greaterThan#0
+EDGES|CALL bsearch#52 -> <operator>.assignment#0
+EDGES|CALL bsearch#54 -> <operator>.addition#0
+EDGES|CALL bsearch#55 -> <operator>.cast#0
+EDGES|CALL bsearch#59 -> <operator>.assignmentMinus#0
+EDGES|CALL bsearch#61 -> <operator>.addition#0
+EDGES|CALL bsearch#62 -> <operator>.division#0
 EDGES|CALL classify#13 -> <operator>.assignment#0
 EDGES|CALL classify#15 -> <operator>.subtraction#0
 EDGES|CALL classify#20 -> <operator>.assignment#0
@@ -2129,6 +2350,7 @@ EDGES|CFG <operator>.assignmentMultiplication#0 -> <operator>.assignmentMultipli
 EDGES|CFG <operator>.assignmentPlus#0 -> <operator>.assignmentPlus#5
 EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
 EDGES|CFG <operator>.conditional#0 -> <operator>.conditional#5
+EDGES|CFG <operator>.division#0 -> <operator>.division#5
 EDGES|CFG <operator>.equals#0 -> <operator>.equals#5
 EDGES|CFG <operator>.fieldAccess#0 -> <operator>.fieldAccess#5
 EDGES|CFG <operator>.greaterThan#0 -> <operator>.greaterThan#5
@@ -2200,6 +2422,59 @@ EDGES|CFG apply#6 -> apply#11
 EDGES|CFG apply#7 -> apply#6
 EDGES|CFG apply#8 -> apply#9
 EDGES|CFG apply#9 -> apply#10
+EDGES|CFG bsearch#0 -> bsearch#17
+EDGES|CFG bsearch#16 -> bsearch#21
+EDGES|CFG bsearch#16 -> bsearch#71
+EDGES|CFG bsearch#17 -> bsearch#18
+EDGES|CFG bsearch#18 -> bsearch#16
+EDGES|CFG bsearch#20 -> bsearch#32
+EDGES|CFG bsearch#21 -> bsearch#24
+EDGES|CFG bsearch#22 -> bsearch#20
+EDGES|CFG bsearch#23 -> bsearch#27
+EDGES|CFG bsearch#24 -> bsearch#25
+EDGES|CFG bsearch#25 -> bsearch#23
+EDGES|CFG bsearch#26 -> bsearch#22
+EDGES|CFG bsearch#27 -> bsearch#29
+EDGES|CFG bsearch#28 -> bsearch#26
+EDGES|CFG bsearch#29 -> bsearch#30
+EDGES|CFG bsearch#30 -> bsearch#28
+EDGES|CFG bsearch#31 -> bsearch#39
+EDGES|CFG bsearch#32 -> bsearch#34
+EDGES|CFG bsearch#33 -> bsearch#31
+EDGES|CFG bsearch#34 -> bsearch#35
+EDGES|CFG bsearch#35 -> bsearch#36
+EDGES|CFG bsearch#36 -> bsearch#33
+EDGES|CFG bsearch#38 -> bsearch#43
+EDGES|CFG bsearch#38 -> bsearch#49
+EDGES|CFG bsearch#39 -> bsearch#40
+EDGES|CFG bsearch#40 -> bsearch#38
+EDGES|CFG bsearch#42 -> bsearch#17
+EDGES|CFG bsearch#43 -> bsearch#44
+EDGES|CFG bsearch#44 -> bsearch#42
+EDGES|CFG bsearch#48 -> bsearch#53
+EDGES|CFG bsearch#48 -> bsearch#69
+EDGES|CFG bsearch#49 -> bsearch#50
+EDGES|CFG bsearch#50 -> bsearch#48
+EDGES|CFG bsearch#52 -> bsearch#60
+EDGES|CFG bsearch#53 -> bsearch#56
+EDGES|CFG bsearch#54 -> bsearch#52
+EDGES|CFG bsearch#55 -> bsearch#58
+EDGES|CFG bsearch#56 -> bsearch#57
+EDGES|CFG bsearch#57 -> bsearch#55
+EDGES|CFG bsearch#58 -> bsearch#54
+EDGES|CFG bsearch#59 -> bsearch#17
+EDGES|CFG bsearch#60 -> bsearch#63
+EDGES|CFG bsearch#61 -> bsearch#59
+EDGES|CFG bsearch#62 -> bsearch#65
+EDGES|CFG bsearch#63 -> bsearch#64
+EDGES|CFG bsearch#64 -> bsearch#62
+EDGES|CFG bsearch#65 -> bsearch#61
+EDGES|CFG bsearch#68 -> bsearch#72
+EDGES|CFG bsearch#69 -> bsearch#68
+EDGES|CFG bsearch#70 -> bsearch#72
+EDGES|CFG bsearch#71 -> bsearch#70
+EDGES|CFG bsearch.c:<global>#0 -> bsearch.c:<global>#75
+EDGES|CFG bsearch.c:<global>#75 -> bsearch.c:<global>#76
 EDGES|CFG classify#0 -> classify#6
 EDGES|CFG classify#10 -> classify#11
 EDGES|CFG classify#11 -> classify#9
@@ -2646,6 +2921,9 @@ EDGES|CFG use#6 -> use#13
 EDGES|CFG use#7 -> use#9
 EDGES|CFG use#8 -> use#6
 EDGES|CFG use#9 -> use#10
+EDGES|CONDITION bsearch#15 -> bsearch#16
+EDGES|CONDITION bsearch#37 -> bsearch#38
+EDGES|CONDITION bsearch#47 -> bsearch#48
 EDGES|CONDITION classify#8 -> classify#9
 EDGES|CONDITION count#24 -> count#28
 EDGES|CONDITION count#8 -> count#13
@@ -2675,6 +2953,7 @@ EDGES|CONTAINS <operator>.assignmentMultiplication#0 -> <operator>.assignmentMul
 EDGES|CONTAINS <operator>.assignmentPlus#0 -> <operator>.assignmentPlus#2
 EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
 EDGES|CONTAINS <operator>.conditional#0 -> <operator>.conditional#2
+EDGES|CONTAINS <operator>.division#0 -> <operator>.division#2
 EDGES|CONTAINS <operator>.equals#0 -> <operator>.equals#2
 EDGES|CONTAINS <operator>.fieldAccess#0 -> <operator>.fieldAccess#2
 EDGES|CONTAINS <operator>.greaterThan#0 -> <operator>.greaterThan#2
@@ -2703,6 +2982,8 @@ EDGES|CONTAINS <operators>.assignmentXor#0 -> <operators>.assignmentXor#2
 EDGES|CONTAINS D:add.c:<global> -> D:add
 EDGES|CONTAINS D:add.c:<global> -> D:main
 EDGES|CONTAINS D:add.c:<global> -> add.c:<global>#0
+EDGES|CONTAINS D:bsearch.c:<global> -> D:bsearch
+EDGES|CONTAINS D:bsearch.c:<global> -> bsearch.c:<global>#0
 EDGES|CONTAINS D:exprs.c:<global> -> D:exprs
 EDGES|CONTAINS D:exprs.c:<global> -> exprs.c:<global>#0
 EDGES|CONTAINS D:forloop.c:<global> -> D:count
@@ -2747,10 +3028,13 @@ EDGES|CONTAINS F:<includes> -> D:int[]
 EDGES|CONTAINS F:<includes> -> D:long
 EDGES|CONTAINS F:<includes> -> D:longunsigned
 EDGES|CONTAINS F:<includes> -> D:point*
+EDGES|CONTAINS F:<includes> -> D:size_t
 EDGES|CONTAINS F:<includes> -> D:unionvalue
 EDGES|CONTAINS F:<includes> -> D:unsigned int
 EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:void*
 EDGES|CONTAINS F:add.c -> D:add.c:<global>
+EDGES|CONTAINS F:bsearch.c -> D:bsearch.c:<global>
 EDGES|CONTAINS F:exprs.c -> D:exprs.c:<global>
 EDGES|CONTAINS F:forloop.c -> D:forloop.c:<global>
 EDGES|CONTAINS F:gotos.c -> D:gotos.c:<global>
@@ -2818,6 +3102,67 @@ EDGES|CONTAINS apply#0 -> apply#6
 EDGES|CONTAINS apply#0 -> apply#7
 EDGES|CONTAINS apply#0 -> apply#8
 EDGES|CONTAINS apply#0 -> apply#9
+EDGES|CONTAINS bsearch#0 -> bsearch#11
+EDGES|CONTAINS bsearch#0 -> bsearch#15
+EDGES|CONTAINS bsearch#0 -> bsearch#16
+EDGES|CONTAINS bsearch#0 -> bsearch#17
+EDGES|CONTAINS bsearch#0 -> bsearch#18
+EDGES|CONTAINS bsearch#0 -> bsearch#19
+EDGES|CONTAINS bsearch#0 -> bsearch#20
+EDGES|CONTAINS bsearch#0 -> bsearch#21
+EDGES|CONTAINS bsearch#0 -> bsearch#22
+EDGES|CONTAINS bsearch#0 -> bsearch#23
+EDGES|CONTAINS bsearch#0 -> bsearch#24
+EDGES|CONTAINS bsearch#0 -> bsearch#25
+EDGES|CONTAINS bsearch#0 -> bsearch#26
+EDGES|CONTAINS bsearch#0 -> bsearch#27
+EDGES|CONTAINS bsearch#0 -> bsearch#28
+EDGES|CONTAINS bsearch#0 -> bsearch#29
+EDGES|CONTAINS bsearch#0 -> bsearch#30
+EDGES|CONTAINS bsearch#0 -> bsearch#31
+EDGES|CONTAINS bsearch#0 -> bsearch#32
+EDGES|CONTAINS bsearch#0 -> bsearch#33
+EDGES|CONTAINS bsearch#0 -> bsearch#34
+EDGES|CONTAINS bsearch#0 -> bsearch#35
+EDGES|CONTAINS bsearch#0 -> bsearch#36
+EDGES|CONTAINS bsearch#0 -> bsearch#37
+EDGES|CONTAINS bsearch#0 -> bsearch#38
+EDGES|CONTAINS bsearch#0 -> bsearch#39
+EDGES|CONTAINS bsearch#0 -> bsearch#40
+EDGES|CONTAINS bsearch#0 -> bsearch#41
+EDGES|CONTAINS bsearch#0 -> bsearch#42
+EDGES|CONTAINS bsearch#0 -> bsearch#43
+EDGES|CONTAINS bsearch#0 -> bsearch#44
+EDGES|CONTAINS bsearch#0 -> bsearch#45
+EDGES|CONTAINS bsearch#0 -> bsearch#46
+EDGES|CONTAINS bsearch#0 -> bsearch#47
+EDGES|CONTAINS bsearch#0 -> bsearch#48
+EDGES|CONTAINS bsearch#0 -> bsearch#49
+EDGES|CONTAINS bsearch#0 -> bsearch#50
+EDGES|CONTAINS bsearch#0 -> bsearch#51
+EDGES|CONTAINS bsearch#0 -> bsearch#52
+EDGES|CONTAINS bsearch#0 -> bsearch#53
+EDGES|CONTAINS bsearch#0 -> bsearch#54
+EDGES|CONTAINS bsearch#0 -> bsearch#55
+EDGES|CONTAINS bsearch#0 -> bsearch#56
+EDGES|CONTAINS bsearch#0 -> bsearch#57
+EDGES|CONTAINS bsearch#0 -> bsearch#58
+EDGES|CONTAINS bsearch#0 -> bsearch#59
+EDGES|CONTAINS bsearch#0 -> bsearch#60
+EDGES|CONTAINS bsearch#0 -> bsearch#61
+EDGES|CONTAINS bsearch#0 -> bsearch#62
+EDGES|CONTAINS bsearch#0 -> bsearch#63
+EDGES|CONTAINS bsearch#0 -> bsearch#64
+EDGES|CONTAINS bsearch#0 -> bsearch#65
+EDGES|CONTAINS bsearch#0 -> bsearch#66
+EDGES|CONTAINS bsearch#0 -> bsearch#67
+EDGES|CONTAINS bsearch#0 -> bsearch#68
+EDGES|CONTAINS bsearch#0 -> bsearch#69
+EDGES|CONTAINS bsearch#0 -> bsearch#70
+EDGES|CONTAINS bsearch#0 -> bsearch#71
+EDGES|CONTAINS bsearch.c:<global>#0 -> bsearch#0
+EDGES|CONTAINS bsearch.c:<global>#0 -> bsearch.c:<global>#74
+EDGES|CONTAINS bsearch.c:<global>#0 -> bsearch.c:<global>#75
 EDGES|CONTAINS classify#0 -> classify#10
 EDGES|CONTAINS classify#0 -> classify#11
 EDGES|CONTAINS classify#0 -> classify#12
@@ -3363,6 +3708,12 @@ EDGES|EVAL_TYPE <operator>.conditional#5 -> T:ANY
 EDGES|EVAL_TYPE <operator>.conditional#6 -> T:ANY
 EDGES|EVAL_TYPE <operator>.conditional#7 -> T:ANY
 EDGES|EVAL_TYPE <operator>.conditional#8 -> T:ANY
+EDGES|EVAL_TYPE <operator>.division#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.division#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.division#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.division#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.division#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.division#6 -> T:ANY
 EDGES|EVAL_TYPE <operator>.equals#1 -> T:ANY
 EDGES|EVAL_TYPE <operator>.equals#2 -> T:ANY
 EDGES|EVAL_TYPE <operator>.equals#3 -> T:ANY
@@ -3555,6 +3906,74 @@ EDGES|EVAL_TYPE apply#5 -> T:void
 EDGES|EVAL_TYPE apply#7 -> T:int
 EDGES|EVAL_TYPE apply#8 -> T:int
 EDGES|EVAL_TYPE apply#9 -> T:int
+EDGES|EVAL_TYPE bsearch#1 -> T:void*
+EDGES|EVAL_TYPE bsearch#10 -> T:int
+EDGES|EVAL_TYPE bsearch#11 -> T:void
+EDGES|EVAL_TYPE bsearch#12 -> T:ANY
+EDGES|EVAL_TYPE bsearch#13 -> T:void*
+EDGES|EVAL_TYPE bsearch#14 -> T:int
+EDGES|EVAL_TYPE bsearch#16 -> T:ANY
+EDGES|EVAL_TYPE bsearch#17 -> T:size_t
+EDGES|EVAL_TYPE bsearch#18 -> T:int
+EDGES|EVAL_TYPE bsearch#19 -> T:void
+EDGES|EVAL_TYPE bsearch#2 -> T:void*
+EDGES|EVAL_TYPE bsearch#20 -> T:ANY
+EDGES|EVAL_TYPE bsearch#21 -> T:void*
+EDGES|EVAL_TYPE bsearch#22 -> T:ANY
+EDGES|EVAL_TYPE bsearch#23 -> T:char
+EDGES|EVAL_TYPE bsearch#24 -> T:char
+EDGES|EVAL_TYPE bsearch#25 -> T:void*
+EDGES|EVAL_TYPE bsearch#26 -> T:ANY
+EDGES|EVAL_TYPE bsearch#27 -> T:size_t
+EDGES|EVAL_TYPE bsearch#28 -> T:ANY
+EDGES|EVAL_TYPE bsearch#29 -> T:size_t
+EDGES|EVAL_TYPE bsearch#3 -> T:void*
+EDGES|EVAL_TYPE bsearch#30 -> T:int
+EDGES|EVAL_TYPE bsearch#31 -> T:ANY
+EDGES|EVAL_TYPE bsearch#32 -> T:int
+EDGES|EVAL_TYPE bsearch#33 -> T:int
+EDGES|EVAL_TYPE bsearch#34 -> T:int
+EDGES|EVAL_TYPE bsearch#35 -> T:void*
+EDGES|EVAL_TYPE bsearch#36 -> T:void*
+EDGES|EVAL_TYPE bsearch#38 -> T:ANY
+EDGES|EVAL_TYPE bsearch#39 -> T:int
+EDGES|EVAL_TYPE bsearch#4 -> T:void*
+EDGES|EVAL_TYPE bsearch#40 -> T:int
+EDGES|EVAL_TYPE bsearch#41 -> T:void
+EDGES|EVAL_TYPE bsearch#42 -> T:ANY
+EDGES|EVAL_TYPE bsearch#43 -> T:size_t
+EDGES|EVAL_TYPE bsearch#44 -> T:int
+EDGES|EVAL_TYPE bsearch#46 -> T:ANY
+EDGES|EVAL_TYPE bsearch#48 -> T:ANY
+EDGES|EVAL_TYPE bsearch#49 -> T:int
+EDGES|EVAL_TYPE bsearch#5 -> T:size_t
+EDGES|EVAL_TYPE bsearch#50 -> T:int
+EDGES|EVAL_TYPE bsearch#51 -> T:void
+EDGES|EVAL_TYPE bsearch#52 -> T:ANY
+EDGES|EVAL_TYPE bsearch#53 -> T:void*
+EDGES|EVAL_TYPE bsearch#54 -> T:ANY
+EDGES|EVAL_TYPE bsearch#55 -> T:char
+EDGES|EVAL_TYPE bsearch#56 -> T:char
+EDGES|EVAL_TYPE bsearch#57 -> T:void*
+EDGES|EVAL_TYPE bsearch#58 -> T:size_t
+EDGES|EVAL_TYPE bsearch#59 -> T:ANY
+EDGES|EVAL_TYPE bsearch#6 -> T:size_t
+EDGES|EVAL_TYPE bsearch#60 -> T:size_t
+EDGES|EVAL_TYPE bsearch#61 -> T:ANY
+EDGES|EVAL_TYPE bsearch#62 -> T:ANY
+EDGES|EVAL_TYPE bsearch#63 -> T:size_t
+EDGES|EVAL_TYPE bsearch#64 -> T:int
+EDGES|EVAL_TYPE bsearch#65 -> T:int
+EDGES|EVAL_TYPE bsearch#67 -> T:void
+EDGES|EVAL_TYPE bsearch#69 -> T:void*
+EDGES|EVAL_TYPE bsearch#7 -> T:size_t
+EDGES|EVAL_TYPE bsearch#71 -> T:ANY
+EDGES|EVAL_TYPE bsearch#72 -> T:void*
+EDGES|EVAL_TYPE bsearch#8 -> T:size_t
+EDGES|EVAL_TYPE bsearch#9 -> T:int
+EDGES|EVAL_TYPE bsearch.c:<global>#74 -> T:ANY
+EDGES|EVAL_TYPE bsearch.c:<global>#75 -> T:bsearch
+EDGES|EVAL_TYPE bsearch.c:<global>#76 -> T:ANY
 EDGES|EVAL_TYPE classify#1 -> T:int
 EDGES|EVAL_TYPE classify#10 -> T:int
 EDGES|EVAL_TYPE classify#11 -> T:int
@@ -4069,6 +4488,8 @@ EDGES|EVAL_TYPE use#6 -> T:void
 EDGES|EVAL_TYPE use#7 -> T:uint_t
 EDGES|EVAL_TYPE use#8 -> T:uint_t
 EDGES|EVAL_TYPE use#9 -> T:uint_t
+EDGES|FALSE_BODY bsearch#37 -> bsearch#45
+EDGES|FALSE_BODY bsearch#47 -> bsearch#66
 EDGES|FALSE_BODY classify#8 -> classify#18
 EDGES|FOR_BODY count#8 -> count#18
 EDGES|FOR_BODY logic#35 -> logic#45
@@ -4101,6 +4522,8 @@ EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
 EDGES|PARAMETER_LINK <operator>.conditional#1 -> <operator>.conditional#3
 EDGES|PARAMETER_LINK <operator>.conditional#4 -> <operator>.conditional#6
 EDGES|PARAMETER_LINK <operator>.conditional#7 -> <operator>.conditional#8
+EDGES|PARAMETER_LINK <operator>.division#1 -> <operator>.division#3
+EDGES|PARAMETER_LINK <operator>.division#4 -> <operator>.division#6
 EDGES|PARAMETER_LINK <operator>.equals#1 -> <operator>.equals#3
 EDGES|PARAMETER_LINK <operator>.equals#4 -> <operator>.equals#6
 EDGES|PARAMETER_LINK <operator>.fieldAccess#1 -> <operator>.fieldAccess#3
@@ -4149,6 +4572,11 @@ EDGES|PARAMETER_LINK agg#1 -> agg#2
 EDGES|PARAMETER_LINK agg#3 -> agg#4
 EDGES|PARAMETER_LINK apply#1 -> apply#2
 EDGES|PARAMETER_LINK apply#3 -> apply#4
+EDGES|PARAMETER_LINK bsearch#1 -> bsearch#2
+EDGES|PARAMETER_LINK bsearch#3 -> bsearch#4
+EDGES|PARAMETER_LINK bsearch#5 -> bsearch#6
+EDGES|PARAMETER_LINK bsearch#7 -> bsearch#8
+EDGES|PARAMETER_LINK bsearch#9 -> bsearch#10
 EDGES|PARAMETER_LINK classify#1 -> classify#2
 EDGES|PARAMETER_LINK count#1 -> count#2
 EDGES|PARAMETER_LINK exprs#1 -> exprs#2
@@ -4169,6 +4597,7 @@ EDGES|PARAMETER_LINK use#1 -> use#2
 EDGES|REF NB:<global> -> NS:<global>
 EDGES|REF NB:<includes>:<global> -> NS:<global>
 EDGES|REF NB:add.c:<global> -> NS:<global>
+EDGES|REF NB:bsearch.c:<global> -> NS:<global>
 EDGES|REF NB:exprs.c:<global> -> NS:<global>
 EDGES|REF NB:forloop.c:<global> -> NS:<global>
 EDGES|REF NB:gotos.c:<global> -> NS:<global>
@@ -4185,6 +4614,7 @@ EDGES|REF T:ANY -> D:ANY
 EDGES|REF T:add -> D:add
 EDGES|REF T:agg -> D:agg
 EDGES|REF T:apply -> D:apply
+EDGES|REF T:bsearch -> D:bsearch
 EDGES|REF T:char -> D:char
 EDGES|REF T:char* -> D:char*
 EDGES|REF T:classify -> D:classify
@@ -4212,6 +4642,7 @@ EDGES|REF T:point -> structs.c:<global>#1
 EDGES|REF T:point* -> D:point*
 EDGES|REF T:ptr -> D:ptr
 EDGES|REF T:second -> D:second
+EDGES|REF T:size_t -> D:size_t
 EDGES|REF T:sum -> D:sum
 EDGES|REF T:uint_t -> types2.c:<global>#72
 EDGES|REF T:unary -> D:unary
@@ -4220,6 +4651,7 @@ EDGES|REF T:unsigned int -> D:unsigned int
 EDGES|REF T:use -> D:use
 EDGES|REF T:value -> types2.c:<global>#14
 EDGES|REF T:void -> D:void
+EDGES|REF T:void* -> D:void*
 EDGES|REF add#8 -> add#1
 EDGES|REF add#9 -> add#3
 EDGES|REF add.c:<global>#24 -> add#0
@@ -4241,6 +4673,26 @@ EDGES|REF agg#9 -> structs.c:<global>#2
 EDGES|REF apply#10 -> apply#3
 EDGES|REF apply#8 -> apply#1
 EDGES|REF apply#9 -> apply#3
+EDGES|REF bsearch#17 -> bsearch#5
+EDGES|REF bsearch#21 -> bsearch#13
+EDGES|REF bsearch#25 -> bsearch#3
+EDGES|REF bsearch#27 -> bsearch#7
+EDGES|REF bsearch#29 -> bsearch#5
+EDGES|REF bsearch#32 -> bsearch#14
+EDGES|REF bsearch#34 -> bsearch#9
+EDGES|REF bsearch#35 -> bsearch#1
+EDGES|REF bsearch#36 -> bsearch#13
+EDGES|REF bsearch#39 -> bsearch#14
+EDGES|REF bsearch#43 -> bsearch#5
+EDGES|REF bsearch#49 -> bsearch#14
+EDGES|REF bsearch#53 -> bsearch#3
+EDGES|REF bsearch#57 -> bsearch#13
+EDGES|REF bsearch#58 -> bsearch#7
+EDGES|REF bsearch#60 -> bsearch#5
+EDGES|REF bsearch#63 -> bsearch#5
+EDGES|REF bsearch#69 -> bsearch#13
+EDGES|REF bsearch#71 -> bsearch#12
+EDGES|REF bsearch.c:<global>#75 -> bsearch#0
 EDGES|REF classify#10 -> classify#1
 EDGES|REF classify#14 -> classify#4
 EDGES|REF classify#16 -> classify#1
@@ -4404,6 +4856,8 @@ EDGES|SOURCE_FILE D:add -> F:add.c
 EDGES|SOURCE_FILE D:add.c:<global> -> F:add.c
 EDGES|SOURCE_FILE D:agg -> F:structs.c
 EDGES|SOURCE_FILE D:apply -> F:types2.c
+EDGES|SOURCE_FILE D:bsearch -> F:bsearch.c
+EDGES|SOURCE_FILE D:bsearch.c:<global> -> F:bsearch.c
 EDGES|SOURCE_FILE D:char -> F:<includes>
 EDGES|SOURCE_FILE D:char* -> F:<includes>
 EDGES|SOURCE_FILE D:classify -> F:ops.c
@@ -4436,6 +4890,7 @@ EDGES|SOURCE_FILE D:pick -> F:switch.c
 EDGES|SOURCE_FILE D:point* -> F:<includes>
 EDGES|SOURCE_FILE D:ptr -> F:unary.c
 EDGES|SOURCE_FILE D:second -> F:order.c
+EDGES|SOURCE_FILE D:size_t -> F:<includes>
 EDGES|SOURCE_FILE D:structs.c:<global> -> F:structs.c
 EDGES|SOURCE_FILE D:sum -> F:loop.c
 EDGES|SOURCE_FILE D:switch.c:<global> -> F:switch.c
@@ -4446,9 +4901,11 @@ EDGES|SOURCE_FILE D:unionvalue -> F:<includes>
 EDGES|SOURCE_FILE D:unsigned int -> F:<includes>
 EDGES|SOURCE_FILE D:use -> F:types2.c
 EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:void* -> F:<includes>
 EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
 EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
 EDGES|SOURCE_FILE NB:add.c:<global> -> F:add.c
+EDGES|SOURCE_FILE NB:bsearch.c:<global> -> F:bsearch.c
 EDGES|SOURCE_FILE NB:exprs.c:<global> -> F:exprs.c
 EDGES|SOURCE_FILE NB:forloop.c:<global> -> F:forloop.c
 EDGES|SOURCE_FILE NB:gotos.c:<global> -> F:gotos.c
@@ -4466,6 +4923,8 @@ EDGES|SOURCE_FILE add.c:<global>#0 -> F:add.c
 EDGES|SOURCE_FILE add.c:<global>#12 -> F:add.c
 EDGES|SOURCE_FILE agg#0 -> F:structs.c
 EDGES|SOURCE_FILE apply#0 -> F:types2.c
+EDGES|SOURCE_FILE bsearch#0 -> F:bsearch.c
+EDGES|SOURCE_FILE bsearch.c:<global>#0 -> F:bsearch.c
 EDGES|SOURCE_FILE classify#0 -> F:ops.c
 EDGES|SOURCE_FILE color.<clinit>:color()#0 -> F:types2.c
 EDGES|SOURCE_FILE count#0 -> F:forloop.c
@@ -4501,6 +4960,9 @@ EDGES|SOURCE_FILE types2.c:<global>#29 -> F:types2.c
 EDGES|SOURCE_FILE types2.c:<global>#72 -> F:types2.c
 EDGES|SOURCE_FILE unary#0 -> F:unary.c
 EDGES|SOURCE_FILE unary.c:<global>#0 -> F:unary.c
+EDGES|TRUE_BODY bsearch#15 -> bsearch#19
+EDGES|TRUE_BODY bsearch#37 -> bsearch#41
+EDGES|TRUE_BODY bsearch#47 -> bsearch#51
 EDGES|TRUE_BODY classify#8 -> classify#12
 EDGES|TRUE_BODY gotos#19 -> gotos#23
 EDGES|TRUE_BODY logic#10 -> logic#18

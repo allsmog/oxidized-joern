@@ -192,3 +192,13 @@ pins it, so a regression shows up as a diff.
   both the call node and the expansion exit flowing to the continuation;
   macro methods get SOURCE_FILE and CONTAINS-from-file-global-TYPE_DECL but
   no method TYPE_DECL.
+- **Real-world pins** (`corpus/bsearch.c`, musl, unmodified): pointer return
+  types come from pointer levels above the function declarator
+  (`void *bsearch` -> void*); NULL is an unresolved identifier — CODE
+  `<unknown> NULL`, ANY, with a phantom ORDER=0 LOCAL (the general rule for
+  fully unresolved identifiers); `(char *)x` casts type as the BASE type
+  `char` only, while the TYPE_REF CODE keeps the raw `char *`; `else if`
+  wraps the nested if in a synthetic CODE-less ANY-typed BLOCK; each
+  `#include` becomes an IMPORT slot, pushing the file-global TYPE_DECL's
+  ORDER to 1 + #includes; directive names and dropped #ifdef branches never
+  produce phantoms.
