@@ -3202,11 +3202,32 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
             "IDENTIFIER" => arena[use_i].name.clone(),
             _ => arena[use_i].fullcode.clone(),
         };
+        let container_def = |d: usize| matches!(arena[d].name.as_str(),
+            "<operator>.fieldAccess"|"<operator>.indirectFieldAccess"
+            |"<operator>.indexAccess"|"<operator>.indirectIndexAccess");
         match def_var.get(&def_i) {
             Some(dv) => {
-                *dv == uv
+                if *dv == uv
                     || strip_access(dv) == uv
                     || (field_use(use_i) && !dv.is_empty() && uv.contains(dv.as_str()))
+                {
+                    return true;
+                }
+                // isContainer: a container-access def (q.x) is used by a use
+                // whose string equals the access's base operand (q).
+                if container_def(def_i) {
+                    if let Some(&base) = rd_args(&arena, def_i).first() {
+                        let bs = if arena[base].label == "IDENTIFIER" {
+                            arena[base].name.clone()
+                        } else {
+                            arena[base].fullcode.clone()
+                        };
+                        if bs == uv {
+                            return true;
+                        }
+                    }
+                }
+                false
             }
             None => false,
         }
