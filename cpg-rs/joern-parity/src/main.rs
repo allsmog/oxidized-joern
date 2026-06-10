@@ -67,6 +67,8 @@ fn main() {
     let mut dumps: Vec<(String, String)> = Vec::new();
     let mut stub_uses: HashMap<String, usize> = HashMap::new();
     let mut used_types: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+    let mut edges: Vec<(String, String, String)> = Vec::new();
+    let mut placements: HashMap<String, Vec<(String, usize)>> = HashMap::new();
 
     for u in &units {
         let b = u.src.as_bytes();
@@ -116,6 +118,15 @@ fn main() {
             stubs: &mut stub_uses,
             types: &mut used_types,
             out: String::new(),
+            block: String::new(),
+            line_no: 0,
+            suppress_below: None,
+            ctx_stack: Vec::new(),
+            parent_stack: Vec::new(),
+            sym_line: HashMap::new(),
+            param_in_line: HashMap::new(),
+            edges: &mut edges,
+            placements: &mut placements,
         };
 
         // Standalone dump per user method, plus one per struct <clinit>.
@@ -123,45 +134,71 @@ fn main() {
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(f, b) {
+                        ctx.begin_block(&name);
                         ctx.emit_method(f, b, 0);
+                        ctx.edge("SOURCE_FILE", format!("M:{name}"), format!("F:{}", u.file));
                         dumps.push((name, std::mem::take(&mut ctx.out)));
                     }
                 }
                 "struct_specifier" if struct_has_sized_array(f) => {
                     let tag = f.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
                     let members = count_members(f);
+                    let key = format!("{tag}.<clinit>:{tag}()");
+                    ctx.begin_block(&key);
                     ctx.emit_clinit(f, b, 0, members + 1);
-                    dumps.push((format!("{tag}.<clinit>:{tag}()"), std::mem::take(&mut ctx.out)));
+                    ctx.edge("SOURCE_FILE", format!("M:{key}"), format!("F:{}", u.file));
+                    dumps.push((key, std::mem::take(&mut ctx.out)));
                 }
                 _ => {}
             }
         }
 
         // The per-file `<global>` wrapper method.
+        let gkey = format!("{}:<global>", u.file);
+        ctx.begin_block(&gkey);
         ctx.emit_file_global(root, b, &u.file);
-        dumps.push((format!("{}:<global>", u.file), std::mem::take(&mut ctx.out)));
+        ctx.edge("SOURCE_FILE", format!("M:{gkey}"), format!("F:{}", u.file));
+        dumps.push((gkey, std::mem::take(&mut ctx.out)));
     }
 
-    // Operator stubs (one per project for each called-but-undefined name).
+    // Operator stubs and the synthetic <includes>:<global>, emitted through
+    // an instrumented Ctx so they too produce addresses and edges.
+    let empty_fns: HashMap<String, String> = HashMap::new();
+    let empty_globals: HashMap<String, String> = HashMap::new();
+    let mut stub_uses2: HashMap<String, usize> = HashMap::new();
+    let mut sctx = Ctx {
+        functions: &empty_fns,
+        globals: &empty_globals,
+        symbols: HashMap::new(),
+        phantoms: Vec::new(),
+        stubs: &mut stub_uses2,
+        types: &mut used_types,
+        out: String::new(),
+        block: String::new(),
+        line_no: 0,
+        suppress_below: None,
+        ctx_stack: Vec::new(),
+        parent_stack: Vec::new(),
+        sym_line: HashMap::new(),
+        param_in_line: HashMap::new(),
+        edges: &mut edges,
+        placements: &mut placements,
+    };
     let mut stub_list: Vec<(String, usize)> = stub_uses
         .into_iter()
         .filter(|(n, _)| !defined.contains(n))
         .collect();
     stub_list.sort();
     for (name, arity) in stub_list {
-        dumps.push((name.clone(), stub_method(&name, arity)));
+        sctx.begin_block(&name);
+        sctx.emit_stub(&name, arity);
+        dumps.push((name, std::mem::take(&mut sctx.out)));
     }
-
-    // The synthetic `<includes>:<global>` method.
-    dumps.push((
-        "<includes>:<global>".into(),
-        concat!(
-            "METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1\n",
-            "  BLOCK TYPE_FULL_NAME=ANY ORDER=1\n",
-            "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2\n",
-        )
-        .to_string(),
-    ));
+    sctx.begin_block("<includes>:<global>");
+    sctx.emit_includes_global();
+    sctx.edge("SOURCE_FILE", "M:<includes>:<global>".into(), "F:<includes>".into());
+    dumps.push(("<includes>:<global>".into(), std::mem::take(&mut sctx.out)));
+    drop(sctx);
 
     dumps.sort_by(|a, b| a.0.cmp(&b.0));
     let mut out = String::new();
@@ -224,6 +261,79 @@ fn main() {
     for t in &used_types {
         out.push_str(&format!("NODES|TYPE NAME={t} FULL_NAME={t} TYPE_DECL_FULL_NAME={t}\n"));
     }
+
+    // ---- EDGES section ----
+    // TYPE -> its TYPE_DECL (struct decls are walk-addressed, rest are D:).
+    for t in &used_types {
+        let dst = if struct_tags.contains(&t) {
+            format!("TD:{t}")
+        } else {
+            format!("D:{t}")
+        };
+        edges.push(("REF".into(), format!("T:{t}"), dst));
+    }
+    // NAMESPACE_BLOCK -> NAMESPACE, and NAMESPACE_BLOCK -> its FILE.
+    edges.push(("REF".into(), "NB:<global>".into(), "NS:<global>".into()));
+    edges.push(("REF".into(), "NB:<includes>:<global>".into(), "NS:<global>".into()));
+    edges.push(("SOURCE_FILE".into(), "NB:<global>".into(), "F:<unknown>".into()));
+    edges.push(("SOURCE_FILE".into(), "NB:<includes>:<global>".into(), "F:<includes>".into()));
+    for f in &files {
+        edges.push(("REF".into(), format!("NB:{f}:<global>"), "NS:<global>".into()));
+        edges.push(("SOURCE_FILE".into(), format!("NB:{f}:<global>"), format!("F:{f}")));
+    }
+    // The per-file <global> TYPE_DECL CONTAINS the file-global METHOD and the
+    // method TYPE_DECLs of that file; each FILE contains its <global>
+    // TYPE_DECL, and <includes> contains its method + external TYPE_DECLs.
+    for f in &files {
+        edges.push(("CONTAINS".into(), format!("D:{f}:<global>"), format!("M:{f}:<global>")));
+        edges.push(("CONTAINS".into(), format!("F:{f}"), format!("D:{f}:<global>")));
+    }
+    for (name, file) in &fn_decls {
+        edges.push(("CONTAINS".into(), format!("D:{file}:<global>"), format!("D:{name}")));
+    }
+    edges.push(("CONTAINS".into(), "F:<includes>".into(), "M:<includes>:<global>".into()));
+    for t in &used_types {
+        if !struct_tags.contains(&t) && !defined.contains(t) {
+            edges.push(("CONTAINS".into(), "F:<includes>".into(), format!("D:{t}")));
+        }
+    }
+    // SOURCE_FILE for the TYPE_DECL population.
+    for (tag, _, file) in &struct_decls {
+        edges.push(("SOURCE_FILE".into(), format!("TD:{tag}"), format!("F:{file}")));
+    }
+    for (name, file) in &fn_decls {
+        edges.push(("SOURCE_FILE".into(), format!("D:{name}"), format!("F:{file}")));
+    }
+    for f in &files {
+        edges.push(("SOURCE_FILE".into(), format!("D:{f}:<global>"), format!("F:{f}")));
+    }
+    for t in &used_types {
+        if !struct_tags.contains(&t) && !defined.contains(t) {
+            edges.push(("SOURCE_FILE".into(), format!("D:{t}"), "F:<includes>".into()));
+        }
+    }
+
+    // Resolve M:/TD: symbolic addresses to first placement in block-name order.
+    let resolve = |a: &str| -> Option<String> {
+        if a.starts_with("M:") || a.starts_with("TD:") || a.starts_with("MB:") {
+            placements
+                .get(a)?
+                .iter()
+                .min()
+                .map(|(blk, idx)| format!("{blk}#{idx}"))
+        } else {
+            Some(a.to_string())
+        }
+    };
+    let mut edge_lines: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+    for (k, src, dst) in &edges {
+        if let (Some(s), Some(d)) = (resolve(src), resolve(dst)) {
+            edge_lines.insert(format!("{k} {s} -> {d}"));
+        }
+    }
+    for l in &edge_lines {
+        out.push_str(&format!("EDGES|{l}\n"));
+    }
     print!("{out}");
 }
 
@@ -241,30 +351,6 @@ fn count_members(n: Node) -> i64 {
         .sum()
 }
 
-/// A `<operator>.*` stub method. Layout mirrors Joern's stable sort by ORDER
-/// over insertion order [IN p1..pn, BLOCK(1), RET(2), OUT p1..pn]:
-/// O1 = IN p1, BLOCK, OUT p1; O2 = IN p2(?), RET, OUT p2(?); Ok = IN pk, OUT pk.
-fn stub_method(name: &str, arity: usize) -> String {
-    let mut s = format!("METHOD NAME={name} FULL_NAME={name} ORDER=0\n");
-    let p_in = |k: usize| format!("  METHOD_PARAMETER_IN NAME=p{k} CODE=p{k} TYPE_FULL_NAME=ANY ORDER={k}\n");
-    let p_out = |k: usize| format!("  METHOD_PARAMETER_OUT NAME=p{k} CODE=p{k} TYPE_FULL_NAME=ANY ORDER={k}\n");
-    s.push_str(&p_in(1));
-    s.push_str("  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1\n");
-    s.push_str(&p_out(1));
-    if arity >= 2 {
-        s.push_str(&p_in(2));
-        s.push_str("  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2\n");
-        s.push_str(&p_out(2));
-        for k in 3..=arity {
-            s.push_str(&p_in(k));
-            s.push_str(&p_out(k));
-        }
-    } else {
-        s.push_str("  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2\n");
-    }
-    s
-}
-
 /// Per-function emission context.
 struct Ctx<'a> {
     functions: &'a HashMap<String, String>,
@@ -277,7 +363,31 @@ struct Ctx<'a> {
     stubs: &'a mut HashMap<String, usize>,
     types: &'a mut std::collections::BTreeSet<String>,
     out: String,
+    // --- edge layer (M4) ---
+    // Current dump block name and 0-based line index within it; every node's
+    // address is "<block>#<idx>". METHOD/TYPE_DECL nodes are addressed
+    // symbolically ("M:<full>"/"TD:<full>") and resolved at the end to the
+    // first placement in block-name sort order, replicating the oracle's
+    // first-wins assignment across sorted method walks.
+    block: String,
+    line_no: usize,
+    suppress_below: Option<usize>, // depth of a nested METHOD whose interior is foreign
+    ctx_stack: Vec<(usize, String)>, // CONTAINS contexts: (depth, src addr)
+    parent_stack: Vec<(usize, String, String)>, // (depth, label, addr) for ARGUMENT
+    sym_line: HashMap<String, usize>, // LOCAL/param name -> defining line idx
+    param_in_line: HashMap<String, usize>,
+    edges: &'a mut Vec<(String, String, String)>,
+    placements: &'a mut HashMap<String, Vec<(String, usize)>>,
 }
+
+/// AST labels that receive a CONTAINS edge from their enclosing method or
+/// type-decl context (Joern's ContainsEdgePass destination list — note that
+/// LOCAL, parameters, METHOD_RETURN, MODIFIER and MEMBER are absent).
+const CONTAINS_DST: [&str; 13] = [
+    "BLOCK", "IDENTIFIER", "FIELD_IDENTIFIER", "RETURN", "METHOD", "TYPE_DECL",
+    "CALL", "LITERAL", "METHOD_REF", "TYPE_REF", "CONTROL_STRUCTURE",
+    "JUMP_TARGET", "UNKNOWN",
+];
 
 struct Phantom {
     name: String,
@@ -300,10 +410,103 @@ struct P {
 }
 
 impl Ctx<'_> {
+    fn begin_block(&mut self, name: &str) {
+        self.block = name.to_string();
+        self.line_no = 0;
+        self.suppress_below = None;
+        self.ctx_stack.clear();
+        self.parent_stack.clear();
+        self.sym_line.clear();
+        self.param_in_line.clear();
+    }
+
+    fn at(&self, idx: usize) -> String {
+        format!("{}#{}", self.block, idx)
+    }
+
+    fn edge(&mut self, kind: &str, src: String, dst: String) {
+        if self.suppress_below.is_none() {
+            self.edges.push((kind.to_string(), src, dst));
+        }
+    }
+
     fn line(&mut self, depth: usize, label: &str, p: P) {
         if let Some(t) = &p.tfn {
             self.types.insert(t.clone());
         }
+        // -- addressing & suppression --
+        let suppressed = self.suppress_below.map_or(false, |nd| depth > nd);
+        if !suppressed {
+            self.suppress_below = None;
+        }
+        let idx = self.line_no;
+        let my_addr = match (label, &p.full) {
+            ("METHOD", Some(f)) => format!("M:{f}"),
+            ("TYPE_DECL", Some(f)) => format!("TD:{f}"),
+            _ => format!("{}#{}", self.block, idx),
+        };
+        while self.parent_stack.last().is_some_and(|t| t.0 >= depth) {
+            self.parent_stack.pop();
+        }
+        while self.ctx_stack.last().is_some_and(|t| t.0 >= depth) {
+            self.ctx_stack.pop();
+        }
+        if !suppressed {
+            if let ("METHOD" | "TYPE_DECL", Some(f)) = (label, &p.full) {
+                let key = if label == "METHOD" { format!("M:{f}") } else { format!("TD:{f}") };
+                self.placements.entry(key).or_default().push((self.block.clone(), idx));
+            }
+            if CONTAINS_DST.contains(&label) {
+                if let Some((_, src)) = self.ctx_stack.last() {
+                    let src = src.clone();
+                    self.edges.push(("CONTAINS".into(), src, my_addr.clone()));
+                }
+            }
+            if let Some((_, plabel, paddr)) = self.parent_stack.last() {
+                if plabel == "CALL" || plabel == "RETURN" {
+                    let paddr = paddr.clone();
+                    self.edges.push(("ARGUMENT".into(), paddr, my_addr.clone()));
+                }
+            }
+            if let Some(t) = &p.tfn {
+                self.edges.push(("EVAL_TYPE".into(), my_addr.clone(), format!("T:{t}")));
+            }
+            if label == "CALL" {
+                if let Some(mfn) = &p.mfn {
+                    self.edges.push(("CALL".into(), my_addr.clone(), format!("M:{mfn}")));
+                }
+            }
+            if label == "METHOD_REF" {
+                if let Some(mfn) = &p.mfn {
+                    self.edges.push(("REF".into(), my_addr.clone(), format!("M:{mfn}")));
+                }
+            }
+            if label == "IDENTIFIER" {
+                if let Some(n) = &p.name {
+                    if let Some(i) = self.sym_line.get(n) {
+                        let dst = format!("{}#{}", self.block, i);
+                        self.edges.push(("REF".into(), my_addr.clone(), dst));
+                    }
+                }
+            }
+            if let ("LOCAL" | "METHOD_PARAMETER_IN", Some(n)) = (label, &p.name) {
+                self.sym_line.insert(n.clone(), idx);
+            }
+            if let ("METHOD_PARAMETER_IN", Some(n)) = (label, &p.name) {
+                self.param_in_line.insert(n.clone(), idx);
+            }
+            if let ("METHOD_PARAMETER_OUT", Some(n)) = (label, &p.name) {
+                if let Some(i) = self.param_in_line.get(n) {
+                    let src = format!("{}#{}", self.block, i);
+                    self.edges.push(("PARAMETER_LINK".into(), src, my_addr.clone()));
+                }
+            }
+        }
+        if label == "METHOD" || label == "TYPE_DECL" {
+            self.ctx_stack.push((depth, my_addr.clone()));
+        }
+        self.parent_stack.push((depth, label.to_string(), my_addr));
+        self.line_no += 1;
         let mut s = format!("{}{label}", "  ".repeat(depth));
         let mut kv = |k: &str, v: &str| s.push_str(&format!(" {k}={v}"));
         if let Some(v) = &p.name { kv("NAME", v); }
@@ -329,6 +532,7 @@ impl Ctx<'_> {
     fn emit_method(&mut self, f: Node, b: &[u8], d: usize) {
         self.symbols.clear();
         let (name, ret, params) = fn_header(f, b).expect("function header");
+        let nested = d > 0;
         let sig = format!(
             "{ret}({})",
             params.iter().map(|p| p.ty.clone()).collect::<Vec<_>>().join(",")
@@ -341,6 +545,11 @@ impl Ctx<'_> {
             order: Some(1),
             ..Default::default()
         });
+        if nested {
+            // A nested method's interior is addressed (and produces edges) in
+            // its own standalone walk; only the METHOD line itself belongs here.
+            self.suppress_below = Some(d);
+        }
 
         // Parameters: a METHOD_PARAMETER_IN and a mirrored _OUT, sharing ORDER.
         for (i, p) in params.iter().enumerate() {
@@ -367,6 +576,70 @@ impl Ctx<'_> {
             code: Some("RET".into()),
             tfn: Some(ret),
             order: Some((params.len() + 2) as i64),
+            ..Default::default()
+        });
+    }
+
+    /// A `<operator>.*` stub method. Layout mirrors Joern's stable sort by
+    /// ORDER over insertion order [IN p1..pn, BLOCK(1), RET(2), OUT p1..pn].
+    fn emit_stub(&mut self, name: &str, arity: usize) {
+        self.line(0, "METHOD", P {
+            name: Some(name.into()),
+            full: Some(name.into()),
+            order: Some(0),
+            ..Default::default()
+        });
+        let pin = |k: usize| P {
+            name: Some(format!("p{k}")),
+            code: Some(format!("p{k}")),
+            tfn: Some("ANY".into()),
+            order: Some(k as i64),
+            ..Default::default()
+        };
+        self.line(1, "METHOD_PARAMETER_IN", pin(1));
+        self.line(1, "BLOCK", P {
+            tfn: Some("ANY".into()),
+            order: Some(1),
+            arg: Some(1),
+            ..Default::default()
+        });
+        self.line(1, "METHOD_PARAMETER_OUT", pin(1));
+        let ret = P {
+            code: Some("RET".into()),
+            tfn: Some("ANY".into()),
+            order: Some(2),
+            ..Default::default()
+        };
+        if arity >= 2 {
+            self.line(1, "METHOD_PARAMETER_IN", pin(2));
+            self.line(1, "METHOD_RETURN", ret);
+            self.line(1, "METHOD_PARAMETER_OUT", pin(2));
+            for k in 3..=arity {
+                self.line(1, "METHOD_PARAMETER_IN", pin(k));
+                self.line(1, "METHOD_PARAMETER_OUT", pin(k));
+            }
+        } else {
+            self.line(1, "METHOD_RETURN", ret);
+        }
+    }
+
+    fn emit_includes_global(&mut self) {
+        self.line(0, "METHOD", P {
+            name: Some("<global>".into()),
+            code: Some("<global>".into()),
+            full: Some("<includes>:<global>".into()),
+            order: Some(1),
+            ..Default::default()
+        });
+        self.line(1, "BLOCK", P {
+            tfn: Some("ANY".into()),
+            order: Some(1),
+            ..Default::default()
+        });
+        self.line(1, "METHOD_RETURN", P {
+            code: Some("RET".into()),
+            tfn: Some("ANY".into()),
+            order: Some(2),
             ..Default::default()
         });
     }
@@ -468,6 +741,9 @@ impl Ctx<'_> {
             for d in named_children(f) {
                 if matches!(d.kind(), "field_identifier" | "pointer_declarator" | "array_declarator") {
                     let mname = innermost_id(d, b);
+                    let key = format!("MB:{name}.{mname}");
+                    let placement = (self.block.clone(), self.line_no);
+                    self.placements.entry(key).or_default().push(placement);
                     self.line(depth + 1, "MEMBER", P {
                         name: Some(mname),
                         code: Some(text(d, b).to_string()),
@@ -497,6 +773,9 @@ impl Ctx<'_> {
             order: Some(order),
             ..Default::default()
         });
+        if depth > 0 {
+            self.suppress_below = Some(depth);
+        }
         self.line(depth + 1, "BLOCK", P { order: Some(1), ..Default::default() });
         let mut co = 1i64;
         if let Some(body) = n.child_by_field_name("body") {
@@ -617,16 +896,21 @@ impl Ctx<'_> {
             "switch_statement" => {
                 let o = *order;
                 *order += 1;
+                let cs = self.line_no;
                 self.line(depth, "CONTROL_STRUCTURE", P {
                     code: Some(esc(text(n, b))),
                     order: Some(o),
                     ..Default::default()
                 });
                 if let Some(cond) = n.child_by_field_name("condition") {
+                    let ci = self.line_no;
                     self.emit_expr(unwrap_paren(cond), b, depth + 1, 1, None);
+                    self.edge("CONDITION", self.at(cs), self.at(ci));
                 }
                 if let Some(body) = n.child_by_field_name("body") {
+                    let bi = self.line_no;
                     self.emit_block(body, b, 2, depth + 1);
+                    self.edge("TRUE_BODY", self.at(cs), self.at(bi));
                 }
             }
             // Cases are flattened into the switch body's BLOCK: a JUMP_TARGET,
@@ -667,18 +951,24 @@ impl Ctx<'_> {
                     order: Some(o),
                     ..Default::default()
                 });
+                let cs = self.line_no - 1;
                 if let Some(body) = n.child_by_field_name("body") {
                     if body.kind() == "compound_statement" {
+                        let bi = self.line_no;
                         self.emit_block(body, b, 1, depth + 1);
+                        self.edge("DO_BODY", self.at(cs), self.at(bi));
                     }
                 }
                 if let Some(cond) = n.child_by_field_name("condition") {
+                    let ci = self.line_no;
                     self.emit_expr(unwrap_paren(cond), b, depth + 1, 2, None);
+                    self.edge("CONDITION", self.at(cs), self.at(ci));
                 }
             }
             "while_statement" => {
                 let o = *order;
                 *order += 1;
+                let cs = self.line_no;
                 let cond = n.child_by_field_name("condition");
                 // c2cpg quirk: a while's CODE is just `while <cond>`, not the body.
                 let code = cond.map(|c| format!("while {}", text(c, b))).unwrap_or("while".into());
@@ -688,11 +978,15 @@ impl Ctx<'_> {
                     ..Default::default()
                 });
                 if let Some(c) = cond {
+                    let ci = self.line_no;
                     self.emit_expr(unwrap_paren(c), b, depth + 1, 1, None);
+                    self.edge("CONDITION", self.at(cs), self.at(ci));
                 }
                 if let Some(body) = n.child_by_field_name("body") {
                     if body.kind() == "compound_statement" {
+                        let bi = self.line_no;
                         self.emit_block(body, b, 2, depth + 1);
+                        self.edge("TRUE_BODY", self.at(cs), self.at(bi));
                     }
                 }
             }
@@ -726,25 +1020,32 @@ impl Ctx<'_> {
     fn emit_if(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
         let o = *order;
         *order += 1;
+        let cs = self.line_no;
         self.line(depth, "CONTROL_STRUCTURE", P {
             code: Some(esc(text(n, b))),
             order: Some(o),
             ..Default::default()
         });
         if let Some(cond) = n.child_by_field_name("condition") {
+            let ci = self.line_no;
             self.emit_expr(unwrap_paren(cond), b, depth + 1, 1, None);
+            self.edge("CONDITION", self.at(cs), self.at(ci));
         }
         if let Some(cons) = n.child_by_field_name("consequence") {
             if cons.kind() == "compound_statement" {
+                let bi = self.line_no;
                 self.emit_block(cons, b, 2, depth + 1);
+                self.edge("TRUE_BODY", self.at(cs), self.at(bi));
             }
         }
         if let Some(alt) = n.child_by_field_name("alternative") {
+            let ei = self.line_no;
             self.line(depth + 1, "CONTROL_STRUCTURE", P {
                 code: Some("else".into()),
                 order: Some(3),
                 ..Default::default()
             });
+            self.edge("FALSE_BODY", self.at(cs), self.at(ei));
             if let Some(body) = named_children(alt).into_iter().find(|c| c.kind() == "compound_statement") {
                 self.emit_block(body, b, 1, depth + 2);
             }
@@ -765,6 +1066,7 @@ impl Ctx<'_> {
         };
         let o = *order;
         *order += 1;
+        let cs = self.line_no;
         self.line(depth, "CONTROL_STRUCTURE", P {
             code: Some(esc(&format!("for ({};{};{})", part(init), part(cond), part(update)))),
             order: Some(o),
@@ -773,23 +1075,36 @@ impl Ctx<'_> {
         let mut co = 1i64;
         if let Some(i) = init {
             if i.kind() == "declaration" {
+                let before = self.line_no;
                 self.emit_declaration(i, b, &mut co, depth + 1, Some(1));
+                // FOR_INIT targets the init assignment CALL, not the LOCAL.
+                if self.line_no > before + 1 {
+                    self.edge("FOR_INIT", self.at(cs), self.at(before + 1));
+                }
             } else {
+                let ii = self.line_no;
                 self.emit_expr(i, b, depth + 1, co, Some(1));
+                self.edge("FOR_INIT", self.at(cs), self.at(ii));
                 co += 1;
             }
         }
         if let Some(c) = cond {
+            let ci = self.line_no;
             self.emit_expr(c, b, depth + 1, co, None);
+            self.edge("CONDITION", self.at(cs), self.at(ci));
             co += 1;
         }
         if let Some(u) = update {
+            let ui = self.line_no;
             self.emit_expr(u, b, depth + 1, co, None);
+            self.edge("FOR_UPDATE", self.at(cs), self.at(ui));
             co += 1;
         }
         if let Some(body) = n.child_by_field_name("body") {
             if body.kind() == "compound_statement" {
+                let bi = self.line_no;
                 self.emit_block(body, b, co, depth + 1);
+                self.edge("FOR_BODY", self.at(cs), self.at(bi));
             }
         }
     }
@@ -992,6 +1307,18 @@ impl Ctx<'_> {
                     "<operator>.fieldAccess".to_string()
                 };
                 self.note_call(&name, 2);
+                // CDT resolves `q.x` to the struct MEMBER (REF edge) only for
+                // value receivers — `p->y` through a pointer stays unresolved.
+                if op == "." {
+                    let recv_ty = n
+                        .child_by_field_name("argument")
+                        .filter(|a| a.kind() == "identifier")
+                        .and_then(|a| self.symbols.get(text(a, b)).cloned());
+                    if let (Some(t), Some(f)) = (recv_ty, n.child_by_field_name("field")) {
+                        let call_at = self.at(self.line_no);
+                        self.edge("REF", call_at, format!("MB:{t}.{}", text(f, b)));
+                    }
+                }
                 self.line(depth, "CALL", P {
                     name: Some(name.clone()),
                     code: Some(esc(text(n, b))),
