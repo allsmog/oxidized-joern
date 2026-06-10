@@ -3264,7 +3264,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // never contributes its (bypass) param defs to the exit. For a
     // single-return method this is identical to the union.
     let exit_in: HashSet<usize> = (0..n)
-        .find(|&i| arena[i].label == "METHOD_RETURN")
+        .find(|&i| own.contains(&i) && arena[i].label == "METHOD_RETURN")
         .and_then(|e| preds[e].iter().copied().filter(|&p| p < n).min())
         .map(|la| out[la].clone())
         .unwrap_or_default();
@@ -3287,7 +3287,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     };
 
     // method-return (exit) index
-    let exit = (0..n).find(|&i| arena[i].label == "METHOD_RETURN");
+    let exit = (0..n).find(|&i| own.contains(&i) && arena[i].label == "METHOD_RETURN");
 
     // isDdgNode: everything EXCEPT Method, ControlStructure, FieldIdentifier,
     // JumpTarget, MethodReturn. A BLOCK is a ddg node only when it is itself a
