@@ -95,3 +95,27 @@ pins it, so a regression shows up as a diff.
 - **TYPE_DECL/MEMBER** (`corpus/structs.c`): TYPE_DECL NAME=FULL_NAME=tag
   (struct keyword dropped), CODE = full struct source text; MEMBERs in
   declaration order with CODE = just the member name.
+- **Scaffolding nodes** (`corpus/*`): META_DATA LANGUAGE=NEWC; FILE nodes for
+  every source file (ORDER=0) plus `<includes>` (ORDER=1) and `<unknown>`
+  (ORDER=0); one NAMESPACE_BLOCK per file plus `<global>`@`<unknown>` and
+  `<includes>:<global>`; a single NAMESPACE `<global>` with no ORDER.
+- **TYPE_DECL population** (`corpus/*`): internal structs carry EMPTY-string
+  AST_PARENT_TYPE/AST_PARENT_FULL_NAME; every defined function gets a
+  TYPE_DECL with AST_PARENT_TYPE=TYPE_DECL parented at `<file>:<global>`;
+  each file gets a `<global>` TYPE_DECL parented at its NAMESPACE_BLOCK; every
+  other referenced type (builtins, pointers, arrays, ANY) becomes
+  IS_EXTERNAL=true under `<includes>:<global>` with NO ORDER property. TYPE
+  nodes exist for exactly the set of TYPE_FULL_NAME strings emitted anywhere.
+- **<clinit>** (`corpus/order.c`): a struct with a sized-array member gains a
+  synthetic METHOD `<clinit>` (FULL_NAME `tag.<clinit>:tag()`) after its
+  MEMBERs: a BLOCK with NO properties at all, one `<operator>.arrayInitializer`
+  CALL (CODE = `arr[4]`, arg = the size literal) per sized member, two bare
+  MODIFIERs (ORDER 2,3), and METHOD_RETURN typed as the struct. It is also a
+  top-level method in the method set (and spawns the arrayInitializer stub).
+- **Members are declarators** (`corpus/order.c`): MEMBER CODE is the
+  declarator text (`*ptr`, `arr[4]`), and sized arrays keep the size in the
+  type: `int[4]` (vs `int[]` for an unsized param).
+- **Global initialisers** (`corpus/order.c`): `int g = 5;` lowers inside the
+  file-global BLOCK exactly like a method-body declaration — LOCAL slot, then
+  a void-typed assignment CALL slot — and the lhs IDENTIFIER there is plain
+  `g`, while references inside methods use CODE `<global> g`.

@@ -38,14 +38,26 @@ fn main() {
         })
         .collect();
 
-    // Project-wide defined functions: calls to these never become stubs.
+    // Project-wide registries: defined functions (calls to these never become
+    // stubs; each also gets a method TYPE_DECL) and struct definitions.
     let mut defined: Vec<String> = Vec::new();
+    let mut fn_decls: Vec<(String, String)> = Vec::new(); // (name, file)
+    let mut struct_decls: Vec<(String, String, String)> = Vec::new(); // (tag, code, file)
     for u in &units {
+        let b = u.src.as_bytes();
         for f in named_children(u.tree.root_node()) {
-            if f.kind() == "function_definition" {
-                if let Some((name, _, _)) = fn_header(f, u.src.as_bytes()) {
-                    defined.push(name);
+            match f.kind() {
+                "function_definition" => {
+                    if let Some((name, _, _)) = fn_header(f, b) {
+                        defined.push(name.clone());
+                        fn_decls.push((name, u.file.clone()));
+                    }
                 }
+                "struct_specifier" if f.child_by_field_name("body").is_some() => {
+                    let tag = f.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                    struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
+                }
+                _ => {}
             }
         }
     }
@@ -54,6 +66,7 @@ fn main() {
     // all methods (user, <global> wrappers, <operator> stubs) by fullName.
     let mut dumps: Vec<(String, String)> = Vec::new();
     let mut stub_uses: HashMap<String, usize> = HashMap::new();
+    let mut used_types: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
 
     for u in &units {
         let b = u.src.as_bytes();
@@ -85,7 +98,7 @@ fn main() {
                             if find_function_declarator(decl).is_none() {
                                 let name = innermost_id(decl, b);
                                 if !name.is_empty() {
-                                    globals.insert(name, format!("{base}{}", decl_suffix(decl)));
+                                    globals.insert(name, format!("{base}{}", decl_suffix(decl, b)));
                                 }
                             }
                         }
@@ -101,16 +114,26 @@ fn main() {
             symbols: HashMap::new(),
             phantoms: Vec::new(),
             stubs: &mut stub_uses,
+            types: &mut used_types,
             out: String::new(),
         };
 
-        // Standalone dump per user method.
+        // Standalone dump per user method, plus one per struct <clinit>.
         for f in named_children(root) {
-            if f.kind() == "function_definition" {
-                if let Some((name, _, _)) = fn_header(f, b) {
-                    ctx.emit_method(f, b, 0);
-                    dumps.push((name, std::mem::take(&mut ctx.out)));
+            match f.kind() {
+                "function_definition" => {
+                    if let Some((name, _, _)) = fn_header(f, b) {
+                        ctx.emit_method(f, b, 0);
+                        dumps.push((name, std::mem::take(&mut ctx.out)));
+                    }
                 }
+                "struct_specifier" if struct_has_sized_array(f) => {
+                    let tag = f.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                    let members = count_members(f);
+                    ctx.emit_clinit(f, b, 0, members + 1);
+                    dumps.push((format!("{tag}.<clinit>:{tag}()"), std::mem::take(&mut ctx.out)));
+                }
+                _ => {}
             }
         }
 
@@ -146,7 +169,76 @@ fn main() {
         out.push_str(&d);
         out.push('\n');
     }
+
+    // ---- non-method scaffolding nodes (NODES| section) ----
+    out.push_str("NODES|META_DATA LANGUAGE=NEWC\n");
+    out.push_str("NODES|FILE NAME=<includes> ORDER=1\n");
+    out.push_str("NODES|FILE NAME=<unknown> ORDER=0\n");
+    let mut files: Vec<&String> = units.iter().map(|u| &u.file).collect();
+    files.sort();
+    for f in &files {
+        out.push_str(&format!("NODES|FILE NAME={f} ORDER=0\n"));
+    }
+    out.push_str("NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1\n");
+    out.push_str("NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1\n");
+    for f in &files {
+        out.push_str(&format!(
+            "NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME={f}:<global> FILENAME={f} ORDER=1\n"
+        ));
+    }
+    out.push_str("NODES|NAMESPACE NAME=<global>\n");
+
+    // TYPE_DECLs, sorted by FULL_NAME: internal structs (empty AST_PARENT_*
+    // values, a c2cpg quirk), one per defined method (parented TYPE_DECL ->
+    // file global), one per file <global>, and IS_EXTERNAL=true entries under
+    // <includes>:<global> for every other referenced type (no ORDER).
+    let struct_tags: Vec<&String> = struct_decls.iter().map(|(t, _, _)| t).collect();
+    let mut tds: Vec<(String, String)> = Vec::new();
+    for (tag, code, file) in &struct_decls {
+        tds.push((tag.clone(), format!(
+            "NODES|TYPE_DECL NAME={tag} FULL_NAME={tag} CODE={code} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME={file} ORDER=1\n"
+        )));
+    }
+    for (name, file) in &fn_decls {
+        tds.push((name.clone(), format!(
+            "NODES|TYPE_DECL NAME={name} FULL_NAME={name} CODE={name} AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME={file}:<global> FILENAME={file} ORDER=1\n"
+        )));
+    }
+    for f in &files {
+        tds.push((format!("{f}:<global>"), format!(
+            "NODES|TYPE_DECL NAME=<global> FULL_NAME={f}:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME={f}:<global> FILENAME={f} ORDER=1\n"
+        )));
+    }
+    for t in &used_types {
+        if struct_tags.contains(&t) || defined.contains(t) {
+            continue;
+        }
+        tds.push((t.clone(), format!(
+            "NODES|TYPE_DECL NAME={t} FULL_NAME={t} CODE={t} IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>\n"
+        )));
+    }
+    tds.sort_by(|a, b| a.0.cmp(&b.0));
+    for (_, l) in tds {
+        out.push_str(&l);
+    }
+    for t in &used_types {
+        out.push_str(&format!("NODES|TYPE NAME={t} FULL_NAME={t} TYPE_DECL_FULL_NAME={t}\n"));
+    }
     print!("{out}");
+}
+
+fn count_members(n: Node) -> i64 {
+    let Some(body) = n.child_by_field_name("body") else { return 0 };
+    named_children(body)
+        .iter()
+        .filter(|f| f.kind() == "field_declaration")
+        .map(|f| {
+            named_children(*f)
+                .iter()
+                .filter(|d| matches!(d.kind(), "field_identifier" | "pointer_declarator" | "array_declarator"))
+                .count() as i64
+        })
+        .sum()
 }
 
 /// A `<operator>.*` stub method. Layout mirrors Joern's stable sort by ORDER
@@ -183,6 +275,7 @@ struct Ctx<'a> {
     // and each type name used as a sizeof(T) argument.
     phantoms: Vec<Phantom>,
     stubs: &'a mut HashMap<String, usize>,
+    types: &'a mut std::collections::BTreeSet<String>,
     out: String,
 }
 
@@ -208,6 +301,9 @@ struct P {
 
 impl Ctx<'_> {
     fn line(&mut self, depth: usize, label: &str, p: P) {
+        if let Some(t) = &p.tfn {
+            self.types.insert(t.clone());
+        }
         let mut s = format!("{}{label}", "  ".repeat(depth));
         let mut kv = |k: &str, v: &str| s.push_str(&format!(" {k}={v}"));
         if let Some(v) = &p.name { kv("NAME", v); }
@@ -316,33 +412,13 @@ impl Ctx<'_> {
                     slot += 1;
                 }
                 "declaration" => {
-                    let ty = normalize_type(
-                        &n.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into()),
-                    );
-                    let spec_end = n.child_by_field_name("type").map(|t| t.end_byte()).unwrap_or(n.start_byte());
-                    for d in named_children(n) {
-                        let decl = if d.kind() == "init_declarator" {
-                            d.child_by_field_name("declarator")
-                        } else if matches!(d.kind(), "identifier" | "pointer_declarator" | "array_declarator") {
-                            Some(d)
-                        } else {
-                            None
-                        };
-                        let Some(decl) = decl else { continue };
-                        if find_function_declarator(decl).is_some() {
-                            continue; // prototype: no slot
-                        }
-                        let name = innermost_id(decl, b);
-                        let spec = std::str::from_utf8(&b[n.start_byte()..spec_end]).unwrap_or("");
-                        self.line(2, "LOCAL", P {
-                            name: Some(name),
-                            code: Some(esc(&format!("{spec} {}", text(decl, b)))),
-                            tfn: Some(format!("{ty}{}", decl_suffix(decl))),
-                            order: Some(slot),
-                            ..Default::default()
-                        });
-                        slot += 1;
+                    // Same lowering as in a method body: LOCAL per declarator,
+                    // plus an assignment CALL when initialised (`int g = 5;`).
+                    // Prototypes contribute nothing and consume no slot.
+                    if named_children(n).iter().any(|d| find_function_declarator(*d).is_some()) {
+                        continue;
                     }
+                    self.emit_declaration(n, b, &mut slot, 2, None);
                 }
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(n, b) {
@@ -367,14 +443,16 @@ impl Ctx<'_> {
         });
     }
 
-    /// `struct T { ... }` → TYPE_DECL with one MEMBER per field (CODE is just
-    /// the member name).
+    /// `struct T { ... }` → TYPE_DECL with one MEMBER per field (CODE is the
+    /// member's declarator text: `x`, `*ptr`, `arr[4]`). If any member is a
+    /// sized array, a `<clinit>` method follows the members to host the
+    /// `<operator>.arrayInitializer` calls.
     fn emit_type_decl(&mut self, n: Node, b: &[u8], depth: usize) {
         let name = n.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
         self.line(depth, "TYPE_DECL", P {
             name: Some(name.clone()),
             code: Some(esc(text(n, b))),
-            full: Some(name),
+            full: Some(name.clone()),
             order: Some(1),
             ..Default::default()
         });
@@ -391,9 +469,9 @@ impl Ctx<'_> {
                 if matches!(d.kind(), "field_identifier" | "pointer_declarator" | "array_declarator") {
                     let mname = innermost_id(d, b);
                     self.line(depth + 1, "MEMBER", P {
-                        name: Some(mname.clone()),
-                        code: Some(mname),
-                        tfn: Some(format!("{ty}{}", decl_suffix(d))),
+                        name: Some(mname),
+                        code: Some(text(d, b).to_string()),
+                        tfn: Some(format!("{ty}{}", decl_suffix(d, b))),
                         order: Some(order),
                         ..Default::default()
                     });
@@ -401,6 +479,59 @@ impl Ctx<'_> {
                 }
             }
         }
+        if struct_has_sized_array(n) {
+            self.emit_clinit(n, b, depth + 1, order);
+        }
+    }
+
+    /// The synthetic `<clinit>` static initialiser Joern adds to a struct with
+    /// sized-array members: a property-less BLOCK holding one
+    /// `<operator>.arrayInitializer` call per sized array, two bare MODIFIERs,
+    /// and a METHOD_RETURN typed as the struct.
+    fn emit_clinit(&mut self, n: Node, b: &[u8], depth: usize, order: i64) {
+        let tag = n.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+        self.line(depth, "METHOD", P {
+            name: Some("<clinit>".into()),
+            code: Some("<clinit>".into()),
+            full: Some(format!("{tag}.<clinit>:{tag}()")),
+            order: Some(order),
+            ..Default::default()
+        });
+        self.line(depth + 1, "BLOCK", P { order: Some(1), ..Default::default() });
+        let mut co = 1i64;
+        if let Some(body) = n.child_by_field_name("body") {
+            for f in named_children(body) {
+                if f.kind() != "field_declaration" {
+                    continue;
+                }
+                for d in named_children(f) {
+                    if d.kind() == "array_declarator" {
+                        if let Some(sz) = d.child_by_field_name("size") {
+                            self.note_call("<operator>.arrayInitializer", 1);
+                            self.line(depth + 2, "CALL", P {
+                                name: Some("<operator>.arrayInitializer".into()),
+                                code: Some(esc(text(d, b))),
+                                tfn: Some("ANY".into()),
+                                mfn: Some("<operator>.arrayInitializer".into()),
+                                order: Some(co),
+                                dispatch: Some("STATIC_DISPATCH".into()),
+                                ..Default::default()
+                            });
+                            self.emit_expr(sz, b, depth + 3, 1, Some(1));
+                            co += 1;
+                        }
+                    }
+                }
+            }
+        }
+        self.line(depth + 1, "MODIFIER", P { order: Some(2), ..Default::default() });
+        self.line(depth + 1, "MODIFIER", P { order: Some(3), ..Default::default() });
+        self.line(depth + 1, "METHOD_RETURN", P {
+            code: Some("RET".into()),
+            tfn: Some(tag),
+            order: Some(4),
+            ..Default::default()
+        });
     }
 
     /// Pre-scan the method body for names that Joern's local-creation pass
@@ -682,7 +813,7 @@ impl Ctx<'_> {
                     let name = name_node.map(|x| innermost_id(x, b)).unwrap_or_default();
                     // LOCAL CODE keeps the source declarator form (`int *q`),
                     // while TYPE_FULL_NAME normalises pointers to `int*`.
-                    let full_ty = format!("{ty}{}", name_node.map(decl_suffix).unwrap_or_default());
+                    let full_ty = format!("{ty}{}", name_node.map(|x| decl_suffix(x, b)).unwrap_or_default());
                     self.symbols.insert(name.clone(), full_ty.clone());
                     let lo = *order;
                     *order += 1;
@@ -722,7 +853,7 @@ impl Ctx<'_> {
                 }
                 "identifier" | "pointer_declarator" | "array_declarator" => {
                     let name = innermost_id(d, b);
-                    let full_ty = format!("{ty}{}", decl_suffix(d));
+                    let full_ty = format!("{ty}{}", decl_suffix(d, b));
                     self.symbols.insert(name.clone(), full_ty.clone());
                     let lo = *order;
                     *order += 1;
@@ -1108,7 +1239,7 @@ fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
             if p.kind() == "parameter_declaration" {
                 let base = normalize_type(&p.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into()));
                 let decl = p.child_by_field_name("declarator");
-                let ty = format!("{base}{}", decl.map(decl_suffix).unwrap_or_default());
+                let ty = format!("{base}{}", decl.map(|d| decl_suffix(d, b)).unwrap_or_default());
                 let name = decl.map(|d| innermost_id(d, b)).unwrap_or_default();
                 if !name.is_empty() {
                     params.push(Param { name, ty, code: text(p, b).to_string() });
@@ -1151,13 +1282,21 @@ fn unary_name(op: &str) -> String {
 
 /// Type suffix from declarator nesting: `*` per pointer level, `[]` per array
 /// level (Joern renders `int *p` as `int*` and `int vals[]` as `int[]`).
-fn decl_suffix(n: Node) -> String {
+fn decl_suffix(n: Node, b: &[u8]) -> String {
     let mut s = String::new();
     let mut cur = n;
     loop {
         match cur.kind() {
             "pointer_declarator" => s.push('*'),
-            "array_declarator" => s.push_str("[]"),
+            "array_declarator" => {
+                // CDT keeps the size: `int arr[4]` types as `int[4]`.
+                let size = cur.child_by_field_name("size");
+                s.push('[');
+                if let Some(sz) = size {
+                    s.push_str(text(sz, b));
+                }
+                s.push(']');
+            }
             _ => break,
         }
         match cur.child_by_field_name("declarator") {
@@ -1241,6 +1380,16 @@ fn flatten_comma<'t>(n: Node<'t>, out: &mut Vec<Node<'t>>) {
     } else {
         out.push(n);
     }
+}
+
+fn struct_has_sized_array(n: Node) -> bool {
+    let Some(body) = n.child_by_field_name("body") else { return false };
+    named_children(body).iter().any(|f| {
+        f.kind() == "field_declaration"
+            && named_children(*f).iter().any(|d| {
+                d.kind() == "array_declarator" && d.child_by_field_name("size").is_some()
+            })
+    })
 }
 
 fn collect_decl_names(n: Node, b: &[u8], out: &mut Vec<String>) {
