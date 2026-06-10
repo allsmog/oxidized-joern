@@ -198,9 +198,22 @@ which is exactly what de-risks consolidating frontend logic.
 
 The current cases cover method/parameter shape, call arguments, intraprocedural
 call resolution, nested calls as arguments, calls inside control structures, and
-multiple top-level methods. Both C and Python pass all six. Growing this set
-(field access, overloading guarded by traits, loop/branch CFG shape) is how the
-spec hardens as more frontends land.
+multiple top-level methods. **All seven languages pass all six cases.** The
+contract is stressed at three further levels beyond structure:
+
+* **Dataflow** (`cpg-incremental`): the shared summaries-first taint engine
+  finds an interprocedural source→sink flow through a passthrough function, with
+  a witness path, in every language — including Rust/Ruby tail-expression
+  returns.
+* **Realistic code** (`cpg-lang-ts/tests/robustness.rs`): classes, member and
+  receiver method calls, Rust macros, JS arrows, for-each loops and typed
+  multi-parameter signatures all extract a sensible graph. (This is where two
+  real bugs were caught and fixed: Rust macro args in a `token_tree`, and typed
+  parameters whose *type* is itself a `*_identifier` shadowing the name.)
+* **Cross-file + incremental + scale**: Go and Java two-file projects resolve
+  calls across files, and an edit to a callee's file correctly breaks and
+  restores a flow in the caller's file. The generic engine builds 4000 Go/Rust
+  functions in ~80 ms — on par with the hand-written C frontend.
 
 ## Running it
 
@@ -238,9 +251,11 @@ conforming tree-sitter frontends (C and Python, ~300 lines each, tolerant of
 uncompilable code); CFG/symbol/call-graph passes on the layer-dependency
 framework with batch entry points; parallel summaries-first dataflow with a
 reverse-dependency invalidation web and a JSON external-summary loader; an
-edit path served entirely by incrementally-maintained indices; the
-cross-language conformance harness run against both frontends; a JSON-over-
-stdio query server with live incremental updates; and a 1M-LOC benchmark.
+edit path served entirely by incrementally-maintained indices; **seven
+languages** (C plus Java/Go/JavaScript/Ruby/Rust/Python via one generic engine)
+passing the cross-language conformance harness, the dataflow engine, and a
+realistic-code robustness suite; a JSON-over-stdio query server with live
+incremental updates; and a 1M-LOC benchmark.
 
 **Deliberately simplified, and where to go next** (in priority order):
 
@@ -252,10 +267,11 @@ stdio query server with live incremental updates; and a 1M-LOC benchmark.
    right for editing but a quiescent graph served to many read-only queries
    wants a compacted CSR layout; the persistence format is uncompressed and
    would shrink substantially with it. Freeze on first query, invalidate on edit.
-3. **More frontends behind the same contract.** Java/TS/Go via tree-sitter,
-   each validated by the conformance suite — and grow the case set (control
-   flow shape, field accesses, method overloading guarded by traits) as the
-   real specification.
+3. **Deepen the frontends.** Seven languages pass the contract; the next
+   fidelity gains are per-language, not architectural — precise type resolution,
+   trait-guarded overloading, namespace-qualified method full-names (today a
+   method's full-name is its bare name), and richer control-flow shape. Each is
+   local work behind the stable spec/builder interface.
 4. **Transports + cross-procedure witnesses.** Source→sink taint with witness
    paths is in (`taint` command). Next: extend witnesses across the callee
    boundary (currently the call hop is shown, not the callee's internal path),
