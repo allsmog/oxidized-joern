@@ -78,6 +78,30 @@ Next, in preference order:
 
 ## Done
 
+- **M7/Track B reaching-def engine (2026-06-10):** Built a full reaching-def
+  engine in joern-parity (parse_dump_block -> index CFG -> GEN/KILL fixpoint ->
+  DdgGenerator edge routines) emitting the FLOWS| section. Drove the diff vs
+  the 1458-fact oracle from 904 -> 165 (~1384/1458 = 95% of flows correct);
+  7 methods byte-exact (add, main, classify, pick, unary, gotos, helper) and
+  all simple/medium control flow. Rules pinned: GEN at params + non-access
+  calls ({call} u Call/Identifier args), access-like calls (indirection/
+  addressOf/cast) gen only {call}, KILL on reassignment, per-method own-node
+  restriction, entry edges (excl. assignment LHS), arg->call, literal->sibling
+  and call-arg/condition cross-arg, isUsing access-path strip (`*l`->`l`),
+  return/param-out/exit routines.
+  HONEST STATUS — NOT byte-matched. The remaining ~165 are in pointer-
+  arithmetic-in-loops (bsearch/memcmp/strcmp), casts, and macros. Empirical
+  local rules PLATEAU here: e.g. classify `n-1` has a literal->ident cross-edge
+  but sum `i+1` does not, with no local discriminator — these edges are
+  EMERGENT from Joern's exact dataflow fixpoint + UsageAnalyzer.isUsing
+  (container/part/alias over access paths), not from construction heuristics.
+  NEXT (the right approach, not more rules): port the ACTUAL algorithm faithfully
+  — ReachingDefProblem (Definition numbering, gen/kill), the DataFlowSolver
+  worklist, and UsageAnalyzer.isUsing with real access-path matching — from
+  joernio/joern dataflowengineoss, validated against FLOWS|. Source skew note:
+  master DdgGenerator differs from v4.0.555 in places; trust the oracle.
+  check.sh still gates Track A only (FLOWS is informational until matched);
+  Track A stays green 95/95.
 - **M7/Track B start (2026-06-10):** Reframed toward self-hosted IRIS on
   cpg-rs (see plan). Added the FLOWS| oracle section to oracle.sc:
   REACHING_DEF edges dumped with their VARIABLE property via the existing
