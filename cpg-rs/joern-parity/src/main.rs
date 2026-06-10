@@ -3283,12 +3283,20 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         }
     }
 
-    // 1. addEdgesFromEntryNode: ddg node with empty uses -> method->n, "".
+    // 1. addEdgesFromEntryNode: a ddg node whose usedIncomingDefs are all empty
+    // (no reaching def is actually used) gets method -> node, var "". This
+    // includes `return 0` (literal, no reaching def) but not `return SQR(n)`
+    // (the call is a reaching def). Non-INLINED calls (function calls,
+    // operators) never get an entry edge; INLINED macro calls do (when their
+    // args carry no reaching def). isValidEdge in push drops write-only targets.
     for i in 0..n {
         if i == 0 || !own.contains(&i) || !is_ddg(i) || assign_lhs.contains(&i) {
             continue;
         }
-        if uses_of(i).is_empty() {
+        if arena[i].label == "CALL" && !arena[i].inlined {
+            continue;
+        }
+        if used_incoming(i).iter().all(|(_, ds)| ds.is_empty()) {
             push(String::new(), 0, i, &mut flows);
         }
     }
