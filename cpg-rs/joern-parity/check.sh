@@ -26,17 +26,18 @@ if [ -x "$JOERN/joern" ]; then
   fi
 fi
 
-# Build mine: run joern-parity on every corpus file, concatenate.
+# Build mine: one run over the whole corpus (stubs/globals are project-wide).
 MINE="$(mktemp)"
-for f in corpus/*.c; do
-  cargo run -q --manifest-path "$ROOT/Cargo.toml" -p joern-parity -- "$f"
-done > "$MINE"
+cargo run -q --manifest-path "$ROOT/Cargo.toml" -p joern-parity -- corpus/*.c > "$MINE"
 
-# Split a dump file into per-method blocks keyed by method name.
+# Split a dump file into per-method blocks keyed by FULL_NAME (NAME collides:
+# every file has a <global> method).
 split_methods() { # $1 = file, $2 = outdir
   awk -v out="$2" '
-    /^METHOD NAME=/ { name=$0; sub(/^METHOD NAME=/,"",name); sub(/ .*/,"",name);
-                      file=out "/" name; }
+    /^METHOD / { match($0, /FULL_NAME=[^ ]+/);
+                 name=substr($0, RSTART+10, RLENGTH-10);
+                 gsub(/\//, "_", name);
+                 file=out "/" name; }
     NF>0 && file { print > file }
     /^$/ { file="" }
   ' "$1"

@@ -76,3 +76,22 @@ pins it, so a regression shows up as a diff.
 - **Multi-declarator CODE** (`corpus/structs.c`): `int a, b = 1;` yields
   LOCALs with rebuilt CODE `int a` and `int b` (decl-specifier + that
   declarator only), then the `b = 1` assignment as a separate sibling.
+- **Operator stub methods** (whole corpus): one METHOD per
+  called-but-undefined name, FULL_NAME=NAME, ORDER=0, no CODE/SIGNATURE;
+  params p1..pn (n = max arity seen anywhere in the project), all ANY. Child
+  layout is Joern's stable sort by ORDER over insertion order
+  [IN p1..pn, BLOCK(O1, ARGUMENT_INDEX=1), RET(O2), OUT p1..pn]: so
+  `IN p1, BLOCK, OUT p1, IN p2, RET, OUT p2, IN p3, OUT p3, ...`
+  (arity 1: `IN p1, BLOCK, OUT p1, RET`).
+- **File-global wrapper** (`corpus/add.c`, `corpus/structs.c`): METHOD
+  NAME/CODE=`<global>`, FULL_NAME=`<file>:<global>`, ORDER=1. Children in
+  source order: TYPE_DECLs and full nested METHOD dumps (each ORDER=1
+  regardless of position), then a CODE-less BLOCK (ANY, ORDER=1) holding one
+  slot per top-level construct in source order — TYPE_REF (CODE = whole
+  struct text) for a struct def, LOCAL per global object declarator,
+  METHOD_REF (CODE=TYPE=METHOD_FULL_NAME=name) per function definition;
+  prototypes consume NO slot — then METHOD_RETURN (RET, ANY, ORDER=2).
+  A bare `<includes>:<global>` method (BLOCK + RET only) always exists.
+- **TYPE_DECL/MEMBER** (`corpus/structs.c`): TYPE_DECL NAME=FULL_NAME=tag
+  (struct keyword dropped), CODE = full struct source text; MEMBERs in
+  declaration order with CODE = just the member name.

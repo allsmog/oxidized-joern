@@ -8,9 +8,10 @@ Single source of truth across sessions. Update in the same commit as the work.
   <operator> stubs, TYPE_DECL/TYPE/NAMESPACE_BLOCK/FILE/META_DATA, METHOD_REF)
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` fetches latest; if the version
   drifts and output changes, record it here and in QUIRKS.md)
-- **Gate:** `joern-parity/check.sh` — green, 11/11 methods byte-identical
-  (corpus: add.c, ops.c, loop.c, unary.c, forloop.c, switch.c, exprs.c,
-  structs.c)
+- **Gate:** `joern-parity/check.sh` — green, 51/51 methods byte-identical
+  (11 user methods + 8 file-globals + <includes>:<global> + 31 operator
+  stubs; corpus: add.c, ops.c, loop.c, unary.c, forloop.c, switch.c,
+  exprs.c, structs.c)
 
 ## Next task (start here)
 
@@ -31,21 +32,31 @@ M2, in this order — one corpus file + diff-to-zero per line:
 - [x] multiple declarators, globals (phantom ORDER=0 LOCALs), prototypes
   (corpus/structs.c)
 
-**M2 COMPLETE.** M3 next:
+**M2 COMPLETE.** M3 progress:
 
-1. Widen `oracle.sc`: drop the `filterNot(_.name.startsWith("<"))` filter so
-   the `<global>` methods (`<includes>:<global>` and per-file `add.c:<global>`)
-   and `<operator>.*` stub methods are dumped; drive those to zero (see the
-   first M1 session's unfiltered dump for their shapes: stub methods have p1/p2
-   params and ANY types; the file-global wraps nested METHODs + METHOD_REFs).
-2. Extend the canonical dump to TYPE_DECL / TYPE / NAMESPACE_BLOCK / FILE /
-   META_DATA nodes (new oracle keys likely needed: AST_PARENT_TYPE,
-   AST_PARENT_FULL_NAME, FILENAME, LANGUAGE). Pin struct member layout under
-   TYPE_DECL (structs.c already has `struct point`).
-3. METHOD_REF bindings under the file-global BLOCK.
+- [x] Widened `oracle.sc` (all methods, scaffolding included); 51/51 green:
+  `<includes>:<global>`, per-file `<global>` wrappers (nested METHOD dumps,
+  TYPE_REF/LOCAL/METHOD_REF slot BLOCK), all 31 `<operator>`/`<operators>`
+  stub methods (arity = max use; stable-sort child layout).
+- [x] TYPE_DECL + MEMBER under the file-global (struct point pinned).
+- [x] METHOD_REF bindings under the file-global BLOCK.
+- [ ] Non-method scaffolding nodes: NAMESPACE_BLOCK / FILE / META_DATA / TYPE
+  nodes are NOT covered by the method-walk oracle. Add a second dump section
+  to oracle.sc (e.g. `NODES|` lines for cpg.file, cpg.namespaceBlock,
+  cpg.typeDecl not under a method, cpg.typ, cpg.metaData with
+  AST_PARENT_TYPE/AST_PARENT_FULL_NAME/FILENAME keys), extend check.sh to
+  diff that section, then emit it from the Rust side.
+- [ ] Pin underdetermined cases while here: TYPE_DECL ORDER with a struct
+  declared *between* functions; multi-declarator globals; global with
+  initialiser (`int g = 5;`); struct member pointers/arrays.
 
 ## Done
 
+- **M3 part 1 (2026-06-10):** Method-set scaffolding parity, 51/51. Emitter
+  restructured: multi-file invocation, per-method dump buffers sorted by
+  FULL_NAME, project-wide stub tracking (called-but-undefined, max arity),
+  file-global wrapper + TYPE_DECL/MEMBER emitters. check.sh keys blocks by
+  FULL_NAME and runs the binary once over corpus/*.c.
 - **M2 (2026-06-10):** Full C statement/expression AST coverage, 11/11 methods
   byte-identical. Corpus: switch.c (switch/JUMP_TARGET flattening,
   break/continue), exprs.c (compound assigns, cast/TYPE_REF, sizeof + phantom
