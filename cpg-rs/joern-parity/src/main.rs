@@ -11,64 +11,166 @@ use std::collections::HashMap;
 use tree_sitter::{Node, Parser};
 
 fn main() {
-    let path = std::env::args().nth(1).expect("usage: joern-parity <file.c>");
-    let src = std::fs::read_to_string(&path).expect("read file");
+    let paths: Vec<String> = std::env::args().skip(1).collect();
+    if paths.is_empty() {
+        eprintln!("usage: joern-parity <file.c>...");
+        std::process::exit(2);
+    }
     let mut parser = Parser::new();
     parser.set_language(&tree_sitter_c::LANGUAGE.into()).unwrap();
-    let tree = parser.parse(&src, None).unwrap();
-    let bytes = src.as_bytes();
 
-    // Pass 1: index free functions (name -> return type) and file-level
-    // object declarations (globals: name -> type), skipping prototypes.
-    let mut functions: HashMap<String, String> = HashMap::new();
-    let mut globals: HashMap<String, String> = HashMap::new();
-    for f in named_children(tree.root_node()) {
-        match f.kind() {
-            "function_definition" => {
-                if let Some((name, ret, _)) = fn_header(f, bytes) {
-                    functions.insert(name, ret);
+    struct Unit {
+        file: String,
+        src: String,
+        tree: tree_sitter::Tree,
+    }
+    let units: Vec<Unit> = paths
+        .iter()
+        .map(|p| {
+            let src = std::fs::read_to_string(p).expect("read file");
+            let tree = parser.parse(&src, None).unwrap();
+            let file = std::path::Path::new(p)
+                .file_name()
+                .unwrap()
+                .to_string_lossy()
+                .into_owned();
+            Unit { file, src, tree }
+        })
+        .collect();
+
+    // Project-wide defined functions: calls to these never become stubs.
+    let mut defined: Vec<String> = Vec::new();
+    for u in &units {
+        for f in named_children(u.tree.root_node()) {
+            if f.kind() == "function_definition" {
+                if let Some((name, _, _)) = fn_header(f, u.src.as_bytes()) {
+                    defined.push(name);
                 }
             }
-            "declaration" => {
-                let base = normalize_type(
-                    &f.child_by_field_name("type").map(|t| text(t, bytes).to_string()).unwrap_or("ANY".into()),
-                );
-                for d in named_children(f) {
-                    let decl = if d.kind() == "init_declarator" {
-                        d.child_by_field_name("declarator")
-                    } else if matches!(d.kind(), "identifier" | "pointer_declarator" | "array_declarator") {
-                        Some(d)
-                    } else {
-                        None
-                    };
-                    if let Some(decl) = decl {
-                        if find_function_declarator(decl).is_none() {
-                            let name = innermost_id(decl, bytes);
-                            if !name.is_empty() {
-                                globals.insert(name, format!("{base}{}", decl_suffix(decl)));
+        }
+    }
+
+    // Each dump is one method subtree keyed by FULL_NAME; Joern's oracle sorts
+    // all methods (user, <global> wrappers, <operator> stubs) by fullName.
+    let mut dumps: Vec<(String, String)> = Vec::new();
+    let mut stub_uses: HashMap<String, usize> = HashMap::new();
+
+    for u in &units {
+        let b = u.src.as_bytes();
+        let root = u.tree.root_node();
+
+        // Per-file tables (c2cpg resolves within the translation unit).
+        let mut functions: HashMap<String, String> = HashMap::new();
+        let mut globals: HashMap<String, String> = HashMap::new();
+        for f in named_children(root) {
+            match f.kind() {
+                "function_definition" => {
+                    if let Some((name, ret, _)) = fn_header(f, b) {
+                        functions.insert(name, ret);
+                    }
+                }
+                "declaration" => {
+                    let base = normalize_type(
+                        &f.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into()),
+                    );
+                    for d in named_children(f) {
+                        let decl = if d.kind() == "init_declarator" {
+                            d.child_by_field_name("declarator")
+                        } else if matches!(d.kind(), "identifier" | "pointer_declarator" | "array_declarator") {
+                            Some(d)
+                        } else {
+                            None
+                        };
+                        if let Some(decl) = decl {
+                            if find_function_declarator(decl).is_none() {
+                                let name = innermost_id(decl, b);
+                                if !name.is_empty() {
+                                    globals.insert(name, format!("{base}{}", decl_suffix(decl)));
+                                }
                             }
                         }
                     }
                 }
+                _ => {}
             }
-            _ => {}
         }
+
+        let mut ctx = Ctx {
+            functions: &functions,
+            globals: &globals,
+            symbols: HashMap::new(),
+            phantoms: Vec::new(),
+            stubs: &mut stub_uses,
+            out: String::new(),
+        };
+
+        // Standalone dump per user method.
+        for f in named_children(root) {
+            if f.kind() == "function_definition" {
+                if let Some((name, _, _)) = fn_header(f, b) {
+                    ctx.emit_method(f, b, 0);
+                    dumps.push((name, std::mem::take(&mut ctx.out)));
+                }
+            }
+        }
+
+        // The per-file `<global>` wrapper method.
+        ctx.emit_file_global(root, b, &u.file);
+        dumps.push((format!("{}:<global>", u.file), std::mem::take(&mut ctx.out)));
     }
 
-    // Pass 2: emit each function's canonical AST, sorted by name (as the oracle).
-    let mut funcs: Vec<Node> = named_children(tree.root_node())
+    // Operator stubs (one per project for each called-but-undefined name).
+    let mut stub_list: Vec<(String, usize)> = stub_uses
         .into_iter()
-        .filter(|f| f.kind() == "function_definition")
+        .filter(|(n, _)| !defined.contains(n))
         .collect();
-    funcs.sort_by_key(|f| fn_header(*f, bytes).map(|h| h.0).unwrap_or_default());
+    stub_list.sort();
+    for (name, arity) in stub_list {
+        dumps.push((name.clone(), stub_method(&name, arity)));
+    }
 
+    // The synthetic `<includes>:<global>` method.
+    dumps.push((
+        "<includes>:<global>".into(),
+        concat!(
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1\n",
+            "  BLOCK TYPE_FULL_NAME=ANY ORDER=1\n",
+            "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2\n",
+        )
+        .to_string(),
+    ));
+
+    dumps.sort_by(|a, b| a.0.cmp(&b.0));
     let mut out = String::new();
-    for f in funcs {
-        let mut ctx = Ctx { functions: &functions, globals: &globals, symbols: HashMap::new(), phantoms: Vec::new(), out: &mut out };
-        ctx.emit_method(f, bytes);
+    for (_, d) in dumps {
+        out.push_str(&d);
         out.push('\n');
     }
     print!("{out}");
+}
+
+/// A `<operator>.*` stub method. Layout mirrors Joern's stable sort by ORDER
+/// over insertion order [IN p1..pn, BLOCK(1), RET(2), OUT p1..pn]:
+/// O1 = IN p1, BLOCK, OUT p1; O2 = IN p2(?), RET, OUT p2(?); Ok = IN pk, OUT pk.
+fn stub_method(name: &str, arity: usize) -> String {
+    let mut s = format!("METHOD NAME={name} FULL_NAME={name} ORDER=0\n");
+    let p_in = |k: usize| format!("  METHOD_PARAMETER_IN NAME=p{k} CODE=p{k} TYPE_FULL_NAME=ANY ORDER={k}\n");
+    let p_out = |k: usize| format!("  METHOD_PARAMETER_OUT NAME=p{k} CODE=p{k} TYPE_FULL_NAME=ANY ORDER={k}\n");
+    s.push_str(&p_in(1));
+    s.push_str("  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1\n");
+    s.push_str(&p_out(1));
+    if arity >= 2 {
+        s.push_str(&p_in(2));
+        s.push_str("  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2\n");
+        s.push_str(&p_out(2));
+        for k in 3..=arity {
+            s.push_str(&p_in(k));
+            s.push_str(&p_out(k));
+        }
+    } else {
+        s.push_str("  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2\n");
+    }
+    s
 }
 
 /// Per-function emission context.
@@ -80,7 +182,8 @@ struct Ctx<'a> {
     // method body BLOCK for each referenced global (CODE `<global> name`)
     // and each type name used as a sizeof(T) argument.
     phantoms: Vec<Phantom>,
-    out: &'a mut String,
+    stubs: &'a mut HashMap<String, usize>,
+    out: String,
 }
 
 struct Phantom {
@@ -120,13 +223,21 @@ impl Ctx<'_> {
         self.out.push('\n');
     }
 
-    fn emit_method(&mut self, f: Node, b: &[u8]) {
+    fn note_call(&mut self, name: &str, argc: usize) {
+        let e = self.stubs.entry(name.to_string()).or_insert(0);
+        if argc > *e {
+            *e = argc;
+        }
+    }
+
+    fn emit_method(&mut self, f: Node, b: &[u8], d: usize) {
+        self.symbols.clear();
         let (name, ret, params) = fn_header(f, b).expect("function header");
         let sig = format!(
             "{ret}({})",
             params.iter().map(|p| p.ty.clone()).collect::<Vec<_>>().join(",")
         );
-        self.line(0, "METHOD", P {
+        self.line(d, "METHOD", P {
             name: Some(name.clone()),
             code: Some(esc(text(f, b))),
             full: Some(name.clone()),
@@ -140,7 +251,7 @@ impl Ctx<'_> {
             self.symbols.insert(p.name.clone(), p.ty.clone());
             let order = (i + 1) as i64;
             for label in ["METHOD_PARAMETER_IN", "METHOD_PARAMETER_OUT"] {
-                self.line(1, label, P {
+                self.line(d + 1, label, P {
                     name: Some(p.name.clone()),
                     code: Some(esc(&p.code)),
                     tfn: Some(p.ty.clone()),
@@ -154,14 +265,142 @@ impl Ctx<'_> {
         let block_order = (params.len() + 1) as i64;
         if let Some(body) = f.child_by_field_name("body") {
             self.collect_phantoms(body, b);
-            self.emit_block(body, b, block_order, 1);
+            self.emit_block(body, b, block_order, d + 1);
         }
-        self.line(1, "METHOD_RETURN", P {
+        self.line(d + 1, "METHOD_RETURN", P {
             code: Some("RET".into()),
             tfn: Some(ret),
             order: Some((params.len() + 2) as i64),
             ..Default::default()
         });
+    }
+
+    /// The per-file `<global>` wrapper: TYPE_DECLs and nested METHOD dumps in
+    /// source order (each ORDER=1), then a BLOCK holding one slot per
+    /// top-level construct in source order — TYPE_REF for a struct def, LOCAL
+    /// per global object declarator, METHOD_REF per function definition;
+    /// prototypes consume no slot — then METHOD_RETURN.
+    fn emit_file_global(&mut self, root: Node, b: &[u8], file: &str) {
+        self.line(0, "METHOD", P {
+            name: Some("<global>".into()),
+            code: Some("<global>".into()),
+            full: Some(format!("{file}:<global>")),
+            order: Some(1),
+            ..Default::default()
+        });
+        for n in named_children(root) {
+            match n.kind() {
+                "struct_specifier" if n.child_by_field_name("body").is_some() => {
+                    self.emit_type_decl(n, b, 1);
+                }
+                "function_definition" => self.emit_method(n, b, 1),
+                _ => {}
+            }
+        }
+        self.line(1, "BLOCK", P {
+            tfn: Some("ANY".into()),
+            order: Some(1),
+            ..Default::default()
+        });
+        let mut slot = 1i64;
+        for n in named_children(root) {
+            match n.kind() {
+                "struct_specifier" if n.child_by_field_name("body").is_some() => {
+                    let name = n.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                    self.line(2, "TYPE_REF", P {
+                        code: Some(esc(text(n, b))),
+                        tfn: Some(name),
+                        order: Some(slot),
+                        ..Default::default()
+                    });
+                    slot += 1;
+                }
+                "declaration" => {
+                    let ty = normalize_type(
+                        &n.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into()),
+                    );
+                    let spec_end = n.child_by_field_name("type").map(|t| t.end_byte()).unwrap_or(n.start_byte());
+                    for d in named_children(n) {
+                        let decl = if d.kind() == "init_declarator" {
+                            d.child_by_field_name("declarator")
+                        } else if matches!(d.kind(), "identifier" | "pointer_declarator" | "array_declarator") {
+                            Some(d)
+                        } else {
+                            None
+                        };
+                        let Some(decl) = decl else { continue };
+                        if find_function_declarator(decl).is_some() {
+                            continue; // prototype: no slot
+                        }
+                        let name = innermost_id(decl, b);
+                        let spec = std::str::from_utf8(&b[n.start_byte()..spec_end]).unwrap_or("");
+                        self.line(2, "LOCAL", P {
+                            name: Some(name),
+                            code: Some(esc(&format!("{spec} {}", text(decl, b)))),
+                            tfn: Some(format!("{ty}{}", decl_suffix(decl))),
+                            order: Some(slot),
+                            ..Default::default()
+                        });
+                        slot += 1;
+                    }
+                }
+                "function_definition" => {
+                    if let Some((name, _, _)) = fn_header(n, b) {
+                        self.line(2, "METHOD_REF", P {
+                            code: Some(name.clone()),
+                            tfn: Some(name.clone()),
+                            mfn: Some(name),
+                            order: Some(slot),
+                            ..Default::default()
+                        });
+                        slot += 1;
+                    }
+                }
+                _ => {}
+            }
+        }
+        self.line(1, "METHOD_RETURN", P {
+            code: Some("RET".into()),
+            tfn: Some("ANY".into()),
+            order: Some(2),
+            ..Default::default()
+        });
+    }
+
+    /// `struct T { ... }` → TYPE_DECL with one MEMBER per field (CODE is just
+    /// the member name).
+    fn emit_type_decl(&mut self, n: Node, b: &[u8], depth: usize) {
+        let name = n.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+        self.line(depth, "TYPE_DECL", P {
+            name: Some(name.clone()),
+            code: Some(esc(text(n, b))),
+            full: Some(name),
+            order: Some(1),
+            ..Default::default()
+        });
+        let Some(body) = n.child_by_field_name("body") else { return };
+        let mut order = 1i64;
+        for f in named_children(body) {
+            if f.kind() != "field_declaration" {
+                continue;
+            }
+            let ty = normalize_type(
+                &f.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into()),
+            );
+            for d in named_children(f) {
+                if matches!(d.kind(), "field_identifier" | "pointer_declarator" | "array_declarator") {
+                    let mname = innermost_id(d, b);
+                    self.line(depth + 1, "MEMBER", P {
+                        name: Some(mname.clone()),
+                        code: Some(mname),
+                        tfn: Some(format!("{ty}{}", decl_suffix(d))),
+                        order: Some(order),
+                        ..Default::default()
+                    });
+                    order += 1;
+                }
+            }
+        }
     }
 
     /// Pre-scan the method body for names that Joern's local-creation pass
@@ -457,6 +696,7 @@ impl Ctx<'_> {
                     // The assignment call.
                     let ao = *order;
                     *order += 1;
+                    self.note_call("<operator>.assignment", 2);
                     self.line(depth, "CALL", P {
                         name: Some("<operator>.assignment".into()),
                         code: Some(esc(text(d, b))),
@@ -505,6 +745,7 @@ impl Ctx<'_> {
             "binary_expression" => {
                 let op = n.child(1).map(|o| text(o, b)).unwrap_or("?");
                 let name = operator_name(op);
+                self.note_call(&name, 2);
                 self.line(depth, "CALL", P {
                     name: Some(name.clone()),
                     code: Some(esc(text(n, b))),
@@ -527,6 +768,7 @@ impl Ctx<'_> {
                 // initialiser assignment, which c2cpg types `void`).
                 let op = n.child_by_field_name("operator").map(|o| text(o, b)).unwrap_or("=");
                 let name = assignment_name(op);
+                self.note_call(&name, 2);
                 self.line(depth, "CALL", P {
                     name: Some(name.clone()),
                     code: Some(esc(text(n, b))),
@@ -547,6 +789,7 @@ impl Ctx<'_> {
             "unary_expression" | "pointer_expression" => {
                 let op = n.child(0).map(|o| text(o, b)).unwrap_or("?");
                 let name = unary_name(op);
+                self.note_call(&name, 1);
                 self.line(depth, "CALL", P {
                     name: Some(name.clone()),
                     code: Some(esc(text(n, b))),
@@ -574,6 +817,7 @@ impl Ctx<'_> {
                     if prefix { "pre" } else { "post" },
                     if op == "++" { "Increment" } else { "Decrement" }
                 );
+                self.note_call(&name, 1);
                 self.line(depth, "CALL", P {
                     name: Some(name.clone()),
                     code: Some(esc(text(n, b))),
@@ -589,6 +833,7 @@ impl Ctx<'_> {
                 }
             }
             "conditional_expression" => {
+                self.note_call("<operator>.conditional", 3);
                 self.line(depth, "CALL", P {
                     name: Some("<operator>.conditional".into()),
                     code: Some(esc(text(n, b))),
@@ -615,6 +860,7 @@ impl Ctx<'_> {
                 } else {
                     "<operator>.fieldAccess".to_string()
                 };
+                self.note_call(&name, 2);
                 self.line(depth, "CALL", P {
                     name: Some(name.clone()),
                     code: Some(esc(text(n, b))),
@@ -638,6 +884,7 @@ impl Ctx<'_> {
                 }
             }
             "subscript_expression" => {
+                self.note_call("<operator>.indirectIndexAccess", 2);
                 self.line(depth, "CALL", P {
                     name: Some("<operator>.indirectIndexAccess".into()),
                     code: Some(esc(text(n, b))),
@@ -659,6 +906,11 @@ impl Ctx<'_> {
                 let callee = n.child_by_field_name("function");
                 let name = callee.map(|c| text(c, b).to_string()).unwrap_or("<anon>".into());
                 let ty = self.functions.get(&name).cloned().unwrap_or("ANY".into());
+                let argc = n
+                    .child_by_field_name("arguments")
+                    .map(|a| named_children(a).len())
+                    .unwrap_or(0);
+                self.note_call(&name, argc);
                 self.line(depth, "CALL", P {
                     name: Some(name.clone()),
                     code: Some(esc(text(n, b))),
@@ -700,6 +952,7 @@ impl Ctx<'_> {
                 let t = text(n, b).to_string();
                 if let Some(rest) = t.strip_prefix('-').or_else(|| t.strip_prefix('+')) {
                     let name = unary_name(&t[..1]);
+                    self.note_call(&name, 1);
                     self.line(depth, "CALL", P {
                         name: Some(name.clone()),
                         code: Some(t.clone()),
@@ -760,6 +1013,7 @@ impl Ctx<'_> {
                     .child_by_field_name("type")
                     .map(|t| normalize_type(text(t, b)))
                     .unwrap_or("ANY".into());
+                self.note_call("<operator>.cast", 2);
                 self.line(depth, "CALL", P {
                     name: Some("<operator>.cast".into()),
                     code: Some(esc(text(n, b))),
@@ -782,6 +1036,7 @@ impl Ctx<'_> {
                 }
             }
             "sizeof_expression" => {
+                self.note_call("<operator>.sizeOf", 1);
                 self.line(depth, "CALL", P {
                     name: Some("<operator>.sizeOf".into()),
                     code: Some(esc(text(n, b))),
