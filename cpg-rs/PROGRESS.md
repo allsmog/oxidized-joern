@@ -4,15 +4,14 @@ Single source of truth across sessions. Update in the same commit as the work.
 
 ## Current state
 
-- **Milestone:** M4 — edge parity beyond AST (CFG, REF, CALL, ARGUMENT,
-  EVAL_TYPE, CONTAINS, SOURCE_FILE)
+- **Milestone:** M5 (real-world corpus) / M7 (dataflow oracle) — M1-M4 done
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` fetches latest; if the version
   drifts and output changes, record it here and in QUIRKS.md)
-- **Gate:** `joern-parity/check.sh` — green, 71/71 blocks byte-identical:
-  56 method blocks + scaffolding-nodes section + 14 structural edge kinds
-  (1,531 edges: ARGUMENT 177, CALL 90, CONDITION 8, CONTAINS 408, EVAL_TYPE
-  539, PARAMETER_LINK 70, REF 158, SOURCE_FILE 71, control-structure body
-  edges 10). Previously:
+- **Gate:** `joern-parity/check.sh` — green, 76/76 blocks byte-identical:
+  57 method blocks + scaffolding nodes + 15 edge kinds incl. CFG (~2,300
+  edges; corpus now includes logic.c: short-circuit &&/||, if-without-else,
+  nested loops with break/continue, switch fallthrough + no-default).
+  Previously:
   13 user methods + pair.<clinit> + 9 file-globals + <includes>:<global> +
   32 operator stubs + the scaffolding-nodes section (FILE, NAMESPACE_BLOCK,
   NAMESPACE, META_DATA, TYPE_DECL incl. IS_EXTERNAL entries, TYPE). Corpus:
@@ -38,28 +37,41 @@ M2, in this order — one corpus file + diff-to-zero per line:
 - [x] multiple declarators, globals (phantom ORDER=0 LOCALs), prototypes
   (corpus/structs.c)
 
-**M2 COMPLETE. M3 COMPLETE. M4 part 1 (structural edges) COMPLETE.**
+**M2, M3, M4 COMPLETE** (AST + node set + structural edges + CFG).
 
-M4 remaining — CFG:
+Next, in preference order:
 
-1. Add "CFG" to the `kinds` set in `oracle.sc`, regenerate, and port Joern's
-   CfgCreationPass semantics to the Rust emitter: statement chaining through
-   expression evaluation order (post-order: operands before operator),
-   METHOD -> first expr, last -> METHOD_RETURN, branch out of conditions,
-   loop back-edges, do-while, for (init -> cond -> body -> update -> cond),
-   switch dispatch to JUMP_TARGETs + fallthrough, break/continue targets.
-   Addressing infrastructure is already in place (line indices + symbolic
-   M:/TD:/MB: resolution) — emit CFG edges from a per-method post-pass over
-   the emitted statement structure, or track (predecessor-set -> next) during
-   emission the way the Scala pass does.
-2. New corpus cases alongside: short-circuit `&&`/`||` (lazy evaluation
-   produces distinctive CFG diamonds), nested loops with break/continue,
-   goto/label (closes the M2 goto gap), `if` without else, return-in-branch.
-3. Then M5 (real-world corpus) or M7 dataflow oracle (REACHING_DEF, CDG,
-   DOMINATE/POST_DOMINATE are already in the graph — same harness, new kinds).
+1. **M5 — real-world corpus.** Vendor a small real C project (suggest: a
+   single-file lib like miniz/stb subset, or zlib's adler32.c+crc32.c to
+   start), run both sides, triage every diff into either a minimal new
+   corpus pin + fix, or a QUIRKS.md entry. This will surface the long tail:
+   typedefs, enums, unions, static/extern, multi-dim arrays, function
+   pointers, varargs, preprocessor output constructs, goto/label (KNOWN GAP:
+   CFG builder has a goto/label TODO; AST side also unpinned).
+2. **M7 — dataflow oracle.** Add REACHING_DEF, CDG, DOMINATE, POST_DOMINATE
+   to oracle kinds (they're already in the importCode graph; the addressing
+   scheme works as-is). DOMINATE/POST_DOMINATE are computable from our
+   now-identical CFG (standard dominator tree); CDG from post-dominance
+   frontiers; REACHING_DEF is the big one (Joern's ReachingDefPass: def-use
+   over the CFG with its specific gen/kill conventions).
+3. **M6 — real graph output** (fold onto cpg-core schema + binary export
+   loadable by joern) can proceed in parallel with either.
 
 ## Done
 
+- **M4 part 2 (2026-06-10):** CFG parity, 76/76 blocks, 340+ CFG edges on the
+  base corpus plus logic.c pins — all matched. CfgCreationPass semantics
+  reconstructed from the oracle and implemented as a generic builder over our
+  own dump blocks (shared line addresses): evaluation-order chaining (args
+  then call), statement BLOCKs transparent vs comma BLOCKs (CALL children) as
+  CFG nodes, LOCALs/params/MODIFIERs invisible, stub bodies skipped
+  (METHOD->METHOD_RETURN direct), condition roots branch to both arms, loop
+  back-edges to the condition's first leaf, do-while entry at body, for:
+  init->cond->body->update->cond with continue->update, switch: cond root ->
+  every JUMP_TARGET (+ continuation when no default), case values chained
+  after their JUMP_TARGETs, natural fallthrough, break -> after construct,
+  ternary + short-circuit &&/|| branch shapes. logic.c passed first-run —
+  the semantics model is predictive now.
 - **M4 part 1 (2026-06-10):** Structural edge parity, 71/71. EDGES| oracle
   section with deterministic addressing: every node = <homeMethod>#<dumpLineIdx>;
   METHOD/TYPE_DECL/MEMBER addresses resolve first-wins across sorted method
