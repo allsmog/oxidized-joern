@@ -7,9 +7,9 @@ Single source of truth across sessions. Update in the same commit as the work.
 - **Milestone:** M5 (real-world corpus) / M7 (dataflow oracle) — M1-M4 done
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` fetches latest; if the version
   drifts and output changes, record it here and in QUIRKS.md)
-- **Gate:** `joern-parity/check.sh` — green, 91/91 blocks byte-identical.
-  Corpus now includes REAL-WORLD code: musl's bsearch.c, unmodified —
-  AST, nodes, and all 15 edge kinds incl. CFG. Previously 88/88 with
+- **Gate:** `joern-parity/check.sh` — green, 95/95 blocks byte-identical.
+  Corpus includes THREE unmodified real-world musl files: bsearch.c,
+  memcmp.c, strcmp.c — AST, nodes, and all 15 edge kinds incl. CFG. Previously 88/88 with
   macros.c (#define expansion as INLINED calls + #ifdef). Previously 84/84 with gotos.c
   and types2.c (goto/label, typedef, enum + <clinit>, union, static,
   function pointers/pointerCall, multi-dim arrays/alloc).
@@ -44,14 +44,13 @@ M2, in this order — one corpus file + diff-to-zero per line:
 
 Next, in preference order:
 
-1. **M5 — real-world corpus, continued.** First real file (musl bsearch.c)
-   is GREEN, unmodified. Scale up: vendor the next real files (musl
-   memcmp.c/strcmp.c are low-macro; then a macro-heavy one like zlib
-   adler32.c to stress nested expansion and #if evaluation). Still
+1. **M5 — real-world corpus, continued.** Three musl files GREEN
+   (bsearch.c, memcmp.c, strcmp.c). Next: a macro-heavy real file (zlib
+   adler32.c) to stress nested macro expansion and #if evaluation. Still
    unpinned: #if/#elif expression evaluation, nested macro expansion,
    token pasting/stringizing, varargs, extern, calls to undefined
    functions (printf stub shape), initializer lists `{1,2}`, struct defs
-   inside functions, single-statement (braceless) if/loop bodies.
+   inside functions, braceless if/while bodies (for-with-; is pinned).
 2. **M7 — dataflow oracle.** Add REACHING_DEF, CDG, DOMINATE, POST_DOMINATE
    to oracle kinds (they're already in the importCode graph; the addressing
    scheme works as-is). DOMINATE/POST_DOMINATE are computable from our
@@ -63,6 +62,17 @@ Next, in preference order:
 
 ## Done
 
+- **M5 musl string fns (2026-06-10):** memcmp.c + strcmp.c byte-identical,
+  95/95. New pins: multi-declarator initialisers emit ALL LOCALs first, then
+  all assignments (`T *l=vl, *r=vr;`); empty for-init clause becomes a
+  CODE-less ANY BLOCK placeholder that still receives the FOR_INIT edge;
+  comma updates are BLOCKs, so for-clause classification is positional
+  ([init, cond, update, body?] after skipping LOCALs); body-less
+  `for (...);` loops branch cond -> update entry directly; `unsigned char`
+  keeps its space in types (vs longunsigned) and declarations register the
+  decl-SPECIFIER type separately — `unsigned char c` also registers bare
+  `unsigned`, a pointer decl registers its base (CDT's typeForDeclSpecifier
+  divergence).
 - **M5 first real file (2026-06-10):** musl bsearch.c byte-identical, 91/91.
   New pins from real code: pointer return types (`void *bsearch` ->
   SIGNATURE void*(...), ret from pointer levels above the function

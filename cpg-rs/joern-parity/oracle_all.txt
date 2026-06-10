@@ -1211,6 +1211,96 @@ AST|    RETURN CODE=return x; ORDER=3
 AST|      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
 AST|
+AST|METHOD NAME=memcmp CODE=int memcmp(const void *vl, const void *vr, size_t n)\n{\n	const unsigned char *l=vl, *r=vr;\n	for (; n && *l == *r; n--, l++, r++);\n	return n ? *l-*r : 0;\n} FULL_NAME=memcmp SIGNATURE=int(void*,void*,size_t) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=vl CODE=const void *vl TYPE_FULL_NAME=void* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=vl CODE=const void *vl TYPE_FULL_NAME=void* ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=vr CODE=const void *vr TYPE_FULL_NAME=void* ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=vr CODE=const void *vr TYPE_FULL_NAME=void* ORDER=2
+AST|  METHOD_PARAMETER_IN NAME=n CODE=size_t n TYPE_FULL_NAME=size_t ORDER=3
+AST|  METHOD_PARAMETER_OUT NAME=n CODE=size_t n TYPE_FULL_NAME=size_t ORDER=3
+AST|  BLOCK CODE={\n	const unsigned char *l=vl, *r=vr;\n	for (; n && *l == *r; n--, l++, r++);\n	return n ? *l-*r : 0;\n} TYPE_FULL_NAME=void ORDER=4
+AST|    LOCAL NAME=l CODE=const unsigned char *l TYPE_FULL_NAME=unsigned char* ORDER=1
+AST|    LOCAL NAME=r CODE=const unsigned char *r TYPE_FULL_NAME=unsigned char* ORDER=2
+AST|    CALL NAME=<operator>.assignment CODE=*l=vl TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|      IDENTIFIER NAME=vl CODE=vl TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|    CALL NAME=<operator>.assignment CODE=*r=vr TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|      IDENTIFIER NAME=vr CODE=vr TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|    CONTROL_STRUCTURE CODE=for (;n && *l == *r;n--, l++, r++) ORDER=5
+AST|      BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|      CALL NAME=<operator>.logicalAnd CODE=n && *l == *r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalAnd ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.equals CODE=*l == *r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.indirection CODE=*l TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.indirection CODE=*r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|      BLOCK TYPE_FULL_NAME=ANY ORDER=3
+AST|        CALL NAME=<operator>.postDecrement CODE=n-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.postIncrement CODE=l++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.postIncrement CODE=r++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|    RETURN CODE=return n ? *l-*r : 0; ORDER=6
+AST|      CALL NAME=<operator>.conditional CODE=n ? *l-*r : 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.subtraction CODE=*l-*r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.indirection CODE=*l TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.indirection CODE=*r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=3 ARGUMENT_INDEX=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=5
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=memcmp.c:<global> ORDER=1
+AST|  METHOD NAME=memcmp CODE=int memcmp(const void *vl, const void *vr, size_t n)\n{\n	const unsigned char *l=vl, *r=vr;\n	for (; n && *l == *r; n--, l++, r++);\n	return n ? *l-*r : 0;\n} FULL_NAME=memcmp SIGNATURE=int(void*,void*,size_t) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=vl CODE=const void *vl TYPE_FULL_NAME=void* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=vl CODE=const void *vl TYPE_FULL_NAME=void* ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=vr CODE=const void *vr TYPE_FULL_NAME=void* ORDER=2
+AST|    METHOD_PARAMETER_OUT NAME=vr CODE=const void *vr TYPE_FULL_NAME=void* ORDER=2
+AST|    METHOD_PARAMETER_IN NAME=n CODE=size_t n TYPE_FULL_NAME=size_t ORDER=3
+AST|    METHOD_PARAMETER_OUT NAME=n CODE=size_t n TYPE_FULL_NAME=size_t ORDER=3
+AST|    BLOCK CODE={\n	const unsigned char *l=vl, *r=vr;\n	for (; n && *l == *r; n--, l++, r++);\n	return n ? *l-*r : 0;\n} TYPE_FULL_NAME=void ORDER=4
+AST|      LOCAL NAME=l CODE=const unsigned char *l TYPE_FULL_NAME=unsigned char* ORDER=1
+AST|      LOCAL NAME=r CODE=const unsigned char *r TYPE_FULL_NAME=unsigned char* ORDER=2
+AST|      CALL NAME=<operator>.assignment CODE=*l=vl TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=vl CODE=vl TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|      CALL NAME=<operator>.assignment CODE=*r=vr TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=vr CODE=vr TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|      CONTROL_STRUCTURE CODE=for (;n && *l == *r;n--, l++, r++) ORDER=5
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|        CALL NAME=<operator>.logicalAnd CODE=n && *l == *r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalAnd ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.equals CODE=*l == *r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.indirection CODE=*l TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|            CALL NAME=<operator>.indirection CODE=*r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=3
+AST|          CALL NAME=<operator>.postDecrement CODE=n-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.postIncrement CODE=l++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.postIncrement CODE=r++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|      RETURN CODE=return n ? *l-*r : 0; ORDER=6
+AST|        CALL NAME=<operator>.conditional CODE=n ? *l-*r : 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.subtraction CODE=*l-*r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.indirection CODE=*l TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|            CALL NAME=<operator>.indirection CODE=*r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=unsigned char* ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=3 ARGUMENT_INDEX=3
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=5
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=memcmp TYPE_FULL_NAME=memcmp METHOD_FULL_NAME=memcmp ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
 AST|METHOD NAME=<global> CODE=<global> FULL_NAME=ops.c:<global> ORDER=1
 AST|  METHOD NAME=classify CODE=int classify(int n) {\n    int r = 0;\n    if (n > 10) {\n        r = n - 1;\n    } else {\n        r = n * 2;\n    }\n    return r;\n} FULL_NAME=classify SIGNATURE=int(int) ORDER=1
 AST|    METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
@@ -1384,6 +1474,76 @@ AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
 AST|        CALL NAME=first CODE=first(1) TYPE_FULL_NAME=int METHOD_FULL_NAME=first ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
 AST|          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=strcmp CODE=int strcmp(const char *l, const char *r)\n{\n	for (; *l==*r && *l; l++, r++);\n	return *(unsigned char *)l - *(unsigned char *)r;\n} FULL_NAME=strcmp SIGNATURE=int(char*,char*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=l CODE=const char *l TYPE_FULL_NAME=char* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=l CODE=const char *l TYPE_FULL_NAME=char* ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=r CODE=const char *r TYPE_FULL_NAME=char* ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=r CODE=const char *r TYPE_FULL_NAME=char* ORDER=2
+AST|  BLOCK CODE={\n	for (; *l==*r && *l; l++, r++);\n	return *(unsigned char *)l - *(unsigned char *)r;\n} TYPE_FULL_NAME=void ORDER=3
+AST|    CONTROL_STRUCTURE CODE=for (;*l==*r && *l;l++, r++) ORDER=1
+AST|      BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|      CALL NAME=<operator>.logicalAnd CODE=*l==*r && *l TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalAnd ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.equals CODE=*l==*r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.indirection CODE=*l TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.indirection CODE=*r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.indirection CODE=*l TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+AST|      BLOCK TYPE_FULL_NAME=ANY ORDER=3
+AST|        CALL NAME=<operator>.postIncrement CODE=l++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.postIncrement CODE=r++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+AST|    RETURN CODE=return *(unsigned char *)l - *(unsigned char *)r; ORDER=2
+AST|      CALL NAME=<operator>.subtraction CODE=*(unsigned char *)l - *(unsigned char *)r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirection CODE=*(unsigned char *)l TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.cast CODE=(unsigned char *)l TYPE_FULL_NAME=unsigned char METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            TYPE_REF CODE=unsigned char * TYPE_FULL_NAME=unsigned char ORDER=1 ARGUMENT_INDEX=1
+AST|            IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+AST|        CALL NAME=<operator>.indirection CODE=*(unsigned char *)r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.cast CODE=(unsigned char *)r TYPE_FULL_NAME=unsigned char METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            TYPE_REF CODE=unsigned char * TYPE_FULL_NAME=unsigned char ORDER=1 ARGUMENT_INDEX=1
+AST|            IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=strcmp.c:<global> ORDER=1
+AST|  METHOD NAME=strcmp CODE=int strcmp(const char *l, const char *r)\n{\n	for (; *l==*r && *l; l++, r++);\n	return *(unsigned char *)l - *(unsigned char *)r;\n} FULL_NAME=strcmp SIGNATURE=int(char*,char*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=l CODE=const char *l TYPE_FULL_NAME=char* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=l CODE=const char *l TYPE_FULL_NAME=char* ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=r CODE=const char *r TYPE_FULL_NAME=char* ORDER=2
+AST|    METHOD_PARAMETER_OUT NAME=r CODE=const char *r TYPE_FULL_NAME=char* ORDER=2
+AST|    BLOCK CODE={\n	for (; *l==*r && *l; l++, r++);\n	return *(unsigned char *)l - *(unsigned char *)r;\n} TYPE_FULL_NAME=void ORDER=3
+AST|      CONTROL_STRUCTURE CODE=for (;*l==*r && *l;l++, r++) ORDER=1
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|        CALL NAME=<operator>.logicalAnd CODE=*l==*r && *l TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalAnd ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.equals CODE=*l==*r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.indirection CODE=*l TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+AST|            CALL NAME=<operator>.indirection CODE=*r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.indirection CODE=*l TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=3
+AST|          CALL NAME=<operator>.postIncrement CODE=l++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.postIncrement CODE=r++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+AST|      RETURN CODE=return *(unsigned char *)l - *(unsigned char *)r; ORDER=2
+AST|        CALL NAME=<operator>.subtraction CODE=*(unsigned char *)l - *(unsigned char *)r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.indirection CODE=*(unsigned char *)l TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.cast CODE=(unsigned char *)l TYPE_FULL_NAME=unsigned char METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=unsigned char * TYPE_FULL_NAME=unsigned char ORDER=1 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=l CODE=l TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=<operator>.indirection CODE=*(unsigned char *)r TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.cast CODE=(unsigned char *)r TYPE_FULL_NAME=unsigned char METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=unsigned char * TYPE_FULL_NAME=unsigned char ORDER=1 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=strcmp TYPE_FULL_NAME=strcmp METHOD_FULL_NAME=strcmp ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|
 AST|METHOD NAME=<global> CODE=<global> FULL_NAME=structs.c:<global> ORDER=1
 AST|  TYPE_DECL NAME=point CODE=struct point {\n    int x;\n    int y;\n} FULL_NAME=point ORDER=1
@@ -1747,8 +1907,10 @@ NODES|FILE NAME=gotos.c ORDER=0
 NODES|FILE NAME=logic.c ORDER=0
 NODES|FILE NAME=loop.c ORDER=0
 NODES|FILE NAME=macros.c ORDER=0
+NODES|FILE NAME=memcmp.c ORDER=0
 NODES|FILE NAME=ops.c ORDER=0
 NODES|FILE NAME=order.c ORDER=0
+NODES|FILE NAME=strcmp.c ORDER=0
 NODES|FILE NAME=structs.c ORDER=0
 NODES|FILE NAME=switch.c ORDER=0
 NODES|FILE NAME=types2.c ORDER=0
@@ -1763,8 +1925,10 @@ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=gotos.c:<global> FILENAME=gotos.c 
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=logic.c:<global> FILENAME=logic.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=loop.c:<global> FILENAME=loop.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=macros.c:<global> FILENAME=macros.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=memcmp.c:<global> FILENAME=memcmp.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=ops.c:<global> FILENAME=ops.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=order.c:<global> FILENAME=order.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=strcmp.c:<global> FILENAME=strcmp.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=structs.c:<global> FILENAME=structs.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=switch.c:<global> FILENAME=switch.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=types2.c:<global> FILENAME=types2.c ORDER=1
@@ -1804,6 +1968,8 @@ NODES|TYPE_DECL NAME=<global> FULL_NAME=loop.c:<global> CODE=<global> AST_PARENT
 NODES|TYPE_DECL NAME=macros FULL_NAME=macros CODE=macros AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=macros.c:<global> FILENAME=macros.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=macros.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=macros.c:<global> FILENAME=macros.c ORDER=1
 NODES|TYPE_DECL NAME=main FULL_NAME=main CODE=main AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
+NODES|TYPE_DECL NAME=memcmp FULL_NAME=memcmp CODE=memcmp AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=memcmp.c:<global> FILENAME=memcmp.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=memcmp.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=memcmp.c:<global> FILENAME=memcmp.c ORDER=2
 NODES|TYPE_DECL NAME=<global> FULL_NAME=ops.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=ops.c:<global> FILENAME=ops.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=order.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=order.c:<global> FILENAME=order.c ORDER=1
 NODES|TYPE_DECL NAME=pair FULL_NAME=pair CODE=struct pair {\n    int *ptr;\n    int arr[4];\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=order.c ORDER=1
@@ -1813,6 +1979,8 @@ NODES|TYPE_DECL NAME=point* FULL_NAME=point* CODE=point* IS_EXTERNAL=true AST_PA
 NODES|TYPE_DECL NAME=ptr FULL_NAME=ptr CODE=ptr AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=unary.c:<global> FILENAME=unary.c ORDER=1
 NODES|TYPE_DECL NAME=second FULL_NAME=second CODE=second AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=order.c:<global> FILENAME=order.c ORDER=1
 NODES|TYPE_DECL NAME=size_t FULL_NAME=size_t CODE=size_t IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=strcmp FULL_NAME=strcmp CODE=strcmp AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strcmp.c:<global> FILENAME=strcmp.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=strcmp.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=strcmp.c:<global> FILENAME=strcmp.c ORDER=2
 NODES|TYPE_DECL NAME=<global> FULL_NAME=structs.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=structs.c:<global> FILENAME=structs.c ORDER=1
 NODES|TYPE_DECL NAME=sum FULL_NAME=sum CODE=sum AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=loop.c:<global> FILENAME=loop.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=switch.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=switch.c:<global> FILENAME=switch.c ORDER=1
@@ -1821,6 +1989,9 @@ NODES|TYPE_DECL NAME=uint_t FULL_NAME=uint_t CODE=typedef unsigned int uint_t; A
 NODES|TYPE_DECL NAME=unary FULL_NAME=unary CODE=unary AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=unary.c:<global> FILENAME=unary.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=unary.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=unary.c:<global> FILENAME=unary.c ORDER=1
 NODES|TYPE_DECL NAME=unionvalue FULL_NAME=unionvalue CODE=unionvalue IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned FULL_NAME=unsigned CODE=unsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned char FULL_NAME=unsigned char CODE=unsigned char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned char* FULL_NAME=unsigned char* CODE=unsigned char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=unsigned int FULL_NAME=unsigned int CODE=unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=use FULL_NAME=use CODE=use AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types2.c:<global> FILENAME=types2.c ORDER=1
 NODES|TYPE_DECL NAME=value FULL_NAME=value CODE=union value {\n    int i;\n    float f;\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=types2.c ORDER=1
@@ -1852,6 +2023,7 @@ NODES|TYPE NAME=long FULL_NAME=long TYPE_DECL_FULL_NAME=long
 NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
 NODES|TYPE NAME=macros FULL_NAME=macros TYPE_DECL_FULL_NAME=macros
 NODES|TYPE NAME=main FULL_NAME=main TYPE_DECL_FULL_NAME=main
+NODES|TYPE NAME=memcmp FULL_NAME=memcmp TYPE_DECL_FULL_NAME=memcmp
 NODES|TYPE NAME=pair FULL_NAME=pair TYPE_DECL_FULL_NAME=pair
 NODES|TYPE NAME=pick FULL_NAME=pick TYPE_DECL_FULL_NAME=pick
 NODES|TYPE NAME=point FULL_NAME=point TYPE_DECL_FULL_NAME=point
@@ -1859,10 +2031,14 @@ NODES|TYPE NAME=point* FULL_NAME=point* TYPE_DECL_FULL_NAME=point*
 NODES|TYPE NAME=ptr FULL_NAME=ptr TYPE_DECL_FULL_NAME=ptr
 NODES|TYPE NAME=second FULL_NAME=second TYPE_DECL_FULL_NAME=second
 NODES|TYPE NAME=size_t FULL_NAME=size_t TYPE_DECL_FULL_NAME=size_t
+NODES|TYPE NAME=strcmp FULL_NAME=strcmp TYPE_DECL_FULL_NAME=strcmp
 NODES|TYPE NAME=sum FULL_NAME=sum TYPE_DECL_FULL_NAME=sum
 NODES|TYPE NAME=uint_t FULL_NAME=uint_t TYPE_DECL_FULL_NAME=uint_t
 NODES|TYPE NAME=unary FULL_NAME=unary TYPE_DECL_FULL_NAME=unary
 NODES|TYPE NAME=unionvalue FULL_NAME=unionvalue TYPE_DECL_FULL_NAME=unionvalue
+NODES|TYPE NAME=unsigned FULL_NAME=unsigned TYPE_DECL_FULL_NAME=unsigned
+NODES|TYPE NAME=unsigned char FULL_NAME=unsigned char TYPE_DECL_FULL_NAME=unsigned char
+NODES|TYPE NAME=unsigned char* FULL_NAME=unsigned char* TYPE_DECL_FULL_NAME=unsigned char*
 NODES|TYPE NAME=unsigned int FULL_NAME=unsigned int TYPE_DECL_FULL_NAME=unsigned int
 NODES|TYPE NAME=use FULL_NAME=use TYPE_DECL_FULL_NAME=use
 NODES|TYPE NAME=value FULL_NAME=value TYPE_DECL_FULL_NAME=value
@@ -2091,6 +2267,27 @@ EDGES|ARGUMENT main#3 -> main#5
 EDGES|ARGUMENT main#5 -> main#6
 EDGES|ARGUMENT main#5 -> main#7
 EDGES|ARGUMENT main#8 -> main#9
+EDGES|ARGUMENT memcmp#10 -> memcmp#11
+EDGES|ARGUMENT memcmp#10 -> memcmp#12
+EDGES|ARGUMENT memcmp#13 -> memcmp#14
+EDGES|ARGUMENT memcmp#13 -> memcmp#15
+EDGES|ARGUMENT memcmp#18 -> memcmp#19
+EDGES|ARGUMENT memcmp#18 -> memcmp#20
+EDGES|ARGUMENT memcmp#20 -> memcmp#21
+EDGES|ARGUMENT memcmp#20 -> memcmp#23
+EDGES|ARGUMENT memcmp#21 -> memcmp#22
+EDGES|ARGUMENT memcmp#23 -> memcmp#24
+EDGES|ARGUMENT memcmp#26 -> memcmp#27
+EDGES|ARGUMENT memcmp#28 -> memcmp#29
+EDGES|ARGUMENT memcmp#30 -> memcmp#31
+EDGES|ARGUMENT memcmp#32 -> memcmp#33
+EDGES|ARGUMENT memcmp#33 -> memcmp#34
+EDGES|ARGUMENT memcmp#33 -> memcmp#35
+EDGES|ARGUMENT memcmp#33 -> memcmp#40
+EDGES|ARGUMENT memcmp#35 -> memcmp#36
+EDGES|ARGUMENT memcmp#35 -> memcmp#38
+EDGES|ARGUMENT memcmp#36 -> memcmp#37
+EDGES|ARGUMENT memcmp#38 -> memcmp#39
 EDGES|ARGUMENT order.c:<global>#37 -> order.c:<global>#38
 EDGES|ARGUMENT order.c:<global>#37 -> order.c:<global>#39
 EDGES|ARGUMENT pair.<clinit>:pair()#2 -> pair.<clinit>:pair()#3
@@ -2129,6 +2326,24 @@ EDGES|ARGUMENT second#6 -> second#10
 EDGES|ARGUMENT second#6 -> second#7
 EDGES|ARGUMENT second#7 -> second#8
 EDGES|ARGUMENT second#7 -> second#9
+EDGES|ARGUMENT strcmp#10 -> strcmp#11
+EDGES|ARGUMENT strcmp#12 -> strcmp#13
+EDGES|ARGUMENT strcmp#14 -> strcmp#15
+EDGES|ARGUMENT strcmp#17 -> strcmp#18
+EDGES|ARGUMENT strcmp#19 -> strcmp#20
+EDGES|ARGUMENT strcmp#21 -> strcmp#22
+EDGES|ARGUMENT strcmp#22 -> strcmp#23
+EDGES|ARGUMENT strcmp#22 -> strcmp#27
+EDGES|ARGUMENT strcmp#23 -> strcmp#24
+EDGES|ARGUMENT strcmp#24 -> strcmp#25
+EDGES|ARGUMENT strcmp#24 -> strcmp#26
+EDGES|ARGUMENT strcmp#27 -> strcmp#28
+EDGES|ARGUMENT strcmp#28 -> strcmp#29
+EDGES|ARGUMENT strcmp#28 -> strcmp#30
+EDGES|ARGUMENT strcmp#8 -> strcmp#14
+EDGES|ARGUMENT strcmp#8 -> strcmp#9
+EDGES|ARGUMENT strcmp#9 -> strcmp#10
+EDGES|ARGUMENT strcmp#9 -> strcmp#12
 EDGES|ARGUMENT sum#13 -> sum#14
 EDGES|ARGUMENT sum#13 -> sum#15
 EDGES|ARGUMENT sum#17 -> sum#18
@@ -2290,6 +2505,19 @@ EDGES|CALL macros#5 -> <operator>.greaterThan#0
 EDGES|CALL macros#7 -> macros.c:LIMIT:int(0)#0
 EDGES|CALL main#3 -> <operator>.assignment#0
 EDGES|CALL main#5 -> add#0
+EDGES|CALL memcmp#10 -> <operator>.assignment#0
+EDGES|CALL memcmp#13 -> <operator>.assignment#0
+EDGES|CALL memcmp#18 -> <operator>.logicalAnd#0
+EDGES|CALL memcmp#20 -> <operator>.equals#0
+EDGES|CALL memcmp#21 -> <operator>.indirection#0
+EDGES|CALL memcmp#23 -> <operator>.indirection#0
+EDGES|CALL memcmp#26 -> <operator>.postDecrement#0
+EDGES|CALL memcmp#28 -> <operator>.postIncrement#0
+EDGES|CALL memcmp#30 -> <operator>.postIncrement#0
+EDGES|CALL memcmp#33 -> <operator>.conditional#0
+EDGES|CALL memcmp#35 -> <operator>.subtraction#0
+EDGES|CALL memcmp#36 -> <operator>.indirection#0
+EDGES|CALL memcmp#38 -> <operator>.indirection#0
 EDGES|CALL order.c:<global>#37 -> <operator>.assignment#0
 EDGES|CALL pair.<clinit>:pair()#2 -> <operator>.arrayInitializer#0
 EDGES|CALL pick#13 -> <operator>.assignment#0
@@ -2311,6 +2539,18 @@ EDGES|CALL second#11 -> first#0
 EDGES|CALL second#5 -> <operator>.addition#0
 EDGES|CALL second#6 -> <operator>.indirectIndexAccess#0
 EDGES|CALL second#7 -> <operator>.fieldAccess#0
+EDGES|CALL strcmp#10 -> <operator>.indirection#0
+EDGES|CALL strcmp#12 -> <operator>.indirection#0
+EDGES|CALL strcmp#14 -> <operator>.indirection#0
+EDGES|CALL strcmp#17 -> <operator>.postIncrement#0
+EDGES|CALL strcmp#19 -> <operator>.postIncrement#0
+EDGES|CALL strcmp#22 -> <operator>.subtraction#0
+EDGES|CALL strcmp#23 -> <operator>.indirection#0
+EDGES|CALL strcmp#24 -> <operator>.cast#0
+EDGES|CALL strcmp#27 -> <operator>.indirection#0
+EDGES|CALL strcmp#28 -> <operator>.cast#0
+EDGES|CALL strcmp#8 -> <operator>.logicalAnd#0
+EDGES|CALL strcmp#9 -> <operator>.equals#0
 EDGES|CALL sum#13 -> <operator>.lessThan#0
 EDGES|CALL sum#17 -> <operator>.assignment#0
 EDGES|CALL sum#19 -> <operator>.addition#0
@@ -2754,6 +2994,40 @@ EDGES|CFG main#6 -> main#7
 EDGES|CFG main#7 -> main#5
 EDGES|CFG main#8 -> main#10
 EDGES|CFG main#9 -> main#8
+EDGES|CFG memcmp#0 -> memcmp#11
+EDGES|CFG memcmp#10 -> memcmp#14
+EDGES|CFG memcmp#11 -> memcmp#12
+EDGES|CFG memcmp#12 -> memcmp#10
+EDGES|CFG memcmp#13 -> memcmp#19
+EDGES|CFG memcmp#14 -> memcmp#15
+EDGES|CFG memcmp#15 -> memcmp#13
+EDGES|CFG memcmp#18 -> memcmp#27
+EDGES|CFG memcmp#18 -> memcmp#34
+EDGES|CFG memcmp#19 -> memcmp#18
+EDGES|CFG memcmp#19 -> memcmp#22
+EDGES|CFG memcmp#20 -> memcmp#18
+EDGES|CFG memcmp#21 -> memcmp#24
+EDGES|CFG memcmp#22 -> memcmp#21
+EDGES|CFG memcmp#23 -> memcmp#20
+EDGES|CFG memcmp#24 -> memcmp#23
+EDGES|CFG memcmp#26 -> memcmp#29
+EDGES|CFG memcmp#27 -> memcmp#26
+EDGES|CFG memcmp#28 -> memcmp#31
+EDGES|CFG memcmp#29 -> memcmp#28
+EDGES|CFG memcmp#30 -> memcmp#19
+EDGES|CFG memcmp#31 -> memcmp#30
+EDGES|CFG memcmp#32 -> memcmp#41
+EDGES|CFG memcmp#33 -> memcmp#32
+EDGES|CFG memcmp#34 -> memcmp#37
+EDGES|CFG memcmp#34 -> memcmp#40
+EDGES|CFG memcmp#35 -> memcmp#33
+EDGES|CFG memcmp#36 -> memcmp#39
+EDGES|CFG memcmp#37 -> memcmp#36
+EDGES|CFG memcmp#38 -> memcmp#35
+EDGES|CFG memcmp#39 -> memcmp#38
+EDGES|CFG memcmp#40 -> memcmp#33
+EDGES|CFG memcmp.c:<global>#0 -> memcmp.c:<global>#44
+EDGES|CFG memcmp.c:<global>#44 -> memcmp.c:<global>#45
 EDGES|CFG ops.c:<global>#0 -> ops.c:<global>#30
 EDGES|CFG ops.c:<global>#30 -> ops.c:<global>#31
 EDGES|CFG order.c:<global>#0 -> order.c:<global>#38
@@ -2833,6 +3107,33 @@ EDGES|CFG second#6 -> second#12
 EDGES|CFG second#7 -> second#10
 EDGES|CFG second#8 -> second#9
 EDGES|CFG second#9 -> second#7
+EDGES|CFG strcmp#0 -> strcmp#11
+EDGES|CFG strcmp#10 -> strcmp#13
+EDGES|CFG strcmp#11 -> strcmp#10
+EDGES|CFG strcmp#12 -> strcmp#9
+EDGES|CFG strcmp#13 -> strcmp#12
+EDGES|CFG strcmp#14 -> strcmp#8
+EDGES|CFG strcmp#15 -> strcmp#14
+EDGES|CFG strcmp#17 -> strcmp#20
+EDGES|CFG strcmp#18 -> strcmp#17
+EDGES|CFG strcmp#19 -> strcmp#11
+EDGES|CFG strcmp#20 -> strcmp#19
+EDGES|CFG strcmp#21 -> strcmp#31
+EDGES|CFG strcmp#22 -> strcmp#21
+EDGES|CFG strcmp#23 -> strcmp#29
+EDGES|CFG strcmp#24 -> strcmp#23
+EDGES|CFG strcmp#25 -> strcmp#26
+EDGES|CFG strcmp#26 -> strcmp#24
+EDGES|CFG strcmp#27 -> strcmp#22
+EDGES|CFG strcmp#28 -> strcmp#27
+EDGES|CFG strcmp#29 -> strcmp#30
+EDGES|CFG strcmp#30 -> strcmp#28
+EDGES|CFG strcmp#8 -> strcmp#18
+EDGES|CFG strcmp#8 -> strcmp#25
+EDGES|CFG strcmp#9 -> strcmp#15
+EDGES|CFG strcmp#9 -> strcmp#8
+EDGES|CFG strcmp.c:<global>#0 -> strcmp.c:<global>#34
+EDGES|CFG strcmp.c:<global>#34 -> strcmp.c:<global>#35
 EDGES|CFG structs.c:<global>#0 -> structs.c:<global>#56
 EDGES|CFG structs.c:<global>#56 -> structs.c:<global>#58
 EDGES|CFG structs.c:<global>#58 -> structs.c:<global>#59
@@ -2936,10 +3237,12 @@ EDGES|CONDITION logic#57 -> logic#58
 EDGES|CONDITION logic#63 -> logic#64
 EDGES|CONDITION logic#74 -> logic#75
 EDGES|CONDITION macros#4 -> macros#5
+EDGES|CONDITION memcmp#16 -> memcmp#18
 EDGES|CONDITION pick#29 -> pick#30
 EDGES|CONDITION pick#34 -> pick#35
 EDGES|CONDITION pick#40 -> pick#41
 EDGES|CONDITION pick#8 -> pick#9
+EDGES|CONDITION strcmp#6 -> strcmp#8
 EDGES|CONDITION sum#12 -> sum#13
 EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
 EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
@@ -2998,11 +3301,15 @@ EDGES|CONTAINS D:macros.c:<global> -> D:macros
 EDGES|CONTAINS D:macros.c:<global> -> macros.c:<global>#0
 EDGES|CONTAINS D:macros.c:<global> -> macros.c:LIMIT:int(0)#0
 EDGES|CONTAINS D:macros.c:<global> -> macros.c:SQR:ANY(1)#0
+EDGES|CONTAINS D:memcmp.c:<global> -> D:memcmp
+EDGES|CONTAINS D:memcmp.c:<global> -> memcmp.c:<global>#0
 EDGES|CONTAINS D:ops.c:<global> -> D:classify
 EDGES|CONTAINS D:ops.c:<global> -> ops.c:<global>#0
 EDGES|CONTAINS D:order.c:<global> -> D:first
 EDGES|CONTAINS D:order.c:<global> -> D:second
 EDGES|CONTAINS D:order.c:<global> -> order.c:<global>#0
+EDGES|CONTAINS D:strcmp.c:<global> -> D:strcmp
+EDGES|CONTAINS D:strcmp.c:<global> -> strcmp.c:<global>#0
 EDGES|CONTAINS D:structs.c:<global> -> D:agg
 EDGES|CONTAINS D:structs.c:<global> -> D:helper
 EDGES|CONTAINS D:structs.c:<global> -> structs.c:<global>#0
@@ -3030,6 +3337,9 @@ EDGES|CONTAINS F:<includes> -> D:longunsigned
 EDGES|CONTAINS F:<includes> -> D:point*
 EDGES|CONTAINS F:<includes> -> D:size_t
 EDGES|CONTAINS F:<includes> -> D:unionvalue
+EDGES|CONTAINS F:<includes> -> D:unsigned
+EDGES|CONTAINS F:<includes> -> D:unsigned char
+EDGES|CONTAINS F:<includes> -> D:unsigned char*
 EDGES|CONTAINS F:<includes> -> D:unsigned int
 EDGES|CONTAINS F:<includes> -> D:void
 EDGES|CONTAINS F:<includes> -> D:void*
@@ -3041,8 +3351,10 @@ EDGES|CONTAINS F:gotos.c -> D:gotos.c:<global>
 EDGES|CONTAINS F:logic.c -> D:logic.c:<global>
 EDGES|CONTAINS F:loop.c -> D:loop.c:<global>
 EDGES|CONTAINS F:macros.c -> D:macros.c:<global>
+EDGES|CONTAINS F:memcmp.c -> D:memcmp.c:<global>
 EDGES|CONTAINS F:ops.c -> D:ops.c:<global>
 EDGES|CONTAINS F:order.c -> D:order.c:<global>
+EDGES|CONTAINS F:strcmp.c -> D:strcmp.c:<global>
 EDGES|CONTAINS F:structs.c -> D:structs.c:<global>
 EDGES|CONTAINS F:switch.c -> D:switch.c:<global>
 EDGES|CONTAINS F:types2.c -> D:types2.c:<global>
@@ -3474,6 +3786,41 @@ EDGES|CONTAINS macros.c:<global>#0 -> macros.c:<global>#29
 EDGES|CONTAINS macros.c:<global>#0 -> macros.c:<global>#30
 EDGES|CONTAINS macros.c:LIMIT:int(0)#0 -> macros.c:LIMIT:int(0)#1
 EDGES|CONTAINS macros.c:SQR:ANY(1)#0 -> macros.c:SQR:ANY(1)#3
+EDGES|CONTAINS memcmp#0 -> memcmp#10
+EDGES|CONTAINS memcmp#0 -> memcmp#11
+EDGES|CONTAINS memcmp#0 -> memcmp#12
+EDGES|CONTAINS memcmp#0 -> memcmp#13
+EDGES|CONTAINS memcmp#0 -> memcmp#14
+EDGES|CONTAINS memcmp#0 -> memcmp#15
+EDGES|CONTAINS memcmp#0 -> memcmp#16
+EDGES|CONTAINS memcmp#0 -> memcmp#17
+EDGES|CONTAINS memcmp#0 -> memcmp#18
+EDGES|CONTAINS memcmp#0 -> memcmp#19
+EDGES|CONTAINS memcmp#0 -> memcmp#20
+EDGES|CONTAINS memcmp#0 -> memcmp#21
+EDGES|CONTAINS memcmp#0 -> memcmp#22
+EDGES|CONTAINS memcmp#0 -> memcmp#23
+EDGES|CONTAINS memcmp#0 -> memcmp#24
+EDGES|CONTAINS memcmp#0 -> memcmp#25
+EDGES|CONTAINS memcmp#0 -> memcmp#26
+EDGES|CONTAINS memcmp#0 -> memcmp#27
+EDGES|CONTAINS memcmp#0 -> memcmp#28
+EDGES|CONTAINS memcmp#0 -> memcmp#29
+EDGES|CONTAINS memcmp#0 -> memcmp#30
+EDGES|CONTAINS memcmp#0 -> memcmp#31
+EDGES|CONTAINS memcmp#0 -> memcmp#32
+EDGES|CONTAINS memcmp#0 -> memcmp#33
+EDGES|CONTAINS memcmp#0 -> memcmp#34
+EDGES|CONTAINS memcmp#0 -> memcmp#35
+EDGES|CONTAINS memcmp#0 -> memcmp#36
+EDGES|CONTAINS memcmp#0 -> memcmp#37
+EDGES|CONTAINS memcmp#0 -> memcmp#38
+EDGES|CONTAINS memcmp#0 -> memcmp#39
+EDGES|CONTAINS memcmp#0 -> memcmp#40
+EDGES|CONTAINS memcmp#0 -> memcmp#7
+EDGES|CONTAINS memcmp.c:<global>#0 -> memcmp#0
+EDGES|CONTAINS memcmp.c:<global>#0 -> memcmp.c:<global>#43
+EDGES|CONTAINS memcmp.c:<global>#0 -> memcmp.c:<global>#44
 EDGES|CONTAINS ops.c:<global>#0 -> classify#0
 EDGES|CONTAINS ops.c:<global>#0 -> ops.c:<global>#29
 EDGES|CONTAINS ops.c:<global>#0 -> ops.c:<global>#30
@@ -3561,6 +3908,35 @@ EDGES|CONTAINS ptr#0 -> ptr#5
 EDGES|CONTAINS ptr#0 -> ptr#6
 EDGES|CONTAINS ptr#0 -> ptr#7
 EDGES|CONTAINS ptr#0 -> ptr#8
+EDGES|CONTAINS strcmp#0 -> strcmp#10
+EDGES|CONTAINS strcmp#0 -> strcmp#11
+EDGES|CONTAINS strcmp#0 -> strcmp#12
+EDGES|CONTAINS strcmp#0 -> strcmp#13
+EDGES|CONTAINS strcmp#0 -> strcmp#14
+EDGES|CONTAINS strcmp#0 -> strcmp#15
+EDGES|CONTAINS strcmp#0 -> strcmp#16
+EDGES|CONTAINS strcmp#0 -> strcmp#17
+EDGES|CONTAINS strcmp#0 -> strcmp#18
+EDGES|CONTAINS strcmp#0 -> strcmp#19
+EDGES|CONTAINS strcmp#0 -> strcmp#20
+EDGES|CONTAINS strcmp#0 -> strcmp#21
+EDGES|CONTAINS strcmp#0 -> strcmp#22
+EDGES|CONTAINS strcmp#0 -> strcmp#23
+EDGES|CONTAINS strcmp#0 -> strcmp#24
+EDGES|CONTAINS strcmp#0 -> strcmp#25
+EDGES|CONTAINS strcmp#0 -> strcmp#26
+EDGES|CONTAINS strcmp#0 -> strcmp#27
+EDGES|CONTAINS strcmp#0 -> strcmp#28
+EDGES|CONTAINS strcmp#0 -> strcmp#29
+EDGES|CONTAINS strcmp#0 -> strcmp#30
+EDGES|CONTAINS strcmp#0 -> strcmp#5
+EDGES|CONTAINS strcmp#0 -> strcmp#6
+EDGES|CONTAINS strcmp#0 -> strcmp#7
+EDGES|CONTAINS strcmp#0 -> strcmp#8
+EDGES|CONTAINS strcmp#0 -> strcmp#9
+EDGES|CONTAINS strcmp.c:<global>#0 -> strcmp#0
+EDGES|CONTAINS strcmp.c:<global>#0 -> strcmp.c:<global>#33
+EDGES|CONTAINS strcmp.c:<global>#0 -> strcmp.c:<global>#34
 EDGES|CONTAINS structs.c:<global>#0 -> agg#0
 EDGES|CONTAINS structs.c:<global>#0 -> helper#0
 EDGES|CONTAINS structs.c:<global>#0 -> structs.c:<global>#1
@@ -4289,6 +4665,48 @@ EDGES|EVAL_TYPE main#5 -> T:int
 EDGES|EVAL_TYPE main#6 -> T:int
 EDGES|EVAL_TYPE main#7 -> T:int
 EDGES|EVAL_TYPE main#9 -> T:int
+EDGES|EVAL_TYPE memcmp#1 -> T:void*
+EDGES|EVAL_TYPE memcmp#10 -> T:void
+EDGES|EVAL_TYPE memcmp#11 -> T:unsigned char*
+EDGES|EVAL_TYPE memcmp#12 -> T:void*
+EDGES|EVAL_TYPE memcmp#13 -> T:void
+EDGES|EVAL_TYPE memcmp#14 -> T:unsigned char*
+EDGES|EVAL_TYPE memcmp#15 -> T:void*
+EDGES|EVAL_TYPE memcmp#17 -> T:ANY
+EDGES|EVAL_TYPE memcmp#18 -> T:ANY
+EDGES|EVAL_TYPE memcmp#19 -> T:size_t
+EDGES|EVAL_TYPE memcmp#2 -> T:void*
+EDGES|EVAL_TYPE memcmp#20 -> T:ANY
+EDGES|EVAL_TYPE memcmp#21 -> T:ANY
+EDGES|EVAL_TYPE memcmp#22 -> T:unsigned char*
+EDGES|EVAL_TYPE memcmp#23 -> T:ANY
+EDGES|EVAL_TYPE memcmp#24 -> T:unsigned char*
+EDGES|EVAL_TYPE memcmp#25 -> T:ANY
+EDGES|EVAL_TYPE memcmp#26 -> T:ANY
+EDGES|EVAL_TYPE memcmp#27 -> T:size_t
+EDGES|EVAL_TYPE memcmp#28 -> T:ANY
+EDGES|EVAL_TYPE memcmp#29 -> T:unsigned char*
+EDGES|EVAL_TYPE memcmp#3 -> T:void*
+EDGES|EVAL_TYPE memcmp#30 -> T:ANY
+EDGES|EVAL_TYPE memcmp#31 -> T:unsigned char*
+EDGES|EVAL_TYPE memcmp#33 -> T:ANY
+EDGES|EVAL_TYPE memcmp#34 -> T:size_t
+EDGES|EVAL_TYPE memcmp#35 -> T:ANY
+EDGES|EVAL_TYPE memcmp#36 -> T:ANY
+EDGES|EVAL_TYPE memcmp#37 -> T:unsigned char*
+EDGES|EVAL_TYPE memcmp#38 -> T:ANY
+EDGES|EVAL_TYPE memcmp#39 -> T:unsigned char*
+EDGES|EVAL_TYPE memcmp#4 -> T:void*
+EDGES|EVAL_TYPE memcmp#40 -> T:int
+EDGES|EVAL_TYPE memcmp#41 -> T:int
+EDGES|EVAL_TYPE memcmp#5 -> T:size_t
+EDGES|EVAL_TYPE memcmp#6 -> T:size_t
+EDGES|EVAL_TYPE memcmp#7 -> T:void
+EDGES|EVAL_TYPE memcmp#8 -> T:unsigned char*
+EDGES|EVAL_TYPE memcmp#9 -> T:unsigned char*
+EDGES|EVAL_TYPE memcmp.c:<global>#43 -> T:ANY
+EDGES|EVAL_TYPE memcmp.c:<global>#44 -> T:memcmp
+EDGES|EVAL_TYPE memcmp.c:<global>#45 -> T:ANY
 EDGES|EVAL_TYPE ops.c:<global>#29 -> T:ANY
 EDGES|EVAL_TYPE ops.c:<global>#30 -> T:classify
 EDGES|EVAL_TYPE ops.c:<global>#31 -> T:ANY
@@ -4372,6 +4790,38 @@ EDGES|EVAL_TYPE second#5 -> T:ANY
 EDGES|EVAL_TYPE second#6 -> T:ANY
 EDGES|EVAL_TYPE second#7 -> T:ANY
 EDGES|EVAL_TYPE second#8 -> T:pair
+EDGES|EVAL_TYPE strcmp#1 -> T:char*
+EDGES|EVAL_TYPE strcmp#10 -> T:ANY
+EDGES|EVAL_TYPE strcmp#11 -> T:char*
+EDGES|EVAL_TYPE strcmp#12 -> T:ANY
+EDGES|EVAL_TYPE strcmp#13 -> T:char*
+EDGES|EVAL_TYPE strcmp#14 -> T:ANY
+EDGES|EVAL_TYPE strcmp#15 -> T:char*
+EDGES|EVAL_TYPE strcmp#16 -> T:ANY
+EDGES|EVAL_TYPE strcmp#17 -> T:ANY
+EDGES|EVAL_TYPE strcmp#18 -> T:char*
+EDGES|EVAL_TYPE strcmp#19 -> T:ANY
+EDGES|EVAL_TYPE strcmp#2 -> T:char*
+EDGES|EVAL_TYPE strcmp#20 -> T:char*
+EDGES|EVAL_TYPE strcmp#22 -> T:ANY
+EDGES|EVAL_TYPE strcmp#23 -> T:ANY
+EDGES|EVAL_TYPE strcmp#24 -> T:unsigned char
+EDGES|EVAL_TYPE strcmp#25 -> T:unsigned char
+EDGES|EVAL_TYPE strcmp#26 -> T:char*
+EDGES|EVAL_TYPE strcmp#27 -> T:ANY
+EDGES|EVAL_TYPE strcmp#28 -> T:unsigned char
+EDGES|EVAL_TYPE strcmp#29 -> T:unsigned char
+EDGES|EVAL_TYPE strcmp#3 -> T:char*
+EDGES|EVAL_TYPE strcmp#30 -> T:char*
+EDGES|EVAL_TYPE strcmp#31 -> T:int
+EDGES|EVAL_TYPE strcmp#4 -> T:char*
+EDGES|EVAL_TYPE strcmp#5 -> T:void
+EDGES|EVAL_TYPE strcmp#7 -> T:ANY
+EDGES|EVAL_TYPE strcmp#8 -> T:ANY
+EDGES|EVAL_TYPE strcmp#9 -> T:ANY
+EDGES|EVAL_TYPE strcmp.c:<global>#33 -> T:ANY
+EDGES|EVAL_TYPE strcmp.c:<global>#34 -> T:strcmp
+EDGES|EVAL_TYPE strcmp.c:<global>#35 -> T:ANY
 EDGES|EVAL_TYPE structs.c:<global>#2 -> T:int
 EDGES|EVAL_TYPE structs.c:<global>#3 -> T:int
 EDGES|EVAL_TYPE structs.c:<global>#55 -> T:ANY
@@ -4497,9 +4947,13 @@ EDGES|FOR_BODY logic#46 -> logic#56
 EDGES|FOR_INIT count#8 -> count#10
 EDGES|FOR_INIT logic#35 -> logic#37
 EDGES|FOR_INIT logic#46 -> logic#48
+EDGES|FOR_INIT memcmp#16 -> memcmp#17
+EDGES|FOR_INIT strcmp#6 -> strcmp#7
 EDGES|FOR_UPDATE count#8 -> count#16
 EDGES|FOR_UPDATE logic#35 -> logic#43
 EDGES|FOR_UPDATE logic#46 -> logic#54
+EDGES|FOR_UPDATE memcmp#16 -> memcmp#25
+EDGES|FOR_UPDATE strcmp#6 -> strcmp#16
 EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
 EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
 EDGES|PARAMETER_LINK <operator>.addressOf#1 -> <operator>.addressOf#3
@@ -4588,9 +5042,14 @@ EDGES|PARAMETER_LINK logic#1 -> logic#2
 EDGES|PARAMETER_LINK logic#3 -> logic#4
 EDGES|PARAMETER_LINK macros#1 -> macros#2
 EDGES|PARAMETER_LINK macros.c:SQR:ANY(1)#1 -> macros.c:SQR:ANY(1)#2
+EDGES|PARAMETER_LINK memcmp#1 -> memcmp#2
+EDGES|PARAMETER_LINK memcmp#3 -> memcmp#4
+EDGES|PARAMETER_LINK memcmp#5 -> memcmp#6
 EDGES|PARAMETER_LINK pick#1 -> pick#2
 EDGES|PARAMETER_LINK ptr#1 -> ptr#2
 EDGES|PARAMETER_LINK second#1 -> second#2
+EDGES|PARAMETER_LINK strcmp#1 -> strcmp#2
+EDGES|PARAMETER_LINK strcmp#3 -> strcmp#4
 EDGES|PARAMETER_LINK sum#1 -> sum#2
 EDGES|PARAMETER_LINK unary#1 -> unary#2
 EDGES|PARAMETER_LINK use#1 -> use#2
@@ -4604,8 +5063,10 @@ EDGES|REF NB:gotos.c:<global> -> NS:<global>
 EDGES|REF NB:logic.c:<global> -> NS:<global>
 EDGES|REF NB:loop.c:<global> -> NS:<global>
 EDGES|REF NB:macros.c:<global> -> NS:<global>
+EDGES|REF NB:memcmp.c:<global> -> NS:<global>
 EDGES|REF NB:ops.c:<global> -> NS:<global>
 EDGES|REF NB:order.c:<global> -> NS:<global>
+EDGES|REF NB:strcmp.c:<global> -> NS:<global>
 EDGES|REF NB:structs.c:<global> -> NS:<global>
 EDGES|REF NB:switch.c:<global> -> NS:<global>
 EDGES|REF NB:types2.c:<global> -> NS:<global>
@@ -4636,6 +5097,7 @@ EDGES|REF T:long -> D:long
 EDGES|REF T:longunsigned -> D:longunsigned
 EDGES|REF T:macros -> D:macros
 EDGES|REF T:main -> D:main
+EDGES|REF T:memcmp -> D:memcmp
 EDGES|REF T:pair -> order.c:<global>#11
 EDGES|REF T:pick -> D:pick
 EDGES|REF T:point -> structs.c:<global>#1
@@ -4643,10 +5105,14 @@ EDGES|REF T:point* -> D:point*
 EDGES|REF T:ptr -> D:ptr
 EDGES|REF T:second -> D:second
 EDGES|REF T:size_t -> D:size_t
+EDGES|REF T:strcmp -> D:strcmp
 EDGES|REF T:sum -> D:sum
 EDGES|REF T:uint_t -> types2.c:<global>#72
 EDGES|REF T:unary -> D:unary
 EDGES|REF T:unionvalue -> D:unionvalue
+EDGES|REF T:unsigned -> D:unsigned
+EDGES|REF T:unsigned char -> D:unsigned char
+EDGES|REF T:unsigned char* -> D:unsigned char*
 EDGES|REF T:unsigned int -> D:unsigned int
 EDGES|REF T:use -> D:use
 EDGES|REF T:value -> types2.c:<global>#14
@@ -4791,6 +5257,20 @@ EDGES|REF macros#6 -> macros#1
 EDGES|REF macros.c:<global>#30 -> macros#0
 EDGES|REF main#4 -> main#2
 EDGES|REF main#9 -> main#2
+EDGES|REF memcmp#11 -> memcmp#8
+EDGES|REF memcmp#12 -> memcmp#1
+EDGES|REF memcmp#14 -> memcmp#9
+EDGES|REF memcmp#15 -> memcmp#3
+EDGES|REF memcmp#19 -> memcmp#5
+EDGES|REF memcmp#22 -> memcmp#8
+EDGES|REF memcmp#24 -> memcmp#9
+EDGES|REF memcmp#27 -> memcmp#5
+EDGES|REF memcmp#29 -> memcmp#8
+EDGES|REF memcmp#31 -> memcmp#9
+EDGES|REF memcmp#34 -> memcmp#5
+EDGES|REF memcmp#37 -> memcmp#8
+EDGES|REF memcmp#39 -> memcmp#9
+EDGES|REF memcmp.c:<global>#44 -> memcmp#0
 EDGES|REF ops.c:<global>#30 -> classify#0
 EDGES|REF order.c:<global>#38 -> order.c:<global>#36
 EDGES|REF order.c:<global>#40 -> first#0
@@ -4813,6 +5293,14 @@ EDGES|REF ptr#6 -> ptr#4
 EDGES|REF ptr#8 -> ptr#1
 EDGES|REF second#7 -> order.c:<global>#13
 EDGES|REF second#8 -> second#1
+EDGES|REF strcmp#11 -> strcmp#1
+EDGES|REF strcmp#13 -> strcmp#3
+EDGES|REF strcmp#15 -> strcmp#1
+EDGES|REF strcmp#18 -> strcmp#1
+EDGES|REF strcmp#20 -> strcmp#3
+EDGES|REF strcmp#26 -> strcmp#1
+EDGES|REF strcmp#30 -> strcmp#3
+EDGES|REF strcmp.c:<global>#34 -> strcmp#0
 EDGES|REF structs.c:<global>#58 -> agg#0
 EDGES|REF structs.c:<global>#59 -> helper#0
 EDGES|REF sum#10 -> sum#8
@@ -4884,6 +5372,8 @@ EDGES|SOURCE_FILE D:loop.c:<global> -> F:loop.c
 EDGES|SOURCE_FILE D:macros -> F:macros.c
 EDGES|SOURCE_FILE D:macros.c:<global> -> F:macros.c
 EDGES|SOURCE_FILE D:main -> F:add.c
+EDGES|SOURCE_FILE D:memcmp -> F:memcmp.c
+EDGES|SOURCE_FILE D:memcmp.c:<global> -> F:memcmp.c
 EDGES|SOURCE_FILE D:ops.c:<global> -> F:ops.c
 EDGES|SOURCE_FILE D:order.c:<global> -> F:order.c
 EDGES|SOURCE_FILE D:pick -> F:switch.c
@@ -4891,6 +5381,8 @@ EDGES|SOURCE_FILE D:point* -> F:<includes>
 EDGES|SOURCE_FILE D:ptr -> F:unary.c
 EDGES|SOURCE_FILE D:second -> F:order.c
 EDGES|SOURCE_FILE D:size_t -> F:<includes>
+EDGES|SOURCE_FILE D:strcmp -> F:strcmp.c
+EDGES|SOURCE_FILE D:strcmp.c:<global> -> F:strcmp.c
 EDGES|SOURCE_FILE D:structs.c:<global> -> F:structs.c
 EDGES|SOURCE_FILE D:sum -> F:loop.c
 EDGES|SOURCE_FILE D:switch.c:<global> -> F:switch.c
@@ -4898,6 +5390,9 @@ EDGES|SOURCE_FILE D:types2.c:<global> -> F:types2.c
 EDGES|SOURCE_FILE D:unary -> F:unary.c
 EDGES|SOURCE_FILE D:unary.c:<global> -> F:unary.c
 EDGES|SOURCE_FILE D:unionvalue -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned char -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned char* -> F:<includes>
 EDGES|SOURCE_FILE D:unsigned int -> F:<includes>
 EDGES|SOURCE_FILE D:use -> F:types2.c
 EDGES|SOURCE_FILE D:void -> F:<includes>
@@ -4912,8 +5407,10 @@ EDGES|SOURCE_FILE NB:gotos.c:<global> -> F:gotos.c
 EDGES|SOURCE_FILE NB:logic.c:<global> -> F:logic.c
 EDGES|SOURCE_FILE NB:loop.c:<global> -> F:loop.c
 EDGES|SOURCE_FILE NB:macros.c:<global> -> F:macros.c
+EDGES|SOURCE_FILE NB:memcmp.c:<global> -> F:memcmp.c
 EDGES|SOURCE_FILE NB:ops.c:<global> -> F:ops.c
 EDGES|SOURCE_FILE NB:order.c:<global> -> F:order.c
+EDGES|SOURCE_FILE NB:strcmp.c:<global> -> F:strcmp.c
 EDGES|SOURCE_FILE NB:structs.c:<global> -> F:structs.c
 EDGES|SOURCE_FILE NB:switch.c:<global> -> F:switch.c
 EDGES|SOURCE_FILE NB:types2.c:<global> -> F:types2.c
@@ -4943,6 +5440,8 @@ EDGES|SOURCE_FILE macros#0 -> F:macros.c
 EDGES|SOURCE_FILE macros.c:<global>#0 -> F:macros.c
 EDGES|SOURCE_FILE macros.c:LIMIT:int(0)#0 -> F:macros.c
 EDGES|SOURCE_FILE macros.c:SQR:ANY(1)#0 -> F:macros.c
+EDGES|SOURCE_FILE memcmp#0 -> F:memcmp.c
+EDGES|SOURCE_FILE memcmp.c:<global>#0 -> F:memcmp.c
 EDGES|SOURCE_FILE ops.c:<global>#0 -> F:ops.c
 EDGES|SOURCE_FILE order.c:<global>#0 -> F:order.c
 EDGES|SOURCE_FILE order.c:<global>#11 -> F:order.c
@@ -4950,6 +5449,8 @@ EDGES|SOURCE_FILE order.c:<global>#14 -> F:order.c
 EDGES|SOURCE_FILE order.c:<global>#21 -> F:order.c
 EDGES|SOURCE_FILE pick#0 -> F:switch.c
 EDGES|SOURCE_FILE ptr#0 -> F:unary.c
+EDGES|SOURCE_FILE strcmp#0 -> F:strcmp.c
+EDGES|SOURCE_FILE strcmp.c:<global>#0 -> F:strcmp.c
 EDGES|SOURCE_FILE structs.c:<global>#0 -> F:structs.c
 EDGES|SOURCE_FILE structs.c:<global>#1 -> F:structs.c
 EDGES|SOURCE_FILE switch.c:<global>#0 -> F:switch.c
