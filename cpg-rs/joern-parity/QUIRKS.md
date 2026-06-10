@@ -151,3 +151,30 @@ pins it, so a regression shows up as a diff.
   JUMP_TARGET, and fallthrough is natural chaining. Ternary: cond root ->
   arm entries, arms -> the conditional CALL. &&/||: lhs root -> rhs entry
   AND directly -> the call (short-circuit), rhs -> call.
+- **goto/label** (`corpus/gotos.c`): a label flattens like a switch case —
+  JUMP_TARGET (NAME = label, CODE = the WHOLE labeled statement) then the
+  statement as a sibling consuming the next ORDER slot; `goto L;` is a
+  childless CONTROL_STRUCTURE with a CFG edge to the JUMP_TARGET.
+- **typedef** (`corpus/types2.c`): a TYPE_DECL *inside* the file-global
+  BLOCK (consuming a slot; CODE keeps the whole `typedef ...;` statement),
+  internal in the TYPE_DECL population; its UNDERLYING type registers as a
+  used TYPE with its raw source spelling (`unsigned int` — NOT normalised,
+  unlike variable types which become `longunsigned`).
+- **enum** (`corpus/types2.c`): TYPE_DECL with one ANY-typed MEMBER per
+  enumerator (CODE keeps `GREEN = 5`); initialised enumerators produce a
+  <clinit> (phantom ANY LOCALs at ORDER=0 + one void assignment per
+  initialiser). References to enumerators get plain-CODE ANY phantoms.
+- **union typing** (`corpus/types2.c`): `union value v` types as
+  `unionvalue` (concatenated!) while struct/enum strip the keyword — so the
+  use-type is an IS_EXTERNAL TYPE_DECL while the definition TYPE_DECL
+  (`value`) is internal. Both exist.
+- **Function pointers** (`corpus/types2.c`): the param types as just the
+  base/return type (`int` for `int (*fn)(int,int)`); a call through a
+  pointer symbol becomes `<operator>.pointerCall` with DYNAMIC_DISPATCH —
+  receiver at ORDER=1 with NO ARGUMENT_INDEX, args shifted to ORDER=2../
+  INDEX=1..; ARGUMENT edges only to indexed children; NO CALL edge (dynamic),
+  but the stub method still exists with arity = number of indexed args.
+- **Sized-array locals** (`corpus/types2.c`): `int grid[2][3];` lowers to a
+  void assignment whose CODE is the declarator text, wrapping
+  `<operator>.alloc` typed `int[2][3]` with the TYPE NAME AS AN IDENTIFIER
+  argument (no phantom local) followed by the dimension literals.

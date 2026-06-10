@@ -43,6 +43,7 @@ fn main() {
     let mut defined: Vec<String> = Vec::new();
     let mut fn_decls: Vec<(String, String)> = Vec::new(); // (name, file)
     let mut struct_decls: Vec<(String, String, String)> = Vec::new(); // (tag, code, file)
+    let mut used_types: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     for u in &units {
         let b = u.src.as_bytes();
         for f in named_children(u.tree.root_node()) {
@@ -53,9 +54,24 @@ fn main() {
                         fn_decls.push((name, u.file.clone()));
                     }
                 }
-                "struct_specifier" if f.child_by_field_name("body").is_some() => {
+                "struct_specifier" | "union_specifier" | "enum_specifier"
+                    if f.child_by_field_name("body").is_some() =>
+                {
                     let tag = f.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
                     struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
+                }
+                "type_definition" => {
+                    let tag = f
+                        .child_by_field_name("declarator")
+                        .map(|x| text(x, b).to_string())
+                        .unwrap_or_default();
+                    struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
+                    // The typedef's underlying type registers as a used type,
+                    // with its RAW source spelling (`unsigned int` is not
+                    // normalised here, unlike variable types).
+                    if let Some(t) = f.child_by_field_name("type") {
+                        used_types.insert(text(t, b).to_string());
+                    }
                 }
                 _ => {}
             }
@@ -66,7 +82,6 @@ fn main() {
     // all methods (user, <global> wrappers, <operator> stubs) by fullName.
     let mut dumps: Vec<(String, String)> = Vec::new();
     let mut stub_uses: HashMap<String, usize> = HashMap::new();
-    let mut used_types: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     let mut edges: Vec<(String, String, String)> = Vec::new();
     let mut placements: HashMap<String, Vec<(String, usize)>> = HashMap::new();
 
@@ -77,6 +92,20 @@ fn main() {
         // Per-file tables (c2cpg resolves within the translation unit).
         let mut functions: HashMap<String, String> = HashMap::new();
         let mut globals: HashMap<String, String> = HashMap::new();
+        let mut enumerators: Vec<String> = Vec::new();
+        for f in named_children(root) {
+            if f.kind() == "enum_specifier" {
+                if let Some(body) = f.child_by_field_name("body") {
+                    for e in named_children(body) {
+                        if e.kind() == "enumerator" {
+                            if let Some(en) = e.child_by_field_name("name") {
+                                enumerators.push(text(en, b).to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
         for f in named_children(root) {
             match f.kind() {
                 "function_definition" => {
@@ -113,6 +142,7 @@ fn main() {
         let mut ctx = Ctx {
             functions: &functions,
             globals: &globals,
+            enumerators: &enumerators,
             symbols: HashMap::new(),
             phantoms: Vec::new(),
             stubs: &mut stub_uses,
@@ -140,7 +170,7 @@ fn main() {
                         dumps.push((name, std::mem::take(&mut ctx.out)));
                     }
                 }
-                "struct_specifier" if struct_has_sized_array(f) => {
+                "struct_specifier" | "union_specifier" | "enum_specifier" if needs_clinit(f, b) => {
                     let tag = f.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
                     let members = count_members(f);
                     let key = format!("{tag}.<clinit>:{tag}()");
@@ -166,9 +196,11 @@ fn main() {
     let empty_fns: HashMap<String, String> = HashMap::new();
     let empty_globals: HashMap<String, String> = HashMap::new();
     let mut stub_uses2: HashMap<String, usize> = HashMap::new();
+    let empty_enums: Vec<String> = Vec::new();
     let mut sctx = Ctx {
         functions: &empty_fns,
         globals: &empty_globals,
+        enumerators: &empty_enums,
         symbols: HashMap::new(),
         phantoms: Vec::new(),
         stubs: &mut stub_uses2,
@@ -350,12 +382,13 @@ fn count_members(n: Node) -> i64 {
     let Some(body) = n.child_by_field_name("body") else { return 0 };
     named_children(body)
         .iter()
-        .filter(|f| f.kind() == "field_declaration")
-        .map(|f| {
-            named_children(*f)
+        .map(|f| match f.kind() {
+            "field_declaration" => named_children(*f)
                 .iter()
                 .filter(|d| matches!(d.kind(), "field_identifier" | "pointer_declarator" | "array_declarator"))
-                .count() as i64
+                .count() as i64,
+            "enumerator" => 1,
+            _ => 0,
         })
         .sum()
 }
@@ -364,6 +397,7 @@ fn count_members(n: Node) -> i64 {
 struct Ctx<'a> {
     functions: &'a HashMap<String, String>,
     globals: &'a HashMap<String, String>,
+    enumerators: &'a Vec<String>,
     symbols: HashMap<String, String>, // local/param name -> type
     // Joern's local-creation pass materialises a LOCAL at ORDER=0 atop the
     // method body BLOCK for each referenced global (CODE `<global> name`)
@@ -472,7 +506,8 @@ impl Ctx<'_> {
                 }
             }
             if let Some((_, plabel, paddr)) = self.parent_stack.last() {
-                if plabel == "CALL" || plabel == "RETURN" {
+                // Receivers (pointerCall arg without ARGUMENT_INDEX) get none.
+                if (plabel == "CALL" && p.arg.is_some()) || plabel == "RETURN" {
                     let paddr = paddr.clone();
                     self.edges.push(("ARGUMENT".into(), paddr, my_addr.clone()));
                 }
@@ -480,7 +515,7 @@ impl Ctx<'_> {
             if let Some(t) = &p.tfn {
                 self.edges.push(("EVAL_TYPE".into(), my_addr.clone(), format!("T:{t}")));
             }
-            if label == "CALL" {
+            if label == "CALL" && p.dispatch.as_deref() != Some("DYNAMIC_DISPATCH") {
                 if let Some(mfn) = &p.mfn {
                     self.edges.push(("CALL".into(), my_addr.clone(), format!("M:{mfn}")));
                 }
@@ -668,7 +703,9 @@ impl Ctx<'_> {
         });
         for n in named_children(root) {
             match n.kind() {
-                "struct_specifier" if n.child_by_field_name("body").is_some() => {
+                "struct_specifier" | "union_specifier" | "enum_specifier"
+                    if n.child_by_field_name("body").is_some() =>
+                {
                     self.emit_type_decl(n, b, 1);
                 }
                 "function_definition" => self.emit_method(n, b, 1),
@@ -683,11 +720,29 @@ impl Ctx<'_> {
         let mut slot = 1i64;
         for n in named_children(root) {
             match n.kind() {
-                "struct_specifier" if n.child_by_field_name("body").is_some() => {
+                "struct_specifier" | "union_specifier" | "enum_specifier"
+                    if n.child_by_field_name("body").is_some() =>
+                {
                     let name = n.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
                     self.line(2, "TYPE_REF", P {
                         code: Some(esc(text(n, b))),
                         tfn: Some(name),
+                        order: Some(slot),
+                        ..Default::default()
+                    });
+                    slot += 1;
+                }
+                "type_definition" => {
+                    // typedef: a TYPE_DECL *inside* the global BLOCK, CODE
+                    // keeps the whole statement incl. the semicolon.
+                    let name = n
+                        .child_by_field_name("declarator")
+                        .map(|x| text(x, b).to_string())
+                        .unwrap_or_default();
+                    self.line(2, "TYPE_DECL", P {
+                        name: Some(name.clone()),
+                        code: Some(esc(text(n, b))),
+                        full: Some(name),
                         order: Some(slot),
                         ..Default::default()
                     });
@@ -740,6 +795,21 @@ impl Ctx<'_> {
         });
         let Some(body) = n.child_by_field_name("body") else { return };
         let mut order = 1i64;
+        // enum: one ANY-typed MEMBER per enumerator (CODE keeps `GREEN = 5`).
+        for e in named_children(body) {
+            if e.kind() != "enumerator" {
+                continue;
+            }
+            let ename = e.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+            self.line(depth + 1, "MEMBER", P {
+                name: Some(ename),
+                code: Some(esc(text(e, b))),
+                tfn: Some("ANY".into()),
+                order: Some(order),
+                ..Default::default()
+            });
+            order += 1;
+        }
         for f in named_children(body) {
             if f.kind() != "field_declaration" {
                 continue;
@@ -764,7 +834,7 @@ impl Ctx<'_> {
                 }
             }
         }
-        if struct_has_sized_array(n) {
+        if needs_clinit(n, b) {
             self.emit_clinit(n, b, depth + 1, order);
         }
     }
@@ -788,6 +858,47 @@ impl Ctx<'_> {
         self.line(depth + 1, "BLOCK", P { order: Some(1), ..Default::default() });
         let mut co = 1i64;
         if let Some(body) = n.child_by_field_name("body") {
+            // enum mode: phantom ANY LOCALs (ORDER=0) for the initialised
+            // enumerators, then one void assignment per initialiser.
+            let inits: Vec<Node> = named_children(body)
+                .into_iter()
+                .filter(|e| e.kind() == "enumerator" && e.child_by_field_name("value").is_some())
+                .collect();
+            for e in &inits {
+                let ename = e.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                self.line(depth + 2, "LOCAL", P {
+                    name: Some(ename.clone()),
+                    code: Some(ename),
+                    tfn: Some("ANY".into()),
+                    order: Some(0),
+                    ..Default::default()
+                });
+            }
+            for e in &inits {
+                let ename = e.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                self.note_call("<operator>.assignment", 2);
+                self.line(depth + 2, "CALL", P {
+                    name: Some("<operator>.assignment".into()),
+                    code: Some(esc(text(*e, b))),
+                    tfn: Some("void".into()),
+                    mfn: Some("<operator>.assignment".into()),
+                    order: Some(co),
+                    dispatch: Some("STATIC_DISPATCH".into()),
+                    ..Default::default()
+                });
+                self.line(depth + 3, "IDENTIFIER", P {
+                    name: Some(ename.clone()),
+                    code: Some(ename),
+                    tfn: Some("ANY".into()),
+                    order: Some(1),
+                    arg: Some(1),
+                    ..Default::default()
+                });
+                if let Some(v) = e.child_by_field_name("value") {
+                    self.emit_expr(v, b, depth + 3, 2, Some(2));
+                }
+                co += 1;
+            }
             for f in named_children(body) {
                 if f.kind() != "field_declaration" {
                     continue;
@@ -842,6 +953,15 @@ impl Ctx<'_> {
                                 ty: ty.clone(),
                                 name,
                             });
+                        } else if self.enumerators.contains(&name) {
+                            // Enumerators phantom like globals, but plain CODE
+                            // and type ANY.
+                            seen.push(name.clone());
+                            self.phantoms.push(Phantom {
+                                code: name.clone(),
+                                ty: "ANY".into(),
+                                name,
+                            });
                         }
                     }
                 }
@@ -893,6 +1013,33 @@ impl Ctx<'_> {
             "declaration" => self.emit_declaration(n, b, order, depth, None),
             "if_statement" => self.emit_if(n, b, order, depth),
             "for_statement" => self.emit_for(n, b, order, depth),
+            "labeled_statement" => {
+                // A label flattens like a switch case: JUMP_TARGET (CODE is
+                // the whole labeled statement) then the statement as sibling.
+                let o = *order;
+                *order += 1;
+                let lname = n.child_by_field_name("label").map(|l| text(l, b).to_string()).unwrap_or_default();
+                self.line(depth, "JUMP_TARGET", P {
+                    name: Some(lname),
+                    code: Some(esc(text(n, b))),
+                    order: Some(o),
+                    ..Default::default()
+                });
+                for c in named_children(n) {
+                    if c.kind() != "statement_identifier" {
+                        self.emit_stmt(c, b, order, depth);
+                    }
+                }
+            }
+            "goto_statement" => {
+                let o = *order;
+                *order += 1;
+                self.line(depth, "CONTROL_STRUCTURE", P {
+                    code: Some(esc(text(n, b))),
+                    order: Some(o),
+                    ..Default::default()
+                });
+            }
             "break_statement" | "continue_statement" => {
                 let o = *order;
                 *order += 1;
@@ -1184,10 +1331,60 @@ impl Ctx<'_> {
                     self.line(depth, "LOCAL", P {
                         name: Some(name.clone()),
                         code: Some(decl_code(d)),
-                        tfn: Some(full_ty),
+                        tfn: Some(full_ty.clone()),
                         order: Some(lo),
                         ..Default::default()
                     });
+                    // A sized-array local lowers to `<operator>.alloc`:
+                    // grid = alloc(int[2][3], 2, 3) — CODE on both calls is
+                    // the declarator text, the type appears as an IDENTIFIER.
+                    let sizes = array_sizes(d);
+                    if !sizes.is_empty() {
+                        let ao = *order;
+                        *order += 1;
+                        self.note_call("<operator>.assignment", 2);
+                        self.note_call("<operator>.alloc", sizes.len() + 1);
+                        self.line(depth, "CALL", P {
+                            name: Some("<operator>.assignment".into()),
+                            code: Some(esc(text(d, b))),
+                            tfn: Some("void".into()),
+                            mfn: Some("<operator>.assignment".into()),
+                            order: Some(ao),
+                            arg: assign_arg,
+                            dispatch: Some("STATIC_DISPATCH".into()),
+                            ..Default::default()
+                        });
+                        self.line(depth + 1, "IDENTIFIER", P {
+                            name: Some(name.clone()),
+                            code: Some(name),
+                            tfn: Some(full_ty.clone()),
+                            order: Some(1),
+                            arg: Some(1),
+                            ..Default::default()
+                        });
+                        self.line(depth + 1, "CALL", P {
+                            name: Some("<operator>.alloc".into()),
+                            code: Some(esc(text(d, b))),
+                            tfn: Some(full_ty.clone()),
+                            mfn: Some("<operator>.alloc".into()),
+                            order: Some(2),
+                            arg: Some(2),
+                            dispatch: Some("STATIC_DISPATCH".into()),
+                            ..Default::default()
+                        });
+                        self.line(depth + 2, "IDENTIFIER", P {
+                            name: Some(full_ty.clone()),
+                            code: Some(full_ty.clone()),
+                            tfn: Some(full_ty),
+                            order: Some(1),
+                            arg: Some(1),
+                            ..Default::default()
+                        });
+                        for (i, sz) in sizes.into_iter().enumerate() {
+                            let k = (i + 2) as i64;
+                            self.emit_expr(sz, b, depth + 2, k, Some(k));
+                        }
+                    }
                 }
                 _ => {}
             }
@@ -1372,26 +1569,52 @@ impl Ctx<'_> {
             "call_expression" => {
                 let callee = n.child_by_field_name("function");
                 let name = callee.map(|c| text(c, b).to_string()).unwrap_or("<anon>".into());
-                let ty = self.functions.get(&name).cloned().unwrap_or("ANY".into());
-                let argc = n
-                    .child_by_field_name("arguments")
-                    .map(|a| named_children(a).len())
-                    .unwrap_or(0);
-                self.note_call(&name, argc);
-                self.line(depth, "CALL", P {
-                    name: Some(name.clone()),
-                    code: Some(esc(text(n, b))),
-                    tfn: Some(ty),
-                    mfn: Some(name),
-                    order: Some(order),
-                    arg,
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
-                if let Some(args) = n.child_by_field_name("arguments") {
-                    for (i, a) in named_children(args).into_iter().enumerate() {
-                        let k = (i + 1) as i64;
-                        self.emit_expr(a, b, depth + 1, k, Some(k));
+                let args = n.child_by_field_name("arguments");
+                let argc = args.map(|a| named_children(a).len()).unwrap_or(0);
+                if !self.functions.contains_key(&name)
+                    && (self.symbols.contains_key(&name) || self.globals.contains_key(&name))
+                {
+                    // Call through a pointer-valued symbol: <operator>.pointerCall,
+                    // DYNAMIC_DISPATCH, receiver at ORDER=1 with no
+                    // ARGUMENT_INDEX, args shifted to ORDER=2.. / INDEX=1..
+                    self.note_call("<operator>.pointerCall", argc);
+                    let ty = self.symbols.get(&name).or_else(|| self.globals.get(&name)).cloned();
+                    self.line(depth, "CALL", P {
+                        name: Some("<operator>.pointerCall".into()),
+                        code: Some(esc(text(n, b))),
+                        tfn: ty,
+                        mfn: Some("<operator>.pointerCall".into()),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("DYNAMIC_DISPATCH".into()),
+                        ..Default::default()
+                    });
+                    if let Some(c) = callee {
+                        self.emit_expr(c, b, depth + 1, 1, None);
+                    }
+                    if let Some(args) = args {
+                        for (i, a) in named_children(args).into_iter().enumerate() {
+                            self.emit_expr(a, b, depth + 1, (i + 2) as i64, Some((i + 1) as i64));
+                        }
+                    }
+                } else {
+                    let ty = self.functions.get(&name).cloned().unwrap_or("ANY".into());
+                    self.note_call(&name, argc);
+                    self.line(depth, "CALL", P {
+                        name: Some(name.clone()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some(ty),
+                        mfn: Some(name),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    });
+                    if let Some(args) = args {
+                        for (i, a) in named_children(args).into_iter().enumerate() {
+                            let k = (i + 1) as i64;
+                            self.emit_expr(a, b, depth + 1, k, Some(k));
+                        }
                     }
                 }
             }
@@ -1619,19 +1842,16 @@ fn unary_name(op: &str) -> String {
 /// Type suffix from declarator nesting: `*` per pointer level, `[]` per array
 /// level (Joern renders `int *p` as `int*` and `int vals[]` as `int[]`).
 fn decl_suffix(n: Node, b: &[u8]) -> String {
-    let mut s = String::new();
+    let mut parts: Vec<String> = Vec::new();
     let mut cur = n;
     loop {
         match cur.kind() {
-            "pointer_declarator" => s.push('*'),
+            "pointer_declarator" => parts.push("*".into()),
             "array_declarator" => {
-                // CDT keeps the size: `int arr[4]` types as `int[4]`.
-                let size = cur.child_by_field_name("size");
-                s.push('[');
-                if let Some(sz) = size {
-                    s.push_str(text(sz, b));
-                }
-                s.push(']');
+                // CDT keeps the size: `int grid[2][3]` types as `int[2][3]`
+                // (declarator nesting is outermost-last, so reverse).
+                let size = cur.child_by_field_name("size").map(|sz| text(sz, b).to_string()).unwrap_or_default();
+                parts.push(format!("[{size}]"));
             }
             _ => break,
         }
@@ -1640,7 +1860,29 @@ fn decl_suffix(n: Node, b: &[u8]) -> String {
             None => break,
         }
     }
-    s
+    parts.reverse();
+    parts.concat()
+}
+
+/// Size expressions of a (possibly multi-dim) array declarator, source order.
+fn array_sizes<'t>(n: Node<'t>) -> Vec<Node<'t>> {
+    let mut out = Vec::new();
+    let mut cur = n;
+    loop {
+        if cur.kind() == "array_declarator" {
+            if let Some(sz) = cur.child_by_field_name("size") {
+                out.push(sz);
+            }
+        } else if cur.kind() != "pointer_declarator" {
+            break;
+        }
+        match cur.child_by_field_name("declarator") {
+            Some(c) => cur = c,
+            None => break,
+        }
+    }
+    out.reverse();
+    out
 }
 
 /// Assignment operator → Joern operator name. Joern inconsistency, pinned by
@@ -1668,7 +1910,12 @@ fn assignment_name(op: &str) -> String {
 /// table only with oracle-pinned combinations.
 fn normalize_type(base: &str) -> String {
     let t = base.trim();
-    for tag in ["struct ", "union ", "enum "] {
+    // CDT inconsistency: `struct X`/`enum X` strip the keyword but `union X`
+    // concatenates to `unionX` (pinned by corpus/types2.c).
+    if let Some(rest) = t.strip_prefix("union ") {
+        return format!("union{}", rest.trim());
+    }
+    for tag in ["struct ", "enum "] {
         if let Some(rest) = t.strip_prefix(tag) {
             return rest.trim().into();
         }
@@ -1718,13 +1965,14 @@ fn flatten_comma<'t>(n: Node<'t>, out: &mut Vec<Node<'t>>) {
     }
 }
 
-fn struct_has_sized_array(n: Node) -> bool {
+fn needs_clinit(n: Node, _b: &[u8]) -> bool {
     let Some(body) = n.child_by_field_name("body") else { return false };
     named_children(body).iter().any(|f| {
-        f.kind() == "field_declaration"
+        (f.kind() == "field_declaration"
             && named_children(*f).iter().any(|d| {
                 d.kind() == "array_declarator" && d.child_by_field_name("size").is_some()
-            })
+            }))
+            || (f.kind() == "enumerator" && f.child_by_field_name("value").is_some())
     })
 }
 
@@ -1792,6 +2040,7 @@ struct DNode {
     code1: String,
     full: String,
     has_arg: bool,
+    code2: String,
     children: Vec<usize>,
     parent: Option<usize>,
     idx: usize,
@@ -1820,12 +2069,21 @@ fn parse_dump_block(text: &str) -> Vec<DNode> {
         if let Some(pid) = parent {
             arena[pid].children.push(id);
         }
+        let code2 = rest
+            .find(" CODE=")
+            .map(|i| {
+                let mut it = rest[i + 6..].split_whitespace();
+                it.next();
+                it.next().unwrap_or("").trim_end_matches(';').to_string()
+            })
+            .unwrap_or_default();
         arena.push(DNode {
             label,
             name: grab(" NAME="),
             code1: grab(" CODE="),
             full: grab(" FULL_NAME="),
             has_arg: rest.contains(" ARGUMENT_INDEX="),
+            code2,
             children: Vec::new(),
             parent,
             idx,
@@ -1842,6 +2100,7 @@ struct CfgBuilder<'a> {
     edges: Vec<(String, String)>,
     breaks: Vec<Vec<String>>,    // per breakable construct
     continues: Vec<Vec<String>>, // per loop
+    labels: HashMap<String, String>, // label name -> JUMP_TARGET addr
 }
 
 impl CfgBuilder<'_> {
@@ -2089,6 +2348,13 @@ impl CfgBuilder<'_> {
                 outs.extend(self.breaks.pop().unwrap());
                 (ce, outs)
             }
+            "goto" => {
+                // `goto L;` -> edge to the JUMP_TARGET named L; no fallthrough.
+                if let Some(t) = self.labels.get(&self.arena[id].code2).cloned() {
+                    self.edges.push((me.clone(), t));
+                }
+                (Some(me), vec![])
+            }
             "break" => {
                 if let Some(b) = self.breaks.last_mut() {
                     b.push(me.clone());
@@ -2119,6 +2385,12 @@ fn cfg_edges_for_block(block: &str, text: &str) -> Vec<(String, String)> {
         .find(|&c| arena[c].label == "METHOD_RETURN" );
     let body = root_kids.iter().copied().find(|&c| arena[c].label == "BLOCK");
     let Some(mret) = mret else { return Vec::new() };
+    let mut labels: HashMap<String, String> = HashMap::new();
+    for n in &arena {
+        if n.label == "JUMP_TARGET" && n.name != "case" && n.name != "default" {
+            labels.insert(n.name.clone(), format!("{block}#{}", n.idx));
+        }
+    }
     let mut b = CfgBuilder {
         arena: &arena,
         block,
@@ -2126,6 +2398,7 @@ fn cfg_edges_for_block(block: &str, text: &str) -> Vec<(String, String)> {
         edges: Vec::new(),
         breaks: Vec::new(),
         continues: Vec::new(),
+        labels,
     };
     let m_addr = format!("M:{}", arena[0].full);
     let mret_addr = b.mret.clone();
