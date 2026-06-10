@@ -72,4 +72,19 @@ import scala.collection.mutable
     }
   }
   lines.foreach(l => println("EDGES|" + l))
+
+  // FLOWS section: REACHING_DEF (def -> use, with VARIABLE) — the data-dependence
+  // backbone reachableBy walks. Edge carries a VARIABLE property.
+  val flows = mutable.SortedSet[String]()
+  cpg.all.foreach { n =>
+    n.outE.foreach { e =>
+      if (e.label == "REACHING_DEF") {
+        val v = Option(e.property).map(_.toString).getOrElse("")
+        for (s <- address(e.src.asInstanceOf[StoredNode]);
+             d <- address(e.dst.asInstanceOf[StoredNode]))
+          flows += s"REACHING_DEF[$v] $s -> $d"
+      }
+    }
+  }
+  flows.foreach(l => println("FLOWS|" + l))
 }
