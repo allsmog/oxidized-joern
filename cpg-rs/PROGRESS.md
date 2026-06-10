@@ -7,11 +7,11 @@ Single source of truth across sessions. Update in the same commit as the work.
 - **Milestone:** M5 (real-world corpus) / M7 (dataflow oracle) — M1-M4 done
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` fetches latest; if the version
   drifts and output changes, record it here and in QUIRKS.md)
-- **Gate:** `joern-parity/check.sh` — green, 76/76 blocks byte-identical:
-  57 method blocks + scaffolding nodes + 15 edge kinds incl. CFG (~2,300
-  edges; corpus now includes logic.c: short-circuit &&/||, if-without-else,
-  nested loops with break/continue, switch fallthrough + no-default).
-  Previously:
+- **Gate:** `joern-parity/check.sh` — green, 84/84 blocks byte-identical
+  (corpus adds gotos.c and types2.c: goto/label, typedef, enum + <clinit>,
+  union, static, function pointers/pointerCall, multi-dim arrays/alloc).
+  Previously 76/76 with logic.c (short-circuit &&/||, if-without-else,
+  nested break/continue, switch fallthrough). Previously:
   13 user methods + pair.<clinit> + 9 file-globals + <includes>:<global> +
   32 operator stubs + the scaffolding-nodes section (FILE, NAMESPACE_BLOCK,
   NAMESPACE, META_DATA, TYPE_DECL incl. IS_EXTERNAL entries, TYPE). Corpus:
@@ -41,13 +41,16 @@ M2, in this order — one corpus file + diff-to-zero per line:
 
 Next, in preference order:
 
-1. **M5 — real-world corpus.** Vendor a small real C project (suggest: a
-   single-file lib like miniz/stb subset, or zlib's adler32.c+crc32.c to
-   start), run both sides, triage every diff into either a minimal new
-   corpus pin + fix, or a QUIRKS.md entry. This will surface the long tail:
-   typedefs, enums, unions, static/extern, multi-dim arrays, function
-   pointers, varargs, preprocessor output constructs, goto/label (KNOWN GAP:
-   CFG builder has a goto/label TODO; AST side also unpinned).
+1. **M5 — real-world corpus.** Long-tail synthetic pins are now DONE
+   (goto/label, typedef, enum/union, static, function pointers, multi-dim
+   arrays — see gotos.c/types2.c). Next: vendor a real C file and triage.
+   THE structural gap for real code is the PREPROCESSOR: CDT expands in-file
+   #define macros and evaluates #if blocks; tree-sitter does not. Plan:
+   start with a low-macro real file, then implement in-file object-like +
+   function-like macro expansion in the Rust frontend (a bounded, pinnable
+   subproject). Also still unpinned: varargs, extern declarations, calls to
+   undefined functions (printf-style stub shape), struct definitions inside
+   functions, initializer lists `{1,2}`.
 2. **M7 — dataflow oracle.** Add REACHING_DEF, CDG, DOMINATE, POST_DOMINATE
    to oracle kinds (they're already in the importCode graph; the addressing
    scheme works as-is). DOMINATE/POST_DOMINATE are computable from our
@@ -59,6 +62,22 @@ Next, in preference order:
 
 ## Done
 
+- **M5 prep (2026-06-10):** Long-tail language pins, 84/84. gotos.c: labels
+  flatten like switch cases (JUMP_TARGET CODE = whole labeled stmt, then the
+  stmt as sibling), goto = childless CONTROL_STRUCTURE with CFG edge to its
+  JUMP_TARGET. types2.c: typedef -> TYPE_DECL inside the global BLOCK (CODE
+  incl. semicolon) and its UNDERLYING type registers as a used type with raw
+  spelling (`unsigned int`, NOT normalised); enum -> TYPE_DECL with ANY-typed
+  MEMBERs (CODE `GREEN = 5`) + <clinit> holding phantom enumerator LOCALs and
+  void assignments; union types render CONCATENATED (`unionvalue`) so the
+  use-type is external while the TYPE_DECL `value` is internal; enumerator
+  refs get plain-CODE ANY phantoms; fn-pointer params type as just the return
+  type; calls through pointer symbols -> <operator>.pointerCall with
+  DYNAMIC_DISPATCH (receiver ORDER=1 no ARGUMENT_INDEX, args shifted; NO CALL
+  edge but a stub exists with arity = indexed args); `int grid[2][3];` lowers
+  to <operator>.alloc(int[2][3], 2, 3) with the type as an IDENTIFIER;
+  ARGUMENT edges refined to indexed children only. decl_suffix fixed for
+  multi-dim source order.
 - **M4 part 2 (2026-06-10):** CFG parity, 76/76 blocks, 340+ CFG edges on the
   base corpus plus logic.c pins — all matched. CfgCreationPass semantics
   reconstructed from the oracle and implemented as a generic builder over our
