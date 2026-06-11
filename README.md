@@ -1,28 +1,34 @@
-Joern - The Bug Hunter's Workbench
+Quarry - The Bug Hunter's Workbench
 ===
 
-[![release](https://github.com/joernio/joern/actions/workflows/release.yml/badge.svg)](https://github.com/joernio/joern/actions/workflows/release.yml)
-[![Joern SBT](https://index.scala-lang.org/joernio/joern/latest.svg)](https://index.scala-lang.org/joernio/joern)
-[![Github All Releases](https://img.shields.io/github/downloads/joernio/joern/total.svg)](https://github.com/joernio/joern/releases/)
-[![Gitter](https://img.shields.io/badge/-Discord-lime?style=for-the-badge&logo=discord&logoColor=white&color=black)](https://discord.com/invite/vv4MH284Hc)
+*A code property graph platform for vulnerability discovery — a fork of
+[Joern](https://github.com/joernio/joern) with stronger Go and Python frontends.*
 
-Joern is a platform for analyzing source code, bytecode, and binary
+> **This is a fork of Joern.** Quarry tracks upstream Joern and focuses on maturing
+> the **Go (`gosrc2cpg`)** and **Python (`pysrc2cpg`)** frontends — better statement
+> and type coverage, more accurate type recovery, and richer dependency/import
+> resolution — so data-flow queries find more on Go and Python codebases. See
+> **[ENHANCEMENTS.md](ENHANCEMENTS.md)** for the full list. Core usage, the query
+> language, and all other frontends are unchanged from upstream.
+
+Quarry, like Joern, is a platform for analyzing source code, bytecode, and binary
 executables. It generates code property graphs (CPGs), a graph
 representation of code for cross-language code analysis. Code property
 graphs are stored in a custom graph database. This allows code to be
 mined using search queries formulated in a Scala-based domain-specific
-query language. Joern is developed with the goal of providing a useful
+query language. The goal is to provide a useful
 tool for vulnerability discovery and research in static program
 analysis.
 
-Website: https://joern.io
+Upstream website: https://joern.io
 
-Documentation: https://docs.joern.io/
+Upstream documentation: https://docs.joern.io/
 
 Specification: https://cpg.joern.io
 
 ## News / Changelog
 
+- **Quarry fork:** matured Go and Python frontends — see [ENHANCEMENTS.md](ENHANCEMENTS.md)
 - Joern v4.0.0 [migrates from overflowdb to flatgraph](changelog/4.0.0-flatgraph.md)
 - Joern v2.0.0 [upgrades from Scala2 to Scala3](changelog/2.0.0-scala3.md)
 - Joern v1.2.0 removes the `overflowdb.traversal.Traversal` class. This change is not completely backwards compatible. See [here](changelog/traversal_removal.md) for a detailed writeup.
