@@ -1434,8 +1434,8 @@ class PythonAstVisitor(
       case node: ast.DictComp       => convert(node)
       case node: ast.GeneratorExp   => convert(node)
       case node: ast.Await          => convert(node)
-      case node: ast.Yield          => unhandled(node)
-      case node: ast.YieldFrom      => unhandled(node)
+      case node: ast.Yield          => convert(node)
+      case node: ast.YieldFrom      => convert(node)
       case node: ast.Compare        => convert(node)
       case node: ast.Call           => convert(node)
       case node: ast.FormattedValue => convert(node)
@@ -1780,9 +1780,30 @@ class PythonAstVisitor(
     convert(await.value)
   }
 
-  def convert(yieldExpr: ast.Yield): NewNode = unhandled(yieldExpr)
+  // `yield x` is modelled as a call to <operator>.yield with the yielded
+  // value as its argument, so data flows out of the generator through the
+  // yield. A bare `yield` has no argument. The call's own value represents
+  // what `generator.send(...)` passes back in.
+  def convert(yieldExpr: ast.Yield): NewNode = {
+    val operandNodes = yieldExpr.value.map(convert).toList
+    val argCode      = operandNodes.map(codeOf).mkString(", ")
+    val code         = if (argCode.isEmpty) "yield" else s"yield $argCode"
+    val callNode =
+      nodeBuilder.callNode(code, "<operator>.yield", DispatchTypes.STATIC_DISPATCH, lineAndColOf(yieldExpr))
+    addAstChildrenAsArguments(callNode, 1, operandNodes)
+    callNode
+  }
 
-  def convert(yieldFrom: ast.YieldFrom): NewNode = unhandled(yieldFrom)
+  // `yield from x` is modelled as a call to <operator>.yieldFrom with the
+  // delegated iterable as its argument.
+  def convert(yieldFrom: ast.YieldFrom): NewNode = {
+    val operandNode = convert(yieldFrom.value)
+    val code        = s"yield from ${codeOf(operandNode)}"
+    val callNode =
+      nodeBuilder.callNode(code, "<operator>.yieldFrom", DispatchTypes.STATIC_DISPATCH, lineAndColOf(yieldFrom))
+    addAstChildrenAsArguments(callNode, 1, operandNode)
+    callNode
+  }
 
   // In case of a single compare operation there is no lowering applied.
   // So e.g. x < y stay untouched.
