@@ -2207,7 +2207,9 @@ class PythonAstVisitor(
   }
 
   private def convertKwArg(arg: ast.Arg): nodes.NewMethodParameterIn = {
-    nodeBuilder.methodParameterNode(arg.arg, isVariadic = false, lineAndColOf(arg))
+    val paramNode = nodeBuilder.methodParameterNode(arg.arg, isVariadic = true, lineAndColOf(arg))
+    paramNode.code(s"**${arg.arg}")
+    paramNode
   }
 
   def convert(keyword: ast.Keyword): NewNode = unhandled(keyword)

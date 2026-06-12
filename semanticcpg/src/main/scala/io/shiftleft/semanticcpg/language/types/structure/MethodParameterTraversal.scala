@@ -33,10 +33,14 @@ class MethodParameterTraversal(val traversal: Iterator[MethodParameterIn]) exten
       call    <- callResolver.getMethodCallsites(paramIn.method)
       case (arg: Expression) <- call._argumentOut
       if arg.argumentName match {
+        case Some("**") => isKeywordVariadicParameter(paramIn)
         case Some(name) => name == paramIn.name
         case None => arg.argumentIndex == paramIn.index || (paramIn.isVariadic && arg.argumentIndex > paramIn.index)
       }
     } yield arg
   }
+
+  private def isKeywordVariadicParameter(paramIn: MethodParameterIn): Boolean =
+    paramIn.isVariadic && paramIn.code.startsWith("**")
 
 }

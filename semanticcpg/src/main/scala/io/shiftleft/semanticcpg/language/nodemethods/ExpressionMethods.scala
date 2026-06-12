@@ -58,6 +58,7 @@ class ExpressionMethods(val node: Expression) extends AnyVal with NodeExtension 
 
   def parameter(implicit callResolver: ICallResolver): Iterator[MethodParameterIn] = {
     val predicate: MethodParameterIn => Boolean = node.argumentName match {
+      case Some("**") => isKeywordVariadicParameter
       case Some(name) => _.name == name
       case None => param => param.index == node.argumentIndex || (param.isVariadic && param.index < node.argumentIndex)
     }
@@ -73,6 +74,9 @@ class ExpressionMethods(val node: Expression) extends AnyVal with NodeExtension 
       if predicate(paramIn)
     } yield paramIn
   }
+
+  private def isKeywordVariadicParameter(param: MethodParameterIn): Boolean =
+    param.isVariadic && param.code.startsWith("**")
 
   def typ: Iterator[Type] =
     node._evalTypeOut.cast[Type]
