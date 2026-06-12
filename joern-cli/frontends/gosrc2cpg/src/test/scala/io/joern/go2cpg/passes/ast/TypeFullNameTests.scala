@@ -608,20 +608,25 @@ class TypeFullNameTests extends GoCodeToCpgSuite {
     }
 
     "Type check for CALL nodes working" in {
-      val List(a, b, c, d, e, f, g, h, i, j, k, l, m) = cpg.call.nameNot(Operators.assignment).l
-      a.typeFullName shouldBe "[][]string"
-      b.typeFullName shouldBe "string"
-      c.typeFullName shouldBe "[]string"
-      d.typeFullName shouldBe "[][]string"
-      i.typeFullName shouldBe "[]int"
-      j.typeFullName shouldBe "int"
-      k.typeFullName shouldBe "[]float32"
-      e.typeFullName shouldBe "[]string"
-      f.typeFullName shouldBe "string"
-      g.typeFullName shouldBe "string"
-      h.typeFullName shouldBe "[]string"
-      l.typeFullName shouldBe "int"
-      m.typeFullName shouldBe "float32"
+      cpg.call.nameNot(Operators.assignment).typeFullName.l shouldBe List(
+        "[][]string",
+        "[]string",
+        "[]string",
+        "string",
+        "[]string",
+        "[][]string",
+        "[]string",
+        "[]string",
+        "[]string",
+        "string",
+        "string",
+        "[]string",
+        "[]int",
+        "int",
+        "[]float32",
+        "int",
+        "float32"
+      )
     }
   }
 

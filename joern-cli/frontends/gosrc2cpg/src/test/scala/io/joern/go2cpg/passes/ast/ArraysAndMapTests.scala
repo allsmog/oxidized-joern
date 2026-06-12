@@ -759,4 +759,28 @@ class ArraysAndMapTests extends GoCodeToCpgSuite {
       args.typeFullName shouldBe "main.Person"
     }
   }
+
+  "be correct for nested arrayInitializer children of a 2D literal" should {
+    val cpg = code("""
+        |package main
+        |func main() {
+        |   myArray := [][]string{{"1", "2"}, {"3", "4"}}
+        |}
+        |""".stripMargin)
+    "outer arrayInitializer has two nested arrayInitializer arguments" in {
+      // three total: 1 outer + 2 inner
+      cpg.call(Operators.arrayInitializer).size shouldBe 3
+      val List(outer) = cpg.call(Operators.arrayInitializer).where(_.argument.isCall.name(Operators.arrayInitializer)).l
+      outer.typeFullName shouldBe "[][]string"
+      val List(inner1: Call, inner2: Call) = outer.argument.l: @unchecked
+      inner1.name shouldBe Operators.arrayInitializer
+      inner2.name shouldBe Operators.arrayInitializer
+      val List(a: Literal, b: Literal) = inner1.argument.l: @unchecked
+      a.code shouldBe "\"1\""
+      b.code shouldBe "\"2\""
+      val List(c: Literal, d: Literal) = inner2.argument.l: @unchecked
+      c.code shouldBe "\"3\""
+      d.code shouldBe "\"4\""
+    }
+  }
 }

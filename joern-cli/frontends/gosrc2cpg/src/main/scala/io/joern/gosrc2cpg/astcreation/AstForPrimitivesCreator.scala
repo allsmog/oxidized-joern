@@ -26,12 +26,7 @@ trait AstForPrimitivesCreator(implicit withSchemaValidation: ValidationMode) { t
   ): Seq[Ast] = {
     typeNode.node match {
       case ArrayType =>
-        val elementsAsts = Try(compositeLiteralNode.json(ParserKeys.Elts)) match {
-          case Success(value) if !value.isNull => value.arr.flatMap(e => astForNode(createParserNodeInfo(e))).toSeq
-          case _                               => Seq.empty
-        }
-        val arrayInitCallNode = astForArrayInitializer(compositeLiteralNode)
-        Seq(callAst(arrayInitCallNode, elementsAsts))
+        astForArrayInitializerWithElements(compositeLiteralNode, astForArrayInitializer(compositeLiteralNode))
       // Handling structure initialisation by creating a call node and arguments
       case Ident =>
         astForConstructorCall(compositeLiteralNode)
@@ -43,18 +38,52 @@ trait AstForPrimitivesCreator(implicit withSchemaValidation: ValidationMode) { t
     }
   }
 
+  private def astForArrayInitializerWithElements(
+    compositeLiteralNode: ParserNodeInfo,
+    arrayInitCallNode: NewCall
+  ): Seq[Ast] = {
+    val elementsAsts = Try(compositeLiteralNode.json(ParserKeys.Elts)) match {
+      case Success(value) if !value.isNull => value.arr.flatMap(e => astForNode(createParserNodeInfo(e))).toSeq
+      case _                               => Seq.empty
+    }
+    Seq(callAst(arrayInitCallNode, elementsAsts))
+  }
+
   private def astForCompositeLiteral(compositeLiteralNodeInfo: ParserNodeInfo): Seq[Ast] = {
     Try(createParserNodeInfo(compositeLiteralNodeInfo.json(ParserKeys.Type))) match {
       case Success(typeNode) =>
         astForCompositeLiteralHavingTypeKey(typeNode, compositeLiteralNodeInfo)
       case _ =>
-        val elementsAsts = Try(compositeLiteralNodeInfo.json(ParserKeys.Elts)) match {
-          case Success(compositeElements) if !compositeElements.isNull =>
-            compositeElements.arr.flatMap(e => astForNode(createParserNodeInfo(e))).toSeq
-          case _ => Seq.empty
-          // TODO: merge array initializer node Seq(astForArrayInitializer(compositeLiteralNodeInfo))
+        // Elided-type / nested composite literal (e.g. the inner {"1","2"} of [][]string{...}):
+        // wrap the elements in an arrayInitializer call instead of flattening them away.
+        val elements = Try(compositeLiteralNodeInfo.json(ParserKeys.Elts)) match {
+          case Success(compositeElements) if !compositeElements.isNull => compositeElements.arr.toSeq
+          case _                                                       => Seq.empty
         }
-        elementsAsts
+        val elementsAsts = elements.flatMap(e => astForNode(createParserNodeInfo(e)))
+        // Keyed elements (e.g. the inner {phone: "..."} of []Phone{...}) belong to an elided
+        // struct or map literal, not an array; keep flattening those.
+        val isKeyedLiteral =
+          elements.exists(e => Try(e(ParserKeys.NodeType).str).toOption.contains("ast.KeyValueExpr"))
+        if (isKeyedLiteral) {
+          elementsAsts
+        } else {
+          // The Type key is absent here, so we cannot use processTypeInfo. Derive the type
+          // as "[]" + element type, mirroring the outer dimension's element type.
+          val elemType = elementsAsts.headOption
+            .map(elementAst => getTypeFullNameFromAstNode(Seq(elementAst)))
+            .getOrElse(Defines.anyTypeName)
+          val arrayInitCallNode = callNode(
+            compositeLiteralNodeInfo,
+            compositeLiteralNodeInfo.code,
+            Operators.arrayInitializer,
+            Operators.arrayInitializer,
+            DispatchTypes.STATIC_DISPATCH,
+            Option(Defines.empty),
+            Option(s"[]$elemType")
+          )
+          Seq(callAst(arrayInitCallNode, elementsAsts))
+        }
     }
   }
 
