@@ -150,6 +150,22 @@ pub enum Statement {
         condition: Expression,
         body: Vec<Statement>,
     },
+    For {
+        code: String,
+        line: usize,
+        initializer: Vec<Statement>,
+        condition: Option<Expression>,
+        update: Option<Expression>,
+        body: Vec<Statement>,
+    },
+    Break {
+        code: String,
+        line: usize,
+    },
+    Continue {
+        code: String,
+        line: usize,
+    },
     Expression {
         code: String,
         line: usize,
@@ -177,6 +193,13 @@ pub enum Expression {
         left: Box<Expression>,
         right: Box<Expression>,
     },
+    Unary {
+        operator: String,
+        code: String,
+        line: usize,
+        prefix: bool,
+        argument: Box<Expression>,
+    },
     Call {
         name: String,
         code: String,
@@ -188,6 +211,12 @@ pub enum Expression {
         code: String,
         line: usize,
         base: Box<Expression>,
+    },
+    IndexAccess {
+        code: String,
+        line: usize,
+        base: Box<Expression>,
+        index: Box<Expression>,
     },
 }
 
@@ -490,6 +519,15 @@ fn parse_statement(node: Node, source: &[u8]) -> Vec<Statement> {
             .flat_map(|child| parse_statement(child, source))
             .collect(),
         "while_statement" => parse_while_statement(node, source).into_iter().collect(),
+        "for_statement" => parse_for_statement(node, source).into_iter().collect(),
+        "break_statement" => vec![Statement::Break {
+            code: statement_code(node, source),
+            line: line(node),
+        }],
+        "continue_statement" => vec![Statement::Continue {
+            code: statement_code(node, source),
+            line: line(node),
+        }],
         _ => vec![Statement::Expression {
             code: statement_code(node, source),
             line: line(node),
@@ -573,6 +611,39 @@ fn parse_while_statement(node: Node, source: &[u8]) -> Option<Statement> {
     })
 }
 
+fn parse_for_statement(node: Node, source: &[u8]) -> Option<Statement> {
+    let body = node.child_by_field_name("body")?;
+    let initializer = node
+        .child_by_field_name("initializer")
+        .map(|initializer| parse_for_initializer(initializer, source))
+        .unwrap_or_default();
+    Some(Statement::For {
+        code: statement_code(node, source),
+        line: line(node),
+        initializer,
+        condition: node
+            .child_by_field_name("condition")
+            .map(|condition| parse_expression(condition, source)),
+        update: node
+            .child_by_field_name("update")
+            .map(|update| parse_expression(update, source)),
+        body: parse_statement(body, source),
+    })
+}
+
+fn parse_for_initializer(node: Node, source: &[u8]) -> Vec<Statement> {
+    match node.kind() {
+        "declaration" => parse_local_declarations(node, source),
+        "expression_statement" => named_children(node)
+            .into_iter()
+            .next()
+            .map(|expr| statement_from_expression(node, expr, source))
+            .into_iter()
+            .collect(),
+        _ => vec![statement_from_expression(node, node, source)],
+    }
+}
+
 fn parse_expression(node: Node, source: &[u8]) -> Expression {
     match node.kind() {
         "parenthesized_expression" => named_children(node)
@@ -591,8 +662,10 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
             line: line(node),
         },
         "binary_expression" => parse_binary_expression(node, source),
+        "unary_expression" | "update_expression" => parse_unary_expression(node, source),
         "call_expression" => parse_call_expression(node, source),
         "field_expression" => parse_field_expression(node, source),
+        "subscript_expression" => parse_subscript_expression(node, source),
         "assignment_expression" => parse_binary_like_expression(node, source, "="),
         _ => identifier_expression(node, source),
     }
@@ -619,6 +692,23 @@ fn parse_binary_like_expression(node: Node, source: &[u8], operator: &str) -> Ex
             right: Box::new(parse_expression(right, source)),
         },
         _ => identifier_expression(node, source),
+    }
+}
+
+fn parse_unary_expression(node: Node, source: &[u8]) -> Expression {
+    let operator = operator_text(node, source).unwrap_or("?");
+    let argument = node
+        .child_by_field_name("argument")
+        .or_else(|| named_children(node).into_iter().next());
+    match argument {
+        Some(argument) => Expression::Unary {
+            operator: operator.to_string(),
+            code: node_text(node, source).trim().to_string(),
+            line: line(node),
+            prefix: unary_operator_is_prefix(node, source, operator),
+            argument: Box::new(parse_expression(argument, source)),
+        },
+        None => identifier_expression(node, source),
     }
 }
 
@@ -656,6 +746,24 @@ fn parse_field_expression(node: Node, source: &[u8]) -> Expression {
             code: node_text(node, source).trim().to_string(),
             line: line(node),
             base: Box::new(parse_expression(base, source)),
+        },
+        _ => identifier_expression(node, source),
+    }
+}
+
+fn parse_subscript_expression(node: Node, source: &[u8]) -> Expression {
+    let base = node
+        .child_by_field_name("argument")
+        .or_else(|| named_children(node).into_iter().next());
+    let index = node
+        .child_by_field_name("index")
+        .or_else(|| named_children(node).into_iter().nth(1));
+    match (base, index) {
+        (Some(base), Some(index)) => Expression::IndexAccess {
+            code: node_text(node, source).trim().to_string(),
+            line: line(node),
+            base: Box::new(parse_expression(base, source)),
+            index: Box::new(parse_expression(index, source)),
         },
         _ => identifier_expression(node, source),
     }
@@ -764,6 +872,19 @@ fn operator_text<'a>(node: Node, source: &'a [u8]) -> Option<&'a str> {
         }
     }
     None
+}
+
+fn unary_operator_is_prefix(node: Node, source: &[u8], operator: &str) -> bool {
+    for index in 0..node.child_count() {
+        if let Some(child) = node.child(index as u32) {
+            let text = node_text(child, source).trim();
+            if text.is_empty() {
+                continue;
+            }
+            return !child.is_named() && text == operator;
+        }
+    }
+    false
 }
 
 fn node_text<'a>(node: Node, source: &'a [u8]) -> &'a str {
@@ -904,6 +1025,81 @@ mod tests {
         assert_binary_operator(right, "-");
     }
 
+    #[test]
+    fn parses_for_loop_jump_and_unary_index_expressions() {
+        let sample = r#"
+                int sum(int *xs, int n) {
+                  int total = 0;
+                  for (int i = 0; i < n; i++) {
+                    if (!xs[i]) {
+                      continue;
+                    }
+                    total = total + xs[i];
+                  }
+                  return total;
+                }
+                "#;
+        let declarations =
+            parse_declarations(sample, SourceLanguage::C).expect("for-loop sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        assert_eq!(function.name, "sum");
+        assert_eq!(function.body.len(), 3);
+
+        let Statement::For {
+            initializer,
+            condition,
+            update,
+            body,
+            ..
+        } = &function.body[1]
+        else {
+            panic!("expected for statement");
+        };
+        assert!(matches!(
+            initializer.as_slice(),
+            [Statement::LocalDecl { .. }]
+        ));
+        assert_binary_operator(condition.as_ref().expect("for condition"), "<");
+
+        let Expression::Unary {
+            operator,
+            prefix,
+            argument,
+            ..
+        } = update.as_ref().expect("for update")
+        else {
+            panic!("expected unary update expression");
+        };
+        assert_eq!(operator, "++");
+        assert!(!prefix);
+        assert!(matches!(argument.as_ref(), Expression::Identifier { name, .. } if name == "i"));
+
+        let [Statement::If {
+            condition,
+            then_body,
+            ..
+        }, Statement::Assignment { right, .. }] = body.as_slice()
+        else {
+            panic!("expected if and assignment in for body");
+        };
+        let Expression::Unary {
+            operator, argument, ..
+        } = condition
+        else {
+            panic!("expected unary if condition");
+        };
+        assert_eq!(operator, "!");
+        assert!(matches!(argument.as_ref(), Expression::IndexAccess { .. }));
+        assert!(matches!(then_body.as_slice(), [Statement::Continue { .. }]));
+
+        let Expression::Binary { right, .. } = right else {
+            panic!("expected binary assignment rhs");
+        };
+        assert!(matches!(right.as_ref(), Expression::IndexAccess { .. }));
+    }
+
     fn statement_line(statement: &Statement) -> usize {
         match statement {
             Statement::LocalDecl { line, .. }
@@ -911,6 +1107,9 @@ mod tests {
             | Statement::Return { line, .. }
             | Statement::If { line, .. }
             | Statement::While { line, .. }
+            | Statement::For { line, .. }
+            | Statement::Break { line, .. }
+            | Statement::Continue { line, .. }
             | Statement::Expression { line, .. } => *line,
         }
     }

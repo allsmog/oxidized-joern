@@ -238,6 +238,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             lineNumber = Option(whileStmt.line)
           )
         )
+      case forStmt: OxFor =>
+        val forNode               = controlStructureNode(OxOrigin(forStmt), ControlStructureTypes.FOR, forStmt.code)
+        val initializerAsts       = forStmt.initializer.flatMap(astsForStatement)
+        val (localAsts, initAsts) = initializerAsts.partition(_.root.exists(_.isInstanceOf[NewLocal]))
+        Seq(
+          forAst(
+            forNode,
+            localAsts,
+            initAsts,
+            forStmt.condition.toSeq.map(expressionAst),
+            forStmt.update.toSeq.map(expressionAst),
+            statementBlockAst(forStmt.body, "for", forStmt.line)
+          )
+        )
+      case breakStmt: OxBreak =>
+        Seq(Ast(controlStructureNode(OxOrigin(breakStmt), ControlStructureTypes.BREAK, breakStmt.code)))
+      case continueStmt: OxContinue =>
+        Seq(Ast(controlStructureNode(OxOrigin(continueStmt), ControlStructureTypes.CONTINUE, continueStmt.code)))
       case expressionStatement: OxExpressionStatement =>
         Seq(expressionAst(expressionStatement.expression))
     }
@@ -266,6 +284,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             Option(registerType(Defines.Any))
           )
         callAst(call, Seq(expressionAst(binary.left), expressionAst(binary.right)))
+      case unary: OxUnary =>
+        val operatorName = unaryOperatorFor(unary.operator, unary.prefix)
+        val call =
+          callNode(
+            OxOrigin(unary),
+            unary.code,
+            operatorName,
+            operatorName,
+            DispatchTypes.STATIC_DISPATCH,
+            Option(""),
+            Option(registerType(Defines.Any))
+          )
+        callAst(call, Seq(expressionAst(unary.argument)))
       case call: OxCall =>
         val (methodFullName, signature, typeFullName) = callTargetInfo(call.name)
         val callNode_ =
@@ -288,6 +319,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           fieldAccess.field,
           registerType(Defines.Any)
         )
+      case indexAccess: OxIndexAccess =>
+        val operatorName = Operators.indirectIndexAccess
+        val call =
+          callNode(
+            OxOrigin(indexAccess),
+            indexAccess.code,
+            operatorName,
+            operatorName,
+            DispatchTypes.STATIC_DISPATCH,
+            Option(""),
+            Option(registerType(Defines.Any))
+          )
+        callAst(call, Seq(expressionAst(indexAccess.base), expressionAst(indexAccess.index)))
     }
   }
 
@@ -348,6 +392,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case "&&" => Operators.logicalAnd
       case "="  => Operators.assignment
       case _    => Defines.OperatorUnknown
+    }
+  }
+
+  private def unaryOperatorFor(operator: String, prefix: Boolean): String = {
+    operator match {
+      case "++" if prefix => Operators.preIncrement
+      case "++"           => Operators.postIncrement
+      case "--" if prefix => Operators.preDecrement
+      case "--"           => Operators.postDecrement
+      case "+"            => Operators.plus
+      case "-"            => Operators.minus
+      case "*"            => Operators.indirection
+      case "&"            => Operators.addressOf
+      case "~"            => Operators.not
+      case "!"            => Operators.logicalNot
+      case _              => Defines.OperatorUnknown
     }
   }
 
