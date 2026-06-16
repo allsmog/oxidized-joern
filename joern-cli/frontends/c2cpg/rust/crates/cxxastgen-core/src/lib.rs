@@ -2332,10 +2332,18 @@ fn parse_subscript_expression(node: Node, source: &[u8]) -> Expression {
             code: node_text(node, source).trim().to_string(),
             line: line(node),
             base: Box::new(parse_expression(base, source)),
-            index: Box::new(parse_expression(index, source)),
+            index: Box::new(parse_subscript_index(index, source)),
         },
         _ => identifier_expression(node, source),
     }
+}
+
+fn parse_subscript_index(node: Node, source: &[u8]) -> Expression {
+    named_children(node)
+        .into_iter()
+        .next()
+        .map(|index| parse_expression(index, source))
+        .unwrap_or_else(|| parse_expression(node, source))
 }
 
 fn parse_cast_expression(node: Node, source: &[u8]) -> Expression {
@@ -2528,7 +2536,8 @@ fn declarator_name(node: Node, source: &[u8]) -> Option<String> {
         | "field_identifier"
         | "type_identifier"
         | "qualified_identifier"
-        | "destructor_name" => Some(node_text(node, source).trim().to_string()),
+        | "destructor_name"
+        | "operator_name" => Some(node_text(node, source).trim().to_string()),
         _ => node
             .child_by_field_name("declarator")
             .and_then(|child| declarator_name(child, source))
@@ -2649,7 +2658,8 @@ fn declarator_marker(declarator: Node, source: &[u8]) -> Option<String> {
         | "field_identifier"
         | "type_identifier"
         | "qualified_identifier"
-        | "destructor_name" => Some(String::new()),
+        | "destructor_name"
+        | "operator_name" => Some(String::new()),
         "pointer_declarator" | "abstract_pointer_declarator" => Some(format!(
             "*{}",
             child_declarator(declarator)
@@ -3303,12 +3313,18 @@ mod tests {
                   static int identity(int x);
                   int size() const;
                   int outside() const;
+                  int operator+(const Widget& other) const { return value + other.value; }
+                  int operator[](int index) const { return value + index; }
                 };
                 class Fancy : public Widget {
                 public:
                   int render(int scale) override { return scale + 1; }
                   int inheritedValue() { return value + get(); }
                   int explicitThis() { return this->value + this->get(); }
+                };
+                class Invoker {
+                public:
+                  int operator()(int delta) const { return delta + 1; }
                 };
                 int make() { return 1; }
                 }
@@ -3320,7 +3336,8 @@ mod tests {
                 int use() {
                   Core::Widget widget(7);
                   Core::Fancy fancy;
-                  return Core::make() + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue() + fancy.explicitThis();
+                  Core::Invoker invoker;
+                  return Core::make() + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue() + fancy.explicitThis() + (widget + fancy) + widget[2] + invoker(3);
                 }
                 "#;
         let declarations = parse_declarations(sample, SourceLanguage::Cpp)
@@ -3366,8 +3383,18 @@ mod tests {
         assert_eq!(
             method_names,
             vec![
-                "Widget", "Widget", "declared", "get", "identity", "outside", "render", "size",
-                "stable", "~Widget"
+                "Widget",
+                "Widget",
+                "declared",
+                "get",
+                "identity",
+                "operator+",
+                "operator[]",
+                "outside",
+                "render",
+                "size",
+                "stable",
+                "~Widget"
             ]
         );
         assert!(methods.iter().any(|method| method.name == "size"
@@ -3396,6 +3423,14 @@ mod tests {
             && method.signature == "int(int)"
             && method.is_virtual
             && !method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "operator+"
+            && method.signature == "int(Widget&)<const>"
+            && method.is_const
+            && method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "operator[]"
+            && method.signature == "int(int)<const>"
+            && method.is_const
+            && method.is_definition));
         assert!(methods.iter().any(|method| method.name == "Widget"
             && method.signature == "void()"
             && !method.is_definition));
@@ -3418,6 +3453,22 @@ mod tests {
             declaration,
             Declaration::Function(method)
                 if method.name == "render" && method.signature == "int(int)" && method.is_virtual
+        )));
+
+        let invoker = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "Invoker" => {
+                    Some(struct_decl)
+                }
+                _ => None,
+            })
+            .expect("expected Invoker class");
+        assert!(invoker.nested_declarations.iter().any(|declaration| matches!(
+            declaration,
+            Declaration::Function(method)
+                if method.name == "operator()" && method.signature == "int(int)<const>" && method.is_definition
         )));
 
         let seeded_constructor = methods
@@ -3543,6 +3594,10 @@ mod tests {
             type_name: fancy_type_name,
             initializer: None,
             ..
+        }, Statement::LocalDecl {
+            type_name: invoker_type_name,
+            initializer: None,
+            ..
         }, Statement::Return {
             expression: Some(return_expr),
             ..
@@ -3552,6 +3607,7 @@ mod tests {
         };
         assert_eq!(type_name, "Core::Widget");
         assert_eq!(fancy_type_name, "Core::Fancy");
+        assert_eq!(invoker_type_name, "Core::Invoker");
         let Expression::InitializerList { code, elements, .. } = widget_initializer else {
             panic!("expected constructor argument list initializer");
         };
@@ -3574,7 +3630,8 @@ mod tests {
                 "fancy.get",
                 "fancy.declared",
                 "fancy.inheritedValue",
-                "fancy.explicitThis"
+                "fancy.explicitThis",
+                "invoker"
             ]
         );
     }
@@ -4072,13 +4129,23 @@ mod tests {
             panic!("expected unary if condition");
         };
         assert_eq!(operator, "!");
-        assert!(matches!(argument.as_ref(), Expression::IndexAccess { .. }));
+        assert!(matches!(
+            argument.as_ref(),
+            Expression::IndexAccess {
+                index, ..
+            } if matches!(index.as_ref(), Expression::Identifier { name, .. } if name == "i")
+        ));
         assert!(matches!(then_body.as_slice(), [Statement::Continue { .. }]));
 
         let Expression::Binary { right, .. } = right else {
             panic!("expected binary assignment rhs");
         };
-        assert!(matches!(right.as_ref(), Expression::IndexAccess { .. }));
+        assert!(matches!(
+            right.as_ref(),
+            Expression::IndexAccess {
+                index, ..
+            } if matches!(index.as_ref(), Expression::Identifier { name, .. } if name == "i")
+        ));
     }
 
     #[test]
