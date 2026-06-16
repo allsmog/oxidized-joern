@@ -203,7 +203,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         origin,
         structDecl.name,
         typeName,
-        filename,
+        declarationFilename(structDecl),
         structDecl.code,
         NodeTypes.NAMESPACE_BLOCK,
         parentAstFullName,
@@ -235,7 +235,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         origin,
         enumDecl.name,
         typeName,
-        filename,
+        declarationFilename(enumDecl),
         enumDecl.code,
         NodeTypes.NAMESPACE_BLOCK,
         parentAstFullName,
@@ -260,7 +260,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           constructorName,
           s"$typeFullName.$constructorName:$typeFullName()",
           None,
-          filename,
+          declarationFilename(enumDecl),
           Option(NodeTypes.TYPE_DECL),
           Option(typeFullName)
         )
@@ -297,7 +297,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         origin,
         typedef.name,
         name,
-        filename,
+        declarationFilename(typedef),
         typedef.code,
         NodeTypes.NAMESPACE_BLOCK,
         globalNamespaceBlock().fullName,
@@ -359,7 +359,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val origin     = OxOrigin(function)
     val returnType = registerType(normalizeType(function.returnType))
     val method =
-      methodNode(origin, function.name, function.name, function.name, Option(function.signature), filename)
+      methodNode(
+        origin,
+        function.name,
+        function.name,
+        function.name,
+        Option(function.signature),
+        declarationFilename(function)
+      )
         .isExternal(!function.isDefinition)
     val parameters = function.parameters.zipWithIndex.map { case (parameter, index) =>
       val parameterType = registerType(normalizeType(parameter.typeName))
@@ -768,7 +775,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     } yield {
       val capture = context.capturedGlobals.getOrElseUpdate(
         name, {
-          val closureBindingId = s"$filename:${context.function.name}:$name"
+          val closureBindingId = s"${declarationFilename(context.function)}:${context.function.name}:$name"
           val localCode        = s"${Defines.GlobalTag} $name"
           val capturedLocal =
             localNode(OxOrigin(localCode, Option(line)), name, localCode, registerType(globalEntry.typeFullName))
@@ -845,7 +852,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def macroFilename(macroDecl: OxMacroDecl): String = {
-    macroDecl.sourcePath.map(SourceFiles.toRelativePath(_, config.inputPath)).getOrElse(filename)
+    declarationFilename(macroDecl)
+  }
+
+  private def declarationFilename(declaration: OxDeclaration): String = {
+    declaration.sourcePath.map(SourceFiles.toRelativePath(_, config.inputPath)).getOrElse(filename)
   }
 
   private def macroSignature(macroDecl: OxMacroDecl): String = {

@@ -15,6 +15,7 @@ pub struct ParseOptions {
     pub defines: Vec<String>,
     pub compilation_database: Option<String>,
     pub skip_function_bodies: bool,
+    pub import_header_declarations: bool,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
@@ -72,6 +73,10 @@ pub struct IncludeDecl {
     pub name: String,
     pub code: String,
     pub line: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_path: Option<String>,
+    #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
+    pub visible_line: Option<usize>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -80,6 +85,10 @@ pub struct StructDecl {
     pub name: String,
     pub code: String,
     pub line: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_path: Option<String>,
+    #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
+    pub visible_line: Option<usize>,
     pub fields: Vec<FieldDecl>,
     #[serde(rename = "nestedDeclarations")]
     pub nested_declarations: Vec<Declaration>,
@@ -99,6 +108,10 @@ pub struct EnumDecl {
     pub name: String,
     pub code: String,
     pub line: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_path: Option<String>,
+    #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
+    pub visible_line: Option<usize>,
     pub variants: Vec<EnumVariant>,
 }
 
@@ -118,6 +131,10 @@ pub struct GlobalVariableDecl {
     pub type_name: String,
     pub code: String,
     pub line: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_path: Option<String>,
+    #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
+    pub visible_line: Option<usize>,
     pub initializer: Option<Expression>,
 }
 
@@ -128,6 +145,10 @@ pub struct TypedefDecl {
     pub type_name: String,
     pub code: String,
     pub line: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_path: Option<String>,
+    #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
+    pub visible_line: Option<usize>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -139,6 +160,10 @@ pub struct FunctionDecl {
     pub is_definition: bool,
     pub code: String,
     pub line: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_path: Option<String>,
+    #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
+    pub visible_line: Option<usize>,
     pub parameters: Vec<ParameterDecl>,
     pub body: Vec<Statement>,
 }
@@ -479,17 +504,13 @@ fn parse_declaration_node(
             if let Some(declaration) = parse_include(node, source) {
                 if let (Some(source_path), Some(options)) = (source_path, options) {
                     if let Some(path) = resolve_include(source_path, &declaration.name, options) {
-                        declarations.extend(
-                            header_macro_declarations(
-                                &path,
-                                declaration.line,
-                                options,
-                                symbols,
-                                visited_headers,
-                            )?
-                            .into_iter()
-                            .map(Declaration::Macro),
-                        );
+                        declarations.extend(header_declarations(
+                            &path,
+                            declaration.line,
+                            options,
+                            symbols,
+                            visited_headers,
+                        )?);
                     }
                 }
                 declarations.push(Declaration::Include(declaration));
@@ -587,11 +608,20 @@ fn declaration_line(declaration: &Declaration) -> usize {
     }
 }
 
-fn declaration_sort_line(declaration: &Declaration) -> usize {
+fn declaration_visible_line(declaration: &Declaration) -> Option<usize> {
     match declaration {
-        Declaration::Macro(value) => value.visible_line.unwrap_or(value.line),
-        _ => declaration_line(declaration),
+        Declaration::Macro(value) => value.visible_line,
+        Declaration::Include(value) => value.visible_line,
+        Declaration::Struct(value) => value.visible_line,
+        Declaration::Enum(value) => value.visible_line,
+        Declaration::Typedef(value) => value.visible_line,
+        Declaration::GlobalVariable(value) => value.visible_line,
+        Declaration::Function(value) => value.visible_line,
     }
+}
+
+fn declaration_sort_line(declaration: &Declaration) -> usize {
+    declaration_visible_line(declaration).unwrap_or_else(|| declaration_line(declaration))
 }
 
 fn parse_macro(node: Node, source: &[u8]) -> Option<MacroDecl> {
@@ -623,13 +653,13 @@ fn register_macro_symbols(declarations: &[Declaration], symbols: &mut HashSet<St
     }
 }
 
-fn header_macro_declarations(
+fn header_declarations(
     header_path: &Path,
     visible_line: usize,
     options: &ParseOptions,
     symbols: &mut HashSet<String>,
     visited_headers: &mut HashSet<PathBuf>,
-) -> Result<Vec<MacroDecl>> {
+) -> Result<Vec<Declaration>> {
     let normalized_header = normalized_absolute_path(header_path);
     if !visited_headers.insert(normalized_header.clone()) {
         return Ok(Vec::new());
@@ -645,18 +675,79 @@ fn header_macro_declarations(
         symbols,
         visited_headers,
     )?;
-    let mut macros = Vec::new();
-    for declaration in declarations {
-        if let Declaration::Macro(mut macro_decl) = declaration {
-            if macro_decl.source_path.is_none() {
-                macro_decl.source_path = Some(normalize_path(&normalized_header));
+    Ok(declarations
+        .into_iter()
+        .filter_map(|declaration| {
+            let declaration =
+                annotate_header_declaration(declaration, &normalized_header, visible_line);
+            if let Declaration::Macro(macro_decl) = &declaration {
+                symbols.insert(macro_decl.name.clone());
             }
-            macro_decl.visible_line = Some(visible_line);
-            symbols.insert(macro_decl.name.clone());
-            macros.push(macro_decl);
+            if options.import_header_declarations || matches!(declaration, Declaration::Macro(_)) {
+                Some(declaration)
+            } else {
+                None
+            }
+        })
+        .collect())
+}
+
+fn annotate_header_declaration(
+    mut declaration: Declaration,
+    header_path: &Path,
+    visible_line: usize,
+) -> Declaration {
+    let source_path = normalize_path(header_path);
+    match &mut declaration {
+        Declaration::Macro(value) => {
+            if value.source_path.is_none() {
+                value.source_path = Some(source_path);
+            }
+            value.visible_line = Some(visible_line);
+        }
+        Declaration::Include(value) => {
+            if value.source_path.is_none() {
+                value.source_path = Some(source_path);
+            }
+            value.visible_line = Some(visible_line);
+        }
+        Declaration::Struct(value) => {
+            if value.source_path.is_none() {
+                value.source_path = Some(source_path.clone());
+            }
+            value.visible_line = Some(visible_line);
+            value.nested_declarations = value
+                .nested_declarations
+                .drain(..)
+                .map(|nested| annotate_header_declaration(nested, header_path, visible_line))
+                .collect();
+        }
+        Declaration::Enum(value) => {
+            if value.source_path.is_none() {
+                value.source_path = Some(source_path);
+            }
+            value.visible_line = Some(visible_line);
+        }
+        Declaration::Typedef(value) => {
+            if value.source_path.is_none() {
+                value.source_path = Some(source_path);
+            }
+            value.visible_line = Some(visible_line);
+        }
+        Declaration::GlobalVariable(value) => {
+            if value.source_path.is_none() {
+                value.source_path = Some(source_path);
+            }
+            value.visible_line = Some(visible_line);
+        }
+        Declaration::Function(value) => {
+            if value.source_path.is_none() {
+                value.source_path = Some(source_path);
+            }
+            value.visible_line = Some(visible_line);
         }
     }
-    Ok(macros)
+    declaration
 }
 
 fn parse_preproc_declarations(
@@ -941,6 +1032,8 @@ fn parse_include(node: Node, source: &[u8]) -> Option<IncludeDecl> {
         name,
         code,
         line: line(node),
+        source_path: None,
+        visible_line: None,
     })
 }
 
@@ -990,6 +1083,8 @@ fn parse_struct_with_name(node: Node, source: &[u8], name: String) -> Option<Str
         name,
         code: compact_code(node_text(node, source)),
         line: line(node),
+        source_path: None,
+        visible_line: None,
         fields: field_nodes
             .into_iter()
             .filter_map(|field| parse_field(field, source))
@@ -1097,6 +1192,8 @@ fn parse_enum_with_name(node: Node, source: &[u8], name: String) -> Option<EnumD
         name,
         code: compact_code(node_text(node, source)),
         line: line(node),
+        source_path: None,
+        visible_line: None,
         variants: named_children(body)
             .into_iter()
             .filter(|child| child.kind() == "enumerator")
@@ -1142,6 +1239,8 @@ fn parse_typedef_declarations(node: Node, source: &[u8]) -> Vec<TypedefDecl> {
                 type_name: type_from_declarator(&base_type, declarator, source),
                 code: node_text(node, source).trim().to_string(),
                 line: line(declarator),
+                source_path: None,
+                visible_line: None,
             })
         })
         .collect()
@@ -1189,6 +1288,8 @@ fn parse_global_variable_declarations(node: Node, source: &[u8]) -> Vec<GlobalVa
                 type_name: type_from_declarator(&base_type, declarator, source),
                 code: variable_declaration_code(node, declarator, source),
                 line: line(declarator),
+                source_path: None,
+                visible_line: None,
                 initializer: declarator
                     .child_by_field_name("value")
                     .map(|value| parse_expression(value, source)),
@@ -1222,6 +1323,8 @@ fn parse_function(
         is_definition: true,
         code: compact_code(node_text(node, source)),
         line: line(node),
+        source_path: None,
+        visible_line: None,
         parameters,
         body: parse_statement_block(body, source, symbols),
     })
@@ -1250,6 +1353,8 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
         is_definition: false,
         code: statement_code(node, source),
         line: line(node),
+        source_path: None,
+        visible_line: None,
         parameters,
         body: Vec::new(),
     })
@@ -2201,6 +2306,7 @@ mod tests {
                 ],
                 compilation_database: None,
                 skip_function_bodies: false,
+                import_header_declarations: false,
             },
         )
         .expect("parse temp source");
@@ -2254,6 +2360,7 @@ mod tests {
                 defines: Vec::new(),
                 compilation_database: None,
                 skip_function_bodies: false,
+                import_header_declarations: false,
             },
         )
         .expect("parse source with include");
@@ -2273,6 +2380,91 @@ mod tests {
         let expected_header_path = normalize_path(&header);
         assert_eq!(
             feature_macro.source_path.as_deref(),
+            Some(expected_header_path.as_str())
+        );
+    }
+
+    #[test]
+    fn parse_file_imports_declarations_from_included_headers_when_enabled() {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("clock should be after Unix epoch")
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!(
+            "cxxastgen-core-header-decls-{}-{unique}",
+            std::process::id()
+        ));
+        let include_dir = dir.join("include");
+        fs::create_dir_all(&include_dir).expect("create include dir");
+        let header = include_dir.join("snapshot_math.h");
+        fs::write(
+            &header,
+            r#"
+                struct HeaderBox { int value; };
+                int header_add(int x, int y);
+                int header_global;
+                "#,
+        )
+        .expect("write header");
+        let source = dir.join("main.c");
+        fs::write(
+            &source,
+            "#include \"snapshot_math.h\"\nint use_header(struct HeaderBox box) { return header_add(box.value, header_global); }\n",
+        )
+        .expect("write source");
+
+        let document = parse_file(
+            &source,
+            &ParseOptions {
+                include_paths: vec![normalize_path(&include_dir)],
+                defines: Vec::new(),
+                compilation_database: Some("compile_commands.json".to_string()),
+                skip_function_bodies: false,
+                import_header_declarations: true,
+            },
+        )
+        .expect("parse source with imported header declarations");
+        fs::remove_dir_all(&dir).ok();
+
+        let expected_header_path = normalize_path(&header);
+        let header_struct = document
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(value) if value.name == "HeaderBox" => Some(value),
+                _ => None,
+            })
+            .expect("included struct should be imported");
+        assert_eq!(
+            header_struct.source_path.as_deref(),
+            Some(expected_header_path.as_str())
+        );
+        assert_eq!(header_struct.visible_line, Some(1));
+
+        let header_function = document
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(value) if value.name == "header_add" => Some(value),
+                _ => None,
+            })
+            .expect("included function prototype should be imported");
+        assert_eq!(
+            header_function.source_path.as_deref(),
+            Some(expected_header_path.as_str())
+        );
+        assert!(!header_function.is_definition);
+
+        let header_global = document
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::GlobalVariable(value) if value.name == "header_global" => Some(value),
+                _ => None,
+            })
+            .expect("included global should be imported");
+        assert_eq!(
+            header_global.source_path.as_deref(),
             Some(expected_header_path.as_str())
         );
     }
@@ -2318,6 +2510,7 @@ mod tests {
                 defines: vec!["FEATURE".to_string()],
                 compilation_database: None,
                 skip_function_bodies: false,
+                import_header_declarations: false,
             },
         )
         .expect("parse conditional source");
@@ -2382,6 +2575,7 @@ mod tests {
                 defines: Vec::new(),
                 compilation_database: None,
                 skip_function_bodies: false,
+                import_header_declarations: false,
             },
             declarations: parse_declarations(sample, SourceLanguage::C)
                 .expect("sample C should parse"),

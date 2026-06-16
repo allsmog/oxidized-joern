@@ -8,6 +8,8 @@ sealed trait OxDeclaration {
   def name: String
   def code: String
   def line: Int
+  def sourcePath: Option[String]
+  def visibleLine: Int
 }
 
 case class OxMacroDecl(
@@ -20,19 +22,29 @@ case class OxMacroDecl(
   visibleLine: Int
 ) extends OxDeclaration
 
-case class OxIncludeDecl(name: String, code: String, line: Int) extends OxDeclaration
+case class OxIncludeDecl(name: String, code: String, line: Int, sourcePath: Option[String], visibleLine: Int)
+    extends OxDeclaration
 
 case class OxStructDecl(
   name: String,
   code: String,
   line: Int,
+  sourcePath: Option[String],
+  visibleLine: Int,
   fields: Seq[OxFieldDecl],
   nestedDeclarations: Seq[OxDeclaration]
 ) extends OxDeclaration
 
 case class OxFieldDecl(name: String, typeName: String, code: String)
 
-case class OxEnumDecl(name: String, code: String, line: Int, variants: Seq[OxEnumVariant]) extends OxDeclaration
+case class OxEnumDecl(
+  name: String,
+  code: String,
+  line: Int,
+  sourcePath: Option[String],
+  visibleLine: Int,
+  variants: Seq[OxEnumVariant]
+) extends OxDeclaration
 
 case class OxEnumVariant(name: String, value: Option[String], code: String, line: Int)
 
@@ -41,10 +53,19 @@ case class OxGlobalVariableDecl(
   typeName: String,
   code: String,
   line: Int,
+  sourcePath: Option[String],
+  visibleLine: Int,
   initializer: Option[OxExpression]
 ) extends OxDeclaration
 
-case class OxTypedefDecl(name: String, typeName: String, code: String, line: Int) extends OxDeclaration
+case class OxTypedefDecl(
+  name: String,
+  typeName: String,
+  code: String,
+  line: Int,
+  sourcePath: Option[String],
+  visibleLine: Int
+) extends OxDeclaration
 
 case class OxFunctionDecl(
   name: String,
@@ -53,6 +74,8 @@ case class OxFunctionDecl(
   isDefinition: Boolean,
   code: String,
   line: Int,
+  sourcePath: Option[String],
+  visibleLine: Int,
   parameters: Seq[OxParameterDecl],
   body: Seq[OxStatement]
 ) extends OxDeclaration
@@ -164,16 +187,24 @@ object OxDocument {
           line = int(value, "line"),
           parameters = value("parameters").arr.map(_.str).toSeq,
           body = str(value, "body"),
-          sourcePath = value.obj.get("sourcePath").filter(!_.isNull).map(_.str),
-          visibleLine = value.obj.get("visibleLine").filter(!_.isNull).map(_.num.toInt).getOrElse(int(value, "line"))
+          sourcePath = sourcePath(value),
+          visibleLine = visibleLine(value)
         )
       case "include" =>
-        OxIncludeDecl(name = str(value, "name"), code = str(value, "code"), line = int(value, "line"))
+        OxIncludeDecl(
+          name = str(value, "name"),
+          code = str(value, "code"),
+          line = int(value, "line"),
+          sourcePath = sourcePath(value),
+          visibleLine = visibleLine(value)
+        )
       case "struct" =>
         OxStructDecl(
           name = str(value, "name"),
           code = str(value, "code"),
           line = int(value, "line"),
+          sourcePath = sourcePath(value),
+          visibleLine = visibleLine(value),
           fields = value("fields").arr.map(field).toSeq,
           nestedDeclarations =
             value.obj.get("nestedDeclarations").map(_.arr.map(declaration).toSeq).getOrElse(Seq.empty)
@@ -183,6 +214,8 @@ object OxDocument {
           name = str(value, "name"),
           code = str(value, "code"),
           line = int(value, "line"),
+          sourcePath = sourcePath(value),
+          visibleLine = visibleLine(value),
           variants = value("variants").arr.map(enumVariant).toSeq
         )
       case "globalVariable" =>
@@ -191,6 +224,8 @@ object OxDocument {
           typeName = str(value, "typeName"),
           code = str(value, "code"),
           line = int(value, "line"),
+          sourcePath = sourcePath(value),
+          visibleLine = visibleLine(value),
           initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
         )
       case "typedef" =>
@@ -198,7 +233,9 @@ object OxDocument {
           name = str(value, "name"),
           typeName = str(value, "typeName"),
           code = str(value, "code"),
-          line = int(value, "line")
+          line = int(value, "line"),
+          sourcePath = sourcePath(value),
+          visibleLine = visibleLine(value)
         )
       case "function" =>
         OxFunctionDecl(
@@ -208,6 +245,8 @@ object OxDocument {
           isDefinition = value("isDefinition").bool,
           code = str(value, "code"),
           line = int(value, "line"),
+          sourcePath = sourcePath(value),
+          visibleLine = visibleLine(value),
           parameters = value("parameters").arr.map(parameter).toSeq,
           body = value("body").arr.map(statement).toSeq
         )
@@ -420,5 +459,13 @@ object OxDocument {
   private def str(value: Value, key: String): String = value(key).str
 
   private def int(value: Value, key: String): Int = value(key).num.toInt
+
+  private def sourcePath(value: Value): Option[String] = {
+    value.obj.get("sourcePath").filter(!_.isNull).map(_.str)
+  }
+
+  private def visibleLine(value: Value): Int = {
+    value.obj.get("visibleLine").filter(!_.isNull).map(_.num.toInt).getOrElse(int(value, "line"))
+  }
 
 }
