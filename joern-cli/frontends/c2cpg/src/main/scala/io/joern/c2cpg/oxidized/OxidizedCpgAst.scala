@@ -89,10 +89,13 @@ case class OxFunctionDecl(
   sourcePath: Option[String],
   visibleLine: Int,
   parameters: Seq[OxParameterDecl],
+  constructorInitializers: Seq[OxConstructorInitializer],
   body: Seq[OxStatement]
 ) extends OxDeclaration
 
 case class OxParameterDecl(name: String, typeName: String, code: String, line: Int)
+
+case class OxConstructorInitializer(field: String, code: String, line: Int, arguments: Seq[OxExpression])
 
 sealed trait OxStatement {
   def code: String
@@ -281,6 +284,8 @@ object OxDocument {
           sourcePath = sourcePath(value),
           visibleLine = visibleLine(value),
           parameters = value("parameters").arr.map(parameter).toSeq,
+          constructorInitializers =
+            value.obj.get("constructorInitializers").map(_.arr.map(constructorInitializer).toSeq).getOrElse(Seq.empty),
           body = value("body").arr.map(statement).toSeq
         )
       case other =>
@@ -307,6 +312,15 @@ object OxDocument {
       typeName = str(value, "typeName"),
       code = str(value, "code"),
       line = int(value, "line")
+    )
+  }
+
+  private def constructorInitializer(value: Value): OxConstructorInitializer = {
+    OxConstructorInitializer(
+      field = str(value, "field"),
+      code = str(value, "code"),
+      line = int(value, "line"),
+      arguments = value("arguments").arr.map(expression).toSeq
     )
   }
 

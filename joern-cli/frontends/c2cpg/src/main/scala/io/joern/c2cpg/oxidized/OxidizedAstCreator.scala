@@ -532,7 +532,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     functionCaptureContext = Option(captureContext)
     currentMethodOwnerTypeFullName = parentTypeOwner
     val bodyAsts =
-      try function.body.flatMap(astsForStatement)
+      try function.constructorInitializers.map(constructorInitializerAst) ++ function.body.flatMap(astsForStatement)
       finally {
         currentMethodOwnerTypeFullName = previousMethodOwner
         functionCaptureContext = previousCaptureContext
@@ -546,6 +546,32 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       methodAst(method, parameters.map(_._2._2), body, methodReturn, methodModifiers(simpleName, parentTypeOwner))
 
     captureAstForFunction(captureContext).fold(Seq(ast))(captureAst => Seq(ast, captureAst))
+  }
+
+  private def constructorInitializerAst(initializer: OxConstructorInitializer): Ast = {
+    val fieldName      = qualifiedNameParts(initializer.field).lastOption.getOrElse(initializer.field)
+    val assignmentCode = s"${Defines.This}->$fieldName = ${constructorInitializerValueCode(initializer)}"
+    val left = implicitFieldAccessAst(fieldName, initializer.line).getOrElse(
+      identifierAst(fieldName, fieldName, initializer.line)
+    )
+    val right = initializer.arguments match {
+      case Seq(argument) => expressionAst(argument)
+      case arguments =>
+        operatorCallAst(
+          OxOrigin(initializer.code, Option(initializer.line)),
+          initializer.code,
+          Operators.arrayInitializer,
+          arguments.map(expressionAst)
+        )
+    }
+    assignmentAst(OxOrigin(initializer.code, Option(initializer.line)), left, right, assignmentCode)
+  }
+
+  private def constructorInitializerValueCode(initializer: OxConstructorInitializer): String = {
+    initializer.arguments match {
+      case Seq(argument) => argument.code
+      case arguments     => arguments.map(_.code).mkString("{", ", ", "}")
+    }
   }
 
   private def astsForStatement(statement: OxStatement): Seq[Ast] = {

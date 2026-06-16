@@ -192,6 +192,7 @@ pub struct FunctionDecl {
     #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
     pub visible_line: Option<usize>,
     pub parameters: Vec<ParameterDecl>,
+    pub constructor_initializers: Vec<ConstructorInitializer>,
     pub body: Vec<Statement>,
 }
 
@@ -202,6 +203,15 @@ pub struct ParameterDecl {
     pub type_name: String,
     pub code: String,
     pub line: usize,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConstructorInitializer {
+    pub field: String,
+    pub code: String,
+    pub line: usize,
+    pub arguments: Vec<Expression>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -1599,6 +1609,7 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
         .unwrap_or_default();
+    let constructor_initializers = parse_constructor_initializers(node, source);
     Some(FunctionDecl {
         name,
         signature: signature(&return_type, &parameters),
@@ -1609,6 +1620,7 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
         source_path: None,
         visible_line: None,
         parameters,
+        constructor_initializers,
         body: parse_statement_block(body, source, symbols),
     })
 }
@@ -1643,6 +1655,7 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
         source_path: None,
         visible_line: None,
         parameters,
+        constructor_initializers: Vec::new(),
         body: Vec::new(),
     })
 }
@@ -1663,6 +1676,7 @@ fn parse_constructor_or_destructor(
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
         .unwrap_or_default();
+    let constructor_initializers = parse_constructor_initializers(node, source);
     let body = node
         .child_by_field_name("body")
         .map(|body| parse_statement_block(body, source, symbols))
@@ -1681,7 +1695,42 @@ fn parse_constructor_or_destructor(
         source_path: None,
         visible_line: None,
         parameters,
+        constructor_initializers,
         body,
+    })
+}
+
+fn parse_constructor_initializers(node: Node, source: &[u8]) -> Vec<ConstructorInitializer> {
+    named_children(node)
+        .into_iter()
+        .find(|child| child.kind() == "field_initializer_list")
+        .map(|initializer_list| {
+            named_children(initializer_list)
+                .into_iter()
+                .filter(|initializer| initializer.kind() == "field_initializer")
+                .filter_map(|initializer| parse_constructor_initializer(initializer, source))
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+fn parse_constructor_initializer(node: Node, source: &[u8]) -> Option<ConstructorInitializer> {
+    let field_node = named_children(node).into_iter().find(|child| {
+        matches!(
+            child.kind(),
+            "field_identifier" | "qualified_identifier" | "template_method"
+        )
+    })?;
+    let arguments = named_children(node)
+        .into_iter()
+        .find(|child| matches!(child.kind(), "argument_list" | "initializer_list"))
+        .map(|arguments| initializer_list_elements(arguments, source))
+        .unwrap_or_default();
+    Some(ConstructorInitializer {
+        field: node_text(field_node, source).trim().to_string(),
+        code: compact_code(node_text(node, source)),
+        line: line(node),
+        arguments,
     })
 }
 
@@ -3180,6 +3229,31 @@ mod tests {
         assert!(methods.iter().any(|method| method.name == "Widget"
             && method.signature == "void(int&)"
             && method.is_definition));
+        let seeded_constructor = methods
+            .iter()
+            .find(|method| {
+                method.name == "Widget" && method.signature == "void(int&)" && method.is_definition
+            })
+            .expect("expected inline seeded constructor");
+        assert_eq!(seeded_constructor.constructor_initializers.len(), 1);
+        assert_eq!(
+            seeded_constructor.constructor_initializers[0].field,
+            "value"
+        );
+        assert_eq!(
+            seeded_constructor.constructor_initializers[0].code,
+            "value(seed)"
+        );
+        assert_eq!(
+            seeded_constructor.constructor_initializers[0]
+                .arguments
+                .len(),
+            1
+        );
+        match &seeded_constructor.constructor_initializers[0].arguments[0] {
+            Expression::Identifier { name, .. } => assert_eq!(name, "seed"),
+            other => panic!("expected seed identifier initializer argument, got {other:?}"),
+        }
         assert!(methods.iter().any(|method| method.name == "~Widget"
             && method.signature == "void()"
             && method.is_definition));
@@ -3205,6 +3279,13 @@ mod tests {
             .expect("expected out-of-class constructor definition");
         assert_eq!(constructor.signature, "void()");
         assert!(constructor.is_definition);
+        assert_eq!(constructor.constructor_initializers.len(), 1);
+        assert_eq!(constructor.constructor_initializers[0].field, "value");
+        assert_eq!(constructor.constructor_initializers[0].code, "value(1)");
+        match &constructor.constructor_initializers[0].arguments[0] {
+            Expression::Literal { value, .. } => assert_eq!(value, "1"),
+            other => panic!("expected literal out-of-class initializer argument, got {other:?}"),
+        }
 
         let destructor = declarations
             .iter()
