@@ -3402,6 +3402,10 @@ mod tests {
                   if (1) {
                     Core::Widget scoped(widget);
                   }
+                  if (widget.get()) {
+                    Core::Widget early(widget);
+                    return early.get();
+                  }
                   Core::Widget *ptr = &widget;
                   Core::Fancy fancy;
                   Core::Invoker invoker;
@@ -3677,7 +3681,13 @@ mod tests {
             type_name: copied_type_name,
             initializer: Some(copied_initializer),
             ..
-        }, Statement::If { then_body, .. }, Statement::LocalDecl {
+        }, Statement::If {
+            then_body: scoped_then_body,
+            ..
+        }, Statement::If {
+            then_body: early_then_body,
+            ..
+        }, Statement::LocalDecl {
             type_name: ptr_type_name,
             initializer: Some(ptr_initializer),
             ..
@@ -3733,7 +3743,7 @@ mod tests {
             matches!(copied_initializer, Expression::Identifier { name, .. } if name == "widget")
         );
         assert!(matches!(
-            then_body.as_slice(),
+            scoped_then_body.as_slice(),
             [Statement::LocalDecl {
                 name,
                 type_name,
@@ -3742,6 +3752,21 @@ mod tests {
             }] if name == "scoped"
                 && type_name == "Core::Widget"
                 && matches!(elements.as_slice(), [Expression::Identifier { name, .. }] if name == "widget")
+        ));
+        assert!(matches!(
+            early_then_body.as_slice(),
+            [Statement::LocalDecl {
+                name,
+                type_name,
+                initializer: Some(Expression::InitializerList { elements, .. }),
+                ..
+            }, Statement::Return {
+                expression: Some(Expression::Call { name: return_name, .. }),
+                ..
+            }] if name == "early"
+                && type_name == "Core::Widget"
+                && matches!(elements.as_slice(), [Expression::Identifier { name, .. }] if name == "widget")
+                && return_name == "early.get"
         ));
         assert!(matches!(
             ptr_initializer,
