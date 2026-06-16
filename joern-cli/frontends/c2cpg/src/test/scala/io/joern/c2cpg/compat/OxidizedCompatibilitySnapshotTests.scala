@@ -111,6 +111,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  int size() const;
           |  int outside() const;
           |  int operator+(const Widget& other) const { return value + other.value; }
+          |  Widget& operator=(const Widget& other) { value = other.value; return *this; }
           |  int operator[](int index) const { return value + index; }
           |};
           |class Fancy : public Widget {
@@ -137,6 +138,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  Core::Widget widget(7);
           |  Core::Fancy fancy;
           |  Core::Invoker invoker;
+          |  widget = fancy;
           |  return Core::make() + Core::Widget::identity(2) + Core::Widget::instances + convert(1) + convert(widget) + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue() + fancy.explicitThis() + (widget + fancy) + widget[2] + invoker(3);
           |}
           |""".stripMargin,
@@ -163,6 +165,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "identity",
           "normalize",
           "operator+",
+          "operator=",
           "operator[]",
           "outside",
           "pick",
@@ -205,6 +208,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.fullNameExact("Core.Widget.operator+:int(Widget&)<const>").parameter.name.l shouldBe
         List("this", "other")
       cpg.method.fullNameExact("Core.Widget.operator+:int(Widget&)<const>").parameter.typeFullName.l shouldBe
+        List("Core.Widget*", "Widget&")
+      cpg.method.fullNameExact("Core.Widget.operator=:Widget&(Widget&)").parameter.name.l shouldBe
+        List("this", "other")
+      cpg.method.fullNameExact("Core.Widget.operator=:Widget&(Widget&)").parameter.typeFullName.l shouldBe
         List("Core.Widget*", "Widget&")
       cpg.method.fullNameExact("Core.Widget.operator[]:int(int)<const>").parameter.name.l shouldBe
         List("this", "index")
@@ -317,6 +324,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("Core.Fancy.inheritedValue:int()")
       cpg.method.nameExact("use").call.codeExact("fancy.explicitThis()").methodFullName.l shouldBe
         List("Core.Fancy.explicitThis:int()")
+      inside(cpg.method.nameExact("use").call.nameExact("operator=").codeExact("widget = fancy").l) {
+        case List(operatorCall) =>
+          operatorCall.methodFullName shouldBe "Core.Widget.operator=:Widget&(Widget&)"
+          operatorCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+          operatorCall.typeFullName shouldBe "Widget&"
+          operatorCall.argument.code.l shouldBe List("widget", "fancy")
+      }
+      cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("widget = fancy").l shouldBe Nil
       inside(cpg.method.nameExact("use").call.nameExact("operator+").codeExact("widget + fancy").l) {
         case List(operatorCall) =>
           operatorCall.methodFullName shouldBe "Core.Widget.operator+:int(Widget&)<const>"
