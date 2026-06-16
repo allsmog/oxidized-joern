@@ -44,6 +44,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     qualifiedName: String,
     fullName: String
   )
+  private final case class ResolvedOperatorCall(
+    entry: FunctionEntry,
+    name: String,
+    base: Option[OxExpression],
+    arguments: Seq[OxExpression]
+  )
   private final case class FunctionCaptureContext(
     function: OxFunctionDecl,
     methodRef: NewMethodRef,
@@ -89,6 +95,37 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       Seq(localName, fullName).distinct.map(typeName => typeName -> baseTypes)
     }.toMap
   private val IntegerLiteralPattern = """[+-]?(?:0[xX][0-9a-fA-F]+|\d+)[uUlL]*""".r
+  private val CxxOverloadableBinaryOperators = Set(
+    "+",
+    "-",
+    "*",
+    "/",
+    "%",
+    "<",
+    ">",
+    "<=",
+    ">=",
+    "==",
+    "!=",
+    "&&",
+    "||",
+    "&",
+    "|",
+    "^",
+    "<<",
+    ">>",
+    "=",
+    "+=",
+    "-=",
+    "*=",
+    "/=",
+    "%=",
+    "<<=",
+    ">>=",
+    "&=",
+    "^=",
+    "|="
+  )
 
   private var scope: Map[String, ScopeEntry]                            = Map.empty
   private var globalLocalEntries: Map[OxGlobalVariableDecl, ScopeEntry] = Map.empty
@@ -780,11 +817,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case literal: OxLiteral =>
         Ast(literalNode(OxOrigin(literal), literal.code, literalType(literal.value)))
       case binary: OxBinary =>
-        operatorCallAst(
-          OxOrigin(binary),
-          binary.code,
-          operatorFor(binary.operator),
-          Seq(expressionAst(binary.left), expressionAst(binary.right))
+        overloadedBinaryOperatorAst(binary).getOrElse(
+          operatorCallAst(
+            OxOrigin(binary),
+            binary.code,
+            operatorFor(binary.operator),
+            Seq(expressionAst(binary.left), expressionAst(binary.right))
+          )
         )
       case unary: OxUnary =>
         operatorCallAst(
@@ -852,13 +891,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           registerType(expressionTypeFullName(fieldAccess).getOrElse(Defines.Any))
         )
       case indexAccess: OxIndexAccess =>
-        val operatorName = Operators.indirectIndexAccess
-        operatorCallAst(
-          OxOrigin(indexAccess),
-          indexAccess.code,
-          operatorName,
-          Seq(expressionAst(indexAccess.base), expressionAst(indexAccess.index))
-        )
+        overloadedIndexOperatorAst(indexAccess).getOrElse {
+          val operatorName = Operators.indirectIndexAccess
+          operatorCallAst(
+            OxOrigin(indexAccess),
+            indexAccess.code,
+            operatorName,
+            Seq(expressionAst(indexAccess.base), expressionAst(indexAccess.index))
+          )
+        }
       case initializerList: OxInitializerList =>
         operatorCallAst(
           OxOrigin(initializerList),
@@ -879,7 +920,104 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def astForCallExpression(call: OxCall): Ast = {
-    if (isPointerCall(call)) pointerCallAst(call) else directCallAst(call)
+    overloadedCallOperatorAst(call).getOrElse {
+      if (isPointerCall(call)) pointerCallAst(call) else directCallAst(call)
+    }
+  }
+
+  private def overloadedBinaryOperatorAst(binary: OxBinary): Option[Ast] = {
+    overloadedBinaryOperatorTarget(binary).map(target =>
+      astForResolvedOperatorCall(OxOrigin(binary), binary.code, target)
+    )
+  }
+
+  private def overloadedBinaryOperatorTarget(binary: OxBinary): Option[ResolvedOperatorCall] = {
+    cxxOperatorFunctionName(binary.operator).flatMap { operatorName =>
+      val memberTarget =
+        selectFunctionEntry(memberFunctionCandidates(binary.left, operatorName), Some(Seq(binary.right)))
+          .map(entry => ResolvedOperatorCall(entry, operatorName, Option(binary.left), Seq(binary.right)))
+      memberTarget.orElse {
+        selectFunctionEntry(functionCandidatesByName(operatorName), Some(Seq(binary.left, binary.right)))
+          .map(entry => ResolvedOperatorCall(entry, operatorName, None, Seq(binary.left, binary.right)))
+      }
+    }
+  }
+
+  private def overloadedIndexOperatorAst(indexAccess: OxIndexAccess): Option[Ast] = {
+    overloadedIndexOperatorTarget(indexAccess).map(target =>
+      astForResolvedOperatorCall(OxOrigin(indexAccess), indexAccess.code, target)
+    )
+  }
+
+  private def overloadedIndexOperatorTarget(indexAccess: OxIndexAccess): Option[ResolvedOperatorCall] = {
+    val operatorName = "operator[]"
+    selectFunctionEntry(memberFunctionCandidates(indexAccess.base, operatorName), Some(Seq(indexAccess.index)))
+      .map(entry => ResolvedOperatorCall(entry, operatorName, Option(indexAccess.base), Seq(indexAccess.index)))
+  }
+
+  private def overloadedCallOperatorAst(call: OxCall): Option[Ast] = {
+    overloadedCallOperatorTarget(call).map(target => astForResolvedOperatorCall(OxOrigin(call), call.code, target))
+  }
+
+  private def overloadedCallOperatorTarget(call: OxCall): Option[ResolvedOperatorCall] = {
+    val operatorName = "operator()"
+    selectFunctionEntry(memberFunctionCandidates(call.callee, operatorName), Some(call.arguments))
+      .map(entry => ResolvedOperatorCall(entry, operatorName, Option(call.callee), call.arguments))
+  }
+
+  private def astForResolvedOperatorCall(origin: OxOrigin, code: String, target: ResolvedOperatorCall): Ast = {
+    val dispatchType =
+      if (isVirtualFunctionEntry(target.entry)) DispatchTypes.DYNAMIC_DISPATCH else DispatchTypes.STATIC_DISPATCH
+    val callNode_ =
+      callNode(
+        origin.copy(code = code),
+        code,
+        target.name,
+        target.entry.fullName,
+        dispatchType,
+        Option(target.entry.function.signature),
+        Option(registerType(normalizeType(target.entry.function.returnType)))
+      )
+    val base = target.base.map(expressionAst)
+    createCallAst(
+      callNode_,
+      target.arguments.map(expressionAst),
+      base = base,
+      receiver = if (dispatchType == DispatchTypes.DYNAMIC_DISPATCH) base else None
+    )
+  }
+
+  private def memberFunctionCandidates(receiver: OxExpression, name: String): Seq[FunctionEntry] = {
+    expressionTypeFullName(receiver)
+      .map(receiverAggregateTypeName)
+      .toSeq
+      .flatMap(receiverType =>
+        typeAndBaseTypeFullNames(receiverType).reverse.flatMap(typeName =>
+          functionCandidatesByQualifiedName(s"$typeName.$name")
+        )
+      )
+  }
+
+  private def receiverAggregateTypeName(typeName: String): String = {
+    val normalized = normalizeType(resolveAliasType(typeName))
+    stripCxxTypeQualifiers(stripCxxReference(normalized).stripSuffix("*").stripSuffix("[]"))
+  }
+
+  private def stripCxxReference(typeName: String): String = {
+    if (typeName.endsWith("&&")) typeName.dropRight(2)
+    else if (typeName.endsWith("&")) typeName.dropRight(1)
+    else typeName
+  }
+
+  private def stripCxxTypeQualifiers(typeName: String): String = {
+    typeName
+      .split("\\s+")
+      .filterNot(part => Set("const", "volatile", "mutable").contains(part))
+      .mkString(" ")
+  }
+
+  private def cxxOperatorFunctionName(operator: String): Option[String] = {
+    Option.when(CxxOverloadableBinaryOperators.contains(operator))(s"operator$operator")
   }
 
   private def directCallAst(call: OxCall): Ast = {
@@ -973,9 +1111,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def callReturnTypeFullName(call: OxCall): Option[String] = {
-    expressionTypeFullName(call.callee)
-      .flatMap(returnTypeFromFunctionPointer)
-      .orElse(functionEntryForCall(call).map(entry => normalizeType(entry.function.returnType)))
+    overloadedCallOperatorTarget(call)
+      .map(target => normalizeType(target.entry.function.returnType))
+      .orElse(
+        expressionTypeFullName(call.callee)
+          .flatMap(returnTypeFromFunctionPointer)
+          .orElse(functionEntryForCall(call).map(entry => normalizeType(entry.function.returnType)))
+      )
   }
 
   private def expressionTypeFullName(expression: OxExpression): Option[String] = {
@@ -995,10 +1137,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         expressionTypeFullName(argument)
       case OxCast(typeName, _, _, _) =>
         Option(resolveAliasType(typeName))
-      case OxIndexAccess(_, _, base, _) =>
-        expressionTypeFullName(base).map(_.stripSuffix("[]"))
+      case indexAccess: OxIndexAccess =>
+        overloadedIndexOperatorTarget(indexAccess)
+          .map(target => normalizeType(target.entry.function.returnType))
+          .orElse(expressionTypeFullName(indexAccess.base).map(_.stripSuffix("[]")))
       case call: OxCall =>
         callReturnTypeFullName(call)
+      case binary: OxBinary =>
+        overloadedBinaryOperatorTarget(binary).map(target => normalizeType(target.entry.function.returnType))
       case _ =>
         None
     }

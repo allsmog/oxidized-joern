@@ -110,12 +110,18 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  static int identity(int x);
           |  int size() const;
           |  int outside() const;
+          |  int operator+(const Widget& other) const { return value + other.value; }
+          |  int operator[](int index) const { return value + index; }
           |};
           |class Fancy : public Widget {
           |public:
           |  int render(int scale) override { return scale + 1; }
           |  int inheritedValue() { return value + get(); }
           |  int explicitThis() { return this->value + this->get(); }
+          |};
+          |class Invoker {
+          |public:
+          |  int operator()(int delta) const { return delta + 1; }
           |};
           |int normalize() { return 99; }
           |int convert(int value) { return value; }
@@ -130,7 +136,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |int use() {
           |  Core::Widget widget(7);
           |  Core::Fancy fancy;
-          |  return Core::make() + Core::Widget::identity(2) + Core::Widget::instances + convert(1) + convert(widget) + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue() + fancy.explicitThis();
+          |  Core::Invoker invoker;
+          |  return Core::make() + Core::Widget::identity(2) + Core::Widget::instances + convert(1) + convert(widget) + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue() + fancy.explicitThis() + (widget + fancy) + widget[2] + invoker(3);
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -142,6 +149,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.typeDecl.fullNameExact("Core.Fancy").fullName.l shouldBe List("Core.Fancy")
       cpg.typeDecl.fullNameExact("Core.Fancy").inheritsFromTypeFullName.l shouldBe List("Core.Widget")
       cpg.typeDecl.fullNameExact("Core.Fancy").inheritsFromOut.fullName.l shouldBe List("Core.Widget")
+      cpg.typeDecl.fullNameExact("Core.Invoker").fullName.l shouldBe List("Core.Invoker")
       cpg.typeDecl.fullNameExact("Core.Widget").member.name.l shouldBe List("value", "instances")
       cpg.typeDecl.fullNameExact("Core.Widget").member.typeFullName.l shouldBe List("int", "int")
       cpg.typeDecl.fullNameExact("Core.Widget").member.nameExact("instances").modifier.modifierType.l shouldBe
@@ -154,6 +162,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "get",
           "identity",
           "normalize",
+          "operator+",
+          "operator[]",
           "outside",
           "pick",
           "pick",
@@ -192,6 +202,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.fullNameExact("Core.Widget.declared:int(int)").modifier.modifierType.l shouldBe
         List(ModifierTypes.VIRTUAL)
       cpg.method.fullNameExact("Core.Widget.declared:int(int)").external.l shouldBe Nil
+      cpg.method.fullNameExact("Core.Widget.operator+:int(Widget&)<const>").parameter.name.l shouldBe
+        List("this", "other")
+      cpg.method.fullNameExact("Core.Widget.operator+:int(Widget&)<const>").parameter.typeFullName.l shouldBe
+        List("Core.Widget*", "Widget&")
+      cpg.method.fullNameExact("Core.Widget.operator[]:int(int)<const>").parameter.name.l shouldBe
+        List("this", "index")
+      cpg.method.fullNameExact("Core.Invoker.operator():int(int)<const>").parameter.name.l shouldBe
+        List("this", "delta")
       cpg.method.fullNameExact("Core.Fancy.render:int(int)").modifier.modifierType.l shouldBe
         List(ModifierTypes.VIRTUAL)
       cpg.method.fullNameExact("Core.Fancy.inheritedValue:int()").call.nameExact("get").methodFullName.l shouldBe
@@ -229,6 +247,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("make").fullName.l shouldBe List("Core.make:int()")
       cpg.method.nameExact("use").local.nameExact("widget").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("use").local.nameExact("fancy").typeFullName.l shouldBe List("Core.Fancy")
+      cpg.method.nameExact("use").local.nameExact("invoker").typeFullName.l shouldBe List("Core.Invoker")
       cpg.method.fullNameExact("Core.Widget.get:int()").parameter.name.l shouldBe List("this")
       cpg.method.fullNameExact("Core.Widget.get:int()").parameter.index.l shouldBe List(0)
       cpg.method.fullNameExact("Core.Widget.get:int()").parameter.typeFullName.l shouldBe List("Core.Widget*")
@@ -298,6 +317,27 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("Core.Fancy.inheritedValue:int()")
       cpg.method.nameExact("use").call.codeExact("fancy.explicitThis()").methodFullName.l shouldBe
         List("Core.Fancy.explicitThis:int()")
+      inside(cpg.method.nameExact("use").call.nameExact("operator+").codeExact("widget + fancy").l) {
+        case List(operatorCall) =>
+          operatorCall.methodFullName shouldBe "Core.Widget.operator+:int(Widget&)<const>"
+          operatorCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+          operatorCall.typeFullName shouldBe "int"
+          operatorCall.argument.code.l shouldBe List("widget", "fancy")
+      }
+      inside(cpg.method.nameExact("use").call.nameExact("operator[]").codeExact("widget[2]").l) {
+        case List(operatorCall) =>
+          operatorCall.methodFullName shouldBe "Core.Widget.operator[]:int(int)<const>"
+          operatorCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+          operatorCall.typeFullName shouldBe "int"
+          operatorCall.argument.code.l shouldBe List("widget", "2")
+      }
+      inside(cpg.method.nameExact("use").call.nameExact("operator()").codeExact("invoker(3)").l) {
+        case List(operatorCall) =>
+          operatorCall.methodFullName shouldBe "Core.Invoker.operator():int(int)<const>"
+          operatorCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+          operatorCall.typeFullName shouldBe "int"
+          operatorCall.argument.code.l shouldBe List("invoker", "3")
+      }
     }
 
     "capture C++ new and delete expressions" in {
