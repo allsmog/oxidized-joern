@@ -2183,7 +2183,7 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
             .next()
             .map(|child| parse_expression(child, source))
             .unwrap_or_else(|| identifier_expression(node, source)),
-        "identifier" => Expression::Identifier {
+        "identifier" | "this" => Expression::Identifier {
             name: node_text(node, source).to_string(),
             code: node_text(node, source).to_string(),
             line: line(node),
@@ -3308,6 +3308,7 @@ mod tests {
                 public:
                   int render(int scale) override { return scale + 1; }
                   int inheritedValue() { return value + get(); }
+                  int explicitThis() { return this->value + this->get(); }
                 };
                 int make() { return 1; }
                 }
@@ -3319,7 +3320,7 @@ mod tests {
                 int use() {
                   Core::Widget widget(7);
                   Core::Fancy fancy;
-                  return Core::make() + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue();
+                  return Core::make() + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue() + fancy.explicitThis();
                 }
                 "#;
         let declarations = parse_declarations(sample, SourceLanguage::Cpp)
@@ -3572,7 +3573,8 @@ mod tests {
                 "fancy.render",
                 "fancy.get",
                 "fancy.declared",
-                "fancy.inheritedValue"
+                "fancy.inheritedValue",
+                "fancy.explicitThis"
             ]
         );
     }
