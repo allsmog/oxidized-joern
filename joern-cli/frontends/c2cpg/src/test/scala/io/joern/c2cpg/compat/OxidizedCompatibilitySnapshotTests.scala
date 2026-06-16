@@ -101,6 +101,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |};
           |int make() { return 1; }
           |}
+          |int Core::Widget::outside() { return 2; }
+          |int use() {
+          |  Core::Widget widget;
+          |  return Core::make() + widget.get() + widget.outside();
+          |}
           |""".stripMargin,
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
@@ -110,11 +115,16 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.typeDecl.nameExact("Widget").filename.l shouldBe List("Test0.cpp")
       cpg.typeDecl.nameExact("Widget").member.name.l shouldBe List("value")
       cpg.typeDecl.nameExact("Widget").member.typeFullName.l shouldBe List("int")
-      cpg.typeDecl.nameExact("Widget").method.name.l.sorted shouldBe List("get", "size")
+      cpg.typeDecl.nameExact("Widget").method.name.l.sorted shouldBe List("get", "outside", "size")
       cpg.method.nameExact("get").internal.fullName.l shouldBe List("Core.Widget.get:int()")
       cpg.method.nameExact("size").external.fullName.l shouldBe List("Core.Widget.size:int()")
+      cpg.method.nameExact("outside").internal.fullName.l shouldBe List("Core.Widget.outside:int()")
       cpg.method.nameExact("make").fullName.l shouldBe List("Core.make:int()")
+      cpg.method.nameExact("use").local.nameExact("widget").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("get").ast.isReturn.code.l shouldBe List("return value")
+      cpg.method.nameExact("use").call.nameExact("make").methodFullName.l shouldBe List("Core.make:int()")
+      cpg.method.nameExact("use").call.nameExact("get").methodFullName.l shouldBe List("Core.Widget.get:int()")
+      cpg.method.nameExact("use").call.nameExact("outside").methodFullName.l shouldBe List("Core.Widget.outside:int()")
     }
 
     "capture enum variant initializers through a static initializer" in {
