@@ -45,6 +45,16 @@ case class OxAssignment(code: String, line: Int, left: OxExpression, right: OxEx
 
 case class OxReturn(code: String, line: Int, expression: Option[OxExpression]) extends OxStatement
 
+case class OxIf(
+  code: String,
+  line: Int,
+  condition: OxExpression,
+  thenBody: Seq[OxStatement],
+  elseBody: Seq[OxStatement]
+) extends OxStatement
+
+case class OxWhile(code: String, line: Int, condition: OxExpression, body: Seq[OxStatement]) extends OxStatement
+
 case class OxExpressionStatement(code: String, line: Int, expression: OxExpression) extends OxStatement
 
 sealed trait OxExpression {
@@ -152,6 +162,21 @@ object OxDocument {
           code = str(value, "code"),
           line = int(value, "line"),
           expression = value.obj.get("expression").filter(!_.isNull).map(expression)
+        )
+      case "if" =>
+        OxIf(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          condition = expression(value("condition")),
+          thenBody = value("thenBody").arr.map(statement).toSeq,
+          elseBody = value("elseBody").arr.map(statement).toSeq
+        )
+      case "while" =>
+        OxWhile(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          condition = expression(value("condition")),
+          body = value("body").arr.map(statement).toSeq
         )
       case "expression" =>
         OxExpressionStatement(

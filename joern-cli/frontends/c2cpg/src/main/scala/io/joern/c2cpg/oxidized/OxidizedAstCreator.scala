@@ -5,6 +5,7 @@ import io.joern.c2cpg.astcreation.Defines
 import io.joern.x2cpg.{Ast, AstCreatorBase, ValidationMode}
 import io.shiftleft.codepropertygraph.generated.nodes.*
 import io.shiftleft.codepropertygraph.generated.{
+  ControlStructureTypes,
   DiffGraphBuilder,
   DispatchTypes,
   EvaluationStrategies,
@@ -217,9 +218,33 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         )
       case ret: OxReturn =>
         Seq(returnAst(returnNode(OxOrigin(ret), ret.code), ret.expression.toSeq.map(expressionAst)))
+      case ifStmt: OxIf =>
+        val ifNode       = controlStructureNode(OxOrigin(ifStmt), ControlStructureTypes.IF, ifStmt.code)
+        val conditionAst = expressionAst(ifStmt.condition)
+        val thenAst      = statementBlockAst(ifStmt.thenBody, "then", ifStmt.line)
+        val elseAst =
+          Option.when(ifStmt.elseBody.nonEmpty) {
+            Ast(controlStructureNode(OxOrigin("else", Option(ifStmt.line)), ControlStructureTypes.ELSE, "else"))
+              .withChild(statementBlockAst(ifStmt.elseBody, "else", ifStmt.line))
+          }
+        Seq(ifThenElseAst(ifNode, Option(conditionAst), thenAst, elseAst))
+      case whileStmt: OxWhile =>
+        val bodyAst = statementBlockAst(whileStmt.body, "while", whileStmt.line)
+        Seq(
+          whileAst(
+            Option(expressionAst(whileStmt.condition)),
+            Seq(bodyAst),
+            code = Option(whileStmt.code),
+            lineNumber = Option(whileStmt.line)
+          )
+        )
       case expressionStatement: OxExpressionStatement =>
         Seq(expressionAst(expressionStatement.expression))
     }
+  }
+
+  private def statementBlockAst(statements: Seq[OxStatement], code: String, line: Int): Ast = {
+    blockAst(blockNode(OxOrigin(code, Option(line)), code, Defines.Any), statements.flatMap(astsForStatement).toList)
   }
 
   private def expressionAst(expression: OxExpression): Ast = {
@@ -310,8 +335,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def operatorFor(operator: String): String = {
     operator match {
-      case "+" => Operators.addition
-      case _   => Defines.OperatorUnknown
+      case "+"  => Operators.addition
+      case "-"  => Operators.subtraction
+      case "*"  => Operators.multiplication
+      case "/"  => Operators.division
+      case "<"  => Operators.lessThan
+      case ">"  => Operators.greaterThan
+      case "<=" => Operators.lessEqualsThan
+      case ">=" => Operators.greaterEqualsThan
+      case "==" => Operators.equals
+      case "!=" => Operators.notEquals
+      case "&&" => Operators.logicalAnd
+      case "="  => Operators.assignment
+      case _    => Defines.OperatorUnknown
     }
   }
 

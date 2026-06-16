@@ -3,6 +3,8 @@ package io.joern.c2cpg.compat
 import io.joern.c2cpg.Config
 import io.joern.c2cpg.parser.ParserBackend
 import io.joern.c2cpg.testfixtures.C2CpgSuite
+import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, Operators}
+import io.shiftleft.semanticcpg.language.*
 
 class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
@@ -47,6 +49,29 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |CALL|<operator>.fieldAccess|<operator>.fieldAccess|box.value|14
           |CALL|INC|Test0.c:INC:ANY(1)|INC(add(1, 2))|13
           |CALL|add|add|add(1, 2)|13""".stripMargin
+    }
+
+    "capture control flow from the Rust parser backend" in {
+      val cpg = code("""
+          |int clamp(int x) {
+          |  if (x < 0) {
+          |    return 0;
+          |  } else {
+          |    x = 1;
+          |  }
+          |  while (x > 10) {
+          |    x = x - 1;
+          |  }
+          |  return x;
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("clamp").controlStructure.controlStructureType.l shouldBe
+        List(ControlStructureTypes.IF, ControlStructureTypes.ELSE, ControlStructureTypes.WHILE)
+      cpg.method.nameExact("clamp").ifBlock.condition.code.l shouldBe List("x < 0")
+      cpg.method.nameExact("clamp").whileBlock.condition.code.l shouldBe List("x > 10")
+      cpg.call.nameExact(Operators.subtraction).code.l shouldBe List("x - 1")
+      cpg.call.nameExact(Operators.assignment).code.l.sorted shouldBe List("x = 1", "x = x - 1")
     }
 
   }
