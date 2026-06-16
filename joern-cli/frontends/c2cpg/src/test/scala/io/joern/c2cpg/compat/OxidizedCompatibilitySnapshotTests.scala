@@ -95,12 +95,17 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |namespace Core {
           |class Widget {
           |public:
+          |  Widget();
+          |  Widget(int& seed) : value(seed) {}
+          |  ~Widget();
           |  int value;
           |  int get() { return value; }
           |  int size();
           |};
           |int make() { return 1; }
           |}
+          |Core::Widget::Widget() : value(1) {}
+          |Core::Widget::~Widget() {}
           |int Core::Widget::outside() { return 2; }
           |int use() {
           |  Core::Widget widget;
@@ -115,7 +120,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.typeDecl.nameExact("Widget").filename.l shouldBe List("Test0.cpp")
       cpg.typeDecl.nameExact("Widget").member.name.l shouldBe List("value")
       cpg.typeDecl.nameExact("Widget").member.typeFullName.l shouldBe List("int")
-      cpg.typeDecl.nameExact("Widget").method.name.l.sorted shouldBe List("get", "outside", "size")
+      cpg.typeDecl.nameExact("Widget").method.name.l.sorted shouldBe
+        List("Widget", "Widget", "get", "outside", "size", "~Widget")
+      cpg.method.nameExact("Widget").internal.fullName.l.sorted shouldBe
+        List("Core.Widget.Widget:void()", "Core.Widget.Widget:void(int&)")
+      cpg.method.nameExact("Widget").external.l shouldBe Nil
+      cpg.method.nameExact("Widget").isConstructor.fullName.l.sorted shouldBe
+        List("Core.Widget.Widget:void()", "Core.Widget.Widget:void(int&)")
+      cpg.method.nameExact("~Widget").internal.fullName.l shouldBe List("Core.Widget.~Widget:void()")
       cpg.method.nameExact("get").internal.fullName.l shouldBe List("Core.Widget.get:int()")
       cpg.method.nameExact("size").external.fullName.l shouldBe List("Core.Widget.size:int()")
       cpg.method.nameExact("outside").internal.fullName.l shouldBe List("Core.Widget.outside:int()")
