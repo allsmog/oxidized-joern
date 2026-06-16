@@ -133,7 +133,15 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("outside").internal.fullName.l shouldBe List("Core.Widget.outside:int()")
       cpg.method.nameExact("make").fullName.l shouldBe List("Core.make:int()")
       cpg.method.nameExact("use").local.nameExact("widget").typeFullName.l shouldBe List("Core.Widget")
+      cpg.method.nameExact("get").parameter.name.l shouldBe List("this")
+      cpg.method.nameExact("get").parameter.index.l shouldBe List(0)
+      cpg.method.nameExact("get").parameter.typeFullName.l shouldBe List("Core.Widget*")
       cpg.method.nameExact("get").ast.isReturn.code.l shouldBe List("return value")
+      inside(cpg.method.nameExact("get").call.nameExact(Operators.indirectFieldAccess).l) { case List(fieldAccess) =>
+        fieldAccess.code shouldBe "this->value"
+        fieldAccess.typeFullName shouldBe "int"
+        fieldAccess.argument.code.l shouldBe List("this", "value")
+      }
       cpg.method.nameExact("use").call.nameExact("Widget").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(int&)")
       cpg.method.nameExact("use").call.nameExact("make").methodFullName.l shouldBe List("Core.make:int()")
