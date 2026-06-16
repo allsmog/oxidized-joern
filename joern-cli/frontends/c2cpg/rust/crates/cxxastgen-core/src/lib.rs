@@ -187,6 +187,7 @@ pub struct FunctionDecl {
     pub signature: String,
     pub is_definition: bool,
     pub is_static: bool,
+    pub is_const: bool,
     pub code: String,
     pub line: usize,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1623,12 +1624,14 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
         .map(|params| parse_parameters(params, source))
         .unwrap_or_default();
     let constructor_initializers = parse_constructor_initializers(node, source);
+    let is_const = is_const_function_declarator(declarator, source);
     Some(FunctionDecl {
         name,
-        signature: signature(&return_type, &parameters),
+        signature: function_signature(&return_type, &parameters, is_const),
         return_type,
         is_definition: true,
         is_static: is_static_function(node, source),
+        is_const,
         code: compact_code(node_text(node, source)),
         line: line(node),
         source_path: None,
@@ -1659,12 +1662,14 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
         .unwrap_or_default();
+    let is_const = is_const_function_declarator(declarator, source);
     Some(FunctionDecl {
         name,
-        signature: signature(&return_type, &parameters),
+        signature: function_signature(&return_type, &parameters, is_const),
         return_type,
         is_definition: false,
         is_static: is_static_function(node, source),
+        is_const,
         code: statement_code(node, source),
         line: line(node),
         source_path: None,
@@ -1698,10 +1703,11 @@ fn parse_constructor_or_destructor(
         .unwrap_or_default();
     Some(FunctionDecl {
         name,
-        signature: signature(&return_type, &parameters),
+        signature: function_signature(&return_type, &parameters, false),
         return_type,
         is_definition: is_definition && node.child_by_field_name("body").is_some(),
         is_static: false,
+        is_const: false,
         code: if is_definition {
             compact_code(node_text(node, source))
         } else {
@@ -1722,6 +1728,15 @@ fn is_static_function(node: Node, source: &[u8]) -> bool {
             && node_text(child, source)
                 .split_whitespace()
                 .any(|specifier| specifier == "static")
+    })
+}
+
+fn is_const_function_declarator(declarator: Node, source: &[u8]) -> bool {
+    named_children(declarator).into_iter().any(|child| {
+        child.kind() == "type_qualifier"
+            && node_text(child, source)
+                .split_whitespace()
+                .any(|qualifier| qualifier == "const")
     })
 }
 
@@ -2656,6 +2671,15 @@ fn signature(return_type: &str, params: &[ParameterDecl]) -> String {
     )
 }
 
+fn function_signature(return_type: &str, params: &[ParameterDecl], is_const: bool) -> String {
+    let signature = signature(return_type, params);
+    if is_const {
+        format!("{signature}<const>")
+    } else {
+        signature
+    }
+}
+
 fn named_children(node: Node) -> Vec<Node> {
     let mut cursor = node.walk();
     node.named_children(&mut cursor).collect()
@@ -3190,18 +3214,20 @@ mod tests {
                   int value;
                   static int instances;
                   int get() { return value; }
+                  int stable() const { return value; }
                   static int identity(int x);
-                  int size();
+                  int size() const;
+                  int outside() const;
                 };
                 int make() { return 1; }
                 }
                 Core::Widget::Widget() : value(1) {}
                 Core::Widget::~Widget() {}
                 int Core::Widget::identity(int x) { return x; }
-                int Core::Widget::outside() { return 2; }
+                int Core::Widget::outside() const { return stable(); }
                 int use() {
                   Core::Widget widget(7);
-                  return Core::make() + widget.get() + widget.outside();
+                  return Core::make() + widget.get() + widget.stable() + widget.outside();
                 }
                 "#;
         let declarations = parse_declarations(sample, SourceLanguage::Cpp)
@@ -3246,17 +3272,26 @@ mod tests {
         method_names.sort_unstable();
         assert_eq!(
             method_names,
-            vec!["Widget", "Widget", "get", "identity", "size", "~Widget"]
+            vec!["Widget", "Widget", "get", "identity", "outside", "size", "stable", "~Widget"]
         );
-        assert!(methods
-            .iter()
-            .any(|method| method.name == "size" && !method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "size"
+            && method.signature == "int()<const>"
+            && method.is_const
+            && !method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "outside"
+            && method.signature == "int()<const>"
+            && method.is_const
+            && !method.is_definition));
         assert!(methods
             .iter()
             .any(|method| method.name == "identity" && method.is_static && !method.is_definition));
         assert!(methods
             .iter()
             .any(|method| method.name == "get" && method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "stable"
+            && method.signature == "int()<const>"
+            && method.is_const
+            && method.is_definition));
         assert!(methods.iter().any(|method| method.name == "Widget"
             && method.signature == "void()"
             && !method.is_definition));
@@ -3355,7 +3390,8 @@ mod tests {
                 _ => None,
             })
             .expect("expected out-of-class method definition");
-        assert_eq!(outside.signature, "int()");
+        assert_eq!(outside.signature, "int()<const>");
+        assert!(outside.is_const);
 
         let use_function = declarations
             .iter()
@@ -3387,7 +3423,12 @@ mod tests {
         let call_names = collect_call_names(return_expr);
         assert_eq!(
             call_names,
-            vec!["Core::make", "widget.get", "widget.outside"]
+            vec![
+                "Core::make",
+                "widget.get",
+                "widget.stable",
+                "widget.outside"
+            ]
         );
     }
 
