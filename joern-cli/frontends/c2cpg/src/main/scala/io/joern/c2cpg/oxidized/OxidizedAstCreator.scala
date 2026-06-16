@@ -44,7 +44,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private val usedTypes: mutable.Set[String] = mutable.Set(Defines.Any, Defines.Void)
   private val functionsByName: Map[String, OxFunctionDecl] =
-    document.declarations.collect { case function: OxFunctionDecl => function.name -> function }.toMap
+    collectFunctionDeclarations(document.declarations).map(function => function.name -> function).toMap
   private val macroDeclarations: Seq[OxMacroDecl] =
     document.declarations.collect { case macroDecl: OxMacroDecl => macroDecl }
   private val macroUndefs: Seq[OxMacroUndefDecl] =
@@ -105,7 +105,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option(NodeTypes.TYPE_DECL),
         Option(namespaceBlock.fullName)
       )
-    val globalBlock     = blockNode(origin, NamespaceTraversal.globalNamespaceName, Defines.Any)
+    val globalBlock   = blockNode(origin, NamespaceTraversal.globalNamespaceName, Defines.Any)
+    val namespaceAsts = document.declarations.collect { case namespace: OxNamespaceDecl => astForNamespace(namespace) }
     val declarationAsts = document.declarations.flatMap(astForDeclaration)
     val globalMethodAst =
       methodAst(
@@ -116,7 +117,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       )
 
     val includeAsts = document.declarations.collect { case includeDecl: OxIncludeDecl => astForInclude(includeDecl) }
-    Ast(namespaceBlock).withChildren(includeAsts :+ Ast(globalTypeDecl).withChild(globalMethodAst))
+    Ast(namespaceBlock).withChildren(includeAsts ++ namespaceAsts :+ Ast(globalTypeDecl).withChild(globalMethodAst))
   }
 
   private def fileContent: Option[String] = {
@@ -124,17 +125,50 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def astForDeclaration(declaration: OxDeclaration): Seq[Ast] = {
+    astForDeclaration(declaration, ownerFullName = None, parentAstFullName = globalNamespaceBlock().fullName)
+  }
+
+  private def astForDeclaration(
+    declaration: OxDeclaration,
+    ownerFullName: Option[String],
+    parentAstFullName: String
+  ): Seq[Ast] = {
     declaration match {
       case macroDecl: OxMacroDecl   => Seq(astForMacro(macroDecl))
       case _: OxMacroUndefDecl      => Seq.empty
       case _: OxIncludeDecl         => Seq.empty
-      case structDecl: OxStructDecl => Seq(astForStruct(structDecl))
-      case enumDecl: OxEnumDecl     => Seq(astForEnum(enumDecl))
+      case _: OxNamespaceDecl       => Seq.empty
+      case structDecl: OxStructDecl => Seq(astForStruct(structDecl, ownerFullName, parentAstFullName))
+      case enumDecl: OxEnumDecl     => Seq(astForEnum(enumDecl, ownerFullName, parentAstFullName))
       case global: OxGlobalVariableDecl =>
         astsForGlobalVariable(global)
-      case typedef: OxTypedefDecl   => Seq(astForTypedef(typedef))
-      case function: OxFunctionDecl => astsForFunction(function)
+      case typedef: OxTypedefDecl => Seq(astForTypedef(typedef, ownerFullName, parentAstFullName))
+      case function: OxFunctionDecl =>
+        astsForFunction(function, ownerFullName, NodeTypes.NAMESPACE_BLOCK, parentAstFullName)
     }
+  }
+
+  private def astForNamespace(namespaceDecl: OxNamespaceDecl): Ast = {
+    astForNamespace(namespaceDecl, parentOwnerFullName = None)
+  }
+
+  private def astForNamespace(namespaceDecl: OxNamespaceDecl, parentOwnerFullName: Option[String]): Ast = {
+    val localPath = namespacePath(namespaceDecl.name)
+    val localName = localPath.lastOption.getOrElse(namespaceDecl.name)
+    val ownerFullName = parentOwnerFullName
+      .map(parent => (parent +: localPath).mkString("."))
+      .getOrElse(localPath.mkString("."))
+    val filename = declarationFilename(namespaceDecl)
+    val namespaceBlock =
+      namespaceBlockNode(OxOrigin(namespaceDecl), localName, s"$filename:$ownerFullName", filename)
+        .code(namespaceDecl.code)
+    val childAsts = namespaceDecl.declarations.flatMap {
+      case nestedNamespace: OxNamespaceDecl => Seq(astForNamespace(nestedNamespace, Option(ownerFullName)))
+      case declaration => astForDeclaration(declaration, Option(ownerFullName), namespaceBlock.fullName)
+    }
+    Ast(namespaceBlock).withChild(
+      blockAst(blockNode(OxOrigin(namespaceDecl), namespaceDecl.code, Defines.Any), childAsts.toList)
+    )
   }
 
   private def astForInclude(includeDecl: OxIncludeDecl): Ast = {
@@ -184,8 +218,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val localName = normalizeType(structDecl.name)
         val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
         (structDecl -> parentFullName) +: collectAggregateDeclarations(structDecl.nestedDeclarations, Option(fullName))
+      case namespaceDecl: OxNamespaceDecl =>
+        val namespaceFullName = parentFullName
+          .map(parent => s"$parent.${namespacePath(namespaceDecl.name).mkString(".")}")
+          .orElse(Option(namespacePath(namespaceDecl.name).mkString(".")))
+        collectAggregateDeclarations(namespaceDecl.declarations, namespaceFullName)
       case _ =>
         Seq.empty
+    }
+  }
+
+  private def collectFunctionDeclarations(declarations: Seq[OxDeclaration]): Seq[OxFunctionDecl] = {
+    declarations.flatMap {
+      case functionDecl: OxFunctionDecl   => Seq(functionDecl)
+      case structDecl: OxStructDecl       => collectFunctionDeclarations(structDecl.nestedDeclarations)
+      case namespaceDecl: OxNamespaceDecl => collectFunctionDeclarations(namespaceDecl.declarations)
+      case _                              => Seq.empty
     }
   }
 
@@ -220,7 +268,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val nestedAsts = structDecl.nestedDeclarations.flatMap {
       case nestedStruct: OxStructDecl => Seq(astForStruct(nestedStruct, Option(typeName), typeName))
       case nestedEnum: OxEnumDecl     => Seq(astForEnum(nestedEnum, Option(typeName), typeName))
-      case _                          => Seq.empty
+      case nestedFunction: OxFunctionDecl =>
+        astsForFunction(nestedFunction, Option(typeName), NodeTypes.TYPE_DECL, typeName)
+      case _ => Seq.empty
     }
     Ast(typeDecl).withChildren(fieldAsts ++ nestedAsts)
   }
@@ -291,9 +341,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
-  private def astForTypedef(typedef: OxTypedefDecl): Ast = {
-    val origin    = OxOrigin(typedef)
-    val name      = registerType(normalizeType(typedef.name))
+  private def astForTypedef(
+    typedef: OxTypedefDecl,
+    ownerFullName: Option[String] = None,
+    parentAstFullName: String = globalNamespaceBlock().fullName
+  ): Ast = {
+    val origin = OxOrigin(typedef)
+    val name = registerType(
+      ownerFullName.map(owner => s"$owner.${normalizeType(typedef.name)}").getOrElse(normalizeType(typedef.name))
+    )
     val aliasType = registerType(resolveAliasType(typedef.typeName))
     Ast(
       typeDeclNode(
@@ -303,7 +359,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         declarationFilename(typedef),
         typedef.code,
         NodeTypes.NAMESPACE_BLOCK,
-        globalNamespaceBlock().fullName,
+        parentAstFullName,
         alias = Option(aliasType)
       )
     )
@@ -358,17 +414,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     global.initializer.fold(global.code)(_ => global.code.takeWhile(_ != '=').trim)
   }
 
-  private def astsForFunction(function: OxFunctionDecl): Seq[Ast] = {
+  private def astsForFunction(
+    function: OxFunctionDecl,
+    ownerFullName: Option[String] = None,
+    astParentType: String = NodeTypes.NAMESPACE_BLOCK,
+    astParentFullName: String = globalNamespaceBlock().fullName
+  ): Seq[Ast] = {
     val origin     = OxOrigin(function)
     val returnType = registerType(normalizeType(function.returnType))
+    val fullName   = functionFullName(function, ownerFullName)
     val method =
       methodNode(
         origin,
         function.name,
         function.name,
-        function.name,
+        fullName,
         Option(function.signature),
-        declarationFilename(function)
+        declarationFilename(function),
+        Option(astParentType),
+        Option(astParentFullName)
       )
         .isExternal(!function.isDefinition)
     val parameters = function.parameters.zipWithIndex.map { case (parameter, index) =>
@@ -389,7 +453,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousScope          = scope
     val previousCaptureContext = functionCaptureContext
     val captureContext =
-      FunctionCaptureContext(function, methodRefNode(origin, function.name, function.name, function.name))
+      FunctionCaptureContext(function, methodRefNode(origin, function.name, fullName, function.name))
     scope = parameters.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }.toMap
     functionCaptureContext = Option(captureContext)
     val bodyAsts =
@@ -876,8 +940,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     declarationFilename(macroDecl)
   }
 
+  private def functionFullName(function: OxFunctionDecl, ownerFullName: Option[String]): String = {
+    ownerFullName.map(owner => s"$owner.${function.name}:${function.signature}").getOrElse(function.name)
+  }
+
   private def declarationFilename(declaration: OxDeclaration): String = {
     declaration.sourcePath.map(SourceFiles.toRelativePath(_, config.inputPath)).getOrElse(filename)
+  }
+
+  private def namespacePath(name: String): Seq[String] = {
+    name
+      .split("::")
+      .map(_.trim)
+      .filter(_.nonEmpty)
+      .toSeq match {
+      case Seq() => Seq(name)
+      case path  => path
+    }
   }
 
   private def macroSignature(macroDecl: OxMacroDecl): String = {

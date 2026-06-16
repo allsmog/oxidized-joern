@@ -28,6 +28,15 @@ case class OxMacroUndefDecl(name: String, code: String, line: Int, sourcePath: O
 case class OxIncludeDecl(name: String, code: String, line: Int, sourcePath: Option[String], visibleLine: Int)
     extends OxDeclaration
 
+case class OxNamespaceDecl(
+  name: String,
+  code: String,
+  line: Int,
+  sourcePath: Option[String],
+  visibleLine: Int,
+  declarations: Seq[OxDeclaration]
+) extends OxDeclaration
+
 case class OxStructDecl(
   name: String,
   code: String,
@@ -208,6 +217,15 @@ object OxDocument {
           line = int(value, "line"),
           sourcePath = sourcePath(value),
           visibleLine = visibleLine(value)
+        )
+      case "namespace" =>
+        OxNamespaceDecl(
+          name = str(value, "name"),
+          code = str(value, "code"),
+          line = int(value, "line"),
+          sourcePath = sourcePath(value),
+          visibleLine = visibleLine(value),
+          declarations = value("declarations").arr.map(declaration).toSeq
         )
       case "struct" =>
         OxStructDecl(

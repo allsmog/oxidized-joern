@@ -89,6 +89,34 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture basic C++ namespaces, classes, and methods" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  int value;
+          |  int get() { return value; }
+          |  int size();
+          |};
+          |int make() { return 1; }
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.namespaceBlock.nameExact("Core").fullName.l shouldBe List("Test0.cpp:Core")
+      cpg.typeDecl.nameExact("Widget").fullName.l shouldBe List("Core.Widget")
+      cpg.typeDecl.nameExact("Widget").filename.l shouldBe List("Test0.cpp")
+      cpg.typeDecl.nameExact("Widget").member.name.l shouldBe List("value")
+      cpg.typeDecl.nameExact("Widget").member.typeFullName.l shouldBe List("int")
+      cpg.typeDecl.nameExact("Widget").method.name.l.sorted shouldBe List("get", "size")
+      cpg.method.nameExact("get").internal.fullName.l shouldBe List("Core.Widget.get:int()")
+      cpg.method.nameExact("size").external.fullName.l shouldBe List("Core.Widget.size:int()")
+      cpg.method.nameExact("make").fullName.l shouldBe List("Core.make:int()")
+      cpg.method.nameExact("get").ast.isReturn.code.l shouldBe List("return value")
+    }
+
     "capture enum variant initializers through a static initializer" in {
       val cpg = code("""
           |enum Mode { MODE_A = 1, MODE_B = 2, MODE_C };

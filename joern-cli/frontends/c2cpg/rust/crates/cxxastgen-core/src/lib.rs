@@ -47,6 +47,7 @@ pub enum Declaration {
     Macro(MacroDecl),
     MacroUndef(MacroUndefDecl),
     Include(IncludeDecl),
+    Namespace(NamespaceDecl),
     Struct(StructDecl),
     Enum(EnumDecl),
     Typedef(TypedefDecl),
@@ -90,6 +91,19 @@ pub struct IncludeDecl {
     pub source_path: Option<String>,
     #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
     pub visible_line: Option<usize>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NamespaceDecl {
+    pub name: String,
+    pub code: String,
+    pub line: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_path: Option<String>,
+    #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
+    pub visible_line: Option<usize>,
+    pub declarations: Vec<Declaration>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -568,8 +582,15 @@ fn parse_declaration_node(
                 visited_headers,
             )?);
         }
+        "namespace_definition" => {
+            if let Some(namespace) =
+                parse_namespace(node, source, source_path, options, symbols, visited_headers)?
+            {
+                declarations.push(Declaration::Namespace(namespace));
+            }
+        }
         "declaration" => {
-            declarations.extend(parse_type_declarations(node, source));
+            declarations.extend(parse_type_declarations(node, source, symbols));
             if let Some(function) = parse_function_declaration(node, source) {
                 declarations.push(Declaration::Function(function));
             }
@@ -585,11 +606,13 @@ fn parse_declaration_node(
                     .into_iter()
                     .map(Declaration::Typedef),
             );
-            declarations.extend(parse_anonymous_typedef_aggregate_declarations(node, source));
-            declarations.extend(parse_type_declarations(node, source));
+            declarations.extend(parse_anonymous_typedef_aggregate_declarations(
+                node, source, symbols,
+            ));
+            declarations.extend(parse_type_declarations(node, source, symbols));
         }
-        "struct_specifier" | "union_specifier" => {
-            if let Some(declaration) = parse_struct(node, source) {
+        "struct_specifier" | "union_specifier" | "class_specifier" => {
+            if let Some(declaration) = parse_struct(node, source, symbols) {
                 declarations.push(Declaration::Struct(declaration));
             }
         }
@@ -637,6 +660,7 @@ fn declaration_line(declaration: &Declaration) -> usize {
         Declaration::Macro(value) => value.line,
         Declaration::MacroUndef(value) => value.line,
         Declaration::Include(value) => value.line,
+        Declaration::Namespace(value) => value.line,
         Declaration::Struct(value) => value.line,
         Declaration::Enum(value) => value.line,
         Declaration::Typedef(value) => value.line,
@@ -650,6 +674,7 @@ fn declaration_visible_line(declaration: &Declaration) -> Option<usize> {
         Declaration::Macro(value) => value.visible_line,
         Declaration::MacroUndef(value) => value.visible_line,
         Declaration::Include(value) => value.visible_line,
+        Declaration::Namespace(value) => value.visible_line,
         Declaration::Struct(value) => value.visible_line,
         Declaration::Enum(value) => value.visible_line,
         Declaration::Typedef(value) => value.visible_line,
@@ -797,6 +822,17 @@ fn annotate_header_declaration(
                 value.source_path = Some(source_path);
             }
             value.visible_line = Some(visible_line);
+        }
+        Declaration::Namespace(value) => {
+            if value.source_path.is_none() {
+                value.source_path = Some(source_path.clone());
+            }
+            value.visible_line = Some(visible_line);
+            value.declarations = value
+                .declarations
+                .drain(..)
+                .map(|nested| annotate_header_declaration(nested, header_path, visible_line))
+                .collect();
         }
         Declaration::Struct(value) => {
             if value.source_path.is_none() {
@@ -1160,6 +1196,40 @@ fn parse_include(node: Node, source: &[u8]) -> Option<IncludeDecl> {
     })
 }
 
+fn parse_namespace(
+    node: Node,
+    source: &[u8],
+    source_path: Option<&Path>,
+    options: Option<&ParseOptions>,
+    symbols: &mut MacroSymbols,
+    visited_headers: &mut HashSet<PathBuf>,
+) -> Result<Option<NamespaceDecl>> {
+    let body = node.child_by_field_name("body");
+    let declarations = match body {
+        Some(body) => parse_declaration_children(
+            body,
+            source,
+            source_path,
+            options,
+            symbols,
+            visited_headers,
+        )?,
+        None => Vec::new(),
+    };
+    Ok(Some(NamespaceDecl {
+        name: node
+            .child_by_field_name("name")
+            .map(|name| node_text(name, source).trim().to_string())
+            .filter(|name| !name.is_empty())
+            .unwrap_or_else(|| "<anonymous_namespace>".to_string()),
+        code: compact_code(node_text(node, source)),
+        line: line(node),
+        source_path: None,
+        visible_line: None,
+        declarations,
+    }))
+}
+
 fn include_name(path: &str) -> String {
     path.trim()
         .trim_start_matches('"')
@@ -1169,14 +1239,18 @@ fn include_name(path: &str) -> String {
         .to_string()
 }
 
-fn parse_type_declarations(node: Node, source: &[u8]) -> Vec<Declaration> {
+fn parse_type_declarations(
+    node: Node,
+    source: &[u8],
+    symbols: &mut MacroSymbols,
+) -> Vec<Declaration> {
     named_children(node)
         .into_iter()
         .filter_map(|child| match child.kind() {
-            "struct_specifier" | "union_specifier"
+            "struct_specifier" | "union_specifier" | "class_specifier"
                 if child.child_by_field_name("body").is_some() =>
             {
-                parse_struct(child, source).map(Declaration::Struct)
+                parse_struct(child, source, symbols).map(Declaration::Struct)
             }
             "enum_specifier" if child.child_by_field_name("body").is_some() => {
                 parse_enum(child, source).map(Declaration::Enum)
@@ -1186,22 +1260,47 @@ fn parse_type_declarations(node: Node, source: &[u8]) -> Vec<Declaration> {
         .collect()
 }
 
-fn parse_struct(node: Node, source: &[u8]) -> Option<StructDecl> {
+fn parse_struct(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Option<StructDecl> {
     let name_node = node.child_by_field_name("name")?;
-    parse_struct_with_name(node, source, node_text(name_node, source).to_string())
+    parse_struct_with_name(
+        node,
+        source,
+        node_text(name_node, source).to_string(),
+        symbols,
+    )
 }
 
-fn parse_struct_with_name(node: Node, source: &[u8], name: String) -> Option<StructDecl> {
+fn parse_struct_with_name(
+    node: Node,
+    source: &[u8],
+    name: String,
+    symbols: &mut MacroSymbols,
+) -> Option<StructDecl> {
     let body = node.child_by_field_name("body")?;
     let field_nodes = named_children(body)
         .into_iter()
         .filter(|child| child.kind() == "field_declaration")
         .collect::<Vec<_>>();
     let mut anonymous_index = 0;
-    let nested_declarations = field_nodes
+    let mut nested_declarations = field_nodes
         .iter()
-        .flat_map(|field| parse_nested_aggregate_declaration(*field, source, &mut anonymous_index))
-        .collect();
+        .flat_map(|field| {
+            parse_nested_aggregate_declaration(*field, source, &mut anonymous_index, symbols)
+        })
+        .collect::<Vec<_>>();
+    nested_declarations.extend(
+        field_nodes
+            .iter()
+            .filter_map(|field| parse_function_declaration(*field, source))
+            .map(Declaration::Function),
+    );
+    nested_declarations.extend(
+        named_children(body)
+            .into_iter()
+            .filter(|child| child.kind() == "function_definition")
+            .filter_map(|function| parse_function(function, source, symbols))
+            .map(Declaration::Function),
+    );
     Some(StructDecl {
         name,
         code: compact_code(node_text(node, source)),
@@ -1220,6 +1319,7 @@ fn parse_nested_aggregate_declaration(
     node: Node,
     source: &[u8],
     anonymous_index: &mut usize,
+    symbols: &mut MacroSymbols,
 ) -> Vec<Declaration> {
     if node.kind() != "field_declaration" {
         return Vec::new();
@@ -1231,9 +1331,9 @@ fn parse_nested_aggregate_declaration(
         return Vec::new();
     }
     match type_node.kind() {
-        "struct_specifier" | "union_specifier" => {
+        "struct_specifier" | "union_specifier" | "class_specifier" => {
             let name = aggregate_name_for_field(type_node, node, source, anonymous_index);
-            parse_struct_with_name(type_node, source, name)
+            parse_struct_with_name(type_node, source, name, symbols)
                 .map(Declaration::Struct)
                 .into_iter()
                 .collect()
@@ -1269,6 +1369,12 @@ fn aggregate_name_for_field(
 
 fn parse_field(node: Node, source: &[u8]) -> Option<FieldDecl> {
     let type_node = node.child_by_field_name("type");
+    if node
+        .child_by_field_name("declarator")
+        .is_some_and(is_function_prototype_declarator)
+    {
+        return None;
+    }
     if type_node.is_some_and(|type_node| type_node.child_by_field_name("body").is_some())
         && node.child_by_field_name("declarator").is_none()
     {
@@ -1369,7 +1475,11 @@ fn parse_typedef_declarations(node: Node, source: &[u8]) -> Vec<TypedefDecl> {
         .collect()
 }
 
-fn parse_anonymous_typedef_aggregate_declarations(node: Node, source: &[u8]) -> Vec<Declaration> {
+fn parse_anonymous_typedef_aggregate_declarations(
+    node: Node,
+    source: &[u8],
+    symbols: &mut MacroSymbols,
+) -> Vec<Declaration> {
     let Some(type_node) = node.child_by_field_name("type") else {
         return Vec::new();
     };
@@ -1383,8 +1493,9 @@ fn parse_anonymous_typedef_aggregate_declarations(node: Node, source: &[u8]) -> 
         .filter_map(|declarator| {
             let alias = declarator_name(declarator, source)?;
             match type_node.kind() {
-                "struct_specifier" | "union_specifier" => {
-                    parse_struct_with_name(type_node, source, alias).map(Declaration::Struct)
+                "struct_specifier" | "union_specifier" | "class_specifier" => {
+                    parse_struct_with_name(type_node, source, alias, symbols)
+                        .map(Declaration::Struct)
                 }
                 "enum_specifier" => {
                     parse_enum_with_name(type_node, source, alias).map(Declaration::Enum)
@@ -2128,6 +2239,10 @@ fn type_name_from_type_node(node: Node, source: &[u8]) -> String {
             .child_by_field_name("name")
             .map(|name| normalize_type(node_text(name, source)))
             .unwrap_or_else(|| normalize_type(node_text(node, source))),
+        "class_specifier" => node
+            .child_by_field_name("name")
+            .map(|name| normalize_type(node_text(name, source)))
+            .unwrap_or_else(|| normalize_type(node_text(node, source))),
         _ => normalize_type(node_text(node, source)),
     }
 }
@@ -2135,7 +2250,7 @@ fn type_name_from_type_node(node: Node, source: &[u8]) -> String {
 fn is_anonymous_aggregate_type(node: Node) -> bool {
     matches!(
         node.kind(),
-        "struct_specifier" | "union_specifier" | "enum_specifier"
+        "struct_specifier" | "union_specifier" | "enum_specifier" | "class_specifier"
     ) && node.child_by_field_name("body").is_some()
         && node.child_by_field_name("name").is_none()
 }
@@ -2802,6 +2917,72 @@ mod tests {
         assert_eq!(function.body.len(), 2);
         assert_eq!(statement_line(&function.body[0]), 6);
         assert_eq!(statement_line(&function.body[1]), 7);
+    }
+
+    #[test]
+    fn parses_cpp_namespaces_classes_and_methods() {
+        let sample = r#"
+                namespace Core {
+                class Widget {
+                public:
+                  int value;
+                  int get() { return value; }
+                  int size();
+                };
+                int make() { return 1; }
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("sample C++ namespace and class should parse");
+        let [Declaration::Namespace(namespace)] = declarations.as_slice() else {
+            panic!("expected one namespace declaration");
+        };
+        assert_eq!(namespace.name, "Core");
+
+        let widget = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "Widget" => {
+                    Some(struct_decl)
+                }
+                _ => None,
+            })
+            .expect("expected Widget class");
+        assert_eq!(widget.fields.len(), 1);
+        assert_eq!(widget.fields[0].name, "value");
+
+        let methods = widget
+            .nested_declarations
+            .iter()
+            .filter_map(|declaration| match declaration {
+                Declaration::Function(function) => Some(function),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            methods
+                .iter()
+                .map(|method| method.name.as_str())
+                .collect::<Vec<_>>(),
+            vec!["size", "get"]
+        );
+        assert!(methods
+            .iter()
+            .any(|method| method.name == "size" && !method.is_definition));
+        assert!(methods
+            .iter()
+            .any(|method| method.name == "get" && method.is_definition));
+
+        let make = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "make" => Some(function),
+                _ => None,
+            })
+            .expect("expected namespace free function");
+        assert_eq!(make.signature, "int()");
     }
 
     #[test]
