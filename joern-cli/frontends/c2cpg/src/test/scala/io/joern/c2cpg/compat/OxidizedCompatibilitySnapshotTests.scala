@@ -98,6 +98,49 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("i = 0", "total = 0", "total = total + xs[i]")
     }
 
+    "capture switch, do-while, labels, and gotos from the Rust parser backend" in {
+      val cpg = code("""
+          |int route(int x) {
+          |retry:
+          |  do {
+          |    x = x - 1;
+          |  } while (x > 3);
+          |  switch (x) {
+          |    case 1:
+          |      goto retry;
+          |    default:
+          |      break;
+          |  }
+          |  return x;
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("route").controlStructure.controlStructureType.l.sorted shouldBe
+        List(ControlStructureTypes.BREAK, ControlStructureTypes.DO, ControlStructureTypes.GOTO, ControlStructureTypes.SWITCH)
+      cpg.method.nameExact("route").doBlock.condition.code.l shouldBe List("x > 3")
+      cpg.jumpTarget.name.l.sorted shouldBe List("case", "default", "retry")
+      cpg.jumpTarget.code.l.sorted shouldBe List("case 1:", "default:", "retry:")
+      cpg.call.nameExact(Operators.subtraction).code.l shouldBe List("x - 1")
+    }
+
+    "capture casts, sizeof, ternaries, and compound assignment from the Rust parser backend" in {
+      val cpg = code("""
+          |int score(int x) {
+          |  int y = (int)sizeof(x);
+          |  y += x > 0 ? x : -x;
+          |  return y;
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.call.nameExact(Operators.assignment).code.l shouldBe List("y = (int)sizeof(x)")
+      cpg.call.nameExact(Operators.cast).code.l shouldBe List("(int)sizeof(x)")
+      cpg.call.nameExact(Operators.sizeOf).code.l shouldBe List("sizeof(x)")
+      cpg.call.nameExact(Operators.assignmentPlus).code.l shouldBe List("y += x > 0 ? x : -x")
+      cpg.call.nameExact(Operators.conditional).code.l shouldBe List("x > 0 ? x : -x")
+      cpg.call.nameExact(Operators.greaterThan).code.l shouldBe List("x > 0")
+      cpg.call.nameExact(Operators.minus).code.l shouldBe List("-x")
+    }
+
   }
 
 }

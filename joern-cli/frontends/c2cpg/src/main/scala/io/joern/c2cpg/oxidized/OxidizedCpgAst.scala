@@ -41,7 +41,8 @@ sealed trait OxStatement {
 case class OxLocalDecl(name: String, typeName: String, code: String, line: Int, initializer: Option[OxExpression])
     extends OxStatement
 
-case class OxAssignment(code: String, line: Int, left: OxExpression, right: OxExpression) extends OxStatement
+case class OxAssignment(operator: String, code: String, line: Int, left: OxExpression, right: OxExpression)
+    extends OxStatement
 
 case class OxReturn(code: String, line: Int, expression: Option[OxExpression]) extends OxStatement
 
@@ -55,6 +56,8 @@ case class OxIf(
 
 case class OxWhile(code: String, line: Int, condition: OxExpression, body: Seq[OxStatement]) extends OxStatement
 
+case class OxDoWhile(code: String, line: Int, condition: OxExpression, body: Seq[OxStatement]) extends OxStatement
+
 case class OxFor(
   code: String,
   line: Int,
@@ -67,6 +70,14 @@ case class OxFor(
 case class OxBreak(code: String, line: Int) extends OxStatement
 
 case class OxContinue(code: String, line: Int) extends OxStatement
+
+case class OxGoto(code: String, line: Int, label: String) extends OxStatement
+
+case class OxLabel(code: String, line: Int, label: String, body: Seq[OxStatement]) extends OxStatement
+
+case class OxSwitch(code: String, line: Int, condition: OxExpression, body: Seq[OxStatement]) extends OxStatement
+
+case class OxCase(code: String, line: Int, value: Option[OxExpression], body: Seq[OxStatement]) extends OxStatement
 
 case class OxExpressionStatement(code: String, line: Int, expression: OxExpression) extends OxStatement
 
@@ -84,6 +95,18 @@ case class OxBinary(operator: String, code: String, line: Int, left: OxExpressio
 
 case class OxUnary(operator: String, code: String, line: Int, prefix: Boolean, argument: OxExpression)
     extends OxExpression
+
+case class OxConditional(
+  code: String,
+  line: Int,
+  condition: OxExpression,
+  consequence: Option[OxExpression],
+  alternative: OxExpression
+) extends OxExpression
+
+case class OxCast(typeName: String, code: String, line: Int, value: OxExpression) extends OxExpression
+
+case class OxSizeOf(code: String, line: Int, value: Option[OxExpression], typeName: Option[String]) extends OxExpression
 
 case class OxCall(name: String, code: String, line: Int, arguments: Seq[OxExpression]) extends OxExpression
 
@@ -170,6 +193,7 @@ object OxDocument {
         )
       case "assignment" =>
         OxAssignment(
+          operator = str(value, "operator"),
           code = str(value, "code"),
           line = int(value, "line"),
           left = expression(value("left")),
@@ -196,6 +220,13 @@ object OxDocument {
           condition = expression(value("condition")),
           body = value("body").arr.map(statement).toSeq
         )
+      case "doWhile" =>
+        OxDoWhile(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          condition = expression(value("condition")),
+          body = value("body").arr.map(statement).toSeq
+        )
       case "for" =>
         OxFor(
           code = str(value, "code"),
@@ -209,6 +240,29 @@ object OxDocument {
         OxBreak(code = str(value, "code"), line = int(value, "line"))
       case "continue" =>
         OxContinue(code = str(value, "code"), line = int(value, "line"))
+      case "goto" =>
+        OxGoto(code = str(value, "code"), line = int(value, "line"), label = str(value, "label"))
+      case "label" =>
+        OxLabel(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          label = str(value, "label"),
+          body = value("body").arr.map(statement).toSeq
+        )
+      case "switch" =>
+        OxSwitch(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          condition = expression(value("condition")),
+          body = value("body").arr.map(statement).toSeq
+        )
+      case "case" =>
+        OxCase(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          value = value.obj.get("value").filter(!_.isNull).map(expression),
+          body = value("body").arr.map(statement).toSeq
+        )
       case "expression" =>
         OxExpressionStatement(
           code = str(value, "code"),
@@ -241,6 +295,28 @@ object OxDocument {
           line = int(value, "line"),
           prefix = value("prefix").bool,
           argument = expression(value("argument"))
+        )
+      case "conditional" =>
+        OxConditional(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          condition = expression(value("condition")),
+          consequence = value.obj.get("consequence").filter(!_.isNull).map(expression),
+          alternative = expression(value("alternative"))
+        )
+      case "cast" =>
+        OxCast(
+          typeName = str(value, "typeName"),
+          code = str(value, "code"),
+          line = int(value, "line"),
+          value = expression(value("value"))
+        )
+      case "sizeOf" =>
+        OxSizeOf(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          value = value.obj.get("value").filter(!_.isNull).map(expression),
+          typeName = value.obj.get("typeName").filter(!_.isNull).map(_.str)
         )
       case "call" =>
         OxCall(

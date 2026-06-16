@@ -208,14 +208,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             Seq(localAst)
         }
       case assignment: OxAssignment =>
-        Seq(
-          assignmentAst(
-            OxOrigin(assignment),
-            expressionAst(assignment.left),
-            expressionAst(assignment.right),
-            assignment.code
-          )
-        )
+        val left  = expressionAst(assignment.left)
+        val right = expressionAst(assignment.right)
+        Seq {
+          if (assignment.operator == "=") {
+            assignmentAst(OxOrigin(assignment), left, right, assignment.code)
+          } else {
+            operatorCallAst(OxOrigin(assignment), assignment.code, operatorFor(assignment.operator), Seq(left, right))
+          }
+        }
       case ret: OxReturn =>
         Seq(returnAst(returnNode(OxOrigin(ret), ret.code), ret.expression.toSeq.map(expressionAst)))
       case ifStmt: OxIf =>
@@ -238,6 +239,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             lineNumber = Option(whileStmt.line)
           )
         )
+      case doWhileStmt: OxDoWhile =>
+        Seq(
+          doWhileAst(
+            Option(expressionAst(doWhileStmt.condition)),
+            Seq(statementBlockAst(doWhileStmt.body, "do", doWhileStmt.line)),
+            code = Option(doWhileStmt.code),
+            lineNumber = Option(doWhileStmt.line)
+          )
+        )
       case forStmt: OxFor =>
         val forNode               = controlStructureNode(OxOrigin(forStmt), ControlStructureTypes.FOR, forStmt.code)
         val initializerAsts       = forStmt.initializer.flatMap(astsForStatement)
@@ -256,6 +266,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Seq(Ast(controlStructureNode(OxOrigin(breakStmt), ControlStructureTypes.BREAK, breakStmt.code)))
       case continueStmt: OxContinue =>
         Seq(Ast(controlStructureNode(OxOrigin(continueStmt), ControlStructureTypes.CONTINUE, continueStmt.code)))
+      case gotoStmt: OxGoto =>
+        Seq(Ast(controlStructureNode(OxOrigin(gotoStmt), ControlStructureTypes.GOTO, gotoStmt.code)))
+      case labelStmt: OxLabel =>
+        Ast(jumpTargetNode(OxOrigin(labelStmt), labelStmt.label, labelStmt.code)) +:
+          labelStmt.body.flatMap(astsForStatement)
+      case switchStmt: OxSwitch =>
+        val switchNode = controlStructureNode(OxOrigin(switchStmt), ControlStructureTypes.SWITCH, switchStmt.code)
+        Seq(switchAst(switchNode, expressionAst(switchStmt.condition), switchStmt.body.flatMap(astsForStatement)))
+      case caseStmt: OxCase =>
+        val name = if (caseStmt.value.isDefined) "case" else "default"
+        Ast(jumpTargetNode(OxOrigin(caseStmt), name, caseStmt.code)) +:
+          (caseStmt.value.toSeq.map(expressionAst) ++ caseStmt.body.flatMap(astsForStatement))
       case expressionStatement: OxExpressionStatement =>
         Seq(expressionAst(expressionStatement.expression))
     }
@@ -272,31 +294,43 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case literal: OxLiteral =>
         Ast(literalNode(OxOrigin(literal), literal.code, literalType(literal.value)))
       case binary: OxBinary =>
-        val operatorName = operatorFor(binary.operator)
-        val call =
-          callNode(
-            OxOrigin(binary),
-            binary.code,
-            operatorName,
-            operatorName,
-            DispatchTypes.STATIC_DISPATCH,
-            Option(""),
-            Option(registerType(Defines.Any))
-          )
-        callAst(call, Seq(expressionAst(binary.left), expressionAst(binary.right)))
+        operatorCallAst(
+          OxOrigin(binary),
+          binary.code,
+          operatorFor(binary.operator),
+          Seq(expressionAst(binary.left), expressionAst(binary.right))
+        )
       case unary: OxUnary =>
-        val operatorName = unaryOperatorFor(unary.operator, unary.prefix)
-        val call =
-          callNode(
-            OxOrigin(unary),
-            unary.code,
-            operatorName,
-            operatorName,
-            DispatchTypes.STATIC_DISPATCH,
-            Option(""),
-            Option(registerType(Defines.Any))
-          )
-        callAst(call, Seq(expressionAst(unary.argument)))
+        operatorCallAst(
+          OxOrigin(unary),
+          unary.code,
+          unaryOperatorFor(unary.operator, unary.prefix),
+          Seq(expressionAst(unary.argument))
+        )
+      case conditional: OxConditional =>
+        operatorCallAst(
+          OxOrigin(conditional),
+          conditional.code,
+          Operators.conditional,
+          Seq(expressionAst(conditional.condition)) ++
+            conditional.consequence.toSeq.map(expressionAst) ++
+            Seq(expressionAst(conditional.alternative))
+        )
+      case cast: OxCast =>
+        operatorCallAst(
+          OxOrigin(cast),
+          cast.code,
+          Operators.cast,
+          Seq(expressionAst(cast.value)),
+          typeFullName = registerType(normalizeType(cast.typeName))
+        )
+      case sizeOf: OxSizeOf =>
+        val operand = sizeOf.value.map(expressionAst).orElse {
+          sizeOf.typeName.map { typeName =>
+            Ast(literalNode(OxOrigin(typeName, Option(sizeOf.line)), typeName, registerType(Defines.Any)))
+          }
+        }
+        operatorCallAst(OxOrigin(sizeOf), sizeOf.code, Operators.sizeOf, operand.toSeq)
       case call: OxCall =>
         val (methodFullName, signature, typeFullName) = callTargetInfo(call.name)
         val callNode_ =
@@ -321,18 +355,33 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         )
       case indexAccess: OxIndexAccess =>
         val operatorName = Operators.indirectIndexAccess
-        val call =
-          callNode(
-            OxOrigin(indexAccess),
-            indexAccess.code,
-            operatorName,
-            operatorName,
-            DispatchTypes.STATIC_DISPATCH,
-            Option(""),
-            Option(registerType(Defines.Any))
-          )
-        callAst(call, Seq(expressionAst(indexAccess.base), expressionAst(indexAccess.index)))
+        operatorCallAst(
+          OxOrigin(indexAccess),
+          indexAccess.code,
+          operatorName,
+          Seq(expressionAst(indexAccess.base), expressionAst(indexAccess.index))
+        )
     }
+  }
+
+  private def operatorCallAst(
+    origin: OxOrigin,
+    code: String,
+    operatorName: String,
+    arguments: Seq[Ast],
+    typeFullName: String = registerType(Defines.Any)
+  ): Ast = {
+    val call =
+      callNode(
+        origin.copy(code = code),
+        code,
+        operatorName,
+        operatorName,
+        DispatchTypes.STATIC_DISPATCH,
+        Option(""),
+        Option(typeFullName)
+      )
+    callAst(call, arguments)
   }
 
   private def assignmentAst(origin: OxOrigin, left: Ast, right: Ast, code: String): Ast = {
@@ -379,19 +428,36 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def operatorFor(operator: String): String = {
     operator match {
-      case "+"  => Operators.addition
-      case "-"  => Operators.subtraction
-      case "*"  => Operators.multiplication
-      case "/"  => Operators.division
-      case "<"  => Operators.lessThan
-      case ">"  => Operators.greaterThan
-      case "<=" => Operators.lessEqualsThan
-      case ">=" => Operators.greaterEqualsThan
-      case "==" => Operators.equals
-      case "!=" => Operators.notEquals
-      case "&&" => Operators.logicalAnd
-      case "="  => Operators.assignment
-      case _    => Defines.OperatorUnknown
+      case "+"   => Operators.addition
+      case "-"   => Operators.subtraction
+      case "*"   => Operators.multiplication
+      case "/"   => Operators.division
+      case "%"   => Operators.modulo
+      case "<"   => Operators.lessThan
+      case ">"   => Operators.greaterThan
+      case "<="  => Operators.lessEqualsThan
+      case ">="  => Operators.greaterEqualsThan
+      case "=="  => Operators.equals
+      case "!="  => Operators.notEquals
+      case "&&"  => Operators.logicalAnd
+      case "||"  => Operators.logicalOr
+      case "&"   => Operators.and
+      case "|"   => Operators.or
+      case "^"   => Operators.xor
+      case "<<"  => Operators.shiftLeft
+      case ">>"  => Operators.arithmeticShiftRight
+      case "="   => Operators.assignment
+      case "+="  => Operators.assignmentPlus
+      case "-="  => Operators.assignmentMinus
+      case "*="  => Operators.assignmentMultiplication
+      case "/="  => Operators.assignmentDivision
+      case "%="  => Operators.assignmentModulo
+      case "<<=" => Operators.assignmentShiftLeft
+      case ">>=" => Operators.assignmentArithmeticShiftRight
+      case "&="  => Operators.assignmentAnd
+      case "^="  => Operators.assignmentXor
+      case "|="  => Operators.assignmentOr
+      case _     => Defines.OperatorUnknown
     }
   }
 
