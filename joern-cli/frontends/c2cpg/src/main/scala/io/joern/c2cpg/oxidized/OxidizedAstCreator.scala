@@ -2,7 +2,7 @@ package io.joern.c2cpg.oxidized
 
 import io.joern.c2cpg.Config
 import io.joern.c2cpg.astcreation.Defines
-import io.joern.x2cpg.{Ast, AstCreatorBase, ValidationMode}
+import io.joern.x2cpg.{Ast, AstCreatorBase, SourceFiles, ValidationMode}
 import io.shiftleft.codepropertygraph.generated.nodes.*
 import io.shiftleft.codepropertygraph.generated.{
   ControlStructureTypes,
@@ -159,7 +159,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val returnType = registerType(macroReturnTypeFullName(macroDecl))
     val signature  = macroSignature(macroDecl)
     val method =
-      methodNode(origin, macroDecl.name, macroDecl.name, macroFullName(macroDecl), Option(signature), filename)
+      methodNode(
+        origin,
+        macroDecl.name,
+        macroDecl.name,
+        macroFullName(macroDecl),
+        Option(signature),
+        macroFilename(macroDecl)
+      )
     val body         = blockAst(blockNode(origin, macroDecl.body, returnType))
     val methodReturn = methodReturnNode(origin, returnType)
     methodAst(method, params, body, methodReturn)
@@ -830,11 +837,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def macroForUse(name: String, line: Int): Option[OxMacroDecl] = {
-    macroDeclarations.filter(macroDecl => macroDecl.name == name && macroDecl.line <= line).lastOption
+    macroDeclarations.filter(macroDecl => macroDecl.name == name && macroDecl.visibleLine <= line).lastOption
   }
 
   private def macroFullName(macroDecl: OxMacroDecl): String = {
-    s"$filename:${macroDecl.name}:${macroSignature(macroDecl)}"
+    s"${macroFilename(macroDecl)}:${macroDecl.name}:${macroSignature(macroDecl)}"
+  }
+
+  private def macroFilename(macroDecl: OxMacroDecl): String = {
+    macroDecl.sourcePath.map(SourceFiles.toRelativePath(_, config.inputPath)).getOrElse(filename)
   }
 
   private def macroSignature(macroDecl: OxMacroDecl): String = {

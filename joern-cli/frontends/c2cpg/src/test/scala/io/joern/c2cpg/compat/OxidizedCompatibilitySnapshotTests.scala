@@ -474,9 +474,18 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
     "honor compile database source selection through the Rust backend" in {
       FileUtil.usingTemporaryDirectory("oxidizedCompatibilitySnapshot") { dir =>
+        val includeDir = dir / "include"
+        Files.createDirectories(includeDir)
+        Files.writeString(includeDir / "feature.h", "#define FEATURE_VALUE 5\n")
         val selected = dir / "selected.c"
         val ignored  = dir / "ignored.c"
-        Files.writeString(selected, "int selected() { return FROM_DB; }\n")
+        Files.writeString(
+          selected,
+          """
+            |#include "feature.h"
+            |int selected() { return FROM_DB + FEATURE_VALUE; }
+            |""".stripMargin
+        )
         Files.writeString(ignored, "int ignored() { return 0; }\n")
 
         val compileCommands = dir / "compile_commands.json"
@@ -486,7 +495,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
              |[
              |  {
              |    "directory": "${dir.toString}",
-             |    "arguments": ["clang", "-DFROM_DB=7", "-c", "selected.c"],
+             |    "arguments": ["clang", "-I${includeDir.toString}", "-DFROM_DB=7", "-c", "selected.c"],
              |    "file": "${selected.toString}"
              |  }
              |]
@@ -505,10 +514,17 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           cpg.method.nameExact("selected").name.l shouldBe List("selected")
           cpg.method.nameExact("ignored").name.l shouldBe Nil
           cpg.method.nameExact("FROM_DB").signature.l shouldBe List("int(0)")
+          cpg.method.nameExact("FEATURE_VALUE").fullName.l shouldBe List("include/feature.h:FEATURE_VALUE:int(0)")
           inside(cpg.call.nameExact("FROM_DB").l) { case List(fromDbCall) =>
             fromDbCall.code shouldBe "FROM_DB"
             fromDbCall.signature shouldBe "int(0)"
             fromDbCall.dispatchType shouldBe DispatchTypes.INLINED
+          }
+          inside(cpg.call.nameExact("FEATURE_VALUE").l) { case List(featureCall) =>
+            featureCall.code shouldBe "FEATURE_VALUE"
+            featureCall.methodFullName shouldBe "include/feature.h:FEATURE_VALUE:int(0)"
+            featureCall.signature shouldBe "int(0)"
+            featureCall.dispatchType shouldBe DispatchTypes.INLINED
           }
         } finally {
           cpg.close()

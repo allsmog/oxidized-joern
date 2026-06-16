@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 use serde::Serialize;
 use std::collections::HashSet;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tree_sitter::{Node, Parser};
 
 pub const SCHEMA_VERSION: u32 = 1;
@@ -58,6 +58,10 @@ pub struct MacroDecl {
     pub name: String,
     pub code: String,
     pub line: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_path: Option<String>,
+    #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
+    pub visible_line: Option<usize>,
     pub parameters: Vec<String>,
     pub body: String,
 }
@@ -329,8 +333,15 @@ pub fn parse_file(path: &Path, options: &ParseOptions) -> Result<CxxAstDocument>
     let metadata = fs::metadata(path)
         .with_context(|| format!("failed to read metadata for '{}'", path.display()))?;
 
+    let source_declarations = parse_declarations(&source, language_for_path(path))?;
     let mut declarations = synthetic_macro_declarations(&options.defines);
-    declarations.extend(parse_declarations(&source, language_for_path(path))?);
+    declarations.extend(included_macro_declarations(
+        path,
+        &source_declarations,
+        options,
+    )?);
+    declarations.extend(source_declarations);
+    declarations.sort_by_key(declaration_sort_line);
 
     Ok(CxxAstDocument {
         schema_version: SCHEMA_VERSION,
@@ -485,6 +496,13 @@ fn declaration_line(declaration: &Declaration) -> usize {
     }
 }
 
+fn declaration_sort_line(declaration: &Declaration) -> usize {
+    match declaration {
+        Declaration::Macro(value) => value.visible_line.unwrap_or(value.line),
+        _ => declaration_line(declaration),
+    }
+}
+
 fn parse_macro(node: Node, source: &[u8]) -> Option<MacroDecl> {
     let code = node_text(node, source).trim().to_string();
     let definition = code
@@ -504,6 +522,104 @@ fn synthetic_macro_declarations(defines: &[String]) -> Vec<Declaration> {
         .filter_map(|define| macro_from_define_option(define))
         .map(Declaration::Macro)
         .collect()
+}
+
+fn included_macro_declarations(
+    source_path: &Path,
+    declarations: &[Declaration],
+    options: &ParseOptions,
+) -> Result<Vec<Declaration>> {
+    let mut visited = HashSet::new();
+    let mut macros = Vec::new();
+    for include in declarations
+        .iter()
+        .filter_map(|declaration| match declaration {
+            Declaration::Include(include) => Some(include),
+            _ => None,
+        })
+    {
+        if let Some(path) = resolve_include(source_path, &include.name, options) {
+            macros.extend(header_macro_declarations(
+                &path,
+                include.line,
+                options,
+                &mut visited,
+            )?);
+        }
+    }
+    Ok(macros.into_iter().map(Declaration::Macro).collect())
+}
+
+fn header_macro_declarations(
+    header_path: &Path,
+    visible_line: usize,
+    options: &ParseOptions,
+    visited: &mut HashSet<PathBuf>,
+) -> Result<Vec<MacroDecl>> {
+    let normalized_header = normalized_absolute_path(header_path);
+    if !visited.insert(normalized_header.clone()) {
+        return Ok(Vec::new());
+    }
+
+    let source = fs::read_to_string(&normalized_header)
+        .with_context(|| format!("failed to read included header '{}'", header_path.display()))?;
+    let declarations = parse_declarations(&source, language_for_path(&normalized_header))?;
+    let mut macros = Vec::new();
+    for declaration in declarations {
+        match declaration {
+            Declaration::Include(include) => {
+                if let Some(path) = resolve_include(&normalized_header, &include.name, options) {
+                    macros.extend(header_macro_declarations(
+                        &path,
+                        visible_line,
+                        options,
+                        visited,
+                    )?);
+                }
+            }
+            Declaration::Macro(mut macro_decl) => {
+                macro_decl.source_path = Some(normalize_path(&normalized_header));
+                macro_decl.visible_line = Some(visible_line);
+                macros.push(macro_decl);
+            }
+            _ => {}
+        }
+    }
+    Ok(macros)
+}
+
+fn resolve_include(
+    source_path: &Path,
+    include_name: &str,
+    options: &ParseOptions,
+) -> Option<PathBuf> {
+    let include_path = Path::new(include_name);
+    if include_path.is_absolute() && include_path.is_file() {
+        return Some(include_path.to_path_buf());
+    }
+
+    let local_candidate = source_path.parent().map(|parent| parent.join(include_path));
+    local_candidate
+        .filter(|candidate| candidate.is_file())
+        .or_else(|| {
+            options
+                .include_paths
+                .iter()
+                .map(|include_dir| Path::new(include_dir).join(include_path))
+                .find(|candidate| candidate.is_file())
+        })
+}
+
+fn normalized_absolute_path(path: &Path) -> PathBuf {
+    if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        std::env::current_dir()
+            .unwrap_or_else(|_| PathBuf::from("."))
+            .join(path)
+    }
+    .components()
+    .collect()
 }
 
 fn macro_from_define_option(define: &str) -> Option<MacroDecl> {
@@ -555,6 +671,8 @@ fn macro_from_definition(definition: &str, code: String, line: usize) -> Option<
         name,
         code,
         line,
+        source_path: None,
+        visible_line: None,
         parameters,
         body,
     })
@@ -1771,6 +1889,57 @@ mod tests {
         assert_eq!(inc.parameters, vec!["x".to_string()]);
         assert_eq!(inc.body, "((x) + 1)");
         assert_eq!(function.name, "selected");
+    }
+
+    #[test]
+    fn parse_file_imports_macros_from_included_headers() {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("clock should be after Unix epoch")
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!(
+            "cxxastgen-core-includes-{}-{unique}",
+            std::process::id()
+        ));
+        let include_dir = dir.join("include");
+        fs::create_dir_all(&include_dir).expect("create include dir");
+        let header = include_dir.join("feature.h");
+        fs::write(&header, "#define FEATURE_VALUE 7\n").expect("write header");
+        let source = dir.join("main.c");
+        fs::write(
+            &source,
+            "#include \"feature.h\"\nint selected() { return FEATURE_VALUE; }\n",
+        )
+        .expect("write source");
+
+        let document = parse_file(
+            &source,
+            &ParseOptions {
+                include_paths: vec![normalize_path(&include_dir)],
+                defines: Vec::new(),
+                compilation_database: None,
+                skip_function_bodies: false,
+            },
+        )
+        .expect("parse source with include");
+        fs::remove_dir_all(&dir).ok();
+
+        let feature_macro = document
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Macro(value) if value.name == "FEATURE_VALUE" => Some(value),
+                _ => None,
+            })
+            .expect("included macro should be imported");
+        assert_eq!(feature_macro.body, "7");
+        assert_eq!(feature_macro.line, 1);
+        assert_eq!(feature_macro.visible_line, Some(1));
+        let expected_header_path = normalize_path(&header);
+        assert_eq!(
+            feature_macro.source_path.as_deref(),
+            Some(expected_header_path.as_str())
+        );
     }
 
     #[test]
