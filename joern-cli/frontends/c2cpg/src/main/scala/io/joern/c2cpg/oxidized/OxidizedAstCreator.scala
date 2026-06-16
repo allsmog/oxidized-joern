@@ -145,7 +145,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         filename,
         structDecl.code,
         NodeTypes.NAMESPACE_BLOCK,
-        globalNamespaceBlock().fullName
+        globalNamespaceBlock().fullName,
+        alias = aggregateAlias(typeName)
       )
     val fieldAsts = structDecl.fields.map { field =>
       Ast(
@@ -166,7 +167,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         filename,
         enumDecl.code,
         NodeTypes.NAMESPACE_BLOCK,
-        globalNamespaceBlock().fullName
+        globalNamespaceBlock().fullName,
+        alias = aggregateAlias(typeName)
       )
     val variantAsts = enumDecl.variants.map { variant =>
       Ast(memberNode(origin.copy(code = variant.code), variant.name, variant.code, registerType("int")))
@@ -650,6 +652,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       s"${resolveAliasType(normalized.dropRight(2), aliases)}[]"
     } else {
       aliases.getOrElse(normalized, normalized)
+    }
+  }
+
+  private def aggregateAlias(typeName: String): Option[String] = {
+    document.declarations.collectFirst {
+      case typedef: OxTypedefDecl if resolveAliasType(typedef.typeName) == typeName => registerType(typedef.name)
     }
   }
 
