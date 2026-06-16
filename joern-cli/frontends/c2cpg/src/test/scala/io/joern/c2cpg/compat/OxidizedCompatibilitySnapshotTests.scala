@@ -410,6 +410,41 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ for initializer destructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  ~Widget();
+          |};
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int loop() {
+          |  Core::Widget widget;
+          |  for (Core::Widget guard(widget); 0; ) {
+          |  }
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("loop").local.nameExact("widget").typeFullName.l shouldBe List("Core.Widget")
+      cpg.method.nameExact("loop").local.nameExact("guard").typeFullName.l shouldBe List("Core.Widget")
+      cpg.method.nameExact("loop").call.nameExact("Widget").codeExact("Core.Widget.Widget(widget)").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(Widget&)")
+      cpg.method.nameExact("loop").call.nameExact("~Widget").code.l shouldBe
+        List("guard.~Widget()", "widget.~Widget()")
+      cpg.method.nameExact("loop").controlStructure.controlStructureType(ControlStructureTypes.FOR).ast.isCall
+        .nameExact("~Widget")
+        .code
+        .l shouldBe Nil
+    }
+
     "capture C++ new and delete expressions" in {
       val cpg = code(
         """

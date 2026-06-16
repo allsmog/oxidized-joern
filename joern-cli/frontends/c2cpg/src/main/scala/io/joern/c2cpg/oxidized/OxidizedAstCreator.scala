@@ -766,21 +766,20 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           )
         )
       case forStmt: OxFor =>
-        inNestedScope {
+        val (forAst_, initializerDestructors) = inNestedScopeCollectingDestructors {
           val forNode               = controlStructureNode(OxOrigin(forStmt), ControlStructureTypes.FOR, forStmt.code)
           val initializerAsts       = forStmt.initializer.flatMap(astsForStatement)
           val (localAsts, initAsts) = initializerAsts.partition(_.root.exists(_.isInstanceOf[NewLocal]))
-          Seq(
-            forAst(
-              forNode,
-              localAsts,
-              initAsts,
-              forStmt.condition.toSeq.map(expressionAst),
-              forStmt.update.toSeq.map(expressionAst),
-              statementBlockAst(forStmt.body, "for", forStmt.line)
-            )
+          forAst(
+            forNode,
+            localAsts,
+            initAsts,
+            forStmt.condition.toSeq.map(expressionAst),
+            forStmt.update.toSeq.map(expressionAst),
+            statementBlockAst(forStmt.body, "for", forStmt.line)
           )
         }
+        forAst_ +: initializerDestructors.reverse.map(localDestructorAst)
       case breakStmt: OxBreak =>
         Seq(Ast(controlStructureNode(OxOrigin(breakStmt), ControlStructureTypes.BREAK, breakStmt.code)))
       case continueStmt: OxContinue =>
@@ -917,6 +916,20 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     localDestructorScopes = Vector.empty[LocalDestructor] :: localDestructorScopes
     try body
     finally {
+      localDestructorScopes = outerDestructorScopes
+      scope = outerScope
+    }
+  }
+
+  private def inNestedScopeCollectingDestructors[T](body: => T): (T, Vector[LocalDestructor]) = {
+    val outerScope            = scope
+    val outerDestructorScopes = localDestructorScopes
+    localDestructorScopes = Vector.empty[LocalDestructor] :: localDestructorScopes
+    try {
+      val result      = body
+      val destructors = currentLocalDestructors
+      (result, destructors)
+    } finally {
       localDestructorScopes = outerDestructorScopes
       scope = outerScope
     }
