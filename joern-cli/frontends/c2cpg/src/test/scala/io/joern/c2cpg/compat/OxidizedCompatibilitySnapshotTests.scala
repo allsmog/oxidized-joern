@@ -213,6 +213,16 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       binding._captureIn.l shouldBe cpg.methodRef.methodFullNameExact("read").l
     }
 
+    "capture typedef aliases" in {
+      val cpg = code("""
+          |typedef const char * foo;
+          |typedef foo * bar;
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.typeDecl.nameExact("foo").aliasTypeFullName.l shouldBe List("char*")
+      cpg.typeDecl.nameExact("bar").aliasTypeFullName.l shouldBe List("char**")
+    }
+
     "capture function prototypes as external methods" in {
       val cpg = code("""
           |int external(int value);

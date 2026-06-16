@@ -46,6 +46,7 @@ pub enum Declaration {
     Macro(MacroDecl),
     Struct(StructDecl),
     Enum(EnumDecl),
+    Typedef(TypedefDecl),
     GlobalVariable(GlobalVariableDecl),
     Function(FunctionDecl),
 }
@@ -102,6 +103,15 @@ pub struct GlobalVariableDecl {
     pub code: String,
     pub line: usize,
     pub initializer: Option<Expression>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TypedefDecl {
+    pub name: String,
+    pub type_name: String,
+    pub code: String,
+    pub line: usize,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -370,6 +380,14 @@ fn parse_declarations(source: &str, language: SourceLanguage) -> Result<Vec<Decl
                         .map(Declaration::GlobalVariable),
                 );
             }
+            "type_definition" => {
+                declarations.extend(
+                    parse_typedef_declarations(child, bytes)
+                        .into_iter()
+                        .map(Declaration::Typedef),
+                );
+                declarations.extend(parse_type_declarations(child, bytes));
+            }
             "struct_specifier" => {
                 if let Some(declaration) = parse_struct(child, bytes) {
                     declarations.push(Declaration::Struct(declaration));
@@ -422,6 +440,7 @@ fn declaration_line(declaration: &Declaration) -> usize {
         Declaration::Macro(value) => value.line,
         Declaration::Struct(value) => value.line,
         Declaration::Enum(value) => value.line,
+        Declaration::Typedef(value) => value.line,
         Declaration::GlobalVariable(value) => value.line,
         Declaration::Function(value) => value.line,
     }
@@ -542,6 +561,26 @@ fn parse_enum_variant(node: Node, source: &[u8]) -> Option<EnumVariant> {
         value,
         code: node_text(node, source).trim().to_string(),
     })
+}
+
+fn parse_typedef_declarations(node: Node, source: &[u8]) -> Vec<TypedefDecl> {
+    let Some(type_node) = node.child_by_field_name("type") else {
+        return Vec::new();
+    };
+    let base_type = normalize_type(node_text(type_node, source));
+    named_children(node)
+        .into_iter()
+        .filter(|child| *child != type_node)
+        .filter_map(|declarator| {
+            let name = declarator_name(declarator, source)?;
+            Some(TypedefDecl {
+                name,
+                type_name: type_from_declarator(&base_type, declarator, source),
+                code: node_text(node, source).trim().to_string(),
+                line: line(declarator),
+            })
+        })
+        .collect()
 }
 
 fn parse_global_variable_declarations(node: Node, source: &[u8]) -> Vec<GlobalVariableDecl> {
@@ -1146,6 +1185,7 @@ fn split_type_and_name(raw: &str) -> Option<(String, String)> {
 fn normalize_type(raw: &str) -> String {
     let normalized = raw
         .split_whitespace()
+        .filter(|part| !TYPE_QUALIFIERS.contains(part))
         .collect::<Vec<_>>()
         .join(" ")
         .replace(" *", "*")
@@ -1157,6 +1197,10 @@ fn normalize_type(raw: &str) -> String {
         .unwrap_or(&normalized)
         .to_string()
 }
+
+const TYPE_QUALIFIERS: &[&str] = &[
+    "const", "volatile", "restrict", "static", "extern", "register", "typedef",
+];
 
 fn signature(return_type: &str, params: &[ParameterDecl]) -> String {
     format!(
@@ -1450,6 +1494,30 @@ mod tests {
             panic!("expected function declaration");
         };
         assert_eq!(function.name, "read");
+    }
+
+    #[test]
+    fn parses_typedef_declarations() {
+        let sample = r#"
+                typedef const char * foo;
+                typedef foo * bar;
+                "#;
+        let declarations =
+            parse_declarations(sample, SourceLanguage::C).expect("typedef sample should parse");
+
+        let Declaration::Typedef(foo) = &declarations[0] else {
+            panic!("expected first typedef");
+        };
+        assert_eq!(foo.name, "foo");
+        assert_eq!(foo.type_name, "char*");
+        assert_eq!(foo.code, "typedef const char * foo;");
+
+        let Declaration::Typedef(bar) = &declarations[1] else {
+            panic!("expected second typedef");
+        };
+        assert_eq!(bar.name, "bar");
+        assert_eq!(bar.type_name, "foo*");
+        assert_eq!(bar.code, "typedef foo * bar;");
     }
 
     #[test]
