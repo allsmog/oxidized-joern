@@ -47,7 +47,7 @@ case class OxStructDecl(
   nestedDeclarations: Seq[OxDeclaration]
 ) extends OxDeclaration
 
-case class OxFieldDecl(name: String, typeName: String, code: String)
+case class OxFieldDecl(name: String, typeName: String, code: String, isStatic: Boolean)
 
 case class OxEnumDecl(
   name: String,
@@ -296,7 +296,12 @@ object OxDocument {
   }
 
   private def field(value: Value): OxFieldDecl = {
-    OxFieldDecl(name = str(value, "name"), typeName = str(value, "typeName"), code = str(value, "code"))
+    OxFieldDecl(
+      name = str(value, "name"),
+      typeName = str(value, "typeName"),
+      code = str(value, "code"),
+      isStatic = value.obj.get("isStatic").exists(_.bool)
+    )
   }
 
   private def enumVariant(value: Value): OxEnumVariant = {

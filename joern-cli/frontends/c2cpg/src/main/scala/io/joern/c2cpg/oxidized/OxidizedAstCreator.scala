@@ -301,9 +301,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         alias = aggregateAlias(typeName)
       )
     val fieldAsts = structDecl.fields.map { field =>
-      Ast(
+      val member =
         memberNode(origin.copy(code = field.code), field.name, field.code, registerType(normalizeType(field.typeName)))
-      )
+      Ast(member).withChildren(Option.when(field.isStatic)(Ast(NewModifier().modifierType(ModifierTypes.STATIC))).toSeq)
     }
     val nestedAsts = structDecl.nestedDeclarations.flatMap {
       case nestedStruct: OxStructDecl => Seq(astForStruct(nestedStruct, Option(typeName), typeName))

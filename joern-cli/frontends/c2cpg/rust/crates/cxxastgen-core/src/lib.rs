@@ -127,6 +127,7 @@ pub struct FieldDecl {
     pub name: String,
     pub type_name: String,
     pub code: String,
+    pub is_static: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -1446,6 +1447,7 @@ fn parse_field(node: Node, source: &[u8]) -> Option<FieldDecl> {
             name,
             type_name,
             code: code.to_string(),
+            is_static: is_static_field(node, source),
         });
     }
     let (type_name, name) =
@@ -1454,6 +1456,16 @@ fn parse_field(node: Node, source: &[u8]) -> Option<FieldDecl> {
         name,
         type_name,
         code: code.to_string(),
+        is_static: is_static_field(node, source),
+    })
+}
+
+fn is_static_field(node: Node, source: &[u8]) -> bool {
+    named_children(node).into_iter().any(|child| {
+        child.kind() == "storage_class_specifier"
+            && node_text(child, source)
+                .split_whitespace()
+                .any(|specifier| specifier == "static")
     })
 }
 
@@ -3176,6 +3188,7 @@ mod tests {
                   Widget(int& seed) : value(seed) {}
                   ~Widget() { value = 0; }
                   int value;
+                  static int instances;
                   int get() { return value; }
                   static int identity(int x);
                   int size();
@@ -3212,8 +3225,11 @@ mod tests {
                 _ => None,
             })
             .expect("expected Widget class");
-        assert_eq!(widget.fields.len(), 1);
+        assert_eq!(widget.fields.len(), 2);
         assert_eq!(widget.fields[0].name, "value");
+        assert!(!widget.fields[0].is_static);
+        assert_eq!(widget.fields[1].name, "instances");
+        assert!(widget.fields[1].is_static);
 
         let methods = widget
             .nested_declarations
