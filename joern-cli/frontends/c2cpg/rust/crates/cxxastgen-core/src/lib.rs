@@ -626,6 +626,16 @@ fn parse_declaration_node(
                 declarations.push(Declaration::Function(function));
             }
         }
+        "constructor_or_destructor_definition" => {
+            if let Some(function) = parse_constructor_or_destructor(node, source, true, symbols) {
+                declarations.push(Declaration::Function(function));
+            }
+        }
+        "constructor_or_destructor_declaration" => {
+            if let Some(function) = parse_constructor_or_destructor(node, source, false, symbols) {
+                declarations.push(Declaration::Function(function));
+            }
+        }
         _ => {}
     }
     Ok(declarations)
@@ -1297,8 +1307,35 @@ fn parse_struct_with_name(
     nested_declarations.extend(
         named_children(body)
             .into_iter()
+            .filter(|child| child.kind() == "declaration")
+            .filter_map(|declaration| parse_function_declaration(declaration, source))
+            .map(Declaration::Function),
+    );
+    nested_declarations.extend(
+        named_children(body)
+            .into_iter()
             .filter(|child| child.kind() == "function_definition")
             .filter_map(|function| parse_function(function, source, symbols))
+            .map(Declaration::Function),
+    );
+    nested_declarations.extend(
+        named_children(body)
+            .into_iter()
+            .filter(|child| {
+                matches!(
+                    child.kind(),
+                    "constructor_or_destructor_definition"
+                        | "constructor_or_destructor_declaration"
+                )
+            })
+            .filter_map(|function| {
+                parse_constructor_or_destructor(
+                    function,
+                    source,
+                    function.kind() == "constructor_or_destructor_definition",
+                    symbols,
+                )
+            })
             .map(Declaration::Function),
     );
     Some(StructDecl {
@@ -1533,15 +1570,19 @@ fn parse_global_variable_declarations(node: Node, source: &[u8]) -> Vec<GlobalVa
 }
 
 fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Option<FunctionDecl> {
-    let type_node = node.child_by_field_name("type")?;
+    let type_node = node.child_by_field_name("type");
     let declarator = node.child_by_field_name("declarator")?;
     let body = node.child_by_field_name("body")?;
     let name = declarator_name(declarator, source)?;
-    let return_type = type_from_declarator(
-        &type_name_from_type_node(type_node, source),
-        declarator,
-        source,
-    );
+    let return_type = type_node
+        .map(|type_node| {
+            type_from_declarator(
+                &type_name_from_type_node(type_node, source),
+                declarator,
+                source,
+            )
+        })
+        .unwrap_or_else(|| "void".to_string());
     let parameters = declarator
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
@@ -1561,17 +1602,21 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
 }
 
 fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl> {
-    let type_node = node.child_by_field_name("type")?;
+    let type_node = node.child_by_field_name("type");
     let declarator = node.child_by_field_name("declarator")?;
     if !is_function_prototype_declarator(declarator) {
         return None;
     }
     let name = declarator_name(declarator, source)?;
-    let return_type = type_from_declarator(
-        &type_name_from_type_node(type_node, source),
-        declarator,
-        source,
-    );
+    let return_type = type_node
+        .map(|type_node| {
+            type_from_declarator(
+                &type_name_from_type_node(type_node, source),
+                declarator,
+                source,
+            )
+        })
+        .unwrap_or_else(|| "void".to_string());
     let parameters = declarator
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
@@ -1587,6 +1632,44 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
         visible_line: None,
         parameters,
         body: Vec::new(),
+    })
+}
+
+fn parse_constructor_or_destructor(
+    node: Node,
+    source: &[u8],
+    is_definition: bool,
+    symbols: &mut MacroSymbols,
+) -> Option<FunctionDecl> {
+    let declarator = node.child_by_field_name("declarator")?;
+    if !is_function_prototype_declarator(declarator) {
+        return None;
+    }
+    let name = declarator_name(declarator, source)?;
+    let return_type = "void".to_string();
+    let parameters = declarator
+        .child_by_field_name("parameters")
+        .map(|params| parse_parameters(params, source))
+        .unwrap_or_default();
+    let body = node
+        .child_by_field_name("body")
+        .map(|body| parse_statement_block(body, source, symbols))
+        .unwrap_or_default();
+    Some(FunctionDecl {
+        name,
+        signature: signature(&return_type, &parameters),
+        return_type,
+        is_definition: is_definition && node.child_by_field_name("body").is_some(),
+        code: if is_definition {
+            compact_code(node_text(node, source))
+        } else {
+            statement_code(node, source)
+        },
+        line: line(node),
+        source_path: None,
+        visible_line: None,
+        parameters,
+        body,
     })
 }
 
@@ -2219,9 +2302,11 @@ fn declaration_type_and_name(node: Node, source: &[u8]) -> Option<(String, Strin
 
 fn declarator_name(node: Node, source: &[u8]) -> Option<String> {
     match node.kind() {
-        "identifier" | "field_identifier" | "type_identifier" | "qualified_identifier" => {
-            Some(node_text(node, source).trim().to_string())
-        }
+        "identifier"
+        | "field_identifier"
+        | "type_identifier"
+        | "qualified_identifier"
+        | "destructor_name" => Some(node_text(node, source).trim().to_string()),
         _ => node
             .child_by_field_name("declarator")
             .and_then(|child| declarator_name(child, source))
@@ -2261,6 +2346,19 @@ fn type_from_declarator(base_type: &str, declarator: Node, source: &[u8]) -> Str
             .child_by_field_name("declarator")
             .map(|child| format!("{}*", type_from_declarator(base_type, child, source)))
             .unwrap_or_else(|| format!("{base_type}*")),
+        "reference_declarator" | "abstract_reference_declarator" => {
+            let reference = reference_operator(declarator, source);
+            declarator
+                .child_by_field_name("declarator")
+                .map(|child| {
+                    format!(
+                        "{}{}",
+                        type_from_declarator(base_type, child, source),
+                        reference
+                    )
+                })
+                .unwrap_or_else(|| format!("{base_type}{reference}"))
+        }
         "array_declarator" | "abstract_array_declarator" => declarator
             .child_by_field_name("declarator")
             .map(|child| format!("{}[]", type_from_declarator(base_type, child, source)))
@@ -2289,6 +2387,20 @@ fn type_from_declarator(base_type: &str, declarator: Node, source: &[u8]) -> Str
     }
 }
 
+fn reference_operator(declarator: Node, source: &[u8]) -> &'static str {
+    let text = node_text(declarator, source);
+    let declarator_start = declarator
+        .child_by_field_name("declarator")
+        .map(|child| child.start_byte())
+        .unwrap_or(declarator.end_byte());
+    let prefix = &text[..declarator_start.saturating_sub(declarator.start_byte())];
+    if prefix.contains("&&") {
+        "&&"
+    } else {
+        "&"
+    }
+}
+
 fn function_pointer_marker(declarator: Node, source: &[u8]) -> Option<String> {
     let marker = declarator_marker(declarator, source)?;
     marker.contains('*').then_some(marker)
@@ -2296,7 +2408,11 @@ fn function_pointer_marker(declarator: Node, source: &[u8]) -> Option<String> {
 
 fn declarator_marker(declarator: Node, source: &[u8]) -> Option<String> {
     match declarator.kind() {
-        "identifier" | "field_identifier" | "type_identifier" => Some(String::new()),
+        "identifier"
+        | "field_identifier"
+        | "type_identifier"
+        | "qualified_identifier"
+        | "destructor_name" => Some(String::new()),
         "pointer_declarator" | "abstract_pointer_declarator" => Some(format!(
             "*{}",
             child_declarator(declarator)
@@ -2342,7 +2458,11 @@ fn child_declarator(node: Node) -> Option<Node> {
 fn is_declarator(node: Node) -> bool {
     matches!(
         node.kind(),
-        "identifier" | "field_identifier" | "type_identifier"
+        "identifier"
+            | "field_identifier"
+            | "type_identifier"
+            | "qualified_identifier"
+            | "destructor_name"
     ) || node.kind().ends_with("_declarator")
 }
 
@@ -2925,12 +3045,17 @@ mod tests {
                 namespace Core {
                 class Widget {
                 public:
+                  Widget();
+                  Widget(int& seed) : value(seed) {}
+                  ~Widget() { value = 0; }
                   int value;
                   int get() { return value; }
                   int size();
                 };
                 int make() { return 1; }
                 }
+                Core::Widget::Widget() : value(1) {}
+                Core::Widget::~Widget() {}
                 int Core::Widget::outside() { return 2; }
                 int use() {
                   Core::Widget widget;
@@ -2969,12 +3094,14 @@ mod tests {
                 _ => None,
             })
             .collect::<Vec<_>>();
+        let mut method_names = methods
+            .iter()
+            .map(|method| method.name.as_str())
+            .collect::<Vec<_>>();
+        method_names.sort_unstable();
         assert_eq!(
-            methods
-                .iter()
-                .map(|method| method.name.as_str())
-                .collect::<Vec<_>>(),
-            vec!["size", "get"]
+            method_names,
+            vec!["Widget", "Widget", "get", "size", "~Widget"]
         );
         assert!(methods
             .iter()
@@ -2982,6 +3109,15 @@ mod tests {
         assert!(methods
             .iter()
             .any(|method| method.name == "get" && method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "Widget"
+            && method.signature == "void()"
+            && !method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "Widget"
+            && method.signature == "void(int&)"
+            && method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "~Widget"
+            && method.signature == "void()"
+            && method.is_definition));
 
         let make = namespace
             .declarations
@@ -2992,6 +3128,30 @@ mod tests {
             })
             .expect("expected namespace free function");
         assert_eq!(make.signature, "int()");
+
+        let constructor = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "Core::Widget::Widget" => {
+                    Some(function)
+                }
+                _ => None,
+            })
+            .expect("expected out-of-class constructor definition");
+        assert_eq!(constructor.signature, "void()");
+        assert!(constructor.is_definition);
+
+        let destructor = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "Core::Widget::~Widget" => {
+                    Some(function)
+                }
+                _ => None,
+            })
+            .expect("expected out-of-class destructor definition");
+        assert_eq!(destructor.signature, "void()");
+        assert!(destructor.is_definition);
 
         let outside = declarations
             .iter()

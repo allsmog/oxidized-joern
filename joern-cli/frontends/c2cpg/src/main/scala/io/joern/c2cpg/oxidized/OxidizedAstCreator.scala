@@ -307,6 +307,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val nestedAsts = structDecl.nestedDeclarations.flatMap {
       case nestedStruct: OxStructDecl => Seq(astForStruct(nestedStruct, Option(typeName), typeName))
       case nestedEnum: OxEnumDecl     => Seq(astForEnum(nestedEnum, Option(typeName), typeName))
+      case nestedFunction: OxFunctionDecl if isShadowedByOutOfClassDefinition(typeName, nestedFunction) =>
+        Seq.empty
       case nestedFunction: OxFunctionDecl =>
         astsForFunction(nestedFunction, Option(typeName), NodeTypes.TYPE_DECL, typeName)
       case _ => Seq.empty
@@ -466,11 +468,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val returnType        = registerType(normalizeType(function.returnType))
     val fullName          = functionFullName(function, ownerFullName)
     val simpleName        = functionSimpleName(function)
-    val parentTypeOwner   = functionOwnerFullName(function, ownerFullName).filter(aggregateTypeFullNames.contains)
+    val functionOwner     = functionOwnerFullName(function, ownerFullName)
+    val parentTypeOwner   = functionOwner.filter(aggregateTypeFullNames.contains)
     val effectiveParentTy = parentTypeOwner.map(_ => NodeTypes.TYPE_DECL).getOrElse(astParentType)
     val effectiveParentFullName = parentTypeOwner.getOrElse {
       if (function.name.contains("::")) {
-        functionOwnerFullName(function, ownerFullName)
+        functionOwner
           .map(owner => s"${declarationFilename(function)}:$owner")
           .getOrElse(astParentFullName)
       } else {
@@ -520,7 +523,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       captureContext.capturedGlobals.values.map(capture => Ast(capture.scopeEntry.declaration)).toSeq
     val body         = blockAst(blockNode(origin, function.code, Defines.Any), (captureLocalAsts ++ bodyAsts).toList)
     val methodReturn = methodReturnNode(origin, returnType)
-    val ast          = methodAst(method, parameters.map(_._2._2), body, methodReturn)
+    val ast =
+      methodAst(method, parameters.map(_._2._2), body, methodReturn, methodModifiers(simpleName, parentTypeOwner))
 
     captureAstForFunction(captureContext).fold(Seq(ast))(captureAst => Seq(ast, captureAst))
   }
@@ -1039,6 +1043,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def isOutOfClassAggregateFunction(function: OxFunctionDecl, ownerFullName: Option[String]): Boolean = {
     function.name.contains("::") &&
     functionOwnerFullName(function, ownerFullName).exists(aggregateTypeFullNames.contains)
+  }
+
+  private def isShadowedByOutOfClassDefinition(typeFullName: String, function: OxFunctionDecl): Boolean = {
+    !function.isDefinition &&
+    outOfClassFunctionsByOwner
+      .getOrElse(typeFullName, Seq.empty)
+      .exists(entry =>
+        entry.function.isDefinition &&
+          entry.simpleName == functionSimpleName(function) &&
+          entry.function.signature == function.signature
+      )
+  }
+
+  private def methodModifiers(simpleName: String, parentTypeOwner: Option[String]): Seq[NewModifier] = {
+    val isConstructor = parentTypeOwner
+      .flatMap(_.split('.').lastOption)
+      .contains(simpleName)
+    Option.when(isConstructor)(NewModifier().modifierType(ModifierTypes.CONSTRUCTOR)).toSeq
   }
 
   private def declarationFilename(declaration: OxDeclaration): String = {
