@@ -223,6 +223,27 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.typeDecl.nameExact("bar").aliasTypeFullName.l shouldBe List("char**")
     }
 
+    "capture typedef aggregate aliases" in {
+      val cpg = code("""
+          |typedef struct foo {
+          |  int x;
+          |} abc;
+          |typedef struct {
+          |  int y;
+          |} Foo;
+          |typedef enum mode {
+          |  MODE_A,
+          |} Mode;
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.typeDecl.nameExact("foo").aliasTypeFullName.l shouldBe List("abc")
+      cpg.typeDecl.nameExact("abc").aliasTypeFullName.l shouldBe List("foo")
+      cpg.typeDecl.nameExact("Foo").aliasTypeFullName.l shouldBe Nil
+      cpg.typeDecl.nameExact("Foo").member.name.l shouldBe List("y")
+      cpg.typeDecl.nameExact("mode").aliasTypeFullName.l shouldBe List("Mode")
+      cpg.typeDecl.nameExact("Mode").aliasTypeFullName.l shouldBe List("mode")
+    }
+
     "capture function prototypes as external methods" in {
       val cpg = code("""
           |int external(int value);

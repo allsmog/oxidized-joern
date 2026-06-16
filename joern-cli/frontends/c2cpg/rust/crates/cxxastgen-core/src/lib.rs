@@ -386,6 +386,7 @@ fn parse_declarations(source: &str, language: SourceLanguage) -> Result<Vec<Decl
                         .into_iter()
                         .map(Declaration::Typedef),
                 );
+                declarations.extend(parse_anonymous_typedef_aggregate_declarations(child, bytes));
                 declarations.extend(parse_type_declarations(child, bytes));
             }
             "struct_specifier" => {
@@ -506,9 +507,13 @@ fn parse_type_declarations(node: Node, source: &[u8]) -> Vec<Declaration> {
 
 fn parse_struct(node: Node, source: &[u8]) -> Option<StructDecl> {
     let name_node = node.child_by_field_name("name")?;
+    parse_struct_with_name(node, source, node_text(name_node, source).to_string())
+}
+
+fn parse_struct_with_name(node: Node, source: &[u8], name: String) -> Option<StructDecl> {
     let body = node.child_by_field_name("body")?;
     Some(StructDecl {
-        name: node_text(name_node, source).to_string(),
+        name,
         code: compact_code(node_text(node, source)),
         line: line(node),
         fields: named_children(body)
@@ -532,9 +537,13 @@ fn parse_field(node: Node, source: &[u8]) -> Option<FieldDecl> {
 
 fn parse_enum(node: Node, source: &[u8]) -> Option<EnumDecl> {
     let name_node = node.child_by_field_name("name")?;
+    parse_enum_with_name(node, source, node_text(name_node, source).to_string())
+}
+
+fn parse_enum_with_name(node: Node, source: &[u8], name: String) -> Option<EnumDecl> {
     let body = node.child_by_field_name("body")?;
     Some(EnumDecl {
-        name: node_text(name_node, source).to_string(),
+        name,
         code: compact_code(node_text(node, source)),
         line: line(node),
         variants: named_children(body)
@@ -567,7 +576,10 @@ fn parse_typedef_declarations(node: Node, source: &[u8]) -> Vec<TypedefDecl> {
     let Some(type_node) = node.child_by_field_name("type") else {
         return Vec::new();
     };
-    let base_type = normalize_type(node_text(type_node, source));
+    if is_anonymous_aggregate_type(type_node) {
+        return Vec::new();
+    }
+    let base_type = type_name_from_type_node(type_node, source);
     named_children(node)
         .into_iter()
         .filter(|child| *child != type_node)
@@ -583,11 +595,37 @@ fn parse_typedef_declarations(node: Node, source: &[u8]) -> Vec<TypedefDecl> {
         .collect()
 }
 
+fn parse_anonymous_typedef_aggregate_declarations(node: Node, source: &[u8]) -> Vec<Declaration> {
+    let Some(type_node) = node.child_by_field_name("type") else {
+        return Vec::new();
+    };
+    if !is_anonymous_aggregate_type(type_node) {
+        return Vec::new();
+    }
+
+    named_children(node)
+        .into_iter()
+        .filter(|child| *child != type_node)
+        .filter_map(|declarator| {
+            let alias = declarator_name(declarator, source)?;
+            match type_node.kind() {
+                "struct_specifier" => {
+                    parse_struct_with_name(type_node, source, alias).map(Declaration::Struct)
+                }
+                "enum_specifier" => {
+                    parse_enum_with_name(type_node, source, alias).map(Declaration::Enum)
+                }
+                _ => None,
+            }
+        })
+        .collect()
+}
+
 fn parse_global_variable_declarations(node: Node, source: &[u8]) -> Vec<GlobalVariableDecl> {
     let Some(type_node) = node.child_by_field_name("type") else {
         return Vec::new();
     };
-    let base_type = normalize_type(node_text(type_node, source));
+    let base_type = type_name_from_type_node(type_node, source);
     named_children(node)
         .into_iter()
         .filter(|child| *child != type_node)
@@ -613,7 +651,7 @@ fn parse_function(node: Node, source: &[u8]) -> Option<FunctionDecl> {
     let body = node.child_by_field_name("body")?;
     let name = declarator_name(declarator, source)?;
     let return_type = type_from_declarator(
-        &normalize_type(node_text(type_node, source)),
+        &type_name_from_type_node(type_node, source),
         declarator,
         source,
     );
@@ -641,7 +679,7 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
     }
     let name = declarator_name(declarator, source)?;
     let return_type = type_from_declarator(
-        &normalize_type(node_text(type_node, source)),
+        &type_name_from_type_node(type_node, source),
         declarator,
         source,
     );
@@ -698,7 +736,7 @@ fn parse_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
 fn parameter_type_without_name(node: Node, source: &[u8]) -> Option<String> {
     let base_type = node
         .child_by_field_name("type")
-        .map(|type_node| normalize_type(node_text(type_node, source)))?;
+        .map(|type_node| type_name_from_type_node(type_node, source))?;
     Some(
         node.child_by_field_name("declarator")
             .map(|declarator| type_from_declarator(&base_type, declarator, source))
@@ -769,7 +807,7 @@ fn parse_statement(node: Node, source: &[u8]) -> Vec<Statement> {
 fn parse_local_declarations(node: Node, source: &[u8]) -> Vec<Statement> {
     let type_name = node
         .child_by_field_name("type")
-        .map(|type_node| normalize_type(node_text(type_node, source)));
+        .map(|type_node| type_name_from_type_node(type_node, source));
     named_children(node)
         .into_iter()
         .filter(|child| child.kind() != "primitive_type" && child.kind() != "type_identifier")
@@ -1089,7 +1127,7 @@ fn parse_cast_expression(node: Node, source: &[u8]) -> Expression {
         Some(value) => Expression::Cast {
             type_name: node
                 .child_by_field_name("type")
-                .map(|type_node| normalize_type(node_text(type_node, source)))
+                .map(|type_node| type_name_from_type_node(type_node, source))
                 .unwrap_or_else(|| "ANY".to_string()),
             code: node_text(node, source).trim().to_string(),
             line: line(node),
@@ -1108,7 +1146,7 @@ fn parse_sizeof_expression(node: Node, source: &[u8]) -> Expression {
             .map(|value| Box::new(parse_expression(value, source))),
         type_name: node
             .child_by_field_name("type")
-            .map(|type_node| normalize_type(node_text(type_node, source))),
+            .map(|type_node| type_name_from_type_node(type_node, source)),
     }
 }
 
@@ -1123,7 +1161,7 @@ fn identifier_expression(node: Node, source: &[u8]) -> Expression {
 fn declaration_type_and_name(node: Node, source: &[u8]) -> Option<(String, String)> {
     let base_type = node
         .child_by_field_name("type")
-        .map(|type_node| normalize_type(node_text(type_node, source)))?;
+        .map(|type_node| type_name_from_type_node(type_node, source))?;
     let declarator = node.child_by_field_name("declarator")?;
     let name = declarator_name(declarator, source)?;
     let type_name = type_from_declarator(&base_type, declarator, source);
@@ -1144,6 +1182,22 @@ fn declarator_name(node: Node, source: &[u8]) -> Option<String> {
                     .find_map(|child| declarator_name(child, source))
             }),
     }
+}
+
+fn type_name_from_type_node(node: Node, source: &[u8]) -> String {
+    match node.kind() {
+        "struct_specifier" | "enum_specifier" => node
+            .child_by_field_name("name")
+            .map(|name| normalize_type(node_text(name, source)))
+            .unwrap_or_else(|| normalize_type(node_text(node, source))),
+        _ => normalize_type(node_text(node, source)),
+    }
+}
+
+fn is_anonymous_aggregate_type(node: Node) -> bool {
+    matches!(node.kind(), "struct_specifier" | "enum_specifier")
+        && node.child_by_field_name("body").is_some()
+        && node.child_by_field_name("name").is_none()
 }
 
 fn type_from_declarator(base_type: &str, declarator: Node, source: &[u8]) -> String {
@@ -1518,6 +1572,68 @@ mod tests {
         assert_eq!(bar.name, "bar");
         assert_eq!(bar.type_name, "foo*");
         assert_eq!(bar.code, "typedef foo * bar;");
+    }
+
+    #[test]
+    fn parses_typedef_aggregate_declarations() {
+        let sample = r#"
+                typedef struct foo {
+                  int x;
+                } abc;
+                typedef struct {
+                  int y;
+                } Anon;
+                typedef enum mode {
+                  MODE_A,
+                } Mode;
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::C)
+            .expect("aggregate typedef sample should parse");
+
+        let named_struct = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(value) if value.name == "foo" => Some(value),
+                _ => None,
+            })
+            .expect("named struct should be emitted");
+        assert_eq!(named_struct.fields[0].name, "x");
+
+        let struct_typedef = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Typedef(value) if value.name == "abc" => Some(value),
+                _ => None,
+            })
+            .expect("named struct typedef should be emitted");
+        assert_eq!(struct_typedef.type_name, "foo");
+
+        let anonymous_struct = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(value) if value.name == "Anon" => Some(value),
+                _ => None,
+            })
+            .expect("anonymous struct typedef should become named struct");
+        assert_eq!(anonymous_struct.fields[0].name, "y");
+
+        let named_enum = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Enum(value) if value.name == "mode" => Some(value),
+                _ => None,
+            })
+            .expect("named enum should be emitted");
+        assert_eq!(named_enum.variants[0].name, "MODE_A");
+
+        let enum_typedef = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Typedef(value) if value.name == "Mode" => Some(value),
+                _ => None,
+            })
+            .expect("named enum typedef should be emitted");
+        assert_eq!(enum_typedef.type_name, "mode");
     }
 
     #[test]
