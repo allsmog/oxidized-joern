@@ -73,16 +73,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         entry.function.name.contains("::") && entry.ownerFullName.exists(aggregateTypeFullNames.contains)
       )
       .groupBy(_.ownerFullName.get)
-  private lazy val aggregateFieldsByType: Map[String, Map[String, String]] =
+  private lazy val aggregateFieldEntriesByType: Map[String, Map[String, OxFieldDecl]] =
     aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
       val localName = normalizeType(structDecl.name)
       val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
       Seq(localName, fullName).distinct.map { typeName =>
-        typeName -> structDecl.fields
-          .map(field => field.name -> normalizeType(field.typeName))
-          .toMap
+        typeName -> structDecl.fields.map(field => field.name -> field).toMap
       }
     }.toMap
+  private lazy val aggregateFieldsByType: Map[String, Map[String, String]] =
+    aggregateFieldEntriesByType.view.mapValues(_.view.mapValues(field => normalizeType(field.typeName)).toMap).toMap
   private val IntegerLiteralPattern = """[+-]?(?:0[xX][0-9a-fA-F]+|\d+)[uUlL]*""".r
 
   private var scope: Map[String, ScopeEntry]                            = Map.empty
@@ -908,6 +908,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         scope
           .get(name)
           .map(entry => resolveAliasType(entry.typeFullName))
+          .orElse(staticFieldTypeFullName(name))
           .orElse(implicitFieldTypeFullName(name))
           .orElse(globalScopeByName.get(name).map(entry => resolveAliasType(entry.typeFullName)))
       case OxLiteral(value, _, _) =>
@@ -940,6 +941,48 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def implicitFieldTypeFullName(name: String): Option[String] = {
     currentMethodOwnerTypeFullName.flatMap(ownerTypeFullName => fieldTypeFullName(s"$ownerTypeFullName*", name))
+  }
+
+  private def staticFieldTypeFullName(name: String): Option[String] = {
+    staticFieldTarget(name).map { case (_, field) => resolveAliasType(field.typeName) }
+  }
+
+  private def staticFieldTarget(name: String): Option[(String, OxFieldDecl)] = {
+    val parts = qualifiedNameParts(name)
+    if (parts.size > 1) {
+      val ownerName = parts.dropRight(1).mkString(".")
+      val fieldName = parts.last
+      resolveAggregateTypeFullName(ownerName).flatMap(ownerTypeFullName =>
+        aggregateFieldEntriesByType
+          .get(ownerTypeFullName)
+          .flatMap(_.get(fieldName))
+          .filter(_.isStatic)
+          .map(field => ownerTypeFullName -> field)
+      )
+    } else {
+      currentMethodOwnerTypeFullName.flatMap(ownerTypeFullName =>
+        aggregateFieldEntriesByType
+          .get(ownerTypeFullName)
+          .flatMap(_.get(name))
+          .filter(_.isStatic)
+          .map(field => ownerTypeFullName -> field)
+      )
+    }
+  }
+
+  private def staticFieldOwnerCode(name: String, ownerTypeFullName: String): String = {
+    qualifiedNameParts(name).dropRight(1) match {
+      case parts if parts.nonEmpty => parts.mkString("::")
+      case _                       => ownerTypeFullName
+    }
+  }
+
+  private def resolveAggregateTypeFullName(typeName: String): Option[String] = {
+    val normalized = normalizeType(typeName)
+    val candidates = currentMethodOwnerTypeFullName
+      .filter(_.split('.').lastOption.contains(normalized))
+      .toSeq ++ Seq(normalized) ++ aggregateTypeFullNames.filter(_.endsWith(s".$normalized")).toSeq.sorted
+    candidates.find(aggregateTypeFullNames.contains)
   }
 
   private def returnTypeFromFunctionPointer(typeFullName: String): Option[String] = {
@@ -997,7 +1040,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, typeName)
         Ast(identifier).withRefEdge(identifier, entry.declaration)
       case None =>
-        implicitFieldAccessAst(name, line)
+        staticFieldAccessAst(name, code, line)
+          .orElse(implicitFieldAccessAst(name, line))
           .orElse(capturedGlobalIdentifierAst(name, code, line))
           .orElse(methodRefAst(name, code, line))
           .getOrElse {
@@ -1010,8 +1054,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def implicitFieldAccessAst(name: String, line: Int): Option[Ast] = {
     for {
       ownerTypeFullName <- currentMethodOwnerTypeFullName
-      fields            <- aggregateFieldsByType.get(ownerTypeFullName)
-      if fields.contains(name)
+      fields            <- aggregateFieldEntriesByType.get(ownerTypeFullName)
+      field             <- fields.get(name)
+      if !field.isStatic
       thisEntry <- scope.get(Defines.This)
     } yield {
       val thisIdentifier =
@@ -1035,6 +1080,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           Option(fieldTypeName)
         )
       callAst(call, Seq(thisAst, Ast(fieldIdentifierNode(OxOrigin(name, Option(line)), name, name))))
+    }
+  }
+
+  private def staticFieldAccessAst(name: String, code: String, line: Int): Option[Ast] = {
+    staticFieldTarget(name).map { case (ownerTypeFullName, field) =>
+      val ownerCode = staticFieldOwnerCode(name, ownerTypeFullName)
+      val accessCode =
+        if (qualifiedNameParts(name).size > 1) code else s"$ownerTypeFullName.${field.name}"
+      val ownerIdentifier =
+        identifierNode(OxOrigin(ownerCode, Option(line)), ownerCode, ownerCode, registerType(ownerTypeFullName))
+      fieldAccessAst(
+        OxOrigin(accessCode, Option(line)),
+        OxOrigin(field.name, Option(line)),
+        Ast(ownerIdentifier),
+        accessCode,
+        field.name,
+        registerType(resolveAliasType(field.typeName))
+      )
     }
   }
 

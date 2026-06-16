@@ -114,11 +114,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |}
           |Core::Widget::Widget() : value(1) {}
           |Core::Widget::~Widget() {}
-          |int Core::Widget::identity(int x) { return x; }
+          |int Core::Widget::identity(int x) { return instances + x; }
           |int Core::Widget::outside() { return 2; }
           |int use() {
           |  Core::Widget widget(7);
-          |  return Core::make() + Core::Widget::identity(2) + convert(1) + convert(widget) + widget.get() + widget.outside();
+          |  return Core::make() + Core::Widget::identity(2) + Core::Widget::instances + convert(1) + convert(widget) + widget.get() + widget.outside();
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -151,6 +151,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.fullNameExact("Core.Widget.identity:int(int)").modifier.modifierType.l shouldBe List(ModifierTypes.STATIC)
       cpg.method.fullNameExact("Core.Widget.identity:int(int)").parameter.name.l shouldBe List("x")
       cpg.method.fullNameExact("Core.Widget.identity:int(int)").parameter.index.l shouldBe List(1)
+      inside(cpg.method.fullNameExact("Core.Widget.identity:int(int)").call.nameExact(Operators.fieldAccess).l) {
+        case List(fieldAccess) =>
+          fieldAccess.code shouldBe "Core.Widget.instances"
+          fieldAccess.typeFullName shouldBe "int"
+          fieldAccess.argument.code.l shouldBe List("Core.Widget", "instances")
+      }
       cpg.method.nameExact("normalize").fullName.l.sorted shouldBe List("Core.Widget.normalize:int()", "Core.normalize:int()")
       cpg.method.nameExact("size").external.fullName.l shouldBe List("Core.Widget.size:int()")
       cpg.method.nameExact("outside").internal.fullName.l shouldBe List("Core.Widget.outside:int()")
@@ -176,6 +182,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("Core.Widget.Widget:void(int&)")
       cpg.method.nameExact("use").call.codeExact("Core::Widget::identity(2)").methodFullName.l shouldBe
         List("Core.Widget.identity:int(int)")
+      inside(cpg.method.nameExact("use").call.nameExact(Operators.fieldAccess).codeExact("Core::Widget::instances").l) {
+        case List(fieldAccess) =>
+          fieldAccess.typeFullName shouldBe "int"
+          fieldAccess.argument.code.l shouldBe List("Core::Widget", "instances")
+      }
       cpg.method.nameExact("use").call.nameExact("make").methodFullName.l shouldBe List("Core.make:int()")
       cpg.method.nameExact("use").call.codeExact("convert(1)").methodFullName.l shouldBe List("Core.convert:int(int)")
       cpg.method.nameExact("use").call.codeExact("convert(widget)").methodFullName.l shouldBe
