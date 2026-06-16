@@ -627,6 +627,11 @@ fn parse_declaration_node(
                     .map(Declaration::GlobalVariable),
             );
         }
+        "alias_declaration" => {
+            if let Some(typedef) = parse_alias_declaration(node, source) {
+                declarations.push(Declaration::Typedef(typedef));
+            }
+        }
         "type_definition" => {
             declarations.extend(
                 parse_typedef_declarations(node, source)
@@ -1567,6 +1572,19 @@ fn parse_typedef_declarations(node: Node, source: &[u8]) -> Vec<TypedefDecl> {
             })
         })
         .collect()
+}
+
+fn parse_alias_declaration(node: Node, source: &[u8]) -> Option<TypedefDecl> {
+    let name_node = node.child_by_field_name("name")?;
+    let type_node = node.child_by_field_name("type")?;
+    Some(TypedefDecl {
+        name: node_text(name_node, source).trim().to_string(),
+        type_name: type_name_from_type_descriptor(type_node, source),
+        code: node_text(node, source).trim().to_string(),
+        line: line(name_node),
+        source_path: None,
+        visible_line: None,
+    })
 }
 
 fn parse_anonymous_typedef_aggregate_declarations(
@@ -2534,6 +2552,21 @@ fn type_name_from_type_node(node: Node, source: &[u8]) -> String {
             .unwrap_or_else(|| normalize_type(node_text(node, source))),
         _ => normalize_type(node_text(node, source)),
     }
+}
+
+fn type_name_from_type_descriptor(node: Node, source: &[u8]) -> String {
+    let Some(type_node) = node.child_by_field_name("type") else {
+        return normalize_type(node_text(node, source));
+    };
+    let Some(declarator) = node.child_by_field_name("declarator") else {
+        return normalize_type(node_text(node, source));
+    };
+    let base_type = std::str::from_utf8(&source[node.start_byte()..declarator.start_byte()])
+        .ok()
+        .map(normalize_type)
+        .filter(|base| !base.is_empty())
+        .unwrap_or_else(|| type_name_from_type_node(type_node, source));
+    type_from_declarator(&base_type, declarator, source)
 }
 
 fn is_anonymous_aggregate_type(node: Node) -> bool {
@@ -3755,9 +3788,11 @@ mod tests {
         let sample = r#"
                 typedef const char * foo;
                 typedef foo * bar;
+                using baz = bar;
+                using qux = const char *;
                 "#;
         let declarations =
-            parse_declarations(sample, SourceLanguage::C).expect("typedef sample should parse");
+            parse_declarations(sample, SourceLanguage::Cpp).expect("typedef sample should parse");
 
         let Declaration::Typedef(foo) = &declarations[0] else {
             panic!("expected first typedef");
@@ -3772,6 +3807,20 @@ mod tests {
         assert_eq!(bar.name, "bar");
         assert_eq!(bar.type_name, "foo*");
         assert_eq!(bar.code, "typedef foo * bar;");
+
+        let Declaration::Typedef(baz) = &declarations[2] else {
+            panic!("expected using alias typedef");
+        };
+        assert_eq!(baz.name, "baz");
+        assert_eq!(baz.type_name, "bar");
+        assert_eq!(baz.code, "using baz = bar;");
+
+        let Declaration::Typedef(qux) = &declarations[3] else {
+            panic!("expected pointer using alias typedef");
+        };
+        assert_eq!(qux.name, "qux");
+        assert_eq!(qux.type_name, "char*");
+        assert_eq!(qux.code, "using qux = const char *;");
     }
 
     #[test]
