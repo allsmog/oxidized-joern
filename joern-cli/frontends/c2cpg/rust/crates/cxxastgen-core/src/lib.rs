@@ -1649,6 +1649,7 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
     let declarator = node.child_by_field_name("declarator")?;
     let body = node.child_by_field_name("body")?;
     let name = declarator_name(declarator, source)?;
+    let function_declarator = function_declarator_node(declarator).unwrap_or(declarator);
     let return_type = type_node
         .map(|type_node| {
             type_from_declarator(
@@ -1658,12 +1659,12 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
             )
         })
         .unwrap_or_else(|| "void".to_string());
-    let parameters = declarator
+    let parameters = function_declarator
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
         .unwrap_or_default();
     let constructor_initializers = parse_constructor_initializers(node, source);
-    let is_const = is_const_function_declarator(declarator, source);
+    let is_const = is_const_function_declarator(function_declarator, source);
     let is_virtual = is_virtual_function(node, declarator, source);
     Some(FunctionDecl {
         name,
@@ -1690,6 +1691,7 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
         return None;
     }
     let name = declarator_name(declarator, source)?;
+    let function_declarator = function_declarator_node(declarator).unwrap_or(declarator);
     let return_type = type_node
         .map(|type_node| {
             type_from_declarator(
@@ -1699,11 +1701,11 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
             )
         })
         .unwrap_or_else(|| "void".to_string());
-    let parameters = declarator
+    let parameters = function_declarator
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
         .unwrap_or_default();
-    let is_const = is_const_function_declarator(declarator, source);
+    let is_const = is_const_function_declarator(function_declarator, source);
     let is_virtual = is_virtual_function(node, declarator, source);
     Some(FunctionDecl {
         name,
@@ -1734,8 +1736,9 @@ fn parse_constructor_or_destructor(
         return None;
     }
     let name = declarator_name(declarator, source)?;
+    let function_declarator = function_declarator_node(declarator).unwrap_or(declarator);
     let return_type = "void".to_string();
-    let parameters = declarator
+    let parameters = function_declarator
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
         .unwrap_or_default();
@@ -1843,11 +1846,26 @@ fn parse_constructor_initializer(node: Node, source: &[u8]) -> Option<Constructo
 }
 
 fn is_function_prototype_declarator(node: Node) -> bool {
-    if node.kind() != "function_declarator" {
+    let Some(function_declarator) = function_declarator_node(node) else {
         return false;
-    }
-    node.child_by_field_name("declarator")
+    };
+    function_declarator
+        .child_by_field_name("declarator")
         .is_some_and(|declarator| declarator.kind() != "parenthesized_declarator")
+}
+
+fn function_declarator_node(node: Node) -> Option<Node> {
+    if node.kind() == "function_declarator" {
+        Some(node)
+    } else {
+        node.child_by_field_name("declarator")
+            .and_then(function_declarator_node)
+            .or_else(|| {
+                named_children(node)
+                    .into_iter()
+                    .find_map(function_declarator_node)
+            })
+    }
 }
 
 fn parse_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
@@ -3314,6 +3332,7 @@ mod tests {
                   int size() const;
                   int outside() const;
                   int operator+(const Widget& other) const { return value + other.value; }
+                  Widget& operator=(const Widget& other) { value = other.value; return *this; }
                   int operator[](int index) const { return value + index; }
                 };
                 class Fancy : public Widget {
@@ -3337,6 +3356,7 @@ mod tests {
                   Core::Widget widget(7);
                   Core::Fancy fancy;
                   Core::Invoker invoker;
+                  widget = fancy;
                   return Core::make() + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue() + fancy.explicitThis() + (widget + fancy) + widget[2] + invoker(3);
                 }
                 "#;
@@ -3389,6 +3409,7 @@ mod tests {
                 "get",
                 "identity",
                 "operator+",
+                "operator=",
                 "operator[]",
                 "outside",
                 "render",
@@ -3426,6 +3447,10 @@ mod tests {
         assert!(methods.iter().any(|method| method.name == "operator+"
             && method.signature == "int(Widget&)<const>"
             && method.is_const
+            && method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "operator="
+            && method.signature == "Widget&(Widget&)"
+            && !method.is_const
             && method.is_definition));
         assert!(methods.iter().any(|method| method.name == "operator[]"
             && method.signature == "int(int)<const>"
@@ -3598,6 +3623,11 @@ mod tests {
             type_name: invoker_type_name,
             initializer: None,
             ..
+        }, Statement::Assignment {
+            operator,
+            left,
+            right,
+            ..
         }, Statement::Return {
             expression: Some(return_expr),
             ..
@@ -3608,6 +3638,9 @@ mod tests {
         assert_eq!(type_name, "Core::Widget");
         assert_eq!(fancy_type_name, "Core::Fancy");
         assert_eq!(invoker_type_name, "Core::Invoker");
+        assert_eq!(operator, "=");
+        assert!(matches!(left, Expression::Identifier { name, .. } if name == "widget"));
+        assert!(matches!(right, Expression::Identifier { name, .. } if name == "fancy"));
         let Expression::InitializerList { code, elements, .. } = widget_initializer else {
             panic!("expected constructor argument list initializer");
         };

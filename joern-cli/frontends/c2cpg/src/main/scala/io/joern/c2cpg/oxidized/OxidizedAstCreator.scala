@@ -673,13 +673,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             Seq(localAst)
         }
       case assignment: OxAssignment =>
-        val left  = expressionAst(assignment.left)
-        val right = expressionAst(assignment.right)
         Seq {
-          if (assignment.operator == "=") {
-            assignmentAst(OxOrigin(assignment), left, right, assignment.code)
-          } else {
-            operatorCallAst(OxOrigin(assignment), assignment.code, operatorFor(assignment.operator), Seq(left, right))
+          overloadedAssignmentOperatorAst(assignment).getOrElse {
+            val left  = expressionAst(assignment.left)
+            val right = expressionAst(assignment.right)
+            if (assignment.operator == "=") {
+              assignmentAst(OxOrigin(assignment), left, right, assignment.code)
+            } else {
+              operatorCallAst(OxOrigin(assignment), assignment.code, operatorFor(assignment.operator), Seq(left, right))
+            }
           }
         }
       case ret: OxReturn =>
@@ -940,6 +942,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         selectFunctionEntry(functionCandidatesByName(operatorName), Some(Seq(binary.left, binary.right)))
           .map(entry => ResolvedOperatorCall(entry, operatorName, None, Seq(binary.left, binary.right)))
       }
+    }
+  }
+
+  private def overloadedAssignmentOperatorAst(assignment: OxAssignment): Option[Ast] = {
+    overloadedAssignmentOperatorTarget(assignment).map(target =>
+      astForResolvedOperatorCall(OxOrigin(assignment), assignment.code, target)
+    )
+  }
+
+  private def overloadedAssignmentOperatorTarget(assignment: OxAssignment): Option[ResolvedOperatorCall] = {
+    cxxOperatorFunctionName(assignment.operator).flatMap { operatorName =>
+      selectFunctionEntry(memberFunctionCandidates(assignment.left, operatorName), Some(Seq(assignment.right)))
+        .map(entry => ResolvedOperatorCall(entry, operatorName, Option(assignment.left), Seq(assignment.right)))
     }
   }
 
