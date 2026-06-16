@@ -139,6 +139,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  Core::Widget widget(7);
           |  Core::Widget direct(widget);
           |  Core::Widget copied = widget;
+          |  if (1) {
+          |    Core::Widget scoped(widget);
+          |  }
           |  Core::Widget *ptr = &widget;
           |  Core::Fancy fancy;
           |  Core::Invoker invoker;
@@ -261,6 +264,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").local.nameExact("widget").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("use").local.nameExact("direct").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("use").local.nameExact("copied").typeFullName.l shouldBe List("Core.Widget")
+      cpg.method.nameExact("use").local.nameExact("scoped").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("use").local.nameExact("ptr").typeFullName.l shouldBe List("Core.Widget*")
       cpg.method.nameExact("use").local.nameExact("fancy").typeFullName.l shouldBe List("Core.Fancy")
       cpg.method.nameExact("use").local.nameExact("invoker").typeFullName.l shouldBe List("Core.Invoker")
@@ -283,7 +287,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core.Widget.Widget(7)").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(int&)")
       cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core.Widget.Widget(widget)").methodFullName.l shouldBe
-        List("Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)")
+        List("Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)")
       cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("direct = Core.Widget.Widget(widget)").argument.code.l shouldBe
         List("direct", "Core.Widget.Widget(widget)")
       cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("copied = Core.Widget.Widget(widget)").argument.code.l shouldBe
@@ -297,7 +301,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           destructorCall.argument.code.l shouldBe List("ptr")
       }
       cpg.method.nameExact("use").call.nameExact("~Widget").code.l.sorted shouldBe
-        List("copied.~Widget()", "direct.~Widget()", "ptr->~Widget()", "widget.~Widget()")
+        List("copied.~Widget()", "direct.~Widget()", "ptr->~Widget()", "scoped.~Widget()", "widget.~Widget()")
+      cpg.method.nameExact("use").controlStructure.controlStructureType(ControlStructureTypes.IF).ast.isCall
+        .nameExact("~Widget")
+        .code
+        .l shouldBe List("scoped.~Widget()")
       cpg.method.nameExact("use").call.codeExact("Core::Widget::identity(2)").methodFullName.l shouldBe
         List("Core.Widget.identity:int(int)")
       inside(cpg.method.nameExact("use").call.nameExact(Operators.fieldAccess).codeExact("Core::Widget::instances").l) {

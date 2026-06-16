@@ -3399,6 +3399,9 @@ mod tests {
                   Core::Widget widget(7);
                   Core::Widget direct(widget);
                   Core::Widget copied = widget;
+                  if (1) {
+                    Core::Widget scoped(widget);
+                  }
                   Core::Widget *ptr = &widget;
                   Core::Fancy fancy;
                   Core::Invoker invoker;
@@ -3674,7 +3677,7 @@ mod tests {
             type_name: copied_type_name,
             initializer: Some(copied_initializer),
             ..
-        }, Statement::LocalDecl {
+        }, Statement::If { then_body, .. }, Statement::LocalDecl {
             type_name: ptr_type_name,
             initializer: Some(ptr_initializer),
             ..
@@ -3729,6 +3732,17 @@ mod tests {
         assert!(
             matches!(copied_initializer, Expression::Identifier { name, .. } if name == "widget")
         );
+        assert!(matches!(
+            then_body.as_slice(),
+            [Statement::LocalDecl {
+                name,
+                type_name,
+                initializer: Some(Expression::InitializerList { elements, .. }),
+                ..
+            }] if name == "scoped"
+                && type_name == "Core::Widget"
+                && matches!(elements.as_slice(), [Expression::Identifier { name, .. }] if name == "widget")
+        ));
         assert!(matches!(
             ptr_initializer,
             Expression::Unary {
