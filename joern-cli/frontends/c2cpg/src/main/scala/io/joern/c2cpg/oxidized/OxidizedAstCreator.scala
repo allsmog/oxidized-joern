@@ -134,8 +134,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private var functionCaptureContext: Option[FunctionCaptureContext]    = None
   private var currentMethodOwnerTypeFullName: Option[String]            = None
   private var typeAliases: Map[String, String]                          = Map.empty
-  private var functionLocalDestructors: Vector[LocalDestructor]         = Vector.empty
-  private var localScopeDepth: Int                                      = 0
+  private var localDestructorScopes: List[Vector[LocalDestructor]]      = Nil
 
   def typesSeen(): Set[String] = usedTypes.toSet
 
@@ -597,26 +596,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
     val parameters = implicitThisParameter ++ explicitParameters
 
-    val previousScope          = scope
-    val previousCaptureContext = functionCaptureContext
-    val previousMethodOwner    = currentMethodOwnerTypeFullName
-    val previousDestructors    = functionLocalDestructors
-    val previousScopeDepth     = localScopeDepth
+    val previousScope            = scope
+    val previousCaptureContext   = functionCaptureContext
+    val previousMethodOwner      = currentMethodOwnerTypeFullName
+    val previousDestructorScopes = localDestructorScopes
     val captureContext =
       FunctionCaptureContext(function, methodRefNode(origin, simpleName, fullName, simpleName))
     scope = parameters.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }.toMap
     functionCaptureContext = Option(captureContext)
     currentMethodOwnerTypeFullName = parentTypeOwner
-    functionLocalDestructors = Vector.empty
-    localScopeDepth = 0
+    localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
     val bodyAsts =
       try {
         val statementAsts  = function.body.flatMap(astsForStatement)
-        val destructorAsts = functionLocalDestructors.reverse.map(localDestructorAst)
+        val destructorAsts = currentLocalDestructors.reverse.map(localDestructorAst)
         function.constructorInitializers.map(constructorInitializerAst) ++ statementAsts ++ destructorAsts
       } finally {
-        functionLocalDestructors = previousDestructors
-        localScopeDepth = previousScopeDepth
+        localDestructorScopes = previousDestructorScopes
         currentMethodOwnerTypeFullName = previousMethodOwner
         functionCaptureContext = previousCaptureContext
         scope = previousScope
@@ -664,11 +660,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def registerLocalDestructor(name: String, typeName: String, line: Int): Unit = {
-    if (localScopeDepth == 0) {
-      destructorEntryForType(typeName).foreach { destructor =>
-        functionLocalDestructors = functionLocalDestructors :+ LocalDestructor(name, line, destructor)
+    destructorEntryForType(typeName).foreach { destructor =>
+      localDestructorScopes match {
+        case current :: rest => localDestructorScopes = (current :+ LocalDestructor(name, line, destructor)) :: rest
+        case Nil             =>
       }
     }
+  }
+
+  private def currentLocalDestructors: Vector[LocalDestructor] = {
+    localDestructorScopes.headOption.getOrElse(Vector.empty)
   }
 
   private def localDestructorAst(destructor: LocalDestructor): Ast = {
@@ -874,18 +875,31 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def statementBlockAst(statements: Seq[OxStatement], code: String, line: Int): Ast = {
-    inNestedScope {
-      blockAst(blockNode(OxOrigin(code, Option(line)), code, Defines.Any), statements.flatMap(astsForStatement).toList)
+    inNestedScopeWithDestructors {
+      val statementAsts  = statements.flatMap(astsForStatement)
+      val destructorAsts = currentLocalDestructors.reverse.map(localDestructorAst)
+      blockAst(blockNode(OxOrigin(code, Option(line)), code, Defines.Any), (statementAsts ++ destructorAsts).toList)
     }
   }
 
   private def inNestedScope[T](body: => T): T = {
-    val outerScope      = scope
-    val outerScopeDepth = localScopeDepth
-    localScopeDepth += 1
+    val outerScope            = scope
+    val outerDestructorScopes = localDestructorScopes
+    localDestructorScopes = Vector.empty[LocalDestructor] :: localDestructorScopes
     try body
     finally {
-      localScopeDepth = outerScopeDepth
+      localDestructorScopes = outerDestructorScopes
+      scope = outerScope
+    }
+  }
+
+  private def inNestedScopeWithDestructors[T](body: => T): T = {
+    val outerScope            = scope
+    val outerDestructorScopes = localDestructorScopes
+    localDestructorScopes = Vector.empty[LocalDestructor] :: localDestructorScopes
+    try body
+    finally {
+      localDestructorScopes = outerDestructorScopes
       scope = outerScope
     }
   }
