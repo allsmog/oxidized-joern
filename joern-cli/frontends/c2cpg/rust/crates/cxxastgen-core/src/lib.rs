@@ -342,6 +342,18 @@ pub enum Expression {
         #[serde(rename = "typeName")]
         type_name: Option<String>,
     },
+    New {
+        #[serde(rename = "typeName")]
+        type_name: String,
+        code: String,
+        line: usize,
+        arguments: Vec<Expression>,
+    },
+    Delete {
+        code: String,
+        line: usize,
+        argument: Box<Expression>,
+    },
     Call {
         name: String,
         code: String,
@@ -2035,6 +2047,8 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
         "assignment_expression" => parse_assignment_expression(node, source),
         "cast_expression" => parse_cast_expression(node, source),
         "sizeof_expression" => parse_sizeof_expression(node, source),
+        "new_expression" => parse_new_expression(node, source),
+        "delete_expression" => parse_delete_expression(node, source),
         "argument_list" => parse_initializer_list(node, source),
         "initializer_list" => parse_initializer_list(node, source),
         "initializer_pair" => parse_initializer_pair(node, source),
@@ -2196,15 +2210,65 @@ fn parse_sizeof_expression(node: Node, source: &[u8]) -> Expression {
     }
 }
 
+fn parse_new_expression(node: Node, source: &[u8]) -> Expression {
+    let type_name = node
+        .child_by_field_name("type")
+        .map(|type_node| type_name_from_type_node(type_node, source))
+        .unwrap_or_else(|| "ANY".to_string());
+    let mut arguments = Vec::new();
+    if let Some(declarator) = node.child_by_field_name("declarator") {
+        arguments.extend(new_declarator_lengths(declarator, source));
+    }
+    if let Some(argument_list) = node.child_by_field_name("arguments") {
+        arguments.extend(initializer_list_elements(argument_list, source));
+    }
+    Expression::New {
+        type_name,
+        code: node_text(node, source).trim().to_string(),
+        line: line(node),
+        arguments,
+    }
+}
+
+fn new_declarator_lengths(node: Node, source: &[u8]) -> Vec<Expression> {
+    let mut lengths = node
+        .child_by_field_name("length")
+        .map(|length| vec![parse_expression(length, source)])
+        .unwrap_or_default();
+    lengths.extend(
+        named_children(node)
+            .into_iter()
+            .filter(|child| child.kind() == "new_declarator")
+            .flat_map(|child| new_declarator_lengths(child, source)),
+    );
+    lengths
+}
+
+fn parse_delete_expression(node: Node, source: &[u8]) -> Expression {
+    named_children(node)
+        .into_iter()
+        .next()
+        .map(|argument| Expression::Delete {
+            code: node_text(node, source).trim().to_string(),
+            line: line(node),
+            argument: Box::new(parse_expression(argument, source)),
+        })
+        .unwrap_or_else(|| identifier_expression(node, source))
+}
+
 fn parse_initializer_list(node: Node, source: &[u8]) -> Expression {
     Expression::InitializerList {
         code: node_text(node, source).trim().to_string(),
         line: line(node),
-        elements: named_children(node)
-            .into_iter()
-            .map(|element| parse_expression(element, source))
-            .collect(),
+        elements: initializer_list_elements(node, source),
     }
+}
+
+fn initializer_list_elements(node: Node, source: &[u8]) -> Vec<Expression> {
+    named_children(node)
+        .into_iter()
+        .map(|element| parse_expression(element, source))
+        .collect()
 }
 
 fn parse_initializer_pair(node: Node, source: &[u8]) -> Expression {
@@ -3197,6 +3261,63 @@ mod tests {
             call_names,
             vec!["Core::make", "widget.get", "widget.outside"]
         );
+    }
+
+    #[test]
+    fn parses_cpp_new_and_delete_expressions() {
+        let sample = r#"
+                int *allocate(int n) {
+                  int *arr = new int[n];
+                  delete[] arr;
+                  return arr;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("sample C++ new/delete expressions should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "allocate" => Some(function),
+                _ => None,
+            })
+            .expect("expected allocate function");
+        let [Statement::LocalDecl {
+            type_name,
+            initializer: Some(new_expr),
+            ..
+        }, Statement::Expression {
+            expression: delete_expr,
+            ..
+        }, Statement::Return {
+            expression:
+                Some(Expression::Identifier {
+                    name: return_name, ..
+                }),
+            ..
+        }] = function.body.as_slice()
+        else {
+            panic!("expected local new, delete statement, and return");
+        };
+        assert_eq!(type_name, "int*");
+        let Expression::New {
+            type_name,
+            arguments,
+            ..
+        } = new_expr
+        else {
+            panic!("expected new expression initializer");
+        };
+        assert_eq!(type_name, "int");
+        assert!(matches!(
+            arguments.as_slice(),
+            [Expression::Identifier { name, .. }] if name == "n"
+        ));
+        let Expression::Delete { code, argument, .. } = delete_expr else {
+            panic!("expected delete expression statement");
+        };
+        assert_eq!(code, "delete[] arr");
+        assert!(matches!(argument.as_ref(), Expression::Identifier { name, .. } if name == "arr"));
+        assert_eq!(return_name, "arr");
     }
 
     #[test]

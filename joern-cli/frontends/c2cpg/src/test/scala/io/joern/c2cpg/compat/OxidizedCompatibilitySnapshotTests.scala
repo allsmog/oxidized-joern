@@ -141,6 +141,31 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.nameExact("outside").methodFullName.l shouldBe List("Core.Widget.outside:int()")
     }
 
+    "capture C++ new and delete expressions" in {
+      val cpg = code(
+        """
+          |int *allocate(int n) {
+          |  int *arr = new int[n];
+          |  delete[] arr;
+          |  return arr;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("allocate").local.nameExact("arr").typeFullName.l shouldBe List("int*")
+      inside(cpg.method.nameExact("allocate").call.nameExact(Operators.alloc).l) { case List(alloc) =>
+        alloc.code shouldBe "new int[n]"
+        alloc.methodFullName shouldBe Operators.alloc
+        alloc.argument.code.l shouldBe List("int", "n")
+      }
+      inside(cpg.method.nameExact("allocate").call.nameExact(Operators.delete).l) { case List(delete) =>
+        delete.code shouldBe "delete[] arr"
+        delete.methodFullName shouldBe Operators.delete
+        delete.argument.code.l shouldBe List("arr")
+      }
+    }
+
     "capture enum variant initializers through a static initializer" in {
       val cpg = code("""
           |enum Mode { MODE_A = 1, MODE_B = 2, MODE_C };
