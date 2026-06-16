@@ -81,8 +81,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         typeName -> structDecl.fields.map(field => field.name -> field).toMap
       }
     }.toMap
-  private lazy val aggregateFieldsByType: Map[String, Map[String, String]] =
-    aggregateFieldEntriesByType.view.mapValues(_.view.mapValues(field => normalizeType(field.typeName)).toMap).toMap
+  private lazy val aggregateBaseTypesByType: Map[String, Seq[String]] =
+    aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
+      val localName = normalizeType(structDecl.name)
+      val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
+      val baseTypes = structDecl.baseClasses.map(baseClass => resolveBaseTypeFullName(baseClass, parentFullName))
+      Seq(localName, fullName).distinct.map(typeName => typeName -> baseTypes)
+    }.toMap
   private val IntegerLiteralPattern = """[+-]?(?:0[xX][0-9a-fA-F]+|\d+)[uUlL]*""".r
 
   private var scope: Map[String, ScopeEntry]                            = Map.empty
@@ -329,6 +334,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
     val candidates = ownerCandidates :+ normalized
     candidates.find(aggregateTypeFullNames.contains).getOrElse(normalized)
+  }
+
+  private def typeAndBaseTypeFullNames(typeFullName: String): Seq[String] = {
+    def loop(current: String, seen: Set[String]): Seq[String] = {
+      val normalized = normalizeType(resolveAliasType(current))
+      if (seen.contains(normalized)) {
+        Seq.empty
+      } else {
+        normalized +: aggregateBaseTypesByType.getOrElse(normalized, Seq.empty).flatMap(loop(_, seen + normalized))
+      }
+    }
+
+    loop(typeFullName, Set.empty).distinct
   }
 
   private def astForEnum(enumDecl: OxEnumDecl): Ast = {
@@ -987,14 +1005,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def fieldTypeFullName(baseTypeFullName: String, field: String): Option[String] = {
+    fieldEntryForTypeHierarchy(baseTypeFullName, field).map { case (_, fieldDecl) =>
+      resolveAliasType(fieldDecl.typeName)
+    }
+  }
+
+  private def fieldEntryForTypeHierarchy(baseTypeFullName: String, field: String): Option[(String, OxFieldDecl)] = {
     val normalized = resolveAliasType(baseTypeFullName)
     val candidates = Seq(normalized, normalized.stripSuffix("*"), normalized.stripSuffix("[]")).distinct
-    candidates.collectFirst(Function.unlift { typeName =>
-      aggregateFieldsByType
-        .get(normalizeType(typeName))
-        .flatMap(_.get(field))
-        .map(fieldType => resolveAliasType(fieldType))
-    })
+    candidates
+      .flatMap(typeAndBaseTypeFullNames)
+      .collectFirst(Function.unlift { typeName =>
+        aggregateFieldEntriesByType
+          .get(normalizeType(typeName))
+          .flatMap(_.get(field))
+          .map(fieldDecl => normalizeType(typeName) -> fieldDecl)
+      })
   }
 
   private def implicitFieldTypeFullName(name: String): Option[String] = {
@@ -1011,19 +1037,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val ownerName = parts.dropRight(1).mkString(".")
       val fieldName = parts.last
       resolveAggregateTypeFullName(ownerName).flatMap(ownerTypeFullName =>
-        aggregateFieldEntriesByType
-          .get(ownerTypeFullName)
-          .flatMap(_.get(fieldName))
-          .filter(_.isStatic)
-          .map(field => ownerTypeFullName -> field)
+        fieldEntryForTypeHierarchy(ownerTypeFullName, fieldName)
+          .filter(_._2.isStatic)
       )
     } else {
       currentMethodOwnerTypeFullName.flatMap(ownerTypeFullName =>
-        aggregateFieldEntriesByType
-          .get(ownerTypeFullName)
-          .flatMap(_.get(name))
-          .filter(_.isStatic)
-          .map(field => ownerTypeFullName -> field)
+        fieldEntryForTypeHierarchy(ownerTypeFullName, name)
+          .filter(_._2.isStatic)
       )
     }
   }
@@ -1112,8 +1132,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def implicitFieldAccessAst(name: String, line: Int): Option[Ast] = {
     for {
       ownerTypeFullName <- currentMethodOwnerTypeFullName
-      fields            <- aggregateFieldEntriesByType.get(ownerTypeFullName)
-      field             <- fields.get(name)
+      (_, field)        <- fieldEntryForTypeHierarchy(ownerTypeFullName, name)
       if !field.isStatic
       thisEntry <- scope.get(Defines.This)
     } yield {
@@ -1266,7 +1285,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val candidates = expressionTypeFullName(base)
           .map(typeName => normalizeType(resolveAliasType(typeName)).stripSuffix("*").stripSuffix("[]"))
           .toSeq
-          .flatMap(receiverType => functionCandidatesByQualifiedName(s"$receiverType.$field"))
+          .flatMap(receiverType =>
+            typeAndBaseTypeFullNames(receiverType).reverse.flatMap(typeName =>
+              functionCandidatesByQualifiedName(s"$typeName.$field")
+            )
+          )
         selectFunctionEntry(candidates, Some(call.arguments))
       case _ =>
         val qualifiedName = normalizedQualifiedName(call.name)
@@ -1290,7 +1313,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def currentOwnerFunctionCandidates(name: String): Seq[FunctionEntry] = {
     currentMethodOwnerTypeFullName.toSeq.flatMap { ownerTypeFullName =>
-      functionCandidatesByQualifiedName(s"$ownerTypeFullName.$name")
+      typeAndBaseTypeFullNames(ownerTypeFullName).reverse.flatMap(typeName =>
+        functionCandidatesByQualifiedName(s"$typeName.$name")
+      )
     }
   }
 

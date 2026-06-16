@@ -114,6 +114,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |class Fancy : public Widget {
           |public:
           |  int render(int scale) override { return scale + 1; }
+          |  int inheritedValue() { return value + get(); }
           |};
           |int normalize() { return 99; }
           |int convert(int value) { return value; }
@@ -128,7 +129,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |int use() {
           |  Core::Widget widget(7);
           |  Core::Fancy fancy;
-          |  return Core::make() + Core::Widget::identity(2) + Core::Widget::instances + convert(1) + convert(widget) + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5);
+          |  return Core::make() + Core::Widget::identity(2) + Core::Widget::instances + convert(1) + convert(widget) + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue();
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -192,6 +193,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.fullNameExact("Core.Widget.declared:int(int)").external.l shouldBe Nil
       cpg.method.fullNameExact("Core.Fancy.render:int(int)").modifier.modifierType.l shouldBe
         List(ModifierTypes.VIRTUAL)
+      cpg.method.fullNameExact("Core.Fancy.inheritedValue:int()").call.nameExact("get").methodFullName.l shouldBe
+        List("Core.Widget.get:int()")
+      inside(cpg.method.fullNameExact("Core.Fancy.inheritedValue:int()").call.nameExact(Operators.indirectFieldAccess).l) {
+        case List(fieldAccess) =>
+          fieldAccess.code shouldBe "this->value"
+          fieldAccess.typeFullName shouldBe "int"
+          fieldAccess.argument.code.l shouldBe List("this", "value")
+      }
       cpg.method.fullNameExact("Core.Widget.identity:int(int)").modifier.modifierType.l shouldBe List(ModifierTypes.STATIC)
       cpg.method.fullNameExact("Core.Widget.identity:int(int)").parameter.name.l shouldBe List("x")
       cpg.method.fullNameExact("Core.Widget.identity:int(int)").parameter.index.l shouldBe List(1)
@@ -238,10 +247,16 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.codeExact("convert(1)").methodFullName.l shouldBe List("Core.convert:int(int)")
       cpg.method.nameExact("use").call.codeExact("convert(widget)").methodFullName.l shouldBe
         List("Core.convert:int(Widget)")
-      cpg.method.nameExact("use").call.nameExact("get").methodFullName.l shouldBe List("Core.Widget.get:int()")
+      cpg.method.nameExact("use").call.codeExact("widget.get()").methodFullName.l shouldBe List("Core.Widget.get:int()")
+      cpg.method.nameExact("use").call.codeExact("fancy.get()").methodFullName.l shouldBe List("Core.Widget.get:int()")
       cpg.method.nameExact("use").call.nameExact("stable").methodFullName.l shouldBe List("Core.Widget.stable:int()<const>")
       cpg.method.nameExact("use").call.nameExact("outside").methodFullName.l shouldBe
         List("Core.Widget.outside:int()<const>")
+      inside(cpg.method.nameExact("use").call.nameExact(Operators.fieldAccess).codeExact("fancy.value").l) {
+        case List(fieldAccess) =>
+          fieldAccess.typeFullName shouldBe "int"
+          fieldAccess.argument.code.l shouldBe List("fancy", "value")
+      }
       inside(cpg.method.nameExact("use").call.nameExact("render").codeExact("widget.render(3)").l) { case List(renderCall) =>
         renderCall.methodFullName shouldBe "Core.Widget.render:int(int)"
         renderCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
@@ -254,12 +269,22 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         renderCall.argument.code.l shouldBe List("fancy", "5")
         renderCall.receiver.code.l shouldBe List("fancy")
       }
-      inside(cpg.method.nameExact("use").call.nameExact("declared").l) { case List(declaredCall) =>
+      inside(cpg.method.nameExact("use").call.nameExact("declared").codeExact("widget.declared(4)").l) {
+        case List(declaredCall) =>
+          declaredCall.methodFullName shouldBe "Core.Widget.declared:int(int)"
+          declaredCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+          declaredCall.argument.code.l shouldBe List("widget", "4")
+          declaredCall.receiver.code.l shouldBe List("widget")
+      }
+      inside(cpg.method.nameExact("use").call.nameExact("declared").codeExact("fancy.declared(6)").l) {
+        case List(declaredCall) =>
         declaredCall.methodFullName shouldBe "Core.Widget.declared:int(int)"
         declaredCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
-        declaredCall.argument.code.l shouldBe List("widget", "4")
-        declaredCall.receiver.code.l shouldBe List("widget")
+        declaredCall.argument.code.l shouldBe List("fancy", "6")
+        declaredCall.receiver.code.l shouldBe List("fancy")
       }
+      cpg.method.nameExact("use").call.codeExact("fancy.inheritedValue()").methodFullName.l shouldBe
+        List("Core.Fancy.inheritedValue:int()")
     }
 
     "capture C++ new and delete expressions" in {
