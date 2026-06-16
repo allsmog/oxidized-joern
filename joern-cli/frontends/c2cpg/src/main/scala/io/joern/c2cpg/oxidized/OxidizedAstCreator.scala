@@ -843,7 +843,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case call: OxCall =>
         astForCallExpression(call)
       case fieldAccess: OxFieldAccess =>
-        fieldAccessAst(
+        fieldAccessAstForOperator(
           OxOrigin(fieldAccess),
           OxOrigin(fieldIdentifierCode(fieldAccess), Option(fieldAccess.line)),
           expressionAst(fieldAccess.base),
@@ -1075,6 +1075,20 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def fieldIdentifierCode(fieldAccess: OxFieldAccess): String = {
     if (fieldAccess.code.contains("->")) fieldAccess.code.split("->").lastOption.getOrElse(fieldAccess.field)
     else fieldAccess.code.split('.').lastOption.getOrElse(fieldAccess.field)
+  }
+
+  private def fieldAccessAstForOperator(
+    origin: OxOrigin,
+    fieldIdentifierOrigin: OxOrigin,
+    base: Ast,
+    code: String,
+    fieldName: String,
+    fieldTypeFullName: String
+  ): Ast = {
+    val operatorName = if (code.contains("->")) Operators.indirectFieldAccess else Operators.fieldAccess
+    val call =
+      callNode(origin, code, operatorName, operatorName, DispatchTypes.STATIC_DISPATCH, None, Option(fieldTypeFullName))
+    callAst(call, Seq(base, Ast(fieldIdentifierNode(fieldIdentifierOrigin, fieldName, fieldName))))
   }
 
   private def operatorCallAst(

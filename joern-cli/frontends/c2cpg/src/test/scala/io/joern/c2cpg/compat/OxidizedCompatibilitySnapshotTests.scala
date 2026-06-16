@@ -115,6 +115,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |public:
           |  int render(int scale) override { return scale + 1; }
           |  int inheritedValue() { return value + get(); }
+          |  int explicitThis() { return this->value + this->get(); }
           |};
           |int normalize() { return 99; }
           |int convert(int value) { return value; }
@@ -129,7 +130,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |int use() {
           |  Core::Widget widget(7);
           |  Core::Fancy fancy;
-          |  return Core::make() + Core::Widget::identity(2) + Core::Widget::instances + convert(1) + convert(widget) + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue();
+          |  return Core::make() + Core::Widget::identity(2) + Core::Widget::instances + convert(1) + convert(widget) + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue() + fancy.explicitThis();
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -198,6 +199,16 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       inside(cpg.method.fullNameExact("Core.Fancy.inheritedValue:int()").call.nameExact(Operators.indirectFieldAccess).l) {
         case List(fieldAccess) =>
           fieldAccess.code shouldBe "this->value"
+          fieldAccess.typeFullName shouldBe "int"
+          fieldAccess.argument.code.l shouldBe List("this", "value")
+      }
+      cpg.method.fullNameExact("Core.Fancy.explicitThis:int()").call.codeExact("this->get()").methodFullName.l shouldBe
+        List("Core.Widget.get:int()")
+      cpg.method.fullNameExact("Core.Fancy.explicitThis:int()").call.codeExact("this->get()").argument.code.l shouldBe
+        List("this")
+      inside(cpg.method.fullNameExact("Core.Fancy.explicitThis:int()").call.codeExact("this->value").l) {
+        case List(fieldAccess) =>
+          fieldAccess.name shouldBe Operators.indirectFieldAccess
           fieldAccess.typeFullName shouldBe "int"
           fieldAccess.argument.code.l shouldBe List("this", "value")
       }
@@ -285,6 +296,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
       cpg.method.nameExact("use").call.codeExact("fancy.inheritedValue()").methodFullName.l shouldBe
         List("Core.Fancy.inheritedValue:int()")
+      cpg.method.nameExact("use").call.codeExact("fancy.explicitThis()").methodFullName.l shouldBe
+        List("Core.Fancy.explicitThis:int()")
     }
 
     "capture C++ new and delete expressions" in {
