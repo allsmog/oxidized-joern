@@ -99,6 +99,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  Widget(int& seed) : value(seed) {}
           |  ~Widget();
           |  int value;
+          |  static int instances;
           |  int get() { return normalize(); }
           |  int normalize() { return pick(value) + identity(1); }
           |  int pick(int seed) { return seed; }
@@ -126,8 +127,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.namespaceBlock.nameExact("Core").fullName.l shouldBe List("Test0.cpp:Core")
       cpg.typeDecl.fullNameExact("Core.Widget").fullName.l shouldBe List("Core.Widget")
       cpg.typeDecl.fullNameExact("Core.Widget").filename.l shouldBe List("Test0.cpp")
-      cpg.typeDecl.fullNameExact("Core.Widget").member.name.l shouldBe List("value")
-      cpg.typeDecl.fullNameExact("Core.Widget").member.typeFullName.l shouldBe List("int")
+      cpg.typeDecl.fullNameExact("Core.Widget").member.name.l shouldBe List("value", "instances")
+      cpg.typeDecl.fullNameExact("Core.Widget").member.typeFullName.l shouldBe List("int", "int")
+      cpg.typeDecl.fullNameExact("Core.Widget").member.nameExact("instances").modifier.modifierType.l shouldBe
+        List(ModifierTypes.STATIC)
       cpg.typeDecl.fullNameExact("Core.Widget").method.name.l.sorted shouldBe
         List("Widget", "Widget", "get", "identity", "normalize", "outside", "pick", "pick", "size", "~Widget")
       cpg.method.nameExact("Widget").internal.fullName.l.sorted shouldBe
