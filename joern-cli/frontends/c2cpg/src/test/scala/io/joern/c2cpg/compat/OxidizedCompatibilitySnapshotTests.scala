@@ -74,6 +74,30 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.call.nameExact(Operators.assignment).code.l.sorted shouldBe List("x = 1", "x = x - 1")
     }
 
+    "capture counted loops, jumps, and indexed expressions from the Rust parser backend" in {
+      val cpg = code("""
+          |int sum(int *xs, int n) {
+          |  int total = 0;
+          |  for (int i = 0; i < n; i++) {
+          |    if (!xs[i]) {
+          |      continue;
+          |    }
+          |    total = total + xs[i];
+          |  }
+          |  return total;
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("sum").controlStructure.controlStructureType.l shouldBe
+        List(ControlStructureTypes.FOR, ControlStructureTypes.IF, ControlStructureTypes.CONTINUE)
+      cpg.method.nameExact("sum").forBlock.condition.code.l shouldBe List("i < n")
+      cpg.call.nameExact(Operators.postIncrement).code.l shouldBe List("i++")
+      cpg.call.nameExact(Operators.logicalNot).code.l shouldBe List("!xs[i]")
+      cpg.call.nameExact(Operators.indirectIndexAccess).code.l.sorted shouldBe List("xs[i]", "xs[i]")
+      cpg.call.nameExact(Operators.assignment).code.l.sorted shouldBe
+        List("i = 0", "total = 0", "total = total + xs[i]")
+    }
+
   }
 
 }

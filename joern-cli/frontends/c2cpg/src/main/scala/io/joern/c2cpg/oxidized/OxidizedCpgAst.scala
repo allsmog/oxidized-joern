@@ -55,6 +55,19 @@ case class OxIf(
 
 case class OxWhile(code: String, line: Int, condition: OxExpression, body: Seq[OxStatement]) extends OxStatement
 
+case class OxFor(
+  code: String,
+  line: Int,
+  initializer: Seq[OxStatement],
+  condition: Option[OxExpression],
+  update: Option[OxExpression],
+  body: Seq[OxStatement]
+) extends OxStatement
+
+case class OxBreak(code: String, line: Int) extends OxStatement
+
+case class OxContinue(code: String, line: Int) extends OxStatement
+
 case class OxExpressionStatement(code: String, line: Int, expression: OxExpression) extends OxStatement
 
 sealed trait OxExpression {
@@ -69,9 +82,14 @@ case class OxLiteral(value: String, code: String, line: Int) extends OxExpressio
 case class OxBinary(operator: String, code: String, line: Int, left: OxExpression, right: OxExpression)
     extends OxExpression
 
+case class OxUnary(operator: String, code: String, line: Int, prefix: Boolean, argument: OxExpression)
+    extends OxExpression
+
 case class OxCall(name: String, code: String, line: Int, arguments: Seq[OxExpression]) extends OxExpression
 
 case class OxFieldAccess(field: String, code: String, line: Int, base: OxExpression) extends OxExpression
+
+case class OxIndexAccess(code: String, line: Int, base: OxExpression, index: OxExpression) extends OxExpression
 
 object OxDocument {
 
@@ -178,6 +196,19 @@ object OxDocument {
           condition = expression(value("condition")),
           body = value("body").arr.map(statement).toSeq
         )
+      case "for" =>
+        OxFor(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          initializer = value("initializer").arr.map(statement).toSeq,
+          condition = value.obj.get("condition").filter(!_.isNull).map(expression),
+          update = value.obj.get("update").filter(!_.isNull).map(expression),
+          body = value("body").arr.map(statement).toSeq
+        )
+      case "break" =>
+        OxBreak(code = str(value, "code"), line = int(value, "line"))
+      case "continue" =>
+        OxContinue(code = str(value, "code"), line = int(value, "line"))
       case "expression" =>
         OxExpressionStatement(
           code = str(value, "code"),
@@ -203,6 +234,14 @@ object OxDocument {
           left = expression(value("left")),
           right = expression(value("right"))
         )
+      case "unary" =>
+        OxUnary(
+          operator = str(value, "operator"),
+          code = str(value, "code"),
+          line = int(value, "line"),
+          prefix = value("prefix").bool,
+          argument = expression(value("argument"))
+        )
       case "call" =>
         OxCall(
           name = str(value, "name"),
@@ -216,6 +255,13 @@ object OxDocument {
           code = str(value, "code"),
           line = int(value, "line"),
           base = expression(value("base"))
+        )
+      case "indexAccess" =>
+        OxIndexAccess(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          base = expression(value("base")),
+          index = expression(value("index"))
         )
       case other =>
         throw new IllegalArgumentException(s"unsupported oxidized cxxastgen expression kind '$other'")
