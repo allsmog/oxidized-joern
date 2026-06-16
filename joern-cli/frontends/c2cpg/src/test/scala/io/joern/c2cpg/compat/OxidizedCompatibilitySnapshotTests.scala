@@ -490,6 +490,42 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("moved.~Widget()", "copied.~Widget()", "source.~Widget()")
     }
 
+    "capture C++ constructor temporary destructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |void accept(Widget&& widget) {}
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int use() {
+          |  Core::Widget source;
+          |  Core::accept(Core::Widget());
+          |  Core::accept(Core::Widget(source));
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.fullNameExact("Core.accept:void(Widget&&)").parameter.typeFullName.l shouldBe List("Widget&&")
+      cpg.method.nameExact("use").call.nameExact("accept").methodFullName.l shouldBe
+        List("Core.accept:void(Widget&&)", "Core.accept:void(Widget&&)")
+      cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core::Widget()").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void()")
+      cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core::Widget(source)").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(Widget&)")
+      cpg.method.nameExact("use").call.nameExact("~Widget").code.l shouldBe
+        List("Core::Widget().~Widget()", "Core::Widget(source).~Widget()", "source.~Widget()")
+    }
+
     "capture C++ jump destructors" in {
       val cpg = code(
         """
