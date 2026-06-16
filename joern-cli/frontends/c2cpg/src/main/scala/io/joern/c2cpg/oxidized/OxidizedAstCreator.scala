@@ -663,6 +663,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         local.initializer match {
           case Some(initializer: OxInitializerList) if isConstructorInitializer(typeName, initializer) =>
             Seq(localAst, constructorAssignmentAst(local, initializer, typeName))
+          case Some(initializer) if isCopyConstructorInitializer(typeName, initializer) =>
+            Seq(
+              localAst,
+              constructorAssignmentAst(local, Seq(initializer), initializer.code, OxOrigin(initializer), typeName)
+            )
           case Some(initializer) =>
             val assignmentCode = s"${local.name} = ${initializer.code}"
             val left           = identifierAst(local.name, local.name, local.line)
@@ -772,15 +777,29 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     aggregateTypeFullNames.contains(typeName) && initializer.code.trim.startsWith("(")
   }
 
+  private def isCopyConstructorInitializer(typeName: String, initializer: OxExpression): Boolean = {
+    aggregateTypeFullNames.contains(typeName) && !initializer.isInstanceOf[OxInitializerList]
+  }
+
   private def constructorAssignmentAst(local: OxLocalDecl, initializer: OxInitializerList, typeName: String): Ast = {
+    constructorAssignmentAst(local, initializer.elements, initializer.code.trim, OxOrigin(initializer), typeName)
+  }
+
+  private def constructorAssignmentAst(
+    local: OxLocalDecl,
+    arguments: Seq[OxExpression],
+    initializerCode: String,
+    initializerOrigin: OxOrigin,
+    typeName: String
+  ): Ast = {
     val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
-    val constructor     = constructorEntry(typeName, initializer.elements)
+    val constructor     = constructorEntry(typeName, arguments)
     val signature       = constructor.map(_.function.signature)
     val methodFullName  = constructor.map(_.fullName).getOrElse(s"$typeName.$constructorName")
-    val initCode        = initializer.code.trim.stripPrefix("(").stripSuffix(")")
+    val initCode        = initializerCode.stripPrefix("(").stripSuffix(")")
     val constructorCode = s"$typeName.$constructorName($initCode)"
     val callNode_ = callNode(
-      OxOrigin(initializer).copy(code = constructorCode),
+      initializerOrigin.copy(code = constructorCode),
       constructorCode,
       constructorName,
       methodFullName,
@@ -790,7 +809,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     )
     val assignmentCode = s"${local.name} = $constructorCode"
     val left           = identifierAst(local.name, local.name, local.line)
-    val right          = callAst(callNode_, initializer.elements.map(expressionAst))
+    val right          = callAst(callNode_, arguments.map(expressionAst))
     assignmentAst(OxOrigin(local).copy(code = assignmentCode), left, right, assignmentCode)
   }
 
