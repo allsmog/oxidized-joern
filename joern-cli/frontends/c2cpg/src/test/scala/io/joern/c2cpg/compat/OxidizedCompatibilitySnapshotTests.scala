@@ -476,7 +476,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       FileUtil.usingTemporaryDirectory("oxidizedCompatibilitySnapshot") { dir =>
         val includeDir = dir / "include"
         Files.createDirectories(includeDir)
-        Files.writeString(includeDir / "feature.h", "#define FEATURE_VALUE 5\n")
+        Files.writeString(
+          includeDir / "feature.h",
+          """#define FEATURE_VALUE 5
+            |struct FeatureBox { int value; };
+            |typedef struct FeatureBox FeatureAlias;
+            |int feature_add(int x, int y);
+            |""".stripMargin
+        )
         val selected = dir / "selected.c"
         val ignored  = dir / "ignored.c"
         Files.writeString(
@@ -485,7 +492,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
             |#include "feature.h"
             |int selected() {
             |#ifdef FEATURE
-            |  return FROM_DB + FEATURE_VALUE;
+            |  FeatureAlias box;
+            |  box.value = feature_add(FROM_DB, FEATURE_VALUE);
+            |  return box.value;
             |#else
             |  return 0;
             |#endif
@@ -521,6 +530,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           cpg.method.nameExact("ignored").name.l shouldBe Nil
           cpg.method.nameExact("FROM_DB").signature.l shouldBe List("int(0)")
           cpg.method.nameExact("FEATURE_VALUE").fullName.l shouldBe List("include/feature.h:FEATURE_VALUE:int(0)")
+          cpg.typeDecl.nameExact("FeatureBox").filename.l shouldBe List("include/feature.h")
+          cpg.typeDecl.nameExact("FeatureBox").lineNumber.l shouldBe List(2)
+          cpg.typeDecl.nameExact("FeatureAlias").filename.l shouldBe List("include/feature.h")
+          cpg.typeDecl.nameExact("FeatureAlias").aliasTypeFullName.l shouldBe List("FeatureBox")
+          cpg.method.nameExact("feature_add").external.filename.l shouldBe List("include/feature.h")
+          cpg.method.nameExact("feature_add").external.signature.l shouldBe List("int(int,int)")
+          cpg.method.nameExact("selected").local.nameExact("box").typeFullName.l shouldBe List("FeatureAlias")
           inside(cpg.call.nameExact("FROM_DB").l) { case List(fromDbCall) =>
             fromDbCall.code shouldBe "FROM_DB"
             fromDbCall.signature shouldBe "int(0)"
@@ -532,7 +548,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
             featureCall.signature shouldBe "int(0)"
             featureCall.dispatchType shouldBe DispatchTypes.INLINED
           }
-          cpg.method.nameExact("selected").ast.isReturn.code.l shouldBe List("return FROM_DB + FEATURE_VALUE")
+          inside(cpg.call.nameExact("feature_add").l) { case List(featureAddCall) =>
+            featureAddCall.code shouldBe "feature_add(FROM_DB, FEATURE_VALUE)"
+            featureAddCall.methodFullName shouldBe "feature_add"
+            featureAddCall.signature shouldBe "int(int,int)"
+            featureAddCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+          }
+          cpg.method.nameExact("selected").ast.isReturn.code.l shouldBe List("return box.value")
         } finally {
           cpg.close()
         }

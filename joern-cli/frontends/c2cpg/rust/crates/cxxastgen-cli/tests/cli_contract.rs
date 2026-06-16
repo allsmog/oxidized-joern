@@ -48,6 +48,7 @@ fn writes_one_json_document_per_cxx_input() {
         serde_json::json!(["VALUE=7"])
     );
     assert_eq!(document["options"]["skipFunctionBodies"], true);
+    assert_eq!(document["options"]["importHeaderDeclarations"], false);
     assert!(document["options"]["includePaths"][0]
         .as_str()
         .unwrap()
@@ -159,6 +160,7 @@ fn uses_compile_database_sources_and_options() {
         .as_str()
         .unwrap()
         .ends_with("/compile_commands.json"));
+    assert_eq!(document["options"]["importHeaderDeclarations"], true);
 }
 
 #[test]

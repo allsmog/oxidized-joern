@@ -69,6 +69,7 @@ fn run() -> Result<()> {
             .as_ref()
             .map(|path| display_path(path)),
         skip_function_bodies: args.skip_function_bodies,
+        import_header_declarations: args.compilation_database.is_some() || input.is_file(),
     };
 
     let files = collect_inputs(&input, exclude.as_ref(), compile_database.as_ref())?;
