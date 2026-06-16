@@ -226,6 +226,44 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       fieldPointerCall.receiver.code.l shouldBe List("ops.open")
     }
 
+    "capture nested aggregate declarations, unions, and bitfields" in {
+      val cpg = code("""
+          |struct Outer {
+          |  int flags:3;
+          |  struct Inner {
+          |    int a;
+          |    union Choice {
+          |      int i;
+          |      char c;
+          |    };
+          |  };
+          |  union Storage {
+          |    int x;
+          |    char y;
+          |  };
+          |};
+          |union Top {
+          |  int i;
+          |  char c;
+          |};
+          |int use_union() {
+          |  union Top top;
+          |  return top.i;
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val outer = cpg.typeDecl.nameExact("Outer").head
+      outer.member.nameExact("flags").typeFullName.l shouldBe List("int")
+      outer.member.nameExact("flags").code.l shouldBe List("int flags:3")
+      val inner   = outer.astChildren.isTypeDecl.nameExact("Inner").head
+      val storage = outer.astChildren.isTypeDecl.nameExact("Storage").head
+      inner.member.nameExact("a").typeFullName.l shouldBe List("int")
+      inner.astChildren.isTypeDecl.nameExact("Choice").head.member.name.l shouldBe List("i", "c")
+      storage.member.name.l shouldBe List("x", "y")
+      cpg.typeDecl.nameExact("Top").member.name.l shouldBe List("i", "c")
+      cpg.method.nameExact("use_union").local.nameExact("top").typeFullName.l shouldBe List("Top")
+    }
+
     "capture global variables and local shadow references" in {
       val cpg = code("""
           |int global = 1;

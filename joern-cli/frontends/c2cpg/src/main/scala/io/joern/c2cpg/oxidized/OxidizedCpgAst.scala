@@ -13,7 +13,13 @@ sealed trait OxDeclaration {
 case class OxMacroDecl(name: String, code: String, line: Int, parameters: Seq[String], body: String)
     extends OxDeclaration
 
-case class OxStructDecl(name: String, code: String, line: Int, fields: Seq[OxFieldDecl]) extends OxDeclaration
+case class OxStructDecl(
+  name: String,
+  code: String,
+  line: Int,
+  fields: Seq[OxFieldDecl],
+  nestedDeclarations: Seq[OxDeclaration]
+) extends OxDeclaration
 
 case class OxFieldDecl(name: String, typeName: String, code: String)
 
@@ -155,7 +161,9 @@ object OxDocument {
           name = str(value, "name"),
           code = str(value, "code"),
           line = int(value, "line"),
-          fields = value("fields").arr.map(field).toSeq
+          fields = value("fields").arr.map(field).toSeq,
+          nestedDeclarations =
+            value.obj.get("nestedDeclarations").map(_.arr.map(declaration).toSeq).getOrElse(Seq.empty)
         )
       case "enum" =>
         OxEnumDecl(
