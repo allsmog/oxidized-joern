@@ -56,6 +56,39 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |CALL|add|add|add(1, 2)|13""".stripMargin
     }
 
+    "capture object-like macros and configured defines as inlined zero-argument calls" in {
+      val cpg = code("""
+          |#define SIZE 4
+          |
+          |int configured() {
+          |  return FROM_DB;
+          |}
+          |int source_macro() {
+          |  return SIZE + 1;
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized, defines = Set("FROM_DB=7")))
+
+      cpg.method.nameExact("SIZE").signature.l shouldBe List("int(0)")
+      cpg.method.nameExact("SIZE").fullName.l shouldBe List("Test0.c:SIZE:int(0)")
+      cpg.method.nameExact("FROM_DB").signature.l shouldBe List("int(0)")
+      cpg.method.nameExact("FROM_DB").fullName.l shouldBe List("Test0.c:FROM_DB:int(0)")
+
+      inside(cpg.call.nameExact("SIZE").l) { case List(sizeCall) =>
+        sizeCall.code shouldBe "SIZE"
+        sizeCall.methodFullName shouldBe "Test0.c:SIZE:int(0)"
+        sizeCall.signature shouldBe "int(0)"
+        sizeCall.dispatchType shouldBe DispatchTypes.INLINED
+        sizeCall.argument.l shouldBe Nil
+      }
+      inside(cpg.call.nameExact("FROM_DB").l) { case List(fromDbCall) =>
+        fromDbCall.code shouldBe "FROM_DB"
+        fromDbCall.methodFullName shouldBe "Test0.c:FROM_DB:int(0)"
+        fromDbCall.signature shouldBe "int(0)"
+        fromDbCall.dispatchType shouldBe DispatchTypes.INLINED
+        fromDbCall.argument.l shouldBe Nil
+      }
+    }
+
     "capture control flow from the Rust parser backend" in {
       val cpg = code("""
           |int clamp(int x) {
@@ -453,6 +486,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         try {
           cpg.method.nameExact("selected").name.l shouldBe List("selected")
           cpg.method.nameExact("ignored").name.l shouldBe Nil
+          cpg.method.nameExact("FROM_DB").signature.l shouldBe List("int(0)")
+          inside(cpg.call.nameExact("FROM_DB").l) { case List(fromDbCall) =>
+            fromDbCall.code shouldBe "FROM_DB"
+            fromDbCall.signature shouldBe "int(0)"
+            fromDbCall.dispatchType shouldBe DispatchTypes.INLINED
+          }
         } finally {
           cpg.close()
         }
