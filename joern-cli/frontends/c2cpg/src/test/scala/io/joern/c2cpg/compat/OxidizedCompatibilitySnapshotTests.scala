@@ -241,6 +241,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |    int x;
           |    char y;
           |  };
+          |  union {
+          |    long promoted;
+          |  };
+          |  struct {
+          |    int inline_x;
+          |  } inline_field;
           |};
           |union Top {
           |  int i;
@@ -255,11 +261,16 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       val outer = cpg.typeDecl.nameExact("Outer").head
       outer.member.nameExact("flags").typeFullName.l shouldBe List("int")
       outer.member.nameExact("flags").code.l shouldBe List("int flags:3")
+      outer.member.nameExact("inline_field").typeFullName.l shouldBe List("inline_field")
       val inner   = outer.astChildren.isTypeDecl.nameExact("Inner").head
       val storage = outer.astChildren.isTypeDecl.nameExact("Storage").head
+      val embeddedAnonymous = outer.astChildren.isTypeDecl.nameExact("<type>0").head
+      val inlineFieldType   = outer.astChildren.isTypeDecl.nameExact("inline_field").head
       inner.member.nameExact("a").typeFullName.l shouldBe List("int")
       inner.astChildren.isTypeDecl.nameExact("Choice").head.member.name.l shouldBe List("i", "c")
       storage.member.name.l shouldBe List("x", "y")
+      embeddedAnonymous.member.name.l shouldBe List("promoted")
+      inlineFieldType.member.name.l shouldBe List("inline_x")
       cpg.typeDecl.nameExact("Top").member.name.l shouldBe List("i", "c")
       cpg.method.nameExact("use_union").local.nameExact("top").typeFullName.l shouldBe List("Top")
     }
