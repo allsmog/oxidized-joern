@@ -292,6 +292,22 @@ pub enum Expression {
         base: Box<Expression>,
         index: Box<Expression>,
     },
+    InitializerList {
+        code: String,
+        line: usize,
+        elements: Vec<Expression>,
+    },
+    DesignatedInitializer {
+        code: String,
+        line: usize,
+        designator: Box<Expression>,
+        value: Box<Expression>,
+    },
+    Designator {
+        name: String,
+        code: String,
+        line: usize,
+    },
 }
 
 pub fn parse_file(path: &Path, options: &ParseOptions) -> Result<CxxAstDocument> {
@@ -997,6 +1013,8 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
         "assignment_expression" => parse_assignment_expression(node, source),
         "cast_expression" => parse_cast_expression(node, source),
         "sizeof_expression" => parse_sizeof_expression(node, source),
+        "initializer_list" => parse_initializer_list(node, source),
+        "initializer_pair" => parse_initializer_pair(node, source),
         _ => identifier_expression(node, source),
     }
 }
@@ -1148,6 +1166,93 @@ fn parse_sizeof_expression(node: Node, source: &[u8]) -> Expression {
             .child_by_field_name("type")
             .map(|type_node| type_name_from_type_node(type_node, source)),
     }
+}
+
+fn parse_initializer_list(node: Node, source: &[u8]) -> Expression {
+    Expression::InitializerList {
+        code: node_text(node, source).trim().to_string(),
+        line: line(node),
+        elements: named_children(node)
+            .into_iter()
+            .map(|element| parse_expression(element, source))
+            .collect(),
+    }
+}
+
+fn parse_initializer_pair(node: Node, source: &[u8]) -> Expression {
+    let designator = named_children(node)
+        .into_iter()
+        .find(|child| is_initializer_designator(*child))
+        .map(|designator| parse_initializer_designator(designator, source));
+    let value = node.child_by_field_name("value").or_else(|| {
+        named_children(node)
+            .into_iter()
+            .rev()
+            .find(|child| !is_initializer_designator(*child))
+    });
+
+    match (designator, value) {
+        (Some(designator), Some(value)) => Expression::DesignatedInitializer {
+            code: node_text(node, source).trim().to_string(),
+            line: line(node),
+            designator: Box::new(designator),
+            value: Box::new(parse_expression(value, source)),
+        },
+        _ => identifier_expression(node, source),
+    }
+}
+
+fn parse_initializer_designator(node: Node, source: &[u8]) -> Expression {
+    match node.kind() {
+        "field_designator" | "field_identifier" => {
+            let field = named_children(node)
+                .into_iter()
+                .last()
+                .map(|child| node_text(child, source))
+                .unwrap_or_else(|| node_text(node, source))
+                .trim()
+                .trim_start_matches('.')
+                .to_string();
+            Expression::Designator {
+                name: field.clone(),
+                code: field,
+                line: line(node),
+            }
+        }
+        "subscript_designator" => named_children(node)
+            .into_iter()
+            .next()
+            .map(|index| parse_expression(index, source))
+            .unwrap_or_else(|| identifier_expression(node, source)),
+        "subscript_range_designator" => {
+            let start = node
+                .child_by_field_name("start")
+                .or_else(|| named_children(node).into_iter().next());
+            let end = node
+                .child_by_field_name("end")
+                .or_else(|| named_children(node).into_iter().nth(1));
+            Expression::InitializerList {
+                code: node_text(node, source).trim().to_string(),
+                line: line(node),
+                elements: start
+                    .into_iter()
+                    .chain(end)
+                    .map(|element| parse_expression(element, source))
+                    .collect(),
+            }
+        }
+        _ => parse_expression(node, source),
+    }
+}
+
+fn is_initializer_designator(node: Node) -> bool {
+    matches!(
+        node.kind(),
+        "field_designator"
+            | "field_identifier"
+            | "subscript_designator"
+            | "subscript_range_designator"
+    )
 }
 
 fn identifier_expression(node: Node, source: &[u8]) -> Expression {
@@ -1634,6 +1739,124 @@ mod tests {
             })
             .expect("named enum typedef should be emitted");
         assert_eq!(enum_typedef.type_name, "mode");
+    }
+
+    #[test]
+    fn parses_initializer_lists_and_designated_initializers() {
+        let sample = r#"
+                int global[] = {0, 1};
+                struct Fs { int open; };
+                int init(void) {
+                  int local[2] = {2, 3};
+                  struct Fs fs = { .open = 7 };
+                  int ranged[10] = { [3 ... 9] = 15 };
+                  return local[1] + fs.open + ranged[3] + global[0];
+                }
+                "#;
+        let declarations =
+            parse_declarations(sample, SourceLanguage::C).expect("initializer sample should parse");
+
+        let global = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::GlobalVariable(value) if value.name == "global" => Some(value),
+                _ => None,
+            })
+            .expect("global initializer should be emitted");
+        let Expression::InitializerList { code, elements, .. } =
+            global.initializer.as_ref().expect("global initializer")
+        else {
+            panic!("expected global initializer list");
+        };
+        assert_eq!(code, "{0, 1}");
+        assert!(matches!(
+            elements.as_slice(),
+            [
+                Expression::Literal { value: first, .. },
+                Expression::Literal { value: second, .. }
+            ] if first == "0" && second == "1"
+        ));
+
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(value) if value.name == "init" => Some(value),
+                _ => None,
+            })
+            .expect("function should be emitted");
+
+        let fs_initializer = function
+            .body
+            .iter()
+            .find_map(|statement| match statement {
+                Statement::LocalDecl {
+                    name,
+                    initializer: Some(initializer),
+                    ..
+                } if name == "fs" => Some(initializer),
+                _ => None,
+            })
+            .expect("struct initializer should be emitted");
+        let Expression::InitializerList { elements, .. } = fs_initializer else {
+            panic!("expected struct initializer list");
+        };
+        let [Expression::DesignatedInitializer {
+            code,
+            designator,
+            value,
+            ..
+        }] = elements.as_slice()
+        else {
+            panic!("expected field designated initializer");
+        };
+        assert_eq!(code, ".open = 7");
+        assert!(matches!(
+            designator.as_ref(),
+            Expression::Designator { name, code, .. } if name == "open" && code == "open"
+        ));
+        assert!(matches!(
+            value.as_ref(),
+            Expression::Literal { value, .. } if value == "7"
+        ));
+
+        let ranged_initializer = function
+            .body
+            .iter()
+            .find_map(|statement| match statement {
+                Statement::LocalDecl {
+                    name,
+                    initializer: Some(initializer),
+                    ..
+                } if name == "ranged" => Some(initializer),
+                _ => None,
+            })
+            .expect("range initializer should be emitted");
+        let Expression::InitializerList { elements, .. } = ranged_initializer else {
+            panic!("expected range initializer list");
+        };
+        let [Expression::DesignatedInitializer {
+            code, designator, ..
+        }] = elements.as_slice()
+        else {
+            panic!("expected range designated initializer");
+        };
+        assert_eq!(code, "[3 ... 9] = 15");
+        let Expression::InitializerList {
+            code: designator_code,
+            elements: range_bounds,
+            ..
+        } = designator.as_ref()
+        else {
+            panic!("expected range designator");
+        };
+        assert_eq!(designator_code, "[3 ... 9]");
+        assert!(matches!(
+            range_bounds.as_slice(),
+            [
+                Expression::Literal { value: start, .. },
+                Expression::Literal { value: end, .. }
+            ] if start == "3" && end == "9"
+        ));
     }
 
     #[test]
