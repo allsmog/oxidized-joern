@@ -10,8 +10,15 @@ sealed trait OxDeclaration {
   def line: Int
 }
 
-case class OxMacroDecl(name: String, code: String, line: Int, parameters: Seq[String], body: String)
-    extends OxDeclaration
+case class OxMacroDecl(
+  name: String,
+  code: String,
+  line: Int,
+  parameters: Seq[String],
+  body: String,
+  sourcePath: Option[String],
+  visibleLine: Int
+) extends OxDeclaration
 
 case class OxIncludeDecl(name: String, code: String, line: Int) extends OxDeclaration
 
@@ -156,7 +163,9 @@ object OxDocument {
           code = str(value, "code"),
           line = int(value, "line"),
           parameters = value("parameters").arr.map(_.str).toSeq,
-          body = str(value, "body")
+          body = str(value, "body"),
+          sourcePath = value.obj.get("sourcePath").filter(!_.isNull).map(_.str),
+          visibleLine = value.obj.get("visibleLine").filter(!_.isNull).map(_.num.toInt).getOrElse(int(value, "line"))
         )
       case "include" =>
         OxIncludeDecl(name = str(value, "name"), code = str(value, "code"), line = int(value, "line"))
