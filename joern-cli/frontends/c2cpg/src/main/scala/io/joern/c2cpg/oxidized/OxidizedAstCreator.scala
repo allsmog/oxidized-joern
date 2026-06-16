@@ -36,21 +36,43 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private final case class ScopeEntry(typeFullName: String, declaration: NewNode)
   private final case class CapturedGlobal(scopeEntry: ScopeEntry, binding: NewClosureBinding, globalEntry: ScopeEntry)
+  private final case class FunctionEntry(
+    function: OxFunctionDecl,
+    lexicalOwnerFullName: Option[String],
+    ownerFullName: Option[String],
+    simpleName: String,
+    qualifiedName: String,
+    fullName: String
+  )
   private final case class FunctionCaptureContext(
     function: OxFunctionDecl,
     methodRef: NewMethodRef,
     capturedGlobals: mutable.LinkedHashMap[String, CapturedGlobal] = mutable.LinkedHashMap.empty
   )
 
-  private val usedTypes: mutable.Set[String] = mutable.Set(Defines.Any, Defines.Void)
-  private val functionsByName: Map[String, OxFunctionDecl] =
-    collectFunctionDeclarations(document.declarations).map(function => function.name -> function).toMap
+  private val usedTypes: mutable.Set[String]           = mutable.Set(Defines.Any, Defines.Void)
+  private lazy val functionEntries: Seq[FunctionEntry] = collectFunctionEntries(document.declarations, None)
+  private lazy val functionsByName: Map[String, FunctionEntry] =
+    functionEntries.groupBy(_.simpleName).view.mapValues(_.last).toMap
+  private lazy val functionsByQualifiedName: Map[String, FunctionEntry] =
+    functionEntries.groupBy(_.qualifiedName).view.mapValues(_.last).toMap
   private val macroDeclarations: Seq[OxMacroDecl] =
     document.declarations.collect { case macroDecl: OxMacroDecl => macroDecl }
   private val macroUndefs: Seq[OxMacroUndefDecl] =
     document.declarations.collect { case macroUndef: OxMacroUndefDecl => macroUndef }
   private lazy val aggregateDeclarations: Seq[(OxStructDecl, Option[String])] =
     collectAggregateDeclarations(document.declarations, None)
+  private lazy val aggregateTypeFullNames: Set[String] =
+    aggregateDeclarations.map { case (structDecl, parentFullName) =>
+      val localName = normalizeType(structDecl.name)
+      parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
+    }.toSet
+  private lazy val outOfClassFunctionsByOwner: Map[String, Seq[FunctionEntry]] =
+    functionEntries
+      .filter(entry =>
+        entry.function.name.contains("::") && entry.ownerFullName.exists(aggregateTypeFullNames.contains)
+      )
+      .groupBy(_.ownerFullName.get)
   private lazy val aggregateFieldsByType: Map[String, Map[String, String]] =
     aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
       val localName = normalizeType(structDecl.name)
@@ -143,6 +165,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case global: OxGlobalVariableDecl =>
         astsForGlobalVariable(global)
       case typedef: OxTypedefDecl => Seq(astForTypedef(typedef, ownerFullName, parentAstFullName))
+      case function: OxFunctionDecl if isOutOfClassAggregateFunction(function, ownerFullName) =>
+        Seq.empty
       case function: OxFunctionDecl =>
         astsForFunction(function, ownerFullName, NodeTypes.NAMESPACE_BLOCK, parentAstFullName)
     }
@@ -228,12 +252,27 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
-  private def collectFunctionDeclarations(declarations: Seq[OxDeclaration]): Seq[OxFunctionDecl] = {
+  private def collectFunctionEntries(
+    declarations: Seq[OxDeclaration],
+    ownerFullName: Option[String]
+  ): Seq[FunctionEntry] = {
     declarations.flatMap {
-      case functionDecl: OxFunctionDecl   => Seq(functionDecl)
-      case structDecl: OxStructDecl       => collectFunctionDeclarations(structDecl.nestedDeclarations)
-      case namespaceDecl: OxNamespaceDecl => collectFunctionDeclarations(namespaceDecl.declarations)
-      case _                              => Seq.empty
+      case functionDecl: OxFunctionDecl =>
+        val owner      = functionOwnerFullName(functionDecl, ownerFullName)
+        val simpleName = functionSimpleName(functionDecl)
+        val qualified  = owner.map(parent => s"$parent.$simpleName").getOrElse(simpleName)
+        val fullName   = functionFullName(functionDecl, ownerFullName)
+        Seq(FunctionEntry(functionDecl, ownerFullName, owner, simpleName, qualified, fullName))
+      case structDecl: OxStructDecl =>
+        val localName = normalizeType(structDecl.name)
+        val owner     = ownerFullName.map(parent => s"$parent.$localName").getOrElse(localName)
+        collectFunctionEntries(structDecl.nestedDeclarations, Option(owner))
+      case namespaceDecl: OxNamespaceDecl =>
+        val namespaceOwner = ownerFullName
+          .map(parent => (parent +: namespacePath(namespaceDecl.name)).mkString("."))
+          .orElse(Option(namespacePath(namespaceDecl.name).mkString(".")))
+        collectFunctionEntries(namespaceDecl.declarations, namespaceOwner)
+      case _ => Seq.empty
     }
   }
 
@@ -272,7 +311,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         astsForFunction(nestedFunction, Option(typeName), NodeTypes.TYPE_DECL, typeName)
       case _ => Seq.empty
     }
-    Ast(typeDecl).withChildren(fieldAsts ++ nestedAsts)
+    val outOfClassMethodAsts = outOfClassFunctionsByOwner
+      .getOrElse(typeName, Seq.empty)
+      .flatMap(entry => astsForFunction(entry.function, entry.lexicalOwnerFullName, NodeTypes.TYPE_DECL, typeName))
+    Ast(typeDecl).withChildren(fieldAsts ++ nestedAsts ++ outOfClassMethodAsts)
   }
 
   private def astForEnum(enumDecl: OxEnumDecl): Ast = {
@@ -420,19 +462,31 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     astParentType: String = NodeTypes.NAMESPACE_BLOCK,
     astParentFullName: String = globalNamespaceBlock().fullName
   ): Seq[Ast] = {
-    val origin     = OxOrigin(function)
-    val returnType = registerType(normalizeType(function.returnType))
-    val fullName   = functionFullName(function, ownerFullName)
+    val origin            = OxOrigin(function)
+    val returnType        = registerType(normalizeType(function.returnType))
+    val fullName          = functionFullName(function, ownerFullName)
+    val simpleName        = functionSimpleName(function)
+    val parentTypeOwner   = functionOwnerFullName(function, ownerFullName).filter(aggregateTypeFullNames.contains)
+    val effectiveParentTy = parentTypeOwner.map(_ => NodeTypes.TYPE_DECL).getOrElse(astParentType)
+    val effectiveParentFullName = parentTypeOwner.getOrElse {
+      if (function.name.contains("::")) {
+        functionOwnerFullName(function, ownerFullName)
+          .map(owner => s"${declarationFilename(function)}:$owner")
+          .getOrElse(astParentFullName)
+      } else {
+        astParentFullName
+      }
+    }
     val method =
       methodNode(
         origin,
-        function.name,
-        function.name,
+        simpleName,
+        simpleName,
         fullName,
         Option(function.signature),
         declarationFilename(function),
-        Option(astParentType),
-        Option(astParentFullName)
+        Option(effectiveParentTy),
+        Option(effectiveParentFullName)
       )
         .isExternal(!function.isDefinition)
     val parameters = function.parameters.zipWithIndex.map { case (parameter, index) =>
@@ -453,7 +507,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousScope          = scope
     val previousCaptureContext = functionCaptureContext
     val captureContext =
-      FunctionCaptureContext(function, methodRefNode(origin, function.name, fullName, function.name))
+      FunctionCaptureContext(function, methodRefNode(origin, simpleName, fullName, simpleName))
     scope = parameters.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }.toMap
     functionCaptureContext = Option(captureContext)
     val bodyAsts =
@@ -675,12 +729,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def directCallAst(call: OxCall): Ast = {
-    val (methodFullName, signature, typeFullName, dispatchType) = callTargetInfo(call.name, call.line)
+    val (name, methodFullName, signature, typeFullName, dispatchType) = callTargetInfo(call)
     val callNode_ =
       callNode(
         OxOrigin(call),
         call.code,
-        call.name,
+        name,
         methodFullName,
         dispatchType,
         signature,
@@ -705,7 +759,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def isPointerCall(call: OxCall): Boolean = {
     call.callee match {
-      case _: OxFieldAccess             => true
+      case _: OxFieldAccess             => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
       case OxUnary("*", _, _, _, _)     => true
       case _: OxUnary                   => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
       case _: OxIdentifier | _: OxCast  => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
@@ -817,13 +871,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def methodRefAst(name: String, code: String, line: Int): Option[Ast] = {
-    functionsByName.get(name).map { function =>
+    functionsByName.get(name).map { functionEntry =>
       Ast(
         methodRefNode(
           OxOrigin(code, Option(line)),
           code,
-          function.name,
-          registerType(normalizeType(function.returnType))
+          functionEntry.fullName,
+          registerType(normalizeType(functionEntry.function.returnType))
         )
       )
     }
@@ -886,27 +940,48 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       }
   }
 
-  private def callTargetInfo(name: String, line: Int): (String, Option[String], String, String) = {
-    macroForUse(name, line) match {
+  private def callTargetInfo(call: OxCall): (String, String, Option[String], String, String) = {
+    macroForUse(call.name, call.line) match {
       case Some(macroDecl) =>
         (
+          callName(call),
           macroFullName(macroDecl),
           Option(macroSignature(macroDecl)),
           macroReturnTypeFullName(macroDecl),
           DispatchTypes.INLINED
         )
       case None =>
-        functionsByName.get(name) match {
-          case Some(function) =>
+        functionEntryForCall(call) match {
+          case Some(functionEntry) =>
             (
-              function.name,
-              Option(function.signature),
-              normalizeType(function.returnType),
+              callName(call),
+              functionEntry.fullName,
+              Option(functionEntry.function.signature),
+              normalizeType(functionEntry.function.returnType),
               DispatchTypes.STATIC_DISPATCH
             )
           case None =>
-            (name, None, Defines.Any, DispatchTypes.STATIC_DISPATCH)
+            (callName(call), normalizedQualifiedName(call.name), None, Defines.Any, DispatchTypes.STATIC_DISPATCH)
         }
+    }
+  }
+
+  private def functionEntryForCall(call: OxCall): Option[FunctionEntry] = {
+    call.callee match {
+      case OxFieldAccess(field, _, _, base) =>
+        expressionTypeFullName(base)
+          .map(typeName => normalizeType(resolveAliasType(typeName)).stripSuffix("*").stripSuffix("[]"))
+          .flatMap(receiverType => functionsByQualifiedName.get(s"$receiverType.$field"))
+      case _ =>
+        val qualifiedName = normalizedQualifiedName(call.name)
+        functionsByQualifiedName.get(qualifiedName).orElse(functionsByName.get(call.name))
+    }
+  }
+
+  private def callName(call: OxCall): String = {
+    call.callee match {
+      case OxFieldAccess(field, _, _, _) => field
+      case _                             => qualifiedNameParts(call.name).lastOption.getOrElse(call.name)
     }
   }
 
@@ -941,7 +1016,29 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def functionFullName(function: OxFunctionDecl, ownerFullName: Option[String]): String = {
-    ownerFullName.map(owner => s"$owner.${function.name}:${function.signature}").getOrElse(function.name)
+    val simpleName = functionSimpleName(function)
+    functionOwnerFullName(function, ownerFullName)
+      .map(owner => s"$owner.$simpleName:${function.signature}")
+      .getOrElse(function.name)
+  }
+
+  private def functionSimpleName(function: OxFunctionDecl): String = {
+    qualifiedNameParts(function.name).lastOption.getOrElse(function.name)
+  }
+
+  private def functionOwnerFullName(function: OxFunctionDecl, ownerFullName: Option[String]): Option[String] = {
+    val parts = qualifiedNameParts(function.name)
+    if (parts.size > 1) {
+      val localOwner = parts.dropRight(1).mkString(".")
+      ownerFullName.map(owner => s"$owner.$localOwner").orElse(Option(localOwner))
+    } else {
+      ownerFullName
+    }
+  }
+
+  private def isOutOfClassAggregateFunction(function: OxFunctionDecl, ownerFullName: Option[String]): Boolean = {
+    function.name.contains("::") &&
+    functionOwnerFullName(function, ownerFullName).exists(aggregateTypeFullNames.contains)
   }
 
   private def declarationFilename(declaration: OxDeclaration): String = {
@@ -949,13 +1046,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def namespacePath(name: String): Seq[String] = {
+    qualifiedNameParts(name) match {
+      case Seq() => Seq(name)
+      case path  => path
+    }
+  }
+
+  private def qualifiedNameParts(name: String): Seq[String] = {
     name
       .split("::")
       .map(_.trim)
       .filter(_.nonEmpty)
-      .toSeq match {
-      case Seq() => Seq(name)
-      case path  => path
+      .toSeq
+  }
+
+  private def normalizedQualifiedName(name: String): String = {
+    qualifiedNameParts(name).mkString(".") match {
+      case ""         => name
+      case normalized => normalized
     }
   }
 
@@ -1032,6 +1140,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .stripPrefix("union ")
       .stripPrefix("enum ")
       .trim
+      .replace("::", ".")
   }
 
   private def resolveAliasType(typeName: String, aliases: Map[String, String] = typeAliases): String = {

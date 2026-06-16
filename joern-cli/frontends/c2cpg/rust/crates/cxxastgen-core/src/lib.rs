@@ -2219,7 +2219,7 @@ fn declaration_type_and_name(node: Node, source: &[u8]) -> Option<(String, Strin
 
 fn declarator_name(node: Node, source: &[u8]) -> Option<String> {
     match node.kind() {
-        "identifier" | "field_identifier" | "type_identifier" => {
+        "identifier" | "field_identifier" | "type_identifier" | "qualified_identifier" => {
             Some(node_text(node, source).trim().to_string())
         }
         _ => node
@@ -2931,12 +2931,21 @@ mod tests {
                 };
                 int make() { return 1; }
                 }
+                int Core::Widget::outside() { return 2; }
+                int use() {
+                  Core::Widget widget;
+                  return Core::make() + widget.get() + widget.outside();
+                }
                 "#;
         let declarations = parse_declarations(sample, SourceLanguage::Cpp)
             .expect("sample C++ namespace and class should parse");
-        let [Declaration::Namespace(namespace)] = declarations.as_slice() else {
-            panic!("expected one namespace declaration");
-        };
+        let namespace = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Namespace(namespace) if namespace.name == "Core" => Some(namespace),
+                _ => None,
+            })
+            .expect("expected Core namespace declaration");
         assert_eq!(namespace.name, "Core");
 
         let widget = namespace
@@ -2983,6 +2992,38 @@ mod tests {
             })
             .expect("expected namespace free function");
         assert_eq!(make.signature, "int()");
+
+        let outside = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "Core::Widget::outside" => {
+                    Some(function)
+                }
+                _ => None,
+            })
+            .expect("expected out-of-class method definition");
+        assert_eq!(outside.signature, "int()");
+
+        let use_function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        let [Statement::LocalDecl { type_name, .. }, Statement::Return {
+            expression: Some(return_expr),
+            ..
+        }] = use_function.body.as_slice()
+        else {
+            panic!("expected local declaration followed by return expression");
+        };
+        assert_eq!(type_name, "Core::Widget");
+        let call_names = collect_call_names(return_expr);
+        assert_eq!(
+            call_names,
+            vec!["Core::make", "widget.get", "widget.outside"]
+        );
     }
 
     #[test]
@@ -3780,6 +3821,18 @@ mod tests {
             panic!("expected '{name}' to contain one literal return");
         };
         value
+    }
+
+    fn collect_call_names(expression: &Expression) -> Vec<String> {
+        match expression {
+            Expression::Call { name, .. } => vec![name.clone()],
+            Expression::Binary { left, right, .. } => {
+                let mut calls = collect_call_names(left);
+                calls.extend(collect_call_names(right));
+                calls
+            }
+            _ => Vec::new(),
+        }
     }
 
     fn statement_line(statement: &Statement) -> usize {
