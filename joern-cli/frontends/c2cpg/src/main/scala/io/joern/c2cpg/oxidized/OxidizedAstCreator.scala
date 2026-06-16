@@ -1,0 +1,341 @@
+package io.joern.c2cpg.oxidized
+
+import io.joern.c2cpg.Config
+import io.joern.c2cpg.astcreation.Defines
+import io.joern.x2cpg.{Ast, AstCreatorBase, ValidationMode}
+import io.shiftleft.codepropertygraph.generated.nodes.*
+import io.shiftleft.codepropertygraph.generated.{
+  DiffGraphBuilder,
+  DispatchTypes,
+  EvaluationStrategies,
+  NodeTypes,
+  Operators
+}
+import io.shiftleft.semanticcpg.language.types.structure.NamespaceTraversal
+
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Paths}
+import scala.collection.mutable
+import scala.util.Try
+
+private final case class OxOrigin(code: String, line: Option[Int])
+
+private object OxOrigin {
+  def apply(declaration: OxDeclaration): OxOrigin = OxOrigin(declaration.code, Option(declaration.line))
+  def apply(statement: OxStatement): OxOrigin     = OxOrigin(statement.code, Option(statement.line))
+  def apply(expression: OxExpression): OxOrigin   = OxOrigin(expression.code, Option(expression.line))
+}
+
+final class OxidizedAstCreator(filename: String, document: OxDocument, config: Config)
+    extends AstCreatorBase[OxOrigin, OxidizedAstCreator](filename)(config.schemaValidation) {
+
+  private implicit val schemaValidation: ValidationMode = config.schemaValidation
+
+  private final case class ScopeEntry(typeFullName: String, declaration: NewNode)
+
+  private val usedTypes: mutable.Set[String] = mutable.Set(Defines.Any, Defines.Void)
+  private val functionsByName: Map[String, OxFunctionDecl] =
+    document.declarations.collect { case function: OxFunctionDecl => function.name -> function }.toMap
+  private val macrosByName: Map[String, OxMacroDecl] =
+    document.declarations.collect { case macroDecl: OxMacroDecl => macroDecl.name -> macroDecl }.toMap
+  private val macroFullNames: Map[String, String] =
+    macrosByName.map { case (name, macroDecl) => name -> macroFullName(macroDecl) }
+
+  private var scope: Map[String, ScopeEntry] = Map.empty
+
+  def typesSeen(): Set[String] = usedTypes.toSet
+
+  override def createAst(): DiffGraphBuilder = {
+    val fileNode = NewFile().name(filename).order(0)
+    if (!config.disableFileContent) fileContent.foreach(fileNode.content)
+
+    Ast.storeInDiffGraph(Ast(fileNode).withChild(astForTranslationUnit()), diffGraph)
+    diffGraph
+  }
+
+  private def astForTranslationUnit(): Ast = {
+    val namespaceBlock = globalNamespaceBlock()
+    val origin         = OxOrigin(NamespaceTraversal.globalNamespaceName, Option(1))
+    val globalTypeDecl =
+      typeDeclNode(
+        origin,
+        NamespaceTraversal.globalNamespaceName,
+        namespaceBlock.fullName,
+        filename,
+        NamespaceTraversal.globalNamespaceName,
+        NodeTypes.NAMESPACE_BLOCK,
+        namespaceBlock.fullName
+      )
+    val globalMethod =
+      methodNode(
+        origin,
+        NamespaceTraversal.globalNamespaceName,
+        NamespaceTraversal.globalNamespaceName,
+        namespaceBlock.fullName,
+        None,
+        filename,
+        Option(NodeTypes.TYPE_DECL),
+        Option(namespaceBlock.fullName)
+      )
+    val globalBlock     = blockNode(origin, NamespaceTraversal.globalNamespaceName, Defines.Any)
+    val declarationAsts = document.declarations.flatMap(astForDeclaration)
+    val globalMethodAst =
+      methodAst(
+        globalMethod,
+        Seq.empty,
+        blockAst(globalBlock, declarationAsts.toList),
+        methodReturnNode(origin, Defines.Any)
+      )
+
+    Ast(namespaceBlock).withChild(Ast(globalTypeDecl).withChild(globalMethodAst))
+  }
+
+  private def fileContent: Option[String] = {
+    Try(Files.readString(Paths.get(document.path), StandardCharsets.UTF_8)).toOption
+  }
+
+  private def astForDeclaration(declaration: OxDeclaration): Seq[Ast] = {
+    declaration match {
+      case macroDecl: OxMacroDecl   => Seq(astForMacro(macroDecl))
+      case structDecl: OxStructDecl => Seq(astForStruct(structDecl))
+      case enumDecl: OxEnumDecl     => Seq(astForEnum(enumDecl))
+      case function: OxFunctionDecl => Seq(astForFunction(function))
+    }
+  }
+
+  private def astForMacro(macroDecl: OxMacroDecl): Ast = {
+    val origin = OxOrigin(macroDecl)
+    val params = macroDecl.parameters.zipWithIndex.map { case (name, index) =>
+      Ast(
+        parameterInNode(origin, name, name, index + 1, isVariadic = false, EvaluationStrategies.BY_VALUE, Defines.Any)
+      )
+    }
+    val signature = s"${Defines.Any}(${macroDecl.parameters.size})"
+    val method =
+      methodNode(origin, macroDecl.name, macroDecl.name, macroFullName(macroDecl), Option(signature), filename)
+    val body         = blockAst(blockNode(origin, macroDecl.body, Defines.Any))
+    val methodReturn = methodReturnNode(origin, Defines.Any)
+    methodAst(method, params, body, methodReturn)
+  }
+
+  private def astForStruct(structDecl: OxStructDecl): Ast = {
+    val origin   = OxOrigin(structDecl)
+    val typeName = registerType(normalizeType(structDecl.name))
+    val typeDecl =
+      typeDeclNode(
+        origin,
+        structDecl.name,
+        typeName,
+        filename,
+        structDecl.code,
+        NodeTypes.NAMESPACE_BLOCK,
+        globalNamespaceBlock().fullName
+      )
+    val fieldAsts = structDecl.fields.map { field =>
+      Ast(
+        memberNode(origin.copy(code = field.code), field.name, field.code, registerType(normalizeType(field.typeName)))
+      )
+    }
+    Ast(typeDecl).withChildren(fieldAsts)
+  }
+
+  private def astForEnum(enumDecl: OxEnumDecl): Ast = {
+    val origin   = OxOrigin(enumDecl)
+    val typeName = registerType(normalizeType(enumDecl.name))
+    val typeDecl =
+      typeDeclNode(
+        origin,
+        enumDecl.name,
+        typeName,
+        filename,
+        enumDecl.code,
+        NodeTypes.NAMESPACE_BLOCK,
+        globalNamespaceBlock().fullName
+      )
+    val variantAsts = enumDecl.variants.map { variant =>
+      Ast(memberNode(origin.copy(code = variant.code), variant.name, variant.code, registerType("int")))
+    }
+    Ast(typeDecl).withChildren(variantAsts)
+  }
+
+  private def astForFunction(function: OxFunctionDecl): Ast = {
+    val origin     = OxOrigin(function)
+    val returnType = registerType(normalizeType(function.returnType))
+    val method =
+      methodNode(origin, function.name, function.name, function.name, Option(function.signature), filename)
+    val parameters = function.parameters.zipWithIndex.map { case (parameter, index) =>
+      val parameterType = registerType(normalizeType(parameter.typeName))
+      val parameterNode =
+        parameterInNode(
+          OxOrigin(parameter.code, Option(parameter.line)),
+          parameter.name,
+          parameter.code,
+          index + 1,
+          isVariadic = false,
+          EvaluationStrategies.BY_VALUE,
+          parameterType
+        )
+      parameter.name -> (parameterType, Ast(parameterNode), parameterNode)
+    }
+
+    scope = parameters.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }.toMap
+    val bodyAsts     = function.body.flatMap(astsForStatement)
+    val body         = blockAst(blockNode(origin, function.code, Defines.Any), bodyAsts.toList)
+    val methodReturn = methodReturnNode(origin, returnType)
+    val ast          = methodAst(method, parameters.map(_._2._2), body, methodReturn)
+    scope = Map.empty
+    ast
+  }
+
+  private def astsForStatement(statement: OxStatement): Seq[Ast] = {
+    statement match {
+      case local: OxLocalDecl =>
+        val origin    = OxOrigin(local)
+        val typeName  = registerType(normalizeType(local.typeName))
+        val localCode = local.initializer.fold(local.code)(_ => local.code.takeWhile(_ != '=').trim)
+        val localNode = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
+        scope = scope.updated(local.name, ScopeEntry(typeName, localNode))
+        val localAst = Ast(localNode)
+        local.initializer match {
+          case Some(initializer) =>
+            val assignmentCode = s"${local.name} = ${initializer.code}"
+            val left           = identifierAst(local.name, local.name, local.line)
+            val assignment =
+              assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
+            Seq(localAst, assignment)
+          case None =>
+            Seq(localAst)
+        }
+      case assignment: OxAssignment =>
+        Seq(
+          assignmentAst(
+            OxOrigin(assignment),
+            expressionAst(assignment.left),
+            expressionAst(assignment.right),
+            assignment.code
+          )
+        )
+      case ret: OxReturn =>
+        Seq(returnAst(returnNode(OxOrigin(ret), ret.code), ret.expression.toSeq.map(expressionAst)))
+      case expressionStatement: OxExpressionStatement =>
+        Seq(expressionAst(expressionStatement.expression))
+    }
+  }
+
+  private def expressionAst(expression: OxExpression): Ast = {
+    expression match {
+      case identifier: OxIdentifier =>
+        identifierAst(identifier.name, identifier.code, identifier.line)
+      case literal: OxLiteral =>
+        Ast(literalNode(OxOrigin(literal), literal.code, literalType(literal.value)))
+      case binary: OxBinary =>
+        val operatorName = operatorFor(binary.operator)
+        val call =
+          callNode(
+            OxOrigin(binary),
+            binary.code,
+            operatorName,
+            operatorName,
+            DispatchTypes.STATIC_DISPATCH,
+            Option(""),
+            Option(registerType(Defines.Any))
+          )
+        callAst(call, Seq(expressionAst(binary.left), expressionAst(binary.right)))
+      case call: OxCall =>
+        val (methodFullName, signature, typeFullName) = callTargetInfo(call.name)
+        val callNode_ =
+          callNode(
+            OxOrigin(call),
+            call.code,
+            call.name,
+            methodFullName,
+            DispatchTypes.STATIC_DISPATCH,
+            signature,
+            Option(registerType(typeFullName))
+          )
+        callAst(callNode_, call.arguments.map(expressionAst))
+      case fieldAccess: OxFieldAccess =>
+        fieldAccessAst(
+          OxOrigin(fieldAccess),
+          OxOrigin(fieldAccess.code.split('.').lastOption.getOrElse(fieldAccess.field), Option(fieldAccess.line)),
+          expressionAst(fieldAccess.base),
+          fieldAccess.code,
+          fieldAccess.field,
+          registerType(Defines.Any)
+        )
+    }
+  }
+
+  private def assignmentAst(origin: OxOrigin, left: Ast, right: Ast, code: String): Ast = {
+    val call =
+      callNode(
+        origin.copy(code = code),
+        code,
+        Operators.assignment,
+        Operators.assignment,
+        DispatchTypes.STATIC_DISPATCH,
+        Option(""),
+        Option(registerType(Defines.Void))
+      )
+    callAst(call, Seq(left, right))
+  }
+
+  private def identifierAst(name: String, code: String, line: Int): Ast = {
+    val entry      = scope.get(name)
+    val typeName   = registerType(entry.map(_.typeFullName).getOrElse(Defines.Any))
+    val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, typeName)
+    entry.fold(Ast(identifier))(scopeEntry => Ast(identifier).withRefEdge(identifier, scopeEntry.declaration))
+  }
+
+  private def callTargetInfo(name: String): (String, Option[String], String) = {
+    macroFullNames.get(name) match {
+      case Some(fullName) => (fullName, Option(s"${Defines.Any}(${macrosByName(name).parameters.size})"), Defines.Any)
+      case None =>
+        functionsByName.get(name) match {
+          case Some(function) =>
+            (function.name, Option(function.signature), normalizeType(function.returnType))
+          case None =>
+            (name, None, Defines.Any)
+        }
+    }
+  }
+
+  private def macroFullName(macroDecl: OxMacroDecl): String = {
+    s"$filename:${macroDecl.name}:${Defines.Any}(${macroDecl.parameters.size})"
+  }
+
+  private def literalType(value: String): String = {
+    if (value.forall(_.isDigit)) registerType("int") else registerType(Defines.Any)
+  }
+
+  private def operatorFor(operator: String): String = {
+    operator match {
+      case "+" => Operators.addition
+      case _   => Defines.OperatorUnknown
+    }
+  }
+
+  private def normalizeType(typeName: String): String = {
+    typeName
+      .stripPrefix("struct ")
+      .stripPrefix("enum ")
+      .trim
+  }
+
+  private def registerType(typeName: String): String = {
+    val normalized = if (typeName.isBlank) Defines.Any else typeName
+    usedTypes.add(normalized)
+    normalized
+  }
+
+  override protected def code(node: OxOrigin): String = shortenCode(node.code)
+
+  override protected def line(node: OxOrigin): Option[Int] = node.line
+
+  override protected def column(node: OxOrigin): Option[Int] = None
+
+  override protected def lineEnd(node: OxOrigin): Option[Int] = node.line
+
+  override protected def columnEnd(element: OxOrigin): Option[Int] = None
+
+}

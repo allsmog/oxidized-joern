@@ -17,14 +17,15 @@ class ParserBackendTests extends C2CpgSuite {
       cpg.method.nameExact("main").size shouldBe 1
     }
 
-    "fail clearly when the scaffolded oxidized backend is selected" in {
+    "fail clearly if the oxidized backend is requested through the CDT translation unit provider" in {
       val config   = Config(parserBackend = ParserBackend.Oxidized)
       val provider = TranslationUnitProvider.forConfig(config, new HeaderFileFinder(config), None)
 
       val error = intercept[UnsupportedOperationException] {
         provider.languageMappingForSourceFile(Path.of("main.c"), Map.empty)
       }
-      error.getMessage should include("oxidized c2cpg parser backend is scaffolded")
+      error.getMessage should include("does not expose Eclipse CDT translation units")
+      error.getMessage should include("--parser-backend oxidized")
       error.getMessage should include("--parser-backend cdt")
     }
 
