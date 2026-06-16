@@ -29,6 +29,8 @@ case class OxGlobalVariableDecl(
   initializer: Option[OxExpression]
 ) extends OxDeclaration
 
+case class OxTypedefDecl(name: String, typeName: String, code: String, line: Int) extends OxDeclaration
+
 case class OxFunctionDecl(
   name: String,
   returnType: String,
@@ -161,6 +163,13 @@ object OxDocument {
           code = str(value, "code"),
           line = int(value, "line"),
           initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
+        )
+      case "typedef" =>
+        OxTypedefDecl(
+          name = str(value, "name"),
+          typeName = str(value, "typeName"),
+          code = str(value, "code"),
+          line = int(value, "line")
         )
       case "function" =>
         OxFunctionDecl(

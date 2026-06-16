@@ -52,6 +52,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private var globalLocalEntries: Map[OxGlobalVariableDecl, ScopeEntry] = Map.empty
   private var globalScopeByName: Map[String, ScopeEntry]                = Map.empty
   private var functionCaptureContext: Option[FunctionCaptureContext]    = None
+  private var typeAliases: Map[String, String]                          = Map.empty
 
   def typesSeen(): Set[String] = usedTypes.toSet
 
@@ -65,6 +66,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def astForTranslationUnit(): Ast = {
     initializeGlobalScope()
+    initializeTypeAliases()
     val namespaceBlock = globalNamespaceBlock()
     val origin         = OxOrigin(NamespaceTraversal.globalNamespaceName, Option(1))
     val globalTypeDecl =
@@ -112,6 +114,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case enumDecl: OxEnumDecl     => Seq(astForEnum(enumDecl))
       case global: OxGlobalVariableDecl =>
         astsForGlobalVariable(global)
+      case typedef: OxTypedefDecl   => Seq(astForTypedef(typedef))
       case function: OxFunctionDecl => astsForFunction(function)
     }
   }
@@ -169,6 +172,34 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       Ast(memberNode(origin.copy(code = variant.code), variant.name, variant.code, registerType("int")))
     }
     Ast(typeDecl).withChildren(variantAsts)
+  }
+
+  private def astForTypedef(typedef: OxTypedefDecl): Ast = {
+    val origin    = OxOrigin(typedef)
+    val name      = registerType(normalizeType(typedef.name))
+    val aliasType = registerType(resolveAliasType(typedef.typeName))
+    Ast(
+      typeDeclNode(
+        origin,
+        typedef.name,
+        name,
+        filename,
+        typedef.code,
+        NodeTypes.NAMESPACE_BLOCK,
+        globalNamespaceBlock().fullName,
+        alias = Option(aliasType)
+      )
+    )
+  }
+
+  private def initializeTypeAliases(): Unit = {
+    var aliases = Map.empty[String, String]
+    document.declarations.foreach {
+      case typedef: OxTypedefDecl =>
+        aliases = aliases.updated(typedef.name, resolveAliasType(typedef.typeName, aliases))
+      case _ =>
+    }
+    typeAliases = aliases
   }
 
   private def initializeGlobalScope(): Unit = {
@@ -609,6 +640,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .stripPrefix("struct ")
       .stripPrefix("enum ")
       .trim
+  }
+
+  private def resolveAliasType(typeName: String, aliases: Map[String, String] = typeAliases): String = {
+    val normalized = normalizeType(typeName)
+    if (normalized.endsWith("*") && normalized.length > 1) {
+      s"${resolveAliasType(normalized.dropRight(1), aliases)}*"
+    } else if (normalized.endsWith("[]") && normalized.length > 2) {
+      s"${resolveAliasType(normalized.dropRight(2), aliases)}[]"
+    } else {
+      aliases.getOrElse(normalized, normalized)
+    }
   }
 
   private def registerType(typeName: String): String = {
