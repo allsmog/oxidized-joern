@@ -13,6 +13,8 @@ sealed trait OxDeclaration {
 case class OxMacroDecl(name: String, code: String, line: Int, parameters: Seq[String], body: String)
     extends OxDeclaration
 
+case class OxIncludeDecl(name: String, code: String, line: Int) extends OxDeclaration
+
 case class OxStructDecl(
   name: String,
   code: String,
@@ -156,6 +158,8 @@ object OxDocument {
           parameters = value("parameters").arr.map(_.str).toSeq,
           body = str(value, "body")
         )
+      case "include" =>
+        OxIncludeDecl(name = str(value, "name"), code = str(value, "code"), line = int(value, "line"))
       case "struct" =>
         OxStructDecl(
           name = str(value, "name"),

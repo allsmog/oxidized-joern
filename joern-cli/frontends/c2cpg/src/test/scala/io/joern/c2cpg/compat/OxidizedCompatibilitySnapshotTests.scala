@@ -184,6 +184,33 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("first").local.nameExact("p").typeFullName.l shouldBe List("int*")
     }
 
+    "capture include imports and dependencies" in {
+      val cpg = code("""
+          |#include "./folder/sub/foo.h"
+          |#include <io.h>
+          |int value;
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.dependency.l) { case List(fooDep, ioDep) =>
+        fooDep.name shouldBe "./folder/sub/foo.h"
+        fooDep.version shouldBe "include"
+        fooDep.dependencyGroupId shouldBe Option("./folder/sub/foo.h")
+        ioDep.name shouldBe "io.h"
+        ioDep.version shouldBe "include"
+        ioDep.dependencyGroupId shouldBe Option("io.h")
+      }
+      inside(cpg.imports.l) { case List(fooImport, ioImport) =>
+        fooImport.code shouldBe "#include \"./folder/sub/foo.h\""
+        fooImport.importedEntity shouldBe Option("./folder/sub/foo.h")
+        fooImport.importedAs shouldBe Option("./folder/sub/foo.h")
+        fooImport._dependencyViaImportsOut.name.l shouldBe List("./folder/sub/foo.h")
+        ioImport.code shouldBe "#include <io.h>"
+        ioImport.importedEntity shouldBe Option("io.h")
+        ioImport.importedAs shouldBe Option("io.h")
+        ioImport._dependencyViaImportsOut.name.l shouldBe List("io.h")
+      }
+    }
+
     "preserve function pointer type names from declarators" in {
       val cpg = code("""
           |struct Ops {

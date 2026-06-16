@@ -8,6 +8,7 @@ import io.shiftleft.codepropertygraph.generated.{
   ControlStructureTypes,
   DiffGraphBuilder,
   DispatchTypes,
+  EdgeTypes,
   EvaluationStrategies,
   NodeTypes,
   Operators
@@ -112,7 +113,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         methodReturnNode(origin, Defines.Any)
       )
 
-    Ast(namespaceBlock).withChild(Ast(globalTypeDecl).withChild(globalMethodAst))
+    val includeAsts = document.declarations.collect { case includeDecl: OxIncludeDecl => astForInclude(includeDecl) }
+    Ast(namespaceBlock).withChildren(includeAsts :+ Ast(globalTypeDecl).withChild(globalMethodAst))
   }
 
   private def fileContent: Option[String] = {
@@ -122,6 +124,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def astForDeclaration(declaration: OxDeclaration): Seq[Ast] = {
     declaration match {
       case macroDecl: OxMacroDecl   => Seq(astForMacro(macroDecl))
+      case _: OxIncludeDecl         => Seq.empty
       case structDecl: OxStructDecl => Seq(astForStruct(structDecl))
       case enumDecl: OxEnumDecl     => Seq(astForEnum(enumDecl))
       case global: OxGlobalVariableDecl =>
@@ -129,6 +132,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case typedef: OxTypedefDecl   => Seq(astForTypedef(typedef))
       case function: OxFunctionDecl => astsForFunction(function)
     }
+  }
+
+  private def astForInclude(includeDecl: OxIncludeDecl): Ast = {
+    val dependency = NewDependency()
+      .name(includeDecl.name)
+      .dependencyGroupId(includeDecl.name)
+      .version("include")
+    val importNode = NewImport()
+      .code(includeDecl.code)
+      .importedEntity(includeDecl.name)
+      .importedAs(includeDecl.name)
+      .lineNumber(includeDecl.line)
+    diffGraph.addNode(dependency)
+    diffGraph.addEdge(importNode, dependency, EdgeTypes.IMPORTS)
+    Ast(importNode)
   }
 
   private def astForMacro(macroDecl: OxMacroDecl): Ast = {

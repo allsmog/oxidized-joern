@@ -44,6 +44,7 @@ pub struct CxxAstDocument {
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum Declaration {
     Macro(MacroDecl),
+    Include(IncludeDecl),
     Struct(StructDecl),
     Enum(EnumDecl),
     Typedef(TypedefDecl),
@@ -59,6 +60,14 @@ pub struct MacroDecl {
     pub line: usize,
     pub parameters: Vec<String>,
     pub body: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct IncludeDecl {
+    pub name: String,
+    pub code: String,
+    pub line: usize,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -383,6 +392,11 @@ fn parse_declarations(source: &str, language: SourceLanguage) -> Result<Vec<Decl
     let mut declarations = Vec::new();
     for child in named_children(tree.root_node()) {
         match child.kind() {
+            "preproc_include" => {
+                if let Some(declaration) = parse_include(child, bytes) {
+                    declarations.push(Declaration::Include(declaration));
+                }
+            }
             "preproc_def" | "preproc_function_def" => {
                 if let Some(declaration) = parse_macro(child, bytes) {
                     declarations.push(Declaration::Macro(declaration));
@@ -458,6 +472,7 @@ fn dedupe_function_declarations(declarations: Vec<Declaration>) -> Vec<Declarati
 fn declaration_line(declaration: &Declaration) -> usize {
     match declaration {
         Declaration::Macro(value) => value.line,
+        Declaration::Include(value) => value.line,
         Declaration::Struct(value) => value.line,
         Declaration::Enum(value) => value.line,
         Declaration::Typedef(value) => value.line,
@@ -507,6 +522,29 @@ fn parse_macro(node: Node, source: &[u8]) -> Option<MacroDecl> {
         parameters,
         body,
     })
+}
+
+fn parse_include(node: Node, source: &[u8]) -> Option<IncludeDecl> {
+    let path = node.child_by_field_name("path")?;
+    let code = node_text(node, source).trim().to_string();
+    let name = include_name(node_text(path, source));
+    if name.is_empty() {
+        return None;
+    }
+    Some(IncludeDecl {
+        name,
+        code,
+        line: line(node),
+    })
+}
+
+fn include_name(path: &str) -> String {
+    path.trim()
+        .trim_start_matches('"')
+        .trim_end_matches('"')
+        .trim_start_matches('<')
+        .trim_end_matches('>')
+        .to_string()
 }
 
 fn parse_type_declarations(node: Node, source: &[u8]) -> Vec<Declaration> {
@@ -1688,6 +1726,28 @@ mod tests {
         assert_eq!(function.body.len(), 2);
         assert_eq!(statement_line(&function.body[0]), 6);
         assert_eq!(statement_line(&function.body[1]), 7);
+    }
+
+    #[test]
+    fn parses_include_directives() {
+        let sample = r#"
+                #include "./folder/sub/foo.h"
+                #include <io.h>
+                int value;
+                "#;
+        let declarations =
+            parse_declarations(sample, SourceLanguage::C).expect("include sample should parse");
+
+        let [Declaration::Include(foo), Declaration::Include(io), Declaration::GlobalVariable(global)] =
+            declarations.as_slice()
+        else {
+            panic!("expected two includes and one global");
+        };
+        assert_eq!(foo.name, "./folder/sub/foo.h");
+        assert_eq!(foo.code, "#include \"./folder/sub/foo.h\"");
+        assert_eq!(io.name, "io.h");
+        assert_eq!(io.code, "#include <io.h>");
+        assert_eq!(global.name, "value");
     }
 
     #[test]
