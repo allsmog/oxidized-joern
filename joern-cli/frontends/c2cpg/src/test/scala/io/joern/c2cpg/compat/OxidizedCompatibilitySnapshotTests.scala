@@ -141,6 +141,44 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.call.nameExact(Operators.minus).code.l shouldBe List("-x")
     }
 
+    "preserve block scope when locals shadow outer declarations" in {
+      val cpg = code("""
+          |int shadow(int x) {
+          |  int y = x;
+          |  if (x) {
+          |    int y = 1;
+          |    y = y + 1;
+          |  }
+          |  return y;
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val outerY = cpg.local.nameExact("y").lineNumber(3).head
+      val innerY = cpg.local.nameExact("y").lineNumber(5).head
+      cpg.identifier.nameExact("y").lineNumber(6).refsTo.dedup.l shouldBe List(innerY)
+      cpg.identifier.nameExact("y").lineNumber(8).refsTo.l shouldBe List(outerY)
+    }
+
+    "preserve pointer and array type names from declarators" in {
+      val cpg = code("""
+          |struct Holder {
+          |  int *next;
+          |  int values[4];
+          |};
+          |int first(int *xs) {
+          |  int local[4];
+          |  int *p = xs;
+          |  return p[0];
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.typeDecl.nameExact("Holder").member.nameExact("next").typeFullName.l shouldBe List("int*")
+      cpg.typeDecl.nameExact("Holder").member.nameExact("values").typeFullName.l shouldBe List("int[]")
+      cpg.method.nameExact("first").parameter.nameExact("xs").typeFullName.l shouldBe List("int*")
+      cpg.method.nameExact("first").local.nameExact("local").typeFullName.l shouldBe List("int[]")
+      cpg.method.nameExact("first").local.nameExact("p").typeFullName.l shouldBe List("int*")
+    }
+
   }
 
 }

@@ -502,7 +502,11 @@ fn parse_function(node: Node, source: &[u8]) -> Option<FunctionDecl> {
     let declarator = node.child_by_field_name("declarator")?;
     let body = node.child_by_field_name("body")?;
     let name = declarator_name(declarator, source)?;
-    let return_type = normalize_type(node_text(type_node, source));
+    let return_type = type_from_declarator(
+        &normalize_type(node_text(type_node, source)),
+        declarator,
+        source,
+    );
     let parameters = declarator
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
@@ -613,11 +617,14 @@ fn parse_local_declarations(node: Node, source: &[u8]) -> Vec<Statement> {
                 .map(|value| parse_expression(value, source));
             Some(Statement::LocalDecl {
                 name,
-                type_name: type_name.clone().unwrap_or_else(|| {
-                    split_type_and_name(node_text(node, source))
-                        .map(|(type_name, _)| type_name)
-                        .unwrap_or_default()
-                }),
+                type_name: type_name
+                    .as_deref()
+                    .map(|base_type| type_from_declarator(base_type, declarator, source))
+                    .unwrap_or_else(|| {
+                        split_type_and_name(node_text(node, source))
+                            .map(|(type_name, _)| type_name)
+                            .unwrap_or_default()
+                    }),
                 code: statement_code(node, source),
                 line: line(node),
                 initializer,
@@ -951,11 +958,12 @@ fn identifier_expression(node: Node, source: &[u8]) -> Expression {
 }
 
 fn declaration_type_and_name(node: Node, source: &[u8]) -> Option<(String, String)> {
-    let type_name = node
+    let base_type = node
         .child_by_field_name("type")
         .map(|type_node| normalize_type(node_text(type_node, source)))?;
     let declarator = node.child_by_field_name("declarator")?;
     let name = declarator_name(declarator, source)?;
+    let type_name = type_from_declarator(&base_type, declarator, source);
     Some((type_name, name))
 }
 
@@ -972,6 +980,24 @@ fn declarator_name(node: Node, source: &[u8]) -> Option<String> {
                     .into_iter()
                     .find_map(|child| declarator_name(child, source))
             }),
+    }
+}
+
+fn type_from_declarator(base_type: &str, declarator: Node, source: &[u8]) -> String {
+    match declarator.kind() {
+        "pointer_declarator" => declarator
+            .child_by_field_name("declarator")
+            .map(|child| format!("{}*", type_from_declarator(base_type, child, source)))
+            .unwrap_or_else(|| format!("{base_type}*")),
+        "array_declarator" => declarator
+            .child_by_field_name("declarator")
+            .map(|child| format!("{}[]", type_from_declarator(base_type, child, source)))
+            .unwrap_or_else(|| format!("{base_type}[]")),
+        "init_declarator" | "parenthesized_declarator" | "function_declarator" => declarator
+            .child_by_field_name("declarator")
+            .map(|child| type_from_declarator(base_type, child, source))
+            .unwrap_or_else(|| base_type.to_string()),
+        _ => base_type.to_string(),
     }
 }
 
@@ -1383,6 +1409,51 @@ mod tests {
             alternative.as_ref(),
             Expression::Unary { operator, .. } if operator == "-"
         ));
+    }
+
+    #[test]
+    fn preserves_pointer_and_array_type_suffixes_from_declarators() {
+        let sample = r#"
+                struct Holder {
+                  int *next;
+                  int values[4];
+                };
+                int first(int *xs) {
+                  int local[4];
+                  int *p = xs;
+                  return p[0];
+                }
+                "#;
+        let declarations =
+            parse_declarations(sample, SourceLanguage::C).expect("type suffix sample should parse");
+
+        let Declaration::Struct(holder) = &declarations[0] else {
+            panic!("expected struct declaration");
+        };
+        assert_eq!(holder.fields[0].type_name, "int*");
+        assert_eq!(holder.fields[1].type_name, "int[]");
+
+        let Declaration::Function(function) = &declarations[1] else {
+            panic!("expected function declaration");
+        };
+        assert_eq!(function.parameters[0].type_name, "int*");
+        assert_eq!(function.signature, "int(int*)");
+        let [Statement::LocalDecl {
+            name: local_name,
+            type_name: local_type,
+            ..
+        }, Statement::LocalDecl {
+            name: pointer_name,
+            type_name: pointer_type,
+            ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!("expected array local, pointer local, return");
+        };
+        assert_eq!(local_name, "local");
+        assert_eq!(local_type, "int[]");
+        assert_eq!(pointer_name, "p");
+        assert_eq!(pointer_type, "int*");
     }
 
     fn statement_line(statement: &Statement) -> usize {

@@ -249,19 +249,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           )
         )
       case forStmt: OxFor =>
-        val forNode               = controlStructureNode(OxOrigin(forStmt), ControlStructureTypes.FOR, forStmt.code)
-        val initializerAsts       = forStmt.initializer.flatMap(astsForStatement)
-        val (localAsts, initAsts) = initializerAsts.partition(_.root.exists(_.isInstanceOf[NewLocal]))
-        Seq(
-          forAst(
-            forNode,
-            localAsts,
-            initAsts,
-            forStmt.condition.toSeq.map(expressionAst),
-            forStmt.update.toSeq.map(expressionAst),
-            statementBlockAst(forStmt.body, "for", forStmt.line)
+        inNestedScope {
+          val forNode               = controlStructureNode(OxOrigin(forStmt), ControlStructureTypes.FOR, forStmt.code)
+          val initializerAsts       = forStmt.initializer.flatMap(astsForStatement)
+          val (localAsts, initAsts) = initializerAsts.partition(_.root.exists(_.isInstanceOf[NewLocal]))
+          Seq(
+            forAst(
+              forNode,
+              localAsts,
+              initAsts,
+              forStmt.condition.toSeq.map(expressionAst),
+              forStmt.update.toSeq.map(expressionAst),
+              statementBlockAst(forStmt.body, "for", forStmt.line)
+            )
           )
-        )
+        }
       case breakStmt: OxBreak =>
         Seq(Ast(controlStructureNode(OxOrigin(breakStmt), ControlStructureTypes.BREAK, breakStmt.code)))
       case continueStmt: OxContinue =>
@@ -273,7 +275,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           labelStmt.body.flatMap(astsForStatement)
       case switchStmt: OxSwitch =>
         val switchNode = controlStructureNode(OxOrigin(switchStmt), ControlStructureTypes.SWITCH, switchStmt.code)
-        Seq(switchAst(switchNode, expressionAst(switchStmt.condition), switchStmt.body.flatMap(astsForStatement)))
+        Seq(
+          switchAst(
+            switchNode,
+            expressionAst(switchStmt.condition),
+            inNestedScope {
+              switchStmt.body.flatMap(astsForStatement)
+            }
+          )
+        )
       case caseStmt: OxCase =>
         val name = if (caseStmt.value.isDefined) "case" else "default"
         Ast(jumpTargetNode(OxOrigin(caseStmt), name, caseStmt.code)) +:
@@ -284,7 +294,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def statementBlockAst(statements: Seq[OxStatement], code: String, line: Int): Ast = {
-    blockAst(blockNode(OxOrigin(code, Option(line)), code, Defines.Any), statements.flatMap(astsForStatement).toList)
+    inNestedScope {
+      blockAst(blockNode(OxOrigin(code, Option(line)), code, Defines.Any), statements.flatMap(astsForStatement).toList)
+    }
+  }
+
+  private def inNestedScope[T](body: => T): T = {
+    val outerScope = scope
+    try body
+    finally scope = outerScope
   }
 
   private def expressionAst(expression: OxExpression): Ast = {
