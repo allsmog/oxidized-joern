@@ -108,7 +108,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |Core::Widget::~Widget() {}
           |int Core::Widget::outside() { return 2; }
           |int use() {
-          |  Core::Widget widget;
+          |  Core::Widget widget(7);
           |  return Core::make() + widget.get() + widget.outside();
           |}
           |""".stripMargin,
@@ -134,6 +134,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("make").fullName.l shouldBe List("Core.make:int()")
       cpg.method.nameExact("use").local.nameExact("widget").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("get").ast.isReturn.code.l shouldBe List("return value")
+      cpg.method.nameExact("use").call.nameExact("Widget").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(int&)")
       cpg.method.nameExact("use").call.nameExact("make").methodFullName.l shouldBe List("Core.make:int()")
       cpg.method.nameExact("use").call.nameExact("get").methodFullName.l shouldBe List("Core.Widget.get:int()")
       cpg.method.nameExact("use").call.nameExact("outside").methodFullName.l shouldBe List("Core.Widget.outside:int()")

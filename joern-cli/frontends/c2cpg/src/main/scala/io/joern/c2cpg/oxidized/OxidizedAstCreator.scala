@@ -534,11 +534,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case local: OxLocalDecl =>
         val origin    = OxOrigin(local)
         val typeName  = registerType(normalizeType(local.typeName))
-        val localCode = local.initializer.fold(local.code)(_ => local.code.takeWhile(_ != '=').trim)
+        val localCode = localDeclarationCode(local)
         val localNode = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
         scope = scope.updated(local.name, ScopeEntry(typeName, localNode))
         val localAst = Ast(localNode)
         local.initializer match {
+          case Some(initializer: OxInitializerList) if isConstructorInitializer(typeName, initializer) =>
+            Seq(localAst, constructorAssignmentAst(local, initializer, typeName))
           case Some(initializer) =>
             val assignmentCode = s"${local.name} = ${initializer.code}"
             val left           = identifierAst(local.name, local.name, local.line)
@@ -632,6 +634,48 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case expressionStatement: OxExpressionStatement =>
         Seq(expressionAst(expressionStatement.expression))
     }
+  }
+
+  private def localDeclarationCode(local: OxLocalDecl): String = {
+    local.initializer match {
+      case Some(_) if local.code.contains("=") => local.code.takeWhile(_ != '=').trim
+      case Some(initializer)                   => local.code.stripSuffix(initializer.code).trim
+      case None                                => local.code
+    }
+  }
+
+  private def isConstructorInitializer(typeName: String, initializer: OxInitializerList): Boolean = {
+    aggregateTypeFullNames.contains(typeName) && initializer.code.trim.startsWith("(")
+  }
+
+  private def constructorAssignmentAst(local: OxLocalDecl, initializer: OxInitializerList, typeName: String): Ast = {
+    val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
+    val constructor     = constructorEntry(typeName, initializer.elements.size)
+    val signature       = constructor.map(_.function.signature)
+    val methodFullName  = constructor.map(_.fullName).getOrElse(s"$typeName.$constructorName")
+    val initCode        = initializer.code.trim.stripPrefix("(").stripSuffix(")")
+    val constructorCode = s"$typeName.$constructorName($initCode)"
+    val callNode_ = callNode(
+      OxOrigin(initializer).copy(code = constructorCode),
+      constructorCode,
+      constructorName,
+      methodFullName,
+      DispatchTypes.STATIC_DISPATCH,
+      signature,
+      Some(registerType(Defines.Void))
+    )
+    val assignmentCode = s"${local.name} = $constructorCode"
+    val left           = identifierAst(local.name, local.name, local.line)
+    val right          = callAst(callNode_, initializer.elements.map(expressionAst))
+    assignmentAst(OxOrigin(local).copy(code = assignmentCode), left, right, assignmentCode)
+  }
+
+  private def constructorEntry(typeName: String, argumentCount: Int): Option[FunctionEntry] = {
+    val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
+    val candidates = functionEntries.filter(entry =>
+      entry.qualifiedName == s"$typeName.$constructorName" && entry.function.parameters.size == argumentCount
+    )
+    candidates.find(_.function.isDefinition).orElse(candidates.headOption)
   }
 
   private def statementBlockAst(statements: Seq[OxStatement], code: String, line: Int): Ast = {
