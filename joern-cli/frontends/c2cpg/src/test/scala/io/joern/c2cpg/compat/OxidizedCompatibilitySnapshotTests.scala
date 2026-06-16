@@ -483,7 +483,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           selected,
           """
             |#include "feature.h"
-            |int selected() { return FROM_DB + FEATURE_VALUE; }
+            |int selected() {
+            |#ifdef FEATURE
+            |  return FROM_DB + FEATURE_VALUE;
+            |#else
+            |  return 0;
+            |#endif
+            |}
             |""".stripMargin
         )
         Files.writeString(ignored, "int ignored() { return 0; }\n")
@@ -495,7 +501,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
              |[
              |  {
              |    "directory": "${dir.toString}",
-             |    "arguments": ["clang", "-I${includeDir.toString}", "-DFROM_DB=7", "-c", "selected.c"],
+             |    "arguments": ["clang", "-I${includeDir.toString}", "-DFEATURE", "-DFROM_DB=7", "-c", "selected.c"],
              |    "file": "${selected.toString}"
              |  }
              |]
@@ -526,6 +532,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
             featureCall.signature shouldBe "int(0)"
             featureCall.dispatchType shouldBe DispatchTypes.INLINED
           }
+          cpg.method.nameExact("selected").ast.isReturn.code.l shouldBe List("return FROM_DB + FEATURE_VALUE")
         } finally {
           cpg.close()
         }
