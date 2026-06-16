@@ -244,6 +244,45 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.typeDecl.nameExact("Mode").aliasTypeFullName.l shouldBe List("mode")
     }
 
+    "capture initializer lists and designated initializers" in {
+      val cpg = code("""
+          |struct Fs { int open; };
+          |int global[] = {0, 1};
+          |int opener(int fd) { return fd; }
+          |static const struct Ops ops = { .open = opener };
+          |int init() {
+          |  int local[2] = {2, 3};
+          |  struct Fs fs = { .open = 7 };
+          |  int ranged[10] = { [3 ... 9] = 15 };
+          |  return local[1] + fs.open + ranged[3] + global[0];
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.local.nameExact("global").filter(_.code == "int global[]").typeFullName.l shouldBe List("int[]")
+      cpg.local.nameExact("local").typeFullName.l shouldBe List("int[]")
+      cpg.local.nameExact("ranged").typeFullName.l shouldBe List("int[]")
+      val initializerCodes = cpg.call.nameExact(Operators.arrayInitializer).code.l
+      initializerCodes.contains("{0, 1}") shouldBe true
+      initializerCodes.contains("{2, 3}") shouldBe true
+      initializerCodes.contains("{ .open = 7 }") shouldBe true
+      initializerCodes.contains("{ .open = opener }") shouldBe true
+      initializerCodes.contains("{ [3 ... 9] = 15 }") shouldBe true
+      initializerCodes.contains("[3 ... 9]") shouldBe true
+
+      val fieldInit = cpg.call.nameExact(Operators.assignment).filter(_.code == ".open = 7").head
+      fieldInit.argument.code.l shouldBe List("open", "7")
+      fieldInit.argument(1).start.isIdentifier.refsTo.l shouldBe Nil
+
+      val methodInit = cpg.call.nameExact(Operators.assignment).filter(_.code == ".open = opener").head
+      methodInit.argument(2).start.isMethodRef.methodFullName.l shouldBe List("opener")
+      methodInit.argument(2).start.isMethodRef.typeFullName.l shouldBe List("int")
+
+      val rangeInit = cpg.call.nameExact(Operators.assignment).filter(_.code == "[3 ... 9] = 15").head
+      rangeInit.argument(1).start.isCall.code.l shouldBe List("[3 ... 9]")
+      rangeInit.argument(1).start.isCall.argument.code.l shouldBe List("3", "9")
+      rangeInit.argument(2).code shouldBe "15"
+    }
+
     "capture function prototypes as external methods" in {
       val cpg = code("""
           |int external(int value);

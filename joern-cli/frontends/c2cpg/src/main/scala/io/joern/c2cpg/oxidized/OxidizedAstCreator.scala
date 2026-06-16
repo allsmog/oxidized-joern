@@ -476,6 +476,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           operatorName,
           Seq(expressionAst(indexAccess.base), expressionAst(indexAccess.index))
         )
+      case initializerList: OxInitializerList =>
+        operatorCallAst(
+          OxOrigin(initializerList),
+          initializerList.code,
+          Operators.arrayInitializer,
+          initializerList.elements.map(expressionAst)
+        )
+      case designatedInitializer: OxDesignatedInitializer =>
+        assignmentAst(
+          OxOrigin(designatedInitializer),
+          expressionAst(designatedInitializer.designator),
+          expressionAst(designatedInitializer.value),
+          designatedInitializer.code
+        )
+      case designator: OxDesignator =>
+        Ast(identifierNode(OxOrigin(designator), designator.name, designator.code, registerType(Defines.Any)))
     }
   }
 
@@ -520,10 +536,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, typeName)
         Ast(identifier).withRefEdge(identifier, entry.declaration)
       case None =>
-        capturedGlobalIdentifierAst(name, code, line).getOrElse {
-          val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, registerType(Defines.Any))
-          Ast(identifier)
-        }
+        capturedGlobalIdentifierAst(name, code, line)
+          .orElse(methodRefAst(name, code, line))
+          .getOrElse {
+            val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, registerType(Defines.Any))
+            Ast(identifier)
+          }
+    }
+  }
+
+  private def methodRefAst(name: String, code: String, line: Int): Option[Ast] = {
+    functionsByName.get(name).map { function =>
+      Ast(
+        methodRefNode(
+          OxOrigin(code, Option(line)),
+          code,
+          function.name,
+          registerType(normalizeType(function.returnType))
+        )
+      )
     }
   }
 

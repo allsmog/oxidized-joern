@@ -125,6 +125,13 @@ case class OxFieldAccess(field: String, code: String, line: Int, base: OxExpress
 
 case class OxIndexAccess(code: String, line: Int, base: OxExpression, index: OxExpression) extends OxExpression
 
+case class OxInitializerList(code: String, line: Int, elements: Seq[OxExpression]) extends OxExpression
+
+case class OxDesignatedInitializer(code: String, line: Int, designator: OxExpression, value: OxExpression)
+    extends OxExpression
+
+case class OxDesignator(name: String, code: String, line: Int) extends OxExpression
+
 object OxDocument {
 
   def fromJson(json: String): OxDocument = {
@@ -366,6 +373,21 @@ object OxDocument {
           base = expression(value("base")),
           index = expression(value("index"))
         )
+      case "initializerList" =>
+        OxInitializerList(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          elements = value("elements").arr.map(expression).toSeq
+        )
+      case "designatedInitializer" =>
+        OxDesignatedInitializer(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          designator = expression(value("designator")),
+          value = expression(value("value"))
+        )
+      case "designator" =>
+        OxDesignator(name = str(value, "name"), code = str(value, "code"), line = int(value, "line"))
       case other =>
         throw new IllegalArgumentException(s"unsupported oxidized cxxastgen expression kind '$other'")
     }
