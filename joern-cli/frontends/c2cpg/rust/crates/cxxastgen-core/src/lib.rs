@@ -3801,6 +3801,116 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_rvalue_reference_constructors() {
+        let sample = r#"
+                namespace Core {
+                class Widget {
+                public:
+                  Widget();
+                  Widget(const Widget& other) {}
+                  Widget(Widget&& other) {}
+                  ~Widget() {}
+                };
+                }
+                Core::Widget makeWidget() {
+                  Core::Widget temp;
+                  return temp;
+                }
+                int use() {
+                  Core::Widget source;
+                  Core::Widget copied = source;
+                  Core::Widget moved = makeWidget();
+                  return 0;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("rvalue reference sample should parse");
+        let namespace = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Namespace(namespace) if namespace.name == "Core" => Some(namespace),
+                _ => None,
+            })
+            .expect("expected Core namespace declaration");
+        let widget = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "Widget" => {
+                    Some(struct_decl)
+                }
+                _ => None,
+            })
+            .expect("expected Widget class");
+        let methods = widget
+            .nested_declarations
+            .iter()
+            .filter_map(|declaration| match declaration {
+                Declaration::Function(function) => Some(function),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        assert!(methods
+            .iter()
+            .any(|method| method.name == "Widget" && method.signature == "void(Widget&)"));
+        assert!(methods
+            .iter()
+            .any(|method| method.name == "Widget" && method.signature == "void(Widget&&)"));
+
+        let make_widget = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "makeWidget" => Some(function),
+                _ => None,
+            })
+            .expect("expected makeWidget function");
+        assert_eq!(make_widget.return_type, "Core::Widget");
+
+        let use_function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        let [Statement::LocalDecl {
+            name: source_name,
+            type_name: source_type,
+            initializer: None,
+            ..
+        }, Statement::LocalDecl {
+            name: copied_name,
+            type_name: copied_type,
+            initializer:
+                Some(Expression::Identifier {
+                    name: copied_initializer,
+                    ..
+                }),
+            ..
+        }, Statement::LocalDecl {
+            name: moved_name,
+            type_name: moved_type,
+            initializer:
+                Some(Expression::Call {
+                    name: moved_initializer,
+                    ..
+                }),
+            ..
+        }, Statement::Return { .. }] = use_function.body.as_slice()
+        else {
+            panic!("expected source, copied, moved locals followed by return");
+        };
+        assert_eq!(source_name, "source");
+        assert_eq!(source_type, "Core::Widget");
+        assert_eq!(copied_name, "copied");
+        assert_eq!(copied_type, "Core::Widget");
+        assert_eq!(copied_initializer, "source");
+        assert_eq!(moved_name, "moved");
+        assert_eq!(moved_type, "Core::Widget");
+        assert_eq!(moved_initializer, "makeWidget");
+    }
+
+    #[test]
     fn parses_cpp_new_and_delete_expressions() {
         let sample = r#"
                 int *allocate(int n) {
