@@ -102,12 +102,18 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  static int instances;
           |  int get() { return normalize(); }
           |  int stable() const { return value; }
+          |  virtual int render(int scale) { return scale; }
+          |  virtual int declared(int scale);
           |  int normalize() { return pick(value) + identity(1); }
           |  int pick(int seed) { return seed; }
           |  int pick(Widget& other) { return other.value; }
           |  static int identity(int x);
           |  int size() const;
           |  int outside() const;
+          |};
+          |class Fancy : public Widget {
+          |public:
+          |  int render(int scale) override { return scale + 1; }
           |};
           |int normalize() { return 99; }
           |int convert(int value) { return value; }
@@ -118,9 +124,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |Core::Widget::~Widget() {}
           |int Core::Widget::identity(int x) { return instances + x; }
           |int Core::Widget::outside() const { return stable(); }
+          |int Core::Widget::declared(int scale) { return scale; }
           |int use() {
           |  Core::Widget widget(7);
-          |  return Core::make() + Core::Widget::identity(2) + Core::Widget::instances + convert(1) + convert(widget) + widget.get() + widget.stable() + widget.outside();
+          |  Core::Fancy fancy;
+          |  return Core::make() + Core::Widget::identity(2) + Core::Widget::instances + convert(1) + convert(widget) + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5);
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -129,6 +137,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.namespaceBlock.nameExact("Core").fullName.l shouldBe List("Test0.cpp:Core")
       cpg.typeDecl.fullNameExact("Core.Widget").fullName.l shouldBe List("Core.Widget")
       cpg.typeDecl.fullNameExact("Core.Widget").filename.l shouldBe List("Test0.cpp")
+      cpg.typeDecl.fullNameExact("Core.Fancy").fullName.l shouldBe List("Core.Fancy")
       cpg.typeDecl.fullNameExact("Core.Widget").member.name.l shouldBe List("value", "instances")
       cpg.typeDecl.fullNameExact("Core.Widget").member.typeFullName.l shouldBe List("int", "int")
       cpg.typeDecl.fullNameExact("Core.Widget").member.nameExact("instances").modifier.modifierType.l shouldBe
@@ -137,12 +146,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List(
           "Widget",
           "Widget",
+          "declared",
           "get",
           "identity",
           "normalize",
           "outside",
           "pick",
           "pick",
+          "render",
           "size",
           "stable",
           "~Widget"
@@ -172,6 +183,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           fieldAccess.typeFullName shouldBe "int"
           fieldAccess.argument.code.l shouldBe List("this", "value")
       }
+      cpg.method.fullNameExact("Core.Widget.render:int(int)").modifier.modifierType.l shouldBe
+        List(ModifierTypes.VIRTUAL)
+      cpg.method.fullNameExact("Core.Widget.declared:int(int)").modifier.modifierType.l shouldBe
+        List(ModifierTypes.VIRTUAL)
+      cpg.method.fullNameExact("Core.Widget.declared:int(int)").external.l shouldBe Nil
+      cpg.method.fullNameExact("Core.Fancy.render:int(int)").modifier.modifierType.l shouldBe
+        List(ModifierTypes.VIRTUAL)
       cpg.method.fullNameExact("Core.Widget.identity:int(int)").modifier.modifierType.l shouldBe List(ModifierTypes.STATIC)
       cpg.method.fullNameExact("Core.Widget.identity:int(int)").parameter.name.l shouldBe List("x")
       cpg.method.fullNameExact("Core.Widget.identity:int(int)").parameter.index.l shouldBe List(1)
@@ -188,6 +206,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("Core.Widget.stable:int()<const>")
       cpg.method.nameExact("make").fullName.l shouldBe List("Core.make:int()")
       cpg.method.nameExact("use").local.nameExact("widget").typeFullName.l shouldBe List("Core.Widget")
+      cpg.method.nameExact("use").local.nameExact("fancy").typeFullName.l shouldBe List("Core.Fancy")
       cpg.method.fullNameExact("Core.Widget.get:int()").parameter.name.l shouldBe List("this")
       cpg.method.fullNameExact("Core.Widget.get:int()").parameter.index.l shouldBe List(0)
       cpg.method.fullNameExact("Core.Widget.get:int()").parameter.typeFullName.l shouldBe List("Core.Widget*")
@@ -221,6 +240,24 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.nameExact("stable").methodFullName.l shouldBe List("Core.Widget.stable:int()<const>")
       cpg.method.nameExact("use").call.nameExact("outside").methodFullName.l shouldBe
         List("Core.Widget.outside:int()<const>")
+      inside(cpg.method.nameExact("use").call.nameExact("render").codeExact("widget.render(3)").l) { case List(renderCall) =>
+        renderCall.methodFullName shouldBe "Core.Widget.render:int(int)"
+        renderCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+        renderCall.argument.code.l shouldBe List("widget", "3")
+        renderCall.receiver.code.l shouldBe List("widget")
+      }
+      inside(cpg.method.nameExact("use").call.nameExact("render").codeExact("fancy.render(5)").l) { case List(renderCall) =>
+        renderCall.methodFullName shouldBe "Core.Fancy.render:int(int)"
+        renderCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+        renderCall.argument.code.l shouldBe List("fancy", "5")
+        renderCall.receiver.code.l shouldBe List("fancy")
+      }
+      inside(cpg.method.nameExact("use").call.nameExact("declared").l) { case List(declaredCall) =>
+        declaredCall.methodFullName shouldBe "Core.Widget.declared:int(int)"
+        declaredCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+        declaredCall.argument.code.l shouldBe List("widget", "4")
+        declaredCall.receiver.code.l shouldBe List("widget")
+      }
     }
 
     "capture C++ new and delete expressions" in {

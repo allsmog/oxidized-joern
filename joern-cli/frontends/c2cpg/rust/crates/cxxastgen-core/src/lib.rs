@@ -188,6 +188,7 @@ pub struct FunctionDecl {
     pub is_definition: bool,
     pub is_static: bool,
     pub is_const: bool,
+    pub is_virtual: bool,
     pub code: String,
     pub line: usize,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1625,6 +1626,7 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
         .unwrap_or_default();
     let constructor_initializers = parse_constructor_initializers(node, source);
     let is_const = is_const_function_declarator(declarator, source);
+    let is_virtual = is_virtual_function(node, declarator, source);
     Some(FunctionDecl {
         name,
         signature: function_signature(&return_type, &parameters, is_const),
@@ -1632,6 +1634,7 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
         is_definition: true,
         is_static: is_static_function(node, source),
         is_const,
+        is_virtual,
         code: compact_code(node_text(node, source)),
         line: line(node),
         source_path: None,
@@ -1663,6 +1666,7 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
         .map(|params| parse_parameters(params, source))
         .unwrap_or_default();
     let is_const = is_const_function_declarator(declarator, source);
+    let is_virtual = is_virtual_function(node, declarator, source);
     Some(FunctionDecl {
         name,
         signature: function_signature(&return_type, &parameters, is_const),
@@ -1670,6 +1674,7 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
         is_definition: false,
         is_static: is_static_function(node, source),
         is_const,
+        is_virtual,
         code: statement_code(node, source),
         line: line(node),
         source_path: None,
@@ -1701,6 +1706,7 @@ fn parse_constructor_or_destructor(
         .child_by_field_name("body")
         .map(|body| parse_statement_block(body, source, symbols))
         .unwrap_or_default();
+    let is_virtual = is_virtual_function(node, declarator, source);
     Some(FunctionDecl {
         name,
         signature: function_signature(&return_type, &parameters, false),
@@ -1708,6 +1714,7 @@ fn parse_constructor_or_destructor(
         is_definition: is_definition && node.child_by_field_name("body").is_some(),
         is_static: false,
         is_const: false,
+        is_virtual,
         code: if is_definition {
             compact_code(node_text(node, source))
         } else {
@@ -1738,6 +1745,29 @@ fn is_const_function_declarator(declarator: Node, source: &[u8]) -> bool {
                 .split_whitespace()
                 .any(|qualifier| qualifier == "const")
     })
+}
+
+fn is_virtual_function(node: Node, declarator: Node, source: &[u8]) -> bool {
+    has_named_descendant_kind(declarator, "virtual_specifier")
+        || has_named_descendant_kind(node, "pure_virtual_clause")
+        || header_tokens(node, source).any(|token| token == "virtual")
+}
+
+fn has_named_descendant_kind(node: Node, kind: &str) -> bool {
+    named_children(node)
+        .into_iter()
+        .any(|child| child.kind() == kind || has_named_descendant_kind(child, kind))
+}
+
+fn header_tokens<'a>(node: Node, source: &'a [u8]) -> impl Iterator<Item = &'a str> {
+    let end_byte = node
+        .child_by_field_name("body")
+        .map(|body| body.start_byte())
+        .unwrap_or_else(|| node.end_byte());
+    std::str::from_utf8(&source[node.start_byte()..end_byte])
+        .unwrap_or("")
+        .split(|character: char| !character.is_ascii_alphanumeric() && character != '_')
+        .filter(|token| !token.is_empty())
 }
 
 fn parse_constructor_initializers(node: Node, source: &[u8]) -> Vec<ConstructorInitializer> {
@@ -3215,9 +3245,15 @@ mod tests {
                   static int instances;
                   int get() { return value; }
                   int stable() const { return value; }
+                  virtual int render(int scale) { return scale; }
+                  virtual int declared(int scale);
                   static int identity(int x);
                   int size() const;
                   int outside() const;
+                };
+                class Fancy : public Widget {
+                public:
+                  int render(int scale) override { return scale + 1; }
                 };
                 int make() { return 1; }
                 }
@@ -3225,9 +3261,11 @@ mod tests {
                 Core::Widget::~Widget() {}
                 int Core::Widget::identity(int x) { return x; }
                 int Core::Widget::outside() const { return stable(); }
+                int Core::Widget::declared(int scale) { return scale; }
                 int use() {
                   Core::Widget widget(7);
-                  return Core::make() + widget.get() + widget.stable() + widget.outside();
+                  Core::Fancy fancy;
+                  return Core::make() + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5);
                 }
                 "#;
         let declarations = parse_declarations(sample, SourceLanguage::Cpp)
@@ -3272,7 +3310,10 @@ mod tests {
         method_names.sort_unstable();
         assert_eq!(
             method_names,
-            vec!["Widget", "Widget", "get", "identity", "outside", "size", "stable", "~Widget"]
+            vec![
+                "Widget", "Widget", "declared", "get", "identity", "outside", "render", "size",
+                "stable", "~Widget"
+            ]
         );
         assert!(methods.iter().any(|method| method.name == "size"
             && method.signature == "int()<const>"
@@ -3292,12 +3333,37 @@ mod tests {
             && method.signature == "int()<const>"
             && method.is_const
             && method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "render"
+            && method.signature == "int(int)"
+            && method.is_virtual
+            && method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "declared"
+            && method.signature == "int(int)"
+            && method.is_virtual
+            && !method.is_definition));
         assert!(methods.iter().any(|method| method.name == "Widget"
             && method.signature == "void()"
             && !method.is_definition));
         assert!(methods.iter().any(|method| method.name == "Widget"
             && method.signature == "void(int&)"
             && method.is_definition));
+
+        let fancy = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "Fancy" => {
+                    Some(struct_decl)
+                }
+                _ => None,
+            })
+            .expect("expected Fancy class");
+        assert!(fancy.nested_declarations.iter().any(|declaration| matches!(
+            declaration,
+            Declaration::Function(method)
+                if method.name == "render" && method.signature == "int(int)" && method.is_virtual
+        )));
+
         let seeded_constructor = methods
             .iter()
             .find(|method| {
@@ -3393,6 +3459,19 @@ mod tests {
         assert_eq!(outside.signature, "int()<const>");
         assert!(outside.is_const);
 
+        let declared = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "Core::Widget::declared" => {
+                    Some(function)
+                }
+                _ => None,
+            })
+            .expect("expected out-of-class virtual method definition");
+        assert_eq!(declared.signature, "int(int)");
+        assert!(declared.is_definition);
+        assert!(!declared.is_virtual);
+
         let use_function = declarations
             .iter()
             .find_map(|declaration| match declaration {
@@ -3404,14 +3483,19 @@ mod tests {
             type_name,
             initializer: Some(widget_initializer),
             ..
+        }, Statement::LocalDecl {
+            type_name: fancy_type_name,
+            initializer: None,
+            ..
         }, Statement::Return {
             expression: Some(return_expr),
             ..
         }] = use_function.body.as_slice()
         else {
-            panic!("expected local declaration followed by return expression");
+            panic!("expected local declarations followed by return expression");
         };
         assert_eq!(type_name, "Core::Widget");
+        assert_eq!(fancy_type_name, "Core::Fancy");
         let Expression::InitializerList { code, elements, .. } = widget_initializer else {
             panic!("expected constructor argument list initializer");
         };
@@ -3427,7 +3511,10 @@ mod tests {
                 "Core::make",
                 "widget.get",
                 "widget.stable",
-                "widget.outside"
+                "widget.outside",
+                "widget.render",
+                "widget.declared",
+                "fancy.render"
             ]
         );
     }
