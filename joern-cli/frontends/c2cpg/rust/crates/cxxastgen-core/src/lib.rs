@@ -104,6 +104,7 @@ pub struct EnumVariant {
     pub name: String,
     pub value: Option<String>,
     pub code: String,
+    pub line: usize,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -749,6 +750,7 @@ fn parse_enum_variant(node: Node, source: &[u8]) -> Option<EnumVariant> {
         name: node_text(name_node, source).to_string(),
         value,
         code: node_text(node, source).trim().to_string(),
+        line: line(node),
     })
 }
 
@@ -2036,6 +2038,7 @@ mod tests {
             })
             .expect("named enum should be emitted");
         assert_eq!(named_enum.variants[0].name, "MODE_A");
+        assert_eq!(named_enum.variants[0].line, 9);
 
         let enum_typedef = declarations
             .iter()

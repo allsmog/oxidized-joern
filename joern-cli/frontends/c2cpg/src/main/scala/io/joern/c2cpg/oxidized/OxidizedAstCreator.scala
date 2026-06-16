@@ -10,6 +10,7 @@ import io.shiftleft.codepropertygraph.generated.{
   DispatchTypes,
   EdgeTypes,
   EvaluationStrategies,
+  ModifierTypes,
   NodeTypes,
   Operators
 }
@@ -234,9 +235,50 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         alias = aggregateAlias(typeName)
       )
     val variantAsts = enumDecl.variants.map { variant =>
-      Ast(memberNode(origin.copy(code = variant.code), variant.name, variant.code, registerType("int")))
+      Ast(memberNode(OxOrigin(variant.code, Option(variant.line)), variant.name, variant.code, registerType("int")))
     }
-    Ast(typeDecl).withChildren(variantAsts)
+    val staticConstructorAst = enumStaticConstructorAst(enumDecl, typeName)
+    Ast(typeDecl).withChildren(variantAsts ++ staticConstructorAst.toSeq)
+  }
+
+  private def enumStaticConstructorAst(enumDecl: OxEnumDecl, typeFullName: String): Option[Ast] = {
+    val initializedVariants = enumDecl.variants.filter(_.value.isDefined)
+    Option.when(initializedVariants.nonEmpty) {
+      val constructorName = io.joern.x2cpg.Defines.StaticInitMethodName
+      val origin          = OxOrigin(constructorName, Option(enumDecl.line))
+      val method =
+        methodNode(
+          origin,
+          constructorName,
+          constructorName,
+          s"$typeFullName.$constructorName:$typeFullName()",
+          None,
+          filename,
+          Option(NodeTypes.TYPE_DECL),
+          Option(typeFullName)
+        )
+      val intType = registerType("int")
+      val locals = initializedVariants.map { variant =>
+        variant -> localNode(OxOrigin(variant.name, Option(variant.line)), variant.name, variant.name, intType)
+      }
+      val localAsts = locals.map { case (_, local) => Ast(local) }
+      val assignmentAsts = locals.map { case (variant, local) =>
+        val identifier =
+          identifierNode(OxOrigin(variant.name, Option(variant.line)), variant.name, variant.name, intType)
+        val left  = Ast(identifier).withRefEdge(identifier, local)
+        val value = variant.value.getOrElse("")
+        val right = Ast(literalNode(OxOrigin(value, Option(variant.line)), value, literalType(value)))
+        assignmentAst(OxOrigin(variant.code, Option(variant.line)), left, right, variant.code)
+      }
+      val body = blockAst(blockNode(origin, constructorName, Defines.Any), (localAsts ++ assignmentAsts).toList)
+      methodAst(
+        method,
+        Seq.empty,
+        body,
+        methodReturnNode(origin, typeFullName),
+        Seq(NewModifier().modifierType(ModifierTypes.CONSTRUCTOR), NewModifier().modifierType(ModifierTypes.STATIC))
+      )
+    }
   }
 
   private def astForTypedef(typedef: OxTypedefDecl): Ast = {
