@@ -43,6 +43,7 @@ case class OxStructDecl(
   line: Int,
   sourcePath: Option[String],
   visibleLine: Int,
+  baseClasses: Seq[String],
   fields: Seq[OxFieldDecl],
   nestedDeclarations: Seq[OxDeclaration]
 ) extends OxDeclaration
@@ -244,6 +245,7 @@ object OxDocument {
           line = int(value, "line"),
           sourcePath = sourcePath(value),
           visibleLine = visibleLine(value),
+          baseClasses = value.obj.get("baseClasses").map(_.arr.map(_.str).toSeq).getOrElse(Seq.empty),
           fields = value("fields").arr.map(field).toSeq,
           nestedDeclarations =
             value.obj.get("nestedDeclarations").map(_.arr.map(declaration).toSeq).getOrElse(Seq.empty)

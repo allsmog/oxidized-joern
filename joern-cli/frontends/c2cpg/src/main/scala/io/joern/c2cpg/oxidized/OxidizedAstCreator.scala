@@ -298,6 +298,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         structDecl.code,
         NodeTypes.NAMESPACE_BLOCK,
         parentAstFullName,
+        inherits =
+          structDecl.baseClasses.map(baseClass => registerType(resolveBaseTypeFullName(baseClass, parentTypeFullName))),
         alias = aggregateAlias(typeName)
       )
     val fieldAsts = structDecl.fields.map { field =>
@@ -318,6 +320,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .getOrElse(typeName, Seq.empty)
       .flatMap(entry => astsForFunction(entry.function, entry.lexicalOwnerFullName, NodeTypes.TYPE_DECL, typeName))
     Ast(typeDecl).withChildren(fieldAsts ++ nestedAsts ++ outOfClassMethodAsts)
+  }
+
+  private def resolveBaseTypeFullName(baseClass: String, parentTypeFullName: Option[String]): String = {
+    val normalized = normalizeType(baseClass)
+    val ownerCandidates = parentTypeFullName.toSeq.flatMap { parent =>
+      parent.split('.').toSeq.inits.filter(_.nonEmpty).map(parts => s"${parts.mkString(".")}.$normalized")
+    }
+    val candidates = ownerCandidates :+ normalized
+    candidates.find(aggregateTypeFullNames.contains).getOrElse(normalized)
   }
 
   private def astForEnum(enumDecl: OxEnumDecl): Ast = {
