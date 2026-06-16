@@ -2004,7 +2004,8 @@ fn parse_local_declarations(node: Node, source: &[u8]) -> Vec<Statement> {
             let name = declarator_name(declarator, source)?;
             let initializer = declarator
                 .child_by_field_name("value")
-                .map(|value| parse_expression(value, source));
+                .map(|value| parse_expression(value, source))
+                .or_else(|| direct_initializer_from_declarator(declarator, source));
             Some(Statement::LocalDecl {
                 name,
                 type_name: type_name
@@ -2021,6 +2022,47 @@ fn parse_local_declarations(node: Node, source: &[u8]) -> Vec<Statement> {
             })
         })
         .collect()
+}
+
+fn direct_initializer_from_declarator(declarator: Node, source: &[u8]) -> Option<Expression> {
+    let function_declarator = function_declarator_node(declarator)?;
+    let parameters = function_declarator.child_by_field_name("parameters")?;
+    let elements = named_children(parameters);
+    let elements = elements
+        .into_iter()
+        .map(|element| direct_initializer_element(element, source))
+        .collect::<Option<Vec<_>>>()?;
+    Some(Expression::InitializerList {
+        code: node_text(parameters, source).trim().to_string(),
+        line: line(parameters),
+        elements,
+    })
+}
+
+fn direct_initializer_element(node: Node, source: &[u8]) -> Option<Expression> {
+    if node.kind() != "parameter_declaration" {
+        return Some(parse_expression(node, source));
+    }
+    if node.child_by_field_name("declarator").is_some() {
+        return None;
+    }
+    let text = node_text(node, source).trim();
+    if !is_simple_identifier(text) {
+        return None;
+    }
+    Some(Expression::Identifier {
+        name: text.to_string(),
+        code: text.to_string(),
+        line: line(node),
+    })
+}
+
+fn is_simple_identifier(text: &str) -> bool {
+    let mut chars = text.chars();
+    chars
+        .next()
+        .is_some_and(|first| first.is_ascii_alphabetic() || first == '_')
+        && chars.all(|character| character.is_ascii_alphanumeric() || character == '_')
 }
 
 fn statement_from_expression(statement: Node, expr: Node, source: &[u8]) -> Statement {
@@ -3321,6 +3363,7 @@ mod tests {
                 public:
                   Widget();
                   Widget(int& seed) : value(seed) {}
+                  Widget(const Widget& other) : value(other.value) {}
                   ~Widget() { value = 0; }
                   int value;
                   static int instances;
@@ -3354,6 +3397,8 @@ mod tests {
                 int Core::Widget::declared(int scale) { return scale; }
                 int use() {
                   Core::Widget widget(7);
+                  Core::Widget direct(widget);
+                  Core::Widget copied = widget;
                   Core::Fancy fancy;
                   Core::Invoker invoker;
                   widget = fancy;
@@ -3403,6 +3448,7 @@ mod tests {
         assert_eq!(
             method_names,
             vec![
+                "Widget",
                 "Widget",
                 "Widget",
                 "declared",
@@ -3461,6 +3507,9 @@ mod tests {
             && !method.is_definition));
         assert!(methods.iter().any(|method| method.name == "Widget"
             && method.signature == "void(int&)"
+            && method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "Widget"
+            && method.signature == "void(Widget&)"
             && method.is_definition));
 
         let fancy = namespace
@@ -3616,6 +3665,14 @@ mod tests {
             initializer: Some(widget_initializer),
             ..
         }, Statement::LocalDecl {
+            type_name: direct_type_name,
+            initializer: Some(direct_initializer),
+            ..
+        }, Statement::LocalDecl {
+            type_name: copied_type_name,
+            initializer: Some(copied_initializer),
+            ..
+        }, Statement::LocalDecl {
             type_name: fancy_type_name,
             initializer: None,
             ..
@@ -3636,6 +3693,8 @@ mod tests {
             panic!("expected local declarations followed by return expression");
         };
         assert_eq!(type_name, "Core::Widget");
+        assert_eq!(direct_type_name, "Core::Widget");
+        assert_eq!(copied_type_name, "Core::Widget");
         assert_eq!(fancy_type_name, "Core::Fancy");
         assert_eq!(invoker_type_name, "Core::Invoker");
         assert_eq!(operator, "=");
@@ -3649,6 +3708,17 @@ mod tests {
             elements.as_slice(),
             [Expression::Literal { value, .. }] if value == "7"
         ));
+        let Expression::InitializerList { code, elements, .. } = direct_initializer else {
+            panic!("expected direct copy constructor argument list initializer");
+        };
+        assert_eq!(code, "(widget)");
+        assert!(matches!(
+            elements.as_slice(),
+            [Expression::Identifier { name, .. }] if name == "widget"
+        ));
+        assert!(
+            matches!(copied_initializer, Expression::Identifier { name, .. } if name == "widget")
+        );
         let call_names = collect_call_names(return_expr);
         assert_eq!(
             call_names,

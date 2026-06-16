@@ -97,6 +97,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |public:
           |  Widget();
           |  Widget(int& seed) : value(seed) {}
+          |  Widget(const Widget& other) : value(other.value) {}
           |  ~Widget();
           |  int value;
           |  static int instances;
@@ -136,6 +137,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |int Core::Widget::declared(int scale) { return scale; }
           |int use() {
           |  Core::Widget widget(7);
+          |  Core::Widget direct(widget);
+          |  Core::Widget copied = widget;
           |  Core::Fancy fancy;
           |  Core::Invoker invoker;
           |  widget = fancy;
@@ -160,6 +163,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List(
           "Widget",
           "Widget",
+          "Widget",
           "declared",
           "get",
           "identity",
@@ -176,10 +180,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "~Widget"
         )
       cpg.method.nameExact("Widget").internal.fullName.l.sorted shouldBe
-        List("Core.Widget.Widget:void()", "Core.Widget.Widget:void(int&)")
+        List("Core.Widget.Widget:void()", "Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(int&)")
       cpg.method.nameExact("Widget").external.l shouldBe Nil
       cpg.method.nameExact("Widget").isConstructor.fullName.l.sorted shouldBe
-        List("Core.Widget.Widget:void()", "Core.Widget.Widget:void(int&)")
+        List("Core.Widget.Widget:void()", "Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(int&)")
       cpg.method.fullNameExact("Core.Widget.Widget:void(int&)").call.nameExact(Operators.assignment).code.l shouldBe
         List("this->value = seed")
       cpg.method.fullNameExact("Core.Widget.Widget:void(int&)").call.nameExact(Operators.assignment).argument.code.l shouldBe
@@ -253,6 +257,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("Core.Widget.stable:int()<const>")
       cpg.method.nameExact("make").fullName.l shouldBe List("Core.make:int()")
       cpg.method.nameExact("use").local.nameExact("widget").typeFullName.l shouldBe List("Core.Widget")
+      cpg.method.nameExact("use").local.nameExact("direct").typeFullName.l shouldBe List("Core.Widget")
+      cpg.method.nameExact("use").local.nameExact("copied").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("use").local.nameExact("fancy").typeFullName.l shouldBe List("Core.Fancy")
       cpg.method.nameExact("use").local.nameExact("invoker").typeFullName.l shouldBe List("Core.Invoker")
       cpg.method.fullNameExact("Core.Widget.get:int()").parameter.name.l shouldBe List("this")
@@ -271,8 +277,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         fieldAccess.typeFullName shouldBe "int"
         fieldAccess.argument.code.l shouldBe List("this", "value")
       }
-      cpg.method.nameExact("use").call.nameExact("Widget").methodFullName.l shouldBe
+      cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core.Widget.Widget(7)").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(int&)")
+      cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core.Widget.Widget(widget)").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)")
+      cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("direct = Core.Widget.Widget(widget)").argument.code.l shouldBe
+        List("direct", "Core.Widget.Widget(widget)")
+      cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("copied = Core.Widget.Widget(widget)").argument.code.l shouldBe
+        List("copied", "Core.Widget.Widget(widget)")
       cpg.method.nameExact("use").call.codeExact("Core::Widget::identity(2)").methodFullName.l shouldBe
         List("Core.Widget.identity:int(int)")
       inside(cpg.method.nameExact("use").call.nameExact(Operators.fieldAccess).codeExact("Core::Widget::instances").l) {
