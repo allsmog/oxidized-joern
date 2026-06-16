@@ -607,13 +607,20 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
     }
 
     "capture typedef aliases" in {
-      val cpg = code("""
+      val cpg = code(
+        """
           |typedef const char * foo;
           |typedef foo * bar;
-          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+          |using baz = bar;
+          |using qux = const char *;
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       cpg.typeDecl.nameExact("foo").aliasTypeFullName.l shouldBe List("char*")
       cpg.typeDecl.nameExact("bar").aliasTypeFullName.l shouldBe List("char**")
+      cpg.typeDecl.nameExact("baz").aliasTypeFullName.l shouldBe List("char**")
+      cpg.typeDecl.nameExact("qux").aliasTypeFullName.l shouldBe List("char*")
     }
 
     "capture typedef aggregate aliases" in {
