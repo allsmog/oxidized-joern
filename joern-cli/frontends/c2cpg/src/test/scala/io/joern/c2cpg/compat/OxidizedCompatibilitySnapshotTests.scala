@@ -183,6 +183,29 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("first").local.nameExact("p").typeFullName.l shouldBe List("int*")
     }
 
+    "preserve function pointer type names from declarators" in {
+      val cpg = code("""
+          |struct Ops {
+          |  int (*open)(int);
+          |};
+          |typedef int (*Callback)(int);
+          |int (*foo)(int, int) = { 0 };
+          |int (*bar[])(int, int) = { 0 };
+          |int invoke(int (*cb)(int), int value) {
+          |  int (*local)(int) = cb;
+          |  return cb(value);
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.typeDecl.nameExact("Ops").member.nameExact("open").typeFullName.l shouldBe List("int(*)(int)")
+      cpg.typeDecl.nameExact("Callback").aliasTypeFullName.l shouldBe List("int(*)(int)")
+      cpg.local.nameExact("foo").typeFullName.l shouldBe List("int(*)(int,int)")
+      cpg.local.nameExact("bar").typeFullName.l shouldBe List("int(*[])(int,int)")
+      cpg.method.nameExact("invoke").signature.l shouldBe List("int(int(*)(int),int)")
+      cpg.method.nameExact("invoke").parameter.nameExact("cb").typeFullName.l shouldBe List("int(*)(int)")
+      cpg.method.nameExact("invoke").local.nameExact("local").typeFullName.l shouldBe List("int(*)(int)")
+    }
+
     "capture global variables and local shadow references" in {
       val cpg = code("""
           |int global = 1;

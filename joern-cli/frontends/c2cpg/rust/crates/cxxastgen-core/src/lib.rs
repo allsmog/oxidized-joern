@@ -1315,12 +1315,85 @@ fn type_from_declarator(base_type: &str, declarator: Node, source: &[u8]) -> Str
             .child_by_field_name("declarator")
             .map(|child| format!("{}[]", type_from_declarator(base_type, child, source)))
             .unwrap_or_else(|| format!("{base_type}[]")),
-        "init_declarator" | "parenthesized_declarator" | "function_declarator" => declarator
+        "function_declarator" => child_declarator(declarator)
+            .map(|child| {
+                function_pointer_marker(child, source).map_or_else(
+                    || type_from_declarator(base_type, child, source),
+                    |marker| {
+                        format!(
+                            "{}({})({})",
+                            base_type,
+                            marker,
+                            parameter_type_names(declarator, source).join(",")
+                        )
+                    },
+                )
+            })
+            .unwrap_or_else(|| base_type.to_string()),
+        "init_declarator" | "parenthesized_declarator" => declarator
             .child_by_field_name("declarator")
+            .or_else(|| child_declarator(declarator))
             .map(|child| type_from_declarator(base_type, child, source))
             .unwrap_or_else(|| base_type.to_string()),
         _ => base_type.to_string(),
     }
+}
+
+fn function_pointer_marker(declarator: Node, source: &[u8]) -> Option<String> {
+    let marker = declarator_marker(declarator, source)?;
+    marker.contains('*').then_some(marker)
+}
+
+fn declarator_marker(declarator: Node, source: &[u8]) -> Option<String> {
+    match declarator.kind() {
+        "identifier" | "field_identifier" | "type_identifier" => Some(String::new()),
+        "pointer_declarator" | "abstract_pointer_declarator" => Some(format!(
+            "*{}",
+            child_declarator(declarator)
+                .and_then(|child| declarator_marker(child, source))
+                .unwrap_or_default()
+        )),
+        "array_declarator" | "abstract_array_declarator" => Some(format!(
+            "{}[]",
+            child_declarator(declarator)
+                .and_then(|child| declarator_marker(child, source))
+                .unwrap_or_default()
+        )),
+        "parenthesized_declarator" | "init_declarator" => declarator
+            .child_by_field_name("declarator")
+            .or_else(|| child_declarator(declarator))
+            .and_then(|child| declarator_marker(child, source)),
+        _ => named_children(declarator)
+            .into_iter()
+            .find_map(|child| declarator_marker(child, source)),
+    }
+}
+
+fn parameter_type_names(function_declarator: Node, source: &[u8]) -> Vec<String> {
+    function_declarator
+        .child_by_field_name("parameters")
+        .map(|parameters| {
+            parse_parameters(parameters, source)
+                .into_iter()
+                .map(|parameter| parameter.type_name)
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+fn child_declarator(node: Node) -> Option<Node> {
+    node.child_by_field_name("declarator").or_else(|| {
+        named_children(node)
+            .into_iter()
+            .find(|child| is_declarator(*child))
+    })
+}
+
+fn is_declarator(node: Node) -> bool {
+    matches!(
+        node.kind(),
+        "identifier" | "field_identifier" | "type_identifier"
+    ) || node.kind().ends_with("_declarator")
 }
 
 fn split_type_and_name(raw: &str) -> Option<(String, String)> {
@@ -2082,6 +2155,80 @@ mod tests {
         assert_eq!(local_type, "int[]");
         assert_eq!(pointer_name, "p");
         assert_eq!(pointer_type, "int*");
+    }
+
+    #[test]
+    fn parses_function_pointer_declarator_types() {
+        let sample = r#"
+                struct Ops {
+                  int (*open)(int);
+                };
+                typedef int (*Callback)(int);
+                int (*foo)(int, int) = { 0 };
+                int (*bar[])(int, int) = { 0 };
+                int invoke(int (*cb)(int), int value) {
+                  int (*local)(int) = cb;
+                  return cb(value);
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::C)
+            .expect("function pointer sample should parse");
+
+        let ops = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(value) if value.name == "Ops" => Some(value),
+                _ => None,
+            })
+            .expect("struct should be emitted");
+        assert_eq!(ops.fields[0].name, "open");
+        assert_eq!(ops.fields[0].type_name, "int(*)(int)");
+
+        let callback = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Typedef(value) if value.name == "Callback" => Some(value),
+                _ => None,
+            })
+            .expect("typedef should be emitted");
+        assert_eq!(callback.type_name, "int(*)(int)");
+
+        let foo = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::GlobalVariable(value) if value.name == "foo" => Some(value),
+                _ => None,
+            })
+            .expect("foo global should be emitted");
+        assert_eq!(foo.type_name, "int(*)(int,int)");
+
+        let bar = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::GlobalVariable(value) if value.name == "bar" => Some(value),
+                _ => None,
+            })
+            .expect("bar global should be emitted");
+        assert_eq!(bar.type_name, "int(*[])(int,int)");
+
+        let invoke = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(value) if value.name == "invoke" => Some(value),
+                _ => None,
+            })
+            .expect("function should be emitted");
+        assert_eq!(invoke.parameters[0].name, "cb");
+        assert_eq!(invoke.parameters[0].type_name, "int(*)(int)");
+        assert_eq!(invoke.signature, "int(int(*)(int),int)");
+        let [Statement::LocalDecl {
+            name, type_name, ..
+        }, Statement::Return { .. }] = invoke.body.as_slice()
+        else {
+            panic!("expected local and return");
+        };
+        assert_eq!(name, "local");
+        assert_eq!(type_name, "int(*)(int)");
     }
 
     fn statement_line(statement: &Statement) -> usize {
