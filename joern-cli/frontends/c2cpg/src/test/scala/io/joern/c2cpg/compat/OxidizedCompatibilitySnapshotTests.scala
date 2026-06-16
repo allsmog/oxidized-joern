@@ -183,6 +183,25 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("first").local.nameExact("p").typeFullName.l shouldBe List("int*")
     }
 
+    "capture function prototypes as external methods" in {
+      val cpg = code("""
+          |int external(int value);
+          |int external(int value);
+          |int unnamed(int, char *);
+          |int defined(int value);
+          |int defined(int value) {
+          |  return external(value);
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("external").external.signature.l shouldBe List("int(int)")
+      cpg.method.nameExact("defined").internal.signature.l shouldBe List("int(int)")
+      cpg.method.nameExact("unnamed").external.parameter.name.l shouldBe List("param1", "param2")
+      cpg.method.nameExact("unnamed").external.parameter.typeFullName.l shouldBe List("int", "char*")
+      cpg.call.nameExact("external").methodFullName.l shouldBe List("external")
+      cpg.call.nameExact("external").signature.l shouldBe List("int(int)")
+    }
+
     "honor compile database source selection through the Rust backend" in {
       FileUtil.usingTemporaryDirectory("oxidizedCompatibilitySnapshot") { dir =>
         val selected = dir / "selected.c"

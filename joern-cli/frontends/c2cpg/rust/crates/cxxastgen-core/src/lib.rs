@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use serde::Serialize;
+use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
 use tree_sitter::{Node, Parser};
@@ -98,6 +99,7 @@ pub struct FunctionDecl {
     pub name: String,
     pub return_type: String,
     pub signature: String,
+    pub is_definition: bool,
     pub code: String,
     pub line: usize,
     pub parameters: Vec<ParameterDecl>,
@@ -348,6 +350,9 @@ fn parse_declarations(source: &str, language: SourceLanguage) -> Result<Vec<Decl
             }
             "declaration" => {
                 declarations.extend(parse_type_declarations(child, bytes));
+                if let Some(function) = parse_function_declaration(child, bytes) {
+                    declarations.push(Declaration::Function(function));
+                }
             }
             "struct_specifier" => {
                 if let Some(declaration) = parse_struct(child, bytes) {
@@ -367,8 +372,33 @@ fn parse_declarations(source: &str, language: SourceLanguage) -> Result<Vec<Decl
             _ => {}
         }
     }
+    declarations = dedupe_function_declarations(declarations);
     declarations.sort_by_key(declaration_line);
     Ok(declarations)
+}
+
+fn dedupe_function_declarations(declarations: Vec<Declaration>) -> Vec<Declaration> {
+    let definitions = declarations
+        .iter()
+        .filter_map(|declaration| match declaration {
+            Declaration::Function(function) if function.is_definition => {
+                Some((function.name.clone(), function.signature.clone()))
+            }
+            _ => None,
+        })
+        .collect::<HashSet<_>>();
+
+    let mut seen_prototypes = HashSet::new();
+    declarations
+        .into_iter()
+        .filter(|declaration| match declaration {
+            Declaration::Function(function) if !function.is_definition => {
+                let key = (function.name.clone(), function.signature.clone());
+                !definitions.contains(&key) && seen_prototypes.insert(key)
+            }
+            _ => true,
+        })
+        .collect()
 }
 
 fn declaration_line(declaration: &Declaration) -> usize {
@@ -515,6 +545,7 @@ fn parse_function(node: Node, source: &[u8]) -> Option<FunctionDecl> {
         name,
         signature: signature(&return_type, &parameters),
         return_type,
+        is_definition: true,
         code: compact_code(node_text(node, source)),
         line: line(node),
         parameters,
@@ -522,17 +553,58 @@ fn parse_function(node: Node, source: &[u8]) -> Option<FunctionDecl> {
     })
 }
 
+fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl> {
+    let type_node = node.child_by_field_name("type")?;
+    let declarator = node.child_by_field_name("declarator")?;
+    if !is_function_prototype_declarator(declarator) {
+        return None;
+    }
+    let name = declarator_name(declarator, source)?;
+    let return_type = type_from_declarator(
+        &normalize_type(node_text(type_node, source)),
+        declarator,
+        source,
+    );
+    let parameters = declarator
+        .child_by_field_name("parameters")
+        .map(|params| parse_parameters(params, source))
+        .unwrap_or_default();
+    Some(FunctionDecl {
+        name,
+        signature: signature(&return_type, &parameters),
+        return_type,
+        is_definition: false,
+        code: statement_code(node, source),
+        line: line(node),
+        parameters,
+        body: Vec::new(),
+    })
+}
+
+fn is_function_prototype_declarator(node: Node) -> bool {
+    if node.kind() != "function_declarator" {
+        return false;
+    }
+    node.child_by_field_name("declarator")
+        .is_some_and(|declarator| declarator.kind() != "parenthesized_declarator")
+}
+
 fn parse_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
     named_children(node)
         .into_iter()
         .filter(|child| child.kind() == "parameter_declaration")
-        .filter_map(|parameter| {
+        .enumerate()
+        .filter_map(|(index, parameter)| {
             let code = node_text(parameter, source).trim();
             if code == "void" {
                 return None;
             }
             let (type_name, name) = declaration_type_and_name(parameter, source)
-                .or_else(|| split_type_and_name(code))?;
+                .or_else(|| split_type_and_name(code))
+                .or_else(|| {
+                    parameter_type_without_name(parameter, source)
+                        .map(|type_name| (type_name, format!("param{}", index + 1)))
+                })?;
             Some(ParameterDecl {
                 name,
                 type_name,
@@ -541,6 +613,17 @@ fn parse_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
             })
         })
         .collect()
+}
+
+fn parameter_type_without_name(node: Node, source: &[u8]) -> Option<String> {
+    let base_type = node
+        .child_by_field_name("type")
+        .map(|type_node| normalize_type(node_text(type_node, source)))?;
+    Some(
+        node.child_by_field_name("declarator")
+            .map(|declarator| type_from_declarator(&base_type, declarator, source))
+            .unwrap_or_else(|| normalize_type(node_text(node, source))),
+    )
 }
 
 fn parse_statement_block(node: Node, source: &[u8]) -> Vec<Statement> {
@@ -985,11 +1068,11 @@ fn declarator_name(node: Node, source: &[u8]) -> Option<String> {
 
 fn type_from_declarator(base_type: &str, declarator: Node, source: &[u8]) -> String {
     match declarator.kind() {
-        "pointer_declarator" => declarator
+        "pointer_declarator" | "abstract_pointer_declarator" => declarator
             .child_by_field_name("declarator")
             .map(|child| format!("{}*", type_from_declarator(base_type, child, source)))
             .unwrap_or_else(|| format!("{base_type}*")),
-        "array_declarator" => declarator
+        "array_declarator" | "abstract_array_declarator" => declarator
             .child_by_field_name("declarator")
             .map(|child| format!("{}[]", type_from_declarator(base_type, child, source)))
             .unwrap_or_else(|| format!("{base_type}[]")),
@@ -1229,6 +1312,44 @@ mod tests {
             panic!("expected assignment in while body");
         };
         assert_binary_operator(right, "-");
+    }
+
+    #[test]
+    fn parses_function_prototypes_and_deduplicates_forward_declarations() {
+        let sample = r#"
+                int external(int value);
+                int external(int value);
+                int unnamed(int, char *);
+                int defined(int value);
+                int defined(int value) {
+                  return external(value);
+                }
+                "#;
+        let declarations =
+            parse_declarations(sample, SourceLanguage::C).expect("prototype sample should parse");
+        let functions = declarations
+            .iter()
+            .map(|declaration| match declaration {
+                Declaration::Function(function) => function,
+                _ => panic!("expected only function declarations"),
+            })
+            .collect::<Vec<_>>();
+
+        assert_eq!(functions.len(), 3);
+        assert_eq!(functions[0].name, "external");
+        assert!(!functions[0].is_definition);
+        assert_eq!(functions[0].signature, "int(int)");
+        assert!(functions[0].body.is_empty());
+        assert_eq!(functions[1].name, "unnamed");
+        assert!(!functions[1].is_definition);
+        assert_eq!(functions[1].signature, "int(int,char*)");
+        assert_eq!(functions[1].parameters[0].name, "param1");
+        assert_eq!(functions[1].parameters[1].name, "param2");
+        assert_eq!(functions[1].parameters[1].type_name, "char*");
+        assert_eq!(functions[2].name, "defined");
+        assert!(functions[2].is_definition);
+        assert_eq!(functions[2].signature, "int(int)");
+        assert_eq!(functions[2].body.len(), 1);
     }
 
     #[test]

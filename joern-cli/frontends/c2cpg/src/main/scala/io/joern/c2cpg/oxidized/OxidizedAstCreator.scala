@@ -164,6 +164,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val returnType = registerType(normalizeType(function.returnType))
     val method =
       methodNode(origin, function.name, function.name, function.name, Option(function.signature), filename)
+        .isExternal(!function.isDefinition)
     val parameters = function.parameters.zipWithIndex.map { case (parameter, index) =>
       val parameterType = registerType(normalizeType(parameter.typeName))
       val parameterNode =
