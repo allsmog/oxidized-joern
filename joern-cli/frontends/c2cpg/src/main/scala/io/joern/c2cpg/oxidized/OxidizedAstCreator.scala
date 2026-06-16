@@ -50,6 +50,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     base: Option[OxExpression],
     arguments: Seq[OxExpression]
   )
+  private final case class LocalDestructor(name: String, line: Int, entry: FunctionEntry)
   private final case class FunctionCaptureContext(
     function: OxFunctionDecl,
     methodRef: NewMethodRef,
@@ -133,6 +134,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private var functionCaptureContext: Option[FunctionCaptureContext]    = None
   private var currentMethodOwnerTypeFullName: Option[String]            = None
   private var typeAliases: Map[String, String]                          = Map.empty
+  private var functionLocalDestructors: Vector[LocalDestructor]         = Vector.empty
+  private var localScopeDepth: Int                                      = 0
 
   def typesSeen(): Set[String] = usedTypes.toSet
 
@@ -597,14 +600,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousScope          = scope
     val previousCaptureContext = functionCaptureContext
     val previousMethodOwner    = currentMethodOwnerTypeFullName
+    val previousDestructors    = functionLocalDestructors
+    val previousScopeDepth     = localScopeDepth
     val captureContext =
       FunctionCaptureContext(function, methodRefNode(origin, simpleName, fullName, simpleName))
     scope = parameters.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }.toMap
     functionCaptureContext = Option(captureContext)
     currentMethodOwnerTypeFullName = parentTypeOwner
+    functionLocalDestructors = Vector.empty
+    localScopeDepth = 0
     val bodyAsts =
-      try function.constructorInitializers.map(constructorInitializerAst) ++ function.body.flatMap(astsForStatement)
-      finally {
+      try {
+        val statementAsts  = function.body.flatMap(astsForStatement)
+        val destructorAsts = functionLocalDestructors.reverse.map(localDestructorAst)
+        function.constructorInitializers.map(constructorInitializerAst) ++ statementAsts ++ destructorAsts
+      } finally {
+        functionLocalDestructors = previousDestructors
+        localScopeDepth = previousScopeDepth
         currentMethodOwnerTypeFullName = previousMethodOwner
         functionCaptureContext = previousCaptureContext
         scope = previousScope
@@ -651,6 +663,29 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
+  private def registerLocalDestructor(name: String, typeName: String, line: Int): Unit = {
+    if (localScopeDepth == 0) {
+      destructorEntryForType(typeName).foreach { destructor =>
+        functionLocalDestructors = functionLocalDestructors :+ LocalDestructor(name, line, destructor)
+      }
+    }
+  }
+
+  private def localDestructorAst(destructor: LocalDestructor): Ast = {
+    val code = s"${destructor.name}.${destructor.entry.simpleName}()"
+    val callNode_ =
+      callNode(
+        OxOrigin(code, Option(destructor.line)),
+        code,
+        destructor.entry.simpleName,
+        destructor.entry.fullName,
+        DispatchTypes.STATIC_DISPATCH,
+        Option(destructor.entry.function.signature),
+        Option(registerType(Defines.Void))
+      )
+    createCallAst(callNode_, base = Option(identifierAst(destructor.name, destructor.name, destructor.line)))
+  }
+
   private def astsForStatement(statement: OxStatement): Seq[Ast] = {
     statement match {
       case local: OxLocalDecl =>
@@ -659,6 +694,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val localCode = localDeclarationCode(local)
         val localNode = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
         scope = scope.updated(local.name, ScopeEntry(typeName, localNode))
+        registerLocalDestructor(local.name, typeName, local.line)
         val localAst = Ast(localNode)
         local.initializer match {
           case Some(initializer: OxInitializerList) if isConstructorInitializer(typeName, initializer) =>
@@ -819,6 +855,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     selectFunctionEntry(candidates, Some(arguments))
   }
 
+  private def destructorEntryForType(typeName: String): Option[FunctionEntry] = {
+    val normalizedType = normalizeType(resolveAliasType(typeName))
+    val isObjectType = !(
+      normalizedType.endsWith("*") ||
+        normalizedType.endsWith("[]") ||
+        normalizedType.endsWith("&") ||
+        normalizedType.endsWith("&&")
+    )
+    Option
+      .when(isObjectType) {
+        val receiverType   = receiverAggregateTypeName(typeName)
+        val aggregateType  = resolveAggregateTypeFullName(receiverType).getOrElse(receiverType)
+        val destructorName = s"~${aggregateType.split('.').lastOption.getOrElse(aggregateType)}"
+        functionCandidatesByQualifiedName(s"$aggregateType.$destructorName").lastOption
+      }
+      .flatten
+  }
+
   private def statementBlockAst(statements: Seq[OxStatement], code: String, line: Int): Ast = {
     inNestedScope {
       blockAst(blockNode(OxOrigin(code, Option(line)), code, Defines.Any), statements.flatMap(astsForStatement).toList)
@@ -826,9 +880,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def inNestedScope[T](body: => T): T = {
-    val outerScope = scope
+    val outerScope      = scope
+    val outerScopeDepth = localScopeDepth
+    localScopeDepth += 1
     try body
-    finally scope = outerScope
+    finally {
+      localScopeDepth = outerScopeDepth
+      scope = outerScope
+    }
   }
 
   private def expressionAst(expression: OxExpression): Ast = {

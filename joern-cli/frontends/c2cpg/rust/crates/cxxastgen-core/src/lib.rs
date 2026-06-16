@@ -3399,8 +3399,10 @@ mod tests {
                   Core::Widget widget(7);
                   Core::Widget direct(widget);
                   Core::Widget copied = widget;
+                  Core::Widget *ptr = &widget;
                   Core::Fancy fancy;
                   Core::Invoker invoker;
+                  ptr->~Widget();
                   widget = fancy;
                   return Core::make() + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue() + fancy.explicitThis() + (widget + fancy) + widget[2] + invoker(3);
                 }
@@ -3673,12 +3675,19 @@ mod tests {
             initializer: Some(copied_initializer),
             ..
         }, Statement::LocalDecl {
+            type_name: ptr_type_name,
+            initializer: Some(ptr_initializer),
+            ..
+        }, Statement::LocalDecl {
             type_name: fancy_type_name,
             initializer: None,
             ..
         }, Statement::LocalDecl {
             type_name: invoker_type_name,
             initializer: None,
+            ..
+        }, Statement::Expression {
+            expression: ptr_destructor,
             ..
         }, Statement::Assignment {
             operator,
@@ -3695,6 +3704,7 @@ mod tests {
         assert_eq!(type_name, "Core::Widget");
         assert_eq!(direct_type_name, "Core::Widget");
         assert_eq!(copied_type_name, "Core::Widget");
+        assert_eq!(ptr_type_name, "Core::Widget*");
         assert_eq!(fancy_type_name, "Core::Fancy");
         assert_eq!(invoker_type_name, "Core::Invoker");
         assert_eq!(operator, "=");
@@ -3719,6 +3729,18 @@ mod tests {
         assert!(
             matches!(copied_initializer, Expression::Identifier { name, .. } if name == "widget")
         );
+        assert!(matches!(
+            ptr_initializer,
+            Expression::Unary {
+                operator,
+                argument,
+                ..
+            } if operator == "&" && matches!(argument.as_ref(), Expression::Identifier { name, .. } if name == "widget")
+        ));
+        assert!(matches!(
+            ptr_destructor,
+            Expression::Call { name, .. } if name == "ptr->~Widget"
+        ));
         let call_names = collect_call_names(return_expr);
         assert_eq!(
             call_names,

@@ -139,8 +139,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  Core::Widget widget(7);
           |  Core::Widget direct(widget);
           |  Core::Widget copied = widget;
+          |  Core::Widget *ptr = &widget;
           |  Core::Fancy fancy;
           |  Core::Invoker invoker;
+          |  ptr->~Widget();
           |  widget = fancy;
           |  return Core::make() + Core::Widget::identity(2) + Core::Widget::instances + convert(1) + convert(widget) + widget.get() + widget.stable() + widget.outside() + widget.render(3) + widget.declared(4) + fancy.render(5) + fancy.get() + fancy.value + fancy.declared(6) + fancy.inheritedValue() + fancy.explicitThis() + (widget + fancy) + widget[2] + invoker(3);
           |}
@@ -259,6 +261,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").local.nameExact("widget").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("use").local.nameExact("direct").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("use").local.nameExact("copied").typeFullName.l shouldBe List("Core.Widget")
+      cpg.method.nameExact("use").local.nameExact("ptr").typeFullName.l shouldBe List("Core.Widget*")
       cpg.method.nameExact("use").local.nameExact("fancy").typeFullName.l shouldBe List("Core.Fancy")
       cpg.method.nameExact("use").local.nameExact("invoker").typeFullName.l shouldBe List("Core.Invoker")
       cpg.method.fullNameExact("Core.Widget.get:int()").parameter.name.l shouldBe List("this")
@@ -285,6 +288,16 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("direct", "Core.Widget.Widget(widget)")
       cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("copied = Core.Widget.Widget(widget)").argument.code.l shouldBe
         List("copied", "Core.Widget.Widget(widget)")
+      cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("ptr = &widget").argument.code.l shouldBe
+        List("ptr", "&widget")
+      inside(cpg.method.nameExact("use").call.nameExact("~Widget").codeExact("ptr->~Widget()").l) {
+        case List(destructorCall) =>
+          destructorCall.methodFullName shouldBe "Core.Widget.~Widget:void()"
+          destructorCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+          destructorCall.argument.code.l shouldBe List("ptr")
+      }
+      cpg.method.nameExact("use").call.nameExact("~Widget").code.l.sorted shouldBe
+        List("copied.~Widget()", "direct.~Widget()", "ptr->~Widget()", "widget.~Widget()")
       cpg.method.nameExact("use").call.codeExact("Core::Widget::identity(2)").methodFullName.l shouldBe
         List("Core.Widget.identity:int(int)")
       inside(cpg.method.nameExact("use").call.nameExact(Operators.fieldAccess).codeExact("Core::Widget::instances").l) {
