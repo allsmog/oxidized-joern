@@ -21,6 +21,14 @@ case class OxEnumDecl(name: String, code: String, line: Int, variants: Seq[OxEnu
 
 case class OxEnumVariant(name: String, value: Option[String], code: String)
 
+case class OxGlobalVariableDecl(
+  name: String,
+  typeName: String,
+  code: String,
+  line: Int,
+  initializer: Option[OxExpression]
+) extends OxDeclaration
+
 case class OxFunctionDecl(
   name: String,
   returnType: String,
@@ -145,6 +153,14 @@ object OxDocument {
           code = str(value, "code"),
           line = int(value, "line"),
           variants = value("variants").arr.map(enumVariant).toSeq
+        )
+      case "globalVariable" =>
+        OxGlobalVariableDecl(
+          name = str(value, "name"),
+          typeName = str(value, "typeName"),
+          code = str(value, "code"),
+          line = int(value, "line"),
+          initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
         )
       case "function" =>
         OxFunctionDecl(

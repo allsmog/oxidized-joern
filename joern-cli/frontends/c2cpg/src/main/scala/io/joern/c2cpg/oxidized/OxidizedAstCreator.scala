@@ -42,7 +42,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private val macroFullNames: Map[String, String] =
     macrosByName.map { case (name, macroDecl) => name -> macroFullName(macroDecl) }
 
-  private var scope: Map[String, ScopeEntry] = Map.empty
+  private var scope: Map[String, ScopeEntry]                            = Map.empty
+  private var globalLocalEntries: Map[OxGlobalVariableDecl, ScopeEntry] = Map.empty
 
   def typesSeen(): Set[String] = usedTypes.toSet
 
@@ -55,6 +56,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def astForTranslationUnit(): Ast = {
+    initializeGlobalScope()
     val namespaceBlock = globalNamespaceBlock()
     val origin         = OxOrigin(NamespaceTraversal.globalNamespaceName, Option(1))
     val globalTypeDecl =
@@ -100,6 +102,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case macroDecl: OxMacroDecl   => Seq(astForMacro(macroDecl))
       case structDecl: OxStructDecl => Seq(astForStruct(structDecl))
       case enumDecl: OxEnumDecl     => Seq(astForEnum(enumDecl))
+      case global: OxGlobalVariableDecl =>
+        astsForGlobalVariable(global)
       case function: OxFunctionDecl => Seq(astForFunction(function))
     }
   }
@@ -157,6 +161,44 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       Ast(memberNode(origin.copy(code = variant.code), variant.name, variant.code, registerType("int")))
     }
     Ast(typeDecl).withChildren(variantAsts)
+  }
+
+  private def initializeGlobalScope(): Unit = {
+    val globalEntries = document.declarations.collect { case global: OxGlobalVariableDecl =>
+      val localCode = localCodeForGlobal(global)
+      val typeName  = registerType(normalizeType(global.typeName))
+      val node      = localNode(OxOrigin(global).copy(code = localCode), global.name, localCode, typeName)
+      global -> (typeName, node)
+    }
+    globalLocalEntries = globalEntries.map { case (global, (typeName, node)) =>
+      global -> ScopeEntry(typeName, node)
+    }.toMap
+  }
+
+  private def astsForGlobalVariable(global: OxGlobalVariableDecl): Seq[Ast] = {
+    val origin    = OxOrigin(global)
+    val localCode = localCodeForGlobal(global)
+    val scopeEntry = globalLocalEntries.getOrElse(
+      global, {
+        val typeName = registerType(normalizeType(global.typeName))
+        ScopeEntry(typeName, this.localNode(origin.copy(code = localCode), global.name, localCode, typeName))
+      }
+    )
+    val localAst = Ast(scopeEntry.declaration)
+    global.initializer match {
+      case Some(initializer) =>
+        val assignmentCode = s"${global.name} = ${initializer.code}"
+        val left           = identifierAstForScopeEntry(global.name, global.name, global.line, scopeEntry)
+        val assignment =
+          assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
+        Seq(localAst, assignment)
+      case None =>
+        Seq(localAst)
+    }
+  }
+
+  private def localCodeForGlobal(global: OxGlobalVariableDecl): String = {
+    global.initializer.fold(global.code)(_ => global.code.takeWhile(_ != '=').trim)
   }
 
   private def astForFunction(function: OxFunctionDecl): Ast = {
@@ -422,6 +464,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val typeName   = registerType(entry.map(_.typeFullName).getOrElse(Defines.Any))
     val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, typeName)
     entry.fold(Ast(identifier))(scopeEntry => Ast(identifier).withRefEdge(identifier, scopeEntry.declaration))
+  }
+
+  private def identifierAstForScopeEntry(name: String, code: String, line: Int, scopeEntry: ScopeEntry): Ast = {
+    val typeName   = registerType(scopeEntry.typeFullName)
+    val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, typeName)
+    Ast(identifier).withRefEdge(identifier, scopeEntry.declaration)
   }
 
   private def callTargetInfo(name: String): (String, Option[String], String) = {
