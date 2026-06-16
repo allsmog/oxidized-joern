@@ -52,10 +52,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private val usedTypes: mutable.Set[String]           = mutable.Set(Defines.Any, Defines.Void)
   private lazy val functionEntries: Seq[FunctionEntry] = collectFunctionEntries(document.declarations, None)
-  private lazy val functionsByName: Map[String, FunctionEntry] =
-    functionEntries.groupBy(_.simpleName).view.mapValues(_.last).toMap
-  private lazy val functionsByQualifiedName: Map[String, FunctionEntry] =
-    functionEntries.groupBy(_.qualifiedName).view.mapValues(_.last).toMap
+  private lazy val functionsByName: Map[String, Seq[FunctionEntry]] =
+    functionEntries.groupBy(_.simpleName).view.mapValues(_.toSeq).toMap
+  private lazy val functionsByQualifiedName: Map[String, Seq[FunctionEntry]] =
+    functionEntries.groupBy(_.qualifiedName).view.mapValues(_.toSeq).toMap
   private val macroDeclarations: Seq[OxMacroDecl] =
     document.declarations.collect { case macroDecl: OxMacroDecl => macroDecl }
   private val macroUndefs: Seq[OxMacroUndefDecl] =
@@ -695,7 +695,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def constructorAssignmentAst(local: OxLocalDecl, initializer: OxInitializerList, typeName: String): Ast = {
     val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
-    val constructor     = constructorEntry(typeName, initializer.elements.size)
+    val constructor     = constructorEntry(typeName, initializer.elements)
     val signature       = constructor.map(_.function.signature)
     val methodFullName  = constructor.map(_.fullName).getOrElse(s"$typeName.$constructorName")
     val initCode        = initializer.code.trim.stripPrefix("(").stripSuffix(")")
@@ -715,12 +715,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     assignmentAst(OxOrigin(local).copy(code = assignmentCode), left, right, assignmentCode)
   }
 
-  private def constructorEntry(typeName: String, argumentCount: Int): Option[FunctionEntry] = {
+  private def constructorEntry(typeName: String, arguments: Seq[OxExpression]): Option[FunctionEntry] = {
     val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
-    val candidates = functionEntries.filter(entry =>
-      entry.qualifiedName == s"$typeName.$constructorName" && entry.function.parameters.size == argumentCount
-    )
-    candidates.find(_.function.isDefinition).orElse(candidates.headOption)
+    val candidates      = functionEntries.filter(entry => entry.qualifiedName == s"$typeName.$constructorName")
+    selectFunctionEntry(candidates, Some(arguments))
   }
 
   private def statementBlockAst(statements: Seq[OxStatement], code: String, line: Int): Ast = {
@@ -889,7 +887,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def callReturnTypeFullName(call: OxCall): Option[String] = {
-    expressionTypeFullName(call.callee).flatMap(returnTypeFromFunctionPointer)
+    expressionTypeFullName(call.callee)
+      .flatMap(returnTypeFromFunctionPointer)
+      .orElse(functionEntryForCall(call).map(entry => normalizeType(entry.function.returnType)))
   }
 
   private def expressionTypeFullName(expression: OxExpression): Option[String] = {
@@ -900,6 +900,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           .map(entry => resolveAliasType(entry.typeFullName))
           .orElse(implicitFieldTypeFullName(name))
           .orElse(globalScopeByName.get(name).map(entry => resolveAliasType(entry.typeFullName)))
+      case OxLiteral(value, _, _) =>
+        Option(literalType(value))
       case OxFieldAccess(field, _, _, base) =>
         expressionTypeFullName(base).flatMap(typeName => fieldTypeFullName(typeName, field))
       case OxUnary("*", _, _, _, argument) =>
@@ -1027,16 +1029,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def methodRefAst(name: String, code: String, line: Int): Option[Ast] = {
-    currentOwnerFunctionEntry(name).orElse(functionsByName.get(name)).map { functionEntry =>
-      Ast(
-        methodRefNode(
-          OxOrigin(code, Option(line)),
-          code,
-          functionEntry.fullName,
-          registerType(normalizeType(functionEntry.function.returnType))
+    selectFunctionEntry(currentOwnerFunctionCandidates(name), None)
+      .orElse(selectFunctionEntry(functionCandidatesByName(name), None))
+      .map { functionEntry =>
+        Ast(
+          methodRefNode(
+            OxOrigin(code, Option(line)),
+            code,
+            functionEntry.fullName,
+            registerType(normalizeType(functionEntry.function.returnType))
+          )
         )
-      )
-    }
+      }
   }
 
   private def identifierAstForScopeEntry(name: String, code: String, line: Int, scopeEntry: ScopeEntry): Ast = {
@@ -1125,25 +1129,90 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def functionEntryForCall(call: OxCall): Option[FunctionEntry] = {
     call.callee match {
       case OxFieldAccess(field, _, _, base) =>
-        expressionTypeFullName(base)
+        val candidates = expressionTypeFullName(base)
           .map(typeName => normalizeType(resolveAliasType(typeName)).stripSuffix("*").stripSuffix("[]"))
-          .flatMap(receiverType => functionsByQualifiedName.get(s"$receiverType.$field"))
+          .toSeq
+          .flatMap(receiverType => functionCandidatesByQualifiedName(s"$receiverType.$field"))
+        selectFunctionEntry(candidates, Some(call.arguments))
       case _ =>
         val qualifiedName = normalizedQualifiedName(call.name)
         if (qualifiedNameParts(call.name).size > 1) {
-          functionsByQualifiedName.get(qualifiedName).orElse(functionsByName.get(call.name))
+          val candidates = functionCandidatesByQualifiedName(qualifiedName)
+          selectFunctionEntry(
+            if (candidates.nonEmpty) candidates else functionCandidatesByName(call.name),
+            Some(call.arguments)
+          )
         } else {
-          currentOwnerFunctionEntry(call.name)
-            .orElse(functionsByQualifiedName.get(qualifiedName))
-            .orElse(functionsByName.get(call.name))
+          val ownerCandidates     = currentOwnerFunctionCandidates(call.name)
+          val qualifiedCandidates = functionCandidatesByQualifiedName(qualifiedName)
+          val candidates =
+            if (ownerCandidates.nonEmpty) ownerCandidates
+            else if (qualifiedCandidates.nonEmpty) qualifiedCandidates
+            else functionCandidatesByName(call.name)
+          selectFunctionEntry(candidates, Some(call.arguments))
         }
     }
   }
 
-  private def currentOwnerFunctionEntry(name: String): Option[FunctionEntry] = {
-    currentMethodOwnerTypeFullName.flatMap { ownerTypeFullName =>
-      functionsByQualifiedName.get(s"$ownerTypeFullName.$name")
+  private def currentOwnerFunctionCandidates(name: String): Seq[FunctionEntry] = {
+    currentMethodOwnerTypeFullName.toSeq.flatMap { ownerTypeFullName =>
+      functionCandidatesByQualifiedName(s"$ownerTypeFullName.$name")
     }
+  }
+
+  private def functionCandidatesByName(name: String): Seq[FunctionEntry] = {
+    functionsByName.getOrElse(name, Seq.empty)
+  }
+
+  private def functionCandidatesByQualifiedName(name: String): Seq[FunctionEntry] = {
+    functionsByQualifiedName.getOrElse(name, Seq.empty)
+  }
+
+  private def selectFunctionEntry(
+    candidates: Seq[FunctionEntry],
+    arguments: Option[Seq[OxExpression]]
+  ): Option[FunctionEntry] = {
+    arguments match {
+      case Some(arguments) =>
+        val arityMatches  = candidates.filter(_.function.parameters.size == arguments.size)
+        val pool          = if (arityMatches.nonEmpty) arityMatches else candidates
+        val argumentTypes = arguments.map(argument => expressionTypeFullName(argument))
+        pool.zipWithIndex
+          .maxByOption { case (candidate, index) => (overloadScore(candidate, argumentTypes), index) }
+          .map(_._1)
+      case None =>
+        candidates.lastOption
+    }
+  }
+
+  private def overloadScore(candidate: FunctionEntry, argumentTypes: Seq[Option[String]]): Int = {
+    val arityPenalty = math.abs(candidate.function.parameters.size - argumentTypes.size) * -100
+    arityPenalty + candidate.function.parameters
+      .zip(argumentTypes)
+      .map { case (parameter, argumentType) =>
+        argumentType.map(typeCompatibilityScore(parameter.typeName, _)).getOrElse(1)
+      }
+      .sum
+  }
+
+  private def typeCompatibilityScore(parameterTypeName: String, argumentTypeName: String): Int = {
+    val parameterType = overloadComparableType(parameterTypeName)
+    val argumentType  = overloadComparableType(argumentTypeName)
+    if (parameterType == Defines.Any || argumentType == Defines.Any) 1
+    else if (parameterType == argumentType) 4
+    else if (parameterType.endsWith(s".$argumentType") || argumentType.endsWith(s".$parameterType")) 3
+    else 0
+  }
+
+  private def overloadComparableType(typeName: String): String = {
+    val dereferenced =
+      if (typeName.endsWith("&&")) typeName.dropRight(2)
+      else if (typeName.endsWith("&")) typeName.dropRight(1)
+      else typeName
+    resolveAliasType(dereferenced)
+      .split("\\s+")
+      .filterNot(part => Set("const", "volatile", "mutable").contains(part))
+      .mkString(" ")
   }
 
   private def callName(call: OxCall): String = {
