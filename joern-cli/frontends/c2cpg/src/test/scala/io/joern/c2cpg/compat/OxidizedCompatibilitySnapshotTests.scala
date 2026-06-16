@@ -100,10 +100,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  ~Widget();
           |  int value;
           |  int get() { return normalize(); }
-          |  int normalize() { return value; }
+          |  int normalize() { return pick(value); }
+          |  int pick(int seed) { return seed; }
+          |  int pick(Widget& other) { return other.value; }
           |  int size();
           |};
           |int normalize() { return 99; }
+          |int convert(int value) { return value; }
+          |int convert(Widget widget) { return widget.get(); }
           |int make() { return 1; }
           |}
           |Core::Widget::Widget() : value(1) {}
@@ -111,19 +115,19 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |int Core::Widget::outside() { return 2; }
           |int use() {
           |  Core::Widget widget(7);
-          |  return Core::make() + widget.get() + widget.outside();
+          |  return Core::make() + convert(1) + convert(widget) + widget.get() + widget.outside();
           |}
           |""".stripMargin,
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       cpg.namespaceBlock.nameExact("Core").fullName.l shouldBe List("Test0.cpp:Core")
-      cpg.typeDecl.nameExact("Widget").fullName.l shouldBe List("Core.Widget")
-      cpg.typeDecl.nameExact("Widget").filename.l shouldBe List("Test0.cpp")
-      cpg.typeDecl.nameExact("Widget").member.name.l shouldBe List("value")
-      cpg.typeDecl.nameExact("Widget").member.typeFullName.l shouldBe List("int")
-      cpg.typeDecl.nameExact("Widget").method.name.l.sorted shouldBe
-        List("Widget", "Widget", "get", "normalize", "outside", "size", "~Widget")
+      cpg.typeDecl.fullNameExact("Core.Widget").fullName.l shouldBe List("Core.Widget")
+      cpg.typeDecl.fullNameExact("Core.Widget").filename.l shouldBe List("Test0.cpp")
+      cpg.typeDecl.fullNameExact("Core.Widget").member.name.l shouldBe List("value")
+      cpg.typeDecl.fullNameExact("Core.Widget").member.typeFullName.l shouldBe List("int")
+      cpg.typeDecl.fullNameExact("Core.Widget").method.name.l.sorted shouldBe
+        List("Widget", "Widget", "get", "normalize", "outside", "pick", "pick", "size", "~Widget")
       cpg.method.nameExact("Widget").internal.fullName.l.sorted shouldBe
         List("Core.Widget.Widget:void()", "Core.Widget.Widget:void(int&)")
       cpg.method.nameExact("Widget").external.l shouldBe Nil
@@ -144,12 +148,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("outside").internal.fullName.l shouldBe List("Core.Widget.outside:int()")
       cpg.method.nameExact("make").fullName.l shouldBe List("Core.make:int()")
       cpg.method.nameExact("use").local.nameExact("widget").typeFullName.l shouldBe List("Core.Widget")
-      cpg.method.nameExact("get").parameter.name.l shouldBe List("this")
-      cpg.method.nameExact("get").parameter.index.l shouldBe List(0)
-      cpg.method.nameExact("get").parameter.typeFullName.l shouldBe List("Core.Widget*")
-      cpg.method.nameExact("get").ast.isReturn.code.l shouldBe List("return normalize()")
-      cpg.method.nameExact("get").call.nameExact("normalize").methodFullName.l shouldBe
+      cpg.method.fullNameExact("Core.Widget.get:int()").parameter.name.l shouldBe List("this")
+      cpg.method.fullNameExact("Core.Widget.get:int()").parameter.index.l shouldBe List(0)
+      cpg.method.fullNameExact("Core.Widget.get:int()").parameter.typeFullName.l shouldBe List("Core.Widget*")
+      cpg.method.fullNameExact("Core.Widget.get:int()").ast.isReturn.code.l shouldBe List("return normalize()")
+      cpg.method.fullNameExact("Core.Widget.get:int()").call.nameExact("normalize").methodFullName.l shouldBe
         List("Core.Widget.normalize:int()")
+      cpg.method.fullNameExact("Core.Widget.normalize:int()").call.nameExact("pick").methodFullName.l shouldBe
+        List("Core.Widget.pick:int(int)")
       inside(cpg.method.fullNameExact("Core.Widget.normalize:int()").call.nameExact(Operators.indirectFieldAccess).l) {
         case List(fieldAccess) =>
         fieldAccess.code shouldBe "this->value"
@@ -159,6 +165,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.nameExact("Widget").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(int&)")
       cpg.method.nameExact("use").call.nameExact("make").methodFullName.l shouldBe List("Core.make:int()")
+      cpg.method.nameExact("use").call.codeExact("convert(1)").methodFullName.l shouldBe List("Core.convert:int(int)")
+      cpg.method.nameExact("use").call.codeExact("convert(widget)").methodFullName.l shouldBe
+        List("Core.convert:int(Widget)")
       cpg.method.nameExact("use").call.nameExact("get").methodFullName.l shouldBe List("Core.Widget.get:int()")
       cpg.method.nameExact("use").call.nameExact("outside").methodFullName.l shouldBe List("Core.Widget.outside:int()")
     }
