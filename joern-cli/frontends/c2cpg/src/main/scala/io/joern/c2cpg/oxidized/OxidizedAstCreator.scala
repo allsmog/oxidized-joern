@@ -51,6 +51,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     arguments: Seq[OxExpression]
   )
   private final case class LocalDestructor(name: String, line: Int, entry: FunctionEntry)
+  private final case class JumpCleanupTarget(
+    breakPreservedScopeDepth: Option[Int],
+    continuePreservedScopeDepth: Option[Int]
+  )
   private final case class FunctionCaptureContext(
     function: OxFunctionDecl,
     methodRef: NewMethodRef,
@@ -135,6 +139,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private var currentMethodOwnerTypeFullName: Option[String]            = None
   private var typeAliases: Map[String, String]                          = Map.empty
   private var localDestructorScopes: List[Vector[LocalDestructor]]      = Nil
+  private var jumpCleanupTargets: List[JumpCleanupTarget]               = Nil
 
   def typesSeen(): Set[String] = usedTypes.toSet
 
@@ -600,12 +605,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousCaptureContext   = functionCaptureContext
     val previousMethodOwner      = currentMethodOwnerTypeFullName
     val previousDestructorScopes = localDestructorScopes
+    val previousJumpTargets      = jumpCleanupTargets
     val captureContext =
       FunctionCaptureContext(function, methodRefNode(origin, simpleName, fullName, simpleName))
     scope = parameters.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }.toMap
     functionCaptureContext = Option(captureContext)
     currentMethodOwnerTypeFullName = parentTypeOwner
     localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
+    jumpCleanupTargets = Nil
     val bodyAsts =
       try {
         val statementAsts = function.body.flatMap(astsForStatement)
@@ -616,6 +623,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         function.constructorInitializers.map(constructorInitializerAst) ++ statementAsts ++ destructorAsts
       } finally {
         localDestructorScopes = previousDestructorScopes
+        jumpCleanupTargets = previousJumpTargets
         currentMethodOwnerTypeFullName = previousMethodOwner
         functionCaptureContext = previousCaptureContext
         scope = previousScope
@@ -677,6 +685,27 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def activeLocalDestructors: Seq[LocalDestructor] = {
     localDestructorScopes.flatMap(_.reverse)
+  }
+
+  private def localDestructorsExitingTo(preservedScopeDepth: Int): Seq[LocalDestructor] = {
+    val exitedScopeCount = (localDestructorScopes.length - preservedScopeDepth).max(0)
+    localDestructorScopes.take(exitedScopeCount).flatMap(_.reverse)
+  }
+
+  private def breakLocalDestructors: Seq[LocalDestructor] = {
+    jumpCleanupTargets
+      .collectFirst { case JumpCleanupTarget(Some(preservedScopeDepth), _) =>
+        localDestructorsExitingTo(preservedScopeDepth)
+      }
+      .getOrElse(Vector.empty)
+  }
+
+  private def continueLocalDestructors: Seq[LocalDestructor] = {
+    jumpCleanupTargets
+      .collectFirst { case JumpCleanupTarget(_, Some(preservedScopeDepth)) =>
+        localDestructorsExitingTo(preservedScopeDepth)
+      }
+      .getOrElse(Vector.empty)
   }
 
   private def localDestructorAst(destructor: LocalDestructor): Ast = {
@@ -747,7 +776,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           }
         Seq(ifThenElseAst(ifNode, Option(conditionAst), thenAst, elseAst))
       case whileStmt: OxWhile =>
-        val bodyAst = statementBlockAst(whileStmt.body, "while", whileStmt.line)
+        val preservedScopeDepth = localDestructorScopes.length
+        val bodyAst = withJumpCleanupTarget(
+          JumpCleanupTarget(
+            breakPreservedScopeDepth = Option(preservedScopeDepth),
+            continuePreservedScopeDepth = Option(preservedScopeDepth)
+          )
+        ) {
+          statementBlockAst(whileStmt.body, "while", whileStmt.line)
+        }
         Seq(
           whileAst(
             Option(expressionAst(whileStmt.condition)),
@@ -757,10 +794,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           )
         )
       case doWhileStmt: OxDoWhile =>
+        val preservedScopeDepth = localDestructorScopes.length
+        val bodyAst = withJumpCleanupTarget(
+          JumpCleanupTarget(
+            breakPreservedScopeDepth = Option(preservedScopeDepth),
+            continuePreservedScopeDepth = Option(preservedScopeDepth)
+          )
+        ) {
+          statementBlockAst(doWhileStmt.body, "do", doWhileStmt.line)
+        }
         Seq(
           doWhileAst(
             Option(expressionAst(doWhileStmt.condition)),
-            Seq(statementBlockAst(doWhileStmt.body, "do", doWhileStmt.line)),
+            Seq(bodyAst),
             code = Option(doWhileStmt.code),
             lineNumber = Option(doWhileStmt.line)
           )
@@ -770,20 +816,31 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           val forNode               = controlStructureNode(OxOrigin(forStmt), ControlStructureTypes.FOR, forStmt.code)
           val initializerAsts       = forStmt.initializer.flatMap(astsForStatement)
           val (localAsts, initAsts) = initializerAsts.partition(_.root.exists(_.isInstanceOf[NewLocal]))
+          val preservedScopeDepth   = localDestructorScopes.length
+          val bodyAst = withJumpCleanupTarget(
+            JumpCleanupTarget(
+              breakPreservedScopeDepth = Option(preservedScopeDepth),
+              continuePreservedScopeDepth = Option(preservedScopeDepth)
+            )
+          ) {
+            statementBlockAst(forStmt.body, "for", forStmt.line)
+          }
           forAst(
             forNode,
             localAsts,
             initAsts,
             forStmt.condition.toSeq.map(expressionAst),
             forStmt.update.toSeq.map(expressionAst),
-            statementBlockAst(forStmt.body, "for", forStmt.line)
+            bodyAst
           )
         }
         forAst_ +: initializerDestructors.reverse.map(localDestructorAst)
       case breakStmt: OxBreak =>
-        Seq(Ast(controlStructureNode(OxOrigin(breakStmt), ControlStructureTypes.BREAK, breakStmt.code)))
+        breakLocalDestructors.map(localDestructorAst) :+
+          Ast(controlStructureNode(OxOrigin(breakStmt), ControlStructureTypes.BREAK, breakStmt.code))
       case continueStmt: OxContinue =>
-        Seq(Ast(controlStructureNode(OxOrigin(continueStmt), ControlStructureTypes.CONTINUE, continueStmt.code)))
+        continueLocalDestructors.map(localDestructorAst) :+
+          Ast(controlStructureNode(OxOrigin(continueStmt), ControlStructureTypes.CONTINUE, continueStmt.code))
       case gotoStmt: OxGoto =>
         Seq(Ast(controlStructureNode(OxOrigin(gotoStmt), ControlStructureTypes.GOTO, gotoStmt.code)))
       case labelStmt: OxLabel =>
@@ -791,15 +848,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           labelStmt.body.flatMap(astsForStatement)
       case switchStmt: OxSwitch =>
         val switchNode = controlStructureNode(OxOrigin(switchStmt), ControlStructureTypes.SWITCH, switchStmt.code)
-        Seq(
-          switchAst(
-            switchNode,
-            expressionAst(switchStmt.condition),
-            inNestedScope {
-              switchStmt.body.flatMap(astsForStatement)
-            }
-          )
-        )
+        val (switchAst_, switchDestructors) = inNestedScopeCollectingDestructors {
+          val preservedScopeDepth = localDestructorScopes.length
+          val bodyAsts = withJumpCleanupTarget(
+            JumpCleanupTarget(
+              breakPreservedScopeDepth = Option(preservedScopeDepth),
+              continuePreservedScopeDepth = None
+            )
+          ) {
+            switchStmt.body.flatMap(astsForStatement)
+          }
+          switchAst(switchNode, expressionAst(switchStmt.condition), bodyAsts)
+        }
+        switchAst_ +: switchDestructors.reverse.map(localDestructorAst)
       case caseStmt: OxCase =>
         val name = if (caseStmt.value.isDefined) "case" else "default"
         Ast(jumpTargetNode(OxOrigin(caseStmt), name, caseStmt.code)) +:
@@ -901,12 +962,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def statementMayCompleteNormally(statement: OxStatement): Boolean = {
     statement match {
-      case _: OxReturn => false
+      case _: OxReturn | _: OxBreak | _: OxContinue | _: OxGoto => false
       case ifStmt: OxIf =>
         ifStmt.elseBody.isEmpty ||
         statementsMayCompleteNormally(ifStmt.thenBody) ||
         statementsMayCompleteNormally(ifStmt.elseBody)
       case _ => true
+    }
+  }
+
+  private def withJumpCleanupTarget[T](target: JumpCleanupTarget)(body: => T): T = {
+    val outerJumpCleanupTargets = jumpCleanupTargets
+    jumpCleanupTargets = target :: jumpCleanupTargets
+    try body
+    finally {
+      jumpCleanupTargets = outerJumpCleanupTargets
     }
   }
 

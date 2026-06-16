@@ -445,6 +445,95 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .l shouldBe Nil
     }
 
+    "capture C++ jump destructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  ~Widget();
+          |};
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int jumps(int n) {
+          |  Core::Widget outer;
+          |  for (Core::Widget guard(outer); n; n = n - 1) {
+          |    Core::Widget body(outer);
+          |    if (n == 1) {
+          |      Core::Widget skipped(outer);
+          |      continue;
+          |    }
+          |    if (n == 2) {
+          |      Core::Widget stopped(outer);
+          |      break;
+          |    }
+          |  }
+          |  return 0;
+          |}
+          |int switches(int n) {
+          |  Core::Widget outer;
+          |  switch (n) {
+          |  case 1:
+          |    Core::Widget caseLocal(outer);
+          |    break;
+          |  default:
+          |    break;
+          |  }
+          |  return 1;
+          |}
+          |int switchContinue(int n) {
+          |  Core::Widget outer;
+          |  while (n) {
+          |    Core::Widget body(outer);
+          |    switch (n) {
+          |    case 1:
+          |      Core::Widget inSwitch(outer);
+          |      continue;
+          |    default:
+          |      break;
+          |    }
+          |    break;
+          |  }
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("jumps").call.nameExact("~Widget").code.l.sorted shouldBe
+        List(
+          "body.~Widget()",
+          "body.~Widget()",
+          "body.~Widget()",
+          "guard.~Widget()",
+          "outer.~Widget()",
+          "skipped.~Widget()",
+          "stopped.~Widget()"
+        )
+      inside(cpg.method.nameExact("jumps").controlStructure.controlStructureType(ControlStructureTypes.IF).l) {
+        case List(continueIf, breakIf) =>
+          continueIf.ast.isCall.nameExact("~Widget").code.l shouldBe List("skipped.~Widget()", "body.~Widget()")
+          breakIf.ast.isCall.nameExact("~Widget").code.l shouldBe List("stopped.~Widget()", "body.~Widget()")
+      }
+
+      cpg.method.nameExact("switches").call.nameExact("~Widget").code.l shouldBe
+        List("caseLocal.~Widget()", "outer.~Widget()")
+      cpg.method.nameExact("switches").controlStructure.controlStructureType(ControlStructureTypes.SWITCH).ast.isCall
+        .nameExact("~Widget")
+        .code
+        .l shouldBe Nil
+
+      cpg.method.nameExact("switchContinue").call.nameExact("~Widget").code.l.sorted shouldBe
+        List("body.~Widget()", "body.~Widget()", "inSwitch.~Widget()", "inSwitch.~Widget()", "outer.~Widget()")
+      cpg.method.nameExact("switchContinue").controlStructure.controlStructureType(ControlStructureTypes.SWITCH).ast.isCall
+        .nameExact("~Widget")
+        .code
+        .l shouldBe List("inSwitch.~Widget()", "body.~Widget()")
+    }
+
     "capture C++ new and delete expressions" in {
       val cpg = code(
         """
