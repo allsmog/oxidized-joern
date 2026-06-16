@@ -197,12 +197,20 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       val globalLocal = cpg.local.nameExact("global").filter(_.code == "int global").head
+      val readGlobal  = cpg.method.nameExact("read").local.nameExact("global").head
       val shadowLocal = cpg.method.nameExact("shadow").local.nameExact("global").head
       globalLocal.typeFullName shouldBe "int"
+      readGlobal.code shouldBe "<global> global"
+      readGlobal.typeFullName shouldBe "int"
+      readGlobal.closureBindingId shouldBe Some("Test0.c:read:global")
       cpg.local.nameExact("ptr").typeFullName.l shouldBe List("int*")
       cpg.call.nameExact(Operators.assignment).code.l should contain("global = 1")
-      cpg.method.nameExact("read").block.ast.isIdentifier.nameExact("global").refsTo.l shouldBe Nil
+      cpg.method.nameExact("read").block.ast.isIdentifier.nameExact("global").refsTo.l shouldBe List(readGlobal)
       cpg.method.nameExact("shadow").block.ast.isIdentifier.nameExact("global").refsTo.dedup.l shouldBe List(shadowLocal)
+      val List(binding) = globalLocal.closureBinding.l
+      binding.closureBindingId shouldBe readGlobal.closureBindingId
+      binding._localViaRefOut.get shouldBe globalLocal
+      binding._captureIn.l shouldBe cpg.methodRef.methodFullNameExact("read").l
     }
 
     "capture function prototypes as external methods" in {

@@ -33,6 +33,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private implicit val schemaValidation: ValidationMode = config.schemaValidation
 
   private final case class ScopeEntry(typeFullName: String, declaration: NewNode)
+  private final case class CapturedGlobal(scopeEntry: ScopeEntry, binding: NewClosureBinding, globalEntry: ScopeEntry)
+  private final case class FunctionCaptureContext(
+    function: OxFunctionDecl,
+    methodRef: NewMethodRef,
+    capturedGlobals: mutable.LinkedHashMap[String, CapturedGlobal] = mutable.LinkedHashMap.empty
+  )
 
   private val usedTypes: mutable.Set[String] = mutable.Set(Defines.Any, Defines.Void)
   private val functionsByName: Map[String, OxFunctionDecl] =
@@ -44,6 +50,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private var scope: Map[String, ScopeEntry]                            = Map.empty
   private var globalLocalEntries: Map[OxGlobalVariableDecl, ScopeEntry] = Map.empty
+  private var globalScopeByName: Map[String, ScopeEntry]                = Map.empty
+  private var functionCaptureContext: Option[FunctionCaptureContext]    = None
 
   def typesSeen(): Set[String] = usedTypes.toSet
 
@@ -104,7 +112,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case enumDecl: OxEnumDecl     => Seq(astForEnum(enumDecl))
       case global: OxGlobalVariableDecl =>
         astsForGlobalVariable(global)
-      case function: OxFunctionDecl => Seq(astForFunction(function))
+      case function: OxFunctionDecl => astsForFunction(function)
     }
   }
 
@@ -173,6 +181,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     globalLocalEntries = globalEntries.map { case (global, (typeName, node)) =>
       global -> ScopeEntry(typeName, node)
     }.toMap
+    globalScopeByName = globalLocalEntries.map { case (global, scopeEntry) => global.name -> scopeEntry }
   }
 
   private def astsForGlobalVariable(global: OxGlobalVariableDecl): Seq[Ast] = {
@@ -201,7 +210,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     global.initializer.fold(global.code)(_ => global.code.takeWhile(_ != '=').trim)
   }
 
-  private def astForFunction(function: OxFunctionDecl): Ast = {
+  private def astsForFunction(function: OxFunctionDecl): Seq[Ast] = {
     val origin     = OxOrigin(function)
     val returnType = registerType(normalizeType(function.returnType))
     val method =
@@ -222,13 +231,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       parameter.name -> (parameterType, Ast(parameterNode), parameterNode)
     }
 
+    val previousScope          = scope
+    val previousCaptureContext = functionCaptureContext
+    val captureContext =
+      FunctionCaptureContext(function, methodRefNode(origin, function.name, function.name, function.name))
     scope = parameters.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }.toMap
-    val bodyAsts     = function.body.flatMap(astsForStatement)
-    val body         = blockAst(blockNode(origin, function.code, Defines.Any), bodyAsts.toList)
+    functionCaptureContext = Option(captureContext)
+    val bodyAsts =
+      try function.body.flatMap(astsForStatement)
+      finally {
+        functionCaptureContext = previousCaptureContext
+        scope = previousScope
+      }
+    val captureLocalAsts =
+      captureContext.capturedGlobals.values.map(capture => Ast(capture.scopeEntry.declaration)).toSeq
+    val body         = blockAst(blockNode(origin, function.code, Defines.Any), (captureLocalAsts ++ bodyAsts).toList)
     val methodReturn = methodReturnNode(origin, returnType)
     val ast          = methodAst(method, parameters.map(_._2._2), body, methodReturn)
-    scope = Map.empty
-    ast
+
+    captureAstForFunction(captureContext).fold(Seq(ast))(captureAst => Seq(ast, captureAst))
   }
 
   private def astsForStatement(statement: OxStatement): Seq[Ast] = {
@@ -460,16 +481,55 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def identifierAst(name: String, code: String, line: Int): Ast = {
-    val entry      = scope.get(name)
-    val typeName   = registerType(entry.map(_.typeFullName).getOrElse(Defines.Any))
-    val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, typeName)
-    entry.fold(Ast(identifier))(scopeEntry => Ast(identifier).withRefEdge(identifier, scopeEntry.declaration))
+    scope.get(name) match {
+      case Some(entry) =>
+        val typeName   = registerType(entry.typeFullName)
+        val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, typeName)
+        Ast(identifier).withRefEdge(identifier, entry.declaration)
+      case None =>
+        capturedGlobalIdentifierAst(name, code, line).getOrElse {
+          val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, registerType(Defines.Any))
+          Ast(identifier)
+        }
+    }
   }
 
   private def identifierAstForScopeEntry(name: String, code: String, line: Int, scopeEntry: ScopeEntry): Ast = {
     val typeName   = registerType(scopeEntry.typeFullName)
     val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, typeName)
     Ast(identifier).withRefEdge(identifier, scopeEntry.declaration)
+  }
+
+  private def capturedGlobalIdentifierAst(name: String, code: String, line: Int): Option[Ast] = {
+    for {
+      context     <- functionCaptureContext
+      globalEntry <- globalScopeByName.get(name)
+    } yield {
+      val capture = context.capturedGlobals.getOrElseUpdate(
+        name, {
+          val closureBindingId = s"$filename:${context.function.name}:$name"
+          val localCode        = s"${Defines.GlobalTag} $name"
+          val capturedLocal =
+            localNode(OxOrigin(localCode, Option(line)), name, localCode, registerType(globalEntry.typeFullName))
+              .closureBindingId(closureBindingId)
+          val binding = NewClosureBinding()
+            .closureBindingId(closureBindingId)
+            .evaluationStrategy(EvaluationStrategies.BY_REFERENCE)
+          CapturedGlobal(ScopeEntry(globalEntry.typeFullName, capturedLocal), binding, globalEntry)
+        }
+      )
+      identifierAstForScopeEntry(name, code, line, capture.scopeEntry)
+    }
+  }
+
+  private def captureAstForFunction(context: FunctionCaptureContext): Option[Ast] = {
+    Option.when(context.capturedGlobals.nonEmpty) {
+      context.capturedGlobals.values.foldLeft(Ast(context.methodRef)) { case (ast, capture) =>
+        ast
+          .withCaptureEdge(context.methodRef, capture.binding)
+          .merge(Ast(capture.binding).withRefEdge(capture.binding, capture.globalEntry.declaration))
+      }
+    }
   }
 
   private def callTargetInfo(name: String): (String, Option[String], String) = {
