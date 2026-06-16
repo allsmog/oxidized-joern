@@ -333,14 +333,19 @@ pub fn parse_file(path: &Path, options: &ParseOptions) -> Result<CxxAstDocument>
     let metadata = fs::metadata(path)
         .with_context(|| format!("failed to read metadata for '{}'", path.display()))?;
 
-    let source_declarations = parse_declarations(&source, language_for_path(path))?;
     let mut declarations = synthetic_macro_declarations(&options.defines);
-    declarations.extend(included_macro_declarations(
-        path,
-        &source_declarations,
-        options,
+    let mut symbols = HashSet::new();
+    register_macro_symbols(&declarations, &mut symbols);
+    let mut visited_headers = HashSet::new();
+    declarations.extend(parse_declarations_with_context(
+        &source,
+        language_for_path(path),
+        Some(path),
+        Some(options),
+        &mut symbols,
+        &mut visited_headers,
     )?);
-    declarations.extend(source_declarations);
+    declarations = dedupe_function_declarations(declarations);
     declarations.sort_by_key(declaration_sort_line);
 
     Ok(CxxAstDocument {
@@ -390,7 +395,31 @@ fn normalize_path(path: &Path) -> String {
     path.to_string_lossy().replace('\\', "/")
 }
 
+#[cfg(test)]
 fn parse_declarations(source: &str, language: SourceLanguage) -> Result<Vec<Declaration>> {
+    let mut symbols = HashSet::new();
+    let mut visited_headers = HashSet::new();
+    let mut declarations = parse_declarations_with_context(
+        source,
+        language,
+        None,
+        None,
+        &mut symbols,
+        &mut visited_headers,
+    )?;
+    declarations = dedupe_function_declarations(declarations);
+    declarations.sort_by_key(declaration_line);
+    Ok(declarations)
+}
+
+fn parse_declarations_with_context(
+    source: &str,
+    language: SourceLanguage,
+    source_path: Option<&Path>,
+    options: Option<&ParseOptions>,
+    symbols: &mut HashSet<String>,
+    visited_headers: &mut HashSet<PathBuf>,
+) -> Result<Vec<Declaration>> {
     let mut parser = Parser::new();
     let language = match language {
         SourceLanguage::Cpp => tree_sitter_cpp::LANGUAGE.into(),
@@ -404,59 +433,121 @@ fn parse_declarations(source: &str, language: SourceLanguage) -> Result<Vec<Decl
         .context("tree-sitter returned no parse tree")?;
 
     let bytes = source.as_bytes();
+    parse_declaration_children(
+        tree.root_node(),
+        bytes,
+        source_path,
+        options,
+        symbols,
+        visited_headers,
+    )
+}
+
+fn parse_declaration_children(
+    node: Node,
+    source: &[u8],
+    source_path: Option<&Path>,
+    options: Option<&ParseOptions>,
+    symbols: &mut HashSet<String>,
+    visited_headers: &mut HashSet<PathBuf>,
+) -> Result<Vec<Declaration>> {
     let mut declarations = Vec::new();
-    for child in named_children(tree.root_node()) {
-        match child.kind() {
-            "preproc_include" => {
-                if let Some(declaration) = parse_include(child, bytes) {
-                    declarations.push(Declaration::Include(declaration));
-                }
-            }
-            "preproc_def" | "preproc_function_def" => {
-                if let Some(declaration) = parse_macro(child, bytes) {
-                    declarations.push(Declaration::Macro(declaration));
-                }
-            }
-            "declaration" => {
-                declarations.extend(parse_type_declarations(child, bytes));
-                if let Some(function) = parse_function_declaration(child, bytes) {
-                    declarations.push(Declaration::Function(function));
-                }
-                declarations.extend(
-                    parse_global_variable_declarations(child, bytes)
-                        .into_iter()
-                        .map(Declaration::GlobalVariable),
-                );
-            }
-            "type_definition" => {
-                declarations.extend(
-                    parse_typedef_declarations(child, bytes)
-                        .into_iter()
-                        .map(Declaration::Typedef),
-                );
-                declarations.extend(parse_anonymous_typedef_aggregate_declarations(child, bytes));
-                declarations.extend(parse_type_declarations(child, bytes));
-            }
-            "struct_specifier" | "union_specifier" => {
-                if let Some(declaration) = parse_struct(child, bytes) {
-                    declarations.push(Declaration::Struct(declaration));
-                }
-            }
-            "enum_specifier" => {
-                if let Some(declaration) = parse_enum(child, bytes) {
-                    declarations.push(Declaration::Enum(declaration));
-                }
-            }
-            "function_definition" => {
-                if let Some(function) = parse_function(child, bytes) {
-                    declarations.push(Declaration::Function(function));
-                }
-            }
-            _ => {}
-        }
+    for child in named_children(node) {
+        declarations.extend(parse_declaration_node(
+            child,
+            source,
+            source_path,
+            options,
+            symbols,
+            visited_headers,
+        )?);
     }
-    declarations = dedupe_function_declarations(declarations);
-    declarations.sort_by_key(declaration_line);
+    Ok(declarations)
+}
+
+fn parse_declaration_node(
+    node: Node,
+    source: &[u8],
+    source_path: Option<&Path>,
+    options: Option<&ParseOptions>,
+    symbols: &mut HashSet<String>,
+    visited_headers: &mut HashSet<PathBuf>,
+) -> Result<Vec<Declaration>> {
+    let mut declarations = Vec::new();
+    match node.kind() {
+        "preproc_include" => {
+            if let Some(declaration) = parse_include(node, source) {
+                if let (Some(source_path), Some(options)) = (source_path, options) {
+                    if let Some(path) = resolve_include(source_path, &declaration.name, options) {
+                        declarations.extend(
+                            header_macro_declarations(
+                                &path,
+                                declaration.line,
+                                options,
+                                symbols,
+                                visited_headers,
+                            )?
+                            .into_iter()
+                            .map(Declaration::Macro),
+                        );
+                    }
+                }
+                declarations.push(Declaration::Include(declaration));
+            }
+        }
+        "preproc_def" | "preproc_function_def" => {
+            if let Some(declaration) = parse_macro(node, source) {
+                symbols.insert(declaration.name.clone());
+                declarations.push(Declaration::Macro(declaration));
+            }
+        }
+        "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef" | "preproc_else" => {
+            declarations.extend(parse_preproc_declarations(
+                node,
+                source,
+                source_path,
+                options,
+                symbols,
+                visited_headers,
+            )?);
+        }
+        "declaration" => {
+            declarations.extend(parse_type_declarations(node, source));
+            if let Some(function) = parse_function_declaration(node, source) {
+                declarations.push(Declaration::Function(function));
+            }
+            declarations.extend(
+                parse_global_variable_declarations(node, source)
+                    .into_iter()
+                    .map(Declaration::GlobalVariable),
+            );
+        }
+        "type_definition" => {
+            declarations.extend(
+                parse_typedef_declarations(node, source)
+                    .into_iter()
+                    .map(Declaration::Typedef),
+            );
+            declarations.extend(parse_anonymous_typedef_aggregate_declarations(node, source));
+            declarations.extend(parse_type_declarations(node, source));
+        }
+        "struct_specifier" | "union_specifier" => {
+            if let Some(declaration) = parse_struct(node, source) {
+                declarations.push(Declaration::Struct(declaration));
+            }
+        }
+        "enum_specifier" => {
+            if let Some(declaration) = parse_enum(node, source) {
+                declarations.push(Declaration::Enum(declaration));
+            }
+        }
+        "function_definition" => {
+            if let Some(function) = parse_function(node, source, symbols) {
+                declarations.push(Declaration::Function(function));
+            }
+        }
+        _ => {}
+    }
     Ok(declarations)
 }
 
@@ -524,68 +615,229 @@ fn synthetic_macro_declarations(defines: &[String]) -> Vec<Declaration> {
         .collect()
 }
 
-fn included_macro_declarations(
-    source_path: &Path,
-    declarations: &[Declaration],
-    options: &ParseOptions,
-) -> Result<Vec<Declaration>> {
-    let mut visited = HashSet::new();
-    let mut macros = Vec::new();
-    for include in declarations
-        .iter()
-        .filter_map(|declaration| match declaration {
-            Declaration::Include(include) => Some(include),
-            _ => None,
-        })
-    {
-        if let Some(path) = resolve_include(source_path, &include.name, options) {
-            macros.extend(header_macro_declarations(
-                &path,
-                include.line,
-                options,
-                &mut visited,
-            )?);
+fn register_macro_symbols(declarations: &[Declaration], symbols: &mut HashSet<String>) {
+    for declaration in declarations {
+        if let Declaration::Macro(macro_decl) = declaration {
+            symbols.insert(macro_decl.name.clone());
         }
     }
-    Ok(macros.into_iter().map(Declaration::Macro).collect())
 }
 
 fn header_macro_declarations(
     header_path: &Path,
     visible_line: usize,
     options: &ParseOptions,
-    visited: &mut HashSet<PathBuf>,
+    symbols: &mut HashSet<String>,
+    visited_headers: &mut HashSet<PathBuf>,
 ) -> Result<Vec<MacroDecl>> {
     let normalized_header = normalized_absolute_path(header_path);
-    if !visited.insert(normalized_header.clone()) {
+    if !visited_headers.insert(normalized_header.clone()) {
         return Ok(Vec::new());
     }
 
     let source = fs::read_to_string(&normalized_header)
         .with_context(|| format!("failed to read included header '{}'", header_path.display()))?;
-    let declarations = parse_declarations(&source, language_for_path(&normalized_header))?;
+    let declarations = parse_declarations_with_context(
+        &source,
+        language_for_path(&normalized_header),
+        Some(&normalized_header),
+        Some(options),
+        symbols,
+        visited_headers,
+    )?;
     let mut macros = Vec::new();
     for declaration in declarations {
-        match declaration {
-            Declaration::Include(include) => {
-                if let Some(path) = resolve_include(&normalized_header, &include.name, options) {
-                    macros.extend(header_macro_declarations(
-                        &path,
-                        visible_line,
-                        options,
-                        visited,
-                    )?);
-                }
-            }
-            Declaration::Macro(mut macro_decl) => {
+        if let Declaration::Macro(mut macro_decl) = declaration {
+            if macro_decl.source_path.is_none() {
                 macro_decl.source_path = Some(normalize_path(&normalized_header));
-                macro_decl.visible_line = Some(visible_line);
-                macros.push(macro_decl);
             }
-            _ => {}
+            macro_decl.visible_line = Some(visible_line);
+            symbols.insert(macro_decl.name.clone());
+            macros.push(macro_decl);
         }
     }
     Ok(macros)
+}
+
+fn parse_preproc_declarations(
+    node: Node,
+    source: &[u8],
+    source_path: Option<&Path>,
+    options: Option<&ParseOptions>,
+    symbols: &mut HashSet<String>,
+    visited_headers: &mut HashSet<PathBuf>,
+) -> Result<Vec<Declaration>> {
+    if preproc_branch_is_active(node, source, symbols) {
+        parse_selected_preproc_declaration_children(
+            node,
+            source,
+            source_path,
+            options,
+            symbols,
+            visited_headers,
+        )
+    } else if let Some(alternative) = node.child_by_field_name("alternative") {
+        parse_preproc_declarations(
+            alternative,
+            source,
+            source_path,
+            options,
+            symbols,
+            visited_headers,
+        )
+    } else {
+        Ok(Vec::new())
+    }
+}
+
+fn parse_selected_preproc_declaration_children(
+    node: Node,
+    source: &[u8],
+    source_path: Option<&Path>,
+    options: Option<&ParseOptions>,
+    symbols: &mut HashSet<String>,
+    visited_headers: &mut HashSet<PathBuf>,
+) -> Result<Vec<Declaration>> {
+    let mut declarations = Vec::new();
+    for child in preproc_body_children(node) {
+        declarations.extend(parse_declaration_node(
+            child,
+            source,
+            source_path,
+            options,
+            symbols,
+            visited_headers,
+        )?);
+    }
+    Ok(declarations)
+}
+
+fn preproc_body_children(node: Node) -> Vec<Node> {
+    let condition = node
+        .child_by_field_name("condition")
+        .or_else(|| node.child_by_field_name("name"));
+    let alternative = node.child_by_field_name("alternative");
+    named_children(node)
+        .into_iter()
+        .filter(|child| Some(*child) != condition && Some(*child) != alternative)
+        .collect()
+}
+
+fn preproc_branch_is_active(node: Node, source: &[u8], symbols: &HashSet<String>) -> bool {
+    match node.kind() {
+        "preproc_else" => true,
+        "preproc_ifdef" | "preproc_elifdef" => {
+            let Some(name) = node.child_by_field_name("name") else {
+                return false;
+            };
+            let is_defined = symbols.contains(node_text(name, source).trim());
+            if preproc_directive(node, source).contains("ifndef") {
+                !is_defined
+            } else {
+                is_defined
+            }
+        }
+        "preproc_if" | "preproc_elif" => node
+            .child_by_field_name("condition")
+            .map(|condition| eval_preproc_condition(condition, source, symbols) != 0)
+            .unwrap_or(false),
+        _ => false,
+    }
+}
+
+fn preproc_directive(node: Node, source: &[u8]) -> String {
+    node_text(node, source)
+        .lines()
+        .next()
+        .unwrap_or_default()
+        .split_whitespace()
+        .next()
+        .unwrap_or_default()
+        .to_string()
+}
+
+fn eval_preproc_condition(node: Node, source: &[u8], symbols: &HashSet<String>) -> i64 {
+    match node.kind() {
+        "parenthesized_expression" => named_children(node)
+            .into_iter()
+            .next()
+            .map(|child| eval_preproc_condition(child, source, symbols))
+            .unwrap_or(0),
+        "number_literal" => integer_literal_value(node_text(node, source)).unwrap_or(0),
+        "identifier" => {
+            if symbols.contains(node_text(node, source).trim()) {
+                1
+            } else {
+                0
+            }
+        }
+        "preproc_defined" => named_children(node)
+            .into_iter()
+            .next()
+            .map(|name| symbols.contains(node_text(name, source).trim()) as i64)
+            .unwrap_or(0),
+        "unary_expression" => eval_unary_preproc_condition(node, source, symbols),
+        "binary_expression" => eval_binary_preproc_condition(node, source, symbols),
+        _ => 0,
+    }
+}
+
+fn eval_unary_preproc_condition(node: Node, source: &[u8], symbols: &HashSet<String>) -> i64 {
+    let operator = operator_text(node, source).unwrap_or_default();
+    let value = node
+        .child_by_field_name("argument")
+        .or_else(|| named_children(node).into_iter().next())
+        .map(|argument| eval_preproc_condition(argument, source, symbols))
+        .unwrap_or(0);
+    match operator {
+        "!" | "not" => (value == 0) as i64,
+        "-" => -value,
+        "+" => value,
+        _ => value,
+    }
+}
+
+fn eval_binary_preproc_condition(node: Node, source: &[u8], symbols: &HashSet<String>) -> i64 {
+    let left = node
+        .child_by_field_name("left")
+        .or_else(|| named_children(node).into_iter().next())
+        .map(|left| eval_preproc_condition(left, source, symbols))
+        .unwrap_or(0);
+    let right = node
+        .child_by_field_name("right")
+        .or_else(|| named_children(node).into_iter().nth(1))
+        .map(|right| eval_preproc_condition(right, source, symbols))
+        .unwrap_or(0);
+    match operator_text(node, source).unwrap_or_default() {
+        "&&" | "and" => (left != 0 && right != 0) as i64,
+        "||" | "or" => (left != 0 || right != 0) as i64,
+        "==" => (left == right) as i64,
+        "!=" => (left != right) as i64,
+        ">" => (left > right) as i64,
+        ">=" => (left >= right) as i64,
+        "<" => (left < right) as i64,
+        "<=" => (left <= right) as i64,
+        "+" => left + right,
+        "-" => left - right,
+        "*" => left * right,
+        "/" if right != 0 => left / right,
+        "%" if right != 0 => left % right,
+        _ => 0,
+    }
+}
+
+fn integer_literal_value(value: &str) -> Option<i64> {
+    let trimmed = value
+        .trim()
+        .trim_end_matches(|ch: char| matches!(ch, 'u' | 'U' | 'l' | 'L'));
+    if let Some(hex) = trimmed
+        .strip_prefix("0x")
+        .or_else(|| trimmed.strip_prefix("0X"))
+    {
+        i64::from_str_radix(hex, 16).ok()
+    } else {
+        trimmed.parse::<i64>().ok()
+    }
 }
 
 fn resolve_include(
@@ -945,7 +1197,11 @@ fn parse_global_variable_declarations(node: Node, source: &[u8]) -> Vec<GlobalVa
         .collect()
 }
 
-fn parse_function(node: Node, source: &[u8]) -> Option<FunctionDecl> {
+fn parse_function(
+    node: Node,
+    source: &[u8],
+    symbols: &mut HashSet<String>,
+) -> Option<FunctionDecl> {
     let type_node = node.child_by_field_name("type")?;
     let declarator = node.child_by_field_name("declarator")?;
     let body = node.child_by_field_name("body")?;
@@ -967,7 +1223,7 @@ fn parse_function(node: Node, source: &[u8]) -> Option<FunctionDecl> {
         code: compact_code(node_text(node, source)),
         line: line(node),
         parameters,
-        body: parse_statement_block(body, source),
+        body: parse_statement_block(body, source, symbols),
     })
 }
 
@@ -1044,16 +1300,20 @@ fn parameter_type_without_name(node: Node, source: &[u8]) -> Option<String> {
     )
 }
 
-fn parse_statement_block(node: Node, source: &[u8]) -> Vec<Statement> {
+fn parse_statement_block(
+    node: Node,
+    source: &[u8],
+    symbols: &mut HashSet<String>,
+) -> Vec<Statement> {
     named_children(node)
         .into_iter()
-        .flat_map(|child| parse_statement(child, source))
+        .flat_map(|child| parse_statement(child, source, symbols))
         .collect()
 }
 
-fn parse_statement(node: Node, source: &[u8]) -> Vec<Statement> {
+fn parse_statement(node: Node, source: &[u8], symbols: &mut HashSet<String>) -> Vec<Statement> {
     match node.kind() {
-        "compound_statement" => parse_statement_block(node, source),
+        "compound_statement" => parse_statement_block(node, source, symbols),
         "declaration" => parse_local_declarations(node, source),
         "return_statement" => vec![Statement::Return {
             code: statement_code(node, source),
@@ -1069,17 +1329,40 @@ fn parse_statement(node: Node, source: &[u8]) -> Vec<Statement> {
             .map(|expr| statement_from_expression(node, expr, source))
             .into_iter()
             .collect(),
-        "if_statement" => parse_if_statement(node, source).into_iter().collect(),
+        "if_statement" => parse_if_statement(node, source, symbols)
+            .into_iter()
+            .collect(),
         "else_clause" => named_children(node)
             .into_iter()
-            .flat_map(|child| parse_statement(child, source))
+            .flat_map(|child| parse_statement(child, source, symbols))
             .collect(),
-        "while_statement" => parse_while_statement(node, source).into_iter().collect(),
-        "do_statement" => parse_do_statement(node, source).into_iter().collect(),
-        "for_statement" => parse_for_statement(node, source).into_iter().collect(),
-        "switch_statement" => parse_switch_statement(node, source).into_iter().collect(),
-        "case_statement" => parse_case_statement(node, source).into_iter().collect(),
-        "labeled_statement" => parse_labeled_statement(node, source).into_iter().collect(),
+        "while_statement" => parse_while_statement(node, source, symbols)
+            .into_iter()
+            .collect(),
+        "do_statement" => parse_do_statement(node, source, symbols)
+            .into_iter()
+            .collect(),
+        "for_statement" => parse_for_statement(node, source, symbols)
+            .into_iter()
+            .collect(),
+        "switch_statement" => parse_switch_statement(node, source, symbols)
+            .into_iter()
+            .collect(),
+        "case_statement" => parse_case_statement(node, source, symbols)
+            .into_iter()
+            .collect(),
+        "labeled_statement" => parse_labeled_statement(node, source, symbols)
+            .into_iter()
+            .collect(),
+        "preproc_def" | "preproc_function_def" => {
+            if let Some(macro_decl) = parse_macro(node, source) {
+                symbols.insert(macro_decl.name);
+            }
+            Vec::new()
+        }
+        "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef" | "preproc_else" => {
+            parse_preproc_statements(node, source, symbols)
+        }
         "goto_statement" => vec![Statement::Goto {
             code: statement_code(node, source),
             line: line(node),
@@ -1155,49 +1438,82 @@ fn statement_from_expression(statement: Node, expr: Node, source: &[u8]) -> Stat
     }
 }
 
-fn parse_if_statement(node: Node, source: &[u8]) -> Option<Statement> {
+fn parse_preproc_statements(
+    node: Node,
+    source: &[u8],
+    symbols: &mut HashSet<String>,
+) -> Vec<Statement> {
+    if preproc_branch_is_active(node, source, symbols) {
+        preproc_body_children(node)
+            .into_iter()
+            .flat_map(|child| parse_statement(child, source, symbols))
+            .collect()
+    } else if let Some(alternative) = node.child_by_field_name("alternative") {
+        parse_preproc_statements(alternative, source, symbols)
+    } else {
+        Vec::new()
+    }
+}
+
+fn parse_if_statement(
+    node: Node,
+    source: &[u8],
+    symbols: &mut HashSet<String>,
+) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let consequence = node.child_by_field_name("consequence")?;
     let else_body = node
         .child_by_field_name("alternative")
-        .map(|alternative| parse_statement(alternative, source))
+        .map(|alternative| parse_statement(alternative, source, symbols))
         .unwrap_or_default();
     Some(Statement::If {
         code: statement_code(node, source),
         line: line(node),
         condition: parse_expression(condition, source),
-        then_body: parse_statement(consequence, source),
+        then_body: parse_statement(consequence, source, symbols),
         else_body,
     })
 }
 
-fn parse_while_statement(node: Node, source: &[u8]) -> Option<Statement> {
+fn parse_while_statement(
+    node: Node,
+    source: &[u8],
+    symbols: &mut HashSet<String>,
+) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let body = node.child_by_field_name("body")?;
     Some(Statement::While {
         code: statement_code(node, source),
         line: line(node),
         condition: parse_expression(condition, source),
-        body: parse_statement(body, source),
+        body: parse_statement(body, source, symbols),
     })
 }
 
-fn parse_do_statement(node: Node, source: &[u8]) -> Option<Statement> {
+fn parse_do_statement(
+    node: Node,
+    source: &[u8],
+    symbols: &mut HashSet<String>,
+) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let body = node.child_by_field_name("body")?;
     Some(Statement::DoWhile {
         code: statement_code(node, source),
         line: line(node),
         condition: parse_expression(condition, source),
-        body: parse_statement(body, source),
+        body: parse_statement(body, source, symbols),
     })
 }
 
-fn parse_for_statement(node: Node, source: &[u8]) -> Option<Statement> {
+fn parse_for_statement(
+    node: Node,
+    source: &[u8],
+    symbols: &mut HashSet<String>,
+) -> Option<Statement> {
     let body = node.child_by_field_name("body")?;
     let initializer = node
         .child_by_field_name("initializer")
-        .map(|initializer| parse_for_initializer(initializer, source))
+        .map(|initializer| parse_for_initializer(initializer, source, symbols))
         .unwrap_or_default();
     Some(Statement::For {
         code: statement_code(node, source),
@@ -1209,13 +1525,20 @@ fn parse_for_statement(node: Node, source: &[u8]) -> Option<Statement> {
         update: node
             .child_by_field_name("update")
             .map(|update| parse_expression(update, source)),
-        body: parse_statement(body, source),
+        body: parse_statement(body, source, symbols),
     })
 }
 
-fn parse_for_initializer(node: Node, source: &[u8]) -> Vec<Statement> {
+fn parse_for_initializer(
+    node: Node,
+    source: &[u8],
+    symbols: &mut HashSet<String>,
+) -> Vec<Statement> {
     match node.kind() {
         "declaration" => parse_local_declarations(node, source),
+        "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef" | "preproc_else" => {
+            parse_preproc_statements(node, source, symbols)
+        }
         "expression_statement" => named_children(node)
             .into_iter()
             .next()
@@ -1226,18 +1549,26 @@ fn parse_for_initializer(node: Node, source: &[u8]) -> Vec<Statement> {
     }
 }
 
-fn parse_switch_statement(node: Node, source: &[u8]) -> Option<Statement> {
+fn parse_switch_statement(
+    node: Node,
+    source: &[u8],
+    symbols: &mut HashSet<String>,
+) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let body = node.child_by_field_name("body")?;
     Some(Statement::Switch {
         code: statement_code(node, source),
         line: line(node),
         condition: parse_expression(condition, source),
-        body: parse_statement(body, source),
+        body: parse_statement(body, source, symbols),
     })
 }
 
-fn parse_case_statement(node: Node, source: &[u8]) -> Option<Statement> {
+fn parse_case_statement(
+    node: Node,
+    source: &[u8],
+    symbols: &mut HashSet<String>,
+) -> Option<Statement> {
     let value = node
         .child_by_field_name("value")
         .map(|value| parse_expression(value, source));
@@ -1249,12 +1580,16 @@ fn parse_case_statement(node: Node, source: &[u8]) -> Option<Statement> {
             .into_iter()
             .filter(|child| child.kind() != "type_definition")
             .filter(|child| node.child_by_field_name("value") != Some(*child))
-            .flat_map(|child| parse_statement(child, source))
+            .flat_map(|child| parse_statement(child, source, symbols))
             .collect(),
     })
 }
 
-fn parse_labeled_statement(node: Node, source: &[u8]) -> Option<Statement> {
+fn parse_labeled_statement(
+    node: Node,
+    source: &[u8],
+    symbols: &mut HashSet<String>,
+) -> Option<Statement> {
     let label = node.child_by_field_name("label")?;
     Some(Statement::Label {
         code: case_code(node, source),
@@ -1263,7 +1598,7 @@ fn parse_labeled_statement(node: Node, source: &[u8]) -> Option<Statement> {
         body: named_children(node)
             .into_iter()
             .filter(|child| *child != label)
-            .flat_map(|child| parse_statement(child, source))
+            .flat_map(|child| parse_statement(child, source, symbols))
             .collect(),
     })
 }
@@ -1940,6 +2275,88 @@ mod tests {
             feature_macro.source_path.as_deref(),
             Some(expected_header_path.as_str())
         );
+    }
+
+    #[test]
+    fn parse_file_selects_active_preprocessor_branches() {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("clock should be after Unix epoch")
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!(
+            "cxxastgen-core-conditionals-{}-{unique}",
+            std::process::id()
+        ));
+        fs::create_dir_all(&dir).expect("create temp dir");
+        let source = dir.join("main.c");
+        fs::write(
+            &source,
+            r#"
+                #define LOCAL
+                int selected() {
+                #ifdef FEATURE
+                  return FEATURE_VALUE;
+                #else
+                  return 0;
+                #endif
+                }
+                int local() {
+                #ifndef LOCAL
+                  return 0;
+                #else
+                  return 1;
+                #endif
+                }
+                "#,
+        )
+        .expect("write conditional source");
+
+        let document = parse_file(
+            &source,
+            &ParseOptions {
+                include_paths: Vec::new(),
+                defines: vec!["FEATURE".to_string()],
+                compilation_database: None,
+                skip_function_bodies: false,
+            },
+        )
+        .expect("parse conditional source");
+        fs::remove_dir_all(&dir).ok();
+
+        let selected = document
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "selected" => Some(function),
+                _ => None,
+            })
+            .expect("selected function should be emitted");
+        let local = document
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "local" => Some(function),
+                _ => None,
+            })
+            .expect("local function should be emitted");
+
+        let [Statement::Return {
+            expression: Some(Expression::Identifier { name, .. }),
+            ..
+        }] = selected.body.as_slice()
+        else {
+            panic!("expected selected to return the active FEATURE branch");
+        };
+        assert_eq!(name, "FEATURE_VALUE");
+
+        let [Statement::Return {
+            expression: Some(Expression::Literal { value, .. }),
+            ..
+        }] = local.body.as_slice()
+        else {
+            panic!("expected local to return the #else branch");
+        };
+        assert_eq!(value, "1");
     }
 
     #[test]
