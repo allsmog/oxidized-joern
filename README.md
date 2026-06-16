@@ -25,9 +25,10 @@ The first released Rust rewrite component is the Go AST generator used by
 - Scala `gosrc2cpg` integration is wired to download from this fork's release
   URL.
 
-The C/C++ frontend is still inherited from upstream Joern's Scala/Eclipse CDT
-implementation in this checkout. Treat a Rust C/C++ frontend as roadmap work
-unless a future branch or release explicitly lands it.
+The C/C++ frontend still defaults to upstream Joern's Scala/Eclipse CDT
+implementation. An experimental Rust `cxxastgen` scaffold lives under
+`joern-cli/frontends/c2cpg/rust`; it is not yet wired into production CPG
+generation.
 
 ## Rewrite Priorities
 
