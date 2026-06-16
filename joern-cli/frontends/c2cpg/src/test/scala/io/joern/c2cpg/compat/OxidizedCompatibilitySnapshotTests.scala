@@ -445,6 +445,51 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .l shouldBe Nil
     }
 
+    "resolve C++ move constructors for rvalue initializers" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Widget makeWidget() {
+          |  Core::Widget temp;
+          |  return temp;
+          |}
+          |int use() {
+          |  Core::Widget source;
+          |  Core::Widget copied = source;
+          |  Core::Widget moved = makeWidget();
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.fullNameExact("Core.Widget.Widget:void(Widget&)").parameter.typeFullName.l shouldBe
+        List("Core.Widget*", "Widget&")
+      cpg.method.fullNameExact("Core.Widget.Widget:void(Widget&&)").parameter.typeFullName.l shouldBe
+        List("Core.Widget*", "Widget&&")
+      cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core.Widget.Widget(source)").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(Widget&)")
+      cpg.method
+        .nameExact("use")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget(makeWidget())")
+        .methodFullName
+        .l shouldBe List("Core.Widget.Widget:void(Widget&&)")
+      cpg.method.nameExact("use").call.nameExact("~Widget").code.l shouldBe
+        List("moved.~Widget()", "copied.~Widget()", "source.~Widget()")
+    }
+
     "capture C++ jump destructors" in {
       val cpg = code(
         """

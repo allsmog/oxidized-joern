@@ -55,6 +55,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     breakPreservedScopeDepth: Option[Int],
     continuePreservedScopeDepth: Option[Int]
   )
+  private final case class ArgumentInfo(typeFullName: Option[String], isRvalue: Boolean)
   private final case class FunctionCaptureContext(
     function: OxFunctionDecl,
     methodRef: NewMethodRef,
@@ -901,7 +902,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val constructor     = constructorEntry(typeName, arguments)
     val signature       = constructor.map(_.function.signature)
     val methodFullName  = constructor.map(_.fullName).getOrElse(s"$typeName.$constructorName")
-    val initCode        = initializerCode.stripPrefix("(").stripSuffix(")")
+    val initCode =
+      if (initializerCode.startsWith("(") && initializerCode.endsWith(")"))
+        initializerCode.stripPrefix("(").stripSuffix(")")
+      else initializerCode
     val constructorCode = s"$typeName.$constructorName($initCode)"
     val callNode_ = callNode(
       initializerOrigin.copy(code = constructorCode),
@@ -1712,34 +1716,70 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   ): Option[FunctionEntry] = {
     arguments match {
       case Some(arguments) =>
-        val arityMatches  = candidates.filter(_.function.parameters.size == arguments.size)
-        val pool          = if (arityMatches.nonEmpty) arityMatches else candidates
-        val argumentTypes = arguments.map(argument => expressionTypeFullName(argument))
+        val arityMatches = candidates.filter(_.function.parameters.size == arguments.size)
+        val pool         = if (arityMatches.nonEmpty) arityMatches else candidates
+        val argumentInfos =
+          arguments.map(argument => ArgumentInfo(expressionTypeFullName(argument), expressionIsRvalue(argument)))
         pool.zipWithIndex
-          .maxByOption { case (candidate, index) => (overloadScore(candidate, argumentTypes), index) }
+          .maxByOption { case (candidate, index) => (overloadScore(candidate, argumentInfos), index) }
           .map(_._1)
       case None =>
         candidates.lastOption
     }
   }
 
-  private def overloadScore(candidate: FunctionEntry, argumentTypes: Seq[Option[String]]): Int = {
-    val arityPenalty = math.abs(candidate.function.parameters.size - argumentTypes.size) * -100
+  private def overloadScore(candidate: FunctionEntry, argumentInfos: Seq[ArgumentInfo]): Int = {
+    val arityPenalty = math.abs(candidate.function.parameters.size - argumentInfos.size) * -100
     arityPenalty + candidate.function.parameters
-      .zip(argumentTypes)
-      .map { case (parameter, argumentType) =>
-        argumentType.map(typeCompatibilityScore(parameter.typeName, _)).getOrElse(1)
+      .zip(argumentInfos)
+      .map { case (parameter, argumentInfo) =>
+        argumentInfo.typeFullName.map(typeCompatibilityScore(parameter.typeName, _, argumentInfo.isRvalue)).getOrElse(1)
       }
       .sum
   }
 
-  private def typeCompatibilityScore(parameterTypeName: String, argumentTypeName: String): Int = {
+  private def typeCompatibilityScore(
+    parameterTypeName: String,
+    argumentTypeName: String,
+    argumentIsRvalue: Boolean
+  ): Int = {
     val parameterType = overloadComparableType(parameterTypeName)
     val argumentType  = overloadComparableType(argumentTypeName)
-    if (parameterType == Defines.Any || argumentType == Defines.Any) 1
-    else if (parameterType == argumentType) 4
-    else if (parameterType.endsWith(s".$argumentType") || argumentType.endsWith(s".$parameterType")) 3
-    else 0
+    val baseScore =
+      if (parameterType == Defines.Any || argumentType == Defines.Any) 1
+      else if (parameterType == argumentType) 4
+      else if (parameterType.endsWith(s".$argumentType") || argumentType.endsWith(s".$parameterType")) 3
+      else 0
+    if (baseScore == 0) 0 else baseScore + referenceValueCategoryScore(parameterTypeName, argumentIsRvalue)
+  }
+
+  private def referenceValueCategoryScore(parameterTypeName: String, argumentIsRvalue: Boolean): Int = {
+    val parameterType = normalizeType(resolveAliasType(parameterTypeName))
+    if (parameterType.endsWith("&&")) {
+      if (argumentIsRvalue) 3 else -3
+    } else if (parameterType.endsWith("&")) {
+      if (argumentIsRvalue) 0 else 2
+    } else {
+      0
+    }
+  }
+
+  private def expressionIsRvalue(expression: OxExpression): Boolean = {
+    expression match {
+      case _: OxIdentifier | _: OxFieldAccess | _: OxIndexAccess => false
+      case OxUnary("*", _, _, _, _)                              => false
+      case call: OxCall =>
+        callReturnTypeFullName(call).map(typeNameIsRvalue).getOrElse(true)
+      case OxCast(typeName, _, _, _) =>
+        typeNameIsRvalue(typeName)
+      case _ =>
+        true
+    }
+  }
+
+  private def typeNameIsRvalue(typeName: String): Boolean = {
+    val normalized = normalizeType(typeName)
+    !normalized.endsWith("&") || normalized.endsWith("&&")
   }
 
   private def overloadComparableType(typeName: String): String = {
@@ -1973,6 +2013,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val normalized = normalizeType(typeName)
     if (normalized.endsWith("*") && normalized.length > 1) {
       s"${resolveAliasType(normalized.dropRight(1), aliases)}*"
+    } else if (normalized.endsWith("&&") && normalized.length > 2) {
+      s"${resolveAliasType(normalized.dropRight(2), aliases)}&&"
+    } else if (normalized.endsWith("&") && normalized.length > 1) {
+      s"${resolveAliasType(normalized.dropRight(1), aliases)}&"
     } else if (normalized.endsWith("[]") && normalized.length > 2) {
       s"${resolveAliasType(normalized.dropRight(2), aliases)}[]"
     } else {
