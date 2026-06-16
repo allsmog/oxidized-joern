@@ -1001,7 +1001,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def methodRefAst(name: String, code: String, line: Int): Option[Ast] = {
-    functionsByName.get(name).map { functionEntry =>
+    currentOwnerFunctionEntry(name).orElse(functionsByName.get(name)).map { functionEntry =>
       Ast(
         methodRefNode(
           OxOrigin(code, Option(line)),
@@ -1104,7 +1104,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           .flatMap(receiverType => functionsByQualifiedName.get(s"$receiverType.$field"))
       case _ =>
         val qualifiedName = normalizedQualifiedName(call.name)
-        functionsByQualifiedName.get(qualifiedName).orElse(functionsByName.get(call.name))
+        if (qualifiedNameParts(call.name).size > 1) {
+          functionsByQualifiedName.get(qualifiedName).orElse(functionsByName.get(call.name))
+        } else {
+          currentOwnerFunctionEntry(call.name)
+            .orElse(functionsByQualifiedName.get(qualifiedName))
+            .orElse(functionsByName.get(call.name))
+        }
+    }
+  }
+
+  private def currentOwnerFunctionEntry(name: String): Option[FunctionEntry] = {
+    currentMethodOwnerTypeFullName.flatMap { ownerTypeFullName =>
+      functionsByQualifiedName.get(s"$ownerTypeFullName.$name")
     }
   }
 

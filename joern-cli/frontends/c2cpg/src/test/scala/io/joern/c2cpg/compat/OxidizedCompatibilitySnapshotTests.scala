@@ -99,9 +99,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  Widget(int& seed) : value(seed) {}
           |  ~Widget();
           |  int value;
-          |  int get() { return value; }
+          |  int get() { return normalize(); }
+          |  int normalize() { return value; }
           |  int size();
           |};
+          |int normalize() { return 99; }
           |int make() { return 1; }
           |}
           |Core::Widget::Widget() : value(1) {}
@@ -121,7 +123,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.typeDecl.nameExact("Widget").member.name.l shouldBe List("value")
       cpg.typeDecl.nameExact("Widget").member.typeFullName.l shouldBe List("int")
       cpg.typeDecl.nameExact("Widget").method.name.l.sorted shouldBe
-        List("Widget", "Widget", "get", "outside", "size", "~Widget")
+        List("Widget", "Widget", "get", "normalize", "outside", "size", "~Widget")
       cpg.method.nameExact("Widget").internal.fullName.l.sorted shouldBe
         List("Core.Widget.Widget:void()", "Core.Widget.Widget:void(int&)")
       cpg.method.nameExact("Widget").external.l shouldBe Nil
@@ -129,6 +131,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("Core.Widget.Widget:void()", "Core.Widget.Widget:void(int&)")
       cpg.method.nameExact("~Widget").internal.fullName.l shouldBe List("Core.Widget.~Widget:void()")
       cpg.method.nameExact("get").internal.fullName.l shouldBe List("Core.Widget.get:int()")
+      cpg.method.nameExact("normalize").fullName.l.sorted shouldBe List("Core.Widget.normalize:int()", "Core.normalize:int()")
       cpg.method.nameExact("size").external.fullName.l shouldBe List("Core.Widget.size:int()")
       cpg.method.nameExact("outside").internal.fullName.l shouldBe List("Core.Widget.outside:int()")
       cpg.method.nameExact("make").fullName.l shouldBe List("Core.make:int()")
@@ -136,8 +139,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("get").parameter.name.l shouldBe List("this")
       cpg.method.nameExact("get").parameter.index.l shouldBe List(0)
       cpg.method.nameExact("get").parameter.typeFullName.l shouldBe List("Core.Widget*")
-      cpg.method.nameExact("get").ast.isReturn.code.l shouldBe List("return value")
-      inside(cpg.method.nameExact("get").call.nameExact(Operators.indirectFieldAccess).l) { case List(fieldAccess) =>
+      cpg.method.nameExact("get").ast.isReturn.code.l shouldBe List("return normalize()")
+      cpg.method.nameExact("get").call.nameExact("normalize").methodFullName.l shouldBe
+        List("Core.Widget.normalize:int()")
+      inside(cpg.method.fullNameExact("Core.Widget.normalize:int()").call.nameExact(Operators.indirectFieldAccess).l) {
+        case List(fieldAccess) =>
         fieldAccess.code shouldBe "this->value"
         fieldAccess.typeFullName shouldBe "int"
         fieldAccess.argument.code.l shouldBe List("this", "value")
