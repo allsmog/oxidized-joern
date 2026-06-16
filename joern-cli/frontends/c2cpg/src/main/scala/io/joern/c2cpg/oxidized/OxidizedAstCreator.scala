@@ -472,6 +472,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val functionOwner     = functionOwnerFullName(function, ownerFullName)
     val parentTypeOwner   = functionOwner.filter(aggregateTypeFullNames.contains)
     val isStaticMethod    = isStaticFunction(function, parentTypeOwner)
+    val isVirtualMethod   = isVirtualFunction(function, parentTypeOwner)
     val effectiveParentTy = parentTypeOwner.map(_ => NodeTypes.TYPE_DECL).getOrElse(astParentType)
     val effectiveParentFullName = parentTypeOwner.getOrElse {
       if (function.name.contains("::")) {
@@ -552,7 +553,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         parameters.map(_._2._2),
         body,
         methodReturn,
-        methodModifiers(simpleName, parentTypeOwner, isStaticMethod)
+        methodModifiers(simpleName, parentTypeOwner, isStaticMethod, isVirtualMethod)
       )
 
     captureAstForFunction(captureContext).fold(Seq(ast))(captureAst => Seq(ast, captureAst))
@@ -864,7 +865,53 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         signature,
         Option(registerType(typeFullName))
       )
-    callAst(callNode_, call.arguments.map(expressionAst))
+    val base = memberCallBaseAst(call)
+    createCallAst(
+      callNode_,
+      call.arguments.map(expressionAst),
+      base = base,
+      receiver = if (dispatchType == DispatchTypes.DYNAMIC_DISPATCH) base else None
+    )
+  }
+
+  private def memberCallBaseAst(call: OxCall): Option[Ast] = {
+    call.callee match {
+      case OxFieldAccess(_, _, _, base) => Option(expressionAst(base))
+      case _                            => None
+    }
+  }
+
+  private def createCallAst(
+    callNode: NewCall,
+    arguments: Seq[Ast] = Seq.empty,
+    base: Option[Ast] = None,
+    receiver: Option[Ast] = None
+  ): Ast = {
+    setArgumentIndices(arguments)
+
+    val baseRoot = base.flatMap(_.root).toList
+    baseRoot match {
+      case List(expression: ExpressionNew) => expression.argumentIndex = 0
+      case _                               =>
+    }
+
+    val baseAst = base.getOrElse(Ast())
+    var ast     = Ast(callNode).withChild(baseAst)
+
+    if (receiver.isDefined && receiver != base) {
+      receiver.get.root.get.asInstanceOf[ExpressionNew].argumentIndex = -1
+      ast = ast.withChild(receiver.get)
+    }
+
+    ast = ast
+      .withChildren(arguments)
+      .withArgEdges(callNode, baseRoot)
+      .withArgEdges(callNode, arguments.flatMap(_.root))
+
+    if (receiver.isDefined) {
+      ast = ast.withReceiverEdge(callNode, receiver.get.root.get)
+    }
+    ast
   }
 
   private def pointerCallAst(call: OxCall): Ast = {
@@ -1186,12 +1233,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case None =>
         functionEntryForCall(call) match {
           case Some(functionEntry) =>
+            val dispatchType =
+              if (isVirtualFunctionEntry(functionEntry)) DispatchTypes.DYNAMIC_DISPATCH
+              else DispatchTypes.STATIC_DISPATCH
             (
               callName(call),
               functionEntry.fullName,
               Option(functionEntry.function.signature),
               normalizeType(functionEntry.function.returnType),
-              DispatchTypes.STATIC_DISPATCH
+              dispatchType
             )
           case None =>
             (callName(call), normalizedQualifiedName(call.name), None, Defines.Any, DispatchTypes.STATIC_DISPATCH)
@@ -1373,16 +1423,33 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
+  private def isVirtualFunctionEntry(entry: FunctionEntry): Boolean = {
+    isVirtualFunction(entry.function, entry.ownerFullName.filter(aggregateTypeFullNames.contains))
+  }
+
+  private def isVirtualFunction(function: OxFunctionDecl, parentTypeOwner: Option[String]): Boolean = {
+    function.isVirtual || parentTypeOwner.exists { ownerTypeFullName =>
+      functionEntries.exists(entry =>
+        entry.ownerFullName.contains(ownerTypeFullName) &&
+          entry.simpleName == functionSimpleName(function) &&
+          entry.function.signature == function.signature &&
+          entry.function.isVirtual
+      )
+    }
+  }
+
   private def methodModifiers(
     simpleName: String,
     parentTypeOwner: Option[String],
-    isStaticMethod: Boolean
+    isStaticMethod: Boolean,
+    isVirtualMethod: Boolean
   ): Seq[NewModifier] = {
     val isConstructor = parentTypeOwner
       .flatMap(_.split('.').lastOption)
       .contains(simpleName)
     Option.when(isConstructor)(NewModifier().modifierType(ModifierTypes.CONSTRUCTOR)).toSeq ++
-      Option.when(isStaticMethod)(NewModifier().modifierType(ModifierTypes.STATIC)).toSeq
+      Option.when(isStaticMethod)(NewModifier().modifierType(ModifierTypes.STATIC)).toSeq ++
+      Option.when(isVirtualMethod)(NewModifier().modifierType(ModifierTypes.VIRTUAL)).toSeq
   }
 
   private def declarationFilename(declaration: OxDeclaration): String = {
