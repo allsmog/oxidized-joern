@@ -608,8 +608,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
     val bodyAsts =
       try {
-        val statementAsts  = function.body.flatMap(astsForStatement)
-        val destructorAsts = currentLocalDestructors.reverse.map(localDestructorAst)
+        val statementAsts = function.body.flatMap(astsForStatement)
+        val destructorAsts =
+          Option
+            .when(statementsMayCompleteNormally(function.body))(currentLocalDestructors.reverse.map(localDestructorAst))
+            .getOrElse(Vector.empty)
         function.constructorInitializers.map(constructorInitializerAst) ++ statementAsts ++ destructorAsts
       } finally {
         localDestructorScopes = previousDestructorScopes
@@ -672,6 +675,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     localDestructorScopes.headOption.getOrElse(Vector.empty)
   }
 
+  private def activeLocalDestructors: Seq[LocalDestructor] = {
+    localDestructorScopes.flatMap(_.reverse)
+  }
+
   private def localDestructorAst(destructor: LocalDestructor): Ast = {
     val code = s"${destructor.name}.${destructor.entry.simpleName}()"
     val callNode_ =
@@ -727,7 +734,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           }
         }
       case ret: OxReturn =>
-        Seq(returnAst(returnNode(OxOrigin(ret), ret.code), ret.expression.toSeq.map(expressionAst)))
+        activeLocalDestructors.map(localDestructorAst) :+
+          returnAst(returnNode(OxOrigin(ret), ret.code), ret.expression.toSeq.map(expressionAst))
       case ifStmt: OxIf =>
         val ifNode       = controlStructureNode(OxOrigin(ifStmt), ControlStructureTypes.IF, ifStmt.code)
         val conditionAst = expressionAst(ifStmt.condition)
@@ -876,9 +884,30 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def statementBlockAst(statements: Seq[OxStatement], code: String, line: Int): Ast = {
     inNestedScopeWithDestructors {
-      val statementAsts  = statements.flatMap(astsForStatement)
-      val destructorAsts = currentLocalDestructors.reverse.map(localDestructorAst)
+      val statementAsts = statements.flatMap(astsForStatement)
+      val destructorAsts =
+        Option
+          .when(statementsMayCompleteNormally(statements))(currentLocalDestructors.reverse.map(localDestructorAst))
+          .getOrElse(Vector.empty)
       blockAst(blockNode(OxOrigin(code, Option(line)), code, Defines.Any), (statementAsts ++ destructorAsts).toList)
+    }
+  }
+
+  private def statementsMayCompleteNormally(statements: Seq[OxStatement]): Boolean = {
+    statements.foldLeft(true) {
+      case (true, statement) => statementMayCompleteNormally(statement)
+      case (false, _)        => false
+    }
+  }
+
+  private def statementMayCompleteNormally(statement: OxStatement): Boolean = {
+    statement match {
+      case _: OxReturn => false
+      case ifStmt: OxIf =>
+        ifStmt.elseBody.isEmpty ||
+        statementsMayCompleteNormally(ifStmt.thenBody) ||
+        statementsMayCompleteNormally(ifStmt.elseBody)
+      case _ => true
     }
   }
 
