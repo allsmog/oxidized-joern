@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use serde::Serialize;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 use tree_sitter::{Node, Parser};
@@ -45,6 +45,7 @@ pub struct CxxAstDocument {
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum Declaration {
     Macro(MacroDecl),
+    MacroUndef(MacroUndefDecl),
     Include(IncludeDecl),
     Struct(StructDecl),
     Enum(EnumDecl),
@@ -65,6 +66,18 @@ pub struct MacroDecl {
     pub visible_line: Option<usize>,
     pub parameters: Vec<String>,
     pub body: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MacroUndefDecl {
+    pub name: String,
+    pub code: String,
+    pub line: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_path: Option<String>,
+    #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
+    pub visible_line: Option<usize>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -352,6 +365,23 @@ pub enum Expression {
     },
 }
 
+#[derive(Debug, Clone)]
+struct MacroBinding {
+    parameters: Vec<String>,
+    body: String,
+}
+
+impl MacroBinding {
+    fn from_decl(declaration: &MacroDecl) -> Self {
+        Self {
+            parameters: declaration.parameters.clone(),
+            body: declaration.body.clone(),
+        }
+    }
+}
+
+type MacroSymbols = HashMap<String, MacroBinding>;
+
 pub fn parse_file(path: &Path, options: &ParseOptions) -> Result<CxxAstDocument> {
     let source = fs::read_to_string(path)
         .with_context(|| format!("failed to read C/C++ source '{}'", path.display()))?;
@@ -359,7 +389,7 @@ pub fn parse_file(path: &Path, options: &ParseOptions) -> Result<CxxAstDocument>
         .with_context(|| format!("failed to read metadata for '{}'", path.display()))?;
 
     let mut declarations = synthetic_macro_declarations(&options.defines);
-    let mut symbols = HashSet::new();
+    let mut symbols = MacroSymbols::new();
     register_macro_symbols(&declarations, &mut symbols);
     let mut visited_headers = HashSet::new();
     declarations.extend(parse_declarations_with_context(
@@ -422,7 +452,7 @@ fn normalize_path(path: &Path) -> String {
 
 #[cfg(test)]
 fn parse_declarations(source: &str, language: SourceLanguage) -> Result<Vec<Declaration>> {
-    let mut symbols = HashSet::new();
+    let mut symbols = MacroSymbols::new();
     let mut visited_headers = HashSet::new();
     let mut declarations = parse_declarations_with_context(
         source,
@@ -442,7 +472,7 @@ fn parse_declarations_with_context(
     language: SourceLanguage,
     source_path: Option<&Path>,
     options: Option<&ParseOptions>,
-    symbols: &mut HashSet<String>,
+    symbols: &mut MacroSymbols,
     visited_headers: &mut HashSet<PathBuf>,
 ) -> Result<Vec<Declaration>> {
     let mut parser = Parser::new();
@@ -473,7 +503,7 @@ fn parse_declaration_children(
     source: &[u8],
     source_path: Option<&Path>,
     options: Option<&ParseOptions>,
-    symbols: &mut HashSet<String>,
+    symbols: &mut MacroSymbols,
     visited_headers: &mut HashSet<PathBuf>,
 ) -> Result<Vec<Declaration>> {
     let mut declarations = Vec::new();
@@ -495,7 +525,7 @@ fn parse_declaration_node(
     source: &[u8],
     source_path: Option<&Path>,
     options: Option<&ParseOptions>,
-    symbols: &mut HashSet<String>,
+    symbols: &mut MacroSymbols,
     visited_headers: &mut HashSet<PathBuf>,
 ) -> Result<Vec<Declaration>> {
     let mut declarations = Vec::new();
@@ -518,8 +548,14 @@ fn parse_declaration_node(
         }
         "preproc_def" | "preproc_function_def" => {
             if let Some(declaration) = parse_macro(node, source) {
-                symbols.insert(declaration.name.clone());
+                define_macro_symbol(symbols, &declaration);
                 declarations.push(Declaration::Macro(declaration));
+            }
+        }
+        "preproc_call" => {
+            if let Some(declaration) = parse_macro_undef(node, source) {
+                symbols.remove(&declaration.name);
+                declarations.push(Declaration::MacroUndef(declaration));
             }
         }
         "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef" | "preproc_else" => {
@@ -599,6 +635,7 @@ fn dedupe_function_declarations(declarations: Vec<Declaration>) -> Vec<Declarati
 fn declaration_line(declaration: &Declaration) -> usize {
     match declaration {
         Declaration::Macro(value) => value.line,
+        Declaration::MacroUndef(value) => value.line,
         Declaration::Include(value) => value.line,
         Declaration::Struct(value) => value.line,
         Declaration::Enum(value) => value.line,
@@ -611,6 +648,7 @@ fn declaration_line(declaration: &Declaration) -> usize {
 fn declaration_visible_line(declaration: &Declaration) -> Option<usize> {
     match declaration {
         Declaration::Macro(value) => value.visible_line,
+        Declaration::MacroUndef(value) => value.visible_line,
         Declaration::Include(value) => value.visible_line,
         Declaration::Struct(value) => value.visible_line,
         Declaration::Enum(value) => value.visible_line,
@@ -637,6 +675,35 @@ fn parse_macro(node: Node, source: &[u8]) -> Option<MacroDecl> {
     macro_from_definition(&definition, code, line(node))
 }
 
+fn parse_macro_undef(node: Node, source: &[u8]) -> Option<MacroUndefDecl> {
+    let directive = node
+        .child_by_field_name("directive")
+        .map(|directive| node_text(directive, source).trim())
+        .unwrap_or_default()
+        .trim_start_matches('#');
+    if directive != "undef" {
+        return None;
+    }
+    let name = node
+        .child_by_field_name("argument")
+        .map(|argument| node_text(argument, source).trim())
+        .unwrap_or_default()
+        .split_whitespace()
+        .next()
+        .unwrap_or_default()
+        .to_string();
+    if name.is_empty() {
+        return None;
+    }
+    Some(MacroUndefDecl {
+        name,
+        code: node_text(node, source).trim().to_string(),
+        line: line(node),
+        source_path: None,
+        visible_line: None,
+    })
+}
+
 fn synthetic_macro_declarations(defines: &[String]) -> Vec<Declaration> {
     defines
         .iter()
@@ -645,19 +712,26 @@ fn synthetic_macro_declarations(defines: &[String]) -> Vec<Declaration> {
         .collect()
 }
 
-fn register_macro_symbols(declarations: &[Declaration], symbols: &mut HashSet<String>) {
+fn register_macro_symbols(declarations: &[Declaration], symbols: &mut MacroSymbols) {
     for declaration in declarations {
         if let Declaration::Macro(macro_decl) = declaration {
-            symbols.insert(macro_decl.name.clone());
+            define_macro_symbol(symbols, macro_decl);
         }
     }
+}
+
+fn define_macro_symbol(symbols: &mut MacroSymbols, declaration: &MacroDecl) {
+    symbols.insert(
+        declaration.name.clone(),
+        MacroBinding::from_decl(declaration),
+    );
 }
 
 fn header_declarations(
     header_path: &Path,
     visible_line: usize,
     options: &ParseOptions,
-    symbols: &mut HashSet<String>,
+    symbols: &mut MacroSymbols,
     visited_headers: &mut HashSet<PathBuf>,
 ) -> Result<Vec<Declaration>> {
     let normalized_header = normalized_absolute_path(header_path);
@@ -681,9 +755,16 @@ fn header_declarations(
             let declaration =
                 annotate_header_declaration(declaration, &normalized_header, visible_line);
             if let Declaration::Macro(macro_decl) = &declaration {
-                symbols.insert(macro_decl.name.clone());
+                define_macro_symbol(symbols, macro_decl);
+            } else if let Declaration::MacroUndef(macro_undef) = &declaration {
+                symbols.remove(&macro_undef.name);
             }
-            if options.import_header_declarations || matches!(declaration, Declaration::Macro(_)) {
+            if options.import_header_declarations
+                || matches!(
+                    declaration,
+                    Declaration::Macro(_) | Declaration::MacroUndef(_)
+                )
+            {
                 Some(declaration)
             } else {
                 None
@@ -700,6 +781,12 @@ fn annotate_header_declaration(
     let source_path = normalize_path(header_path);
     match &mut declaration {
         Declaration::Macro(value) => {
+            if value.source_path.is_none() {
+                value.source_path = Some(source_path);
+            }
+            value.visible_line = Some(visible_line);
+        }
+        Declaration::MacroUndef(value) => {
             if value.source_path.is_none() {
                 value.source_path = Some(source_path);
             }
@@ -755,7 +842,7 @@ fn parse_preproc_declarations(
     source: &[u8],
     source_path: Option<&Path>,
     options: Option<&ParseOptions>,
-    symbols: &mut HashSet<String>,
+    symbols: &mut MacroSymbols,
     visited_headers: &mut HashSet<PathBuf>,
 ) -> Result<Vec<Declaration>> {
     if preproc_branch_is_active(node, source, symbols) {
@@ -786,7 +873,7 @@ fn parse_selected_preproc_declaration_children(
     source: &[u8],
     source_path: Option<&Path>,
     options: Option<&ParseOptions>,
-    symbols: &mut HashSet<String>,
+    symbols: &mut MacroSymbols,
     visited_headers: &mut HashSet<PathBuf>,
 ) -> Result<Vec<Declaration>> {
     let mut declarations = Vec::new();
@@ -814,14 +901,14 @@ fn preproc_body_children(node: Node) -> Vec<Node> {
         .collect()
 }
 
-fn preproc_branch_is_active(node: Node, source: &[u8], symbols: &HashSet<String>) -> bool {
+fn preproc_branch_is_active(node: Node, source: &[u8], symbols: &MacroSymbols) -> bool {
     match node.kind() {
         "preproc_else" => true,
         "preproc_ifdef" | "preproc_elifdef" => {
             let Some(name) = node.child_by_field_name("name") else {
                 return false;
             };
-            let is_defined = symbols.contains(node_text(name, source).trim());
+            let is_defined = symbols.contains_key(node_text(name, source).trim());
             if preproc_directive(node, source).contains("ifndef") {
                 !is_defined
             } else {
@@ -847,7 +934,7 @@ fn preproc_directive(node: Node, source: &[u8]) -> String {
         .to_string()
 }
 
-fn eval_preproc_condition(node: Node, source: &[u8], symbols: &HashSet<String>) -> i64 {
+fn eval_preproc_condition(node: Node, source: &[u8], symbols: &MacroSymbols) -> i64 {
     match node.kind() {
         "parenthesized_expression" => named_children(node)
             .into_iter()
@@ -855,17 +942,11 @@ fn eval_preproc_condition(node: Node, source: &[u8], symbols: &HashSet<String>) 
             .map(|child| eval_preproc_condition(child, source, symbols))
             .unwrap_or(0),
         "number_literal" => integer_literal_value(node_text(node, source)).unwrap_or(0),
-        "identifier" => {
-            if symbols.contains(node_text(node, source).trim()) {
-                1
-            } else {
-                0
-            }
-        }
+        "identifier" => eval_preproc_identifier(node_text(node, source).trim(), symbols),
         "preproc_defined" => named_children(node)
             .into_iter()
             .next()
-            .map(|name| symbols.contains(node_text(name, source).trim()) as i64)
+            .map(|name| symbols.contains_key(node_text(name, source).trim()) as i64)
             .unwrap_or(0),
         "unary_expression" => eval_unary_preproc_condition(node, source, symbols),
         "binary_expression" => eval_binary_preproc_condition(node, source, symbols),
@@ -873,7 +954,21 @@ fn eval_preproc_condition(node: Node, source: &[u8], symbols: &HashSet<String>) 
     }
 }
 
-fn eval_unary_preproc_condition(node: Node, source: &[u8], symbols: &HashSet<String>) -> i64 {
+fn eval_preproc_identifier(name: &str, symbols: &MacroSymbols) -> i64 {
+    let Some(binding) = symbols.get(name) else {
+        return 0;
+    };
+    if !binding.parameters.is_empty() {
+        return 1;
+    }
+    macro_body_integer_value(&binding.body).unwrap_or(1)
+}
+
+fn macro_body_integer_value(body: &str) -> Option<i64> {
+    integer_literal_value(strip_wrapping_parentheses(body.trim()))
+}
+
+fn eval_unary_preproc_condition(node: Node, source: &[u8], symbols: &MacroSymbols) -> i64 {
     let operator = operator_text(node, source).unwrap_or_default();
     let value = node
         .child_by_field_name("argument")
@@ -888,7 +983,7 @@ fn eval_unary_preproc_condition(node: Node, source: &[u8], symbols: &HashSet<Str
     }
 }
 
-fn eval_binary_preproc_condition(node: Node, source: &[u8], symbols: &HashSet<String>) -> i64 {
+fn eval_binary_preproc_condition(node: Node, source: &[u8], symbols: &MacroSymbols) -> i64 {
     let left = node
         .child_by_field_name("left")
         .or_else(|| named_children(node).into_iter().next())
@@ -929,6 +1024,34 @@ fn integer_literal_value(value: &str) -> Option<i64> {
     } else {
         trimmed.parse::<i64>().ok()
     }
+}
+
+fn strip_wrapping_parentheses(mut value: &str) -> &str {
+    loop {
+        let trimmed = value.trim();
+        if !(trimmed.starts_with('(') && trimmed.ends_with(')')) {
+            return trimmed;
+        }
+        let inner = &trimmed[1..trimmed.len() - 1];
+        if parentheses_are_balanced(inner) {
+            value = inner;
+        } else {
+            return trimmed;
+        }
+    }
+}
+
+fn parentheses_are_balanced(value: &str) -> bool {
+    let mut depth = 0usize;
+    for ch in value.chars() {
+        match ch {
+            '(' => depth += 1,
+            ')' if depth == 0 => return false,
+            ')' => depth -= 1,
+            _ => {}
+        }
+    }
+    depth == 0
 }
 
 fn resolve_include(
@@ -992,7 +1115,7 @@ fn macro_from_definition(definition: &str, code: String, line: usize) -> Option<
     if name.is_empty() {
         return None;
     }
-    let rest = definition[name_end..].trim_start();
+    let rest = &definition[name_end..];
     let (parameters, body) = if rest.starts_with('(') {
         let close = rest.find(')').unwrap_or(0);
         let params = rest
@@ -1008,7 +1131,7 @@ fn macro_from_definition(definition: &str, code: String, line: usize) -> Option<
             rest.get(close + 1..).unwrap_or_default().trim().to_string(),
         )
     } else {
-        (Vec::new(), rest.to_string())
+        (Vec::new(), rest.trim_start().to_string())
     };
     Some(MacroDecl {
         name,
@@ -1298,11 +1421,7 @@ fn parse_global_variable_declarations(node: Node, source: &[u8]) -> Vec<GlobalVa
         .collect()
 }
 
-fn parse_function(
-    node: Node,
-    source: &[u8],
-    symbols: &mut HashSet<String>,
-) -> Option<FunctionDecl> {
+fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Option<FunctionDecl> {
     let type_node = node.child_by_field_name("type")?;
     let declarator = node.child_by_field_name("declarator")?;
     let body = node.child_by_field_name("body")?;
@@ -1405,18 +1524,14 @@ fn parameter_type_without_name(node: Node, source: &[u8]) -> Option<String> {
     )
 }
 
-fn parse_statement_block(
-    node: Node,
-    source: &[u8],
-    symbols: &mut HashSet<String>,
-) -> Vec<Statement> {
+fn parse_statement_block(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec<Statement> {
     named_children(node)
         .into_iter()
         .flat_map(|child| parse_statement(child, source, symbols))
         .collect()
 }
 
-fn parse_statement(node: Node, source: &[u8], symbols: &mut HashSet<String>) -> Vec<Statement> {
+fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec<Statement> {
     match node.kind() {
         "compound_statement" => parse_statement_block(node, source, symbols),
         "declaration" => parse_local_declarations(node, source),
@@ -1461,7 +1576,13 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut HashSet<String>) -> 
             .collect(),
         "preproc_def" | "preproc_function_def" => {
             if let Some(macro_decl) = parse_macro(node, source) {
-                symbols.insert(macro_decl.name);
+                define_macro_symbol(symbols, &macro_decl);
+            }
+            Vec::new()
+        }
+        "preproc_call" => {
+            if let Some(macro_undef) = parse_macro_undef(node, source) {
+                symbols.remove(&macro_undef.name);
             }
             Vec::new()
         }
@@ -1546,7 +1667,7 @@ fn statement_from_expression(statement: Node, expr: Node, source: &[u8]) -> Stat
 fn parse_preproc_statements(
     node: Node,
     source: &[u8],
-    symbols: &mut HashSet<String>,
+    symbols: &mut MacroSymbols,
 ) -> Vec<Statement> {
     if preproc_branch_is_active(node, source, symbols) {
         preproc_body_children(node)
@@ -1560,11 +1681,7 @@ fn parse_preproc_statements(
     }
 }
 
-fn parse_if_statement(
-    node: Node,
-    source: &[u8],
-    symbols: &mut HashSet<String>,
-) -> Option<Statement> {
+fn parse_if_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let consequence = node.child_by_field_name("consequence")?;
     let else_body = node
@@ -1583,7 +1700,7 @@ fn parse_if_statement(
 fn parse_while_statement(
     node: Node,
     source: &[u8],
-    symbols: &mut HashSet<String>,
+    symbols: &mut MacroSymbols,
 ) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let body = node.child_by_field_name("body")?;
@@ -1595,11 +1712,7 @@ fn parse_while_statement(
     })
 }
 
-fn parse_do_statement(
-    node: Node,
-    source: &[u8],
-    symbols: &mut HashSet<String>,
-) -> Option<Statement> {
+fn parse_do_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let body = node.child_by_field_name("body")?;
     Some(Statement::DoWhile {
@@ -1610,11 +1723,7 @@ fn parse_do_statement(
     })
 }
 
-fn parse_for_statement(
-    node: Node,
-    source: &[u8],
-    symbols: &mut HashSet<String>,
-) -> Option<Statement> {
+fn parse_for_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Option<Statement> {
     let body = node.child_by_field_name("body")?;
     let initializer = node
         .child_by_field_name("initializer")
@@ -1634,11 +1743,7 @@ fn parse_for_statement(
     })
 }
 
-fn parse_for_initializer(
-    node: Node,
-    source: &[u8],
-    symbols: &mut HashSet<String>,
-) -> Vec<Statement> {
+fn parse_for_initializer(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec<Statement> {
     match node.kind() {
         "declaration" => parse_local_declarations(node, source),
         "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef" | "preproc_else" => {
@@ -1657,7 +1762,7 @@ fn parse_for_initializer(
 fn parse_switch_statement(
     node: Node,
     source: &[u8],
-    symbols: &mut HashSet<String>,
+    symbols: &mut MacroSymbols,
 ) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let body = node.child_by_field_name("body")?;
@@ -1672,7 +1777,7 @@ fn parse_switch_statement(
 fn parse_case_statement(
     node: Node,
     source: &[u8],
-    symbols: &mut HashSet<String>,
+    symbols: &mut MacroSymbols,
 ) -> Option<Statement> {
     let value = node
         .child_by_field_name("value")
@@ -1693,7 +1798,7 @@ fn parse_case_statement(
 fn parse_labeled_statement(
     node: Node,
     source: &[u8],
-    symbols: &mut HashSet<String>,
+    symbols: &mut MacroSymbols,
 ) -> Option<Statement> {
     let label = node.child_by_field_name("label")?;
     Some(Statement::Label {
@@ -2553,6 +2658,111 @@ mod tests {
     }
 
     #[test]
+    fn parse_file_evaluates_macro_values_and_undefs_in_preprocessor_branches() {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("clock should be after Unix epoch")
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!(
+            "cxxastgen-core-macro-values-{}-{unique}",
+            std::process::id()
+        ));
+        fs::create_dir_all(&dir).expect("create temp dir");
+        fs::write(
+            dir.join("feature.h"),
+            "#define HEADER_VALUE 11\n#define HEADER_DROP 1\n#undef HEADER_DROP\n",
+        )
+        .expect("write header");
+        let source = dir.join("main.c");
+        fs::write(
+            &source,
+            r#"
+                #include "feature.h"
+                #define WRAPPED (7)
+                #define DROP 1
+                #undef DROP
+                int from_header() {
+                #if HEADER_VALUE == 11
+                  return 11;
+                #else
+                  return 0;
+                #endif
+                }
+                int header_dropped() {
+                #ifdef HEADER_DROP
+                  return 1;
+                #else
+                  return 0;
+                #endif
+                }
+                int from_define() {
+                #if FEATURE == 7
+                  return 7;
+                #else
+                  return 0;
+                #endif
+                }
+                int disabled() {
+                #if DISABLED
+                  return 1;
+                #else
+                  return 0;
+                #endif
+                }
+                int wrapped() {
+                #if WRAPPED == 7
+                  return 7;
+                #else
+                  return 0;
+                #endif
+                }
+                int dropped() {
+                #ifdef DROP
+                  return 1;
+                #else
+                  return 0;
+                #endif
+                }
+                int statement_undef() {
+                #define TEMP 1
+                #undef TEMP
+                #ifdef TEMP
+                  return 1;
+                #else
+                  return 0;
+                #endif
+                }
+                "#,
+        )
+        .expect("write macro value source");
+
+        let document = parse_file(
+            &source,
+            &ParseOptions {
+                include_paths: vec![normalize_path(&dir)],
+                defines: vec!["FEATURE=7".to_string(), "DISABLED=0".to_string()],
+                compilation_database: None,
+                skip_function_bodies: false,
+                import_header_declarations: false,
+            },
+        )
+        .expect("parse macro value source");
+        fs::remove_dir_all(&dir).ok();
+
+        assert_eq!(function_return_literal(&document, "from_header"), "11");
+        assert_eq!(function_return_literal(&document, "header_dropped"), "0");
+        assert_eq!(function_return_literal(&document, "from_define"), "7");
+        assert_eq!(function_return_literal(&document, "disabled"), "0");
+        assert_eq!(function_return_literal(&document, "wrapped"), "7");
+        assert_eq!(function_return_literal(&document, "dropped"), "0");
+        assert_eq!(function_return_literal(&document, "statement_undef"), "0");
+        assert!(document
+            .declarations
+            .iter()
+            .any(|declaration| matches!(declaration, Declaration::MacroUndef(value) if value.name == "DROP")));
+    }
+
+    #[test]
     fn parses_simple_c_declarations_and_statements() {
         let sample = r#"
                 #define INC(x) ((x) + 1)
@@ -3370,6 +3580,25 @@ mod tests {
             callee.as_ref(),
             Expression::Identifier { name, .. } if name == "cb"
         ));
+    }
+
+    fn function_return_literal<'a>(document: &'a CxxAstDocument, name: &str) -> &'a str {
+        let function = document
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == name => Some(function),
+                _ => None,
+            })
+            .unwrap_or_else(|| panic!("expected function '{name}'"));
+        let [Statement::Return {
+            expression: Some(Expression::Literal { value, .. }),
+            ..
+        }] = function.body.as_slice()
+        else {
+            panic!("expected '{name}' to contain one literal return");
+        };
+        value
     }
 
     fn statement_line(statement: &Statement) -> usize {

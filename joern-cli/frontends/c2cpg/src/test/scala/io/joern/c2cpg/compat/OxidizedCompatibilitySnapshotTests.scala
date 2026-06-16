@@ -491,13 +491,32 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           """
             |#include "feature.h"
             |int selected() {
-            |#ifdef FEATURE
+            |#if FEATURE == 1 && FEATURE_VALUE == 5
             |  FeatureAlias box;
             |  box.value = feature_add(FROM_DB, FEATURE_VALUE);
             |  return box.value;
             |#else
             |  return 0;
             |#endif
+            |}
+            |int disabled_by_zero() {
+            |#if DISABLED
+            |  return 1;
+            |#else
+            |  return 0;
+            |#endif
+            |}
+            |#define LOCAL_MACRO 1
+            |#undef LOCAL_MACRO
+            |int dropped_after_undef() {
+            |#ifdef LOCAL_MACRO
+            |  return 1;
+            |#else
+            |  return 0;
+            |#endif
+            |}
+            |int unresolved_after_undef() {
+            |  return LOCAL_MACRO;
             |}
             |""".stripMargin
         )
@@ -510,7 +529,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
              |[
              |  {
              |    "directory": "${dir.toString}",
-             |    "arguments": ["clang", "-I${includeDir.toString}", "-DFEATURE", "-DFROM_DB=7", "-c", "selected.c"],
+             |    "arguments": ["clang", "-I${includeDir.toString}", "-DFEATURE=1", "-DDISABLED=0", "-DFROM_DB=7", "-c", "selected.c"],
              |    "file": "${selected.toString}"
              |  }
              |]
@@ -530,6 +549,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           cpg.method.nameExact("ignored").name.l shouldBe Nil
           cpg.method.nameExact("FROM_DB").signature.l shouldBe List("int(0)")
           cpg.method.nameExact("FEATURE_VALUE").fullName.l shouldBe List("include/feature.h:FEATURE_VALUE:int(0)")
+          cpg.method.nameExact("LOCAL_MACRO").signature.l shouldBe List("int(0)")
           cpg.typeDecl.nameExact("FeatureBox").filename.l shouldBe List("include/feature.h")
           cpg.typeDecl.nameExact("FeatureBox").lineNumber.l shouldBe List(2)
           cpg.typeDecl.nameExact("FeatureAlias").filename.l shouldBe List("include/feature.h")
@@ -555,6 +575,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
             featureAddCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
           }
           cpg.method.nameExact("selected").ast.isReturn.code.l shouldBe List("return box.value")
+          cpg.method.nameExact("disabled_by_zero").ast.isReturn.code.l shouldBe List("return 0")
+          cpg.method.nameExact("dropped_after_undef").ast.isReturn.code.l shouldBe List("return 0")
+          cpg.call.nameExact("LOCAL_MACRO").l shouldBe Nil
+          cpg.method.nameExact("unresolved_after_undef").ast.isIdentifier.nameExact("LOCAL_MACRO").code.l shouldBe List(
+            "LOCAL_MACRO"
+          )
         } finally {
           cpg.close()
         }

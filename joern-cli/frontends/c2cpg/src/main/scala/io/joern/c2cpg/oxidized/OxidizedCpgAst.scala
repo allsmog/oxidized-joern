@@ -22,6 +22,9 @@ case class OxMacroDecl(
   visibleLine: Int
 ) extends OxDeclaration
 
+case class OxMacroUndefDecl(name: String, code: String, line: Int, sourcePath: Option[String], visibleLine: Int)
+    extends OxDeclaration
+
 case class OxIncludeDecl(name: String, code: String, line: Int, sourcePath: Option[String], visibleLine: Int)
     extends OxDeclaration
 
@@ -187,6 +190,14 @@ object OxDocument {
           line = int(value, "line"),
           parameters = value("parameters").arr.map(_.str).toSeq,
           body = str(value, "body"),
+          sourcePath = sourcePath(value),
+          visibleLine = visibleLine(value)
+        )
+      case "macroUndef" =>
+        OxMacroUndefDecl(
+          name = str(value, "name"),
+          code = str(value, "code"),
+          line = int(value, "line"),
           sourcePath = sourcePath(value),
           visibleLine = visibleLine(value)
         )

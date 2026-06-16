@@ -47,6 +47,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     document.declarations.collect { case function: OxFunctionDecl => function.name -> function }.toMap
   private val macroDeclarations: Seq[OxMacroDecl] =
     document.declarations.collect { case macroDecl: OxMacroDecl => macroDecl }
+  private val macroUndefs: Seq[OxMacroUndefDecl] =
+    document.declarations.collect { case macroUndef: OxMacroUndefDecl => macroUndef }
   private lazy val aggregateDeclarations: Seq[(OxStructDecl, Option[String])] =
     collectAggregateDeclarations(document.declarations, None)
   private lazy val aggregateFieldsByType: Map[String, Map[String, String]] =
@@ -124,6 +126,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def astForDeclaration(declaration: OxDeclaration): Seq[Ast] = {
     declaration match {
       case macroDecl: OxMacroDecl   => Seq(astForMacro(macroDecl))
+      case _: OxMacroUndefDecl      => Seq.empty
       case _: OxIncludeDecl         => Seq.empty
       case structDecl: OxStructDecl => Seq(astForStruct(structDecl))
       case enumDecl: OxEnumDecl     => Seq(astForEnum(enumDecl))
@@ -844,7 +847,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def macroForUse(name: String, line: Int): Option[OxMacroDecl] = {
-    macroDeclarations.filter(macroDecl => macroDecl.name == name && macroDecl.visibleLine <= line).lastOption
+    macroDeclarations
+      .filter(macroDecl => macroDecl.name == name && macroDecl.visibleLine <= line)
+      .filterNot(macroDecl => macroIsUndefinedAtUse(macroDecl, line))
+      .lastOption
+  }
+
+  private def macroIsUndefinedAtUse(macroDecl: OxMacroDecl, line: Int): Boolean = {
+    macroUndefs.exists { macroUndef =>
+      macroUndef.name == macroDecl.name &&
+      macroUndefIsAfterMacro(macroUndef, macroDecl) &&
+      macroUndef.visibleLine <= line
+    }
+  }
+
+  private def macroUndefIsAfterMacro(macroUndef: OxMacroUndefDecl, macroDecl: OxMacroDecl): Boolean = {
+    macroUndef.visibleLine > macroDecl.visibleLine ||
+    (macroUndef.visibleLine == macroDecl.visibleLine &&
+      macroUndef.sourcePath == macroDecl.sourcePath &&
+      macroUndef.line > macroDecl.line)
   }
 
   private def macroFullName(macroDecl: OxMacroDecl): String = {
