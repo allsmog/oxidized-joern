@@ -170,7 +170,9 @@ dependencies = [
  "clap",
  "cxxastgen-core",
  "regex",
+ "serde",
  "serde_json",
+ "shlex",
  "tempfile",
 ]
 

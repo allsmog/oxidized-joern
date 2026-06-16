@@ -1,10 +1,14 @@
 package io.joern.c2cpg.compat
 
-import io.joern.c2cpg.Config
+import io.joern.c2cpg.{C2Cpg, Config}
 import io.joern.c2cpg.parser.ParserBackend
 import io.joern.c2cpg.testfixtures.C2CpgSuite
 import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, Operators}
 import io.shiftleft.semanticcpg.language.*
+import io.shiftleft.semanticcpg.utils.FileUtil
+import io.shiftleft.semanticcpg.utils.FileUtil.*
+
+import java.nio.file.{Files, Paths}
 
 class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
@@ -177,6 +181,44 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("first").parameter.nameExact("xs").typeFullName.l shouldBe List("int*")
       cpg.method.nameExact("first").local.nameExact("local").typeFullName.l shouldBe List("int[]")
       cpg.method.nameExact("first").local.nameExact("p").typeFullName.l shouldBe List("int*")
+    }
+
+    "honor compile database source selection through the Rust backend" in {
+      FileUtil.usingTemporaryDirectory("oxidizedCompatibilitySnapshot") { dir =>
+        val selected = dir / "selected.c"
+        val ignored  = dir / "ignored.c"
+        Files.writeString(selected, "int selected() { return FROM_DB; }\n")
+        Files.writeString(ignored, "int ignored() { return 0; }\n")
+
+        val compileCommands = dir / "compile_commands.json"
+        Files.writeString(
+          compileCommands,
+          s"""
+             |[
+             |  {
+             |    "directory": "${dir.toString}",
+             |    "arguments": ["clang", "-DFROM_DB=7", "-c", "selected.c"],
+             |    "file": "${selected.toString}"
+             |  }
+             |]
+             |""".stripMargin.replace("\\", "\\\\")
+        )
+
+        val cpg = new C2Cpg()
+          .createCpg(
+            Config(parserBackend = ParserBackend.Oxidized)
+              .withInputPath(dir.toString)
+              .withCompilationDatabase((Paths.get(dir.toString) / "compile_commands.json").toString)
+          )
+          .get
+
+        try {
+          cpg.method.nameExact("selected").name.l shouldBe List("selected")
+          cpg.method.nameExact("ignored").name.l shouldBe Nil
+        } finally {
+          cpg.close()
+        }
+      }
     }
 
   }

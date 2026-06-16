@@ -77,3 +77,136 @@ fn applies_exclude_regex() {
     assert!(out.join("keep.c.json").exists());
     assert!(!out.join("skip.c.json").exists());
 }
+
+#[test]
+fn uses_compile_database_sources_and_options() {
+    let temp = tempdir().unwrap();
+    let input = temp.path().join("project");
+    let src = input.join("src");
+    let include = input.join("include");
+    let system_include = input.join("system-include");
+    let cli_include = input.join("cli-include");
+    let out = temp.path().join("out");
+    let compile_database = input.join("compile_commands.json");
+    fs::create_dir_all(&src).unwrap();
+    fs::create_dir_all(&include).unwrap();
+    fs::create_dir_all(&system_include).unwrap();
+    fs::create_dir_all(&cli_include).unwrap();
+    fs::write(src.join("main.c"), "int main() { return DB_DEFINE; }\n").unwrap();
+    fs::write(src.join("not_in_database.c"), "int stray() { return 0; }\n").unwrap();
+    fs::write(
+        &compile_database,
+        serde_json::to_string_pretty(&serde_json::json!([
+            {
+                "directory": input,
+                "file": "src/main.c",
+                "arguments": [
+                    "cc",
+                    "-I",
+                    "include",
+                    "-isystem",
+                    "system-include",
+                    "-DDB_DEFINE=1",
+                    "/DMSVC_DEFINE",
+                    "-c",
+                    "src/main.c"
+                ]
+            }
+        ]))
+        .unwrap(),
+    )
+    .unwrap();
+
+    let mut command = Command::cargo_bin("cxxastgen").unwrap();
+    command
+        .arg("-include")
+        .arg(&cli_include)
+        .arg("-define")
+        .arg("CLI_DEFINE=1")
+        .arg("-compilation-database")
+        .arg(&compile_database)
+        .arg("-out")
+        .arg(&out)
+        .arg(&input)
+        .assert()
+        .success();
+
+    assert!(out.join("src/main.c.json").exists());
+    assert!(!out.join("src/not_in_database.c.json").exists());
+
+    let document: Value =
+        serde_json::from_str(&fs::read_to_string(out.join("src/main.c.json")).unwrap()).unwrap();
+    let include_paths = document["options"]["includePaths"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|value| value.as_str().unwrap())
+        .collect::<Vec<_>>();
+    assert!(include_paths
+        .iter()
+        .any(|path| path.ends_with("/cli-include")));
+    assert!(include_paths
+        .iter()
+        .any(|path| path.ends_with("/project/include")));
+    assert!(include_paths
+        .iter()
+        .any(|path| path.ends_with("/project/system-include")));
+    assert_eq!(
+        document["options"]["defines"],
+        serde_json::json!(["CLI_DEFINE=1", "DB_DEFINE=1", "MSVC_DEFINE"])
+    );
+    assert!(document["options"]["compilationDatabase"]
+        .as_str()
+        .unwrap()
+        .ends_with("/compile_commands.json"));
+}
+
+#[test]
+fn parses_compile_database_command_lines() {
+    let temp = tempdir().unwrap();
+    let input = temp.path().join("project");
+    let include = input.join("quoted include");
+    let out = temp.path().join("out");
+    let compile_database = input.join("compile_commands.json");
+    let source = input.join("main.c");
+    fs::create_dir_all(&include).unwrap();
+    fs::write(&source, "int main() { return QUOTED_DEFINE; }\n").unwrap();
+    fs::write(
+        &compile_database,
+        serde_json::to_string_pretty(&serde_json::json!([
+            {
+                "directory": input,
+                "file": "main.c",
+                "command": "cc -I 'quoted include' -DQUOTED_DEFINE=1 -c main.c"
+            }
+        ]))
+        .unwrap(),
+    )
+    .unwrap();
+
+    let mut command = Command::cargo_bin("cxxastgen").unwrap();
+    command
+        .arg("-compilation-database")
+        .arg(&compile_database)
+        .arg("-out")
+        .arg(&out)
+        .arg(&source)
+        .assert()
+        .success();
+
+    let document: Value =
+        serde_json::from_str(&fs::read_to_string(out.join("main.c.json")).unwrap()).unwrap();
+    let include_paths = document["options"]["includePaths"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|value| value.as_str().unwrap())
+        .collect::<Vec<_>>();
+    assert!(include_paths
+        .iter()
+        .any(|path| path.ends_with("/project/quoted include")));
+    assert_eq!(
+        document["options"]["defines"],
+        serde_json::json!(["QUOTED_DEFINE=1"])
+    );
+}
