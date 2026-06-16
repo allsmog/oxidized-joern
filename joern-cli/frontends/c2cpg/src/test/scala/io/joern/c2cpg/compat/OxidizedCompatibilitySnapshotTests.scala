@@ -129,6 +129,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("Widget").external.l shouldBe Nil
       cpg.method.nameExact("Widget").isConstructor.fullName.l.sorted shouldBe
         List("Core.Widget.Widget:void()", "Core.Widget.Widget:void(int&)")
+      cpg.method.fullNameExact("Core.Widget.Widget:void(int&)").call.nameExact(Operators.assignment).code.l shouldBe
+        List("this->value = seed")
+      cpg.method.fullNameExact("Core.Widget.Widget:void(int&)").call.nameExact(Operators.assignment).argument.code.l shouldBe
+        List("this->value", "seed")
+      cpg.method.fullNameExact("Core.Widget.Widget:void()").call.nameExact(Operators.assignment).code.l shouldBe
+        List("this->value = 1")
+      cpg.method.fullNameExact("Core.Widget.Widget:void()").call.nameExact(Operators.assignment).argument.code.l shouldBe
+        List("this->value", "1")
       cpg.method.nameExact("~Widget").internal.fullName.l shouldBe List("Core.Widget.~Widget:void()")
       cpg.method.nameExact("get").internal.fullName.l shouldBe List("Core.Widget.get:int()")
       cpg.method.nameExact("normalize").fullName.l.sorted shouldBe List("Core.Widget.normalize:int()", "Core.normalize:int()")
