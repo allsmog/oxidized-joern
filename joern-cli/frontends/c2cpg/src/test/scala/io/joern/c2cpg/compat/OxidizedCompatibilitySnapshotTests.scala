@@ -4,7 +4,7 @@ import io.joern.c2cpg.{C2Cpg, Config}
 import io.joern.c2cpg.astcreation.Defines
 import io.joern.c2cpg.parser.ParserBackend
 import io.joern.c2cpg.testfixtures.C2CpgSuite
-import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, DispatchTypes, Operators}
+import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, DispatchTypes, ModifierTypes, Operators}
 import io.shiftleft.semanticcpg.language.*
 import io.shiftleft.semanticcpg.utils.FileUtil
 import io.shiftleft.semanticcpg.utils.FileUtil.*
@@ -86,6 +86,24 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         fromDbCall.signature shouldBe "int(0)"
         fromDbCall.dispatchType shouldBe DispatchTypes.INLINED
         fromDbCall.argument.l shouldBe Nil
+      }
+    }
+
+    "capture enum variant initializers through a static initializer" in {
+      val cpg = code("""
+          |enum Mode { MODE_A = 1, MODE_B = 2, MODE_C };
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val mode = cpg.typeDecl.nameExact("Mode").head
+      mode.member.name.l shouldBe List("MODE_A", "MODE_B", "MODE_C")
+      mode.member.typeFullName.l shouldBe List("int", "int", "int")
+
+      inside(mode.astChildren.isMethod.nameExact(io.joern.x2cpg.Defines.StaticInitMethodName).l) { case List(clinit) =>
+        clinit.fullName shouldBe s"Mode.${io.joern.x2cpg.Defines.StaticInitMethodName}:Mode()"
+        clinit.modifier.modifierType.l.sorted shouldBe List(ModifierTypes.CONSTRUCTOR, ModifierTypes.STATIC).sorted
+        clinit.local.name.l shouldBe List("MODE_A", "MODE_B")
+        clinit.call.nameExact(Operators.assignment).code.l.sorted shouldBe List("MODE_A = 1", "MODE_B = 2")
+        clinit.call.nameExact(Operators.assignment).argument.code.l shouldBe List("MODE_A", "1", "MODE_B", "2")
       }
     }
 

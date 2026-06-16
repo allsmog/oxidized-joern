@@ -27,7 +27,7 @@ case class OxFieldDecl(name: String, typeName: String, code: String)
 
 case class OxEnumDecl(name: String, code: String, line: Int, variants: Seq[OxEnumVariant]) extends OxDeclaration
 
-case class OxEnumVariant(name: String, value: Option[String], code: String)
+case class OxEnumVariant(name: String, value: Option[String], code: String, line: Int)
 
 case class OxGlobalVariableDecl(
   name: String,
@@ -215,7 +215,8 @@ object OxDocument {
     OxEnumVariant(
       name = str(value, "name"),
       value = value.obj.get("value").filter(!_.isNull).map(_.str),
-      code = str(value, "code")
+      code = str(value, "code"),
+      line = int(value, "line")
     )
   }
 
