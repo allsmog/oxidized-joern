@@ -471,6 +471,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val simpleName        = functionSimpleName(function)
     val functionOwner     = functionOwnerFullName(function, ownerFullName)
     val parentTypeOwner   = functionOwner.filter(aggregateTypeFullNames.contains)
+    val isStaticMethod    = isStaticFunction(function, parentTypeOwner)
     val effectiveParentTy = parentTypeOwner.map(_ => NodeTypes.TYPE_DECL).getOrElse(astParentType)
     val effectiveParentFullName = parentTypeOwner.getOrElse {
       if (function.name.contains("::")) {
@@ -493,20 +494,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option(effectiveParentFullName)
       )
         .isExternal(!function.isDefinition)
-    val implicitThisParameter = parentTypeOwner.map { ownerTypeFullName =>
-      val thisType = registerType(s"$ownerTypeFullName*")
-      val thisNode =
-        parameterInNode(
-          origin,
-          Defines.This,
-          Defines.This,
-          0,
-          isVariadic = false,
-          EvaluationStrategies.BY_SHARING,
-          thisType
-        )
-      Defines.This -> (thisType, Ast(thisNode), thisNode)
-    }.toSeq
+    val implicitThisParameter = parentTypeOwner
+      .filterNot(_ => isStaticMethod)
+      .map { ownerTypeFullName =>
+        val thisType = registerType(s"$ownerTypeFullName*")
+        val thisNode =
+          parameterInNode(
+            origin,
+            Defines.This,
+            Defines.This,
+            0,
+            isVariadic = false,
+            EvaluationStrategies.BY_SHARING,
+            thisType
+          )
+        Defines.This -> (thisType, Ast(thisNode), thisNode)
+      }
+      .toSeq
     val explicitParameters = function.parameters.zipWithIndex.map { case (parameter, index) =>
       val parameterType = registerType(normalizeType(parameter.typeName))
       val parameterNode =
@@ -543,7 +547,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val body         = blockAst(blockNode(origin, function.code, Defines.Any), (captureLocalAsts ++ bodyAsts).toList)
     val methodReturn = methodReturnNode(origin, returnType)
     val ast =
-      methodAst(method, parameters.map(_._2._2), body, methodReturn, methodModifiers(simpleName, parentTypeOwner))
+      methodAst(
+        method,
+        parameters.map(_._2._2),
+        body,
+        methodReturn,
+        methodModifiers(simpleName, parentTypeOwner, isStaticMethod)
+      )
 
     captureAstForFunction(captureContext).fold(Seq(ast))(captureAst => Seq(ast, captureAst))
   }
@@ -1289,11 +1299,27 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       )
   }
 
-  private def methodModifiers(simpleName: String, parentTypeOwner: Option[String]): Seq[NewModifier] = {
+  private def isStaticFunction(function: OxFunctionDecl, parentTypeOwner: Option[String]): Boolean = {
+    function.isStatic || parentTypeOwner.exists { ownerTypeFullName =>
+      functionEntries.exists(entry =>
+        entry.ownerFullName.contains(ownerTypeFullName) &&
+          entry.simpleName == functionSimpleName(function) &&
+          entry.function.signature == function.signature &&
+          entry.function.isStatic
+      )
+    }
+  }
+
+  private def methodModifiers(
+    simpleName: String,
+    parentTypeOwner: Option[String],
+    isStaticMethod: Boolean
+  ): Seq[NewModifier] = {
     val isConstructor = parentTypeOwner
       .flatMap(_.split('.').lastOption)
       .contains(simpleName)
-    Option.when(isConstructor)(NewModifier().modifierType(ModifierTypes.CONSTRUCTOR)).toSeq
+    Option.when(isConstructor)(NewModifier().modifierType(ModifierTypes.CONSTRUCTOR)).toSeq ++
+      Option.when(isStaticMethod)(NewModifier().modifierType(ModifierTypes.STATIC)).toSeq
   }
 
   private def declarationFilename(declaration: OxDeclaration): String = {

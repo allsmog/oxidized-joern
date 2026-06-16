@@ -185,6 +185,7 @@ pub struct FunctionDecl {
     pub return_type: String,
     pub signature: String,
     pub is_definition: bool,
+    pub is_static: bool,
     pub code: String,
     pub line: usize,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1615,6 +1616,7 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
         signature: signature(&return_type, &parameters),
         return_type,
         is_definition: true,
+        is_static: is_static_function(node, source),
         code: compact_code(node_text(node, source)),
         line: line(node),
         source_path: None,
@@ -1650,6 +1652,7 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
         signature: signature(&return_type, &parameters),
         return_type,
         is_definition: false,
+        is_static: is_static_function(node, source),
         code: statement_code(node, source),
         line: line(node),
         source_path: None,
@@ -1686,6 +1689,7 @@ fn parse_constructor_or_destructor(
         signature: signature(&return_type, &parameters),
         return_type,
         is_definition: is_definition && node.child_by_field_name("body").is_some(),
+        is_static: false,
         code: if is_definition {
             compact_code(node_text(node, source))
         } else {
@@ -1697,6 +1701,15 @@ fn parse_constructor_or_destructor(
         parameters,
         constructor_initializers,
         body,
+    })
+}
+
+fn is_static_function(node: Node, source: &[u8]) -> bool {
+    named_children(node).into_iter().any(|child| {
+        child.kind() == "storage_class_specifier"
+            && node_text(child, source)
+                .split_whitespace()
+                .any(|specifier| specifier == "static")
     })
 }
 
@@ -3164,12 +3177,14 @@ mod tests {
                   ~Widget() { value = 0; }
                   int value;
                   int get() { return value; }
+                  static int identity(int x);
                   int size();
                 };
                 int make() { return 1; }
                 }
                 Core::Widget::Widget() : value(1) {}
                 Core::Widget::~Widget() {}
+                int Core::Widget::identity(int x) { return x; }
                 int Core::Widget::outside() { return 2; }
                 int use() {
                   Core::Widget widget(7);
@@ -3215,11 +3230,14 @@ mod tests {
         method_names.sort_unstable();
         assert_eq!(
             method_names,
-            vec!["Widget", "Widget", "get", "size", "~Widget"]
+            vec!["Widget", "Widget", "get", "identity", "size", "~Widget"]
         );
         assert!(methods
             .iter()
             .any(|method| method.name == "size" && !method.is_definition));
+        assert!(methods
+            .iter()
+            .any(|method| method.name == "identity" && method.is_static && !method.is_definition));
         assert!(methods
             .iter()
             .any(|method| method.name == "get" && method.is_definition));
@@ -3298,6 +3316,19 @@ mod tests {
             .expect("expected out-of-class destructor definition");
         assert_eq!(destructor.signature, "void()");
         assert!(destructor.is_definition);
+
+        let identity = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "Core::Widget::identity" => {
+                    Some(function)
+                }
+                _ => None,
+            })
+            .expect("expected out-of-class static method definition");
+        assert_eq!(identity.signature, "int(int)");
+        assert!(identity.is_definition);
+        assert!(!identity.is_static);
 
         let outside = declarations
             .iter()
