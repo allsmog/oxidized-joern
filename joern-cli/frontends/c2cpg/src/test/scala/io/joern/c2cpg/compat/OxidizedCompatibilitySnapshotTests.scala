@@ -138,6 +138,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.typeDecl.fullNameExact("Core.Widget").fullName.l shouldBe List("Core.Widget")
       cpg.typeDecl.fullNameExact("Core.Widget").filename.l shouldBe List("Test0.cpp")
       cpg.typeDecl.fullNameExact("Core.Fancy").fullName.l shouldBe List("Core.Fancy")
+      cpg.typeDecl.fullNameExact("Core.Fancy").inheritsFromTypeFullName.l shouldBe List("Core.Widget")
+      cpg.typeDecl.fullNameExact("Core.Fancy").inheritsFromOut.fullName.l shouldBe List("Core.Widget")
       cpg.typeDecl.fullNameExact("Core.Widget").member.name.l shouldBe List("value", "instances")
       cpg.typeDecl.fullNameExact("Core.Widget").member.typeFullName.l shouldBe List("int", "int")
       cpg.typeDecl.fullNameExact("Core.Widget").member.nameExact("instances").modifier.modifierType.l shouldBe

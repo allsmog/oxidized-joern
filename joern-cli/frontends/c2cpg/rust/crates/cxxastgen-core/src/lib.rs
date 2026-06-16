@@ -116,6 +116,7 @@ pub struct StructDecl {
     pub source_path: Option<String>,
     #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
     pub visible_line: Option<usize>,
+    pub base_classes: Vec<String>,
     pub fields: Vec<FieldDecl>,
     #[serde(rename = "nestedDeclarations")]
     pub nested_declarations: Vec<Declaration>,
@@ -1370,12 +1371,31 @@ fn parse_struct_with_name(
         line: line(node),
         source_path: None,
         visible_line: None,
+        base_classes: parse_base_classes(node, source),
         fields: field_nodes
             .into_iter()
             .filter_map(|field| parse_field(field, source))
             .collect(),
         nested_declarations,
     })
+}
+
+fn parse_base_classes(node: Node, source: &[u8]) -> Vec<String> {
+    named_children(node)
+        .into_iter()
+        .filter(|child| child.kind() == "base_class_clause")
+        .flat_map(|base_clause| {
+            named_children(base_clause)
+                .into_iter()
+                .filter(|child| {
+                    matches!(
+                        child.kind(),
+                        "type_identifier" | "qualified_identifier" | "template_type"
+                    )
+                })
+                .map(|base| normalize_type(node_text(base, source)))
+        })
+        .collect()
 }
 
 fn parse_nested_aggregate_declaration(
@@ -3358,6 +3378,7 @@ mod tests {
                 _ => None,
             })
             .expect("expected Fancy class");
+        assert_eq!(fancy.base_classes, vec!["Widget"]);
         assert!(fancy.nested_declarations.iter().any(|declaration| matches!(
             declaration,
             Declaration::Function(method)
