@@ -86,9 +86,9 @@ final case class OxidizedTranslationUnitProvider() extends TranslationUnitProvid
 
   private def unsupported: UnsupportedOperationException = {
     new UnsupportedOperationException(
-      "The oxidized c2cpg parser backend is scaffolded but does not produce CPG-compatible translation units yet. " +
-        "Use --parser-backend cdt for production parsing, or run cargo run -p cxxastgen -- from " +
-        "joern-cli/frontends/c2cpg/rust to exercise the experimental Rust AST generator."
+      "The oxidized c2cpg parser backend does not expose Eclipse CDT translation units. " +
+        "Use --parser-backend oxidized through C2Cpg.createCpg to generate CPGs from Rust JSON, " +
+        "or use --parser-backend cdt for CDT translation units."
     )
   }
 

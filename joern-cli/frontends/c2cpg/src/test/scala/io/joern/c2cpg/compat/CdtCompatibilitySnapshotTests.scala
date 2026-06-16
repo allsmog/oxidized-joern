@@ -180,7 +180,7 @@ class CdtCompatibilitySnapshotTests extends C2CpgSuite {
 
 }
 
-private object CompatibilitySnapshot {
+object CompatibilitySnapshot {
 
   private val MacTempPath  = """/var/folders/.+?/T/c2cpgCompatibilitySnapshot\d+/""".r
   private val UnixTempPath = """/tmp/c2cpgCompatibilitySnapshot\d+/""".r
