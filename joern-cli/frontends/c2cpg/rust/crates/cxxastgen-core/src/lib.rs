@@ -328,6 +328,9 @@ pub fn parse_file(path: &Path, options: &ParseOptions) -> Result<CxxAstDocument>
     let metadata = fs::metadata(path)
         .with_context(|| format!("failed to read metadata for '{}'", path.display()))?;
 
+    let mut declarations = synthetic_macro_declarations(&options.defines);
+    declarations.extend(parse_declarations(&source, language_for_path(path))?);
+
     Ok(CxxAstDocument {
         schema_version: SCHEMA_VERSION,
         backend: BACKEND_NAME,
@@ -336,7 +339,7 @@ pub fn parse_file(path: &Path, options: &ParseOptions) -> Result<CxxAstDocument>
         source_bytes: metadata.len(),
         source_lines: source.lines().count(),
         options: options.clone(),
-        declarations: parse_declarations(&source, language_for_path(path))?,
+        declarations,
     })
 }
 
@@ -489,7 +492,39 @@ fn parse_macro(node: Node, source: &[u8]) -> Option<MacroDecl> {
         .trim_start()
         .strip_prefix("define")
         .unwrap_or(&code)
-        .trim();
+        .trim()
+        .to_string();
+    macro_from_definition(&definition, code, line(node))
+}
+
+fn synthetic_macro_declarations(defines: &[String]) -> Vec<Declaration> {
+    defines
+        .iter()
+        .filter_map(|define| macro_from_define_option(define))
+        .map(Declaration::Macro)
+        .collect()
+}
+
+fn macro_from_define_option(define: &str) -> Option<MacroDecl> {
+    let define = define.trim();
+    if define.is_empty() {
+        return None;
+    }
+
+    let (definition, code) = match define.split_once('=') {
+        Some((head, body)) if body.is_empty() => {
+            (head.trim().to_string(), format!("#define {}", head.trim()))
+        }
+        Some((head, body)) => (
+            format!("{} {}", head.trim(), body.trim()),
+            format!("#define {} {}", head.trim(), body.trim()),
+        ),
+        None => (format!("{define} 1"), format!("#define {define} 1")),
+    };
+    macro_from_definition(&definition, code, 1)
+}
+
+fn macro_from_definition(definition: &str, code: String, line: usize) -> Option<MacroDecl> {
     let name_end = definition
         .find(|ch: char| ch == '(' || ch.is_whitespace())
         .unwrap_or(definition.len());
@@ -518,7 +553,7 @@ fn parse_macro(node: Node, source: &[u8]) -> Option<MacroDecl> {
     Some(MacroDecl {
         name,
         code,
-        line: line(node),
+        line,
         parameters,
         body,
     })
@@ -1685,6 +1720,55 @@ mod tests {
             language_for_path(Path::new("README.md")),
             SourceLanguage::Unknown
         );
+    }
+
+    #[test]
+    fn parse_file_adds_command_line_defines_as_macros() {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("clock should be after Unix epoch")
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "cxxastgen-core-defines-{}-{unique}.c",
+            std::process::id()
+        ));
+        fs::write(&path, "int selected() { return FROM_DB; }\n").expect("write temp source");
+
+        let document = parse_file(
+            &path,
+            &ParseOptions {
+                include_paths: Vec::new(),
+                defines: vec![
+                    "FROM_DB=7".to_string(),
+                    "FEATURE".to_string(),
+                    "EMPTY=".to_string(),
+                    "INC(x)=((x) + 1)".to_string(),
+                ],
+                compilation_database: None,
+                skip_function_bodies: false,
+            },
+        )
+        .expect("parse temp source");
+        fs::remove_file(&path).ok();
+
+        let [Declaration::Macro(from_db), Declaration::Macro(feature), Declaration::Macro(empty), Declaration::Macro(inc), Declaration::Function(function)] =
+            document.declarations.as_slice()
+        else {
+            panic!("expected synthetic macros followed by the parsed function");
+        };
+        assert_eq!(from_db.name, "FROM_DB");
+        assert_eq!(from_db.code, "#define FROM_DB 7");
+        assert_eq!(from_db.body, "7");
+        assert_eq!(feature.name, "FEATURE");
+        assert_eq!(feature.code, "#define FEATURE 1");
+        assert_eq!(feature.body, "1");
+        assert_eq!(empty.name, "EMPTY");
+        assert_eq!(empty.code, "#define EMPTY");
+        assert_eq!(empty.body, "");
+        assert_eq!(inc.name, "INC");
+        assert_eq!(inc.parameters, vec!["x".to_string()]);
+        assert_eq!(inc.body, "((x) + 1)");
+        assert_eq!(function.name, "selected");
     }
 
     #[test]

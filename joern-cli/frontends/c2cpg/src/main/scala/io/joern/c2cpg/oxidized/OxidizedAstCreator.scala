@@ -44,8 +44,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private val usedTypes: mutable.Set[String] = mutable.Set(Defines.Any, Defines.Void)
   private val functionsByName: Map[String, OxFunctionDecl] =
     document.declarations.collect { case function: OxFunctionDecl => function.name -> function }.toMap
-  private val macrosByName: Map[String, OxMacroDecl] =
-    document.declarations.collect { case macroDecl: OxMacroDecl => macroDecl.name -> macroDecl }.toMap
+  private val macroDeclarations: Seq[OxMacroDecl] =
+    document.declarations.collect { case macroDecl: OxMacroDecl => macroDecl }
   private lazy val aggregateDeclarations: Seq[(OxStructDecl, Option[String])] =
     collectAggregateDeclarations(document.declarations, None)
   private lazy val aggregateFieldsByType: Map[String, Map[String, String]] =
@@ -58,8 +58,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           .toMap
       }
     }.toMap
-  private val macroFullNames: Map[String, String] =
-    macrosByName.map { case (name, macroDecl) => name -> macroFullName(macroDecl) }
+  private val IntegerLiteralPattern = """[+-]?(?:0[xX][0-9a-fA-F]+|\d+)[uUlL]*""".r
 
   private var scope: Map[String, ScopeEntry]                            = Map.empty
   private var globalLocalEntries: Map[OxGlobalVariableDecl, ScopeEntry] = Map.empty
@@ -156,11 +155,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         parameterInNode(origin, name, name, index + 1, isVariadic = false, EvaluationStrategies.BY_VALUE, Defines.Any)
       )
     }
-    val signature = s"${Defines.Any}(${macroDecl.parameters.size})"
+    val returnType = registerType(macroReturnTypeFullName(macroDecl))
+    val signature  = macroSignature(macroDecl)
     val method =
       methodNode(origin, macroDecl.name, macroDecl.name, macroFullName(macroDecl), Option(signature), filename)
-    val body         = blockAst(blockNode(origin, macroDecl.body, Defines.Any))
-    val methodReturn = methodReturnNode(origin, Defines.Any)
+    val body         = blockAst(blockNode(origin, macroDecl.body, returnType))
+    val methodReturn = methodReturnNode(origin, returnType)
     methodAst(method, params, body, methodReturn)
   }
 
@@ -468,7 +468,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def expressionAst(expression: OxExpression): Ast = {
     expression match {
       case identifier: OxIdentifier =>
-        identifierAst(identifier.name, identifier.code, identifier.line)
+        objectLikeMacroAst(identifier).getOrElse(identifierAst(identifier.name, identifier.code, identifier.line))
       case literal: OxLiteral =>
         Ast(literalNode(OxOrigin(literal), literal.code, literalType(literal.value)))
       case binary: OxBinary =>
@@ -552,14 +552,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def directCallAst(call: OxCall): Ast = {
-    val (methodFullName, signature, typeFullName) = callTargetInfo(call.name)
+    val (methodFullName, signature, typeFullName, dispatchType) = callTargetInfo(call.name, call.line)
     val callNode_ =
       callNode(
         OxOrigin(call),
         call.code,
         call.name,
         methodFullName,
-        DispatchTypes.STATIC_DISPATCH,
+        dispatchType,
         signature,
         Option(registerType(typeFullName))
       )
@@ -744,25 +744,71 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
-  private def callTargetInfo(name: String): (String, Option[String], String) = {
-    macroFullNames.get(name) match {
-      case Some(fullName) => (fullName, Option(s"${Defines.Any}(${macrosByName(name).parameters.size})"), Defines.Any)
+  private def objectLikeMacroAst(identifier: OxIdentifier): Option[Ast] = {
+    macroForUse(identifier.name, identifier.line)
+      .filter(_.parameters.isEmpty)
+      .map { macroDecl =>
+        val typeFullName = macroReturnTypeFullName(macroDecl)
+        val callNode_ =
+          callNode(
+            OxOrigin(identifier),
+            identifier.code,
+            identifier.name,
+            macroFullName(macroDecl),
+            DispatchTypes.INLINED,
+            Option(macroSignature(macroDecl)),
+            Option(registerType(typeFullName))
+          )
+        callAst(callNode_, Seq.empty)
+      }
+  }
+
+  private def callTargetInfo(name: String, line: Int): (String, Option[String], String, String) = {
+    macroForUse(name, line) match {
+      case Some(macroDecl) =>
+        (
+          macroFullName(macroDecl),
+          Option(macroSignature(macroDecl)),
+          macroReturnTypeFullName(macroDecl),
+          DispatchTypes.INLINED
+        )
       case None =>
         functionsByName.get(name) match {
           case Some(function) =>
-            (function.name, Option(function.signature), normalizeType(function.returnType))
+            (
+              function.name,
+              Option(function.signature),
+              normalizeType(function.returnType),
+              DispatchTypes.STATIC_DISPATCH
+            )
           case None =>
-            (name, None, Defines.Any)
+            (name, None, Defines.Any, DispatchTypes.STATIC_DISPATCH)
         }
     }
   }
 
+  private def macroForUse(name: String, line: Int): Option[OxMacroDecl] = {
+    macroDeclarations.filter(macroDecl => macroDecl.name == name && macroDecl.line <= line).lastOption
+  }
+
   private def macroFullName(macroDecl: OxMacroDecl): String = {
-    s"$filename:${macroDecl.name}:${Defines.Any}(${macroDecl.parameters.size})"
+    s"$filename:${macroDecl.name}:${macroSignature(macroDecl)}"
+  }
+
+  private def macroSignature(macroDecl: OxMacroDecl): String = {
+    s"${macroReturnTypeFullName(macroDecl)}(${macroDecl.parameters.size})"
+  }
+
+  private def macroReturnTypeFullName(macroDecl: OxMacroDecl): String = {
+    if (macroDecl.parameters.isEmpty && isIntegerLiteral(macroDecl.body)) "int" else Defines.Any
   }
 
   private def literalType(value: String): String = {
-    if (value.forall(_.isDigit)) registerType("int") else registerType(Defines.Any)
+    if (isIntegerLiteral(value)) registerType("int") else registerType(Defines.Any)
+  }
+
+  private def isIntegerLiteral(value: String): Boolean = {
+    IntegerLiteralPattern.pattern.matcher(value.trim).matches()
   }
 
   private def operatorFor(operator: String): String = {
