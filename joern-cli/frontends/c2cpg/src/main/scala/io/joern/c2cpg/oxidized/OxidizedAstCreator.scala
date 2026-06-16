@@ -734,6 +734,29 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           }
         }
         operatorCallAst(OxOrigin(sizeOf), sizeOf.code, Operators.sizeOf, operand.toSeq)
+      case newExpression: OxNew =>
+        val typeArgument =
+          Ast(
+            literalNode(
+              OxOrigin(newExpression.typeName, Option(newExpression.line)),
+              newExpression.typeName,
+              registerType(Defines.Any)
+            )
+          )
+        operatorCallAst(
+          OxOrigin(newExpression),
+          newExpression.code,
+          Operators.alloc,
+          typeArgument +: newExpression.arguments.map(expressionAst)
+        )
+      case deleteExpression: OxDelete =>
+        operatorCallAst(
+          OxOrigin(deleteExpression),
+          deleteExpression.code,
+          Operators.delete,
+          Seq(expressionAst(deleteExpression.argument)),
+          typeFullName = registerType(Defines.Void)
+        )
       case call: OxCall =>
         astForCallExpression(call)
       case fieldAccess: OxFieldAccess =>
@@ -816,7 +839,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case _: OxDesignatedInitializer   => false
       case _: OxDesignator              => false
       case _: OxLiteral                 => false
-      case _: OxBinary | _: OxConditional | _: OxSizeOf => false
+      case _: OxBinary | _: OxConditional | _: OxSizeOf | _: OxNew | _: OxDelete => false
     }
   }
 

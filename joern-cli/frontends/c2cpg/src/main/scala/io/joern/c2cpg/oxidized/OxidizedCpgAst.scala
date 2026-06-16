@@ -169,6 +169,10 @@ case class OxCast(typeName: String, code: String, line: Int, value: OxExpression
 
 case class OxSizeOf(code: String, line: Int, value: Option[OxExpression], typeName: Option[String]) extends OxExpression
 
+case class OxNew(typeName: String, code: String, line: Int, arguments: Seq[OxExpression]) extends OxExpression
+
+case class OxDelete(code: String, line: Int, argument: OxExpression) extends OxExpression
+
 case class OxCall(name: String, code: String, line: Int, callee: OxExpression, arguments: Seq[OxExpression])
     extends OxExpression
 
@@ -443,6 +447,15 @@ object OxDocument {
           value = value.obj.get("value").filter(!_.isNull).map(expression),
           typeName = value.obj.get("typeName").filter(!_.isNull).map(_.str)
         )
+      case "new" =>
+        OxNew(
+          typeName = str(value, "typeName"),
+          code = str(value, "code"),
+          line = int(value, "line"),
+          arguments = value("arguments").arr.map(expression).toSeq
+        )
+      case "delete" =>
+        OxDelete(code = str(value, "code"), line = int(value, "line"), argument = expression(value("argument")))
       case "call" =>
         OxCall(
           name = str(value, "name"),
