@@ -68,6 +68,8 @@ pub struct StructDecl {
     pub code: String,
     pub line: usize,
     pub fields: Vec<FieldDecl>,
+    #[serde(rename = "nestedDeclarations")]
+    pub nested_declarations: Vec<Declaration>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -406,7 +408,7 @@ fn parse_declarations(source: &str, language: SourceLanguage) -> Result<Vec<Decl
                 declarations.extend(parse_anonymous_typedef_aggregate_declarations(child, bytes));
                 declarations.extend(parse_type_declarations(child, bytes));
             }
-            "struct_specifier" => {
+            "struct_specifier" | "union_specifier" => {
                 if let Some(declaration) = parse_struct(child, bytes) {
                     declarations.push(Declaration::Struct(declaration));
                 }
@@ -508,10 +510,12 @@ fn parse_macro(node: Node, source: &[u8]) -> Option<MacroDecl> {
 }
 
 fn parse_type_declarations(node: Node, source: &[u8]) -> Vec<Declaration> {
-    descendants(node)
+    named_children(node)
         .into_iter()
         .filter_map(|child| match child.kind() {
-            "struct_specifier" if child.child_by_field_name("body").is_some() => {
+            "struct_specifier" | "union_specifier"
+                if child.child_by_field_name("body").is_some() =>
+            {
                 parse_struct(child, source).map(Declaration::Struct)
             }
             "enum_specifier" if child.child_by_field_name("body").is_some() => {
@@ -529,6 +533,10 @@ fn parse_struct(node: Node, source: &[u8]) -> Option<StructDecl> {
 
 fn parse_struct_with_name(node: Node, source: &[u8], name: String) -> Option<StructDecl> {
     let body = node.child_by_field_name("body")?;
+    let nested_declarations = named_children(body)
+        .into_iter()
+        .flat_map(|field| parse_nested_aggregate_declaration(field, source))
+        .collect();
     Some(StructDecl {
         name,
         code: compact_code(node_text(node, source)),
@@ -538,10 +546,40 @@ fn parse_struct_with_name(node: Node, source: &[u8], name: String) -> Option<Str
             .filter(|child| child.kind() == "field_declaration")
             .filter_map(|field| parse_field(field, source))
             .collect(),
+        nested_declarations,
     })
 }
 
+fn parse_nested_aggregate_declaration(node: Node, source: &[u8]) -> Vec<Declaration> {
+    if node.kind() != "field_declaration" {
+        return Vec::new();
+    }
+    let Some(type_node) = node.child_by_field_name("type") else {
+        return Vec::new();
+    };
+    if type_node.child_by_field_name("body").is_none() {
+        return Vec::new();
+    }
+    match type_node.kind() {
+        "struct_specifier" | "union_specifier" => parse_struct(type_node, source)
+            .map(Declaration::Struct)
+            .into_iter()
+            .collect(),
+        "enum_specifier" => parse_enum(type_node, source)
+            .map(Declaration::Enum)
+            .into_iter()
+            .collect(),
+        _ => Vec::new(),
+    }
+}
+
 fn parse_field(node: Node, source: &[u8]) -> Option<FieldDecl> {
+    let type_node = node.child_by_field_name("type");
+    if type_node.is_some_and(|type_node| type_node.child_by_field_name("body").is_some())
+        && node.child_by_field_name("declarator").is_none()
+    {
+        return None;
+    }
     let code = node_text(node, source).trim().trim_end_matches(';').trim();
     let (type_name, name) =
         declaration_type_and_name(node, source).or_else(|| split_type_and_name(code))?;
@@ -626,7 +664,7 @@ fn parse_anonymous_typedef_aggregate_declarations(node: Node, source: &[u8]) -> 
         .filter_map(|declarator| {
             let alias = declarator_name(declarator, source)?;
             match type_node.kind() {
-                "struct_specifier" => {
+                "struct_specifier" | "union_specifier" => {
                     parse_struct_with_name(type_node, source, alias).map(Declaration::Struct)
                 }
                 "enum_specifier" => {
@@ -1296,7 +1334,7 @@ fn declarator_name(node: Node, source: &[u8]) -> Option<String> {
 
 fn type_name_from_type_node(node: Node, source: &[u8]) -> String {
     match node.kind() {
-        "struct_specifier" | "enum_specifier" => node
+        "struct_specifier" | "union_specifier" | "enum_specifier" => node
             .child_by_field_name("name")
             .map(|name| normalize_type(node_text(name, source)))
             .unwrap_or_else(|| normalize_type(node_text(node, source))),
@@ -1305,8 +1343,10 @@ fn type_name_from_type_node(node: Node, source: &[u8]) -> String {
 }
 
 fn is_anonymous_aggregate_type(node: Node) -> bool {
-    matches!(node.kind(), "struct_specifier" | "enum_specifier")
-        && node.child_by_field_name("body").is_some()
+    matches!(
+        node.kind(),
+        "struct_specifier" | "union_specifier" | "enum_specifier"
+    ) && node.child_by_field_name("body").is_some()
         && node.child_by_field_name("name").is_none()
 }
 
@@ -1430,6 +1470,7 @@ fn normalize_type(raw: &str) -> String {
         .to_string();
     normalized
         .strip_prefix("struct ")
+        .or_else(|| normalized.strip_prefix("union "))
         .or_else(|| normalized.strip_prefix("enum "))
         .unwrap_or(&normalized)
         .to_string()
@@ -1454,15 +1495,6 @@ fn signature(return_type: &str, params: &[ParameterDecl]) -> String {
 fn named_children(node: Node) -> Vec<Node> {
     let mut cursor = node.walk();
     node.named_children(&mut cursor).collect()
-}
-
-fn descendants(node: Node) -> Vec<Node> {
-    let mut result = Vec::new();
-    for child in named_children(node) {
-        result.push(child);
-        result.extend(descendants(child));
-    }
-    result
 }
 
 fn operator_text<'a>(node: Node, source: &'a [u8]) -> Option<&'a str> {
@@ -2160,6 +2192,78 @@ mod tests {
         assert_eq!(local_type, "int[]");
         assert_eq!(pointer_name, "p");
         assert_eq!(pointer_type, "int*");
+    }
+
+    #[test]
+    fn parses_nested_aggregates_unions_and_bitfields() {
+        let sample = r#"
+                struct Outer {
+                  int flags:3;
+                  struct Inner {
+                    int a;
+                    union Choice {
+                      int i;
+                      char c;
+                    };
+                  };
+                  union Storage {
+                    int x;
+                    char y;
+                  };
+                };
+                union Top {
+                  int i;
+                  char c;
+                };
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::C)
+            .expect("nested aggregate sample should parse");
+
+        assert_eq!(declarations.len(), 2);
+        let Declaration::Struct(outer) = &declarations[0] else {
+            panic!("expected outer aggregate");
+        };
+        assert_eq!(outer.name, "Outer");
+        assert_eq!(outer.fields.len(), 1);
+        assert_eq!(outer.fields[0].name, "flags");
+        assert_eq!(outer.fields[0].type_name, "int");
+        assert_eq!(outer.fields[0].code, "int flags:3");
+
+        let [Declaration::Struct(inner), Declaration::Struct(storage)] =
+            outer.nested_declarations.as_slice()
+        else {
+            panic!("expected nested struct and union");
+        };
+        assert_eq!(inner.name, "Inner");
+        assert_eq!(inner.fields[0].name, "a");
+        let [Declaration::Struct(choice)] = inner.nested_declarations.as_slice() else {
+            panic!("expected nested union under inner");
+        };
+        assert_eq!(choice.name, "Choice");
+        assert_eq!(
+            choice
+                .fields
+                .iter()
+                .map(|field| field.name.as_str())
+                .collect::<Vec<_>>(),
+            vec!["i", "c"]
+        );
+
+        assert_eq!(storage.name, "Storage");
+        assert_eq!(
+            storage
+                .fields
+                .iter()
+                .map(|field| field.name.as_str())
+                .collect::<Vec<_>>(),
+            vec!["x", "y"]
+        );
+
+        let Declaration::Struct(top) = &declarations[1] else {
+            panic!("expected top-level union");
+        };
+        assert_eq!(top.name, "Top");
+        assert_eq!(top.fields.len(), 2);
     }
 
     #[test]

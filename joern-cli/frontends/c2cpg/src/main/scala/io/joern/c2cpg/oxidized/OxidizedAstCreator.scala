@@ -45,11 +45,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     document.declarations.collect { case function: OxFunctionDecl => function.name -> function }.toMap
   private val macrosByName: Map[String, OxMacroDecl] =
     document.declarations.collect { case macroDecl: OxMacroDecl => macroDecl.name -> macroDecl }.toMap
+  private lazy val aggregateDeclarations: Seq[(OxStructDecl, Option[String])] =
+    collectAggregateDeclarations(document.declarations, None)
   private lazy val aggregateFieldsByType: Map[String, Map[String, String]] =
-    document.declarations.collect { case structDecl: OxStructDecl =>
-      normalizeType(structDecl.name) -> structDecl.fields
-        .map(field => field.name -> normalizeType(field.typeName))
-        .toMap
+    aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
+      val localName = normalizeType(structDecl.name)
+      val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
+      Seq(localName, fullName).distinct.map { typeName =>
+        typeName -> structDecl.fields
+          .map(field => field.name -> normalizeType(field.typeName))
+          .toMap
+      }
     }.toMap
   private val macroFullNames: Map[String, String] =
     macrosByName.map { case (name, macroDecl) => name -> macroFullName(macroDecl) }
@@ -140,9 +146,32 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     methodAst(method, params, body, methodReturn)
   }
 
+  private def collectAggregateDeclarations(
+    declarations: Seq[OxDeclaration],
+    parentFullName: Option[String]
+  ): Seq[(OxStructDecl, Option[String])] = {
+    declarations.flatMap {
+      case structDecl: OxStructDecl =>
+        val localName = normalizeType(structDecl.name)
+        val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
+        (structDecl -> parentFullName) +: collectAggregateDeclarations(structDecl.nestedDeclarations, Option(fullName))
+      case _ =>
+        Seq.empty
+    }
+  }
+
   private def astForStruct(structDecl: OxStructDecl): Ast = {
-    val origin   = OxOrigin(structDecl)
-    val typeName = registerType(normalizeType(structDecl.name))
+    astForStruct(structDecl, parentTypeFullName = None, parentAstFullName = globalNamespaceBlock().fullName)
+  }
+
+  private def astForStruct(
+    structDecl: OxStructDecl,
+    parentTypeFullName: Option[String],
+    parentAstFullName: String
+  ): Ast = {
+    val origin        = OxOrigin(structDecl)
+    val localTypeName = normalizeType(structDecl.name)
+    val typeName = registerType(parentTypeFullName.map(parent => s"$parent.$localTypeName").getOrElse(localTypeName))
     val typeDecl =
       typeDeclNode(
         origin,
@@ -151,7 +180,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         filename,
         structDecl.code,
         NodeTypes.NAMESPACE_BLOCK,
-        globalNamespaceBlock().fullName,
+        parentAstFullName,
         alias = aggregateAlias(typeName)
       )
     val fieldAsts = structDecl.fields.map { field =>
@@ -159,12 +188,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         memberNode(origin.copy(code = field.code), field.name, field.code, registerType(normalizeType(field.typeName)))
       )
     }
-    Ast(typeDecl).withChildren(fieldAsts)
+    val nestedAsts = structDecl.nestedDeclarations.flatMap {
+      case nestedStruct: OxStructDecl => Seq(astForStruct(nestedStruct, Option(typeName), typeName))
+      case nestedEnum: OxEnumDecl     => Seq(astForEnum(nestedEnum, Option(typeName), typeName))
+      case _                          => Seq.empty
+    }
+    Ast(typeDecl).withChildren(fieldAsts ++ nestedAsts)
   }
 
   private def astForEnum(enumDecl: OxEnumDecl): Ast = {
-    val origin   = OxOrigin(enumDecl)
-    val typeName = registerType(normalizeType(enumDecl.name))
+    astForEnum(enumDecl, parentTypeFullName = None, parentAstFullName = globalNamespaceBlock().fullName)
+  }
+
+  private def astForEnum(enumDecl: OxEnumDecl, parentTypeFullName: Option[String], parentAstFullName: String): Ast = {
+    val origin        = OxOrigin(enumDecl)
+    val localTypeName = normalizeType(enumDecl.name)
+    val typeName = registerType(parentTypeFullName.map(parent => s"$parent.$localTypeName").getOrElse(localTypeName))
     val typeDecl =
       typeDeclNode(
         origin,
@@ -173,7 +212,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         filename,
         enumDecl.code,
         NodeTypes.NAMESPACE_BLOCK,
-        globalNamespaceBlock().fullName,
+        parentAstFullName,
         alias = aggregateAlias(typeName)
       )
     val variantAsts = enumDecl.variants.map { variant =>
@@ -762,6 +801,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def normalizeType(typeName: String): String = {
     typeName
       .stripPrefix("struct ")
+      .stripPrefix("union ")
       .stripPrefix("enum ")
       .trim
   }
