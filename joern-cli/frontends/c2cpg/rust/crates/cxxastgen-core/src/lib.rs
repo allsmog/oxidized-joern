@@ -3911,6 +3911,100 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_constructor_temporaries() {
+        let sample = r#"
+                namespace Core {
+                class Widget {
+                public:
+                  Widget();
+                  Widget(const Widget& other) {}
+                  Widget(Widget&& other) {}
+                  ~Widget() {}
+                };
+                void accept(Widget&& widget) {}
+                }
+                int use() {
+                  Core::Widget source;
+                  Core::accept(Core::Widget());
+                  Core::accept(Core::Widget(source));
+                  return 0;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("constructor temporary sample should parse");
+        let namespace = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Namespace(namespace) if namespace.name == "Core" => Some(namespace),
+                _ => None,
+            })
+            .expect("expected Core namespace declaration");
+        let accept = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "accept" => Some(function),
+                _ => None,
+            })
+            .expect("expected accept function");
+        assert_eq!(accept.signature, "void(Widget&&)");
+
+        let use_function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        let [Statement::LocalDecl {
+            name: source_name,
+            type_name: source_type,
+            ..
+        }, Statement::Expression {
+            expression: default_call,
+            ..
+        }, Statement::Expression {
+            expression: copy_call,
+            ..
+        }, Statement::Return { .. }] = use_function.body.as_slice()
+        else {
+            panic!("expected source local, two accept calls, and return");
+        };
+        assert_eq!(source_name, "source");
+        assert_eq!(source_type, "Core::Widget");
+
+        let Expression::Call {
+            name: default_accept_name,
+            arguments: default_arguments,
+            ..
+        } = default_call
+        else {
+            panic!("expected default temporary accept call");
+        };
+        assert_eq!(default_accept_name, "Core::accept");
+        assert!(matches!(
+            default_arguments.as_slice(),
+            [Expression::Call { name, arguments, .. }] if name == "Core::Widget" && arguments.is_empty()
+        ));
+
+        let Expression::Call {
+            name: copy_accept_name,
+            arguments: copy_arguments,
+            ..
+        } = copy_call
+        else {
+            panic!("expected copy temporary accept call");
+        };
+        assert_eq!(copy_accept_name, "Core::accept");
+        assert!(matches!(
+            copy_arguments.as_slice(),
+            [Expression::Call { name, arguments, .. }]
+                if name == "Core::Widget"
+                    && matches!(arguments.as_slice(), [Expression::Identifier { name, .. }] if name == "source")
+        ));
+    }
+
+    #[test]
     fn parses_cpp_new_and_delete_expressions() {
         let sample = r#"
                 int *allocate(int n) {

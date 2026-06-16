@@ -51,6 +51,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     arguments: Seq[OxExpression]
   )
   private final case class LocalDestructor(name: String, line: Int, entry: FunctionEntry)
+  private final case class TemporaryDestructor(code: String, line: Int, entry: FunctionEntry)
   private final case class JumpCleanupTarget(
     breakPreservedScopeDepth: Option[Int],
     continuePreservedScopeDepth: Option[Int]
@@ -752,7 +753,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             Seq(localAst)
         }
       case assignment: OxAssignment =>
-        Seq {
+        val assignmentAst_ =
           overloadedAssignmentOperatorAst(assignment).getOrElse {
             val left  = expressionAst(assignment.left)
             val right = expressionAst(assignment.right)
@@ -762,9 +763,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
               operatorCallAst(OxOrigin(assignment), assignment.code, operatorFor(assignment.operator), Seq(left, right))
             }
           }
-        }
+        assignmentAst_ +: temporaryDestructorAstsForExpressions(Seq(assignment.left, assignment.right))
       case ret: OxReturn =>
-        activeLocalDestructors.map(localDestructorAst) :+
+        temporaryDestructorAstsForExpressions(ret.expression.toSeq) ++ activeLocalDestructors.map(localDestructorAst) :+
           returnAst(returnNode(OxOrigin(ret), ret.code), ret.expression.toSeq.map(expressionAst))
       case ifStmt: OxIf =>
         val ifNode       = controlStructureNode(OxOrigin(ifStmt), ControlStructureTypes.IF, ifStmt.code)
@@ -867,7 +868,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Ast(jumpTargetNode(OxOrigin(caseStmt), name, caseStmt.code)) +:
           (caseStmt.value.toSeq.map(expressionAst) ++ caseStmt.body.flatMap(astsForStatement))
       case expressionStatement: OxExpressionStatement =>
-        Seq(expressionAst(expressionStatement.expression))
+        expressionAst(expressionStatement.expression) +:
+          temporaryDestructorAstsForExpressions(Seq(expressionStatement.expression))
     }
   }
 
@@ -926,6 +928,77 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
     val candidates      = functionEntries.filter(entry => entry.qualifiedName == s"$typeName.$constructorName")
     selectFunctionEntry(candidates, Some(arguments))
+  }
+
+  private def constructorTemporaryTypeFullName(call: OxCall): Option[String] = {
+    resolveAggregateTypeFullName(call.name)
+  }
+
+  private def constructorTemporaryEntry(call: OxCall): Option[(String, FunctionEntry)] = {
+    constructorTemporaryTypeFullName(call).flatMap(typeName =>
+      constructorEntry(typeName, call.arguments).map(typeName -> _)
+    )
+  }
+
+  private def temporaryDestructorAstsForExpressions(expressions: Seq[OxExpression]): Seq[Ast] = {
+    expressions.flatMap(temporaryDestructorsForExpression).reverse.map(temporaryDestructorAst)
+  }
+
+  private def temporaryDestructorsForExpression(expression: OxExpression): Seq[TemporaryDestructor] = {
+    val nested = expression match {
+      case OxBinary(_, _, _, left, right) =>
+        Seq(left, right).flatMap(temporaryDestructorsForExpression)
+      case OxUnary(_, _, _, _, argument) =>
+        temporaryDestructorsForExpression(argument)
+      case OxConditional(_, _, condition, consequence, alternative) =>
+        Seq(condition).flatMap(temporaryDestructorsForExpression) ++
+          consequence.toSeq.flatMap(temporaryDestructorsForExpression) ++
+          Seq(alternative).flatMap(temporaryDestructorsForExpression)
+      case OxCast(_, _, _, value) =>
+        temporaryDestructorsForExpression(value)
+      case OxSizeOf(_, _, value, _) =>
+        value.toSeq.flatMap(temporaryDestructorsForExpression)
+      case OxNew(_, _, _, arguments) =>
+        arguments.flatMap(temporaryDestructorsForExpression)
+      case OxDelete(_, _, argument) =>
+        temporaryDestructorsForExpression(argument)
+      case OxCall(_, _, _, callee, arguments) =>
+        temporaryDestructorsForExpression(callee) ++ arguments.flatMap(temporaryDestructorsForExpression)
+      case OxFieldAccess(_, _, _, base) =>
+        temporaryDestructorsForExpression(base)
+      case OxIndexAccess(_, _, base, index) =>
+        Seq(base, index).flatMap(temporaryDestructorsForExpression)
+      case OxInitializerList(_, _, elements) =>
+        elements.flatMap(temporaryDestructorsForExpression)
+      case OxDesignatedInitializer(_, _, designator, value) =>
+        Seq(designator, value).flatMap(temporaryDestructorsForExpression)
+      case _: OxIdentifier | _: OxLiteral | _: OxDesignator =>
+        Seq.empty
+    }
+    val current = expression match {
+      case call: OxCall =>
+        constructorTemporaryTypeFullName(call)
+          .flatMap(destructorEntryForType)
+          .map(entry => TemporaryDestructor(s"${call.code}.${entry.simpleName}()", call.line, entry))
+          .toSeq
+      case _ =>
+        Seq.empty
+    }
+    nested ++ current
+  }
+
+  private def temporaryDestructorAst(destructor: TemporaryDestructor): Ast = {
+    val callNode_ =
+      callNode(
+        OxOrigin(destructor.code, Option(destructor.line)),
+        destructor.code,
+        destructor.entry.simpleName,
+        destructor.entry.fullName,
+        DispatchTypes.STATIC_DISPATCH,
+        Option(destructor.entry.function.signature),
+        Option(registerType(Defines.Void))
+      )
+    createCallAst(callNode_)
   }
 
   private def destructorEntryForType(typeName: String): Option[FunctionEntry] = {
@@ -1334,12 +1407,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def callReturnTypeFullName(call: OxCall): Option[String] = {
-    overloadedCallOperatorTarget(call)
-      .map(target => normalizeType(target.entry.function.returnType))
+    constructorTemporaryTypeFullName(call)
       .orElse(
-        expressionTypeFullName(call.callee)
-          .flatMap(returnTypeFromFunctionPointer)
-          .orElse(functionEntryForCall(call).map(entry => normalizeType(entry.function.returnType)))
+        overloadedCallOperatorTarget(call)
+          .map(target => normalizeType(target.entry.function.returnType))
+          .orElse(
+            expressionTypeFullName(call.callee)
+              .flatMap(returnTypeFromFunctionPointer)
+              .orElse(functionEntryForCall(call).map(entry => normalizeType(entry.function.returnType)))
+          )
       )
   }
 
@@ -1634,30 +1710,41 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def callTargetInfo(call: OxCall): (String, String, Option[String], String, String) = {
-    macroForUse(call.name, call.line) match {
-      case Some(macroDecl) =>
+    constructorTemporaryEntry(call) match {
+      case Some((typeName, functionEntry)) =>
         (
-          callName(call),
-          macroFullName(macroDecl),
-          Option(macroSignature(macroDecl)),
-          macroReturnTypeFullName(macroDecl),
-          DispatchTypes.INLINED
+          functionEntry.simpleName,
+          functionEntry.fullName,
+          Option(functionEntry.function.signature),
+          typeName,
+          DispatchTypes.STATIC_DISPATCH
         )
       case None =>
-        functionEntryForCall(call) match {
-          case Some(functionEntry) =>
-            val dispatchType =
-              if (isVirtualFunctionEntry(functionEntry)) DispatchTypes.DYNAMIC_DISPATCH
-              else DispatchTypes.STATIC_DISPATCH
+        macroForUse(call.name, call.line) match {
+          case Some(macroDecl) =>
             (
               callName(call),
-              functionEntry.fullName,
-              Option(functionEntry.function.signature),
-              normalizeType(functionEntry.function.returnType),
-              dispatchType
+              macroFullName(macroDecl),
+              Option(macroSignature(macroDecl)),
+              macroReturnTypeFullName(macroDecl),
+              DispatchTypes.INLINED
             )
           case None =>
-            (callName(call), normalizedQualifiedName(call.name), None, Defines.Any, DispatchTypes.STATIC_DISPATCH)
+            functionEntryForCall(call) match {
+              case Some(functionEntry) =>
+                val dispatchType =
+                  if (isVirtualFunctionEntry(functionEntry)) DispatchTypes.DYNAMIC_DISPATCH
+                  else DispatchTypes.STATIC_DISPATCH
+                (
+                  callName(call),
+                  functionEntry.fullName,
+                  Option(functionEntry.function.signature),
+                  normalizeType(functionEntry.function.returnType),
+                  dispatchType
+                )
+              case None =>
+                (callName(call), normalizedQualifiedName(call.name), None, Defines.Any, DispatchTypes.STATIC_DISPATCH)
+            }
         }
     }
   }
