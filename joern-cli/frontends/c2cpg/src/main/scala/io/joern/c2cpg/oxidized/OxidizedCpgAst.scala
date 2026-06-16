@@ -119,7 +119,8 @@ case class OxCast(typeName: String, code: String, line: Int, value: OxExpression
 
 case class OxSizeOf(code: String, line: Int, value: Option[OxExpression], typeName: Option[String]) extends OxExpression
 
-case class OxCall(name: String, code: String, line: Int, arguments: Seq[OxExpression]) extends OxExpression
+case class OxCall(name: String, code: String, line: Int, callee: OxExpression, arguments: Seq[OxExpression])
+    extends OxExpression
 
 case class OxFieldAccess(field: String, code: String, line: Int, base: OxExpression) extends OxExpression
 
@@ -357,6 +358,7 @@ object OxDocument {
           name = str(value, "name"),
           code = str(value, "code"),
           line = int(value, "line"),
+          callee = expression(value("callee")),
           arguments = value("arguments").arr.map(expression).toSeq
         )
       case "fieldAccess" =>

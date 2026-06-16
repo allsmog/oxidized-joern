@@ -45,6 +45,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     document.declarations.collect { case function: OxFunctionDecl => function.name -> function }.toMap
   private val macrosByName: Map[String, OxMacroDecl] =
     document.declarations.collect { case macroDecl: OxMacroDecl => macroDecl.name -> macroDecl }.toMap
+  private lazy val aggregateFieldsByType: Map[String, Map[String, String]] =
+    document.declarations.collect { case structDecl: OxStructDecl =>
+      normalizeType(structDecl.name) -> structDecl.fields
+        .map(field => field.name -> normalizeType(field.typeName))
+        .toMap
+    }.toMap
   private val macroFullNames: Map[String, String] =
     macrosByName.map { case (name, macroDecl) => name -> macroFullName(macroDecl) }
 
@@ -447,26 +453,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         }
         operatorCallAst(OxOrigin(sizeOf), sizeOf.code, Operators.sizeOf, operand.toSeq)
       case call: OxCall =>
-        val (methodFullName, signature, typeFullName) = callTargetInfo(call.name)
-        val callNode_ =
-          callNode(
-            OxOrigin(call),
-            call.code,
-            call.name,
-            methodFullName,
-            DispatchTypes.STATIC_DISPATCH,
-            signature,
-            Option(registerType(typeFullName))
-          )
-        callAst(callNode_, call.arguments.map(expressionAst))
+        astForCallExpression(call)
       case fieldAccess: OxFieldAccess =>
         fieldAccessAst(
           OxOrigin(fieldAccess),
-          OxOrigin(fieldAccess.code.split('.').lastOption.getOrElse(fieldAccess.field), Option(fieldAccess.line)),
+          OxOrigin(fieldIdentifierCode(fieldAccess), Option(fieldAccess.line)),
           expressionAst(fieldAccess.base),
           fieldAccess.code,
           fieldAccess.field,
-          registerType(Defines.Any)
+          registerType(expressionTypeFullName(fieldAccess).getOrElse(Defines.Any))
         )
       case indexAccess: OxIndexAccess =>
         val operatorName = Operators.indirectIndexAccess
@@ -493,6 +488,102 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case designator: OxDesignator =>
         Ast(identifierNode(OxOrigin(designator), designator.name, designator.code, registerType(Defines.Any)))
     }
+  }
+
+  private def astForCallExpression(call: OxCall): Ast = {
+    if (isPointerCall(call)) pointerCallAst(call) else directCallAst(call)
+  }
+
+  private def directCallAst(call: OxCall): Ast = {
+    val (methodFullName, signature, typeFullName) = callTargetInfo(call.name)
+    val callNode_ =
+      callNode(
+        OxOrigin(call),
+        call.code,
+        call.name,
+        methodFullName,
+        DispatchTypes.STATIC_DISPATCH,
+        signature,
+        Option(registerType(typeFullName))
+      )
+    callAst(callNode_, call.arguments.map(expressionAst))
+  }
+
+  private def pointerCallAst(call: OxCall): Ast = {
+    val callNode_ =
+      callNode(
+        OxOrigin(call),
+        call.code,
+        Defines.OperatorPointerCall,
+        Defines.OperatorPointerCall,
+        DispatchTypes.DYNAMIC_DISPATCH,
+        None,
+        Option(registerType(callReturnTypeFullName(call).getOrElse(Defines.Any)))
+      )
+    callAst(callNode_, call.arguments.map(expressionAst), receiver = Option(expressionAst(call.callee)))
+  }
+
+  private def isPointerCall(call: OxCall): Boolean = {
+    call.callee match {
+      case _: OxFieldAccess             => true
+      case OxUnary("*", _, _, _, _)     => true
+      case _: OxUnary                   => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
+      case _: OxIdentifier | _: OxCast  => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
+      case _: OxCall | _: OxIndexAccess => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
+      case _: OxInitializerList         => false
+      case _: OxDesignatedInitializer   => false
+      case _: OxDesignator              => false
+      case _: OxLiteral                 => false
+      case _: OxBinary | _: OxConditional | _: OxSizeOf => false
+    }
+  }
+
+  private def callReturnTypeFullName(call: OxCall): Option[String] = {
+    expressionTypeFullName(call.callee).flatMap(returnTypeFromFunctionPointer)
+  }
+
+  private def expressionTypeFullName(expression: OxExpression): Option[String] = {
+    expression match {
+      case OxIdentifier(name, _, _) =>
+        scope.get(name).orElse(globalScopeByName.get(name)).map(entry => resolveAliasType(entry.typeFullName))
+      case OxFieldAccess(field, _, _, base) =>
+        expressionTypeFullName(base).flatMap(typeName => fieldTypeFullName(typeName, field))
+      case OxUnary("*", _, _, _, argument) =>
+        expressionTypeFullName(argument)
+      case OxCast(typeName, _, _, _) =>
+        Option(resolveAliasType(typeName))
+      case OxIndexAccess(_, _, base, _) =>
+        expressionTypeFullName(base).map(_.stripSuffix("[]"))
+      case call: OxCall =>
+        callReturnTypeFullName(call)
+      case _ =>
+        None
+    }
+  }
+
+  private def fieldTypeFullName(baseTypeFullName: String, field: String): Option[String] = {
+    val normalized = resolveAliasType(baseTypeFullName)
+    val candidates = Seq(normalized, normalized.stripSuffix("*"), normalized.stripSuffix("[]")).distinct
+    candidates.collectFirst(Function.unlift { typeName =>
+      aggregateFieldsByType
+        .get(normalizeType(typeName))
+        .flatMap(_.get(field))
+        .map(fieldType => resolveAliasType(fieldType))
+    })
+  }
+
+  private def returnTypeFromFunctionPointer(typeFullName: String): Option[String] = {
+    val markerIndex = typeFullName.indexOf("(*")
+    Option.when(markerIndex > 0)(typeFullName.take(markerIndex))
+  }
+
+  private def isFunctionPointerType(typeFullName: String): Boolean = {
+    returnTypeFromFunctionPointer(typeFullName).isDefined
+  }
+
+  private def fieldIdentifierCode(fieldAccess: OxFieldAccess): String = {
+    if (fieldAccess.code.contains("->")) fieldAccess.code.split("->").lastOption.getOrElse(fieldAccess.field)
+    else fieldAccess.code.split('.').lastOption.getOrElse(fieldAccess.field)
   }
 
   private def operatorCallAst(

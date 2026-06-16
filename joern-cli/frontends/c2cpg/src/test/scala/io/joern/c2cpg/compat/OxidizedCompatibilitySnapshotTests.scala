@@ -1,9 +1,10 @@
 package io.joern.c2cpg.compat
 
 import io.joern.c2cpg.{C2Cpg, Config}
+import io.joern.c2cpg.astcreation.Defines
 import io.joern.c2cpg.parser.ParserBackend
 import io.joern.c2cpg.testfixtures.C2CpgSuite
-import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, Operators}
+import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, DispatchTypes, Operators}
 import io.shiftleft.semanticcpg.language.*
 import io.shiftleft.semanticcpg.utils.FileUtil
 import io.shiftleft.semanticcpg.utils.FileUtil.*
@@ -192,7 +193,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |int (*foo)(int, int) = { 0 };
           |int (*bar[])(int, int) = { 0 };
           |int invoke(int (*cb)(int), int value) {
+          |  struct Ops ops;
           |  int (*local)(int) = cb;
+          |  local(value);
+          |  ops.open(value);
           |  return cb(value);
           |}
           |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
@@ -204,6 +208,22 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("invoke").signature.l shouldBe List("int(int(*)(int),int)")
       cpg.method.nameExact("invoke").parameter.nameExact("cb").typeFullName.l shouldBe List("int(*)(int)")
       cpg.method.nameExact("invoke").local.nameExact("local").typeFullName.l shouldBe List("int(*)(int)")
+
+      val pointerCalls = cpg.method.nameExact("invoke").call.nameExact(Defines.OperatorPointerCall).l
+      pointerCalls.map(_.code).sorted shouldBe List("cb(value)", "local(value)", "ops.open(value)")
+      pointerCalls.foreach { call =>
+        call.methodFullName shouldBe Defines.OperatorPointerCall
+        call.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+        call.typeFullName shouldBe "int"
+        call.argument.code.l shouldBe List("value")
+        call.receiver.argumentIndex.l shouldBe List(-1)
+      }
+      val cbPointerCall    = pointerCalls.collectFirst { case call if call.code == "cb(value)" => call }.get
+      val localPointerCall = pointerCalls.collectFirst { case call if call.code == "local(value)" => call }.get
+      val fieldPointerCall = pointerCalls.collectFirst { case call if call.code == "ops.open(value)" => call }.get
+      cbPointerCall.receiver.code.l shouldBe List("cb")
+      localPointerCall.receiver.code.l shouldBe List("local")
+      fieldPointerCall.receiver.code.l shouldBe List("ops.open")
     }
 
     "capture global variables and local shadow references" in {

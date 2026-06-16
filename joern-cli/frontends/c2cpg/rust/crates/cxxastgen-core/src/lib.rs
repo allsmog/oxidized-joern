@@ -278,6 +278,7 @@ pub enum Expression {
         name: String,
         code: String,
         line: usize,
+        callee: Box<Expression>,
         arguments: Vec<Expression>,
     },
     FieldAccess {
@@ -821,12 +822,11 @@ fn parse_statement(node: Node, source: &[u8]) -> Vec<Statement> {
 }
 
 fn parse_local_declarations(node: Node, source: &[u8]) -> Vec<Statement> {
-    let type_name = node
-        .child_by_field_name("type")
-        .map(|type_node| type_name_from_type_node(type_node, source));
+    let type_node = node.child_by_field_name("type");
+    let type_name = type_node.map(|type_node| type_name_from_type_node(type_node, source));
     named_children(node)
         .into_iter()
-        .filter(|child| child.kind() != "primitive_type" && child.kind() != "type_identifier")
+        .filter(|child| Some(*child) != type_node)
         .filter_map(|declarator| {
             let name = declarator_name(declarator, source)?;
             let initializer = declarator
@@ -1099,6 +1099,11 @@ fn parse_call_expression(node: Node, source: &[u8]) -> Expression {
             .unwrap_or_else(|| node_text(node, source).trim().to_string()),
         code: node_text(node, source).trim().to_string(),
         line: line(node),
+        callee: Box::new(
+            function
+                .map(|function| parse_expression(function, source))
+                .unwrap_or_else(|| identifier_expression(node, source)),
+        ),
         arguments,
     }
 }
@@ -2167,7 +2172,10 @@ mod tests {
                 int (*foo)(int, int) = { 0 };
                 int (*bar[])(int, int) = { 0 };
                 int invoke(int (*cb)(int), int value) {
+                  struct Ops ops;
                   int (*local)(int) = cb;
+                  local(value);
+                  ops.open(value);
                   return cb(value);
                 }
                 "#;
@@ -2222,13 +2230,51 @@ mod tests {
         assert_eq!(invoke.parameters[0].type_name, "int(*)(int)");
         assert_eq!(invoke.signature, "int(int(*)(int),int)");
         let [Statement::LocalDecl {
+            name: ops_name,
+            type_name: ops_type,
+            ..
+        }, Statement::LocalDecl {
             name, type_name, ..
-        }, Statement::Return { .. }] = invoke.body.as_slice()
+        }, Statement::Expression {
+            expression: local_call,
+            ..
+        }, Statement::Expression {
+            expression: field_call,
+            ..
+        }, Statement::Return {
+            expression: Some(return_call),
+            ..
+        }] = invoke.body.as_slice()
         else {
-            panic!("expected local and return");
+            panic!("expected locals, pointer calls, and return");
         };
+        assert_eq!(ops_name, "ops");
+        assert_eq!(ops_type, "Ops");
         assert_eq!(name, "local");
         assert_eq!(type_name, "int(*)(int)");
+
+        let Expression::Call { callee, .. } = local_call else {
+            panic!("expected local function pointer call");
+        };
+        assert!(matches!(
+            callee.as_ref(),
+            Expression::Identifier { name, .. } if name == "local"
+        ));
+
+        let Expression::Call { callee, .. } = field_call else {
+            panic!("expected field function pointer call");
+        };
+        assert!(
+            matches!(callee.as_ref(), Expression::FieldAccess { field, .. } if field == "open")
+        );
+
+        let Expression::Call { callee, .. } = return_call else {
+            panic!("expected return function pointer call");
+        };
+        assert!(matches!(
+            callee.as_ref(),
+            Expression::Identifier { name, .. } if name == "cb"
+        ));
     }
 
     fn statement_line(statement: &Statement) -> usize {
