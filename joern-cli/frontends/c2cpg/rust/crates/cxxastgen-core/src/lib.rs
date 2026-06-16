@@ -125,6 +125,7 @@ pub enum Statement {
         initializer: Option<Expression>,
     },
     Assignment {
+        operator: String,
         code: String,
         line: usize,
         left: Expression,
@@ -150,6 +151,12 @@ pub enum Statement {
         condition: Expression,
         body: Vec<Statement>,
     },
+    DoWhile {
+        code: String,
+        line: usize,
+        condition: Expression,
+        body: Vec<Statement>,
+    },
     For {
         code: String,
         line: usize,
@@ -165,6 +172,29 @@ pub enum Statement {
     Continue {
         code: String,
         line: usize,
+    },
+    Goto {
+        code: String,
+        line: usize,
+        label: String,
+    },
+    Label {
+        code: String,
+        line: usize,
+        label: String,
+        body: Vec<Statement>,
+    },
+    Switch {
+        code: String,
+        line: usize,
+        condition: Expression,
+        body: Vec<Statement>,
+    },
+    Case {
+        code: String,
+        line: usize,
+        value: Option<Expression>,
+        body: Vec<Statement>,
     },
     Expression {
         code: String,
@@ -199,6 +229,27 @@ pub enum Expression {
         line: usize,
         prefix: bool,
         argument: Box<Expression>,
+    },
+    Conditional {
+        code: String,
+        line: usize,
+        condition: Box<Expression>,
+        consequence: Option<Box<Expression>>,
+        alternative: Box<Expression>,
+    },
+    Cast {
+        #[serde(rename = "typeName")]
+        type_name: String,
+        code: String,
+        line: usize,
+        value: Box<Expression>,
+    },
+    SizeOf {
+        code: String,
+        line: usize,
+        value: Option<Box<Expression>>,
+        #[serde(rename = "typeName")]
+        type_name: Option<String>,
     },
     Call {
         name: String,
@@ -519,7 +570,19 @@ fn parse_statement(node: Node, source: &[u8]) -> Vec<Statement> {
             .flat_map(|child| parse_statement(child, source))
             .collect(),
         "while_statement" => parse_while_statement(node, source).into_iter().collect(),
+        "do_statement" => parse_do_statement(node, source).into_iter().collect(),
         "for_statement" => parse_for_statement(node, source).into_iter().collect(),
+        "switch_statement" => parse_switch_statement(node, source).into_iter().collect(),
+        "case_statement" => parse_case_statement(node, source).into_iter().collect(),
+        "labeled_statement" => parse_labeled_statement(node, source).into_iter().collect(),
+        "goto_statement" => vec![Statement::Goto {
+            code: statement_code(node, source),
+            line: line(node),
+            label: node
+                .child_by_field_name("label")
+                .map(|label| node_text(label, source).trim().to_string())
+                .unwrap_or_default(),
+        }],
         "break_statement" => vec![Statement::Break {
             code: statement_code(node, source),
             line: line(node),
@@ -570,6 +633,7 @@ fn statement_from_expression(statement: Node, expr: Node, source: &[u8]) -> Stat
             expr.child_by_field_name("right"),
         ) {
             return Statement::Assignment {
+                operator: operator_text(expr, source).unwrap_or("=").to_string(),
                 code: statement_code(statement, source),
                 line: line(expr),
                 left: parse_expression(left, source),
@@ -611,6 +675,17 @@ fn parse_while_statement(node: Node, source: &[u8]) -> Option<Statement> {
     })
 }
 
+fn parse_do_statement(node: Node, source: &[u8]) -> Option<Statement> {
+    let condition = node.child_by_field_name("condition")?;
+    let body = node.child_by_field_name("body")?;
+    Some(Statement::DoWhile {
+        code: statement_code(node, source),
+        line: line(node),
+        condition: parse_expression(condition, source),
+        body: parse_statement(body, source),
+    })
+}
+
 fn parse_for_statement(node: Node, source: &[u8]) -> Option<Statement> {
     let body = node.child_by_field_name("body")?;
     let initializer = node
@@ -644,6 +719,48 @@ fn parse_for_initializer(node: Node, source: &[u8]) -> Vec<Statement> {
     }
 }
 
+fn parse_switch_statement(node: Node, source: &[u8]) -> Option<Statement> {
+    let condition = node.child_by_field_name("condition")?;
+    let body = node.child_by_field_name("body")?;
+    Some(Statement::Switch {
+        code: statement_code(node, source),
+        line: line(node),
+        condition: parse_expression(condition, source),
+        body: parse_statement(body, source),
+    })
+}
+
+fn parse_case_statement(node: Node, source: &[u8]) -> Option<Statement> {
+    let value = node
+        .child_by_field_name("value")
+        .map(|value| parse_expression(value, source));
+    Some(Statement::Case {
+        code: case_code(node, source),
+        line: line(node),
+        value,
+        body: named_children(node)
+            .into_iter()
+            .filter(|child| child.kind() != "type_definition")
+            .filter(|child| node.child_by_field_name("value") != Some(*child))
+            .flat_map(|child| parse_statement(child, source))
+            .collect(),
+    })
+}
+
+fn parse_labeled_statement(node: Node, source: &[u8]) -> Option<Statement> {
+    let label = node.child_by_field_name("label")?;
+    Some(Statement::Label {
+        code: case_code(node, source),
+        line: line(node),
+        label: node_text(label, source).trim().to_string(),
+        body: named_children(node)
+            .into_iter()
+            .filter(|child| *child != label)
+            .flat_map(|child| parse_statement(child, source))
+            .collect(),
+    })
+}
+
 fn parse_expression(node: Node, source: &[u8]) -> Expression {
     match node.kind() {
         "parenthesized_expression" => named_children(node)
@@ -662,17 +779,27 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
             line: line(node),
         },
         "binary_expression" => parse_binary_expression(node, source),
-        "unary_expression" | "update_expression" => parse_unary_expression(node, source),
+        "unary_expression" | "update_expression" | "pointer_expression" => {
+            parse_unary_expression(node, source)
+        }
+        "conditional_expression" => parse_conditional_expression(node, source),
         "call_expression" => parse_call_expression(node, source),
         "field_expression" => parse_field_expression(node, source),
         "subscript_expression" => parse_subscript_expression(node, source),
-        "assignment_expression" => parse_binary_like_expression(node, source, "="),
+        "assignment_expression" => parse_assignment_expression(node, source),
+        "cast_expression" => parse_cast_expression(node, source),
+        "sizeof_expression" => parse_sizeof_expression(node, source),
         _ => identifier_expression(node, source),
     }
 }
 
 fn parse_binary_expression(node: Node, source: &[u8]) -> Expression {
     let operator = operator_text(node, source).unwrap_or("?");
+    parse_binary_like_expression(node, source, operator)
+}
+
+fn parse_assignment_expression(node: Node, source: &[u8]) -> Expression {
+    let operator = operator_text(node, source).unwrap_or("=");
     parse_binary_like_expression(node, source, operator)
 }
 
@@ -709,6 +836,23 @@ fn parse_unary_expression(node: Node, source: &[u8]) -> Expression {
             argument: Box::new(parse_expression(argument, source)),
         },
         None => identifier_expression(node, source),
+    }
+}
+
+fn parse_conditional_expression(node: Node, source: &[u8]) -> Expression {
+    let condition = node.child_by_field_name("condition");
+    let alternative = node.child_by_field_name("alternative");
+    match (condition, alternative) {
+        (Some(condition), Some(alternative)) => Expression::Conditional {
+            code: node_text(node, source).trim().to_string(),
+            line: line(node),
+            condition: Box::new(parse_expression(condition, source)),
+            consequence: node
+                .child_by_field_name("consequence")
+                .map(|consequence| Box::new(parse_expression(consequence, source))),
+            alternative: Box::new(parse_expression(alternative, source)),
+        },
+        _ => identifier_expression(node, source),
     }
 }
 
@@ -766,6 +910,35 @@ fn parse_subscript_expression(node: Node, source: &[u8]) -> Expression {
             index: Box::new(parse_expression(index, source)),
         },
         _ => identifier_expression(node, source),
+    }
+}
+
+fn parse_cast_expression(node: Node, source: &[u8]) -> Expression {
+    let value = node.child_by_field_name("value");
+    match value {
+        Some(value) => Expression::Cast {
+            type_name: node
+                .child_by_field_name("type")
+                .map(|type_node| normalize_type(node_text(type_node, source)))
+                .unwrap_or_else(|| "ANY".to_string()),
+            code: node_text(node, source).trim().to_string(),
+            line: line(node),
+            value: Box::new(parse_expression(value, source)),
+        },
+        None => identifier_expression(node, source),
+    }
+}
+
+fn parse_sizeof_expression(node: Node, source: &[u8]) -> Expression {
+    Expression::SizeOf {
+        code: node_text(node, source).trim().to_string(),
+        line: line(node),
+        value: node
+            .child_by_field_name("value")
+            .map(|value| Box::new(parse_expression(value, source))),
+        type_name: node
+            .child_by_field_name("type")
+            .map(|type_node| normalize_type(node_text(type_node, source))),
     }
 }
 
@@ -897,6 +1070,13 @@ fn statement_code(node: Node, source: &[u8]) -> String {
         .trim_end_matches(';')
         .trim()
         .to_string()
+}
+
+fn case_code(node: Node, source: &[u8]) -> String {
+    let code = node_text(node, source).trim();
+    code.find(':')
+        .map(|index| code[..=index].trim().to_string())
+        .unwrap_or_else(|| statement_code(node, source))
 }
 
 fn line(node: Node) -> usize {
@@ -1100,6 +1280,111 @@ mod tests {
         assert!(matches!(right.as_ref(), Expression::IndexAccess { .. }));
     }
 
+    #[test]
+    fn parses_switch_do_goto_and_label_statements() {
+        let sample = r#"
+                int route(int x) {
+                retry:
+                  do {
+                    x = x - 1;
+                  } while (x > 3);
+                  switch (x) {
+                    case 1:
+                      goto retry;
+                    default:
+                      break;
+                  }
+                  return x;
+                }
+                "#;
+        let declarations =
+            parse_declarations(sample, SourceLanguage::C).expect("switch/goto sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        let [Statement::Label { label, body, .. }, Statement::Switch {
+            condition,
+            body: switch_body,
+            ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!("expected label, switch, return");
+        };
+        assert_eq!(label, "retry");
+        assert!(matches!(body.as_slice(), [Statement::DoWhile { .. }]));
+        assert!(matches!(condition, Expression::Identifier { name, .. } if name == "x"));
+
+        let [Statement::Case {
+            value: Some(Expression::Literal { value, .. }),
+            body: first_case_body,
+            ..
+        }, Statement::Case {
+            value: None,
+            body: default_body,
+            ..
+        }] = switch_body.as_slice()
+        else {
+            panic!("expected case and default");
+        };
+        assert_eq!(value, "1");
+        assert!(matches!(
+            first_case_body.as_slice(),
+            [Statement::Goto { label, .. }] if label == "retry"
+        ));
+        assert!(matches!(default_body.as_slice(), [Statement::Break { .. }]));
+    }
+
+    #[test]
+    fn parses_cast_sizeof_conditional_and_compound_assignment_expressions() {
+        let sample = r#"
+                int score(int x) {
+                  int y = (int)sizeof(x);
+                  y += x > 0 ? x : -x;
+                  return y;
+                }
+                "#;
+        let declarations =
+            parse_declarations(sample, SourceLanguage::C).expect("expression sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+
+        let [Statement::LocalDecl {
+            initializer: Some(initializer),
+            ..
+        }, Statement::Assignment {
+            operator, right, ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!("expected local, compound assignment, return");
+        };
+        assert_eq!(operator, "+=");
+
+        let Expression::Cast { value, .. } = initializer else {
+            panic!("expected cast initializer");
+        };
+        assert!(matches!(value.as_ref(), Expression::SizeOf { .. }));
+
+        let Expression::Conditional {
+            condition,
+            consequence,
+            alternative,
+            ..
+        } = right
+        else {
+            panic!("expected conditional expression");
+        };
+        assert_binary_operator(condition, ">");
+        assert!(matches!(
+            consequence.as_deref(),
+            Some(Expression::Identifier { name, .. }) if name == "x"
+        ));
+        assert!(matches!(
+            alternative.as_ref(),
+            Expression::Unary { operator, .. } if operator == "-"
+        ));
+    }
+
     fn statement_line(statement: &Statement) -> usize {
         match statement {
             Statement::LocalDecl { line, .. }
@@ -1107,9 +1392,14 @@ mod tests {
             | Statement::Return { line, .. }
             | Statement::If { line, .. }
             | Statement::While { line, .. }
+            | Statement::DoWhile { line, .. }
             | Statement::For { line, .. }
             | Statement::Break { line, .. }
             | Statement::Continue { line, .. }
+            | Statement::Goto { line, .. }
+            | Statement::Label { line, .. }
+            | Statement::Switch { line, .. }
+            | Statement::Case { line, .. }
             | Statement::Expression { line, .. } => *line,
         }
     }
