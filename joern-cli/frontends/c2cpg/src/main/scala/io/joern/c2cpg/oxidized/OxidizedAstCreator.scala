@@ -89,6 +89,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private var globalLocalEntries: Map[OxGlobalVariableDecl, ScopeEntry] = Map.empty
   private var globalScopeByName: Map[String, ScopeEntry]                = Map.empty
   private var functionCaptureContext: Option[FunctionCaptureContext]    = None
+  private var currentMethodOwnerTypeFullName: Option[String]            = None
   private var typeAliases: Map[String, String]                          = Map.empty
 
   def typesSeen(): Set[String] = usedTypes.toSet
@@ -492,7 +493,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option(effectiveParentFullName)
       )
         .isExternal(!function.isDefinition)
-    val parameters = function.parameters.zipWithIndex.map { case (parameter, index) =>
+    val implicitThisParameter = parentTypeOwner.map { ownerTypeFullName =>
+      val thisType = registerType(s"$ownerTypeFullName*")
+      val thisNode =
+        parameterInNode(
+          origin,
+          Defines.This,
+          Defines.This,
+          0,
+          isVariadic = false,
+          EvaluationStrategies.BY_SHARING,
+          thisType
+        )
+      Defines.This -> (thisType, Ast(thisNode), thisNode)
+    }.toSeq
+    val explicitParameters = function.parameters.zipWithIndex.map { case (parameter, index) =>
       val parameterType = registerType(normalizeType(parameter.typeName))
       val parameterNode =
         parameterInNode(
@@ -506,16 +521,20 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         )
       parameter.name -> (parameterType, Ast(parameterNode), parameterNode)
     }
+    val parameters = implicitThisParameter ++ explicitParameters
 
     val previousScope          = scope
     val previousCaptureContext = functionCaptureContext
+    val previousMethodOwner    = currentMethodOwnerTypeFullName
     val captureContext =
       FunctionCaptureContext(function, methodRefNode(origin, simpleName, fullName, simpleName))
     scope = parameters.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }.toMap
     functionCaptureContext = Option(captureContext)
+    currentMethodOwnerTypeFullName = parentTypeOwner
     val bodyAsts =
       try function.body.flatMap(astsForStatement)
       finally {
+        currentMethodOwnerTypeFullName = previousMethodOwner
         functionCaptureContext = previousCaptureContext
         scope = previousScope
       }
@@ -850,7 +869,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def expressionTypeFullName(expression: OxExpression): Option[String] = {
     expression match {
       case OxIdentifier(name, _, _) =>
-        scope.get(name).orElse(globalScopeByName.get(name)).map(entry => resolveAliasType(entry.typeFullName))
+        scope
+          .get(name)
+          .map(entry => resolveAliasType(entry.typeFullName))
+          .orElse(implicitFieldTypeFullName(name))
+          .orElse(globalScopeByName.get(name).map(entry => resolveAliasType(entry.typeFullName)))
       case OxFieldAccess(field, _, _, base) =>
         expressionTypeFullName(base).flatMap(typeName => fieldTypeFullName(typeName, field))
       case OxUnary("*", _, _, _, argument) =>
@@ -875,6 +898,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         .flatMap(_.get(field))
         .map(fieldType => resolveAliasType(fieldType))
     })
+  }
+
+  private def implicitFieldTypeFullName(name: String): Option[String] = {
+    currentMethodOwnerTypeFullName.flatMap(ownerTypeFullName => fieldTypeFullName(s"$ownerTypeFullName*", name))
   }
 
   private def returnTypeFromFunctionPointer(typeFullName: String): Option[String] = {
@@ -932,12 +959,44 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, typeName)
         Ast(identifier).withRefEdge(identifier, entry.declaration)
       case None =>
-        capturedGlobalIdentifierAst(name, code, line)
+        implicitFieldAccessAst(name, line)
+          .orElse(capturedGlobalIdentifierAst(name, code, line))
           .orElse(methodRefAst(name, code, line))
           .getOrElse {
             val identifier = identifierNode(OxOrigin(code, Option(line)), name, code, registerType(Defines.Any))
             Ast(identifier)
           }
+    }
+  }
+
+  private def implicitFieldAccessAst(name: String, line: Int): Option[Ast] = {
+    for {
+      ownerTypeFullName <- currentMethodOwnerTypeFullName
+      fields            <- aggregateFieldsByType.get(ownerTypeFullName)
+      if fields.contains(name)
+      thisEntry <- scope.get(Defines.This)
+    } yield {
+      val thisIdentifier =
+        identifierNode(
+          OxOrigin(Defines.This, Option(line)),
+          Defines.This,
+          Defines.This,
+          registerType(thisEntry.typeFullName)
+        )
+      val thisAst       = Ast(thisIdentifier).withRefEdge(thisIdentifier, thisEntry.declaration)
+      val fieldTypeName = registerType(implicitFieldTypeFullName(name).getOrElse(Defines.Any))
+      val code          = s"${Defines.This}->$name"
+      val call =
+        callNode(
+          OxOrigin(code, Option(line)),
+          code,
+          Operators.indirectFieldAccess,
+          Operators.indirectFieldAccess,
+          DispatchTypes.STATIC_DISPATCH,
+          None,
+          Option(fieldTypeName)
+        )
+      callAst(call, Seq(thisAst, Ast(fieldIdentifierNode(OxOrigin(name, Option(line)), name, name))))
     }
   }
 
