@@ -46,6 +46,7 @@ pub enum Declaration {
     Macro(MacroDecl),
     Struct(StructDecl),
     Enum(EnumDecl),
+    GlobalVariable(GlobalVariableDecl),
     Function(FunctionDecl),
 }
 
@@ -91,6 +92,16 @@ pub struct EnumVariant {
     pub name: String,
     pub value: Option<String>,
     pub code: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GlobalVariableDecl {
+    pub name: String,
+    pub type_name: String,
+    pub code: String,
+    pub line: usize,
+    pub initializer: Option<Expression>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -353,6 +364,11 @@ fn parse_declarations(source: &str, language: SourceLanguage) -> Result<Vec<Decl
                 if let Some(function) = parse_function_declaration(child, bytes) {
                     declarations.push(Declaration::Function(function));
                 }
+                declarations.extend(
+                    parse_global_variable_declarations(child, bytes)
+                        .into_iter()
+                        .map(Declaration::GlobalVariable),
+                );
             }
             "struct_specifier" => {
                 if let Some(declaration) = parse_struct(child, bytes) {
@@ -406,6 +422,7 @@ fn declaration_line(declaration: &Declaration) -> usize {
         Declaration::Macro(value) => value.line,
         Declaration::Struct(value) => value.line,
         Declaration::Enum(value) => value.line,
+        Declaration::GlobalVariable(value) => value.line,
         Declaration::Function(value) => value.line,
     }
 }
@@ -525,6 +542,30 @@ fn parse_enum_variant(node: Node, source: &[u8]) -> Option<EnumVariant> {
         value,
         code: node_text(node, source).trim().to_string(),
     })
+}
+
+fn parse_global_variable_declarations(node: Node, source: &[u8]) -> Vec<GlobalVariableDecl> {
+    let Some(type_node) = node.child_by_field_name("type") else {
+        return Vec::new();
+    };
+    let base_type = normalize_type(node_text(type_node, source));
+    named_children(node)
+        .into_iter()
+        .filter(|child| *child != type_node)
+        .filter(|declarator| !is_function_prototype_declarator(*declarator))
+        .filter_map(|declarator| {
+            let name = declarator_name(declarator, source)?;
+            Some(GlobalVariableDecl {
+                name,
+                type_name: type_from_declarator(&base_type, declarator, source),
+                code: variable_declaration_code(node, declarator, source),
+                line: line(declarator),
+                initializer: declarator
+                    .child_by_field_name("value")
+                    .map(|value| parse_expression(value, source)),
+            })
+        })
+        .collect()
 }
 
 fn parse_function(node: Node, source: &[u8]) -> Option<FunctionDecl> {
@@ -1181,6 +1222,28 @@ fn statement_code(node: Node, source: &[u8]) -> String {
         .to_string()
 }
 
+fn variable_declaration_code(declaration: Node, declarator: Node, source: &[u8]) -> String {
+    let declarator_code = node_text(declarator, source)
+        .split('=')
+        .next()
+        .unwrap_or_default()
+        .trim();
+    let prefix = declaration
+        .child_by_field_name("type")
+        .map(|type_node| {
+            let declaration_text = node_text(declaration, source);
+            declaration_text[..type_node.end_byte() - declaration.start_byte()]
+                .split_whitespace()
+                .collect::<Vec<_>>()
+                .join(" ")
+        })
+        .unwrap_or_default();
+    format!("{prefix} {declarator_code}")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 fn case_code(node: Node, source: &[u8]) -> String {
     let code = node_text(node, source).trim();
     code.find(':')
@@ -1350,6 +1413,43 @@ mod tests {
         assert!(functions[2].is_definition);
         assert_eq!(functions[2].signature, "int(int)");
         assert_eq!(functions[2].body.len(), 1);
+    }
+
+    #[test]
+    fn parses_global_variable_declarations() {
+        let sample = r#"
+                int global = 1;
+                static int *ptr;
+                int read() {
+                  return global;
+                }
+                "#;
+        let declarations =
+            parse_declarations(sample, SourceLanguage::C).expect("global sample should parse");
+
+        let Declaration::GlobalVariable(global) = &declarations[0] else {
+            panic!("expected global variable");
+        };
+        assert_eq!(global.name, "global");
+        assert_eq!(global.type_name, "int");
+        assert_eq!(global.code, "int global");
+        assert!(matches!(
+            global.initializer.as_ref(),
+            Some(Expression::Literal { value, .. }) if value == "1"
+        ));
+
+        let Declaration::GlobalVariable(ptr) = &declarations[1] else {
+            panic!("expected pointer global variable");
+        };
+        assert_eq!(ptr.name, "ptr");
+        assert_eq!(ptr.type_name, "int*");
+        assert_eq!(ptr.code, "static int *ptr");
+        assert!(ptr.initializer.is_none());
+
+        let Declaration::Function(function) = &declarations[2] else {
+            panic!("expected function declaration");
+        };
+        assert_eq!(function.name, "read");
     }
 
     #[test]

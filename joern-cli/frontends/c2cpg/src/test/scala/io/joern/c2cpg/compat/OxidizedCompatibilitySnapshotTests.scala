@@ -183,6 +183,28 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("first").local.nameExact("p").typeFullName.l shouldBe List("int*")
     }
 
+    "capture global variables and local shadow references" in {
+      val cpg = code("""
+          |int global = 1;
+          |static int *ptr;
+          |int read() {
+          |  return global;
+          |}
+          |int shadow() {
+          |  int global = 2;
+          |  return global;
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val globalLocal = cpg.local.nameExact("global").filter(_.code == "int global").head
+      val shadowLocal = cpg.method.nameExact("shadow").local.nameExact("global").head
+      globalLocal.typeFullName shouldBe "int"
+      cpg.local.nameExact("ptr").typeFullName.l shouldBe List("int*")
+      cpg.call.nameExact(Operators.assignment).code.l should contain("global = 1")
+      cpg.method.nameExact("read").block.ast.isIdentifier.nameExact("global").refsTo.l shouldBe Nil
+      cpg.method.nameExact("shadow").block.ast.isIdentifier.nameExact("global").refsTo.dedup.l shouldBe List(shadowLocal)
+    }
+
     "capture function prototypes as external methods" in {
       val cpg = code("""
           |int external(int value);
