@@ -2035,6 +2035,7 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
         "assignment_expression" => parse_assignment_expression(node, source),
         "cast_expression" => parse_cast_expression(node, source),
         "sizeof_expression" => parse_sizeof_expression(node, source),
+        "argument_list" => parse_initializer_list(node, source),
         "initializer_list" => parse_initializer_list(node, source),
         "initializer_pair" => parse_initializer_pair(node, source),
         _ => identifier_expression(node, source),
@@ -3058,7 +3059,7 @@ mod tests {
                 Core::Widget::~Widget() {}
                 int Core::Widget::outside() { return 2; }
                 int use() {
-                  Core::Widget widget;
+                  Core::Widget widget(7);
                   return Core::make() + widget.get() + widget.outside();
                 }
                 "#;
@@ -3171,7 +3172,11 @@ mod tests {
                 _ => None,
             })
             .expect("expected use function");
-        let [Statement::LocalDecl { type_name, .. }, Statement::Return {
+        let [Statement::LocalDecl {
+            type_name,
+            initializer: Some(widget_initializer),
+            ..
+        }, Statement::Return {
             expression: Some(return_expr),
             ..
         }] = use_function.body.as_slice()
@@ -3179,6 +3184,14 @@ mod tests {
             panic!("expected local declaration followed by return expression");
         };
         assert_eq!(type_name, "Core::Widget");
+        let Expression::InitializerList { code, elements, .. } = widget_initializer else {
+            panic!("expected constructor argument list initializer");
+        };
+        assert_eq!(code, "(7)");
+        assert!(matches!(
+            elements.as_slice(),
+            [Expression::Literal { value, .. }] if value == "7"
+        ));
         let call_names = collect_call_names(return_expr);
         assert_eq!(
             call_names,
