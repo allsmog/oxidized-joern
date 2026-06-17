@@ -919,7 +919,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def isConstructorInitializer(typeName: String, initializer: OxInitializerList): Boolean = {
-    aggregateTypeFullNames.contains(typeName) && initializer.code.trim.startsWith("(")
+    val initializerCode = initializer.code.trim
+    aggregateTypeFullNames.contains(typeName) &&
+    (initializerCode.startsWith("(") || (initializerCode
+      .startsWith("{") && constructorEntry(typeName, initializer.elements).isDefined))
   }
 
   private def isCopyConstructorInitializer(typeName: String, initializer: OxExpression): Boolean = {
@@ -948,6 +951,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val initCode =
       if (initializerCode.startsWith("(") && initializerCode.endsWith(")"))
         initializerCode.stripPrefix("(").stripSuffix(")")
+      else if (initializerCode.startsWith("{") && initializerCode.endsWith("}"))
+        initializerCode.stripPrefix("{").stripSuffix("}")
       else initializerCode
     val constructorCode = s"$typeName.$constructorName($initCode)"
     val callNode_ = callNode(
