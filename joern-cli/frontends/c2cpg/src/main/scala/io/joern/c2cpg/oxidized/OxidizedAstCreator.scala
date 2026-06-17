@@ -1512,7 +1512,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def aggregateInitializerSlots(typeName: String): Seq[AggregateInitializerSlot] = {
-    val normalized = normalizeType(resolveAliasType(typeName))
+    val normalized = aggregateLookupTypeName(typeName)
     aggregateBaseTypesByType.getOrElse(normalized, Seq.empty).map(AggregateBaseInitializerSlot.apply) ++
       aggregateFieldsByType
         .getOrElse(normalized, Seq.empty)
@@ -1721,7 +1721,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def isAggregateFieldType(typeName: String): Boolean = {
-    aggregateFieldEntriesByType.contains(resolveAliasType(typeName))
+    aggregateFieldEntriesByType.contains(aggregateLookupTypeName(typeName))
   }
 
   private def astsForStructuredBinding(binding: OxStructuredBinding): Seq[Ast] = {
@@ -3457,8 +3457,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def receiverAggregateTypeName(typeName: String): String = {
-    val normalized = normalizeType(resolveAliasType(typeName))
-    stripTemplateArguments(stripCxxTypeQualifiers(stripCxxReference(normalized).stripSuffix("*").stripSuffix("[]")))
+    stripTemplateArguments(aggregateLookupTypeName(typeName))
+  }
+
+  private def aggregateLookupTypeName(typeName: String): String = {
+    val normalized          = normalizeType(typeName)
+    val objectTypeName      = stripCxxReference(normalized).stripSuffix("*").stripSuffix("[]")
+    val unqualifiedTypeName = stripCxxTypeQualifiers(objectTypeName).trim
+    normalizeType(resolveAliasType(unqualifiedTypeName))
   }
 
   private def stripTemplateArguments(typeName: String): String = {
