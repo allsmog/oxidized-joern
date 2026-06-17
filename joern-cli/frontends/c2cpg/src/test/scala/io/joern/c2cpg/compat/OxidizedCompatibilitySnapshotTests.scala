@@ -1748,7 +1748,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.literal.code.l should contain allElementsOf List("true", "false", "nullptr")
       cpg.literal.codeExact("true").typeFullName.l shouldBe List("bool")
       cpg.literal.codeExact("false").typeFullName.l shouldBe List("bool")
-      cpg.literal.codeExact("nullptr").typeFullName.l shouldBe List(Defines.Any)
+      cpg.literal.codeExact("nullptr").typeFullName.l shouldBe List("std.nullptr_t")
       cpg.identifier.nameExact("nullptr").l shouldBe Nil
       cpg.call.nameExact(Operators.notEquals).code.l shouldBe List("ptr != nullptr")
     }
