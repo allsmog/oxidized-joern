@@ -734,21 +734,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val localNode = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
         scope = scope.updated(local.name, ScopeEntry(typeName, localNode))
         registerLocalDestructor(local.name, typeName, local.line)
-        val localAst = Ast(localNode)
+        val localAst                = Ast(localNode)
+        val temporaryDestructorAsts = temporaryDestructorAstsForExpressions(local.initializer.toSeq)
         local.initializer match {
           case Some(initializer: OxInitializerList) if isConstructorInitializer(typeName, initializer) =>
-            Seq(localAst, constructorAssignmentAst(local, initializer, typeName))
+            Seq(localAst, constructorAssignmentAst(local, initializer, typeName)) ++ temporaryDestructorAsts
           case Some(initializer) if isCopyConstructorInitializer(typeName, initializer) =>
             Seq(
               localAst,
               constructorAssignmentAst(local, Seq(initializer), initializer.code, OxOrigin(initializer), typeName)
-            )
+            ) ++ temporaryDestructorAsts
           case Some(initializer) =>
             val assignmentCode = s"${local.name} = ${initializer.code}"
             val left           = identifierAst(local.name, local.name, local.line)
             val assignment =
               assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
-            Seq(localAst, assignment)
+            Seq(localAst, assignment) ++ temporaryDestructorAsts
           case None =>
             Seq(localAst)
         }
