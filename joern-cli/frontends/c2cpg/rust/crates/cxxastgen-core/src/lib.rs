@@ -2184,7 +2184,7 @@ fn parse_statement_block(node: Node, source: &[u8], symbols: &mut MacroSymbols) 
 }
 
 fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec<Statement> {
-    if let Some(statement) = coroutine_unknown_statement(node, source) {
+    if let Some(statement) = coroutine_statement(node, source) {
         return vec![statement];
     }
     if let Some(statement) = using_enum_statement(node, source) {
@@ -2285,23 +2285,58 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
     }
 }
 
-fn coroutine_unknown_statement(node: Node, source: &[u8]) -> Option<Statement> {
-    let code = node_text(node, source).trim();
-    let normalized = code.trim_end_matches(';').trim();
-    if starts_with_coroutine_keyword(normalized) {
-        Some(Statement::Unknown {
-            code: code.to_string(),
-            line: line(node),
+fn coroutine_statement(node: Node, source: &[u8]) -> Option<Statement> {
+    let code = statement_code(node, source);
+    let normalized = code.trim_end_matches(';').trim().to_string();
+    let line = line(node);
+    if let Some(operand) = coroutine_keyword_operand(&normalized, "co_return") {
+        Some(Statement::Return {
+            code,
+            line,
+            expression: if operand.is_empty() {
+                None
+            } else {
+                Some(parse_expression_text(operand, line))
+            },
+        })
+    } else if let Some(expression) = coroutine_expression(&normalized, line) {
+        Some(Statement::Expression {
+            code,
+            line,
+            expression,
         })
     } else {
         None
     }
 }
 
-fn starts_with_coroutine_keyword(code: &str) -> bool {
-    ["co_await", "co_return", "co_yield"]
+fn coroutine_expression(code: &str, line: usize) -> Option<Expression> {
+    ["co_await", "co_yield"]
         .iter()
-        .any(|keyword| code == *keyword || code.starts_with(&format!("{keyword} ")))
+        .find_map(|keyword| coroutine_unary_expression(code, keyword, line))
+}
+
+fn coroutine_unary_expression(code: &str, keyword: &str, line: usize) -> Option<Expression> {
+    let operand = coroutine_keyword_operand(code, keyword)?;
+    if operand.is_empty() {
+        return None;
+    }
+    Some(Expression::Unary {
+        operator: keyword.to_string(),
+        code: code.to_string(),
+        line,
+        prefix: true,
+        argument: Box::new(parse_expression_text(operand, line)),
+    })
+}
+
+fn coroutine_keyword_operand<'a>(code: &'a str, keyword: &str) -> Option<&'a str> {
+    let code = code.trim();
+    if code == keyword {
+        Some("")
+    } else {
+        code.strip_prefix(&format!("{keyword} ")).map(str::trim)
+    }
 }
 
 fn using_enum_statement(node: Node, source: &[u8]) -> Option<Statement> {
@@ -2706,8 +2741,8 @@ fn parse_labeled_statement(
 }
 
 fn parse_expression(node: Node, source: &[u8]) -> Expression {
-    if let Some(awaited) = coroutine_await_operand(node_text(node, source)) {
-        return parse_expression_text(awaited, line(node));
+    if let Some(expression) = coroutine_expression(node_text(node, source), line(node)) {
+        return expression;
     }
     match node.kind() {
         "parenthesized_expression" | "condition_clause" => named_children(node)
@@ -2767,8 +2802,8 @@ fn parse_binary_expression(node: Node, source: &[u8]) -> Expression {
 
 fn parse_expression_text(raw: &str, line: usize) -> Expression {
     let code = strip_wrapping_parentheses(raw.trim());
-    if let Some(awaited) = coroutine_await_operand(code) {
-        return parse_expression_text(awaited, line);
+    if let Some(expression) = coroutine_expression(code, line) {
+        return expression;
     }
     if let Some((name, arguments)) = parse_call_text(code, line) {
         Expression::Call {
@@ -2795,13 +2830,6 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
             line,
         }
     }
-}
-
-fn coroutine_await_operand(code: &str) -> Option<&str> {
-    code.trim()
-        .strip_prefix("co_await ")
-        .map(str::trim)
-        .filter(|operand| !operand.is_empty())
 }
 
 fn literal_text_value(value: &str) -> bool {
@@ -7675,13 +7703,30 @@ mod tests {
                 _ => None,
             })
             .expect("expected main function");
-        let [Statement::Unknown { code: first, .. }, Statement::Unknown { code: second, .. }] =
-            main_function.body.as_slice()
+        let [Statement::Expression {
+            expression:
+                Expression::Unary {
+                    operator: await_operator,
+                    code: await_code,
+                    argument: await_argument,
+                    ..
+                },
+            ..
+        }, Statement::Return {
+            code: return_code,
+            expression: Some(Expression::Call {
+                name: return_name, ..
+            }),
+            ..
+        }] = main_function.body.as_slice()
         else {
-            panic!("expected unknown coroutine statements");
+            panic!("expected structured coroutine await and return statements");
         };
-        assert_eq!(first, "co_await x();");
-        assert_eq!(second, "co_return y();");
+        assert_eq!(await_operator, "co_await");
+        assert_eq!(await_code, "co_await x()");
+        assert!(matches!(await_argument.as_ref(), Expression::Call { name, .. } if name == "x"));
+        assert_eq!(return_code, "co_return y()");
+        assert_eq!(return_name, "y");
 
         let range_function = declarations
             .iter()
@@ -7693,11 +7738,24 @@ mod tests {
         let [Statement::While { body, .. }] = range_function.body.as_slice() else {
             panic!("expected range while statement");
         };
-        let [Statement::Unknown { code, .. }, Statement::Expression { .. }] = body.as_slice()
+        let [Statement::Expression {
+            expression:
+                Expression::Unary {
+                    operator,
+                    code,
+                    argument,
+                    ..
+                },
+            ..
+        }, Statement::Expression { .. }] = body.as_slice()
         else {
-            panic!("expected co_yield recovery in while body");
+            panic!("expected structured co_yield expression in while body");
         };
-        assert_eq!(code, "co_yield start;");
+        assert_eq!(operator, "co_yield");
+        assert_eq!(code, "co_yield start");
+        assert!(
+            matches!(argument.as_ref(), Expression::Identifier { name, .. } if name == "start")
+        );
 
         let echo_function = declarations
             .iter()
@@ -7707,17 +7765,35 @@ mod tests {
             })
             .expect("expected echo function");
         let [Statement::LocalDecl {
-            initializer: Some(Expression::Call { name, code, .. }),
+            initializer:
+                Some(Expression::Unary {
+                    operator: local_await_operator,
+                    argument: local_await_argument,
+                    ..
+                }),
             ..
-        }, Statement::Unknown {
-            code: await_code, ..
+        }, Statement::Expression {
+            expression:
+                Expression::Unary {
+                    operator: write_await_operator,
+                    code: await_code,
+                    argument: write_await_argument,
+                    ..
+                },
+            ..
         }] = echo_function.body.as_slice()
         else {
-            panic!("expected awaited call initializer and unknown co_await statement");
+            panic!("expected structured co_await initializer and statement");
         };
-        assert_eq!(name, "s.async_read");
-        assert_eq!(code, "s.async_read()");
-        assert_eq!(await_code, "co_await async_write(s, data);");
+        assert_eq!(local_await_operator, "co_await");
+        assert!(
+            matches!(local_await_argument.as_ref(), Expression::Call { name, code, .. } if name == "s.async_read" && code == "s.async_read()")
+        );
+        assert_eq!(write_await_operator, "co_await");
+        assert_eq!(await_code, "co_await async_write(s, data)");
+        assert!(
+            matches!(write_await_argument.as_ref(), Expression::Call { name, code, .. } if name == "async_write" && code == "async_write(s, data)")
+        );
     }
 
     #[test]

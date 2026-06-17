@@ -11,7 +11,6 @@ import io.shiftleft.codepropertygraph.generated.{
   ModifierTypes,
   Operators
 }
-import io.shiftleft.codepropertygraph.generated.nodes.Unknown
 import io.shiftleft.semanticcpg.language.*
 import io.shiftleft.semanticcpg.utils.FileUtil
 import io.shiftleft.semanticcpg.utils.FileUtil.*
@@ -2062,7 +2061,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
-    "recover C++20 coroutine statements from the Rust parser backend" in {
+    "capture C++20 coroutine statements from the Rust parser backend" in {
       val cpg = code(
         """
           |int main() {
@@ -2085,25 +2084,25 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      cpg.method.nameExact("main").block.astChildren.collectAll[Unknown].code.l shouldBe List(
-        "co_await x();",
-        "co_return y();"
-      )
-      cpg.method
-        .nameExact("range")
-        .controlStructure
-        .astChildren
-        .isBlock
-        .ast
-        .collectAll[Unknown]
-        .code
-        .l shouldBe List("co_yield start;")
+      inside(cpg.method.nameExact("main").call.nameExact("<operator>.await").l) { case List(awaitCall) =>
+        awaitCall.code shouldBe "co_await x()"
+        awaitCall.argument.isCall.code.l shouldBe List("x()")
+      }
+      inside(cpg.method.nameExact("main").ret.codeExact("co_return y()").l) { case List(returnNode) =>
+        returnNode.astChildren.isCall.code.l shouldBe List("y()")
+      }
+      inside(cpg.method.nameExact("range").call.nameExact("<operator>.yield").l) { case List(yieldCall) =>
+        yieldCall.code shouldBe "co_yield start"
+        yieldCall.argument.isIdentifier.code.l shouldBe List("start")
+      }
 
       cpg.method.nameExact("echo").local.nameExact("data").typeFullName.l shouldBe List("auto")
+      inside(cpg.method.nameExact("echo").call.nameExact("<operator>.await").code.l) { case List(readAwait, writeAwait) =>
+        readAwait shouldBe "co_await s.async_read()"
+        writeAwait shouldBe "co_await async_write(s, data)"
+      }
       cpg.method.nameExact("echo").call.codeExact("s.async_read()").size shouldBe 1
-      cpg.method.nameExact("echo").block.astChildren.collectAll[Unknown].code.l shouldBe List(
-        "co_await async_write(s, data);"
-      )
+      cpg.method.nameExact("echo").call.codeExact("async_write(s, data)").size shouldBe 1
     }
 
     "capture C++20 using enum switch cases from the Rust parser backend" in {
