@@ -1142,6 +1142,46 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         )
     }
 
+    "preserve returned C++ object temporaries from destructor cleanup" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |Widget make();
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Widget passThrough() {
+          |  return Core::make();
+          |}
+          |Core::Widget direct() {
+          |  return Core::Widget();
+          |}
+          |int consumed() {
+          |  return Core::consume(Core::make());
+          |}
+          |auto lambdaDirect = []() -> Core::Widget {
+          |  return Core::Widget();
+          |};
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("passThrough").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("direct").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("consumed").call.nameExact("~Widget").code.l shouldBe List("Core::make().~Widget()")
+      cpg.method.nameExact("passThrough").ast.isReturn.astChildren.isCall.code.l shouldBe List("Core::make()")
+      cpg.method.nameExact("direct").ast.isReturn.astChildren.isCall.code.l shouldBe List("Core::Widget()")
+      cpg.method.fullNameExact("Test0.cpp:<lambda>0:Core.Widget()").call.nameExact("~Widget").code.l shouldBe Nil
+    }
+
     "capture C++ control-flow temporary destructors" in {
       val cpg = code(
         """
