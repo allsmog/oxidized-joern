@@ -714,6 +714,56 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .l shouldBe List("Core::Widget(source).~Widget()", "source.~Widget()")
     }
 
+    "capture C++ try catch statements" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  ~Widget();
+          |};
+          |int consume(Widget& widget) { return 1; }
+          |void handle(Widget& widget) {}
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |void guarded(int n) {
+          |  Core::Widget source;
+          |  try {
+          |    Core::Widget local;
+          |    throw Core::consume(source);
+          |  } catch (Core::Widget caught) {
+          |    Core::handle(caught);
+          |  } catch (...) {
+          |    n = 0;
+          |  }
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("guarded").controlStructure.controlStructureType(ControlStructureTypes.TRY).l) {
+        case List(tryNode) =>
+          tryNode.tryBodyOut.astChildren.isControlStructure.controlStructureType(ControlStructureTypes.THROW).code.l shouldBe
+            List("throw Core::consume(source)")
+          inside(tryNode.catchBodyOut.isControlStructure.l) { case List(typedCatch, catchAll) =>
+            typedCatch.controlStructureType shouldBe ControlStructureTypes.CATCH
+            catchAll.controlStructureType shouldBe ControlStructureTypes.CATCH
+            typedCatch.ast.isLocal.code.l shouldBe List("Core::Widget caught")
+            typedCatch.ast.isCall.nameExact("handle").methodFullName.l shouldBe List("Core.handle:void(Widget&)")
+            typedCatch.ast.isCall.nameExact("~Widget").code.l shouldBe List("caught.~Widget()")
+            catchAll.ast.isLocal.l shouldBe Nil
+            catchAll.ast.isCall.nameExact(Operators.assignment).code.l shouldBe List("n = 0")
+          }
+      }
+      cpg.method.nameExact("guarded").call.nameExact("consume").methodFullName.l shouldBe
+        List("Core.consume:int(Widget&)")
+      cpg.method.nameExact("guarded").call.nameExact("~Widget").code.l.sorted shouldBe
+        List("caught.~Widget()", "local.~Widget()", "source.~Widget()")
+    }
+
     "capture C++ jump destructors" in {
       val cpg = code(
         """

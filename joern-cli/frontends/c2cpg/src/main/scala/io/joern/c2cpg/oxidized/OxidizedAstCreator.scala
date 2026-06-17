@@ -54,7 +54,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private final case class TemporaryDestructor(code: String, line: Int, entry: FunctionEntry)
   private final case class JumpCleanupTarget(
     breakPreservedScopeDepth: Option[Int],
-    continuePreservedScopeDepth: Option[Int]
+    continuePreservedScopeDepth: Option[Int],
+    throwPreservedScopeDepth: Option[Int] = None
   )
   private final case class ArgumentInfo(typeFullName: Option[String], isRvalue: Boolean)
   private final case class FunctionCaptureContext(
@@ -696,7 +697,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def breakLocalDestructors: Seq[LocalDestructor] = {
     jumpCleanupTargets
-      .collectFirst { case JumpCleanupTarget(Some(preservedScopeDepth), _) =>
+      .collectFirst { case JumpCleanupTarget(Some(preservedScopeDepth), _, _) =>
         localDestructorsExitingTo(preservedScopeDepth)
       }
       .getOrElse(Vector.empty)
@@ -704,10 +705,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def continueLocalDestructors: Seq[LocalDestructor] = {
     jumpCleanupTargets
-      .collectFirst { case JumpCleanupTarget(_, Some(preservedScopeDepth)) =>
+      .collectFirst { case JumpCleanupTarget(_, Some(preservedScopeDepth), _) =>
         localDestructorsExitingTo(preservedScopeDepth)
       }
       .getOrElse(Vector.empty)
+  }
+
+  private def throwLocalDestructors: Seq[LocalDestructor] = {
+    jumpCleanupTargets
+      .collectFirst { case JumpCleanupTarget(_, _, Some(preservedScopeDepth)) =>
+        localDestructorsExitingTo(preservedScopeDepth)
+      }
+      .getOrElse(activeLocalDestructors)
   }
 
   private def localDestructorAst(destructor: LocalDestructor): Ast = {
@@ -771,10 +780,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case throwStmt: OxThrow =>
         val throwAst = Ast(controlStructureNode(OxOrigin(throwStmt), ControlStructureTypes.THROW, throwStmt.code))
           .withChildren(throwStmt.expression.toSeq.map(expressionAst))
-        temporaryDestructorAstsForExpressions(throwStmt.expression.toSeq) ++ activeLocalDestructors.map(
+        temporaryDestructorAstsForExpressions(throwStmt.expression.toSeq) ++ throwLocalDestructors.map(
           localDestructorAst
         ) :+
           throwAst
+      case tryStmt: OxTry =>
+        val tryNode = controlStructureNode(OxOrigin("try", Option(tryStmt.line)), ControlStructureTypes.TRY, "try")
+        val preservedScopeDepth = localDestructorScopes.length
+        val bodyAst = withJumpCleanupTarget(
+          JumpCleanupTarget(
+            breakPreservedScopeDepth = None,
+            continuePreservedScopeDepth = None,
+            throwPreservedScopeDepth = Option(preservedScopeDepth)
+          )
+        ) {
+          statementBlockAst(tryStmt.body, "try", tryStmt.line)
+        }
+        val catchAsts = tryStmt.catches.map(catchAst)
+        Seq(tryCatchAst(tryNode, bodyAst, catchAsts, None))
       case ifStmt: OxIf =>
         val ifNode                    = controlStructureNode(OxOrigin(ifStmt), ControlStructureTypes.IF, ifStmt.code)
         val conditionAst              = expressionAst(ifStmt.condition)
@@ -1042,6 +1065,30 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
+  private def catchAst(catchClause: OxCatchClause): Ast = {
+    val catchNode =
+      controlStructureNode(OxOrigin("catch", Option(catchClause.line)), ControlStructureTypes.CATCH, "catch")
+    inNestedScopeWithDestructors {
+      val parameterAsts = catchClause.parameter.toSeq.map(catchParameterAst)
+      val bodyAst       = statementBlockAst(catchClause.body, "catch", catchClause.line)
+      val destructorAsts =
+        Option
+          .when(statementsMayCompleteNormally(catchClause.body))(
+            currentLocalDestructors.reverse.map(localDestructorAst)
+          )
+          .getOrElse(Vector.empty)
+      Ast(catchNode).withChildren(parameterAsts).withChild(bodyAst).withChildren(destructorAsts)
+    }
+  }
+
+  private def catchParameterAst(parameter: OxParameterDecl): Ast = {
+    val typeName = registerType(normalizeType(parameter.typeName))
+    val node     = localNode(OxOrigin(parameter.code, Option(parameter.line)), parameter.name, parameter.code, typeName)
+    scope = scope.updated(parameter.name, ScopeEntry(typeName, node))
+    registerLocalDestructor(parameter.name, typeName, parameter.line)
+    Ast(node)
+  }
+
   private def statementsMayCompleteNormally(statements: Seq[OxStatement]): Boolean = {
     statements.foldLeft(true) {
       case (true, statement) => statementMayCompleteNormally(statement)
@@ -1052,6 +1099,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def statementMayCompleteNormally(statement: OxStatement): Boolean = {
     statement match {
       case _: OxReturn | _: OxThrow | _: OxBreak | _: OxContinue | _: OxGoto => false
+      case tryStmt: OxTry =>
+        statementsMayCompleteNormally(tryStmt.body) || tryStmt.catches.exists(catchClause =>
+          statementsMayCompleteNormally(catchClause.body)
+        )
       case ifStmt: OxIf =>
         ifStmt.elseBody.isEmpty ||
         statementsMayCompleteNormally(ifStmt.thenBody) ||

@@ -220,6 +220,15 @@ pub struct ConstructorInitializer {
 }
 
 #[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CatchClause {
+    pub code: String,
+    pub line: usize,
+    pub parameter: Option<ParameterDecl>,
+    pub body: Vec<Statement>,
+}
+
+#[derive(Debug, Clone, Serialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum Statement {
     LocalDecl {
@@ -246,6 +255,12 @@ pub enum Statement {
         code: String,
         line: usize,
         expression: Option<Expression>,
+    },
+    Try {
+        code: String,
+        line: usize,
+        body: Vec<Statement>,
+        catches: Vec<CatchClause>,
     },
     If {
         code: String,
@@ -1937,6 +1952,9 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
                 .next()
                 .map(|expr| parse_expression(expr, source)),
         }],
+        "try_statement" => parse_try_statement(node, source, symbols)
+            .into_iter()
+            .collect(),
         "expression_statement" => named_children(node)
             .into_iter()
             .next()
@@ -2004,6 +2022,37 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
             line: line(node),
             expression: parse_expression(node, source),
         }],
+    }
+}
+
+fn parse_try_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Option<Statement> {
+    let body = node.child_by_field_name("body")?;
+    let catches = named_children(node)
+        .into_iter()
+        .filter(|child| child.kind() == "catch_clause")
+        .map(|catch| parse_catch_clause(catch, source, symbols))
+        .collect();
+    Some(Statement::Try {
+        code: statement_code(node, source),
+        line: line(node),
+        body: parse_statement(body, source, symbols),
+        catches,
+    })
+}
+
+fn parse_catch_clause(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> CatchClause {
+    let parameter = node
+        .child_by_field_name("parameters")
+        .and_then(|parameters| parse_parameters(parameters, source).into_iter().next());
+    let body = node
+        .child_by_field_name("body")
+        .map(|body| parse_statement(body, source, symbols))
+        .unwrap_or_default();
+    CatchClause {
+        code: statement_code(node, source),
+        line: line(node),
+        parameter,
+        body,
     }
 }
 
@@ -4391,6 +4440,70 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_try_catch_statements() {
+        let sample = r#"
+                namespace Core {
+                class Widget {
+                public:
+                  Widget();
+                  ~Widget() {}
+                };
+                void handle(Widget& widget) {}
+                }
+                void guarded(int n) {
+                  try {
+                    Core::Widget local;
+                    throw n;
+                  } catch (Core::Widget caught) {
+                    Core::handle(caught);
+                  } catch (...) {
+                    n = 0;
+                  }
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("try-catch statement sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "guarded" => Some(function),
+                _ => None,
+            })
+            .expect("expected guarded function");
+        let [Statement::Try { body, catches, .. }] = function.body.as_slice() else {
+            panic!("expected top-level try statement");
+        };
+        let [Statement::LocalDecl {
+            name: local_name, ..
+        }, Statement::Throw { .. }] = body.as_slice()
+        else {
+            panic!("expected try body local and throw");
+        };
+        assert_eq!(local_name, "local");
+        let [typed_catch, catch_all] = catches.as_slice() else {
+            panic!("expected typed catch and catch-all");
+        };
+        let parameter = typed_catch
+            .parameter
+            .as_ref()
+            .expect("expected typed catch parameter");
+        assert_eq!(parameter.name, "caught");
+        assert_eq!(parameter.type_name, "Core::Widget");
+        assert!(matches!(
+            typed_catch.body.as_slice(),
+            [Statement::Expression {
+                expression: Expression::Call { name, .. },
+                ..
+            }] if name == "Core::handle"
+        ));
+        assert!(catch_all.parameter.is_none());
+        assert!(matches!(
+            catch_all.body.as_slice(),
+            [Statement::Assignment { code, .. }] if code == "n = 0"
+        ));
+    }
+
+    #[test]
     fn parses_cpp_new_and_delete_expressions() {
         let sample = r#"
                 int *allocate(int n) {
@@ -5333,6 +5446,7 @@ mod tests {
             | Statement::Assignment { line, .. }
             | Statement::Return { line, .. }
             | Statement::Throw { line, .. }
+            | Statement::Try { line, .. }
             | Statement::If { line, .. }
             | Statement::While { line, .. }
             | Statement::DoWhile { line, .. }
