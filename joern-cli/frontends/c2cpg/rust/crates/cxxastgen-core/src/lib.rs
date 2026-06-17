@@ -2467,11 +2467,13 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
             code: node_text(node, source).to_string(),
             line: line(node),
         },
-        "number_literal" | "char_literal" | "string_literal" => Expression::Literal {
-            value: node_text(node, source).to_string(),
-            code: node_text(node, source).to_string(),
-            line: line(node),
-        },
+        "number_literal" | "char_literal" | "string_literal" | "true" | "false" | "null" => {
+            Expression::Literal {
+                value: node_text(node, source).to_string(),
+                code: node_text(node, source).to_string(),
+                line: line(node),
+            }
+        }
         "binary_expression" => parse_binary_expression(node, source),
         "unary_expression" | "update_expression" | "pointer_expression" => {
             parse_unary_expression(node, source)
@@ -2513,7 +2515,7 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
             }),
             arguments,
         }
-    } else if integer_literal_value(code).is_some() {
+    } else if literal_text_value(code) {
         Expression::Literal {
             value: code.to_string(),
             code: code.to_string(),
@@ -2526,6 +2528,14 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
             line,
         }
     }
+}
+
+fn literal_text_value(value: &str) -> bool {
+    integer_literal_value(value).is_some()
+        || matches!(
+            value.trim(),
+            "true" | "false" | "TRUE" | "FALSE" | "nullptr" | "NULL"
+        )
 }
 
 fn parse_call_text(code: &str, line: usize) -> Option<(String, Vec<Expression>)> {
@@ -6524,6 +6534,60 @@ mod tests {
             assert_eq!(type_name, "int");
             assert!(matches!(value.as_ref(), Expression::Identifier { .. }));
         }
+    }
+
+    #[test]
+    fn parses_cpp_boolean_and_null_literals() {
+        let sample = r#"
+                bool flags(int *ptr) {
+                  bool ok = true;
+                  bool nope = false;
+                  return ptr != nullptr;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("boolean and null literal sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        let [Statement::LocalDecl {
+            name: ok_name,
+            type_name: ok_type,
+            initializer:
+                Some(Expression::Literal {
+                    value: ok_value, ..
+                }),
+            ..
+        }, Statement::LocalDecl {
+            name: nope_name,
+            type_name: nope_type,
+            initializer:
+                Some(Expression::Literal {
+                    value: nope_value, ..
+                }),
+            ..
+        }, Statement::Return {
+            expression: Some(Expression::Binary {
+                operator, right, ..
+            }),
+            ..
+        }] = function.body.as_slice()
+        else {
+            panic!("expected boolean locals and null comparison return");
+        };
+        assert_eq!(
+            (ok_name.as_str(), ok_type.as_str(), ok_value.as_str()),
+            ("ok", "bool", "true")
+        );
+        assert_eq!(
+            (nope_name.as_str(), nope_type.as_str(), nope_value.as_str()),
+            ("nope", "bool", "false")
+        );
+        assert_eq!(operator, "!=");
+        assert!(matches!(
+            right.as_ref(),
+            Expression::Literal { value, .. } if value == "nullptr"
+        ));
     }
 
     #[test]

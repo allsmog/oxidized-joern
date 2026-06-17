@@ -2739,7 +2739,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def literalType(value: String): String = {
-    if (isIntegerLiteral(value)) registerType("int") else registerType(Defines.Any)
+    value.trim match {
+      case "true" | "false" | "TRUE" | "FALSE"  => registerType("bool")
+      case literal if isIntegerLiteral(literal) => registerType("int")
+      case _                                    => registerType(Defines.Any)
+    }
   }
 
   private def isIntegerLiteral(value: String): Boolean = {
