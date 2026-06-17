@@ -3940,6 +3940,59 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C anonymous aggregate initializer field assignments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Container {
+          |  union {
+          |    int promoted;
+          |    long alternate;
+          |  };
+          |  struct {
+          |    int inline_x;
+          |    int inline_y;
+          |  };
+          |  int tail;
+          |};
+          |int anonymous_aggregates(int seed) {
+          |  struct Container designated = { .promoted = seed, .inline_x = 2, .inline_y = 3, .tail = 4 };
+          |  struct Container positional = { seed, 5, 6, 7 };
+          |  return designated.promoted + designated.inline_x + positional.inline_y + positional.tail;
+          |}
+          |""".stripMargin,
+        "Test0.c"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("anonymous_aggregates").local.nameExact("designated").typeFullName.l shouldBe
+        List("Container")
+      cpg.method.nameExact("anonymous_aggregates").local.nameExact("positional").typeFullName.l shouldBe
+        List("Container")
+      cpg.method.nameExact("anonymous_aggregates").call.nameExact(Operators.assignment).code.l should contain allElementsOf
+        List(
+          "designated = { .promoted = seed, .inline_x = 2, .inline_y = 3, .tail = 4 }",
+          "designated.promoted = seed",
+          "designated.inline_x = 2",
+          "designated.inline_y = 3",
+          "designated.tail = 4",
+          "positional = { seed, 5, 6, 7 }",
+          "positional.promoted = seed",
+          "positional.inline_x = 5",
+          "positional.inline_y = 6",
+          "positional.tail = 7"
+        )
+      cpg.method.nameExact("anonymous_aggregates").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
+        List(
+          "designated.promoted",
+          "designated.inline_x",
+          "designated.inline_y",
+          "designated.tail",
+          "positional.promoted",
+          "positional.inline_x",
+          "positional.inline_y",
+          "positional.tail"
+        )
+    }
+
     "capture C aggregate nested designated initializer field assignments from the Rust parser backend" in {
       val cpg = code(
         """
