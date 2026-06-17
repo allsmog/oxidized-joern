@@ -186,24 +186,34 @@ class BackendParitySnapshotTests extends C2CpgSuite {
   "The C backend parity snapshot harness" should {
 
     "compare normalized core C slices across CDT and oxidized" in {
-      val source =
-        """
-          |int add(int x, int y) {
-          |  int total = x + y;
-          |  return total;
-          |}
-          |
-          |int main() {
-          |  int result = add(1, 2);
-          |  return result;
-          |}
-          |""".stripMargin
+      val cases = Seq(
+        BackendParitySnapshot.Case(
+          "core methods, locals, calls, and returns",
+          """
+            |int add(int x, int y) {
+            |  int total = x + y;
+            |  return total;
+            |}
+            |
+            |int main() {
+            |  int result = add(1, 2);
+            |  return result;
+            |}
+            |""".stripMargin
+        )
+      )
 
-      val cdt = code(source, "Test0.c").withConfig(Config(parserBackend = ParserBackend.Cdt))
-      val oxidized = code(source, "Test0.c").withConfig(Config(parserBackend = ParserBackend.Oxidized))
+      cases.foreach(assertBackendParity)
+    }
+  }
 
-      CompatibilitySnapshot.render(oxidized, includeReturns = true) shouldBe
-        CompatibilitySnapshot.render(cdt, includeReturns = true)
+  private def assertBackendParity(testCase: BackendParitySnapshot.Case): Unit = {
+    val cdt      = code(testCase.source, testCase.filename).withConfig(Config(parserBackend = ParserBackend.Cdt))
+    val oxidized = code(testCase.source, testCase.filename).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+    withClue(s"${testCase.name} parity snapshot differed\n") {
+      CompatibilitySnapshot.render(oxidized, testCase.options) shouldBe
+        CompatibilitySnapshot.render(cdt, testCase.options)
     }
   }
 
@@ -211,10 +221,16 @@ class BackendParitySnapshotTests extends C2CpgSuite {
 
 object CompatibilitySnapshot {
 
+  final case class RenderOptions(typeNames: Seq[String] = Seq.empty, includeReturns: Boolean = false)
+
   private val MacTempPath  = """/var/folders/.+?/T/c2cpgCompatibilitySnapshot\d+/""".r
   private val UnixTempPath = """/tmp/c2cpgCompatibilitySnapshot\d+/""".r
 
   def render(cpg: Cpg, typeNames: Seq[String] = Seq.empty, includeReturns: Boolean = false): String = {
+    render(cpg, RenderOptions(typeNames, includeReturns))
+  }
+
+  def render(cpg: Cpg, options: RenderOptions): String = {
     val methods = cpg.method.nameNot("<global>").l.map { method =>
       line(
         "METHOD",
@@ -226,9 +242,9 @@ object CompatibilitySnapshot {
     }
 
     val typeDecls =
-      if (typeNames.isEmpty) Seq.empty
+      if (options.typeNames.isEmpty) Seq.empty
       else {
-        cpg.typeDecl.nameExact(typeNames*).l.map { typeDecl =>
+        cpg.typeDecl.nameExact(options.typeNames*).l.map { typeDecl =>
           line(
             "TYPE",
             typeDecl.name,
@@ -250,7 +266,7 @@ object CompatibilitySnapshot {
     }
 
     val returns =
-      if (!includeReturns) Seq.empty
+      if (!options.includeReturns) Seq.empty
       else {
         cpg.ret.l.map { ret =>
           line("RETURN", statementCode(ret.code), ret.lineNumber.map(_.toString).getOrElse("?"))
@@ -271,7 +287,7 @@ object CompatibilitySnapshot {
       section("METHODS", methods),
       section("TYPES", typeDecls),
       section("LOCALS", locals)
-    ) ++ Option.when(includeReturns)(section("RETURNS", returns)) ++ Seq(
+    ) ++ Option.when(options.includeReturns)(section("RETURNS", returns)) ++ Seq(
       section("CALLS", calls)
     )
     sections.mkString("\n")
@@ -293,5 +309,16 @@ object CompatibilitySnapshot {
   }
 
   private def statementCode(value: String): String = normalize(value).stripSuffix(";").trim
+
+}
+
+object BackendParitySnapshot {
+
+  final case class Case(
+    name: String,
+    source: String,
+    filename: String = "Test0.c",
+    options: CompatibilitySnapshot.RenderOptions = CompatibilitySnapshot.RenderOptions(includeReturns = true)
+  )
 
 }
