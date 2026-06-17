@@ -1186,6 +1186,45 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("refs").local.nameExact("rref").typeFullName.l shouldBe List("Core.Widget&&")
     }
 
+    "model C++ conditional aggregate temporary lifetimes" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |Widget make();
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Widget choose(bool flag) {
+          |  return flag ? Core::make() : Core::Widget();
+          |}
+          |int hold(bool flag) {
+          |  const Core::Widget& held = flag ? Core::make() : Core::Widget();
+          |  return 0;
+          |}
+          |int pass(bool flag) {
+          |  Core::consume(flag ? Core::make() : Core::Widget());
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val conditionalCode = "(flag ? Core::make() : Core::Widget()).~Widget()"
+      cpg.method.nameExact("choose").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("hold").call.nameExact("~Widget").code.l shouldBe List(conditionalCode)
+      cpg.method.nameExact("pass").call.nameExact("~Widget").code.l shouldBe List(conditionalCode)
+      cpg.method.nameExact("choose").ast.isReturn.astChildren.isCall.nameExact(Operators.conditional).code.l shouldBe
+        List("flag ? Core::make() : Core::Widget()")
+    }
+
     "preserve returned C++ object temporaries from destructor cleanup" in {
       val cpg = code(
         """
