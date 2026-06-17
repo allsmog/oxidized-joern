@@ -1788,8 +1788,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         temporaryDestructorsForExpression(pattern)
       case OxTypeOf(_, _, argument) =>
         temporaryDestructorsForExpression(argument)
-      case OxCast(_, _, _, value) =>
-        temporaryDestructorsForExpression(value)
+      case cast @ OxCast(_, _, _, value) =>
+        val castType            = temporaryTypeFullNameForExpression(cast)
+        val valueType           = temporaryTypeFullNameForExpression(value)
+        val includeValueCurrent = castType.isEmpty || castType != valueType
+        temporaryDestructorsForExpression(value, includeCurrent = includeValueCurrent)
       case OxSizeOf(_, _, value, _) =>
         value.toSeq.flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxNew(_, _, _, arguments, _) =>
@@ -1858,6 +1861,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     expression match {
       case call: OxCall               => temporaryTypeFullNameForCall(call)
       case conditional: OxConditional => conditionalTemporaryTypeFullName(conditional)
+      case cast: OxCast               => castTemporaryTypeFullName(cast)
       case _                          => None
     }
   }
@@ -1878,14 +1882,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
+  private def castTemporaryTypeFullName(cast: OxCast): Option[String] = {
+    Option(normalizeType(resolveAliasType(cast.typeName))).flatMap(returnedObjectTypeFullName)
+  }
+
   private def temporaryDestructorCode(expression: OxExpression, entry: FunctionEntry): String = {
     s"${temporaryDestructorReceiverCode(expression)}.${entry.simpleName}()"
   }
 
   private def temporaryDestructorReceiverCode(expression: OxExpression): String = {
     expression match {
-      case _: OxConditional => s"(${expression.code})"
-      case _                => expression.code
+      case _: OxConditional | _: OxCast => s"(${expression.code})"
+      case _                            => expression.code
     }
   }
 

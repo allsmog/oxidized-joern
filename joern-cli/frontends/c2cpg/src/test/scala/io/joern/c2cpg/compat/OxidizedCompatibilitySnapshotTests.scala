@@ -1225,6 +1225,45 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("flag ? Core::make() : Core::Widget()")
     }
 
+    "model C++ cast aggregate temporary lifetimes" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int castUse() {
+          |  Core::Widget source;
+          |  Core::consume(static_cast<Core::Widget>(source));
+          |  Core::consume(static_cast<Core::Widget>(Core::Widget(source)));
+          |  const Core::Widget& held = static_cast<Core::Widget>(source);
+          |  return 0;
+          |}
+          |Core::Widget castReturn() {
+          |  Core::Widget source;
+          |  return static_cast<Core::Widget>(source);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val castTemporaryDestructor = "(static_cast<Core::Widget>(source)).~Widget()"
+      val castWrappedTemporaryDestructor = "(static_cast<Core::Widget>(Core::Widget(source))).~Widget()"
+      cpg.method.nameExact("castUse").call.nameExact("~Widget").code.l shouldBe
+        List(castTemporaryDestructor, castWrappedTemporaryDestructor, castTemporaryDestructor, "source.~Widget()")
+      cpg.method.nameExact("castReturn").call.nameExact("~Widget").code.l shouldBe List("source.~Widget()")
+      cpg.method.nameExact("castReturn").ast.isReturn.astChildren.isCall.nameExact(Operators.cast).code.l shouldBe
+        List("static_cast<Core::Widget>(source)")
+    }
+
     "preserve returned C++ object temporaries from destructor cleanup" in {
       val cpg = code(
         """
