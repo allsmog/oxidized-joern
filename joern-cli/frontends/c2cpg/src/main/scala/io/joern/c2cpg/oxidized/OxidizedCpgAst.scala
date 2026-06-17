@@ -97,7 +97,7 @@ case class OxFunctionDecl(
   body: Seq[OxStatement]
 ) extends OxDeclaration
 
-case class OxParameterDecl(name: String, typeName: String, code: String, line: Int)
+case class OxParameterDecl(name: String, typeName: String, isVariadic: Boolean, code: String, line: Int)
 
 case class OxConstructorInitializer(field: String, code: String, line: Int, arguments: Seq[OxExpression])
 
@@ -191,6 +191,8 @@ case class OxCast(typeName: String, code: String, line: Int, value: OxExpression
 
 case class OxFold(operator: String, code: String, line: Int, left: Option[OxExpression], right: Option[OxExpression])
     extends OxExpression
+
+case class OxPackExpansion(code: String, line: Int, pattern: OxExpression) extends OxExpression
 
 case class OxSizeOf(code: String, line: Int, value: Option[OxExpression], typeName: Option[String]) extends OxExpression
 
@@ -360,6 +362,7 @@ object OxDocument {
     OxParameterDecl(
       name = str(value, "name"),
       typeName = str(value, "typeName"),
+      isVariadic = value.obj.get("isVariadic").exists(_.bool),
       code = str(value, "code"),
       line = int(value, "line")
     )
@@ -543,6 +546,8 @@ object OxDocument {
           left = value.obj.get("left").filter(!_.isNull).map(expression),
           right = value.obj.get("right").filter(!_.isNull).map(expression)
         )
+      case "packExpansion" =>
+        OxPackExpansion(code = str(value, "code"), line = int(value, "line"), pattern = expression(value("pattern")))
       case "sizeOf" =>
         OxSizeOf(
           code = str(value, "code"),

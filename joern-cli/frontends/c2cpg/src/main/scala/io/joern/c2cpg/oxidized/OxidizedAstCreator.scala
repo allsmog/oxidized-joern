@@ -617,7 +617,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           parameter.name,
           parameter.code,
           index + 1,
-          isVariadic = false,
+          isVariadic = parameter.isVariadic,
           EvaluationStrategies.BY_VALUE,
           parameterType
         )
@@ -1121,6 +1121,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           Seq(alternative).flatMap(heapConstructorsForExpression)
       case OxFold(_, _, _, left, right) =>
         left.toSeq.flatMap(heapConstructorsForExpression) ++ right.toSeq.flatMap(heapConstructorsForExpression)
+      case OxPackExpansion(_, _, pattern) =>
+        heapConstructorsForExpression(pattern)
       case OxCast(_, _, _, value) =>
         heapConstructorsForExpression(value)
       case OxSizeOf(_, _, value, _) =>
@@ -1234,6 +1236,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           Seq(alternative).flatMap(temporaryDestructorsForExpression)
       case OxFold(_, _, _, left, right) =>
         left.toSeq.flatMap(temporaryDestructorsForExpression) ++ right.toSeq.flatMap(temporaryDestructorsForExpression)
+      case OxPackExpansion(_, _, pattern) =>
+        temporaryDestructorsForExpression(pattern)
       case OxCast(_, _, _, value) =>
         temporaryDestructorsForExpression(value)
       case OxSizeOf(_, _, value, _) =>
@@ -1436,6 +1440,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         )
       case fold: OxFold =>
         foldAst(fold)
+      case packExpansion: OxPackExpansion =>
+        expressionAst(packExpansion.pattern)
       case cast: OxCast =>
         operatorCallAst(
           OxOrigin(cast),
@@ -1749,6 +1755,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         case OxFold(_, _, _, left, right) =>
           left.foreach(visitExpression)
           right.foreach(visitExpression)
+        case OxPackExpansion(_, _, pattern) =>
+          visitExpression(pattern)
         case OxCast(_, _, _, value) =>
           visitExpression(value)
         case OxSizeOf(_, _, value, _) =>
@@ -2094,16 +2102,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def isPointerCall(call: OxCall): Boolean = {
     call.callee match {
-      case _: OxFieldAccess             => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
-      case OxUnary("*", _, _, _, _)     => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
-      case _: OxUnary                   => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
-      case _: OxIdentifier | _: OxCast  => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
-      case _: OxCall | _: OxIndexAccess => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
-      case _: OxLambda                  => false
-      case _: OxInitializerList         => false
-      case _: OxDesignatedInitializer   => false
-      case _: OxDesignator              => false
-      case _: OxLiteral                 => false
+      case _: OxFieldAccess               => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
+      case OxUnary("*", _, _, _, _)       => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
+      case _: OxUnary                     => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
+      case _: OxIdentifier | _: OxCast    => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
+      case _: OxCall | _: OxIndexAccess   => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
+      case _: OxLambda                    => false
+      case _: OxInitializerList           => false
+      case _: OxDesignatedInitializer     => false
+      case _: OxDesignator                => false
+      case _: OxLiteral                   => false
+      case OxPackExpansion(_, _, pattern) => expressionTypeFullName(pattern).exists(isFunctionPointerType)
       case _: OxBinary | _: OxConditional | _: OxFold | _: OxSizeOf | _: OxNew | _: OxDelete => false
     }
   }
@@ -2136,6 +2145,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option(literalType(value))
       case fold: OxFold =>
         foldExpressionTypeFullName(fold)
+      case OxPackExpansion(_, _, pattern) =>
+        expressionTypeFullName(pattern)
       case OxFieldAccess(field, _, _, base) =>
         expressionTypeFullName(base).flatMap(typeName => fieldTypeFullName(typeName, field))
       case OxUnary("*", _, _, _, argument) =>
@@ -2604,6 +2615,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     expression match {
       case _: OxIdentifier | _: OxFieldAccess | _: OxIndexAccess => false
       case OxUnary("*", _, _, _, _)                              => false
+      case OxPackExpansion(_, _, pattern)                        => expressionIsRvalue(pattern)
       case call: OxCall =>
         callReturnTypeFullName(call).map(typeNameIsRvalue).getOrElse(true)
       case OxCast(typeName, _, _, _) =>
