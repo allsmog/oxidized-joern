@@ -1114,10 +1114,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           (heapConstructorAstsForExpressions(Seq(assignment)) ++ temporaryDestructorAstsForExpressions(Seq(assignment)))
       case ret: OxReturn =>
         val returnType = currentMethodReturnTypeFullName
-        heapConstructorAstsForExpressions(ret.expression.toSeq) ++ temporaryDestructorAstsForReturnExpression(
-          ret.expression,
-          returnType
-        ) ++ activeLocalDestructors.map(localDestructorAst) :+
+        heapConstructorAstsForExpressions(ret.expression.toSeq) ++ ret.expression.toSeq.flatMap(
+          aggregateAssignmentExpressionAsts
+        ) ++ temporaryDestructorAstsForReturnExpression(ret.expression, returnType) ++ activeLocalDestructors.map(
+          localDestructorAst
+        ) :+
           returnAst(
             returnNode(OxOrigin(ret), ret.code),
             ret.expression.toSeq.map(expression => expressionAstWithContextualConversion(expression, returnType))
@@ -1125,9 +1126,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case throwStmt: OxThrow =>
         val throwAst = Ast(controlStructureNode(OxOrigin(throwStmt), ControlStructureTypes.THROW, throwStmt.code))
           .withChildren(throwStmt.expression.toSeq.map(expressionAst))
-        heapConstructorAstsForExpressions(throwStmt.expression.toSeq) ++ temporaryDestructorAstsForExpressions(
-          throwStmt.expression.toSeq
-        ) ++ throwLocalDestructors.map(localDestructorAst) :+
+        heapConstructorAstsForExpressions(throwStmt.expression.toSeq) ++ throwStmt.expression.toSeq.flatMap(
+          aggregateAssignmentExpressionAsts
+        ) ++ temporaryDestructorAstsForExpressions(throwStmt.expression.toSeq) ++ throwLocalDestructors.map(
+          localDestructorAst
+        ) :+
           throwAst
       case tryStmt: OxTry =>
         val tryNode = controlStructureNode(OxOrigin("try", Option(tryStmt.line)), ControlStructureTypes.TRY, "try")
