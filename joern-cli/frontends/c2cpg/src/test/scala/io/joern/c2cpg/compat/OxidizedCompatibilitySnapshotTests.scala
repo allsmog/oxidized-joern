@@ -4303,6 +4303,43 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         )
     }
 
+    "capture C++ aggregate assignment initializers inside delete arguments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Cell {
+          |  int x;
+          |  int y;
+          |};
+          |struct Board {
+          |  Cell cell;
+          |  int z;
+          |};
+          |Board *select(Board input, Board *ptr) { return ptr; }
+          |void delete_assignment_argument(int seed, Board *ptr) {
+          |  Board update;
+          |  delete select(update = {{seed, 2}, 3}, ptr);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("delete_assignment_argument").local.nameExact("update").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("delete_assignment_argument").call.nameExact(Operators.assignment).code.l should
+        contain allElementsOf List(
+          "update = {{seed, 2}, 3}",
+          "update.cell = {seed, 2}",
+          "update.cell.x = seed",
+          "update.cell.y = 2",
+          "update.z = 3"
+        )
+      cpg.method.nameExact("delete_assignment_argument").call.nameExact(Operators.fieldAccess).code.l should
+        contain allElementsOf List("update.cell", "update.cell.x", "update.cell.y", "update.z")
+      val callCodes = cpg.method.nameExact("delete_assignment_argument").call.code.l
+      callCodes.indexOf("update.cell.x = seed") should be < callCodes.indexOf(
+        "delete select(update = {{seed, 2}, 3}, ptr)"
+      )
+    }
+
     "capture C++ aggregate assignment initializer subobject targets from the Rust parser backend" in {
       val cpg = code(
         """
