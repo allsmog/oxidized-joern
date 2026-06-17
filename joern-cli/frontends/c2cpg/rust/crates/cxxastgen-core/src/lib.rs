@@ -3922,12 +3922,15 @@ mod tests {
                   ~Widget() {}
                 };
                 void accept(Widget&& widget) {}
+                int consume(Widget&& widget) { return 1; }
                 }
                 int use() {
                   Core::Widget source;
                   Core::accept(Core::Widget());
                   Core::accept(Core::Widget(source));
-                  return 0;
+                  Core::Widget local = Core::Widget();
+                  int result = Core::consume(Core::Widget(source));
+                  return Core::consume(Core::Widget(local)) + result;
                 }
                 "#;
         let declarations = parse_declarations(sample, SourceLanguage::Cpp)
@@ -3948,6 +3951,15 @@ mod tests {
             })
             .expect("expected accept function");
         assert_eq!(accept.signature, "void(Widget&&)");
+        let consume = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "consume" => Some(function),
+                _ => None,
+            })
+            .expect("expected consume function");
+        assert_eq!(consume.signature, "int(Widget&&)");
 
         let use_function = declarations
             .iter()
@@ -3966,9 +3978,26 @@ mod tests {
         }, Statement::Expression {
             expression: copy_call,
             ..
-        }, Statement::Return { .. }] = use_function.body.as_slice()
+        }, Statement::LocalDecl {
+            name: local_name,
+            type_name: local_type,
+            initializer:
+                Some(Expression::Call {
+                    name: local_initializer,
+                    ..
+                }),
+            ..
+        }, Statement::LocalDecl {
+            name: result_name,
+            type_name: result_type,
+            initializer: Some(result_initializer),
+            ..
+        }, Statement::Return {
+            expression: Some(return_expression),
+            ..
+        }] = use_function.body.as_slice()
         else {
-            panic!("expected source local, two accept calls, and return");
+            panic!("expected source local, constructor temporaries, consume local, and return");
         };
         assert_eq!(source_name, "source");
         assert_eq!(source_type, "Core::Widget");
@@ -4001,6 +4030,37 @@ mod tests {
             [Expression::Call { name, arguments, .. }]
                 if name == "Core::Widget"
                     && matches!(arguments.as_slice(), [Expression::Identifier { name, .. }] if name == "source")
+        ));
+        assert_eq!(local_name, "local");
+        assert_eq!(local_type, "Core::Widget");
+        assert_eq!(local_initializer, "Core::Widget");
+        assert_eq!(result_name, "result");
+        assert_eq!(result_type, "int");
+        assert!(matches!(
+            result_initializer,
+            Expression::Call { name, arguments, .. }
+                if name == "Core::consume"
+                    && matches!(
+                        arguments.as_slice(),
+                        [Expression::Call { name, arguments, .. }]
+                            if name == "Core::Widget"
+                                && matches!(arguments.as_slice(), [Expression::Identifier { name, .. }] if name == "source")
+                    )
+        ));
+        let Expression::Binary { operator, left, .. } = return_expression else {
+            panic!("expected binary return expression");
+        };
+        assert_eq!(operator, "+");
+        assert!(matches!(
+            left.as_ref(),
+            Expression::Call { name, arguments, .. }
+                if name == "Core::consume"
+                    && matches!(
+                        arguments.as_slice(),
+                        [Expression::Call { name, arguments, .. }]
+                            if name == "Core::Widget"
+                                && matches!(arguments.as_slice(), [Expression::Identifier { name, .. }] if name == "local")
+                    )
         ));
     }
 

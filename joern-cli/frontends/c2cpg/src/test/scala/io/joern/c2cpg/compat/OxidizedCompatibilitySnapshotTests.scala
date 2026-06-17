@@ -502,6 +502,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  ~Widget();
           |};
           |void accept(Widget&& widget) {}
+          |int consume(Widget&& widget) { return 1; }
           |}
           |Core::Widget::Widget() {}
           |Core::Widget::~Widget() {}
@@ -509,21 +510,40 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  Core::Widget source;
           |  Core::accept(Core::Widget());
           |  Core::accept(Core::Widget(source));
-          |  return 0;
+          |  Core::Widget local = Core::Widget();
+          |  int result = Core::consume(Core::Widget(source));
+          |  return Core::consume(Core::Widget(local)) + result;
           |}
           |""".stripMargin,
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       cpg.method.fullNameExact("Core.accept:void(Widget&&)").parameter.typeFullName.l shouldBe List("Widget&&")
+      cpg.method.fullNameExact("Core.consume:int(Widget&&)").parameter.typeFullName.l shouldBe List("Widget&&")
+      cpg.method.nameExact("use").local.nameExact("local").typeFullName.l shouldBe List("Core.Widget")
+      cpg.method.nameExact("use").local.nameExact("result").typeFullName.l shouldBe List("int")
       cpg.method.nameExact("use").call.nameExact("accept").methodFullName.l shouldBe
         List("Core.accept:void(Widget&&)", "Core.accept:void(Widget&&)")
+      cpg.method.nameExact("use").call.nameExact("consume").methodFullName.l shouldBe
+        List("Core.consume:int(Widget&&)", "Core.consume:int(Widget&&)")
       cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core::Widget()").methodFullName.l shouldBe
-        List("Core.Widget.Widget:void()")
+        List("Core.Widget.Widget:void()", "Core.Widget.Widget:void()")
       cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core::Widget(source)").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)")
+      cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core::Widget(local)").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(Widget&)")
+      cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core.Widget.Widget(Core::Widget())").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(Widget&&)")
       cpg.method.nameExact("use").call.nameExact("~Widget").code.l shouldBe
-        List("Core::Widget().~Widget()", "Core::Widget(source).~Widget()", "source.~Widget()")
+        List(
+          "Core::Widget().~Widget()",
+          "Core::Widget(source).~Widget()",
+          "Core::Widget().~Widget()",
+          "Core::Widget(source).~Widget()",
+          "Core::Widget(local).~Widget()",
+          "local.~Widget()",
+          "source.~Widget()"
+        )
     }
 
     "capture C++ jump destructors" in {
