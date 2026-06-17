@@ -4234,6 +4234,93 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_constructor_temporaries_in_logical_and_conditional_expressions() {
+        let sample = r#"
+                namespace Core {
+                class Widget {
+                public:
+                  Widget();
+                  Widget(const Widget& other) {}
+                  Widget(Widget&& other) {}
+                  ~Widget() {}
+                };
+                int consume(Widget&& widget) { return 1; }
+                }
+                int mix(int n) {
+                  Core::Widget source;
+                  int both = Core::consume(Core::Widget()) && Core::consume(Core::Widget(source));
+                  int either = Core::consume(Core::Widget(source)) || Core::consume(Core::Widget());
+                  int selected = n ? Core::consume(Core::Widget()) : Core::consume(Core::Widget(source));
+                  return both + either + selected;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("logical and conditional constructor temporary sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "mix" => Some(function),
+                _ => None,
+            })
+            .expect("expected mix function");
+        let [Statement::LocalDecl {
+            name: source_name, ..
+        }, Statement::LocalDecl {
+            name: both_name,
+            initializer: Some(both_initializer),
+            ..
+        }, Statement::LocalDecl {
+            name: either_name,
+            initializer: Some(either_initializer),
+            ..
+        }, Statement::LocalDecl {
+            name: selected_name,
+            initializer: Some(selected_initializer),
+            ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!("expected source local, logical locals, conditional local, and return");
+        };
+        assert_eq!(source_name, "source");
+        assert_eq!(both_name, "both");
+        assert_eq!(either_name, "either");
+        assert_eq!(selected_name, "selected");
+        assert_binary_operator(both_initializer, "&&");
+        assert_binary_operator(either_initializer, "||");
+        assert!(matches!(
+            selected_initializer,
+            Expression::Conditional { .. }
+        ));
+        assert_eq!(
+            collect_call_names(both_initializer),
+            vec![
+                "Core::consume",
+                "Core::Widget",
+                "Core::consume",
+                "Core::Widget"
+            ]
+        );
+        assert_eq!(
+            collect_call_names(either_initializer),
+            vec![
+                "Core::consume",
+                "Core::Widget",
+                "Core::consume",
+                "Core::Widget"
+            ]
+        );
+        assert_eq!(
+            collect_call_names(selected_initializer),
+            vec![
+                "Core::consume",
+                "Core::Widget",
+                "Core::consume",
+                "Core::Widget"
+            ]
+        );
+    }
+
+    #[test]
     fn parses_cpp_new_and_delete_expressions() {
         let sample = r#"
                 int *allocate(int n) {
@@ -5125,6 +5212,45 @@ mod tests {
             Expression::Binary { left, right, .. } => {
                 let mut calls = collect_call_names(left);
                 calls.extend(collect_call_names(right));
+                calls
+            }
+            Expression::Conditional {
+                condition,
+                consequence,
+                alternative,
+                ..
+            } => {
+                let mut calls = collect_call_names(condition);
+                if let Some(consequence) = consequence {
+                    calls.extend(collect_call_names(consequence));
+                }
+                calls.extend(collect_call_names(alternative));
+                calls
+            }
+            Expression::Unary { argument, .. }
+            | Expression::Cast {
+                value: argument, ..
+            }
+            | Expression::Delete { argument, .. }
+            | Expression::FieldAccess { base: argument, .. } => collect_call_names(argument),
+            Expression::SizeOf { value, .. } => {
+                value.as_deref().map(collect_call_names).unwrap_or_default()
+            }
+            Expression::New { arguments, .. }
+            | Expression::InitializerList {
+                elements: arguments,
+                ..
+            } => arguments.iter().flat_map(collect_call_names).collect(),
+            Expression::IndexAccess { base, index, .. } => {
+                let mut calls = collect_call_names(base);
+                calls.extend(collect_call_names(index));
+                calls
+            }
+            Expression::DesignatedInitializer {
+                designator, value, ..
+            } => {
+                let mut calls = collect_call_names(designator);
+                calls.extend(collect_call_names(value));
                 calls
             }
             _ => Vec::new(),
