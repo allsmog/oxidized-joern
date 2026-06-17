@@ -90,6 +90,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private final case class AggregateBaseInitializerSlot(typeName: String) extends AggregateInitializerSlot
   private final case class AggregateFieldInitializerSlot(ownerTypeName: String, field: OxFieldDecl)
       extends AggregateInitializerSlot
+  private sealed trait AggregateMemberItem
+  private final case class AggregateFieldMemberItem(field: OxFieldDecl) extends AggregateMemberItem
+  private final case class AggregateAnonymousMemberItem(typeName: String, declaration: OxStructDecl)
+      extends AggregateMemberItem
   private sealed trait AggregatePathSegment
   private final case class AggregateFieldPathSegment(name: String)      extends AggregatePathSegment
   private final case class AggregateIndexPathSegment(indexCode: String) extends AggregatePathSegment
@@ -120,6 +124,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
       Seq(localName, fullName).distinct.map(typeName => typeName -> structDecl)
     }.toMap
+  private lazy val aggregateDeclarationEntriesByType: Map[String, (OxStructDecl, String)] =
+    aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
+      val localName = normalizeType(structDecl.name)
+      val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
+      Seq(localName, fullName).distinct.map(typeName => typeName -> (structDecl -> fullName))
+    }.toMap
   private lazy val requiredImplicitDefaultConstructorTypes: Set[String] =
     collectRequiredImplicitDefaultConstructorTypes(document.declarations, None)
   private lazy val outOfClassFunctionsByOwner: Map[String, Seq[FunctionEntry]] =
@@ -133,14 +143,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val localName = normalizeType(structDecl.name)
       val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
       Seq(localName, fullName).distinct.map { typeName =>
-        typeName -> structDecl.fields.map(field => field.name -> field).toMap
+        typeName -> aggregateFieldsForLookup(structDecl, fullName).map(field => field.name -> field).toMap
       }
     }.toMap
   private lazy val aggregateFieldsByType: Map[String, Seq[OxFieldDecl]] =
     aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
       val localName = normalizeType(structDecl.name)
       val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
-      Seq(localName, fullName).distinct.map(typeName => typeName -> structDecl.fields)
+      Seq(localName, fullName).distinct.map(typeName => typeName -> aggregateFieldsForLookup(structDecl, fullName))
     }.toMap
   private lazy val aggregateBaseTypesByType: Map[String, Seq[String]] =
     aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
@@ -360,6 +370,42 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case _ =>
         Seq.empty
     }
+  }
+
+  private def aggregateFieldsForLookup(structDecl: OxStructDecl, typeName: String): Seq[OxFieldDecl] = {
+    aggregateMemberItems(structDecl, typeName).flatMap {
+      case AggregateFieldMemberItem(field) => Seq(field)
+      case AggregateAnonymousMemberItem(nestedTypeName, nestedDecl) =>
+        aggregateFieldsForLookup(nestedDecl, nestedTypeName)
+    }
+  }
+
+  private def aggregateMemberItems(structDecl: OxStructDecl, typeName: String): Seq[AggregateMemberItem] = {
+    val fieldItems = structDecl.fields.map { field =>
+      aggregateMemberCodeIndex(structDecl, field.code) -> AggregateFieldMemberItem(field)
+    }
+    val anonymousItems = structDecl.nestedDeclarations.collect {
+      case nestedStruct: OxStructDecl if isAnonymousAggregateDecl(nestedStruct) =>
+        val nestedTypeName = s"$typeName.${normalizeType(nestedStruct.name)}"
+        aggregateMemberCodeIndex(structDecl, nestedStruct.code) -> AggregateAnonymousMemberItem(
+          nestedTypeName,
+          nestedStruct
+        )
+    }
+    (fieldItems ++ anonymousItems).sortBy(_._1).map(_._2)
+  }
+
+  private def aggregateMemberCodeIndex(structDecl: OxStructDecl, memberCode: String): Int = {
+    val index = structDecl.code.indexOf(memberCode)
+    if (index >= 0) index else Int.MaxValue
+  }
+
+  private def isAnonymousAggregateDecl(structDecl: OxStructDecl): Boolean = {
+    normalizeType(structDecl.name).startsWith("<type>")
+  }
+
+  private def isUnionAggregateDecl(structDecl: OxStructDecl): Boolean = {
+    structDecl.code.trim.startsWith("union")
   }
 
   private def collectFunctionEntries(
@@ -1513,10 +1559,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def aggregateInitializerSlots(typeName: String): Seq[AggregateInitializerSlot] = {
     val normalized = aggregateLookupTypeName(typeName)
-    aggregateBaseTypesByType.getOrElse(normalized, Seq.empty).map(AggregateBaseInitializerSlot.apply) ++
-      aggregateFieldsByType
-        .getOrElse(normalized, Seq.empty)
-        .map(field => AggregateFieldInitializerSlot(normalized, field))
+    val baseSlots  = aggregateBaseTypesByType.getOrElse(normalized, Seq.empty).map(AggregateBaseInitializerSlot.apply)
+    val fieldSlots = aggregateDeclarationEntriesByType
+      .get(normalized)
+      .map { case (structDecl, fullName) => aggregateFieldInitializerSlots(structDecl, fullName) }
+      .getOrElse(Seq.empty)
+    baseSlots ++ fieldSlots
+  }
+
+  private def aggregateFieldInitializerSlots(
+    structDecl: OxStructDecl,
+    typeName: String
+  ): Seq[AggregateFieldInitializerSlot] = {
+    aggregateMemberItems(structDecl, typeName).flatMap {
+      case AggregateFieldMemberItem(field) =>
+        Seq(AggregateFieldInitializerSlot(typeName, field))
+      case AggregateAnonymousMemberItem(nestedTypeName, nestedDecl) =>
+        val promotedSlots = aggregateFieldInitializerSlots(nestedDecl, nestedTypeName)
+        if (isUnionAggregateDecl(nestedDecl)) promotedSlots.take(1) else promotedSlots
+    }
   }
 
   private def aggregateFlattenedFieldInitializerSlots(typeName: String): Seq[AggregateFieldInitializerSlot] = {
