@@ -200,6 +200,28 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             |  return result;
             |}
             |""".stripMargin
+        ),
+        BackendParitySnapshot.Case(
+          "local reassignment and arithmetic",
+          """
+            |int bump(int x) {
+            |  int y = 0;
+            |  y = y + x;
+            |  return y;
+            |}
+            |""".stripMargin
+        ),
+        BackendParitySnapshot.Case(
+          "nested function calls and multiplication",
+          """
+            |int square(int x) {
+            |  return x * x;
+            |}
+            |
+            |int use_square(int x) {
+            |  return square(x) + square(2);
+            |}
+            |""".stripMargin
         )
       )
 
