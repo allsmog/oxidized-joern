@@ -411,6 +411,41 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ template declarations and instantiated receivers" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |template <typename T>
+          |T pick(T value) { return value; }
+          |template <typename T>
+          |struct Holder {
+          |  T value;
+          |  T get() { return value; }
+          |};
+          |}
+          |int use(Core::Holder<int> holder) {
+          |  return holder.value + holder.get() + Core::pick<int>(1);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.typeDecl.fullNameExact("Core.Holder").member.nameExact("value").typeFullName.l shouldBe List("T")
+      cpg.method.fullNameExact("Core.Holder.get:T()").ast.isReturn.code.l shouldBe List("return value")
+      cpg.method.nameExact("use").parameter.nameExact("holder").typeFullName.l shouldBe List("Core.Holder<int>")
+      inside(cpg.method.nameExact("use").call.nameExact(Operators.fieldAccess).codeExact("holder.value").l) {
+        case List(fieldAccess) =>
+          fieldAccess.typeFullName shouldBe "T"
+          fieldAccess.argument.code.l shouldBe List("holder", "value")
+      }
+      cpg.method.nameExact("use").call.codeExact("holder.get()").methodFullName.l shouldBe List("Core.Holder.get:T()")
+      inside(cpg.method.nameExact("use").call.codeExact("Core::pick<int>(1)").l) { case List(pickCall) =>
+        pickCall.name shouldBe "pick"
+        pickCall.methodFullName shouldBe "Core.pick:T(T)"
+        pickCall.typeFullName shouldBe "T"
+      }
+    }
+
     "capture C++ for initializer destructors" in {
       val cpg = code(
         """
