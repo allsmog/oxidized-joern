@@ -258,6 +258,47 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             |""".stripMargin,
           filename = "Test0.cpp",
           options = CompatibilitySnapshot.RenderOptions(typeNames = Seq("Box"), includeReturns = true)
+        ),
+        BackendParitySnapshot.Case(
+          "C++ member method call",
+          """
+            |struct Counter {
+            |  int value;
+            |  int get() { return value; }
+            |};
+            |
+            |int main() {
+            |  Counter counter;
+            |  counter.value = 1;
+            |  return counter.get();
+            |}
+            |""".stripMargin,
+          filename = "Test0.cpp",
+          options =
+            CompatibilitySnapshot.RenderOptions(typeNames = Seq("Counter"), includeReturns = true, includeCallDetails = true)
+        ),
+        BackendParitySnapshot.Case(
+          "C++ virtual member dispatch",
+          """
+            |struct Base {
+            |  virtual int get() { return 1; }
+            |};
+            |struct Derived : public Base {
+            |  int get() override { return 2; }
+            |};
+            |
+            |int main() {
+            |  Derived derived;
+            |  Base *base = &derived;
+            |  return base->get();
+            |}
+            |""".stripMargin,
+          filename = "Test0.cpp",
+          options = CompatibilitySnapshot.RenderOptions(
+            typeNames = Seq("Base", "Derived"),
+            includeReturns = true,
+            includeCallDetails = true
+          )
         )
       )
 
@@ -280,7 +321,11 @@ class BackendParitySnapshotTests extends C2CpgSuite {
 
 object CompatibilitySnapshot {
 
-  final case class RenderOptions(typeNames: Seq[String] = Seq.empty, includeReturns: Boolean = false)
+  final case class RenderOptions(
+    typeNames: Seq[String] = Seq.empty,
+    includeReturns: Boolean = false,
+    includeCallDetails: Boolean = false
+  )
 
   private val MacTempPath  = """/var/folders/.+?/T/c2cpgCompatibilitySnapshot\d+/""".r
   private val UnixTempPath = """/tmp/c2cpgCompatibilitySnapshot\d+/""".r
@@ -333,13 +378,24 @@ object CompatibilitySnapshot {
       }
 
     val calls = cpg.call.l.map { call =>
-      line(
-        "CALL",
-        call.name,
-        call.methodFullName,
-        call.code,
-        call.lineNumber.map(_.toString).getOrElse("?")
-      )
+      val values =
+        if (options.includeCallDetails)
+          Seq(
+            call.name,
+            call.methodFullName,
+            call.dispatchType,
+            comparableCallTypeFullName(call.name, call.typeFullName),
+            call.code,
+            call.lineNumber.map(_.toString).getOrElse("?")
+          )
+        else
+          Seq(
+            call.name,
+            call.methodFullName,
+            call.code,
+            call.lineNumber.map(_.toString).getOrElse("?")
+          )
+      line("CALL", values*)
     }
 
     val sections = Seq(
@@ -358,6 +414,10 @@ object CompatibilitySnapshot {
     val actualOnly    = actualLines.diff(expectedLines).map(line => s"+ $line")
     val expectedOnly  = expectedLines.diff(actualLines).map(line => s"- $line")
     (actualOnly ++ expectedOnly).mkString("\n", "\n", "\n")
+  }
+
+  private def comparableCallTypeFullName(name: String, typeFullName: String): String = {
+    if (name.startsWith("<operator>.")) "?" else typeFullName
   }
 
   private def section(name: String, lines: Seq[String]): String = {
