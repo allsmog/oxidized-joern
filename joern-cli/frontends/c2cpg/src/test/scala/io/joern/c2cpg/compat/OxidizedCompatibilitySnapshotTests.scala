@@ -1378,6 +1378,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  }
           |  return 0;
           |}
+          |int returns(int n) {
+          |  Core::Widget outer;
+          |  if (n) {
+          |    Core::Widget scoped(outer);
+          |    return 1;
+          |  }
+          |  return 0;
+          |}
           |int switches(int n) {
           |  Core::Widget outer;
           |  switch (n) {
@@ -1423,6 +1431,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           continueIf.ast.isCall.nameExact("~Widget").code.l shouldBe List("skipped.~Widget()", "body.~Widget()")
           breakIf.ast.isCall.nameExact("~Widget").code.l shouldBe List("stopped.~Widget()", "body.~Widget()")
       }
+
+      cpg.method.nameExact("returns").call.nameExact("~Widget").code.l.sorted shouldBe
+        List("outer.~Widget()", "outer.~Widget()", "scoped.~Widget()")
+      cpg.method.nameExact("returns").controlStructure.controlStructureType(ControlStructureTypes.IF).ast.isCall
+        .nameExact("~Widget")
+        .code
+        .l shouldBe List("scoped.~Widget()", "outer.~Widget()")
 
       cpg.method.nameExact("switches").call.nameExact("~Widget").code.l shouldBe
         List("caseLocal.~Widget()", "outer.~Widget()")
