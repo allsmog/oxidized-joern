@@ -2317,6 +2317,32 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("inferRefs").call.nameExact(Operators.addressOf).code.l shouldBe List("&x")
     }
 
+    "infer C++17 braced auto initializer-list local types from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |void use() {
+          |  auto x1 = {1, 2, 3};
+          |  auto x2 {3};
+          |  auto x3 {3.0};
+          |  auto x4 = 3.0f;
+          |  auto x5 = 3.0L;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").local.nameExact("x1").typeFullName.l shouldBe List("std.initializer_list<int>")
+      cpg.method.nameExact("use").local.nameExact("x2").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("use").local.nameExact("x3").typeFullName.l shouldBe List("double")
+      cpg.method.nameExact("use").local.nameExact("x4").typeFullName.l shouldBe List("float")
+      cpg.method.nameExact("use").local.nameExact("x5").typeFullName.l shouldBe List("long double")
+      cpg.method.nameExact("use").call.nameExact(Operators.arrayInitializer).codeExact("{1, 2, 3}").typeFullName.l shouldBe
+        List("std.initializer_list<int>")
+      cpg.literal.codeExact("3.0").typeFullName.l shouldBe List("double")
+      cpg.literal.codeExact("3.0f").typeFullName.l shouldBe List("float")
+      cpg.literal.codeExact("3.0L").typeFullName.l shouldBe List("long double")
+    }
+
     "capture C++ structured bindings from the Rust parser backend" in {
       val cpg = code(
         """
