@@ -768,6 +768,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case ret: OxReturn =>
         temporaryDestructorAstsForExpressions(ret.expression.toSeq) ++ activeLocalDestructors.map(localDestructorAst) :+
           returnAst(returnNode(OxOrigin(ret), ret.code), ret.expression.toSeq.map(expressionAst))
+      case throwStmt: OxThrow =>
+        val throwAst = Ast(controlStructureNode(OxOrigin(throwStmt), ControlStructureTypes.THROW, throwStmt.code))
+          .withChildren(throwStmt.expression.toSeq.map(expressionAst))
+        temporaryDestructorAstsForExpressions(throwStmt.expression.toSeq) ++ activeLocalDestructors.map(
+          localDestructorAst
+        ) :+
+          throwAst
       case ifStmt: OxIf =>
         val ifNode                    = controlStructureNode(OxOrigin(ifStmt), ControlStructureTypes.IF, ifStmt.code)
         val conditionAst              = expressionAst(ifStmt.condition)
@@ -1044,7 +1051,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def statementMayCompleteNormally(statement: OxStatement): Boolean = {
     statement match {
-      case _: OxReturn | _: OxBreak | _: OxContinue | _: OxGoto => false
+      case _: OxReturn | _: OxThrow | _: OxBreak | _: OxContinue | _: OxGoto => false
       case ifStmt: OxIf =>
         ifStmt.elseBody.isEmpty ||
         statementsMayCompleteNormally(ifStmt.thenBody) ||

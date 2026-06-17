@@ -114,6 +114,8 @@ case class OxAssignment(operator: String, code: String, line: Int, left: OxExpre
 
 case class OxReturn(code: String, line: Int, expression: Option[OxExpression]) extends OxStatement
 
+case class OxThrow(code: String, line: Int, expression: Option[OxExpression]) extends OxStatement
+
 case class OxIf(
   code: String,
   line: Int,
@@ -357,6 +359,12 @@ object OxDocument {
         )
       case "return" =>
         OxReturn(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          expression = value.obj.get("expression").filter(!_.isNull).map(expression)
+        )
+      case "throw" =>
+        OxThrow(
           code = str(value, "code"),
           line = int(value, "line"),
           expression = value.obj.get("expression").filter(!_.isNull).map(expression)
