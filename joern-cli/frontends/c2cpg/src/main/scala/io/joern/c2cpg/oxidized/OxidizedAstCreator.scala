@@ -2903,6 +2903,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def literalType(value: String): String = {
     value.trim match {
       case "true" | "false" | "TRUE" | "FALSE"  => registerType("bool")
+      case "nullptr"                            => registerType("std.nullptr_t")
       case literal if isIntegerLiteral(literal) => registerType("int")
       case literal if isCharLiteral(literal)    => registerType("char")
       case literal =>
