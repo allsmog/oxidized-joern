@@ -3708,6 +3708,49 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C++ aggregate nested positional initializer field assignments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Inner {
+          |  int x;
+          |  int y;
+          |};
+          |struct Outer {
+          |  Inner inner;
+          |  int z;
+          |};
+          |void nested(int seed) {
+          |  Outer first {{seed, 2}, 3};
+          |  Outer second = {{4, seed}};
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("nested").local.nameExact("first").typeFullName.l shouldBe List("Outer")
+      cpg.method.nameExact("nested").local.nameExact("second").typeFullName.l shouldBe List("Outer")
+      cpg.method.nameExact("nested").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "first = {{seed, 2}, 3}",
+        "first.inner = {seed, 2}",
+        "first.inner.x = seed",
+        "first.inner.y = 2",
+        "first.z = 3",
+        "second = {{4, seed}}",
+        "second.inner = {4, seed}",
+        "second.inner.x = 4",
+        "second.inner.y = seed"
+      )
+      cpg.method.nameExact("nested").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf List(
+        "first.inner",
+        "first.inner.x",
+        "first.inner.y",
+        "first.z",
+        "second.inner",
+        "second.inner.x",
+        "second.inner.y"
+      )
+    }
+
     "capture function prototypes as external methods" in {
       val cpg = code("""
           |int external(int value);
