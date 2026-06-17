@@ -2959,7 +2959,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
                   dispatchType
                 )
               case None =>
-                (callName(call), normalizedQualifiedName(call.name), None, Defines.Any, DispatchTypes.STATIC_DISPATCH)
+                (
+                  callName(call),
+                  normalizedQualifiedName(call.name),
+                  None,
+                  callReturnTypeFullName(call).getOrElse(Defines.Any),
+                  DispatchTypes.STATIC_DISPATCH
+                )
             }
         }
     }

@@ -339,6 +339,29 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             |""".stripMargin,
           filename = "Test0.cpp",
           options = CompatibilitySnapshot.RenderOptions(typeNames = Seq("Box"), includeReturns = true, includeCallDetails = true)
+        ),
+        BackendParitySnapshot.Case(
+          "C++ template declarations and instantiated receivers",
+          """
+            |namespace Core {
+            |template <typename T>
+            |T pick(T value) { return value; }
+            |template <typename T>
+            |struct Holder {
+            |  T value;
+            |  T get() { return value; }
+            |};
+            |}
+            |int use(Core::Holder<int> holder) {
+            |  return holder.value + holder.get() + Core::pick<int>(1);
+            |}
+            |""".stripMargin,
+          filename = "Test0.cpp",
+          options = CompatibilitySnapshot.RenderOptions(
+            typeNames = Seq("Holder"),
+            includeReturns = true,
+            includeCallDetails = true
+          )
         )
       )
 
@@ -375,14 +398,29 @@ object CompatibilitySnapshot {
   }
 
   def render(cpg: Cpg, options: RenderOptions): String = {
-    val methods = cpg.method.nameNot("<global>").l
-      .filterNot(method => options.includeCallDetails && isSyntheticOperatorMethod(method.name))
+    val rawMethods = cpg.method.nameNot("<global>").l
+    val genericMethodFullNames = rawMethods
+      .map(method => comparableMethodFullName(method.fullName))
+      .filter(isGenericTemplateMethodFullName)
+      .toSet
+    val methods = rawMethods
+      .filterNot(method =>
+        options.includeCallDetails && (
+          isSyntheticOperatorMethod(method.name) ||
+            isSyntheticTemplateInstantiation(
+              method.lineNumber.isEmpty,
+              comparableTemplateMethodFullName(method.fullName, genericMethodFullNames),
+              genericMethodFullNames
+            )
+        )
+      )
       .map { method =>
+        val methodFullName = comparableTemplateMethodFullName(method.fullName, genericMethodFullNames)
         line(
           "METHOD",
           comparableMethodName(method.name),
-          comparableMethodFullName(method.fullName),
-          method.signature,
+          methodFullName,
+          comparableSignature(method.signature),
           method.lineNumber.map(_.toString).getOrElse("?")
         )
       }
@@ -394,7 +432,7 @@ object CompatibilitySnapshot {
           line(
             "TYPE",
             typeDecl.name,
-            typeDecl.fullName,
+            comparableTypeDeclFullName(typeDecl.fullName, typeDecl.filename),
             typeDecl.filename,
             typeDecl.lineNumber.map(_.toString).getOrElse("?")
           )
@@ -425,11 +463,16 @@ object CompatibilitySnapshot {
       val values =
         if (options.includeCallDetails) {
           val name = comparableCallName(call.name)
+          val methodFullName =
+            comparableTemplateMethodFullName(
+              comparableCallMethodFullName(call.name, call.methodFullName),
+              genericMethodFullNames
+            )
           Seq(
             name,
-            comparableCallMethodFullName(call.name, call.methodFullName),
+            methodFullName,
             call.dispatchType,
-            comparableCallTypeFullName(name, call.typeFullName),
+            comparableCallTypeFullName(name, methodFullName, call.typeFullName),
             call.code,
             call.lineNumber.map(_.toString).getOrElse("?")
           )
@@ -461,8 +504,8 @@ object CompatibilitySnapshot {
     (actualOnly ++ expectedOnly).mkString("\n", "\n", "\n")
   }
 
-  private def comparableCallTypeFullName(name: String, typeFullName: String): String = {
-    if (name.startsWith("<operator>.")) "?" else typeFullName
+  private def comparableCallTypeFullName(name: String, methodFullName: String, typeFullName: String): String = {
+    if (name.startsWith("<operator>.")) "?" else methodReturnType(methodFullName).getOrElse(typeFullName)
   }
 
   private def comparableMethodName(name: String): String = {
@@ -476,11 +519,13 @@ object CompatibilitySnapshot {
   }
 
   private def comparableMethodFullName(fullName: String): String = {
-    fullName
+    val operatorNormalized =
+      fullName
       .replace(".operator():", ".():")
       .replace(".operator+:", ".+:")
       .replace(".operator=:", ".=:")
       .replace(".operator[]:", ".[]:")
+    normalizeFullNameSignature(operatorNormalized)
   }
 
   private def comparableCallName(name: String): String = {
@@ -489,7 +534,7 @@ object CompatibilitySnapshot {
       case "operator+"  => "<operator>.addition"
       case "operator="  => "<operator>.assignment"
       case "operator[]" => "<operator>.indirectIndexAccess"
-      case _            => name
+      case _            => eraseTemplateArguments(name)
     }
   }
 
@@ -503,8 +548,86 @@ object CompatibilitySnapshot {
     }
   }
 
+  private def comparableTemplateMethodFullName(fullName: String, genericMethodFullNames: Set[String]): String = {
+    val comparable = comparableMethodFullName(fullName)
+    val generic    = methodFullNameWithReturnType(comparable, "T")
+    generic.filter(genericMethodFullNames.contains).getOrElse(comparable)
+  }
+
+  private def comparableSignature(signature: String): String = {
+    normalizeTypeReferences(signature)
+  }
+
+  private def comparableTypeDeclFullName(fullName: String, filename: String): String = {
+    val erased = eraseTemplateArguments(fullName)
+    if (fullName.contains("<") || filename == "<includes>") simpleTypeName(erased) else erased
+  }
+
+  private def isGenericTemplateMethodFullName(fullName: String): Boolean = {
+    methodReturnType(fullName).contains("T")
+  }
+
+  private def isSyntheticTemplateInstantiation(
+    hasNoLineNumber: Boolean,
+    methodFullName: String,
+    genericMethodFullNames: Set[String]
+  ): Boolean = {
+    hasNoLineNumber && genericMethodFullNames.contains(methodFullName)
+  }
+
   private def isSyntheticOperatorMethod(name: String): Boolean = {
     name == "<operator>()" || name == "<operator>.indirectIndexAccess"
+  }
+
+  private def normalizeFullNameSignature(fullName: String): String = {
+    val signatureStart = fullName.indexOf(':')
+    if (signatureStart < 0) fullName
+    else s"${fullName.take(signatureStart + 1)}${normalizeTypeReferences(fullName.drop(signatureStart + 1))}"
+  }
+
+  private def normalizeTypeReferences(value: String): String = {
+    eraseTemplateArguments(value)
+      .replace("::", ".")
+      .replaceAll("""\b(?:[A-Za-z_]\w*\.)+([A-Za-z_]\w*)""", "$1")
+  }
+
+  private def eraseTemplateArguments(value: String): String = {
+    if (value.contains("<operator>")) {
+      value
+    } else {
+      val builder = new StringBuilder
+      var depth   = 0
+      value.foreach {
+        case '<' =>
+          depth += 1
+        case '>' if depth > 0 =>
+          depth -= 1
+        case ch if depth == 0 =>
+          builder.append(ch)
+        case _ =>
+      }
+      if (depth == 0) builder.toString else value
+    }
+  }
+
+  private def simpleTypeName(typeFullName: String): String = {
+    typeFullName.replace("::", ".").split('.').lastOption.getOrElse(typeFullName)
+  }
+
+  private def methodReturnType(methodFullName: String): Option[String] = {
+    val signatureStart = methodFullName.indexOf(':')
+    val paramsStart    = methodFullName.indexOf('(', signatureStart + 1)
+    Option.when(signatureStart >= 0 && paramsStart > signatureStart) {
+      methodFullName.substring(signatureStart + 1, paramsStart)
+    }
+  }
+
+  private def methodFullNameWithReturnType(methodFullName: String, returnType: String): Option[String] = {
+    val signatureStart = methodFullName.indexOf(':')
+    val paramsStart    = methodFullName.indexOf('(', signatureStart + 1)
+    Option.when(signatureStart >= 0 && paramsStart > signatureStart) {
+      s"${methodFullName.take(signatureStart + 1)}$returnType${methodFullName.drop(paramsStart)}"
+    }
   }
 
   private def isTypeOwnerLocal(cpg: Cpg, name: String, typeFullName: String, code: String): Boolean = {
