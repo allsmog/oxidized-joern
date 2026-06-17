@@ -3791,6 +3791,73 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C aggregate array initializer field assignments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Cell {
+          |  int x;
+          |  int y;
+          |};
+          |struct Board {
+          |  struct Cell cells[2];
+          |  int totals[2];
+          |  int z;
+          |};
+          |int aggregate_arrays(int seed) {
+          |  struct Board board = {{{seed, 2}, {3, 4}}, {5, seed}, 9};
+          |  struct Board designated = { .cells[1].x = seed, .cells[1].y = 7, .totals[0] = 4, .z = 8 };
+          |  return board.cells[0].x + board.cells[1].y + board.totals[1] + designated.cells[1].x;
+          |}
+          |""".stripMargin,
+        "Test0.c"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("aggregate_arrays").local.nameExact("board").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("aggregate_arrays").local.nameExact("designated").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("aggregate_arrays").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "board = {{{seed, 2}, {3, 4}}, {5, seed}, 9}",
+        "board.cells = {{seed, 2}, {3, 4}}",
+        "board.cells[0] = {seed, 2}",
+        "board.cells[0].x = seed",
+        "board.cells[0].y = 2",
+        "board.cells[1] = {3, 4}",
+        "board.cells[1].x = 3",
+        "board.cells[1].y = 4",
+        "board.totals = {5, seed}",
+        "board.totals[0] = 5",
+        "board.totals[1] = seed",
+        "board.z = 9",
+        "designated = { .cells[1].x = seed, .cells[1].y = 7, .totals[0] = 4, .z = 8 }",
+        "designated.cells[1].x = seed",
+        "designated.cells[1].y = 7",
+        "designated.totals[0] = 4",
+        "designated.z = 8"
+      )
+      cpg.method.nameExact("aggregate_arrays").call.nameExact(Operators.indirectIndexAccess).code.l should contain allElementsOf
+        List(
+          "board.cells[0]",
+          "board.cells[1]",
+          "board.totals[0]",
+          "board.totals[1]",
+          "designated.cells[1]",
+          "designated.totals[0]"
+        )
+      cpg.method.nameExact("aggregate_arrays").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf List(
+        "board.cells",
+        "board.cells[0].x",
+        "board.cells[0].y",
+        "board.cells[1].x",
+        "board.cells[1].y",
+        "board.totals",
+        "board.z",
+        "designated.cells",
+        "designated.cells[1].x",
+        "designated.cells[1].y",
+        "designated.totals",
+        "designated.z"
+      )
+    }
+
     "capture C aggregate nested designated initializer field assignments from the Rust parser backend" in {
       val cpg = code(
         """
