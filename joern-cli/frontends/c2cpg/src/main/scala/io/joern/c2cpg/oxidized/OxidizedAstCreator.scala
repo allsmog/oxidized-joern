@@ -2692,9 +2692,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def functionFullName(function: OxFunctionDecl, ownerFullName: Option[String]): String = {
     val simpleName = functionSimpleName(function)
-    functionOwnerFullName(function, ownerFullName)
-      .map(owner => s"$owner.$simpleName:${function.signature}")
-      .getOrElse(function.name)
+    if (isSyntheticRequiresFunction(function) && ownerFullName.isEmpty) {
+      s"${function.name}:${function.signature}"
+    } else
+      functionOwnerFullName(function, ownerFullName)
+        .map(owner => s"$owner.$simpleName:${function.signature}")
+        .getOrElse(function.name)
+  }
+
+  private def isSyntheticRequiresFunction(function: OxFunctionDecl): Boolean = {
+    function.name == "requires" && function.returnType == "requires" && !function.isDefinition
   }
 
   private def functionSimpleName(function: OxFunctionDecl): String = {

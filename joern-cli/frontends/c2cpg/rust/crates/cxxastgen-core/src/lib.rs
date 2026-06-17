@@ -694,6 +694,13 @@ fn parse_declaration_node(
                 visited_headers,
             )?);
         }
+        "concept_definition" | "requires_clause" => {
+            declarations.extend(
+                parse_requires_expression_declarations(node, source)
+                    .into_iter()
+                    .map(Declaration::Function),
+            );
+        }
         "namespace_definition" => {
             if let Some(namespace) =
                 parse_namespace(node, source, source_path, options, symbols, visited_headers)?
@@ -1794,6 +1801,36 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
         constructor_initializers: Vec::new(),
         body: Vec::new(),
     })
+}
+
+fn parse_requires_expression_declarations(node: Node, source: &[u8]) -> Vec<FunctionDecl> {
+    named_descendants(node)
+        .into_iter()
+        .filter(|descendant| descendant.kind() == "requires_expression")
+        .map(|requires_expression| {
+            let return_type = "requires".to_string();
+            let parameters = requires_expression
+                .child_by_field_name("parameters")
+                .map(|parameters| parse_parameters(parameters, source))
+                .unwrap_or_default();
+            FunctionDecl {
+                name: "requires".to_string(),
+                signature: signature(&return_type, &parameters),
+                return_type,
+                is_definition: false,
+                is_static: false,
+                is_const: false,
+                is_virtual: false,
+                code: compact_code(node_text(requires_expression, source)),
+                line: line(requires_expression),
+                source_path: None,
+                visible_line: None,
+                parameters,
+                constructor_initializers: Vec::new(),
+                body: Vec::new(),
+            }
+        })
+        .collect()
 }
 
 fn parse_constructor_or_destructor(
@@ -5343,6 +5380,50 @@ mod tests {
             argument.as_ref(),
             Expression::Identifier { name, code, .. } if name == "local" && code == "local"
         ));
+    }
+
+    #[test]
+    fn parses_cpp_concept_requires_expression_placeholders() {
+        let sample = r#"
+                template <typename T>
+                concept callable = requires (T f) { f(); };
+
+                template <typename T>
+                  requires requires (T x) { x + x; }
+                T add(T a, T b) { return a + b; }
+
+                template <typename T>
+                  requires callable<T>
+                void f(T v);
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("concept requires sample should parse");
+        let functions: Vec<&FunctionDecl> = declarations
+            .iter()
+            .filter_map(|declaration| match declaration {
+                Declaration::Function(function) => Some(function),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(
+            functions
+                .iter()
+                .map(|function| (function.name.as_str(), function.signature.as_str()))
+                .collect::<Vec<_>>(),
+            vec![
+                ("requires", "requires(T)"),
+                ("add", "T(T,T)"),
+                ("f", "void(T)")
+            ]
+        );
+
+        let requires = functions[0];
+        assert!(!requires.is_definition);
+        assert_eq!(requires.code, "requires (T f) { f(); }");
+        assert_eq!(requires.parameters.len(), 1);
+        assert_eq!(requires.parameters[0].name, "f");
+        assert_eq!(requires.parameters[0].type_name, "T");
+        assert_eq!(requires.parameters[0].code, "T f");
     }
 
     #[test]
