@@ -1495,6 +1495,32 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("i = 0", "total = 0", "total = total + xs[i]")
     }
 
+    "capture C++ range-based for loops from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |int sum(int *items) {
+          |  int total = 0;
+          |  for (int value : items) {
+          |    total += value;
+          |  }
+          |  return total;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("sum").controlStructure.controlStructureType(ControlStructureTypes.FOR).l) {
+        case List(rangeFor) =>
+          rangeFor.code shouldBe "for (int value : items) {\n    total += value;\n  }"
+          rangeFor.condition.code.l shouldBe List("items")
+      }
+      cpg.method.nameExact("sum").local.nameExact("value").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("sum").call.nameExact(Operators.assignmentPlus).code.l shouldBe List("total += value")
+      cpg.identifier.nameExact("items").refsTo.l shouldBe
+        List(cpg.method.nameExact("sum").parameter.nameExact("items").head)
+      cpg.identifier.nameExact("value").refsTo.l shouldBe List(cpg.method.nameExact("sum").local.nameExact("value").head)
+    }
+
     "capture switch, do-while, labels, and gotos from the Rust parser backend" in {
       val cpg = code("""
           |int route(int x) {

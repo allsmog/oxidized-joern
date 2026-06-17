@@ -2013,6 +2013,9 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
         "for_statement" => parse_for_statement(node, source, symbols)
             .into_iter()
             .collect(),
+        "for_range_loop" => parse_for_range_loop(node, source, symbols)
+            .into_iter()
+            .collect(),
         "switch_statement" => parse_switch_statement(node, source, symbols)
             .into_iter()
             .collect(),
@@ -2260,6 +2263,38 @@ fn parse_for_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) ->
         update: node
             .child_by_field_name("update")
             .map(|update| parse_expression(update, source)),
+        body: parse_statement(body, source, symbols),
+    })
+}
+
+fn parse_for_range_loop(
+    node: Node,
+    source: &[u8],
+    symbols: &mut MacroSymbols,
+) -> Option<Statement> {
+    let body = node.child_by_field_name("body")?;
+    let type_node = node.child_by_field_name("type")?;
+    let declarator = node.child_by_field_name("declarator")?;
+    let right = node.child_by_field_name("right")?;
+    let mut initializer = node
+        .child_by_field_name("initializer")
+        .map(|initializer| parse_for_initializer(initializer, source, symbols))
+        .unwrap_or_default();
+    let base_type = type_name_from_type_node(type_node, source);
+    let name = declarator_name(declarator, source)?;
+    initializer.push(Statement::LocalDecl {
+        name,
+        type_name: type_from_declarator(&base_type, declarator, source),
+        code: node_text(declarator, source).trim().to_string(),
+        line: line(declarator),
+        initializer: None,
+    });
+    Some(Statement::For {
+        code: statement_code(node, source),
+        line: line(node),
+        initializer,
+        condition: Some(parse_expression(right, source)),
+        update: None,
         body: parse_statement(body, source, symbols),
     })
 }
@@ -6161,6 +6196,56 @@ mod tests {
             [Statement::Goto { label, .. }] if label == "retry"
         ));
         assert!(matches!(default_body.as_slice(), [Statement::Break { .. }]));
+    }
+
+    #[test]
+    fn parses_cpp_range_based_for_loops() {
+        let sample = r#"
+                int sum(int *items) {
+                  int total = 0;
+                  for (int value : items) {
+                    total += value;
+                  }
+                  return total;
+                }
+                "#;
+        let declarations =
+            parse_declarations(sample, SourceLanguage::Cpp).expect("range-for sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        let [Statement::LocalDecl { .. }, Statement::For {
+            initializer,
+            condition: Some(condition),
+            update,
+            body,
+            ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!("expected local, range-for, return");
+        };
+        assert!(update.is_none());
+        assert!(matches!(condition, Expression::Identifier { name, .. } if name == "items"));
+        assert!(matches!(
+            initializer.as_slice(),
+            [Statement::LocalDecl {
+                name,
+                type_name,
+                initializer: None,
+                ..
+            }] if name == "value" && type_name == "int"
+        ));
+        assert!(matches!(
+            body.as_slice(),
+            [Statement::Assignment {
+                operator,
+                left,
+                right,
+                ..
+            }] if operator == "+="
+                && matches!(left, Expression::Identifier { name, .. } if name == "total")
+                && matches!(right, Expression::Identifier { name, .. } if name == "value")
+        ));
     }
 
     #[test]
