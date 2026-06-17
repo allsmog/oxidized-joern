@@ -93,6 +93,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private sealed trait AggregatePathSegment
   private final case class AggregateFieldPathSegment(name: String)      extends AggregatePathSegment
   private final case class AggregateIndexPathSegment(indexCode: String) extends AggregatePathSegment
+  private final case class AggregateAssignmentRoot(name: String, line: Int, scopeEntry: Option[ScopeEntry])
 
   private val usedTypes: mutable.Set[String]             = mutable.Set(Defines.Any, Defines.Void)
   private val temporaryIndices: mutable.Map[String, Int] = mutable.HashMap.empty
@@ -808,7 +809,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val left           = identifierAstForScopeEntry(global.name, leftCode, global.line, scopeEntry)
         val assignment =
           assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
-        Seq(localAst, assignment)
+        val fieldAssignments =
+          aggregateInitializerAssignmentAsts(
+            AggregateAssignmentRoot(global.name, global.line, Option(scopeEntry)),
+            initializer,
+            scopeEntry.typeFullName
+          )
+        Seq(localAst, assignment) ++ fieldAssignments
       case None =>
         Seq(localAst)
     }
@@ -1363,15 +1370,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     initializer: OxExpression,
     typeName: String
   ): Seq[Ast] = {
+    aggregateInitializerAssignmentAsts(AggregateAssignmentRoot(local.name, local.line, None), initializer, typeName)
+  }
+
+  private def aggregateInitializerAssignmentAsts(
+    root: AggregateAssignmentRoot,
+    initializer: OxExpression,
+    typeName: String
+  ): Seq[Ast] = {
     initializer match {
       case initializerList: OxInitializerList if isAggregateFieldType(typeName) =>
-        aggregateInitializerAssignmentAsts(local, rootTypeName = typeName, typeName, initializerList, Seq.empty)
+        aggregateInitializerAssignmentAsts(root, rootTypeName = typeName, typeName, initializerList, Seq.empty)
       case _ => Seq.empty
     }
   }
 
   private def aggregateInitializerAssignmentAsts(
-    local: OxLocalDecl,
+    root: AggregateAssignmentRoot,
     rootTypeName: String,
     typeName: String,
     initializer: OxInitializerList,
@@ -1379,14 +1394,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   ): Seq[Ast] = {
     val OxInitializerList(_, _, elements) = initializer
     if (isArrayLikeType(typeName)) {
-      aggregateArrayInitializerAssignmentAsts(local, rootTypeName, typeName, initializer, fieldPathPrefix)
+      aggregateArrayInitializerAssignmentAsts(root, rootTypeName, typeName, initializer, fieldPathPrefix)
     } else if (isAggregateFieldType(typeName)) {
       val assignments =
         if (elements.exists(_.isInstanceOf[OxDesignatedInitializer])) {
           elements.flatMap {
             case OxDesignatedInitializer(code, line, designator: OxDesignator, value) =>
               aggregateDesignatedFieldAssignmentAsts(
-                local,
+                root,
                 rootTypeName,
                 typeName,
                 fieldPathPrefix,
@@ -1399,7 +1414,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
               Seq.empty
           }
         } else {
-          aggregatePositionalFieldAssignmentAsts(local, rootTypeName, typeName, fieldPathPrefix, elements)
+          aggregatePositionalFieldAssignmentAsts(root, rootTypeName, typeName, fieldPathPrefix, elements)
         }
       assignments
     } else {
@@ -1408,7 +1423,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def aggregatePositionalFieldAssignmentAsts(
-    local: OxLocalDecl,
+    root: AggregateAssignmentRoot,
     rootTypeName: String,
     typeName: String,
     fieldPathPrefix: Seq[AggregatePathSegment],
@@ -1424,7 +1439,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             value match {
               case initializerList: OxInitializerList =>
                 assignments ++= aggregateInitializerAssignmentAsts(
-                  local,
+                  root,
                   rootTypeName,
                   baseTypeName,
                   initializerList,
@@ -1441,7 +1456,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             }
           case AggregateFieldInitializerSlot(ownerTypeName, field) =>
             assignments ++= aggregateFieldAssignmentAsts(
-              local,
+              root,
               rootTypeName,
               ownerTypeName,
               fieldPathPrefix,
@@ -1458,7 +1473,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def aggregateArrayInitializerAssignmentAsts(
-    local: OxLocalDecl,
+    root: AggregateAssignmentRoot,
     rootTypeName: String,
     typeName: String,
     initializer: OxInitializerList,
@@ -1469,7 +1484,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       elements.flatMap {
         case OxDesignatedInitializer(code, line, designator: OxDesignator, value) =>
           aggregateDesignatedFieldAssignmentAsts(
-            local,
+            root,
             rootTypeName,
             typeName,
             fieldPathPrefix,
@@ -1484,7 +1499,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     } else {
       elements.zipWithIndex.flatMap { case (value, index) =>
         aggregateFieldAssignmentAsts(
-          local,
+          root,
           rootTypeName,
           typeName,
           fieldPathPrefix,
@@ -1512,7 +1527,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def aggregateDesignatedFieldAssignmentAsts(
-    local: OxLocalDecl,
+    root: AggregateAssignmentRoot,
     rootTypeName: String,
     typeName: String,
     fieldPathPrefix: Seq[AggregatePathSegment],
@@ -1522,12 +1537,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     line: Int
   ): Seq[Ast] = {
     aggregateDesignatorFieldPath(initializerCode, designator).toSeq.flatMap { fieldPath =>
-      aggregateFieldAssignmentAsts(local, rootTypeName, typeName, fieldPathPrefix, fieldPath, value, line)
+      aggregateFieldAssignmentAsts(root, rootTypeName, typeName, fieldPathPrefix, fieldPath, value, line)
     }
   }
 
   private def aggregateFieldAssignmentAsts(
-    local: OxLocalDecl,
+    root: AggregateAssignmentRoot,
     rootTypeName: String,
     typeName: String,
     fieldPathPrefix: Seq[AggregatePathSegment],
@@ -1536,11 +1551,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     line: Int
   ): Seq[Ast] = {
     val fieldPath  = fieldPathPrefix ++ fieldPathSuffix
-    val assignment = aggregateFieldAssignmentAst(local, rootTypeName, fieldPath, value, line)
+    val assignment = aggregateFieldAssignmentAst(root, rootTypeName, fieldPath, value, line)
     val nestedAssignments = value match {
       case initializerList: OxInitializerList =>
         fieldPathTypeFullName(typeName, fieldPathSuffix).toSeq.flatMap { fieldType =>
-          aggregateInitializerAssignmentAsts(local, rootTypeName, fieldType, initializerList, fieldPath)
+          aggregateInitializerAssignmentAsts(root, rootTypeName, fieldType, initializerList, fieldPath)
         }
       case _ =>
         Seq.empty
@@ -1656,24 +1671,27 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def aggregateFieldAssignmentAst(
-    local: OxLocalDecl,
+    root: AggregateAssignmentRoot,
     rootTypeName: String,
     fieldPath: Seq[AggregatePathSegment],
     value: OxExpression,
     line: Int
   ): Ast = {
-    val (left, fieldCode) = aggregateFieldAccessAst(local.name, rootTypeName, fieldPath, line)
+    val (left, fieldCode) = aggregateFieldAccessAst(root, rootTypeName, fieldPath, line)
     val code              = s"$fieldCode = ${value.code}"
     assignmentAst(OxOrigin(code, Option(line)), left, expressionAst(value), code)
   }
 
   private def aggregateFieldAccessAst(
-    rootName: String,
+    root: AggregateAssignmentRoot,
     rootTypeName: String,
     fieldPath: Seq[AggregatePathSegment],
     line: Int
   ): (Ast, String) = {
-    fieldPath.foldLeft((identifierAst(rootName, rootName, line), rootName, rootTypeName)) {
+    val rootAst = root.scopeEntry
+      .map(identifierAstForScopeEntry(root.name, root.name, line, _))
+      .getOrElse(identifierAst(root.name, root.name, line))
+    fieldPath.foldLeft((rootAst, root.name, rootTypeName)) {
       case ((baseAst, baseCode, baseTypeName), AggregateFieldPathSegment(fieldName)) =>
         val fieldCode     = s"$baseCode.$fieldName"
         val fieldTypeName = fieldTypeFullName(baseTypeName, fieldName).getOrElse(Defines.Any)

@@ -3858,6 +3858,49 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C global aggregate initializer field assignments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Inner {
+          |  int x;
+          |  int y;
+          |};
+          |struct GlobalConfig {
+          |  struct Inner inner;
+          |  int values[2];
+          |};
+          |struct GlobalConfig config = { .inner = {1, 2}, .values = {3, 4} };
+          |int read_config() {
+          |  return config.inner.x + config.values[1];
+          |}
+          |""".stripMargin,
+        "Test0.c"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val configLocal = cpg.local.nameExact("config").filter(_.code == "struct GlobalConfig config").head
+      configLocal.typeFullName shouldBe "GlobalConfig"
+      cpg.call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "config = { .inner = {1, 2}, .values = {3, 4} }",
+        "config.inner = {1, 2}",
+        "config.inner.x = 1",
+        "config.inner.y = 2",
+        "config.values = {3, 4}",
+        "config.values[0] = 3",
+        "config.values[1] = 4"
+      )
+      cpg.call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf List(
+        "config.inner",
+        "config.inner.x",
+        "config.inner.y",
+        "config.values"
+      )
+      cpg.call.nameExact(Operators.indirectIndexAccess).code.l should contain allElementsOf List(
+        "config.values[0]",
+        "config.values[1]"
+      )
+      cpg.identifier.nameExact("config").refsTo.l should contain(configLocal)
+    }
+
     "capture C aggregate nested designated initializer field assignments from the Rust parser backend" in {
       val cpg = code(
         """
