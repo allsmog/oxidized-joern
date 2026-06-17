@@ -136,12 +136,14 @@ case class OxTry(code: String, line: Int, body: Seq[OxStatement], catches: Seq[O
 case class OxIf(
   code: String,
   line: Int,
+  initializer: Seq[OxStatement],
   condition: OxExpression,
   thenBody: Seq[OxStatement],
   elseBody: Seq[OxStatement]
 ) extends OxStatement
 
-case class OxWhile(code: String, line: Int, condition: OxExpression, body: Seq[OxStatement]) extends OxStatement
+case class OxWhile(code: String, line: Int, initializer: Seq[OxStatement], condition: OxExpression, body: Seq[OxStatement])
+    extends OxStatement
 
 case class OxDoWhile(code: String, line: Int, condition: OxExpression, body: Seq[OxStatement]) extends OxStatement
 
@@ -162,7 +164,8 @@ case class OxGoto(code: String, line: Int, label: String) extends OxStatement
 
 case class OxLabel(code: String, line: Int, label: String, body: Seq[OxStatement]) extends OxStatement
 
-case class OxSwitch(code: String, line: Int, condition: OxExpression, body: Seq[OxStatement]) extends OxStatement
+case class OxSwitch(code: String, line: Int, initializer: Seq[OxStatement], condition: OxExpression, body: Seq[OxStatement])
+    extends OxStatement
 
 case class OxCase(code: String, line: Int, value: Option[OxExpression], body: Seq[OxStatement]) extends OxStatement
 
@@ -437,6 +440,7 @@ object OxDocument {
         OxIf(
           code = str(value, "code"),
           line = int(value, "line"),
+          initializer = value.obj.get("initializer").map(_.arr.map(statement).toSeq).getOrElse(Seq.empty),
           condition = expression(value("condition")),
           thenBody = value("thenBody").arr.map(statement).toSeq,
           elseBody = value("elseBody").arr.map(statement).toSeq
@@ -445,6 +449,7 @@ object OxDocument {
         OxWhile(
           code = str(value, "code"),
           line = int(value, "line"),
+          initializer = value.obj.get("initializer").map(_.arr.map(statement).toSeq).getOrElse(Seq.empty),
           condition = expression(value("condition")),
           body = value("body").arr.map(statement).toSeq
         )
@@ -481,6 +486,7 @@ object OxDocument {
         OxSwitch(
           code = str(value, "code"),
           line = int(value, "line"),
+          initializer = value.obj.get("initializer").map(_.arr.map(statement).toSeq).getOrElse(Seq.empty),
           condition = expression(value("condition")),
           body = value("body").arr.map(statement).toSeq
         )
