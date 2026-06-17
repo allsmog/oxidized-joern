@@ -1461,6 +1461,86 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .l shouldBe List("Core::makeMaker()", "4")
     }
 
+    "model C++ conversion operator aggregate temporary lifetimes" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |class Source {
+          |public:
+          |  Source();
+          |  Source(const Source& other) {}
+          |  Source(Source&& other) {}
+          |  operator Widget() const { return Widget(); }
+          |  ~Source();
+          |};
+          |Source makeSource();
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Source::Source() {}
+          |Core::Source::~Source() {}
+          |Core::Widget convertReturn(Core::Source& source) {
+          |  return source;
+          |}
+          |int convertRef(Core::Source& source) {
+          |  const Core::Widget& held = source;
+          |  return 0;
+          |}
+          |int convertUse(Core::Source& source) {
+          |  Core::consume(source);
+          |  return 0;
+          |}
+          |int convertPrvalue() {
+          |  Core::consume(Core::makeSource());
+          |  return 0;
+          |}
+          |Core::Widget convertPrvalueReturn() {
+          |  return Core::makeSource();
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val lvalueConversionDestructor = "source.operator Widget().~Widget()"
+      val prvalueConversionCall      = "Core::makeSource().operator Widget()"
+      cpg.method.nameExact("convertReturn").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("convertRef").call.nameExact("~Widget").code.l shouldBe List(lvalueConversionDestructor)
+      cpg.method.nameExact("convertUse").call.nameExact("~Widget").code.l shouldBe List(lvalueConversionDestructor)
+      cpg.method.nameExact("convertPrvalue").call.nameExact("~Widget").code.l shouldBe
+        List(s"$prvalueConversionCall.~Widget()")
+      cpg.method.nameExact("convertPrvalue").call.nameExact("~Source").code.l shouldBe
+        List("Core::makeSource().~Source()")
+      cpg.method.nameExact("convertPrvalueReturn").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("convertPrvalueReturn").call.nameExact("~Source").code.l shouldBe
+        List("Core::makeSource().~Source()")
+      cpg.method.nameExact("convertReturn").ast.isReturn.astChildren.isCall.nameExact("operator Widget").code.l shouldBe
+        List("source.operator Widget()")
+      cpg.method
+        .nameExact("convertUse")
+        .call
+        .nameExact("consume")
+        .codeExact("Core::consume(source)")
+        .argument
+        .code
+        .l shouldBe List("source.operator Widget()")
+      cpg.method
+        .nameExact("convertPrvalue")
+        .call
+        .nameExact("consume")
+        .codeExact("Core::consume(Core::makeSource())")
+        .argument
+        .code
+        .l shouldBe List(prvalueConversionCall)
+    }
+
     "model C++ overloaded index aggregate temporary lifetimes" in {
       val cpg = code(
         """
