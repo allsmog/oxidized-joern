@@ -4216,6 +4216,90 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_braced_local_initializers() {
+        let sample = r#"
+                namespace Core {
+                class Widget {
+                public:
+                  Widget();
+                  Widget(int seed) {}
+                  ~Widget() {}
+                };
+                }
+                int use(int seed) {
+                  Core::Widget empty{};
+                  Core::Widget direct{seed};
+                  Core::Widget assigned = {seed};
+                  return 0;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("braced local initializer sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        let [Statement::LocalDecl {
+            name: empty_name,
+            initializer: Some(empty_initializer),
+            ..
+        }, Statement::LocalDecl {
+            name: direct_name,
+            initializer: Some(direct_initializer),
+            ..
+        }, Statement::LocalDecl {
+            name: assigned_name,
+            initializer: Some(assigned_initializer),
+            ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!("expected braced local declarations and return");
+        };
+        assert_eq!(empty_name, "empty");
+        assert_eq!(direct_name, "direct");
+        assert_eq!(assigned_name, "assigned");
+        let Expression::InitializerList {
+            code: empty_code,
+            elements: empty_elements,
+            ..
+        } = empty_initializer
+        else {
+            panic!("expected empty braced initializer list");
+        };
+        assert_eq!(empty_code, "{}");
+        assert!(empty_elements.is_empty());
+        let Expression::InitializerList {
+            code: direct_code,
+            elements: direct_elements,
+            ..
+        } = direct_initializer
+        else {
+            panic!("expected direct braced initializer list");
+        };
+        assert_eq!(direct_code, "{seed}");
+        assert!(matches!(
+            direct_elements.as_slice(),
+            [Expression::Identifier { name, .. }] if name == "seed"
+        ));
+        let Expression::InitializerList {
+            code: assigned_code,
+            elements: assigned_elements,
+            ..
+        } = assigned_initializer
+        else {
+            panic!("expected assigned braced initializer list");
+        };
+        assert_eq!(assigned_code, "{seed}");
+        assert!(matches!(
+            assigned_elements.as_slice(),
+            [Expression::Identifier { name, .. }] if name == "seed"
+        ));
+    }
+
+    #[test]
     fn parses_cpp_constructor_temporaries_in_control_flow() {
         let sample = r#"
                 namespace Core {

@@ -487,6 +487,44 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("guard.~Widget()", "outer.~Widget()", "scoped.~Widget()")
     }
 
+    "capture C++ braced local constructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(int seed) {}
+          |  ~Widget();
+          |};
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int braces(int seed) {
+          |  Core::Widget empty{};
+          |  Core::Widget direct{seed};
+          |  Core::Widget assigned = {seed};
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("braces").local.name.l shouldBe List("empty", "direct", "assigned")
+      cpg.method.nameExact("braces").call.nameExact("Widget").codeExact("Core.Widget.Widget()").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void()")
+      cpg.method.nameExact("braces").call.nameExact("Widget").codeExact("Core.Widget.Widget(seed)").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(int)", "Core.Widget.Widget:void(int)")
+      cpg.method.nameExact("braces").call.nameExact(Operators.assignment).code.l shouldBe
+        List(
+          "empty = Core.Widget.Widget()",
+          "direct = Core.Widget.Widget(seed)",
+          "assigned = Core.Widget.Widget(seed)"
+        )
+      cpg.method.nameExact("braces").call.nameExact("~Widget").code.l shouldBe
+        List("assigned.~Widget()", "direct.~Widget()", "empty.~Widget()")
+    }
+
     "resolve C++ move constructors for rvalue initializers" in {
       val cpg = code(
         """
