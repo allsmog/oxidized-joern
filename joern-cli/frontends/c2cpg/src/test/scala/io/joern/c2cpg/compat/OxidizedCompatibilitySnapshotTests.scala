@@ -3858,6 +3858,58 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C array initializer element assignments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Cell {
+          |  int x;
+          |  int y;
+          |};
+          |int globalNumbers[3] = { [1] = 4, [2] = 5 };
+          |int array_roots(int seed) {
+          |  int numbers[3] = { [0] = seed, [2] = 7 };
+          |  struct Cell cells[2] = { [0] = {seed, 2}, [1] = {.x = 3, .y = 4} };
+          |  return globalNumbers[1] + numbers[0] + cells[0].x + cells[1].y;
+          |}
+          |""".stripMargin,
+        "Test0.c"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.local.nameExact("globalNumbers").filter(_.code == "int globalNumbers[3]").typeFullName.l shouldBe
+        List("int[]")
+      cpg.method.nameExact("array_roots").local.nameExact("numbers").typeFullName.l shouldBe List("int[]")
+      cpg.method.nameExact("array_roots").local.nameExact("cells").typeFullName.l shouldBe List("Cell[]")
+      cpg.call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "globalNumbers[] = { [1] = 4, [2] = 5 }",
+        "globalNumbers[1] = 4",
+        "globalNumbers[2] = 5",
+        "numbers = { [0] = seed, [2] = 7 }",
+        "numbers[0] = seed",
+        "numbers[2] = 7",
+        "cells = { [0] = {seed, 2}, [1] = {.x = 3, .y = 4} }",
+        "cells[0] = {seed, 2}",
+        "cells[0].x = seed",
+        "cells[0].y = 2",
+        "cells[1] = {.x = 3, .y = 4}",
+        "cells[1].x = 3",
+        "cells[1].y = 4"
+      )
+      cpg.call.nameExact(Operators.indirectIndexAccess).code.l should contain allElementsOf List(
+        "globalNumbers[1]",
+        "globalNumbers[2]",
+        "numbers[0]",
+        "numbers[2]",
+        "cells[0]",
+        "cells[1]"
+      )
+      cpg.call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf List(
+        "cells[0].x",
+        "cells[0].y",
+        "cells[1].x",
+        "cells[1].y"
+      )
+    }
+
     "capture C global aggregate initializer field assignments from the Rust parser backend" in {
       val cpg = code(
         """
