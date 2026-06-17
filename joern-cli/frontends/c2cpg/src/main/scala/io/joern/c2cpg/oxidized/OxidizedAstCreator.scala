@@ -968,9 +968,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def localTypeFullName(local: OxLocalDecl): String = {
+    val explicitType = normalizeType(local.typeName)
     local.initializer match {
-      case Some(lambda: OxLambda) if normalizeType(local.typeName) == Defines.Auto => lambdaInfo(lambda).fullName
-      case _                                                                       => normalizeType(local.typeName)
+      case Some(lambda: OxLambda) if explicitType == Defines.Auto => lambdaInfo(lambda).fullName
+      case Some(initializer) if explicitType == Defines.Auto =>
+        expressionTypeFullName(initializer)
+          .map(typeName => normalizeType(resolveAliasType(typeName)))
+          .getOrElse(explicitType)
+      case _ => explicitType
     }
   }
 

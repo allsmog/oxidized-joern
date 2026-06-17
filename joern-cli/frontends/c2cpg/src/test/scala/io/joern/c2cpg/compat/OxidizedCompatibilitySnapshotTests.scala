@@ -1587,6 +1587,29 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.call.nameExact(Operators.cast).typeFullName.l shouldBe List("int", "int", "int", "int")
     }
 
+    "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
+      val cpg = code(
+        """
+          |int infer(int x, int *ptr) {
+          |  auto literal = 1;
+          |  auto copied = x;
+          |  auto casted = static_cast<int>(x);
+          |  auto pointer = ptr;
+          |  int values[2];
+          |  auto indexed = values[0];
+          |  return literal + copied + casted + indexed;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("infer").local.nameExact("literal").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("infer").local.nameExact("copied").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("infer").local.nameExact("casted").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("infer").local.nameExact("pointer").typeFullName.l shouldBe List("int*")
+      cpg.method.nameExact("infer").local.nameExact("indexed").typeFullName.l shouldBe List("int")
+    }
+
     "preserve block scope when locals shadow outer declarations" in {
       val cpg = code("""
           |int shadow(int x) {
