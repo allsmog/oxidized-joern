@@ -54,7 +54,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     base: Option[OxExpression],
     arguments: Seq[OxExpression]
   )
-  private final case class LocalDestructor(name: String, line: Int, entry: FunctionEntry)
+  private final case class LocalDestructor(receiverCode: String, line: Int, entry: FunctionEntry)
   private final case class TemporaryDestructor(code: String, line: Int, entry: FunctionEntry)
   private final case class HeapConstructor(code: String, line: Int, entry: FunctionEntry, arguments: Seq[OxExpression])
   private final case class HeapDestructor(code: String, line: Int, entry: FunctionEntry, receiver: OxExpression)
@@ -956,10 +956,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def registerLocalDestructor(name: String, typeName: String, line: Int): Unit = {
     destructorEntryForType(typeName).foreach { destructor =>
-      localDestructorScopes match {
-        case current :: rest => localDestructorScopes = (current :+ LocalDestructor(name, line, destructor)) :: rest
-        case Nil             =>
-      }
+      registerLocalDestructor(LocalDestructor(name, line, destructor))
+    }
+  }
+
+  private def registerLocalDestructor(destructor: LocalDestructor): Unit = {
+    localDestructorScopes match {
+      case current :: rest => localDestructorScopes = (current :+ destructor) :: rest
+      case Nil             =>
     }
   }
 
@@ -1001,7 +1005,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def localDestructorAst(destructor: LocalDestructor): Ast = {
-    val code = s"${destructor.name}.${destructor.entry.simpleName}()"
+    val code = s"${destructor.receiverCode}.${destructor.entry.simpleName}()"
     val callNode_ =
       callNode(
         OxOrigin(code, Option(destructor.line)),
@@ -1012,7 +1016,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option(destructor.entry.function.signature),
         Option(registerType(Defines.Void))
       )
-    createCallAst(callNode_, base = Option(identifierAst(destructor.name, destructor.name, destructor.line)))
+    createCallAst(
+      callNode_,
+      base = Option(identifierAst(destructor.receiverCode, destructor.receiverCode, destructor.line))
+    )
   }
 
   private def astsForStatement(statement: OxStatement): Seq[Ast] = {
@@ -1286,8 +1293,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val localNode       = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
     scope = scope.updated(local.name, ScopeEntry(typeName, localNode, localLambdaInfo))
     registerLocalDestructor(local.name, typeName, local.line)
-    val localAst                = Ast(localNode)
-    val temporaryDestructorAsts = temporaryDestructorAstsForExpressions(local.initializer.toSeq)
+    val extendedTemporaryDestructor = local.initializer.flatMap(referenceBoundTemporaryDestructor(typeName, _))
+    extendedTemporaryDestructor.foreach(registerLocalDestructor)
+    val localAst = Ast(localNode)
+    val temporaryDestructorAsts =
+      temporaryDestructorAstsForLocalInitializer(local.initializer, extendedTemporaryDestructor.isDefined)
     local.initializer match {
       case Some(initializer: OxInitializerList)
           if useConstructorInitializers && isConstructorInitializer(typeName, initializer) =>
@@ -1741,6 +1751,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .map(temporaryDestructorAst)
   }
 
+  private def temporaryDestructorAstsForLocalInitializer(
+    expression: Option[OxExpression],
+    extendCurrentTemporaryLifetime: Boolean
+  ): Seq[Ast] = {
+    expression.toSeq
+      .flatMap(expression =>
+        temporaryDestructorsForExpression(expression, includeCurrent = !extendCurrentTemporaryLifetime)
+      )
+      .reverse
+      .map(temporaryDestructorAst)
+  }
+
   private def temporaryDestructorsForExpression(
     expression: OxExpression,
     includeCurrent: Boolean = true
@@ -1804,6 +1826,29 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case _            => None
     }
     currentReturnType.isDefined && currentReturnType == expressionType
+  }
+
+  private def referenceBoundTemporaryDestructor(
+    localTypeName: String,
+    expression: OxExpression
+  ): Option[LocalDestructor] = {
+    Option
+      .when(isCxxReferenceType(localTypeName)) {
+        expression match {
+          case call: OxCall =>
+            temporaryTypeFullNameForCall(call)
+              .flatMap(destructorEntryForType)
+              .map(entry => LocalDestructor(call.code, call.line, entry))
+          case _ =>
+            None
+        }
+      }
+      .flatten
+  }
+
+  private def isCxxReferenceType(typeName: String): Boolean = {
+    val normalizedType = normalizeType(resolveAliasType(typeName))
+    normalizedType.endsWith("&") || normalizedType.endsWith("&&")
   }
 
   private def currentMethodReturnedObjectTypeFullName: Option[String] = {
