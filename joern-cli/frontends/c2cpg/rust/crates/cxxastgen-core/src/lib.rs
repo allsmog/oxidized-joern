@@ -2560,7 +2560,7 @@ fn parse_conditional_expression(node: Node, source: &[u8]) -> Expression {
 
 fn parse_call_expression(node: Node, source: &[u8]) -> Expression {
     let function = node.child_by_field_name("function");
-    let arguments = node
+    let arguments: Vec<Expression> = node
         .child_by_field_name("arguments")
         .map(|args| {
             named_children(args)
@@ -2569,6 +2569,16 @@ fn parse_call_expression(node: Node, source: &[u8]) -> Expression {
                 .collect()
         })
         .unwrap_or_default();
+    if let (Some(function), [value]) = (function, arguments.as_slice()) {
+        if let Some(type_name) = cpp_named_cast_type(node_text(function, source).trim()) {
+            return Expression::Cast {
+                type_name,
+                code: node_text(node, source).trim().to_string(),
+                line: line(node),
+                value: Box::new(value.clone()),
+            };
+        }
+    }
     Expression::Call {
         name: function
             .map(|function| node_text(function, source).trim().to_string())
@@ -2582,6 +2592,45 @@ fn parse_call_expression(node: Node, source: &[u8]) -> Expression {
         ),
         arguments,
     }
+}
+
+fn cpp_named_cast_type(function_code: &str) -> Option<String> {
+    const NAMED_CASTS: &[&str] = &[
+        "const_cast",
+        "dynamic_cast",
+        "reinterpret_cast",
+        "static_cast",
+    ];
+    NAMED_CASTS
+        .iter()
+        .find_map(|cast| function_code.strip_prefix(cast))
+        .and_then(template_argument_text)
+        .map(normalize_type)
+}
+
+fn template_argument_text(raw: &str) -> Option<&str> {
+    let raw = raw.trim();
+    if !raw.starts_with('<') {
+        return None;
+    }
+    let mut depth = 0usize;
+    for (index, character) in raw.char_indices() {
+        match character {
+            '<' => depth += 1,
+            '>' if depth > 0 => {
+                depth -= 1;
+                if depth == 0 {
+                    return raw[index + character.len_utf8()..]
+                        .trim()
+                        .is_empty()
+                        .then(|| raw[1..index].trim())
+                        .filter(|argument| !argument.is_empty());
+                }
+            }
+            _ => {}
+        }
+    }
+    None
 }
 
 fn parse_compound_literal_expression(node: Node, source: &[u8]) -> Expression {
@@ -6297,6 +6346,46 @@ mod tests {
             alternative.as_ref(),
             Expression::Unary { operator, .. } if operator == "-"
         ));
+    }
+
+    #[test]
+    fn parses_cpp_named_cast_expressions() {
+        let sample = r#"
+                int casts(float x, void *ptr) {
+                  int a = static_cast<int>(x);
+                  int b = const_cast<int>(a);
+                  int c = dynamic_cast<int>(b);
+                  int d = reinterpret_cast<int>(ptr);
+                  return a + b + c + d;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("named cast sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        let casts = function
+            .body
+            .iter()
+            .filter_map(|statement| match statement {
+                Statement::LocalDecl {
+                    initializer: Some(initializer),
+                    ..
+                } => Some(initializer),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(casts.len(), 4);
+        for cast in casts {
+            let Expression::Cast {
+                type_name, value, ..
+            } = cast
+            else {
+                panic!("expected named cast initializer");
+            };
+            assert_eq!(type_name, "int");
+            assert!(matches!(value.as_ref(), Expression::Identifier { .. }));
+        }
     }
 
     #[test]
