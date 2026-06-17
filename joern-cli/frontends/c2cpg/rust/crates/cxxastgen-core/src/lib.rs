@@ -1732,15 +1732,7 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
     let body = node.child_by_field_name("body")?;
     let name = declarator_name(declarator, source)?;
     let function_declarator = function_declarator_node(declarator).unwrap_or(declarator);
-    let return_type = type_node
-        .map(|type_node| {
-            type_from_declarator(
-                &type_name_from_type_node(type_node, source),
-                declarator,
-                source,
-            )
-        })
-        .unwrap_or_else(|| "void".to_string());
+    let return_type = function_return_type(type_node, declarator, function_declarator, source);
     let parameters = function_declarator
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
@@ -1774,15 +1766,7 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
     }
     let name = declarator_name(declarator, source)?;
     let function_declarator = function_declarator_node(declarator).unwrap_or(declarator);
-    let return_type = type_node
-        .map(|type_node| {
-            type_from_declarator(
-                &type_name_from_type_node(type_node, source),
-                declarator,
-                source,
-            )
-        })
-        .unwrap_or_else(|| "void".to_string());
+    let return_type = function_return_type(type_node, declarator, function_declarator, source);
     let parameters = function_declarator
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
@@ -1948,6 +1932,35 @@ fn function_declarator_node(node: Node) -> Option<Node> {
                     .find_map(function_declarator_node)
             })
     }
+}
+
+fn function_return_type(
+    type_node: Option<Node>,
+    declarator: Node,
+    function_declarator: Node,
+    source: &[u8],
+) -> String {
+    trailing_return_type(function_declarator, source)
+        .or_else(|| {
+            type_node.map(|type_node| {
+                type_from_declarator(
+                    &type_name_from_type_node(type_node, source),
+                    declarator,
+                    source,
+                )
+            })
+        })
+        .unwrap_or_else(|| "void".to_string())
+}
+
+fn trailing_return_type(declarator: Node, source: &[u8]) -> Option<String> {
+    find_named_descendant_kind(declarator, "trailing_return_type")
+        .and_then(|trailing_return| {
+            named_children(trailing_return)
+                .into_iter()
+                .find(|child| child.kind() == "type_descriptor")
+        })
+        .map(|type_node| type_name_from_type_descriptor(type_node, source))
 }
 
 fn parse_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
@@ -3127,13 +3140,7 @@ fn lambda_return_type(
 
 fn find_lambda_trailing_return_type(node: Node, source: &[u8]) -> Option<String> {
     node.child_by_field_name("declarator")
-        .and_then(|declarator| find_named_descendant_kind(declarator, "trailing_return_type"))
-        .and_then(|trailing_return| {
-            named_children(trailing_return)
-                .into_iter()
-                .find(|child| child.kind() == "type_descriptor")
-        })
-        .map(|type_node| type_name_from_type_descriptor(type_node, source))
+        .and_then(|declarator| trailing_return_type(declarator, source))
         .or_else(|| {
             node.child_by_field_name("type")
                 .map(|type_node| type_name_from_type_node(type_node, source))
@@ -5215,6 +5222,54 @@ mod tests {
         assert!(
             matches!(typed, Some((return_type, signature)) if return_type == "long" && signature == "long()")
         );
+    }
+
+    #[test]
+    fn parses_cpp_function_trailing_return_types() {
+        let sample = r#"
+                auto f(int x) -> long { return x; }
+                auto g(int *p) -> int* { return p; }
+                auto ref(int &x) -> int& { return x; }
+                auto h() -> decltype(1 + 2);
+                struct Widget {
+                  auto size() const -> int;
+                };
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("trailing return type sample should parse");
+        let function_type = |name: &str| {
+            declarations
+                .iter()
+                .find_map(|declaration| match declaration {
+                    Declaration::Function(function) if function.name == name => {
+                        Some((function.return_type.as_str(), function.signature.as_str()))
+                    }
+                    _ => None,
+                })
+                .unwrap_or_else(|| panic!("expected function {name}"))
+        };
+        assert_eq!(function_type("f"), ("long", "long(int)"));
+        assert_eq!(function_type("g"), ("int*", "int*(int*)"));
+        assert_eq!(function_type("ref"), ("int&", "int&(int&)"));
+        assert_eq!(function_type("h"), ("decltype(1 + 2)", "decltype(1 + 2)()"));
+
+        let widget_size = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "Widget" => struct_decl
+                    .nested_declarations
+                    .iter()
+                    .find_map(|nested| match nested {
+                        Declaration::Function(function) if function.name == "size" => {
+                            Some(function)
+                        }
+                        _ => None,
+                    }),
+                _ => None,
+            })
+            .expect("expected Widget::size declaration");
+        assert_eq!(widget_size.return_type, "int");
+        assert_eq!(widget_size.signature, "int()<const>");
     }
 
     #[test]
