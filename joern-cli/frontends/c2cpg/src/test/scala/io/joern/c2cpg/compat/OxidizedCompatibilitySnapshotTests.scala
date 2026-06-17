@@ -631,6 +631,45 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ mutable lambda modifiers and captured-state mutation" in {
+      val cpg = code(
+        """
+          |int use(int seed) {
+          |  auto bump = [seed](int step) mutable -> int {
+          |    seed += step;
+          |    return seed;
+          |  };
+          |  auto read = [seed]() -> int { return seed; };
+          |  return bump(1) + read();
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val bumpFullName = "use.<lambda>0:int(int)"
+      val readFullName = "use.<lambda>1:int()"
+      cpg.method.nameExact("use").local.nameExact("bump").typeFullName.l shouldBe List(bumpFullName)
+      cpg.method.nameExact("use").local.nameExact("read").typeFullName.l shouldBe List(readFullName)
+
+      cpg.method.fullNameExact(bumpFullName).modifier.modifierType.l.sorted shouldBe
+        List(ModifierTypes.LAMBDA, "MUTABLE", ModifierTypes.PRIVATE, ModifierTypes.STATIC, ModifierTypes.VIRTUAL).sorted
+      cpg.method.fullNameExact(readFullName).modifier.modifierType.l should contain theSameElementsAs
+        List(ModifierTypes.LAMBDA, ModifierTypes.PRIVATE, ModifierTypes.STATIC, ModifierTypes.VIRTUAL)
+
+      cpg.method.fullNameExact(bumpFullName).local.nameExact("seed").typeFullName.l shouldBe List("int")
+      cpg.method.fullNameExact(readFullName).local.nameExact("seed").typeFullName.l shouldBe List("int")
+      cpg.method.fullNameExact(bumpFullName).call.nameExact(Operators.assignmentPlus).code.l shouldBe
+        List("seed += step")
+      cpg.method.fullNameExact(bumpFullName).ast.isReturn.code.l shouldBe List("return seed")
+
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$bumpFullName:seed")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_VALUE)
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$readFullName:seed")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_VALUE)
+      cpg.method.nameExact("use").call.nameExact(Defines.OperatorCall).code.l should contain theSameElementsAs
+        List("bump(1)", "read()")
+    }
+
     "capture C++ nested lambda ownership and captures" in {
       val cpg = code(
         """
