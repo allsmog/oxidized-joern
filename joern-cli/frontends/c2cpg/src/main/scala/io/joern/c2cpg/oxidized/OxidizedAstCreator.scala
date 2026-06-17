@@ -387,7 +387,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def typeAndBaseTypeFullNames(typeFullName: String): Seq[String] = {
     def loop(current: String, seen: Set[String]): Seq[String] = {
-      val normalized = normalizeType(resolveAliasType(current))
+      val normalized = receiverAggregateTypeName(resolveAliasType(current))
       if (seen.contains(normalized)) {
         Seq.empty
       } else {
@@ -1495,7 +1495,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def receiverAggregateTypeName(typeName: String): String = {
     val normalized = normalizeType(resolveAliasType(typeName))
-    stripCxxTypeQualifiers(stripCxxReference(normalized).stripSuffix("*").stripSuffix("[]"))
+    stripTemplateArguments(stripCxxTypeQualifiers(stripCxxReference(normalized).stripSuffix("*").stripSuffix("[]")))
+  }
+
+  private def stripTemplateArguments(typeName: String): String = {
+    val builder = new StringBuilder
+    var depth   = 0
+    typeName.foreach {
+      case '<' =>
+        depth += 1
+      case '>' if depth > 0 =>
+        depth -= 1
+      case ch if depth == 0 =>
+        builder.append(ch)
+      case _ =>
+    }
+    if (depth == 0) builder.toString else typeName
   }
 
   private def stripCxxReference(typeName: String): String = {
@@ -1658,7 +1673,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def fieldEntryForTypeHierarchy(baseTypeFullName: String, field: String): Option[(String, OxFieldDecl)] = {
     val normalized = resolveAliasType(baseTypeFullName)
-    val candidates = Seq(normalized, normalized.stripSuffix("*"), normalized.stripSuffix("[]")).distinct
+    val candidates = Seq(normalized, receiverAggregateTypeName(normalized)).distinct
     candidates
       .flatMap(typeAndBaseTypeFullNames)
       .collectFirst(Function.unlift { typeName =>
@@ -1702,10 +1717,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def resolveAggregateTypeFullName(typeName: String): Option[String] = {
-    val normalized = normalizeType(typeName)
+    val normalized     = normalizeType(typeName)
+    val templateErased = stripTemplateArguments(normalized)
     val candidates = currentMethodOwnerTypeFullName
-      .filter(_.split('.').lastOption.contains(normalized))
-      .toSeq ++ Seq(normalized) ++ aggregateTypeFullNames.filter(_.endsWith(s".$normalized")).toSeq.sorted
+      .filter(owner => Seq(normalized, templateErased).contains(owner.split('.').lastOption.getOrElse(owner)))
+      .toSeq ++ Seq(normalized, templateErased) ++ aggregateTypeFullNames
+      .filter(typeName => Seq(normalized, templateErased).exists(candidate => typeName.endsWith(s".$candidate")))
+      .toSeq
+      .sorted
     candidates.find(aggregateTypeFullNames.contains)
   }
 
@@ -1954,7 +1973,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     call.callee match {
       case OxFieldAccess(field, _, _, base) =>
         val candidates = expressionTypeFullName(base)
-          .map(typeName => normalizeType(resolveAliasType(typeName)).stripSuffix("*").stripSuffix("[]"))
+          .map(receiverAggregateTypeName)
           .toSeq
           .flatMap(receiverType =>
             typeAndBaseTypeFullNames(receiverType).reverse.flatMap(typeName =>
@@ -1963,20 +1982,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           )
         selectFunctionEntry(candidates, Some(call.arguments))
       case _ =>
-        val qualifiedName = normalizedQualifiedName(call.name)
+        val lookupName    = stripTemplateArguments(call.name)
+        val qualifiedName = normalizedQualifiedName(lookupName)
         if (qualifiedNameParts(call.name).size > 1) {
           val candidates = functionCandidatesByQualifiedName(qualifiedName)
           selectFunctionEntry(
-            if (candidates.nonEmpty) candidates else functionCandidatesByName(call.name),
+            if (candidates.nonEmpty) candidates else functionCandidatesByName(lookupName),
             Some(call.arguments)
           )
         } else {
-          val ownerCandidates     = currentOwnerFunctionCandidates(call.name)
+          val ownerCandidates     = currentOwnerFunctionCandidates(lookupName)
           val qualifiedCandidates = functionCandidatesByQualifiedName(qualifiedName)
           val candidates =
             if (ownerCandidates.nonEmpty) ownerCandidates
             else if (qualifiedCandidates.nonEmpty) qualifiedCandidates
-            else functionCandidatesByName(call.name)
+            else functionCandidatesByName(lookupName)
           selectFunctionEntry(candidates, Some(call.arguments))
         }
     }
@@ -2034,11 +2054,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val parameterType = overloadComparableType(parameterTypeName)
     val argumentType  = overloadComparableType(argumentTypeName)
     val baseScore =
-      if (parameterType == Defines.Any || argumentType == Defines.Any) 1
+      if (isTemplateParameterComparableType(parameterType)) 2
+      else if (parameterType == Defines.Any || argumentType == Defines.Any) 1
       else if (parameterType == argumentType) 4
       else if (parameterType.endsWith(s".$argumentType") || argumentType.endsWith(s".$parameterType")) 3
       else 0
     if (baseScore == 0) 0 else baseScore + referenceValueCategoryScore(parameterTypeName, argumentIsRvalue)
+  }
+
+  private def isTemplateParameterComparableType(typeName: String): Boolean = {
+    typeName.matches("[A-Z][0-9]?")
   }
 
   private def referenceValueCategoryScore(parameterTypeName: String, argumentIsRvalue: Boolean): Int = {
@@ -2075,7 +2100,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       if (typeName.endsWith("&&")) typeName.dropRight(2)
       else if (typeName.endsWith("&")) typeName.dropRight(1)
       else typeName
-    resolveAliasType(dereferenced)
+    stripTemplateArguments(resolveAliasType(dereferenced))
       .split("\\s+")
       .filterNot(part => Set("const", "volatile", "mutable").contains(part))
       .mkString(" ")
@@ -2084,7 +2109,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def callName(call: OxCall): String = {
     call.callee match {
       case OxFieldAccess(field, _, _, _) => field
-      case _                             => qualifiedNameParts(call.name).lastOption.getOrElse(call.name)
+      case _ => stripTemplateArguments(qualifiedNameParts(call.name).lastOption.getOrElse(call.name))
     }
   }
 

@@ -631,6 +631,16 @@ fn parse_declaration_node(
                 visited_headers,
             )?);
         }
+        "template_declaration" => {
+            declarations.extend(parse_declaration_children(
+                node,
+                source,
+                source_path,
+                options,
+                symbols,
+                visited_headers,
+            )?);
+        }
         "namespace_definition" => {
             if let Some(namespace) =
                 parse_namespace(node, source, source_path, options, symbols, visited_headers)?
@@ -4088,6 +4098,70 @@ mod tests {
         assert_eq!(moved_name, "moved");
         assert_eq!(moved_type, "Core::Widget");
         assert_eq!(moved_initializer, "makeWidget");
+    }
+
+    #[test]
+    fn parses_cpp_template_declarations() {
+        let sample = r#"
+                namespace Core {
+                template <typename T>
+                T pick(T value) { return value; }
+                template <typename T>
+                struct Holder {
+                  T value;
+                  T get() { return value; }
+                };
+                }
+                int use(Core::Holder<int> holder) {
+                  return holder.get() + Core::pick(1);
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("template declaration sample should parse");
+        let namespace = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Namespace(namespace) if namespace.name == "Core" => Some(namespace),
+                _ => None,
+            })
+            .expect("expected Core namespace declaration");
+        let pick = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "pick" => Some(function),
+                _ => None,
+            })
+            .expect("expected templated pick function");
+        assert_eq!(pick.signature, "T(T)");
+        assert!(pick.is_definition);
+        let holder = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "Holder" => {
+                    Some(struct_decl)
+                }
+                _ => None,
+            })
+            .expect("expected templated Holder class");
+        assert_eq!(holder.fields[0].type_name, "T");
+        assert!(holder
+            .nested_declarations
+            .iter()
+            .any(|declaration| matches!(
+                declaration,
+                Declaration::Function(method)
+                    if method.name == "get" && method.signature == "T()" && method.is_definition
+            )));
+        let use_function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        assert_eq!(use_function.parameters[0].type_name, "Core::Holder<int>");
     }
 
     #[test]
