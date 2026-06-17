@@ -116,6 +116,10 @@ case class OxReturn(code: String, line: Int, expression: Option[OxExpression]) e
 
 case class OxThrow(code: String, line: Int, expression: Option[OxExpression]) extends OxStatement
 
+case class OxCatchClause(code: String, line: Int, parameter: Option[OxParameterDecl], body: Seq[OxStatement])
+
+case class OxTry(code: String, line: Int, body: Seq[OxStatement], catches: Seq[OxCatchClause]) extends OxStatement
+
 case class OxIf(
   code: String,
   line: Int,
@@ -369,6 +373,13 @@ object OxDocument {
           line = int(value, "line"),
           expression = value.obj.get("expression").filter(!_.isNull).map(expression)
         )
+      case "try" =>
+        OxTry(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          body = value("body").arr.map(statement).toSeq,
+          catches = value("catches").arr.map(catchClause).toSeq
+        )
       case "if" =>
         OxIf(
           code = str(value, "code"),
@@ -436,6 +447,15 @@ object OxDocument {
       case other =>
         throw new IllegalArgumentException(s"unsupported oxidized cxxastgen statement kind '$other'")
     }
+  }
+
+  private def catchClause(value: Value): OxCatchClause = {
+    OxCatchClause(
+      code = str(value, "code"),
+      line = int(value, "line"),
+      parameter = value.obj.get("parameter").filter(!_.isNull).map(parameter),
+      body = value("body").arr.map(statement).toSeq
+    )
   }
 
   private def expression(value: Value): OxExpression = {
