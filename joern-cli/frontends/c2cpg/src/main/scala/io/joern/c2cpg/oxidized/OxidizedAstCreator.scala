@@ -1862,6 +1862,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case call: OxCall               => temporaryTypeFullNameForCall(call)
       case conditional: OxConditional => conditionalTemporaryTypeFullName(conditional)
       case cast: OxCast               => castTemporaryTypeFullName(cast)
+      case binary: OxBinary           => overloadedBinaryTemporaryTypeFullName(binary)
       case _                          => None
     }
   }
@@ -1886,14 +1887,20 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     Option(normalizeType(resolveAliasType(cast.typeName))).flatMap(returnedObjectTypeFullName)
   }
 
+  private def overloadedBinaryTemporaryTypeFullName(binary: OxBinary): Option[String] = {
+    overloadedBinaryOperatorTarget(binary)
+      .map(target => normalizeType(resolveAliasType(target.entry.function.returnType)))
+      .flatMap(returnedObjectTypeFullName)
+  }
+
   private def temporaryDestructorCode(expression: OxExpression, entry: FunctionEntry): String = {
     s"${temporaryDestructorReceiverCode(expression)}.${entry.simpleName}()"
   }
 
   private def temporaryDestructorReceiverCode(expression: OxExpression): String = {
     expression match {
-      case _: OxConditional | _: OxCast => s"(${expression.code})"
-      case _                            => expression.code
+      case _: OxBinary | _: OxConditional | _: OxCast => s"(${expression.code})"
+      case _                                          => expression.code
     }
   }
 

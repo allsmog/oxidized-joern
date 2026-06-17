@@ -1264,6 +1264,51 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("static_cast<Core::Widget>(source)")
     }
 
+    "model C++ overloaded binary aggregate temporary lifetimes" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  Widget operator+(const Widget& other) const { return Widget(); }
+          |  ~Widget();
+          |};
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Widget sumReturn(Core::Widget& left, Core::Widget& right) {
+          |  return left + right;
+          |}
+          |int sumRef(Core::Widget& left, Core::Widget& right) {
+          |  const Core::Widget& held = left + right;
+          |  return 0;
+          |}
+          |int sumUse(Core::Widget& left, Core::Widget& right) {
+          |  Core::consume(left + right);
+          |  return 0;
+          |}
+          |int sumPrvalue() {
+          |  Core::consume(Core::Widget() + Core::Widget());
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val binaryTemporaryDestructor = "(left + right).~Widget()"
+      cpg.method.nameExact("sumReturn").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("sumRef").call.nameExact("~Widget").code.l shouldBe List(binaryTemporaryDestructor)
+      cpg.method.nameExact("sumUse").call.nameExact("~Widget").code.l shouldBe List(binaryTemporaryDestructor)
+      cpg.method.nameExact("sumPrvalue").call.nameExact("~Widget").code.l shouldBe
+        List("(Core::Widget() + Core::Widget()).~Widget()", "Core::Widget().~Widget()", "Core::Widget().~Widget()")
+      cpg.method.nameExact("sumReturn").ast.isReturn.astChildren.isCall.nameExact("operator+").code.l shouldBe
+        List("left + right")
+    }
+
     "preserve returned C++ object temporaries from destructor cleanup" in {
       val cpg = code(
         """
