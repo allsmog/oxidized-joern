@@ -182,7 +182,13 @@ case class OxCast(typeName: String, code: String, line: Int, value: OxExpression
 
 case class OxSizeOf(code: String, line: Int, value: Option[OxExpression], typeName: Option[String]) extends OxExpression
 
-case class OxNew(typeName: String, code: String, line: Int, arguments: Seq[OxExpression]) extends OxExpression
+case class OxNew(
+  typeName: String,
+  code: String,
+  line: Int,
+  arguments: Seq[OxExpression],
+  initializerArguments: Seq[OxExpression]
+) extends OxExpression
 
 case class OxDelete(code: String, line: Int, argument: OxExpression) extends OxExpression
 
@@ -503,11 +509,14 @@ object OxDocument {
           typeName = value.obj.get("typeName").filter(!_.isNull).map(_.str)
         )
       case "new" =>
+        val initializerArguments =
+          value.obj.get("initializerArguments").map(_.arr.map(expression).toSeq).getOrElse(Seq.empty)
         OxNew(
           typeName = str(value, "typeName"),
           code = str(value, "code"),
           line = int(value, "line"),
-          arguments = value("arguments").arr.map(expression).toSeq
+          arguments = value("arguments").arr.map(expression).toSeq,
+          initializerArguments = initializerArguments
         )
       case "delete" =>
         OxDelete(code = str(value, "code"), line = int(value, "line"), argument = expression(value("argument")))
