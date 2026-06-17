@@ -1083,7 +1083,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .methodFullName
         .l shouldBe List("Core.Widget.Widget:void(Widget&&)")
       cpg.method.nameExact("use").call.nameExact("~Widget").code.l shouldBe
-        List("moved.~Widget()", "copied.~Widget()", "source.~Widget()")
+        List("makeWidget().~Widget()", "moved.~Widget()", "copied.~Widget()", "source.~Widget()")
     }
 
     "capture C++ constructor temporary destructors" in {
@@ -1740,7 +1740,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         }
         whileBlock.condition.ast.isCall.nameExact(Operators.notEquals).codeExact("guard != 0").l shouldBe Nil
         whileBlock.ast.isCall.nameExact("~Widget").code.l.sorted shouldBe
-          List("guard.~Widget()", "guard.~Widget()")
+          List("Core::make().~Widget()", "guard.~Widget()", "guard.~Widget()")
       }
       inside(cpg.method.nameExact("conditionLifetime").controlStructure.controlStructureType(ControlStructureTypes.IF).l) {
         case List(continueIf, breakIf) =>
@@ -1748,7 +1748,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           breakIf.ast.isCall.nameExact("~Widget").code.l shouldBe Nil
       }
       cpg.method.nameExact("conditionLifetime").call.nameExact("~Widget").code.l.sorted shouldBe
-        List("guard.~Widget()", "guard.~Widget()", "guard.~Widget()")
+        List("Core::make().~Widget()", "guard.~Widget()", "guard.~Widget()", "guard.~Widget()")
     }
 
     "capture C++ contextual boolean conversions from the Rust parser backend" in {
@@ -1756,10 +1756,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         """
           |namespace Core {
           |struct Flag {
+          |  ~Flag();
           |  operator bool() const { return true; }
           |};
           |Flag make();
           |}
+          |Core::Flag::~Flag() {}
           |int contextual(Core::Flag flag, int n) {
           |  if (!flag) {
           |    n = n + 1;
@@ -1801,6 +1803,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         operatorBool.code shouldBe "Core::make().operator bool()"
         operatorBool.argument.code.l shouldBe List("Core::make()")
       }
+      method.whileBlock.ast.isCall.nameExact("~Flag").code.l shouldBe List("Core::make().~Flag()")
     }
 
     "capture counted loops, jumps, and indexed expressions from the Rust parser backend" in {
