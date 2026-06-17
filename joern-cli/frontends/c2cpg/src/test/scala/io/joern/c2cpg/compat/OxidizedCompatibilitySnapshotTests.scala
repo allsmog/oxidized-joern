@@ -2335,6 +2335,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("inferRefs").local.nameExact("copiedPtr").typeFullName.l shouldBe List("int*")
       cpg.method.nameExact("inferRefs").local.nameExact("addressedPtr").typeFullName.l shouldBe List("int*")
       cpg.method.nameExact("inferRefs").call.nameExact(Operators.addressOf).code.l shouldBe List("&x")
+      cpg.method.nameExact("inferRefs").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "&ref = x",
+        "&rref = static_cast<int>(x)",
+        "*copiedPtr = ptr",
+        "*addressedPtr = &x"
+      )
     }
 
     "infer C++17 braced auto initializer-list local types from the Rust parser backend" in {
