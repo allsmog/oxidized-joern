@@ -1595,6 +1595,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
     "capture C++ selection initializers from the Rust parser backend" in {
       val cpg = code("""
+          |struct Pair {
+          |  int first;
+          |  int second;
+          |};
+          |Pair makePair();
+          |
           |int seed(int x) {
           |  return x;
           |}
@@ -1606,8 +1612,15 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  if (int q = seed(n)) {
           |    n = q;
           |  }
+          |  if (auto [first, second] = makePair(); first) {
+          |    n = second;
+          |  }
           |  while (int w = seed(n)) {
           |    n = w;
+          |    break;
+          |  }
+          |  while (auto [left, right] = makePair()) {
+          |    n = left + right;
           |    break;
           |  }
           |  switch (int y = seed(n); y) {
@@ -1619,24 +1632,34 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |}
           |""".stripMargin, "Test0.cpp").withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      cpg.local.name.l should contain allElementsOf List("x", "q", "w", "y")
+      cpg.local.name.l should contain allElementsOf List("x", "q", "first", "second", "w", "left", "right", "y")
       cpg.local.nameExact("x").typeFullName.l shouldBe List("int")
       cpg.local.nameExact("q").typeFullName.l shouldBe List("int")
+      cpg.local.nameExact("first").typeFullName.l shouldBe List("int")
+      cpg.local.nameExact("second").typeFullName.l shouldBe List("int")
       cpg.local.nameExact("w").typeFullName.l shouldBe List("int")
+      cpg.local.nameExact("left").typeFullName.l shouldBe List("int")
+      cpg.local.nameExact("right").typeFullName.l shouldBe List("int")
       cpg.local.nameExact("y").typeFullName.l shouldBe List("int")
-      cpg.method.nameExact("use").ifBlock.condition.code.l shouldBe List("x != 0", "q != 0")
-      cpg.method.nameExact("use").whileBlock.condition.code.l shouldBe List("w != 0")
+      cpg.method.nameExact("use").ifBlock.condition.code.l should contain allElementsOf List("x != 0", "q != 0", "first != 0")
+      cpg.method.nameExact("use").whileBlock.condition.code.l should contain("w != 0")
       cpg.method.nameExact("use").controlStructure.controlStructureTypeExact(ControlStructureTypes.SWITCH).condition.code.l shouldBe
         List("y")
-      inside(cpg.method.nameExact("use").ifBlock.l) { case List(initStatementIf, conditionDeclarationIf) =>
+      inside(cpg.method.nameExact("use").ifBlock.l) { case List(initStatementIf, conditionDeclarationIf, structuredIf) =>
         initStatementIf.condition.ast.isLocal.name.l shouldBe Nil
         initStatementIf.condition.ast.isCall.nameExact("seed").code.l shouldBe Nil
         conditionDeclarationIf.condition.ast.isLocal.name.l shouldBe List("q")
         conditionDeclarationIf.condition.ast.isCall.nameExact("seed").code.l shouldBe List("seed(n)")
+        structuredIf.condition.ast.isLocal.name.l shouldBe Nil
+        structuredIf.condition.ast.isIdentifier.nameExact("first").refsTo.l shouldBe
+          List(cpg.method.nameExact("use").local.nameExact("first").head)
       }
-      inside(cpg.method.nameExact("use").whileBlock.l) { case List(whileBlock) =>
-        whileBlock.condition.ast.isLocal.name.l shouldBe List("w")
-        whileBlock.condition.ast.isCall.nameExact("seed").code.l shouldBe List("seed(n)")
+      inside(cpg.method.nameExact("use").whileBlock.l) { case List(simpleWhile, structuredWhile) =>
+        simpleWhile.condition.ast.isLocal.name.l shouldBe List("w")
+        simpleWhile.condition.ast.isCall.nameExact("seed").code.l shouldBe List("seed(n)")
+        structuredWhile.condition.ast.isLocal.name.l should contain allElementsOf List("left", "right")
+        structuredWhile.condition.ast.isCall.nameExact("makePair").code.l shouldBe List("makePair()")
+        structuredWhile.condition.code.l.head should startWith("<tmp>")
       }
       inside(cpg.method.nameExact("use").controlStructure.controlStructureTypeExact(ControlStructureTypes.SWITCH).l) {
         case List(switchBlock) =>
@@ -1644,15 +1667,22 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           switchBlock.condition.ast.isCall.nameExact("seed").code.l shouldBe Nil
       }
       cpg.method.nameExact("use").call.nameExact("seed").methodFullName.l shouldBe List.fill(4)("seed:int(int)")
-      cpg.method.nameExact("use").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+      cpg.method.nameExact("use").call.nameExact("makePair").methodFullName.l shouldBe List.fill(2)("makePair:Pair()")
+      val assignmentCodes = cpg.method.nameExact("use").call.nameExact(Operators.assignment).code.l
+      assignmentCodes should contain allElementsOf List(
         "x = seed(n)",
         "q = seed(n)",
         "w = seed(n)",
         "y = seed(n)",
         "n = x",
         "n = q",
+        "n = second",
         "n = w"
       )
+      assignmentCodes.exists(_.startsWith("first = ")) shouldBe true
+      assignmentCodes.exists(_.startsWith("second = ")) shouldBe true
+      assignmentCodes.exists(_.startsWith("left = ")) shouldBe true
+      assignmentCodes.exists(_.startsWith("right = ")) shouldBe true
     }
 
     "capture C++ while condition declaration destructor cleanup" in {
@@ -1802,14 +1832,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
       inside(cpg.method.nameExact("sumPairs").controlStructure.controlStructureType(ControlStructureTypes.FOR).l) {
         case List(rangeFor) =>
-          rangeFor.condition.code.l shouldBe List("pairs")
+          rangeFor.condition.code.l shouldBe List("pairs != NULL")
       }
       val temp = cpg.method.nameExact("sumPairs").local.filter(_.name.startsWith("<tmp>")).head
       temp.typeFullName shouldBe "Pair*"
       cpg.method.nameExact("sumPairs").local.nameExact("first").typeFullName.l shouldBe List("int")
       cpg.method.nameExact("sumPairs").local.nameExact("second").typeFullName.l shouldBe List("int")
       cpg.method.nameExact("sumPairs").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
-        s"${temp.name} = pairs",
+        s"*${temp.name} = pairs",
         s"first = ${temp.name}.first",
         s"second = ${temp.name}.second"
       )

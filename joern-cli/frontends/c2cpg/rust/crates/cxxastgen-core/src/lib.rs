@@ -2835,6 +2835,9 @@ fn parse_condition_initializer(
 }
 
 fn parse_condition_declaration(node: Node, source: &[u8]) -> Vec<Statement> {
+    if let Some(binding) = condition_structured_binding_from_text(node, source) {
+        return vec![binding];
+    }
     let declarations = parse_local_declarations(node, source);
     let code = node_text(node, source).trim();
     let parsed_as_single_initialized_local = matches!(
@@ -2851,6 +2854,31 @@ fn parse_condition_declaration(node: Node, source: &[u8]) -> Vec<Statement> {
             .into_iter()
             .collect()
     }
+}
+
+fn condition_structured_binding_from_text(node: Node, source: &[u8]) -> Option<Statement> {
+    let code = node_text(node, source).trim().trim_end_matches(';');
+    let (left, right) = split_top_level_assignment(code)?;
+    let open = left.find('[')?;
+    let close = left[open + 1..].find(']')? + open + 1;
+    let type_name = left[..open].trim();
+    let names = left[open + 1..close]
+        .split(',')
+        .map(str::trim)
+        .filter(|name| !name.is_empty())
+        .map(str::to_string)
+        .collect::<Vec<_>>();
+    if type_name.is_empty() || names.is_empty() {
+        return None;
+    }
+    Some(Statement::StructuredBinding {
+        type_name: type_name.to_string(),
+        code: code.to_string(),
+        line: line(node),
+        temp_name: format!("<tmp>{}", node.start_byte()),
+        names,
+        initializer: Some(parse_expression_text(right.trim(), line(node))),
+    })
 }
 
 fn condition_declaration_from_text(node: Node, source: &[u8]) -> Option<Statement> {
@@ -6914,13 +6942,24 @@ mod tests {
     #[test]
     fn parses_cpp_selection_initializers_and_condition_declarations() {
         let sample = r#"
+                struct Pair {
+                  int first;
+                  int second;
+                };
                 int f();
+                Pair make_pair();
                 int use(int n) {
                   if (int x = f(); x) {
                     return x;
                   }
+                  if (auto [first, second] = make_pair(); first) {
+                    return second;
+                  }
                   while (int w = f()) {
                     return w;
+                  }
+                  while (auto [left, right] = make_pair()) {
+                    return left + right;
                   }
                   switch (int y = f(); y) {
                   case 1:
@@ -6945,11 +6984,23 @@ mod tests {
             condition: if_condition,
             then_body,
             ..
+        }, Statement::If {
+            initializer: structured_if_initializer,
+            condition_initializer: structured_if_condition_initializer,
+            condition: structured_if_condition,
+            then_body: structured_if_body,
+            ..
         }, Statement::While {
             initializer: while_initializer,
             condition_initializer: while_condition_initializer,
             condition: while_condition,
             body: while_body,
+            ..
+        }, Statement::While {
+            initializer: structured_while_initializer,
+            condition_initializer: structured_while_condition_initializer,
+            condition: structured_while_condition,
+            body: structured_while_body,
             ..
         }, Statement::Switch {
             initializer: switch_initializer,
@@ -6959,7 +7010,7 @@ mod tests {
             ..
         }] = function.body.as_slice()
         else {
-            panic!("expected if, while, and switch");
+            panic!("expected if, structured if, while, structured while, and switch");
         };
 
         assert!(matches!(
@@ -6974,6 +7025,27 @@ mod tests {
         assert!(matches!(if_condition, Expression::Identifier { name, .. } if name == "x"));
         assert!(matches!(then_body.as_slice(), [Statement::Return { .. }]));
 
+        assert!(matches!(
+            structured_if_initializer.as_slice(),
+            [Statement::StructuredBinding {
+                type_name,
+                names,
+                initializer: Some(Expression::Call { name: call_name, .. }),
+                ..
+            }] if type_name == "auto"
+                && names == &vec!["first".to_string(), "second".to_string()]
+                && call_name == "make_pair"
+        ));
+        assert!(structured_if_condition_initializer.is_empty());
+        assert!(matches!(
+            structured_if_condition,
+            Expression::Identifier { name, .. } if name == "first"
+        ));
+        assert!(matches!(
+            structured_if_body.as_slice(),
+            [Statement::Return { .. }]
+        ));
+
         assert!(while_initializer.is_empty());
         assert!(matches!(
             while_condition_initializer.as_slice(),
@@ -6985,6 +7057,25 @@ mod tests {
         ));
         assert!(matches!(while_condition, Expression::Identifier { name, .. } if name == "w"));
         assert!(matches!(while_body.as_slice(), [Statement::Return { .. }]));
+
+        assert!(structured_while_initializer.is_empty());
+        assert!(matches!(
+            structured_while_condition_initializer.as_slice(),
+            [Statement::StructuredBinding {
+                type_name,
+                names,
+                initializer: Some(Expression::Call { name: call_name, .. }),
+                temp_name,
+                ..
+            }] if type_name == "auto"
+                && names == &vec!["left".to_string(), "right".to_string()]
+                && call_name == "make_pair"
+                && matches!(structured_while_condition, Expression::Identifier { name, .. } if name == temp_name)
+        ));
+        assert!(matches!(
+            structured_while_body.as_slice(),
+            [Statement::Return { expression: Some(Expression::Binary { operator, .. }), .. }] if operator == "+"
+        ));
 
         assert!(matches!(
             switch_initializer.as_slice(),
