@@ -3918,18 +3918,35 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  int z;
           |  operator bool() const { return z != 0; }
           |};
+          |int accept(Board input) { return input.z; }
           |void condition_assignments(int seed) {
           |  Board check;
           |  if (check = {{seed, 2}, 3}) {
           |    check.z = check.z + 1;
           |  }
+          |  if (accept(check = {{10, seed}, 11})) {
+          |    check.z = check.z + 1;
+          |  }
           |  while (check = {{4, seed}, 5}) {
+          |    break;
+          |  }
+          |  while (accept(check = {{12, seed}, 13})) {
           |    break;
           |  }
           |  do {
           |    check.z = check.z + 2;
           |  } while (check = {{6, seed}, 7});
+          |  do {
+          |    check.z = check.z + 3;
+          |  } while (accept(check = {{14, seed}, 15}));
           |  for (; check = {{8, seed}, 9};) {
+          |    break;
+          |  }
+          |  for (; accept(check = {{16, seed}, 17});) {
+          |    break;
+          |  }
+          |  switch (accept(check = {{18, seed}, 19})) {
+          |  default:
           |    break;
           |  }
           |}
@@ -3945,21 +3962,46 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "check.cell.x = seed",
           "check.cell.y = 2",
           "check.z = 3",
+          "check = {{10, seed}, 11}",
+          "check.cell = {10, seed}",
+          "check.cell.x = 10",
+          "check.cell.y = seed",
+          "check.z = 11",
           "check = {{4, seed}, 5}",
           "check.cell = {4, seed}",
           "check.cell.x = 4",
           "check.cell.y = seed",
           "check.z = 5",
+          "check = {{12, seed}, 13}",
+          "check.cell = {12, seed}",
+          "check.cell.x = 12",
+          "check.cell.y = seed",
+          "check.z = 13",
           "check = {{6, seed}, 7}",
           "check.cell = {6, seed}",
           "check.cell.x = 6",
           "check.cell.y = seed",
           "check.z = 7",
+          "check = {{14, seed}, 15}",
+          "check.cell = {14, seed}",
+          "check.cell.x = 14",
+          "check.cell.y = seed",
+          "check.z = 15",
           "check = {{8, seed}, 9}",
           "check.cell = {8, seed}",
           "check.cell.x = 8",
           "check.cell.y = seed",
-          "check.z = 9"
+          "check.z = 9",
+          "check = {{16, seed}, 17}",
+          "check.cell = {16, seed}",
+          "check.cell.x = 16",
+          "check.cell.y = seed",
+          "check.z = 17",
+          "check = {{18, seed}, 19}",
+          "check.cell = {18, seed}",
+          "check.cell.x = 18",
+          "check.cell.y = seed",
+          "check.z = 19"
         )
       cpg.method.nameExact("condition_assignments").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
         List(
@@ -3968,6 +4010,22 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "check.cell.y",
           "check.z"
         )
+      val callCodes = cpg.method.nameExact("condition_assignments").call.code.l
+      callCodes.indexOf("check.cell.x = 10") should be < callCodes.indexOf(
+        "accept(check = {{10, seed}, 11})"
+      )
+      callCodes.indexOf("check.cell.x = 12") should be < callCodes.indexOf(
+        "accept(check = {{12, seed}, 13})"
+      )
+      callCodes.indexOf("check.cell.x = 14") should be < callCodes.indexOf(
+        "accept(check = {{14, seed}, 15})"
+      )
+      callCodes.indexOf("check.cell.x = 16") should be < callCodes.indexOf(
+        "accept(check = {{16, seed}, 17})"
+      )
+      callCodes.indexOf("check.cell.x = 18") should be < callCodes.indexOf(
+        "accept(check = {{18, seed}, 19})"
+      )
     }
 
     "capture C++ aggregate assignment initializers in return and throw expressions from the Rust parser backend" in {
