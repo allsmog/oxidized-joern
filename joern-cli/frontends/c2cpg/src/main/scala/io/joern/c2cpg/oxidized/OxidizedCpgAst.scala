@@ -109,6 +109,15 @@ sealed trait OxStatement {
 case class OxLocalDecl(name: String, typeName: String, code: String, line: Int, initializer: Option[OxExpression])
     extends OxStatement
 
+case class OxStructuredBinding(
+  typeName: String,
+  code: String,
+  line: Int,
+  tempName: String,
+  names: Seq[String],
+  initializer: Option[OxExpression]
+) extends OxStatement
+
 case class OxAssignment(operator: String, code: String, line: Int, left: OxExpression, right: OxExpression)
     extends OxStatement
 
@@ -370,6 +379,15 @@ object OxDocument {
           typeName = str(value, "typeName"),
           code = str(value, "code"),
           line = int(value, "line"),
+          initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
+        )
+      case "structuredBinding" =>
+        OxStructuredBinding(
+          typeName = str(value, "typeName"),
+          code = str(value, "code"),
+          line = int(value, "line"),
+          tempName = str(value, "tempName"),
+          names = value("names").arr.map(_.str).toSeq,
           initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
         )
       case "assignment" =>

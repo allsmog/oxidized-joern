@@ -761,34 +761,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def astsForStatement(statement: OxStatement): Seq[Ast] = {
     statement match {
       case local: OxLocalDecl =>
-        val origin          = OxOrigin(local)
-        val localLambdaInfo = local.initializer.collect { case lambda: OxLambda => lambdaInfo(lambda) }
-        val typeName        = registerType(localTypeFullName(local))
-        val localCode       = localDeclarationCode(local)
-        val localNode       = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
-        scope = scope.updated(local.name, ScopeEntry(typeName, localNode, localLambdaInfo))
-        registerLocalDestructor(local.name, typeName, local.line)
-        val localAst                = Ast(localNode)
-        val temporaryDestructorAsts = temporaryDestructorAstsForExpressions(local.initializer.toSeq)
-        local.initializer match {
-          case Some(initializer: OxInitializerList) if isConstructorInitializer(typeName, initializer) =>
-            Seq(localAst, constructorAssignmentAst(local, initializer, typeName)) ++ temporaryDestructorAsts
-          case Some(initializer) if isCopyConstructorInitializer(typeName, initializer) =>
-            Seq(
-              localAst,
-              constructorAssignmentAst(local, Seq(initializer), initializer.code, OxOrigin(initializer), typeName)
-            ) ++ temporaryDestructorAsts
-          case Some(initializer) =>
-            val assignmentCode = s"${local.name} = ${initializer.code}"
-            val left           = identifierAst(local.name, local.name, local.line)
-            val assignment =
-              assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
-            Seq(localAst, assignment) ++ heapConstructorAstsForExpressions(Seq(initializer)) ++ temporaryDestructorAsts
-          case None if isDefaultConstructorInitializer(typeName) =>
-            Seq(localAst, constructorAssignmentAst(local, Seq.empty, "", origin, typeName))
-          case None =>
-            Seq(localAst)
-        }
+        astsForLocalDecl(local)
+      case structuredBinding: OxStructuredBinding =>
+        astsForStructuredBinding(structuredBinding)
       case assignment: OxAssignment =>
         val assignmentAst_ =
           overloadedAssignmentOperatorAst(assignment).getOrElse {
@@ -957,6 +932,83 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
               ))
         }
     }
+  }
+
+  private def astsForLocalDecl(local: OxLocalDecl, useConstructorInitializers: Boolean = true): Seq[Ast] = {
+    val origin          = OxOrigin(local)
+    val localLambdaInfo = local.initializer.collect { case lambda: OxLambda => lambdaInfo(lambda) }
+    val typeName        = registerType(localTypeFullName(local))
+    val localCode       = localDeclarationCode(local)
+    val localNode       = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
+    scope = scope.updated(local.name, ScopeEntry(typeName, localNode, localLambdaInfo))
+    registerLocalDestructor(local.name, typeName, local.line)
+    val localAst                = Ast(localNode)
+    val temporaryDestructorAsts = temporaryDestructorAstsForExpressions(local.initializer.toSeq)
+    local.initializer match {
+      case Some(initializer: OxInitializerList)
+          if useConstructorInitializers && isConstructorInitializer(typeName, initializer) =>
+        Seq(localAst, constructorAssignmentAst(local, initializer, typeName)) ++ temporaryDestructorAsts
+      case Some(initializer) if useConstructorInitializers && isCopyConstructorInitializer(typeName, initializer) =>
+        Seq(
+          localAst,
+          constructorAssignmentAst(local, Seq(initializer), initializer.code, OxOrigin(initializer), typeName)
+        ) ++ temporaryDestructorAsts
+      case Some(initializer) =>
+        val assignmentCode = s"${local.name} = ${initializer.code}"
+        val left           = identifierAst(local.name, local.name, local.line)
+        val assignment =
+          assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
+        Seq(localAst, assignment) ++ heapConstructorAstsForExpressions(Seq(initializer)) ++ temporaryDestructorAsts
+      case None if useConstructorInitializers && isDefaultConstructorInitializer(typeName) =>
+        Seq(localAst, constructorAssignmentAst(local, Seq.empty, "", origin, typeName))
+      case None =>
+        Seq(localAst)
+    }
+  }
+
+  private def astsForStructuredBinding(binding: OxStructuredBinding): Seq[Ast] = {
+    val tempTypeName = if (normalizeType(binding.typeName).startsWith(Defines.Auto)) Defines.Auto else binding.typeName
+    val tempLocal = OxLocalDecl(
+      name = binding.tempName,
+      typeName = tempTypeName,
+      code = s"$tempTypeName ${binding.tempName}",
+      line = binding.line,
+      initializer = binding.initializer
+    )
+    val tempAsts = astsForLocalDecl(tempLocal, useConstructorInitializers = false)
+    val tempType = scope.get(binding.tempName).map(_.typeFullName).getOrElse(registerType(Defines.Any))
+    tempAsts ++ binding.names.zipWithIndex.flatMap { case (name, index) =>
+      val access = structuredBindingAccess(binding.tempName, tempType, name, index, binding.line)
+      astsForLocalDecl(
+        OxLocalDecl(name = name, typeName = Defines.Auto, code = name, line = binding.line, initializer = Some(access))
+      )
+    }
+  }
+
+  private def structuredBindingAccess(
+    tempName: String,
+    tempType: String,
+    name: String,
+    index: Int,
+    line: Int
+  ): OxExpression = {
+    val base = OxIdentifier(tempName, tempName, line)
+    if (isArrayLikeType(tempType)) {
+      val indexCode = index.toString
+      OxIndexAccess(
+        code = s"$tempName[$indexCode]",
+        line = line,
+        base = base,
+        index = OxLiteral(indexCode, indexCode, line)
+      )
+    } else {
+      OxFieldAccess(field = name, code = s"$tempName.$name", line = line, base = base)
+    }
+  }
+
+  private def isArrayLikeType(typeName: String): Boolean = {
+    val normalized = normalizeType(resolveAliasType(typeName))
+    normalized.endsWith("[]") || normalized.matches(""".*\[[^\]]*\]$""")
   }
 
   private def localDeclarationCode(local: OxLocalDecl): String = {
@@ -1588,6 +1640,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         case OxLocalDecl(name, _, _, _, initializer) =>
           initializer.foreach(visitExpression)
           declared.add(name)
+        case OxStructuredBinding(_, _, _, _, names, initializer) =>
+          initializer.foreach(visitExpression)
+          declared.addAll(names)
         case OxAssignment(_, _, _, left, right) =>
           visitExpression(left)
           visitExpression(right)

@@ -1610,6 +1610,60 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("infer").local.nameExact("indexed").typeFullName.l shouldBe List("int")
     }
 
+    "capture C++ structured bindings from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Pair {
+          |  int first;
+          |  int second;
+          |};
+          |Pair make();
+          |int use() {
+          |  auto [first, second] = make();
+          |  return first + second;
+          |}
+          |int useArray() {
+          |  int values[2];
+          |  auto [left, right] = values;
+          |  return left + right;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val temp = cpg.method.nameExact("use").local.filter(_.name.startsWith("<tmp>")).head
+      temp.typeFullName shouldBe "Pair"
+      cpg.method.nameExact("use").local.nameExact("first").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("use").local.nameExact("second").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("use").call.nameExact(Operators.assignment).code.l should contain theSameElementsAs List(
+        s"${temp.name} = make()",
+        s"first = ${temp.name}.first",
+        s"second = ${temp.name}.second"
+      )
+      cpg.method.nameExact("use").call.nameExact(Operators.fieldAccess).code.l should contain theSameElementsAs List(
+        s"${temp.name}.first",
+        s"${temp.name}.second"
+      )
+      cpg.identifier.nameExact("first").refsTo.dedup.l shouldBe List(cpg.method.nameExact("use").local.nameExact("first").head)
+      cpg.identifier.nameExact("second").refsTo.dedup.l shouldBe List(
+        cpg.method.nameExact("use").local.nameExact("second").head
+      )
+
+      val arrayTemp = cpg.method.nameExact("useArray").local.filter(_.name.startsWith("<tmp>")).head
+      arrayTemp.typeFullName shouldBe "int[]"
+      cpg.method.nameExact("useArray").local.nameExact("left").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("useArray").local.nameExact("right").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("useArray").call.nameExact(Operators.assignment).code.l should contain theSameElementsAs List(
+        s"${arrayTemp.name} = values",
+        s"left = ${arrayTemp.name}[0]",
+        s"right = ${arrayTemp.name}[1]"
+      )
+      cpg.method.nameExact("useArray").call.nameExact(Operators.indirectIndexAccess).code.l should contain theSameElementsAs List(
+        s"${arrayTemp.name}[0]",
+        s"${arrayTemp.name}[1]"
+      )
+    }
+
     "preserve block scope when locals shadow outer declarations" in {
       val cpg = code("""
           |int shadow(int x) {

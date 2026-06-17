@@ -239,6 +239,16 @@ pub enum Statement {
         line: usize,
         initializer: Option<Expression>,
     },
+    StructuredBinding {
+        #[serde(rename = "typeName")]
+        type_name: String,
+        code: String,
+        line: usize,
+        #[serde(rename = "tempName")]
+        temp_name: String,
+        names: Vec<String>,
+        initializer: Option<Expression>,
+    },
     Assignment {
         operator: String,
         code: String,
@@ -1617,7 +1627,9 @@ fn parse_typedef_declarations(node: Node, source: &[u8]) -> Vec<TypedefDecl> {
         .into_iter()
         .filter(|child| *child != type_node)
         .filter_map(|declarator| {
-            let name = declarator_name(declarator, source)?;
+            let Some(name) = declarator_name(declarator, source) else {
+                return None;
+            };
             Some(TypedefDecl {
                 name,
                 type_name: type_from_declarator(&base_type, declarator, source),
@@ -2101,8 +2113,24 @@ fn parse_local_declarations(node: Node, source: &[u8]) -> Vec<Statement> {
     named_children(node)
         .into_iter()
         .filter(|child| Some(*child) != type_node)
-        .filter_map(|declarator| {
-            let name = declarator_name(declarator, source)?;
+        .flat_map(|declarator| {
+            if let (Some(base_type), Some(binding_declarator)) = (
+                type_name.as_deref(),
+                structured_binding_declarator(declarator),
+            ) {
+                return parse_structured_binding(
+                    node,
+                    declarator,
+                    binding_declarator,
+                    base_type,
+                    source,
+                )
+                .into_iter()
+                .collect();
+            }
+            let Some(name) = declarator_name(declarator, source) else {
+                return Vec::new();
+            };
             let initializer = declarator
                 .child_by_field_name("value")
                 .map(|value| parse_expression(value, source))
@@ -2121,8 +2149,55 @@ fn parse_local_declarations(node: Node, source: &[u8]) -> Vec<Statement> {
                 line: line(node),
                 initializer,
             })
+            .into_iter()
+            .collect::<Vec<_>>()
         })
         .collect()
+}
+
+fn parse_structured_binding(
+    statement: Node,
+    declarator: Node,
+    binding_declarator: Node,
+    base_type: &str,
+    source: &[u8],
+) -> Option<Statement> {
+    let names = structured_binding_names(binding_declarator, source);
+    if names.is_empty() {
+        return None;
+    }
+    Some(Statement::StructuredBinding {
+        type_name: type_from_declarator(base_type, declarator, source),
+        code: statement_code(statement, source),
+        line: line(statement),
+        temp_name: structured_binding_temp_name(binding_declarator),
+        names,
+        initializer: declarator
+            .child_by_field_name("value")
+            .map(|value| parse_expression(value, source)),
+    })
+}
+
+fn structured_binding_declarator(node: Node) -> Option<Node> {
+    if node.kind() == "structured_binding_declarator" {
+        Some(node)
+    } else {
+        named_children(node)
+            .into_iter()
+            .find_map(structured_binding_declarator)
+    }
+}
+
+fn structured_binding_names(node: Node, source: &[u8]) -> Vec<String> {
+    named_children(node)
+        .into_iter()
+        .filter(|child| child.kind() == "identifier")
+        .map(|identifier| node_text(identifier, source).trim().to_string())
+        .collect()
+}
+
+fn structured_binding_temp_name(node: Node) -> String {
+    format!("<tmp>{}", node.start_byte())
 }
 
 fn direct_initializer_from_declarator(declarator: Node, source: &[u8]) -> Option<Expression> {
@@ -2281,14 +2356,25 @@ fn parse_for_range_loop(
         .map(|initializer| parse_for_initializer(initializer, source, symbols))
         .unwrap_or_default();
     let base_type = type_name_from_type_node(type_node, source);
-    let name = declarator_name(declarator, source)?;
-    initializer.push(Statement::LocalDecl {
-        name,
-        type_name: type_from_declarator(&base_type, declarator, source),
-        code: node_text(declarator, source).trim().to_string(),
-        line: line(declarator),
-        initializer: None,
-    });
+    if let Some(binding_declarator) = structured_binding_declarator(declarator) {
+        initializer.push(Statement::StructuredBinding {
+            type_name: type_from_declarator(&base_type, declarator, source),
+            code: node_text(declarator, source).trim().to_string(),
+            line: line(declarator),
+            temp_name: structured_binding_temp_name(binding_declarator),
+            names: structured_binding_names(binding_declarator, source),
+            initializer: Some(parse_expression(right, source)),
+        });
+    } else {
+        let name = declarator_name(declarator, source)?;
+        initializer.push(Statement::LocalDecl {
+            name,
+            type_name: type_from_declarator(&base_type, declarator, source),
+            code: node_text(declarator, source).trim().to_string(),
+            line: line(declarator),
+            initializer: None,
+        });
+    }
     Some(Statement::For {
         code: statement_code(node, source),
         line: line(node),
@@ -6389,6 +6475,44 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_structured_binding_declarations() {
+        let sample = r#"
+                struct Pair {
+                  int first;
+                  int second;
+                };
+                Pair make();
+                int use() {
+                  auto [first, second] = make();
+                  return first + second;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("structured binding sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        let [Statement::StructuredBinding {
+            type_name,
+            temp_name,
+            names,
+            initializer: Some(initializer),
+            ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!("expected structured binding followed by return");
+        };
+        assert_eq!(type_name, "auto");
+        assert!(temp_name.starts_with("<tmp>"));
+        assert_eq!(names, &vec!["first".to_string(), "second".to_string()]);
+        assert!(matches!(initializer, Expression::Call { name, .. } if name == "make"));
+    }
+
+    #[test]
     fn preserves_pointer_and_array_type_suffixes_from_declarators() {
         let sample = r#"
                 struct Holder {
@@ -6790,6 +6914,10 @@ mod tests {
                 .as_ref()
                 .map(collect_call_names)
                 .unwrap_or_default(),
+            Statement::StructuredBinding { initializer, .. } => initializer
+                .as_ref()
+                .map(collect_call_names)
+                .unwrap_or_default(),
             Statement::Assignment { left, right, .. } => {
                 let mut calls = collect_call_names(left);
                 calls.extend(collect_call_names(right));
@@ -6871,6 +6999,7 @@ mod tests {
     fn statement_line(statement: &Statement) -> usize {
         match statement {
             Statement::LocalDecl { line, .. }
+            | Statement::StructuredBinding { line, .. }
             | Statement::Assignment { line, .. }
             | Statement::Return { line, .. }
             | Statement::Throw { line, .. }
