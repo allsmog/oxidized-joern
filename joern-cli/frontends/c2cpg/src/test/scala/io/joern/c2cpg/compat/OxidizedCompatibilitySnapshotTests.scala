@@ -1564,6 +1564,29 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.call.nameExact(Operators.minus).code.l shouldBe List("-x")
     }
 
+    "capture C++ named casts from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |int casts(float x, void *ptr) {
+          |  int a = static_cast<int>(x);
+          |  int b = const_cast<int>(a);
+          |  int c = dynamic_cast<int>(b);
+          |  int d = reinterpret_cast<int>(ptr);
+          |  return a + b + c + d;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.call.nameExact(Operators.cast).code.l shouldBe
+        List("static_cast<int>(x)", "const_cast<int>(a)", "dynamic_cast<int>(b)", "reinterpret_cast<int>(ptr)")
+      cpg.call.codeExact("static_cast<int>(x)").name.l shouldBe List(Operators.cast)
+      cpg.call.codeExact("const_cast<int>(a)").name.l shouldBe List(Operators.cast)
+      cpg.call.codeExact("dynamic_cast<int>(b)").name.l shouldBe List(Operators.cast)
+      cpg.call.codeExact("reinterpret_cast<int>(ptr)").name.l shouldBe List(Operators.cast)
+      cpg.call.nameExact(Operators.cast).typeFullName.l shouldBe List("int", "int", "int", "int")
+    }
+
     "preserve block scope when locals shadow outer declarations" in {
       val cpg = code("""
           |int shadow(int x) {
