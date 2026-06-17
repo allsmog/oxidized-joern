@@ -993,6 +993,42 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ heap constructor and delete destructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |struct Widget {
+          |  Widget();
+          |  Widget(Widget &other);
+          |  ~Widget();
+          |};
+          |}
+          |Core::Widget *heap(Core::Widget &source) {
+          |  Core::Widget *first = new Core::Widget();
+          |  Core::Widget *second = new Core::Widget{source};
+          |  delete first;
+          |  delete second;
+          |  return second;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("heap").local.nameExact("first").typeFullName.l shouldBe List("Core.Widget*")
+      cpg.method.nameExact("heap").local.nameExact("second").typeFullName.l shouldBe List("Core.Widget*")
+      cpg.method.nameExact("heap").call.nameExact(Operators.alloc).code.l.sorted shouldBe
+        List("new Core::Widget()", "new Core::Widget{source}")
+      cpg.method.nameExact("heap").call.nameExact("Widget").code.l.sorted shouldBe
+        List("Core.Widget.Widget()", "Core.Widget.Widget(source)")
+      cpg.method.nameExact("heap").call.nameExact("Widget").methodFullName.l.sorted shouldBe
+        List("Core.Widget.Widget:void()", "Core.Widget.Widget:void(Widget&)")
+      cpg.method.nameExact("heap").call.nameExact("~Widget").code.l.sorted shouldBe
+        List("first->~Widget()", "second->~Widget()")
+      cpg.method.nameExact("heap").call.nameExact("~Widget").methodFullName.l shouldBe
+        List("Core.Widget.~Widget:void()", "Core.Widget.~Widget:void()")
+      cpg.method.nameExact("heap").call.nameExact(Operators.delete).code.l shouldBe List("delete first", "delete second")
+    }
+
     "capture enum variant initializers through a static initializer" in {
       val cpg = code("""
           |enum Mode { MODE_A = 1, MODE_B = 2, MODE_C };

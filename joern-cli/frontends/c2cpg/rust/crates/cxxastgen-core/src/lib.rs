@@ -383,6 +383,8 @@ pub enum Expression {
         code: String,
         line: usize,
         arguments: Vec<Expression>,
+        #[serde(rename = "initializerArguments")]
+        initializer_arguments: Vec<Expression>,
     },
     Delete {
         code: String,
@@ -2619,14 +2621,17 @@ fn parse_new_expression(node: Node, source: &[u8]) -> Expression {
     if let Some(declarator) = node.child_by_field_name("declarator") {
         arguments.extend(new_declarator_lengths(declarator, source));
     }
+    let mut initializer_arguments = Vec::new();
     if let Some(argument_list) = node.child_by_field_name("arguments") {
-        arguments.extend(initializer_list_elements(argument_list, source));
+        initializer_arguments.extend(initializer_list_elements(argument_list, source));
+        arguments.extend(initializer_arguments.clone());
     }
     Expression::New {
         type_name,
         code: node_text(node, source).trim().to_string(),
         line: line(node),
         arguments,
+        initializer_arguments,
     }
 }
 
@@ -4746,6 +4751,77 @@ mod tests {
         assert_eq!(code, "delete[] arr");
         assert!(matches!(argument.as_ref(), Expression::Identifier { name, .. } if name == "arr"));
         assert_eq!(return_name, "arr");
+    }
+
+    #[test]
+    fn parses_cpp_heap_constructor_initializers() {
+        let sample = r#"
+                Core::Widget *build(Core::Widget &source) {
+                  Core::Widget *one = new Core::Widget();
+                  Core::Widget *two = new Core::Widget{source};
+                  delete one;
+                  return two;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("sample C++ heap constructor expressions should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "build" => Some(function),
+                _ => None,
+            })
+            .expect("expected build function");
+        let [Statement::LocalDecl {
+            initializer: Some(default_new),
+            ..
+        }, Statement::LocalDecl {
+            initializer: Some(braced_new),
+            ..
+        }, Statement::Expression {
+            expression: delete_expr,
+            ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!("expected two heap locals, delete statement, and return");
+        };
+        let Expression::New {
+            type_name,
+            arguments,
+            initializer_arguments,
+            ..
+        } = default_new
+        else {
+            panic!("expected default heap constructor new expression");
+        };
+        assert_eq!(type_name, "Core::Widget");
+        assert!(arguments.is_empty());
+        assert!(initializer_arguments.is_empty());
+
+        let Expression::New {
+            type_name,
+            arguments,
+            initializer_arguments,
+            ..
+        } = braced_new
+        else {
+            panic!("expected braced heap constructor new expression");
+        };
+        assert_eq!(type_name, "Core::Widget");
+        assert!(matches!(
+            arguments.as_slice(),
+            [Expression::Identifier { name, .. }] if name == "source"
+        ));
+        assert!(matches!(
+            initializer_arguments.as_slice(),
+            [Expression::Identifier { name, .. }] if name == "source"
+        ));
+        assert!(
+            matches!(delete_expr, Expression::Delete { argument, .. } if matches!(
+                argument.as_ref(),
+                Expression::Identifier { name, .. } if name == "one"
+            ))
+        );
     }
 
     #[test]
