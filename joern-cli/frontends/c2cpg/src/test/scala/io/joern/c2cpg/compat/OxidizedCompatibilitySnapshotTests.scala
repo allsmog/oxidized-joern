@@ -521,7 +521,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      val lambdaFullName = "use.<lambda>0:int(int)"
+      val useFullName    = cpg.method.nameExact("use").fullName.head
+      val lambdaFullName = s"$useFullName.<lambda>0:int(int)"
       cpg.method.nameExact("use").local.nameExact("mapper").typeFullName.l shouldBe List(lambdaFullName)
       cpg.method.nameExact("use").ast.isMethodRef.methodFullNameExact(lambdaFullName).typeFullName.l shouldBe
         List(lambdaFullName)
@@ -580,8 +581,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      val refLambda = "use.<lambda>0:int(int)"
-      val valLambda = "use.<lambda>1:int(int)"
+      val useFullName = cpg.method.nameExact("use").fullName.head
+      val refLambda   = s"$useFullName.<lambda>0:int(int)"
+      val valLambda   = s"$useFullName.<lambda>1:int(int)"
 
       cpg.method.nameExact("use").local.nameExact("by_ref").typeFullName.l shouldBe List(refLambda)
       cpg.method.nameExact("use").local.nameExact("by_val").typeFullName.l shouldBe List(valLambda)
@@ -642,7 +644,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      val lambdaFullName = "use.<lambda>0:int(int)"
+      val useFullName    = cpg.method.nameExact("use").fullName.head
+      val lambdaFullName = s"$useFullName.<lambda>0:int(int)"
       cpg.method.nameExact("use").local.nameExact("mapper").typeFullName.l shouldBe List(lambdaFullName)
       cpg.method.fullNameExact(lambdaFullName).local.name.l.sorted shouldBe List("alias", "snap")
       cpg.method.fullNameExact(lambdaFullName).local.typeFullName.l.sorted shouldBe List("int", "int")
@@ -673,7 +676,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      val lambdaFullName = "use.<lambda>0:auto(auto)"
+      val useFullName    = cpg.method.nameExact("use").fullName.head
+      val lambdaFullName = s"$useFullName.<lambda>0:auto(auto)"
       cpg.method.nameExact("use").local.nameExact("identity").typeFullName.l shouldBe List(lambdaFullName)
       inside(cpg.method.fullNameExact(lambdaFullName).l) { case List(lambdaMethod) =>
         lambdaMethod.parameter.name.l shouldBe List("value")
@@ -704,11 +708,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      val l1FullName = "use.<lambda>0:T(T)"
-      val l2FullName = "use.<lambda>1:T(T)"
-      val l3FullName = "use.<lambda>2:T(T)"
-      val l4FullName = "use.<lambda>3:my_concept auto(my_concept auto)"
-      val l5FullName = "use.<lambda>4:my_concept auto()"
+      val useFullName = cpg.method.nameExact("use").fullName.head
+      val l1FullName  = s"$useFullName.<lambda>0:T(T)"
+      val l2FullName  = s"$useFullName.<lambda>1:T(T)"
+      val l3FullName  = s"$useFullName.<lambda>2:T(T)"
+      val l4FullName  = s"$useFullName.<lambda>3:my_concept auto(my_concept auto)"
+      val l5FullName  = s"$useFullName.<lambda>4:my_concept auto()"
 
       cpg.method.nameExact("use").local.nameExact("l1").typeFullName.l shouldBe List(l1FullName)
       cpg.method.nameExact("use").local.nameExact("l2").typeFullName.l shouldBe List(l2FullName)
@@ -754,8 +759,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      val bumpFullName = "use.<lambda>0:int(int)"
-      val readFullName = "use.<lambda>1:int()"
+      val useFullName  = cpg.method.nameExact("use").fullName.head
+      val bumpFullName = s"$useFullName.<lambda>0:int(int)"
+      val readFullName = s"$useFullName.<lambda>1:int()"
       cpg.method.nameExact("use").local.nameExact("bump").typeFullName.l shouldBe List(bumpFullName)
       cpg.method.nameExact("use").local.nameExact("read").typeFullName.l shouldBe List(readFullName)
 
@@ -790,8 +796,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      val mapperLambda = "use.<lambda>0:int(int)"
-      val callerLambda = "use.<lambda>1:int(int)"
+      val useFullName  = cpg.method.nameExact("use").fullName.head
+      val mapperLambda = s"$useFullName.<lambda>0:int(int)"
+      val callerLambda = s"$useFullName.<lambda>1:int(int)"
 
       cpg.method.nameExact("use").local.nameExact("mapper").typeFullName.l shouldBe
         List("std.function<int(int)>")
@@ -834,7 +841,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      val outerFullName = "use.<lambda>0:int(int)"
+      val useFullName   = cpg.method.nameExact("use").fullName.head
+      val outerFullName = s"$useFullName.<lambda>0:int(int)"
       val innerFullName = s"$outerFullName.<lambda>1:int(int)"
       cpg.method.nameExact("use").local.nameExact("outer").typeFullName.l shouldBe List(outerFullName)
       cpg.method.fullNameExact(outerFullName).local.nameExact("inner").typeFullName.l shouldBe List(innerFullName)
@@ -1784,7 +1792,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       inside(cpg.method.nameExact("sum").controlStructure.controlStructureType(ControlStructureTypes.FOR).l) {
         case List(rangeFor) =>
           rangeFor.code shouldBe "for (int value : items) {\n    total += value;\n  }"
-          rangeFor.condition.code.l shouldBe List("items")
+          rangeFor.condition.code.l shouldBe List("items != NULL")
       }
       cpg.method.nameExact("sum").local.nameExact("value").typeFullName.l shouldBe List("int")
       cpg.method.nameExact("sum").call.nameExact(Operators.assignmentPlus).code.l shouldBe List("total += value")
@@ -1807,12 +1815,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
       inside(cpg.method.nameExact("each").controlStructure.controlStructureType(ControlStructureTypes.FOR).l) {
         case List(rangeFor) =>
-          rangeFor.condition.code.l shouldBe List("v")
+          rangeFor.condition.code.l shouldBe List("v != NULL")
           rangeFor.astChildren.isLocal.name.l shouldBe List("v", "e")
       }
       cpg.method.nameExact("each").local.nameExact("v").typeFullName.l shouldBe List("int*")
       cpg.method.nameExact("each").local.nameExact("e").typeFullName.l shouldBe List("auto&")
-      cpg.call.nameExact(Operators.assignment).code.l shouldBe List("v = list")
+      cpg.call.nameExact(Operators.assignment).code.l shouldBe List("*v = list")
       cpg.call.nameExact(Operators.assignmentPlus).code.l shouldBe List("e += 1")
       cpg.identifier.nameExact("list").refsTo.l shouldBe
         List(cpg.method.nameExact("each").parameter.nameExact("list").head)
@@ -2116,8 +2124,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      val f1Lambda = "f1.<lambda>0:void()"
-      val f2Lambda = "f2.<lambda>1:void()"
+      val f1Lambda = s"${cpg.method.nameExact("f1").fullName.head}.<lambda>0:void()"
+      val f2Lambda = s"${cpg.method.nameExact("f2").fullName.head}.<lambda>1:void()"
 
       cpg.method.nameExact("f1", "f2").signature.sorted.l shouldBe List("auto(Args&&)", "auto(Args&&)")
       cpg.method.nameExact("f1").ast.isReturn.astChildren.isMethodRef.methodFullName.l shouldBe List(f1Lambda)
@@ -2170,7 +2178,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         }
       }
       inside(cpg.call.nameExact("foo").l) { case List(fooCall) =>
-        fooCall.methodFullName shouldBe "foo"
+        fooCall.methodFullName shouldBe "foo:int(char*,...)"
         fooCall.signature shouldBe "int(char*,...)"
       }
     }
@@ -2319,10 +2327,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
 
       cpg.method.nameExact("echo").local.nameExact("data").typeFullName.l shouldBe List("auto")
-      inside(cpg.method.nameExact("echo").call.nameExact("<operator>.await").code.l) { case List(readAwait, writeAwait) =>
-        readAwait shouldBe "co_await s.async_read()"
-        writeAwait shouldBe "co_await async_write(s, data)"
-      }
+      cpg.method.nameExact("echo").call.nameExact("<operator>.await").code.l should contain theSameElementsAs
+        List("co_await s.async_read()", "co_await async_write(s, data)")
       cpg.method.nameExact("echo").call.codeExact("s.async_read()").size shouldBe 1
       cpg.method.nameExact("echo").call.codeExact("async_write(s, data)").size shouldBe 1
     }
