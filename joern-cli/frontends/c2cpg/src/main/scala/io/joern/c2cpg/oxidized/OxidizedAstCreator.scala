@@ -33,6 +33,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     extends AstCreatorBase[OxOrigin, OxidizedAstCreator](filename)(config.schemaValidation) {
 
   private implicit val schemaValidation: ValidationMode = config.schemaValidation
+  private val LambdaMutableModifier                     = "MUTABLE"
 
   private final case class ScopeEntry(typeFullName: String, declaration: NewNode)
   private final case class CapturedGlobal(scopeEntry: ScopeEntry, binding: NewClosureBinding, globalEntry: ScopeEntry)
@@ -1722,10 +1723,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val captureLocalAsts = captures.map(capture => Ast(capture.scopeEntry.declaration))
     val body             = blockAst(blockNode(origin, lambda.code, Defines.Any), (captureLocalAsts ++ bodyAsts).toList)
     val methodReturn     = methodReturnNode(origin, info.returnType)
-    val modifiers =
-      Seq(ModifierTypes.VIRTUAL, ModifierTypes.STATIC, ModifierTypes.PRIVATE, ModifierTypes.LAMBDA).map(modifier =>
-        modifierNode(origin, modifier)
-      )
+    val modifierTypes =
+      Seq(ModifierTypes.VIRTUAL, ModifierTypes.STATIC, ModifierTypes.PRIVATE, ModifierTypes.LAMBDA) ++
+        Option.when(lambda.isMutable)(LambdaMutableModifier)
+    val modifiers = modifierTypes.map(modifier => modifierNode(origin, modifier))
     val methodAst_ =
       methodAst(method, parameterEntries.map(_._2._2), body, methodReturn, modifiers)
 

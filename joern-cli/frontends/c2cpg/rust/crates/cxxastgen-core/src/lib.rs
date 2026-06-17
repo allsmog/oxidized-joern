@@ -407,6 +407,8 @@ pub enum Expression {
         code: String,
         line: usize,
         captures: Vec<LambdaCapture>,
+        #[serde(rename = "isMutable")]
+        is_mutable: bool,
         parameters: Vec<ParameterDecl>,
         #[serde(rename = "returnType")]
         return_type: String,
@@ -2713,6 +2715,7 @@ fn parse_lambda_expression(node: Node, source: &[u8]) -> Expression {
         code: node_text(node, source).trim().to_string(),
         line: line(node),
         captures: lambda_captures(node, source),
+        is_mutable: lambda_is_mutable(node, source),
         signature: signature(&return_type, &parameters),
         return_type,
         parameters,
@@ -2723,6 +2726,16 @@ fn parse_lambda_expression(node: Node, source: &[u8]) -> Expression {
 fn lambda_parameter_list(node: Node) -> Option<Node> {
     node.child_by_field_name("declarator")
         .and_then(|declarator| find_named_descendant_kind(declarator, "parameter_list"))
+}
+
+fn lambda_is_mutable(node: Node, source: &[u8]) -> bool {
+    node.child_by_field_name("declarator")
+        .map(|declarator| {
+            named_descendants(declarator).into_iter().any(|child| {
+                child.kind() == "type_qualifier" && node_text(child, source).trim() == "mutable"
+            })
+        })
+        .unwrap_or(false)
 }
 
 fn lambda_return_type(
@@ -3329,6 +3342,17 @@ fn function_signature(return_type: &str, params: &[ParameterDecl], is_const: boo
 fn named_children(node: Node) -> Vec<Node> {
     let mut cursor = node.walk();
     node.named_children(&mut cursor).collect()
+}
+
+fn named_descendants(node: Node) -> Vec<Node> {
+    named_children(node)
+        .into_iter()
+        .flat_map(|child| {
+            let mut descendants = vec![child];
+            descendants.extend(named_descendants(child));
+            descendants
+        })
+        .collect()
 }
 
 fn find_named_descendant_kind<'a>(node: Node<'a>, kind: &str) -> Option<Node<'a>> {
@@ -4711,6 +4735,65 @@ mod tests {
         assert!(
             matches!(typed, Some((return_type, signature)) if return_type == "long" && signature == "long()")
         );
+    }
+
+    #[test]
+    fn parses_cpp_mutable_lambdas() {
+        let sample = r#"
+                int use(int seed) {
+                  auto bump = [seed](int step) mutable -> int {
+                    seed += step;
+                    return seed;
+                  };
+                  auto read = [seed]() { return seed; };
+                  return bump(1) + read();
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("mutable lambda sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        let lambdas: Vec<(&str, &Expression)> = function
+            .body
+            .iter()
+            .filter_map(|statement| match statement {
+                Statement::LocalDecl {
+                    name,
+                    initializer: Some(lambda @ Expression::Lambda { .. }),
+                    ..
+                } => Some((name.as_str(), lambda)),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(lambdas.len(), 2);
+        let Expression::Lambda {
+            is_mutable,
+            return_type,
+            signature,
+            body,
+            ..
+        } = lambdas[0].1
+        else {
+            panic!("expected mutable bump lambda");
+        };
+        assert_eq!(lambdas[0].0, "bump");
+        assert!(*is_mutable);
+        assert_eq!(return_type, "int");
+        assert_eq!(signature, "int(int)");
+        assert!(matches!(
+            body.as_slice(),
+            [Statement::Assignment { operator, .. }, Statement::Return { .. }] if operator == "+="
+        ));
+        let Expression::Lambda { is_mutable, .. } = lambdas[1].1 else {
+            panic!("expected read lambda");
+        };
+        assert_eq!(lambdas[1].0, "read");
+        assert!(!*is_mutable);
     }
 
     #[test]
