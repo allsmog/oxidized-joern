@@ -192,6 +192,16 @@ case class OxNew(
 
 case class OxDelete(code: String, line: Int, argument: OxExpression) extends OxExpression
 
+case class OxLambda(
+  code: String,
+  line: Int,
+  captures: Seq[String],
+  parameters: Seq[OxParameterDecl],
+  returnType: String,
+  signature: String,
+  body: Seq[OxStatement]
+) extends OxExpression
+
 case class OxCall(name: String, code: String, line: Int, callee: OxExpression, arguments: Seq[OxExpression])
     extends OxExpression
 
@@ -520,6 +530,16 @@ object OxDocument {
         )
       case "delete" =>
         OxDelete(code = str(value, "code"), line = int(value, "line"), argument = expression(value("argument")))
+      case "lambda" =>
+        OxLambda(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          captures = value("captures").arr.map(_.str).toSeq,
+          parameters = value("parameters").arr.map(parameter).toSeq,
+          returnType = str(value, "returnType"),
+          signature = str(value, "signature"),
+          body = value("body").arr.map(statement).toSeq
+        )
       case "call" =>
         OxCall(
           name = str(value, "name"),

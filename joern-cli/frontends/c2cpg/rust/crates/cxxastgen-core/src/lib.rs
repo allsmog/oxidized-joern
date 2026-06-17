@@ -391,6 +391,16 @@ pub enum Expression {
         line: usize,
         argument: Box<Expression>,
     },
+    Lambda {
+        code: String,
+        line: usize,
+        captures: Vec<String>,
+        parameters: Vec<ParameterDecl>,
+        #[serde(rename = "returnType")]
+        return_type: String,
+        signature: String,
+        body: Vec<Statement>,
+    },
     Call {
         name: String,
         code: String,
@@ -2341,6 +2351,7 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
         "sizeof_expression" => parse_sizeof_expression(node, source),
         "new_expression" => parse_new_expression(node, source),
         "delete_expression" => parse_delete_expression(node, source),
+        "lambda_expression" => parse_lambda_expression(node, source),
         "argument_list" => parse_initializer_list(node, source),
         "initializer_list" => parse_initializer_list(node, source),
         "initializer_pair" => parse_initializer_pair(node, source),
@@ -2669,6 +2680,151 @@ fn parse_delete_expression(node: Node, source: &[u8]) -> Expression {
             argument: Box::new(parse_expression(argument, source)),
         })
         .unwrap_or_else(|| identifier_expression(node, source))
+}
+
+fn parse_lambda_expression(node: Node, source: &[u8]) -> Expression {
+    let parameters = find_named_descendant_kind(node, "parameter_list")
+        .map(|parameters| parse_parameters(parameters, source))
+        .unwrap_or_default();
+    let mut symbols = MacroSymbols::new();
+    let body = node
+        .child_by_field_name("body")
+        .or_else(|| {
+            named_children(node)
+                .into_iter()
+                .find(|child| child.kind() == "compound_statement")
+        })
+        .map(|body| parse_statement_block(body, source, &mut symbols))
+        .unwrap_or_default();
+    let return_type = lambda_return_type(node, source, &parameters, &body);
+    Expression::Lambda {
+        code: node_text(node, source).trim().to_string(),
+        line: line(node),
+        captures: lambda_captures(node_text(node, source)),
+        signature: signature(&return_type, &parameters),
+        return_type,
+        parameters,
+        body,
+    }
+}
+
+fn lambda_return_type(
+    node: Node,
+    source: &[u8],
+    parameters: &[ParameterDecl],
+    body: &[Statement],
+) -> String {
+    find_lambda_trailing_return_type(node, source).unwrap_or_else(|| {
+        body.iter()
+            .find_map(|statement| return_statement_expression(statement))
+            .map(|expression| expression_static_type(expression, parameters))
+            .unwrap_or_else(|| "void".to_string())
+    })
+}
+
+fn find_lambda_trailing_return_type(node: Node, source: &[u8]) -> Option<String> {
+    node.child_by_field_name("type")
+        .map(|type_node| type_name_from_type_node(type_node, source))
+        .or_else(|| {
+            let body_start = node
+                .child_by_field_name("body")
+                .map(|body| body.start_byte())
+                .unwrap_or_else(|| node.end_byte());
+            named_children(node)
+                .into_iter()
+                .filter(|child| child.end_byte() <= body_start)
+                .rev()
+                .find(|child| {
+                    matches!(
+                        child.kind(),
+                        "primitive_type"
+                            | "type_identifier"
+                            | "qualified_identifier"
+                            | "template_type"
+                            | "auto"
+                    )
+                })
+                .map(|type_node| type_name_from_type_node(type_node, source))
+        })
+}
+
+fn return_statement_expression(statement: &Statement) -> Option<&Expression> {
+    match statement {
+        Statement::Return {
+            expression: Some(expression),
+            ..
+        } => Some(expression),
+        Statement::Try { body, catches, .. } => body
+            .iter()
+            .find_map(return_statement_expression)
+            .or_else(|| {
+                catches
+                    .iter()
+                    .flat_map(|catch| catch.body.iter())
+                    .find_map(return_statement_expression)
+            }),
+        Statement::If {
+            then_body,
+            else_body,
+            ..
+        } => then_body
+            .iter()
+            .chain(else_body.iter())
+            .find_map(return_statement_expression),
+        Statement::While { body, .. }
+        | Statement::DoWhile { body, .. }
+        | Statement::For { body, .. }
+        | Statement::Label { body, .. }
+        | Statement::Switch { body, .. }
+        | Statement::Case { body, .. } => body.iter().find_map(return_statement_expression),
+        _ => None,
+    }
+}
+
+fn expression_static_type(expression: &Expression, parameters: &[ParameterDecl]) -> String {
+    match expression {
+        Expression::Literal { value, .. } if integer_literal_value(value).is_some() => {
+            "int".to_string()
+        }
+        Expression::Identifier { name, .. } => parameters
+            .iter()
+            .find(|parameter| parameter.name == *name)
+            .map(|parameter| parameter.type_name.clone())
+            .unwrap_or_else(|| "ANY".to_string()),
+        Expression::Binary { left, right, .. } => {
+            let left_type = expression_static_type(left, parameters);
+            let right_type = expression_static_type(right, parameters);
+            if left_type == right_type {
+                left_type
+            } else if left_type == "int" || right_type == "int" {
+                "int".to_string()
+            } else {
+                "ANY".to_string()
+            }
+        }
+        _ => "ANY".to_string(),
+    }
+}
+
+fn lambda_captures(code: &str) -> Vec<String> {
+    let Some(open) = code.find('[') else {
+        return Vec::new();
+    };
+    let Some(close) = code[open + 1..].find(']') else {
+        return Vec::new();
+    };
+    code[open + 1..open + 1 + close]
+        .split(',')
+        .filter_map(|capture| {
+            let raw = capture.trim().trim_start_matches('&').trim();
+            let name = raw.strip_prefix('*').unwrap_or(raw).trim();
+            if name.is_empty() || name == "=" || name == "&" {
+                None
+            } else {
+                Some(name.to_string())
+            }
+        })
+        .collect()
 }
 
 fn parse_initializer_list(node: Node, source: &[u8]) -> Expression {
@@ -3026,6 +3182,16 @@ fn function_signature(return_type: &str, params: &[ParameterDecl], is_const: boo
 fn named_children(node: Node) -> Vec<Node> {
     let mut cursor = node.walk();
     node.named_children(&mut cursor).collect()
+}
+
+fn find_named_descendant_kind<'a>(node: Node<'a>, kind: &str) -> Option<Node<'a>> {
+    named_children(node).into_iter().find_map(|child| {
+        if child.kind() == kind {
+            Some(child)
+        } else {
+            find_named_descendant_kind(child, kind)
+        }
+    })
 }
 
 fn operator_text<'a>(node: Node, source: &'a [u8]) -> Option<&'a str> {
@@ -4162,6 +4328,71 @@ mod tests {
             })
             .expect("expected use function");
         assert_eq!(use_function.parameters[0].type_name, "Core::Holder<int>");
+    }
+
+    #[test]
+    fn parses_cpp_lambda_expressions() {
+        let sample = r#"
+                int use(int base) {
+                  auto mapper = [base](int x) { return base + x; };
+                  return mapper(2);
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("lambda expression sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        let [Statement::LocalDecl {
+            name,
+            type_name,
+            initializer: Some(lambda),
+            ..
+        }, Statement::Return {
+            expression: Some(call),
+            ..
+        }] = function.body.as_slice()
+        else {
+            panic!("expected lambda local followed by return call");
+        };
+        assert_eq!(name, "mapper");
+        assert_eq!(type_name, "auto");
+        let Expression::Lambda {
+            captures,
+            parameters,
+            return_type,
+            signature,
+            body,
+            ..
+        } = lambda
+        else {
+            panic!("expected lambda initializer");
+        };
+        assert_eq!(captures, &vec!["base".to_string()]);
+        assert_eq!(parameters.len(), 1);
+        assert_eq!(parameters[0].name, "x");
+        assert_eq!(parameters[0].type_name, "int");
+        assert_eq!(return_type, "int");
+        assert_eq!(signature, "int(int)");
+        assert!(matches!(
+            body.as_slice(),
+            [Statement::Return {
+                expression: Some(Expression::Binary { operator, .. }),
+                ..
+            }] if operator == "+"
+        ));
+        assert!(matches!(
+            call,
+            Expression::Call { name, arguments, .. }
+                if name == "mapper" && matches!(
+                    arguments.as_slice(),
+                    [Expression::Literal { value, .. }] if value == "2"
+                )
+        ));
     }
 
     #[test]
@@ -5762,6 +5993,9 @@ mod tests {
                 elements: arguments,
                 ..
             } => arguments.iter().flat_map(collect_call_names).collect(),
+            Expression::Lambda { body, .. } => {
+                body.iter().flat_map(collect_statement_call_names).collect()
+            }
             Expression::IndexAccess { base, index, .. } => {
                 let mut calls = collect_call_names(base);
                 calls.extend(collect_call_names(index));
@@ -5775,6 +6009,90 @@ mod tests {
                 calls
             }
             _ => Vec::new(),
+        }
+    }
+
+    fn collect_statement_call_names(statement: &Statement) -> Vec<String> {
+        match statement {
+            Statement::LocalDecl { initializer, .. } => initializer
+                .as_ref()
+                .map(collect_call_names)
+                .unwrap_or_default(),
+            Statement::Assignment { left, right, .. } => {
+                let mut calls = collect_call_names(left);
+                calls.extend(collect_call_names(right));
+                calls
+            }
+            Statement::Return { expression, .. } | Statement::Throw { expression, .. } => {
+                expression
+                    .as_ref()
+                    .map(collect_call_names)
+                    .unwrap_or_default()
+            }
+            Statement::Try { body, catches, .. } => {
+                let mut calls = body
+                    .iter()
+                    .flat_map(collect_statement_call_names)
+                    .collect::<Vec<_>>();
+                calls.extend(
+                    catches
+                        .iter()
+                        .flat_map(|catch| catch.body.iter())
+                        .flat_map(collect_statement_call_names),
+                );
+                calls
+            }
+            Statement::If {
+                condition,
+                then_body,
+                else_body,
+                ..
+            } => {
+                let mut calls = collect_call_names(condition);
+                calls.extend(then_body.iter().flat_map(collect_statement_call_names));
+                calls.extend(else_body.iter().flat_map(collect_statement_call_names));
+                calls
+            }
+            Statement::While {
+                condition, body, ..
+            }
+            | Statement::DoWhile {
+                condition, body, ..
+            }
+            | Statement::Switch {
+                condition, body, ..
+            } => {
+                let mut calls = collect_call_names(condition);
+                calls.extend(body.iter().flat_map(collect_statement_call_names));
+                calls
+            }
+            Statement::For {
+                initializer,
+                condition,
+                update,
+                body,
+                ..
+            } => {
+                let mut calls = initializer
+                    .iter()
+                    .flat_map(collect_statement_call_names)
+                    .collect::<Vec<_>>();
+                if let Some(condition) = condition {
+                    calls.extend(collect_call_names(condition));
+                }
+                if let Some(update) = update {
+                    calls.extend(collect_call_names(update));
+                }
+                calls.extend(body.iter().flat_map(collect_statement_call_names));
+                calls
+            }
+            Statement::Label { body, .. } | Statement::Case { body, .. } => {
+                body.iter().flat_map(collect_statement_call_names).collect()
+            }
+            Statement::Expression { expression, .. } => collect_call_names(expression),
+            Statement::Break { .. } | Statement::Continue { .. } | Statement::Goto { .. } => {
+                Vec::new()
+            }
         }
     }
 

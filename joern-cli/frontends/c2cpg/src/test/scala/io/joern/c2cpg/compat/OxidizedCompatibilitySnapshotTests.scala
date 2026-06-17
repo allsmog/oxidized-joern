@@ -446,6 +446,62 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ lambda methods, captures, and invocations" in {
+      val cpg = code(
+        """
+          |int use(int base) {
+          |  auto mapper = [base](int x) { return base + x; };
+          |  return mapper(2);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val lambdaFullName = "use.<lambda>0:int(int)"
+      cpg.method.nameExact("use").local.nameExact("mapper").typeFullName.l shouldBe List(lambdaFullName)
+      cpg.method.nameExact("use").ast.isMethodRef.methodFullNameExact(lambdaFullName).typeFullName.l shouldBe
+        List(lambdaFullName)
+
+      inside(cpg.method.fullNameExact(lambdaFullName).l) { case List(lambdaMethod) =>
+        lambdaMethod.name shouldBe "<lambda>0"
+        lambdaMethod.signature shouldBe "int(int)"
+        lambdaMethod.modifier.modifierType.l.sorted shouldBe
+          List(ModifierTypes.LAMBDA, ModifierTypes.PRIVATE, ModifierTypes.STATIC, ModifierTypes.VIRTUAL).sorted
+        lambdaMethod.parameter.name.l shouldBe List("x")
+        lambdaMethod.parameter.typeFullName.l shouldBe List("int")
+        lambdaMethod.methodReturn.typeFullName shouldBe "int"
+        lambdaMethod.ast.isReturn.code.l shouldBe List("return base + x")
+        lambdaMethod.local.nameExact("base").typeFullName.l shouldBe List("int")
+      }
+
+      inside(cpg.typeDecl.fullNameExact(lambdaFullName).l) { case List(lambdaType) =>
+        lambdaType.name shouldBe "<lambda>0"
+        lambdaType.inheritsFromTypeFullName should contain theSameElementsAs List(Defines.Function)
+        inside(lambdaType.bindsOut.l) { case List(binding) =>
+          binding.name shouldBe Defines.OperatorCall
+          binding.methodFullName shouldBe lambdaFullName
+          binding.signature shouldBe "int(int)"
+        }
+      }
+
+      inside(cpg.closureBinding.l) { case List(binding) =>
+        val capturedBase = cpg.method.fullNameExact(lambdaFullName).local.nameExact("base").head
+        binding.closureBindingId shouldBe capturedBase.closureBindingId
+        binding._refOut.l shouldBe cpg.method.nameExact("use").parameter.nameExact("base").l
+        binding._captureIn.l shouldBe cpg.methodRef.methodFullNameExact(lambdaFullName).l
+      }
+
+      inside(cpg.method.nameExact("use").call.nameExact(Defines.OperatorCall).codeExact("mapper(2)").l) {
+        case List(lambdaCall) =>
+          lambdaCall.methodFullName shouldBe s"${Defines.OperatorCall}:int(int)"
+          lambdaCall.signature shouldBe "int(int)"
+          lambdaCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+          lambdaCall.typeFullName shouldBe "int"
+          lambdaCall.receiver.code.l shouldBe List("mapper")
+          lambdaCall.argument.code.l shouldBe List("2")
+      }
+    }
+
     "capture C++ for initializer destructors" in {
       val cpg = code(
         """
