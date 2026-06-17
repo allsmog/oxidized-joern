@@ -1839,6 +1839,29 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ decltype qualified field access from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |void method() {
+          |  int local = 1;
+          |  constexpr bool is_std_array_v = decltype(local)::value;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.local.nameExact("is_std_array_v").typeFullName.l shouldBe List("bool")
+      inside(cpg.call.codeExact("decltype(local)::value").l) { case List(fieldAccess) =>
+        fieldAccess.methodFullName shouldBe Operators.fieldAccess
+        fieldAccess.argument(2).code shouldBe "value"
+        inside(fieldAccess.argument(1)) { case typeOf: io.shiftleft.codepropertygraph.generated.nodes.Call =>
+          typeOf.code shouldBe "decltype(local)"
+          typeOf.methodFullName shouldBe Defines.OperatorTypeOf
+          typeOf.argument(1).code shouldBe "local"
+        }
+      }
+    }
+
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
       val cpg = code(
         """

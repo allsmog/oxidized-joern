@@ -1123,6 +1123,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         left.toSeq.flatMap(heapConstructorsForExpression) ++ right.toSeq.flatMap(heapConstructorsForExpression)
       case OxPackExpansion(_, _, pattern) =>
         heapConstructorsForExpression(pattern)
+      case OxTypeOf(_, _, argument) =>
+        heapConstructorsForExpression(argument)
       case OxCast(_, _, _, value) =>
         heapConstructorsForExpression(value)
       case OxSizeOf(_, _, value, _) =>
@@ -1238,6 +1240,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         left.toSeq.flatMap(temporaryDestructorsForExpression) ++ right.toSeq.flatMap(temporaryDestructorsForExpression)
       case OxPackExpansion(_, _, pattern) =>
         temporaryDestructorsForExpression(pattern)
+      case OxTypeOf(_, _, argument) =>
+        temporaryDestructorsForExpression(argument)
       case OxCast(_, _, _, value) =>
         temporaryDestructorsForExpression(value)
       case OxSizeOf(_, _, value, _) =>
@@ -1442,6 +1446,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         foldAst(fold)
       case packExpansion: OxPackExpansion =>
         expressionAst(packExpansion.pattern)
+      case typeOf: OxTypeOf =>
+        operatorCallAst(OxOrigin(typeOf), typeOf.code, Defines.OperatorTypeOf, Seq(expressionAst(typeOf.argument)))
       case cast: OxCast =>
         operatorCallAst(
           OxOrigin(cast),
@@ -1757,6 +1763,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           right.foreach(visitExpression)
         case OxPackExpansion(_, _, pattern) =>
           visitExpression(pattern)
+        case OxTypeOf(_, _, argument) =>
+          visitExpression(argument)
         case OxCast(_, _, _, value) =>
           visitExpression(value)
         case OxSizeOf(_, _, value, _) =>
@@ -2113,7 +2121,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case _: OxDesignator                => false
       case _: OxLiteral                   => false
       case OxPackExpansion(_, _, pattern) => expressionTypeFullName(pattern).exists(isFunctionPointerType)
-      case _: OxBinary | _: OxConditional | _: OxFold | _: OxSizeOf | _: OxNew | _: OxDelete => false
+      case _: OxBinary | _: OxConditional | _: OxFold | _: OxTypeOf | _: OxSizeOf | _: OxNew | _: OxDelete => false
     }
   }
 
@@ -2147,6 +2155,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         foldExpressionTypeFullName(fold)
       case OxPackExpansion(_, _, pattern) =>
         expressionTypeFullName(pattern)
+      case OxTypeOf(_, _, _) =>
+        None
       case OxFieldAccess(field, _, _, base) =>
         expressionTypeFullName(base).flatMap(typeName => fieldTypeFullName(typeName, field))
       case OxUnary("*", _, _, _, argument) =>
@@ -2273,6 +2283,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def fieldIdentifierCode(fieldAccess: OxFieldAccess): String = {
     if (fieldAccess.code.contains("->")) fieldAccess.code.split("->").lastOption.getOrElse(fieldAccess.field)
+    else if (fieldAccess.code.contains("::")) fieldAccess.code.split("::").lastOption.getOrElse(fieldAccess.field)
     else fieldAccess.code.split('.').lastOption.getOrElse(fieldAccess.field)
   }
 
@@ -2616,6 +2627,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case _: OxIdentifier | _: OxFieldAccess | _: OxIndexAccess => false
       case OxUnary("*", _, _, _, _)                              => false
       case OxPackExpansion(_, _, pattern)                        => expressionIsRvalue(pattern)
+      case _: OxTypeOf                                           => true
       case call: OxCall =>
         callReturnTypeFullName(call).map(typeNameIsRvalue).getOrElse(true)
       case OxCast(typeName, _, _, _) =>
