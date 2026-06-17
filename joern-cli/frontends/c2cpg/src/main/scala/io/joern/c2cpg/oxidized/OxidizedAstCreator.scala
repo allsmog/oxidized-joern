@@ -1303,7 +1303,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def constructorTemporaryTypeFullName(call: OxCall): Option[String] = {
-    resolveAggregateTypeFullName(call.name)
+    resolveAggregateTypeFullName(call.name).orElse(bracedTypeConstructionTypeFullName(call))
+  }
+
+  private def bracedTypeConstructionTypeFullName(call: OxCall): Option[String] = {
+    val code     = call.code.trim
+    val typeName = stripTemplateArguments(call.name)
+    Option
+      .when(code.startsWith(call.name) && code.drop(call.name.length).trim.startsWith("{") && typeName.nonEmpty) {
+        normalizedQualifiedName(typeName)
+      }
   }
 
   private def constructorTemporaryEntry(call: OxCall): Option[(String, FunctionEntry)] = {
