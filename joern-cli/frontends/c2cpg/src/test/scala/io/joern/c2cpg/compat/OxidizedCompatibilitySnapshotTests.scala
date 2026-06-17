@@ -1676,6 +1676,29 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.identifier.codeExact("42_km").l shouldBe Nil
     }
 
+    "capture C++ offsetof expressions from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Pair {
+          |  int first;
+          |  int second;
+          |};
+          |int offset() {
+          |  return offsetof(Pair, second);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.call.nameExact("offsetof").l) { case List(offsetOf) =>
+        offsetOf.code shouldBe "offsetof(Pair, second)"
+        offsetOf.methodFullName shouldBe "offsetof"
+        offsetOf.argument.code.l shouldBe List("Pair", "second")
+      }
+      cpg.literal.code.l should contain allElementsOf List("Pair", "second")
+      cpg.identifier.codeExact("second").l shouldBe Nil
+    }
+
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
       val cpg = code(
         """
