@@ -1773,9 +1773,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case OxUnary(_, _, _, _, argument) =>
         temporaryDestructorsForExpression(argument)
       case OxConditional(_, _, condition, consequence, alternative) =>
+        val includeBranchCurrent = temporaryTypeFullNameForExpression(expression).isEmpty
         Seq(condition).flatMap(expression => temporaryDestructorsForExpression(expression)) ++
-          consequence.toSeq.flatMap(expression => temporaryDestructorsForExpression(expression)) ++
-          Seq(alternative).flatMap(expression => temporaryDestructorsForExpression(expression))
+          consequence.toSeq.flatMap(expression =>
+            temporaryDestructorsForExpression(expression, includeCurrent = includeBranchCurrent)
+          ) ++
+          Seq(alternative).flatMap(expression =>
+            temporaryDestructorsForExpression(expression, includeCurrent = includeBranchCurrent)
+          )
       case OxFold(_, _, _, left, right) =>
         left.toSeq.flatMap(expression => temporaryDestructorsForExpression(expression)) ++
           right.toSeq.flatMap(expression => temporaryDestructorsForExpression(expression))
@@ -1808,10 +1813,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Seq.empty
     }
     val current = expression match {
-      case call: OxCall if includeCurrent =>
-        temporaryTypeFullNameForCall(call)
+      case expression if includeCurrent =>
+        temporaryTypeFullNameForExpression(expression)
           .flatMap(destructorEntryForType)
-          .map(entry => TemporaryDestructor(s"${call.code}.${entry.simpleName}()", call.line, entry))
+          .map(entry => TemporaryDestructor(temporaryDestructorCode(expression, entry), expression.line, entry))
           .toSeq
       case _ =>
         Seq.empty
@@ -1821,10 +1826,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def isCurrentReturnedObjectTemporary(expression: OxExpression): Boolean = {
     val currentReturnType = currentMethodReturnedObjectTypeFullName
-    val expressionType = expression match {
-      case call: OxCall => temporaryTypeFullNameForCall(call)
-      case _            => None
-    }
+    val expressionType    = temporaryTypeFullNameForExpression(expression)
     currentReturnType.isDefined && currentReturnType == expressionType
   }
 
@@ -1834,14 +1836,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   ): Option[LocalDestructor] = {
     Option
       .when(isCxxReferenceType(localTypeName)) {
-        expression match {
-          case call: OxCall =>
-            temporaryTypeFullNameForCall(call)
-              .flatMap(destructorEntryForType)
-              .map(entry => LocalDestructor(call.code, call.line, entry))
-          case _ =>
-            None
-        }
+        temporaryTypeFullNameForExpression(expression)
+          .flatMap(destructorEntryForType)
+          .map(entry => LocalDestructor(temporaryDestructorReceiverCode(expression), expression.line, entry))
       }
       .flatten
   }
@@ -1857,8 +1854,39 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .flatMap(returnedObjectTypeFullName)
   }
 
+  private def temporaryTypeFullNameForExpression(expression: OxExpression): Option[String] = {
+    expression match {
+      case call: OxCall               => temporaryTypeFullNameForCall(call)
+      case conditional: OxConditional => conditionalTemporaryTypeFullName(conditional)
+      case _                          => None
+    }
+  }
+
   private def temporaryTypeFullNameForCall(call: OxCall): Option[String] = {
     constructorTemporaryTypeFullName(call).orElse(returnedObjectTemporaryTypeFullName(call))
+  }
+
+  private def conditionalTemporaryTypeFullName(conditional: OxConditional): Option[String] = {
+    conditional.consequence.flatMap { consequence =>
+      val branchTypes =
+        Seq(consequence, conditional.alternative).map(temporaryTypeFullNameForExpression)
+      Option
+        .when(branchTypes.forall(_.isDefined)) {
+          branchTypes.flatten.distinct
+        }
+        .collect { case Seq(typeName) => typeName }
+    }
+  }
+
+  private def temporaryDestructorCode(expression: OxExpression, entry: FunctionEntry): String = {
+    s"${temporaryDestructorReceiverCode(expression)}.${entry.simpleName}()"
+  }
+
+  private def temporaryDestructorReceiverCode(expression: OxExpression): String = {
+    expression match {
+      case _: OxConditional => s"(${expression.code})"
+      case _                => expression.code
+    }
   }
 
   private def returnedObjectTemporaryTypeFullName(call: OxCall): Option[String] = {
