@@ -5427,6 +5427,65 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_constrained_function_declarations() {
+        let sample = r#"
+                template <my_concept T>
+                void f1(T v);
+
+                template <typename T>
+                  requires my_concept<T>
+                void f2(T v);
+
+                template <typename T>
+                void f3(T v) requires my_concept<T>;
+
+                void f4(my_concept auto v);
+
+                template <my_concept auto v>
+                void f5();
+
+                template <typename T>
+                  requires my_concept<T>
+                void f6(T);
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("constrained function declarations should parse");
+        let functions = declarations
+            .iter()
+            .filter_map(|declaration| match declaration {
+                Declaration::Function(function) => Some(function),
+                _ => None,
+            })
+            .map(|function| {
+                (
+                    function.name.as_str(),
+                    function.signature.as_str(),
+                    function
+                        .parameters
+                        .iter()
+                        .map(|parameter| (parameter.name.as_str(), parameter.type_name.as_str()))
+                        .collect::<Vec<_>>(),
+                )
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            functions,
+            vec![
+                ("f1", "void(T)", vec![("v", "T")]),
+                ("f2", "void(T)", vec![("v", "T")]),
+                ("f3", "void(T)", vec![("v", "T")]),
+                (
+                    "f4",
+                    "void(my_concept auto)",
+                    vec![("v", "my_concept auto")]
+                ),
+                ("f5", "void()", vec![]),
+                ("f6", "void(T)", vec![("param1", "T")]),
+            ]
+        );
+    }
+
+    #[test]
     fn parses_cpp_mutable_lambdas() {
         let sample = r#"
                 int use(int seed) {

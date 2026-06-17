@@ -1877,6 +1877,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |template <typename T>
           |  requires callable<T>
           |void f(T v);
+          |
+          |void f4(my_concept auto v);
+          |
+          |template <my_concept auto v>
+          |void f5();
           |""".stripMargin,
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
@@ -1884,6 +1889,15 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("callable").l shouldBe Nil
       cpg.method.nameExact("add").signature.l shouldBe List("T(T,T)")
       cpg.method.nameExact("f").external.signature.l shouldBe List("void(T)")
+      inside(cpg.method.nameExact("f4").external.l) { case List(f4Method) =>
+        f4Method.signature shouldBe "void(my_concept auto)"
+        inside(f4Method.parameter.l) { case List(parameter) =>
+          parameter.name shouldBe "v"
+          parameter.code shouldBe "my_concept auto v"
+          parameter.typeFullName shouldBe "my_concept auto"
+        }
+      }
+      cpg.method.nameExact("f5").external.signature.l shouldBe List("void()")
       inside(cpg.method.nameExact("requires").l) { case List(requiresMethod) =>
         requiresMethod.fullName shouldBe "requires:requires(T)"
         requiresMethod.signature shouldBe "requires(T)"
