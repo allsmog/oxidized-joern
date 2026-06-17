@@ -1357,41 +1357,110 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     typeName: String
   ): Seq[Ast] = {
     initializer match {
-      case OxInitializerList(_, _, elements) if aggregateFieldEntriesByType.contains(resolveAliasType(typeName)) =>
-        if (elements.exists(_.isInstanceOf[OxDesignatedInitializer])) {
-          elements.collect { case OxDesignatedInitializer(_, line, OxDesignator(fieldName, _, _), value) =>
-            aggregateFieldAssignmentAst(local, typeName, fieldName, value, line)
-          }
-        } else {
-          elements.zipWithIndex.flatMap { case (value, index) =>
-            aggregateFieldByIndex(typeName, index).map(field =>
-              aggregateFieldAssignmentAst(local, typeName, field.name, value, value.line)
-            )
-          }
-        }
+      case initializerList: OxInitializerList if isAggregateFieldType(typeName) =>
+        aggregateInitializerAssignmentAsts(local, rootTypeName = typeName, typeName, initializerList, Seq.empty)
       case _ => Seq.empty
     }
   }
 
-  private def aggregateFieldAssignmentAst(
+  private def aggregateInitializerAssignmentAsts(
     local: OxLocalDecl,
+    rootTypeName: String,
     typeName: String,
+    initializer: OxInitializerList,
+    fieldPathPrefix: Seq[String]
+  ): Seq[Ast] = {
+    val OxInitializerList(_, _, elements) = initializer
+    if (isAggregateFieldType(typeName)) {
+      val assignments =
+        if (elements.exists(_.isInstanceOf[OxDesignatedInitializer])) {
+          elements.flatMap {
+            case OxDesignatedInitializer(_, line, OxDesignator(fieldName, _, _), value) =>
+              aggregateFieldAssignmentAsts(local, rootTypeName, typeName, fieldPathPrefix, fieldName, value, line)
+            case _ =>
+              Seq.empty
+          }
+        } else {
+          elements.zipWithIndex.flatMap { case (value, index) =>
+            aggregateFieldByIndex(typeName, index).toSeq.flatMap(field =>
+              aggregateFieldAssignmentAsts(
+                local,
+                rootTypeName,
+                typeName,
+                fieldPathPrefix,
+                field.name,
+                value,
+                value.line
+              )
+            )
+          }
+        }
+      assignments
+    } else {
+      Seq.empty
+    }
+  }
+
+  private def aggregateFieldAssignmentAsts(
+    local: OxLocalDecl,
+    rootTypeName: String,
+    typeName: String,
+    fieldPathPrefix: Seq[String],
     fieldName: String,
     value: OxExpression,
     line: Int
+  ): Seq[Ast] = {
+    val fieldPath  = fieldPathPrefix :+ fieldName
+    val assignment = aggregateFieldAssignmentAst(local, rootTypeName, fieldPath, value, line)
+    val nestedAssignments = value match {
+      case initializerList: OxInitializerList =>
+        fieldTypeFullName(typeName, fieldName).toSeq.flatMap { fieldType =>
+          aggregateInitializerAssignmentAsts(local, rootTypeName, fieldType, initializerList, fieldPath)
+        }
+      case _ =>
+        Seq.empty
+    }
+    assignment +: nestedAssignments
+  }
+
+  private def aggregateFieldAssignmentAst(
+    local: OxLocalDecl,
+    rootTypeName: String,
+    fieldPath: Seq[String],
+    value: OxExpression,
+    line: Int
   ): Ast = {
-    val fieldCode = s"${local.name}.$fieldName"
-    val code      = s"$fieldCode = ${value.code}"
-    val fieldType = fieldTypeFullName(typeName, fieldName).getOrElse(Defines.Any)
-    val left = fieldAccessAstForOperator(
-      OxOrigin(fieldCode, Option(line)),
-      OxOrigin(fieldName, Option(line)),
-      identifierAst(local.name, local.name, line),
-      fieldCode,
-      fieldName,
-      registerType(fieldType)
-    )
+    val (left, fieldCode) = aggregateFieldAccessAst(local.name, rootTypeName, fieldPath, line)
+    val code              = s"$fieldCode = ${value.code}"
     assignmentAst(OxOrigin(code, Option(line)), left, expressionAst(value), code)
+  }
+
+  private def aggregateFieldAccessAst(
+    rootName: String,
+    rootTypeName: String,
+    fieldPath: Seq[String],
+    line: Int
+  ): (Ast, String) = {
+    fieldPath.foldLeft((identifierAst(rootName, rootName, line), rootName, rootTypeName)) {
+      case ((baseAst, baseCode, baseTypeName), fieldName) =>
+        val fieldCode = s"$baseCode.$fieldName"
+        val fieldType = fieldTypeFullName(baseTypeName, fieldName).getOrElse(Defines.Any)
+        val accessAst = fieldAccessAstForOperator(
+          OxOrigin(fieldCode, Option(line)),
+          OxOrigin(fieldName, Option(line)),
+          baseAst,
+          fieldCode,
+          fieldName,
+          registerType(fieldType)
+        )
+        (accessAst, fieldCode, fieldType)
+    } match {
+      case (ast, code, _) => ast -> code
+    }
+  }
+
+  private def isAggregateFieldType(typeName: String): Boolean = {
+    aggregateFieldEntriesByType.contains(resolveAliasType(typeName))
   }
 
   private def astsForStructuredBinding(binding: OxStructuredBinding): Seq[Ast] = {
