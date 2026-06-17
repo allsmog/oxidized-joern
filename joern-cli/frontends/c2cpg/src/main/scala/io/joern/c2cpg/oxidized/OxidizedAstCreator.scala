@@ -760,6 +760,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def astsForStatement(statement: OxStatement): Seq[Ast] = {
     statement match {
+      case unknown: OxUnknownStatement =>
+        Seq(Ast(unknownNode(OxOrigin(unknown), unknown.code)))
       case local: OxLocalDecl =>
         astsForLocalDecl(local)
       case structuredBinding: OxStructuredBinding =>
@@ -1767,6 +1769,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           body.foreach(visitStatement)
         case OxExpressionStatement(_, _, expression) =>
           visitExpression(expression)
+        case _: OxUnknownStatement                  =>
         case _: OxBreak | _: OxContinue | _: OxGoto =>
       }
     }
