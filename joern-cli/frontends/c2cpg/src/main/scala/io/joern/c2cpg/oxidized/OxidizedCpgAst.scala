@@ -108,6 +108,8 @@ sealed trait OxStatement {
 
 case class OxUnknownStatement(code: String, line: Int) extends OxStatement
 
+case class OxUsingEnumStatement(typeName: String, code: String, line: Int) extends OxStatement
+
 case class OxLocalDecl(name: String, typeName: String, code: String, line: Int, initializer: Option[OxExpression])
     extends OxStatement
 
@@ -385,6 +387,8 @@ object OxDocument {
     str(value, "kind") match {
       case "unknown" =>
         OxUnknownStatement(code = str(value, "code"), line = int(value, "line"))
+      case "usingEnum" =>
+        OxUsingEnumStatement(typeName = str(value, "typeName"), code = str(value, "code"), line = int(value, "line"))
       case "localDecl" =>
         OxLocalDecl(
           name = str(value, "name"),

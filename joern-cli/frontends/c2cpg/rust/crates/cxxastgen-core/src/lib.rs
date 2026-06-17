@@ -237,6 +237,12 @@ pub enum Statement {
         code: String,
         line: usize,
     },
+    UsingEnum {
+        #[serde(rename = "typeName")]
+        type_name: String,
+        code: String,
+        line: usize,
+    },
     LocalDecl {
         name: String,
         #[serde(rename = "typeName")]
@@ -2146,6 +2152,9 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
     if let Some(statement) = coroutine_unknown_statement(node, source) {
         return vec![statement];
     }
+    if let Some(statement) = using_enum_statement(node, source) {
+        return vec![statement];
+    }
     match node.kind() {
         "compound_statement" => parse_statement_block(node, source, symbols),
         "declaration" => parse_local_declarations(node, source),
@@ -2258,6 +2267,20 @@ fn starts_with_coroutine_keyword(code: &str) -> bool {
     ["co_await", "co_return", "co_yield"]
         .iter()
         .any(|keyword| code == *keyword || code.starts_with(&format!("{keyword} ")))
+}
+
+fn using_enum_statement(node: Node, source: &[u8]) -> Option<Statement> {
+    let code = node_text(node, source).trim();
+    let normalized = code.trim_end_matches(';').trim();
+    normalized
+        .strip_prefix("using enum ")
+        .map(str::trim)
+        .filter(|type_name| !type_name.is_empty())
+        .map(|type_name| Statement::UsingEnum {
+            type_name: normalize_type(type_name),
+            code: statement_code(node, source),
+            line: line(node),
+        })
 }
 
 fn parse_try_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Option<Statement> {
@@ -6975,6 +6998,46 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_using_enum_statements() {
+        let sample = r#"
+                enum class rgba_color_channel { red, green, blue, alpha };
+                int to_int(rgba_color_channel channel) {
+                  switch (channel) {
+                    using enum rgba_color_channel;
+                    case red:
+                      return 1;
+                    default:
+                      return 0;
+                  }
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("using enum sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "to_int" => Some(function),
+                _ => None,
+            })
+            .expect("expected to_int function");
+        let [Statement::Switch { body, .. }] = function.body.as_slice() else {
+            panic!("expected switch statement");
+        };
+        let [Statement::UsingEnum {
+            type_name, code, ..
+        }, Statement::Case {
+            value: Some(Expression::Identifier { name, .. }),
+            ..
+        }, Statement::Case { value: None, .. }] = body.as_slice()
+        else {
+            panic!("expected using enum followed by cases");
+        };
+        assert_eq!(type_name, "rgba_color_channel");
+        assert_eq!(code, "using enum rgba_color_channel");
+        assert_eq!(name, "red");
+    }
+
+    #[test]
     fn parses_cpp_range_based_for_loops() {
         let sample = r#"
                 int sum(int *items) {
@@ -8091,7 +8154,7 @@ mod tests {
 
     fn collect_statement_call_names(statement: &Statement) -> Vec<String> {
         match statement {
-            Statement::Unknown { .. } => Vec::new(),
+            Statement::Unknown { .. } | Statement::UsingEnum { .. } => Vec::new(),
             Statement::LocalDecl { initializer, .. } => initializer
                 .as_ref()
                 .map(collect_call_names)
@@ -8181,6 +8244,7 @@ mod tests {
     fn statement_line(statement: &Statement) -> usize {
         match statement {
             Statement::Unknown { line, .. }
+            | Statement::UsingEnum { line, .. }
             | Statement::LocalDecl { line, .. }
             | Statement::StructuredBinding { line, .. }
             | Statement::Assignment { line, .. }

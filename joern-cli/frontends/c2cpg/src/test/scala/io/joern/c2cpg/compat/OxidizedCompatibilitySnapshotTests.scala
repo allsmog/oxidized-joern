@@ -2054,6 +2054,41 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C++20 using enum switch cases from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |enum class rgba_color_channel { red, green, blue, alpha };
+          |
+          |int to_int(rgba_color_channel my_channel) {
+          |  switch (my_channel) {
+          |    using enum rgba_color_channel;
+          |    case red:   return 1;
+          |    case green: return 2;
+          |    case blue:  return 3;
+          |    case alpha: return 4;
+          |  }
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("to_int").controlStructure.controlStructureTypeExact(ControlStructureTypes.SWITCH).size shouldBe 1
+      cpg.jumpTarget.code.l shouldBe List(
+        "case red:",
+        "case green:",
+        "case blue:",
+        "case alpha:"
+      )
+      cpg.call.nameExact(Operators.fieldAccess).code.l shouldBe List(
+        "rgba_color_channel.red",
+        "rgba_color_channel.green",
+        "rgba_color_channel.blue",
+        "rgba_color_channel.alpha"
+      )
+      cpg.identifier.codeExact("using enum rgba_color_channel").l shouldBe Nil
+      cpg.identifier.codeExact("using enum rgba_color_channel;").l shouldBe Nil
+    }
+
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
       val cpg = code(
         """

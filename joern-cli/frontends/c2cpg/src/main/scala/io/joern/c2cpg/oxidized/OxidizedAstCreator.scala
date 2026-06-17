@@ -762,6 +762,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     statement match {
       case unknown: OxUnknownStatement =>
         Seq(Ast(unknownNode(OxOrigin(unknown), unknown.code)))
+      case _: OxUsingEnumStatement =>
+        Seq.empty
       case local: OxLocalDecl =>
         astsForLocalDecl(local)
       case structuredBinding: OxStructuredBinding =>
@@ -910,7 +912,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
               continuePreservedScopeDepth = None
             )
           ) {
-            switchStmt.body.flatMap(astsForStatement)
+            switchBodyWithUsingEnumCases(switchStmt.body).flatMap(astsForStatement)
           }
           switchAst(switchNode, expressionAst(switchStmt.condition), bodyAsts)
             .withChildren(conditionHeapConstructors ++ conditionTemporaryCleanup)
@@ -933,6 +935,39 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
                 Seq(expression)
               ))
         }
+    }
+  }
+
+  private def switchBodyWithUsingEnumCases(body: Seq[OxStatement]): Seq[OxStatement] = {
+    var activeUsingEnumType: Option[String] = None
+    body.map {
+      case usingEnum: OxUsingEnumStatement =>
+        activeUsingEnumType = Option(usingEnum.typeName)
+        usingEnum
+      case caseStmt: OxCase =>
+        activeUsingEnumType.map(qualifyUsingEnumCase(caseStmt, _)).getOrElse(caseStmt)
+      case statement =>
+        statement
+    }
+  }
+
+  private def qualifyUsingEnumCase(caseStmt: OxCase, typeName: String): OxCase = {
+    caseStmt.value match {
+      case Some(OxIdentifier(name, _, line)) =>
+        val normalizedType = normalizeType(typeName)
+        val code           = s"$normalizedType.$name"
+        caseStmt.copy(value =
+          Some(
+            OxFieldAccess(
+              field = name,
+              code = code,
+              line = line,
+              base = OxIdentifier(normalizedType, normalizedType, line)
+            )
+          )
+        )
+      case _ =>
+        caseStmt
     }
   }
 
@@ -1769,6 +1804,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           body.foreach(visitStatement)
         case OxExpressionStatement(_, _, expression) =>
           visitExpression(expression)
+        case _: OxUsingEnumStatement                =>
         case _: OxUnknownStatement                  =>
         case _: OxBreak | _: OxContinue | _: OxGoto =>
       }
