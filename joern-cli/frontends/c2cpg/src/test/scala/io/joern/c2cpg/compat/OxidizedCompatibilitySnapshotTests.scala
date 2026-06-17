@@ -3844,6 +3844,45 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C++ aggregate assignment initializers in expression positions from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Cell {
+          |  int x;
+          |  int y;
+          |};
+          |struct Board {
+          |  Cell cell;
+          |  int z;
+          |};
+          |void expression_positions(int seed) {
+          |  Board update;
+          |  for (int i = 0; i < 1; update = {{4, seed}, 6}) {
+          |    ++i;
+          |  }
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("expression_positions").local.nameExact("update").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("expression_positions").call.nameExact(Operators.assignment).code.l should contain allElementsOf
+        List(
+          "update = {{4, seed}, 6}",
+          "update.cell = {4, seed}",
+          "update.cell.x = 4",
+          "update.cell.y = seed",
+          "update.z = 6"
+        )
+      cpg.method.nameExact("expression_positions").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
+        List(
+          "update.cell",
+          "update.cell.x",
+          "update.cell.y",
+          "update.z"
+        )
+    }
+
     "capture C aggregate array initializer field assignments from the Rust parser backend" in {
       val cpg = code(
         """
