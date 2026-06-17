@@ -3901,6 +3901,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  board.cells[1] = {3, seed};
           |  boards[0] = {{4, 5}, {{6, 7}, {8, seed}}};
           |}
+          |void pointer_subobject_assignments(Board *ptr, int seed) {
+          |  ptr->cell = {seed, 9};
+          |  ptr->cells[1] = {10, seed};
+          |}
           |""".stripMargin,
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
@@ -3950,6 +3954,29 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "boards[0].cells[0].y",
           "boards[0].cells[1].x",
           "boards[0].cells[1].y"
+        )
+      cpg.method.nameExact("pointer_subobject_assignments").parameter.nameExact("ptr").typeFullName.l shouldBe
+        List("Board*")
+      cpg.method.nameExact("pointer_subobject_assignments").call.nameExact(Operators.assignment).code.l should
+        contain allElementsOf List(
+          "ptr->cell = {seed, 9}",
+          "ptr->cell.x = seed",
+          "ptr->cell.y = 9",
+          "ptr->cells[1] = {10, seed}",
+          "ptr->cells[1].x = 10",
+          "ptr->cells[1].y = seed"
+        )
+      cpg.method.nameExact("pointer_subobject_assignments").call.nameExact(Operators.indirectFieldAccess).code.l should
+        contain allElementsOf List(
+          "ptr->cell",
+          "ptr->cells"
+        )
+      cpg.method.nameExact("pointer_subobject_assignments").call.nameExact(Operators.fieldAccess).code.l should
+        contain allElementsOf List(
+          "ptr->cell.x",
+          "ptr->cell.y",
+          "ptr->cells[1].x",
+          "ptr->cells[1].y"
         )
     }
 

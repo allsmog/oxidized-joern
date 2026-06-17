@@ -95,7 +95,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private final case class AggregateAnonymousMemberItem(typeName: String, declaration: OxStructDecl)
       extends AggregateMemberItem
   private sealed trait AggregatePathSegment
-  private final case class AggregateFieldPathSegment(name: String) extends AggregatePathSegment
+  private final case class AggregateFieldPathSegment(name: String, isIndirect: Boolean = false)
+      extends AggregatePathSegment
   private final case class AggregateIndexPathSegment(indexCode: String, indexExpression: Option[OxExpression] = None)
       extends AggregatePathSegment
   private final case class AggregateAssignmentRoot(name: String, line: Int, scopeEntry: Option[ScopeEntry])
@@ -1734,7 +1735,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def fieldPathTypeFullName(baseTypeFullName: String, fieldPath: Seq[AggregatePathSegment]): Option[String] = {
     fieldPath.foldLeft(Option(resolveAliasType(baseTypeFullName))) {
-      case (baseType, AggregateFieldPathSegment(field)) =>
+      case (baseType, AggregateFieldPathSegment(field, _)) =>
         baseType.flatMap(fieldTypeFullName(_, field))
       case (baseType, AggregateIndexPathSegment(_, _)) =>
         baseType.flatMap(arrayElementTypeFullName)
@@ -1763,8 +1764,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .map(identifierAstForScopeEntry(root.name, root.name, line, _))
       .getOrElse(identifierAst(root.name, root.name, line))
     fieldPath.foldLeft((rootAst, root.name, rootTypeName)) {
-      case ((baseAst, baseCode, baseTypeName), AggregateFieldPathSegment(fieldName)) =>
-        val fieldCode     = s"$baseCode.$fieldName"
+      case ((baseAst, baseCode, baseTypeName), AggregateFieldPathSegment(fieldName, isIndirect)) =>
+        val operator      = if (isIndirect) "->" else "."
+        val fieldCode     = s"$baseCode$operator$fieldName"
         val fieldTypeName = fieldTypeFullName(baseTypeName, fieldName).getOrElse(Defines.Any)
         val accessAst = fieldAccessAstForOperator(
           OxOrigin(fieldCode, Option(line)),
@@ -1772,7 +1774,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           baseAst,
           fieldCode,
           fieldName,
-          registerType(fieldTypeName)
+          registerType(fieldTypeName),
+          Option(isIndirect)
         )
         (accessAst, fieldCode, fieldTypeName)
       case ((baseAst, baseCode, baseTypeName), AggregateIndexPathSegment(indexCode, indexExpression)) =>
@@ -2926,18 +2929,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             Seq.empty
           )
         }
-      case OxFieldAccess(field, _, _, base) =>
+      case fieldAccess @ OxFieldAccess(field, _, _, base) =>
         aggregateAssignmentTarget(base).flatMap { baseTarget =>
-          Option
-            .unless(normalizeType(resolveAliasType(baseTarget.targetTypeName)).endsWith("*")) {
-              fieldTypeFullName(baseTarget.targetTypeName, field).map { fieldType =>
-                baseTarget.copy(
-                  targetTypeName = fieldType,
-                  fieldPathPrefix = baseTarget.fieldPathPrefix :+ AggregateFieldPathSegment(field)
-                )
-              }
-            }
-            .flatten
+          fieldTypeFullName(baseTarget.targetTypeName, field).map { fieldType =>
+            baseTarget.copy(
+              targetTypeName = fieldType,
+              fieldPathPrefix =
+                baseTarget.fieldPathPrefix :+ AggregateFieldPathSegment(field, fieldAccessUsesIndirect(fieldAccess))
+            )
+          }
         }
       case OxIndexAccess(_, _, base, index) =>
         aggregateAssignmentTarget(base).flatMap { baseTarget =>
@@ -2955,6 +2955,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def aggregateRootScopeEntry(name: String): Option[ScopeEntry] = {
     scope.get(name).orElse(globalScopeByName.get(name))
+  }
+
+  private def fieldAccessUsesIndirect(fieldAccess: OxFieldAccess): Boolean = {
+    val code     = fieldAccess.code.trim
+    val baseCode = fieldAccess.base.code.trim
+    if (baseCode.nonEmpty && code.startsWith(baseCode)) {
+      code.drop(baseCode.length).trim.startsWith("->")
+    } else {
+      code.contains("->") && !code.split("->").lastOption.exists(_.contains("."))
+    }
   }
 
   private def aggregateAssignmentExpressionAsts(expression: OxExpression): Seq[Ast] = {
@@ -4008,9 +4018,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     base: Ast,
     code: String,
     fieldName: String,
-    fieldTypeFullName: String
+    fieldTypeFullName: String,
+    isIndirect: Option[Boolean] = None
   ): Ast = {
-    val operatorName = if (code.contains("->")) Operators.indirectFieldAccess else Operators.fieldAccess
+    val operatorName =
+      if (isIndirect.getOrElse(code.contains("->"))) Operators.indirectFieldAccess else Operators.fieldAccess
     val call =
       callNode(origin, code, operatorName, operatorName, DispatchTypes.STATIC_DISPATCH, None, Option(fieldTypeFullName))
     callAst(call, Seq(base, Ast(fieldIdentifierNode(fieldIdentifierOrigin, fieldName, fieldName))))
