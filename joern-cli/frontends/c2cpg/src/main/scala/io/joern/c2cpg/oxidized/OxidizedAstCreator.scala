@@ -177,6 +177,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private var functionCaptureContext: Option[FunctionCaptureContext]    = None
   private var currentMethodOwnerTypeFullName: Option[String]            = None
   private var currentMethodFullName: Option[String]                     = None
+  private var currentMethodReturnTypeFullName: Option[String]           = None
   private var typeAliases: Map[String, String]                          = Map.empty
   private var localDestructorScopes: List[Vector[LocalDestructor]]      = Nil
   private var jumpCleanupTargets: List[JumpCleanupTarget]               = Nil
@@ -882,6 +883,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousCaptureContext   = functionCaptureContext
     val previousMethodOwner      = currentMethodOwnerTypeFullName
     val previousMethodFullName   = currentMethodFullName
+    val previousMethodReturnType = currentMethodReturnTypeFullName
     val previousDestructorScopes = localDestructorScopes
     val previousJumpTargets      = jumpCleanupTargets
     val captureContext =
@@ -890,6 +892,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     functionCaptureContext = Option(captureContext)
     currentMethodOwnerTypeFullName = parentTypeOwner
     currentMethodFullName = Option(fullName)
+    currentMethodReturnTypeFullName = Option(returnType)
     localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
     jumpCleanupTargets = Nil
     val bodyAsts =
@@ -903,6 +906,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       } finally {
         localDestructorScopes = previousDestructorScopes
         jumpCleanupTargets = previousJumpTargets
+        currentMethodReturnTypeFullName = previousMethodReturnType
         currentMethodFullName = previousMethodFullName
         currentMethodOwnerTypeFullName = previousMethodOwner
         functionCaptureContext = previousCaptureContext
@@ -1036,8 +1040,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           (heapConstructorAstsForExpressions(Seq(assignment.left, assignment.right)) ++
             temporaryDestructorAstsForExpressions(Seq(assignment.left, assignment.right)))
       case ret: OxReturn =>
-        heapConstructorAstsForExpressions(ret.expression.toSeq) ++ temporaryDestructorAstsForExpressions(
-          ret.expression.toSeq
+        heapConstructorAstsForExpressions(ret.expression.toSeq) ++ temporaryDestructorAstsForReturnExpression(
+          ret.expression
         ) ++ activeLocalDestructors.map(localDestructorAst) :+
           returnAst(returnNode(OxOrigin(ret), ret.code), ret.expression.toSeq.map(expressionAst))
       case throwStmt: OxThrow =>
@@ -1091,18 +1095,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         }
       case whileStmt: OxWhile =>
         def whileAsts(preservedScopeDepth: Int): Seq[Ast] = {
-          val initializerAsts = whileStmt.initializer.flatMap(astsForStatement)
+          val initializerAsts          = whileStmt.initializer.flatMap(astsForStatement)
           val conditionDestructorStart = currentLocalDestructors.length
-          val conditionAst = conditionExpressionAstWithInitializers(
-            whileStmt.conditionInitializer,
-            whileStmt.condition
-          )
+          val conditionAst = conditionExpressionAstWithInitializers(whileStmt.conditionInitializer, whileStmt.condition)
           val conditionDestructors = currentLocalDestructors.drop(conditionDestructorStart)
           val conditionHeapConstructors =
             if (whileStmt.conditionInitializer.isEmpty) heapConstructorAstsForExpressions(Seq(whileStmt.condition))
             else Seq.empty
           val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(whileStmt.condition))
-          val hasScopedInitializer = whileStmt.initializer.nonEmpty || whileStmt.conditionInitializer.nonEmpty
+          val hasScopedInitializer      = whileStmt.initializer.nonEmpty || whileStmt.conditionInitializer.nonEmpty
           val breakPreservedScopeDepth =
             if (hasScopedInitializer) localDestructorScopes.length else preservedScopeDepth
           val continuePreservedScopeDepth =
@@ -1197,7 +1198,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case switchStmt: OxSwitch =>
         val (switchAsts, switchDestructors) = inNestedScopeCollectingDestructors {
           val initializerAsts = switchStmt.initializer.flatMap(astsForStatement)
-          val switchNode      = controlStructureNode(OxOrigin(switchStmt), ControlStructureTypes.SWITCH, switchStmt.code)
+          val switchNode = controlStructureNode(OxOrigin(switchStmt), ControlStructureTypes.SWITCH, switchStmt.code)
           val conditionAst =
             conditionExpressionAstWithInitializers(
               switchStmt.conditionInitializer,
@@ -1488,7 +1489,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def hasImplicitDefaultConstructor(typeName: String): Boolean = {
     val resolvedType = resolveAliasType(typeName)
     aggregateDeclarationsByType.get(resolvedType).exists { structDecl =>
-      FileDefaults.hasCppFileExtension(declarationFilename(structDecl)) && constructorEntriesForType(resolvedType).isEmpty
+      FileDefaults.hasCppFileExtension(declarationFilename(structDecl)) && constructorEntriesForType(
+        resolvedType
+      ).isEmpty
     }
   }
 
@@ -1513,7 +1516,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val constructor     = constructorEntry(typeName, arguments)
     val implicitSignature =
       Option.when(arguments.isEmpty && hasImplicitDefaultConstructor(typeName))("void()")
-    val signature      = constructor.map(_.function.signature).orElse(implicitSignature)
+    val signature = constructor.map(_.function.signature).orElse(implicitSignature)
     val methodFullName = constructor
       .map(_.fullName)
       .orElse(signature.map(sig => s"$typeName.$constructorName:$sig"))
@@ -1547,12 +1550,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     constructorCallNode: NewCall,
     arguments: Seq[Ast]
   ): Ast = {
-    val block          = blockNode(origin, constructorCallNode.code, Defines.Any)
-    val tmpName        = nextTemporaryName()
-    val tmpLocal       = localNode(origin.copy(code = tmpName), tmpName, tmpName, registerType(typeName))
-    val tmpIdentifier  = identifierNode(origin.copy(code = tmpName), tmpName, tmpName, registerType(typeName))
-    val tmpAst         = Ast(tmpIdentifier).withRefEdge(tmpIdentifier, tmpLocal)
-    val allocCallNode  = callNode(
+    val block         = blockNode(origin, constructorCallNode.code, Defines.Any)
+    val tmpName       = nextTemporaryName()
+    val tmpLocal      = localNode(origin.copy(code = tmpName), tmpName, tmpName, registerType(typeName))
+    val tmpIdentifier = identifierNode(origin.copy(code = tmpName), tmpName, tmpName, registerType(typeName))
+    val tmpAst        = Ast(tmpIdentifier).withRefEdge(tmpIdentifier, tmpLocal)
+    val allocCallNode = callNode(
       origin.copy(code = Operators.alloc),
       Operators.alloc,
       Operators.alloc,
@@ -1723,21 +1726,37 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def temporaryDestructorAstsForExpressions(expressions: Seq[OxExpression]): Seq[Ast] = {
-    expressions.flatMap(temporaryDestructorsForExpression).reverse.map(temporaryDestructorAst)
+    expressions
+      .flatMap(expression => temporaryDestructorsForExpression(expression))
+      .reverse
+      .map(temporaryDestructorAst)
   }
 
-  private def temporaryDestructorsForExpression(expression: OxExpression): Seq[TemporaryDestructor] = {
+  private def temporaryDestructorAstsForReturnExpression(expression: Option[OxExpression]): Seq[Ast] = {
+    expression.toSeq
+      .flatMap(expression =>
+        temporaryDestructorsForExpression(expression, includeCurrent = !isCurrentReturnedObjectTemporary(expression))
+      )
+      .reverse
+      .map(temporaryDestructorAst)
+  }
+
+  private def temporaryDestructorsForExpression(
+    expression: OxExpression,
+    includeCurrent: Boolean = true
+  ): Seq[TemporaryDestructor] = {
     val nested = expression match {
       case OxBinary(_, _, _, left, right) =>
-        Seq(left, right).flatMap(temporaryDestructorsForExpression)
+        Seq(left, right).flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxUnary(_, _, _, _, argument) =>
         temporaryDestructorsForExpression(argument)
       case OxConditional(_, _, condition, consequence, alternative) =>
-        Seq(condition).flatMap(temporaryDestructorsForExpression) ++
-          consequence.toSeq.flatMap(temporaryDestructorsForExpression) ++
-          Seq(alternative).flatMap(temporaryDestructorsForExpression)
+        Seq(condition).flatMap(expression => temporaryDestructorsForExpression(expression)) ++
+          consequence.toSeq.flatMap(expression => temporaryDestructorsForExpression(expression)) ++
+          Seq(alternative).flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxFold(_, _, _, left, right) =>
-        left.toSeq.flatMap(temporaryDestructorsForExpression) ++ right.toSeq.flatMap(temporaryDestructorsForExpression)
+        left.toSeq.flatMap(expression => temporaryDestructorsForExpression(expression)) ++
+          right.toSeq.flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxPackExpansion(_, _, pattern) =>
         temporaryDestructorsForExpression(pattern)
       case OxTypeOf(_, _, argument) =>
@@ -1745,28 +1764,29 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case OxCast(_, _, _, value) =>
         temporaryDestructorsForExpression(value)
       case OxSizeOf(_, _, value, _) =>
-        value.toSeq.flatMap(temporaryDestructorsForExpression)
+        value.toSeq.flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxNew(_, _, _, arguments, _) =>
-        arguments.flatMap(temporaryDestructorsForExpression)
+        arguments.flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxDelete(_, _, argument) =>
         temporaryDestructorsForExpression(argument)
       case _: OxLambda =>
         Seq.empty
       case OxCall(_, _, _, callee, arguments) =>
-        temporaryDestructorsForExpression(callee) ++ arguments.flatMap(temporaryDestructorsForExpression)
+        temporaryDestructorsForExpression(callee) ++
+          arguments.flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxFieldAccess(_, _, _, base) =>
         temporaryDestructorsForExpression(base)
       case OxIndexAccess(_, _, base, index) =>
-        Seq(base, index).flatMap(temporaryDestructorsForExpression)
+        Seq(base, index).flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxInitializerList(_, _, elements) =>
-        elements.flatMap(temporaryDestructorsForExpression)
+        elements.flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxDesignatedInitializer(_, _, designator, value) =>
-        Seq(designator, value).flatMap(temporaryDestructorsForExpression)
+        Seq(designator, value).flatMap(expression => temporaryDestructorsForExpression(expression))
       case _: OxIdentifier | _: OxLiteral | _: OxDesignator =>
         Seq.empty
     }
     val current = expression match {
-      case call: OxCall =>
+      case call: OxCall if includeCurrent =>
         temporaryTypeFullNameForCall(call)
           .flatMap(destructorEntryForType)
           .map(entry => TemporaryDestructor(s"${call.code}.${entry.simpleName}()", call.line, entry))
@@ -1777,6 +1797,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     nested ++ current
   }
 
+  private def isCurrentReturnedObjectTemporary(expression: OxExpression): Boolean = {
+    val currentReturnType = currentMethodReturnedObjectTypeFullName
+    val expressionType = expression match {
+      case call: OxCall => temporaryTypeFullNameForCall(call)
+      case _            => None
+    }
+    currentReturnType.isDefined && currentReturnType == expressionType
+  }
+
+  private def currentMethodReturnedObjectTypeFullName: Option[String] = {
+    currentMethodReturnTypeFullName
+      .map(typeName => normalizeType(resolveAliasType(typeName)))
+      .flatMap(returnedObjectTypeFullName)
+  }
+
   private def temporaryTypeFullNameForCall(call: OxCall): Option[String] = {
     constructorTemporaryTypeFullName(call).orElse(returnedObjectTemporaryTypeFullName(call))
   }
@@ -1784,6 +1819,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def returnedObjectTemporaryTypeFullName(call: OxCall): Option[String] = {
     callReturnTypeFullName(call)
       .map(typeName => normalizeType(resolveAliasType(typeName)))
+      .flatMap(returnedObjectTypeFullName)
+  }
+
+  private def returnedObjectTypeFullName(typeName: String): Option[String] = {
+    Option(typeName)
       .filterNot(typeName =>
         typeName == Defines.Void ||
           typeName.endsWith("*") ||
@@ -1952,12 +1992,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     if (initializers.isEmpty) {
       conditionAstForExpression
     } else {
-      val initializerAsts = initializers.flatMap(astsForStatement)
+      val initializerAsts     = initializers.flatMap(astsForStatement)
       val heapConstructorAsts = heapConstructorAstsForExpressions(Seq(expression))
-      val conditionAst = conditionAstForExpression
-      val conditionCode = conditionAst.root.collect { case expressionNode: ExpressionNew =>
-        expressionNode.code
-      }.getOrElse(expression.code)
+      val conditionAst        = conditionAstForExpression
+      val conditionCode = conditionAst.root
+        .collect { case expressionNode: ExpressionNew =>
+          expressionNode.code
+        }
+        .getOrElse(expression.code)
       blockAst(
         blockNode(OxOrigin(conditionCode, Option(expression.line)), conditionCode, Defines.Any),
         (initializerAsts ++ heapConstructorAsts :+ conditionAst).toList
@@ -1986,13 +2028,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             case Some(identifier: NewIdentifier) if identifier.typeFullName.endsWith("*") => "NULL" -> Defines.Any
             case _                                                                        => "0"    -> "int"
           }
-          val literalAst_ = Ast(
-            literalNode(
-              OxOrigin(literalCode, Option(expression.line)),
-              literalCode,
-              registerType(literalType)
-            )
-          )
+          val literalAst_ =
+            Ast(literalNode(OxOrigin(literalCode, Option(expression.line)), literalCode, registerType(literalType)))
           val comparisonCode = s"${expression.code} != $literalCode"
           val call =
             callNode(
@@ -2018,12 +2055,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Ast(literalNode(OxOrigin(literal), literal.code, literalType(literal.value)))
       case binary: OxBinary =>
         overloadedBinaryOperatorAst(binary).getOrElse(
-          operatorCallAst(
-            OxOrigin(binary),
-            binary.code,
-            operatorFor(binary.operator),
-            binaryOperandAsts(binary)
-          )
+          operatorCallAst(OxOrigin(binary), binary.code, operatorFor(binary.operator), binaryOperandAsts(binary))
         )
       case unary: OxUnary =>
         operatorCallAst(
@@ -2455,6 +2487,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousCaptureContext   = functionCaptureContext
     val previousMethodOwner      = currentMethodOwnerTypeFullName
     val previousMethodFullName   = currentMethodFullName
+    val previousMethodReturnType = currentMethodReturnTypeFullName
     val previousDestructorScopes = localDestructorScopes
     val previousJumpTargets      = jumpCleanupTargets
     scope = (captures.map(capture => capture.name -> capture.scopeEntry) ++
@@ -2462,6 +2495,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     functionCaptureContext = None
     currentMethodOwnerTypeFullName = None
     currentMethodFullName = Option(info.fullName)
+    currentMethodReturnTypeFullName = Option(info.returnType)
     localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
     jumpCleanupTargets = Nil
     val bodyAsts =
@@ -2470,6 +2504,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       } finally {
         localDestructorScopes = previousDestructorScopes
         jumpCleanupTargets = previousJumpTargets
+        currentMethodReturnTypeFullName = previousMethodReturnType
         currentMethodFullName = previousMethodFullName
         currentMethodOwnerTypeFullName = previousMethodOwner
         functionCaptureContext = previousCaptureContext
@@ -2858,9 +2893,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def initializerListElementTypeFullName(initializerList: OxInitializerList): Option[String] = {
     val elementTypes = initializerList.elements.map(expressionTypeFullName)
-    Option.when(elementTypes.nonEmpty && elementTypes.forall(_.isDefined)) {
-      elementTypes.flatten.map(normalizeType).distinct
-    }.collect { case Seq(typeName) => typeName }
+    Option
+      .when(elementTypes.nonEmpty && elementTypes.forall(_.isDefined)) {
+        elementTypes.flatten.map(normalizeType).distinct
+      }
+      .collect { case Seq(typeName) => typeName }
   }
 
   private def dereferencedTypeFullName(typeFullName: String): String = {
@@ -3486,11 +3523,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def literalType(value: String): String = {
     value.trim match {
-      case "true" | "false" | "TRUE" | "FALSE"  => registerType("bool")
-      case "nullptr"                            => registerType("std.nullptr_t")
-      case literal if isIntegerLiteral(literal) => registerType("int")
+      case "true" | "false" | "TRUE" | "FALSE"   => registerType("bool")
+      case "nullptr"                             => registerType("std.nullptr_t")
+      case literal if isIntegerLiteral(literal)  => registerType("int")
       case literal if isFloatingLiteral(literal) => registerType(floatingLiteralTypeFullName(literal))
-      case literal if isCharLiteral(literal)    => registerType("char")
+      case literal if isCharLiteral(literal)     => registerType("char")
       case literal =>
         stringLiteralElementCount(literal)
           .map(count => registerType(s"char[$count]"))
