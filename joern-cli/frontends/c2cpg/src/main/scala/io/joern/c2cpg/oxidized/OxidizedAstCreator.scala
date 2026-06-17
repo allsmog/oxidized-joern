@@ -958,11 +958,38 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val left           = identifierAst(local.name, local.name, local.line)
         val assignment =
           assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
-        Seq(localAst, assignment) ++ heapConstructorAstsForExpressions(Seq(initializer)) ++ temporaryDestructorAsts
+        val fieldAssignments = designatedInitializerAssignmentAsts(local, initializer, typeName)
+        Seq(localAst, assignment) ++ fieldAssignments ++ heapConstructorAstsForExpressions(Seq(initializer)) ++
+          temporaryDestructorAsts
       case None if useConstructorInitializers && isDefaultConstructorInitializer(typeName) =>
         Seq(localAst, constructorAssignmentAst(local, Seq.empty, "", origin, typeName))
       case None =>
         Seq(localAst)
+    }
+  }
+
+  private def designatedInitializerAssignmentAsts(
+    local: OxLocalDecl,
+    initializer: OxExpression,
+    typeName: String
+  ): Seq[Ast] = {
+    initializer match {
+      case OxInitializerList(_, _, elements) if aggregateFieldEntriesByType.contains(resolveAliasType(typeName)) =>
+        elements.collect { case OxDesignatedInitializer(_, line, OxDesignator(fieldName, _, _), value) =>
+          val fieldCode = s"${local.name}.$fieldName"
+          val code      = s"$fieldCode = ${value.code}"
+          val fieldType = fieldTypeFullName(typeName, fieldName).getOrElse(Defines.Any)
+          val left = fieldAccessAstForOperator(
+            OxOrigin(fieldCode, Option(line)),
+            OxOrigin(fieldName, Option(line)),
+            identifierAst(local.name, local.name, line),
+            fieldCode,
+            fieldName,
+            registerType(fieldType)
+          )
+          assignmentAst(OxOrigin(code, Option(line)), left, expressionAst(value), code)
+        }
+      case _ => Seq.empty
     }
   }
 
