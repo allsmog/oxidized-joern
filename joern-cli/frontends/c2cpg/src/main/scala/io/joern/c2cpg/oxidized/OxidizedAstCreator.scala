@@ -1767,7 +1767,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
     val current = expression match {
       case call: OxCall =>
-        constructorTemporaryTypeFullName(call)
+        temporaryTypeFullNameForCall(call)
           .flatMap(destructorEntryForType)
           .map(entry => TemporaryDestructor(s"${call.code}.${entry.simpleName}()", call.line, entry))
           .toSeq
@@ -1775,6 +1775,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Seq.empty
     }
     nested ++ current
+  }
+
+  private def temporaryTypeFullNameForCall(call: OxCall): Option[String] = {
+    constructorTemporaryTypeFullName(call).orElse(returnedObjectTemporaryTypeFullName(call))
+  }
+
+  private def returnedObjectTemporaryTypeFullName(call: OxCall): Option[String] = {
+    callReturnTypeFullName(call)
+      .map(typeName => normalizeType(resolveAliasType(typeName)))
+      .filterNot(typeName =>
+        typeName == Defines.Void ||
+          typeName.endsWith("*") ||
+          typeName.endsWith("[]") ||
+          typeName.endsWith("&") ||
+          typeName.endsWith("&&")
+      )
+      .flatMap(typeName => resolveAggregateTypeFullName(receiverAggregateTypeName(typeName)))
   }
 
   private def temporaryDestructorAst(destructor: TemporaryDestructor): Ast = {
