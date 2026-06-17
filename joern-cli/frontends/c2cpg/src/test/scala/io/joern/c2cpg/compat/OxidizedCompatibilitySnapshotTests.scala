@@ -1309,6 +1309,47 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("left + right")
     }
 
+    "model C++ overloaded index aggregate temporary lifetimes" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |class Store {
+          |public:
+          |  Widget operator[](int index) const { return Widget(); }
+          |};
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Widget indexReturn(Core::Store& store) {
+          |  return store[0];
+          |}
+          |int indexRef(Core::Store& store) {
+          |  const Core::Widget& held = store[1];
+          |  return 0;
+          |}
+          |int indexUse(Core::Store& store) {
+          |  Core::consume(store[2]);
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("indexReturn").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("indexRef").call.nameExact("~Widget").code.l shouldBe List("store[1].~Widget()")
+      cpg.method.nameExact("indexUse").call.nameExact("~Widget").code.l shouldBe List("store[2].~Widget()")
+      cpg.method.nameExact("indexReturn").ast.isReturn.astChildren.isCall.nameExact("operator[]").code.l shouldBe
+        List("store[0]")
+    }
+
     "preserve returned C++ object temporaries from destructor cleanup" in {
       val cpg = code(
         """
