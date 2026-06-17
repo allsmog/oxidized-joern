@@ -1045,7 +1045,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val orderedFieldInitializers = fields.flatMap { field =>
       initializersByField
         .get(field.name)
-        .map(_.flatMap(constructorInitializerAsts))
+        .map(_.flatMap(initializer => constructorInitializerAsts(initializer, Option(field.typeName))))
         .getOrElse(defaultMemberInitializerAsts(ownerTypeFullName, field))
     }
     val consumedBaseInitializers = baseInitializers.toSet
@@ -1054,13 +1054,28 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         initializer
       )
     }
-    baseInitializers.flatMap(constructorInitializerAsts) ++
+    baseInitializers.flatMap(initializer =>
+      constructorInitializerAsts(initializer, constructorInitializerTargetTypeName(ownerTypeFullName, initializer))
+    ) ++
       orderedFieldInitializers ++
-      extraInitializers.flatMap(constructorInitializerAsts)
+      extraInitializers.flatMap(initializer =>
+        constructorInitializerAsts(initializer, constructorInitializerTargetTypeName(ownerTypeFullName, initializer))
+      )
   }
 
   private def constructorInitializerAsts(initializer: OxConstructorInitializer): Seq[Ast] = {
-    initializer.arguments.flatMap(aggregateAssignmentExpressionAsts) :+ constructorInitializerAst(initializer)
+    constructorInitializerAsts(initializer, None)
+  }
+
+  private def constructorInitializerAsts(
+    initializer: OxConstructorInitializer,
+    initializedTypeName: Option[String]
+  ): Seq[Ast] = {
+    val constructorEntry =
+      initializedTypeName.flatMap(typeName => constructorEntryForInitializedType(typeName, initializer.arguments))
+    initializer.arguments.flatMap(aggregateAssignmentExpressionAsts) ++
+      Seq(constructorInitializerAst(initializer)) ++
+      temporaryDestructorAstsForConstructorArguments(initializer.arguments, constructorEntry)
   }
 
   private def constructorInitializerAst(initializer: OxConstructorInitializer): Ast = {
@@ -1107,9 +1122,39 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           case _ =>
             Seq.empty
         }
-        aggregateAssignmentExpressionAsts(initializer) ++ Seq(assignment) ++ fieldAssignments
+        val temporaryCleanup =
+          temporaryDestructorAstsForLocalInitializer(
+            Option(initializer),
+            Option(fieldTypeName),
+            extendCurrentTemporaryLifetime = false
+          )
+        aggregateAssignmentExpressionAsts(initializer) ++ Seq(assignment) ++ fieldAssignments ++ temporaryCleanup
       }
     }
+  }
+
+  private def constructorInitializerTargetTypeName(
+    ownerTypeFullName: String,
+    initializer: OxConstructorInitializer
+  ): Option[String] = {
+    val name = constructorInitializerFieldName(initializer)
+    fieldEntryForTypeHierarchy(ownerTypeFullName, name)
+      .map { case (_, field) => field.typeName }
+      .orElse(
+        aggregateBaseTypesByType
+          .getOrElse(resolveAliasType(ownerTypeFullName), Seq.empty)
+          .find(baseType => baseType.split('.').lastOption.contains(name) || baseType == name)
+      )
+  }
+
+  private def constructorEntryForInitializedType(
+    typeName: String,
+    arguments: Seq[OxExpression]
+  ): Option[FunctionEntry] = {
+    val normalizedType = normalizeType(resolveAliasType(typeName))
+    val aggregateType =
+      resolveAggregateTypeFullName(receiverAggregateTypeName(normalizedType)).getOrElse(normalizedType)
+    constructorEntry(aggregateType, arguments)
   }
 
   private def constructorInitializerFieldName(initializer: OxConstructorInitializer): String = {
