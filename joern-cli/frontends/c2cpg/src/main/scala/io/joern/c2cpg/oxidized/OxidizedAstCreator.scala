@@ -870,7 +870,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             initializer,
             scopeEntry.typeFullName
           )
-        Seq(localAst, assignment) ++ initializerAggregateAssignments ++ fieldAssignments
+        Seq(localAst) ++ initializerAggregateAssignments ++ Seq(assignment) ++ fieldAssignments
       case None =>
         Seq(localAst)
     }
@@ -1386,7 +1386,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case Some(initializer: OxInitializerList)
           if useConstructorInitializers && isConstructorInitializer(typeName, initializer) =>
         val resolution = constructorInitializerResolution(typeName, initializer)
-        Seq(localAst, constructorAssignmentAst(local, initializer, typeName, resolution)) ++
+        Seq(localAst) ++ resolution.arguments.flatMap(aggregateAssignmentExpressionAsts) ++ Seq(
+          constructorAssignmentAst(local, initializer, typeName, resolution)
+        ) ++
           temporaryDestructorAstsForConstructorArguments(resolution.arguments, resolution.entry)
       case Some(initializer) if useConstructorInitializers && isCopyConstructorInitializer(typeName, initializer) =>
         val arguments   = Seq(initializer)
@@ -1406,10 +1408,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           )
         val initializerAggregateAssignments = aggregateAssignmentExpressionAsts(initializer)
         val fieldAssignments                = aggregateInitializerAssignmentAsts(local, initializer, typeName)
-        Seq(
-          localAst,
+        Seq(localAst) ++ initializerAggregateAssignments ++ Seq(
           assignment
-        ) ++ initializerAggregateAssignments ++ fieldAssignments ++ heapConstructorAstsForExpressions(
+        ) ++ fieldAssignments ++ heapConstructorAstsForExpressions(
           Seq(initializer)
         ) ++ localInitializerTemporaryDestructorAsts
       case None if useConstructorInitializers && isDefaultConstructorInitializer(typeName) =>

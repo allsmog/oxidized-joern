@@ -4049,6 +4049,54 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "target.cell.y",
         "target.z"
       )
+      val localAssignmentCodes =
+        cpg.method.nameExact("local_initializer_assignment").call.nameExact(Operators.assignment).code.l
+      localAssignmentCodes.indexOf("target.cell.x = seed") should be < localAssignmentCodes.indexOf(
+        "copy = Board.Board(target = {{seed, 4}, 5})"
+      )
+    }
+
+    "capture C++ aggregate assignment initializers inside constructor initializer arguments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Cell {
+          |  int x;
+          |  int y;
+          |};
+          |struct Board {
+          |  Cell cell;
+          |  int z;
+          |};
+          |struct Holder {
+          |  Holder(Board input) {}
+          |};
+          |void constructor_initializer_assignment(int seed) {
+          |  Board target;
+          |  Holder braced{target = {{4, seed}, 5}};
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("constructor_initializer_assignment").local.nameExact("target").typeFullName.l shouldBe
+        List("Board")
+      cpg.method.nameExact("constructor_initializer_assignment").local.nameExact("braced").typeFullName.l shouldBe
+        List("Holder")
+      cpg.method.nameExact("constructor_initializer_assignment").call.nameExact(Operators.assignment).code.l should
+        contain allElementsOf List(
+          "target = {{4, seed}, 5}",
+          "target.cell = {4, seed}",
+          "target.cell.x = 4",
+          "target.cell.y = seed",
+          "target.z = 5"
+        )
+      cpg.method.nameExact("constructor_initializer_assignment").call.nameExact(Operators.fieldAccess).code.l should
+        contain allElementsOf List(
+          "target.cell",
+          "target.cell.x",
+          "target.cell.y",
+          "target.z"
+        )
     }
 
     "capture C++ aggregate assignment initializer subobject targets from the Rust parser backend" in {
