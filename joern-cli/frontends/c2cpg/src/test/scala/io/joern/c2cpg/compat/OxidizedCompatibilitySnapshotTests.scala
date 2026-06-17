@@ -617,6 +617,56 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .l shouldBe List("Core::Widget(source).~Widget()")
     }
 
+    "capture C++ logical and ternary temporary destructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int mix(int n) {
+          |  Core::Widget source;
+          |  int both = Core::consume(Core::Widget()) && Core::consume(Core::Widget(source));
+          |  int either = Core::consume(Core::Widget(source)) || Core::consume(Core::Widget());
+          |  int selected = n ? Core::consume(Core::Widget()) : Core::consume(Core::Widget(source));
+          |  return both + either + selected;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("mix").call.nameExact(Operators.logicalAnd).code.l shouldBe
+        List("Core::consume(Core::Widget()) && Core::consume(Core::Widget(source))")
+      cpg.method.nameExact("mix").call.nameExact(Operators.logicalOr).code.l shouldBe
+        List("Core::consume(Core::Widget(source)) || Core::consume(Core::Widget())")
+      cpg.method.nameExact("mix").call.nameExact(Operators.conditional).code.l shouldBe
+        List("n ? Core::consume(Core::Widget()) : Core::consume(Core::Widget(source))")
+      cpg.method.nameExact("mix").call.nameExact("consume").methodFullName.l shouldBe
+        List.fill(6)("Core.consume:int(Widget&&)")
+      cpg.method.nameExact("mix").call.nameExact("Widget").codeExact("Core::Widget()").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void()", "Core.Widget.Widget:void()", "Core.Widget.Widget:void()")
+      cpg.method.nameExact("mix").call.nameExact("Widget").codeExact("Core::Widget(source)").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)")
+      cpg.method.nameExact("mix").call.nameExact("~Widget").code.l.sorted shouldBe
+        List(
+          "Core::Widget().~Widget()",
+          "Core::Widget().~Widget()",
+          "Core::Widget().~Widget()",
+          "Core::Widget(source).~Widget()",
+          "Core::Widget(source).~Widget()",
+          "Core::Widget(source).~Widget()",
+          "source.~Widget()"
+        )
+    }
+
     "capture C++ jump destructors" in {
       val cpg = code(
         """
