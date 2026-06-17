@@ -398,6 +398,13 @@ pub enum Expression {
         left: Box<Expression>,
         right: Box<Expression>,
     },
+    Assignment {
+        operator: String,
+        code: String,
+        line: usize,
+        left: Box<Expression>,
+        right: Box<Expression>,
+    },
     Unary {
         operator: String,
         code: String,
@@ -3318,7 +3325,22 @@ fn split_top_level_arguments(arguments: &str) -> Vec<&str> {
 
 fn parse_assignment_expression(node: Node, source: &[u8]) -> Expression {
     let operator = operator_text(node, source).unwrap_or("=");
-    parse_binary_like_expression(node, source, operator)
+    let left = node
+        .child_by_field_name("left")
+        .or_else(|| named_children(node).into_iter().next());
+    let right = node
+        .child_by_field_name("right")
+        .or_else(|| named_children(node).into_iter().nth(1));
+    match (left, right) {
+        (Some(left), Some(right)) => Expression::Assignment {
+            operator: operator.to_string(),
+            code: node_text(node, source).trim().to_string(),
+            line: line(node),
+            left: Box::new(parse_expression(left, source)),
+            right: Box::new(parse_expression(right, source)),
+        },
+        _ => identifier_expression(node, source),
+    }
 }
 
 fn parse_binary_like_expression(node: Node, source: &[u8], operator: &str) -> Expression {
@@ -3841,6 +3863,7 @@ fn expression_static_type(expression: &Expression, parameters: &[ParameterDecl])
                 "ANY".to_string()
             }
         }
+        Expression::Assignment { left, .. } => expression_static_type(left, parameters),
         _ => "ANY".to_string(),
     }
 }
@@ -8082,6 +8105,42 @@ mod tests {
     }
 
     #[test]
+    fn parses_nested_assignment_expressions() {
+        let sample = r#"
+                int score(int x, int y) {
+                  int z = 0;
+                  return (z = x) + y;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("nested assignment expression sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        let [Statement::LocalDecl { .. }, Statement::Return {
+            expression: Some(return_expression),
+            ..
+        }] = function.body.as_slice()
+        else {
+            panic!("expected local declaration and return");
+        };
+        let Expression::Binary { left, right, .. } = return_expression else {
+            panic!("expected binary return expression");
+        };
+        assert!(matches!(
+            left.as_ref(),
+            Expression::Assignment { operator, left, right, .. }
+                if operator == "="
+                    && matches!(left.as_ref(), Expression::Identifier { name, .. } if name == "z")
+                    && matches!(right.as_ref(), Expression::Identifier { name, .. } if name == "x")
+        ));
+        assert!(matches!(
+            right.as_ref(),
+            Expression::Identifier { name, .. } if name == "y"
+        ));
+    }
+
+    #[test]
     fn parses_cpp_three_way_comparison_expressions() {
         let sample = r#"
                 bool foo() {
@@ -8957,7 +9016,7 @@ mod tests {
                 calls.extend(arguments.iter().flat_map(collect_call_names));
                 calls
             }
-            Expression::Binary { left, right, .. } => {
+            Expression::Binary { left, right, .. } | Expression::Assignment { left, right, .. } => {
                 let mut calls = collect_call_names(left);
                 calls.extend(collect_call_names(right));
                 calls
@@ -9029,8 +9088,10 @@ mod tests {
                     })
                 }
             }
-            Expression::Binary { left, right, .. } => find_call_by_name(left, expected_name)
-                .or_else(|| find_call_by_name(right, expected_name)),
+            Expression::Binary { left, right, .. } | Expression::Assignment { left, right, .. } => {
+                find_call_by_name(left, expected_name)
+                    .or_else(|| find_call_by_name(right, expected_name))
+            }
             Expression::Conditional {
                 condition,
                 consequence,
