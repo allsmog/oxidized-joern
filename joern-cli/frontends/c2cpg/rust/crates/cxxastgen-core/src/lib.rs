@@ -2683,10 +2683,10 @@ fn direct_initializer_element(node: Node, source: &[u8]) -> Option<Expression> {
     if node.kind() != "parameter_declaration" {
         return Some(parse_expression(node, source));
     }
-    if node.child_by_field_name("declarator").is_some() {
-        return None;
-    }
     let text = node_text(node, source).trim();
+    if node.child_by_field_name("declarator").is_some() {
+        return direct_initializer_call_expression(text, line(node));
+    }
     if !is_simple_identifier(text) {
         return None;
     }
@@ -2695,6 +2695,13 @@ fn direct_initializer_element(node: Node, source: &[u8]) -> Option<Expression> {
         code: text.to_string(),
         line: line(node),
     })
+}
+
+fn direct_initializer_call_expression(text: &str, line: usize) -> Option<Expression> {
+    match parse_expression_text(text, line) {
+        expression @ Expression::Call { .. } => Some(expression),
+        _ => None,
+    }
 }
 
 fn is_simple_identifier(text: &str) -> bool {
@@ -6583,6 +6590,53 @@ mod tests {
         assert!(matches!(
             assigned_elements.as_slice(),
             [Expression::Identifier { name, .. }] if name == "seed"
+        ));
+    }
+
+    #[test]
+    fn parses_cpp_parenthesized_local_initializer_calls() {
+        let sample = r#"
+                namespace Core {
+                class Source {};
+                Source makeSource();
+                class Holder {
+                public:
+                  Holder(Source source) {}
+                };
+                }
+                int use(Core::Source& source) {
+                  Core::Holder local(Core::makeSource());
+                  return 0;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("parenthesized local initializer sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        let [Statement::LocalDecl {
+            name,
+            initializer: Some(initializer),
+            ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!(
+                "expected initialized local and return: {:#?}",
+                function.body
+            );
+        };
+        assert_eq!(name, "local");
+        let Expression::InitializerList { code, elements, .. } = initializer else {
+            panic!("expected direct initializer list");
+        };
+        assert_eq!(code, "(Core::makeSource())");
+        assert!(matches!(
+            elements.as_slice(),
+            [Expression::Call { name, arguments, .. }] if name == "Core::makeSource" && arguments.is_empty()
         ));
     }
 
