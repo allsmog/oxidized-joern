@@ -1863,6 +1863,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case conditional: OxConditional => conditionalTemporaryTypeFullName(conditional)
       case cast: OxCast               => castTemporaryTypeFullName(cast)
       case binary: OxBinary           => overloadedBinaryTemporaryTypeFullName(binary)
+      case index: OxIndexAccess       => overloadedIndexTemporaryTypeFullName(index)
       case _                          => None
     }
   }
@@ -1889,6 +1890,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def overloadedBinaryTemporaryTypeFullName(binary: OxBinary): Option[String] = {
     overloadedBinaryOperatorTarget(binary)
+      .map(target => normalizeType(resolveAliasType(target.entry.function.returnType)))
+      .flatMap(returnedObjectTypeFullName)
+  }
+
+  private def overloadedIndexTemporaryTypeFullName(indexAccess: OxIndexAccess): Option[String] = {
+    overloadedIndexOperatorTarget(indexAccess)
       .map(target => normalizeType(resolveAliasType(target.entry.function.returnType)))
       .flatMap(returnedObjectTypeFullName)
   }
