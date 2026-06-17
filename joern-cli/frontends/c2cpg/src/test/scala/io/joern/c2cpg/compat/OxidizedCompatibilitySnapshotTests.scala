@@ -1521,6 +1521,51 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.identifier.nameExact("value").refsTo.l shouldBe List(cpg.method.nameExact("sum").local.nameExact("value").head)
     }
 
+    "capture C++ range-based for loops with structured bindings from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Pair {
+          |  int first;
+          |  int second;
+          |};
+          |int sumPairs(Pair *pairs) {
+          |  int total = 0;
+          |  for (auto [first, second] : pairs) {
+          |    total += first + second;
+          |  }
+          |  return total;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("sumPairs").controlStructure.controlStructureType(ControlStructureTypes.FOR).l) {
+        case List(rangeFor) =>
+          rangeFor.condition.code.l shouldBe List("pairs")
+      }
+      val temp = cpg.method.nameExact("sumPairs").local.filter(_.name.startsWith("<tmp>")).head
+      temp.typeFullName shouldBe "Pair*"
+      cpg.method.nameExact("sumPairs").local.nameExact("first").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("sumPairs").local.nameExact("second").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("sumPairs").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        s"${temp.name} = pairs",
+        s"first = ${temp.name}.first",
+        s"second = ${temp.name}.second"
+      )
+      cpg.method.nameExact("sumPairs").call.nameExact(Operators.fieldAccess).code.l should contain theSameElementsAs List(
+        s"${temp.name}.first",
+        s"${temp.name}.second"
+      )
+      cpg.method.nameExact("sumPairs").call.nameExact(Operators.assignmentPlus).code.l shouldBe
+        List("total += first + second")
+      cpg.identifier.nameExact("first").refsTo.dedup.l shouldBe List(
+        cpg.method.nameExact("sumPairs").local.nameExact("first").head
+      )
+      cpg.identifier.nameExact("second").refsTo.dedup.l shouldBe List(
+        cpg.method.nameExact("sumPairs").local.nameExact("second").head
+      )
+    }
+
     "capture switch, do-while, labels, and gotos from the Rust parser backend" in {
       val cpg = code("""
           |int route(int x) {
