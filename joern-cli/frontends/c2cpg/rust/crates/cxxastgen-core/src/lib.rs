@@ -2492,6 +2492,7 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
         "assignment_expression" => parse_assignment_expression(node, source),
         "cast_expression" => parse_cast_expression(node, source),
         "sizeof_expression" | "alignof_expression" => parse_sizeof_expression(node, source),
+        "offsetof_expression" => parse_offsetof_expression(node, source),
         "new_expression" => parse_new_expression(node, source),
         "delete_expression" => parse_delete_expression(node, source),
         "lambda_expression" => parse_lambda_expression(node, source),
@@ -2841,6 +2842,35 @@ fn parse_sizeof_expression(node: Node, source: &[u8]) -> Expression {
         type_name: node
             .child_by_field_name("type")
             .map(|type_node| type_name_from_type_node(type_node, source)),
+    }
+}
+
+fn parse_offsetof_expression(node: Node, source: &[u8]) -> Expression {
+    let line = line(node);
+    let arguments = [
+        node.child_by_field_name("type")
+            .map(|type_node| type_name_from_type_node(type_node, source)),
+        node.child_by_field_name("member")
+            .map(|member| node_text(member, source).trim().to_string()),
+    ]
+    .into_iter()
+    .flatten()
+    .map(|value| Expression::Literal {
+        code: value.clone(),
+        value,
+        line,
+    })
+    .collect();
+    Expression::Call {
+        name: "offsetof".to_string(),
+        code: node_text(node, source).trim().to_string(),
+        line,
+        callee: Box::new(Expression::Identifier {
+            name: "offsetof".to_string(),
+            code: "offsetof".to_string(),
+            line,
+        }),
+        arguments,
     }
 }
 
@@ -6654,6 +6684,41 @@ mod tests {
                 ("tagged", "42_km"),
             ]
         );
+    }
+
+    #[test]
+    fn parses_cpp_offsetof_expressions() {
+        let sample = r#"
+                struct Pair {
+                  int first;
+                  int second;
+                };
+                int offset() {
+                  return offsetof(Pair, second);
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("offsetof expression sample should parse");
+        let Declaration::Function(function) = &declarations[1] else {
+            panic!("expected function declaration");
+        };
+        let [Statement::Return {
+            expression: Some(Expression::Call {
+                name, arguments, ..
+            }),
+            ..
+        }] = function.body.as_slice()
+        else {
+            panic!("expected offsetof return call");
+        };
+        assert_eq!(name, "offsetof");
+        assert!(matches!(
+            arguments.as_slice(),
+            [
+                Expression::Literal { value: type_name, .. },
+                Expression::Literal { value: member, .. }
+            ] if type_name == "Pair" && member == "second"
+        ));
     }
 
     #[test]
