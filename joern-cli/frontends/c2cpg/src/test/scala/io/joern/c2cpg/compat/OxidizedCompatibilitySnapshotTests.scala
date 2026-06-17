@@ -604,6 +604,88 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ generic lambda parameters" in {
+      val cpg = code(
+        """
+          |int use() {
+          |  auto identity = [](auto value) { return value; };
+          |  return identity(1);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val lambdaFullName = "use.<lambda>0:auto(auto)"
+      cpg.method.nameExact("use").local.nameExact("identity").typeFullName.l shouldBe List(lambdaFullName)
+      inside(cpg.method.fullNameExact(lambdaFullName).l) { case List(lambdaMethod) =>
+        lambdaMethod.parameter.name.l shouldBe List("value")
+        lambdaMethod.parameter.typeFullName.l shouldBe List("auto")
+        lambdaMethod.methodReturn.typeFullName shouldBe "auto"
+        lambdaMethod.ast.isReturn.code.l shouldBe List("return value")
+      }
+      inside(cpg.method.nameExact("use").call.nameExact(Defines.OperatorCall).codeExact("identity(1)").l) {
+        case List(lambdaCall) =>
+          lambdaCall.methodFullName shouldBe s"${Defines.OperatorCall}:auto(auto)"
+          lambdaCall.signature shouldBe "auto(auto)"
+          lambdaCall.typeFullName shouldBe "auto"
+      }
+    }
+
+    "capture C++ nested lambda ownership and captures" in {
+      val cpg = code(
+        """
+          |int use(int base) {
+          |  auto outer = [base](int x) -> int {
+          |    auto inner = [&](int y) -> int { return base + x + y; };
+          |    return inner(1);
+          |  };
+          |  return outer(2);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val outerFullName = "use.<lambda>0:int(int)"
+      val innerFullName = s"$outerFullName.<lambda>1:int(int)"
+      cpg.method.nameExact("use").local.nameExact("outer").typeFullName.l shouldBe List(outerFullName)
+      cpg.method.fullNameExact(outerFullName).local.nameExact("inner").typeFullName.l shouldBe List(innerFullName)
+
+      inside(cpg.method.fullNameExact(innerFullName).l) { case List(innerMethod) =>
+        innerMethod.parameter.name.l shouldBe List("y")
+        innerMethod.parameter.typeFullName.l shouldBe List("int")
+        innerMethod.local.name.l.sorted shouldBe List("base", "x")
+        innerMethod.ast.isReturn.code.l shouldBe List("return base + x + y")
+      }
+
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$outerFullName:base")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_VALUE)
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$innerFullName:base")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_REFERENCE)
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$innerFullName:x")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_REFERENCE)
+      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$innerFullName:base")).l) {
+        case List(binding) =>
+          binding._refOut.l shouldBe cpg.method.fullNameExact(outerFullName).local.nameExact("base").l
+      }
+      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$innerFullName:x")).l) {
+        case List(binding) =>
+          binding._refOut.l shouldBe cpg.method.fullNameExact(outerFullName).parameter.nameExact("x").l
+      }
+
+      inside(cpg.method.fullNameExact(outerFullName).call.nameExact(Defines.OperatorCall).codeExact("inner(1)").l) {
+        case List(innerCall) =>
+          innerCall.methodFullName shouldBe s"${Defines.OperatorCall}:int(int)"
+          innerCall.receiver.code.l shouldBe List("inner")
+          innerCall.typeFullName shouldBe "int"
+      }
+      inside(cpg.method.nameExact("use").call.nameExact(Defines.OperatorCall).codeExact("outer(2)").l) {
+        case List(outerCall) =>
+          outerCall.methodFullName shouldBe s"${Defines.OperatorCall}:int(int)"
+          outerCall.receiver.code.l shouldBe List("outer")
+          outerCall.typeFullName shouldBe "int"
+      }
+    }
+
     "capture C++ for initializer destructors" in {
       val cpg = code(
         """

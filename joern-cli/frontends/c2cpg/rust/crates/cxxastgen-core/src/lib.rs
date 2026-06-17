@@ -2695,7 +2695,7 @@ fn parse_delete_expression(node: Node, source: &[u8]) -> Expression {
 }
 
 fn parse_lambda_expression(node: Node, source: &[u8]) -> Expression {
-    let parameters = find_named_descendant_kind(node, "parameter_list")
+    let parameters = lambda_parameter_list(node)
         .map(|parameters| parse_parameters(parameters, source))
         .unwrap_or_default();
     let mut symbols = MacroSymbols::new();
@@ -2720,6 +2720,11 @@ fn parse_lambda_expression(node: Node, source: &[u8]) -> Expression {
     }
 }
 
+fn lambda_parameter_list(node: Node) -> Option<Node> {
+    node.child_by_field_name("declarator")
+        .and_then(|declarator| find_named_descendant_kind(declarator, "parameter_list"))
+}
+
 fn lambda_return_type(
     node: Node,
     source: &[u8],
@@ -2735,8 +2740,18 @@ fn lambda_return_type(
 }
 
 fn find_lambda_trailing_return_type(node: Node, source: &[u8]) -> Option<String> {
-    node.child_by_field_name("type")
-        .map(|type_node| type_name_from_type_node(type_node, source))
+    node.child_by_field_name("declarator")
+        .and_then(|declarator| find_named_descendant_kind(declarator, "trailing_return_type"))
+        .and_then(|trailing_return| {
+            named_children(trailing_return)
+                .into_iter()
+                .find(|child| child.kind() == "type_descriptor")
+        })
+        .map(|type_node| type_name_from_type_descriptor(type_node, source))
+        .or_else(|| {
+            node.child_by_field_name("type")
+                .map(|type_node| type_name_from_type_node(type_node, source))
+        })
         .or_else(|| {
             let body_start = node
                 .child_by_field_name("body")
@@ -4609,6 +4624,93 @@ mod tests {
         ));
         assert_eq!(captures[3].len(), 1);
         assert_lambda_capture(&captures[3][0], Some("this"), "*this", "copyThis", false);
+    }
+
+    #[test]
+    fn parses_cpp_generic_and_nested_lambdas() {
+        let sample = r#"
+                int use(int base) {
+                  auto identity = [](auto value) { return value; };
+                  auto outer = [base] {
+                    auto inner = [](int x) { return x; };
+                    return base;
+                  };
+                  auto typed = []() -> long { return 1; };
+                  return identity(outer());
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("generic and nested lambda sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+
+        let [Statement::LocalDecl {
+            initializer: Some(identity),
+            ..
+        }, Statement::LocalDecl {
+            initializer: Some(outer),
+            ..
+        }, ..] = function.body.as_slice()
+        else {
+            panic!("expected identity and outer lambda locals");
+        };
+
+        let Expression::Lambda {
+            parameters,
+            return_type,
+            signature,
+            ..
+        } = identity
+        else {
+            panic!("expected generic identity lambda");
+        };
+        assert_eq!(parameters.len(), 1);
+        assert_eq!(parameters[0].name, "value");
+        assert_eq!(parameters[0].type_name, "auto");
+        assert_eq!(return_type, "auto");
+        assert_eq!(signature, "auto(auto)");
+
+        let Expression::Lambda {
+            parameters, body, ..
+        } = outer
+        else {
+            panic!("expected outer lambda");
+        };
+        assert!(
+            parameters.is_empty(),
+            "outer lambda must not inherit inner lambda parameters"
+        );
+        let nested = body.iter().find_map(|statement| match statement {
+            Statement::LocalDecl {
+                initializer: Some(Expression::Lambda { parameters, .. }),
+                ..
+            } => Some(parameters),
+            _ => None,
+        });
+        assert!(
+            matches!(nested, Some(parameters) if parameters.len() == 1 && parameters[0].name == "x")
+        );
+        let typed = function.body.iter().find_map(|statement| match statement {
+            Statement::LocalDecl {
+                name,
+                initializer:
+                    Some(Expression::Lambda {
+                        return_type,
+                        signature,
+                        ..
+                    }),
+                ..
+            } if name == "typed" => Some((return_type, signature)),
+            _ => None,
+        });
+        assert!(
+            matches!(typed, Some((return_type, signature)) if return_type == "long" && signature == "long()")
+        );
     }
 
     #[test]
