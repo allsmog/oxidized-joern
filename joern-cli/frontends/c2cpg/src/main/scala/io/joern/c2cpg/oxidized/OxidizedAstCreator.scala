@@ -2834,6 +2834,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case "=="     => Operators.equals
       case "!="     => Operators.notEquals
       case "not_eq" => Operators.notEquals
+      case "<=>"    => Operators.compare
       case "&&"     => Operators.logicalAnd
       case "and"    => Operators.logicalAnd
       case "||"     => Operators.logicalOr

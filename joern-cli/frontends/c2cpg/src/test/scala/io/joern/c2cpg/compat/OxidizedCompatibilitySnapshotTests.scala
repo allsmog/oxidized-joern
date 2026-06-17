@@ -1686,6 +1686,26 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.call.nameExact(Operators.cast).typeFullName.l shouldBe List("int", "int", "int", "int")
     }
 
+    "capture C++ three-way comparison from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |bool foo() {
+          |  bool x = 1 <=> 2;
+          |  return x;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.local.nameExact("x").typeFullName.l shouldBe List("bool")
+      cpg.call.nameExact(Operators.assignment).code.l shouldBe List("x = 1 <=> 2")
+      inside(cpg.call.codeExact("1 <=> 2").l) { case List(compare) =>
+        compare.name shouldBe Operators.compare
+        compare.methodFullName shouldBe Operators.compare
+        compare.argument.code.l shouldBe List("1", "2")
+      }
+    }
+
     "capture C++ boolean and nullptr literals from the Rust parser backend" in {
       val cpg = code(
         """

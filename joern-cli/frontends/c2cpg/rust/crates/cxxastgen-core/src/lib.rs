@@ -7097,6 +7097,29 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_three_way_comparison_expressions() {
+        let sample = r#"
+                bool foo() {
+                  bool x = 1 <=> 2;
+                  return x;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("three-way comparison sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        let [Statement::LocalDecl {
+            initializer: Some(initializer),
+            ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!("expected local declaration and return");
+        };
+        assert_binary_operator(initializer, "<=>");
+    }
+
+    #[test]
     fn parses_cpp_named_cast_expressions() {
         let sample = r#"
                 int casts(float x, void *ptr) {
