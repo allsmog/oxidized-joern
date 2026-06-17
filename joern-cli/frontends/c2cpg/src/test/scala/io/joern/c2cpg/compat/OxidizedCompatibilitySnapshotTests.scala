@@ -928,12 +928,15 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("defaults").local.nameExact("guard").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("defaults").call.nameExact("Widget").codeExact("Core.Widget.Widget()").methodFullName.l shouldBe
         List("Core.Widget.Widget:void()", "Core.Widget.Widget:void()", "Core.Widget.Widget:void()")
-      cpg.method.nameExact("defaults").call.nameExact(Operators.assignment).code.l shouldBe
+      val defaultAssignments = cpg.method.nameExact("defaults").call.nameExact(Operators.assignment).code.l
+      defaultAssignments.filterNot(_.startsWith("<tmp>")) shouldBe
         List(
           "outer = Core.Widget.Widget()",
           "scoped = Core.Widget.Widget()",
           "guard = Core.Widget.Widget()"
         )
+      defaultAssignments.filter(_.startsWith("<tmp>")) shouldBe
+        List("<tmp>0 = <operator>.alloc", "<tmp>1 = <operator>.alloc", "<tmp>2 = <operator>.alloc")
       cpg.method.nameExact("defaults").call.nameExact("~Widget").code.l.sorted shouldBe
         List("guard.~Widget()", "outer.~Widget()", "scoped.~Widget()")
     }
@@ -961,17 +964,22 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      cpg.method.nameExact("braces").local.name.l shouldBe List("empty", "direct", "assigned")
+      val bracedLocalNames = cpg.method.nameExact("braces").local.name.l
+      bracedLocalNames.filterNot(_.startsWith("<tmp>")) shouldBe List("empty", "direct", "assigned")
+      bracedLocalNames.filter(_.startsWith("<tmp>")) shouldBe List("<tmp>0", "<tmp>1", "<tmp>2")
       cpg.method.nameExact("braces").call.nameExact("Widget").codeExact("Core.Widget.Widget()").methodFullName.l shouldBe
         List("Core.Widget.Widget:void()")
       cpg.method.nameExact("braces").call.nameExact("Widget").codeExact("Core.Widget.Widget(seed)").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(int)", "Core.Widget.Widget:void(int)")
-      cpg.method.nameExact("braces").call.nameExact(Operators.assignment).code.l shouldBe
+      val bracedAssignments = cpg.method.nameExact("braces").call.nameExact(Operators.assignment).code.l
+      bracedAssignments.filterNot(_.startsWith("<tmp>")) shouldBe
         List(
           "empty = Core.Widget.Widget()",
           "direct = Core.Widget.Widget(seed)",
           "assigned = Core.Widget.Widget(seed)"
         )
+      bracedAssignments.filter(_.startsWith("<tmp>")) shouldBe
+        List("<tmp>0 = <operator>.alloc", "<tmp>1 = <operator>.alloc", "<tmp>2 = <operator>.alloc")
       cpg.method.nameExact("braces").call.nameExact("~Widget").code.l shouldBe
         List("assigned.~Widget()", "direct.~Widget()", "empty.~Widget()")
     }

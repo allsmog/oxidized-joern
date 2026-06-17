@@ -183,9 +183,9 @@ class CdtCompatibilitySnapshotTests extends C2CpgSuite {
 
 class BackendParitySnapshotTests extends C2CpgSuite {
 
-  "The C backend parity snapshot harness" should {
+  "The C/C++ backend parity snapshot harness" should {
 
-    "compare normalized core C slices across CDT and oxidized" in {
+    "compare normalized core C and C++ slices across CDT and oxidized" in {
       val cases = Seq(
         BackendParitySnapshot.Case(
           "core methods, locals, calls, and returns",
@@ -222,6 +222,42 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             |  return square(x) + square(2);
             |}
             |""".stripMargin
+        ),
+        BackendParitySnapshot.Case(
+          "C++ namespace function call",
+          """
+            |namespace Core {
+            |int twice(int x) {
+            |  return x + x;
+            |}
+            |}
+            |
+            |int main() {
+            |  int value = Core::twice(21);
+            |  return value;
+            |}
+            |""".stripMargin,
+          filename = "Test0.cpp"
+        ),
+        BackendParitySnapshot.Case(
+          "C++ struct local and field access",
+          """
+            |struct Box {
+            |  int value;
+            |};
+            |
+            |int read(Box box) {
+            |  return box.value;
+            |}
+            |
+            |int main() {
+            |  Box box;
+            |  box.value = 1;
+            |  return read(box);
+            |}
+            |""".stripMargin,
+          filename = "Test0.cpp",
+          options = CompatibilitySnapshot.RenderOptions(typeNames = Seq("Box"), includeReturns = true)
         )
       )
 
@@ -232,10 +268,11 @@ class BackendParitySnapshotTests extends C2CpgSuite {
   private def assertBackendParity(testCase: BackendParitySnapshot.Case): Unit = {
     val cdt      = code(testCase.source, testCase.filename).withConfig(Config(parserBackend = ParserBackend.Cdt))
     val oxidized = code(testCase.source, testCase.filename).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+    val cdtSnapshot      = CompatibilitySnapshot.render(cdt, testCase.options)
+    val oxidizedSnapshot = CompatibilitySnapshot.render(oxidized, testCase.options)
 
-    withClue(s"${testCase.name} parity snapshot differed\n") {
-      CompatibilitySnapshot.render(oxidized, testCase.options) shouldBe
-        CompatibilitySnapshot.render(cdt, testCase.options)
+    withClue(s"${testCase.name} parity snapshot differed\n${CompatibilitySnapshot.diff(oxidizedSnapshot, cdtSnapshot)}") {
+      oxidizedSnapshot shouldBe cdtSnapshot
     }
   }
 
@@ -313,6 +350,14 @@ object CompatibilitySnapshot {
       section("CALLS", calls)
     )
     sections.mkString("\n")
+  }
+
+  def diff(actual: String, expected: String): String = {
+    val actualLines   = actual.linesIterator.toSeq
+    val expectedLines = expected.linesIterator.toSeq
+    val actualOnly    = actualLines.diff(expectedLines).map(line => s"+ $line")
+    val expectedOnly  = expectedLines.diff(actualLines).map(line => s"- $line")
+    (actualOnly ++ expectedOnly).mkString("\n", "\n", "\n")
   }
 
   private def section(name: String, lines: Seq[String]): String = {

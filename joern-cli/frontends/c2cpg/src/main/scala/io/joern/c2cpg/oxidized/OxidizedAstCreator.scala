@@ -2,6 +2,7 @@ package io.joern.c2cpg.oxidized
 
 import io.joern.c2cpg.Config
 import io.joern.c2cpg.astcreation.Defines
+import io.joern.c2cpg.parser.FileDefaults
 import io.joern.x2cpg.{Ast, AstCreatorBase, SourceFiles, ValidationMode}
 import io.shiftleft.codepropertygraph.generated.nodes.*
 import io.shiftleft.codepropertygraph.generated.{
@@ -80,8 +81,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     capturedGlobals: mutable.LinkedHashMap[String, CapturedGlobal] = mutable.LinkedHashMap.empty
   )
 
-  private val usedTypes: mutable.Set[String]           = mutable.Set(Defines.Any, Defines.Void)
-  private lazy val functionEntries: Seq[FunctionEntry] = collectFunctionEntries(document.declarations, None)
+  private val usedTypes: mutable.Set[String]             = mutable.Set(Defines.Any, Defines.Void)
+  private val temporaryIndices: mutable.Map[String, Int] = mutable.HashMap.empty
+  private lazy val functionEntries: Seq[FunctionEntry]   = collectFunctionEntries(document.declarations, None)
   private lazy val functionsByName: Map[String, Seq[FunctionEntry]] =
     functionEntries.groupBy(_.simpleName).view.mapValues(_.toSeq).toMap
   private lazy val functionsByQualifiedName: Map[String, Seq[FunctionEntry]] =
@@ -97,6 +99,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val localName = normalizeType(structDecl.name)
       parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
     }.toSet
+  private lazy val aggregateDeclarationsByType: Map[String, OxStructDecl] =
+    aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
+      val localName = normalizeType(structDecl.name)
+      val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
+      Seq(localName, fullName).distinct.map(typeName => typeName -> structDecl)
+    }.toMap
   private lazy val outOfClassFunctionsByOwner: Map[String, Seq[FunctionEntry]] =
     functionEntries
       .filter(entry =>
@@ -394,7 +402,48 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val outOfClassMethodAsts = outOfClassFunctionsByOwner
       .getOrElse(typeName, Seq.empty)
       .flatMap(entry => astsForFunction(entry.function, entry.lexicalOwnerFullName, NodeTypes.TYPE_DECL, typeName))
-    Ast(typeDecl).withChildren(fieldAsts ++ nestedAsts ++ outOfClassMethodAsts)
+    val implicitConstructorAst = Option.when(hasImplicitDefaultConstructor(typeName)) {
+      implicitDefaultConstructorAst(structDecl, typeName)
+    }
+    Ast(typeDecl).withChildren(fieldAsts ++ implicitConstructorAst.toSeq ++ nestedAsts ++ outOfClassMethodAsts)
+  }
+
+  private def implicitDefaultConstructorAst(structDecl: OxStructDecl, typeName: String): Ast = {
+    val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
+    val origin          = OxOrigin(constructorName, None)
+    val signature       = "void()"
+    val fullName        = s"$typeName.$constructorName:$signature"
+    val method =
+      methodNode(
+        origin,
+        constructorName,
+        constructorName,
+        fullName,
+        Option(signature),
+        declarationFilename(structDecl),
+        Option(NodeTypes.TYPE_DECL),
+        Option(typeName)
+      )
+    val thisType = registerType(s"$typeName*")
+    val thisParameter =
+      parameterInNode(
+        origin,
+        Defines.This,
+        Defines.This,
+        0,
+        isVariadic = false,
+        EvaluationStrategies.BY_SHARING,
+        thisType
+      )
+    val body         = blockAst(blockNode(origin, constructorName, Defines.Any))
+    val methodReturn = methodReturnNode(origin, Defines.Void)
+    methodAst(
+      method,
+      Seq(Ast(thisParameter)),
+      body,
+      methodReturn,
+      Seq(NewModifier().modifierType(ModifierTypes.CONSTRUCTOR))
+    )
   }
 
   private def resolveBaseTypeFullName(baseClass: String, parentTypeFullName: Option[String]): String = {
@@ -1166,7 +1215,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def isDefaultConstructorInitializer(typeName: String): Boolean = {
-    aggregateTypeFullNames.contains(typeName) && constructorEntry(typeName, Seq.empty).isDefined
+    aggregateTypeFullNames.contains(typeName) &&
+    (constructorEntry(typeName, Seq.empty).isDefined || hasImplicitDefaultConstructor(typeName))
+  }
+
+  private def hasImplicitDefaultConstructor(typeName: String): Boolean = {
+    val resolvedType = resolveAliasType(typeName)
+    aggregateDeclarationsByType.get(resolvedType).exists { structDecl =>
+      FileDefaults.hasCppFileExtension(declarationFilename(structDecl)) && constructorEntriesForType(resolvedType).isEmpty
+    }
   }
 
   private def constructorAssignmentAst(local: OxLocalDecl, initializer: OxInitializerList, typeName: String): Ast = {
@@ -1182,8 +1239,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   ): Ast = {
     val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
     val constructor     = constructorEntry(typeName, arguments)
-    val signature       = constructor.map(_.function.signature)
-    val methodFullName  = constructor.map(_.fullName).getOrElse(s"$typeName.$constructorName")
+    val implicitSignature =
+      Option.when(arguments.isEmpty && hasImplicitDefaultConstructor(typeName))("void()")
+    val signature      = constructor.map(_.function.signature).orElse(implicitSignature)
+    val methodFullName = constructor
+      .map(_.fullName)
+      .orElse(signature.map(sig => s"$typeName.$constructorName:$sig"))
+      .getOrElse(s"$typeName.$constructorName")
     val initCode =
       if (initializerCode.startsWith("(") && initializerCode.endsWith(")"))
         initializerCode.stripPrefix("(").stripSuffix(")")
@@ -1202,14 +1264,64 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     )
     val assignmentCode = s"${local.name} = $constructorCode"
     val left           = identifierAst(local.name, local.name, local.line)
-    val right          = callAst(callNode_, arguments.map(expressionAst))
+    val right =
+      constructorInvocationBlockAst(initializerOrigin, typeName, callNode_, arguments.map(expressionAst))
     assignmentAst(OxOrigin(local).copy(code = assignmentCode), left, right, assignmentCode)
   }
 
+  private def constructorInvocationBlockAst(
+    origin: OxOrigin,
+    typeName: String,
+    constructorCallNode: NewCall,
+    arguments: Seq[Ast]
+  ): Ast = {
+    val block          = blockNode(origin, constructorCallNode.code, Defines.Any)
+    val tmpName        = nextTemporaryName()
+    val tmpLocal       = localNode(origin.copy(code = tmpName), tmpName, tmpName, registerType(typeName))
+    val tmpIdentifier  = identifierNode(origin.copy(code = tmpName), tmpName, tmpName, registerType(typeName))
+    val tmpAst         = Ast(tmpIdentifier).withRefEdge(tmpIdentifier, tmpLocal)
+    val allocCallNode  = callNode(
+      origin.copy(code = Operators.alloc),
+      Operators.alloc,
+      Operators.alloc,
+      Operators.alloc,
+      DispatchTypes.STATIC_DISPATCH
+    )
+    val allocAssignCode = s"$tmpName = ${Operators.alloc}"
+    val allocAssignAst =
+      assignmentAst(origin.copy(code = allocAssignCode), tmpAst, Ast(allocCallNode), allocAssignCode)
+    val baseIdentifier = identifierNode(origin.copy(code = tmpName), tmpName, tmpName, registerType(typeName))
+    val baseAst        = Ast(baseIdentifier).withRefEdge(baseIdentifier, tmpLocal)
+    val addressOfNode =
+      callNode(
+        origin.copy(code = s"&$tmpName"),
+        s"&$tmpName",
+        Operators.addressOf,
+        Operators.addressOf,
+        DispatchTypes.STATIC_DISPATCH
+      )
+    val addressOfAst       = callAst(addressOfNode, Seq(baseAst))
+    val retIdentifier      = identifierNode(origin.copy(code = tmpName), tmpName, tmpName, registerType(typeName))
+    val retAst             = Ast(retIdentifier).withRefEdge(retIdentifier, tmpLocal)
+    val constructorCallAst = createCallAst(constructorCallNode, arguments, base = Option(addressOfAst))
+    Ast(block).withChildren(Seq(Ast(tmpLocal), allocAssignAst, constructorCallAst, retAst))
+  }
+
+  private def nextTemporaryName(): String = {
+    val scopeName = currentMethodFullName.getOrElse(globalNamespaceBlock().fullName)
+    val index     = temporaryIndices.getOrElse(scopeName, 0)
+    temporaryIndices.update(scopeName, index + 1)
+    s"<tmp>$index"
+  }
+
   private def constructorEntry(typeName: String, arguments: Seq[OxExpression]): Option[FunctionEntry] = {
-    val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
-    val candidates      = functionEntries.filter(entry => entry.qualifiedName == s"$typeName.$constructorName")
+    val candidates = constructorEntriesForType(typeName)
     selectFunctionEntry(candidates, Some(arguments))
+  }
+
+  private def constructorEntriesForType(typeName: String): Seq[FunctionEntry] = {
+    val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
+    functionEntries.filter(entry => entry.qualifiedName == s"$typeName.$constructorName")
   }
 
   private def heapConstructorAstsForExpressions(expressions: Seq[OxExpression]): Seq[Ast] = {
@@ -2829,7 +2941,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     } else
       functionOwnerFullName(function, ownerFullName)
         .map(owner => s"$owner.$simpleName:${function.signature}")
-        .getOrElse(function.name)
+        .getOrElse(topLevelFunctionFullName(function))
+  }
+
+  private def topLevelFunctionFullName(function: OxFunctionDecl): String = {
+    if (FileDefaults.hasCppFileExtension(declarationFilename(function))) s"${function.name}:${function.signature}"
+    else function.name
   }
 
   private def isSyntheticRequiresFunction(function: OxFunctionDecl): Boolean = {
