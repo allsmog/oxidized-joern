@@ -2549,6 +2549,10 @@ fn parse_for_range_loop(
 
 fn parse_for_initializer(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec<Statement> {
     match node.kind() {
+        "init_statement" => named_children(node)
+            .into_iter()
+            .flat_map(|child| parse_for_initializer(child, source, symbols))
+            .collect(),
         "declaration" => parse_local_declarations(node, source),
         "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef" | "preproc_else" => {
             parse_preproc_statements(node, source, symbols)
@@ -6978,6 +6982,66 @@ mod tests {
             }] if operator == "+="
                 && matches!(left, Expression::Identifier { name, .. } if name == "total")
                 && matches!(right, Expression::Identifier { name, .. } if name == "value")
+        ));
+    }
+
+    #[test]
+    fn parses_cpp_range_based_for_loops_with_initializers() {
+        let sample = r#"
+                void each(int *list) {
+                  for (auto v = list; auto& e : v) {
+                    e += 1;
+                  }
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("range-for initializer sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        let [Statement::For {
+            initializer,
+            condition: Some(condition),
+            update,
+            body,
+            ..
+        }] = function.body.as_slice()
+        else {
+            panic!("expected range-for statement");
+        };
+        assert!(update.is_none());
+        assert!(matches!(condition, Expression::Identifier { name, .. } if name == "v"));
+        assert!(matches!(
+            initializer.as_slice(),
+            [
+                Statement::LocalDecl {
+                    name: range_initializer,
+                    type_name: range_initializer_type,
+                    initializer: Some(Expression::Identifier { name: initializer_value, .. }),
+                    ..
+                },
+                Statement::LocalDecl {
+                    name: range_variable,
+                    type_name: range_variable_type,
+                    initializer: None,
+                    ..
+                }
+            ] if range_initializer == "v"
+                && range_initializer_type == "auto"
+                && initializer_value == "list"
+                && range_variable == "e"
+                && range_variable_type == "auto&"
+        ));
+        assert!(matches!(
+            body.as_slice(),
+            [Statement::Assignment {
+                operator,
+                left,
+                right,
+                ..
+            }] if operator == "+="
+                && matches!(left, Expression::Identifier { name, .. } if name == "e")
+                && matches!(right, Expression::Literal { value, .. } if value == "1")
         ));
     }
 
