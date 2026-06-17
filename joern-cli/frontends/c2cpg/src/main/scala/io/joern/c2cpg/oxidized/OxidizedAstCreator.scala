@@ -1425,7 +1425,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     typeName: String
   ): Seq[Ast] = {
     initializer match {
-      case initializerList: OxInitializerList if isAggregateFieldType(typeName) =>
+      case initializerList: OxInitializerList if isAggregateFieldType(typeName) || isArrayLikeType(typeName) =>
         aggregateInitializerAssignmentAsts(root, rootTypeName = typeName, typeName, initializerList, Seq.empty)
       case _ => Seq.empty
     }
@@ -1445,7 +1445,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val assignments =
         if (elements.exists(_.isInstanceOf[OxDesignatedInitializer])) {
           elements.flatMap {
-            case OxDesignatedInitializer(code, line, designator: OxDesignator, value) =>
+            case OxDesignatedInitializer(code, line, designator, value) =>
               aggregateDesignatedFieldAssignmentAsts(
                 root,
                 rootTypeName,
@@ -1528,7 +1528,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val OxInitializerList(_, _, elements) = initializer
     if (elements.exists(_.isInstanceOf[OxDesignatedInitializer])) {
       elements.flatMap {
-        case OxDesignatedInitializer(code, line, designator: OxDesignator, value) =>
+        case OxDesignatedInitializer(code, line, designator, value) =>
           aggregateDesignatedFieldAssignmentAsts(
             root,
             rootTypeName,
@@ -1593,7 +1593,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     typeName: String,
     fieldPathPrefix: Seq[AggregatePathSegment],
     initializerCode: String,
-    designator: OxDesignator,
+    designator: OxExpression,
     value: OxExpression,
     line: Int
   ): Seq[Ast] = {
@@ -1626,14 +1626,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def aggregateDesignatorFieldPath(
     initializerCode: String,
-    designator: OxDesignator
+    designator: OxExpression
   ): Option[Seq[AggregatePathSegment]] = {
     val initializerDesignator = initializerCode.takeWhile(_ != '=').trim
     val initializerPath       = aggregateDesignatorFieldPath(initializerDesignator)
     if (hasExplicitDesignatorSyntax(initializerDesignator)) {
       initializerPath
     } else {
-      initializerPath.orElse(aggregateDesignatorFieldPath(designator))
+      initializerPath.orElse(designator match {
+        case designator: OxDesignator => aggregateDesignatorFieldPath(designator)
+        case _                        => None
+      })
     }
   }
 
