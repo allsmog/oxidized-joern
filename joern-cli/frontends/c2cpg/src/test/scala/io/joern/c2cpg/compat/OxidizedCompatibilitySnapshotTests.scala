@@ -1350,6 +1350,51 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("store[0]")
     }
 
+    "model C++ overloaded unary aggregate temporary lifetimes" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  Widget operator-() const { return Widget(); }
+          |  ~Widget();
+          |};
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Widget negReturn(Core::Widget& value) {
+          |  return -value;
+          |}
+          |int negRef(Core::Widget& value) {
+          |  const Core::Widget& held = -value;
+          |  return 0;
+          |}
+          |int negUse(Core::Widget& value) {
+          |  Core::consume(-value);
+          |  return 0;
+          |}
+          |int negPrvalue() {
+          |  Core::consume(-Core::Widget());
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val unaryTemporaryDestructor = "(-value).~Widget()"
+      cpg.method.nameExact("negReturn").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("negRef").call.nameExact("~Widget").code.l shouldBe List(unaryTemporaryDestructor)
+      cpg.method.nameExact("negUse").call.nameExact("~Widget").code.l shouldBe List(unaryTemporaryDestructor)
+      cpg.method.nameExact("negPrvalue").call.nameExact("~Widget").code.l shouldBe
+        List("(-Core::Widget()).~Widget()", "Core::Widget().~Widget()")
+      cpg.method.nameExact("negReturn").ast.isReturn.astChildren.isCall.nameExact("operator-").code.l shouldBe
+        List("-value")
+    }
+
     "preserve returned C++ object temporaries from destructor cleanup" in {
       val cpg = code(
         """

@@ -170,6 +170,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     "^=",
     "|="
   )
+  private val CxxOverloadableUnaryOperators              = Set("+", "-", "*", "&", "~", "!", "++", "--")
+  private val CxxPostfixUnaryOperatorsWithDummyParameter = Set("++", "--")
 
   private var scope: Map[String, ScopeEntry]                            = Map.empty
   private var globalLocalEntries: Map[OxGlobalVariableDecl, ScopeEntry] = Map.empty
@@ -1864,6 +1866,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case cast: OxCast               => castTemporaryTypeFullName(cast)
       case binary: OxBinary           => overloadedBinaryTemporaryTypeFullName(binary)
       case index: OxIndexAccess       => overloadedIndexTemporaryTypeFullName(index)
+      case unary: OxUnary             => overloadedUnaryTemporaryTypeFullName(unary)
       case _                          => None
     }
   }
@@ -1894,6 +1897,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .flatMap(returnedObjectTypeFullName)
   }
 
+  private def overloadedUnaryTemporaryTypeFullName(unary: OxUnary): Option[String] = {
+    overloadedUnaryOperatorTarget(unary)
+      .map(target => normalizeType(resolveAliasType(target.entry.function.returnType)))
+      .flatMap(returnedObjectTypeFullName)
+  }
+
   private def overloadedIndexTemporaryTypeFullName(indexAccess: OxIndexAccess): Option[String] = {
     overloadedIndexOperatorTarget(indexAccess)
       .map(target => normalizeType(resolveAliasType(target.entry.function.returnType)))
@@ -1906,8 +1915,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def temporaryDestructorReceiverCode(expression: OxExpression): String = {
     expression match {
-      case _: OxBinary | _: OxConditional | _: OxCast => s"(${expression.code})"
-      case _                                          => expression.code
+      case _: OxBinary | _: OxConditional | _: OxCast | _: OxUnary => s"(${expression.code})"
+      case _                                                       => expression.code
     }
   }
 
@@ -1927,6 +1936,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           typeName.endsWith("&&")
       )
       .flatMap(typeName => resolveAggregateTypeFullName(receiverAggregateTypeName(typeName)))
+  }
+
+  private def expressionHasAggregateObjectOrReferenceType(expression: OxExpression): Boolean = {
+    expressionTypeFullName(expression).exists { typeName =>
+      val normalizedType = normalizeType(resolveAliasType(typeName))
+      !normalizedType.endsWith("*") &&
+      !normalizedType.endsWith("[]") &&
+      resolveAggregateTypeFullName(receiverAggregateTypeName(normalizedType)).isDefined
+    }
   }
 
   private def temporaryDestructorAst(destructor: TemporaryDestructor): Ast = {
@@ -2153,11 +2171,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           operatorCallAst(OxOrigin(binary), binary.code, operatorFor(binary.operator), binaryOperandAsts(binary))
         )
       case unary: OxUnary =>
-        operatorCallAst(
-          OxOrigin(unary),
-          unary.code,
-          unaryOperatorFor(unary.operator, unary.prefix),
-          Seq(unaryOperandAst(unary))
+        overloadedUnaryOperatorAst(unary).getOrElse(
+          operatorCallAst(
+            OxOrigin(unary),
+            unary.code,
+            unaryOperatorFor(unary.operator, unary.prefix),
+            Seq(unaryOperandAst(unary))
+          )
         )
       case conditional: OxConditional =>
         operatorCallAst(
@@ -2682,6 +2702,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     )
   }
 
+  private def overloadedUnaryOperatorAst(unary: OxUnary): Option[Ast] = {
+    overloadedUnaryOperatorTarget(unary).map(target => astForResolvedOperatorCall(OxOrigin(unary), unary.code, target))
+  }
+
+  private def overloadedUnaryOperatorTarget(unary: OxUnary): Option[ResolvedOperatorCall] = {
+    Option
+      .when(expressionHasAggregateObjectOrReferenceType(unary.argument))(unary)
+      .flatMap(cxxUnaryOperatorFunctionName)
+      .flatMap { operatorName =>
+        val memberTarget =
+          selectFunctionEntry(memberFunctionCandidates(unary.argument, operatorName), Some(Seq.empty))
+            .map(entry => ResolvedOperatorCall(entry, operatorName, Option(unary.argument), Seq.empty))
+        memberTarget.orElse {
+          selectFunctionEntry(freeFunctionCandidatesByName(operatorName), Some(Seq(unary.argument)))
+            .map(entry => ResolvedOperatorCall(entry, operatorName, None, Seq(unary.argument)))
+        }
+      }
+  }
+
   private def overloadedBinaryOperatorTarget(binary: OxBinary): Option[ResolvedOperatorCall] = {
     cxxOperatorFunctionName(binary.operator).flatMap { operatorName =>
       val memberTarget =
@@ -2799,6 +2838,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def cxxOperatorFunctionName(operator: String): Option[String] = {
     Option.when(CxxOverloadableBinaryOperators.contains(operator))(s"operator$operator")
+  }
+
+  private def cxxUnaryOperatorFunctionName(unary: OxUnary): Option[String] = {
+    Option.when(
+      CxxOverloadableUnaryOperators.contains(unary.operator) &&
+        (unary.prefix || !CxxPostfixUnaryOperatorsWithDummyParameter.contains(unary.operator))
+    )(s"operator${unary.operator}")
   }
 
   private def directCallAst(call: OxCall): Ast = {
@@ -2937,12 +2983,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         None
       case OxFieldAccess(field, _, _, base) =>
         expressionTypeFullName(base).flatMap(typeName => fieldTypeFullName(typeName, field))
-      case OxUnary("*", _, _, _, argument) =>
-        expressionTypeFullName(argument).map(dereferencedTypeFullName)
-      case OxUnary("&", _, _, _, argument) =>
-        expressionTypeFullName(argument).map(typeName =>
-          s"${stripCxxReference(normalizeType(resolveAliasType(typeName)))}*"
-        )
+      case unary: OxUnary =>
+        overloadedUnaryOperatorTarget(unary)
+          .map(target => normalizeType(target.entry.function.returnType))
+          .orElse(unaryExpressionTypeFullName(unary))
       case OxCast(typeName, _, _, _) =>
         Option(resolveAliasType(typeName))
       case OxNew(typeName, _, _, _, _) =>
@@ -2974,6 +3018,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case (Some("int"), _)                           => Some("int")
       case (_, Some("int"))                           => Some("int")
       case _                                          => None
+    }
+  }
+
+  private def unaryExpressionTypeFullName(unary: OxUnary): Option[String] = {
+    unary match {
+      case OxUnary("*", _, _, _, argument) =>
+        expressionTypeFullName(argument).map(dereferencedTypeFullName)
+      case OxUnary("&", _, _, _, argument) =>
+        expressionTypeFullName(argument).map(typeName =>
+          s"${stripCxxReference(normalizeType(resolveAliasType(typeName)))}*"
+        )
+      case _ =>
+        None
     }
   }
 
