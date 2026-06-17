@@ -123,6 +123,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         typeName -> structDecl.fields.map(field => field.name -> field).toMap
       }
     }.toMap
+  private lazy val aggregateFieldsByType: Map[String, Seq[OxFieldDecl]] =
+    aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
+      val localName = normalizeType(structDecl.name)
+      val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
+      Seq(localName, fullName).distinct.map(typeName => typeName -> structDecl.fields)
+    }.toMap
   private lazy val aggregateBaseTypesByType: Map[String, Seq[String]] =
     aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
       val localName = normalizeType(structDecl.name)
@@ -1379,8 +1385,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         index = OxLiteral(indexCode, indexCode, line)
       )
     } else {
-      OxFieldAccess(field = name, code = s"$tempName.$name", line = line, base = base)
+      val fieldName = aggregateFieldByIndex(tempType, index).map(_.name).getOrElse(name)
+      OxFieldAccess(field = fieldName, code = s"$tempName.$fieldName", line = line, base = base)
     }
+  }
+
+  private def aggregateFieldByIndex(typeName: String, index: Int): Option[OxFieldDecl] = {
+    typeAndBaseTypeFullNames(typeName).collectFirst(Function.unlift { candidate =>
+      aggregateFieldsByType.get(normalizeType(candidate)).flatMap(_.lift(index))
+    })
   }
 
   private def isArrayLikeType(typeName: String): Boolean = {
