@@ -473,6 +473,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     expression match {
       case OxBinary(_, _, _, left, right) =>
         Seq(left, right).flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)).toSet
+      case OxAssignment(_, _, _, left, right) =>
+        Seq(left, right).flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)).toSet
       case OxUnary(_, _, _, _, argument) =>
         collectRequiredImplicitDefaultConstructorTypesFromExpression(argument, ownerFullName)
       case OxConditional(_, _, condition, consequence, alternative) =>
@@ -1035,19 +1037,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case structuredBinding: OxStructuredBinding =>
         astsForStructuredBinding(structuredBinding)
       case assignment: OxAssignment =>
-        val assignmentAst_ =
-          overloadedAssignmentOperatorAst(assignment).getOrElse {
-            val left  = expressionAst(assignment.left)
-            val right = expressionAst(assignment.right)
-            if (assignment.operator == "=") {
-              assignmentAst(OxOrigin(assignment), left, right, assignment.code)
-            } else {
-              operatorCallAst(OxOrigin(assignment), assignment.code, operatorFor(assignment.operator), Seq(left, right))
-            }
-          }
-        assignmentAst_ +:
-          (heapConstructorAstsForExpressions(Seq(assignment.left, assignment.right)) ++
-            temporaryDestructorAstsForAssignment(assignment))
+        assignmentExpressionAst(assignment) +:
+          (heapConstructorAstsForExpressions(Seq(assignment)) ++ temporaryDestructorAstsForExpressions(Seq(assignment)))
       case ret: OxReturn =>
         heapConstructorAstsForExpressions(ret.expression.toSeq) ++ temporaryDestructorAstsForReturnExpression(
           ret.expression
@@ -1619,6 +1610,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val nested = expression match {
       case OxBinary(_, _, _, left, right) =>
         Seq(left, right).flatMap(heapConstructorsForExpression)
+      case OxAssignment(_, _, _, left, right) =>
+        Seq(left, right).flatMap(heapConstructorsForExpression)
       case OxUnary(_, _, _, _, argument) =>
         heapConstructorsForExpression(argument)
       case OxConditional(_, _, condition, consequence, alternative) =>
@@ -1744,16 +1737,6 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .map(temporaryDestructorAst)
   }
 
-  private def temporaryDestructorAstsForAssignment(assignment: OxAssignment): Seq[Ast] = {
-    val nested =
-      Seq(assignment.left, assignment.right).flatMap(expression => temporaryDestructorsForExpression(expression))
-    val current = overloadedAssignmentTemporaryTypeFullName(assignment)
-      .flatMap(destructorEntryForType)
-      .map(entry => TemporaryDestructor(temporaryDestructorCode(assignment, entry), assignment.line, entry))
-      .toSeq
-    (nested ++ current).reverse.map(temporaryDestructorAst)
-  }
-
   private def temporaryDestructorAstsForReturnExpression(expression: Option[OxExpression]): Seq[Ast] = {
     expression.toSeq
       .flatMap(expression =>
@@ -1781,6 +1764,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   ): Seq[TemporaryDestructor] = {
     val nested = expression match {
       case OxBinary(_, _, _, left, right) =>
+        Seq(left, right).flatMap(expression => temporaryDestructorsForExpression(expression))
+      case OxAssignment(_, _, _, left, right) =>
         Seq(left, right).flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxUnary(_, _, _, _, argument) =>
         temporaryDestructorsForExpression(argument)
@@ -1875,6 +1860,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case conditional: OxConditional => conditionalTemporaryTypeFullName(conditional)
       case cast: OxCast               => castTemporaryTypeFullName(cast)
       case binary: OxBinary           => overloadedBinaryTemporaryTypeFullName(binary)
+      case assignment: OxAssignment   => overloadedAssignmentTemporaryTypeFullName(assignment)
       case index: OxIndexAccess       => overloadedIndexTemporaryTypeFullName(index)
       case unary: OxUnary             => overloadedUnaryTemporaryTypeFullName(unary)
       case _                          => None
@@ -1929,14 +1915,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     s"${temporaryDestructorReceiverCode(expression)}.${entry.simpleName}()"
   }
 
-  private def temporaryDestructorCode(assignment: OxAssignment, entry: FunctionEntry): String = {
-    s"(${assignment.code}).${entry.simpleName}()"
-  }
-
   private def temporaryDestructorReceiverCode(expression: OxExpression): String = {
     expression match {
-      case _: OxBinary | _: OxConditional | _: OxCast | _: OxUnary => s"(${expression.code})"
-      case _                                                       => expression.code
+      case _: OxBinary | _: OxAssignment | _: OxConditional | _: OxCast | _: OxUnary => s"(${expression.code})"
+      case _                                                                         => expression.code
     }
   }
 
@@ -2190,6 +2172,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         overloadedBinaryOperatorAst(binary).getOrElse(
           operatorCallAst(OxOrigin(binary), binary.code, operatorFor(binary.operator), binaryOperandAsts(binary))
         )
+      case assignment: OxAssignment =>
+        assignmentExpressionAst(assignment)
       case unary: OxUnary =>
         overloadedUnaryOperatorAst(unary).getOrElse(
           operatorCallAst(
@@ -2292,6 +2276,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         )
       case designator: OxDesignator =>
         Ast(identifierNode(OxOrigin(designator), designator.name, designator.code, registerType(Defines.Any)))
+    }
+  }
+
+  private def assignmentExpressionAst(assignment: OxAssignment): Ast = {
+    overloadedAssignmentOperatorAst(assignment).getOrElse {
+      val left  = expressionAst(assignment.left)
+      val right = expressionAst(assignment.right)
+      if (assignment.operator == "=") {
+        assignmentAst(assignmentOrigin(assignment), left, right, assignment.code)
+      } else {
+        operatorCallAst(
+          assignmentOrigin(assignment),
+          assignment.code,
+          operatorFor(assignment.operator),
+          Seq(left, right)
+        )
+      }
     }
   }
 
@@ -2542,6 +2543,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         case OxBinary(_, _, _, left, right) =>
           visitExpression(left)
           visitExpression(right)
+        case OxAssignment(_, _, _, left, right) =>
+          visitExpression(left)
+          visitExpression(right)
         case OxUnary(_, _, _, _, argument) =>
           visitExpression(argument)
         case OxConditional(_, _, condition, consequence, alternative) =>
@@ -2781,8 +2785,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def overloadedAssignmentOperatorAst(assignment: OxAssignment): Option[Ast] = {
     overloadedAssignmentOperatorTarget(assignment).map(target =>
-      astForResolvedOperatorCall(OxOrigin(assignment), assignment.code, target)
+      astForResolvedOperatorCall(assignmentOrigin(assignment), assignment.code, target)
     )
+  }
+
+  private def assignmentOrigin(assignment: OxAssignment): OxOrigin = {
+    OxOrigin(assignment.code, Option(assignment.line))
   }
 
   private def overloadedAssignmentOperatorTarget(assignment: OxAssignment): Option[ResolvedOperatorCall] = {
@@ -2985,7 +2993,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case _: OxDesignator                => false
       case _: OxLiteral                   => false
       case OxPackExpansion(_, _, pattern) => expressionTypeFullName(pattern).exists(isFunctionPointerType)
-      case _: OxBinary | _: OxConditional | _: OxFold | _: OxTypeOf | _: OxSizeOf | _: OxNew | _: OxDelete => false
+      case _: OxBinary | _: OxAssignment | _: OxConditional | _: OxFold | _: OxTypeOf | _: OxSizeOf | _: OxNew |
+          _: OxDelete =>
+        false
     }
   }
 
@@ -3055,9 +3065,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         overloadedBinaryOperatorTarget(binary)
           .map(target => normalizeType(target.entry.function.returnType))
           .orElse(binaryExpressionTypeFullName(binary))
+      case assignment: OxAssignment =>
+        assignmentExpressionTypeFullName(assignment)
       case _ =>
         None
     }
+  }
+
+  private def assignmentExpressionTypeFullName(assignment: OxAssignment): Option[String] = {
+    overloadedAssignmentOperatorTarget(assignment)
+      .map(target => normalizeType(target.entry.function.returnType))
+      .orElse(expressionTypeFullName(assignment.left))
   }
 
   private def binaryExpressionTypeFullName(binary: OxBinary): Option[String] = {
@@ -3535,9 +3553,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def expressionIsRvalue(expression: OxExpression): Boolean = {
     expression match {
       case _: OxIdentifier | _: OxFieldAccess | _: OxIndexAccess => false
-      case OxUnary("*", _, _, _, _)                              => false
-      case OxPackExpansion(_, _, pattern)                        => expressionIsRvalue(pattern)
-      case _: OxTypeOf                                           => true
+      case assignment: OxAssignment =>
+        overloadedAssignmentOperatorTarget(assignment)
+          .map(target => typeNameIsRvalue(target.entry.function.returnType))
+          .getOrElse(false)
+      case OxUnary("*", _, _, _, _)       => false
+      case OxPackExpansion(_, _, pattern) => expressionIsRvalue(pattern)
+      case _: OxTypeOf                    => true
       case call: OxCall =>
         callReturnTypeFullName(call).map(typeNameIsRvalue).getOrElse(true)
       case OxCast(typeName, _, _, _) =>

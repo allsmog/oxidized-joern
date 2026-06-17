@@ -124,6 +124,7 @@ case class OxStructuredBinding(
 
 case class OxAssignment(operator: String, code: String, line: Int, left: OxExpression, right: OxExpression)
     extends OxStatement
+    with OxExpression
 
 case class OxReturn(code: String, line: Int, expression: Option[OxExpression]) extends OxStatement
 
@@ -544,6 +545,14 @@ object OxDocument {
         OxLiteral(value = str(value, "value"), code = str(value, "code"), line = int(value, "line"))
       case "binary" =>
         OxBinary(
+          operator = str(value, "operator"),
+          code = str(value, "code"),
+          line = int(value, "line"),
+          left = expression(value("left")),
+          right = expression(value("right"))
+        )
+      case "assignment" =>
+        OxAssignment(
           operator = str(value, "operator"),
           code = str(value, "code"),
           line = int(value, "line"),

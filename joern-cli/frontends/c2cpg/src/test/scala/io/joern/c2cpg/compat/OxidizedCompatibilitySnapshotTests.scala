@@ -1326,8 +1326,30 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |}
           |Core::Widget::Widget() {}
           |Core::Widget::~Widget() {}
+          |Core::Widget assignReturn(Core::Widget& left, Core::Widget& right) {
+          |  return left = right;
+          |}
+          |int assignRef(Core::Widget& left, Core::Widget& right) {
+          |  const Core::Widget& held = left = right;
+          |  return 0;
+          |}
+          |int assignUse(Core::Widget& left, Core::Widget& right) {
+          |  Core::consume(left = right);
+          |  return 0;
+          |}
           |int assignStmt(Core::Widget& left, Core::Widget& right) {
           |  left = right;
+          |  return 0;
+          |}
+          |Core::Widget plusReturn(Core::Widget& left, Core::Widget& right) {
+          |  return left += right;
+          |}
+          |int plusRef(Core::Widget& left, Core::Widget& right) {
+          |  const Core::Widget& held = left += right;
+          |  return 0;
+          |}
+          |int plusUse(Core::Widget& left, Core::Widget& right) {
+          |  Core::consume(left += right);
           |  return 0;
           |}
           |int plusStmt(Core::Widget& left, Core::Widget& right) {
@@ -1340,13 +1362,27 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
       val assignmentTemporaryDestructor = "(left = right).~Widget()"
       val compoundTemporaryDestructor   = "(left += right).~Widget()"
+      cpg.method.nameExact("assignReturn").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("assignRef").call.nameExact("~Widget").code.l shouldBe
+        List(assignmentTemporaryDestructor)
+      cpg.method.nameExact("assignUse").call.nameExact("~Widget").code.l shouldBe
+        List(assignmentTemporaryDestructor)
       cpg.method.nameExact("assignStmt").call.nameExact("~Widget").code.l shouldBe
         List(assignmentTemporaryDestructor)
+      cpg.method.nameExact("plusReturn").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("plusRef").call.nameExact("~Widget").code.l shouldBe List(compoundTemporaryDestructor)
+      cpg.method.nameExact("plusUse").call.nameExact("~Widget").code.l shouldBe List(compoundTemporaryDestructor)
       cpg.method.nameExact("plusStmt").call.nameExact("~Widget").code.l shouldBe List(compoundTemporaryDestructor)
+      cpg.method.nameExact("assignReturn").ast.isReturn.astChildren.isCall.nameExact("operator=").code.l shouldBe
+        List("left = right")
       cpg.method.nameExact("assignStmt").call.nameExact("operator=").codeExact("left = right").argument.code.l shouldBe
+        List("left", "right")
+      cpg.method.nameExact("assignUse").call.nameExact("operator=").codeExact("left = right").argument.code.l shouldBe
         List("left", "right")
       cpg.method.nameExact("assignStmt").call.nameExact(Operators.assignment).codeExact("left = right").l shouldBe Nil
       cpg.method.nameExact("plusStmt").call.nameExact("operator+=").codeExact("left += right").argument.code.l shouldBe
+        List("left", "right")
+      cpg.method.nameExact("plusUse").call.nameExact("operator+=").codeExact("left += right").argument.code.l shouldBe
         List("left", "right")
       cpg.method.nameExact("plusStmt").call.nameExact(Operators.assignmentPlus).codeExact("left += right").l shouldBe Nil
       cpg.method.nameExact("assignStmt").call.nameExact("operator=").code.l shouldBe
