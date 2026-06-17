@@ -3161,6 +3161,8 @@ fn parse_lambda_expression(node: Node, source: &[u8]) -> Expression {
     let parameters = lambda_parameter_list(node)
         .map(|parameters| parse_parameters(parameters, source))
         .unwrap_or_default();
+    let mut inference_parameters = parameters.clone();
+    inference_parameters.extend(lambda_template_parameters(node, source));
     let mut symbols = MacroSymbols::new();
     let body = node
         .child_by_field_name("body")
@@ -3171,7 +3173,7 @@ fn parse_lambda_expression(node: Node, source: &[u8]) -> Expression {
         })
         .map(|body| parse_statement_block(body, source, &mut symbols))
         .unwrap_or_default();
-    let return_type = lambda_return_type(node, source, &parameters, &body);
+    let return_type = lambda_return_type(node, source, &inference_parameters, &body);
     Expression::Lambda {
         code: node_text(node, source).trim().to_string(),
         line: line(node),
@@ -3182,6 +3184,12 @@ fn parse_lambda_expression(node: Node, source: &[u8]) -> Expression {
         parameters,
         body,
     }
+}
+
+fn lambda_template_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
+    node.child_by_field_name("template_parameters")
+        .map(|parameters| parse_parameters_without_varargs(parameters, source))
+        .unwrap_or_default()
 }
 
 fn lambda_parameter_list(node: Node) -> Option<Node> {
@@ -5296,6 +5304,76 @@ mod tests {
         });
         assert!(
             matches!(typed, Some((return_type, signature)) if return_type == "long" && signature == "long()")
+        );
+    }
+
+    #[test]
+    fn parses_cpp_constrained_lambdas() {
+        let sample = r#"
+                void use() {
+                  auto l1 = []<my_concept T> (T v) { return v; };
+                  auto l2 = []<typename T> requires my_concept<T> (T v) { return v; };
+                  auto l3 = []<typename T> (T v) requires my_concept<T> { return v; };
+                  auto l4 = [](my_concept auto v) { return v; };
+                  auto l5 = []<my_concept auto v> () { return v; };
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("constrained lambda sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+
+        let lambdas = function
+            .body
+            .iter()
+            .filter_map(|statement| match statement {
+                Statement::LocalDecl {
+                    name,
+                    initializer: Some(lambda @ Expression::Lambda { .. }),
+                    ..
+                } => Some((name.as_str(), lambda)),
+                _ => None,
+            })
+            .map(|(name, lambda)| {
+                let Expression::Lambda {
+                    parameters,
+                    return_type,
+                    signature,
+                    ..
+                } = lambda
+                else {
+                    unreachable!();
+                };
+                (
+                    name,
+                    signature.as_str(),
+                    return_type.as_str(),
+                    parameters
+                        .iter()
+                        .map(|parameter| (parameter.name.as_str(), parameter.type_name.as_str()))
+                        .collect::<Vec<_>>(),
+                )
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            lambdas,
+            vec![
+                ("l1", "T(T)", "T", vec![("v", "T")]),
+                ("l2", "T(T)", "T", vec![("v", "T")]),
+                ("l3", "T(T)", "T", vec![("v", "T")]),
+                (
+                    "l4",
+                    "my_concept auto(my_concept auto)",
+                    "my_concept auto",
+                    vec![("v", "my_concept auto")]
+                ),
+                ("l5", "my_concept auto()", "my_concept auto", vec![]),
+            ]
         );
     }
 
