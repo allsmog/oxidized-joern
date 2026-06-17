@@ -2088,7 +2088,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         awaitCall.code shouldBe "co_await x()"
         awaitCall.argument.isCall.code.l shouldBe List("x()")
       }
-      inside(cpg.method.nameExact("main").ret.codeExact("co_return y()").l) { case List(returnNode) =>
+      inside(cpg.method.nameExact("main").ast.isReturn.codeExact("co_return y()").l) { case List(returnNode) =>
         returnNode.astChildren.isCall.code.l shouldBe List("y()")
       }
       inside(cpg.method.nameExact("range").call.nameExact("<operator>.yield").l) { case List(yieldCall) =>
@@ -2146,8 +2146,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "likelyIf()",
         "unlikelyWhile()"
       )
-      cpg.method.nameExact("foo").identifier.code.l should contain("unlikely_truthy_condition")
-      cpg.method.nameExact("foo").identifier.code(".*\\[\\[(likely|unlikely)\\]\\].*").l shouldBe Nil
+      cpg.method.nameExact("foo").ast.isIdentifier.code.l.should(contain("unlikely_truthy_condition"))
+      cpg.method.nameExact("foo").ast.isIdentifier.code(".*\\[\\[(likely|unlikely)\\]\\].*").l shouldBe Nil
     }
 
     "capture C++20 using enum switch cases from the Rust parser backend" in {
