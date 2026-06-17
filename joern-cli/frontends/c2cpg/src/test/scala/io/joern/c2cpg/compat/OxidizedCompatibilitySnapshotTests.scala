@@ -308,8 +308,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("direct", "Core.Widget.Widget(widget)")
       cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("copied = Core.Widget.Widget(widget)").argument.code.l shouldBe
         List("copied", "Core.Widget.Widget(widget)")
-      cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("ptr = &widget").argument.code.l shouldBe
-        List("ptr", "&widget")
+      cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("*ptr = &widget").argument.code.l shouldBe
+        List("*ptr", "&widget")
       inside(cpg.method.nameExact("use").call.nameExact("~Widget").codeExact("ptr->~Widget()").l) {
         case List(destructorCall) =>
           destructorCall.methodFullName shouldBe "Core.Widget.~Widget:void()"

@@ -105,6 +105,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
       Seq(localName, fullName).distinct.map(typeName => typeName -> structDecl)
     }.toMap
+  private lazy val requiredImplicitDefaultConstructorTypes: Set[String] =
+    collectRequiredImplicitDefaultConstructorTypes(document.declarations, None)
   private lazy val outOfClassFunctionsByOwner: Map[String, Seq[FunctionEntry]] =
     functionEntries
       .filter(entry =>
@@ -360,6 +362,183 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
+  private def collectRequiredImplicitDefaultConstructorTypes(
+    declarations: Seq[OxDeclaration],
+    ownerFullName: Option[String]
+  ): Set[String] = {
+    declarations.flatMap {
+      case functionDecl: OxFunctionDecl =>
+        collectRequiredImplicitDefaultConstructorTypesFromStatements(
+          functionDecl.body,
+          functionOwnerFullName(functionDecl, ownerFullName)
+        )
+      case structDecl: OxStructDecl =>
+        val localName       = normalizeType(structDecl.name)
+        val structFullName  = ownerFullName.map(parent => s"$parent.$localName").getOrElse(localName)
+        val nestedOwnerName = Option(structFullName)
+        collectRequiredImplicitDefaultConstructorTypes(structDecl.nestedDeclarations, nestedOwnerName)
+      case namespaceDecl: OxNamespaceDecl =>
+        val namespaceOwner = ownerFullName
+          .map(parent => (parent +: namespacePath(namespaceDecl.name)).mkString("."))
+          .orElse(Option(namespacePath(namespaceDecl.name).mkString(".")))
+        collectRequiredImplicitDefaultConstructorTypes(namespaceDecl.declarations, namespaceOwner)
+      case _ =>
+        Set.empty[String]
+    }.toSet
+  }
+
+  private def collectRequiredImplicitDefaultConstructorTypesFromStatements(
+    statements: Seq[OxStatement],
+    ownerFullName: Option[String]
+  ): Set[String] = {
+    statements
+      .flatMap(statement => collectRequiredImplicitDefaultConstructorTypesFromStatement(statement, ownerFullName))
+      .toSet
+  }
+
+  private def collectRequiredImplicitDefaultConstructorTypesFromStatement(
+    statement: OxStatement,
+    ownerFullName: Option[String]
+  ): Set[String] = {
+    statement match {
+      case local: OxLocalDecl =>
+        requiredImplicitDefaultConstructorType(local, ownerFullName).toSet ++
+          local.initializer.toSet.flatMap(
+            collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)
+          )
+      case OxStructuredBinding(_, _, _, _, _, initializer) =>
+        initializer.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
+      case OxAssignment(_, _, _, left, right) =>
+        Seq(left, right).flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)).toSet
+      case OxReturn(_, _, expression) =>
+        expression.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
+      case OxThrow(_, _, expression) =>
+        expression.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
+      case OxTry(_, _, body, catches) =>
+        collectRequiredImplicitDefaultConstructorTypesFromStatements(body, ownerFullName) ++
+          catches.flatMap(catchClause =>
+            collectRequiredImplicitDefaultConstructorTypesFromStatements(catchClause.body, ownerFullName)
+          )
+      case OxIf(_, _, condition, thenBody, elseBody) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
+          collectRequiredImplicitDefaultConstructorTypesFromStatements(thenBody, ownerFullName) ++
+          collectRequiredImplicitDefaultConstructorTypesFromStatements(elseBody, ownerFullName)
+      case OxWhile(_, _, condition, body) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
+          collectRequiredImplicitDefaultConstructorTypesFromStatements(body, ownerFullName)
+      case OxDoWhile(_, _, condition, body) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
+          collectRequiredImplicitDefaultConstructorTypesFromStatements(body, ownerFullName)
+      case OxFor(_, _, initializer, condition, update, body) =>
+        collectRequiredImplicitDefaultConstructorTypesFromStatements(initializer, ownerFullName) ++
+          condition.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)) ++
+          update.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)) ++
+          collectRequiredImplicitDefaultConstructorTypesFromStatements(body, ownerFullName)
+      case OxLabel(_, _, _, body) =>
+        collectRequiredImplicitDefaultConstructorTypesFromStatements(body, ownerFullName)
+      case OxSwitch(_, _, condition, body) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
+          collectRequiredImplicitDefaultConstructorTypesFromStatements(body, ownerFullName)
+      case OxCase(_, _, value, body) =>
+        value.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)) ++
+          collectRequiredImplicitDefaultConstructorTypesFromStatements(body, ownerFullName)
+      case OxExpressionStatement(_, _, expression) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(expression, ownerFullName)
+      case _: OxUnknownStatement | _: OxUsingEnumStatement | _: OxBreak | _: OxContinue | _: OxGoto =>
+        Set.empty
+    }
+  }
+
+  private def collectRequiredImplicitDefaultConstructorTypesFromExpression(
+    expression: OxExpression,
+    ownerFullName: Option[String]
+  ): Set[String] = {
+    expression match {
+      case OxBinary(_, _, _, left, right) =>
+        Seq(left, right).flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)).toSet
+      case OxUnary(_, _, _, _, argument) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(argument, ownerFullName)
+      case OxConditional(_, _, condition, consequence, alternative) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
+          consequence.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)) ++
+          collectRequiredImplicitDefaultConstructorTypesFromExpression(alternative, ownerFullName)
+      case OxCast(_, _, _, value) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(value, ownerFullName)
+      case OxFold(_, _, _, left, right) =>
+        left.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)) ++
+          right.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
+      case OxPackExpansion(_, _, pattern) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(pattern, ownerFullName)
+      case OxTypeOf(_, _, argument) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(argument, ownerFullName)
+      case OxSizeOf(_, _, value, _) =>
+        value.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
+      case OxNew(_, _, _, arguments, initializerArguments) =>
+        (arguments ++ initializerArguments)
+          .flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
+          .toSet
+      case OxDelete(_, _, argument) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(argument, ownerFullName)
+      case OxLambda(_, _, captures, _, _, _, _, body) =>
+        captures
+          .flatMap(_.initializer)
+          .flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
+          .toSet ++
+          collectRequiredImplicitDefaultConstructorTypesFromStatements(body, ownerFullName)
+      case OxCall(_, _, _, callee, arguments) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(callee, ownerFullName) ++
+          arguments.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
+      case OxFieldAccess(_, _, _, base) =>
+        collectRequiredImplicitDefaultConstructorTypesFromExpression(base, ownerFullName)
+      case OxIndexAccess(_, _, base, index) =>
+        Seq(base, index).flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)).toSet
+      case OxInitializerList(_, _, elements) =>
+        elements.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)).toSet
+      case OxDesignatedInitializer(_, _, designator, value) =>
+        Seq(designator, value)
+          .flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
+          .toSet
+      case _: OxIdentifier | _: OxLiteral | _: OxDesignator =>
+        Set.empty
+    }
+  }
+
+  private def requiredImplicitDefaultConstructorType(
+    local: OxLocalDecl,
+    ownerFullName: Option[String]
+  ): Option[String] = {
+    val isDefaultConstruction = local.initializer match {
+      case None =>
+        true
+      case Some(initializerList: OxInitializerList) if initializerList.elements.isEmpty =>
+        isDirectListInitializer(local, initializerList)
+      case _ =>
+        false
+    }
+    Option
+      .when(isDefaultConstruction)(localObjectAggregateTypeFullName(local.typeName, ownerFullName))
+      .flatten
+      .filter(hasImplicitDefaultConstructor)
+  }
+
+  private def localObjectAggregateTypeFullName(typeName: String, ownerFullName: Option[String]): Option[String] = {
+    val normalized = stripCxxTypeQualifiers(normalizeType(resolveAliasType(typeName))).trim
+    val isObjectType = normalized.nonEmpty &&
+      normalized != Defines.Auto &&
+      !normalized.endsWith("*") &&
+      !normalized.endsWith("[]") &&
+      !normalized.endsWith("&") &&
+      !normalized.endsWith("&&")
+    if (!isObjectType) {
+      None
+    } else {
+      val ownerCandidates = ownerFullName.toSeq.flatMap { owner =>
+        owner.split('.').toSeq.inits.filter(_.nonEmpty).map(parts => s"${parts.mkString(".")}.$normalized")
+      }
+      (ownerCandidates :+ normalized).find(aggregateTypeFullNames.contains)
+    }
+  }
+
   private def astForStruct(structDecl: OxStructDecl): Ast = {
     astForStruct(structDecl, parentTypeFullName = None, parentAstFullName = globalNamespaceBlock().fullName)
   }
@@ -402,7 +581,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val outOfClassMethodAsts = outOfClassFunctionsByOwner
       .getOrElse(typeName, Seq.empty)
       .flatMap(entry => astsForFunction(entry.function, entry.lexicalOwnerFullName, NodeTypes.TYPE_DECL, typeName))
-    val implicitConstructorAst = Option.when(hasImplicitDefaultConstructor(typeName)) {
+    val implicitConstructorAst = Option.when(shouldEmitImplicitDefaultConstructor(typeName)) {
       implicitDefaultConstructorAst(structDecl, typeName)
     }
     Ast(typeDecl).withChildren(fieldAsts ++ implicitConstructorAst.toSeq ++ nestedAsts ++ outOfClassMethodAsts)
@@ -1051,8 +1230,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           constructorAssignmentAst(local, Seq(initializer), initializer.code, OxOrigin(initializer), typeName)
         ) ++ temporaryDestructorAsts
       case Some(initializer) =>
-        val assignmentCode = s"${local.name} = ${initializer.code}"
-        val left           = identifierAst(local.name, local.name, local.line)
+        val (left, targetCode) = localAssignmentTargetAst(local, typeName)
+        val assignmentCode     = s"$targetCode = ${initializer.code}"
         val assignment =
           assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
         val fieldAssignments = designatedInitializerAssignmentAsts(local, initializer, typeName)
@@ -1062,6 +1241,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Seq(localAst, constructorAssignmentAst(local, Seq.empty, "", origin, typeName))
       case None =>
         Seq(localAst)
+    }
+  }
+
+  private def localAssignmentTargetAst(local: OxLocalDecl, typeName: String): (Ast, String) = {
+    val normalizedType = normalizeType(resolveAliasType(typeName))
+    if (normalizedType.endsWith("*")) {
+      val targetCode = s"*${local.name}"
+      identifierAst(local.name, targetCode, local.line) -> targetCode
+    } else {
+      identifierAst(local.name, local.name, local.line) -> local.name
     }
   }
 
@@ -1224,6 +1413,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     aggregateDeclarationsByType.get(resolvedType).exists { structDecl =>
       FileDefaults.hasCppFileExtension(declarationFilename(structDecl)) && constructorEntriesForType(resolvedType).isEmpty
     }
+  }
+
+  private def shouldEmitImplicitDefaultConstructor(typeName: String): Boolean = {
+    hasImplicitDefaultConstructor(typeName) && requiredImplicitDefaultConstructorTypes.contains(
+      resolveAliasType(typeName)
+    )
   }
 
   private def constructorAssignmentAst(local: OxLocalDecl, initializer: OxInitializerList, typeName: String): Ast = {
