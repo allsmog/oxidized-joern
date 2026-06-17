@@ -4241,6 +4241,77 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C++ default member initializers from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Cell {
+          |  int x;
+          |  int y;
+          |};
+          |struct Holder {
+          |  Cell cell = {1, 2};
+          |  int z = 3;
+          |  int overridden = 4;
+          |  static int counter = 5;
+          |  Holder() {}
+          |  Holder(int seed) : overridden(seed) {}
+          |};
+          |struct ImplicitHolder {
+          |  Cell cell = {7, 8};
+          |  int z = 9;
+          |};
+          |void default_member_initializers(int seed) {
+          |  Holder first;
+          |  Holder second(seed);
+          |  ImplicitHolder third;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.typeDecl.nameExact("Holder").member.name.l should contain allElementsOf List(
+        "cell",
+        "z",
+        "overridden",
+        "counter"
+      )
+      cpg.typeDecl.nameExact("Holder").member.nameExact("counter").modifier.modifierType.l shouldBe
+        List(ModifierTypes.STATIC)
+
+      val defaultAssignments =
+        cpg.method.fullNameExact("Holder.Holder:void()").call.nameExact(Operators.assignment).code.l
+      defaultAssignments should contain allElementsOf List(
+        "this->cell = {1, 2}",
+        "this->cell.x = 1",
+        "this->cell.y = 2",
+        "this->z = 3",
+        "this->overridden = 4"
+      )
+      defaultAssignments should not contain "this->counter = 5"
+
+      val seededAssignments =
+        cpg.method.fullNameExact("Holder.Holder:void(int)").call.nameExact(Operators.assignment).code.l
+      seededAssignments should contain allElementsOf List(
+        "this->cell = {1, 2}",
+        "this->cell.x = 1",
+        "this->cell.y = 2",
+        "this->z = 3",
+        "this->overridden = seed"
+      )
+      seededAssignments should not contain "this->overridden = 4"
+      seededAssignments.indexOf("this->cell.x = 1") should be < seededAssignments.indexOf("this->z = 3")
+      seededAssignments.indexOf("this->z = 3") should be < seededAssignments.indexOf("this->overridden = seed")
+
+      val implicitAssignments =
+        cpg.method.fullNameExact("ImplicitHolder.ImplicitHolder:void()").call.nameExact(Operators.assignment).code.l
+      implicitAssignments should contain allElementsOf List(
+        "this->cell = {7, 8}",
+        "this->cell.x = 7",
+        "this->cell.y = 8",
+        "this->z = 9"
+      )
+    }
+
     "capture C++ aggregate assignment initializers inside new and lambda init-capture arguments from the Rust parser backend" in {
       val cpg = code(
         """

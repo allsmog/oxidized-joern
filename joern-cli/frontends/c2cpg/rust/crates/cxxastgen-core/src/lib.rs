@@ -129,6 +129,8 @@ pub struct FieldDecl {
     pub type_name: String,
     pub code: String,
     pub is_static: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub initializer: Option<Expression>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -1683,6 +1685,7 @@ fn parse_field(node: Node, source: &[u8]) -> Option<FieldDecl> {
             type_name,
             code: code.to_string(),
             is_static: is_static_field(node, source),
+            initializer: field_initializer(node, source),
         });
     }
     let (type_name, name) =
@@ -1692,7 +1695,19 @@ fn parse_field(node: Node, source: &[u8]) -> Option<FieldDecl> {
         type_name,
         code: code.to_string(),
         is_static: is_static_field(node, source),
+        initializer: field_initializer(node, source),
     })
+}
+
+fn field_initializer(node: Node, source: &[u8]) -> Option<Expression> {
+    if let Some(default_value) = node.child_by_field_name("default_value") {
+        return Some(parse_expression(default_value, source));
+    }
+    let declarator = node.child_by_field_name("declarator")?;
+    declarator
+        .child_by_field_name("value")
+        .map(|value| parse_expression(value, source))
+        .or_else(|| direct_initializer_from_declarator(declarator, source))
 }
 
 fn is_static_field(node: Node, source: &[u8]) -> bool {
@@ -5542,6 +5557,80 @@ mod tests {
                 "fancy.explicitThis",
                 "invoker"
             ]
+        );
+    }
+
+    #[test]
+    fn parses_cpp_default_member_initializers() {
+        let sample = r#"
+                struct Cell {
+                  int x = 1;
+                  int y{2};
+                };
+                struct Holder {
+                  Cell cell = {3, 4};
+                  static int count = 5;
+                  int plain;
+                };
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("default member initializer sample should parse");
+        let holder = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "Holder" => {
+                    Some(struct_decl)
+                }
+                _ => None,
+            })
+            .expect("expected Holder struct");
+        assert_eq!(holder.fields.len(), 3);
+        assert_eq!(holder.fields[0].name, "cell");
+        assert!(
+            matches!(
+                holder.fields[0].initializer.as_ref(),
+                Some(Expression::InitializerList { code, elements, .. })
+                    if code == "{3, 4}" && elements.len() == 2
+            ),
+            "expected cell initializer list, got {:?}",
+            holder.fields[0].initializer
+        );
+        assert_eq!(holder.fields[1].name, "count");
+        assert!(holder.fields[1].is_static);
+        assert!(
+            matches!(
+                holder.fields[1].initializer.as_ref(),
+                Some(Expression::Literal { value, .. }) if value == "5"
+            ),
+            "expected count literal initializer, got {:?}",
+            holder.fields[1].initializer
+        );
+        assert_eq!(holder.fields[2].name, "plain");
+        assert!(holder.fields[2].initializer.is_none());
+
+        let cell = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "Cell" => Some(struct_decl),
+                _ => None,
+            })
+            .expect("expected Cell struct");
+        assert!(
+            matches!(
+                cell.fields[0].initializer.as_ref(),
+                Some(Expression::Literal { value, .. }) if value == "1"
+            ),
+            "expected x literal initializer, got {:?}",
+            cell.fields[0].initializer
+        );
+        assert!(
+            matches!(
+                cell.fields[1].initializer.as_ref(),
+                Some(Expression::InitializerList { code, elements, .. })
+                    if code == "{2}" && matches!(elements.as_slice(), [Expression::Literal { value, .. }] if value == "2")
+            ),
+            "expected y initializer list, got {:?}",
+            cell.fields[1].initializer
         );
     }
 
