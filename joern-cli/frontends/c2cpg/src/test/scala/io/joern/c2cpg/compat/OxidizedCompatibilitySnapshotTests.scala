@@ -401,6 +401,18 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           operatorCall.typeFullName shouldBe "int"
           operatorCall.argument.code.l shouldBe List("widget", "fancy")
       }
+      cpg.method
+        .fullNameExact("Core.Widget.operator+:int(Widget&)<const>")
+        .call
+        .nameExact(Operators.addition)
+        .codeExact("value + other.value")
+        .size shouldBe 1
+      cpg.method
+        .fullNameExact("Core.Invoker.operator():int(int)<const>")
+        .call
+        .nameExact(Operators.addition)
+        .codeExact("delta + 1")
+        .size shouldBe 1
       inside(cpg.method.nameExact("use").call.nameExact("operator[]").codeExact("widget[2]").l) {
         case List(operatorCall) =>
           operatorCall.methodFullName shouldBe "Core.Widget.operator[]:int(int)<const>"

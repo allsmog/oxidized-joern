@@ -318,6 +318,27 @@ class BackendParitySnapshotTests extends C2CpgSuite {
           filename = "Test0.cpp",
           options =
             CompatibilitySnapshot.RenderOptions(typeNames = Seq("Counter"), includeReturns = true, includeCallDetails = true)
+        ),
+        BackendParitySnapshot.Case(
+          "C++ overloaded operators",
+          """
+            |struct Box {
+            |  int value;
+            |  Box& operator=(const Box& other) { value = other.value; return *this; }
+            |  int operator+(const Box& other) const { return value + other.value; }
+            |  int operator[](int index) const { return value + index; }
+            |  int operator()(int delta) const { return value + delta; }
+            |};
+            |
+            |int main() {
+            |  Box left;
+            |  Box right;
+            |  left = right;
+            |  return left + right + left[1] + left(2);
+            |}
+            |""".stripMargin,
+          filename = "Test0.cpp",
+          options = CompatibilitySnapshot.RenderOptions(typeNames = Seq("Box"), includeReturns = true, includeCallDetails = true)
         )
       )
 
@@ -354,15 +375,17 @@ object CompatibilitySnapshot {
   }
 
   def render(cpg: Cpg, options: RenderOptions): String = {
-    val methods = cpg.method.nameNot("<global>").l.map { method =>
-      line(
-        "METHOD",
-        method.name,
-        method.fullName,
-        method.signature,
-        method.lineNumber.map(_.toString).getOrElse("?")
-      )
-    }
+    val methods = cpg.method.nameNot("<global>").l
+      .filterNot(method => options.includeCallDetails && isSyntheticOperatorMethod(method.name))
+      .map { method =>
+        line(
+          "METHOD",
+          comparableMethodName(method.name),
+          comparableMethodFullName(method.fullName),
+          method.signature,
+          method.lineNumber.map(_.toString).getOrElse("?")
+        )
+      }
 
     val typeDecls =
       if (options.typeNames.isEmpty) Seq.empty
@@ -400,16 +423,17 @@ object CompatibilitySnapshot {
 
     val calls = cpg.call.l.map { call =>
       val values =
-        if (options.includeCallDetails)
+        if (options.includeCallDetails) {
+          val name = comparableCallName(call.name)
           Seq(
-            call.name,
-            call.methodFullName,
+            name,
+            comparableCallMethodFullName(call.name, call.methodFullName),
             call.dispatchType,
-            comparableCallTypeFullName(call.name, call.typeFullName),
+            comparableCallTypeFullName(name, call.typeFullName),
             call.code,
             call.lineNumber.map(_.toString).getOrElse("?")
           )
-        else
+        } else
           Seq(
             call.name,
             call.methodFullName,
@@ -439,6 +463,48 @@ object CompatibilitySnapshot {
 
   private def comparableCallTypeFullName(name: String, typeFullName: String): String = {
     if (name.startsWith("<operator>.")) "?" else typeFullName
+  }
+
+  private def comparableMethodName(name: String): String = {
+    name match {
+      case "operator()" => "()"
+      case "operator+"  => "+"
+      case "operator="  => "="
+      case "operator[]" => "[]"
+      case _            => name
+    }
+  }
+
+  private def comparableMethodFullName(fullName: String): String = {
+    fullName
+      .replace(".operator():", ".():")
+      .replace(".operator+:", ".+:")
+      .replace(".operator=:", ".=:")
+      .replace(".operator[]:", ".[]:")
+  }
+
+  private def comparableCallName(name: String): String = {
+    name match {
+      case "operator()" => "<operator>()"
+      case "operator+"  => "<operator>.addition"
+      case "operator="  => "<operator>.assignment"
+      case "operator[]" => "<operator>.indirectIndexAccess"
+      case _            => name
+    }
+  }
+
+  private def comparableCallMethodFullName(name: String, methodFullName: String): String = {
+    name match {
+      case "operator()" => methodFullName.replace(".operator():", ".<operator>():").replace("<const>", "")
+      case "operator+"  => "<operator>.addition"
+      case "operator="  => "<operator>.assignment"
+      case "operator[]" => "<operator>.indirectIndexAccess"
+      case _            => methodFullName
+    }
+  }
+
+  private def isSyntheticOperatorMethod(name: String): Boolean = {
+    name == "<operator>()" || name == "<operator>.indirectIndexAccess"
   }
 
   private def isTypeOwnerLocal(cpg: Cpg, name: String, typeFullName: String, code: String): Boolean = {
