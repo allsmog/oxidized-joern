@@ -1395,6 +1395,47 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("-value")
     }
 
+    "model C++ overloaded postfix unary aggregate temporary lifetimes" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  Widget operator++(int) { return Widget(); }
+          |  ~Widget();
+          |};
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Widget postReturn(Core::Widget& value) {
+          |  return value++;
+          |}
+          |int postRef(Core::Widget& value) {
+          |  const Core::Widget& held = value++;
+          |  return 0;
+          |}
+          |int postUse(Core::Widget& value) {
+          |  Core::consume(value++);
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val postfixTemporaryDestructor = "(value++).~Widget()"
+      cpg.method.nameExact("postReturn").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("postRef").call.nameExact("~Widget").code.l shouldBe List(postfixTemporaryDestructor)
+      cpg.method.nameExact("postUse").call.nameExact("~Widget").code.l shouldBe List(postfixTemporaryDestructor)
+      cpg.method.nameExact("postReturn").ast.isReturn.astChildren.isCall.nameExact("operator++").code.l shouldBe
+        List("value++")
+      cpg.method.nameExact("postUse").call.nameExact("operator++").codeExact("value++").argument.code.l shouldBe
+        List("value")
+    }
+
     "preserve returned C++ object temporaries from destructor cleanup" in {
       val cpg = code(
         """

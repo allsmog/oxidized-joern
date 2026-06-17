@@ -2711,14 +2711,40 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .when(expressionHasAggregateObjectOrReferenceType(unary.argument))(unary)
       .flatMap(cxxUnaryOperatorFunctionName)
       .flatMap { operatorName =>
-        val memberTarget =
-          selectFunctionEntry(memberFunctionCandidates(unary.argument, operatorName), Some(Seq.empty))
-            .map(entry => ResolvedOperatorCall(entry, operatorName, Option(unary.argument), Seq.empty))
-        memberTarget.orElse {
-          selectFunctionEntry(freeFunctionCandidatesByName(operatorName), Some(Seq(unary.argument)))
-            .map(entry => ResolvedOperatorCall(entry, operatorName, None, Seq(unary.argument)))
+        if (isPostfixUnaryOperatorWithDummyParameter(unary)) {
+          overloadedPostfixUnaryOperatorTarget(unary, operatorName)
+        } else {
+          val memberTarget =
+            selectFunctionEntry(memberFunctionCandidates(unary.argument, operatorName), Some(Seq.empty))
+              .map(entry => ResolvedOperatorCall(entry, operatorName, Option(unary.argument), Seq.empty))
+          memberTarget.orElse {
+            selectFunctionEntry(freeFunctionCandidatesByName(operatorName), Some(Seq(unary.argument)))
+              .map(entry => ResolvedOperatorCall(entry, operatorName, None, Seq(unary.argument)))
+          }
         }
       }
+  }
+
+  private def overloadedPostfixUnaryOperatorTarget(
+    unary: OxUnary,
+    operatorName: String
+  ): Option[ResolvedOperatorCall] = {
+    val dummyArgument = postfixUnaryDummyArgument(unary.line)
+    val memberTarget =
+      selectFunctionEntry(memberFunctionCandidates(unary.argument, operatorName), Some(Seq(dummyArgument)))
+        .map(entry => ResolvedOperatorCall(entry, operatorName, Option(unary.argument), Seq.empty))
+    memberTarget.orElse {
+      selectFunctionEntry(freeFunctionCandidatesByName(operatorName), Some(Seq(unary.argument, dummyArgument)))
+        .map(entry => ResolvedOperatorCall(entry, operatorName, None, Seq(unary.argument)))
+    }
+  }
+
+  private def postfixUnaryDummyArgument(line: Int): OxExpression = {
+    OxLiteral("0", "0", line)
+  }
+
+  private def isPostfixUnaryOperatorWithDummyParameter(unary: OxUnary): Boolean = {
+    !unary.prefix && CxxPostfixUnaryOperatorsWithDummyParameter.contains(unary.operator)
   }
 
   private def overloadedBinaryOperatorTarget(binary: OxBinary): Option[ResolvedOperatorCall] = {
@@ -2841,10 +2867,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def cxxUnaryOperatorFunctionName(unary: OxUnary): Option[String] = {
-    Option.when(
-      CxxOverloadableUnaryOperators.contains(unary.operator) &&
-        (unary.prefix || !CxxPostfixUnaryOperatorsWithDummyParameter.contains(unary.operator))
-    )(s"operator${unary.operator}")
+    Option.when(CxxOverloadableUnaryOperators.contains(unary.operator))(s"operator${unary.operator}")
   }
 
   private def directCallAst(call: OxCall): Ast = {
