@@ -676,6 +676,56 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ constrained lambdas from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |int use() {
+          |  auto l1 = []<my_concept T> (T v) { return v; };
+          |  auto l2 = []<typename T> requires my_concept<T> (T v) { return v; };
+          |  auto l3 = []<typename T> (T v) requires my_concept<T> { return v; };
+          |  auto l4 = [](my_concept auto v) { return v; };
+          |  auto l5 = []<my_concept auto v> () { return v; };
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val l1FullName = "use.<lambda>0:T(T)"
+      val l2FullName = "use.<lambda>1:T(T)"
+      val l3FullName = "use.<lambda>2:T(T)"
+      val l4FullName = "use.<lambda>3:my_concept auto(my_concept auto)"
+      val l5FullName = "use.<lambda>4:my_concept auto()"
+
+      cpg.method.nameExact("use").local.nameExact("l1").typeFullName.l shouldBe List(l1FullName)
+      cpg.method.nameExact("use").local.nameExact("l2").typeFullName.l shouldBe List(l2FullName)
+      cpg.method.nameExact("use").local.nameExact("l3").typeFullName.l shouldBe List(l3FullName)
+      cpg.method.nameExact("use").local.nameExact("l4").typeFullName.l shouldBe List(l4FullName)
+      cpg.method.nameExact("use").local.nameExact("l5").typeFullName.l shouldBe List(l5FullName)
+
+      Seq(l1FullName, l2FullName, l3FullName).foreach { fullName =>
+        inside(cpg.method.fullNameExact(fullName).l) { case List(lambdaMethod) =>
+          lambdaMethod.signature shouldBe "T(T)"
+          lambdaMethod.methodReturn.typeFullName shouldBe "T"
+          lambdaMethod.parameter.name.l shouldBe List("v")
+          lambdaMethod.parameter.typeFullName.l shouldBe List("T")
+        }
+      }
+
+      inside(cpg.method.fullNameExact(l4FullName).l) { case List(lambdaMethod) =>
+        lambdaMethod.signature shouldBe "my_concept auto(my_concept auto)"
+        lambdaMethod.methodReturn.typeFullName shouldBe "my_concept auto"
+        lambdaMethod.parameter.name.l shouldBe List("v")
+        lambdaMethod.parameter.code.l shouldBe List("my_concept auto v")
+        lambdaMethod.parameter.typeFullName.l shouldBe List("my_concept auto")
+      }
+      inside(cpg.method.fullNameExact(l5FullName).l) { case List(lambdaMethod) =>
+        lambdaMethod.signature shouldBe "my_concept auto()"
+        lambdaMethod.methodReturn.typeFullName shouldBe "my_concept auto"
+        lambdaMethod.parameter.l shouldBe Nil
+      }
+    }
+
     "capture C++ mutable lambda modifiers and captured-state mutation" in {
       val cpg = code(
         """
