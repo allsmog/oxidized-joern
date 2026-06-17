@@ -863,13 +863,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val left           = identifierAstForScopeEntry(global.name, leftCode, global.line, scopeEntry)
         val assignment =
           assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
+        val initializerAggregateAssignments = aggregateAssignmentExpressionAsts(initializer)
         val fieldAssignments =
           aggregateInitializerAssignmentAsts(
             AggregateAssignmentRoot(global.name, global.line, Option(scopeEntry)),
             initializer,
             scopeEntry.typeFullName
           )
-        Seq(localAst, assignment) ++ fieldAssignments
+        Seq(localAst, assignment) ++ initializerAggregateAssignments ++ fieldAssignments
       case None =>
         Seq(localAst)
     }
@@ -1390,8 +1391,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case Some(initializer) if useConstructorInitializers && isCopyConstructorInitializer(typeName, initializer) =>
         val arguments   = Seq(initializer)
         val constructor = constructorEntry(typeName, arguments)
-        Seq(
-          localAst,
+        Seq(localAst) ++ aggregateAssignmentExpressionAsts(initializer) ++ Seq(
           constructorAssignmentAst(local, arguments, initializer.code, OxOrigin(initializer), typeName)
         ) ++ temporaryDestructorAstsForConstructorArguments(arguments, constructor)
       case Some(initializer) =>
@@ -1404,9 +1404,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             expressionAstWithContextualConversion(initializer, Option(typeName)),
             assignmentCode
           )
-        val fieldAssignments = aggregateInitializerAssignmentAsts(local, initializer, typeName)
-        Seq(localAst, assignment) ++ fieldAssignments ++ heapConstructorAstsForExpressions(Seq(initializer)) ++
-          localInitializerTemporaryDestructorAsts
+        val initializerAggregateAssignments = aggregateAssignmentExpressionAsts(initializer)
+        val fieldAssignments                = aggregateInitializerAssignmentAsts(local, initializer, typeName)
+        Seq(
+          localAst,
+          assignment
+        ) ++ initializerAggregateAssignments ++ fieldAssignments ++ heapConstructorAstsForExpressions(
+          Seq(initializer)
+        ) ++ localInitializerTemporaryDestructorAsts
       case None if useConstructorInitializers && isDefaultConstructorInitializer(typeName) =>
         Seq(localAst, constructorAssignmentAst(local, Seq.empty, "", origin, typeName))
       case None =>
