@@ -1375,8 +1375,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val assignments =
         if (elements.exists(_.isInstanceOf[OxDesignatedInitializer])) {
           elements.flatMap {
-            case OxDesignatedInitializer(_, line, OxDesignator(fieldName, _, _), value) =>
-              aggregateFieldAssignmentAsts(local, rootTypeName, typeName, fieldPathPrefix, fieldName, value, line)
+            case OxDesignatedInitializer(code, line, designator: OxDesignator, value) =>
+              aggregateDesignatedFieldAssignmentAsts(
+                local,
+                rootTypeName,
+                typeName,
+                fieldPathPrefix,
+                code,
+                designator,
+                value,
+                line
+              )
             case _ =>
               Seq.empty
           }
@@ -1388,7 +1397,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
                 rootTypeName,
                 typeName,
                 fieldPathPrefix,
-                field.name,
+                Seq(field.name),
                 value,
                 value.line
               )
@@ -1401,26 +1410,80 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
+  private def aggregateDesignatedFieldAssignmentAsts(
+    local: OxLocalDecl,
+    rootTypeName: String,
+    typeName: String,
+    fieldPathPrefix: Seq[String],
+    initializerCode: String,
+    designator: OxDesignator,
+    value: OxExpression,
+    line: Int
+  ): Seq[Ast] = {
+    aggregateDesignatorFieldPath(initializerCode, designator).toSeq.flatMap { fieldPath =>
+      aggregateFieldAssignmentAsts(local, rootTypeName, typeName, fieldPathPrefix, fieldPath, value, line)
+    }
+  }
+
   private def aggregateFieldAssignmentAsts(
     local: OxLocalDecl,
     rootTypeName: String,
     typeName: String,
     fieldPathPrefix: Seq[String],
-    fieldName: String,
+    fieldPathSuffix: Seq[String],
     value: OxExpression,
     line: Int
   ): Seq[Ast] = {
-    val fieldPath  = fieldPathPrefix :+ fieldName
+    val fieldPath  = fieldPathPrefix ++ fieldPathSuffix
     val assignment = aggregateFieldAssignmentAst(local, rootTypeName, fieldPath, value, line)
     val nestedAssignments = value match {
       case initializerList: OxInitializerList =>
-        fieldTypeFullName(typeName, fieldName).toSeq.flatMap { fieldType =>
+        fieldPathTypeFullName(typeName, fieldPathSuffix).toSeq.flatMap { fieldType =>
           aggregateInitializerAssignmentAsts(local, rootTypeName, fieldType, initializerList, fieldPath)
         }
       case _ =>
         Seq.empty
     }
     assignment +: nestedAssignments
+  }
+
+  private def aggregateDesignatorFieldPath(initializerCode: String, designator: OxDesignator): Option[Seq[String]] = {
+    val initializerDesignator = initializerCode.takeWhile(_ != '=').trim
+    val initializerPath       = aggregateDesignatorFieldPath(initializerDesignator)
+    if (hasExplicitDesignatorSyntax(initializerDesignator)) {
+      initializerPath
+    } else {
+      initializerPath.orElse(aggregateDesignatorFieldPath(designator))
+    }
+  }
+
+  private def aggregateDesignatorFieldPath(designator: OxDesignator): Option[Seq[String]] = {
+    val code     = designator.code.trim
+    val codePath = aggregateDesignatorFieldPath(code)
+    if (hasExplicitDesignatorSyntax(code)) {
+      codePath
+    } else {
+      codePath.orElse(aggregateDesignatorFieldPath(designator.name))
+    }
+  }
+
+  private def hasExplicitDesignatorSyntax(code: String): Boolean = {
+    code.nonEmpty && (code.startsWith(".") || code.contains(".") || code.contains("["))
+  }
+
+  private def aggregateDesignatorFieldPath(rawPath: String): Option[Seq[String]] = {
+    val path = rawPath.stripPrefix(".").split('.').toSeq.map(_.trim).filter(_.nonEmpty)
+    Option.when(path.nonEmpty && path.forall(isFieldDesignatorSegment))(path)
+  }
+
+  private def isFieldDesignatorSegment(segment: String): Boolean = {
+    segment.forall(character => character == '_' || character.isLetterOrDigit)
+  }
+
+  private def fieldPathTypeFullName(baseTypeFullName: String, fieldPath: Seq[String]): Option[String] = {
+    fieldPath.foldLeft(Option(resolveAliasType(baseTypeFullName))) { case (baseType, field) =>
+      baseType.flatMap(fieldTypeFullName(_, field))
+    }
   }
 
   private def aggregateFieldAssignmentAst(

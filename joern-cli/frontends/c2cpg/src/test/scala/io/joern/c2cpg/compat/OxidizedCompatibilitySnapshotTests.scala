@@ -3751,6 +3751,41 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C aggregate nested designated initializer field assignments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Inner {
+          |  int x;
+          |  int y;
+          |};
+          |struct Outer {
+          |  struct Inner inner;
+          |  int z;
+          |};
+          |int nested_designators(int seed) {
+          |  struct Outer item = { .inner.x = seed, .inner.y = 2, .z = 3 };
+          |  return item.inner.x + item.inner.y + item.z;
+          |}
+          |""".stripMargin,
+        "Test0.c"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("nested_designators").local.nameExact("item").typeFullName.l shouldBe List("Outer")
+      cpg.method.nameExact("nested_designators").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "item = { .inner.x = seed, .inner.y = 2, .z = 3 }",
+        "item.inner.x = seed",
+        "item.inner.y = 2",
+        "item.z = 3"
+      )
+      cpg.method.nameExact("nested_designators").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
+        List(
+          "item.inner",
+          "item.inner.x",
+          "item.inner.y",
+          "item.z"
+        )
+    }
+
     "capture function prototypes as external methods" in {
       val cpg = code("""
           |int external(int value);
