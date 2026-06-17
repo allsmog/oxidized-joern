@@ -192,10 +192,12 @@ case class OxNew(
 
 case class OxDelete(code: String, line: Int, argument: OxExpression) extends OxExpression
 
+case class OxLambdaCapture(name: Option[String], code: String, captureKind: String)
+
 case class OxLambda(
   code: String,
   line: Int,
-  captures: Seq[String],
+  captures: Seq[OxLambdaCapture],
   parameters: Seq[OxParameterDecl],
   returnType: String,
   signature: String,
@@ -534,7 +536,7 @@ object OxDocument {
         OxLambda(
           code = str(value, "code"),
           line = int(value, "line"),
-          captures = value("captures").arr.map(_.str).toSeq,
+          captures = value("captures").arr.map(lambdaCapture).toSeq,
           parameters = value("parameters").arr.map(parameter).toSeq,
           returnType = str(value, "returnType"),
           signature = str(value, "signature"),
@@ -579,6 +581,19 @@ object OxDocument {
         OxDesignator(name = str(value, "name"), code = str(value, "code"), line = int(value, "line"))
       case other =>
         throw new IllegalArgumentException(s"unsupported oxidized cxxastgen expression kind '$other'")
+    }
+  }
+
+  private def lambdaCapture(value: Value): OxLambdaCapture = {
+    value match {
+      case stringValue: ujson.Str =>
+        OxLambdaCapture(name = Option(stringValue.str), code = stringValue.str, captureKind = "explicitByValue")
+      case _ =>
+        OxLambdaCapture(
+          name = value.obj.get("name").filter(!_.isNull).map(_.str),
+          code = str(value, "code"),
+          captureKind = str(value, "captureKind")
+        )
     }
   }
 
