@@ -980,7 +980,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           Option
             .when(statementsMayCompleteNormally(function.body))(currentLocalDestructors.reverse.map(localDestructorAst))
             .getOrElse(Vector.empty)
-        function.constructorInitializers.map(constructorInitializerAst) ++ statementAsts ++ destructorAsts
+        function.constructorInitializers.flatMap(constructorInitializerAsts) ++ statementAsts ++ destructorAsts
       } finally {
         localDestructorScopes = previousDestructorScopes
         jumpCleanupTargets = previousJumpTargets
@@ -1004,6 +1004,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       )
 
     captureAstForFunction(captureContext).fold(Seq(ast))(captureAst => Seq(ast, captureAst))
+  }
+
+  private def constructorInitializerAsts(initializer: OxConstructorInitializer): Seq[Ast] = {
+    initializer.arguments.flatMap(aggregateAssignmentExpressionAsts) :+ constructorInitializerAst(initializer)
   }
 
   private def constructorInitializerAst(initializer: OxConstructorInitializer): Ast = {
