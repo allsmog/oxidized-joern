@@ -3858,16 +3858,19 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |void consume(Board input) {}
           |void expression_positions(int seed) {
           |  Board update;
+          |  Board other;
           |  for (int i = 0; i < 1; update = {{4, seed}, 6}) {
           |    ++i;
           |  }
           |  consume(update = {{seed, 8}, 9});
+          |  other = (update = {{10, seed}, 11});
           |}
           |""".stripMargin,
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       cpg.method.nameExact("expression_positions").local.nameExact("update").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("expression_positions").local.nameExact("other").typeFullName.l shouldBe List("Board")
       cpg.method.nameExact("expression_positions").call.nameExact(Operators.assignment).code.l should contain allElementsOf
         List(
           "update = {{4, seed}, 6}",
@@ -3879,7 +3882,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "update.cell = {seed, 8}",
           "update.cell.x = seed",
           "update.cell.y = 8",
-          "update.z = 9"
+          "update.z = 9",
+          "update = {{10, seed}, 11}",
+          "update.cell = {10, seed}",
+          "update.cell.x = 10",
+          "update.cell.y = seed",
+          "update.z = 11",
+          "other = (update = {{10, seed}, 11})"
         )
       cpg.method.nameExact("expression_positions").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
         List(
@@ -3891,6 +3900,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       val callCodes = cpg.method.nameExact("expression_positions").call.code.l
       callCodes.indexOf("update.cell.x = seed") should be < callCodes.indexOf(
         "consume(update = {{seed, 8}, 9})"
+      )
+      callCodes.indexOf("update.cell.x = 10") should be < callCodes.indexOf(
+        "other = (update = {{10, seed}, 11})"
       )
     }
 

@@ -2900,8 +2900,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def expressionAstsWithRecoveredAggregateAssignments(expression: OxExpression): Seq[Ast] = {
     expression match {
-      case assignment: OxAssignment => expressionAst(assignment) +: aggregateAssignmentExpressionAsts(assignment)
-      case _                        => aggregateAssignmentExpressionAsts(expression) :+ expressionAst(expression)
+      case assignment @ OxAssignment("=", _, _, _, _: OxInitializerList) =>
+        expressionAst(assignment) +: aggregateAssignmentExpressionAsts(assignment)
+      case _ =>
+        aggregateAssignmentExpressionAsts(expression) :+ expressionAst(expression)
     }
   }
 
