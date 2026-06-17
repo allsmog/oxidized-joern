@@ -339,7 +339,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.codeExact("convert(1)").methodFullName.l shouldBe List("Core.convert:int(int)")
       cpg.method.nameExact("use").call.codeExact("convert(widget)").methodFullName.l shouldBe
         List("Core.convert:int(Widget)")
-      cpg.method.nameExact("use").call.codeExact("widget.get()").methodFullName.l shouldBe List("Core.Widget.get:int()")
+      cpg.method.nameExact("use").call.codeExact("widget.get()").methodFullName.l shouldBe
+        List("Core.Widget.get:int()", "Core.Widget.get:int()")
       cpg.method.nameExact("use").call.codeExact("fancy.get()").methodFullName.l shouldBe List("Core.Widget.get:int()")
       cpg.method.nameExact("use").call.nameExact("stable").methodFullName.l shouldBe List("Core.Widget.stable:int()<const>")
       cpg.method.nameExact("use").call.nameExact("outside").methodFullName.l shouldBe
@@ -544,6 +545,76 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "local.~Widget()",
           "source.~Widget()"
         )
+    }
+
+    "capture C++ control-flow temporary destructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int flow(int n) {
+          |  Core::Widget source;
+          |  if (Core::consume(Core::Widget())) {
+          |    n = n + 1;
+          |  }
+          |  while (Core::consume(Core::Widget(source))) {
+          |    break;
+          |  }
+          |  for (; Core::consume(Core::Widget()); Core::consume(Core::Widget(source))) {
+          |    break;
+          |  }
+          |  switch (Core::consume(Core::Widget(source))) {
+          |  default:
+          |    break;
+          |  }
+          |  return n;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("flow").call.nameExact("consume").methodFullName.l shouldBe
+        List.fill(5)("Core.consume:int(Widget&&)")
+      cpg.method.nameExact("flow").call.nameExact("Widget").codeExact("Core::Widget()").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void()", "Core.Widget.Widget:void()")
+      cpg.method.nameExact("flow").call.nameExact("Widget").codeExact("Core::Widget(source)").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)")
+      cpg.method.nameExact("flow").call.nameExact("~Widget").code.l.sorted shouldBe
+        List(
+          "Core::Widget().~Widget()",
+          "Core::Widget().~Widget()",
+          "Core::Widget(source).~Widget()",
+          "Core::Widget(source).~Widget()",
+          "Core::Widget(source).~Widget()",
+          "source.~Widget()"
+        )
+      cpg.method.nameExact("flow").controlStructure.controlStructureType(ControlStructureTypes.IF).ast.isCall
+        .nameExact("~Widget")
+        .code
+        .l shouldBe List("Core::Widget().~Widget()")
+      cpg.method.nameExact("flow").controlStructure.controlStructureType(ControlStructureTypes.WHILE).ast.isCall
+        .nameExact("~Widget")
+        .code
+        .l shouldBe List("Core::Widget(source).~Widget()")
+      cpg.method.nameExact("flow").controlStructure.controlStructureType(ControlStructureTypes.FOR).ast.isCall
+        .nameExact("~Widget")
+        .code
+        .l
+        .sorted shouldBe List("Core::Widget().~Widget()", "Core::Widget(source).~Widget()")
+      cpg.method.nameExact("flow").controlStructure.controlStructureType(ControlStructureTypes.SWITCH).ast.isCall
+        .nameExact("~Widget")
+        .code
+        .l shouldBe List("Core::Widget(source).~Widget()")
     }
 
     "capture C++ jump destructors" in {

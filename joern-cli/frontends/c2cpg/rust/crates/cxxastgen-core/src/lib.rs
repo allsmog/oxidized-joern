@@ -1014,7 +1014,7 @@ fn preproc_directive(node: Node, source: &[u8]) -> String {
 
 fn eval_preproc_condition(node: Node, source: &[u8], symbols: &MacroSymbols) -> i64 {
     match node.kind() {
-        "parenthesized_expression" => named_children(node)
+        "parenthesized_expression" | "condition_clause" => named_children(node)
             .into_iter()
             .next()
             .map(|child| eval_preproc_condition(child, source, symbols))
@@ -2238,11 +2238,11 @@ fn parse_labeled_statement(
 
 fn parse_expression(node: Node, source: &[u8]) -> Expression {
     match node.kind() {
-        "parenthesized_expression" => named_children(node)
+        "parenthesized_expression" | "condition_clause" => named_children(node)
             .into_iter()
             .next()
             .map(|child| parse_expression(child, source))
-            .unwrap_or_else(|| identifier_expression(node, source)),
+            .unwrap_or_else(|| parse_expression_text(node_text(node, source), line(node))),
         "identifier" | "this" => Expression::Identifier {
             name: node_text(node, source).to_string(),
             code: node_text(node, source).to_string(),
@@ -2276,6 +2276,93 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
 fn parse_binary_expression(node: Node, source: &[u8]) -> Expression {
     let operator = operator_text(node, source).unwrap_or("?");
     parse_binary_like_expression(node, source, operator)
+}
+
+fn parse_expression_text(raw: &str, line: usize) -> Expression {
+    let code = strip_wrapping_parentheses(raw.trim());
+    if let Some((name, arguments)) = parse_call_text(code, line) {
+        Expression::Call {
+            name: name.clone(),
+            code: code.to_string(),
+            line,
+            callee: Box::new(Expression::Identifier {
+                name: name.clone(),
+                code: name,
+                line,
+            }),
+            arguments,
+        }
+    } else if integer_literal_value(code).is_some() {
+        Expression::Literal {
+            value: code.to_string(),
+            code: code.to_string(),
+            line,
+        }
+    } else {
+        Expression::Identifier {
+            name: code.to_string(),
+            code: code.to_string(),
+            line,
+        }
+    }
+}
+
+fn parse_call_text(code: &str, line: usize) -> Option<(String, Vec<Expression>)> {
+    if !code.ends_with(')') {
+        return None;
+    }
+    let open_index = top_level_call_open_index(code)?;
+    let name = code[..open_index].trim();
+    if name.is_empty() {
+        return None;
+    }
+    let argument_text = &code[open_index + 1..code.len() - 1];
+    Some((
+        name.to_string(),
+        split_top_level_arguments(argument_text)
+            .into_iter()
+            .map(|argument| parse_expression_text(argument, line))
+            .collect(),
+    ))
+}
+
+fn top_level_call_open_index(code: &str) -> Option<usize> {
+    let mut depth = 0usize;
+    for (index, ch) in code.char_indices() {
+        match ch {
+            '(' if depth == 0 => return Some(index),
+            '(' => depth += 1,
+            ')' if depth == 0 => return None,
+            ')' => depth -= 1,
+            _ => {}
+        }
+    }
+    None
+}
+
+fn split_top_level_arguments(arguments: &str) -> Vec<&str> {
+    let mut result = Vec::new();
+    let mut start = 0usize;
+    let mut depth = 0usize;
+    for (index, ch) in arguments.char_indices() {
+        match ch {
+            '(' => depth += 1,
+            ')' if depth > 0 => depth -= 1,
+            ',' if depth == 0 => {
+                let argument = arguments[start..index].trim();
+                if !argument.is_empty() {
+                    result.push(argument);
+                }
+                start = index + 1;
+            }
+            _ => {}
+        }
+    }
+    let argument = arguments[start..].trim();
+    if !argument.is_empty() {
+        result.push(argument);
+    }
+    result
 }
 
 fn parse_assignment_expression(node: Node, source: &[u8]) -> Expression {
@@ -4065,6 +4152,88 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_constructor_temporaries_in_control_flow() {
+        let sample = r#"
+                namespace Core {
+                class Widget {
+                public:
+                  Widget();
+                  Widget(const Widget& other) {}
+                  Widget(Widget&& other) {}
+                  ~Widget() {}
+                };
+                int consume(Widget&& widget) { return 1; }
+                }
+                int flow(int n) {
+                  Core::Widget source;
+                  if (Core::consume(Core::Widget())) {
+                    n = n + 1;
+                  }
+                  while (Core::consume(Core::Widget(source))) {
+                    break;
+                  }
+                  for (; Core::consume(Core::Widget()); Core::consume(Core::Widget(source))) {
+                    break;
+                  }
+                  switch (Core::consume(Core::Widget(source))) {
+                  default:
+                    break;
+                  }
+                  return n;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("control-flow constructor temporary sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "flow" => Some(function),
+                _ => None,
+            })
+            .expect("expected flow function");
+        let [Statement::LocalDecl {
+            name: source_name, ..
+        }, Statement::If {
+            condition: if_condition,
+            ..
+        }, Statement::While {
+            condition: while_condition,
+            ..
+        }, Statement::For {
+            condition: Some(for_condition),
+            update: Some(for_update),
+            ..
+        }, Statement::Switch {
+            condition: switch_condition,
+            ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!("expected source local, if, while, for, switch, and return");
+        };
+        assert_eq!(source_name, "source");
+        assert_eq!(
+            collect_call_names(if_condition),
+            vec!["Core::consume", "Core::Widget"]
+        );
+        assert_eq!(
+            collect_call_names(while_condition),
+            vec!["Core::consume", "Core::Widget"]
+        );
+        assert_eq!(
+            collect_call_names(for_condition),
+            vec!["Core::consume", "Core::Widget"]
+        );
+        assert_eq!(
+            collect_call_names(for_update),
+            vec!["Core::consume", "Core::Widget"]
+        );
+        assert_eq!(
+            collect_call_names(switch_condition),
+            vec!["Core::consume", "Core::Widget"]
+        );
+    }
+
+    #[test]
     fn parses_cpp_new_and_delete_expressions() {
         let sample = r#"
                 int *allocate(int n) {
@@ -4946,7 +5115,13 @@ mod tests {
 
     fn collect_call_names(expression: &Expression) -> Vec<String> {
         match expression {
-            Expression::Call { name, .. } => vec![name.clone()],
+            Expression::Call {
+                name, arguments, ..
+            } => {
+                let mut calls = vec![name.clone()];
+                calls.extend(arguments.iter().flat_map(collect_call_names));
+                calls
+            }
             Expression::Binary { left, right, .. } => {
                 let mut calls = collect_call_names(left);
                 calls.extend(collect_call_names(right));
