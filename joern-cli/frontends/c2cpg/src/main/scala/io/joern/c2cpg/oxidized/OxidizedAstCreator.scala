@@ -54,6 +54,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private final case class TemporaryDestructor(code: String, line: Int, entry: FunctionEntry)
   private final case class HeapConstructor(code: String, line: Int, entry: FunctionEntry, arguments: Seq[OxExpression])
   private final case class HeapDestructor(code: String, line: Int, entry: FunctionEntry, receiver: OxExpression)
+  private final case class LambdaInfo(name: String, fullName: String, signature: String, returnType: String)
+  private final case class LambdaCapture(
+    name: String,
+    scopeEntry: ScopeEntry,
+    binding: NewClosureBinding,
+    outer: ScopeEntry
+  )
   private final case class JumpCleanupTarget(
     breakPreservedScopeDepth: Option[Int],
     continuePreservedScopeDepth: Option[Int],
@@ -142,9 +149,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private var globalScopeByName: Map[String, ScopeEntry]                = Map.empty
   private var functionCaptureContext: Option[FunctionCaptureContext]    = None
   private var currentMethodOwnerTypeFullName: Option[String]            = None
+  private var currentMethodFullName: Option[String]                     = None
   private var typeAliases: Map[String, String]                          = Map.empty
   private var localDestructorScopes: List[Vector[LocalDestructor]]      = Nil
   private var jumpCleanupTargets: List[JumpCleanupTarget]               = Nil
+  private val lambdaInfos: mutable.LinkedHashMap[String, LambdaInfo]    = mutable.LinkedHashMap.empty
+  private val emittedLambdaFullNames: mutable.Set[String]               = mutable.Set.empty
+  private val lambdaReturnTypesByFullName: mutable.Map[String, String]  = mutable.Map.empty
+  private val lambdaSignaturesByFullName: mutable.Map[String, String]   = mutable.Map.empty
 
   def typesSeen(): Set[String] = usedTypes.toSet
 
@@ -609,6 +621,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousScope            = scope
     val previousCaptureContext   = functionCaptureContext
     val previousMethodOwner      = currentMethodOwnerTypeFullName
+    val previousMethodFullName   = currentMethodFullName
     val previousDestructorScopes = localDestructorScopes
     val previousJumpTargets      = jumpCleanupTargets
     val captureContext =
@@ -616,6 +629,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     scope = parameters.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }.toMap
     functionCaptureContext = Option(captureContext)
     currentMethodOwnerTypeFullName = parentTypeOwner
+    currentMethodFullName = Option(fullName)
     localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
     jumpCleanupTargets = Nil
     val bodyAsts =
@@ -629,6 +643,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       } finally {
         localDestructorScopes = previousDestructorScopes
         jumpCleanupTargets = previousJumpTargets
+        currentMethodFullName = previousMethodFullName
         currentMethodOwnerTypeFullName = previousMethodOwner
         functionCaptureContext = previousCaptureContext
         scope = previousScope
@@ -740,7 +755,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     statement match {
       case local: OxLocalDecl =>
         val origin    = OxOrigin(local)
-        val typeName  = registerType(normalizeType(local.typeName))
+        val typeName  = registerType(localTypeFullName(local))
         val localCode = localDeclarationCode(local)
         val localNode = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
         scope = scope.updated(local.name, ScopeEntry(typeName, localNode))
@@ -944,6 +959,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
+  private def localTypeFullName(local: OxLocalDecl): String = {
+    local.initializer match {
+      case Some(lambda: OxLambda) if normalizeType(local.typeName) == Defines.Auto => lambdaInfo(lambda).fullName
+      case _                                                                       => normalizeType(local.typeName)
+    }
+  }
+
   private def isConstructorInitializer(typeName: String, initializer: OxInitializerList): Boolean = {
     val initializerCode = initializer.code.trim
     aggregateTypeFullNames.contains(typeName) &&
@@ -1024,6 +1046,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         arguments.flatMap(heapConstructorsForExpression)
       case OxDelete(_, _, argument) =>
         heapConstructorsForExpression(argument)
+      case _: OxLambda =>
+        Seq.empty
       case OxCall(_, _, _, callee, arguments) =>
         heapConstructorsForExpression(callee) ++ arguments.flatMap(heapConstructorsForExpression)
       case OxFieldAccess(_, _, _, base) =>
@@ -1133,6 +1157,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         arguments.flatMap(temporaryDestructorsForExpression)
       case OxDelete(_, _, argument) =>
         temporaryDestructorsForExpression(argument)
+      case _: OxLambda =>
+        Seq.empty
       case OxCall(_, _, _, callee, arguments) =>
         temporaryDestructorsForExpression(callee) ++ arguments.flatMap(temporaryDestructorsForExpression)
       case OxFieldAccess(_, _, _, base) =>
@@ -1361,6 +1387,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           Seq(expressionAst(deleteExpression.argument)),
           typeFullName = registerType(Defines.Void)
         )
+      case lambda: OxLambda =>
+        lambdaExpressionAst(lambda)
       case call: OxCall =>
         astForCallExpression(call)
       case fieldAccess: OxFieldAccess =>
@@ -1402,8 +1430,176 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def astForCallExpression(call: OxCall): Ast = {
-    overloadedCallOperatorAst(call).getOrElse {
-      if (isPointerCall(call)) pointerCallAst(call) else directCallAst(call)
+    lambdaCallAst(call).getOrElse {
+      overloadedCallOperatorAst(call).getOrElse {
+        if (isPointerCall(call)) pointerCallAst(call) else directCallAst(call)
+      }
+    }
+  }
+
+  private def lambdaCallAst(call: OxCall): Option[Ast] = {
+    lambdaCallableInfo(call.callee).map { info =>
+      val callNode_ =
+        callNode(
+          OxOrigin(call),
+          call.code,
+          Defines.OperatorCall,
+          s"${Defines.OperatorCall}:${info.signature}",
+          DispatchTypes.DYNAMIC_DISPATCH,
+          Option(info.signature),
+          Option(registerType(info.returnType))
+        )
+      createCallAst(callNode_, call.arguments.map(expressionAst), receiver = Option(expressionAst(call.callee)))
+    }
+  }
+
+  private def lambdaExpressionAst(lambda: OxLambda): Ast = {
+    val info     = lambdaInfo(lambda)
+    val captures = lambdaCaptures(lambda, info)
+    emitLambda(lambda, info, captures)
+    val methodRef = methodRefNode(OxOrigin(lambda), info.fullName, info.fullName, info.fullName)
+    captures.foldLeft(Ast(methodRef)) { case (ast, capture) =>
+      ast
+        .withCaptureEdge(methodRef, capture.binding)
+        .merge(Ast(capture.binding).withRefEdge(capture.binding, capture.outer.declaration))
+    }
+  }
+
+  private def lambdaInfo(lambda: OxLambda): LambdaInfo = {
+    lambdaInfos.getOrElseUpdate(
+      lambdaKey(lambda), {
+        val name       = nextClosureName()
+        val owner      = currentMethodFullName.getOrElse(globalNamespaceBlock().fullName)
+        val returnType = registerType(normalizeType(lambda.returnType))
+        val signature  = lambda.signature
+        val fullName   = s"$owner.$name:$signature"
+        lambdaReturnTypesByFullName.update(fullName, returnType)
+        lambdaSignaturesByFullName.update(fullName, signature)
+        LambdaInfo(name, fullName, signature, returnType)
+      }
+    )
+  }
+
+  private def lambdaKey(lambda: OxLambda): String = {
+    s"${currentMethodFullName.getOrElse(globalNamespaceBlock().fullName)}:${lambda.line}:${lambda.code}"
+  }
+
+  private def lambdaCaptures(lambda: OxLambda, info: LambdaInfo): Seq[LambdaCapture] = {
+    lambda.captures.distinct.flatMap { captureName =>
+      scope.get(captureName).map { outerEntry =>
+        val bindingId = s"${info.fullName}:$captureName"
+        val local =
+          localNode(OxOrigin(captureName, Option(lambda.line)), captureName, captureName, outerEntry.typeFullName)
+            .closureBindingId(bindingId)
+        val binding = NewClosureBinding()
+          .closureBindingId(bindingId)
+          .evaluationStrategy(EvaluationStrategies.BY_VALUE)
+        LambdaCapture(captureName, ScopeEntry(outerEntry.typeFullName, local), binding, outerEntry)
+      }
+    }
+  }
+
+  private def emitLambda(lambda: OxLambda, info: LambdaInfo, captures: Seq[LambdaCapture]): Unit = {
+    if (!emittedLambdaFullNames.add(info.fullName)) {
+      return
+    }
+
+    val origin = OxOrigin(lambda)
+    val method =
+      methodNode(
+        origin,
+        info.name,
+        lambda.code,
+        info.fullName,
+        Option(info.signature),
+        filename,
+        Option(NodeTypes.TYPE_DECL),
+        Option(info.fullName)
+      )
+    val parameterEntries = lambda.parameters.zipWithIndex.map { case (parameter, index) =>
+      val parameterType = registerType(normalizeType(parameter.typeName))
+      val node =
+        parameterInNode(
+          OxOrigin(parameter.code, Option(parameter.line)),
+          parameter.name,
+          parameter.code,
+          index + 1,
+          isVariadic = false,
+          EvaluationStrategies.BY_VALUE,
+          parameterType
+        )
+      parameter.name -> (parameterType, Ast(node), node)
+    }
+
+    val previousScope            = scope
+    val previousCaptureContext   = functionCaptureContext
+    val previousMethodOwner      = currentMethodOwnerTypeFullName
+    val previousMethodFullName   = currentMethodFullName
+    val previousDestructorScopes = localDestructorScopes
+    val previousJumpTargets      = jumpCleanupTargets
+    scope = (captures.map(capture => capture.name -> capture.scopeEntry) ++
+      parameterEntries.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }).toMap
+    functionCaptureContext = None
+    currentMethodOwnerTypeFullName = None
+    currentMethodFullName = Option(info.fullName)
+    localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
+    jumpCleanupTargets = Nil
+    val bodyAsts =
+      try {
+        lambda.body.flatMap(astsForStatement)
+      } finally {
+        localDestructorScopes = previousDestructorScopes
+        jumpCleanupTargets = previousJumpTargets
+        currentMethodFullName = previousMethodFullName
+        currentMethodOwnerTypeFullName = previousMethodOwner
+        functionCaptureContext = previousCaptureContext
+        scope = previousScope
+      }
+
+    val captureLocalAsts = captures.map(capture => Ast(capture.scopeEntry.declaration))
+    val body             = blockAst(blockNode(origin, lambda.code, Defines.Any), (captureLocalAsts ++ bodyAsts).toList)
+    val methodReturn     = methodReturnNode(origin, info.returnType)
+    val modifiers =
+      Seq(ModifierTypes.VIRTUAL, ModifierTypes.STATIC, ModifierTypes.PRIVATE, ModifierTypes.LAMBDA).map(modifier =>
+        modifierNode(origin, modifier)
+      )
+    val methodAst_ =
+      methodAst(method, parameterEntries.map(_._2._2), body, methodReturn, modifiers)
+
+    val typeDecl =
+      typeDeclNode(
+        origin,
+        info.name,
+        info.fullName,
+        filename,
+        lambda.code,
+        NodeTypes.NAMESPACE_BLOCK,
+        globalNamespaceBlock().fullName,
+        Seq(registerType(Defines.Function))
+      )
+    val binding = NewBinding()
+      .name(Defines.OperatorCall)
+      .methodFullName(info.fullName)
+      .signature(info.signature)
+    val bindingAst = Ast(binding)
+      .withBindsEdge(typeDecl, binding)
+      .withRefEdge(binding, method)
+
+    Ast.storeInDiffGraph(Ast(typeDecl).withChild(methodAst_), diffGraph)
+    Ast.storeInDiffGraph(bindingAst, diffGraph)
+  }
+
+  private def lambdaCallableInfo(expression: OxExpression): Option[LambdaInfo] = {
+    expressionTypeFullName(expression).flatMap { typeFullName =>
+      for {
+        signature  <- lambdaSignaturesByFullName.get(typeFullName)
+        returnType <- lambdaReturnTypesByFullName.get(typeFullName)
+      } yield LambdaInfo(
+        typeFullName.split('.').lastOption.getOrElse(typeFullName).takeWhile(_ != ':'),
+        typeFullName,
+        signature,
+        returnType
+      )
     }
   }
 
@@ -1612,6 +1808,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case _: OxUnary                   => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
       case _: OxIdentifier | _: OxCast  => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
       case _: OxCall | _: OxIndexAccess => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
+      case _: OxLambda                  => false
       case _: OxInitializerList         => false
       case _: OxDesignatedInitializer   => false
       case _: OxDesignator              => false
@@ -1621,7 +1818,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def callReturnTypeFullName(call: OxCall): Option[String] = {
-    constructorTemporaryTypeFullName(call)
+    lambdaCallableInfo(call.callee)
+      .map(_.returnType)
+      .orElse(constructorTemporaryTypeFullName(call))
       .orElse(
         overloadedCallOperatorTarget(call)
           .map(target => normalizeType(target.entry.function.returnType))
@@ -1652,6 +1851,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option(resolveAliasType(typeName))
       case OxNew(typeName, _, _, _, _) =>
         Option(s"${normalizeType(resolveAliasType(typeName))}*")
+      case lambda: OxLambda =>
+        Option(lambdaInfo(lambda).fullName)
       case indexAccess: OxIndexAccess =>
         overloadedIndexOperatorTarget(indexAccess)
           .map(target => normalizeType(target.entry.function.returnType))
