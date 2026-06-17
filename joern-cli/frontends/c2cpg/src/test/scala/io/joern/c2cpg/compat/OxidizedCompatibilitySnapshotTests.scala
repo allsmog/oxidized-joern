@@ -3791,6 +3791,59 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C++ aggregate assignment initializer field assignments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Cell {
+          |  int x;
+          |  int y;
+          |};
+          |struct Board {
+          |  Cell cells[2];
+          |  int z;
+          |};
+          |void assign(int seed) {
+          |  Board board;
+          |  board = {{{seed, 2}, {3, 4}}, 5};
+          |  board = {.cells = {{6, seed}, {8, 9}}, .z = 10};
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("assign").local.nameExact("board").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("assign").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "board = {{{seed, 2}, {3, 4}}, 5}",
+        "board.cells = {{seed, 2}, {3, 4}}",
+        "board.cells[0] = {seed, 2}",
+        "board.cells[0].x = seed",
+        "board.cells[0].y = 2",
+        "board.cells[1] = {3, 4}",
+        "board.cells[1].x = 3",
+        "board.cells[1].y = 4",
+        "board.z = 5",
+        "board = {.cells = {{6, seed}, {8, 9}}, .z = 10}",
+        "board.cells = {{6, seed}, {8, 9}}",
+        "board.cells[0] = {6, seed}",
+        "board.cells[0].x = 6",
+        "board.cells[0].y = seed",
+        "board.cells[1] = {8, 9}",
+        "board.cells[1].x = 8",
+        "board.cells[1].y = 9",
+        "board.z = 10"
+      )
+      cpg.method.nameExact("assign").call.nameExact(Operators.indirectIndexAccess).code.l should contain allElementsOf
+        List("board.cells[0]", "board.cells[1]")
+      cpg.method.nameExact("assign").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf List(
+        "board.cells",
+        "board.cells[0].x",
+        "board.cells[0].y",
+        "board.cells[1].x",
+        "board.cells[1].y",
+        "board.z"
+      )
+    }
+
     "capture C aggregate array initializer field assignments from the Rust parser backend" in {
       val cpg = code(
         """

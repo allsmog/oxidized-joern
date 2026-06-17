@@ -1102,7 +1102,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case structuredBinding: OxStructuredBinding =>
         astsForStructuredBinding(structuredBinding)
       case assignment: OxAssignment =>
-        assignmentExpressionAst(assignment) +:
+        Seq(assignmentExpressionAst(assignment)) ++ aggregateAssignmentExpressionAsts(assignment) ++
           (heapConstructorAstsForExpressions(Seq(assignment)) ++ temporaryDestructorAstsForExpressions(Seq(assignment)))
       case ret: OxReturn =>
         val returnType = currentMethodReturnTypeFullName
@@ -2882,6 +2882,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           Seq(left, right)
         )
       }
+    }
+  }
+
+  private def aggregateAssignmentExpressionAsts(assignment: OxAssignment): Seq[Ast] = {
+    assignment match {
+      case OxAssignment("=", _, _, target: OxIdentifier, initializer: OxInitializerList) =>
+        expressionTypeFullName(target).toSeq.flatMap { typeName =>
+          aggregateInitializerAssignmentAsts(
+            AggregateAssignmentRoot(target.name, target.line, scope.get(target.name)),
+            initializer,
+            typeName
+          )
+        }
+      case _ =>
+        Seq.empty
     }
   }
 
