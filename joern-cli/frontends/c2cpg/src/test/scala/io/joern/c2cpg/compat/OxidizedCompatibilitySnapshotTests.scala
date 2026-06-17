@@ -1577,7 +1577,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  Core::Holder paren(source);
           |  Core::Holder brace{source};
           |  Core::Widget converted = source;
-          |  Core::Holder prvalue{Core::makeSource()};
+          |  Core::Holder prvalueBrace{Core::makeSource()};
+          |  Core::Holder prvalueParen(Core::makeSource());
           |  return 0;
           |}
           |""".stripMargin,
@@ -1599,7 +1600,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .nameExact("Holder")
         .codeExact("Core.Holder.Holder(Core::makeSource())")
         .methodFullName
-        .l shouldBe List("Core.Holder.Holder:void(Widget&&)")
+        .l shouldBe List("Core.Holder.Holder:void(Widget&&)", "Core.Holder.Holder:void(Widget&&)")
       cpg.method
         .nameExact("init")
         .call
@@ -1608,19 +1609,20 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .methodFullName
         .l shouldBe List("Core.Widget.Widget:void(Widget&&)")
       cpg.method.nameExact("init").call.nameExact("operator Widget").code.l shouldBe
-        List(sourceConversion, sourceConversion, sourceConversion, prvalueConversion)
+        List(sourceConversion, sourceConversion, sourceConversion, prvalueConversion, prvalueConversion)
       cpg.method.nameExact("init").call.nameExact("~Widget").code.l shouldBe
         List(
           s"$sourceConversion.~Widget()",
           s"$sourceConversion.~Widget()",
           s"$sourceConversion.~Widget()",
           s"$prvalueConversion.~Widget()",
+          s"$prvalueConversion.~Widget()",
           "converted.~Widget()"
         )
       cpg.method.nameExact("init").call.nameExact("~Source").code.l shouldBe
-        List("Core::makeSource().~Source()")
+        List("Core::makeSource().~Source()", "Core::makeSource().~Source()")
       cpg.method.nameExact("init").call.nameExact("~Holder").code.l shouldBe
-        List("prvalue.~Holder()", "brace.~Holder()", "paren.~Holder()")
+        List("prvalueParen.~Holder()", "prvalueBrace.~Holder()", "brace.~Holder()", "paren.~Holder()")
     }
 
     "model C++ overloaded index aggregate temporary lifetimes" in {
