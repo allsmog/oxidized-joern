@@ -6384,6 +6384,58 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_range_based_for_loops_with_structured_bindings() {
+        let sample = r#"
+                struct Pair {
+                  int first;
+                  int second;
+                };
+                int sum(Pair *pairs) {
+                  int total = 0;
+                  for (auto [first, second] : pairs) {
+                    total += first + second;
+                  }
+                  return total;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("range-for structured binding sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "sum" => Some(function),
+                _ => None,
+            })
+            .expect("expected sum function");
+        let [Statement::LocalDecl { .. }, Statement::For {
+            initializer,
+            condition: Some(condition),
+            update,
+            body,
+            ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!("expected local, range-for, return");
+        };
+        assert!(update.is_none());
+        assert!(matches!(condition, Expression::Identifier { name, .. } if name == "pairs"));
+        assert!(matches!(
+            initializer.as_slice(),
+            [Statement::StructuredBinding {
+                type_name,
+                names,
+                initializer: Some(Expression::Identifier { name, .. }),
+                ..
+            }] if type_name == "auto" && names == &vec!["first".to_string(), "second".to_string()] && name == "pairs"
+        ));
+        assert!(matches!(
+            body.as_slice(),
+            [Statement::Assignment { right, .. }]
+                if matches!(right, Expression::Binary { operator, .. } if operator == "+")
+        ));
+    }
+
+    #[test]
     fn parses_cast_sizeof_conditional_and_compound_assignment_expressions() {
         let sample = r#"
                 int score(int x) {
