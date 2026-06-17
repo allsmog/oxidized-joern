@@ -48,7 +48,13 @@ case class OxStructDecl(
   nestedDeclarations: Seq[OxDeclaration]
 ) extends OxDeclaration
 
-case class OxFieldDecl(name: String, typeName: String, code: String, isStatic: Boolean)
+case class OxFieldDecl(
+  name: String,
+  typeName: String,
+  code: String,
+  isStatic: Boolean,
+  initializer: Option[OxExpression]
+)
 
 case class OxEnumDecl(
   name: String,
@@ -368,7 +374,8 @@ object OxDocument {
       name = str(value, "name"),
       typeName = str(value, "typeName"),
       code = str(value, "code"),
-      isStatic = value.obj.get("isStatic").exists(_.bool)
+      isStatic = value.obj.get("isStatic").exists(_.bool),
+      initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
     )
   }
 

@@ -700,7 +700,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         EvaluationStrategies.BY_SHARING,
         thisType
       )
-    val body         = blockAst(blockNode(origin, constructorName, Defines.Any))
+    val previousScope            = scope
+    val previousMethodOwner      = currentMethodOwnerTypeFullName
+    val previousMethodFullName   = currentMethodFullName
+    val previousMethodReturnType = currentMethodReturnTypeFullName
+    scope = Map(Defines.This -> ScopeEntry(thisType, thisParameter))
+    currentMethodOwnerTypeFullName = Option(typeName)
+    currentMethodFullName = Option(fullName)
+    currentMethodReturnTypeFullName = Option(Defines.Void)
+    val defaultInitializerAsts =
+      try {
+        constructorPrefixInitializerAsts(typeName, Seq.empty)
+      } finally {
+        currentMethodReturnTypeFullName = previousMethodReturnType
+        currentMethodFullName = previousMethodFullName
+        currentMethodOwnerTypeFullName = previousMethodOwner
+        scope = previousScope
+      }
+    val body         = blockAst(blockNode(origin, constructorName, Defines.Any), defaultInitializerAsts.toList)
     val methodReturn = methodReturnNode(origin, Defines.Void)
     methodAst(
       method,
@@ -975,12 +992,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     jumpCleanupTargets = Nil
     val bodyAsts =
       try {
+        val constructorPrefixAsts =
+          if (isConstructorMethod(simpleName, parentTypeOwner)) {
+            constructorPrefixInitializerAsts(parentTypeOwner.get, function.constructorInitializers)
+          } else {
+            function.constructorInitializers.flatMap(constructorInitializerAsts)
+          }
         val statementAsts = function.body.flatMap(astsForStatement)
         val destructorAsts =
           Option
             .when(statementsMayCompleteNormally(function.body))(currentLocalDestructors.reverse.map(localDestructorAst))
             .getOrElse(Vector.empty)
-        function.constructorInitializers.flatMap(constructorInitializerAsts) ++ statementAsts ++ destructorAsts
+        constructorPrefixAsts ++ statementAsts ++ destructorAsts
       } finally {
         localDestructorScopes = previousDestructorScopes
         jumpCleanupTargets = previousJumpTargets
@@ -1006,12 +1029,42 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     captureAstForFunction(captureContext).fold(Seq(ast))(captureAst => Seq(ast, captureAst))
   }
 
+  private def constructorPrefixInitializerAsts(
+    ownerTypeFullName: String,
+    initializers: Seq[OxConstructorInitializer]
+  ): Seq[Ast] = {
+    val fields              = aggregateFieldsByType.getOrElse(resolveAliasType(ownerTypeFullName), Seq.empty)
+    val fieldNames          = fields.map(_.name).toSet
+    val initializersByField = initializers.groupBy(constructorInitializerFieldName)
+    val baseInitializers = initializers.filter { initializer =>
+      val name = constructorInitializerFieldName(initializer)
+      !fieldNames.contains(name) && aggregateBaseTypesByType
+        .getOrElse(resolveAliasType(ownerTypeFullName), Seq.empty)
+        .exists(baseType => baseType.split('.').lastOption.contains(name) || baseType == name)
+    }
+    val orderedFieldInitializers = fields.flatMap { field =>
+      initializersByField
+        .get(field.name)
+        .map(_.flatMap(constructorInitializerAsts))
+        .getOrElse(defaultMemberInitializerAsts(ownerTypeFullName, field))
+    }
+    val consumedBaseInitializers = baseInitializers.toSet
+    val extraInitializers = initializers.filterNot { initializer =>
+      fieldNames.contains(constructorInitializerFieldName(initializer)) || consumedBaseInitializers.contains(
+        initializer
+      )
+    }
+    baseInitializers.flatMap(constructorInitializerAsts) ++
+      orderedFieldInitializers ++
+      extraInitializers.flatMap(constructorInitializerAsts)
+  }
+
   private def constructorInitializerAsts(initializer: OxConstructorInitializer): Seq[Ast] = {
     initializer.arguments.flatMap(aggregateAssignmentExpressionAsts) :+ constructorInitializerAst(initializer)
   }
 
   private def constructorInitializerAst(initializer: OxConstructorInitializer): Ast = {
-    val fieldName      = qualifiedNameParts(initializer.field).lastOption.getOrElse(initializer.field)
+    val fieldName      = constructorInitializerFieldName(initializer)
     val assignmentCode = s"${Defines.This}->$fieldName = ${constructorInitializerValueCode(initializer)}"
     val left = implicitFieldAccessAst(fieldName, initializer.line).getOrElse(
       identifierAst(fieldName, fieldName, initializer.line)
@@ -1027,6 +1080,40 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         )
     }
     assignmentAst(OxOrigin(initializer.code, Option(initializer.line)), left, right, assignmentCode)
+  }
+
+  private def defaultMemberInitializerAsts(ownerTypeFullName: String, field: OxFieldDecl): Seq[Ast] = {
+    if (field.isStatic) {
+      Seq.empty
+    } else {
+      field.initializer.toSeq.flatMap { initializer =>
+        val line           = initializer.line
+        val fieldTypeName  = registerType(resolveAliasType(field.typeName))
+        val assignmentCode = s"${Defines.This}->${field.name} = ${initializer.code}"
+        val left = implicitFieldAccessAst(field.name, line).getOrElse(identifierAst(field.name, field.name, line))
+        val right =
+          expressionAstWithContextualConversion(initializer, Option(fieldTypeName))
+        val assignment = assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
+        val fieldAssignments = initializer match {
+          case initializerList: OxInitializerList
+              if isAggregateFieldType(fieldTypeName) || isArrayLikeType(fieldTypeName) =>
+            aggregateInitializerAssignmentAsts(
+              AggregateAssignmentRoot(Defines.This, line, scope.get(Defines.This)),
+              rootTypeName = ownerTypeFullName,
+              typeName = fieldTypeName,
+              initializer = initializerList,
+              fieldPathPrefix = Seq(AggregateFieldPathSegment(field.name, isIndirect = true))
+            )
+          case _ =>
+            Seq.empty
+        }
+        aggregateAssignmentExpressionAsts(initializer) ++ Seq(assignment) ++ fieldAssignments
+      }
+    }
+  }
+
+  private def constructorInitializerFieldName(initializer: OxConstructorInitializer): String = {
+    qualifiedNameParts(initializer.field).lastOption.getOrElse(initializer.field)
   }
 
   private def constructorInitializerValueCode(initializer: OxConstructorInitializer): String = {
@@ -4639,12 +4726,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     isStaticMethod: Boolean,
     isVirtualMethod: Boolean
   ): Seq[NewModifier] = {
-    val isConstructor = parentTypeOwner
-      .flatMap(_.split('.').lastOption)
-      .contains(simpleName)
+    val isConstructor = isConstructorMethod(simpleName, parentTypeOwner)
     Option.when(isConstructor)(NewModifier().modifierType(ModifierTypes.CONSTRUCTOR)).toSeq ++
       Option.when(isStaticMethod)(NewModifier().modifierType(ModifierTypes.STATIC)).toSeq ++
       Option.when(isVirtualMethod)(NewModifier().modifierType(ModifierTypes.VIRTUAL)).toSeq
+  }
+
+  private def isConstructorMethod(simpleName: String, parentTypeOwner: Option[String]): Boolean = {
+    parentTypeOwner
+      .flatMap(_.split('.').lastOption)
+      .contains(simpleName)
   }
 
   private def declarationFilename(declaration: OxDeclaration): String = {
