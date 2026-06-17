@@ -1730,6 +1730,35 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ parameter pack expansions from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |void foo(int x, int*... args) {
+          |  foo(x, args...);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("foo").l) { case List(fooMethod) =>
+        fooMethod.signature shouldBe "void(int,int*)"
+        inside(fooMethod.parameter.l) { case List(x, args) =>
+          x.name shouldBe "x"
+          x.typeFullName shouldBe "int"
+          x.isVariadic shouldBe false
+          args.name shouldBe "args"
+          args.code shouldBe "int*... args"
+          args.typeFullName shouldBe "int*"
+          args.isVariadic shouldBe true
+        }
+        inside(fooMethod.call.nameExact("foo").l) { case List(fooCall) =>
+          fooCall.code shouldBe "foo(x, args...)"
+          fooCall.argument.code.l shouldBe List("x", "args")
+        }
+        cpg.identifier.codeExact("args").refsTo.l shouldBe List(fooMethod.parameter.nameExact("args").head)
+      }
+    }
+
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
       val cpg = code(
         """

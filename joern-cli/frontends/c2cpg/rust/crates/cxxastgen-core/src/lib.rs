@@ -206,6 +206,8 @@ pub struct FunctionDecl {
 pub struct ParameterDecl {
     pub name: String,
     pub type_name: String,
+    #[serde(rename = "isVariadic")]
+    pub is_variadic: bool,
     pub code: String,
     pub line: usize,
 }
@@ -391,6 +393,11 @@ pub enum Expression {
         line: usize,
         left: Option<Box<Expression>>,
         right: Option<Box<Expression>>,
+    },
+    PackExpansion {
+        code: String,
+        line: usize,
+        pattern: Box<Expression>,
     },
     Cast {
         #[serde(rename = "typeName")]
@@ -1958,6 +1965,7 @@ fn parse_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
             if code == "void" {
                 return None;
             }
+            let is_variadic = parameter.kind() == "variadic_parameter_declaration";
             let (type_name, name) = declaration_type_and_name(parameter, source)
                 .or_else(|| split_type_and_name(code))
                 .or_else(|| {
@@ -1967,6 +1975,7 @@ fn parse_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
             Some(ParameterDecl {
                 name,
                 type_name,
+                is_variadic,
                 code: code.to_string(),
                 line: line(parameter),
             })
@@ -1975,12 +1984,13 @@ fn parse_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
 }
 
 fn parameter_type_without_name(node: Node, source: &[u8]) -> Option<String> {
-    let base_type = node
-        .child_by_field_name("type")
-        .map(|type_node| type_name_from_type_node(type_node, source))?;
+    let type_node = node.child_by_field_name("type")?;
     Some(
         node.child_by_field_name("declarator")
-            .map(|declarator| type_from_declarator(&base_type, declarator, source))
+            .map(|declarator| {
+                let base_type = declaration_base_type(node, type_node, declarator, source);
+                type_from_declarator(&base_type, declarator, source)
+            })
             .unwrap_or_else(|| normalize_type(node_text(node, source))),
     )
 }
@@ -2498,6 +2508,7 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
         }
         "conditional_expression" => parse_conditional_expression(node, source),
         "fold_expression" => parse_fold_expression(node, source),
+        "parameter_pack_expansion" => parse_parameter_pack_expansion(node, source),
         "call_expression" => parse_call_expression(node, source),
         "compound_literal_expression" => parse_compound_literal_expression(node, source),
         "field_expression" => parse_field_expression(node, source),
@@ -2710,6 +2721,16 @@ fn fold_operand_expression(node: Node, source: &[u8]) -> Option<Expression> {
     } else {
         Some(parse_expression(node, source))
     }
+}
+
+fn parse_parameter_pack_expansion(node: Node, source: &[u8]) -> Expression {
+    node.child_by_field_name("pattern")
+        .map(|pattern| Expression::PackExpansion {
+            code: node_text(node, source).trim().to_string(),
+            line: line(node),
+            pattern: Box::new(parse_expression(pattern, source)),
+        })
+        .unwrap_or_else(|| identifier_expression(node, source))
 }
 
 fn parse_call_expression(node: Node, source: &[u8]) -> Expression {
@@ -3354,13 +3375,25 @@ fn identifier_expression(node: Node, source: &[u8]) -> Expression {
 }
 
 fn declaration_type_and_name(node: Node, source: &[u8]) -> Option<(String, String)> {
-    let base_type = node
-        .child_by_field_name("type")
-        .map(|type_node| type_name_from_type_node(type_node, source))?;
+    let type_node = node.child_by_field_name("type")?;
     let declarator = node.child_by_field_name("declarator")?;
     let name = declarator_name(declarator, source)?;
+    let base_type = declaration_base_type(node, type_node, declarator, source);
     let type_name = type_from_declarator(&base_type, declarator, source);
     Some((type_name, name))
+}
+
+fn declaration_base_type(
+    declaration: Node,
+    type_node: Node,
+    declarator: Node,
+    source: &[u8],
+) -> String {
+    std::str::from_utf8(&source[declaration.start_byte()..declarator.start_byte()])
+        .ok()
+        .map(normalize_type)
+        .filter(|base| !base.is_empty())
+        .unwrap_or_else(|| type_name_from_type_node(type_node, source))
 }
 
 fn declarator_name(node: Node, source: &[u8]) -> Option<String> {
@@ -3457,7 +3490,7 @@ fn type_from_declarator(base_type: &str, declarator: Node, source: &[u8]) -> Str
                 )
             })
             .unwrap_or_else(|| base_type.to_string()),
-        "init_declarator" | "parenthesized_declarator" => declarator
+        "init_declarator" | "parenthesized_declarator" | "variadic_declarator" => declarator
             .child_by_field_name("declarator")
             .or_else(|| child_declarator(declarator))
             .map(|child| type_from_declarator(base_type, child, source))
@@ -3505,7 +3538,7 @@ fn declarator_marker(declarator: Node, source: &[u8]) -> Option<String> {
                 .and_then(|child| declarator_marker(child, source))
                 .unwrap_or_default()
         )),
-        "parenthesized_declarator" | "init_declarator" => declarator
+        "parenthesized_declarator" | "init_declarator" | "variadic_declarator" => declarator
             .child_by_field_name("declarator")
             .or_else(|| child_declarator(declarator))
             .and_then(|child| declarator_marker(child, source)),
@@ -6827,6 +6860,39 @@ mod tests {
         };
         assert_eq!(operator, "+");
         assert!(matches!(right.as_ref(), Expression::Identifier { name, .. } if name == "args"));
+    }
+
+    #[test]
+    fn parses_cpp_parameter_pack_expansions() {
+        let sample = r#"
+                void foo(int x, int*... args) {
+                  foo(x, args...);
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("parameter pack expansion sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        assert_eq!(function.parameters.len(), 2);
+        assert_eq!(function.parameters[1].name, "args");
+        assert_eq!(function.parameters[1].type_name, "int*");
+        assert!(function.parameters[1].is_variadic);
+        let [Statement::Expression {
+            expression: Expression::Call { arguments, .. },
+            ..
+        }] = function.body.as_slice()
+        else {
+            panic!("expected call expression statement");
+        };
+        assert!(matches!(
+            arguments.as_slice(),
+            [
+                Expression::Identifier { name: first, .. },
+                Expression::PackExpansion { pattern, .. }
+            ] if first == "x"
+                && matches!(pattern.as_ref(), Expression::Identifier { name, .. } if name == "args")
+        ));
     }
 
     #[test]
