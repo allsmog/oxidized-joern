@@ -55,11 +55,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private final case class HeapConstructor(code: String, line: Int, entry: FunctionEntry, arguments: Seq[OxExpression])
   private final case class HeapDestructor(code: String, line: Int, entry: FunctionEntry, receiver: OxExpression)
   private final case class LambdaInfo(name: String, fullName: String, signature: String, returnType: String)
+  private final case class LambdaCaptureRequest(
+    name: String,
+    evaluationStrategy: String,
+    initializer: Option[OxExpression]
+  )
   private final case class LambdaCapture(
     name: String,
     scopeEntry: ScopeEntry,
     binding: NewClosureBinding,
-    outer: ScopeEntry,
+    outer: Option[ScopeEntry],
     evaluationStrategy: String
   )
   private final case class JumpCleanupTarget(
@@ -1460,9 +1465,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     emitLambda(lambda, info, captures)
     val methodRef = methodRefNode(OxOrigin(lambda), info.fullName, info.fullName, info.fullName)
     captures.foldLeft(Ast(methodRef)) { case (ast, capture) =>
+      val bindingAst = capture.outer
+        .map(outer => Ast(capture.binding).withRefEdge(capture.binding, outer.declaration))
+        .getOrElse(Ast(capture.binding))
       ast
         .withCaptureEdge(methodRef, capture.binding)
-        .merge(Ast(capture.binding).withRefEdge(capture.binding, capture.outer.declaration))
+        .merge(bindingAst)
     }
   }
 
@@ -1486,42 +1494,53 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def lambdaCaptures(lambda: OxLambda, info: LambdaInfo): Seq[LambdaCapture] = {
-    val requestedCaptures = mutable.LinkedHashMap.empty[String, String]
+    val requestedCaptures = mutable.LinkedHashMap.empty[String, LambdaCaptureRequest]
     lambda.captures.foreach { capture =>
       capture.name.foreach { name =>
-        requestedCaptures.update(name, lambdaCaptureEvaluationStrategy(capture))
+        requestedCaptures.update(
+          name,
+          LambdaCaptureRequest(name, lambdaCaptureEvaluationStrategy(capture), capture.initializer)
+        )
       }
     }
     lambdaDefaultCaptureEvaluationStrategy(lambda).foreach { strategy =>
       inferredLambdaCaptureNames(lambda).foreach { name =>
         if (!requestedCaptures.contains(name)) {
           val captureStrategy = if (name == Defines.This) EvaluationStrategies.BY_SHARING else strategy
-          requestedCaptures.update(name, captureStrategy)
+          requestedCaptures.update(name, LambdaCaptureRequest(name, captureStrategy, None))
         }
       }
     }
-    requestedCaptures.toSeq.flatMap { case (captureName, evaluationStrategy) =>
-      scope.get(captureName).map { outerEntry =>
-        lambdaCapture(captureName, evaluationStrategy, info, lambda, outerEntry)
-      }
+    requestedCaptures.values.toSeq.flatMap { request =>
+      lambdaCapture(request, info, lambda)
     }
   }
 
   private def lambdaCapture(
-    captureName: String,
-    evaluationStrategy: String,
+    request: LambdaCaptureRequest,
     info: LambdaInfo,
-    lambda: OxLambda,
-    outerEntry: ScopeEntry
-  ): LambdaCapture = {
-    val bindingId = s"${info.fullName}:$captureName"
+    lambda: OxLambda
+  ): Option[LambdaCapture] = {
+    val outerEntry = scope
+      .get(request.name)
+      .orElse(request.initializer.collect { case OxIdentifier(name, _, _) => name }.flatMap(scope.get))
+    val typeName = outerEntry
+      .map(_.typeFullName)
+      .orElse(request.initializer.flatMap(expressionTypeFullName))
+      .map(typeName => registerType(normalizeType(typeName)))
+      .getOrElse(Defines.Any)
+    if (outerEntry.isEmpty && request.initializer.isEmpty) {
+      return None
+    }
+    val captureName = request.name
+    val bindingId   = s"${info.fullName}:$captureName"
     val local =
-      localNode(OxOrigin(captureName, Option(lambda.line)), captureName, captureName, outerEntry.typeFullName)
+      localNode(OxOrigin(captureName, Option(lambda.line)), captureName, captureName, typeName)
         .closureBindingId(bindingId)
     val binding = NewClosureBinding()
       .closureBindingId(bindingId)
-      .evaluationStrategy(evaluationStrategy)
-    LambdaCapture(captureName, ScopeEntry(outerEntry.typeFullName, local), binding, outerEntry, evaluationStrategy)
+      .evaluationStrategy(request.evaluationStrategy)
+    Some(LambdaCapture(captureName, ScopeEntry(typeName, local), binding, outerEntry, request.evaluationStrategy))
   }
 
   private def lambdaCaptureEvaluationStrategy(capture: OxLambdaCapture): String = {
@@ -2004,9 +2023,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case call: OxCall =>
         callReturnTypeFullName(call)
       case binary: OxBinary =>
-        overloadedBinaryOperatorTarget(binary).map(target => normalizeType(target.entry.function.returnType))
+        overloadedBinaryOperatorTarget(binary)
+          .map(target => normalizeType(target.entry.function.returnType))
+          .orElse(binaryExpressionTypeFullName(binary))
       case _ =>
         None
+    }
+  }
+
+  private def binaryExpressionTypeFullName(binary: OxBinary): Option[String] = {
+    val leftType  = expressionTypeFullName(binary.left)
+    val rightType = expressionTypeFullName(binary.right)
+    (leftType, rightType) match {
+      case (Some(left), Some(right)) if left == right => Some(left)
+      case (Some("int"), _)                           => Some("int")
+      case (_, Some("int"))                           => Some("int")
+      case _                                          => None
     }
   }
 

@@ -572,6 +572,38 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("this", "value")
     }
 
+    "capture C++ lambda init captures" in {
+      val cpg = code(
+        """
+          |int use(int base) {
+          |  int delta = 3;
+          |  auto mapper = [snap = base + delta, alias = base](int x) { return snap + alias + x; };
+          |  return mapper(2);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val lambdaFullName = "use.<lambda>0:int(int)"
+      cpg.method.nameExact("use").local.nameExact("mapper").typeFullName.l shouldBe List(lambdaFullName)
+      cpg.method.fullNameExact(lambdaFullName).local.name.l.sorted shouldBe List("alias", "snap")
+      cpg.method.fullNameExact(lambdaFullName).local.typeFullName.l.sorted shouldBe List("int", "int")
+      cpg.method.fullNameExact(lambdaFullName).ast.isReturn.code.l shouldBe List("return snap + alias + x")
+
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:snap")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_VALUE)
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:alias")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_VALUE)
+      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:alias")).l) {
+        case List(binding) =>
+          binding._refOut.l shouldBe cpg.method.nameExact("use").parameter.nameExact("base").l
+      }
+      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:snap")).l) {
+        case List(binding) =>
+          binding._refOut.l shouldBe Nil
+      }
+    }
+
     "capture C++ for initializer destructors" in {
       val cpg = code(
         """

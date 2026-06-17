@@ -192,7 +192,7 @@ case class OxNew(
 
 case class OxDelete(code: String, line: Int, argument: OxExpression) extends OxExpression
 
-case class OxLambdaCapture(name: Option[String], code: String, captureKind: String)
+case class OxLambdaCapture(name: Option[String], code: String, captureKind: String, initializer: Option[OxExpression])
 
 case class OxLambda(
   code: String,
@@ -587,12 +587,18 @@ object OxDocument {
   private def lambdaCapture(value: Value): OxLambdaCapture = {
     value match {
       case stringValue: ujson.Str =>
-        OxLambdaCapture(name = Option(stringValue.str), code = stringValue.str, captureKind = "explicitByValue")
+        OxLambdaCapture(
+          name = Option(stringValue.str),
+          code = stringValue.str,
+          captureKind = "explicitByValue",
+          initializer = None
+        )
       case _ =>
         OxLambdaCapture(
           name = value.obj.get("name").filter(!_.isNull).map(_.str),
           code = str(value, "code"),
-          captureKind = str(value, "captureKind")
+          captureKind = str(value, "captureKind"),
+          initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
         )
     }
   }
