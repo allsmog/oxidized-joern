@@ -759,6 +759,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             val assignment =
               assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
             Seq(localAst, assignment) ++ temporaryDestructorAsts
+          case None if isDefaultConstructorInitializer(typeName) =>
+            Seq(localAst, constructorAssignmentAst(local, Seq.empty, "", origin, typeName))
           case None =>
             Seq(localAst)
         }
@@ -922,6 +924,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def isCopyConstructorInitializer(typeName: String, initializer: OxExpression): Boolean = {
     aggregateTypeFullNames.contains(typeName) && !initializer.isInstanceOf[OxInitializerList]
+  }
+
+  private def isDefaultConstructorInitializer(typeName: String): Boolean = {
+    aggregateTypeFullNames.contains(typeName) && constructorEntry(typeName, Seq.empty).isDefined
   }
 
   private def constructorAssignmentAst(local: OxLocalDecl, initializer: OxInitializerList, typeName: String): Ast = {
