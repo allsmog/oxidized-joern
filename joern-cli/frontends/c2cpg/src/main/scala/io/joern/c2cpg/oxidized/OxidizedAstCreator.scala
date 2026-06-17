@@ -19,6 +19,7 @@ import io.shiftleft.semanticcpg.language.types.structure.NamespaceTraversal
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
+import java.util.IdentityHashMap
 import scala.collection.mutable
 import scala.util.Try
 
@@ -83,6 +84,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private val usedTypes: mutable.Set[String]             = mutable.Set(Defines.Any, Defines.Void)
   private val temporaryIndices: mutable.Map[String, Int] = mutable.HashMap.empty
+  private val expressionTypeFullNameCache                = new IdentityHashMap[OxExpression, Option[String]]
   private lazy val functionEntries: Seq[FunctionEntry]   = collectFunctionEntries(document.declarations, None)
   private lazy val functionsByName: Map[String, Seq[FunctionEntry]] =
     functionEntries.groupBy(_.simpleName).view.mapValues(_.toSeq).toMap
@@ -2348,7 +2350,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         selectFunctionEntry(memberFunctionCandidates(binary.left, operatorName), Some(Seq(binary.right)))
           .map(entry => ResolvedOperatorCall(entry, operatorName, Option(binary.left), Seq(binary.right)))
       memberTarget.orElse {
-        selectFunctionEntry(functionCandidatesByName(operatorName), Some(Seq(binary.left, binary.right)))
+        selectFunctionEntry(freeFunctionCandidatesByName(operatorName), Some(Seq(binary.left, binary.right)))
           .map(entry => ResolvedOperatorCall(entry, operatorName, None, Seq(binary.left, binary.right)))
       }
     }
@@ -2567,6 +2569,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def expressionTypeFullName(expression: OxExpression): Option[String] = {
+    if (expressionTypeFullNameCache.containsKey(expression)) {
+      expressionTypeFullNameCache.get(expression)
+    } else {
+      val typeFullName = expressionTypeFullNameUncached(expression)
+      expressionTypeFullNameCache.put(expression, typeFullName)
+      typeFullName
+    }
+  }
+
+  private def expressionTypeFullNameUncached(expression: OxExpression): Option[String] = {
     expression match {
       case OxIdentifier(name, _, _) =>
         scope
@@ -2996,6 +3008,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def functionCandidatesByName(name: String): Seq[FunctionEntry] = {
     functionsByName.getOrElse(name, Seq.empty)
+  }
+
+  private def freeFunctionCandidatesByName(name: String): Seq[FunctionEntry] = {
+    functionCandidatesByName(name).filterNot(_.ownerFullName.exists(aggregateTypeFullNames.contains))
   }
 
   private def functionCandidatesByQualifiedName(name: String): Seq[FunctionEntry] = {
