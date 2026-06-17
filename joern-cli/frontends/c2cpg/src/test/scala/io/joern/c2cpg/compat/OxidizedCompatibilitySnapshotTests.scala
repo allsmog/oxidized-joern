@@ -670,6 +670,48 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("bump(1)", "read()")
     }
 
+    "capture C++ lambdas assigned to explicit function object locals" in {
+      val cpg = code(
+        """
+          |int use(int base) {
+          |  std::function<int(int)> mapper = [base](int x) -> int { return base + x; };
+          |  auto caller = [mapper](int y) -> int { return mapper(y); };
+          |  return mapper(2) + caller(3);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val mapperLambda = "use.<lambda>0:int(int)"
+      val callerLambda = "use.<lambda>1:int(int)"
+
+      cpg.method.nameExact("use").local.nameExact("mapper").typeFullName.l shouldBe
+        List("std.function<int(int)>")
+      cpg.method.nameExact("use").local.nameExact("caller").typeFullName.l shouldBe List(callerLambda)
+      cpg.method.nameExact("use").ast.isMethodRef.methodFullNameExact(mapperLambda).typeFullName.l shouldBe
+        List(mapperLambda)
+
+      inside(cpg.method.nameExact("use").call.nameExact(Defines.OperatorCall).codeExact("mapper(2)").l) {
+        case List(mapperCall) =>
+          mapperCall.methodFullName shouldBe s"${Defines.OperatorCall}:int(int)"
+          mapperCall.signature shouldBe "int(int)"
+          mapperCall.typeFullName shouldBe "int"
+          mapperCall.receiver.code.l shouldBe List("mapper")
+      }
+      inside(cpg.method.fullNameExact(callerLambda).call.nameExact(Defines.OperatorCall).codeExact("mapper(y)").l) {
+        case List(capturedMapperCall) =>
+          capturedMapperCall.methodFullName shouldBe s"${Defines.OperatorCall}:int(int)"
+          capturedMapperCall.signature shouldBe "int(int)"
+          capturedMapperCall.typeFullName shouldBe "int"
+          capturedMapperCall.receiver.code.l shouldBe List("mapper")
+      }
+      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$callerLambda:mapper")).l) {
+        case List(binding) =>
+          binding.evaluationStrategy shouldBe EvaluationStrategies.BY_VALUE
+          binding._refOut.l shouldBe cpg.method.nameExact("use").local.nameExact("mapper").l
+      }
+    }
+
     "capture C++ nested lambda ownership and captures" in {
       val cpg = code(
         """

@@ -35,7 +35,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private implicit val schemaValidation: ValidationMode = config.schemaValidation
   private val LambdaMutableModifier                     = "MUTABLE"
 
-  private final case class ScopeEntry(typeFullName: String, declaration: NewNode)
+  private final case class LambdaInfo(name: String, fullName: String, signature: String, returnType: String)
+  private final case class ScopeEntry(typeFullName: String, declaration: NewNode, lambdaInfo: Option[LambdaInfo] = None)
   private final case class CapturedGlobal(scopeEntry: ScopeEntry, binding: NewClosureBinding, globalEntry: ScopeEntry)
   private final case class FunctionEntry(
     function: OxFunctionDecl,
@@ -55,7 +56,6 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private final case class TemporaryDestructor(code: String, line: Int, entry: FunctionEntry)
   private final case class HeapConstructor(code: String, line: Int, entry: FunctionEntry, arguments: Seq[OxExpression])
   private final case class HeapDestructor(code: String, line: Int, entry: FunctionEntry, receiver: OxExpression)
-  private final case class LambdaInfo(name: String, fullName: String, signature: String, returnType: String)
   private final case class LambdaCaptureRequest(
     name: String,
     evaluationStrategy: String,
@@ -761,11 +761,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def astsForStatement(statement: OxStatement): Seq[Ast] = {
     statement match {
       case local: OxLocalDecl =>
-        val origin    = OxOrigin(local)
-        val typeName  = registerType(localTypeFullName(local))
-        val localCode = localDeclarationCode(local)
-        val localNode = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
-        scope = scope.updated(local.name, ScopeEntry(typeName, localNode))
+        val origin          = OxOrigin(local)
+        val localLambdaInfo = local.initializer.collect { case lambda: OxLambda => lambdaInfo(lambda) }
+        val typeName        = registerType(localTypeFullName(local))
+        val localCode       = localDeclarationCode(local)
+        val localNode       = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
+        scope = scope.updated(local.name, ScopeEntry(typeName, localNode, localLambdaInfo))
         registerLocalDestructor(local.name, typeName, local.line)
         val localAst                = Ast(localNode)
         val temporaryDestructorAsts = temporaryDestructorAstsForExpressions(local.initializer.toSeq)
@@ -1541,7 +1542,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val binding = NewClosureBinding()
       .closureBindingId(bindingId)
       .evaluationStrategy(request.evaluationStrategy)
-    Some(LambdaCapture(captureName, ScopeEntry(typeName, local), binding, outerEntry, request.evaluationStrategy))
+    Some(
+      LambdaCapture(
+        captureName,
+        ScopeEntry(typeName, local, outerEntry.flatMap(_.lambdaInfo)),
+        binding,
+        outerEntry,
+        request.evaluationStrategy
+      )
+    )
   }
 
   private def lambdaCaptureEvaluationStrategy(capture: OxLambdaCapture): String = {
@@ -1754,17 +1763,27 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def lambdaCallableInfo(expression: OxExpression): Option[LambdaInfo] = {
-    expressionTypeFullName(expression).flatMap { typeFullName =>
-      for {
-        signature  <- lambdaSignaturesByFullName.get(typeFullName)
-        returnType <- lambdaReturnTypesByFullName.get(typeFullName)
-      } yield LambdaInfo(
-        typeFullName.split('.').lastOption.getOrElse(typeFullName).takeWhile(_ != ':'),
-        typeFullName,
-        signature,
-        returnType
-      )
+    expression match {
+      case OxIdentifier(name, _, _) =>
+        scope.get(name).flatMap(_.lambdaInfo).orElse(lambdaCallableInfoByType(expression))
+      case _ => lambdaCallableInfoByType(expression)
     }
+  }
+
+  private def lambdaCallableInfoByType(expression: OxExpression): Option[LambdaInfo] = {
+    expressionTypeFullName(expression).flatMap(lambdaCallableInfoByTypeFullName)
+  }
+
+  private def lambdaCallableInfoByTypeFullName(typeFullName: String): Option[LambdaInfo] = {
+    for {
+      signature  <- lambdaSignaturesByFullName.get(typeFullName)
+      returnType <- lambdaReturnTypesByFullName.get(typeFullName)
+    } yield LambdaInfo(
+      typeFullName.split('.').lastOption.getOrElse(typeFullName).takeWhile(_ != ':'),
+      typeFullName,
+      signature,
+      returnType
+    )
   }
 
   private def overloadedBinaryOperatorAst(binary: OxBinary): Option[Ast] = {

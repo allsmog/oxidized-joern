@@ -4797,6 +4797,72 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_lambda_assigned_to_explicit_function_object_type() {
+        let sample = r#"
+                int use(int base) {
+                  std::function<int(int)> mapper = [base](int x) -> int { return base + x; };
+                  auto caller = [mapper](int y) -> int { return mapper(y); };
+                  return mapper(2) + caller(3);
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("explicit function-object lambda sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        let [Statement::LocalDecl {
+            name: mapper_name,
+            type_name: mapper_type,
+            initializer: Some(mapper),
+            ..
+        }, Statement::LocalDecl {
+            name: caller_name,
+            type_name: caller_type,
+            initializer: Some(caller),
+            ..
+        }, ..] = function.body.as_slice()
+        else {
+            panic!("expected mapper and caller locals");
+        };
+        assert_eq!(mapper_name, "mapper");
+        assert_eq!(mapper_type, "std::function<int(int)>");
+        let Expression::Lambda {
+            signature,
+            return_type,
+            ..
+        } = mapper
+        else {
+            panic!("expected mapper lambda initializer");
+        };
+        assert_eq!(signature, "int(int)");
+        assert_eq!(return_type, "int");
+        assert_eq!(caller_name, "caller");
+        assert_eq!(caller_type, "auto");
+        let Expression::Lambda { captures, body, .. } = caller else {
+            panic!("expected caller lambda initializer");
+        };
+        assert_eq!(captures.len(), 1);
+        assert_lambda_capture(
+            &captures[0],
+            Some("mapper"),
+            "mapper",
+            "explicitByValue",
+            false,
+        );
+        assert!(matches!(
+            body.as_slice(),
+            [Statement::Return {
+                expression: Some(Expression::Call { name, .. }),
+                ..
+            }] if name == "mapper"
+        ));
+    }
+
+    #[test]
     fn parses_cpp_constructor_temporaries() {
         let sample = r#"
                 namespace Core {
