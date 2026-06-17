@@ -189,6 +189,9 @@ case class OxConditional(
 
 case class OxCast(typeName: String, code: String, line: Int, value: OxExpression) extends OxExpression
 
+case class OxFold(operator: String, code: String, line: Int, left: Option[OxExpression], right: Option[OxExpression])
+    extends OxExpression
+
 case class OxSizeOf(code: String, line: Int, value: Option[OxExpression], typeName: Option[String]) extends OxExpression
 
 case class OxNew(
@@ -531,6 +534,14 @@ object OxDocument {
           code = str(value, "code"),
           line = int(value, "line"),
           value = expression(value("value"))
+        )
+      case "fold" =>
+        OxFold(
+          operator = str(value, "operator"),
+          code = str(value, "code"),
+          line = int(value, "line"),
+          left = value.obj.get("left").filter(!_.isNull).map(expression),
+          right = value.obj.get("right").filter(!_.isNull).map(expression)
         )
       case "sizeOf" =>
         OxSizeOf(

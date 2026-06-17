@@ -385,6 +385,13 @@ pub enum Expression {
         consequence: Option<Box<Expression>>,
         alternative: Box<Expression>,
     },
+    Fold {
+        operator: String,
+        code: String,
+        line: usize,
+        left: Option<Box<Expression>>,
+        right: Option<Box<Expression>>,
+    },
     Cast {
         #[serde(rename = "typeName")]
         type_name: String,
@@ -1939,7 +1946,12 @@ fn function_declarator_node(node: Node) -> Option<Node> {
 fn parse_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
     named_children(node)
         .into_iter()
-        .filter(|child| child.kind() == "parameter_declaration")
+        .filter(|child| {
+            matches!(
+                child.kind(),
+                "parameter_declaration" | "variadic_parameter_declaration"
+            )
+        })
         .enumerate()
         .filter_map(|(index, parameter)| {
             let code = node_text(parameter, source).trim();
@@ -2485,6 +2497,7 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
             parse_unary_expression(node, source)
         }
         "conditional_expression" => parse_conditional_expression(node, source),
+        "fold_expression" => parse_fold_expression(node, source),
         "call_expression" => parse_call_expression(node, source),
         "compound_literal_expression" => parse_compound_literal_expression(node, source),
         "field_expression" => parse_field_expression(node, source),
@@ -2669,6 +2682,33 @@ fn parse_conditional_expression(node: Node, source: &[u8]) -> Expression {
             alternative: Box::new(parse_expression(alternative, source)),
         },
         _ => identifier_expression(node, source),
+    }
+}
+
+fn parse_fold_expression(node: Node, source: &[u8]) -> Expression {
+    let left = node
+        .child_by_field_name("left")
+        .and_then(|left| fold_operand_expression(left, source));
+    let right = node
+        .child_by_field_name("right")
+        .and_then(|right| fold_operand_expression(right, source));
+    Expression::Fold {
+        operator: node
+            .child_by_field_name("operator")
+            .map(|operator| node_text(operator, source).trim().to_string())
+            .unwrap_or_else(|| operator_text(node, source).unwrap_or("?").to_string()),
+        code: node_text(node, source).trim().to_string(),
+        line: line(node),
+        left: left.map(Box::new),
+        right: right.map(Box::new),
+    }
+}
+
+fn fold_operand_expression(node: Node, source: &[u8]) -> Option<Expression> {
+    if node.kind() == "..." {
+        None
+    } else {
+        Some(parse_expression(node, source))
     }
 }
 
@@ -6719,6 +6759,74 @@ mod tests {
                 Expression::Literal { value: member, .. }
             ] if type_name == "Pair" && member == "second"
         ));
+    }
+
+    #[test]
+    fn parses_cpp_fold_expressions() {
+        let sample = r#"
+                template <typename... Args>
+                bool logicalAnd(Args... args) {
+                  return (true && ... && args);
+                }
+                template <typename... Args>
+                auto sum(Args... args) {
+                  return (... + args);
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("fold expression sample should parse");
+        let logical_and = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "logicalAnd" => Some(function),
+                _ => None,
+            })
+            .expect("expected logicalAnd function");
+        assert_eq!(logical_and.parameters.len(), 1);
+        assert_eq!(logical_and.parameters[0].name, "args");
+        assert_eq!(logical_and.parameters[0].type_name, "Args");
+        let [Statement::Return {
+            expression:
+                Some(Expression::Fold {
+                    operator,
+                    left: Some(left),
+                    right: Some(right),
+                    ..
+                }),
+            ..
+        }] = logical_and.body.as_slice()
+        else {
+            panic!("expected binary fold return");
+        };
+        assert_eq!(operator, "&&");
+        assert!(matches!(left.as_ref(), Expression::Literal { value, .. } if value == "true"));
+        assert!(matches!(right.as_ref(), Expression::Identifier { name, .. } if name == "args"));
+
+        let sum = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "sum" => Some(function),
+                _ => None,
+            })
+            .expect("expected sum function");
+        assert_eq!(sum.parameters.len(), 1);
+        assert_eq!(sum.parameters[0].name, "args");
+        assert_eq!(sum.parameters[0].type_name, "Args");
+        let [Statement::Return {
+            expression:
+                Some(Expression::Fold {
+                    operator,
+                    left: None,
+                    right: Some(right),
+                    ..
+                }),
+            ..
+        }] = sum.body.as_slice()
+        else {
+            panic!("expected unary fold return");
+        };
+        assert_eq!(operator, "+");
+        assert!(matches!(right.as_ref(), Expression::Identifier { name, .. } if name == "args"));
     }
 
     #[test]

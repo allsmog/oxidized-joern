@@ -1699,6 +1699,37 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.identifier.codeExact("second").l shouldBe Nil
     }
 
+    "capture C++ fold expressions from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |template <typename... Args>
+          |bool logicalAnd(Args... args) {
+          |  return (true && ... && args);
+          |}
+          |template <typename... Args>
+          |auto sum(Args... args) {
+          |  return (... + args);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("logicalAnd").ast.isReturn.astChildren.isCall.nameExact("<operator>.fold").l) {
+        case List(retExpr) =>
+          retExpr.typeFullName shouldBe "bool"
+          retExpr.code shouldBe "(true && ... && args)"
+          retExpr.argument.isMethodRef.code.l shouldBe List(Operators.logicalAnd)
+          retExpr.argument.code.l shouldBe List(Operators.logicalAnd, "true", "args")
+      }
+      inside(cpg.method.nameExact("sum").ast.isReturn.astChildren.isCall.nameExact("<operator>.fold").l) {
+        case List(retExpr) =>
+          retExpr.typeFullName shouldBe "Args"
+          retExpr.code shouldBe "(... + args)"
+          retExpr.argument.isMethodRef.code.l shouldBe List(Operators.addition)
+          retExpr.argument.code.l shouldBe List(Operators.addition, "args", "args")
+      }
+    }
+
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
       val cpg = code(
         """

@@ -1119,6 +1119,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Seq(condition).flatMap(heapConstructorsForExpression) ++
           consequence.toSeq.flatMap(heapConstructorsForExpression) ++
           Seq(alternative).flatMap(heapConstructorsForExpression)
+      case OxFold(_, _, _, left, right) =>
+        left.toSeq.flatMap(heapConstructorsForExpression) ++ right.toSeq.flatMap(heapConstructorsForExpression)
       case OxCast(_, _, _, value) =>
         heapConstructorsForExpression(value)
       case OxSizeOf(_, _, value, _) =>
@@ -1230,6 +1232,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Seq(condition).flatMap(temporaryDestructorsForExpression) ++
           consequence.toSeq.flatMap(temporaryDestructorsForExpression) ++
           Seq(alternative).flatMap(temporaryDestructorsForExpression)
+      case OxFold(_, _, _, left, right) =>
+        left.toSeq.flatMap(temporaryDestructorsForExpression) ++ right.toSeq.flatMap(temporaryDestructorsForExpression)
       case OxCast(_, _, _, value) =>
         temporaryDestructorsForExpression(value)
       case OxSizeOf(_, _, value, _) =>
@@ -1430,6 +1434,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             conditional.consequence.toSeq.map(expressionAst) ++
             Seq(expressionAst(conditional.alternative))
         )
+      case fold: OxFold =>
+        foldAst(fold)
       case cast: OxCast =>
         operatorCallAst(
           OxOrigin(cast),
@@ -1508,6 +1514,29 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case designator: OxDesignator =>
         Ast(identifierNode(OxOrigin(designator), designator.name, designator.code, registerType(Defines.Any)))
     }
+  }
+
+  private def foldAst(fold: OxFold): Ast = {
+    val foldOperator = "<operator>.fold"
+    val callNode_ =
+      callNode(
+        OxOrigin(fold),
+        fold.code,
+        foldOperator,
+        foldOperator,
+        DispatchTypes.STATIC_DISPATCH,
+        None,
+        Option(registerType(foldExpressionTypeFullName(fold).getOrElse(Defines.Any)))
+      )
+    val operatorName = operatorFor(fold.operator)
+    val operatorRef =
+      methodRefNode(OxOrigin(operatorName, Option(fold.line)), operatorName, operatorName, registerType(operatorName))
+    val operands = (fold.left, fold.right) match {
+      case (Some(left), None)  => Seq(expressionAst(left), expressionAst(left))
+      case (None, Some(right)) => Seq(expressionAst(right), expressionAst(right))
+      case (left, right)       => left.toSeq.map(expressionAst) ++ right.toSeq.map(expressionAst)
+    }
+    callAst(callNode_, Ast(operatorRef) +: operands)
   }
 
   private def astForCallExpression(call: OxCall): Ast = {
@@ -1717,6 +1746,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           visitExpression(condition)
           consequence.foreach(visitExpression)
           visitExpression(alternative)
+        case OxFold(_, _, _, left, right) =>
+          left.foreach(visitExpression)
+          right.foreach(visitExpression)
         case OxCast(_, _, _, value) =>
           visitExpression(value)
         case OxSizeOf(_, _, value, _) =>
@@ -2072,7 +2104,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case _: OxDesignatedInitializer   => false
       case _: OxDesignator              => false
       case _: OxLiteral                 => false
-      case _: OxBinary | _: OxConditional | _: OxSizeOf | _: OxNew | _: OxDelete => false
+      case _: OxBinary | _: OxConditional | _: OxFold | _: OxSizeOf | _: OxNew | _: OxDelete => false
     }
   }
 
@@ -2102,6 +2134,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           .orElse(globalScopeByName.get(name).map(entry => resolveAliasType(entry.typeFullName)))
       case OxLiteral(value, _, _) =>
         Option(literalType(value))
+      case fold: OxFold =>
+        foldExpressionTypeFullName(fold)
       case OxFieldAccess(field, _, _, base) =>
         expressionTypeFullName(base).flatMap(typeName => fieldTypeFullName(typeName, field))
       case OxUnary("*", _, _, _, argument) =>
@@ -2140,6 +2174,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case (_, Some("int"))                           => Some("int")
       case _                                          => None
     }
+  }
+
+  private def foldExpressionTypeFullName(fold: OxFold): Option[String] = {
+    if (Set("&&", "||", "and", "or").contains(fold.operator)) Option(registerType("bool"))
+    else fold.left.orElse(fold.right).flatMap(expressionTypeFullName)
   }
 
   private def dereferencedTypeFullName(typeFullName: String): String = {
@@ -2752,36 +2791,42 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def operatorFor(operator: String): String = {
     operator match {
-      case "+"   => Operators.addition
-      case "-"   => Operators.subtraction
-      case "*"   => Operators.multiplication
-      case "/"   => Operators.division
-      case "%"   => Operators.modulo
-      case "<"   => Operators.lessThan
-      case ">"   => Operators.greaterThan
-      case "<="  => Operators.lessEqualsThan
-      case ">="  => Operators.greaterEqualsThan
-      case "=="  => Operators.equals
-      case "!="  => Operators.notEquals
-      case "&&"  => Operators.logicalAnd
-      case "||"  => Operators.logicalOr
-      case "&"   => Operators.and
-      case "|"   => Operators.or
-      case "^"   => Operators.xor
-      case "<<"  => Operators.shiftLeft
-      case ">>"  => Operators.arithmeticShiftRight
-      case "="   => Operators.assignment
-      case "+="  => Operators.assignmentPlus
-      case "-="  => Operators.assignmentMinus
-      case "*="  => Operators.assignmentMultiplication
-      case "/="  => Operators.assignmentDivision
-      case "%="  => Operators.assignmentModulo
-      case "<<=" => Operators.assignmentShiftLeft
-      case ">>=" => Operators.assignmentArithmeticShiftRight
-      case "&="  => Operators.assignmentAnd
-      case "^="  => Operators.assignmentXor
-      case "|="  => Operators.assignmentOr
-      case _     => Defines.OperatorUnknown
+      case "+"      => Operators.addition
+      case "-"      => Operators.subtraction
+      case "*"      => Operators.multiplication
+      case "/"      => Operators.division
+      case "%"      => Operators.modulo
+      case "<"      => Operators.lessThan
+      case ">"      => Operators.greaterThan
+      case "<="     => Operators.lessEqualsThan
+      case ">="     => Operators.greaterEqualsThan
+      case "=="     => Operators.equals
+      case "!="     => Operators.notEquals
+      case "not_eq" => Operators.notEquals
+      case "&&"     => Operators.logicalAnd
+      case "and"    => Operators.logicalAnd
+      case "||"     => Operators.logicalOr
+      case "or"     => Operators.logicalOr
+      case "&"      => Operators.and
+      case "bitand" => Operators.and
+      case "|"      => Operators.or
+      case "bitor"  => Operators.or
+      case "^"      => Operators.xor
+      case "xor"    => Operators.xor
+      case "<<"     => Operators.shiftLeft
+      case ">>"     => Operators.arithmeticShiftRight
+      case "="      => Operators.assignment
+      case "+="     => Operators.assignmentPlus
+      case "-="     => Operators.assignmentMinus
+      case "*="     => Operators.assignmentMultiplication
+      case "/="     => Operators.assignmentDivision
+      case "%="     => Operators.assignmentModulo
+      case "<<="    => Operators.assignmentShiftLeft
+      case ">>="    => Operators.assignmentArithmeticShiftRight
+      case "&="     => Operators.assignmentAnd
+      case "^="     => Operators.assignmentXor
+      case "|="     => Operators.assignmentOr
+      case _        => Defines.OperatorUnknown
     }
   }
 
