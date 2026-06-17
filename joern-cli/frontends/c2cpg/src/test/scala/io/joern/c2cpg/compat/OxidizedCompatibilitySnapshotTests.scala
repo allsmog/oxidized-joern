@@ -1541,6 +1541,88 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .l shouldBe List(prvalueConversionCall)
     }
 
+    "model C++ constructor argument contextual conversions" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |class Source {
+          |public:
+          |  Source();
+          |  Source(const Source& other) {}
+          |  Source(Source&& other) {}
+          |  operator Widget() const { return Widget(); }
+          |  ~Source();
+          |};
+          |class Holder {
+          |public:
+          |  Holder(int seed) {}
+          |  Holder(Widget&& widget) {}
+          |  ~Holder();
+          |};
+          |Source makeSource();
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Source::Source() {}
+          |Core::Source::~Source() {}
+          |Core::Holder::~Holder() {}
+          |int init(Core::Source& source) {
+          |  Core::Holder paren(source);
+          |  Core::Holder brace{source};
+          |  Core::Widget converted = source;
+          |  Core::Holder prvalue{Core::makeSource()};
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val sourceConversion = "source.operator Widget()"
+      val prvalueConversion = "Core::makeSource().operator Widget()"
+      cpg.method
+        .nameExact("init")
+        .call
+        .nameExact("Holder")
+        .codeExact("Core.Holder.Holder(source)")
+        .methodFullName
+        .l shouldBe List("Core.Holder.Holder:void(Widget&&)", "Core.Holder.Holder:void(Widget&&)")
+      cpg.method
+        .nameExact("init")
+        .call
+        .nameExact("Holder")
+        .codeExact("Core.Holder.Holder(Core::makeSource())")
+        .methodFullName
+        .l shouldBe List("Core.Holder.Holder:void(Widget&&)")
+      cpg.method
+        .nameExact("init")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget(source)")
+        .methodFullName
+        .l shouldBe List("Core.Widget.Widget:void(Widget&&)")
+      cpg.method.nameExact("init").call.nameExact("operator Widget").code.l shouldBe
+        List(sourceConversion, sourceConversion, sourceConversion, prvalueConversion)
+      cpg.method.nameExact("init").call.nameExact("~Widget").code.l shouldBe
+        List(
+          s"$sourceConversion.~Widget()",
+          s"$sourceConversion.~Widget()",
+          s"$sourceConversion.~Widget()",
+          s"$prvalueConversion.~Widget()",
+          "converted.~Widget()"
+        )
+      cpg.method.nameExact("init").call.nameExact("~Source").code.l shouldBe
+        List("Core::makeSource().~Source()")
+      cpg.method.nameExact("init").call.nameExact("~Holder").code.l shouldBe
+        List("prvalue.~Holder()", "brace.~Holder()", "paren.~Holder()")
+    }
+
     "model C++ overloaded index aggregate temporary lifetimes" in {
       val cpg = code(
         """
