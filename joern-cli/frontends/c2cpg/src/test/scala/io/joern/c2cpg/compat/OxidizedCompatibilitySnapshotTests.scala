@@ -1005,6 +1005,47 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("assigned.~Widget()", "direct.~Widget()", "empty.~Widget()")
     }
 
+    "prefer C++ initializer-list constructors for braced locals" in {
+      val cpg = code(
+        """
+          |#include <initializer_list>
+          |namespace Core {
+          |class Bag {
+          |public:
+          |  Bag(int seed) {}
+          |  Bag(std::initializer_list<int> values) {}
+          |  ~Bag();
+          |};
+          |}
+          |Core::Bag::~Bag() {}
+          |int bags(int seed) {
+          |  Core::Bag single{seed};
+          |  Core::Bag many{seed, 2};
+          |  Core::Bag assigned = {seed, 3};
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val initializerListConstructor = "Core.Bag.Bag:void(std::initializer_list<int>)"
+      cpg.method.nameExact("bags").call.nameExact("Bag").codeExact("Core.Bag.Bag({seed})").methodFullName.l shouldBe
+        List(initializerListConstructor)
+      cpg.method.nameExact("bags").call.nameExact("Bag").codeExact("Core.Bag.Bag({seed, 2})").methodFullName.l shouldBe
+        List(initializerListConstructor)
+      cpg.method.nameExact("bags").call.nameExact("Bag").codeExact("Core.Bag.Bag({seed, 3})").methodFullName.l shouldBe
+        List(initializerListConstructor)
+      cpg.method
+        .fullNameExact(initializerListConstructor)
+        .parameter
+        .typeFullName
+        .l shouldBe List("Core.Bag*", "std.initializer_list<int>")
+      cpg.method.nameExact("bags").call.nameExact("Bag").argument.code.l shouldBe
+        List("&<tmp>0", "{seed}", "&<tmp>1", "{seed, 2}", "&<tmp>2", "{seed, 3}")
+      cpg.method.nameExact("bags").call.nameExact("~Bag").code.l shouldBe
+        List("assigned.~Bag()", "many.~Bag()", "single.~Bag()")
+    }
+
     "capture C++ braced constructor temporary destructors" in {
       val cpg = code(
         """

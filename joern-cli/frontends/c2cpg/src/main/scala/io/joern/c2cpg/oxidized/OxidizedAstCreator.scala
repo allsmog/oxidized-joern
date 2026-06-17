@@ -58,6 +58,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private final case class TemporaryDestructor(code: String, line: Int, entry: FunctionEntry)
   private final case class HeapConstructor(code: String, line: Int, entry: FunctionEntry, arguments: Seq[OxExpression])
   private final case class HeapDestructor(code: String, line: Int, entry: FunctionEntry, receiver: OxExpression)
+  private final case class ConstructorInitializerResolution(
+    arguments: Seq[OxExpression],
+    entry: Option[FunctionEntry],
+    preserveInitializerListCode: Boolean = false
+  )
   private final case class LambdaCaptureRequest(
     name: String,
     evaluationStrategy: String,
@@ -1303,9 +1308,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     local.initializer match {
       case Some(initializer: OxInitializerList)
           if useConstructorInitializers && isConstructorInitializer(typeName, initializer) =>
-        val constructor = constructorEntry(typeName, initializer.elements)
-        Seq(localAst, constructorAssignmentAst(local, initializer, typeName)) ++
-          temporaryDestructorAstsForConstructorArguments(initializer.elements, constructor)
+        val resolution = constructorInitializerResolution(typeName, initializer)
+        Seq(localAst, constructorAssignmentAst(local, initializer, typeName, resolution)) ++
+          temporaryDestructorAstsForConstructorArguments(resolution.arguments, resolution.entry)
       case Some(initializer) if useConstructorInitializers && isCopyConstructorInitializer(typeName, initializer) =>
         val arguments   = Seq(initializer)
         val constructor = constructorEntry(typeName, arguments)
@@ -1495,7 +1500,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val initializerCode = initializer.code.trim
     aggregateTypeFullNames.contains(typeName) &&
     (initializerCode.startsWith("(") || (initializerCode
-      .startsWith("{") && constructorEntry(typeName, initializer.elements).isDefined))
+      .startsWith("{") && constructorInitializerResolution(typeName, initializer).entry.isDefined))
   }
 
   private def isCopyConstructorInitializer(typeName: String, initializer: OxExpression): Boolean = {
@@ -1522,8 +1527,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     )
   }
 
-  private def constructorAssignmentAst(local: OxLocalDecl, initializer: OxInitializerList, typeName: String): Ast = {
-    constructorAssignmentAst(local, initializer.elements, initializer.code.trim, OxOrigin(initializer), typeName)
+  private def constructorAssignmentAst(
+    local: OxLocalDecl,
+    initializer: OxInitializerList,
+    typeName: String,
+    resolution: ConstructorInitializerResolution
+  ): Ast = {
+    constructorAssignmentAst(
+      local,
+      resolution.arguments,
+      initializer.code.trim,
+      OxOrigin(initializer),
+      typeName,
+      resolvedConstructor = resolution.entry,
+      preserveInitializerListCode = resolution.preserveInitializerListCode
+    )
   }
 
   private def constructorAssignmentAst(
@@ -1531,10 +1549,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     arguments: Seq[OxExpression],
     initializerCode: String,
     initializerOrigin: OxOrigin,
-    typeName: String
+    typeName: String,
+    resolvedConstructor: Option[FunctionEntry] = None,
+    preserveInitializerListCode: Boolean = false
   ): Ast = {
     val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
-    val constructor     = constructorEntry(typeName, arguments)
+    val constructor     = resolvedConstructor.orElse(constructorEntry(typeName, arguments))
     val implicitSignature =
       Option.when(arguments.isEmpty && hasImplicitDefaultConstructor(typeName))("void()")
     val signature = constructor.map(_.function.signature).orElse(implicitSignature)
@@ -1543,7 +1563,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .orElse(signature.map(sig => s"$typeName.$constructorName:$sig"))
       .getOrElse(s"$typeName.$constructorName")
     val initCode =
-      if (initializerCode.startsWith("(") && initializerCode.endsWith(")"))
+      if (preserveInitializerListCode) initializerCode
+      else if (initializerCode.startsWith("(") && initializerCode.endsWith(")"))
         initializerCode.stripPrefix("(").stripSuffix(")")
       else if (initializerCode.startsWith("{") && initializerCode.endsWith("}"))
         initializerCode.stripPrefix("{").stripSuffix("}")
@@ -1616,6 +1637,40 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def constructorEntry(typeName: String, arguments: Seq[OxExpression]): Option[FunctionEntry] = {
     val candidates = constructorEntriesForType(typeName)
     selectFunctionEntry(candidates, Some(arguments))
+  }
+
+  private def constructorInitializerResolution(
+    typeName: String,
+    initializer: OxInitializerList
+  ): ConstructorInitializerResolution = {
+    val initializerListEntry = initializerListConstructorEntry(typeName, initializer)
+    initializerListEntry match {
+      case Some(entry) =>
+        ConstructorInitializerResolution(Seq(initializer), Option(entry), preserveInitializerListCode = true)
+      case None =>
+        ConstructorInitializerResolution(initializer.elements, constructorEntry(typeName, initializer.elements))
+    }
+  }
+
+  private def initializerListConstructorEntry(
+    typeName: String,
+    initializer: OxInitializerList
+  ): Option[FunctionEntry] = {
+    Option
+      .when(initializer.code.trim.startsWith("{")) {
+        val candidates = constructorEntriesForType(typeName).filter { entry =>
+          entry.function.parameters match {
+            case Seq(parameter) => isStdInitializerListType(parameter.typeName)
+            case _              => false
+          }
+        }
+        selectFunctionEntry(candidates, Some(Seq(initializer)))
+      }
+      .flatten
+  }
+
+  private def isStdInitializerListType(typeName: String): Boolean = {
+    normalizeType(resolveAliasType(typeName)).startsWith("std.initializer_list<")
   }
 
   private def constructorEntriesForType(typeName: String): Seq[FunctionEntry] = {
