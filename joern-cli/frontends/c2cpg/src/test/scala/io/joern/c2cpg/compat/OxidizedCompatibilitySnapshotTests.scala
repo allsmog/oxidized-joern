@@ -2089,6 +2089,35 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.identifier.codeExact("using enum rgba_color_channel;").l shouldBe Nil
     }
 
+    "capture C++20 explicit bool constructor templates from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct foo {
+          |  template <typename T>
+          |  explicit(!std::is_integral_v<T>) foo(T) {}
+          |};
+          |
+          |void use() {
+          |  foo a = 123;
+          |  foo c {"123"};
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.fullNameExact("foo.foo:void(T)").l) { case List(constructor) =>
+        constructor.signature shouldBe "void(T)"
+        constructor.methodReturn.typeFullName shouldBe "void"
+        constructor.parameter.name.l shouldBe List("this", "param1")
+        constructor.parameter.typeFullName.l shouldBe List("foo*", "T")
+      }
+      cpg.method.nameExact("use").local.nameExact("a", "c").typeFullName.l shouldBe List("foo", "foo")
+      cpg.method.nameExact("use").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "a = foo.foo(123)",
+        """c = foo.foo("123")"""
+      )
+    }
+
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
       val cpg = code(
         """

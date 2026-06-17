@@ -1472,6 +1472,13 @@ fn parse_struct_with_name(
             })
             .map(Declaration::Function),
     );
+    nested_declarations.extend(
+        named_children(body)
+            .into_iter()
+            .filter(|child| child.kind() == "template_declaration")
+            .flat_map(|template| parse_nested_template_functions(template, source, symbols))
+            .map(Declaration::Function),
+    );
     Some(StructDecl {
         name,
         code: compact_code(node_text(node, source)),
@@ -1485,6 +1492,34 @@ fn parse_struct_with_name(
             .collect(),
         nested_declarations,
     })
+}
+
+fn parse_nested_template_functions(
+    node: Node,
+    source: &[u8],
+    symbols: &mut MacroSymbols,
+) -> Vec<FunctionDecl> {
+    named_children(node)
+        .into_iter()
+        .flat_map(|child| match child.kind() {
+            "declaration" => parse_function_declaration(child, source)
+                .into_iter()
+                .collect(),
+            "function_definition" => parse_function(child, source, symbols).into_iter().collect(),
+            "constructor_or_destructor_definition" => {
+                parse_constructor_or_destructor(child, source, true, symbols)
+                    .into_iter()
+                    .collect()
+            }
+            "constructor_or_destructor_declaration" => {
+                parse_constructor_or_destructor(child, source, false, symbols)
+                    .into_iter()
+                    .collect()
+            }
+            "template_declaration" => parse_nested_template_functions(child, source, symbols),
+            _ => Vec::new(),
+        })
+        .collect()
 }
 
 fn parse_base_classes(node: Node, source: &[u8]) -> Vec<String> {
@@ -5148,6 +5183,35 @@ mod tests {
             })
             .expect("expected use function");
         assert_eq!(use_function.parameters[0].type_name, "Core::Holder<int>");
+    }
+
+    #[test]
+    fn parses_cpp_explicit_bool_constructor_templates() {
+        let sample = r#"
+                struct foo {
+                  template <typename T>
+                  explicit(!std::is_integral_v<T>) foo(T) {}
+                };
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("explicit(bool) constructor sample should parse");
+        let Declaration::Struct(struct_decl) = &declarations[0] else {
+            panic!("expected struct declaration");
+        };
+        let constructor = struct_decl
+            .nested_declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "foo" => Some(function),
+                _ => None,
+            })
+            .expect("expected explicit(bool) constructor");
+        assert_eq!(constructor.return_type, "void");
+        assert_eq!(constructor.signature, "void(T)");
+        assert!(constructor.is_definition);
+        assert_eq!(constructor.parameters.len(), 1);
+        assert_eq!(constructor.parameters[0].name, "param1");
+        assert_eq!(constructor.parameters[0].type_name, "T");
     }
 
     #[test]
