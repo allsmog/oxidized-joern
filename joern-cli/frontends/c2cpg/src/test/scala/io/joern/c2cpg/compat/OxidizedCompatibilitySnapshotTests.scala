@@ -667,6 +667,53 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         )
     }
 
+    "capture C++ throw temporary destructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int fail(int n) {
+          |  Core::Widget source;
+          |  if (n) {
+          |    throw Core::consume(Core::Widget(source));
+          |  }
+          |  throw Core::consume(Core::Widget());
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("fail").controlStructure.controlStructureType(ControlStructureTypes.THROW).code.l shouldBe
+        List("throw Core::consume(Core::Widget(source))", "throw Core::consume(Core::Widget())")
+      cpg.method.nameExact("fail").call.nameExact("consume").methodFullName.l shouldBe
+        List("Core.consume:int(Widget&&)", "Core.consume:int(Widget&&)")
+      cpg.method.nameExact("fail").call.nameExact("Widget").codeExact("Core::Widget()").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void()")
+      cpg.method.nameExact("fail").call.nameExact("Widget").codeExact("Core::Widget(source)").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(Widget&)")
+      cpg.method.nameExact("fail").call.nameExact("~Widget").code.l.sorted shouldBe
+        List(
+          "Core::Widget().~Widget()",
+          "Core::Widget(source).~Widget()",
+          "source.~Widget()",
+          "source.~Widget()"
+        )
+      cpg.method.nameExact("fail").controlStructure.controlStructureType(ControlStructureTypes.IF).ast.isCall
+        .nameExact("~Widget")
+        .code
+        .l shouldBe List("Core::Widget(source).~Widget()", "source.~Widget()")
+    }
+
     "capture C++ jump destructors" in {
       val cpg = code(
         """

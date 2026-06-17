@@ -242,6 +242,11 @@ pub enum Statement {
         line: usize,
         expression: Option<Expression>,
     },
+    Throw {
+        code: String,
+        line: usize,
+        expression: Option<Expression>,
+    },
     If {
         code: String,
         line: usize,
@@ -1917,6 +1922,14 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
         "compound_statement" => parse_statement_block(node, source, symbols),
         "declaration" => parse_local_declarations(node, source),
         "return_statement" => vec![Statement::Return {
+            code: statement_code(node, source),
+            line: line(node),
+            expression: named_children(node)
+                .into_iter()
+                .next()
+                .map(|expr| parse_expression(expr, source)),
+        }],
+        "throw_statement" => vec![Statement::Throw {
             code: statement_code(node, source),
             line: line(node),
             expression: named_children(node)
@@ -4321,6 +4334,63 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_throw_statements_with_constructor_temporaries() {
+        let sample = r#"
+                namespace Core {
+                class Widget {
+                public:
+                  Widget();
+                  Widget(const Widget& other) {}
+                  Widget(Widget&& other) {}
+                  ~Widget() {}
+                };
+                int consume(Widget&& widget) { return 1; }
+                }
+                int fail(int n) {
+                  Core::Widget source;
+                  if (n) {
+                    throw Core::consume(Core::Widget(source));
+                  }
+                  throw Core::consume(Core::Widget());
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("throw constructor temporary sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "fail" => Some(function),
+                _ => None,
+            })
+            .expect("expected fail function");
+        let [Statement::LocalDecl {
+            name: source_name, ..
+        }, Statement::If { then_body, .. }, Statement::Throw {
+            expression: Some(top_level_throw),
+            ..
+        }] = function.body.as_slice()
+        else {
+            panic!("expected source local, guarded throw, and top-level throw");
+        };
+        assert_eq!(source_name, "source");
+        let [Statement::Throw {
+            expression: Some(guarded_throw),
+            ..
+        }] = then_body.as_slice()
+        else {
+            panic!("expected guarded throw body");
+        };
+        assert_eq!(
+            collect_call_names(guarded_throw),
+            vec!["Core::consume", "Core::Widget"]
+        );
+        assert_eq!(
+            collect_call_names(top_level_throw),
+            vec!["Core::consume", "Core::Widget"]
+        );
+    }
+
+    #[test]
     fn parses_cpp_new_and_delete_expressions() {
         let sample = r#"
                 int *allocate(int n) {
@@ -5262,6 +5332,7 @@ mod tests {
             Statement::LocalDecl { line, .. }
             | Statement::Assignment { line, .. }
             | Statement::Return { line, .. }
+            | Statement::Throw { line, .. }
             | Statement::If { line, .. }
             | Statement::While { line, .. }
             | Statement::DoWhile { line, .. }
