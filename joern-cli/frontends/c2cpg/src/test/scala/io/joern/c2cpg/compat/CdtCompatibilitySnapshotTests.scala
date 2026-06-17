@@ -377,6 +377,44 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             |""".stripMargin,
           filename = "Test0.cpp",
           options = CompatibilitySnapshot.RenderOptions(includeReturns = true, includeCallDetails = true)
+        ),
+        BackendParitySnapshot.Case(
+          "C++ scoped destructors across control-flow exits",
+          """
+            |namespace Core {
+            |class Guard {
+            |public:
+            |  Guard();
+            |  Guard(const Guard& other) {}
+            |  ~Guard();
+            |};
+            |}
+            |Core::Guard::Guard() {}
+            |Core::Guard::~Guard() {}
+            |int flow(int n) {
+            |  Core::Guard outer;
+            |  if (n != 0) {
+            |    Core::Guard scoped(outer);
+            |    return 1;
+            |  }
+            |  for (Core::Guard guard(outer); n != 0; n = n - 1) {
+            |    Core::Guard body(outer);
+            |    if (n == 1) {
+            |      continue;
+            |    }
+            |    if (n == 2) {
+            |      break;
+            |    }
+            |  }
+            |  return 0;
+            |}
+            |""".stripMargin,
+          filename = "Test0.cpp",
+          options = CompatibilitySnapshot.RenderOptions(
+            typeNames = Seq("Guard"),
+            includeReturns = true,
+            includeCallDetails = true
+          )
         )
       )
 
@@ -420,14 +458,12 @@ object CompatibilitySnapshot {
       .toSet
     val methods = rawMethods
       .filterNot(method =>
-        options.includeCallDetails && (
+        options.includeCallDetails && {
+          val methodFullName = comparableTemplateMethodFullName(method.fullName, genericMethodFullNames)
           isSyntheticOperatorMethod(method.name) ||
-            isSyntheticTemplateInstantiation(
-              method.lineNumber.isEmpty,
-              comparableTemplateMethodFullName(method.fullName, genericMethodFullNames),
-              genericMethodFullNames
-            )
-        )
+            isSyntheticTemplateInstantiation(method.lineNumber.isEmpty, methodFullName, genericMethodFullNames) ||
+            isSyntheticConstructorMethod(method.lineNumber.isEmpty, methodFullName)
+        }
       )
       .map { method =>
         val methodFullName = comparableTemplateMethodFullName(method.fullName, genericMethodFullNames)
@@ -435,7 +471,7 @@ object CompatibilitySnapshot {
           "METHOD",
           comparableMethodName(method.name),
           methodFullName,
-          comparableSignature(method.signature),
+          comparableMethodSignature(methodFullName, method.signature),
           method.lineNumber.map(_.toString).getOrElse("?")
         )
       }
@@ -443,15 +479,19 @@ object CompatibilitySnapshot {
     val typeDecls =
       if (options.typeNames.isEmpty) Seq.empty
       else {
-        cpg.typeDecl.nameExact(options.typeNames*).l.map { typeDecl =>
-          line(
-            "TYPE",
-            typeDecl.name,
-            comparableTypeDeclFullName(typeDecl.fullName, typeDecl.filename),
-            typeDecl.filename,
-            typeDecl.lineNumber.map(_.toString).getOrElse("?")
-          )
-        }
+        cpg.typeDecl
+          .nameExact(options.typeNames*)
+          .filterNot(typeDecl => isSyntheticMethodTypeDecl(typeDecl.fullName))
+          .l
+          .map { typeDecl =>
+            line(
+              "TYPE",
+              typeDecl.name,
+              comparableTypeDeclFullName(typeDecl.fullName, typeDecl.filename),
+              typeDecl.filename,
+              typeDecl.lineNumber.map(_.toString).getOrElse("?")
+            )
+          }
       }
 
     val locals = cpg.local.l
@@ -474,7 +514,7 @@ object CompatibilitySnapshot {
         }
       }
 
-    val calls = cpg.call.l.map { call =>
+    val calls = cpg.call.l.filterNot(call => options.includeCallDetails && isDestructorName(call.name)).map { call =>
       val values =
         if (options.includeCallDetails) {
           val name = comparableCallName(call.name)
@@ -529,7 +569,10 @@ object CompatibilitySnapshot {
       case "operator+"  => "+"
       case "operator="  => "="
       case "operator[]" => "[]"
-      case _            => name
+      case _ if name.startsWith("<operator>.") =>
+        name
+      case _ =>
+        simpleTypeName(eraseTemplateArguments(name))
     }
   }
 
@@ -540,7 +583,7 @@ object CompatibilitySnapshot {
       .replace(".operator+:", ".+:")
       .replace(".operator=:", ".=:")
       .replace(".operator[]:", ".[]:")
-    normalizeFullNameSignature(operatorNormalized)
+    normalizeConstructorAndDestructorFullName(normalizeFullNameSignature(operatorNormalized))
   }
 
   private def comparableCallName(name: String): String = {
@@ -549,7 +592,10 @@ object CompatibilitySnapshot {
       case "operator+"  => "<operator>.addition"
       case "operator="  => "<operator>.assignment"
       case "operator[]" => "<operator>.indirectIndexAccess"
-      case _            => eraseTemplateArguments(name)
+      case _ if name.startsWith("<operator>.") =>
+        name
+      case _ =>
+        simpleTypeName(eraseTemplateArguments(name))
     }
   }
 
@@ -573,6 +619,14 @@ object CompatibilitySnapshot {
     normalizeTypeReferences(signature)
   }
 
+  private def comparableMethodSignature(methodFullName: String, signature: String): String = {
+    if (isDestructorFullName(methodFullName)) {
+      methodSignatureFromFullName(methodFullName).getOrElse(comparableSignature(signature))
+    } else {
+      comparableSignature(signature)
+    }
+  }
+
   private def comparableTypeDeclFullName(fullName: String, filename: String): String = {
     val erased = eraseTemplateArguments(fullName)
     if (fullName.contains("<") || filename == "<includes>") simpleTypeName(erased) else erased
@@ -592,6 +646,49 @@ object CompatibilitySnapshot {
 
   private def isSyntheticOperatorMethod(name: String): Boolean = {
     name == "<operator>()" || name == "<operator>.indirectIndexAccess"
+  }
+
+  private def isSyntheticConstructorMethod(hasNoLineNumber: Boolean, fullName: String): Boolean = {
+    hasNoLineNumber && isConstructorFullName(fullName)
+  }
+
+  private def isSyntheticMethodTypeDecl(fullName: String): Boolean = {
+    fullName.contains("(")
+  }
+
+  private def normalizeConstructorAndDestructorFullName(fullName: String): String = {
+    val returnNormalized =
+      if (isDestructorFullName(fullName)) {
+        val signatureStart = fullName.indexOf(':')
+        val paramsStart    = fullName.indexOf('(', signatureStart + 1)
+        if (signatureStart >= 0 && paramsStart > signatureStart)
+          s"${fullName.take(signatureStart + 1)}void${fullName.drop(paramsStart)}"
+        else fullName
+      } else {
+        fullName
+      }
+
+    if (isConstructorFullName(returnNormalized)) {
+      val signatureStart = returnNormalized.indexOf(':')
+      if (signatureStart >= 0)
+        s"${returnNormalized.take(signatureStart + 1)}${returnNormalized.drop(signatureStart + 1).replace("&", "")}"
+      else returnNormalized
+    } else {
+      returnNormalized
+    }
+  }
+
+  private def isConstructorFullName(fullName: String): Boolean = {
+    val parts = fullName.takeWhile(_ != ':').split('.').filter(_.nonEmpty)
+    parts.length >= 2 && parts.last == parts(parts.length - 2)
+  }
+
+  private def isDestructorFullName(fullName: String): Boolean = {
+    fullName.takeWhile(_ != ':').split('.').lastOption.exists(isDestructorName)
+  }
+
+  private def isDestructorName(name: String): Boolean = {
+    name.startsWith("~")
   }
 
   private def normalizeFullNameSignature(fullName: String): String = {
@@ -634,6 +731,13 @@ object CompatibilitySnapshot {
     val paramsStart    = methodFullName.indexOf('(', signatureStart + 1)
     Option.when(signatureStart >= 0 && paramsStart > signatureStart) {
       methodFullName.substring(signatureStart + 1, paramsStart)
+    }
+  }
+
+  private def methodSignatureFromFullName(methodFullName: String): Option[String] = {
+    val signatureStart = methodFullName.indexOf(':')
+    Option.when(signatureStart >= 0) {
+      methodFullName.drop(signatureStart + 1)
     }
   }
 
