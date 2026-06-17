@@ -289,6 +289,9 @@ pub enum Statement {
         line: usize,
         #[serde(skip_serializing_if = "Vec::is_empty")]
         initializer: Vec<Statement>,
+        #[serde(rename = "conditionInitializer")]
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        condition_initializer: Vec<Statement>,
         condition: Expression,
         #[serde(rename = "thenBody")]
         then_body: Vec<Statement>,
@@ -300,6 +303,9 @@ pub enum Statement {
         line: usize,
         #[serde(skip_serializing_if = "Vec::is_empty")]
         initializer: Vec<Statement>,
+        #[serde(rename = "conditionInitializer")]
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        condition_initializer: Vec<Statement>,
         condition: Expression,
         body: Vec<Statement>,
     },
@@ -341,6 +347,9 @@ pub enum Statement {
         line: usize,
         #[serde(skip_serializing_if = "Vec::is_empty")]
         initializer: Vec<Statement>,
+        #[serde(rename = "conditionInitializer")]
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        condition_initializer: Vec<Statement>,
         condition: Expression,
         body: Vec<Statement>,
     },
@@ -2609,7 +2618,7 @@ fn parse_preproc_statements(
 fn parse_if_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let consequence = node.child_by_field_name("consequence")?;
-    let (initializer, condition) = parse_condition_clause(condition, source, symbols);
+    let condition_clause = parse_condition_clause(condition, source, symbols);
     let else_body = node
         .child_by_field_name("alternative")
         .map(|alternative| parse_statement(alternative, source, symbols))
@@ -2617,8 +2626,9 @@ fn parse_if_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> 
     Some(Statement::If {
         code: statement_code(node, source),
         line: line(node),
-        initializer,
-        condition,
+        initializer: condition_clause.initializer,
+        condition_initializer: condition_clause.condition_initializer,
+        condition: condition_clause.condition,
         then_body: parse_statement(consequence, source, symbols),
         else_body,
     })
@@ -2631,12 +2641,13 @@ fn parse_while_statement(
 ) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let body = node.child_by_field_name("body")?;
-    let (initializer, condition) = parse_condition_clause(condition, source, symbols);
+    let condition_clause = parse_condition_clause(condition, source, symbols);
     Some(Statement::While {
         code: statement_code(node, source),
         line: line(node),
-        initializer,
-        condition,
+        initializer: condition_clause.initializer,
+        condition_initializer: condition_clause.condition_initializer,
+        condition: condition_clause.condition,
         body: parse_statement(body, source, symbols),
     })
 }
@@ -2742,44 +2753,67 @@ fn parse_switch_statement(
 ) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let body = node.child_by_field_name("body")?;
-    let (initializer, condition) = parse_condition_clause(condition, source, symbols);
+    let condition_clause = parse_condition_clause(condition, source, symbols);
     Some(Statement::Switch {
         code: statement_code(node, source),
         line: line(node),
-        initializer,
-        condition,
+        initializer: condition_clause.initializer,
+        condition_initializer: condition_clause.condition_initializer,
+        condition: condition_clause.condition,
         body: flatten_switch_cases(parse_statement(body, source, symbols)),
     })
+}
+
+struct ConditionClause {
+    initializer: Vec<Statement>,
+    condition_initializer: Vec<Statement>,
+    condition: Expression,
 }
 
 fn parse_condition_clause(
     node: Node,
     source: &[u8],
     symbols: &mut MacroSymbols,
-) -> (Vec<Statement>, Expression) {
+) -> ConditionClause {
     if node.kind() != "condition_clause" {
-        return (Vec::new(), parse_expression(node, source));
+        return ConditionClause {
+            initializer: Vec::new(),
+            condition_initializer: Vec::new(),
+            condition: parse_expression(node, source),
+        };
     }
 
     let children = named_children(node);
     if children.is_empty() {
-        return (Vec::new(), parse_expression(node, source));
+        return ConditionClause {
+            initializer: Vec::new(),
+            condition_initializer: Vec::new(),
+            condition: parse_expression(node, source),
+        };
     }
 
     if condition_clause_has_semicolon(node, source) && children.len() >= 2 {
         let condition = *children.last().expect("condition child");
-        let mut initializer = children[..children.len() - 1]
+        let initializer = children[..children.len() - 1]
             .iter()
             .flat_map(|child| parse_condition_initializer(*child, source, symbols))
             .collect::<Vec<_>>();
-        let condition = parse_condition_component(condition, source, symbols, &mut initializer);
-        return (initializer, condition);
+        let (condition_initializer, condition) =
+            parse_condition_component(condition, source, symbols);
+        return ConditionClause {
+            initializer,
+            condition_initializer,
+            condition,
+        };
     }
 
     let child = children[0];
-    let mut initializer = Vec::new();
-    let condition = parse_condition_component(child, source, symbols, &mut initializer);
-    (initializer, condition)
+    let (condition_initializer, condition) = parse_condition_component(child, source, symbols);
+    ConditionClause {
+        initializer: Vec::new(),
+        condition_initializer,
+        condition,
+    }
 }
 
 fn parse_condition_initializer(
@@ -2850,16 +2884,14 @@ fn parse_condition_component(
     node: Node,
     source: &[u8],
     symbols: &mut MacroSymbols,
-    initializer: &mut Vec<Statement>,
-) -> Expression {
+) -> (Vec<Statement>, Expression) {
     if matches!(node.kind(), "declaration" | "init_statement") {
         let declarations = parse_condition_initializer(node, source, symbols);
         let condition = condition_expression_from_initializer(&declarations)
             .unwrap_or_else(|| parse_expression(node, source));
-        initializer.extend(declarations);
-        condition
+        (declarations, condition)
     } else {
-        parse_expression(node, source)
+        (Vec::new(), parse_expression(node, source))
     }
 }
 
@@ -6909,16 +6941,19 @@ mod tests {
             .expect("expected use function");
         let [Statement::If {
             initializer: if_initializer,
+            condition_initializer: if_condition_initializer,
             condition: if_condition,
             then_body,
             ..
         }, Statement::While {
             initializer: while_initializer,
+            condition_initializer: while_condition_initializer,
             condition: while_condition,
             body: while_body,
             ..
         }, Statement::Switch {
             initializer: switch_initializer,
+            condition_initializer: switch_condition_initializer,
             condition: switch_condition,
             body: switch_body,
             ..
@@ -6935,11 +6970,13 @@ mod tests {
                 ..
             }] if name == "x" && call_name == "f"
         ));
+        assert!(if_condition_initializer.is_empty());
         assert!(matches!(if_condition, Expression::Identifier { name, .. } if name == "x"));
         assert!(matches!(then_body.as_slice(), [Statement::Return { .. }]));
 
+        assert!(while_initializer.is_empty());
         assert!(matches!(
-            while_initializer.as_slice(),
+            while_condition_initializer.as_slice(),
             [Statement::LocalDecl {
                 name,
                 initializer: Some(Expression::Call { name: call_name, .. }),
@@ -6957,6 +6994,7 @@ mod tests {
                 ..
             }] if name == "y" && call_name == "f"
         ));
+        assert!(switch_condition_initializer.is_empty());
         assert!(matches!(switch_condition, Expression::Identifier { name, .. } if name == "y"));
         assert!(matches!(
             switch_body.as_slice(),
@@ -8797,6 +8835,7 @@ mod tests {
             }
             Statement::If {
                 initializer,
+                condition_initializer,
                 condition,
                 then_body,
                 else_body,
@@ -8806,6 +8845,11 @@ mod tests {
                     .iter()
                     .flat_map(collect_statement_call_names)
                     .collect::<Vec<_>>();
+                calls.extend(
+                    condition_initializer
+                        .iter()
+                        .flat_map(collect_statement_call_names),
+                );
                 calls.extend(collect_call_names(condition));
                 calls.extend(then_body.iter().flat_map(collect_statement_call_names));
                 calls.extend(else_body.iter().flat_map(collect_statement_call_names));
@@ -8813,6 +8857,7 @@ mod tests {
             }
             Statement::While {
                 initializer,
+                condition_initializer,
                 condition,
                 body,
                 ..
@@ -8821,6 +8866,11 @@ mod tests {
                     .iter()
                     .flat_map(collect_statement_call_names)
                     .collect::<Vec<_>>();
+                calls.extend(
+                    condition_initializer
+                        .iter()
+                        .flat_map(collect_statement_call_names),
+                );
                 calls.extend(collect_call_names(condition));
                 calls.extend(body.iter().flat_map(collect_statement_call_names));
                 calls
@@ -8834,6 +8884,7 @@ mod tests {
             }
             Statement::Switch {
                 initializer,
+                condition_initializer,
                 condition,
                 body,
                 ..
@@ -8842,6 +8893,11 @@ mod tests {
                     .iter()
                     .flat_map(collect_statement_call_names)
                     .collect::<Vec<_>>();
+                calls.extend(
+                    condition_initializer
+                        .iter()
+                        .flat_map(collect_statement_call_names),
+                );
                 calls.extend(collect_call_names(condition));
                 calls.extend(body.iter().flat_map(collect_statement_call_names));
                 calls
