@@ -3072,6 +3072,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case "&"            => Operators.addressOf
       case "~"            => Operators.not
       case "!"            => Operators.logicalNot
+      case "co_await"     => "<operator>.await"
+      case "co_yield"     => "<operator>.yield"
       case _              => Defines.OperatorUnknown
     }
   }
