@@ -299,6 +299,25 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             includeReturns = true,
             includeCallDetails = true
           )
+        ),
+        BackendParitySnapshot.Case(
+          "C++ static member access",
+          """
+            |struct Counter {
+            |  static int total;
+            |  int value;
+            |};
+            |
+            |int main() {
+            |  Counter counter;
+            |  Counter::total = 1;
+            |  counter.value = Counter::total;
+            |  return counter.value;
+            |}
+            |""".stripMargin,
+          filename = "Test0.cpp",
+          options =
+            CompatibilitySnapshot.RenderOptions(typeNames = Seq("Counter"), includeReturns = true, includeCallDetails = true)
         )
       )
 
@@ -359,15 +378,17 @@ object CompatibilitySnapshot {
         }
       }
 
-    val locals = cpg.local.l.map { local =>
-      line(
-        "LOCAL",
-        local.name,
-        local.typeFullName,
-        local.code,
-        local.lineNumber.map(_.toString).getOrElse("?")
-      )
-    }
+    val locals = cpg.local.l
+      .filterNot(local => isTypeOwnerLocal(cpg, local.name, local.typeFullName, local.code))
+      .map { local =>
+        line(
+          "LOCAL",
+          local.name,
+          local.typeFullName,
+          local.code,
+          local.lineNumber.map(_.toString).getOrElse("?")
+        )
+      }
 
     val returns =
       if (!options.includeReturns) Seq.empty
@@ -418,6 +439,10 @@ object CompatibilitySnapshot {
 
   private def comparableCallTypeFullName(name: String, typeFullName: String): String = {
     if (name.startsWith("<operator>.")) "?" else typeFullName
+  }
+
+  private def isTypeOwnerLocal(cpg: Cpg, name: String, typeFullName: String, code: String): Boolean = {
+    name == typeFullName && code == name && cpg.typeDecl.fullNameExact(typeFullName).nonEmpty
   }
 
   private def section(name: String, lines: Seq[String]): String = {
