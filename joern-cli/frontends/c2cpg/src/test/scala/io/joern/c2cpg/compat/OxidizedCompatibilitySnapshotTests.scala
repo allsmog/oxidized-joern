@@ -1183,6 +1183,57 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         )
     }
 
+    "capture C++ member initializer temporary destructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |class Holder {
+          |public:
+          |  Holder(Widget&& widget) {}
+          |  ~Holder();
+          |};
+          |class Wrapper {
+          |  Holder holder;
+          |public:
+          |  Wrapper() : holder(Core::Widget()) {}
+          |  ~Wrapper();
+          |};
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Holder::~Holder() {}
+          |Core::Wrapper::~Wrapper() {}
+          |int use() {
+          |  Core::Wrapper wrapper;
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val wrapperConstructorCalls = cpg.method.fullNameExact("Core.Wrapper.Wrapper:void()").call.code.l
+      cpg.method
+        .fullNameExact("Core.Wrapper.Wrapper:void()")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core::Widget()")
+        .methodFullName
+        .l shouldBe List("Core.Widget.Widget:void()")
+      cpg.method.fullNameExact("Core.Wrapper.Wrapper:void()").call.nameExact("~Widget").code.l shouldBe
+        List("Core::Widget().~Widget()")
+      wrapperConstructorCalls.indexOf("this->holder = Core::Widget()") should be < wrapperConstructorCalls.indexOf(
+        "Core::Widget().~Widget()"
+      )
+      cpg.method.nameExact("use").call.nameExact("~Wrapper").code.l shouldBe List("wrapper.~Wrapper()")
+    }
+
     "extend C++ reference-bound temporary lifetimes" in {
       val cpg = code(
         """
