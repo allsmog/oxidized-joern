@@ -769,17 +769,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         temporaryDestructorAstsForExpressions(ret.expression.toSeq) ++ activeLocalDestructors.map(localDestructorAst) :+
           returnAst(returnNode(OxOrigin(ret), ret.code), ret.expression.toSeq.map(expressionAst))
       case ifStmt: OxIf =>
-        val ifNode       = controlStructureNode(OxOrigin(ifStmt), ControlStructureTypes.IF, ifStmt.code)
-        val conditionAst = expressionAst(ifStmt.condition)
-        val thenAst      = statementBlockAst(ifStmt.thenBody, "then", ifStmt.line)
+        val ifNode                    = controlStructureNode(OxOrigin(ifStmt), ControlStructureTypes.IF, ifStmt.code)
+        val conditionAst              = expressionAst(ifStmt.condition)
+        val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(ifStmt.condition))
+        val thenAst                   = statementBlockAst(ifStmt.thenBody, "then", ifStmt.line)
         val elseAst =
           Option.when(ifStmt.elseBody.nonEmpty) {
             Ast(controlStructureNode(OxOrigin("else", Option(ifStmt.line)), ControlStructureTypes.ELSE, "else"))
               .withChild(statementBlockAst(ifStmt.elseBody, "else", ifStmt.line))
           }
-        Seq(ifThenElseAst(ifNode, Option(conditionAst), thenAst, elseAst))
+        Seq(ifThenElseAst(ifNode, Option(conditionAst), thenAst, elseAst).withChildren(conditionTemporaryCleanup))
       case whileStmt: OxWhile =>
-        val preservedScopeDepth = localDestructorScopes.length
+        val preservedScopeDepth       = localDestructorScopes.length
+        val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(whileStmt.condition))
         val bodyAst = withJumpCleanupTarget(
           JumpCleanupTarget(
             breakPreservedScopeDepth = Option(preservedScopeDepth),
@@ -794,10 +796,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             Seq(bodyAst),
             code = Option(whileStmt.code),
             lineNumber = Option(whileStmt.line)
-          )
+          ).withChildren(conditionTemporaryCleanup)
         )
       case doWhileStmt: OxDoWhile =>
-        val preservedScopeDepth = localDestructorScopes.length
+        val preservedScopeDepth       = localDestructorScopes.length
+        val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(doWhileStmt.condition))
         val bodyAst = withJumpCleanupTarget(
           JumpCleanupTarget(
             breakPreservedScopeDepth = Option(preservedScopeDepth),
@@ -812,14 +815,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             Seq(bodyAst),
             code = Option(doWhileStmt.code),
             lineNumber = Option(doWhileStmt.line)
-          )
+          ).withChildren(conditionTemporaryCleanup)
         )
       case forStmt: OxFor =>
         val (forAst_, initializerDestructors) = inNestedScopeCollectingDestructors {
           val forNode               = controlStructureNode(OxOrigin(forStmt), ControlStructureTypes.FOR, forStmt.code)
           val initializerAsts       = forStmt.initializer.flatMap(astsForStatement)
           val (localAsts, initAsts) = initializerAsts.partition(_.root.exists(_.isInstanceOf[NewLocal]))
-          val preservedScopeDepth   = localDestructorScopes.length
+          val conditionAsts         = forStmt.condition.toSeq.map(expressionAst)
+          val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(forStmt.condition.toSeq)
+          val updateAsts = forStmt.update.toSeq.flatMap { update =>
+            expressionAst(update) +: temporaryDestructorAstsForExpressions(Seq(update))
+          }
+          val preservedScopeDepth = localDestructorScopes.length
           val bodyAst = withJumpCleanupTarget(
             JumpCleanupTarget(
               breakPreservedScopeDepth = Option(preservedScopeDepth),
@@ -828,13 +836,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           ) {
             statementBlockAst(forStmt.body, "for", forStmt.line)
           }
-          forAst(
-            forNode,
-            localAsts,
-            initAsts,
-            forStmt.condition.toSeq.map(expressionAst),
-            forStmt.update.toSeq.map(expressionAst),
-            bodyAst
+          forAst(forNode, localAsts, initAsts, conditionAsts, updateAsts, bodyAst).withChildren(
+            conditionTemporaryCleanup
           )
         }
         forAst_ +: initializerDestructors.reverse.map(localDestructorAst)
@@ -851,6 +854,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           labelStmt.body.flatMap(astsForStatement)
       case switchStmt: OxSwitch =>
         val switchNode = controlStructureNode(OxOrigin(switchStmt), ControlStructureTypes.SWITCH, switchStmt.code)
+        val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(switchStmt.condition))
         val (switchAst_, switchDestructors) = inNestedScopeCollectingDestructors {
           val preservedScopeDepth = localDestructorScopes.length
           val bodyAsts = withJumpCleanupTarget(
@@ -861,7 +865,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           ) {
             switchStmt.body.flatMap(astsForStatement)
           }
-          switchAst(switchNode, expressionAst(switchStmt.condition), bodyAsts)
+          switchAst(switchNode, expressionAst(switchStmt.condition), bodyAsts).withChildren(conditionTemporaryCleanup)
         }
         switchAst_ +: switchDestructors.reverse.map(localDestructorAst)
       case caseStmt: OxCase =>
