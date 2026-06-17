@@ -446,6 +446,47 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .l shouldBe Nil
     }
 
+    "capture C++ default local constructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  ~Widget();
+          |};
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int defaults() {
+          |  Core::Widget outer;
+          |  {
+          |    Core::Widget scoped;
+          |  }
+          |  for (Core::Widget guard; 0; ) {
+          |  }
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("defaults").local.nameExact("outer").typeFullName.l shouldBe List("Core.Widget")
+      cpg.method.nameExact("defaults").local.nameExact("scoped").typeFullName.l shouldBe List("Core.Widget")
+      cpg.method.nameExact("defaults").local.nameExact("guard").typeFullName.l shouldBe List("Core.Widget")
+      cpg.method.nameExact("defaults").call.nameExact("Widget").codeExact("Core.Widget.Widget()").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void()", "Core.Widget.Widget:void()", "Core.Widget.Widget:void()")
+      cpg.method.nameExact("defaults").call.nameExact(Operators.assignment).code.l shouldBe
+        List(
+          "outer = Core.Widget.Widget()",
+          "scoped = Core.Widget.Widget()",
+          "guard = Core.Widget.Widget()"
+        )
+      cpg.method.nameExact("defaults").call.nameExact("~Widget").code.l.sorted shouldBe
+        List("guard.~Widget()", "outer.~Widget()", "scoped.~Widget()")
+    }
+
     "resolve C++ move constructors for rvalue initializers" in {
       val cpg = code(
         """

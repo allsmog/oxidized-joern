@@ -4120,6 +4120,7 @@ mod tests {
         let [Statement::LocalDecl {
             name: source_name,
             type_name: source_type,
+            initializer: source_initializer,
             ..
         }, Statement::Expression {
             expression: default_call,
@@ -4150,6 +4151,7 @@ mod tests {
         };
         assert_eq!(source_name, "source");
         assert_eq!(source_type, "Core::Widget");
+        assert!(source_initializer.is_none());
 
         let Expression::Call {
             name: default_accept_name,
