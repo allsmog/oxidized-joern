@@ -3901,6 +3901,45 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.identifier.nameExact("config").refsTo.l should contain(configLocal)
     }
 
+    "capture qualified C aggregate initializer field assignments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Qualified {
+          |  int x;
+          |  int y;
+          |};
+          |const struct Qualified globalQualified = { .x = 1, .y = 2 };
+          |int qualified_aggregates(int seed) {
+          |  const struct Qualified localQualified = { .x = seed, .y = 3 };
+          |  return globalQualified.x + localQualified.y;
+          |}
+          |""".stripMargin,
+        "Test0.c"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.local
+        .nameExact("globalQualified")
+        .filter(_.code == "const struct Qualified globalQualified")
+        .typeFullName
+        .l shouldBe List("Qualified")
+      cpg.method.nameExact("qualified_aggregates").local.nameExact("localQualified").typeFullName.l shouldBe
+        List("Qualified")
+      cpg.call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "globalQualified = { .x = 1, .y = 2 }",
+        "globalQualified.x = 1",
+        "globalQualified.y = 2",
+        "localQualified = { .x = seed, .y = 3 }",
+        "localQualified.x = seed",
+        "localQualified.y = 3"
+      )
+      cpg.call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf List(
+        "globalQualified.x",
+        "globalQualified.y",
+        "localQualified.x",
+        "localQualified.y"
+      )
+    }
+
     "capture C aggregate nested designated initializer field assignments from the Rust parser backend" in {
       val cpg = code(
         """
