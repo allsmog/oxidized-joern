@@ -2005,7 +2005,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             OxOrigin(binary),
             binary.code,
             operatorFor(binary.operator),
-            Seq(expressionAst(binary.left), expressionAst(binary.right))
+            binaryOperandAsts(binary)
           )
         )
       case unary: OxUnary =>
@@ -2013,14 +2013,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           OxOrigin(unary),
           unary.code,
           unaryOperatorFor(unary.operator, unary.prefix),
-          Seq(expressionAst(unary.argument))
+          Seq(unaryOperandAst(unary))
         )
       case conditional: OxConditional =>
         operatorCallAst(
           OxOrigin(conditional),
           conditional.code,
           Operators.conditional,
-          Seq(expressionAst(conditional.condition)) ++
+          Seq(contextualBooleanAst(conditional.condition)) ++
             conditional.consequence.toSeq.map(expressionAst) ++
             Seq(expressionAst(conditional.alternative))
         )
@@ -2109,6 +2109,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case designator: OxDesignator =>
         Ast(identifierNode(OxOrigin(designator), designator.name, designator.code, registerType(Defines.Any)))
     }
+  }
+
+  private def binaryOperandAsts(binary: OxBinary): Seq[Ast] = {
+    val operandAst: OxExpression => Ast =
+      if (Set("&&", "||", "and", "or").contains(binary.operator)) contextualBooleanAst
+      else expressionAst
+    Seq(operandAst(binary.left), operandAst(binary.right))
+  }
+
+  private def unaryOperandAst(unary: OxUnary): Ast = {
+    if (unary.operator == "!") contextualBooleanAst(unary.argument) else expressionAst(unary.argument)
+  }
+
+  private def contextualBooleanAst(expression: OxExpression): Ast = {
+    booleanConversionOperatorAst(expression).getOrElse(expressionAst(expression))
   }
 
   private def foldAst(fold: OxFold): Ast = {
@@ -2594,9 +2609,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .map(receiverAggregateTypeName)
       .toSeq
       .flatMap(receiverType =>
-        typeAndBaseTypeFullNames(receiverType).reverse.flatMap(typeName =>
-          functionCandidatesByQualifiedName(s"$typeName.$name")
-        )
+        typeAndBaseTypeFullNames(receiverType)
+          .flatMap(typeName => resolveAggregateTypeFullName(typeName).toSeq :+ typeName)
+          .distinct
+          .reverse
+          .flatMap(typeName => functionCandidatesByQualifiedName(s"$typeName.$name"))
       )
   }
 

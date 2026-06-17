@@ -1751,6 +1751,58 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("guard.~Widget()", "guard.~Widget()", "guard.~Widget()")
     }
 
+    "capture C++ contextual boolean conversions from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |struct Flag {
+          |  operator bool() const { return true; }
+          |};
+          |Flag make();
+          |}
+          |int contextual(Core::Flag flag, int n) {
+          |  if (!flag) {
+          |    n = n + 1;
+          |  }
+          |  if (flag && n) {
+          |    n = n + 2;
+          |  }
+          |  n = flag ? n : 0;
+          |  while (Core::make()) {
+          |    break;
+          |  }
+          |  return n;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      def method = cpg.method.nameExact("contextual")
+      method.call.nameExact("operator bool").code.l.sorted shouldBe
+        List(
+          "Core::make().operator bool()",
+          "flag.operator bool()",
+          "flag.operator bool()",
+          "flag.operator bool()"
+        ).sorted
+      method.call.nameExact("operator bool").methodFullName.distinct.l shouldBe
+        List("Core.Flag.operator bool:bool()<const>")
+
+      inside(method.call.nameExact(Operators.logicalNot).codeExact("!flag").l) { case List(logicalNot) =>
+        logicalNot.argument.isCall.nameExact("operator bool").code.l shouldBe List("flag.operator bool()")
+      }
+      inside(method.call.nameExact(Operators.logicalAnd).codeExact("flag && n").l) { case List(logicalAnd) =>
+        logicalAnd.argument.code.l shouldBe List("flag.operator bool()", "n")
+      }
+      inside(method.call.nameExact(Operators.conditional).codeExact("flag ? n : 0").l) { case List(conditional) =>
+        conditional.argument.code.l shouldBe List("flag.operator bool()", "n", "0")
+      }
+      inside(method.whileBlock.condition.ast.isCall.nameExact("operator bool").l) { case List(operatorBool) =>
+        operatorBool.code shouldBe "Core::make().operator bool()"
+        operatorBool.argument.code.l shouldBe List("Core::make()")
+      }
+    }
+
     "capture counted loops, jumps, and indexed expressions from the Rust parser backend" in {
       val cpg = code("""
           |int sum(int *xs, int n) {
