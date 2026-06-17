@@ -2105,6 +2105,51 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("echo").call.codeExact("async_write(s, data)").size shouldBe 1
     }
 
+    "capture C++20 likely and unlikely attributed statements from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |void foo() {
+          |  switch (n) {
+          |    case 1:
+          |      case1();
+          |      break;
+          |    [[likely]] case 2:
+          |      case2();
+          |      break;
+          |  }
+          |
+          |  if (random > 0) [[likely]] {
+          |    likelyIf();
+          |  }
+          |
+          |  while (unlikely_truthy_condition) [[unlikely]] {
+          |    unlikelyWhile();
+          |  }
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val List(switchBlock) = cpg.method
+        .nameExact("foo")
+        .controlStructure
+        .controlStructureTypeExact(ControlStructureTypes.SWITCH)
+        .astChildren
+        .isBlock
+        .l
+      switchBlock._jumpTargetViaAstOut.code.l shouldBe List("case 1:", "[[likely]] case 2:")
+
+      cpg.method.nameExact("foo").call.code.l should contain allElementsOf List(
+        "case1()",
+        "case2()",
+        "random > 0",
+        "likelyIf()",
+        "unlikelyWhile()"
+      )
+      cpg.method.nameExact("foo").identifier.code.l should contain("unlikely_truthy_condition")
+      cpg.method.nameExact("foo").identifier.code(".*\\[\\[(likely|unlikely)\\]\\].*").l shouldBe Nil
+    }
+
     "capture C++20 using enum switch cases from the Rust parser backend" in {
       val cpg = code(
         """
