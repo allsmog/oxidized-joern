@@ -3855,11 +3855,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  Cell cell;
           |  int z;
           |};
+          |void consume(Board input) {}
           |void expression_positions(int seed) {
           |  Board update;
           |  for (int i = 0; i < 1; update = {{4, seed}, 6}) {
           |    ++i;
           |  }
+          |  consume(update = {{seed, 8}, 9});
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -3872,7 +3874,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "update.cell = {4, seed}",
           "update.cell.x = 4",
           "update.cell.y = seed",
-          "update.z = 6"
+          "update.z = 6",
+          "update = {{seed, 8}, 9}",
+          "update.cell = {seed, 8}",
+          "update.cell.x = seed",
+          "update.cell.y = 8",
+          "update.z = 9"
         )
       cpg.method.nameExact("expression_positions").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
         List(
@@ -3881,6 +3888,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "update.cell.y",
           "update.z"
         )
+      val callCodes = cpg.method.nameExact("expression_positions").call.code.l
+      callCodes.indexOf("update.cell.x = seed") should be < callCodes.indexOf(
+        "consume(update = {{seed, 8}, 9})"
+      )
     }
 
     "capture C++ aggregate assignment initializers in control conditions from the Rust parser backend" in {
