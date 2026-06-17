@@ -2152,12 +2152,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         heapConstructorsForExpression(value)
       case OxSizeOf(_, _, value, _) =>
         value.toSeq.flatMap(heapConstructorsForExpression)
-      case OxNew(_, _, _, arguments, _) =>
-        arguments.flatMap(heapConstructorsForExpression)
+      case OxNew(_, _, _, arguments, initializerArguments) =>
+        (arguments ++ initializerArguments).flatMap(heapConstructorsForExpression)
       case OxDelete(_, _, argument) =>
         heapConstructorsForExpression(argument)
-      case _: OxLambda =>
-        Seq.empty
+      case OxLambda(_, _, captures, _, _, _, _, _) =>
+        captures.flatMap(_.initializer).flatMap(heapConstructorsForExpression)
       case OxCall(_, _, _, callee, arguments) =>
         heapConstructorsForExpression(callee) ++ arguments.flatMap(heapConstructorsForExpression)
       case OxFieldAccess(_, _, _, base) =>
@@ -2342,12 +2342,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         temporaryDestructorsForExpression(value, includeCurrent = includeValueCurrent)
       case OxSizeOf(_, _, value, _) =>
         value.toSeq.flatMap(expression => temporaryDestructorsForExpression(expression))
-      case OxNew(_, _, _, arguments, _) =>
-        arguments.flatMap(expression => temporaryDestructorsForExpression(expression))
+      case OxNew(_, _, _, arguments, initializerArguments) =>
+        (arguments ++ initializerArguments).flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxDelete(_, _, argument) =>
         temporaryDestructorsForExpression(argument)
-      case _: OxLambda =>
-        Seq.empty
+      case OxLambda(_, _, captures, _, _, _, _, _) =>
+        captures.flatMap(_.initializer).flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxCall(_, _, _, callee, arguments) =>
         temporaryDestructorsForExpression(callee) ++ temporaryDestructorsForCallArguments(expression)
       case OxFieldAccess(_, _, _, base) =>
@@ -3003,12 +3003,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         aggregateAssignmentExpressionAsts(value)
       case OxSizeOf(_, _, value, _) =>
         value.toSeq.flatMap(aggregateAssignmentExpressionAsts)
-      case OxNew(_, _, _, arguments, _) =>
-        arguments.flatMap(aggregateAssignmentExpressionAsts)
+      case OxNew(_, _, _, arguments, initializerArguments) =>
+        (arguments ++ initializerArguments).flatMap(aggregateAssignmentExpressionAsts)
       case OxDelete(_, _, argument) =>
         aggregateAssignmentExpressionAsts(argument)
-      case _: OxLambda =>
-        Seq.empty
+      case OxLambda(_, _, captures, _, _, _, _, _) =>
+        captures.flatMap(_.initializer).flatMap(lambdaCaptureInitializerAssignmentAsts)
       case OxCall(_, _, _, callee, arguments) =>
         aggregateAssignmentExpressionAsts(callee) ++ arguments.flatMap(aggregateAssignmentExpressionAsts)
       case OxFieldAccess(_, _, _, base) =>
@@ -3024,6 +3024,55 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
     val current = expression match {
       case assignment: OxAssignment => aggregateAssignmentExpressionAsts(assignment)
+      case _                        => Seq.empty
+    }
+    current ++ nested
+  }
+
+  private def lambdaCaptureInitializerAssignmentAsts(expression: OxExpression): Seq[Ast] = {
+    val nested = expression match {
+      case OxBinary(_, _, _, left, right) =>
+        Seq(left, right).flatMap(lambdaCaptureInitializerAssignmentAsts)
+      case OxAssignment(_, _, _, left, right) =>
+        Seq(left, right).flatMap(lambdaCaptureInitializerAssignmentAsts)
+      case OxUnary(_, _, _, _, argument) =>
+        lambdaCaptureInitializerAssignmentAsts(argument)
+      case OxConditional(_, _, condition, consequence, alternative) =>
+        lambdaCaptureInitializerAssignmentAsts(condition) ++
+          consequence.toSeq.flatMap(lambdaCaptureInitializerAssignmentAsts) ++
+          lambdaCaptureInitializerAssignmentAsts(alternative)
+      case OxFold(_, _, _, left, right) =>
+        left.toSeq.flatMap(lambdaCaptureInitializerAssignmentAsts) ++
+          right.toSeq.flatMap(lambdaCaptureInitializerAssignmentAsts)
+      case OxPackExpansion(_, _, pattern) =>
+        lambdaCaptureInitializerAssignmentAsts(pattern)
+      case OxTypeOf(_, _, argument) =>
+        lambdaCaptureInitializerAssignmentAsts(argument)
+      case OxCast(_, _, _, value) =>
+        lambdaCaptureInitializerAssignmentAsts(value)
+      case OxSizeOf(_, _, value, _) =>
+        value.toSeq.flatMap(lambdaCaptureInitializerAssignmentAsts)
+      case OxNew(_, _, _, arguments, initializerArguments) =>
+        (arguments ++ initializerArguments).flatMap(lambdaCaptureInitializerAssignmentAsts)
+      case OxDelete(_, _, argument) =>
+        lambdaCaptureInitializerAssignmentAsts(argument)
+      case OxLambda(_, _, captures, _, _, _, _, _) =>
+        captures.flatMap(_.initializer).flatMap(lambdaCaptureInitializerAssignmentAsts)
+      case OxCall(_, _, _, callee, arguments) =>
+        lambdaCaptureInitializerAssignmentAsts(callee) ++ arguments.flatMap(lambdaCaptureInitializerAssignmentAsts)
+      case OxFieldAccess(_, _, _, base) =>
+        lambdaCaptureInitializerAssignmentAsts(base)
+      case OxIndexAccess(_, _, base, index) =>
+        Seq(base, index).flatMap(lambdaCaptureInitializerAssignmentAsts)
+      case OxInitializerList(_, _, elements) =>
+        elements.flatMap(lambdaCaptureInitializerAssignmentAsts)
+      case OxDesignatedInitializer(_, _, designator, value) =>
+        Seq(designator, value).flatMap(lambdaCaptureInitializerAssignmentAsts)
+      case _: OxIdentifier | _: OxLiteral | _: OxDesignator =>
+        Seq.empty
+    }
+    val current = expression match {
+      case assignment: OxAssignment => expressionAst(assignment) +: aggregateAssignmentExpressionAsts(assignment)
       case _                        => Seq.empty
     }
     current ++ nested
@@ -3316,7 +3365,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           initializerArguments.foreach(visitExpression)
         case OxDelete(_, _, argument) =>
           visitExpression(argument)
-        case _: OxLambda =>
+        case OxLambda(_, _, captures, _, _, _, _, _) =>
+          captures.flatMap(_.initializer).foreach(visitExpression)
         case OxCall(_, _, _, callee, arguments) =>
           visitExpression(callee)
           arguments.foreach(visitExpression)
