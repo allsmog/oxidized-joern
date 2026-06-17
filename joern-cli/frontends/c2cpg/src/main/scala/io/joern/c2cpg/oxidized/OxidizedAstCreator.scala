@@ -1320,6 +1320,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         expressionStatement.expression match {
           case deleteExpression: OxDelete =>
             heapConstructorAstsForExpressions(Seq(deleteExpression.argument)) ++
+              aggregateAssignmentExpressionAsts(deleteExpression.argument) ++
               heapDestructorAstsForDelete(deleteExpression) ++
               Seq(expressionAst(deleteExpression)) ++
               temporaryDestructorAstsForExpressions(Seq(deleteExpression.argument))
