@@ -1857,6 +1857,36 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ lambda parameter-pack init captures from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |template <typename... Args>
+          |auto f1(Args&&... args) {
+          |  return [...args = std::forward<Args>(args)] {};
+          |}
+          |
+          |template <typename... Args>
+          |auto f2(Args&&... args) {
+          |  return [&...args = std::forward<Args>(args)] {};
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val f1Lambda = "f1.<lambda>0:void()"
+      val f2Lambda = "f2.<lambda>1:void()"
+
+      cpg.method.nameExact("f1", "f2").signature.sorted.l shouldBe List("auto(Args&&)", "auto(Args&&)")
+      cpg.method.nameExact("f1").ast.isReturn.astChildren.isMethodRef.methodFullName.l shouldBe List(f1Lambda)
+      cpg.method.nameExact("f2").ast.isReturn.astChildren.isMethodRef.methodFullName.l shouldBe List(f2Lambda)
+      cpg.method.fullNameExact(f1Lambda).local.nameExact("args").typeFullName.l shouldBe List("Args&&")
+      cpg.method.fullNameExact(f2Lambda).local.nameExact("args").typeFullName.l shouldBe List("Args&&")
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$f1Lambda:args")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_VALUE)
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$f2Lambda:args")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_REFERENCE)
+    }
+
     "capture C++ classic varargs from the Rust parser backend" in {
       val cpg = code(
         """
