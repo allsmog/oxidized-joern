@@ -3668,6 +3668,46 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.identifier.nameExact("a").refsTo.l should contain(cpg.method.nameExact("foo").local.nameExact("a").head)
     }
 
+    "capture C++ aggregate positional initializer field assignments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct A {
+          |  int x;
+          |  int y;
+          |  int z;
+          |};
+          |void bar(int seed) {
+          |  A first {seed, 2, 3};
+          |  A second = {4, seed};
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("bar").local.nameExact("first").typeFullName.l shouldBe List("A")
+      cpg.method.nameExact("bar").local.nameExact("second").typeFullName.l shouldBe List("A")
+      cpg.method.nameExact("bar").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "first = {seed, 2, 3}",
+        "first.x = seed",
+        "first.y = 2",
+        "first.z = 3",
+        "second = {4, seed}",
+        "second.x = 4",
+        "second.y = seed"
+      )
+      cpg.method.nameExact("bar").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf List(
+        "first.x",
+        "first.y",
+        "first.z",
+        "second.x",
+        "second.y"
+      )
+      cpg.identifier.nameExact("first").refsTo.l should contain(cpg.method.nameExact("bar").local.nameExact("first").head)
+      cpg.identifier.nameExact("second").refsTo.l should contain(
+        cpg.method.nameExact("bar").local.nameExact("second").head
+      )
+    }
+
     "capture function prototypes as external methods" in {
       val cpg = code("""
           |int external(int value);
