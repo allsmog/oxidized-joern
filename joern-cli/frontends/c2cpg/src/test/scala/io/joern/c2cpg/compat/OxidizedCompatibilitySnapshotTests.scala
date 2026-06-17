@@ -4099,6 +4099,68 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         )
     }
 
+    "capture C++ aggregate assignment initializers inside new and lambda init-capture arguments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Cell {
+          |  int x;
+          |  int y;
+          |};
+          |struct Board {
+          |  Cell cell;
+          |  int z;
+          |};
+          |struct Holder {
+          |  Holder(Board input) {}
+          |};
+          |void advanced_assignment_contexts(int seed) {
+          |  Board heapTarget;
+          |  Holder *heap = new Holder(heapTarget = {{seed, 2}, 3});
+          |  Board lambdaTarget;
+          |  auto mapper = [copy = (lambdaTarget = {{4, seed}, 5})]() { return copy.z; };
+          |  (void)heap;
+          |  (void)mapper;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val lambdaFullName = cpg.method.nameExact("<lambda>0").fullName.head
+      cpg.method.nameExact("advanced_assignment_contexts").local.nameExact("heapTarget").typeFullName.l shouldBe
+        List("Board")
+      cpg.method.nameExact("advanced_assignment_contexts").local.nameExact("lambdaTarget").typeFullName.l shouldBe
+        List("Board")
+      cpg.method.nameExact("advanced_assignment_contexts").local.nameExact("heap").typeFullName.l shouldBe
+        List("Holder*")
+      cpg.method.nameExact("advanced_assignment_contexts").local.nameExact("mapper").typeFullName.l shouldBe
+        List(lambdaFullName)
+      cpg.method.fullNameExact(lambdaFullName).local.nameExact("copy").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("advanced_assignment_contexts").call.nameExact(Operators.assignment).code.l should
+        contain allElementsOf List(
+          "heapTarget = {{seed, 2}, 3}",
+          "heapTarget.cell = {seed, 2}",
+          "heapTarget.cell.x = seed",
+          "heapTarget.cell.y = 2",
+          "heapTarget.z = 3",
+          "lambdaTarget = {{4, seed}, 5}",
+          "lambdaTarget.cell = {4, seed}",
+          "lambdaTarget.cell.x = 4",
+          "lambdaTarget.cell.y = seed",
+          "lambdaTarget.z = 5"
+        )
+      cpg.method.nameExact("advanced_assignment_contexts").call.nameExact(Operators.fieldAccess).code.l should
+        contain allElementsOf List(
+          "heapTarget.cell",
+          "heapTarget.cell.x",
+          "heapTarget.cell.y",
+          "heapTarget.z",
+          "lambdaTarget.cell",
+          "lambdaTarget.cell.x",
+          "lambdaTarget.cell.y",
+          "lambdaTarget.z"
+        )
+    }
+
     "capture C++ aggregate assignment initializer subobject targets from the Rust parser backend" in {
       val cpg = code(
         """
