@@ -2361,6 +2361,33 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       rangeInit.argument(2).code shouldBe "15"
     }
 
+    "capture C++ aggregate designated initializer field assignments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct A {
+          |  int x;
+          |  int y;
+          |  int z;
+          |};
+          |void foo() {
+          |  A a {.x = 1, .z = 2};
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("foo").local.nameExact("a").typeFullName.l shouldBe List("A")
+      cpg.method.nameExact("foo").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "a.x = 1",
+        "a.z = 2"
+      )
+      cpg.method.nameExact("foo").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf List(
+        "a.x",
+        "a.z"
+      )
+      cpg.identifier.nameExact("a").refsTo.l should contain(cpg.method.nameExact("foo").local.nameExact("a").head)
+    }
+
     "capture function prototypes as external methods" in {
       val cpg = code("""
           |int external(int value);
