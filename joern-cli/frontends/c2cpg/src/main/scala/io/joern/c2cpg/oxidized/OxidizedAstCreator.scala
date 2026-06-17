@@ -1159,9 +1159,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           val conditionHeapConstructors =
             if (ifStmt.conditionInitializer.isEmpty) heapConstructorAstsForExpressions(Seq(ifStmt.condition))
             else Seq.empty
-          val conditionAggregateAssignments = aggregateAssignmentExpressionAsts(ifStmt.condition)
-          val conditionTemporaryCleanup     = temporaryDestructorAstsForExpressions(Seq(ifStmt.condition))
-          val thenAst                       = statementBlockAst(ifStmt.thenBody, "then", ifStmt.line)
+          val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(ifStmt.condition))
+          val thenAst                   = statementBlockAst(ifStmt.thenBody, "then", ifStmt.line)
           val elseAst =
             Option.when(ifStmt.elseBody.nonEmpty) {
               Ast(controlStructureNode(OxOrigin("else", Option(ifStmt.line)), ControlStructureTypes.ELSE, "else"))
@@ -1169,7 +1168,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             }
           initializerAsts :+
             ifThenElseAst(ifNode, Option(conditionAst), thenAst, elseAst)
-              .withChildren(conditionHeapConstructors ++ conditionAggregateAssignments ++ conditionTemporaryCleanup)
+              .withChildren(conditionHeapConstructors ++ conditionTemporaryCleanup)
         }
 
         if (ifStmt.initializer.isEmpty && ifStmt.conditionInitializer.isEmpty) {
@@ -1189,9 +1188,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           val conditionHeapConstructors =
             if (whileStmt.conditionInitializer.isEmpty) heapConstructorAstsForExpressions(Seq(whileStmt.condition))
             else Seq.empty
-          val conditionAggregateAssignments = aggregateAssignmentExpressionAsts(whileStmt.condition)
-          val conditionTemporaryCleanup     = temporaryDestructorAstsForExpressions(Seq(whileStmt.condition))
-          val hasScopedInitializer          = whileStmt.initializer.nonEmpty || whileStmt.conditionInitializer.nonEmpty
+          val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(whileStmt.condition))
+          val hasScopedInitializer      = whileStmt.initializer.nonEmpty || whileStmt.conditionInitializer.nonEmpty
           val breakPreservedScopeDepth =
             if (hasScopedInitializer) localDestructorScopes.length else preservedScopeDepth
           val continuePreservedScopeDepth =
@@ -1217,7 +1215,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
               Seq(bodyAst),
               code = Option(whileStmt.code),
               lineNumber = Option(whileStmt.line)
-            ).withChildren(conditionHeapConstructors ++ conditionAggregateAssignments ++ conditionTemporaryCleanup)
+            ).withChildren(conditionHeapConstructors ++ conditionTemporaryCleanup)
         }
         val preservedScopeDepth = localDestructorScopes.length
         if (whileStmt.initializer.isEmpty && whileStmt.conditionInitializer.isEmpty) {
@@ -1227,10 +1225,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           asts ++ destructors.reverse.map(localDestructorAst)
         }
       case doWhileStmt: OxDoWhile =>
-        val preservedScopeDepth           = localDestructorScopes.length
-        val conditionHeapConstructors     = heapConstructorAstsForExpressions(Seq(doWhileStmt.condition))
-        val conditionAggregateAssignments = aggregateAssignmentExpressionAsts(doWhileStmt.condition)
-        val conditionTemporaryCleanup     = temporaryDestructorAstsForExpressions(Seq(doWhileStmt.condition))
+        val preservedScopeDepth       = localDestructorScopes.length
+        val conditionHeapConstructors = heapConstructorAstsForExpressions(Seq(doWhileStmt.condition))
+        val conditionAst              = conditionExpressionAstWithRecoveredAggregateAssignments(doWhileStmt.condition)
+        val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(doWhileStmt.condition))
         val bodyAst = withJumpCleanupTarget(
           JumpCleanupTarget(
             breakPreservedScopeDepth = Option(preservedScopeDepth),
@@ -1241,21 +1239,20 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         }
         Seq(
           doWhileAst(
-            Option(conditionExpressionAst(doWhileStmt.condition)),
+            Option(conditionAst),
             Seq(bodyAst),
             code = Option(doWhileStmt.code),
             lineNumber = Option(doWhileStmt.line)
-          ).withChildren(conditionHeapConstructors ++ conditionAggregateAssignments ++ conditionTemporaryCleanup)
+          ).withChildren(conditionHeapConstructors ++ conditionTemporaryCleanup)
         )
       case forStmt: OxFor =>
         val (forAst_, initializerDestructors) = inNestedScopeCollectingDestructors {
           val forNode               = controlStructureNode(OxOrigin(forStmt), ControlStructureTypes.FOR, forStmt.code)
           val initializerAsts       = forStmt.initializer.flatMap(astsForStatement)
           val (localAsts, initAsts) = initializerAsts.partition(_.root.exists(_.isInstanceOf[NewLocal]))
-          val conditionAsts         = forStmt.condition.toSeq.map(conditionExpressionAst)
-          val conditionTemporaryCleanup     = temporaryDestructorAstsForExpressions(forStmt.condition.toSeq)
-          val conditionHeapConstructors     = heapConstructorAstsForExpressions(forStmt.condition.toSeq)
-          val conditionAggregateAssignments = forStmt.condition.toSeq.flatMap(aggregateAssignmentExpressionAsts)
+          val conditionAsts = forStmt.condition.toSeq.map(conditionExpressionAstWithRecoveredAggregateAssignments(_))
+          val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(forStmt.condition.toSeq)
+          val conditionHeapConstructors = heapConstructorAstsForExpressions(forStmt.condition.toSeq)
           val updateAsts = forStmt.update.toSeq.flatMap { update =>
             expressionAstsWithRecoveredAggregateAssignments(update) ++
               (heapConstructorAstsForExpressions(Seq(update)) ++ temporaryDestructorAstsForExpressions(Seq(update)))
@@ -1270,7 +1267,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             statementBlockAst(forStmt.body, "for", forStmt.line)
           }
           forAst(forNode, localAsts, initAsts, conditionAsts, updateAsts, bodyAst).withChildren(
-            conditionHeapConstructors ++ conditionAggregateAssignments ++ conditionTemporaryCleanup
+            conditionHeapConstructors ++ conditionTemporaryCleanup
           )
         }
         forAst_ +: initializerDestructors.reverse.map(localDestructorAst)
@@ -1298,8 +1295,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           val conditionHeapConstructors =
             if (switchStmt.conditionInitializer.isEmpty) heapConstructorAstsForExpressions(Seq(switchStmt.condition))
             else Seq.empty
-          val conditionAggregateAssignments = aggregateAssignmentExpressionAsts(switchStmt.condition)
-          val conditionTemporaryCleanup     = temporaryDestructorAstsForExpressions(Seq(switchStmt.condition))
+          val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(switchStmt.condition))
           val switchAst_ = {
             val preservedScopeDepth = localDestructorScopes.length
             val bodyAsts = withJumpCleanupTarget(
@@ -1311,7 +1307,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
               switchBodyWithUsingEnumCases(switchStmt.body).flatMap(astsForStatement)
             }
             switchAst(switchNode, conditionAst, bodyAsts)
-              .withChildren(conditionHeapConstructors ++ conditionAggregateAssignments ++ conditionTemporaryCleanup)
+              .withChildren(conditionHeapConstructors ++ conditionTemporaryCleanup)
           }
           initializerAsts :+ switchAst_
         }
@@ -2719,16 +2715,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     expression: OxExpression,
     wrapTruthy: Boolean = true
   ): Ast = {
-    def conditionAstForExpression: Ast = {
-      if (wrapTruthy) conditionExpressionAst(expression) else expressionAst(expression)
-    }
+    val initializerAsts = initializers.flatMap(astsForStatement)
+    val conditionAst    = if (wrapTruthy) conditionExpressionAst(expression) else expressionAst(expression)
+    val conditionAsts   = conditionExpressionAstsWithRecoveredAggregateAssignments(expression, conditionAst)
 
-    if (initializers.isEmpty) {
-      conditionAstForExpression
+    if (initializers.isEmpty && conditionAsts.size == 1) {
+      conditionAst
     } else {
-      val initializerAsts     = initializers.flatMap(astsForStatement)
-      val heapConstructorAsts = heapConstructorAstsForExpressions(Seq(expression))
-      val conditionAst        = conditionAstForExpression
+      val heapConstructorAsts =
+        if (initializers.nonEmpty) heapConstructorAstsForExpressions(Seq(expression)) else Seq.empty
       val conditionCode = conditionAst.root
         .collect { case expressionNode: ExpressionNew =>
           expressionNode.code
@@ -2736,8 +2731,27 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         .getOrElse(expression.code)
       blockAst(
         blockNode(OxOrigin(conditionCode, Option(expression.line)), conditionCode, Defines.Any),
-        (initializerAsts ++ heapConstructorAsts :+ conditionAst).toList
+        (initializerAsts ++ heapConstructorAsts ++ conditionAsts).toList
       )
+    }
+  }
+
+  private def conditionExpressionAstWithRecoveredAggregateAssignments(
+    expression: OxExpression,
+    wrapTruthy: Boolean = true
+  ): Ast = {
+    conditionExpressionAstWithInitializers(Seq.empty, expression, wrapTruthy)
+  }
+
+  private def conditionExpressionAstsWithRecoveredAggregateAssignments(
+    expression: OxExpression,
+    conditionAst: Ast
+  ): Seq[Ast] = {
+    expression match {
+      case assignment @ OxAssignment("=", _, _, _, _: OxInitializerList) =>
+        conditionAst +: aggregateAssignmentExpressionAsts(assignment)
+      case _ =>
+        aggregateAssignmentExpressionAsts(expression) :+ conditionAst
     }
   }
 
