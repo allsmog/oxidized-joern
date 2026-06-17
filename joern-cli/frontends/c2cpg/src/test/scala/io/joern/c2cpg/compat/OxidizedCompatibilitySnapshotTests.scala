@@ -3947,6 +3947,53 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         )
     }
 
+    "capture C++ aggregate assignment initializers in return and throw expressions from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Cell {
+          |  int x;
+          |  int y;
+          |};
+          |struct Board {
+          |  Cell cell;
+          |  int z;
+          |};
+          |Board return_assignment(int seed) {
+          |  Board result;
+          |  return result = {{seed, 2}, 3};
+          |}
+          |void throw_assignment(int seed) {
+          |  Board failure;
+          |  throw failure = {{4, seed}, 5};
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("return_assignment").local.nameExact("result").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("throw_assignment").local.nameExact("failure").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("return_assignment").call.nameExact(Operators.assignment).code.l should contain allElementsOf
+        List(
+          "result = {{seed, 2}, 3}",
+          "result.cell = {seed, 2}",
+          "result.cell.x = seed",
+          "result.cell.y = 2",
+          "result.z = 3"
+        )
+      cpg.method.nameExact("throw_assignment").call.nameExact(Operators.assignment).code.l should contain allElementsOf
+        List(
+          "failure = {{4, seed}, 5}",
+          "failure.cell = {4, seed}",
+          "failure.cell.x = 4",
+          "failure.cell.y = seed",
+          "failure.z = 5"
+        )
+      cpg.method.nameExact("return_assignment").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
+        List("result.cell", "result.cell.x", "result.cell.y", "result.z")
+      cpg.method.nameExact("throw_assignment").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
+        List("failure.cell", "failure.cell.x", "failure.cell.y", "failure.z")
+    }
+
     "capture C++ aggregate assignment initializer subobject targets from the Rust parser backend" in {
       val cpg = code(
         """
