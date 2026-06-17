@@ -86,6 +86,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     methodRef: NewMethodRef,
     capturedGlobals: mutable.LinkedHashMap[String, CapturedGlobal] = mutable.LinkedHashMap.empty
   )
+  private sealed trait AggregateInitializerSlot
+  private final case class AggregateBaseInitializerSlot(typeName: String) extends AggregateInitializerSlot
+  private final case class AggregateFieldInitializerSlot(ownerTypeName: String, field: OxFieldDecl)
+      extends AggregateInitializerSlot
 
   private val usedTypes: mutable.Set[String]             = mutable.Set(Defines.Any, Defines.Void)
   private val temporaryIndices: mutable.Map[String, Int] = mutable.HashMap.empty
@@ -1390,23 +1394,76 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
               Seq.empty
           }
         } else {
-          elements.zipWithIndex.flatMap { case (value, index) =>
-            aggregateFieldByIndex(typeName, index).toSeq.flatMap(field =>
-              aggregateFieldAssignmentAsts(
-                local,
-                rootTypeName,
-                typeName,
-                fieldPathPrefix,
-                Seq(field.name),
-                value,
-                value.line
-              )
-            )
-          }
+          aggregatePositionalFieldAssignmentAsts(local, rootTypeName, typeName, fieldPathPrefix, elements)
         }
       assignments
     } else {
       Seq.empty
+    }
+  }
+
+  private def aggregatePositionalFieldAssignmentAsts(
+    local: OxLocalDecl,
+    rootTypeName: String,
+    typeName: String,
+    fieldPathPrefix: Seq[String],
+    elements: Seq[OxExpression]
+  ): Seq[Ast] = {
+    var targets = aggregateInitializerSlots(typeName).toList
+    elements.flatMap { value =>
+      val assignments = mutable.ArrayBuffer.empty[Ast]
+      var assigned    = false
+      while (!assigned && targets.nonEmpty) {
+        targets.head match {
+          case AggregateBaseInitializerSlot(baseTypeName) =>
+            value match {
+              case initializerList: OxInitializerList =>
+                assignments ++= aggregateInitializerAssignmentAsts(
+                  local,
+                  rootTypeName,
+                  baseTypeName,
+                  initializerList,
+                  fieldPathPrefix
+                )
+                targets = targets.tail
+                assigned = true
+              case _ =>
+                val expandedTargets = aggregateFlattenedFieldInitializerSlots(baseTypeName)
+                targets = expandedTargets.toList ++ targets.tail
+                if (expandedTargets.isEmpty) {
+                  assigned = true
+                }
+            }
+          case AggregateFieldInitializerSlot(ownerTypeName, field) =>
+            assignments ++= aggregateFieldAssignmentAsts(
+              local,
+              rootTypeName,
+              ownerTypeName,
+              fieldPathPrefix,
+              Seq(field.name),
+              value,
+              value.line
+            )
+            targets = targets.tail
+            assigned = true
+        }
+      }
+      assignments.toSeq
+    }
+  }
+
+  private def aggregateInitializerSlots(typeName: String): Seq[AggregateInitializerSlot] = {
+    val normalized = normalizeType(resolveAliasType(typeName))
+    aggregateBaseTypesByType.getOrElse(normalized, Seq.empty).map(AggregateBaseInitializerSlot.apply) ++
+      aggregateFieldsByType
+        .getOrElse(normalized, Seq.empty)
+        .map(field => AggregateFieldInitializerSlot(normalized, field))
+  }
+
+  private def aggregateFlattenedFieldInitializerSlots(typeName: String): Seq[AggregateFieldInitializerSlot] = {
+    aggregateInitializerSlots(typeName).flatMap {
+      case AggregateBaseInitializerSlot(baseTypeName) => aggregateFlattenedFieldInitializerSlots(baseTypeName)
+      case fieldSlot: AggregateFieldInitializerSlot   => Seq(fieldSlot)
     }
   }
 

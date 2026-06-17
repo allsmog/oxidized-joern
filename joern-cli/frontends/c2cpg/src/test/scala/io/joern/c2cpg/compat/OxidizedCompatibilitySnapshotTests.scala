@@ -3751,6 +3751,46 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C++ aggregate inherited positional initializer field assignments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Base {
+          |  int x;
+          |  int y;
+          |};
+          |struct Derived : Base {
+          |  int z;
+          |};
+          |void inherited(int seed) {
+          |  Derived braced {{seed, 2}, 3};
+          |  Derived flat {4, seed, 6};
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("inherited").local.nameExact("braced").typeFullName.l shouldBe List("Derived")
+      cpg.method.nameExact("inherited").local.nameExact("flat").typeFullName.l shouldBe List("Derived")
+      cpg.method.nameExact("inherited").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "braced = {{seed, 2}, 3}",
+        "braced.x = seed",
+        "braced.y = 2",
+        "braced.z = 3",
+        "flat = {4, seed, 6}",
+        "flat.x = 4",
+        "flat.y = seed",
+        "flat.z = 6"
+      )
+      cpg.method.nameExact("inherited").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf List(
+        "braced.x",
+        "braced.y",
+        "braced.z",
+        "flat.x",
+        "flat.y",
+        "flat.z"
+      )
+    }
+
     "capture C aggregate nested designated initializer field assignments from the Rust parser backend" in {
       val cpg = code(
         """
