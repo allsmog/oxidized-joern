@@ -3994,6 +3994,63 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("failure.cell", "failure.cell.x", "failure.cell.y", "failure.z")
     }
 
+    "capture C++ aggregate assignment initializers inside local and global initializers from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Cell {
+          |  int x;
+          |  int y;
+          |};
+          |struct Board {
+          |  Cell cell;
+          |  int z;
+          |};
+          |Board globalTarget;
+          |Board globalCopy = (globalTarget = {{1, 2}, 3});
+          |Board local_initializer_assignment(int seed) {
+          |  Board target;
+          |  Board copy = (target = {{seed, 4}, 5});
+          |  int value = (target = {{6, seed}, 7}).z;
+          |  return copy;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.local.nameExact("globalTarget").filter(_.code == "Board globalTarget").typeFullName.l shouldBe List("Board")
+      cpg.local.nameExact("globalCopy").filter(_.code == "Board globalCopy").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("local_initializer_assignment").local.nameExact("target").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("local_initializer_assignment").local.nameExact("copy").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("local_initializer_assignment").local.nameExact("value").typeFullName.l shouldBe List("int")
+      cpg.call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "globalTarget = {{1, 2}, 3}",
+        "globalTarget.cell = {1, 2}",
+        "globalTarget.cell.x = 1",
+        "globalTarget.cell.y = 2",
+        "globalTarget.z = 3",
+        "target = {{seed, 4}, 5}",
+        "target.cell = {seed, 4}",
+        "target.cell.x = seed",
+        "target.cell.y = 4",
+        "target.z = 5",
+        "target = {{6, seed}, 7}",
+        "target.cell = {6, seed}",
+        "target.cell.x = 6",
+        "target.cell.y = seed",
+        "target.z = 7"
+      )
+      cpg.call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf List(
+        "globalTarget.cell",
+        "globalTarget.cell.x",
+        "globalTarget.cell.y",
+        "globalTarget.z",
+        "target.cell",
+        "target.cell.x",
+        "target.cell.y",
+        "target.z"
+      )
+    }
+
     "capture C++ aggregate assignment initializer subobject targets from the Rust parser backend" in {
       val cpg = code(
         """
