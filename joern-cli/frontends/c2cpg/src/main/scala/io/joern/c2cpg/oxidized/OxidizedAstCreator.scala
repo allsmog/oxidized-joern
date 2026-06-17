@@ -1251,6 +1251,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     if (normalizedType.endsWith("*")) {
       val targetCode = s"*${local.name}"
       identifierAst(local.name, targetCode, local.line) -> targetCode
+    } else if (normalizedType.endsWith("&") || normalizedType.endsWith("&&")) {
+      val targetCode = s"&${local.name}"
+      identifierAst(local.name, targetCode, local.line) -> targetCode
     } else {
       identifierAst(local.name, local.name, local.line) -> local.name
     }

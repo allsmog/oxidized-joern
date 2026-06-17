@@ -362,6 +362,21 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             includeReturns = true,
             includeCallDetails = true
           )
+        ),
+        BackendParitySnapshot.Case(
+          "C++ reference and pointer expressions",
+          """
+            |int use(int &ref, int *ptr) {
+            |  int local = ref;
+            |  int &alias = local;
+            |  int *copy = ptr;
+            |  int *addressed = &alias;
+            |  *copy = alias;
+            |  return ref + *ptr + *addressed;
+            |}
+            |""".stripMargin,
+          filename = "Test0.cpp",
+          options = CompatibilitySnapshot.RenderOptions(includeReturns = true, includeCallDetails = true)
         )
       )
 
