@@ -1958,32 +1958,38 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       }
     }
 
-    if (conditionAst.root.isEmpty || !isWrapCandidate(conditionAst)) {
+    if (conditionAst.root.isEmpty) {
       conditionAst
     } else {
-      val (literalCode, literalType) = conditionAst.root match {
-        case Some(identifier: NewIdentifier) if identifier.typeFullName.endsWith("*") => "NULL" -> Defines.Any
-        case _                                                                        => "0"    -> "int"
+      booleanConversionOperatorAst(expression).getOrElse {
+        if (!isWrapCandidate(conditionAst)) {
+          conditionAst
+        } else {
+          val (literalCode, literalType) = conditionAst.root match {
+            case Some(identifier: NewIdentifier) if identifier.typeFullName.endsWith("*") => "NULL" -> Defines.Any
+            case _                                                                        => "0"    -> "int"
+          }
+          val literalAst_ = Ast(
+            literalNode(
+              OxOrigin(literalCode, Option(expression.line)),
+              literalCode,
+              registerType(literalType)
+            )
+          )
+          val comparisonCode = s"${expression.code} != $literalCode"
+          val call =
+            callNode(
+              OxOrigin(comparisonCode, Option(expression.line)),
+              comparisonCode,
+              Operators.notEquals,
+              Operators.notEquals,
+              DispatchTypes.STATIC_DISPATCH,
+              None,
+              Some(registerType("int"))
+            )
+          callAst(call, Seq(conditionAst, literalAst_))
+        }
       }
-      val literalAst_ = Ast(
-        literalNode(
-          OxOrigin(literalCode, Option(expression.line)),
-          literalCode,
-          registerType(literalType)
-        )
-      )
-      val comparisonCode = s"${expression.code} != $literalCode"
-      val call =
-        callNode(
-          OxOrigin(comparisonCode, Option(expression.line)),
-          comparisonCode,
-          Operators.notEquals,
-          Operators.notEquals,
-          DispatchTypes.STATIC_DISPATCH,
-          None,
-          Some(registerType("int"))
-        )
-      callAst(call, Seq(conditionAst, literalAst_))
     }
   }
 
@@ -2493,6 +2499,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       signature,
       returnType
     )
+  }
+
+  private def booleanConversionOperatorAst(expression: OxExpression): Option[Ast] = {
+    booleanConversionOperatorTarget(expression).map { target =>
+      astForResolvedOperatorCall(OxOrigin(expression), s"${expression.code}.${target.name}()", target)
+    }
+  }
+
+  private def booleanConversionOperatorTarget(expression: OxExpression): Option[ResolvedOperatorCall] = {
+    val operatorName = "operator bool"
+    selectFunctionEntry(memberFunctionCandidates(expression, operatorName), Some(Seq.empty))
+      .filter(entry => normalizeType(entry.function.returnType) == "bool")
+      .map(entry => ResolvedOperatorCall(entry, operatorName, Option(expression), Seq.empty))
   }
 
   private def overloadedBinaryOperatorAst(binary: OxBinary): Option[Ast] = {

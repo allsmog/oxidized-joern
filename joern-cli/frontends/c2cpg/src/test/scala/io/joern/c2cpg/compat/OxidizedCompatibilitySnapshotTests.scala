@@ -1723,6 +1723,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       inside(cpg.method.nameExact("conditionLifetime").whileBlock.l) { case List(whileBlock) =>
         whileBlock.condition.ast.isLocal.name.l should contain("guard")
         whileBlock.condition.ast.isCall.nameExact("make").code.l shouldBe List("Core::make()")
+        inside(whileBlock.condition.ast.isCall.nameExact("operator bool").codeExact("guard.operator bool()").l) {
+          case List(operatorBool) =>
+            operatorBool.methodFullName shouldBe "Core.Widget.operator bool:bool()<const>"
+            operatorBool.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+            operatorBool.typeFullName shouldBe "bool"
+            operatorBool.argument.code.l shouldBe List("guard")
+        }
+        whileBlock.condition.ast.isCall.nameExact(Operators.notEquals).codeExact("guard != 0").l shouldBe Nil
         whileBlock.ast.isCall.nameExact("~Widget").code.l.sorted shouldBe
           List("guard.~Widget()", "guard.~Widget()")
       }

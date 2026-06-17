@@ -737,6 +737,8 @@ fn parse_declaration_node(
             declarations.extend(parse_type_declarations(node, source, symbols));
             if let Some(function) = parse_function_declaration(node, source) {
                 declarations.push(Declaration::Function(function));
+            } else if let Some(function) = parse_operator_cast(node, source, false, symbols) {
+                declarations.push(Declaration::Function(function));
             }
             declarations.extend(
                 parse_global_variable_declarations(node, source)
@@ -771,7 +773,19 @@ fn parse_declaration_node(
             }
         }
         "function_definition" => {
-            if let Some(function) = parse_function(node, source, symbols) {
+            if let Some(function) = parse_operator_cast(node, source, true, symbols)
+                .or_else(|| parse_function(node, source, symbols))
+            {
+                declarations.push(Declaration::Function(function));
+            }
+        }
+        "operator_cast_definition" => {
+            if let Some(function) = parse_operator_cast(node, source, true, symbols) {
+                declarations.push(Declaration::Function(function));
+            }
+        }
+        "operator_cast_declaration" => {
+            if let Some(function) = parse_operator_cast(node, source, false, symbols) {
                 declarations.push(Declaration::Function(function));
             }
         }
@@ -1457,14 +1471,39 @@ fn parse_struct_with_name(
         named_children(body)
             .into_iter()
             .filter(|child| child.kind() == "declaration")
-            .filter_map(|declaration| parse_function_declaration(declaration, source))
+            .filter_map(|declaration| {
+                parse_function_declaration(declaration, source)
+                    .or_else(|| parse_operator_cast(declaration, source, false, symbols))
+            })
             .map(Declaration::Function),
     );
     nested_declarations.extend(
         named_children(body)
             .into_iter()
             .filter(|child| child.kind() == "function_definition")
-            .filter_map(|function| parse_function(function, source, symbols))
+            .filter_map(|function| {
+                parse_operator_cast(function, source, true, symbols)
+                    .or_else(|| parse_function(function, source, symbols))
+            })
+            .map(Declaration::Function),
+    );
+    nested_declarations.extend(
+        named_children(body)
+            .into_iter()
+            .filter(|child| {
+                matches!(
+                    child.kind(),
+                    "operator_cast_definition" | "operator_cast_declaration"
+                )
+            })
+            .filter_map(|function| {
+                parse_operator_cast(
+                    function,
+                    source,
+                    function.kind() == "operator_cast_definition",
+                    symbols,
+                )
+            })
             .map(Declaration::Function),
     );
     nested_declarations.extend(
@@ -1518,9 +1557,19 @@ fn parse_nested_template_functions(
         .into_iter()
         .flat_map(|child| match child.kind() {
             "declaration" => parse_function_declaration(child, source)
+                .or_else(|| parse_operator_cast(child, source, false, symbols))
                 .into_iter()
                 .collect(),
-            "function_definition" => parse_function(child, source, symbols).into_iter().collect(),
+            "function_definition" => parse_operator_cast(child, source, true, symbols)
+                .or_else(|| parse_function(child, source, symbols))
+                .into_iter()
+                .collect(),
+            "operator_cast_definition" => parse_operator_cast(child, source, true, symbols)
+                .into_iter()
+                .collect(),
+            "operator_cast_declaration" => parse_operator_cast(child, source, false, symbols)
+                .into_iter()
+                .collect(),
             "constructor_or_destructor_definition" => {
                 parse_constructor_or_destructor(child, source, true, symbols)
                     .into_iter()
@@ -1860,6 +1909,79 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
         parameters,
         constructor_initializers: Vec::new(),
         body: Vec::new(),
+    })
+}
+
+fn parse_operator_cast(
+    node: Node,
+    source: &[u8],
+    is_definition: bool,
+    symbols: &mut MacroSymbols,
+) -> Option<FunctionDecl> {
+    let declarator = node.child_by_field_name("declarator")?;
+    let operator_cast = find_named_descendant_kind(declarator, "operator_cast")
+        .or_else(|| (declarator.kind() == "operator_cast").then_some(declarator))?;
+    let return_type = operator_cast
+        .child_by_field_name("type")
+        .map(|type_node| type_name_from_type_node(type_node, source))?;
+    let name = operator_cast_name(declarator, &return_type, source);
+    let function_declarator = function_declarator_node(operator_cast).unwrap_or(operator_cast);
+    let parameters = function_declarator
+        .child_by_field_name("parameters")
+        .map(|params| parse_parameters(params, source))
+        .unwrap_or_default();
+    let body = node
+        .child_by_field_name("body")
+        .map(|body| parse_statement_block(body, source, symbols))
+        .unwrap_or_default();
+    let is_const = is_const_function_declarator(function_declarator, source)
+        || operator_cast
+            .child_by_field_name("declarator")
+            .is_some_and(|declarator| has_type_qualifier(declarator, "const", source));
+    let is_virtual = is_virtual_function(node, declarator, source);
+    Some(FunctionDecl {
+        name,
+        signature: function_signature(&return_type, &parameters, is_const),
+        return_type,
+        is_definition: is_definition && node.child_by_field_name("body").is_some(),
+        is_static: false,
+        is_const,
+        is_virtual,
+        code: if is_definition {
+            compact_code(node_text(node, source))
+        } else {
+            statement_code(node, source)
+        },
+        line: line(node),
+        source_path: None,
+        visible_line: None,
+        parameters,
+        constructor_initializers: Vec::new(),
+        body,
+    })
+}
+
+fn operator_cast_name(declarator: Node, return_type: &str, source: &[u8]) -> String {
+    let code = node_text(declarator, source).trim();
+    if let Some(operator_index) = code.find("operator") {
+        let owner = code[..operator_index].trim_end_matches("::").trim();
+        if owner.is_empty() {
+            format!("operator {return_type}")
+        } else {
+            format!("{owner}::operator {return_type}")
+        }
+    } else {
+        format!("operator {return_type}")
+    }
+}
+
+fn has_type_qualifier(node: Node, qualifier: &str, source: &[u8]) -> bool {
+    named_children(node).into_iter().any(|child| {
+        (child.kind() == "type_qualifier"
+            && node_text(child, source)
+                .split_whitespace()
+                .any(|token| token == qualifier))
+            || has_type_qualifier(child, qualifier, source)
     })
 }
 
@@ -4843,6 +4965,7 @@ mod tests {
                   int operator+(const Widget& other) const { return value + other.value; }
                   Widget& operator=(const Widget& other) { value = other.value; return *this; }
                   int operator[](int index) const { return value + index; }
+                  operator bool() const { return value != 0; }
                 };
                 class Fancy : public Widget {
                 public:
@@ -4929,6 +5052,7 @@ mod tests {
                 "declared",
                 "get",
                 "identity",
+                "operator bool",
                 "operator+",
                 "operator=",
                 "operator[]",
@@ -4975,6 +5099,11 @@ mod tests {
             && method.is_definition));
         assert!(methods.iter().any(|method| method.name == "operator[]"
             && method.signature == "int(int)<const>"
+            && method.is_const
+            && method.is_definition));
+        assert!(methods.iter().any(|method| method.name == "operator bool"
+            && method.return_type == "bool"
+            && method.signature == "bool()<const>"
             && method.is_const
             && method.is_definition));
         assert!(methods.iter().any(|method| method.name == "Widget"
@@ -5264,6 +5393,69 @@ mod tests {
                 "invoker"
             ]
         );
+    }
+
+    #[test]
+    fn parses_cpp_operator_cast_declarations_and_definitions() {
+        let sample = r#"
+                namespace Core {
+                class Widget {
+                public:
+                  operator bool() const;
+                };
+                }
+                Core::Widget::operator bool() const { return true; }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("operator cast sample should parse");
+        let namespace = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Namespace(namespace) if namespace.name == "Core" => Some(namespace),
+                _ => None,
+            })
+            .expect("expected Core namespace declaration");
+        let declared = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "Widget" => struct_decl
+                    .nested_declarations
+                    .iter()
+                    .find_map(|nested| match nested {
+                        Declaration::Function(function) if function.name == "operator bool" => {
+                            Some(function)
+                        }
+                        _ => None,
+                    }),
+                _ => None,
+            })
+            .expect("expected operator bool declaration");
+        assert_eq!(declared.return_type, "bool");
+        assert_eq!(declared.signature, "bool()<const>");
+        assert!(declared.is_const);
+        assert!(!declared.is_definition);
+
+        let defined = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) => {
+                    (function.name == "Core::Widget::operator bool").then_some(function)
+                }
+                _ => None,
+            })
+            .expect("expected out-of-class operator bool definition");
+        assert_eq!(defined.return_type, "bool");
+        assert_eq!(defined.signature, "bool()<const>");
+        assert!(defined.is_const);
+        assert!(defined.is_definition);
+        assert!(matches!(
+            defined.body.as_slice(),
+            [Statement::Return {
+                expression: Some(Expression::Literal { value, .. }),
+                ..
+            }] if value == "true"
+        ));
     }
 
     #[test]
