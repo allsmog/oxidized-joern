@@ -3032,16 +3032,62 @@ fn condition_declaration_from_text(node: Node, source: &[u8]) -> Option<Statemen
 }
 
 fn split_top_level_assignment(code: &str) -> Option<(&str, &str)> {
+    split_top_level_assignment_operator(code).map(|(left, _, right)| (left, right))
+}
+
+fn split_top_level_assignment_operator(code: &str) -> Option<(&str, &str, &str)> {
     let mut depth = 0usize;
     for (index, ch) in code.char_indices() {
         match ch {
             '(' | '[' | '{' => depth += 1,
             ')' | ']' | '}' if depth > 0 => depth -= 1,
-            '=' if depth == 0 => return Some((code[..index].trim(), code[index + 1..].trim())),
+            _ if depth == 0 => {
+                let rest = &code[index..];
+                if let Some(operator) = assignment_operator_at(rest) {
+                    if operator == "=" && !is_standalone_assignment_equals(code, index) {
+                        continue;
+                    }
+                    let left = code[..index].trim();
+                    let right = code[index + operator.len()..].trim();
+                    if !left.is_empty() && !right.is_empty() && !is_operator_function_prefix(left) {
+                        return Some((left, operator, right));
+                    }
+                }
+            }
             _ => {}
         }
     }
     None
+}
+
+fn assignment_operator_at(value: &str) -> Option<&'static str> {
+    [
+        "<<=", ">>=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "=",
+    ]
+    .into_iter()
+    .find(|operator| value.starts_with(operator))
+}
+
+fn is_standalone_assignment_equals(code: &str, index: usize) -> bool {
+    let rest = &code[index..];
+    if rest.starts_with("==") || rest.starts_with("=>") {
+        return false;
+    }
+    !matches!(
+        previous_non_whitespace_char(code, index),
+        Some('!' | '<' | '>' | '=')
+    )
+}
+
+fn previous_non_whitespace_char(value: &str, index: usize) -> Option<char> {
+    value[..index]
+        .chars()
+        .rev()
+        .find(|character| !character.is_whitespace())
+}
+
+fn is_operator_function_prefix(value: &str) -> bool {
+    value == "operator" || value.ends_with(".operator") || value.ends_with("::operator")
 }
 
 fn parse_condition_component(
@@ -3171,11 +3217,7 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
             .next()
             .map(|child| parse_expression(child, source))
             .unwrap_or_else(|| parse_expression_text(node_text(node, source), line(node))),
-        "identifier" | "this" => Expression::Identifier {
-            name: node_text(node, source).to_string(),
-            code: node_text(node, source).to_string(),
-            line: line(node),
-        },
+        "identifier" | "this" => identifier_expression(node, source),
         "number_literal"
         | "char_literal"
         | "string_literal"
@@ -3226,6 +3268,30 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
     if let Some(expression) = coroutine_expression(code, line) {
         return expression;
     }
+    if let Some((left, operator, right)) = split_top_level_assignment_operator(code) {
+        if is_initializer_designator_text(left) {
+            return Expression::DesignatedInitializer {
+                code: code.to_string(),
+                line,
+                designator: Box::new(Expression::Designator {
+                    name: left.trim().to_string(),
+                    code: left.trim().to_string(),
+                    line,
+                }),
+                value: Box::new(parse_expression_text(right, line)),
+            };
+        }
+        return Expression::Assignment {
+            operator: operator.to_string(),
+            code: code.to_string(),
+            line,
+            left: Box::new(parse_expression_text(left, line)),
+            right: Box::new(parse_expression_text(right, line)),
+        };
+    }
+    if let Some(initializer_list) = parse_initializer_list_text(code, line) {
+        return initializer_list;
+    }
     if let Some((name, arguments)) = parse_call_text(code, line) {
         Expression::Call {
             name: name.clone(),
@@ -3251,6 +3317,56 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
             line,
         }
     }
+}
+
+fn parse_initializer_list_text(code: &str, line: usize) -> Option<Expression> {
+    let trimmed = code.trim();
+    if !(trimmed.starts_with('{') && trimmed.ends_with('}')) {
+        return None;
+    }
+    let inner = &trimmed[1..trimmed.len() - 1];
+    if !delimiters_are_balanced(inner) {
+        return None;
+    }
+    Some(Expression::InitializerList {
+        code: trimmed.to_string(),
+        line,
+        elements: split_top_level_arguments(inner)
+            .into_iter()
+            .map(|element| parse_expression_text(element, line))
+            .collect(),
+    })
+}
+
+fn delimiters_are_balanced(value: &str) -> bool {
+    let mut stack = Vec::new();
+    for ch in value.chars() {
+        match ch {
+            '(' | '[' | '{' => stack.push(ch),
+            ')' => {
+                if stack.pop() != Some('(') {
+                    return false;
+                }
+            }
+            ']' => {
+                if stack.pop() != Some('[') {
+                    return false;
+                }
+            }
+            '}' => {
+                if stack.pop() != Some('{') {
+                    return false;
+                }
+            }
+            _ => {}
+        }
+    }
+    stack.is_empty()
+}
+
+fn is_initializer_designator_text(value: &str) -> bool {
+    let trimmed = value.trim();
+    trimmed.starts_with('.') || trimmed.starts_with('[')
 }
 
 fn literal_text_value(value: &str) -> bool {
@@ -4108,9 +4224,13 @@ fn is_initializer_designator(node: Node) -> bool {
 }
 
 fn identifier_expression(node: Node, source: &[u8]) -> Expression {
+    let code = node_text(node, source).trim();
+    if !is_simple_identifier(code) {
+        return parse_expression_text(code, line(node));
+    }
     Expression::Identifier {
-        name: node_text(node, source).trim().to_string(),
-        code: node_text(node, source).trim().to_string(),
+        name: code.to_string(),
+        code: code.to_string(),
         line: line(node),
     }
 }
@@ -6604,8 +6724,21 @@ mod tests {
                   Holder(Source source) {}
                 };
                 }
-                int use(Core::Source& source) {
+                struct Cell {
+                  int x;
+                  int y;
+                };
+                struct Board {
+                  Cell cell;
+                  int z;
+                };
+                struct BoardHolder {
+                  BoardHolder(Board input) {}
+                };
+                int use(Core::Source& source, int seed) {
+                  Board target;
                   Core::Holder local(Core::makeSource());
+                  BoardHolder aggregate(target = {{1, seed}, 2});
                   return 0;
                 }
                 "#;
@@ -6618,14 +6751,18 @@ mod tests {
                 _ => None,
             })
             .expect("expected use function");
-        let [Statement::LocalDecl {
+        let [Statement::LocalDecl { .. }, Statement::LocalDecl {
             name,
             initializer: Some(initializer),
+            ..
+        }, Statement::LocalDecl {
+            name: aggregate_name,
+            initializer: Some(aggregate_initializer),
             ..
         }, Statement::Return { .. }] = function.body.as_slice()
         else {
             panic!(
-                "expected initialized local and return: {:#?}",
+                "expected target, initialized locals, and return: {:#?}",
                 function.body
             );
         };
@@ -6637,6 +6774,40 @@ mod tests {
         assert!(matches!(
             elements.as_slice(),
             [Expression::Call { name, arguments, .. }] if name == "Core::makeSource" && arguments.is_empty()
+        ));
+        assert_eq!(aggregate_name, "aggregate");
+        let Expression::InitializerList {
+            code,
+            elements: aggregate_elements,
+            ..
+        } = aggregate_initializer
+        else {
+            panic!("expected aggregate direct initializer list");
+        };
+        assert_eq!(code, "(target = {{1, seed}, 2})");
+        assert!(matches!(
+            aggregate_elements.as_slice(),
+            [Expression::Assignment {
+                operator,
+                left,
+                right,
+                ..
+            }] if operator == "="
+                && matches!(left.as_ref(), Expression::Identifier { name, .. } if name == "target")
+                && matches!(
+                    right.as_ref(),
+                    Expression::InitializerList { elements, .. }
+                        if matches!(
+                            elements.as_slice(),
+                            [Expression::InitializerList { elements, .. }, Expression::Literal { value, .. }]
+                                if value == "2"
+                                    && matches!(
+                                        elements.as_slice(),
+                                        [Expression::Literal { value, .. }, Expression::Identifier { name, .. }]
+                                            if value == "1" && name == "seed"
+                                    )
+                        )
+                )
         ));
     }
 
@@ -8155,6 +8326,47 @@ mod tests {
         assert!(matches!(
             alternative.as_ref(),
             Expression::Unary { operator, .. } if operator == "-"
+        ));
+    }
+
+    #[test]
+    fn parses_raw_assignment_initializer_text_without_confusing_comparisons_or_operators() {
+        let expression = parse_expression_text("target = {{1, seed}, 2}", 1);
+        assert!(matches!(
+            expression,
+            Expression::Assignment {
+                operator,
+                left,
+                right,
+                ..
+            } if operator == "="
+                && matches!(left.as_ref(), Expression::Identifier { name, .. } if name == "target")
+                && matches!(right.as_ref(), Expression::InitializerList { .. })
+        ));
+
+        let designated = parse_expression_text(".cell = {1, seed}", 1);
+        assert!(matches!(
+            designated,
+            Expression::DesignatedInitializer {
+                designator,
+                value,
+                ..
+            } if matches!(designator.as_ref(), Expression::Designator { code, .. } if code == ".cell")
+                && matches!(value.as_ref(), Expression::InitializerList { .. })
+        ));
+
+        assert!(matches!(
+            parse_expression_text("left == right", 1),
+            Expression::Identifier { .. }
+        ));
+        assert!(matches!(
+            parse_expression_text("operator=(value)", 1),
+            Expression::Call { name, .. } if name == "operator="
+        ));
+        assert!(matches!(
+            parse_expression_text("cooperator = value", 1),
+            Expression::Assignment { left, .. }
+                if matches!(left.as_ref(), Expression::Identifier { name, .. } if name == "cooperator")
         ));
     }
 

@@ -4073,6 +4073,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |void constructor_initializer_assignment(int seed) {
           |  Board target;
           |  Holder braced{target = {{4, seed}, 5}};
+          |  Holder paren(target = {{6, seed}, 7});
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -4082,13 +4083,20 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("Board")
       cpg.method.nameExact("constructor_initializer_assignment").local.nameExact("braced").typeFullName.l shouldBe
         List("Holder")
+      cpg.method.nameExact("constructor_initializer_assignment").local.nameExact("paren").typeFullName.l shouldBe
+        List("Holder")
       cpg.method.nameExact("constructor_initializer_assignment").call.nameExact(Operators.assignment).code.l should
         contain allElementsOf List(
           "target = {{4, seed}, 5}",
           "target.cell = {4, seed}",
           "target.cell.x = 4",
           "target.cell.y = seed",
-          "target.z = 5"
+          "target.z = 5",
+          "target = {{6, seed}, 7}",
+          "target.cell = {6, seed}",
+          "target.cell.x = 6",
+          "target.cell.y = seed",
+          "target.z = 7"
         )
       cpg.method.nameExact("constructor_initializer_assignment").call.nameExact(Operators.fieldAccess).code.l should
         contain allElementsOf List(
@@ -4097,6 +4105,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "target.cell.y",
           "target.z"
         )
+      val assignmentCodes =
+        cpg.method.nameExact("constructor_initializer_assignment").call.nameExact(Operators.assignment).code.l
+      assignmentCodes.indexOf("target.cell.x = 6") should be < assignmentCodes.indexOf(
+        "paren = Holder.Holder(target = {{6, seed}, 7})"
+      )
     }
 
     "capture C++ aggregate assignment initializers inside new and lambda init-capture arguments from the Rust parser backend" in {
