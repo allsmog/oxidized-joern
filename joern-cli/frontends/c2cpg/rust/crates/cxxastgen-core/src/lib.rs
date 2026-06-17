@@ -2321,6 +2321,7 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
         }
         "conditional_expression" => parse_conditional_expression(node, source),
         "call_expression" => parse_call_expression(node, source),
+        "compound_literal_expression" => parse_compound_literal_expression(node, source),
         "field_expression" => parse_field_expression(node, source),
         "subscript_expression" => parse_subscript_expression(node, source),
         "assignment_expression" => parse_assignment_expression(node, source),
@@ -2508,6 +2509,31 @@ fn parse_call_expression(node: Node, source: &[u8]) -> Expression {
                 .unwrap_or_else(|| identifier_expression(node, source)),
         ),
         arguments,
+    }
+}
+
+fn parse_compound_literal_expression(node: Node, source: &[u8]) -> Expression {
+    let code = node_text(node, source).trim();
+    let Some(type_node) = node.child_by_field_name("type") else {
+        return identifier_expression(node, source);
+    };
+    let Some(value) = node.child_by_field_name("value") else {
+        return identifier_expression(node, source);
+    };
+    if code.starts_with('(') {
+        return parse_initializer_list(value, source);
+    }
+    let name = node_text(type_node, source).trim().to_string();
+    Expression::Call {
+        name: name.clone(),
+        code: code.to_string(),
+        line: line(node),
+        callee: Box::new(Expression::Identifier {
+            name: name.clone(),
+            code: name,
+            line: line(type_node),
+        }),
+        arguments: initializer_list_elements(value, source),
     }
 }
 
@@ -4296,6 +4322,82 @@ mod tests {
         assert!(matches!(
             assigned_elements.as_slice(),
             [Expression::Identifier { name, .. }] if name == "seed"
+        ));
+    }
+
+    #[test]
+    fn parses_cpp_braced_constructor_temporaries() {
+        let sample = r#"
+                namespace Core {
+                class Widget {
+                public:
+                  Widget();
+                  Widget(const Widget& other) {}
+                  Widget(Widget&& other) {}
+                  ~Widget() {}
+                };
+                void accept(Widget&& widget) {}
+                }
+                int use() {
+                  Core::Widget source;
+                  Core::accept(Core::Widget{});
+                  Core::accept(Core::Widget{source});
+                  return 0;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("braced constructor temporary sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        let [Statement::LocalDecl {
+            name: source_name, ..
+        }, Statement::Expression {
+            expression: empty_accept,
+            ..
+        }, Statement::Expression {
+            expression: copy_accept,
+            ..
+        }, Statement::Return { .. }] = function.body.as_slice()
+        else {
+            panic!("expected source local, braced temporary calls, and return");
+        };
+        assert_eq!(source_name, "source");
+        assert_eq!(
+            collect_call_names(empty_accept),
+            vec!["Core::accept", "Core::Widget"]
+        );
+        assert_eq!(
+            collect_call_names(copy_accept),
+            vec!["Core::accept", "Core::Widget"]
+        );
+        let Expression::Call {
+            arguments: empty_arguments,
+            ..
+        } = empty_accept
+        else {
+            panic!("expected empty accept call");
+        };
+        assert!(matches!(
+            empty_arguments.as_slice(),
+            [Expression::Call { name, arguments, .. }] if name == "Core::Widget" && arguments.is_empty()
+        ));
+        let Expression::Call {
+            arguments: copy_arguments,
+            ..
+        } = copy_accept
+        else {
+            panic!("expected copy accept call");
+        };
+        assert!(matches!(
+            copy_arguments.as_slice(),
+            [Expression::Call { name, arguments, .. }]
+                if name == "Core::Widget"
+                    && matches!(arguments.as_slice(), [Expression::Identifier { name, .. }] if name == "source")
         ));
     }
 
