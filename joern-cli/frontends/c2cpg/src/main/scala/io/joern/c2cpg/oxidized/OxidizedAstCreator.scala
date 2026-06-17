@@ -75,7 +75,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     continuePreservedScopeDepth: Option[Int],
     throwPreservedScopeDepth: Option[Int] = None
   )
-  private final case class ArgumentInfo(typeFullName: Option[String], isRvalue: Boolean)
+  private final case class ArgumentInfo(expression: OxExpression, typeFullName: Option[String], isRvalue: Boolean)
   private final case class FunctionCaptureContext(
     function: OxFunctionDecl,
     methodRef: NewMethodRef,
@@ -1294,7 +1294,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val extendedTemporaryDestructor = local.initializer.flatMap(referenceBoundTemporaryDestructor(typeName, _))
     extendedTemporaryDestructor.foreach(registerLocalDestructor)
     val localAst = Ast(localNode)
-    val temporaryDestructorAsts =
+    val localInitializerTemporaryDestructorAsts =
       temporaryDestructorAstsForLocalInitializer(
         local.initializer,
         Option.when(extendedTemporaryDestructor.isDefined)(typeName),
@@ -1303,12 +1303,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     local.initializer match {
       case Some(initializer: OxInitializerList)
           if useConstructorInitializers && isConstructorInitializer(typeName, initializer) =>
-        Seq(localAst, constructorAssignmentAst(local, initializer, typeName)) ++ temporaryDestructorAsts
+        val constructor = constructorEntry(typeName, initializer.elements)
+        Seq(localAst, constructorAssignmentAst(local, initializer, typeName)) ++
+          temporaryDestructorAstsForConstructorArguments(initializer.elements, constructor)
       case Some(initializer) if useConstructorInitializers && isCopyConstructorInitializer(typeName, initializer) =>
+        val arguments   = Seq(initializer)
+        val constructor = constructorEntry(typeName, arguments)
         Seq(
           localAst,
-          constructorAssignmentAst(local, Seq(initializer), initializer.code, OxOrigin(initializer), typeName)
-        ) ++ temporaryDestructorAsts
+          constructorAssignmentAst(local, arguments, initializer.code, OxOrigin(initializer), typeName)
+        ) ++ temporaryDestructorAstsForConstructorArguments(arguments, constructor)
       case Some(initializer) =>
         val (left, targetCode) = localAssignmentTargetAst(local, typeName)
         val assignmentCode     = s"$targetCode = ${initializer.code}"
@@ -1321,7 +1325,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           )
         val fieldAssignments = designatedInitializerAssignmentAsts(local, initializer, typeName)
         Seq(localAst, assignment) ++ fieldAssignments ++ heapConstructorAstsForExpressions(Seq(initializer)) ++
-          temporaryDestructorAsts
+          localInitializerTemporaryDestructorAsts
       case None if useConstructorInitializers && isDefaultConstructorInitializer(typeName) =>
         Seq(localAst, constructorAssignmentAst(local, Seq.empty, "", origin, typeName))
       case None =>
@@ -1556,8 +1560,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     )
     val assignmentCode = s"${local.name} = $constructorCode"
     val left           = identifierAst(local.name, local.name, local.line)
+    val argumentAsts = constructor
+      .map(entry => argumentAstsForFunctionEntry(entry, arguments))
+      .getOrElse(arguments.map(expressionAst))
     val right =
-      constructorInvocationBlockAst(initializerOrigin, typeName, callNode_, arguments.map(expressionAst))
+      constructorInvocationBlockAst(initializerOrigin, typeName, callNode_, argumentAsts)
     assignmentAst(OxOrigin(local).copy(code = assignmentCode), left, right, assignmentCode)
   }
 
@@ -1780,6 +1787,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           includeCurrent = !extendCurrentTemporaryLifetime
         )
       )
+      .reverse
+      .map(temporaryDestructorAst)
+  }
+
+  private def temporaryDestructorAstsForConstructorArguments(
+    arguments: Seq[OxExpression],
+    entry: Option[FunctionEntry]
+  ): Seq[Ast] = {
+    arguments.zipWithIndex
+      .flatMap { case (argument, index) =>
+        val expectedTypeFullName = entry.flatMap(_.function.parameters.lift(index).map(_.typeName))
+        temporaryDestructorsForExpression(argument, expectedTypeFullName = expectedTypeFullName)
+      }
       .reverse
       .map(temporaryDestructorAst)
   }
@@ -3674,7 +3694,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val arityMatches = candidates.filter(_.function.parameters.size == arguments.size)
         val pool         = if (arityMatches.nonEmpty) arityMatches else candidates
         val argumentInfos =
-          arguments.map(argument => ArgumentInfo(expressionTypeFullName(argument), expressionIsRvalue(argument)))
+          arguments.map(argument =>
+            ArgumentInfo(argument, expressionTypeFullName(argument), expressionIsRvalue(argument))
+          )
         pool.zipWithIndex
           .maxByOption { case (candidate, index) => (overloadScore(candidate, argumentInfos), index) }
           .map(_._1)
@@ -3688,12 +3710,26 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     arityPenalty + candidate.function.parameters
       .zip(argumentInfos)
       .map { case (parameter, argumentInfo) =>
-        argumentInfo.typeFullName.map(typeCompatibilityScore(parameter.typeName, _, argumentInfo.isRvalue)).getOrElse(1)
+        typeCompatibilityScore(parameter.typeName, argumentInfo)
       }
       .sum
   }
 
-  private def typeCompatibilityScore(
+  private def typeCompatibilityScore(parameterTypeName: String, argumentInfo: ArgumentInfo): Int = {
+    val directScore = argumentInfo.typeFullName
+      .map(argumentTypeName => directTypeCompatibilityScore(parameterTypeName, argumentTypeName, argumentInfo.isRvalue))
+      .getOrElse(1)
+    if (directScore > 0) {
+      directScore
+    } else {
+      contextualConversionOperatorTarget(argumentInfo.expression, Option(parameterTypeName))
+        .map(_ => 2 + referenceValueCategoryScore(parameterTypeName, argumentIsRvalue = true))
+        .filter(_ > 0)
+        .getOrElse(0)
+    }
+  }
+
+  private def directTypeCompatibilityScore(
     parameterTypeName: String,
     argumentTypeName: String,
     argumentIsRvalue: Boolean
