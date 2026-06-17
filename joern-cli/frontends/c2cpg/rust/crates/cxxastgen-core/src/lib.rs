@@ -329,6 +329,16 @@ pub enum Statement {
     },
 }
 
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct LambdaCapture {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    name: Option<String>,
+    code: String,
+    #[serde(rename = "captureKind")]
+    capture_kind: String,
+}
+
 #[derive(Debug, Clone, Serialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum Expression {
@@ -394,7 +404,7 @@ pub enum Expression {
     Lambda {
         code: String,
         line: usize,
-        captures: Vec<String>,
+        captures: Vec<LambdaCapture>,
         parameters: Vec<ParameterDecl>,
         #[serde(rename = "returnType")]
         return_type: String,
@@ -2432,8 +2442,8 @@ fn split_top_level_arguments(arguments: &str) -> Vec<&str> {
     let mut depth = 0usize;
     for (index, ch) in arguments.char_indices() {
         match ch {
-            '(' => depth += 1,
-            ')' if depth > 0 => depth -= 1,
+            '(' | '[' | '{' => depth += 1,
+            ')' | ']' | '}' if depth > 0 => depth -= 1,
             ',' if depth == 0 => {
                 let argument = arguments[start..index].trim();
                 if !argument.is_empty() {
@@ -2806,25 +2816,107 @@ fn expression_static_type(expression: &Expression, parameters: &[ParameterDecl])
     }
 }
 
-fn lambda_captures(code: &str) -> Vec<String> {
+fn lambda_captures(code: &str) -> Vec<LambdaCapture> {
     let Some(open) = code.find('[') else {
         return Vec::new();
     };
     let Some(close) = code[open + 1..].find(']') else {
         return Vec::new();
     };
-    code[open + 1..open + 1 + close]
-        .split(',')
-        .filter_map(|capture| {
-            let raw = capture.trim().trim_start_matches('&').trim();
-            let name = raw.strip_prefix('*').unwrap_or(raw).trim();
-            if name.is_empty() || name == "=" || name == "&" {
-                None
-            } else {
-                Some(name.to_string())
-            }
-        })
+    let capture_text = &code[open + 1..open + 1 + close];
+    split_top_level_arguments(capture_text)
+        .into_iter()
+        .filter_map(lambda_capture)
         .collect()
+}
+
+fn lambda_capture(capture: &str) -> Option<LambdaCapture> {
+    let raw = capture.trim();
+    if raw.is_empty() {
+        return None;
+    }
+    match raw {
+        "=" => {
+            return Some(LambdaCapture {
+                name: None,
+                code: raw.to_string(),
+                capture_kind: "defaultByValue".to_string(),
+            });
+        }
+        "&" => {
+            return Some(LambdaCapture {
+                name: None,
+                code: raw.to_string(),
+                capture_kind: "defaultByReference".to_string(),
+            });
+        }
+        "this" => {
+            return Some(LambdaCapture {
+                name: Some("this".to_string()),
+                code: raw.to_string(),
+                capture_kind: "this".to_string(),
+            });
+        }
+        "*this" => {
+            return Some(LambdaCapture {
+                name: Some("this".to_string()),
+                code: raw.to_string(),
+                capture_kind: "copyThis".to_string(),
+            });
+        }
+        _ => {}
+    }
+
+    let (is_reference, rest) = raw
+        .strip_prefix('&')
+        .map(|rest| (true, rest.trim()))
+        .unwrap_or((false, raw));
+    let rest = rest.strip_prefix("...").unwrap_or(rest).trim();
+    if rest == "this" {
+        return Some(LambdaCapture {
+            name: Some("this".to_string()),
+            code: raw.to_string(),
+            capture_kind: "this".to_string(),
+        });
+    }
+    if rest == "*this" {
+        return Some(LambdaCapture {
+            name: Some("this".to_string()),
+            code: raw.to_string(),
+            capture_kind: "copyThis".to_string(),
+        });
+    }
+
+    let (name, capture_kind) = rest
+        .split_once('=')
+        .map(|(name, _)| {
+            (
+                name.trim(),
+                if is_reference {
+                    "initByReference"
+                } else {
+                    "initByValue"
+                },
+            )
+        })
+        .unwrap_or((
+            rest,
+            if is_reference {
+                "explicitByReference"
+            } else {
+                "explicitByValue"
+            },
+        ));
+    let name = name.trim().strip_prefix('*').unwrap_or(name.trim()).trim();
+    if name.is_empty() {
+        None
+    } else {
+        Some(LambdaCapture {
+            name: Some(name.to_string()),
+            code: raw.to_string(),
+            capture_kind: capture_kind.to_string(),
+        })
+    }
 }
 
 fn parse_initializer_list(node: Node, source: &[u8]) -> Expression {
@@ -4372,7 +4464,14 @@ mod tests {
         else {
             panic!("expected lambda initializer");
         };
-        assert_eq!(captures, &vec!["base".to_string()]);
+        assert_eq!(
+            captures,
+            &vec![LambdaCapture {
+                name: Some("base".to_string()),
+                code: "base".to_string(),
+                capture_kind: "explicitByValue".to_string()
+            }]
+        );
         assert_eq!(parameters.len(), 1);
         assert_eq!(parameters[0].name, "x");
         assert_eq!(parameters[0].type_name, "int");
@@ -4393,6 +4492,85 @@ mod tests {
                     [Expression::Literal { value, .. }] if value == "2"
                 )
         ));
+    }
+
+    #[test]
+    fn parses_cpp_lambda_capture_kinds() {
+        let sample = r#"
+                struct Widget {
+                  int value;
+                  int use(int base) {
+                    int delta = 1;
+                    auto by_ref = [&](int x) { return base + delta + x; };
+                    auto mixed = [=, &delta, this](int x) { return this->value + base + delta + x; };
+                    auto copied_this = [*this]() { return value; };
+                    return by_ref(1) + mixed(2) + copied_this();
+                  }
+                };
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("lambda capture-kind sample should parse");
+        let method = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "Widget" => struct_decl
+                    .nested_declarations
+                    .iter()
+                    .find_map(|nested| match nested {
+                        Declaration::Function(function) if function.name == "use" => Some(function),
+                        _ => None,
+                    }),
+                _ => None,
+            })
+            .expect("expected use method");
+        let captures: Vec<Vec<LambdaCapture>> = method
+            .body
+            .iter()
+            .filter_map(|statement| match statement {
+                Statement::LocalDecl {
+                    initializer: Some(Expression::Lambda { captures, .. }),
+                    ..
+                } => Some(captures.clone()),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(captures.len(), 3);
+        assert_eq!(
+            captures[0],
+            vec![LambdaCapture {
+                name: None,
+                code: "&".to_string(),
+                capture_kind: "defaultByReference".to_string()
+            }]
+        );
+        assert_eq!(
+            captures[1],
+            vec![
+                LambdaCapture {
+                    name: None,
+                    code: "=".to_string(),
+                    capture_kind: "defaultByValue".to_string()
+                },
+                LambdaCapture {
+                    name: Some("delta".to_string()),
+                    code: "&delta".to_string(),
+                    capture_kind: "explicitByReference".to_string()
+                },
+                LambdaCapture {
+                    name: Some("this".to_string()),
+                    code: "this".to_string(),
+                    capture_kind: "this".to_string()
+                }
+            ]
+        );
+        assert_eq!(
+            captures[2],
+            vec![LambdaCapture {
+                name: Some("this".to_string()),
+                code: "*this".to_string(),
+                capture_kind: "copyThis".to_string()
+            }]
+        );
     }
 
     #[test]

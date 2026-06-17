@@ -4,7 +4,13 @@ import io.joern.c2cpg.{C2Cpg, Config}
 import io.joern.c2cpg.astcreation.Defines
 import io.joern.c2cpg.parser.ParserBackend
 import io.joern.c2cpg.testfixtures.C2CpgSuite
-import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, DispatchTypes, ModifierTypes, Operators}
+import io.shiftleft.codepropertygraph.generated.{
+  ControlStructureTypes,
+  DispatchTypes,
+  EvaluationStrategies,
+  ModifierTypes,
+  Operators
+}
 import io.shiftleft.semanticcpg.language.*
 import io.shiftleft.semanticcpg.utils.FileUtil
 import io.shiftleft.semanticcpg.utils.FileUtil.*
@@ -487,6 +493,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       inside(cpg.closureBinding.l) { case List(binding) =>
         val capturedBase = cpg.method.fullNameExact(lambdaFullName).local.nameExact("base").head
         binding.closureBindingId shouldBe capturedBase.closureBindingId
+        binding.evaluationStrategy shouldBe EvaluationStrategies.BY_VALUE
         binding._refOut.l shouldBe cpg.method.nameExact("use").parameter.nameExact("base").l
         binding._captureIn.l shouldBe cpg.methodRef.methodFullNameExact(lambdaFullName).l
       }
@@ -500,6 +507,69 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           lambdaCall.receiver.code.l shouldBe List("mapper")
           lambdaCall.argument.code.l shouldBe List("2")
       }
+    }
+
+    "capture C++ lambda default and reference captures" in {
+      val cpg = code(
+        """
+          |int use(int base) {
+          |  int delta = 3;
+          |  auto by_ref = [&](int x) { return base + delta + x; };
+          |  auto by_val = [=](int x) { return base + delta + x; };
+          |  return by_ref(2) + by_val(1);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val refLambda = "use.<lambda>0:int(int)"
+      val valLambda = "use.<lambda>1:int(int)"
+
+      cpg.method.nameExact("use").local.nameExact("by_ref").typeFullName.l shouldBe List(refLambda)
+      cpg.method.nameExact("use").local.nameExact("by_val").typeFullName.l shouldBe List(valLambda)
+      cpg.method.fullNameExact(refLambda).local.name.l.sorted shouldBe List("base", "delta")
+      cpg.method.fullNameExact(valLambda).local.name.l.sorted shouldBe List("base", "delta")
+
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$refLambda:base")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_REFERENCE)
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$refLambda:delta")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_REFERENCE)
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$valLambda:base")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_VALUE)
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$valLambda:delta")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_VALUE)
+
+      cpg.method.nameExact("use").call.nameExact(Defines.OperatorCall).code.l should contain theSameElementsAs
+        List("by_ref(2)", "by_val(1)")
+    }
+
+    "capture C++ lambda this captures inside methods" in {
+      val cpg = code(
+        """
+          |class Widget {
+          |public:
+          |  int value;
+          |  int read(int base) {
+          |    auto reader = [this](int x) { return this->value + x; };
+          |    return reader(base);
+          |  }
+          |};
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val readFullName   = cpg.method.nameExact("read").fullName.head
+      val lambdaFullName = s"$readFullName.<lambda>0:int(int)"
+      cpg.method.nameExact("read").local.nameExact("reader").typeFullName.l shouldBe List(lambdaFullName)
+      cpg.method.fullNameExact(lambdaFullName).local.nameExact("this").typeFullName.l shouldBe List("Widget*")
+      cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:this")).evaluationStrategy.l shouldBe
+        List(EvaluationStrategies.BY_SHARING)
+      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:this")).l) {
+        case List(binding) =>
+          binding._refOut.l shouldBe cpg.method.nameExact("read").parameter.nameExact("this").l
+      }
+      cpg.method.fullNameExact(lambdaFullName).call.codeExact("this->value").argument.code.l shouldBe
+        List("this", "value")
     }
 
     "capture C++ for initializer destructors" in {

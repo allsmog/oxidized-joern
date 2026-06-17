@@ -59,7 +59,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     name: String,
     scopeEntry: ScopeEntry,
     binding: NewClosureBinding,
-    outer: ScopeEntry
+    outer: ScopeEntry,
+    evaluationStrategy: String
   )
   private final case class JumpCleanupTarget(
     breakPreservedScopeDepth: Option[Int],
@@ -1485,18 +1486,161 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def lambdaCaptures(lambda: OxLambda, info: LambdaInfo): Seq[LambdaCapture] = {
-    lambda.captures.distinct.flatMap { captureName =>
-      scope.get(captureName).map { outerEntry =>
-        val bindingId = s"${info.fullName}:$captureName"
-        val local =
-          localNode(OxOrigin(captureName, Option(lambda.line)), captureName, captureName, outerEntry.typeFullName)
-            .closureBindingId(bindingId)
-        val binding = NewClosureBinding()
-          .closureBindingId(bindingId)
-          .evaluationStrategy(EvaluationStrategies.BY_VALUE)
-        LambdaCapture(captureName, ScopeEntry(outerEntry.typeFullName, local), binding, outerEntry)
+    val requestedCaptures = mutable.LinkedHashMap.empty[String, String]
+    lambda.captures.foreach { capture =>
+      capture.name.foreach { name =>
+        requestedCaptures.update(name, lambdaCaptureEvaluationStrategy(capture))
       }
     }
+    lambdaDefaultCaptureEvaluationStrategy(lambda).foreach { strategy =>
+      inferredLambdaCaptureNames(lambda).foreach { name =>
+        if (!requestedCaptures.contains(name)) {
+          val captureStrategy = if (name == Defines.This) EvaluationStrategies.BY_SHARING else strategy
+          requestedCaptures.update(name, captureStrategy)
+        }
+      }
+    }
+    requestedCaptures.toSeq.flatMap { case (captureName, evaluationStrategy) =>
+      scope.get(captureName).map { outerEntry =>
+        lambdaCapture(captureName, evaluationStrategy, info, lambda, outerEntry)
+      }
+    }
+  }
+
+  private def lambdaCapture(
+    captureName: String,
+    evaluationStrategy: String,
+    info: LambdaInfo,
+    lambda: OxLambda,
+    outerEntry: ScopeEntry
+  ): LambdaCapture = {
+    val bindingId = s"${info.fullName}:$captureName"
+    val local =
+      localNode(OxOrigin(captureName, Option(lambda.line)), captureName, captureName, outerEntry.typeFullName)
+        .closureBindingId(bindingId)
+    val binding = NewClosureBinding()
+      .closureBindingId(bindingId)
+      .evaluationStrategy(evaluationStrategy)
+    LambdaCapture(captureName, ScopeEntry(outerEntry.typeFullName, local), binding, outerEntry, evaluationStrategy)
+  }
+
+  private def lambdaCaptureEvaluationStrategy(capture: OxLambdaCapture): String = {
+    capture.captureKind match {
+      case "defaultByReference" | "explicitByReference" | "initByReference" => EvaluationStrategies.BY_REFERENCE
+      case "this"                                                           => EvaluationStrategies.BY_SHARING
+      case _                                                                => EvaluationStrategies.BY_VALUE
+    }
+  }
+
+  private def lambdaDefaultCaptureEvaluationStrategy(lambda: OxLambda): Option[String] = {
+    lambda.captures.collectFirst {
+      case capture if capture.captureKind == "defaultByReference" => EvaluationStrategies.BY_REFERENCE
+      case capture if capture.captureKind == "defaultByValue"     => EvaluationStrategies.BY_VALUE
+    }
+  }
+
+  private def inferredLambdaCaptureNames(lambda: OxLambda): Seq[String] = {
+    val declared = mutable.Set.from(lambda.parameters.map(_.name).filter(_.nonEmpty))
+    val names    = mutable.LinkedHashSet.empty[String]
+
+    def reference(name: String): Unit = {
+      if (!declared.contains(name) && scope.contains(name)) {
+        names.add(name)
+      }
+    }
+
+    def visitStatement(statement: OxStatement): Unit = {
+      statement match {
+        case OxLocalDecl(name, _, _, _, initializer) =>
+          initializer.foreach(visitExpression)
+          declared.add(name)
+        case OxAssignment(_, _, _, left, right) =>
+          visitExpression(left)
+          visitExpression(right)
+        case OxReturn(_, _, expression) =>
+          expression.foreach(visitExpression)
+        case OxThrow(_, _, expression) =>
+          expression.foreach(visitExpression)
+        case OxTry(_, _, body, catches) =>
+          body.foreach(visitStatement)
+          catches.foreach { catchClause =>
+            val previousDeclarations = declared.toSet
+            catchClause.parameter.foreach(parameter => declared.add(parameter.name))
+            catchClause.body.foreach(visitStatement)
+            declared.filterInPlace(previousDeclarations.contains)
+          }
+        case OxIf(_, _, condition, thenBody, elseBody) =>
+          visitExpression(condition)
+          thenBody.foreach(visitStatement)
+          elseBody.foreach(visitStatement)
+        case OxWhile(_, _, condition, body) =>
+          visitExpression(condition)
+          body.foreach(visitStatement)
+        case OxDoWhile(_, _, condition, body) =>
+          visitExpression(condition)
+          body.foreach(visitStatement)
+        case OxFor(_, _, initializer, condition, update, body) =>
+          initializer.foreach(visitStatement)
+          condition.foreach(visitExpression)
+          update.foreach(visitExpression)
+          body.foreach(visitStatement)
+        case OxLabel(_, _, _, body) =>
+          body.foreach(visitStatement)
+        case OxSwitch(_, _, condition, body) =>
+          visitExpression(condition)
+          body.foreach(visitStatement)
+        case OxCase(_, _, value, body) =>
+          value.foreach(visitExpression)
+          body.foreach(visitStatement)
+        case OxExpressionStatement(_, _, expression) =>
+          visitExpression(expression)
+        case _: OxBreak | _: OxContinue | _: OxGoto =>
+      }
+    }
+
+    def visitExpression(expression: OxExpression): Unit = {
+      expression match {
+        case OxIdentifier(name, _, _) =>
+          reference(name)
+        case OxLiteral(_, _, _) =>
+        case OxBinary(_, _, _, left, right) =>
+          visitExpression(left)
+          visitExpression(right)
+        case OxUnary(_, _, _, _, argument) =>
+          visitExpression(argument)
+        case OxConditional(_, _, condition, consequence, alternative) =>
+          visitExpression(condition)
+          consequence.foreach(visitExpression)
+          visitExpression(alternative)
+        case OxCast(_, _, _, value) =>
+          visitExpression(value)
+        case OxSizeOf(_, _, value, _) =>
+          value.foreach(visitExpression)
+        case OxNew(_, _, _, arguments, initializerArguments) =>
+          arguments.foreach(visitExpression)
+          initializerArguments.foreach(visitExpression)
+        case OxDelete(_, _, argument) =>
+          visitExpression(argument)
+        case _: OxLambda =>
+        case OxCall(_, _, _, callee, arguments) =>
+          visitExpression(callee)
+          arguments.foreach(visitExpression)
+        case OxFieldAccess(_, _, _, base) =>
+          visitExpression(base)
+        case OxIndexAccess(_, _, base, index) =>
+          visitExpression(base)
+          visitExpression(index)
+        case OxInitializerList(_, _, elements) =>
+          elements.foreach(visitExpression)
+        case OxDesignatedInitializer(_, _, designator, value) =>
+          visitExpression(designator)
+          visitExpression(value)
+        case OxDesignator(_, _, _) =>
+      }
+    }
+
+    lambda.body.foreach(visitStatement)
+    names.toSeq
   }
 
   private def emitLambda(lambda: OxLambda, info: LambdaInfo, captures: Seq[LambdaCapture]): Unit = {
