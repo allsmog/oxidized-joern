@@ -119,6 +119,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       Seq(localName, fullName).distinct.map(typeName => typeName -> baseTypes)
     }.toMap
   private val IntegerLiteralPattern = """[+-]?(?:0[xX][0-9a-fA-F]+|\d+)[uUlL]*""".r
+  private val FloatingLiteralPattern =
+    """[+-]?(?:(?:\d+\.\d*|\.\d+)(?:[eE][+-]?\d+)?|\d+[eE][+-]?\d+)[fFlL]?""".r
   private val CxxOverloadableBinaryOperators = Set(
     "+",
     "-",
@@ -1086,11 +1088,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def localDeclarationCode(local: OxLocalDecl): String = {
     val code = local.initializer match {
-      case Some(_) if local.code.contains("=") => local.code.takeWhile(_ != '=').trim
-      case Some(initializer)                   => local.code.stripSuffix(initializer.code).trim
-      case None                                => local.code
+      case Some(initializer) =>
+        val prefix = localInitializerPrefix(local, initializer)
+        if (prefix.endsWith("=")) prefix.stripSuffix("=").trim else prefix
+      case None => local.code
     }
     stripConstinitSpecifier(code)
+  }
+
+  private def localInitializerPrefix(local: OxLocalDecl, initializer: OxExpression): String = {
+    val initializerIndex = local.code.lastIndexOf(initializer.code)
+    if (initializerIndex >= 0) local.code.take(initializerIndex).trim else local.code
   }
 
   private def stripConstinitSpecifier(code: String): String = {
@@ -1101,12 +1109,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val explicitType = typeFullNameWithStringLiteralLength(local.typeName, local.initializer)
     local.initializer match {
       case Some(lambda: OxLambda) if explicitType == Defines.Auto => lambdaInfo(lambda).fullName
+      case Some(initializerList: OxInitializerList)
+          if explicitType.startsWith(Defines.Auto) && isDirectListInitializer(local, initializerList) =>
+        initializerListElementTypeFullName(initializerList)
+          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName))
+          .getOrElse(explicitType)
       case Some(initializer) if explicitType.startsWith(Defines.Auto) =>
         expressionTypeFullName(initializer)
           .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName))
           .getOrElse(explicitType)
       case _ => explicitType
     }
+  }
+
+  private def isDirectListInitializer(local: OxLocalDecl, initializerList: OxInitializerList): Boolean = {
+    !localInitializerPrefix(local, initializerList).endsWith("=")
   }
 
   private def typeFullNameWithStringLiteralLength(typeName: String, initializer: Option[OxExpression]): String = {
@@ -1613,7 +1630,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           OxOrigin(initializerList),
           initializerList.code,
           Operators.arrayInitializer,
-          initializerList.elements.map(expressionAst)
+          initializerList.elements.map(expressionAst),
+          registerType(expressionTypeFullName(initializerList).getOrElse(Defines.Any))
         )
       case designatedInitializer: OxDesignatedInitializer =>
         assignmentAst(
@@ -2276,6 +2294,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         overloadedIndexOperatorTarget(indexAccess)
           .map(target => normalizeType(target.entry.function.returnType))
           .orElse(expressionTypeFullName(indexAccess.base).map(_.stripSuffix("[]")))
+      case initializerList: OxInitializerList =>
+        initializerListTypeFullName(initializerList)
       case call: OxCall =>
         callReturnTypeFullName(call)
       case binary: OxBinary =>
@@ -2301,6 +2321,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def foldExpressionTypeFullName(fold: OxFold): Option[String] = {
     if (Set("&&", "||", "and", "or").contains(fold.operator)) Option(registerType("bool"))
     else fold.left.orElse(fold.right).flatMap(expressionTypeFullName)
+  }
+
+  private def initializerListTypeFullName(initializerList: OxInitializerList): Option[String] = {
+    initializerListElementTypeFullName(initializerList).map(typeName => s"std.initializer_list<$typeName>")
+  }
+
+  private def initializerListElementTypeFullName(initializerList: OxInitializerList): Option[String] = {
+    val elementTypes = initializerList.elements.map(expressionTypeFullName)
+    Option.when(elementTypes.nonEmpty && elementTypes.forall(_.isDefined)) {
+      elementTypes.flatten.map(normalizeType).distinct
+    }.collect { case Seq(typeName) => typeName }
   }
 
   private def dereferencedTypeFullName(typeFullName: String): String = {
@@ -2914,6 +2945,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case "true" | "false" | "TRUE" | "FALSE"  => registerType("bool")
       case "nullptr"                            => registerType("std.nullptr_t")
       case literal if isIntegerLiteral(literal) => registerType("int")
+      case literal if isFloatingLiteral(literal) => registerType(floatingLiteralTypeFullName(literal))
       case literal if isCharLiteral(literal)    => registerType("char")
       case literal =>
         stringLiteralElementCount(literal)
@@ -3026,6 +3058,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def isIntegerLiteral(value: String): Boolean = {
     IntegerLiteralPattern.pattern.matcher(value.trim).matches()
+  }
+
+  private def isFloatingLiteral(value: String): Boolean = {
+    FloatingLiteralPattern.pattern.matcher(value.trim).matches()
+  }
+
+  private def floatingLiteralTypeFullName(value: String): String = {
+    Character.toLowerCase(value.trim.last) match {
+      case 'f' => "float"
+      case 'l' => "long double"
+      case _   => "double"
+    }
   }
 
   private def operatorFor(operator: String): String = {
