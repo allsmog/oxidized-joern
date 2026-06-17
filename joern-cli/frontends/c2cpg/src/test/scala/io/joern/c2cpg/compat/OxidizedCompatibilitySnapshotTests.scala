@@ -1632,6 +1632,26 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.call.nameExact(Operators.cast).typeFullName.l shouldBe List("int", "int", "int", "int")
     }
 
+    "capture C++ boolean and nullptr literals from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |bool flags(int *ptr) {
+          |  bool ok = true;
+          |  bool nope = false;
+          |  return ptr != nullptr;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.literal.code.l should contain allElementsOf List("true", "false", "nullptr")
+      cpg.literal.codeExact("true").typeFullName.l shouldBe List("bool")
+      cpg.literal.codeExact("false").typeFullName.l shouldBe List("bool")
+      cpg.literal.codeExact("nullptr").typeFullName.l shouldBe List(Defines.Any)
+      cpg.identifier.nameExact("nullptr").l shouldBe Nil
+      cpg.call.nameExact(Operators.notEquals).code.l shouldBe List("ptr != nullptr")
+    }
+
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
       val cpg = code(
         """
