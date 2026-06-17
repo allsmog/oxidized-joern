@@ -212,6 +212,36 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             |""".stripMargin
         ),
         BackendParitySnapshot.Case(
+          "truthy scalar control conditions",
+          """
+            |int truthy(int x, int *ptr) {
+            |  if (x) {
+            |    x = x + 1;
+            |  }
+            |  while (ptr) {
+            |    ptr = 0;
+            |  }
+            |  do {
+            |    x = x - 1;
+            |  } while (x);
+            |  for (; x; x = x - 1) {
+            |    x = x + 2;
+            |  }
+            |  if (1) {
+            |    x = x + 3;
+            |  }
+            |  if (x < 0) {
+            |    x = 0;
+            |  }
+            |  if (!ptr) {
+            |    x = x + 4;
+            |  }
+            |  return x;
+            |}
+            |""".stripMargin,
+          options = CompatibilitySnapshot.RenderOptions(includeReturns = true, includeCallDetails = true)
+        ),
+        BackendParitySnapshot.Case(
           "nested function calls and multiplication",
           """
             |int square(int x) {
