@@ -1051,7 +1051,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Seq(tryCatchAst(tryNode, bodyAst, catchAsts, None))
       case ifStmt: OxIf =>
         val ifNode                    = controlStructureNode(OxOrigin(ifStmt), ControlStructureTypes.IF, ifStmt.code)
-        val conditionAst              = expressionAst(ifStmt.condition)
+        val conditionAst              = conditionExpressionAst(ifStmt.condition)
         val conditionHeapConstructors = heapConstructorAstsForExpressions(Seq(ifStmt.condition))
         val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(ifStmt.condition))
         val thenAst                   = statementBlockAst(ifStmt.thenBody, "then", ifStmt.line)
@@ -1078,7 +1078,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         }
         Seq(
           whileAst(
-            Option(expressionAst(whileStmt.condition)),
+            Option(conditionExpressionAst(whileStmt.condition)),
             Seq(bodyAst),
             code = Option(whileStmt.code),
             lineNumber = Option(whileStmt.line)
@@ -1098,7 +1098,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         }
         Seq(
           doWhileAst(
-            Option(expressionAst(doWhileStmt.condition)),
+            Option(conditionExpressionAst(doWhileStmt.condition)),
             Seq(bodyAst),
             code = Option(doWhileStmt.code),
             lineNumber = Option(doWhileStmt.line)
@@ -1109,7 +1109,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           val forNode               = controlStructureNode(OxOrigin(forStmt), ControlStructureTypes.FOR, forStmt.code)
           val initializerAsts       = forStmt.initializer.flatMap(astsForStatement)
           val (localAsts, initAsts) = initializerAsts.partition(_.root.exists(_.isInstanceOf[NewLocal]))
-          val conditionAsts         = forStmt.condition.toSeq.map(expressionAst)
+          val conditionAsts         = forStmt.condition.toSeq.map(conditionExpressionAst)
           val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(forStmt.condition.toSeq)
           val conditionHeapConstructors = heapConstructorAstsForExpressions(forStmt.condition.toSeq)
           val updateAsts = forStmt.update.toSeq.flatMap { update =>
@@ -1836,6 +1836,49 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     finally {
       localDestructorScopes = outerDestructorScopes
       scope = outerScope
+    }
+  }
+
+  private def conditionExpressionAst(expression: OxExpression): Ast = {
+    wrapConditionInNullComparison(expression, expressionAst(expression))
+  }
+
+  private def wrapConditionInNullComparison(expression: OxExpression, conditionAst: Ast): Ast = {
+    def isWrapCandidate(ast: Ast): Boolean = {
+      ast.root match {
+        case Some(_: NewCall)    => false
+        case Some(_: NewBlock)   => false
+        case Some(_: NewLiteral) => false
+        case _                   => true
+      }
+    }
+
+    if (conditionAst.root.isEmpty || !isWrapCandidate(conditionAst)) {
+      conditionAst
+    } else {
+      val (literalCode, literalType) = conditionAst.root match {
+        case Some(identifier: NewIdentifier) if identifier.typeFullName.endsWith("*") => "NULL" -> Defines.Any
+        case _                                                                        => "0"    -> "int"
+      }
+      val literalAst_ = Ast(
+        literalNode(
+          OxOrigin(literalCode, Option(expression.line)),
+          literalCode,
+          registerType(literalType)
+        )
+      )
+      val comparisonCode = s"${expression.code} != $literalCode"
+      val call =
+        callNode(
+          OxOrigin(comparisonCode, Option(expression.line)),
+          comparisonCode,
+          Operators.notEquals,
+          Operators.notEquals,
+          DispatchTypes.STATIC_DISPATCH,
+          None,
+          Some(registerType("int"))
+        )
+      callAst(call, Seq(conditionAst, literalAst_))
     }
   }
 

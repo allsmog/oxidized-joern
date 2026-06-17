@@ -11,6 +11,7 @@ import io.shiftleft.codepropertygraph.generated.{
   ModifierTypes,
   Operators
 }
+import io.shiftleft.codepropertygraph.generated.nodes.JumpTarget
 import io.shiftleft.semanticcpg.language.*
 import io.shiftleft.semanticcpg.utils.FileUtil
 import io.shiftleft.semanticcpg.utils.FileUtil.*
@@ -1556,6 +1557,42 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.call.nameExact(Operators.assignment).code.l.sorted shouldBe List("x = 1", "x = x - 1")
     }
 
+    "normalize truthy scalar control conditions from the Rust parser backend" in {
+      val cpg = code("""
+          |int truthy(int x, int *ptr) {
+          |  if (x) {
+          |    x = x + 1;
+          |  }
+          |  while (ptr) {
+          |    ptr = 0;
+          |  }
+          |  do {
+          |    x = x - 1;
+          |  } while (x);
+          |  for (; x; x = x - 1) {
+          |    x = x + 2;
+          |  }
+          |  if (1) {
+          |    x = x + 3;
+          |  }
+          |  if (x < 0) {
+          |    x = 0;
+          |  }
+          |  if (!ptr) {
+          |    x = x + 4;
+          |  }
+          |  return x;
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("truthy").ifBlock.condition.code.l shouldBe List("x != 0", "1", "x < 0", "!ptr")
+      cpg.method.nameExact("truthy").whileBlock.condition.code.l shouldBe List("ptr != NULL")
+      cpg.method.nameExact("truthy").doBlock.condition.code.l shouldBe List("x != 0")
+      cpg.method.nameExact("truthy").forBlock.condition.code.l shouldBe List("x != 0")
+      cpg.method.nameExact("truthy").call.nameExact(Operators.notEquals).code.l shouldBe
+        List("x != 0", "ptr != NULL", "x != 0", "x != 0")
+    }
+
     "capture counted loops, jumps, and indexed expressions from the Rust parser backend" in {
       val cpg = code("""
           |int sum(int *xs, int n) {
@@ -2165,14 +2202,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      val List(switchBlock) = cpg.method
+      cpg.method
         .nameExact("foo")
         .controlStructure
         .controlStructureTypeExact(ControlStructureTypes.SWITCH)
-        .astChildren
-        .isBlock
-        .l
-      switchBlock._jumpTargetViaAstOut.code.l shouldBe List("case 1:", "[[likely]] case 2:")
+        .ast
+        .collectAll[JumpTarget]
+        .code
+        .l shouldBe List("case 1:", "[[likely]] case 2:")
 
       cpg.method.nameExact("foo").call.code.l should contain allElementsOf List(
         "case1()",
@@ -2181,6 +2218,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "likelyIf()",
         "unlikelyWhile()"
       )
+      cpg.method.nameExact("foo").whileBlock.condition.code.l shouldBe List("unlikely_truthy_condition != 0")
       cpg.method.nameExact("foo").ast.isIdentifier.code.l.should(contain("unlikely_truthy_condition"))
       cpg.method.nameExact("foo").ast.isIdentifier.code(".*\\[\\[(likely|unlikely)\\]\\].*").l shouldBe Nil
     }
