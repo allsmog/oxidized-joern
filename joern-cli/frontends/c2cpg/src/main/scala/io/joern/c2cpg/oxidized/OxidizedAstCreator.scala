@@ -421,12 +421,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           catches.flatMap(catchClause =>
             collectRequiredImplicitDefaultConstructorTypesFromStatements(catchClause.body, ownerFullName)
           )
-      case OxIf(_, _, condition, thenBody, elseBody) =>
-        collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
+      case OxIf(_, _, initializer, condition, thenBody, elseBody) =>
+        collectRequiredImplicitDefaultConstructorTypesFromStatements(initializer, ownerFullName) ++
+          collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
           collectRequiredImplicitDefaultConstructorTypesFromStatements(thenBody, ownerFullName) ++
           collectRequiredImplicitDefaultConstructorTypesFromStatements(elseBody, ownerFullName)
-      case OxWhile(_, _, condition, body) =>
-        collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
+      case OxWhile(_, _, initializer, condition, body) =>
+        collectRequiredImplicitDefaultConstructorTypesFromStatements(initializer, ownerFullName) ++
+          collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
           collectRequiredImplicitDefaultConstructorTypesFromStatements(body, ownerFullName)
       case OxDoWhile(_, _, condition, body) =>
         collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
@@ -438,8 +440,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           collectRequiredImplicitDefaultConstructorTypesFromStatements(body, ownerFullName)
       case OxLabel(_, _, _, body) =>
         collectRequiredImplicitDefaultConstructorTypesFromStatements(body, ownerFullName)
-      case OxSwitch(_, _, condition, body) =>
-        collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
+      case OxSwitch(_, _, initializer, condition, body) =>
+        collectRequiredImplicitDefaultConstructorTypesFromStatements(initializer, ownerFullName) ++
+          collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
           collectRequiredImplicitDefaultConstructorTypesFromStatements(body, ownerFullName)
       case OxCase(_, _, value, body) =>
         value.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)) ++
@@ -1050,40 +1053,59 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val catchAsts = tryStmt.catches.map(catchAst)
         Seq(tryCatchAst(tryNode, bodyAst, catchAsts, None))
       case ifStmt: OxIf =>
-        val ifNode                    = controlStructureNode(OxOrigin(ifStmt), ControlStructureTypes.IF, ifStmt.code)
-        val conditionAst              = conditionExpressionAst(ifStmt.condition)
-        val conditionHeapConstructors = heapConstructorAstsForExpressions(Seq(ifStmt.condition))
-        val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(ifStmt.condition))
-        val thenAst                   = statementBlockAst(ifStmt.thenBody, "then", ifStmt.line)
-        val elseAst =
-          Option.when(ifStmt.elseBody.nonEmpty) {
-            Ast(controlStructureNode(OxOrigin("else", Option(ifStmt.line)), ControlStructureTypes.ELSE, "else"))
-              .withChild(statementBlockAst(ifStmt.elseBody, "else", ifStmt.line))
-          }
-        Seq(
-          ifThenElseAst(ifNode, Option(conditionAst), thenAst, elseAst)
-            .withChildren(conditionHeapConstructors ++ conditionTemporaryCleanup)
-        )
-      case whileStmt: OxWhile =>
-        val preservedScopeDepth       = localDestructorScopes.length
-        val conditionHeapConstructors = heapConstructorAstsForExpressions(Seq(whileStmt.condition))
-        val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(whileStmt.condition))
-        val bodyAst = withJumpCleanupTarget(
-          JumpCleanupTarget(
-            breakPreservedScopeDepth = Option(preservedScopeDepth),
-            continuePreservedScopeDepth = Option(preservedScopeDepth)
-          )
-        ) {
-          statementBlockAst(whileStmt.body, "while", whileStmt.line)
+        def ifAsts: Seq[Ast] = {
+          val initializerAsts          = ifStmt.initializer.flatMap(astsForStatement)
+          val ifNode                   = controlStructureNode(OxOrigin(ifStmt), ControlStructureTypes.IF, ifStmt.code)
+          val conditionAst             = conditionExpressionAst(ifStmt.condition)
+          val conditionHeapConstructors = heapConstructorAstsForExpressions(Seq(ifStmt.condition))
+          val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(ifStmt.condition))
+          val thenAst                  = statementBlockAst(ifStmt.thenBody, "then", ifStmt.line)
+          val elseAst =
+            Option.when(ifStmt.elseBody.nonEmpty) {
+              Ast(controlStructureNode(OxOrigin("else", Option(ifStmt.line)), ControlStructureTypes.ELSE, "else"))
+                .withChild(statementBlockAst(ifStmt.elseBody, "else", ifStmt.line))
+            }
+          initializerAsts :+
+            ifThenElseAst(ifNode, Option(conditionAst), thenAst, elseAst)
+              .withChildren(conditionHeapConstructors ++ conditionTemporaryCleanup)
         }
-        Seq(
-          whileAst(
-            Option(conditionExpressionAst(whileStmt.condition)),
-            Seq(bodyAst),
-            code = Option(whileStmt.code),
-            lineNumber = Option(whileStmt.line)
-          ).withChildren(conditionHeapConstructors ++ conditionTemporaryCleanup)
-        )
+
+        if (ifStmt.initializer.isEmpty) {
+          ifAsts
+        } else {
+          val (asts, destructors) = inNestedScopeCollectingDestructors(ifAsts)
+          asts ++ Option
+            .when(statementsMayCompleteNormally(Seq(ifStmt)))(destructors.reverse.map(localDestructorAst))
+            .getOrElse(Seq.empty)
+        }
+      case whileStmt: OxWhile =>
+        def whileAsts(preservedScopeDepth: Int): Seq[Ast] = {
+          val initializerAsts          = whileStmt.initializer.flatMap(astsForStatement)
+          val conditionHeapConstructors = heapConstructorAstsForExpressions(Seq(whileStmt.condition))
+          val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(whileStmt.condition))
+          val bodyAst = withJumpCleanupTarget(
+            JumpCleanupTarget(
+              breakPreservedScopeDepth = Option(preservedScopeDepth),
+              continuePreservedScopeDepth = Option(preservedScopeDepth)
+            )
+          ) {
+            statementBlockAst(whileStmt.body, "while", whileStmt.line)
+          }
+          initializerAsts :+
+            whileAst(
+              Option(conditionExpressionAst(whileStmt.condition)),
+              Seq(bodyAst),
+              code = Option(whileStmt.code),
+              lineNumber = Option(whileStmt.line)
+            ).withChildren(conditionHeapConstructors ++ conditionTemporaryCleanup)
+        }
+        val preservedScopeDepth = localDestructorScopes.length
+        if (whileStmt.initializer.isEmpty) {
+          whileAsts(preservedScopeDepth)
+        } else {
+          val (asts, destructors) = inNestedScopeCollectingDestructors(whileAsts(preservedScopeDepth))
+          asts ++ destructors.reverse.map(localDestructorAst)
+        }
       case doWhileStmt: OxDoWhile =>
         val preservedScopeDepth       = localDestructorScopes.length
         val conditionHeapConstructors = heapConstructorAstsForExpressions(Seq(doWhileStmt.condition))
@@ -1142,23 +1164,27 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Ast(jumpTargetNode(OxOrigin(labelStmt), labelStmt.label, labelStmt.code)) +:
           labelStmt.body.flatMap(astsForStatement)
       case switchStmt: OxSwitch =>
-        val switchNode = controlStructureNode(OxOrigin(switchStmt), ControlStructureTypes.SWITCH, switchStmt.code)
-        val conditionHeapConstructors = heapConstructorAstsForExpressions(Seq(switchStmt.condition))
-        val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(switchStmt.condition))
-        val (switchAst_, switchDestructors) = inNestedScopeCollectingDestructors {
-          val preservedScopeDepth = localDestructorScopes.length
-          val bodyAsts = withJumpCleanupTarget(
-            JumpCleanupTarget(
-              breakPreservedScopeDepth = Option(preservedScopeDepth),
-              continuePreservedScopeDepth = None
-            )
-          ) {
-            switchBodyWithUsingEnumCases(switchStmt.body).flatMap(astsForStatement)
+        val (switchAsts, switchDestructors) = inNestedScopeCollectingDestructors {
+          val initializerAsts          = switchStmt.initializer.flatMap(astsForStatement)
+          val switchNode               = controlStructureNode(OxOrigin(switchStmt), ControlStructureTypes.SWITCH, switchStmt.code)
+          val conditionHeapConstructors = heapConstructorAstsForExpressions(Seq(switchStmt.condition))
+          val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(Seq(switchStmt.condition))
+          val switchAst_ = {
+            val preservedScopeDepth = localDestructorScopes.length
+            val bodyAsts = withJumpCleanupTarget(
+              JumpCleanupTarget(
+                breakPreservedScopeDepth = Option(preservedScopeDepth),
+                continuePreservedScopeDepth = None
+              )
+            ) {
+              switchBodyWithUsingEnumCases(switchStmt.body).flatMap(astsForStatement)
+            }
+            switchAst(switchNode, expressionAst(switchStmt.condition), bodyAsts)
+              .withChildren(conditionHeapConstructors ++ conditionTemporaryCleanup)
           }
-          switchAst(switchNode, expressionAst(switchStmt.condition), bodyAsts)
-            .withChildren(conditionHeapConstructors ++ conditionTemporaryCleanup)
+          initializerAsts :+ switchAst_
         }
-        switchAst_ +: switchDestructors.reverse.map(localDestructorAst)
+        switchAsts ++ switchDestructors.reverse.map(localDestructorAst)
       case caseStmt: OxCase =>
         val name = if (caseStmt.value.isDefined) "case" else "default"
         Ast(jumpTargetNode(OxOrigin(caseStmt), name, caseStmt.code)) +:
@@ -2187,11 +2213,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             catchClause.body.foreach(visitStatement)
             declared.filterInPlace(previousDeclarations.contains)
           }
-        case OxIf(_, _, condition, thenBody, elseBody) =>
+        case OxIf(_, _, initializer, condition, thenBody, elseBody) =>
+          initializer.foreach(visitStatement)
           visitExpression(condition)
           thenBody.foreach(visitStatement)
           elseBody.foreach(visitStatement)
-        case OxWhile(_, _, condition, body) =>
+        case OxWhile(_, _, initializer, condition, body) =>
+          initializer.foreach(visitStatement)
           visitExpression(condition)
           body.foreach(visitStatement)
         case OxDoWhile(_, _, condition, body) =>
@@ -2204,7 +2232,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           body.foreach(visitStatement)
         case OxLabel(_, _, _, body) =>
           body.foreach(visitStatement)
-        case OxSwitch(_, _, condition, body) =>
+        case OxSwitch(_, _, initializer, condition, body) =>
+          initializer.foreach(visitStatement)
           visitExpression(condition)
           body.foreach(visitStatement)
         case OxCase(_, _, value, body) =>

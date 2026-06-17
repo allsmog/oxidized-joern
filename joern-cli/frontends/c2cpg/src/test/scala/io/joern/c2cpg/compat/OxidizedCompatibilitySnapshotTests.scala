@@ -1593,6 +1593,47 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("x != 0", "ptr != NULL", "x != 0", "x != 0")
     }
 
+    "capture C++ selection initializers from the Rust parser backend" in {
+      val cpg = code("""
+          |int seed(int x) {
+          |  return x;
+          |}
+          |
+          |int use(int n) {
+          |  if (int x = seed(n); x) {
+          |    n = x;
+          |  }
+          |  while (int w = seed(n)) {
+          |    n = w;
+          |    break;
+          |  }
+          |  switch (int y = seed(n); y) {
+          |  case 1:
+          |    return y;
+          |  default:
+          |    return n;
+          |  }
+          |}
+          |""".stripMargin, "Test0.cpp").withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.local.name.l should contain allElementsOf List("x", "w", "y")
+      cpg.local.nameExact("x").typeFullName.l shouldBe List("int")
+      cpg.local.nameExact("w").typeFullName.l shouldBe List("int")
+      cpg.local.nameExact("y").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("use").ifBlock.condition.code.l shouldBe List("x != 0")
+      cpg.method.nameExact("use").whileBlock.condition.code.l shouldBe List("w != 0")
+      cpg.method.nameExact("use").controlStructure.controlStructureTypeExact(ControlStructureTypes.SWITCH).condition.code.l shouldBe
+        List("y")
+      cpg.method.nameExact("use").call.nameExact("seed").methodFullName.l shouldBe List.fill(3)("seed:int(int)")
+      cpg.method.nameExact("use").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+        "x = seed(n)",
+        "w = seed(n)",
+        "y = seed(n)",
+        "n = x",
+        "n = w"
+      )
+    }
+
     "capture counted loops, jumps, and indexed expressions from the Rust parser backend" in {
       val cpg = code("""
           |int sum(int *xs, int n) {

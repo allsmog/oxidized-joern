@@ -287,6 +287,8 @@ pub enum Statement {
     If {
         code: String,
         line: usize,
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        initializer: Vec<Statement>,
         condition: Expression,
         #[serde(rename = "thenBody")]
         then_body: Vec<Statement>,
@@ -296,6 +298,8 @@ pub enum Statement {
     While {
         code: String,
         line: usize,
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        initializer: Vec<Statement>,
         condition: Expression,
         body: Vec<Statement>,
     },
@@ -335,6 +339,8 @@ pub enum Statement {
     Switch {
         code: String,
         line: usize,
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        initializer: Vec<Statement>,
         condition: Expression,
         body: Vec<Statement>,
     },
@@ -2603,6 +2609,7 @@ fn parse_preproc_statements(
 fn parse_if_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let consequence = node.child_by_field_name("consequence")?;
+    let (initializer, condition) = parse_condition_clause(condition, source, symbols);
     let else_body = node
         .child_by_field_name("alternative")
         .map(|alternative| parse_statement(alternative, source, symbols))
@@ -2610,7 +2617,8 @@ fn parse_if_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> 
     Some(Statement::If {
         code: statement_code(node, source),
         line: line(node),
-        condition: parse_expression(condition, source),
+        initializer,
+        condition,
         then_body: parse_statement(consequence, source, symbols),
         else_body,
     })
@@ -2623,10 +2631,12 @@ fn parse_while_statement(
 ) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let body = node.child_by_field_name("body")?;
+    let (initializer, condition) = parse_condition_clause(condition, source, symbols);
     Some(Statement::While {
         code: statement_code(node, source),
         line: line(node),
-        condition: parse_expression(condition, source),
+        initializer,
+        condition,
         body: parse_statement(body, source, symbols),
     })
 }
@@ -2732,12 +2742,150 @@ fn parse_switch_statement(
 ) -> Option<Statement> {
     let condition = node.child_by_field_name("condition")?;
     let body = node.child_by_field_name("body")?;
+    let (initializer, condition) = parse_condition_clause(condition, source, symbols);
     Some(Statement::Switch {
         code: statement_code(node, source),
         line: line(node),
-        condition: parse_expression(condition, source),
+        initializer,
+        condition,
         body: flatten_switch_cases(parse_statement(body, source, symbols)),
     })
+}
+
+fn parse_condition_clause(
+    node: Node,
+    source: &[u8],
+    symbols: &mut MacroSymbols,
+) -> (Vec<Statement>, Expression) {
+    if node.kind() != "condition_clause" {
+        return (Vec::new(), parse_expression(node, source));
+    }
+
+    let children = named_children(node);
+    if children.is_empty() {
+        return (Vec::new(), parse_expression(node, source));
+    }
+
+    if condition_clause_has_semicolon(node, source) && children.len() >= 2 {
+        let condition = *children.last().expect("condition child");
+        let mut initializer = children[..children.len() - 1]
+            .iter()
+            .flat_map(|child| parse_condition_initializer(*child, source, symbols))
+            .collect::<Vec<_>>();
+        let condition = parse_condition_component(condition, source, symbols, &mut initializer);
+        return (initializer, condition);
+    }
+
+    let child = children[0];
+    let mut initializer = Vec::new();
+    let condition = parse_condition_component(child, source, symbols, &mut initializer);
+    (initializer, condition)
+}
+
+fn parse_condition_initializer(
+    node: Node,
+    source: &[u8],
+    symbols: &mut MacroSymbols,
+) -> Vec<Statement> {
+    match node.kind() {
+        "init_statement" => parse_for_initializer(node, source, symbols),
+        "declaration" => parse_condition_declaration(node, source),
+        "expression_statement" => named_children(node)
+            .into_iter()
+            .next()
+            .map(|expr| statement_from_expression(node, expr, source))
+            .into_iter()
+            .collect(),
+        _ => vec![statement_from_expression(node, node, source)],
+    }
+}
+
+fn parse_condition_declaration(node: Node, source: &[u8]) -> Vec<Statement> {
+    let declarations = parse_local_declarations(node, source);
+    let code = node_text(node, source).trim();
+    let parsed_as_single_initialized_local = matches!(
+        declarations.as_slice(),
+        [Statement::LocalDecl {
+            initializer: Some(_),
+            ..
+        }]
+    );
+    if !code.contains('=') || parsed_as_single_initialized_local {
+        declarations
+    } else {
+        condition_declaration_from_text(node, source)
+            .into_iter()
+            .collect()
+    }
+}
+
+fn condition_declaration_from_text(node: Node, source: &[u8]) -> Option<Statement> {
+    let code = node_text(node, source).trim().trim_end_matches(';');
+    let (left, right) = split_top_level_assignment(code)?;
+    let (type_name, name) =
+        split_type_and_name_with_declarator(left).or_else(|| split_type_and_name(left))?;
+    Some(Statement::LocalDecl {
+        name,
+        type_name,
+        code: code.to_string(),
+        line: line(node),
+        initializer: Some(parse_expression_text(right.trim(), line(node))),
+    })
+}
+
+fn split_top_level_assignment(code: &str) -> Option<(&str, &str)> {
+    let mut depth = 0usize;
+    for (index, ch) in code.char_indices() {
+        match ch {
+            '(' | '[' | '{' => depth += 1,
+            ')' | ']' | '}' if depth > 0 => depth -= 1,
+            '=' if depth == 0 => return Some((code[..index].trim(), code[index + 1..].trim())),
+            _ => {}
+        }
+    }
+    None
+}
+
+fn parse_condition_component(
+    node: Node,
+    source: &[u8],
+    symbols: &mut MacroSymbols,
+    initializer: &mut Vec<Statement>,
+) -> Expression {
+    if matches!(node.kind(), "declaration" | "init_statement") {
+        let declarations = parse_condition_initializer(node, source, symbols);
+        let condition = condition_expression_from_initializer(&declarations)
+            .unwrap_or_else(|| parse_expression(node, source));
+        initializer.extend(declarations);
+        condition
+    } else {
+        parse_expression(node, source)
+    }
+}
+
+fn condition_expression_from_initializer(initializer: &[Statement]) -> Option<Expression> {
+    initializer
+        .iter()
+        .rev()
+        .find_map(|statement| match statement {
+            Statement::LocalDecl { name, line, .. } => Some(Expression::Identifier {
+                name: name.clone(),
+                code: name.clone(),
+                line: *line,
+            }),
+            Statement::StructuredBinding {
+                temp_name, line, ..
+            } => Some(Expression::Identifier {
+                name: temp_name.clone(),
+                code: temp_name.clone(),
+                line: *line,
+            }),
+            _ => None,
+        })
+}
+
+fn condition_clause_has_semicolon(node: Node, source: &[u8]) -> bool {
+    node_text(node, source).contains(';')
 }
 
 fn flatten_switch_cases(statements: Vec<Statement>) -> Vec<Statement> {
@@ -6732,6 +6880,91 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_selection_initializers_and_condition_declarations() {
+        let sample = r#"
+                int f();
+                int use(int n) {
+                  if (int x = f(); x) {
+                    return x;
+                  }
+                  while (int w = f()) {
+                    return w;
+                  }
+                  switch (int y = f(); y) {
+                  case 1:
+                    return y;
+                  default:
+                    return n;
+                  }
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("selection initializer sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        let [Statement::If {
+            initializer: if_initializer,
+            condition: if_condition,
+            then_body,
+            ..
+        }, Statement::While {
+            initializer: while_initializer,
+            condition: while_condition,
+            body: while_body,
+            ..
+        }, Statement::Switch {
+            initializer: switch_initializer,
+            condition: switch_condition,
+            body: switch_body,
+            ..
+        }] = function.body.as_slice()
+        else {
+            panic!("expected if, while, and switch");
+        };
+
+        assert!(matches!(
+            if_initializer.as_slice(),
+            [Statement::LocalDecl {
+                name,
+                initializer: Some(Expression::Call { name: call_name, .. }),
+                ..
+            }] if name == "x" && call_name == "f"
+        ));
+        assert!(matches!(if_condition, Expression::Identifier { name, .. } if name == "x"));
+        assert!(matches!(then_body.as_slice(), [Statement::Return { .. }]));
+
+        assert!(matches!(
+            while_initializer.as_slice(),
+            [Statement::LocalDecl {
+                name,
+                initializer: Some(Expression::Call { name: call_name, .. }),
+                ..
+            }] if name == "w" && call_name == "f"
+        ));
+        assert!(matches!(while_condition, Expression::Identifier { name, .. } if name == "w"));
+        assert!(matches!(while_body.as_slice(), [Statement::Return { .. }]));
+
+        assert!(matches!(
+            switch_initializer.as_slice(),
+            [Statement::LocalDecl {
+                name,
+                initializer: Some(Expression::Call { name: call_name, .. }),
+                ..
+            }] if name == "y" && call_name == "f"
+        ));
+        assert!(matches!(switch_condition, Expression::Identifier { name, .. } if name == "y"));
+        assert!(matches!(
+            switch_body.as_slice(),
+            [Statement::Case { .. }, Statement::Case { .. }]
+        ));
+    }
+
+    #[test]
     fn parses_function_prototypes_and_deduplicates_forward_declarations() {
         let sample = r#"
                 int external(int value);
@@ -8563,26 +8796,53 @@ mod tests {
                 calls
             }
             Statement::If {
+                initializer,
                 condition,
                 then_body,
                 else_body,
                 ..
             } => {
-                let mut calls = collect_call_names(condition);
+                let mut calls = initializer
+                    .iter()
+                    .flat_map(collect_statement_call_names)
+                    .collect::<Vec<_>>();
+                calls.extend(collect_call_names(condition));
                 calls.extend(then_body.iter().flat_map(collect_statement_call_names));
                 calls.extend(else_body.iter().flat_map(collect_statement_call_names));
                 calls
             }
             Statement::While {
-                condition, body, ..
+                initializer,
+                condition,
+                body,
+                ..
+            } => {
+                let mut calls = initializer
+                    .iter()
+                    .flat_map(collect_statement_call_names)
+                    .collect::<Vec<_>>();
+                calls.extend(collect_call_names(condition));
+                calls.extend(body.iter().flat_map(collect_statement_call_names));
+                calls
             }
-            | Statement::DoWhile {
-                condition, body, ..
-            }
-            | Statement::Switch {
+            Statement::DoWhile {
                 condition, body, ..
             } => {
                 let mut calls = collect_call_names(condition);
+                calls.extend(body.iter().flat_map(collect_statement_call_names));
+                calls
+            }
+            Statement::Switch {
+                initializer,
+                condition,
+                body,
+                ..
+            } => {
+                let mut calls = initializer
+                    .iter()
+                    .flat_map(collect_statement_call_names)
+                    .collect::<Vec<_>>();
+                calls.extend(collect_call_names(condition));
                 calls.extend(body.iter().flat_map(collect_statement_call_names));
                 calls
             }

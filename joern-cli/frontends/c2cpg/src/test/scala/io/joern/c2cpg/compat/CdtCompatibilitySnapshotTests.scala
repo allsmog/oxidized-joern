@@ -238,7 +238,29 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             |  }
             |  return x;
             |}
+          |""".stripMargin,
+          options = CompatibilitySnapshot.RenderOptions(includeReturns = true, includeCallDetails = true)
+        ),
+        BackendParitySnapshot.Case(
+          "C++ if and switch selection initializers",
+          """
+            |int seed(int x) {
+            |  return x;
+            |}
+            |
+            |int use(int n) {
+            |  if (int x = seed(n); x) {
+            |    n = x;
+            |  }
+            |  switch (int y = seed(n); y) {
+            |  case 1:
+            |    return y;
+            |  default:
+            |    return n;
+            |  }
+            |}
             |""".stripMargin,
+          filename = "Test0.cpp",
           options = CompatibilitySnapshot.RenderOptions(includeReturns = true, includeCallDetails = true)
         ),
         BackendParitySnapshot.Case(
