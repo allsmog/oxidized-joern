@@ -233,6 +233,10 @@ pub struct CatchClause {
 #[derive(Debug, Clone, Serialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum Statement {
+    Unknown {
+        code: String,
+        line: usize,
+    },
     LocalDecl {
         name: String,
         #[serde(rename = "typeName")]
@@ -2139,6 +2143,9 @@ fn parse_statement_block(node: Node, source: &[u8], symbols: &mut MacroSymbols) 
 }
 
 fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec<Statement> {
+    if let Some(statement) = coroutine_unknown_statement(node, source) {
+        return vec![statement];
+    }
     match node.kind() {
         "compound_statement" => parse_statement_block(node, source, symbols),
         "declaration" => parse_local_declarations(node, source),
@@ -2232,6 +2239,25 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
             expression: parse_expression(node, source),
         }],
     }
+}
+
+fn coroutine_unknown_statement(node: Node, source: &[u8]) -> Option<Statement> {
+    let code = node_text(node, source).trim();
+    let normalized = code.trim_end_matches(';').trim();
+    if starts_with_coroutine_keyword(normalized) {
+        Some(Statement::Unknown {
+            code: code.to_string(),
+            line: line(node),
+        })
+    } else {
+        None
+    }
+}
+
+fn starts_with_coroutine_keyword(code: &str) -> bool {
+    ["co_await", "co_return", "co_yield"]
+        .iter()
+        .any(|keyword| code == *keyword || code.starts_with(&format!("{keyword} ")))
 }
 
 fn parse_try_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Option<Statement> {
@@ -2622,6 +2648,9 @@ fn parse_labeled_statement(
 }
 
 fn parse_expression(node: Node, source: &[u8]) -> Expression {
+    if let Some(awaited) = coroutine_await_operand(node_text(node, source)) {
+        return parse_expression_text(awaited, line(node));
+    }
     match node.kind() {
         "parenthesized_expression" | "condition_clause" => named_children(node)
             .into_iter()
@@ -2680,6 +2709,9 @@ fn parse_binary_expression(node: Node, source: &[u8]) -> Expression {
 
 fn parse_expression_text(raw: &str, line: usize) -> Expression {
     let code = strip_wrapping_parentheses(raw.trim());
+    if let Some(awaited) = coroutine_await_operand(code) {
+        return parse_expression_text(awaited, line);
+    }
     if let Some((name, arguments)) = parse_call_text(code, line) {
         Expression::Call {
             name: name.clone(),
@@ -2705,6 +2737,13 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
             line,
         }
     }
+}
+
+fn coroutine_await_operand(code: &str) -> Option<&str> {
+    code.trim()
+        .strip_prefix("co_await ")
+        .map(str::trim)
+        .filter(|operand| !operand.is_empty())
 }
 
 fn literal_text_value(value: &str) -> bool {
@@ -7418,6 +7457,81 @@ mod tests {
     }
 
     #[test]
+    fn recovers_cpp_coroutine_statements() {
+        let sample = r#"
+                int main() {
+                  co_await x();
+                  co_return y();
+                }
+
+                generator<int> range(int start, int end) {
+                  while (start < end) {
+                    co_yield start;
+                    start++;
+                  }
+                }
+
+                task<void> echo(socket s) {
+                  auto data = co_await s.async_read();
+                  co_await async_write(s, data);
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("coroutine recovery sample should parse");
+
+        let main_function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "main" => Some(function),
+                _ => None,
+            })
+            .expect("expected main function");
+        let [Statement::Unknown { code: first, .. }, Statement::Unknown { code: second, .. }] =
+            main_function.body.as_slice()
+        else {
+            panic!("expected unknown coroutine statements");
+        };
+        assert_eq!(first, "co_await x();");
+        assert_eq!(second, "co_return y();");
+
+        let range_function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "range" => Some(function),
+                _ => None,
+            })
+            .expect("expected range function");
+        let [Statement::While { body, .. }] = range_function.body.as_slice() else {
+            panic!("expected range while statement");
+        };
+        let [Statement::Unknown { code, .. }, Statement::Expression { .. }] = body.as_slice()
+        else {
+            panic!("expected co_yield recovery in while body");
+        };
+        assert_eq!(code, "co_yield start;");
+
+        let echo_function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "echo" => Some(function),
+                _ => None,
+            })
+            .expect("expected echo function");
+        let [Statement::LocalDecl {
+            initializer: Some(Expression::Call { name, code, .. }),
+            ..
+        }, Statement::Unknown {
+            code: await_code, ..
+        }] = echo_function.body.as_slice()
+        else {
+            panic!("expected awaited call initializer and unknown co_await statement");
+        };
+        assert_eq!(name, "s.async_read");
+        assert_eq!(code, "s.async_read()");
+        assert_eq!(await_code, "co_await async_write(s, data);");
+    }
+
+    #[test]
     fn parses_cpp_parameter_pack_expansions() {
         let sample = r#"
                 void foo(int x, int*... args) {
@@ -7977,6 +8091,7 @@ mod tests {
 
     fn collect_statement_call_names(statement: &Statement) -> Vec<String> {
         match statement {
+            Statement::Unknown { .. } => Vec::new(),
             Statement::LocalDecl { initializer, .. } => initializer
                 .as_ref()
                 .map(collect_call_names)
@@ -8065,7 +8180,8 @@ mod tests {
 
     fn statement_line(statement: &Statement) -> usize {
         match statement {
-            Statement::LocalDecl { line, .. }
+            Statement::Unknown { line, .. }
+            | Statement::LocalDecl { line, .. }
             | Statement::StructuredBinding { line, .. }
             | Statement::Assignment { line, .. }
             | Statement::Return { line, .. }

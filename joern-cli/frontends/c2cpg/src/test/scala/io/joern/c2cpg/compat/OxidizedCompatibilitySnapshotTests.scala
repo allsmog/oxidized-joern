@@ -11,6 +11,7 @@ import io.shiftleft.codepropertygraph.generated.{
   ModifierTypes,
   Operators
 }
+import io.shiftleft.codepropertygraph.generated.nodes.Unknown
 import io.shiftleft.semanticcpg.language.*
 import io.shiftleft.semanticcpg.utils.FileUtil
 import io.shiftleft.semanticcpg.utils.FileUtil.*
@@ -2007,6 +2008,50 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           parameter.typeFullName shouldBe "T"
         }
       }
+    }
+
+    "recover C++20 coroutine statements from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |int main() {
+          |  co_await x();
+          |  co_return y();
+          |}
+          |
+          |generator<int> range(int start, int end) {
+          |  while (start < end) {
+          |    co_yield start;
+          |    start++;
+          |  }
+          |}
+          |
+          |task<void> echo(socket s) {
+          |  auto data = co_await s.async_read();
+          |  co_await async_write(s, data);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("main").block.astChildren.collectAll[Unknown].code.l shouldBe List(
+        "co_await x();",
+        "co_return y();"
+      )
+      cpg.method
+        .nameExact("range")
+        .controlStructure
+        .astChildren
+        .isBlock
+        .ast
+        .collectAll[Unknown]
+        .code
+        .l shouldBe List("co_yield start;")
+
+      cpg.method.nameExact("echo").local.nameExact("data").typeFullName.l shouldBe List("auto")
+      cpg.method.nameExact("echo").call.codeExact("s.async_read()").size shouldBe 1
+      cpg.method.nameExact("echo").block.astChildren.collectAll[Unknown].code.l shouldBe List(
+        "co_await async_write(s, data);"
+      )
     }
 
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
