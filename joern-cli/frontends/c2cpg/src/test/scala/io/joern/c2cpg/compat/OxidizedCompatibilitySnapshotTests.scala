@@ -1142,6 +1142,50 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         )
     }
 
+    "extend C++ reference-bound temporary lifetimes" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |Widget make();
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int refs() {
+          |  Core::Widget source;
+          |  const Core::Widget& alias = source;
+          |  const Core::Widget& cref = Core::Widget();
+          |  Core::Widget&& rref = Core::make();
+          |  const Core::Widget& copied = Core::Widget(Core::Widget(source));
+          |  int result = Core::consume(Core::Widget(source));
+          |  return result;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("refs").call.nameExact("~Widget").code.l shouldBe
+        List(
+          "Core::Widget(source).~Widget()",
+          "Core::Widget(source).~Widget()",
+          "Core::Widget(Core::Widget(source)).~Widget()",
+          "Core::make().~Widget()",
+          "Core::Widget().~Widget()",
+          "source.~Widget()"
+        )
+      cpg.method.nameExact("refs").local.nameExact("alias").typeFullName.l shouldBe List("Core.Widget&")
+      cpg.method.nameExact("refs").local.nameExact("cref").typeFullName.l shouldBe List("Core.Widget&")
+      cpg.method.nameExact("refs").local.nameExact("copied").typeFullName.l shouldBe List("Core.Widget&")
+      cpg.method.nameExact("refs").local.nameExact("rref").typeFullName.l shouldBe List("Core.Widget&&")
+    }
+
     "preserve returned C++ object temporaries from destructor cleanup" in {
       val cpg = code(
         """
