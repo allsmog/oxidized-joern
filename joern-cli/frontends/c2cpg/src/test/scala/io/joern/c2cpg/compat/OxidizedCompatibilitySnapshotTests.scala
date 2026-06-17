@@ -4112,6 +4112,54 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C++ aggregate assignment initializers inside member initializer arguments from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Cell {
+          |  int x;
+          |  int y;
+          |};
+          |struct Board {
+          |  Cell cell;
+          |  int z;
+          |};
+          |struct Holder {
+          |  Holder(Board input) {}
+          |};
+          |struct Wrapper {
+          |  Board target;
+          |  Holder holder;
+          |  Wrapper(int seed) : target(), holder(target = {{seed, 2}, 3}) {}
+          |};
+          |void member_initializer_assignment(int seed) {
+          |  Wrapper wrapper(seed);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.fullNameExact("Wrapper.Wrapper:void(int)").call.nameExact(Operators.assignment).code.l should
+        contain allElementsOf List(
+          "target = {{seed, 2}, 3}",
+          "target.cell = {seed, 2}",
+          "target.cell.x = seed",
+          "target.cell.y = 2",
+          "target.z = 3"
+        )
+      cpg.method.fullNameExact("Wrapper.Wrapper:void(int)").call.nameExact(Operators.fieldAccess).code.l should
+        contain allElementsOf List(
+          "target.cell",
+          "target.cell.x",
+          "target.cell.y",
+          "target.z"
+        )
+      val assignmentCodes =
+        cpg.method.fullNameExact("Wrapper.Wrapper:void(int)").call.nameExact(Operators.assignment).code.l
+      assignmentCodes.indexOf("target.cell.x = seed") should be < assignmentCodes.indexOf(
+        "this->holder = target = {{seed, 2}, 3}"
+      )
+    }
+
     "capture C++ aggregate assignment initializers inside new and lambda init-capture arguments from the Rust parser backend" in {
       val cpg = code(
         """
