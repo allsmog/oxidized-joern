@@ -1040,10 +1040,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         assignmentExpressionAst(assignment) +:
           (heapConstructorAstsForExpressions(Seq(assignment)) ++ temporaryDestructorAstsForExpressions(Seq(assignment)))
       case ret: OxReturn =>
+        val returnType = currentMethodReturnTypeFullName
         heapConstructorAstsForExpressions(ret.expression.toSeq) ++ temporaryDestructorAstsForReturnExpression(
-          ret.expression
+          ret.expression,
+          returnType
         ) ++ activeLocalDestructors.map(localDestructorAst) :+
-          returnAst(returnNode(OxOrigin(ret), ret.code), ret.expression.toSeq.map(expressionAst))
+          returnAst(
+            returnNode(OxOrigin(ret), ret.code),
+            ret.expression.toSeq.map(expression => expressionAstWithContextualConversion(expression, returnType))
+          )
       case throwStmt: OxThrow =>
         val throwAst = Ast(controlStructureNode(OxOrigin(throwStmt), ControlStructureTypes.THROW, throwStmt.code))
           .withChildren(throwStmt.expression.toSeq.map(expressionAst))
@@ -1290,7 +1295,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     extendedTemporaryDestructor.foreach(registerLocalDestructor)
     val localAst = Ast(localNode)
     val temporaryDestructorAsts =
-      temporaryDestructorAstsForLocalInitializer(local.initializer, extendedTemporaryDestructor.isDefined)
+      temporaryDestructorAstsForLocalInitializer(
+        local.initializer,
+        Option.when(extendedTemporaryDestructor.isDefined)(typeName),
+        extendedTemporaryDestructor.isDefined
+      )
     local.initializer match {
       case Some(initializer: OxInitializerList)
           if useConstructorInitializers && isConstructorInitializer(typeName, initializer) =>
@@ -1304,7 +1313,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val (left, targetCode) = localAssignmentTargetAst(local, typeName)
         val assignmentCode     = s"$targetCode = ${initializer.code}"
         val assignment =
-          assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
+          assignmentAst(
+            origin.copy(code = assignmentCode),
+            left,
+            expressionAstWithContextualConversion(initializer, Option(typeName)),
+            assignmentCode
+          )
         val fieldAssignments = designatedInitializerAssignmentAsts(local, initializer, typeName)
         Seq(localAst, assignment) ++ fieldAssignments ++ heapConstructorAstsForExpressions(Seq(initializer)) ++
           temporaryDestructorAsts
@@ -1737,10 +1751,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .map(temporaryDestructorAst)
   }
 
-  private def temporaryDestructorAstsForReturnExpression(expression: Option[OxExpression]): Seq[Ast] = {
+  private def temporaryDestructorAstsForReturnExpression(
+    expression: Option[OxExpression],
+    expectedTypeFullName: Option[String]
+  ): Seq[Ast] = {
     expression.toSeq
       .flatMap(expression =>
-        temporaryDestructorsForExpression(expression, includeCurrent = !isCurrentReturnedObjectTemporary(expression))
+        temporaryDestructorsForExpression(
+          expression,
+          expectedTypeFullName = expectedTypeFullName,
+          includeCurrent = !isCurrentReturnedObjectTemporary(expression, expectedTypeFullName)
+        )
       )
       .reverse
       .map(temporaryDestructorAst)
@@ -1748,11 +1769,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def temporaryDestructorAstsForLocalInitializer(
     expression: Option[OxExpression],
+    expectedTypeFullName: Option[String],
     extendCurrentTemporaryLifetime: Boolean
   ): Seq[Ast] = {
     expression.toSeq
       .flatMap(expression =>
-        temporaryDestructorsForExpression(expression, includeCurrent = !extendCurrentTemporaryLifetime)
+        temporaryDestructorsForExpression(
+          expression,
+          expectedTypeFullName = expectedTypeFullName,
+          includeCurrent = !extendCurrentTemporaryLifetime
+        )
       )
       .reverse
       .map(temporaryDestructorAst)
@@ -1760,6 +1786,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def temporaryDestructorsForExpression(
     expression: OxExpression,
+    expectedTypeFullName: Option[String] = None,
     includeCurrent: Boolean = true
   ): Seq[TemporaryDestructor] = {
     val nested = expression match {
@@ -1799,8 +1826,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case _: OxLambda =>
         Seq.empty
       case OxCall(_, _, _, callee, arguments) =>
-        temporaryDestructorsForExpression(callee) ++
-          arguments.flatMap(expression => temporaryDestructorsForExpression(expression))
+        temporaryDestructorsForExpression(callee) ++ temporaryDestructorsForCallArguments(expression)
       case OxFieldAccess(_, _, _, base) =>
         temporaryDestructorsForExpression(base)
       case OxIndexAccess(_, _, base, index) =>
@@ -1813,20 +1839,68 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Seq.empty
     }
     val current = expression match {
-      case expression if includeCurrent =>
-        temporaryTypeFullNameForExpression(expression)
-          .flatMap(destructorEntryForType)
-          .map(entry => TemporaryDestructor(temporaryDestructorCode(expression, entry), expression.line, entry))
-          .toSeq
-      case _ =>
-        Seq.empty
+      case expression => currentTemporaryDestructorsForExpression(expression, expectedTypeFullName, includeCurrent)
     }
     nested ++ current
   }
 
-  private def isCurrentReturnedObjectTemporary(expression: OxExpression): Boolean = {
+  private def currentTemporaryDestructorsForExpression(
+    expression: OxExpression,
+    expectedTypeFullName: Option[String],
+    includeCurrent: Boolean
+  ): Seq[TemporaryDestructor] = {
+    contextualConversionTemporaryTypeFullName(expression, expectedTypeFullName) match {
+      case Some(conversionTypeFullName) =>
+        val sourceTemporary = temporaryTypeFullNameForExpression(expression)
+          .flatMap(destructorEntryForType)
+          .map(entry => TemporaryDestructor(temporaryDestructorCode(expression, entry), expression.line, entry))
+          .toSeq
+        val conversionTemporary =
+          Option
+            .when(includeCurrent)(conversionTypeFullName)
+            .flatMap(destructorEntryForType)
+            .map(entry =>
+              TemporaryDestructor(
+                temporaryDestructorCode(expression, entry, expectedTypeFullName),
+                expression.line,
+                entry
+              )
+            )
+            .toSeq
+        sourceTemporary ++ conversionTemporary
+      case None if includeCurrent =>
+        temporaryTypeFullNameForExpression(expression)
+          .flatMap(destructorEntryForType)
+          .map(entry => TemporaryDestructor(temporaryDestructorCode(expression, entry), expression.line, entry))
+          .toSeq
+      case None =>
+        Seq.empty
+    }
+  }
+
+  private def temporaryDestructorsForCallArguments(call: OxExpression): Seq[TemporaryDestructor] = {
+    call match {
+      case call: OxCall =>
+        targetEntryForCallArguments(call) match {
+          case Some(entry) =>
+            call.arguments.zipWithIndex.flatMap { case (argument, index) =>
+              val expectedType = entry.function.parameters.lift(index).map(_.typeName)
+              temporaryDestructorsForExpression(argument, expectedTypeFullName = expectedType)
+            }
+          case None =>
+            call.arguments.flatMap(expression => temporaryDestructorsForExpression(expression))
+        }
+      case _ =>
+        Seq.empty
+    }
+  }
+
+  private def isCurrentReturnedObjectTemporary(
+    expression: OxExpression,
+    expectedTypeFullName: Option[String]
+  ): Boolean = {
     val currentReturnType = currentMethodReturnedObjectTypeFullName
-    val expressionType    = temporaryTypeFullNameForExpression(expression)
+    val expressionType    = temporaryTypeFullNameForExpression(expression, expectedTypeFullName)
     currentReturnType.isDefined && currentReturnType == expressionType
   }
 
@@ -1836,9 +1910,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   ): Option[LocalDestructor] = {
     Option
       .when(isCxxReferenceType(localTypeName)) {
-        temporaryTypeFullNameForExpression(expression)
+        temporaryTypeFullNameForExpression(expression, Option(localTypeName))
           .flatMap(destructorEntryForType)
-          .map(entry => LocalDestructor(temporaryDestructorReceiverCode(expression), expression.line, entry))
+          .map(entry =>
+            LocalDestructor(temporaryDestructorReceiverCode(expression, Option(localTypeName)), expression.line, entry)
+          )
       }
       .flatten
   }
@@ -1854,16 +1930,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .flatMap(returnedObjectTypeFullName)
   }
 
-  private def temporaryTypeFullNameForExpression(expression: OxExpression): Option[String] = {
-    expression match {
-      case call: OxCall               => temporaryTypeFullNameForCall(call)
-      case conditional: OxConditional => conditionalTemporaryTypeFullName(conditional)
-      case cast: OxCast               => castTemporaryTypeFullName(cast)
-      case binary: OxBinary           => overloadedBinaryTemporaryTypeFullName(binary)
-      case assignment: OxAssignment   => overloadedAssignmentTemporaryTypeFullName(assignment)
-      case index: OxIndexAccess       => overloadedIndexTemporaryTypeFullName(index)
-      case unary: OxUnary             => overloadedUnaryTemporaryTypeFullName(unary)
-      case _                          => None
+  private def temporaryTypeFullNameForExpression(
+    expression: OxExpression,
+    expectedTypeFullName: Option[String] = None
+  ): Option[String] = {
+    contextualConversionTemporaryTypeFullName(expression, expectedTypeFullName).orElse {
+      expression match {
+        case call: OxCall               => temporaryTypeFullNameForCall(call)
+        case conditional: OxConditional => conditionalTemporaryTypeFullName(conditional)
+        case cast: OxCast               => castTemporaryTypeFullName(cast)
+        case binary: OxBinary           => overloadedBinaryTemporaryTypeFullName(binary)
+        case assignment: OxAssignment   => overloadedAssignmentTemporaryTypeFullName(assignment)
+        case index: OxIndexAccess       => overloadedIndexTemporaryTypeFullName(index)
+        case unary: OxUnary             => overloadedUnaryTemporaryTypeFullName(unary)
+        case _                          => None
+      }
     }
   }
 
@@ -1874,7 +1955,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def conditionalTemporaryTypeFullName(conditional: OxConditional): Option[String] = {
     conditional.consequence.flatMap { consequence =>
       val branchTypes =
-        Seq(consequence, conditional.alternative).map(temporaryTypeFullNameForExpression)
+        Seq(consequence, conditional.alternative).map(expression => temporaryTypeFullNameForExpression(expression))
       Option
         .when(branchTypes.forall(_.isDefined)) {
           branchTypes.flatten.distinct
@@ -1911,15 +1992,26 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .flatMap(returnedObjectTypeFullName)
   }
 
-  private def temporaryDestructorCode(expression: OxExpression, entry: FunctionEntry): String = {
-    s"${temporaryDestructorReceiverCode(expression)}.${entry.simpleName}()"
+  private def temporaryDestructorCode(
+    expression: OxExpression,
+    entry: FunctionEntry,
+    expectedTypeFullName: Option[String] = None
+  ): String = {
+    s"${temporaryDestructorReceiverCode(expression, expectedTypeFullName)}.${entry.simpleName}()"
   }
 
-  private def temporaryDestructorReceiverCode(expression: OxExpression): String = {
-    expression match {
-      case _: OxBinary | _: OxAssignment | _: OxConditional | _: OxCast | _: OxUnary => s"(${expression.code})"
-      case _                                                                         => expression.code
-    }
+  private def temporaryDestructorReceiverCode(
+    expression: OxExpression,
+    expectedTypeFullName: Option[String] = None
+  ): String = {
+    contextualConversionOperatorTarget(expression, expectedTypeFullName)
+      .map(conversionOperatorCallCode(expression, _))
+      .getOrElse {
+        expression match {
+          case _: OxBinary | _: OxAssignment | _: OxConditional | _: OxCast | _: OxUnary => s"(${expression.code})"
+          case _                                                                         => expression.code
+        }
+      }
   }
 
   private def returnedObjectTemporaryTypeFullName(call: OxCall): Option[String] = {
@@ -2309,6 +2401,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def contextualBooleanAst(expression: OxExpression): Ast = {
     booleanConversionOperatorAst(expression).getOrElse(expressionAst(expression))
+  }
+
+  private def expressionAstWithContextualConversion(
+    expression: OxExpression,
+    expectedTypeFullName: Option[String]
+  ): Ast = {
+    contextualConversionOperatorTarget(expression, expectedTypeFullName)
+      .map(target =>
+        astForResolvedOperatorCall(
+          OxOrigin(conversionOperatorCallCode(expression, target), Option(expression.line)),
+          conversionOperatorCallCode(expression, target),
+          target
+        )
+      )
+      .getOrElse(expressionAst(expression))
   }
 
   private def foldAst(fold: OxFold): Ast = {
@@ -2720,6 +2827,58 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .map(entry => ResolvedOperatorCall(entry, operatorName, Option(expression), Seq.empty))
   }
 
+  private def contextualConversionOperatorTarget(
+    expression: OxExpression,
+    expectedTypeFullName: Option[String]
+  ): Option[ResolvedOperatorCall] = {
+    expectedTypeFullName
+      .flatMap(contextualConversionObjectTypeFullName)
+      .filterNot(targetType => expressionObjectTypeFullName(expression).contains(targetType))
+      .flatMap { targetType =>
+        val candidates = conversionOperatorNamesForType(targetType)
+          .flatMap(operatorName => memberFunctionCandidates(expression, operatorName))
+          .distinct
+          .filter(entry => conversionOperatorReturnObjectTypeFullName(entry).contains(targetType))
+        selectFunctionEntry(candidates, Some(Seq.empty))
+          .map(entry => ResolvedOperatorCall(entry, entry.simpleName, Option(expression), Seq.empty))
+      }
+  }
+
+  private def contextualConversionTemporaryTypeFullName(
+    expression: OxExpression,
+    expectedTypeFullName: Option[String]
+  ): Option[String] = {
+    contextualConversionOperatorTarget(expression, expectedTypeFullName)
+      .flatMap(target => conversionOperatorReturnObjectTypeFullName(target.entry))
+  }
+
+  private def contextualConversionObjectTypeFullName(typeFullName: String): Option[String] = {
+    val normalized = stripCxxTypeQualifiers(stripCxxReference(normalizeType(resolveAliasType(typeFullName)))).trim
+    returnedObjectTypeFullName(normalized)
+  }
+
+  private def expressionObjectTypeFullName(expression: OxExpression): Option[String] = {
+    expressionTypeFullName(expression).flatMap(contextualConversionObjectTypeFullName)
+  }
+
+  private def conversionOperatorReturnObjectTypeFullName(entry: FunctionEntry): Option[String] = {
+    Option(normalizeType(resolveAliasType(entry.function.returnType))).flatMap(returnedObjectTypeFullName)
+  }
+
+  private def conversionOperatorNamesForType(typeFullName: String): Seq[String] = {
+    val localName    = typeFullName.split('.').lastOption.getOrElse(typeFullName)
+    val cxxQualified = typeFullName.replace(".", "::")
+    Seq(localName, cxxQualified, typeFullName).map(typeName => s"operator $typeName").distinct
+  }
+
+  private def conversionOperatorCallCode(expression: OxExpression, target: ResolvedOperatorCall): String = {
+    s"${expression.code}.${conversionOperatorCodeName(target.name)}()"
+  }
+
+  private def conversionOperatorCodeName(name: String): String = {
+    if (name.startsWith("operator ")) s"operator ${name.stripPrefix("operator ").replace(".", "::")}" else name
+  }
+
   private def overloadedBinaryOperatorAst(binary: OxBinary): Option[Ast] = {
     overloadedBinaryOperatorTarget(binary).map(target =>
       astForResolvedOperatorCall(OxOrigin(binary), binary.code, target)
@@ -2845,7 +3004,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val base = target.base.map(expressionAst)
     createCallAst(
       callNode_,
-      target.arguments.map(expressionAst),
+      argumentAstsForFunctionEntry(target.entry, target.arguments),
       base = base,
       receiver = if (dispatchType == DispatchTypes.DYNAMIC_DISPATCH) base else None
     )
@@ -2920,10 +3079,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val base = memberCallBaseAst(call)
     createCallAst(
       callNode_,
-      call.arguments.map(expressionAst),
+      targetEntryForCallArguments(call)
+        .map(entry => argumentAstsForFunctionEntry(entry, call.arguments))
+        .getOrElse(call.arguments.map(expressionAst)),
       base = base,
       receiver = if (dispatchType == DispatchTypes.DYNAMIC_DISPATCH) base else None
     )
+  }
+
+  private def argumentAstsForFunctionEntry(entry: FunctionEntry, arguments: Seq[OxExpression]): Seq[Ast] = {
+    arguments.zipWithIndex.map { case (argument, index) =>
+      expressionAstWithContextualConversion(argument, entry.function.parameters.lift(index).map(_.typeName))
+    }
+  }
+
+  private def targetEntryForCallArguments(call: OxCall): Option[FunctionEntry] = {
+    constructorTemporaryEntry(call)
+      .map(_._2)
+      .orElse(overloadedCallOperatorTarget(call).map(_.entry))
+      .orElse(functionEntryForCall(call))
   }
 
   private def memberCallBaseAst(call: OxCall): Option[Ast] = {
@@ -3642,16 +3816,39 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def functionSimpleName(function: OxFunctionDecl): String = {
-    qualifiedNameParts(function.name).lastOption.getOrElse(function.name)
+    splitConversionOperatorFunctionName(function.name)
+      .map(_._2)
+      .getOrElse(qualifiedNameParts(function.name).lastOption.getOrElse(function.name))
   }
 
   private def functionOwnerFullName(function: OxFunctionDecl, ownerFullName: Option[String]): Option[String] = {
-    val parts = qualifiedNameParts(function.name)
-    if (parts.size > 1) {
-      val localOwner = parts.dropRight(1).mkString(".")
-      ownerFullName.map(owner => s"$owner.$localOwner").orElse(Option(localOwner))
-    } else {
-      ownerFullName
+    splitConversionOperatorFunctionName(function.name) match {
+      case Some((Some(localOwner), _)) =>
+        ownerFullName.map(owner => s"$owner.$localOwner").orElse(Option(localOwner))
+      case Some((None, _)) =>
+        ownerFullName
+      case None =>
+        val parts = qualifiedNameParts(function.name)
+        if (parts.size > 1) {
+          val localOwner = parts.dropRight(1).mkString(".")
+          ownerFullName.map(owner => s"$owner.$localOwner").orElse(Option(localOwner))
+        } else {
+          ownerFullName
+        }
+    }
+  }
+
+  private def splitConversionOperatorFunctionName(name: String): Option[(Option[String], String)] = {
+    val operatorIndex = name.indexOf("operator ")
+    Option.when(operatorIndex >= 0) {
+      val owner = name.take(operatorIndex).trim.stripSuffix("::").trim
+      val simpleName =
+        name.drop(operatorIndex).trim match {
+          case operatorName if operatorName.startsWith("operator ") =>
+            s"operator ${normalizeType(operatorName.stripPrefix("operator ").trim)}"
+          case operatorName => operatorName
+        }
+      Option(owner).filter(_.nonEmpty).map(normalizedQualifiedName) -> simpleName
     }
   }
 
