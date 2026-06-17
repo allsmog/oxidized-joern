@@ -1603,6 +1603,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  if (int x = seed(n); x) {
           |    n = x;
           |  }
+          |  if (int q = seed(n)) {
+          |    n = q;
+          |  }
           |  while (int w = seed(n)) {
           |    n = w;
           |    break;
@@ -1616,22 +1619,90 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |}
           |""".stripMargin, "Test0.cpp").withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      cpg.local.name.l should contain allElementsOf List("x", "w", "y")
+      cpg.local.name.l should contain allElementsOf List("x", "q", "w", "y")
       cpg.local.nameExact("x").typeFullName.l shouldBe List("int")
+      cpg.local.nameExact("q").typeFullName.l shouldBe List("int")
       cpg.local.nameExact("w").typeFullName.l shouldBe List("int")
       cpg.local.nameExact("y").typeFullName.l shouldBe List("int")
-      cpg.method.nameExact("use").ifBlock.condition.code.l shouldBe List("x != 0")
+      cpg.method.nameExact("use").ifBlock.condition.code.l shouldBe List("x != 0", "q != 0")
       cpg.method.nameExact("use").whileBlock.condition.code.l shouldBe List("w != 0")
       cpg.method.nameExact("use").controlStructure.controlStructureTypeExact(ControlStructureTypes.SWITCH).condition.code.l shouldBe
         List("y")
-      cpg.method.nameExact("use").call.nameExact("seed").methodFullName.l shouldBe List.fill(3)("seed:int(int)")
+      inside(cpg.method.nameExact("use").ifBlock.l) { case List(initStatementIf, conditionDeclarationIf) =>
+        initStatementIf.condition.ast.isLocal.name.l shouldBe Nil
+        initStatementIf.condition.ast.isCall.nameExact("seed").code.l shouldBe Nil
+        conditionDeclarationIf.condition.ast.isLocal.name.l shouldBe List("q")
+        conditionDeclarationIf.condition.ast.isCall.nameExact("seed").code.l shouldBe List("seed(n)")
+      }
+      inside(cpg.method.nameExact("use").whileBlock.l) { case List(whileBlock) =>
+        whileBlock.condition.ast.isLocal.name.l shouldBe List("w")
+        whileBlock.condition.ast.isCall.nameExact("seed").code.l shouldBe List("seed(n)")
+      }
+      inside(cpg.method.nameExact("use").controlStructure.controlStructureTypeExact(ControlStructureTypes.SWITCH).l) {
+        case List(switchBlock) =>
+          switchBlock.condition.ast.isLocal.name.l shouldBe Nil
+          switchBlock.condition.ast.isCall.nameExact("seed").code.l shouldBe Nil
+      }
+      cpg.method.nameExact("use").call.nameExact("seed").methodFullName.l shouldBe List.fill(4)("seed:int(int)")
       cpg.method.nameExact("use").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
         "x = seed(n)",
+        "q = seed(n)",
         "w = seed(n)",
         "y = seed(n)",
         "n = x",
+        "n = q",
         "n = w"
       )
+    }
+
+    "capture C++ while condition declaration destructor cleanup" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  ~Widget();
+          |  operator bool() const { return true; }
+          |};
+          |Widget make();
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Widget Core::make() {
+          |  Core::Widget widget;
+          |  return widget;
+          |}
+          |int conditionLifetime(int n) {
+          |  while (Core::Widget guard = Core::make()) {
+          |    if (n == 1) {
+          |      continue;
+          |    }
+          |    if (n == 2) {
+          |      break;
+          |    }
+          |    n = n - 1;
+          |  }
+          |  return n;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("conditionLifetime").whileBlock.l) { case List(whileBlock) =>
+        whileBlock.condition.ast.isLocal.name.l should contain("guard")
+        whileBlock.condition.ast.isCall.nameExact("make").code.l shouldBe List("Core::make()")
+        whileBlock.ast.isCall.nameExact("~Widget").code.l.sorted shouldBe
+          List("guard.~Widget()", "guard.~Widget()")
+      }
+      inside(cpg.method.nameExact("conditionLifetime").controlStructure.controlStructureType(ControlStructureTypes.IF).l) {
+        case List(continueIf, breakIf) =>
+          continueIf.ast.isCall.nameExact("~Widget").code.l shouldBe List("guard.~Widget()")
+          breakIf.ast.isCall.nameExact("~Widget").code.l shouldBe Nil
+      }
+      cpg.method.nameExact("conditionLifetime").call.nameExact("~Widget").code.l.sorted shouldBe
+        List("guard.~Widget()", "guard.~Widget()", "guard.~Widget()")
     }
 
     "capture counted loops, jumps, and indexed expressions from the Rust parser backend" in {
