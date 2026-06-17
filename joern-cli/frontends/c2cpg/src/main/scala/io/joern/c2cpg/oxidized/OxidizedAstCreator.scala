@@ -1102,7 +1102,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case structuredBinding: OxStructuredBinding =>
         astsForStructuredBinding(structuredBinding)
       case assignment: OxAssignment =>
-        Seq(assignmentExpressionAst(assignment)) ++ aggregateAssignmentExpressionAsts(assignment) ++
+        expressionAstsWithRecoveredAggregateAssignments(assignment) ++
           (heapConstructorAstsForExpressions(Seq(assignment)) ++ temporaryDestructorAstsForExpressions(Seq(assignment)))
       case ret: OxReturn =>
         val returnType = currentMethodReturnTypeFullName
@@ -1237,7 +1237,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           val conditionTemporaryCleanup = temporaryDestructorAstsForExpressions(forStmt.condition.toSeq)
           val conditionHeapConstructors = heapConstructorAstsForExpressions(forStmt.condition.toSeq)
           val updateAsts = forStmt.update.toSeq.flatMap { update =>
-            expressionAst(update) +:
+            expressionAstsWithRecoveredAggregateAssignments(update) ++
               (heapConstructorAstsForExpressions(Seq(update)) ++ temporaryDestructorAstsForExpressions(Seq(update)))
           }
           val preservedScopeDepth = localDestructorScopes.length
@@ -1307,7 +1307,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
               Seq(expressionAst(deleteExpression)) ++
               temporaryDestructorAstsForExpressions(Seq(deleteExpression.argument))
           case expression =>
-            expressionAst(expression) +:
+            expressionAstsWithRecoveredAggregateAssignments(expression) ++
               (heapConstructorAstsForExpressions(Seq(expression)) ++ temporaryDestructorAstsForExpressions(
                 Seq(expression)
               ))
@@ -2868,6 +2868,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
+  private def expressionAstsWithRecoveredAggregateAssignments(expression: OxExpression): Seq[Ast] = {
+    expressionAst(expression) +: aggregateAssignmentExpressionAsts(expression)
+  }
+
   private def assignmentExpressionAst(assignment: OxAssignment): Ast = {
     overloadedAssignmentOperatorAst(assignment).getOrElse {
       val left  = expressionAst(assignment.left)
@@ -2898,6 +2902,54 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case _ =>
         Seq.empty
     }
+  }
+
+  private def aggregateAssignmentExpressionAsts(expression: OxExpression): Seq[Ast] = {
+    val nested = expression match {
+      case OxBinary(_, _, _, left, right) =>
+        Seq(left, right).flatMap(aggregateAssignmentExpressionAsts)
+      case OxAssignment(_, _, _, left, right) =>
+        Seq(left, right).flatMap(aggregateAssignmentExpressionAsts)
+      case OxUnary(_, _, _, _, argument) =>
+        aggregateAssignmentExpressionAsts(argument)
+      case OxConditional(_, _, condition, consequence, alternative) =>
+        aggregateAssignmentExpressionAsts(condition) ++
+          consequence.toSeq.flatMap(aggregateAssignmentExpressionAsts) ++
+          aggregateAssignmentExpressionAsts(alternative)
+      case OxFold(_, _, _, left, right) =>
+        left.toSeq.flatMap(aggregateAssignmentExpressionAsts) ++ right.toSeq.flatMap(aggregateAssignmentExpressionAsts)
+      case OxPackExpansion(_, _, pattern) =>
+        aggregateAssignmentExpressionAsts(pattern)
+      case OxTypeOf(_, _, argument) =>
+        aggregateAssignmentExpressionAsts(argument)
+      case OxCast(_, _, _, value) =>
+        aggregateAssignmentExpressionAsts(value)
+      case OxSizeOf(_, _, value, _) =>
+        value.toSeq.flatMap(aggregateAssignmentExpressionAsts)
+      case OxNew(_, _, _, arguments, _) =>
+        arguments.flatMap(aggregateAssignmentExpressionAsts)
+      case OxDelete(_, _, argument) =>
+        aggregateAssignmentExpressionAsts(argument)
+      case _: OxLambda =>
+        Seq.empty
+      case OxCall(_, _, _, callee, arguments) =>
+        aggregateAssignmentExpressionAsts(callee) ++ arguments.flatMap(aggregateAssignmentExpressionAsts)
+      case OxFieldAccess(_, _, _, base) =>
+        aggregateAssignmentExpressionAsts(base)
+      case OxIndexAccess(_, _, base, index) =>
+        Seq(base, index).flatMap(aggregateAssignmentExpressionAsts)
+      case OxInitializerList(_, _, elements) =>
+        elements.flatMap(aggregateAssignmentExpressionAsts)
+      case OxDesignatedInitializer(_, _, designator, value) =>
+        Seq(designator, value).flatMap(aggregateAssignmentExpressionAsts)
+      case _: OxIdentifier | _: OxLiteral | _: OxDesignator =>
+        Seq.empty
+    }
+    val current = expression match {
+      case assignment: OxAssignment => aggregateAssignmentExpressionAsts(assignment)
+      case _                        => Seq.empty
+    }
+    current ++ nested
   }
 
   private def binaryOperandAsts(binary: OxBinary): Seq[Ast] = {
