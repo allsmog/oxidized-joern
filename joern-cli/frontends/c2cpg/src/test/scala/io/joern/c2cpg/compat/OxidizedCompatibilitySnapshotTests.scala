@@ -1768,10 +1768,32 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       cpg.literal.code.l should contain allElementsOf List("R\"(hello)\"", "\"a\" \"b\"", "42_km")
-      cpg.literal.codeExact("R\"(hello)\"").typeFullName.l shouldBe List(Defines.Any)
-      cpg.literal.codeExact("\"a\" \"b\"").typeFullName.l shouldBe List(Defines.Any)
+      cpg.literal.codeExact("R\"(hello)\"").typeFullName.l shouldBe List("char[6]")
+      cpg.literal.codeExact("\"a\" \"b\"").typeFullName.l shouldBe List("char[3]")
       cpg.literal.codeExact("42_km").typeFullName.l shouldBe List(Defines.Any)
       cpg.identifier.codeExact("42_km").l shouldBe Nil
+    }
+
+    "capture C++ UTF-8 string and character literals from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |char8_t utf8_str[] = u8"abcde";
+          |void chars() {
+          |  char x = u8'x';
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.local.nameExact("utf8_str").typeFullName.l shouldBe List("char8_t[6]")
+      inside(cpg.call.nameExact(Operators.assignment).codeExact("""utf8_str[] = u8"abcde"""").l) {
+        case List(assignmentCall) =>
+          assignmentCall.argument.isIdentifier.code.l shouldBe List("utf8_str[]")
+          assignmentCall.argument.isLiteral.code.l shouldBe List("""u8"abcde"""")
+      }
+      cpg.literal.codeExact("""u8"abcde"""").typeFullName.l shouldBe List("char[6]")
+      cpg.method.nameExact("chars").local.nameExact("x").typeFullName.l shouldBe List("char")
+      cpg.method.nameExact("chars").literal.codeExact("u8'x'").typeFullName.l shouldBe List("char")
     }
 
     "capture C++ offsetof expressions from the Rust parser backend" in {
@@ -2146,6 +2168,37 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "a = foo.foo(123)",
         """c = foo.foo("123")"""
       )
+    }
+
+    "capture C++20 consteval and constinit declarations from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |consteval int sqr(int n) {
+          |  return n * n;
+          |}
+          |
+          |constexpr const char* f(bool p) {
+          |  return p ? "constant initializer" : g();
+          |}
+          |
+          |void use() {
+          |  constexpr int r = sqr(100);
+          |  constinit const char *c = f(true);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("sqr").signature.l shouldBe List("int(int)")
+      cpg.method.nameExact("f").signature.l shouldBe List("char*(bool)")
+      inside(cpg.method.nameExact("use").local.nameExact("r", "c").l) { case List(rLocal, cLocal) =>
+        rLocal.typeFullName shouldBe "int"
+        rLocal.code shouldBe "constexpr int r"
+        cLocal.typeFullName shouldBe "char*"
+        cLocal.code shouldBe "const char *c"
+      }
+      cpg.method.nameExact("use").call.nameExact("sqr").code.l shouldBe List("sqr(100)")
+      cpg.method.nameExact("use").call.nameExact("f").code.l shouldBe List("f(true)")
     }
 
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {

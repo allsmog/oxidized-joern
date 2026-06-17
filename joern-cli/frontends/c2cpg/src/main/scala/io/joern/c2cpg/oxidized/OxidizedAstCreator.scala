@@ -520,7 +520,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def initializeGlobalScope(): Unit = {
     val globalEntries = document.declarations.collect { case global: OxGlobalVariableDecl =>
       val localCode = localCodeForGlobal(global)
-      val typeName  = registerType(normalizeType(global.typeName))
+      val typeName  = registerType(globalTypeFullName(global))
       val node      = localNode(OxOrigin(global).copy(code = localCode), global.name, localCode, typeName)
       global -> (typeName, node)
     }
@@ -535,15 +535,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val localCode = localCodeForGlobal(global)
     val scopeEntry = globalLocalEntries.getOrElse(
       global, {
-        val typeName = registerType(normalizeType(global.typeName))
+        val typeName = registerType(globalTypeFullName(global))
         ScopeEntry(typeName, this.localNode(origin.copy(code = localCode), global.name, localCode, typeName))
       }
     )
     val localAst = Ast(scopeEntry.declaration)
     global.initializer match {
       case Some(initializer) =>
-        val assignmentCode = s"${global.name} = ${initializer.code}"
-        val left           = identifierAstForScopeEntry(global.name, global.name, global.line, scopeEntry)
+        val leftCode       = globalAssignmentTargetCode(global)
+        val assignmentCode = s"$leftCode = ${initializer.code}"
+        val left           = identifierAstForScopeEntry(global.name, leftCode, global.line, scopeEntry)
         val assignment =
           assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
         Seq(localAst, assignment)
@@ -553,7 +554,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def localCodeForGlobal(global: OxGlobalVariableDecl): String = {
-    global.initializer.fold(global.code)(_ => global.code.takeWhile(_ != '=').trim)
+    stripConstinitSpecifier(global.initializer.fold(global.code)(_ => global.code.takeWhile(_ != '=').trim))
+  }
+
+  private def globalTypeFullName(global: OxGlobalVariableDecl): String = {
+    typeFullNameWithStringLiteralLength(global.typeName, global.initializer)
+  }
+
+  private def globalAssignmentTargetCode(global: OxGlobalVariableDecl): String = {
+    if (normalizeType(global.typeName).endsWith("[]")) s"${global.name}[]" else global.name
   }
 
   private def astsForFunction(
@@ -1076,15 +1085,20 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def localDeclarationCode(local: OxLocalDecl): String = {
-    local.initializer match {
+    val code = local.initializer match {
       case Some(_) if local.code.contains("=") => local.code.takeWhile(_ != '=').trim
       case Some(initializer)                   => local.code.stripSuffix(initializer.code).trim
       case None                                => local.code
     }
+    stripConstinitSpecifier(code)
+  }
+
+  private def stripConstinitSpecifier(code: String): String = {
+    code.trim.replaceFirst("""^constinit\s+""", "")
   }
 
   private def localTypeFullName(local: OxLocalDecl): String = {
-    val explicitType = normalizeType(local.typeName)
+    val explicitType = typeFullNameWithStringLiteralLength(local.typeName, local.initializer)
     local.initializer match {
       case Some(lambda: OxLambda) if explicitType == Defines.Auto => lambdaInfo(lambda).fullName
       case Some(initializer) if explicitType.startsWith(Defines.Auto) =>
@@ -1092,6 +1106,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName))
           .getOrElse(explicitType)
       case _ => explicitType
+    }
+  }
+
+  private def typeFullNameWithStringLiteralLength(typeName: String, initializer: Option[OxExpression]): String = {
+    val explicitType = normalizeType(typeName)
+    initializer match {
+      case Some(OxLiteral(value, _, _)) if explicitType.endsWith("[]") =>
+        stringLiteralElementCount(value)
+          .map(count => s"${explicitType.stripSuffix("[]")}[$count]")
+          .getOrElse(explicitType)
+      case _ =>
+        explicitType
     }
   }
 
@@ -2878,8 +2904,114 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     value.trim match {
       case "true" | "false" | "TRUE" | "FALSE"  => registerType("bool")
       case literal if isIntegerLiteral(literal) => registerType("int")
-      case _                                    => registerType(Defines.Any)
+      case literal if isCharLiteral(literal)    => registerType("char")
+      case literal =>
+        stringLiteralElementCount(literal)
+          .map(count => registerType(s"char[$count]"))
+          .getOrElse(registerType(Defines.Any))
     }
+  }
+
+  private def isCharLiteral(value: String): Boolean = {
+    val literal  = value.trim
+    val prefixes = Seq("u8", "u", "U", "L", "")
+    prefixes.exists { prefix =>
+      literal.startsWith(s"$prefix'") && literal.endsWith("'") && literal.length > prefix.length + 2
+    }
+  }
+
+  private def stringLiteralElementCount(value: String): Option[Int] = {
+    val literal      = value.trim
+    val tokenLengths = mutable.ArrayBuffer.empty[Int]
+    var index        = 0
+    while (index < literal.length) {
+      while (index < literal.length && literal.charAt(index).isWhitespace) index += 1
+      if (index < literal.length) {
+        parseStringLiteralToken(literal, index) match {
+          case Some((length, nextIndex)) =>
+            tokenLengths.addOne(length)
+            index = nextIndex
+          case None =>
+            return None
+        }
+      }
+    }
+    Option.when(tokenLengths.nonEmpty)(tokenLengths.sum + 1)
+  }
+
+  private def parseStringLiteralToken(literal: String, start: Int): Option[(Int, Int)] = {
+    val prefixes = Seq("u8R", "uR", "UR", "LR", "R", "u8", "u", "U", "L", "")
+    prefixes.collectFirst(Function.unlift { prefix =>
+      val tokenStart = start + prefix.length
+      Option
+        .when(literal.startsWith(prefix, start) && tokenStart < literal.length) {
+          if (prefix.endsWith("R")) parseRawStringLiteralToken(literal, tokenStart)
+          else parseRegularStringLiteralToken(literal, tokenStart)
+        }
+        .flatten
+    })
+  }
+
+  private def parseRawStringLiteralToken(literal: String, quoteIndex: Int): Option[(Int, Int)] = {
+    if (literal.charAt(quoteIndex) != '"') return None
+    val delimiterStart = quoteIndex + 1
+    val openParen      = literal.indexOf('(', delimiterStart)
+    if (openParen < 0) return None
+    val delimiter  = literal.substring(delimiterStart, openParen)
+    val close      = s")$delimiter\""
+    val closeIndex = literal.indexOf(close, openParen + 1)
+    Option.when(closeIndex >= 0) {
+      val contentLength = literal.substring(openParen + 1, closeIndex).codePointCount(0, closeIndex - openParen - 1)
+      (contentLength, closeIndex + close.length)
+    }
+  }
+
+  private def parseRegularStringLiteralToken(literal: String, quoteIndex: Int): Option[(Int, Int)] = {
+    if (literal.charAt(quoteIndex) != '"') return None
+    var index  = quoteIndex + 1
+    var length = 0
+    while (index < literal.length) {
+      literal.charAt(index) match {
+        case '"' =>
+          return Some((length, index + 1))
+        case '\\' if index + 1 < literal.length =>
+          index = escapedLiteralEnd(literal, index + 1)
+          length += 1
+        case _ =>
+          val codePoint = literal.codePointAt(index)
+          index += Character.charCount(codePoint)
+          length += 1
+      }
+    }
+    None
+  }
+
+  private def escapedLiteralEnd(literal: String, start: Int): Int = {
+    literal.charAt(start) match {
+      case 'x' =>
+        val end = firstIndexWhere(literal, start + 1)(ch => !ch.isDigit && !"abcdefABCDEF".contains(ch))
+        math.max(start + 1, end)
+      case 'u' =>
+        math.min(literal.length, start + 5)
+      case 'U' =>
+        math.min(literal.length, start + 9)
+      case ch if ch >= '0' && ch <= '7' =>
+        var index = start + 1
+        var seen  = 1
+        while (index < literal.length && seen < 3 && literal.charAt(index) >= '0' && literal.charAt(index) <= '7') {
+          index += 1
+          seen += 1
+        }
+        index
+      case _ =>
+        start + 1
+    }
+  }
+
+  private def firstIndexWhere(value: String, start: Int)(predicate: Char => Boolean): Int = {
+    var index = start
+    while (index < value.length && !predicate(value.charAt(index))) index += 1
+    index
   }
 
   private def isIntegerLiteral(value: String): Boolean = {
