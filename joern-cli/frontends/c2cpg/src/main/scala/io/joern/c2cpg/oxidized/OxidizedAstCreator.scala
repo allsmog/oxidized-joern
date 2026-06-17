@@ -95,9 +95,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private final case class AggregateAnonymousMemberItem(typeName: String, declaration: OxStructDecl)
       extends AggregateMemberItem
   private sealed trait AggregatePathSegment
-  private final case class AggregateFieldPathSegment(name: String)      extends AggregatePathSegment
-  private final case class AggregateIndexPathSegment(indexCode: String) extends AggregatePathSegment
+  private final case class AggregateFieldPathSegment(name: String) extends AggregatePathSegment
+  private final case class AggregateIndexPathSegment(indexCode: String, indexExpression: Option[OxExpression] = None)
+      extends AggregatePathSegment
   private final case class AggregateAssignmentRoot(name: String, line: Int, scopeEntry: Option[ScopeEntry])
+  private final case class AggregateAssignmentTarget(
+    root: AggregateAssignmentRoot,
+    rootTypeName: String,
+    targetTypeName: String,
+    fieldPathPrefix: Seq[AggregatePathSegment]
+  )
 
   private val usedTypes: mutable.Set[String]             = mutable.Set(Defines.Any, Defines.Void)
   private val temporaryIndices: mutable.Map[String, Int] = mutable.HashMap.empty
@@ -1729,7 +1736,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     fieldPath.foldLeft(Option(resolveAliasType(baseTypeFullName))) {
       case (baseType, AggregateFieldPathSegment(field)) =>
         baseType.flatMap(fieldTypeFullName(_, field))
-      case (baseType, AggregateIndexPathSegment(_)) =>
+      case (baseType, AggregateIndexPathSegment(_, _)) =>
         baseType.flatMap(arrayElementTypeFullName)
     }
   }
@@ -1768,14 +1775,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           registerType(fieldTypeName)
         )
         (accessAst, fieldCode, fieldTypeName)
-      case ((baseAst, baseCode, baseTypeName), AggregateIndexPathSegment(indexCode)) =>
+      case ((baseAst, baseCode, baseTypeName), AggregateIndexPathSegment(indexCode, indexExpression)) =>
         val indexAccessCode = s"$baseCode[$indexCode]"
         val elementTypeName = arrayElementTypeFullName(baseTypeName).getOrElse(Defines.Any)
+        val indexAst =
+          indexExpression.map(expressionAst).getOrElse(expressionAst(OxLiteral(indexCode, indexCode, line)))
         val accessAst = operatorCallAst(
           OxOrigin(indexAccessCode, Option(line)),
           indexAccessCode,
           Operators.indirectIndexAccess,
-          Seq(baseAst, expressionAst(OxLiteral(indexCode, indexCode, line))),
+          Seq(baseAst, indexAst),
           registerType(elementTypeName)
         )
         (accessAst, indexAccessCode, elementTypeName)
@@ -2891,17 +2900,61 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def aggregateAssignmentExpressionAsts(assignment: OxAssignment): Seq[Ast] = {
     assignment match {
-      case OxAssignment("=", _, _, target: OxIdentifier, initializer: OxInitializerList) =>
-        expressionTypeFullName(target).toSeq.flatMap { typeName =>
+      case OxAssignment("=", _, _, target, initializer: OxInitializerList) =>
+        aggregateAssignmentTarget(target).toSeq.flatMap { assignmentTarget =>
           aggregateInitializerAssignmentAsts(
-            AggregateAssignmentRoot(target.name, target.line, scope.get(target.name)),
+            assignmentTarget.root,
+            assignmentTarget.rootTypeName,
+            assignmentTarget.targetTypeName,
             initializer,
-            typeName
+            assignmentTarget.fieldPathPrefix
           )
         }
       case _ =>
         Seq.empty
     }
+  }
+
+  private def aggregateAssignmentTarget(target: OxExpression): Option[AggregateAssignmentTarget] = {
+    target match {
+      case identifier: OxIdentifier =>
+        expressionTypeFullName(identifier).map { typeName =>
+          AggregateAssignmentTarget(
+            AggregateAssignmentRoot(identifier.name, identifier.line, aggregateRootScopeEntry(identifier.name)),
+            typeName,
+            typeName,
+            Seq.empty
+          )
+        }
+      case OxFieldAccess(field, _, _, base) =>
+        aggregateAssignmentTarget(base).flatMap { baseTarget =>
+          Option
+            .unless(normalizeType(resolveAliasType(baseTarget.targetTypeName)).endsWith("*")) {
+              fieldTypeFullName(baseTarget.targetTypeName, field).map { fieldType =>
+                baseTarget.copy(
+                  targetTypeName = fieldType,
+                  fieldPathPrefix = baseTarget.fieldPathPrefix :+ AggregateFieldPathSegment(field)
+                )
+              }
+            }
+            .flatten
+        }
+      case OxIndexAccess(_, _, base, index) =>
+        aggregateAssignmentTarget(base).flatMap { baseTarget =>
+          arrayElementTypeFullName(baseTarget.targetTypeName).map { elementType =>
+            baseTarget.copy(
+              targetTypeName = elementType,
+              fieldPathPrefix = baseTarget.fieldPathPrefix :+ AggregateIndexPathSegment(index.code, Option(index))
+            )
+          }
+        }
+      case _ =>
+        None
+    }
+  }
+
+  private def aggregateRootScopeEntry(name: String): Option[ScopeEntry] = {
+    scope.get(name).orElse(globalScopeByName.get(name))
   }
 
   private def aggregateAssignmentExpressionAsts(expression: OxExpression): Seq[Ast] = {
