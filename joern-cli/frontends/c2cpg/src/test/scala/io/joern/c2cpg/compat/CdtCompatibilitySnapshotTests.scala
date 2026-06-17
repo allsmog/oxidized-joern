@@ -1,6 +1,7 @@
 package io.joern.c2cpg.compat
 
 import io.joern.c2cpg.{C2Cpg, Config}
+import io.joern.c2cpg.parser.ParserBackend
 import io.joern.c2cpg.testfixtures.C2CpgSuite
 import io.shiftleft.codepropertygraph.generated.Cpg
 import io.shiftleft.semanticcpg.language.*
@@ -180,12 +181,40 @@ class CdtCompatibilitySnapshotTests extends C2CpgSuite {
 
 }
 
+class BackendParitySnapshotTests extends C2CpgSuite {
+
+  "The C backend parity snapshot harness" should {
+
+    "compare normalized core C slices across CDT and oxidized" in {
+      val source =
+        """
+          |int add(int x, int y) {
+          |  int total = x + y;
+          |  return total;
+          |}
+          |
+          |int main() {
+          |  int result = add(1, 2);
+          |  return result;
+          |}
+          |""".stripMargin
+
+      val cdt = code(source, "Test0.c").withConfig(Config(parserBackend = ParserBackend.Cdt))
+      val oxidized = code(source, "Test0.c").withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      CompatibilitySnapshot.render(oxidized, includeReturns = true) shouldBe
+        CompatibilitySnapshot.render(cdt, includeReturns = true)
+    }
+  }
+
+}
+
 object CompatibilitySnapshot {
 
   private val MacTempPath  = """/var/folders/.+?/T/c2cpgCompatibilitySnapshot\d+/""".r
   private val UnixTempPath = """/tmp/c2cpgCompatibilitySnapshot\d+/""".r
 
-  def render(cpg: Cpg, typeNames: Seq[String] = Seq.empty): String = {
+  def render(cpg: Cpg, typeNames: Seq[String] = Seq.empty, includeReturns: Boolean = false): String = {
     val methods = cpg.method.nameNot("<global>").l.map { method =>
       line(
         "METHOD",
@@ -220,6 +249,14 @@ object CompatibilitySnapshot {
       )
     }
 
+    val returns =
+      if (!includeReturns) Seq.empty
+      else {
+        cpg.ret.l.map { ret =>
+          line("RETURN", statementCode(ret.code), ret.lineNumber.map(_.toString).getOrElse("?"))
+        }
+      }
+
     val calls = cpg.call.l.map { call =>
       line(
         "CALL",
@@ -230,12 +267,14 @@ object CompatibilitySnapshot {
       )
     }
 
-    Seq(
+    val sections = Seq(
       section("METHODS", methods),
       section("TYPES", typeDecls),
-      section("LOCALS", locals),
+      section("LOCALS", locals)
+    ) ++ Option.when(includeReturns)(section("RETURNS", returns)) ++ Seq(
       section("CALLS", calls)
-    ).mkString("\n")
+    )
+    sections.mkString("\n")
   }
 
   private def section(name: String, lines: Seq[String]): String = {
@@ -252,5 +291,7 @@ object CompatibilitySnapshot {
     val tempNormalized = UnixTempPath.replaceAllIn(MacTempPath.replaceAllIn(unixSeparators, "<tmp>/"), "<tmp>/")
     tempNormalized.replaceAll("\\s+", " ").trim
   }
+
+  private def statementCode(value: String): String = normalize(value).stripSuffix(";").trim
 
 }
