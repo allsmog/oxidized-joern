@@ -3883,6 +3883,70 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         )
     }
 
+    "capture C++ aggregate assignment initializers in control conditions from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |struct Cell {
+          |  int x;
+          |  int y;
+          |};
+          |struct Board {
+          |  Cell cell;
+          |  int z;
+          |  operator bool() const { return z != 0; }
+          |};
+          |void condition_assignments(int seed) {
+          |  Board check;
+          |  if (check = {{seed, 2}, 3}) {
+          |    check.z = check.z + 1;
+          |  }
+          |  while (check = {{4, seed}, 5}) {
+          |    break;
+          |  }
+          |  do {
+          |    check.z = check.z + 2;
+          |  } while (check = {{6, seed}, 7});
+          |  for (; check = {{8, seed}, 9};) {
+          |    break;
+          |  }
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("condition_assignments").local.nameExact("check").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("condition_assignments").call.nameExact(Operators.assignment).code.l should contain allElementsOf
+        List(
+          "check = {{seed, 2}, 3}",
+          "check.cell = {seed, 2}",
+          "check.cell.x = seed",
+          "check.cell.y = 2",
+          "check.z = 3",
+          "check = {{4, seed}, 5}",
+          "check.cell = {4, seed}",
+          "check.cell.x = 4",
+          "check.cell.y = seed",
+          "check.z = 5",
+          "check = {{6, seed}, 7}",
+          "check.cell = {6, seed}",
+          "check.cell.x = 6",
+          "check.cell.y = seed",
+          "check.z = 7",
+          "check = {{8, seed}, 9}",
+          "check.cell = {8, seed}",
+          "check.cell.x = 8",
+          "check.cell.y = seed",
+          "check.z = 9"
+        )
+      cpg.method.nameExact("condition_assignments").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
+        List(
+          "check.cell",
+          "check.cell.x",
+          "check.cell.y",
+          "check.z"
+        )
+    }
+
     "capture C++ aggregate assignment initializer subobject targets from the Rust parser backend" in {
       val cpg = code(
         """
