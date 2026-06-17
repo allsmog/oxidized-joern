@@ -1862,6 +1862,42 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++20 concept requires expressions from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |template <typename T>
+          |concept callable = requires (T f) { f(); };
+          |
+          |template <typename T>
+          |  requires requires (T x) { x + x; }
+          |T add(T a, T b) {
+          |  return a + b;
+          |}
+          |
+          |template <typename T>
+          |  requires callable<T>
+          |void f(T v);
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("callable").l shouldBe Nil
+      cpg.method.nameExact("add").signature.l shouldBe List("T(T,T)")
+      cpg.method.nameExact("f").external.signature.l shouldBe List("void(T)")
+      inside(cpg.method.nameExact("requires").l) { case List(requiresMethod) =>
+        requiresMethod.fullName shouldBe "requires:requires(T)"
+        requiresMethod.signature shouldBe "requires(T)"
+        requiresMethod.code shouldBe "requires"
+        requiresMethod.isExternal shouldBe true
+        requiresMethod.methodReturn.typeFullName shouldBe "requires"
+        inside(requiresMethod.parameter.l) { case List(parameter) =>
+          parameter.name shouldBe "f"
+          parameter.code shouldBe "T f"
+          parameter.typeFullName shouldBe "T"
+        }
+      }
+    }
+
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
       val cpg = code(
         """
