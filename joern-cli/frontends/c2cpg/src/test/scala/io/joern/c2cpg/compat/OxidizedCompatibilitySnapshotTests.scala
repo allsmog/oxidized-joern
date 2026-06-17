@@ -1804,6 +1804,41 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ trailing return types from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |auto f(int x) -> long { return x; }
+          |auto ptr(int *p) -> int* { return p; }
+          |auto value() -> decltype(1 + 2);
+          |struct Widget {
+          |  auto size() const -> int;
+          |};
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("f").l) { case List(fMethod) =>
+        fMethod.signature shouldBe "long(int)"
+        fMethod.methodReturn.typeFullName shouldBe "long"
+        fMethod.parameter.nameExact("x").typeFullName.l shouldBe List("int")
+      }
+      inside(cpg.method.nameExact("ptr").l) { case List(ptrMethod) =>
+        ptrMethod.signature shouldBe "int*(int*)"
+        ptrMethod.methodReturn.typeFullName shouldBe "int*"
+        ptrMethod.parameter.nameExact("p").typeFullName.l shouldBe List("int*")
+      }
+      inside(cpg.method.nameExact("value").l) { case List(valueMethod) =>
+        valueMethod.signature shouldBe "decltype(1 + 2)()"
+        valueMethod.methodReturn.typeFullName shouldBe "decltype(1 + 2)"
+        valueMethod.isExternal shouldBe true
+      }
+      inside(cpg.method.nameExact("size").l) { case List(sizeMethod) =>
+        sizeMethod.signature shouldBe "int()<const>"
+        sizeMethod.methodReturn.typeFullName shouldBe "int"
+        sizeMethod.isExternal shouldBe true
+      }
+    }
+
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
       val cpg = code(
         """
