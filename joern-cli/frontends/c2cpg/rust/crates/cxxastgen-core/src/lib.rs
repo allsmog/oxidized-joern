@@ -2218,6 +2218,7 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
             .map(|expr| statement_from_expression(node, expr, source))
             .into_iter()
             .collect(),
+        "attributed_statement" => parse_attributed_statement(node, source, symbols),
         "if_statement" => parse_if_statement(node, source, symbols)
             .into_iter()
             .collect(),
@@ -2385,6 +2386,44 @@ fn parse_catch_clause(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> 
         line: line(node),
         parameter,
         body,
+    }
+}
+
+fn parse_attributed_statement(
+    node: Node,
+    source: &[u8],
+    symbols: &mut MacroSymbols,
+) -> Vec<Statement> {
+    let Some(statement_node) = named_children(node).into_iter().last() else {
+        return Vec::new();
+    };
+    let attribute_prefix =
+        std::str::from_utf8(&source[node.start_byte()..statement_node.start_byte()])
+            .unwrap_or("")
+            .trim();
+    parse_statement(statement_node, source, symbols)
+        .into_iter()
+        .map(|statement| statement_with_attribute_prefix(statement, attribute_prefix))
+        .collect()
+}
+
+fn statement_with_attribute_prefix(statement: Statement, attribute_prefix: &str) -> Statement {
+    if attribute_prefix.is_empty() {
+        return statement;
+    }
+    match statement {
+        Statement::Case {
+            code,
+            line,
+            value,
+            body,
+        } => Statement::Case {
+            code: format!("{attribute_prefix} {code}"),
+            line,
+            value,
+            body,
+        },
+        _ => statement,
     }
 }
 
@@ -2697,8 +2736,46 @@ fn parse_switch_statement(
         code: statement_code(node, source),
         line: line(node),
         condition: parse_expression(condition, source),
-        body: parse_statement(body, source, symbols),
+        body: flatten_switch_cases(parse_statement(body, source, symbols)),
     })
+}
+
+fn flatten_switch_cases(statements: Vec<Statement>) -> Vec<Statement> {
+    let mut flattened = Vec::new();
+    for statement in statements {
+        flatten_switch_case_statement(statement, &mut flattened);
+    }
+    flattened
+}
+
+fn flatten_switch_case_statement(statement: Statement, flattened: &mut Vec<Statement>) {
+    match statement {
+        Statement::Case {
+            code,
+            line,
+            value,
+            body,
+        } => {
+            let mut case_body = Vec::new();
+            let mut nested_cases = Vec::new();
+            for child in body {
+                match child {
+                    nested @ Statement::Case { .. } => nested_cases.push(nested),
+                    other => case_body.push(other),
+                }
+            }
+            flattened.push(Statement::Case {
+                code,
+                line,
+                value,
+                body: case_body,
+            });
+            for nested in nested_cases {
+                flatten_switch_case_statement(nested, flattened);
+            }
+        }
+        other => flattened.push(other),
+    }
 }
 
 fn parse_case_statement(
@@ -7087,6 +7164,102 @@ mod tests {
             [Statement::Goto { label, .. }] if label == "retry"
         ));
         assert!(matches!(default_body.as_slice(), [Statement::Break { .. }]));
+    }
+
+    #[test]
+    fn parses_cpp_likely_and_unlikely_attributed_statements() {
+        let sample = r#"
+                void foo() {
+                  switch (n) {
+                    case 1:
+                      case1();
+                      break;
+                    [[likely]] case 2:
+                      case2();
+                      break;
+                  }
+                  if (random > 0) [[likely]] {
+                    likelyIf();
+                  }
+                  while (unlikely_truthy_condition) [[unlikely]] {
+                    unlikelyWhile();
+                  }
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("likely/unlikely attributed statement sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        let [Statement::Switch {
+            body: switch_body, ..
+        }, Statement::If {
+            condition,
+            then_body,
+            ..
+        }, Statement::While {
+            condition: while_condition,
+            body: while_body,
+            ..
+        }] = function.body.as_slice()
+        else {
+            panic!("expected switch, if, and while statements");
+        };
+
+        let [Statement::Case {
+            code: first_case,
+            body: first_case_body,
+            ..
+        }, Statement::Case {
+            code: likely_case,
+            body: likely_case_body,
+            ..
+        }] = switch_body.as_slice()
+        else {
+            panic!("expected plain and attributed cases");
+        };
+        assert_eq!(first_case, "case 1:");
+        assert_eq!(likely_case, "[[likely]] case 2:");
+        assert!(matches!(
+            first_case_body.as_slice(),
+            [
+                Statement::Expression {
+                    expression: Expression::Call { name, .. },
+                    ..
+                },
+                Statement::Break { .. }
+            ] if name == "case1"
+        ));
+        assert!(matches!(
+            likely_case_body.as_slice(),
+            [
+                Statement::Expression {
+                    expression: Expression::Call { name, .. },
+                    ..
+                },
+                Statement::Break { .. }
+            ] if name == "case2"
+        ));
+
+        assert_binary_operator(condition, ">");
+        assert!(matches!(
+            then_body.as_slice(),
+            [Statement::Expression {
+                expression: Expression::Call { name, .. },
+                ..
+            }] if name == "likelyIf"
+        ));
+        assert!(matches!(
+            while_condition,
+            Expression::Identifier { name, .. } if name == "unlikely_truthy_condition"
+        ));
+        assert!(matches!(
+            while_body.as_slice(),
+            [Statement::Expression {
+                expression: Expression::Call { name, .. },
+                ..
+            }] if name == "unlikelyWhile"
+        ));
     }
 
     #[test]
