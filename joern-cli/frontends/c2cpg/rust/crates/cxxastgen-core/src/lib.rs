@@ -2491,7 +2491,7 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
         "subscript_expression" => parse_subscript_expression(node, source),
         "assignment_expression" => parse_assignment_expression(node, source),
         "cast_expression" => parse_cast_expression(node, source),
-        "sizeof_expression" => parse_sizeof_expression(node, source),
+        "sizeof_expression" | "alignof_expression" => parse_sizeof_expression(node, source),
         "new_expression" => parse_new_expression(node, source),
         "delete_expression" => parse_delete_expression(node, source),
         "lambda_expression" => parse_lambda_expression(node, source),
@@ -6467,18 +6467,22 @@ mod tests {
         let sample = r#"
                 int score(int x) {
                   int y = (int)sizeof(x);
+                  int alignment = alignof(int);
                   y += x > 0 ? x : -x;
                   return y;
                 }
                 "#;
-        let declarations =
-            parse_declarations(sample, SourceLanguage::C).expect("expression sample should parse");
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("expression sample should parse");
         let Declaration::Function(function) = &declarations[0] else {
             panic!("expected function declaration");
         };
 
         let [Statement::LocalDecl {
             initializer: Some(initializer),
+            ..
+        }, Statement::LocalDecl {
+            initializer: Some(alignof_initializer),
             ..
         }, Statement::Assignment {
             operator, right, ..
@@ -6492,6 +6496,14 @@ mod tests {
             panic!("expected cast initializer");
         };
         assert!(matches!(value.as_ref(), Expression::SizeOf { .. }));
+        assert!(matches!(
+            alignof_initializer,
+            Expression::SizeOf {
+                value: None,
+                type_name: Some(type_name),
+                ..
+            } if type_name == "int"
+        ));
 
         let Expression::Conditional {
             condition,

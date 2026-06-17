@@ -1595,14 +1595,18 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       val cpg = code("""
           |int score(int x) {
           |  int y = (int)sizeof(x);
+          |  int alignment = alignof(int);
           |  y += x > 0 ? x : -x;
           |  return y;
           |}
           |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      cpg.call.nameExact(Operators.assignment).code.l shouldBe List("y = (int)sizeof(x)")
+      cpg.call.nameExact(Operators.assignment).code.l should contain theSameElementsAs List(
+        "y = (int)sizeof(x)",
+        "alignment = alignof(int)"
+      )
       cpg.call.nameExact(Operators.cast).code.l shouldBe List("(int)sizeof(x)")
-      cpg.call.nameExact(Operators.sizeOf).code.l shouldBe List("sizeof(x)")
+      cpg.call.nameExact(Operators.sizeOf).code.l should contain theSameElementsAs List("sizeof(x)", "alignof(int)")
       cpg.call.nameExact(Operators.assignmentPlus).code.l shouldBe List("y += x > 0 ? x : -x")
       cpg.call.nameExact(Operators.conditional).code.l shouldBe List("x > 0 ? x : -x")
       cpg.call.nameExact(Operators.greaterThan).code.l shouldBe List("x > 0")
