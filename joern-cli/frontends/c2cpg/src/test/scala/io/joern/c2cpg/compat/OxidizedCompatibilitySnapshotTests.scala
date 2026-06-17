@@ -2245,6 +2245,43 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.nameExact("f").code.l shouldBe List("f(true)")
     }
 
+    "infer C++17 class template argument deduction braced locals from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |template <typename T>
+          |struct container {
+          |  container(T t) {}
+          |  template <typename Iter>
+          |  container(Iter beg, Iter end);
+          |};
+          |
+          |template <typename Iter>
+          |container(Iter b, Iter e) -> container<typename std::iterator_traits<Iter>::value_type>;
+          |
+          |void use() {
+          |  std::mutex mtx;
+          |  auto lck = std::lock_guard{ mtx };
+          |  auto p = new std::pair{ 1.0, 2.0 };
+          |  container a{ 7 };
+          |  std::vector<double> values{ 1.0, 2.0, 3.0 };
+          |  auto b = container{ values.begin(), values.end() };
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").local.nameExact("lck").typeFullName.l shouldBe List("std.lock_guard")
+      cpg.method.nameExact("use").local.nameExact("p").typeFullName.l shouldBe List("std.pair*")
+      cpg.method.nameExact("use").local.nameExact("a").typeFullName.l shouldBe List("container")
+      cpg.method.nameExact("use").local.nameExact("b").typeFullName.l shouldBe List("container")
+
+      cpg.method.nameExact("use").call.codeExact("std::lock_guard{ mtx }").typeFullName.l shouldBe List(
+        "std.lock_guard"
+      )
+      cpg.method.nameExact("use").call.codeExact("container{ values.begin(), values.end() }").typeFullName.l shouldBe
+        List("container")
+    }
+
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
       val cpg = code(
         """
