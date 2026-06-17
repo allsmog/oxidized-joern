@@ -399,6 +399,11 @@ pub enum Expression {
         line: usize,
         pattern: Box<Expression>,
     },
+    TypeOf {
+        code: String,
+        line: usize,
+        argument: Box<Expression>,
+    },
     Cast {
         #[serde(rename = "typeName")]
         type_name: String,
@@ -2607,6 +2612,8 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
         "conditional_expression" => parse_conditional_expression(node, source),
         "fold_expression" => parse_fold_expression(node, source),
         "parameter_pack_expansion" => parse_parameter_pack_expansion(node, source),
+        "decltype" => parse_decltype_expression(node, source),
+        "qualified_identifier" => parse_qualified_identifier_expression(node, source),
         "call_expression" => parse_call_expression(node, source),
         "compound_literal_expression" => parse_compound_literal_expression(node, source),
         "field_expression" => parse_field_expression(node, source),
@@ -2829,6 +2836,37 @@ fn parse_parameter_pack_expansion(node: Node, source: &[u8]) -> Expression {
             pattern: Box::new(parse_expression(pattern, source)),
         })
         .unwrap_or_else(|| identifier_expression(node, source))
+}
+
+fn parse_decltype_expression(node: Node, source: &[u8]) -> Expression {
+    named_children(node)
+        .into_iter()
+        .find(|child| child.kind() != "auto")
+        .map(|argument| Expression::TypeOf {
+            code: node_text(node, source).trim().to_string(),
+            line: line(node),
+            argument: Box::new(parse_expression(argument, source)),
+        })
+        .unwrap_or_else(|| identifier_expression(node, source))
+}
+
+fn parse_qualified_identifier_expression(node: Node, source: &[u8]) -> Expression {
+    let scope = node.child_by_field_name("scope");
+    let name = node.child_by_field_name("name").or_else(|| {
+        named_children(node)
+            .into_iter()
+            .rev()
+            .find(|child| Some(*child) != scope)
+    });
+    match (scope, name) {
+        (Some(scope), Some(name)) if scope.kind() == "decltype" => Expression::FieldAccess {
+            field: node_text(name, source).trim().to_string(),
+            code: node_text(node, source).trim().to_string(),
+            line: line(node),
+            base: Box::new(parse_decltype_expression(scope, source)),
+        },
+        _ => identifier_expression(node, source),
+    }
 }
 
 fn parse_call_expression(node: Node, source: &[u8]) -> Expression {
@@ -5270,6 +5308,41 @@ mod tests {
             .expect("expected Widget::size declaration");
         assert_eq!(widget_size.return_type, "int");
         assert_eq!(widget_size.signature, "int()<const>");
+    }
+
+    #[test]
+    fn parses_cpp_decltype_qualified_field_access() {
+        let sample = r#"
+                void method() {
+                  int local = 1;
+                  constexpr bool is_std_array_v = decltype(local)::value;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("decltype qualified access sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        let Some(Statement::LocalDecl {
+            initializer:
+                Some(Expression::FieldAccess {
+                    field, code, base, ..
+                }),
+            ..
+        }) = function.body.get(1)
+        else {
+            panic!("expected decltype qualified field access initializer");
+        };
+        assert_eq!(field, "value");
+        assert_eq!(code, "decltype(local)::value");
+        let Expression::TypeOf { code, argument, .. } = base.as_ref() else {
+            panic!("expected decltype base to parse as typeOf");
+        };
+        assert_eq!(code, "decltype(local)");
+        assert!(matches!(
+            argument.as_ref(),
+            Expression::Identifier { name, code, .. } if name == "local" && code == "local"
+        ));
     }
 
     #[test]

@@ -194,6 +194,8 @@ case class OxFold(operator: String, code: String, line: Int, left: Option[OxExpr
 
 case class OxPackExpansion(code: String, line: Int, pattern: OxExpression) extends OxExpression
 
+case class OxTypeOf(code: String, line: Int, argument: OxExpression) extends OxExpression
+
 case class OxSizeOf(code: String, line: Int, value: Option[OxExpression], typeName: Option[String]) extends OxExpression
 
 case class OxNew(
@@ -548,6 +550,8 @@ object OxDocument {
         )
       case "packExpansion" =>
         OxPackExpansion(code = str(value, "code"), line = int(value, "line"), pattern = expression(value("pattern")))
+      case "typeOf" =>
+        OxTypeOf(code = str(value, "code"), line = int(value, "line"), argument = expression(value("argument")))
       case "sizeOf" =>
         OxSizeOf(
           code = str(value, "code"),
