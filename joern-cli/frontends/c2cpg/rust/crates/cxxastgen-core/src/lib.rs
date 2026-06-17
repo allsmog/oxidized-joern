@@ -6475,6 +6475,43 @@ mod tests {
     }
 
     #[test]
+    fn preserves_cpp_auto_pointer_and_reference_declarators() {
+        let sample = r#"
+                int refs(int x, int *ptr) {
+                  auto &ref = x;
+                  auto &&rref = static_cast<int>(x);
+                  auto *copied = ptr;
+                  auto *addressed = &x;
+                  return ref + rref + *copied + *addressed;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("auto declarator sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        let local_types = function
+            .body
+            .iter()
+            .filter_map(|statement| match statement {
+                Statement::LocalDecl {
+                    name, type_name, ..
+                } => Some((name.as_str(), type_name.as_str())),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            local_types,
+            vec![
+                ("ref", "auto&"),
+                ("rref", "auto&&"),
+                ("copied", "auto*"),
+                ("addressed", "auto*"),
+            ]
+        );
+    }
+
+    #[test]
     fn parses_cpp_structured_binding_declarations() {
         let sample = r#"
                 struct Pair {

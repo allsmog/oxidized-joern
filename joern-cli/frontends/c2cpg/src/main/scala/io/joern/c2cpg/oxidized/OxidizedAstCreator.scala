@@ -1023,11 +1023,27 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val explicitType = normalizeType(local.typeName)
     local.initializer match {
       case Some(lambda: OxLambda) if explicitType == Defines.Auto => lambdaInfo(lambda).fullName
-      case Some(initializer) if explicitType == Defines.Auto =>
+      case Some(initializer) if explicitType.startsWith(Defines.Auto) =>
         expressionTypeFullName(initializer)
-          .map(typeName => normalizeType(resolveAliasType(typeName)))
+          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName))
           .getOrElse(explicitType)
       case _ => explicitType
+    }
+  }
+
+  private def inferredAutoTypeFullName(explicitType: String, initializerType: String): Option[String] = {
+    val resolvedInitializerType = normalizeType(resolveAliasType(initializerType))
+    explicitType match {
+      case Defines.Auto =>
+        Some(resolvedInitializerType)
+      case "auto*" if resolvedInitializerType.endsWith("*") =>
+        Some(resolvedInitializerType)
+      case "auto&" =>
+        Some(s"${stripCxxReference(resolvedInitializerType)}&")
+      case "auto&&" =>
+        Some(s"${stripCxxReference(resolvedInitializerType)}&&")
+      case _ =>
+        None
     }
   }
 
@@ -2090,6 +2106,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         expressionTypeFullName(base).flatMap(typeName => fieldTypeFullName(typeName, field))
       case OxUnary("*", _, _, _, argument) =>
         expressionTypeFullName(argument).map(dereferencedTypeFullName)
+      case OxUnary("&", _, _, _, argument) =>
+        expressionTypeFullName(argument).map(typeName =>
+          s"${stripCxxReference(normalizeType(resolveAliasType(typeName)))}*"
+        )
       case OxCast(typeName, _, _, _) =>
         Option(resolveAliasType(typeName))
       case OxNew(typeName, _, _, _, _) =>

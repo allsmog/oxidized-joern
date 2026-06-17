@@ -1599,6 +1599,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  auto indexed = values[0];
           |  return literal + copied + casted + indexed;
           |}
+          |int inferRefs(int x, int *ptr) {
+          |  auto &ref = x;
+          |  auto &&rref = static_cast<int>(x);
+          |  auto *copiedPtr = ptr;
+          |  auto *addressedPtr = &x;
+          |  return ref + rref + *copiedPtr + *addressedPtr;
+          |}
           |""".stripMargin,
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
@@ -1608,6 +1615,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("infer").local.nameExact("casted").typeFullName.l shouldBe List("int")
       cpg.method.nameExact("infer").local.nameExact("pointer").typeFullName.l shouldBe List("int*")
       cpg.method.nameExact("infer").local.nameExact("indexed").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("inferRefs").local.nameExact("ref").typeFullName.l shouldBe List("int&")
+      cpg.method.nameExact("inferRefs").local.nameExact("rref").typeFullName.l shouldBe List("int&&")
+      cpg.method.nameExact("inferRefs").local.nameExact("copiedPtr").typeFullName.l shouldBe List("int*")
+      cpg.method.nameExact("inferRefs").local.nameExact("addressedPtr").typeFullName.l shouldBe List("int*")
+      cpg.method.nameExact("inferRefs").call.nameExact(Operators.addressOf).code.l shouldBe List("&x")
     }
 
     "capture C++ structured bindings from the Rust parser backend" in {
