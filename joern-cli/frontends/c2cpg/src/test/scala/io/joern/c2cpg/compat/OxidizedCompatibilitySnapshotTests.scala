@@ -1571,6 +1571,33 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.identifier.nameExact("value").refsTo.l shouldBe List(cpg.method.nameExact("sum").local.nameExact("value").head)
     }
 
+    "capture C++ range-based for loops with initializers from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |void each(int *list) {
+          |  for (auto v = list; auto& e : v) {
+          |    e += 1;
+          |  }
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("each").controlStructure.controlStructureType(ControlStructureTypes.FOR).l) {
+        case List(rangeFor) =>
+          rangeFor.condition.code.l shouldBe List("v")
+          rangeFor.astChildren.isLocal.name.l shouldBe List("v", "e")
+      }
+      cpg.method.nameExact("each").local.nameExact("v").typeFullName.l shouldBe List("int*")
+      cpg.method.nameExact("each").local.nameExact("e").typeFullName.l shouldBe List("auto&")
+      cpg.call.nameExact(Operators.assignment).code.l shouldBe List("v = list")
+      cpg.call.nameExact(Operators.assignmentPlus).code.l shouldBe List("e += 1")
+      cpg.identifier.nameExact("list").refsTo.l shouldBe
+        List(cpg.method.nameExact("each").parameter.nameExact("list").head)
+      cpg.identifier.nameExact("v").refsTo.l should contain(cpg.method.nameExact("each").local.nameExact("v").head)
+      cpg.identifier.nameExact("e").refsTo.l should contain(cpg.method.nameExact("each").local.nameExact("e").head)
+    }
+
     "capture C++ range-based for loops with structured bindings from the Rust parser backend" in {
       val cpg = code(
         """
