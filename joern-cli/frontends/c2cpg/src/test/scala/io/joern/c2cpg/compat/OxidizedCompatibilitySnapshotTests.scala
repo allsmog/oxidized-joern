@@ -1309,6 +1309,50 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("left + right")
     }
 
+    "model C++ overloaded assignment aggregate temporary lifetimes" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  Widget operator=(const Widget& other) { return Widget(); }
+          |  ~Widget();
+          |};
+          |Widget operator+=(Widget& left, const Widget& right) { return Widget(); }
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int assignStmt(Core::Widget& left, Core::Widget& right) {
+          |  left = right;
+          |  return 0;
+          |}
+          |int plusStmt(Core::Widget& left, Core::Widget& right) {
+          |  left += right;
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val assignmentTemporaryDestructor = "(left = right).~Widget()"
+      val compoundTemporaryDestructor   = "(left += right).~Widget()"
+      cpg.method.nameExact("assignStmt").call.nameExact("~Widget").code.l shouldBe
+        List(assignmentTemporaryDestructor)
+      cpg.method.nameExact("plusStmt").call.nameExact("~Widget").code.l shouldBe List(compoundTemporaryDestructor)
+      cpg.method.nameExact("assignStmt").call.nameExact("operator=").codeExact("left = right").argument.code.l shouldBe
+        List("left", "right")
+      cpg.method.nameExact("assignStmt").call.nameExact(Operators.assignment).codeExact("left = right").l shouldBe Nil
+      cpg.method.nameExact("plusStmt").call.nameExact("operator+=").codeExact("left += right").argument.code.l shouldBe
+        List("left", "right")
+      cpg.method.nameExact("plusStmt").call.nameExact(Operators.assignmentPlus).codeExact("left += right").l shouldBe Nil
+      cpg.method.nameExact("assignStmt").call.nameExact("operator=").code.l shouldBe
+        List("left = right")
+    }
+
     "model C++ overloaded index aggregate temporary lifetimes" in {
       val cpg = code(
         """

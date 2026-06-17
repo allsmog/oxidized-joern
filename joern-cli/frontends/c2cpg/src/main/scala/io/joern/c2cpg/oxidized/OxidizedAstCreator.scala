@@ -1047,7 +1047,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           }
         assignmentAst_ +:
           (heapConstructorAstsForExpressions(Seq(assignment.left, assignment.right)) ++
-            temporaryDestructorAstsForExpressions(Seq(assignment.left, assignment.right)))
+            temporaryDestructorAstsForAssignment(assignment))
       case ret: OxReturn =>
         heapConstructorAstsForExpressions(ret.expression.toSeq) ++ temporaryDestructorAstsForReturnExpression(
           ret.expression
@@ -1744,6 +1744,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .map(temporaryDestructorAst)
   }
 
+  private def temporaryDestructorAstsForAssignment(assignment: OxAssignment): Seq[Ast] = {
+    val nested =
+      Seq(assignment.left, assignment.right).flatMap(expression => temporaryDestructorsForExpression(expression))
+    val current = overloadedAssignmentTemporaryTypeFullName(assignment)
+      .flatMap(destructorEntryForType)
+      .map(entry => TemporaryDestructor(temporaryDestructorCode(assignment, entry), assignment.line, entry))
+      .toSeq
+    (nested ++ current).reverse.map(temporaryDestructorAst)
+  }
+
   private def temporaryDestructorAstsForReturnExpression(expression: Option[OxExpression]): Seq[Ast] = {
     expression.toSeq
       .flatMap(expression =>
@@ -1897,6 +1907,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .flatMap(returnedObjectTypeFullName)
   }
 
+  private def overloadedAssignmentTemporaryTypeFullName(assignment: OxAssignment): Option[String] = {
+    overloadedAssignmentOperatorTarget(assignment)
+      .map(target => normalizeType(resolveAliasType(target.entry.function.returnType)))
+      .flatMap(returnedObjectTypeFullName)
+  }
+
   private def overloadedUnaryTemporaryTypeFullName(unary: OxUnary): Option[String] = {
     overloadedUnaryOperatorTarget(unary)
       .map(target => normalizeType(resolveAliasType(target.entry.function.returnType)))
@@ -1911,6 +1927,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def temporaryDestructorCode(expression: OxExpression, entry: FunctionEntry): String = {
     s"${temporaryDestructorReceiverCode(expression)}.${entry.simpleName}()"
+  }
+
+  private def temporaryDestructorCode(assignment: OxAssignment, entry: FunctionEntry): String = {
+    s"(${assignment.code}).${entry.simpleName}()"
   }
 
   private def temporaryDestructorReceiverCode(expression: OxExpression): String = {
@@ -2767,8 +2787,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def overloadedAssignmentOperatorTarget(assignment: OxAssignment): Option[ResolvedOperatorCall] = {
     cxxOperatorFunctionName(assignment.operator).flatMap { operatorName =>
-      selectFunctionEntry(memberFunctionCandidates(assignment.left, operatorName), Some(Seq(assignment.right)))
-        .map(entry => ResolvedOperatorCall(entry, operatorName, Option(assignment.left), Seq(assignment.right)))
+      val memberTarget =
+        selectFunctionEntry(memberFunctionCandidates(assignment.left, operatorName), Some(Seq(assignment.right)))
+          .map(entry => ResolvedOperatorCall(entry, operatorName, Option(assignment.left), Seq(assignment.right)))
+      memberTarget.orElse {
+        Option
+          .when(assignment.operator != "=")(freeFunctionCandidatesByName(operatorName))
+          .flatMap(candidates => selectFunctionEntry(candidates, Some(Seq(assignment.left, assignment.right))))
+          .map(entry => ResolvedOperatorCall(entry, operatorName, None, Seq(assignment.left, assignment.right)))
+      }
     }
   }
 
