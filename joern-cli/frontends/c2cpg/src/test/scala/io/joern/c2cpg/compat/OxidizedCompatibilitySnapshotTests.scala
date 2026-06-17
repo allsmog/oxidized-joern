@@ -1652,6 +1652,26 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.call.nameExact(Operators.notEquals).code.l shouldBe List("ptr != nullptr")
     }
 
+    "capture C++ extended string literals from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |const char *strings() {
+          |  const char *raw = R"(hello)";
+          |  const char *joined = "a" "b";
+          |  auto tagged = 42_km;
+          |  return raw;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.literal.code.l should contain allElementsOf List("R\"(hello)\"", "\"a\" \"b\"", "42_km")
+      cpg.literal.codeExact("R\"(hello)\"").typeFullName.l shouldBe List(Defines.Any)
+      cpg.literal.codeExact("\"a\" \"b\"").typeFullName.l shouldBe List(Defines.Any)
+      cpg.literal.codeExact("42_km").typeFullName.l shouldBe List(Defines.Any)
+      cpg.identifier.codeExact("42_km").l shouldBe Nil
+    }
+
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
       val cpg = code(
         """

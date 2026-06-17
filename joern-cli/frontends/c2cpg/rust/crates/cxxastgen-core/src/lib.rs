@@ -2467,13 +2467,19 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
             code: node_text(node, source).to_string(),
             line: line(node),
         },
-        "number_literal" | "char_literal" | "string_literal" | "true" | "false" | "null" => {
-            Expression::Literal {
-                value: node_text(node, source).to_string(),
-                code: node_text(node, source).to_string(),
-                line: line(node),
-            }
-        }
+        "number_literal"
+        | "char_literal"
+        | "string_literal"
+        | "raw_string_literal"
+        | "concatenated_string"
+        | "user_defined_literal"
+        | "true"
+        | "false"
+        | "null" => Expression::Literal {
+            value: node_text(node, source).to_string(),
+            code: node_text(node, source).to_string(),
+            line: line(node),
+        },
         "binary_expression" => parse_binary_expression(node, source),
         "unary_expression" | "update_expression" | "pointer_expression" => {
             parse_unary_expression(node, source)
@@ -2531,11 +2537,22 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
 }
 
 fn literal_text_value(value: &str) -> bool {
+    let trimmed = value.trim();
     integer_literal_value(value).is_some()
         || matches!(
-            value.trim(),
+            trimmed,
             "true" | "false" | "TRUE" | "FALSE" | "nullptr" | "NULL"
         )
+        || string_literal_text_value(trimmed)
+}
+
+fn string_literal_text_value(value: &str) -> bool {
+    [
+        "\"", "u8\"", "u\"", "U\"", "L\"", "R\"", "u8R\"", "uR\"", "UR\"", "LR\"", "'", "u'", "U'",
+        "L'",
+    ]
+    .iter()
+    .any(|prefix| value.starts_with(prefix))
 }
 
 fn parse_call_text(code: &str, line: usize) -> Option<(String, Vec<Expression>)> {
@@ -6588,6 +6605,43 @@ mod tests {
             right.as_ref(),
             Expression::Literal { value, .. } if value == "nullptr"
         ));
+    }
+
+    #[test]
+    fn parses_cpp_extended_string_literals() {
+        let sample = r#"
+                const char *strings() {
+                  const char *raw = R"(hello)";
+                  const char *joined = "a" "b";
+                  auto tagged = 42_km;
+                  return raw;
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("extended string literal sample should parse");
+        let Declaration::Function(function) = &declarations[0] else {
+            panic!("expected function declaration");
+        };
+        let literal_initializers = function
+            .body
+            .iter()
+            .filter_map(|statement| match statement {
+                Statement::LocalDecl {
+                    name,
+                    initializer: Some(Expression::Literal { value, .. }),
+                    ..
+                } => Some((name.as_str(), value.as_str())),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            literal_initializers,
+            vec![
+                ("raw", "R\"(hello)\""),
+                ("joined", "\"a\" \"b\""),
+                ("tagged", "42_km"),
+            ]
+        );
     }
 
     #[test]
