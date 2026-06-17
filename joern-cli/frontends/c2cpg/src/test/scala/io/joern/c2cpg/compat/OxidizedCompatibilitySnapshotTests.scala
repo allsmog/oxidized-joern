@@ -1389,6 +1389,78 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("left = right")
     }
 
+    "model C++ overloaded call aggregate temporary lifetimes" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(const Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |class Maker {
+          |public:
+          |  Maker();
+          |  Maker(const Maker& other) {}
+          |  Maker(Maker&& other) {}
+          |  Widget operator()(int seed) const { return Widget(); }
+          |  ~Maker();
+          |};
+          |Maker makeMaker();
+          |int consume(Widget&& widget) { return 1; }
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Maker::Maker() {}
+          |Core::Maker::~Maker() {}
+          |Core::Widget callReturn(Core::Maker& make) {
+          |  return make(1);
+          |}
+          |int callRef(Core::Maker& make) {
+          |  const Core::Widget& held = make(2);
+          |  return 0;
+          |}
+          |int callUse(Core::Maker& make) {
+          |  Core::consume(make(3));
+          |  return 0;
+          |}
+          |int callPrvalue() {
+          |  Core::consume(Core::makeMaker()(4));
+          |  return 0;
+          |}
+          |Core::Widget callPrvalueReturn() {
+          |  return Core::makeMaker()(5);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("callReturn").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("callRef").call.nameExact("~Widget").code.l shouldBe List("make(2).~Widget()")
+      cpg.method.nameExact("callUse").call.nameExact("~Widget").code.l shouldBe List("make(3).~Widget()")
+      cpg.method.nameExact("callPrvalue").call.nameExact("~Widget").code.l shouldBe
+        List("Core::makeMaker()(4).~Widget()")
+      cpg.method.nameExact("callPrvalue").call.nameExact("~Maker").code.l shouldBe
+        List("Core::makeMaker().~Maker()")
+      cpg.method.nameExact("callPrvalueReturn").call.nameExact("~Widget").code.l shouldBe Nil
+      cpg.method.nameExact("callPrvalueReturn").call.nameExact("~Maker").code.l shouldBe
+        List("Core::makeMaker().~Maker()")
+      cpg.method.nameExact("callReturn").ast.isReturn.astChildren.isCall.nameExact("operator()").code.l shouldBe
+        List("make(1)")
+      cpg.method.nameExact("callUse").call.nameExact("operator()").codeExact("make(3)").argument.code.l shouldBe
+        List("make", "3")
+      cpg.method
+        .nameExact("callPrvalue")
+        .call
+        .nameExact("operator()")
+        .codeExact("Core::makeMaker()(4)")
+        .argument
+        .code
+        .l shouldBe List("Core::makeMaker()", "4")
+    }
+
     "model C++ overloaded index aggregate temporary lifetimes" in {
       val cpg = code(
         """
