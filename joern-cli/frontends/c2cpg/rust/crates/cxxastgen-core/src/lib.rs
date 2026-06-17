@@ -7481,6 +7481,68 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_utf8_literals_and_const_keywords() {
+        let sample = r#"
+                char8_t utf8_str[] = u8"abcde";
+                consteval int sqr(int n) { return n * n; }
+                void chars() {
+                  char x = u8'x';
+                  constinit const char *c = "ready";
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("UTF-8 literal and const keyword sample should parse");
+        let global = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::GlobalVariable(global) if global.name == "utf8_str" => Some(global),
+                _ => None,
+            })
+            .expect("expected utf8_str global");
+        assert_eq!(global.type_name, "char8_t[]");
+        assert!(matches!(
+            global.initializer.as_ref(),
+            Some(Expression::Literal { value, .. }) if value == "u8\"abcde\""
+        ));
+
+        let sqr = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "sqr" => Some(function),
+                _ => None,
+            })
+            .expect("expected consteval function");
+        assert_eq!(sqr.return_type, "int");
+        assert_eq!(sqr.signature, "int(int)");
+
+        let chars = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "chars" => Some(function),
+                _ => None,
+            })
+            .expect("expected chars function");
+        let [Statement::LocalDecl {
+            name: x_name,
+            initializer: Some(Expression::Literal { value: x_value, .. }),
+            ..
+        }, Statement::LocalDecl {
+            name: c_name,
+            type_name: c_type,
+            code: c_code,
+            ..
+        }] = chars.body.as_slice()
+        else {
+            panic!("expected UTF-8 char local and constinit local");
+        };
+        assert_eq!(x_name, "x");
+        assert_eq!(x_value, "u8'x'");
+        assert_eq!(c_name, "c");
+        assert_eq!(c_type, "char*");
+        assert_eq!(c_code, "constinit const char *c = \"ready\"");
+    }
+
+    #[test]
     fn parses_cpp_offsetof_expressions() {
         let sample = r#"
                 struct Pair {
