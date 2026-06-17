@@ -1987,7 +1987,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def isPointerCall(call: OxCall): Boolean = {
     call.callee match {
       case _: OxFieldAccess             => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
-      case OxUnary("*", _, _, _, _)     => true
+      case OxUnary("*", _, _, _, _)     => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
       case _: OxUnary                   => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
       case _: OxIdentifier | _: OxCast  => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
       case _: OxCall | _: OxIndexAccess => expressionTypeFullName(call.callee).exists(isFunctionPointerType)
@@ -2029,7 +2029,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case OxFieldAccess(field, _, _, base) =>
         expressionTypeFullName(base).flatMap(typeName => fieldTypeFullName(typeName, field))
       case OxUnary("*", _, _, _, argument) =>
-        expressionTypeFullName(argument)
+        expressionTypeFullName(argument).map(dereferencedTypeFullName)
       case OxCast(typeName, _, _, _) =>
         Option(resolveAliasType(typeName))
       case OxNew(typeName, _, _, _, _) =>
@@ -2060,6 +2060,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case (_, Some("int"))                           => Some("int")
       case _                                          => None
     }
+  }
+
+  private def dereferencedTypeFullName(typeFullName: String): String = {
+    val normalized = normalizeType(resolveAliasType(typeFullName))
+    if (isFunctionPointerType(normalized)) normalized
+    else if (normalized.endsWith("*")) normalized.stripSuffix("*")
+    else normalized
   }
 
   private def fieldTypeFullName(baseTypeFullName: String, field: String): Option[String] = {

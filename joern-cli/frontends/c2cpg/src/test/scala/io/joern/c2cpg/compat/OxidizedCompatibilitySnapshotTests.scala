@@ -417,6 +417,51 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ callable object references and pointer dereference calls" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Invoker {
+          |public:
+          |  int operator()(int delta) const { return delta + 1; }
+          |};
+          |}
+          |int use(Core::Invoker& ref, Core::Invoker* ptr) {
+          |  Core::Invoker local;
+          |  return ref(1) + (*ptr)(2) + local(3);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").parameter.nameExact("ref").typeFullName.l shouldBe List("Core.Invoker&")
+      cpg.method.nameExact("use").parameter.nameExact("ptr").typeFullName.l shouldBe List("Core.Invoker*")
+      cpg.method.nameExact("use").local.nameExact("local").typeFullName.l shouldBe List("Core.Invoker")
+
+      inside(cpg.method.nameExact("use").call.nameExact("operator()").codeExact("ref(1)").l) {
+        case List(operatorCall) =>
+          operatorCall.methodFullName shouldBe "Core.Invoker.operator():int(int)<const>"
+          operatorCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+          operatorCall.typeFullName shouldBe "int"
+          operatorCall.argument.code.l shouldBe List("ref", "1")
+      }
+      inside(cpg.method.nameExact("use").call.nameExact("operator()").codeExact("(*ptr)(2)").l) {
+        case List(operatorCall) =>
+          operatorCall.methodFullName shouldBe "Core.Invoker.operator():int(int)<const>"
+          operatorCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+          operatorCall.typeFullName shouldBe "int"
+          operatorCall.argument.code.l shouldBe List("*ptr", "2")
+      }
+      inside(cpg.method.nameExact("use").call.nameExact("operator()").codeExact("local(3)").l) {
+        case List(operatorCall) =>
+          operatorCall.methodFullName shouldBe "Core.Invoker.operator():int(int)<const>"
+          operatorCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+          operatorCall.typeFullName shouldBe "int"
+          operatorCall.argument.code.l shouldBe List("local", "3")
+      }
+      cpg.method.nameExact("use").call.nameExact(Defines.OperatorPointerCall).codeExact("(*ptr)(2)").l shouldBe Nil
+    }
+
     "capture C++ template declarations and instantiated receivers" in {
       val cpg = code(
         """

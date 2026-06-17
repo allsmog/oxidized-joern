@@ -4341,6 +4341,64 @@ mod tests {
     }
 
     #[test]
+    fn parses_cpp_callable_object_reference_and_pointer_calls() {
+        let sample = r#"
+                namespace Core {
+                class Invoker {
+                public:
+                  int operator()(int delta) const { return delta + 1; }
+                };
+                }
+                int use(Core::Invoker& ref, Core::Invoker* ptr) {
+                  Core::Invoker local;
+                  return ref(1) + (*ptr)(2) + local(3);
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("callable reference and pointer sample should parse");
+        let function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        assert_eq!(function.parameters[0].type_name, "Core::Invoker&");
+        assert_eq!(function.parameters[1].type_name, "Core::Invoker*");
+        let [Statement::LocalDecl {
+            name: local_name,
+            type_name: local_type,
+            ..
+        }, Statement::Return {
+            expression: Some(return_expression),
+            ..
+        }] = function.body.as_slice()
+        else {
+            panic!("expected local callable followed by return");
+        };
+        assert_eq!(local_name, "local");
+        assert_eq!(local_type, "Core::Invoker");
+        let call_names = collect_call_names(return_expression);
+        assert_eq!(call_names, vec!["ref", "(*ptr)", "local"]);
+        let dereferenced_call = find_call_by_name(return_expression, "(*ptr)")
+            .expect("expected pointer-dereferenced callable call");
+        assert!(matches!(
+            dereferenced_call,
+            Expression::Call {
+                callee,
+                ..
+            } if matches!(
+                callee.as_ref(),
+                Expression::Unary {
+                    operator,
+                    argument,
+                    ..
+                } if operator == "*" && matches!(argument.as_ref(), Expression::Identifier { name, .. } if name == "ptr")
+            )
+        ));
+    }
+
+    #[test]
     fn parses_cpp_rvalue_reference_constructors() {
         let sample = r#"
                 namespace Core {
@@ -6476,6 +6534,79 @@ mod tests {
                 calls
             }
             _ => Vec::new(),
+        }
+    }
+
+    fn find_call_by_name<'a>(
+        expression: &'a Expression,
+        expected_name: &str,
+    ) -> Option<&'a Expression> {
+        match expression {
+            Expression::Call {
+                name,
+                callee,
+                arguments,
+                ..
+            } => {
+                if name == expected_name {
+                    Some(expression)
+                } else {
+                    find_call_by_name(callee, expected_name).or_else(|| {
+                        arguments
+                            .iter()
+                            .find_map(|argument| find_call_by_name(argument, expected_name))
+                    })
+                }
+            }
+            Expression::Binary { left, right, .. } => find_call_by_name(left, expected_name)
+                .or_else(|| find_call_by_name(right, expected_name)),
+            Expression::Conditional {
+                condition,
+                consequence,
+                alternative,
+                ..
+            } => find_call_by_name(condition, expected_name)
+                .or_else(|| {
+                    consequence
+                        .as_deref()
+                        .and_then(|consequence| find_call_by_name(consequence, expected_name))
+                })
+                .or_else(|| find_call_by_name(alternative, expected_name)),
+            Expression::Unary { argument, .. }
+            | Expression::Cast {
+                value: argument, ..
+            }
+            | Expression::Delete { argument, .. }
+            | Expression::FieldAccess { base: argument, .. } => {
+                find_call_by_name(argument, expected_name)
+            }
+            Expression::SizeOf { value, .. } => value
+                .as_deref()
+                .and_then(|value| find_call_by_name(value, expected_name)),
+            Expression::New { arguments, .. }
+            | Expression::InitializerList {
+                elements: arguments,
+                ..
+            } => arguments
+                .iter()
+                .find_map(|argument| find_call_by_name(argument, expected_name)),
+            Expression::IndexAccess { base, index, .. } => find_call_by_name(base, expected_name)
+                .or_else(|| find_call_by_name(index, expected_name)),
+            Expression::DesignatedInitializer {
+                designator, value, ..
+            } => find_call_by_name(designator, expected_name)
+                .or_else(|| find_call_by_name(value, expected_name)),
+            Expression::Lambda { body, .. } => body.iter().find_map(|statement| match statement {
+                Statement::Return {
+                    expression: Some(expression),
+                    ..
+                }
+                | Statement::Expression { expression, .. } => {
+                    find_call_by_name(expression, expected_name)
+                }
+                _ => None,
+            }),
+            _ => None,
         }
     }
 
