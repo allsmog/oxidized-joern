@@ -1759,6 +1759,51 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "capture C++ classic varargs from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |int foo(const char *a, ...){ return 0; }
+          |int bar(const char *a...){ return 0; }
+          |
+          |void main() {
+          |  foo("a", "b", "c");
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("foo").l) { case List(fooMethod) =>
+        fooMethod.signature shouldBe "int(char*,...)"
+        inside(fooMethod.parameter.l) { case List(a, ellipsis) =>
+          a.name shouldBe "a"
+          a.code shouldBe "const char *a"
+          a.typeFullName shouldBe "char*"
+          a.isVariadic shouldBe false
+          ellipsis.name shouldBe "<param>2"
+          ellipsis.code shouldBe "<param>2..."
+          ellipsis.typeFullName shouldBe "char*"
+          ellipsis.isVariadic shouldBe true
+        }
+      }
+      inside(cpg.method.nameExact("bar").l) { case List(barMethod) =>
+        barMethod.signature shouldBe "int(char*,...)"
+        inside(barMethod.parameter.l) { case List(a, ellipsis) =>
+          a.name shouldBe "a"
+          a.code shouldBe "const char *a"
+          a.typeFullName shouldBe "char*"
+          a.isVariadic shouldBe false
+          ellipsis.name shouldBe "<param>2"
+          ellipsis.code shouldBe "<param>2..."
+          ellipsis.typeFullName shouldBe "char*"
+          ellipsis.isVariadic shouldBe true
+        }
+      }
+      inside(cpg.call.nameExact("foo").l) { case List(fooCall) =>
+        fooCall.methodFullName shouldBe "foo"
+        fooCall.signature shouldBe "int(char*,...)"
+      }
+    }
+
     "infer C++ auto local types from initializer expressions in the Rust parser backend" in {
       val cpg = code(
         """

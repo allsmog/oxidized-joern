@@ -1951,7 +1951,21 @@ fn function_declarator_node(node: Node) -> Option<Node> {
 }
 
 fn parse_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
-    named_children(node)
+    parse_parameters_with_varargs(node, source, true)
+}
+
+fn parse_parameters_without_varargs(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
+    parse_parameters_with_varargs(node, source, false)
+}
+
+fn parse_parameters_with_varargs(
+    node: Node,
+    source: &[u8],
+    include_varargs: bool,
+) -> Vec<ParameterDecl> {
+    let mut parameters = Vec::new();
+    let mut has_classic_varargs_parameter = false;
+    for (index, parameter) in named_children(node)
         .into_iter()
         .filter(|child| {
             matches!(
@@ -1960,27 +1974,94 @@ fn parse_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
             )
         })
         .enumerate()
-        .filter_map(|(index, parameter)| {
-            let code = node_text(parameter, source).trim();
-            if code == "void" {
-                return None;
-            }
-            let is_variadic = parameter.kind() == "variadic_parameter_declaration";
-            let (type_name, name) = declaration_type_and_name(parameter, source)
-                .or_else(|| split_type_and_name(code))
-                .or_else(|| {
-                    parameter_type_without_name(parameter, source)
-                        .map(|type_name| (type_name, format!("param{}", index + 1)))
-                })?;
-            Some(ParameterDecl {
-                name,
-                type_name,
-                is_variadic,
-                code: code.to_string(),
-                line: line(parameter),
+    {
+        let code = node_text(parameter, source).trim();
+        if code == "void" {
+            continue;
+        }
+        let parsed = declaration_type_and_name(parameter, source)
+            .or_else(|| split_type_and_name(code))
+            .or_else(|| {
+                parameter_type_without_name(parameter, source)
+                    .map(|type_name| (type_name, format!("param{}", index + 1)))
+            });
+        let is_pack = parameter.kind() == "variadic_parameter_declaration"
+            && parsed
+                .as_ref()
+                .is_some_and(|(_, name)| code.contains(&format!("... {name}")));
+        let is_classic_varargs = parameter.kind() == "variadic_parameter_declaration"
+            && !is_pack
+            && code.ends_with("...");
+        let Some((type_name, name, code, is_variadic)) = (if is_classic_varargs {
+            has_classic_varargs_parameter = true;
+            let parameter_code = code.trim_end_matches("...").trim();
+            split_type_and_name_with_declarator(parameter_code)
+                .map(|(type_name, name)| (type_name, name, parameter_code.to_string(), false))
+        } else {
+            parsed.map(|(type_name, name)| {
+                (
+                    type_name,
+                    name,
+                    code.to_string(),
+                    parameter.kind() == "variadic_parameter_declaration",
+                )
             })
+        }) else {
+            continue;
+        };
+        parameters.push(ParameterDecl {
+            name,
+            type_name,
+            is_variadic,
+            code,
+            line: line(parameter),
+        });
+    }
+    if include_varargs
+        && (parameter_list_has_varargs(node, source) || has_classic_varargs_parameter)
+    {
+        let index = parameters.len() + 1;
+        let type_name = parameters
+            .last()
+            .map(|parameter| parameter.type_name.clone())
+            .unwrap_or_else(|| "ANY".to_string());
+        let line = parameters
+            .last()
+            .map(|parameter| parameter.line)
+            .unwrap_or_else(|| line(node));
+        let name = format!("<param>{index}");
+        parameters.push(ParameterDecl {
+            name: name.clone(),
+            type_name,
+            is_variadic: true,
+            code: format!("{name}..."),
+            line,
+        });
+    }
+    parameters
+}
+
+fn parameter_list_has_varargs(node: Node, source: &[u8]) -> bool {
+    let has_standalone_ellipsis = (0..node.child_count()).any(|index| {
+        node.child(index as u32)
+            .is_some_and(|child| !child.is_named() && node_text(child, source).trim() == "...")
+    });
+    let has_parameter_suffix_ellipsis = named_children(node)
+        .into_iter()
+        .filter(|child| {
+            matches!(
+                child.kind(),
+                "parameter_declaration" | "variadic_parameter_declaration"
+            )
         })
-        .collect()
+        .last()
+        .is_some_and(|last_parameter| {
+            last_parameter.kind() != "variadic_parameter_declaration"
+                && std::str::from_utf8(&source[last_parameter.end_byte()..node.end_byte()])
+                    .ok()
+                    .is_some_and(|suffix| suffix.contains("..."))
+        });
+    has_standalone_ellipsis || has_parameter_suffix_ellipsis
 }
 
 fn parameter_type_without_name(node: Node, source: &[u8]) -> Option<String> {
@@ -2116,7 +2197,11 @@ fn parse_try_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) ->
 fn parse_catch_clause(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> CatchClause {
     let parameter = node
         .child_by_field_name("parameters")
-        .and_then(|parameters| parse_parameters(parameters, source).into_iter().next());
+        .and_then(|parameters| {
+            parse_parameters_without_varargs(parameters, source)
+                .into_iter()
+                .next()
+        });
     let body = node
         .child_by_field_name("body")
         .map(|body| parse_statement(body, source, symbols))
@@ -3597,6 +3682,32 @@ fn split_type_and_name(raw: &str) -> Option<(String, String)> {
     Some((normalize_type(parts[1]), name.to_string()))
 }
 
+fn split_type_and_name_with_declarator(raw: &str) -> Option<(String, String)> {
+    let normalized = raw
+        .trim()
+        .trim_end_matches(';')
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    let parts: Vec<&str> = normalized.rsplitn(2, ' ').collect();
+    if parts.len() != 2 {
+        return None;
+    }
+    let declarator = parts[0].trim();
+    let marker = declarator
+        .chars()
+        .take_while(|ch| matches!(ch, '*' | '&'))
+        .collect::<String>();
+    let name = declarator.trim_start_matches(|ch| matches!(ch, '*' | '&'));
+    if name.is_empty() {
+        return None;
+    }
+    Some((
+        normalize_type(&format!("{}{marker}", parts[1])),
+        name.to_string(),
+    ))
+}
+
 fn normalize_type(raw: &str) -> String {
     let normalized = raw
         .split_whitespace()
@@ -3624,10 +3735,21 @@ fn signature(return_type: &str, params: &[ParameterDecl]) -> String {
         return_type,
         params
             .iter()
-            .map(|param| param.type_name.as_str())
+            .map(signature_parameter_type)
             .collect::<Vec<_>>()
             .join(",")
     )
+}
+
+fn signature_parameter_type(param: &ParameterDecl) -> &str {
+    if param.is_variadic
+        && param.name.starts_with("<param>")
+        && param.code == format!("{}...", param.name)
+    {
+        "..."
+    } else {
+        param.type_name.as_str()
+    }
 }
 
 fn function_signature(return_type: &str, params: &[ParameterDecl], is_const: bool) -> String {
@@ -6893,6 +7015,60 @@ mod tests {
             ] if first == "x"
                 && matches!(pattern.as_ref(), Expression::Identifier { name, .. } if name == "args")
         ));
+    }
+
+    #[test]
+    fn parses_cpp_classic_varargs() {
+        let sample = r#"
+                int foo(const char *a, ...) { return 0; }
+                void bar(int x, int args...) {}
+                "#;
+        let declarations =
+            parse_declarations(sample, SourceLanguage::Cpp).expect("varargs sample should parse");
+        let functions: Vec<&FunctionDecl> = declarations
+            .iter()
+            .filter_map(|declaration| match declaration {
+                Declaration::Function(function) => Some(function),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(functions.len(), 2);
+
+        let foo = functions[0];
+        assert_eq!(foo.signature, "int(char*,...)");
+        assert_eq!(foo.parameters.len(), 2);
+        assert_eq!(foo.parameters[0].name, "a");
+        assert_eq!(foo.parameters[0].type_name, "char*");
+        assert!(!foo.parameters[0].is_variadic);
+        assert_eq!(foo.parameters[1].name, "<param>2");
+        assert_eq!(foo.parameters[1].code, "<param>2...");
+        assert_eq!(foo.parameters[1].type_name, "char*");
+        assert!(foo.parameters[1].is_variadic);
+
+        let bar = functions[1];
+        assert_eq!(bar.signature, "void(int,int,...)");
+        assert_eq!(bar.parameters.len(), 3);
+        assert_eq!(bar.parameters[1].name, "args");
+        assert_eq!(bar.parameters[1].type_name, "int");
+        assert!(!bar.parameters[1].is_variadic);
+        assert_eq!(bar.parameters[2].name, "<param>3");
+        assert_eq!(bar.parameters[2].code, "<param>3...");
+        assert_eq!(bar.parameters[2].type_name, "int");
+        assert!(bar.parameters[2].is_variadic);
+
+        let c_declarations = parse_declarations(
+            "int baz(const char *a, ...) { return 0; }",
+            SourceLanguage::C,
+        )
+        .expect("C varargs sample should parse");
+        let Declaration::Function(baz) = &c_declarations[0] else {
+            panic!("expected C function declaration");
+        };
+        assert_eq!(baz.signature, "int(char*,...)");
+        assert_eq!(baz.parameters.len(), 2);
+        assert_eq!(baz.parameters[1].name, "<param>2");
+        assert_eq!(baz.parameters[1].type_name, "char*");
+        assert!(baz.parameters[1].is_variadic);
     }
 
     #[test]
