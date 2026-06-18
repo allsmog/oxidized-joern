@@ -86,6 +86,7 @@ fn stmt_json(node: Node, source: &str) -> Value {
         "function_declaration" => function_declaration_json(node, source),
         "statement_block" => block_statement_json(node, source),
         "return_statement" => return_statement_json(node, source),
+        "if_statement" => if_statement_json(node, source),
         "expression_statement" => expression_statement_json(node, source),
         "empty_statement" => with_span("EmptyStatement", node, json!({})),
         _ => noop_json(node),
@@ -105,6 +106,7 @@ fn expr_json(node: Node, source: &str) -> Value {
         "assignment_expression" => assignment_expression_json(node, source),
         "call_expression" => call_expression_json(node, source),
         "member_expression" => member_expression_json(node, source),
+        "subscript_expression" => subscript_expression_json(node, source),
         "array" => array_expression_json(node, source),
         "object" => object_expression_json(node, source),
         "arrow_function" => arrow_function_json(node, source),
@@ -209,6 +211,32 @@ fn return_statement_json(node: Node, source: &str) -> Value {
     with_span("ReturnStatement", node, json!({ "argument": argument }))
 }
 
+fn if_statement_json(node: Node, source: &str) -> Value {
+    let test = node
+        .child_by_field_name("condition")
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let consequent = node
+        .child_by_field_name("consequence")
+        .map(|child| stmt_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let alternate = node
+        .child_by_field_name("alternative")
+        .and_then(first_named_child)
+        .map(|child| stmt_json(child, source))
+        .unwrap_or(Value::Null);
+
+    with_span(
+        "IfStatement",
+        node,
+        json!({
+            "test": test,
+            "consequent": consequent,
+            "alternate": alternate
+        }),
+    )
+}
+
 fn expression_statement_json(node: Node, source: &str) -> Value {
     let expression = node
         .named_child(0)
@@ -296,6 +324,22 @@ fn member_expression_json(node: Node, source: &str) -> Value {
             "object": object,
             "property": property,
             "computed": false,
+            "optional": false
+        }),
+    )
+}
+
+fn subscript_expression_json(node: Node, source: &str) -> Value {
+    let object = field_json(node, "object", source).unwrap_or_else(|| noop_json(node));
+    let property = field_json(node, "index", source).unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        "MemberExpression",
+        node,
+        json!({
+            "object": object,
+            "property": property,
+            "computed": true,
             "optional": false
         }),
     )
@@ -680,6 +724,10 @@ fn named_children(node: Node) -> impl Iterator<Item = Node> {
     (0..node.named_child_count()).filter_map(move |index| node.named_child(index))
 }
 
+fn first_named_child(node: Node) -> Option<Node> {
+    node.named_child(0)
+}
+
 fn is_comment(node: Node) -> bool {
     matches!(node.kind(), "comment" | "hash_bang_line")
 }
@@ -841,6 +889,24 @@ mod tests {
         assert_eq!(computed["type"], "ObjectMethod");
         assert_eq!(computed["key"]["name"], "bar");
         assert_eq!(computed["computed"], true);
+    }
+
+    #[test]
+    fn emits_if_statements_and_computed_member_expressions() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json =
+            parse_source(root, path, "if (d = decorators[i]) foo();\n").expect("parse succeeds");
+
+        let if_stmt = &json["ast"]["program"]["body"][0];
+        assert_eq!(if_stmt["type"], "IfStatement");
+        assert_eq!(if_stmt["test"]["type"], "AssignmentExpression");
+        assert_eq!(if_stmt["test"]["right"]["type"], "MemberExpression");
+        assert_eq!(if_stmt["test"]["right"]["computed"], true);
+        assert_eq!(if_stmt["test"]["right"]["object"]["name"], "decorators");
+        assert_eq!(if_stmt["test"]["right"]["property"]["name"], "i");
+        assert_eq!(if_stmt["consequent"]["type"], "ExpressionStatement");
+        assert_eq!(if_stmt["alternate"], Value::Null);
     }
 
     #[test]
