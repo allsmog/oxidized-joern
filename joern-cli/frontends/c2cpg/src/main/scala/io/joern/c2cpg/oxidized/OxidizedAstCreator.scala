@@ -3612,6 +3612,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     stripCxxTypeQualifiers(normalizeType(typeName)).trim.startsWith(Defines.Auto)
   }
 
+  private def isDecltypeAutoType(typeName: String): Boolean = {
+    stripCxxTypeQualifiers(normalizeType(typeName)).trim == "decltype(auto)"
+  }
+
   private def inferredAutoTypeFullName(
     explicitType: String,
     initializerType: String,
@@ -5958,7 +5962,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       )
     Option
       .when(
-        isAutoType(syntacticReturnType) ||
+        isAutoType(syntacticReturnType) || isDecltypeAutoType(syntacticReturnType) ||
           typeNameHasCxxQualifier(semanticReturnType) ||
           functionTemplateParametersInType(entry, entry.function.returnType, receiverTypeFullName).nonEmpty
       )(semanticReturnType)
@@ -6121,6 +6125,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val specializedReturnType = substituteTemplateTypeNames(functionSemanticReturnTypeFullName(entry), templateBindings)
     if (isAutoType(specializedReturnType)) {
       functionAutoReturnTypeFullName(entry, specializedReturnType, templateBindings).getOrElse(specializedReturnType)
+    } else if (isDecltypeAutoType(specializedReturnType)) {
+      functionDecltypeAutoReturnTypeFullName(entry, templateBindings).getOrElse(specializedReturnType)
     } else {
       specializedReturnType
     }
@@ -6157,6 +6163,31 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val bindingKey =
       templateBindings.toSeq.sortBy(_._1).map { case (name, typeName) => s"$name=$typeName" }.mkString(",")
     s"${entry.fullName}:$bindingKey"
+  }
+
+  private def functionDecltypeAutoReturnTypeFullName(
+    entry: FunctionEntry,
+    templateBindings: Map[String, String]
+  ): Option[String] = {
+    val inferenceKey = autoReturnInferenceKey(entry, templateBindings)
+    if (!autoReturnInferenceStack.add(inferenceKey)) {
+      None
+    } else {
+      try {
+        val returnExpressions = directFunctionReturnExpressions(entry.function)
+        val localTypes        = functionTopLevelLocalTypeFullNames(entry, templateBindings)
+        val inferredReturnTypes = returnExpressions.map { expression =>
+          functionReturnExpressionTypeFullName(entry, expression, templateBindings, localTypes)
+        }
+        Option
+          .when(returnExpressions.nonEmpty && inferredReturnTypes.forall(_.isDefined)) {
+            inferredReturnTypes.flatten.map(normalizeType).distinct
+          }
+          .collect { case Seq(returnType) => returnType }
+      } finally {
+        autoReturnInferenceStack.remove(inferenceKey)
+      }
+    }
   }
 
   private def directFunctionReturnExpressions(function: OxFunctionDecl): Seq[OxExpression] = {
