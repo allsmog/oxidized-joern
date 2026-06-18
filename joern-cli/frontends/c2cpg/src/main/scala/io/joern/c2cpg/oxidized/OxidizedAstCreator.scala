@@ -124,6 +124,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     throwPreservedScopeDepth: Option[Int] = None
   )
   private final case class ArgumentInfo(expression: OxExpression, typeFullName: Option[String], isRvalue: Boolean)
+  private final case class FunctionReturnExpression(expression: OxExpression, localTypes: Map[String, String])
   private final case class FunctionCaptureContext(
     function: OxFunctionDecl,
     methodRef: NewMethodRef,
@@ -6142,10 +6143,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       None
     } else {
       try {
-        val returnExpressions = directFunctionReturnExpressions(entry.function)
-        val localTypes        = functionTopLevelLocalTypeFullNames(entry, templateBindings)
+        val returnExpressions = functionReturnExpressions(entry, templateBindings)
         val inferredReturnTypes = returnExpressions.map { expression =>
-          functionReturnExpressionTypeFullName(entry, expression, templateBindings, localTypes)
+          functionReturnExpressionTypeFullName(entry, expression.expression, templateBindings, expression.localTypes)
             .flatMap(typeName => inferredAutoTypeFullName(explicitReturnType, typeName, preserveCv = true))
         }
         Option
@@ -6174,10 +6174,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       None
     } else {
       try {
-        val returnExpressions = directFunctionReturnExpressions(entry.function)
-        val localTypes        = functionTopLevelLocalTypeFullNames(entry, templateBindings)
+        val returnExpressions = functionReturnExpressions(entry, templateBindings)
         val inferredReturnTypes = returnExpressions.map { expression =>
-          functionReturnExpressionTypeFullName(entry, expression, templateBindings, localTypes)
+          functionReturnExpressionTypeFullName(entry, expression.expression, templateBindings, expression.localTypes)
         }
         Option
           .when(returnExpressions.nonEmpty && inferredReturnTypes.forall(_.isDefined)) {
@@ -6190,70 +6189,101 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
-  private def directFunctionReturnExpressions(function: OxFunctionDecl): Seq[OxExpression] = {
-    returnExpressionsInStatements(function.body)
-  }
-
-  private def returnExpressionsInStatements(statements: Seq[OxStatement]): Seq[OxExpression] = {
-    statements.flatMap(returnExpressionsInStatement)
-  }
-
-  private def returnExpressionsInStatement(statement: OxStatement): Seq[OxExpression] = {
-    statement match {
-      case OxReturn(_, _, Some(expression)) =>
-        Seq(expression)
-      case OxTry(_, _, body, catches) =>
-        returnExpressionsInStatements(body) ++ catches.flatMap(catchClause =>
-          returnExpressionsInStatements(catchClause.body)
-        )
-      case OxIf(_, _, initializer, conditionInitializer, _, thenBody, elseBody) =>
-        returnExpressionsInStatements(initializer) ++
-          returnExpressionsInStatements(conditionInitializer) ++
-          returnExpressionsInStatements(thenBody) ++
-          returnExpressionsInStatements(elseBody)
-      case OxWhile(_, _, initializer, conditionInitializer, _, body) =>
-        returnExpressionsInStatements(initializer) ++
-          returnExpressionsInStatements(conditionInitializer) ++
-          returnExpressionsInStatements(body)
-      case OxDoWhile(_, _, _, body) =>
-        returnExpressionsInStatements(body)
-      case OxFor(_, _, initializer, _, _, body) =>
-        returnExpressionsInStatements(initializer) ++ returnExpressionsInStatements(body)
-      case OxLabel(_, _, _, body) =>
-        returnExpressionsInStatements(body)
-      case OxSwitch(_, _, initializer, conditionInitializer, _, body) =>
-        returnExpressionsInStatements(initializer) ++
-          returnExpressionsInStatements(conditionInitializer) ++
-          returnExpressionsInStatements(body)
-      case OxCase(_, _, _, body) =>
-        returnExpressionsInStatements(body)
-      case _ =>
-        Seq.empty
-    }
-  }
-
-  private def functionTopLevelLocalTypeFullNames(
+  private def functionReturnExpressions(
     entry: FunctionEntry,
     templateBindings: Map[String, String]
-  ): Map[String, String] = {
-    entry.function.body.foldLeft(Map.empty[String, String]) {
-      case (localTypes, local: OxLocalDecl) =>
-        val explicitType =
-          functionScopedTypeFullName(
-            entry,
-            typeFullNameWithStringLiteralLength(local.semanticTypeName, local.initializer),
-            templateBindings
-          )
-        val inferredType = Option
-          .when(isAutoType(explicitType))(local.initializer)
-          .flatten
-          .flatMap(expression => functionReturnExpressionTypeFullName(entry, expression, templateBindings, localTypes))
-          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName, preserveCv = true))
-          .getOrElse(explicitType)
-        localTypes.updated(local.name, inferredType)
-      case (localTypes, _) =>
-        localTypes
+  ): Seq[FunctionReturnExpression] = {
+    returnExpressionsInStatements(entry, templateBindings, entry.function.body, Map.empty)._2
+  }
+
+  private def returnExpressionsInStatements(
+    entry: FunctionEntry,
+    templateBindings: Map[String, String],
+    statements: Seq[OxStatement],
+    localTypes: Map[String, String]
+  ): (Map[String, String], Seq[FunctionReturnExpression]) = {
+    statements.foldLeft(localTypes -> Seq.empty[FunctionReturnExpression]) {
+      case ((currentLocalTypes, returnExpressions), statement) =>
+        val (nextLocalTypes, statementReturnExpressions) =
+          returnExpressionsInStatement(entry, templateBindings, statement, currentLocalTypes)
+        nextLocalTypes -> (returnExpressions ++ statementReturnExpressions)
     }
+  }
+
+  private def returnExpressionsInStatement(
+    entry: FunctionEntry,
+    templateBindings: Map[String, String],
+    statement: OxStatement,
+    localTypes: Map[String, String]
+  ): (Map[String, String], Seq[FunctionReturnExpression]) = {
+    statement match {
+      case local: OxLocalDecl =>
+        localTypes.updated(local.name, functionLocalTypeFullName(entry, local, templateBindings, localTypes)) ->
+          Seq.empty
+      case OxReturn(_, _, Some(expression)) =>
+        localTypes -> Seq(FunctionReturnExpression(expression, localTypes))
+      case OxTry(_, _, body, catches) =>
+        val bodyReturns = returnExpressionsInStatements(entry, templateBindings, body, localTypes)._2
+        val catchReturns = catches.flatMap(catchClause =>
+          returnExpressionsInStatements(entry, templateBindings, catchClause.body, localTypes)._2
+        )
+        localTypes -> (bodyReturns ++ catchReturns)
+      case OxIf(_, _, initializer, conditionInitializer, _, thenBody, elseBody) =>
+        val (initializerLocalTypes, initializerReturns) =
+          returnExpressionsInStatements(entry, templateBindings, initializer, localTypes)
+        val (conditionLocalTypes, conditionReturns) =
+          returnExpressionsInStatements(entry, templateBindings, conditionInitializer, initializerLocalTypes)
+        val thenReturns = returnExpressionsInStatements(entry, templateBindings, thenBody, conditionLocalTypes)._2
+        val elseReturns = returnExpressionsInStatements(entry, templateBindings, elseBody, conditionLocalTypes)._2
+        localTypes -> (initializerReturns ++ conditionReturns ++ thenReturns ++ elseReturns)
+      case OxWhile(_, _, initializer, conditionInitializer, _, body) =>
+        val (initializerLocalTypes, initializerReturns) =
+          returnExpressionsInStatements(entry, templateBindings, initializer, localTypes)
+        val (conditionLocalTypes, conditionReturns) =
+          returnExpressionsInStatements(entry, templateBindings, conditionInitializer, initializerLocalTypes)
+        val bodyReturns = returnExpressionsInStatements(entry, templateBindings, body, conditionLocalTypes)._2
+        localTypes -> (initializerReturns ++ conditionReturns ++ bodyReturns)
+      case OxDoWhile(_, _, _, body) =>
+        localTypes -> returnExpressionsInStatements(entry, templateBindings, body, localTypes)._2
+      case OxFor(_, _, initializer, _, _, body) =>
+        val (initializerLocalTypes, initializerReturns) =
+          returnExpressionsInStatements(entry, templateBindings, initializer, localTypes)
+        val bodyReturns = returnExpressionsInStatements(entry, templateBindings, body, initializerLocalTypes)._2
+        localTypes -> (initializerReturns ++ bodyReturns)
+      case OxLabel(_, _, _, body) =>
+        returnExpressionsInStatements(entry, templateBindings, body, localTypes)
+      case OxSwitch(_, _, initializer, conditionInitializer, _, body) =>
+        val (initializerLocalTypes, initializerReturns) =
+          returnExpressionsInStatements(entry, templateBindings, initializer, localTypes)
+        val (conditionLocalTypes, conditionReturns) =
+          returnExpressionsInStatements(entry, templateBindings, conditionInitializer, initializerLocalTypes)
+        val bodyReturns = returnExpressionsInStatements(entry, templateBindings, body, conditionLocalTypes)._2
+        localTypes -> (initializerReturns ++ conditionReturns ++ bodyReturns)
+      case OxCase(_, _, _, body) =>
+        returnExpressionsInStatements(entry, templateBindings, body, localTypes)
+      case _ =>
+        localTypes -> Seq.empty
+    }
+  }
+
+  private def functionLocalTypeFullName(
+    entry: FunctionEntry,
+    local: OxLocalDecl,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): String = {
+    val explicitType =
+      functionScopedTypeFullName(
+        entry,
+        typeFullNameWithStringLiteralLength(local.semanticTypeName, local.initializer),
+        templateBindings
+      )
+    Option
+      .when(isAutoType(explicitType))(local.initializer)
+      .flatten
+      .flatMap(expression => functionReturnExpressionTypeFullName(entry, expression, templateBindings, localTypes))
+      .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName, preserveCv = true))
+      .getOrElse(explicitType)
   }
 
   private def functionReturnExpressionTypeFullName(
