@@ -117,11 +117,25 @@ pub struct StructDecl {
     #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
     pub visible_line: Option<usize>,
     pub base_classes: Vec<String>,
+    #[serde(
+        rename = "baseClassDeclarations",
+        skip_serializing_if = "Vec::is_empty"
+    )]
+    pub base_class_declarations: Vec<BaseClassDecl>,
     #[serde(rename = "usingDeclarations", skip_serializing_if = "Vec::is_empty")]
     pub using_declarations: Vec<UsingDecl>,
     pub fields: Vec<FieldDecl>,
     #[serde(rename = "nestedDeclarations")]
     pub nested_declarations: Vec<Declaration>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BaseClassDecl {
+    pub name: String,
+    pub code: String,
+    pub is_virtual: bool,
+    pub line: usize,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -1553,13 +1567,18 @@ fn parse_struct_with_name(
             .flat_map(|template| parse_nested_template_functions(template, source, symbols))
             .map(Declaration::Function),
     );
+    let base_class_declarations = parse_base_class_declarations(node, source);
     Some(StructDecl {
         name,
         code: compact_code(node_text(node, source)),
         line: line(node),
         source_path: None,
         visible_line: None,
-        base_classes: parse_base_classes(node, source),
+        base_classes: base_class_declarations
+            .iter()
+            .map(|base| base.name.clone())
+            .collect(),
+        base_class_declarations,
         using_declarations: parse_using_declarations(body, source),
         fields: field_nodes
             .into_iter()
@@ -1635,23 +1654,70 @@ fn parse_nested_template_functions(
         .collect()
 }
 
-fn parse_base_classes(node: Node, source: &[u8]) -> Vec<String> {
+fn parse_base_class_declarations(node: Node, source: &[u8]) -> Vec<BaseClassDecl> {
     named_children(node)
         .into_iter()
         .filter(|child| child.kind() == "base_class_clause")
         .flat_map(|base_clause| {
-            named_children(base_clause)
+            let text = node_text(base_clause, source);
+            split_top_level_base_classes(text.trim().trim_start_matches(':'))
                 .into_iter()
-                .filter(|child| {
-                    matches!(
-                        child.kind(),
-                        "type_identifier" | "qualified_identifier" | "template_type"
-                    )
-                })
-                .map(|base| normalize_type(node_text(base, source)))
+                .filter_map(move |base| parse_base_class_declaration(base, line(base_clause)))
         })
         .collect()
 }
+
+fn parse_base_class_declaration(base: &str, line: usize) -> Option<BaseClassDecl> {
+    let code = base.trim();
+    if code.is_empty() {
+        return None;
+    }
+    let tokens = code.split_whitespace().collect::<Vec<_>>();
+    let is_virtual = tokens.iter().any(|token| *token == "virtual");
+    let name = normalize_type(
+        &tokens
+            .into_iter()
+            .filter(|token| !BASE_CLASS_SPECIFIERS.contains(token))
+            .collect::<Vec<_>>()
+            .join(" "),
+    );
+    if name.is_empty() {
+        return None;
+    }
+    Some(BaseClassDecl {
+        name,
+        code: code.to_string(),
+        is_virtual,
+        line,
+    })
+}
+
+fn split_top_level_base_classes(base_classes: &str) -> Vec<&str> {
+    let mut result = Vec::new();
+    let mut start = 0usize;
+    let mut depth = 0usize;
+    for (index, ch) in base_classes.char_indices() {
+        match ch {
+            '<' | '(' | '[' | '{' => depth += 1,
+            '>' | ')' | ']' | '}' if depth > 0 => depth -= 1,
+            ',' if depth == 0 => {
+                let base = base_classes[start..index].trim();
+                if !base.is_empty() {
+                    result.push(base);
+                }
+                start = index + 1;
+            }
+            _ => {}
+        }
+    }
+    let base = base_classes[start..].trim();
+    if !base.is_empty() {
+        result.push(base);
+    }
+    result
+}
+
+const BASE_CLASS_SPECIFIERS: &[&str] = &["public", "protected", "private", "virtual"];
 
 fn parse_nested_aggregate_declaration(
     node: Node,
@@ -5332,6 +5398,9 @@ mod tests {
             })
             .expect("expected Fancy class");
         assert_eq!(fancy.base_classes, vec!["Widget"]);
+        assert_eq!(fancy.base_class_declarations.len(), 1);
+        assert_eq!(fancy.base_class_declarations[0].name, "Widget");
+        assert!(!fancy.base_class_declarations[0].is_virtual);
         assert!(fancy.nested_declarations.iter().any(|declaration| matches!(
             declaration,
             Declaration::Function(method)
@@ -5641,6 +5710,46 @@ mod tests {
         assert_eq!(using.name, "pick");
         assert_eq!(using.target, "Base::pick");
         assert_eq!(using.code, "using Base::pick");
+    }
+
+    #[test]
+    fn parses_cpp_virtual_base_declarations() {
+        let sample = r#"
+                template <typename T, typename U>
+                class PairBase {};
+                class Root {};
+                class Other {};
+                class Derived : public virtual Root, protected Other, private PairBase<int, float> {};
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("virtual base declaration sample should parse");
+        let derived = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "Derived" => {
+                    Some(struct_decl)
+                }
+                _ => None,
+            })
+            .expect("expected Derived class");
+
+        assert_eq!(
+            derived.base_classes,
+            vec!["Root", "Other", "PairBase<int, float>"]
+        );
+        assert_eq!(derived.base_class_declarations.len(), 3);
+        assert_eq!(
+            derived.base_class_declarations[0].code,
+            "public virtual Root"
+        );
+        assert!(derived.base_class_declarations[0].is_virtual);
+        assert_eq!(derived.base_class_declarations[1].code, "protected Other");
+        assert!(!derived.base_class_declarations[1].is_virtual);
+        assert_eq!(
+            derived.base_class_declarations[2].name,
+            "PairBase<int, float>"
+        );
+        assert!(!derived.base_class_declarations[2].is_virtual);
     }
 
     #[test]

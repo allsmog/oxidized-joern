@@ -1247,6 +1247,75 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C++ virtual base constructor and destructor order" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Root {
+          |public:
+          |  Root();
+          |  Root(int seed) {}
+          |  ~Root();
+          |};
+          |class Left : public virtual Root {
+          |public:
+          |  Left();
+          |  ~Left();
+          |};
+          |class Right : public virtual Root {
+          |public:
+          |  Right();
+          |  ~Right();
+          |};
+          |class Diamond : public Left, public Right {
+          |public:
+          |  Diamond(int seed) : Root(seed) {}
+          |  ~Diamond();
+          |};
+          |}
+          |Core::Root::Root() {}
+          |Core::Root::~Root() {}
+          |Core::Left::Left() {}
+          |Core::Left::~Left() {}
+          |Core::Right::Right() {}
+          |Core::Right::~Right() {}
+          |Core::Diamond::~Diamond() {}
+          |int virtual_bases(int seed) {
+          |  Core::Diamond diamond(seed);
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.fullNameExact("Core.Left.Left:void()").call.nameExact("Root").code.l shouldBe
+        List("Core.Root.Root()")
+      cpg.method.fullNameExact("Core.Right.Right:void()").call.nameExact("Root").code.l shouldBe
+        List("Core.Root.Root()")
+
+      val diamondConstructorCalls = cpg.method.fullNameExact("Core.Diamond.Diamond:void(int)").call.code.l
+      diamondConstructorCalls should contain allElementsOf List(
+        "Core.Root.Root(seed)",
+        "Core.Left.Left()",
+        "Core.Right.Right()"
+      )
+      diamondConstructorCalls.count(_ == "Core.Root.Root(seed)") shouldBe 1
+      diamondConstructorCalls should not contain "Core.Root.Root()"
+      diamondConstructorCalls.indexOf("Core.Root.Root(seed)") should be < diamondConstructorCalls.indexOf(
+        "Core.Left.Left()"
+      )
+      diamondConstructorCalls.indexOf("Core.Left.Left()") should be < diamondConstructorCalls.indexOf(
+        "Core.Right.Right()"
+      )
+
+      cpg.method
+        .fullNameExact("Core.Diamond.~Diamond:void()")
+        .call
+        .filter(call => Set("~Root", "~Left", "~Right").contains(call.name))
+        .code
+        .l shouldBe List("this->~Right()", "this->~Left()", "this->~Root()")
+    }
+
     "capture C++ braced local constructors" in {
       val cpg = code(
         """

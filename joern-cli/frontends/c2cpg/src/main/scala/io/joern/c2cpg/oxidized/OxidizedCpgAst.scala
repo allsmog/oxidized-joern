@@ -44,10 +44,13 @@ case class OxStructDecl(
   sourcePath: Option[String],
   visibleLine: Int,
   baseClasses: Seq[String],
+  baseClassDeclarations: Seq[OxBaseClassDecl],
   usingDeclarations: Seq[OxUsingDeclaration],
   fields: Seq[OxFieldDecl],
   nestedDeclarations: Seq[OxDeclaration]
 ) extends OxDeclaration
+
+case class OxBaseClassDecl(name: String, code: String, isVirtual: Boolean, line: Int)
 
 case class OxUsingDeclaration(name: String, target: String, code: String, line: Int)
 
@@ -310,13 +313,19 @@ object OxDocument {
           declarations = value("declarations").arr.map(declaration).toSeq
         )
       case "struct" =>
+        val structLine  = int(value, "line")
+        val baseClasses = value.obj.get("baseClasses").map(_.arr.map(_.str).toSeq).getOrElse(Seq.empty)
         OxStructDecl(
           name = str(value, "name"),
           code = str(value, "code"),
-          line = int(value, "line"),
+          line = structLine,
           sourcePath = sourcePath(value),
           visibleLine = visibleLine(value),
-          baseClasses = value.obj.get("baseClasses").map(_.arr.map(_.str).toSeq).getOrElse(Seq.empty),
+          baseClasses = baseClasses,
+          baseClassDeclarations = value.obj
+            .get("baseClassDeclarations")
+            .map(_.arr.map(baseClassDeclaration).toSeq)
+            .getOrElse(baseClasses.map(name => OxBaseClassDecl(name, name, isVirtual = false, structLine))),
           usingDeclarations =
             value.obj.get("usingDeclarations").map(_.arr.map(usingDeclaration).toSeq).getOrElse(Seq.empty),
           fields = value("fields").arr.map(field).toSeq,
@@ -381,6 +390,15 @@ object OxDocument {
       code = str(value, "code"),
       isStatic = value.obj.get("isStatic").exists(_.bool),
       initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
+    )
+  }
+
+  private def baseClassDeclaration(value: Value): OxBaseClassDecl = {
+    OxBaseClassDecl(
+      name = str(value, "name"),
+      code = str(value, "code"),
+      isVirtual = value.obj.get("isVirtual").exists(_.bool),
+      line = int(value, "line")
     )
   }
 

@@ -76,6 +76,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     entry: Option[FunctionEntry],
     preserveInitializerListCode: Boolean = false
   )
+  private final case class ResolvedBaseClass(typeFullName: String, isVirtual: Boolean)
   private sealed trait ConstructorSubobject
   private final case class ConstructorBaseSubobject(typeName: String)    extends ConstructorSubobject
   private final case class ConstructorFieldSubobject(field: OxFieldDecl) extends ConstructorSubobject
@@ -187,13 +188,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
       Seq(localName, fullName).distinct.map(typeName => typeName -> aggregateFieldsForLookup(structDecl, fullName))
     }.toMap
-  private lazy val aggregateBaseTypesByType: Map[String, Seq[String]] =
+  private lazy val aggregateBaseClassesByType: Map[String, Seq[ResolvedBaseClass]] =
     aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
       val localName = normalizeType(structDecl.name)
       val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
-      val baseTypes = structDecl.baseClasses.map(baseClass => resolveBaseTypeFullName(baseClass, parentFullName))
+      val baseTypes = structDecl.baseClassDeclarations.map(baseClass =>
+        ResolvedBaseClass(resolveBaseTypeFullName(baseClass.name, parentFullName), baseClass.isVirtual)
+      )
       Seq(localName, fullName).distinct.map(typeName => typeName -> baseTypes)
     }.toMap
+  private lazy val aggregateBaseTypesByType: Map[String, Seq[String]] =
+    aggregateBaseClassesByType.view.mapValues(_.map(_.typeFullName)).toMap
   private lazy val aggregateUsingDeclarationsByType: Map[String, Seq[OxUsingDeclaration]] =
     aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
       val localName = normalizeType(structDecl.name)
@@ -777,8 +782,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         structDecl.code,
         NodeTypes.NAMESPACE_BLOCK,
         parentAstFullName,
-        inherits =
-          structDecl.baseClasses.map(baseClass => registerType(resolveBaseTypeFullName(baseClass, parentTypeFullName))),
+        inherits = structDecl.baseClassDeclarations.map(baseClass =>
+          registerType(resolveBaseTypeFullName(baseClass.name, parentTypeFullName))
+        ),
         alias = aggregateAlias(typeName)
       )
     val fieldAsts = structDecl.fields.map { field =>
@@ -875,6 +881,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Seq.empty
       } else {
         normalized +: aggregateBaseTypesByType.getOrElse(normalized, Seq.empty).flatMap(loop(_, seen + normalized))
+      }
+    }
+
+    loop(typeFullName, Set.empty).distinct
+  }
+
+  private def virtualBaseTypesForMostDerived(typeFullName: String): Seq[String] = {
+    def loop(current: String, seen: Set[String]): Seq[String] = {
+      val normalized = receiverAggregateTypeName(resolveAliasType(current))
+      if (seen.contains(normalized)) {
+        Seq.empty
+      } else {
+        aggregateBaseClassesByType.getOrElse(normalized, Seq.empty).flatMap { baseClass =>
+          val baseType    = receiverAggregateTypeName(resolveAliasType(baseClass.typeFullName))
+          val nestedBases = loop(baseClass.typeFullName, seen + normalized)
+          val currentBase = Option.when(baseClass.isVirtual && !seen.contains(baseType))(baseClass.typeFullName)
+          nestedBases ++ currentBase
+        }
       }
     }
 
@@ -1489,14 +1513,37 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val fields              = aggregateFieldsByType.getOrElse(ownerType, Seq.empty)
     val fieldNames          = fields.map(_.name).toSet
     val initializersByField = initializers.groupBy(constructorInitializerFieldName)
-    val baseTypes           = aggregateBaseTypesByType.getOrElse(ownerType, Seq.empty)
-    val baseInitializers = initializers.filter { initializer =>
+    val virtualBaseTypes    = virtualBaseTypesForMostDerived(ownerType)
+    val directBaseTypes = aggregateBaseClassesByType
+      .getOrElse(ownerType, Seq.empty)
+      .filterNot(_.isVirtual)
+      .map(_.typeFullName)
+    val virtualBaseInitializers = initializers.filter { initializer =>
       val name = constructorInitializerFieldName(initializer)
-      !fieldNames.contains(name) && baseTypes.exists(baseType => constructorInitializerMatchesBase(baseType, name))
+      !fieldNames.contains(name) && virtualBaseTypes.exists(baseType =>
+        constructorInitializerMatchesBase(baseType, name)
+      )
     }
-    val baseInitializerSteps = baseTypes.flatMap { baseType =>
+    val directBaseInitializers = initializers.filter { initializer =>
+      val name = constructorInitializerFieldName(initializer)
+      !fieldNames.contains(name) && directBaseTypes.exists(baseType =>
+        constructorInitializerMatchesBase(baseType, name)
+      )
+    }
+    val virtualBaseInitializerSteps = virtualBaseTypes.flatMap { baseType =>
       val explicitInitializers =
-        baseInitializers.filter(initializer =>
+        virtualBaseInitializers.filter(initializer =>
+          constructorInitializerMatchesBase(baseType, constructorInitializerFieldName(initializer))
+        )
+      if (explicitInitializers.nonEmpty) {
+        explicitInitializers.map(initializer => baseConstructorInitializerStep(baseType, initializer))
+      } else {
+        Seq(defaultBaseConstructorStep(baseType, line))
+      }
+    }
+    val directBaseInitializerSteps = directBaseTypes.flatMap { baseType =>
+      val explicitInitializers =
+        directBaseInitializers.filter(initializer =>
           constructorInitializerMatchesBase(baseType, constructorInitializerFieldName(initializer))
         )
       if (explicitInitializers.nonEmpty) {
@@ -1522,7 +1569,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             .getOrElse(defaultMemberConstructorSteps(field, line))
         }
     }
-    val consumedBaseInitializers = baseInitializers.toSet
+    val consumedBaseInitializers = (virtualBaseInitializers ++ directBaseInitializers).toSet
     val extraInitializers = initializers.filterNot { initializer =>
       fieldNames.contains(constructorInitializerFieldName(initializer)) || consumedBaseInitializers.contains(
         initializer
@@ -1536,7 +1583,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           constructed = Seq.empty
         )
       )
-    guardedConstructorPrefixStepAsts(baseInitializerSteps ++ orderedFieldInitializerSteps ++ extraInitializerSteps)
+    guardedConstructorPrefixStepAsts(
+      virtualBaseInitializerSteps ++ directBaseInitializerSteps ++ orderedFieldInitializerSteps ++ extraInitializerSteps
+    )
   }
 
   private def guardedConstructorPrefixStepAsts(steps: Seq[ConstructorPrefixStep]): Seq[Ast] = {
@@ -1990,11 +2039,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val name = constructorInitializerFieldName(initializer)
     fieldEntryForTypeHierarchy(ownerTypeFullName, name)
       .map { case (_, field) => field.typeName }
-      .orElse(
-        aggregateBaseTypesByType
-          .getOrElse(resolveAliasType(ownerTypeFullName), Seq.empty)
+      .orElse {
+        val ownerType = resolveAliasType(ownerTypeFullName)
+        (aggregateBaseTypesByType.getOrElse(ownerType, Seq.empty) ++ virtualBaseTypesForMostDerived(ownerType)).distinct
           .find(baseType => baseType.split('.').lastOption.contains(name) || baseType == name)
-      )
+      }
   }
 
   private def constructorInitializerMatchesBase(baseType: String, initializerName: String): Boolean = {
@@ -2199,11 +2248,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         memberArrayDestructorAsts(field, line) ++
           destructorEntryForType(field.typeName).map(entry => memberDestructorAst(field, entry, line))
       )
-    val baseDestructorAsts = aggregateBaseTypesByType
+    val directBaseDestructorAsts = aggregateBaseClassesByType
       .getOrElse(ownerType, Seq.empty)
+      .filterNot(_.isVirtual)
       .reverse
+      .flatMap(baseClass => destructorEntryForType(baseClass.typeFullName).map(entry => baseDestructorAst(entry, line)))
+    val virtualBaseDestructorAsts = virtualBaseTypesForMostDerived(ownerType).reverse
       .flatMap(baseType => destructorEntryForType(baseType).map(entry => baseDestructorAst(entry, line)))
-    memberDestructorAsts ++ baseDestructorAsts
+    memberDestructorAsts ++ directBaseDestructorAsts ++ virtualBaseDestructorAsts
   }
 
   private def memberDestructorAst(field: OxFieldDecl, entry: FunctionEntry, line: Int): Ast = {
