@@ -111,5 +111,53 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           pickCall.receiver.code.l shouldBe Nil
       }
     }
+
+    "force static dispatch for explicit base-qualified member calls" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Base {
+          |public:
+          |  virtual int render(int scale) { return scale; }
+          |};
+          |class Derived : public Base {
+          |public:
+          |  int render(int scale) { return Base::render(scale) + this->Base::render(scale); }
+          |};
+          |}
+          |int use() {
+          |  Core::Derived derived;
+          |  return derived.render(1) + derived.Base::render(2);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.fullNameExact("Core.Derived.render:int(int)").call.codeExact("Base::render(scale)").l) {
+        case List(renderCall) =>
+          renderCall.name shouldBe "render"
+          renderCall.methodFullName shouldBe "Core.Base.render:int(int)"
+          renderCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+          renderCall.receiver.code.l shouldBe Nil
+      }
+      inside(cpg.method.fullNameExact("Core.Derived.render:int(int)").call.codeExact("this->Base::render(scale)").l) {
+        case List(renderCall) =>
+          renderCall.name shouldBe "render"
+          renderCall.methodFullName shouldBe "Core.Base.render:int(int)"
+          renderCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+          renderCall.receiver.code.l shouldBe Nil
+      }
+      inside(cpg.method.nameExact("use").call.codeExact("derived.render(1)").l) { case List(renderCall) =>
+        renderCall.methodFullName shouldBe "Core.Derived.render:int(int)"
+        renderCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+        renderCall.receiver.code.l shouldBe List("derived")
+      }
+      inside(cpg.method.nameExact("use").call.codeExact("derived.Base::render(2)").l) { case List(renderCall) =>
+        renderCall.name shouldBe "render"
+        renderCall.methodFullName shouldBe "Core.Base.render:int(int)"
+        renderCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+        renderCall.receiver.code.l shouldBe Nil
+      }
+    }
   }
 }

@@ -5393,6 +5393,37 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .getOrElse(Seq.empty)
   }
 
+  private def qualifiedMemberFunctionCandidates(name: String, receiverType: Option[String]): Seq[FunctionEntry] = {
+    qualifiedMemberFunctionName(name).toSeq.flatMap { case (ownerName, simpleName) =>
+      qualifiedMemberOwnerTypeFullNames(ownerName, receiverType)
+        .flatMap(ownerTypeName => functionCandidatesByQualifiedName(s"$ownerTypeName.$simpleName"))
+    }
+  }
+
+  private def qualifiedMemberOwnerTypeFullNames(ownerName: String, receiverType: Option[String]): Seq[String] = {
+    val normalizedOwner = normalizedQualifiedName(ownerName)
+    def typeHierarchy(typeName: String): Seq[String] = {
+      typeAndBaseTypeFullNames(typeName)
+        .flatMap(candidate => resolveAggregateTypeFullName(candidate).toSeq :+ candidate)
+        .distinct
+    }
+    def matchesOwner(typeName: String): Boolean = {
+      typeName == normalizedOwner || typeName.endsWith(s".$normalizedOwner")
+    }
+
+    val receiverCandidates = receiverType.toSeq.flatMap(typeHierarchy).filter(matchesOwner)
+    val currentOwnerCandidates = currentMethodOwnerTypeFullName.toSeq
+      .flatMap(typeHierarchy)
+      .filter(matchesOwner)
+    val globalCandidates = resolveAggregateTypeFullName(normalizedOwner).toSeq
+    (receiverCandidates ++ currentOwnerCandidates ++ globalCandidates).distinct
+  }
+
+  private def qualifiedMemberFunctionName(name: String): Option[(String, String)] = {
+    val parts = qualifiedNameParts(name)
+    Option.when(parts.size > 1)(parts.dropRight(1).mkString(".") -> parts.last)
+  }
+
   private def receiverAggregateTypeName(typeName: String): String = {
     stripTemplateArguments(aggregateLookupTypeName(typeName))
   }
@@ -5968,8 +5999,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             functionEntryForCall(call) match {
               case Some(functionEntry) =>
                 val dispatchType =
-                  if (isVirtualFunctionEntry(functionEntry)) DispatchTypes.DYNAMIC_DISPATCH
-                  else DispatchTypes.STATIC_DISPATCH
+                  if (isVirtualFunctionEntry(functionEntry) && !isExplicitQualifiedMemberCall(call, functionEntry)) {
+                    DispatchTypes.DYNAMIC_DISPATCH
+                  } else DispatchTypes.STATIC_DISPATCH
                 (
                   callName(call),
                   functionEntry.fullName,
@@ -5990,18 +6022,36 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
+  private def isExplicitQualifiedMemberCall(call: OxCall, entry: FunctionEntry): Boolean = {
+    entry.ownerFullName.exists(aggregateTypeFullNames.contains) &&
+    explicitQualifiedMemberName(call).isDefined
+  }
+
+  private def explicitQualifiedMemberName(call: OxCall): Option[String] = {
+    call.callee match {
+      case OxFieldAccess(field, _, _, _) => qualifiedMemberFunctionName(field).map(_._1)
+      case _                             => qualifiedMemberFunctionName(stripTemplateArguments(call.name)).map(_._1)
+    }
+  }
+
   private def functionEntryForCall(call: OxCall): Option[FunctionEntry] = {
     call.callee match {
       case OxFieldAccess(field, _, _, base) =>
-        val candidates = expressionTypeFullName(base)
-          .map(receiverAggregateTypeName)
-          .toSeq
-          .flatMap(receiverType => memberFunctionCandidatesForType(receiverType, field))
+        val receiverType              = expressionTypeFullName(base).map(receiverAggregateTypeName)
+        val qualifiedMemberCandidates = qualifiedMemberFunctionCandidates(field, receiverType)
+        val unqualifiedMemberCandidates = receiverType.toSeq.flatMap { receiverType =>
+          memberFunctionCandidatesForType(receiverType, field)
+        }
+        val candidates =
+          if (qualifiedMemberCandidates.nonEmpty) qualifiedMemberCandidates else unqualifiedMemberCandidates
         selectFunctionEntry(candidates, Some(call.arguments))
       case _ =>
-        val lookupName    = stripTemplateArguments(call.name)
-        val qualifiedName = normalizedQualifiedName(lookupName)
-        if (qualifiedNameParts(call.name).size > 1) {
+        val lookupName                = stripTemplateArguments(call.name)
+        val qualifiedName             = normalizedQualifiedName(lookupName)
+        val qualifiedMemberCandidates = qualifiedMemberFunctionCandidates(lookupName, None)
+        if (qualifiedMemberCandidates.nonEmpty) {
+          selectFunctionEntry(qualifiedMemberCandidates, Some(call.arguments))
+        } else if (qualifiedNameParts(call.name).size > 1) {
           val candidates = functionCandidatesByQualifiedName(qualifiedName)
           selectFunctionEntry(
             if (candidates.nonEmpty) candidates else functionCandidatesByName(lookupName),
@@ -6149,7 +6199,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def callName(call: OxCall): String = {
     call.callee match {
-      case OxFieldAccess(field, _, _, _) => field
+      case OxFieldAccess(field, _, _, _) =>
+        stripTemplateArguments(qualifiedNameParts(field).lastOption.getOrElse(field))
       case _ => stripTemplateArguments(qualifiedNameParts(call.name).lastOption.getOrElse(call.name))
     }
   }
