@@ -7759,6 +7759,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val argumentWithoutCvReference = stripCxxTypeQualifiers(argumentWithoutReference).trim
     val pairs                      = mutable.ArrayBuffer(parameterType -> argumentType)
     pairs ++= pointerTemplateDeductionTypePairs(parameterWithoutReference, argumentWithoutReference)
+    pairs ++= arrayPointerTemplateDeductionTypePairs(parameterWithoutReference, argumentWithoutReference)
     if (parameterWithoutReference != parameterType) {
       pairs += parameterWithoutReference -> argumentWithoutReference
       if (stripCxxTypeQualifiers(parameterWithoutReference).trim != parameterWithoutReference) {
@@ -7783,6 +7784,27 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         )
       }
       pointerPairs.toSeq
+    } else {
+      Seq.empty
+    }
+  }
+
+  private def arrayPointerTemplateDeductionTypePairs(
+    parameterType: String,
+    argumentType: String
+  ): Seq[(String, String)] = {
+    if (parameterType.endsWith("*") && isArrayLikeType(argumentType)) {
+      val parameterPointee = normalizeType(parameterType.stripSuffix("*"))
+      val argumentElement  = arrayElementTypeFullName(argumentType).map(normalizeType)
+      argumentElement.toSeq.flatMap { elementType =>
+        val arrayPairs          = mutable.ArrayBuffer(parameterPointee -> elementType)
+        val parameterQualifiers = cxxTypeQualifiers(parameterPointee)
+        val unqualifiedElement  = stripCxxTypeQualifiers(elementType).trim
+        if (parameterQualifiers.nonEmpty) {
+          arrayPairs += parameterPointee -> addMissingCxxTypeQualifiers(unqualifiedElement, parameterQualifiers)
+        }
+        arrayPairs.toSeq
+      }
     } else {
       Seq.empty
     }
