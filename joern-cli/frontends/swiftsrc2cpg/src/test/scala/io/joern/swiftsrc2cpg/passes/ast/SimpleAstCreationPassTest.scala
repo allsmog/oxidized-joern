@@ -151,6 +151,24 @@ class SimpleAstCreationPassTest extends SwiftSrc2CpgSuite {
       cpg.call.nameExact("baz").code.l should contain allOf ("baz()", "self.baz()")
     }
 
+    "have correct structure for simple if else control flow" in {
+      val cpg = code("""
+          |func pick(flag: Bool) {
+          |  if flag {
+          |    foo()
+          |  } else {
+          |    bar()
+          |  }
+          |}
+          |""".stripMargin)
+
+      inside(cpg.controlStructure.controlStructureType(ControlStructureTypes.IF).l) { case List(ifNode) =>
+        ifNode.condition.code.l shouldBe List("flag")
+        ifNode.trueBodyOut.ast.isCall.nameExact("foo").code.l shouldBe List("foo()")
+        ifNode.falseBodyOut.ast.isCall.nameExact("bar").code.l shouldBe List("bar()")
+      }
+    }
+
     "have correct closure bindings" in {
       val cpg = code("""
         |func foo() -> {
