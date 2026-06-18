@@ -130,7 +130,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "function_declaration" => self.function_decl(node),
             "class_declaration" => self.nominal_type_decl(node),
             "control_transfer_statement" => self.return_stmt(node),
+            "if_statement" => self.if_expr(node),
             "assignment"
+            | "boolean_literal"
             | "call_expression"
             | "integer_literal"
             | "simple_identifier"
@@ -529,8 +531,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let right_brace = self
             .immediate_child_kind(node, "}")
             .context("function body is missing '}'")?;
-        let statement_nodes: Vec<_> = named_children(node)
-            .find(|child| child.kind() == "statements")
+        let statements = named_children(node).find(|child| child.kind() == "statements");
+        self.code_block_from_statements(statements, left_brace, right_brace)
+    }
+
+    fn code_block_from_statements(
+        &self,
+        statements: Option<Node<'a>>,
+        left_brace: Node<'a>,
+        right_brace: Node<'a>,
+    ) -> Result<Value> {
+        let statement_nodes: Vec<_> = statements
             .map(named_children)
             .into_iter()
             .flatten()
@@ -542,7 +553,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let statements_range = self.covering_range_or_point(&items, left_brace.end_byte());
         Ok(self.syntax_node(
             "CodeBlockSyntax",
-            self.range_for_node(node),
+            self.range_from_offsets(left_brace.start_byte(), right_brace.end_byte()),
             vec![
                 self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace"),
                 self.with_name(
@@ -563,8 +574,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.expr(child)
             }
             "assignment" => self.assignment_expr(node),
+            "if_statement" => self.if_expr(node),
             "call_expression" => self.function_call_expr(node),
             "navigation_expression" => self.member_access_expr(node),
+            "boolean_literal" => Ok(self.syntax_node(
+                "BooleanLiteralExprSyntax",
+                self.range_for_node(node),
+                vec![self.with_name(
+                    self.token_for_node(
+                        node,
+                        &format!("keyword(SwiftSyntax.Keyword.{})", self.text(node)),
+                    ),
+                    "literal",
+                )],
+            )),
             "integer_literal" => Ok(self.syntax_node(
                 "IntegerLiteralExprSyntax",
                 self.range_for_node(node),
@@ -623,6 +646,85 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "MemberAccessExprSyntax",
             self.range_for_node(node),
             children,
+        ))
+    }
+
+    fn if_expr(&self, node: Node<'a>) -> Result<Value> {
+        let if_keyword = self
+            .immediate_child_kind(node, "if")
+            .context("if expression is missing 'if'")?;
+        let body_statements = named_children(node)
+            .find(|child| child.kind() == "statements")
+            .context("if expression is missing body statements")?;
+        let condition = self
+            .field_child(node, "condition")
+            .filter(|child| child.is_named())
+            .or_else(|| self.first_named_if_condition(node, if_keyword, body_statements))
+            .context("if expression is missing condition")?;
+        let left_brace = self
+            .nearest_child_before(node, "{", body_statements.start_byte())
+            .context("if expression body is missing '{'")?;
+        let right_brace = self
+            .nearest_child_after(node, "}", body_statements.end_byte())
+            .context("if expression body is missing '}'")?;
+
+        let mut children = vec![
+            self.with_name(
+                self.token_for_node(if_keyword, "keyword(SwiftSyntax.Keyword.if)"),
+                "ifKeyword",
+            ),
+            self.with_name(self.condition_element_list(condition)?, "conditions"),
+            self.with_name(
+                self.code_block_from_statements(Some(body_statements), left_brace, right_brace)?,
+                "body",
+            ),
+        ];
+
+        if let Some(else_keyword) = named_children(node)
+            .find(|child| child.kind() == "else" && child.start_byte() > right_brace.end_byte())
+        {
+            children.push(self.with_name(
+                self.token_for_node(else_keyword, "keyword(SwiftSyntax.Keyword.else)"),
+                "elseKeyword",
+            ));
+            if let Some(nested_if) = named_children(node).find(|child| {
+                child.kind() == "if_statement" && child.start_byte() > else_keyword.end_byte()
+            }) {
+                children.push(self.with_name(self.if_expr(nested_if)?, "elseBody"));
+            } else if let Some(else_statements) = named_children(node)
+                .filter(|child| child.kind() == "statements")
+                .find(|child| child.start_byte() > else_keyword.end_byte())
+            {
+                let else_left_brace = self
+                    .nearest_child_before(node, "{", else_statements.start_byte())
+                    .context("if else body is missing '{'")?;
+                let else_right_brace = self
+                    .nearest_child_after(node, "}", else_statements.end_byte())
+                    .context("if else body is missing '}'")?;
+                children.push(self.with_name(
+                    self.code_block_from_statements(
+                        Some(else_statements),
+                        else_left_brace,
+                        else_right_brace,
+                    )?,
+                    "elseBody",
+                ));
+            }
+        }
+
+        Ok(self.syntax_node("IfExprSyntax", self.range_for_node(node), children))
+    }
+
+    fn condition_element_list(&self, condition: Node<'a>) -> Result<Value> {
+        let element = self.syntax_node(
+            "ConditionElementSyntax",
+            self.range_for_node(condition),
+            vec![self.with_name(self.expr(condition)?, "condition")],
+        );
+        Ok(self.syntax_node(
+            "ConditionElementListSyntax",
+            self.range_for_node(condition),
+            vec![self.with_name(element, "")],
         ))
     }
 
@@ -928,6 +1030,30 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         named_children(node).find(|child| child.kind() == kind)
     }
 
+    fn nearest_child_before(&self, node: Node<'a>, kind: &str, offset: usize) -> Option<Node<'a>> {
+        children(node)
+            .filter(|child| child.kind() == kind && child.start_byte() <= offset)
+            .last()
+    }
+
+    fn nearest_child_after(&self, node: Node<'a>, kind: &str, offset: usize) -> Option<Node<'a>> {
+        children(node).find(|child| child.kind() == kind && child.start_byte() >= offset)
+    }
+
+    fn first_named_if_condition(
+        &self,
+        node: Node<'a>,
+        if_keyword: Node<'a>,
+        body_statements: Node<'a>,
+    ) -> Option<Node<'a>> {
+        named_children(node).find(|child| {
+            child.start_byte() > if_keyword.end_byte()
+                && child.end_byte() <= body_statements.start_byte()
+                && child.kind() != "else"
+                && child.kind() != "statements"
+        })
+    }
+
     fn trailing_delimiter(
         &self,
         parent: Node<'a>,
@@ -1102,6 +1228,32 @@ mod tests {
             return_stmt["children"][1]["nodeType"],
             "FunctionCallExprSyntax"
         );
+    }
+
+    #[test]
+    fn emits_if_else_expression() {
+        let source =
+            "func f(flag: Bool) {\n  if flag {\n    foo()\n  } else {\n    bar()\n  }\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let if_expr = find_first_node_type(&value, "IfExprSyntax").unwrap();
+        assert_eq!(
+            if_expr["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.if)"
+        );
+        assert_eq!(
+            if_expr["children"][1]["nodeType"],
+            "ConditionElementListSyntax"
+        );
+        assert_eq!(
+            if_expr["children"][1]["children"][0]["children"][0]["nodeType"],
+            "DeclReferenceExprSyntax"
+        );
+        assert_eq!(if_expr["children"][2]["nodeType"], "CodeBlockSyntax");
+        assert_eq!(
+            if_expr["children"][3]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.else)"
+        );
+        assert_eq!(if_expr["children"][4]["nodeType"], "CodeBlockSyntax");
     }
 
     #[test]
