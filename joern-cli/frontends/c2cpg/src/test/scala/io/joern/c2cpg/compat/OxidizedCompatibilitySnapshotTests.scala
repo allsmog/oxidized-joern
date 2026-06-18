@@ -985,6 +985,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
+      def globalMethod = cpg.method.fullNameExact("Test0.cpp:<global>")
       cpg.method.nameExact("statics").call.nameExact("Widget").codeExact("Core.Widget.Widget()").methodFullName.l shouldBe
         List(
           "Core.Widget.Widget:void()",
@@ -1012,6 +1013,20 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "threadCached = Core.Widget.Widget()"
         )
       cpg.method.nameExact("statics").call.nameExact("~Widget").code.l shouldBe List("automatic.~Widget()")
+      globalMethod.controlStructure.controlStructureType(ControlStructureTypes.IF).code.l
+        .filter(_.startsWith("if (statics::")) shouldBe
+        List(
+          "if (statics::<static-init>slots)",
+          "if (statics::<static-init>threadCached)",
+          "if (statics::<static-init>cached)"
+        )
+      globalMethod.call.nameExact("~Widget").code.l shouldBe
+        List(
+          "statics::slots[1].~Widget()",
+          "statics::slots[0].~Widget()",
+          "statics::threadCached.~Widget()",
+          "statics::cached.~Widget()"
+        )
     }
 
     "capture C++ local array default constructors and destructors" in {
