@@ -1105,11 +1105,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     initializer: OxConstructorInitializer,
     initializedTypeName: Option[String]
   ): Seq[Ast] = {
-    val constructorEntry =
-      initializedTypeName.flatMap(typeName => constructorEntryForInitializedType(typeName, initializer.arguments))
-    initializer.arguments.flatMap(aggregateAssignmentExpressionAsts) ++
-      Seq(constructorInitializerAst(initializer)) ++
-      temporaryDestructorAstsForConstructorArguments(initializer.arguments, constructorEntry)
+    memberConstructorInitializerAsts(initializer, initializedTypeName).getOrElse {
+      val constructorEntry =
+        initializedTypeName.flatMap(typeName => constructorEntryForInitializedType(typeName, initializer.arguments))
+      initializer.arguments.flatMap(aggregateAssignmentExpressionAsts) ++
+        Seq(constructorInitializerAst(initializer)) ++
+        temporaryDestructorAstsForConstructorArguments(initializer.arguments, constructorEntry)
+    }
   }
 
   private def constructorInitializerAst(initializer: OxConstructorInitializer): Ast = {
@@ -1129,6 +1131,37 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         )
     }
     assignmentAst(OxOrigin(initializer.code, Option(initializer.line)), left, right, assignmentCode)
+  }
+
+  private def memberConstructorInitializerAsts(
+    initializer: OxConstructorInitializer,
+    initializedTypeName: Option[String]
+  ): Option[Seq[Ast]] = {
+    initializedTypeName
+      .flatMap(typeName =>
+        constructorInvocationInfo(typeName, initializer.arguments, constructorInitializerInvocationCode(initializer))
+      )
+      .map { info =>
+        val constructorEntry = info.constructor
+        val callNode_        = constructorCallNode(OxOrigin(initializer.code, Option(initializer.line)), info)
+        val argumentAsts = constructorEntry
+          .map(entry => argumentAstsForFunctionEntry(entry, initializer.arguments))
+          .getOrElse(initializer.arguments.map(expressionAst))
+        val right = constructorInvocationBlockAst(
+          OxOrigin(info.code, Option(initializer.line)),
+          info.typeName,
+          callNode_,
+          argumentAsts
+        )
+        val fieldName      = constructorInitializerFieldName(initializer)
+        val assignmentCode = s"${Defines.This}->$fieldName = ${info.code}"
+        val left = implicitFieldAccessAst(fieldName, initializer.line).getOrElse(
+          identifierAst(fieldName, fieldName, initializer.line)
+        )
+        initializer.arguments.flatMap(aggregateAssignmentExpressionAsts) ++
+          Seq(assignmentAst(OxOrigin(assignmentCode, Option(initializer.line)), left, right, assignmentCode)) ++
+          temporaryDestructorAstsForConstructorArguments(initializer.arguments, constructorEntry)
+      }
   }
 
   private def baseConstructorInitializerAsts(baseType: String, initializer: OxConstructorInitializer): Seq[Ast] = {
@@ -1284,6 +1317,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case Seq(argument) => argument.code
       case arguments     => arguments.map(_.code).mkString("{", ", ", "}")
     }
+  }
+
+  private def constructorInitializerInvocationCode(initializer: OxConstructorInitializer): String = {
+    if (initializer.arguments.isEmpty) "" else constructorInitializerValueCode(initializer)
   }
 
   private def registerLocalDestructor(name: String, typeName: String, line: Int): Unit = {

@@ -1311,9 +1311,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .l shouldBe List("Core.Widget.Widget:void()")
       cpg.method.fullNameExact("Core.Wrapper.Wrapper:void()").call.nameExact("~Widget").code.l shouldBe
         List("Core::Widget().~Widget()")
-      wrapperConstructorCalls.indexOf("this->holder = Core::Widget()") should be < wrapperConstructorCalls.indexOf(
-        "Core::Widget().~Widget()"
-      )
+      wrapperConstructorCalls.indexOf(
+        "this->holder = Core.Holder.Holder(Core::Widget())"
+      ) should be < wrapperConstructorCalls.indexOf("Core::Widget().~Widget()")
       cpg.method.nameExact("use").call.nameExact("~Wrapper").code.l shouldBe List("wrapper.~Wrapper()")
     }
 
@@ -4436,7 +4436,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       val assignmentCodes =
         cpg.method.fullNameExact("Wrapper.Wrapper:void(int)").call.nameExact(Operators.assignment).code.l
       assignmentCodes.indexOf("target.cell.x = seed") should be < assignmentCodes.indexOf(
-        "this->holder = target = {{seed, 2}, 3}"
+        "this->holder = Holder.Holder(target = {{seed, 2}, 3})"
       )
     }
 
