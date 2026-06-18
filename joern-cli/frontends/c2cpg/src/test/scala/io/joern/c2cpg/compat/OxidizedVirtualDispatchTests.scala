@@ -304,6 +304,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |template <typename T>
           |decltype(auto) idDecltype(T& value) { return value; }
           |template <typename T>
+          |decltype(auto) idDecltypeParen(T value) { return (value); }
+          |template <typename T>
           |decltype(auto) idDecltypeBranch(bool choose, T& left, T& right) {
           |  if (choose) {
           |    return left;
@@ -325,6 +327,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::pick(Core::idAutoBranch(true, Core::makeLeaf(), Core::makeLeaf())) +
           |    Core::pick(Core::idAutoBranchLocal(true, Core::makeLeaf(), Core::makeLeaf())) +
           |    Core::pick(Core::idDecltype(leaf)) +
+          |    Core::pick(Core::idDecltypeParen(Core::makeLeaf())) +
           |    Core::pick(Core::idDecltypeBranch(true, leaf, leaf)) +
           |    Core::pick(Core::makeExplicit<Core::Leaf>()) +
           |    Core::pick(Core::ref(leaf)) +
@@ -353,6 +356,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         .typeFullName
         .l shouldBe List("Core.Leaf")
       cpg.method.nameExact("use").call.codeExact("Core::idDecltype(leaf)").typeFullName.l shouldBe
+        List("Core.Leaf&")
+      cpg.method.nameExact("use").call.codeExact("Core::idDecltypeParen(Core::makeLeaf())").typeFullName.l shouldBe
         List("Core.Leaf&")
       cpg.method.nameExact("use").call.codeExact("Core::idDecltypeBranch(true, leaf, leaf)").typeFullName.l shouldBe
         List("Core.Leaf&")
@@ -386,6 +391,12 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         .l shouldBe List("Core.pick:char(Leaf&&)")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::idDecltype(leaf))").methodFullName.l shouldBe
         List("Core.pick:short(Mid&)")
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("Core::pick(Core::idDecltypeParen(Core::makeLeaf()))")
+        .methodFullName
+        .l shouldBe List("Core.pick:short(Mid&)")
       cpg.method
         .nameExact("use")
         .call
