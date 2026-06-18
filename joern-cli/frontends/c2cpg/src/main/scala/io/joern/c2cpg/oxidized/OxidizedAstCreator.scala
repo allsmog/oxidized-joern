@@ -2814,7 +2814,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
     val extendedTemporaryDestructor =
       Option
-        .when(!isStaticStorageLocal)(local.initializer.flatMap(referenceBoundTemporaryDestructor(typeName, _)))
+        .when(!isStaticStorageLocal)(local.initializer.flatMap(referenceBoundTemporaryDestructor(semanticTypeName, _)))
         .flatten
     extendedTemporaryDestructor.foreach(registerLocalDestructor)
     val extendsCurrentInitializerTemporary =
