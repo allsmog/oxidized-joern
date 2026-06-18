@@ -6363,6 +6363,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         functionReturnExpressionTypeFullName(entry, argument, templateBindings, localTypes).map { typeName =>
           s"${stripCxxReference(normalizeType(resolveAliasType(typeName)))}*"
         }
+      case assignment: OxAssignment =>
+        functionScopedAssignmentExpressionTypeFullName(entry, assignment, templateBindings, localTypes)
       case unary: OxUnary =>
         functionScopedUnaryExpressionTypeFullName(entry, unary, templateBindings, localTypes)
       case binary: OxBinary =>
@@ -6465,6 +6467,59 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         }
       }
       .orElse(baseTypeFullName.map(_.stripSuffix("[]")))
+  }
+
+  private def functionScopedAssignmentExpressionTypeFullName(
+    entry: FunctionEntry,
+    assignment: OxAssignment,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    functionScopedAssignmentOperatorTypeFullName(entry, assignment, templateBindings, localTypes)
+      .orElse(functionReturnExpressionTypeFullName(entry, assignment.left, templateBindings, localTypes))
+  }
+
+  private def functionScopedAssignmentOperatorTypeFullName(
+    entry: FunctionEntry,
+    assignment: OxAssignment,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    cxxOperatorFunctionName(assignment.operator).flatMap { operatorName =>
+      val leftInfo = ArgumentInfo(
+        assignment.left,
+        functionReturnExpressionTypeFullName(entry, assignment.left, templateBindings, localTypes),
+        functionReturnExpressionIsRvalue(entry, assignment.left, templateBindings, localTypes)
+      )
+      val rightInfo = ArgumentInfo(
+        assignment.right,
+        functionReturnExpressionTypeFullName(entry, assignment.right, templateBindings, localTypes),
+        functionReturnExpressionIsRvalue(entry, assignment.right, templateBindings, localTypes)
+      )
+      val memberTarget =
+        leftInfo.typeFullName.flatMap { receiverTypeFullName =>
+          selectFunctionEntryForArgumentInfos(
+            memberFunctionCandidatesForReceiverType(receiverTypeFullName, operatorName),
+            Seq(rightInfo),
+            Option(receiverTypeFullName)
+          ).map(targetEntry =>
+            functionSemanticReturnTypeFullNameForArgumentInfos(
+              targetEntry,
+              Seq(rightInfo),
+              Option(receiverTypeFullName)
+            )
+          )
+        }
+      memberTarget.orElse {
+        Option
+          .when(assignment.operator != "=") {
+            val argumentInfos = Seq(leftInfo, rightInfo)
+            selectFunctionEntryForArgumentInfos(freeFunctionCandidatesByName(operatorName), argumentInfos)
+              .map(targetEntry => functionSemanticReturnTypeFullNameForArgumentInfos(targetEntry, argumentInfos))
+          }
+          .flatten
+      }
+    }
   }
 
   private def functionScopedUnaryExpressionTypeFullName(
@@ -6711,6 +6766,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         functionScopedBinaryExpressionTypeFullName(entry, binary, templateBindings, localTypes)
           .map(typeNameIsRvalue)
           .getOrElse(true)
+      case assignment: OxAssignment =>
+        functionScopedAssignmentOperatorTypeFullName(entry, assignment, templateBindings, localTypes)
+          .map(typeNameIsRvalue)
+          .getOrElse(false)
       case unary: OxUnary =>
         functionScopedUnaryExpressionTypeFullName(entry, unary, templateBindings, localTypes)
           .map(typeNameIsRvalue)
