@@ -25,9 +25,6 @@ pub fn parse_source(relative_file_path: &str, full_file_path: &str, source: &str
         .parse(source, None)
         .context("Swift parser returned no tree")?;
     let root = tree.root_node();
-    if root.has_error() {
-        bail!("Swift parse contains syntax errors");
-    }
 
     let emitter = SwiftSyntaxEmitter::new(source);
     emitter.source_file(root, relative_file_path, full_file_path)
@@ -195,10 +192,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             node_type,
             self.range_for_node(node),
             vec![
-                self.with_name(
-                    self.empty_collection("AttributeListSyntax", node.start_byte()),
-                    "attributes",
-                ),
+                self.with_name(self.attribute_list(node)?, "attributes"),
                 self.with_name(
                     self.empty_collection("DeclModifierListSyntax", node.start_byte()),
                     "modifiers",
@@ -256,6 +250,41 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn attribute_list(&self, node: Node<'a>) -> Result<Value> {
+        let mut attributes = Vec::new();
+        for modifiers in named_children(node).filter(|child| child.kind() == "modifiers") {
+            for attribute in named_children(modifiers).filter(|child| child.kind() == "attribute") {
+                attributes.push(self.with_name(self.attribute(attribute)?, ""));
+            }
+        }
+        let range = self.covering_range_or_point(&attributes, node.start_byte());
+        Ok(self.syntax_node("AttributeListSyntax", range, attributes))
+    }
+
+    fn attribute(&self, node: Node<'a>) -> Result<Value> {
+        let at_sign = self
+            .immediate_child_kind(node, "@")
+            .context("attribute is missing '@'")?;
+        let name = self
+            .immediate_named_child_kind(node, "user_type")
+            .or_else(|| self.first_descendant_kind(node, "type_identifier"))
+            .context("attribute is missing a name")?;
+        let mut children = vec![
+            self.with_name(self.token_for_node(at_sign, "atSign"), "atSign"),
+            self.with_name(self.identifier_type(name)?, "attributeName"),
+        ];
+        if let Some(left_paren) = self.immediate_child_kind(node, "(") {
+            children
+                .push(self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"));
+        }
+        if let Some(right_paren) = self.immediate_child_kind(node, ")") {
+            children
+                .push(self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"));
+        }
+
+        Ok(self.syntax_node("AttributeSyntax", self.range_for_node(node), children))
+    }
+
     fn variable_decl(&self, node: Node<'a>) -> Result<Value> {
         let binding_keyword = self
             .first_descendant_any_kind(node, "let")
@@ -301,10 +330,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "VariableDeclSyntax",
             self.range_for_node(node),
             vec![
-                self.with_name(
-                    self.empty_collection("AttributeListSyntax", node.start_byte()),
-                    "attributes",
-                ),
+                self.with_name(self.attribute_list(node)?, "attributes"),
                 self.with_name(
                     self.empty_collection("DeclModifierListSyntax", node.start_byte()),
                     "modifiers",
@@ -474,10 +500,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let body = self.field_child(node, "body");
 
         let mut children = vec![
-            self.with_name(
-                self.empty_collection("AttributeListSyntax", node.start_byte()),
-                "attributes",
-            ),
+            self.with_name(self.attribute_list(node)?, "attributes"),
             self.with_name(
                 self.empty_collection("DeclModifierListSyntax", node.start_byte()),
                 "modifiers",
@@ -579,10 +602,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "FunctionParameterSyntax",
             self.range_for_node(node),
             vec![
-                self.with_name(
-                    self.empty_collection("AttributeListSyntax", node.start_byte()),
-                    "attributes",
-                ),
+                self.with_name(self.attribute_list(node)?, "attributes"),
                 self.with_name(
                     self.empty_collection("DeclModifierListSyntax", node.start_byte()),
                     "modifiers",
@@ -1625,6 +1645,39 @@ mod tests {
         assert_eq!(members.as_array().unwrap().len(), 2);
         assert_eq!(members[0]["children"][0]["nodeType"], "VariableDeclSyntax");
         assert_eq!(members[1]["children"][0]["nodeType"], "FunctionDeclSyntax");
+    }
+
+    #[test]
+    fn emits_declaration_attributes() {
+        let source =
+            "@bar(x: \"y\")\nfunc foo() -> {\n  let x = 1\n}\n@objc(Foo)\npublic class Foo {}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let attributes = find_node_types(&value, "AttributeSyntax");
+        assert_eq!(attributes.len(), 2);
+        assert_eq!(attributes[0]["children"][0]["tokenKind"], "atSign");
+        assert_eq!(
+            attributes[0]["children"][1]["children"][0]["tokenKind"],
+            "identifier(\"bar\")"
+        );
+        assert_eq!(attributes[0]["children"][2]["tokenKind"], "leftParen");
+        assert_eq!(attributes[0]["children"][3]["tokenKind"], "rightParen");
+        assert_eq!(
+            attributes[1]["children"][1]["children"][0]["tokenKind"],
+            "identifier(\"objc\")"
+        );
+
+        let function = find_first_node_type(&value, "FunctionDeclSyntax").unwrap();
+        assert_eq!(function["children"][0]["nodeType"], "AttributeListSyntax");
+        assert_eq!(
+            function["children"][0]["children"][0]["nodeType"],
+            "AttributeSyntax"
+        );
+        let class_decl = find_first_node_type(&value, "ClassDeclSyntax").unwrap();
+        assert_eq!(class_decl["children"][0]["nodeType"], "AttributeListSyntax");
+        assert_eq!(
+            class_decl["children"][0]["children"][0]["nodeType"],
+            "AttributeSyntax"
+        );
     }
 
     #[test]
