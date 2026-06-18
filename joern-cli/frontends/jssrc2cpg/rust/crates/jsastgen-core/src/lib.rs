@@ -105,6 +105,7 @@ fn expr_json(node: Node, source: &str) -> Value {
         "call_expression" => call_expression_json(node, source),
         "member_expression" => member_expression_json(node, source),
         "array" => array_expression_json(node, source),
+        "object" => object_expression_json(node, source),
         "rest_pattern" => unary_argument_json("RestElement", node, source),
         "spread_element" => unary_argument_json("SpreadElement", node, source),
         "parenthesized_expression" => node
@@ -305,6 +306,69 @@ fn array_expression_json(node: Node, source: &str) -> Value {
         .collect::<Vec<_>>();
 
     with_span("ArrayExpression", node, json!({ "elements": elements }))
+}
+
+fn object_expression_json(node: Node, source: &str) -> Value {
+    let properties = named_children(node)
+        .filter_map(|child| object_property_json(child, source))
+        .collect::<Vec<_>>();
+
+    with_span(
+        "ObjectExpression",
+        node,
+        json!({ "properties": properties }),
+    )
+}
+
+fn object_property_json(node: Node, source: &str) -> Option<Value> {
+    match node.kind() {
+        "pair" => Some(object_pair_json(node, source)),
+        "spread_element" => Some(unary_argument_json("SpreadElement", node, source)),
+        "shorthand_property_identifier" => Some(shorthand_object_property_json(node, source)),
+        _ => None,
+    }
+}
+
+fn object_pair_json(node: Node, source: &str) -> Value {
+    let key_node = node.child_by_field_name("key").unwrap_or(node);
+    let computed = key_node.kind() == "computed_property_name";
+    let key = object_key_json(key_node, source);
+    let value = field_json(node, "value", source).unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        "ObjectProperty",
+        node,
+        json!({
+            "key": key,
+            "value": value,
+            "computed": computed,
+            "shorthand": false
+        }),
+    )
+}
+
+fn shorthand_object_property_json(node: Node, source: &str) -> Value {
+    let identifier = identifier_json(node, source);
+    with_span(
+        "ObjectProperty",
+        node,
+        json!({
+            "key": identifier.clone(),
+            "value": identifier,
+            "computed": false,
+            "shorthand": true
+        }),
+    )
+}
+
+fn object_key_json(node: Node, source: &str) -> Value {
+    if node.kind() == "computed_property_name" {
+        return node
+            .named_child(0)
+            .map(|child| expr_json(child, source))
+            .unwrap_or_else(|| noop_json(node));
+    }
+    expr_json(node, source)
 }
 
 fn unary_argument_json(kind: &str, node: Node, source: &str) -> Value {
@@ -523,5 +587,36 @@ mod tests {
         assert_eq!(values["elements"][1]["name"], "two");
         assert_eq!(values["elements"][2]["type"], "SpreadElement");
         assert_eq!(values["elements"][2]["argument"]["name"], "rest");
+    }
+
+    #[test]
+    fn emits_object_literals_as_babel_object_expressions() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(
+            root,
+            path,
+            "const x = { key1: \"value\", key2: 2, [1 + 1]: value(), shorthand, ...rest };\n",
+        )
+        .expect("parse succeeds");
+
+        let object = &json["ast"]["program"]["body"][0]["declarations"][0]["init"];
+        assert_eq!(object["type"], "ObjectExpression");
+        assert_eq!(object["properties"].as_array().unwrap().len(), 5);
+
+        assert_eq!(object["properties"][0]["type"], "ObjectProperty");
+        assert_eq!(object["properties"][0]["key"]["name"], "key1");
+        assert_eq!(object["properties"][0]["value"]["type"], "StringLiteral");
+        assert_eq!(object["properties"][0]["computed"], false);
+
+        assert_eq!(object["properties"][2]["key"]["type"], "BinaryExpression");
+        assert_eq!(object["properties"][2]["computed"], true);
+
+        assert_eq!(object["properties"][3]["key"]["name"], "shorthand");
+        assert_eq!(object["properties"][3]["value"]["name"], "shorthand");
+        assert_eq!(object["properties"][3]["shorthand"], true);
+
+        assert_eq!(object["properties"][4]["type"], "SpreadElement");
+        assert_eq!(object["properties"][4]["argument"]["name"], "rest");
     }
 }
