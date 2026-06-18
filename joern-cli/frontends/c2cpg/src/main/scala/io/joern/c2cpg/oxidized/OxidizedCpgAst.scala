@@ -57,6 +57,7 @@ case class OxUsingDeclaration(name: String, target: String, code: String, line: 
 case class OxFieldDecl(
   name: String,
   typeName: String,
+  semanticTypeName: String,
   code: String,
   isStatic: Boolean,
   initializer: Option[OxExpression]
@@ -76,6 +77,7 @@ case class OxEnumVariant(name: String, value: Option[String], code: String, line
 case class OxGlobalVariableDecl(
   name: String,
   typeName: String,
+  semanticTypeName: String,
   code: String,
   line: Int,
   sourcePath: Option[String],
@@ -358,6 +360,7 @@ object OxDocument {
         OxGlobalVariableDecl(
           name = str(value, "name"),
           typeName = str(value, "typeName"),
+          semanticTypeName = value.obj.get("semanticTypeName").map(_.str).getOrElse(str(value, "typeName")),
           code = str(value, "code"),
           line = int(value, "line"),
           sourcePath = sourcePath(value),
@@ -400,6 +403,7 @@ object OxDocument {
     OxFieldDecl(
       name = str(value, "name"),
       typeName = str(value, "typeName"),
+      semanticTypeName = value.obj.get("semanticTypeName").map(_.str).getOrElse(str(value, "typeName")),
       code = str(value, "code"),
       isStatic = value.obj.get("isStatic").exists(_.bool),
       initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
