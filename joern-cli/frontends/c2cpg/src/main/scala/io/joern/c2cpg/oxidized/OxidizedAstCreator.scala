@@ -6768,12 +6768,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   ): Option[(FunctionEntry, Option[String])] = {
     call.callee match {
       case OxFieldAccess(field, _, _, base) =>
+        val lookupField = stripTemplateArguments(field)
         val receiverTypeFullName =
           functionReturnExpressionTypeFullName(entry, base, templateBindings, localTypes)
         val receiverType              = receiverTypeFullName.map(receiverAggregateTypeName)
-        val qualifiedMemberCandidates = qualifiedMemberFunctionCandidates(field, receiverType)
+        val qualifiedMemberCandidates = qualifiedMemberFunctionCandidates(lookupField, receiverType)
         val unqualifiedMemberCandidates = receiverTypeFullName.toSeq.flatMap { receiverType =>
-          memberFunctionCandidatesForReceiverType(receiverType, field)
+          memberFunctionCandidatesForReceiverType(receiverType, lookupField)
         }
         val unfilteredCandidates =
           if (qualifiedMemberCandidates.nonEmpty) qualifiedMemberCandidates else unqualifiedMemberCandidates
@@ -7351,11 +7352,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val explicitTemplateArguments = explicitTemplateArgumentTypeNames(call)
     call.callee match {
       case OxFieldAccess(field, _, _, base) =>
+        val lookupField               = stripTemplateArguments(field)
         val receiverTypeFullName      = expressionTypeFullName(base)
         val receiverType              = receiverTypeFullName.map(receiverAggregateTypeName)
-        val qualifiedMemberCandidates = qualifiedMemberFunctionCandidates(field, receiverType)
+        val qualifiedMemberCandidates = qualifiedMemberFunctionCandidates(lookupField, receiverType)
         val unqualifiedMemberCandidates = receiverTypeFullName.toSeq.flatMap { receiverType =>
-          memberFunctionCandidatesForReceiverType(receiverType, field)
+          memberFunctionCandidatesForReceiverType(receiverType, lookupField)
         }
         val unfilteredCandidates =
           if (qualifiedMemberCandidates.nonEmpty) qualifiedMemberCandidates else unqualifiedMemberCandidates
@@ -7672,8 +7674,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .get(normalizeType(ownerTypeFullName))
       .map { case (structDecl, _) => templateParameterNames(structDecl) }
       .getOrElse(Seq.empty)
-    if (parameters.nonEmpty && parameters.size == arguments.size) {
-      parameters.zip(arguments).toMap
+    if (parameters.nonEmpty && arguments.nonEmpty && parameters.size >= arguments.size) {
+      parameters.take(arguments.size).zip(arguments).toMap
     } else {
       Map.empty
     }
@@ -7842,10 +7844,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def orderedTemplateParameterNames(function: OxFunctionDecl): Seq[String] = {
-    val namesFromTemplatePrefix = TemplateParameterListPattern
-      .findAllMatchIn(function.code)
-      .flatMap(templateMatch => TemplateTypeParameterPattern.findAllMatchIn(templateMatch.group(1)).map(_.group(1)))
-      .toSeq
+    val namesFromTemplatePrefix = leadingTemplateParameterNames(function.code)
     if (namesFromTemplatePrefix.nonEmpty) {
       namesFromTemplatePrefix.distinct
     } else {
@@ -7858,23 +7857,30 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def templateParameterNames(structDecl: OxStructDecl): Seq[String] = {
-    val namesFromTemplatePrefix = TemplateParameterListPattern
-      .findAllMatchIn(structDecl.code)
-      .flatMap(templateMatch => TemplateTypeParameterPattern.findAllMatchIn(templateMatch.group(1)).map(_.group(1)))
-      .toSeq
+    val namesFromTemplatePrefix = leadingTemplateParameterNames(structDecl.code)
     if (namesFromTemplatePrefix.nonEmpty) {
       namesFromTemplatePrefix.distinct
     } else {
       val fieldTypes = structDecl.fields.map(_.semanticTypeName)
       val baseTypes  = structDecl.baseClassDeclarations.map(_.name)
       val functionTypes = structDecl.nestedDeclarations.collect { case function: OxFunctionDecl =>
-        function.semanticReturnType +: function.parameters.map(_.semanticTypeName)
+        val nestedTemplateParameters = leadingTemplateParameterNames(function.code).toSet
+        (function.semanticReturnType +: function.parameters.map(_.semanticTypeName))
+          .flatMap(templateParameterTokens)
+          .filterNot(nestedTemplateParameters.contains)
       }.flatten
       (fieldTypes ++ baseTypes ++ functionTypes)
         .flatMap(templateParameterTokens)
         .filterNot(typeName => resolveAggregateTypeFullName(typeName).isDefined)
         .distinct
     }
+  }
+
+  private def leadingTemplateParameterNames(code: String): Seq[String] = {
+    TemplateParameterListPattern
+      .findPrefixMatchOf(code.trim)
+      .toSeq
+      .flatMap(templateMatch => TemplateTypeParameterPattern.findAllMatchIn(templateMatch.group(1)).map(_.group(1)))
   }
 
   private def templateParameterTokens(typeName: String): Seq[String] = {

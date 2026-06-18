@@ -452,6 +452,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |class Holder {
           |public:
           |  T& operator[](int index);
+          |  template <typename U>
+          |  U memberExplicit();
           |};
           |template <typename T>
           |T id(T value) { return value; }
@@ -538,6 +540,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::pick(Core::first(holder)) +
           |    Core::pick(Core::firstRef(holder)) +
           |    Core::pick(Core::nestedFirst(nestedHolder)) +
+          |    Core::pick(holder.memberExplicit<Core::Leaf>()) +
           |    Core::pick(Core::makeExplicit<Core::Leaf>()) +
           |    Core::pick(Core::ref(leaf)) +
           |    Core::pick(Core::cref(constLeaf)) +
@@ -588,6 +591,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.codeExact("Core::firstRef(holder)").typeFullName.l shouldBe
         List("Core.Leaf&")
       cpg.method.nameExact("use").call.codeExact("Core::nestedFirst(nestedHolder)").typeFullName.l shouldBe
+        List("Core.Leaf")
+      cpg.method.nameExact("use").call.codeExact("holder.memberExplicit<Core::Leaf>()").typeFullName.l shouldBe
         List("Core.Leaf")
       cpg.method.nameExact("use").call.codeExact("Core::makeExplicit<Core::Leaf>()").typeFullName.l shouldBe
         List("Core.Leaf")
@@ -650,6 +655,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::firstRef(holder))").methodFullName.l shouldBe
         List("Core.pick:short(Mid&)")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::nestedFirst(nestedHolder))").methodFullName.l shouldBe
+        List("Core.pick:char(Leaf&&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(holder.memberExplicit<Core::Leaf>())").methodFullName.l shouldBe
         List("Core.pick:char(Leaf&&)")
       cpg.method
         .nameExact("use")
