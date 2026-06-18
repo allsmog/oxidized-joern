@@ -723,6 +723,56 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.Visible.Visible(seed)")
     }
 
+    "ignore explicit constructors for copy initialization" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Hidden {
+          |public:
+          |  explicit Hidden(int value) {}
+          |};
+          |class Visible {
+          |public:
+          |  Visible(int value) {}
+          |};
+          |class ConditionalVisible {
+          |public:
+          |  explicit(false) ConditionalVisible(int value) {}
+          |};
+          |class ConditionalHidden {
+          |public:
+          |  explicit(true) ConditionalHidden(int value) {}
+          |};
+          |}
+          |int use(int seed) {
+          |  Core::Hidden direct(seed);
+          |  Core::Hidden copyHidden = seed;
+          |  Core::Visible copyVisible = seed;
+          |  Core::ConditionalVisible copyConditionalVisible = seed;
+          |  Core::ConditionalHidden copyConditionalHidden = seed;
+          |  return seed;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").call.codeExact("direct = Core.Hidden.Hidden(seed)").l should have size 1
+      cpg.method.nameExact("use").call.codeExact("copyHidden = Core.Hidden.Hidden(seed)").l shouldBe Nil
+      cpg.method.nameExact("use").call.codeExact("copyHidden = seed").l should have size 1
+      cpg.method.nameExact("use").call.codeExact("copyVisible = Core.Visible.Visible(seed)").l should have size 1
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("copyConditionalVisible = Core.ConditionalVisible.ConditionalVisible(seed)")
+        .l should have size 1
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("copyConditionalHidden = Core.ConditionalHidden.ConditionalHidden(seed)")
+        .l shouldBe Nil
+      cpg.method.nameExact("use").call.codeExact("copyConditionalHidden = seed").l should have size 1
+    }
+
     "ignore explicit conversion operators for implicit overload conversions" in {
       val cpg = code(
         """
