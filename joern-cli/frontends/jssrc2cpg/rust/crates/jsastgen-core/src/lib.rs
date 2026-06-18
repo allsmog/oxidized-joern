@@ -90,6 +90,7 @@ fn stmt_json(node: Node, source: &str) -> Value {
         "while_statement" => while_statement_json(node, source),
         "do_statement" => do_while_statement_json(node, source),
         "for_statement" => for_statement_json(node, source),
+        "for_in_statement" => for_in_of_statement_json(node, source),
         "break_statement" => jump_statement_json("BreakStatement", node, source),
         "continue_statement" => jump_statement_json("ContinueStatement", node, source),
         "try_statement" => try_statement_json(node, source),
@@ -102,9 +103,10 @@ fn stmt_json(node: Node, source: &str) -> Value {
 
 fn expr_json(node: Node, source: &str) -> Value {
     match node.kind() {
-        "identifier" | "property_identifier" | "statement_identifier" => {
-            identifier_json(node, source)
-        }
+        "identifier"
+        | "property_identifier"
+        | "statement_identifier"
+        | "shorthand_property_identifier_pattern" => identifier_json(node, source),
         "number" => numeric_literal_json(node, source),
         "string" => string_literal_json(node, source),
         "template_string" => template_string_json(node, source),
@@ -122,6 +124,9 @@ fn expr_json(node: Node, source: &str) -> Value {
         "subscript_expression" => subscript_expression_json(node, source),
         "array" => array_expression_json(node, source),
         "object" => object_expression_json(node, source),
+        "array_pattern" => array_pattern_json(node, source),
+        "object_pattern" => object_pattern_json(node, source),
+        "assignment_pattern" => assignment_pattern_json(node, source),
         "arrow_function" => arrow_function_json(node, source),
         "rest_pattern" => unary_argument_json("RestElement", node, source),
         "spread_element" => unary_argument_json("SpreadElement", node, source),
@@ -318,6 +323,65 @@ fn for_statement_json(node: Node, source: &str) -> Value {
             "body": body
         }),
     )
+}
+
+fn for_in_of_statement_json(node: Node, source: &str) -> Value {
+    let operator = node
+        .child_by_field_name("operator")
+        .map(|child| node_text(child, source))
+        .unwrap_or_default();
+    let kind = if operator == "of" {
+        "ForOfStatement"
+    } else {
+        "ForInStatement"
+    };
+    let left_node = node.child_by_field_name("left");
+    let left = left_node
+        .map(|child| for_in_of_left_json(node, child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let right = node
+        .child_by_field_name("right")
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let body = node
+        .child_by_field_name("body")
+        .map(|child| stmt_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        kind,
+        node,
+        json!({
+            "left": left,
+            "right": right,
+            "body": body,
+            "await": has_keyword_child(node, source, "await")
+        }),
+    )
+}
+
+fn for_in_of_left_json(for_node: Node, left_node: Node, source: &str) -> Value {
+    let id = pattern_or_expr_json(left_node, source);
+    if let Some(kind) = declaration_kind_in_for_in_of(for_node, source) {
+        let declarator = with_span(
+            "VariableDeclarator",
+            left_node,
+            json!({
+                "id": id,
+                "init": Value::Null
+            }),
+        );
+        with_span(
+            "VariableDeclaration",
+            left_node,
+            json!({
+                "kind": kind,
+                "declarations": [declarator]
+            }),
+        )
+    } else {
+        id
+    }
 }
 
 fn non_empty_stmt_or_expr_json(node: Node, source: &str) -> Option<Value> {
@@ -553,6 +617,15 @@ fn array_expression_json(node: Node, source: &str) -> Value {
     with_span("ArrayExpression", node, json!({ "elements": elements }))
 }
 
+fn array_pattern_json(node: Node, source: &str) -> Value {
+    let elements = named_children(node)
+        .filter(|child| !is_comment(*child))
+        .map(|child| pattern_json(child, source))
+        .collect::<Vec<_>>();
+
+    with_span("ArrayPattern", node, json!({ "elements": elements }))
+}
+
 fn object_expression_json(node: Node, source: &str) -> Value {
     let properties = named_children(node)
         .filter_map(|child| object_property_json(child, source))
@@ -565,12 +638,32 @@ fn object_expression_json(node: Node, source: &str) -> Value {
     )
 }
 
+fn object_pattern_json(node: Node, source: &str) -> Value {
+    let properties = named_children(node)
+        .filter_map(|child| object_pattern_property_json(child, source))
+        .collect::<Vec<_>>();
+
+    with_span("ObjectPattern", node, json!({ "properties": properties }))
+}
+
 fn object_property_json(node: Node, source: &str) -> Option<Value> {
     match node.kind() {
         "pair" => Some(object_pair_json(node, source)),
         "method_definition" => Some(object_method_json(node, source)),
         "spread_element" => Some(unary_argument_json("SpreadElement", node, source)),
         "shorthand_property_identifier" => Some(shorthand_object_property_json(node, source)),
+        _ => None,
+    }
+}
+
+fn object_pattern_property_json(node: Node, source: &str) -> Option<Value> {
+    match node.kind() {
+        "pair_pattern" => Some(object_pair_pattern_json(node, source)),
+        "object_assignment_pattern" => Some(object_assignment_pattern_json(node, source)),
+        "rest_pattern" => Some(unary_argument_json("RestElement", node, source)),
+        "shorthand_property_identifier_pattern" => {
+            Some(shorthand_object_property_json(node, source))
+        }
         _ => None,
     }
 }
@@ -589,6 +682,60 @@ fn object_pair_json(node: Node, source: &str) -> Value {
             "value": value,
             "computed": computed,
             "shorthand": false
+        }),
+    )
+}
+
+fn object_pair_pattern_json(node: Node, source: &str) -> Value {
+    let key_node = node.child_by_field_name("key").unwrap_or(node);
+    let computed = key_node.kind() == "computed_property_name";
+    let key = object_key_json(key_node, source);
+    let value = node
+        .child_by_field_name("value")
+        .map(|child| pattern_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        "ObjectProperty",
+        node,
+        json!({
+            "key": key,
+            "value": value,
+            "computed": computed,
+            "shorthand": false
+        }),
+    )
+}
+
+fn object_assignment_pattern_json(node: Node, source: &str) -> Value {
+    let left = node.child_by_field_name("left").unwrap_or(node);
+    let right = node
+        .child_by_field_name("right")
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let key = match left.kind() {
+        "shorthand_property_identifier_pattern" | "identifier" | "property_identifier" => {
+            identifier_json(left, source)
+        }
+        _ => pattern_json(left, source),
+    };
+    let value = with_span(
+        "AssignmentPattern",
+        node,
+        json!({
+            "left": pattern_json(left, source),
+            "right": right
+        }),
+    );
+
+    with_span(
+        "ObjectProperty",
+        node,
+        json!({
+            "key": key,
+            "value": value,
+            "computed": false,
+            "shorthand": true
         }),
     )
 }
@@ -650,6 +797,26 @@ fn object_key_json(node: Node, source: &str) -> Value {
             .unwrap_or_else(|| noop_json(node));
     }
     expr_json(node, source)
+}
+
+fn assignment_pattern_json(node: Node, source: &str) -> Value {
+    let left = node
+        .child_by_field_name("left")
+        .map(|child| pattern_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let right = node
+        .child_by_field_name("right")
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        "AssignmentPattern",
+        node,
+        json!({
+            "left": left,
+            "right": right
+        }),
+    )
 }
 
 fn arrow_function_json(node: Node, source: &str) -> Value {
@@ -875,6 +1042,29 @@ fn field_json(node: Node, field: &str, source: &str) -> Option<Value> {
         .map(|child| expr_json(child, source))
 }
 
+fn pattern_json(node: Node, source: &str) -> Value {
+    match node.kind() {
+        "array_pattern" => array_pattern_json(node, source),
+        "object_pattern" => object_pattern_json(node, source),
+        "assignment_pattern" => assignment_pattern_json(node, source),
+        "rest_pattern" => unary_argument_json("RestElement", node, source),
+        "parenthesized_expression" => node
+            .named_child(0)
+            .map(|child| pattern_json(child, source))
+            .unwrap_or_else(|| noop_json(node)),
+        _ => expr_json(node, source),
+    }
+}
+
+fn pattern_or_expr_json(node: Node, source: &str) -> Value {
+    match node.kind() {
+        "array_pattern" | "object_pattern" | "assignment_pattern" | "rest_pattern" => {
+            pattern_json(node, source)
+        }
+        _ => expr_json(node, source),
+    }
+}
+
 fn declaration_kind(node: Node, source: &str) -> String {
     for index in 0..node.child_count() {
         if let Some(child) = node.child(index) {
@@ -885,6 +1075,14 @@ fn declaration_kind(node: Node, source: &str) -> String {
         }
     }
     "var".to_string()
+}
+
+fn declaration_kind_in_for_in_of(node: Node, source: &str) -> Option<String> {
+    (0..node.child_count())
+        .filter_map(|index| node.child(index))
+        .filter(|child| !child.is_named())
+        .map(|child| node_text(child, source))
+        .find(|text| matches!(text.as_str(), "let" | "const" | "var"))
 }
 
 fn with_span(kind: &str, node: Node, fields: Value) -> Value {
@@ -1172,6 +1370,44 @@ mod tests {
         assert_eq!(empty_for["init"], Value::Null);
         assert_eq!(empty_for["test"], Value::Null);
         assert_eq!(empty_for["update"], Value::Null);
+    }
+
+    #[test]
+    fn emits_for_in_of_loops_and_destructuring_patterns() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(
+            root,
+            path,
+            "for (var i in arr) { foo(i); }\nfor (i of arr) { foo(i); }\nfor (var {a, b, c} of obj) { foo(a, b, c); }\nfor ([x, y] of arr) {}\n",
+        )
+        .expect("parse succeeds");
+
+        let for_in = &json["ast"]["program"]["body"][0];
+        assert_eq!(for_in["type"], "ForInStatement");
+        assert_eq!(for_in["left"]["type"], "VariableDeclaration");
+        assert_eq!(for_in["left"]["kind"], "var");
+        assert_eq!(for_in["left"]["declarations"][0]["id"]["name"], "i");
+        assert_eq!(for_in["left"]["declarations"][0]["init"], Value::Null);
+        assert_eq!(for_in["right"]["name"], "arr");
+
+        let for_of = &json["ast"]["program"]["body"][1];
+        assert_eq!(for_of["type"], "ForOfStatement");
+        assert_eq!(for_of["left"]["type"], "Identifier");
+        assert_eq!(for_of["left"]["name"], "i");
+
+        let object_pattern = &json["ast"]["program"]["body"][2]["left"]["declarations"][0]["id"];
+        assert_eq!(object_pattern["type"], "ObjectPattern");
+        assert_eq!(object_pattern["properties"].as_array().unwrap().len(), 3);
+        assert_eq!(object_pattern["properties"][0]["type"], "ObjectProperty");
+        assert_eq!(object_pattern["properties"][0]["key"]["name"], "a");
+        assert_eq!(object_pattern["properties"][0]["value"]["name"], "a");
+        assert_eq!(object_pattern["properties"][0]["shorthand"], true);
+
+        let array_pattern = &json["ast"]["program"]["body"][3]["left"];
+        assert_eq!(array_pattern["type"], "ArrayPattern");
+        assert_eq!(array_pattern["elements"][0]["name"], "x");
+        assert_eq!(array_pattern["elements"][1]["name"], "y");
     }
 
     #[test]
