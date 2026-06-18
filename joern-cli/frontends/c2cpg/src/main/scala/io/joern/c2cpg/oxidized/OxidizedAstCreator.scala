@@ -266,8 +266,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       )
     val globalBlock   = blockNode(origin, NamespaceTraversal.globalNamespaceName, Defines.Any)
     val namespaceAsts = document.declarations.collect { case namespace: OxNamespaceDecl => astForNamespace(namespace) }
-    val declarationAsts      = document.declarations.flatMap(astForDeclaration)
-    val globalDestructorAsts = topLevelGlobalDestructorAsts(document.declarations)
+    val declarationAsts      = globalMethodDeclarationAsts(document.declarations)
+    val globalDestructorAsts = globalDestructorAstsForDeclarations(document.declarations)
     val globalMethodAst =
       methodAst(
         globalMethod,
@@ -278,6 +278,27 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
     val includeAsts = document.declarations.collect { case includeDecl: OxIncludeDecl => astForInclude(includeDecl) }
     Ast(namespaceBlock).withChildren(includeAsts ++ namespaceAsts :+ Ast(globalTypeDecl).withChild(globalMethodAst))
+  }
+
+  private def globalMethodDeclarationAsts(
+    declarations: Seq[OxDeclaration],
+    ownerFullName: Option[String] = None,
+    includeNonGlobals: Boolean = true
+  ): Seq[Ast] = {
+    declarations.flatMap {
+      case namespace: OxNamespaceDecl =>
+        globalMethodDeclarationAsts(
+          namespace.declarations,
+          Option(namespaceOwnerFullName(namespace, ownerFullName)),
+          includeNonGlobals = false
+        )
+      case global: OxGlobalVariableDecl =>
+        astsForGlobalVariable(global, ownerFullName)
+      case declaration if includeNonGlobals =>
+        astForDeclaration(declaration, ownerFullName, globalNamespaceBlock().fullName)
+      case _ =>
+        Seq.empty
+    }
   }
 
   private def fileContent: Option[String] = {
@@ -301,7 +322,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case structDecl: OxStructDecl => Seq(astForStruct(structDecl, ownerFullName, parentAstFullName))
       case enumDecl: OxEnumDecl     => Seq(astForEnum(enumDecl, ownerFullName, parentAstFullName))
       case global: OxGlobalVariableDecl =>
-        astsForGlobalVariable(global)
+        astsForGlobalVariable(global, ownerFullName)
       case typedef: OxTypedefDecl => Seq(astForTypedef(typedef, ownerFullName, parentAstFullName))
       case function: OxFunctionDecl if isOutOfClassAggregateFunction(function, ownerFullName) =>
         Seq.empty
@@ -315,22 +336,28 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def astForNamespace(namespaceDecl: OxNamespaceDecl, parentOwnerFullName: Option[String]): Ast = {
-    val localPath = namespacePath(namespaceDecl.name)
-    val localName = localPath.lastOption.getOrElse(namespaceDecl.name)
-    val ownerFullName = parentOwnerFullName
-      .map(parent => (parent +: localPath).mkString("."))
-      .getOrElse(localPath.mkString("."))
-    val filename = declarationFilename(namespaceDecl)
+    val localPath     = namespacePath(namespaceDecl.name)
+    val localName     = localPath.lastOption.getOrElse(namespaceDecl.name)
+    val ownerFullName = namespaceOwnerFullName(namespaceDecl, parentOwnerFullName)
+    val filename      = declarationFilename(namespaceDecl)
     val namespaceBlock =
       namespaceBlockNode(OxOrigin(namespaceDecl), localName, s"$filename:$ownerFullName", filename)
         .code(namespaceDecl.code)
     val childAsts = namespaceDecl.declarations.flatMap {
       case nestedNamespace: OxNamespaceDecl => Seq(astForNamespace(nestedNamespace, Option(ownerFullName)))
+      case _: OxGlobalVariableDecl          => Seq.empty
       case declaration => astForDeclaration(declaration, Option(ownerFullName), namespaceBlock.fullName)
     }
     Ast(namespaceBlock).withChild(
       blockAst(blockNode(OxOrigin(namespaceDecl), namespaceDecl.code, Defines.Any), childAsts.toList)
     )
+  }
+
+  private def namespaceOwnerFullName(namespaceDecl: OxNamespaceDecl, parentOwnerFullName: Option[String]): String = {
+    val localPath = namespacePath(namespaceDecl.name)
+    parentOwnerFullName
+      .map(parent => (parent +: localPath).mkString("."))
+      .getOrElse(localPath.mkString("."))
   }
 
   private def astForInclude(includeDecl: OxIncludeDecl): Ast = {
@@ -927,24 +954,43 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def initializeGlobalScope(): Unit = {
-    val globalEntries = document.declarations.collect { case global: OxGlobalVariableDecl =>
+    val globalEntries = globalVariableDeclarations(document.declarations).map { case (global, ownerFullName) =>
       val localCode = localCodeForGlobal(global)
-      val typeName  = registerType(globalTypeFullName(global))
+      val typeName  = registerType(globalTypeFullName(global, ownerFullName))
       val node      = localNode(OxOrigin(global).copy(code = localCode), global.name, localCode, typeName)
-      global -> (typeName, node)
+      global -> (ownerFullName, ScopeEntry(typeName, node))
     }
-    globalLocalEntries = globalEntries.map { case (global, (typeName, node)) =>
-      global -> ScopeEntry(typeName, node)
+    globalLocalEntries = globalEntries.map { case (global, (_, scopeEntry)) =>
+      global -> scopeEntry
     }.toMap
-    globalScopeByName = globalLocalEntries.map { case (global, scopeEntry) => global.name -> scopeEntry }
+    globalScopeByName = globalEntries.flatMap { case (global, (ownerFullName, scopeEntry)) =>
+      val qualifiedNames = ownerFullName.toSeq.flatMap { owner =>
+        Seq(s"$owner.${global.name}", s"${owner.split('.').mkString("::")}::${global.name}")
+      }
+      (global.name +: qualifiedNames).map(_ -> scopeEntry)
+    }.toMap
   }
 
-  private def astsForGlobalVariable(global: OxGlobalVariableDecl): Seq[Ast] = {
+  private def globalVariableDeclarations(
+    declarations: Seq[OxDeclaration],
+    ownerFullName: Option[String] = None
+  ): Seq[(OxGlobalVariableDecl, Option[String])] = {
+    declarations.flatMap {
+      case namespace: OxNamespaceDecl =>
+        globalVariableDeclarations(namespace.declarations, Option(namespaceOwnerFullName(namespace, ownerFullName)))
+      case global: OxGlobalVariableDecl =>
+        Seq(global -> ownerFullName)
+      case _ =>
+        Seq.empty
+    }
+  }
+
+  private def astsForGlobalVariable(global: OxGlobalVariableDecl, ownerFullName: Option[String] = None): Seq[Ast] = {
     val origin    = OxOrigin(global)
     val localCode = localCodeForGlobal(global)
     val scopeEntry = globalLocalEntries.getOrElse(
       global, {
-        val typeName = registerType(globalTypeFullName(global))
+        val typeName = registerType(globalTypeFullName(global, ownerFullName))
         ScopeEntry(typeName, this.localNode(origin.copy(code = localCode), global.name, localCode, typeName))
       }
     )
@@ -1156,8 +1202,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
   }
 
-  private def topLevelGlobalDestructorAsts(declarations: Seq[OxDeclaration]): Seq[Ast] = {
-    declarations.collect { case global: OxGlobalVariableDecl => global }.reverse.flatMap(globalDestructorAsts)
+  private def globalDestructorAstsForDeclarations(declarations: Seq[OxDeclaration]): Seq[Ast] = {
+    globalVariableDeclarations(declarations).reverse.flatMap { case (global, _) => globalDestructorAsts(global) }
   }
 
   private def globalDestructorAsts(global: OxGlobalVariableDecl): Seq[Ast] = {
@@ -1220,8 +1266,34 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     stripConstinitSpecifier(global.initializer.fold(global.code)(_ => global.code.takeWhile(_ != '=').trim))
   }
 
-  private def globalTypeFullName(global: OxGlobalVariableDecl): String = {
-    typeFullNameWithStringLiteralLength(global.typeName, global.initializer)
+  private def globalTypeFullName(global: OxGlobalVariableDecl, ownerFullName: Option[String] = None): String = {
+    ownerResolvedGlobalTypeFullName(
+      typeFullNameWithStringLiteralLength(global.typeName, global.initializer),
+      ownerFullName
+    )
+  }
+
+  private def ownerResolvedGlobalTypeFullName(typeName: String, ownerFullName: Option[String]): String = {
+    val normalized = normalizeType(typeName)
+    arrayTypeSuffix(normalized) match {
+      case Some(suffix) =>
+        arrayElementTypeFullName(normalized)
+          .flatMap(localObjectAggregateTypeFullName(_, ownerFullName))
+          .map(elementType => s"$elementType$suffix")
+          .getOrElse(normalized)
+      case None =>
+        localObjectAggregateTypeFullName(normalized, ownerFullName).getOrElse(normalized)
+    }
+  }
+
+  private def arrayTypeSuffix(typeName: String): Option[String] = {
+    val normalized = normalizeType(typeName)
+    if (normalized.endsWith("[]") && normalized.length > 2) {
+      Option("[]")
+    } else {
+      val bracketIndex = normalized.lastIndexOf('[')
+      Option.when(bracketIndex > 0 && normalized.endsWith("]"))(normalized.drop(bracketIndex))
+    }
   }
 
   private def globalAssignmentTargetCode(global: OxGlobalVariableDecl): String = {
