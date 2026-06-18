@@ -279,6 +279,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private val lambdaReturnTypesByFullName: mutable.Map[String, String]         = mutable.Map.empty
   private val lambdaSemanticReturnTypesByFullName: mutable.Map[String, String] = mutable.Map.empty
   private val lambdaSignaturesByFullName: mutable.Map[String, String]          = mutable.Map.empty
+  private val autoReturnInferenceStack: mutable.Set[String]                    = mutable.Set.empty
 
   def typesSeen(): Set[String] = usedTypes.toSet
 
@@ -6099,8 +6100,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     receiverTypeFullName: Option[String] = None,
     explicitTemplateArguments: Seq[String] = Seq.empty
   ): String = {
+    val argumentInfos =
+      arguments.map(argument => ArgumentInfo(argument, expressionTypeFullName(argument), isRvalue = false))
+    functionSemanticReturnTypeFullNameForArgumentInfos(
+      entry,
+      argumentInfos,
+      receiverTypeFullName,
+      explicitTemplateArguments
+    )
+  }
+
+  private def functionSemanticReturnTypeFullNameForArgumentInfos(
+    entry: FunctionEntry,
+    argumentInfos: Seq[ArgumentInfo],
+    receiverTypeFullName: Option[String] = None,
+    explicitTemplateArguments: Seq[String] = Seq.empty
+  ): String = {
     val templateBindings =
-      templateBindingsForFunctionCall(entry, arguments, receiverTypeFullName, explicitTemplateArguments)
+      templateBindingsForFunctionArgumentInfos(entry, argumentInfos, receiverTypeFullName, explicitTemplateArguments)
     val specializedReturnType = substituteTemplateTypeNames(functionSemanticReturnTypeFullName(entry), templateBindings)
     if (isAutoType(specializedReturnType)) {
       functionAutoReturnTypeFullName(entry, specializedReturnType, templateBindings).getOrElse(specializedReturnType)
@@ -6114,17 +6131,32 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     explicitReturnType: String,
     templateBindings: Map[String, String]
   ): Option[String] = {
-    val returnExpressions = directFunctionReturnExpressions(entry.function)
-    val localTypes        = functionTopLevelLocalTypeFullNames(entry, templateBindings)
-    val inferredReturnTypes = returnExpressions.map { expression =>
-      functionReturnExpressionTypeFullName(entry, expression, templateBindings, localTypes)
-        .flatMap(typeName => inferredAutoTypeFullName(explicitReturnType, typeName, preserveCv = true))
-    }
-    Option
-      .when(returnExpressions.nonEmpty && inferredReturnTypes.forall(_.isDefined)) {
-        inferredReturnTypes.flatten.map(normalizeType).distinct
+    val inferenceKey = autoReturnInferenceKey(entry, templateBindings)
+    if (!autoReturnInferenceStack.add(inferenceKey)) {
+      None
+    } else {
+      try {
+        val returnExpressions = directFunctionReturnExpressions(entry.function)
+        val localTypes        = functionTopLevelLocalTypeFullNames(entry, templateBindings)
+        val inferredReturnTypes = returnExpressions.map { expression =>
+          functionReturnExpressionTypeFullName(entry, expression, templateBindings, localTypes)
+            .flatMap(typeName => inferredAutoTypeFullName(explicitReturnType, typeName, preserveCv = true))
+        }
+        Option
+          .when(returnExpressions.nonEmpty && inferredReturnTypes.forall(_.isDefined)) {
+            inferredReturnTypes.flatten.map(normalizeType).distinct
+          }
+          .collect { case Seq(returnType) => returnType }
+      } finally {
+        autoReturnInferenceStack.remove(inferenceKey)
       }
-      .collect { case Seq(returnType) => returnType }
+    }
+  }
+
+  private def autoReturnInferenceKey(entry: FunctionEntry, templateBindings: Map[String, String]): String = {
+    val bindingKey =
+      templateBindings.toSeq.sortBy(_._1).map { case (name, typeName) => s"$name=$typeName" }.mkString(",")
+    s"${entry.fullName}:$bindingKey"
   }
 
   private def directFunctionReturnExpressions(function: OxFunctionDecl): Seq[OxExpression] = {
@@ -6190,8 +6222,124 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option.when(branchTypes.forall(_.isDefined))(branchTypes.flatten.map(normalizeType).distinct).collect {
           case Seq(branchType) => branchType
         }
+      case call: OxCall =>
+        functionScopedCallReturnTypeFullName(entry, call, templateBindings, localTypes)
       case _ =>
         None
+    }
+  }
+
+  private def functionScopedCallReturnTypeFullName(
+    entry: FunctionEntry,
+    call: OxCall,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    val argumentInfos = call.arguments.map { argument =>
+      ArgumentInfo(
+        argument,
+        functionReturnExpressionTypeFullName(entry, argument, templateBindings, localTypes),
+        functionReturnExpressionIsRvalue(entry, argument, templateBindings, localTypes)
+      )
+    }
+    val explicitTemplateArguments = explicitTemplateArgumentTypeNames(call)
+    functionEntryForScopedCall(entry, call, templateBindings, localTypes, argumentInfos, explicitTemplateArguments)
+      .map { case (targetEntry, receiverTypeFullName) =>
+        functionSemanticReturnTypeFullNameForArgumentInfos(
+          targetEntry,
+          argumentInfos,
+          receiverTypeFullName,
+          explicitTemplateArguments
+        )
+      }
+      .orElse(macroForUse(call.name, call.line).map(macroReturnTypeFullName))
+  }
+
+  private def functionEntryForScopedCall(
+    entry: FunctionEntry,
+    call: OxCall,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String],
+    argumentInfos: Seq[ArgumentInfo],
+    explicitTemplateArguments: Seq[String]
+  ): Option[(FunctionEntry, Option[String])] = {
+    call.callee match {
+      case OxFieldAccess(field, _, _, base) =>
+        val receiverTypeFullName =
+          functionReturnExpressionTypeFullName(entry, base, templateBindings, localTypes)
+        val receiverType              = receiverTypeFullName.map(receiverAggregateTypeName)
+        val qualifiedMemberCandidates = qualifiedMemberFunctionCandidates(field, receiverType)
+        val unqualifiedMemberCandidates = receiverTypeFullName.toSeq.flatMap { receiverType =>
+          memberFunctionCandidatesForReceiverType(receiverType, field)
+        }
+        val unfilteredCandidates =
+          if (qualifiedMemberCandidates.nonEmpty) qualifiedMemberCandidates else unqualifiedMemberCandidates
+        val candidates = receiverTypeFullName
+          .map(receiverType => filterMemberFunctionCandidatesForReceiver(unfilteredCandidates, receiverType))
+          .getOrElse(unfilteredCandidates)
+        selectFunctionEntryForArgumentInfos(candidates, argumentInfos, receiverTypeFullName, explicitTemplateArguments)
+          .map(_ -> receiverTypeFullName)
+      case _ =>
+        val lookupName                = stripTemplateArguments(call.name)
+        val qualifiedName             = normalizedQualifiedName(lookupName)
+        val qualifiedMemberCandidates = qualifiedMemberFunctionCandidates(lookupName, None)
+        val candidates =
+          if (qualifiedMemberCandidates.nonEmpty) {
+            qualifiedMemberCandidates
+          } else if (qualifiedNameParts(call.name).size > 1) {
+            val qualifiedCandidates = functionCandidatesByQualifiedName(qualifiedName)
+            if (qualifiedCandidates.nonEmpty) qualifiedCandidates else functionCandidatesByName(lookupName)
+          } else {
+            val ownerCandidates     = scopedCurrentOwnerFunctionCandidates(entry, lookupName)
+            val qualifiedCandidates = functionCandidatesByQualifiedName(qualifiedName)
+            if (ownerCandidates.nonEmpty) ownerCandidates
+            else if (qualifiedCandidates.nonEmpty) qualifiedCandidates
+            else functionCandidatesByName(lookupName)
+          }
+        selectFunctionEntryForArgumentInfos(
+          candidates,
+          argumentInfos,
+          explicitTemplateArguments = explicitTemplateArguments
+        ).map(_ -> None)
+    }
+  }
+
+  private def scopedCurrentOwnerFunctionCandidates(entry: FunctionEntry, name: String): Seq[FunctionEntry] = {
+    entry.ownerFullName
+      .filter(aggregateTypeFullNames.contains)
+      .toSeq
+      .flatMap { ownerTypeFullName =>
+        val receiverType =
+          if (entry.function.isConst) s"const $ownerTypeFullName*" else s"$ownerTypeFullName*"
+        memberFunctionCandidatesForReceiverType(receiverType, name)
+      }
+  }
+
+  private def functionReturnExpressionIsRvalue(
+    entry: FunctionEntry,
+    expression: OxExpression,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Boolean = {
+    expression match {
+      case OxIdentifier(name, _, _) =>
+        !(localTypes.contains(name) || functionParameterTypeFullName(entry, name, templateBindings).isDefined)
+      case _: OxFieldAccess =>
+        false
+      case OxUnary("*", _, _, _, _) =>
+        false
+      case OxCast(_, semanticTypeName, _, _, _) =>
+        typeNameIsRvalue(functionScopedTypeFullName(entry, semanticTypeName, templateBindings))
+      case call: OxCall =>
+        functionScopedCallReturnTypeFullName(entry, call, templateBindings, localTypes)
+          .map(typeNameIsRvalue)
+          .getOrElse(true)
+      case OxConditional(_, _, _, Some(consequence), alternative) =>
+        Seq(consequence, alternative).forall { branch =>
+          functionReturnExpressionIsRvalue(entry, branch, templateBindings, localTypes)
+        }
+      case _ =>
+        true
     }
   }
 
@@ -6751,22 +6899,31 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   ): Option[FunctionEntry] = {
     arguments match {
       case Some(arguments) =>
-        val viableByArity = candidates.filter(candidate => functionArityIsViable(candidate, arguments.size))
-        val arityMatches  = candidates.filter(_.function.parameters.size == arguments.size)
-        val pool =
-          if (viableByArity.nonEmpty) viableByArity else if (arityMatches.nonEmpty) arityMatches else candidates
         val argumentInfos =
           arguments.map(argument =>
             ArgumentInfo(argument, expressionTypeFullName(argument), expressionIsRvalue(argument))
           )
-        pool.zipWithIndex
-          .maxByOption { case (candidate, index) =>
-            (overloadScore(candidate, argumentInfos, receiverTypeFullName, explicitTemplateArguments), index)
-          }
-          .map(_._1)
+        selectFunctionEntryForArgumentInfos(candidates, argumentInfos, receiverTypeFullName, explicitTemplateArguments)
       case None =>
         candidates.lastOption
     }
+  }
+
+  private def selectFunctionEntryForArgumentInfos(
+    candidates: Seq[FunctionEntry],
+    argumentInfos: Seq[ArgumentInfo],
+    receiverTypeFullName: Option[String] = None,
+    explicitTemplateArguments: Seq[String] = Seq.empty
+  ): Option[FunctionEntry] = {
+    val viableByArity = candidates.filter(candidate => functionArityIsViable(candidate, argumentInfos.size))
+    val arityMatches  = candidates.filter(_.function.parameters.size == argumentInfos.size)
+    val pool =
+      if (viableByArity.nonEmpty) viableByArity else if (arityMatches.nonEmpty) arityMatches else candidates
+    pool.zipWithIndex
+      .maxByOption { case (candidate, index) =>
+        (overloadScore(candidate, argumentInfos, receiverTypeFullName, explicitTemplateArguments), index)
+      }
+      .map(_._1)
   }
 
   private def functionArityIsViable(candidate: FunctionEntry, argumentCount: Int): Boolean = {
@@ -6842,6 +6999,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     receiverTypeFullName: Option[String] = None,
     explicitTemplateArguments: Seq[String] = Seq.empty
   ): Map[String, String] = {
+    val argumentInfos =
+      arguments.map(argument => ArgumentInfo(argument, expressionTypeFullName(argument), isRvalue = false))
+    templateBindingsForFunctionArgumentInfos(entry, argumentInfos, receiverTypeFullName, explicitTemplateArguments)
+  }
+
+  private def templateBindingsForFunctionArgumentInfos(
+    entry: FunctionEntry,
+    argumentInfos: Seq[ArgumentInfo],
+    receiverTypeFullName: Option[String] = None,
+    explicitTemplateArguments: Seq[String] = Seq.empty
+  ): Map[String, String] = {
     val receiverTemplateBindings =
       receiverTemplateBindingsForOwner(receiverTypeFullName, entry.ownerFullName.orElse(entry.lexicalOwnerFullName))
     val explicitTemplateBindings =
@@ -6850,8 +7018,6 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       )
     val functionTemplateParameters =
       templateParameterNames(entry.function).diff(receiverTemplateBindings.keySet ++ explicitTemplateBindings.keySet)
-    val argumentInfos =
-      arguments.map(argument => ArgumentInfo(argument, expressionTypeFullName(argument), isRvalue = false))
     receiverTemplateBindings ++ explicitTemplateBindings ++
       templateBindingsForArgumentInfos(entry, argumentInfos, functionTemplateParameters).getOrElse(Map.empty)
   }
