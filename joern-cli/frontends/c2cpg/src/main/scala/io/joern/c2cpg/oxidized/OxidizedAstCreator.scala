@@ -38,7 +38,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private val LambdaMutableModifier                     = "MUTABLE"
   private val CxxTypeQualifiers                         = Set("const", "volatile", "mutable", "restrict")
 
-  private final case class LambdaInfo(name: String, fullName: String, signature: String, returnType: String)
+  private final case class LambdaInfo(
+    name: String,
+    fullName: String,
+    signature: String,
+    returnType: String,
+    semanticReturnType: String
+  )
   private final case class ScopeEntry(
     typeFullName: String,
     declaration: NewNode,
@@ -250,24 +256,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private val CxxOverloadableUnaryOperators              = Set("+", "-", "*", "&", "~", "!", "++", "--")
   private val CxxPostfixUnaryOperatorsWithDummyParameter = Set("++", "--")
 
-  private var scope: Map[String, ScopeEntry]                                 = Map.empty
-  private var globalLocalEntries: Map[OxGlobalVariableDecl, ScopeEntry]      = Map.empty
-  private var globalScopeByName: Map[String, ScopeEntry]                     = Map.empty
-  private var functionCaptureContext: Option[FunctionCaptureContext]         = None
-  private var currentMethodOwnerTypeFullName: Option[String]                 = None
-  private var currentMethodFullName: Option[String]                          = None
-  private var currentMethodSimpleName: Option[String]                        = None
-  private var currentMethodIsConst: Option[Boolean]                          = None
-  private var currentMethodReturnTypeFullName: Option[String]                = None
-  private var typeAliases: Map[String, String]                               = Map.empty
-  private var localDestructorScopes: List[Vector[LocalDestructor]]           = Nil
-  private var jumpCleanupTargets: List[JumpCleanupTarget]                    = Nil
-  private var gotoLabelCleanupDestructors: Map[String, Seq[LocalDestructor]] = Map.empty
-  private var staticLocalStorages: Vector[StaticLocalStorage]                = Vector.empty
-  private val lambdaInfos: mutable.LinkedHashMap[String, LambdaInfo]         = mutable.LinkedHashMap.empty
-  private val emittedLambdaFullNames: mutable.Set[String]                    = mutable.Set.empty
-  private val lambdaReturnTypesByFullName: mutable.Map[String, String]       = mutable.Map.empty
-  private val lambdaSignaturesByFullName: mutable.Map[String, String]        = mutable.Map.empty
+  private var scope: Map[String, ScopeEntry]                                   = Map.empty
+  private var globalLocalEntries: Map[OxGlobalVariableDecl, ScopeEntry]        = Map.empty
+  private var globalScopeByName: Map[String, ScopeEntry]                       = Map.empty
+  private var functionCaptureContext: Option[FunctionCaptureContext]           = None
+  private var currentMethodOwnerTypeFullName: Option[String]                   = None
+  private var currentMethodFullName: Option[String]                            = None
+  private var currentMethodSimpleName: Option[String]                          = None
+  private var currentMethodIsConst: Option[Boolean]                            = None
+  private var currentMethodReturnTypeFullName: Option[String]                  = None
+  private var typeAliases: Map[String, String]                                 = Map.empty
+  private var localDestructorScopes: List[Vector[LocalDestructor]]             = Nil
+  private var jumpCleanupTargets: List[JumpCleanupTarget]                      = Nil
+  private var gotoLabelCleanupDestructors: Map[String, Seq[LocalDestructor]]   = Map.empty
+  private var staticLocalStorages: Vector[StaticLocalStorage]                  = Vector.empty
+  private val lambdaInfos: mutable.LinkedHashMap[String, LambdaInfo]           = mutable.LinkedHashMap.empty
+  private val emittedLambdaFullNames: mutable.Set[String]                      = mutable.Set.empty
+  private val lambdaReturnTypesByFullName: mutable.Map[String, String]         = mutable.Map.empty
+  private val lambdaSemanticReturnTypesByFullName: mutable.Map[String, String] = mutable.Map.empty
+  private val lambdaSignaturesByFullName: mutable.Map[String, String]          = mutable.Map.empty
 
   def typesSeen(): Set[String] = usedTypes.toSet
 
@@ -650,7 +657,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             .toSet
       case OxDelete(_, _, argument) =>
         collectRequiredImplicitDefaultConstructorTypesFromExpression(argument, ownerFullName)
-      case OxLambda(_, _, captures, _, _, _, _, body) =>
+      case OxLambda(_, _, captures, _, _, _, _, _, body) =>
         captures
           .flatMap(_.initializer)
           .flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
@@ -3551,13 +3558,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     local.initializer match {
       case Some(lambda: OxLambda) if explicitType == Defines.Auto => lambdaInfo(lambda).fullName
       case Some(initializerList: OxInitializerList)
-          if explicitType.startsWith(Defines.Auto) && isDirectListInitializer(local, initializerList) =>
+          if isAutoType(explicitType) && isDirectListInitializer(local, initializerList) =>
         initializerListElementTypeFullName(initializerList)
-          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName))
+          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName, preserveCv = false))
           .getOrElse(explicitType)
-      case Some(initializer) if explicitType.startsWith(Defines.Auto) =>
+      case Some(initializer) if isAutoType(explicitType) =>
         expressionTypeFullName(initializer)
-          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName))
+          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName, preserveCv = false))
           .getOrElse(explicitType)
       case _ => explicitType
     }
@@ -3568,13 +3575,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     local.initializer match {
       case Some(lambda: OxLambda) if explicitType == Defines.Auto => lambdaInfo(lambda).fullName
       case Some(initializerList: OxInitializerList)
-          if explicitType.startsWith(Defines.Auto) && isDirectListInitializer(local, initializerList) =>
+          if isAutoType(explicitType) && isDirectListInitializer(local, initializerList) =>
         initializerListElementTypeFullName(initializerList)
-          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName))
+          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName, preserveCv = true))
           .getOrElse(explicitType)
-      case Some(initializer) if explicitType.startsWith(Defines.Auto) =>
+      case Some(initializer) if isAutoType(explicitType) =>
         expressionTypeFullName(initializer)
-          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName))
+          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName, preserveCv = true))
           .getOrElse(explicitType)
       case _ => explicitType
     }
@@ -3596,20 +3603,53 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
-  private def inferredAutoTypeFullName(explicitType: String, initializerType: String): Option[String] = {
+  private def isAutoType(typeName: String): Boolean = {
+    stripCxxTypeQualifiers(normalizeType(typeName)).trim.startsWith(Defines.Auto)
+  }
+
+  private def inferredAutoTypeFullName(
+    explicitType: String,
+    initializerType: String,
+    preserveCv: Boolean
+  ): Option[String] = {
+    val explicit                = normalizeType(explicitType)
+    val explicitWithoutCv       = stripCxxTypeQualifiers(explicit).trim
+    val explicitTypeQualifiers  = cxxTypeQualifiers(explicit)
     val resolvedInitializerType = normalizeType(resolveAliasType(initializerType))
-    explicitType match {
+    val initializerObjectType   = stripCxxReference(resolvedInitializerType)
+    def valueBase: String = {
+      val base = stripCxxTypeQualifiers(initializerObjectType).trim
+      if (preserveCv) addMissingCxxTypeQualifiers(base, explicitTypeQualifiers) else base
+    }
+    def referenceBase: String = {
+      val base = if (preserveCv) initializerObjectType else stripCxxTypeQualifiers(initializerObjectType).trim
+      if (preserveCv) addMissingCxxTypeQualifiers(base, explicitTypeQualifiers) else base
+    }
+    explicitWithoutCv match {
       case Defines.Auto =>
-        Some(resolvedInitializerType)
+        Some(valueBase)
       case "auto*" if resolvedInitializerType.endsWith("*") =>
-        Some(resolvedInitializerType)
+        Some(
+          if (preserveCv) addMissingCxxTypeQualifiers(resolvedInitializerType, explicitTypeQualifiers)
+          else stripCxxTypeQualifiers(resolvedInitializerType).trim
+        )
       case "auto&" =>
-        Some(s"${stripCxxReference(resolvedInitializerType)}&")
+        Some(s"$referenceBase&")
       case "auto&&" =>
-        Some(s"${stripCxxReference(resolvedInitializerType)}&&")
+        Some(s"$referenceBase&&")
       case _ =>
         None
     }
+  }
+
+  private def cxxTypeQualifiers(typeName: String): Seq[String] = {
+    typeName.split("\\s+").filter(CxxTypeQualifiers.contains).distinct.toSeq
+  }
+
+  private def addMissingCxxTypeQualifiers(typeName: String, qualifiers: Seq[String]): String = {
+    val existing = cxxTypeQualifiers(typeName).toSet
+    val missing  = qualifiers.filterNot(existing.contains)
+    (missing ++ Seq(typeName)).mkString(" ").trim
   }
 
   private def isConstructorInitializer(typeName: String, initializer: OxInitializerList): Boolean = {
@@ -3827,7 +3867,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         (arguments ++ initializerArguments).flatMap(heapConstructorsForExpression)
       case OxDelete(_, _, argument) =>
         heapConstructorsForExpression(argument)
-      case OxLambda(_, _, captures, _, _, _, _, _) =>
+      case OxLambda(_, _, captures, _, _, _, _, _, _) =>
         captures.flatMap(_.initializer).flatMap(heapConstructorsForExpression)
       case OxCall(_, _, _, callee, arguments) =>
         heapConstructorsForExpression(callee) ++ arguments.flatMap(heapConstructorsForExpression)
@@ -4060,7 +4100,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         (arguments ++ initializerArguments).flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxDelete(_, _, argument) =>
         temporaryDestructorsForExpression(argument)
-      case OxLambda(_, _, captures, _, _, _, _, _) =>
+      case OxLambda(_, _, captures, _, _, _, _, _, _) =>
         captures.flatMap(_.initializer).flatMap(expression => temporaryDestructorsForExpression(expression))
       case OxCall(_, _, _, callee, arguments) =>
         temporaryDestructorsForExpression(callee) ++ temporaryDestructorsForCallArguments(expression)
@@ -4872,7 +4912,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         (arguments ++ initializerArguments).flatMap(aggregateAssignmentExpressionAsts)
       case OxDelete(_, _, argument) =>
         aggregateAssignmentExpressionAsts(argument)
-      case OxLambda(_, _, captures, _, _, _, _, _) =>
+      case OxLambda(_, _, captures, _, _, _, _, _, _) =>
         captures.flatMap(_.initializer).flatMap(lambdaCaptureInitializerAssignmentAsts)
       case OxCall(_, _, _, callee, arguments) =>
         aggregateAssignmentExpressionAsts(callee) ++ arguments.flatMap(aggregateAssignmentExpressionAsts)
@@ -4921,7 +4961,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         (arguments ++ initializerArguments).flatMap(lambdaCaptureInitializerAssignmentAsts)
       case OxDelete(_, _, argument) =>
         lambdaCaptureInitializerAssignmentAsts(argument)
-      case OxLambda(_, _, captures, _, _, _, _, _) =>
+      case OxLambda(_, _, captures, _, _, _, _, _, _) =>
         captures.flatMap(_.initializer).flatMap(lambdaCaptureInitializerAssignmentAsts)
       case OxCall(_, _, _, callee, arguments) =>
         lambdaCaptureInitializerAssignmentAsts(callee) ++ arguments.flatMap(lambdaCaptureInitializerAssignmentAsts)
@@ -5038,14 +5078,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def lambdaInfo(lambda: OxLambda): LambdaInfo = {
     lambdaInfos.getOrElseUpdate(
       lambdaKey(lambda), {
-        val name       = nextClosureName()
-        val owner      = currentMethodFullName.getOrElse(globalNamespaceBlock().fullName)
-        val returnType = registerType(normalizeType(lambda.returnType))
-        val signature  = lambda.signature
-        val fullName   = s"$owner.$name:$signature"
+        val name               = nextClosureName()
+        val owner              = currentMethodFullName.getOrElse(globalNamespaceBlock().fullName)
+        val returnType         = registerType(normalizeType(lambda.returnType))
+        val semanticReturnType = registerType(ownerResolvedTypeFullNamePreservingCv(lambda.semanticReturnType, None))
+        val signature          = lambda.signature
+        val fullName           = s"$owner.$name:$signature"
         lambdaReturnTypesByFullName.update(fullName, returnType)
+        lambdaSemanticReturnTypesByFullName.update(fullName, semanticReturnType)
         lambdaSignaturesByFullName.update(fullName, signature)
-        LambdaInfo(name, fullName, signature, returnType)
+        LambdaInfo(name, fullName, signature, returnType, semanticReturnType)
       }
     )
   }
@@ -5230,7 +5272,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           initializerArguments.foreach(visitExpression)
         case OxDelete(_, _, argument) =>
           visitExpression(argument)
-        case OxLambda(_, _, captures, _, _, _, _, _) =>
+        case OxLambda(_, _, captures, _, _, _, _, _, _) =>
           captures.flatMap(_.initializer).foreach(visitExpression)
         case OxCall(_, _, _, callee, arguments) =>
           visitExpression(callee)
@@ -5372,13 +5414,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def lambdaCallableInfoByTypeFullName(typeFullName: String): Option[LambdaInfo] = {
     for {
-      signature  <- lambdaSignaturesByFullName.get(typeFullName)
-      returnType <- lambdaReturnTypesByFullName.get(typeFullName)
+      signature          <- lambdaSignaturesByFullName.get(typeFullName)
+      returnType         <- lambdaReturnTypesByFullName.get(typeFullName)
+      semanticReturnType <- lambdaSemanticReturnTypesByFullName.get(typeFullName)
     } yield LambdaInfo(
       typeFullName.split('.').lastOption.getOrElse(typeFullName).takeWhile(_ != ':'),
       typeFullName,
       signature,
-      returnType
+      returnType,
+      semanticReturnType
     )
   }
 
@@ -5821,7 +5865,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def callReturnTypeFullName(call: OxCall): Option[String] = {
     lambdaCallableInfo(call.callee)
-      .map(_.returnType)
+      .map(_.semanticReturnType)
       .orElse(constructorTemporaryTypeFullName(call))
       .orElse(
         overloadedCallOperatorTarget(call)

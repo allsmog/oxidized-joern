@@ -267,6 +267,7 @@ case class OxLambda(
   isMutable: Boolean,
   parameters: Seq[OxParameterDecl],
   returnType: String,
+  semanticReturnType: String,
   signature: String,
   body: Seq[OxStatement]
 ) extends OxExpression
@@ -685,6 +686,7 @@ object OxDocument {
           isMutable = value.obj.get("isMutable").exists(_.bool),
           parameters = value("parameters").arr.map(parameter).toSeq,
           returnType = str(value, "returnType"),
+          semanticReturnType = value.obj.get("semanticReturnType").map(_.str).getOrElse(str(value, "returnType")),
           signature = str(value, "signature"),
           body = value("body").arr.map(statement).toSeq
         )
