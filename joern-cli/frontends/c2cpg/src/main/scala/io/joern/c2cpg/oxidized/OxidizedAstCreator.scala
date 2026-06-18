@@ -7658,12 +7658,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     else if (parameterType == argumentType) Some(60)
     else if (parameterType.endsWith(s".$argumentType") || argumentType.endsWith(s".$parameterType")) Some(55)
     else
-      arithmeticConversionScore(parameterType, argumentType)
+      nullPointerConversionScore(parameterType, argumentType)
+        .orElse(arithmeticConversionScore(parameterType, argumentType))
         .orElse {
           inheritanceDistanceFromArgumentToParameter(argumentType, parameterType)
             .filter(_ > 0)
             .map(distance => 50 - math.min(distance, 40))
         }
+  }
+
+  private def nullPointerConversionScore(parameterType: String, argumentType: String): Option[Int] = {
+    Option.when(argumentType == "std.nullptr_t" && parameterType.endsWith("*"))(45)
   }
 
   private def arithmeticConversionScore(parameterType: String, argumentType: String): Option[Int] = {
