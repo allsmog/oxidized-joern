@@ -889,8 +889,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let has_typed_parameters = parameters
             .iter()
             .any(|parameter| self.lambda_parameter_type(*parameter).is_some());
+        let has_parenthesized_parameters = self.is_parenthesized_closure_parameters(node);
 
-        if has_typed_parameters {
+        if has_typed_parameters || has_parenthesized_parameters {
             let mut parameter_values = Vec::new();
             for parameter in parameters {
                 let trailing_comma = self.trailing_delimiter(node, parameter, ",");
@@ -938,9 +939,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn closure_parameter(&self, node: Node<'a>, trailing_comma: Option<Node<'a>>) -> Result<Value> {
         let name = self.lambda_parameter_name(node)?;
-        let type_node = self
-            .lambda_parameter_type(node)
-            .context("typed closure parameter is missing a type")?;
+        let type_node = self.lambda_parameter_type(node);
         let mut children = vec![
             self.with_name(self.attribute_list(node)?, "attributes"),
             self.with_name(self.modifier_list(node), "modifiers"),
@@ -952,10 +951,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "firstName",
             ),
         ];
-        if let Some(colon) = self.immediate_child_kind(node, ":") {
-            children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
+        if let Some(type_node) = type_node {
+            if let Some(colon) = self.immediate_child_kind(node, ":") {
+                children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
+            }
+            children.push(self.with_name(self.identifier_type(type_node)?, "type"));
         }
-        children.push(self.with_name(self.identifier_type(type_node)?, "type"));
         if let Some(comma) = trailing_comma {
             children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
         }
@@ -964,6 +965,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_for_node(node),
             children,
         ))
+    }
+
+    fn is_parenthesized_closure_parameters(&self, node: Node<'a>) -> bool {
+        self.immediate_child_kind(node, "(").is_some()
+            || self.source[..node.start_byte()].trim_end().ends_with('(')
+            || self.text(node).trim_start().starts_with('(')
     }
 
     fn closure_shorthand_parameter(
@@ -1283,6 +1290,28 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             bail!("multiple trailing closures are not supported yet");
         }
 
+        if let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments") {
+            if self.subscript_delimiters(value_arguments).is_some() {
+                return self.subscript_call_expr(
+                    node,
+                    callee,
+                    value_arguments,
+                    trailing_closures.first().copied(),
+                    true,
+                );
+            }
+        } else if let Some(trailing_closure) = trailing_closures.first().copied() {
+            if let Some((inner_callee, inner_value_arguments)) = self.subscript_call_parts(callee) {
+                return self.subscript_call_expr(
+                    node,
+                    inner_callee,
+                    inner_value_arguments,
+                    Some(trailing_closure),
+                    false,
+                );
+            }
+        }
+
         let mut children = vec![self.with_name(self.expr(callee)?, "calledExpression")];
 
         if let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments") {
@@ -1320,6 +1349,64 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_for_node(node),
             children,
         ))
+    }
+
+    fn subscript_call_expr(
+        &self,
+        node: Node<'a>,
+        callee: Node<'a>,
+        value_arguments: Node<'a>,
+        trailing_closure: Option<Node<'a>>,
+        include_arguments: bool,
+    ) -> Result<Value> {
+        let (left_square, right_square) = self
+            .subscript_delimiters(value_arguments)
+            .context("subscript call is missing square brackets")?;
+        let arguments = if include_arguments {
+            self.labeled_expr_list(value_arguments, left_square, right_square)?
+        } else {
+            self.empty_collection("LabeledExprListSyntax", left_square.end_byte())
+        };
+
+        let mut children = vec![
+            self.with_name(self.expr(callee)?, "calledExpression"),
+            self.with_name(self.token_for_node(left_square, "leftSquare"), "leftSquare"),
+            self.with_name(arguments, "arguments"),
+            self.with_name(
+                self.token_for_node(right_square, "rightSquare"),
+                "rightSquare",
+            ),
+        ];
+        if let Some(closure) = trailing_closure {
+            children.push(self.with_name(self.closure_expr(closure)?, "trailingClosure"));
+        }
+        children.push(self.with_name(
+            self.empty_collection("MultipleTrailingClosureElementListSyntax", node.end_byte()),
+            "additionalTrailingClosures",
+        ));
+
+        Ok(self.syntax_node(
+            "SubscriptCallExprSyntax",
+            self.range_for_node(node),
+            children,
+        ))
+    }
+
+    fn subscript_call_parts(&self, node: Node<'a>) -> Option<(Node<'a>, Node<'a>)> {
+        if node.kind() != "call_expression" {
+            return None;
+        }
+        let callee = named_children(node).find(|child| child.kind() != "call_suffix")?;
+        let suffix = self.immediate_named_child_kind(node, "call_suffix")?;
+        let value_arguments = self.immediate_named_child_kind(suffix, "value_arguments")?;
+        self.subscript_delimiters(value_arguments)?;
+        Some((callee, value_arguments))
+    }
+
+    fn subscript_delimiters(&self, value_arguments: Node<'a>) -> Option<(Node<'a>, Node<'a>)> {
+        let left_square = self.immediate_child_kind(value_arguments, "[")?;
+        let right_square = self.immediate_child_kind(value_arguments, "]")?;
+        Some((left_square, right_square))
     }
 
     fn labeled_expr_list(
@@ -1895,6 +1982,64 @@ mod tests {
     }
 
     #[test]
+    fn emits_subscript_call_expression() {
+        let source = "let first = items[0]\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let subscript = find_first_node_type(&value, "SubscriptCallExprSyntax").unwrap();
+        assert_eq!(
+            subscript["children"][0]["nodeType"],
+            "DeclReferenceExprSyntax"
+        );
+        assert_eq!(subscript["children"][1]["tokenKind"], "leftSquare");
+        assert_eq!(
+            subscript["children"][2]["nodeType"],
+            "LabeledExprListSyntax"
+        );
+        assert_eq!(
+            subscript["children"][2]["children"][0]["children"][0]["nodeType"],
+            "IntegerLiteralExprSyntax"
+        );
+        assert_eq!(subscript["children"][3]["tokenKind"], "rightSquare");
+        assert_eq!(
+            subscript["children"][4]["nodeType"],
+            "MultipleTrailingClosureElementListSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_trailing_closure_subscript_call_expression() {
+        let source = "var button = View.Button[5, 4, 3] {\n  Text(\"ABC\")\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let subscript = find_first_node_type(&value, "SubscriptCallExprSyntax").unwrap();
+        assert_eq!(
+            subscript["children"][0]["nodeType"],
+            "MemberAccessExprSyntax"
+        );
+        assert_eq!(subscript["children"][1]["tokenKind"], "leftSquare");
+        assert_eq!(
+            subscript["children"][2]["nodeType"],
+            "LabeledExprListSyntax"
+        );
+        assert_eq!(
+            subscript["children"][2]["children"]
+                .as_array()
+                .unwrap()
+                .len(),
+            0
+        );
+        assert_eq!(subscript["children"][3]["tokenKind"], "rightSquare");
+        assert_eq!(subscript["children"][4]["nodeType"], "ClosureExprSyntax");
+        assert_eq!(
+            subscript["children"][4]["children"][1]["children"][0]["children"][0]["nodeType"],
+            "FunctionCallExprSyntax"
+        );
+        assert_eq!(
+            subscript["children"][5]["nodeType"],
+            "MultipleTrailingClosureElementListSyntax"
+        );
+    }
+
+    #[test]
     fn emits_typed_closure_literal() {
         let source =
             "func f() {\n  let compare = { (s1: String, s2: String) -> Bool in\n    return s1 > s2\n  }\n}\n";
@@ -1933,6 +2078,35 @@ mod tests {
             closure["children"][2]["children"][0]["children"][0]["nodeType"],
             "ReturnStmtSyntax"
         );
+    }
+
+    #[test]
+    fn emits_parenthesized_untyped_closure_parameter_clause() {
+        let source = "func f() {\n  compactMap { (parserDiag) in }\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let closure = find_first_node_type(&value, "ClosureExprSyntax").unwrap();
+        let signature = &closure["children"][1];
+        assert_eq!(
+            signature["children"][1]["nodeType"],
+            "ClosureParameterClauseSyntax"
+        );
+        let parameter_list = signature["children"][1]["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "parameters")
+            .unwrap();
+        let parameters = &parameter_list["children"];
+        assert_eq!(parameters.as_array().unwrap().len(), 1);
+        assert_eq!(
+            parameters[0]["children"][2]["tokenKind"],
+            "identifier(\"parserDiag\")"
+        );
+        assert!(parameters[0]["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|child| child["name"] != "type"));
     }
 
     #[test]

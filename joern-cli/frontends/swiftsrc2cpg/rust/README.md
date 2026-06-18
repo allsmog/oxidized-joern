@@ -20,11 +20,12 @@ identifier references, simple function declarations with bodies, simple
 function calls with labeled arguments, return statements, reassignment
 expressions, binary arithmetic, comparison, equality, and boolean operators,
 array literal expressions, simple closure literals and trailing closures, simple
-`if`/`else` control flow, simple `while` loops, simple identifier `for-in`
-loops, unlabeled `break`/`continue`, boolean literals, simple `class`/`struct`
-member blocks, dot member-access expressions, simple declaration attributes,
-and simple declaration modifiers. Unsupported syntax fails per-file and is
-reported on stdout so the existing skipped-file handling can continue.
+subscript/index expressions, simple `if`/`else` control flow, simple `while`
+loops, simple identifier `for-in` loops, unlabeled `break`/`continue`, boolean
+literals, simple `class`/`struct` member blocks, dot member-access expressions,
+simple declaration attributes, and simple declaration modifiers. Unsupported
+syntax fails per-file and is reported on stdout so the existing skipped-file
+handling can continue.
 
 Run the Rust checks with:
 
