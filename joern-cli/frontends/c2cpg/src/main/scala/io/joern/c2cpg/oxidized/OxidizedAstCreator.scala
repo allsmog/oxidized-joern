@@ -2154,10 +2154,52 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def defaultBaseConstructorAsts(baseType: String, line: Int): Seq[Ast] = {
-    constructorInvocationInfo(baseType, Seq.empty, "").map { info =>
-      val callNode_ = constructorCallNode(OxOrigin(info.code, Option(line)), info)
-      createCallAst(callNode_, base = Option(identifierAst(Defines.This, Defines.This, line)))
-    }.toSeq
+    if (defaultConstructorInvocationHasWork(baseType)) {
+      constructorInvocationInfo(baseType, Seq.empty, "").map { info =>
+        val callNode_ = constructorCallNode(OxOrigin(info.code, Option(line)), info)
+        createCallAst(callNode_, base = Option(identifierAst(Defines.This, Defines.This, line)))
+      }.toSeq
+    } else {
+      Seq.empty
+    }
+  }
+
+  private def defaultConstructorInvocationHasWork(typeName: String): Boolean = {
+    defaultConstructorInvocationHasWork(typeName, Set.empty)
+  }
+
+  private def defaultConstructorInvocationHasWork(typeName: String, seen: Set[String]): Boolean = {
+    val normalizedType = normalizeType(resolveAliasType(typeName))
+    val aggregateType =
+      resolveAggregateTypeFullName(receiverAggregateTypeName(normalizedType)).getOrElse(normalizedType)
+    if (seen.contains(aggregateType)) {
+      false
+    } else {
+      constructorEntry(aggregateType, Seq.empty).isDefined ||
+      implicitDefaultConstructorHasWork(aggregateType, seen + aggregateType)
+    }
+  }
+
+  private def implicitDefaultConstructorHasWork(typeName: String, seen: Set[String]): Boolean = {
+    hasImplicitDefaultConstructor(typeName) && {
+      val baseHasWork = aggregateBaseClassesByType
+        .getOrElse(typeName, Seq.empty)
+        .exists(baseClass => defaultConstructorInvocationHasWork(baseClass.typeFullName, seen))
+      val fieldHasWork = aggregateFieldsByType
+        .getOrElse(typeName, Seq.empty)
+        .exists(field => defaultFieldConstructorHasWork(field, seen))
+      baseHasWork || fieldHasWork
+    }
+  }
+
+  private def defaultFieldConstructorHasWork(field: OxFieldDecl, seen: Set[String]): Boolean = {
+    !field.isStatic && {
+      field.initializer.isDefined ||
+      fieldArrayElementCount(field)
+        .exists(_ > 0) && arrayElementTypeFullName(field.typeName)
+        .exists(elementType => defaultConstructorInvocationHasWork(elementType, seen)) ||
+      defaultConstructorInvocationHasWork(field.typeName, seen)
+    }
   }
 
   private def defaultMemberConstructorAsts(field: OxFieldDecl, line: Int): Seq[Ast] = {

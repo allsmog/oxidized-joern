@@ -3,7 +3,7 @@ use clap::Parser;
 use cxxastgen_core::{is_cxx_input, parse_file, write_json, ParseOptions};
 use regex::Regex;
 use serde::Deserialize;
-use std::collections::HashMap;
+use std::collections::{hash_map::Entry, HashMap};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -141,9 +141,9 @@ impl CompileDatabase {
                 format!("failed to read compile command for '{}'", file.display())
             })?;
             let options = CompileCommandOptions::from_arguments(&arguments, &working_dir);
-            if !options_by_file.contains_key(&key) {
-                files.push(key.clone());
-                options_by_file.insert(key, options);
+            if let Entry::Vacant(entry) = options_by_file.entry(key) {
+                files.push(entry.key().clone());
+                entry.insert(options);
             }
         }
         files.sort();
