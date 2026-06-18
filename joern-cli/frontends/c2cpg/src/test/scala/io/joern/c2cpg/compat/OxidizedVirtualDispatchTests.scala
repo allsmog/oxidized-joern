@@ -394,6 +394,69 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pick:short(Mid&)")
     }
 
+    "type character literals for overload ranking" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |int pickOrdinary(int value) { return 1; }
+          |short pickOrdinary(char value) { return 2; }
+          |int pickWide(int value) { return 1; }
+          |short pickWide(wchar_t value) { return 2; }
+          |int pickChar8(int value) { return 1; }
+          |short pickChar8(char8_t value) { return 2; }
+          |int pickChar16(int value) { return 1; }
+          |short pickChar16(char16_t value) { return 2; }
+          |int pickChar32(int value) { return 1; }
+          |short pickChar32(char32_t value) { return 2; }
+          |int pickMulti(int value) { return 1; }
+          |short pickMulti(char value) { return 2; }
+          |int promoteWide(int value) { return 1; }
+          |long promoteWide(long value) { return 2; }
+          |int promoteChar8(int value) { return 1; }
+          |long promoteChar8(long value) { return 2; }
+          |int promoteChar16(int value) { return 1; }
+          |long promoteChar16(long value) { return 2; }
+          |int convertChar32(int value) { return 1; }
+          |long convertChar32(long value) { return 2; }
+          |}
+          |long use() {
+          |  return Core::pickOrdinary('x') +
+          |    Core::pickWide(L'x') +
+          |    Core::pickChar8(u8'x') +
+          |    Core::pickChar16(u'x') +
+          |    Core::pickChar32(U'x') +
+          |    Core::pickMulti('ab') +
+          |    Core::promoteWide(L'x') +
+          |    Core::promoteChar8(u8'x') +
+          |    Core::promoteChar16(u'x') +
+          |    Core::convertChar32(U'x');
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").call.codeExact("Core::pickOrdinary('x')").methodFullName.l shouldBe
+        List("Core.pickOrdinary:short(char)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickWide(L'x')").methodFullName.l shouldBe
+        List("Core.pickWide:short(wchar_t)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickChar8(u8'x')").methodFullName.l shouldBe
+        List("Core.pickChar8:short(char8_t)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickChar16(u'x')").methodFullName.l shouldBe
+        List("Core.pickChar16:short(char16_t)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickChar32(U'x')").methodFullName.l shouldBe
+        List("Core.pickChar32:short(char32_t)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickMulti('ab')").methodFullName.l shouldBe
+        List("Core.pickMulti:int(int)")
+      cpg.method.nameExact("use").call.codeExact("Core::promoteWide(L'x')").methodFullName.l shouldBe
+        List("Core.promoteWide:int(int)")
+      cpg.method.nameExact("use").call.codeExact("Core::promoteChar8(u8'x')").methodFullName.l shouldBe
+        List("Core.promoteChar8:int(int)")
+      cpg.method.nameExact("use").call.codeExact("Core::promoteChar16(u'x')").methodFullName.l shouldBe
+        List("Core.promoteChar16:int(int)")
+      cpg.method.nameExact("use").call.codeExact("Core::convertChar32(U'x')").methodFullName.l shouldBe
+        List("Core.convertChar32")
+    }
+
     "reject non-const lvalue reference overloads for rvalues" in {
       val cpg = code(
         """
