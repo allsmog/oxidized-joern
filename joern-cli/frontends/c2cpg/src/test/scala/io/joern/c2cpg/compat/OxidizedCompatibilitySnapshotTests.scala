@@ -969,6 +969,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |class Base {
           |public:
           |  Base();
+          |  Base(int seed) {}
           |  ~Base();
           |};
           |class Member {
@@ -986,6 +987,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |class Implicit : public Base {
           |  Member member;
           |};
+          |class WithExplicit : public Base {
+          |  Member member;
+          |public:
+          |  WithExplicit(int seed) : Base(seed) {}
+          |};
           |}
           |Core::Base::Base() {}
           |Core::Base::~Base() {}
@@ -995,6 +1001,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |int subobjects() {
           |  Core::WithCtor explicitCtor;
           |  Core::Implicit implicitCtor;
+          |  Core::WithExplicit explicitBase(7);
           |  return 0;
           |}
           |""".stripMargin,
@@ -1025,6 +1032,17 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         1
       cpg.method.nameExact("subobjects").call.nameExact("Implicit").codeExact("Core.Implicit.Implicit()").size shouldBe
         1
+
+      val explicitBaseConstructorCalls =
+        cpg.method.fullNameExact("Core.WithExplicit.WithExplicit:void(int)").call.code.l
+      explicitBaseConstructorCalls should contain allElementsOf List(
+        "Core.Base.Base(seed)",
+        "this->member = Core.Member.Member()"
+      )
+      explicitBaseConstructorCalls should not contain "this->Base = seed"
+      explicitBaseConstructorCalls.indexOf("Core.Base.Base(seed)") should be < explicitBaseConstructorCalls.indexOf(
+        "this->member = Core.Member.Member()"
+      )
     }
 
     "capture C++ braced local constructors" in {
