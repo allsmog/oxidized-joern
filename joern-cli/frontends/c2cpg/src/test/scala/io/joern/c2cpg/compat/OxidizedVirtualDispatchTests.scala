@@ -368,6 +368,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |long pickNumber(long value) { return 2; }
           |int pickBool(bool value) { return 1; }
           |long pickBool(int value) { return 2; }
+          |int pickList(std::initializer_list<int> values) { return 1; }
+          |long pickList(long value) { return 2; }
           |template <typename T>
           |class Holder {
           |public:
@@ -408,6 +410,11 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |template <typename T>
           |decltype(auto) assignRef(T& target, T value) { return (target = value); }
           |template <typename T>
+          |auto list(T left, T right) {
+          |  auto tmp = {left, right};
+          |  return tmp;
+          |}
+          |template <typename T>
           |decltype(auto) idDecltype(T& value) { return value; }
           |template <typename T>
           |decltype(auto) idDecltypeParen(T value) { return (value); }
@@ -441,6 +448,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::pickBool(Core::logicalNot(true)) +
           |    Core::pick(Core::assignValue(leaf, Core::makeLeaf())) +
           |    Core::pick(Core::assignRef(leaf, Core::makeLeaf())) +
+          |    Core::pickList(Core::list(1, 2)) +
           |    Core::pick(Core::idDecltype(leaf)) +
           |    Core::pick(Core::idDecltypeParen(Core::makeLeaf())) +
           |    Core::pick(Core::idDecltypeBranch(true, leaf, leaf)) +
@@ -482,6 +490,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.Leaf")
       cpg.method.nameExact("use").call.codeExact("Core::assignRef(leaf, Core::makeLeaf())").typeFullName.l shouldBe
         List("Core.Leaf&")
+      cpg.method.nameExact("use").call.codeExact("Core::list(1, 2)").typeFullName.l shouldBe
+        List("std.initializer_list<int>")
       cpg.method.nameExact("use").call.codeExact("Core::idDecltype(leaf)").typeFullName.l shouldBe
         List("Core.Leaf&")
       cpg.method.nameExact("use").call.codeExact("Core::idDecltypeParen(Core::makeLeaf())").typeFullName.l shouldBe
@@ -530,6 +540,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pick:char(Leaf&&)")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::assignRef(leaf, Core::makeLeaf()))").methodFullName.l shouldBe
         List("Core.pick:short(Mid&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickList(Core::list(1, 2))").methodFullName.l shouldBe
+        List("Core.pickList:int(std::initializer_list<int>)")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::idDecltype(leaf))").methodFullName.l shouldBe
         List("Core.pick:short(Mid&)")
       cpg.method
