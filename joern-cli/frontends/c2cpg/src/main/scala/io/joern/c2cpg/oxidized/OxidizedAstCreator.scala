@@ -2255,8 +2255,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val localCode       = localDeclarationCode(local)
     val localNode       = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
     scope = scope.updated(local.name, ScopeEntry(typeName, localNode, localLambdaInfo))
-    registerLocalDestructor(local, typeName)
-    val extendedTemporaryDestructor = local.initializer.flatMap(referenceBoundTemporaryDestructor(typeName, _))
+    val isStaticStorageLocal = hasStaticStorageDuration(local)
+    if (!isStaticStorageLocal) {
+      registerLocalDestructor(local, typeName)
+    }
+    val extendedTemporaryDestructor =
+      Option
+        .when(!isStaticStorageLocal)(local.initializer.flatMap(referenceBoundTemporaryDestructor(typeName, _)))
+        .flatten
     extendedTemporaryDestructor.foreach(registerLocalDestructor)
     val localAst = Ast(localNode)
     val arrayConstructorAsts =
@@ -2943,6 +2949,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def localInitializerPrefix(local: OxLocalDecl, initializer: OxExpression): String = {
     val initializerIndex = local.code.lastIndexOf(initializer.code)
     if (initializerIndex >= 0) local.code.take(initializerIndex).trim else local.code
+  }
+
+  private def hasStaticStorageDuration(local: OxLocalDecl): Boolean = {
+    """(^|\s)(static|thread_local)\b""".r.findFirstIn(localDeclarationCode(local)).isDefined
   }
 
   private def stripConstinitSpecifier(code: String): String = {
