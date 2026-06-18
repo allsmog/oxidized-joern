@@ -117,6 +117,7 @@ case class OxParameterDecl(
   typeName: String,
   semanticTypeName: String,
   isVariadic: Boolean,
+  hasDefault: Boolean,
   code: String,
   line: Int
 )
@@ -448,6 +449,7 @@ object OxDocument {
       typeName = typeName,
       semanticTypeName = value.obj.get("semanticTypeName").map(_.str).getOrElse(typeName),
       isVariadic = value.obj.get("isVariadic").exists(_.bool),
+      hasDefault = value.obj.get("hasDefault").exists(_.bool),
       code = str(value, "code"),
       line = int(value, "line")
     )
