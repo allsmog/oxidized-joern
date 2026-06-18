@@ -37,6 +37,13 @@ The JavaScript/TypeScript frontend still defaults to upstream Joern's Babel
 through `jssrc2cpg/jsAstGenBuildRust`; it emits the existing Babel-shaped JSON
 contract plus TypeScript `.typemap` sidecars for the Scala frontend.
 
+The Swift frontend still defaults to upstream Joern's SwiftSyntax-based
+`SwiftAstGen` binary. The Rust `SwiftAstGen` workspace under
+`joern-cli/frontends/swiftsrc2cpg/rust` is available as an opt-in oxidized
+backend through `swiftsrc2cpg/swiftAstGenBuildRust`; it emits the existing
+SwiftSyntax-shaped JSON contract for the first simple declaration/function
+slice.
+
 ## Rewrite Priorities
 
 1. Keep the upstream Joern CLI and CPG behavior usable while replacing
@@ -113,6 +120,30 @@ Run the Scala frontend suite against the locally built Rust binary:
 
 ```bash
 sbt 'jssrc2cpg/jsAstGenBuildRust' 'jssrc2cpg/test'
+```
+
+## Swift Frontend / Rust `SwiftAstGen`
+
+The Rust Swift AST generator workspace lives under:
+
+```text
+joern-cli/frontends/swiftsrc2cpg/rust
+```
+
+Useful commands:
+
+```bash
+cd joern-cli/frontends/swiftsrc2cpg/rust
+cargo fmt --check
+cargo test
+cargo clippy --all-targets -- -D warnings
+```
+
+Build and install the Rust binary into the location used by the existing
+`swiftsrc2cpg` SBT project:
+
+```bash
+sbt 'swiftsrc2cpg/swiftAstGenBuildRust'
 ```
 
 ## Requirements
