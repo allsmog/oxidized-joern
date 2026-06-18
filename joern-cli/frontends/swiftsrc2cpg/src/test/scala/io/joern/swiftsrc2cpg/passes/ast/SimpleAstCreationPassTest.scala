@@ -129,6 +129,28 @@ class SimpleAstCreationPassTest extends SwiftSrc2CpgSuite {
       }
     }
 
+    "have correct structure for simple class members and member access" in {
+      val cpg = code("""
+          |class Foo {
+          |  var x = 1
+          |  func baz() {}
+          |  func bar() {
+          |    x = self.x
+          |    baz()
+          |    self.baz()
+          |  }
+          |}
+          |""".stripMargin)
+
+      inside(cpg.typeDecl.nameExact("Foo").l) { case List(foo) =>
+        foo.fullName shouldBe "Test0.swift:<global>.Foo"
+        foo.member.nameExact("x").typeFullName.l shouldBe List(Defines.Any)
+      }
+      cpg.method.nameExact("bar").fullName.l should contain("Test0.swift:<global>.Foo.bar:()->ANY")
+      cpg.call.nameExact(Operators.fieldAccess).code.l should contain("self.x")
+      cpg.call.nameExact("baz").code.l should contain allOf ("baz()", "self.baz()")
+    }
+
     "have correct closure bindings" in {
       val cpg = code("""
         |func foo() -> {
