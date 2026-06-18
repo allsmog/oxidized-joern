@@ -1018,10 +1018,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def initializeGlobalScope(): Unit = {
     val globalEntries = globalVariableDeclarations(document.declarations).map { case (global, ownerFullName) =>
-      val localCode = localCodeForGlobal(global)
-      val typeName  = registerType(globalTypeFullName(global, ownerFullName))
-      val node      = localNode(OxOrigin(global).copy(code = localCode), global.name, localCode, typeName)
-      global -> (ownerFullName, ScopeEntry(typeName, node))
+      val localCode        = localCodeForGlobal(global)
+      val typeName         = registerType(globalTypeFullName(global, ownerFullName))
+      val semanticTypeName = registerType(globalSemanticTypeFullName(global, ownerFullName))
+      val node             = localNode(OxOrigin(global).copy(code = localCode), global.name, localCode, typeName)
+      global -> (ownerFullName, ScopeEntry(typeName, node, semanticTypeFullName = Option(semanticTypeName)))
     }
     globalLocalEntries = globalEntries.map { case (global, (_, scopeEntry)) =>
       global -> scopeEntry
@@ -1053,8 +1054,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val localCode = localCodeForGlobal(global)
     val scopeEntry = globalLocalEntries.getOrElse(
       global, {
-        val typeName = registerType(globalTypeFullName(global, ownerFullName))
-        ScopeEntry(typeName, this.localNode(origin.copy(code = localCode), global.name, localCode, typeName))
+        val typeName         = registerType(globalTypeFullName(global, ownerFullName))
+        val semanticTypeName = registerType(globalSemanticTypeFullName(global, ownerFullName))
+        ScopeEntry(
+          typeName,
+          this.localNode(origin.copy(code = localCode), global.name, localCode, typeName),
+          semanticTypeFullName = Option(semanticTypeName)
+        )
       }
     )
     val localAst        = Ast(scopeEntry.declaration)
@@ -1334,6 +1340,48 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       typeFullNameWithStringLiteralLength(global.typeName, global.initializer),
       ownerFullName
     )
+  }
+
+  private def globalSemanticTypeFullName(global: OxGlobalVariableDecl, ownerFullName: Option[String] = None): String = {
+    ownerResolvedTypeFullNamePreservingCv(
+      typeFullNameWithStringLiteralLength(global.semanticTypeName, global.initializer),
+      ownerFullName
+    )
+  }
+
+  private def ownerResolvedTypeFullNamePreservingCv(typeName: String, ownerFullName: Option[String]): String = {
+    val normalized             = normalizeType(typeName)
+    val objectTypeName         = unaliasedAggregateObjectTypeName(normalized)
+    val lookupObjectTypeName   = normalizeType(resolveAliasType(objectTypeName))
+    val resolvedObjectTypeName = localObjectAggregateTypeFullName(lookupObjectTypeName, ownerFullName)
+    resolvedObjectTypeName
+      .map(resolvedObjectTypeName => replaceObjectTypeName(normalized, objectTypeName, resolvedObjectTypeName))
+      .getOrElse(normalized)
+  }
+
+  private def unaliasedAggregateObjectTypeName(typeName: String): String = {
+    val normalized     = normalizeType(typeName)
+    val objectTypeName = stripCxxReference(normalized).stripSuffix("*").stripSuffix("[]")
+    stripCxxTypeQualifiers(objectTypeName).trim
+  }
+
+  private def replaceObjectTypeName(
+    typeName: String,
+    objectTypeName: String,
+    resolvedObjectTypeName: String
+  ): String = {
+    val candidates = Seq(objectTypeName, objectTypeName.split('.').lastOption.getOrElse(objectTypeName)).distinct
+    candidates
+      .flatMap(candidate => objectTypeNameStart(typeName, candidate).map(candidate -> _))
+      .headOption
+      .map { case (candidate, start) => typeName.patch(start, resolvedObjectTypeName, candidate.length) }
+      .getOrElse(typeName)
+  }
+
+  private def objectTypeNameStart(typeName: String, candidate: String): Option[Int] = {
+    val pattern =
+      s"(^|[^A-Za-z0-9_.])(${java.util.regex.Pattern.quote(candidate)})(?=$$|[^A-Za-z0-9_.])".r
+    pattern.findFirstMatchIn(typeName).map(_.start(2))
   }
 
   private def ownerResolvedGlobalTypeFullName(typeName: String, ownerFullName: Option[String]): String = {
@@ -5873,8 +5921,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def fieldTypeFullName(baseTypeFullName: String, field: String): Option[String] = {
     fieldEntryForTypeHierarchy(baseTypeFullName, field).map { case (_, fieldDecl) =>
-      resolveAliasType(fieldDecl.typeName)
+      fieldSemanticTypeFullName(fieldDecl)
     }
+  }
+
+  private def fieldSemanticTypeFullName(field: OxFieldDecl): String = {
+    resolveAliasType(field.semanticTypeName)
   }
 
   private def fieldEntryForTypeHierarchy(baseTypeFullName: String, field: String): Option[(String, OxFieldDecl)] = {
@@ -5895,7 +5947,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def staticFieldTypeFullName(name: String): Option[String] = {
-    staticFieldTarget(name).map { case (_, field) => resolveAliasType(field.typeName) }
+    staticFieldTarget(name).map { case (_, field) => fieldSemanticTypeFullName(field) }
   }
 
   private def staticFieldTarget(name: String): Option[(String, OxFieldDecl)] = {
@@ -6061,7 +6113,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Ast(ownerIdentifier),
         accessCode,
         field.name,
-        registerType(resolveAliasType(field.typeName))
+        registerType(fieldSemanticTypeFullName(field))
       )
     }
   }
