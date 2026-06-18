@@ -1648,6 +1648,73 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("local.~Local()", "this->second.~Field()", "this->first.~Field()", "this->~Base()")
     }
 
+    "capture C++ constructor initializer failure cleanup" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Base {
+          |public:
+          |  Base();
+          |  ~Base();
+          |};
+          |class Field {
+          |public:
+          |  Field();
+          |  Field(int seed) {}
+          |  ~Field();
+          |};
+          |class Owner : public Base {
+          |  Field first;
+          |  Field second;
+          |  Field slots[2];
+          |public:
+          |  Owner(int seed) : first(seed), second(seed + 1), slots{{seed}, {seed + 2}} {}
+          |  ~Owner();
+          |};
+          |}
+          |Core::Base::Base() {}
+          |Core::Base::~Base() {}
+          |Core::Field::Field() {}
+          |Core::Field::~Field() {}
+          |Core::Owner::~Owner() {}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      def ownerConstructor = cpg.method.fullNameExact("Core.Owner.Owner:void(int)")
+      ownerConstructor.controlStructure.controlStructureType(ControlStructureTypes.TRY).tryBodyOut.ast.isCall
+        .nameExact(Operators.assignment)
+        .code
+        .filterNot(_.startsWith("<tmp>"))
+        .l shouldBe
+        List(
+          "this->first = Core.Field.Field(seed)",
+          "this->second = Core.Field.Field(seed + 1)",
+          "this->slots[0] = Core.Field.Field(seed)",
+          "this->slots[1] = Core.Field.Field(seed + 2)"
+        )
+      ownerConstructor.controlStructure.controlStructureType(ControlStructureTypes.TRY).tryBodyOut.ast.isCall
+        .filter(call => Set("~Field", "~Base").contains(call.name))
+        .code
+        .l shouldBe
+        List(
+          "this->~Base()",
+          "this->first.~Field()",
+          "this->~Base()",
+          "this->second.~Field()",
+          "this->first.~Field()",
+          "this->~Base()",
+          "this->slots[0].~Field()",
+          "this->second.~Field()",
+          "this->first.~Field()",
+          "this->~Base()"
+        )
+      ownerConstructor.controlStructure.controlStructureType(ControlStructureTypes.TRY).tryBodyOut.ast.isControlStructure
+        .controlStructureType(ControlStructureTypes.THROW)
+        .code
+        .l shouldBe List.fill(4)("throw;")
+    }
+
     "capture C++ member array constructors and destructors" in {
       val cpg = code(
         """

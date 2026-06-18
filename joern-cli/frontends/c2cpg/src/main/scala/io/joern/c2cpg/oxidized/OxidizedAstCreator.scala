@@ -70,6 +70,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     entry: Option[FunctionEntry],
     preserveInitializerListCode: Boolean = false
   )
+  private sealed trait ConstructorSubobject
+  private final case class ConstructorBaseSubobject(typeName: String)    extends ConstructorSubobject
+  private final case class ConstructorFieldSubobject(field: OxFieldDecl) extends ConstructorSubobject
+  private final case class ConstructorFieldArrayElementSubobject(field: OxFieldDecl, index: Int)
+      extends ConstructorSubobject
+  private final case class ConstructorPrefixStep(asts: Seq[Ast], constructed: Seq[ConstructorSubobject], line: Int)
   private final case class ConstructorInvocationInfo(
     typeName: String,
     constructorName: String,
@@ -1476,30 +1482,32 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val name = constructorInitializerFieldName(initializer)
       !fieldNames.contains(name) && baseTypes.exists(baseType => constructorInitializerMatchesBase(baseType, name))
     }
-    val baseInitializerAsts = baseTypes.flatMap { baseType =>
+    val baseInitializerSteps = baseTypes.flatMap { baseType =>
       val explicitInitializers =
         baseInitializers.filter(initializer =>
           constructorInitializerMatchesBase(baseType, constructorInitializerFieldName(initializer))
         )
       if (explicitInitializers.nonEmpty) {
-        explicitInitializers.flatMap(initializer => baseConstructorInitializerAsts(baseType, initializer))
+        explicitInitializers.map(initializer => baseConstructorInitializerStep(baseType, initializer))
       } else {
-        defaultBaseConstructorAsts(baseType, line)
+        Seq(defaultBaseConstructorStep(baseType, line))
       }
     }
-    val orderedFieldInitializers = fields.flatMap { field =>
+    val orderedFieldInitializerSteps = fields.flatMap { field =>
       initializersByField
         .get(field.name)
         .map(
           _.flatMap(initializer =>
-            memberArrayConstructorInitializerAsts(initializer, field)
-              .getOrElse(constructorInitializerAsts(initializer, Option(field.typeName)))
+            memberArrayConstructorInitializerSteps(initializer, field)
+              .getOrElse(
+                constructorInitializerStep(initializer, Option(field.typeName), constructorFieldSubobjects(field))
+              )
           )
         )
         .getOrElse {
           field.initializer
-            .map(_ => defaultMemberInitializerAsts(ownerTypeFullName, field))
-            .getOrElse(defaultMemberConstructorAsts(field, line))
+            .map(_ => defaultMemberInitializerSteps(ownerTypeFullName, field))
+            .getOrElse(defaultMemberConstructorSteps(field, line))
         }
     }
     val consumedBaseInitializers = baseInitializers.toSet
@@ -1508,11 +1516,225 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         initializer
       )
     }
-    baseInitializerAsts ++
-      orderedFieldInitializers ++
+    val extraInitializerSteps =
       extraInitializers.flatMap(initializer =>
-        constructorInitializerAsts(initializer, constructorInitializerTargetTypeName(ownerTypeFullName, initializer))
+        constructorInitializerStep(
+          initializer,
+          constructorInitializerTargetTypeName(ownerTypeFullName, initializer),
+          constructed = Seq.empty
+        )
       )
+    guardedConstructorPrefixStepAsts(baseInitializerSteps ++ orderedFieldInitializerSteps ++ extraInitializerSteps)
+  }
+
+  private def guardedConstructorPrefixStepAsts(steps: Seq[ConstructorPrefixStep]): Seq[Ast] = {
+    val (_, asts) = steps.foldLeft((Vector.empty[ConstructorSubobject], Vector.empty[Ast])) {
+      case ((constructed, asts), step) =>
+        val guardedAsts = constructorInitializerUnwindAsts(step.asts, constructed, step.line)
+        (constructed ++ step.constructed, asts ++ guardedAsts)
+    }
+    asts
+  }
+
+  private def constructorInitializerUnwindAsts(
+    asts: Seq[Ast],
+    constructed: Seq[ConstructorSubobject],
+    line: Int
+  ): Seq[Ast] = {
+    val cleanupAsts = constructed.reverse.flatMap(constructorSubobjectDestructorAsts(_, line))
+    if (asts.nonEmpty && cleanupAsts.nonEmpty) {
+      val tryNode = controlStructureNode(OxOrigin("try", Option(line)), ControlStructureTypes.TRY, "try")
+      val rethrow = Ast(controlStructureNode(OxOrigin("throw;", Option(line)), ControlStructureTypes.THROW, "throw;"))
+      val unwindBlock =
+        blockAst(
+          blockNode(OxOrigin("<constructor-unwind>", Option(line)), "<constructor-unwind>", Defines.Any),
+          (cleanupAsts :+ rethrow).toList
+        )
+      val tryBlock =
+        blockAst(blockNode(OxOrigin("try", Option(line)), "try", Defines.Any), (asts :+ unwindBlock).toList)
+      Seq(tryCatchAst(tryNode, tryBlock, Seq.empty, None))
+    } else {
+      asts
+    }
+  }
+
+  private def constructorSubobjectDestructorAsts(subobject: ConstructorSubobject, line: Int): Seq[Ast] = {
+    subobject match {
+      case ConstructorBaseSubobject(typeName) =>
+        destructorEntryForType(typeName).toSeq.map(entry => baseDestructorAst(entry, line))
+      case ConstructorFieldSubobject(field) =>
+        destructorEntryForType(field.typeName).toSeq.map(entry => memberDestructorAst(field, entry, line))
+      case ConstructorFieldArrayElementSubobject(field, index) =>
+        arrayElementTypeFullName(field.typeName).flatMap(destructorEntryForType).toSeq.map { entry =>
+          memberArrayElementDestructorAst(field, index, line, entry)
+        }
+    }
+  }
+
+  private def constructorPrefixStep(
+    asts: Seq[Ast],
+    constructed: Seq[ConstructorSubobject],
+    line: Int
+  ): ConstructorPrefixStep = {
+    val constructedSubobjects =
+      if (asts.nonEmpty) constructed.filter(constructorSubobjectHasDestructor) else Seq.empty
+    ConstructorPrefixStep(asts, constructedSubobjects, line)
+  }
+
+  private def constructorSubobjectHasDestructor(subobject: ConstructorSubobject): Boolean = {
+    subobject match {
+      case ConstructorBaseSubobject(typeName) => destructorEntryForType(typeName).isDefined
+      case ConstructorFieldSubobject(field)   => destructorEntryForType(field.typeName).isDefined
+      case ConstructorFieldArrayElementSubobject(field, _) =>
+        arrayElementTypeFullName(field.typeName).flatMap(destructorEntryForType).isDefined
+    }
+  }
+
+  private def constructorFieldSubobjects(field: OxFieldDecl): Seq[ConstructorSubobject] = {
+    if (field.isStatic) {
+      Seq.empty
+    } else {
+      fieldArrayElementCount(field)
+        .map(count => (0 until count).map(index => ConstructorFieldArrayElementSubobject(field, index)))
+        .getOrElse(Seq(ConstructorFieldSubobject(field)))
+    }
+  }
+
+  private def constructorInitializerStep(
+    initializer: OxConstructorInitializer,
+    initializedTypeName: Option[String],
+    constructed: Seq[ConstructorSubobject]
+  ): Seq[ConstructorPrefixStep] = {
+    Seq(
+      constructorPrefixStep(constructorInitializerAsts(initializer, initializedTypeName), constructed, initializer.line)
+    )
+  }
+
+  private def baseConstructorInitializerStep(
+    baseType: String,
+    initializer: OxConstructorInitializer
+  ): ConstructorPrefixStep = {
+    constructorPrefixStep(
+      baseConstructorInitializerAsts(baseType, initializer),
+      Seq(ConstructorBaseSubobject(baseType)),
+      initializer.line
+    )
+  }
+
+  private def defaultBaseConstructorStep(baseType: String, line: Int): ConstructorPrefixStep = {
+    constructorPrefixStep(defaultBaseConstructorAsts(baseType, line), Seq(ConstructorBaseSubobject(baseType)), line)
+  }
+
+  private def defaultMemberInitializerSteps(
+    ownerTypeFullName: String,
+    field: OxFieldDecl
+  ): Seq[ConstructorPrefixStep] = {
+    if (field.isStatic) {
+      Seq.empty
+    } else {
+      field.initializer.toSeq.flatMap { initializer =>
+        val arraySteps = initializer match {
+          case initializerList: OxInitializerList =>
+            memberArrayInitializerConstructorSteps(field, initializerList.elements, initializer.line)
+          case _ =>
+            Seq.empty
+        }
+        if (arraySteps.nonEmpty) {
+          arraySteps
+        } else {
+          Seq(
+            constructorPrefixStep(
+              defaultMemberInitializerAsts(ownerTypeFullName, field),
+              constructorFieldSubobjects(field),
+              initializer.line
+            )
+          )
+        }
+      }
+    }
+  }
+
+  private def defaultMemberConstructorSteps(field: OxFieldDecl, line: Int): Seq[ConstructorPrefixStep] = {
+    if (field.isStatic) {
+      Seq.empty
+    } else {
+      val arrayConstructorSteps = memberArrayDefaultConstructorSteps(field, line)
+      if (arrayConstructorSteps.nonEmpty) {
+        arrayConstructorSteps
+      } else {
+        Seq(constructorPrefixStep(defaultMemberConstructorAsts(field, line), constructorFieldSubobjects(field), line))
+      }
+    }
+  }
+
+  private def memberArrayConstructorInitializerSteps(
+    initializer: OxConstructorInitializer,
+    field: OxFieldDecl
+  ): Option[Seq[ConstructorPrefixStep]] = {
+    Option
+      .when(!field.isStatic) {
+        memberArrayInitializerConstructorSteps(field, initializer.arguments, initializer.line)
+      }
+      .filter(_.nonEmpty)
+  }
+
+  private def memberArrayDefaultConstructorSteps(field: OxFieldDecl, line: Int): Seq[ConstructorPrefixStep] = {
+    for {
+      count       <- fieldArrayElementCount(field).toSeq
+      elementType <- arrayElementTypeFullName(field.typeName).toSeq
+      info        <- constructorInvocationInfo(elementType, Seq.empty, "").toSeq
+      index       <- 0 until count
+    } yield constructorPrefixStep(
+      Seq(memberArrayElementConstructorAssignmentAst(field, index, line, info)),
+      Seq(ConstructorFieldArrayElementSubobject(field, index)),
+      line
+    )
+  }
+
+  private def memberArrayInitializerConstructorSteps(
+    field: OxFieldDecl,
+    initializers: Seq[OxExpression],
+    line: Int
+  ): Seq[ConstructorPrefixStep] = {
+    val count       = fieldArrayElementCount(field)
+    val elementType = arrayElementTypeFullName(field.typeName)
+    (count, elementType) match {
+      case (Some(elementCount), Some(elementTypeName)) =>
+        val explicitInitializers = initializers.take(elementCount)
+        val explicitConstructorSteps = explicitInitializers.zipWithIndex.map { case (elementInitializer, index) =>
+          memberArrayElementInitializerConstructorStep(field, elementTypeName, index, line, elementInitializer)
+        }
+        if (explicitConstructorSteps.exists(_.isEmpty)) {
+          Seq.empty
+        } else {
+          val defaultConstructorSteps = for {
+            info  <- constructorInvocationInfo(elementTypeName, Seq.empty, "").toSeq
+            index <- explicitInitializers.size until elementCount
+          } yield constructorPrefixStep(
+            Seq(memberArrayElementConstructorAssignmentAst(field, index, line, info)),
+            Seq(ConstructorFieldArrayElementSubobject(field, index)),
+            line
+          )
+          explicitConstructorSteps.flatten ++ defaultConstructorSteps
+        }
+      case _ =>
+        Seq.empty
+    }
+  }
+
+  private def memberArrayElementInitializerConstructorStep(
+    field: OxFieldDecl,
+    elementTypeName: String,
+    index: Int,
+    line: Int,
+    initializer: OxExpression
+  ): Seq[ConstructorPrefixStep] = {
+    val asts = memberArrayElementInitializerConstructorAsts(field, elementTypeName, index, line, initializer)
+    Option
+      .when(asts.nonEmpty) {
+        constructorPrefixStep(asts, Seq(ConstructorFieldArrayElementSubobject(field, index)), line)
+      }
+      .toSeq
   }
 
   private def constructorInitializerAsts(initializer: OxConstructorInitializer): Seq[Ast] = {
