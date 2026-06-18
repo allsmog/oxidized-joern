@@ -506,7 +506,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       inside(cpg.method.nameExact("use").call.codeExact("Core::pick<int>(1)").l) { case List(pickCall) =>
         pickCall.name shouldBe "pick"
         pickCall.methodFullName shouldBe "Core.pick:T(T)"
-        pickCall.typeFullName shouldBe "T"
+        pickCall.typeFullName shouldBe "int"
       }
     }
 
