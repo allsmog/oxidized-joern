@@ -2275,22 +2275,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option.when(extendsCurrentInitializerTemporary)(typeName),
         extendsCurrentInitializerTemporary
       )
-    local.initializer match {
+    val initializationAsts = local.initializer match {
       case Some(initializer: OxInitializerList)
           if useConstructorInitializers && isConstructorInitializer(typeName, initializer) =>
         val resolution = constructorInitializerResolution(typeName, initializer)
-        Seq(localAst) ++ resolution.arguments.flatMap(aggregateAssignmentExpressionAsts) ++ Seq(
+        resolution.arguments.flatMap(aggregateAssignmentExpressionAsts) ++ Seq(
           constructorAssignmentAst(local, initializer, typeName, resolution)
         ) ++
           temporaryDestructorAstsForConstructorArguments(resolution.arguments, resolution.entry)
       case Some(initializer) if useConstructorInitializers && isCopyConstructorInitializer(typeName, initializer) =>
         val arguments   = Seq(initializer)
         val constructor = constructorEntry(typeName, arguments)
-        Seq(localAst) ++ aggregateAssignmentExpressionAsts(initializer) ++ Seq(
+        aggregateAssignmentExpressionAsts(initializer) ++ Seq(
           constructorAssignmentAst(local, arguments, initializer.code, OxOrigin(initializer), typeName)
         ) ++ temporaryDestructorAstsForConstructorArguments(arguments, constructor)
       case Some(_: OxInitializerList) if arrayConstructorAsts.nonEmpty =>
-        Seq(localAst) ++ arrayConstructorAsts
+        arrayConstructorAsts
       case Some(initializer) =>
         val (left, targetCode) = localAssignmentTargetAst(local, typeName)
         val assignmentCode     = s"$targetCode = ${initializer.code}"
@@ -2303,18 +2303,59 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           )
         val initializerAggregateAssignments = aggregateAssignmentExpressionAsts(initializer)
         val fieldAssignments                = aggregateInitializerAssignmentAsts(local, initializer, typeName)
-        Seq(localAst) ++ initializerAggregateAssignments ++ Seq(
-          assignment
-        ) ++ fieldAssignments ++ heapConstructorAstsForExpressions(
+        initializerAggregateAssignments ++ Seq(assignment) ++ fieldAssignments ++ heapConstructorAstsForExpressions(
           Seq(initializer)
         ) ++ localInitializerTemporaryDestructorAsts
       case None if arrayConstructorAsts.nonEmpty =>
-        Seq(localAst) ++ arrayConstructorAsts
+        arrayConstructorAsts
       case None if useConstructorInitializers && isDefaultConstructorInitializer(typeName) =>
-        Seq(localAst, constructorAssignmentAst(local, Seq.empty, "", origin, typeName))
+        Seq(constructorAssignmentAst(local, Seq.empty, "", origin, typeName))
       case None =>
-        Seq(localAst)
+        Seq.empty
     }
+    val guardedInitializationAsts =
+      if (isStaticStorageLocal) staticLocalInitializationAsts(local, initializationAsts) else initializationAsts
+    Seq(localAst) ++ guardedInitializationAsts
+  }
+
+  private def staticLocalInitializationAsts(local: OxLocalDecl, initializationAsts: Seq[Ast]): Seq[Ast] = {
+    Option
+      .when(initializationAsts.nonEmpty) {
+        val guardName      = s"<static-init>${local.name}"
+        val guardCode      = guardName
+        val guardType      = registerType("bool")
+        val guardLocal     = localNode(OxOrigin(guardCode, Option(local.line)), guardName, guardCode, guardType)
+        val guardEntry     = ScopeEntry(guardType, guardLocal)
+        val guardCondition = staticLocalGuardConditionAst(guardName, guardEntry, local.line)
+        val guardSet       = staticLocalGuardAssignmentAst(guardName, guardEntry, local.line)
+        val ifCode         = s"if (!$guardCode)"
+        val ifNode = controlStructureNode(OxOrigin(ifCode, Option(local.line)), ControlStructureTypes.IF, ifCode)
+        val thenAst =
+          blockAst(
+            blockNode(OxOrigin("then", Option(local.line)), "then", Defines.Any),
+            (initializationAsts :+ guardSet).toList
+          )
+        Seq(Ast(guardLocal), ifThenElseAst(ifNode, Option(guardCondition), thenAst, None))
+      }
+      .getOrElse(Seq.empty)
+  }
+
+  private def staticLocalGuardConditionAst(guardName: String, guardEntry: ScopeEntry, line: Int): Ast = {
+    val guardAst = identifierAstForScopeEntry(guardName, guardName, line, guardEntry)
+    operatorCallAst(
+      OxOrigin(s"!$guardName", Option(line)),
+      s"!$guardName",
+      Operators.logicalNot,
+      Seq(guardAst),
+      registerType("bool")
+    )
+  }
+
+  private def staticLocalGuardAssignmentAst(guardName: String, guardEntry: ScopeEntry, line: Int): Ast = {
+    val assignmentCode = s"$guardName = true"
+    val left           = identifierAstForScopeEntry(guardName, guardName, line, guardEntry)
+    val right          = expressionAst(OxLiteral("true", "true", line))
+    assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
   }
 
   private def localArrayConstructorAsts(local: OxLocalDecl, typeName: String): Seq[Ast] = {
