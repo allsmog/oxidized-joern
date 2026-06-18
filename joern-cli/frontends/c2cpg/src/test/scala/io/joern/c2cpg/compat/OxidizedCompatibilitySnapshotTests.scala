@@ -5288,8 +5288,19 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "globalSlots[1] = Core.Widget.Widget(Core::makeWidget())",
           "globalSlots[2] = Core.Widget.Widget()"
         )
+      globalMethod.call.nameExact("~Defaulted").code.l shouldBe List("implicitGlobal.~Defaulted()")
       globalMethod.call.nameExact("~Widget").code.l shouldBe
-        List("Core::makeWidget().~Widget()", "Core::makeWidget().~Widget()")
+        List(
+          "Core::makeWidget().~Widget()",
+          "Core::makeWidget().~Widget()",
+          "globalSlots[2].~Widget()",
+          "globalSlots[1].~Widget()",
+          "globalSlots[0].~Widget()",
+          "movedGlobal.~Widget()",
+          "copiedGlobal.~Widget()",
+          "seededGlobal.~Widget()",
+          "sourceGlobal.~Widget()"
+        )
     }
 
     "capture C global aggregate initializer field assignments from the Rust parser backend" in {
