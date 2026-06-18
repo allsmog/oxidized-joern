@@ -75,3 +75,36 @@ fn writes_babel_shaped_json_for_typescript_sources() {
         "ForOfStatement"
     );
 }
+
+#[test]
+fn writes_babel_shaped_json_for_vue_sources() {
+    let input = TempDir::new().unwrap();
+    let output = TempDir::new().unwrap();
+    fs::write(
+        input.path().join("App.vue"),
+        "<template><h1>{{ msg }}</h1></template>\n<script lang=\"ts\">export default class App {}</script>\n",
+    )
+    .unwrap();
+    fs::write(input.path().join("app.ts"), "const skipped = true;\n").unwrap();
+
+    Command::cargo_bin("astgen")
+        .unwrap()
+        .args(["-t", "vue", "-o"])
+        .arg(output.path())
+        .arg(input.path())
+        .assert()
+        .success();
+
+    let vue_json_path = output.path().join("App.vue.json");
+    let document: Value = serde_json::from_slice(&fs::read(vue_json_path).unwrap()).unwrap();
+    assert_eq!(document["relativeName"], "App.vue");
+    assert_eq!(
+        document["ast"]["program"]["body"][0]["type"],
+        "ExpressionStatement"
+    );
+    assert_eq!(
+        document["ast"]["program"]["body"][1]["type"],
+        "ExportDefaultDeclaration"
+    );
+    assert!(!output.path().join("app.ts.json").exists());
+}

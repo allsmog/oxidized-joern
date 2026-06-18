@@ -46,12 +46,17 @@ fn run() -> Result<()> {
 
     let out = args.out.context("missing -o <dir>")?;
     let input = args.input.unwrap_or(std::env::current_dir()?);
-    if args.language_type != "ts" && args.language_type != "js" {
+    if args.language_type != "ts" && args.language_type != "js" && args.language_type != "vue" {
         bail!("unsupported astgen type '{}'", args.language_type);
     }
 
     let exclude = args.exclude_regex.as_deref().map(Regex::new).transpose()?;
-    let files = collect_inputs(&input, exclude.as_ref(), &args.exclude_files)?;
+    let files = collect_inputs(
+        &input,
+        exclude.as_ref(),
+        &args.exclude_files,
+        &args.language_type,
+    )?;
     for file in files {
         let target = output_path(&input, &out, &file);
         match parse_file(&input_root(&input), &file).and_then(|value| write_json(&target, &value)) {
@@ -82,13 +87,14 @@ fn collect_inputs(
     input: &Path,
     exclude: Option<&Regex>,
     exclude_files: &[PathBuf],
+    language_type: &str,
 ) -> Result<Vec<PathBuf>> {
     if input.is_file() {
-        if is_js_input(input) && !is_excluded(input, exclude, exclude_files) {
+        if is_supported_input(input, language_type) && !is_excluded(input, exclude, exclude_files) {
             return Ok(vec![input.to_path_buf()]);
         }
         bail!(
-            "input file is not a supported JavaScript source: {}",
+            "input file is not a supported {language_type} source: {}",
             input.display()
         );
     }
@@ -97,7 +103,10 @@ fn collect_inputs(
     for entry in WalkBuilder::new(input).hidden(false).build() {
         let entry = entry?;
         let path = entry.path();
-        if path.is_file() && is_js_input(path) && !is_excluded(path, exclude, exclude_files) {
+        if path.is_file()
+            && is_supported_input(path, language_type)
+            && !is_excluded(path, exclude, exclude_files)
+        {
             files.push(path.to_path_buf());
         }
     }
@@ -110,6 +119,14 @@ fn is_js_input(path: &Path) -> bool {
         path.extension().and_then(|x| x.to_str()),
         Some("js" | "jsx" | "cjs" | "mjs" | "xsjs" | "xsjslib" | "ts" | "tsx")
     )
+}
+
+fn is_supported_input(path: &Path, language_type: &str) -> bool {
+    if language_type == "vue" {
+        path.extension().and_then(|x| x.to_str()) == Some("vue")
+    } else {
+        is_js_input(path)
+    }
 }
 
 fn is_excluded(path: &Path, exclude: Option<&Regex>, exclude_files: &[PathBuf]) -> bool {

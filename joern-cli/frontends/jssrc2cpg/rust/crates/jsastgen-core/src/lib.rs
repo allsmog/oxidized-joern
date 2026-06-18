@@ -11,15 +11,22 @@ pub fn parse_file(root: &Path, path: &Path) -> Result<Value> {
 }
 
 pub fn parse_source(root: &Path, path: &Path, source: &str) -> Result<Value> {
+    if is_vue_file(path) {
+        return parse_vue_source(root, path, source);
+    }
     let tree = parse_tree(path, source)?;
     Ok(file_json(root, path, source, &tree))
 }
 
 fn parse_tree(path: &Path, source: &str) -> Result<Tree> {
+    parse_tree_with_candidates(source, language_candidates(path))
+}
+
+fn parse_tree_with_candidates(source: &str, candidates: Vec<SourceLanguage>) -> Result<Tree> {
     let mut last_error = None;
-    for language in language_candidates(path) {
+    for language in candidates {
         let tree = parse_with_language(source, language)
-            .with_context(|| format!("parsing {} as {}", path.display(), language.name()))?;
+            .with_context(|| format!("parsing as {}", language.name()))?;
         if !tree.root_node().has_error() {
             return Ok(tree);
         }
@@ -30,6 +37,80 @@ fn parse_tree(path: &Path, source: &str) -> Result<Tree> {
         bail!("parser reported syntax errors after trying {language}");
     }
     bail!("parser reported syntax errors");
+}
+
+fn is_vue_file(path: &Path) -> bool {
+    path.extension().and_then(|x| x.to_str()) == Some("vue")
+}
+
+fn parse_vue_source(root: &Path, path: &Path, source: &str) -> Result<Value> {
+    let mut body = Vec::new();
+
+    let script_source = masked_vue_script_source(source);
+    if script_source
+        .bytes()
+        .any(|byte| !byte.is_ascii_whitespace())
+    {
+        let tree = parse_tree_with_candidates(
+            &script_source,
+            vec![
+                SourceLanguage::TypeScript,
+                SourceLanguage::Tsx,
+                SourceLanguage::JavaScript,
+            ],
+        )
+        .with_context(|| format!("parsing {} script blocks", path.display()))?;
+        body.extend(program_body_json(tree.root_node(), &script_source));
+    }
+
+    let template_source = masked_vue_template_source(source);
+    if template_source
+        .bytes()
+        .any(|byte| !byte.is_ascii_whitespace())
+    {
+        let tree = parse_tree_with_candidates(&template_source, vec![SourceLanguage::Tsx])
+            .with_context(|| format!("parsing {} template blocks", path.display()))?;
+        body.extend(program_body_json(tree.root_node(), &template_source));
+    }
+
+    body.sort_by_key(|value| {
+        value
+            .get("start")
+            .and_then(Value::as_u64)
+            .unwrap_or(u64::MAX) as usize
+    });
+
+    let program = with_span_bounds(
+        "Program",
+        0,
+        Point { row: 0, column: 0 },
+        source.len(),
+        point_for_byte(source, source.len()),
+        json!({
+            "sourceType": "module",
+            "interpreter": Value::Null,
+            "directives": [],
+            "body": body
+        }),
+    );
+    let ast = with_span_bounds(
+        "File",
+        0,
+        Point { row: 0, column: 0 },
+        source.len(),
+        point_for_byte(source, source.len()),
+        json!({
+            "program": program,
+            "comments": [],
+            "tokens": []
+        }),
+    );
+
+    Ok(json!({
+        "fullName": path.to_string_lossy(),
+        "relativeName": relative_name(root, path),
+        "ast": ast
+    }))
 }
 
 fn parse_with_language(source: &str, language: SourceLanguage) -> Result<Tree> {
@@ -124,11 +205,7 @@ fn relative_name(root: &Path, path: &Path) -> String {
 }
 
 fn program_json(root: Node, source: &str) -> Value {
-    let body = named_children(root)
-        .filter(|child| !is_comment(*child))
-        .map(|child| stmt_json(child, source))
-        .filter(|value| !value.is_null())
-        .collect::<Vec<_>>();
+    let body = program_body_json(root, source);
 
     with_span(
         "Program",
@@ -140,6 +217,129 @@ fn program_json(root: Node, source: &str) -> Value {
             "body": body
         }),
     )
+}
+
+fn program_body_json(root: Node, source: &str) -> Vec<Value> {
+    named_children(root)
+        .filter(|child| !is_comment(*child))
+        .map(|child| stmt_json(child, source))
+        .filter(|value| !value.is_null())
+        .collect::<Vec<_>>()
+}
+
+#[derive(Debug)]
+struct VueBlock {
+    start: usize,
+    end: usize,
+    content_start: usize,
+    content_end: usize,
+}
+
+fn masked_vue_script_source(source: &str) -> String {
+    let mut bytes = blank_source_bytes(source);
+    for block in vue_blocks(source, "script") {
+        bytes[block.content_start..block.content_end]
+            .copy_from_slice(&source.as_bytes()[block.content_start..block.content_end]);
+    }
+    String::from_utf8(bytes).expect("masked source is valid UTF-8")
+}
+
+fn masked_vue_template_source(source: &str) -> String {
+    let mut bytes = blank_source_bytes(source);
+    for block in vue_blocks(source, "template") {
+        bytes[block.start..block.end].copy_from_slice(&source.as_bytes()[block.start..block.end]);
+        normalize_vue_template_syntax(&mut bytes[block.start..block.end]);
+    }
+    String::from_utf8(bytes).expect("masked source is valid UTF-8")
+}
+
+fn blank_source_bytes(source: &str) -> Vec<u8> {
+    source
+        .as_bytes()
+        .iter()
+        .map(|byte| match byte {
+            b'\n' | b'\r' => *byte,
+            _ => b' ',
+        })
+        .collect()
+}
+
+fn vue_blocks(source: &str, tag: &str) -> Vec<VueBlock> {
+    let lower = source.to_ascii_lowercase();
+    let open_pattern = format!("<{tag}");
+    let close_pattern = format!("</{tag}>");
+    let mut blocks = Vec::new();
+    let mut cursor = 0;
+
+    while let Some(relative_start) = lower[cursor..].find(&open_pattern) {
+        let start = cursor + relative_start;
+        let after_tag_name = start + open_pattern.len();
+        if !lower
+            .as_bytes()
+            .get(after_tag_name)
+            .is_none_or(|byte| is_tag_boundary(*byte))
+        {
+            cursor = after_tag_name;
+            continue;
+        }
+
+        let Some(relative_open_end) = lower[after_tag_name..].find('>') else {
+            break;
+        };
+        let content_start = after_tag_name + relative_open_end + 1;
+        let Some(relative_close_start) = lower[content_start..].find(&close_pattern) else {
+            break;
+        };
+        let content_end = content_start + relative_close_start;
+        let end = content_end + close_pattern.len();
+        blocks.push(VueBlock {
+            start,
+            end,
+            content_start,
+            content_end,
+        });
+        cursor = end;
+    }
+
+    blocks
+}
+
+fn is_tag_boundary(byte: u8) -> bool {
+    byte.is_ascii_whitespace() || matches!(byte, b'>' | b'/')
+}
+
+fn normalize_vue_template_syntax(bytes: &mut [u8]) {
+    let mut index = 0;
+    while index + 1 < bytes.len() {
+        match (bytes[index], bytes[index + 1]) {
+            (b'{', b'{') => {
+                bytes[index + 1] = b' ';
+                index += 2;
+            }
+            (b'}', b'}') => {
+                bytes[index] = b' ';
+                index += 2;
+            }
+            _ => {
+                index += 1;
+            }
+        }
+    }
+
+    for index in 0..bytes.len() {
+        if matches!(bytes[index], b':' | b'@' | b'#')
+            && is_vue_shorthand_attribute_start(bytes, index)
+        {
+            bytes[index] = b' ';
+        }
+    }
+}
+
+fn is_vue_shorthand_attribute_start(bytes: &[u8], index: usize) -> bool {
+    if index == 0 {
+        return false;
+    }
+    bytes[index - 1].is_ascii_whitespace() || bytes[index - 1] == b'<'
 }
 
 fn stmt_json(node: Node, source: &str) -> Value {
@@ -311,7 +511,7 @@ fn class_like_json(kind: &str, node: Node, source: &str) -> Value {
             "id": id,
             "superClass": super_class,
             "body": body,
-            "decorators": [],
+            "decorators": decorators_json(node, source),
             "implements": implements,
             "mixins": [],
             "abstract": node.kind() == "abstract_class_declaration"
@@ -354,9 +554,18 @@ fn class_implements_json(node: Node, source: &str) -> Vec<Value> {
 }
 
 fn class_body_json(node: Node, source: &str) -> Value {
-    let body = named_children(node)
-        .filter_map(|child| class_member_json(child, source))
-        .collect::<Vec<_>>();
+    let mut body = Vec::new();
+    let mut pending_decorators = Vec::new();
+
+    for child in named_children(node) {
+        if child.kind() == "decorator" {
+            pending_decorators.push(decorator_json(child, source));
+            continue;
+        }
+        if let Some(member) = class_member_json(child, source) {
+            body.push(with_decorator_values(member, &mut pending_decorators));
+        }
+    }
 
     with_span("ClassBody", node, json!({ "body": body }))
 }
@@ -383,11 +592,11 @@ fn class_method_json(node: Node, source: &str) -> Value {
         .child_by_field_name("body")
         .map(|child| stmt_json(child, source))
         .unwrap_or_else(|| block_from_node(node));
+    let return_type = node
+        .child_by_field_name("return_type")
+        .map(|child| ts_type_annotation_json(child, source));
 
-    with_span(
-        "ClassMethod",
-        node,
-        json!({
+    let mut fields = json!({
             "kind": object_method_kind(node, source),
             "key": key,
             "id": Value::Null,
@@ -396,9 +605,14 @@ fn class_method_json(node: Node, source: &str) -> Value {
             "computed": computed,
             "static": has_keyword_child(node, source, "static"),
             "generator": has_keyword_child(node, source, "*"),
-            "async": has_keyword_child(node, source, "async")
-        }),
-    )
+            "async": has_keyword_child(node, source, "async"),
+            "decorators": decorators_json(node, source)
+    });
+    if let Some(return_type) = return_type {
+        fields = with_extra_field(fields, "returnType", return_type);
+    }
+
+    with_span("ClassMethod", node, fields)
 }
 
 fn class_property_json(node: Node, source: &str) -> Value {
@@ -423,7 +637,8 @@ fn class_property_json(node: Node, source: &str) -> Value {
         "computed": computed,
         "static": has_keyword_child(node, source, "static"),
         "readonly": has_named_or_keyword_child(node, source, "readonly"),
-        "abstract": has_named_or_keyword_child(node, source, "abstract")
+        "abstract": has_named_or_keyword_child(node, source, "abstract"),
+        "decorators": decorators_json(node, source)
     });
     if let Some(type_annotation) = node
         .child_by_field_name("type")
@@ -491,7 +706,8 @@ fn ts_method_signature_json(kind: &str, node: Node, source: &str) -> Value {
         "static": has_keyword_child(node, source, "static"),
         "generator": false,
         "async": false,
-        "abstract": has_named_or_keyword_child(node, source, "abstract")
+        "abstract": has_named_or_keyword_child(node, source, "abstract"),
+        "decorators": decorators_json(node, source)
     });
     if let Some(return_type) = node
         .child_by_field_name("return_type")
@@ -623,7 +839,8 @@ fn function_like_json_with_span(
             "params": params,
             "body": body,
             "generator": false,
-            "async": false
+            "async": false,
+            "decorators": decorators_json(span_node, source)
     });
     if let Some(return_type) = return_type {
         fields = with_extra_field(fields, "returnType", return_type);
@@ -961,6 +1178,7 @@ fn export_statement_json(node: Node, source: &str) -> Value {
                     .find(|child| child.kind() != "export_clause")
                     .map(|child| expr_json(child, source))
             })
+            .map(|declaration| with_leading_decorators(declaration, node, source))
             .unwrap_or(Value::Null);
         return with_span(
             "ExportDefaultDeclaration",
@@ -974,6 +1192,7 @@ fn export_statement_json(node: Node, source: &str) -> Value {
     let declaration = node
         .child_by_field_name("declaration")
         .map(|child| stmt_json(child, source))
+        .map(|declaration| with_leading_decorators(declaration, node, source))
         .unwrap_or(Value::Null);
 
     with_span(
@@ -1625,11 +1844,13 @@ fn parameter_json(node: Node, source: &str) -> Value {
     } else {
         left
     };
+    let parameter = with_decorators(parameter, node, source);
 
     if parameter_property {
         let mut fields = json!({
             "parameter": parameter,
-            "readonly": has_named_or_keyword_child(node, source, "readonly")
+            "readonly": has_named_or_keyword_child(node, source, "readonly"),
+            "decorators": decorators_json(node, source)
         });
         if let Some(annotation) = type_annotation {
             fields = with_extra_field(fields, "typeAnnotation", annotation);
@@ -1795,19 +2016,15 @@ fn array_elements_json(
 }
 
 fn jsx_element_json(node: Node, source: &str) -> Value {
-    let opening = node
-        .child_by_field_name("open_tag")
+    let opening_node = node.child_by_field_name("open_tag");
+    let closing_node = node.child_by_field_name("close_tag");
+    let opening = opening_node
         .map(|child| jsx_opening_element_json(child, false, source))
         .unwrap_or_else(|| noop_json(node));
-    let closing = node
-        .child_by_field_name("close_tag")
+    let closing = closing_node
         .map(|child| jsx_closing_element_json(child, source))
         .unwrap_or(Value::Null);
-    let children = named_children(node)
-        .filter(|child| !matches!(child.kind(), "jsx_opening_element" | "jsx_closing_element"))
-        .map(|child| jsx_child_json(child, source))
-        .filter(|value| !value.is_null())
-        .collect::<Vec<_>>();
+    let children = jsx_element_children_json(node, opening_node, closing_node, source);
 
     with_span(
         "JSXElement",
@@ -1818,6 +2035,40 @@ fn jsx_element_json(node: Node, source: &str) -> Value {
             "children": children
         }),
     )
+}
+
+fn jsx_element_children_json(
+    node: Node,
+    opening_node: Option<Node>,
+    closing_node: Option<Node>,
+    source: &str,
+) -> Vec<Value> {
+    let mut values = Vec::new();
+    let mut cursor = opening_node
+        .map(|child| child.end_byte())
+        .unwrap_or_else(|| node.start_byte());
+    let closing_start = closing_node
+        .map(|child| child.start_byte())
+        .unwrap_or_else(|| node.end_byte());
+
+    for child in children(node)
+        .filter(|child| !matches!(child.kind(), "jsx_opening_element" | "jsx_closing_element"))
+    {
+        if child.start_byte() > cursor {
+            values.push(jsx_text_json_bounds(cursor, child.start_byte(), source));
+        }
+        let value = jsx_child_json(child, source);
+        if !value.is_null() {
+            values.push(value);
+        }
+        cursor = child.end_byte();
+    }
+
+    if closing_start > cursor {
+        values.push(jsx_text_json_bounds(cursor, closing_start, source));
+    }
+
+    values
 }
 
 fn jsx_self_closing_element_json(node: Node, source: &str) -> Value {
@@ -1841,6 +2092,17 @@ fn jsx_child_json(node: Node, source: &str) -> Value {
         "jsx_text" | "html_character_reference" => with_span("JSXText", node, json!({})),
         _ => expr_json(node, source),
     }
+}
+
+fn jsx_text_json_bounds(start_byte: usize, end_byte: usize, source: &str) -> Value {
+    with_span_bounds(
+        "JSXText",
+        start_byte,
+        point_for_byte(source, start_byte),
+        end_byte,
+        point_for_byte(source, end_byte),
+        json!({}),
+    )
 }
 
 fn jsx_opening_element_json(node: Node, self_closing: bool, source: &str) -> Value {
@@ -2232,6 +2494,54 @@ fn identifier_json_with_span(
         fields = with_extra_field(fields, "typeAnnotation", annotation);
     }
     with_span("Identifier", span_node, fields)
+}
+
+fn decorators_json(node: Node, source: &str) -> Vec<Value> {
+    named_children(node)
+        .filter(|child| child.kind() == "decorator")
+        .map(|child| decorator_json(child, source))
+        .collect()
+}
+
+fn decorator_json(node: Node, source: &str) -> Value {
+    let expression = named_children(node)
+        .find(|child| child.kind() != "decorator")
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    with_span("Decorator", node, json!({ "expression": expression }))
+}
+
+fn with_decorators(value: Value, node: Node, source: &str) -> Value {
+    let decorators = decorators_json(node, source);
+    if decorators.is_empty() {
+        value
+    } else {
+        with_extra_field(value, "decorators", Value::Array(decorators))
+    }
+}
+
+fn with_leading_decorators(value: Value, node: Node, source: &str) -> Value {
+    let mut decorators = decorators_json(node, source);
+    with_decorator_values(value, &mut decorators)
+}
+
+fn with_decorator_values(value: Value, decorators: &mut Vec<Value>) -> Value {
+    if decorators.is_empty() {
+        return value;
+    }
+
+    let mut object = match value {
+        Value::Object(map) => map,
+        other => return other,
+    };
+    if let Some(Value::Array(existing)) = object.remove("decorators") {
+        decorators.extend(existing);
+    }
+    object.insert(
+        "decorators".to_string(),
+        Value::Array(std::mem::take(decorators)),
+    );
+    Value::Object(object)
 }
 
 fn with_extra_field(value: Value, key: &str, field_value: Value) -> Value {
@@ -2718,6 +3028,10 @@ fn point_for_byte(source: &str, byte: usize) -> Point {
 
 fn named_children(node: Node) -> impl Iterator<Item = Node> {
     (0..node.named_child_count()).filter_map(move |index| node.named_child(index))
+}
+
+fn children(node: Node) -> impl Iterator<Item = Node> {
+    (0..node.child_count()).filter_map(move |index| node.child(index))
 }
 
 fn first_named_child(node: Node) -> Option<Node> {
@@ -3518,6 +3832,98 @@ mod tests {
         assert_eq!(pattern["elements"][0]["name"], "a");
         assert_eq!(pattern["elements"][1], Value::Null);
         assert_eq!(pattern["elements"][2]["name"], "b");
+    }
+
+    #[test]
+    fn emits_vue_templates_and_script_blocks_with_original_offsets() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/App.vue");
+        let source = "<template>\n  <h1>{{ msg }}</h1><img :src=\"image.url\" v-bind:alt=\"image.description\" />\n</template>\n<script lang=\"ts\">\nimport { Component, Prop, Vue } from 'vue-property-decorator';\n@Component\nexport default class HelloWorld extends Vue {\n  @Prop() private msg!: string;\n}\n</script>\n<style>h1 { color: red; }</style>\n";
+        let json = parse_source(root, path, source).expect("parse succeeds");
+        let body = json["ast"]["program"]["body"].as_array().unwrap();
+
+        assert_eq!(body[0]["type"], "ExpressionStatement");
+        assert_eq!(body[0]["expression"]["type"], "JSXElement");
+        assert_eq!(body[1]["type"], "ImportDeclaration");
+        assert_eq!(body[2]["type"], "ExportDefaultDeclaration");
+
+        let template_children = body[0]["expression"]["children"].as_array().unwrap();
+        assert!(template_children
+            .iter()
+            .any(|child| child["type"] == "JSXText"));
+        let h1 = template_children
+            .iter()
+            .find(|child| child["openingElement"]["name"]["name"] == "h1")
+            .unwrap();
+        let moustache = h1["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["type"] == "JSXExpressionContainer")
+            .unwrap();
+        assert_eq!(moustache["type"], "JSXExpressionContainer");
+        assert_eq!(
+            &source[moustache["start"].as_u64().unwrap() as usize
+                ..moustache["end"].as_u64().unwrap() as usize],
+            "{{ msg }}"
+        );
+        assert_eq!(moustache["expression"]["name"], "msg");
+
+        let img = template_children
+            .iter()
+            .find(|child| child["openingElement"]["name"]["name"] == "img")
+            .unwrap();
+        let shorthand_attr = &img["openingElement"]["attributes"][0];
+        assert_eq!(shorthand_attr["type"], "JSXAttribute");
+        assert_eq!(shorthand_attr["name"]["name"], "src");
+        assert_eq!(
+            &source[shorthand_attr["start"].as_u64().unwrap() as usize
+                ..shorthand_attr["end"].as_u64().unwrap() as usize],
+            "src=\"image.url\""
+        );
+
+        let class_decl = &body[2]["declaration"];
+        assert_eq!(class_decl["type"], "ClassDeclaration");
+        assert_eq!(class_decl["decorators"][0]["type"], "Decorator");
+        assert_eq!(
+            class_decl["decorators"][0]["expression"]["name"],
+            "Component"
+        );
+        assert_eq!(
+            class_decl["body"]["body"][0]["decorators"][0]["expression"]["callee"]["name"],
+            "Prop"
+        );
+    }
+
+    #[test]
+    fn emits_decorators_for_classes_members_methods_and_parameters() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/decor.ts");
+        let json = parse_source(
+            root,
+            path,
+            "@a(false)\nclass Greeter {\n  @b(foo)\n  greeting: string;\n  @c()\n  greet(@d(foo=false) x: number) {}\n}\n",
+        )
+        .expect("parse succeeds");
+
+        let class_decl = &json["ast"]["program"]["body"][0];
+        assert_eq!(
+            class_decl["decorators"][0]["expression"]["callee"]["name"],
+            "a"
+        );
+
+        let property = &class_decl["body"]["body"][0];
+        assert_eq!(
+            property["decorators"][0]["expression"]["callee"]["name"],
+            "b"
+        );
+
+        let method = &class_decl["body"]["body"][1];
+        assert_eq!(method["decorators"][0]["expression"]["callee"]["name"], "c");
+        assert_eq!(
+            method["params"][0]["decorators"][0]["expression"]["callee"]["name"],
+            "d"
+        );
     }
 
     #[test]
