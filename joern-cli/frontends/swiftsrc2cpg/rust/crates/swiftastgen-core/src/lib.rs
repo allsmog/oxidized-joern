@@ -193,10 +193,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_for_node(node),
             vec![
                 self.with_name(self.attribute_list(node)?, "attributes"),
-                self.with_name(
-                    self.empty_collection("DeclModifierListSyntax", node.start_byte()),
-                    "modifiers",
-                ),
+                self.with_name(self.modifier_list(node), "modifiers"),
                 self.with_name(
                     self.token_for_node(declaration_kind, keyword_kind),
                     keyword_name,
@@ -285,6 +282,33 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(self.syntax_node("AttributeSyntax", self.range_for_node(node), children))
     }
 
+    fn modifier_list(&self, node: Node<'a>) -> Value {
+        let mut modifiers = Vec::new();
+        for modifier_container in named_children(node).filter(|child| child.kind() == "modifiers") {
+            for modifier in
+                named_children(modifier_container).filter(|child| child.kind() != "attribute")
+            {
+                modifiers.push(self.with_name(self.decl_modifier(modifier), ""));
+            }
+        }
+        let range = self.covering_range_or_point(&modifiers, node.start_byte());
+        self.syntax_node("DeclModifierListSyntax", range, modifiers)
+    }
+
+    fn decl_modifier(&self, node: Node<'a>) -> Value {
+        self.syntax_node(
+            "DeclModifierSyntax",
+            self.range_for_node(node),
+            vec![self.with_name(
+                self.token_for_node(
+                    node,
+                    &format!("keyword(SwiftSyntax.Keyword.{})", self.text(node)),
+                ),
+                "name",
+            )],
+        )
+    }
+
     fn variable_decl(&self, node: Node<'a>) -> Result<Value> {
         let binding_keyword = self
             .first_descendant_any_kind(node, "let")
@@ -331,10 +355,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_for_node(node),
             vec![
                 self.with_name(self.attribute_list(node)?, "attributes"),
-                self.with_name(
-                    self.empty_collection("DeclModifierListSyntax", node.start_byte()),
-                    "modifiers",
-                ),
+                self.with_name(self.modifier_list(node), "modifiers"),
                 self.with_name(
                     self.token_for_node(
                         binding_keyword,
@@ -501,10 +522,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
         let mut children = vec![
             self.with_name(self.attribute_list(node)?, "attributes"),
-            self.with_name(
-                self.empty_collection("DeclModifierListSyntax", node.start_byte()),
-                "modifiers",
-            ),
+            self.with_name(self.modifier_list(node), "modifiers"),
             self.with_name(
                 self.token_for_node(func_keyword, "keyword(SwiftSyntax.Keyword.func)"),
                 "funcKeyword",
@@ -603,10 +621,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_for_node(node),
             vec![
                 self.with_name(self.attribute_list(node)?, "attributes"),
-                self.with_name(
-                    self.empty_collection("DeclModifierListSyntax", node.start_byte()),
-                    "modifiers",
-                ),
+                self.with_name(self.modifier_list(node), "modifiers"),
                 self.with_name(
                     self.token_for_node(
                         name,
@@ -1677,6 +1692,34 @@ mod tests {
         assert_eq!(
             class_decl["children"][0]["children"][0]["nodeType"],
             "AttributeSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_declaration_modifiers() {
+        let source = "private static func foo() -> {}\npublic class Foo {}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+
+        let function = find_first_node_type(&value, "FunctionDeclSyntax").unwrap();
+        let function_modifiers = &function["children"][1];
+        assert_eq!(function_modifiers["nodeType"], "DeclModifierListSyntax");
+        let modifiers = function_modifiers["children"].as_array().unwrap();
+        assert_eq!(modifiers.len(), 2);
+        assert_eq!(
+            modifiers[0]["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.private)"
+        );
+        assert_eq!(
+            modifiers[1]["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.static)"
+        );
+
+        let class_decl = find_first_node_type(&value, "ClassDeclSyntax").unwrap();
+        let class_modifiers = &class_decl["children"][1];
+        assert_eq!(class_modifiers["nodeType"], "DeclModifierListSyntax");
+        assert_eq!(
+            class_modifiers["children"][0]["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.public)"
         );
     }
 
