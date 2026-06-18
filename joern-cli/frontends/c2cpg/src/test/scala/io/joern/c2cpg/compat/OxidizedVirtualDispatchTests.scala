@@ -179,6 +179,11 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |  short selectPtr(Mid* value) { return 2; }
           |  long selectPtr(const Mid* value) { return 3; }
           |};
+          |class Box {
+          |public:
+          |  Leaf operator[](int index) { return makeLeaf(); }
+          |  Leaf& operator()();
+          |};
           |}
           |long use(
           |  Core::Leaf& leaf,
@@ -188,6 +193,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |  long wide,
           |  Core::Mid& mid,
           |  Core::Chooser& chooser,
+          |  Core::Box& box,
           |  Core::Source& source,
           |  const Core::ConstSource& constSource,
           |  Core::ValueSource& valueSource
@@ -209,7 +215,9 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    chooser.select(constLeaf) +
           |    chooser.select(Core::makeLeaf()) +
           |    chooser.selectPtr(leafPtr) +
-          |    chooser.selectPtr(constLeafPtr);
+          |    chooser.selectPtr(constLeafPtr) +
+          |    Core::pick(box[0]) +
+          |    Core::pick(box());
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -251,6 +259,10 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.Chooser.selectPtr:short(Mid*)")
       cpg.method.nameExact("use").call.codeExact("chooser.selectPtr(constLeafPtr)").methodFullName.l shouldBe
         List("Core.Chooser.selectPtr:long(Mid*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(box[0])").methodFullName.l shouldBe
+        List("Core.pick:char(Leaf&&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(box())").methodFullName.l shouldBe
+        List("Core.pick:short(Mid&)")
     }
 
     "prefer const member overloads for const this" in {
