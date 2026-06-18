@@ -63,6 +63,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     entry: Option[FunctionEntry],
     preserveInitializerListCode: Boolean = false
   )
+  private final case class ConstructorInvocationInfo(
+    typeName: String,
+    constructorName: String,
+    constructor: Option[FunctionEntry],
+    signature: Option[String],
+    methodFullName: String,
+    code: String
+  )
   private final case class LambdaCaptureRequest(
     name: String,
     evaluationStrategy: String,
@@ -711,7 +719,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     currentMethodReturnTypeFullName = Option(Defines.Void)
     val defaultInitializerAsts =
       try {
-        constructorPrefixInitializerAsts(typeName, Seq.empty)
+        constructorPrefixInitializerAsts(typeName, Seq.empty, structDecl.line)
       } finally {
         currentMethodReturnTypeFullName = previousMethodReturnType
         currentMethodFullName = previousMethodFullName
@@ -997,7 +1005,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       try {
         val constructorPrefixAsts =
           if (isConstructorMethod(simpleName, parentTypeOwner)) {
-            constructorPrefixInitializerAsts(parentTypeOwner.get, function.constructorInitializers)
+            constructorPrefixInitializerAsts(parentTypeOwner.get, function.constructorInitializers, function.line)
           } else {
             function.constructorInitializers.flatMap(constructorInitializerAsts)
           }
@@ -1043,22 +1051,40 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def constructorPrefixInitializerAsts(
     ownerTypeFullName: String,
-    initializers: Seq[OxConstructorInitializer]
+    initializers: Seq[OxConstructorInitializer],
+    line: Int
   ): Seq[Ast] = {
-    val fields              = aggregateFieldsByType.getOrElse(resolveAliasType(ownerTypeFullName), Seq.empty)
+    val ownerType           = resolveAliasType(ownerTypeFullName)
+    val fields              = aggregateFieldsByType.getOrElse(ownerType, Seq.empty)
     val fieldNames          = fields.map(_.name).toSet
     val initializersByField = initializers.groupBy(constructorInitializerFieldName)
+    val baseTypes           = aggregateBaseTypesByType.getOrElse(ownerType, Seq.empty)
     val baseInitializers = initializers.filter { initializer =>
       val name = constructorInitializerFieldName(initializer)
-      !fieldNames.contains(name) && aggregateBaseTypesByType
-        .getOrElse(resolveAliasType(ownerTypeFullName), Seq.empty)
-        .exists(baseType => baseType.split('.').lastOption.contains(name) || baseType == name)
+      !fieldNames.contains(name) && baseTypes.exists(baseType => constructorInitializerMatchesBase(baseType, name))
+    }
+    val baseInitializerAsts = baseTypes.flatMap { baseType =>
+      val explicitInitializers =
+        baseInitializers.filter(initializer =>
+          constructorInitializerMatchesBase(baseType, constructorInitializerFieldName(initializer))
+        )
+      if (explicitInitializers.nonEmpty) {
+        explicitInitializers.flatMap(initializer =>
+          constructorInitializerAsts(initializer, constructorInitializerTargetTypeName(ownerTypeFullName, initializer))
+        )
+      } else {
+        defaultBaseConstructorAsts(baseType, line)
+      }
     }
     val orderedFieldInitializers = fields.flatMap { field =>
       initializersByField
         .get(field.name)
         .map(_.flatMap(initializer => constructorInitializerAsts(initializer, Option(field.typeName))))
-        .getOrElse(defaultMemberInitializerAsts(ownerTypeFullName, field))
+        .getOrElse {
+          field.initializer
+            .map(_ => defaultMemberInitializerAsts(ownerTypeFullName, field))
+            .getOrElse(defaultMemberConstructorAsts(field, line))
+        }
     }
     val consumedBaseInitializers = baseInitializers.toSet
     val extraInitializers = initializers.filterNot { initializer =>
@@ -1066,9 +1092,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         initializer
       )
     }
-    baseInitializers.flatMap(initializer =>
-      constructorInitializerAsts(initializer, constructorInitializerTargetTypeName(ownerTypeFullName, initializer))
-    ) ++
+    baseInitializerAsts ++
       orderedFieldInitializers ++
       extraInitializers.flatMap(initializer =>
         constructorInitializerAsts(initializer, constructorInitializerTargetTypeName(ownerTypeFullName, initializer))
@@ -1145,6 +1169,28 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
+  private def defaultBaseConstructorAsts(baseType: String, line: Int): Seq[Ast] = {
+    constructorInvocationInfo(baseType, Seq.empty, "").map { info =>
+      val callNode_ = constructorCallNode(OxOrigin(info.code, Option(line)), info)
+      createCallAst(callNode_, base = Option(identifierAst(Defines.This, Defines.This, line)))
+    }.toSeq
+  }
+
+  private def defaultMemberConstructorAsts(field: OxFieldDecl, line: Int): Seq[Ast] = {
+    if (field.isStatic) {
+      Seq.empty
+    } else {
+      constructorInvocationInfo(field.typeName, Seq.empty, "").map { info =>
+        val callNode_ = constructorCallNode(OxOrigin(info.code, Option(line)), info)
+        val right =
+          constructorInvocationBlockAst(OxOrigin(info.code, Option(line)), info.typeName, callNode_, Seq.empty)
+        val assignmentCode = s"${Defines.This}->${field.name} = ${info.code}"
+        val left = implicitFieldAccessAst(field.name, line).getOrElse(identifierAst(field.name, field.name, line))
+        assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
+      }.toSeq
+    }
+  }
+
   private def constructorInitializerTargetTypeName(
     ownerTypeFullName: String,
     initializer: OxConstructorInitializer
@@ -1159,6 +1205,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       )
   }
 
+  private def constructorInitializerMatchesBase(baseType: String, initializerName: String): Boolean = {
+    baseType == initializerName || baseType.split('.').lastOption.contains(initializerName)
+  }
+
   private def constructorEntryForInitializedType(
     typeName: String,
     arguments: Seq[OxExpression]
@@ -1167,6 +1217,46 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val aggregateType =
       resolveAggregateTypeFullName(receiverAggregateTypeName(normalizedType)).getOrElse(normalizedType)
     constructorEntry(aggregateType, arguments)
+  }
+
+  private def constructorInvocationInfo(
+    typeName: String,
+    arguments: Seq[OxExpression],
+    initCode: String
+  ): Option[ConstructorInvocationInfo] = {
+    val normalizedType = normalizeType(resolveAliasType(typeName))
+    val aggregateType =
+      resolveAggregateTypeFullName(receiverAggregateTypeName(normalizedType)).getOrElse(normalizedType)
+    val constructorName = aggregateType.split('.').lastOption.getOrElse(aggregateType)
+    val constructor     = constructorEntry(aggregateType, arguments)
+    val implicitSignature =
+      Option.when(arguments.isEmpty && hasImplicitDefaultConstructor(aggregateType))("void()")
+    val signature = constructor.map(_.function.signature).orElse(implicitSignature)
+    signature.map { signature =>
+      val methodFullName = constructor
+        .map(_.fullName)
+        .getOrElse(s"$aggregateType.$constructorName:$signature")
+      ConstructorInvocationInfo(
+        typeName = aggregateType,
+        constructorName = constructorName,
+        constructor = constructor,
+        signature = Option(signature),
+        methodFullName = methodFullName,
+        code = s"$aggregateType.$constructorName($initCode)"
+      )
+    }
+  }
+
+  private def constructorCallNode(origin: OxOrigin, info: ConstructorInvocationInfo): NewCall = {
+    callNode(
+      origin.copy(code = info.code),
+      info.code,
+      info.constructorName,
+      info.methodFullName,
+      DispatchTypes.STATIC_DISPATCH,
+      info.signature,
+      Some(registerType(Defines.Void))
+    )
   }
 
   private def constructorInitializerFieldName(initializer: OxConstructorInitializer): String = {

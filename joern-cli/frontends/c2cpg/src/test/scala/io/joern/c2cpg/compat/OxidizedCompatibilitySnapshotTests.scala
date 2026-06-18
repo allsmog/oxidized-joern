@@ -962,6 +962,71 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("guard.~Widget()", "outer.~Widget()", "scoped.~Widget()")
     }
 
+    "capture C++ default subobject constructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Base {
+          |public:
+          |  Base();
+          |  ~Base();
+          |};
+          |class Member {
+          |public:
+          |  Member();
+          |  ~Member();
+          |};
+          |class WithCtor : public Base {
+          |  Member first;
+          |  Member second;
+          |public:
+          |  WithCtor() {}
+          |  ~WithCtor();
+          |};
+          |class Implicit : public Base {
+          |  Member member;
+          |};
+          |}
+          |Core::Base::Base() {}
+          |Core::Base::~Base() {}
+          |Core::Member::Member() {}
+          |Core::Member::~Member() {}
+          |Core::WithCtor::~WithCtor() {}
+          |int subobjects() {
+          |  Core::WithCtor explicitCtor;
+          |  Core::Implicit implicitCtor;
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val explicitConstructorCalls = cpg.method.fullNameExact("Core.WithCtor.WithCtor:void()").call.code.l
+      explicitConstructorCalls should contain allElementsOf List(
+        "Core.Base.Base()",
+        "this->first = Core.Member.Member()",
+        "this->second = Core.Member.Member()"
+      )
+      explicitConstructorCalls.indexOf("Core.Base.Base()") should be < explicitConstructorCalls.indexOf(
+        "this->first = Core.Member.Member()"
+      )
+      explicitConstructorCalls.indexOf("this->first = Core.Member.Member()") should be < explicitConstructorCalls
+        .indexOf("this->second = Core.Member.Member()")
+
+      val implicitConstructorCalls = cpg.method.fullNameExact("Core.Implicit.Implicit:void()").call.code.l
+      implicitConstructorCalls should contain allElementsOf List(
+        "Core.Base.Base()",
+        "this->member = Core.Member.Member()"
+      )
+      implicitConstructorCalls.indexOf("Core.Base.Base()") should be < implicitConstructorCalls.indexOf(
+        "this->member = Core.Member.Member()"
+      )
+      cpg.method.nameExact("subobjects").call.nameExact("WithCtor").codeExact("Core.WithCtor.WithCtor()").size shouldBe
+        1
+      cpg.method.nameExact("subobjects").call.nameExact("Implicit").codeExact("Core.Implicit.Implicit()").size shouldBe
+        1
+    }
+
     "capture C++ braced local constructors" in {
       val cpg = code(
         """
