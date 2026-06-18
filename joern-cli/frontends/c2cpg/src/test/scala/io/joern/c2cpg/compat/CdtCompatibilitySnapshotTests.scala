@@ -521,7 +521,7 @@ object CompatibilitySnapshot {
         val methodFullName = comparableTemplateMethodFullName(method.fullName, genericMethodFullNames)
         line(
           "METHOD",
-          comparableMethodName(method.name),
+          comparableMethodName(method.name, methodFullName),
           methodFullName,
           comparableMethodSignature(methodFullName, method.signature),
           method.lineNumber.map(_.toString).getOrElse("?")
@@ -615,16 +615,20 @@ object CompatibilitySnapshot {
     if (name.startsWith("<operator>.")) "?" else methodReturnType(methodFullName).getOrElse(typeFullName)
   }
 
-  private def comparableMethodName(name: String): String = {
-    name match {
-      case "operator()" => "()"
-      case "operator+"  => "+"
-      case "operator="  => "="
-      case "operator[]" => "[]"
-      case _ if name.startsWith("<operator>.") =>
-        name
-      case _ =>
-        simpleTypeName(eraseTemplateArguments(name))
+  private def comparableMethodName(name: String, fullName: String): String = {
+    if (fullName.contains("<clinit>")) {
+      "<clinit>"
+    } else {
+      name match {
+        case "operator()" => "()"
+        case "operator+"  => "+"
+        case "operator="  => "="
+        case "operator[]" => "[]"
+        case _ if name.startsWith("<operator>.") =>
+          name
+        case _ =>
+          simpleTypeName(eraseTemplateArguments(name))
+      }
     }
   }
 

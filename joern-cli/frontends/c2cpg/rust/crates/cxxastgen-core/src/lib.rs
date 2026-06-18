@@ -1269,9 +1269,7 @@ fn eval_binary_preproc_condition(node: Node, source: &[u8], symbols: &MacroSymbo
 }
 
 fn integer_literal_value(value: &str) -> Option<i64> {
-    let trimmed = value
-        .trim()
-        .trim_end_matches(|ch: char| matches!(ch, 'u' | 'U' | 'l' | 'L'));
+    let trimmed = value.trim().trim_end_matches(['u', 'U', 'l', 'L']);
     if let Some(hex) = trimmed
         .strip_prefix("0x")
         .or_else(|| trimmed.strip_prefix("0X"))
@@ -1351,9 +1349,7 @@ fn macro_from_define_option(define: &str) -> Option<MacroDecl> {
     }
 
     let (definition, code) = match define.split_once('=') {
-        Some((head, body)) if body.is_empty() => {
-            (head.trim().to_string(), format!("#define {}", head.trim()))
-        }
+        Some((head, "")) => (head.trim().to_string(), format!("#define {}", head.trim())),
         Some((head, body)) => (
             format!("{} {}", head.trim(), body.trim()),
             format!("#define {} {}", head.trim(), body.trim()),
@@ -1689,7 +1685,7 @@ fn parse_base_class_declaration(base: &str, line: usize) -> Option<BaseClassDecl
         return None;
     }
     let tokens = code.split_whitespace().collect::<Vec<_>>();
-    let is_virtual = tokens.iter().any(|token| *token == "virtual");
+    let is_virtual = tokens.contains(&"virtual");
     let name = normalize_type(
         &tokens
             .into_iter()
@@ -1915,9 +1911,7 @@ fn parse_typedef_declarations(node: Node, source: &[u8]) -> Vec<TypedefDecl> {
         .into_iter()
         .filter(|child| *child != type_node)
         .filter_map(|declarator| {
-            let Some(name) = declarator_name(declarator, source) else {
-                return None;
-            };
+            let name = declarator_name(declarator, source)?;
             Some(TypedefDecl {
                 name,
                 type_name: type_from_declarator(&base_type, declarator, source),
@@ -2610,13 +2604,12 @@ fn parameter_list_has_varargs(node: Node, source: &[u8]) -> bool {
     });
     let has_parameter_suffix_ellipsis = named_children(node)
         .into_iter()
-        .filter(|child| {
+        .rfind(|child| {
             matches!(
                 child.kind(),
                 "parameter_declaration" | "variadic_parameter_declaration"
             )
         })
-        .last()
         .is_some_and(|last_parameter| {
             last_parameter.kind() != "variadic_parameter_declaration"
                 && std::str::from_utf8(&source[last_parameter.end_byte()..node.end_byte()])
@@ -2776,14 +2769,12 @@ fn coroutine_statement(node: Node, source: &[u8]) -> Option<Statement> {
                 Some(parse_expression_text(operand, line))
             },
         })
-    } else if let Some(expression) = coroutine_expression(&normalized, line) {
-        Some(Statement::Expression {
+    } else {
+        coroutine_expression(&normalized, line).map(|expression| Statement::Expression {
             code,
             line,
             expression,
         })
-    } else {
-        None
     }
 }
 
@@ -3700,21 +3691,9 @@ fn delimiters_are_balanced(value: &str) -> bool {
     for ch in value.chars() {
         match ch {
             '(' | '[' | '{' => stack.push(ch),
-            ')' => {
-                if stack.pop() != Some('(') {
-                    return false;
-                }
-            }
-            ']' => {
-                if stack.pop() != Some('[') {
-                    return false;
-                }
-            }
-            '}' => {
-                if stack.pop() != Some('{') {
-                    return false;
-                }
-            }
+            ')' if stack.pop() != Some('(') => return false,
+            ']' if stack.pop() != Some('[') => return false,
+            '}' if stack.pop() != Some('{') => return false,
             _ => {}
         }
     }
@@ -4833,7 +4812,7 @@ fn type_from_declarator(base_type: &str, declarator: Node, source: &[u8]) -> Str
             .unwrap_or_else(|| format!("{base_type}[]")),
         "function_declarator" => child_declarator(declarator)
             .map(|child| {
-                function_pointer_marker(child, source).map_or_else(
+                function_pointer_marker(child).map_or_else(
                     || type_from_declarator(base_type, child, source),
                     |marker| {
                         format!(
@@ -4869,12 +4848,12 @@ fn reference_operator(declarator: Node, source: &[u8]) -> &'static str {
     }
 }
 
-fn function_pointer_marker(declarator: Node, source: &[u8]) -> Option<String> {
-    let marker = declarator_marker(declarator, source)?;
+fn function_pointer_marker(declarator: Node) -> Option<String> {
+    let marker = declarator_marker(declarator)?;
     marker.contains('*').then_some(marker)
 }
 
-fn declarator_marker(declarator: Node, source: &[u8]) -> Option<String> {
+fn declarator_marker(declarator: Node) -> Option<String> {
     match declarator.kind() {
         "identifier"
         | "field_identifier"
@@ -4885,22 +4864,22 @@ fn declarator_marker(declarator: Node, source: &[u8]) -> Option<String> {
         "pointer_declarator" | "abstract_pointer_declarator" => Some(format!(
             "*{}",
             child_declarator(declarator)
-                .and_then(|child| declarator_marker(child, source))
+                .and_then(declarator_marker)
                 .unwrap_or_default()
         )),
         "array_declarator" | "abstract_array_declarator" => Some(format!(
             "{}[]",
             child_declarator(declarator)
-                .and_then(|child| declarator_marker(child, source))
+                .and_then(declarator_marker)
                 .unwrap_or_default()
         )),
         "parenthesized_declarator" | "init_declarator" | "variadic_declarator" => declarator
             .child_by_field_name("declarator")
             .or_else(|| child_declarator(declarator))
-            .and_then(|child| declarator_marker(child, source)),
+            .and_then(declarator_marker),
         _ => named_children(declarator)
             .into_iter()
-            .find_map(|child| declarator_marker(child, source)),
+            .find_map(declarator_marker),
     }
 }
 
@@ -4991,7 +4970,7 @@ fn split_type_and_name_with_declarator_and_normalizer(
         .chars()
         .take_while(|ch| matches!(ch, '*' | '&'))
         .collect::<String>();
-    let name = declarator.trim_start_matches(|ch| matches!(ch, '*' | '&'));
+    let name = declarator.trim_start_matches(['*', '&']);
     if name.is_empty() {
         return None;
     }
