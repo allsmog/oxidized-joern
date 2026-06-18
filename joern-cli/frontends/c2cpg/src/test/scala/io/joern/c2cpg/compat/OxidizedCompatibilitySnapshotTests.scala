@@ -1034,6 +1034,69 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("slots[2].~Widget()", "slots[1].~Widget()", "slots[0].~Widget()")
     }
 
+    "resolve C++ copy and move constructors for local array elements" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |Widget makeWidget();
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Widget Core::makeWidget() {
+          |  Core::Widget temp;
+          |  return temp;
+          |}
+          |int arrayCopyMove() {
+          |  Core::Widget source;
+          |  Core::Widget slots[3] = {source, Core::makeWidget()};
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method
+        .nameExact("arrayCopyMove")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget(source)")
+        .methodFullName
+        .l shouldBe List("Core.Widget.Widget:void(Widget&)")
+      cpg.method
+        .nameExact("arrayCopyMove")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget(Core::makeWidget())")
+        .methodFullName
+        .l shouldBe List("Core.Widget.Widget:void(Widget&&)")
+      cpg.method
+        .nameExact("arrayCopyMove")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l
+        .filterNot(_.startsWith("<tmp>")) should contain allElementsOf List(
+          "slots[0] = Core.Widget.Widget(source)",
+          "slots[1] = Core.Widget.Widget(Core::makeWidget())",
+          "slots[2] = Core.Widget.Widget()"
+        )
+      cpg.method.nameExact("arrayCopyMove").call.nameExact("~Widget").code.l shouldBe
+        List(
+          "Core::makeWidget().~Widget()",
+          "slots[2].~Widget()",
+          "slots[1].~Widget()",
+          "slots[0].~Widget()",
+          "source.~Widget()"
+        )
+    }
+
     "capture C++ default subobject constructors" in {
       val cpg = code(
         """
@@ -1561,6 +1624,68 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("this->slots[2].~Member()", "this->slots[1].~Member()", "this->slots[0].~Member()")
       cpg.method.fullNameExact("Core.DefaultOwner.~DefaultOwner:void()").call.nameExact("~Member").code.l shouldBe
         List("this->slots[1].~Member()", "this->slots[0].~Member()")
+    }
+
+    "resolve C++ copy and move constructors for member array elements" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Member {
+          |public:
+          |  Member();
+          |  Member(Member& other) {}
+          |  Member(Member&& other) {}
+          |  ~Member();
+          |};
+          |Member makeMember();
+          |class Owner {
+          |  Member slots[3];
+          |public:
+          |  Owner(Member& source) : slots{source, makeMember()} {}
+          |  ~Owner();
+          |};
+          |}
+          |Core::Member::Member() {}
+          |Core::Member::~Member() {}
+          |Core::Member Core::makeMember() {
+          |  Core::Member temp;
+          |  return temp;
+          |}
+          |Core::Owner::~Owner() {}
+          |int useMemberArrayCopyMove() {
+          |  Core::Member source;
+          |  Core::Owner owner(source);
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.fullNameExact("Core.Owner.Owner:void(Member&)").call.nameExact("Member").code.l shouldBe
+        List("Core.Member.Member(source)", "Core.Member.Member(makeMember())", "Core.Member.Member()")
+      cpg.method
+        .fullNameExact("Core.Owner.Owner:void(Member&)")
+        .call
+        .nameExact("Member")
+        .methodFullName
+        .l shouldBe
+        List("Core.Member.Member:void(Member&)", "Core.Member.Member:void(Member&&)", "Core.Member.Member:void()")
+      cpg.method
+        .fullNameExact("Core.Owner.Owner:void(Member&)")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l
+        .filterNot(_.startsWith("<tmp>")) shouldBe
+        List(
+          "this->slots[0] = Core.Member.Member(source)",
+          "this->slots[1] = Core.Member.Member(makeMember())",
+          "this->slots[2] = Core.Member.Member()"
+        )
+      cpg.method.fullNameExact("Core.Owner.Owner:void(Member&)").call.nameExact("~Member").code.l shouldBe
+        List("makeMember().~Member()")
+      cpg.method.fullNameExact("Core.Owner.~Owner:void()").call.nameExact("~Member").code.l shouldBe
+        List("this->slots[2].~Member()", "this->slots[1].~Member()", "this->slots[0].~Member()")
     }
 
     "extend C++ reference-bound temporary lifetimes" in {
