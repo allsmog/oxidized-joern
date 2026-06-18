@@ -2798,6 +2798,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def astsForLocalDecl(local: OxLocalDecl, useConstructorInitializers: Boolean = true): Seq[Ast] = {
+    local.initializer.foreach(reserveLambdaInfosInExpression)
     val origin           = OxOrigin(local)
     val localLambdaInfo  = local.initializer.collect { case lambda: OxLambda => lambdaInfo(lambda) }
     val typeName         = registerType(localTypeFullName(local))
@@ -4680,6 +4681,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
 
     def localDestructors(local: OxLocalDecl): Seq[LocalDestructor] = {
+      local.initializer.foreach(reserveLambdaInfosInExpression)
       val typeName = registerType(localTypeFullName(local))
       if (hasStaticStorageDuration(local)) {
         Seq.empty
@@ -5332,6 +5334,55 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       ast
         .withCaptureEdge(methodRef, capture.binding)
         .merge(bindingAst)
+    }
+  }
+
+  private def reserveLambdaInfosInExpression(expression: OxExpression): Unit = {
+    expression match {
+      case _: OxIdentifier | _: OxLiteral | _: OxDesignator =>
+      case OxBinary(_, _, _, left, right) =>
+        reserveLambdaInfosInExpression(left)
+        reserveLambdaInfosInExpression(right)
+      case OxUnary(_, _, _, _, argument) =>
+        reserveLambdaInfosInExpression(argument)
+      case OxConditional(_, _, condition, consequence, alternative) =>
+        reserveLambdaInfosInExpression(condition)
+        consequence.foreach(reserveLambdaInfosInExpression)
+        reserveLambdaInfosInExpression(alternative)
+      case OxAssignment(_, _, _, left, right) =>
+        reserveLambdaInfosInExpression(left)
+        reserveLambdaInfosInExpression(right)
+      case OxCast(_, _, _, _, value) =>
+        reserveLambdaInfosInExpression(value)
+      case OxFold(_, _, _, left, right) =>
+        left.foreach(reserveLambdaInfosInExpression)
+        right.foreach(reserveLambdaInfosInExpression)
+      case OxPackExpansion(_, _, pattern) =>
+        reserveLambdaInfosInExpression(pattern)
+      case OxTypeOf(_, _, argument) =>
+        reserveLambdaInfosInExpression(argument)
+      case OxSizeOf(_, _, value, _) =>
+        value.foreach(reserveLambdaInfosInExpression)
+      case OxNew(_, _, _, arguments, initializerArguments) =>
+        (arguments ++ initializerArguments).foreach(reserveLambdaInfosInExpression)
+      case OxDelete(_, _, argument) =>
+        reserveLambdaInfosInExpression(argument)
+      case lambda: OxLambda =>
+        lambdaInfo(lambda)
+        lambda.captures.flatMap(_.initializer).foreach(reserveLambdaInfosInExpression)
+      case OxCall(_, _, _, callee, arguments) =>
+        reserveLambdaInfosInExpression(callee)
+        arguments.foreach(reserveLambdaInfosInExpression)
+      case OxFieldAccess(_, _, _, base) =>
+        reserveLambdaInfosInExpression(base)
+      case OxIndexAccess(_, _, base, index) =>
+        reserveLambdaInfosInExpression(base)
+        reserveLambdaInfosInExpression(index)
+      case OxInitializerList(_, _, elements) =>
+        elements.foreach(reserveLambdaInfosInExpression)
+      case OxDesignatedInitializer(_, _, designator, value) =>
+        reserveLambdaInfosInExpression(designator)
+        reserveLambdaInfosInExpression(value)
     }
   }
 
@@ -6574,6 +6625,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     templateBindings: Map[String, String],
     localTypes: Map[String, String]
   ): String = {
+    local.initializer.foreach(reserveLambdaInfosInExpression)
     val explicitType =
       functionScopedTypeFullName(
         entry,
