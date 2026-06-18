@@ -1823,8 +1823,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val extendedTemporaryDestructor = local.initializer.flatMap(referenceBoundTemporaryDestructor(typeName, _))
     extendedTemporaryDestructor.foreach(registerLocalDestructor)
     val localAst = Ast(localNode)
-    val localArrayConstructorAsts =
-      if (useConstructorInitializers) localArrayDefaultConstructorAsts(local, typeName) else Seq.empty
+    val arrayConstructorAsts =
+      if (useConstructorInitializers) localArrayConstructorAsts(local, typeName) else Seq.empty
     val localInitializerTemporaryDestructorAsts =
       temporaryDestructorAstsForLocalInitializer(
         local.initializer,
@@ -1845,6 +1845,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Seq(localAst) ++ aggregateAssignmentExpressionAsts(initializer) ++ Seq(
           constructorAssignmentAst(local, arguments, initializer.code, OxOrigin(initializer), typeName)
         ) ++ temporaryDestructorAstsForConstructorArguments(arguments, constructor)
+      case Some(_: OxInitializerList) if arrayConstructorAsts.nonEmpty =>
+        Seq(localAst) ++ arrayConstructorAsts
       case Some(initializer) =>
         val (left, targetCode) = localAssignmentTargetAst(local, typeName)
         val assignmentCode     = s"$targetCode = ${initializer.code}"
@@ -1862,12 +1864,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         ) ++ fieldAssignments ++ heapConstructorAstsForExpressions(
           Seq(initializer)
         ) ++ localInitializerTemporaryDestructorAsts
-      case None if localArrayConstructorAsts.nonEmpty =>
-        Seq(localAst) ++ localArrayConstructorAsts
+      case None if arrayConstructorAsts.nonEmpty =>
+        Seq(localAst) ++ arrayConstructorAsts
       case None if useConstructorInitializers && isDefaultConstructorInitializer(typeName) =>
         Seq(localAst, constructorAssignmentAst(local, Seq.empty, "", origin, typeName))
       case None =>
         Seq(localAst)
+    }
+  }
+
+  private def localArrayConstructorAsts(local: OxLocalDecl, typeName: String): Seq[Ast] = {
+    local.initializer match {
+      case Some(initializer: OxInitializerList) =>
+        localArrayInitializerConstructorAsts(local, typeName, initializer)
+      case None =>
+        localArrayDefaultConstructorAsts(local, typeName)
+      case _ =>
+        Seq.empty
     }
   }
 
@@ -1878,6 +1891,70 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       info        <- constructorInvocationInfo(elementType, Seq.empty, "").toSeq
       index       <- 0 until count
     } yield localArrayElementConstructorAssignmentAst(local.name, typeName, index, local.line, info)
+  }
+
+  private def localArrayInitializerConstructorAsts(
+    local: OxLocalDecl,
+    typeName: String,
+    initializer: OxInitializerList
+  ): Seq[Ast] = {
+    if (initializer.elements.exists(_.isInstanceOf[OxDesignatedInitializer])) {
+      Seq.empty
+    } else {
+      val count       = localArrayElementCount(local)
+      val elementType = arrayElementTypeFullName(typeName)
+      (count, elementType) match {
+        case (Some(elementCount), Some(elementTypeName)) =>
+          val explicitInitializers = initializer.elements.take(elementCount)
+          val explicitConstructorAsts = explicitInitializers.zipWithIndex.map { case (elementInitializer, index) =>
+            localArrayElementInitializerConstructorAsts(local, typeName, elementTypeName, index, elementInitializer)
+          }
+          if (explicitConstructorAsts.exists(_.isEmpty)) {
+            Seq.empty
+          } else {
+            val defaultConstructorAsts = for {
+              info  <- constructorInvocationInfo(elementTypeName, Seq.empty, "").toSeq
+              index <- explicitInitializers.size until elementCount
+            } yield localArrayElementConstructorAssignmentAst(local.name, typeName, index, local.line, info)
+            explicitConstructorAsts.flatten ++ defaultConstructorAsts
+          }
+        case _ =>
+          Seq.empty
+      }
+    }
+  }
+
+  private def localArrayElementInitializerConstructorAsts(
+    local: OxLocalDecl,
+    arrayTypeName: String,
+    elementTypeName: String,
+    index: Int,
+    initializer: OxExpression
+  ): Seq[Ast] = {
+    arrayElementConstructorInvocationInfo(elementTypeName, initializer).toSeq.flatMap {
+      case (info, arguments, constructorEntry) =>
+        arguments.flatMap(aggregateAssignmentExpressionAsts) ++
+          Seq(localArrayElementConstructorAssignmentAst(local.name, arrayTypeName, index, local.line, info)) ++
+          temporaryDestructorAstsForConstructorArguments(arguments, constructorEntry)
+    }
+  }
+
+  private def arrayElementConstructorInvocationInfo(
+    elementTypeName: String,
+    initializer: OxExpression
+  ): Option[(ConstructorInvocationInfo, Seq[OxExpression], Option[FunctionEntry])] = {
+    initializer match {
+      case initializerList: OxInitializerList if isConstructorInitializer(elementTypeName, initializerList) =>
+        val resolution = constructorInitializerResolution(elementTypeName, initializerList)
+        val initCode = normalizedConstructorInitCode(initializerList.code.trim, resolution.preserveInitializerListCode)
+        constructorInvocationInfo(elementTypeName, resolution.arguments, initCode, resolution.entry)
+          .map(info => (info, resolution.arguments, resolution.entry))
+      case _ =>
+        val arguments   = Seq(initializer)
+        val constructor = constructorEntry(elementTypeName, arguments)
+        constructorInvocationInfo(elementTypeName, arguments, initializer.code, constructor)
+          .map(info => (info, arguments, constructor))
+    }
   }
 
   private def localArrayElementConstructorAssignmentAst(
@@ -2540,13 +2617,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .map(_.fullName)
       .orElse(signature.map(sig => s"$typeName.$constructorName:$sig"))
       .getOrElse(s"$typeName.$constructorName")
-    val initCode =
-      if (preserveInitializerListCode) initializerCode
-      else if (initializerCode.startsWith("(") && initializerCode.endsWith(")"))
-        initializerCode.stripPrefix("(").stripSuffix(")")
-      else if (initializerCode.startsWith("{") && initializerCode.endsWith("}"))
-        initializerCode.stripPrefix("{").stripSuffix("}")
-      else initializerCode
+    val initCode        = normalizedConstructorInitCode(initializerCode, preserveInitializerListCode)
     val constructorCode = s"$typeName.$constructorName($initCode)"
     val callNode_ = callNode(
       initializerOrigin.copy(code = constructorCode),
@@ -2565,6 +2636,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val right =
       constructorInvocationBlockAst(initializerOrigin, typeName, callNode_, argumentAsts)
     assignmentAst(OxOrigin(local).copy(code = assignmentCode), left, right, assignmentCode)
+  }
+
+  private def normalizedConstructorInitCode(initializerCode: String, preserveInitializerListCode: Boolean): String = {
+    if (preserveInitializerListCode) initializerCode
+    else if (initializerCode.startsWith("(") && initializerCode.endsWith(")"))
+      initializerCode.stripPrefix("(").stripSuffix(")")
+    else if (initializerCode.startsWith("{") && initializerCode.endsWith("}"))
+      initializerCode.stripPrefix("{").stripSuffix("}")
+    else initializerCode
   }
 
   private def constructorInvocationBlockAst(
