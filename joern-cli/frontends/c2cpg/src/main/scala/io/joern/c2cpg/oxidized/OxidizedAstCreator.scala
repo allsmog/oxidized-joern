@@ -6687,23 +6687,51 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     receiverTypeFullName: String,
     ownerTypeFullName: String
   ): Map[String, String] = {
+    receiverTemplateBindingsForOwnerPath(receiverTypeFullName, ownerTypeFullName, Set.empty).getOrElse(Map.empty)
+  }
+
+  private def receiverTemplateBindingsForOwnerPath(
+    receiverTypeFullName: String,
+    ownerTypeFullName: String,
+    seen: Set[String]
+  ): Option[Map[String, String]] = {
     val receiverType          = aggregateLookupTypeName(receiverTypeFullName)
     val receiverAggregateType = receiverAggregateTypeName(receiverType)
-    val ownerCandidates =
-      (resolveAggregateTypeFullName(receiverAggregateType).toSeq :+ receiverAggregateType).map(normalizeType).toSet
-    if (!ownerCandidates.contains(normalizeType(ownerTypeFullName))) {
-      Map.empty
+    val currentOwnerCandidates =
+      (resolveAggregateTypeFullName(receiverAggregateType).toSeq :+ receiverAggregateType).map(normalizeType).distinct
+    val currentOwnerKey =
+      currentOwnerCandidates.find(aggregateDeclarationEntriesByType.contains).getOrElse(receiverAggregateType)
+    if (seen.contains(currentOwnerKey)) {
+      None
+    } else if (currentOwnerCandidates.contains(normalizeType(ownerTypeFullName))) {
+      Option(receiverTemplateBindingsForExactOwner(receiverType, ownerTypeFullName))
     } else {
-      val arguments = templateArgumentTypeNames(receiverType)
-      val parameters = aggregateDeclarationEntriesByType
-        .get(normalizeType(ownerTypeFullName))
-        .map { case (structDecl, _) => templateParameterNames(structDecl) }
-        .getOrElse(Seq.empty)
-      if (parameters.nonEmpty && parameters.size == arguments.size) {
-        parameters.zip(arguments).toMap
-      } else {
-        Map.empty
-      }
+      val currentBindings = receiverTemplateBindingsForExactOwner(receiverType, currentOwnerKey)
+      aggregateBaseClassesByType
+        .getOrElse(currentOwnerKey, Seq.empty)
+        .iterator
+        .flatMap { baseClass =>
+          val concreteBaseType = substituteTemplateTypeNames(baseClass.typeFullName, currentBindings)
+          receiverTemplateBindingsForOwnerPath(concreteBaseType, ownerTypeFullName, seen + currentOwnerKey)
+        }
+        .toSeq
+        .headOption
+    }
+  }
+
+  private def receiverTemplateBindingsForExactOwner(
+    receiverTypeFullName: String,
+    ownerTypeFullName: String
+  ): Map[String, String] = {
+    val arguments = templateArgumentTypeNames(receiverTypeFullName)
+    val parameters = aggregateDeclarationEntriesByType
+      .get(normalizeType(ownerTypeFullName))
+      .map { case (structDecl, _) => templateParameterNames(structDecl) }
+      .getOrElse(Seq.empty)
+    if (parameters.nonEmpty && parameters.size == arguments.size) {
+      parameters.zip(arguments).toMap
+    } else {
+      Map.empty
     }
   }
 
@@ -6866,10 +6894,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       namesFromTemplatePrefix.distinct
     } else {
       val fieldTypes = structDecl.fields.map(_.semanticTypeName)
+      val baseTypes  = structDecl.baseClassDeclarations.map(_.name)
       val functionTypes = structDecl.nestedDeclarations.collect { case function: OxFunctionDecl =>
         function.semanticReturnType +: function.parameters.map(_.semanticTypeName)
       }.flatten
-      (fieldTypes ++ functionTypes)
+      (fieldTypes ++ baseTypes ++ functionTypes)
         .flatMap(templateParameterTokens)
         .filterNot(typeName => resolveAggregateTypeFullName(typeName).isDefined)
         .distinct
