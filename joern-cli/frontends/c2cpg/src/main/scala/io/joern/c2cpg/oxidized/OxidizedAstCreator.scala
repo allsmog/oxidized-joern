@@ -19,6 +19,7 @@ import io.shiftleft.semanticcpg.language.types.structure.NamespaceTraversal
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
+import java.util.regex.{Matcher, Pattern}
 import java.util.IdentityHashMap
 import scala.collection.mutable
 import scala.util.Try
@@ -219,7 +220,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
       Seq(localName, fullName).distinct.map(typeName => typeName -> structDecl.usingDeclarations)
     }.toMap
-  private val IntegerLiteralPattern = """[+-]?(?:0[xX][0-9a-fA-F]+|\d+)[uUlL]*""".r
+  private val TemplateParameterListPattern = raw"template\s*<([^>]*)>".r
+  private val TemplateTypeParameterPattern = raw"(?:typename|class)\s*(?:\.\.\.)?\s+([A-Za-z_]\w*)".r
+  private val IdentifierTokenPattern       = raw"[A-Za-z_]\w*".r
+  private val IntegerLiteralPattern        = """[+-]?(?:0[xX][0-9a-fA-F]+|\d+)[uUlL]*""".r
   private val FloatingLiteralPattern =
     """[+-]?(?:(?:\d+\.\d*|\.\d+)(?:[eE][+-]?\d+)?|\d+[eE][+-]?\d+)[fFlL]?""".r
   private val CxxOverloadableBinaryOperators = Set(
@@ -4247,25 +4251,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def overloadedBinaryTemporaryTypeFullName(binary: OxBinary): Option[String] = {
     overloadedBinaryOperatorTarget(binary)
-      .map(target => functionSemanticReturnTypeFullName(target.entry))
+      .map(target => functionSemanticReturnTypeFullName(target.entry, target.arguments))
       .flatMap(returnedObjectTypeFullName)
   }
 
   private def overloadedAssignmentTemporaryTypeFullName(assignment: OxAssignment): Option[String] = {
     overloadedAssignmentOperatorTarget(assignment)
-      .map(target => functionSemanticReturnTypeFullName(target.entry))
+      .map(target => functionSemanticReturnTypeFullName(target.entry, target.arguments))
       .flatMap(returnedObjectTypeFullName)
   }
 
   private def overloadedUnaryTemporaryTypeFullName(unary: OxUnary): Option[String] = {
     overloadedUnaryOperatorTarget(unary)
-      .map(target => functionSemanticReturnTypeFullName(target.entry))
+      .map(target => functionSemanticReturnTypeFullName(target.entry, target.arguments))
       .flatMap(returnedObjectTypeFullName)
   }
 
   private def overloadedIndexTemporaryTypeFullName(indexAccess: OxIndexAccess): Option[String] = {
     overloadedIndexOperatorTarget(indexAccess)
-      .map(target => functionSemanticReturnTypeFullName(target.entry))
+      .map(target => functionSemanticReturnTypeFullName(target.entry, target.arguments))
       .flatMap(returnedObjectTypeFullName)
   }
 
@@ -5641,7 +5645,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         target.entry.fullName,
         dispatchType,
         Option(target.entry.function.signature),
-        Option(registerType(operatorCallReturnTypeFullName(target.entry)))
+        Option(registerType(operatorCallReturnTypeFullName(target)))
       )
     val base = target.base.map(expressionAst)
     createCallAst(
@@ -5652,10 +5656,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     )
   }
 
-  private def operatorCallReturnTypeFullName(entry: FunctionEntry): String = {
-    val semanticReturnType = functionSemanticReturnTypeFullName(entry)
+  private def operatorCallReturnTypeFullName(target: ResolvedOperatorCall): String = {
+    val semanticReturnType = functionSemanticReturnTypeFullName(target.entry, target.arguments)
     Option.when(typeNameHasCxxQualifier(semanticReturnType))(semanticReturnType).getOrElse {
-      normalizeType(entry.function.returnType)
+      specializeFunctionTypeName(normalizeType(target.entry.function.returnType), target.entry, target.arguments)
     }
   }
 
@@ -5819,9 +5823,26 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def argumentAstsForFunctionEntry(entry: FunctionEntry, arguments: Seq[OxExpression]): Seq[Ast] = {
+    val templateBindings = templateBindingsForFunctionCall(entry, arguments)
     arguments.zipWithIndex.map { case (argument, index) =>
-      expressionAstWithContextualConversion(argument, entry.function.parameters.lift(index).map(_.semanticTypeName))
+      val parameterType = entry.function.parameters
+        .lift(index)
+        .map(parameter => substituteTemplateTypeNames(parameter.semanticTypeName, templateBindings))
+      expressionAstWithContextualConversion(argument, parameterType)
     }
+  }
+
+  private def functionCallTypeFullName(entry: FunctionEntry, arguments: Seq[OxExpression]): String = {
+    val semanticReturnType  = functionSemanticReturnTypeFullName(entry, arguments)
+    val syntacticReturnType = specializeFunctionTypeName(normalizeType(entry.function.returnType), entry, arguments)
+    Option
+      .when(
+        typeNameHasCxxQualifier(semanticReturnType) || functionTemplateParametersInType(
+          entry,
+          entry.function.returnType
+        ).nonEmpty
+      )(semanticReturnType)
+      .getOrElse(syntacticReturnType)
   }
 
   private def targetEntryForCallArguments(call: OxCall): Option[FunctionEntry] = {
@@ -5910,11 +5931,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .orElse(constructorTemporaryTypeFullName(call))
       .orElse(
         overloadedCallOperatorTarget(call)
-          .map(target => functionSemanticReturnTypeFullName(target.entry))
+          .map(target => functionSemanticReturnTypeFullName(target.entry, target.arguments))
           .orElse(
             expressionTypeFullName(call.callee)
               .flatMap(returnTypeFromFunctionPointer)
-              .orElse(functionEntryForCall(call).map(functionSemanticReturnTypeFullName))
+              .orElse(
+                functionEntryForCall(call).map(entry => functionSemanticReturnTypeFullName(entry, call.arguments))
+              )
           )
       )
   }
@@ -5924,6 +5947,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       entry.function.semanticReturnType,
       entry.ownerFullName.orElse(entry.lexicalOwnerFullName)
     )
+  }
+
+  private def functionSemanticReturnTypeFullName(entry: FunctionEntry, arguments: Seq[OxExpression]): String = {
+    specializeFunctionTypeName(functionSemanticReturnTypeFullName(entry), entry, arguments)
   }
 
   private def expressionTypeFullName(expression: OxExpression): Option[String] = {
@@ -5957,7 +5984,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         expressionTypeFullName(base).flatMap(typeName => fieldTypeFullName(typeName, field))
       case unary: OxUnary =>
         overloadedUnaryOperatorTarget(unary)
-          .map(target => functionSemanticReturnTypeFullName(target.entry))
+          .map(target => functionSemanticReturnTypeFullName(target.entry, target.arguments))
           .orElse(unaryExpressionTypeFullName(unary))
       case OxCast(_, semanticTypeName, _, _, _) =>
         Option(resolveAliasType(semanticTypeName))
@@ -5967,7 +5994,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option(lambdaInfo(lambda).fullName)
       case indexAccess: OxIndexAccess =>
         overloadedIndexOperatorTarget(indexAccess)
-          .map(target => functionSemanticReturnTypeFullName(target.entry))
+          .map(target => functionSemanticReturnTypeFullName(target.entry, target.arguments))
           .orElse(expressionTypeFullName(indexAccess.base).map(_.stripSuffix("[]")))
       case initializerList: OxInitializerList =>
         initializerListTypeFullName(initializerList)
@@ -5975,7 +6002,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         callReturnTypeFullName(call)
       case binary: OxBinary =>
         overloadedBinaryOperatorTarget(binary)
-          .map(target => functionSemanticReturnTypeFullName(target.entry))
+          .map(target => functionSemanticReturnTypeFullName(target.entry, target.arguments))
           .orElse(binaryExpressionTypeFullName(binary))
       case assignment: OxAssignment =>
         assignmentExpressionTypeFullName(assignment)
@@ -5986,7 +6013,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def assignmentExpressionTypeFullName(assignment: OxAssignment): Option[String] = {
     overloadedAssignmentOperatorTarget(assignment)
-      .map(target => functionSemanticReturnTypeFullName(target.entry))
+      .map(target => functionSemanticReturnTypeFullName(target.entry, target.arguments))
       .orElse(expressionTypeFullName(assignment.left))
   }
 
@@ -6341,7 +6368,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
                   callName(call),
                   functionEntry.fullName,
                   Option(functionEntry.function.signature),
-                  normalizeType(functionEntry.function.returnType),
+                  functionCallTypeFullName(functionEntry, call.arguments),
                   dispatchType
                 )
               case None =>
@@ -6459,11 +6486,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def overloadScore(candidate: FunctionEntry, argumentInfos: Seq[ArgumentInfo]): Int = {
-    val arityAdjustment = overloadArityAdjustment(candidate, argumentInfos.size)
-    arityAdjustment + candidate.function.parameters
+    val templateParameters    = templateParameterNames(candidate.function)
+    val templateBindingResult = templateBindingsForArgumentInfos(candidate, argumentInfos, templateParameters)
+    val templateBindings      = templateBindingResult.getOrElse(Map.empty)
+    val arityAdjustment       = overloadArityAdjustment(candidate, argumentInfos.size)
+    val invalidTemplatePenalty = Option
+      .when(templateBindingResult.isEmpty)(-10000)
+      .getOrElse(0)
+    val templatePenalty = Option.when(templateParameters.nonEmpty)(-5).getOrElse(0)
+    arityAdjustment + invalidTemplatePenalty + templatePenalty + candidate.function.parameters
       .zip(argumentInfos)
       .map { case (parameter, argumentInfo) =>
-        typeCompatibilityScore(parameter.semanticTypeName, argumentInfo)
+        typeCompatibilityScore(substituteTemplateTypeNames(parameter.semanticTypeName, templateBindings), argumentInfo)
       }
       .sum
   }
@@ -6475,6 +6509,173 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val extraVariadicArgs  = if (hasVariadic) math.max(0, argumentCount - parameters.size + 1) else 0
     val invalidPenalty     = Option.when(!functionArityIsViable(candidate, argumentCount))(-1000).getOrElse(0)
     invalidPenalty - (missingDefaultArgs * 3) - (extraVariadicArgs * 5)
+  }
+
+  private def specializeFunctionTypeName(
+    typeName: String,
+    entry: FunctionEntry,
+    arguments: Seq[OxExpression]
+  ): String = {
+    substituteTemplateTypeNames(typeName, templateBindingsForFunctionCall(entry, arguments))
+  }
+
+  private def templateBindingsForFunctionCall(
+    entry: FunctionEntry,
+    arguments: Seq[OxExpression]
+  ): Map[String, String] = {
+    val argumentInfos =
+      arguments.map(argument => ArgumentInfo(argument, expressionTypeFullName(argument), isRvalue = false))
+    templateBindingsForArgumentInfos(entry, argumentInfos, templateParameterNames(entry.function)).getOrElse(Map.empty)
+  }
+
+  private def templateBindingsForArgumentInfos(
+    entry: FunctionEntry,
+    argumentInfos: Seq[ArgumentInfo],
+    templateParameters: Set[String]
+  ): Option[Map[String, String]] = {
+    if (templateParameters.isEmpty) {
+      Some(Map.empty)
+    } else {
+      entry.function.parameters
+        .zip(argumentInfos)
+        .foldLeft(Option(Map.empty[String, String])) { case (bindingsOption, (parameter, argumentInfo)) =>
+          bindingsOption.flatMap { bindings =>
+            val updates = argumentInfo.typeFullName
+              .map(argumentTypeName =>
+                templateBindingsForParameterType(parameter.semanticTypeName, argumentTypeName, templateParameters)
+              )
+              .getOrElse(Seq.empty)
+            mergeTemplateBindings(bindings, updates)
+          }
+        }
+    }
+  }
+
+  private def mergeTemplateBindings(
+    bindings: Map[String, String],
+    updates: Seq[(String, String)]
+  ): Option[Map[String, String]] = {
+    updates.foldLeft(Option(bindings)) { case (bindingsOption, (name, typeName)) =>
+      bindingsOption.flatMap { current =>
+        current.get(name) match {
+          case Some(existing) if normalizeType(existing) != normalizeType(typeName) => None
+          case _ => Some(current.updated(name, typeName))
+        }
+      }
+    }
+  }
+
+  private def templateBindingsForParameterType(
+    parameterTypeName: String,
+    argumentTypeName: String,
+    templateParameters: Set[String]
+  ): Seq[(String, String)] = {
+    templateParameters.toSeq.flatMap { templateParameter =>
+      Option
+        .when(typeNameContainsToken(parameterTypeName, templateParameter))(
+          deduceTemplateBinding(parameterTypeName, argumentTypeName, templateParameter)
+        )
+        .flatten
+        .map(templateParameter -> _)
+    }
+  }
+
+  private def deduceTemplateBinding(
+    parameterTypeName: String,
+    argumentTypeName: String,
+    templateParameter: String
+  ): Option[String] = {
+    val parameterType = normalizeType(resolveAliasType(parameterTypeName))
+    val argumentType  = normalizeType(resolveAliasType(argumentTypeName))
+    templateDeductionTypePairs(parameterType, argumentType).iterator
+      .flatMap { case (parameterCandidate, argumentCandidate) =>
+        matchTemplateBinding(parameterCandidate, argumentCandidate, templateParameter)
+      }
+      .toSeq
+      .headOption
+  }
+
+  private def templateDeductionTypePairs(parameterType: String, argumentType: String): Seq[(String, String)] = {
+    val parameterWithoutReference  = stripCxxReference(parameterType)
+    val argumentWithoutReference   = stripCxxReference(argumentType)
+    val argumentWithoutCvReference = stripCxxTypeQualifiers(argumentWithoutReference).trim
+    val pairs                      = mutable.ArrayBuffer(parameterType -> argumentType)
+    if (parameterWithoutReference != parameterType) {
+      pairs += parameterWithoutReference -> argumentWithoutReference
+      if (stripCxxTypeQualifiers(parameterWithoutReference).trim != parameterWithoutReference) {
+        pairs += parameterWithoutReference -> s"const $argumentWithoutCvReference"
+      }
+    } else {
+      pairs += parameterType -> argumentWithoutCvReference
+    }
+    pairs.distinct.toSeq
+  }
+
+  private def matchTemplateBinding(
+    parameterTypeName: String,
+    argumentTypeName: String,
+    templateParameter: String
+  ): Option[String] = {
+    val tokenPattern = Pattern.compile(s"\\b${Pattern.quote(templateParameter)}\\b")
+    val tokenMatcher = tokenPattern.matcher(parameterTypeName)
+    val regexBuilder = new StringBuilder("^")
+    var lastIndex    = 0
+    var groupCount   = 0
+    while (tokenMatcher.find()) {
+      regexBuilder.append(Pattern.quote(parameterTypeName.substring(lastIndex, tokenMatcher.start())))
+      regexBuilder.append("(.+?)")
+      lastIndex = tokenMatcher.end()
+      groupCount += 1
+    }
+    if (groupCount == 0) {
+      None
+    } else {
+      regexBuilder.append(Pattern.quote(parameterTypeName.substring(lastIndex))).append("$")
+      val matcher = Pattern.compile(regexBuilder.toString).matcher(argumentTypeName)
+      Option
+        .when(matcher.matches()) {
+          val bindings = (1 to groupCount).map(index => normalizeType(matcher.group(index))).filter(_.nonEmpty)
+          bindings.headOption.filter(first => bindings.forall(_ == first))
+        }
+        .flatten
+    }
+  }
+
+  private def substituteTemplateTypeNames(typeName: String, bindings: Map[String, String]): String = {
+    bindings.foldLeft(typeName) { case (current, (name, replacement)) =>
+      Pattern
+        .compile(s"\\b${Pattern.quote(name)}\\b")
+        .matcher(current)
+        .replaceAll(Matcher.quoteReplacement(replacement))
+    }
+  }
+
+  private def functionTemplateParametersInType(entry: FunctionEntry, typeName: String): Set[String] = {
+    templateParameterNames(entry.function).filter(typeNameContainsToken(typeName, _))
+  }
+
+  private def templateParameterNames(function: OxFunctionDecl): Set[String] = {
+    val namesFromTemplatePrefix = TemplateParameterListPattern
+      .findAllMatchIn(function.code)
+      .flatMap(templateMatch => TemplateTypeParameterPattern.findAllMatchIn(templateMatch.group(1)).map(_.group(1)))
+      .toSet
+    if (namesFromTemplatePrefix.nonEmpty) {
+      namesFromTemplatePrefix
+    } else {
+      val typeNames = function.semanticReturnType +: function.parameters.map(_.semanticTypeName)
+      typeNames
+        .flatMap(templateParameterTokens)
+        .filterNot(typeName => resolveAggregateTypeFullName(typeName).isDefined)
+        .toSet
+    }
+  }
+
+  private def templateParameterTokens(typeName: String): Seq[String] = {
+    IdentifierTokenPattern.findAllIn(typeName).filter(isTemplateParameterComparableType).toSeq
+  }
+
+  private def typeNameContainsToken(typeName: String, token: String): Boolean = {
+    Pattern.compile(s"\\b${Pattern.quote(token)}\\b").matcher(typeName).find()
   }
 
   private def typeCompatibilityScore(parameterTypeName: String, argumentInfo: ArgumentInfo): Int = {
@@ -6569,19 +6770,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case _: OxIdentifier | _: OxFieldAccess => false
       case indexAccess: OxIndexAccess =>
         overloadedIndexOperatorTarget(indexAccess)
-          .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry)))
+          .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry, target.arguments)))
           .getOrElse(false)
       case assignment: OxAssignment =>
         overloadedAssignmentOperatorTarget(assignment)
-          .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry)))
+          .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry, target.arguments)))
           .getOrElse(false)
       case unary: OxUnary =>
         overloadedUnaryOperatorTarget(unary)
-          .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry)))
+          .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry, target.arguments)))
           .getOrElse(unary.operator != "*")
       case binary: OxBinary =>
         overloadedBinaryOperatorTarget(binary)
-          .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry)))
+          .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry, target.arguments)))
           .getOrElse(true)
       case OxPackExpansion(_, _, pattern) => expressionIsRvalue(pattern)
       case _: OxTypeOf                    => true

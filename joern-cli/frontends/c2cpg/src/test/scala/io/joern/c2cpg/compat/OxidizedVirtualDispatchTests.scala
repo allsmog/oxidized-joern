@@ -265,6 +265,48 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pick:short(Mid&)")
     }
 
+    "specialize function template returns during overload resolution" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Base {};
+          |class Mid : public Base {};
+          |class Leaf : public Mid {};
+          |Leaf makeLeaf();
+          |int pick(Base& value) { return 1; }
+          |short pick(Mid& value) { return 2; }
+          |long pick(const Mid& value) { return 3; }
+          |char pick(Leaf&& value) { return 4; }
+          |template <typename T>
+          |T id(T value) { return value; }
+          |template <typename T>
+          |T& ref(T& value) { return value; }
+          |template <typename T>
+          |const T& cref(const T& value) { return value; }
+          |}
+          |long use(Core::Leaf& leaf, const Core::Leaf& constLeaf) {
+          |  return Core::pick(Core::id(Core::makeLeaf())) +
+          |    Core::pick(Core::ref(leaf)) +
+          |    Core::pick(Core::cref(constLeaf));
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").call.codeExact("Core::id(Core::makeLeaf())").typeFullName.l shouldBe
+        List("Core.Leaf")
+      cpg.method.nameExact("use").call.codeExact("Core::ref(leaf)").typeFullName.l shouldBe
+        List("Core.Leaf&")
+      cpg.method.nameExact("use").call.codeExact("Core::cref(constLeaf)").typeFullName.l shouldBe
+        List("const Core.Leaf&")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(Core::id(Core::makeLeaf()))").methodFullName.l shouldBe
+        List("Core.pick:char(Leaf&&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(Core::ref(leaf))").methodFullName.l shouldBe
+        List("Core.pick:short(Mid&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(Core::cref(constLeaf))").methodFullName.l shouldBe
+        List("Core.pick:long(Mid&)")
+    }
+
     "prefer const member overloads for const this" in {
       val cpg = code(
         """
