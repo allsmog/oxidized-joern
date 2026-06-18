@@ -97,6 +97,7 @@ fn expr_json(node: Node, source: &str) -> Value {
         "identifier" | "property_identifier" => identifier_json(node, source),
         "number" => numeric_literal_json(node, source),
         "string" => string_literal_json(node, source),
+        "template_string" => template_string_json(node, source),
         "true" => boolean_literal_json(node, true),
         "false" => boolean_literal_json(node, false),
         "null" => with_span("NullLiteral", node, json!({ "value": Value::Null })),
@@ -461,17 +462,119 @@ fn numeric_literal_json(node: Node, source: &str) -> Value {
 
 fn string_literal_json(node: Node, source: &str) -> Value {
     let raw = node_text(node, source);
-    let value = raw
-        .strip_prefix('"')
-        .and_then(|s| s.strip_suffix('"'))
-        .or_else(|| raw.strip_prefix('\'').and_then(|s| s.strip_suffix('\'')))
-        .unwrap_or(&raw)
-        .to_string();
+    let value = decode_js_string_literal(&raw);
     with_span(
         "StringLiteral",
         node,
         json!({ "value": value, "extra": { "raw": raw } }),
     )
+}
+
+fn template_string_json(node: Node, source: &str) -> Value {
+    if named_children(node).any(|child| child.kind() == "template_substitution") {
+        noop_json(node)
+    } else {
+        string_literal_json(node, source)
+    }
+}
+
+fn decode_js_string_literal(raw: &str) -> String {
+    let Some(quote) = raw.chars().next() else {
+        return String::new();
+    };
+    if !matches!(quote, '"' | '\'' | '`') || !raw.ends_with(quote) || raw.len() < 2 {
+        return raw.to_string();
+    }
+    let body = &raw[1..raw.len() - 1];
+    decode_js_string_escapes(body)
+}
+
+fn decode_js_string_escapes(body: &str) -> String {
+    let chars = body.chars().collect::<Vec<_>>();
+    let mut decoded = String::with_capacity(body.len());
+    let mut index = 0;
+    while index < chars.len() {
+        let ch = chars[index];
+        index += 1;
+        if ch != '\\' {
+            decoded.push(ch);
+            continue;
+        }
+
+        if index >= chars.len() {
+            decoded.push('\\');
+            break;
+        }
+
+        let escaped = chars[index];
+        index += 1;
+        match escaped {
+            '"' => decoded.push('"'),
+            '\'' => decoded.push('\''),
+            '`' => decoded.push('`'),
+            '\\' => decoded.push('\\'),
+            'b' => decoded.push('\u{0008}'),
+            'f' => decoded.push('\u{000c}'),
+            'n' => decoded.push('\n'),
+            'r' => decoded.push('\r'),
+            't' => decoded.push('\t'),
+            'v' => decoded.push('\u{000b}'),
+            '0' => decoded.push('\0'),
+            '\n' => {}
+            '\r' => {
+                if index < chars.len() && chars[index] == '\n' {
+                    index += 1;
+                }
+            }
+            'x' if index + 2 <= chars.len()
+                && chars[index..index + 2]
+                    .iter()
+                    .all(|c| c.is_ascii_hexdigit()) =>
+            {
+                if let Some(value) = decode_hex_escape(&chars[index..index + 2]) {
+                    decoded.push(value);
+                }
+                index += 2;
+            }
+            'u' if index < chars.len() && chars[index] == '{' => {
+                index += 1;
+                let start = index;
+                while index < chars.len() && chars[index] != '}' {
+                    index += 1;
+                }
+                if index < chars.len() && chars[index] == '}' {
+                    if let Some(value) = decode_hex_escape(&chars[start..index]) {
+                        decoded.push(value);
+                    }
+                    index += 1;
+                }
+            }
+            'u' if index + 4 <= chars.len()
+                && chars[index..index + 4]
+                    .iter()
+                    .all(|c| c.is_ascii_hexdigit()) =>
+            {
+                if let Some(value) = decode_hex_escape(&chars[index..index + 4]) {
+                    decoded.push(value);
+                }
+                index += 4;
+            }
+            other => decoded.push(other),
+        }
+    }
+    decoded
+}
+
+fn decode_hex_escape(digits: &[char]) -> Option<char> {
+    let value = digits
+        .iter()
+        .collect::<String>()
+        .chars()
+        .try_fold(0_u32, |acc, ch| {
+            ch.to_digit(16)
+                .map(|digit| acc.saturating_mul(16).saturating_add(digit))
+        })?;
+    char::from_u32(value)
 }
 
 fn boolean_literal_json(node: Node, value: bool) -> Value {
@@ -691,5 +794,30 @@ mod tests {
         assert_eq!(id["params"][0]["name"], "x");
         assert_eq!(id["body"]["type"], "BlockStatement");
         assert_eq!(id["expression"], false);
+    }
+
+    #[test]
+    fn decodes_string_literal_values_like_babel() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(
+            root,
+            path,
+            "let a = \"\\\"abc\";\nlet b = 'abc\\'';\nlet c = `abc\ndef\n`;\n",
+        )
+        .expect("parse succeeds");
+
+        assert_eq!(
+            json["ast"]["program"]["body"][0]["declarations"][0]["init"]["value"],
+            "\"abc"
+        );
+        assert_eq!(
+            json["ast"]["program"]["body"][1]["declarations"][0]["init"]["value"],
+            "abc'"
+        );
+        assert_eq!(
+            json["ast"]["program"]["body"][2]["declarations"][0]["init"]["value"],
+            "abc\ndef\n"
+        );
     }
 }
