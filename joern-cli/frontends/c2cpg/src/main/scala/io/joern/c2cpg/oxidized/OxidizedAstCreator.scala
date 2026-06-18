@@ -6566,12 +6566,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def expressionIsRvalue(expression: OxExpression): Boolean = {
     expression match {
-      case _: OxIdentifier | _: OxFieldAccess | _: OxIndexAccess => false
+      case _: OxIdentifier | _: OxFieldAccess => false
+      case indexAccess: OxIndexAccess =>
+        overloadedIndexOperatorTarget(indexAccess)
+          .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry)))
+          .getOrElse(false)
       case assignment: OxAssignment =>
         overloadedAssignmentOperatorTarget(assignment)
           .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry)))
           .getOrElse(false)
-      case OxUnary("*", _, _, _, _)       => false
+      case unary: OxUnary =>
+        overloadedUnaryOperatorTarget(unary)
+          .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry)))
+          .getOrElse(unary.operator != "*")
+      case binary: OxBinary =>
+        overloadedBinaryOperatorTarget(binary)
+          .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry)))
+          .getOrElse(true)
       case OxPackExpansion(_, _, pattern) => expressionIsRvalue(pattern)
       case _: OxTypeOf                    => true
       case call: OxCall =>
