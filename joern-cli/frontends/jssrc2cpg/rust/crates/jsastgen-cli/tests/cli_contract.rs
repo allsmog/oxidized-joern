@@ -108,3 +108,46 @@ fn writes_babel_shaped_json_for_vue_sources() {
     );
     assert!(!output.path().join("app.ts.json").exists());
 }
+
+#[test]
+fn honors_exclude_files_regexes_and_hidden_directories() {
+    let input = TempDir::new().unwrap();
+    let output = TempDir::new().unwrap();
+    fs::create_dir_all(input.path().join("folder")).unwrap();
+    fs::create_dir_all(input.path().join("regexed")).unwrap();
+    fs::create_dir_all(input.path().join(".sub")).unwrap();
+    fs::write(input.path().join("keep.js"), "const keep = true;\n").unwrap();
+    fs::write(input.path().join("index.js"), "const excluded = true;\n").unwrap();
+    fs::write(
+        input.path().join("folder").join("nested.js"),
+        "const nested = true;\n",
+    )
+    .unwrap();
+    fs::write(
+        input.path().join("regexed").join("skip.js"),
+        "const regexed = true;\n",
+    )
+    .unwrap();
+    fs::write(
+        input.path().join(".sub").join("hidden.js"),
+        "const hidden = true;\n",
+    )
+    .unwrap();
+
+    Command::cargo_bin("astgen")
+        .unwrap()
+        .args(["-t", "ts", "-o"])
+        .arg(output.path())
+        .args(["--exclude-file", "index.js"])
+        .args(["--exclude-file", "folder"])
+        .args(["--exclude-regex", r".*\Q/\E?regexed\Q/\E.*"])
+        .arg(input.path())
+        .assert()
+        .success();
+
+    assert!(output.path().join("keep.js.json").exists());
+    assert!(!output.path().join("index.js.json").exists());
+    assert!(!output.path().join("folder").join("nested.js.json").exists());
+    assert!(!output.path().join("regexed").join("skip.js.json").exists());
+    assert!(!output.path().join(".sub").join("hidden.js.json").exists());
+}

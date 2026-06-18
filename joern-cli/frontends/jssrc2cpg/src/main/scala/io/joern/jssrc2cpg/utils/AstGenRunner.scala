@@ -102,7 +102,7 @@ class AstGenRunner(config: Config) extends io.joern.x2cpg.astgen.AstGenRunner(As
       Seq.empty
     }
     val ignoreFileArgs =
-      if (config.ignoredFiles.nonEmpty) Seq("--exclude-file") ++ config.ignoredFiles.map(f => s"\"$f\"") else Seq.empty
+      config.ignoredFiles.flatMap(f => Seq("--exclude-file", f))
     tsArgs ++ ignoredFilesRegex ++ ignoreFileArgs
   }
 
@@ -122,7 +122,20 @@ class AstGenRunner(config: Config) extends io.joern.x2cpg.astgen.AstGenRunner(As
         logger.debug(s"\t+ $out")
         None
     }
-    skipped.flatten
+    skipped.flatten.map(relativeSkippedFile(in, _))
+  }
+
+  private def relativeSkippedFile(in: Path, fileName: String): String = {
+    val path = Paths.get(fileName)
+    val inputPath = Try(in.toRealPath()).getOrElse(in.toAbsolutePath.normalize())
+    val skippedPath =
+      if (path.isAbsolute) Try(path.toRealPath()).getOrElse(path.normalize())
+      else path
+    if (skippedPath.isAbsolute && skippedPath.startsWith(inputPath)) {
+      inputPath.relativize(skippedPath).toString
+    } else {
+      fileName
+    }
   }
 
   override protected def fileFilter(file: String, out: Path): Boolean = {
