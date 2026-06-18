@@ -1498,6 +1498,71 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("useMemberArrays").call.nameExact("~Owner").code.l shouldBe List("owner.~Owner()")
     }
 
+    "capture C++ initialized member array constructors and destructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Member {
+          |public:
+          |  Member();
+          |  Member(int seed) {}
+          |  ~Member();
+          |};
+          |class ExplicitOwner {
+          |  Member slots[3];
+          |public:
+          |  ExplicitOwner(int seed) : slots{{seed}, {2}} {}
+          |  ~ExplicitOwner();
+          |};
+          |class DefaultOwner {
+          |  Member slots[2] = {{4}};
+          |public:
+          |  ~DefaultOwner();
+          |};
+          |}
+          |Core::Member::Member() {}
+          |Core::Member::~Member() {}
+          |Core::ExplicitOwner::~ExplicitOwner() {}
+          |Core::DefaultOwner::~DefaultOwner() {}
+          |int useInitializedMemberArrays(int seed) {
+          |  Core::ExplicitOwner explicitOwner(seed);
+          |  Core::DefaultOwner defaultOwner;
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.fullNameExact("Core.ExplicitOwner.ExplicitOwner:void(int)").call.nameExact("Member").code.l shouldBe
+        List("Core.Member.Member(seed)", "Core.Member.Member(2)", "Core.Member.Member()")
+      cpg.method
+        .fullNameExact("Core.ExplicitOwner.ExplicitOwner:void(int)")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l
+        .filterNot(_.startsWith("<tmp>")) shouldBe
+        List(
+          "this->slots[0] = Core.Member.Member(seed)",
+          "this->slots[1] = Core.Member.Member(2)",
+          "this->slots[2] = Core.Member.Member()"
+        )
+      cpg.method.fullNameExact("Core.DefaultOwner.DefaultOwner:void()").call.nameExact("Member").code.l shouldBe
+        List("Core.Member.Member(4)", "Core.Member.Member()")
+      cpg.method
+        .fullNameExact("Core.DefaultOwner.DefaultOwner:void()")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l
+        .filterNot(_.startsWith("<tmp>")) shouldBe
+        List("this->slots[0] = Core.Member.Member(4)", "this->slots[1] = Core.Member.Member()")
+      cpg.method.fullNameExact("Core.ExplicitOwner.~ExplicitOwner:void()").call.nameExact("~Member").code.l shouldBe
+        List("this->slots[2].~Member()", "this->slots[1].~Member()", "this->slots[0].~Member()")
+      cpg.method.fullNameExact("Core.DefaultOwner.~DefaultOwner:void()").call.nameExact("~Member").code.l shouldBe
+        List("this->slots[1].~Member()", "this->slots[0].~Member()")
+    }
+
     "extend C++ reference-bound temporary lifetimes" in {
       val cpg = code(
         """
