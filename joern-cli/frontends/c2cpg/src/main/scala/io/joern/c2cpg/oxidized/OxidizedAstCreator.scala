@@ -469,6 +469,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           .map(parent => (parent +: namespacePath(namespaceDecl.name)).mkString("."))
           .orElse(Option(namespacePath(namespaceDecl.name).mkString(".")))
         collectRequiredImplicitDefaultConstructorTypes(namespaceDecl.declarations, namespaceOwner)
+      case global: OxGlobalVariableDecl =>
+        requiredImplicitDefaultConstructorType(global, ownerFullName).toSet ++
+          global.initializer.toSet.flatMap(
+            collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)
+          )
       case _ =>
         Set.empty[String]
     }.toSet
@@ -615,6 +620,35 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .when(isDefaultConstruction)(localDefaultConstructedAggregateTypeFullName(local, ownerFullName))
       .flatten
       .filter(hasImplicitDefaultConstructor)
+  }
+
+  private def requiredImplicitDefaultConstructorType(
+    global: OxGlobalVariableDecl,
+    ownerFullName: Option[String]
+  ): Option[String] = {
+    Option
+      .when(global.initializer.isEmpty)(globalDefaultConstructedAggregateTypeFullName(global, ownerFullName))
+      .flatten
+      .filter(hasImplicitDefaultConstructor)
+  }
+
+  private def globalDefaultConstructedAggregateTypeFullName(
+    global: OxGlobalVariableDecl,
+    ownerFullName: Option[String]
+  ): Option[String] = {
+    localObjectAggregateTypeFullName(global.typeName, ownerFullName)
+      .orElse(globalArrayElementAggregateTypeFullName(global, ownerFullName))
+  }
+
+  private def globalArrayElementAggregateTypeFullName(
+    global: OxGlobalVariableDecl,
+    ownerFullName: Option[String]
+  ): Option[String] = {
+    Option
+      .when(globalArrayElementCount(global).exists(_ > 0))(
+        arrayElementTypeFullName(global.typeName).flatMap(localObjectAggregateTypeFullName(_, ownerFullName))
+      )
+      .flatten
   }
 
   private def localDefaultConstructedAggregateTypeFullName(
@@ -913,25 +947,212 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         ScopeEntry(typeName, this.localNode(origin.copy(code = localCode), global.name, localCode, typeName))
       }
     )
-    val localAst = Ast(scopeEntry.declaration)
-    global.initializer match {
-      case Some(initializer) =>
-        val leftCode       = globalAssignmentTargetCode(global)
-        val assignmentCode = s"$leftCode = ${initializer.code}"
-        val left           = identifierAstForScopeEntry(global.name, leftCode, global.line, scopeEntry)
-        val assignment =
-          assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
-        val initializerAggregateAssignments = aggregateAssignmentExpressionAsts(initializer)
-        val fieldAssignments =
-          aggregateInitializerAssignmentAsts(
-            AggregateAssignmentRoot(global.name, global.line, Option(scopeEntry)),
-            initializer,
-            scopeEntry.typeFullName
-          )
-        Seq(localAst) ++ initializerAggregateAssignments ++ Seq(assignment) ++ fieldAssignments
-      case None =>
-        Seq(localAst)
+    val localAst        = Ast(scopeEntry.declaration)
+    val constructorAsts = globalConstructorAsts(global, scopeEntry)
+    if (constructorAsts.nonEmpty) {
+      Seq(localAst) ++ constructorAsts
+    } else {
+      global.initializer match {
+        case Some(initializer) =>
+          val leftCode       = globalAssignmentTargetCode(global)
+          val assignmentCode = s"$leftCode = ${initializer.code}"
+          val left           = identifierAstForScopeEntry(global.name, leftCode, global.line, scopeEntry)
+          val assignment =
+            assignmentAst(origin.copy(code = assignmentCode), left, expressionAst(initializer), assignmentCode)
+          val initializerAggregateAssignments = aggregateAssignmentExpressionAsts(initializer)
+          val fieldAssignments =
+            aggregateInitializerAssignmentAsts(
+              AggregateAssignmentRoot(global.name, global.line, Option(scopeEntry)),
+              initializer,
+              scopeEntry.typeFullName
+            )
+          Seq(localAst) ++ initializerAggregateAssignments ++ Seq(assignment) ++ fieldAssignments
+        case None =>
+          Seq(localAst)
+      }
     }
+  }
+
+  private def globalConstructorAsts(global: OxGlobalVariableDecl, scopeEntry: ScopeEntry): Seq[Ast] = {
+    val typeName = scopeEntry.typeFullName
+    global.initializer match {
+      case Some(initializer: OxInitializerList) if isConstructorInitializer(typeName, initializer) =>
+        val resolution = constructorInitializerResolution(typeName, initializer)
+        resolution.arguments.flatMap(aggregateAssignmentExpressionAsts) ++
+          Seq(globalConstructorAssignmentAst(global, scopeEntry, initializer, typeName, resolution)) ++
+          temporaryDestructorAstsForConstructorArguments(resolution.arguments, resolution.entry)
+      case Some(initializer) if isCopyConstructorInitializer(typeName, initializer) =>
+        val arguments   = Seq(initializer)
+        val constructor = constructorEntry(typeName, arguments)
+        aggregateAssignmentExpressionAsts(initializer) ++ Seq(
+          globalConstructorAssignmentAst(
+            global,
+            scopeEntry,
+            typeName,
+            arguments,
+            initializer.code,
+            OxOrigin(initializer),
+            constructor
+          )
+        ) ++ temporaryDestructorAstsForConstructorArguments(arguments, constructor)
+      case Some(initializer: OxInitializerList) =>
+        globalArrayInitializerConstructorAsts(global, scopeEntry, typeName, initializer)
+      case None =>
+        val arrayConstructorAsts = globalArrayDefaultConstructorAsts(global, scopeEntry, typeName)
+        if (arrayConstructorAsts.nonEmpty) {
+          arrayConstructorAsts
+        } else if (isDefaultConstructorInitializer(typeName)) {
+          Seq(globalConstructorAssignmentAst(global, scopeEntry, typeName, Seq.empty, "", OxOrigin(global), None))
+        } else {
+          Seq.empty
+        }
+      case _ =>
+        Seq.empty
+    }
+  }
+
+  private def globalConstructorAssignmentAst(
+    global: OxGlobalVariableDecl,
+    scopeEntry: ScopeEntry,
+    initializer: OxInitializerList,
+    typeName: String,
+    resolution: ConstructorInitializerResolution
+  ): Ast = {
+    globalConstructorAssignmentAst(
+      global,
+      scopeEntry,
+      typeName,
+      resolution.arguments,
+      initializer.code.trim,
+      OxOrigin(initializer),
+      resolution.entry,
+      preserveInitializerListCode = resolution.preserveInitializerListCode
+    )
+  }
+
+  private def globalConstructorAssignmentAst(
+    global: OxGlobalVariableDecl,
+    scopeEntry: ScopeEntry,
+    typeName: String,
+    arguments: Seq[OxExpression],
+    initializerCode: String,
+    initializerOrigin: OxOrigin,
+    resolvedConstructor: Option[FunctionEntry],
+    preserveInitializerListCode: Boolean = false
+  ): Ast = {
+    val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
+    val constructor     = resolvedConstructor.orElse(constructorEntry(typeName, arguments))
+    val implicitSignature =
+      Option.when(arguments.isEmpty && hasImplicitDefaultConstructor(typeName))("void()")
+    val signature = constructor.map(_.function.signature).orElse(implicitSignature)
+    val methodFullName = constructor
+      .map(_.fullName)
+      .orElse(signature.map(sig => s"$typeName.$constructorName:$sig"))
+      .getOrElse(s"$typeName.$constructorName")
+    val initCode        = normalizedConstructorInitCode(initializerCode, preserveInitializerListCode)
+    val constructorCode = s"$typeName.$constructorName($initCode)"
+    val callNode_ = callNode(
+      initializerOrigin.copy(code = constructorCode),
+      constructorCode,
+      constructorName,
+      methodFullName,
+      DispatchTypes.STATIC_DISPATCH,
+      signature,
+      Some(registerType(Defines.Void))
+    )
+    val assignmentCode = s"${global.name} = $constructorCode"
+    val left           = identifierAstForScopeEntry(global.name, global.name, global.line, scopeEntry)
+    val argumentAsts = constructor
+      .map(entry => argumentAstsForFunctionEntry(entry, arguments))
+      .getOrElse(arguments.map(expressionAst))
+    val right = constructorInvocationBlockAst(initializerOrigin, typeName, callNode_, argumentAsts)
+    assignmentAst(OxOrigin(global).copy(code = assignmentCode), left, right, assignmentCode)
+  }
+
+  private def globalArrayDefaultConstructorAsts(
+    global: OxGlobalVariableDecl,
+    scopeEntry: ScopeEntry,
+    typeName: String
+  ): Seq[Ast] = {
+    for {
+      count       <- globalArrayElementCount(global).toSeq
+      elementType <- arrayElementTypeFullName(typeName).toSeq
+      info        <- constructorInvocationInfo(elementType, Seq.empty, "").toSeq
+      index       <- 0 until count
+    } yield globalArrayElementConstructorAssignmentAst(global, scopeEntry, typeName, index, global.line, info)
+  }
+
+  private def globalArrayInitializerConstructorAsts(
+    global: OxGlobalVariableDecl,
+    scopeEntry: ScopeEntry,
+    typeName: String,
+    initializer: OxInitializerList
+  ): Seq[Ast] = {
+    if (initializer.elements.exists(_.isInstanceOf[OxDesignatedInitializer])) {
+      Seq.empty
+    } else {
+      val count       = globalArrayElementCount(global)
+      val elementType = arrayElementTypeFullName(typeName)
+      (count, elementType) match {
+        case (Some(elementCount), Some(elementTypeName)) =>
+          val explicitInitializers = initializer.elements.take(elementCount)
+          val explicitConstructorAsts = explicitInitializers.zipWithIndex.map { case (elementInitializer, index) =>
+            globalArrayElementInitializerConstructorAsts(
+              global,
+              scopeEntry,
+              typeName,
+              elementTypeName,
+              index,
+              elementInitializer
+            )
+          }
+          if (explicitConstructorAsts.exists(_.isEmpty)) {
+            Seq.empty
+          } else {
+            val defaultConstructorAsts = for {
+              info  <- constructorInvocationInfo(elementTypeName, Seq.empty, "").toSeq
+              index <- explicitInitializers.size until elementCount
+            } yield globalArrayElementConstructorAssignmentAst(global, scopeEntry, typeName, index, global.line, info)
+            explicitConstructorAsts.flatten ++ defaultConstructorAsts
+          }
+        case _ =>
+          Seq.empty
+      }
+    }
+  }
+
+  private def globalArrayElementInitializerConstructorAsts(
+    global: OxGlobalVariableDecl,
+    scopeEntry: ScopeEntry,
+    arrayTypeName: String,
+    elementTypeName: String,
+    index: Int,
+    initializer: OxExpression
+  ): Seq[Ast] = {
+    arrayElementConstructorInvocationInfo(elementTypeName, initializer).toSeq.flatMap {
+      case (info, arguments, constructorEntry) =>
+        arguments.flatMap(aggregateAssignmentExpressionAsts) ++
+          Seq(
+            globalArrayElementConstructorAssignmentAst(global, scopeEntry, arrayTypeName, index, global.line, info)
+          ) ++
+          temporaryDestructorAstsForConstructorArguments(arguments, constructorEntry)
+    }
+  }
+
+  private def globalArrayElementConstructorAssignmentAst(
+    global: OxGlobalVariableDecl,
+    scopeEntry: ScopeEntry,
+    arrayTypeName: String,
+    index: Int,
+    line: Int,
+    info: ConstructorInvocationInfo
+  ): Ast = {
+    val elementCode    = s"${global.name}[$index]"
+    val assignmentCode = s"$elementCode = ${info.code}"
+    val left           = arrayElementAccessAst(global.name, arrayTypeName, index, line, Option(scopeEntry))
+    val callNode_      = constructorCallNode(OxOrigin(info.code, Option(line)), info)
+    val right = constructorInvocationBlockAst(OxOrigin(info.code, Option(line)), info.typeName, callNode_, Seq.empty)
+    assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
   }
 
   private def localCodeForGlobal(global: OxGlobalVariableDecl): String = {
@@ -944,6 +1165,20 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def globalAssignmentTargetCode(global: OxGlobalVariableDecl): String = {
     if (normalizeType(global.typeName).endsWith("[]")) s"${global.name}[]" else global.name
+  }
+
+  private def globalArrayElementCount(global: OxGlobalVariableDecl): Option[Int] = {
+    val code      = localCodeForGlobal(global)
+    val nameIndex = code.indexOf(global.name)
+    Option
+      .when(nameIndex >= 0)(code.drop(nameIndex + global.name.length).dropWhile(_.isWhitespace))
+      .filter(_.startsWith("["))
+      .flatMap { suffix =>
+        val endIndex = suffix.indexOf(']')
+        Option.when(endIndex > 1)(suffix.substring(1, endIndex).trim)
+      }
+      .flatMap(rawCount => Try(rawCount.toInt).toOption)
+      .filter(_ > 0)
   }
 
   private def astsForFunction(
@@ -2042,14 +2277,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
   }
 
-  private def arrayElementAccessAst(localName: String, arrayTypeName: String, index: Int, line: Int): Ast = {
+  private def arrayElementAccessAst(
+    localName: String,
+    arrayTypeName: String,
+    index: Int,
+    line: Int,
+    scopeEntry: Option[ScopeEntry] = None
+  ): Ast = {
     val elementCode     = s"$localName[$index]"
     val elementTypeName = arrayElementTypeFullName(arrayTypeName).getOrElse(Defines.Any)
+    val baseAst = scopeEntry
+      .map(identifierAstForScopeEntry(localName, localName, line, _))
+      .getOrElse(identifierAst(localName, localName, line))
     operatorCallAst(
       OxOrigin(elementCode, Option(line)),
       elementCode,
       Operators.indirectIndexAccess,
-      Seq(identifierAst(localName, localName, line), expressionAst(OxLiteral(index.toString, index.toString, line))),
+      Seq(baseAst, expressionAst(OxLiteral(index.toString, index.toString, line))),
       registerType(elementTypeName)
     )
   }

@@ -5220,6 +5220,78 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
     }
 
+    "capture C++ global object and array constructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |struct Defaulted {
+          |  ~Defaulted();
+          |};
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(int seed) {}
+          |  Widget(Widget& other) {}
+          |  Widget(Widget&& other) {}
+          |  ~Widget();
+          |};
+          |Widget makeWidget();
+          |}
+          |Core::Defaulted::~Defaulted() {}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |Core::Widget Core::makeWidget() {
+          |  Core::Widget temp;
+          |  return temp;
+          |}
+          |Core::Defaulted implicitGlobal;
+          |Core::Widget sourceGlobal;
+          |Core::Widget seededGlobal = {7};
+          |Core::Widget copiedGlobal = sourceGlobal;
+          |Core::Widget movedGlobal = Core::makeWidget();
+          |Core::Widget globalSlots[3] = {sourceGlobal, Core::makeWidget()};
+          |int read_global_objects() {
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      def globalMethod = cpg.method.fullNameExact("Test0.cpp:<global>")
+      cpg.method.fullNameExact("Core.Defaulted.Defaulted:void()").signature.l shouldBe List("void()")
+      globalMethod.call.nameExact("Defaulted").code.l shouldBe List("Core.Defaulted.Defaulted()")
+      globalMethod.call.nameExact("Widget").code.l shouldBe List(
+        "Core.Widget.Widget()",
+        "Core.Widget.Widget(7)",
+        "Core.Widget.Widget(sourceGlobal)",
+        "Core.Widget.Widget(Core::makeWidget())",
+        "Core.Widget.Widget(sourceGlobal)",
+        "Core.Widget.Widget(Core::makeWidget())",
+        "Core.Widget.Widget()"
+      )
+      globalMethod.call.nameExact("Widget").codeExact("Core.Widget.Widget(sourceGlobal)").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)")
+      globalMethod
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget(Core::makeWidget())")
+        .methodFullName
+        .l shouldBe List("Core.Widget.Widget:void(Widget&&)", "Core.Widget.Widget:void(Widget&&)")
+      globalMethod.call.nameExact(Operators.assignment).code.l.filterNot(_.startsWith("<tmp>")) should contain allElementsOf
+        List(
+          "implicitGlobal = Core.Defaulted.Defaulted()",
+          "sourceGlobal = Core.Widget.Widget()",
+          "seededGlobal = Core.Widget.Widget(7)",
+          "copiedGlobal = Core.Widget.Widget(sourceGlobal)",
+          "movedGlobal = Core.Widget.Widget(Core::makeWidget())",
+          "globalSlots[0] = Core.Widget.Widget(sourceGlobal)",
+          "globalSlots[1] = Core.Widget.Widget(Core::makeWidget())",
+          "globalSlots[2] = Core.Widget.Widget()"
+        )
+      globalMethod.call.nameExact("~Widget").code.l shouldBe
+        List("Core::makeWidget().~Widget()", "Core::makeWidget().~Widget()")
+    }
+
     "capture C global aggregate initializer field assignments from the Rust parser backend" in {
       val cpg = code(
         """
