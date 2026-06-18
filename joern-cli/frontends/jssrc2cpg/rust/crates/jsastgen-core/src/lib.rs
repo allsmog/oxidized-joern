@@ -1,13 +1,23 @@
 use anyhow::{bail, Context, Result};
 use serde_json::{json, Map, Value};
+use std::collections::BTreeMap;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tree_sitter::{Language, Node, Parser, Point, Tree};
+
+pub type TypeMap = BTreeMap<String, String>;
 
 pub fn parse_file(root: &Path, path: &Path) -> Result<Value> {
     let content =
         fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
     parse_source(root, path, &content)
+}
+
+pub fn parse_file_with_source(root: &Path, path: &Path) -> Result<(Value, String)> {
+    let content =
+        fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
+    let ast = parse_source(root, path, &content)?;
+    Ok((ast, content))
 }
 
 pub fn parse_source(root: &Path, path: &Path, source: &str) -> Result<Value> {
@@ -241,6 +251,1293 @@ pub fn write_json(path: &Path, value: &Value) -> Result<()> {
     }
     let bytes = serde_json::to_vec_pretty(value)?;
     fs::write(path, bytes).with_context(|| format!("writing {}", path.display()))
+}
+
+pub fn write_type_map(path: &Path, value: &TypeMap) -> Result<()> {
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
+    }
+    let bytes = serde_json::to_vec_pretty(value)?;
+    fs::write(path, bytes).with_context(|| format!("writing {}", path.display()))
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct TypeMapProject {
+    files: BTreeMap<String, FileTypeInfo>,
+    module_lookup: BTreeMap<String, String>,
+    exports: BTreeMap<String, BTreeMap<String, String>>,
+}
+
+impl TypeMapProject {
+    pub fn from_parsed_files(files: &[(PathBuf, Value, String)]) -> Self {
+        let mut project = TypeMapProject::default();
+        for (_, ast, source) in files {
+            let info = collect_file_type_info(ast, source);
+            for key in module_keys_for_relative_name(&info.relative_name) {
+                project
+                    .module_lookup
+                    .entry(key)
+                    .or_insert_with(|| info.relative_name.clone());
+            }
+            project.files.insert(info.relative_name.clone(), info);
+        }
+
+        let mut exports = BTreeMap::new();
+        for (_, ast, source) in files {
+            if let Some(relative_name) = relative_name_from_ast(ast) {
+                let mut infer = TypeMapInfer::new(&project, relative_name, source);
+                infer.infer_ast(ast);
+                exports.insert(relative_name.to_string(), infer.exports);
+            }
+        }
+        project.exports = exports;
+        project
+    }
+
+    pub fn infer_type_map(&self, ast: &Value, source: &str) -> TypeMap {
+        let Some(relative_name) = relative_name_from_ast(ast) else {
+            return TypeMap::new();
+        };
+        let mut infer = TypeMapInfer::new(self, relative_name, source);
+        infer.infer_ast(ast);
+        infer.type_map
+    }
+
+    fn file(&self, relative_name: &str) -> Option<&FileTypeInfo> {
+        self.files.get(relative_name)
+    }
+
+    fn resolve_module(&self, current_file: &FileTypeInfo, specifier: &str) -> Option<String> {
+        if !specifier.starts_with('.') {
+            return None;
+        }
+
+        let current_dir = current_file
+            .relative_name
+            .rsplit_once('/')
+            .map(|(dir, _)| dir)
+            .unwrap_or("");
+        let joined = if current_dir.is_empty() {
+            specifier.to_string()
+        } else {
+            format!("{current_dir}/{specifier}")
+        };
+        let normalized = normalize_module_path(&joined);
+        module_keys_for_relative_name(&normalized)
+            .into_iter()
+            .chain(std::iter::once(normalized))
+            .find_map(|key| self.module_lookup.get(&key).cloned())
+    }
+
+    fn class_info<'a>(&'a self, file: &'a FileTypeInfo, class_name: &str) -> Option<&'a ClassInfo> {
+        file.classes.get(class_name).or_else(|| {
+            self.files
+                .values()
+                .find_map(|candidate| candidate.classes.get(class_name))
+        })
+    }
+
+    fn imported_member_type(
+        &self,
+        current_file: &FileTypeInfo,
+        module: &str,
+        member: &str,
+    ) -> Option<String> {
+        if let Some(relative_name) = self.resolve_module(current_file, module) {
+            if let Some(exports) = self.exports.get(&relative_name).and_then(|x| x.get(member)) {
+                return Some(exports.clone());
+            }
+            if self
+                .files
+                .get(&relative_name)
+                .is_some_and(|info| info.classes.contains_key(member))
+            {
+                return Some(member.to_string());
+            }
+            return None;
+        }
+        Some(format!("{module}:{member}"))
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+struct FileTypeInfo {
+    relative_name: String,
+    imports: BTreeMap<String, ImportBinding>,
+    aliases: BTreeMap<String, String>,
+    classes: BTreeMap<String, ClassInfo>,
+}
+
+#[derive(Clone, Debug)]
+enum ImportBinding {
+    Named { module: String, imported: String },
+    Namespace { module: String },
+    Default { module: String },
+}
+
+#[derive(Clone, Debug, Default)]
+struct ClassInfo {
+    methods: BTreeMap<String, String>,
+    properties: BTreeMap<String, String>,
+}
+
+fn collect_file_type_info(ast: &Value, source: &str) -> FileTypeInfo {
+    let relative_name = relative_name_from_ast(ast).unwrap_or("").to_string();
+    let mut info = FileTypeInfo {
+        relative_name,
+        ..FileTypeInfo::default()
+    };
+
+    if let Some(body) = program_body(ast) {
+        for statement in body {
+            collect_imports(statement, &mut info);
+        }
+        for statement in body {
+            collect_type_aliases(statement, source, &mut info);
+        }
+        for statement in body {
+            collect_classes(statement, source, &mut info);
+        }
+    }
+
+    info
+}
+
+fn collect_imports(statement: &Value, info: &mut FileTypeInfo) {
+    match node_type(statement) {
+        Some("ImportDeclaration") => {
+            let Some(module) = string_field(statement.get("source"), "value") else {
+                return;
+            };
+            for specifier in array_field(statement, "specifiers") {
+                match node_type(specifier) {
+                    Some("ImportSpecifier") => {
+                        let Some(local) = name_from_node(specifier.get("local")) else {
+                            continue;
+                        };
+                        let imported = name_from_node(specifier.get("imported"))
+                            .unwrap_or_else(|| local.clone());
+                        info.imports.insert(
+                            local,
+                            ImportBinding::Named {
+                                module: module.to_string(),
+                                imported,
+                            },
+                        );
+                    }
+                    Some("ImportNamespaceSpecifier") => {
+                        if let Some(local) = name_from_node(specifier.get("local")) {
+                            info.imports.insert(
+                                local,
+                                ImportBinding::Namespace {
+                                    module: module.to_string(),
+                                },
+                            );
+                        }
+                    }
+                    Some("ImportDefaultSpecifier") => {
+                        if let Some(local) = name_from_node(specifier.get("local")) {
+                            info.imports.insert(
+                                local,
+                                ImportBinding::Default {
+                                    module: module.to_string(),
+                                },
+                            );
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        Some("TSImportEqualsDeclaration") => {
+            let Some(local) = name_from_node(statement.get("id")) else {
+                return;
+            };
+            let Some(module) = statement
+                .get("moduleReference")
+                .and_then(|x| x.get("expression"))
+                .and_then(|x| string_field(Some(x), "value"))
+            else {
+                return;
+            };
+            info.imports.insert(
+                local,
+                ImportBinding::Namespace {
+                    module: module.to_string(),
+                },
+            );
+        }
+        _ => {}
+    }
+}
+
+fn collect_type_aliases(statement: &Value, source: &str, info: &mut FileTypeInfo) {
+    match node_type(statement) {
+        Some("TSTypeAliasDeclaration") => {
+            if let Some(name) = name_from_node(statement.get("id")) {
+                let tpe =
+                    type_from_annotation(statement.get("typeAnnotation"), source, &info.aliases);
+                if tpe != "any" {
+                    info.aliases.insert(name, tpe);
+                }
+            }
+        }
+        Some("ExportNamedDeclaration") | Some("ExportDefaultDeclaration") => {
+            if let Some(declaration) = statement.get("declaration").filter(|x| !x.is_null()) {
+                collect_type_aliases(declaration, source, info);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn collect_classes(statement: &Value, source: &str, info: &mut FileTypeInfo) {
+    let declaration = match node_type(statement) {
+        Some("ClassDeclaration") | Some("ClassExpression") => Some(statement),
+        Some("ExportNamedDeclaration") | Some("ExportDefaultDeclaration") => {
+            statement.get("declaration").filter(|x| !x.is_null())
+        }
+        _ => None,
+    };
+    let Some(class_node) = declaration else {
+        return;
+    };
+    if !matches!(
+        node_type(class_node),
+        Some("ClassDeclaration") | Some("ClassExpression")
+    ) {
+        return;
+    }
+    let Some(name) = name_from_node(class_node.get("id")) else {
+        return;
+    };
+
+    let mut class_info = ClassInfo::default();
+    for member in class_members(class_node) {
+        if matches!(
+            node_type(member),
+            Some("ClassProperty") | Some("ClassPrivateProperty")
+        ) {
+            if let Some(member_name) = name_from_node(member.get("key")) {
+                let tpe = member
+                    .get("typeAnnotation")
+                    .map(|annotation| type_from_annotation(Some(annotation), source, &info.aliases))
+                    .or_else(|| member.get("value").map(simple_literal_type))
+                    .unwrap_or_else(|| "any".to_string());
+                if tpe != "any" {
+                    class_info.properties.insert(member_name, tpe);
+                }
+            }
+        }
+    }
+    for member in class_members(class_node) {
+        if matches!(
+            node_type(member),
+            Some("ClassMethod") | Some("TSDeclareMethod")
+        ) {
+            if let Some(member_name) = name_from_node(member.get("key")) {
+                let tpe = function_return_type_from_node(
+                    member,
+                    source,
+                    &info.aliases,
+                    &BTreeMap::new(),
+                    Some(&class_info),
+                    None,
+                );
+                if tpe != "any" {
+                    class_info.methods.insert(member_name, tpe);
+                }
+            }
+        }
+    }
+
+    info.classes.insert(name, class_info);
+}
+
+struct TypeMapInfer<'a> {
+    project: &'a TypeMapProject,
+    file: &'a FileTypeInfo,
+    source: &'a str,
+    env: BTreeMap<String, String>,
+    type_map: TypeMap,
+    exports: BTreeMap<String, String>,
+}
+
+impl<'a> TypeMapInfer<'a> {
+    fn new(project: &'a TypeMapProject, relative_name: &str, source: &'a str) -> Self {
+        let file = project
+            .file(relative_name)
+            .unwrap_or_else(|| project.files.values().next().expect("project has files"));
+        let mut env = BTreeMap::new();
+        for class_name in file.classes.keys() {
+            env.insert(class_name.clone(), class_name.clone());
+        }
+        Self {
+            project,
+            file,
+            source,
+            env,
+            type_map: TypeMap::new(),
+            exports: BTreeMap::new(),
+        }
+    }
+
+    fn infer_ast(&mut self, ast: &Value) {
+        if let Some(body) = program_body(ast) {
+            for statement in body {
+                self.infer_statement(statement);
+            }
+        }
+    }
+
+    fn infer_statement(&mut self, statement: &Value) -> Vec<(String, String)> {
+        match node_type(statement) {
+            Some("VariableDeclaration") => array_field(statement, "declarations")
+                .iter()
+                .filter_map(|declarator| self.infer_variable_declarator(declarator))
+                .collect(),
+            Some("FunctionDeclaration") => self.infer_function_declaration(statement),
+            Some("ClassDeclaration") => self.infer_class_declaration(statement),
+            Some("ExportNamedDeclaration") => self.infer_export_named(statement),
+            Some("ExportDefaultDeclaration") => self.infer_export_default(statement),
+            Some("ExpressionStatement") => {
+                if let Some(expression) = statement.get("expression") {
+                    self.infer_expr(expression);
+                }
+                Vec::new()
+            }
+            Some("BlockStatement") => {
+                for child in array_field(statement, "body") {
+                    self.infer_statement(child);
+                }
+                Vec::new()
+            }
+            Some("ReturnStatement") => {
+                if let Some(argument) = statement.get("argument").filter(|x| !x.is_null()) {
+                    self.infer_expr(argument);
+                }
+                Vec::new()
+            }
+            _ => {
+                self.infer_expr(statement);
+                Vec::new()
+            }
+        }
+    }
+
+    fn infer_variable_declarator(&mut self, declarator: &Value) -> Option<(String, String)> {
+        let id = declarator.get("id")?;
+        let name = name_from_node(Some(id))?;
+        let init = declarator.get("init").filter(|x| !x.is_null());
+        let init_type = init.map(|value| self.infer_expr(value));
+        let tpe = self
+            .type_from_variable_annotation(declarator)
+            .or(init_type)
+            .unwrap_or_else(|| "any".to_string());
+
+        self.insert_node_type(declarator, &tpe);
+        self.insert_node_type(id, &tpe);
+        self.env.insert(name.clone(), tpe.clone());
+        Some((name, tpe))
+    }
+
+    fn infer_function_declaration(&mut self, function: &Value) -> Vec<(String, String)> {
+        let return_type = self.function_return_type(function);
+        self.insert_node_type(function, &return_type);
+        if let Some(name) = function.get("id").and_then(|id| name_from_node(Some(id))) {
+            let signature = self.function_signature(function, &return_type);
+            if let Some(id) = function.get("id") {
+                self.insert_node_type(id, &signature);
+            }
+            self.env.insert(name.clone(), signature.clone());
+            vec![(name, signature)]
+        } else {
+            Vec::new()
+        }
+    }
+
+    fn infer_class_declaration(&mut self, class_node: &Value) -> Vec<(String, String)> {
+        let Some(name) = class_node.get("id").and_then(|id| name_from_node(Some(id))) else {
+            return Vec::new();
+        };
+        self.insert_node_type(class_node, &name);
+        if let Some(id) = class_node.get("id") {
+            self.insert_node_type(id, &name);
+        }
+        self.env.insert(name.clone(), name.clone());
+        for member in class_members(class_node) {
+            if matches!(
+                node_type(member),
+                Some("ClassMethod") | Some("TSDeclareMethod")
+            ) {
+                let return_type = self.function_return_type(member);
+                self.insert_node_type(member, &return_type);
+            }
+        }
+        vec![(name.clone(), name)]
+    }
+
+    fn infer_export_named(&mut self, statement: &Value) -> Vec<(String, String)> {
+        let mut declarations = Vec::new();
+        if let Some(declaration) = statement.get("declaration").filter(|x| !x.is_null()) {
+            declarations.extend(self.infer_statement(declaration));
+            for (name, tpe) in &declarations {
+                self.exports.insert(name.clone(), tpe.clone());
+            }
+        }
+        for specifier in array_field(statement, "specifiers") {
+            let Some(local) = name_from_node(specifier.get("local")) else {
+                continue;
+            };
+            let exported =
+                name_from_node(specifier.get("exported")).unwrap_or_else(|| local.clone());
+            let tpe = statement
+                .get("source")
+                .and_then(|source| string_field(Some(source), "value"))
+                .and_then(|module| self.project.imported_member_type(self.file, module, &local))
+                .or_else(|| self.env.get(&local).cloned())
+                .unwrap_or_else(|| "any".to_string());
+            if tpe != "any" {
+                self.exports.insert(exported, tpe);
+            }
+        }
+        declarations
+    }
+
+    fn infer_export_default(&mut self, statement: &Value) -> Vec<(String, String)> {
+        let Some(declaration) = statement.get("declaration").filter(|x| !x.is_null()) else {
+            return Vec::new();
+        };
+        let declarations = self.infer_statement(declaration);
+        if let Some((_, tpe)) = declarations.first() {
+            self.exports.insert("default".to_string(), tpe.clone());
+        } else {
+            let tpe = self.infer_expr(declaration);
+            if tpe != "any" {
+                self.exports.insert("default".to_string(), tpe);
+            }
+        }
+        declarations
+    }
+
+    fn infer_expr(&mut self, expr: &Value) -> String {
+        let expression_type = node_type(expr);
+        let tpe = match node_type(expr) {
+            Some("StringLiteral") | Some("TemplateLiteral") | Some("TemplateElement") => {
+                "string".to_string()
+            }
+            Some("NumericLiteral") | Some("DecimalLiteral") | Some("BigIntLiteral") => {
+                "number".to_string()
+            }
+            Some("BooleanLiteral") => "boolean".to_string(),
+            Some("NullLiteral") => "null".to_string(),
+            Some("Identifier") => self.identifier_type(expr),
+            Some("ThisExpression") => "this".to_string(),
+            Some("ArrayExpression") => "any[]".to_string(),
+            Some("ObjectExpression") => "{}".to_string(),
+            Some("TSAsExpression") | Some("TSTypeAssertion") | Some("TSSatisfiesExpression") => {
+                self.type_from_cast_source(expr)
+                    .or_else(|| {
+                        expr.get("typeAnnotation")
+                            .map(|annotation| self.type_from_annotation(Some(annotation)))
+                    })
+                    .unwrap_or_else(|| {
+                        expr.get("expression")
+                            .map(|inner| self.infer_expr(inner))
+                            .unwrap_or_else(|| "any".to_string())
+                    })
+            }
+            Some("AssignmentExpression") => self.infer_assignment_expression(expr),
+            Some("TSNonNullExpression") => expr
+                .get("expression")
+                .map(|inner| self.infer_expr(inner))
+                .unwrap_or_else(|| "any".to_string()),
+            Some("ArrowFunctionExpression")
+            | Some("FunctionExpression")
+            | Some("FunctionDeclaration")
+            | Some("ClassMethod")
+            | Some("ObjectMethod") => {
+                let return_type = self.function_return_type(expr);
+                self.insert_node_type(expr, &return_type);
+                self.function_signature(expr, &return_type)
+            }
+            Some("CallExpression") => self.infer_call_expression(expr),
+            Some("NewExpression") => self.infer_new_expression(expr),
+            Some("MemberExpression") => self.infer_member_expression(expr),
+            Some("BinaryExpression") | Some("LogicalExpression") => {
+                self.infer_binary_expression(expr)
+            }
+            Some("UnaryExpression") => self.infer_unary_expression(expr),
+            Some("ConditionalExpression") => {
+                let consequent = expr
+                    .get("consequent")
+                    .map(|value| self.infer_expr(value))
+                    .unwrap_or_else(|| "any".to_string());
+                let alternate = expr
+                    .get("alternate")
+                    .map(|value| self.infer_expr(value))
+                    .unwrap_or_else(|| "any".to_string());
+                if consequent == alternate {
+                    consequent
+                } else {
+                    "any".to_string()
+                }
+            }
+            Some("AwaitExpression") => expr
+                .get("argument")
+                .map(|argument| self.infer_expr(argument))
+                .unwrap_or_else(|| "any".to_string()),
+            _ => simple_literal_type(expr),
+        };
+        if !matches!(
+            expression_type,
+            Some("ArrowFunctionExpression")
+                | Some("FunctionExpression")
+                | Some("FunctionDeclaration")
+                | Some("ClassMethod")
+                | Some("ObjectMethod")
+        ) {
+            self.insert_node_type(expr, &tpe);
+        }
+        tpe
+    }
+
+    fn identifier_type(&self, ident: &Value) -> String {
+        let Some(name) = name_from_node(Some(ident)) else {
+            return "any".to_string();
+        };
+        self.env
+            .get(&name)
+            .cloned()
+            .or_else(|| self.type_from_import(&name))
+            .or_else(|| self.file.aliases.get(&name).cloned())
+            .unwrap_or_else(|| "any".to_string())
+    }
+
+    fn type_from_import(&self, name: &str) -> Option<String> {
+        match self.file.imports.get(name)? {
+            ImportBinding::Named { module, imported } => self
+                .project
+                .imported_member_type(self.file, module, imported),
+            ImportBinding::Default { module } => {
+                if module.starts_with('.') {
+                    self.project
+                        .resolve_module(self.file, module)
+                        .and_then(|relative| {
+                            self.project
+                                .exports
+                                .get(&relative)
+                                .and_then(|exports| exports.get("default").cloned())
+                        })
+                } else {
+                    Some(format!("{module}:default"))
+                }
+            }
+            ImportBinding::Namespace { .. } => None,
+        }
+    }
+
+    fn infer_call_expression(&mut self, expr: &Value) -> String {
+        let Some(callee) = expr.get("callee") else {
+            return "any".to_string();
+        };
+        match node_type(callee) {
+            Some("MemberExpression") => {
+                if callee
+                    .get("object")
+                    .and_then(|object| name_from_node(Some(object)))
+                    .is_some_and(|name| name == "Math")
+                {
+                    return "number".to_string();
+                }
+                let receiver = callee
+                    .get("object")
+                    .map(|object| self.infer_expr(object))
+                    .unwrap_or_else(|| "any".to_string());
+                let property = callee
+                    .get("property")
+                    .and_then(|property| name_from_node(Some(property)))
+                    .unwrap_or_default();
+                if receiver == "__ecma.Math" || receiver == "Math" {
+                    return "number".to_string();
+                }
+                if let Some(class_info) = self.project.class_info(self.file, &receiver) {
+                    if let Some(return_type) = class_info.methods.get(&property) {
+                        return return_type.clone();
+                    }
+                }
+                if receiver != "any" && receiver != "ANY" && !property.is_empty() {
+                    return format!("{receiver}:{property}:<returnValue>");
+                }
+                "any".to_string()
+            }
+            Some("Identifier") => {
+                let name = name_from_node(Some(callee)).unwrap_or_default();
+                match name.as_str() {
+                    "Number" | "parseInt" | "parseFloat" => "number".to_string(),
+                    "String" => "string".to_string(),
+                    "Boolean" => "boolean".to_string(),
+                    _ => self
+                        .env
+                        .get(&name)
+                        .and_then(|tpe| return_type_from_function_signature(tpe))
+                        .unwrap_or_else(|| "any".to_string()),
+                }
+            }
+            _ => "any".to_string(),
+        }
+    }
+
+    fn infer_assignment_expression(&mut self, expr: &Value) -> String {
+        let right_type = expr
+            .get("right")
+            .map(|right| self.infer_expr(right))
+            .unwrap_or_else(|| "any".to_string());
+        if let Some(left) = expr.get("left") {
+            if matches!(node_type(left), Some("Identifier")) {
+                if let Some(name) = name_from_node(Some(left)) {
+                    self.env.insert(name, right_type.clone());
+                }
+                self.insert_node_type(left, &right_type);
+            } else {
+                self.infer_expr(left);
+            }
+        }
+        right_type
+    }
+
+    fn infer_new_expression(&mut self, expr: &Value) -> String {
+        expr.get("callee")
+            .map(|callee| self.constructor_type(callee))
+            .unwrap_or_else(|| "any".to_string())
+    }
+
+    fn constructor_type(&mut self, callee: &Value) -> String {
+        match node_type(callee) {
+            Some("Identifier") => {
+                let Some(name) = name_from_node(Some(callee)) else {
+                    return "any".to_string();
+                };
+                self.type_from_import(&name).unwrap_or(name)
+            }
+            Some("MemberExpression") => {
+                let Some(object) = callee.get("object") else {
+                    return "any".to_string();
+                };
+                let Some(property) = callee.get("property").and_then(|p| name_from_node(Some(p)))
+                else {
+                    return "any".to_string();
+                };
+                if let Some(ImportBinding::Namespace { module }) =
+                    name_from_node(Some(object)).and_then(|name| self.file.imports.get(&name))
+                {
+                    return self
+                        .project
+                        .imported_member_type(self.file, module, &property)
+                        .unwrap_or(property);
+                }
+                property
+            }
+            _ => "any".to_string(),
+        }
+    }
+
+    fn infer_member_expression(&mut self, expr: &Value) -> String {
+        let Some(object) = expr.get("object") else {
+            return "any".to_string();
+        };
+        let Some(property) = expr.get("property").and_then(|p| name_from_node(Some(p))) else {
+            return "any".to_string();
+        };
+        if let Some(object_name) = name_from_node(Some(object)) {
+            if object_name == "Math" {
+                return "__ecma.Math".to_string();
+            }
+            if let Some(ImportBinding::Namespace { module }) = self.file.imports.get(&object_name) {
+                return self
+                    .project
+                    .imported_member_type(self.file, module, &property)
+                    .unwrap_or_else(|| "any".to_string());
+            }
+        }
+
+        let receiver = self.infer_expr(object);
+        if receiver == "this" {
+            if let Some(class_info) = self.current_class_for_member(expr) {
+                return class_info
+                    .properties
+                    .get(&property)
+                    .cloned()
+                    .unwrap_or_else(|| "any".to_string());
+            }
+        }
+        if let Some(class_info) = self.project.class_info(self.file, &receiver) {
+            if let Some(property_type) = class_info.properties.get(&property) {
+                return property_type.clone();
+            }
+        }
+        "any".to_string()
+    }
+
+    fn infer_binary_expression(&mut self, expr: &Value) -> String {
+        let left = expr
+            .get("left")
+            .map(|value| self.infer_expr(value))
+            .unwrap_or_else(|| "any".to_string());
+        let right = expr
+            .get("right")
+            .map(|value| self.infer_expr(value))
+            .unwrap_or_else(|| "any".to_string());
+        let op = expr
+            .get("operator")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        if matches!(
+            op,
+            "==" | "===" | "!=" | "!==" | "<" | ">" | "<=" | ">=" | "&&" | "||"
+        ) {
+            return "boolean".to_string();
+        }
+        if op == "+" && (left == "string" || right == "string") {
+            "string".to_string()
+        } else if left == "number" && right == "number" {
+            "number".to_string()
+        } else {
+            "any".to_string()
+        }
+    }
+
+    fn infer_unary_expression(&mut self, expr: &Value) -> String {
+        let operator = expr
+            .get("operator")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        if operator == "!" || operator == "typeof" {
+            return if operator == "!" { "boolean" } else { "string" }.to_string();
+        }
+        expr.get("argument")
+            .map(|argument| self.infer_expr(argument))
+            .unwrap_or_else(|| "any".to_string())
+    }
+
+    fn function_return_type(&mut self, function: &Value) -> String {
+        let aliases = self.file.aliases.clone();
+        let env = self.env.clone();
+        function_return_type_from_node(function, self.source, &aliases, &env, None, Some(self))
+    }
+
+    fn function_signature(&mut self, function: &Value, return_type: &str) -> String {
+        let params = array_field(function, "params")
+            .iter()
+            .map(|param| {
+                param
+                    .get("typeAnnotation")
+                    .map(|annotation| self.type_from_annotation(Some(annotation)))
+                    .or_else(|| self.type_from_parameter_source(param))
+                    .unwrap_or_else(|| "any".to_string())
+            })
+            .collect::<Vec<_>>();
+        format!("({}) => {return_type}", params.join(", "))
+    }
+
+    fn type_from_variable_annotation(&self, declarator: &Value) -> Option<String> {
+        let id = declarator.get("id")?;
+        if !matches!(node_type(id), Some("Identifier")) {
+            return None;
+        }
+        source_slice_for_node(declarator, self.source).and_then(|code| {
+            let before_initializer =
+                split_top_level_once(code, '=').map_or(code, |(before, _)| before);
+            let (_, annotation) = split_top_level_once(before_initializer, ':')?;
+            let tpe = self.type_from_text(annotation);
+            (tpe != "any").then_some(tpe)
+        })
+    }
+
+    fn type_from_parameter_source(&self, param: &Value) -> Option<String> {
+        source_slice_for_node(param, self.source).and_then(|code| {
+            let (_, annotation) = split_top_level_once(code, ':')?;
+            let annotation =
+                split_top_level_once(annotation, '=').map_or(annotation, |(before, _)| before);
+            let tpe = self.type_from_text(annotation);
+            (tpe != "any").then_some(tpe)
+        })
+    }
+
+    fn type_from_cast_source(&self, expr: &Value) -> Option<String> {
+        if !matches!(node_type(expr), Some("TSTypeAssertion")) {
+            return None;
+        }
+        let code = source_slice_for_node(expr, self.source)?.trim_start();
+        let rest = code.strip_prefix('<')?;
+        let type_end = rest.find('>')?;
+        let tpe = self.type_from_text(&rest[..type_end]);
+        (tpe != "any").then_some(tpe)
+    }
+
+    fn type_from_annotation(&self, node: Option<&Value>) -> String {
+        type_from_annotation(node, self.source, &self.file.aliases)
+    }
+
+    fn type_from_text(&self, text: &str) -> String {
+        type_from_text(text, &self.file.aliases)
+    }
+
+    fn current_class_for_member(&self, _expr: &Value) -> Option<&ClassInfo> {
+        None
+    }
+
+    fn insert_node_type(&mut self, node: &Value, tpe: &str) {
+        if should_emit_type(tpe) {
+            if let Some(range) = range_key(node) {
+                self.type_map.insert(range, tpe.to_string());
+            }
+        }
+    }
+}
+
+fn function_return_type_from_node(
+    function: &Value,
+    source: &str,
+    aliases: &BTreeMap<String, String>,
+    env: &BTreeMap<String, String>,
+    class_info: Option<&ClassInfo>,
+    infer: Option<&mut TypeMapInfer<'_>>,
+) -> String {
+    if let Some(return_type) = function.get("returnType") {
+        let tpe = type_from_annotation(Some(return_type), source, aliases);
+        if tpe != "any" {
+            return tpe;
+        }
+    }
+    if matches!(node_type(function), Some("ArrowFunctionExpression"))
+        && function
+            .get("expression")
+            .and_then(Value::as_bool)
+            .unwrap_or(false)
+    {
+        if let Some(body) = function.get("body") {
+            return if let Some(infer) = infer {
+                infer.infer_expr(body)
+            } else {
+                infer_expr_without_project(body, source, aliases, env, class_info)
+            };
+        }
+    }
+    if let Some(body) = function.get("body") {
+        return return_type_from_body(body, source, aliases, env, class_info, infer);
+    }
+    "any".to_string()
+}
+
+fn return_type_from_body(
+    body: &Value,
+    source: &str,
+    aliases: &BTreeMap<String, String>,
+    env: &BTreeMap<String, String>,
+    class_info: Option<&ClassInfo>,
+    mut infer: Option<&mut TypeMapInfer<'_>>,
+) -> String {
+    match node_type(body) {
+        Some("BlockStatement") => {
+            for statement in array_field(body, "body") {
+                if matches!(node_type(statement), Some("ReturnStatement")) {
+                    if let Some(argument) = statement.get("argument").filter(|x| !x.is_null()) {
+                        return if let Some(ref mut infer) = infer {
+                            infer.infer_expr(argument)
+                        } else {
+                            infer_expr_without_project(argument, source, aliases, env, class_info)
+                        };
+                    }
+                }
+            }
+            "any".to_string()
+        }
+        _ => {
+            if let Some(ref mut infer) = infer {
+                infer.infer_expr(body)
+            } else {
+                infer_expr_without_project(body, source, aliases, env, class_info)
+            }
+        }
+    }
+}
+
+fn infer_expr_without_project(
+    expr: &Value,
+    source: &str,
+    aliases: &BTreeMap<String, String>,
+    env: &BTreeMap<String, String>,
+    class_info: Option<&ClassInfo>,
+) -> String {
+    match node_type(expr) {
+        Some("StringLiteral") | Some("TemplateLiteral") | Some("TemplateElement") => {
+            "string".to_string()
+        }
+        Some("NumericLiteral") | Some("DecimalLiteral") | Some("BigIntLiteral") => {
+            "number".to_string()
+        }
+        Some("BooleanLiteral") => "boolean".to_string(),
+        Some("NullLiteral") => "null".to_string(),
+        Some("Identifier") => name_from_node(Some(expr))
+            .and_then(|name| {
+                env.get(&name)
+                    .cloned()
+                    .or_else(|| aliases.get(&name).cloned())
+            })
+            .unwrap_or_else(|| "any".to_string()),
+        Some("TSAsExpression") | Some("TSTypeAssertion") | Some("TSSatisfiesExpression") => expr
+            .get("typeAnnotation")
+            .map(|annotation| type_from_annotation(Some(annotation), source, aliases))
+            .unwrap_or_else(|| "any".to_string()),
+        Some("MemberExpression") => {
+            if matches!(
+                expr.get("object").and_then(node_type),
+                Some("ThisExpression")
+            ) {
+                if let Some(property) = expr.get("property").and_then(|x| name_from_node(Some(x))) {
+                    if let Some(property_type) =
+                        class_info.and_then(|info| info.properties.get(&property))
+                    {
+                        return property_type.clone();
+                    }
+                }
+            }
+            "any".to_string()
+        }
+        Some("CallExpression") => {
+            if expr
+                .get("callee")
+                .and_then(|callee| callee.get("object"))
+                .and_then(|object| name_from_node(Some(object)))
+                .is_some_and(|name| name == "Math")
+            {
+                "number".to_string()
+            } else {
+                "any".to_string()
+            }
+        }
+        _ => simple_literal_type(expr),
+    }
+}
+
+fn return_type_from_function_signature(tpe: &str) -> Option<String> {
+    tpe.split("=>").nth(1).map(|value| value.trim().to_string())
+}
+
+fn type_from_annotation(
+    node: Option<&Value>,
+    source: &str,
+    aliases: &BTreeMap<String, String>,
+) -> String {
+    let Some(node) = node else {
+        return "any".to_string();
+    };
+    match node_type(node) {
+        Some("TSTypeAnnotation") | Some("TypeAnnotation") => {
+            type_from_annotation(node.get("typeAnnotation"), source, aliases)
+        }
+        Some("TSStringKeyword") | Some("StringTypeAnnotation") => "string".to_string(),
+        Some("TSNumberKeyword") | Some("NumberTypeAnnotation") => "number".to_string(),
+        Some("TSBigIntKeyword") => "number".to_string(),
+        Some("TSBooleanKeyword") | Some("BooleanTypeAnnotation") => "boolean".to_string(),
+        Some("TSNullKeyword") | Some("NullLiteralTypeAnnotation") => "null".to_string(),
+        Some("TSVoidKeyword") => "void".to_string(),
+        Some("TSUndefinedKeyword") => "undefined".to_string(),
+        Some("TSUnknownKeyword") => "unknown".to_string(),
+        Some("TSNeverKeyword") => "never".to_string(),
+        Some("TSArrayType") | Some("ArrayTypeAnnotation") => "any[]".to_string(),
+        Some("TSTypeLiteral") | Some("ObjectTypeAnnotation") => "{}".to_string(),
+        Some("TSLiteralType") => node
+            .get("literal")
+            .map(simple_literal_type)
+            .unwrap_or_else(|| "any".to_string()),
+        Some("TSTypeReference") | Some("GenericTypeAnnotation") => {
+            let text = source_slice_for_node(node, source).unwrap_or_default();
+            if !text.is_empty() {
+                let tpe = type_from_text(text, aliases);
+                if tpe != "any" {
+                    return tpe;
+                }
+            }
+            name_from_node(node.get("typeName").or_else(|| node.get("id")))
+                .map(|name| resolve_alias(&name, aliases, 0).unwrap_or(name))
+                .unwrap_or_else(|| "any".to_string())
+        }
+        Some("TSUnionType") => {
+            let mut inferred = array_field(node, "types")
+                .iter()
+                .map(|child| type_from_annotation(Some(child), source, aliases))
+                .filter(|tpe| !matches!(tpe.as_str(), "null" | "undefined" | "any"));
+            let first = inferred.next().unwrap_or_else(|| "any".to_string());
+            if inferred.all(|tpe| tpe == first) {
+                first
+            } else {
+                "any".to_string()
+            }
+        }
+        _ => source_slice_for_node(node, source)
+            .map(|text| type_from_text(text, aliases))
+            .unwrap_or_else(|| "any".to_string()),
+    }
+}
+
+fn type_from_text(text: &str, aliases: &BTreeMap<String, String>) -> String {
+    let trimmed = text
+        .trim()
+        .trim_start_matches(':')
+        .trim()
+        .trim_end_matches(';')
+        .trim();
+    if trimmed.is_empty() {
+        return "any".to_string();
+    }
+    match trimmed {
+        "string" => return "string".to_string(),
+        "number" | "int" => return "number".to_string(),
+        "boolean" => return "boolean".to_string(),
+        "bigint" => return "number".to_string(),
+        "void" => return "void".to_string(),
+        "unknown" => return "unknown".to_string(),
+        "never" => return "never".to_string(),
+        "undefined" => return "undefined".to_string(),
+        "null" => return "null".to_string(),
+        "any" => return "any".to_string(),
+        _ => {}
+    }
+    if (trimmed.starts_with('"') && trimmed.ends_with('"'))
+        || (trimmed.starts_with('\'') && trimmed.ends_with('\''))
+    {
+        return "string".to_string();
+    }
+    if matches!(trimmed, "true" | "false") {
+        return "boolean".to_string();
+    }
+    if trimmed.parse::<f64>().is_ok() {
+        return "number".to_string();
+    }
+    if trimmed.ends_with("[]")
+        || trimmed.starts_with("Array<")
+        || trimmed.starts_with("ReadonlyArray<")
+    {
+        return "any[]".to_string();
+    }
+    if trimmed.starts_with('{') {
+        return "{}".to_string();
+    }
+    if trimmed.contains("=>") {
+        return trimmed.to_string();
+    }
+    if let Some((outer, inner)) = split_generic_type(trimmed) {
+        if matches!(
+            outer,
+            "Uppercase" | "Lowercase" | "Capitalize" | "Uncapitalize" | "NonNullable"
+        ) {
+            let inner_type = type_from_text(inner, aliases);
+            return resolve_alias(&inner_type, aliases, 0).unwrap_or(inner_type);
+        }
+        if matches!(outer, "Array" | "ReadonlyArray" | "Readonly") {
+            return "any[]".to_string();
+        }
+        return outer.to_string();
+    }
+    resolve_alias(trimmed, aliases, 0).unwrap_or_else(|| trimmed.to_string())
+}
+
+fn resolve_alias(name: &str, aliases: &BTreeMap<String, String>, depth: usize) -> Option<String> {
+    if depth > 8 {
+        return None;
+    }
+    let target = aliases.get(name)?;
+    resolve_alias(target, aliases, depth + 1).or_else(|| Some(target.clone()))
+}
+
+fn split_generic_type(text: &str) -> Option<(&str, &str)> {
+    let start = text.find('<')?;
+    let end = text.rfind('>')?;
+    if end <= start {
+        return None;
+    }
+    Some((text[..start].trim(), text[start + 1..end].trim()))
+}
+
+fn simple_literal_type(node: &Value) -> String {
+    match node_type(node) {
+        Some("StringLiteral") | Some("TemplateLiteral") | Some("TemplateElement") => {
+            "string".to_string()
+        }
+        Some("NumericLiteral") | Some("DecimalLiteral") | Some("BigIntLiteral") => {
+            "number".to_string()
+        }
+        Some("BooleanLiteral") => "boolean".to_string(),
+        Some("NullLiteral") => "null".to_string(),
+        Some("ArrayExpression") => "any[]".to_string(),
+        Some("ObjectExpression") => "{}".to_string(),
+        _ => "any".to_string(),
+    }
+}
+
+fn should_emit_type(tpe: &str) -> bool {
+    !matches!(tpe, "" | "any" | "this")
+}
+
+fn relative_name_from_ast(ast: &Value) -> Option<&str> {
+    ast.get("relativeName").and_then(Value::as_str)
+}
+
+fn program_body(ast: &Value) -> Option<&Vec<Value>> {
+    ast.get("ast")?.get("program")?.get("body")?.as_array()
+}
+
+fn class_members(class_node: &Value) -> &[Value] {
+    class_node
+        .get("body")
+        .and_then(|body| body.get("body"))
+        .and_then(Value::as_array)
+        .map(Vec::as_slice)
+        .unwrap_or(&[])
+}
+
+fn node_type(node: &Value) -> Option<&str> {
+    node.get("type").and_then(Value::as_str)
+}
+
+fn array_field<'a>(node: &'a Value, key: &str) -> &'a [Value] {
+    node.get(key)
+        .and_then(Value::as_array)
+        .map(Vec::as_slice)
+        .unwrap_or(&[])
+}
+
+fn string_field<'a>(node: Option<&'a Value>, key: &str) -> Option<&'a str> {
+    node?.get(key).and_then(Value::as_str)
+}
+
+fn name_from_node(node: Option<&Value>) -> Option<String> {
+    let node = node?;
+    match node_type(node) {
+        Some("Identifier") | Some("PrivateName") => {
+            string_field(Some(node), "name").map(str::to_string)
+        }
+        Some("StringLiteral") => string_field(Some(node), "value").map(str::to_string),
+        Some("TSQualifiedName") => {
+            let left = name_from_node(node.get("left"))?;
+            let right = name_from_node(node.get("right"))?;
+            Some(format!("{left}.{right}"))
+        }
+        _ => string_field(Some(node), "name").map(str::to_string),
+    }
+}
+
+fn range_key(node: &Value) -> Option<String> {
+    let start = node.get("start")?.as_u64()?;
+    let end = node.get("end")?.as_u64()?;
+    Some(format!("{start}:{end}"))
+}
+
+fn source_slice_for_node<'a>(node: &Value, source: &'a str) -> Option<&'a str> {
+    let start = node.get("start")?.as_u64()? as usize;
+    let end = node.get("end")?.as_u64()? as usize;
+    source_slice_utf16(source, start, end)
+}
+
+fn source_slice_utf16(source: &str, start: usize, end: usize) -> Option<&str> {
+    let start_byte = byte_offset_for_utf16(source, start);
+    let end_byte = byte_offset_for_utf16(source, end);
+    source.get(start_byte..end_byte)
+}
+
+fn byte_offset_for_utf16(source: &str, offset: usize) -> usize {
+    let mut utf16 = 0;
+    for (byte, ch) in source.char_indices() {
+        if utf16 >= offset {
+            return byte;
+        }
+        let next = utf16 + ch.len_utf16();
+        if next > offset {
+            return byte;
+        }
+        utf16 = next;
+    }
+    source.len()
+}
+
+fn split_top_level_once(text: &str, needle: char) -> Option<(&str, &str)> {
+    let mut angle_depth = 0usize;
+    let mut brace_depth = 0usize;
+    let mut bracket_depth = 0usize;
+    let mut paren_depth = 0usize;
+    let mut quote = None;
+    for (index, ch) in text.char_indices() {
+        if let Some(active_quote) = quote {
+            if ch == active_quote {
+                quote = None;
+            }
+            continue;
+        }
+        match ch {
+            '"' | '\'' | '`' => quote = Some(ch),
+            '<' => angle_depth += 1,
+            '>' => angle_depth = angle_depth.saturating_sub(1),
+            '{' => brace_depth += 1,
+            '}' => brace_depth = brace_depth.saturating_sub(1),
+            '[' => bracket_depth += 1,
+            ']' => bracket_depth = bracket_depth.saturating_sub(1),
+            '(' => paren_depth += 1,
+            ')' => paren_depth = paren_depth.saturating_sub(1),
+            _ if ch == needle
+                && angle_depth == 0
+                && brace_depth == 0
+                && bracket_depth == 0
+                && paren_depth == 0 =>
+            {
+                return Some((&text[..index], &text[index + ch.len_utf8()..]));
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+fn module_keys_for_relative_name(relative_name: &str) -> Vec<String> {
+    let normalized = normalize_module_path(relative_name);
+    let mut keys = vec![normalized.clone()];
+    if let Some(stripped) = strip_known_js_extension(&normalized) {
+        keys.push(stripped.to_string());
+    }
+    if let Some(stripped) = normalized
+        .strip_suffix("/index.ts")
+        .or_else(|| normalized.strip_suffix("/index.tsx"))
+        .or_else(|| normalized.strip_suffix("/index.js"))
+        .or_else(|| normalized.strip_suffix("/index.jsx"))
+    {
+        keys.push(stripped.to_string());
+    }
+    keys
+}
+
+fn strip_known_js_extension(path: &str) -> Option<&str> {
+    path.strip_suffix(".ts")
+        .or_else(|| path.strip_suffix(".tsx"))
+        .or_else(|| path.strip_suffix(".js"))
+        .or_else(|| path.strip_suffix(".jsx"))
+        .or_else(|| path.strip_suffix(".mjs"))
+        .or_else(|| path.strip_suffix(".cjs"))
+}
+
+fn normalize_module_path(path: &str) -> String {
+    let mut parts = Vec::new();
+    let normalized = path.replace('\\', "/");
+    for part in normalized.split('/') {
+        match part {
+            "" | "." => {}
+            ".." => {
+                parts.pop();
+            }
+            other => parts.push(other),
+        }
+    }
+    parts.join("/")
 }
 
 fn file_json(root: &Path, path: &Path, source: &str, tree: &Tree) -> Value {
@@ -1860,6 +3157,7 @@ fn ts_type_assertion_json(node: Node, source: &str) -> Value {
         .unwrap_or_else(|| noop_json(node));
     let type_annotation = last_type_child(node)
         .map(|child| ts_type_json(child, source))
+        .or_else(|| type_assertion_type_json(node, source))
         .unwrap_or_else(|| with_span("TSAnyKeyword", node, json!({})));
 
     with_span(
@@ -1868,6 +3166,72 @@ fn ts_type_assertion_json(node: Node, source: &str) -> Value {
         json!({
             "expression": expression,
             "typeAnnotation": type_annotation
+        }),
+    )
+}
+
+fn type_assertion_type_json(node: Node, source: &str) -> Option<Value> {
+    let text = node_text(node, source);
+    let type_start = text.find('<')? + 1;
+    let type_end = text[type_start..].find('>')? + type_start;
+    let raw_type = &text[type_start..type_end];
+    let leading_ws = raw_type.len() - raw_type.trim_start().len();
+    let trailing_ws = raw_type.len() - raw_type.trim_end().len();
+    let start_byte = node.start_byte() + type_start + leading_ws;
+    let end_byte = node.start_byte() + type_end - trailing_ws;
+    let type_text = source.get(start_byte..end_byte)?.trim();
+    Some(ts_type_json_from_text(
+        type_text, start_byte, end_byte, source,
+    ))
+}
+
+fn ts_type_json_from_text(
+    type_text: &str,
+    start_byte: usize,
+    end_byte: usize,
+    source: &str,
+) -> Value {
+    let kind = match type_text {
+        "any" => Some("TSAnyKeyword"),
+        "bigint" => Some("TSBigIntKeyword"),
+        "boolean" => Some("TSBooleanKeyword"),
+        "never" => Some("TSNeverKeyword"),
+        "null" => Some("TSNullKeyword"),
+        "number" | "int" => Some("TSNumberKeyword"),
+        "object" => Some("TSObjectKeyword"),
+        "string" => Some("TSStringKeyword"),
+        "symbol" => Some("TSSymbolKeyword"),
+        "undefined" => Some("TSUndefinedKeyword"),
+        "unknown" => Some("TSUnknownKeyword"),
+        "void" => Some("TSVoidKeyword"),
+        _ => None,
+    };
+    if let Some(kind) = kind {
+        return with_span_bounds(
+            kind,
+            start_byte,
+            point_for_byte(source, start_byte),
+            end_byte,
+            point_for_byte(source, end_byte),
+            json!({}),
+        );
+    }
+
+    with_span_bounds(
+        "TSTypeReference",
+        start_byte,
+        point_for_byte(source, start_byte),
+        end_byte,
+        point_for_byte(source, end_byte),
+        json!({
+            "typeName": with_span_bounds(
+                "Identifier",
+                start_byte,
+                point_for_byte(source, start_byte),
+                end_byte,
+                point_for_byte(source, end_byte),
+                json!({ "name": type_text })
+            )
         }),
     )
 }
@@ -4170,5 +5534,86 @@ mod tests {
             json["ast"]["program"]["body"][2]["declarations"][0]["init"]["value"],
             "abc\ndef\n"
         );
+    }
+
+    #[test]
+    fn emits_type_map_for_typescript_inference_and_cross_file_calls() {
+        let root = Path::new("/repo");
+        let main_path = Path::new("/repo/main.ts");
+        let dep_path = Path::new("/repo/dep.ts");
+        let main_source = "const foo = () => 42;\nlet x = \"test\";\nvar y = x;\nimport * as deps from \"./dep\";\nvar z = new deps.Foo().bar();\n";
+        let dep_source = "export class Foo { bar() { return \"bar\"; } }\n";
+        let main_json = parse_source(root, main_path, main_source).expect("parse succeeds");
+        let dep_json = parse_source(root, dep_path, dep_source).expect("parse succeeds");
+        let files = vec![
+            (
+                main_path.to_path_buf(),
+                main_json.clone(),
+                main_source.to_string(),
+            ),
+            (dep_path.to_path_buf(), dep_json, dep_source.to_string()),
+        ];
+
+        let project = TypeMapProject::from_parsed_files(&files);
+        let type_map = project.infer_type_map(&main_json, main_source);
+        let body = main_json["ast"]["program"]["body"].as_array().unwrap();
+        let foo_declarator = &body[0]["declarations"][0];
+        let arrow_function = &foo_declarator["init"];
+        let y_declarator = &body[2]["declarations"][0];
+        let z_declarator = &body[4]["declarations"][0];
+
+        assert_eq!(
+            type_map
+                .get(&test_range(foo_declarator))
+                .map(String::as_str),
+            Some("() => number")
+        );
+        assert_eq!(
+            type_map
+                .get(&test_range(arrow_function))
+                .map(String::as_str),
+            Some("number")
+        );
+        assert_eq!(
+            type_map.get(&test_range(y_declarator)).map(String::as_str),
+            Some("string")
+        );
+        assert_eq!(
+            type_map.get(&test_range(z_declarator)).map(String::as_str),
+            Some("string")
+        );
+    }
+
+    #[test]
+    fn emits_type_annotations_for_ts_angle_bracket_assertions() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/cast.ts");
+        let json = parse_source(
+            root,
+            path,
+            "let imgScr: string = <string>this.imageElement;\n(<HTMLImageElement>this.imageElement).src = imgScr;\n",
+        )
+        .expect("parse succeeds");
+        let body = json["ast"]["program"]["body"].as_array().unwrap();
+        let string_assertion = &body[0]["declarations"][0]["init"];
+        let html_assertion = &body[1]["expression"]["left"]["object"];
+
+        assert_eq!(
+            string_assertion["typeAnnotation"]["type"],
+            "TSStringKeyword"
+        );
+        assert_eq!(html_assertion["typeAnnotation"]["type"], "TSTypeReference");
+        assert_eq!(
+            html_assertion["typeAnnotation"]["typeName"]["name"],
+            "HTMLImageElement"
+        );
+    }
+
+    fn test_range(node: &Value) -> String {
+        format!(
+            "{}:{}",
+            node["start"].as_u64().unwrap(),
+            node["end"].as_u64().unwrap()
+        )
     }
 }
