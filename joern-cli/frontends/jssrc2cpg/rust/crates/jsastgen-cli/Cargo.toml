@@ -1,0 +1,21 @@
+[package]
+name = "jsastgen"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[[bin]]
+name = "astgen"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+ignore.workspace = true
+jsastgen-core = { path = "../jsastgen-core" }
+regex.workspace = true
+
+[dev-dependencies]
+assert_cmd = "2"
+serde_json.workspace = true
+tempfile.workspace = true

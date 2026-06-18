@@ -31,6 +31,24 @@ yarn install
 
 Copy the resulting `astgen-linux`, `astgen-macos`, `astgen-macos-arm`, and `astgen-win.exe` to `joern/joern-cli/frontends/jssrc2cpg/bin/astgen`.
 
+### Experimental Rust AST Generator
+
+This fork also contains an opt-in Rust implementation under `rust/`. It is the
+oxidized replacement track for the JavaScript frontend and currently emits the
+same Babel-shaped JSON contract for an initial JavaScript syntax subset.
+
+```shell script
+cd joern-cli/frontends/jssrc2cpg/rust
+cargo fmt --check
+cargo test
+```
+
+Install the locally built Rust binary into `bin/astgen/` with:
+
+```shell script
+sbt 'jssrc2cpg/jsAstGenBuildRust'
+```
+
 ### Binary Resolution Order
 
 At runtime jssrc2cpg locates the `astgen` binary in this order:

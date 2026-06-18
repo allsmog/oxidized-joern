@@ -2,15 +2,15 @@ import versionsort.VersionHelper
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.sbt.packager.Keys.stagingDirectory
 
-import scala.sys.process.stringToProcess
+import scala.sys.process.{Process, stringToProcess}
 import scala.util.Try
 
 name := "jssrc2cpg"
 
 dependsOn(
-  Projects.dataflowengineoss  % "test->test",
-  Projects.x2cpg              % "compile->compile;test->test",
-  Projects.linterRules % ScalafixConfig
+  Projects.dataflowengineoss % "test->test",
+  Projects.x2cpg             % "compile->compile;test->test",
+  Projects.linterRules       % ScalafixConfig
 )
 
 lazy val appProperties = settingKey[Config]("App Properties")
@@ -68,6 +68,38 @@ astGenBinaryNames := {
       case _ => Seq(AstgenWinAmd64, AstgenLinuxAmd64, AstgenLinuxArmV8, AstgenMacAmd64, AstgenMacArmV8)
     }
   }
+}
+
+lazy val astGenCurrentBinaryName = taskKey[String]("astgen binary name for the current host")
+astGenCurrentBinaryName := {
+  (Environment.operatingSystem, Environment.architecture) match {
+    case (Environment.OperatingSystemType.Windows, _)                                => AstgenWinAmd64
+    case (Environment.OperatingSystemType.Linux, Environment.ArchitectureType.X86)   => AstgenLinuxAmd64
+    case (Environment.OperatingSystemType.Linux, Environment.ArchitectureType.ARMv8) => AstgenLinuxArmV8
+    case (Environment.OperatingSystemType.Mac, Environment.ArchitectureType.X86)     => AstgenMacAmd64
+    case (Environment.OperatingSystemType.Mac, Environment.ArchitectureType.ARMv8)   => AstgenMacArmV8
+    case _                                                                           => AstgenLinuxAmd64
+  }
+}
+
+lazy val jsAstGenBuildRust = taskKey[File]("Build local Rust JavaScript astgen and install it under bin/astgen")
+jsAstGenBuildRust := {
+  val rustRoot = baseDirectory.value / "rust"
+  val rustBinaryName =
+    if (Environment.operatingSystem == Environment.OperatingSystemType.Windows) "astgen.exe" else "astgen"
+  val exitCode = Process(Seq("cargo", "build", "--release", "--bin", "astgen"), rustRoot).!
+  if (exitCode != 0) {
+    sys.error(s"cargo build failed with exit code $exitCode")
+  }
+
+  val builtBinary = rustRoot / "target" / "release" / rustBinaryName
+  val astGenDir   = baseDirectory.value / "bin" / "astgen"
+  val targetFile  = astGenDir / astGenCurrentBinaryName.value
+  astGenDir.mkdirs()
+  IO.copyFile(builtBinary, targetFile, preserveLastModified = true)
+  targetFile.setExecutable(true, false)
+  streams.value.log.info(s"installed Rust JavaScript astgen to $targetFile")
+  targetFile
 }
 
 lazy val astGenDlTask = taskKey[Unit](s"Download astgen binaries")
