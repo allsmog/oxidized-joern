@@ -1234,6 +1234,71 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.nameExact("~Wrapper").code.l shouldBe List("wrapper.~Wrapper()")
     }
 
+    "capture C++ member and base destructor cleanup" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |void mark();
+          |class Base {
+          |public:
+          |  ~Base();
+          |};
+          |class Member {
+          |public:
+          |  ~Member();
+          |};
+          |class Normal : public Base {
+          |  Member first;
+          |  Member second;
+          |public:
+          |  ~Normal();
+          |};
+          |class Returning : public Base {
+          |  Member only;
+          |public:
+          |  ~Returning();
+          |};
+          |}
+          |void Core::mark() {}
+          |Core::Base::~Base() {}
+          |Core::Member::~Member() {}
+          |Core::Normal::~Normal() { Core::mark(); }
+          |Core::Returning::~Returning() { return; }
+          |int use() {
+          |  Core::Normal normal;
+          |  Core::Returning returning;
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val normalDestructorCalls = cpg.method.fullNameExact("Core.Normal.~Normal:void()").call.code.l
+      normalDestructorCalls should contain allElementsOf List(
+        "Core::mark()",
+        "this->second.~Member()",
+        "this->first.~Member()",
+        "this->~Base()"
+      )
+      normalDestructorCalls.indexOf("Core::mark()") should be < normalDestructorCalls.indexOf(
+        "this->second.~Member()"
+      )
+      normalDestructorCalls.indexOf("this->second.~Member()") should be < normalDestructorCalls.indexOf(
+        "this->first.~Member()"
+      )
+      normalDestructorCalls.indexOf("this->first.~Member()") should be < normalDestructorCalls.indexOf("this->~Base()")
+
+      cpg.method
+        .fullNameExact("Core.Returning.~Returning:void()")
+        .call
+        .filter(call => Set("~Member", "~Base").contains(call.name))
+        .code
+        .l shouldBe
+        List("this->only.~Member()", "this->~Base()")
+      cpg.method.nameExact("use").call.nameExact("~Normal").code.l shouldBe List("normal.~Normal()")
+      cpg.method.nameExact("use").call.nameExact("~Returning").code.l shouldBe List("returning.~Returning()")
+    }
+
     "extend C++ reference-bound temporary lifetimes" in {
       val cpg = code(
         """
