@@ -159,5 +159,34 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         renderCall.receiver.code.l shouldBe Nil
       }
     }
+
+    "dispatch virtual destructors for single-object delete" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Base {
+          |public:
+          |  virtual ~Base();
+          |};
+          |class Derived : public Base {
+          |public:
+          |  ~Derived();
+          |};
+          |}
+          |void destroy(Core::Base *ptr) {
+          |  delete ptr;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.fullNameExact("Core.Base.~Base:void()").modifier.modifierType.l shouldBe List(ModifierTypes.VIRTUAL)
+      inside(cpg.method.nameExact("destroy").call.nameExact("~Base").codeExact("ptr->~Base()").l) {
+        case List(destructorCall) =>
+          destructorCall.methodFullName shouldBe "Core.Base.~Base:void()"
+          destructorCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+          destructorCall.receiver.code.l shouldBe List("ptr")
+      }
+    }
   }
 }
