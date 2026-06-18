@@ -292,6 +292,16 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |  }
           |}
           |template <typename T>
+          |auto idAutoBranchLocal(bool choose, T left, T right) {
+          |  if (choose) {
+          |    auto tmp = left;
+          |    return tmp;
+          |  } else {
+          |    auto tmp = right;
+          |    return tmp;
+          |  }
+          |}
+          |template <typename T>
           |decltype(auto) idDecltype(T& value) { return value; }
           |template <typename T>
           |decltype(auto) idDecltypeBranch(bool choose, T& left, T& right) {
@@ -313,6 +323,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::pick(Core::idAuto(Core::makeLeaf())) +
           |    Core::pick(Core::idAutoForward(Core::makeLeaf())) +
           |    Core::pick(Core::idAutoBranch(true, Core::makeLeaf(), Core::makeLeaf())) +
+          |    Core::pick(Core::idAutoBranchLocal(true, Core::makeLeaf(), Core::makeLeaf())) +
           |    Core::pick(Core::idDecltype(leaf)) +
           |    Core::pick(Core::idDecltypeBranch(true, leaf, leaf)) +
           |    Core::pick(Core::makeExplicit<Core::Leaf>()) +
@@ -333,6 +344,12 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         .nameExact("use")
         .call
         .codeExact("Core::idAutoBranch(true, Core::makeLeaf(), Core::makeLeaf())")
+        .typeFullName
+        .l shouldBe List("Core.Leaf")
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("Core::idAutoBranchLocal(true, Core::makeLeaf(), Core::makeLeaf())")
         .typeFullName
         .l shouldBe List("Core.Leaf")
       cpg.method.nameExact("use").call.codeExact("Core::idDecltype(leaf)").typeFullName.l shouldBe
@@ -359,6 +376,12 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         .nameExact("use")
         .call
         .codeExact("Core::pick(Core::idAutoBranch(true, Core::makeLeaf(), Core::makeLeaf()))")
+        .methodFullName
+        .l shouldBe List("Core.pick:char(Leaf&&)")
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("Core::pick(Core::idAutoBranchLocal(true, Core::makeLeaf(), Core::makeLeaf()))")
         .methodFullName
         .l shouldBe List("Core.pick:char(Leaf&&)")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::idDecltype(leaf))").methodFullName.l shouldBe
