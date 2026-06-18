@@ -79,7 +79,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     ) -> Result<Value> {
         let mut statement_items = Vec::new();
         for child in named_children(root) {
-            if child.kind() == "shebang_line" {
+            if is_trivia_node(child) {
                 continue;
             }
             statement_items.push(self.code_block_item(child)?);
@@ -132,6 +132,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "while_statement" => self.while_stmt(node),
             "assignment"
             | "additive_expression"
+            | "array_literal"
             | "boolean_literal"
             | "call_expression"
             | "comparison_expression"
@@ -139,6 +140,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "disjunction_expression"
             | "equality_expression"
             | "integer_literal"
+            | "lambda_literal"
             | "multiplicative_expression"
             | "simple_identifier"
             | "self_expression"
@@ -219,7 +221,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .context("member block is missing '}'")?;
         let mut items = Vec::new();
         for child in named_children(node) {
-            if child.kind() == "line_comment" || child.kind() == "multiline_comment" {
+            if is_trivia_node(child) {
                 continue;
             }
             items.push(self.member_block_item(child)?);
@@ -656,6 +658,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .map(named_children)
             .into_iter()
             .flatten()
+            .filter(|child| !is_trivia_node(*child))
             .collect();
         let mut items = Vec::new();
         for child in statement_nodes {
@@ -692,7 +695,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "disjunction_expression"
             | "equality_expression"
             | "multiplicative_expression" => self.binary_operator_expr(node),
+            "array_literal" => self.array_expr(node),
             "call_expression" => self.function_call_expr(node),
+            "lambda_literal" => self.closure_expr(node),
             "navigation_expression" => self.member_access_expr(node),
             "boolean_literal" => Ok(self.syntax_node(
                 "BooleanLiteralExprSyntax",
@@ -738,6 +743,291 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "line_string_literal" => self.string_literal(node),
             other => bail!("unsupported Swift expression node '{other}'"),
         }
+    }
+
+    fn array_expr(&self, node: Node<'a>) -> Result<Value> {
+        let left_square = self
+            .immediate_child_kind(node, "[")
+            .context("array literal is missing '['")?;
+        let right_square = self
+            .immediate_child_kind(node, "]")
+            .context("array literal is missing ']'")?;
+
+        let mut elements = Vec::new();
+        for child in named_children(node).filter(|child| {
+            child.start_byte() >= left_square.end_byte()
+                && child.end_byte() <= right_square.start_byte()
+        }) {
+            let trailing_comma = self.trailing_delimiter(node, child, ",");
+            let element_end = trailing_comma.map_or(child.end_byte(), |comma| comma.end_byte());
+            let mut element_children = vec![self.with_name(self.expr(child)?, "expression")];
+            if let Some(comma) = trailing_comma {
+                element_children
+                    .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+            }
+            elements.push(self.with_name(
+                self.syntax_node(
+                    "ArrayElementSyntax",
+                    self.range_from_offsets(child.start_byte(), element_end),
+                    element_children,
+                ),
+                "",
+            ));
+        }
+
+        Ok(self.syntax_node(
+            "ArrayExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_square, "leftSquare"), "leftSquare"),
+                self.with_name(
+                    self.syntax_node(
+                        "ArrayElementListSyntax",
+                        self.range_from_offsets(left_square.end_byte(), right_square.start_byte()),
+                        elements,
+                    ),
+                    "elements",
+                ),
+                self.with_name(
+                    self.token_for_node(right_square, "rightSquare"),
+                    "rightSquare",
+                ),
+            ],
+        ))
+    }
+
+    fn closure_expr(&self, node: Node<'a>) -> Result<Value> {
+        if self.field_child(node, "captures").is_some() {
+            bail!("closure captures are not supported yet");
+        }
+
+        let left_brace = self
+            .immediate_child_kind(node, "{")
+            .context("closure literal is missing '{'")?;
+        let right_brace = self
+            .immediate_child_kind(node, "}")
+            .context("closure literal is missing '}'")?;
+        let statements = named_children(node).find(|child| child.kind() == "statements");
+        let mut children =
+            vec![self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace")];
+
+        if let Some(function_type) = self.field_child(node, "type") {
+            children
+                .push(self.with_name(self.closure_signature(function_type, node)?, "signature"));
+        }
+
+        let statement_items = statements
+            .map(named_children)
+            .into_iter()
+            .flatten()
+            .filter(|child| !is_trivia_node(*child))
+            .map(|child| self.code_block_item(child))
+            .collect::<Result<Vec<_>>>()?;
+        let statements_range =
+            self.covering_range_or_point(&statement_items, left_brace.end_byte());
+        children.push(self.with_name(
+            self.syntax_node("CodeBlockItemListSyntax", statements_range, statement_items),
+            "statements",
+        ));
+        children.push(self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"));
+
+        Ok(self.syntax_node("ClosureExprSyntax", self.range_for_node(node), children))
+    }
+
+    fn closure_signature(&self, node: Node<'a>, closure: Node<'a>) -> Result<Value> {
+        let in_keyword = self
+            .immediate_child_kind(closure, "in")
+            .or_else(|| self.nearest_child_before(closure, "in", closure.end_byte()))
+            .context("closure signature is missing 'in'")?;
+        let mut children = vec![self.with_name(
+            self.empty_collection("AttributeListSyntax", node.start_byte()),
+            "attributes",
+        )];
+
+        if let Some(parameter_node) =
+            named_children(node).find(|child| child.kind() == "lambda_function_type_parameters")
+        {
+            children.push(self.with_name(
+                self.closure_parameter_clause(parameter_node)?,
+                "parameterClause",
+            ));
+        }
+
+        if let Some(return_type) = self.closure_return_type(node) {
+            let arrow = self
+                .immediate_child_kind(node, "->")
+                .context("closure return type is missing '->'")?;
+            children.push(self.with_name(
+                self.syntax_node(
+                    "ReturnClauseSyntax",
+                    self.range_from_offsets(arrow.start_byte(), return_type.end_byte()),
+                    vec![
+                        self.with_name(self.token_for_node(arrow, "arrow"), "arrow"),
+                        self.with_name(self.identifier_type(return_type)?, "type"),
+                    ],
+                ),
+                "returnClause",
+            ));
+        }
+
+        children.push(self.with_name(
+            self.token_for_node(in_keyword, "keyword(SwiftSyntax.Keyword.in)"),
+            "inKeyword",
+        ));
+
+        Ok(self.syntax_node(
+            "ClosureSignatureSyntax",
+            self.range_from_offsets(node.start_byte(), in_keyword.end_byte()),
+            children,
+        ))
+    }
+
+    fn closure_parameter_clause(&self, node: Node<'a>) -> Result<Value> {
+        let parameters = named_children(node)
+            .filter(|child| child.kind() == "lambda_parameter")
+            .collect::<Vec<_>>();
+        let has_typed_parameters = parameters
+            .iter()
+            .any(|parameter| self.lambda_parameter_type(*parameter).is_some());
+
+        if has_typed_parameters {
+            let mut parameter_values = Vec::new();
+            for parameter in parameters {
+                let trailing_comma = self.trailing_delimiter(node, parameter, ",");
+                parameter_values
+                    .push(self.with_name(self.closure_parameter(parameter, trailing_comma)?, ""));
+            }
+            let params_range = self.covering_range_or_point(&parameter_values, node.start_byte());
+            let parameter_list =
+                self.syntax_node("ClosureParameterListSyntax", params_range, parameter_values);
+
+            let mut children = Vec::new();
+            if let Some(left_paren) = self.immediate_child_kind(node, "(") {
+                children.push(
+                    self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+                );
+            }
+            children.push(self.with_name(parameter_list, "parameters"));
+            if let Some(right_paren) = self.immediate_child_kind(node, ")") {
+                children.push(
+                    self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
+                );
+            }
+
+            Ok(self.syntax_node(
+                "ClosureParameterClauseSyntax",
+                self.range_for_node(node),
+                children,
+            ))
+        } else {
+            let mut parameter_values = Vec::new();
+            for parameter in parameters {
+                let trailing_comma = self.trailing_delimiter(node, parameter, ",");
+                parameter_values.push(self.with_name(
+                    self.closure_shorthand_parameter(parameter, trailing_comma)?,
+                    "",
+                ));
+            }
+            Ok(self.syntax_node(
+                "ClosureShorthandParameterListSyntax",
+                self.range_for_node(node),
+                parameter_values,
+            ))
+        }
+    }
+
+    fn closure_parameter(&self, node: Node<'a>, trailing_comma: Option<Node<'a>>) -> Result<Value> {
+        let name = self.lambda_parameter_name(node)?;
+        let type_node = self
+            .lambda_parameter_type(node)
+            .context("typed closure parameter is missing a type")?;
+        let mut children = vec![
+            self.with_name(self.attribute_list(node)?, "attributes"),
+            self.with_name(self.modifier_list(node), "modifiers"),
+            self.with_name(
+                self.token_for_node(
+                    name,
+                    &format!("identifier({})", quoted_text(self.text(name))),
+                ),
+                "firstName",
+            ),
+        ];
+        if let Some(colon) = self.immediate_child_kind(node, ":") {
+            children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
+        }
+        children.push(self.with_name(self.identifier_type(type_node)?, "type"));
+        if let Some(comma) = trailing_comma {
+            children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+        }
+        Ok(self.syntax_node(
+            "ClosureParameterSyntax",
+            self.range_for_node(node),
+            children,
+        ))
+    }
+
+    fn closure_shorthand_parameter(
+        &self,
+        node: Node<'a>,
+        trailing_comma: Option<Node<'a>>,
+    ) -> Result<Value> {
+        let name = self.lambda_parameter_name(node)?;
+        let mut children = vec![self.with_name(
+            self.token_for_node(
+                name,
+                &format!("identifier({})", quoted_text(self.text(name))),
+            ),
+            "name",
+        )];
+        if let Some(comma) = trailing_comma {
+            children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+        }
+        Ok(self.syntax_node(
+            "ClosureShorthandParameterSyntax",
+            self.range_for_node(node),
+            children,
+        ))
+    }
+
+    fn lambda_parameter_name(&self, node: Node<'a>) -> Result<Node<'a>> {
+        if let Some(external_name) = self.field_child(node, "external_name") {
+            return Ok(external_name);
+        }
+        let mut cursor = node.walk();
+        if let Some(name) = node
+            .children_by_field_name("name", &mut cursor)
+            .find(|child| matches!(child.kind(), "simple_identifier" | "identifier" | "_"))
+        {
+            return Ok(name);
+        }
+        named_children(node)
+            .find(|child| matches!(child.kind(), "simple_identifier" | "identifier" | "_"))
+            .context("closure parameter is missing a name")
+    }
+
+    fn lambda_parameter_type(&self, node: Node<'a>) -> Option<Node<'a>> {
+        let mut type_cursor = node.walk();
+        if let Some(type_node) = node
+            .children_by_field_name("type", &mut type_cursor)
+            .find(|child| child.is_named())
+        {
+            return Some(type_node);
+        }
+        let mut name_cursor = node.walk();
+        let name_type = node
+            .children_by_field_name("name", &mut name_cursor)
+            .filter(|child| child.is_named())
+            .nth(1);
+        name_type
+    }
+
+    fn closure_return_type(&self, node: Node<'a>) -> Option<Node<'a>> {
+        let arrow = self.immediate_child_kind(node, "->")?;
+        named_children(node)
+            .filter(|child| {
+                child.start_byte() > arrow.end_byte() && child.end_byte() <= node.end_byte()
+            })
+            .find(|child| child.kind() != "lambda_function_type_parameters")
     }
 
     fn member_access_expr(&self, node: Node<'a>) -> Result<Value> {
@@ -986,33 +1276,44 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let suffix = self
             .immediate_named_child_kind(node, "call_suffix")
             .context("call expression is missing call suffix")?;
-        let value_arguments = self
-            .immediate_named_child_kind(suffix, "value_arguments")
-            .context("call suffix is missing value arguments")?;
-        let left_paren = self
-            .immediate_child_kind(value_arguments, "(")
-            .context("call arguments are missing '('")?;
-        let right_paren = self
-            .immediate_child_kind(value_arguments, ")")
-            .context("call arguments are missing ')'")?;
-
-        if named_children(suffix).any(|child| child.kind() == "lambda_literal") {
-            bail!("trailing closures are not supported yet");
+        let trailing_closures = named_children(suffix)
+            .filter(|child| child.kind() == "lambda_literal")
+            .collect::<Vec<_>>();
+        if trailing_closures.len() > 1 {
+            bail!("multiple trailing closures are not supported yet");
         }
 
-        let children = vec![
-            self.with_name(self.expr(callee)?, "calledExpression"),
-            self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
-            self.with_name(
+        let mut children = vec![self.with_name(self.expr(callee)?, "calledExpression")];
+
+        if let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments") {
+            let left_paren = self
+                .immediate_child_kind(value_arguments, "(")
+                .context("call arguments are missing '('")?;
+            let right_paren = self
+                .immediate_child_kind(value_arguments, ")")
+                .context("call arguments are missing ')'")?;
+            children
+                .push(self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"));
+            children.push(self.with_name(
                 self.labeled_expr_list(value_arguments, left_paren, right_paren)?,
                 "arguments",
-            ),
-            self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
-            self.with_name(
-                self.empty_collection("MultipleTrailingClosureElementListSyntax", node.end_byte()),
-                "additionalTrailingClosures",
-            ),
-        ];
+            ));
+            children
+                .push(self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"));
+        } else {
+            children.push(self.with_name(
+                self.empty_collection("LabeledExprListSyntax", suffix.start_byte()),
+                "arguments",
+            ));
+        }
+
+        if let Some(trailing_closure) = trailing_closures.first() {
+            children.push(self.with_name(self.closure_expr(*trailing_closure)?, "trailingClosure"));
+        }
+        children.push(self.with_name(
+            self.empty_collection("MultipleTrailingClosureElementListSyntax", node.end_byte()),
+            "additionalTrailingClosures",
+        ));
 
         Ok(self.syntax_node(
             "FunctionCallExprSyntax",
@@ -1388,6 +1689,13 @@ fn named_children(node: Node<'_>) -> impl Iterator<Item = Node<'_>> {
         .into_iter()
 }
 
+fn is_trivia_node(node: Node<'_>) -> bool {
+    matches!(
+        node.kind(),
+        "comment" | "line_comment" | "multiline_comment" | "shebang_line"
+    )
+}
+
 fn quoted_text(text: &str) -> String {
     serde_json::to_string(text).expect("serializing a string cannot fail")
 }
@@ -1513,6 +1821,129 @@ mod tests {
         );
         assert_eq!(
             assignment["children"][2]["nodeType"],
+            "FunctionCallExprSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_array_literal_expression() {
+        let source = "let numbers = [1, foo(2), bar]\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let array_expr = find_first_node_type(&value, "ArrayExprSyntax").unwrap();
+        assert_eq!(array_expr["children"][0]["tokenKind"], "leftSquare");
+        assert_eq!(
+            array_expr["children"][1]["nodeType"],
+            "ArrayElementListSyntax"
+        );
+        assert_eq!(array_expr["children"][2]["tokenKind"], "rightSquare");
+
+        let elements = array_expr["children"][1]["children"].as_array().unwrap();
+        assert_eq!(elements.len(), 3);
+        assert_eq!(elements[0]["children"][0]["name"], "expression");
+        assert_eq!(
+            elements[0]["children"][0]["nodeType"],
+            "IntegerLiteralExprSyntax"
+        );
+        assert_eq!(elements[0]["children"][1]["tokenKind"], "comma");
+        assert_eq!(
+            elements[1]["children"][0]["nodeType"],
+            "FunctionCallExprSyntax"
+        );
+        assert_eq!(elements[1]["children"][1]["tokenKind"], "comma");
+        assert_eq!(
+            elements[2]["children"][0]["nodeType"],
+            "DeclReferenceExprSyntax"
+        );
+        assert_eq!(elements[2]["children"].as_array().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn emits_trailing_closure_function_call() {
+        let source = "func f() {\n  numbers.forEach { num in\n    print(num)\n  }\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let call = find_node_types(&value, "FunctionCallExprSyntax")
+            .into_iter()
+            .find(|node| {
+                node["children"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .any(|child| child["name"] == "trailingClosure")
+            })
+            .unwrap();
+        assert_eq!(call["children"][0]["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(call["children"][1]["nodeType"], "LabeledExprListSyntax");
+        assert_eq!(call["children"][1]["children"].as_array().unwrap().len(), 0);
+        assert_eq!(call["children"][2]["nodeType"], "ClosureExprSyntax");
+
+        let closure = &call["children"][2];
+        assert_eq!(closure["children"][0]["tokenKind"], "leftBrace");
+        assert_eq!(closure["children"][1]["nodeType"], "ClosureSignatureSyntax");
+        assert_eq!(
+            closure["children"][1]["children"][1]["nodeType"],
+            "ClosureShorthandParameterListSyntax"
+        );
+        assert_eq!(
+            closure["children"][1]["children"][1]["children"][0]["children"][0]["tokenKind"],
+            "identifier(\"num\")"
+        );
+        assert_eq!(
+            closure["children"][2]["children"][0]["children"][0]["nodeType"],
+            "FunctionCallExprSyntax"
+        );
+        assert_eq!(closure["children"][3]["tokenKind"], "rightBrace");
+    }
+
+    #[test]
+    fn emits_typed_closure_literal() {
+        let source =
+            "func f() {\n  let compare = { (s1: String, s2: String) -> Bool in\n    return s1 > s2\n  }\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let closure = find_first_node_type(&value, "ClosureExprSyntax").unwrap();
+        let signature = &closure["children"][1];
+        assert_eq!(signature["nodeType"], "ClosureSignatureSyntax");
+        assert_eq!(
+            signature["children"][1]["nodeType"],
+            "ClosureParameterClauseSyntax"
+        );
+        let parameter_list = signature["children"][1]["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "parameters")
+            .unwrap();
+        let parameters = &parameter_list["children"];
+        assert_eq!(parameters.as_array().unwrap().len(), 2);
+        assert_eq!(
+            parameters[0]["children"][2]["tokenKind"],
+            "identifier(\"s1\")"
+        );
+        assert_eq!(parameters[0]["children"][3]["tokenKind"], "colon");
+        assert_eq!(
+            parameters[0]["children"][4]["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+        assert_eq!(parameters[0]["children"][5]["tokenKind"], "comma");
+        assert_eq!(signature["children"][2]["nodeType"], "ReturnClauseSyntax");
+        assert_eq!(
+            signature["children"][3]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.in)"
+        );
+        assert_eq!(
+            closure["children"][2]["children"][0]["children"][0]["nodeType"],
+            "ReturnStmtSyntax"
+        );
+    }
+
+    #[test]
+    fn skips_comments_inside_closure_body() {
+        let source = "func f() {\n  let closure = { value in\n    // skip me\n    print(value) // and me\n  }\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let closure = find_first_node_type(&value, "ClosureExprSyntax").unwrap();
+        let statements = &closure["children"][2]["children"];
+        assert_eq!(statements.as_array().unwrap().len(), 1);
+        assert_eq!(
+            statements[0]["children"][0]["nodeType"],
             "FunctionCallExprSyntax"
         );
     }
