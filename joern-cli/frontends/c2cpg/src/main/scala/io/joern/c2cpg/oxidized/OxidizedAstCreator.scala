@@ -7858,6 +7858,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     else if (parameterType.endsWith(s".$argumentType") || argumentType.endsWith(s".$parameterType")) Some(55)
     else
       nullPointerConversionScore(parameterType, argumentType)
+        .orElse(pointerConversionScore(parameterType, argumentType))
         .orElse(arithmeticConversionScore(parameterType, argumentType))
         .orElse {
           inheritanceDistanceFromArgumentToParameter(argumentType, parameterType)
@@ -7868,6 +7869,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def nullPointerConversionScore(parameterType: String, argumentType: String): Option[Int] = {
     Option.when(argumentType == "std.nullptr_t" && parameterType.endsWith("*"))(45)
+  }
+
+  private def pointerConversionScore(parameterType: String, argumentType: String): Option[Int] = {
+    Option
+      .when(parameterType.endsWith("*") && argumentType.endsWith("*")) {
+        val parameterPointee = stripCxxTypeQualifiers(parameterType.stripSuffix("*")).trim
+        val argumentPointee  = stripCxxTypeQualifiers(argumentType.stripSuffix("*")).trim
+        Option.when(parameterPointee == Defines.Void && argumentPointee != Defines.Void)(45)
+      }
+      .flatten
   }
 
   private def arithmeticConversionScore(parameterType: String, argumentType: String): Option[Int] = {
