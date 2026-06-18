@@ -401,6 +401,33 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.mix")
     }
 
+    "leave ambiguous contextual conversion calls unresolved" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Base {};
+          |class Left : public Base {};
+          |class Right : public Base {};
+          |class Source {
+          |public:
+          |  operator Left&();
+          |  operator Right&();
+          |};
+          |int take(Base& value) { return 1; }
+          |long take(long value) { return 2; }
+          |}
+          |long use(Core::Source& source) {
+          |  return Core::take(source);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").call.codeExact("Core::take(source)").methodFullName.l shouldBe
+        List("Core.take")
+      cpg.method.nameExact("use").call.name("operator .*").l shouldBe Nil
+    }
+
     "specialize function template returns during overload resolution" in {
       val cpg = code(
         """

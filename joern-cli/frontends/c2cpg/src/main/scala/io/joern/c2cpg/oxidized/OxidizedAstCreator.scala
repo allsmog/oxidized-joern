@@ -145,6 +145,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private final case class ArgumentInfo(expression: OxExpression, typeFullName: Option[String], isRvalue: Boolean)
   private final case class OverloadScore(score: Int, argumentScores: Seq[Int], isViable: Boolean)
   private final case class ScoredOverload(candidate: FunctionEntry, score: OverloadScore, index: Int)
+  private final case class ScoredConversionOperator(entry: FunctionEntry, score: Int, index: Int)
   private final case class FunctionReturnExpression(
     expression: OxExpression,
     localTypes: Map[String, String],
@@ -5528,15 +5529,36 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         .flatMap(conversionOperatorNamesForType)
         .flatMap(operatorName => memberFunctionCandidates(expression, operatorName)) ++
         conversionOperatorCandidates(expression)).distinct
-      candidates.zipWithIndex
-        .flatMap { case (entry, index) =>
-          conversionOperatorCompatibilityScore(expectedType, entry).map(score => (entry, score, index))
-        }
-        .maxByOption { case (_, score, index) => (score, index) }
-        .map { case (entry, _, _) =>
+      selectBestConversionOperator(candidates.zipWithIndex.flatMap { case (entry, index) =>
+        conversionOperatorCompatibilityScore(expectedType, entry).map(score =>
+          ScoredConversionOperator(entry, score, index)
+        )
+      })
+        .map { entry =>
           ResolvedOperatorCall(entry, entry.simpleName, Option(expression), Seq.empty)
         }
     }
+  }
+
+  private def selectBestConversionOperator(scoredOperators: Seq[ScoredConversionOperator]): Option[FunctionEntry] = {
+    scoredOperators
+      .map(_.score)
+      .maxOption
+      .flatMap { bestScore =>
+        val best = scoredOperators.filter(_.score == bestScore)
+        if (best.size == 1) Some(best.head.entry)
+        else selectMutableConversionOperator(best)
+      }
+  }
+
+  private def selectMutableConversionOperator(scoredOperators: Seq[ScoredConversionOperator]): Option[FunctionEntry] = {
+    val nonConstMembers = scoredOperators.filterNot(scored => scored.entry.function.isConst)
+    Option
+      .when(
+        nonConstMembers.size == 1 &&
+          scoredOperators.exists(_.entry.function.isConst) &&
+          scoredOperators.forall(scored => sameMemberSignature(scored.entry, nonConstMembers.head.entry))
+      )(nonConstMembers.head.entry)
   }
 
   private def expressionDirectlyCompatibleWithExpected(
@@ -7427,6 +7449,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
     if (scoredPool.exists(_.score.isViable)) {
       selectBestViableFunctionEntry(removeDominatedOverloads(scoredPool.filter(_.score.isViable)))
+    } else if (argumentInfos.forall(_.typeFullName.isDefined)) {
+      None
     } else {
       scoredPool
         .maxByOption(scored => (scored.score.score, scored.index))
