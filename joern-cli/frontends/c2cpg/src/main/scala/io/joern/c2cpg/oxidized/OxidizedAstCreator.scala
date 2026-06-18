@@ -6434,8 +6434,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   ): Option[FunctionEntry] = {
     arguments match {
       case Some(arguments) =>
-        val arityMatches = candidates.filter(_.function.parameters.size == arguments.size)
-        val pool         = if (arityMatches.nonEmpty) arityMatches else candidates
+        val viableByArity = candidates.filter(candidate => functionArityIsViable(candidate, arguments.size))
+        val arityMatches  = candidates.filter(_.function.parameters.size == arguments.size)
+        val pool =
+          if (viableByArity.nonEmpty) viableByArity else if (arityMatches.nonEmpty) arityMatches else candidates
         val argumentInfos =
           arguments.map(argument =>
             ArgumentInfo(argument, expressionTypeFullName(argument), expressionIsRvalue(argument))
@@ -6448,14 +6450,31 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
+  private def functionArityIsViable(candidate: FunctionEntry, argumentCount: Int): Boolean = {
+    val parameters    = candidate.function.parameters
+    val hasVariadic   = parameters.lastOption.exists(_.isVariadic)
+    val requiredCount = parameters.takeWhile(parameter => !parameter.hasDefault && !parameter.isVariadic).size
+    val maxCount      = Option.when(!hasVariadic)(parameters.size)
+    argumentCount >= requiredCount && maxCount.forall(argumentCount <= _)
+  }
+
   private def overloadScore(candidate: FunctionEntry, argumentInfos: Seq[ArgumentInfo]): Int = {
-    val arityPenalty = math.abs(candidate.function.parameters.size - argumentInfos.size) * -100
-    arityPenalty + candidate.function.parameters
+    val arityAdjustment = overloadArityAdjustment(candidate, argumentInfos.size)
+    arityAdjustment + candidate.function.parameters
       .zip(argumentInfos)
       .map { case (parameter, argumentInfo) =>
         typeCompatibilityScore(parameter.semanticTypeName, argumentInfo)
       }
       .sum
+  }
+
+  private def overloadArityAdjustment(candidate: FunctionEntry, argumentCount: Int): Int = {
+    val parameters         = candidate.function.parameters
+    val hasVariadic        = parameters.lastOption.exists(_.isVariadic)
+    val missingDefaultArgs = parameters.drop(argumentCount).count(_.hasDefault)
+    val extraVariadicArgs  = if (hasVariadic) math.max(0, argumentCount - parameters.size + 1) else 0
+    val invalidPenalty     = Option.when(!functionArityIsViable(candidate, argumentCount))(-1000).getOrElse(0)
+    invalidPenalty - (missingDefaultArgs * 3) - (extraVariadicArgs * 5)
   }
 
   private def typeCompatibilityScore(parameterTypeName: String, argumentInfo: ArgumentInfo): Int = {

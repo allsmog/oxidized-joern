@@ -147,6 +147,10 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |int pickPtr(Base* value) { return 1; }
           |short pickPtr(Mid* value) { return 2; }
           |long pickPtr(const Mid* value) { return 3; }
+          |int choose(int value, int scale = 1) { return value + scale; }
+          |long choose(long value) { return value; }
+          |template <typename T>
+          |T choose(T value) { return value; }
           |class TargetBase {};
           |class TargetMid : public TargetBase {};
           |class Source {
@@ -181,6 +185,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |  const Core::Leaf& constLeaf,
           |  Core::Leaf* leafPtr,
           |  const Core::Leaf* constLeafPtr,
+          |  long wide,
           |  Core::Mid& mid,
           |  Core::Chooser& chooser,
           |  Core::Source& source,
@@ -193,6 +198,10 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::pick(mid) +
           |    Core::pickPtr(leafPtr) +
           |    Core::pickPtr(constLeafPtr) +
+          |    Core::choose(leaf) +
+          |    Core::choose(1) +
+          |    Core::choose(1, 2) +
+          |    Core::choose(wide) +
           |    Core::pickConverted(source) +
           |    Core::pickConverted(constSource) +
           |    Core::pickConverted(valueSource) +
@@ -218,6 +227,14 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pickPtr:short(Mid*)")
       cpg.method.nameExact("use").call.codeExact("Core::pickPtr(constLeafPtr)").methodFullName.l shouldBe
         List("Core.pickPtr:long(Mid*)")
+      cpg.method.nameExact("use").call.codeExact("Core::choose(leaf)").methodFullName.l shouldBe
+        List("Core.choose:T(T)")
+      cpg.method.nameExact("use").call.codeExact("Core::choose(1)").methodFullName.l shouldBe
+        List("Core.choose:int(int,int)")
+      cpg.method.nameExact("use").call.codeExact("Core::choose(1, 2)").methodFullName.l shouldBe
+        List("Core.choose:int(int,int)")
+      cpg.method.nameExact("use").call.codeExact("Core::choose(wide)").methodFullName.l shouldBe
+        List("Core.choose:long(long)")
       cpg.method.nameExact("use").call.codeExact("Core::pickConverted(source)").methodFullName.l shouldBe
         List("Core.pickConverted:short(TargetMid&)")
       cpg.method.nameExact("use").call.codeExact("Core::pickConverted(constSource)").methodFullName.l shouldBe

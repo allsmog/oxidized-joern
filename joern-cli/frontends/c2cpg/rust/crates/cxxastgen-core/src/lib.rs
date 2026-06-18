@@ -240,6 +240,8 @@ pub struct ParameterDecl {
     pub semantic_type_name: String,
     #[serde(rename = "isVariadic")]
     pub is_variadic: bool,
+    #[serde(rename = "hasDefault")]
+    pub has_default: bool,
     pub code: String,
     pub line: usize,
 }
@@ -2497,7 +2499,9 @@ fn parse_parameters_with_varargs(
         .filter(|child| {
             matches!(
                 child.kind(),
-                "parameter_declaration" | "variadic_parameter_declaration"
+                "parameter_declaration"
+                    | "optional_parameter_declaration"
+                    | "variadic_parameter_declaration"
             )
         })
         .enumerate()
@@ -2564,6 +2568,8 @@ fn parse_parameters_with_varargs(
             type_name,
             semantic_type_name,
             is_variadic,
+            has_default: parameter.kind() == "optional_parameter_declaration"
+                || parameter.child_by_field_name("default_value").is_some(),
             code,
             line: line(parameter),
         });
@@ -2589,6 +2595,7 @@ fn parse_parameters_with_varargs(
                 .map(|parameter| parameter.semantic_type_name.clone())
                 .unwrap_or_else(|| "ANY".to_string()),
             is_variadic: true,
+            has_default: false,
             code: format!("{name}..."),
             line,
         });
@@ -6660,6 +6667,7 @@ mod tests {
                 namespace Core {
                 template <typename T>
                 T pick(T value) { return value; }
+                int withDefault(int value, int scale = 1) { return value + scale; }
                 template <typename T>
                 struct Holder {
                   T value;
@@ -6689,6 +6697,17 @@ mod tests {
             .expect("expected templated pick function");
         assert_eq!(pick.signature, "T(T)");
         assert!(pick.is_definition);
+        let with_default = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "withDefault" => Some(function),
+                _ => None,
+            })
+            .expect("expected default-argument function");
+        assert_eq!(with_default.signature, "int(int,int)");
+        assert!(!with_default.parameters[0].has_default);
+        assert!(with_default.parameters[1].has_default);
         let holder = namespace
             .declarations
             .iter()
