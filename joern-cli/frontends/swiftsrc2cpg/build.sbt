@@ -2,7 +2,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.sbt.packager.Keys.stagingDirectory
 import versionsort.VersionHelper
 
-import scala.sys.process.stringToProcess
+import scala.sys.process.{Process, stringToProcess}
 import scala.util.Try
 
 name := "swiftsrc2cpg"
@@ -49,20 +49,26 @@ lazy val AstgenMac      = "SwiftAstGen-mac"
 lazy val astGenDlUrl = settingKey[String]("astgen download url")
 astGenDlUrl := s"https://github.com/joernio/astgen-monorepo/releases/download/swift-astgen/v${astGenVersion.value}/"
 
-def hasCompatibleAstGenVersion(astGenVersion: String): Boolean = {
-  Try("SwiftAstGen --version".!!).toOption.map(_.strip()) match {
+def isCompatibleAstGen(command: Seq[String], astGenVersion: String): Boolean = {
+  Try(Process(command).!!.strip()).toOption.map(_.strip()) match {
     case Some(installedVersion) if installedVersion != "unknown" =>
       VersionHelper.compare(installedVersion, astGenVersion) >= 0
     case _ => false
   }
 }
 
+def hasCompatibleAstGenVersion(astGenVersion: String): Boolean =
+  isCompatibleAstGen(Seq("SwiftAstGen", "--version"), astGenVersion)
+
 lazy val astGenBinaryNames = taskKey[Seq[String]]("astgen binary names")
 astGenBinaryNames := {
+  val bundledCurrentAstgen = baseDirectory.value / "bin" / "astgen" / astGenCurrentBinaryName.value
   if (hasCompatibleAstGenVersion(astGenVersion.value)) {
     Seq.empty
   } else if (sys.props.get("ALL_PLATFORMS").contains("TRUE")) {
     Seq(AstgenWin, AstgenLinux, AstgenLinuxArm, AstgenMac)
+  } else if (isCompatibleAstGen(Seq(bundledCurrentAstgen.getAbsolutePath, "--version"), astGenVersion.value)) {
+    Seq.empty
   } else {
     Environment.operatingSystem match {
       case Environment.OperatingSystemType.Windows =>
@@ -78,6 +84,43 @@ astGenBinaryNames := {
         Seq(AstgenWin, AstgenLinux, AstgenLinuxArm, AstgenMac)
     }
   }
+}
+
+lazy val astGenCurrentBinaryName = taskKey[String]("astgen binary name for the current host")
+astGenCurrentBinaryName := {
+  Environment.operatingSystem match {
+    case Environment.OperatingSystemType.Windows =>
+      AstgenWin
+    case Environment.OperatingSystemType.Linux =>
+      Environment.architecture match {
+        case Environment.ArchitectureType.X86   => AstgenLinux
+        case Environment.ArchitectureType.ARMv8 => AstgenLinuxArm
+      }
+    case Environment.OperatingSystemType.Mac =>
+      AstgenMac
+    case Environment.OperatingSystemType.Unknown =>
+      AstgenLinux
+  }
+}
+
+lazy val swiftAstGenBuildRust = taskKey[File]("Build local Rust SwiftAstGen and install it under bin/astgen")
+swiftAstGenBuildRust := {
+  val rustRoot = baseDirectory.value / "rust"
+  val rustBinaryName =
+    if (Environment.operatingSystem == Environment.OperatingSystemType.Windows) "SwiftAstGen.exe" else "SwiftAstGen"
+  val exitCode = Process(Seq("cargo", "build", "--release", "--bin", "SwiftAstGen"), rustRoot).!
+  if (exitCode != 0) {
+    sys.error(s"cargo build failed with exit code $exitCode")
+  }
+
+  val builtBinary = rustRoot / "target" / "release" / rustBinaryName
+  val astGenDir   = baseDirectory.value / "bin" / "astgen"
+  val targetFile  = astGenDir / astGenCurrentBinaryName.value
+  astGenDir.mkdirs()
+  IO.copyFile(builtBinary, targetFile, preserveLastModified = true)
+  targetFile.setExecutable(true, false)
+  streams.value.log.info(s"installed Rust SwiftAstGen to $targetFile")
+  targetFile
 }
 
 lazy val astGenDlTask = taskKey[Unit](s"Download astgen binaries")
