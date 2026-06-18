@@ -124,7 +124,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     throwPreservedScopeDepth: Option[Int] = None
   )
   private final case class ArgumentInfo(expression: OxExpression, typeFullName: Option[String], isRvalue: Boolean)
-  private final case class OverloadScore(score: Int, isViable: Boolean)
+  private final case class OverloadScore(score: Int, argumentScores: Seq[Int], isViable: Boolean)
+  private final case class ScoredOverload(candidate: FunctionEntry, score: OverloadScore, index: Int)
   private final case class FunctionReturnExpression(
     expression: OxExpression,
     localTypes: Map[String, String],
@@ -7200,17 +7201,33 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val pool =
       if (viableByArity.nonEmpty) viableByArity else if (arityMatches.nonEmpty) arityMatches else candidates
     val scoredPool = pool.zipWithIndex.map { case (candidate, index) =>
-      (candidate, overloadScore(candidate, argumentInfos, receiverTypeFullName, explicitTemplateArguments), index)
+      ScoredOverload(
+        candidate,
+        overloadScore(candidate, argumentInfos, receiverTypeFullName, explicitTemplateArguments),
+        index
+      )
     }
     val selectionPool =
-      if (scoredPool.exists { case (_, score, _) => score.isViable }) {
-        scoredPool.filter { case (_, score, _) => score.isViable }
+      if (scoredPool.exists(_.score.isViable)) {
+        removeDominatedOverloads(scoredPool.filter(_.score.isViable))
       } else {
         scoredPool
       }
     selectionPool
-      .maxByOption { case (_, score, index) => (score.score, index) }
-      .map(_._1)
+      .maxByOption(scored => (scored.score.score, scored.index))
+      .map(_.candidate)
+  }
+
+  private def removeDominatedOverloads(scoredOverloads: Seq[ScoredOverload]): Seq[ScoredOverload] = {
+    scoredOverloads.filterNot { scored =>
+      scoredOverloads.exists(other => other != scored && overloadDominates(other.score, scored.score))
+    }
+  }
+
+  private def overloadDominates(left: OverloadScore, right: OverloadScore): Boolean = {
+    left.argumentScores.size == right.argumentScores.size &&
+    left.argumentScores.zip(right.argumentScores).forall { case (leftScore, rightScore) => leftScore >= rightScore } &&
+    left.argumentScores.zip(right.argumentScores).exists { case (leftScore, rightScore) => leftScore > rightScore }
   }
 
   private def functionArityIsViable(candidate: FunctionEntry, argumentCount: Int): Boolean = {
@@ -7263,7 +7280,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         explicitTemplateBindingResult.nonEmpty &&
         templateBindingResult.nonEmpty &&
         parameterCompatibilityScores.forall(_ > 0)
-    OverloadScore(score, isViable)
+    OverloadScore(score, parameterCompatibilityScores, isViable)
   }
 
   private def overloadArityAdjustment(candidate: FunctionEntry, argumentCount: Int): Int = {

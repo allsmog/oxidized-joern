@@ -151,6 +151,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |long choose(long value) { return value; }
           |template <typename T>
           |T choose(T value) { return value; }
+          |int preferDefault(Base& value) { return 1; }
+          |short preferDefault(Mid& value, int scale = 1) { return 2; }
           |class TargetBase {};
           |class TargetMid : public TargetBase {};
           |class Source {
@@ -208,6 +210,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::choose(1) +
           |    Core::choose(1, 2) +
           |    Core::choose(wide) +
+          |    Core::preferDefault(leaf) +
           |    Core::pickConverted(source) +
           |    Core::pickConverted(constSource) +
           |    Core::pickConverted(valueSource) +
@@ -243,6 +246,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.choose:int(int,int)")
       cpg.method.nameExact("use").call.codeExact("Core::choose(wide)").methodFullName.l shouldBe
         List("Core.choose:long(long)")
+      cpg.method.nameExact("use").call.codeExact("Core::preferDefault(leaf)").methodFullName.l shouldBe
+        List("Core.preferDefault:short(Mid&,int)")
       cpg.method.nameExact("use").call.codeExact("Core::pickConverted(source)").methodFullName.l shouldBe
         List("Core.pickConverted:short(TargetMid&)")
       cpg.method.nameExact("use").call.codeExact("Core::pickConverted(constSource)").methodFullName.l shouldBe
