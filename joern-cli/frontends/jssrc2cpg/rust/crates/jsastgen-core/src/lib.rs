@@ -87,6 +87,7 @@ fn stmt_json(node: Node, source: &str) -> Value {
         "statement_block" => block_statement_json(node, source),
         "return_statement" => return_statement_json(node, source),
         "if_statement" => if_statement_json(node, source),
+        "with_statement" => with_statement_json(node, source),
         "while_statement" => while_statement_json(node, source),
         "do_statement" => do_while_statement_json(node, source),
         "for_statement" => for_statement_json(node, source),
@@ -255,6 +256,26 @@ fn if_statement_json(node: Node, source: &str) -> Value {
             "test": test,
             "consequent": consequent,
             "alternate": alternate
+        }),
+    )
+}
+
+fn with_statement_json(node: Node, source: &str) -> Value {
+    let object = node
+        .child_by_field_name("object")
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let body = node
+        .child_by_field_name("body")
+        .map(|child| stmt_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        "WithStatement",
+        node,
+        json!({
+            "object": object,
+            "body": body
         }),
     )
 }
@@ -1559,6 +1580,33 @@ mod tests {
         assert_eq!(
             default_label["consequent"][0]["expression"]["object"]["type"],
             "ThisExpression"
+        );
+    }
+
+    #[test]
+    fn emits_with_statements() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(root, path, "with (foo()) { bar(); }\nwith (baz()) qux();\n")
+            .expect("parse succeeds");
+
+        let block_with = &json["ast"]["program"]["body"][0];
+        assert_eq!(block_with["type"], "WithStatement");
+        assert_eq!(block_with["object"]["type"], "CallExpression");
+        assert_eq!(block_with["object"]["callee"]["name"], "foo");
+        assert_eq!(block_with["body"]["type"], "BlockStatement");
+        assert_eq!(
+            block_with["body"]["body"][0]["expression"]["callee"]["name"],
+            "bar"
+        );
+
+        let statement_with = &json["ast"]["program"]["body"][1];
+        assert_eq!(statement_with["type"], "WithStatement");
+        assert_eq!(statement_with["object"]["callee"]["name"], "baz");
+        assert_eq!(statement_with["body"]["type"], "ExpressionStatement");
+        assert_eq!(
+            statement_with["body"]["expression"]["callee"]["name"],
+            "qux"
         );
     }
 
