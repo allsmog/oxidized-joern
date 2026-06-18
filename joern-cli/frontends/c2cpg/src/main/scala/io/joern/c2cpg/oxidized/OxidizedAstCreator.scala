@@ -187,9 +187,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private val expressionTypeFullNameCache                = new IdentityHashMap[OxExpression, Option[String]]
   private lazy val functionEntries: Seq[FunctionEntry]   = collectFunctionEntries(document.declarations, None)
   private lazy val functionsByName: Map[String, Seq[FunctionEntry]] =
-    functionEntries.groupBy(_.simpleName).view.mapValues(_.toSeq).toMap
+    functionEntries.groupBy(_.simpleName).view.mapValues(entries => distinctFunctionEntries(entries.toSeq)).toMap
   private lazy val functionsByQualifiedName: Map[String, Seq[FunctionEntry]] =
-    functionEntries.groupBy(_.qualifiedName).view.mapValues(_.toSeq).toMap
+    functionEntries.groupBy(_.qualifiedName).view.mapValues(entries => distinctFunctionEntries(entries.toSeq)).toMap
   private val macroDeclarations: Seq[OxMacroDecl] =
     document.declarations.collect { case macroDecl: OxMacroDecl => macroDecl }
   private val macroUndefs: Seq[OxMacroUndefDecl] =
@@ -1540,15 +1540,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
-  private def globalAssignmentTargetCode(global: OxGlobalVariableDecl): String = {
-    if (normalizeType(global.typeName).endsWith("[]")) s"${global.name}[]" else global.name
-  }
-
-  private def globalArrayElementCount(global: OxGlobalVariableDecl): Option[Int] = {
-    val code      = localCodeForGlobal(global)
-    val nameIndex = code.indexOf(global.name)
+  private def arrayElementCountFromDeclarationCode(code: String, name: String): Option[Int] = {
+    val nameIndex = code.indexOf(name)
     Option
-      .when(nameIndex >= 0)(code.drop(nameIndex + global.name.length).dropWhile(_.isWhitespace))
+      .when(nameIndex >= 0)(code.drop(nameIndex + name.length).dropWhile(_.isWhitespace))
       .filter(_.startsWith("["))
       .flatMap { suffix =>
         val endIndex = suffix.indexOf(']')
@@ -1556,6 +1551,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       }
       .flatMap(rawCount => Try(rawCount.toInt).toOption)
       .filter(_ > 0)
+  }
+
+  private def arrayElementCountFromTypeName(typeName: String): Option[Int] = {
+    arrayTypeSuffix(typeName)
+      .filter(suffix => suffix.startsWith("[") && suffix.endsWith("]"))
+      .map(_.stripPrefix("[").stripSuffix("]").trim)
+      .flatMap(rawCount => Try(rawCount.toInt).toOption)
+      .filter(_ > 0)
+  }
+
+  private def globalAssignmentTargetCode(global: OxGlobalVariableDecl): String = {
+    if (normalizeType(global.typeName).endsWith("[]")) s"${global.name}[]" else global.name
+  }
+
+  private def globalArrayElementCount(global: OxGlobalVariableDecl): Option[Int] = {
+    arrayElementCountFromDeclarationCode(localCodeForGlobal(global), global.name)
+      .orElse(arrayElementCountFromDeclarationCode(global.code, global.name))
+      .orElse(arrayElementCountFromTypeName(global.typeName))
   }
 
   private def astsForFunction(
@@ -3162,16 +3175,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def localArrayElementCount(local: OxLocalDecl): Option[Int] = {
-    val nameIndex = local.code.indexOf(local.name)
-    Option
-      .when(nameIndex >= 0)(local.code.drop(nameIndex + local.name.length).dropWhile(_.isWhitespace))
-      .filter(_.startsWith("["))
-      .flatMap { suffix =>
-        val endIndex = suffix.indexOf(']')
-        Option.when(endIndex > 1)(suffix.substring(1, endIndex).trim)
-      }
-      .flatMap(rawCount => Try(rawCount.toInt).toOption)
-      .filter(_ > 0)
+    arrayElementCountFromDeclarationCode(localDeclarationCode(local), local.name)
+      .orElse(arrayElementCountFromDeclarationCode(local.code, local.name))
+      .orElse(arrayElementCountFromTypeName(local.typeName))
   }
 
   private def memberArrayElementAccessAst(field: OxFieldDecl, index: Int, line: Int): Ast = {
@@ -3188,16 +3194,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def fieldArrayElementCount(field: OxFieldDecl): Option[Int] = {
-    val nameIndex = field.code.indexOf(field.name)
-    Option
-      .when(nameIndex >= 0)(field.code.drop(nameIndex + field.name.length).dropWhile(_.isWhitespace))
-      .filter(_.startsWith("["))
-      .flatMap { suffix =>
-        val endIndex = suffix.indexOf(']')
-        Option.when(endIndex > 1)(suffix.substring(1, endIndex).trim)
-      }
-      .flatMap(rawCount => Try(rawCount.toInt).toOption)
-      .filter(_ > 0)
+    arrayElementCountFromDeclarationCode(field.code, field.name)
+      .orElse(arrayElementCountFromTypeName(field.typeName))
   }
 
   private def localAssignmentTargetAst(local: OxLocalDecl, typeName: String): (Ast, String) = {
@@ -4021,7 +4019,28 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def constructorEntriesForType(typeName: String): Seq[FunctionEntry] = {
     val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
-    functionEntries.filter(entry => entry.qualifiedName == s"$typeName.$constructorName")
+    distinctFunctionEntries(functionEntries.filter(entry => entry.qualifiedName == s"$typeName.$constructorName"))
+  }
+
+  private def distinctFunctionEntries(entries: Seq[FunctionEntry]): Seq[FunctionEntry] = {
+    val selected = mutable.LinkedHashMap.empty[String, FunctionEntry]
+    entries.foreach { entry =>
+      val key =
+        Seq(
+          entry.qualifiedName,
+          entry.function.parameters.map(_.semanticTypeName).mkString(","),
+          entry.function.isConst
+        )
+          .mkString(":")
+      selected.get(key) match {
+        case Some(existing) if !existing.function.isDefinition && entry.function.isDefinition =>
+          selected.update(key, entry)
+        case None =>
+          selected.update(key, entry)
+        case _ =>
+      }
+    }
+    selected.values.toSeq
   }
 
   private def heapConstructorAstsForExpressions(expressions: Seq[OxExpression]): Seq[Ast] = {
