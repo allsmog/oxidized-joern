@@ -612,9 +612,28 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         false
     }
     Option
-      .when(isDefaultConstruction)(localObjectAggregateTypeFullName(local.typeName, ownerFullName))
+      .when(isDefaultConstruction)(localDefaultConstructedAggregateTypeFullName(local, ownerFullName))
       .flatten
       .filter(hasImplicitDefaultConstructor)
+  }
+
+  private def localDefaultConstructedAggregateTypeFullName(
+    local: OxLocalDecl,
+    ownerFullName: Option[String]
+  ): Option[String] = {
+    localObjectAggregateTypeFullName(local.typeName, ownerFullName)
+      .orElse(localArrayElementAggregateTypeFullName(local, ownerFullName))
+  }
+
+  private def localArrayElementAggregateTypeFullName(
+    local: OxLocalDecl,
+    ownerFullName: Option[String]
+  ): Option[String] = {
+    Option
+      .when(localArrayElementCount(local).exists(_ > 0))(
+        arrayElementTypeFullName(local.typeName).flatMap(localObjectAggregateTypeFullName(_, ownerFullName))
+      )
+      .flatten
   }
 
   private def localObjectAggregateTypeFullName(typeName: String, ownerFullName: Option[String]): Option[String] = {
@@ -1337,6 +1356,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     if (initializer.arguments.isEmpty) "" else constructorInitializerValueCode(initializer)
   }
 
+  private def registerLocalDestructor(local: OxLocalDecl, typeName: String): Unit = {
+    val arrayDestructors = localArrayElementReceiverCodes(local).flatMap { receiverCode =>
+      arrayElementTypeFullName(typeName).flatMap(destructorEntryForType).map { destructor =>
+        LocalDestructor(receiverCode, local.line, destructor)
+      }
+    }
+    if (arrayDestructors.nonEmpty) {
+      arrayDestructors.foreach(registerLocalDestructor)
+    } else {
+      registerLocalDestructor(local.name, typeName, local.line)
+    }
+  }
+
   private def registerLocalDestructor(name: String, typeName: String, line: Int): Unit = {
     destructorEntryForType(typeName).foreach { destructor =>
       registerLocalDestructor(LocalDestructor(name, line, destructor))
@@ -1731,10 +1763,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val localCode       = localDeclarationCode(local)
     val localNode       = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
     scope = scope.updated(local.name, ScopeEntry(typeName, localNode, localLambdaInfo))
-    registerLocalDestructor(local.name, typeName, local.line)
+    registerLocalDestructor(local, typeName)
     val extendedTemporaryDestructor = local.initializer.flatMap(referenceBoundTemporaryDestructor(typeName, _))
     extendedTemporaryDestructor.foreach(registerLocalDestructor)
     val localAst = Ast(localNode)
+    val localArrayConstructorAsts =
+      if (useConstructorInitializers) localArrayDefaultConstructorAsts(local, typeName) else Seq.empty
     val localInitializerTemporaryDestructorAsts =
       temporaryDestructorAstsForLocalInitializer(
         local.initializer,
@@ -1772,11 +1806,66 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         ) ++ fieldAssignments ++ heapConstructorAstsForExpressions(
           Seq(initializer)
         ) ++ localInitializerTemporaryDestructorAsts
+      case None if localArrayConstructorAsts.nonEmpty =>
+        Seq(localAst) ++ localArrayConstructorAsts
       case None if useConstructorInitializers && isDefaultConstructorInitializer(typeName) =>
         Seq(localAst, constructorAssignmentAst(local, Seq.empty, "", origin, typeName))
       case None =>
         Seq(localAst)
     }
+  }
+
+  private def localArrayDefaultConstructorAsts(local: OxLocalDecl, typeName: String): Seq[Ast] = {
+    for {
+      count       <- localArrayElementCount(local).toSeq
+      elementType <- arrayElementTypeFullName(typeName).toSeq
+      info        <- constructorInvocationInfo(elementType, Seq.empty, "").toSeq
+      index       <- 0 until count
+    } yield localArrayElementConstructorAssignmentAst(local.name, typeName, index, local.line, info)
+  }
+
+  private def localArrayElementConstructorAssignmentAst(
+    localName: String,
+    arrayTypeName: String,
+    index: Int,
+    line: Int,
+    info: ConstructorInvocationInfo
+  ): Ast = {
+    val elementCode    = s"$localName[$index]"
+    val assignmentCode = s"$elementCode = ${info.code}"
+    val left           = arrayElementAccessAst(localName, arrayTypeName, index, line)
+    val callNode_      = constructorCallNode(OxOrigin(info.code, Option(line)), info)
+    val right = constructorInvocationBlockAst(OxOrigin(info.code, Option(line)), info.typeName, callNode_, Seq.empty)
+    assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
+  }
+
+  private def arrayElementAccessAst(localName: String, arrayTypeName: String, index: Int, line: Int): Ast = {
+    val elementCode     = s"$localName[$index]"
+    val elementTypeName = arrayElementTypeFullName(arrayTypeName).getOrElse(Defines.Any)
+    operatorCallAst(
+      OxOrigin(elementCode, Option(line)),
+      elementCode,
+      Operators.indirectIndexAccess,
+      Seq(identifierAst(localName, localName, line), expressionAst(OxLiteral(index.toString, index.toString, line))),
+      registerType(elementTypeName)
+    )
+  }
+
+  private def localArrayElementReceiverCodes(local: OxLocalDecl): Seq[String] = {
+    localArrayElementCount(local).toSeq.flatMap(count => 0 until count).map(index => s"${local.name}[$index]")
+  }
+
+  private def localArrayElementCount(local: OxLocalDecl): Option[Int] = {
+    val nameIndex = local.code.indexOf(local.name)
+    Option
+      .when(nameIndex >= 0)(local.code.drop(nameIndex + local.name.length).dropWhile(_.isWhitespace))
+      .filter(_.startsWith("["))
+      .flatMap { suffix =>
+        val endIndex = suffix.indexOf(']')
+        Option.when(endIndex > 1)(suffix.substring(1, endIndex).trim)
+      }
+      .flatMap(rawCount => Try(rawCount.toInt).toOption)
+      .filter(_ > 0)
   }
 
   private def localAssignmentTargetAst(local: OxLocalDecl, typeName: String): (Ast, String) = {
