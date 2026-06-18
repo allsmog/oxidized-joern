@@ -78,7 +78,7 @@ fn run() -> Result<()> {
         let options = options_for_file(&base_options, compile_database.as_ref(), &file);
         match parse_file(&file, &options).and_then(|document| write_json(&target, &document)) {
             Ok(()) => println!(
-                "Converted AST scaffold for {} to {}",
+                "Converted AST for {} to {}",
                 file.display(),
                 target.display()
             ),

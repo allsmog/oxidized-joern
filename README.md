@@ -26,9 +26,10 @@ The first released Rust rewrite component is the Go AST generator used by
   URL.
 
 The C/C++ frontend still defaults to upstream Joern's Scala/Eclipse CDT
-implementation. An experimental Rust `cxxastgen` scaffold lives under
-`joern-cli/frontends/c2cpg/rust`; it is not yet wired into production CPG
-generation.
+implementation. The Rust `cxxastgen` workspace under
+`joern-cli/frontends/c2cpg/rust` is wired into the Scala frontend as an opt-in
+oxidized backend via `--parser-backend oxidized`, with compatibility coverage
+against the CDT backend.
 
 The JavaScript/TypeScript frontend still defaults to upstream Joern's Babel
 `astgen` binary. An experimental Rust `astgen` workspace now lives under

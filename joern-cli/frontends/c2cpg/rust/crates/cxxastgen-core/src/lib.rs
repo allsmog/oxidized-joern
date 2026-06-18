@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use tree_sitter::{Node, Parser};
 
 pub const SCHEMA_VERSION: u32 = 1;
-pub const BACKEND_NAME: &str = "oxidized-cxxastgen-scaffold";
+pub const BACKEND_NAME: &str = "oxidized-cxxastgen";
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]

@@ -40,7 +40,7 @@ fn writes_one_json_document_per_cxx_input() {
     let document: Value =
         serde_json::from_str(&fs::read_to_string(out.join("main.c.json")).unwrap()).unwrap();
     assert_eq!(document["schemaVersion"], 1);
-    assert_eq!(document["backend"], "oxidized-cxxastgen-scaffold");
+    assert_eq!(document["backend"], "oxidized-cxxastgen");
     assert_eq!(document["language"], "c");
     assert_eq!(document["sourceLines"], 3);
     assert_eq!(
