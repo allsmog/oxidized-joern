@@ -669,6 +669,41 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.ambiguous")
     }
 
+    "ignore explicit constructors for implicit overload conversions" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Hidden {
+          |public:
+          |  explicit Hidden(int value) {}
+          |};
+          |class Visible {
+          |public:
+          |  Visible(int value) {}
+          |};
+          |int onlyHidden(Hidden value) { return 1; }
+          |long choose(Hidden value) { return 1; }
+          |int choose(Visible value) { return 2; }
+          |}
+          |long use(int seed) {
+          |  Core::Hidden direct(seed);
+          |  return Core::onlyHidden(seed) + Core::choose(seed);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").call.codeExact("Core.Hidden.Hidden(seed)").methodFullName.l should contain(
+        "Core.Hidden.Hidden:void(int)"
+      )
+      cpg.method.nameExact("use").call.codeExact("Core::onlyHidden(seed)").methodFullName.l shouldBe
+        List("Core.onlyHidden")
+      cpg.method.nameExact("use").call.codeExact("Core::choose(seed)").methodFullName.l shouldBe
+        List("Core.choose:int(Visible)")
+      cpg.method.nameExact("use").call.codeExact("Core::choose(seed)").argument.code.l shouldBe
+        List("Core.Visible.Visible(seed)")
+    }
+
     "specialize function template returns during overload resolution" in {
       val cpg = code(
         """
