@@ -169,6 +169,22 @@ class SimpleAstCreationPassTest extends SwiftSrc2CpgSuite {
       }
     }
 
+    "have correct structure for simple binary operators" in {
+      val cpg = code("""
+          |func bump(x: Int) {
+          |  var y = x + 1
+          |  if y > 0 {
+          |    y = y - 1
+          |  }
+          |}
+          |""".stripMargin)
+
+      cpg.call.nameExact(Operators.addition).code.l should contain("x + 1")
+      cpg.call.nameExact(Operators.greaterThan).code.l should contain("y > 0")
+      cpg.call.nameExact(Operators.subtraction).code.l should contain("y - 1")
+      cpg.controlStructure.controlStructureType(ControlStructureTypes.IF).condition.code.l shouldBe List("y > 0")
+    }
+
     "have correct closure bindings" in {
       val cpg = code("""
         |func foo() -> {
