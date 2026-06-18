@@ -7732,6 +7732,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val argumentWithoutReference   = stripCxxReference(argumentType)
     val argumentWithoutCvReference = stripCxxTypeQualifiers(argumentWithoutReference).trim
     val pairs                      = mutable.ArrayBuffer(parameterType -> argumentType)
+    pairs ++= pointerTemplateDeductionTypePairs(parameterWithoutReference, argumentWithoutReference)
     if (parameterWithoutReference != parameterType) {
       pairs += parameterWithoutReference -> argumentWithoutReference
       if (stripCxxTypeQualifiers(parameterWithoutReference).trim != parameterWithoutReference) {
@@ -7741,6 +7742,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       pairs += parameterType -> argumentWithoutCvReference
     }
     pairs.distinct.toSeq
+  }
+
+  private def pointerTemplateDeductionTypePairs(parameterType: String, argumentType: String): Seq[(String, String)] = {
+    if (parameterType.endsWith("*") && argumentType.endsWith("*")) {
+      val parameterPointee    = normalizeType(parameterType.stripSuffix("*"))
+      val argumentPointee     = normalizeType(argumentType.stripSuffix("*"))
+      val pointerPairs        = mutable.ArrayBuffer(parameterPointee -> argumentPointee)
+      val parameterQualifiers = cxxTypeQualifiers(parameterPointee)
+      if (parameterQualifiers.nonEmpty) {
+        pointerPairs += parameterPointee -> addMissingCxxTypeQualifiers(
+          stripCxxTypeQualifiers(argumentPointee).trim,
+          parameterQualifiers
+        )
+      }
+      pointerPairs.toSeq
+    } else {
+      Seq.empty
+    }
   }
 
   private def matchTemplateBinding(
