@@ -110,6 +110,25 @@ class SimpleAstCreationPassTest extends SwiftSrc2CpgSuite {
       idX.refOut.head shouldBe localX
     }
 
+    "have correct structure for simple calls, returns, and reassignment" in {
+      val cpg = code("""
+          |func foo() -> Int {
+          |  return 1
+          |}
+          |var a = 0
+          |a = foo()
+          |foo(1, bar: "x")
+          |""".stripMargin)
+
+      cpg.method.nameExact("foo").ast.isReturn.code.l shouldBe List("return 1")
+      cpg.call.nameExact("foo").code.l should contain allOf ("foo()", """foo(1, bar: "x")""")
+      cpg.call.nameExact(Operators.assignment).code.l should contain("a = foo()")
+
+      inside(cpg.call.nameExact("foo").codeExact("""foo(1, bar: "x")""").l) { case List(call) =>
+        call.argument.code.l should contain allOf ("1", """"x"""")
+      }
+    }
+
     "have correct closure bindings" in {
       val cpg = code("""
         |func foo() -> {

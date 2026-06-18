@@ -128,7 +128,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         match node.kind() {
             "property_declaration" => self.variable_decl(node),
             "function_declaration" => self.function_decl(node),
-            "integer_literal" | "simple_identifier" | "line_string_literal" => self.expr(node),
+            "control_transfer_statement" => self.return_stmt(node),
+            "assignment"
+            | "call_expression"
+            | "integer_literal"
+            | "simple_identifier"
+            | "line_string_literal" => self.expr(node),
             other => bail!("unsupported Swift syntax node '{other}'"),
         }
     }
@@ -443,6 +448,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn expr(&self, node: Node<'a>) -> Result<Value> {
         match node.kind() {
+            "directly_assignable_expression" => {
+                let child = named_children(node)
+                    .next()
+                    .context("assignable expression is empty")?;
+                self.expr(child)
+            }
+            "assignment" => self.assignment_expr(node),
+            "call_expression" => self.function_call_expr(node),
             "integer_literal" => Ok(self.syntax_node(
                 "IntegerLiteralExprSyntax",
                 self.range_for_node(node),
@@ -468,6 +481,139 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "line_string_literal" => self.string_literal(node),
             other => bail!("unsupported Swift expression node '{other}'"),
         }
+    }
+
+    fn function_call_expr(&self, node: Node<'a>) -> Result<Value> {
+        let callee = named_children(node)
+            .find(|child| child.kind() != "call_suffix")
+            .context("call expression is missing callee")?;
+        let suffix = self
+            .immediate_named_child_kind(node, "call_suffix")
+            .context("call expression is missing call suffix")?;
+        let value_arguments = self
+            .immediate_named_child_kind(suffix, "value_arguments")
+            .context("call suffix is missing value arguments")?;
+        let left_paren = self
+            .immediate_child_kind(value_arguments, "(")
+            .context("call arguments are missing '('")?;
+        let right_paren = self
+            .immediate_child_kind(value_arguments, ")")
+            .context("call arguments are missing ')'")?;
+
+        if named_children(suffix).any(|child| child.kind() == "lambda_literal") {
+            bail!("trailing closures are not supported yet");
+        }
+
+        let children = vec![
+            self.with_name(self.expr(callee)?, "calledExpression"),
+            self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+            self.with_name(
+                self.labeled_expr_list(value_arguments, left_paren, right_paren)?,
+                "arguments",
+            ),
+            self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
+            self.with_name(
+                self.empty_collection("MultipleTrailingClosureElementListSyntax", node.end_byte()),
+                "additionalTrailingClosures",
+            ),
+        ];
+
+        Ok(self.syntax_node(
+            "FunctionCallExprSyntax",
+            self.range_for_node(node),
+            children,
+        ))
+    }
+
+    fn labeled_expr_list(
+        &self,
+        value_arguments: Node<'a>,
+        left_paren: Node<'a>,
+        right_paren: Node<'a>,
+    ) -> Result<Value> {
+        let mut args = Vec::new();
+        for arg in named_children(value_arguments).filter(|child| child.kind() == "value_argument")
+        {
+            let trailing_comma = self.trailing_delimiter(value_arguments, arg, ",");
+            args.push(self.with_name(self.labeled_expr(arg, trailing_comma)?, ""));
+        }
+        Ok(self.syntax_node(
+            "LabeledExprListSyntax",
+            self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
+            args,
+        ))
+    }
+
+    fn labeled_expr(&self, node: Node<'a>, trailing_comma: Option<Node<'a>>) -> Result<Value> {
+        let value = self
+            .field_child(node, "value")
+            .or_else(|| named_children(node).find(|child| child.kind() != "value_argument_label"))
+            .context("call argument is missing value")?;
+        let mut children = Vec::new();
+        if let Some(label_node) = self.field_child(node, "name") {
+            let label = self
+                .first_descendant_kind(label_node, "simple_identifier")
+                .unwrap_or(label_node);
+            children.push(self.with_name(
+                self.token_for_node(
+                    label,
+                    &format!("identifier({})", quoted_text(self.text(label))),
+                ),
+                "label",
+            ));
+            if let Some(colon) = self.immediate_child_kind(node, ":") {
+                children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
+            }
+        }
+        children.push(self.with_name(self.expr(value)?, "expression"));
+        if let Some(comma) = trailing_comma {
+            children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+        }
+        Ok(self.syntax_node("LabeledExprSyntax", self.range_for_node(node), children))
+    }
+
+    fn assignment_expr(&self, node: Node<'a>) -> Result<Value> {
+        let lhs = self
+            .field_child(node, "target")
+            .context("assignment is missing lhs")?;
+        let equal = self
+            .field_child(node, "operator")
+            .or_else(|| self.immediate_child_kind(node, "="))
+            .context("assignment is missing '='")?;
+        let rhs = self
+            .field_child(node, "result")
+            .context("assignment is missing rhs")?;
+        let assignment_operator = self.syntax_node(
+            "AssignmentExprSyntax",
+            self.range_for_node(equal),
+            vec![self.with_name(self.token_for_node(equal, "equal"), "equal")],
+        );
+        Ok(self.syntax_node(
+            "InfixOperatorExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.expr(lhs)?, "leftOperand"),
+                self.with_name(assignment_operator, "operator"),
+                self.with_name(self.expr(rhs)?, "rightOperand"),
+            ],
+        ))
+    }
+
+    fn return_stmt(&self, node: Node<'a>) -> Result<Value> {
+        let return_keyword = self
+            .first_descendant_any_kind(node, "return")
+            .context("return statement is missing return keyword")?;
+        let mut children = vec![self.with_name(
+            self.token_for_node(return_keyword, "keyword(SwiftSyntax.Keyword.return)"),
+            "returnKeyword",
+        )];
+        if let Some(expression) = self
+            .field_child(node, "result")
+            .or_else(|| named_children(node).find(|child| child.kind() != "throw_keyword"))
+        {
+            children.push(self.with_name(self.expr(expression)?, "expression"));
+        }
+        Ok(self.syntax_node("ReturnStmtSyntax", self.range_for_node(node), children))
     }
 
     fn string_literal(&self, node: Node<'a>) -> Result<Value> {
@@ -626,6 +772,24 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         named_children(node).find(|child| child.kind() == kind)
     }
 
+    fn trailing_delimiter(
+        &self,
+        parent: Node<'a>,
+        node: Node<'a>,
+        delimiter: &str,
+    ) -> Option<Node<'a>> {
+        let next_named =
+            named_children(parent).find(|candidate| candidate.start_byte() > node.start_byte());
+        children(parent).find(|child| {
+            child.kind() == delimiter
+                && child.start_byte() >= node.end_byte()
+                && match next_named {
+                    Some(next) => child.end_byte() <= next.start_byte(),
+                    None => true,
+                }
+        })
+    }
+
     fn first_named_child_excluding(&self, node: Node<'a>, excluded: &[&str]) -> Option<Node<'a>> {
         named_children(node).find(|child| !excluded.contains(&child.kind()))
     }
@@ -716,5 +880,71 @@ mod tests {
         assert_eq!(function["nodeType"], "FunctionDeclSyntax");
         assert_eq!(function["children"][3]["tokenKind"], "identifier(\"foo\")");
         assert_eq!(function["children"][5]["nodeType"], "CodeBlockSyntax");
+    }
+
+    #[test]
+    fn emits_function_call_arguments() {
+        let source = "foo(1, bar: \"x\")\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let call = &value["children"][0]["children"][0]["children"][0];
+        assert_eq!(call["nodeType"], "FunctionCallExprSyntax");
+        assert_eq!(call["children"][0]["name"], "calledExpression");
+        assert_eq!(
+            call["children"][0]["children"][0]["tokenKind"],
+            "identifier(\"foo\")"
+        );
+        let args = &call["children"][2]["children"];
+        assert_eq!(args.as_array().unwrap().len(), 2);
+        assert_eq!(args[0]["nodeType"], "LabeledExprSyntax");
+        assert_eq!(
+            args[0]["children"][0]["nodeType"],
+            "IntegerLiteralExprSyntax"
+        );
+        assert_eq!(args[0]["children"][1]["tokenKind"], "comma");
+        assert_eq!(args[1]["children"][0]["tokenKind"], "identifier(\"bar\")");
+        assert_eq!(args[1]["children"][1]["tokenKind"], "colon");
+        assert_eq!(
+            args[1]["children"][2]["nodeType"],
+            "StringLiteralExprSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_assignment_as_infix_operator() {
+        let source = "a = foo()\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let assignment = &value["children"][0]["children"][0]["children"][0];
+        assert_eq!(assignment["nodeType"], "InfixOperatorExprSyntax");
+        assert_eq!(assignment["children"][0]["name"], "leftOperand");
+        assert_eq!(
+            assignment["children"][1]["nodeType"],
+            "AssignmentExprSyntax"
+        );
+        assert_eq!(
+            assignment["children"][1]["children"][0]["tokenKind"],
+            "equal"
+        );
+        assert_eq!(
+            assignment["children"][2]["nodeType"],
+            "FunctionCallExprSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_return_statement() {
+        let source = "func f() -> Int {\n  return foo()\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let function = &value["children"][0]["children"][0]["children"][0];
+        let body = &function["children"][5];
+        let return_stmt = &body["children"][1]["children"][0]["children"][0];
+        assert_eq!(return_stmt["nodeType"], "ReturnStmtSyntax");
+        assert_eq!(
+            return_stmt["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.return)"
+        );
+        assert_eq!(
+            return_stmt["children"][1]["nodeType"],
+            "FunctionCallExprSyntax"
+        );
     }
 }
