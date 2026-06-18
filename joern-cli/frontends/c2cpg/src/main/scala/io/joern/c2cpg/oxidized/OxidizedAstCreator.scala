@@ -6275,12 +6275,43 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def isVirtualFunction(function: OxFunctionDecl, parentTypeOwner: Option[String]): Boolean = {
     function.isVirtual || parentTypeOwner.exists { ownerTypeFullName =>
-      functionEntries.exists(entry =>
-        entry.ownerFullName.contains(ownerTypeFullName) &&
-          entry.simpleName == functionSimpleName(function) &&
-          entry.function.signature == function.signature &&
+      virtualFunctionInTypeHierarchy(ownerTypeFullName, function, Set.empty)
+    }
+  }
+
+  private def virtualFunctionInTypeHierarchy(
+    ownerTypeFullName: String,
+    function: OxFunctionDecl,
+    seen: Set[String]
+  ): Boolean = {
+    val normalizedOwner = receiverAggregateTypeName(resolveAliasType(ownerTypeFullName))
+    if (seen.contains(normalizedOwner)) {
+      false
+    } else {
+      val directVirtual = functionEntries.exists(entry =>
+        entry.ownerFullName.contains(normalizedOwner) &&
+          isSameVirtualSlot(entry, function) &&
           entry.function.isVirtual
       )
+      directVirtual || aggregateBaseTypesByType
+        .getOrElse(normalizedOwner, Seq.empty)
+        .exists(baseType => virtualFunctionInTypeHierarchy(baseType, function, seen + normalizedOwner))
+    }
+  }
+
+  private def isSameVirtualSlot(entry: FunctionEntry, function: OxFunctionDecl): Boolean = {
+    entry.simpleName == functionSimpleName(function) &&
+    virtualSlotSignature(entry.function) == virtualSlotSignature(function)
+  }
+
+  private def virtualSlotSignature(function: OxFunctionDecl): String = {
+    val parameterStart = function.signature.indexOf('(')
+    if (parameterStart >= 0) {
+      function.signature.drop(parameterStart)
+    } else {
+      val parameters =
+        function.parameters.map(parameter => normalizeType(resolveAliasType(parameter.typeName))).mkString(",")
+      s"($parameters)${Option.when(function.isConst)("<const>").getOrElse("")}"
     }
   }
 
