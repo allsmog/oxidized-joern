@@ -1109,7 +1109,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val orderedFieldInitializers = fields.flatMap { field =>
       initializersByField
         .get(field.name)
-        .map(_.flatMap(initializer => constructorInitializerAsts(initializer, Option(field.typeName))))
+        .map(
+          _.flatMap(initializer =>
+            memberArrayConstructorInitializerAsts(initializer, field)
+              .getOrElse(constructorInitializerAsts(initializer, Option(field.typeName)))
+          )
+        )
         .getOrElse {
           field.initializer
             .map(_ => defaultMemberInitializerAsts(ownerTypeFullName, field))
@@ -1196,6 +1201,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       }
   }
 
+  private def memberArrayConstructorInitializerAsts(
+    initializer: OxConstructorInitializer,
+    field: OxFieldDecl
+  ): Option[Seq[Ast]] = {
+    Option
+      .when(!field.isStatic) {
+        memberArrayInitializerConstructorAsts(field, initializer.arguments, initializer.line)
+      }
+      .filter(_.nonEmpty)
+  }
+
   private def baseConstructorInitializerAsts(baseType: String, initializer: OxConstructorInitializer): Seq[Ast] = {
     val info = constructorInvocationInfo(baseType, initializer.arguments, constructorInitializerValueCode(initializer))
     val constructorEntry = info.flatMap(_.constructor)
@@ -1219,33 +1235,43 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       Seq.empty
     } else {
       field.initializer.toSeq.flatMap { initializer =>
-        val line           = initializer.line
-        val fieldTypeName  = registerType(resolveAliasType(field.typeName))
-        val assignmentCode = s"${Defines.This}->${field.name} = ${initializer.code}"
-        val left = implicitFieldAccessAst(field.name, line).getOrElse(identifierAst(field.name, field.name, line))
-        val right =
-          expressionAstWithContextualConversion(initializer, Option(fieldTypeName))
-        val assignment = assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
-        val fieldAssignments = initializer match {
-          case initializerList: OxInitializerList
-              if isAggregateFieldType(fieldTypeName) || isArrayLikeType(fieldTypeName) =>
-            aggregateInitializerAssignmentAsts(
-              AggregateAssignmentRoot(Defines.This, line, scope.get(Defines.This)),
-              rootTypeName = ownerTypeFullName,
-              typeName = fieldTypeName,
-              initializer = initializerList,
-              fieldPathPrefix = Seq(AggregateFieldPathSegment(field.name, isIndirect = true))
-            )
+        val memberArrayConstructorAsts = initializer match {
+          case initializerList: OxInitializerList =>
+            memberArrayInitializerConstructorAsts(field, initializerList.elements, initializer.line)
           case _ =>
             Seq.empty
         }
-        val temporaryCleanup =
-          temporaryDestructorAstsForLocalInitializer(
-            Option(initializer),
-            Option(fieldTypeName),
-            extendCurrentTemporaryLifetime = false
-          )
-        aggregateAssignmentExpressionAsts(initializer) ++ Seq(assignment) ++ fieldAssignments ++ temporaryCleanup
+        if (memberArrayConstructorAsts.nonEmpty) {
+          memberArrayConstructorAsts
+        } else {
+          val line           = initializer.line
+          val fieldTypeName  = registerType(resolveAliasType(field.typeName))
+          val assignmentCode = s"${Defines.This}->${field.name} = ${initializer.code}"
+          val left = implicitFieldAccessAst(field.name, line).getOrElse(identifierAst(field.name, field.name, line))
+          val right =
+            expressionAstWithContextualConversion(initializer, Option(fieldTypeName))
+          val assignment = assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
+          val fieldAssignments = initializer match {
+            case initializerList: OxInitializerList
+                if isAggregateFieldType(fieldTypeName) || isArrayLikeType(fieldTypeName) =>
+              aggregateInitializerAssignmentAsts(
+                AggregateAssignmentRoot(Defines.This, line, scope.get(Defines.This)),
+                rootTypeName = ownerTypeFullName,
+                typeName = fieldTypeName,
+                initializer = initializerList,
+                fieldPathPrefix = Seq(AggregateFieldPathSegment(field.name, isIndirect = true))
+              )
+            case _ =>
+              Seq.empty
+          }
+          val temporaryCleanup =
+            temporaryDestructorAstsForLocalInitializer(
+              Option(initializer),
+              Option(fieldTypeName),
+              extendCurrentTemporaryLifetime = false
+            )
+          aggregateAssignmentExpressionAsts(initializer) ++ Seq(assignment) ++ fieldAssignments ++ temporaryCleanup
+        }
       }
     }
   }
@@ -1284,6 +1310,48 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       info        <- constructorInvocationInfo(elementType, Seq.empty, "").toSeq
       index       <- 0 until count
     } yield memberArrayElementConstructorAssignmentAst(field, index, line, info)
+  }
+
+  private def memberArrayInitializerConstructorAsts(
+    field: OxFieldDecl,
+    initializers: Seq[OxExpression],
+    line: Int
+  ): Seq[Ast] = {
+    val count       = fieldArrayElementCount(field)
+    val elementType = arrayElementTypeFullName(field.typeName)
+    (count, elementType) match {
+      case (Some(elementCount), Some(elementTypeName)) =>
+        val explicitInitializers = initializers.take(elementCount)
+        val explicitConstructorAsts = explicitInitializers.zipWithIndex.map { case (elementInitializer, index) =>
+          memberArrayElementInitializerConstructorAsts(field, elementTypeName, index, line, elementInitializer)
+        }
+        if (explicitConstructorAsts.exists(_.isEmpty)) {
+          Seq.empty
+        } else {
+          val defaultConstructorAsts = for {
+            info  <- constructorInvocationInfo(elementTypeName, Seq.empty, "").toSeq
+            index <- explicitInitializers.size until elementCount
+          } yield memberArrayElementConstructorAssignmentAst(field, index, line, info)
+          explicitConstructorAsts.flatten ++ defaultConstructorAsts
+        }
+      case _ =>
+        Seq.empty
+    }
+  }
+
+  private def memberArrayElementInitializerConstructorAsts(
+    field: OxFieldDecl,
+    elementTypeName: String,
+    index: Int,
+    line: Int,
+    initializer: OxExpression
+  ): Seq[Ast] = {
+    arrayElementConstructorInvocationInfo(elementTypeName, initializer).toSeq.flatMap {
+      case (info, arguments, constructorEntry) =>
+        arguments.flatMap(aggregateAssignmentExpressionAsts) ++
+          Seq(memberArrayElementConstructorAssignmentAst(field, index, line, info)) ++
+          temporaryDestructorAstsForConstructorArguments(arguments, constructorEntry)
+    }
   }
 
   private def memberArrayElementConstructorAssignmentAst(
@@ -1943,16 +2011,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     elementTypeName: String,
     initializer: OxExpression
   ): Option[(ConstructorInvocationInfo, Seq[OxExpression], Option[FunctionEntry])] = {
+    val resolvedElementTypeName =
+      resolveAggregateTypeFullName(receiverAggregateTypeName(elementTypeName)).getOrElse(elementTypeName)
     initializer match {
-      case initializerList: OxInitializerList if isConstructorInitializer(elementTypeName, initializerList) =>
-        val resolution = constructorInitializerResolution(elementTypeName, initializerList)
+      case initializerList: OxInitializerList if isConstructorInitializer(resolvedElementTypeName, initializerList) =>
+        val resolution = constructorInitializerResolution(resolvedElementTypeName, initializerList)
         val initCode = normalizedConstructorInitCode(initializerList.code.trim, resolution.preserveInitializerListCode)
-        constructorInvocationInfo(elementTypeName, resolution.arguments, initCode, resolution.entry)
+        constructorInvocationInfo(resolvedElementTypeName, resolution.arguments, initCode, resolution.entry)
           .map(info => (info, resolution.arguments, resolution.entry))
       case _ =>
         val arguments   = Seq(initializer)
-        val constructor = constructorEntry(elementTypeName, arguments)
-        constructorInvocationInfo(elementTypeName, arguments, initializer.code, constructor)
+        val constructor = constructorEntry(resolvedElementTypeName, arguments)
+        constructorInvocationInfo(resolvedElementTypeName, arguments, initializer.code, constructor)
           .map(info => (info, arguments, constructor))
     }
   }
