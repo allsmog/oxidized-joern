@@ -194,6 +194,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val baseTypes = structDecl.baseClasses.map(baseClass => resolveBaseTypeFullName(baseClass, parentFullName))
       Seq(localName, fullName).distinct.map(typeName => typeName -> baseTypes)
     }.toMap
+  private lazy val aggregateUsingDeclarationsByType: Map[String, Seq[OxUsingDeclaration]] =
+    aggregateDeclarations.flatMap { case (structDecl, parentFullName) =>
+      val localName = normalizeType(structDecl.name)
+      val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
+      Seq(localName, fullName).distinct.map(typeName => typeName -> structDecl.usingDeclarations)
+    }.toMap
   private val IntegerLiteralPattern = """[+-]?(?:0[xX][0-9a-fA-F]+|\d+)[uUlL]*""".r
   private val FloatingLiteralPattern =
     """[+-]?(?:(?:\d+\.\d*|\.\d+)(?:[eE][+-]?\d+)?|\d+[eE][+-]?\d+)[fFlL]?""".r
@@ -5403,9 +5409,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .flatMap(typeName => resolveAggregateTypeFullName(typeName).toSeq :+ typeName)
       .distinct
       .iterator
-      .map(typeName => functionCandidatesByQualifiedName(s"$typeName.$name"))
+      .map(typeName => memberFunctionCandidatesDeclaredOrUsing(typeName, name))
       .find(_.nonEmpty)
       .getOrElse(Seq.empty)
+  }
+
+  private def memberFunctionCandidatesDeclaredOrUsing(typeName: String, name: String): Seq[FunctionEntry] = {
+    val declared = functionCandidatesByQualifiedName(s"$typeName.$name")
+    val usingTargets = aggregateUsingDeclarationsByType
+      .getOrElse(typeName, Seq.empty)
+      .filter(_.name == name)
+      .flatMap(usingDecl => qualifiedMemberFunctionCandidates(usingDecl.target, Option(typeName)))
+    (declared ++ usingTargets).distinct
   }
 
   private def qualifiedMemberFunctionCandidates(name: String, receiverType: Option[String]): Seq[FunctionEntry] = {

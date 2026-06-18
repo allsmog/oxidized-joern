@@ -44,9 +44,12 @@ case class OxStructDecl(
   sourcePath: Option[String],
   visibleLine: Int,
   baseClasses: Seq[String],
+  usingDeclarations: Seq[OxUsingDeclaration],
   fields: Seq[OxFieldDecl],
   nestedDeclarations: Seq[OxDeclaration]
 ) extends OxDeclaration
+
+case class OxUsingDeclaration(name: String, target: String, code: String, line: Int)
 
 case class OxFieldDecl(
   name: String,
@@ -314,6 +317,8 @@ object OxDocument {
           sourcePath = sourcePath(value),
           visibleLine = visibleLine(value),
           baseClasses = value.obj.get("baseClasses").map(_.arr.map(_.str).toSeq).getOrElse(Seq.empty),
+          usingDeclarations =
+            value.obj.get("usingDeclarations").map(_.arr.map(usingDeclaration).toSeq).getOrElse(Seq.empty),
           fields = value("fields").arr.map(field).toSeq,
           nestedDeclarations =
             value.obj.get("nestedDeclarations").map(_.arr.map(declaration).toSeq).getOrElse(Seq.empty)
@@ -376,6 +381,15 @@ object OxDocument {
       code = str(value, "code"),
       isStatic = value.obj.get("isStatic").exists(_.bool),
       initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
+    )
+  }
+
+  private def usingDeclaration(value: Value): OxUsingDeclaration = {
+    OxUsingDeclaration(
+      name = str(value, "name"),
+      target = str(value, "target"),
+      code = str(value, "code"),
+      line = int(value, "line")
     )
   }
 
