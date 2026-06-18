@@ -632,7 +632,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         collectRequiredImplicitDefaultConstructorTypesFromExpression(condition, ownerFullName) ++
           consequence.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)) ++
           collectRequiredImplicitDefaultConstructorTypesFromExpression(alternative, ownerFullName)
-      case OxCast(_, _, _, value) =>
+      case OxCast(_, _, _, _, value) =>
         collectRequiredImplicitDefaultConstructorTypesFromExpression(value, ownerFullName)
       case OxFold(_, _, _, left, right) =>
         left.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName)) ++
@@ -3819,7 +3819,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         heapConstructorsForExpression(pattern)
       case OxTypeOf(_, _, argument) =>
         heapConstructorsForExpression(argument)
-      case OxCast(_, _, _, value) =>
+      case OxCast(_, _, _, _, value) =>
         heapConstructorsForExpression(value)
       case OxSizeOf(_, _, value, _) =>
         value.toSeq.flatMap(heapConstructorsForExpression)
@@ -4049,7 +4049,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         temporaryDestructorsForExpression(pattern)
       case OxTypeOf(_, _, argument) =>
         temporaryDestructorsForExpression(argument)
-      case cast @ OxCast(_, _, _, value) =>
+      case cast @ OxCast(_, _, _, _, value) =>
         val castType            = temporaryTypeFullNameForExpression(cast)
         val valueType           = temporaryTypeFullNameForExpression(value)
         val includeValueCurrent = castType.isEmpty || castType != valueType
@@ -4202,30 +4202,30 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def castTemporaryTypeFullName(cast: OxCast): Option[String] = {
-    Option(normalizeType(resolveAliasType(cast.typeName))).flatMap(returnedObjectTypeFullName)
+    Option(normalizeType(resolveAliasType(cast.semanticTypeName))).flatMap(returnedObjectTypeFullName)
   }
 
   private def overloadedBinaryTemporaryTypeFullName(binary: OxBinary): Option[String] = {
     overloadedBinaryOperatorTarget(binary)
-      .map(target => normalizeType(resolveAliasType(target.entry.function.returnType)))
+      .map(target => functionSemanticReturnTypeFullName(target.entry))
       .flatMap(returnedObjectTypeFullName)
   }
 
   private def overloadedAssignmentTemporaryTypeFullName(assignment: OxAssignment): Option[String] = {
     overloadedAssignmentOperatorTarget(assignment)
-      .map(target => normalizeType(resolveAliasType(target.entry.function.returnType)))
+      .map(target => functionSemanticReturnTypeFullName(target.entry))
       .flatMap(returnedObjectTypeFullName)
   }
 
   private def overloadedUnaryTemporaryTypeFullName(unary: OxUnary): Option[String] = {
     overloadedUnaryOperatorTarget(unary)
-      .map(target => normalizeType(resolveAliasType(target.entry.function.returnType)))
+      .map(target => functionSemanticReturnTypeFullName(target.entry))
       .flatMap(returnedObjectTypeFullName)
   }
 
   private def overloadedIndexTemporaryTypeFullName(indexAccess: OxIndexAccess): Option[String] = {
     overloadedIndexOperatorTarget(indexAccess)
-      .map(target => normalizeType(resolveAliasType(target.entry.function.returnType)))
+      .map(target => functionSemanticReturnTypeFullName(target.entry))
       .flatMap(returnedObjectTypeFullName)
   }
 
@@ -4864,7 +4864,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         aggregateAssignmentExpressionAsts(pattern)
       case OxTypeOf(_, _, argument) =>
         aggregateAssignmentExpressionAsts(argument)
-      case OxCast(_, _, _, value) =>
+      case OxCast(_, _, _, _, value) =>
         aggregateAssignmentExpressionAsts(value)
       case OxSizeOf(_, _, value, _) =>
         value.toSeq.flatMap(aggregateAssignmentExpressionAsts)
@@ -4913,7 +4913,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         lambdaCaptureInitializerAssignmentAsts(pattern)
       case OxTypeOf(_, _, argument) =>
         lambdaCaptureInitializerAssignmentAsts(argument)
-      case OxCast(_, _, _, value) =>
+      case OxCast(_, _, _, _, value) =>
         lambdaCaptureInitializerAssignmentAsts(value)
       case OxSizeOf(_, _, value, _) =>
         value.toSeq.flatMap(lambdaCaptureInitializerAssignmentAsts)
@@ -5221,7 +5221,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           visitExpression(pattern)
         case OxTypeOf(_, _, argument) =>
           visitExpression(argument)
-        case OxCast(_, _, _, value) =>
+        case OxCast(_, _, _, _, value) =>
           visitExpression(value)
         case OxSizeOf(_, _, value, _) =>
           value.foreach(visitExpression)
@@ -5430,7 +5430,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def conversionOperatorReturnObjectTypeFullName(entry: FunctionEntry): Option[String] = {
-    Option(normalizeType(resolveAliasType(entry.function.returnType))).flatMap(returnedObjectTypeFullName)
+    Option(functionSemanticReturnTypeFullName(entry)).flatMap(returnedObjectTypeFullName)
   }
 
   private def conversionOperatorNamesForType(typeFullName: String): Seq[String] = {
@@ -5825,13 +5825,20 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .orElse(constructorTemporaryTypeFullName(call))
       .orElse(
         overloadedCallOperatorTarget(call)
-          .map(target => normalizeType(target.entry.function.returnType))
+          .map(target => functionSemanticReturnTypeFullName(target.entry))
           .orElse(
             expressionTypeFullName(call.callee)
               .flatMap(returnTypeFromFunctionPointer)
-              .orElse(functionEntryForCall(call).map(entry => normalizeType(entry.function.returnType)))
+              .orElse(functionEntryForCall(call).map(functionSemanticReturnTypeFullName))
           )
       )
+  }
+
+  private def functionSemanticReturnTypeFullName(entry: FunctionEntry): String = {
+    ownerResolvedTypeFullNamePreservingCv(
+      entry.function.semanticReturnType,
+      entry.ownerFullName.orElse(entry.lexicalOwnerFullName)
+    )
   }
 
   private def expressionTypeFullName(expression: OxExpression): Option[String] = {
@@ -5865,17 +5872,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         expressionTypeFullName(base).flatMap(typeName => fieldTypeFullName(typeName, field))
       case unary: OxUnary =>
         overloadedUnaryOperatorTarget(unary)
-          .map(target => normalizeType(target.entry.function.returnType))
+          .map(target => functionSemanticReturnTypeFullName(target.entry))
           .orElse(unaryExpressionTypeFullName(unary))
-      case OxCast(typeName, _, _, _) =>
-        Option(resolveAliasType(typeName))
+      case OxCast(_, semanticTypeName, _, _, _) =>
+        Option(resolveAliasType(semanticTypeName))
       case OxNew(typeName, _, _, _, _) =>
         Option(s"${normalizeType(resolveAliasType(typeName))}*")
       case lambda: OxLambda =>
         Option(lambdaInfo(lambda).fullName)
       case indexAccess: OxIndexAccess =>
         overloadedIndexOperatorTarget(indexAccess)
-          .map(target => normalizeType(target.entry.function.returnType))
+          .map(target => functionSemanticReturnTypeFullName(target.entry))
           .orElse(expressionTypeFullName(indexAccess.base).map(_.stripSuffix("[]")))
       case initializerList: OxInitializerList =>
         initializerListTypeFullName(initializerList)
@@ -5883,7 +5890,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         callReturnTypeFullName(call)
       case binary: OxBinary =>
         overloadedBinaryOperatorTarget(binary)
-          .map(target => normalizeType(target.entry.function.returnType))
+          .map(target => functionSemanticReturnTypeFullName(target.entry))
           .orElse(binaryExpressionTypeFullName(binary))
       case assignment: OxAssignment =>
         assignmentExpressionTypeFullName(assignment)
@@ -5894,7 +5901,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def assignmentExpressionTypeFullName(assignment: OxAssignment): Option[String] = {
     overloadedAssignmentOperatorTarget(assignment)
-      .map(target => normalizeType(target.entry.function.returnType))
+      .map(target => functionSemanticReturnTypeFullName(target.entry))
       .orElse(expressionTypeFullName(assignment.left))
   }
 
@@ -6416,15 +6423,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case _: OxIdentifier | _: OxFieldAccess | _: OxIndexAccess => false
       case assignment: OxAssignment =>
         overloadedAssignmentOperatorTarget(assignment)
-          .map(target => typeNameIsRvalue(target.entry.function.returnType))
+          .map(target => typeNameIsRvalue(functionSemanticReturnTypeFullName(target.entry)))
           .getOrElse(false)
       case OxUnary("*", _, _, _, _)       => false
       case OxPackExpansion(_, _, pattern) => expressionIsRvalue(pattern)
       case _: OxTypeOf                    => true
       case call: OxCall =>
         callReturnTypeFullName(call).map(typeNameIsRvalue).getOrElse(true)
-      case OxCast(typeName, _, _, _) =>
-        typeNameIsRvalue(typeName)
+      case OxCast(_, semanticTypeName, _, _, _) =>
+        typeNameIsRvalue(semanticTypeName)
       case _ =>
         true
     }

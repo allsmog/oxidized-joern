@@ -146,6 +146,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |using MeterAlias = Meter;
           |const Meter globalMeter;
           |const MeterAlias aliasGlobal;
+          |const MeterAlias& borrowAlias(Meter& meter) { return meter; }
+          |auto borrowTrailing(Meter& meter) -> const MeterAlias& { return meter; }
           |class Holder {
           |public:
           |  const Meter field;
@@ -155,6 +157,9 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |};
           |}
           |typedef Core::Meter GlobalMeterAlias;
+          |const GlobalMeterAlias& borrowTypedef(Core::Meter& meter) {
+          |  return meter;
+          |}
           |int readConst(const Core::Meter& meter) {
           |  return meter.value();
           |}
@@ -171,6 +176,21 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |}
           |int readNamespaceAlias(const Core::MeterAlias& meter) {
           |  return meter.value();
+          |}
+          |int readReturn(Core::Meter& meter) {
+          |  return Core::borrowAlias(meter).value();
+          |}
+          |int readTrailingReturn(Core::Meter& meter) {
+          |  return Core::borrowTrailing(meter).value();
+          |}
+          |int readTypedefReturn(Core::Meter& meter) {
+          |  return borrowTypedef(meter).value();
+          |}
+          |int readCast(Core::Meter& meter) {
+          |  return static_cast<const Core::Meter&>(meter).value();
+          |}
+          |int readAliasCast(Core::Meter& meter) {
+          |  return static_cast<const GlobalMeterAlias&>(meter).value();
           |}
           |int readGlobal() {
           |  return Core::globalMeter.value();
@@ -204,6 +224,28 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.Meter.value:int()<const>")
       cpg.method.nameExact("readNamespaceAlias").call.codeExact("meter.value()").methodFullName.l shouldBe
         List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readReturn").call.codeExact("Core::borrowAlias(meter).value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method
+        .nameExact("readTrailingReturn")
+        .call
+        .codeExact("Core::borrowTrailing(meter).value()")
+        .methodFullName
+        .l shouldBe List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readTypedefReturn").call.codeExact("borrowTypedef(meter).value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method
+        .nameExact("readCast")
+        .call
+        .codeExact("static_cast<const Core::Meter&>(meter).value()")
+        .methodFullName
+        .l shouldBe List("Core.Meter.value:int()<const>")
+      cpg.method
+        .nameExact("readAliasCast")
+        .call
+        .codeExact("static_cast<const GlobalMeterAlias&>(meter).value()")
+        .methodFullName
+        .l shouldBe List("Core.Meter.value:int()<const>")
       cpg.method
         .fullNameExact("Core.Holder.readField:int()")
         .call
