@@ -132,9 +132,15 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "control_transfer_statement" => self.return_stmt(node),
             "if_statement" => self.if_expr(node),
             "assignment"
+            | "additive_expression"
             | "boolean_literal"
             | "call_expression"
+            | "comparison_expression"
+            | "conjunction_expression"
+            | "disjunction_expression"
+            | "equality_expression"
             | "integer_literal"
+            | "multiplicative_expression"
             | "simple_identifier"
             | "self_expression"
             | "navigation_expression"
@@ -575,6 +581,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
             "assignment" => self.assignment_expr(node),
             "if_statement" => self.if_expr(node),
+            "additive_expression"
+            | "comparison_expression"
+            | "conjunction_expression"
+            | "disjunction_expression"
+            | "equality_expression"
+            | "multiplicative_expression" => self.binary_operator_expr(node),
             "call_expression" => self.function_call_expr(node),
             "navigation_expression" => self.member_access_expr(node),
             "boolean_literal" => Ok(self.syntax_node(
@@ -646,6 +658,38 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "MemberAccessExprSyntax",
             self.range_for_node(node),
             children,
+        ))
+    }
+
+    fn binary_operator_expr(&self, node: Node<'a>) -> Result<Value> {
+        let lhs = self
+            .field_child(node, "lhs")
+            .context("binary expression is missing lhs")?;
+        let op = self
+            .field_child(node, "op")
+            .context("binary expression is missing operator")?;
+        let rhs = self
+            .field_child(node, "rhs")
+            .context("binary expression is missing rhs")?;
+        let operator = self.syntax_node(
+            "BinaryOperatorExprSyntax",
+            self.range_for_node(op),
+            vec![self.with_name(
+                self.token_for_node(
+                    op,
+                    &format!("binaryOperator({})", quoted_text(self.text(op))),
+                ),
+                "operator",
+            )],
+        );
+        Ok(self.syntax_node(
+            "InfixOperatorExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.expr(lhs)?, "leftOperand"),
+                self.with_name(operator, "operator"),
+                self.with_name(self.expr(rhs)?, "rightOperand"),
+            ],
         ))
     }
 
@@ -1213,6 +1257,19 @@ mod tests {
     }
 
     #[test]
+    fn emits_binary_operator_expressions() {
+        let source = "a = b + 1\nif a > 0 {\n  foo()\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let binary_ops = find_node_types(&value, "BinaryOperatorExprSyntax");
+        let token_kinds = binary_ops
+            .iter()
+            .map(|node| node["children"][0]["tokenKind"].as_str().unwrap())
+            .collect::<Vec<_>>();
+        assert!(token_kinds.contains(&"binaryOperator(\"+\")"));
+        assert!(token_kinds.contains(&"binaryOperator(\">\")"));
+    }
+
+    #[test]
     fn emits_return_statement() {
         let source = "func f() -> Int {\n  return foo()\n}\n";
         let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
@@ -1314,5 +1371,18 @@ mod tests {
                     .iter()
                     .find_map(|child| find_first_node_type(child, node_type))
             })
+    }
+
+    fn find_node_types<'v>(value: &'v Value, node_type: &str) -> Vec<&'v Value> {
+        let mut values = Vec::new();
+        if value.get("nodeType").and_then(Value::as_str) == Some(node_type) {
+            values.push(value);
+        }
+        if let Some(children) = value.get("children").and_then(Value::as_array) {
+            for child in children {
+                values.extend(find_node_types(child, node_type));
+            }
+        }
+        values
     }
 }
