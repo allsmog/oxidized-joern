@@ -135,6 +135,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
     "rank overloads by inheritance distance and reference binding" in {
       val cpg = code(
         """
+          |#define CORE_NULL 0
           |namespace Core {
           |class Base {};
           |class Mid : public Base {};
@@ -174,6 +175,16 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |long rankIntegral(long value) { return 2; }
           |double rankFloat(double value) { return 1; }
           |long double rankFloat(long double value) { return 2; }
+          |int pickSignedLiteral(int value) { return 1; }
+          |long pickSignedLiteral(long value) { return 2; }
+          |int pickUnsignedLiteral(int value) { return 1; }
+          |short pickUnsignedLiteral(unsigned int value) { return 2; }
+          |int pickLongLongLiteral(long value) { return 1; }
+          |short pickLongLongLiteral(long long value) { return 2; }
+          |int pickUnsignedLongLiteral(unsigned int value) { return 1; }
+          |short pickUnsignedLongLiteral(unsigned long value) { return 2; }
+          |int pickUnsignedLongLongLiteral(unsigned int value) { return 1; }
+          |short pickUnsignedLongLongLiteral(unsigned long long value) { return 2; }
           |int pickNull(Mid* value) { return 1; }
           |long pickNull(long value) { return 2; }
           |class TargetBase {};
@@ -240,7 +251,18 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::pickPointerBool(intPtr) +
           |    Core::pickArrayBool(values) +
           |    Core::pickZeroNull(0) +
+          |    Core::pickZeroNull(0L) +
+          |    Core::pickZeroNull(0x0) +
+          |    Core::pickZeroNull(0b0) +
+          |    Core::pickZeroNull(0B0u) +
+          |    Core::pickZeroNull(0'0) +
+          |    Core::pickZeroNull(0x0'0L) +
+          |    Core::pickZeroNull((0)) +
+          |    Core::pickZeroNull(CORE_NULL) +
+          |    Core::pickZeroNull(+0) +
+          |    Core::pickZeroNull(-0) +
           |    Core::pickZeroNullAmbiguous(0) +
+          |    Core::pickZeroNullAmbiguous(CORE_NULL) +
           |    Core::choose(leaf) +
           |    Core::choose(1) +
           |    Core::choose(1, 2) +
@@ -249,6 +271,11 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::rankIntegral('x') +
           |    Core::rankIntegral(true) +
           |    Core::rankFloat(1.0f) +
+          |    Core::pickSignedLiteral(1L) +
+          |    Core::pickUnsignedLiteral(1u) +
+          |    Core::pickLongLongLiteral(1LL) +
+          |    Core::pickUnsignedLongLiteral(1UL) +
+          |    Core::pickUnsignedLongLongLiteral(0b1ULL) +
           |    Core::pickNull(nullptr) +
           |    Core::pickConverted(source) +
           |    Core::pickConverted(constSource) +
@@ -293,7 +320,29 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pickArrayBool:int(bool)")
       cpg.method.nameExact("use").call.codeExact("Core::pickZeroNull(0)").methodFullName.l shouldBe
         List("Core.pickZeroNull:int(Mid*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNull(0L)").methodFullName.l shouldBe
+        List("Core.pickZeroNull:int(Mid*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNull(0x0)").methodFullName.l shouldBe
+        List("Core.pickZeroNull:int(Mid*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNull(0b0)").methodFullName.l shouldBe
+        List("Core.pickZeroNull:int(Mid*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNull(0B0u)").methodFullName.l shouldBe
+        List("Core.pickZeroNull:int(Mid*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNull(0'0)").methodFullName.l shouldBe
+        List("Core.pickZeroNull:int(Mid*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNull(0x0'0L)").methodFullName.l shouldBe
+        List("Core.pickZeroNull:int(Mid*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNull((0))").methodFullName.l shouldBe
+        List("Core.pickZeroNull:int(Mid*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNull(CORE_NULL)").methodFullName.l shouldBe
+        List("Core.pickZeroNull:int(Mid*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNull(+0)").methodFullName.l shouldBe
+        List("Core.pickZeroNull")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNull(-0)").methodFullName.l shouldBe
+        List("Core.pickZeroNull")
       cpg.method.nameExact("use").call.codeExact("Core::pickZeroNullAmbiguous(0)").methodFullName.l shouldBe
+        List("Core.pickZeroNullAmbiguous")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNullAmbiguous(CORE_NULL)").methodFullName.l shouldBe
         List("Core.pickZeroNullAmbiguous")
       cpg.method.nameExact("use").call.codeExact("Core::choose(leaf)").methodFullName.l shouldBe
         List("Core.choose:T(T)")
@@ -311,6 +360,16 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.rankIntegral:int(int)")
       cpg.method.nameExact("use").call.codeExact("Core::rankFloat(1.0f)").methodFullName.l shouldBe
         List("Core.rankFloat:double(double)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickSignedLiteral(1L)").methodFullName.l shouldBe
+        List("Core.pickSignedLiteral:long(long)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickUnsignedLiteral(1u)").methodFullName.l shouldBe
+        List("Core.pickUnsignedLiteral:short(unsigned int)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickLongLongLiteral(1LL)").methodFullName.l shouldBe
+        List("Core.pickLongLongLiteral:short(long long)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickUnsignedLongLiteral(1UL)").methodFullName.l shouldBe
+        List("Core.pickUnsignedLongLiteral:short(unsigned long)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickUnsignedLongLongLiteral(0b1ULL)").methodFullName.l shouldBe
+        List("Core.pickUnsignedLongLongLiteral:short(unsigned long long)")
       cpg.method.nameExact("use").call.codeExact("Core::pickNull(nullptr)").methodFullName.l shouldBe
         List("Core.pickNull:int(Mid*)")
       cpg.method.nameExact("use").call.codeExact("Core::pickConverted(source)").methodFullName.l shouldBe
