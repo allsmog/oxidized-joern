@@ -129,7 +129,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "property_declaration" => self.variable_decl(node),
             "function_declaration" => self.function_decl(node),
             "class_declaration" => self.nominal_type_decl(node),
-            "control_transfer_statement" => self.return_stmt(node),
+            "control_transfer_statement" => self.control_transfer_stmt(node),
             "if_statement" => self.if_expr(node),
             "while_statement" => self.while_stmt(node),
             "assignment"
@@ -959,6 +959,43 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(self.syntax_node("ReturnStmtSyntax", self.range_for_node(node), children))
     }
 
+    fn control_transfer_stmt(&self, node: Node<'a>) -> Result<Value> {
+        if self.first_descendant_any_kind(node, "return").is_some() {
+            return self.return_stmt(node);
+        }
+        if let Some(break_keyword) = self.first_descendant_any_kind(node, "break") {
+            return Ok(self.jump_stmt(
+                "BreakStmtSyntax",
+                break_keyword,
+                "breakKeyword",
+                "keyword(SwiftSyntax.Keyword.break)",
+            ));
+        }
+        if let Some(continue_keyword) = self.first_descendant_any_kind(node, "continue") {
+            return Ok(self.jump_stmt(
+                "ContinueStmtSyntax",
+                continue_keyword,
+                "continueKeyword",
+                "keyword(SwiftSyntax.Keyword.continue)",
+            ));
+        }
+        bail!("unsupported Swift control transfer statement");
+    }
+
+    fn jump_stmt(
+        &self,
+        node_type: &str,
+        keyword: Node<'a>,
+        keyword_name: &str,
+        token_kind: &str,
+    ) -> Value {
+        self.syntax_node(
+            node_type,
+            self.range_for_node(keyword),
+            vec![self.with_name(self.token_for_node(keyword, token_kind), keyword_name)],
+        )
+    }
+
     fn string_literal(&self, node: Node<'a>) -> Result<Value> {
         let text_node = self.field_child(node, "text");
         let open_quote = self.token_with_range(
@@ -1372,6 +1409,22 @@ mod tests {
             "InfixOperatorExprSyntax"
         );
         assert_eq!(while_stmt["children"][2]["nodeType"], "CodeBlockSyntax");
+    }
+
+    #[test]
+    fn emits_break_and_continue_statements() {
+        let source = "func f() {\n  while true {\n    continue\n    break\n  }\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let continue_stmt = find_first_node_type(&value, "ContinueStmtSyntax").unwrap();
+        assert_eq!(
+            continue_stmt["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.continue)"
+        );
+        let break_stmt = find_first_node_type(&value, "BreakStmtSyntax").unwrap();
+        assert_eq!(
+            break_stmt["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.break)"
+        );
     }
 
     #[test]

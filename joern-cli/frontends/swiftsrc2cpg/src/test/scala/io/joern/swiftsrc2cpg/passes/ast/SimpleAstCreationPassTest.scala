@@ -201,6 +201,20 @@ class SimpleAstCreationPassTest extends SwiftSrc2CpgSuite {
       }
     }
 
+    "have correct structure for simple break and continue" in {
+      val cpg = code("""
+          |func loop(flag: Bool) {
+          |  while flag {
+          |    continue
+          |    break
+          |  }
+          |}
+          |""".stripMargin)
+
+      cpg.controlStructure.controlStructureType(ControlStructureTypes.CONTINUE).code.l shouldBe List("continue")
+      cpg.controlStructure.controlStructureType(ControlStructureTypes.BREAK).code.l shouldBe List("break")
+    }
+
     "have correct closure bindings" in {
       val cpg = code("""
         |func foo() -> {
