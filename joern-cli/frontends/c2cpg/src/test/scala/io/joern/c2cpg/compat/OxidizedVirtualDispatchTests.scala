@@ -394,6 +394,54 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pick:short(Mid&)")
     }
 
+    "type floating literals for overload ranking" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |int pickFloat(float value) { return 1; }
+          |short pickFloat(double value) { return 2; }
+          |int pickDouble(float value) { return 1; }
+          |short pickDouble(double value) { return 2; }
+          |int pickLongDouble(double value) { return 1; }
+          |short pickLongDouble(long double value) { return 2; }
+          |int pickHexFloat(float value) { return 1; }
+          |short pickHexFloat(double value) { return 2; }
+          |int pickHexDouble(float value) { return 1; }
+          |short pickHexDouble(double value) { return 2; }
+          |int pickHexLongDouble(double value) { return 1; }
+          |short pickHexLongDouble(long double value) { return 2; }
+          |int pickSeparated(float value) { return 1; }
+          |short pickSeparated(double value) { return 2; }
+          |}
+          |long use() {
+          |  return Core::pickFloat(1.0f) +
+          |    Core::pickDouble(1.0) +
+          |    Core::pickLongDouble(1.0L) +
+          |    Core::pickHexFloat(0x1.0p0f) +
+          |    Core::pickHexDouble(0x1.0p0) +
+          |    Core::pickHexLongDouble(0x1.0p0L) +
+          |    Core::pickSeparated(1'000.0f);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").call.codeExact("Core::pickFloat(1.0f)").methodFullName.l shouldBe
+        List("Core.pickFloat:int(float)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickDouble(1.0)").methodFullName.l shouldBe
+        List("Core.pickDouble:short(double)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickLongDouble(1.0L)").methodFullName.l shouldBe
+        List("Core.pickLongDouble:short(long double)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickHexFloat(0x1.0p0f)").methodFullName.l shouldBe
+        List("Core.pickHexFloat:int(float)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickHexDouble(0x1.0p0)").methodFullName.l shouldBe
+        List("Core.pickHexDouble:short(double)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickHexLongDouble(0x1.0p0L)").methodFullName.l shouldBe
+        List("Core.pickHexLongDouble:short(long double)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickSeparated(1'000.0f)").methodFullName.l shouldBe
+        List("Core.pickSeparated:int(float)")
+    }
+
     "type character literals for overload ranking" in {
       val cpg = code(
         """

@@ -251,13 +251,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val fullName  = parentFullName.map(parent => s"$parent.$localName").getOrElse(localName)
       Seq(localName, fullName).distinct.map(typeName => typeName -> structDecl.usingDeclarations)
     }.toMap
-  private val TemplateParameterListPattern = raw"template\s*<([^>]*)>".r
-  private val TemplateTypeParameterPattern = raw"(?:typename|class)\s*(?:\.\.\.)?\s+([A-Za-z_]\w*)".r
-  private val IdentifierTokenPattern       = raw"[A-Za-z_]\w*".r
+  private val TemplateParameterListPattern          = raw"template\s*<([^>]*)>".r
+  private val TemplateTypeParameterPattern          = raw"(?:typename|class)\s*(?:\.\.\.)?\s+([A-Za-z_]\w*)".r
+  private val IdentifierTokenPattern                = raw"[A-Za-z_]\w*".r
+  private val DecimalDigitSequencePatternSource     = raw"\d(?:'?\d)*"
+  private val HexadecimalDigitSequencePatternSource = raw"[0-9a-fA-F](?:'?[0-9a-fA-F])*"
+  private val DecimalExponentPatternSource          = raw"[eE][+-]?$DecimalDigitSequencePatternSource"
+  private val BinaryExponentPatternSource           = raw"[pP][+-]?$DecimalDigitSequencePatternSource"
+  private val DecimalFloatingLiteralPatternSource =
+    raw"(?:(?:(?:$DecimalDigitSequencePatternSource)?\.$DecimalDigitSequencePatternSource|$DecimalDigitSequencePatternSource\.)(?:$DecimalExponentPatternSource)?|$DecimalDigitSequencePatternSource$DecimalExponentPatternSource)"
+  private val HexadecimalFloatingLiteralPatternSource =
+    raw"0[xX](?:(?:(?:$HexadecimalDigitSequencePatternSource)?\.$HexadecimalDigitSequencePatternSource|$HexadecimalDigitSequencePatternSource\.)$BinaryExponentPatternSource|$HexadecimalDigitSequencePatternSource$BinaryExponentPatternSource)"
   private val IntegerLiteralPattern =
     """[+-]?(?:0[xX][0-9a-fA-F](?:'?[0-9a-fA-F])*|0[bB][01](?:'?[01])*|\d(?:'?\d)*)[uUlL]*""".r
   private val FloatingLiteralPattern =
-    """[+-]?(?:(?:\d+\.\d*|\.\d+)(?:[eE][+-]?\d+)?|\d+[eE][+-]?\d+)[fFlL]?""".r
+    raw"[+-]?(?:$DecimalFloatingLiteralPatternSource|$HexadecimalFloatingLiteralPatternSource)[fFlL]?".r
   private val CxxOverloadableBinaryOperators = Set(
     "+",
     "-",
