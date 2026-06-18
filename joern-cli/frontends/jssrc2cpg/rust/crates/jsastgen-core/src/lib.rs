@@ -2,7 +2,7 @@ use anyhow::{bail, Context, Result};
 use serde_json::{json, Map, Value};
 use std::fs;
 use std::path::Path;
-use tree_sitter::{Node, Parser, Tree};
+use tree_sitter::{Node, Parser, Point, Tree};
 
 pub fn parse_file(root: &Path, path: &Path) -> Result<Value> {
     let content =
@@ -91,6 +91,8 @@ fn stmt_json(node: Node, source: &str) -> Value {
         "do_statement" => do_while_statement_json(node, source),
         "for_statement" => for_statement_json(node, source),
         "for_in_statement" => for_in_of_statement_json(node, source),
+        "switch_statement" => switch_statement_json(node, source),
+        "labeled_statement" => labeled_statement_json(node, source),
         "break_statement" => jump_statement_json("BreakStatement", node, source),
         "continue_statement" => jump_statement_json("ContinueStatement", node, source),
         "try_statement" => try_statement_json(node, source),
@@ -113,6 +115,7 @@ fn expr_json(node: Node, source: &str) -> Value {
         "true" => boolean_literal_json(node, true),
         "false" => boolean_literal_json(node, false),
         "null" => with_span("NullLiteral", node, json!({ "value": Value::Null })),
+        "this" => with_span("ThisExpression", node, json!({})),
         "binary_expression" => binary_expression_json(node, source),
         "assignment_expression" | "augmented_assignment_expression" => {
             assignment_expression_json(node, source)
@@ -223,6 +226,7 @@ fn block_from_node(node: Node) -> Value {
 fn return_statement_json(node: Node, source: &str) -> Value {
     let argument = node
         .child_by_field_name("argument")
+        .or_else(|| node.named_child(0))
         .map(|child| expr_json(child, source))
         .unwrap_or(Value::Null);
 
@@ -382,6 +386,84 @@ fn for_in_of_left_json(for_node: Node, left_node: Node, source: &str) -> Value {
     } else {
         id
     }
+}
+
+fn switch_statement_json(node: Node, source: &str) -> Value {
+    let discriminant = node
+        .child_by_field_name("value")
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let cases = node
+        .child_by_field_name("body")
+        .map(|body| {
+            named_children(body)
+                .filter_map(|child| switch_case_json(child, source))
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+
+    with_span(
+        "SwitchStatement",
+        node,
+        json!({
+            "discriminant": discriminant,
+            "cases": cases
+        }),
+    )
+}
+
+fn switch_case_json(node: Node, source: &str) -> Option<Value> {
+    let test_node = node.child_by_field_name("value");
+    let test = test_node
+        .map(|child| expr_json(child, source))
+        .unwrap_or(Value::Null);
+    let consequent = named_children(node)
+        .filter(|child| {
+            test_node.is_none_or(|test| {
+                child.kind() != test.kind()
+                    || child.start_byte() != test.start_byte()
+                    || child.end_byte() != test.end_byte()
+            })
+        })
+        .map(|child| stmt_json(child, source))
+        .filter(|value| !value.is_null())
+        .collect::<Vec<_>>();
+    let colon = colon_child(node, source).unwrap_or(node);
+
+    match node.kind() {
+        "switch_case" | "switch_default" => Some(with_span_bounds(
+            "SwitchCase",
+            node.start_byte(),
+            node.start_position(),
+            colon.end_byte(),
+            colon.end_position(),
+            json!({
+                "test": test,
+                "consequent": consequent
+            }),
+        )),
+        _ => None,
+    }
+}
+
+fn labeled_statement_json(node: Node, source: &str) -> Value {
+    let label = node
+        .child_by_field_name("label")
+        .map(|child| identifier_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let body = node
+        .child_by_field_name("body")
+        .map(|child| stmt_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        "LabeledStatement",
+        node,
+        json!({
+            "label": label,
+            "body": body
+        }),
+    )
 }
 
 fn non_empty_stmt_or_expr_json(node: Node, source: &str) -> Option<Value> {
@@ -1086,23 +1168,41 @@ fn declaration_kind_in_for_in_of(node: Node, source: &str) -> Option<String> {
 }
 
 fn with_span(kind: &str, node: Node, fields: Value) -> Value {
+    with_span_bounds(
+        kind,
+        node.start_byte(),
+        node.start_position(),
+        node.end_byte(),
+        node.end_position(),
+        fields,
+    )
+}
+
+fn with_span_bounds(
+    kind: &str,
+    start_byte: usize,
+    start_position: Point,
+    end_byte: usize,
+    end_position: Point,
+    fields: Value,
+) -> Value {
     let mut object = match fields {
         Value::Object(map) => map,
         _ => Map::new(),
     };
     object.insert("type".into(), Value::String(kind.into()));
-    object.insert("start".into(), Value::from(node.start_byte()));
-    object.insert("end".into(), Value::from(node.end_byte()));
+    object.insert("start".into(), Value::from(start_byte));
+    object.insert("end".into(), Value::from(end_byte));
     object.insert(
         "loc".into(),
         json!({
             "start": {
-                "line": node.start_position().row + 1,
-                "column": node.start_position().column
+                "line": start_position.row + 1,
+                "column": start_position.column
             },
             "end": {
-                "line": node.end_position().row + 1,
-                "column": node.end_position().column
+                "line": end_position.row + 1,
+                "column": end_position.column
             }
         }),
     );
@@ -1154,6 +1254,12 @@ fn has_keyword_child(node: Node, source: &str, keyword: &str) -> bool {
     false
 }
 
+fn colon_child<'a>(node: Node<'a>, source: &str) -> Option<Node<'a>> {
+    (0..node.child_count())
+        .filter_map(|index| node.child(index))
+        .find(|child| !child.is_named() && node_text(*child, source) == ":")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1183,6 +1289,10 @@ mod tests {
         assert_eq!(
             json["ast"]["program"]["body"][1]["type"],
             "FunctionDeclaration"
+        );
+        assert_eq!(
+            json["ast"]["program"]["body"][1]["body"]["body"][0]["argument"]["name"],
+            "x"
         );
         assert_eq!(
             json["ast"]["program"]["body"][2]["type"],
@@ -1408,6 +1518,48 @@ mod tests {
         assert_eq!(array_pattern["type"], "ArrayPattern");
         assert_eq!(array_pattern["elements"][0]["name"], "x");
         assert_eq!(array_pattern["elements"][1]["name"], "y");
+    }
+
+    #[test]
+    fn emits_switch_labeled_and_this_expressions() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let source =
+            "loop1: while (ok) { continue loop1; }\nswitch (x) { case 1: y; default: this.z; }\n";
+        let json = parse_source(root, path, source).expect("parse succeeds");
+
+        let labeled = &json["ast"]["program"]["body"][0];
+        assert_eq!(labeled["type"], "LabeledStatement");
+        assert_eq!(labeled["label"]["name"], "loop1");
+        assert_eq!(labeled["body"]["type"], "WhileStatement");
+        assert_eq!(labeled["body"]["body"]["body"][0]["label"]["name"], "loop1");
+
+        let switch_stmt = &json["ast"]["program"]["body"][1];
+        assert_eq!(switch_stmt["type"], "SwitchStatement");
+        assert_eq!(switch_stmt["discriminant"]["name"], "x");
+        assert_eq!(switch_stmt["cases"].as_array().unwrap().len(), 2);
+
+        let case_label = &switch_stmt["cases"][0];
+        assert_eq!(case_label["type"], "SwitchCase");
+        assert_eq!(case_label["test"]["value"], 1.0);
+        assert_eq!(case_label["consequent"][0]["expression"]["name"], "y");
+        assert_eq!(
+            &source[case_label["start"].as_u64().unwrap() as usize
+                ..case_label["end"].as_u64().unwrap() as usize],
+            "case 1:"
+        );
+
+        let default_label = &switch_stmt["cases"][1];
+        assert_eq!(default_label["test"], Value::Null);
+        assert_eq!(
+            &source[default_label["start"].as_u64().unwrap() as usize
+                ..default_label["end"].as_u64().unwrap() as usize],
+            "default:"
+        );
+        assert_eq!(
+            default_label["consequent"][0]["expression"]["object"]["type"],
+            "ThisExpression"
+        );
     }
 
     #[test]
