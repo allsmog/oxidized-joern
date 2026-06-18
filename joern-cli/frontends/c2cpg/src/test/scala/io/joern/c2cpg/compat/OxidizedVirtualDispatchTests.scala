@@ -835,6 +835,114 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         .l shouldBe Nil
     }
 
+    "ignore explicit constructors for array element initialization" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Hidden {
+          |public:
+          |  explicit Hidden(int value) {}
+          |};
+          |class Visible {
+          |public:
+          |  Visible(int value) {}
+          |};
+          |class ConditionalVisible {
+          |public:
+          |  explicit(false) ConditionalVisible(int value) {}
+          |};
+          |class ConditionalHidden {
+          |public:
+          |  explicit(true) ConditionalHidden(int value) {}
+          |};
+          |class Owner {
+          |  Hidden hidden[1];
+          |  Visible visible[1];
+          |  ConditionalVisible conditionalVisible[1];
+          |  ConditionalHidden conditionalHidden[1];
+          |public:
+          |  Owner(int seed) : hidden{{seed}}, visible{{seed}}, conditionalVisible{{seed}},
+          |    conditionalHidden{{seed}} {}
+          |};
+          |}
+          |Core::Hidden globalDirectHidden[1]{{1}};
+          |Core::Hidden globalCopyHidden[1] = {{1}};
+          |Core::Hidden globalFlatHidden[1] = {1};
+          |Core::Visible globalCopyVisible[1] = {{1}};
+          |Core::Visible globalFlatVisible[1] = {1};
+          |Core::ConditionalVisible globalCopyConditionalVisible[1] = {{1}};
+          |Core::ConditionalHidden globalCopyConditionalHidden[1] = {{1}};
+          |int use(int seed) {
+          |  Core::Hidden localDirectHidden[1]{{seed}};
+          |  Core::Hidden localCopyHidden[1] = {{seed}};
+          |  Core::Hidden localFlatHidden[1] = {seed};
+          |  Core::Visible localCopyVisible[1] = {{seed}};
+          |  Core::Visible localFlatVisible[1] = {seed};
+          |  Core::ConditionalVisible localCopyConditionalVisible[1] = {{seed}};
+          |  Core::ConditionalHidden localCopyConditionalHidden[1] = {{seed}};
+          |  Core::Owner owner(seed);
+          |  return seed;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.call.codeExact("globalDirectHidden[0] = Core.Hidden.Hidden(1)").l shouldBe Nil
+      cpg.call.codeExact("globalCopyHidden[0] = Core.Hidden.Hidden(1)").l shouldBe Nil
+      cpg.call.codeExact("globalFlatHidden[0] = Core.Hidden.Hidden(1)").l shouldBe Nil
+      cpg.call.codeExact("globalCopyVisible[0] = Core.Visible.Visible(1)").l should have size 1
+      cpg.call.codeExact("globalFlatVisible[0] = Core.Visible.Visible(1)").l should have size 1
+      cpg.call
+        .codeExact("globalCopyConditionalVisible[0] = Core.ConditionalVisible.ConditionalVisible(1)")
+        .l should have size 1
+      cpg.call
+        .codeExact("globalCopyConditionalHidden[0] = Core.ConditionalHidden.ConditionalHidden(1)")
+        .l shouldBe Nil
+      cpg.method.nameExact("use").call.codeExact("localDirectHidden[0] = Core.Hidden.Hidden(seed)").l shouldBe Nil
+      cpg.method.nameExact("use").call.codeExact("localCopyHidden[0] = Core.Hidden.Hidden(seed)").l shouldBe Nil
+      cpg.method.nameExact("use").call.codeExact("localFlatHidden[0] = Core.Hidden.Hidden(seed)").l shouldBe Nil
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("localCopyVisible[0] = Core.Visible.Visible(seed)")
+        .l should have size 1
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("localFlatVisible[0] = Core.Visible.Visible(seed)")
+        .l should have size 1
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("localCopyConditionalVisible[0] = Core.ConditionalVisible.ConditionalVisible(seed)")
+        .l should have size 1
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("localCopyConditionalHidden[0] = Core.ConditionalHidden.ConditionalHidden(seed)")
+        .l shouldBe Nil
+      cpg.method
+        .fullNameExact("Core.Owner.Owner:void(int)")
+        .call
+        .codeExact("this->hidden[0] = Core.Hidden.Hidden(seed)")
+        .l shouldBe Nil
+      cpg.method
+        .fullNameExact("Core.Owner.Owner:void(int)")
+        .call
+        .codeExact("this->visible[0] = Core.Visible.Visible(seed)")
+        .l should have size 1
+      cpg.method
+        .fullNameExact("Core.Owner.Owner:void(int)")
+        .call
+        .codeExact("this->conditionalVisible[0] = Core.ConditionalVisible.ConditionalVisible(seed)")
+        .l should have size 1
+      cpg.method
+        .fullNameExact("Core.Owner.Owner:void(int)")
+        .call
+        .codeExact("this->conditionalHidden[0] = Core.ConditionalHidden.ConditionalHidden(seed)")
+        .l shouldBe Nil
+    }
+
     "ignore explicit conversion operators for implicit overload conversions" in {
       val cpg = code(
         """

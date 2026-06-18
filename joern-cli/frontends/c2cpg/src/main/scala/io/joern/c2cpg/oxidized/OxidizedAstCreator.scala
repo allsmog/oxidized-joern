@@ -2263,13 +2263,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     typeName: String,
     arguments: Seq[OxExpression],
     initCode: String,
-    resolvedConstructor: Option[FunctionEntry] = None
+    resolvedConstructor: Option[FunctionEntry] = None,
+    includeExplicitConstructors: Boolean = true
   ): Option[ConstructorInvocationInfo] = {
     val normalizedType = normalizeType(resolveAliasType(typeName))
     val aggregateType =
       resolveAggregateTypeFullName(receiverAggregateTypeName(normalizedType)).getOrElse(normalizedType)
     val constructorName = aggregateType.split('.').lastOption.getOrElse(aggregateType)
-    val constructor     = resolvedConstructor.orElse(constructorEntry(aggregateType, arguments))
+    val constructor =
+      resolvedConstructor.orElse(constructorEntry(aggregateType, arguments, includeExplicitConstructors))
     val implicitSignature =
       Option.when(arguments.isEmpty && hasImplicitDefaultConstructor(aggregateType))("void()")
     val signature = constructor.map(_.function.signature).orElse(implicitSignature)
@@ -3086,15 +3088,33 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val resolvedElementTypeName =
       resolveAggregateTypeFullName(receiverAggregateTypeName(elementTypeName)).getOrElse(elementTypeName)
     initializer match {
-      case initializerList: OxInitializerList if isConstructorInitializer(resolvedElementTypeName, initializerList) =>
-        val resolution = constructorInitializerResolution(resolvedElementTypeName, initializerList)
+      case initializerList: OxInitializerList
+          if isConstructorInitializer(resolvedElementTypeName, initializerList, includeExplicitConstructors = false) =>
+        val resolution =
+          constructorInitializerResolution(
+            resolvedElementTypeName,
+            initializerList,
+            includeExplicitConstructors = false
+          )
         val initCode = normalizedConstructorInitCode(initializerList.code.trim, resolution.preserveInitializerListCode)
-        constructorInvocationInfo(resolvedElementTypeName, resolution.arguments, initCode, resolution.entry)
+        constructorInvocationInfo(
+          resolvedElementTypeName,
+          resolution.arguments,
+          initCode,
+          resolution.entry,
+          includeExplicitConstructors = false
+        )
           .map(info => (info, resolution.arguments, resolution.entry))
       case _ =>
         val arguments   = Seq(initializer)
-        val constructor = constructorEntry(resolvedElementTypeName, arguments)
-        constructorInvocationInfo(resolvedElementTypeName, arguments, initializer.code, constructor)
+        val constructor = implicitConstructorEntry(resolvedElementTypeName, arguments)
+        constructorInvocationInfo(
+          resolvedElementTypeName,
+          arguments,
+          initializer.code,
+          constructor,
+          includeExplicitConstructors = false
+        )
           .map(info => (info, arguments, constructor))
     }
   }
