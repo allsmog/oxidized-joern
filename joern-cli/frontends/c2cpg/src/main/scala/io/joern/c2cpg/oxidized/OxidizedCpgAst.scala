@@ -97,6 +97,7 @@ case class OxTypedefDecl(
 case class OxFunctionDecl(
   name: String,
   returnType: String,
+  semanticReturnType: String,
   signature: String,
   isDefinition: Boolean,
   isStatic: Boolean,
@@ -235,7 +236,8 @@ case class OxConditional(
   alternative: OxExpression
 ) extends OxExpression
 
-case class OxCast(typeName: String, code: String, line: Int, value: OxExpression) extends OxExpression
+case class OxCast(typeName: String, semanticTypeName: String, code: String, line: Int, value: OxExpression)
+    extends OxExpression
 
 case class OxFold(operator: String, code: String, line: Int, left: Option[OxExpression], right: Option[OxExpression])
     extends OxExpression
@@ -380,6 +382,7 @@ object OxDocument {
         OxFunctionDecl(
           name = str(value, "name"),
           returnType = str(value, "returnType"),
+          semanticReturnType = value.obj.get("semanticReturnType").map(_.str).getOrElse(str(value, "returnType")),
           signature = str(value, "signature"),
           isDefinition = value("isDefinition").bool,
           isStatic = value.obj.get("isStatic").exists(_.bool),
@@ -638,6 +641,7 @@ object OxDocument {
       case "cast" =>
         OxCast(
           typeName = str(value, "typeName"),
+          semanticTypeName = value.obj.get("semanticTypeName").map(_.str).getOrElse(str(value, "typeName")),
           code = str(value, "code"),
           line = int(value, "line"),
           value = expression(value("value"))

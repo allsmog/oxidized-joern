@@ -214,6 +214,7 @@ pub struct TypedefDecl {
 pub struct FunctionDecl {
     pub name: String,
     pub return_type: String,
+    pub semantic_return_type: String,
     pub signature: String,
     pub is_definition: bool,
     pub is_static: bool,
@@ -472,6 +473,8 @@ pub enum Expression {
     Cast {
         #[serde(rename = "typeName")]
         type_name: String,
+        #[serde(rename = "semanticTypeName")]
+        semantic_type_name: String,
         code: String,
         line: usize,
         value: Box<Expression>,
@@ -2004,6 +2007,8 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
     let name = declarator_name(declarator, source)?;
     let function_declarator = function_declarator_node(declarator).unwrap_or(declarator);
     let return_type = function_return_type(type_node, declarator, function_declarator, source);
+    let semantic_return_type =
+        semantic_function_return_type(node, type_node, declarator, function_declarator, source);
     let parameters = function_declarator
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
@@ -2015,6 +2020,7 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
         name,
         signature: function_signature(&return_type, &parameters, is_const),
         return_type,
+        semantic_return_type,
         is_definition: true,
         is_static: is_static_function(node, source),
         is_const,
@@ -2038,6 +2044,8 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
     let name = declarator_name(declarator, source)?;
     let function_declarator = function_declarator_node(declarator).unwrap_or(declarator);
     let return_type = function_return_type(type_node, declarator, function_declarator, source);
+    let semantic_return_type =
+        semantic_function_return_type(node, type_node, declarator, function_declarator, source);
     let parameters = function_declarator
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
@@ -2048,6 +2056,7 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
         name,
         signature: function_signature(&return_type, &parameters, is_const),
         return_type,
+        semantic_return_type,
         is_definition: false,
         is_static: is_static_function(node, source),
         is_const,
@@ -2074,6 +2083,9 @@ fn parse_operator_cast(
     let return_type = operator_cast
         .child_by_field_name("type")
         .map(|type_node| type_name_from_type_node(type_node, source))?;
+    let semantic_return_type = operator_cast
+        .child_by_field_name("type")
+        .map(|type_node| type_name_from_type_node_preserving_cv(type_node, source))?;
     let name = operator_cast_name(declarator, &return_type, source);
     let function_declarator = function_declarator_node(operator_cast).unwrap_or(operator_cast);
     let parameters = function_declarator
@@ -2093,6 +2105,7 @@ fn parse_operator_cast(
         name,
         signature: function_signature(&return_type, &parameters, is_const),
         return_type,
+        semantic_return_type,
         is_definition: is_definition && node.child_by_field_name("body").is_some(),
         is_static: false,
         is_const,
@@ -2148,6 +2161,7 @@ fn parse_requires_expression_declarations(node: Node, source: &[u8]) -> Vec<Func
             FunctionDecl {
                 name: "requires".to_string(),
                 signature: signature(&return_type, &parameters),
+                semantic_return_type: return_type.clone(),
                 return_type,
                 is_definition: false,
                 is_static: false,
@@ -2191,6 +2205,7 @@ fn parse_constructor_or_destructor(
     Some(FunctionDecl {
         name,
         signature: function_signature(&return_type, &parameters, false),
+        semantic_return_type: return_type.clone(),
         return_type,
         is_definition: is_definition && node.child_by_field_name("body").is_some(),
         is_static: false,
@@ -2314,11 +2329,27 @@ fn function_return_type(
     function_declarator: Node,
     source: &[u8],
 ) -> String {
-    trailing_return_type(function_declarator, source)
+    function_return_type_with_normalizer(
+        type_node,
+        declarator,
+        function_declarator,
+        source,
+        normalize_type,
+    )
+}
+
+fn function_return_type_with_normalizer(
+    type_node: Option<Node>,
+    declarator: Node,
+    function_declarator: Node,
+    source: &[u8],
+    normalizer: fn(&str) -> String,
+) -> String {
+    trailing_return_type_with_normalizer(function_declarator, source, normalizer)
         .or_else(|| {
             type_node.map(|type_node| {
                 type_from_declarator(
-                    &type_name_from_type_node(type_node, source),
+                    &type_name_from_type_node_with_normalizer(type_node, source, normalizer),
                     declarator,
                     source,
                 )
@@ -2327,14 +2358,47 @@ fn function_return_type(
         .unwrap_or_else(|| "void".to_string())
 }
 
+fn semantic_function_return_type(
+    declaration: Node,
+    type_node: Option<Node>,
+    declarator: Node,
+    function_declarator: Node,
+    source: &[u8],
+) -> String {
+    trailing_return_type_with_normalizer(function_declarator, source, normalize_type_preserving_cv)
+        .or_else(|| {
+            type_node.map(|type_node| {
+                let base_type = declaration_base_type_with_normalizer(
+                    declaration,
+                    type_node,
+                    declarator,
+                    source,
+                    normalize_function_return_type_preserving_cv,
+                );
+                type_from_declarator(&base_type, declarator, source)
+            })
+        })
+        .unwrap_or_else(|| "void".to_string())
+}
+
 fn trailing_return_type(declarator: Node, source: &[u8]) -> Option<String> {
+    trailing_return_type_with_normalizer(declarator, source, normalize_type)
+}
+
+fn trailing_return_type_with_normalizer(
+    declarator: Node,
+    source: &[u8],
+    normalizer: fn(&str) -> String,
+) -> Option<String> {
     find_named_descendant_kind(declarator, "trailing_return_type")
         .and_then(|trailing_return| {
             named_children(trailing_return)
                 .into_iter()
                 .find(|child| child.kind() == "type_descriptor")
         })
-        .map(|type_node| type_name_from_type_descriptor(type_node, source))
+        .map(|type_node| {
+            type_name_from_type_descriptor_with_normalizer(type_node, source, normalizer)
+        })
 }
 
 fn parse_parameters(node: Node, source: &[u8]) -> Vec<ParameterDecl> {
@@ -3809,9 +3873,13 @@ fn parse_call_expression(node: Node, source: &[u8]) -> Expression {
         })
         .unwrap_or_default();
     if let (Some(function), [value]) = (function, arguments.as_slice()) {
-        if let Some(type_name) = cpp_named_cast_type(node_text(function, source).trim()) {
+        let function_code = node_text(function, source).trim();
+        if let Some(type_name) = cpp_named_cast_type(function_code) {
+            let semantic_type_name = cpp_named_cast_type_preserving_cv(function_code)
+                .unwrap_or_else(|| type_name.clone());
             return Expression::Cast {
                 type_name,
+                semantic_type_name,
                 code: node_text(node, source).trim().to_string(),
                 line: line(node),
                 value: Box::new(value.clone()),
@@ -3834,6 +3902,17 @@ fn parse_call_expression(node: Node, source: &[u8]) -> Expression {
 }
 
 fn cpp_named_cast_type(function_code: &str) -> Option<String> {
+    cpp_named_cast_type_with_normalizer(function_code, normalize_type)
+}
+
+fn cpp_named_cast_type_preserving_cv(function_code: &str) -> Option<String> {
+    cpp_named_cast_type_with_normalizer(function_code, normalize_type_preserving_cv)
+}
+
+fn cpp_named_cast_type_with_normalizer(
+    function_code: &str,
+    normalizer: fn(&str) -> String,
+) -> Option<String> {
     const NAMED_CASTS: &[&str] = &[
         "const_cast",
         "dynamic_cast",
@@ -3844,7 +3923,7 @@ fn cpp_named_cast_type(function_code: &str) -> Option<String> {
         .iter()
         .find_map(|cast| function_code.strip_prefix(cast))
         .and_then(template_argument_text)
-        .map(normalize_type)
+        .map(normalizer)
 }
 
 fn template_argument_text(raw: &str) -> Option<&str> {
@@ -3944,15 +4023,23 @@ fn parse_subscript_index(node: Node, source: &[u8]) -> Expression {
 fn parse_cast_expression(node: Node, source: &[u8]) -> Expression {
     let value = node.child_by_field_name("value");
     match value {
-        Some(value) => Expression::Cast {
-            type_name: node
+        Some(value) => {
+            let type_name = node
                 .child_by_field_name("type")
-                .map(|type_node| type_name_from_type_node(type_node, source))
-                .unwrap_or_else(|| "ANY".to_string()),
-            code: node_text(node, source).trim().to_string(),
-            line: line(node),
-            value: Box::new(parse_expression(value, source)),
-        },
+                .map(|type_node| type_name_from_type_descriptor(type_node, source))
+                .unwrap_or_else(|| "ANY".to_string());
+            let semantic_type_name = node
+                .child_by_field_name("type")
+                .map(|type_node| type_name_from_type_descriptor_preserving_cv(type_node, source))
+                .unwrap_or_else(|| type_name.clone());
+            Expression::Cast {
+                type_name,
+                semantic_type_name,
+                code: node_text(node, source).trim().to_string(),
+                line: line(node),
+                value: Box::new(parse_expression(value, source)),
+            }
+        }
         None => identifier_expression(node, source),
     }
 }
@@ -4546,17 +4633,29 @@ fn type_name_from_type_node_with_normalizer(
 }
 
 fn type_name_from_type_descriptor(node: Node, source: &[u8]) -> String {
+    type_name_from_type_descriptor_with_normalizer(node, source, normalize_type)
+}
+
+fn type_name_from_type_descriptor_preserving_cv(node: Node, source: &[u8]) -> String {
+    type_name_from_type_descriptor_with_normalizer(node, source, normalize_type_preserving_cv)
+}
+
+fn type_name_from_type_descriptor_with_normalizer(
+    node: Node,
+    source: &[u8],
+    normalizer: fn(&str) -> String,
+) -> String {
     let Some(type_node) = node.child_by_field_name("type") else {
-        return normalize_type(node_text(node, source));
+        return normalizer(node_text(node, source));
     };
     let Some(declarator) = node.child_by_field_name("declarator") else {
-        return normalize_type(node_text(node, source));
+        return normalizer(node_text(node, source));
     };
     let base_type = std::str::from_utf8(&source[node.start_byte()..declarator.start_byte()])
         .ok()
-        .map(normalize_type)
+        .map(normalizer)
         .filter(|base| !base.is_empty())
-        .unwrap_or_else(|| type_name_from_type_node(type_node, source));
+        .unwrap_or_else(|| type_name_from_type_node_with_normalizer(type_node, source, normalizer));
     type_from_declarator(&base_type, declarator, source)
 }
 
@@ -4795,10 +4894,26 @@ fn normalize_type_preserving_cv(raw: &str) -> String {
         .to_string()
 }
 
+fn normalize_function_return_type_preserving_cv(raw: &str) -> String {
+    normalize_type_preserving_cv(raw)
+        .split_whitespace()
+        .filter(|part| !FUNCTION_RETURN_SPECIFIERS.contains(part))
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 const TYPE_QUALIFIERS: &[&str] = &[
     "const", "volatile", "restrict", "static", "extern", "register", "typedef",
 ];
 const TYPE_STORAGE_SPECIFIERS: &[&str] = &["static", "extern", "register", "typedef"];
+const FUNCTION_RETURN_SPECIFIERS: &[&str] = &[
+    "inline",
+    "virtual",
+    "constexpr",
+    "consteval",
+    "friend",
+    "explicit",
+];
 
 fn signature(return_type: &str, params: &[ParameterDecl]) -> String {
     format!(
@@ -5940,6 +6055,16 @@ mod tests {
                   const Meter& alias = meter;
                   return 0;
                 }
+                const Meter& pick(const Meter& meter) {
+                  return meter;
+                }
+                auto trailing(const Meter& meter) -> const Meter& {
+                  return meter;
+                }
+                int castRead(Meter& meter) {
+                  const Meter& casted = static_cast<const Meter&>(meter);
+                  return 0;
+                }
                 }
                 "#;
         let declarations = parse_declarations(sample, SourceLanguage::Cpp)
@@ -5959,6 +6084,30 @@ mod tests {
                 _ => None,
             })
             .expect("expected read function");
+        let pick = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "pick" => Some(function),
+                _ => None,
+            })
+            .expect("expected pick function");
+        let trailing = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "trailing" => Some(function),
+                _ => None,
+            })
+            .expect("expected trailing function");
+        let cast_read = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "castRead" => Some(function),
+                _ => None,
+            })
+            .expect("expected castRead function");
         let global = namespace
             .declarations
             .iter()
@@ -5980,6 +6129,10 @@ mod tests {
 
         assert_eq!(function.parameters[0].type_name, "Meter&");
         assert_eq!(function.parameters[0].semantic_type_name, "const Meter&");
+        assert_eq!(pick.return_type, "Meter&");
+        assert_eq!(pick.semantic_return_type, "const Meter&");
+        assert_eq!(trailing.return_type, "Meter&");
+        assert_eq!(trailing.semantic_return_type, "const Meter&");
         assert_eq!(global.type_name, "Meter");
         assert_eq!(global.semantic_type_name, "const Meter");
         assert_eq!(holder.fields[0].name, "field");
@@ -5998,6 +6151,25 @@ mod tests {
             }, Statement::Return { .. }] if name == "alias"
                 && type_name == "Meter&"
                 && semantic_type_name == "const Meter&"
+        ));
+        assert!(matches!(
+            cast_read.body.as_slice(),
+            [Statement::LocalDecl {
+                name,
+                type_name,
+                semantic_type_name,
+                initializer:
+                    Some(Expression::Cast {
+                        type_name: cast_type_name,
+                        semantic_type_name: cast_semantic_type_name,
+                        ..
+                    }),
+                ..
+            }, Statement::Return { .. }] if name == "casted"
+                && type_name == "Meter&"
+                && semantic_type_name == "const Meter&"
+                && cast_type_name == "Meter&"
+                && cast_semantic_type_name == "const Meter&"
         ));
     }
 
