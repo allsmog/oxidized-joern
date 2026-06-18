@@ -266,12 +266,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       )
     val globalBlock   = blockNode(origin, NamespaceTraversal.globalNamespaceName, Defines.Any)
     val namespaceAsts = document.declarations.collect { case namespace: OxNamespaceDecl => astForNamespace(namespace) }
-    val declarationAsts = document.declarations.flatMap(astForDeclaration)
+    val declarationAsts      = document.declarations.flatMap(astForDeclaration)
+    val globalDestructorAsts = topLevelGlobalDestructorAsts(document.declarations)
     val globalMethodAst =
       methodAst(
         globalMethod,
         Seq.empty,
-        blockAst(globalBlock, declarationAsts.toList),
+        blockAst(globalBlock, (declarationAsts ++ globalDestructorAsts).toList),
         methodReturnNode(origin, Defines.Any)
       )
 
@@ -1153,6 +1154,66 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val callNode_      = constructorCallNode(OxOrigin(info.code, Option(line)), info)
     val right = constructorInvocationBlockAst(OxOrigin(info.code, Option(line)), info.typeName, callNode_, Seq.empty)
     assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
+  }
+
+  private def topLevelGlobalDestructorAsts(declarations: Seq[OxDeclaration]): Seq[Ast] = {
+    declarations.collect { case global: OxGlobalVariableDecl => global }.reverse.flatMap(globalDestructorAsts)
+  }
+
+  private def globalDestructorAsts(global: OxGlobalVariableDecl): Seq[Ast] = {
+    globalLocalEntries.get(global).toSeq.flatMap { scopeEntry =>
+      val typeName = scopeEntry.typeFullName
+      val arrayDestructors = for {
+        count       <- globalArrayElementCount(global).toSeq
+        elementType <- arrayElementTypeFullName(typeName).toSeq
+        entry       <- destructorEntryForType(elementType).toSeq
+        index       <- (0 until count).reverse
+      } yield globalArrayElementDestructorAst(global, scopeEntry, typeName, index, global.line, entry)
+      if (arrayDestructors.nonEmpty) {
+        arrayDestructors
+      } else {
+        destructorEntryForType(typeName).toSeq.map { entry =>
+          globalDestructorAst(
+            global.name,
+            global.line,
+            entry,
+            identifierAstForScopeEntry(global.name, global.name, global.line, scopeEntry)
+          )
+        }
+      }
+    }
+  }
+
+  private def globalArrayElementDestructorAst(
+    global: OxGlobalVariableDecl,
+    scopeEntry: ScopeEntry,
+    arrayTypeName: String,
+    index: Int,
+    line: Int,
+    entry: FunctionEntry
+  ): Ast = {
+    val receiverCode = s"${global.name}[$index]"
+    globalDestructorAst(
+      receiverCode,
+      line,
+      entry,
+      arrayElementAccessAst(global.name, arrayTypeName, index, line, Option(scopeEntry))
+    )
+  }
+
+  private def globalDestructorAst(receiverCode: String, line: Int, entry: FunctionEntry, receiverAst: Ast): Ast = {
+    val code = s"$receiverCode.${entry.simpleName}()"
+    val callNode_ =
+      callNode(
+        OxOrigin(code, Option(line)),
+        code,
+        entry.simpleName,
+        entry.fullName,
+        DispatchTypes.STATIC_DISPATCH,
+        Option(entry.function.signature),
+        Option(registerType(Defines.Void))
+      )
+    createCallAst(callNode_, base = Option(receiverAst))
   }
 
   private def localCodeForGlobal(global: OxGlobalVariableDecl): String = {
