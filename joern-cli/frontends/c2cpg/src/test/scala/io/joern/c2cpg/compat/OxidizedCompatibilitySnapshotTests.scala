@@ -1584,6 +1584,70 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.nameExact("~Returning").code.l shouldBe List("returning.~Returning()")
     }
 
+    "destroy C++ constructor subobjects on throw" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Base {
+          |public:
+          |  Base();
+          |  ~Base();
+          |};
+          |class Field {
+          |public:
+          |  Field();
+          |  ~Field();
+          |};
+          |class Local {
+          |public:
+          |  Local();
+          |  ~Local();
+          |};
+          |class Owner : public Base {
+          |  Field first;
+          |  Field second;
+          |public:
+          |  Owner(int flag);
+          |  ~Owner();
+          |};
+          |}
+          |Core::Base::Base() {}
+          |Core::Base::~Base() {}
+          |Core::Field::Field() {}
+          |Core::Field::~Field() {}
+          |Core::Local::Local() {}
+          |Core::Local::~Local() {}
+          |Core::Owner::Owner(int flag) {
+          |  Core::Local local;
+          |  if (flag) {
+          |    throw 1;
+          |  }
+          |}
+          |Core::Owner::~Owner() {}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val ownerConstructorCalls = cpg.method.fullNameExact("Core.Owner.Owner:void(int)").call.code.l
+      ownerConstructorCalls should contain allElementsOf List(
+        "Core.Base.Base()",
+        "this->first = Core.Field.Field()",
+        "this->second = Core.Field.Field()",
+        "local = Core.Local.Local()"
+      )
+      val throwCleanupCalls = cpg.method
+        .fullNameExact("Core.Owner.Owner:void(int)")
+        .controlStructure
+        .controlStructureType(ControlStructureTypes.IF)
+        .ast
+        .isCall
+        .filter(call => Set("~Local", "~Field", "~Base").contains(call.name))
+        .code
+        .l
+      throwCleanupCalls shouldBe
+        List("local.~Local()", "this->second.~Field()", "this->first.~Field()", "this->~Base()")
+    }
+
     "capture C++ member array constructors and destructors" in {
       val cpg = code(
         """

@@ -1918,6 +1918,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .flatMap(ownerTypeFullName => automaticSubobjectDestructorAsts(ownerTypeFullName, line))
   }
 
+  private def currentConstructorUnwindSubobjectDestructorAsts(line: Int): Seq[Ast] = {
+    currentMethodOwnerTypeFullName
+      .filter(ownerTypeFullName =>
+        isConstructorMethod(currentMethodSimpleName.getOrElse(""), Option(ownerTypeFullName))
+      )
+      .toSeq
+      .flatMap(ownerTypeFullName => automaticSubobjectDestructorAsts(ownerTypeFullName, line))
+  }
+
   private def automaticSubobjectDestructorAsts(ownerTypeFullName: String, line: Int): Seq[Ast] = {
     val ownerType = resolveAliasType(ownerTypeFullName)
     val fields = aggregateDeclarationsByType
@@ -2027,7 +2036,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           aggregateAssignmentExpressionAsts
         ) ++ temporaryDestructorAstsForExpressions(throwStmt.expression.toSeq) ++ throwLocalDestructors.map(
           localDestructorAst
-        ) ++ currentAutomaticSubobjectDestructorAsts(throwStmt.line) :+
+        ) ++ currentAutomaticSubobjectDestructorAsts(throwStmt.line) ++ currentConstructorUnwindSubobjectDestructorAsts(
+          throwStmt.line
+        ) :+
           throwAst
       case tryStmt: OxTry =>
         val tryNode = controlStructureNode(OxOrigin("try", Option(tryStmt.line)), ControlStructureTypes.TRY, "try")
