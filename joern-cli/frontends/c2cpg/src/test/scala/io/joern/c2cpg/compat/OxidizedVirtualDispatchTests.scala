@@ -617,6 +617,58 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.name("operator .*").l shouldBe Nil
     }
 
+    "resolve constructor conversions during overload resolution" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Box {
+          |public:
+          |  Box(int value) {}
+          |  Box(long value) {}
+          |};
+          |class Left {
+          |public:
+          |  Left(int value) {}
+          |};
+          |class Right {
+          |public:
+          |  Right(int value) {}
+          |};
+          |int onlyBox(Box value) { return 1; }
+          |int onlyConstBoxRef(const Box& value) { return 1; }
+          |int onlyBoxRef(Box& value) { return 1; }
+          |int preferLong(Box value) { return 1; }
+          |long preferLong(long value) { return 2; }
+          |int ambiguous(Left value) { return 1; }
+          |long ambiguous(Right value) { return 2; }
+          |}
+          |long use(int seed) {
+          |  return Core::onlyBox(seed) +
+          |    Core::onlyConstBoxRef(seed) +
+          |    Core::onlyBoxRef(seed) +
+          |    Core::preferLong(seed) +
+          |    Core::ambiguous(seed);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").call.codeExact("Core::onlyBox(seed)").methodFullName.l shouldBe
+        List("Core.onlyBox:int(Box)")
+      cpg.method.nameExact("use").call.codeExact("Core::onlyBox(seed)").argument.code.l shouldBe
+        List("Core.Box.Box(seed)")
+      cpg.method.nameExact("use").call.codeExact("Core::onlyConstBoxRef(seed)").methodFullName.l shouldBe
+        List("Core.onlyConstBoxRef:int(Box&)")
+      cpg.method.nameExact("use").call.codeExact("Core::onlyConstBoxRef(seed)").argument.code.l shouldBe
+        List("Core.Box.Box(seed)")
+      cpg.method.nameExact("use").call.codeExact("Core::onlyBoxRef(seed)").methodFullName.l shouldBe
+        List("Core.onlyBoxRef")
+      cpg.method.nameExact("use").call.codeExact("Core::preferLong(seed)").methodFullName.l shouldBe
+        List("Core.preferLong:long(long)")
+      cpg.method.nameExact("use").call.codeExact("Core::ambiguous(seed)").methodFullName.l shouldBe
+        List("Core.ambiguous")
+    }
+
     "specialize function template returns during overload resolution" in {
       val cpg = code(
         """
@@ -827,9 +879,19 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pickNumber:int(int)")
       cpg.method.nameExact("use").call.codeExact("Core::pickBool(Core::logicalNot(true))").methodFullName.l shouldBe
         List("Core.pickBool:int(bool)")
-      cpg.method.nameExact("use").call.codeExact("Core::pick(Core::assignValue(leaf, Core::makeLeaf()))").methodFullName.l shouldBe
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("Core::pick(Core::assignValue(leaf, Core::makeLeaf()))")
+        .methodFullName
+        .l shouldBe
         List("Core.pick:char(Leaf&&)")
-      cpg.method.nameExact("use").call.codeExact("Core::pick(Core::assignRef(leaf, Core::makeLeaf()))").methodFullName.l shouldBe
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("Core::pick(Core::assignRef(leaf, Core::makeLeaf()))")
+        .methodFullName
+        .l shouldBe
         List("Core.pick:short(Mid&)")
       cpg.method.nameExact("use").call.codeExact("Core::pickList(Core::list(1, 2))").methodFullName.l shouldBe
         List("Core.pickList:int(std::initializer_list<int>)")
@@ -851,9 +913,19 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pick:char(Leaf&&)")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::firstRef(holder))").methodFullName.l shouldBe
         List("Core.pick:short(Mid&)")
-      cpg.method.nameExact("use").call.codeExact("Core::pick(Core::nestedFirst(nestedHolder))").methodFullName.l shouldBe
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("Core::pick(Core::nestedFirst(nestedHolder))")
+        .methodFullName
+        .l shouldBe
         List("Core.pick:char(Leaf&&)")
-      cpg.method.nameExact("use").call.codeExact("Core::pick(holder.memberExplicit<Core::Leaf>())").methodFullName.l shouldBe
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("Core::pick(holder.memberExplicit<Core::Leaf>())")
+        .methodFullName
+        .l shouldBe
         List("Core.pick:char(Leaf&&)")
       cpg.method
         .nameExact("use")
@@ -1048,21 +1120,50 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.Meter.value:int()<const>")
       cpg.method.nameExact("readMemberOperator").call.codeExact("(source + meter).value()").methodFullName.l shouldBe
         List("Core.Meter.value:int()<const>")
-      cpg.method.nameExact("readMemberOperator").call.nameExact("operator+").codeExact("source + meter").typeFullName.l shouldBe
+      cpg.method
+        .nameExact("readMemberOperator")
+        .call
+        .nameExact("operator+")
+        .codeExact("source + meter")
+        .typeFullName
+        .l shouldBe
         List("const Core.Meter&")
       cpg.method.nameExact("readFreeOperator").call.codeExact("(source - meter).value()").methodFullName.l shouldBe
         List("Core.Meter.value:int()<const>")
-      cpg.method.nameExact("readFreeOperator").call.nameExact("operator-").codeExact("source - meter").typeFullName.l shouldBe
+      cpg.method
+        .nameExact("readFreeOperator")
+        .call
+        .nameExact("operator-")
+        .codeExact("source - meter")
+        .typeFullName
+        .l shouldBe
         List("const Core.Meter&")
       cpg.method.nameExact("readIndexOperator").call.codeExact("source[0].value()").methodFullName.l shouldBe
         List("Core.Meter.value:int()<const>")
-      cpg.method.nameExact("readIndexOperator").call.nameExact("operator[]").codeExact("source[0]").typeFullName.l shouldBe
+      cpg.method
+        .nameExact("readIndexOperator")
+        .call
+        .nameExact("operator[]")
+        .codeExact("source[0]")
+        .typeFullName
+        .l shouldBe
         List("const Core.Meter&")
       cpg.method.nameExact("readCallOperator").call.codeExact("source().value()").methodFullName.l shouldBe
         List("Core.Meter.value:int()<const>")
-      cpg.method.nameExact("readCallOperator").call.nameExact("operator()").codeExact("source()").typeFullName.l shouldBe
+      cpg.method
+        .nameExact("readCallOperator")
+        .call
+        .nameExact("operator()")
+        .codeExact("source()")
+        .typeFullName
+        .l shouldBe
         List("const Core.Meter&")
-      cpg.method.nameExact("readAssignmentOperator").call.codeExact("(source = meter).value()").methodFullName.l shouldBe
+      cpg.method
+        .nameExact("readAssignmentOperator")
+        .call
+        .codeExact("(source = meter).value()")
+        .methodFullName
+        .l shouldBe
         List("Core.Meter.value:int()<const>")
       cpg.method
         .nameExact("readAssignmentOperator")

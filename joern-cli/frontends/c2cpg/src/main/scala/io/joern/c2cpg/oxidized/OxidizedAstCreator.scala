@@ -150,6 +150,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private final case class OverloadScore(score: Int, argumentScores: Seq[Int], isViable: Boolean)
   private final case class ScoredOverload(candidate: FunctionEntry, score: OverloadScore, index: Int)
   private final case class ScoredConversionOperator(entry: FunctionEntry, score: Int, index: Int)
+  private final case class ScoredConstructorConversion(entry: FunctionEntry, selectionScore: Int, conversionScore: Int)
   private final case class FunctionReturnExpression(
     expression: OxExpression,
     localTypes: Map[String, String],
@@ -5100,7 +5101,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           target
         )
       )
+      .orElse(contextualConstructorConversionAst(expression, expectedTypeFullName))
       .getOrElse(expressionAst(expression))
+  }
+
+  private def contextualConstructorConversionAst(
+    expression: OxExpression,
+    expectedTypeFullName: Option[String]
+  ): Option[Ast] = {
+    contextualConstructorConversionTarget(expression, expectedTypeFullName).flatMap { case (targetType, entry) =>
+      constructorInvocationInfo(targetType, Seq(expression), expression.code, resolvedConstructor = Option(entry)).map {
+        info =>
+          val origin       = OxOrigin(info.code, Option(expression.line))
+          val callNode_    = constructorCallNode(origin, info)
+          val argumentAsts = argumentAstsForFunctionEntry(entry, Seq(expression))
+          constructorInvocationBlockAst(origin, targetType, callNode_, argumentAsts)
+      }
+    }
   }
 
   private def foldAst(fold: OxFold): Ast = {
@@ -5594,6 +5611,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   ): Option[String] = {
     contextualConversionOperatorTarget(expression, expectedTypeFullName)
       .flatMap(target => conversionOperatorReturnObjectTypeFullName(target.entry))
+      .orElse(contextualConstructorConversionTarget(expression, expectedTypeFullName).map(_._1))
+  }
+
+  private def contextualConstructorConversionTarget(
+    expression: OxExpression,
+    expectedTypeFullName: Option[String]
+  ): Option[(String, FunctionEntry)] = {
+    expectedTypeFullName.filterNot(expressionDirectlyCompatibleWithExpected(expression, _)).flatMap { expectedType =>
+      val argumentInfo = ArgumentInfo(expression, expressionTypeFullName(expression), expressionIsRvalue(expression))
+      contextualConversionObjectTypeFullName(expectedType).flatMap { targetType =>
+        constructorConversionEntry(targetType, argumentInfo).flatMap { case (entry, _) =>
+          Option.when(directTypeCompatibilityScore(expectedType, targetType, argumentIsRvalue = true) > 0) {
+            targetType -> entry
+          }
+        }
+      }
+    }
   }
 
   private def contextualConversionObjectTypeFullName(typeFullName: String): Option[String] = {
@@ -7947,6 +7981,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     } else {
       contextualConversionOperatorTarget(argumentInfo.expression, Option(parameterTypeName))
         .flatMap(target => conversionOperatorCompatibilityScore(parameterTypeName, target.entry))
+        .orElse(constructorConversionCompatibilityScore(parameterTypeName, argumentInfo))
         .getOrElse(0)
     }
   }
@@ -7955,6 +7990,63 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val returnType  = functionSemanticReturnTypeFullName(entry)
     val directScore = directTypeCompatibilityScore(parameterTypeName, returnType, typeNameIsRvalue(returnType))
     Option.when(directScore > 0)(10 + math.max(0, math.min(directScore - 50, 9)))
+  }
+
+  private def constructorConversionCompatibilityScore(
+    parameterTypeName: String,
+    argumentInfo: ArgumentInfo
+  ): Option[Int] = {
+    contextualConversionObjectTypeFullName(parameterTypeName).flatMap { targetType =>
+      constructorConversionEntry(targetType, argumentInfo).flatMap { case (_, conversionScore) =>
+        val constructedScore = directTypeCompatibilityScore(parameterTypeName, targetType, argumentIsRvalue = true)
+        Option.when(constructedScore > 0) {
+          10 + math.max(0, math.min(math.min(conversionScore, constructedScore) - 50, 9))
+        }
+      }
+    }
+  }
+
+  private def constructorConversionEntry(typeName: String, argumentInfo: ArgumentInfo): Option[(FunctionEntry, Int)] = {
+    val scoredConstructors = constructorEntriesForType(typeName)
+      .filter(functionArityIsViable(_, 1))
+      .flatMap { entry =>
+        constructorConversionParameterScore(entry, argumentInfo).map { conversionScore =>
+          ScoredConstructorConversion(entry, conversionScore + overloadArityAdjustment(entry, 1), conversionScore)
+        }
+      }
+    scoredConstructors
+      .map(_.selectionScore)
+      .maxOption
+      .flatMap { bestScore =>
+        val best = scoredConstructors.filter(_.selectionScore == bestScore)
+        Option.when(best.size == 1)(best.head.entry -> best.head.conversionScore)
+      }
+  }
+
+  private def constructorConversionParameterScore(entry: FunctionEntry, argumentInfo: ArgumentInfo): Option[Int] = {
+    for {
+      parameter        <- entry.function.parameters.headOption.filterNot(_.isVariadic)
+      argumentTypeName <- argumentInfo.typeFullName
+      templateBindings <- templateBindingsForArgumentInfos(
+        entry,
+        Seq(argumentInfo),
+        templateParameterNames(entry.function)
+      )
+      parameterTypeName = substituteTemplateTypeNames(
+        ownerResolvedTypeFullNamePreservingCv(
+          parameter.semanticTypeName,
+          entry.ownerFullName.orElse(entry.lexicalOwnerFullName)
+        ),
+        templateBindings
+      )
+      directScore = directTypeCompatibilityScore(
+        parameterTypeName,
+        argumentTypeName,
+        argumentInfo.isRvalue,
+        Some(argumentInfo.expression)
+      )
+      if directScore > 0
+    } yield directScore
   }
 
   private def directTypeCompatibilityScore(
