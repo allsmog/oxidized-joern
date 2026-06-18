@@ -128,14 +128,122 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         match node.kind() {
             "property_declaration" => self.variable_decl(node),
             "function_declaration" => self.function_decl(node),
+            "class_declaration" => self.nominal_type_decl(node),
             "control_transfer_statement" => self.return_stmt(node),
             "assignment"
             | "call_expression"
             | "integer_literal"
             | "simple_identifier"
+            | "self_expression"
+            | "navigation_expression"
             | "line_string_literal" => self.expr(node),
             other => bail!("unsupported Swift syntax node '{other}'"),
         }
+    }
+
+    fn syntax_for_member_decl(&self, node: Node<'a>) -> Result<Value> {
+        match node.kind() {
+            "property_declaration" => self.variable_decl(node),
+            "function_declaration" => self.function_decl(node),
+            "class_declaration" => self.nominal_type_decl(node),
+            other => bail!("unsupported Swift member declaration node '{other}'"),
+        }
+    }
+
+    fn nominal_type_decl(&self, node: Node<'a>) -> Result<Value> {
+        let declaration_kind = self
+            .field_child(node, "declaration_kind")
+            .context("nominal type declaration is missing declaration kind")?;
+        let (node_type, keyword_name, keyword_kind) = match declaration_kind.kind() {
+            "class" => (
+                "ClassDeclSyntax",
+                "classKeyword",
+                "keyword(SwiftSyntax.Keyword.class)",
+            ),
+            "struct" => (
+                "StructDeclSyntax",
+                "structKeyword",
+                "keyword(SwiftSyntax.Keyword.struct)",
+            ),
+            other => bail!("unsupported nominal type declaration kind '{other}'"),
+        };
+        let name_node = self
+            .field_child(node, "name")
+            .context("nominal type declaration is missing a name")?;
+        let name = match name_node.kind() {
+            "type_identifier" | "simple_identifier" => name_node,
+            _ => self
+                .first_descendant_kind(name_node, "type_identifier")
+                .or_else(|| self.first_descendant_kind(name_node, "simple_identifier"))
+                .context("nominal type declaration name is missing an identifier")?,
+        };
+        let body = self
+            .field_child(node, "body")
+            .context("nominal type declaration is missing a body")?;
+
+        Ok(self.syntax_node(
+            node_type,
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.empty_collection("AttributeListSyntax", node.start_byte()),
+                    "attributes",
+                ),
+                self.with_name(
+                    self.empty_collection("DeclModifierListSyntax", node.start_byte()),
+                    "modifiers",
+                ),
+                self.with_name(
+                    self.token_for_node(declaration_kind, keyword_kind),
+                    keyword_name,
+                ),
+                self.with_name(
+                    self.token_for_node(
+                        name,
+                        &format!("identifier({})", quoted_text(self.text(name))),
+                    ),
+                    "name",
+                ),
+                self.with_name(self.member_block(body)?, "memberBlock"),
+            ],
+        ))
+    }
+
+    fn member_block(&self, node: Node<'a>) -> Result<Value> {
+        let left_brace = self
+            .immediate_child_kind(node, "{")
+            .context("member block is missing '{'")?;
+        let right_brace = self
+            .immediate_child_kind(node, "}")
+            .context("member block is missing '}'")?;
+        let mut items = Vec::new();
+        for child in named_children(node) {
+            if child.kind() == "line_comment" || child.kind() == "multiline_comment" {
+                continue;
+            }
+            items.push(self.member_block_item(child)?);
+        }
+        let members_range = self.covering_range_or_point(&items, left_brace.end_byte());
+        Ok(self.syntax_node(
+            "MemberBlockSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace"),
+                self.with_name(
+                    self.syntax_node("MemberBlockItemListSyntax", members_range, items),
+                    "members",
+                ),
+                self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"),
+            ],
+        ))
+    }
+
+    fn member_block_item(&self, node: Node<'a>) -> Result<Value> {
+        Ok(self.syntax_node(
+            "MemberBlockItemSyntax",
+            self.range_for_node(node),
+            vec![self.with_name(self.syntax_for_member_decl(node)?, "decl")],
+        ))
     }
 
     fn variable_decl(&self, node: Node<'a>) -> Result<Value> {
@@ -456,6 +564,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
             "assignment" => self.assignment_expr(node),
             "call_expression" => self.function_call_expr(node),
+            "navigation_expression" => self.member_access_expr(node),
             "integer_literal" => Ok(self.syntax_node(
                 "IntegerLiteralExprSyntax",
                 self.range_for_node(node),
@@ -478,9 +587,56 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "baseName",
                 )],
             )),
+            "self_expression" => Ok(self.syntax_node(
+                "DeclReferenceExprSyntax",
+                self.range_for_node(node),
+                vec![self.with_name(
+                    self.token_for_node(node, "keyword(SwiftSyntax.Keyword.self)"),
+                    "baseName",
+                )],
+            )),
             "line_string_literal" => self.string_literal(node),
             other => bail!("unsupported Swift expression node '{other}'"),
         }
+    }
+
+    fn member_access_expr(&self, node: Node<'a>) -> Result<Value> {
+        let suffix_node = self
+            .field_child(node, "suffix")
+            .context("member access expression is missing suffix")?;
+        let suffix = self
+            .field_child(suffix_node, "suffix")
+            .or_else(|| named_children(suffix_node).next())
+            .context("member access suffix is missing a name")?;
+        let period = self
+            .immediate_child_kind(suffix_node, ".")
+            .context("member access expression is missing '.'")?;
+
+        let mut children = Vec::new();
+        if let Some(base) = self.field_child(node, "target") {
+            children.push(self.with_name(self.expr(base)?, "base"));
+        }
+        children.push(self.with_name(self.token_for_node(period, "period"), "period"));
+        children.push(self.with_name(self.decl_reference_expr(suffix), "declName"));
+
+        Ok(self.syntax_node(
+            "MemberAccessExprSyntax",
+            self.range_for_node(node),
+            children,
+        ))
+    }
+
+    fn decl_reference_expr(&self, node: Node<'a>) -> Value {
+        let token_kind = match node.kind() {
+            "integer_literal" => format!("integerLiteral({})", quoted_text(self.text(node))),
+            "self_expression" => "keyword(SwiftSyntax.Keyword.self)".to_string(),
+            _ => format!("identifier({})", quoted_text(self.text(node))),
+        };
+        self.syntax_node(
+            "DeclReferenceExprSyntax",
+            self.range_for_node(node),
+            vec![self.with_name(self.token_for_node(node, &token_kind), "baseName")],
+        )
     }
 
     fn function_call_expr(&self, node: Node<'a>) -> Result<Value> {
@@ -946,5 +1102,65 @@ mod tests {
             return_stmt["children"][1]["nodeType"],
             "FunctionCallExprSyntax"
         );
+    }
+
+    #[test]
+    fn emits_simple_class_members() {
+        let source = "class Foo {\n  var x = 1\n  func bar() {}\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let class_decl = find_first_node_type(&value, "ClassDeclSyntax").unwrap();
+        assert_eq!(class_decl["children"][2]["name"], "classKeyword");
+        assert_eq!(
+            class_decl["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.class)"
+        );
+        assert_eq!(
+            class_decl["children"][3]["tokenKind"],
+            "identifier(\"Foo\")"
+        );
+
+        let member_block = class_decl["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "memberBlock")
+            .unwrap();
+        assert_eq!(member_block["nodeType"], "MemberBlockSyntax");
+        let members = &member_block["children"][1]["children"];
+        assert_eq!(members.as_array().unwrap().len(), 2);
+        assert_eq!(members[0]["children"][0]["nodeType"], "VariableDeclSyntax");
+        assert_eq!(members[1]["children"][0]["nodeType"], "FunctionDeclSyntax");
+    }
+
+    #[test]
+    fn emits_member_access_expressions() {
+        let source = "class Foo {\n  var x = 1\n  func baz() {}\n  func bar() {\n    x = self.x\n    self.baz()\n  }\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let member_access = find_first_node_type(&value, "MemberAccessExprSyntax").unwrap();
+        assert_eq!(member_access["children"][0]["name"], "base");
+        assert_eq!(
+            member_access["children"][0]["nodeType"],
+            "DeclReferenceExprSyntax"
+        );
+        assert_eq!(member_access["children"][1]["tokenKind"], "period");
+        assert_eq!(member_access["children"][2]["name"], "declName");
+        assert_eq!(
+            member_access["children"][2]["children"][0]["tokenKind"],
+            "identifier(\"x\")"
+        );
+    }
+
+    fn find_first_node_type<'v>(value: &'v Value, node_type: &str) -> Option<&'v Value> {
+        if value.get("nodeType").and_then(Value::as_str) == Some(node_type) {
+            return Some(value);
+        }
+        value
+            .get("children")
+            .and_then(Value::as_array)
+            .and_then(|children| {
+                children
+                    .iter()
+                    .find_map(|child| find_first_node_type(child, node_type))
+            })
     }
 }
