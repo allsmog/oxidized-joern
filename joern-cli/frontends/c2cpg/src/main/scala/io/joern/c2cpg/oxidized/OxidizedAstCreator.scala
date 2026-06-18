@@ -6378,6 +6378,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         }
       case indexAccess: OxIndexAccess =>
         functionScopedIndexAccessTypeFullName(entry, indexAccess, templateBindings, localTypes)
+      case initializerList: OxInitializerList =>
+        functionScopedInitializerListTypeFullName(entry, initializerList, templateBindings, localTypes)
       case call: OxCall =>
         functionScopedCallReturnTypeFullName(entry, call, templateBindings, localTypes)
       case _ =>
@@ -6467,6 +6469,32 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         }
       }
       .orElse(baseTypeFullName.map(_.stripSuffix("[]")))
+  }
+
+  private def functionScopedInitializerListTypeFullName(
+    entry: FunctionEntry,
+    initializerList: OxInitializerList,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    functionScopedInitializerListElementTypeFullName(entry, initializerList, templateBindings, localTypes)
+      .map(typeName => s"std.initializer_list<$typeName>")
+  }
+
+  private def functionScopedInitializerListElementTypeFullName(
+    entry: FunctionEntry,
+    initializerList: OxInitializerList,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    val elementTypes = initializerList.elements.map { element =>
+      functionReturnExpressionTypeFullName(entry, element, templateBindings, localTypes)
+    }
+    Option
+      .when(elementTypes.nonEmpty && elementTypes.forall(_.isDefined)) {
+        elementTypes.flatten.map(normalizeType).distinct
+      }
+      .collect { case Seq(typeName) => typeName }
   }
 
   private def functionScopedAssignmentExpressionTypeFullName(
