@@ -91,6 +91,8 @@ fn stmt_json(node: Node, source: &str) -> Value {
         "do_statement" => do_while_statement_json(node, source),
         "break_statement" => jump_statement_json("BreakStatement", node, source),
         "continue_statement" => jump_statement_json("ContinueStatement", node, source),
+        "try_statement" => try_statement_json(node, source),
+        "throw_statement" => throw_statement_json(node, source),
         "expression_statement" => expression_statement_json(node, source),
         "empty_statement" => with_span("EmptyStatement", node, json!({})),
         _ => noop_json(node),
@@ -292,6 +294,60 @@ fn jump_statement_json(kind: &str, node: Node, source: &str) -> Value {
         .map(|child| expr_json(child, source))
         .unwrap_or(Value::Null);
     with_span(kind, node, json!({ "label": label }))
+}
+
+fn try_statement_json(node: Node, source: &str) -> Value {
+    let block = node
+        .child_by_field_name("body")
+        .map(|child| stmt_json(child, source))
+        .unwrap_or_else(|| block_from_node(node));
+    let handler = node
+        .child_by_field_name("handler")
+        .map(|child| catch_clause_json(child, source))
+        .unwrap_or(Value::Null);
+    let finalizer = node
+        .child_by_field_name("finalizer")
+        .and_then(|finally_clause| finally_clause.child_by_field_name("body"))
+        .map(|child| stmt_json(child, source))
+        .unwrap_or(Value::Null);
+
+    with_span(
+        "TryStatement",
+        node,
+        json!({
+            "block": block,
+            "handler": handler,
+            "finalizer": finalizer
+        }),
+    )
+}
+
+fn catch_clause_json(node: Node, source: &str) -> Value {
+    let param = node
+        .child_by_field_name("parameter")
+        .map(|child| expr_json(child, source))
+        .unwrap_or(Value::Null);
+    let body = node
+        .child_by_field_name("body")
+        .map(|child| stmt_json(child, source))
+        .unwrap_or_else(|| block_from_node(node));
+
+    with_span(
+        "CatchClause",
+        node,
+        json!({
+            "param": param,
+            "body": body
+        }),
+    )
+}
+
+fn throw_statement_json(node: Node, source: &str) -> Value {
+    let argument = node
+        .named_child(0)
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    with_span("ThrowStatement", node, json!({ "argument": argument }))
 }
 
 fn expression_statement_json(node: Node, source: &str) -> Value {
@@ -1019,6 +1075,29 @@ mod tests {
         assert_eq!(do_stmt["test"]["name"], "ok");
         assert_eq!(do_stmt["body"]["body"][0]["type"], "ContinueStatement");
         assert_eq!(do_stmt["body"]["body"][0]["label"]["name"], "loop1");
+    }
+
+    #[test]
+    fn emits_try_catch_finally_and_throw_statements() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(
+            root,
+            path,
+            "try { open(); } catch (err) { throw err; } finally { close(); }\n",
+        )
+        .expect("parse succeeds");
+
+        let try_stmt = &json["ast"]["program"]["body"][0];
+        assert_eq!(try_stmt["type"], "TryStatement");
+        assert_eq!(try_stmt["block"]["type"], "BlockStatement");
+        assert_eq!(try_stmt["handler"]["type"], "CatchClause");
+        assert_eq!(try_stmt["handler"]["param"]["name"], "err");
+        assert_eq!(
+            try_stmt["handler"]["body"]["body"][0]["type"],
+            "ThrowStatement"
+        );
+        assert_eq!(try_stmt["finalizer"]["type"], "BlockStatement");
     }
 
     #[test]
