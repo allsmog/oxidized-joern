@@ -192,6 +192,22 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |int readAliasCast(Core::Meter& meter) {
           |  return static_cast<const GlobalMeterAlias&>(meter).value();
           |}
+          |int readAutoCopy(Core::Meter& meter) {
+          |  auto copy = Core::borrowAlias(meter);
+          |  return copy.value();
+          |}
+          |int readAutoRef(Core::Meter& meter) {
+          |  auto& ref = Core::borrowAlias(meter);
+          |  return ref.value();
+          |}
+          |int readConstAuto(Core::Meter& meter) {
+          |  const auto copy = Core::borrowAlias(meter);
+          |  return copy.value();
+          |}
+          |int readLambdaReturn(Core::Meter& meter) {
+          |  auto pick = [](Core::Meter& input) -> const Core::Meter& { return input; };
+          |  return pick(meter).value();
+          |}
           |int readGlobal() {
           |  return Core::globalMeter.value();
           |}
@@ -246,6 +262,14 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         .codeExact("static_cast<const GlobalMeterAlias&>(meter).value()")
         .methodFullName
         .l shouldBe List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readAutoCopy").call.codeExact("copy.value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()")
+      cpg.method.nameExact("readAutoRef").call.codeExact("ref.value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readConstAuto").call.codeExact("copy.value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readLambdaReturn").call.codeExact("pick(meter).value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
       cpg.method
         .fullNameExact("Core.Holder.readField:int()")
         .call

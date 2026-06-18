@@ -509,6 +509,8 @@ pub enum Expression {
         parameters: Vec<ParameterDecl>,
         #[serde(rename = "returnType")]
         return_type: String,
+        #[serde(rename = "semanticReturnType")]
+        semantic_return_type: String,
         signature: String,
         body: Vec<Statement>,
     },
@@ -2381,10 +2383,6 @@ fn semantic_function_return_type(
         .unwrap_or_else(|| "void".to_string())
 }
 
-fn trailing_return_type(declarator: Node, source: &[u8]) -> Option<String> {
-    trailing_return_type_with_normalizer(declarator, source, normalize_type)
-}
-
 fn trailing_return_type_with_normalizer(
     declarator: Node,
     source: &[u8],
@@ -4152,6 +4150,8 @@ fn parse_lambda_expression(node: Node, source: &[u8]) -> Expression {
         .map(|body| parse_statement_block(body, source, &mut symbols))
         .unwrap_or_default();
     let return_type = lambda_return_type(node, source, &inference_parameters, &body);
+    let semantic_return_type =
+        lambda_semantic_return_type(node, source, &inference_parameters, &body);
     Expression::Lambda {
         code: node_text(node, source).trim().to_string(),
         line: line(node),
@@ -4159,6 +4159,7 @@ fn parse_lambda_expression(node: Node, source: &[u8]) -> Expression {
         is_mutable: lambda_is_mutable(node, source),
         signature: signature(&return_type, &parameters),
         return_type,
+        semantic_return_type,
         parameters,
         body,
     }
@@ -4199,12 +4200,36 @@ fn lambda_return_type(
     })
 }
 
+fn lambda_semantic_return_type(
+    node: Node,
+    source: &[u8],
+    parameters: &[ParameterDecl],
+    body: &[Statement],
+) -> String {
+    find_lambda_trailing_return_type_with_normalizer(node, source, normalize_type_preserving_cv)
+        .unwrap_or_else(|| {
+            body.iter()
+                .find_map(|statement| return_statement_expression(statement))
+                .map(|expression| expression_static_semantic_type(expression, parameters))
+                .unwrap_or_else(|| "void".to_string())
+        })
+}
+
 fn find_lambda_trailing_return_type(node: Node, source: &[u8]) -> Option<String> {
+    find_lambda_trailing_return_type_with_normalizer(node, source, normalize_type)
+}
+
+fn find_lambda_trailing_return_type_with_normalizer(
+    node: Node,
+    source: &[u8],
+    normalizer: fn(&str) -> String,
+) -> Option<String> {
     node.child_by_field_name("declarator")
-        .and_then(|declarator| trailing_return_type(declarator, source))
+        .and_then(|declarator| trailing_return_type_with_normalizer(declarator, source, normalizer))
         .or_else(|| {
-            node.child_by_field_name("type")
-                .map(|type_node| type_name_from_type_node(type_node, source))
+            node.child_by_field_name("type").map(|type_node| {
+                type_name_from_type_node_with_normalizer(type_node, source, normalizer)
+            })
         })
         .or_else(|| {
             let body_start = node
@@ -4225,7 +4250,9 @@ fn find_lambda_trailing_return_type(node: Node, source: &[u8]) -> Option<String>
                             | "auto"
                     )
                 })
-                .map(|type_node| type_name_from_type_node(type_node, source))
+                .map(|type_node| {
+                    type_name_from_type_node_with_normalizer(type_node, source, normalizer)
+                })
         })
 }
 
@@ -4285,6 +4312,35 @@ fn expression_static_type(expression: &Expression, parameters: &[ParameterDecl])
         }
         Expression::Assignment { left, .. } => expression_static_type(left, parameters),
         _ => "ANY".to_string(),
+    }
+}
+
+fn expression_static_semantic_type(
+    expression: &Expression,
+    parameters: &[ParameterDecl],
+) -> String {
+    match expression {
+        Expression::Literal { value, .. } if integer_literal_value(value).is_some() => {
+            "int".to_string()
+        }
+        Expression::Identifier { name, .. } => parameters
+            .iter()
+            .find(|parameter| parameter.name == *name)
+            .map(|parameter| parameter.semantic_type_name.clone())
+            .unwrap_or_else(|| "ANY".to_string()),
+        Expression::Binary { left, right, .. } => {
+            let left_type = expression_static_semantic_type(left, parameters);
+            let right_type = expression_static_semantic_type(right, parameters);
+            if left_type == right_type {
+                left_type
+            } else if left_type == "int" || right_type == "int" {
+                "int".to_string()
+            } else {
+                "ANY".to_string()
+            }
+        }
+        Expression::Assignment { left, .. } => expression_static_semantic_type(left, parameters),
+        _ => expression_static_type(expression, parameters),
     }
 }
 
@@ -6063,6 +6119,7 @@ mod tests {
                 }
                 int castRead(Meter& meter) {
                   const Meter& casted = static_cast<const Meter&>(meter);
+                  auto pick = [](Meter& input) -> const Meter& { return input; };
                   return 0;
                 }
                 }
@@ -6165,11 +6222,23 @@ mod tests {
                         ..
                     }),
                 ..
+            }, Statement::LocalDecl {
+                name: lambda_name,
+                initializer:
+                    Some(Expression::Lambda {
+                        return_type: lambda_return_type,
+                        semantic_return_type: lambda_semantic_return_type,
+                        ..
+                    }),
+                ..
             }, Statement::Return { .. }] if name == "casted"
                 && type_name == "Meter&"
                 && semantic_type_name == "const Meter&"
                 && cast_type_name == "Meter&"
                 && cast_semantic_type_name == "const Meter&"
+                && lambda_name == "pick"
+                && lambda_return_type == "Meter&"
+                && lambda_semantic_return_type == "const Meter&"
         ));
     }
 
