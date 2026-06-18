@@ -42,7 +42,7 @@ The Swift frontend still defaults to upstream Joern's SwiftSyntax-based
 `joern-cli/frontends/swiftsrc2cpg/rust` is available as an opt-in oxidized
 backend through `swiftsrc2cpg/swiftAstGenBuildRust`; it emits the existing
 SwiftSyntax-shaped JSON contract for the first simple declaration/function
-slice.
+and expression slices.
 
 ## Rewrite Priorities
 
