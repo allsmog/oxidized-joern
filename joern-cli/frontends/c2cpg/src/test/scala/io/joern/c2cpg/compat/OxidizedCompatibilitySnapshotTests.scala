@@ -1979,7 +1979,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "this->slots[2] = Core.Member.Member()"
         )
       cpg.method.fullNameExact("Core.Owner.Owner:void(Member&)").call.nameExact("~Member").code.l shouldBe
-        List("makeMember().~Member()")
+        List(
+          "makeMember().~Member()",
+          "this->slots[0].~Member()",
+          "this->slots[1].~Member()",
+          "this->slots[0].~Member()"
+        )
       cpg.method.fullNameExact("Core.Owner.~Owner:void()").call.nameExact("~Member").code.l shouldBe
         List("this->slots[2].~Member()", "this->slots[1].~Member()", "this->slots[0].~Member()")
     }
