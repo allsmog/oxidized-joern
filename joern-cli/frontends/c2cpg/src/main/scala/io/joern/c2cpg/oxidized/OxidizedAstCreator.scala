@@ -2411,6 +2411,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def staticLocalDestructorCallAsts(storage: StaticLocalStorage): Seq[Ast] = {
+    val referenceTemporaryDestructor =
+      staticReferenceBoundTemporaryDestructor(storage).map(temporaryDestructorAst).toSeq
     val arrayDestructors = for {
       count       <- localArrayElementCount(storage.local).toSeq
       elementType <- arrayElementTypeFullName(storage.typeName).toSeq
@@ -2429,7 +2431,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         )
       )
     }
-    if (arrayDestructors.nonEmpty) {
+    if (referenceTemporaryDestructor.nonEmpty) {
+      referenceTemporaryDestructor
+    } else if (arrayDestructors.nonEmpty) {
       arrayDestructors
     } else {
       destructorEntryForType(storage.typeName).toSeq.map { entry =>
@@ -2443,6 +2447,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           )
         )
       }
+    }
+  }
+
+  private def staticReferenceBoundTemporaryDestructor(storage: StaticLocalStorage): Option[TemporaryDestructor] = {
+    storage.local.initializer.flatMap { initializer =>
+      Option
+        .when(isCxxReferenceType(storage.typeName)) {
+          temporaryTypeFullNameForExpression(initializer, Option(storage.typeName))
+            .flatMap(destructorEntryForType)
+            .map(entry =>
+              TemporaryDestructor(
+                temporaryDestructorCode(initializer, entry, Option(storage.typeName)),
+                initializer.line,
+                entry
+              )
+            )
+        }
+        .flatten
     }
   }
 
