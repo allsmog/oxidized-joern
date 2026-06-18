@@ -7425,15 +7425,40 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         index
       )
     }
-    val selectionPool =
-      if (scoredPool.exists(_.score.isViable)) {
-        removeDominatedOverloads(scoredPool.filter(_.score.isViable))
-      } else {
-        scoredPool
+    if (scoredPool.exists(_.score.isViable)) {
+      selectBestViableFunctionEntry(removeDominatedOverloads(scoredPool.filter(_.score.isViable)))
+    } else {
+      scoredPool
+        .maxByOption(scored => (scored.score.score, scored.index))
+        .map(_.candidate)
+    }
+  }
+
+  private def selectBestViableFunctionEntry(scoredOverloads: Seq[ScoredOverload]): Option[FunctionEntry] = {
+    scoredOverloads
+      .map(_.score.score)
+      .maxOption
+      .flatMap { bestScore =>
+        val best = scoredOverloads.filter(_.score.score == bestScore)
+        if (best.size == 1) Some(best.head.candidate)
+        else selectMutableMemberOverload(best)
       }
-    selectionPool
-      .maxByOption(scored => (scored.score.score, scored.index))
-      .map(_.candidate)
+  }
+
+  private def selectMutableMemberOverload(scoredOverloads: Seq[ScoredOverload]): Option[FunctionEntry] = {
+    val nonConstMembers = scoredOverloads.filterNot(scored => scored.candidate.function.isConst)
+    Option
+      .when(
+        nonConstMembers.size == 1 &&
+          scoredOverloads.exists(_.candidate.function.isConst) &&
+          scoredOverloads.forall(scored => sameMemberSignature(scored.candidate, nonConstMembers.head.candidate))
+      )(nonConstMembers.head.candidate)
+  }
+
+  private def sameMemberSignature(left: FunctionEntry, right: FunctionEntry): Boolean = {
+    left.ownerFullName == right.ownerFullName &&
+    left.simpleName == right.simpleName &&
+    left.function.parameters.map(_.semanticTypeName) == right.function.parameters.map(_.semanticTypeName)
   }
 
   private def removeDominatedOverloads(scoredOverloads: Seq[ScoredOverload]): Seq[ScoredOverload] = {
