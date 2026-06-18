@@ -157,6 +157,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |long rankIntegral(long value) { return 2; }
           |double rankFloat(double value) { return 1; }
           |long double rankFloat(long double value) { return 2; }
+          |int pickNull(Mid* value) { return 1; }
+          |long pickNull(long value) { return 2; }
           |class TargetBase {};
           |class TargetMid : public TargetBase {};
           |class Source {
@@ -218,6 +220,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::rankIntegral('x') +
           |    Core::rankIntegral(true) +
           |    Core::rankFloat(1.0f) +
+          |    Core::pickNull(nullptr) +
           |    Core::pickConverted(source) +
           |    Core::pickConverted(constSource) +
           |    Core::pickConverted(valueSource) +
@@ -261,6 +264,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.rankIntegral:int(int)")
       cpg.method.nameExact("use").call.codeExact("Core::rankFloat(1.0f)").methodFullName.l shouldBe
         List("Core.rankFloat:double(double)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickNull(nullptr)").methodFullName.l shouldBe
+        List("Core.pickNull:int(Mid*)")
       cpg.method.nameExact("use").call.codeExact("Core::pickConverted(source)").methodFullName.l shouldBe
         List("Core.pickConverted:short(TargetMid&)")
       cpg.method.nameExact("use").call.codeExact("Core::pickConverted(constSource)").methodFullName.l shouldBe
