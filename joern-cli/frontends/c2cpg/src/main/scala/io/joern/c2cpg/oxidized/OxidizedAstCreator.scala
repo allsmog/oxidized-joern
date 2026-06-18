@@ -124,7 +124,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     throwPreservedScopeDepth: Option[Int] = None
   )
   private final case class ArgumentInfo(expression: OxExpression, typeFullName: Option[String], isRvalue: Boolean)
-  private final case class FunctionReturnExpression(expression: OxExpression, localTypes: Map[String, String])
+  private final case class FunctionReturnExpression(
+    expression: OxExpression,
+    localTypes: Map[String, String],
+    returnCode: String
+  )
   private final case class FunctionCaptureContext(
     function: OxFunctionDecl,
     methodRef: NewMethodRef,
@@ -6176,7 +6180,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       try {
         val returnExpressions = functionReturnExpressions(entry, templateBindings)
         val inferredReturnTypes = returnExpressions.map { expression =>
-          functionReturnExpressionTypeFullName(entry, expression.expression, templateBindings, expression.localTypes)
+          functionDecltypeAutoReturnExpressionTypeFullName(
+            entry,
+            expression.expression,
+            expression.returnCode,
+            templateBindings,
+            expression.localTypes
+          )
         }
         Option
           .when(returnExpressions.nonEmpty && inferredReturnTypes.forall(_.isDefined)) {
@@ -6220,8 +6230,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case local: OxLocalDecl =>
         localTypes.updated(local.name, functionLocalTypeFullName(entry, local, templateBindings, localTypes)) ->
           Seq.empty
-      case OxReturn(_, _, Some(expression)) =>
-        localTypes -> Seq(FunctionReturnExpression(expression, localTypes))
+      case OxReturn(code, _, Some(expression)) =>
+        localTypes -> Seq(FunctionReturnExpression(expression, localTypes, code))
       case OxTry(_, _, body, catches) =>
         val bodyReturns = returnExpressionsInStatements(entry, templateBindings, body, localTypes)._2
         val catchReturns = catches.flatMap(catchClause =>
@@ -6325,6 +6335,62 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         functionScopedCallReturnTypeFullName(entry, call, templateBindings, localTypes)
       case _ =>
         None
+    }
+  }
+
+  private def functionDecltypeAutoReturnExpressionTypeFullName(
+    entry: FunctionEntry,
+    expression: OxExpression,
+    returnCode: String,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    functionReturnExpressionTypeFullName(entry, expression, templateBindings, localTypes).map { typeName =>
+      val normalizedType = normalizeType(typeName)
+      if (
+        returnExpressionCodeHasOuterParentheses(returnCode) &&
+        !functionReturnExpressionIsRvalue(entry, expression, templateBindings, localTypes) &&
+        !normalizedType.endsWith("&")
+      ) {
+        s"$normalizedType&"
+      } else {
+        normalizedType
+      }
+    }
+  }
+
+  private def returnExpressionCodeHasOuterParentheses(returnCode: String): Boolean = {
+    val returnedCode = returnCode.trim.stripPrefix("return").stripSuffix(";").trim
+    expressionCodeHasOuterParentheses(returnedCode)
+  }
+
+  private def expressionCodeHasOuterParentheses(code: String): Boolean = {
+    val trimmed = code.trim
+    trimmed.startsWith("(") && trimmed.endsWith(")") && matchingOuterParenthesisEnd(trimmed).contains(
+      trimmed.length - 1
+    )
+  }
+
+  private def matchingOuterParenthesisEnd(code: String): Option[Int] = {
+    if (!code.startsWith("(")) {
+      None
+    } else {
+      var depth = 0
+      var index = 0
+      while (index < code.length) {
+        code.charAt(index) match {
+          case '(' =>
+            depth += 1
+          case ')' =>
+            depth -= 1
+            if (depth == 0) {
+              return Option(index)
+            }
+          case _ =>
+        }
+        index += 1
+      }
+      None
     }
   }
 
