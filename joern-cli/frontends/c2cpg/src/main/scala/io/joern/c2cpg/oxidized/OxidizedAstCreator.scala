@@ -1395,13 +1395,31 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     ownerFullName: Option[String],
     aliases: Map[String, String] = typeAliases
   ): String = {
-    val normalized             = normalizeType(resolveAliasType(typeName, aliases))
-    val objectTypeName         = unaliasedAggregateObjectTypeName(normalized)
-    val lookupObjectTypeName   = normalizeType(resolveAliasType(objectTypeName, aliases))
-    val resolvedObjectTypeName = localObjectAggregateTypeFullName(lookupObjectTypeName, ownerFullName, aliases)
+    val normalized           = normalizeType(resolveAliasType(typeName, aliases))
+    val objectTypeName       = unaliasedAggregateObjectTypeName(normalized)
+    val lookupObjectTypeName = normalizeType(resolveAliasType(objectTypeName, aliases))
+    val resolvedObjectTypeName =
+      localObjectAggregateTypeFullNamePreservingTemplate(lookupObjectTypeName, ownerFullName, aliases)
     resolvedObjectTypeName
       .map(resolvedObjectTypeName => replaceObjectTypeName(normalized, objectTypeName, resolvedObjectTypeName))
       .getOrElse(normalized)
+  }
+
+  private def localObjectAggregateTypeFullNamePreservingTemplate(
+    typeName: String,
+    ownerFullName: Option[String],
+    aliases: Map[String, String]
+  ): Option[String] = {
+    localObjectAggregateTypeFullName(typeName, ownerFullName, aliases).orElse {
+      val erasedTypeName = stripTemplateArguments(typeName)
+      Option
+        .when(erasedTypeName != typeName) {
+          localObjectAggregateTypeFullName(erasedTypeName, ownerFullName, aliases).map { resolvedErasedTypeName =>
+            replaceObjectTypeName(typeName, erasedTypeName, resolvedErasedTypeName)
+          }
+        }
+        .flatten
+    }
   }
 
   private def unaliasedAggregateObjectTypeName(typeName: String): String = {
@@ -6331,6 +6349,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option.when(branchTypes.forall(_.isDefined))(branchTypes.flatten.map(normalizeType).distinct).collect {
           case Seq(branchType) => branchType
         }
+      case indexAccess: OxIndexAccess =>
+        functionScopedIndexAccessTypeFullName(entry, indexAccess, templateBindings, localTypes)
       case call: OxCall =>
         functionScopedCallReturnTypeFullName(entry, call, templateBindings, localTypes)
       case _ =>
@@ -6392,6 +6412,34 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       }
       None
     }
+  }
+
+  private def functionScopedIndexAccessTypeFullName(
+    entry: FunctionEntry,
+    indexAccess: OxIndexAccess,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    val baseTypeFullName =
+      functionReturnExpressionTypeFullName(entry, indexAccess.base, templateBindings, localTypes)
+    val argumentInfos = Seq(
+      ArgumentInfo(
+        indexAccess.index,
+        functionReturnExpressionTypeFullName(entry, indexAccess.index, templateBindings, localTypes),
+        functionReturnExpressionIsRvalue(entry, indexAccess.index, templateBindings, localTypes)
+      )
+    )
+    baseTypeFullName
+      .flatMap { receiverTypeFullName =>
+        selectFunctionEntryForArgumentInfos(
+          memberFunctionCandidatesForReceiverType(receiverTypeFullName, "operator[]"),
+          argumentInfos,
+          Option(receiverTypeFullName)
+        ).map { targetEntry =>
+          functionSemanticReturnTypeFullNameForArgumentInfos(targetEntry, argumentInfos, Option(receiverTypeFullName))
+        }
+      }
+      .orElse(baseTypeFullName.map(_.stripSuffix("[]")))
   }
 
   private def functionScopedCallReturnTypeFullName(
@@ -6495,6 +6543,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         false
       case OxCast(_, semanticTypeName, _, _, _) =>
         typeNameIsRvalue(functionScopedTypeFullName(entry, semanticTypeName, templateBindings))
+      case indexAccess: OxIndexAccess =>
+        functionScopedIndexAccessTypeFullName(entry, indexAccess, templateBindings, localTypes)
+          .map(typeNameIsRvalue)
+          .getOrElse(false)
       case call: OxCall =>
         functionScopedCallReturnTypeFullName(entry, call, templateBindings, localTypes)
           .map(typeNameIsRvalue)
@@ -7278,9 +7330,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         .foldLeft(Option(Map.empty[String, String])) { case (bindingsOption, (parameter, argumentInfo)) =>
           bindingsOption.flatMap { bindings =>
             val updates = argumentInfo.typeFullName
-              .map(argumentTypeName =>
-                templateBindingsForParameterType(parameter.semanticTypeName, argumentTypeName, templateParameters)
-              )
+              .map { argumentTypeName =>
+                val parameterTypeName =
+                  ownerResolvedTypeFullNamePreservingCv(
+                    parameter.semanticTypeName,
+                    entry.ownerFullName.orElse(entry.lexicalOwnerFullName)
+                  )
+                templateBindingsForParameterType(parameterTypeName, argumentTypeName, templateParameters)
+              }
               .getOrElse(Seq.empty)
             mergeTemplateBindings(bindings, updates)
           }
