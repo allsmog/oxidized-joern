@@ -1786,6 +1786,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
+      def globalMethod = cpg.method.fullNameExact("Test0.cpp:<global>")
       cpg.method.nameExact("refs").call.nameExact("~Widget").code.l shouldBe
         List(
           "Core::Widget(source).~Widget()",
@@ -1801,6 +1802,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("refs").local.nameExact("rref").typeFullName.l shouldBe List("Core.Widget&&")
       cpg.method.nameExact("refs").local.nameExact("staticCref").typeFullName.l shouldBe List("Core.Widget&")
       cpg.method.nameExact("refs").local.nameExact("threadRref").typeFullName.l shouldBe List("Core.Widget&&")
+      globalMethod.controlStructure.controlStructureType(ControlStructureTypes.IF).code.l
+        .filter(_.startsWith("if (refs::")) shouldBe
+        List("if (refs::<static-init>threadRref)", "if (refs::<static-init>staticCref)")
+      globalMethod.call.nameExact("~Widget").code.l shouldBe
+        List("Core::make().~Widget()", "Core::Widget().~Widget()")
     }
 
     "model C++ conditional aggregate temporary lifetimes" in {
