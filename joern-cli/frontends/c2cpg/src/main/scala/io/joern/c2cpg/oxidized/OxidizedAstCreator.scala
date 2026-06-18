@@ -254,7 +254,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }.toMap
   private val TemplateParameterListPattern          = raw"template\s*<([^>]*)>".r
   private val TemplateTypeParameterPattern          = raw"(?:typename|class)\s*(?:\.\.\.)?\s+([A-Za-z_]\w*)".r
-  private val ExplicitSpecifierPattern              = raw"\bexplicit\b".r
+  private val ExplicitSpecifierPattern              = raw"\bexplicit\b\s*(?:\(\s*(true|false)\s*\))?".r
   private val IdentifierTokenPattern                = raw"[A-Za-z_]\w*".r
   private val DecimalDigitSequencePatternSource     = raw"\d(?:'?\d)*"
   private val HexadecimalDigitSequencePatternSource = raw"[0-9a-fA-F](?:'?[0-9a-fA-F])*"
@@ -5560,6 +5560,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         .flatMap(conversionOperatorNamesForType)
         .flatMap(operatorName => memberFunctionCandidates(expression, operatorName)) ++
         conversionOperatorCandidates(expression)).distinct
+        .filterNot(entry => functionHasExplicitSpecifier(entry.function))
       selectBestConversionOperator(candidates.zipWithIndex.flatMap { case (entry, index) =>
         conversionOperatorCompatibilityScore(expectedType, entry).map(score =>
           ScoredConversionOperator(entry, score, index)
@@ -8342,7 +8343,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val declarationPrefix =
       if (functionNameIndex >= 0) function.code.take(functionNameIndex)
       else function.code
-    ExplicitSpecifierPattern.findFirstIn(declarationPrefix).isDefined
+    ExplicitSpecifierPattern.findFirstMatchIn(declarationPrefix) match {
+      case Some(explicitSpecifier) => Option(explicitSpecifier.group(1)).forall(_ != "false")
+      case None                    => false
+    }
   }
 
   private def functionOwnerFullName(function: OxFunctionDecl, ownerFullName: Option[String]): Option[String] = {

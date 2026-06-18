@@ -681,13 +681,26 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |public:
           |  Visible(int value) {}
           |};
+          |class ConditionalVisible {
+          |public:
+          |  explicit(false) ConditionalVisible(int value) {}
+          |};
+          |class ConditionalHidden {
+          |public:
+          |  explicit(true) ConditionalHidden(int value) {}
+          |};
           |int onlyHidden(Hidden value) { return 1; }
+          |int onlyConditionalVisible(ConditionalVisible value) { return 1; }
+          |int onlyConditionalHidden(ConditionalHidden value) { return 1; }
           |long choose(Hidden value) { return 1; }
           |int choose(Visible value) { return 2; }
           |}
           |long use(int seed) {
           |  Core::Hidden direct(seed);
-          |  return Core::onlyHidden(seed) + Core::choose(seed);
+          |  return Core::onlyHidden(seed) +
+          |    Core::onlyConditionalVisible(seed) +
+          |    Core::onlyConditionalHidden(seed) +
+          |    Core::choose(seed);
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -698,10 +711,100 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
       )
       cpg.method.nameExact("use").call.codeExact("Core::onlyHidden(seed)").methodFullName.l shouldBe
         List("Core.onlyHidden")
+      cpg.method.nameExact("use").call.codeExact("Core::onlyConditionalVisible(seed)").methodFullName.l shouldBe
+        List("Core.onlyConditionalVisible:int(ConditionalVisible)")
+      cpg.method.nameExact("use").call.codeExact("Core::onlyConditionalVisible(seed)").argument.code.l shouldBe
+        List("Core.ConditionalVisible.ConditionalVisible(seed)")
+      cpg.method.nameExact("use").call.codeExact("Core::onlyConditionalHidden(seed)").methodFullName.l shouldBe
+        List("Core.onlyConditionalHidden")
       cpg.method.nameExact("use").call.codeExact("Core::choose(seed)").methodFullName.l shouldBe
         List("Core.choose:int(Visible)")
       cpg.method.nameExact("use").call.codeExact("Core::choose(seed)").argument.code.l shouldBe
         List("Core.Visible.Visible(seed)")
+    }
+
+    "ignore explicit conversion operators for implicit overload conversions" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class ExplicitOnly {
+          |public:
+          |  explicit operator int() const { return 1; }
+          |};
+          |class Numeric {
+          |public:
+          |  explicit operator int() const { return 1; }
+          |  operator long() const { return 2; }
+          |};
+          |class ConditionalVisibleNumeric {
+          |public:
+          |  explicit(false) operator int() const { return 3; }
+          |};
+          |class ConditionalHiddenNumeric {
+          |public:
+          |  explicit(true) operator int() const { return 4; }
+          |};
+          |class Flag {
+          |public:
+          |  explicit operator bool() const { return true; }
+          |};
+          |int onlyInt(int value) { return 1; }
+          |int onlyConditionalInt(int value) { return 1; }
+          |int onlyConditionalHiddenInt(int value) { return 1; }
+          |int onlyFlagBool(bool value) { return 1; }
+          |int choose(int value) { return 1; }
+          |long choose(long value) { return 2; }
+          |}
+          |long use(Core::ExplicitOnly explicitOnly,
+          |  Core::Numeric numeric,
+          |  Core::ConditionalVisibleNumeric conditionalVisible,
+          |  Core::ConditionalHiddenNumeric conditionalHidden,
+          |  Core::Flag flag) {
+          |  if (flag) {
+          |    return Core::onlyInt(explicitOnly) +
+          |      Core::onlyConditionalInt(conditionalVisible) +
+          |      Core::onlyConditionalHiddenInt(conditionalHidden) +
+          |      Core::choose(numeric) +
+          |      Core::onlyFlagBool(flag);
+          |  }
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").controlStructure.condition.ast.isCall.nameExact("operator bool").code.l shouldBe
+        List("flag.operator bool()")
+      cpg.method.nameExact("use").call.codeExact("Core::onlyInt(explicitOnly)").methodFullName.l shouldBe
+        List("Core.onlyInt")
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("Core::onlyConditionalInt(conditionalVisible)")
+        .methodFullName
+        .l shouldBe
+        List("Core.onlyConditionalInt:int(int)")
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("Core::onlyConditionalInt(conditionalVisible)")
+        .argument
+        .code
+        .l shouldBe
+        List("conditionalVisible.operator int()")
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("Core::onlyConditionalHiddenInt(conditionalHidden)")
+        .methodFullName
+        .l shouldBe
+        List("Core.onlyConditionalHiddenInt")
+      cpg.method.nameExact("use").call.codeExact("Core::choose(numeric)").methodFullName.l shouldBe
+        List("Core.choose:long(long)")
+      cpg.method.nameExact("use").call.codeExact("Core::choose(numeric)").argument.code.l shouldBe
+        List("numeric.operator long()")
+      cpg.method.nameExact("use").call.codeExact("Core::onlyFlagBool(flag)").methodFullName.l shouldBe
+        List("Core.onlyFlagBool")
     }
 
     "specialize function template returns during overload resolution" in {
