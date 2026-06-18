@@ -124,6 +124,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     throwPreservedScopeDepth: Option[Int] = None
   )
   private final case class ArgumentInfo(expression: OxExpression, typeFullName: Option[String], isRvalue: Boolean)
+  private final case class OverloadScore(score: Int, isViable: Boolean)
   private final case class FunctionReturnExpression(
     expression: OxExpression,
     localTypes: Map[String, String],
@@ -7136,10 +7137,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val arityMatches  = candidates.filter(_.function.parameters.size == argumentInfos.size)
     val pool =
       if (viableByArity.nonEmpty) viableByArity else if (arityMatches.nonEmpty) arityMatches else candidates
-    pool.zipWithIndex
-      .maxByOption { case (candidate, index) =>
-        (overloadScore(candidate, argumentInfos, receiverTypeFullName, explicitTemplateArguments), index)
+    val scoredPool = pool.zipWithIndex.map { case (candidate, index) =>
+      (candidate, overloadScore(candidate, argumentInfos, receiverTypeFullName, explicitTemplateArguments), index)
+    }
+    val selectionPool =
+      if (scoredPool.exists { case (_, score, _) => score.isViable }) {
+        scoredPool.filter { case (_, score, _) => score.isViable }
+      } else {
+        scoredPool
       }
+    selectionPool
+      .maxByOption { case (_, score, index) => (score.score, index) }
       .map(_._1)
   }
 
@@ -7156,7 +7164,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     argumentInfos: Seq[ArgumentInfo],
     receiverTypeFullName: Option[String] = None,
     explicitTemplateArguments: Seq[String] = Seq.empty
-  ): Int = {
+  ): OverloadScore = {
     val receiverTemplateBindings =
       receiverTemplateBindingsForOwner(
         receiverTypeFullName,
@@ -7180,12 +7188,20 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .when(templateBindingResult.isEmpty)(-10000)
       .getOrElse(0)
     val templatePenalty = Option.when(templateParameters.nonEmpty)(-5).getOrElse(0)
-    arityAdjustment + invalidExplicitTemplatePenalty + invalidTemplatePenalty + templatePenalty + candidate.function.parameters
+    val parameterCompatibilityScores = candidate.function.parameters
       .zip(argumentInfos)
       .map { case (parameter, argumentInfo) =>
         typeCompatibilityScore(substituteTemplateTypeNames(parameter.semanticTypeName, templateBindings), argumentInfo)
       }
-      .sum
+    val score =
+      arityAdjustment + invalidExplicitTemplatePenalty + invalidTemplatePenalty + templatePenalty +
+        parameterCompatibilityScores.sum
+    val isViable =
+      functionArityIsViable(candidate, argumentInfos.size) &&
+        explicitTemplateBindingResult.nonEmpty &&
+        templateBindingResult.nonEmpty &&
+        parameterCompatibilityScores.forall(_ > 0)
+    OverloadScore(score, isViable)
   }
 
   private def overloadArityAdjustment(candidate: FunctionEntry, argumentCount: Int): Int = {

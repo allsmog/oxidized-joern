@@ -291,6 +291,44 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.bindItem:long(Item&)")
     }
 
+    "filter overloads with incompatible arguments before scoring" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class TargetBase {};
+          |class TargetMid : public TargetBase {};
+          |class Source {
+          |public:
+          |  operator TargetMid&();
+          |};
+          |class Wrong {};
+          |class Root {};
+          |class N1 : public Root {};
+          |class N2 : public N1 {};
+          |class N3 : public N2 {};
+          |class N4 : public N3 {};
+          |class N5 : public N4 {};
+          |class N6 : public N5 {};
+          |class N7 : public N6 {};
+          |class N8 : public N7 {};
+          |class N9 : public N8 {};
+          |class N10 : public N9 {};
+          |class N11 : public N10 {};
+          |class N12 : public N11 {};
+          |int route(Wrong& source, N12& value) { return 1; }
+          |long route(TargetBase& source, Root& value) { return 2; }
+          |}
+          |long use(Core::Source& source, Core::N12& value) {
+          |  return Core::route(source, value);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").call.codeExact("Core::route(source, value)").methodFullName.l shouldBe
+        List("Core.route:long(TargetBase&,Root&)")
+    }
+
     "specialize function template returns during overload resolution" in {
       val cpg = code(
         """
