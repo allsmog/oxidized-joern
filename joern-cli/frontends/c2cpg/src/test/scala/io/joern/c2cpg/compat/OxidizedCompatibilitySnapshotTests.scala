@@ -993,13 +993,23 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "Core.Widget.Widget:void()",
           "Core.Widget.Widget:void()"
         )
-      cpg.method.nameExact("statics").call.nameExact(Operators.assignment).code.l.filterNot(_.startsWith("<tmp>")) shouldBe
+      cpg.method.nameExact("statics").controlStructure.controlStructureType(ControlStructureTypes.IF).code.l shouldBe
+        List("if (!<static-init>cached)", "if (!<static-init>threadCached)", "if (!<static-init>slots)")
+      cpg.method.nameExact("statics").call.nameExact(Operators.assignment).code.l.filter(_.startsWith("<static-init>")) shouldBe
         List(
+          "<static-init>cached = true",
+          "<static-init>threadCached = true",
+          "<static-init>slots = true"
+        )
+      cpg.method.nameExact("statics").call.nameExact(Operators.assignment).code.l
+        .filterNot(code => code.startsWith("<tmp>") || code.startsWith("<static-init>"))
+        .sorted shouldBe
+        List(
+          "automatic = Core.Widget.Widget()",
           "cached = Core.Widget.Widget()",
-          "threadCached = Core.Widget.Widget()",
           "slots[0] = Core.Widget.Widget()",
           "slots[1] = Core.Widget.Widget()",
-          "automatic = Core.Widget.Widget()"
+          "threadCached = Core.Widget.Widget()"
         )
       cpg.method.nameExact("statics").call.nameExact("~Widget").code.l shouldBe List("automatic.~Widget()")
     }
