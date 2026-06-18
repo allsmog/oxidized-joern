@@ -250,7 +250,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private val TemplateParameterListPattern = raw"template\s*<([^>]*)>".r
   private val TemplateTypeParameterPattern = raw"(?:typename|class)\s*(?:\.\.\.)?\s+([A-Za-z_]\w*)".r
   private val IdentifierTokenPattern       = raw"[A-Za-z_]\w*".r
-  private val IntegerLiteralPattern        = """[+-]?(?:0[xX][0-9a-fA-F]+|\d+)[uUlL]*""".r
+  private val IntegerLiteralPattern =
+    """[+-]?(?:0[xX][0-9a-fA-F](?:'?[0-9a-fA-F])*|0[bB][01](?:'?[01])*|\d(?:'?\d)*)[uUlL]*""".r
   private val FloatingLiteralPattern =
     """[+-]?(?:(?:\d+\.\d*|\.\d+)(?:[eE][+-]?\d+)?|\d+[eE][+-]?\d+)[fFlL]?""".r
   private val CxxOverloadableBinaryOperators = Set(
@@ -8396,7 +8397,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     value.trim match {
       case "true" | "false" | "TRUE" | "FALSE"   => registerType("bool")
       case "nullptr"                             => registerType("std.nullptr_t")
-      case literal if isIntegerLiteral(literal)  => registerType("int")
+      case literal if isIntegerLiteral(literal)  => registerType(integerLiteralTypeFullName(literal))
       case literal if isFloatingLiteral(literal) => registerType(floatingLiteralTypeFullName(literal))
       case literal if isCharLiteral(literal)     => registerType("char")
       case literal =>
@@ -8524,12 +8525,46 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     if (!isIntegerLiteral(literal)) {
       false
     } else {
-      val withoutSuffix = literal.replaceFirst("[uUlL]*$", "").stripPrefix("+").stripPrefix("-")
-      val digits =
-        if (withoutSuffix.startsWith("0x") || withoutSuffix.startsWith("0X")) withoutSuffix.drop(2)
-        else withoutSuffix
-      digits.nonEmpty && digits.forall(_ == '0')
+      val hasUnarySign = literal.startsWith("+") || literal.startsWith("-")
+      val digits       = integerLiteralDigits(literal)
+      !hasUnarySign && digits.nonEmpty && digits.forall(_ == '0')
     }
+  }
+
+  private def integerLiteralTypeFullName(value: String): String = {
+    val suffix      = integerLiteralSuffix(value)
+    val isUnsigned  = suffix.contains('u')
+    val longMarkers = suffix.count(_ == 'l')
+    val signedType =
+      if (longMarkers >= 2) "long long"
+      else if (longMarkers == 1) "long"
+      else "int"
+    if (isUnsigned) s"unsigned $signedType" else signedType
+  }
+
+  private def integerLiteralSuffix(value: String): String = {
+    integerLiteralDigitsAndSuffix(value)._2
+  }
+
+  private def integerLiteralDigits(value: String): String = {
+    integerLiteralDigitsAndSuffix(value)._1
+  }
+
+  private def integerLiteralDigitsAndSuffix(value: String): (String, String) = {
+    val literal         = value.trim.replace("'", "")
+    val unsignedLiteral = literal.stripPrefix("+").stripPrefix("-")
+    val lower           = unsignedLiteral.toLowerCase
+    val (digitsStart, ok) =
+      if (lower.startsWith("0x")) 2 -> ((ch: Char) => ch.isDigit || "abcdefABCDEF".contains(ch))
+      else if (lower.startsWith("0b")) 2 -> ((ch: Char) => ch == '0' || ch == '1')
+      else 0                             -> ((ch: Char) => ch.isDigit)
+    val suffixOffset = unsignedLiteral.drop(digitsStart).indexWhere(ch => !ok(ch))
+    val suffixStart =
+      if (suffixOffset < 0) unsignedLiteral.length
+      else digitsStart + suffixOffset
+    val digits = unsignedLiteral.substring(digitsStart, suffixStart)
+    val suffix = unsignedLiteral.substring(suffixStart).toLowerCase
+    digits -> suffix
   }
 
   private def isFloatingLiteral(value: String): Boolean = {
