@@ -7858,6 +7858,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     else if (parameterType.endsWith(s".$argumentType") || argumentType.endsWith(s".$parameterType")) Some(55)
     else
       nullPointerConversionScore(parameterType, argumentType)
+        .orElse(arrayToPointerConversionScore(parameterType, argumentType))
         .orElse(pointerConversionScore(parameterType, argumentType))
         .orElse(arithmeticConversionScore(parameterType, argumentType))
         .orElse {
@@ -7877,6 +7878,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val parameterPointee = stripCxxTypeQualifiers(parameterType.stripSuffix("*")).trim
         val argumentPointee  = stripCxxTypeQualifiers(argumentType.stripSuffix("*")).trim
         Option.when(parameterPointee == Defines.Void && argumentPointee != Defines.Void)(45)
+      }
+      .flatten
+  }
+
+  private def arrayToPointerConversionScore(parameterType: String, argumentType: String): Option[Int] = {
+    Option
+      .when(parameterType.endsWith("*") && isArrayLikeType(argumentType)) {
+        val parameterPointee = stripCxxTypeQualifiers(parameterType.stripSuffix("*")).trim
+        val argumentElement  = arrayElementTypeFullName(argumentType).map(stripCxxTypeQualifiers).map(_.trim)
+        argumentElement.flatMap { argumentPointee =>
+          if (parameterPointee == argumentPointee) Some(59)
+          else Option.when(parameterPointee == Defines.Void)(45)
+        }
       }
       .flatten
   }
@@ -7946,6 +7960,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val parameterObjectIsConst = receiverObjectTypeIsConst(parameterType)
     val argumentObjectIsConst  = receiverObjectTypeIsConst(argumentTypeName)
     if (parameterType.endsWith("*") && argumentType.endsWith("*")) {
+      Option.when(parameterObjectIsConst || !argumentObjectIsConst) {
+        if (parameterObjectIsConst && !argumentObjectIsConst) 1 else 2
+      }
+    } else if (parameterType.endsWith("*") && isArrayLikeType(argumentType)) {
       Option.when(parameterObjectIsConst || !argumentObjectIsConst) {
         if (parameterObjectIsConst && !argumentObjectIsConst) 1 else 2
       }
