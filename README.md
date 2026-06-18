@@ -30,6 +30,12 @@ implementation. An experimental Rust `cxxastgen` scaffold lives under
 `joern-cli/frontends/c2cpg/rust`; it is not yet wired into production CPG
 generation.
 
+The JavaScript/TypeScript frontend still defaults to upstream Joern's Babel
+`astgen` binary. An experimental Rust `astgen` workspace now lives under
+`joern-cli/frontends/jssrc2cpg/rust`; it emits the existing Babel-shaped JSON
+contract for an initial JavaScript syntax subset and can be installed locally
+with the opt-in `jssrc2cpg/jsAstGenBuildRust` SBT task.
+
 ## Rewrite Priorities
 
 1. Keep the upstream Joern CLI and CPG behavior usable while replacing
@@ -77,6 +83,29 @@ Release notes and compatibility details are in:
 - [`joern-cli/frontends/gosrc2cpg/rust/README.md`](joern-cli/frontends/gosrc2cpg/rust/README.md)
 - [`joern-cli/frontends/gosrc2cpg/rust/docs/json-contract.md`](joern-cli/frontends/gosrc2cpg/rust/docs/json-contract.md)
 - [`joern-cli/frontends/gosrc2cpg/rust/docs/release-checklist.md`](joern-cli/frontends/gosrc2cpg/rust/docs/release-checklist.md)
+
+## JavaScript Frontend / experimental Rust `astgen`
+
+The Rust JavaScript AST generator workspace lives under:
+
+```text
+joern-cli/frontends/jssrc2cpg/rust
+```
+
+Useful commands:
+
+```bash
+cd joern-cli/frontends/jssrc2cpg/rust
+cargo fmt --check
+cargo test
+```
+
+Build and install the Rust binary into the location used by the existing
+`jssrc2cpg` SBT project:
+
+```bash
+sbt 'jssrc2cpg/jsAstGenBuildRust'
+```
 
 ## Requirements
 
