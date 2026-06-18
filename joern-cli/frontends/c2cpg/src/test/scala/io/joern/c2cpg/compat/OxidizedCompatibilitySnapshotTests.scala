@@ -488,11 +488,22 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  T& borrow() { return value; }
           |  const T& borrowConst() const { return value; }
           |};
+          |template <typename T>
+          |struct Base {
+          |  T inherited;
+          |  T inheritedGet() { return inherited; }
+          |  T& inheritedBorrow() { return inherited; }
+          |};
+          |template <typename T>
+          |struct Derived : public Base<T> {
+          |  T own;
+          |};
           |}
-          |int use(Core::Holder<int> holder, const Core::Holder<int>& constHolder) {
+          |int use(Core::Holder<int> holder, const Core::Holder<int>& constHolder, Core::Derived<int> derived) {
           |  holder.borrow();
           |  constHolder.borrowConst();
-          |  return holder.value + holder.get() + Core::pick<int>(1);
+          |  derived.inheritedBorrow();
+          |  return holder.value + holder.get() + derived.inherited + derived.inheritedGet() + Core::pick<int>(1);
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -511,6 +522,16 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.codeExact("holder.borrow()").typeFullName.l shouldBe List("int&")
       cpg.method.nameExact("use").call.codeExact("constHolder.borrowConst()").typeFullName.l shouldBe
         List("const int&")
+      cpg.method.nameExact("use").parameter.nameExact("derived").typeFullName.l shouldBe List("Core.Derived<int>")
+      inside(cpg.method.nameExact("use").call.nameExact(Operators.fieldAccess).codeExact("derived.inherited").l) {
+        case List(fieldAccess) =>
+          fieldAccess.typeFullName shouldBe "int"
+          fieldAccess.argument.code.l shouldBe List("derived", "inherited")
+      }
+      cpg.method.nameExact("use").call.codeExact("derived.inheritedGet()").methodFullName.l shouldBe
+        List("Core.Base.inheritedGet:T()")
+      cpg.method.nameExact("use").call.codeExact("derived.inheritedGet()").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("use").call.codeExact("derived.inheritedBorrow()").typeFullName.l shouldBe List("int&")
       inside(cpg.method.nameExact("use").call.codeExact("Core::pick<int>(1)").l) { case List(pickCall) =>
         pickCall.name shouldBe "pick"
         pickCall.methodFullName shouldBe "Core.pick:T(T)"
