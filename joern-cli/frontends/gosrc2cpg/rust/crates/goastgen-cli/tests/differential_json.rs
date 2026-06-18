@@ -91,7 +91,7 @@ fn configured_reference_binary() -> Option<PathBuf> {
 }
 
 fn default_reference_binary() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
+    goastgen_cli_dir()
         .join("../../../bin/astgen")
         .join(host_reference_name())
 }
@@ -120,7 +120,22 @@ fn host_reference_name() -> &'static str {
 }
 
 fn fixture_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/go-corpus")
+    goastgen_cli_dir().join("../../fixtures/go-corpus")
+}
+
+fn goastgen_cli_dir() -> PathBuf {
+    let compiled = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    if compiled.join("src/main.rs").is_file() {
+        return compiled;
+    }
+
+    let cwd = env::current_dir().expect("reading current dir");
+    for candidate in [cwd.join("crates/goastgen-cli"), cwd] {
+        if candidate.join("src/main.rs").is_file() {
+            return candidate;
+        }
+    }
+    panic!("could not locate goastgen-cli crate directory")
 }
 
 fn configured_corpus_dirs(fixture_root: &Path) -> Vec<PathBuf> {

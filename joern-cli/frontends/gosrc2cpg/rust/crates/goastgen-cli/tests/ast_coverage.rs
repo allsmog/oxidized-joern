@@ -118,12 +118,26 @@ fn collect_node_types(value: &Value, out: &mut BTreeSet<String>) {
 }
 
 fn fixture_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/go-corpus")
+    goastgen_cli_dir().join("../../fixtures/go-corpus")
 }
 
 fn parser_ast_path() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../../src/main/scala/io/joern/gosrc2cpg/parser/ParserAst.scala")
+    goastgen_cli_dir().join("../../../src/main/scala/io/joern/gosrc2cpg/parser/ParserAst.scala")
+}
+
+fn goastgen_cli_dir() -> PathBuf {
+    let compiled = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    if compiled.join("src/main.rs").is_file() {
+        return compiled;
+    }
+
+    let cwd = std::env::current_dir().expect("reading current dir");
+    for candidate in [cwd.join("crates/goastgen-cli"), cwd] {
+        if candidate.join("src/main.rs").is_file() {
+            return candidate;
+        }
+    }
+    panic!("could not locate goastgen-cli crate directory")
 }
 
 fn immediate_child_dirs(root: &Path) -> Vec<PathBuf> {
