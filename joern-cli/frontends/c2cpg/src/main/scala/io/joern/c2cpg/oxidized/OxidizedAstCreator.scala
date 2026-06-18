@@ -210,6 +210,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private var functionCaptureContext: Option[FunctionCaptureContext]    = None
   private var currentMethodOwnerTypeFullName: Option[String]            = None
   private var currentMethodFullName: Option[String]                     = None
+  private var currentMethodSimpleName: Option[String]                   = None
   private var currentMethodReturnTypeFullName: Option[String]           = None
   private var typeAliases: Map[String, String]                          = Map.empty
   private var localDestructorScopes: List[Vector[LocalDestructor]]      = Nil
@@ -978,6 +979,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousCaptureContext   = functionCaptureContext
     val previousMethodOwner      = currentMethodOwnerTypeFullName
     val previousMethodFullName   = currentMethodFullName
+    val previousMethodSimpleName = currentMethodSimpleName
     val previousMethodReturnType = currentMethodReturnTypeFullName
     val previousDestructorScopes = localDestructorScopes
     val previousJumpTargets      = jumpCleanupTargets
@@ -987,6 +989,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     functionCaptureContext = Option(captureContext)
     currentMethodOwnerTypeFullName = parentTypeOwner
     currentMethodFullName = Option(fullName)
+    currentMethodSimpleName = Option(simpleName)
     currentMethodReturnTypeFullName = Option(returnType)
     localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
     jumpCleanupTargets = Nil
@@ -1003,11 +1006,20 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           Option
             .when(statementsMayCompleteNormally(function.body))(currentLocalDestructors.reverse.map(localDestructorAst))
             .getOrElse(Vector.empty)
-        constructorPrefixAsts ++ statementAsts ++ destructorAsts
+        val subobjectDestructorAsts =
+          Option
+            .when(
+              function.isDefinition &&
+                isDestructorMethod(simpleName, parentTypeOwner) &&
+                statementsMayCompleteNormally(function.body)
+            )(automaticSubobjectDestructorAsts(parentTypeOwner.get, function.line))
+            .getOrElse(Seq.empty)
+        constructorPrefixAsts ++ statementAsts ++ destructorAsts ++ subobjectDestructorAsts
       } finally {
         localDestructorScopes = previousDestructorScopes
         jumpCleanupTargets = previousJumpTargets
         currentMethodReturnTypeFullName = previousMethodReturnType
+        currentMethodSimpleName = previousMethodSimpleName
         currentMethodFullName = previousMethodFullName
         currentMethodOwnerTypeFullName = previousMethodOwner
         functionCaptureContext = previousCaptureContext
@@ -1236,6 +1248,63 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     )
   }
 
+  private def currentAutomaticSubobjectDestructorAsts(line: Int): Seq[Ast] = {
+    currentMethodOwnerTypeFullName
+      .filter(ownerTypeFullName => isDestructorMethod(currentMethodSimpleName.getOrElse(""), Option(ownerTypeFullName)))
+      .toSeq
+      .flatMap(ownerTypeFullName => automaticSubobjectDestructorAsts(ownerTypeFullName, line))
+  }
+
+  private def automaticSubobjectDestructorAsts(ownerTypeFullName: String, line: Int): Seq[Ast] = {
+    val ownerType = resolveAliasType(ownerTypeFullName)
+    val fields = aggregateDeclarationsByType
+      .get(ownerType)
+      .map(_.fields)
+      .getOrElse(aggregateFieldsByType.getOrElse(ownerType, Seq.empty))
+    val memberDestructorAsts = fields.reverse
+      .filterNot(_.isStatic)
+      .flatMap(field => destructorEntryForType(field.typeName).map(entry => memberDestructorAst(field, entry, line)))
+    val baseDestructorAsts = aggregateBaseTypesByType
+      .getOrElse(ownerType, Seq.empty)
+      .reverse
+      .flatMap(baseType => destructorEntryForType(baseType).map(entry => baseDestructorAst(entry, line)))
+    memberDestructorAsts ++ baseDestructorAsts
+  }
+
+  private def memberDestructorAst(field: OxFieldDecl, entry: FunctionEntry, line: Int): Ast = {
+    val receiverCode = s"${Defines.This}->${field.name}"
+    val code         = s"$receiverCode.${entry.simpleName}()"
+    val callNode_ =
+      callNode(
+        OxOrigin(code, Option(line)),
+        code,
+        entry.simpleName,
+        entry.fullName,
+        DispatchTypes.STATIC_DISPATCH,
+        Option(entry.function.signature),
+        Option(registerType(Defines.Void))
+      )
+    createCallAst(
+      callNode_,
+      base = Option(implicitFieldAccessAst(field.name, line).getOrElse(identifierAst(field.name, field.name, line)))
+    )
+  }
+
+  private def baseDestructorAst(entry: FunctionEntry, line: Int): Ast = {
+    val code = s"${Defines.This}->${entry.simpleName}()"
+    val callNode_ =
+      callNode(
+        OxOrigin(code, Option(line)),
+        code,
+        entry.simpleName,
+        entry.fullName,
+        DispatchTypes.STATIC_DISPATCH,
+        Option(entry.function.signature),
+        Option(registerType(Defines.Void))
+      )
+    createCallAst(callNode_, base = Option(identifierAst(Defines.This, Defines.This, line)))
+  }
+
   private def astsForStatement(statement: OxStatement): Seq[Ast] = {
     statement match {
       case unknown: OxUnknownStatement =>
@@ -1255,7 +1324,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           aggregateAssignmentExpressionAsts
         ) ++ temporaryDestructorAstsForReturnExpression(ret.expression, returnType) ++ activeLocalDestructors.map(
           localDestructorAst
-        ) :+
+        ) ++ currentAutomaticSubobjectDestructorAsts(ret.line) :+
           returnAst(
             returnNode(OxOrigin(ret), ret.code),
             ret.expression.toSeq.map(expression => expressionAstWithContextualConversion(expression, returnType))
@@ -1267,7 +1336,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           aggregateAssignmentExpressionAsts
         ) ++ temporaryDestructorAstsForExpressions(throwStmt.expression.toSeq) ++ throwLocalDestructors.map(
           localDestructorAst
-        ) :+
+        ) ++ currentAutomaticSubobjectDestructorAsts(throwStmt.line) :+
           throwAst
       case tryStmt: OxTry =>
         val tryNode = controlStructureNode(OxOrigin("try", Option(tryStmt.line)), ControlStructureTypes.TRY, "try")
@@ -3580,6 +3649,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousCaptureContext   = functionCaptureContext
     val previousMethodOwner      = currentMethodOwnerTypeFullName
     val previousMethodFullName   = currentMethodFullName
+    val previousMethodSimpleName = currentMethodSimpleName
     val previousMethodReturnType = currentMethodReturnTypeFullName
     val previousDestructorScopes = localDestructorScopes
     val previousJumpTargets      = jumpCleanupTargets
@@ -3588,6 +3658,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     functionCaptureContext = None
     currentMethodOwnerTypeFullName = None
     currentMethodFullName = Option(info.fullName)
+    currentMethodSimpleName = Option(info.name)
     currentMethodReturnTypeFullName = Option(info.returnType)
     localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
     jumpCleanupTargets = Nil
@@ -3598,6 +3669,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         localDestructorScopes = previousDestructorScopes
         jumpCleanupTargets = previousJumpTargets
         currentMethodReturnTypeFullName = previousMethodReturnType
+        currentMethodSimpleName = previousMethodSimpleName
         currentMethodFullName = previousMethodFullName
         currentMethodOwnerTypeFullName = previousMethodOwner
         functionCaptureContext = previousCaptureContext
@@ -4781,6 +4853,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     parentTypeOwner
       .flatMap(_.split('.').lastOption)
       .contains(simpleName)
+  }
+
+  private def isDestructorMethod(simpleName: String, parentTypeOwner: Option[String]): Boolean = {
+    parentTypeOwner
+      .flatMap(_.split('.').lastOption)
+      .exists(localTypeName => simpleName == s"~$localTypeName")
   }
 
   private def declarationFilename(declaration: OxDeclaration): String = {
