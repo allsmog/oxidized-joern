@@ -155,6 +155,20 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |  Meter mutableField;
           |  int readField() { return this->field.value() + this->aliasField.value() + this->mutableField.value(); }
           |};
+          |class OperatorSource {
+          |public:
+          |  const MeterAlias& operator+(Meter& meter) { return meter; }
+          |  const MeterAlias& operator[](int) { return aliasGlobal; }
+          |  const MeterAlias& operator()() { return aliasGlobal; }
+          |  const MeterAlias& operator=(Meter& meter) { return meter; }
+          |};
+          |const MeterAlias& operator-(OperatorSource& source, Meter& meter) {
+          |  return meter;
+          |}
+          |class Convertible {
+          |public:
+          |  operator const MeterAlias&() { return aliasGlobal; }
+          |};
           |}
           |typedef Core::Meter GlobalMeterAlias;
           |const GlobalMeterAlias& borrowTypedef(Core::Meter& meter) {
@@ -162,6 +176,9 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |}
           |int readConst(const Core::Meter& meter) {
           |  return meter.value();
+          |}
+          |int readContextualConversion(Core::Convertible& source) {
+          |  return readConst(source);
           |}
           |int readAlias(Core::Meter& meter) {
           |  const Core::Meter& alias = meter;
@@ -208,6 +225,21 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |  auto pick = [](Core::Meter& input) -> const Core::Meter& { return input; };
           |  return pick(meter).value();
           |}
+          |int readMemberOperator(Core::OperatorSource& source, Core::Meter& meter) {
+          |  return (source + meter).value();
+          |}
+          |int readFreeOperator(Core::OperatorSource& source, Core::Meter& meter) {
+          |  return (source - meter).value();
+          |}
+          |int readIndexOperator(Core::OperatorSource& source) {
+          |  return source[0].value();
+          |}
+          |int readCallOperator(Core::OperatorSource& source) {
+          |  return source().value();
+          |}
+          |int readAssignmentOperator(Core::OperatorSource& source, Core::Meter& meter) {
+          |  return (source = meter).value();
+          |}
           |int readGlobal() {
           |  return Core::globalMeter.value();
           |}
@@ -231,6 +263,10 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
       cpg.method.nameExact("readConst").parameter.nameExact("meter").typeFullName.l shouldBe List("Core.Meter&")
       cpg.method.nameExact("readConst").call.codeExact("meter.value()").methodFullName.l shouldBe
         List("Core.Meter.value:int()<const>")
+      inside(cpg.method.nameExact("readContextualConversion").call.filter(_.name.startsWith("operator ")).l) {
+        case List(conversionCall) =>
+          conversionCall.typeFullName shouldBe "const Core.Meter&"
+      }
       cpg.method.nameExact("readAlias").local.nameExact("alias").typeFullName.l shouldBe List("Core.Meter&")
       cpg.method.nameExact("readAlias").call.codeExact("alias.value()").methodFullName.l shouldBe
         List("Core.Meter.value:int()<const>")
@@ -270,6 +306,31 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.Meter.value:int()<const>")
       cpg.method.nameExact("readLambdaReturn").call.codeExact("pick(meter).value()").methodFullName.l shouldBe
         List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readMemberOperator").call.codeExact("(source + meter).value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readMemberOperator").call.nameExact("operator+").codeExact("source + meter").typeFullName.l shouldBe
+        List("const Core.Meter&")
+      cpg.method.nameExact("readFreeOperator").call.codeExact("(source - meter).value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readFreeOperator").call.nameExact("operator-").codeExact("source - meter").typeFullName.l shouldBe
+        List("const Core.Meter&")
+      cpg.method.nameExact("readIndexOperator").call.codeExact("source[0].value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readIndexOperator").call.nameExact("operator[]").codeExact("source[0]").typeFullName.l shouldBe
+        List("const Core.Meter&")
+      cpg.method.nameExact("readCallOperator").call.codeExact("source().value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readCallOperator").call.nameExact("operator()").codeExact("source()").typeFullName.l shouldBe
+        List("const Core.Meter&")
+      cpg.method.nameExact("readAssignmentOperator").call.codeExact("(source = meter).value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method
+        .nameExact("readAssignmentOperator")
+        .call
+        .nameExact("operator=")
+        .codeExact("source = meter")
+        .typeFullName
+        .l shouldBe List("const Core.Meter&")
       cpg.method
         .fullNameExact("Core.Holder.readField:int()")
         .call

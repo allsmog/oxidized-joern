@@ -1509,7 +1509,10 @@ fn parse_struct_with_name(
     nested_declarations.extend(
         field_nodes
             .iter()
-            .filter_map(|field| parse_function_declaration(*field, source))
+            .filter_map(|field| {
+                parse_operator_cast(*field, source, false, symbols)
+                    .or_else(|| parse_function_declaration(*field, source))
+            })
             .map(Declaration::Function),
     );
     nested_declarations.extend(
@@ -2016,7 +2019,11 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
         .map(|params| parse_parameters(params, source))
         .unwrap_or_default();
     let constructor_initializers = parse_constructor_initializers(node, source);
-    let is_const = is_const_function_declarator(function_declarator, source);
+    let is_const = if is_conversion_operator_name(&name) {
+        is_const_operator_cast(declarator, function_declarator, source)
+    } else {
+        is_const_function_declarator(function_declarator, source)
+    };
     let is_virtual = is_virtual_function(node, declarator, source);
     Some(FunctionDecl {
         name,
@@ -2040,6 +2047,9 @@ fn parse_function(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Opti
 fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl> {
     let type_node = node.child_by_field_name("type");
     let declarator = node.child_by_field_name("declarator")?;
+    if is_operator_cast_declaration_node(node) {
+        return None;
+    }
     if !is_function_prototype_declarator(declarator) {
         return None;
     }
@@ -2052,7 +2062,11 @@ fn parse_function_declaration(node: Node, source: &[u8]) -> Option<FunctionDecl>
         .child_by_field_name("parameters")
         .map(|params| parse_parameters(params, source))
         .unwrap_or_default();
-    let is_const = is_const_function_declarator(function_declarator, source);
+    let is_const = if is_conversion_operator_name(&name) {
+        is_const_operator_cast(declarator, function_declarator, source)
+    } else {
+        is_const_function_declarator(function_declarator, source)
+    };
     let is_virtual = is_virtual_function(node, declarator, source);
     Some(FunctionDecl {
         name,
@@ -2082,12 +2096,8 @@ fn parse_operator_cast(
     let declarator = node.child_by_field_name("declarator")?;
     let operator_cast = find_named_descendant_kind(declarator, "operator_cast")
         .or_else(|| (declarator.kind() == "operator_cast").then_some(declarator))?;
-    let return_type = operator_cast
-        .child_by_field_name("type")
-        .map(|type_node| type_name_from_type_node(type_node, source))?;
-    let semantic_return_type = operator_cast
-        .child_by_field_name("type")
-        .map(|type_node| type_name_from_type_node_preserving_cv(type_node, source))?;
+    let return_type = operator_cast_return_type(operator_cast, source)?;
+    let semantic_return_type = operator_cast_semantic_return_type(operator_cast, source)?;
     let name = operator_cast_name(declarator, &return_type, source);
     let function_declarator = function_declarator_node(operator_cast).unwrap_or(operator_cast);
     let parameters = function_declarator
@@ -2098,10 +2108,7 @@ fn parse_operator_cast(
         .child_by_field_name("body")
         .map(|body| parse_statement_block(body, source, symbols))
         .unwrap_or_default();
-    let is_const = is_const_function_declarator(function_declarator, source)
-        || operator_cast
-            .child_by_field_name("declarator")
-            .is_some_and(|declarator| has_type_qualifier(declarator, "const", source));
+    let is_const = is_const_operator_cast(operator_cast, function_declarator, source);
     let is_virtual = is_virtual_function(node, declarator, source);
     Some(FunctionDecl {
         name,
@@ -2126,6 +2133,62 @@ fn parse_operator_cast(
     })
 }
 
+fn is_operator_cast_declaration_node(node: Node) -> bool {
+    matches!(
+        node.kind(),
+        "operator_cast" | "operator_cast_declaration" | "operator_cast_definition"
+    ) || find_named_descendant_kind(node, "operator_cast").is_some()
+}
+
+fn is_conversion_operator_name(name: &str) -> bool {
+    name.contains("operator ")
+}
+
+fn operator_cast_return_type(operator_cast: Node, source: &[u8]) -> Option<String> {
+    operator_cast_return_type_with_normalizer(operator_cast, source, normalize_type)
+}
+
+fn operator_cast_semantic_return_type(operator_cast: Node, source: &[u8]) -> Option<String> {
+    operator_cast_return_type_with_normalizer(operator_cast, source, normalize_type_preserving_cv)
+}
+
+fn operator_cast_return_type_with_normalizer(
+    operator_cast: Node,
+    source: &[u8],
+    normalizer: fn(&str) -> String,
+) -> Option<String> {
+    let type_node = operator_cast.child_by_field_name("type")?;
+    let declarator = operator_cast.child_by_field_name("declarator");
+    let base_type = operator_cast_base_type_with_normalizer(
+        operator_cast,
+        type_node,
+        declarator,
+        source,
+        normalizer,
+    );
+    declarator
+        .map(|declarator| type_from_declarator(&base_type, declarator, source))
+        .or(Some(base_type))
+}
+
+fn operator_cast_base_type_with_normalizer(
+    operator_cast: Node,
+    type_node: Node,
+    declarator: Option<Node>,
+    source: &[u8],
+    normalizer: fn(&str) -> String,
+) -> String {
+    let end_byte = declarator
+        .map(|node| node.start_byte())
+        .unwrap_or(type_node.end_byte());
+    std::str::from_utf8(&source[operator_cast.start_byte()..end_byte])
+        .ok()
+        .and_then(|raw| raw.trim().strip_prefix("operator").map(str::trim))
+        .map(normalizer)
+        .filter(|base_type| !base_type.is_empty())
+        .unwrap_or_else(|| type_name_from_type_node_with_normalizer(type_node, source, normalizer))
+}
+
 fn operator_cast_name(declarator: Node, return_type: &str, source: &[u8]) -> String {
     let code = node_text(declarator, source).trim();
     if let Some(operator_index) = code.find("operator") {
@@ -2138,16 +2201,6 @@ fn operator_cast_name(declarator: Node, return_type: &str, source: &[u8]) -> Str
     } else {
         format!("operator {return_type}")
     }
-}
-
-fn has_type_qualifier(node: Node, qualifier: &str, source: &[u8]) -> bool {
-    named_children(node).into_iter().any(|child| {
-        (child.kind() == "type_qualifier"
-            && node_text(child, source)
-                .split_whitespace()
-                .any(|token| token == qualifier))
-            || has_type_qualifier(child, qualifier, source)
-    })
 }
 
 fn parse_requires_expression_declarations(node: Node, source: &[u8]) -> Vec<FunctionDecl> {
@@ -2242,6 +2295,31 @@ fn is_const_function_declarator(declarator: Node, source: &[u8]) -> bool {
             && node_text(child, source)
                 .split_whitespace()
                 .any(|qualifier| qualifier == "const")
+    })
+}
+
+fn is_const_operator_cast(operator_cast: Node, function_declarator: Node, source: &[u8]) -> bool {
+    let parameters_end = function_declarator
+        .child_by_field_name("parameters")
+        .or_else(|| find_named_descendant_kind(function_declarator, "parameter_list"))
+        .map(|parameters| parameters.end_byte())
+        .unwrap_or(function_declarator.end_byte());
+    has_type_qualifier_after(operator_cast, "const", parameters_end, source)
+}
+
+fn has_type_qualifier_after(
+    node: Node,
+    qualifier: &str,
+    min_start_byte: usize,
+    source: &[u8],
+) -> bool {
+    named_children(node).into_iter().any(|child| {
+        child.kind() == "type_qualifier"
+            && child.start_byte() >= min_start_byte
+            && node_text(child, source)
+                .split_whitespace()
+                .any(|token| token == qualifier)
+            || has_type_qualifier_after(child, qualifier, min_start_byte, source)
     })
 }
 
@@ -6320,9 +6398,15 @@ mod tests {
     fn parses_cpp_operator_cast_declarations_and_definitions() {
         let sample = r#"
                 namespace Core {
+                class Meter {};
+                using MeterAlias = Meter;
                 class Widget {
                 public:
                   operator bool() const;
+                };
+                class RefWidget {
+                public:
+                  operator const MeterAlias&();
                 };
                 }
                 Core::Widget::operator bool() const { return true; }
@@ -6356,6 +6440,29 @@ mod tests {
         assert_eq!(declared.signature, "bool()<const>");
         assert!(declared.is_const);
         assert!(!declared.is_definition);
+        let declared_ref = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "RefWidget" => struct_decl
+                    .nested_declarations
+                    .iter()
+                    .find_map(|nested| match nested {
+                        Declaration::Function(function)
+                            if function.name == "operator MeterAlias&" =>
+                        {
+                            Some(function)
+                        }
+                        _ => None,
+                    }),
+                _ => None,
+            })
+            .expect("expected operator const MeterAlias& declaration");
+        assert_eq!(declared_ref.return_type, "MeterAlias&");
+        assert_eq!(declared_ref.semantic_return_type, "const MeterAlias&");
+        assert_eq!(declared_ref.signature, "MeterAlias&()");
+        assert!(!declared_ref.is_const);
+        assert!(!declared_ref.is_definition);
 
         let defined = declarations
             .iter()
