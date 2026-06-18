@@ -254,6 +254,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }.toMap
   private val TemplateParameterListPattern          = raw"template\s*<([^>]*)>".r
   private val TemplateTypeParameterPattern          = raw"(?:typename|class)\s*(?:\.\.\.)?\s+([A-Za-z_]\w*)".r
+  private val ExplicitSpecifierPattern              = raw"\bexplicit\b".r
   private val IdentifierTokenPattern                = raw"[A-Za-z_]\w*".r
   private val DecimalDigitSequencePatternSource     = raw"\d(?:'?\d)*"
   private val HexadecimalDigitSequencePatternSource = raw"[0-9a-fA-F](?:'?[0-9a-fA-F])*"
@@ -8008,6 +8009,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def constructorConversionEntry(typeName: String, argumentInfo: ArgumentInfo): Option[(FunctionEntry, Int)] = {
     val scoredConstructors = constructorEntriesForType(typeName)
+      .filterNot(entry => functionHasExplicitSpecifier(entry.function))
       .filter(functionArityIsViable(_, 1))
       .flatMap { entry =>
         constructorConversionParameterScore(entry, argumentInfo).map { conversionScore =>
@@ -8333,6 +8335,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     splitConversionOperatorFunctionName(function.name)
       .map(_._2)
       .getOrElse(qualifiedNameParts(function.name).lastOption.getOrElse(function.name))
+  }
+
+  private def functionHasExplicitSpecifier(function: OxFunctionDecl): Boolean = {
+    val functionNameIndex = function.code.indexOf(function.name)
+    val declarationPrefix =
+      if (functionNameIndex >= 0) function.code.take(functionNameIndex)
+      else function.code
+    ExplicitSpecifierPattern.findFirstIn(declarationPrefix).isDefined
   }
 
   private def functionOwnerFullName(function: OxFunctionDecl, ownerFullName: Option[String]): Option[String] = {
