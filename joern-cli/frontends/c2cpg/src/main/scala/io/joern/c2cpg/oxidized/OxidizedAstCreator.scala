@@ -1069,9 +1069,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           constructorInitializerMatchesBase(baseType, constructorInitializerFieldName(initializer))
         )
       if (explicitInitializers.nonEmpty) {
-        explicitInitializers.flatMap(initializer =>
-          constructorInitializerAsts(initializer, constructorInitializerTargetTypeName(ownerTypeFullName, initializer))
-        )
+        explicitInitializers.flatMap(initializer => baseConstructorInitializerAsts(baseType, initializer))
       } else {
         defaultBaseConstructorAsts(baseType, line)
       }
@@ -1131,6 +1129,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         )
     }
     assignmentAst(OxOrigin(initializer.code, Option(initializer.line)), left, right, assignmentCode)
+  }
+
+  private def baseConstructorInitializerAsts(baseType: String, initializer: OxConstructorInitializer): Seq[Ast] = {
+    val info = constructorInvocationInfo(baseType, initializer.arguments, constructorInitializerValueCode(initializer))
+    val constructorEntry = info.flatMap(_.constructor)
+    initializer.arguments.flatMap(aggregateAssignmentExpressionAsts) ++
+      info.map { invocationInfo =>
+        val callNode_ = constructorCallNode(OxOrigin(initializer.code, Option(initializer.line)), invocationInfo)
+        val argumentAsts = constructorEntry
+          .map(entry => argumentAstsForFunctionEntry(entry, initializer.arguments))
+          .getOrElse(initializer.arguments.map(expressionAst))
+        createCallAst(
+          callNode_,
+          argumentAsts,
+          base = Option(identifierAst(Defines.This, Defines.This, initializer.line))
+        )
+      }.toSeq ++
+      temporaryDestructorAstsForConstructorArguments(initializer.arguments, constructorEntry)
   }
 
   private def defaultMemberInitializerAsts(ownerTypeFullName: String, field: OxFieldDecl): Seq[Ast] = {
