@@ -1752,6 +1752,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |  const Core::Widget& cref = Core::Widget();
           |  Core::Widget&& rref = Core::make();
           |  const Core::Widget& copied = Core::Widget(Core::Widget(source));
+          |  static const Core::Widget& staticCref = Core::Widget();
+          |  thread_local Core::Widget&& threadRref = Core::make();
           |  int result = Core::consume(Core::Widget(source));
           |  return result;
           |}
@@ -1772,6 +1774,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("refs").local.nameExact("cref").typeFullName.l shouldBe List("Core.Widget&")
       cpg.method.nameExact("refs").local.nameExact("copied").typeFullName.l shouldBe List("Core.Widget&")
       cpg.method.nameExact("refs").local.nameExact("rref").typeFullName.l shouldBe List("Core.Widget&&")
+      cpg.method.nameExact("refs").local.nameExact("staticCref").typeFullName.l shouldBe List("Core.Widget&")
+      cpg.method.nameExact("refs").local.nameExact("threadRref").typeFullName.l shouldBe List("Core.Widget&&")
     }
 
     "model C++ conditional aggregate temporary lifetimes" in {

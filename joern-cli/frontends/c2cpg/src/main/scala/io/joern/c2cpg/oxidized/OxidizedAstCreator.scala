@@ -2264,14 +2264,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         .when(!isStaticStorageLocal)(local.initializer.flatMap(referenceBoundTemporaryDestructor(typeName, _)))
         .flatten
     extendedTemporaryDestructor.foreach(registerLocalDestructor)
+    val extendsCurrentInitializerTemporary =
+      extendedTemporaryDestructor.isDefined || (isStaticStorageLocal && isCxxReferenceType(typeName))
     val localAst = Ast(localNode)
     val arrayConstructorAsts =
       if (useConstructorInitializers) localArrayConstructorAsts(local, typeName) else Seq.empty
     val localInitializerTemporaryDestructorAsts =
       temporaryDestructorAstsForLocalInitializer(
         local.initializer,
-        Option.when(extendedTemporaryDestructor.isDefined)(typeName),
-        extendedTemporaryDestructor.isDefined
+        Option.when(extendsCurrentInitializerTemporary)(typeName),
+        extendsCurrentInitializerTemporary
       )
     local.initializer match {
       case Some(initializer: OxInitializerList)
