@@ -431,6 +431,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |template <typename T>
           |decltype(auto) firstRef(Holder<T>& holder) { return holder[0]; }
           |template <typename T>
+          |auto nestedFirst(Holder<Holder<T>>& holder) { return holder[0][0]; }
+          |template <typename T>
           |T makeExplicit();
           |template <typename T>
           |T& ref(T& value) { return value; }
@@ -438,6 +440,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |const T& cref(const T& value) { return value; }
           |}
           |long use(Core::Leaf& leaf, const Core::Leaf& constLeaf, Core::Holder<Core::Leaf>& holder) {
+          |  Core::Holder<Core::Holder<Core::Leaf>> nestedHolder;
           |  return Core::pick(Core::id(Core::makeLeaf())) +
           |    Core::pick(Core::idAuto(Core::makeLeaf())) +
           |    Core::pick(Core::idAutoForward(Core::makeLeaf())) +
@@ -454,6 +457,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::pick(Core::idDecltypeBranch(true, leaf, leaf)) +
           |    Core::pick(Core::first(holder)) +
           |    Core::pick(Core::firstRef(holder)) +
+          |    Core::pick(Core::nestedFirst(nestedHolder)) +
           |    Core::pick(Core::makeExplicit<Core::Leaf>()) +
           |    Core::pick(Core::ref(leaf)) +
           |    Core::pick(Core::cref(constLeaf));
@@ -502,6 +506,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.Leaf")
       cpg.method.nameExact("use").call.codeExact("Core::firstRef(holder)").typeFullName.l shouldBe
         List("Core.Leaf&")
+      cpg.method.nameExact("use").call.codeExact("Core::nestedFirst(nestedHolder)").typeFullName.l shouldBe
+        List("Core.Leaf")
       cpg.method.nameExact("use").call.codeExact("Core::makeExplicit<Core::Leaf>()").typeFullName.l shouldBe
         List("Core.Leaf")
       cpg.method.nameExact("use").call.codeExact("Core::ref(leaf)").typeFullName.l shouldBe
@@ -560,6 +566,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pick:char(Leaf&&)")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::firstRef(holder))").methodFullName.l shouldBe
         List("Core.pick:short(Mid&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(Core::nestedFirst(nestedHolder))").methodFullName.l shouldBe
+        List("Core.pick:char(Leaf&&)")
       cpg.method
         .nameExact("use")
         .call

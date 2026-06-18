@@ -1421,9 +1421,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val lookupObjectTypeName = normalizeType(resolveAliasType(objectTypeName, aliases))
     val resolvedObjectTypeName =
       localObjectAggregateTypeFullNamePreservingTemplate(lookupObjectTypeName, ownerFullName, aliases)
-    resolvedObjectTypeName
+    val resolvedTypeName = resolvedObjectTypeName
       .map(resolvedObjectTypeName => replaceObjectTypeName(normalized, objectTypeName, resolvedObjectTypeName))
       .getOrElse(normalized)
+    ownerResolvedTemplateArgumentTypeFullNames(resolvedTypeName, ownerFullName, aliases)
   }
 
   private def localObjectAggregateTypeFullNamePreservingTemplate(
@@ -1440,6 +1441,28 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           }
         }
         .flatten
+    }
+  }
+
+  private def ownerResolvedTemplateArgumentTypeFullNames(
+    typeName: String,
+    ownerFullName: Option[String],
+    aliases: Map[String, String]
+  ): String = {
+    val startIndex = typeName.indexOf('<')
+    if (startIndex < 0) {
+      typeName
+    } else {
+      templateArgumentListEndIndex(typeName, startIndex)
+        .map { endIndex =>
+          val resolvedArguments = splitTemplateArgumentList(typeName.substring(startIndex + 1, endIndex))
+            .map(argument => ownerResolvedTypeFullNamePreservingCv(argument, ownerFullName, aliases))
+            .mkString(",")
+          val prefix = typeName.take(startIndex + 1)
+          val suffix = typeName.drop(endIndex)
+          s"$prefix$resolvedArguments$suffix"
+        }
+        .getOrElse(typeName)
     }
   }
 
@@ -5871,26 +5894,28 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def templateArgumentList(typeName: String): Option[String] = {
     val startIndex = typeName.indexOf('<')
-    if (startIndex < 0) {
-      None
-    } else {
-      var depth = 0
-      var index = startIndex
-      while (index < typeName.length) {
-        typeName.charAt(index) match {
-          case '<' =>
-            depth += 1
-          case '>' =>
-            depth -= 1
-            if (depth == 0) {
-              return Option(typeName.substring(startIndex + 1, index))
-            }
-          case _ =>
-        }
-        index += 1
-      }
-      None
+    Option.when(startIndex >= 0)(startIndex).flatMap { startIndex =>
+      templateArgumentListEndIndex(typeName, startIndex).map(endIndex => typeName.substring(startIndex + 1, endIndex))
     }
+  }
+
+  private def templateArgumentListEndIndex(typeName: String, startIndex: Int): Option[Int] = {
+    var depth = 0
+    var index = startIndex
+    while (index < typeName.length) {
+      typeName.charAt(index) match {
+        case '<' =>
+          depth += 1
+        case '>' =>
+          depth -= 1
+          if (depth == 0) {
+            return Option(index)
+          }
+        case _ =>
+      }
+      index += 1
+    }
+    None
   }
 
   private def splitTemplateArgumentList(argumentList: String): Seq[String] = {
