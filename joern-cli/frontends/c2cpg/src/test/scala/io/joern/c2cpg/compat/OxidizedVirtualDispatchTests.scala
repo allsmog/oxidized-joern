@@ -151,6 +151,12 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |long pickConstIntPtr(long value) { return 2; }
           |int pickVoidPtr(const void* value) { return 1; }
           |long pickVoidPtr(long value) { return 2; }
+          |int pickArray(int* value) { return 1; }
+          |long pickArray(long value) { return 2; }
+          |int pickConstArray(const int* value) { return 1; }
+          |long pickConstArray(long value) { return 2; }
+          |int pickArrayVoid(const void* value) { return 1; }
+          |long pickArrayVoid(long value) { return 2; }
           |int choose(int value, int scale = 1) { return value + scale; }
           |long choose(long value) { return value; }
           |template <typename T>
@@ -211,6 +217,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |  const Core::ConstSource& constSource,
           |  Core::ValueSource& valueSource
           |) {
+          |  int values[2];
+          |  const int constValues[2];
           |  return Core::pick(leaf) +
           |    Core::pick(constLeaf) +
           |    Core::pick(Core::makeLeaf()) +
@@ -219,6 +227,9 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::pickPtr(constLeafPtr) +
           |    Core::pickConstIntPtr(intPtr) +
           |    Core::pickVoidPtr(intPtr) +
+          |    Core::pickArray(values) +
+          |    Core::pickConstArray(constValues) +
+          |    Core::pickArrayVoid(values) +
           |    Core::choose(leaf) +
           |    Core::choose(1) +
           |    Core::choose(1, 2) +
@@ -259,6 +270,12 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pickConstIntPtr:int(int*)")
       cpg.method.nameExact("use").call.codeExact("Core::pickVoidPtr(intPtr)").methodFullName.l shouldBe
         List("Core.pickVoidPtr:int(void*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickArray(values)").methodFullName.l shouldBe
+        List("Core.pickArray:int(int*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickConstArray(constValues)").methodFullName.l shouldBe
+        List("Core.pickConstArray:int(int*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickArrayVoid(values)").methodFullName.l shouldBe
+        List("Core.pickArrayVoid:int(void*)")
       cpg.method.nameExact("use").call.codeExact("Core::choose(leaf)").methodFullName.l shouldBe
         List("Core.choose:T(T)")
       cpg.method.nameExact("use").call.codeExact("Core::choose(1)").methodFullName.l shouldBe
