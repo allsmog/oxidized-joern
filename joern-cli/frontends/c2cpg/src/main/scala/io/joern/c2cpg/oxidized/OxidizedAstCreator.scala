@@ -5957,11 +5957,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       )
     Option
       .when(
-        typeNameHasCxxQualifier(semanticReturnType) || functionTemplateParametersInType(
-          entry,
-          entry.function.returnType,
-          receiverTypeFullName
-        ).nonEmpty
+        isAutoType(syntacticReturnType) ||
+          typeNameHasCxxQualifier(semanticReturnType) ||
+          functionTemplateParametersInType(entry, entry.function.returnType, receiverTypeFullName).nonEmpty
       )(semanticReturnType)
       .getOrElse(syntacticReturnType)
   }
@@ -6101,13 +6099,126 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     receiverTypeFullName: Option[String] = None,
     explicitTemplateArguments: Seq[String] = Seq.empty
   ): String = {
-    specializeFunctionTypeName(
-      functionSemanticReturnTypeFullName(entry),
-      entry,
-      arguments,
-      receiverTypeFullName,
-      explicitTemplateArguments
-    )
+    val templateBindings =
+      templateBindingsForFunctionCall(entry, arguments, receiverTypeFullName, explicitTemplateArguments)
+    val specializedReturnType = substituteTemplateTypeNames(functionSemanticReturnTypeFullName(entry), templateBindings)
+    if (isAutoType(specializedReturnType)) {
+      functionAutoReturnTypeFullName(entry, specializedReturnType, templateBindings).getOrElse(specializedReturnType)
+    } else {
+      specializedReturnType
+    }
+  }
+
+  private def functionAutoReturnTypeFullName(
+    entry: FunctionEntry,
+    explicitReturnType: String,
+    templateBindings: Map[String, String]
+  ): Option[String] = {
+    val returnExpressions = directFunctionReturnExpressions(entry.function)
+    val localTypes        = functionTopLevelLocalTypeFullNames(entry, templateBindings)
+    val inferredReturnTypes = returnExpressions.map { expression =>
+      functionReturnExpressionTypeFullName(entry, expression, templateBindings, localTypes)
+        .flatMap(typeName => inferredAutoTypeFullName(explicitReturnType, typeName, preserveCv = true))
+    }
+    Option
+      .when(returnExpressions.nonEmpty && inferredReturnTypes.forall(_.isDefined)) {
+        inferredReturnTypes.flatten.map(normalizeType).distinct
+      }
+      .collect { case Seq(returnType) => returnType }
+  }
+
+  private def directFunctionReturnExpressions(function: OxFunctionDecl): Seq[OxExpression] = {
+    function.body.collect { case OxReturn(_, _, Some(expression)) => expression }
+  }
+
+  private def functionTopLevelLocalTypeFullNames(
+    entry: FunctionEntry,
+    templateBindings: Map[String, String]
+  ): Map[String, String] = {
+    entry.function.body.foldLeft(Map.empty[String, String]) {
+      case (localTypes, local: OxLocalDecl) =>
+        val explicitType =
+          functionScopedTypeFullName(
+            entry,
+            typeFullNameWithStringLiteralLength(local.semanticTypeName, local.initializer),
+            templateBindings
+          )
+        val inferredType = Option
+          .when(isAutoType(explicitType))(local.initializer)
+          .flatten
+          .flatMap(expression => functionReturnExpressionTypeFullName(entry, expression, templateBindings, localTypes))
+          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName, preserveCv = true))
+          .getOrElse(explicitType)
+        localTypes.updated(local.name, inferredType)
+      case (localTypes, _) =>
+        localTypes
+    }
+  }
+
+  private def functionReturnExpressionTypeFullName(
+    entry: FunctionEntry,
+    expression: OxExpression,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    expression match {
+      case OxIdentifier(name, _, _) =>
+        localTypes
+          .get(name)
+          .orElse(functionParameterTypeFullName(entry, name, templateBindings))
+          .orElse(functionThisTypeFullName(entry).filter(_ => name == Defines.This))
+      case OxLiteral(value, _, _) =>
+        Option(literalType(value))
+      case OxCast(_, semanticTypeName, _, _, _) =>
+        Option(functionScopedTypeFullName(entry, semanticTypeName, templateBindings))
+      case OxFieldAccess(field, _, _, base) =>
+        functionReturnExpressionTypeFullName(entry, base, templateBindings, localTypes).flatMap(
+          fieldTypeFullName(_, field)
+        )
+      case OxUnary("*", _, _, _, argument) =>
+        functionReturnExpressionTypeFullName(entry, argument, templateBindings, localTypes).map(
+          dereferencedTypeFullName
+        )
+      case OxUnary("&", _, _, _, argument) =>
+        functionReturnExpressionTypeFullName(entry, argument, templateBindings, localTypes).map { typeName =>
+          s"${stripCxxReference(normalizeType(resolveAliasType(typeName)))}*"
+        }
+      case OxConditional(_, _, _, Some(consequence), alternative) =>
+        val branchTypes = Seq(consequence, alternative).map { branch =>
+          functionReturnExpressionTypeFullName(entry, branch, templateBindings, localTypes)
+        }
+        Option.when(branchTypes.forall(_.isDefined))(branchTypes.flatten.map(normalizeType).distinct).collect {
+          case Seq(branchType) => branchType
+        }
+      case _ =>
+        None
+    }
+  }
+
+  private def functionParameterTypeFullName(
+    entry: FunctionEntry,
+    name: String,
+    templateBindings: Map[String, String]
+  ): Option[String] = {
+    entry.function.parameters
+      .find(_.name == name)
+      .map(parameter => functionScopedTypeFullName(entry, parameter.semanticTypeName, templateBindings))
+  }
+
+  private def functionThisTypeFullName(entry: FunctionEntry): Option[String] = {
+    entry.ownerFullName
+      .filter(aggregateTypeFullNames.contains)
+      .map(ownerTypeFullName => if (entry.function.isConst) s"const $ownerTypeFullName*" else s"$ownerTypeFullName*")
+  }
+
+  private def functionScopedTypeFullName(
+    entry: FunctionEntry,
+    typeName: String,
+    templateBindings: Map[String, String]
+  ): String = {
+    val scopedTypeName =
+      ownerResolvedTypeFullNamePreservingCv(typeName, entry.ownerFullName.orElse(entry.lexicalOwnerFullName))
+    resolveAliasType(substituteTemplateTypeNames(scopedTypeName, templateBindings))
   }
 
   private def expressionTypeFullName(expression: OxExpression): Option[String] = {
