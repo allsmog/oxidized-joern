@@ -1284,13 +1284,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def constructorInvocationInfo(
     typeName: String,
     arguments: Seq[OxExpression],
-    initCode: String
+    initCode: String,
+    resolvedConstructor: Option[FunctionEntry] = None
   ): Option[ConstructorInvocationInfo] = {
     val normalizedType = normalizeType(resolveAliasType(typeName))
     val aggregateType =
       resolveAggregateTypeFullName(receiverAggregateTypeName(normalizedType)).getOrElse(normalizedType)
     val constructorName = aggregateType.split('.').lastOption.getOrElse(aggregateType)
-    val constructor     = constructorEntry(aggregateType, arguments)
+    val constructor     = resolvedConstructor.orElse(constructorEntry(aggregateType, arguments))
     val implicitSignature =
       Option.when(arguments.isEmpty && hasImplicitDefaultConstructor(aggregateType))("void()")
     val signature = constructor.map(_.function.signature).orElse(implicitSignature)
@@ -2541,10 +2542,45 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def heapConstructorForNew(newExpression: OxNew): Option[HeapConstructor] = {
     val aggregateType = receiverAggregateTypeName(newExpression.typeName)
     resolveAggregateTypeFullName(aggregateType).flatMap { typeName =>
-      val initCode = newExpression.initializerArguments.map(_.code).mkString(", ")
-      constructorInvocationInfo(typeName, newExpression.initializerArguments, initCode).map { info =>
-        HeapConstructor(newExpression.line, info, newExpression.initializerArguments)
+      val resolution = heapConstructorInitializerResolution(typeName, newExpression)
+      val initCode =
+        if (resolution.preserveInitializerListCode) resolution.arguments.headOption.map(_.code).getOrElse("")
+        else newExpression.initializerArguments.map(_.code).mkString(", ")
+      constructorInvocationInfo(typeName, resolution.arguments, initCode, resolution.entry).map { info =>
+        HeapConstructor(newExpression.line, info, resolution.arguments)
       }
+    }
+  }
+
+  private def heapConstructorInitializerResolution(
+    typeName: String,
+    newExpression: OxNew
+  ): ConstructorInitializerResolution = {
+    heapInitializerList(newExpression).flatMap { initializer =>
+      initializerListConstructorEntry(typeName, initializer).map { entry =>
+        ConstructorInitializerResolution(Seq(initializer), Option(entry), preserveInitializerListCode = true)
+      }
+    } match {
+      case Some(resolution) => resolution
+      case None =>
+        ConstructorInitializerResolution(
+          newExpression.initializerArguments,
+          constructorEntry(typeName, newExpression.initializerArguments)
+        )
+    }
+  }
+
+  private def heapInitializerList(newExpression: OxNew): Option[OxInitializerList] = {
+    val code       = newExpression.code.trim
+    val braceStart = code.indexOf('{')
+    val braceEnd   = code.lastIndexOf('}')
+    val parenStart = code.indexOf('(')
+    Option.when(braceStart >= 0 && braceEnd > braceStart && (parenStart < 0 || braceStart < parenStart)) {
+      OxInitializerList(
+        code.substring(braceStart, braceEnd + 1),
+        newExpression.line,
+        newExpression.initializerArguments
+      )
     }
   }
 
