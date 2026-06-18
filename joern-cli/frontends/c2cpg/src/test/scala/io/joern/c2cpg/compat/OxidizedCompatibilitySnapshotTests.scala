@@ -992,6 +992,48 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("slots[1].~Defaulted()", "slots[0].~Defaulted()")
     }
 
+    "capture C++ initialized local array constructors and destructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  Widget(int seed) {}
+          |  ~Widget();
+          |};
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int initializedArrays(int seed) {
+          |  Core::Widget slots[3] = {{seed}, {2}};
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("initializedArrays").local.nameExact("slots").typeFullName.l shouldBe List("Core.Widget[]")
+      cpg.method.nameExact("initializedArrays").call.nameExact("Widget").code.l shouldBe
+        List("Core.Widget.Widget(seed)", "Core.Widget.Widget(2)", "Core.Widget.Widget()")
+      cpg.method.nameExact("initializedArrays").call.nameExact("Widget").methodFullName.l shouldBe
+        List("Core.Widget.Widget:void(int)", "Core.Widget.Widget:void(int)", "Core.Widget.Widget:void()")
+      cpg.method
+        .nameExact("initializedArrays")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l
+        .filterNot(_.startsWith("<tmp>")) shouldBe
+        List(
+          "slots[0] = Core.Widget.Widget(seed)",
+          "slots[1] = Core.Widget.Widget(2)",
+          "slots[2] = Core.Widget.Widget()"
+        )
+      cpg.method.nameExact("initializedArrays").call.nameExact("~Widget").code.l shouldBe
+        List("slots[2].~Widget()", "slots[1].~Widget()", "slots[0].~Widget()")
+    }
+
     "capture C++ default subobject constructors" in {
       val cpg = code(
         """
