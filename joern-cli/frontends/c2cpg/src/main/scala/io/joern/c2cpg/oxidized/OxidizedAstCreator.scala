@@ -36,6 +36,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private implicit val schemaValidation: ValidationMode = config.schemaValidation
   private val LambdaMutableModifier                     = "MUTABLE"
+  private val CxxTypeQualifiers                         = Set("const", "volatile", "mutable", "restrict")
 
   private final case class LambdaInfo(name: String, fullName: String, signature: String, returnType: String)
   private final case class ScopeEntry(
@@ -739,8 +740,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .flatten
   }
 
-  private def localObjectAggregateTypeFullName(typeName: String, ownerFullName: Option[String]): Option[String] = {
-    val normalized = stripCxxTypeQualifiers(normalizeType(resolveAliasType(typeName))).trim
+  private def localObjectAggregateTypeFullName(
+    typeName: String,
+    ownerFullName: Option[String],
+    aliases: Map[String, String] = typeAliases
+  ): Option[String] = {
+    val normalized = stripCxxTypeQualifiers(normalizeType(resolveAliasType(typeName, aliases))).trim
     val isObjectType = normalized.nonEmpty &&
       normalized != Defines.Auto &&
       !normalized.endsWith("*") &&
@@ -991,7 +996,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val name = registerType(
       ownerFullName.map(owner => s"$owner.${normalizeType(typedef.name)}").getOrElse(normalizeType(typedef.name))
     )
-    val aliasType = registerType(resolveAliasType(typedef.typeName))
+    val aliasType = registerType(ownerResolvedTypeFullNamePreservingCv(typedef.typeName, ownerFullName))
     Ast(
       typeDeclNode(
         origin,
@@ -1007,13 +1012,32 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def initializeTypeAliases(): Unit = {
-    var aliases = Map.empty[String, String]
-    document.declarations.foreach {
+    typeAliases = collectTypeAliases(document.declarations, None, Map.empty)
+  }
+
+  private def collectTypeAliases(
+    declarations: Seq[OxDeclaration],
+    ownerFullName: Option[String],
+    aliases: Map[String, String]
+  ): Map[String, String] = {
+    var currentAliases = aliases
+    declarations.foreach {
+      case namespace: OxNamespaceDecl =>
+        currentAliases = collectTypeAliases(
+          namespace.declarations,
+          Option(namespaceOwnerFullName(namespace, ownerFullName)),
+          currentAliases
+        )
       case typedef: OxTypedefDecl =>
-        aliases = aliases.updated(typedef.name, resolveAliasType(typedef.typeName, aliases))
+        val localName = normalizeType(typedef.name)
+        val target    = ownerResolvedTypeFullNamePreservingCv(typedef.typeName, ownerFullName, currentAliases)
+        currentAliases = currentAliases.updated(localName, target)
+        ownerFullName.foreach { owner =>
+          currentAliases = currentAliases.updated(s"$owner.$localName", target)
+        }
       case _ =>
     }
-    typeAliases = aliases
+    currentAliases
   }
 
   private def initializeGlobalScope(): Unit = {
@@ -1349,11 +1373,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     )
   }
 
-  private def ownerResolvedTypeFullNamePreservingCv(typeName: String, ownerFullName: Option[String]): String = {
-    val normalized             = normalizeType(typeName)
+  private def ownerResolvedTypeFullNamePreservingCv(
+    typeName: String,
+    ownerFullName: Option[String],
+    aliases: Map[String, String] = typeAliases
+  ): String = {
+    val normalized             = normalizeType(resolveAliasType(typeName, aliases))
     val objectTypeName         = unaliasedAggregateObjectTypeName(normalized)
-    val lookupObjectTypeName   = normalizeType(resolveAliasType(objectTypeName))
-    val resolvedObjectTypeName = localObjectAggregateTypeFullName(lookupObjectTypeName, ownerFullName)
+    val lookupObjectTypeName   = normalizeType(resolveAliasType(objectTypeName, aliases))
+    val resolvedObjectTypeName = localObjectAggregateTypeFullName(lookupObjectTypeName, ownerFullName, aliases)
     resolvedObjectTypeName
       .map(resolvedObjectTypeName => replaceObjectTypeName(normalized, objectTypeName, resolvedObjectTypeName))
       .getOrElse(normalized)
@@ -5670,7 +5698,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def stripCxxTypeQualifiers(typeName: String): String = {
     typeName
       .split("\\s+")
-      .filterNot(part => Set("const", "volatile", "mutable").contains(part))
+      .filterNot(CxxTypeQualifiers.contains)
       .mkString(" ")
   }
 
@@ -6855,8 +6883,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     } else if (normalized.endsWith("[]") && normalized.length > 2) {
       s"${resolveAliasType(normalized.dropRight(2), aliases)}[]"
     } else {
-      aliases.getOrElse(normalized, normalized)
+      aliases
+        .get(normalized)
+        .orElse(resolveAliasTypeWithCvQualifiers(normalized, aliases))
+        .getOrElse(normalized)
     }
+  }
+
+  private def resolveAliasTypeWithCvQualifiers(typeName: String, aliases: Map[String, String]): Option[String] = {
+    val parts       = typeName.split("\\s+").filter(_.nonEmpty)
+    val objectParts = parts.filterNot(CxxTypeQualifiers.contains)
+    Option
+      .when(objectParts.size == 1)(objectParts.head)
+      .flatMap(aliasName => aliases.get(aliasName).map(aliasName -> _))
+      .map { case (aliasName, resolvedTypeName) =>
+        parts.map(part => if (part == aliasName) resolvedTypeName else part).mkString(" ")
+      }
   }
 
   private def aggregateAlias(typeName: String): Option[String] = {

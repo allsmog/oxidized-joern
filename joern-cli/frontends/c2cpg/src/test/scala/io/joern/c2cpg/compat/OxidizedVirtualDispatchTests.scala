@@ -143,14 +143,18 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |  int viaMutable() { return value() + this->value(); }
           |  int viaConst() const { return value() + this->value(); }
           |};
+          |using MeterAlias = Meter;
           |const Meter globalMeter;
+          |const MeterAlias aliasGlobal;
           |class Holder {
           |public:
           |  const Meter field;
+          |  const MeterAlias aliasField;
           |  Meter mutableField;
-          |  int readField() { return this->field.value() + this->mutableField.value(); }
+          |  int readField() { return this->field.value() + this->aliasField.value() + this->mutableField.value(); }
           |};
           |}
+          |typedef Core::Meter GlobalMeterAlias;
           |int readConst(const Core::Meter& meter) {
           |  return meter.value();
           |}
@@ -158,8 +162,21 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |  const Core::Meter& alias = meter;
           |  return alias.value();
           |}
+          |int readTypedef(const GlobalMeterAlias& meter) {
+          |  return meter.value();
+          |}
+          |int readTypedefAlias(Core::Meter& meter) {
+          |  const GlobalMeterAlias& alias = meter;
+          |  return alias.value();
+          |}
+          |int readNamespaceAlias(const Core::MeterAlias& meter) {
+          |  return meter.value();
+          |}
           |int readGlobal() {
           |  return Core::globalMeter.value();
+          |}
+          |int readAliasGlobal() {
+          |  return Core::aliasGlobal.value();
           |}
           |int use() {
           |  Core::Meter meter;
@@ -181,8 +198,25 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
       cpg.method.nameExact("readAlias").local.nameExact("alias").typeFullName.l shouldBe List("Core.Meter&")
       cpg.method.nameExact("readAlias").call.codeExact("alias.value()").methodFullName.l shouldBe
         List("Core.Meter.value:int()<const>")
-      cpg.method.fullNameExact("Core.Holder.readField:int()").call.codeExact("this->field.value()").methodFullName.l shouldBe
+      cpg.method.nameExact("readTypedef").call.codeExact("meter.value()").methodFullName.l shouldBe
         List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readTypedefAlias").call.codeExact("alias.value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readNamespaceAlias").call.codeExact("meter.value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method
+        .fullNameExact("Core.Holder.readField:int()")
+        .call
+        .codeExact("this->field.value()")
+        .methodFullName
+        .l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method
+        .fullNameExact("Core.Holder.readField:int()")
+        .call
+        .codeExact("this->aliasField.value()")
+        .methodFullName
+        .l shouldBe List("Core.Meter.value:int()<const>")
       cpg.method
         .fullNameExact("Core.Holder.readField:int()")
         .call
@@ -190,6 +224,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         .methodFullName
         .l shouldBe List("Core.Meter.value:int()")
       cpg.method.nameExact("readGlobal").call.codeExact("Core::globalMeter.value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readAliasGlobal").call.codeExact("Core::aliasGlobal.value()").methodFullName.l shouldBe
         List("Core.Meter.value:int()<const>")
     }
 
