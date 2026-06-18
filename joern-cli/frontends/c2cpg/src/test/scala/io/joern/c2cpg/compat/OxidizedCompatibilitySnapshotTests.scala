@@ -5311,6 +5311,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |}
           |Core::Defaulted implicitGlobal;
           |Core::Widget sourceGlobal;
+          |static Core::Widget fileStatic;
+          |thread_local Core::Widget threadGlobal;
           |Core::Widget seededGlobal = {7};
           |Core::Widget copiedGlobal = sourceGlobal;
           |Core::Widget movedGlobal = Core::makeWidget();
@@ -5332,6 +5334,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Core.Widget.Widget()",
         "Core.Widget.Widget()",
         "Core.Widget.Widget(Registry::member)",
+        "Core.Widget.Widget()",
+        "Core.Widget.Widget()",
         "Core.Widget.Widget()",
         "Core.Widget.Widget()",
         "Core.Widget.Widget(7)",
@@ -5361,6 +5365,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List(
           "implicitGlobal = Core.Defaulted.Defaulted()",
           "sourceGlobal = Core.Widget.Widget()",
+          "fileStatic = Core.Widget.Widget()",
+          "threadGlobal = Core.Widget.Widget()",
           "seededGlobal = Core.Widget.Widget(7)",
           "copiedGlobal = Core.Widget.Widget(sourceGlobal)",
           "movedGlobal = Core.Widget.Widget(Core::makeWidget())",
@@ -5386,6 +5392,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "movedGlobal.~Widget()",
           "copiedGlobal.~Widget()",
           "seededGlobal.~Widget()",
+          "threadGlobal.~Widget()",
+          "fileStatic.~Widget()",
           "sourceGlobal.~Widget()",
           "Registry::slots[1].~Widget()",
           "Registry::slots[0].~Widget()",
