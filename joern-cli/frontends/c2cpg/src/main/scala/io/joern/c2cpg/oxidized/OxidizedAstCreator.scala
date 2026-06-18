@@ -254,7 +254,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }.toMap
   private val TemplateParameterListPattern          = raw"template\s*<([^>]*)>".r
   private val TemplateTypeParameterPattern          = raw"(?:typename|class)\s*(?:\.\.\.)?\s+([A-Za-z_]\w*)".r
-  private val ExplicitSpecifierPattern              = raw"\bexplicit\b\s*(?:\(\s*(true|false)\s*\))?".r
+  private val ExplicitSpecifierPattern              = raw"\bexplicit\b\s*(?:\(([^)]*)\))?".r
+  private val ExplicitIsIntegralPattern             = raw"(!)?\s*(?:std::)?is_integral_v\s*<\s*([A-Za-z_]\w*)\s*>".r
   private val IdentifierTokenPattern                = raw"[A-Za-z_]\w*".r
   private val DecimalDigitSequencePatternSource     = raw"\d(?:'?\d)*"
   private val HexadecimalDigitSequencePatternSource = raw"[0-9a-fA-F](?:'?[0-9a-fA-F])*"
@@ -3976,20 +3977,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     arguments: Seq[OxExpression],
     includeExplicitConstructors: Boolean
   ): Option[FunctionEntry] = {
+    val argumentInfos =
+      arguments.map(argument => ArgumentInfo(argument, expressionTypeFullName(argument), expressionIsRvalue(argument)))
     val candidates = constructorEntriesForType(typeName).filter(entry =>
-      includeExplicitConstructors || !functionHasExplicitSpecifier(entry.function)
+      includeExplicitConstructors || !functionHasExplicitSpecifier(entry, argumentInfos)
     )
-    selectFunctionEntry(candidates, Some(arguments)).orElse(bestEffortConstructorEntry(candidates, arguments))
+    selectFunctionEntryForArgumentInfos(candidates, argumentInfos)
+      .orElse(bestEffortConstructorEntry(candidates, argumentInfos))
   }
 
   private def bestEffortConstructorEntry(
     candidates: Seq[FunctionEntry],
-    arguments: Seq[OxExpression]
+    argumentInfos: Seq[ArgumentInfo]
   ): Option[FunctionEntry] = {
-    val argumentInfos =
-      arguments.map(argument => ArgumentInfo(argument, expressionTypeFullName(argument), expressionIsRvalue(argument)))
     val scored = candidates
-      .filter(functionArityIsViable(_, arguments.size))
+      .filter(functionArityIsViable(_, argumentInfos.size))
       .zipWithIndex
       .flatMap { case (candidate, index) =>
         val scores = candidate.function.parameters.zip(argumentInfos).map { case (parameter, argumentInfo) =>
@@ -8491,14 +8493,61 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def functionHasExplicitSpecifier(function: OxFunctionDecl): Boolean = {
+    explicitSpecifierMatch(function) match {
+      case Some(explicitSpecifier) => explicitSpecifierValue(explicitSpecifier).getOrElse(true)
+      case None                    => false
+    }
+  }
+
+  private def functionHasExplicitSpecifier(entry: FunctionEntry, argumentInfos: Seq[ArgumentInfo]): Boolean = {
+    explicitSpecifierMatch(entry.function) match {
+      case Some(explicitSpecifier) =>
+        val expressionValue =
+          explicitSpecifierValue(explicitSpecifier)
+            .orElse(explicitSpecifierValue(explicitSpecifier, entry, argumentInfos))
+        expressionValue.getOrElse(true)
+      case None => false
+    }
+  }
+
+  private def explicitSpecifierMatch(function: OxFunctionDecl): Option[scala.util.matching.Regex.Match] = {
     val functionNameIndex = function.code.indexOf(function.name)
     val declarationPrefix =
       if (functionNameIndex >= 0) function.code.take(functionNameIndex)
       else function.code
-    ExplicitSpecifierPattern.findFirstMatchIn(declarationPrefix) match {
-      case Some(explicitSpecifier) => Option(explicitSpecifier.group(1)).forall(_ != "false")
-      case None                    => false
+    ExplicitSpecifierPattern.findFirstMatchIn(declarationPrefix)
+  }
+
+  private def explicitSpecifierValue(explicitSpecifier: scala.util.matching.Regex.Match): Option[Boolean] = {
+    Option(explicitSpecifier.group(1)).map(_.trim) match {
+      case Some("true")  => Option(true)
+      case Some("false") => Option(false)
+      case None          => Option(true)
+      case _             => None
     }
+  }
+
+  private def explicitSpecifierValue(
+    explicitSpecifier: scala.util.matching.Regex.Match,
+    entry: FunctionEntry,
+    argumentInfos: Seq[ArgumentInfo]
+  ): Option[Boolean] = {
+    Option(explicitSpecifier.group(1)).map(_.trim).flatMap {
+      case ExplicitIsIntegralPattern(negation, templateParameter) =>
+        val bindings = templateBindingsForArgumentInfos(entry, argumentInfos, templateParameterNames(entry.function))
+          .getOrElse(Map.empty)
+        bindings.get(templateParameter).map { typeName =>
+          val isIntegral = isIntegralTypeName(typeName)
+          if (Option(negation).contains("!")) !isIntegral else isIntegral
+        }
+      case _ => None
+    }
+  }
+
+  private def isIntegralTypeName(typeName: String): Boolean = {
+    val normalized = stripCxxTypeQualifiers(stripCxxReference(normalizeType(resolveAliasType(typeName)))).trim
+    val canonical  = canonicalArithmeticType(normalized)
+    CxxArithmeticTypes.contains(canonical) && !Set("float", "double", "long double").contains(canonical)
   }
 
   private def functionOwnerFullName(function: OxFunctionDecl, ownerFullName: Option[String]): Option[String] = {
