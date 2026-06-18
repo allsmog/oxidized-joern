@@ -2646,6 +2646,50 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .l shouldBe List("Core::Widget(source).~Widget()", "source.~Widget()")
     }
 
+    "capture C++ goto local destructor cleanup" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  ~Widget();
+          |};
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int jumpOut(int n) {
+          |  if (n) {
+          |    Core::Widget scoped;
+          |    goto done;
+          |  }
+          |done:
+          |  return 0;
+          |}
+          |int sameScope(int n) {
+          |  Core::Widget outer;
+          |  if (n) {
+          |    goto done;
+          |  }
+          |done:
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("jumpOut").call.nameExact("~Widget").code.l shouldBe List("scoped.~Widget()")
+      cpg.method.nameExact("jumpOut").controlStructure.controlStructureType(ControlStructureTypes.IF).ast.isCall
+        .nameExact("~Widget")
+        .code
+        .l shouldBe List("scoped.~Widget()")
+      cpg.method.nameExact("sameScope").call.nameExact("~Widget").code.l shouldBe List("outer.~Widget()")
+      cpg.method.nameExact("sameScope").controlStructure.controlStructureType(ControlStructureTypes.GOTO).ast.isCall
+        .nameExact("~Widget")
+        .code
+        .l shouldBe Nil
+    }
+
     "capture C++ try catch statements" in {
       val cpg = code(
         """

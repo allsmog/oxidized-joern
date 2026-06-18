@@ -219,22 +219,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private val CxxOverloadableUnaryOperators              = Set("+", "-", "*", "&", "~", "!", "++", "--")
   private val CxxPostfixUnaryOperatorsWithDummyParameter = Set("++", "--")
 
-  private var scope: Map[String, ScopeEntry]                            = Map.empty
-  private var globalLocalEntries: Map[OxGlobalVariableDecl, ScopeEntry] = Map.empty
-  private var globalScopeByName: Map[String, ScopeEntry]                = Map.empty
-  private var functionCaptureContext: Option[FunctionCaptureContext]    = None
-  private var currentMethodOwnerTypeFullName: Option[String]            = None
-  private var currentMethodFullName: Option[String]                     = None
-  private var currentMethodSimpleName: Option[String]                   = None
-  private var currentMethodReturnTypeFullName: Option[String]           = None
-  private var typeAliases: Map[String, String]                          = Map.empty
-  private var localDestructorScopes: List[Vector[LocalDestructor]]      = Nil
-  private var jumpCleanupTargets: List[JumpCleanupTarget]               = Nil
-  private var staticLocalStorages: Vector[StaticLocalStorage]           = Vector.empty
-  private val lambdaInfos: mutable.LinkedHashMap[String, LambdaInfo]    = mutable.LinkedHashMap.empty
-  private val emittedLambdaFullNames: mutable.Set[String]               = mutable.Set.empty
-  private val lambdaReturnTypesByFullName: mutable.Map[String, String]  = mutable.Map.empty
-  private val lambdaSignaturesByFullName: mutable.Map[String, String]   = mutable.Map.empty
+  private var scope: Map[String, ScopeEntry]                                 = Map.empty
+  private var globalLocalEntries: Map[OxGlobalVariableDecl, ScopeEntry]      = Map.empty
+  private var globalScopeByName: Map[String, ScopeEntry]                     = Map.empty
+  private var functionCaptureContext: Option[FunctionCaptureContext]         = None
+  private var currentMethodOwnerTypeFullName: Option[String]                 = None
+  private var currentMethodFullName: Option[String]                          = None
+  private var currentMethodSimpleName: Option[String]                        = None
+  private var currentMethodReturnTypeFullName: Option[String]                = None
+  private var typeAliases: Map[String, String]                               = Map.empty
+  private var localDestructorScopes: List[Vector[LocalDestructor]]           = Nil
+  private var jumpCleanupTargets: List[JumpCleanupTarget]                    = Nil
+  private var gotoLabelCleanupDestructors: Map[String, Seq[LocalDestructor]] = Map.empty
+  private var staticLocalStorages: Vector[StaticLocalStorage]                = Vector.empty
+  private val lambdaInfos: mutable.LinkedHashMap[String, LambdaInfo]         = mutable.LinkedHashMap.empty
+  private val emittedLambdaFullNames: mutable.Set[String]                    = mutable.Set.empty
+  private val lambdaReturnTypesByFullName: mutable.Map[String, String]       = mutable.Map.empty
+  private val lambdaSignaturesByFullName: mutable.Map[String, String]        = mutable.Map.empty
 
   def typesSeen(): Set[String] = usedTypes.toSet
 
@@ -1400,6 +1401,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousMethodReturnType = currentMethodReturnTypeFullName
     val previousDestructorScopes = localDestructorScopes
     val previousJumpTargets      = jumpCleanupTargets
+    val previousGotoLabels       = gotoLabelCleanupDestructors
     val captureContext =
       FunctionCaptureContext(function, methodRefNode(origin, simpleName, fullName, simpleName))
     scope = parameters.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }.toMap
@@ -1410,6 +1412,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     currentMethodReturnTypeFullName = Option(returnType)
     localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
     jumpCleanupTargets = Nil
+    gotoLabelCleanupDestructors = collectGotoLabelCleanupDestructors(function.body)
     val bodyAsts =
       try {
         val constructorPrefixAsts =
@@ -1435,6 +1438,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       } finally {
         localDestructorScopes = previousDestructorScopes
         jumpCleanupTargets = previousJumpTargets
+        gotoLabelCleanupDestructors = previousGotoLabels
         currentMethodReturnTypeFullName = previousMethodReturnType
         currentMethodSimpleName = previousMethodSimpleName
         currentMethodFullName = previousMethodFullName
@@ -1830,22 +1834,28 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def registerLocalDestructor(local: OxLocalDecl, typeName: String): Unit = {
+    localDestructorsForDecl(local, typeName).foreach(registerLocalDestructor)
+  }
+
+  private def localDestructorsForDecl(local: OxLocalDecl, typeName: String): Seq[LocalDestructor] = {
     val arrayDestructors = localArrayElementReceiverCodes(local).flatMap { receiverCode =>
       arrayElementTypeFullName(typeName).flatMap(destructorEntryForType).map { destructor =>
         LocalDestructor(receiverCode, local.line, destructor)
       }
     }
     if (arrayDestructors.nonEmpty) {
-      arrayDestructors.foreach(registerLocalDestructor)
+      arrayDestructors
     } else {
-      registerLocalDestructor(local.name, typeName, local.line)
+      localDestructorForName(local.name, typeName, local.line).toSeq
     }
   }
 
   private def registerLocalDestructor(name: String, typeName: String, line: Int): Unit = {
-    destructorEntryForType(typeName).foreach { destructor =>
-      registerLocalDestructor(LocalDestructor(name, line, destructor))
-    }
+    localDestructorForName(name, typeName, line).foreach(registerLocalDestructor)
+  }
+
+  private def localDestructorForName(name: String, typeName: String, line: Int): Option[LocalDestructor] = {
+    destructorEntryForType(typeName).map(destructor => LocalDestructor(name, line, destructor))
   }
 
   private def registerLocalDestructor(destructor: LocalDestructor): Unit = {
@@ -1890,6 +1900,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         localDestructorsExitingTo(preservedScopeDepth)
       }
       .getOrElse(activeLocalDestructors)
+  }
+
+  private def gotoLocalDestructors(label: String): Seq[LocalDestructor] = {
+    gotoLabelCleanupDestructors
+      .get(label)
+      .map { targetDestructors =>
+        val active = activeLocalDestructors
+        val commonSuffixLength = active.reverse
+          .zip(targetDestructors.reverse)
+          .takeWhile { case (left, right) =>
+            left == right
+          }
+          .length
+        active.take(active.length - commonSuffixLength)
+      }
+      .getOrElse(Seq.empty)
   }
 
   private def localDestructorAst(destructor: LocalDestructor): Ast = {
@@ -2181,7 +2207,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         continueLocalDestructors.map(localDestructorAst) :+
           Ast(controlStructureNode(OxOrigin(continueStmt), ControlStructureTypes.CONTINUE, continueStmt.code))
       case gotoStmt: OxGoto =>
-        Seq(Ast(controlStructureNode(OxOrigin(gotoStmt), ControlStructureTypes.GOTO, gotoStmt.code)))
+        gotoLocalDestructors(gotoStmt.label).map(localDestructorAst) :+
+          Ast(controlStructureNode(OxOrigin(gotoStmt), ControlStructureTypes.GOTO, gotoStmt.code))
       case labelStmt: OxLabel =>
         Ast(jumpTargetNode(OxOrigin(labelStmt), labelStmt.label, labelStmt.code)) +:
           labelStmt.body.flatMap(astsForStatement)
@@ -3928,8 +3955,134 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         ifStmt.elseBody.isEmpty ||
         statementsMayCompleteNormally(ifStmt.thenBody) ||
         statementsMayCompleteNormally(ifStmt.elseBody)
-      case _ => true
+      case labelStmt: OxLabel => statementsMayCompleteNormally(labelStmt.body)
+      case caseStmt: OxCase   => statementsMayCompleteNormally(caseStmt.body)
+      case _                  => true
     }
+  }
+
+  // Snapshot destructor stacks at labels so goto cleanup only destroys scopes it actually leaves.
+  private def collectGotoLabelCleanupDestructors(statements: Seq[OxStatement]): Map[String, Seq[LocalDestructor]] = {
+    val labels = mutable.LinkedHashMap.empty[String, Seq[LocalDestructor]]
+
+    def activeDestructors(stack: List[Vector[LocalDestructor]]): Seq[LocalDestructor] = {
+      stack.flatMap(_.reverse)
+    }
+
+    def addDestructors(
+      stack: List[Vector[LocalDestructor]],
+      destructors: Seq[LocalDestructor]
+    ): List[Vector[LocalDestructor]] = {
+      stack match {
+        case current :: rest => (current ++ destructors) :: rest
+        case Nil             => stack
+      }
+    }
+
+    def localDestructors(local: OxLocalDecl): Seq[LocalDestructor] = {
+      val typeName = registerType(localTypeFullName(local))
+      if (hasStaticStorageDuration(local)) {
+        Seq.empty
+      } else {
+        localDestructorsForDecl(local, typeName) ++
+          local.initializer.flatMap(referenceBoundTemporaryDestructor(typeName, _)).toSeq
+      }
+    }
+
+    def catchParameterDestructors(parameter: OxParameterDecl): Seq[LocalDestructor] = {
+      localDestructorForName(parameter.name, registerType(normalizeType(parameter.typeName)), parameter.line).toSeq
+    }
+
+    def visitNestedStatements(statements: Seq[OxStatement], stack: List[Vector[LocalDestructor]]): Unit = {
+      visitStatements(statements, Vector.empty[LocalDestructor] :: stack)
+      ()
+    }
+
+    def visitStatements(
+      statements: Seq[OxStatement],
+      stack: List[Vector[LocalDestructor]]
+    ): List[Vector[LocalDestructor]] = {
+      statements.foldLeft(stack) { case (currentStack, statement) =>
+        visitStatement(statement, currentStack)
+      }
+    }
+
+    def visitStatement(statement: OxStatement, stack: List[Vector[LocalDestructor]]): List[Vector[LocalDestructor]] = {
+      statement match {
+        case local: OxLocalDecl =>
+          addDestructors(stack, localDestructors(local))
+        case binding: OxStructuredBinding =>
+          val tempTypeName =
+            if (normalizeType(binding.typeName).startsWith(Defines.Auto)) Defines.Auto else binding.typeName
+          val tempLocal = OxLocalDecl(
+            name = binding.tempName,
+            typeName = tempTypeName,
+            code = s"$tempTypeName ${binding.tempName}",
+            line = binding.line,
+            initializer = binding.initializer
+          )
+          addDestructors(stack, localDestructors(tempLocal))
+        case tryStmt: OxTry =>
+          visitNestedStatements(tryStmt.body, stack)
+          tryStmt.catches.foreach { catchClause =>
+            val catchStack =
+              addDestructors(
+                Vector.empty[LocalDestructor] :: stack,
+                catchClause.parameter.toSeq.flatMap(catchParameterDestructors)
+              )
+            visitNestedStatements(catchClause.body, catchStack)
+          }
+          stack
+        case ifStmt: OxIf =>
+          val scopedStack =
+            if (ifStmt.initializer.nonEmpty || ifStmt.conditionInitializer.nonEmpty) {
+              visitStatements(ifStmt.initializer ++ ifStmt.conditionInitializer, Vector.empty[LocalDestructor] :: stack)
+            } else {
+              stack
+            }
+          visitNestedStatements(ifStmt.thenBody, scopedStack)
+          visitNestedStatements(ifStmt.elseBody, scopedStack)
+          stack
+        case whileStmt: OxWhile =>
+          val scopedStack =
+            if (whileStmt.initializer.nonEmpty || whileStmt.conditionInitializer.nonEmpty) {
+              visitStatements(
+                whileStmt.initializer ++ whileStmt.conditionInitializer,
+                Vector.empty[LocalDestructor] :: stack
+              )
+            } else {
+              stack
+            }
+          visitNestedStatements(whileStmt.body, scopedStack)
+          stack
+        case doWhileStmt: OxDoWhile =>
+          visitNestedStatements(doWhileStmt.body, stack)
+          stack
+        case forStmt: OxFor =>
+          val scopedStack = visitStatements(forStmt.initializer, Vector.empty[LocalDestructor] :: stack)
+          visitNestedStatements(forStmt.body, scopedStack)
+          stack
+        case switchStmt: OxSwitch =>
+          val scopedStack =
+            visitStatements(
+              switchStmt.initializer ++ switchStmt.conditionInitializer,
+              Vector.empty[LocalDestructor] :: stack
+            )
+          visitStatements(switchStmt.body, scopedStack)
+          stack
+        case caseStmt: OxCase =>
+          visitStatements(caseStmt.body, stack)
+        case labelStmt: OxLabel =>
+          labels.update(labelStmt.label, activeDestructors(stack))
+          visitStatements(labelStmt.body, stack)
+        case _: OxReturn | _: OxThrow | _: OxBreak | _: OxContinue | _: OxGoto | _: OxUnknownStatement |
+            _: OxUsingEnumStatement | _: OxAssignment | _: OxExpressionStatement =>
+          stack
+      }
+    }
+
+    visitStatements(statements, Vector.empty[LocalDestructor] :: Nil)
+    labels.toMap
   }
 
   private def withJumpCleanupTarget[T](target: JumpCleanupTarget)(body: => T): T = {
@@ -4722,6 +4875,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousMethodReturnType = currentMethodReturnTypeFullName
     val previousDestructorScopes = localDestructorScopes
     val previousJumpTargets      = jumpCleanupTargets
+    val previousGotoLabels       = gotoLabelCleanupDestructors
     scope = (captures.map(capture => capture.name -> capture.scopeEntry) ++
       parameterEntries.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }).toMap
     functionCaptureContext = None
@@ -4731,12 +4885,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     currentMethodReturnTypeFullName = Option(info.returnType)
     localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
     jumpCleanupTargets = Nil
+    gotoLabelCleanupDestructors = collectGotoLabelCleanupDestructors(lambda.body)
     val bodyAsts =
       try {
         lambda.body.flatMap(astsForStatement)
       } finally {
         localDestructorScopes = previousDestructorScopes
         jumpCleanupTargets = previousJumpTargets
+        gotoLabelCleanupDestructors = previousGotoLabels
         currentMethodReturnTypeFullName = previousMethodReturnType
         currentMethodSimpleName = previousMethodSimpleName
         currentMethodFullName = previousMethodFullName
