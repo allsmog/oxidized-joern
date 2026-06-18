@@ -962,6 +962,48 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("guard.~Widget()", "outer.~Widget()", "scoped.~Widget()")
     }
 
+    "avoid automatic C++ destructors for static locals" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Widget {
+          |public:
+          |  Widget();
+          |  ~Widget();
+          |};
+          |}
+          |Core::Widget::Widget() {}
+          |Core::Widget::~Widget() {}
+          |int statics() {
+          |  static Core::Widget cached;
+          |  thread_local Core::Widget threadCached;
+          |  static Core::Widget slots[2];
+          |  Core::Widget automatic;
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("statics").call.nameExact("Widget").codeExact("Core.Widget.Widget()").methodFullName.l shouldBe
+        List(
+          "Core.Widget.Widget:void()",
+          "Core.Widget.Widget:void()",
+          "Core.Widget.Widget:void()",
+          "Core.Widget.Widget:void()",
+          "Core.Widget.Widget:void()"
+        )
+      cpg.method.nameExact("statics").call.nameExact(Operators.assignment).code.l.filterNot(_.startsWith("<tmp>")) shouldBe
+        List(
+          "cached = Core.Widget.Widget()",
+          "threadCached = Core.Widget.Widget()",
+          "slots[0] = Core.Widget.Widget()",
+          "slots[1] = Core.Widget.Widget()",
+          "automatic = Core.Widget.Widget()"
+        )
+      cpg.method.nameExact("statics").call.nameExact("~Widget").code.l shouldBe List("automatic.~Widget()")
+    }
+
     "capture C++ local array default constructors and destructors" in {
       val cpg = code(
         """
