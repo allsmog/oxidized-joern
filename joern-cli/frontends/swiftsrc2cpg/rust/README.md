@@ -21,9 +21,9 @@ function calls with labeled arguments, return statements, reassignment
 expressions, binary arithmetic, comparison, equality, and boolean operators,
 simple `if`/`else` control flow, simple `while` loops, simple identifier
 `for-in` loops, unlabeled `break`/`continue`, boolean literals, simple
-`class`/`struct` member blocks, and dot member-access expressions. Unsupported
-syntax fails per-file and is reported on stdout so the existing skipped-file
-handling can continue.
+`class`/`struct` member blocks, dot member-access expressions, and simple
+declaration attributes. Unsupported syntax fails per-file and is reported on
+stdout so the existing skipped-file handling can continue.
 
 Run the Rust checks with:
 
