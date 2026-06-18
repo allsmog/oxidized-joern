@@ -38,6 +38,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private implicit val schemaValidation: ValidationMode = config.schemaValidation
   private val LambdaMutableModifier                     = "MUTABLE"
   private val CxxTypeQualifiers                         = Set("const", "volatile", "mutable", "restrict")
+  private val CxxArithmeticTypes = Set(
+    "bool",
+    "char",
+    "signed char",
+    "unsigned char",
+    "short",
+    "unsigned short",
+    "int",
+    "unsigned int",
+    "long",
+    "unsigned long",
+    "long long",
+    "unsigned long long",
+    "float",
+    "double",
+    "long double"
+  )
+  private val CxxIntegralPromotionSources =
+    Set("bool", "char", "signed char", "unsigned char", "short", "unsigned short")
 
   private final case class LambdaInfo(
     name: String,
@@ -7623,9 +7642,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     argumentTypeName: String,
     argumentIsRvalue: Boolean
   ): Int = {
-    val parameterType = overloadComparableType(parameterTypeName)
-    val argumentType  = overloadComparableType(argumentTypeName)
+    val parameterType       = overloadComparableType(parameterTypeName)
+    val argumentType        = overloadComparableType(argumentTypeName)
+    val arithmeticConverts  = arithmeticConversionScore(parameterType, argumentType).isDefined
+    val rejectsNonConstBind = arithmeticConverts && nonConstLvalueReferenceTypeName(parameterTypeName)
     overloadBaseCompatibilityScore(parameterType, argumentType)
+      .filter(_ => !rejectsNonConstBind)
       .flatMap(baseScore => typeBindingScore(parameterTypeName, argumentTypeName, argumentIsRvalue).map(baseScore + _))
       .getOrElse(0)
   }
@@ -7635,11 +7657,52 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     else if (parameterType == Defines.Any || argumentType == Defines.Any) Some(10)
     else if (parameterType == argumentType) Some(60)
     else if (parameterType.endsWith(s".$argumentType") || argumentType.endsWith(s".$parameterType")) Some(55)
-    else {
-      inheritanceDistanceFromArgumentToParameter(argumentType, parameterType)
-        .filter(_ > 0)
-        .map(distance => 50 - math.min(distance, 40))
+    else
+      arithmeticConversionScore(parameterType, argumentType)
+        .orElse {
+          inheritanceDistanceFromArgumentToParameter(argumentType, parameterType)
+            .filter(_ > 0)
+            .map(distance => 50 - math.min(distance, 40))
+        }
+  }
+
+  private def arithmeticConversionScore(parameterType: String, argumentType: String): Option[Int] = {
+    val parameter = canonicalArithmeticType(parameterType)
+    val argument  = canonicalArithmeticType(argumentType)
+    if (!CxxArithmeticTypes.contains(parameter) || !CxxArithmeticTypes.contains(argument) || parameter == argument) {
+      None
+    } else if (parameter == "int" && CxxIntegralPromotionSources.contains(argument)) {
+      Some(58)
+    } else if (parameter == "double" && argument == "float") {
+      Some(58)
+    } else {
+      Some(45)
     }
+  }
+
+  private def canonicalArithmeticType(typeName: String): String = {
+    val parts = stripCxxTypeQualifiers(normalizeType(typeName)).trim.split("\\s+").filter(_.nonEmpty).toSeq
+    parts match {
+      case Seq("signed", rest*)   => canonicalArithmeticType(rest.mkString(" "))
+      case Seq("short", "int")    => "short"
+      case Seq("unsigned")        => "unsigned int"
+      case Seq("unsigned", "int") => "unsigned int"
+      case Seq("unsigned", "short") | Seq("unsigned", "short", "int") =>
+        "unsigned short"
+      case Seq("long", "int") => "long"
+      case Seq("unsigned", "long") | Seq("unsigned", "long", "int") =>
+        "unsigned long"
+      case Seq("long", "long") | Seq("long", "long", "int") =>
+        "long long"
+      case Seq("unsigned", "long", "long") | Seq("unsigned", "long", "long", "int") =>
+        "unsigned long long"
+      case _ => parts.mkString(" ")
+    }
+  }
+
+  private def nonConstLvalueReferenceTypeName(typeName: String): Boolean = {
+    val normalized = normalizeType(resolveAliasType(typeName))
+    normalized.endsWith("&") && !normalized.endsWith("&&") && !receiverObjectTypeIsConst(normalized)
   }
 
   private def inheritanceDistanceFromArgumentToParameter(argumentType: String, parameterType: String): Option[Int] = {
