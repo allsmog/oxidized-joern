@@ -6363,6 +6363,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         functionReturnExpressionTypeFullName(entry, argument, templateBindings, localTypes).map { typeName =>
           s"${stripCxxReference(normalizeType(resolveAliasType(typeName)))}*"
         }
+      case unary: OxUnary =>
+        functionScopedUnaryExpressionTypeFullName(entry, unary, templateBindings, localTypes)
       case binary: OxBinary =>
         functionScopedBinaryExpressionTypeFullName(entry, binary, templateBindings, localTypes)
       case OxConditional(_, _, _, Some(consequence), alternative) =>
@@ -6463,6 +6465,87 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         }
       }
       .orElse(baseTypeFullName.map(_.stripSuffix("[]")))
+  }
+
+  private def functionScopedUnaryExpressionTypeFullName(
+    entry: FunctionEntry,
+    unary: OxUnary,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    functionScopedUnaryOperatorTypeFullName(entry, unary, templateBindings, localTypes)
+      .orElse(functionScopedBuiltinUnaryExpressionTypeFullName(entry, unary, templateBindings, localTypes))
+  }
+
+  private def functionScopedUnaryOperatorTypeFullName(
+    entry: FunctionEntry,
+    unary: OxUnary,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    cxxUnaryOperatorFunctionName(unary).flatMap { operatorName =>
+      val argumentInfo = ArgumentInfo(
+        unary.argument,
+        functionReturnExpressionTypeFullName(entry, unary.argument, templateBindings, localTypes),
+        functionReturnExpressionIsRvalue(entry, unary.argument, templateBindings, localTypes)
+      )
+      val dummyArgumentInfo =
+        Option.when(isPostfixUnaryOperatorWithDummyParameter(unary)) {
+          val dummyArgument = postfixUnaryDummyArgument(unary.line)
+          ArgumentInfo(dummyArgument, Option(literalType("0")), isRvalue = true)
+        }
+      val memberArgumentInfos = dummyArgumentInfo.toSeq
+      val memberTarget =
+        argumentInfo.typeFullName.flatMap { receiverTypeFullName =>
+          selectFunctionEntryForArgumentInfos(
+            memberFunctionCandidatesForReceiverType(receiverTypeFullName, operatorName),
+            memberArgumentInfos,
+            Option(receiverTypeFullName)
+          ).map(targetEntry =>
+            functionSemanticReturnTypeFullNameForArgumentInfos(
+              targetEntry,
+              memberArgumentInfos,
+              Option(receiverTypeFullName)
+            )
+          )
+        }
+      memberTarget.orElse {
+        val freeArgumentInfos = argumentInfo +: dummyArgumentInfo.toSeq
+        selectFunctionEntryForArgumentInfos(freeFunctionCandidatesByName(operatorName), freeArgumentInfos)
+          .map(targetEntry => functionSemanticReturnTypeFullNameForArgumentInfos(targetEntry, freeArgumentInfos))
+      }
+    }
+  }
+
+  private def functionScopedBuiltinUnaryExpressionTypeFullName(
+    entry: FunctionEntry,
+    unary: OxUnary,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    unary.operator match {
+      case "*" =>
+        functionReturnExpressionTypeFullName(entry, unary.argument, templateBindings, localTypes).map(
+          dereferencedTypeFullName
+        )
+      case "&" =>
+        functionReturnExpressionTypeFullName(entry, unary.argument, templateBindings, localTypes).map { typeName =>
+          s"${stripCxxReference(normalizeType(resolveAliasType(typeName)))}*"
+        }
+      case "!" | "not" =>
+        Option(registerType("bool"))
+      case "+" | "-" | "~" =>
+        functionReturnExpressionTypeFullName(entry, unary.argument, templateBindings, localTypes)
+          .map(arithmeticUnaryResultTypeFullName)
+      case _ =>
+        None
+    }
+  }
+
+  private def arithmeticUnaryResultTypeFullName(typeName: String): String = {
+    val normalized = stripCxxTypeQualifiers(stripCxxReference(normalizeType(resolveAliasType(typeName)))).trim
+    val canonical  = canonicalArithmeticType(normalized)
+    if (CxxIntegralPromotionSources.contains(canonical)) "int" else normalized
   }
 
   private def functionScopedBinaryExpressionTypeFullName(
@@ -6626,6 +6709,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           .getOrElse(false)
       case binary: OxBinary =>
         functionScopedBinaryExpressionTypeFullName(entry, binary, templateBindings, localTypes)
+          .map(typeNameIsRvalue)
+          .getOrElse(true)
+      case unary: OxUnary =>
+        functionScopedUnaryExpressionTypeFullName(entry, unary, templateBindings, localTypes)
           .map(typeNameIsRvalue)
           .getOrElse(true)
       case call: OxCall =>
