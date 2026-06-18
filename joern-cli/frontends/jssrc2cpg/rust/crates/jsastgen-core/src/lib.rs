@@ -146,11 +146,14 @@ fn stmt_json(node: Node, source: &str) -> Value {
     match node.kind() {
         "lexical_declaration" | "variable_declaration" => variable_declaration_json(node, source),
         "function_declaration" => function_declaration_json(node, source),
-        "class_declaration" => class_declaration_json(node, source),
+        "class_declaration" | "abstract_class_declaration" => class_declaration_json(node, source),
         "ambient_declaration" => ambient_declaration_json(node, source),
         "import_statement" => import_statement_json(node, source),
         "export_statement" => export_statement_json(node, source),
         "internal_module" | "module" => ts_module_declaration_json(node, source),
+        "interface_declaration" => ts_interface_declaration_json(node, source),
+        "enum_declaration" => ts_enum_declaration_json(node, source),
+        "type_alias_declaration" => ts_type_alias_declaration_json(node, source),
         "statement_block" => block_statement_json(node, source),
         "return_statement" => return_statement_json(node, source),
         "if_statement" => if_statement_json(node, source),
@@ -203,6 +206,10 @@ fn expr_json(node: Node, source: &str) -> Value {
         "subscript_expression" => subscript_expression_json(node, source),
         "array" => array_expression_json(node, source),
         "object" => object_expression_json(node, source),
+        "jsx_element" => jsx_element_json(node, source),
+        "jsx_self_closing_element" => jsx_self_closing_element_json(node, source),
+        "jsx_expression" => jsx_expression_container_json(node, source),
+        "jsx_text" => with_span("JSXText", node, json!({})),
         "array_pattern" => array_pattern_json(node, source),
         "object_pattern" => object_pattern_json(node, source),
         "assignment_pattern" => assignment_pattern_json(node, source),
@@ -294,10 +301,8 @@ fn class_like_json(kind: &str, node: Node, source: &str) -> Value {
         .child_by_field_name("body")
         .map(|child| class_body_json(child, source))
         .unwrap_or_else(|| with_span("ClassBody", node, json!({ "body": [] })));
-    let super_class = node
-        .child_by_field_name("superclass")
-        .map(|child| expr_json(child, source))
-        .unwrap_or(Value::Null);
+    let super_class = class_super_json(node, source).unwrap_or(Value::Null);
+    let implements = class_implements_json(node, source);
 
     with_span(
         kind,
@@ -307,10 +312,45 @@ fn class_like_json(kind: &str, node: Node, source: &str) -> Value {
             "superClass": super_class,
             "body": body,
             "decorators": [],
-            "implements": [],
-            "mixins": []
+            "implements": implements,
+            "mixins": [],
+            "abstract": node.kind() == "abstract_class_declaration"
+                || has_named_or_keyword_child(node, source, "abstract")
         }),
     )
+}
+
+fn class_super_json(node: Node, source: &str) -> Option<Value> {
+    let heritage = named_children(node).find(|child| child.kind() == "class_heritage")?;
+    for child in named_children(heritage) {
+        if child.kind() == "extends_clause" {
+            return named_children(child)
+                .find(|candidate| is_expression_like(*candidate))
+                .map(|candidate| expr_json(candidate, source));
+        }
+        if is_expression_like(child) {
+            return Some(expr_json(child, source));
+        }
+    }
+    None
+}
+
+fn class_implements_json(node: Node, source: &str) -> Vec<Value> {
+    let Some(heritage) = named_children(node).find(|child| child.kind() == "class_heritage") else {
+        return Vec::new();
+    };
+    named_children(heritage)
+        .filter(|child| child.kind() == "implements_clause")
+        .flat_map(named_children)
+        .filter(|child| is_type_like(*child))
+        .map(|child| {
+            with_span(
+                "TSExpressionWithTypeArguments",
+                child,
+                json!({ "expression": type_name_json(child, source) }),
+            )
+        })
+        .collect()
 }
 
 fn class_body_json(node: Node, source: &str) -> Value {
@@ -324,6 +364,12 @@ fn class_body_json(node: Node, source: &str) -> Value {
 fn class_member_json(node: Node, source: &str) -> Option<Value> {
     match node.kind() {
         "method_definition" => Some(class_method_json(node, source)),
+        "field_definition" | "public_field_definition" => Some(class_property_json(node, source)),
+        "class_static_block" => Some(class_static_block_json(node, source)),
+        "abstract_method_signature" | "method_signature" => {
+            Some(ts_declare_method_json(node, source))
+        }
+        "index_signature" => Some(ts_index_signature_json(node, source)),
         _ => None,
     }
 }
@@ -353,6 +399,195 @@ fn class_method_json(node: Node, source: &str) -> Value {
             "async": has_keyword_child(node, source, "async")
         }),
     )
+}
+
+fn class_property_json(node: Node, source: &str) -> Value {
+    let key_node = node
+        .child_by_field_name("name")
+        .or_else(|| node.child_by_field_name("property"))
+        .unwrap_or(node);
+    let is_private = key_node.kind() == "private_property_identifier";
+    let key = if is_private {
+        private_name_json(key_node, source)
+    } else {
+        object_key_json(key_node, source)
+    };
+    let computed = key_node.kind() == "computed_property_name";
+    let value = node
+        .child_by_field_name("value")
+        .map(|child| expr_json(child, source))
+        .unwrap_or(Value::Null);
+    let mut fields = json!({
+        "key": key,
+        "value": value,
+        "computed": computed,
+        "static": has_keyword_child(node, source, "static"),
+        "readonly": has_named_or_keyword_child(node, source, "readonly"),
+        "abstract": has_named_or_keyword_child(node, source, "abstract")
+    });
+    if let Some(type_annotation) = node
+        .child_by_field_name("type")
+        .map(|child| ts_type_annotation_json(child, source))
+    {
+        fields = with_extra_field(fields, "typeAnnotation", type_annotation);
+    }
+    if let Some(accessibility) = accessibility_modifier(node, source) {
+        fields = with_extra_field(fields, "accessibility", Value::String(accessibility));
+    }
+
+    let kind = if is_private {
+        "ClassPrivateProperty"
+    } else {
+        "ClassProperty"
+    };
+    with_span_including_trailing_semicolon(kind, node, source, fields)
+}
+
+fn class_static_block_json(node: Node, source: &str) -> Value {
+    let body = node
+        .child_by_field_name("body")
+        .map(|block| {
+            named_children(block)
+                .filter(|child| !is_comment(*child))
+                .map(|child| stmt_json(child, source))
+                .filter(|value| !value.is_null())
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+
+    with_span("StaticBlock", node, json!({ "body": body }))
+}
+
+fn ts_declare_method_json(node: Node, source: &str) -> Value {
+    let mut method = ts_method_signature_json("TSDeclareMethod", node, source);
+    if let Value::Object(ref mut object) = method {
+        object.insert(
+            "abstract".to_string(),
+            Value::Bool(
+                node.kind() == "abstract_method_signature"
+                    || has_named_or_keyword_child(node, source, "abstract"),
+            ),
+        );
+    }
+    method
+}
+
+fn ts_method_signature_json(kind: &str, node: Node, source: &str) -> Value {
+    let key_node = node.child_by_field_name("name").unwrap_or(node);
+    let computed = key_node.kind() == "computed_property_name";
+    let params = params_json(node, source);
+    let method_kind = if node_text(key_node, source) == "constructor" {
+        "constructor"
+    } else {
+        "method"
+    };
+    let mut fields = json!({
+        "kind": method_kind,
+        "key": object_key_json(key_node, source),
+        "id": Value::Null,
+        "params": params.clone(),
+        "parameters": params,
+        "computed": computed,
+        "static": has_keyword_child(node, source, "static"),
+        "generator": false,
+        "async": false,
+        "abstract": has_named_or_keyword_child(node, source, "abstract")
+    });
+    if let Some(return_type) = node
+        .child_by_field_name("return_type")
+        .map(|child| ts_type_annotation_json(child, source))
+    {
+        fields = with_extra_field(fields, "returnType", return_type);
+    }
+    if let Some(accessibility) = accessibility_modifier(node, source) {
+        fields = with_extra_field(fields, "accessibility", Value::String(accessibility));
+    }
+
+    with_span_including_trailing_semicolon(kind, node, source, fields)
+}
+
+fn ts_property_signature_json(node: Node, source: &str) -> Value {
+    let key_node = node.child_by_field_name("name").unwrap_or(node);
+    let mut fields = json!({
+        "key": object_key_json(key_node, source),
+        "computed": key_node.kind() == "computed_property_name",
+        "optional": has_keyword_child(node, source, "?"),
+        "readonly": has_named_or_keyword_child(node, source, "readonly")
+    });
+    if let Some(type_annotation) = node
+        .child_by_field_name("type")
+        .map(|child| ts_type_annotation_json(child, source))
+    {
+        fields = with_extra_field(fields, "typeAnnotation", type_annotation);
+    }
+    if let Some(accessibility) = accessibility_modifier(node, source) {
+        fields = with_extra_field(fields, "accessibility", Value::String(accessibility));
+    }
+
+    with_span_including_trailing_semicolon("TSPropertySignature", node, source, fields)
+}
+
+fn ts_call_signature_json(node: Node, source: &str) -> Value {
+    let params = params_json(node, source);
+    let mut fields = json!({
+        "parameters": params.clone(),
+        "params": params
+    });
+    if let Some(return_type) = node
+        .child_by_field_name("return_type")
+        .map(|child| ts_type_annotation_json(child, source))
+    {
+        fields = with_extra_field(fields, "returnType", return_type);
+    }
+
+    with_span_including_trailing_semicolon("TSCallSignatureDeclaration", node, source, fields)
+}
+
+fn ts_construct_signature_json(node: Node, source: &str) -> Value {
+    let params = params_json(node, source);
+    let mut fields = json!({
+        "kind": "constructor",
+        "parameters": params.clone(),
+        "params": params
+    });
+    if let Some(type_annotation) = node
+        .child_by_field_name("type")
+        .map(|child| ts_type_annotation_json(child, source))
+    {
+        fields = with_extra_field(fields, "typeAnnotation", type_annotation);
+    }
+
+    with_span_including_trailing_semicolon("TSConstructSignatureDeclaration", node, source, fields)
+}
+
+fn ts_index_signature_json(node: Node, source: &str) -> Value {
+    let parameter = node
+        .child_by_field_name("name")
+        .map(|name| {
+            let mut value = identifier_json(name, source);
+            if let Some(index_type) = node
+                .child_by_field_name("index_type")
+                .map(|child| ts_type_annotation_json(child, source))
+            {
+                value = with_extra_field(value, "typeAnnotation", index_type);
+            }
+            value
+        })
+        .unwrap_or_else(|| identifier_from_name(node, "index"));
+    let mut fields = json!({
+        "parameters": [parameter]
+    });
+    if let Some(type_annotation) = node
+        .child_by_field_name("type")
+        .map(|child| ts_type_annotation_json(child, source))
+    {
+        fields = with_extra_field(fields, "typeAnnotation", type_annotation);
+    }
+    if let Some(accessibility) = accessibility_modifier(node, source) {
+        fields = with_extra_field(fields, "accessibility", Value::String(accessibility));
+    }
+
+    with_span_including_trailing_semicolon("TSIndexSignature", node, source, fields)
 }
 
 fn function_like_json(kind: &str, node: Node, source: &str) -> Value {
@@ -398,14 +633,19 @@ fn function_like_json_with_span(
 }
 
 fn ts_module_declaration_json(node: Node, source: &str) -> Value {
-    let id = node
-        .child_by_field_name("name")
-        .map(|child| expr_json(child, source))
-        .unwrap_or_else(|| noop_json(node));
+    let name_node = node.child_by_field_name("name");
     let body = node
         .child_by_field_name("body")
         .map(|child| ts_module_block_json(child, source))
         .unwrap_or(Value::Null);
+
+    if let Some(name) = name_node.filter(|name| node_text(*name, source).contains('.')) {
+        return nested_ts_module_declaration_json(node, name, body, source);
+    }
+
+    let id = name_node
+        .map(|child| module_identifier_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
 
     with_span(
         "TSModuleDeclaration",
@@ -418,6 +658,56 @@ fn ts_module_declaration_json(node: Node, source: &str) -> Value {
     )
 }
 
+fn nested_ts_module_declaration_json(
+    node: Node,
+    name_node: Node,
+    leaf_body: Value,
+    source: &str,
+) -> Value {
+    let name_text = node_text(name_node, source);
+    let mut cursor = name_node.start_byte();
+    let mut parts = Vec::new();
+    for part in name_text.split('.') {
+        let start = cursor;
+        let end = start + part.len();
+        parts.push((part.to_string(), start, end));
+        cursor = end + 1;
+    }
+
+    let mut body = leaf_body;
+    for (index, (part, start, end)) in parts.into_iter().enumerate().rev() {
+        let id = with_span_bounds(
+            "Identifier",
+            start,
+            point_for_byte(source, start),
+            end,
+            point_for_byte(source, end),
+            json!({ "name": part }),
+        );
+        let span_start = if index == 0 { node.start_byte() } else { start };
+        body = with_span_bounds(
+            "TSModuleDeclaration",
+            span_start,
+            point_for_byte(source, span_start),
+            node.end_byte(),
+            node.end_position(),
+            json!({
+                "id": id,
+                "body": body,
+                "declare": has_keyword_child(node, source, "declare")
+            }),
+        );
+    }
+    body
+}
+
+fn module_identifier_json(node: Node, source: &str) -> Value {
+    match node.kind() {
+        "string" => string_literal_json(node, source),
+        _ => identifier_json(node, source),
+    }
+}
+
 fn ts_module_block_json(node: Node, source: &str) -> Value {
     let body = named_children(node)
         .filter(|child| !is_comment(*child))
@@ -426,6 +716,132 @@ fn ts_module_block_json(node: Node, source: &str) -> Value {
         .collect::<Vec<_>>();
 
     with_span("TSModuleBlock", node, json!({ "body": body }))
+}
+
+fn ts_interface_declaration_json(node: Node, source: &str) -> Value {
+    let id = node
+        .child_by_field_name("name")
+        .map(|child| identifier_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let body = node
+        .child_by_field_name("body")
+        .map(|child| ts_interface_body_json(child, source))
+        .unwrap_or_else(|| with_span("TSInterfaceBody", node, json!({ "body": [] })));
+    let extends = named_children(node)
+        .find(|child| child.kind() == "extends_type_clause")
+        .map(|child| {
+            named_children(child)
+                .filter(|candidate| is_type_like(*candidate))
+                .map(|candidate| {
+                    with_span(
+                        "TSExpressionWithTypeArguments",
+                        candidate,
+                        json!({ "expression": type_name_json(candidate, source) }),
+                    )
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+
+    with_span(
+        "TSInterfaceDeclaration",
+        node,
+        json!({
+            "id": id,
+            "body": body,
+            "extends": extends
+        }),
+    )
+}
+
+fn ts_interface_body_json(node: Node, source: &str) -> Value {
+    let body = named_children(node)
+        .filter_map(|child| ts_interface_member_json(child, source))
+        .collect::<Vec<_>>();
+
+    with_span("TSInterfaceBody", node, json!({ "body": body }))
+}
+
+fn ts_interface_member_json(node: Node, source: &str) -> Option<Value> {
+    match node.kind() {
+        "property_signature" => Some(ts_property_signature_json(node, source)),
+        "method_signature" => Some(ts_method_signature_json("TSMethodSignature", node, source)),
+        "call_signature" => Some(ts_call_signature_json(node, source)),
+        "construct_signature" => Some(ts_construct_signature_json(node, source)),
+        "index_signature" => Some(ts_index_signature_json(node, source)),
+        "export_statement" => Some(export_statement_json(node, source)),
+        _ => None,
+    }
+}
+
+fn ts_enum_declaration_json(node: Node, source: &str) -> Value {
+    let id = node
+        .child_by_field_name("name")
+        .map(|child| identifier_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let members = node
+        .child_by_field_name("body")
+        .map(|body| {
+            named_children(body)
+                .filter_map(|child| ts_enum_member_json(child, source))
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+
+    with_span(
+        "TSEnumDeclaration",
+        node,
+        json!({
+            "id": id,
+            "members": members
+        }),
+    )
+}
+
+fn ts_enum_member_json(node: Node, source: &str) -> Option<Value> {
+    match node.kind() {
+        "enum_assignment" => {
+            let id_node = node.child_by_field_name("name").unwrap_or(node);
+            let initializer = node
+                .child_by_field_name("value")
+                .map(|child| expr_json(child, source))
+                .unwrap_or(Value::Null);
+            Some(with_span(
+                "TSEnumMember",
+                node,
+                json!({
+                    "id": import_export_name_json(id_node, source),
+                    "initializer": initializer
+                }),
+            ))
+        }
+        "property_identifier" | "identifier" | "string" | "number" => Some(with_span(
+            "TSEnumMember",
+            node,
+            json!({ "id": import_export_name_json(node, source) }),
+        )),
+        _ => None,
+    }
+}
+
+fn ts_type_alias_declaration_json(node: Node, source: &str) -> Value {
+    let id = node
+        .child_by_field_name("name")
+        .map(|child| identifier_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let type_annotation = node
+        .child_by_field_name("value")
+        .map(|child| ts_type_json(child, source))
+        .unwrap_or_else(|| with_span("TSAnyKeyword", node, json!({})));
+
+    with_span(
+        "TSTypeAliasDeclaration",
+        node,
+        json!({
+            "id": id,
+            "typeAnnotation": type_annotation
+        }),
+    )
 }
 
 fn import_statement_json(node: Node, source: &str) -> Value {
@@ -959,6 +1375,13 @@ fn throw_statement_json(node: Node, source: &str) -> Value {
 }
 
 fn expression_statement_json(node: Node, source: &str) -> Value {
+    if let Some(module) = node
+        .named_child(0)
+        .filter(|child| matches!(child.kind(), "internal_module" | "module"))
+    {
+        return ts_module_declaration_json(module, source);
+    }
+
     let expression = node
         .named_child(0)
         .map(|child| expr_json(child, source))
@@ -1161,6 +1584,7 @@ fn sequence_expression_json(node: Node, source: &str) -> Value {
 }
 
 fn parameter_json(node: Node, source: &str) -> Value {
+    let parameter_property = is_parameter_property(node, source);
     let left_node = node
         .child_by_field_name("pattern")
         .or_else(|| node.child_by_field_name("name"))
@@ -1175,7 +1599,8 @@ fn parameter_json(node: Node, source: &str) -> Value {
                 "identifier" | "property_identifier" | "type_identifier"
             ) =>
         {
-            identifier_json_with_span(child, node, source, type_annotation.clone())
+            let span_node = if parameter_property { child } else { node };
+            identifier_json_with_span(child, span_node, source, type_annotation.clone())
         }
         Some(child) => {
             let value = pattern_json(child, source);
@@ -1188,18 +1613,34 @@ fn parameter_json(node: Node, source: &str) -> Value {
         None => noop_json(node),
     };
 
-    if let Some(right) = node.child_by_field_name("value") {
-        return with_span(
+    let parameter = if let Some(right) = node.child_by_field_name("value") {
+        with_span(
             "AssignmentPattern",
             node,
             json!({
                 "left": left,
                 "right": expr_json(right, source)
             }),
-        );
+        )
+    } else {
+        left
+    };
+
+    if parameter_property {
+        let mut fields = json!({
+            "parameter": parameter,
+            "readonly": has_named_or_keyword_child(node, source, "readonly")
+        });
+        if let Some(annotation) = type_annotation {
+            fields = with_extra_field(fields, "typeAnnotation", annotation);
+        }
+        if let Some(accessibility) = accessibility_modifier(node, source) {
+            fields = with_extra_field(fields, "accessibility", Value::String(accessibility));
+        }
+        return with_span("TSParameterProperty", node, fields);
     }
 
-    left
+    parameter
 }
 
 fn call_expression_json(node: Node, source: &str) -> Value {
@@ -1311,21 +1752,192 @@ fn subscript_expression_json(node: Node, source: &str) -> Value {
 }
 
 fn array_expression_json(node: Node, source: &str) -> Value {
-    let elements = named_children(node)
-        .filter(|child| !is_comment(*child))
-        .map(|child| expr_json(child, source))
-        .collect::<Vec<_>>();
+    let elements = array_elements_json(node, source, expr_json);
 
     with_span("ArrayExpression", node, json!({ "elements": elements }))
 }
 
 fn array_pattern_json(node: Node, source: &str) -> Value {
-    let elements = named_children(node)
-        .filter(|child| !is_comment(*child))
-        .map(|child| pattern_json(child, source))
-        .collect::<Vec<_>>();
+    let elements = array_elements_json(node, source, pattern_json);
 
     with_span("ArrayPattern", node, json!({ "elements": elements }))
+}
+
+fn array_elements_json(
+    node: Node,
+    source: &str,
+    value_json: fn(Node, &str) -> Value,
+) -> Vec<Value> {
+    let mut elements = Vec::new();
+    let mut expect_element = true;
+
+    for index in 0..node.child_count() {
+        let Some(child) = node.child(index) else {
+            continue;
+        };
+        if child.is_named() {
+            if !is_comment(child) {
+                elements.push(value_json(child, source));
+                expect_element = false;
+            }
+            continue;
+        }
+
+        if node_text(child, source) == "," {
+            if expect_element {
+                elements.push(Value::Null);
+            }
+            expect_element = true;
+        }
+    }
+
+    elements
+}
+
+fn jsx_element_json(node: Node, source: &str) -> Value {
+    let opening = node
+        .child_by_field_name("open_tag")
+        .map(|child| jsx_opening_element_json(child, false, source))
+        .unwrap_or_else(|| noop_json(node));
+    let closing = node
+        .child_by_field_name("close_tag")
+        .map(|child| jsx_closing_element_json(child, source))
+        .unwrap_or(Value::Null);
+    let children = named_children(node)
+        .filter(|child| !matches!(child.kind(), "jsx_opening_element" | "jsx_closing_element"))
+        .map(|child| jsx_child_json(child, source))
+        .filter(|value| !value.is_null())
+        .collect::<Vec<_>>();
+
+    with_span(
+        "JSXElement",
+        node,
+        json!({
+            "openingElement": opening,
+            "closingElement": closing,
+            "children": children
+        }),
+    )
+}
+
+fn jsx_self_closing_element_json(node: Node, source: &str) -> Value {
+    let opening = jsx_opening_element_json(node, true, source);
+    with_span(
+        "JSXElement",
+        node,
+        json!({
+            "openingElement": opening,
+            "closingElement": Value::Null,
+            "children": []
+        }),
+    )
+}
+
+fn jsx_child_json(node: Node, source: &str) -> Value {
+    match node.kind() {
+        "jsx_element" => jsx_element_json(node, source),
+        "jsx_self_closing_element" => jsx_self_closing_element_json(node, source),
+        "jsx_expression" => jsx_expression_container_json(node, source),
+        "jsx_text" | "html_character_reference" => with_span("JSXText", node, json!({})),
+        _ => expr_json(node, source),
+    }
+}
+
+fn jsx_opening_element_json(node: Node, self_closing: bool, source: &str) -> Value {
+    let name = node
+        .child_by_field_name("name")
+        .map(|child| jsx_name_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let attributes = named_children(node)
+        .filter(|child| matches!(child.kind(), "jsx_attribute" | "jsx_expression"))
+        .map(|child| match child.kind() {
+            "jsx_attribute" => jsx_attribute_json(child, source),
+            "jsx_expression" => jsx_expression_container_json(child, source),
+            _ => noop_json(child),
+        })
+        .collect::<Vec<_>>();
+
+    with_span(
+        "JSXOpeningElement",
+        node,
+        json!({
+            "name": name,
+            "attributes": attributes,
+            "selfClosing": self_closing
+        }),
+    )
+}
+
+fn jsx_closing_element_json(node: Node, source: &str) -> Value {
+    let name = node
+        .child_by_field_name("name")
+        .map(|child| jsx_name_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+
+    with_span("JSXClosingElement", node, json!({ "name": name }))
+}
+
+fn jsx_attribute_json(node: Node, source: &str) -> Value {
+    let name_node = named_children(node)
+        .find(|child| {
+            matches!(
+                child.kind(),
+                "property_identifier" | "identifier" | "jsx_namespace_name"
+            )
+        })
+        .unwrap_or(node);
+    let value = named_children(node)
+        .find(|child| {
+            matches!(
+                child.kind(),
+                "string" | "jsx_expression" | "jsx_element" | "jsx_self_closing_element"
+            )
+        })
+        .map(|child| match child.kind() {
+            "string" => string_literal_json(child, source),
+            "jsx_expression" => jsx_expression_container_json(child, source),
+            "jsx_element" => jsx_element_json(child, source),
+            "jsx_self_closing_element" => jsx_self_closing_element_json(child, source),
+            _ => noop_json(child),
+        })
+        .unwrap_or(Value::Null);
+
+    with_span(
+        "JSXAttribute",
+        node,
+        json!({
+            "name": jsx_name_json(name_node, source),
+            "value": value
+        }),
+    )
+}
+
+fn jsx_expression_container_json(node: Node, source: &str) -> Value {
+    let expression = node
+        .named_child(0)
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| with_span("JSXEmptyExpression", node, json!({})));
+
+    with_span(
+        "JSXExpressionContainer",
+        node,
+        json!({ "expression": expression }),
+    )
+}
+
+fn jsx_name_json(node: Node, source: &str) -> Value {
+    match node.kind() {
+        "jsx_namespace_name" => with_span(
+            "JSXIdentifier",
+            node,
+            json!({ "name": node_text(node, source) }),
+        ),
+        _ => with_span(
+            "JSXIdentifier",
+            node,
+            json!({ "name": node_text(node, source) }),
+        ),
+    }
 }
 
 fn object_expression_json(node: Node, source: &str) -> Value {
@@ -1468,7 +2080,12 @@ fn object_method_json(node: Node, source: &str) -> Value {
 }
 
 fn object_method_kind(node: Node, source: &str) -> &'static str {
-    if has_keyword_child(node, source, "get") {
+    if node
+        .child_by_field_name("name")
+        .is_some_and(|child| node_text(child, source) == "constructor")
+    {
+        "constructor"
+    } else if has_keyword_child(node, source, "get") {
         "get"
     } else if has_keyword_child(node, source, "set") {
         "set"
@@ -1643,10 +2260,10 @@ fn ts_type_json(node: Node, source: &str) -> Value {
     match node.kind() {
         "type_annotation" => ts_type_annotation_json(node, source),
         "predefined_type" => ts_predefined_type_json(node, source),
-        "type_identifier" | "nested_type_identifier" => with_span(
+        "type_identifier" | "nested_type_identifier" | "generic_type" => with_span(
             "TSTypeReference",
             node,
-            json!({ "typeName": identifier_json(node, source) }),
+            json!({ "typeName": type_name_json(node, source) }),
         ),
         "array_type" => with_span(
             "TSArrayType",
@@ -1656,6 +2273,45 @@ fn ts_type_json(node: Node, source: &str) -> Value {
                     .named_child(0)
                     .map(|child| ts_type_json(child, source))
                     .unwrap_or_else(|| with_span("TSAnyKeyword", node, json!({})))
+            }),
+        ),
+        "object_type" => with_span(
+            "TSTypeLiteral",
+            node,
+            json!({
+                "members": named_children(node)
+                    .filter_map(|child| ts_interface_member_json(child, source))
+                    .collect::<Vec<_>>()
+            }),
+        ),
+        "literal_type" => with_span(
+            "TSLiteralType",
+            node,
+            json!({
+                "literal": node
+                    .named_child(0)
+                    .map(|child| expr_json(child, source))
+                    .unwrap_or_else(|| noop_json(node))
+            }),
+        ),
+        "union_type" => with_span(
+            "TSUnionType",
+            node,
+            json!({
+                "types": named_children(node)
+                    .filter(|child| is_type_like(*child))
+                    .map(|child| ts_type_json(child, source))
+                    .collect::<Vec<_>>()
+            }),
+        ),
+        "intersection_type" => with_span(
+            "TSIntersectionType",
+            node,
+            json!({
+                "types": named_children(node)
+                    .filter(|child| is_type_like(*child))
+                    .map(|child| ts_type_json(child, source))
+                    .collect::<Vec<_>>()
             }),
         ),
         _ => with_span("TSAnyKeyword", node, json!({})),
@@ -1872,6 +2528,55 @@ fn boolean_literal_json(node: Node, value: bool) -> Value {
     with_span("BooleanLiteral", node, json!({ "value": value }))
 }
 
+fn private_name_json(node: Node, source: &str) -> Value {
+    let name = node_text(node, source).trim_start_matches('#').to_string();
+    let id_start = if source.as_bytes().get(node.start_byte()) == Some(&b'#') {
+        node.start_byte() + 1
+    } else {
+        node.start_byte()
+    };
+    let id = with_span_bounds(
+        "Identifier",
+        id_start,
+        point_for_byte(source, id_start),
+        node.end_byte(),
+        node.end_position(),
+        json!({ "name": name }),
+    );
+    with_span("PrivateName", node, json!({ "id": id }))
+}
+
+fn identifier_from_name(node: Node, name: &str) -> Value {
+    with_span("Identifier", node, json!({ "name": name }))
+}
+
+fn type_name_json(node: Node, source: &str) -> Value {
+    match node.kind() {
+        "generic_type" => node
+            .named_child(0)
+            .map(|child| type_name_json(child, source))
+            .unwrap_or_else(|| identifier_json(node, source)),
+        "nested_type_identifier" => {
+            let text = node_text(node, source);
+            let mut parts = text.split('.').filter(|part| !part.is_empty());
+            let Some(first) = parts.next() else {
+                return identifier_json(node, source);
+            };
+            parts.fold(identifier_from_name(node, first), |left, right| {
+                with_span(
+                    "TSQualifiedName",
+                    node,
+                    json!({
+                        "left": left,
+                        "right": identifier_from_name(node, right)
+                    }),
+                )
+            })
+        }
+        _ => identifier_json(node, source),
+    }
+}
+
 fn field_json(node: Node, field: &str, source: &str) -> Option<Value> {
     node.child_by_field_name(field)
         .map(|child| expr_json(child, source))
@@ -1929,6 +2634,31 @@ fn with_span(kind: &str, node: Node, fields: Value) -> Value {
         node.end_position(),
         fields,
     )
+}
+
+fn with_span_including_trailing_semicolon(
+    kind: &str,
+    node: Node,
+    source: &str,
+    fields: Value,
+) -> Value {
+    let end_byte = node.end_byte();
+    if source
+        .as_bytes()
+        .get(end_byte)
+        .is_some_and(|byte| *byte == b';')
+    {
+        let adjusted_end = end_byte + 1;
+        return with_span_bounds(
+            kind,
+            node.start_byte(),
+            node.start_position(),
+            adjusted_end,
+            point_for_byte(source, adjusted_end),
+            fields,
+        );
+    }
+    with_span(kind, node, fields)
 }
 
 fn with_span_bounds(
@@ -2084,6 +2814,22 @@ fn has_keyword_child(node: Node, source: &str, keyword: &str) -> bool {
         }
     }
     false
+}
+
+fn has_named_or_keyword_child(node: Node, source: &str, keyword: &str) -> bool {
+    has_keyword_child(node, source, keyword)
+        || named_children(node).any(|child| node_text(child, source) == keyword)
+}
+
+fn accessibility_modifier(node: Node, source: &str) -> Option<String> {
+    named_children(node)
+        .find(|child| child.kind() == "accessibility_modifier")
+        .map(|child| node_text(child, source))
+}
+
+fn is_parameter_property(node: Node, source: &str) -> bool {
+    accessibility_modifier(node, source).is_some()
+        || has_named_or_keyword_child(node, source, "readonly")
 }
 
 fn colon_child<'a>(node: Node<'a>, source: &str) -> Option<Node<'a>> {
@@ -2678,6 +3424,100 @@ mod tests {
         let as_expr = &json["ast"]["program"]["body"][5]["declarations"][0]["init"];
         assert_eq!(as_expr["type"], "TSAsExpression");
         assert_eq!(as_expr["expression"]["type"], "MemberExpression");
+    }
+
+    #[test]
+    fn emits_class_members_ts_declarations_and_namespaces() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.ts");
+        let json = parse_source(
+            root,
+            path,
+            "abstract class Foo extends Base { static a: string; #b: number; public abstract run(): void; }\ninterface I { x: string; (value: string): boolean; }\nenum E { A = 1, B }\ntype User = { name: string; tags: string[]; };\nnamespace A.B { class C {} }\n",
+        )
+        .expect("parse succeeds");
+
+        let class_decl = &json["ast"]["program"]["body"][0];
+        assert_eq!(class_decl["type"], "ClassDeclaration");
+        assert_eq!(class_decl["abstract"], true);
+        assert_eq!(class_decl["superClass"]["name"], "Base");
+        assert_eq!(class_decl["body"]["body"][0]["type"], "ClassProperty");
+        assert_eq!(class_decl["body"]["body"][0]["static"], true);
+        assert_eq!(
+            class_decl["body"]["body"][1]["type"],
+            "ClassPrivateProperty"
+        );
+        assert_eq!(class_decl["body"]["body"][1]["key"]["id"]["name"], "b");
+        assert_eq!(class_decl["body"]["body"][2]["type"], "TSDeclareMethod");
+        assert_eq!(class_decl["body"]["body"][2]["abstract"], true);
+
+        let interface_decl = &json["ast"]["program"]["body"][1];
+        assert_eq!(interface_decl["type"], "TSInterfaceDeclaration");
+        assert_eq!(
+            interface_decl["body"]["body"][0]["type"],
+            "TSPropertySignature"
+        );
+        assert_eq!(
+            interface_decl["body"]["body"][1]["type"],
+            "TSCallSignatureDeclaration"
+        );
+
+        let enum_decl = &json["ast"]["program"]["body"][2];
+        assert_eq!(enum_decl["type"], "TSEnumDeclaration");
+        assert_eq!(enum_decl["members"][0]["initializer"]["value"], 1.0);
+        assert_eq!(enum_decl["members"][1]["id"]["name"], "B");
+
+        let alias_decl = &json["ast"]["program"]["body"][3];
+        assert_eq!(alias_decl["type"], "TSTypeAliasDeclaration");
+        assert_eq!(alias_decl["typeAnnotation"]["type"], "TSTypeLiteral");
+        assert_eq!(
+            alias_decl["typeAnnotation"]["members"][1]["key"]["name"],
+            "tags"
+        );
+        assert_eq!(
+            alias_decl["typeAnnotation"]["members"][1]["typeAnnotation"]["typeAnnotation"]["type"],
+            "TSArrayType"
+        );
+
+        let namespace_a = &json["ast"]["program"]["body"][4];
+        assert_eq!(namespace_a["type"], "TSModuleDeclaration");
+        assert_eq!(namespace_a["id"]["name"], "A");
+        assert_eq!(namespace_a["body"]["type"], "TSModuleDeclaration");
+        assert_eq!(namespace_a["body"]["id"]["name"], "B");
+    }
+
+    #[test]
+    fn emits_jsx_expression_containers_and_array_holes() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.jsx");
+        let json = parse_source(
+            root,
+            path,
+            "const View = ({ value }) => <Button onClick={() => use(value)}>TRY</Button>;\nvar [a, , b] = x;\n",
+        )
+        .expect("parse succeeds");
+
+        let jsx = &json["ast"]["program"]["body"][0]["declarations"][0]["init"]["body"];
+        assert_eq!(jsx["type"], "JSXElement");
+        assert_eq!(jsx["openingElement"]["type"], "JSXOpeningElement");
+        let on_click = &jsx["openingElement"]["attributes"][0];
+        assert_eq!(on_click["type"], "JSXAttribute");
+        assert_eq!(on_click["name"]["name"], "onClick");
+        assert_eq!(on_click["value"]["type"], "JSXExpressionContainer");
+        assert_eq!(
+            on_click["value"]["expression"]["type"],
+            "ArrowFunctionExpression"
+        );
+        assert_eq!(
+            on_click["value"]["expression"]["body"]["callee"]["name"],
+            "use"
+        );
+
+        let pattern = &json["ast"]["program"]["body"][1]["declarations"][0]["id"];
+        assert_eq!(pattern["type"], "ArrayPattern");
+        assert_eq!(pattern["elements"][0]["name"], "a");
+        assert_eq!(pattern["elements"][1], Value::Null);
+        assert_eq!(pattern["elements"][2]["name"], "b");
     }
 
     #[test]
