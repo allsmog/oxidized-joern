@@ -1,7 +1,7 @@
 use anyhow::{bail, Context, Result};
 use clap::Parser;
 use ignore::WalkBuilder;
-use jsastgen_core::{parse_file, write_json};
+use jsastgen_core::{parse_file_with_source, write_json, write_type_map, TypeMapProject};
 use regex::Regex;
 use std::path::{Component, Path, PathBuf};
 
@@ -57,9 +57,28 @@ fn run() -> Result<()> {
         .transpose()?;
     let exclude = ExcludeMatcher::new(&input, exclude_regex, &args.exclude_files);
     let files = collect_inputs(&input, &exclude, &args.language_type)?;
+    let root = input_root(&input);
+    let mut parsed_files = Vec::new();
     for file in files {
+        match parse_file_with_source(&root, &file) {
+            Ok((value, source)) => parsed_files.push((file, value, source)),
+            Err(err) => println!("{} {}", file.display(), err),
+        }
+    }
+
+    let type_project =
+        (!args.no_ts_types).then(|| TypeMapProject::from_parsed_files(&parsed_files));
+    for (file, value, source) in parsed_files {
         let target = output_path(&input, &out, &file);
-        match parse_file(&input_root(&input), &file).and_then(|value| write_json(&target, &value)) {
+        let write_result = (|| -> Result<()> {
+            write_json(&target, &value)?;
+            if let Some(project) = &type_project {
+                let type_map = project.infer_type_map(&value, &source);
+                write_type_map(&type_map_output_path(&target), &type_map)?;
+            }
+            Ok(())
+        })();
+        match write_result {
             Ok(()) => println!(
                 "Converted AST for {} to {}",
                 file.display(),
@@ -246,4 +265,10 @@ fn output_path(input: &Path, out: &Path, file: &Path) -> PathBuf {
         .unwrap_or_else(|| "out.json".into());
     target.set_file_name(file_name);
     target
+}
+
+fn type_map_output_path(json_path: &Path) -> PathBuf {
+    let mut path = json_path.to_path_buf();
+    path.set_extension("typemap");
+    path
 }
