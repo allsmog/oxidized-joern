@@ -5447,9 +5447,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .flatMap(contextualConversionObjectTypeFullName)
       .filterNot(targetType => expressionObjectTypeFullName(expression).contains(targetType))
       .flatMap { targetType =>
-        val candidates = conversionOperatorNamesForType(targetType)
-          .flatMap(operatorName => memberFunctionCandidates(expression, operatorName))
-          .distinct
+        val candidates = (conversionOperatorNamesForType(targetType)
+          .flatMap(operatorName => memberFunctionCandidates(expression, operatorName)) ++
+          conversionOperatorCandidates(expression)).distinct
           .filter(entry => conversionOperatorReturnObjectTypeFullName(entry).contains(targetType))
         selectFunctionEntry(candidates, Some(Seq.empty))
           .map(entry => ResolvedOperatorCall(entry, entry.simpleName, Option(expression), Seq.empty))
@@ -5474,7 +5474,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def conversionOperatorReturnObjectTypeFullName(entry: FunctionEntry): Option[String] = {
-    Option(functionSemanticReturnTypeFullName(entry)).flatMap(returnedObjectTypeFullName)
+    Option(functionSemanticReturnTypeFullName(entry)).flatMap(contextualConversionObjectTypeFullName)
+  }
+
+  private def conversionOperatorCandidates(expression: OxExpression): Seq[FunctionEntry] = {
+    expressionTypeFullName(expression).toSeq.flatMap { receiverTypeFullName =>
+      val receiverType = receiverAggregateTypeName(receiverTypeFullName)
+      val candidates = typeAndBaseTypeFullNames(receiverType)
+        .flatMap(typeName => resolveAggregateTypeFullName(typeName).toSeq :+ typeName)
+        .distinct
+        .iterator
+        .map(conversionOperatorsDeclaredForType)
+        .find(_.nonEmpty)
+        .getOrElse(Seq.empty)
+      filterMemberFunctionCandidatesForReceiver(candidates, receiverTypeFullName)
+    }
+  }
+
+  private def conversionOperatorsDeclaredForType(typeName: String): Seq[FunctionEntry] = {
+    functionEntries.filter(entry => entry.ownerFullName.contains(typeName) && entry.simpleName.startsWith("operator "))
   }
 
   private def conversionOperatorNamesForType(typeFullName: String): Seq[String] = {
@@ -5611,7 +5629,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         target.entry.fullName,
         dispatchType,
         Option(target.entry.function.signature),
-        Option(registerType(normalizeType(target.entry.function.returnType)))
+        Option(registerType(operatorCallReturnTypeFullName(target.entry)))
       )
     val base = target.base.map(expressionAst)
     createCallAst(
@@ -5620,6 +5638,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       base = base,
       receiver = if (dispatchType == DispatchTypes.DYNAMIC_DISPATCH) base else None
     )
+  }
+
+  private def operatorCallReturnTypeFullName(entry: FunctionEntry): String = {
+    val semanticReturnType = functionSemanticReturnTypeFullName(entry)
+    Option.when(typeNameHasCxxQualifier(semanticReturnType))(semanticReturnType).getOrElse {
+      normalizeType(entry.function.returnType)
+    }
+  }
+
+  private def typeNameHasCxxQualifier(typeName: String): Boolean = {
+    normalizeType(typeName).split("\\s+").exists(CxxTypeQualifiers.contains)
   }
 
   private def memberFunctionCandidates(receiver: OxExpression, name: String): Seq[FunctionEntry] = {
