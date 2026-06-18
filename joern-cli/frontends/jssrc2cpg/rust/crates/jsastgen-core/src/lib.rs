@@ -11,11 +11,14 @@ pub fn parse_file(root: &Path, path: &Path) -> Result<Value> {
 }
 
 pub fn parse_source(root: &Path, path: &Path, source: &str) -> Result<Value> {
-    if is_vue_file(path) {
-        return parse_vue_source(root, path, source);
-    }
-    let tree = parse_tree(path, source)?;
-    Ok(file_json(root, path, source, &tree))
+    let mut value = if is_vue_file(path) {
+        parse_vue_source(root, path, source)?
+    } else {
+        let tree = parse_tree(path, source)?;
+        file_json(root, path, source, &tree)
+    };
+    convert_spans_to_utf16(&mut value, source);
+    Ok(value)
 }
 
 fn parse_tree(path: &Path, source: &str) -> Result<Tree> {
@@ -243,9 +246,12 @@ pub fn write_json(path: &Path, value: &Value) -> Result<()> {
 fn file_json(root: &Path, path: &Path, source: &str, tree: &Tree) -> Value {
     let relative_name = relative_name(root, path);
     let program = program_json(tree.root_node(), source);
-    let ast = with_span(
+    let ast = with_span_bounds(
         "File",
-        tree.root_node(),
+        0,
+        Point { row: 0, column: 0 },
+        source.len(),
+        point_for_byte(source, source.len()),
         json!({
             "program": program,
             "comments": [],
@@ -270,9 +276,12 @@ fn relative_name(root: &Path, path: &Path) -> String {
 fn program_json(root: Node, source: &str) -> Value {
     let body = program_body_json(root, source);
 
-    with_span(
+    with_span_bounds(
         "Program",
-        root,
+        0,
+        Point { row: 0, column: 0 },
+        source.len(),
+        point_for_byte(source, source.len()),
         json!({
             "sourceType": "module",
             "interpreter": Value::Null,
@@ -3114,8 +3123,49 @@ fn node_text(node: Node, source: &str) -> String {
     node.utf8_text(source.as_bytes()).unwrap_or("").to_string()
 }
 
+fn convert_spans_to_utf16(value: &mut Value, source: &str) {
+    match value {
+        Value::Object(map) => {
+            if let Some(start) = map.get("start").and_then(Value::as_u64) {
+                map.insert(
+                    "start".into(),
+                    Value::from(utf16_offset_for_byte(source, start as usize)),
+                );
+            }
+            if let Some(end) = map.get("end").and_then(Value::as_u64) {
+                map.insert(
+                    "end".into(),
+                    Value::from(utf16_offset_for_byte(source, end as usize)),
+                );
+            }
+            for child in map.values_mut() {
+                convert_spans_to_utf16(child, source);
+            }
+        }
+        Value::Array(values) => {
+            for child in values {
+                convert_spans_to_utf16(child, source);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn utf16_offset_for_byte(source: &str, byte: usize) -> usize {
+    let clamped = previous_char_boundary(source, byte.min(source.len()));
+    source[..clamped].encode_utf16().count()
+}
+
+fn previous_char_boundary(source: &str, byte: usize) -> usize {
+    let mut boundary = byte.min(source.len());
+    while boundary > 0 && !source.is_char_boundary(boundary) {
+        boundary -= 1;
+    }
+    boundary
+}
+
 fn point_for_byte(source: &str, byte: usize) -> Point {
-    let clamped = byte.min(source.len());
+    let clamped = previous_char_boundary(source, byte.min(source.len()));
     let mut row = 0;
     let mut line_start = 0;
     for (index, value) in source.bytes().take(clamped).enumerate() {
@@ -3126,7 +3176,7 @@ fn point_for_byte(source: &str, byte: usize) -> Point {
     }
     Point {
         row,
-        column: clamped.saturating_sub(line_start),
+        column: source[line_start..clamped].encode_utf16().count(),
     }
 }
 
@@ -3828,6 +3878,33 @@ mod tests {
         assert_eq!(body[6]["source"]["value"], "Qux");
         assert_eq!(body[6]["specifiers"][0]["type"], "ExportNamespaceSpecifier");
         assert_eq!(body[6]["specifiers"][0]["exported"]["name"], "B");
+    }
+
+    #[test]
+    fn emits_utf16_offsets_for_non_ascii_prefixes() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/utf8.js");
+        let json = parse_source(root, path, "// 😼\nlogger.error()\n").expect("parse succeeds");
+        let property = &json["ast"]["program"]["body"][0]["expression"]["callee"]["property"];
+
+        assert_eq!(property["name"], "error");
+        assert_eq!(property["start"], 13);
+        assert_eq!(property["end"], 18);
+        assert_eq!(property["loc"]["start"]["column"], 7);
+        assert_eq!(property["loc"]["end"]["column"], 12);
+    }
+
+    #[test]
+    fn emits_file_and_program_spans_covering_leading_trivia() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/leading.js");
+        let json = parse_source(root, path, "\n// A comment\nfoo();\n").expect("parse succeeds");
+
+        assert_eq!(json["ast"]["start"], 0);
+        assert_eq!(json["ast"]["program"]["start"], 0);
+        assert_eq!(json["ast"]["end"], 21);
+        assert_eq!(json["ast"]["program"]["end"], 21);
+        assert_eq!(json["ast"]["program"]["body"][0]["start"], 14);
     }
 
     #[test]

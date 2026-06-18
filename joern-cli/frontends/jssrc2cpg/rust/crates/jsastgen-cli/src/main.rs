@@ -3,7 +3,7 @@ use clap::Parser;
 use ignore::WalkBuilder;
 use jsastgen_core::{parse_file, write_json};
 use regex::Regex;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 #[derive(Parser, Debug)]
 #[command(name = "astgen", disable_version_flag = true)]
@@ -50,13 +50,13 @@ fn run() -> Result<()> {
         bail!("unsupported astgen type '{}'", args.language_type);
     }
 
-    let exclude = args.exclude_regex.as_deref().map(Regex::new).transpose()?;
-    let files = collect_inputs(
-        &input,
-        exclude.as_ref(),
-        &args.exclude_files,
-        &args.language_type,
-    )?;
+    let exclude_regex = args
+        .exclude_regex
+        .as_deref()
+        .map(compile_exclude_regex)
+        .transpose()?;
+    let exclude = ExcludeMatcher::new(&input, exclude_regex, &args.exclude_files);
+    let files = collect_inputs(&input, &exclude, &args.language_type)?;
     for file in files {
         let target = output_path(&input, &out, &file);
         match parse_file(&input_root(&input), &file).and_then(|value| write_json(&target, &value)) {
@@ -85,12 +85,11 @@ fn normalized_args() -> Vec<String> {
 
 fn collect_inputs(
     input: &Path,
-    exclude: Option<&Regex>,
-    exclude_files: &[PathBuf],
+    exclude: &ExcludeMatcher,
     language_type: &str,
 ) -> Result<Vec<PathBuf>> {
     if input.is_file() {
-        if is_supported_input(input, language_type) && !is_excluded(input, exclude, exclude_files) {
+        if is_supported_input(input, language_type) && !exclude.is_excluded(input) {
             return Ok(vec![input.to_path_buf()]);
         }
         bail!(
@@ -100,13 +99,10 @@ fn collect_inputs(
     }
 
     let mut files = Vec::new();
-    for entry in WalkBuilder::new(input).hidden(false).build() {
+    for entry in WalkBuilder::new(input).hidden(true).build() {
         let entry = entry?;
         let path = entry.path();
-        if path.is_file()
-            && is_supported_input(path, language_type)
-            && !is_excluded(path, exclude, exclude_files)
-        {
+        if path.is_file() && is_supported_input(path, language_type) && !exclude.is_excluded(path) {
             files.push(path.to_path_buf());
         }
     }
@@ -129,9 +125,100 @@ fn is_supported_input(path: &Path, language_type: &str) -> bool {
     }
 }
 
-fn is_excluded(path: &Path, exclude: Option<&Regex>, exclude_files: &[PathBuf]) -> bool {
-    exclude.is_some_and(|re| re.is_match(&path.to_string_lossy()))
-        || exclude_files.iter().any(|excluded| excluded == path)
+struct ExcludeMatcher {
+    input_root: PathBuf,
+    regex: Option<Regex>,
+    paths: Vec<PathBuf>,
+}
+
+impl ExcludeMatcher {
+    fn new(input: &Path, regex: Option<Regex>, exclude_files: &[PathBuf]) -> Self {
+        let input_root = normalize_absolute_path(&input_root(input));
+        let paths = exclude_files
+            .iter()
+            .map(|path| {
+                if path.is_absolute() {
+                    normalize_absolute_path(path)
+                } else {
+                    normalize_absolute_path(&input_root.join(path))
+                }
+            })
+            .collect();
+        Self {
+            input_root,
+            regex,
+            paths,
+        }
+    }
+
+    fn is_excluded(&self, path: &Path) -> bool {
+        let normalized_path = normalize_absolute_path(path);
+        self.is_excluded_by_regex(&normalized_path) || self.is_excluded_by_path(&normalized_path)
+    }
+
+    fn is_excluded_by_regex(&self, path: &Path) -> bool {
+        self.regex.as_ref().is_some_and(|regex| {
+            regex.is_match(&path.to_string_lossy())
+                || path
+                    .strip_prefix(&self.input_root)
+                    .ok()
+                    .is_some_and(|relative| regex.is_match(&relative.to_string_lossy()))
+        })
+    }
+
+    fn is_excluded_by_path(&self, path: &Path) -> bool {
+        self.paths
+            .iter()
+            .any(|excluded| path == excluded || (excluded.is_dir() && path.starts_with(excluded)))
+    }
+}
+
+fn compile_exclude_regex(raw: &str) -> Result<Regex> {
+    let pattern = normalize_java_quoted_regex(raw);
+    Regex::new(&pattern).with_context(|| format!("invalid exclude regex '{raw}'"))
+}
+
+fn normalize_java_quoted_regex(raw: &str) -> String {
+    let mut normalized = String::new();
+    let mut rest = raw;
+    while let Some(start) = rest.find(r"\Q") {
+        normalized.push_str(&rest[..start]);
+        let quoted = &rest[start + 2..];
+        if let Some(end) = quoted.find(r"\E") {
+            normalized.push_str(&regex::escape(&quoted[..end]));
+            rest = &quoted[end + 2..];
+        } else {
+            normalized.push_str(&regex::escape(quoted));
+            rest = "";
+        }
+    }
+    normalized.push_str(rest);
+    normalized
+}
+
+fn normalize_absolute_path(path: &Path) -> PathBuf {
+    let absolute = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        std::env::current_dir()
+            .unwrap_or_else(|_| PathBuf::from("."))
+            .join(path)
+    };
+    normalize_path_components(&absolute)
+}
+
+fn normalize_path_components(path: &Path) -> PathBuf {
+    let mut normalized = PathBuf::new();
+    for component in path.components() {
+        match component {
+            Component::CurDir => {}
+            Component::ParentDir => {
+                normalized.pop();
+            }
+            _ => normalized.push(component.as_os_str()),
+        }
+    }
+    normalized
 }
 
 fn input_root(input: &Path) -> PathBuf {
