@@ -6191,7 +6191,45 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def directFunctionReturnExpressions(function: OxFunctionDecl): Seq[OxExpression] = {
-    function.body.collect { case OxReturn(_, _, Some(expression)) => expression }
+    returnExpressionsInStatements(function.body)
+  }
+
+  private def returnExpressionsInStatements(statements: Seq[OxStatement]): Seq[OxExpression] = {
+    statements.flatMap(returnExpressionsInStatement)
+  }
+
+  private def returnExpressionsInStatement(statement: OxStatement): Seq[OxExpression] = {
+    statement match {
+      case OxReturn(_, _, Some(expression)) =>
+        Seq(expression)
+      case OxTry(_, _, body, catches) =>
+        returnExpressionsInStatements(body) ++ catches.flatMap(catchClause =>
+          returnExpressionsInStatements(catchClause.body)
+        )
+      case OxIf(_, _, initializer, conditionInitializer, _, thenBody, elseBody) =>
+        returnExpressionsInStatements(initializer) ++
+          returnExpressionsInStatements(conditionInitializer) ++
+          returnExpressionsInStatements(thenBody) ++
+          returnExpressionsInStatements(elseBody)
+      case OxWhile(_, _, initializer, conditionInitializer, _, body) =>
+        returnExpressionsInStatements(initializer) ++
+          returnExpressionsInStatements(conditionInitializer) ++
+          returnExpressionsInStatements(body)
+      case OxDoWhile(_, _, _, body) =>
+        returnExpressionsInStatements(body)
+      case OxFor(_, _, initializer, _, _, body) =>
+        returnExpressionsInStatements(initializer) ++ returnExpressionsInStatements(body)
+      case OxLabel(_, _, _, body) =>
+        returnExpressionsInStatements(body)
+      case OxSwitch(_, _, initializer, conditionInitializer, _, body) =>
+        returnExpressionsInStatements(initializer) ++
+          returnExpressionsInStatements(conditionInitializer) ++
+          returnExpressionsInStatements(body)
+      case OxCase(_, _, _, body) =>
+        returnExpressionsInStatements(body)
+      case _ =>
+        Seq.empty
+    }
   }
 
   private def functionTopLevelLocalTypeFullNames(
