@@ -773,6 +773,68 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.codeExact("copyConditionalHidden = seed").l should have size 1
     }
 
+    "ignore explicit constructors for copy list initialization" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Hidden {
+          |public:
+          |  explicit Hidden(int value) {}
+          |};
+          |class Visible {
+          |public:
+          |  Visible(int value) {}
+          |};
+          |class ConditionalVisible {
+          |public:
+          |  explicit(false) ConditionalVisible(int value) {}
+          |};
+          |class ConditionalHidden {
+          |public:
+          |  explicit(true) ConditionalHidden(int value) {}
+          |};
+          |}
+          |Core::Hidden globalDirectList{1};
+          |Core::Hidden globalCopyListHidden = {1};
+          |Core::Visible globalCopyListVisible = {1};
+          |Core::ConditionalVisible globalCopyListConditionalVisible = {1};
+          |Core::ConditionalHidden globalCopyListConditionalHidden = {1};
+          |int use(int seed) {
+          |  Core::Hidden directList{seed};
+          |  Core::Hidden copyListHidden = {seed};
+          |  Core::Visible copyListVisible = {seed};
+          |  Core::ConditionalVisible copyListConditionalVisible = {seed};
+          |  Core::ConditionalHidden copyListConditionalHidden = {seed};
+          |  return seed;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.call.codeExact("globalDirectList = Core.Hidden.Hidden(1)").l should have size 1
+      cpg.call.codeExact("globalCopyListHidden = Core.Hidden.Hidden(1)").l shouldBe Nil
+      cpg.call.codeExact("globalCopyListVisible = Core.Visible.Visible(1)").l should have size 1
+      cpg.call
+        .codeExact("globalCopyListConditionalVisible = Core.ConditionalVisible.ConditionalVisible(1)")
+        .l should have size 1
+      cpg.call
+        .codeExact("globalCopyListConditionalHidden = Core.ConditionalHidden.ConditionalHidden(1)")
+        .l shouldBe Nil
+      cpg.method.nameExact("use").call.codeExact("directList = Core.Hidden.Hidden(seed)").l should have size 1
+      cpg.method.nameExact("use").call.codeExact("copyListHidden = Core.Hidden.Hidden(seed)").l shouldBe Nil
+      cpg.method.nameExact("use").call.codeExact("copyListVisible = Core.Visible.Visible(seed)").l should have size 1
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("copyListConditionalVisible = Core.ConditionalVisible.ConditionalVisible(seed)")
+        .l should have size 1
+      cpg.method
+        .nameExact("use")
+        .call
+        .codeExact("copyListConditionalHidden = Core.ConditionalHidden.ConditionalHidden(seed)")
+        .l shouldBe Nil
+    }
+
     "ignore explicit conversion operators for implicit overload conversions" in {
       val cpg = code(
         """

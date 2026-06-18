@@ -1170,8 +1170,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def globalConstructorAsts(global: OxGlobalVariableDecl, scopeEntry: ScopeEntry): Seq[Ast] = {
     val typeName = scopeEntry.typeFullName
     global.initializer match {
-      case Some(initializer: OxInitializerList) if isConstructorInitializer(typeName, initializer) =>
-        val resolution = constructorInitializerResolution(typeName, initializer)
+      case Some(initializer: OxInitializerList)
+          if isConstructorInitializer(
+            typeName,
+            initializer,
+            globalInitializerAllowsExplicitConstructors(global, initializer)
+          ) =>
+        val resolution =
+          constructorInitializerResolution(
+            typeName,
+            initializer,
+            globalInitializerAllowsExplicitConstructors(global, initializer)
+          )
         resolution.arguments.flatMap(aggregateAssignmentExpressionAsts) ++
           Seq(globalConstructorAssignmentAst(global, scopeEntry, initializer, typeName, resolution)) ++
           temporaryDestructorAstsForConstructorArguments(resolution.arguments, resolution.entry)
@@ -2803,8 +2813,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       )
     val initializationAsts = local.initializer match {
       case Some(initializer: OxInitializerList)
-          if useConstructorInitializers && isConstructorInitializer(typeName, initializer) =>
-        val resolution = constructorInitializerResolution(typeName, initializer)
+          if useConstructorInitializers && isConstructorInitializer(
+            typeName,
+            initializer,
+            localInitializerAllowsExplicitConstructors(local, initializer)
+          ) =>
+        val resolution =
+          constructorInitializerResolution(
+            typeName,
+            initializer,
+            localInitializerAllowsExplicitConstructors(local, initializer)
+          )
         resolution.arguments.flatMap(aggregateAssignmentExpressionAsts) ++ Seq(
           constructorAssignmentAst(local, initializer, typeName, resolution)
         ) ++
@@ -3686,6 +3705,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     !localInitializerPrefix(local, initializerList).endsWith("=")
   }
 
+  private def isDirectListInitializer(global: OxGlobalVariableDecl, initializerList: OxInitializerList): Boolean = {
+    val initializerIndex = global.code.lastIndexOf(initializerList.code)
+    initializerIndex >= 0 && !global.code.take(initializerIndex).trim.endsWith("=")
+  }
+
+  private def localInitializerAllowsExplicitConstructors(
+    local: OxLocalDecl,
+    initializerList: OxInitializerList
+  ): Boolean = {
+    !initializerList.code.trim.startsWith("{") || isDirectListInitializer(local, initializerList)
+  }
+
+  private def globalInitializerAllowsExplicitConstructors(
+    global: OxGlobalVariableDecl,
+    initializerList: OxInitializerList
+  ): Boolean = {
+    !initializerList.code.trim.startsWith("{") || isDirectListInitializer(global, initializerList)
+  }
+
   private def typeFullNameWithStringLiteralLength(typeName: String, initializer: Option[OxExpression]): String = {
     val explicitType = normalizeType(typeName)
     initializer match {
@@ -3751,11 +3789,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     (missing ++ Seq(typeName)).mkString(" ").trim
   }
 
-  private def isConstructorInitializer(typeName: String, initializer: OxInitializerList): Boolean = {
+  private def isConstructorInitializer(
+    typeName: String,
+    initializer: OxInitializerList,
+    includeExplicitConstructors: Boolean = true
+  ): Boolean = {
     val initializerCode = initializer.code.trim
+    val hasBracedConstructor =
+      initializerCode.startsWith("{") &&
+        constructorInitializerResolution(typeName, initializer, includeExplicitConstructors).entry.isDefined
     aggregateTypeFullNames.contains(typeName) &&
-    (initializerCode.startsWith("(") || (initializerCode
-      .startsWith("{") && constructorInitializerResolution(typeName, initializer).entry.isDefined))
+    (initializerCode.startsWith("(") || hasBracedConstructor)
   }
 
   private def isCopyConstructorInitializer(typeName: String, initializer: OxExpression): Boolean = {
@@ -3916,29 +3960,36 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def constructorInitializerResolution(
     typeName: String,
-    initializer: OxInitializerList
+    initializer: OxInitializerList,
+    includeExplicitConstructors: Boolean = true
   ): ConstructorInitializerResolution = {
-    val initializerListEntry = initializerListConstructorEntry(typeName, initializer)
+    val initializerListEntry = initializerListConstructorEntry(typeName, initializer, includeExplicitConstructors)
     initializerListEntry match {
       case Some(entry) =>
         ConstructorInitializerResolution(Seq(initializer), Option(entry), preserveInitializerListCode = true)
       case None =>
-        ConstructorInitializerResolution(initializer.elements, constructorEntry(typeName, initializer.elements))
+        ConstructorInitializerResolution(
+          initializer.elements,
+          constructorEntry(typeName, initializer.elements, includeExplicitConstructors)
+        )
     }
   }
 
   private def initializerListConstructorEntry(
     typeName: String,
-    initializer: OxInitializerList
+    initializer: OxInitializerList,
+    includeExplicitConstructors: Boolean = true
   ): Option[FunctionEntry] = {
     Option
       .when(initializer.code.trim.startsWith("{")) {
-        val candidates = constructorEntriesForType(typeName).filter { entry =>
-          entry.function.parameters match {
-            case Seq(parameter) => isStdInitializerListType(parameter.typeName)
-            case _              => false
+        val candidates = constructorEntriesForType(typeName)
+          .filter(entry => includeExplicitConstructors || !functionHasExplicitSpecifier(entry.function))
+          .filter { entry =>
+            entry.function.parameters match {
+              case Seq(parameter) => isStdInitializerListType(parameter.typeName)
+              case _              => false
+            }
           }
-        }
         selectFunctionEntry(candidates, Some(Seq(initializer)))
       }
       .flatten
