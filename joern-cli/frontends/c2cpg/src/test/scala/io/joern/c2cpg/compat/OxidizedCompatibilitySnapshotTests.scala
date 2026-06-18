@@ -962,6 +962,36 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("guard.~Widget()", "outer.~Widget()", "scoped.~Widget()")
     }
 
+    "capture C++ local array default constructors and destructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |struct Defaulted {
+          |  int value;
+          |  ~Defaulted();
+          |};
+          |}
+          |int localArrays() {
+          |  Core::Defaulted slots[2];
+          |  return 0;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.fullNameExact("Core.Defaulted.Defaulted:void()").signature.l shouldBe List("void()")
+      cpg.method.nameExact("localArrays").local.nameExact("slots").typeFullName.l shouldBe List("Core.Defaulted[]")
+      cpg.method.nameExact("localArrays").call.nameExact("Defaulted").code.l shouldBe
+        List("Core.Defaulted.Defaulted()", "Core.Defaulted.Defaulted()")
+      cpg.method.nameExact("localArrays").call.nameExact(Operators.assignment).code.l.filterNot(_.startsWith("<tmp>")) shouldBe
+        List(
+          "slots[0] = Core.Defaulted.Defaulted()",
+          "slots[1] = Core.Defaulted.Defaulted()"
+        )
+      cpg.method.nameExact("localArrays").call.nameExact("~Defaulted").code.l shouldBe
+        List("slots[1].~Defaulted()", "slots[0].~Defaulted()")
+    }
+
     "capture C++ default subobject constructors" in {
       val cpg = code(
         """
