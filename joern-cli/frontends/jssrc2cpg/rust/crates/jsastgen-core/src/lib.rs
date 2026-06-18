@@ -89,6 +89,7 @@ fn stmt_json(node: Node, source: &str) -> Value {
         "if_statement" => if_statement_json(node, source),
         "while_statement" => while_statement_json(node, source),
         "do_statement" => do_while_statement_json(node, source),
+        "for_statement" => for_statement_json(node, source),
         "break_statement" => jump_statement_json("BreakStatement", node, source),
         "continue_statement" => jump_statement_json("ContinueStatement", node, source),
         "try_statement" => try_statement_json(node, source),
@@ -114,6 +115,7 @@ fn expr_json(node: Node, source: &str) -> Value {
         "assignment_expression" | "augmented_assignment_expression" => {
             assignment_expression_json(node, source)
         }
+        "update_expression" => update_expression_json(node, source),
         "ternary_expression" => conditional_expression_json(node, source),
         "call_expression" => call_expression_json(node, source),
         "member_expression" => member_expression_json(node, source),
@@ -288,6 +290,49 @@ fn do_while_statement_json(node: Node, source: &str) -> Value {
     )
 }
 
+fn for_statement_json(node: Node, source: &str) -> Value {
+    let init = node
+        .child_by_field_name("initializer")
+        .and_then(|child| non_empty_stmt_or_expr_json(child, source))
+        .unwrap_or(Value::Null);
+    let test = node
+        .child_by_field_name("condition")
+        .and_then(|child| non_empty_stmt_or_expr_json(child, source))
+        .unwrap_or(Value::Null);
+    let update = node
+        .child_by_field_name("increment")
+        .and_then(|child| non_empty_stmt_or_expr_json(child, source))
+        .unwrap_or(Value::Null);
+    let body = node
+        .child_by_field_name("body")
+        .map(|child| stmt_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        "ForStatement",
+        node,
+        json!({
+            "init": init,
+            "test": test,
+            "update": update,
+            "body": body
+        }),
+    )
+}
+
+fn non_empty_stmt_or_expr_json(node: Node, source: &str) -> Option<Value> {
+    if node.kind() == "empty_statement" {
+        None
+    } else if matches!(
+        node.kind(),
+        "lexical_declaration" | "variable_declaration" | "function_declaration"
+    ) {
+        Some(stmt_json(node, source))
+    } else {
+        Some(expr_json(node, source))
+    }
+}
+
 fn jump_statement_json(kind: &str, node: Node, source: &str) -> Value {
     let label = node
         .child_by_field_name("label")
@@ -397,6 +442,31 @@ fn assignment_expression_json(node: Node, source: &str) -> Value {
             "left": left,
             "operator": operator,
             "right": right
+        }),
+    )
+}
+
+fn update_expression_json(node: Node, source: &str) -> Value {
+    let argument = node
+        .child_by_field_name("argument")
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let operator = node
+        .child_by_field_name("operator")
+        .map(|child| node_text(child, source))
+        .unwrap_or_else(|| infer_operator(node, source));
+    let prefix = node
+        .child(0)
+        .map(|child| !child.is_named() && node_text(child, source) == operator)
+        .unwrap_or(false);
+
+    with_span(
+        "UpdateExpression",
+        node,
+        json!({
+            "argument": argument,
+            "operator": operator,
+            "prefix": prefix
         }),
     )
 }
@@ -1075,6 +1145,33 @@ mod tests {
         assert_eq!(do_stmt["test"]["name"], "ok");
         assert_eq!(do_stmt["body"]["body"][0]["type"], "ContinueStatement");
         assert_eq!(do_stmt["body"]["body"][0]["label"]["name"], "loop1");
+    }
+
+    #[test]
+    fn emits_classic_for_loops_and_update_expressions() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(
+            root,
+            path,
+            "for (x = 0; x < 1; x++) { z += 1; }\nfor (;;) {}\n",
+        )
+        .expect("parse succeeds");
+
+        let for_stmt = &json["ast"]["program"]["body"][0];
+        assert_eq!(for_stmt["type"], "ForStatement");
+        assert_eq!(for_stmt["init"]["type"], "AssignmentExpression");
+        assert_eq!(for_stmt["test"]["type"], "BinaryExpression");
+        assert_eq!(for_stmt["update"]["type"], "UpdateExpression");
+        assert_eq!(for_stmt["update"]["operator"], "++");
+        assert_eq!(for_stmt["update"]["prefix"], false);
+        assert_eq!(for_stmt["body"]["body"][0]["expression"]["operator"], "+=");
+
+        let empty_for = &json["ast"]["program"]["body"][1];
+        assert_eq!(empty_for["type"], "ForStatement");
+        assert_eq!(empty_for["init"], Value::Null);
+        assert_eq!(empty_for["test"], Value::Null);
+        assert_eq!(empty_for["update"], Value::Null);
     }
 
     #[test]
