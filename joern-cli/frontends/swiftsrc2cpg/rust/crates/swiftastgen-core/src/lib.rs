@@ -267,8 +267,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let type_annotation_node = self.immediate_named_child_kind(node, "type_annotation");
         let value_node = self.field_child(node, "value");
 
-        let mut binding_children =
-            vec![self.with_name(self.identifier_pattern(pattern_node)?, "pattern")];
+        let mut binding_children = vec![self.with_name(self.pattern(pattern_node)?, "pattern")];
         if let Some(type_node) = type_annotation_node {
             binding_children
                 .push(self.with_name(self.type_annotation(type_node)?, "typeAnnotation"));
@@ -322,6 +321,25 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn pattern(&self, node: Node<'a>) -> Result<Value> {
+        match node.kind() {
+            "pattern" if self.immediate_child_kind(node, "(").is_some() => self.tuple_pattern(node),
+            "pattern" => {
+                let child = named_children(node)
+                    .find(|child| {
+                        matches!(
+                            child.kind(),
+                            "identifier" | "pattern" | "simple_identifier" | "wildcard_pattern"
+                        )
+                    })
+                    .context("pattern is empty")?;
+                self.pattern(child)
+            }
+            "identifier" | "simple_identifier" => self.identifier_pattern(node),
+            other => bail!("unsupported Swift pattern node '{other}'"),
+        }
+    }
+
     fn identifier_pattern(&self, node: Node<'a>) -> Result<Value> {
         let identifier = self
             .first_descendant_kind(node, "simple_identifier")
@@ -357,6 +375,56 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             vec![
                 self.with_name(self.token_for_node(colon, "colon"), "colon"),
                 self.with_name(self.identifier_type(type_node)?, "type"),
+            ],
+        ))
+    }
+
+    fn tuple_pattern(&self, node: Node<'a>) -> Result<Value> {
+        let left_paren = self
+            .immediate_child_kind(node, "(")
+            .context("tuple pattern is missing '('")?;
+        let right_paren = self
+            .immediate_child_kind(node, ")")
+            .context("tuple pattern is missing ')'")?;
+        let mut elements = Vec::new();
+        for child in named_children(node).filter(|child| {
+            child.start_byte() >= left_paren.end_byte()
+                && child.end_byte() <= right_paren.start_byte()
+        }) {
+            if child.kind() == "type_annotation" {
+                continue;
+            }
+            let trailing_comma = self.trailing_delimiter(node, child, ",");
+            let mut element_children = vec![self.with_name(self.pattern(child)?, "pattern")];
+            if let Some(comma) = trailing_comma {
+                element_children
+                    .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+            }
+            let element_end = trailing_comma.map_or(child.end_byte(), |comma| comma.end_byte());
+            elements.push(self.with_name(
+                self.syntax_node(
+                    "TuplePatternElementSyntax",
+                    self.range_from_offsets(child.start_byte(), element_end),
+                    element_children,
+                ),
+                "",
+            ));
+        }
+
+        Ok(self.syntax_node(
+            "TuplePatternSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+                self.with_name(
+                    self.syntax_node(
+                        "TuplePatternElementListSyntax",
+                        self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
+                        elements,
+                    ),
+                    "elements",
+                ),
+                self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
             ],
         ))
     }
@@ -832,7 +900,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     self.token_for_node(for_keyword, "keyword(SwiftSyntax.Keyword.for)"),
                     "forKeyword",
                 ),
-                self.with_name(self.identifier_pattern(pattern)?, "pattern"),
+                self.with_name(self.pattern(pattern)?, "pattern"),
                 self.with_name(
                     self.token_for_node(in_keyword, "keyword(SwiftSyntax.Keyword.in)"),
                     "inKeyword",
@@ -1323,6 +1391,36 @@ mod tests {
         assert_eq!(
             statements[1]["children"][0]["children"][3]["children"][0]["children"][1]["nodeType"],
             "TypeAnnotationSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_tuple_variable_declaration_pattern() {
+        let source = "var (a, b): Int = foo()\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let tuple = find_first_node_type(&value, "TuplePatternSyntax").unwrap();
+        assert_eq!(tuple["children"][0]["tokenKind"], "leftParen");
+        assert_eq!(
+            tuple["children"][1]["nodeType"],
+            "TuplePatternElementListSyntax"
+        );
+        let elements = tuple["children"][1]["children"].as_array().unwrap();
+        assert_eq!(elements.len(), 2);
+        assert_eq!(
+            elements[0]["children"][0]["nodeType"],
+            "IdentifierPatternSyntax"
+        );
+        assert_eq!(elements[0]["children"][1]["tokenKind"], "comma");
+        assert_eq!(
+            elements[1]["children"][0]["nodeType"],
+            "IdentifierPatternSyntax"
+        );
+        assert_eq!(tuple["children"][2]["tokenKind"], "rightParen");
+        let binding = find_first_node_type(&value, "PatternBindingSyntax").unwrap();
+        assert_eq!(binding["children"][1]["nodeType"], "TypeAnnotationSyntax");
+        assert_eq!(
+            binding["children"][2]["nodeType"],
+            "InitializerClauseSyntax"
         );
     }
 
