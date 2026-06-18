@@ -3662,6 +3662,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     }
   }
 
+  private def indexedElementTypeFullName(typeName: String): Option[String] = {
+    val normalized = normalizeType(resolveAliasType(typeName))
+    arrayElementTypeFullName(normalized)
+      .orElse(Option.when(normalized.endsWith("*") && !isFunctionPointerType(normalized))(normalized.stripSuffix("*")))
+  }
+
   private def localDeclarationCode(local: OxLocalDecl): String = {
     val code = local.initializer match {
       case Some(initializer) =>
@@ -4977,7 +4983,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             OxOrigin(indexAccess),
             indexAccess.code,
             operatorName,
-            Seq(expressionAst(indexAccess.base), expressionAst(indexAccess.index))
+            Seq(expressionAst(indexAccess.base), expressionAst(indexAccess.index)),
+            registerType(expressionTypeFullName(indexAccess).getOrElse(Defines.Any))
           )
         }
       case initializerList: OxInitializerList =>
@@ -6683,7 +6690,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           functionSemanticReturnTypeFullNameForArgumentInfos(targetEntry, argumentInfos, Option(receiverTypeFullName))
         }
       }
-      .orElse(baseTypeFullName.map(_.stripSuffix("[]")))
+      .orElse(baseTypeFullName.flatMap(indexedElementTypeFullName))
   }
 
   private def functionScopedInitializerListTypeFullName(
@@ -7058,12 +7065,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def expressionTypeFullName(expression: OxExpression): Option[String] = {
-    if (expressionTypeFullNameCache.containsKey(expression)) {
-      expressionTypeFullNameCache.get(expression)
-    } else {
-      val typeFullName = expressionTypeFullNameUncached(expression)
-      expressionTypeFullNameCache.put(expression, typeFullName)
-      typeFullName
+    Option(expressionTypeFullNameCache.get(expression)).flatten match {
+      case resolved @ Some(_) => resolved
+      case None =>
+        val typeFullName = expressionTypeFullNameUncached(expression)
+        if (typeFullName.isDefined) {
+          expressionTypeFullNameCache.put(expression, typeFullName)
+        }
+        typeFullName
     }
   }
 
@@ -7103,7 +7112,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           .map(target =>
             functionSemanticReturnTypeFullName(target.entry, target.arguments, receiverTypeFullName(target))
           )
-          .orElse(expressionTypeFullName(indexAccess.base).map(_.stripSuffix("[]")))
+          .orElse(expressionTypeFullName(indexAccess.base).flatMap(indexedElementTypeFullName))
       case initializerList: OxInitializerList =>
         initializerListTypeFullName(initializerList)
       case call: OxCall =>
