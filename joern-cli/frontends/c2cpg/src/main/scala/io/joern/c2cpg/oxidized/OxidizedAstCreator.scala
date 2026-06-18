@@ -41,6 +41,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private val CxxArithmeticTypes = Set(
     "bool",
     "char",
+    "wchar_t",
+    "char8_t",
+    "char16_t",
+    "char32_t",
     "signed char",
     "unsigned char",
     "short",
@@ -56,7 +60,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     "long double"
   )
   private val CxxIntegralPromotionSources =
-    Set("bool", "char", "signed char", "unsigned char", "short", "unsigned short")
+    Set("bool", "char", "wchar_t", "char8_t", "char16_t", "signed char", "unsigned char", "short", "unsigned short")
 
   private final case class LambdaInfo(
     name: String,
@@ -8399,7 +8403,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case "nullptr"                             => registerType("std.nullptr_t")
       case literal if isIntegerLiteral(literal)  => registerType(integerLiteralTypeFullName(literal))
       case literal if isFloatingLiteral(literal) => registerType(floatingLiteralTypeFullName(literal))
-      case literal if isCharLiteral(literal)     => registerType("char")
+      case literal if isCharLiteral(literal)     => registerType(characterLiteralTypeFullName(literal))
       case literal =>
         stringLiteralElementCount(literal)
           .map(count => registerType(s"char[$count]"))
@@ -8408,11 +8412,43 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def isCharLiteral(value: String): Boolean = {
+    characterLiteralPrefixAndBody(value).isDefined
+  }
+
+  private def characterLiteralTypeFullName(value: String): String = {
+    characterLiteralPrefixAndBody(value)
+      .map {
+        case ("L", _)  => "wchar_t"
+        case ("u8", _) => "char8_t"
+        case ("u", _)  => "char16_t"
+        case ("U", _)  => "char32_t"
+        case ("", body) if characterLiteralElementCount(body) > 1 =>
+          "int"
+        case _ =>
+          "char"
+      }
+      .getOrElse(Defines.Any)
+  }
+
+  private def characterLiteralPrefixAndBody(value: String): Option[(String, String)] = {
     val literal  = value.trim
     val prefixes = Seq("u8", "u", "U", "L", "")
-    prefixes.exists { prefix =>
-      literal.startsWith(s"$prefix'") && literal.endsWith("'") && literal.length > prefix.length + 2
+    prefixes.collectFirst {
+      case prefix if literal.startsWith(s"$prefix'") && literal.endsWith("'") && literal.length > prefix.length + 2 =>
+        prefix -> literal.substring(prefix.length + 1, literal.length - 1)
     }
+  }
+
+  private def characterLiteralElementCount(body: String): Int = {
+    var index = 0
+    var count = 0
+    while (index < body.length) {
+      index =
+        if (body.charAt(index) == '\\' && index + 1 < body.length) escapedLiteralEnd(body, index + 1)
+        else index + Character.charCount(body.codePointAt(index))
+      count += 1
+    }
+    count
   }
 
   private def stringLiteralElementCount(value: String): Option[Int] = {
