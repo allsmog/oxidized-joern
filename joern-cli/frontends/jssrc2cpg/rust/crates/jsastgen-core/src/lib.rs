@@ -131,6 +131,7 @@ fn expr_json(node: Node, source: &str) -> Value {
         "array_pattern" => array_pattern_json(node, source),
         "object_pattern" => object_pattern_json(node, source),
         "assignment_pattern" => assignment_pattern_json(node, source),
+        "function_expression" => function_expression_json(node, source),
         "arrow_function" => arrow_function_json(node, source),
         "rest_pattern" => unary_argument_json("RestElement", node, source),
         "spread_element" => unary_argument_json("SpreadElement", node, source),
@@ -174,6 +175,14 @@ fn variable_declarator_json(node: Node, source: &str) -> Value {
 }
 
 fn function_declaration_json(node: Node, source: &str) -> Value {
+    function_like_json("FunctionDeclaration", node, source)
+}
+
+fn function_expression_json(node: Node, source: &str) -> Value {
+    function_like_json("FunctionExpression", node, source)
+}
+
+fn function_like_json(kind: &str, node: Node, source: &str) -> Value {
     let id = field_json(node, "name", source).unwrap_or(Value::Null);
     let params = node
         .child_by_field_name("parameters")
@@ -190,7 +199,7 @@ fn function_declaration_json(node: Node, source: &str) -> Value {
         .unwrap_or_else(|| block_from_node(node));
 
     with_span(
-        "FunctionDeclaration",
+        kind,
         node,
         json!({
             "id": id,
@@ -1656,6 +1665,24 @@ mod tests {
         assert_eq!(id["params"][0]["name"], "x");
         assert_eq!(id["body"]["type"], "BlockStatement");
         assert_eq!(id["expression"], false);
+    }
+
+    #[test]
+    fn emits_function_expressions() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(
+            root,
+            path,
+            "function method() { return function foo(x) { return x; }; }\n",
+        )
+        .expect("parse succeeds");
+
+        let func = &json["ast"]["program"]["body"][0]["body"]["body"][0]["argument"];
+        assert_eq!(func["type"], "FunctionExpression");
+        assert_eq!(func["id"]["name"], "foo");
+        assert_eq!(func["params"][0]["name"], "x");
+        assert_eq!(func["body"]["body"][0]["argument"]["name"], "x");
     }
 
     #[test]
