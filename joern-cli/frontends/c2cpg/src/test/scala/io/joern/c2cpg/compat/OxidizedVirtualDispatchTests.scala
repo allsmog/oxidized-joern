@@ -132,6 +132,34 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
       }
     }
 
+    "prefer const member overloads for const this" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Meter {
+          |public:
+          |  int value() { return 1; }
+          |  int value() const { return 2; }
+          |  int viaMutable() { return value() + this->value(); }
+          |  int viaConst() const { return value() + this->value(); }
+          |};
+          |}
+          |int use() {
+          |  Core::Meter meter;
+          |  return meter.viaMutable() + meter.viaConst();
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.fullNameExact("Core.Meter.viaMutable:int()").call.nameExact("value").methodFullName.l shouldBe
+        List("Core.Meter.value:int()", "Core.Meter.value:int()")
+      cpg.method.fullNameExact("Core.Meter.viaConst:int()<const>").parameter.nameExact("this").typeFullName.l shouldBe
+        List("const Core.Meter*")
+      cpg.method.fullNameExact("Core.Meter.viaConst:int()<const>").call.nameExact("value").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>", "Core.Meter.value:int()<const>")
+    }
+
     "force static dispatch for explicit base-qualified member calls" in {
       val cpg = code(
         """

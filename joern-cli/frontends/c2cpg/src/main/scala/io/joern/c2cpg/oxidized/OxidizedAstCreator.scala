@@ -249,6 +249,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private var currentMethodOwnerTypeFullName: Option[String]                 = None
   private var currentMethodFullName: Option[String]                          = None
   private var currentMethodSimpleName: Option[String]                        = None
+  private var currentMethodIsConst: Option[Boolean]                          = None
   private var currentMethodReturnTypeFullName: Option[String]                = None
   private var typeAliases: Map[String, String]                               = Map.empty
   private var localDestructorScopes: List[Vector[LocalDestructor]]           = Nil
@@ -840,16 +841,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousScope            = scope
     val previousMethodOwner      = currentMethodOwnerTypeFullName
     val previousMethodFullName   = currentMethodFullName
+    val previousMethodIsConst    = currentMethodIsConst
     val previousMethodReturnType = currentMethodReturnTypeFullName
     scope = Map(Defines.This -> ScopeEntry(thisType, thisParameter))
     currentMethodOwnerTypeFullName = Option(typeName)
     currentMethodFullName = Option(fullName)
+    currentMethodIsConst = Option(false)
     currentMethodReturnTypeFullName = Option(Defines.Void)
     val defaultInitializerAsts =
       try {
         constructorPrefixInitializerAsts(typeName, Seq.empty, structDecl.line)
       } finally {
         currentMethodReturnTypeFullName = previousMethodReturnType
+        currentMethodIsConst = previousMethodIsConst
         currentMethodFullName = previousMethodFullName
         currentMethodOwnerTypeFullName = previousMethodOwner
         scope = previousScope
@@ -1405,7 +1409,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val implicitThisParameter = parentTypeOwner
       .filterNot(_ => isStaticMethod)
       .map { ownerTypeFullName =>
-        val thisType = registerType(s"$ownerTypeFullName*")
+        val thisTypeName = if (function.isConst) s"const $ownerTypeFullName*" else s"$ownerTypeFullName*"
+        val thisType     = registerType(thisTypeName)
         val thisNode =
           parameterInNode(
             origin,
@@ -1440,6 +1445,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousMethodOwner      = currentMethodOwnerTypeFullName
     val previousMethodFullName   = currentMethodFullName
     val previousMethodSimpleName = currentMethodSimpleName
+    val previousMethodIsConst    = currentMethodIsConst
     val previousMethodReturnType = currentMethodReturnTypeFullName
     val previousDestructorScopes = localDestructorScopes
     val previousJumpTargets      = jumpCleanupTargets
@@ -1451,6 +1457,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     currentMethodOwnerTypeFullName = parentTypeOwner
     currentMethodFullName = Option(fullName)
     currentMethodSimpleName = Option(simpleName)
+    currentMethodIsConst = Option(function.isConst)
     currentMethodReturnTypeFullName = Option(returnType)
     localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
     jumpCleanupTargets = Nil
@@ -1482,6 +1489,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         jumpCleanupTargets = previousJumpTargets
         gotoLabelCleanupDestructors = previousGotoLabels
         currentMethodReturnTypeFullName = previousMethodReturnType
+        currentMethodIsConst = previousMethodIsConst
         currentMethodSimpleName = previousMethodSimpleName
         currentMethodFullName = previousMethodFullName
         currentMethodOwnerTypeFullName = previousMethodOwner
@@ -5167,6 +5175,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousMethodOwner      = currentMethodOwnerTypeFullName
     val previousMethodFullName   = currentMethodFullName
     val previousMethodSimpleName = currentMethodSimpleName
+    val previousMethodIsConst    = currentMethodIsConst
     val previousMethodReturnType = currentMethodReturnTypeFullName
     val previousDestructorScopes = localDestructorScopes
     val previousJumpTargets      = jumpCleanupTargets
@@ -5177,6 +5186,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     currentMethodOwnerTypeFullName = None
     currentMethodFullName = Option(info.fullName)
     currentMethodSimpleName = Option(info.name)
+    currentMethodIsConst = None
     currentMethodReturnTypeFullName = Option(info.returnType)
     localDestructorScopes = Vector.empty[LocalDestructor] :: Nil
     jumpCleanupTargets = Nil
@@ -5189,6 +5199,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         jumpCleanupTargets = previousJumpTargets
         gotoLabelCleanupDestructors = previousGotoLabels
         currentMethodReturnTypeFullName = previousMethodReturnType
+        currentMethodIsConst = previousMethodIsConst
         currentMethodSimpleName = previousMethodSimpleName
         currentMethodFullName = previousMethodFullName
         currentMethodOwnerTypeFullName = previousMethodOwner
@@ -5450,10 +5461,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def memberFunctionCandidates(receiver: OxExpression, name: String): Seq[FunctionEntry] = {
-    expressionTypeFullName(receiver)
-      .map(receiverAggregateTypeName)
-      .toSeq
-      .flatMap(receiverType => memberFunctionCandidatesForType(receiverType, name))
+    expressionTypeFullName(receiver).toSeq
+      .flatMap(receiverType => memberFunctionCandidatesForReceiverType(receiverType, name))
+  }
+
+  private def memberFunctionCandidatesForReceiverType(
+    receiverTypeFullName: String,
+    name: String
+  ): Seq[FunctionEntry] = {
+    val receiverType = receiverAggregateTypeName(receiverTypeFullName)
+    val candidates   = memberFunctionCandidatesForType(receiverType, name)
+    filterMemberFunctionCandidatesForReceiver(candidates, receiverTypeFullName)
   }
 
   private def memberFunctionCandidatesForType(receiverType: String, name: String): Seq[FunctionEntry] = {
@@ -5464,6 +5482,27 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .map(typeName => memberFunctionCandidatesDeclaredOrUsing(typeName, name))
       .find(_.nonEmpty)
       .getOrElse(Seq.empty)
+  }
+
+  private def filterMemberFunctionCandidatesForReceiver(
+    candidates: Seq[FunctionEntry],
+    receiverTypeFullName: String
+  ): Seq[FunctionEntry] = {
+    if (receiverObjectTypeIsConst(receiverTypeFullName)) {
+      candidates.filter(entry => entry.function.isConst || entry.function.isStatic)
+    } else {
+      val (constMembers, otherMembers) =
+        candidates.partition(entry => entry.function.isConst && !entry.function.isStatic)
+      constMembers ++ otherMembers
+    }
+  }
+
+  private def receiverObjectTypeIsConst(typeName: String): Boolean = {
+    val normalized          = normalizeType(resolveAliasType(typeName))
+    val referencedObject    = stripCxxReference(normalized)
+    val pointerObject       = if (referencedObject.endsWith("*")) referencedObject.dropRight(1) else referencedObject
+    val arrayElementOrValue = pointerObject.stripSuffix("[]")
+    arrayElementOrValue.split("\\s+").contains("const")
   }
 
   private def memberFunctionCandidatesDeclaredOrUsing(typeName: String, name: String): Seq[FunctionEntry] = {
@@ -6119,13 +6158,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def functionEntryForCall(call: OxCall): Option[FunctionEntry] = {
     call.callee match {
       case OxFieldAccess(field, _, _, base) =>
-        val receiverType              = expressionTypeFullName(base).map(receiverAggregateTypeName)
+        val receiverTypeFullName      = expressionTypeFullName(base)
+        val receiverType              = receiverTypeFullName.map(receiverAggregateTypeName)
         val qualifiedMemberCandidates = qualifiedMemberFunctionCandidates(field, receiverType)
-        val unqualifiedMemberCandidates = receiverType.toSeq.flatMap { receiverType =>
-          memberFunctionCandidatesForType(receiverType, field)
+        val unqualifiedMemberCandidates = receiverTypeFullName.toSeq.flatMap { receiverType =>
+          memberFunctionCandidatesForReceiverType(receiverType, field)
         }
-        val candidates =
+        val unfilteredCandidates =
           if (qualifiedMemberCandidates.nonEmpty) qualifiedMemberCandidates else unqualifiedMemberCandidates
+        val candidates = receiverTypeFullName
+          .map(receiverType => filterMemberFunctionCandidatesForReceiver(unfilteredCandidates, receiverType))
+          .getOrElse(unfilteredCandidates)
         selectFunctionEntry(candidates, Some(call.arguments))
       case _ =>
         val lookupName                = stripTemplateArguments(call.name)
@@ -6153,7 +6196,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def currentOwnerFunctionCandidates(name: String): Seq[FunctionEntry] = {
     currentMethodOwnerTypeFullName.toSeq.flatMap { ownerTypeFullName =>
-      memberFunctionCandidatesForType(ownerTypeFullName, name)
+      val receiverType =
+        if (currentMethodIsConst.contains(true)) s"const $ownerTypeFullName*" else s"$ownerTypeFullName*"
+      memberFunctionCandidatesForReceiverType(receiverType, name)
     }
   }
 
