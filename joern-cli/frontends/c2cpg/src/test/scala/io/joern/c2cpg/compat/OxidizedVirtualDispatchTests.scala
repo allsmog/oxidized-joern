@@ -404,6 +404,10 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |template <typename T>
           |auto logicalNot(T value) { return !value; }
           |template <typename T>
+          |auto assignValue(T& target, T value) { return target = value; }
+          |template <typename T>
+          |decltype(auto) assignRef(T& target, T value) { return (target = value); }
+          |template <typename T>
           |decltype(auto) idDecltype(T& value) { return value; }
           |template <typename T>
           |decltype(auto) idDecltypeParen(T value) { return (value); }
@@ -435,6 +439,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::pickNumber(Core::add(1, 2)) +
           |    Core::pickNumber(Core::negate(1)) +
           |    Core::pickBool(Core::logicalNot(true)) +
+          |    Core::pick(Core::assignValue(leaf, Core::makeLeaf())) +
+          |    Core::pick(Core::assignRef(leaf, Core::makeLeaf())) +
           |    Core::pick(Core::idDecltype(leaf)) +
           |    Core::pick(Core::idDecltypeParen(Core::makeLeaf())) +
           |    Core::pick(Core::idDecltypeBranch(true, leaf, leaf)) +
@@ -472,6 +478,10 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("int")
       cpg.method.nameExact("use").call.codeExact("Core::logicalNot(true)").typeFullName.l shouldBe
         List("bool")
+      cpg.method.nameExact("use").call.codeExact("Core::assignValue(leaf, Core::makeLeaf())").typeFullName.l shouldBe
+        List("Core.Leaf")
+      cpg.method.nameExact("use").call.codeExact("Core::assignRef(leaf, Core::makeLeaf())").typeFullName.l shouldBe
+        List("Core.Leaf&")
       cpg.method.nameExact("use").call.codeExact("Core::idDecltype(leaf)").typeFullName.l shouldBe
         List("Core.Leaf&")
       cpg.method.nameExact("use").call.codeExact("Core::idDecltypeParen(Core::makeLeaf())").typeFullName.l shouldBe
@@ -516,6 +526,10 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pickNumber:int(int)")
       cpg.method.nameExact("use").call.codeExact("Core::pickBool(Core::logicalNot(true))").methodFullName.l shouldBe
         List("Core.pickBool:int(bool)")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(Core::assignValue(leaf, Core::makeLeaf()))").methodFullName.l shouldBe
+        List("Core.pick:char(Leaf&&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(Core::assignRef(leaf, Core::makeLeaf()))").methodFullName.l shouldBe
+        List("Core.pick:short(Mid&)")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::idDecltype(leaf))").methodFullName.l shouldBe
         List("Core.pick:short(Mid&)")
       cpg.method
