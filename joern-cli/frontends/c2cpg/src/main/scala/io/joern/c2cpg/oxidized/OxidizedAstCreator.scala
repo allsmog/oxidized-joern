@@ -8656,7 +8656,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     characterLiteralPrefixAndBody(value)
       .map {
         case ("L", _)  => "wchar_t"
-        case ("u8", _) => "char8_t"
+        case ("u8", _) => "char"
         case ("u", _)  => "char16_t"
         case ("U", _)  => "char32_t"
         case ("", body) if characterLiteralElementCount(body) > 1 =>
