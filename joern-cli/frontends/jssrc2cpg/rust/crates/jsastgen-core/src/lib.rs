@@ -325,6 +325,7 @@ fn object_expression_json(node: Node, source: &str) -> Value {
 fn object_property_json(node: Node, source: &str) -> Option<Value> {
     match node.kind() {
         "pair" => Some(object_pair_json(node, source)),
+        "method_definition" => Some(object_method_json(node, source)),
         "spread_element" => Some(unary_argument_json("SpreadElement", node, source)),
         "shorthand_property_identifier" => Some(shorthand_object_property_json(node, source)),
         _ => None,
@@ -347,6 +348,41 @@ fn object_pair_json(node: Node, source: &str) -> Value {
             "shorthand": false
         }),
     )
+}
+
+fn object_method_json(node: Node, source: &str) -> Value {
+    let key_node = node.child_by_field_name("name").unwrap_or(node);
+    let computed = key_node.kind() == "computed_property_name";
+    let key = object_key_json(key_node, source);
+    let params = params_json(node, source);
+    let body = node
+        .child_by_field_name("body")
+        .map(|child| stmt_json(child, source))
+        .unwrap_or_else(|| block_from_node(node));
+
+    with_span(
+        "ObjectMethod",
+        node,
+        json!({
+            "kind": object_method_kind(node, source),
+            "key": key,
+            "params": params,
+            "body": body,
+            "computed": computed,
+            "generator": has_keyword_child(node, source, "*"),
+            "async": has_keyword_child(node, source, "async")
+        }),
+    )
+}
+
+fn object_method_kind(node: Node, source: &str) -> &'static str {
+    if has_keyword_child(node, source, "get") {
+        "get"
+    } else if has_keyword_child(node, source, "set") {
+        "set"
+    } else {
+        "method"
+    }
 }
 
 fn shorthand_object_property_json(node: Node, source: &str) -> Value {
@@ -399,14 +435,24 @@ fn arrow_function_json(node: Node, source: &str) -> Value {
 
 fn arrow_params_json(node: Node, source: &str) -> Vec<Value> {
     if let Some(params_node) = node.child_by_field_name("parameters") {
-        return named_children(params_node)
-            .filter(|child| !is_comment(*child))
-            .map(|child| expr_json(child, source))
-            .collect();
+        return params_from_node(params_node, source);
     }
     node.child_by_field_name("parameter")
         .map(|param| vec![expr_json(param, source)])
         .unwrap_or_default()
+}
+
+fn params_json(node: Node, source: &str) -> Vec<Value> {
+    node.child_by_field_name("parameters")
+        .map(|params_node| params_from_node(params_node, source))
+        .unwrap_or_default()
+}
+
+fn params_from_node(node: Node, source: &str) -> Vec<Value> {
+    named_children(node)
+        .filter(|child| !is_comment(*child))
+        .map(|child| expr_json(child, source))
+        .collect()
 }
 
 fn unary_argument_json(kind: &str, node: Node, source: &str) -> Value {
@@ -769,6 +815,32 @@ mod tests {
 
         assert_eq!(object["properties"][4]["type"], "SpreadElement");
         assert_eq!(object["properties"][4]["argument"]["name"], "rest");
+    }
+
+    #[test]
+    fn emits_object_methods_as_babel_object_methods() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(
+            root,
+            path,
+            "const x = { foo(arg) { return arg; }, [bar]() {} };\n",
+        )
+        .expect("parse succeeds");
+
+        let object = &json["ast"]["program"]["body"][0]["declarations"][0]["init"];
+        let plain = &object["properties"][0];
+        assert_eq!(plain["type"], "ObjectMethod");
+        assert_eq!(plain["kind"], "method");
+        assert_eq!(plain["key"]["name"], "foo");
+        assert_eq!(plain["params"][0]["name"], "arg");
+        assert_eq!(plain["body"]["type"], "BlockStatement");
+        assert_eq!(plain["computed"], false);
+
+        let computed = &object["properties"][1];
+        assert_eq!(computed["type"], "ObjectMethod");
+        assert_eq!(computed["key"]["name"], "bar");
+        assert_eq!(computed["computed"], true);
     }
 
     #[test]
