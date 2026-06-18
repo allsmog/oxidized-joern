@@ -2773,9 +2773,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val aggregateType = resolveAggregateTypeFullName(receiverType).getOrElse(receiverType)
       destructorEntryForType(aggregateType).map { entry =>
         val receiverCode = deleteExpression.argument.code
-        HeapDestructor(s"$receiverCode->${entry.simpleName}()", deleteExpression.line, entry, deleteExpression.argument)
+        val destructorCode =
+          if (isArrayDelete(deleteExpression)) s"$receiverCode[].${entry.simpleName}()"
+          else s"$receiverCode->${entry.simpleName}()"
+        HeapDestructor(destructorCode, deleteExpression.line, entry, deleteExpression.argument)
       }
     }
+  }
+
+  private def isArrayDelete(deleteExpression: OxDelete): Boolean = {
+    deleteExpression.code.trim.startsWith("delete[]")
   }
 
   private def heapDestructorAst(destructor: HeapDestructor): Ast = {

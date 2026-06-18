@@ -2515,6 +2515,35 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("heapDefault").call.nameExact("~Defaulted").code.l shouldBe List("ptr->~Defaulted()")
     }
 
+    "capture C++ heap array constructors and delete destructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |struct Defaulted {
+          |  int value;
+          |  ~Defaulted();
+          |};
+          |}
+          |Core::Defaulted *heapArray(int count) {
+          |  Core::Defaulted *items = new Core::Defaulted[count];
+          |  delete[] items;
+          |  return items;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.fullNameExact("Core.Defaulted.Defaulted:void()").signature.l shouldBe List("void()")
+      cpg.method.nameExact("heapArray").local.nameExact("items").typeFullName.l shouldBe List("Core.Defaulted*")
+      cpg.method.nameExact("heapArray").call.nameExact(Operators.alloc).code.l shouldBe
+        List("new Core::Defaulted[count]")
+      cpg.method.nameExact("heapArray").call.nameExact("Defaulted").code.l shouldBe
+        List("Core.Defaulted.Defaulted()")
+      cpg.method.nameExact("heapArray").call.nameExact("~Defaulted").code.l shouldBe
+        List("items[].~Defaulted()")
+      cpg.method.nameExact("heapArray").call.nameExact(Operators.delete).code.l shouldBe List("delete[] items")
+    }
+
     "prefer C++ initializer-list constructors for braced heap new" in {
       val cpg = code(
         """
