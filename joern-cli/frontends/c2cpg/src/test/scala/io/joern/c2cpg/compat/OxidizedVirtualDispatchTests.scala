@@ -89,11 +89,18 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |  int pick(int value) { return value + 1; }
           |  int callOwn(int& value) { return pick(value); }
           |};
+          |class Reintroduced : public Base {
+          |public:
+          |  using Base::pick;
+          |  int pick(int value) { return value + 2; }
+          |  int callOwn(int& value) { return pick(value); }
+          |};
           |}
           |int use() {
           |  int value = 1;
           |  Core::Derived derived;
-          |  return derived.pick(value) + derived.callOwn(value);
+          |  Core::Reintroduced reintroduced;
+          |  return derived.pick(value) + derived.callOwn(value) + reintroduced.pick(value) + reintroduced.callOwn(value);
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -104,9 +111,22 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
       )
       cpg.method.fullNameExact("Core.Derived.callOwn:int(int&)").call.codeExact("pick(value)").methodFullName.l shouldBe
         List("Core.Derived.pick:int(int)")
+      cpg.method
+        .fullNameExact("Core.Reintroduced.callOwn:int(int&)")
+        .call
+        .codeExact("pick(value)")
+        .methodFullName
+        .l shouldBe
+        List("Core.Base.pick:int(int&)")
       inside(cpg.method.nameExact("use").call.nameExact("pick").codeExact("derived.pick(value)").l) {
         case List(pickCall) =>
           pickCall.methodFullName shouldBe "Core.Derived.pick:int(int)"
+          pickCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+          pickCall.receiver.code.l shouldBe Nil
+      }
+      inside(cpg.method.nameExact("use").call.nameExact("pick").codeExact("reintroduced.pick(value)").l) {
+        case List(pickCall) =>
+          pickCall.methodFullName shouldBe "Core.Base.pick:int(int&)"
           pickCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
           pickCall.receiver.code.l shouldBe Nil
       }

@@ -117,9 +117,20 @@ pub struct StructDecl {
     #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
     pub visible_line: Option<usize>,
     pub base_classes: Vec<String>,
+    #[serde(rename = "usingDeclarations", skip_serializing_if = "Vec::is_empty")]
+    pub using_declarations: Vec<UsingDecl>,
     pub fields: Vec<FieldDecl>,
     #[serde(rename = "nestedDeclarations")]
     pub nested_declarations: Vec<Declaration>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UsingDecl {
+    pub name: String,
+    pub target: String,
+    pub code: String,
+    pub line: usize,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -1549,11 +1560,40 @@ fn parse_struct_with_name(
         source_path: None,
         visible_line: None,
         base_classes: parse_base_classes(node, source),
+        using_declarations: parse_using_declarations(body, source),
         fields: field_nodes
             .into_iter()
             .filter_map(|field| parse_field(field, source))
             .collect(),
         nested_declarations,
+    })
+}
+
+fn parse_using_declarations(node: Node, source: &[u8]) -> Vec<UsingDecl> {
+    named_children(node)
+        .into_iter()
+        .filter(|child| child.kind() == "using_declaration")
+        .filter_map(|child| parse_using_declaration(child, source))
+        .collect()
+}
+
+fn parse_using_declaration(node: Node, source: &[u8]) -> Option<UsingDecl> {
+    let code = node_text(node, source).trim().trim_end_matches(';').trim();
+    let target = code.strip_prefix("using ")?.trim().to_string();
+    if target.is_empty() || target.contains('=') || target.starts_with("namespace ") {
+        return None;
+    }
+    let name = target
+        .split("::")
+        .last()
+        .map(str::trim)
+        .filter(|name| !name.is_empty())?
+        .to_string();
+    Some(UsingDecl {
+        name,
+        target,
+        code: code.to_string(),
+        line: line(node),
     })
 }
 
@@ -5297,6 +5337,7 @@ mod tests {
             Declaration::Function(method)
                 if method.name == "render" && method.signature == "int(int)" && method.is_virtual
         )));
+        assert!(fancy.using_declarations.is_empty());
 
         let invoker = namespace
             .declarations
@@ -5558,6 +5599,48 @@ mod tests {
                 "invoker"
             ]
         );
+    }
+
+    #[test]
+    fn parses_cpp_member_using_declarations() {
+        let sample = r#"
+                namespace Core {
+                class Base {
+                public:
+                  int pick(int& value) { return value; }
+                };
+                class Derived : public Base {
+                public:
+                  using Base::pick;
+                  int pick(int value) { return value + 1; }
+                };
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("member using declaration sample should parse");
+        let namespace = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Namespace(namespace) if namespace.name == "Core" => Some(namespace),
+                _ => None,
+            })
+            .expect("expected Core namespace declaration");
+        let derived = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Struct(struct_decl) if struct_decl.name == "Derived" => {
+                    Some(struct_decl)
+                }
+                _ => None,
+            })
+            .expect("expected Derived class");
+
+        assert_eq!(derived.using_declarations.len(), 1);
+        let using = &derived.using_declarations[0];
+        assert_eq!(using.name, "pick");
+        assert_eq!(using.target, "Base::pick");
+        assert_eq!(using.code, "using Base::pick");
     }
 
     #[test]
