@@ -419,6 +419,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |long pickBool(int value) { return 2; }
           |int pickList(std::initializer_list<int> values) { return 1; }
           |long pickList(long value) { return 2; }
+          |int pickConstLeafPtr(const Leaf* value) { return 1; }
+          |long pickConstLeafPtr(long value) { return 2; }
           |template <typename T>
           |class Holder {
           |public:
@@ -487,6 +489,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |T& ref(T& value) { return value; }
           |template <typename T>
           |const T& cref(const T& value) { return value; }
+          |template <typename T>
+          |const T* cptr(const T* value) { return value; }
           |}
           |long use(Core::Leaf& leaf, const Core::Leaf& constLeaf, Core::Holder<Core::Leaf>& holder) {
           |  Core::Holder<Core::Holder<Core::Leaf>> nestedHolder;
@@ -509,7 +513,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::pick(Core::nestedFirst(nestedHolder)) +
           |    Core::pick(Core::makeExplicit<Core::Leaf>()) +
           |    Core::pick(Core::ref(leaf)) +
-          |    Core::pick(Core::cref(constLeaf));
+          |    Core::pick(Core::cref(constLeaf)) +
+          |    Core::pickConstLeafPtr(Core::cptr(&leaf));
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -563,6 +568,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.Leaf&")
       cpg.method.nameExact("use").call.codeExact("Core::cref(constLeaf)").typeFullName.l shouldBe
         List("const Core.Leaf&")
+      cpg.method.nameExact("use").call.codeExact("Core::cptr(&leaf)").typeFullName.l shouldBe
+        List("const Core.Leaf*")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::id(Core::makeLeaf()))").methodFullName.l shouldBe
         List("Core.pick:char(Leaf&&)")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::idAuto(Core::makeLeaf()))").methodFullName.l shouldBe
@@ -628,6 +635,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pick:short(Mid&)")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::cref(constLeaf))").methodFullName.l shouldBe
         List("Core.pick:long(Mid&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickConstLeafPtr(Core::cptr(&leaf))").methodFullName.l shouldBe
+        List("Core.pickConstLeafPtr:int(Leaf*)")
     }
 
     "prefer const member overloads for const this" in {
