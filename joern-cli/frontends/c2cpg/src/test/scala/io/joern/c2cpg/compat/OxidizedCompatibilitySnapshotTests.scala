@@ -5281,6 +5281,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |Widget nsSource;
           |Widget nsCopied = nsSource;
           |Widget nsSlots[2] = {nsSource};
+          |struct Registry {
+          |  static Widget member;
+          |  static Widget slots[2];
+          |};
+          |Widget Registry::member;
+          |Widget Registry::slots[2] = {Registry::member};
           |}
           |Core::Defaulted::~Defaulted() {}
           |Core::Widget::Widget() {}
@@ -5311,6 +5317,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Core.Widget.Widget(nsSource)",
         "Core.Widget.Widget()",
         "Core.Widget.Widget()",
+        "Core.Widget.Widget(Registry::member)",
+        "Core.Widget.Widget()",
+        "Core.Widget.Widget()",
         "Core.Widget.Widget(7)",
         "Core.Widget.Widget(sourceGlobal)",
         "Core.Widget.Widget(Core::makeWidget())",
@@ -5320,6 +5329,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
       globalMethod.call.nameExact("Widget").codeExact("Core.Widget.Widget(nsSource)").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)")
+      globalMethod
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget(Registry::member)")
+        .methodFullName
+        .l shouldBe List("Core.Widget.Widget:void(Widget&)")
       globalMethod.call.nameExact("Widget").codeExact("Core.Widget.Widget(sourceGlobal)").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)")
       globalMethod
@@ -5341,7 +5356,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "nsCopied = Core.Widget.Widget(nsSource)",
           "nsSlots[0] = Core.Widget.Widget(nsSource)",
           "nsSlots[1] = Core.Widget.Widget()",
-          "nsSource = Core.Widget.Widget()"
+          "nsSource = Core.Widget.Widget()",
+          "Registry::member = Core.Widget.Widget()",
+          "Registry::slots[0] = Core.Widget.Widget(Registry::member)",
+          "Registry::slots[1] = Core.Widget.Widget()"
         )
       globalMethod.call.nameExact("~Defaulted").code.l shouldBe List("implicitGlobal.~Defaulted()")
       globalMethod.call.nameExact("~Widget").code.l shouldBe
@@ -5355,6 +5373,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "copiedGlobal.~Widget()",
           "seededGlobal.~Widget()",
           "sourceGlobal.~Widget()",
+          "Registry::slots[1].~Widget()",
+          "Registry::slots[0].~Widget()",
+          "Registry::member.~Widget()",
           "nsSlots[1].~Widget()",
           "nsSlots[0].~Widget()",
           "nsCopied.~Widget()",
