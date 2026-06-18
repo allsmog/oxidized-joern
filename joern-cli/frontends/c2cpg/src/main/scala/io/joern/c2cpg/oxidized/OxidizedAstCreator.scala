@@ -1261,15 +1261,43 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     if (field.isStatic) {
       Seq.empty
     } else {
-      constructorInvocationInfo(field.typeName, Seq.empty, "").map { info =>
-        val callNode_ = constructorCallNode(OxOrigin(info.code, Option(line)), info)
-        val right =
-          constructorInvocationBlockAst(OxOrigin(info.code, Option(line)), info.typeName, callNode_, Seq.empty)
-        val assignmentCode = s"${Defines.This}->${field.name} = ${info.code}"
-        val left = implicitFieldAccessAst(field.name, line).getOrElse(identifierAst(field.name, field.name, line))
-        assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
-      }.toSeq
+      val arrayConstructorAsts = memberArrayDefaultConstructorAsts(field, line)
+      if (arrayConstructorAsts.nonEmpty) {
+        arrayConstructorAsts
+      } else {
+        constructorInvocationInfo(field.typeName, Seq.empty, "").map { info =>
+          val callNode_ = constructorCallNode(OxOrigin(info.code, Option(line)), info)
+          val right =
+            constructorInvocationBlockAst(OxOrigin(info.code, Option(line)), info.typeName, callNode_, Seq.empty)
+          val assignmentCode = s"${Defines.This}->${field.name} = ${info.code}"
+          val left = implicitFieldAccessAst(field.name, line).getOrElse(identifierAst(field.name, field.name, line))
+          assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
+        }.toSeq
+      }
     }
+  }
+
+  private def memberArrayDefaultConstructorAsts(field: OxFieldDecl, line: Int): Seq[Ast] = {
+    for {
+      count       <- fieldArrayElementCount(field).toSeq
+      elementType <- arrayElementTypeFullName(field.typeName).toSeq
+      info        <- constructorInvocationInfo(elementType, Seq.empty, "").toSeq
+      index       <- 0 until count
+    } yield memberArrayElementConstructorAssignmentAst(field, index, line, info)
+  }
+
+  private def memberArrayElementConstructorAssignmentAst(
+    field: OxFieldDecl,
+    index: Int,
+    line: Int,
+    info: ConstructorInvocationInfo
+  ): Ast = {
+    val elementCode    = s"${Defines.This}->${field.name}[$index]"
+    val assignmentCode = s"$elementCode = ${info.code}"
+    val left           = memberArrayElementAccessAst(field, index, line)
+    val callNode_      = constructorCallNode(OxOrigin(info.code, Option(line)), info)
+    val right = constructorInvocationBlockAst(OxOrigin(info.code, Option(line)), info.typeName, callNode_, Seq.empty)
+    assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
   }
 
   private def constructorInitializerTargetTypeName(
@@ -1452,7 +1480,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       .getOrElse(aggregateFieldsByType.getOrElse(ownerType, Seq.empty))
     val memberDestructorAsts = fields.reverse
       .filterNot(_.isStatic)
-      .flatMap(field => destructorEntryForType(field.typeName).map(entry => memberDestructorAst(field, entry, line)))
+      .flatMap(field =>
+        memberArrayDestructorAsts(field, line) ++
+          destructorEntryForType(field.typeName).map(entry => memberDestructorAst(field, entry, line))
+      )
     val baseDestructorAsts = aggregateBaseTypesByType
       .getOrElse(ownerType, Seq.empty)
       .reverse
@@ -1477,6 +1508,31 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       callNode_,
       base = Option(implicitFieldAccessAst(field.name, line).getOrElse(identifierAst(field.name, field.name, line)))
     )
+  }
+
+  private def memberArrayDestructorAsts(field: OxFieldDecl, line: Int): Seq[Ast] = {
+    for {
+      count       <- fieldArrayElementCount(field).toSeq
+      elementType <- arrayElementTypeFullName(field.typeName).toSeq
+      entry       <- destructorEntryForType(elementType).toSeq
+      index       <- (0 until count).reverse
+    } yield memberArrayElementDestructorAst(field, index, line, entry)
+  }
+
+  private def memberArrayElementDestructorAst(field: OxFieldDecl, index: Int, line: Int, entry: FunctionEntry): Ast = {
+    val receiverCode = s"${Defines.This}->${field.name}[$index]"
+    val code         = s"$receiverCode.${entry.simpleName}()"
+    val callNode_ =
+      callNode(
+        OxOrigin(code, Option(line)),
+        code,
+        entry.simpleName,
+        entry.fullName,
+        DispatchTypes.STATIC_DISPATCH,
+        Option(entry.function.signature),
+        Option(registerType(Defines.Void))
+      )
+    createCallAst(callNode_, base = Option(memberArrayElementAccessAst(field, index, line)))
   }
 
   private def baseDestructorAst(entry: FunctionEntry, line: Int): Ast = {
@@ -1859,6 +1915,32 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val nameIndex = local.code.indexOf(local.name)
     Option
       .when(nameIndex >= 0)(local.code.drop(nameIndex + local.name.length).dropWhile(_.isWhitespace))
+      .filter(_.startsWith("["))
+      .flatMap { suffix =>
+        val endIndex = suffix.indexOf(']')
+        Option.when(endIndex > 1)(suffix.substring(1, endIndex).trim)
+      }
+      .flatMap(rawCount => Try(rawCount.toInt).toOption)
+      .filter(_ > 0)
+  }
+
+  private def memberArrayElementAccessAst(field: OxFieldDecl, index: Int, line: Int): Ast = {
+    val elementCode     = s"${Defines.This}->${field.name}[$index]"
+    val elementTypeName = arrayElementTypeFullName(field.typeName).getOrElse(Defines.Any)
+    val fieldAst = implicitFieldAccessAst(field.name, line).getOrElse(identifierAst(field.name, field.name, line))
+    operatorCallAst(
+      OxOrigin(elementCode, Option(line)),
+      elementCode,
+      Operators.indirectIndexAccess,
+      Seq(fieldAst, expressionAst(OxLiteral(index.toString, index.toString, line))),
+      registerType(elementTypeName)
+    )
+  }
+
+  private def fieldArrayElementCount(field: OxFieldDecl): Option[Int] = {
+    val nameIndex = field.code.indexOf(field.name)
+    Option
+      .when(nameIndex >= 0)(field.code.drop(nameIndex + field.name.length).dropWhile(_.isWhitespace))
       .filter(_.startsWith("["))
       .flatMap { suffix =>
         val endIndex = suffix.indexOf(']')
