@@ -5808,7 +5808,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def argumentAstsForFunctionEntry(entry: FunctionEntry, arguments: Seq[OxExpression]): Seq[Ast] = {
     arguments.zipWithIndex.map { case (argument, index) =>
-      expressionAstWithContextualConversion(argument, entry.function.parameters.lift(index).map(_.typeName))
+      expressionAstWithContextualConversion(argument, entry.function.parameters.lift(index).map(_.semanticTypeName))
     }
   }
 
@@ -6441,7 +6441,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     arityPenalty + candidate.function.parameters
       .zip(argumentInfos)
       .map { case (parameter, argumentInfo) =>
-        typeCompatibilityScore(parameter.typeName, argumentInfo)
+        typeCompatibilityScore(parameter.semanticTypeName, argumentInfo)
       }
       .sum
   }
@@ -6454,8 +6454,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       directScore
     } else {
       contextualConversionOperatorTarget(argumentInfo.expression, Option(parameterTypeName))
-        .map(_ => 2 + referenceValueCategoryScore(parameterTypeName, argumentIsRvalue = true))
-        .filter(_ > 0)
+        .flatMap { target =>
+          val returnType = functionSemanticReturnTypeFullName(target.entry)
+          referenceBindingScore(parameterTypeName, returnType, typeNameIsRvalue(returnType)).map(2 + _)
+        }
         .getOrElse(0)
     }
   }
@@ -6467,27 +6469,61 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   ): Int = {
     val parameterType = overloadComparableType(parameterTypeName)
     val argumentType  = overloadComparableType(argumentTypeName)
-    val baseScore =
-      if (isTemplateParameterComparableType(parameterType)) 2
-      else if (parameterType == Defines.Any || argumentType == Defines.Any) 1
-      else if (parameterType == argumentType) 4
-      else if (parameterType.endsWith(s".$argumentType") || argumentType.endsWith(s".$parameterType")) 3
-      else 0
-    if (baseScore == 0) 0 else baseScore + referenceValueCategoryScore(parameterTypeName, argumentIsRvalue)
+    overloadBaseCompatibilityScore(parameterType, argumentType)
+      .flatMap(baseScore =>
+        referenceBindingScore(parameterTypeName, argumentTypeName, argumentIsRvalue).map(baseScore + _)
+      )
+      .getOrElse(0)
+  }
+
+  private def overloadBaseCompatibilityScore(parameterType: String, argumentType: String): Option[Int] = {
+    if (isTemplateParameterComparableType(parameterType)) Some(20)
+    else if (parameterType == Defines.Any || argumentType == Defines.Any) Some(10)
+    else if (parameterType == argumentType) Some(60)
+    else if (parameterType.endsWith(s".$argumentType") || argumentType.endsWith(s".$parameterType")) Some(55)
+    else {
+      inheritanceDistanceFromArgumentToParameter(argumentType, parameterType)
+        .filter(_ > 0)
+        .map(distance => 50 - math.min(distance, 40))
+    }
+  }
+
+  private def inheritanceDistanceFromArgumentToParameter(argumentType: String, parameterType: String): Option[Int] = {
+    val parameterCandidates = aggregateFullNameCandidates(parameterType)
+    typeAndBaseTypeFullNames(argumentType).zipWithIndex.collectFirst {
+      case (candidate, distance) if parameterCandidates.contains(candidate) => distance
+    }
+  }
+
+  private def aggregateFullNameCandidates(typeName: String): Set[String] = {
+    val aggregateType = receiverAggregateTypeName(typeName)
+    (resolveAggregateTypeFullName(aggregateType).toSeq :+ aggregateType).toSet
   }
 
   private def isTemplateParameterComparableType(typeName: String): Boolean = {
     typeName.matches("[A-Z][0-9]?")
   }
 
-  private def referenceValueCategoryScore(parameterTypeName: String, argumentIsRvalue: Boolean): Int = {
-    val parameterType = normalizeType(resolveAliasType(parameterTypeName))
+  private def referenceBindingScore(
+    parameterTypeName: String,
+    argumentTypeName: String,
+    argumentIsRvalue: Boolean
+  ): Option[Int] = {
+    val parameterType          = normalizeType(resolveAliasType(parameterTypeName))
+    val parameterObjectIsConst = receiverObjectTypeIsConst(parameterType)
+    val argumentObjectIsConst  = receiverObjectTypeIsConst(argumentTypeName)
+    val argumentIsAggregate =
+      resolveAggregateTypeFullName(receiverAggregateTypeName(argumentTypeName)).isDefined
     if (parameterType.endsWith("&&")) {
-      if (argumentIsRvalue) 3 else -3
+      Option.when(argumentIsRvalue && (!argumentObjectIsConst || parameterObjectIsConst))(3)
     } else if (parameterType.endsWith("&")) {
-      if (argumentIsRvalue) 0 else 2
+      Option.when(parameterObjectIsConst || (!argumentObjectIsConst && (!argumentIsRvalue || !argumentIsAggregate))) {
+        if (argumentIsRvalue) 0
+        else if (parameterObjectIsConst && !argumentObjectIsConst) 1
+        else 2
+      }
     } else {
-      0
+      Some(0)
     }
   }
 

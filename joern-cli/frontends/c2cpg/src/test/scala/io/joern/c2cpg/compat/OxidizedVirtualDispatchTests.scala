@@ -132,6 +132,55 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
       }
     }
 
+    "rank overloads by inheritance distance and reference binding" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Base {};
+          |class Mid : public Base {};
+          |class Leaf : public Mid {};
+          |Leaf makeLeaf();
+          |int pick(Base& value) { return 1; }
+          |short pick(Mid& value) { return 2; }
+          |long pick(const Mid& value) { return 3; }
+          |char pick(Leaf&& value) { return 4; }
+          |class Chooser {
+          |public:
+          |  int select(Base& value) { return 1; }
+          |  short select(Mid& value) { return 2; }
+          |  long select(const Mid& value) { return 3; }
+          |  char select(Leaf&& value) { return 4; }
+          |};
+          |}
+          |long use(Core::Leaf& leaf, const Core::Leaf& constLeaf, Core::Mid& mid, Core::Chooser& chooser) {
+          |  return Core::pick(leaf) +
+          |    Core::pick(constLeaf) +
+          |    Core::pick(Core::makeLeaf()) +
+          |    Core::pick(mid) +
+          |    chooser.select(leaf) +
+          |    chooser.select(constLeaf) +
+          |    chooser.select(Core::makeLeaf());
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").call.codeExact("Core::pick(leaf)").methodFullName.l shouldBe
+        List("Core.pick:short(Mid&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(constLeaf)").methodFullName.l shouldBe
+        List("Core.pick:long(Mid&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(Core::makeLeaf())").methodFullName.l shouldBe
+        List("Core.pick:char(Leaf&&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(mid)").methodFullName.l shouldBe
+        List("Core.pick:short(Mid&)")
+      cpg.method.nameExact("use").call.codeExact("chooser.select(leaf)").methodFullName.l shouldBe
+        List("Core.Chooser.select:short(Mid&)")
+      cpg.method.nameExact("use").call.codeExact("chooser.select(constLeaf)").methodFullName.l shouldBe
+        List("Core.Chooser.select:long(Mid&)")
+      cpg.method.nameExact("use").call.codeExact("chooser.select(Core::makeLeaf())").methodFullName.l shouldBe
+        List("Core.Chooser.select:char(Leaf&&)")
+    }
+
     "prefer const member overloads for const this" in {
       val cpg = code(
         """
