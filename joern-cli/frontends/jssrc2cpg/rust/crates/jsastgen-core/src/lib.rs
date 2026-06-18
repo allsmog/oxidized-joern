@@ -2,7 +2,7 @@ use anyhow::{bail, Context, Result};
 use serde_json::{json, Map, Value};
 use std::fs;
 use std::path::Path;
-use tree_sitter::{Node, Parser, Point, Tree};
+use tree_sitter::{Language, Node, Parser, Point, Tree};
 
 pub fn parse_file(root: &Path, path: &Path) -> Result<Value> {
     let content =
@@ -11,19 +11,81 @@ pub fn parse_file(root: &Path, path: &Path) -> Result<Value> {
 }
 
 pub fn parse_source(root: &Path, path: &Path, source: &str) -> Result<Value> {
-    let mut parser = Parser::new();
-    parser
-        .set_language(&tree_sitter_javascript::LANGUAGE.into())
-        .context("initializing JavaScript parser")?;
-    let tree = parser
-        .parse(source, None)
-        .with_context(|| format!("parsing {}", path.display()))?;
+    let tree = parse_tree(path, source)?;
+    Ok(file_json(root, path, source, &tree))
+}
 
-    if tree.root_node().has_error() {
-        bail!("parser reported syntax errors");
+fn parse_tree(path: &Path, source: &str) -> Result<Tree> {
+    let mut last_error = None;
+    for language in language_candidates(path) {
+        let tree = parse_with_language(source, language)
+            .with_context(|| format!("parsing {} as {}", path.display(), language.name()))?;
+        if !tree.root_node().has_error() {
+            return Ok(tree);
+        }
+        last_error = Some(language.name());
     }
 
-    Ok(file_json(root, path, source, &tree))
+    if let Some(language) = last_error {
+        bail!("parser reported syntax errors after trying {language}");
+    }
+    bail!("parser reported syntax errors");
+}
+
+fn parse_with_language(source: &str, language: SourceLanguage) -> Result<Tree> {
+    let mut parser = Parser::new();
+    parser
+        .set_language(&language.language())
+        .with_context(|| format!("initializing {} parser", language.name()))?;
+    parser
+        .parse(source, None)
+        .context("parser returned no tree")
+}
+
+#[derive(Clone, Copy)]
+enum SourceLanguage {
+    JavaScript,
+    TypeScript,
+    Tsx,
+}
+
+impl SourceLanguage {
+    fn language(self) -> Language {
+        match self {
+            SourceLanguage::JavaScript => tree_sitter_javascript::LANGUAGE.into(),
+            SourceLanguage::TypeScript => tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
+            SourceLanguage::Tsx => tree_sitter_typescript::LANGUAGE_TSX.into(),
+        }
+    }
+
+    fn name(self) -> &'static str {
+        match self {
+            SourceLanguage::JavaScript => "JavaScript",
+            SourceLanguage::TypeScript => "TypeScript",
+            SourceLanguage::Tsx => "TSX",
+        }
+    }
+}
+
+fn language_candidates(path: &Path) -> Vec<SourceLanguage> {
+    match path.extension().and_then(|x| x.to_str()) {
+        Some("ts") => vec![SourceLanguage::TypeScript, SourceLanguage::JavaScript],
+        Some("tsx") => vec![
+            SourceLanguage::Tsx,
+            SourceLanguage::TypeScript,
+            SourceLanguage::JavaScript,
+        ],
+        Some("jsx") => vec![
+            SourceLanguage::JavaScript,
+            SourceLanguage::Tsx,
+            SourceLanguage::TypeScript,
+        ],
+        _ => vec![
+            SourceLanguage::JavaScript,
+            SourceLanguage::TypeScript,
+            SourceLanguage::Tsx,
+        ],
+    }
 }
 
 pub fn write_json(path: &Path, value: &Value) -> Result<()> {
@@ -84,6 +146,7 @@ fn stmt_json(node: Node, source: &str) -> Value {
     match node.kind() {
         "lexical_declaration" | "variable_declaration" => variable_declaration_json(node, source),
         "function_declaration" => function_declaration_json(node, source),
+        "class_declaration" => class_declaration_json(node, source),
         "statement_block" => block_statement_json(node, source),
         "return_statement" => return_statement_json(node, source),
         "if_statement" => if_statement_json(node, source),
@@ -107,7 +170,9 @@ fn stmt_json(node: Node, source: &str) -> Value {
 fn expr_json(node: Node, source: &str) -> Value {
     match node.kind() {
         "identifier"
+        | "type_identifier"
         | "property_identifier"
+        | "private_property_identifier"
         | "statement_identifier"
         | "shorthand_property_identifier_pattern" => identifier_json(node, source),
         "number" => numeric_literal_json(node, source),
@@ -124,6 +189,7 @@ fn expr_json(node: Node, source: &str) -> Value {
         "update_expression" => update_expression_json(node, source),
         "ternary_expression" => conditional_expression_json(node, source),
         "call_expression" => call_expression_json(node, source),
+        "new_expression" => new_expression_json(node, source),
         "member_expression" => member_expression_json(node, source),
         "subscript_expression" => subscript_expression_json(node, source),
         "array" => array_expression_json(node, source),
@@ -133,6 +199,10 @@ fn expr_json(node: Node, source: &str) -> Value {
         "assignment_pattern" => assignment_pattern_json(node, source),
         "function_expression" => function_expression_json(node, source),
         "arrow_function" => arrow_function_json(node, source),
+        "class" => class_expression_json(node, source),
+        "non_null_expression" => ts_non_null_expression_json(node, source),
+        "required_parameter" | "optional_parameter" => parameter_json(node, source),
+        "sequence_expression" => sequence_expression_json(node, source),
         "rest_pattern" => unary_argument_json("RestElement", node, source),
         "spread_element" => unary_argument_json("SpreadElement", node, source),
         "parenthesized_expression" => node
@@ -180,6 +250,84 @@ fn function_declaration_json(node: Node, source: &str) -> Value {
 
 fn function_expression_json(node: Node, source: &str) -> Value {
     function_like_json("FunctionExpression", node, source)
+}
+
+fn class_declaration_json(node: Node, source: &str) -> Value {
+    class_like_json("ClassDeclaration", node, source)
+}
+
+fn class_expression_json(node: Node, source: &str) -> Value {
+    class_like_json("ClassExpression", node, source)
+}
+
+fn class_like_json(kind: &str, node: Node, source: &str) -> Value {
+    let id = node
+        .child_by_field_name("name")
+        .map(|child| identifier_json(child, source))
+        .unwrap_or(Value::Null);
+    let body = node
+        .child_by_field_name("body")
+        .map(|child| class_body_json(child, source))
+        .unwrap_or_else(|| with_span("ClassBody", node, json!({ "body": [] })));
+    let super_class = node
+        .child_by_field_name("superclass")
+        .map(|child| expr_json(child, source))
+        .unwrap_or(Value::Null);
+
+    with_span(
+        kind,
+        node,
+        json!({
+            "id": id,
+            "superClass": super_class,
+            "body": body,
+            "decorators": [],
+            "implements": [],
+            "mixins": []
+        }),
+    )
+}
+
+fn class_body_json(node: Node, source: &str) -> Value {
+    let body = named_children(node)
+        .filter_map(|child| class_member_json(child, source))
+        .collect::<Vec<_>>();
+
+    with_span("ClassBody", node, json!({ "body": body }))
+}
+
+fn class_member_json(node: Node, source: &str) -> Option<Value> {
+    match node.kind() {
+        "method_definition" => Some(class_method_json(node, source)),
+        _ => None,
+    }
+}
+
+fn class_method_json(node: Node, source: &str) -> Value {
+    let key_node = node.child_by_field_name("name").unwrap_or(node);
+    let computed = key_node.kind() == "computed_property_name";
+    let key = object_key_json(key_node, source);
+    let params = params_json(node, source);
+    let body = node
+        .child_by_field_name("body")
+        .map(|child| stmt_json(child, source))
+        .unwrap_or_else(|| block_from_node(node));
+
+    with_span(
+        "ClassMethod",
+        node,
+        json!({
+            "kind": object_method_kind(node, source),
+            "key": key,
+            "id": Value::Null,
+            "params": params,
+            "body": body,
+            "computed": computed,
+            "static": has_keyword_child(node, source, "static"),
+            "generator": has_keyword_child(node, source, "*"),
+            "async": has_keyword_child(node, source, "async")
+        }),
+    )
 }
 
 fn function_like_json(kind: &str, node: Node, source: &str) -> Value {
@@ -663,7 +811,61 @@ fn conditional_expression_json(node: Node, source: &str) -> Value {
     )
 }
 
+fn ts_non_null_expression_json(node: Node, source: &str) -> Value {
+    let expression = node
+        .named_child(0)
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        "TSNonNullExpression",
+        node,
+        json!({ "expression": expression }),
+    )
+}
+
+fn sequence_expression_json(node: Node, source: &str) -> Value {
+    let expressions = named_children(node)
+        .map(|child| expr_json(child, source))
+        .collect::<Vec<_>>();
+
+    with_span(
+        "SequenceExpression",
+        node,
+        json!({ "expressions": expressions }),
+    )
+}
+
+fn parameter_json(node: Node, source: &str) -> Value {
+    let left = node
+        .child_by_field_name("pattern")
+        .or_else(|| node.child_by_field_name("name"))
+        .or_else(|| node.named_child(0))
+        .map(|child| pattern_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+
+    if let Some(right) = node.child_by_field_name("value") {
+        return with_span(
+            "AssignmentPattern",
+            node,
+            json!({
+                "left": left,
+                "right": expr_json(right, source)
+            }),
+        );
+    }
+
+    left
+}
+
 fn call_expression_json(node: Node, source: &str) -> Value {
+    if node
+        .child_by_field_name("arguments")
+        .is_some_and(|child| child.kind() == "template_string")
+    {
+        return tagged_template_expression_json(node, source);
+    }
+
     let callee = node
         .child_by_field_name("function")
         .map(|child| expr_json(child, source))
@@ -684,6 +886,50 @@ fn call_expression_json(node: Node, source: &str) -> Value {
             "callee": callee,
             "arguments": arguments,
             "optional": false
+        }),
+    )
+}
+
+fn tagged_template_expression_json(node: Node, source: &str) -> Value {
+    let tag = node
+        .child_by_field_name("function")
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let quasi = node
+        .child_by_field_name("arguments")
+        .map(|child| template_literal_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        "TaggedTemplateExpression",
+        node,
+        json!({
+            "tag": tag,
+            "quasi": quasi
+        }),
+    )
+}
+
+fn new_expression_json(node: Node, source: &str) -> Value {
+    let callee = node
+        .child_by_field_name("constructor")
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let arguments = node
+        .child_by_field_name("arguments")
+        .map(|args_node| {
+            named_children(args_node)
+                .map(|child| expr_json(child, source))
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+
+    with_span(
+        "NewExpression",
+        node,
+        json!({
+            "callee": callee,
+            "arguments": arguments
         }),
     )
 }
@@ -1040,10 +1286,70 @@ fn string_literal_json(node: Node, source: &str) -> Value {
 
 fn template_string_json(node: Node, source: &str) -> Value {
     if named_children(node).any(|child| child.kind() == "template_substitution") {
-        noop_json(node)
+        template_literal_json(node, source)
     } else {
         string_literal_json(node, source)
     }
+}
+
+fn template_literal_json(node: Node, source: &str) -> Value {
+    let substitutions = named_children(node)
+        .filter(|child| child.kind() == "template_substitution")
+        .collect::<Vec<_>>();
+    let mut quasis = Vec::with_capacity(substitutions.len() + 1);
+    let mut expressions = Vec::with_capacity(substitutions.len());
+    let mut quasi_start = node.start_byte().saturating_add(1);
+    let content_end = node.end_byte().saturating_sub(1);
+
+    for substitution in &substitutions {
+        quasis.push(template_element_json(
+            quasi_start,
+            substitution.start_byte(),
+            false,
+            source,
+        ));
+        if let Some(expression) = substitution.named_child(0) {
+            expressions.push(expr_json(expression, source));
+        }
+        quasi_start = substitution.end_byte();
+    }
+
+    quasis.push(template_element_json(
+        quasi_start,
+        content_end,
+        true,
+        source,
+    ));
+
+    with_span(
+        "TemplateLiteral",
+        node,
+        json!({
+            "expressions": expressions,
+            "quasis": quasis
+        }),
+    )
+}
+
+fn template_element_json(start_byte: usize, end_byte: usize, tail: bool, source: &str) -> Value {
+    let raw = source
+        .get(start_byte..end_byte)
+        .unwrap_or_default()
+        .to_string();
+    with_span_bounds(
+        "TemplateElement",
+        start_byte,
+        point_for_byte(source, start_byte),
+        end_byte,
+        point_for_byte(source, end_byte),
+        json!({
+            "value": {
+                "raw": raw,
+                "cooked": decode_js_string_escapes(&raw)
+            },
+            "tail": tail
+        }),
+    )
 }
 
 fn decode_js_string_literal(raw: &str) -> String {
@@ -1245,6 +1551,22 @@ fn noop_json(node: Node) -> Value {
 
 fn node_text(node: Node, source: &str) -> String {
     node.utf8_text(source.as_bytes()).unwrap_or("").to_string()
+}
+
+fn point_for_byte(source: &str, byte: usize) -> Point {
+    let clamped = byte.min(source.len());
+    let mut row = 0;
+    let mut line_start = 0;
+    for (index, value) in source.bytes().take(clamped).enumerate() {
+        if value == b'\n' {
+            row += 1;
+            line_start = index + 1;
+        }
+    }
+    Point {
+        row,
+        column: clamped.saturating_sub(line_start),
+    }
 }
 
 fn named_children(node: Node) -> impl Iterator<Item = Node> {
@@ -1683,6 +2005,106 @@ mod tests {
         assert_eq!(func["id"]["name"], "foo");
         assert_eq!(func["params"][0]["name"], "x");
         assert_eq!(func["body"]["body"][0]["argument"]["name"], "x");
+    }
+
+    #[test]
+    fn emits_typescript_non_null_expressions_with_fallback_parser() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(root, path, "const foo = bar!\n").expect("parse succeeds");
+
+        let init = &json["ast"]["program"]["body"][0]["declarations"][0]["init"];
+        assert_eq!(init["type"], "TSNonNullExpression");
+        assert_eq!(init["expression"]["name"], "bar");
+        assert_eq!(init["start"], 12);
+        assert_eq!(init["end"], 16);
+        assert_eq!(init["expression"]["start"], 12);
+        assert_eq!(init["expression"]["end"], 15);
+    }
+
+    #[test]
+    fn emits_typescript_parameter_wrappers_as_plain_parameters() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.ts");
+        let json = parse_source(
+            root,
+            path,
+            "const obj = { [\"someNameComputation()\"](node: Node) { foo(node); } };\n",
+        )
+        .expect("parse succeeds");
+
+        let method = &json["ast"]["program"]["body"][0]["declarations"][0]["init"]["properties"][0];
+        assert_eq!(method["type"], "ObjectMethod");
+        assert_eq!(method["computed"], true);
+        assert_eq!(method["key"]["type"], "StringLiteral");
+        assert_eq!(method["key"]["value"], "someNameComputation()");
+        assert_eq!(method["params"][0]["type"], "Identifier");
+        assert_eq!(method["params"][0]["name"], "node");
+    }
+
+    #[test]
+    fn emits_template_literals_and_tagged_templates() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(
+            root,
+            path,
+            "foo(`Hello ${world}!`);\nx`a ${1+1} b`;\nString.raw`../${42}\\..`;\n",
+        )
+        .expect("parse succeeds");
+
+        let template = &json["ast"]["program"]["body"][0]["expression"]["arguments"][0];
+        assert_eq!(template["type"], "TemplateLiteral");
+        assert_eq!(template["expressions"][0]["name"], "world");
+        assert_eq!(template["quasis"][0]["type"], "TemplateElement");
+        assert_eq!(template["quasis"][0]["value"]["raw"], "Hello ");
+        assert_eq!(template["quasis"][0]["tail"], false);
+        assert_eq!(template["quasis"][1]["value"]["raw"], "!");
+        assert_eq!(template["quasis"][1]["tail"], true);
+
+        let simple_tag = &json["ast"]["program"]["body"][1]["expression"];
+        assert_eq!(simple_tag["type"], "TaggedTemplateExpression");
+        assert_eq!(simple_tag["tag"]["name"], "x");
+        assert_eq!(simple_tag["quasi"]["quasis"][0]["value"]["raw"], "a ");
+        assert_eq!(simple_tag["quasi"]["expressions"][0]["operator"], "+");
+        assert_eq!(simple_tag["quasi"]["quasis"][1]["value"]["raw"], " b");
+
+        let member_tag = &json["ast"]["program"]["body"][2]["expression"];
+        assert_eq!(member_tag["type"], "TaggedTemplateExpression");
+        assert_eq!(member_tag["tag"]["type"], "MemberExpression");
+        assert_eq!(member_tag["tag"]["property"]["name"], "raw");
+        assert_eq!(member_tag["quasi"]["quasis"][0]["value"]["raw"], "../");
+        assert_eq!(member_tag["quasi"]["quasis"][1]["value"]["raw"], "\\..");
+    }
+
+    #[test]
+    fn emits_sequence_and_class_expressions() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json =
+            parse_source(root, path, "let x = (class Foo {}, bar())\n").expect("parse succeeds");
+
+        let init = &json["ast"]["program"]["body"][0]["declarations"][0]["init"];
+        assert_eq!(init["type"], "SequenceExpression");
+        assert_eq!(init["expressions"][0]["type"], "ClassExpression");
+        assert_eq!(init["expressions"][0]["id"]["name"], "Foo");
+        assert_eq!(init["expressions"][0]["body"]["type"], "ClassBody");
+        assert_eq!(init["expressions"][1]["type"], "CallExpression");
+        assert_eq!(init["expressions"][1]["callee"]["name"], "bar");
+    }
+
+    #[test]
+    fn emits_constructor_calls_as_babel_new_expressions() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json =
+            parse_source(root, path, "var x = new MyClass(arg1, arg2)\n").expect("parse succeeds");
+
+        let init = &json["ast"]["program"]["body"][0]["declarations"][0]["init"];
+        assert_eq!(init["type"], "NewExpression");
+        assert_eq!(init["callee"]["name"], "MyClass");
+        assert_eq!(init["arguments"][0]["name"], "arg1");
+        assert_eq!(init["arguments"][1]["name"], "arg2");
     }
 
     #[test]
