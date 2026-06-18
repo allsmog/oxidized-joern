@@ -32,10 +32,10 @@ oxidized backend via `--parser-backend oxidized`, with compatibility coverage
 against the CDT backend.
 
 The JavaScript/TypeScript frontend still defaults to upstream Joern's Babel
-`astgen` binary. An experimental Rust `astgen` workspace now lives under
-`joern-cli/frontends/jssrc2cpg/rust`; it emits the existing Babel-shaped JSON
-contract for an initial JavaScript syntax subset and can be installed locally
-with the opt-in `jssrc2cpg/jsAstGenBuildRust` SBT task.
+`astgen` binary. The Rust `astgen` workspace under
+`joern-cli/frontends/jssrc2cpg/rust` is available as an opt-in oxidized backend
+through `jssrc2cpg/jsAstGenBuildRust`; it emits the existing Babel-shaped JSON
+contract plus TypeScript `.typemap` sidecars for the Scala frontend.
 
 ## Rewrite Priorities
 
@@ -85,7 +85,7 @@ Release notes and compatibility details are in:
 - [`joern-cli/frontends/gosrc2cpg/rust/docs/json-contract.md`](joern-cli/frontends/gosrc2cpg/rust/docs/json-contract.md)
 - [`joern-cli/frontends/gosrc2cpg/rust/docs/release-checklist.md`](joern-cli/frontends/gosrc2cpg/rust/docs/release-checklist.md)
 
-## JavaScript Frontend / experimental Rust `astgen`
+## JavaScript/TypeScript Frontend / Rust `astgen`
 
 The Rust JavaScript AST generator workspace lives under:
 
@@ -99,6 +99,7 @@ Useful commands:
 cd joern-cli/frontends/jssrc2cpg/rust
 cargo fmt --check
 cargo test
+cargo clippy --all-targets -- -D warnings
 ```
 
 Build and install the Rust binary into the location used by the existing
@@ -106,6 +107,12 @@ Build and install the Rust binary into the location used by the existing
 
 ```bash
 sbt 'jssrc2cpg/jsAstGenBuildRust'
+```
+
+Run the Scala frontend suite against the locally built Rust binary:
+
+```bash
+sbt 'jssrc2cpg/jsAstGenBuildRust' 'jssrc2cpg/test'
 ```
 
 ## Requirements
