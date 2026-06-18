@@ -56,7 +56,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   )
   private final case class LocalDestructor(receiverCode: String, line: Int, entry: FunctionEntry)
   private final case class TemporaryDestructor(code: String, line: Int, entry: FunctionEntry)
-  private final case class HeapConstructor(code: String, line: Int, entry: FunctionEntry, arguments: Seq[OxExpression])
+  private final case class HeapConstructor(line: Int, info: ConstructorInvocationInfo, arguments: Seq[OxExpression])
   private final case class HeapDestructor(code: String, line: Int, entry: FunctionEntry, receiver: OxExpression)
   private final case class ConstructorInitializerResolution(
     arguments: Seq[OxExpression],
@@ -568,10 +568,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         collectRequiredImplicitDefaultConstructorTypesFromExpression(argument, ownerFullName)
       case OxSizeOf(_, _, value, _) =>
         value.toSet.flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
-      case OxNew(_, _, _, arguments, initializerArguments) =>
-        (arguments ++ initializerArguments)
-          .flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
-          .toSet
+      case newExpression @ OxNew(_, _, _, arguments, initializerArguments) =>
+        implicitDefaultConstructorTypeForNew(newExpression, ownerFullName).toSet ++
+          (arguments ++ initializerArguments)
+            .flatMap(collectRequiredImplicitDefaultConstructorTypesFromExpression(_, ownerFullName))
+            .toSet
       case OxDelete(_, _, argument) =>
         collectRequiredImplicitDefaultConstructorTypesFromExpression(argument, ownerFullName)
       case OxLambda(_, _, captures, _, _, _, _, body) =>
@@ -632,6 +633,18 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       }
       (ownerCandidates :+ normalized).find(aggregateTypeFullNames.contains)
     }
+  }
+
+  private def implicitDefaultConstructorTypeForNew(
+    newExpression: OxNew,
+    ownerFullName: Option[String]
+  ): Option[String] = {
+    Option
+      .when(newExpression.initializerArguments.isEmpty)(
+        localObjectAggregateTypeFullName(newExpression.typeName, ownerFullName)
+      )
+      .flatten
+      .filter(hasImplicitDefaultConstructor)
   }
 
   private def astForStruct(structDecl: OxStructDecl): Ast = {
@@ -2528,27 +2541,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def heapConstructorForNew(newExpression: OxNew): Option[HeapConstructor] = {
     val aggregateType = receiverAggregateTypeName(newExpression.typeName)
     resolveAggregateTypeFullName(aggregateType).flatMap { typeName =>
-      constructorEntry(typeName, newExpression.initializerArguments).map { entry =>
-        val constructorName = typeName.split('.').lastOption.getOrElse(typeName)
-        val initCode        = newExpression.initializerArguments.map(_.code).mkString(", ")
-        val constructorCode = s"$typeName.$constructorName($initCode)"
-        HeapConstructor(constructorCode, newExpression.line, entry, newExpression.initializerArguments)
+      val initCode = newExpression.initializerArguments.map(_.code).mkString(", ")
+      constructorInvocationInfo(typeName, newExpression.initializerArguments, initCode).map { info =>
+        HeapConstructor(newExpression.line, info, newExpression.initializerArguments)
       }
     }
   }
 
   private def heapConstructorAst(constructor: HeapConstructor): Ast = {
-    val callNode_ =
-      callNode(
-        OxOrigin(constructor.code, Option(constructor.line)),
-        constructor.code,
-        constructor.entry.simpleName,
-        constructor.entry.fullName,
-        DispatchTypes.STATIC_DISPATCH,
-        Option(constructor.entry.function.signature),
-        Option(registerType(Defines.Void))
-      )
-    createCallAst(callNode_, constructor.arguments.map(expressionAst))
+    val callNode_ = constructorCallNode(OxOrigin(constructor.info.code, Option(constructor.line)), constructor.info)
+    val argumentAsts = constructor.info.constructor
+      .map(entry => argumentAstsForFunctionEntry(entry, constructor.arguments))
+      .getOrElse(constructor.arguments.map(expressionAst))
+    createCallAst(callNode_, argumentAsts)
   }
 
   private def heapDestructorAstsForDelete(deleteExpression: OxDelete): Seq[Ast] = {
