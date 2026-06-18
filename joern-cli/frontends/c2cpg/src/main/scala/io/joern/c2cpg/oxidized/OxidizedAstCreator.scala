@@ -6343,6 +6343,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         functionReturnExpressionTypeFullName(entry, argument, templateBindings, localTypes).map { typeName =>
           s"${stripCxxReference(normalizeType(resolveAliasType(typeName)))}*"
         }
+      case binary: OxBinary =>
+        functionScopedBinaryExpressionTypeFullName(entry, binary, templateBindings, localTypes)
       case OxConditional(_, _, _, Some(consequence), alternative) =>
         val branchTypes = Seq(consequence, alternative).map { branch =>
           functionReturnExpressionTypeFullName(entry, branch, templateBindings, localTypes)
@@ -6441,6 +6443,60 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         }
       }
       .orElse(baseTypeFullName.map(_.stripSuffix("[]")))
+  }
+
+  private def functionScopedBinaryExpressionTypeFullName(
+    entry: FunctionEntry,
+    binary: OxBinary,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    functionScopedBinaryOperatorTypeFullName(entry, binary, templateBindings, localTypes)
+      .orElse {
+        binaryExpressionTypeFullName(
+          functionReturnExpressionTypeFullName(entry, binary.left, templateBindings, localTypes),
+          functionReturnExpressionTypeFullName(entry, binary.right, templateBindings, localTypes)
+        )
+      }
+  }
+
+  private def functionScopedBinaryOperatorTypeFullName(
+    entry: FunctionEntry,
+    binary: OxBinary,
+    templateBindings: Map[String, String],
+    localTypes: Map[String, String]
+  ): Option[String] = {
+    cxxOperatorFunctionName(binary.operator).flatMap { operatorName =>
+      val leftInfo = ArgumentInfo(
+        binary.left,
+        functionReturnExpressionTypeFullName(entry, binary.left, templateBindings, localTypes),
+        functionReturnExpressionIsRvalue(entry, binary.left, templateBindings, localTypes)
+      )
+      val rightInfo = ArgumentInfo(
+        binary.right,
+        functionReturnExpressionTypeFullName(entry, binary.right, templateBindings, localTypes),
+        functionReturnExpressionIsRvalue(entry, binary.right, templateBindings, localTypes)
+      )
+      val memberTarget =
+        leftInfo.typeFullName.flatMap { receiverTypeFullName =>
+          selectFunctionEntryForArgumentInfos(
+            memberFunctionCandidatesForReceiverType(receiverTypeFullName, operatorName),
+            Seq(rightInfo),
+            Option(receiverTypeFullName)
+          ).map(targetEntry =>
+            functionSemanticReturnTypeFullNameForArgumentInfos(
+              targetEntry,
+              Seq(rightInfo),
+              Option(receiverTypeFullName)
+            )
+          )
+        }
+      memberTarget.orElse {
+        val argumentInfos = Seq(leftInfo, rightInfo)
+        selectFunctionEntryForArgumentInfos(freeFunctionCandidatesByName(operatorName), argumentInfos)
+          .map(targetEntry => functionSemanticReturnTypeFullNameForArgumentInfos(targetEntry, argumentInfos))
+      }
+    }
   }
 
   private def functionScopedCallReturnTypeFullName(
@@ -6548,6 +6604,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         functionScopedIndexAccessTypeFullName(entry, indexAccess, templateBindings, localTypes)
           .map(typeNameIsRvalue)
           .getOrElse(false)
+      case binary: OxBinary =>
+        functionScopedBinaryExpressionTypeFullName(entry, binary, templateBindings, localTypes)
+          .map(typeNameIsRvalue)
+          .getOrElse(true)
       case call: OxCall =>
         functionScopedCallReturnTypeFullName(entry, call, templateBindings, localTypes)
           .map(typeNameIsRvalue)
@@ -6658,8 +6718,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def binaryExpressionTypeFullName(binary: OxBinary): Option[String] = {
-    val leftType  = expressionTypeFullName(binary.left)
-    val rightType = expressionTypeFullName(binary.right)
+    binaryExpressionTypeFullName(expressionTypeFullName(binary.left), expressionTypeFullName(binary.right))
+  }
+
+  private def binaryExpressionTypeFullName(leftType: Option[String], rightType: Option[String]): Option[String] = {
     (leftType, rightType) match {
       case (Some(left), Some(right)) if left == right => Some(left)
       case (Some("int"), _)                           => Some("int")

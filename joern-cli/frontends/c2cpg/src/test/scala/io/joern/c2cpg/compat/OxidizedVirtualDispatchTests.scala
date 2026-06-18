@@ -341,6 +341,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |short pick(Mid& value) { return 2; }
           |long pick(const Mid& value) { return 3; }
           |char pick(Leaf&& value) { return 4; }
+          |int pickNumber(int value) { return 1; }
+          |long pickNumber(long value) { return 2; }
           |template <typename T>
           |class Holder {
           |public:
@@ -371,6 +373,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |  }
           |}
           |template <typename T>
+          |auto add(T left, T right) { return left + right; }
+          |template <typename T>
           |decltype(auto) idDecltype(T& value) { return value; }
           |template <typename T>
           |decltype(auto) idDecltypeParen(T value) { return (value); }
@@ -399,6 +403,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::pick(Core::idAutoForward(Core::makeLeaf())) +
           |    Core::pick(Core::idAutoBranch(true, Core::makeLeaf(), Core::makeLeaf())) +
           |    Core::pick(Core::idAutoBranchLocal(true, Core::makeLeaf(), Core::makeLeaf())) +
+          |    Core::pickNumber(Core::add(1, 2)) +
           |    Core::pick(Core::idDecltype(leaf)) +
           |    Core::pick(Core::idDecltypeParen(Core::makeLeaf())) +
           |    Core::pick(Core::idDecltypeBranch(true, leaf, leaf)) +
@@ -430,6 +435,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         .codeExact("Core::idAutoBranchLocal(true, Core::makeLeaf(), Core::makeLeaf())")
         .typeFullName
         .l shouldBe List("Core.Leaf")
+      cpg.method.nameExact("use").call.codeExact("Core::add(1, 2)").typeFullName.l shouldBe
+        List("int")
       cpg.method.nameExact("use").call.codeExact("Core::idDecltype(leaf)").typeFullName.l shouldBe
         List("Core.Leaf&")
       cpg.method.nameExact("use").call.codeExact("Core::idDecltypeParen(Core::makeLeaf())").typeFullName.l shouldBe
@@ -468,6 +475,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         .codeExact("Core::pick(Core::idAutoBranchLocal(true, Core::makeLeaf(), Core::makeLeaf()))")
         .methodFullName
         .l shouldBe List("Core.pick:char(Leaf&&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickNumber(Core::add(1, 2))").methodFullName.l shouldBe
+        List("Core.pickNumber:int(int)")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::idDecltype(leaf))").methodFullName.l shouldBe
         List("Core.pick:short(Mid&)")
       cpg.method
