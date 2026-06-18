@@ -104,6 +104,7 @@ fn expr_json(node: Node, source: &str) -> Value {
         "assignment_expression" => assignment_expression_json(node, source),
         "call_expression" => call_expression_json(node, source),
         "member_expression" => member_expression_json(node, source),
+        "array" => array_expression_json(node, source),
         "rest_pattern" => unary_argument_json("RestElement", node, source),
         "spread_element" => unary_argument_json("SpreadElement", node, source),
         "parenthesized_expression" => node
@@ -295,6 +296,15 @@ fn member_expression_json(node: Node, source: &str) -> Value {
             "optional": false
         }),
     )
+}
+
+fn array_expression_json(node: Node, source: &str) -> Value {
+    let elements = named_children(node)
+        .filter(|child| !is_comment(*child))
+        .map(|child| expr_json(child, source))
+        .collect::<Vec<_>>();
+
+    with_span("ArrayExpression", node, json!({ "elements": elements }))
 }
 
 fn unary_argument_json(kind: &str, node: Node, source: &str) -> Value {
@@ -489,5 +499,29 @@ mod tests {
             params[1]["typeAnnotation"]["typeAnnotation"]["type"],
             "TSArrayType"
         );
+    }
+
+    #[test]
+    fn emits_array_literals_as_babel_array_expressions() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(
+            root,
+            path,
+            "const empty = [];\nconst values = [1, two, ...rest];\n",
+        )
+        .expect("parse succeeds");
+
+        let empty = &json["ast"]["program"]["body"][0]["declarations"][0]["init"];
+        assert_eq!(empty["type"], "ArrayExpression");
+        assert_eq!(empty["elements"].as_array().unwrap().len(), 0);
+
+        let values = &json["ast"]["program"]["body"][1]["declarations"][0]["init"];
+        assert_eq!(values["type"], "ArrayExpression");
+        assert_eq!(values["elements"][0]["type"], "NumericLiteral");
+        assert_eq!(values["elements"][1]["type"], "Identifier");
+        assert_eq!(values["elements"][1]["name"], "two");
+        assert_eq!(values["elements"][2]["type"], "SpreadElement");
+        assert_eq!(values["elements"][2]["argument"]["name"], "rest");
     }
 }
