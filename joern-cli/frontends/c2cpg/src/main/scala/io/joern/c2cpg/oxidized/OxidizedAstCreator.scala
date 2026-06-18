@@ -5380,13 +5380,17 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     expressionTypeFullName(receiver)
       .map(receiverAggregateTypeName)
       .toSeq
-      .flatMap(receiverType =>
-        typeAndBaseTypeFullNames(receiverType)
-          .flatMap(typeName => resolveAggregateTypeFullName(typeName).toSeq :+ typeName)
-          .distinct
-          .reverse
-          .flatMap(typeName => functionCandidatesByQualifiedName(s"$typeName.$name"))
-      )
+      .flatMap(receiverType => memberFunctionCandidatesForType(receiverType, name))
+  }
+
+  private def memberFunctionCandidatesForType(receiverType: String, name: String): Seq[FunctionEntry] = {
+    typeAndBaseTypeFullNames(receiverType)
+      .flatMap(typeName => resolveAggregateTypeFullName(typeName).toSeq :+ typeName)
+      .distinct
+      .iterator
+      .map(typeName => functionCandidatesByQualifiedName(s"$typeName.$name"))
+      .find(_.nonEmpty)
+      .getOrElse(Seq.empty)
   }
 
   private def receiverAggregateTypeName(typeName: String): String = {
@@ -5992,11 +5996,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val candidates = expressionTypeFullName(base)
           .map(receiverAggregateTypeName)
           .toSeq
-          .flatMap(receiverType =>
-            typeAndBaseTypeFullNames(receiverType).reverse.flatMap(typeName =>
-              functionCandidatesByQualifiedName(s"$typeName.$field")
-            )
-          )
+          .flatMap(receiverType => memberFunctionCandidatesForType(receiverType, field))
         selectFunctionEntry(candidates, Some(call.arguments))
       case _ =>
         val lookupName    = stripTemplateArguments(call.name)
@@ -6021,9 +6021,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def currentOwnerFunctionCandidates(name: String): Seq[FunctionEntry] = {
     currentMethodOwnerTypeFullName.toSeq.flatMap { ownerTypeFullName =>
-      typeAndBaseTypeFullNames(ownerTypeFullName).reverse.flatMap(typeName =>
-        functionCandidatesByQualifiedName(s"$typeName.$name")
-      )
+      memberFunctionCandidatesForType(ownerTypeFullName, name)
     }
   }
 
