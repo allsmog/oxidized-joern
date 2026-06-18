@@ -19,9 +19,9 @@ annotations, integer and string literal initializers, identifier references,
 simple function declarations with bodies, simple function calls with labeled
 arguments, return statements, reassignment expressions, binary arithmetic,
 comparison, equality, and boolean operators, simple `if`/`else` control flow,
-boolean literals, simple `class`/`struct` member blocks, and dot member-access
-expressions. Unsupported syntax fails per-file and is reported on stdout so the
-existing skipped-file handling can continue.
+simple `while` loops, boolean literals, simple `class`/`struct` member blocks,
+and dot member-access expressions. Unsupported syntax fails per-file and is
+reported on stdout so the existing skipped-file handling can continue.
 
 Run the Rust checks with:
 
