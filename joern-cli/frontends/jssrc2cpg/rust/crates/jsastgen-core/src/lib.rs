@@ -87,6 +87,10 @@ fn stmt_json(node: Node, source: &str) -> Value {
         "statement_block" => block_statement_json(node, source),
         "return_statement" => return_statement_json(node, source),
         "if_statement" => if_statement_json(node, source),
+        "while_statement" => while_statement_json(node, source),
+        "do_statement" => do_while_statement_json(node, source),
+        "break_statement" => jump_statement_json("BreakStatement", node, source),
+        "continue_statement" => jump_statement_json("ContinueStatement", node, source),
         "expression_statement" => expression_statement_json(node, source),
         "empty_statement" => with_span("EmptyStatement", node, json!({})),
         _ => noop_json(node),
@@ -95,7 +99,9 @@ fn stmt_json(node: Node, source: &str) -> Value {
 
 fn expr_json(node: Node, source: &str) -> Value {
     match node.kind() {
-        "identifier" | "property_identifier" => identifier_json(node, source),
+        "identifier" | "property_identifier" | "statement_identifier" => {
+            identifier_json(node, source)
+        }
         "number" => numeric_literal_json(node, source),
         "string" => string_literal_json(node, source),
         "template_string" => template_string_json(node, source),
@@ -103,7 +109,9 @@ fn expr_json(node: Node, source: &str) -> Value {
         "false" => boolean_literal_json(node, false),
         "null" => with_span("NullLiteral", node, json!({ "value": Value::Null })),
         "binary_expression" => binary_expression_json(node, source),
-        "assignment_expression" => assignment_expression_json(node, source),
+        "assignment_expression" | "augmented_assignment_expression" => {
+            assignment_expression_json(node, source)
+        }
         "ternary_expression" => conditional_expression_json(node, source),
         "call_expression" => call_expression_json(node, source),
         "member_expression" => member_expression_json(node, source),
@@ -236,6 +244,54 @@ fn if_statement_json(node: Node, source: &str) -> Value {
             "alternate": alternate
         }),
     )
+}
+
+fn while_statement_json(node: Node, source: &str) -> Value {
+    let test = node
+        .child_by_field_name("condition")
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let body = node
+        .child_by_field_name("body")
+        .map(|child| stmt_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        "WhileStatement",
+        node,
+        json!({
+            "test": test,
+            "body": body
+        }),
+    )
+}
+
+fn do_while_statement_json(node: Node, source: &str) -> Value {
+    let test = node
+        .child_by_field_name("condition")
+        .map(|child| expr_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+    let body = node
+        .child_by_field_name("body")
+        .map(|child| stmt_json(child, source))
+        .unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        "DoWhileStatement",
+        node,
+        json!({
+            "test": test,
+            "body": body
+        }),
+    )
+}
+
+fn jump_statement_json(kind: &str, node: Node, source: &str) -> Value {
+    let label = node
+        .child_by_field_name("label")
+        .map(|child| expr_json(child, source))
+        .unwrap_or(Value::Null);
+    with_span(kind, node, json!({ "label": label }))
 }
 
 fn expression_statement_json(node: Node, source: &str) -> Value {
@@ -937,6 +993,32 @@ mod tests {
         assert_eq!(expression["test"]["name"], "x");
         assert_eq!(expression["consequent"]["name"], "y");
         assert_eq!(expression["alternate"]["name"], "z");
+    }
+
+    #[test]
+    fn emits_loops_jumps_and_augmented_assignments() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(
+            root,
+            path,
+            "while (x < 1) { x += 1; break; }\ndo { continue loop1; } while (ok);\n",
+        )
+        .expect("parse succeeds");
+
+        let while_stmt = &json["ast"]["program"]["body"][0];
+        assert_eq!(while_stmt["type"], "WhileStatement");
+        assert_eq!(while_stmt["test"]["type"], "BinaryExpression");
+        let assignment = &while_stmt["body"]["body"][0]["expression"];
+        assert_eq!(assignment["type"], "AssignmentExpression");
+        assert_eq!(assignment["operator"], "+=");
+        assert_eq!(while_stmt["body"]["body"][1]["type"], "BreakStatement");
+
+        let do_stmt = &json["ast"]["program"]["body"][1];
+        assert_eq!(do_stmt["type"], "DoWhileStatement");
+        assert_eq!(do_stmt["test"]["name"], "ok");
+        assert_eq!(do_stmt["body"]["body"][0]["type"], "ContinueStatement");
+        assert_eq!(do_stmt["body"]["body"][0]["label"]["name"], "loop1");
     }
 
     #[test]
