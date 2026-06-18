@@ -5909,7 +5909,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     createCallAst(
       callNode_,
       targetEntryForCallArguments(call)
-        .map(entry => argumentAstsForFunctionEntry(entry, call.arguments, receiverTypeFullName(call)))
+        .map(entry =>
+          argumentAstsForFunctionEntry(
+            entry,
+            call.arguments,
+            receiverTypeFullName(call),
+            explicitTemplateArgumentTypeNames(call)
+          )
+        )
         .getOrElse(call.arguments.map(expressionAst)),
       base = base,
       receiver = if (dispatchType == DispatchTypes.DYNAMIC_DISPATCH) base else None
@@ -5919,9 +5926,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def argumentAstsForFunctionEntry(
     entry: FunctionEntry,
     arguments: Seq[OxExpression],
-    receiverTypeFullName: Option[String] = None
+    receiverTypeFullName: Option[String] = None,
+    explicitTemplateArguments: Seq[String] = Seq.empty
   ): Seq[Ast] = {
-    val templateBindings = templateBindingsForFunctionCall(entry, arguments, receiverTypeFullName)
+    val templateBindings =
+      templateBindingsForFunctionCall(entry, arguments, receiverTypeFullName, explicitTemplateArguments)
     arguments.zipWithIndex.map { case (argument, index) =>
       val parameterType = entry.function.parameters
         .lift(index)
@@ -5933,11 +5942,19 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def functionCallTypeFullName(
     entry: FunctionEntry,
     arguments: Seq[OxExpression],
-    receiverTypeFullName: Option[String] = None
+    receiverTypeFullName: Option[String] = None,
+    explicitTemplateArguments: Seq[String] = Seq.empty
   ): String = {
-    val semanticReturnType = functionSemanticReturnTypeFullName(entry, arguments, receiverTypeFullName)
+    val semanticReturnType =
+      functionSemanticReturnTypeFullName(entry, arguments, receiverTypeFullName, explicitTemplateArguments)
     val syntacticReturnType =
-      specializeFunctionTypeName(normalizeType(entry.function.returnType), entry, arguments, receiverTypeFullName)
+      specializeFunctionTypeName(
+        normalizeType(entry.function.returnType),
+        entry,
+        arguments,
+        receiverTypeFullName,
+        explicitTemplateArguments
+      )
     Option
       .when(
         typeNameHasCxxQualifier(semanticReturnType) || functionTemplateParametersInType(
@@ -5968,6 +5985,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case OxFieldAccess(_, _, _, base) => expressionTypeFullName(base)
       case _                            => None
     }
+  }
+
+  private def explicitTemplateArgumentTypeNames(call: OxCall): Seq[String] = {
+    val calleeName = call.callee match {
+      case OxFieldAccess(field, _, _, _) => field
+      case _                             => call.name
+    }
+    templateArgumentTypeNames(calleeName)
   }
 
   private def createCallAst(
@@ -6050,7 +6075,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
               .flatMap(returnTypeFromFunctionPointer)
               .orElse(
                 functionEntryForCall(call)
-                  .map(entry => functionSemanticReturnTypeFullName(entry, call.arguments, receiverTypeFullName(call)))
+                  .map(entry =>
+                    functionSemanticReturnTypeFullName(
+                      entry,
+                      call.arguments,
+                      receiverTypeFullName(call),
+                      explicitTemplateArgumentTypeNames(call)
+                    )
+                  )
               )
           )
       )
@@ -6066,9 +6098,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def functionSemanticReturnTypeFullName(
     entry: FunctionEntry,
     arguments: Seq[OxExpression],
-    receiverTypeFullName: Option[String] = None
+    receiverTypeFullName: Option[String] = None,
+    explicitTemplateArguments: Seq[String] = Seq.empty
   ): String = {
-    specializeFunctionTypeName(functionSemanticReturnTypeFullName(entry), entry, arguments, receiverTypeFullName)
+    specializeFunctionTypeName(
+      functionSemanticReturnTypeFullName(entry),
+      entry,
+      arguments,
+      receiverTypeFullName,
+      explicitTemplateArguments
+    )
   }
 
   private def expressionTypeFullName(expression: OxExpression): Option[String] = {
@@ -6495,7 +6534,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
                   callName(call),
                   functionEntry.fullName,
                   Option(functionEntry.function.signature),
-                  functionCallTypeFullName(functionEntry, call.arguments, receiverTypeFullName(call)),
+                  functionCallTypeFullName(
+                    functionEntry,
+                    call.arguments,
+                    receiverTypeFullName(call),
+                    explicitTemplateArgumentTypeNames(call)
+                  ),
                   dispatchType
                 )
               case None =>
@@ -6524,6 +6568,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def functionEntryForCall(call: OxCall): Option[FunctionEntry] = {
+    val explicitTemplateArguments = explicitTemplateArgumentTypeNames(call)
     call.callee match {
       case OxFieldAccess(field, _, _, base) =>
         val receiverTypeFullName      = expressionTypeFullName(base)
@@ -6537,18 +6582,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         val candidates = receiverTypeFullName
           .map(receiverType => filterMemberFunctionCandidatesForReceiver(unfilteredCandidates, receiverType))
           .getOrElse(unfilteredCandidates)
-        selectFunctionEntry(candidates, Some(call.arguments), receiverTypeFullName)
+        selectFunctionEntry(candidates, Some(call.arguments), receiverTypeFullName, explicitTemplateArguments)
       case _ =>
         val lookupName                = stripTemplateArguments(call.name)
         val qualifiedName             = normalizedQualifiedName(lookupName)
         val qualifiedMemberCandidates = qualifiedMemberFunctionCandidates(lookupName, None)
         if (qualifiedMemberCandidates.nonEmpty) {
-          selectFunctionEntry(qualifiedMemberCandidates, Some(call.arguments))
+          selectFunctionEntry(
+            qualifiedMemberCandidates,
+            Some(call.arguments),
+            explicitTemplateArguments = explicitTemplateArguments
+          )
         } else if (qualifiedNameParts(call.name).size > 1) {
           val candidates = functionCandidatesByQualifiedName(qualifiedName)
           selectFunctionEntry(
             if (candidates.nonEmpty) candidates else functionCandidatesByName(lookupName),
-            Some(call.arguments)
+            Some(call.arguments),
+            explicitTemplateArguments = explicitTemplateArguments
           )
         } else {
           val ownerCandidates     = currentOwnerFunctionCandidates(lookupName)
@@ -6557,7 +6607,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             if (ownerCandidates.nonEmpty) ownerCandidates
             else if (qualifiedCandidates.nonEmpty) qualifiedCandidates
             else functionCandidatesByName(lookupName)
-          selectFunctionEntry(candidates, Some(call.arguments))
+          selectFunctionEntry(candidates, Some(call.arguments), explicitTemplateArguments = explicitTemplateArguments)
         }
     }
   }
@@ -6585,7 +6635,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def selectFunctionEntry(
     candidates: Seq[FunctionEntry],
     arguments: Option[Seq[OxExpression]],
-    receiverTypeFullName: Option[String] = None
+    receiverTypeFullName: Option[String] = None,
+    explicitTemplateArguments: Seq[String] = Seq.empty
   ): Option[FunctionEntry] = {
     arguments match {
       case Some(arguments) =>
@@ -6599,7 +6650,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           )
         pool.zipWithIndex
           .maxByOption { case (candidate, index) =>
-            (overloadScore(candidate, argumentInfos, receiverTypeFullName), index)
+            (overloadScore(candidate, argumentInfos, receiverTypeFullName, explicitTemplateArguments), index)
           }
           .map(_._1)
       case None =>
@@ -6618,22 +6669,33 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def overloadScore(
     candidate: FunctionEntry,
     argumentInfos: Seq[ArgumentInfo],
-    receiverTypeFullName: Option[String] = None
+    receiverTypeFullName: Option[String] = None,
+    explicitTemplateArguments: Seq[String] = Seq.empty
   ): Int = {
     val receiverTemplateBindings =
       receiverTemplateBindingsForOwner(
         receiverTypeFullName,
         candidate.ownerFullName.orElse(candidate.lexicalOwnerFullName)
       )
-    val templateParameters    = templateParameterNames(candidate.function).diff(receiverTemplateBindings.keySet)
+    val explicitTemplateBindingResult =
+      explicitTemplateBindingsForFunction(candidate, explicitTemplateArguments, receiverTemplateBindings)
+    val explicitTemplateBindings = explicitTemplateBindingResult.getOrElse(Map.empty)
+    val templateParameters =
+      templateParameterNames(candidate.function).diff(
+        receiverTemplateBindings.keySet ++ explicitTemplateBindings.keySet
+      )
     val templateBindingResult = templateBindingsForArgumentInfos(candidate, argumentInfos, templateParameters)
-    val templateBindings      = receiverTemplateBindings ++ templateBindingResult.getOrElse(Map.empty)
-    val arityAdjustment       = overloadArityAdjustment(candidate, argumentInfos.size)
+    val templateBindings =
+      receiverTemplateBindings ++ explicitTemplateBindings ++ templateBindingResult.getOrElse(Map.empty)
+    val arityAdjustment = overloadArityAdjustment(candidate, argumentInfos.size)
+    val invalidExplicitTemplatePenalty = Option
+      .when(explicitTemplateBindingResult.isEmpty)(-10000)
+      .getOrElse(0)
     val invalidTemplatePenalty = Option
       .when(templateBindingResult.isEmpty)(-10000)
       .getOrElse(0)
     val templatePenalty = Option.when(templateParameters.nonEmpty)(-5).getOrElse(0)
-    arityAdjustment + invalidTemplatePenalty + templatePenalty + candidate.function.parameters
+    arityAdjustment + invalidExplicitTemplatePenalty + invalidTemplatePenalty + templatePenalty + candidate.function.parameters
       .zip(argumentInfos)
       .map { case (parameter, argumentInfo) =>
         typeCompatibilityScore(substituteTemplateTypeNames(parameter.semanticTypeName, templateBindings), argumentInfo)
@@ -6654,23 +6716,49 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     typeName: String,
     entry: FunctionEntry,
     arguments: Seq[OxExpression],
-    receiverTypeFullName: Option[String] = None
+    receiverTypeFullName: Option[String] = None,
+    explicitTemplateArguments: Seq[String] = Seq.empty
   ): String = {
-    substituteTemplateTypeNames(typeName, templateBindingsForFunctionCall(entry, arguments, receiverTypeFullName))
+    substituteTemplateTypeNames(
+      typeName,
+      templateBindingsForFunctionCall(entry, arguments, receiverTypeFullName, explicitTemplateArguments)
+    )
   }
 
   private def templateBindingsForFunctionCall(
     entry: FunctionEntry,
     arguments: Seq[OxExpression],
-    receiverTypeFullName: Option[String] = None
+    receiverTypeFullName: Option[String] = None,
+    explicitTemplateArguments: Seq[String] = Seq.empty
   ): Map[String, String] = {
     val receiverTemplateBindings =
       receiverTemplateBindingsForOwner(receiverTypeFullName, entry.ownerFullName.orElse(entry.lexicalOwnerFullName))
-    val functionTemplateParameters = templateParameterNames(entry.function).diff(receiverTemplateBindings.keySet)
+    val explicitTemplateBindings =
+      explicitTemplateBindingsForFunction(entry, explicitTemplateArguments, receiverTemplateBindings).getOrElse(
+        Map.empty
+      )
+    val functionTemplateParameters =
+      templateParameterNames(entry.function).diff(receiverTemplateBindings.keySet ++ explicitTemplateBindings.keySet)
     val argumentInfos =
       arguments.map(argument => ArgumentInfo(argument, expressionTypeFullName(argument), isRvalue = false))
-    receiverTemplateBindings ++
+    receiverTemplateBindings ++ explicitTemplateBindings ++
       templateBindingsForArgumentInfos(entry, argumentInfos, functionTemplateParameters).getOrElse(Map.empty)
+  }
+
+  private def explicitTemplateBindingsForFunction(
+    entry: FunctionEntry,
+    explicitTemplateArguments: Seq[String],
+    receiverTemplateBindings: Map[String, String]
+  ): Option[Map[String, String]] = {
+    if (explicitTemplateArguments.isEmpty) {
+      Some(Map.empty)
+    } else {
+      val parameters = orderedTemplateParameterNames(entry.function).filterNot(receiverTemplateBindings.contains)
+      Option
+        .when(parameters.nonEmpty && explicitTemplateArguments.size <= parameters.size) {
+          parameters.zip(explicitTemplateArguments).toMap
+        }
+    }
   }
 
   private def receiverTemplateBindingsForOwner(
@@ -6870,18 +6958,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def templateParameterNames(function: OxFunctionDecl): Set[String] = {
+    orderedTemplateParameterNames(function).toSet
+  }
+
+  private def orderedTemplateParameterNames(function: OxFunctionDecl): Seq[String] = {
     val namesFromTemplatePrefix = TemplateParameterListPattern
       .findAllMatchIn(function.code)
       .flatMap(templateMatch => TemplateTypeParameterPattern.findAllMatchIn(templateMatch.group(1)).map(_.group(1)))
-      .toSet
+      .toSeq
     if (namesFromTemplatePrefix.nonEmpty) {
-      namesFromTemplatePrefix
+      namesFromTemplatePrefix.distinct
     } else {
       val typeNames = function.semanticReturnType +: function.parameters.map(_.semanticTypeName)
       typeNames
         .flatMap(templateParameterTokens)
         .filterNot(typeName => resolveAggregateTypeFullName(typeName).isDefined)
-        .toSet
+        .distinct
     }
   }
 
