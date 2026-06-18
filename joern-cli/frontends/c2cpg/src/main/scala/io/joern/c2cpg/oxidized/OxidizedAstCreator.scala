@@ -56,6 +56,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   )
   private final case class LocalDestructor(receiverCode: String, line: Int, entry: FunctionEntry)
   private final case class TemporaryDestructor(code: String, line: Int, entry: FunctionEntry)
+  private final case class StaticLocalStorage(
+    local: OxLocalDecl,
+    typeName: String,
+    receiverPrefix: String,
+    guardName: String,
+    guardReceiverCode: String
+  )
   private final case class HeapConstructor(line: Int, info: ConstructorInvocationInfo, arguments: Seq[OxExpression])
   private final case class HeapDestructor(code: String, line: Int, entry: FunctionEntry, receiver: OxExpression)
   private final case class ConstructorInitializerResolution(
@@ -223,6 +230,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private var typeAliases: Map[String, String]                          = Map.empty
   private var localDestructorScopes: List[Vector[LocalDestructor]]      = Nil
   private var jumpCleanupTargets: List[JumpCleanupTarget]               = Nil
+  private var staticLocalStorages: Vector[StaticLocalStorage]           = Vector.empty
   private val lambdaInfos: mutable.LinkedHashMap[String, LambdaInfo]    = mutable.LinkedHashMap.empty
   private val emittedLambdaFullNames: mutable.Set[String]               = mutable.Set.empty
   private val lambdaReturnTypesByFullName: mutable.Map[String, String]  = mutable.Map.empty
@@ -266,13 +274,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       )
     val globalBlock   = blockNode(origin, NamespaceTraversal.globalNamespaceName, Defines.Any)
     val namespaceAsts = document.declarations.collect { case namespace: OxNamespaceDecl => astForNamespace(namespace) }
-    val declarationAsts      = globalMethodDeclarationAsts(document.declarations)
-    val globalDestructorAsts = globalDestructorAstsForDeclarations(document.declarations)
+    val declarationAsts            = globalMethodDeclarationAsts(document.declarations)
+    val staticLocalDestructionAsts = staticLocalDestructorAsts()
+    val globalDestructorAsts       = globalDestructorAstsForDeclarations(document.declarations)
     val globalMethodAst =
       methodAst(
         globalMethod,
         Seq.empty,
-        blockAst(globalBlock, (declarationAsts ++ globalDestructorAsts).toList),
+        blockAst(globalBlock, (declarationAsts ++ staticLocalDestructionAsts ++ globalDestructorAsts).toList),
         methodReturnNode(origin, Defines.Any)
       )
 
@@ -1884,6 +1893,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def localDestructorAst(destructor: LocalDestructor): Ast = {
+    localDestructorAst(destructor, identifierAst(destructor.receiverCode, destructor.receiverCode, destructor.line))
+  }
+
+  private def localDestructorAst(destructor: LocalDestructor, base: Ast): Ast = {
     val code = s"${destructor.receiverCode}.${destructor.entry.simpleName}()"
     val callNode_ =
       callNode(
@@ -1895,10 +1908,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option(destructor.entry.function.signature),
         Option(registerType(Defines.Void))
       )
-    createCallAst(
-      callNode_,
-      base = Option(identifierAst(destructor.receiverCode, destructor.receiverCode, destructor.line))
-    )
+    createCallAst(callNode_, base = Option(base))
   }
 
   private def currentAutomaticSubobjectDestructorAsts(line: Int): Seq[Ast] = {
@@ -2254,7 +2264,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val typeName        = registerType(localTypeFullName(local))
     val localCode       = localDeclarationCode(local)
     val localNode       = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
-    scope = scope.updated(local.name, ScopeEntry(typeName, localNode, localLambdaInfo))
+    val localScopeEntry = ScopeEntry(typeName, localNode, localLambdaInfo)
+    scope = scope.updated(local.name, localScopeEntry)
     val isStaticStorageLocal = hasStaticStorageDuration(local)
     if (!isStaticStorageLocal) {
       registerLocalDestructor(local, typeName)
@@ -2314,18 +2325,24 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Seq.empty
     }
     val guardedInitializationAsts =
-      if (isStaticStorageLocal) staticLocalInitializationAsts(local, initializationAsts) else initializationAsts
+      if (isStaticStorageLocal) staticLocalInitializationAsts(local, typeName, initializationAsts)
+      else initializationAsts
     Seq(localAst) ++ guardedInitializationAsts
   }
 
-  private def staticLocalInitializationAsts(local: OxLocalDecl, initializationAsts: Seq[Ast]): Seq[Ast] = {
+  private def staticLocalInitializationAsts(
+    local: OxLocalDecl,
+    typeName: String,
+    initializationAsts: Seq[Ast]
+  ): Seq[Ast] = {
     Option
       .when(initializationAsts.nonEmpty) {
-        val guardName      = s"<static-init>${local.name}"
-        val guardCode      = guardName
-        val guardType      = registerType("bool")
-        val guardLocal     = localNode(OxOrigin(guardCode, Option(local.line)), guardName, guardCode, guardType)
-        val guardEntry     = ScopeEntry(guardType, guardLocal)
+        val guardName  = s"<static-init>${local.name}"
+        val guardCode  = guardName
+        val guardType  = registerType("bool")
+        val guardLocal = localNode(OxOrigin(guardCode, Option(local.line)), guardName, guardCode, guardType)
+        val guardEntry = ScopeEntry(guardType, guardLocal)
+        registerStaticLocalStorage(local, typeName)
         val guardCondition = staticLocalGuardConditionAst(guardName, guardEntry, local.line)
         val guardSet       = staticLocalGuardAssignmentAst(guardName, guardEntry, local.line)
         val ifCode         = s"if (!$guardCode)"
@@ -2356,6 +2373,81 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val left           = identifierAstForScopeEntry(guardName, guardName, line, guardEntry)
     val right          = expressionAst(OxLiteral("true", "true", line))
     assignmentAst(OxOrigin(assignmentCode, Option(line)), left, right, assignmentCode)
+  }
+
+  private def registerStaticLocalStorage(local: OxLocalDecl, typeName: String): Unit = {
+    val ownerPrefix = currentMethodSimpleName.map(simpleName => s"$simpleName::").getOrElse("")
+    staticLocalStorages = staticLocalStorages :+ StaticLocalStorage(
+      local,
+      typeName,
+      receiverPrefix = s"$ownerPrefix${local.name}",
+      guardName = s"<static-init>${local.name}",
+      guardReceiverCode = s"$ownerPrefix<static-init>${local.name}"
+    )
+  }
+
+  private def staticLocalDestructorAsts(): Seq[Ast] = {
+    staticLocalStorages.reverse.flatMap(staticLocalDestructorAst)
+  }
+
+  private def staticLocalDestructorAst(storage: StaticLocalStorage): Seq[Ast] = {
+    val destructorAsts = staticLocalDestructorCallAsts(storage)
+    Option
+      .when(destructorAsts.nonEmpty) {
+        val guardCondition = staticLocalSyntheticIdentifierAst(
+          storage.guardName,
+          storage.guardReceiverCode,
+          storage.local.line,
+          registerType("bool")
+        )
+        val ifCode = s"if (${storage.guardReceiverCode})"
+        val ifNode =
+          controlStructureNode(OxOrigin(ifCode, Option(storage.local.line)), ControlStructureTypes.IF, ifCode)
+        val thenAst =
+          blockAst(blockNode(OxOrigin("then", Option(storage.local.line)), "then", Defines.Any), destructorAsts.toList)
+        ifThenElseAst(ifNode, Option(guardCondition), thenAst, None)
+      }
+      .toSeq
+  }
+
+  private def staticLocalDestructorCallAsts(storage: StaticLocalStorage): Seq[Ast] = {
+    val arrayDestructors = for {
+      count       <- localArrayElementCount(storage.local).toSeq
+      elementType <- arrayElementTypeFullName(storage.typeName).toSeq
+      entry       <- destructorEntryForType(elementType).toSeq
+      index       <- (0 until count).reverse
+    } yield {
+      val receiverCode = s"${storage.receiverPrefix}[$index]"
+      localDestructorAst(
+        LocalDestructor(receiverCode, storage.local.line, entry),
+        base = arrayElementAccessAst(
+          storage.local.name,
+          storage.typeName,
+          index,
+          storage.local.line,
+          baseCode = Option(storage.receiverPrefix)
+        )
+      )
+    }
+    if (arrayDestructors.nonEmpty) {
+      arrayDestructors
+    } else {
+      destructorEntryForType(storage.typeName).toSeq.map { entry =>
+        localDestructorAst(
+          LocalDestructor(storage.receiverPrefix, storage.local.line, entry),
+          base = staticLocalSyntheticIdentifierAst(
+            storage.local.name,
+            storage.receiverPrefix,
+            storage.local.line,
+            registerType(storage.typeName)
+          )
+        )
+      }
+    }
+  }
+
+  private def staticLocalSyntheticIdentifierAst(name: String, code: String, line: Int, typeName: String): Ast = {
+    Ast(identifierNode(OxOrigin(code, Option(line)), name, code, typeName))
   }
 
   private def localArrayConstructorAsts(local: OxLocalDecl, typeName: String): Seq[Ast] = {
@@ -2464,13 +2556,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     arrayTypeName: String,
     index: Int,
     line: Int,
-    scopeEntry: Option[ScopeEntry] = None
+    scopeEntry: Option[ScopeEntry] = None,
+    baseCode: Option[String] = None
   ): Ast = {
-    val elementCode     = s"$localName[$index]"
+    val arrayCode       = baseCode.getOrElse(localName)
+    val elementCode     = s"$arrayCode[$index]"
     val elementTypeName = arrayElementTypeFullName(arrayTypeName).getOrElse(Defines.Any)
     val baseAst = scopeEntry
-      .map(identifierAstForScopeEntry(localName, localName, line, _))
-      .getOrElse(identifierAst(localName, localName, line))
+      .map(identifierAstForScopeEntry(localName, arrayCode, line, _))
+      .getOrElse(identifierAst(localName, arrayCode, line))
     operatorCallAst(
       OxOrigin(elementCode, Option(line)),
       elementCode,
