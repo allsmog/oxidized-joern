@@ -48,3 +48,30 @@ fn writes_babel_shaped_json_for_javascript_sources() {
         "ExpressionStatement"
     );
 }
+
+#[test]
+fn writes_babel_shaped_json_for_typescript_sources() {
+    let input = TempDir::new().unwrap();
+    let output = TempDir::new().unwrap();
+    fs::write(
+        input.path().join("app.ts"),
+        "for (foo().x of arr) { bar(); }\n",
+    )
+    .unwrap();
+
+    Command::cargo_bin("astgen")
+        .unwrap()
+        .args(["-t", "ts", "-o"])
+        .arg(output.path())
+        .arg(input.path())
+        .assert()
+        .success();
+
+    let json_path = output.path().join("app.ts.json");
+    let document: Value = serde_json::from_slice(&fs::read(json_path).unwrap()).unwrap();
+    assert_eq!(document["relativeName"], "app.ts");
+    assert_eq!(
+        document["ast"]["program"]["body"][0]["type"],
+        "ForOfStatement"
+    );
+}

@@ -108,7 +108,7 @@ fn collect_inputs(
 fn is_js_input(path: &Path) -> bool {
     matches!(
         path.extension().and_then(|x| x.to_str()),
-        Some("js" | "jsx" | "cjs" | "mjs")
+        Some("js" | "jsx" | "cjs" | "mjs" | "xsjs" | "xsjslib" | "ts" | "tsx")
     )
 }
 
