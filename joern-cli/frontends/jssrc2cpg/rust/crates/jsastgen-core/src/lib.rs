@@ -19,7 +19,26 @@ pub fn parse_source(root: &Path, path: &Path, source: &str) -> Result<Value> {
 }
 
 fn parse_tree(path: &Path, source: &str) -> Result<Tree> {
-    parse_tree_with_candidates(source, language_candidates(path))
+    let candidates = if contains_ts_export_assignment(source) {
+        vec![
+            SourceLanguage::TypeScript,
+            SourceLanguage::Tsx,
+            SourceLanguage::JavaScript,
+        ]
+    } else {
+        language_candidates(path)
+    };
+    parse_tree_with_candidates(source, candidates.clone()).or_else(|original_error| {
+        if let Some(normalized) = normalize_export_default_from_source(source) {
+            parse_tree_with_candidates(&normalized, candidates).or(Err(original_error))
+        } else {
+            Err(original_error)
+        }
+    })
+}
+
+fn contains_ts_export_assignment(source: &str) -> bool {
+    source.contains("export =")
 }
 
 fn parse_tree_with_candidates(source: &str, candidates: Vec<SourceLanguage>) -> Result<Tree> {
@@ -37,6 +56,50 @@ fn parse_tree_with_candidates(source: &str, candidates: Vec<SourceLanguage>) -> 
         bail!("parser reported syntax errors after trying {language}");
     }
     bail!("parser reported syntax errors");
+}
+
+fn normalize_export_default_from_source(source: &str) -> Option<String> {
+    let mut bytes = source.as_bytes().to_vec();
+    let mut changed = false;
+    let mut cursor = 0;
+
+    while let Some(relative) = source[cursor..].find("export ") {
+        let export_start = cursor + relative;
+        let name_start = export_start + "export ".len();
+        let Some(first) = source.as_bytes().get(name_start).copied() else {
+            break;
+        };
+        if !is_identifier_start(first) {
+            cursor = name_start;
+            continue;
+        }
+
+        let mut name_end = name_start + 1;
+        while source
+            .as_bytes()
+            .get(name_end)
+            .is_some_and(|byte| is_identifier_continue(*byte))
+        {
+            name_end += 1;
+        }
+
+        if source[name_end..].starts_with(" from ") {
+            bytes[export_start + "export".len()] = b'{';
+            bytes[name_end] = b'}';
+            changed = true;
+        }
+        cursor = name_end;
+    }
+
+    changed.then(|| String::from_utf8(bytes).expect("normalized source is valid UTF-8"))
+}
+
+fn is_identifier_start(byte: u8) -> bool {
+    byte == b'_' || byte == b'$' || byte.is_ascii_alphabetic()
+}
+
+fn is_identifier_continue(byte: u8) -> bool {
+    is_identifier_start(byte) || byte.is_ascii_digit()
 }
 
 fn is_vue_file(path: &Path) -> bool {
@@ -1160,10 +1223,40 @@ fn export_statement_json(node: Node, source: &str) -> Value {
         .child_by_field_name("source")
         .map(|child| string_literal_json(child, source))
         .unwrap_or(Value::Null);
-    let specifiers = named_children(node)
+    let mut specifiers = named_children(node)
         .find(|child| child.kind() == "export_clause")
         .map(|child| export_specifiers_json(child, source))
         .unwrap_or_default();
+    if let Some(namespace_export) =
+        named_children(node).find(|child| child.kind() == "namespace_export")
+    {
+        specifiers.push(export_namespace_specifier_json(namespace_export, source));
+    }
+
+    if has_keyword_child(node, source, "=") {
+        let expression = node
+            .child_by_field_name("value")
+            .or_else(|| named_children(node).find(|child| is_expression_like(*child)))
+            .map(|child| expr_json(child, source))
+            .unwrap_or_else(|| noop_json(node));
+        return with_span(
+            "TSExportAssignment",
+            node,
+            json!({ "expression": expression }),
+        );
+    }
+
+    if source_value != Value::Null && specifiers.is_empty() && has_keyword_child(node, source, "*")
+    {
+        return with_span(
+            "ExportAllDeclaration",
+            node,
+            json!({
+                "source": source_value,
+                "exported": Value::Null
+            }),
+        );
+    }
 
     if has_keyword_child(node, source, "default") {
         let declaration = node
@@ -1211,6 +1304,17 @@ fn export_specifiers_json(node: Node, source: &str) -> Vec<Value> {
         .filter(|child| child.kind() == "export_specifier")
         .map(|child| export_specifier_json(child, source))
         .collect()
+}
+
+fn export_namespace_specifier_json(node: Node, source: &str) -> Value {
+    let exported_node = named_children(node).last().unwrap_or(node);
+    with_span(
+        "ExportNamespaceSpecifier",
+        node,
+        json!({
+            "exported": import_export_name_json(exported_node, source)
+        }),
+    )
 }
 
 fn export_specifier_json(node: Node, source: &str) -> Value {
@@ -3684,6 +3788,46 @@ mod tests {
             export_decl["declaration"]["declarations"][0]["id"]["name"],
             "getApiA"
         );
+    }
+
+    #[test]
+    fn emits_export_assignments_star_exports_and_default_from_exports() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/exports.js");
+        let json = parse_source(
+            root,
+            path,
+            "export = foo;\nexport = function func(param) {};\nexport = class ClassA {};\nexport { import1 as name1, name3 } from \"Foo\";\nexport bar from \"Bar\";\nexport * from \"Baz\";\nexport * as B from \"Qux\";\n",
+        )
+        .expect("parse succeeds");
+        let body = json["ast"]["program"]["body"].as_array().unwrap();
+
+        assert_eq!(body[0]["type"], "TSExportAssignment");
+        assert_eq!(body[0]["expression"]["name"], "foo");
+        assert_eq!(body[1]["type"], "TSExportAssignment");
+        assert_eq!(body[1]["expression"]["type"], "FunctionExpression");
+        assert_eq!(body[1]["expression"]["id"]["name"], "func");
+        assert_eq!(body[2]["type"], "TSExportAssignment");
+        assert_eq!(body[2]["expression"]["type"], "ClassExpression");
+        assert_eq!(body[2]["expression"]["id"]["name"], "ClassA");
+
+        assert_eq!(body[3]["type"], "ExportNamedDeclaration");
+        assert_eq!(body[3]["source"]["value"], "Foo");
+        assert_eq!(body[3]["specifiers"][0]["local"]["name"], "import1");
+        assert_eq!(body[3]["specifiers"][0]["exported"]["name"], "name1");
+
+        assert_eq!(body[4]["type"], "ExportNamedDeclaration");
+        assert_eq!(body[4]["source"]["value"], "Bar");
+        assert_eq!(body[4]["specifiers"][0]["local"]["name"], "bar");
+        assert_eq!(body[4]["specifiers"][0]["exported"]["name"], "bar");
+
+        assert_eq!(body[5]["type"], "ExportAllDeclaration");
+        assert_eq!(body[5]["source"]["value"], "Baz");
+
+        assert_eq!(body[6]["type"], "ExportNamedDeclaration");
+        assert_eq!(body[6]["source"]["value"], "Qux");
+        assert_eq!(body[6]["specifiers"][0]["type"], "ExportNamespaceSpecifier");
+        assert_eq!(body[6]["specifiers"][0]["exported"]["name"], "B");
     }
 
     #[test]
