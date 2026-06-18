@@ -201,6 +201,20 @@ class SimpleAstCreationPassTest extends SwiftSrc2CpgSuite {
       }
     }
 
+    "have correct structure for simple for in loops" in {
+      val cpg = code("""
+          |func visit(items: Int) {
+          |  for item in items {
+          |    sink(item)
+          |  }
+          |}
+          |""".stripMargin)
+
+      cpg.controlStructure.controlStructureType(ControlStructureTypes.WHILE).code.l shouldBe List("for item in items {\n    sink(item)\n  }")
+      cpg.call.nameExact(Operators.assignment).code.l should contain("item = <result>0.value")
+      cpg.call.nameExact("sink").code.l shouldBe List("sink(item)")
+    }
+
     "have correct structure for simple break and continue" in {
       val cpg = code("""
           |func loop(flag: Bool) {
