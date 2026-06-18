@@ -104,6 +104,7 @@ fn expr_json(node: Node, source: &str) -> Value {
         "null" => with_span("NullLiteral", node, json!({ "value": Value::Null })),
         "binary_expression" => binary_expression_json(node, source),
         "assignment_expression" => assignment_expression_json(node, source),
+        "ternary_expression" => conditional_expression_json(node, source),
         "call_expression" => call_expression_json(node, source),
         "member_expression" => member_expression_json(node, source),
         "subscript_expression" => subscript_expression_json(node, source),
@@ -284,6 +285,22 @@ fn assignment_expression_json(node: Node, source: &str) -> Value {
             "left": left,
             "operator": operator,
             "right": right
+        }),
+    )
+}
+
+fn conditional_expression_json(node: Node, source: &str) -> Value {
+    let test = field_json(node, "condition", source).unwrap_or_else(|| noop_json(node));
+    let consequent = field_json(node, "consequence", source).unwrap_or_else(|| noop_json(node));
+    let alternate = field_json(node, "alternative", source).unwrap_or_else(|| noop_json(node));
+
+    with_span(
+        "ConditionalExpression",
+        node,
+        json!({
+            "test": test,
+            "consequent": consequent,
+            "alternate": alternate
         }),
     )
 }
@@ -907,6 +924,19 @@ mod tests {
         assert_eq!(if_stmt["test"]["right"]["property"]["name"], "i");
         assert_eq!(if_stmt["consequent"]["type"], "ExpressionStatement");
         assert_eq!(if_stmt["alternate"], Value::Null);
+    }
+
+    #[test]
+    fn emits_ternaries_as_babel_conditional_expressions() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(root, path, "x ? y : z;\n").expect("parse succeeds");
+
+        let expression = &json["ast"]["program"]["body"][0]["expression"];
+        assert_eq!(expression["type"], "ConditionalExpression");
+        assert_eq!(expression["test"]["name"], "x");
+        assert_eq!(expression["consequent"]["name"], "y");
+        assert_eq!(expression["alternate"]["name"], "z");
     }
 
     #[test]
