@@ -161,6 +161,9 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |long pickPointerBool(long value) { return 2; }
           |int pickArrayBool(bool value) { return 1; }
           |long pickArrayBool(long value) { return 2; }
+          |int pickZeroNull(Mid* value) { return 1; }
+          |int pickZeroNullAmbiguous(Mid* value) { return 1; }
+          |long pickZeroNullAmbiguous(long value) { return 2; }
           |int choose(int value, int scale = 1) { return value + scale; }
           |long choose(long value) { return value; }
           |template <typename T>
@@ -236,6 +239,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |    Core::pickArrayVoid(values) +
           |    Core::pickPointerBool(intPtr) +
           |    Core::pickArrayBool(values) +
+          |    Core::pickZeroNull(0) +
+          |    Core::pickZeroNullAmbiguous(0) +
           |    Core::choose(leaf) +
           |    Core::choose(1) +
           |    Core::choose(1, 2) +
@@ -286,6 +291,10 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pickPointerBool:int(bool)")
       cpg.method.nameExact("use").call.codeExact("Core::pickArrayBool(values)").methodFullName.l shouldBe
         List("Core.pickArrayBool:int(bool)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNull(0)").methodFullName.l shouldBe
+        List("Core.pickZeroNull:int(Mid*)")
+      cpg.method.nameExact("use").call.codeExact("Core::pickZeroNullAmbiguous(0)").methodFullName.l shouldBe
+        List("Core.pickZeroNullAmbiguous")
       cpg.method.nameExact("use").call.codeExact("Core::choose(leaf)").methodFullName.l shouldBe
         List("Core.choose:T(T)")
       cpg.method.nameExact("use").call.codeExact("Core::choose(1)").methodFullName.l shouldBe

@@ -5566,7 +5566,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     expectedTypeFullName: String
   ): Boolean = {
     expressionTypeFullName(expression).exists { argumentType =>
-      directTypeCompatibilityScore(expectedTypeFullName, argumentType, expressionIsRvalue(expression)) > 0
+      directTypeCompatibilityScore(
+        expectedTypeFullName,
+        argumentType,
+        expressionIsRvalue(expression),
+        Some(expression)
+      ) > 0
     }
   }
 
@@ -7915,7 +7920,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def typeCompatibilityScore(parameterTypeName: String, argumentInfo: ArgumentInfo): Int = {
     val directScore = argumentInfo.typeFullName
-      .map(argumentTypeName => directTypeCompatibilityScore(parameterTypeName, argumentTypeName, argumentInfo.isRvalue))
+      .map(argumentTypeName =>
+        directTypeCompatibilityScore(
+          parameterTypeName,
+          argumentTypeName,
+          argumentInfo.isRvalue,
+          Some(argumentInfo.expression)
+        )
+      )
       .getOrElse(1)
     if (directScore > 0) {
       directScore
@@ -7935,25 +7947,30 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private def directTypeCompatibilityScore(
     parameterTypeName: String,
     argumentTypeName: String,
-    argumentIsRvalue: Boolean
+    argumentIsRvalue: Boolean,
+    argumentExpression: Option[OxExpression] = None
   ): Int = {
     val parameterType       = overloadComparableType(parameterTypeName)
     val argumentType        = overloadComparableType(argumentTypeName)
     val arithmeticConverts  = arithmeticConversionScore(parameterType, argumentType).isDefined
     val rejectsNonConstBind = arithmeticConverts && nonConstLvalueReferenceTypeName(parameterTypeName)
-    overloadBaseCompatibilityScore(parameterType, argumentType)
+    overloadBaseCompatibilityScore(parameterType, argumentType, argumentExpression)
       .filter(_ => !rejectsNonConstBind)
       .flatMap(baseScore => typeBindingScore(parameterTypeName, argumentTypeName, argumentIsRvalue).map(baseScore + _))
       .getOrElse(0)
   }
 
-  private def overloadBaseCompatibilityScore(parameterType: String, argumentType: String): Option[Int] = {
+  private def overloadBaseCompatibilityScore(
+    parameterType: String,
+    argumentType: String,
+    argumentExpression: Option[OxExpression] = None
+  ): Option[Int] = {
     if (isTemplateParameterComparableType(parameterType)) Some(20)
     else if (parameterType == Defines.Any || argumentType == Defines.Any) Some(10)
     else if (parameterType == argumentType) Some(60)
     else if (parameterType.endsWith(s".$argumentType") || argumentType.endsWith(s".$parameterType")) Some(55)
     else
-      nullPointerConversionScore(parameterType, argumentType)
+      nullPointerConversionScore(parameterType, argumentType, argumentExpression)
         .orElse(arrayToPointerConversionScore(parameterType, argumentType))
         .orElse(pointerConversionScore(parameterType, argumentType))
         .orElse(booleanConversionScore(parameterType, argumentType))
@@ -7965,8 +7982,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         }
   }
 
-  private def nullPointerConversionScore(parameterType: String, argumentType: String): Option[Int] = {
-    Option.when(argumentType == "std.nullptr_t" && parameterType.endsWith("*"))(45)
+  private def nullPointerConversionScore(
+    parameterType: String,
+    argumentType: String,
+    argumentExpression: Option[OxExpression] = None
+  ): Option[Int] = {
+    Option.when(
+      parameterType.endsWith("*") &&
+        (argumentType == "std.nullptr_t" || argumentExpression.exists(isZeroIntegerLiteralExpression))
+    )(45)
   }
 
   private def pointerConversionScore(parameterType: String, argumentType: String): Option[Int] = {
@@ -8486,6 +8510,26 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def isIntegerLiteral(value: String): Boolean = {
     IntegerLiteralPattern.pattern.matcher(value.trim).matches()
+  }
+
+  private def isZeroIntegerLiteralExpression(expression: OxExpression): Boolean = {
+    expression match {
+      case OxLiteral(value, _, _) => isZeroIntegerLiteral(value)
+      case _                      => false
+    }
+  }
+
+  private def isZeroIntegerLiteral(value: String): Boolean = {
+    val literal = value.trim
+    if (!isIntegerLiteral(literal)) {
+      false
+    } else {
+      val withoutSuffix = literal.replaceFirst("[uUlL]*$", "").stripPrefix("+").stripPrefix("-")
+      val digits =
+        if (withoutSuffix.startsWith("0x") || withoutSuffix.startsWith("0X")) withoutSuffix.drop(2)
+        else withoutSuffix
+      digits.nonEmpty && digits.forall(_ == '0')
+    }
   }
 
   private def isFloatingLiteral(value: String): Boolean = {
