@@ -7572,8 +7572,6 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val argumentType           = normalizeType(resolveAliasType(argumentTypeName))
     val parameterObjectIsConst = receiverObjectTypeIsConst(parameterType)
     val argumentObjectIsConst  = receiverObjectTypeIsConst(argumentTypeName)
-    val argumentIsAggregate =
-      resolveAggregateTypeFullName(receiverAggregateTypeName(argumentTypeName)).isDefined
     if (parameterType.endsWith("*") && argumentType.endsWith("*")) {
       Option.when(parameterObjectIsConst || !argumentObjectIsConst) {
         if (parameterObjectIsConst && !argumentObjectIsConst) 1 else 2
@@ -7581,7 +7579,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     } else if (parameterType.endsWith("&&")) {
       Option.when(argumentIsRvalue && (!argumentObjectIsConst || parameterObjectIsConst))(3)
     } else if (parameterType.endsWith("&")) {
-      Option.when(parameterObjectIsConst || (!argumentObjectIsConst && (!argumentIsRvalue || !argumentIsAggregate))) {
+      Option.when(parameterObjectIsConst || (!argumentObjectIsConst && !argumentIsRvalue)) {
         if (argumentIsRvalue) 0
         else if (parameterObjectIsConst && !argumentObjectIsConst) 1
         else 2

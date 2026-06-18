@@ -265,6 +265,32 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.pick:short(Mid&)")
     }
 
+    "reject non-const lvalue reference overloads for rvalues" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Item {};
+          |Item makeItem();
+          |long bind(const int& value) { return 1; }
+          |short bind(int& value) { return 2; }
+          |long bindItem(const Item& value) { return 1; }
+          |short bindItem(Item& value) { return 2; }
+          |}
+          |long use(int& value) {
+          |  return Core::bind(1) + Core::bind(value) + Core::bindItem(Core::makeItem());
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").call.codeExact("Core::bind(1)").methodFullName.l shouldBe
+        List("Core.bind:long(int&)")
+      cpg.method.nameExact("use").call.codeExact("Core::bind(value)").methodFullName.l shouldBe
+        List("Core.bind:short(int&)")
+      cpg.method.nameExact("use").call.codeExact("Core::bindItem(Core::makeItem())").methodFullName.l shouldBe
+        List("Core.bindItem:long(Item&)")
+    }
+
     "specialize function template returns during overload resolution" in {
       val cpg = code(
         """
