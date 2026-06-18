@@ -131,6 +131,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "class_declaration" => self.nominal_type_decl(node),
             "control_transfer_statement" => self.return_stmt(node),
             "if_statement" => self.if_expr(node),
+            "while_statement" => self.while_stmt(node),
             "assignment"
             | "additive_expression"
             | "boolean_literal"
@@ -703,7 +704,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let condition = self
             .field_child(node, "condition")
             .filter(|child| child.is_named())
-            .or_else(|| self.first_named_if_condition(node, if_keyword, body_statements))
+            .or_else(|| self.first_named_condition(node, if_keyword, body_statements))
             .context("if expression is missing condition")?;
         let left_brace = self
             .nearest_child_before(node, "{", body_statements.start_byte())
@@ -757,6 +758,46 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
 
         Ok(self.syntax_node("IfExprSyntax", self.range_for_node(node), children))
+    }
+
+    fn while_stmt(&self, node: Node<'a>) -> Result<Value> {
+        let while_keyword = self
+            .immediate_child_kind(node, "while")
+            .context("while statement is missing 'while'")?;
+        let body_statements = named_children(node)
+            .find(|child| child.kind() == "statements")
+            .context("while statement is missing body statements")?;
+        let condition = self
+            .field_child(node, "condition")
+            .filter(|child| child.is_named())
+            .or_else(|| self.first_named_condition(node, while_keyword, body_statements))
+            .context("while statement is missing condition")?;
+        let left_brace = self
+            .nearest_child_before(node, "{", body_statements.start_byte())
+            .context("while statement body is missing '{'")?;
+        let right_brace = self
+            .nearest_child_after(node, "}", body_statements.end_byte())
+            .context("while statement body is missing '}'")?;
+
+        Ok(self.syntax_node(
+            "WhileStmtSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(while_keyword, "keyword(SwiftSyntax.Keyword.while)"),
+                    "whileKeyword",
+                ),
+                self.with_name(self.condition_element_list(condition)?, "conditions"),
+                self.with_name(
+                    self.code_block_from_statements(
+                        Some(body_statements),
+                        left_brace,
+                        right_brace,
+                    )?,
+                    "body",
+                ),
+            ],
+        ))
     }
 
     fn condition_element_list(&self, condition: Node<'a>) -> Result<Value> {
@@ -1084,14 +1125,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         children(node).find(|child| child.kind() == kind && child.start_byte() >= offset)
     }
 
-    fn first_named_if_condition(
+    fn first_named_condition(
         &self,
         node: Node<'a>,
-        if_keyword: Node<'a>,
+        keyword: Node<'a>,
         body_statements: Node<'a>,
     ) -> Option<Node<'a>> {
         named_children(node).find(|child| {
-            child.start_byte() > if_keyword.end_byte()
+            child.start_byte() > keyword.end_byte()
                 && child.end_byte() <= body_statements.start_byte()
                 && child.kind() != "else"
                 && child.kind() != "statements"
@@ -1311,6 +1352,26 @@ mod tests {
             "keyword(SwiftSyntax.Keyword.else)"
         );
         assert_eq!(if_expr["children"][4]["nodeType"], "CodeBlockSyntax");
+    }
+
+    #[test]
+    fn emits_while_statement() {
+        let source = "func f(i: Int) {\n  while i > 0 {\n    foo()\n  }\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let while_stmt = find_first_node_type(&value, "WhileStmtSyntax").unwrap();
+        assert_eq!(
+            while_stmt["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.while)"
+        );
+        assert_eq!(
+            while_stmt["children"][1]["nodeType"],
+            "ConditionElementListSyntax"
+        );
+        assert_eq!(
+            while_stmt["children"][1]["children"][0]["children"][0]["nodeType"],
+            "InfixOperatorExprSyntax"
+        );
+        assert_eq!(while_stmt["children"][2]["nodeType"], "CodeBlockSyntax");
     }
 
     #[test]

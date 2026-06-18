@@ -185,6 +185,22 @@ class SimpleAstCreationPassTest extends SwiftSrc2CpgSuite {
       cpg.controlStructure.controlStructureType(ControlStructureTypes.IF).condition.code.l shouldBe List("y > 0")
     }
 
+    "have correct structure for simple while loops" in {
+      val cpg = code("""
+          |func count() {
+          |  var i = 0
+          |  while i < 3 {
+          |    i = i + 1
+          |  }
+          |}
+          |""".stripMargin)
+
+      inside(cpg.controlStructure.controlStructureType(ControlStructureTypes.WHILE).l) { case List(whileNode) =>
+        whileNode.condition.code.l shouldBe List("i < 3")
+        whileNode.whenTrue.ast.isCall.nameExact(Operators.assignment).code.l should contain("i = i + 1")
+      }
+    }
+
     "have correct closure bindings" in {
       val cpg = code("""
         |func foo() -> {
