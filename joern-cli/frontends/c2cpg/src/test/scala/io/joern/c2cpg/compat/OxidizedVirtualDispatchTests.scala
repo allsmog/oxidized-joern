@@ -280,6 +280,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |template <typename T>
           |T id(T value) { return value; }
           |template <typename T>
+          |auto idAuto(T value) { return value; }
+          |template <typename T>
           |T makeExplicit();
           |template <typename T>
           |T& ref(T& value) { return value; }
@@ -288,6 +290,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |}
           |long use(Core::Leaf& leaf, const Core::Leaf& constLeaf) {
           |  return Core::pick(Core::id(Core::makeLeaf())) +
+          |    Core::pick(Core::idAuto(Core::makeLeaf())) +
           |    Core::pick(Core::makeExplicit<Core::Leaf>()) +
           |    Core::pick(Core::ref(leaf)) +
           |    Core::pick(Core::cref(constLeaf));
@@ -298,6 +301,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
 
       cpg.method.nameExact("use").call.codeExact("Core::id(Core::makeLeaf())").typeFullName.l shouldBe
         List("Core.Leaf")
+      cpg.method.nameExact("use").call.codeExact("Core::idAuto(Core::makeLeaf())").typeFullName.l shouldBe
+        List("Core.Leaf")
       cpg.method.nameExact("use").call.codeExact("Core::makeExplicit<Core::Leaf>()").typeFullName.l shouldBe
         List("Core.Leaf")
       cpg.method.nameExact("use").call.codeExact("Core::ref(leaf)").typeFullName.l shouldBe
@@ -305,6 +310,8 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.codeExact("Core::cref(constLeaf)").typeFullName.l shouldBe
         List("const Core.Leaf&")
       cpg.method.nameExact("use").call.codeExact("Core::pick(Core::id(Core::makeLeaf()))").methodFullName.l shouldBe
+        List("Core.pick:char(Leaf&&)")
+      cpg.method.nameExact("use").call.codeExact("Core::pick(Core::idAuto(Core::makeLeaf()))").methodFullName.l shouldBe
         List("Core.pick:char(Leaf&&)")
       cpg.method
         .nameExact("use")
