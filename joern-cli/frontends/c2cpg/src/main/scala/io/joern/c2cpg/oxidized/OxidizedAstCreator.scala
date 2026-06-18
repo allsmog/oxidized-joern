@@ -7934,6 +7934,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       nullPointerConversionScore(parameterType, argumentType)
         .orElse(arrayToPointerConversionScore(parameterType, argumentType))
         .orElse(pointerConversionScore(parameterType, argumentType))
+        .orElse(booleanConversionScore(parameterType, argumentType))
         .orElse(arithmeticConversionScore(parameterType, argumentType))
         .orElse {
           inheritanceDistanceFromArgumentToParameter(argumentType, parameterType)
@@ -7967,6 +7968,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         }
       }
       .flatten
+  }
+
+  private def booleanConversionScore(parameterType: String, argumentType: String): Option[Int] = {
+    Option.when(parameterType == "bool" && (argumentType.endsWith("*") || isArrayLikeType(argumentType)))(45)
   }
 
   private def arithmeticConversionScore(parameterType: String, argumentType: String): Option[Int] = {
