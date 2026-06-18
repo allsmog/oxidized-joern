@@ -1177,7 +1177,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           temporaryDestructorAstsForConstructorArguments(resolution.arguments, resolution.entry)
       case Some(initializer) if isCopyConstructorInitializer(typeName, initializer) =>
         val arguments   = Seq(initializer)
-        val constructor = constructorEntry(typeName, arguments)
+        val constructor = implicitConstructorEntry(typeName, arguments)
         aggregateAssignmentExpressionAsts(initializer) ++ Seq(
           globalConstructorAssignmentAst(
             global,
@@ -2811,9 +2811,16 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           temporaryDestructorAstsForConstructorArguments(resolution.arguments, resolution.entry)
       case Some(initializer) if useConstructorInitializers && isCopyConstructorInitializer(typeName, initializer) =>
         val arguments   = Seq(initializer)
-        val constructor = constructorEntry(typeName, arguments)
+        val constructor = implicitConstructorEntry(typeName, arguments)
         aggregateAssignmentExpressionAsts(initializer) ++ Seq(
-          constructorAssignmentAst(local, arguments, initializer.code, OxOrigin(initializer), typeName)
+          constructorAssignmentAst(
+            local,
+            arguments,
+            initializer.code,
+            OxOrigin(initializer),
+            typeName,
+            resolvedConstructor = constructor
+          )
         ) ++ temporaryDestructorAstsForConstructorArguments(arguments, constructor)
       case Some(_: OxInitializerList) if arrayConstructorAsts.nonEmpty =>
         arrayConstructorAsts
@@ -3752,7 +3759,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def isCopyConstructorInitializer(typeName: String, initializer: OxExpression): Boolean = {
-    aggregateTypeFullNames.contains(typeName) && !initializer.isInstanceOf[OxInitializerList]
+    val constructorEntries = constructorEntriesForType(typeName)
+    aggregateTypeFullNames.contains(typeName) &&
+    !initializer.isInstanceOf[OxInitializerList] &&
+    (constructorEntries.isEmpty || implicitConstructorEntry(typeName, Seq(initializer)).isDefined)
   }
 
   private def isDefaultConstructorInitializer(typeName: String): Boolean = {
@@ -3886,7 +3896,21 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def constructorEntry(typeName: String, arguments: Seq[OxExpression]): Option[FunctionEntry] = {
-    val candidates = constructorEntriesForType(typeName)
+    constructorEntry(typeName, arguments, includeExplicitConstructors = true)
+  }
+
+  private def implicitConstructorEntry(typeName: String, arguments: Seq[OxExpression]): Option[FunctionEntry] = {
+    constructorEntry(typeName, arguments, includeExplicitConstructors = false)
+  }
+
+  private def constructorEntry(
+    typeName: String,
+    arguments: Seq[OxExpression],
+    includeExplicitConstructors: Boolean
+  ): Option[FunctionEntry] = {
+    val candidates = constructorEntriesForType(typeName).filter(entry =>
+      includeExplicitConstructors || !functionHasExplicitSpecifier(entry.function)
+    )
     selectFunctionEntry(candidates, Some(arguments))
   }
 
