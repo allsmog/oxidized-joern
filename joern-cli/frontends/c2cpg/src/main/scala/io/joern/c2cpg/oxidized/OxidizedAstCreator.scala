@@ -5443,17 +5443,29 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     expression: OxExpression,
     expectedTypeFullName: Option[String]
   ): Option[ResolvedOperatorCall] = {
-    expectedTypeFullName
-      .flatMap(contextualConversionObjectTypeFullName)
-      .filterNot(targetType => expressionObjectTypeFullName(expression).contains(targetType))
-      .flatMap { targetType =>
-        val candidates = (conversionOperatorNamesForType(targetType)
-          .flatMap(operatorName => memberFunctionCandidates(expression, operatorName)) ++
-          conversionOperatorCandidates(expression)).distinct
-          .filter(entry => conversionOperatorReturnObjectTypeFullName(entry).contains(targetType))
-        selectFunctionEntry(candidates, Some(Seq.empty))
-          .map(entry => ResolvedOperatorCall(entry, entry.simpleName, Option(expression), Seq.empty))
-      }
+    expectedTypeFullName.filterNot(expressionDirectlyCompatibleWithExpected(expression, _)).flatMap { expectedType =>
+      val candidates = (contextualConversionObjectTypeFullName(expectedType).toSeq
+        .flatMap(conversionOperatorNamesForType)
+        .flatMap(operatorName => memberFunctionCandidates(expression, operatorName)) ++
+        conversionOperatorCandidates(expression)).distinct
+      candidates.zipWithIndex
+        .flatMap { case (entry, index) =>
+          conversionOperatorCompatibilityScore(expectedType, entry).map(score => (entry, score, index))
+        }
+        .maxByOption { case (_, score, index) => (score, index) }
+        .map { case (entry, _, _) =>
+          ResolvedOperatorCall(entry, entry.simpleName, Option(expression), Seq.empty)
+        }
+    }
+  }
+
+  private def expressionDirectlyCompatibleWithExpected(
+    expression: OxExpression,
+    expectedTypeFullName: String
+  ): Boolean = {
+    expressionTypeFullName(expression).exists { argumentType =>
+      directTypeCompatibilityScore(expectedTypeFullName, argumentType, expressionIsRvalue(expression)) > 0
+    }
   }
 
   private def contextualConversionTemporaryTypeFullName(
@@ -6454,12 +6466,15 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       directScore
     } else {
       contextualConversionOperatorTarget(argumentInfo.expression, Option(parameterTypeName))
-        .flatMap { target =>
-          val returnType = functionSemanticReturnTypeFullName(target.entry)
-          referenceBindingScore(parameterTypeName, returnType, typeNameIsRvalue(returnType)).map(2 + _)
-        }
+        .flatMap(target => conversionOperatorCompatibilityScore(parameterTypeName, target.entry))
         .getOrElse(0)
     }
+  }
+
+  private def conversionOperatorCompatibilityScore(parameterTypeName: String, entry: FunctionEntry): Option[Int] = {
+    val returnType  = functionSemanticReturnTypeFullName(entry)
+    val directScore = directTypeCompatibilityScore(parameterTypeName, returnType, typeNameIsRvalue(returnType))
+    Option.when(directScore > 0)(10 + math.max(0, math.min(directScore - 50, 9)))
   }
 
   private def directTypeCompatibilityScore(
@@ -6470,9 +6485,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val parameterType = overloadComparableType(parameterTypeName)
     val argumentType  = overloadComparableType(argumentTypeName)
     overloadBaseCompatibilityScore(parameterType, argumentType)
-      .flatMap(baseScore =>
-        referenceBindingScore(parameterTypeName, argumentTypeName, argumentIsRvalue).map(baseScore + _)
-      )
+      .flatMap(baseScore => typeBindingScore(parameterTypeName, argumentTypeName, argumentIsRvalue).map(baseScore + _))
       .getOrElse(0)
   }
 
@@ -6504,17 +6517,22 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     typeName.matches("[A-Z][0-9]?")
   }
 
-  private def referenceBindingScore(
+  private def typeBindingScore(
     parameterTypeName: String,
     argumentTypeName: String,
     argumentIsRvalue: Boolean
   ): Option[Int] = {
     val parameterType          = normalizeType(resolveAliasType(parameterTypeName))
+    val argumentType           = normalizeType(resolveAliasType(argumentTypeName))
     val parameterObjectIsConst = receiverObjectTypeIsConst(parameterType)
     val argumentObjectIsConst  = receiverObjectTypeIsConst(argumentTypeName)
     val argumentIsAggregate =
       resolveAggregateTypeFullName(receiverAggregateTypeName(argumentTypeName)).isDefined
-    if (parameterType.endsWith("&&")) {
+    if (parameterType.endsWith("*") && argumentType.endsWith("*")) {
+      Option.when(parameterObjectIsConst || !argumentObjectIsConst) {
+        if (parameterObjectIsConst && !argumentObjectIsConst) 1 else 2
+      }
+    } else if (parameterType.endsWith("&&")) {
       Option.when(argumentIsRvalue && (!argumentObjectIsConst || parameterObjectIsConst))(3)
     } else if (parameterType.endsWith("&")) {
       Option.when(parameterObjectIsConst || (!argumentObjectIsConst && (!argumentIsRvalue || !argumentIsAggregate))) {
