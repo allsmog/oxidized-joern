@@ -109,7 +109,14 @@ case class OxFunctionDecl(
   body: Seq[OxStatement]
 ) extends OxDeclaration
 
-case class OxParameterDecl(name: String, typeName: String, isVariadic: Boolean, code: String, line: Int)
+case class OxParameterDecl(
+  name: String,
+  typeName: String,
+  semanticTypeName: String,
+  isVariadic: Boolean,
+  code: String,
+  line: Int
+)
 
 case class OxConstructorInitializer(field: String, code: String, line: Int, arguments: Seq[OxExpression])
 
@@ -122,8 +129,14 @@ case class OxUnknownStatement(code: String, line: Int) extends OxStatement
 
 case class OxUsingEnumStatement(typeName: String, code: String, line: Int) extends OxStatement
 
-case class OxLocalDecl(name: String, typeName: String, code: String, line: Int, initializer: Option[OxExpression])
-    extends OxStatement
+case class OxLocalDecl(
+  name: String,
+  typeName: String,
+  semanticTypeName: String,
+  code: String,
+  line: Int,
+  initializer: Option[OxExpression]
+) extends OxStatement
 
 case class OxStructuredBinding(
   typeName: String,
@@ -421,9 +434,11 @@ object OxDocument {
   }
 
   private def parameter(value: Value): OxParameterDecl = {
+    val typeName = str(value, "typeName")
     OxParameterDecl(
       name = str(value, "name"),
-      typeName = str(value, "typeName"),
+      typeName = typeName,
+      semanticTypeName = value.obj.get("semanticTypeName").map(_.str).getOrElse(typeName),
       isVariadic = value.obj.get("isVariadic").exists(_.bool),
       code = str(value, "code"),
       line = int(value, "line")
@@ -446,9 +461,11 @@ object OxDocument {
       case "usingEnum" =>
         OxUsingEnumStatement(typeName = str(value, "typeName"), code = str(value, "code"), line = int(value, "line"))
       case "localDecl" =>
+        val typeName = str(value, "typeName")
         OxLocalDecl(
           name = str(value, "name"),
-          typeName = str(value, "typeName"),
+          typeName = typeName,
+          semanticTypeName = value.obj.get("semanticTypeName").map(_.str).getOrElse(typeName),
           code = str(value, "code"),
           line = int(value, "line"),
           initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)

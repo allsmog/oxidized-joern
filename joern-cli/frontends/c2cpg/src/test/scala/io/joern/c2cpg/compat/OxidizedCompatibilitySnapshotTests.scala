@@ -228,7 +228,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.fullNameExact("Core.Widget.operator+:int(Widget&)<const>").parameter.name.l shouldBe
         List("this", "other")
       cpg.method.fullNameExact("Core.Widget.operator+:int(Widget&)<const>").parameter.typeFullName.l shouldBe
-        List("Core.Widget*", "Widget&")
+        List("const Core.Widget*", "Widget&")
       cpg.method.fullNameExact("Core.Widget.operator=:Widget&(Widget&)").parameter.name.l shouldBe
         List("this", "other")
       cpg.method.fullNameExact("Core.Widget.operator=:Widget&(Widget&)").parameter.typeFullName.l shouldBe

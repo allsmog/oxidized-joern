@@ -144,9 +144,16 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
           |  int viaConst() const { return value() + this->value(); }
           |};
           |}
+          |int readConst(const Core::Meter& meter) {
+          |  return meter.value();
+          |}
+          |int readAlias(Core::Meter& meter) {
+          |  const Core::Meter& alias = meter;
+          |  return alias.value();
+          |}
           |int use() {
           |  Core::Meter meter;
-          |  return meter.viaMutable() + meter.viaConst();
+          |  return meter.viaMutable() + meter.viaConst() + readConst(meter) + readAlias(meter);
           |}
           |""".stripMargin,
         "Test0.cpp"
@@ -158,6 +165,12 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("const Core.Meter*")
       cpg.method.fullNameExact("Core.Meter.viaConst:int()<const>").call.nameExact("value").methodFullName.l shouldBe
         List("Core.Meter.value:int()<const>", "Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readConst").parameter.nameExact("meter").typeFullName.l shouldBe List("Core.Meter&")
+      cpg.method.nameExact("readConst").call.codeExact("meter.value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
+      cpg.method.nameExact("readAlias").local.nameExact("alias").typeFullName.l shouldBe List("Core.Meter&")
+      cpg.method.nameExact("readAlias").call.codeExact("alias.value()").methodFullName.l shouldBe
+        List("Core.Meter.value:int()<const>")
     }
 
     "force static dispatch for explicit base-qualified member calls" in {

@@ -38,7 +38,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   private val LambdaMutableModifier                     = "MUTABLE"
 
   private final case class LambdaInfo(name: String, fullName: String, signature: String, returnType: String)
-  private final case class ScopeEntry(typeFullName: String, declaration: NewNode, lambdaInfo: Option[LambdaInfo] = None)
+  private final case class ScopeEntry(
+    typeFullName: String,
+    declaration: NewNode,
+    lambdaInfo: Option[LambdaInfo] = None,
+    semanticTypeFullName: Option[String] = None
+  ) {
+    def expressionTypeFullName: String = semanticTypeFullName.getOrElse(typeFullName)
+  }
   private final case class CapturedGlobal(scopeEntry: ScopeEntry, binding: NewClosureBinding, globalEntry: ScopeEntry)
   private final case class FunctionEntry(
     function: OxFunctionDecl,
@@ -1421,11 +1428,12 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
             EvaluationStrategies.BY_SHARING,
             thisType
           )
-        Defines.This -> (thisType, Ast(thisNode), thisNode)
+        Defines.This -> (thisType, thisType, Ast(thisNode), thisNode)
       }
       .toSeq
     val explicitParameters = function.parameters.zipWithIndex.map { case (parameter, index) =>
-      val parameterType = registerType(normalizeType(parameter.typeName))
+      val parameterType         = registerType(normalizeType(parameter.typeName))
+      val semanticParameterType = registerType(normalizeType(parameter.semanticTypeName))
       val parameterNode =
         parameterInNode(
           OxOrigin(parameter.code, Option(parameter.line)),
@@ -1436,7 +1444,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           EvaluationStrategies.BY_VALUE,
           parameterType
         )
-      parameter.name -> (parameterType, Ast(parameterNode), parameterNode)
+      parameter.name -> (parameterType, semanticParameterType, Ast(parameterNode), parameterNode)
     }
     val parameters = implicitThisParameter ++ explicitParameters
 
@@ -1452,7 +1460,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousGotoLabels       = gotoLabelCleanupDestructors
     val captureContext =
       FunctionCaptureContext(function, methodRefNode(origin, simpleName, fullName, simpleName))
-    scope = parameters.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }.toMap
+    scope = parameters.map { case (name, (typeName, semanticTypeName, _, node)) =>
+      name -> ScopeEntry(typeName, node, semanticTypeFullName = Option(semanticTypeName))
+    }.toMap
     functionCaptureContext = Option(captureContext)
     currentMethodOwnerTypeFullName = parentTypeOwner
     currentMethodFullName = Option(fullName)
@@ -1503,7 +1513,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val ast =
       methodAst(
         method,
-        parameters.map(_._2._2),
+        parameters.map(_._2._3),
         body,
         methodReturn,
         methodModifiers(simpleName, parentTypeOwner, isStaticMethod, isVirtualMethod)
@@ -2591,12 +2601,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def astsForLocalDecl(local: OxLocalDecl, useConstructorInitializers: Boolean = true): Seq[Ast] = {
-    val origin          = OxOrigin(local)
-    val localLambdaInfo = local.initializer.collect { case lambda: OxLambda => lambdaInfo(lambda) }
-    val typeName        = registerType(localTypeFullName(local))
-    val localCode       = localDeclarationCode(local)
-    val localNode       = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
-    val localScopeEntry = ScopeEntry(typeName, localNode, localLambdaInfo)
+    val origin           = OxOrigin(local)
+    val localLambdaInfo  = local.initializer.collect { case lambda: OxLambda => lambdaInfo(lambda) }
+    val typeName         = registerType(localTypeFullName(local))
+    val semanticTypeName = registerType(localSemanticTypeFullName(local))
+    val localCode        = localDeclarationCode(local)
+    val localNode        = this.localNode(origin.copy(code = localCode), local.name, localCode, typeName)
+    val localScopeEntry =
+      ScopeEntry(typeName, localNode, localLambdaInfo, semanticTypeFullName = Option(semanticTypeName))
     scope = scope.updated(local.name, localScopeEntry)
     val isStaticStorageLocal = hasStaticStorageDuration(local)
     if (!isStaticStorageLocal) {
@@ -3370,6 +3382,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val tempLocal = OxLocalDecl(
       name = binding.tempName,
       typeName = tempTypeName,
+      semanticTypeName = tempTypeName,
       code = s"$tempTypeName ${binding.tempName}",
       line = binding.line,
       initializer = binding.initializer
@@ -3379,7 +3392,14 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     tempAsts ++ binding.names.zipWithIndex.flatMap { case (name, index) =>
       val access = structuredBindingAccess(binding.tempName, tempType, name, index, binding.line)
       astsForLocalDecl(
-        OxLocalDecl(name = name, typeName = Defines.Auto, code = name, line = binding.line, initializer = Some(access))
+        OxLocalDecl(
+          name = name,
+          typeName = Defines.Auto,
+          semanticTypeName = Defines.Auto,
+          code = name,
+          line = binding.line,
+          initializer = Some(access)
+        )
       )
     }
   }
@@ -3452,6 +3472,23 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
   private def localTypeFullName(local: OxLocalDecl): String = {
     val explicitType = typeFullNameWithStringLiteralLength(local.typeName, local.initializer)
+    local.initializer match {
+      case Some(lambda: OxLambda) if explicitType == Defines.Auto => lambdaInfo(lambda).fullName
+      case Some(initializerList: OxInitializerList)
+          if explicitType.startsWith(Defines.Auto) && isDirectListInitializer(local, initializerList) =>
+        initializerListElementTypeFullName(initializerList)
+          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName))
+          .getOrElse(explicitType)
+      case Some(initializer) if explicitType.startsWith(Defines.Auto) =>
+        expressionTypeFullName(initializer)
+          .flatMap(typeName => inferredAutoTypeFullName(explicitType, typeName))
+          .getOrElse(explicitType)
+      case _ => explicitType
+    }
+  }
+
+  private def localSemanticTypeFullName(local: OxLocalDecl): String = {
+    val explicitType = typeFullNameWithStringLiteralLength(local.semanticTypeName, local.initializer)
     local.initializer match {
       case Some(lambda: OxLambda) if explicitType == Defines.Auto => lambdaInfo(lambda).fullName
       case Some(initializerList: OxInitializerList)
@@ -4233,9 +4270,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def catchParameterAst(parameter: OxParameterDecl): Ast = {
-    val typeName = registerType(normalizeType(parameter.typeName))
-    val node     = localNode(OxOrigin(parameter.code, Option(parameter.line)), parameter.name, parameter.code, typeName)
-    scope = scope.updated(parameter.name, ScopeEntry(typeName, node))
+    val typeName         = registerType(normalizeType(parameter.typeName))
+    val semanticTypeName = registerType(normalizeType(parameter.semanticTypeName))
+    val node = localNode(OxOrigin(parameter.code, Option(parameter.line)), parameter.name, parameter.code, typeName)
+    scope = scope.updated(parameter.name, ScopeEntry(typeName, node, semanticTypeFullName = Option(semanticTypeName)))
     registerLocalDestructor(parameter.name, typeName, parameter.line)
     Ast(node)
   }
@@ -4320,6 +4358,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           val tempLocal = OxLocalDecl(
             name = binding.tempName,
             typeName = tempTypeName,
+            semanticTypeName = tempTypeName,
             code = s"$tempTypeName ${binding.tempName}",
             line = binding.line,
             initializer = binding.initializer
@@ -5024,7 +5063,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
 
     def visitStatement(statement: OxStatement): Unit = {
       statement match {
-        case OxLocalDecl(name, _, _, _, initializer) =>
+        case OxLocalDecl(name, _, _, _, _, initializer) =>
           initializer.foreach(visitExpression)
           declared.add(name)
         case OxStructuredBinding(_, _, _, _, names, initializer) =>
@@ -5156,7 +5195,8 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option(info.fullName)
       )
     val parameterEntries = lambda.parameters.zipWithIndex.map { case (parameter, index) =>
-      val parameterType = registerType(normalizeType(parameter.typeName))
+      val parameterType         = registerType(normalizeType(parameter.typeName))
+      val semanticParameterType = registerType(normalizeType(parameter.semanticTypeName))
       val node =
         parameterInNode(
           OxOrigin(parameter.code, Option(parameter.line)),
@@ -5167,7 +5207,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
           EvaluationStrategies.BY_VALUE,
           parameterType
         )
-      parameter.name -> (parameterType, Ast(node), node)
+      parameter.name -> (parameterType, semanticParameterType, Ast(node), node)
     }
 
     val previousScope            = scope
@@ -5181,7 +5221,9 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val previousJumpTargets      = jumpCleanupTargets
     val previousGotoLabels       = gotoLabelCleanupDestructors
     scope = (captures.map(capture => capture.name -> capture.scopeEntry) ++
-      parameterEntries.map { case (name, (typeName, _, node)) => name -> ScopeEntry(typeName, node) }).toMap
+      parameterEntries.map { case (name, (typeName, semanticTypeName, _, node)) =>
+        name -> ScopeEntry(typeName, node, semanticTypeFullName = Option(semanticTypeName))
+      }).toMap
     functionCaptureContext = None
     currentMethodOwnerTypeFullName = None
     currentMethodFullName = Option(info.fullName)
@@ -5215,7 +5257,7 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
         Option.when(lambda.isMutable)(LambdaMutableModifier)
     val modifiers = modifierTypes.map(modifier => modifierNode(origin, modifier))
     val methodAst_ =
-      methodAst(method, parameterEntries.map(_._2._2), body, methodReturn, modifiers)
+      methodAst(method, parameterEntries.map(_._2._3), body, methodReturn, modifiers)
 
     val typeDecl =
       typeDeclNode(
@@ -5731,10 +5773,10 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       case OxIdentifier(name, _, _) =>
         scope
           .get(name)
-          .map(entry => resolveAliasType(entry.typeFullName))
+          .map(entry => resolveAliasType(entry.expressionTypeFullName))
           .orElse(staticFieldTypeFullName(name))
           .orElse(implicitFieldTypeFullName(name))
-          .orElse(globalScopeByName.get(name).map(entry => resolveAliasType(entry.typeFullName)))
+          .orElse(globalScopeByName.get(name).map(entry => resolveAliasType(entry.expressionTypeFullName)))
       case OxLiteral(value, _, _) =>
         Option(literalType(value))
       case fold: OxFold =>
