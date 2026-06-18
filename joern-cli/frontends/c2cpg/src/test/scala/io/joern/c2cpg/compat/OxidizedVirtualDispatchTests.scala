@@ -380,6 +380,27 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
         List("Core.route:long(TargetBase&,Root&)")
     }
 
+    "leave ambiguous overload calls unresolved" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |class Base {};
+          |class Mid : public Base {};
+          |class Leaf : public Mid {};
+          |int mix(Base& left, Mid& right) { return 1; }
+          |long mix(Mid& left, Base& right) { return 2; }
+          |}
+          |long use(Core::Leaf& leaf) {
+          |  return Core::mix(leaf, leaf);
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("use").call.codeExact("Core::mix(leaf, leaf)").methodFullName.l shouldBe
+        List("Core.mix")
+    }
+
     "specialize function template returns during overload resolution" in {
       val cpg = code(
         """
