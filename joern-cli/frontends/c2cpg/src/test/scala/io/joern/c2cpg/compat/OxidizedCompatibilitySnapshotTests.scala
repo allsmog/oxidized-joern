@@ -2441,6 +2441,38 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("heapDefault").call.nameExact("~Defaulted").code.l shouldBe List("ptr->~Defaulted()")
     }
 
+    "prefer C++ initializer-list constructors for braced heap new" in {
+      val cpg = code(
+        """
+          |#include <initializer_list>
+          |namespace Core {
+          |class Bag {
+          |public:
+          |  Bag(int seed) {}
+          |  Bag(std::initializer_list<int> values) {}
+          |  ~Bag();
+          |};
+          |}
+          |Core::Bag *heapBags(int seed) {
+          |  Core::Bag *single = new Core::Bag{seed};
+          |  Core::Bag *many = new Core::Bag{seed, 2};
+          |  delete single;
+          |  delete many;
+          |  return many;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      val initializerListConstructor = "Core.Bag.Bag:void(std::initializer_list<int>)"
+      cpg.method.nameExact("heapBags").call.nameExact("Bag").code.l.sorted shouldBe
+        List("Core.Bag.Bag({seed, 2})", "Core.Bag.Bag({seed})")
+      cpg.method.nameExact("heapBags").call.nameExact("Bag").methodFullName.l shouldBe
+        List(initializerListConstructor, initializerListConstructor)
+      cpg.method.nameExact("heapBags").call.nameExact("~Bag").code.l shouldBe
+        List("single->~Bag()", "many->~Bag()")
+    }
+
     "capture enum variant initializers through a static initializer" in {
       val cpg = code("""
           |enum Mode { MODE_A = 1, MODE_B = 2, MODE_C };
