@@ -64,7 +64,13 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     guardReceiverCode: String
   )
   private final case class HeapConstructor(line: Int, info: ConstructorInvocationInfo, arguments: Seq[OxExpression])
-  private final case class HeapDestructor(code: String, line: Int, entry: FunctionEntry, receiver: OxExpression)
+  private final case class HeapDestructor(
+    code: String,
+    line: Int,
+    entry: FunctionEntry,
+    receiver: OxExpression,
+    isArrayDelete: Boolean
+  )
   private final case class ConstructorInitializerResolution(
     arguments: Seq[OxExpression],
     entry: Option[FunctionEntry],
@@ -3729,10 +3735,11 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
       val aggregateType = resolveAggregateTypeFullName(receiverType).getOrElse(receiverType)
       destructorEntryForType(aggregateType).map { entry =>
         val receiverCode = deleteExpression.argument.code
+        val isArray      = isArrayDelete(deleteExpression)
         val destructorCode =
-          if (isArrayDelete(deleteExpression)) s"$receiverCode[].${entry.simpleName}()"
+          if (isArray) s"$receiverCode[].${entry.simpleName}()"
           else s"$receiverCode->${entry.simpleName}()"
-        HeapDestructor(destructorCode, deleteExpression.line, entry, deleteExpression.argument)
+        HeapDestructor(destructorCode, deleteExpression.line, entry, deleteExpression.argument, isArray)
       }
     }
   }
@@ -3742,17 +3749,25 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
   }
 
   private def heapDestructorAst(destructor: HeapDestructor): Ast = {
+    val dispatchType =
+      if (!destructor.isArrayDelete && isVirtualFunctionEntry(destructor.entry)) DispatchTypes.DYNAMIC_DISPATCH
+      else DispatchTypes.STATIC_DISPATCH
     val callNode_ =
       callNode(
         OxOrigin(destructor.code, Option(destructor.line)),
         destructor.code,
         destructor.entry.simpleName,
         destructor.entry.fullName,
-        DispatchTypes.STATIC_DISPATCH,
+        dispatchType,
         Option(destructor.entry.function.signature),
         Option(registerType(Defines.Void))
       )
-    createCallAst(callNode_, base = Option(expressionAst(destructor.receiver)))
+    val base = expressionAst(destructor.receiver)
+    createCallAst(
+      callNode_,
+      base = Option(base),
+      receiver = Option.when(dispatchType == DispatchTypes.DYNAMIC_DISPATCH)(base)
+    )
   }
 
   private def constructorTemporaryTypeFullName(call: OxCall): Option[String] = {
