@@ -485,9 +485,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |struct Holder {
           |  T value;
           |  T get() { return value; }
+          |  T& borrow() { return value; }
+          |  const T& borrowConst() const { return value; }
           |};
           |}
-          |int use(Core::Holder<int> holder) {
+          |int use(Core::Holder<int> holder, const Core::Holder<int>& constHolder) {
+          |  holder.borrow();
+          |  constHolder.borrowConst();
           |  return holder.value + holder.get() + Core::pick<int>(1);
           |}
           |""".stripMargin,
@@ -499,10 +503,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").parameter.nameExact("holder").typeFullName.l shouldBe List("Core.Holder<int>")
       inside(cpg.method.nameExact("use").call.nameExact(Operators.fieldAccess).codeExact("holder.value").l) {
         case List(fieldAccess) =>
-          fieldAccess.typeFullName shouldBe "T"
+          fieldAccess.typeFullName shouldBe "int"
           fieldAccess.argument.code.l shouldBe List("holder", "value")
       }
       cpg.method.nameExact("use").call.codeExact("holder.get()").methodFullName.l shouldBe List("Core.Holder.get:T()")
+      cpg.method.nameExact("use").call.codeExact("holder.get()").typeFullName.l shouldBe List("int")
+      cpg.method.nameExact("use").call.codeExact("holder.borrow()").typeFullName.l shouldBe List("int&")
+      cpg.method.nameExact("use").call.codeExact("constHolder.borrowConst()").typeFullName.l shouldBe
+        List("const int&")
       inside(cpg.method.nameExact("use").call.codeExact("Core::pick<int>(1)").l) { case List(pickCall) =>
         pickCall.name shouldBe "pick"
         pickCall.methodFullName shouldBe "Core.pick:T(T)"
