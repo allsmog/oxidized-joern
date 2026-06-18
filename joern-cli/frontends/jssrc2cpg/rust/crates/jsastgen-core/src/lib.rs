@@ -106,6 +106,7 @@ fn expr_json(node: Node, source: &str) -> Value {
         "member_expression" => member_expression_json(node, source),
         "array" => array_expression_json(node, source),
         "object" => object_expression_json(node, source),
+        "arrow_function" => arrow_function_json(node, source),
         "rest_pattern" => unary_argument_json("RestElement", node, source),
         "spread_element" => unary_argument_json("SpreadElement", node, source),
         "parenthesized_expression" => node
@@ -371,6 +372,42 @@ fn object_key_json(node: Node, source: &str) -> Value {
     expr_json(node, source)
 }
 
+fn arrow_function_json(node: Node, source: &str) -> Value {
+    let params = arrow_params_json(node, source);
+    let body_node = node.child_by_field_name("body").unwrap_or(node);
+    let expression = body_node.kind() != "statement_block";
+    let body = if expression {
+        expr_json(body_node, source)
+    } else {
+        stmt_json(body_node, source)
+    };
+
+    with_span(
+        "ArrowFunctionExpression",
+        node,
+        json!({
+            "id": Value::Null,
+            "params": params,
+            "body": body,
+            "expression": expression,
+            "generator": false,
+            "async": has_keyword_child(node, source, "async")
+        }),
+    )
+}
+
+fn arrow_params_json(node: Node, source: &str) -> Vec<Value> {
+    if let Some(params_node) = node.child_by_field_name("parameters") {
+        return named_children(params_node)
+            .filter(|child| !is_comment(*child))
+            .map(|child| expr_json(child, source))
+            .collect();
+    }
+    node.child_by_field_name("parameter")
+        .map(|param| vec![expr_json(param, source)])
+        .unwrap_or_default()
+}
+
 fn unary_argument_json(kind: &str, node: Node, source: &str) -> Value {
     let argument = node
         .child_by_field_name("argument")
@@ -512,6 +549,17 @@ fn infer_operator(node: Node, source: &str) -> String {
     String::new()
 }
 
+fn has_keyword_child(node: Node, source: &str, keyword: &str) -> bool {
+    for index in 0..node.child_count() {
+        if let Some(child) = node.child(index) {
+            if !child.is_named() && node_text(child, source) == keyword {
+                return true;
+            }
+        }
+    }
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -618,5 +666,30 @@ mod tests {
 
         assert_eq!(object["properties"][4]["type"], "SpreadElement");
         assert_eq!(object["properties"][4]["argument"]["name"], "rest");
+    }
+
+    #[test]
+    fn emits_arrow_functions_as_babel_arrow_function_expressions() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/app.js");
+        let json = parse_source(
+            root,
+            path,
+            "const value = () => 42;\nconst id = x => { return x; };\n",
+        )
+        .expect("parse succeeds");
+
+        let value = &json["ast"]["program"]["body"][0]["declarations"][0]["init"];
+        assert_eq!(value["type"], "ArrowFunctionExpression");
+        assert_eq!(value["id"], Value::Null);
+        assert_eq!(value["params"].as_array().unwrap().len(), 0);
+        assert_eq!(value["body"]["type"], "NumericLiteral");
+        assert_eq!(value["expression"], true);
+
+        let id = &json["ast"]["program"]["body"][1]["declarations"][0]["init"];
+        assert_eq!(id["type"], "ArrowFunctionExpression");
+        assert_eq!(id["params"][0]["name"], "x");
+        assert_eq!(id["body"]["type"], "BlockStatement");
+        assert_eq!(id["expression"], false);
     }
 }
