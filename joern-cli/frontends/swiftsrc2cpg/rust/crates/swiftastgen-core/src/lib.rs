@@ -130,6 +130,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "function_declaration" => self.function_decl(node),
             "class_declaration" => self.nominal_type_decl(node),
             "control_transfer_statement" => self.control_transfer_stmt(node),
+            "for_statement" => self.for_stmt(node),
             "if_statement" => self.if_expr(node),
             "while_statement" => self.while_stmt(node),
             "assignment"
@@ -800,6 +801,55 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn for_stmt(&self, node: Node<'a>) -> Result<Value> {
+        let for_keyword = self
+            .immediate_child_kind(node, "for")
+            .context("for statement is missing 'for'")?;
+        let pattern = self
+            .field_child(node, "item")
+            .context("for statement is missing item pattern")?;
+        let in_keyword = self
+            .immediate_child_kind(node, "in")
+            .context("for statement is missing 'in'")?;
+        let sequence = self
+            .field_child(node, "collection")
+            .context("for statement is missing collection expression")?;
+        let body_statements = named_children(node)
+            .find(|child| child.kind() == "statements")
+            .context("for statement is missing body statements")?;
+        let left_brace = self
+            .nearest_child_before(node, "{", body_statements.start_byte())
+            .context("for statement body is missing '{'")?;
+        let right_brace = self
+            .nearest_child_after(node, "}", body_statements.end_byte())
+            .context("for statement body is missing '}'")?;
+
+        Ok(self.syntax_node(
+            "ForStmtSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(for_keyword, "keyword(SwiftSyntax.Keyword.for)"),
+                    "forKeyword",
+                ),
+                self.with_name(self.identifier_pattern(pattern)?, "pattern"),
+                self.with_name(
+                    self.token_for_node(in_keyword, "keyword(SwiftSyntax.Keyword.in)"),
+                    "inKeyword",
+                ),
+                self.with_name(self.expr(sequence)?, "sequence"),
+                self.with_name(
+                    self.code_block_from_statements(
+                        Some(body_statements),
+                        left_brace,
+                        right_brace,
+                    )?,
+                    "body",
+                ),
+            ],
+        ))
+    }
+
     fn condition_element_list(&self, condition: Node<'a>) -> Result<Value> {
         let element = self.syntax_node(
             "ConditionElementSyntax",
@@ -1409,6 +1459,30 @@ mod tests {
             "InfixOperatorExprSyntax"
         );
         assert_eq!(while_stmt["children"][2]["nodeType"], "CodeBlockSyntax");
+    }
+
+    #[test]
+    fn emits_simple_for_statement() {
+        let source = "func f(items: Int) {\n  for item in items {\n    foo(item)\n  }\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let for_stmt = find_first_node_type(&value, "ForStmtSyntax").unwrap();
+        assert_eq!(
+            for_stmt["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.for)"
+        );
+        assert_eq!(
+            for_stmt["children"][1]["nodeType"],
+            "IdentifierPatternSyntax"
+        );
+        assert_eq!(
+            for_stmt["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.in)"
+        );
+        assert_eq!(
+            for_stmt["children"][3]["nodeType"],
+            "DeclReferenceExprSyntax"
+        );
+        assert_eq!(for_stmt["children"][4]["nodeType"], "CodeBlockSyntax");
     }
 
     #[test]
