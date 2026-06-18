@@ -2414,6 +2414,33 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("heap").call.nameExact(Operators.delete).code.l shouldBe List("delete first", "delete second")
     }
 
+    "capture C++ implicit heap default constructors" in {
+      val cpg = code(
+        """
+          |namespace Core {
+          |struct Defaulted {
+          |  int value;
+          |  ~Defaulted();
+          |};
+          |}
+          |Core::Defaulted *heapDefault() {
+          |  Core::Defaulted *ptr = new Core::Defaulted();
+          |  delete ptr;
+          |  return ptr;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.fullNameExact("Core.Defaulted.Defaulted:void()").signature.l shouldBe List("void()")
+      cpg.method.nameExact("heapDefault").local.nameExact("ptr").typeFullName.l shouldBe List("Core.Defaulted*")
+      cpg.method.nameExact("heapDefault").call.nameExact(Operators.alloc).code.l shouldBe List("new Core::Defaulted()")
+      cpg.method.nameExact("heapDefault").call.nameExact("Defaulted").code.l shouldBe List("Core.Defaulted.Defaulted()")
+      cpg.method.nameExact("heapDefault").call.nameExact("Defaulted").methodFullName.l shouldBe
+        List("Core.Defaulted.Defaulted:void()")
+      cpg.method.nameExact("heapDefault").call.nameExact("~Defaulted").code.l shouldBe List("ptr->~Defaulted()")
+    }
+
     "capture enum variant initializers through a static initializer" in {
       val cpg = code("""
           |enum Mode { MODE_A = 1, MODE_B = 2, MODE_C };
