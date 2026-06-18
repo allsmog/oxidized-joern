@@ -488,7 +488,7 @@ class OxidizedVirtualDispatchTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.codeExact("Core::pickWide(L'x')").methodFullName.l shouldBe
         List("Core.pickWide:short(wchar_t)")
       cpg.method.nameExact("use").call.codeExact("Core::pickChar8(u8'x')").methodFullName.l shouldBe
-        List("Core.pickChar8:short(char8_t)")
+        List("Core.pickChar8:int(int)")
       cpg.method.nameExact("use").call.codeExact("Core::pickChar16(u'x')").methodFullName.l shouldBe
         List("Core.pickChar16:short(char16_t)")
       cpg.method.nameExact("use").call.codeExact("Core::pickChar32(U'x')").methodFullName.l shouldBe
