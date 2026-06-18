@@ -233,6 +233,8 @@ pub struct FunctionDecl {
 pub struct ParameterDecl {
     pub name: String,
     pub type_name: String,
+    #[serde(rename = "semanticTypeName")]
+    pub semantic_type_name: String,
     #[serde(rename = "isVariadic")]
     pub is_variadic: bool,
     pub code: String,
@@ -274,6 +276,8 @@ pub enum Statement {
         name: String,
         #[serde(rename = "typeName")]
         type_name: String,
+        #[serde(rename = "semanticTypeName")]
+        semantic_type_name: String,
         code: String,
         line: usize,
         initializer: Option<Expression>,
@@ -2350,6 +2354,12 @@ fn parse_parameters_with_varargs(
                 parameter_type_without_name(parameter, source)
                     .map(|type_name| (type_name, format!("param{}", index + 1)))
             });
+        let semantic_parsed = declaration_semantic_type_and_name(parameter, source)
+            .or_else(|| split_type_and_name_preserving_cv(code))
+            .or_else(|| {
+                parameter_type_without_name_preserving_cv(parameter, source)
+                    .map(|type_name| (type_name, format!("param{}", index + 1)))
+            });
         let is_pack = parameter.kind() == "variadic_parameter_declaration"
             && parsed
                 .as_ref()
@@ -2357,15 +2367,32 @@ fn parse_parameters_with_varargs(
         let is_classic_varargs = parameter.kind() == "variadic_parameter_declaration"
             && !is_pack
             && code.ends_with("...");
-        let Some((type_name, name, code, is_variadic)) = (if is_classic_varargs {
+        let Some((type_name, semantic_type_name, name, code, is_variadic)) = (if is_classic_varargs
+        {
             has_classic_varargs_parameter = true;
             let parameter_code = code.trim_end_matches("...").trim();
-            split_type_and_name_with_declarator(parameter_code)
-                .map(|(type_name, name)| (type_name, name, parameter_code.to_string(), false))
-        } else {
-            parsed.map(|(type_name, name)| {
+            split_type_and_name_with_declarator(parameter_code).map(|(type_name, name)| {
+                let semantic_type_name =
+                    split_type_and_name_with_declarator_preserving_cv(parameter_code)
+                        .map(|(semantic_type_name, _)| semantic_type_name)
+                        .unwrap_or_else(|| type_name.clone());
                 (
                     type_name,
+                    semantic_type_name,
+                    name,
+                    parameter_code.to_string(),
+                    false,
+                )
+            })
+        } else {
+            parsed.map(|(type_name, name)| {
+                let semantic_type_name = semantic_parsed
+                    .as_ref()
+                    .map(|(semantic_type_name, _)| semantic_type_name.clone())
+                    .unwrap_or_else(|| type_name.clone());
+                (
+                    type_name,
+                    semantic_type_name,
                     name,
                     code.to_string(),
                     parameter.kind() == "variadic_parameter_declaration",
@@ -2377,6 +2404,7 @@ fn parse_parameters_with_varargs(
         parameters.push(ParameterDecl {
             name,
             type_name,
+            semantic_type_name,
             is_variadic,
             code,
             line: line(parameter),
@@ -2398,6 +2426,10 @@ fn parse_parameters_with_varargs(
         parameters.push(ParameterDecl {
             name: name.clone(),
             type_name,
+            semantic_type_name: parameters
+                .last()
+                .map(|parameter| parameter.semantic_type_name.clone())
+                .unwrap_or_else(|| "ANY".to_string()),
             is_variadic: true,
             code: format!("{name}..."),
             line,
@@ -2430,14 +2462,28 @@ fn parameter_list_has_varargs(node: Node, source: &[u8]) -> bool {
 }
 
 fn parameter_type_without_name(node: Node, source: &[u8]) -> Option<String> {
+    parameter_type_without_name_with_normalizer(node, source, normalize_type)
+}
+
+fn parameter_type_without_name_preserving_cv(node: Node, source: &[u8]) -> Option<String> {
+    parameter_type_without_name_with_normalizer(node, source, normalize_type_preserving_cv)
+}
+
+fn parameter_type_without_name_with_normalizer(
+    node: Node,
+    source: &[u8],
+    normalizer: fn(&str) -> String,
+) -> Option<String> {
     let type_node = node.child_by_field_name("type")?;
     Some(
         node.child_by_field_name("declarator")
             .map(|declarator| {
-                let base_type = declaration_base_type(node, type_node, declarator, source);
+                let base_type = declaration_base_type_with_normalizer(
+                    node, type_node, declarator, source, normalizer,
+                );
                 type_from_declarator(&base_type, declarator, source)
             })
-            .unwrap_or_else(|| normalize_type(node_text(node, source))),
+            .unwrap_or_else(|| normalizer(node_text(node, source))),
     )
 }
 
@@ -2720,16 +2766,34 @@ fn parse_local_declarations(node: Node, source: &[u8]) -> Vec<Statement> {
                 .child_by_field_name("value")
                 .map(|value| parse_expression(value, source))
                 .or_else(|| direct_initializer_from_declarator(declarator, source));
+            let type_name = type_name
+                .as_deref()
+                .map(|base_type| type_from_declarator(base_type, declarator, source))
+                .unwrap_or_else(|| {
+                    split_type_and_name(node_text(node, source))
+                        .map(|(type_name, _)| type_name)
+                        .unwrap_or_default()
+                });
+            let semantic_type_name = type_node
+                .map(|type_node| {
+                    let base_type = declaration_base_type_with_normalizer(
+                        node,
+                        type_node,
+                        declarator,
+                        source,
+                        normalize_type_preserving_cv,
+                    );
+                    type_from_declarator(&base_type, declarator, source)
+                })
+                .unwrap_or_else(|| {
+                    split_type_and_name_preserving_cv(node_text(node, source))
+                        .map(|(type_name, _)| type_name)
+                        .unwrap_or_else(|| type_name.clone())
+                });
             Some(Statement::LocalDecl {
                 name,
-                type_name: type_name
-                    .as_deref()
-                    .map(|base_type| type_from_declarator(base_type, declarator, source))
-                    .unwrap_or_else(|| {
-                        split_type_and_name(node_text(node, source))
-                            .map(|(type_name, _)| type_name)
-                            .unwrap_or_default()
-                    }),
+                type_name,
+                semantic_type_name,
                 code: statement_code(node, source),
                 line: line(node),
                 initializer,
@@ -2965,9 +3029,11 @@ fn parse_for_range_loop(
         });
     } else {
         let name = declarator_name(declarator, source)?;
+        let semantic_base_type = type_name_from_type_node_preserving_cv(type_node, source);
         initializer.push(Statement::LocalDecl {
             name,
             type_name: type_from_declarator(&base_type, declarator, source),
+            semantic_type_name: type_from_declarator(&semantic_base_type, declarator, source),
             code: node_text(declarator, source).trim().to_string(),
             line: line(declarator),
             initializer: None,
@@ -3143,9 +3209,14 @@ fn condition_declaration_from_text(node: Node, source: &[u8]) -> Option<Statemen
     let (left, right) = split_top_level_assignment(code)?;
     let (type_name, name) =
         split_type_and_name_with_declarator(left).or_else(|| split_type_and_name(left))?;
+    let semantic_type_name = split_type_and_name_with_declarator_preserving_cv(left)
+        .or_else(|| split_type_and_name_preserving_cv(left))
+        .map(|(type_name, _)| type_name)
+        .unwrap_or_else(|| type_name.clone());
     Some(Statement::LocalDecl {
         name,
         type_name,
+        semantic_type_name,
         code: code.to_string(),
         line: line(node),
         initializer: Some(parse_expression_text(right.trim(), line(node))),
@@ -4357,25 +4428,39 @@ fn identifier_expression(node: Node, source: &[u8]) -> Expression {
 }
 
 fn declaration_type_and_name(node: Node, source: &[u8]) -> Option<(String, String)> {
+    declaration_type_and_name_with_normalizer(node, source, normalize_type)
+}
+
+fn declaration_semantic_type_and_name(node: Node, source: &[u8]) -> Option<(String, String)> {
+    declaration_type_and_name_with_normalizer(node, source, normalize_type_preserving_cv)
+}
+
+fn declaration_type_and_name_with_normalizer(
+    node: Node,
+    source: &[u8],
+    normalizer: fn(&str) -> String,
+) -> Option<(String, String)> {
     let type_node = node.child_by_field_name("type")?;
     let declarator = node.child_by_field_name("declarator")?;
     let name = declarator_name(declarator, source)?;
-    let base_type = declaration_base_type(node, type_node, declarator, source);
+    let base_type =
+        declaration_base_type_with_normalizer(node, type_node, declarator, source, normalizer);
     let type_name = type_from_declarator(&base_type, declarator, source);
     Some((type_name, name))
 }
 
-fn declaration_base_type(
+fn declaration_base_type_with_normalizer(
     declaration: Node,
     type_node: Node,
     declarator: Node,
     source: &[u8],
+    normalizer: fn(&str) -> String,
 ) -> String {
     std::str::from_utf8(&source[declaration.start_byte()..declarator.start_byte()])
         .ok()
-        .map(normalize_type)
+        .map(normalizer)
         .filter(|base| !base.is_empty())
-        .unwrap_or_else(|| type_name_from_type_node(type_node, source))
+        .unwrap_or_else(|| type_name_from_type_node_with_normalizer(type_node, source, normalizer))
 }
 
 fn declarator_name(node: Node, source: &[u8]) -> Option<String> {
@@ -4398,16 +4483,28 @@ fn declarator_name(node: Node, source: &[u8]) -> Option<String> {
 }
 
 fn type_name_from_type_node(node: Node, source: &[u8]) -> String {
+    type_name_from_type_node_with_normalizer(node, source, normalize_type)
+}
+
+fn type_name_from_type_node_preserving_cv(node: Node, source: &[u8]) -> String {
+    type_name_from_type_node_with_normalizer(node, source, normalize_type_preserving_cv)
+}
+
+fn type_name_from_type_node_with_normalizer(
+    node: Node,
+    source: &[u8],
+    normalizer: fn(&str) -> String,
+) -> String {
     match node.kind() {
         "struct_specifier" | "union_specifier" | "enum_specifier" => node
             .child_by_field_name("name")
-            .map(|name| normalize_type(node_text(name, source)))
-            .unwrap_or_else(|| normalize_type(node_text(node, source))),
+            .map(|name| normalizer(node_text(name, source)))
+            .unwrap_or_else(|| normalizer(node_text(node, source))),
         "class_specifier" => node
             .child_by_field_name("name")
-            .map(|name| normalize_type(node_text(name, source)))
-            .unwrap_or_else(|| normalize_type(node_text(node, source))),
-        _ => normalize_type(node_text(node, source)),
+            .map(|name| normalizer(node_text(name, source)))
+            .unwrap_or_else(|| normalizer(node_text(node, source))),
+        _ => normalizer(node_text(node, source)),
     }
 }
 
@@ -4562,6 +4659,17 @@ fn is_declarator(node: Node) -> bool {
 }
 
 fn split_type_and_name(raw: &str) -> Option<(String, String)> {
+    split_type_and_name_with_normalizer(raw, normalize_type)
+}
+
+fn split_type_and_name_preserving_cv(raw: &str) -> Option<(String, String)> {
+    split_type_and_name_with_normalizer(raw, normalize_type_preserving_cv)
+}
+
+fn split_type_and_name_with_normalizer(
+    raw: &str,
+    normalizer: fn(&str) -> String,
+) -> Option<(String, String)> {
     let normalized = raw
         .trim()
         .trim_end_matches(';')
@@ -4576,10 +4684,21 @@ fn split_type_and_name(raw: &str) -> Option<(String, String)> {
     if name.is_empty() {
         return None;
     }
-    Some((normalize_type(parts[1]), name.to_string()))
+    Some((normalizer(parts[1]), name.to_string()))
 }
 
 fn split_type_and_name_with_declarator(raw: &str) -> Option<(String, String)> {
+    split_type_and_name_with_declarator_and_normalizer(raw, normalize_type)
+}
+
+fn split_type_and_name_with_declarator_preserving_cv(raw: &str) -> Option<(String, String)> {
+    split_type_and_name_with_declarator_and_normalizer(raw, normalize_type_preserving_cv)
+}
+
+fn split_type_and_name_with_declarator_and_normalizer(
+    raw: &str,
+    normalizer: fn(&str) -> String,
+) -> Option<(String, String)> {
     let normalized = raw
         .trim()
         .trim_end_matches(';')
@@ -4600,7 +4719,7 @@ fn split_type_and_name_with_declarator(raw: &str) -> Option<(String, String)> {
         return None;
     }
     Some((
-        normalize_type(&format!("{}{marker}", parts[1])),
+        normalizer(&format!("{}{marker}", parts[1])),
         name.to_string(),
     ))
 }
@@ -4622,9 +4741,27 @@ fn normalize_type(raw: &str) -> String {
         .to_string()
 }
 
+fn normalize_type_preserving_cv(raw: &str) -> String {
+    let normalized = raw
+        .split_whitespace()
+        .filter(|part| !TYPE_STORAGE_SPECIFIERS.contains(part))
+        .collect::<Vec<_>>()
+        .join(" ")
+        .replace(" *", "*")
+        .trim()
+        .to_string();
+    normalized
+        .strip_prefix("struct ")
+        .or_else(|| normalized.strip_prefix("union "))
+        .or_else(|| normalized.strip_prefix("enum "))
+        .unwrap_or(&normalized)
+        .to_string()
+}
+
 const TYPE_QUALIFIERS: &[&str] = &[
     "const", "volatile", "restrict", "static", "extern", "register", "typedef",
 ];
+const TYPE_STORAGE_SPECIFIERS: &[&str] = &["static", "extern", "register", "typedef"];
 
 fn signature(return_type: &str, params: &[ParameterDecl]) -> String {
     format!(
@@ -5750,6 +5887,50 @@ mod tests {
             "PairBase<int, float>"
         );
         assert!(!derived.base_class_declarations[2].is_virtual);
+    }
+
+    #[test]
+    fn preserves_cpp_const_semantic_types() {
+        let sample = r#"
+                namespace Core {
+                class Meter {};
+                int read(const Meter& meter) {
+                  const Meter& alias = meter;
+                  return 0;
+                }
+                }
+                "#;
+        let declarations = parse_declarations(sample, SourceLanguage::Cpp)
+            .expect("const semantic type sample should parse");
+        let namespace = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Namespace(namespace) if namespace.name == "Core" => Some(namespace),
+                _ => None,
+            })
+            .expect("expected Core namespace declaration");
+        let function = namespace
+            .declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "read" => Some(function),
+                _ => None,
+            })
+            .expect("expected read function");
+
+        assert_eq!(function.parameters[0].type_name, "Meter&");
+        assert_eq!(function.parameters[0].semantic_type_name, "const Meter&");
+        assert!(matches!(
+            function.body.as_slice(),
+            [Statement::LocalDecl {
+                name,
+                type_name,
+                semantic_type_name,
+                ..
+            }, Statement::Return { .. }] if name == "alias"
+                && type_name == "Meter&"
+                && semantic_type_name == "const Meter&"
+        ));
     }
 
     #[test]
