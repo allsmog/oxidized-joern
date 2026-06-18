@@ -3979,7 +3979,36 @@ final class OxidizedAstCreator(filename: String, document: OxDocument, config: C
     val candidates = constructorEntriesForType(typeName).filter(entry =>
       includeExplicitConstructors || !functionHasExplicitSpecifier(entry.function)
     )
-    selectFunctionEntry(candidates, Some(arguments))
+    selectFunctionEntry(candidates, Some(arguments)).orElse(bestEffortConstructorEntry(candidates, arguments))
+  }
+
+  private def bestEffortConstructorEntry(
+    candidates: Seq[FunctionEntry],
+    arguments: Seq[OxExpression]
+  ): Option[FunctionEntry] = {
+    val argumentInfos =
+      arguments.map(argument => ArgumentInfo(argument, expressionTypeFullName(argument), expressionIsRvalue(argument)))
+    val scored = candidates
+      .filter(functionArityIsViable(_, arguments.size))
+      .zipWithIndex
+      .flatMap { case (candidate, index) =>
+        val scores = candidate.function.parameters.zip(argumentInfos).map { case (parameter, argumentInfo) =>
+          argumentInfo.typeFullName.flatMap { argumentTypeName =>
+            overloadBaseCompatibilityScore(
+              overloadComparableType(parameter.semanticTypeName),
+              overloadComparableType(argumentTypeName),
+              Some(argumentInfo.expression)
+            )
+          }
+        }
+        Option.when(scores.nonEmpty && scores.forall(_.isDefined)) {
+          (candidate, scores.flatten.sum, index)
+        }
+      }
+    scored.map(_._2).maxOption.flatMap { bestScore =>
+      val best = scored.filter(_._2 == bestScore)
+      Option.when(best.size == 1)(best.head._1)
+    }
   }
 
   private def constructorInitializerResolution(
