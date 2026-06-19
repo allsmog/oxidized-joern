@@ -96,6 +96,14 @@ struct StringLiteralNodeSpec {
     segments: Vec<Value>,
 }
 
+#[derive(Clone, Copy)]
+struct GenericMemberComponent {
+    name_start: usize,
+    name_end: usize,
+    segment_end: usize,
+    period_before: Option<usize>,
+}
+
 struct TernaryNodeParts<'a> {
     start: usize,
     end: usize,
@@ -2517,9 +2525,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .first_descendant_any_kind(node, "let")
             .or_else(|| self.first_descendant_any_kind(node, "var"))
             .context("property declaration is missing let/var")?;
-        let pattern_node = self
-            .field_child(node, "name")
-            .context("property declaration is missing a name")?;
+        let pattern_nodes = self.field_children(node, "name");
+        let pattern_nodes = if pattern_nodes.is_empty() {
+            vec![self
+                .field_child(node, "name")
+                .context("property declaration is missing a name")?]
+        } else {
+            pattern_nodes
+        };
         let type_annotation_node = self.immediate_named_child_kind(node, "type_annotation");
         let value_node = self.value_field_child(node);
         let value_end = value_node.map(|value| self.recovered_value_end(node, value));
@@ -2527,46 +2540,66 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .field_child(node, "computed_value")
             .or_else(|| self.immediate_named_child_kind(node, "protocol_property_requirements"));
 
-        let mut binding_children =
-            vec![self.with_name(self.variable_decl_pattern(pattern_node)?, "pattern")];
-        if let Some(type_node) = type_annotation_node {
-            binding_children
-                .push(self.with_name(self.type_annotation(type_node)?, "typeAnnotation"));
-        }
-        if let Some(value) = value_node {
-            let equal = self
-                .immediate_child_kind(node, "=")
-                .context("property initializer is missing '='")?;
-            binding_children.push(self.with_name(
-                self.initializer_clause_with_end(
-                    equal,
-                    value,
-                    value_end.unwrap_or(value.end_byte()),
-                )?,
-                "initializer",
-            ));
-        }
-        if let Some(accessor_block) = accessor_block_node {
-            binding_children.push(self.with_name(
-                self.variable_accessor_block(accessor_block)?,
-                "accessorBlock",
-            ));
+        let mut binding_items = Vec::new();
+        for (index, pattern_node) in pattern_nodes.iter().copied().enumerate() {
+            let is_last = index + 1 == pattern_nodes.len();
+            let mut binding_children =
+                vec![self.with_name(self.variable_decl_pattern(pattern_node)?, "pattern")];
+            if is_last {
+                if let Some(type_node) = type_annotation_node {
+                    binding_children
+                        .push(self.with_name(self.type_annotation(type_node)?, "typeAnnotation"));
+                }
+                if let Some(value) = value_node {
+                    let equal = self
+                        .immediate_child_kind(node, "=")
+                        .context("property initializer is missing '='")?;
+                    binding_children.push(self.with_name(
+                        self.initializer_clause_with_end(
+                            equal,
+                            value,
+                            value_end.unwrap_or(value.end_byte()),
+                        )?,
+                        "initializer",
+                    ));
+                }
+                if let Some(accessor_block) = accessor_block_node {
+                    binding_children.push(self.with_name(
+                        self.variable_accessor_block(accessor_block)?,
+                        "accessorBlock",
+                    ));
+                }
+            }
+
+            let trailing_comma = pattern_nodes.get(index + 1).and_then(|next| {
+                self.delimiter_between(node, pattern_node.end_byte(), next.start_byte(), ",")
+            });
+            if let Some(comma) = trailing_comma {
+                binding_children
+                    .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+            }
+
+            let binding_end = binding_children
+                .last()
+                .map(end_offset)
+                .unwrap_or_else(|| pattern_node.end_byte());
+            let binding = self.syntax_node(
+                "PatternBindingSyntax",
+                self.range_from_offsets(pattern_node.start_byte(), binding_end),
+                binding_children,
+            );
+            binding_items.push(self.with_name(binding, ""));
         }
 
-        let binding_range = self.range_from_offsets(
-            pattern_node.start_byte(),
-            accessor_block_node
-                .map(|accessor_block| accessor_block.end_byte())
-                .or(value_end)
-                .or_else(|| type_annotation_node.map(|type_annotation| type_annotation.end_byte()))
-                .unwrap_or_else(|| pattern_node.end_byte()),
-        );
-        let binding = self.syntax_node("PatternBindingSyntax", binding_range, binding_children);
+        let bindings_end = binding_items
+            .last()
+            .map(end_offset)
+            .unwrap_or_else(|| pattern_nodes[0].end_byte());
         let bindings = self.with_name(
             self.syntax_node(
                 "PatternBindingListSyntax",
-                self.range_for_node(pattern_node),
-                vec![self.with_name(binding, "")],
+                self.range_from_offsets(pattern_nodes[0].start_byte(), bindings_end),
+                binding_items,
             ),
             "bindings",
         );
@@ -7203,6 +7236,30 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         None
     }
 
+    fn matching_angle_offset(&self, left_angle: usize, end: usize) -> Option<usize> {
+        if self.source.as_bytes().get(left_angle) != Some(&b'<') {
+            return None;
+        }
+        let bytes = self.source.as_bytes();
+        let mut depth = 0usize;
+        let mut offset = left_angle;
+        while offset < end {
+            match bytes[offset] {
+                b'<' => depth += 1,
+                b'>' if offset > left_angle && bytes.get(offset - 1) == Some(&b'-') => {}
+                b'>' => {
+                    depth = depth.checked_sub(1)?;
+                    if depth == 0 {
+                        return Some(offset);
+                    }
+                }
+                _ => {}
+            }
+            offset += 1;
+        }
+        None
+    }
+
     fn enclosing_parens(&self, start: usize, end: usize) -> Option<(usize, usize)> {
         if end <= start + 1
             || self.source.as_bytes().get(start) != Some(&b'(')
@@ -8402,7 +8459,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn binary_operator_expr(&self, node: Node<'a>) -> Result<Value> {
-        if let Some(member_access) = self.recovered_generic_metatype_member_access_expr(node) {
+        if let Some(function_call) = self.recovered_generic_member_function_call_expr(node) {
+            return Ok(function_call);
+        }
+        if let Some(member_access) = self.recovered_generic_member_access_expr(node) {
             return Ok(member_access);
         }
 
@@ -8442,51 +8502,140 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         self.infix_operator_expr_from_parts(node, lhs, op, rhs, rhs.end_byte())
     }
 
-    fn recovered_generic_metatype_member_access_expr(&self, node: Node<'a>) -> Option<Value> {
+    fn recovered_generic_member_function_call_expr(&self, node: Node<'a>) -> Option<Value> {
         if node.kind() != "comparison_expression" {
             return None;
         }
-
         let (start, end) = self.trim_offsets(node.start_byte(), node.end_byte());
-        let dot = self.last_top_level_dot(start, end)?;
-        let (member_start, member_end) = self.trim_offsets(dot + 1, end);
-        if member_start >= member_end || &self.source[member_start..member_end] != "self" {
-            return None;
-        }
-
-        let left_angle = self.source[start..dot]
-            .find('<')
-            .map(|offset| start + offset)?;
-        let right_angle = self.source[left_angle + 1..dot]
-            .rfind('>')
-            .map(|offset| left_angle + 1 + offset)?;
-        if !self.source[right_angle + 1..dot].trim().is_empty() {
-            return None;
-        }
-
-        let (base_start, base_end) = self.trim_offsets(start, left_angle);
-        if base_start >= base_end || !is_identifier_like_text(&self.source[base_start..base_end]) {
-            return None;
-        }
-
+        let (left_paren_start, right_paren_start) = self.outer_call_parens(start, end)?;
+        let called_expression =
+            self.generic_member_access_expr_from_offsets(start, left_paren_start)?;
         Some(self.syntax_node(
-            "MemberAccessExprSyntax",
+            "FunctionCallExprSyntax",
             self.range_from_offsets(start, end),
             vec![
+                self.with_name(called_expression, "calledExpression"),
                 self.with_name(
-                    self.decl_reference_expr_from_offsets(base_start, base_end),
-                    "base",
+                    self.token_with_range(
+                        "leftParen",
+                        self.range_from_offsets(left_paren_start, left_paren_start + 1),
+                    ),
+                    "leftParen",
                 ),
                 self.with_name(
-                    self.token_with_range("period", self.range_from_offsets(dot, dot + 1)),
-                    "period",
+                    self.synthetic_labeled_expr_list_from_offsets(
+                        left_paren_start + 1,
+                        right_paren_start,
+                    ),
+                    "arguments",
                 ),
                 self.with_name(
-                    self.decl_reference_expr_from_offsets(member_start, member_end),
-                    "declName",
+                    self.token_with_range(
+                        "rightParen",
+                        self.range_from_offsets(right_paren_start, right_paren_start + 1),
+                    ),
+                    "rightParen",
+                ),
+                self.with_name(
+                    self.empty_collection("MultipleTrailingClosureElementListSyntax", end),
+                    "additionalTrailingClosures",
                 ),
             ],
         ))
+    }
+
+    fn recovered_generic_member_access_expr(&self, node: Node<'a>) -> Option<Value> {
+        if node.kind() != "comparison_expression" {
+            return None;
+        }
+        let (start, end) = self.trim_offsets(node.start_byte(), node.end_byte());
+        self.generic_member_access_expr_from_offsets(start, end)
+    }
+
+    fn generic_member_access_expr_from_offsets(&self, start: usize, end: usize) -> Option<Value> {
+        let components = self.generic_member_chain_components(start, end)?;
+        let first = components.first().copied()?;
+        let mut current = self.decl_reference_expr_from_offsets(first.name_start, first.name_end);
+        for component in components.iter().copied().skip(1) {
+            let period = component.period_before?;
+            current = self.syntax_node(
+                "MemberAccessExprSyntax",
+                self.range_from_offsets(start, component.segment_end),
+                vec![
+                    self.with_name(current, "base"),
+                    self.with_name(
+                        self.token_with_range(
+                            "period",
+                            self.range_from_offsets(period, period + 1),
+                        ),
+                        "period",
+                    ),
+                    self.with_name(
+                        self.decl_reference_expr_from_offsets(
+                            component.name_start,
+                            component.name_end,
+                        ),
+                        "declName",
+                    ),
+                ],
+            );
+        }
+        Some(current)
+    }
+
+    fn generic_member_chain_components(
+        &self,
+        start: usize,
+        end: usize,
+    ) -> Option<Vec<GenericMemberComponent>> {
+        if !self.source.get(start..end)?.contains('<') {
+            return None;
+        }
+
+        let bytes = self.source.as_bytes();
+        let mut offset = start;
+        let mut period_before = None;
+        let mut components = Vec::new();
+        loop {
+            while offset < end && bytes[offset].is_ascii_whitespace() {
+                offset += 1;
+            }
+            let name_start = offset;
+            while offset < end && is_identifier_byte(bytes[offset]) {
+                offset += 1;
+            }
+            let name_end = offset;
+            if name_start == name_end {
+                return None;
+            }
+            while offset < end && bytes[offset].is_ascii_whitespace() {
+                offset += 1;
+            }
+            if bytes.get(offset) == Some(&b'<') {
+                offset = self.matching_angle_offset(offset, end)? + 1;
+                while offset < end && bytes[offset].is_ascii_whitespace() {
+                    offset += 1;
+                }
+            }
+            let segment_end = offset;
+            components.push(GenericMemberComponent {
+                name_start,
+                name_end,
+                segment_end,
+                period_before,
+            });
+
+            if offset == end {
+                break;
+            }
+            if bytes.get(offset) != Some(&b'.') {
+                return None;
+            }
+            period_before = Some(offset);
+            offset += 1;
+        }
+
+        (components.len() >= 2).then_some(components)
     }
 
     fn infix_operator_expr_from_parts(
@@ -12717,6 +12866,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         })
     }
 
+    fn delimiter_between(
+        &self,
+        parent: Node<'a>,
+        start: usize,
+        end: usize,
+        delimiter: &str,
+    ) -> Option<Node<'a>> {
+        children(parent).find(|child| {
+            child.kind() == delimiter && child.start_byte() >= start && child.end_byte() <= end
+        })
+    }
+
     fn first_named_child_excluding(&self, node: Node<'a>, excluded: &[&str]) -> Option<Node<'a>> {
         named_children(node).find(|child| !excluded.contains(&child.kind()))
     }
@@ -13578,6 +13739,92 @@ repeat { sink() } while x < 1
         assert_eq!(
             inner_argument["children"][0]["tokenKind"],
             "identifier(\"Foo\")"
+        );
+    }
+
+    #[test]
+    fn emits_grouped_variable_pattern_bindings() {
+        let source = "var a, b, c, d : Int";
+        let value = parse_source("GroupedVars.swift", "/tmp/GroupedVars.swift", source).unwrap();
+        let declaration = find_first_node_type(&value, "VariableDeclSyntax").unwrap();
+        let bindings = child_by_name(declaration, "bindings").unwrap()["children"]
+            .as_array()
+            .unwrap();
+        let names = bindings
+            .iter()
+            .map(|binding| {
+                child_by_name(child_by_name(binding, "pattern").unwrap(), "identifier").unwrap()
+                    ["tokenKind"]
+                    .clone()
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            names,
+            vec![
+                json!("identifier(\"a\")"),
+                json!("identifier(\"b\")"),
+                json!("identifier(\"c\")"),
+                json!("identifier(\"d\")")
+            ]
+        );
+        assert!(bindings[..3]
+            .iter()
+            .all(|binding| child_by_name(binding, "typeAnnotation").is_none()));
+        assert_eq!(
+            child_by_name(
+                child_by_name(bindings.last().unwrap(), "typeAnnotation").unwrap(),
+                "type"
+            )
+            .unwrap()["children"][0]["tokenKind"],
+            json!("identifier(\"Int\")")
+        );
+    }
+
+    #[test]
+    fn recovers_nested_generic_member_call() {
+        let source = "A<B>.C<D>.e()";
+        let value = parse_source("GenericCall.swift", "/tmp/GenericCall.swift", source).unwrap();
+        let call = find_first_node_type(&value, "FunctionCallExprSyntax").unwrap();
+        assert_eq!(source_text(source, call), source);
+        let called_expression = child_by_name(call, "calledExpression").unwrap();
+        assert_eq!(called_expression["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(
+            child_by_name(
+                child_by_name(called_expression, "declName").unwrap(),
+                "baseName"
+            )
+            .unwrap()["tokenKind"],
+            json!("identifier(\"e\")")
+        );
+        let base = child_by_name(called_expression, "base").unwrap();
+        assert_eq!(base["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(
+            child_by_name(child_by_name(base, "declName").unwrap(), "baseName").unwrap()
+                ["tokenKind"],
+            json!("identifier(\"C\")")
+        );
+    }
+
+    #[test]
+    fn recovers_nested_generic_metatype_member_access() {
+        let source = "meta1(A<B>.C<D>.self)";
+        let value = parse_source("GenericSelf.swift", "/tmp/GenericSelf.swift", source).unwrap();
+        let member_accesses = find_node_types(&value, "MemberAccessExprSyntax");
+        let outer = member_accesses
+            .iter()
+            .copied()
+            .find(|member| {
+                child_by_name(child_by_name(member, "declName").unwrap(), "baseName")
+                    .is_some_and(|name| name["tokenKind"] == json!("identifier(\"self\")"))
+            })
+            .unwrap();
+        assert_eq!(source_text(source, outer), "A<B>.C<D>.self");
+        let base = child_by_name(outer, "base").unwrap();
+        assert_eq!(base["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(
+            child_by_name(child_by_name(base, "declName").unwrap(), "baseName").unwrap()
+                ["tokenKind"],
+            json!("identifier(\"C\")")
         );
     }
 
