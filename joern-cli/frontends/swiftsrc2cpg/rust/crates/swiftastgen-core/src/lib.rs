@@ -8893,30 +8893,27 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .nearest_child_after(node, "}", body_statements.end_byte())
             .context("for statement body is missing '}'")?;
 
-        Ok(self.syntax_node(
-            "ForStmtSyntax",
-            self.range_for_node(node),
-            vec![
-                self.with_name(
-                    self.token_for_node(for_keyword, "keyword(SwiftSyntax.Keyword.for)"),
-                    "forKeyword",
-                ),
-                self.with_name(self.pattern(pattern)?, "pattern"),
-                self.with_name(
-                    self.token_for_node(in_keyword, "keyword(SwiftSyntax.Keyword.in)"),
-                    "inKeyword",
-                ),
-                self.with_name(self.expr(sequence)?, "sequence"),
-                self.with_name(
-                    self.code_block_from_statements(
-                        Some(body_statements),
-                        left_brace,
-                        right_brace,
-                    )?,
-                    "body",
-                ),
-            ],
-        ))
+        let mut children = vec![
+            self.with_name(
+                self.token_for_node(for_keyword, "keyword(SwiftSyntax.Keyword.for)"),
+                "forKeyword",
+            ),
+            self.with_name(self.pattern(pattern)?, "pattern"),
+            self.with_name(
+                self.token_for_node(in_keyword, "keyword(SwiftSyntax.Keyword.in)"),
+                "inKeyword",
+            ),
+            self.with_name(self.expr(sequence)?, "sequence"),
+        ];
+        if let Some(where_clause) = self.immediate_named_child_kind(node, "where_clause") {
+            children.push(self.with_name(self.where_clause(where_clause)?, "whereClause"));
+        }
+        children.push(self.with_name(
+            self.code_block_from_statements(Some(body_statements), left_brace, right_brace)?,
+            "body",
+        ));
+
+        Ok(self.syntax_node("ForStmtSyntax", self.range_for_node(node), children))
     }
 
     fn guard_condition_element_list(
@@ -14222,6 +14219,27 @@ someFunction(parameterLabel: 2)
             "DeclReferenceExprSyntax"
         );
         assert_eq!(for_stmt["children"][4]["nodeType"], "CodeBlockSyntax");
+    }
+
+    #[test]
+    fn emits_for_statement_where_clause() {
+        let source = "func f(items: [Int]) {\n  for item in items where item == 1 {\n    foo(item)\n  }\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let for_stmt = find_first_node_type(&value, "ForStmtSyntax").unwrap();
+        let where_clause = child_by_name(for_stmt, "whereClause").unwrap();
+        assert_eq!(source_text(source, where_clause), "where item == 1");
+        assert_eq!(
+            child_by_name(where_clause, "whereKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.where)"
+        );
+        assert_eq!(
+            child_by_name(where_clause, "condition").unwrap()["nodeType"],
+            "InfixOperatorExprSyntax"
+        );
+        assert_eq!(
+            child_by_name(for_stmt, "body").unwrap()["nodeType"],
+            "CodeBlockSyntax"
+        );
     }
 
     #[test]
