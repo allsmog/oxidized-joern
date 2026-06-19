@@ -141,8 +141,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn is_ignorable_top_level_error(&self, node: Node<'a>) -> bool {
         node.kind() == "ERROR"
-            && self.text(node).trim() == "}"
-            && named_children(node).all(is_trivia_node)
+            && ((self.text(node).trim() == "}" && named_children(node).all(is_trivia_node))
+                || self.text(node).trim_start().starts_with(','))
     }
 
     fn is_ignorable_member_error(&self, node: Node<'a>) -> bool {
@@ -178,6 +178,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "protocol_property_declaration" => self.variable_decl(node),
             "function_declaration" => self.function_decl(node),
             "protocol_function_declaration" => self.function_decl(node),
+            "typealias_declaration" => self.typealias_decl(node),
             "class_declaration" => self.nominal_type_decl(node),
             "protocol_declaration" => self.protocol_decl(node),
             "operator_declaration" => self.operator_decl(node),
@@ -226,6 +227,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "protocol_property_declaration" => self.variable_decl(node),
             "function_declaration" => self.function_decl(node),
             "protocol_function_declaration" => self.function_decl(node),
+            "typealias_declaration" => self.typealias_decl(node),
             "class_declaration" => self.nominal_type_decl(node),
             "protocol_declaration" => self.protocol_decl(node),
             "operator_declaration" => self.operator_decl(node),
@@ -938,6 +940,60 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn typealias_decl(&self, node: Node<'a>) -> Result<Value> {
+        let typealias_keyword = self
+            .immediate_child_kind(node, "typealias")
+            .context("typealias declaration is missing 'typealias'")?;
+        let name = self
+            .field_child(node, "name")
+            .or_else(|| {
+                named_children(node).find(|child| {
+                    child.kind() == "type_identifier"
+                        && child.start_byte() > typealias_keyword.end_byte()
+                })
+            })
+            .context("typealias declaration is missing a name")?;
+        let equal = children(node)
+            .find(|child| child.kind() == "=" && child.start_byte() > name.end_byte())
+            .context("typealias declaration is missing '='")?;
+        let mut values =
+            named_children(node).filter(|child| child.start_byte() >= equal.end_byte());
+        let value = values
+            .next()
+            .context("typealias declaration is missing an initializer")?;
+        let value = if value.kind() == "type_modifiers" {
+            values
+                .next()
+                .context("typealias declaration type modifiers are missing a base type")?
+        } else {
+            value
+        };
+
+        Ok(self.syntax_node(
+            "TypeAliasDeclSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.attribute_list(node)?, "attributes"),
+                self.with_name(self.modifier_list(node), "modifiers"),
+                self.with_name(
+                    self.token_for_node(
+                        typealias_keyword,
+                        "keyword(SwiftSyntax.Keyword.typealias)",
+                    ),
+                    "typealiasKeyword",
+                ),
+                self.with_name(
+                    self.token_for_node(
+                        name,
+                        &format!("identifier({})", quoted_text(self.text(name))),
+                    ),
+                    "name",
+                ),
+                self.with_name(self.type_initializer_clause(equal, value)?, "initializer"),
+            ],
+        ))
+    }
+
     fn associated_type_inheritance_clause(&self, node: Node<'a>) -> Result<Option<Value>> {
         let colon = match self.immediate_child_kind(node, ":") {
             Some(colon) => colon,
@@ -996,7 +1052,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_from_offsets(equal.start_byte(), value.end_byte()),
             vec![
                 self.with_name(self.token_for_node(equal, "equal"), "equal"),
-                self.with_name(self.identifier_type(value)?, "value"),
+                self.with_name(self.type_syntax(value)?, "value"),
             ],
         ))
     }
@@ -1696,7 +1752,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_for_node(node),
             vec![
                 self.with_name(self.token_for_node(colon, "colon"), "colon"),
-                self.with_name(self.identifier_type(type_node)?, "type"),
+                self.with_name(self.type_syntax(type_node)?, "type"),
             ],
         ))
     }
@@ -1768,6 +1824,222 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ),
                 "name",
             )],
+        ))
+    }
+
+    fn type_syntax(&self, node: Node<'a>) -> Result<Value> {
+        match node.kind() {
+            "function_type" => self.function_type(node),
+            "optional_type" => self.optional_type(node),
+            "tuple_type" => self.tuple_type(node),
+            "type_identifier" | "user_type" => self.identifier_type(node),
+            "tuple_type_item" => {
+                let type_node = named_children(node)
+                    .next()
+                    .context("tuple type item is missing a type")?;
+                self.type_syntax(type_node)
+            }
+            other => bail!("unsupported Swift type node '{other}'"),
+        }
+    }
+
+    fn optional_type(&self, node: Node<'a>) -> Result<Value> {
+        let wrapped_type = named_children(node)
+            .next()
+            .context("optional type is missing wrapped type")?;
+        let marker = children(node)
+            .find(|child| matches!(self.text(*child), "?" | "!"))
+            .context("optional type is missing marker")?;
+        let (node_type, marker_name, token_kind) = if self.text(marker) == "!" {
+            (
+                "ImplicitlyUnwrappedOptionalTypeSyntax",
+                "exclamationMark",
+                "exclamationMark",
+            )
+        } else {
+            ("OptionalTypeSyntax", "questionMark", "postfixQuestionMark")
+        };
+        Ok(self.syntax_node(
+            node_type,
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.type_syntax(wrapped_type)?, "wrappedType"),
+                self.with_name(self.token_for_node(marker, token_kind), marker_name),
+            ],
+        ))
+    }
+
+    fn function_type(&self, node: Node<'a>) -> Result<Value> {
+        let parameters = named_children(node)
+            .find(|child| child.kind() == "tuple_type")
+            .context("function type is missing parameter tuple")?;
+        let left_paren = self
+            .immediate_child_kind(parameters, "(")
+            .context("function type parameter tuple is missing '('")?;
+        let right_paren = self
+            .immediate_child_kind(parameters, ")")
+            .context("function type parameter tuple is missing ')'")?;
+        let return_clause = self
+            .return_clause(node)?
+            .context("function type is missing return clause")?;
+
+        let mut children = vec![
+            self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+            self.with_name(
+                self.tuple_type_element_list(parameters, left_paren, right_paren)?,
+                "parameters",
+            ),
+            self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
+        ];
+        if let Some(effect_specifiers) = self.type_effect_specifiers(node, right_paren)? {
+            children.push(self.with_name(effect_specifiers, "effectSpecifiers"));
+        }
+        children.push(self.with_name(return_clause, "returnClause"));
+
+        Ok(self.syntax_node("FunctionTypeSyntax", self.range_for_node(node), children))
+    }
+
+    fn type_effect_specifiers(
+        &self,
+        node: Node<'a>,
+        after_parameter_clause: Node<'a>,
+    ) -> Result<Option<Value>> {
+        let arrow = self
+            .immediate_child_kind(node, "->")
+            .context("function type is missing '->'")?;
+        let async_specifier = children(node).find(|child| {
+            matches!(child.kind(), "async" | "reasync")
+                && child.start_byte() > after_parameter_clause.end_byte()
+                && child.end_byte() <= arrow.start_byte()
+        });
+        let throws_specifier = children(node).find(|child| {
+            matches!(child.kind(), "throws" | "rethrows")
+                && child.start_byte() > after_parameter_clause.end_byte()
+                && child.end_byte() <= arrow.start_byte()
+        });
+        if async_specifier.is_none() && throws_specifier.is_none() {
+            return Ok(None);
+        }
+
+        let mut children = Vec::new();
+        if let Some(async_specifier) = async_specifier {
+            children.push(self.with_name(
+                self.token_for_node(
+                    async_specifier,
+                    &format!("keyword(SwiftSyntax.Keyword.{})", async_specifier.kind()),
+                ),
+                "asyncSpecifier",
+            ));
+        }
+        if let Some(throws_specifier) = throws_specifier {
+            let throws_clause = self.syntax_node(
+                "ThrowsClauseSyntax",
+                self.range_for_node(throws_specifier),
+                vec![self.with_name(
+                    self.token_for_node(
+                        throws_specifier,
+                        &format!("keyword(SwiftSyntax.Keyword.{})", throws_specifier.kind()),
+                    ),
+                    "throwsSpecifier",
+                )],
+            );
+            children.push(self.with_name(throws_clause, "throwsClause"));
+        }
+        let range = self.covering_range_or_point(&children, after_parameter_clause.end_byte());
+        Ok(Some(self.syntax_node(
+            "TypeEffectSpecifiersSyntax",
+            range,
+            children,
+        )))
+    }
+
+    fn tuple_type(&self, node: Node<'a>) -> Result<Value> {
+        let left_paren = self
+            .immediate_child_kind(node, "(")
+            .context("tuple type is missing '('")?;
+        let right_paren = self
+            .immediate_child_kind(node, ")")
+            .context("tuple type is missing ')'")?;
+
+        Ok(self.syntax_node(
+            "TupleTypeSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+                self.with_name(
+                    self.tuple_type_element_list(node, left_paren, right_paren)?,
+                    "elements",
+                ),
+                self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
+            ],
+        ))
+    }
+
+    fn tuple_type_element_list(
+        &self,
+        node: Node<'a>,
+        left_paren: Node<'a>,
+        right_paren: Node<'a>,
+    ) -> Result<Value> {
+        let mut elements = Vec::new();
+        for item in named_children(node).filter(|child| child.kind() == "tuple_type_item") {
+            let trailing_comma = self.trailing_delimiter(node, item, ",");
+            let mut item_children = Vec::new();
+            if let Some(colon) = self.immediate_child_kind(item, ":") {
+                let names = named_children(item)
+                    .filter(|child| {
+                        child.end_byte() <= colon.start_byte()
+                            && matches!(
+                                child.kind(),
+                                "simple_identifier" | "identifier" | "wildcard_pattern"
+                            )
+                    })
+                    .collect::<Vec<_>>();
+                if let Some(first_name) = names.first().copied() {
+                    item_children.push(
+                        self.with_name(self.identifier_or_wildcard_token(first_name), "firstName"),
+                    );
+                }
+                if let Some(second_name) = names.get(1).copied() {
+                    item_children.push(
+                        self.with_name(
+                            self.identifier_or_wildcard_token(second_name),
+                            "secondName",
+                        ),
+                    );
+                }
+                item_children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
+            }
+            let type_node = named_children(item)
+                .filter(|child| {
+                    !matches!(
+                        child.kind(),
+                        "simple_identifier" | "identifier" | "wildcard_pattern"
+                    )
+                })
+                .find(|child| child.kind() != "type_annotation")
+                .or_else(|| named_children(item).last())
+                .context("tuple type item is missing a type")?;
+            item_children.push(self.with_name(self.type_syntax(type_node)?, "type"));
+            if let Some(comma) = trailing_comma {
+                item_children
+                    .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+            }
+            let element_end = trailing_comma.map_or(item.end_byte(), |comma| comma.end_byte());
+            elements.push(self.with_name(
+                self.syntax_node(
+                    "TupleTypeElementSyntax",
+                    self.range_from_offsets(item.start_byte(), element_end),
+                    item_children,
+                ),
+                "",
+            ));
+        }
+
+        Ok(self.syntax_node(
+            "TupleTypeElementListSyntax",
+            self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
+            elements,
         ))
     }
 
@@ -1888,7 +2160,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .field_child(node, "return_type")
                 .or_else(|| self.type_node_after(node, arrow.end_byte()))
             {
-                Some(self.identifier_type(return_type)?)
+                Some(self.type_syntax(return_type)?)
             } else {
                 self.synthetic_identifier_type_after_arrow(node, arrow)
             };
@@ -4011,6 +4283,99 @@ fn end_offset(value: &Value) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn emits_typealias_declarations() {
+        let source = r#"
+typealias IntPair = (Int, Int)
+typealias IntTriple = (Int, Int, Int)
+typealias Foo1 = Int
+typealias Recovery5 = Int, Float
+typealias `switch` = Int
+"#;
+        let value = parse_source("Typealias.swift", "/tmp/Typealias.swift", source).unwrap();
+        let aliases = find_node_types(&value, "TypeAliasDeclSyntax");
+        assert_eq!(aliases.len(), 5);
+        assert!(aliases.iter().all(|alias| {
+            alias["children"][2]["tokenKind"] == "keyword(SwiftSyntax.Keyword.typealias)"
+                && alias["children"][4]["nodeType"] == "TypeInitializerClauseSyntax"
+        }));
+
+        let tuple_types = find_node_types(&value, "TupleTypeSyntax");
+        assert_eq!(tuple_types.len(), 2);
+        assert_eq!(
+            tuple_types[0]["children"][1]["children"]
+                .as_array()
+                .unwrap()
+                .len(),
+            2
+        );
+        assert_eq!(
+            tuple_types[1]["children"][1]["children"]
+                .as_array()
+                .unwrap()
+                .len(),
+            3
+        );
+        assert_eq!(
+            aliases[2]["children"][4]["children"][1]["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+        assert_eq!(
+            aliases[4]["children"][3]["tokenKind"],
+            "identifier(\"`switch`\")"
+        );
+    }
+
+    #[test]
+    fn emits_function_typealiases() {
+        let source = r#"
+typealias MyAlias = (_ a: Int, _ b: Double, _ c: Bool, _ d: String) -> Bool
+typealias A = @attr1 @attr2(hello) (Int) -> Void
+typealias AsyncFunc2 = () async throws -> ()
+"#;
+        let value =
+            parse_source("FunctionTypes.swift", "/tmp/FunctionTypes.swift", source).unwrap();
+        let function_types = find_node_types(&value, "FunctionTypeSyntax");
+        assert_eq!(function_types.len(), 3);
+
+        assert_eq!(
+            function_types[0]["children"][1]["children"]
+                .as_array()
+                .unwrap()
+                .len(),
+            4
+        );
+        assert_eq!(
+            function_types[0]["children"][1]["children"][0]["children"][0]["tokenKind"],
+            "wildcard"
+        );
+        assert_eq!(
+            function_types[0]["children"][1]["children"][0]["children"][1]["tokenKind"],
+            "identifier(\"a\")"
+        );
+        assert_eq!(
+            function_types[0]["children"][3]["nodeType"],
+            "ReturnClauseSyntax"
+        );
+
+        assert_eq!(
+            function_types[2]["children"][3]["nodeType"],
+            "TypeEffectSpecifiersSyntax"
+        );
+        assert_eq!(
+            function_types[2]["children"][3]["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.async)"
+        );
+        assert_eq!(
+            function_types[2]["children"][3]["children"][1]["nodeType"],
+            "ThrowsClauseSyntax"
+        );
+        assert_eq!(
+            function_types[2]["children"][4]["children"][1]["nodeType"],
+            "TupleTypeSyntax"
+        );
+    }
 
     #[test]
     fn emits_guard_statements() {

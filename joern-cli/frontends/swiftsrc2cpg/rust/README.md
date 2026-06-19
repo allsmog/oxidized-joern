@@ -34,13 +34,14 @@ declarations with protocol functions, protocol properties, and associated
 types, recovered initialized protocol members emitted for upstream test
 compatibility, simple initializer and deinitializer declarations, simple
 subscript declarations with direct bodies and `get`/`set` accessors, computed
-property bodies and protocol property accessors, simple switch statements,
-wildcard patterns, simple extension declarations with inheritance clauses, dot
-member-access expressions including `self` and `super` bases, simple implicit
-member expressions, simple actor declarations, simple operator declarations,
-parser-only precedence group declarations, simple declaration attributes, and
-simple declaration modifiers. Unsupported syntax fails per-file and is reported
-on stdout so the existing skipped-file handling can continue.
+property bodies and protocol property accessors, simple typealias declarations
+with identifier, tuple, and function-type initializers, simple switch
+statements, wildcard patterns, simple extension declarations with inheritance
+clauses, dot member-access expressions including `self` and `super` bases,
+simple implicit member expressions, simple actor declarations, simple operator
+declarations, parser-only precedence group declarations, simple declaration
+attributes, and simple declaration modifiers. Unsupported syntax fails per-file
+and is reported on stdout so the existing skipped-file handling can continue.
 
 Run the Rust checks with:
 
