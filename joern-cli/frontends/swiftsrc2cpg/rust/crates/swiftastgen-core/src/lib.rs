@@ -2173,6 +2173,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn identifier_type(&self, node: Node<'a>) -> Result<Value> {
+        if node.kind() == "user_type" {
+            return self.user_type_syntax(node);
+        }
         let name = match node.kind() {
             "type_identifier" => node,
             _ => self
@@ -2189,6 +2192,94 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ),
                 "name",
             )],
+        ))
+    }
+
+    fn user_type_syntax(&self, node: Node<'a>) -> Result<Value> {
+        let names = self.immediate_type_identifiers(node);
+        let first = names
+            .first()
+            .copied()
+            .context("user type is missing type identifier")?;
+        let type_arguments = self.immediate_named_child_kind(node, "type_arguments");
+
+        if names.len() == 1 {
+            return self.identifier_type_for_name(
+                first,
+                node.start_byte(),
+                node.end_byte(),
+                type_arguments,
+            );
+        }
+
+        let mut current =
+            self.identifier_type_for_name(first, first.start_byte(), first.end_byte(), None)?;
+        let mut previous = first;
+        for (index, name) in names.iter().copied().enumerate().skip(1) {
+            let period = self
+                .children_between(node, previous.end_byte(), name.start_byte())
+                .into_iter()
+                .find(|child| child.kind() == ".")
+                .context("member type is missing '.'")?;
+            let is_last = index + 1 == names.len();
+            let mut children = vec![
+                self.with_name(current, "baseType"),
+                self.with_name(self.token_for_node(period, "period"), "period"),
+                self.with_name(
+                    self.token_for_node(
+                        name,
+                        &format!("identifier({})", quoted_text(self.text(name))),
+                    ),
+                    "name",
+                ),
+            ];
+            let end = if is_last {
+                if let Some(arguments) = type_arguments {
+                    children.push(self.with_name(
+                        self.generic_argument_clause(arguments)?,
+                        "genericArgumentClause",
+                    ));
+                    arguments.end_byte()
+                } else {
+                    name.end_byte()
+                }
+            } else {
+                name.end_byte()
+            };
+            current = self.syntax_node(
+                "MemberTypeSyntax",
+                self.range_from_offsets(node.start_byte(), end),
+                children,
+            );
+            previous = name;
+        }
+        Ok(current)
+    }
+
+    fn identifier_type_for_name(
+        &self,
+        name: Node<'a>,
+        start: usize,
+        end: usize,
+        generic_arguments: Option<Node<'a>>,
+    ) -> Result<Value> {
+        let mut children = vec![self.with_name(
+            self.token_for_node(
+                name,
+                &format!("identifier({})", quoted_text(self.text(name))),
+            ),
+            "name",
+        )];
+        if let Some(arguments) = generic_arguments {
+            children.push(self.with_name(
+                self.generic_argument_clause(arguments)?,
+                "genericArgumentClause",
+            ));
+        }
+        Ok(self.syntax_node(
+            "IdentifierTypeSyntax",
+            self.range_from_offsets(start, end),
+            children,
         ))
     }
 
@@ -5011,10 +5102,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn constructed_type_expr(&self, node: Node<'a>) -> Result<Value> {
-        let name = self
-            .first_descendant_kind(node, "type_identifier")
-            .context("constructed type is missing type identifier")?;
-        let base = self.decl_reference_expr(name);
+        let base = self.constructed_type_base_expr(node)?;
         let Some(type_arguments) = self.immediate_named_child_kind(node, "type_arguments") else {
             return Ok(base);
         };
@@ -5029,6 +5117,34 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ),
             ],
         ))
+    }
+
+    fn constructed_type_base_expr(&self, node: Node<'a>) -> Result<Value> {
+        let names = self.immediate_type_identifiers(node);
+        let first = names
+            .first()
+            .copied()
+            .context("constructed type is missing type identifier")?;
+        let mut current = self.decl_reference_expr(first);
+        let mut previous = first;
+        for name in names.into_iter().skip(1) {
+            let period = self
+                .children_between(node, previous.end_byte(), name.start_byte())
+                .into_iter()
+                .find(|child| child.kind() == ".")
+                .context("constructed member type is missing '.'")?;
+            current = self.syntax_node(
+                "MemberAccessExprSyntax",
+                self.range_from_offsets(first.start_byte(), name.end_byte()),
+                vec![
+                    self.with_name(current, "base"),
+                    self.with_name(self.token_for_node(period, "period"), "period"),
+                    self.with_name(self.decl_reference_expr(name), "declName"),
+                ],
+            );
+            previous = name;
+        }
+        Ok(current)
     }
 
     fn generic_argument_clause(&self, node: Node<'a>) -> Result<Value> {
@@ -6487,6 +6603,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         named_children(node).find(|child| child.kind() == kind)
     }
 
+    fn immediate_type_identifiers(&self, node: Node<'a>) -> Vec<Node<'a>> {
+        if node.kind() == "type_identifier" {
+            vec![node]
+        } else {
+            named_children(node)
+                .filter(|child| child.kind() == "type_identifier")
+                .collect()
+        }
+    }
+
     fn nearest_child_before(&self, node: Node<'a>, kind: &str, offset: usize) -> Option<Node<'a>> {
         children(node)
             .filter(|child| child.kind() == kind && child.start_byte() <= offset)
@@ -6778,6 +6904,50 @@ fn end_offset(value: &Value) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn emits_nested_type_specialization_calls() {
+        let value = parse_source(
+            "NestedType.swift",
+            "/tmp/NestedType.swift",
+            "Swift.Array<Array<Foo>>()\n",
+        )
+        .unwrap();
+        let call = find_first_node_type(&value, "FunctionCallExprSyntax").unwrap();
+        assert_eq!(call["range"]["startOffset"], 0);
+        assert_eq!(call["range"]["endOffset"], 25);
+
+        let specialization = &call["children"][0];
+        assert_eq!(
+            specialization["nodeType"],
+            "GenericSpecializationExprSyntax"
+        );
+        let member_access = &specialization["children"][0];
+        assert_eq!(member_access["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(
+            member_access["children"][0]["children"][0]["tokenKind"],
+            "identifier(\"Swift\")"
+        );
+        assert_eq!(member_access["children"][1]["tokenKind"], "period");
+        assert_eq!(
+            member_access["children"][2]["children"][0]["tokenKind"],
+            "identifier(\"Array\")"
+        );
+
+        let outer_argument =
+            &specialization["children"][1]["children"][1]["children"][0]["children"][0];
+        assert_eq!(outer_argument["nodeType"], "IdentifierTypeSyntax");
+        assert_eq!(
+            outer_argument["children"][0]["tokenKind"],
+            "identifier(\"Array\")"
+        );
+        let inner_argument =
+            &outer_argument["children"][1]["children"][1]["children"][0]["children"][0];
+        assert_eq!(
+            inner_argument["children"][0]["tokenKind"],
+            "identifier(\"Foo\")"
+        );
+    }
 
     #[test]
     fn recovers_keyword_apply_calls() {
