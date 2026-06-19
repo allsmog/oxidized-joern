@@ -126,6 +126,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 continue;
             }
             if let Some(next) = root_children.get(child_index + 1).copied() {
+                if self.is_split_keyword_apply_call(child, next) {
+                    let call = self.recovered_keyword_apply_call(child, next)?;
+                    statement_items.push(self.code_block_item_for_value(call, "item"));
+                    child_index += 2;
+                    continue;
+                }
                 if self.is_recoverable_regex_assignment(child, next) {
                     let assignment = self.recovered_regex_assignment(child, next)?;
                     statement_items.push(self.code_block_item_for_value(assignment, "item"));
@@ -1737,6 +1743,56 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             && is_identifier_like_text(self.text(continuation))
     }
 
+    fn is_split_keyword_apply_call(&self, callee: Node<'a>, arguments: Node<'a>) -> bool {
+        if callee.kind() != "ERROR"
+            || arguments.kind() != "tuple_expression"
+            || !is_identifier_like_text(self.text(callee))
+            || self.immediate_child_kind(arguments, "(").is_none()
+            || self.immediate_child_kind(arguments, ")").is_none()
+        {
+            return false;
+        }
+        let between = &self.source[callee.end_byte()..arguments.start_byte()];
+        !between.contains('\n') && between.chars().all(char::is_whitespace)
+    }
+
+    fn recovered_keyword_apply_call(
+        &self,
+        callee: Node<'a>,
+        arguments_tuple: Node<'a>,
+    ) -> Result<Value> {
+        let left_paren = self
+            .immediate_child_kind(arguments_tuple, "(")
+            .context("keyword apply call arguments are missing '('")?;
+        let right_paren = self
+            .immediate_child_kind(arguments_tuple, ")")
+            .context("keyword apply call arguments are missing ')'")?;
+        Ok(self.syntax_node(
+            "FunctionCallExprSyntax",
+            self.range_from_offsets(callee.start_byte(), arguments_tuple.end_byte()),
+            vec![
+                self.with_name(self.decl_reference_expr(callee), "calledExpression"),
+                self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+                self.with_name(
+                    self.labeled_expr_list_from_tuple_expr(
+                        arguments_tuple,
+                        left_paren,
+                        right_paren,
+                    )?,
+                    "arguments",
+                ),
+                self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
+                self.with_name(
+                    self.empty_collection(
+                        "MultipleTrailingClosureElementListSyntax",
+                        arguments_tuple.end_byte(),
+                    ),
+                    "additionalTrailingClosures",
+                ),
+            ],
+        ))
+    }
+
     fn is_split_bare_macro_variable_decl(
         &self,
         declaration: Node<'a>,
@@ -2618,6 +2674,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         while index < statement_nodes.len() {
             let child = statement_nodes[index];
             if let Some(next) = statement_nodes.get(index + 1).copied() {
+                if self.is_split_keyword_apply_call(child, next) {
+                    let call = self.recovered_keyword_apply_call(child, next)?;
+                    items.push(self.code_block_item_for_value(call, "item"));
+                    index += 2;
+                    continue;
+                }
                 if self.is_split_copy_variable_decl(child, next) {
                     let declaration = self.recovered_copy_variable_decl(child, next)?;
                     items.push(self.code_block_item_for_value(declaration, "item"));
@@ -3458,6 +3520,65 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ),
                 self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
             ],
+        ))
+    }
+
+    fn labeled_expr_list_from_tuple_expr(
+        &self,
+        node: Node<'a>,
+        left_paren: Node<'a>,
+        right_paren: Node<'a>,
+    ) -> Result<Value> {
+        let labels = self.field_children(node, "name");
+        let mut elements = Vec::new();
+        for value in self
+            .field_children(node, "value")
+            .into_iter()
+            .filter(|value| !self.is_recovery_bang_node(*value))
+        {
+            let trailing_comma = self.trailing_delimiter(node, value, ",");
+            let label = labels
+                .iter()
+                .copied()
+                .rfind(|label| label.end_byte() <= value.start_byte());
+            let mut children = Vec::new();
+            let element_start = if let Some(label) = label {
+                let colon = self
+                    .children_between(node, label.end_byte(), value.start_byte())
+                    .into_iter()
+                    .find(|child| child.kind() == ":")
+                    .context("keyword apply call argument label is missing ':'")?;
+                children.push(self.with_name(
+                    self.token_for_node(
+                        label,
+                        &format!("identifier({})", quoted_text(self.text(label))),
+                    ),
+                    "label",
+                ));
+                children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
+                label.start_byte()
+            } else {
+                value.start_byte()
+            };
+            children.push(self.with_name(self.expr(value)?, "expression"));
+            if let Some(comma) = trailing_comma {
+                children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+            }
+            let element_end = trailing_comma.map_or(value.end_byte(), |comma| comma.end_byte());
+            elements.push(self.with_name(
+                self.syntax_node(
+                    "LabeledExprSyntax",
+                    self.range_from_offsets(element_start, element_end),
+                    children,
+                ),
+                "",
+            ));
+        }
+
+        Ok(self.syntax_node(
+            "LabeledExprListSyntax",
+            self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
+            elements,
         ))
     }
 
@@ -6657,6 +6778,55 @@ fn end_offset(value: &Value) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn recovers_keyword_apply_calls() {
+        let source = "optional(x: .some(23))\noptional(x: .none)\nvar pair : (Int, Double) = makePair(a: 1, b: 2.5)\n";
+        let value = parse_source("KeywordApply.swift", "/tmp/KeywordApply.swift", source).unwrap();
+        let statements = value["children"][0]["children"].as_array().unwrap();
+        assert_eq!(statements.len(), 3);
+
+        let first_call = &statements[0]["children"][0];
+        assert_eq!(first_call["nodeType"], "FunctionCallExprSyntax");
+        assert_eq!(first_call["range"]["startOffset"], 0);
+        assert_eq!(first_call["range"]["endOffset"], 22);
+        assert_eq!(
+            first_call["children"][0]["children"][0]["tokenKind"],
+            "identifier(\"optional\")"
+        );
+        let first_argument = &first_call["children"][2]["children"][0];
+        assert_eq!(
+            first_argument["children"][0]["tokenKind"],
+            "identifier(\"x\")"
+        );
+        assert_eq!(
+            first_argument["children"][2]["nodeType"],
+            "FunctionCallExprSyntax"
+        );
+        assert_eq!(
+            first_argument["children"][2]["children"][0]["nodeType"],
+            "MemberAccessExprSyntax"
+        );
+
+        let second_call = &statements[1]["children"][0];
+        assert_eq!(second_call["nodeType"], "FunctionCallExprSyntax");
+        assert_eq!(second_call["range"]["startOffset"], 23);
+        assert_eq!(second_call["range"]["endOffset"], 41);
+        let second_argument = &second_call["children"][2]["children"][0];
+        assert_eq!(
+            second_argument["children"][2]["nodeType"],
+            "MemberAccessExprSyntax"
+        );
+
+        let declaration = &statements[2]["children"][0];
+        assert_eq!(declaration["nodeType"], "VariableDeclSyntax");
+        let make_pair = find_node_types(declaration, "FunctionCallExprSyntax");
+        assert_eq!(make_pair.len(), 1);
+        assert_eq!(
+            make_pair[0]["children"][0]["children"][0]["tokenKind"],
+            "identifier(\"makePair\")"
+        );
+    }
 
     #[test]
     fn emits_raw_string_literals() {
