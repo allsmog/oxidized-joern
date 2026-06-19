@@ -78,11 +78,23 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         full_file_path: &str,
     ) -> Result<Value> {
         let mut statement_items = Vec::new();
-        for child in named_children(root) {
+        let root_children = named_children(root).collect::<Vec<_>>();
+        let mut child_index = 0;
+        while child_index < root_children.len() {
+            let child = root_children[child_index];
             if is_trivia_node(child) || self.is_ignorable_top_level_error(child) {
+                child_index += 1;
+                continue;
+            }
+            if self.is_recoverable_protocol_error(child) {
+                let (decl, next_index) =
+                    self.recovered_protocol_decl(&root_children, child_index)?;
+                statement_items.push(self.code_block_item_for_value(decl, "item"));
+                child_index = next_index;
                 continue;
             }
             statement_items.push(self.code_block_item(child)?);
+            child_index += 1;
         }
 
         let statements_range = self.covering_range_or_point(&statement_items, root.start_byte());
@@ -123,9 +135,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn is_ignorable_member_error(&self, node: Node<'a>) -> bool {
-        node.kind() == "ERROR"
-            && self.text(node).trim() == "deinit"
-            && named_children(node).all(is_trivia_node)
+        if node.kind() != "ERROR" {
+            return false;
+        }
+        let trimmed = self.text(node).trim_start();
+        if trimmed == "deinit" && named_children(node).all(is_trivia_node) {
+            return true;
+        }
+        !(trimmed.starts_with("case")
+            || trimmed.starts_with("subscript")
+            || self.is_recoverable_property_error(node))
     }
 
     fn code_block_item(&self, node: Node<'a>) -> Result<Value> {
@@ -133,15 +152,28 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(self.syntax_node("CodeBlockItemSyntax", self.range_for_node(node), vec![item]))
     }
 
+    fn code_block_item_for_value(&self, value: Value, child_name: &str) -> Value {
+        let range = value["range"].clone();
+        self.syntax_node(
+            "CodeBlockItemSyntax",
+            range,
+            vec![self.with_name(value, child_name)],
+        )
+    }
+
     fn syntax_for_statement(&self, node: Node<'a>) -> Result<Value> {
         match node.kind() {
             "property_declaration" => self.variable_decl(node),
+            "protocol_property_declaration" => self.variable_decl(node),
             "function_declaration" => self.function_decl(node),
+            "protocol_function_declaration" => self.function_decl(node),
             "class_declaration" => self.nominal_type_decl(node),
+            "protocol_declaration" => self.protocol_decl(node),
             "control_transfer_statement" => self.control_transfer_stmt(node),
             "for_statement" => self.for_stmt(node),
             "if_statement" => self.if_expr(node),
             "import_declaration" => self.import_decl(node),
+            "switch_statement" => self.switch_expr(node),
             "while_statement" => self.while_stmt(node),
             "assignment"
             | "additive_expression"
@@ -160,7 +192,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "range_expression"
             | "real_literal"
             | "simple_identifier"
+            | "nil"
             | "self_expression"
+            | "super_expression"
             | "tuple_expression"
             | "navigation_expression"
             | "line_string_literal" => self.expr(node),
@@ -170,12 +204,23 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn syntax_for_member_decl(&self, node: Node<'a>) -> Result<Value> {
         match node.kind() {
+            "associatedtype_declaration" => self.associated_type_decl(node),
             "property_declaration" => self.variable_decl(node),
+            "protocol_property_declaration" => self.variable_decl(node),
             "function_declaration" => self.function_decl(node),
+            "protocol_function_declaration" => self.function_decl(node),
             "class_declaration" => self.nominal_type_decl(node),
+            "protocol_declaration" => self.protocol_decl(node),
+            "enum_entry" => self.enum_case_decl(node),
             "deinit_declaration" => self.deinitializer_decl(node),
             "init_declaration" => self.initializer_decl(node),
             "subscript_declaration" => self.subscript_decl(node),
+            "ERROR" if self.is_recoverable_property_error(node) => {
+                self.recovered_variable_decl(node, None)
+            }
+            "ERROR" if self.text(node).trim_start().starts_with("case") => {
+                self.enum_case_decl(node)
+            }
             "ERROR" if self.text(node).trim_start().starts_with("subscript") => {
                 self.subscript_decl(node)
             }
@@ -200,6 +245,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "StructDeclSyntax",
                 "structKeyword",
                 "keyword(SwiftSyntax.Keyword.struct)",
+            ),
+            "enum" => (
+                "EnumDeclSyntax",
+                "enumKeyword",
+                "keyword(SwiftSyntax.Keyword.enum)",
             ),
             other => bail!("unsupported nominal type declaration kind '{other}'"),
         };
@@ -240,6 +290,452 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(self.syntax_node(node_type, self.range_for_node(node), children))
     }
 
+    fn protocol_decl(&self, node: Node<'a>) -> Result<Value> {
+        let protocol_keyword = self
+            .field_child(node, "declaration_kind")
+            .or_else(|| self.immediate_child_kind(node, "protocol"))
+            .context("protocol declaration is missing 'protocol'")?;
+        let name_node = self
+            .field_child(node, "name")
+            .context("protocol declaration is missing a name")?;
+        let name = match name_node.kind() {
+            "type_identifier" | "simple_identifier" => name_node,
+            _ => self
+                .first_descendant_kind(name_node, "type_identifier")
+                .or_else(|| self.first_descendant_kind(name_node, "simple_identifier"))
+                .context("protocol declaration name is missing an identifier")?,
+        };
+        let body = self
+            .field_child(node, "body")
+            .context("protocol declaration is missing a body")?;
+
+        let mut children = vec![
+            self.with_name(self.attribute_list(node)?, "attributes"),
+            self.with_name(self.modifier_list(node), "modifiers"),
+            self.with_name(
+                self.token_for_node(protocol_keyword, "keyword(SwiftSyntax.Keyword.protocol)"),
+                "protocolKeyword",
+            ),
+            self.with_name(
+                self.token_for_node(
+                    name,
+                    &format!("identifier({})", quoted_text(self.text(name))),
+                ),
+                "name",
+            ),
+        ];
+        if let Some(inheritance_clause) = self.inheritance_clause(node)? {
+            children.push(self.with_name(inheritance_clause, "inheritanceClause"));
+        }
+        children.push(self.with_name(self.member_block(body)?, "memberBlock"));
+
+        Ok(self.syntax_node("ProtocolDeclSyntax", self.range_for_node(node), children))
+    }
+
+    fn is_recoverable_protocol_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR"
+            && self.immediate_child_kind(node, "protocol").is_some()
+            && self.immediate_child_kind(node, "{").is_some()
+    }
+
+    fn recovered_protocol_decl(
+        &self,
+        siblings: &[Node<'a>],
+        start_index: usize,
+    ) -> Result<(Value, usize)> {
+        let header = siblings[start_index];
+        let protocol_keyword = self
+            .immediate_child_kind(header, "protocol")
+            .context("recovered protocol declaration is missing 'protocol'")?;
+        let left_brace = self
+            .immediate_child_kind(header, "{")
+            .context("recovered protocol declaration is missing '{'")?;
+        let name = self
+            .first_descendant_kind_between(
+                header,
+                "simple_identifier",
+                protocol_keyword.end_byte(),
+                left_brace.start_byte(),
+            )
+            .or_else(|| {
+                self.first_descendant_kind_between(
+                    header,
+                    "type_identifier",
+                    protocol_keyword.end_byte(),
+                    left_brace.start_byte(),
+                )
+            })
+            .context("recovered protocol declaration is missing a name")?;
+        let close_index = siblings
+            .iter()
+            .enumerate()
+            .skip(start_index + 1)
+            .find(|(_, sibling)| sibling.kind() == "ERROR" && self.text(**sibling).trim() == "}")
+            .map(|(index, _)| index)
+            .context("recovered protocol declaration is missing '}'")?;
+        let right_brace = siblings[close_index];
+
+        let mut members = Vec::new();
+        let mut member_index = start_index + 1;
+        if self.is_recoverable_property_error(header) {
+            let initializer_continuation = siblings
+                .get(member_index)
+                .copied()
+                .filter(|candidate| self.is_split_initializer_continuation(*candidate));
+            members.push(self.member_block_item_for_value(
+                self.recovered_variable_decl(header, initializer_continuation)?,
+            ));
+            if initializer_continuation.is_some() {
+                member_index += 1;
+            }
+        }
+
+        while member_index < close_index {
+            let member = siblings[member_index];
+            if !(is_trivia_node(member) || self.is_ignorable_member_error(member)) {
+                members.push(self.member_block_item(member)?);
+            }
+            member_index += 1;
+        }
+
+        let members_range = self.covering_range_or_point(&members, left_brace.end_byte());
+        let member_block = self.syntax_node(
+            "MemberBlockSyntax",
+            self.range_from_offsets(left_brace.start_byte(), right_brace.end_byte()),
+            vec![
+                self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace"),
+                self.with_name(
+                    self.syntax_node("MemberBlockItemListSyntax", members_range, members),
+                    "members",
+                ),
+                self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"),
+            ],
+        );
+
+        let mut children = vec![
+            self.with_name(
+                self.attribute_list_before(header, protocol_keyword.start_byte())?,
+                "attributes",
+            ),
+            self.with_name(
+                self.modifier_list_before(header, protocol_keyword.start_byte()),
+                "modifiers",
+            ),
+            self.with_name(
+                self.token_for_node(protocol_keyword, "keyword(SwiftSyntax.Keyword.protocol)"),
+                "protocolKeyword",
+            ),
+            self.with_name(
+                self.token_for_node(
+                    name,
+                    &format!("identifier({})", quoted_text(self.text(name))),
+                ),
+                "name",
+            ),
+        ];
+        if let Some(inheritance_clause) = self.inheritance_clause(header)? {
+            children.push(self.with_name(inheritance_clause, "inheritanceClause"));
+        }
+        children.push(self.with_name(member_block, "memberBlock"));
+
+        Ok((
+            self.syntax_node(
+                "ProtocolDeclSyntax",
+                self.range_from_offsets(header.start_byte(), right_brace.end_byte()),
+                children,
+            ),
+            close_index + 1,
+        ))
+    }
+
+    fn enum_case_decl(&self, node: Node<'a>) -> Result<Value> {
+        let case_keyword = self
+            .immediate_child_kind(node, "case")
+            .context("enum case declaration is missing 'case'")?;
+        let names = self.enum_case_name_ranges(node, case_keyword);
+        if names.is_empty() {
+            bail!("enum case declaration is missing case elements");
+        }
+        let data_contents = self.field_children(node, "data_contents");
+        let raw_values = self.field_children(node, "raw_value");
+
+        let mut elements = Vec::new();
+        for (index, (name_start, name_end)) in names.iter().copied().enumerate() {
+            let next_name_start = names
+                .get(index + 1)
+                .map(|(next_start, _)| *next_start)
+                .unwrap_or_else(|| node.end_byte());
+            let data_content = data_contents.iter().copied().find(|candidate| {
+                candidate.start_byte() >= name_end && candidate.end_byte() <= next_name_start
+            });
+            let raw_value = raw_values.iter().copied().find(|candidate| {
+                candidate.start_byte() >= name_end && candidate.start_byte() < next_name_start
+            });
+
+            let mut element_children = vec![self.with_name(
+                self.token_with_range(
+                    &format!(
+                        "identifier({})",
+                        quoted_text(&self.source[name_start..name_end])
+                    ),
+                    self.range_from_offsets(name_start, name_end),
+                ),
+                "name",
+            )];
+            if let Some(parameter_node) = data_content {
+                element_children.push(self.with_name(
+                    self.enum_case_parameter_clause(parameter_node)?,
+                    "parameterClause",
+                ));
+            }
+            if let Some(raw_value) = raw_value {
+                let equal = children(node)
+                    .find(|child| {
+                        child.kind() == "="
+                            && child.start_byte() >= name_end
+                            && child.end_byte() <= raw_value.start_byte()
+                    })
+                    .context("enum case raw value is missing '='")?;
+                element_children
+                    .push(self.with_name(self.initializer_clause(equal, raw_value)?, "rawValue"));
+            }
+
+            let element_content_end = raw_value
+                .or(data_content)
+                .map(|child| child.end_byte())
+                .unwrap_or(name_end);
+            let trailing_comma = children(node).find(|child| {
+                child.kind() == ","
+                    && child.start_byte() >= element_content_end
+                    && child.end_byte() <= next_name_start
+            });
+            if let Some(comma) = trailing_comma {
+                element_children
+                    .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+            }
+
+            let element_end = trailing_comma
+                .map(|comma| comma.end_byte())
+                .unwrap_or(element_content_end);
+            elements.push(self.with_name(
+                self.syntax_node(
+                    "EnumCaseElementSyntax",
+                    self.range_from_offsets(name_start, element_end),
+                    element_children,
+                ),
+                "",
+            ));
+        }
+
+        let elements_range = self.covering_range_or_point(&elements, case_keyword.end_byte());
+        Ok(self.syntax_node(
+            "EnumCaseDeclSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.attribute_list(node)?, "attributes"),
+                self.with_name(self.modifier_list(node), "modifiers"),
+                self.with_name(
+                    self.token_for_node(case_keyword, "keyword(SwiftSyntax.Keyword.case)"),
+                    "caseKeyword",
+                ),
+                self.with_name(
+                    self.syntax_node("EnumCaseElementListSyntax", elements_range, elements),
+                    "elements",
+                ),
+            ],
+        ))
+    }
+
+    fn enum_case_name_ranges(&self, node: Node<'a>, case_keyword: Node<'a>) -> Vec<(usize, usize)> {
+        let names = self.field_children(node, "name");
+        if !names.is_empty() {
+            return names
+                .into_iter()
+                .map(|name| (name.start_byte(), name.end_byte()))
+                .collect();
+        }
+
+        let mut ranges = Vec::new();
+        let bytes = self.source.as_bytes();
+        let mut cursor = case_keyword.end_byte();
+        while cursor < node.end_byte() {
+            while cursor < node.end_byte()
+                && (bytes[cursor].is_ascii_whitespace()
+                    || matches!(bytes[cursor], b',' | b';' | b'(' | b')'))
+            {
+                cursor += 1;
+            }
+            if cursor >= node.end_byte() {
+                break;
+            }
+
+            let start = cursor;
+            if bytes[cursor] == b'`' {
+                cursor += 1;
+                while cursor < node.end_byte() && bytes[cursor] != b'`' {
+                    cursor += 1;
+                }
+                if cursor < node.end_byte() {
+                    cursor += 1;
+                }
+            } else {
+                while cursor < node.end_byte()
+                    && !bytes[cursor].is_ascii_whitespace()
+                    && !matches!(bytes[cursor], b',' | b'(' | b')' | b'=' | b';')
+                {
+                    cursor += 1;
+                }
+            }
+
+            if start < cursor {
+                ranges.push((start, cursor));
+            }
+
+            while cursor < node.end_byte() && bytes[cursor] != b',' {
+                cursor += 1;
+            }
+        }
+        ranges
+    }
+
+    fn enum_case_parameter_clause(&self, node: Node<'a>) -> Result<Value> {
+        let left_paren = self
+            .immediate_child_kind(node, "(")
+            .context("enum case parameter clause is missing '('")?;
+        let right_paren = self
+            .immediate_child_kind(node, ")")
+            .context("enum case parameter clause is missing ')'")?;
+        Ok(self.syntax_node(
+            "EnumCaseParameterClauseSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+                self.with_name(
+                    self.syntax_node(
+                        "EnumCaseParameterListSyntax",
+                        self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
+                        Vec::new(),
+                    ),
+                    "parameters",
+                ),
+                self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
+            ],
+        ))
+    }
+
+    fn associated_type_decl(&self, node: Node<'a>) -> Result<Value> {
+        let associatedtype_keyword = self
+            .immediate_child_kind(node, "associatedtype")
+            .context("associated type declaration is missing 'associatedtype'")?;
+        let name = self
+            .field_child(node, "name")
+            .context("associated type declaration is missing a name")?;
+
+        let mut decl_children = vec![
+            self.with_name(self.attribute_list(node)?, "attributes"),
+            self.with_name(self.modifier_list(node), "modifiers"),
+            self.with_name(
+                self.token_for_node(
+                    associatedtype_keyword,
+                    "keyword(SwiftSyntax.Keyword.associatedtype)",
+                ),
+                "associatedtypeKeyword",
+            ),
+            self.with_name(
+                self.token_for_node(
+                    name,
+                    &format!("identifier({})", quoted_text(self.text(name))),
+                ),
+                "name",
+            ),
+        ];
+        if let Some(inheritance_clause) = self.associated_type_inheritance_clause(node)? {
+            decl_children.push(self.with_name(inheritance_clause, "inheritanceClause"));
+        }
+        if let Some(default_value) = self.field_child(node, "default_value") {
+            let equal = children(node)
+                .find(|child| {
+                    child.kind() == "="
+                        && child.start_byte() >= name.end_byte()
+                        && child.end_byte() <= default_value.start_byte()
+                })
+                .context("associated type default value is missing '='")?;
+            decl_children.push(self.with_name(
+                self.type_initializer_clause(equal, default_value)?,
+                "initializer",
+            ));
+        }
+
+        Ok(self.syntax_node(
+            "AssociatedTypeDeclSyntax",
+            self.range_for_node(node),
+            decl_children,
+        ))
+    }
+
+    fn associated_type_inheritance_clause(&self, node: Node<'a>) -> Result<Option<Value>> {
+        let colon = match self.immediate_child_kind(node, ":") {
+            Some(colon) => colon,
+            None => return Ok(None),
+        };
+        let inherited_nodes = self.field_children(node, "must_inherit");
+        let boundary = self
+            .immediate_child_kind(node, "=")
+            .or_else(|| self.immediate_named_child_kind(node, "type_constraints"))
+            .map(|child| child.start_byte())
+            .unwrap_or_else(|| node.end_byte());
+        let inherited_nodes = if inherited_nodes.is_empty() {
+            self.type_node_after(node, colon.end_byte())
+                .filter(|candidate| candidate.end_byte() <= boundary)
+                .into_iter()
+                .collect::<Vec<_>>()
+        } else {
+            inherited_nodes
+        };
+        if inherited_nodes.is_empty() {
+            return Ok(None);
+        };
+
+        let mut inherited_types = Vec::new();
+        for inherited_node in inherited_nodes {
+            inherited_types.push(self.with_name(
+                self.syntax_node(
+                    "InheritedTypeSyntax",
+                    self.range_for_node(inherited_node),
+                    vec![self.with_name(self.identifier_type(inherited_node)?, "type")],
+                ),
+                "",
+            ));
+        }
+        let inherited_type_list_range =
+            self.covering_range_or_point(&inherited_types, colon.end_byte());
+        let inherited_type_list = self.syntax_node(
+            "InheritedTypeListSyntax",
+            inherited_type_list_range,
+            inherited_types,
+        );
+        let clause_end = end_offset(&inherited_type_list);
+        Ok(Some(self.syntax_node(
+            "InheritanceClauseSyntax",
+            self.range_from_offsets(colon.start_byte(), clause_end),
+            vec![
+                self.with_name(self.token_for_node(colon, "colon"), "colon"),
+                self.with_name(inherited_type_list, "inheritedTypes"),
+            ],
+        )))
+    }
+
+    fn type_initializer_clause(&self, equal: Node<'a>, value: Node<'a>) -> Result<Value> {
+        Ok(self.syntax_node(
+            "TypeInitializerClauseSyntax",
+            self.range_from_offsets(equal.start_byte(), value.end_byte()),
+            vec![
+                self.with_name(self.token_for_node(equal, "equal"), "equal"),
+                self.with_name(self.identifier_type(value)?, "value"),
+            ],
+        ))
+    }
+
     fn extension_decl(&self, node: Node<'a>, extension_keyword: Node<'a>) -> Result<Value> {
         let extended_type = self
             .field_child(node, "name")
@@ -260,7 +756,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(inheritance_clause) = self.inheritance_clause(node)? {
             children.push(self.with_name(inheritance_clause, "inheritanceClause"));
         }
-        children.push(self.with_name(self.member_block(body)?, "memberBlock"));
+        children.push(self.with_name(
+            self.member_block_without_case_recovery(body)?,
+            "memberBlock",
+        ));
 
         Ok(self.syntax_node("ExtensionDeclSyntax", self.range_for_node(node), children))
     }
@@ -317,6 +816,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn member_block(&self, node: Node<'a>) -> Result<Value> {
+        self.member_block_with_case_recovery(node, true)
+    }
+
+    fn member_block_without_case_recovery(&self, node: Node<'a>) -> Result<Value> {
+        self.member_block_with_case_recovery(node, false)
+    }
+
+    fn member_block_with_case_recovery(
+        &self,
+        node: Node<'a>,
+        recover_case_errors: bool,
+    ) -> Result<Value> {
         let left_brace = self
             .immediate_child_kind(node, "{")
             .context("member block is missing '{'")?;
@@ -325,7 +836,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .context("member block is missing '}'")?;
         let mut items = Vec::new();
         for child in named_children(node) {
-            if is_trivia_node(child) || self.is_ignorable_member_error(child) {
+            if is_trivia_node(child)
+                || self.is_ignorable_member_error(child)
+                || (!recover_case_errors
+                    && (child.kind() == "enum_entry"
+                        || (child.kind() == "ERROR"
+                            && self.text(child).trim_start().starts_with("case"))))
+            {
                 continue;
             }
             items.push(self.member_block_item(child)?);
@@ -353,9 +870,31 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn member_block_item_for_value(&self, value: Value) -> Value {
+        let range = value["range"].clone();
+        self.syntax_node(
+            "MemberBlockItemSyntax",
+            range,
+            vec![self.with_name(value, "decl")],
+        )
+    }
+
     fn attribute_list(&self, node: Node<'a>) -> Result<Value> {
         let mut attributes = Vec::new();
         for modifiers in named_children(node).filter(|child| child.kind() == "modifiers") {
+            for attribute in named_children(modifiers).filter(|child| child.kind() == "attribute") {
+                attributes.push(self.with_name(self.attribute(attribute)?, ""));
+            }
+        }
+        let range = self.covering_range_or_point(&attributes, node.start_byte());
+        Ok(self.syntax_node("AttributeListSyntax", range, attributes))
+    }
+
+    fn attribute_list_before(&self, node: Node<'a>, boundary: usize) -> Result<Value> {
+        let mut attributes = Vec::new();
+        for modifiers in named_children(node)
+            .filter(|child| child.kind() == "modifiers" && child.end_byte() <= boundary)
+        {
             for attribute in named_children(modifiers).filter(|child| child.kind() == "attribute") {
                 attributes.push(self.with_name(self.attribute(attribute)?, ""));
             }
@@ -391,6 +930,21 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     fn modifier_list(&self, node: Node<'a>) -> Value {
         let mut modifiers = Vec::new();
         for modifier_container in named_children(node).filter(|child| child.kind() == "modifiers") {
+            for modifier in
+                named_children(modifier_container).filter(|child| child.kind() != "attribute")
+            {
+                modifiers.push(self.with_name(self.decl_modifier(modifier), ""));
+            }
+        }
+        let range = self.covering_range_or_point(&modifiers, node.start_byte());
+        self.syntax_node("DeclModifierListSyntax", range, modifiers)
+    }
+
+    fn modifier_list_before(&self, node: Node<'a>, boundary: usize) -> Value {
+        let mut modifiers = Vec::new();
+        for modifier_container in named_children(node)
+            .filter(|child| child.kind() == "modifiers" && child.end_byte() <= boundary)
+        {
             for modifier in
                 named_children(modifier_container).filter(|child| child.kind() != "attribute")
             {
@@ -594,6 +1148,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .context("property declaration is missing a name")?;
         let type_annotation_node = self.immediate_named_child_kind(node, "type_annotation");
         let value_node = self.field_child(node, "value");
+        let accessor_block_node = self
+            .field_child(node, "computed_value")
+            .or_else(|| self.immediate_named_child_kind(node, "protocol_property_requirements"));
 
         let mut binding_children = vec![self.with_name(self.pattern(pattern_node)?, "pattern")];
         if let Some(type_node) = type_annotation_node {
@@ -607,10 +1164,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             binding_children
                 .push(self.with_name(self.initializer_clause(equal, value)?, "initializer"));
         }
+        if let Some(accessor_block) = accessor_block_node {
+            binding_children.push(self.with_name(
+                self.variable_accessor_block(accessor_block)?,
+                "accessorBlock",
+            ));
+        }
 
         let binding_range = self.range_from_offsets(
             pattern_node.start_byte(),
-            value_node
+            accessor_block_node
+                .or(value_node)
                 .or(type_annotation_node)
                 .unwrap_or(pattern_node)
                 .end_byte(),
@@ -643,6 +1207,164 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn is_recoverable_property_error(&self, node: Node<'a>) -> bool {
+        if node.kind() != "ERROR" {
+            return false;
+        }
+        let Some(binding_keyword) = self
+            .first_descendant_any_kind(node, "let")
+            .or_else(|| self.first_descendant_any_kind(node, "var"))
+        else {
+            return false;
+        };
+        self.recovered_property_name(node, binding_keyword)
+            .is_some()
+    }
+
+    fn recovered_variable_decl(
+        &self,
+        node: Node<'a>,
+        initializer_continuation: Option<Node<'a>>,
+    ) -> Result<Value> {
+        let binding_keyword = self
+            .first_descendant_any_kind(node, "let")
+            .or_else(|| self.first_descendant_any_kind(node, "var"))
+            .context("recovered property declaration is missing let/var")?;
+        let pattern_node = self
+            .recovered_property_name(node, binding_keyword)
+            .context("recovered property declaration is missing a name")?;
+        let type_annotation_node = self.immediate_named_child_kind(node, "type_annotation");
+
+        let mut binding_children = vec![self.with_name(self.pattern(pattern_node)?, "pattern")];
+        if let Some(type_node) = type_annotation_node {
+            binding_children
+                .push(self.with_name(self.type_annotation(type_node)?, "typeAnnotation"));
+        }
+        if let Some(initializer) =
+            self.recovered_property_initializer(node, pattern_node, initializer_continuation)?
+        {
+            binding_children.push(self.with_name(initializer, "initializer"));
+        }
+
+        let binding_range = self.range_from_offsets(
+            pattern_node.start_byte(),
+            binding_children
+                .last()
+                .map(end_offset)
+                .unwrap_or_else(|| pattern_node.end_byte()),
+        );
+        let binding = self.syntax_node("PatternBindingSyntax", binding_range, binding_children);
+        let bindings = self.with_name(
+            self.syntax_node(
+                "PatternBindingListSyntax",
+                self.range_from_offsets(pattern_node.start_byte(), end_offset(&binding)),
+                vec![self.with_name(binding, "")],
+            ),
+            "bindings",
+        );
+        let declaration_end = end_offset(&bindings);
+
+        Ok(self.syntax_node(
+            "VariableDeclSyntax",
+            self.range_from_offsets(binding_keyword.start_byte(), declaration_end),
+            vec![
+                self.with_name(self.attribute_list(node)?, "attributes"),
+                self.with_name(self.modifier_list(node), "modifiers"),
+                self.with_name(
+                    self.token_for_node(
+                        binding_keyword,
+                        &format!("keyword(SwiftSyntax.Keyword.{})", binding_keyword.kind()),
+                    ),
+                    "bindingSpecifier",
+                ),
+                bindings,
+            ],
+        ))
+    }
+
+    fn recovered_property_name(
+        &self,
+        node: Node<'a>,
+        binding_keyword: Node<'a>,
+    ) -> Option<Node<'a>> {
+        self.field_child(node, "name")
+            .or_else(|| self.field_child(node, "bound_identifier"))
+            .or_else(|| {
+                self.first_descendant_kind_between(
+                    node,
+                    "simple_identifier",
+                    binding_keyword.end_byte(),
+                    node.end_byte(),
+                )
+            })
+            .or_else(|| {
+                self.first_descendant_kind_between(
+                    node,
+                    "identifier",
+                    binding_keyword.end_byte(),
+                    node.end_byte(),
+                )
+            })
+    }
+
+    fn recovered_property_initializer(
+        &self,
+        node: Node<'a>,
+        pattern_node: Node<'a>,
+        initializer_continuation: Option<Node<'a>>,
+    ) -> Result<Option<Value>> {
+        if let Some(continuation) = initializer_continuation {
+            let equal_start = self
+                .source
+                .as_bytes()
+                .get(continuation.start_byte()..continuation.end_byte())
+                .and_then(|bytes| bytes.iter().position(|byte| *byte == b'='))
+                .map(|relative| continuation.start_byte() + relative)
+                .context("split property initializer is missing '='")?;
+            return self
+                .initializer_clause_from_offsets(equal_start, equal_start + 1, continuation, true)
+                .map(Some);
+        }
+
+        let Some(equal) = children(node)
+            .find(|child| child.kind() == "=" && child.start_byte() >= pattern_node.end_byte())
+        else {
+            return Ok(None);
+        };
+        let value = named_children(node)
+            .filter(|child| child.start_byte() >= equal.end_byte())
+            .find(|child| is_expression_like_node(*child))
+            .context("recovered property initializer is missing a value")?;
+        self.initializer_clause_from_offsets(equal.start_byte(), equal.end_byte(), value, false)
+            .map(Some)
+    }
+
+    fn initializer_clause_from_offsets(
+        &self,
+        equal_start: usize,
+        equal_end: usize,
+        value: Node<'a>,
+        strip_leading_equal: bool,
+    ) -> Result<Value> {
+        let value_expr = if strip_leading_equal {
+            self.expr_for_split_initializer(value)?
+        } else {
+            self.expr(value)?
+        };
+        let end = end_offset(&value_expr);
+        Ok(self.syntax_node(
+            "InitializerClauseSyntax",
+            self.range_from_offsets(equal_start, end),
+            vec![
+                self.with_name(
+                    self.token_with_range("equal", self.range_from_offsets(equal_start, equal_end)),
+                    "equal",
+                ),
+                self.with_name(value_expr, "value"),
+            ],
+        ))
+    }
+
     fn pattern(&self, node: Node<'a>) -> Result<Value> {
         match node.kind() {
             "pattern" if self.immediate_child_kind(node, "(").is_some() => self.tuple_pattern(node),
@@ -658,8 +1380,21 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.pattern(child)
             }
             "identifier" | "simple_identifier" => self.identifier_pattern(node),
+            "wildcard_pattern" => self.wildcard_pattern(node),
             other => bail!("unsupported Swift pattern node '{other}'"),
         }
+    }
+
+    fn wildcard_pattern(&self, node: Node<'a>) -> Result<Value> {
+        let wildcard = self
+            .first_descendant_any_kind(node, "_")
+            .or_else(|| self.immediate_child_kind(node, "_"))
+            .unwrap_or(node);
+        Ok(self.syntax_node(
+            "WildcardPatternSyntax",
+            self.range_for_node(node),
+            vec![self.with_name(self.token_for_node(wildcard, "wildcard"), "wildcard")],
+        ))
     }
 
     fn identifier_pattern(&self, node: Node<'a>) -> Result<Value> {
@@ -1011,12 +1746,29 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         else {
             return Ok(None);
         };
+        self.accessor_block_for_computed_property(computed_property, "subscript")
+            .map(Some)
+    }
+
+    fn variable_accessor_block(&self, node: Node<'a>) -> Result<Value> {
+        match node.kind() {
+            "computed_property" => self.accessor_block_for_computed_property(node, "property"),
+            "protocol_property_requirements" => self.protocol_property_accessor_block(node),
+            other => bail!("unsupported variable accessor block node '{other}'"),
+        }
+    }
+
+    fn accessor_block_for_computed_property(
+        &self,
+        computed_property: Node<'a>,
+        context: &str,
+    ) -> Result<Value> {
         let left_brace = self
             .immediate_child_kind(computed_property, "{")
-            .context("subscript accessor block is missing '{'")?;
+            .with_context(|| format!("{context} accessor block is missing '{{'"))?;
         let right_brace = self
             .immediate_child_kind(computed_property, "}")
-            .context("subscript accessor block is missing '}'")?;
+            .with_context(|| format!("{context} accessor block is missing '}}'"))?;
 
         let accessor_nodes: Vec<_> = named_children(computed_property)
             .filter(|child| {
@@ -1046,7 +1798,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             )
         };
 
-        Ok(Some(self.syntax_node(
+        Ok(self.syntax_node(
             "AccessorBlockSyntax",
             self.range_for_node(computed_property),
             vec![
@@ -1054,7 +1806,35 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 accessors,
                 self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"),
             ],
-        )))
+        ))
+    }
+
+    fn protocol_property_accessor_block(&self, node: Node<'a>) -> Result<Value> {
+        let left_brace = self
+            .immediate_child_kind(node, "{")
+            .context("protocol property accessor block is missing '{'")?;
+        let right_brace = self
+            .immediate_child_kind(node, "}")
+            .context("protocol property accessor block is missing '}'")?;
+        let mut accessor_items = Vec::new();
+        for accessor in named_children(node)
+            .filter(|child| matches!(child.kind(), "getter_specifier" | "setter_specifier"))
+        {
+            accessor_items.push(self.with_name(self.accessor_decl(accessor)?, ""));
+        }
+        let range = self.covering_range_or_point(&accessor_items, left_brace.end_byte());
+        Ok(self.syntax_node(
+            "AccessorBlockSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace"),
+                self.with_name(
+                    self.syntax_node("AccessorDeclListSyntax", range, accessor_items),
+                    "accessors",
+                ),
+                self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"),
+            ],
+        ))
     }
 
     fn accessor_decl(&self, node: Node<'a>) -> Result<Value> {
@@ -1140,6 +1920,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
             "assignment" => self.assignment_expr(node),
             "if_statement" => self.if_expr(node),
+            "switch_statement" => self.switch_expr(node),
             "additive_expression"
             | "comparison_expression"
             | "conjunction_expression"
@@ -1153,6 +1934,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "lambda_literal" => self.closure_expr(node),
             "navigation_expression" => self.member_access_expr(node),
             "prefix_expression" => self.prefix_expr(node),
+            "super_expression" => Ok(self.super_expr(node)),
             "boolean_literal" => Ok(self.syntax_node(
                 "BooleanLiteralExprSyntax",
                 self.range_for_node(node),
@@ -1197,6 +1979,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "baseName",
                 )],
             )),
+            "nil" => Ok(self.syntax_node(
+                "NilLiteralExprSyntax",
+                self.range_for_node(node),
+                vec![self.with_name(
+                    self.token_for_node(node, "keyword(SwiftSyntax.Keyword.nil)"),
+                    "nilKeyword",
+                )],
+            )),
             "self_expression" => Ok(self.syntax_node(
                 "DeclReferenceExprSyntax",
                 self.range_for_node(node),
@@ -1207,8 +1997,215 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             )),
             "line_string_literal" => self.string_literal(node),
             "tuple_expression" => self.tuple_expr(node),
+            "ERROR" if is_identifier_like_text(self.text(node)) => {
+                Ok(self.decl_reference_expr(node))
+            }
             other => bail!("unsupported Swift expression node '{other}'"),
         }
+    }
+
+    fn is_split_initializer_continuation(&self, node: Node<'a>) -> bool {
+        node.kind() == "call_expression" && self.text(node).trim_start().starts_with('=')
+    }
+
+    fn expr_for_split_initializer(&self, node: Node<'a>) -> Result<Value> {
+        if self.is_split_initializer_continuation(node) {
+            return self.recovered_call_expr_for_split_initializer(node);
+        }
+        self.expr(node)
+    }
+
+    fn recovered_call_expr_for_split_initializer(&self, node: Node<'a>) -> Result<Value> {
+        let callee = named_children(node)
+            .find(|child| child.kind() != "call_suffix")
+            .context("split initializer call is missing callee")?;
+        let suffix = self
+            .immediate_named_child_kind(node, "call_suffix")
+            .context("split initializer call is missing call suffix")?;
+        let mut children = vec![self.with_name(self.expr(callee)?, "calledExpression")];
+
+        if let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments") {
+            let left_paren = self
+                .immediate_child_kind(value_arguments, "(")
+                .context("split initializer call arguments are missing '('")?;
+            let right_paren = self
+                .immediate_child_kind(value_arguments, ")")
+                .context("split initializer call arguments are missing ')'")?;
+            children
+                .push(self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"));
+            children.push(self.with_name(
+                self.labeled_expr_list(value_arguments, left_paren, right_paren)?,
+                "arguments",
+            ));
+            children
+                .push(self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"));
+        } else {
+            children.push(self.with_name(
+                self.empty_collection("LabeledExprListSyntax", suffix.start_byte()),
+                "arguments",
+            ));
+        }
+        children.push(self.with_name(
+            self.empty_collection("MultipleTrailingClosureElementListSyntax", node.end_byte()),
+            "additionalTrailingClosures",
+        ));
+
+        Ok(self.syntax_node(
+            "FunctionCallExprSyntax",
+            self.range_from_offsets(callee.start_byte(), node.end_byte()),
+            children,
+        ))
+    }
+
+    fn super_expr(&self, node: Node<'a>) -> Value {
+        self.syntax_node(
+            "SuperExprSyntax",
+            self.range_for_node(node),
+            vec![self.with_name(
+                self.token_for_node(node, "keyword(SwiftSyntax.Keyword.super)"),
+                "superKeyword",
+            )],
+        )
+    }
+
+    fn switch_expr(&self, node: Node<'a>) -> Result<Value> {
+        let switch_keyword = self
+            .immediate_child_kind(node, "switch")
+            .context("switch statement is missing 'switch'")?;
+        let subject = self
+            .field_child(node, "expr")
+            .context("switch statement is missing subject expression")?;
+        let left_brace = self
+            .immediate_child_kind(node, "{")
+            .context("switch statement is missing '{'")?;
+        let right_brace = self
+            .immediate_child_kind(node, "}")
+            .context("switch statement is missing '}'")?;
+
+        let mut cases = Vec::new();
+        for switch_entry in named_children(node).filter(|child| child.kind() == "switch_entry") {
+            cases.push(self.with_name(self.switch_case(switch_entry)?, ""));
+        }
+        let cases_range = self.covering_range_or_point(&cases, left_brace.end_byte());
+        Ok(self.syntax_node(
+            "SwitchExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(switch_keyword, "keyword(SwiftSyntax.Keyword.switch)"),
+                    "switchKeyword",
+                ),
+                self.with_name(self.expr(subject)?, "subject"),
+                self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace"),
+                self.with_name(
+                    self.syntax_node("SwitchCaseListSyntax", cases_range, cases),
+                    "cases",
+                ),
+                self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"),
+            ],
+        ))
+    }
+
+    fn switch_case(&self, node: Node<'a>) -> Result<Value> {
+        let colon = self
+            .immediate_child_kind(node, ":")
+            .context("switch case is missing ':'")?;
+        let label = if let Some(default_keyword) = self.immediate_child_kind(node, "default") {
+            self.syntax_node(
+                "SwitchDefaultLabelSyntax",
+                self.range_from_offsets(default_keyword.start_byte(), colon.end_byte()),
+                vec![
+                    self.with_name(
+                        self.token_for_node(
+                            default_keyword,
+                            "keyword(SwiftSyntax.Keyword.default)",
+                        ),
+                        "defaultKeyword",
+                    ),
+                    self.with_name(self.token_for_node(colon, "colon"), "colon"),
+                ],
+            )
+        } else {
+            let case_keyword = self
+                .immediate_child_kind(node, "case")
+                .context("switch case is missing 'case'")?;
+            let mut case_items = Vec::new();
+            let patterns: Vec<_> = named_children(node)
+                .filter(|child| child.kind() == "pattern" && child.end_byte() <= colon.start_byte())
+                .collect();
+            for (index, pattern) in patterns.iter().copied().enumerate() {
+                let next_start = patterns
+                    .get(index + 1)
+                    .map(|next| next.start_byte())
+                    .unwrap_or_else(|| colon.start_byte());
+                let trailing_comma = children(node).find(|child| {
+                    child.kind() == ","
+                        && child.start_byte() >= pattern.end_byte()
+                        && child.end_byte() <= next_start
+                });
+                let mut item_children =
+                    vec![self.with_name(self.switch_case_pattern(pattern)?, "pattern")];
+                if let Some(comma) = trailing_comma {
+                    item_children
+                        .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+                }
+                let item_end = trailing_comma.map_or(pattern.end_byte(), |comma| comma.end_byte());
+                case_items.push(self.with_name(
+                    self.syntax_node(
+                        "SwitchCaseItemSyntax",
+                        self.range_from_offsets(pattern.start_byte(), item_end),
+                        item_children,
+                    ),
+                    "",
+                ));
+            }
+            let item_range = self.covering_range_or_point(&case_items, case_keyword.end_byte());
+            self.syntax_node(
+                "SwitchCaseLabelSyntax",
+                self.range_from_offsets(case_keyword.start_byte(), colon.end_byte()),
+                vec![
+                    self.with_name(
+                        self.token_for_node(case_keyword, "keyword(SwiftSyntax.Keyword.case)"),
+                        "caseKeyword",
+                    ),
+                    self.with_name(
+                        self.syntax_node("SwitchCaseItemListSyntax", item_range, case_items),
+                        "caseItems",
+                    ),
+                    self.with_name(self.token_for_node(colon, "colon"), "colon"),
+                ],
+            )
+        };
+
+        let statements = self.immediate_named_child_kind(node, "statements");
+        Ok(self.syntax_node(
+            "SwitchCaseSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(label, "label"),
+                self.with_name(
+                    self.code_block_item_list_from_statements(statements, colon.end_byte())?,
+                    "statements",
+                ),
+            ],
+        ))
+    }
+
+    fn switch_case_pattern(&self, node: Node<'a>) -> Result<Value> {
+        if self.immediate_child_kind(node, "(").is_some() {
+            return self.tuple_pattern(node);
+        }
+        if let Some(identifier) = self.first_descendant_kind(node, "simple_identifier") {
+            return self.identifier_pattern(identifier);
+        }
+        if let Some(wildcard) = self.first_descendant_kind(node, "wildcard_pattern") {
+            return self.wildcard_pattern(wildcard);
+        }
+        Ok(self.syntax_node(
+            "ExpressionPatternSyntax",
+            self.range_for_node(node),
+            vec![self.with_name(self.expr(node)?, "expression")],
+        ))
     }
 
     fn array_expr(&self, node: Node<'a>) -> Result<Value> {
@@ -2515,6 +3512,47 @@ fn is_trivia_node(node: Node<'_>) -> bool {
     )
 }
 
+fn is_expression_like_node(node: Node<'_>) -> bool {
+    matches!(
+        node.kind(),
+        "additive_expression"
+            | "array_literal"
+            | "boolean_literal"
+            | "call_expression"
+            | "comparison_expression"
+            | "conjunction_expression"
+            | "dictionary_literal"
+            | "disjunction_expression"
+            | "equality_expression"
+            | "integer_literal"
+            | "lambda_literal"
+            | "line_string_literal"
+            | "multiplicative_expression"
+            | "navigation_expression"
+            | "nil"
+            | "prefix_expression"
+            | "range_expression"
+            | "real_literal"
+            | "self_expression"
+            | "simple_identifier"
+            | "super_expression"
+            | "tuple_expression"
+    )
+}
+
+fn is_identifier_like_text(text: &str) -> bool {
+    let trimmed = text.trim();
+    let unquoted = trimmed
+        .strip_prefix('`')
+        .and_then(|rest| rest.strip_suffix('`'))
+        .unwrap_or(trimmed);
+    let mut chars = unquoted.chars();
+    let Some(first) = chars.next() else {
+        return false;
+    };
+    (first == '_' || first.is_alphabetic()) && chars.all(|ch| ch == '_' || ch.is_alphanumeric())
+}
+
 fn quoted_text(text: &str) -> String {
     serde_json::to_string(text).expect("serializing a string cannot fail")
 }
@@ -2526,6 +3564,70 @@ fn end_offset(value: &Value) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn recovers_protocol_decl_split_by_invalid_initialized_members() {
+        let source = r#"
+public protocol A {}
+private protocol B {
+  var b = 0.0
+}
+protocol Foo: Bar {
+  public var a = A()
+  private var b = false
+  var c = 0.0
+  var d: String?
+
+  static var e = 1
+  static var f = true
+
+  var g: Double { return self * 1_000.0 }
+
+  init(paramA: String, paramB: Int) {
+    self.init()
+  }
+
+  private func someFunc() {}
+
+  override internal func someMethod() {
+    super.someMethod()
+  }
+
+  mutating func square() {
+    self = self * self
+  }
+}
+extension Foo: SomeProtocol, AnotherProtocol {
+  func someOtherFunc() {}
+}
+"#;
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let protocols = find_node_types(&value, "ProtocolDeclSyntax");
+        assert_eq!(protocols.len(), 3);
+
+        let foo = protocols
+            .iter()
+            .find(|protocol| {
+                protocol["children"][2]["tokenKind"] == "keyword(SwiftSyntax.Keyword.protocol)"
+                    && protocol["children"][3]["tokenKind"] == "identifier(\"Foo\")"
+            })
+            .unwrap();
+        let members = find_node_types(foo, "MemberBlockItemSyntax");
+        assert_eq!(members.len(), 11);
+        let variables = find_node_types(foo, "VariableDeclSyntax");
+        assert_eq!(variables.len(), 7);
+        let first_initializer =
+            find_first_node_type(variables[0], "InitializerClauseSyntax").unwrap();
+        assert_eq!(first_initializer["children"][0]["tokenKind"], "equal");
+        assert_eq!(
+            first_initializer["children"][1]["nodeType"],
+            "FunctionCallExprSyntax"
+        );
+        assert_eq!(
+            find_first_node_type(foo, "SuperExprSyntax").unwrap()["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.super)"
+        );
+    }
 
     #[test]
     fn emits_empty_source_file() {
@@ -3357,6 +4459,168 @@ mod tests {
                 ["tokenKind"],
             "identifier(\"Codable\")"
         );
+    }
+
+    #[test]
+    fn emits_enum_declarations_and_cases() {
+        let source = "enum Color: Int {\n  @xyz case red = 1, green, grayscale(Int), blue = nil\n  init() { self = .red }\n}\n";
+        let value = parse_source("Enum.swift", "/tmp/Enum.swift", source).unwrap();
+        let enum_decl = find_first_node_type(&value, "EnumDeclSyntax").unwrap();
+        assert_eq!(
+            enum_decl["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.enum)"
+        );
+        assert_eq!(
+            enum_decl["children"][3]["tokenKind"],
+            "identifier(\"Color\")"
+        );
+
+        let inheritance_clause = enum_decl["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "inheritanceClause")
+            .unwrap();
+        assert_eq!(
+            inheritance_clause["children"][1]["children"][0]["children"][0]["children"][0]
+                ["tokenKind"],
+            "identifier(\"Int\")"
+        );
+
+        let enum_case = find_first_node_type(&value, "EnumCaseDeclSyntax").unwrap();
+        assert_eq!(
+            enum_case["children"][0]["children"][0]["nodeType"],
+            "AttributeSyntax"
+        );
+        assert_eq!(
+            enum_case["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.case)"
+        );
+        let elements = &enum_case["children"][3]["children"];
+        assert_eq!(elements.as_array().unwrap().len(), 4);
+        assert_eq!(
+            elements[0]["children"][0]["tokenKind"],
+            "identifier(\"red\")"
+        );
+        assert_eq!(
+            elements[0]["children"][1]["nodeType"],
+            "InitializerClauseSyntax"
+        );
+        assert_eq!(
+            elements[0]["children"][1]["children"][1]["nodeType"],
+            "IntegerLiteralExprSyntax"
+        );
+        assert_eq!(
+            elements[1]["children"][0]["tokenKind"],
+            "identifier(\"green\")"
+        );
+        assert_eq!(
+            elements[2]["children"][0]["tokenKind"],
+            "identifier(\"grayscale\")"
+        );
+        assert_eq!(
+            elements[2]["children"][1]["nodeType"],
+            "EnumCaseParameterClauseSyntax"
+        );
+        assert_eq!(
+            elements[3]["children"][0]["tokenKind"],
+            "identifier(\"blue\")"
+        );
+        assert_eq!(
+            elements[3]["children"][1]["children"][1]["nodeType"],
+            "NilLiteralExprSyntax"
+        );
+
+        let member_block = enum_decl["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "memberBlock")
+            .unwrap();
+        let members = &member_block["children"][1]["children"];
+        assert_eq!(members.as_array().unwrap().len(), 2);
+        assert_eq!(members[0]["children"][0]["nodeType"], "EnumCaseDeclSyntax");
+        assert_eq!(
+            members[1]["children"][0]["nodeType"],
+            "InitializerDeclSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_protocol_declarations_and_members() {
+        let source = "public protocol Drawable: Shape {\n  associatedtype Item: View = DefaultView\n  var area: Int { get set }\n  func draw(_ value: Item) -> Int\n  init()\n}\n";
+        let value = parse_source("Protocol.swift", "/tmp/Protocol.swift", source).unwrap();
+        let protocol_decl = find_first_node_type(&value, "ProtocolDeclSyntax").unwrap();
+        assert_eq!(
+            protocol_decl["children"][1]["children"][0]["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.public)"
+        );
+        assert_eq!(
+            protocol_decl["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.protocol)"
+        );
+        assert_eq!(
+            protocol_decl["children"][3]["tokenKind"],
+            "identifier(\"Drawable\")"
+        );
+
+        let inheritance_clause = protocol_decl["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "inheritanceClause")
+            .unwrap();
+        assert_eq!(
+            inheritance_clause["children"][1]["children"][0]["children"][0]["children"][0]
+                ["tokenKind"],
+            "identifier(\"Shape\")"
+        );
+
+        let member_block = protocol_decl["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "memberBlock")
+            .unwrap();
+        let members = &member_block["children"][1]["children"];
+        assert_eq!(members.as_array().unwrap().len(), 4);
+        assert_eq!(
+            members[0]["children"][0]["nodeType"],
+            "AssociatedTypeDeclSyntax"
+        );
+        assert_eq!(members[1]["children"][0]["nodeType"], "VariableDeclSyntax");
+        assert_eq!(members[2]["children"][0]["nodeType"], "FunctionDeclSyntax");
+        assert_eq!(
+            members[3]["children"][0]["nodeType"],
+            "InitializerDeclSyntax"
+        );
+
+        let associated_type = &members[0]["children"][0];
+        assert_eq!(
+            associated_type["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.associatedtype)"
+        );
+        assert_eq!(
+            associated_type["children"][3]["tokenKind"],
+            "identifier(\"Item\")"
+        );
+        assert!(associated_type["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|child| child["name"] == "inheritanceClause"));
+        assert!(associated_type["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|child| child["name"] == "initializer"));
+
+        let function = &members[2]["children"][0];
+        assert_eq!(
+            function["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.func)"
+        );
+        assert_eq!(function["children"][3]["tokenKind"], "identifier(\"draw\")");
     }
 
     #[test]
