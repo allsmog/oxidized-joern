@@ -272,6 +272,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "enumKeyword",
                 "keyword(SwiftSyntax.Keyword.enum)",
             ),
+            "actor" => (
+                "ActorDeclSyntax",
+                "actorKeyword",
+                "keyword(SwiftSyntax.Keyword.actor)",
+            ),
             other => bail!("unsupported nominal type declaration kind '{other}'"),
         };
         let name_node = self
@@ -4634,6 +4639,36 @@ extension Foo: SomeProtocol, AnotherProtocol {
         assert_eq!(members.as_array().unwrap().len(), 2);
         assert_eq!(members[0]["children"][0]["nodeType"], "VariableDeclSyntax");
         assert_eq!(members[1]["children"][0]["nodeType"], "FunctionDeclSyntax");
+    }
+
+    #[test]
+    fn emits_actor_declarations_and_members() {
+        let source = "actor MyActor {\n  init() {}\n  func hello() {}\n  func foo(x: String) -> Int { return 0 }\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let actor_decl = find_first_node_type(&value, "ActorDeclSyntax").unwrap();
+        assert_eq!(
+            actor_decl["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.actor)"
+        );
+        assert_eq!(
+            actor_decl["children"][3]["tokenKind"],
+            "identifier(\"MyActor\")"
+        );
+
+        let member_block = actor_decl["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "memberBlock")
+            .unwrap();
+        let members = &member_block["children"][1]["children"];
+        assert_eq!(members.as_array().unwrap().len(), 3);
+        assert_eq!(
+            members[0]["children"][0]["nodeType"],
+            "InitializerDeclSyntax"
+        );
+        assert_eq!(members[1]["children"][0]["nodeType"], "FunctionDeclSyntax");
+        assert_eq!(members[2]["children"][0]["nodeType"], "FunctionDeclSyntax");
     }
 
     #[test]
