@@ -2533,9 +2533,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         } else {
             pattern_nodes
         };
-        let type_annotation_node = self.immediate_named_child_kind(node, "type_annotation");
-        let value_node = self.value_field_child(node);
-        let value_end = value_node.map(|value| self.recovered_value_end(node, value));
+        let type_annotation_nodes = named_children(node)
+            .filter(|child| child.kind() == "type_annotation")
+            .collect::<Vec<_>>();
+        let value_nodes = self
+            .field_children(node, "value")
+            .into_iter()
+            .filter(|child| !self.is_recovery_bang_node(*child))
+            .collect::<Vec<_>>();
         let accessor_block_node = self
             .field_child(node, "computed_value")
             .or_else(|| self.immediate_named_child_kind(node, "protocol_property_requirements"));
@@ -2543,26 +2548,40 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut binding_items = Vec::new();
         for (index, pattern_node) in pattern_nodes.iter().copied().enumerate() {
             let is_last = index + 1 == pattern_nodes.len();
+            let segment_end = pattern_nodes
+                .get(index + 1)
+                .map(|next| next.start_byte())
+                .unwrap_or_else(|| node.end_byte());
+            let type_annotation_node = type_annotation_nodes.iter().copied().find(|candidate| {
+                candidate.start_byte() >= pattern_node.end_byte()
+                    && candidate.end_byte() <= segment_end
+            });
+            let value_node = value_nodes.iter().copied().find(|candidate| {
+                candidate.start_byte() >= pattern_node.end_byte()
+                    && candidate.end_byte() <= segment_end
+            });
+            let value_end = value_node.map(|value| self.recovered_value_end(node, value));
             let mut binding_children =
                 vec![self.with_name(self.variable_decl_pattern(pattern_node)?, "pattern")];
+            if let Some(type_node) = type_annotation_node {
+                binding_children
+                    .push(self.with_name(self.type_annotation(type_node)?, "typeAnnotation"));
+            }
+            if let Some(value) = value_node {
+                let equal = self
+                    .delimiter_between(node, pattern_node.end_byte(), value.start_byte(), "=")
+                    .or_else(|| self.immediate_child_kind(node, "="))
+                    .context("property initializer is missing '='")?;
+                binding_children.push(self.with_name(
+                    self.initializer_clause_with_end(
+                        equal,
+                        value,
+                        value_end.unwrap_or(value.end_byte()),
+                    )?,
+                    "initializer",
+                ));
+            }
             if is_last {
-                if let Some(type_node) = type_annotation_node {
-                    binding_children
-                        .push(self.with_name(self.type_annotation(type_node)?, "typeAnnotation"));
-                }
-                if let Some(value) = value_node {
-                    let equal = self
-                        .immediate_child_kind(node, "=")
-                        .context("property initializer is missing '='")?;
-                    binding_children.push(self.with_name(
-                        self.initializer_clause_with_end(
-                            equal,
-                            value,
-                            value_end.unwrap_or(value.end_byte()),
-                        )?,
-                        "initializer",
-                    ));
-                }
                 if let Some(accessor_block) = accessor_block_node {
                     binding_children.push(self.with_name(
                         self.variable_accessor_block(accessor_block)?,
@@ -2604,12 +2623,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "bindings",
         );
 
-        let declaration_end = accessor_block_node
-            .map(|accessor_block| accessor_block.end_byte())
-            .or(value_end)
-            .or_else(|| type_annotation_node.map(|type_annotation| type_annotation.end_byte()))
-            .unwrap_or_else(|| node.end_byte())
-            .max(node.end_byte());
+        let declaration_end = bindings_end.max(node.end_byte());
 
         Ok(self.syntax_node(
             "VariableDeclSyntax",
@@ -13829,6 +13843,27 @@ repeat { sink() } while x < 1
             )
             .unwrap()["children"][0]["tokenKind"],
             json!("identifier(\"Int\")")
+        );
+
+        let source = "let d = 2, e = 3";
+        let value = parse_source(
+            "GroupedInitializers.swift",
+            "/tmp/GroupedInitializers.swift",
+            source,
+        )
+        .unwrap();
+        let declaration = find_first_node_type(&value, "VariableDeclSyntax").unwrap();
+        let bindings = child_by_name(declaration, "bindings").unwrap()["children"]
+            .as_array()
+            .unwrap();
+        assert_eq!(bindings.len(), 2);
+        assert_eq!(
+            source_text(source, child_by_name(&bindings[0], "initializer").unwrap()),
+            "= 2"
+        );
+        assert_eq!(
+            source_text(source, child_by_name(&bindings[1], "initializer").unwrap()),
+            "= 3"
         );
     }
 
