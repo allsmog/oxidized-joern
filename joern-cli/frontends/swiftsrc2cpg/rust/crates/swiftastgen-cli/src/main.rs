@@ -43,7 +43,11 @@ fn run() -> Result<()> {
 
     let out = args.out.context("missing -o <dir>")?;
     let input = args.input.unwrap_or(std::env::current_dir()?);
-    let exclude = args.exclude_regex.as_deref().map(Regex::new).transpose()?;
+    let exclude = args
+        .exclude_regex
+        .as_deref()
+        .map(compile_exclude_regex)
+        .transpose()?;
     let files = collect_inputs(&input, exclude.as_ref())?;
     for file in files {
         let target = output_path(&input, &out, &file);
@@ -66,18 +70,24 @@ fn normalized_args() -> Vec<String> {
 }
 
 fn collect_inputs(input: &Path, exclude: Option<&Regex>) -> Result<Vec<PathBuf>> {
+    let input_root = input_root(input);
     if input.is_file() {
-        if is_swift_input(input) && !is_excluded(input, exclude) {
+        if is_swift_input(input) && !is_excluded(input, &input_root, exclude) {
             return Ok(vec![input.to_path_buf()]);
         }
         bail!("input file is not a .swift file: {}", input.display());
     }
 
     let mut files = Vec::new();
-    for entry in WalkBuilder::new(input).hidden(false).build() {
+    let walk_input_root = input_root.clone();
+    for entry in WalkBuilder::new(input)
+        .hidden(false)
+        .filter_entry(move |entry| !is_default_ignored_entry(&walk_input_root, entry.path()))
+        .build()
+    {
         let entry = entry?;
         let path = entry.path();
-        if path.is_file() && is_swift_input(path) && !is_excluded(path, exclude) {
+        if path.is_file() && is_swift_input(path) && !is_excluded(path, &input_root, exclude) {
             files.push(path.to_path_buf());
         }
     }
@@ -89,8 +99,61 @@ fn is_swift_input(path: &Path) -> bool {
     path.extension().and_then(|x| x.to_str()) == Some("swift")
 }
 
-fn is_excluded(path: &Path, exclude: Option<&Regex>) -> bool {
-    exclude.is_some_and(|regex| regex.is_match(&path.to_string_lossy()))
+fn is_excluded(path: &Path, input_root: &Path, exclude: Option<&Regex>) -> bool {
+    exclude.is_some_and(|regex| {
+        regex.is_match(&path.to_string_lossy())
+            || path
+                .strip_prefix(input_root)
+                .ok()
+                .is_some_and(|relative| regex.is_match(&relative.to_string_lossy()))
+    })
+}
+
+fn is_default_ignored_entry(input: &Path, path: &Path) -> bool {
+    if path == input {
+        return false;
+    }
+    let Ok(relative) = path.strip_prefix(input) else {
+        return false;
+    };
+    let Some(first_component) = relative.components().next() else {
+        return false;
+    };
+    let name = first_component.as_os_str().to_string_lossy();
+    name.starts_with('.')
+        || name.starts_with("__")
+        || matches!(name.as_ref(), "tests" | "specs" | "test" | "spec")
+}
+
+fn compile_exclude_regex(raw: &str) -> Result<Regex> {
+    let pattern = normalize_java_quoted_regex(raw);
+    Regex::new(&pattern).with_context(|| format!("invalid exclude regex '{raw}'"))
+}
+
+fn normalize_java_quoted_regex(raw: &str) -> String {
+    let mut normalized = String::new();
+    let mut rest = raw;
+    while let Some(start) = rest.find(r"\Q") {
+        normalized.push_str(&rest[..start]);
+        let quoted = &rest[start + 2..];
+        if let Some(end) = quoted.find(r"\E") {
+            normalized.push_str(&regex::escape(&quoted[..end]));
+            rest = &quoted[end + 2..];
+        } else {
+            normalized.push_str(&regex::escape(quoted));
+            rest = "";
+        }
+    }
+    normalized.push_str(rest);
+    normalized
+}
+
+fn input_root(input: &Path) -> PathBuf {
+    if input.is_dir() {
+        input.to_path_buf()
+    } else {
+        input.parent().unwrap_or(input).to_path_buf()
+    }
 }
 
 fn output_path(input: &Path, out: &Path, file: &Path) -> PathBuf {
