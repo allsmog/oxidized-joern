@@ -951,12 +951,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "dictionary_literal"
             | "disjunction_expression"
             | "equality_expression"
+            | "binary_literal"
+            | "bin_literal"
+            | "hex_literal"
             | "integer_literal"
+            | "oct_literal"
+            | "octal_literal"
             | "key_path_expression"
             | "lambda_literal"
             | "line_string_literal"
             | "multi_line_string_literal"
             | "multiplicative_expression"
+            | "postfix_expression"
             | "prefix_expression"
             | "raw_string_literal"
             | "range_expression"
@@ -4942,6 +4948,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "await_expression" => self.await_expr(node),
             "check_expression" => self.is_expr(node),
             "nil_coalescing_expression" => self.nil_coalescing_expr(node),
+            "postfix_expression" => self.postfix_expr(node),
             "additive_expression"
             | "comparison_expression"
             | "conjunction_expression"
@@ -4975,7 +4982,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "literal",
                 )],
             )),
-            "integer_literal" => Ok(self.syntax_node(
+            "binary_literal" | "bin_literal" | "hex_literal" | "integer_literal"
+            | "oct_literal" | "octal_literal" => Ok(self.syntax_node(
                 "IntegerLiteralExprSyntax",
                 self.range_for_node(node),
                 vec![self.with_name(
@@ -7876,6 +7884,39 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .any(|child| child.kind() == "ERROR" && is_identifier_like_text(self.text(child)))
     }
 
+    fn postfix_expr(&self, node: Node<'a>) -> Result<Value> {
+        let expression = self
+            .field_child(node, "target")
+            .or_else(|| self.field_child(node, "expression"))
+            .or_else(|| named_children(node).next())
+            .context("postfix expression is missing operand")?;
+        let operator = self
+            .field_child(node, "operator")
+            .or_else(|| {
+                children(node)
+                    .filter(|child| {
+                        !child.is_named() && child.start_byte() >= expression.end_byte()
+                    })
+                    .last()
+            })
+            .context("postfix expression is missing operator")?;
+
+        Ok(self.syntax_node(
+            "PostfixOperatorExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.expr(expression)?, "expression"),
+                self.with_name(
+                    self.token_for_node(
+                        operator,
+                        &format!("postfixOperator({})", quoted_text(self.text(operator))),
+                    ),
+                    "operator",
+                ),
+            ],
+        ))
+    }
+
     fn prefix_expr(&self, node: Node<'a>) -> Result<Value> {
         let operation = self
             .field_child(node, "operation")
@@ -7887,9 +7928,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
         if operation.kind() == "." || self.text(operation) == "." {
             let decl_name = match target.kind() {
-                "identifier" | "integer_literal" | "simple_identifier" | "self_expression" => {
-                    target
-                }
+                "binary_literal" | "bin_literal" | "hex_literal" | "identifier"
+                | "integer_literal" | "oct_literal" | "octal_literal" | "simple_identifier"
+                | "self_expression" => target,
                 other => bail!("unsupported implicit member target '{other}'"),
             };
             return Ok(self.syntax_node(
@@ -10040,7 +10081,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn decl_reference_expr(&self, node: Node<'a>) -> Value {
         let token_kind = match node.kind() {
-            "integer_literal" => format!("integerLiteral({})", quoted_text(self.text(node))),
+            "binary_literal" | "bin_literal" | "hex_literal" | "integer_literal"
+            | "oct_literal" | "octal_literal" => {
+                format!("integerLiteral({})", quoted_text(self.text(node)))
+            }
             "self_expression" => "keyword(SwiftSyntax.Keyword.self)".to_string(),
             _ => format!("identifier({})", quoted_text(self.text(node))),
         };
@@ -12432,7 +12476,12 @@ fn is_expression_like_node(node: Node<'_>) -> bool {
             | "dictionary_literal"
             | "disjunction_expression"
             | "equality_expression"
+            | "binary_literal"
+            | "bin_literal"
+            | "hex_literal"
             | "integer_literal"
+            | "oct_literal"
+            | "octal_literal"
             | "key_path_expression"
             | "lambda_literal"
             | "line_string_literal"
@@ -12442,6 +12491,7 @@ fn is_expression_like_node(node: Node<'_>) -> bool {
             | "navigation_expression"
             | "nil_coalescing_expression"
             | "nil"
+            | "postfix_expression"
             | "prefix_expression"
             | "raw_string_literal"
             | "range_expression"
@@ -13941,6 +13991,28 @@ extension Foo: SomeProtocol, AnotherProtocol {
         assert_eq!(
             statements[1]["children"][0]["children"][3]["children"][0]["children"][1]["nodeType"],
             "TypeAnnotationSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_base_prefixed_integer_literals() {
+        let source = "let a = 0x37\nlet b = 0b101\nlet c = 0o77\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let literals = find_node_types(&value, "IntegerLiteralExprSyntax")
+            .into_iter()
+            .map(|literal| {
+                child_by_name(literal, "literal").unwrap()["tokenKind"]
+                    .as_str()
+                    .unwrap()
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            literals,
+            vec![
+                "integerLiteral(\"0x37\")",
+                "integerLiteral(\"0b101\")",
+                "integerLiteral(\"0o77\")"
+            ]
         );
     }
 
@@ -15475,6 +15547,21 @@ someFunction(parameterLabel: 2)
         assert!(prefixes
             .iter()
             .all(|node| node["children"][1]["nodeType"] == "DeclReferenceExprSyntax"));
+    }
+
+    #[test]
+    fn emits_postfix_operator_expressions() {
+        let source = "func flow() {\n  z++\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let postfix = find_first_node_type(&value, "PostfixOperatorExprSyntax").unwrap();
+        assert_eq!(
+            child_by_name(postfix, "expression").unwrap()["nodeType"],
+            "DeclReferenceExprSyntax"
+        );
+        assert_eq!(
+            child_by_name(postfix, "operator").unwrap()["tokenKind"],
+            "postfixOperator(\"++\")"
+        );
     }
 
     #[test]
