@@ -179,6 +179,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 || self.is_ignorable_diagnostic(child)
                 || self.is_ignorable_directive_call(child)
                 || self.is_ignorable_top_level_error(child)
+                || self.is_ignorable_top_level_function_type_fragment(child)
                 || self.is_regex_delimiter_error(child)
             {
                 child_index += 1;
@@ -311,6 +312,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             || trimmed.starts_with(',')
             || self.is_standalone_attribute_error(node)
             || (!trimmed.is_empty() && trimmed.chars().all(|ch| ch == '!'))
+    }
+
+    fn is_ignorable_top_level_function_type_fragment(&self, node: Node<'a>) -> bool {
+        if node.kind() != "call_expression" {
+            return false;
+        }
+        let trimmed = self.text(node).trim_start();
+        trimmed.starts_with("() ->")
     }
 
     fn is_ignorable_diagnostic(&self, node: Node<'a>) -> bool {
@@ -2587,6 +2596,15 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn type_syntax(&self, node: Node<'a>) -> Result<Value> {
+        if node.kind() == "type_modifiers" {
+            if let Some(base) = self.base_type_sibling_after_modifiers(node) {
+                if let Some(recovered) = self.recovered_function_type_from_modifiers(node, base)? {
+                    return Ok(recovered);
+                }
+            }
+        }
+
+        let node = self.base_type_after_modifiers(node)?;
         match node.kind() {
             "array_type" => self.array_type(node),
             "function_type" => self.function_type(node),
@@ -2601,6 +2619,27 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
             other => bail!("unsupported Swift type node '{other}'"),
         }
+    }
+
+    fn base_type_after_modifiers(&self, node: Node<'a>) -> Result<Node<'a>> {
+        if node.kind() != "type_modifiers" {
+            return Ok(node);
+        }
+
+        if let Some(base) = self.base_type_sibling_after_modifiers(node) {
+            return Ok(base);
+        }
+
+        named_children(node)
+            .find(|child| is_type_syntax_node_kind(child.kind()))
+            .context("type modifiers are missing a base type")
+    }
+
+    fn base_type_sibling_after_modifiers(&self, node: Node<'a>) -> Option<Node<'a>> {
+        let parent = node.parent()?;
+        named_children(parent).find(|child| {
+            child.start_byte() >= node.end_byte() && is_type_syntax_node_kind(child.kind())
+        })
     }
 
     fn array_type(&self, node: Node<'a>) -> Result<Value> {
@@ -2675,15 +2714,15 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn function_type(&self, node: Node<'a>) -> Result<Value> {
-        let parameters = named_children(node)
-            .find(|child| child.kind() == "tuple_type")
-            .context("function type is missing parameter tuple")?;
+        let parameters = self
+            .function_type_parameters_node(node)
+            .context("function type is missing parameters")?;
         let left_paren = self
             .immediate_child_kind(parameters, "(")
-            .context("function type parameter tuple is missing '('")?;
+            .context("function type parameters are missing '('")?;
         let right_paren = self
             .immediate_child_kind(parameters, ")")
-            .context("function type parameter tuple is missing ')'")?;
+            .context("function type parameters are missing ')'")?;
         let return_clause = self
             .return_clause(node)?
             .context("function type is missing return clause")?;
@@ -2691,7 +2730,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut children = vec![
             self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
             self.with_name(
-                self.tuple_type_element_list(parameters, left_paren, right_paren)?,
+                self.function_type_parameter_list(parameters, left_paren, right_paren)?,
                 "parameters",
             ),
             self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
@@ -2702,6 +2741,286 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         children.push(self.with_name(return_clause, "returnClause"));
 
         Ok(self.syntax_node("FunctionTypeSyntax", self.range_for_node(node), children))
+    }
+
+    fn function_type_parameters_node(&self, node: Node<'a>) -> Option<Node<'a>> {
+        named_children(node).find(|child| {
+            matches!(
+                child.kind(),
+                "tuple_type" | "lambda_function_type_parameters"
+            )
+        })
+    }
+
+    fn recovered_function_type_from_modifiers(
+        &self,
+        modifiers: Node<'a>,
+        base: Node<'a>,
+    ) -> Result<Option<Value>> {
+        if base.kind() != "function_type" || self.function_type_parameters_node(base).is_some() {
+            return Ok(None);
+        }
+
+        let Some(left_paren_start) = self.source[modifiers.start_byte()..base.start_byte()]
+            .rfind('(')
+            .map(|offset| modifiers.start_byte() + offset)
+        else {
+            return Ok(None);
+        };
+        let Some(right_paren_start) = self.source[left_paren_start..base.start_byte()]
+            .rfind(')')
+            .map(|offset| left_paren_start + offset)
+        else {
+            return Ok(None);
+        };
+        if right_paren_start <= left_paren_start {
+            return Ok(None);
+        }
+
+        let arrow = self
+            .immediate_child_kind(base, "->")
+            .context("function type is missing '->'")?;
+        let return_clause = self
+            .return_clause(base)?
+            .context("function type is missing return clause")?;
+
+        let mut children = vec![
+            self.with_name(
+                self.token_with_range(
+                    "leftParen",
+                    self.range_from_offsets(left_paren_start, left_paren_start + 1),
+                ),
+                "leftParen",
+            ),
+            self.with_name(
+                self.synthetic_tuple_type_element_list_from_offsets(
+                    left_paren_start + 1,
+                    right_paren_start,
+                ),
+                "parameters",
+            ),
+            self.with_name(
+                self.token_with_range(
+                    "rightParen",
+                    self.range_from_offsets(right_paren_start, right_paren_start + 1),
+                ),
+                "rightParen",
+            ),
+        ];
+        if let Some(effect_specifiers) =
+            self.synthetic_type_effect_specifiers_between(right_paren_start + 1, arrow.start_byte())
+        {
+            children.push(self.with_name(effect_specifiers, "effectSpecifiers"));
+        }
+        children.push(self.with_name(return_clause, "returnClause"));
+
+        let end = end_offset(children.last().expect("function type has a return clause"));
+        let function_type = self.syntax_node(
+            "FunctionTypeSyntax",
+            self.range_from_offsets(left_paren_start, end),
+            children,
+        );
+        Ok(Some(self.syntax_node(
+            "AttributedTypeSyntax",
+            self.range_from_offsets(modifiers.start_byte(), end),
+            vec![
+                self.with_name(
+                    self.empty_collection("TypeSpecifierListSyntax", modifiers.start_byte()),
+                    "specifiers",
+                ),
+                self.with_name(self.type_attribute_list(modifiers)?, "attributes"),
+                self.with_name(
+                    self.empty_collection("TypeSpecifierListSyntax", left_paren_start),
+                    "lateSpecifiers",
+                ),
+                self.with_name(function_type, "baseType"),
+            ],
+        )))
+    }
+
+    fn type_attribute_list(&self, node: Node<'a>) -> Result<Value> {
+        let mut attributes = Vec::new();
+        for attribute in named_children(node).filter(|child| child.kind() == "attribute") {
+            attributes.push(self.with_name(self.attribute(attribute)?, ""));
+        }
+        let range = self.covering_range_or_point(&attributes, node.start_byte());
+        Ok(self.syntax_node("AttributeListSyntax", range, attributes))
+    }
+
+    fn function_type_parameter_list(
+        &self,
+        node: Node<'a>,
+        left_paren: Node<'a>,
+        right_paren: Node<'a>,
+    ) -> Result<Value> {
+        if node.kind() == "tuple_type" {
+            return self.tuple_type_element_list(node, left_paren, right_paren);
+        }
+
+        let mut elements = Vec::new();
+        for parameter in named_children(node).filter(|child| child.kind() == "lambda_parameter") {
+            let trailing_comma = self.trailing_delimiter(node, parameter, ",");
+            let mut item_children = Vec::new();
+
+            if let Some(colon) = self.immediate_child_kind(parameter, ":") {
+                let (first_name, second_name) = self.lambda_parameter_names(parameter)?;
+                item_children.push(
+                    self.with_name(self.identifier_or_wildcard_token(first_name), "firstName"),
+                );
+                if let Some(second_name) = second_name {
+                    item_children.push(
+                        self.with_name(
+                            self.identifier_or_wildcard_token(second_name),
+                            "secondName",
+                        ),
+                    );
+                }
+                item_children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
+            }
+
+            let type_node = self
+                .lambda_parameter_type(parameter)
+                .map(|type_node| self.type_syntax(type_node))
+                .unwrap_or_else(|| {
+                    let name = self.lambda_parameter_name(parameter)?;
+                    Ok(self.identifier_type_from_offsets(name.start_byte(), name.end_byte()))
+                })?;
+            item_children.push(self.with_name(type_node, "type"));
+
+            if let Some(comma) = trailing_comma {
+                item_children
+                    .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+            }
+            let element_end = trailing_comma.map_or(parameter.end_byte(), |comma| comma.end_byte());
+            elements.push(self.with_name(
+                self.syntax_node(
+                    "TupleTypeElementSyntax",
+                    self.range_from_offsets(parameter.start_byte(), element_end),
+                    item_children,
+                ),
+                "",
+            ));
+        }
+
+        Ok(self.syntax_node(
+            "TupleTypeElementListSyntax",
+            self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
+            elements,
+        ))
+    }
+
+    fn synthetic_tuple_type_element_list_from_offsets(&self, start: usize, end: usize) -> Value {
+        let mut elements = Vec::new();
+        let mut element_start = start;
+        let mut cursor = start;
+        while cursor <= end {
+            let is_comma = cursor < end && self.source.as_bytes()[cursor] == b',';
+            if cursor == end || is_comma {
+                let (trimmed_start, trimmed_end) = self.trim_offsets(element_start, cursor);
+                if trimmed_start < trimmed_end {
+                    let mut item_children = vec![self.with_name(
+                        self.identifier_type_from_offsets(trimmed_start, trimmed_end),
+                        "type",
+                    )];
+                    let element_end = if is_comma {
+                        item_children.push(self.with_name(
+                            self.token_with_range(
+                                "comma",
+                                self.range_from_offsets(cursor, cursor + 1),
+                            ),
+                            "trailingComma",
+                        ));
+                        cursor + 1
+                    } else {
+                        trimmed_end
+                    };
+                    elements.push(self.with_name(
+                        self.syntax_node(
+                            "TupleTypeElementSyntax",
+                            self.range_from_offsets(trimmed_start, element_end),
+                            item_children,
+                        ),
+                        "",
+                    ));
+                }
+                element_start = cursor.saturating_add(1);
+            }
+            cursor += 1;
+        }
+
+        self.syntax_node(
+            "TupleTypeElementListSyntax",
+            self.range_from_offsets(start, end),
+            elements,
+        )
+    }
+
+    fn synthetic_type_effect_specifiers_between(&self, start: usize, end: usize) -> Option<Value> {
+        let async_specifier = self.keyword_between(start, end, &["async", "reasync"]);
+        let throws_specifier = self.keyword_between(start, end, &["throws", "rethrows"]);
+        if async_specifier.is_none() && throws_specifier.is_none() {
+            return None;
+        }
+
+        let mut children = Vec::new();
+        if let Some((keyword, keyword_start, keyword_end)) = async_specifier {
+            children.push(self.with_name(
+                self.token_with_range(
+                    &format!("keyword(SwiftSyntax.Keyword.{keyword})"),
+                    self.range_from_offsets(keyword_start, keyword_end),
+                ),
+                "asyncSpecifier",
+            ));
+        }
+        if let Some((keyword, keyword_start, keyword_end)) = throws_specifier {
+            children.push(self.with_name(
+                self.syntax_node(
+                    "ThrowsClauseSyntax",
+                    self.range_from_offsets(keyword_start, keyword_end),
+                    vec![self.with_name(
+                        self.token_with_range(
+                            &format!("keyword(SwiftSyntax.Keyword.{keyword})"),
+                            self.range_from_offsets(keyword_start, keyword_end),
+                        ),
+                        "throwsSpecifier",
+                    )],
+                ),
+                "throwsClause",
+            ));
+        }
+        let range = self.covering_range_or_point(&children, start);
+        Some(self.syntax_node("TypeEffectSpecifiersSyntax", range, children))
+    }
+
+    fn keyword_between(
+        &self,
+        start: usize,
+        end: usize,
+        keywords: &[&'static str],
+    ) -> Option<(&'static str, usize, usize)> {
+        keywords.iter().find_map(|keyword| {
+            let mut search_start = start;
+            while search_start <= end {
+                let relative = self.source[search_start..end].find(keyword)?;
+                let keyword_start = search_start + relative;
+                let keyword_end = keyword_start + keyword.len();
+                if self.is_keyword_boundary(keyword_start, keyword_end) {
+                    return Some((*keyword, keyword_start, keyword_end));
+                }
+                search_start = keyword_end;
+            }
+            None
+        })
+    }
+
+    fn is_keyword_boundary(&self, start: usize, end: usize) -> bool {
+        let before = start
+            .checked_sub(1)
+            .and_then(|offset| self.source.as_bytes().get(offset))
+            .copied();
+        let after = self.source.as_bytes().get(end).copied();
+        before.is_none_or(|byte| !is_identifier_byte(byte))
+            && after.is_none_or(|byte| !is_identifier_byte(byte))
     }
 
     fn type_effect_specifiers(
@@ -10092,6 +10411,27 @@ fn is_binary_expression_kind(kind: &str) -> bool {
     )
 }
 
+fn is_type_syntax_node_kind(kind: &str) -> bool {
+    matches!(
+        kind,
+        "array_type"
+            | "bracket_qualified_type"
+            | "dictionary_type"
+            | "existential_type"
+            | "function_type"
+            | "metatype"
+            | "opaque_type"
+            | "optional_type"
+            | "protocol_composition_type"
+            | "suppressed_constraint"
+            | "tuple_type"
+            | "type_identifier"
+            | "type_pack_expansion"
+            | "type_parameter_pack"
+            | "user_type"
+    )
+}
+
 fn is_identifier_like_text(text: &str) -> bool {
     let trimmed = text.trim();
     let unquoted = trimmed
@@ -10106,6 +10446,10 @@ fn is_identifier_like_text(text: &str) -> bool {
         return chars.all(|ch| ch == '_' || ch.is_alphanumeric());
     }
     (first == '_' || first.is_alphabetic()) && chars.all(|ch| ch == '_' || ch.is_alphanumeric())
+}
+
+fn is_identifier_byte(byte: u8) -> bool {
+    byte == b'_' || byte.is_ascii_alphanumeric()
 }
 
 fn operator_token_kind(fixity: &str) -> &'static str {
@@ -10873,6 +11217,36 @@ typealias AsyncFuncArray = [() async throws -> ()]
         assert_eq!(
             function_types[2]["children"][4]["children"][1]["nodeType"],
             "TupleTypeSyntax"
+        );
+    }
+
+    #[test]
+    fn unwraps_type_modifiers_before_function_type_annotations() {
+        let source =
+            "\nlet a: (a, b) -> c\nlet a: @MainActor (a, b) async throws -> c\n() -> (\\u{feff})\n";
+        let value = parse_source("ClosureTypes.swift", "/tmp/ClosureTypes.swift", source).unwrap();
+        let annotations = find_node_types(&value, "TypeAnnotationSyntax");
+        assert_eq!(annotations.len(), 2);
+
+        let plain_type = child_by_name(annotations[0], "type").unwrap();
+        assert_eq!(plain_type["nodeType"], "FunctionTypeSyntax");
+        assert_eq!(source_text(source, plain_type), "(a, b) -> c");
+
+        let attributed_type = child_by_name(annotations[1], "type").unwrap();
+        assert_eq!(attributed_type["nodeType"], "AttributedTypeSyntax");
+        assert_eq!(
+            source_text(source, attributed_type),
+            "@MainActor (a, b) async throws -> c"
+        );
+        let attributed_type = child_by_name(attributed_type, "baseType").unwrap();
+        assert_eq!(attributed_type["nodeType"], "FunctionTypeSyntax");
+        assert_eq!(
+            source_text(source, attributed_type),
+            "(a, b) async throws -> c"
+        );
+        assert_eq!(
+            child_by_name(attributed_type, "effectSpecifiers").unwrap()["nodeType"],
+            "TypeEffectSpecifiersSyntax"
         );
     }
 
