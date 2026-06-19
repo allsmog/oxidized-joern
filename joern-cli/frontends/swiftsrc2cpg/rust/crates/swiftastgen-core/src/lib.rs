@@ -116,6 +116,33 @@ struct TernaryValueParts<'a> {
 }
 
 #[derive(Clone, Copy)]
+enum AccessorCandidate<'a> {
+    Tree(Node<'a>),
+    SplitKeywordCall {
+        keyword_container: Node<'a>,
+        body_call: Node<'a>,
+    },
+}
+
+impl<'a> AccessorCandidate<'a> {
+    fn start_byte(self) -> usize {
+        match self {
+            AccessorCandidate::Tree(node) => node.start_byte(),
+            AccessorCandidate::SplitKeywordCall {
+                keyword_container, ..
+            } => keyword_container.start_byte(),
+        }
+    }
+
+    fn end_byte(self) -> usize {
+        match self {
+            AccessorCandidate::Tree(node) => node.end_byte(),
+            AccessorCandidate::SplitKeywordCall { body_call, .. } => body_call.end_byte(),
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
 struct RecoveredSwitchCaseSlice {
     label_start: usize,
     keyword_end: usize,
@@ -4807,20 +4834,36 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "computed_getter" | "computed_setter" | "computed_modify"
                 )
             })
+            .map(AccessorCandidate::Tree)
             .collect();
-        if accessor_nodes.is_empty() {
-            accessor_nodes = named_children(computed_property)
+        accessor_nodes.extend(
+            named_children(computed_property)
                 .filter(|child| self.is_recovered_accessor_keyword_error(*child))
-                .collect();
-            if let Some(statements) =
-                self.immediate_named_child_kind(computed_property, "statements")
-            {
-                accessor_nodes.extend(
-                    named_children(statements)
-                        .filter(|child| self.is_recovered_accessor_call(*child)),
-                );
+                .map(AccessorCandidate::Tree),
+        );
+        if let Some(statements) = self.immediate_named_child_kind(computed_property, "statements") {
+            let statement_children = named_children(statements).collect::<Vec<_>>();
+            for (index, statement) in statement_children.iter().copied().enumerate() {
+                if self.is_recovered_accessor_call(statement) {
+                    accessor_nodes.push(AccessorCandidate::Tree(statement));
+                    continue;
+                }
+                if self.is_recovered_accessor_keyword_error(statement) {
+                    if let Some(body_call) = statement_children
+                        .get(index + 1)
+                        .copied()
+                        .filter(|node| self.is_recovered_accessor_body_call(*node))
+                    {
+                        accessor_nodes.push(AccessorCandidate::SplitKeywordCall {
+                            keyword_container: statement,
+                            body_call,
+                        });
+                    }
+                }
             }
         }
+        accessor_nodes.sort_by_key(|node| node.start_byte());
+        accessor_nodes.dedup_by_key(|node| (node.start_byte(), node.end_byte()));
         let accessors = if accessor_nodes.is_empty() {
             self.with_name(
                 self.code_block_item_list_from_statements(
@@ -4832,7 +4875,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         } else {
             let mut accessor_items = Vec::new();
             for accessor in accessor_nodes {
-                accessor_items.push(self.with_name(self.accessor_decl(accessor)?, ""));
+                let accessor_decl = match accessor {
+                    AccessorCandidate::Tree(node) => self.accessor_decl(node)?,
+                    AccessorCandidate::SplitKeywordCall {
+                        keyword_container,
+                        body_call,
+                    } => self.split_accessor_decl(keyword_container, body_call)?,
+                };
+                accessor_items.push(self.with_name(accessor_decl, ""));
             }
             let range = self.covering_range_or_point(&accessor_items, left_brace.end_byte());
             self.with_name(
@@ -4857,6 +4907,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             return false;
         }
         self.accessor_keyword_node(node).is_some()
+            && self.first_descendant_kind(node, "lambda_literal").is_some()
+    }
+
+    fn is_recovered_accessor_body_call(&self, node: Node<'a>) -> bool {
+        node.kind() == "call_expression"
             && self.first_descendant_kind(node, "lambda_literal").is_some()
     }
 
@@ -4925,6 +4980,38 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             children.push(self.with_name(self.code_block(body)?, "body"));
         }
         Ok(self.syntax_node("AccessorDeclSyntax", self.range_for_node(node), children))
+    }
+
+    fn split_accessor_decl(
+        &self,
+        keyword_container: Node<'a>,
+        body_call: Node<'a>,
+    ) -> Result<Value> {
+        let accessor_keyword = self
+            .accessor_keyword_node(keyword_container)
+            .context("split accessor declaration is missing accessor keyword")?;
+        let body = self
+            .first_descendant_kind(body_call, "lambda_literal")
+            .context("split accessor declaration is missing body")?;
+        let children = vec![
+            self.with_name(self.attribute_list(keyword_container)?, "attributes"),
+            self.with_name(
+                self.token_for_node(
+                    accessor_keyword,
+                    &format!(
+                        "keyword(SwiftSyntax.Keyword.{})",
+                        self.text(accessor_keyword)
+                    ),
+                ),
+                "accessorSpecifier",
+            ),
+            self.with_name(self.code_block(body)?, "body"),
+        ];
+        Ok(self.syntax_node(
+            "AccessorDeclSyntax",
+            self.range_from_offsets(keyword_container.start_byte(), body_call.end_byte()),
+            children,
+        ))
     }
 
     fn accessor_parameters(&self, node: Node<'a>) -> Result<Option<Value>> {
@@ -14855,6 +14942,46 @@ if case let .Naught(value) = n {}
         assert_eq!(
             child_by_name(accessor, "accessorSpecifier").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword._read)"
+        );
+    }
+
+    #[test]
+    fn recovers_mixed_computed_property_accessors() {
+        let source = "\
+var prop3 : Bool {
+  _read { yield prop3 }
+  get throws { false }
+  get async { true }
+  get {}
+}
+";
+        let value = parse_source("Accessors.swift", "/tmp/Accessors.swift", source).unwrap();
+        let accessors = find_node_types(&value, "AccessorDeclSyntax");
+        let accessor_texts = accessors
+            .iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            accessor_texts,
+            vec![
+                "_read { yield prop3 }",
+                "get throws { false }",
+                "get async { true }",
+                "get {}"
+            ]
+        );
+        let accessor_specifiers = accessors
+            .iter()
+            .map(|node| child_by_name(node, "accessorSpecifier").unwrap()["tokenKind"].clone())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            accessor_specifiers,
+            vec![
+                json!("keyword(SwiftSyntax.Keyword._read)"),
+                json!("keyword(SwiftSyntax.Keyword.get)"),
+                json!("keyword(SwiftSyntax.Keyword.get)"),
+                json!("keyword(SwiftSyntax.Keyword.get)")
+            ]
         );
     }
 
