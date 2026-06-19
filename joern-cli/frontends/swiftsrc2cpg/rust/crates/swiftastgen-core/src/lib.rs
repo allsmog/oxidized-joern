@@ -122,6 +122,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             && named_children(node).all(is_trivia_node)
     }
 
+    fn is_ignorable_member_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR"
+            && self.text(node).trim() == "deinit"
+            && named_children(node).all(is_trivia_node)
+    }
+
     fn code_block_item(&self, node: Node<'a>) -> Result<Value> {
         let item = self.with_name(self.syntax_for_statement(node)?, "item");
         Ok(self.syntax_node("CodeBlockItemSyntax", self.range_for_node(node), vec![item]))
@@ -167,6 +173,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "property_declaration" => self.variable_decl(node),
             "function_declaration" => self.function_decl(node),
             "class_declaration" => self.nominal_type_decl(node),
+            "deinit_declaration" => self.deinitializer_decl(node),
+            "init_declaration" => self.initializer_decl(node),
+            "subscript_declaration" => self.subscript_decl(node),
+            "ERROR" if self.text(node).trim_start().starts_with("subscript") => {
+                self.subscript_decl(node)
+            }
             other => bail!("unsupported Swift member declaration node '{other}'"),
         }
     }
@@ -313,7 +325,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .context("member block is missing '}'")?;
         let mut items = Vec::new();
         for child in named_children(node) {
-            if is_trivia_node(child) {
+            if is_trivia_node(child) || self.is_ignorable_member_error(child) {
                 continue;
             }
             items.push(self.member_block_item(child)?);
@@ -401,6 +413,81 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "name",
             )],
         )
+    }
+
+    fn initializer_decl(&self, node: Node<'a>) -> Result<Value> {
+        let init_keyword = self
+            .immediate_child_kind(node, "init")
+            .context("initializer declaration is missing 'init'")?;
+        let mut children = vec![
+            self.with_name(self.attribute_list(node)?, "attributes"),
+            self.with_name(self.modifier_list(node), "modifiers"),
+            self.with_name(
+                self.token_for_node(init_keyword, "keyword(SwiftSyntax.Keyword.init)"),
+                "initKeyword",
+            ),
+        ];
+        if let Some(optional_mark) = self.initializer_optional_mark(node, init_keyword) {
+            let token_kind = if self.text(optional_mark) == "!" {
+                "exclamationMark"
+            } else {
+                "postfixQuestionMark"
+            };
+            children.push(self.with_name(
+                self.token_for_node(optional_mark, token_kind),
+                "optionalMark",
+            ));
+        }
+        children.push(self.with_name(self.function_signature(node)?, "signature"));
+        if let Some(body_node) = self.field_child(node, "body") {
+            children.push(self.with_name(self.code_block(body_node)?, "body"));
+        }
+        Ok(self.syntax_node("InitializerDeclSyntax", self.range_for_node(node), children))
+    }
+
+    fn deinitializer_decl(&self, node: Node<'a>) -> Result<Value> {
+        let deinit_keyword = self
+            .immediate_child_kind(node, "deinit")
+            .context("deinitializer declaration is missing 'deinit'")?;
+        let mut children = vec![
+            self.with_name(self.attribute_list(node)?, "attributes"),
+            self.with_name(self.modifier_list(node), "modifiers"),
+            self.with_name(
+                self.token_for_node(deinit_keyword, "keyword(SwiftSyntax.Keyword.deinit)"),
+                "deinitKeyword",
+            ),
+        ];
+        if let Some(body_node) = self.field_child(node, "body") {
+            children.push(self.with_name(self.code_block(body_node)?, "body"));
+        }
+        Ok(self.syntax_node(
+            "DeinitializerDeclSyntax",
+            self.range_for_node(node),
+            children,
+        ))
+    }
+
+    fn subscript_decl(&self, node: Node<'a>) -> Result<Value> {
+        let subscript_keyword = self
+            .immediate_child_kind(node, "subscript")
+            .context("subscript declaration is missing 'subscript'")?;
+        let return_clause = self
+            .return_clause(node)?
+            .context("subscript declaration is missing return clause")?;
+        let mut children = vec![
+            self.with_name(self.attribute_list(node)?, "attributes"),
+            self.with_name(self.modifier_list(node), "modifiers"),
+            self.with_name(
+                self.token_for_node(subscript_keyword, "keyword(SwiftSyntax.Keyword.subscript)"),
+                "subscriptKeyword",
+            ),
+            self.with_name(self.function_parameter_clause(node)?, "parameterClause"),
+            self.with_name(return_clause, "returnClause"),
+        ];
+        if let Some(accessor_block) = self.subscript_accessor_block(node)? {
+            children.push(self.with_name(accessor_block, "accessorBlock"));
+        }
+        Ok(self.syntax_node("SubscriptDeclSyntax", self.range_for_node(node), children))
     }
 
     fn import_decl(&self, node: Node<'a>) -> Result<Value> {
@@ -684,6 +771,21 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn identifier_type_from_offsets(&self, start: usize, end: usize) -> Value {
+        let name = &self.source[start..end];
+        self.syntax_node(
+            "IdentifierTypeSyntax",
+            self.range_from_offsets(start, end),
+            vec![self.with_name(
+                self.token_with_range(
+                    &format!("identifier({})", quoted_text(name)),
+                    self.range_from_offsets(start, end),
+                ),
+                "name",
+            )],
+        )
+    }
+
     fn initializer_clause(&self, equal: Node<'a>, value: Node<'a>) -> Result<Value> {
         Ok(self.syntax_node(
             "InitializerClauseSyntax",
@@ -731,13 +833,32 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn function_signature(&self, node: Node<'a>) -> Result<Value> {
+        let parameter_clause =
+            self.with_name(self.function_parameter_clause(node)?, "parameterClause");
+
+        let mut signature_children = vec![parameter_clause];
+        if let Some(return_clause) = self.return_clause(node)? {
+            signature_children.push(self.with_name(return_clause, "returnClause"));
+        }
+
+        let start = signature_children[0]["range"]["startOffset"]
+            .as_u64()
+            .unwrap_or_default() as usize;
+        let end = signature_children.last().map_or(start, end_offset);
+        Ok(self.syntax_node(
+            "FunctionSignatureSyntax",
+            self.range_from_offsets(start, end),
+            signature_children,
+        ))
+    }
+
+    fn function_parameter_clause(&self, node: Node<'a>) -> Result<Value> {
         let left_paren = self
             .immediate_child_kind(node, "(")
-            .context("function signature is missing '('")?;
+            .context("function parameter clause is missing '('")?;
         let right_paren = self
             .immediate_child_kind(node, ")")
-            .context("function signature is missing ')'")?;
-
+            .context("function parameter clause is missing ')'")?;
         let mut parameters = Vec::new();
         for param in named_children(node).filter(|child| child.kind() == "parameter") {
             parameters.push(self.with_name(self.function_parameter(param)?, ""));
@@ -750,44 +871,39 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             ),
             "parameters",
         );
-        let parameter_clause = self.with_name(
-            self.syntax_node(
-                "FunctionParameterClauseSyntax",
-                self.range_from_offsets(left_paren.start_byte(), right_paren.end_byte()),
-                vec![
-                    self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
-                    parameter_list,
-                    self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
-                ],
-            ),
-            "parameterClause",
-        );
+        Ok(self.syntax_node(
+            "FunctionParameterClauseSyntax",
+            self.range_from_offsets(left_paren.start_byte(), right_paren.end_byte()),
+            vec![
+                self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+                parameter_list,
+                self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
+            ],
+        ))
+    }
 
-        let mut signature_children = vec![parameter_clause];
-        if let Some(return_type) = self.field_child(node, "return_type") {
-            if let Some(arrow) = self.immediate_child_kind(node, "->") {
-                signature_children.push(self.with_name(
-                    self.syntax_node(
-                        "ReturnClauseSyntax",
-                        self.range_from_offsets(arrow.start_byte(), return_type.end_byte()),
-                        vec![
-                            self.with_name(self.token_for_node(arrow, "arrow"), "arrow"),
-                            self.with_name(self.identifier_type(return_type)?, "type"),
-                        ],
-                    ),
-                    "returnClause",
-                ));
+    fn return_clause(&self, node: Node<'a>) -> Result<Option<Value>> {
+        if let Some(arrow) = self.immediate_child_kind(node, "->") {
+            let type_syntax = if let Some(return_type) = self
+                .field_child(node, "return_type")
+                .or_else(|| self.type_node_after(node, arrow.end_byte()))
+            {
+                Some(self.identifier_type(return_type)?)
+            } else {
+                self.synthetic_identifier_type_after_arrow(node, arrow)
+            };
+            if let Some(type_syntax) = type_syntax {
+                return Ok(Some(self.syntax_node(
+                    "ReturnClauseSyntax",
+                    self.range_from_offsets(arrow.start_byte(), end_offset(&type_syntax)),
+                    vec![
+                        self.with_name(self.token_for_node(arrow, "arrow"), "arrow"),
+                        self.with_name(type_syntax, "type"),
+                    ],
+                )));
             }
         }
-
-        let end = signature_children
-            .last()
-            .map_or(right_paren.end_byte(), end_offset);
-        Ok(self.syntax_node(
-            "FunctionSignatureSyntax",
-            self.range_from_offsets(left_paren.start_byte(), end),
-            signature_children,
-        ))
+        Ok(None)
     }
 
     fn function_parameter(&self, node: Node<'a>) -> Result<Value> {
@@ -869,6 +985,149 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"),
             ],
         ))
+    }
+
+    fn code_block_item_list_from_statements(
+        &self,
+        statements: Option<Node<'a>>,
+        fallback_offset: usize,
+    ) -> Result<Value> {
+        let statement_nodes: Vec<_> = statements
+            .map(named_children)
+            .into_iter()
+            .flatten()
+            .filter(|child| !is_trivia_node(*child))
+            .collect();
+        let mut items = Vec::new();
+        for child in statement_nodes {
+            items.push(self.code_block_item(child)?);
+        }
+        let range = self.covering_range_or_point(&items, fallback_offset);
+        Ok(self.syntax_node("CodeBlockItemListSyntax", range, items))
+    }
+
+    fn subscript_accessor_block(&self, node: Node<'a>) -> Result<Option<Value>> {
+        let Some(computed_property) = self.immediate_named_child_kind(node, "computed_property")
+        else {
+            return Ok(None);
+        };
+        let left_brace = self
+            .immediate_child_kind(computed_property, "{")
+            .context("subscript accessor block is missing '{'")?;
+        let right_brace = self
+            .immediate_child_kind(computed_property, "}")
+            .context("subscript accessor block is missing '}'")?;
+
+        let accessor_nodes: Vec<_> = named_children(computed_property)
+            .filter(|child| {
+                matches!(
+                    child.kind(),
+                    "computed_getter" | "computed_setter" | "computed_modify"
+                )
+            })
+            .collect();
+        let accessors = if accessor_nodes.is_empty() {
+            self.with_name(
+                self.code_block_item_list_from_statements(
+                    self.immediate_named_child_kind(computed_property, "statements"),
+                    left_brace.end_byte(),
+                )?,
+                "accessors",
+            )
+        } else {
+            let mut accessor_items = Vec::new();
+            for accessor in accessor_nodes {
+                accessor_items.push(self.with_name(self.accessor_decl(accessor)?, ""));
+            }
+            let range = self.covering_range_or_point(&accessor_items, left_brace.end_byte());
+            self.with_name(
+                self.syntax_node("AccessorDeclListSyntax", range, accessor_items),
+                "accessors",
+            )
+        };
+
+        Ok(Some(self.syntax_node(
+            "AccessorBlockSyntax",
+            self.range_for_node(computed_property),
+            vec![
+                self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace"),
+                accessors,
+                self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"),
+            ],
+        )))
+    }
+
+    fn accessor_decl(&self, node: Node<'a>) -> Result<Value> {
+        let accessor_keyword = self
+            .accessor_keyword_node(node)
+            .context("accessor declaration is missing accessor keyword")?;
+        let mut children = vec![self.with_name(self.attribute_list(node)?, "attributes")];
+        if let Some(modifier) = self.first_descendant_kind(node, "mutation_modifier") {
+            children.push(self.with_name(self.decl_modifier(modifier), "modifier"));
+        }
+        children.push(self.with_name(
+            self.token_for_node(
+                accessor_keyword,
+                &format!(
+                    "keyword(SwiftSyntax.Keyword.{})",
+                    self.text(accessor_keyword)
+                ),
+            ),
+            "accessorSpecifier",
+        ));
+        if let Some(parameters) = self.accessor_parameters(node)? {
+            children.push(self.with_name(parameters, "parameters"));
+        }
+        if let Some(left_brace) = self.immediate_child_kind(node, "{") {
+            if let Some(right_brace) = self.immediate_child_kind(node, "}") {
+                let statements = self.immediate_named_child_kind(node, "statements");
+                children.push(self.with_name(
+                    self.code_block_from_statements(statements, left_brace, right_brace)?,
+                    "body",
+                ));
+            }
+        }
+        Ok(self.syntax_node("AccessorDeclSyntax", self.range_for_node(node), children))
+    }
+
+    fn accessor_parameters(&self, node: Node<'a>) -> Result<Option<Value>> {
+        let Some(left_paren) = self.immediate_child_kind(node, "(") else {
+            return Ok(None);
+        };
+        let right_paren = self
+            .immediate_child_kind(node, ")")
+            .context("accessor parameters are missing ')'")?;
+        let name = self
+            .first_descendant_kind_between(
+                node,
+                "simple_identifier",
+                left_paren.end_byte(),
+                right_paren.start_byte(),
+            )
+            .or_else(|| {
+                self.first_descendant_kind_between(
+                    node,
+                    "identifier",
+                    left_paren.end_byte(),
+                    right_paren.start_byte(),
+                )
+            })
+            .context("accessor parameters are missing a name")?;
+        Ok(Some(self.syntax_node(
+            "AccessorParametersSyntax",
+            self.range_from_offsets(left_paren.start_byte(), right_paren.end_byte()),
+            vec![
+                self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+                self.with_name(
+                    self.token_for_node(
+                        name,
+                        &format!("identifier({})", quoted_text(self.text(name))),
+                    ),
+                    "name",
+                ),
+                self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
+            ],
+        )))
     }
 
     fn expr(&self, node: Node<'a>) -> Result<Value> {
@@ -2096,6 +2355,65 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         children(node).find(|child| child.kind() == kind && child.start_byte() >= offset)
     }
 
+    fn initializer_optional_mark(
+        &self,
+        node: Node<'a>,
+        init_keyword: Node<'a>,
+    ) -> Option<Node<'a>> {
+        let left_paren = self.immediate_child_kind(node, "(")?;
+        children(node).find(|child| {
+            matches!(child.kind(), "?" | "bang")
+                && child.start_byte() >= init_keyword.end_byte()
+                && child.end_byte() <= left_paren.start_byte()
+        })
+    }
+
+    fn accessor_keyword_node(&self, node: Node<'a>) -> Option<Node<'a>> {
+        ["get", "set", "_modify", "modify"]
+            .iter()
+            .find_map(|kind| self.first_descendant_any_kind(node, kind))
+    }
+
+    fn type_node_after(&self, node: Node<'a>, offset: usize) -> Option<Node<'a>> {
+        named_children(node).find(|child| {
+            child.start_byte() >= offset
+                && matches!(
+                    child.kind(),
+                    "array_type"
+                        | "bracket_qualified_type"
+                        | "dictionary_type"
+                        | "existential_type"
+                        | "function_type"
+                        | "metatype"
+                        | "opaque_type"
+                        | "optional_type"
+                        | "protocol_composition_type"
+                        | "suppressed_constraint"
+                        | "tuple_type"
+                        | "type_identifier"
+                        | "type_pack_expansion"
+                        | "type_parameter_pack"
+                        | "user_type"
+                )
+        })
+    }
+
+    fn synthetic_identifier_type_after_arrow(
+        &self,
+        node: Node<'a>,
+        arrow: Node<'a>,
+    ) -> Option<Value> {
+        let mut start = arrow.end_byte();
+        let mut end = node.end_byte();
+        while start < end && self.source.as_bytes()[start].is_ascii_whitespace() {
+            start += 1;
+        }
+        while end > start && self.source.as_bytes()[end - 1].is_ascii_whitespace() {
+            end -= 1;
+        }
+        (start < end).then(|| self.identifier_type_from_offsets(start, end))
+    }
+
     fn first_named_condition(
         &self,
         node: Node<'a>,
@@ -2138,6 +2456,27 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
         for child in named_children(node) {
             if let Some(found) = self.first_descendant_kind(child, kind) {
+                return Some(found);
+            }
+        }
+        None
+    }
+
+    fn first_descendant_kind_between(
+        &self,
+        node: Node<'a>,
+        kind: &str,
+        start: usize,
+        end: usize,
+    ) -> Option<Node<'a>> {
+        if node.kind() == kind && node.start_byte() >= start && node.end_byte() <= end {
+            return Some(node);
+        }
+        for child in children(node) {
+            if child.end_byte() < start || child.start_byte() > end {
+                continue;
+            }
+            if let Some(found) = self.first_descendant_kind_between(child, kind, start, end) {
                 return Some(found);
             }
         }
@@ -2325,6 +2664,43 @@ mod tests {
         );
         assert_eq!(parameter["children"][4]["tokenKind"], "colon");
         assert_eq!(parameter["children"][5]["nodeType"], "IdentifierTypeSyntax");
+    }
+
+    #[test]
+    fn emits_initializer_and_deinitializer_declarations() {
+        let source =
+            "class Foo {\n  init!(int: Int) {}\n  init?(text: String) {}\n  deinit {}\n  deinit\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let initializers = find_node_types(&value, "InitializerDeclSyntax");
+        assert_eq!(initializers.len(), 2);
+        assert_eq!(
+            initializers[0]["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.init)"
+        );
+        assert_eq!(
+            initializers[0]["children"][3]["tokenKind"],
+            "exclamationMark"
+        );
+        assert_eq!(
+            initializers[0]["children"][4]["nodeType"],
+            "FunctionSignatureSyntax"
+        );
+        assert_eq!(
+            initializers[0]["children"][5]["nodeType"],
+            "CodeBlockSyntax"
+        );
+        assert_eq!(
+            initializers[1]["children"][3]["tokenKind"],
+            "postfixQuestionMark"
+        );
+
+        let deinitializer = find_first_node_type(&value, "DeinitializerDeclSyntax").unwrap();
+        assert_eq!(
+            deinitializer["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.deinit)"
+        );
+        assert_eq!(deinitializer["children"][3]["nodeType"], "CodeBlockSyntax");
+        assert_eq!(find_node_types(&value, "DeinitializerDeclSyntax").len(), 1);
     }
 
     #[test]
@@ -2863,6 +3239,87 @@ mod tests {
         assert_eq!(members.as_array().unwrap().len(), 2);
         assert_eq!(members[0]["children"][0]["nodeType"], "VariableDeclSyntax");
         assert_eq!(members[1]["children"][0]["nodeType"], "FunctionDeclSyntax");
+    }
+
+    #[test]
+    fn emits_subscript_declarations_with_direct_bodies() {
+        let source =
+            "struct TimesTable {\n  subscript(index: Int) -> Int {\n    return index\n  }\n  subscript(i: Int) -> Int\n}\n";
+        let value = parse_source("Sub.swift", "/tmp/Sub.swift", source).unwrap();
+        let subscripts = find_node_types(&value, "SubscriptDeclSyntax");
+        assert_eq!(subscripts.len(), 2);
+        let subscript = subscripts[0];
+        assert_eq!(
+            subscript["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.subscript)"
+        );
+        assert_eq!(
+            subscript["children"][3]["nodeType"],
+            "FunctionParameterClauseSyntax"
+        );
+        assert_eq!(subscript["children"][4]["nodeType"], "ReturnClauseSyntax");
+        assert_eq!(subscript["children"][5]["nodeType"], "AccessorBlockSyntax");
+        assert_eq!(
+            subscript["children"][5]["children"][1]["nodeType"],
+            "CodeBlockItemListSyntax"
+        );
+        assert_eq!(
+            subscript["children"][5]["children"][1]["children"][0]["children"][0]["nodeType"],
+            "ReturnStmtSyntax"
+        );
+
+        let bodyless = subscripts[1];
+        assert_eq!(
+            bodyless["children"][3]["nodeType"],
+            "FunctionParameterClauseSyntax"
+        );
+        assert_eq!(bodyless["children"][4]["nodeType"], "ReturnClauseSyntax");
+        assert!(bodyless["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|child| child["name"] != "accessorBlock"));
+    }
+
+    #[test]
+    fn emits_subscript_declarations_with_accessors() {
+        let source = "struct X {\n  subscript(i: Int) -> Int {\n    get { return i }\n    mutating set(v) { stored = v }\n  }\n}\n";
+        let value = parse_source("Sub.swift", "/tmp/Sub.swift", source).unwrap();
+        let subscript = find_first_node_type(&value, "SubscriptDeclSyntax").unwrap();
+        let accessor_block = subscript["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "accessorBlock")
+            .unwrap();
+        assert_eq!(
+            accessor_block["children"][1]["nodeType"],
+            "AccessorDeclListSyntax"
+        );
+        let accessors = &accessor_block["children"][1]["children"];
+        assert_eq!(accessors.as_array().unwrap().len(), 2);
+        assert_eq!(
+            accessors[0]["children"][1]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.get)"
+        );
+        assert_eq!(accessors[0]["children"][2]["nodeType"], "CodeBlockSyntax");
+        assert_eq!(
+            accessors[1]["children"][1]["nodeType"],
+            "DeclModifierSyntax"
+        );
+        assert_eq!(
+            accessors[1]["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.set)"
+        );
+        assert_eq!(
+            accessors[1]["children"][3]["nodeType"],
+            "AccessorParametersSyntax"
+        );
+        assert_eq!(
+            accessors[1]["children"][3]["children"][1]["tokenKind"],
+            "identifier(\"v\")"
+        );
+        assert_eq!(accessors[1]["children"][4]["nodeType"], "CodeBlockSyntax");
     }
 
     #[test]
