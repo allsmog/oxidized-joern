@@ -17,14 +17,16 @@ The current implementation emits SwiftSyntax-shaped JSON for an initial parity
 slice: empty files, top-level `let`/`var` declarations, simple tuple variable
 declarations, simple type annotations, integer and string literal initializers,
 identifier references, simple function declarations with bodies, simple
-function calls with labeled arguments, return statements, reassignment
-expressions, binary arithmetic, comparison, equality, and boolean operators,
-range expressions, ordinary prefix operator expressions, array, dictionary, and
-tuple literal expressions, simple import declarations, simple closure literals
-and trailing closures, simple subscript/index expressions, simple `if`/`else`
-control flow, simple `while` loops, simple identifier `for-in` loops, unlabeled
-`break`/`continue`, boolean literals, simple `class`/`struct` member blocks,
-dot member-access expressions, simple implicit member expressions, simple
+function external parameter labels, simple function calls with labeled
+arguments, return statements, reassignment expressions, binary arithmetic,
+comparison, equality, and boolean operators, range expressions, ordinary prefix
+operator expressions, array, dictionary, and tuple literal expressions, simple
+import declarations, simple closure literals and trailing closures, simple
+subscript/index expressions, simple `if`/`else` control flow, simple `while`
+loops, simple identifier `for-in` loops, unlabeled `break`/`continue`, boolean
+literals, simple `class`/`struct` member blocks, class/struct inheritance
+clauses, simple extension declarations with inheritance clauses, dot
+member-access expressions, simple implicit member expressions, simple
 declaration attributes, and simple declaration modifiers. Unsupported syntax
 fails per-file and is reported on stdout so the existing skipped-file handling
 can continue.
