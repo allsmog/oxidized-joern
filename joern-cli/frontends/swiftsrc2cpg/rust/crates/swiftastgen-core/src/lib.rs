@@ -2607,6 +2607,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let node = self.base_type_after_modifiers(node)?;
         match node.kind() {
             "array_type" => self.array_type(node),
+            "dictionary_type" => self.dictionary_type(node),
             "function_type" => self.function_type(node),
             "optional_type" => self.optional_type(node),
             "tuple_type" => self.tuple_type(node),
@@ -2662,6 +2663,45 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             vec![
                 self.with_name(self.token_for_node(left_square, "leftSquare"), "leftSquare"),
                 self.with_name(self.type_syntax(element)?, "element"),
+                self.with_name(
+                    self.token_for_node(right_square, "rightSquare"),
+                    "rightSquare",
+                ),
+            ],
+        ))
+    }
+
+    fn dictionary_type(&self, node: Node<'a>) -> Result<Value> {
+        let left_square = self
+            .immediate_child_kind(node, "[")
+            .context("dictionary type is missing '['")?;
+        let colon = self
+            .immediate_child_kind(node, ":")
+            .context("dictionary type is missing ':'")?;
+        let right_square = self
+            .immediate_child_kind(node, "]")
+            .context("dictionary type is missing ']'")?;
+        let key = named_children(node)
+            .find(|child| {
+                child.start_byte() >= left_square.end_byte()
+                    && child.end_byte() <= colon.start_byte()
+            })
+            .context("dictionary type is missing key type")?;
+        let value = named_children(node)
+            .find(|child| {
+                child.start_byte() >= colon.end_byte()
+                    && child.end_byte() <= right_square.start_byte()
+            })
+            .context("dictionary type is missing value type")?;
+
+        Ok(self.syntax_node(
+            "DictionaryTypeSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_square, "leftSquare"), "leftSquare"),
+                self.with_name(self.type_syntax(key)?, "key"),
+                self.with_name(self.token_for_node(colon, "colon"), "colon"),
+                self.with_name(self.type_syntax(value)?, "value"),
                 self.with_name(
                     self.token_for_node(right_square, "rightSquare"),
                     "rightSquare",
@@ -4107,6 +4147,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "as_expression" => self.as_expr(node),
             "await_expression" => self.await_expr(node),
             "check_expression" => self.is_expr(node),
+            "nil_coalescing_expression" => self.nil_coalescing_expr(node),
             "additive_expression"
             | "comparison_expression"
             | "conjunction_expression"
@@ -6629,6 +6670,42 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.with_name(lhs, "leftOperand"),
                 self.with_name(operator, "operator"),
                 self.with_name(rhs, "rightOperand"),
+            ],
+        ))
+    }
+
+    fn nil_coalescing_expr(&self, node: Node<'a>) -> Result<Value> {
+        let value = self
+            .expression_field_child(node, "value")
+            .or_else(|| self.field_child(node, "value"))
+            .context("nil coalescing expression is missing value")?;
+        let if_nil = self
+            .expression_field_child(node, "if_nil")
+            .or_else(|| self.field_child(node, "if_nil"))
+            .context("nil coalescing expression is missing fallback")?;
+        let operator_start = self.source[value.end_byte()..if_nil.start_byte()]
+            .find("??")
+            .map(|offset| value.end_byte() + offset)
+            .context("nil coalescing expression is missing '??'")?;
+        let operator_end = operator_start + 2;
+        let operator = self.syntax_node(
+            "BinaryOperatorExprSyntax",
+            self.range_from_offsets(operator_start, operator_end),
+            vec![self.with_name(
+                self.token_with_range(
+                    "binaryOperator(\"??\")",
+                    self.range_from_offsets(operator_start, operator_end),
+                ),
+                "operator",
+            )],
+        );
+        Ok(self.syntax_node(
+            "InfixOperatorExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.expr(value)?, "leftOperand"),
+                self.with_name(operator, "operator"),
+                self.with_name(self.expr(if_nil)?, "rightOperand"),
             ],
         ))
     }
@@ -10372,6 +10449,7 @@ fn is_expression_like_node(node: Node<'_>) -> bool {
             | "multi_line_string_literal"
             | "multiplicative_expression"
             | "navigation_expression"
+            | "nil_coalescing_expression"
             | "nil"
             | "prefix_expression"
             | "raw_string_literal"
@@ -11217,6 +11295,35 @@ typealias AsyncFuncArray = [() async throws -> ()]
         assert_eq!(
             function_types[2]["children"][4]["children"][1]["nodeType"],
             "TupleTypeSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_dictionary_type_syntax() {
+        let source = "func bar(_ : String) async -> [[String]: Array<String>] {}\n";
+        let value = parse_source(
+            "DictionaryTypes.swift",
+            "/tmp/DictionaryTypes.swift",
+            source,
+        )
+        .unwrap();
+        let dictionary_types = find_node_types(&value, "DictionaryTypeSyntax");
+        assert_eq!(dictionary_types.len(), 1);
+        assert_eq!(
+            source_text(source, dictionary_types[0]),
+            "[[String]: Array<String>]"
+        );
+        assert_eq!(
+            child_by_name(dictionary_types[0], "key").unwrap()["nodeType"],
+            "ArrayTypeSyntax"
+        );
+        assert_eq!(
+            child_by_name(dictionary_types[0], "value").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+        assert_eq!(
+            child_by_name(dictionary_types[0], "colon").unwrap()["tokenKind"],
+            "colon"
         );
     }
 
@@ -12852,6 +12959,7 @@ var c = a?
 var d : ()? = a?.foo()
 var e : (() -> A)?
 var f = e?()
+var g = foo?.bar ?? 0
 ";
         let value = parse_source("Optional.swift", "/tmp/Optional.swift", source).unwrap();
 
@@ -12886,6 +12994,19 @@ var f = e?()
         assert_eq!(
             child_by_name(member, "base").unwrap()["nodeType"],
             "OptionalChainingExprSyntax"
+        );
+
+        let nil_coalescing = find_node_types(&value, "InfixOperatorExprSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "foo?.bar ?? 0")
+            .unwrap();
+        assert_eq!(
+            child_by_name(
+                child_by_name(nil_coalescing, "operator").unwrap(),
+                "operator"
+            )
+            .unwrap()["tokenKind"],
+            "binaryOperator(\"??\")"
         );
     }
 
