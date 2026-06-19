@@ -11846,6 +11846,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if self.first_descendant_any_kind(node, "return").is_some() {
             return self.return_stmt(node);
         }
+        if self.throw_keyword_offsets(node).is_some() {
+            return self.throw_stmt(node);
+        }
         if self.yield_keyword_offsets(node).is_some() {
             return self.yield_stmt(node);
         }
@@ -11871,6 +11874,55 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             return Ok(self.fallthrough_stmt(fallthrough_keyword));
         }
         bail!("unsupported Swift control transfer statement");
+    }
+
+    fn throw_stmt(&self, node: Node<'a>) -> Result<Value> {
+        let (throw_start, throw_end) = self
+            .throw_keyword_offsets(node)
+            .context("throw statement is missing throw keyword")?;
+        let expression = self
+            .field_child(node, "result")
+            .or_else(|| named_children(node).find(|child| child.start_byte() >= throw_end));
+        let expression = if let Some(expression) = expression {
+            self.expr(expression)?
+        } else {
+            let (expr_start, expr_end) = self.trim_offsets(throw_end, node.end_byte());
+            self.synthetic_expr_from_offsets(expr_start, expr_end)
+        };
+        Ok(self.syntax_node(
+            "ThrowStmtSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "keyword(SwiftSyntax.Keyword.throw)",
+                        self.range_from_offsets(throw_start, throw_end),
+                    ),
+                    "throwKeyword",
+                ),
+                self.with_name(expression, "expression"),
+            ],
+        ))
+    }
+
+    fn throw_keyword_offsets(&self, node: Node<'a>) -> Option<(usize, usize)> {
+        if let Some(throw_keyword) = self.first_descendant_any_kind(node, "throw") {
+            return Some((throw_keyword.start_byte(), throw_keyword.end_byte()));
+        }
+        let (start, end) = self.trim_offsets(node.start_byte(), node.end_byte());
+        let throw_end = start.checked_add("throw".len())?;
+        if throw_end <= end
+            && self.source.get(start..throw_end) == Some("throw")
+            && self
+                .source
+                .as_bytes()
+                .get(throw_end)
+                .map_or(true, |byte| !is_identifier_byte(*byte))
+        {
+            Some((start, throw_end))
+        } else {
+            None
+        }
     }
 
     fn fallthrough_stmt(&self, fallthrough_keyword: Node<'a>) -> Value {
@@ -15319,6 +15371,21 @@ _ = { (x y: MyType) in }
             return_stmt["children"][1]["nodeType"],
             "FunctionCallExprSyntax"
         );
+    }
+
+    #[test]
+    fn emits_throw_statement() {
+        let source = "func canThrow() throws {\n  throw E.A\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let throw_stmt = find_first_node_type(&value, "ThrowStmtSyntax").unwrap();
+        assert_eq!(source_text(source, throw_stmt), "throw E.A");
+        assert_eq!(
+            child_by_name(throw_stmt, "throwKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.throw)"
+        );
+        let expression = child_by_name(throw_stmt, "expression").unwrap();
+        assert_eq!(expression["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(source_text(source, expression), "E.A");
     }
 
     #[test]
