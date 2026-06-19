@@ -129,6 +129,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         while child_index < root_children.len() {
             let child = root_children[child_index];
             if is_trivia_node(child)
+                || is_ignorable_directive(child)
                 || self.is_ignorable_top_level_error(child)
                 || self.is_regex_delimiter_error(child)
             {
@@ -848,7 +849,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
         while member_index < close_index {
             let member = siblings[member_index];
-            if !(is_trivia_node(member) || self.is_ignorable_member_error(member)) {
+            if !(is_trivia_node(member)
+                || is_ignorable_directive(member)
+                || self.is_ignorable_member_error(member))
+            {
                 members.push(self.member_block_item(member)?);
             }
             member_index += 1;
@@ -1347,6 +1351,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut items = Vec::new();
         for child in named_children(node) {
             if is_trivia_node(child)
+                || is_ignorable_directive(child)
                 || self.is_ignorable_member_error(child)
                 || (!recover_case_errors
                     && (child.kind() == "enum_entry"
@@ -2777,6 +2782,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut index = 0;
         while index < statement_nodes.len() {
             let child = statement_nodes[index];
+            if is_trivia_node(child) || is_ignorable_directive(child) {
+                index += 1;
+                continue;
+            }
             if let Some(next) = statement_nodes.get(index + 1).copied() {
                 if self.is_split_keyword_apply_call(child, next) {
                     let call = self.recovered_keyword_apply_call(child, next)?;
@@ -7089,6 +7098,10 @@ fn is_trivia_node(node: Node<'_>) -> bool {
     )
 }
 
+fn is_ignorable_directive(node: Node<'_>) -> bool {
+    node.kind() == "directive"
+}
+
 fn is_expression_like_node(node: Node<'_>) -> bool {
     matches!(
         node.kind(),
@@ -7210,6 +7223,19 @@ fn end_offset(value: &Value) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn skips_conditional_compilation_directives_in_code_blocks() {
+        let source = "class C {\n  init() {\n  #if true\n    init()\n  #endif\n  }\n}\n";
+        let value = parse_source("PoundIf.swift", "/tmp/PoundIf.swift", source).unwrap();
+        assert_eq!(find_node_types(&value, "InitializerDeclSyntax").len(), 1);
+        let calls = find_node_types(&value, "FunctionCallExprSyntax");
+        assert_eq!(calls.len(), 1);
+        assert_eq!(
+            calls[0]["children"][0]["children"][0]["tokenKind"],
+            "identifier(\"init\")"
+        );
+    }
 
     #[test]
     fn emits_interpolated_string_segments() {
