@@ -114,6 +114,14 @@ struct RecoveredSwitchCaseSlice {
     is_default: bool,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum DirectiveKind {
+    If,
+    ElseIf,
+    Else,
+    EndIf,
+}
+
 impl<'a> SwiftSyntaxEmitter<'a> {
     fn new(source: &'a str) -> Self {
         let mut line_starts = vec![0];
@@ -139,8 +147,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut child_index = 0;
         while child_index < root_children.len() {
             let child = root_children[child_index];
+            if self.is_if_config_start(child) {
+                let (if_config, next_index) =
+                    self.if_config_decl_from_code_block_nodes(&root_children, child_index)?;
+                statement_items.push(self.code_block_item_for_value(if_config, "item"));
+                child_index = next_index;
+                continue;
+            }
             if is_trivia_node(child)
                 || is_ignorable_directive(child)
+                || self.is_ignorable_diagnostic(child)
+                || self.is_ignorable_directive_call(child)
                 || self.is_ignorable_top_level_error(child)
                 || self.is_regex_delimiter_error(child)
             {
@@ -271,7 +288,59 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let trimmed = self.text(node).trim();
         (trimmed == "}" && named_children(node).all(is_trivia_node))
             || trimmed.starts_with(',')
+            || self.is_standalone_attribute_error(node)
             || (!trimmed.is_empty() && trimmed.chars().all(|ch| ch == '!'))
+    }
+
+    fn is_ignorable_diagnostic(&self, node: Node<'a>) -> bool {
+        node.kind() == "diagnostic" && self.text(node).trim_start().starts_with("#sourceLocation")
+    }
+
+    fn is_if_config_start(&self, node: Node<'a>) -> bool {
+        self.directive_keyword_info(node)
+            .is_some_and(|(kind, _, _, _)| kind == DirectiveKind::If)
+    }
+
+    fn directive_keyword_info(
+        &self,
+        node: Node<'a>,
+    ) -> Option<(DirectiveKind, usize, usize, &'static str)> {
+        if node.kind() != "directive" {
+            return None;
+        }
+        let text = self.text(node);
+        let trimmed = text.trim_start();
+        let leading = text.len() - trimmed.len();
+        let keyword = if starts_directive_keyword(trimmed, "#elseif") {
+            (DirectiveKind::ElseIf, "#elseif", "poundElseif")
+        } else if starts_directive_keyword(trimmed, "#else") {
+            (DirectiveKind::Else, "#else", "poundElse")
+        } else if starts_directive_keyword(trimmed, "#endif") {
+            (DirectiveKind::EndIf, "#endif", "poundEndif")
+        } else if starts_directive_keyword(trimmed, "#if") {
+            (DirectiveKind::If, "#if", "poundIf")
+        } else {
+            return None;
+        };
+        let start = node.start_byte() + leading;
+        Some((keyword.0, start, start + keyword.1.len(), keyword.2))
+    }
+
+    fn is_ignorable_directive_call(&self, node: Node<'a>) -> bool {
+        node.kind() == "call_expression"
+            && named_children(node)
+                .next()
+                .is_some_and(|child| child.kind() == "directive")
+    }
+
+    fn is_standalone_attribute_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR"
+            && self.text(node).trim_start().starts_with('@')
+            && named_children(node).all(|child| {
+                child.kind() == "attribute"
+                    || is_trivia_node(child)
+                    || is_ignorable_directive(child)
+            })
     }
 
     fn is_regex_delimiter_error(&self, node: Node<'a>) -> bool {
@@ -2969,8 +3038,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .flatten()
             .filter(|child| !is_trivia_node(*child))
             .collect();
+        self.code_block_item_list_from_nodes(&statement_nodes, fallback_offset)
+    }
+
+    fn code_block_item_list_from_nodes(
+        &self,
+        statement_nodes: &[Node<'a>],
+        fallback_offset: usize,
+    ) -> Result<Value> {
         let mut items = Vec::new();
-        self.push_code_block_items_from_nodes(&statement_nodes, &mut items)?;
+        self.push_code_block_items_from_nodes(statement_nodes, &mut items)?;
         let range = self.covering_range_or_point(&items, fallback_offset);
         Ok(self.syntax_node("CodeBlockItemListSyntax", range, items))
     }
@@ -2983,6 +3060,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut index = 0;
         while index < statement_nodes.len() {
             let child = statement_nodes[index];
+            if self.is_if_config_start(child) {
+                let (if_config, next_index) =
+                    self.if_config_decl_from_code_block_nodes(statement_nodes, index)?;
+                items.push(self.code_block_item_for_value(if_config, "item"));
+                index = next_index;
+                continue;
+            }
             if is_trivia_node(child) || is_ignorable_directive(child) {
                 index += 1;
                 continue;
@@ -3033,6 +3117,117 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             index += 1;
         }
         Ok(())
+    }
+
+    fn if_config_decl_from_code_block_nodes(
+        &self,
+        nodes: &[Node<'a>],
+        start_index: usize,
+    ) -> Result<(Value, usize)> {
+        let start = nodes[start_index];
+        if !self.is_if_config_start(start) {
+            bail!("if config declaration must start with #if");
+        }
+
+        let mut clauses = Vec::new();
+        let mut index = start_index;
+        let pound_endif;
+        let next_index;
+        loop {
+            let directive = nodes[index];
+            let (kind, _, _, _) = self
+                .directive_keyword_info(directive)
+                .context("if config clause is missing directive keyword")?;
+            if !matches!(
+                kind,
+                DirectiveKind::If | DirectiveKind::ElseIf | DirectiveKind::Else
+            ) {
+                bail!("unexpected directive in if config clause");
+            }
+
+            let body_start = index + 1;
+            let mut body_end = body_start;
+            let mut nested_depth = 0usize;
+            while body_end < nodes.len() {
+                if let Some((kind, _, _, _)) = self.directive_keyword_info(nodes[body_end]) {
+                    match kind {
+                        DirectiveKind::If => nested_depth += 1,
+                        DirectiveKind::ElseIf | DirectiveKind::Else if nested_depth == 0 => break,
+                        DirectiveKind::EndIf if nested_depth == 0 => break,
+                        DirectiveKind::EndIf => nested_depth = nested_depth.saturating_sub(1),
+                        _ => {}
+                    }
+                }
+                body_end += 1;
+            }
+
+            clauses.push(self.if_config_clause(directive, &nodes[body_start..body_end])?);
+
+            if body_end >= nodes.len() {
+                bail!("if config declaration is missing #endif");
+            }
+            match self.directive_keyword_info(nodes[body_end]) {
+                Some((DirectiveKind::ElseIf | DirectiveKind::Else, _, _, _)) => {
+                    index = body_end;
+                }
+                Some((DirectiveKind::EndIf, _, _, _)) => {
+                    pound_endif = nodes[body_end];
+                    next_index = body_end + 1;
+                    break;
+                }
+                _ => bail!("unexpected node while parsing if config declaration"),
+            }
+        }
+
+        let clauses_range = self.covering_range_or_point(&clauses, start.end_byte());
+        let clause_list = self.syntax_node("IfConfigClauseListSyntax", clauses_range, clauses);
+        let (_, endif_start, endif_end, endif_kind) = self
+            .directive_keyword_info(pound_endif)
+            .context("if config declaration is missing #endif")?;
+        Ok((
+            self.syntax_node(
+                "IfConfigDeclSyntax",
+                self.range_from_offsets(start.start_byte(), pound_endif.end_byte()),
+                vec![
+                    self.with_name(clause_list, "clauses"),
+                    self.with_name(
+                        self.token_with_range(
+                            endif_kind,
+                            self.range_from_offsets(endif_start, endif_end),
+                        ),
+                        "poundEndif",
+                    ),
+                ],
+            ),
+            next_index,
+        ))
+    }
+
+    fn if_config_clause(&self, directive: Node<'a>, body: &[Node<'a>]) -> Result<Value> {
+        let (kind, keyword_start, keyword_end, token_kind) = self
+            .directive_keyword_info(directive)
+            .context("if config clause is missing directive keyword")?;
+        let mut children = vec![self.with_name(
+            self.token_with_range(
+                token_kind,
+                self.range_from_offsets(keyword_start, keyword_end),
+            ),
+            "poundKeyword",
+        )];
+        if matches!(kind, DirectiveKind::If | DirectiveKind::ElseIf) {
+            if let Some(condition) = named_children(directive).next() {
+                children.push(self.with_name(self.expr(condition)?, "condition"));
+            }
+        }
+
+        let elements = self.code_block_item_list_from_nodes(body, directive.end_byte())?;
+        let clause_end = end_offset(&elements).max(directive.end_byte());
+        children.push(self.with_name(elements, "elements"));
+        Ok(self.syntax_node(
+            "IfConfigClauseSyntax",
+            self.range_from_offsets(directive.start_byte(), clause_end),
+            children,
+        ))
     }
 
     fn subscript_accessor_block(&self, node: Node<'a>) -> Result<Option<Value>> {
@@ -8275,6 +8470,16 @@ fn is_ignorable_directive(node: Node<'_>) -> bool {
     node.kind() == "directive"
 }
 
+fn starts_directive_keyword(text: &str, keyword: &str) -> bool {
+    text.strip_prefix(keyword).is_some_and(|rest| {
+        rest.is_empty()
+            || rest
+                .as_bytes()
+                .first()
+                .is_some_and(|byte| byte.is_ascii_whitespace())
+    })
+}
+
 fn is_expression_like_node(node: Node<'_>) -> bool {
     matches!(
         node.kind(),
@@ -8550,6 +8755,56 @@ switch Whatever.Thing {
         assert_eq!(
             calls[0]["children"][0]["children"][0]["tokenKind"],
             "identifier(\"init\")"
+        );
+    }
+
+    #[test]
+    fn emits_if_config_declarations_for_directive_blocks() {
+        let source = "foo()\n#if CONFIG1\nconfig1()\n#if CONFIG2\nconfig2()\n#else\nelse2()\n#endif\n#else\nelse1()\n#endif\nbar()\n";
+        let value = parse_source("PoundIf.swift", "/tmp/PoundIf.swift", source).unwrap();
+        let if_configs = find_node_types(&value, "IfConfigDeclSyntax");
+        assert_eq!(if_configs.len(), 2);
+
+        let outer_clauses = child_by_name(if_configs[0], "clauses").unwrap()["children"]
+            .as_array()
+            .unwrap();
+        assert_eq!(outer_clauses.len(), 2);
+        assert_eq!(
+            child_by_name(&outer_clauses[0], "poundKeyword").unwrap()["tokenKind"],
+            "poundIf"
+        );
+        assert_eq!(
+            source_text(
+                source,
+                child_by_name(&outer_clauses[0], "condition").unwrap()
+            ),
+            "CONFIG1"
+        );
+        assert_eq!(
+            child_by_name(&outer_clauses[1], "poundKeyword").unwrap()["tokenKind"],
+            "poundElse"
+        );
+
+        let root_items = child_by_name(&value, "statements").unwrap()["children"]
+            .as_array()
+            .unwrap();
+        assert_eq!(root_items.len(), 3);
+        assert_eq!(
+            root_items[1]["children"][0]["nodeType"],
+            "IfConfigDeclSyntax"
+        );
+    }
+
+    #[test]
+    fn skips_source_location_and_conditional_attribute_fragments() {
+        let source =
+            "#sourceLocation(file: \"foo\", line: 42)\n@frozen\n#if hasAttribute(foo)\n@foo\n#endif\npublic struct S2 { }\n";
+        let value = parse_source("Directive.swift", "/tmp/Directive.swift", source).unwrap();
+        assert!(find_node_types(&value, "FunctionCallExprSyntax").is_empty());
+        let class_decl = find_first_node_type(&value, "StructDeclSyntax").unwrap();
+        assert_eq!(
+            child_by_name(class_decl, "name").unwrap()["tokenKind"],
+            "identifier(\"S2\")"
         );
     }
 
