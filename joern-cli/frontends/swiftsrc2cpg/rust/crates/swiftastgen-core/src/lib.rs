@@ -3993,8 +3993,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .immediate_child_kind(node, ")")
             .context("function parameter clause is missing ')'")?;
         let mut parameters = Vec::new();
-        for param in named_children(node).filter(|child| child.kind() == "parameter") {
-            parameters.push(self.with_name(self.function_parameter(param)?, ""));
+        for (index, param) in named_children(node)
+            .filter(|child| child.kind() == "parameter")
+            .enumerate()
+        {
+            parameters.push(self.with_name_and_index(self.function_parameter(param)?, "", index));
         }
         let parameter_list = self.with_name(
             self.syntax_node(
@@ -11953,6 +11956,15 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         value
     }
 
+    fn with_name_and_index(&self, mut value: Value, name: &str, index: usize) -> Value {
+        let obj = value
+            .as_object_mut()
+            .expect("SwiftSyntax JSON nodes are always objects");
+        obj.insert("name".into(), Value::String(name.into()));
+        obj.insert("index".into(), json!(index));
+        value
+    }
+
     fn range_for_node(&self, node: Node<'a>) -> Value {
         json!({
             "startColumn": node.start_position().column + 1,
@@ -14009,6 +14021,19 @@ extension Foo: SomeProtocol, AnotherProtocol {
         let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
         let initializers = find_node_types(&value, "InitializerDeclSyntax");
         assert_eq!(initializers.len(), 2);
+        let first_parameters = child_by_name(
+            child_by_name(
+                child_by_name(initializers[0], "signature").unwrap(),
+                "parameterClause",
+            )
+            .unwrap(),
+            "parameters",
+        )
+        .unwrap()["children"]
+            .as_array()
+            .unwrap();
+        assert_eq!(first_parameters.len(), 1);
+        assert_eq!(first_parameters[0]["index"].as_i64().unwrap(), 0);
         assert_eq!(
             initializers[0]["children"][2]["tokenKind"],
             "keyword(SwiftSyntax.Keyword.init)"
