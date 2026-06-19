@@ -12,6 +12,9 @@ SwiftAstGen --version
 
 When `input` is omitted, the current working directory is parsed. This matches
 the Scala runner, which invokes `SwiftAstGen` from the source directory.
+Directory walks skip the same default top-level folders as the Scala runner
+(`.*`, `__*`, `test`, `tests`, `spec`, and `specs`), and `--exclude-regex`
+accepts Java-style quoted fragments such as `\Q/\E`.
 
 The current implementation emits SwiftSyntax-shaped JSON for an initial parity
 slice: empty files, top-level `let`/`var` declarations, simple tuple variable
