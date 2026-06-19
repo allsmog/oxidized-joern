@@ -171,7 +171,17 @@ trait AstForExprSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
     Ast(idNode)
   }
 
-  private def astForDoExprSyntax(node: DoExprSyntax): Ast = notHandledYet(node)
+  private def astForDoExprSyntax(node: DoExprSyntax): Ast = {
+    val tryNode = controlStructureNode(node, ControlStructureTypes.TRY, code(node))
+    val bodyAst = astForNode(node.body)
+    val catchAsts = node.catchClauses.children.map { catchClause =>
+      val catchNode = controlStructureNode(catchClause, ControlStructureTypes.CATCH, code(catchClause))
+      val declAst   = astForNode(catchClause.catchItems)
+      val bodyAst   = astForNode(catchClause.body)
+      Ast(catchNode).withChild(declAst).withChild(bodyAst)
+    }
+    tryCatchAst(tryNode, bodyAst, catchAsts, None)
+  }
 
   private def astForEditorPlaceholderExprSyntax(node: EditorPlaceholderExprSyntax): Ast = {
     Ast(literalNode(node, code(node), Option(Defines.String)))

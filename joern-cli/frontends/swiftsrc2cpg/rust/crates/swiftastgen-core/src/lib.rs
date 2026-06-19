@@ -195,6 +195,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 child_index = next_index;
                 continue;
             }
+            if self.is_recoverable_do_error(child) {
+                let value = self.recovered_do_syntax_from_error(child)?;
+                statement_items.push(self.code_block_item_for_value(value, "item"));
+                child_index = self.skip_do_cast_artifacts(&root_children, child_index + 1);
+                continue;
+            }
             if self.is_operator_designated_types_recovery_error(child) {
                 child_index += 1;
                 continue;
@@ -353,15 +359,24 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "operator_declaration" => self.operator_decl(node),
             "precedence_group_declaration" => self.precedence_group_decl(node),
             "control_transfer_statement" => self.control_transfer_stmt(node),
+            "call_expression" if self.is_return_do_expr_call(node) => {
+                self.recovered_return_do_stmt(node)
+            }
+            "call_expression" if self.is_do_expr_call(node) => self.do_expr(node),
             "call_expression" if self.is_defer_stmt(node) => self.defer_stmt(node),
+            "do_statement" => self.do_stmt(node),
             "for_statement" => self.for_stmt(node),
             "guard_statement" => self.guard_stmt(node),
             "if_statement" => self.if_expr(node),
             "import_declaration" => self.import_decl(node),
+            "repeat_while_statement" => self.repeat_stmt(node),
             "switch_statement" => self.switch_expr(node),
             "while_statement" => self.while_stmt(node),
             "ERROR" if self.is_recoverable_precedence_group_error(node) => {
                 self.precedence_group_decl(node)
+            }
+            "ERROR" if self.is_recoverable_do_error(node) => {
+                self.recovered_do_syntax_from_error(node)
             }
             "ERROR" if self.is_recoverable_array_expr_error(node) => {
                 self.recovered_array_expr(node)
@@ -2724,6 +2739,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let right_brace = self
             .immediate_child_kind(node, "}")
             .context("function body is missing '}'")?;
+        let direct_statement_nodes = named_children(node).collect::<Vec<_>>();
+        if direct_statement_nodes
+            .iter()
+            .copied()
+            .any(|child| self.is_recoverable_do_error(child))
+        {
+            return self.code_block_from_statement_nodes(
+                &direct_statement_nodes,
+                left_brace,
+                right_brace,
+            );
+        }
         let statements = named_children(node).find(|child| child.kind() == "statements");
         self.code_block_from_statements(statements, left_brace, right_brace)
     }
@@ -2740,8 +2767,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .flatten()
             .filter(|child| !is_trivia_node(*child))
             .collect();
+        self.code_block_from_statement_nodes(&statement_nodes, left_brace, right_brace)
+    }
+
+    fn code_block_from_statement_nodes(
+        &self,
+        statement_nodes: &[Node<'a>],
+        left_brace: Node<'a>,
+        right_brace: Node<'a>,
+    ) -> Result<Value> {
         let mut items = Vec::new();
-        self.push_code_block_items_from_nodes(&statement_nodes, &mut items)?;
+        self.push_code_block_items_from_nodes(statement_nodes, &mut items)?;
         let statements_range = self.covering_range_or_point(&items, left_brace.end_byte());
         Ok(self.syntax_node(
             "CodeBlockSyntax",
@@ -2784,6 +2820,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             let child = statement_nodes[index];
             if is_trivia_node(child) || is_ignorable_directive(child) {
                 index += 1;
+                continue;
+            }
+            if self.is_recoverable_do_error(child) {
+                let value = self.recovered_do_syntax_from_error(child)?;
+                items.push(self.code_block_item_for_value(value, "item"));
+                index = self.skip_do_cast_artifacts(statement_nodes, index + 1);
                 continue;
             }
             if let Some(next) = statement_nodes.get(index + 1).copied() {
@@ -3017,6 +3059,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "multiplicative_expression"
             | "range_expression" => self.binary_operator_expr(node),
             "array_literal" => self.array_expr(node),
+            "call_expression" if self.is_do_expr_call(node) => self.do_expr(node),
             "call_expression" => self.function_call_expr(node),
             "constructor_expression" => self.constructor_expr(node),
             "consume_expression" => self.consume_expr(node),
@@ -4860,6 +4903,376 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     )?,
                     "body",
                 ),
+            ],
+        ))
+    }
+
+    fn repeat_stmt(&self, node: Node<'a>) -> Result<Value> {
+        let repeat_keyword = self
+            .immediate_child_kind(node, "repeat")
+            .context("repeat statement is missing 'repeat'")?;
+        let body_statements = named_children(node)
+            .find(|child| child.kind() == "statements")
+            .context("repeat statement is missing body statements")?;
+        let left_brace = self
+            .nearest_child_before(node, "{", body_statements.start_byte())
+            .context("repeat statement body is missing '{'")?;
+        let right_brace = self
+            .nearest_child_after(node, "}", body_statements.end_byte())
+            .context("repeat statement body is missing '}'")?;
+        let while_keyword = self
+            .immediate_child_kind(node, "while")
+            .context("repeat statement is missing 'while'")?;
+        let condition = self
+            .field_child(node, "condition")
+            .context("repeat statement is missing condition")?;
+
+        Ok(self.syntax_node(
+            "RepeatStmtSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(repeat_keyword, "keyword(SwiftSyntax.Keyword.repeat)"),
+                    "repeatKeyword",
+                ),
+                self.with_name(
+                    self.code_block_from_statements(
+                        Some(body_statements),
+                        left_brace,
+                        right_brace,
+                    )?,
+                    "body",
+                ),
+                self.with_name(
+                    self.token_for_node(while_keyword, "keyword(SwiftSyntax.Keyword.while)"),
+                    "whileKeyword",
+                ),
+                self.with_name(self.expr(condition)?, "condition"),
+            ],
+        ))
+    }
+
+    fn do_stmt(&self, node: Node<'a>) -> Result<Value> {
+        let do_keyword = self
+            .immediate_child_kind(node, "do")
+            .context("do statement is missing 'do'")?;
+        let body_statements = named_children(node)
+            .find(|child| child.kind() == "statements")
+            .context("do statement is missing body statements")?;
+        let left_brace = self
+            .nearest_child_before(node, "{", body_statements.start_byte())
+            .context("do statement body is missing '{'")?;
+        let right_brace = self
+            .nearest_child_after(node, "}", body_statements.end_byte())
+            .context("do statement body is missing '}'")?;
+        let catch_blocks = named_children(node)
+            .filter(|child| child.kind() == "catch_block")
+            .collect::<Vec<_>>();
+
+        Ok(self.syntax_node(
+            "DoStmtSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(do_keyword, "keyword(SwiftSyntax.Keyword.do)"),
+                    "doKeyword",
+                ),
+                self.with_name(
+                    self.code_block_from_statements(
+                        Some(body_statements),
+                        left_brace,
+                        right_brace,
+                    )?,
+                    "body",
+                ),
+                self.with_name(
+                    self.catch_clause_list_from_blocks(&catch_blocks, node.end_byte())?,
+                    "catchClauses",
+                ),
+            ],
+        ))
+    }
+
+    fn is_recoverable_do_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR"
+            && (self.first_descendant_kind(node, "do_statement").is_some()
+                || (self.text(node).trim_start().starts_with("do")
+                    && self.first_descendant_kind(node, "statements").is_some()))
+    }
+
+    fn recovered_do_syntax_from_error(&self, node: Node<'a>) -> Result<Value> {
+        if let Some(do_statement) = self.first_descendant_kind(node, "do_statement") {
+            return self.do_stmt(do_statement);
+        }
+        self.recovered_do_expr_from_error(node)
+    }
+
+    fn recovered_do_expr_from_error(&self, node: Node<'a>) -> Result<Value> {
+        let text = self.text(node);
+        let do_relative = text
+            .find("do")
+            .context("recovered do expression is missing 'do'")?;
+        let do_start = node.start_byte() + do_relative;
+        let body_statements = self
+            .first_descendant_kind(node, "statements")
+            .context("recovered do expression is missing body statements")?;
+        let left_brace = self
+            .nearest_child_before(node, "{", body_statements.start_byte())
+            .context("recovered do expression body is missing '{'")?;
+        let right_brace = self
+            .nearest_child_after(node, "}", body_statements.end_byte())
+            .context("recovered do expression body is missing '}'")?;
+        Ok(self.syntax_node(
+            "DoExprSyntax",
+            self.range_from_offsets(do_start, right_brace.end_byte()),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "keyword(SwiftSyntax.Keyword.do)",
+                        self.range_from_offsets(do_start, do_start + "do".len()),
+                    ),
+                    "doKeyword",
+                ),
+                self.with_name(
+                    self.code_block_from_statements(
+                        Some(body_statements),
+                        left_brace,
+                        right_brace,
+                    )?,
+                    "body",
+                ),
+                self.with_name(
+                    self.empty_collection("CatchClauseListSyntax", right_brace.end_byte()),
+                    "catchClauses",
+                ),
+            ],
+        ))
+    }
+
+    fn skip_do_cast_artifacts(&self, nodes: &[Node<'a>], start_index: usize) -> usize {
+        let mut index = start_index;
+        if nodes
+            .get(index)
+            .copied()
+            .is_some_and(|node| self.is_do_cast_artifact_start(node))
+        {
+            index += 1;
+            if nodes
+                .get(index)
+                .copied()
+                .is_some_and(|node| node.kind() == "ERROR")
+            {
+                index += 1;
+            }
+        }
+        index
+    }
+
+    fn is_do_cast_artifact_start(&self, node: Node<'a>) -> bool {
+        if node.kind() == "statements" {
+            return named_children(node).next().is_some_and(|child| {
+                child.kind() == "simple_identifier" && self.text(child) == "as"
+            });
+        }
+        node.kind() == "simple_identifier" && self.text(node) == "as"
+    }
+
+    fn is_do_expr_call(&self, node: Node<'a>) -> bool {
+        self.do_expr_parts(node).is_some()
+    }
+
+    fn do_expr(&self, node: Node<'a>) -> Result<Value> {
+        let (do_keyword, body, catch_clauses, end_offset) = self
+            .do_expr_parts(node)
+            .context("do expression is missing body")?;
+        Ok(self.syntax_node(
+            "DoExprSyntax",
+            self.range_from_offsets(do_keyword.start_byte(), end_offset),
+            vec![
+                self.with_name(
+                    self.token_for_node(do_keyword, "keyword(SwiftSyntax.Keyword.do)"),
+                    "doKeyword",
+                ),
+                self.with_name(self.code_block(body)?, "body"),
+                self.with_name(catch_clauses, "catchClauses"),
+            ],
+        ))
+    }
+
+    fn do_expr_parts(&self, node: Node<'a>) -> Option<(Node<'a>, Node<'a>, Value, usize)> {
+        if let Some((do_keyword, body)) = self.do_call_body_parts(node) {
+            return Some((
+                do_keyword,
+                body,
+                self.empty_collection("CatchClauseListSyntax", node.end_byte()),
+                node.end_byte(),
+            ));
+        }
+        self.do_expr_with_catch_parts(node)
+    }
+
+    fn do_expr_with_catch_parts(
+        &self,
+        node: Node<'a>,
+    ) -> Option<(Node<'a>, Node<'a>, Value, usize)> {
+        if node.kind() != "call_expression" {
+            return None;
+        }
+        let callee = named_children(node)
+            .find(|child| child.kind() != "call_suffix" && child.kind() != "ERROR")?;
+        let (do_keyword, body) = self.do_call_body_parts(callee)?;
+        let catch_marker = named_children(node).find(|child| {
+            child.kind() == "ERROR"
+                && self
+                    .first_descendant_any_kind(*child, "simple_identifier")
+                    .is_some_and(|identifier| self.text(identifier) == "catch")
+        })?;
+        let suffix = self.immediate_named_child_kind(node, "call_suffix")?;
+        let catch_body = named_children(suffix).find(|child| child.kind() == "lambda_literal")?;
+        let catch_clause = self
+            .catch_clause_from_recovered_expr(catch_marker, catch_body)
+            .ok()?;
+        let catch_clauses = self.syntax_node(
+            "CatchClauseListSyntax",
+            self.range_from_offsets(catch_marker.start_byte(), catch_body.end_byte()),
+            vec![self.with_name(catch_clause, "")],
+        );
+        Some((do_keyword, body, catch_clauses, node.end_byte()))
+    }
+
+    fn do_call_body_parts(&self, node: Node<'a>) -> Option<(Node<'a>, Node<'a>)> {
+        if node.kind() != "call_expression" {
+            return None;
+        }
+        let callee = named_children(node).find(|child| child.kind() != "call_suffix")?;
+        if callee.kind() != "simple_identifier" || self.text(callee) != "do" {
+            return None;
+        }
+        let suffix = self.immediate_named_child_kind(node, "call_suffix")?;
+        let body = named_children(suffix).find(|child| child.kind() == "lambda_literal")?;
+        Some((callee, body))
+    }
+
+    fn is_return_do_expr_call(&self, node: Node<'a>) -> bool {
+        self.return_do_expr_parts(node).is_some()
+    }
+
+    fn recovered_return_do_stmt(&self, node: Node<'a>) -> Result<Value> {
+        let (return_keyword, do_keyword, body) = self
+            .return_do_expr_parts(node)
+            .context("return do statement is missing do expression")?;
+        let do_expr = self.syntax_node(
+            "DoExprSyntax",
+            self.range_from_offsets(do_keyword.start_byte(), body.end_byte()),
+            vec![
+                self.with_name(
+                    self.token_for_node(do_keyword, "keyword(SwiftSyntax.Keyword.do)"),
+                    "doKeyword",
+                ),
+                self.with_name(self.code_block(body)?, "body"),
+                self.with_name(
+                    self.empty_collection("CatchClauseListSyntax", body.end_byte()),
+                    "catchClauses",
+                ),
+            ],
+        );
+        Ok(self.syntax_node(
+            "ReturnStmtSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(return_keyword, "keyword(SwiftSyntax.Keyword.return)"),
+                    "returnKeyword",
+                ),
+                self.with_name(do_expr, "expression"),
+            ],
+        ))
+    }
+
+    fn return_do_expr_parts(&self, node: Node<'a>) -> Option<(Node<'a>, Node<'a>, Node<'a>)> {
+        if node.kind() != "call_expression" {
+            return None;
+        }
+        let return_keyword = named_children(node)
+            .find(|child| child.kind() == "simple_identifier" && self.text(*child) == "return")?;
+        let do_keyword = named_children(node).find(|child| child.kind() == "ERROR")?;
+        let suffix = self.immediate_named_child_kind(node, "call_suffix")?;
+        let body = named_children(suffix).find(|child| child.kind() == "lambda_literal")?;
+        Some((return_keyword, do_keyword, body))
+    }
+
+    fn catch_clause_list_from_blocks(
+        &self,
+        catch_blocks: &[Node<'a>],
+        fallback_offset: usize,
+    ) -> Result<Value> {
+        let mut clauses = Vec::new();
+        for catch_block in catch_blocks {
+            clauses.push(self.with_name(self.catch_clause_from_block(*catch_block)?, ""));
+        }
+        let range = self.covering_range_or_point(&clauses, fallback_offset);
+        Ok(self.syntax_node("CatchClauseListSyntax", range, clauses))
+    }
+
+    fn catch_clause_from_block(&self, node: Node<'a>) -> Result<Value> {
+        let catch_keyword = self
+            .first_descendant_any_kind(node, "catch_keyword")
+            .context("catch clause is missing 'catch'")?;
+        let body_statements = named_children(node)
+            .find(|child| child.kind() == "statements")
+            .context("catch clause is missing body statements")?;
+        let left_brace = self
+            .nearest_child_before(node, "{", body_statements.start_byte())
+            .context("catch clause body is missing '{'")?;
+        let right_brace = self
+            .nearest_child_after(node, "}", body_statements.end_byte())
+            .context("catch clause body is missing '}'")?;
+
+        Ok(self.syntax_node(
+            "CatchClauseSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(catch_keyword, "keyword(SwiftSyntax.Keyword.catch)"),
+                    "catchKeyword",
+                ),
+                self.with_name(
+                    self.empty_collection("CatchItemListSyntax", catch_keyword.end_byte()),
+                    "catchItems",
+                ),
+                self.with_name(
+                    self.code_block_from_statements(
+                        Some(body_statements),
+                        left_brace,
+                        right_brace,
+                    )?,
+                    "body",
+                ),
+            ],
+        ))
+    }
+
+    fn catch_clause_from_recovered_expr(
+        &self,
+        catch_marker: Node<'a>,
+        body: Node<'a>,
+    ) -> Result<Value> {
+        let catch_keyword = self
+            .first_descendant_any_kind(catch_marker, "simple_identifier")
+            .unwrap_or(catch_marker);
+        Ok(self.syntax_node(
+            "CatchClauseSyntax",
+            self.range_from_offsets(catch_marker.start_byte(), body.end_byte()),
+            vec![
+                self.with_name(
+                    self.token_for_node(catch_keyword, "keyword(SwiftSyntax.Keyword.catch)"),
+                    "catchKeyword",
+                ),
+                self.with_name(
+                    self.empty_collection("CatchItemListSyntax", catch_keyword.end_byte()),
+                    "catchItems",
+                ),
+                self.with_name(self.code_block(body)?, "body"),
             ],
         ))
     }
@@ -7235,6 +7648,49 @@ mod tests {
             calls[0]["children"][0]["children"][0]["tokenKind"],
             "identifier(\"init\")"
         );
+    }
+
+    #[test]
+    fn emits_do_and_repeat_control_syntax() {
+        let source = "\
+let x = do { 5 } catch { 0 }
+func foo() { do { 5 } catch { 0 } }
+func casted() { do { 6 } as Int }
+do { 8 } as Int
+return do { 7 }
+repeat { sink() } while x < 1
+";
+        let value = parse_source("Do.swift", "/tmp/Do.swift", source).unwrap();
+
+        let do_exprs = find_node_types(&value, "DoExprSyntax");
+        assert_eq!(do_exprs.len(), 3);
+        assert_eq!(source_text(source, do_exprs[0]), "do { 5 } catch { 0 }");
+        assert_eq!(
+            do_exprs[0]["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.do)"
+        );
+        assert!(do_exprs
+            .iter()
+            .any(|node| source_text(source, node) == "do { 8 }"));
+
+        let do_stmts = find_node_types(&value, "DoStmtSyntax");
+        assert_eq!(do_stmts.len(), 2);
+        assert_eq!(source_text(source, do_stmts[0]), "do { 5 } catch { 0 }");
+        assert_eq!(find_node_types(&value, "CatchClauseSyntax").len(), 2);
+        assert_eq!(find_node_types(&value, "ReturnStmtSyntax").len(), 1);
+
+        let repeat_stmts = find_node_types(&value, "RepeatStmtSyntax");
+        assert_eq!(repeat_stmts.len(), 1);
+        assert_eq!(
+            repeat_stmts[0]["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.while)"
+        );
+
+        let do_calls = find_node_types(&value, "FunctionCallExprSyntax")
+            .into_iter()
+            .filter(|node| source_text(source, node).starts_with("do "))
+            .count();
+        assert_eq!(do_calls, 0);
     }
 
     #[test]
