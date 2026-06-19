@@ -148,6 +148,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 continue;
             }
             if let Some(next) = root_children.get(child_index + 1).copied() {
+                if child.kind() == "statement_label" {
+                    let labeled_stmt = self.labeled_stmt(child, next)?;
+                    statement_items.push(self.code_block_item_for_value(labeled_stmt, "item"));
+                    child_index += 2;
+                    continue;
+                }
                 if self.is_split_keyword_apply_call(child, next) {
                     let call = self.recovered_keyword_apply_call(child, next)?;
                     statement_items.push(self.code_block_item_for_value(call, "item"));
@@ -356,6 +362,41 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             range,
             vec![self.with_name(value, child_name)],
         )
+    }
+
+    fn labeled_stmt(&self, label: Node<'a>, statement: Node<'a>) -> Result<Value> {
+        let label_text = self.text(label);
+        let colon_relative = label_text
+            .rfind(':')
+            .context("statement label is missing ':'")?;
+        let label_start = label.start_byte();
+        let colon_start = label.start_byte() + colon_relative;
+        let (name_start, name_end) = self.trim_offsets(label_start, colon_start);
+        let statement_syntax = self.syntax_for_statement(statement)?;
+        Ok(self.syntax_node(
+            "LabeledStmtSyntax",
+            self.range_from_offsets(label.start_byte(), statement.end_byte()),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        &format!(
+                            "identifier({})",
+                            quoted_text(&self.source[name_start..name_end])
+                        ),
+                        self.range_from_offsets(name_start, name_end),
+                    ),
+                    "label",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "colon",
+                        self.range_from_offsets(colon_start, colon_start + 1),
+                    ),
+                    "colon",
+                ),
+                self.with_name(statement_syntax, "statement"),
+            ],
+        ))
     }
 
     fn syntax_for_statement(&self, node: Node<'a>) -> Result<Value> {
@@ -2953,6 +2994,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 continue;
             }
             if let Some(next) = statement_nodes.get(index + 1).copied() {
+                if child.kind() == "statement_label" {
+                    let labeled_stmt = self.labeled_stmt(child, next)?;
+                    items.push(self.code_block_item_for_value(labeled_stmt, "item"));
+                    index += 2;
+                    continue;
+                }
                 if self.is_split_keyword_apply_call(child, next) {
                     let call = self.recovered_keyword_apply_call(child, next)?;
                     items.push(self.code_block_item_for_value(call, "item"));
@@ -3608,8 +3655,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .find('\n')
                 .map(|relative| line_start + relative)
                 .unwrap_or(end);
-            let label_start = self.skip_horizontal_whitespace(line_start, line_end);
-            if let Some(is_default) = self.switch_label_kind_at(label_start, line_end) {
+            if let Some((label_start, is_default)) = self.switch_label_at(line_start, line_end) {
                 label_starts.push((label_start, is_default));
             }
             if line_end == end {
@@ -3645,6 +3691,19 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             });
         }
         Some(slices)
+    }
+
+    fn switch_label_at(&self, line_start: usize, line_end: usize) -> Option<(usize, bool)> {
+        let mut start = self.skip_horizontal_whitespace(line_start, line_end);
+        while self.source.get(start..line_end)?.starts_with('@') {
+            let attribute_end = self.source[start..line_end]
+                .bytes()
+                .position(|byte| byte.is_ascii_whitespace())
+                .map(|relative| start + relative)?;
+            start = self.skip_horizontal_whitespace(attribute_end, line_end);
+        }
+        self.switch_label_kind_at(start, line_end)
+            .map(|is_default| (start, is_default))
     }
 
     fn switch_label_kind_at(&self, start: usize, line_end: usize) -> Option<bool> {
@@ -7252,6 +7311,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(break_keyword) = self.first_descendant_any_kind(node, "break") {
             return Ok(self.jump_stmt(
                 "BreakStmtSyntax",
+                node,
                 break_keyword,
                 "breakKeyword",
                 "keyword(SwiftSyntax.Keyword.break)",
@@ -7260,6 +7320,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(continue_keyword) = self.first_descendant_any_kind(node, "continue") {
             return Ok(self.jump_stmt(
                 "ContinueStmtSyntax",
+                node,
                 continue_keyword,
                 "continueKeyword",
                 "keyword(SwiftSyntax.Keyword.continue)",
@@ -7271,15 +7332,42 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     fn jump_stmt(
         &self,
         node_type: &str,
+        node: Node<'a>,
         keyword: Node<'a>,
         keyword_name: &str,
         token_kind: &str,
     ) -> Value {
+        let label = self.control_transfer_label(node, keyword);
+        let range_end = label
+            .map(|label| label.end_byte())
+            .unwrap_or(keyword.end_byte());
+        let mut children =
+            vec![self.with_name(self.token_for_node(keyword, token_kind), keyword_name)];
+        if let Some(label) = label {
+            children.push(self.with_name(
+                self.token_for_node(
+                    label,
+                    &format!("identifier({})", quoted_text(self.text(label))),
+                ),
+                "label",
+            ));
+        }
         self.syntax_node(
             node_type,
-            self.range_for_node(keyword),
-            vec![self.with_name(self.token_for_node(keyword, token_kind), keyword_name)],
+            self.range_from_offsets(keyword.start_byte(), range_end),
+            children,
         )
+    }
+
+    fn control_transfer_label(&self, node: Node<'a>, keyword: Node<'a>) -> Option<Node<'a>> {
+        self.field_child(node, "result")
+            .filter(|child| child.start_byte() >= keyword.end_byte())
+            .or_else(|| {
+                named_children(node).find(|child| {
+                    child.start_byte() >= keyword.end_byte()
+                        && matches!(child.kind(), "identifier" | "simple_identifier")
+                })
+            })
     }
 
     fn string_literal(&self, node: Node<'a>) -> Result<Value> {
@@ -8310,6 +8398,43 @@ mod tests {
     use super::*;
 
     #[test]
+    fn emits_labeled_statements() {
+        let source =
+            "loop: while foo() {\n  continue loop\n  break loop\n}\nGronk:\nswitch x { case 42: return }\n";
+        let value = parse_source("Label.swift", "/tmp/Label.swift", source).unwrap();
+        let labeled = find_node_types(&value, "LabeledStmtSyntax");
+        assert_eq!(labeled.len(), 2);
+        assert_eq!(
+            child_by_name(labeled[0], "label").unwrap()["tokenKind"],
+            "identifier(\"loop\")"
+        );
+        assert_eq!(
+            child_by_name(labeled[0], "statement").unwrap()["nodeType"],
+            "WhileStmtSyntax"
+        );
+        assert_eq!(
+            child_by_name(labeled[1], "label").unwrap()["tokenKind"],
+            "identifier(\"Gronk\")"
+        );
+        assert_eq!(
+            child_by_name(labeled[1], "statement").unwrap()["nodeType"],
+            "SwitchExprSyntax"
+        );
+        let continue_stmt = find_first_node_type(&value, "ContinueStmtSyntax").unwrap();
+        assert_eq!(source_text(source, continue_stmt), "continue loop");
+        assert_eq!(
+            child_by_name(continue_stmt, "label").unwrap()["tokenKind"],
+            "identifier(\"loop\")"
+        );
+        let break_stmt = find_first_node_type(&value, "BreakStmtSyntax").unwrap();
+        assert_eq!(source_text(source, break_stmt), "break loop");
+        assert_eq!(
+            child_by_name(break_stmt, "label").unwrap()["tokenKind"],
+            "identifier(\"loop\")"
+        );
+    }
+
+    #[test]
     fn emits_switch_case_items_and_where_clauses() {
         let source = "switch x {\n  case _ where x % 2 == 0, 20:\n    x = 7\n}\n";
         let value = parse_source("Switch.swift", "/tmp/Switch.swift", source).unwrap();
@@ -8378,6 +8503,41 @@ switch x {
                 "WildcardPatternSyntax"
             ]
         );
+    }
+
+    #[test]
+    fn recovers_attributed_switch_case_labels_from_merged_entries() {
+        let case_source = r#"
+switch Whatever.Thing {
+  case .Thing:
+  @unknown case _:
+    x = 0
+}
+"#;
+        let value = parse_source("Switch.swift", "/tmp/Switch.swift", case_source).unwrap();
+        let case_labels = find_node_types(&value, "SwitchCaseSyntax")
+            .into_iter()
+            .map(|switch_case| {
+                source_text(case_source, child_by_name(switch_case, "label").unwrap())
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(case_labels, vec!["case .Thing:", "case _:"]);
+
+        let default_source = r#"
+switch Whatever.Thing {
+  case .Thing:
+  @unknown default:
+    x = 0
+}
+"#;
+        let value = parse_source("Switch.swift", "/tmp/Switch.swift", default_source).unwrap();
+        let case_labels = find_node_types(&value, "SwitchCaseSyntax")
+            .into_iter()
+            .map(|switch_case| {
+                source_text(default_source, child_by_name(switch_case, "label").unwrap())
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(case_labels, vec!["case .Thing:", "default:"]);
     }
 
     #[test]
