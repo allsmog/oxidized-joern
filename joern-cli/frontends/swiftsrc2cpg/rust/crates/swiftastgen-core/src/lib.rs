@@ -129,6 +129,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "control_transfer_statement" => self.control_transfer_stmt(node),
             "for_statement" => self.for_stmt(node),
             "if_statement" => self.if_expr(node),
+            "import_declaration" => self.import_decl(node),
             "while_statement" => self.while_stmt(node),
             "assignment"
             | "additive_expression"
@@ -311,6 +312,100 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ),
                 "name",
             )],
+        )
+    }
+
+    fn import_decl(&self, node: Node<'a>) -> Result<Value> {
+        let import_keyword = self
+            .immediate_child_kind(node, "import")
+            .context("import declaration is missing import keyword")?;
+        let path = named_children(node)
+            .find(|child| {
+                child.kind() == "identifier" && child.start_byte() > import_keyword.end_byte()
+            })
+            .context("import declaration is missing import path")?;
+
+        let mut decl_children = vec![
+            self.with_name(self.attribute_list(node)?, "attributes"),
+            self.with_name(self.modifier_list(node), "modifiers"),
+            self.with_name(
+                self.token_for_node(import_keyword, "keyword(SwiftSyntax.Keyword.import)"),
+                "importKeyword",
+            ),
+        ];
+
+        if let Some(kind) = children(node).find(|child| {
+            child.start_byte() > import_keyword.end_byte()
+                && child.end_byte() <= path.start_byte()
+                && matches!(
+                    child.kind(),
+                    "typealias" | "struct" | "class" | "enum" | "protocol" | "let" | "var" | "func"
+                )
+        }) {
+            decl_children.push(self.with_name(
+                self.token_for_node(
+                    kind,
+                    &format!("keyword(SwiftSyntax.Keyword.{})", kind.kind()),
+                ),
+                "importKindSpecifier",
+            ));
+        }
+
+        decl_children.push(self.with_name(self.import_path(path), "path"));
+
+        Ok(self.syntax_node("ImportDeclSyntax", self.range_for_node(node), decl_children))
+    }
+
+    fn import_path(&self, node: Node<'a>) -> Value {
+        let path_children: Vec<_> = named_children(node)
+            .filter(|child| child.kind() == "simple_identifier")
+            .collect();
+        let mut components = Vec::new();
+
+        for (index, component) in path_children.iter().enumerate() {
+            let mut component_children = vec![self.with_name(
+                self.token_for_node(
+                    *component,
+                    &format!("identifier({})", quoted_text(self.text(*component))),
+                ),
+                "name",
+            )];
+
+            if let Some(next_component) = path_children.get(index + 1) {
+                if let Some(period) = self
+                    .children_between(node, component.end_byte(), next_component.start_byte())
+                    .into_iter()
+                    .find(|child| child.kind() == "." || child.kind() == "::")
+                {
+                    let token_kind = if period.kind() == "::" {
+                        "colonColon"
+                    } else {
+                        "period"
+                    };
+                    component_children.push(
+                        self.with_name(self.token_for_node(period, token_kind), "trailingPeriod"),
+                    );
+                }
+            }
+
+            let component_end = component_children
+                .last()
+                .map(end_offset)
+                .unwrap_or_else(|| component.end_byte());
+            components.push(self.with_name(
+                self.syntax_node(
+                    "ImportPathComponentSyntax",
+                    self.range_from_offsets(component.start_byte(), component_end),
+                    component_children,
+                ),
+                "",
+            ));
+        }
+
+        self.syntax_node(
+            "ImportPathComponentListSyntax",
+            self.range_for_node(node),
+            components,
         )
     }
 
@@ -1949,6 +2044,57 @@ mod tests {
         assert_eq!(value["loc"], 1);
         assert_eq!(value["children"][0]["nodeType"], "CodeBlockItemListSyntax");
         assert_eq!(value["children"][1]["tokenKind"], "endOfFile");
+    }
+
+    #[test]
+    fn emits_import_declarations() {
+        let source = "import Foundation\n@_exported import class Foundation.Thread\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let statements = value["children"][0]["children"].as_array().unwrap();
+        assert_eq!(statements.len(), 2);
+
+        let import = &statements[0]["children"][0];
+        assert_eq!(import["nodeType"], "ImportDeclSyntax");
+        assert_eq!(import["children"][0]["nodeType"], "AttributeListSyntax");
+        assert_eq!(import["children"][1]["nodeType"], "DeclModifierListSyntax");
+        assert_eq!(
+            import["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.import)"
+        );
+        let path = import["children"][3]["children"].as_array().unwrap();
+        assert_eq!(path.len(), 1);
+        assert_eq!(
+            path[0]["children"][0]["tokenKind"],
+            "identifier(\"Foundation\")"
+        );
+
+        let dotted_import = &statements[1]["children"][0];
+        assert_eq!(dotted_import["nodeType"], "ImportDeclSyntax");
+        assert_eq!(
+            dotted_import["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.import)"
+        );
+        assert_eq!(
+            dotted_import["children"][3]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.class)"
+        );
+        let attributes = dotted_import["children"][0]["children"].as_array().unwrap();
+        assert_eq!(attributes.len(), 1);
+        assert_eq!(
+            attributes[0]["children"][1]["children"][0]["tokenKind"],
+            "identifier(\"_exported\")"
+        );
+        let path = dotted_import["children"][4]["children"].as_array().unwrap();
+        assert_eq!(path.len(), 2);
+        assert_eq!(
+            path[0]["children"][0]["tokenKind"],
+            "identifier(\"Foundation\")"
+        );
+        assert_eq!(path[0]["children"][1]["tokenKind"], "period");
+        assert_eq!(
+            path[1]["children"][0]["tokenKind"],
+            "identifier(\"Thread\")"
+        );
     }
 
     #[test]
