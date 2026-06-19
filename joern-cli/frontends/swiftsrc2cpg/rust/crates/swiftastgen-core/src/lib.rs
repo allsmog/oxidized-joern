@@ -137,13 +137,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "call_expression"
             | "comparison_expression"
             | "conjunction_expression"
+            | "dictionary_literal"
             | "disjunction_expression"
             | "equality_expression"
             | "integer_literal"
             | "lambda_literal"
             | "multiplicative_expression"
+            | "real_literal"
             | "simple_identifier"
             | "self_expression"
+            | "tuple_expression"
             | "navigation_expression"
             | "line_string_literal" => self.expr(node),
             other => bail!("unsupported Swift syntax node '{other}'"),
@@ -697,6 +700,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "multiplicative_expression" => self.binary_operator_expr(node),
             "array_literal" => self.array_expr(node),
             "call_expression" => self.function_call_expr(node),
+            "dictionary_literal" => self.dictionary_expr(node),
             "lambda_literal" => self.closure_expr(node),
             "navigation_expression" => self.member_access_expr(node),
             "boolean_literal" => Ok(self.syntax_node(
@@ -721,6 +725,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "literal",
                 )],
             )),
+            "real_literal" => Ok(self.syntax_node(
+                "FloatLiteralExprSyntax",
+                self.range_for_node(node),
+                vec![self.with_name(
+                    self.token_for_node(
+                        node,
+                        &format!("floatLiteral({})", quoted_text(self.text(node))),
+                    ),
+                    "literal",
+                )],
+            )),
             "simple_identifier" | "identifier" => Ok(self.syntax_node(
                 "DeclReferenceExprSyntax",
                 self.range_for_node(node),
@@ -741,6 +756,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 )],
             )),
             "line_string_literal" => self.string_literal(node),
+            "tuple_expression" => self.tuple_expr(node),
             other => bail!("unsupported Swift expression node '{other}'"),
         }
     }
@@ -792,6 +808,109 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     self.token_for_node(right_square, "rightSquare"),
                     "rightSquare",
                 ),
+            ],
+        ))
+    }
+
+    fn dictionary_expr(&self, node: Node<'a>) -> Result<Value> {
+        let left_square = self
+            .immediate_child_kind(node, "[")
+            .context("dictionary literal is missing '['")?;
+        let right_square = self
+            .immediate_child_kind(node, "]")
+            .context("dictionary literal is missing ']'")?;
+        let keys = self.field_children(node, "key");
+        let values = self.field_children(node, "value");
+
+        let content = if keys.is_empty() && values.is_empty() {
+            match self.immediate_child_kind(node, ":") {
+                Some(colon) => self.token_for_node(colon, "colon"),
+                None => self.syntax_node(
+                    "DictionaryElementListSyntax",
+                    self.range_from_offsets(left_square.end_byte(), right_square.start_byte()),
+                    Vec::new(),
+                ),
+            }
+        } else {
+            let mut elements = Vec::new();
+            for (key, value) in keys.into_iter().zip(values) {
+                let colon = self
+                    .children_between(node, key.end_byte(), value.start_byte())
+                    .into_iter()
+                    .find(|child| child.kind() == ":")
+                    .context("dictionary element is missing ':'")?;
+                let trailing_comma = self.trailing_delimiter(node, value, ",");
+                let element_end = trailing_comma.map_or(value.end_byte(), |comma| comma.end_byte());
+                let mut element_children = vec![
+                    self.with_name(self.expr(key)?, "key"),
+                    self.with_name(self.token_for_node(colon, "colon"), "colon"),
+                    self.with_name(self.expr(value)?, "value"),
+                ];
+                if let Some(comma) = trailing_comma {
+                    element_children
+                        .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+                }
+                elements.push(self.with_name(
+                    self.syntax_node(
+                        "DictionaryElementSyntax",
+                        self.range_from_offsets(key.start_byte(), element_end),
+                        element_children,
+                    ),
+                    "",
+                ));
+            }
+            self.syntax_node(
+                "DictionaryElementListSyntax",
+                self.range_from_offsets(left_square.end_byte(), right_square.start_byte()),
+                elements,
+            )
+        };
+
+        Ok(self.syntax_node(
+            "DictionaryExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_square, "leftSquare"), "leftSquare"),
+                self.with_name(content, "content"),
+                self.with_name(
+                    self.token_for_node(right_square, "rightSquare"),
+                    "rightSquare",
+                ),
+            ],
+        ))
+    }
+
+    fn tuple_expr(&self, node: Node<'a>) -> Result<Value> {
+        let left_paren = self
+            .immediate_child_kind(node, "(")
+            .context("tuple expression is missing '('")?;
+        let right_paren = self
+            .immediate_child_kind(node, ")")
+            .context("tuple expression is missing ')'")?;
+        let values = self.field_children(node, "value");
+        let mut elements = Vec::new();
+        for value in values {
+            if value.kind() == "bang" && value.start_byte() == value.end_byte() {
+                continue;
+            }
+            let trailing_comma = self.trailing_delimiter(node, value, ",");
+            elements.push(self.with_name(self.labeled_expr_for_value(value, trailing_comma)?, ""));
+        }
+
+        Ok(self.syntax_node(
+            "TupleExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+                self.with_name(
+                    self.syntax_node(
+                        "LabeledExprListSyntax",
+                        self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
+                        elements,
+                    ),
+                    "elements",
+                ),
+                self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
             ],
         ))
     }
@@ -1456,6 +1575,23 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(self.syntax_node("LabeledExprSyntax", self.range_for_node(node), children))
     }
 
+    fn labeled_expr_for_value(
+        &self,
+        value: Node<'a>,
+        trailing_comma: Option<Node<'a>>,
+    ) -> Result<Value> {
+        let mut children = vec![self.with_name(self.expr(value)?, "expression")];
+        if let Some(comma) = trailing_comma {
+            children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+        }
+        let end = trailing_comma.map_or(value.end_byte(), |comma| comma.end_byte());
+        Ok(self.syntax_node(
+            "LabeledExprSyntax",
+            self.range_from_offsets(value.start_byte(), end),
+            children,
+        ))
+    }
+
     fn assignment_expr(&self, node: Node<'a>) -> Result<Value> {
         let lhs = self
             .field_child(node, "target")
@@ -1683,6 +1819,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn field_child(&self, node: Node<'a>, field: &str) -> Option<Node<'a>> {
         node.child_by_field_name(field)
+    }
+
+    fn field_children(&self, node: Node<'a>, field: &str) -> Vec<Node<'a>> {
+        let mut cursor = node.walk();
+        node.children_by_field_name(field, &mut cursor).collect()
+    }
+
+    fn children_between(&self, node: Node<'a>, start: usize, end: usize) -> Vec<Node<'a>> {
+        children(node)
+            .filter(|child| child.start_byte() >= start && child.end_byte() <= end)
+            .collect()
     }
 
     fn immediate_child_kind(&self, node: Node<'a>, kind: &str) -> Option<Node<'a>> {
@@ -1942,6 +2089,82 @@ mod tests {
             "DeclReferenceExprSyntax"
         );
         assert_eq!(elements[2]["children"].as_array().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn emits_dictionary_literal_expression() {
+        let source = "let x = [\"a\": 1, \"b\": 2]\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let dictionary = find_first_node_type(&value, "DictionaryExprSyntax").unwrap();
+        assert_eq!(dictionary["children"][0]["tokenKind"], "leftSquare");
+        assert_eq!(
+            dictionary["children"][1]["nodeType"],
+            "DictionaryElementListSyntax"
+        );
+        assert_eq!(dictionary["children"][2]["tokenKind"], "rightSquare");
+
+        let elements = dictionary["children"][1]["children"].as_array().unwrap();
+        assert_eq!(elements.len(), 2);
+        assert_eq!(elements[0]["children"][0]["name"], "key");
+        assert_eq!(
+            elements[0]["children"][0]["nodeType"],
+            "StringLiteralExprSyntax"
+        );
+        assert_eq!(elements[0]["children"][1]["tokenKind"], "colon");
+        assert_eq!(elements[0]["children"][2]["name"], "value");
+        assert_eq!(
+            elements[0]["children"][2]["nodeType"],
+            "IntegerLiteralExprSyntax"
+        );
+        assert_eq!(elements[0]["children"][3]["tokenKind"], "comma");
+    }
+
+    #[test]
+    fn emits_dictionary_literal_with_empty_tuple_values() {
+        let source = "[1: (), 2: ()]\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let dictionary = find_first_node_type(&value, "DictionaryExprSyntax").unwrap();
+        let elements = dictionary["children"][1]["children"].as_array().unwrap();
+        assert_eq!(elements.len(), 2);
+        assert_eq!(elements[0]["children"][2]["nodeType"], "TupleExprSyntax");
+        assert_eq!(
+            elements[0]["children"][2]["children"][1]["nodeType"],
+            "LabeledExprListSyntax"
+        );
+        assert_eq!(
+            elements[0]["children"][2]["children"][1]["children"]
+                .as_array()
+                .unwrap()
+                .len(),
+            0
+        );
+        assert_eq!(elements[1]["children"][2]["nodeType"], "TupleExprSyntax");
+    }
+
+    #[test]
+    fn emits_tuple_expression_with_float_literal() {
+        let source = "var product = (\"MacBook\", 1099.99)\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let tuple = find_first_node_type(&value, "TupleExprSyntax").unwrap();
+        assert_eq!(tuple["children"][0]["tokenKind"], "leftParen");
+        assert_eq!(tuple["children"][1]["nodeType"], "LabeledExprListSyntax");
+        assert_eq!(tuple["children"][2]["tokenKind"], "rightParen");
+
+        let elements = tuple["children"][1]["children"].as_array().unwrap();
+        assert_eq!(elements.len(), 2);
+        assert_eq!(
+            elements[0]["children"][0]["nodeType"],
+            "StringLiteralExprSyntax"
+        );
+        assert_eq!(elements[0]["children"][1]["tokenKind"], "comma");
+        assert_eq!(
+            elements[1]["children"][0]["nodeType"],
+            "FloatLiteralExprSyntax"
+        );
+        assert_eq!(
+            elements[1]["children"][0]["children"][0]["tokenKind"],
+            "floatLiteral(\"1099.99\")"
+        );
     }
 
     #[test]
