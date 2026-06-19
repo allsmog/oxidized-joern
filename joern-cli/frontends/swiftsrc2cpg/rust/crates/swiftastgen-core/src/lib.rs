@@ -1730,6 +1730,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             && is_identifier_like_text(self.text(continuation))
     }
 
+    fn is_split_ownership_statement(&self, statement: Node<'a>, continuation: Node<'a>) -> bool {
+        statement.kind() == "simple_identifier"
+            && matches!(self.text(statement), "_move" | "_borrow")
+            && continuation.kind() == "ERROR"
+            && is_identifier_like_text(self.text(continuation))
+    }
+
     fn is_split_bare_macro_variable_decl(
         &self,
         declaration: Node<'a>,
@@ -2618,6 +2625,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     continue;
                 }
                 if self.is_split_move_variable_decl(child, next) {
+                    items.push(self.code_block_item(child)?);
+                    index += 2;
+                    continue;
+                }
+                if self.is_split_ownership_statement(child, next) {
                     items.push(self.code_block_item(child)?);
                     index += 2;
                     continue;
@@ -5489,9 +5501,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         else {
             return Ok(None);
         };
-        if !matches!(self.text(keyword), "borrow" | "_borrow")
-            || !is_identifier_like_text(self.text(*continuation))
-        {
+        if self.text(keyword) != "borrow" || !is_identifier_like_text(self.text(*continuation)) {
             return Ok(None);
         }
 
@@ -6733,6 +6743,29 @@ let _ = copy $0
         assert!(reference_tokens.contains(&"identifier(\"global\")"));
         assert!(reference_tokens.contains(&"identifier(\"_move\")"));
         assert!(reference_tokens.contains(&"identifier(\"$0\")"));
+    }
+
+    #[test]
+    fn recovers_contextual_move_and_borrow_continuations() {
+        let source = r#"
+func foo(msg: String) {
+  _move msg
+  use(_move msg)
+  let b = (_move self).buffer
+  _borrow msg
+  use(_borrow msg)
+  let c = (_borrow self).buffer
+}
+"#;
+        let value = parse_source("Ownership.swift", "/tmp/Ownership.swift", source).unwrap();
+        let references = find_node_types(&value, "DeclReferenceExprSyntax");
+        let reference_tokens = references
+            .iter()
+            .filter_map(|reference| reference["children"][0]["tokenKind"].as_str())
+            .collect::<Vec<_>>();
+        assert!(reference_tokens.contains(&"identifier(\"_move\")"));
+        assert!(reference_tokens.contains(&"identifier(\"_borrow\")"));
+        assert_eq!(find_node_types(&value, "MemberAccessExprSyntax").len(), 2);
     }
 
     #[test]
