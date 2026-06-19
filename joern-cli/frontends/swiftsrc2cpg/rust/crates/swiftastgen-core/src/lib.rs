@@ -193,6 +193,23 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     .max(child_index + 1);
                 continue;
             }
+            if child.kind() == "ERROR" && self.is_recoverable_function_error(child) {
+                let function_decls = self.recovered_function_error_decls(child)?;
+                if function_decls.len() > 1 {
+                    for function_decl in function_decls {
+                        statement_items.push(self.code_block_item_for_value(function_decl, "item"));
+                    }
+                    child_index += 1;
+                    continue;
+                }
+            }
+            if child.kind() == "macro_declaration" {
+                for fragment in self.macro_decl_fragments(child) {
+                    statement_items.push(self.code_block_item_for_value(fragment, "item"));
+                }
+                child_index += 1;
+                continue;
+            }
             if is_trivia_node(child)
                 || is_ignorable_directive(child)
                 || self.is_ignorable_diagnostic(child)
@@ -475,8 +492,194 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             return true;
         }
         !(trimmed.starts_with("case")
+            || self.is_recoverable_function_error(node)
             || trimmed.starts_with("subscript")
             || self.is_recoverable_property_error(node))
+    }
+
+    fn is_recoverable_function_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR" && self.keyword_start_at_trimmed_start(node, "func").is_some()
+    }
+
+    fn recovered_function_error_decls(&self, node: Node<'a>) -> Result<Vec<Value>> {
+        let line_ranges = self.function_line_ranges(node);
+        if line_ranges.len() <= 1 {
+            return Ok(vec![self.function_decl(node)?]);
+        }
+
+        line_ranges
+            .into_iter()
+            .map(|(start, end)| self.synthetic_function_decl_from_offsets(start, end))
+            .collect()
+    }
+
+    fn function_line_ranges(&self, node: Node<'a>) -> Vec<(usize, usize)> {
+        let mut ranges = Vec::new();
+        let mut line_start = node.start_byte();
+        while line_start < node.end_byte() {
+            let line_end = self.line_end_offset(line_start).min(node.end_byte());
+            let (start, end) = self.trim_offsets(line_start, line_end);
+            if start < end && self.source[start..end].starts_with("func") {
+                ranges.push((start, end));
+            }
+            line_start = line_end.saturating_add(1);
+        }
+        ranges
+    }
+
+    fn synthetic_function_decl_from_offsets(&self, start: usize, end: usize) -> Result<Value> {
+        let func_end = start + "func".len();
+        let name_start = self.skip_horizontal_whitespace(func_end, end);
+        let name_end = self
+            .source
+            .get(name_start..end)
+            .and_then(|text| {
+                text.char_indices()
+                    .find(|(_, ch)| ch.is_whitespace() || matches!(ch, '(' | '<'))
+                    .map(|(offset, _)| name_start + offset)
+            })
+            .unwrap_or(end);
+        if name_start >= name_end {
+            bail!("synthetic function declaration is missing a name");
+        }
+        let left_paren_start = self.source[name_end..end]
+            .find('(')
+            .map(|offset| name_end + offset)
+            .context("synthetic function declaration is missing '('")?;
+        let right_paren_start = self.source[left_paren_start..end]
+            .find(')')
+            .map(|offset| left_paren_start + offset)
+            .context("synthetic function declaration is missing ')'")?;
+        let parameter_clause =
+            self.synthetic_empty_function_parameter_clause(left_paren_start, right_paren_start);
+        let signature = self.syntax_node(
+            "FunctionSignatureSyntax",
+            self.range_from_offsets(left_paren_start, right_paren_start + 1),
+            vec![self.with_name(parameter_clause, "parameterClause")],
+        );
+
+        Ok(self.syntax_node(
+            "FunctionDeclSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.empty_collection("AttributeListSyntax", start),
+                    "attributes",
+                ),
+                self.with_name(
+                    self.empty_collection("DeclModifierListSyntax", start),
+                    "modifiers",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "keyword(SwiftSyntax.Keyword.func)",
+                        self.range_from_offsets(start, func_end),
+                    ),
+                    "funcKeyword",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        &format!(
+                            "identifier({})",
+                            quoted_text(&self.source[name_start..name_end])
+                        ),
+                        self.range_from_offsets(name_start, name_end),
+                    ),
+                    "name",
+                ),
+                self.with_name(signature, "signature"),
+            ],
+        ))
+    }
+
+    fn synthetic_empty_function_parameter_clause(
+        &self,
+        left_paren_start: usize,
+        right_paren_start: usize,
+    ) -> Value {
+        self.syntax_node(
+            "FunctionParameterClauseSyntax",
+            self.range_from_offsets(left_paren_start, right_paren_start + 1),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "leftParen",
+                        self.range_from_offsets(left_paren_start, left_paren_start + 1),
+                    ),
+                    "leftParen",
+                ),
+                self.with_name(
+                    self.syntax_node(
+                        "FunctionParameterListSyntax",
+                        self.range_from_offsets(left_paren_start + 1, right_paren_start),
+                        Vec::new(),
+                    ),
+                    "parameters",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "rightParen",
+                        self.range_from_offsets(right_paren_start, right_paren_start + 1),
+                    ),
+                    "rightParen",
+                ),
+            ],
+        )
+    }
+
+    fn macro_decl_fragments(&self, node: Node<'a>) -> Vec<Value> {
+        let line_end = self.line_end_offset(node.end_byte());
+        let (start, end) = self.trim_offsets(node.start_byte(), line_end);
+        if start >= end {
+            return vec![self.macro_decl_fragment(node.start_byte(), node.end_byte())];
+        }
+
+        if let Some(colon_start) = self.macro_decl_colon_return_split(start, end) {
+            let (_, first_end) = self.trim_offsets(start, colon_start);
+            let (second_start, second_end) = self.trim_offsets(colon_start, end);
+            let mut fragments = Vec::new();
+            if start < first_end {
+                fragments.push(self.macro_decl_fragment(start, first_end));
+            }
+            if second_start < second_end {
+                fragments.push(self.macro_decl_fragment(second_start, second_end));
+            }
+            if !fragments.is_empty() {
+                return fragments;
+            }
+        }
+
+        vec![self.macro_decl_fragment(start, end)]
+    }
+
+    fn macro_decl_fragment(&self, start: usize, end: usize) -> Value {
+        self.syntax_node(
+            "MacroDeclSyntax",
+            self.range_from_offsets(start, end),
+            Vec::new(),
+        )
+    }
+
+    fn macro_decl_colon_return_split(&self, start: usize, end: usize) -> Option<usize> {
+        let bytes = self.source.as_bytes();
+        let mut depth = 0usize;
+        let mut offset = start;
+        while offset < end {
+            match bytes[offset] {
+                b'(' => depth += 1,
+                b')' if depth > 0 => {
+                    depth -= 1;
+                    if depth == 0 {
+                        let after_params = self.skip_horizontal_whitespace(offset + 1, end);
+                        return (after_params < end && bytes[after_params] == b':')
+                            .then_some(after_params);
+                    }
+                }
+                _ => {}
+            }
+            offset += 1;
+        }
+        None
     }
 
     fn code_block_item(&self, node: Node<'a>) -> Result<Value> {
@@ -562,6 +765,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "ERROR" if self.is_recoverable_missing_if_error(node) => {
                 self.recovered_missing_if_expr(node)
             }
+            "ERROR" if self.is_recoverable_function_error(node) => self.function_decl(node),
             "ERROR" if self.is_recoverable_do_error(node) => {
                 self.recovered_do_syntax_from_error(node)
             }
@@ -572,6 +776,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "ERROR" if self.is_bare_macro_error(node) => self.macro_expansion_decl(node),
             "diagnostic" => self.macro_expansion_decl(node),
             "macro_invocation" => self.macro_expansion_decl(node),
+            "macro_declaration" => Ok(self
+                .macro_decl_fragments(node)
+                .into_iter()
+                .next()
+                .unwrap_or_else(|| self.macro_decl_fragment(node.start_byte(), node.end_byte()))),
             "assignment"
             | "additive_expression"
             | "array_literal"
@@ -632,6 +841,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "deinit_declaration" => self.deinitializer_decl(node),
             "init_declaration" => self.initializer_decl(node),
             "subscript_declaration" => self.subscript_decl(node),
+            "ERROR" if self.is_recoverable_function_error(node) => self.function_decl(node),
             "ERROR" if self.is_recoverable_property_error(node) => {
                 self.recovered_variable_decl(node, None)
             }
@@ -644,6 +854,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "ERROR" if self.is_recoverable_precedence_group_error(node) => {
                 self.precedence_group_decl(node)
             }
+            "macro_declaration" => Ok(self
+                .macro_decl_fragments(node)
+                .into_iter()
+                .next()
+                .unwrap_or_else(|| self.macro_decl_fragment(node.start_byte(), node.end_byte()))),
             other => bail!("unsupported Swift member declaration node '{other}'"),
         }
     }
@@ -1655,6 +1870,15 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .context("member block is missing '}'")?;
         let mut items = Vec::new();
         for child in named_children(node) {
+            if child.kind() == "ERROR" && self.is_recoverable_function_error(child) {
+                let function_decls = self.recovered_function_error_decls(child)?;
+                if function_decls.len() > 1 {
+                    for function_decl in function_decls {
+                        items.push(self.member_block_item_for_value(function_decl));
+                    }
+                    continue;
+                }
+            }
             if is_trivia_node(child)
                 || is_ignorable_directive(child)
                 || self.is_ignorable_member_error(child)
@@ -2741,6 +2965,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "type_pack_expansion" => self.pack_expansion_type(node),
             "type_identifier" | "user_type" => self.identifier_type(node),
             "type_parameter_pack" => self.pack_element_type(node),
+            "parameter_modifiers" => {
+                let (start, end) = self.trim_offsets(node.start_byte(), node.end_byte());
+                Ok(self.identifier_type_from_offsets(start, end))
+            }
             "tuple_type_item" => {
                 let type_node = named_children(node)
                     .next()
@@ -3184,7 +3412,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
             let type_node = self
                 .lambda_parameter_type(parameter)
-                .map(|type_node| self.type_syntax(type_node))
+                .map(|type_node| self.type_syntax_for_parameter_node(parameter, type_node))
                 .unwrap_or_else(|| {
                     let name = self.lambda_parameter_name(parameter)?;
                     Ok(self.identifier_type_from_offsets(name.start_byte(), name.end_byte()))
@@ -3519,14 +3747,30 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn function_decl(&self, node: Node<'a>) -> Result<Value> {
-        let func_keyword = self
-            .immediate_child_kind(node, "func")
-            .context("function declaration is missing 'func'")?;
+        let func_keyword_token = if let Some(func_keyword) = self.immediate_child_kind(node, "func")
+        {
+            self.token_for_node(func_keyword, "keyword(SwiftSyntax.Keyword.func)")
+        } else {
+            let start = self
+                .keyword_start_at_trimmed_start(node, "func")
+                .context("function declaration is missing 'func'")?;
+            self.token_with_range(
+                "keyword(SwiftSyntax.Keyword.func)",
+                self.range_from_offsets(start, start + "func".len()),
+            )
+        };
         let name = self
             .field_child(node, "name")
             .and_then(|n| {
                 self.first_descendant_kind(n, "simple_identifier")
                     .or(Some(n))
+            })
+            .or_else(|| {
+                let func_start = self.keyword_start_at_trimmed_start(node, "func")?;
+                named_children(node).find(|child| {
+                    matches!(child.kind(), "simple_identifier" | "identifier")
+                        && child.start_byte() >= func_start + "func".len()
+                })
             })
             .context("function declaration is missing a name")?;
         let body = self.field_child(node, "body");
@@ -3534,10 +3778,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut children = vec![
             self.with_name(self.attribute_list(node)?, "attributes"),
             self.with_name(self.modifier_list(node), "modifiers"),
-            self.with_name(
-                self.token_for_node(func_keyword, "keyword(SwiftSyntax.Keyword.func)"),
-                "funcKeyword",
-            ),
+            self.with_name(func_keyword_token, "funcKeyword"),
             self.with_name(
                 self.token_for_node(
                     name,
@@ -3628,22 +3869,34 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn function_parameter(&self, node: Node<'a>) -> Result<Value> {
+        let identifier_children = named_children(node)
+            .filter(|child| matches!(child.kind(), "simple_identifier" | "identifier"))
+            .collect::<Vec<_>>();
         let name = self
             .field_child(node, "name")
-            .and_then(|n| {
-                self.first_descendant_kind(n, "simple_identifier")
-                    .or(Some(n))
+            .filter(|n| !is_type_syntax_node_kind(n.kind()))
+            .and_then(|n| self.identifier_descendant_or_self(n))
+            .or_else(|| {
+                if self.field_child(node, "external_name").is_some()
+                    && identifier_children.len() > 1
+                {
+                    identifier_children.get(1).copied()
+                } else {
+                    identifier_children.first().copied()
+                }
             })
             .context("function parameter is missing a name")?;
-        let external_name = self.field_child(node, "external_name").and_then(|n| {
-            self.first_descendant_kind(n, "simple_identifier")
-                .or(Some(n))
-        });
-        let colon = self
-            .immediate_child_kind(node, ":")
-            .context("function parameter is missing ':'")?;
+        let external_name = self
+            .field_child(node, "external_name")
+            .and_then(|n| self.identifier_descendant_or_self(n));
+        let colon = self.immediate_child_kind(node, ":");
         let type_node = self
             .field_child(node, "type")
+            .or_else(|| {
+                named_children(node)
+                    .filter(|child| child.start_byte() >= name.end_byte())
+                    .find(|child| is_type_syntax_node_kind(child.kind()))
+            })
             .context("function parameter is missing a type")?;
         let mut children = vec![
             self.with_name(self.attribute_list(node)?, "attributes"),
@@ -3656,14 +3909,40 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if external_name.is_some() {
             children.push(self.with_name(self.identifier_or_wildcard_token(name), "secondName"));
         }
-        children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
-        children.push(self.with_name(self.identifier_type(type_node)?, "type"));
+        children.push(self.with_name(
+            colon.map_or_else(
+                || self.token_with_range("colon", self.point_range(type_node.start_byte())),
+                |colon| self.token_for_node(colon, "colon"),
+            ),
+            "colon",
+        ));
+        children.push(self.with_name(
+            self.type_syntax_for_parameter_node(node, type_node)?,
+            "type",
+        ));
 
         Ok(self.syntax_node(
             "FunctionParameterSyntax",
             self.range_for_node(node),
             children,
         ))
+    }
+
+    fn type_syntax_for_parameter_node(
+        &self,
+        parameter: Node<'a>,
+        type_node: Node<'a>,
+    ) -> Result<Value> {
+        if type_node.kind() == "parameter_modifiers" {
+            if let Some(base) = named_children(parameter).find(|child| {
+                child.start_byte() >= type_node.end_byte()
+                    && is_type_syntax_node_kind(child.kind())
+                    && child.kind() != "parameter_modifiers"
+            }) {
+                return self.type_syntax(base);
+            }
+        }
+        self.type_syntax(type_node)
     }
 
     fn code_block(&self, node: Node<'a>) -> Result<Value> {
@@ -3775,6 +4054,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 continue;
             }
             if is_trivia_node(child) || is_ignorable_directive(child) {
+                index += 1;
+                continue;
+            }
+            if child.kind() == "macro_declaration" {
+                for fragment in self.macro_decl_fragments(child) {
+                    items.push(self.code_block_item_for_value(fragment, "item"));
+                }
                 index += 1;
                 continue;
             }
@@ -4263,12 +4549,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             })
             .collect();
         if accessor_nodes.is_empty() {
+            accessor_nodes = named_children(computed_property)
+                .filter(|child| self.is_recovered_accessor_keyword_error(*child))
+                .collect();
             if let Some(statements) =
                 self.immediate_named_child_kind(computed_property, "statements")
             {
-                accessor_nodes = named_children(statements)
-                    .filter(|child| self.is_recovered_accessor_call(*child))
-                    .collect();
+                accessor_nodes.extend(
+                    named_children(statements)
+                        .filter(|child| self.is_recovered_accessor_call(*child)),
+                );
             }
         }
         let accessors = if accessor_nodes.is_empty() {
@@ -4306,11 +4596,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if node.kind() != "call_expression" {
             return false;
         }
-        named_children(node).next().is_some_and(|callee| {
-            callee.kind() == "simple_identifier"
-                && matches!(self.text(callee), "_read" | "read" | "_modify" | "modify")
-                && self.first_descendant_kind(node, "lambda_literal").is_some()
-        })
+        self.accessor_keyword_node(node).is_some()
+            && self.first_descendant_kind(node, "lambda_literal").is_some()
+    }
+
+    fn is_recovered_accessor_keyword_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR" && self.accessor_keyword_node(node).is_some()
     }
 
     fn protocol_property_accessor_block(&self, node: Node<'a>) -> Result<Value> {
@@ -10945,6 +11236,23 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         (start, end)
     }
 
+    fn line_end_offset(&self, mut offset: usize) -> usize {
+        let bytes = self.source.as_bytes();
+        while offset < bytes.len() && bytes[offset] != b'\n' {
+            offset += 1;
+        }
+        offset
+    }
+
+    fn keyword_start_at_trimmed_start(&self, node: Node<'a>, keyword: &str) -> Option<usize> {
+        let (start, end) = self.trim_offsets(node.start_byte(), node.end_byte());
+        if self.source.get(start..end)?.starts_with(keyword) {
+            Some(start)
+        } else {
+            None
+        }
+    }
+
     fn skip_horizontal_whitespace(&self, mut start: usize, end: usize) -> usize {
         while start < end && matches!(self.source.as_bytes()[start], b' ' | b'\t') {
             start += 1;
@@ -11056,6 +11364,15 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
     }
 
+    fn identifier_descendant_or_self(&self, node: Node<'a>) -> Option<Node<'a>> {
+        if matches!(node.kind(), "simple_identifier" | "identifier") {
+            Some(node)
+        } else {
+            self.first_descendant_kind(node, "simple_identifier")
+                .or_else(|| self.first_descendant_kind(node, "identifier"))
+        }
+    }
+
     fn nearest_child_before(&self, node: Node<'a>, kind: &str, offset: usize) -> Option<Node<'a>> {
         children(node)
             .filter(|child| child.kind() == kind && child.start_byte() <= offset)
@@ -11080,7 +11397,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn accessor_keyword_node(&self, node: Node<'a>) -> Option<Node<'a>> {
-        ["get", "set", "_read", "read", "_modify", "modify"]
+        ["get", "set", "_read", "read", "_modify", "modify", "init"]
             .iter()
             .find_map(|kind| {
                 self.first_descendant_any_kind(node, kind)
@@ -13478,6 +13795,86 @@ if case let .Naught(value) = n {}
         assert_eq!(
             child_by_name(accessor, "accessorSpecifier").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword._read)"
+        );
+    }
+
+    #[test]
+    fn recovers_declaration_suite_shapes() {
+        let source = r#"
+func test(first second: Int)
+class MyClass {
+  func withoutParameters()
+  func foo2<Int>()
+  func withParameters() {}
+}
+var foo1 : Int {
+  _read async { 0 }
+}
+struct Foo {
+  var x: Int {
+    borrowing get {}
+  }
+}
+struct S1 {
+  var value: Int {
+    init {}
+    get {}
+    set {}
+  }
+}
+macro m1(): Int = A.M1
+macro m2(_: Int) = A.M2
+macro m3(a b: Int) -> Int = A.M3
+macro m4<T>(): T = A.M4 where T.Assoc: P
+macro m5<T: P>(_: T)
+"#;
+        let value = parse_source("Decls.swift", "/tmp/Decls.swift", source).unwrap();
+
+        let function_texts = find_node_types(&value, "FunctionDeclSyntax")
+            .iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert!(function_texts.contains(&"func test(first second: Int)"));
+        assert!(function_texts.contains(&"func withoutParameters()"));
+        assert!(function_texts.contains(&"func foo2<Int>()"));
+        assert!(function_texts.contains(&"func withParameters() {}"));
+
+        let recovered_parameter = find_node_types(&value, "FunctionParameterSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "first second: Int")
+            .unwrap();
+        assert_eq!(
+            source_text(
+                source,
+                child_by_name(recovered_parameter, "secondName").unwrap()
+            ),
+            "second"
+        );
+
+        let accessor_specifiers = find_node_types(&value, "AccessorDeclSyntax")
+            .iter()
+            .map(|node| child_by_name(node, "accessorSpecifier").unwrap()["tokenKind"].clone())
+            .collect::<Vec<_>>();
+        assert!(accessor_specifiers.contains(&json!("keyword(SwiftSyntax.Keyword._read)")));
+        assert!(accessor_specifiers.contains(&json!("keyword(SwiftSyntax.Keyword.get)")));
+        assert!(accessor_specifiers.contains(&json!("keyword(SwiftSyntax.Keyword.set)")));
+        assert!(accessor_specifiers.contains(&json!("keyword(SwiftSyntax.Keyword.init)")));
+
+        let macro_fragments = find_node_types(&value, "MacroDeclSyntax")
+            .iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            macro_fragments,
+            vec![
+                "macro m1()",
+                ": Int = A.M1",
+                "macro m2(_: Int) = A.M2",
+                "macro m3(a b: Int) -> Int = A.M3",
+                "macro m4<T>()",
+                ": T = A.M4 where T.Assoc: P",
+                "macro m5<T: P>(_: T)",
+            ]
         );
     }
 
