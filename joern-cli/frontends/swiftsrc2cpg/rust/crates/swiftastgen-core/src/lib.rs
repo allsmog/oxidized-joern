@@ -2873,12 +2873,24 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         value: Node<'a>,
         end: usize,
     ) -> Result<Value> {
+        let value_expr = if let Some(question_mark) = self.optional_chain_question_after(value, end)
+        {
+            let expression = self.expr(value)?;
+            self.optional_chaining_expr_from_value(
+                expression,
+                question_mark,
+                value.start_byte(),
+                question_mark.end_byte(),
+            )
+        } else {
+            self.expr(value)?
+        };
         Ok(self.syntax_node(
             "InitializerClauseSyntax",
             self.range_from_offsets(equal.start_byte(), end),
             vec![
                 self.with_name(self.token_for_node(equal, "equal"), "equal"),
-                self.with_name(self.expr(value)?, "value"),
+                self.with_name(value_expr, "value"),
             ],
         ))
     }
@@ -3943,7 +3955,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let suffix = self
             .immediate_named_child_kind(node, "call_suffix")
             .context("split initializer call is missing call suffix")?;
-        let mut children = vec![self.with_name(self.expr(callee)?, "calledExpression")];
+        let mut children = vec![self.with_name(
+            self.called_expression_with_optional_chaining(node, callee, suffix)?,
+            "calledExpression",
+        )];
 
         if let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments") {
             let left_paren = self
@@ -6028,7 +6043,22 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
         let mut children = Vec::new();
         if let Some(base) = self.field_child(node, "target") {
-            children.push(self.with_name(self.expr(base)?, "base"));
+            let base_expr = if let Some(question_mark) = self.optional_chain_question_between(
+                node,
+                base.end_byte(),
+                suffix_node.start_byte(),
+            ) {
+                let expression = self.expr(base)?;
+                self.optional_chaining_expr_from_value(
+                    expression,
+                    question_mark,
+                    base.start_byte(),
+                    question_mark.end_byte(),
+                )
+            } else {
+                self.expr(base)?
+            };
+            children.push(self.with_name(base_expr, "base"));
         }
         children.push(self.with_name(self.token_for_node(period, "period"), "period"));
         children.push(self.with_name(self.decl_reference_expr(suffix), "declName"));
@@ -6038,6 +6068,71 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_for_node(node),
             children,
         ))
+    }
+
+    fn optional_chaining_expr_from_value(
+        &self,
+        expression: Value,
+        question_mark: Node<'a>,
+        start: usize,
+        end: usize,
+    ) -> Value {
+        self.syntax_node(
+            "OptionalChainingExprSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(expression, "expression"),
+                self.with_name(
+                    self.token_for_node(question_mark, "postfixQuestionMark"),
+                    "questionMark",
+                ),
+            ],
+        )
+    }
+
+    fn called_expression_with_optional_chaining(
+        &self,
+        parent: Node<'a>,
+        callee: Node<'a>,
+        suffix: Node<'a>,
+    ) -> Result<Value> {
+        let expression = self.expr(callee)?;
+        Ok(
+            if let Some(question_mark) =
+                self.optional_chain_question_between(parent, callee.end_byte(), suffix.start_byte())
+            {
+                self.optional_chaining_expr_from_value(
+                    expression,
+                    question_mark,
+                    callee.start_byte(),
+                    question_mark.end_byte(),
+                )
+            } else {
+                expression
+            },
+        )
+    }
+
+    fn optional_chain_question_after(&self, expression: Node<'a>, end: usize) -> Option<Node<'a>> {
+        let parent = expression.parent()?;
+        self.optional_chain_question_between(parent, expression.end_byte(), end)
+    }
+
+    fn optional_chain_question_between(
+        &self,
+        parent: Node<'a>,
+        start: usize,
+        end: usize,
+    ) -> Option<Node<'a>> {
+        children(parent).find(|child| {
+            child.start_byte() >= start
+                && child.end_byte() <= end
+                && self.is_optional_chain_question_mark(*child)
+        })
+    }
+
+    fn is_optional_chain_question_mark(&self, node: Node<'a>) -> bool {
+        node.kind() == "?" && self.text(node) == "?"
     }
 
     fn is_recoverable_prefix_slash_navigation(&self, node: Node<'a>) -> bool {
@@ -8361,7 +8456,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
         }
 
-        let mut children = vec![self.with_name(self.expr(callee)?, "calledExpression")];
+        let mut children = vec![self.with_name(
+            self.called_expression_with_optional_chaining(node, callee, suffix)?,
+            "calledExpression",
+        )];
 
         if let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments") {
             let left_paren = self
@@ -8429,7 +8527,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .or_else(|| self.field_child(callee, "end"))
             .context("binary expression is missing rhs")?;
         let rhs_call =
-            self.expr_with_call_suffix(rhs, suffix, rhs.start_byte(), node.end_byte())?;
+            self.expr_with_call_suffix(node, rhs, suffix, rhs.start_byte(), node.end_byte())?;
 
         if lhs.kind() == "try_expression" && lhs.start_byte() == callee.start_byte() {
             let try_expression = self
@@ -8457,6 +8555,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn expr_with_call_suffix(
         &self,
+        parent: Node<'a>,
         expression: Node<'a>,
         suffix: Node<'a>,
         start: usize,
@@ -8466,21 +8565,30 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             let inner = self
                 .expression_field_child(expression, "expr")
                 .context("try expression is missing expression")?;
-            let call =
-                self.function_call_expr_with_suffix(inner, suffix, inner.start_byte(), end)?;
+            let call = self.function_call_expr_with_suffix(
+                parent,
+                inner,
+                suffix,
+                inner.start_byte(),
+                end,
+            )?;
             return self.try_expr_wrapping_value(expression, call);
         }
-        self.function_call_expr_with_suffix(expression, suffix, start, end)
+        self.function_call_expr_with_suffix(parent, expression, suffix, start, end)
     }
 
     fn function_call_expr_with_suffix(
         &self,
+        parent: Node<'a>,
         callee: Node<'a>,
         suffix: Node<'a>,
         start: usize,
         end: usize,
     ) -> Result<Value> {
-        let mut children = vec![self.with_name(self.expr(callee)?, "calledExpression")];
+        let mut children = vec![self.with_name(
+            self.called_expression_with_optional_chaining(parent, callee, suffix)?,
+            "calledExpression",
+        )];
         if let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments") {
             let left_paren = self
                 .immediate_child_kind(value_arguments, "(")
@@ -9681,7 +9789,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     fn recovered_value_end(&self, node: Node<'a>, value: Node<'a>) -> usize {
         let mut end = value.end_byte();
         for child in self.field_children(node, "value") {
-            if child.start_byte() >= end && self.is_recovery_bang_node(child) {
+            if child.start_byte() >= end
+                && (self.is_recovery_bang_node(child)
+                    || self.is_optional_chain_question_mark(child))
+            {
                 end = child.end_byte();
             }
         }
@@ -9690,7 +9801,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             if next.start_byte() > end {
                 break;
             }
-            if !self.is_recovery_bang_node(next) {
+            if !(self.is_recovery_bang_node(next) || self.is_optional_chain_question_mark(next)) {
                 break;
             }
             end = end.max(next.end_byte());
@@ -12358,6 +12469,50 @@ _ = bar(/E.e) / 2
         assert!(call_texts.contains(&"foo((/E.e), /E.e)"));
         assert!(call_texts.contains(&"foo((/)(E.e), /E.e)"));
         assert!(call_texts.contains(&"bar(/E.e)"));
+    }
+
+    #[test]
+    fn emits_optional_chaining_expressions() {
+        let source = "\
+var c = a?
+var d : ()? = a?.foo()
+var e : (() -> A)?
+var f = e?()
+";
+        let value = parse_source("Optional.swift", "/tmp/Optional.swift", source).unwrap();
+
+        let optional_texts = find_node_types(&value, "OptionalChainingExprSyntax")
+            .iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert!(optional_texts.contains(&"a?"));
+        assert!(optional_texts.contains(&"e?"));
+
+        let initializers = find_node_types(&value, "InitializerClauseSyntax");
+        assert!(initializers
+            .iter()
+            .any(|node| source_text(source, node) == "= a?"));
+
+        let calls = find_node_types(&value, "FunctionCallExprSyntax");
+        let optional_call = calls
+            .iter()
+            .find(|node| source_text(source, node) == "e?()")
+            .unwrap();
+        assert_eq!(
+            child_by_name(optional_call, "calledExpression").unwrap()["nodeType"],
+            "OptionalChainingExprSyntax"
+        );
+
+        let foo_call = calls
+            .iter()
+            .find(|node| source_text(source, node) == "a?.foo()")
+            .unwrap();
+        let member = child_by_name(foo_call, "calledExpression").unwrap();
+        assert_eq!(member["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(
+            child_by_name(member, "base").unwrap()["nodeType"],
+            "OptionalChainingExprSyntax"
+        );
     }
 
     #[test]
