@@ -143,6 +143,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     child_index += 2;
                     continue;
                 }
+                if self.is_split_bare_macro_variable_decl(child, next) {
+                    let declaration = self.recovered_variable_decl(child, Some(next))?;
+                    statement_items.push(self.code_block_item_for_value(declaration, "item"));
+                    child_index += 2;
+                    continue;
+                }
             }
             if self.is_recoverable_escaped_raw_assignment(child) {
                 let mut end_node = child;
@@ -230,6 +236,24 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn is_regex_delimiter_error(&self, node: Node<'a>) -> bool {
         node.kind() == "ERROR" && self.text(node).chars().all(|ch| ch == '#')
+    }
+
+    fn is_bare_macro_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR"
+            && self.bare_macro_pound_start(node).is_some()
+            && named_children(node)
+                .any(|child| matches!(child.kind(), "simple_identifier" | "identifier"))
+    }
+
+    fn bare_macro_pound_start(&self, node: Node<'a>) -> Option<usize> {
+        let text = self.text(node);
+        let hash_offset = text.find('#')?;
+        let prefix = text[..hash_offset].trim();
+        if prefix.is_empty() || prefix == "=" {
+            Some(node.start_byte() + hash_offset)
+        } else {
+            None
+        }
     }
 
     fn is_recoverable_escaped_raw_assignment(&self, node: Node<'a>) -> bool {
@@ -322,6 +346,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "ERROR" if self.is_recoverable_precedence_group_error(node) => {
                 self.precedence_group_decl(node)
             }
+            "ERROR" if self.is_bare_macro_error(node) => self.macro_expansion_decl(node),
+            "diagnostic" => self.macro_expansion_decl(node),
+            "macro_invocation" => self.macro_expansion_decl(node),
             "assignment"
             | "additive_expression"
             | "array_literal"
@@ -350,6 +377,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "simple_identifier"
             | "nil"
             | "self_expression"
+            | "special_literal"
             | "super_expression"
             | "ternary_expression"
             | "tuple_expression"
@@ -1701,6 +1729,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             && is_identifier_like_text(self.text(continuation))
     }
 
+    fn is_split_bare_macro_variable_decl(
+        &self,
+        declaration: Node<'a>,
+        continuation: Node<'a>,
+    ) -> bool {
+        declaration.kind() == "property_declaration" && self.is_bare_macro_error(continuation)
+    }
+
     fn recovered_copy_variable_decl(
         &self,
         declaration: Node<'a>,
@@ -1859,6 +1895,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     ) -> Option<Node<'a>> {
         self.field_child(node, "name")
             .or_else(|| self.field_child(node, "bound_identifier"))
+            .or_else(|| self.first_descendant_kind(node, "wildcard_pattern"))
             .or_else(|| {
                 self.first_descendant_kind_between(
                     node,
@@ -1884,15 +1921,30 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         initializer_continuation: Option<Node<'a>>,
     ) -> Result<Option<Value>> {
         if let Some(continuation) = initializer_continuation {
-            let equal_start = self
+            let continuation_equal = self
                 .source
                 .as_bytes()
                 .get(continuation.start_byte()..continuation.end_byte())
                 .and_then(|bytes| bytes.iter().position(|byte| *byte == b'='))
-                .map(|relative| continuation.start_byte() + relative)
-                .context("split property initializer is missing '='")?;
+                .map(|relative| continuation.start_byte() + relative);
+            let declaration_equal = children(node)
+                .find(|child| child.kind() == "=" && child.start_byte() >= pattern_node.end_byte())
+                .map(|equal| (equal.start_byte(), equal.end_byte()));
+            let (equal_start, equal_end, strip_leading_equal) =
+                if let Some(equal_start) = continuation_equal {
+                    (equal_start, equal_start + 1, true)
+                } else if let Some((equal_start, equal_end)) = declaration_equal {
+                    (equal_start, equal_end, false)
+                } else {
+                    bail!("split property initializer is missing '='");
+                };
             return self
-                .initializer_clause_from_offsets(equal_start, equal_start + 1, continuation, true)
+                .initializer_clause_from_offsets(
+                    equal_start,
+                    equal_end,
+                    continuation,
+                    strip_leading_equal,
+                )
                 .map(Some);
         }
 
@@ -2569,6 +2621,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     index += 2;
                     continue;
                 }
+                if self.is_split_bare_macro_variable_decl(child, next) {
+                    let declaration = self.recovered_variable_decl(child, Some(next))?;
+                    items.push(self.code_block_item_for_value(declaration, "item"));
+                    index += 2;
+                    continue;
+                }
             }
             items.push(self.code_block_item(child)?);
             index += 1;
@@ -2842,6 +2900,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "macro_invocation" if self.is_regex_literal_text(self.text(node)) => {
                 self.regex_literal_expr_from_offsets(node.start_byte(), node.end_byte())
             }
+            "macro_invocation" => self.macro_expansion_expr(node),
+            "special_literal" => self.special_literal_expr(node),
             "regex_literal" => {
                 if let Some(parent) = node.parent() {
                     if let Some(recovered) =
@@ -2856,6 +2916,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "ternary_expression" => self.ternary_expr(node),
             "try_expression" => self.try_expr(node),
             "user_type" => self.constructed_type_expr(node),
+            "ERROR" if self.is_bare_macro_error(node) => self.macro_expansion_expr(node),
             "ERROR" if is_identifier_like_text(self.text(node)) => {
                 Ok(self.decl_reference_expr(node))
             }
@@ -2864,11 +2925,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn is_split_initializer_continuation(&self, node: Node<'a>) -> bool {
-        node.kind() == "call_expression" && self.text(node).trim_start().starts_with('=')
+        (node.kind() == "call_expression" && self.text(node).trim_start().starts_with('='))
+            || self.is_bare_macro_error(node)
     }
 
     fn expr_for_split_initializer(&self, node: Node<'a>) -> Result<Value> {
-        if self.is_split_initializer_continuation(node) {
+        if node.kind() == "call_expression" && self.text(node).trim_start().starts_with('=') {
             return self.recovered_call_expr_for_split_initializer(node);
         }
         self.expr(node)
@@ -4661,7 +4723,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 && child.end_byte() <= right_angle.start_byte()
         }) {
             let trailing_comma = self.trailing_delimiter(node, argument, ",");
-            let mut children = vec![self.with_name(self.type_syntax(argument)?, "argument")];
+            let argument_type = self.generic_argument_type(argument)?;
+            let mut children = vec![self.with_name(self.type_syntax(argument_type)?, "argument")];
             if let Some(comma) = trailing_comma {
                 children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
             }
@@ -4691,6 +4754,252 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.with_name(self.token_for_node(right_angle, "rightAngle"), "rightAngle"),
             ],
         ))
+    }
+
+    fn generic_argument_type(&self, argument: Node<'a>) -> Result<Node<'a>> {
+        if argument.kind() != "type_parameter" {
+            return Ok(argument);
+        }
+        named_children(argument)
+            .find(|child| {
+                matches!(
+                    child.kind(),
+                    "function_type"
+                        | "optional_type"
+                        | "tuple_type"
+                        | "type_identifier"
+                        | "user_type"
+                )
+            })
+            .context("generic type parameter is missing a type")
+    }
+
+    fn special_literal_expr(&self, node: Node<'a>) -> Result<Value> {
+        if self.text(node).starts_with('#') {
+            return self.macro_expansion_expr(node);
+        }
+        bail!("unsupported Swift special literal '{}'", self.text(node))
+    }
+
+    fn macro_expansion_expr(&self, node: Node<'a>) -> Result<Value> {
+        self.macro_expansion(node, "MacroExpansionExprSyntax", false)
+    }
+
+    fn macro_expansion_decl(&self, node: Node<'a>) -> Result<Value> {
+        self.macro_expansion(node, "MacroExpansionDeclSyntax", true)
+    }
+
+    fn macro_expansion(
+        &self,
+        node: Node<'a>,
+        node_type: &str,
+        include_decl_prefix: bool,
+    ) -> Result<Value> {
+        let (macro_name, macro_name_end) = self.macro_name_token(node)?;
+        let pound_start = self
+            .bare_macro_pound_start(node)
+            .unwrap_or_else(|| node.start_byte());
+        let mut syntax_children = Vec::new();
+        if include_decl_prefix {
+            syntax_children.push(self.with_name(
+                self.empty_collection("AttributeListSyntax", pound_start),
+                "attributes",
+            ));
+            syntax_children.push(self.with_name(
+                self.empty_collection("DeclModifierListSyntax", pound_start),
+                "modifiers",
+            ));
+        }
+
+        syntax_children.push(self.with_name(
+            self.token_with_range(
+                "pound",
+                self.range_from_offsets(pound_start, pound_start + 1),
+            ),
+            "pound",
+        ));
+        syntax_children.push(self.with_name(macro_name, "macroName"));
+
+        if let Some(type_parameters) = self
+            .immediate_named_child_kind(node, "type_parameters")
+            .or_else(|| self.immediate_named_child_kind(node, "type_arguments"))
+        {
+            syntax_children.push(self.with_name(
+                self.generic_argument_clause(type_parameters)?,
+                "genericArgumentClause",
+            ));
+        }
+
+        let suffix = self.immediate_named_child_kind(node, "call_suffix");
+        if node.kind() == "diagnostic" {
+            if let Some((left_paren, arguments, right_paren)) =
+                self.diagnostic_macro_arguments(node, macro_name_end)?
+            {
+                syntax_children.push(self.with_name(left_paren, "leftParen"));
+                syntax_children.push(self.with_name(arguments, "arguments"));
+                syntax_children.push(self.with_name(right_paren, "rightParen"));
+            } else {
+                syntax_children.push(self.with_name(
+                    self.empty_collection("LabeledExprListSyntax", macro_name_end),
+                    "arguments",
+                ));
+            }
+        } else if let Some(suffix) = suffix {
+            let trailing_closures = named_children(suffix)
+                .filter(|child| child.kind() == "lambda_literal")
+                .collect::<Vec<_>>();
+            if trailing_closures.len() > 1 {
+                bail!("multiple macro trailing closures are not supported yet");
+            }
+
+            if let Some(value_arguments) =
+                self.immediate_named_child_kind(suffix, "value_arguments")
+            {
+                let left_paren = self
+                    .immediate_child_kind(value_arguments, "(")
+                    .context("macro arguments are missing '('")?;
+                let right_paren = self
+                    .immediate_child_kind(value_arguments, ")")
+                    .context("macro arguments are missing ')'")?;
+                syntax_children.push(
+                    self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+                );
+                syntax_children.push(self.with_name(
+                    self.labeled_expr_list(value_arguments, left_paren, right_paren)?,
+                    "arguments",
+                ));
+                syntax_children.push(
+                    self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
+                );
+            } else {
+                syntax_children.push(self.with_name(
+                    self.empty_collection("LabeledExprListSyntax", suffix.start_byte()),
+                    "arguments",
+                ));
+            }
+
+            if let Some(trailing_closure) = trailing_closures.first() {
+                syntax_children
+                    .push(self.with_name(self.closure_expr(*trailing_closure)?, "trailingClosure"));
+            }
+        } else {
+            syntax_children.push(self.with_name(
+                self.empty_collection("LabeledExprListSyntax", macro_name_end),
+                "arguments",
+            ));
+        }
+
+        syntax_children.push(self.with_name(
+            self.empty_collection("MultipleTrailingClosureElementListSyntax", node.end_byte()),
+            "additionalTrailingClosures",
+        ));
+
+        Ok(self.syntax_node(
+            node_type,
+            self.range_from_offsets(pound_start, node.end_byte()),
+            syntax_children,
+        ))
+    }
+
+    fn diagnostic_macro_arguments(
+        &self,
+        node: Node<'a>,
+        macro_name_end: usize,
+    ) -> Result<Option<(Value, Value, Value)>> {
+        let Some(left_relative) = self.source[macro_name_end..node.end_byte()].find('(') else {
+            return Ok(None);
+        };
+        let left_start = macro_name_end + left_relative;
+        let right_start = self.source[left_start..node.end_byte()]
+            .rfind(')')
+            .map(|relative| left_start + relative)
+            .context("diagnostic macro arguments are missing ')'")?;
+        let left_paren = self.token_with_range(
+            "leftParen",
+            self.range_from_offsets(left_start, left_start + 1),
+        );
+        let right_paren = self.token_with_range(
+            "rightParen",
+            self.range_from_offsets(right_start, right_start + 1),
+        );
+
+        let mut arguments = Vec::new();
+        if let Some(string_start) = self.source[left_start + 1..right_start]
+            .find('"')
+            .map(|relative| left_start + 1 + relative)
+        {
+            let string_end = self.source[string_start + 1..right_start]
+                .rfind('"')
+                .map(|relative| string_start + 1 + relative + 1)
+                .context("diagnostic string argument is missing closing quote")?;
+            let literal = self.string_literal_node(StringLiteralSpec {
+                start: string_start,
+                end: string_end,
+                opening_pounds: None,
+                opening_quote: (string_start, string_start + 1),
+                closing_quote: (string_end - 1, string_end),
+                closing_pounds: None,
+                segment_specs: vec![(
+                    string_start + 1,
+                    string_end - 1,
+                    self.source[string_start + 1..string_end - 1].to_string(),
+                )],
+            });
+            arguments.push(self.with_name(
+                self.syntax_node(
+                    "LabeledExprSyntax",
+                    self.range_from_offsets(string_start, string_end),
+                    vec![self.with_name(literal, "expression")],
+                ),
+                "",
+            ));
+        }
+
+        let arguments = self.syntax_node(
+            "LabeledExprListSyntax",
+            self.range_from_offsets(left_start + 1, right_start),
+            arguments,
+        );
+        Ok(Some((left_paren, arguments, right_paren)))
+    }
+
+    fn macro_name_token(&self, node: Node<'a>) -> Result<(Value, usize)> {
+        if let Some(name) = named_children(node)
+            .find(|child| matches!(child.kind(), "simple_identifier" | "identifier"))
+        {
+            return Ok((
+                self.token_for_node(
+                    name,
+                    &format!("identifier({})", quoted_text(self.text(name))),
+                ),
+                name.end_byte(),
+            ));
+        }
+
+        if let Some(pound_start) = self.bare_macro_pound_start(node) {
+            let name_start = pound_start + 1;
+            let mut name_end = name_start;
+            for (offset, ch) in self.source[name_start..node.end_byte()].char_indices() {
+                if ch == '_' || ch.is_alphanumeric() {
+                    name_end = name_start + offset + ch.len_utf8();
+                } else {
+                    break;
+                }
+            }
+            if name_end == name_start {
+                bail!("macro expansion is missing a macro name");
+            }
+            let name = &self.source[name_start..name_end];
+            return Ok((
+                self.token_with_range(
+                    &format!("identifier({})", quoted_text(name)),
+                    self.range_from_offsets(name_start, name_end),
+                ),
+                name_end,
+            ));
+        }
+
+        bail!("macro expansion is missing a macro name")
     }
 
     fn function_call_expr(&self, node: Node<'a>) -> Result<Value> {
@@ -6048,6 +6357,7 @@ fn is_expression_like_node(node: Node<'_>) -> bool {
             | "integer_literal"
             | "lambda_literal"
             | "line_string_literal"
+            | "macro_invocation"
             | "multi_line_string_literal"
             | "multiplicative_expression"
             | "navigation_expression"
@@ -6059,6 +6369,7 @@ fn is_expression_like_node(node: Node<'_>) -> bool {
             | "regex_literal"
             | "self_expression"
             | "simple_identifier"
+            | "special_literal"
             | "super_expression"
             | "ternary_expression"
             | "try_expression"
@@ -7773,6 +8084,80 @@ let f = value is Foo
         assert_eq!(
             outer_ternary["children"][4]["nodeType"],
             "TernaryExprSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_macro_expansion_expressions_and_declarations() {
+        let source = "\
+#file == $0.path
+let a = #embed(\"filename.txt\")
+#Test {
+  print(\"This is a test\")
+}
+#fancyMacro<Arg1, Arg2>(hello: \"me\")
+";
+        let value = parse_source("Macros.swift", "/tmp/Macros.swift", source).unwrap();
+        let bare_value = parse_source(
+            "BareMacro.swift",
+            "/tmp/BareMacro.swift",
+            "let b = #notAPound",
+        )
+        .unwrap();
+        let diagnostic_value = parse_source(
+            "Diagnostic.swift",
+            "/tmp/Diagnostic.swift",
+            "#error(\"Unsupported platform\")",
+        )
+        .unwrap();
+
+        let expr_macros = find_node_types(&value, "MacroExpansionExprSyntax");
+        let decl_macros = find_node_types(&value, "MacroExpansionDeclSyntax");
+        assert_eq!(
+            find_node_types(&value, "GenericArgumentClauseSyntax").len(),
+            1
+        );
+        assert_eq!(find_node_types(&value, "ClosureExprSyntax").len(), 1);
+
+        let macro_names = expr_macros
+            .into_iter()
+            .chain(decl_macros)
+            .filter_map(|macro_node| {
+                macro_node["children"].as_array().and_then(|children| {
+                    children
+                        .iter()
+                        .find(|child| child["name"] == "macroName")
+                        .and_then(|child| child["tokenKind"].as_str())
+                })
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(macro_names.len(), 4);
+        assert!(macro_names.contains(&"identifier(\"file\")"));
+        assert!(macro_names.contains(&"identifier(\"embed\")"));
+        assert!(macro_names.contains(&"identifier(\"Test\")"));
+        assert!(macro_names.contains(&"identifier(\"fancyMacro\")"));
+
+        let bare_macro = find_first_node_type(&bare_value, "MacroExpansionExprSyntax").unwrap();
+        let bare_macro_name = bare_macro["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "macroName")
+            .and_then(|child| child["tokenKind"].as_str());
+        assert_eq!(bare_macro_name, Some("identifier(\"notAPound\")"));
+
+        let diagnostic =
+            find_first_node_type(&diagnostic_value, "MacroExpansionDeclSyntax").unwrap();
+        let diagnostic_name = diagnostic["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "macroName")
+            .and_then(|child| child["tokenKind"].as_str());
+        assert_eq!(diagnostic_name, Some("identifier(\"error\")"));
+        assert_eq!(
+            find_node_types(diagnostic, "StringLiteralExprSyntax").len(),
+            1
         );
     }
 
