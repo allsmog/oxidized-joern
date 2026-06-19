@@ -114,6 +114,13 @@ struct RecoveredSwitchCaseSlice {
     is_default: bool,
 }
 
+#[derive(Clone, Copy)]
+struct PostfixDirectiveCallParts<'a> {
+    directive: Node<'a>,
+    navigation: Node<'a>,
+    period: Node<'a>,
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum DirectiveKind {
     If,
@@ -147,6 +154,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut child_index = 0;
         while child_index < root_children.len() {
             let child = root_children[child_index];
+            if let Some((postfix_if_config, next_index)) =
+                self.postfix_if_config_expr_from_nodes(&root_children, child_index)?
+            {
+                statement_items.push(self.code_block_item_for_value(postfix_if_config, "item"));
+                child_index = next_index;
+                continue;
+            }
             if self.is_if_config_start(child) {
                 let (if_config, next_index) =
                     self.if_config_decl_from_code_block_nodes(&root_children, child_index)?;
@@ -3060,6 +3074,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut index = 0;
         while index < statement_nodes.len() {
             let child = statement_nodes[index];
+            if let Some((postfix_if_config, next_index)) =
+                self.postfix_if_config_expr_from_nodes(statement_nodes, index)?
+            {
+                items.push(self.code_block_item_for_value(postfix_if_config, "item"));
+                index = next_index;
+                continue;
+            }
             if self.is_if_config_start(child) {
                 let (if_config, next_index) =
                     self.if_config_decl_from_code_block_nodes(statement_nodes, index)?;
@@ -3117,6 +3138,294 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             index += 1;
         }
         Ok(())
+    }
+
+    fn postfix_if_config_expr_from_nodes(
+        &self,
+        nodes: &[Node<'a>],
+        base_index: usize,
+    ) -> Result<Option<(Value, usize)>> {
+        let Some(base) = nodes.get(base_index).copied() else {
+            return Ok(None);
+        };
+        let Some(first_branch) = nodes.get(base_index + 1).copied() else {
+            return Ok(None);
+        };
+        if !is_expression_like_node(base)
+            || !self
+                .postfix_directive_kind(first_branch)
+                .is_some_and(|kind| kind == DirectiveKind::If)
+        {
+            return Ok(None);
+        }
+
+        let (config, next_index, trailing_call) =
+            self.postfix_if_config_decl_from_nodes(nodes, base_index + 1)?;
+        let config_end = end_offset(&config);
+        let base_expr = self.expr(base)?;
+        let postfix_if_config = self.syntax_node(
+            "PostfixIfConfigExprSyntax",
+            self.range_from_offsets(base.start_byte(), config_end.max(base.end_byte())),
+            vec![
+                self.with_name(base_expr, "base"),
+                self.with_name(config, "config"),
+            ],
+        );
+
+        if let Some(trailing_call) = trailing_call {
+            return Ok(Some((
+                self.postfix_directive_trailing_call_expr(
+                    trailing_call,
+                    postfix_if_config,
+                    base.start_byte(),
+                )?,
+                next_index,
+            )));
+        }
+
+        Ok(Some((postfix_if_config, next_index)))
+    }
+
+    fn postfix_if_config_decl_from_nodes(
+        &self,
+        nodes: &[Node<'a>],
+        start_index: usize,
+    ) -> Result<(Value, usize, Option<Node<'a>>)> {
+        let mut clauses = Vec::new();
+        let mut index = start_index;
+        let pound_endif;
+        let next_index;
+        let trailing_call;
+        loop {
+            let branch_call = nodes[index];
+            let parts = self
+                .postfix_directive_call_parts(branch_call)
+                .context("postfix if config clause is missing directive call")?;
+            let (kind, _, _, _) = self
+                .directive_keyword_info(parts.directive)
+                .context("postfix if config clause is missing directive keyword")?;
+            if !matches!(
+                kind,
+                DirectiveKind::If | DirectiveKind::ElseIf | DirectiveKind::Else
+            ) {
+                bail!("unexpected directive in postfix if config clause");
+            }
+            clauses.push(self.postfix_if_config_clause(parts.directive, branch_call)?);
+
+            index += 1;
+            let Some(next) = nodes.get(index).copied() else {
+                bail!("postfix if config declaration is missing #endif");
+            };
+            if let Some(next_parts) = self.postfix_directive_call_parts(next) {
+                match self.directive_keyword_info(next_parts.directive) {
+                    Some((DirectiveKind::ElseIf | DirectiveKind::Else, _, _, _)) => continue,
+                    Some((DirectiveKind::EndIf, _, _, _)) => {
+                        pound_endif = next_parts.directive;
+                        next_index = index + 1;
+                        trailing_call = Some(next);
+                        break;
+                    }
+                    _ => bail!("unexpected directive call in postfix if config declaration"),
+                }
+            }
+
+            match self.directive_keyword_info(next) {
+                Some((DirectiveKind::EndIf, _, _, _)) => {
+                    pound_endif = next;
+                    next_index = index + 1;
+                    trailing_call = None;
+                    break;
+                }
+                _ => bail!("unexpected node while parsing postfix if config declaration"),
+            }
+        }
+
+        let clauses_range = self.covering_range_or_point(&clauses, nodes[start_index].end_byte());
+        let clause_list = self.syntax_node("IfConfigClauseListSyntax", clauses_range, clauses);
+        let (_, endif_start, endif_end, endif_kind) = self
+            .directive_keyword_info(pound_endif)
+            .context("postfix if config declaration is missing #endif")?;
+        Ok((
+            self.syntax_node(
+                "IfConfigDeclSyntax",
+                self.range_from_offsets(nodes[start_index].start_byte(), pound_endif.end_byte()),
+                vec![
+                    self.with_name(clause_list, "clauses"),
+                    self.with_name(
+                        self.token_with_range(
+                            endif_kind,
+                            self.range_from_offsets(endif_start, endif_end),
+                        ),
+                        "poundEndif",
+                    ),
+                ],
+            ),
+            next_index,
+            trailing_call,
+        ))
+    }
+
+    fn postfix_if_config_clause(
+        &self,
+        directive: Node<'a>,
+        branch_call: Node<'a>,
+    ) -> Result<Value> {
+        let (kind, keyword_start, keyword_end, token_kind) = self
+            .directive_keyword_info(directive)
+            .context("postfix if config clause is missing directive keyword")?;
+        let mut children = vec![self.with_name(
+            self.token_with_range(
+                token_kind,
+                self.range_from_offsets(keyword_start, keyword_end),
+            ),
+            "poundKeyword",
+        )];
+        if matches!(kind, DirectiveKind::If | DirectiveKind::ElseIf) {
+            if let Some(condition) = named_children(directive).next() {
+                children.push(self.with_name(self.expr(condition)?, "condition"));
+            }
+        }
+
+        let elements = self.postfix_directive_branch_call_expr(branch_call)?;
+        let clause_end = end_offset(&elements).max(directive.end_byte());
+        children.push(self.with_name(elements, "elements"));
+        Ok(self.syntax_node(
+            "IfConfigClauseSyntax",
+            self.range_from_offsets(directive.start_byte(), clause_end),
+            children,
+        ))
+    }
+
+    fn postfix_directive_kind(&self, node: Node<'a>) -> Option<DirectiveKind> {
+        let parts = self.postfix_directive_call_parts(node)?;
+        self.directive_keyword_info(parts.directive)
+            .map(|(kind, _, _, _)| kind)
+    }
+
+    fn postfix_directive_call_parts(
+        &self,
+        node: Node<'a>,
+    ) -> Option<PostfixDirectiveCallParts<'a>> {
+        if node.kind() != "call_expression" {
+            return None;
+        }
+        let navigation = named_children(node).find(|child| child.kind() != "call_suffix")?;
+        if navigation.kind() != "navigation_expression" {
+            return None;
+        }
+        let directive = self.field_child(navigation, "target")?;
+        if directive.kind() != "directive" {
+            return None;
+        }
+        let suffix_node = self.field_child(navigation, "suffix")?;
+        let period = self.immediate_child_kind(suffix_node, ".")?;
+        Some(PostfixDirectiveCallParts {
+            directive,
+            navigation,
+            period,
+        })
+    }
+
+    fn postfix_directive_branch_call_expr(&self, node: Node<'a>) -> Result<Value> {
+        let parts = self
+            .postfix_directive_call_parts(node)
+            .context("postfix branch is missing directive navigation")?;
+        let member_access =
+            self.directive_member_access_expr(parts.navigation, None, parts.period.start_byte())?;
+        self.function_call_expr_from_called_expression(
+            node,
+            member_access,
+            parts.period.start_byte(),
+        )
+    }
+
+    fn postfix_directive_trailing_call_expr(
+        &self,
+        node: Node<'a>,
+        base: Value,
+        range_start: usize,
+    ) -> Result<Value> {
+        let parts = self
+            .postfix_directive_call_parts(node)
+            .context("postfix trailing call is missing directive navigation")?;
+        let member_access =
+            self.directive_member_access_expr(parts.navigation, Some(base), range_start)?;
+        self.function_call_expr_from_called_expression(node, member_access, range_start)
+    }
+
+    fn directive_member_access_expr(
+        &self,
+        navigation: Node<'a>,
+        base: Option<Value>,
+        range_start: usize,
+    ) -> Result<Value> {
+        let suffix_node = self
+            .field_child(navigation, "suffix")
+            .context("directive member access is missing suffix")?;
+        let suffix = self
+            .field_child(suffix_node, "suffix")
+            .or_else(|| named_children(suffix_node).next())
+            .context("directive member access suffix is missing a name")?;
+        let period = self
+            .immediate_child_kind(suffix_node, ".")
+            .context("directive member access is missing '.'")?;
+
+        let mut children = Vec::new();
+        if let Some(base) = base {
+            children.push(self.with_name(base, "base"));
+        }
+        children.push(self.with_name(self.token_for_node(period, "period"), "period"));
+        children.push(self.with_name(self.decl_reference_expr(suffix), "declName"));
+
+        Ok(self.syntax_node(
+            "MemberAccessExprSyntax",
+            self.range_from_offsets(range_start, navigation.end_byte()),
+            children,
+        ))
+    }
+
+    fn function_call_expr_from_called_expression(
+        &self,
+        node: Node<'a>,
+        called_expression: Value,
+        range_start: usize,
+    ) -> Result<Value> {
+        let suffix = self
+            .immediate_named_child_kind(node, "call_suffix")
+            .context("directive call expression is missing call suffix")?;
+        let mut children = vec![self.with_name(called_expression, "calledExpression")];
+
+        if let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments") {
+            let left_paren = self
+                .immediate_child_kind(value_arguments, "(")
+                .context("directive call arguments are missing '('")?;
+            let right_paren = self
+                .immediate_child_kind(value_arguments, ")")
+                .context("directive call arguments are missing ')'")?;
+            children
+                .push(self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"));
+            children.push(self.with_name(
+                self.labeled_expr_list(value_arguments, left_paren, right_paren)?,
+                "arguments",
+            ));
+            children
+                .push(self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"));
+        } else {
+            children.push(self.with_name(
+                self.empty_collection("LabeledExprListSyntax", suffix.start_byte()),
+                "arguments",
+            ));
+        }
+        children.push(self.with_name(
+            self.empty_collection("MultipleTrailingClosureElementListSyntax", node.end_byte()),
+            "additionalTrailingClosures",
+        ));
+
+        Ok(self.syntax_node(
+            "FunctionCallExprSyntax",
+            self.range_from_offsets(range_start, node.end_byte()),
+            children,
+        ))
     }
 
     fn if_config_decl_from_code_block_nodes(
@@ -8792,6 +9101,74 @@ switch Whatever.Thing {
         assert_eq!(
             root_items[1]["children"][0]["nodeType"],
             "IfConfigDeclSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_postfix_if_config_expressions() {
+        let source = "foo\n#if CONFIG1\n.bar()\n#else\n.baz()\n#endif\n";
+        let value = parse_source(
+            "PostfixIfConfig.swift",
+            "/tmp/PostfixIfConfig.swift",
+            source,
+        )
+        .unwrap();
+        let postfix = find_first_node_type(&value, "PostfixIfConfigExprSyntax").unwrap();
+        assert_eq!(
+            source_text(source, child_by_name(postfix, "base").unwrap()),
+            "foo"
+        );
+
+        let clauses = child_by_name(child_by_name(postfix, "config").unwrap(), "clauses").unwrap()
+            ["children"]
+            .as_array()
+            .unwrap();
+        assert_eq!(clauses.len(), 2);
+        assert_eq!(
+            child_by_name(&clauses[0], "elements").unwrap()["nodeType"],
+            "FunctionCallExprSyntax"
+        );
+        assert_eq!(
+            source_text(
+                source,
+                find_node_types(&clauses[0], "FunctionCallExprSyntax")[0]
+            ),
+            ".bar()"
+        );
+        assert_eq!(
+            source_text(
+                source,
+                find_node_types(&clauses[1], "FunctionCallExprSyntax")[0]
+            ),
+            ".baz()"
+        );
+    }
+
+    #[test]
+    fn emits_postfix_if_config_expressions_with_trailing_calls() {
+        let source = "foo\n#if CONFIG1\n.bar()\n#else\n.baz()\n#endif\n.oneMore(x: 1)\n";
+        let value = parse_source(
+            "PostfixIfConfig.swift",
+            "/tmp/PostfixIfConfig.swift",
+            source,
+        )
+        .unwrap();
+        let root_items = child_by_name(&value, "statements").unwrap()["children"]
+            .as_array()
+            .unwrap();
+        assert_eq!(root_items.len(), 1);
+
+        let outer_call = child_by_name(&root_items[0], "item").unwrap();
+        assert_eq!(outer_call["nodeType"], "FunctionCallExprSyntax");
+        let member_access = child_by_name(outer_call, "calledExpression").unwrap();
+        assert_eq!(member_access["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(
+            source_text(source, child_by_name(member_access, "declName").unwrap()),
+            "oneMore"
+        );
+        assert_eq!(
+            child_by_name(member_access, "base").unwrap()["nodeType"],
+            "PostfixIfConfigExprSyntax"
         );
     }
 
