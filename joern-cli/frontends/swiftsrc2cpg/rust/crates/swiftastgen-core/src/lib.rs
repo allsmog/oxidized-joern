@@ -301,6 +301,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
         let trimmed = self.text(node).trim();
         (trimmed == "}" && named_children(node).all(is_trivia_node))
+            || (trimmed == "async" && named_children(node).all(is_trivia_node))
             || trimmed.starts_with(',')
             || self.is_standalone_attribute_error(node)
             || (!trimmed.is_empty() && trimmed.chars().all(|ch| ch == '!'))
@@ -2566,6 +2567,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn type_syntax(&self, node: Node<'a>) -> Result<Value> {
         match node.kind() {
+            "array_type" => self.array_type(node),
             "function_type" => self.function_type(node),
             "optional_type" => self.optional_type(node),
             "tuple_type" => self.tuple_type(node),
@@ -2578,6 +2580,34 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
             other => bail!("unsupported Swift type node '{other}'"),
         }
+    }
+
+    fn array_type(&self, node: Node<'a>) -> Result<Value> {
+        let left_square = self
+            .immediate_child_kind(node, "[")
+            .context("array type is missing '['")?;
+        let right_square = self
+            .immediate_child_kind(node, "]")
+            .context("array type is missing ']'")?;
+        let element = named_children(node)
+            .find(|child| {
+                child.start_byte() >= left_square.end_byte()
+                    && child.end_byte() <= right_square.start_byte()
+            })
+            .context("array type is missing element type")?;
+
+        Ok(self.syntax_node(
+            "ArrayTypeSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_square, "leftSquare"), "leftSquare"),
+                self.with_name(self.type_syntax(element)?, "element"),
+                self.with_name(
+                    self.token_for_node(right_square, "rightSquare"),
+                    "rightSquare",
+                ),
+            ],
+        ))
     }
 
     fn optional_type(&self, node: Node<'a>) -> Result<Value> {
@@ -4664,6 +4694,34 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             vec![
                 self.with_name(self.token_for_node(left_square, "leftSquare"), "leftSquare"),
                 self.with_name(elements, "elements"),
+                self.with_name(
+                    self.token_for_node(right_square, "rightSquare"),
+                    "rightSquare",
+                ),
+            ],
+        ))
+    }
+
+    fn empty_array_expr_from_type(&self, node: Node<'a>) -> Result<Value> {
+        let left_square = self
+            .immediate_child_kind(node, "[")
+            .context("array type expression is missing '['")?;
+        let right_square = self
+            .immediate_child_kind(node, "]")
+            .context("array type expression is missing ']'")?;
+        Ok(self.syntax_node(
+            "ArrayExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_square, "leftSquare"), "leftSquare"),
+                self.with_name(
+                    self.syntax_node(
+                        "ArrayElementListSyntax",
+                        self.point_range(left_square.end_byte()),
+                        Vec::new(),
+                    ),
+                    "elements",
+                ),
                 self.with_name(
                     self.token_for_node(right_square, "rightSquare"),
                     "rightSquare",
@@ -6876,6 +6934,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn constructed_type_base_expr(&self, node: Node<'a>) -> Result<Value> {
+        if node.kind() == "array_type" {
+            return self.empty_array_expr_from_type(node);
+        }
         let names = self.immediate_type_identifiers(node);
         let first = names
             .first()
@@ -6957,7 +7018,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .find(|child| {
                 matches!(
                     child.kind(),
-                    "function_type"
+                    "array_type"
+                        | "function_type"
                         | "optional_type"
                         | "tuple_type"
                         | "type_identifier"
@@ -9585,11 +9647,18 @@ typealias `switch` = Int
 typealias MyAlias = (_ a: Int, _ b: Double, _ c: Bool, _ d: String) -> Bool
 typealias A = @attr1 @attr2(hello) (Int) -> Void
 typealias AsyncFunc2 = () async throws -> ()
+typealias AsyncFuncArray = [() async throws -> ()]
 "#;
         let value =
             parse_source("FunctionTypes.swift", "/tmp/FunctionTypes.swift", source).unwrap();
         let function_types = find_node_types(&value, "FunctionTypeSyntax");
-        assert_eq!(function_types.len(), 3);
+        assert_eq!(function_types.len(), 4);
+        let array_types = find_node_types(&value, "ArrayTypeSyntax");
+        assert_eq!(array_types.len(), 1);
+        assert_eq!(
+            child_by_name(array_types[0], "element").unwrap()["nodeType"],
+            "FunctionTypeSyntax"
+        );
 
         assert_eq!(
             function_types[0]["children"][1]["children"]
@@ -9627,6 +9696,31 @@ typealias AsyncFunc2 = () async throws -> ()
             function_types[2]["children"][4]["children"][1]["nodeType"],
             "TupleTypeSyntax"
         );
+    }
+
+    #[test]
+    fn emits_array_function_type_constructor_calls() {
+        let source = "let _ = [() async -> ()]()\nlet _ = [() async throws -> ()]()\n";
+        let value = parse_source("AsyncArray.swift", "/tmp/AsyncArray.swift", source).unwrap();
+        let calls = find_node_types(&value, "FunctionCallExprSyntax");
+        assert_eq!(calls.len(), 2);
+        assert_eq!(source_text(source, calls[0]), "[() async -> ()]()");
+        assert_eq!(
+            child_by_name(calls[0], "calledExpression").unwrap()["nodeType"],
+            "ArrayExprSyntax"
+        );
+        assert_eq!(
+            child_by_name(
+                child_by_name(calls[0], "calledExpression").unwrap(),
+                "elements"
+            )
+            .unwrap()["children"]
+                .as_array()
+                .unwrap()
+                .len(),
+            0
+        );
+        assert_eq!(source_text(source, calls[1]), "[() async throws -> ()]()");
     }
 
     #[test]
@@ -9954,6 +10048,17 @@ extension Foo: SomeProtocol, AnotherProtocol {
         assert_eq!(function["nodeType"], "FunctionDeclSyntax");
         assert_eq!(function["children"][3]["tokenKind"], "identifier(\"foo\")");
         assert_eq!(function["children"][5]["nodeType"], "CodeBlockSyntax");
+    }
+
+    #[test]
+    fn skips_leading_async_recovery_error_before_function() {
+        let source = "async func asyncIncorrectly() { }\n";
+        let value = parse_source("Async.swift", "/tmp/Async.swift", source).unwrap();
+        let function = find_first_node_type(&value, "FunctionDeclSyntax").unwrap();
+        assert_eq!(
+            child_by_name(function, "name").unwrap()["tokenKind"],
+            "identifier(\"asyncIncorrectly\")"
+        );
     }
 
     #[test]
