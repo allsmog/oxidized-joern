@@ -36,9 +36,10 @@ subscript declarations with direct bodies and `get`/`set` accessors, computed
 property bodies and protocol property accessors, simple switch statements,
 wildcard patterns, simple extension declarations with inheritance clauses, dot
 member-access expressions including `self` and `super` bases, simple implicit
-member expressions, simple declaration attributes, and simple declaration
-modifiers. Unsupported syntax fails per-file and is reported on stdout so the
-existing skipped-file handling can continue.
+member expressions, simple operator declarations, parser-only precedence group
+declarations, simple declaration attributes, and simple declaration modifiers.
+Unsupported syntax fails per-file and is reported on stdout so the existing
+skipped-file handling can continue.
 
 Run the Rust checks with:
 
