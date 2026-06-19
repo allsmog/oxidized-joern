@@ -215,6 +215,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 || self.is_ignorable_diagnostic(child)
                 || self.is_ignorable_directive_call(child)
                 || self.is_ignorable_top_level_error(child)
+                || self.is_ignorable_statement_error(child)
                 || self.is_ignorable_top_level_function_type_fragment(child)
                 || self.is_regex_delimiter_error(child)
             {
@@ -349,6 +350,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             || trimmed.starts_with(',')
             || self.is_standalone_attribute_error(node)
             || (!trimmed.is_empty() && trimmed.chars().all(|ch| ch == '!'))
+    }
+
+    fn is_ignorable_statement_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR" && matches!(self.text(node).trim(), "" | ";")
     }
 
     fn skip_same_line_nodes(&self, nodes: &[Node<'a>], mut index: usize, row: usize) -> usize {
@@ -4053,7 +4058,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 index = next_index;
                 continue;
             }
-            if is_trivia_node(child) || is_ignorable_directive(child) {
+            if is_trivia_node(child)
+                || is_ignorable_directive(child)
+                || self.is_ignorable_statement_error(child)
+            {
                 index += 1;
                 continue;
             }
@@ -13876,6 +13884,41 @@ macro m5<T: P>(_: T)
                 "macro m5<T: P>(_: T)",
             ]
         );
+    }
+
+    #[test]
+    fn recovers_labeled_parameter_signature_shapes() {
+        let source = r#"
+func someFunction(argumentLabel parameterName: Int) { }
+func someFunction(argumentLabel parameterName: String) {}
+func someFunction(otherLabel parameterName: Int) -> String { "" }
+func someFunction(otherLabel parameterName: Int) -> Int { print("Hello") ; return 0 }
+func someFunction(_ parameterName: Int) -> Int { print("World"); return 0 }
+func someFunction(parameterLabel: Int) -> Int { print("!"); return 0 }
+
+let i: Int = someFunction(otherLabel: 1)
+someFunction(2)
+someFunction(parameterLabel: 2)
+"#;
+        let value = parse_source("Labels.swift", "/tmp/Labels.swift", source).unwrap();
+        let functions = find_node_types(&value, "FunctionDeclSyntax");
+        assert_eq!(functions.len(), 6);
+        let signatures = find_node_types(&value, "FunctionSignatureSyntax");
+        assert_eq!(signatures.len(), 6);
+        let parameter = find_node_types(&value, "FunctionParameterSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "argumentLabel parameterName: Int")
+            .unwrap();
+        assert_eq!(
+            source_text(source, child_by_name(parameter, "firstName").unwrap()),
+            "argumentLabel"
+        );
+        assert_eq!(
+            source_text(source, child_by_name(parameter, "secondName").unwrap()),
+            "parameterName"
+        );
+        assert_eq!(find_node_types(&value, "ReturnStmtSyntax").len(), 3);
+        assert_eq!(find_node_types(&value, "FunctionCallExprSyntax").len(), 6);
     }
 
     #[test]
