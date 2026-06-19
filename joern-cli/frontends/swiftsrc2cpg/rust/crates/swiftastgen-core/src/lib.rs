@@ -174,6 +174,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 child_index += 1;
                 continue;
             }
+            if let Some(typealias_decl) = self.recovered_suppressed_typealias_decl(child)? {
+                statement_items.push(self.code_block_item_for_value(typealias_decl, "item"));
+                child_index = self
+                    .skip_same_line_nodes(&root_children, child_index + 1, child.end_position().row)
+                    .max(child_index + 1);
+                continue;
+            }
             if is_trivia_node(child)
                 || is_ignorable_directive(child)
                 || self.is_ignorable_diagnostic(child)
@@ -309,9 +316,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let trimmed = self.text(node).trim();
         (trimmed == "}" && named_children(node).all(is_trivia_node))
             || (trimmed == "async" && named_children(node).all(is_trivia_node))
+            || trimmed == "?"
             || trimmed.starts_with(',')
             || self.is_standalone_attribute_error(node)
             || (!trimmed.is_empty() && trimmed.chars().all(|ch| ch == '!'))
+    }
+
+    fn skip_same_line_nodes(&self, nodes: &[Node<'a>], mut index: usize, row: usize) -> usize {
+        while nodes
+            .get(index)
+            .is_some_and(|node| node.start_position().row == row)
+        {
+            index += 1;
+        }
+        index
     }
 
     fn is_ignorable_top_level_function_type_fragment(&self, node: Node<'a>) -> bool {
@@ -1366,6 +1384,91 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.with_name(self.type_initializer_clause(equal, value)?, "initializer"),
             ],
         ))
+    }
+
+    fn recovered_suppressed_typealias_decl(&self, node: Node<'a>) -> Result<Option<Value>> {
+        if node.kind() != "ERROR" {
+            return Ok(None);
+        }
+
+        let (start, end) = self.trim_offsets(node.start_byte(), node.end_byte());
+        let text = &self.source[start..end];
+        let Some(after_keyword) = text.strip_prefix("typealias") else {
+            return Ok(None);
+        };
+        if !after_keyword
+            .as_bytes()
+            .first()
+            .is_some_and(|byte| byte.is_ascii_whitespace())
+        {
+            return Ok(None);
+        }
+
+        let keyword_end = start + "typealias".len();
+        let name = named_children(node)
+            .find(|child| {
+                child.start_byte() >= keyword_end
+                    && matches!(child.kind(), "simple_identifier" | "type_identifier")
+            })
+            .context("recovered typealias declaration is missing a name")?;
+        let equal_start = self.source[name.end_byte()..end]
+            .find('=')
+            .map(|offset| name.end_byte() + offset)
+            .context("recovered typealias declaration is missing '='")?;
+        let value = self
+            .first_descendant_type_after(node, equal_start + 1)
+            .context("recovered typealias declaration is missing an initializer")?;
+
+        Ok(Some(self.syntax_node(
+            "TypeAliasDeclSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(self.attribute_list(node)?, "attributes"),
+                self.with_name(self.modifier_list(node), "modifiers"),
+                self.with_name(
+                    self.token_with_range(
+                        "keyword(SwiftSyntax.Keyword.typealias)",
+                        self.range_from_offsets(start, keyword_end),
+                    ),
+                    "typealiasKeyword",
+                ),
+                self.with_name(
+                    self.token_for_node(
+                        name,
+                        &format!("identifier({})", quoted_text(self.text(name))),
+                    ),
+                    "name",
+                ),
+                self.with_name(
+                    self.type_initializer_clause_from_value(
+                        equal_start,
+                        equal_start + 1,
+                        self.type_syntax(value)?,
+                    ),
+                    "initializer",
+                ),
+            ],
+        )))
+    }
+
+    fn type_initializer_clause_from_value(
+        &self,
+        equal_start: usize,
+        equal_end: usize,
+        value: Value,
+    ) -> Value {
+        let value_end = end_offset(&value);
+        self.syntax_node(
+            "TypeInitializerClauseSyntax",
+            self.range_from_offsets(equal_start, value_end),
+            vec![
+                self.with_name(
+                    self.token_with_range("equal", self.range_from_offsets(equal_start, equal_end)),
+                    "equal",
+                ),
+                self.with_name(value, "value"),
+            ],
+        )
     }
 
     fn associated_type_inheritance_clause(&self, node: Node<'a>) -> Result<Option<Value>> {
@@ -2608,10 +2711,15 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         match node.kind() {
             "array_type" => self.array_type(node),
             "dictionary_type" => self.dictionary_type(node),
+            "existential_type" | "opaque_type" => self.some_or_any_type(node),
             "function_type" => self.function_type(node),
+            "metatype" => self.metatype_type(node),
             "optional_type" => self.optional_type(node),
+            "suppressed_constraint" => self.suppressed_type(node),
             "tuple_type" => self.tuple_type(node),
+            "type_pack_expansion" => self.pack_expansion_type(node),
             "type_identifier" | "user_type" => self.identifier_type(node),
+            "type_parameter_pack" => self.pack_element_type(node),
             "tuple_type_item" => {
                 let type_node = named_children(node)
                     .next()
@@ -2707,6 +2815,141 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "rightSquare",
                 ),
             ],
+        ))
+    }
+
+    fn pack_element_type(&self, node: Node<'a>) -> Result<Value> {
+        let pack = self
+            .first_type_child(node)
+            .context("pack element type is missing pack type")?;
+        Ok(self.syntax_node(
+            "PackElementTypeSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.keyword_token_before_child(node, pack, "each")?,
+                    "eachKeyword",
+                ),
+                self.with_name(self.type_syntax(pack)?, "pack"),
+            ],
+        ))
+    }
+
+    fn pack_expansion_type(&self, node: Node<'a>) -> Result<Value> {
+        let repetition_pattern = self
+            .first_type_child(node)
+            .context("pack expansion type is missing repetition pattern")?;
+        Ok(self.syntax_node(
+            "PackExpansionTypeSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.keyword_token_before_child(node, repetition_pattern, "repeat")?,
+                    "repeatKeyword",
+                ),
+                self.with_name(self.type_syntax(repetition_pattern)?, "repetitionPattern"),
+            ],
+        ))
+    }
+
+    fn some_or_any_type(&self, node: Node<'a>) -> Result<Value> {
+        let constraint = self
+            .first_type_child(node)
+            .context("some/any type is missing constraint")?;
+        let keyword = match node.kind() {
+            "opaque_type" => "some",
+            _ => "any",
+        };
+        Ok(self.syntax_node(
+            "SomeOrAnyTypeSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.keyword_token_before_child(node, constraint, keyword)?,
+                    "someOrAnySpecifier",
+                ),
+                self.with_name(self.type_syntax(constraint)?, "constraint"),
+            ],
+        ))
+    }
+
+    fn suppressed_type(&self, node: Node<'a>) -> Result<Value> {
+        let suppressed_type = self
+            .field_child(node, "suppressed")
+            .or_else(|| self.first_type_child(node))
+            .context("suppressed type is missing underlying type")?;
+        let tilde_start = self.source[node.start_byte()..suppressed_type.start_byte()]
+            .find('~')
+            .map(|offset| node.start_byte() + offset)
+            .context("suppressed type is missing '~'")?;
+        Ok(self.syntax_node(
+            "SuppressedTypeSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "prefixOperator(\"~\")",
+                        self.range_from_offsets(tilde_start, tilde_start + 1),
+                    ),
+                    "withoutTilde",
+                ),
+                self.with_name(self.type_syntax(suppressed_type)?, "type"),
+            ],
+        ))
+    }
+
+    fn metatype_type(&self, node: Node<'a>) -> Result<Value> {
+        let base_type = self
+            .first_type_child(node)
+            .context("metatype is missing base type")?;
+        let period_start = self.source[base_type.end_byte()..node.end_byte()]
+            .find('.')
+            .map(|offset| base_type.end_byte() + offset)
+            .context("metatype is missing '.'")?;
+        let (specifier_start, specifier_end) = self.trim_offsets(period_start + 1, node.end_byte());
+        if specifier_start >= specifier_end {
+            bail!("metatype is missing specifier");
+        }
+        let specifier = &self.source[specifier_start..specifier_end];
+        Ok(self.syntax_node(
+            "MetatypeTypeSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.type_syntax(base_type)?, "baseType"),
+                self.with_name(
+                    self.token_with_range(
+                        "period",
+                        self.range_from_offsets(period_start, period_start + 1),
+                    ),
+                    "period",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        &format!("keyword(SwiftSyntax.Keyword.{specifier})"),
+                        self.range_from_offsets(specifier_start, specifier_end),
+                    ),
+                    "metatypeSpecifier",
+                ),
+            ],
+        ))
+    }
+
+    fn first_type_child(&self, node: Node<'a>) -> Option<Node<'a>> {
+        named_children(node).find(|child| is_type_syntax_node_kind(child.kind()))
+    }
+
+    fn keyword_token_before_child(
+        &self,
+        node: Node<'a>,
+        child: Node<'a>,
+        keyword: &'static str,
+    ) -> Result<Value> {
+        let (_, start, end) = self
+            .keyword_between(node.start_byte(), child.start_byte(), &[keyword])
+            .with_context(|| format!("{} is missing '{keyword}'", node.kind()))?;
+        Ok(self.token_with_range(
+            &format!("keyword(SwiftSyntax.Keyword.{keyword})"),
+            self.range_from_offsets(start, end),
         ))
     }
 
@@ -4253,6 +4496,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "ternary_expression" => self.ternary_expr(node),
             "try_expression" => self.try_expr(node),
             "user_type" => self.constructed_type_expr(node),
+            "value_pack_expansion" => self.pack_expansion_expr(node),
+            "value_parameter_pack" => self.pack_element_expr(node),
             "ERROR" if self.is_recoverable_array_expr_error(node) => {
                 self.recovered_array_expr(node)
             }
@@ -4262,6 +4507,44 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
             other => bail!("unsupported Swift expression node '{other}'"),
         }
+    }
+
+    fn pack_element_expr(&self, node: Node<'a>) -> Result<Value> {
+        let pack = self
+            .first_expression_child(node)
+            .context("pack element expression is missing pack expression")?;
+        Ok(self.syntax_node(
+            "PackElementExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.keyword_token_before_child(node, pack, "each")?,
+                    "eachKeyword",
+                ),
+                self.with_name(self.expr(pack)?, "pack"),
+            ],
+        ))
+    }
+
+    fn pack_expansion_expr(&self, node: Node<'a>) -> Result<Value> {
+        let repetition_pattern = self
+            .first_expression_child(node)
+            .context("pack expansion expression is missing repetition pattern")?;
+        Ok(self.syntax_node(
+            "PackExpansionExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.keyword_token_before_child(node, repetition_pattern, "repeat")?,
+                    "repeatKeyword",
+                ),
+                self.with_name(self.expr(repetition_pattern)?, "repetitionPattern"),
+            ],
+        ))
+    }
+
+    fn first_expression_child(&self, node: Node<'a>) -> Option<Node<'a>> {
+        named_children(node).find(|child| is_expression_like_node(*child))
     }
 
     fn is_split_initializer_continuation(&self, node: Node<'a>) -> bool {
@@ -6591,6 +6874,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn binary_operator_expr(&self, node: Node<'a>) -> Result<Value> {
+        if let Some(member_access) = self.recovered_generic_metatype_member_access_expr(node) {
+            return Ok(member_access);
+        }
+
         let raw_lhs = self
             .field_child(node, "lhs")
             .or_else(|| self.field_child(node, "start"))
@@ -6625,6 +6912,53 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             return self.try_expr_wrapping_value(lhs, expression);
         }
         self.infix_operator_expr_from_parts(node, lhs, op, rhs, rhs.end_byte())
+    }
+
+    fn recovered_generic_metatype_member_access_expr(&self, node: Node<'a>) -> Option<Value> {
+        if node.kind() != "comparison_expression" {
+            return None;
+        }
+
+        let (start, end) = self.trim_offsets(node.start_byte(), node.end_byte());
+        let dot = self.last_top_level_dot(start, end)?;
+        let (member_start, member_end) = self.trim_offsets(dot + 1, end);
+        if member_start >= member_end || &self.source[member_start..member_end] != "self" {
+            return None;
+        }
+
+        let left_angle = self.source[start..dot]
+            .find('<')
+            .map(|offset| start + offset)?;
+        let right_angle = self.source[left_angle + 1..dot]
+            .rfind('>')
+            .map(|offset| left_angle + 1 + offset)?;
+        if !self.source[right_angle + 1..dot].trim().is_empty() {
+            return None;
+        }
+
+        let (base_start, base_end) = self.trim_offsets(start, left_angle);
+        if base_start >= base_end || !is_identifier_like_text(&self.source[base_start..base_end]) {
+            return None;
+        }
+
+        Some(self.syntax_node(
+            "MemberAccessExprSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.decl_reference_expr_from_offsets(base_start, base_end),
+                    "base",
+                ),
+                self.with_name(
+                    self.token_with_range("period", self.range_from_offsets(dot, dot + 1)),
+                    "period",
+                ),
+                self.with_name(
+                    self.decl_reference_expr_from_offsets(member_start, member_end),
+                    "declName",
+                ),
+            ],
+        ))
     }
 
     fn infix_operator_expr_from_parts(
@@ -8569,17 +8903,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             return Ok(argument);
         }
         named_children(argument)
-            .find(|child| {
-                matches!(
-                    child.kind(),
-                    "array_type"
-                        | "function_type"
-                        | "optional_type"
-                        | "tuple_type"
-                        | "type_identifier"
-                        | "user_type"
-                )
-            })
+            .find(|child| is_type_syntax_node_kind(child.kind()))
             .context("generic type parameter is missing a type")
     }
 
@@ -10379,6 +10703,21 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         None
     }
 
+    fn first_descendant_type_after(&self, node: Node<'a>, start: usize) -> Option<Node<'a>> {
+        if is_type_syntax_node_kind(node.kind()) && node.start_byte() >= start {
+            return Some(node);
+        }
+        for child in named_children(node) {
+            if child.end_byte() < start {
+                continue;
+            }
+            if let Some(found) = self.first_descendant_type_after(child, start) {
+                return Some(found);
+            }
+        }
+        None
+    }
+
     fn first_descendant_any_kind(&self, node: Node<'a>, kind: &str) -> Option<Node<'a>> {
         if node.kind() == kind {
             return Some(node);
@@ -10464,6 +10803,8 @@ fn is_expression_like_node(node: Node<'_>) -> bool {
             | "try_expression"
             | "tuple_expression"
             | "user_type"
+            | "value_pack_expansion"
+            | "value_parameter_pack"
     )
 }
 
@@ -11325,6 +11666,150 @@ typealias AsyncFuncArray = [() async throws -> ()]
             child_by_name(dictionary_types[0], "colon").unwrap()["tokenKind"],
             "colon"
         );
+    }
+
+    #[test]
+    fn emits_variadic_existential_suppressed_and_metatype_syntax() {
+        let source = r#"
+func f1<each T>(_ x: repeat each T) -> repeat each T {}
+func use<each T>(_ value: repeat each T) { _ = (repeat each value) }
+func opaque() -> some P {}
+let foo: any ~Copyable = 0
+typealias X = ~Copyable.Type
+typealias Y = ~A.B.C
+typealias Z1 = ~A?
+typealias Z2 = ~A<T>
+let _: G<repeat each T> = G()
+let _ = G< >.self
+"#;
+        let value = parse_source("Types.swift", "/tmp/Types.swift", source).unwrap();
+
+        let pack_expansion = find_node_types(&value, "PackExpansionTypeSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "repeat each T")
+            .unwrap();
+        assert_eq!(
+            child_by_name(pack_expansion, "repeatKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.repeat)"
+        );
+        assert_eq!(
+            child_by_name(pack_expansion, "repetitionPattern").unwrap()["nodeType"],
+            "PackElementTypeSyntax"
+        );
+
+        let pack_element = find_node_types(&value, "PackElementTypeSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "each T")
+            .unwrap();
+        assert_eq!(
+            child_by_name(pack_element, "eachKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.each)"
+        );
+        assert_eq!(
+            child_by_name(pack_element, "pack").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+
+        let pack_expansion_expr = find_node_types(&value, "PackExpansionExprSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "repeat each value")
+            .unwrap();
+        assert_eq!(
+            child_by_name(pack_expansion_expr, "repeatKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.repeat)"
+        );
+        assert_eq!(
+            child_by_name(pack_expansion_expr, "repetitionPattern").unwrap()["nodeType"],
+            "PackElementExprSyntax"
+        );
+
+        let pack_element_expr = find_node_types(&value, "PackElementExprSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "each value")
+            .unwrap();
+        assert_eq!(
+            child_by_name(pack_element_expr, "eachKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.each)"
+        );
+        assert_eq!(
+            child_by_name(pack_element_expr, "pack").unwrap()["nodeType"],
+            "DeclReferenceExprSyntax"
+        );
+
+        let empty_generic_member_access = find_node_types(&value, "MemberAccessExprSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "G< >.self")
+            .unwrap();
+        assert_eq!(
+            child_by_name(empty_generic_member_access, "base").unwrap()["children"][0]["tokenKind"],
+            "identifier(\"G\")"
+        );
+        assert_eq!(
+            child_by_name(empty_generic_member_access, "declName").unwrap()["children"][0]
+                ["tokenKind"],
+            "identifier(\"self\")"
+        );
+
+        let some_or_any_texts = find_node_types(&value, "SomeOrAnyTypeSyntax")
+            .into_iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert!(some_or_any_texts.contains(&"some P"));
+        assert!(some_or_any_texts.contains(&"any ~Copyable"));
+
+        let any_type = find_node_types(&value, "SomeOrAnyTypeSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "any ~Copyable")
+            .unwrap();
+        assert_eq!(
+            child_by_name(any_type, "someOrAnySpecifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.any)"
+        );
+        assert_eq!(
+            child_by_name(any_type, "constraint").unwrap()["nodeType"],
+            "SuppressedTypeSyntax"
+        );
+
+        let suppressed = find_node_types(&value, "SuppressedTypeSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "~Copyable")
+            .unwrap();
+        assert_eq!(
+            child_by_name(suppressed, "withoutTilde").unwrap()["tokenKind"],
+            "prefixOperator(\"~\")"
+        );
+        assert_eq!(
+            child_by_name(suppressed, "type").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+
+        let metatype = find_first_node_type(&value, "MetatypeTypeSyntax").unwrap();
+        assert_eq!(source_text(source, metatype), "~Copyable.Type");
+        assert_eq!(
+            child_by_name(metatype, "baseType").unwrap()["nodeType"],
+            "SuppressedTypeSyntax"
+        );
+        assert_eq!(
+            child_by_name(metatype, "period").unwrap()["tokenKind"],
+            "period"
+        );
+        assert_eq!(
+            child_by_name(metatype, "metatypeSpecifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.Type)"
+        );
+
+        let alias_names = find_node_types(&value, "TypeAliasDeclSyntax")
+            .into_iter()
+            .map(|node| {
+                child_by_name(node, "name").unwrap()["tokenKind"]
+                    .as_str()
+                    .unwrap()
+            })
+            .collect::<Vec<_>>();
+        assert!(alias_names.contains(&"identifier(\"X\")"));
+        assert!(alias_names.contains(&"identifier(\"Y\")"));
+        assert!(alias_names.contains(&"identifier(\"Z1\")"));
+        assert!(alias_names.contains(&"identifier(\"Z2\")"));
     }
 
     #[test]
