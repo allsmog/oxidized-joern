@@ -2361,7 +2361,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .field_child(node, "computed_value")
             .or_else(|| self.immediate_named_child_kind(node, "protocol_property_requirements"));
 
-        let mut binding_children = vec![self.with_name(self.pattern(pattern_node)?, "pattern")];
+        let mut binding_children =
+            vec![self.with_name(self.variable_decl_pattern(pattern_node)?, "pattern")];
         if let Some(type_node) = type_annotation_node {
             binding_children
                 .push(self.with_name(self.type_annotation(type_node)?, "typeAnnotation"));
@@ -2531,7 +2532,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .immediate_child_kind(declaration, "=")
             .context("recovered copy declaration is missing '='")?;
 
-        let mut binding_children = vec![self.with_name(self.pattern(pattern_node)?, "pattern")];
+        let mut binding_children =
+            vec![self.with_name(self.variable_decl_pattern(pattern_node)?, "pattern")];
         if let Some(type_node) = self.immediate_named_child_kind(declaration, "type_annotation") {
             binding_children
                 .push(self.with_name(self.type_annotation(type_node)?, "typeAnnotation"));
@@ -2616,7 +2618,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .context("recovered property declaration is missing a name")?;
         let type_annotation_node = self.immediate_named_child_kind(node, "type_annotation");
 
-        let mut binding_children = vec![self.with_name(self.pattern(pattern_node)?, "pattern")];
+        let mut binding_children =
+            vec![self.with_name(self.variable_decl_pattern(pattern_node)?, "pattern")];
         if let Some(type_node) = type_annotation_node {
             binding_children
                 .push(self.with_name(self.type_annotation(type_node)?, "typeAnnotation"));
@@ -2791,6 +2794,40 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             _ if is_expression_like_node(node) => self.expression_pattern(node),
             other => bail!("unsupported Swift pattern node '{other}'"),
         }
+    }
+
+    fn variable_decl_pattern(&self, node: Node<'a>) -> Result<Value> {
+        if let Some(binding) =
+            named_children(node).find(|child| child.kind() == "value_binding_pattern")
+        {
+            if let Some(left_paren) = children(node)
+                .find(|child| child.kind() == "(" && child.start_byte() >= binding.end_byte())
+            {
+                let right_paren = children(node)
+                    .filter(|child| {
+                        child.kind() == ")" && child.start_byte() >= left_paren.end_byte()
+                    })
+                    .last()
+                    .context("variable binding tuple pattern is missing ')'")?;
+                return self.tuple_pattern_from_parens(
+                    node,
+                    left_paren,
+                    right_paren,
+                    left_paren.start_byte(),
+                    right_paren.end_byte(),
+                );
+            }
+
+            if let Some(child) = named_children(node)
+                .filter(|child| child.start_byte() >= binding.end_byte())
+                .find(|child| {
+                    child.kind() != "value_binding_pattern" && child.kind() != "type_annotation"
+                })
+            {
+                return self.pattern(child);
+            }
+        }
+        self.pattern(node)
     }
 
     fn is_type_pattern(&self, node: Node<'a>) -> Result<Option<Value>> {
@@ -15392,6 +15429,15 @@ someFunction(parameterLabel: 2)
             "AssociatedTypeDeclSyntax"
         );
         assert_eq!(members[1]["children"][0]["nodeType"], "VariableDeclSyntax");
+        let protocol_property_binding =
+            find_first_node_type(&members[1]["children"][0], "PatternBindingSyntax").unwrap();
+        let protocol_property_pattern =
+            child_by_name(protocol_property_binding, "pattern").unwrap();
+        assert_eq!(
+            protocol_property_pattern["nodeType"],
+            "IdentifierPatternSyntax"
+        );
+        assert_eq!(source_text(source, protocol_property_pattern), "area");
         assert_eq!(members[2]["children"][0]["nodeType"], "FunctionDeclSyntax");
         assert_eq!(
             members[3]["children"][0]["nodeType"],
