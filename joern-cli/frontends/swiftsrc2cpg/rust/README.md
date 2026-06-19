@@ -25,12 +25,17 @@ import declarations, simple closure literals and trailing closures, simple
 subscript/index expressions, simple `if`/`else` control flow, simple `while`
 loops, simple identifier `for-in` loops, unlabeled `break`/`continue`, boolean
 literals, simple `class`/`struct` member blocks, class/struct inheritance
-clauses, simple initializer and deinitializer declarations, simple subscript
-declarations with direct bodies and `get`/`set` accessors, simple extension
-declarations with inheritance clauses, dot member-access expressions, simple
-implicit member expressions, simple declaration attributes, and simple
-declaration modifiers. Unsupported syntax fails per-file and is reported on
-stdout so the existing skipped-file handling can continue.
+clauses, simple enum declarations and enum case declarations, simple protocol
+declarations with protocol functions, protocol properties, and associated
+types, recovered initialized protocol members emitted for upstream test
+compatibility, simple initializer and deinitializer declarations, simple
+subscript declarations with direct bodies and `get`/`set` accessors, computed
+property bodies and protocol property accessors, simple switch statements,
+wildcard patterns, simple extension declarations with inheritance clauses, dot
+member-access expressions including `self` and `super` bases, simple implicit
+member expressions, simple declaration attributes, and simple declaration
+modifiers. Unsupported syntax fails per-file and is reported on stdout so the
+existing skipped-file handling can continue.
 
 Run the Rust checks with:
 
