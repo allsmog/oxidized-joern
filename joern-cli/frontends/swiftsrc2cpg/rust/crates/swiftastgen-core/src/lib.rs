@@ -57,6 +57,23 @@ struct SwiftSyntaxEmitter<'a> {
     line_starts: Vec<usize>,
 }
 
+#[derive(Clone, Copy)]
+struct RegexListItem {
+    literal_start: usize,
+    literal_end: usize,
+    comma: Option<(usize, usize)>,
+}
+
+struct StringLiteralSpec {
+    start: usize,
+    end: usize,
+    opening_pounds: Option<(usize, usize)>,
+    opening_quote: (usize, usize),
+    closing_quote: (usize, usize),
+    closing_pounds: Option<(usize, usize)>,
+    segment_specs: Vec<(usize, usize, String)>,
+}
+
 impl<'a> SwiftSyntaxEmitter<'a> {
     fn new(source: &'a str) -> Self {
         let mut line_starts = vec![0];
@@ -82,8 +99,40 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut child_index = 0;
         while child_index < root_children.len() {
             let child = root_children[child_index];
-            if is_trivia_node(child) || self.is_ignorable_top_level_error(child) {
+            if is_trivia_node(child)
+                || self.is_ignorable_top_level_error(child)
+                || self.is_regex_delimiter_error(child)
+            {
                 child_index += 1;
+                continue;
+            }
+            if let Some(next) = root_children.get(child_index + 1).copied() {
+                if self.is_recoverable_regex_assignment(child, next) {
+                    let assignment = self.recovered_regex_assignment(child, next)?;
+                    statement_items.push(self.code_block_item_for_value(assignment, "item"));
+                    child_index += 2;
+                    continue;
+                }
+            }
+            if self.is_recoverable_escaped_raw_assignment(child) {
+                let mut end_node = child;
+                let mut next_index = child_index + 1;
+                while let Some(candidate) = root_children.get(next_index).copied() {
+                    if candidate.start_byte() < end_node.end_byte()
+                        || (!self.is_escaped_raw_recovery_continuation(candidate)
+                            && !is_trivia_node(candidate))
+                    {
+                        break;
+                    }
+                    end_node = candidate;
+                    next_index += 1;
+                    if self.is_escaped_raw_closing_error(candidate) {
+                        break;
+                    }
+                }
+                let assignment = self.recovered_escaped_raw_assignment(child, end_node)?;
+                statement_items.push(self.code_block_item_for_value(assignment, "item"));
+                child_index = next_index.max(child_index + 1);
                 continue;
             }
             if self.is_recoverable_precedence_group_error(child) {
@@ -143,6 +192,51 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         node.kind() == "ERROR"
             && ((self.text(node).trim() == "}" && named_children(node).all(is_trivia_node))
                 || self.text(node).trim_start().starts_with(','))
+    }
+
+    fn is_regex_delimiter_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR" && self.text(node).chars().all(|ch| ch == '#')
+    }
+
+    fn is_recoverable_escaped_raw_assignment(&self, node: Node<'a>) -> bool {
+        matches!(node.kind(), "assignment" | "ERROR")
+            && (self.text(node).contains("\\\"\\\"") || self.text(node).contains("\\\"\""))
+            && self.starts_with_escaped_raw_delimiter(node)
+            && self.assignment_lhs(node).is_some()
+            && self.assignment_equal(node).is_some()
+    }
+
+    fn starts_with_escaped_raw_delimiter(&self, node: Node<'a>) -> bool {
+        let Some(equal) = self.assignment_equal(node) else {
+            return false;
+        };
+        let mut rhs_start = equal.end_byte();
+        while rhs_start < node.end_byte() && self.source.as_bytes()[rhs_start].is_ascii_whitespace()
+        {
+            rhs_start += 1;
+        }
+        let pounds = self.count_hashes(rhs_start, node.end_byte());
+        self.source[rhs_start + pounds..node.end_byte()].starts_with("\\\"")
+    }
+
+    fn is_escaped_raw_closing_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR"
+            && (self.text(node).contains("\\\"\\\"") || self.text(node).contains("\\\"\""))
+    }
+
+    fn is_escaped_raw_recovery_continuation(&self, node: Node<'a>) -> bool {
+        matches!(
+            node.kind(),
+            "ERROR" | "regex_literal" | "line_string_literal"
+        )
+    }
+
+    fn is_recoverable_regex_assignment(&self, assignment: Node<'a>, next: Node<'a>) -> bool {
+        assignment.kind() == "assignment"
+            && self.is_regex_delimiter_error(next)
+            && self
+                .field_child(assignment, "result")
+                .is_some_and(|rhs| rhs.kind() == "regex_literal")
     }
 
     fn is_ignorable_member_error(&self, node: Node<'a>) -> bool {
@@ -206,17 +300,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "equality_expression"
             | "integer_literal"
             | "lambda_literal"
+            | "line_string_literal"
+            | "multi_line_string_literal"
             | "multiplicative_expression"
             | "prefix_expression"
+            | "raw_string_literal"
             | "range_expression"
             | "real_literal"
+            | "regex_literal"
             | "simple_identifier"
             | "nil"
             | "self_expression"
             | "super_expression"
             | "tuple_expression"
-            | "navigation_expression"
-            | "line_string_literal" => self.expr(node),
+            | "navigation_expression" => self.expr(node),
             other => bail!("unsupported Swift syntax node '{other}'"),
         }
     }
@@ -2536,6 +2633,21 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 )],
             )),
             "line_string_literal" => self.string_literal(node),
+            "multi_line_string_literal" => self.string_literal(node),
+            "raw_string_literal" => self.raw_string_literal(node),
+            "macro_invocation" if self.is_regex_literal_text(self.text(node)) => {
+                self.regex_literal_expr_from_offsets(node.start_byte(), node.end_byte())
+            }
+            "regex_literal" => {
+                if let Some(parent) = node.parent() {
+                    if let Some(recovered) =
+                        self.recovered_escaped_raw_string_literal(parent, node)?
+                    {
+                        return Ok(recovered);
+                    }
+                }
+                self.regex_literal_expr(node)
+            }
             "tuple_expression" => self.tuple_expr(node),
             "ERROR" if is_identifier_like_text(self.text(node)) => {
                 Ok(self.decl_reference_expr(node))
@@ -2756,47 +2868,176 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .immediate_child_kind(node, "]")
             .context("array literal is missing ']'")?;
 
-        let mut elements = Vec::new();
-        for child in named_children(node).filter(|child| {
-            child.start_byte() >= left_square.end_byte()
-                && child.end_byte() <= right_square.start_byte()
-        }) {
-            let trailing_comma = self.trailing_delimiter(node, child, ",");
-            let element_end = trailing_comma.map_or(child.end_byte(), |comma| comma.end_byte());
-            let mut element_children = vec![self.with_name(self.expr(child)?, "expression")];
-            if let Some(comma) = trailing_comma {
-                element_children
-                    .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+        let elements = if let Some(regex_elements) =
+            self.regex_array_element_list(left_square, right_square)?
+        {
+            regex_elements
+        } else {
+            let mut elements = Vec::new();
+            for child in named_children(node).filter(|child| {
+                child.start_byte() >= left_square.end_byte()
+                    && child.end_byte() <= right_square.start_byte()
+            }) {
+                let trailing_comma = self.trailing_delimiter(node, child, ",");
+                let element_end = trailing_comma.map_or(child.end_byte(), |comma| comma.end_byte());
+                let mut element_children = vec![self.with_name(self.expr(child)?, "expression")];
+                if let Some(comma) = trailing_comma {
+                    element_children
+                        .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+                }
+                elements.push(self.with_name(
+                    self.syntax_node(
+                        "ArrayElementSyntax",
+                        self.range_from_offsets(child.start_byte(), element_end),
+                        element_children,
+                    ),
+                    "",
+                ));
             }
-            elements.push(self.with_name(
-                self.syntax_node(
-                    "ArrayElementSyntax",
-                    self.range_from_offsets(child.start_byte(), element_end),
-                    element_children,
-                ),
-                "",
-            ));
-        }
+            self.syntax_node(
+                "ArrayElementListSyntax",
+                self.range_from_offsets(left_square.end_byte(), right_square.start_byte()),
+                elements,
+            )
+        };
 
         Ok(self.syntax_node(
             "ArrayExprSyntax",
             self.range_for_node(node),
             vec![
                 self.with_name(self.token_for_node(left_square, "leftSquare"), "leftSquare"),
-                self.with_name(
-                    self.syntax_node(
-                        "ArrayElementListSyntax",
-                        self.range_from_offsets(left_square.end_byte(), right_square.start_byte()),
-                        elements,
-                    ),
-                    "elements",
-                ),
+                self.with_name(elements, "elements"),
                 self.with_name(
                     self.token_for_node(right_square, "rightSquare"),
                     "rightSquare",
                 ),
             ],
         ))
+    }
+
+    fn regex_array_element_list(
+        &self,
+        left_square: Node<'a>,
+        right_square: Node<'a>,
+    ) -> Result<Option<Value>> {
+        let Some(items) =
+            self.regex_literal_list_items(left_square.end_byte(), right_square.start_byte())
+        else {
+            return Ok(None);
+        };
+        if items.len() < 2 {
+            return Ok(None);
+        }
+        let elements = items
+            .iter()
+            .map(|item| {
+                let mut element_children = vec![self.with_name(
+                    self.regex_literal_expr_from_offsets(item.literal_start, item.literal_end)?,
+                    "expression",
+                )];
+                if let Some((comma_start, comma_end)) = item.comma {
+                    element_children.push(self.with_name(
+                        self.token_with_range(
+                            "comma",
+                            self.range_from_offsets(comma_start, comma_end),
+                        ),
+                        "trailingComma",
+                    ));
+                }
+                let element_end = item.comma.map_or(item.literal_end, |(_, end)| end);
+                Ok(self.with_name(
+                    self.syntax_node(
+                        "ArrayElementSyntax",
+                        self.range_from_offsets(item.literal_start, element_end),
+                        element_children,
+                    ),
+                    "",
+                ))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        Ok(Some(self.syntax_node(
+            "ArrayElementListSyntax",
+            self.range_from_offsets(left_square.end_byte(), right_square.start_byte()),
+            elements,
+        )))
+    }
+
+    fn regex_literal_list_items(&self, start: usize, end: usize) -> Option<Vec<RegexListItem>> {
+        let mut cursor = self.skip_ascii_whitespace(start, end);
+        let mut items = Vec::new();
+        while cursor < end {
+            let literal_start = cursor;
+            let opening_pounds = self.count_hashes(cursor, end);
+            cursor += opening_pounds;
+            if cursor >= end || self.source.as_bytes()[cursor] != b'/' {
+                return None;
+            }
+
+            let mut scan = cursor + 1;
+            let mut literal_end = None;
+            while scan < end {
+                if self.source.as_bytes()[scan] == b'/'
+                    && self.has_hashes(scan + 1, opening_pounds, end)
+                {
+                    let candidate_end = scan + 1 + opening_pounds;
+                    let after_literal = self.skip_ascii_whitespace(candidate_end, end);
+                    if after_literal == end || self.source.as_bytes()[after_literal] == b',' {
+                        literal_end = Some((candidate_end, after_literal));
+                        break;
+                    }
+                }
+                scan += 1;
+            }
+            let (literal_end, after_literal) = literal_end?;
+            let comma = if after_literal < end {
+                let comma_end = after_literal + 1;
+                cursor = self.skip_ascii_whitespace(comma_end, end);
+                Some((after_literal, comma_end))
+            } else {
+                cursor = after_literal;
+                None
+            };
+            items.push(RegexListItem {
+                literal_start,
+                literal_end,
+                comma,
+            });
+        }
+        (!items.is_empty()).then_some(items)
+    }
+
+    fn is_regex_literal_text(&self, text: &str) -> bool {
+        let opening_pounds = text.bytes().take_while(|byte| *byte == b'#').count();
+        text[opening_pounds..].starts_with('/')
+            && text.rfind('/').is_some_and(|closing_slash| {
+                closing_slash > opening_pounds
+                    && text[closing_slash + 1..].bytes().all(|byte| byte == b'#')
+                    && text[closing_slash + 1..].len() == opening_pounds
+            })
+    }
+
+    fn skip_ascii_whitespace(&self, mut offset: usize, end: usize) -> usize {
+        let bytes = self.source.as_bytes();
+        while offset < end && bytes[offset].is_ascii_whitespace() {
+            offset += 1;
+        }
+        offset
+    }
+
+    fn count_hashes(&self, mut offset: usize, end: usize) -> usize {
+        let bytes = self.source.as_bytes();
+        let start = offset;
+        while offset < end && bytes[offset] == b'#' {
+            offset += 1;
+        }
+        offset - start
+    }
+
+    fn has_hashes(&self, offset: usize, count: usize, end: usize) -> bool {
+        offset + count <= end
+            && self.source.as_bytes()[offset..offset + count]
+                .iter()
+                .all(|byte| *byte == b'#')
     }
 
     fn dictionary_expr(&self, node: Node<'a>) -> Result<Value> {
@@ -3771,6 +4012,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         left_paren: Node<'a>,
         right_paren: Node<'a>,
     ) -> Result<Value> {
+        if let Some(regex_arguments) = self.regex_labeled_expr_list(left_paren, right_paren)? {
+            return Ok(regex_arguments);
+        }
+
         let mut args = Vec::new();
         for arg in named_children(value_arguments).filter(|child| child.kind() == "value_argument")
         {
@@ -3782,6 +4027,53 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
             args,
         ))
+    }
+
+    fn regex_labeled_expr_list(
+        &self,
+        left_paren: Node<'a>,
+        right_paren: Node<'a>,
+    ) -> Result<Option<Value>> {
+        let Some(items) =
+            self.regex_literal_list_items(left_paren.end_byte(), right_paren.start_byte())
+        else {
+            return Ok(None);
+        };
+        if items.len() < 2 {
+            return Ok(None);
+        }
+        let args = items
+            .iter()
+            .map(|item| {
+                let mut children = vec![self.with_name(
+                    self.regex_literal_expr_from_offsets(item.literal_start, item.literal_end)?,
+                    "expression",
+                )];
+                if let Some((comma_start, comma_end)) = item.comma {
+                    children.push(self.with_name(
+                        self.token_with_range(
+                            "comma",
+                            self.range_from_offsets(comma_start, comma_end),
+                        ),
+                        "trailingComma",
+                    ));
+                }
+                let element_end = item.comma.map_or(item.literal_end, |(_, end)| end);
+                Ok(self.with_name(
+                    self.syntax_node(
+                        "LabeledExprSyntax",
+                        self.range_from_offsets(item.literal_start, element_end),
+                        children,
+                    ),
+                    "",
+                ))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        Ok(Some(self.syntax_node(
+            "LabeledExprListSyntax",
+            self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
+            args,
+        )))
     }
 
     fn labeled_expr(&self, node: Node<'a>, trailing_comma: Option<Node<'a>>) -> Result<Value> {
@@ -3840,6 +4132,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let rhs = self
             .field_child(node, "result")
             .context("assignment is missing rhs")?;
+        if let Some(recovered) = self.recovered_raw_string_assignment(node)? {
+            return Ok(recovered);
+        }
         let assignment_operator = self.syntax_node(
             "AssignmentExprSyntax",
             self.range_for_node(equal),
@@ -3854,6 +4149,157 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.with_name(self.expr(rhs)?, "rightOperand"),
             ],
         ))
+    }
+
+    fn recovered_raw_string_assignment(&self, assignment: Node<'a>) -> Result<Option<Value>> {
+        let lhs = self
+            .assignment_lhs(assignment)
+            .context("assignment is missing lhs")?;
+        let equal = self
+            .assignment_equal(assignment)
+            .context("assignment is missing '='")?;
+        let mut rhs_start = equal.end_byte();
+        while rhs_start < assignment.end_byte()
+            && self.source.as_bytes()[rhs_start].is_ascii_whitespace()
+        {
+            rhs_start += 1;
+        }
+        let mut rhs_end = assignment.end_byte();
+        while rhs_end > rhs_start && self.source.as_bytes()[rhs_end - 1].is_ascii_whitespace() {
+            rhs_end -= 1;
+        }
+        let text = &self.source[rhs_start..rhs_end];
+        if !text.starts_with("#\"") {
+            return Ok(None);
+        }
+        let Some((opening_pounds_len, quote_len, closing_quote_start)) = raw_string_bounds(text)
+        else {
+            return Ok(None);
+        };
+        let content_start = rhs_start + opening_pounds_len + quote_len;
+        let content_end = rhs_start + closing_quote_start;
+        let rhs = self.string_literal_node(StringLiteralSpec {
+            start: rhs_start,
+            end: rhs_end,
+            opening_pounds: Some((rhs_start, rhs_start + opening_pounds_len)),
+            opening_quote: (
+                rhs_start + opening_pounds_len,
+                rhs_start + opening_pounds_len + quote_len,
+            ),
+            closing_quote: (
+                rhs_start + closing_quote_start,
+                rhs_start + closing_quote_start + quote_len,
+            ),
+            closing_pounds: Some((rhs_end - opening_pounds_len, rhs_end)),
+            segment_specs: self.raw_string_segments(content_start, content_end),
+        });
+        let assignment_operator = self.syntax_node(
+            "AssignmentExprSyntax",
+            self.range_for_node(equal),
+            vec![self.with_name(self.token_for_node(equal, "equal"), "equal")],
+        );
+        Ok(Some(self.syntax_node(
+            "InfixOperatorExprSyntax",
+            self.range_for_node(assignment),
+            vec![
+                self.with_name(self.expr(lhs)?, "leftOperand"),
+                self.with_name(assignment_operator, "operator"),
+                self.with_name(rhs, "rightOperand"),
+            ],
+        )))
+    }
+
+    fn recovered_escaped_raw_assignment(
+        &self,
+        assignment: Node<'a>,
+        end_node: Node<'a>,
+    ) -> Result<Value> {
+        let lhs = self
+            .assignment_lhs(assignment)
+            .context("assignment is missing lhs")?;
+        let equal = self
+            .assignment_equal(assignment)
+            .context("assignment is missing '='")?;
+        let mut rhs_start = equal.end_byte();
+        while rhs_start < end_node.end_byte()
+            && self.source.as_bytes()[rhs_start].is_ascii_whitespace()
+        {
+            rhs_start += 1;
+        }
+        let rhs_text = &self.source[rhs_start..end_node.end_byte()];
+        let segments = self.escaped_raw_string_segments(rhs_start, rhs_text);
+        let quote_start = rhs_text
+            .find('"')
+            .map(|offset| rhs_start + offset)
+            .unwrap_or(rhs_start);
+        let quote_end = rhs_text
+            .rfind('"')
+            .map(|offset| rhs_start + offset + 1)
+            .unwrap_or(end_node.end_byte());
+        let rhs = self.string_literal_node(StringLiteralSpec {
+            start: rhs_start,
+            end: end_node.end_byte(),
+            opening_pounds: None,
+            opening_quote: (quote_start, quote_start.saturating_add(1)),
+            closing_quote: (quote_end.saturating_sub(1), quote_end),
+            closing_pounds: None,
+            segment_specs: segments,
+        });
+        let assignment_operator = self.syntax_node(
+            "AssignmentExprSyntax",
+            self.range_for_node(equal),
+            vec![self.with_name(self.token_for_node(equal, "equal"), "equal")],
+        );
+        Ok(self.syntax_node(
+            "InfixOperatorExprSyntax",
+            self.range_from_offsets(assignment.start_byte(), end_node.end_byte()),
+            vec![
+                self.with_name(self.expr(lhs)?, "leftOperand"),
+                self.with_name(assignment_operator, "operator"),
+                self.with_name(rhs, "rightOperand"),
+            ],
+        ))
+    }
+
+    fn recovered_regex_assignment(
+        &self,
+        assignment: Node<'a>,
+        end_node: Node<'a>,
+    ) -> Result<Value> {
+        let lhs = self
+            .assignment_lhs(assignment)
+            .context("assignment is missing lhs")?;
+        let equal = self
+            .assignment_equal(assignment)
+            .context("assignment is missing '='")?;
+        let rhs = self
+            .field_child(assignment, "result")
+            .context("assignment is missing rhs")?;
+        let assignment_operator = self.syntax_node(
+            "AssignmentExprSyntax",
+            self.range_for_node(equal),
+            vec![self.with_name(self.token_for_node(equal, "equal"), "equal")],
+        );
+        Ok(self.syntax_node(
+            "InfixOperatorExprSyntax",
+            self.range_from_offsets(assignment.start_byte(), end_node.end_byte()),
+            vec![
+                self.with_name(self.expr(lhs)?, "leftOperand"),
+                self.with_name(assignment_operator, "operator"),
+                self.with_name(self.expr(rhs)?, "rightOperand"),
+            ],
+        ))
+    }
+
+    fn assignment_lhs(&self, assignment: Node<'a>) -> Option<Node<'a>> {
+        self.field_child(assignment, "target").or_else(|| {
+            self.immediate_named_child_kind(assignment, "directly_assignable_expression")
+        })
+    }
+
+    fn assignment_equal(&self, assignment: Node<'a>) -> Option<Node<'a>> {
+        self.field_child(assignment, "operator")
+            .or_else(|| self.immediate_child_kind(assignment, "="))
     }
 
     fn return_stmt(&self, node: Node<'a>) -> Result<Value> {
@@ -3911,48 +4357,340 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn string_literal(&self, node: Node<'a>) -> Result<Value> {
-        let text_node = self.field_child(node, "text");
-        let open_quote = self.token_with_range(
-            "stringQuote",
-            self.range_from_offsets(node.start_byte(), node.start_byte() + 1),
-        );
-        let close_quote = self.token_with_range(
-            "stringQuote",
-            self.range_from_offsets(node.end_byte() - 1, node.end_byte()),
-        );
+        let quote_len = if self.text(node).starts_with("\"\"\"") {
+            3
+        } else {
+            1
+        };
+        let segments = self
+            .field_children(node, "text")
+            .into_iter()
+            .map(|text| {
+                (
+                    text.start_byte(),
+                    text.end_byte(),
+                    normalize_escaped_raw_segment(self.text(text)),
+                )
+            })
+            .collect();
+        Ok(self.string_literal_node(StringLiteralSpec {
+            start: node.start_byte(),
+            end: node.end_byte(),
+            opening_pounds: None,
+            opening_quote: (node.start_byte(), node.start_byte() + quote_len),
+            closing_quote: (node.end_byte() - quote_len, node.end_byte()),
+            closing_pounds: None,
+            segment_specs: segments,
+        }))
+    }
+
+    fn raw_string_literal(&self, node: Node<'a>) -> Result<Value> {
+        let text = self.text(node);
+        let (opening_pounds_len, quote_len, closing_quote_start) =
+            raw_string_bounds(text).context("raw string literal is missing delimiters")?;
+        let content_start = node.start_byte() + opening_pounds_len + quote_len;
+        let content_end = node.start_byte() + closing_quote_start;
+        let segments = self.raw_string_segments(content_start, content_end);
+
+        Ok(self.string_literal_node(StringLiteralSpec {
+            start: node.start_byte(),
+            end: node.end_byte(),
+            opening_pounds: (opening_pounds_len > 0)
+                .then_some((node.start_byte(), node.start_byte() + opening_pounds_len)),
+            opening_quote: (
+                node.start_byte() + opening_pounds_len,
+                node.start_byte() + opening_pounds_len + quote_len,
+            ),
+            closing_quote: (
+                node.start_byte() + closing_quote_start,
+                node.start_byte() + closing_quote_start + quote_len,
+            ),
+            closing_pounds: (opening_pounds_len > 0)
+                .then_some((node.end_byte() - opening_pounds_len, node.end_byte())),
+            segment_specs: segments,
+        }))
+    }
+
+    fn raw_string_segments(
+        &self,
+        content_start: usize,
+        content_end: usize,
+    ) -> Vec<(usize, usize, String)> {
+        let content = &self.source[content_start..content_end];
         let mut segments = Vec::new();
-        if let Some(text) = text_node {
-            segments.push(self.with_name(
-                self.syntax_node(
-                    "StringSegmentSyntax",
-                    self.range_for_node(text),
-                    vec![self.with_name(
-                        self.token_for_node(
-                            text,
-                            &format!("stringSegment({})", quoted_text(self.text(text))),
-                        ),
-                        "content",
-                    )],
+        let mut start = 0;
+        while let Some(relative) = content[start..].find("\\#n") {
+            let end = start + relative + "\\#n".len();
+            segments.push((
+                content_start + start,
+                content_start + end,
+                content[start..end].to_string(),
+            ));
+            start = end;
+        }
+        if start < content.len() {
+            segments.push((
+                content_start + start,
+                content_end,
+                content[start..].to_string(),
+            ));
+        }
+        segments
+    }
+
+    fn recovered_escaped_raw_string_literal(
+        &self,
+        assignment: Node<'a>,
+        rhs: Node<'a>,
+    ) -> Result<Option<Value>> {
+        if assignment.kind() != "assignment" || rhs.kind() != "regex_literal" {
+            return Ok(None);
+        }
+        let equal = self
+            .field_child(assignment, "operator")
+            .or_else(|| self.immediate_child_kind(assignment, "="))
+            .context("assignment is missing '='")?;
+        let mut start = equal.end_byte();
+        while start < rhs.end_byte() && self.source.as_bytes()[start].is_ascii_whitespace() {
+            start += 1;
+        }
+        let text = &self.source[start..rhs.end_byte()];
+        if !(text.contains("\\\"\\\"") || text.contains("\\\"\"")) {
+            return Ok(None);
+        }
+        let segments = self.escaped_raw_string_segments(start, text);
+        if segments.is_empty() {
+            return Ok(None);
+        }
+        let quote_start = self.source[start..rhs.end_byte()]
+            .find('"')
+            .map(|offset| start + offset)
+            .unwrap_or(start);
+        let quote_end = self.source[start..rhs.end_byte()]
+            .rfind('"')
+            .map(|offset| start + offset + 1)
+            .unwrap_or(rhs.end_byte());
+        Ok(Some(self.string_literal_node(StringLiteralSpec {
+            start,
+            end: rhs.end_byte(),
+            opening_pounds: None,
+            opening_quote: (quote_start, quote_start.saturating_add(1)),
+            closing_quote: (quote_end.saturating_sub(1), quote_end),
+            closing_pounds: None,
+            segment_specs: segments,
+        })))
+    }
+
+    fn escaped_raw_string_segments(
+        &self,
+        base_offset: usize,
+        text: &str,
+    ) -> Vec<(usize, usize, String)> {
+        let mut segments = Vec::new();
+        let mut index = 0;
+        while index < text.len() {
+            let rest = &text[index..];
+            if rest.starts_with("\\\"\"\"") {
+                let segment_start = index;
+                let after_quotes = index + "\\\"\"\"".len();
+                let line_end = text[after_quotes..]
+                    .find('\n')
+                    .map(|relative| after_quotes + relative)
+                    .unwrap_or(text.len());
+                let suffix = text[after_quotes..line_end].trim_end_matches('\r');
+                segments.push((
+                    base_offset + segment_start,
+                    base_offset + line_end,
+                    format!("\\\"\\\"{suffix}"),
+                ));
+                index = line_end.saturating_add(1);
+            } else if rest.starts_with("\\\"\\\"") {
+                let segment_start = index;
+                let mut after_quotes = index + "\\\"\\\"".len();
+                if text[after_quotes..].starts_with("\\\"") {
+                    after_quotes += "\\\"".len();
+                }
+                let line_end = text[after_quotes..]
+                    .find('\n')
+                    .map(|relative| after_quotes + relative)
+                    .unwrap_or(text.len());
+                let suffix = text[after_quotes..line_end].trim_end_matches('\r');
+                segments.push((
+                    base_offset + segment_start,
+                    base_offset + line_end,
+                    format!("\\\"\\\"{suffix}"),
+                ));
+                index = line_end.saturating_add(1);
+            } else if rest.starts_with("\"\"") {
+                let point = base_offset + index + 1;
+                segments.push((point, point, String::new()));
+                index += "\"\"".len();
+            } else {
+                let Some(ch) = rest.chars().next() else {
+                    break;
+                };
+                index += ch.len_utf8();
+            }
+        }
+        segments
+    }
+
+    fn regex_literal_expr(&self, node: Node<'a>) -> Result<Value> {
+        let (start, end) = self.expanded_regex_literal_range(node);
+        self.regex_literal_expr_from_offsets(start, end)
+    }
+
+    fn regex_literal_expr_from_offsets(&self, start: usize, end: usize) -> Result<Value> {
+        let text = &self.source[start..end];
+        let opening_slash = text
+            .find('/')
+            .context("regex literal is missing opening slash")?;
+        let closing_slash = text
+            .rfind('/')
+            .filter(|offset| *offset > opening_slash)
+            .context("regex literal is missing closing slash")?;
+        let mut children = Vec::new();
+        if opening_slash > 0 {
+            children.push(self.with_name(
+                self.token_with_range(
+                    "regexPoundDelimiter",
+                    self.range_from_offsets(start, start + opening_slash),
                 ),
-                "",
+                "openingPounds",
+            ));
+        }
+        children.push(self.with_name(
+            self.token_with_range(
+                "regexSlash",
+                self.range_from_offsets(start + opening_slash, start + opening_slash + 1),
+            ),
+            "openingSlash",
+        ));
+        children.push(self.with_name(
+            self.token_with_range(
+                &format!(
+                    "regexLiteralPattern({})",
+                    quoted_text(&text[opening_slash + 1..closing_slash])
+                ),
+                self.range_from_offsets(start + opening_slash + 1, start + closing_slash),
+            ),
+            "regex",
+        ));
+        children.push(self.with_name(
+            self.token_with_range(
+                "regexSlash",
+                self.range_from_offsets(start + closing_slash, start + closing_slash + 1),
+            ),
+            "closingSlash",
+        ));
+        if closing_slash + 1 < text.len() {
+            children.push(self.with_name(
+                self.token_with_range(
+                    "regexPoundDelimiter",
+                    self.range_from_offsets(start + closing_slash + 1, end),
+                ),
+                "closingPounds",
             ));
         }
         Ok(self.syntax_node(
-            "StringLiteralExprSyntax",
-            self.range_for_node(node),
-            vec![
-                self.with_name(open_quote, "openingQuote"),
+            "RegexLiteralExprSyntax",
+            self.range_from_offsets(start, end),
+            children,
+        ))
+    }
+
+    fn expanded_regex_literal_range(&self, node: Node<'a>) -> (usize, usize) {
+        let mut start = node.start_byte();
+        let mut end = node.end_byte();
+        while start > 0 && self.source.as_bytes()[start - 1] == b'#' {
+            start -= 1;
+        }
+        while end < self.source.len() && self.source.as_bytes()[end] == b'#' {
+            end += 1;
+        }
+        (start, end)
+    }
+
+    fn string_literal_node(&self, spec: StringLiteralSpec) -> Value {
+        let StringLiteralSpec {
+            start,
+            end,
+            opening_pounds,
+            opening_quote,
+            closing_quote,
+            closing_pounds,
+            segment_specs,
+        } = spec;
+        let quote_kind = if opening_quote.1.saturating_sub(opening_quote.0) == 3 {
+            "multilineStringQuote"
+        } else {
+            "stringQuote"
+        };
+        let mut children = Vec::new();
+        if let Some((pounds_start, pounds_end)) = opening_pounds {
+            children.push(self.with_name(
+                self.token_with_range(
+                    "rawStringPoundDelimiter",
+                    self.range_from_offsets(pounds_start, pounds_end),
+                ),
+                "openingPounds",
+            ));
+        }
+        children.push(self.with_name(
+            self.token_with_range(
+                quote_kind,
+                self.range_from_offsets(opening_quote.0, opening_quote.1),
+            ),
+            "openingQuote",
+        ));
+        let segments = segment_specs
+            .into_iter()
+            .map(|(segment_start, segment_end, text)| {
                 self.with_name(
                     self.syntax_node(
-                        "StringLiteralSegmentListSyntax",
-                        self.range_for_node(node),
-                        segments,
+                        "StringSegmentSyntax",
+                        self.range_from_offsets(segment_start, segment_end),
+                        vec![self.with_name(
+                            self.token_with_range(
+                                &format!("stringSegment({})", quoted_text(&text)),
+                                self.range_from_offsets(segment_start, segment_end),
+                            ),
+                            "content",
+                        )],
                     ),
-                    "segments",
+                    "",
+                )
+            })
+            .collect::<Vec<_>>();
+        children.push(self.with_name(
+            self.syntax_node(
+                "StringLiteralSegmentListSyntax",
+                self.covering_range_or_point(&segments, opening_quote.1),
+                segments,
+            ),
+            "segments",
+        ));
+        children.push(self.with_name(
+            self.token_with_range(
+                quote_kind,
+                self.range_from_offsets(closing_quote.0, closing_quote.1),
+            ),
+            "closingQuote",
+        ));
+        if let Some((pounds_start, pounds_end)) = closing_pounds {
+            children.push(self.with_name(
+                self.token_with_range(
+                    "rawStringPoundDelimiter",
+                    self.range_from_offsets(pounds_start, pounds_end),
                 ),
-                self.with_name(close_quote, "closingQuote"),
-            ],
-        ))
+                "closingPounds",
+            ));
+        }
+        self.syntax_node(
+            "StringLiteralExprSyntax",
+            self.range_from_offsets(start, end),
+            children,
+        )
     }
 
     fn text(&self, node: Node<'a>) -> &'a str {
@@ -4273,12 +5011,15 @@ fn is_expression_like_node(node: Node<'_>) -> bool {
             | "integer_literal"
             | "lambda_literal"
             | "line_string_literal"
+            | "multi_line_string_literal"
             | "multiplicative_expression"
             | "navigation_expression"
             | "nil"
             | "prefix_expression"
+            | "raw_string_literal"
             | "range_expression"
             | "real_literal"
+            | "regex_literal"
             | "self_expression"
             | "simple_identifier"
             | "super_expression"
@@ -4311,6 +5052,29 @@ fn quoted_text(text: &str) -> String {
     serde_json::to_string(text).expect("serializing a string cannot fail")
 }
 
+fn normalize_escaped_raw_segment(text: &str) -> String {
+    if let Some(suffix) = text.strip_prefix("\\\"\\\"\\\"") {
+        format!("\\\"\\\"{suffix}")
+    } else if let Some(suffix) = text.strip_prefix("\\\"\"\"") {
+        format!("\\\"\\\"{suffix}")
+    } else {
+        text.to_string()
+    }
+}
+
+fn raw_string_bounds(text: &str) -> Option<(usize, usize, usize)> {
+    let opening_pounds_len = text.bytes().take_while(|byte| *byte == b'#').count();
+    let quote_len = if text[opening_pounds_len..].starts_with("\"\"\"") {
+        3
+    } else if text[opening_pounds_len..].starts_with('"') {
+        1
+    } else {
+        return None;
+    };
+    let closing_quote_start = text.len().checked_sub(opening_pounds_len + quote_len)?;
+    Some((opening_pounds_len, quote_len, closing_quote_start))
+}
+
 fn end_offset(value: &Value) -> usize {
     value["range"]["endOffset"].as_u64().unwrap_or_default() as usize
 }
@@ -4318,6 +5082,89 @@ fn end_offset(value: &Value) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn emits_raw_string_literals() {
+        let source = r######"
+_ = #"This is a string"#
+_ = #####""Zeta""#####
+_ = #""Eta"\#n\#n\#n\#""#
+_ = #""Iota"\n\n\n\""#
+"######;
+        let value = parse_source("Raw.swift", "/tmp/Raw.swift", source).unwrap();
+        let segments = find_node_types(&value, "StringSegmentSyntax");
+        let segment_texts = segments
+            .iter()
+            .filter_map(|segment| segment["children"][0]["tokenKind"].as_str())
+            .collect::<Vec<_>>();
+        assert!(segment_texts.contains(&"stringSegment(\"This is a string\")"));
+        assert!(segment_texts.contains(&"stringSegment(\"\\\"Zeta\\\"\")"));
+        assert!(segment_texts.contains(&"stringSegment(\"\\\"Eta\\\"\\\\#n\")"));
+        assert!(segment_texts.contains(&"stringSegment(\"\\\\#\\\"\")"));
+        assert!(segment_texts.contains(&"stringSegment(\"\\\"Iota\\\"\\\\n\\\\n\\\\n\\\\\\\"\")"));
+    }
+
+    #[test]
+    fn emits_regex_literals_as_regex_syntax() {
+        let value = parse_source("Regex.swift", "/tmp/Regex.swift", "##/abc/#def/##").unwrap();
+        let regex_literals = find_node_types(&value, "RegexLiteralExprSyntax");
+        assert_eq!(regex_literals.len(), 1);
+        assert_eq!(regex_literals[0]["children"][1]["tokenKind"], "regexSlash");
+        assert_eq!(
+            regex_literals[0]["children"][2]["tokenKind"],
+            "regexLiteralPattern(\"abc/#def\")"
+        );
+    }
+
+    #[test]
+    fn recovers_regex_literals_in_argument_and_array_lists() {
+        let source = "foo(/abc/, #/abc/#, ##/abc/##)\nlet arr = [/abc/, #/abc/#, ##/abc/##]\n";
+        let value = parse_source("Regex.swift", "/tmp/Regex.swift", source).unwrap();
+        let regex_literals = find_node_types(&value, "RegexLiteralExprSyntax");
+        let patterns = regex_literals
+            .iter()
+            .filter_map(|literal| {
+                literal["children"].as_array()?.iter().find_map(|child| {
+                    child["tokenKind"]
+                        .as_str()
+                        .filter(|token| token.starts_with("regexLiteralPattern"))
+                })
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            patterns,
+            vec![
+                "regexLiteralPattern(\"abc\")",
+                "regexLiteralPattern(\"abc\")",
+                "regexLiteralPattern(\"abc\")",
+                "regexLiteralPattern(\"abc\")",
+                "regexLiteralPattern(\"abc\")",
+                "regexLiteralPattern(\"abc\")",
+            ]
+        );
+        assert_eq!(find_node_types(&value, "LabeledExprSyntax").len(), 3);
+        assert_eq!(find_node_types(&value, "ArrayElementSyntax").len(), 3);
+    }
+
+    #[test]
+    fn recovers_escaped_raw_multiline_literal_segments() {
+        let source = "_ = ##\\\"\\\"\\\"\n  \"\"Alpha\"\"\n  \\\"\\\"\\\"##\n";
+        let value = parse_source("Raw.swift", "/tmp/Raw.swift", source).unwrap();
+        let segments = find_node_types(&value, "StringSegmentSyntax");
+        let segment_texts = segments
+            .iter()
+            .filter_map(|segment| segment["children"][0]["tokenKind"].as_str())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            segment_texts,
+            vec![
+                "stringSegment(\"\\\\\\\"\\\\\\\"\")",
+                "stringSegment(\"\")",
+                "stringSegment(\"\")",
+                "stringSegment(\"\\\\\\\"\\\\\\\"##\")",
+            ]
+        );
+    }
 
     #[test]
     fn emits_defer_statements() {
