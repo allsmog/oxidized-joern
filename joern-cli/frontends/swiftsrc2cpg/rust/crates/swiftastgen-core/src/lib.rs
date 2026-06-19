@@ -175,6 +175,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let declaration_kind = self
             .field_child(node, "declaration_kind")
             .context("nominal type declaration is missing declaration kind")?;
+        if declaration_kind.kind() == "extension" {
+            return self.extension_decl(node, declaration_kind);
+        }
         let (node_type, keyword_name, keyword_kind) = match declaration_kind.kind() {
             "class" => (
                 "ClassDeclSyntax",
@@ -202,26 +205,103 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .field_child(node, "body")
             .context("nominal type declaration is missing a body")?;
 
-        Ok(self.syntax_node(
-            node_type,
-            self.range_for_node(node),
+        let mut children = vec![
+            self.with_name(self.attribute_list(node)?, "attributes"),
+            self.with_name(self.modifier_list(node), "modifiers"),
+            self.with_name(
+                self.token_for_node(declaration_kind, keyword_kind),
+                keyword_name,
+            ),
+            self.with_name(
+                self.token_for_node(
+                    name,
+                    &format!("identifier({})", quoted_text(self.text(name))),
+                ),
+                "name",
+            ),
+        ];
+        if let Some(inheritance_clause) = self.inheritance_clause(node)? {
+            children.push(self.with_name(inheritance_clause, "inheritanceClause"));
+        }
+        children.push(self.with_name(self.member_block(body)?, "memberBlock"));
+
+        Ok(self.syntax_node(node_type, self.range_for_node(node), children))
+    }
+
+    fn extension_decl(&self, node: Node<'a>, extension_keyword: Node<'a>) -> Result<Value> {
+        let extended_type = self
+            .field_child(node, "name")
+            .context("extension declaration is missing extended type")?;
+        let body = self
+            .field_child(node, "body")
+            .context("extension declaration is missing a body")?;
+
+        let mut children = vec![
+            self.with_name(self.attribute_list(node)?, "attributes"),
+            self.with_name(self.modifier_list(node), "modifiers"),
+            self.with_name(
+                self.token_for_node(extension_keyword, "keyword(SwiftSyntax.Keyword.extension)"),
+                "extensionKeyword",
+            ),
+            self.with_name(self.identifier_type(extended_type)?, "extendedType"),
+        ];
+        if let Some(inheritance_clause) = self.inheritance_clause(node)? {
+            children.push(self.with_name(inheritance_clause, "inheritanceClause"));
+        }
+        children.push(self.with_name(self.member_block(body)?, "memberBlock"));
+
+        Ok(self.syntax_node("ExtensionDeclSyntax", self.range_for_node(node), children))
+    }
+
+    fn inheritance_clause(&self, node: Node<'a>) -> Result<Option<Value>> {
+        let inherited_nodes: Vec<_> = named_children(node)
+            .filter(|child| child.kind() == "inheritance_specifier")
+            .collect();
+        let Some(first_inherited) = inherited_nodes.first().copied() else {
+            return Ok(None);
+        };
+        let colon = children(node)
+            .find(|child| child.kind() == ":" && child.end_byte() <= first_inherited.start_byte())
+            .context("inheritance clause is missing ':'")?;
+
+        let mut inherited_types = Vec::new();
+        for inherited_node in inherited_nodes {
+            let type_node = self
+                .field_child(inherited_node, "inherits_from")
+                .or_else(|| self.first_named_child_excluding(inherited_node, &["attribute"]))
+                .context("inheritance specifier is missing a type")?;
+            let trailing_comma = self.trailing_delimiter(node, inherited_node, ",");
+            let mut children = vec![self.with_name(self.identifier_type(type_node)?, "type")];
+            if let Some(comma) = trailing_comma {
+                children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+            }
+            let end = trailing_comma.map_or(inherited_node.end_byte(), |comma| comma.end_byte());
+            inherited_types.push(self.with_name(
+                self.syntax_node(
+                    "InheritedTypeSyntax",
+                    self.range_from_offsets(inherited_node.start_byte(), end),
+                    children,
+                ),
+                "",
+            ));
+        }
+
+        let inherited_type_list_range =
+            self.covering_range_or_point(&inherited_types, colon.end_byte());
+        let inherited_type_list = self.syntax_node(
+            "InheritedTypeListSyntax",
+            inherited_type_list_range,
+            inherited_types,
+        );
+        let clause_end = end_offset(&inherited_type_list);
+        Ok(Some(self.syntax_node(
+            "InheritanceClauseSyntax",
+            self.range_from_offsets(colon.start_byte(), clause_end),
             vec![
-                self.with_name(self.attribute_list(node)?, "attributes"),
-                self.with_name(self.modifier_list(node), "modifiers"),
-                self.with_name(
-                    self.token_for_node(declaration_kind, keyword_kind),
-                    keyword_name,
-                ),
-                self.with_name(
-                    self.token_for_node(
-                        name,
-                        &format!("identifier({})", quoted_text(self.text(name))),
-                    ),
-                    "name",
-                ),
-                self.with_name(self.member_block(body)?, "memberBlock"),
+                self.with_name(self.token_for_node(colon, "colon"), "colon"),
+                self.with_name(inherited_type_list, "inheritedTypes"),
             ],
-        ))
+        )))
     }
 
     fn member_block(&self, node: Node<'a>) -> Result<Value> {
@@ -718,28 +798,34 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     .or(Some(n))
             })
             .context("function parameter is missing a name")?;
+        let external_name = self.field_child(node, "external_name").and_then(|n| {
+            self.first_descendant_kind(n, "simple_identifier")
+                .or(Some(n))
+        });
         let colon = self
             .immediate_child_kind(node, ":")
             .context("function parameter is missing ':'")?;
         let type_node = self
             .field_child(node, "type")
             .context("function parameter is missing a type")?;
+        let mut children = vec![
+            self.with_name(self.attribute_list(node)?, "attributes"),
+            self.with_name(self.modifier_list(node), "modifiers"),
+            self.with_name(
+                self.identifier_or_wildcard_token(external_name.unwrap_or(name)),
+                "firstName",
+            ),
+        ];
+        if external_name.is_some() {
+            children.push(self.with_name(self.identifier_or_wildcard_token(name), "secondName"));
+        }
+        children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
+        children.push(self.with_name(self.identifier_type(type_node)?, "type"));
+
         Ok(self.syntax_node(
             "FunctionParameterSyntax",
             self.range_for_node(node),
-            vec![
-                self.with_name(self.attribute_list(node)?, "attributes"),
-                self.with_name(self.modifier_list(node), "modifiers"),
-                self.with_name(
-                    self.token_for_node(
-                        name,
-                        &format!("identifier({})", quoted_text(self.text(name))),
-                    ),
-                    "firstName",
-                ),
-                self.with_name(self.token_for_node(colon, "colon"), "colon"),
-                self.with_name(self.identifier_type(type_node)?, "type"),
-            ],
+            children,
         ))
     }
 
@@ -1889,6 +1975,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         self.token_with_range(token_kind, self.range_for_node(node))
     }
 
+    fn identifier_or_wildcard_token(&self, node: Node<'a>) -> Value {
+        if self.text(node) == "_" {
+            self.token_for_node(node, "wildcard")
+        } else {
+            self.token_for_node(
+                node,
+                &format!("identifier({})", quoted_text(self.text(node))),
+            )
+        }
+    }
+
     fn token_with_range(&self, token_kind: &str, range: Value) -> Value {
         json!({
             "children": [],
@@ -2209,6 +2306,25 @@ mod tests {
         assert_eq!(function["nodeType"], "FunctionDeclSyntax");
         assert_eq!(function["children"][3]["tokenKind"], "identifier(\"foo\")");
         assert_eq!(function["children"][5]["nodeType"], "CodeBlockSyntax");
+    }
+
+    #[test]
+    fn emits_function_parameter_external_labels() {
+        let source = "func handle(_ gesture: UIScreenEdgePanGestureRecognizer) {}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let parameter_list = find_first_node_type(&value, "FunctionParameterListSyntax").unwrap();
+        let parameters = &parameter_list["children"];
+        assert_eq!(parameters.as_array().unwrap().len(), 1);
+        let parameter = &parameters[0];
+        assert_eq!(parameter["children"][2]["name"], "firstName");
+        assert_eq!(parameter["children"][2]["tokenKind"], "wildcard");
+        assert_eq!(parameter["children"][3]["name"], "secondName");
+        assert_eq!(
+            parameter["children"][3]["tokenKind"],
+            "identifier(\"gesture\")"
+        );
+        assert_eq!(parameter["children"][4]["tokenKind"], "colon");
+        assert_eq!(parameter["children"][5]["nodeType"], "IdentifierTypeSyntax");
     }
 
     #[test]
@@ -2688,6 +2804,102 @@ mod tests {
         assert_eq!(members.as_array().unwrap().len(), 2);
         assert_eq!(members[0]["children"][0]["nodeType"], "VariableDeclSyntax");
         assert_eq!(members[1]["children"][0]["nodeType"], "FunctionDeclSyntax");
+    }
+
+    #[test]
+    fn emits_extension_declarations() {
+        let source = "public extension Foo: Bar, Baz {\n  var d: Int { return 1 }\n  func someFooFunc() {}\n}\n";
+        let value = parse_source("Ext.swift", "/tmp/Ext.swift", source).unwrap();
+        let extension_decl = find_first_node_type(&value, "ExtensionDeclSyntax").unwrap();
+        assert_eq!(
+            extension_decl["children"][0]["nodeType"],
+            "AttributeListSyntax"
+        );
+        assert_eq!(
+            extension_decl["children"][1]["nodeType"],
+            "DeclModifierListSyntax"
+        );
+        assert_eq!(
+            extension_decl["children"][1]["children"][0]["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.public)"
+        );
+        assert_eq!(
+            extension_decl["children"][2]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.extension)"
+        );
+        assert_eq!(extension_decl["children"][3]["name"], "extendedType");
+        assert_eq!(
+            extension_decl["children"][3]["children"][0]["tokenKind"],
+            "identifier(\"Foo\")"
+        );
+
+        let inheritance_clause = extension_decl["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "inheritanceClause")
+            .unwrap();
+        assert_eq!(inheritance_clause["nodeType"], "InheritanceClauseSyntax");
+        assert_eq!(inheritance_clause["children"][0]["tokenKind"], "colon");
+        let inherited_types = &inheritance_clause["children"][1]["children"];
+        assert_eq!(inherited_types.as_array().unwrap().len(), 2);
+        assert_eq!(
+            inherited_types[0]["children"][0]["children"][0]["tokenKind"],
+            "identifier(\"Bar\")"
+        );
+        assert_eq!(inherited_types[0]["children"][1]["tokenKind"], "comma");
+        assert_eq!(
+            inherited_types[1]["children"][0]["children"][0]["tokenKind"],
+            "identifier(\"Baz\")"
+        );
+
+        let member_block = extension_decl["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "memberBlock")
+            .unwrap();
+        let members = &member_block["children"][1]["children"];
+        assert_eq!(members.as_array().unwrap().len(), 2);
+        assert_eq!(members[0]["children"][0]["nodeType"], "VariableDeclSyntax");
+        assert_eq!(members[1]["children"][0]["nodeType"], "FunctionDeclSyntax");
+    }
+
+    #[test]
+    fn emits_nominal_type_inheritance_clauses() {
+        let source = "class Foo: Bar, Baz {}\nstruct Quux: Codable {}\n";
+        let value = parse_source("Types.swift", "/tmp/Types.swift", source).unwrap();
+
+        let class_decl = find_first_node_type(&value, "ClassDeclSyntax").unwrap();
+        let class_inheritance = class_decl["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "inheritanceClause")
+            .unwrap();
+        let class_inherited_types = &class_inheritance["children"][1]["children"];
+        assert_eq!(class_inherited_types.as_array().unwrap().len(), 2);
+        assert_eq!(
+            class_inherited_types[0]["children"][0]["children"][0]["tokenKind"],
+            "identifier(\"Bar\")"
+        );
+        assert_eq!(
+            class_inherited_types[1]["children"][0]["children"][0]["tokenKind"],
+            "identifier(\"Baz\")"
+        );
+
+        let struct_decl = find_first_node_type(&value, "StructDeclSyntax").unwrap();
+        let struct_inheritance = struct_decl["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|child| child["name"] == "inheritanceClause")
+            .unwrap();
+        assert_eq!(
+            struct_inheritance["children"][1]["children"][0]["children"][0]["children"][0]
+                ["tokenKind"],
+            "identifier(\"Codable\")"
+        );
     }
 
     #[test]
