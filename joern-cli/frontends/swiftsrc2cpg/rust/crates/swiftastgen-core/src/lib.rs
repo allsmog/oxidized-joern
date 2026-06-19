@@ -3681,12 +3681,25 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .find(|child| child.kind() != "type_annotation")
                 .or_else(|| named_children(item).last())
                 .context("tuple type item is missing a type")?;
+            let type_search_end =
+                trailing_comma.map_or(right_paren.start_byte(), |comma| comma.start_byte());
+            let (type_node, ellipsis_start) = self
+                .variadic_type_parts_until(type_node, type_search_end)
+                .map_or((type_node, None), |(base, ellipsis_start)| {
+                    (base, Some(ellipsis_start))
+                });
             item_children.push(self.with_name(self.type_syntax(type_node)?, "type"));
+            if let Some(ellipsis_start) = ellipsis_start {
+                item_children.push(self.with_name(self.ellipsis_token(ellipsis_start), "ellipsis"));
+            }
             if let Some(comma) = trailing_comma {
                 item_children
                     .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
             }
-            let element_end = trailing_comma.map_or(item.end_byte(), |comma| comma.end_byte());
+            let element_end = trailing_comma.map_or(
+                ellipsis_start.map_or(item.end_byte(), |start| start + 3),
+                |comma| comma.end_byte(),
+            );
             elements.push(self.with_name(
                 self.syntax_node(
                     "TupleTypeElementSyntax",
@@ -3921,10 +3934,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             ),
             "colon",
         ));
+        let (type_node, ellipsis_start) = self
+            .variadic_type_parts(node, type_node)
+            .map_or((type_node, None), |(base, ellipsis_start)| {
+                (base, Some(ellipsis_start))
+            });
         children.push(self.with_name(
             self.type_syntax_for_parameter_node(node, type_node)?,
             "type",
         ));
+        if let Some(ellipsis_start) = ellipsis_start {
+            children.push(self.with_name(self.ellipsis_token(ellipsis_start), "ellipsis"));
+        }
 
         Ok(self.syntax_node(
             "FunctionParameterSyntax",
@@ -3948,6 +3969,38 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
         }
         self.type_syntax(type_node)
+    }
+
+    fn variadic_type_parts(
+        &self,
+        owner: Node<'a>,
+        type_node: Node<'a>,
+    ) -> Option<(Node<'a>, usize)> {
+        self.variadic_type_parts_until(type_node, owner.end_byte())
+    }
+
+    fn variadic_type_parts_until(
+        &self,
+        type_node: Node<'a>,
+        search_end: usize,
+    ) -> Option<(Node<'a>, usize)> {
+        let base = if type_node.kind() == "metatype" {
+            self.first_type_child(type_node)?
+        } else {
+            type_node
+        };
+        let search_start = base.end_byte();
+        let ellipsis_start = self.source[search_start..search_end]
+            .find("...")
+            .map(|offset| search_start + offset)?;
+        Some((base, ellipsis_start))
+    }
+
+    fn ellipsis_token(&self, ellipsis_start: usize) -> Value {
+        self.token_with_range(
+            "ellipsis",
+            self.range_from_offsets(ellipsis_start, ellipsis_start + 3),
+        )
     }
 
     fn code_block(&self, node: Node<'a>) -> Result<Value> {
@@ -12670,6 +12723,47 @@ let _ = G< >.self
         assert!(alias_names.contains(&"identifier(\"Y\")"));
         assert!(alias_names.contains(&"identifier(\"Z1\")"));
         assert!(alias_names.contains(&"identifier(\"Z2\")"));
+    }
+
+    #[test]
+    fn recovers_variadic_function_type_elements() {
+        let source = r#"
+func direct(_ values: String...) {}
+func takesVariadicFnWithGenericRet<T>(_ fn: (S...) -> T) {}
+let _: (S...) -> Int = \.i
+let _: (S...) -> Int = \Array.i1
+let _: (S...) -> Int = \S.i2
+"#;
+        let value = parse_source("Types.swift", "/tmp/Types.swift", source).unwrap();
+        let direct_parameter = find_node_types(&value, "FunctionParameterSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "_ values: String...")
+            .unwrap();
+        assert_eq!(
+            child_by_name(direct_parameter, "type").unwrap()["children"][0]["tokenKind"],
+            "identifier(\"String\")"
+        );
+        assert_eq!(
+            child_by_name(direct_parameter, "ellipsis").unwrap()["tokenKind"],
+            "ellipsis"
+        );
+
+        let function_type = find_node_types(&value, "FunctionTypeSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "(S...) -> T")
+            .unwrap();
+        let tuple_element = find_node_types(function_type, "TupleTypeElementSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "S...")
+            .unwrap();
+        assert_eq!(
+            child_by_name(tuple_element, "type").unwrap()["children"][0]["tokenKind"],
+            "identifier(\"S\")"
+        );
+        assert_eq!(
+            child_by_name(tuple_element, "ellipsis").unwrap()["tokenKind"],
+            "ellipsis"
+        );
     }
 
     #[test]
