@@ -958,6 +958,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "simple_identifier" if self.text(node) == "return" => {
                 Ok(self.return_stmt_from_keyword(node))
             }
+            "simple_identifier" if self.text(node) == "fallthrough" => {
+                Ok(self.fallthrough_stmt(node))
+            }
             "simple_identifier" => self.expr(node),
             other => bail!("unsupported Swift syntax node '{other}'"),
         }
@@ -10716,7 +10719,24 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "keyword(SwiftSyntax.Keyword.continue)",
             ));
         }
+        if let Some(fallthrough_keyword) = self.first_descendant_any_kind(node, "fallthrough") {
+            return Ok(self.fallthrough_stmt(fallthrough_keyword));
+        }
         bail!("unsupported Swift control transfer statement");
+    }
+
+    fn fallthrough_stmt(&self, fallthrough_keyword: Node<'a>) -> Value {
+        self.syntax_node(
+            "FallThroughStmtSyntax",
+            self.range_for_node(fallthrough_keyword),
+            vec![self.with_name(
+                self.token_for_node(
+                    fallthrough_keyword,
+                    "keyword(SwiftSyntax.Keyword.fallthrough)",
+                ),
+                "fallthroughKeyword",
+            )],
+        )
     }
 
     fn yield_stmt(&self, node: Node<'a>) -> Result<Value> {
@@ -14255,6 +14275,18 @@ someFunction(parameterLabel: 2)
         assert_eq!(
             break_stmt["children"][0]["tokenKind"],
             "keyword(SwiftSyntax.Keyword.break)"
+        );
+    }
+
+    #[test]
+    fn emits_fallthrough_statement() {
+        let source = "func f(x: Int) {\n  switch x {\n  case 0:\n    fallthrough\n  default:\n    break\n  }\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let fallthrough_stmt = find_first_node_type(&value, "FallThroughStmtSyntax").unwrap();
+        assert_eq!(source_text(source, fallthrough_stmt), "fallthrough");
+        assert_eq!(
+            child_by_name(fallthrough_stmt, "fallthroughKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.fallthrough)"
         );
     }
 
