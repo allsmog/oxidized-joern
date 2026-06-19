@@ -1078,6 +1078,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "bin_literal"
             | "hex_literal"
             | "integer_literal"
+            | "infix_expression"
             | "oct_literal"
             | "octal_literal"
             | "key_path_expression"
@@ -4544,6 +4545,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 continue;
             }
             if let Some(next) = statement_nodes.get(index + 1).copied() {
+                if self.is_recoverable_unbraced_if_error(child, next) {
+                    let if_expr = self.recovered_unbraced_if_expr(child, next)?;
+                    items.push(self.code_block_item_for_value(if_expr, "item"));
+                    index += 2;
+                    continue;
+                }
                 if child.kind() == "statement_label" {
                     let labeled_stmt = self.labeled_stmt(child, next)?;
                     items.push(self.code_block_item_for_value(labeled_stmt, "item"));
@@ -9227,6 +9234,56 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             && self.first_descendant_kind(node, "lambda_literal").is_some()
     }
 
+    fn is_recoverable_unbraced_if_error(&self, node: Node<'a>, body: Node<'a>) -> bool {
+        node.kind() == "ERROR"
+            && body.kind() == "control_transfer_statement"
+            && body.start_position().row == node.start_position().row
+            && self.keyword_start_at_trimmed_start(node, "if").is_some()
+            && named_children(node).any(is_expression_like_node)
+    }
+
+    fn recovered_unbraced_if_expr(
+        &self,
+        node: Node<'a>,
+        body_statement: Node<'a>,
+    ) -> Result<Value> {
+        let if_start = self
+            .keyword_start_at_trimmed_start(node, "if")
+            .context("recovered unbraced if expression is missing 'if'")?;
+        let if_end = if_start + "if".len();
+        let condition_nodes = named_children(node)
+            .filter(|child| is_expression_like_node(*child))
+            .collect::<Vec<_>>();
+        if condition_nodes.is_empty() {
+            bail!("recovered unbraced if expression is missing condition");
+        }
+        let body_item = self.code_block_item(body_statement)?;
+        let body = self.synthetic_code_block_with_items(
+            vec![body_item],
+            body_statement.start_byte(),
+            body_statement.end_byte(),
+        );
+
+        Ok(self.syntax_node(
+            "IfExprSyntax",
+            self.range_from_offsets(if_start, body_statement.end_byte()),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "keyword(SwiftSyntax.Keyword.if)",
+                        self.range_from_offsets(if_start, if_end),
+                    ),
+                    "ifKeyword",
+                ),
+                self.with_name(
+                    self.condition_element_list_from_nodes(node, &condition_nodes, if_end)?,
+                    "conditions",
+                ),
+                self.with_name(body, "body"),
+            ],
+        ))
+    }
+
     fn recovered_missing_if_expr(&self, node: Node<'a>) -> Result<Value> {
         let node_start = node.start_byte();
         let node_end = node.end_byte();
@@ -9427,6 +9484,33 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                         "rightBrace",
                         self.range_from_offsets(right_brace_start, end),
                     ),
+                    "rightBrace",
+                ),
+            ],
+        )
+    }
+
+    fn synthetic_code_block_with_items(
+        &self,
+        items: Vec<Value>,
+        left_brace_offset: usize,
+        right_brace_offset: usize,
+    ) -> Value {
+        let statements_range = self.covering_range_or_point(&items, left_brace_offset);
+        self.syntax_node(
+            "CodeBlockSyntax",
+            self.range_from_offsets(left_brace_offset, right_brace_offset),
+            vec![
+                self.with_name(
+                    self.token_with_range("leftBrace", self.point_range(left_brace_offset)),
+                    "leftBrace",
+                ),
+                self.with_name(
+                    self.syntax_node("CodeBlockItemListSyntax", statements_range, items),
+                    "statements",
+                ),
+                self.with_name(
+                    self.token_with_range("rightBrace", self.point_range(right_brace_offset)),
                     "rightBrace",
                 ),
             ],
@@ -13157,6 +13241,7 @@ fn is_expression_like_node(node: Node<'_>) -> bool {
             | "bin_literal"
             | "hex_literal"
             | "integer_literal"
+            | "infix_expression"
             | "oct_literal"
             | "octal_literal"
             | "key_path_expression"
@@ -15594,6 +15679,53 @@ if case let .Naught(value) = n {}
             parse_source("MissingIf.swift", "/tmp/MissingIf.swift", missing_if_source).unwrap();
         let recovered_if = find_first_node_type(&missing_if_value, "IfExprSyntax").unwrap();
         assert_eq!(source_text(missing_if_source, recovered_if), "if _ = 42 {}");
+
+        let unbraced_if_source = "\
+func foo() {
+  var v1: Int = 0
+  var v2: Int = 0
+  if (v1 = 1, v2 == 2) || v2 <= 3 return v2
+  return 0
+}
+";
+        let unbraced_if_value = parse_source(
+            "UnbracedIf.swift",
+            "/tmp/UnbracedIf.swift",
+            unbraced_if_source,
+        )
+        .unwrap();
+        let recovered_if = find_first_node_type(&unbraced_if_value, "IfExprSyntax").unwrap();
+        assert_eq!(
+            source_text(unbraced_if_source, recovered_if),
+            "if (v1 = 1, v2 == 2) || v2 <= 3 return v2"
+        );
+        let condition_items = child_by_name(recovered_if, "conditions").unwrap()["children"]
+            .as_array()
+            .unwrap();
+        assert_eq!(condition_items.len(), 2);
+        assert_eq!(
+            source_text(
+                unbraced_if_source,
+                child_by_name(&condition_items[1], "condition").unwrap()
+            ),
+            "v2 <= 3"
+        );
+        let body_items = child_by_name(child_by_name(recovered_if, "body").unwrap(), "statements")
+            .unwrap()["children"]
+            .as_array()
+            .unwrap();
+        assert_eq!(body_items.len(), 1);
+        assert_eq!(
+            source_text(
+                unbraced_if_source,
+                child_by_name(&body_items[0], "item").unwrap()
+            ),
+            "return v2"
+        );
+        assert_eq!(
+            find_node_types(&unbraced_if_value, "ReturnStmtSyntax").len(),
+            2
+        );
 
         let return_source = "return actor\n{ return 0 }\nreturn\n";
         let return_value =
