@@ -236,6 +236,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     .max(child_index + 1);
                 continue;
             }
+            if let Some((nominal_decl, next_index)) =
+                self.recovered_split_nested_nominal_decl(&root_children, child_index)?
+            {
+                statement_items.push(self.code_block_item_for_value(nominal_decl, "item"));
+                child_index = next_index;
+                continue;
+            }
             if child.kind() == "ERROR" && self.is_recoverable_function_error(child) {
                 let function_decls = self.recovered_function_error_decls(child)?;
                 if function_decls.len() > 1 {
@@ -414,6 +421,73 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         named_children(node)
             .next()
             .is_some_and(|child| matches!(self.text(child), "willSet" | "didSet"))
+    }
+
+    fn recovered_split_nested_nominal_decl(
+        &self,
+        siblings: &[Node<'a>],
+        index: usize,
+    ) -> Result<Option<(Value, usize)>> {
+        let Some(node) = siblings.get(index).copied() else {
+            return Ok(None);
+        };
+        if !is_nominal_type_decl_kind(node.kind()) {
+            return Ok(None);
+        }
+        let Some(body) = self.field_child(node, "body") else {
+            return Ok(None);
+        };
+        let Some(left_brace) = self.immediate_child_kind(body, "{") else {
+            return Ok(None);
+        };
+        let Some(missing_right_brace) = self.immediate_child_kind(body, "}") else {
+            return Ok(None);
+        };
+        if missing_right_brace.start_byte() != missing_right_brace.end_byte() {
+            return Ok(None);
+        }
+
+        let Some(modifier_error) = siblings.get(index + 1).copied() else {
+            return Ok(None);
+        };
+        if !self.is_split_nominal_modifier_error(modifier_error) {
+            return Ok(None);
+        }
+        let Some(nested_decl) = siblings.get(index + 2).copied() else {
+            return Ok(None);
+        };
+        if !is_member_decl_kind(nested_decl.kind()) {
+            return Ok(None);
+        }
+
+        let right_brace_start = self
+            .matching_right_brace_offset(left_brace.start_byte(), self.source.len())
+            .filter(|offset| *offset >= nested_decl.end_byte())
+            .unwrap_or_else(|| nested_decl.end_byte());
+        let member_block =
+            self.recovered_member_block_with_items(body, &[nested_decl], right_brace_start)?;
+        let nominal_decl = self.nominal_type_decl_with_recovered_member_block(
+            node,
+            Some(member_block),
+            Some(right_brace_start + 1),
+        )?;
+
+        let mut next_index = index + 3;
+        while siblings.get(next_index).is_some_and(|candidate| {
+            candidate.end_byte() <= right_brace_start + 1
+                && (is_trivia_node(*candidate) || self.is_ignorable_top_level_error(*candidate))
+        }) {
+            next_index += 1;
+        }
+        Ok(Some((nominal_decl, next_index)))
+    }
+
+    fn is_split_nominal_modifier_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR"
+            && is_identifier_like_text(self.text(node))
+            && named_children(node).all(|child| {
+                matches!(child.kind(), "simple_identifier" | "identifier") || is_trivia_node(child)
+            })
     }
 
     fn is_ignorable_statement_error(&self, node: Node<'a>) -> bool {
@@ -1069,6 +1143,15 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn nominal_type_decl(&self, node: Node<'a>) -> Result<Value> {
+        self.nominal_type_decl_with_recovered_member_block(node, None, None)
+    }
+
+    fn nominal_type_decl_with_recovered_member_block(
+        &self,
+        node: Node<'a>,
+        recovered_member_block: Option<Value>,
+        recovered_end: Option<usize>,
+    ) -> Result<Value> {
         let declaration_kind = self
             .field_child(node, "declaration_kind")
             .context("nominal type declaration is missing declaration kind")?;
@@ -1130,9 +1213,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(inheritance_clause) = self.inheritance_clause(node)? {
             children.push(self.with_name(inheritance_clause, "inheritanceClause"));
         }
-        children.push(self.with_name(self.member_block(body)?, "memberBlock"));
+        let member_block = match recovered_member_block {
+            Some(member_block) => member_block,
+            None => self.member_block(body)?,
+        };
+        children.push(self.with_name(member_block, "memberBlock"));
 
-        Ok(self.syntax_node(node_type, self.range_for_node(node), children))
+        let range = recovered_end
+            .map(|end| self.range_from_offsets(node.start_byte(), end))
+            .unwrap_or_else(|| self.range_for_node(node));
+        Ok(self.syntax_node(node_type, range, children))
     }
 
     fn protocol_decl(&self, node: Node<'a>) -> Result<Value> {
@@ -2060,6 +2150,41 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn member_block_without_case_recovery(&self, node: Node<'a>) -> Result<Value> {
         self.member_block_with_case_recovery(node, false)
+    }
+
+    fn recovered_member_block_with_items(
+        &self,
+        node: Node<'a>,
+        members: &[Node<'a>],
+        right_brace_start: usize,
+    ) -> Result<Value> {
+        let left_brace = self
+            .immediate_child_kind(node, "{")
+            .context("recovered member block is missing '{'")?;
+        let items = members
+            .iter()
+            .copied()
+            .map(|member| self.member_block_item(member))
+            .collect::<Result<Vec<_>>>()?;
+        let members_range = self.covering_range_or_point(&items, left_brace.end_byte());
+        Ok(self.syntax_node(
+            "MemberBlockSyntax",
+            self.range_from_offsets(left_brace.start_byte(), right_brace_start + 1),
+            vec![
+                self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace"),
+                self.with_name(
+                    self.syntax_node("MemberBlockItemListSyntax", members_range, items),
+                    "members",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "rightBrace",
+                        self.range_from_offsets(right_brace_start, right_brace_start + 1),
+                    ),
+                    "rightBrace",
+                ),
+            ],
+        ))
     }
 
     fn member_block_with_case_recovery(
@@ -12710,6 +12835,37 @@ fn named_children(node: Node<'_>) -> impl Iterator<Item = Node<'_>> {
         .into_iter()
 }
 
+fn is_nominal_type_decl_kind(kind: &str) -> bool {
+    matches!(
+        kind,
+        "class_declaration" | "struct_declaration" | "enum_declaration" | "actor_declaration"
+    )
+}
+
+fn is_member_decl_kind(kind: &str) -> bool {
+    matches!(
+        kind,
+        "associatedtype_declaration"
+            | "property_declaration"
+            | "protocol_property_declaration"
+            | "function_declaration"
+            | "protocol_function_declaration"
+            | "typealias_declaration"
+            | "class_declaration"
+            | "struct_declaration"
+            | "enum_declaration"
+            | "actor_declaration"
+            | "protocol_declaration"
+            | "operator_declaration"
+            | "precedence_group_declaration"
+            | "enum_entry"
+            | "deinit_declaration"
+            | "init_declaration"
+            | "subscript_declaration"
+            | "macro_declaration"
+    )
+}
+
 fn is_trivia_node(node: Node<'_>) -> bool {
     matches!(
         node.kind(),
@@ -15214,6 +15370,57 @@ protocol P {
                 json!("keyword(SwiftSyntax.Keyword.get)"),
                 json!("keyword(SwiftSyntax.Keyword.set)")
             ]
+        );
+    }
+
+    #[test]
+    fn recovers_split_nested_class_declarations() {
+        let source = "\
+public class N1 {
+  pubic class N2 {
+    public class N3 {}
+  }
+}
+";
+        let value = parse_source("Nested.swift", "/tmp/Nested.swift", source).unwrap();
+        let classes = find_node_types(&value, "ClassDeclSyntax");
+        let class_names = classes
+            .iter()
+            .map(|node| child_by_name(node, "name").unwrap()["tokenKind"].clone())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            class_names,
+            vec![
+                json!("identifier(\"N1\")"),
+                json!("identifier(\"N2\")"),
+                json!("identifier(\"N3\")")
+            ]
+        );
+
+        let n1_members =
+            child_by_name(child_by_name(classes[0], "memberBlock").unwrap(), "members").unwrap()
+                ["children"]
+                .as_array()
+                .unwrap()
+                .clone();
+        let n1_member_decl = child_by_name(&n1_members[0], "decl").unwrap();
+        assert_eq!(
+            child_by_name(n1_member_decl, "name").unwrap()["tokenKind"],
+            json!("identifier(\"N2\")")
+        );
+
+        let n2_members = child_by_name(
+            child_by_name(n1_member_decl, "memberBlock").unwrap(),
+            "members",
+        )
+        .unwrap()["children"]
+            .as_array()
+            .unwrap()
+            .clone();
+        let n2_member_decl = child_by_name(&n2_members[0], "decl").unwrap();
+        assert_eq!(
+            child_by_name(n2_member_decl, "name").unwrap()["tokenKind"],
+            json!("identifier(\"N3\")")
         );
     }
 
