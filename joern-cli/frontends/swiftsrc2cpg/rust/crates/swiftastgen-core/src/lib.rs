@@ -6081,29 +6081,33 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let if_keyword = self
             .immediate_child_kind(node, "if")
             .context("if expression is missing 'if'")?;
-        let body_statements = named_children(node)
-            .find(|child| child.kind() == "statements")
-            .context("if expression is missing body statements")?;
-        let condition = self
-            .field_child(node, "condition")
-            .filter(|child| child.is_named())
-            .or_else(|| self.first_named_condition(node, if_keyword, body_statements))
-            .context("if expression is missing condition")?;
         let left_brace = self
-            .nearest_child_before(node, "{", body_statements.start_byte())
+            .nearest_child_after(node, "{", if_keyword.end_byte())
             .context("if expression body is missing '{'")?;
         let right_brace = self
-            .nearest_child_after(node, "}", body_statements.end_byte())
+            .nearest_child_after(node, "}", left_brace.end_byte())
             .context("if expression body is missing '}'")?;
+        let body_statements = named_children(node).find(|child| {
+            child.kind() == "statements"
+                && child.start_byte() >= left_brace.end_byte()
+                && child.end_byte() <= right_brace.start_byte()
+        });
+        let conditions = self.condition_nodes(node, if_keyword, left_brace.start_byte());
+        if conditions.is_empty() {
+            bail!("if expression is missing condition");
+        }
 
         let mut children = vec![
             self.with_name(
                 self.token_for_node(if_keyword, "keyword(SwiftSyntax.Keyword.if)"),
                 "ifKeyword",
             ),
-            self.with_name(self.condition_element_list(condition)?, "conditions"),
             self.with_name(
-                self.code_block_from_statements(Some(body_statements), left_brace, right_brace)?,
+                self.condition_element_list_from_nodes(node, &conditions, if_keyword.end_byte())?,
+                "conditions",
+            ),
+            self.with_name(
+                self.code_block_from_statements(body_statements, left_brace, right_brace)?,
                 "body",
             ),
         ];
@@ -6119,19 +6123,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 child.kind() == "if_statement" && child.start_byte() > else_keyword.end_byte()
             }) {
                 children.push(self.with_name(self.if_expr(nested_if)?, "elseBody"));
-            } else if let Some(else_statements) = named_children(node)
-                .filter(|child| child.kind() == "statements")
-                .find(|child| child.start_byte() > else_keyword.end_byte())
+            } else if let Some(else_left_brace) =
+                self.nearest_child_after(node, "{", else_keyword.end_byte())
             {
-                let else_left_brace = self
-                    .nearest_child_before(node, "{", else_statements.start_byte())
-                    .context("if else body is missing '{'")?;
                 let else_right_brace = self
-                    .nearest_child_after(node, "}", else_statements.end_byte())
+                    .nearest_child_after(node, "}", else_left_brace.end_byte())
                     .context("if else body is missing '}'")?;
+                let else_statements = named_children(node).find(|child| {
+                    child.kind() == "statements"
+                        && child.start_byte() >= else_left_brace.end_byte()
+                        && child.end_byte() <= else_right_brace.start_byte()
+                });
                 children.push(self.with_name(
                     self.code_block_from_statements(
-                        Some(else_statements),
+                        else_statements,
                         else_left_brace,
                         else_right_brace,
                     )?,
@@ -6147,20 +6152,21 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let while_keyword = self
             .immediate_child_kind(node, "while")
             .context("while statement is missing 'while'")?;
-        let body_statements = named_children(node)
-            .find(|child| child.kind() == "statements")
-            .context("while statement is missing body statements")?;
-        let condition = self
-            .field_child(node, "condition")
-            .filter(|child| child.is_named())
-            .or_else(|| self.first_named_condition(node, while_keyword, body_statements))
-            .context("while statement is missing condition")?;
         let left_brace = self
-            .nearest_child_before(node, "{", body_statements.start_byte())
+            .nearest_child_after(node, "{", while_keyword.end_byte())
             .context("while statement body is missing '{'")?;
         let right_brace = self
-            .nearest_child_after(node, "}", body_statements.end_byte())
+            .nearest_child_after(node, "}", left_brace.end_byte())
             .context("while statement body is missing '}'")?;
+        let body_statements = named_children(node).find(|child| {
+            child.kind() == "statements"
+                && child.start_byte() >= left_brace.end_byte()
+                && child.end_byte() <= right_brace.start_byte()
+        });
+        let conditions = self.condition_nodes(node, while_keyword, left_brace.start_byte());
+        if conditions.is_empty() {
+            bail!("while statement is missing condition");
+        }
 
         Ok(self.syntax_node(
             "WhileStmtSyntax",
@@ -6170,13 +6176,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     self.token_for_node(while_keyword, "keyword(SwiftSyntax.Keyword.while)"),
                     "whileKeyword",
                 ),
-                self.with_name(self.condition_element_list(condition)?, "conditions"),
                 self.with_name(
-                    self.code_block_from_statements(
-                        Some(body_statements),
-                        left_brace,
-                        right_brace,
+                    self.condition_element_list_from_nodes(
+                        node,
+                        &conditions,
+                        while_keyword.end_byte(),
                     )?,
+                    "conditions",
+                ),
+                self.with_name(
+                    self.code_block_from_statements(body_statements, left_brace, right_brace)?,
                     "body",
                 ),
             ],
@@ -6677,48 +6686,74 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
-    fn condition_element_list(&self, condition: Node<'a>) -> Result<Value> {
-        let element = self.condition_element(condition, None)?;
-        Ok(self.syntax_node(
-            "ConditionElementListSyntax",
-            self.range_for_node(condition),
-            vec![self.with_name(element, "")],
-        ))
-    }
-
     fn guard_condition_element_list(
         &self,
         node: Node<'a>,
         guard_keyword: Node<'a>,
         else_keyword: Node<'a>,
     ) -> Result<Value> {
-        let mut elements = Vec::new();
         let condition_nodes = named_children(node)
             .filter(|child| {
                 child.start_byte() > guard_keyword.end_byte()
                     && child.end_byte() <= else_keyword.start_byte()
             })
             .collect::<Vec<_>>();
+        if condition_nodes.is_empty() {
+            bail!("guard statement is missing conditions");
+        }
+        self.condition_element_list_from_nodes(node, &condition_nodes, guard_keyword.end_byte())
+    }
 
+    fn condition_nodes(
+        &self,
+        node: Node<'a>,
+        keyword: Node<'a>,
+        condition_end: usize,
+    ) -> Vec<Node<'a>> {
+        let conditions = self
+            .field_children(node, "condition")
+            .into_iter()
+            .filter(|child| child.is_named() && child.end_byte() <= condition_end)
+            .collect::<Vec<_>>();
+        if conditions.is_empty() {
+            self.first_named_condition(node, keyword, condition_end)
+                .into_iter()
+                .collect()
+        } else {
+            conditions
+        }
+    }
+
+    fn condition_element_list_from_nodes(
+        &self,
+        parent: Node<'a>,
+        condition_nodes: &[Node<'a>],
+        fallback_offset: usize,
+    ) -> Result<Value> {
+        let mut elements = Vec::new();
         let mut index = 0;
         while index < condition_nodes.len() {
             let condition = condition_nodes[index];
             if condition.kind() == "value_binding_pattern" {
                 let (element, next_index) =
-                    self.optional_binding_condition_element(node, &condition_nodes, index)?;
+                    self.optional_binding_condition_element(parent, condition_nodes, index)?;
                 elements.push(self.with_name(element, ""));
                 index = next_index;
                 continue;
             }
-            let trailing_comma = self.trailing_delimiter(node, condition, ",");
+            if let Some((element, next_index)) =
+                self.matching_pattern_condition_element(parent, condition_nodes, index)?
+            {
+                elements.push(self.with_name(element, ""));
+                index = next_index;
+                continue;
+            }
+            let trailing_comma = self.trailing_delimiter(parent, condition, ",");
             elements.push(self.with_name(self.condition_element(condition, trailing_comma)?, ""));
             index += 1;
         }
 
-        if elements.is_empty() {
-            bail!("guard statement is missing conditions");
-        }
-        let range = self.covering_range_or_point(&elements, guard_keyword.end_byte());
+        let range = self.covering_range_or_point(&elements, fallback_offset);
         Ok(self.syntax_node("ConditionElementListSyntax", range, elements))
     }
 
@@ -6727,7 +6762,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         condition: Node<'a>,
         trailing_comma: Option<Node<'a>>,
     ) -> Result<Value> {
-        let mut children = vec![self.with_name(self.expr(condition)?, "condition")];
+        let condition_value = if condition.kind() == "availability_condition" {
+            self.availability_condition(condition)?
+        } else {
+            self.expr(condition)?
+        };
+        let mut children = vec![self.with_name(condition_value, "condition")];
         if let Some(comma) = trailing_comma {
             children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
         }
@@ -6753,7 +6793,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .iter()
             .copied()
             .skip(index + 1)
-            .find(|child| matches!(child.kind(), "simple_identifier" | "identifier" | "pattern"))
+            .find(|child| {
+                matches!(
+                    child.kind(),
+                    "simple_identifier" | "identifier" | "pattern" | "wildcard_pattern"
+                )
+            })
             .context("optional binding condition is missing a pattern")?;
         let equal = children(parent)
             .find(|child| {
@@ -6818,6 +6863,278 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 element_children,
             ),
             value_index + 1,
+        ))
+    }
+
+    fn matching_pattern_condition_element(
+        &self,
+        parent: Node<'a>,
+        condition_nodes: &[Node<'a>],
+        index: usize,
+    ) -> Result<Option<(Value, usize)>> {
+        let assignment = condition_nodes[index];
+        if assignment.kind() != "assignment" {
+            return Ok(None);
+        }
+        let Some(case_keyword) = self.case_keyword_before(parent, assignment) else {
+            return Ok(None);
+        };
+        let target = self
+            .field_child(assignment, "target")
+            .context("matching pattern condition is missing pattern")?;
+        let pattern_node = if target.kind() == "directly_assignable_expression" {
+            named_children(target).next().unwrap_or(target)
+        } else {
+            target
+        };
+        let equal = self
+            .immediate_child_kind(assignment, "=")
+            .context("matching pattern condition is missing '='")?;
+        let value = self
+            .field_child(assignment, "result")
+            .context("matching pattern condition is missing initializer")?;
+        let initializer = self.initializer_clause(equal, value)?;
+        let pattern_condition_end = end_offset(&initializer);
+        let pattern_condition = self.syntax_node(
+            "MatchingPatternConditionSyntax",
+            self.range_from_offsets(case_keyword.start_byte(), pattern_condition_end),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "keyword(SwiftSyntax.Keyword.case)",
+                        self.range_from_offsets(case_keyword.start_byte(), case_keyword.end_byte()),
+                    ),
+                    "caseKeyword",
+                ),
+                self.with_name(self.pattern(pattern_node)?, "pattern"),
+                self.with_name(initializer, "initializer"),
+            ],
+        );
+
+        let trailing_comma = self.trailing_delimiter(parent, assignment, ",");
+        let mut element_children = vec![self.with_name(pattern_condition, "condition")];
+        if let Some(comma) = trailing_comma {
+            element_children
+                .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+        }
+        let element_end = trailing_comma.map_or(pattern_condition_end, |comma| comma.end_byte());
+        Ok(Some((
+            self.syntax_node(
+                "ConditionElementSyntax",
+                self.range_from_offsets(case_keyword.start_byte(), element_end),
+                element_children,
+            ),
+            index + 1,
+        )))
+    }
+
+    fn case_keyword_before(&self, parent: Node<'a>, condition: Node<'a>) -> Option<Node<'a>> {
+        children(parent)
+            .filter(|child| child.end_byte() <= condition.start_byte())
+            .filter(|child| self.text(*child).trim() == "case")
+            .last()
+    }
+
+    fn availability_condition(&self, node: Node<'a>) -> Result<Value> {
+        let (start, end) = self.trim_offsets(node.start_byte(), node.end_byte());
+        let text = &self.source[start..end];
+        let left_paren_start = start
+            + text
+                .find('(')
+                .context("availability condition is missing '('")?;
+        let right_paren_start = start
+            + text
+                .rfind(')')
+                .context("availability condition is missing ')'")?;
+        let keyword_text = &self.source[start..left_paren_start];
+        let keyword_kind = match keyword_text {
+            "#available" => "poundAvailable",
+            "#unavailable" => "poundUnavailable",
+            other => bail!("unsupported availability keyword '{other}'"),
+        };
+        Ok(self.syntax_node(
+            "AvailabilityConditionSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        keyword_kind,
+                        self.range_from_offsets(start, left_paren_start),
+                    ),
+                    "availabilityKeyword",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "leftParen",
+                        self.range_from_offsets(left_paren_start, left_paren_start + 1),
+                    ),
+                    "leftParen",
+                ),
+                self.with_name(
+                    self.availability_argument_list(left_paren_start + 1, right_paren_start)?,
+                    "availabilityArguments",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "rightParen",
+                        self.range_from_offsets(right_paren_start, right_paren_start + 1),
+                    ),
+                    "rightParen",
+                ),
+            ],
+        ))
+    }
+
+    fn availability_argument_list(&self, start: usize, end: usize) -> Result<Value> {
+        let mut elements = Vec::new();
+        let mut argument_start = start;
+        let mut cursor = start;
+        while cursor < end {
+            if self.source.as_bytes()[cursor] == b',' {
+                if let Some(argument) =
+                    self.availability_argument(argument_start, cursor, Some((cursor, cursor + 1)))?
+                {
+                    elements.push(self.with_name(argument, ""));
+                }
+                argument_start = cursor + 1;
+            }
+            cursor += 1;
+        }
+        if let Some(argument) = self.availability_argument(argument_start, end, None)? {
+            elements.push(self.with_name(argument, ""));
+        }
+        let range = self.covering_range_or_point(&elements, start);
+        Ok(self.syntax_node("AvailabilityArgumentListSyntax", range, elements))
+    }
+
+    fn availability_argument(
+        &self,
+        start: usize,
+        end: usize,
+        comma: Option<(usize, usize)>,
+    ) -> Result<Option<Value>> {
+        let (argument_start, argument_end) = self.trim_offsets(start, end);
+        if argument_start >= argument_end {
+            return Ok(None);
+        }
+        let mut children = vec![self.with_name(
+            self.availability_argument_value(argument_start, argument_end)?,
+            "argument",
+        )];
+        if let Some((comma_start, comma_end)) = comma {
+            children.push(self.with_name(
+                self.token_with_range("comma", self.range_from_offsets(comma_start, comma_end)),
+                "trailingComma",
+            ));
+        }
+        let node_end = comma.map_or(argument_end, |(_, comma_end)| comma_end);
+        Ok(Some(self.syntax_node(
+            "AvailabilityArgumentSyntax",
+            self.range_from_offsets(argument_start, node_end),
+            children,
+        )))
+    }
+
+    fn availability_argument_value(&self, start: usize, end: usize) -> Result<Value> {
+        let text = &self.source[start..end];
+        if text == "*" {
+            return Ok(
+                self.token_with_range("binaryOperator(\"*\")", self.range_from_offsets(start, end))
+            );
+        }
+        let Some(platform_end) = self.find_horizontal_whitespace(start, end) else {
+            return Ok(self.token_with_range(
+                &format!("identifier({})", quoted_text(text)),
+                self.range_from_offsets(start, end),
+            ));
+        };
+        let version_start = self.skip_horizontal_whitespace(platform_end, end);
+        let mut children = vec![self.with_name(
+            self.token_with_range(
+                &format!(
+                    "identifier({})",
+                    quoted_text(&self.source[start..platform_end])
+                ),
+                self.range_from_offsets(start, platform_end),
+            ),
+            "platform",
+        )];
+        if version_start < end {
+            children.push(self.with_name(self.version_tuple(version_start, end)?, "version"));
+        }
+        Ok(self.syntax_node(
+            "PlatformVersionSyntax",
+            self.range_from_offsets(start, end),
+            children,
+        ))
+    }
+
+    fn version_tuple(&self, start: usize, end: usize) -> Result<Value> {
+        let text = &self.source[start..end];
+        let major_len = text.find('.').unwrap_or(text.len());
+        let major_end = start + major_len;
+        let mut components = Vec::new();
+        let mut cursor = major_end;
+        while cursor < end {
+            if self.source.as_bytes()[cursor] != b'.' {
+                break;
+            }
+            let number_start = cursor + 1;
+            let mut number_end = number_start;
+            while number_end < end && self.source.as_bytes()[number_end].is_ascii_digit() {
+                number_end += 1;
+            }
+            components.push(self.with_name(
+                self.syntax_node(
+                    "VersionComponentSyntax",
+                    self.range_from_offsets(cursor, number_end),
+                    vec![
+                        self.with_name(
+                            self.token_with_range(
+                                "period",
+                                self.range_from_offsets(cursor, cursor + 1),
+                            ),
+                            "period",
+                        ),
+                        self.with_name(
+                            self.token_with_range(
+                                &format!(
+                                    "integerLiteral({})",
+                                    quoted_text(&self.source[number_start..number_end])
+                                ),
+                                self.range_from_offsets(number_start, number_end),
+                            ),
+                            "number",
+                        ),
+                    ],
+                ),
+                "",
+            ));
+            cursor = number_end;
+        }
+        Ok(self.syntax_node(
+            "VersionTupleSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        &format!(
+                            "integerLiteral({})",
+                            quoted_text(&self.source[start..major_end])
+                        ),
+                        self.range_from_offsets(start, major_end),
+                    ),
+                    "major",
+                ),
+                self.with_name(
+                    self.syntax_node(
+                        "VersionComponentListSyntax",
+                        self.covering_range_or_point(&components, major_end),
+                        components,
+                    ),
+                    "components",
+                ),
+            ],
         ))
     }
 
@@ -8570,6 +8887,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         start
     }
 
+    fn find_horizontal_whitespace(&self, start: usize, end: usize) -> Option<usize> {
+        (start..end).find(|offset| matches!(self.source.as_bytes()[*offset], b' ' | b'\t'))
+    }
+
     fn covering_range_or_point(&self, values: &[Value], fallback_offset: usize) -> Value {
         let mut start = None::<usize>;
         let mut end = None::<usize>;
@@ -8740,11 +9061,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         &self,
         node: Node<'a>,
         keyword: Node<'a>,
-        body_statements: Node<'a>,
+        condition_end: usize,
     ) -> Option<Node<'a>> {
         named_children(node).find(|child| {
             child.start_byte() > keyword.end_byte()
-                && child.end_byte() <= body_statements.start_byte()
+                && child.end_byte() <= condition_end
                 && child.kind() != "else"
                 && child.kind() != "statements"
         })
@@ -10553,6 +10874,68 @@ _ = { (x y: MyType) in }
             "keyword(SwiftSyntax.Keyword.else)"
         );
         assert_eq!(if_expr["children"][4]["nodeType"], "CodeBlockSyntax");
+    }
+
+    #[test]
+    fn emits_availability_conditions() {
+        let source = r#"
+if #available(OSX 10.51, *), #available(OSX 10.52, *) {}
+if let _ = Optional(5), #unavailable(OSX 10.52, *) {}
+if case 42 = 42, #available(iOS 8.0, *) {}
+if #available(*) {}
+"#;
+        let value = parse_source("Availability.swift", "/tmp/Availability.swift", source).unwrap();
+        let availability = find_node_types(&value, "AvailabilityConditionSyntax");
+        assert_eq!(availability.len(), 5);
+        assert_eq!(
+            child_by_name(availability[0], "availabilityKeyword").unwrap()["tokenKind"],
+            "poundAvailable"
+        );
+        assert_eq!(
+            source_text(source, availability[0]),
+            "#available(OSX 10.51, *)"
+        );
+        assert_eq!(
+            child_by_name(availability[2], "availabilityKeyword").unwrap()["tokenKind"],
+            "poundUnavailable"
+        );
+
+        let first_arguments = child_by_name(availability[0], "availabilityArguments").unwrap()
+            ["children"]
+            .as_array()
+            .unwrap();
+        assert_eq!(first_arguments.len(), 2);
+        assert_eq!(source_text(source, &first_arguments[0]), "OSX 10.51,");
+        assert_eq!(
+            child_by_name(&first_arguments[0], "argument").unwrap()["nodeType"],
+            "PlatformVersionSyntax"
+        );
+        assert_eq!(
+            child_by_name(&first_arguments[1], "argument").unwrap()["tokenKind"],
+            "binaryOperator(\"*\")"
+        );
+
+        let condition_lists = find_node_types(&value, "ConditionElementListSyntax");
+        let condition_counts = condition_lists
+            .iter()
+            .map(|list| list["children"].as_array().unwrap().len())
+            .collect::<Vec<_>>();
+        assert_eq!(condition_counts, vec![2, 2, 2, 1]);
+
+        let optional_binding =
+            find_first_node_type(&value, "OptionalBindingConditionSyntax").unwrap();
+        assert_eq!(
+            child_by_name(optional_binding, "pattern").unwrap()["nodeType"],
+            "WildcardPatternSyntax"
+        );
+
+        let matching_pattern =
+            find_first_node_type(&value, "MatchingPatternConditionSyntax").unwrap();
+        assert_eq!(source_text(source, matching_pattern), "case 42 = 42");
+        assert_eq!(
+            child_by_name(matching_pattern, "pattern").unwrap()["nodeType"],
+            "ExpressionPatternSyntax"
+        );
     }
 
     #[test]
