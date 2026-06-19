@@ -543,6 +543,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "call_expression" if self.is_return_do_expr_call(node) => {
                 self.recovered_return_do_stmt(node)
             }
+            "call_expression" if self.is_recoverable_return_call(node) => {
+                self.recovered_return_call_stmt(node)
+            }
             "call_expression" if self.is_do_expr_call(node) => self.do_expr(node),
             "call_expression" if self.is_defer_stmt(node) => self.defer_stmt(node),
             "do_statement" => self.do_stmt(node),
@@ -555,6 +558,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "while_statement" => self.while_stmt(node),
             "ERROR" if self.is_recoverable_precedence_group_error(node) => {
                 self.precedence_group_decl(node)
+            }
+            "ERROR" if self.is_recoverable_missing_if_error(node) => {
+                self.recovered_missing_if_expr(node)
             }
             "ERROR" if self.is_recoverable_do_error(node) => {
                 self.recovered_do_syntax_from_error(node)
@@ -592,7 +598,6 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "range_expression"
             | "real_literal"
             | "regex_literal"
-            | "simple_identifier"
             | "nil"
             | "self_expression"
             | "special_literal"
@@ -602,6 +607,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "try_expression"
             | "user_type"
             | "navigation_expression" => self.expr(node),
+            "simple_identifier" if self.text(node) == "return" => {
+                Ok(self.return_stmt_from_keyword(node))
+            }
+            "simple_identifier" => self.expr(node),
             other => bail!("unsupported Swift syntax node '{other}'"),
         }
     }
@@ -4245,7 +4254,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .immediate_child_kind(computed_property, "}")
             .with_context(|| format!("{context} accessor block is missing '}}'"))?;
 
-        let accessor_nodes: Vec<_> = named_children(computed_property)
+        let mut accessor_nodes: Vec<_> = named_children(computed_property)
             .filter(|child| {
                 matches!(
                     child.kind(),
@@ -4253,6 +4262,15 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 )
             })
             .collect();
+        if accessor_nodes.is_empty() {
+            if let Some(statements) =
+                self.immediate_named_child_kind(computed_property, "statements")
+            {
+                accessor_nodes = named_children(statements)
+                    .filter(|child| self.is_recovered_accessor_call(*child))
+                    .collect();
+            }
+        }
         let accessors = if accessor_nodes.is_empty() {
             self.with_name(
                 self.code_block_item_list_from_statements(
@@ -4282,6 +4300,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"),
             ],
         ))
+    }
+
+    fn is_recovered_accessor_call(&self, node: Node<'a>) -> bool {
+        if node.kind() != "call_expression" {
+            return false;
+        }
+        named_children(node).next().is_some_and(|callee| {
+            callee.kind() == "simple_identifier"
+                && matches!(self.text(callee), "_read" | "read" | "_modify" | "modify")
+                && self.first_descendant_kind(node, "lambda_literal").is_some()
+        })
     }
 
     fn protocol_property_accessor_block(&self, node: Node<'a>) -> Result<Value> {
@@ -4341,6 +4370,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "body",
                 ));
             }
+        } else if let Some(body) = self.first_descendant_kind(node, "lambda_literal") {
+            children.push(self.with_name(self.code_block(body)?, "body"));
         }
         Ok(self.syntax_node("AccessorDeclSyntax", self.range_for_node(node), children))
     }
@@ -7542,6 +7573,56 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(self.syntax_node("IfExprSyntax", self.range_for_node(node), children))
     }
 
+    fn is_recoverable_missing_if_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR"
+            && self.text(node).trim_start().starts_with("if ")
+            && self.first_descendant_kind(node, "lambda_literal").is_some()
+    }
+
+    fn recovered_missing_if_expr(&self, node: Node<'a>) -> Result<Value> {
+        let node_start = node.start_byte();
+        let node_end = node.end_byte();
+        let if_start = self.skip_horizontal_whitespace(node_start, node_end);
+        let if_end = if_start + "if".len();
+        let body = self
+            .first_descendant_kind(node, "lambda_literal")
+            .context("recovered missing-if expression is missing body")?;
+        let (condition_start, condition_end) = self.trim_offsets(if_end, body.start_byte());
+        if condition_start >= condition_end {
+            bail!("recovered missing-if expression is missing condition");
+        }
+
+        let condition = self.syntax_node(
+            "ConditionElementSyntax",
+            self.range_from_offsets(condition_start, condition_end),
+            vec![self.with_name(
+                self.synthetic_expr_from_offsets(condition_start, condition_end),
+                "condition",
+            )],
+        );
+        let conditions = self.syntax_node(
+            "ConditionElementListSyntax",
+            self.range_from_offsets(condition_start, condition_end),
+            vec![self.with_name(condition, "")],
+        );
+
+        Ok(self.syntax_node(
+            "IfExprSyntax",
+            self.range_from_offsets(if_start, body.end_byte()),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "keyword(SwiftSyntax.Keyword.if)",
+                        self.range_from_offsets(if_start, if_end),
+                    ),
+                    "ifKeyword",
+                ),
+                self.with_name(conditions, "conditions"),
+                self.with_name(self.code_block(body)?, "body"),
+            ],
+        ))
+    }
+
     fn is_recoverable_if_case_error(&self, node: Node<'a>) -> bool {
         node.kind() == "ERROR" && self.text(node).trim_start().starts_with("if case")
     }
@@ -8036,10 +8117,79 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
         let return_keyword = named_children(node)
             .find(|child| child.kind() == "simple_identifier" && self.text(*child) == "return")?;
-        let do_keyword = named_children(node).find(|child| child.kind() == "ERROR")?;
+        let do_keyword = named_children(node)
+            .find(|child| child.kind() == "ERROR" && self.text(*child).trim() == "do")?;
         let suffix = self.immediate_named_child_kind(node, "call_suffix")?;
         let body = named_children(suffix).find(|child| child.kind() == "lambda_literal")?;
         Some((return_keyword, do_keyword, body))
+    }
+
+    fn is_recoverable_return_call(&self, node: Node<'a>) -> bool {
+        self.return_call_parts(node).is_some()
+    }
+
+    fn recovered_return_call_stmt(&self, node: Node<'a>) -> Result<Value> {
+        let (return_keyword, callee, suffix, trailing_closure) = self
+            .return_call_parts(node)
+            .context("return call statement is missing trailing closure")?;
+        let (callee_start, callee_end) = self.trim_offsets(callee.start_byte(), callee.end_byte());
+        if callee_start >= callee_end {
+            bail!("return call statement is missing callee");
+        }
+        let expression = self.syntax_node(
+            "FunctionCallExprSyntax",
+            self.range_from_offsets(callee_start, trailing_closure.end_byte()),
+            vec![
+                self.with_name(
+                    self.synthetic_expr_from_offsets(callee_start, callee_end),
+                    "calledExpression",
+                ),
+                self.with_name(
+                    self.empty_collection("LabeledExprListSyntax", callee_end),
+                    "arguments",
+                ),
+                self.with_name(self.closure_expr(trailing_closure)?, "trailingClosure"),
+                self.with_name(
+                    self.additional_trailing_closure_list(
+                        suffix,
+                        &self.trailing_closure_nodes(suffix),
+                        trailing_closure.end_byte(),
+                    )?,
+                    "additionalTrailingClosures",
+                ),
+            ],
+        );
+        Ok(self.syntax_node(
+            "ReturnStmtSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(return_keyword, "keyword(SwiftSyntax.Keyword.return)"),
+                    "returnKeyword",
+                ),
+                self.with_name(expression, "expression"),
+            ],
+        ))
+    }
+
+    fn return_call_parts(
+        &self,
+        node: Node<'a>,
+    ) -> Option<(Node<'a>, Node<'a>, Node<'a>, Node<'a>)> {
+        if node.kind() != "call_expression" {
+            return None;
+        }
+        let return_keyword = named_children(node)
+            .find(|child| child.kind() == "simple_identifier" && self.text(*child) == "return")?;
+        let suffix = self.immediate_named_child_kind(node, "call_suffix")?;
+        let trailing_closure = self.trailing_closure_nodes(suffix).first().copied()?;
+        let callee = named_children(node).find(|child| {
+            child.start_byte() >= return_keyword.end_byte()
+                && child.end_byte() <= suffix.start_byte()
+                && child.kind() != "call_suffix"
+                && self.text(*child).trim() != "return"
+        })?;
+        Some((return_keyword, callee, suffix, trailing_closure))
     }
 
     fn catch_clause_list_from_blocks(
@@ -8059,15 +8209,21 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let catch_keyword = self
             .first_descendant_any_kind(node, "catch_keyword")
             .context("catch clause is missing 'catch'")?;
-        let body_statements = named_children(node)
-            .find(|child| child.kind() == "statements")
-            .context("catch clause is missing body statements")?;
-        let left_brace = self
-            .nearest_child_before(node, "{", body_statements.start_byte())
-            .context("catch clause body is missing '{'")?;
-        let right_brace = self
-            .nearest_child_after(node, "}", body_statements.end_byte())
-            .context("catch clause body is missing '}'")?;
+        let body_statements = named_children(node).find(|child| child.kind() == "statements");
+        let left_brace = if let Some(body_statements) = body_statements {
+            self.nearest_child_before(node, "{", body_statements.start_byte())
+        } else {
+            self.nearest_child_after(node, "{", catch_keyword.end_byte())
+        }
+        .context("catch clause body is missing '{'")?;
+        let right_brace = if let Some(body_statements) = body_statements {
+            self.nearest_child_after(node, "}", body_statements.end_byte())
+        } else {
+            children(node)
+                .filter(|child| child.kind() == "}" && child.start_byte() >= left_brace.end_byte())
+                .last()
+        }
+        .context("catch clause body is missing '}'")?;
 
         Ok(self.syntax_node(
             "CatchClauseSyntax",
@@ -8078,17 +8234,52 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "catchKeyword",
                 ),
                 self.with_name(
-                    self.empty_collection("CatchItemListSyntax", catch_keyword.end_byte()),
+                    self.catch_item_list_from_block(node, catch_keyword.end_byte())?,
                     "catchItems",
                 ),
                 self.with_name(
-                    self.code_block_from_statements(
-                        Some(body_statements),
-                        left_brace,
-                        right_brace,
-                    )?,
+                    self.code_block_from_statements(body_statements, left_brace, right_brace)?,
                     "body",
                 ),
+            ],
+        ))
+    }
+
+    fn catch_item_list_from_block(&self, node: Node<'a>, fallback_offset: usize) -> Result<Value> {
+        let Some(where_clause_node) = self.immediate_named_child_kind(node, "where_clause") else {
+            return Ok(self.empty_collection("CatchItemListSyntax", fallback_offset));
+        };
+        let where_clause = self.where_clause(where_clause_node)?;
+        let catch_item = self.syntax_node(
+            "CatchItemSyntax",
+            self.range_for_node(where_clause_node),
+            vec![self.with_name(where_clause, "whereClause")],
+        );
+        Ok(self.syntax_node(
+            "CatchItemListSyntax",
+            self.range_for_node(where_clause_node),
+            vec![self.with_name(catch_item, "")],
+        ))
+    }
+
+    fn where_clause(&self, node: Node<'a>) -> Result<Value> {
+        let where_keyword = self
+            .first_descendant_any_kind(node, "where_keyword")
+            .context("where clause is missing 'where'")?;
+        let condition = named_children(node)
+            .find(|child| {
+                child.start_byte() >= where_keyword.end_byte() && is_expression_like_node(*child)
+            })
+            .context("where clause is missing condition")?;
+        Ok(self.syntax_node(
+            "WhereClauseSyntax",
+            self.range_from_offsets(where_keyword.start_byte(), condition.end_byte()),
+            vec![
+                self.with_name(
+                    self.token_for_node(where_keyword, "keyword(SwiftSyntax.Keyword.where)"),
+                    "whereKeyword",
+                ),
+                self.with_name(self.expr(condition)?, "condition"),
             ],
         ))
     }
@@ -8297,7 +8488,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 index = next_index;
                 continue;
             }
-            if condition.kind() == "value_binding_pattern" {
+            if condition.kind() == "value_binding_pattern"
+                || self
+                    .first_descendant_kind(condition, "value_binding_pattern")
+                    .is_some()
+                || self
+                    .optional_binding_specifier_before(parent, condition)
+                    .is_some()
+            {
                 let (element, next_index) =
                     self.optional_binding_condition_element(parent, condition_nodes, index)?;
                 elements.push(self.with_name(element, ""));
@@ -8344,38 +8542,65 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let binding = condition_nodes[index];
         let binding_specifier = children(binding)
             .find(|child| matches!(child.kind(), "let" | "var"))
+            .or_else(|| self.first_descendant_any_kind(binding, "let"))
+            .or_else(|| self.first_descendant_any_kind(binding, "var"))
+            .or_else(|| self.optional_binding_specifier_before(parent, binding))
             .context("optional binding condition is missing binding specifier")?;
-        let equal = children(parent)
-            .find(|child| {
-                child.kind() == "="
-                    && child.start_byte() > binding_specifier.end_byte()
-                    && condition_nodes
-                        .get(index + 1)
-                        .is_none_or(|next| child.start_byte() >= next.start_byte())
-            })
-            .context("optional binding condition is missing '='")?;
-        let value_index = condition_nodes
-            .iter()
-            .enumerate()
-            .skip(index + 1)
-            .find(|(_, child)| child.start_byte() > equal.end_byte())
-            .map(|(index, _)| index)
-            .context("optional binding condition is missing an initializer")?;
-        let value = condition_nodes[value_index];
+        let condition_end = self.optional_binding_condition_boundary(parent, binding_specifier);
+        let equal = children(parent).find(|child| {
+            child.kind() == "="
+                && child.start_byte() > binding_specifier.end_byte()
+                && child.start_byte() < condition_end
+        });
         let type_annotation = condition_nodes.iter().copied().find(|child| {
             child.kind() == "type_annotation"
                 && child.start_byte() > binding_specifier.end_byte()
-                && child.end_byte() < equal.start_byte()
+                && equal
+                    .map(|equal| child.end_byte() < equal.start_byte())
+                    .unwrap_or_else(|| child.end_byte() < condition_end)
         });
-        let pattern_end = type_annotation
-            .map(|annotation| annotation.start_byte())
-            .unwrap_or_else(|| equal.start_byte());
+        let (value, next_index, pattern_boundary, trailing_delimiter_node) = if let Some(equal) =
+            equal
+        {
+            let value_index = condition_nodes
+                .iter()
+                .enumerate()
+                .skip(index + 1)
+                .find(|(_, child)| {
+                    child.start_byte() > equal.end_byte()
+                        && child.start_byte() < condition_end
+                        && is_expression_like_node(**child)
+                })
+                .map(|(index, _)| index)
+                .context("optional binding condition is missing an initializer")?;
+            let value = condition_nodes[value_index];
+            (
+                Some((equal, value)),
+                value_index + 1,
+                type_annotation
+                    .map(|annotation| annotation.start_byte())
+                    .unwrap_or_else(|| equal.start_byte()),
+                value,
+            )
+        } else {
+            let pattern_node = self
+                .optional_binding_shorthand_pattern_node(parent, binding_specifier, condition_end)
+                .context("optional binding condition is missing a pattern")?;
+            (
+                None,
+                index + 1,
+                type_annotation
+                    .map(|annotation| annotation.start_byte())
+                    .unwrap_or_else(|| pattern_node.end_byte()),
+                pattern_node,
+            )
+        };
         let (pattern_start, pattern_end) =
-            self.trim_offsets(binding_specifier.end_byte(), pattern_end);
+            self.trim_offsets(binding_specifier.end_byte(), pattern_boundary);
         if pattern_start >= pattern_end {
             bail!("optional binding condition is missing a pattern");
         }
-        let trailing_comma = self.trailing_delimiter(parent, value, ",");
+        let trailing_comma = self.trailing_delimiter(parent, trailing_delimiter_node, ",");
 
         let mut optional_children = vec![
             self.with_name(
@@ -8397,8 +8622,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             optional_children
                 .push(self.with_name(self.type_annotation(type_annotation)?, "typeAnnotation"));
         }
-        optional_children
-            .push(self.with_name(self.initializer_clause(equal, value)?, "initializer"));
+        if let Some((equal, value)) = value {
+            optional_children
+                .push(self.with_name(self.initializer_clause(equal, value)?, "initializer"));
+        }
         let optional_end = end_offset(optional_children.last().unwrap());
         let optional_binding = self.syntax_node(
             "OptionalBindingConditionSyntax",
@@ -8418,8 +8645,56 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.range_from_offsets(binding.start_byte(), element_end),
                 element_children,
             ),
-            value_index + 1,
+            next_index,
         ))
+    }
+
+    fn optional_binding_condition_boundary(
+        &self,
+        parent: Node<'a>,
+        binding_specifier: Node<'a>,
+    ) -> usize {
+        let body_start = self
+            .nearest_child_after(parent, "{", binding_specifier.end_byte())
+            .map(|brace| brace.start_byte())
+            .unwrap_or_else(|| parent.end_byte());
+        self.top_level_commas(binding_specifier.end_byte(), body_start)
+            .into_iter()
+            .next()
+            .unwrap_or(body_start)
+    }
+
+    fn optional_binding_specifier_before(
+        &self,
+        parent: Node<'a>,
+        condition: Node<'a>,
+    ) -> Option<Node<'a>> {
+        let specifier =
+            self.last_descendant_kind_before(parent, &["let", "var"], condition.start_byte())?;
+        self.top_level_commas(specifier.end_byte(), condition.start_byte())
+            .is_empty()
+            .then_some(specifier)
+    }
+
+    fn optional_binding_shorthand_pattern_node(
+        &self,
+        parent: Node<'a>,
+        binding_specifier: Node<'a>,
+        condition_end: usize,
+    ) -> Option<Node<'a>> {
+        named_children(parent).find(|child| {
+            child.start_byte() >= binding_specifier.end_byte()
+                && child.end_byte() <= condition_end
+                && !matches!(
+                    child.kind(),
+                    "type_annotation"
+                        | "statements"
+                        | "else"
+                        | "catch_block"
+                        | "value_binding_pattern"
+                )
+                && !is_trivia_node(*child)
+        })
     }
 
     fn matching_pattern_condition_element(
@@ -9922,9 +10197,23 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(self.syntax_node("ReturnStmtSyntax", self.range_for_node(node), children))
     }
 
+    fn return_stmt_from_keyword(&self, return_keyword: Node<'a>) -> Value {
+        self.syntax_node(
+            "ReturnStmtSyntax",
+            self.range_for_node(return_keyword),
+            vec![self.with_name(
+                self.token_for_node(return_keyword, "keyword(SwiftSyntax.Keyword.return)"),
+                "returnKeyword",
+            )],
+        )
+    }
+
     fn control_transfer_stmt(&self, node: Node<'a>) -> Result<Value> {
         if self.first_descendant_any_kind(node, "return").is_some() {
             return self.return_stmt(node);
+        }
+        if self.yield_keyword_offsets(node).is_some() {
+            return self.yield_stmt(node);
         }
         if let Some(break_keyword) = self.first_descendant_any_kind(node, "break") {
             return Ok(self.jump_stmt(
@@ -9945,6 +10234,47 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             ));
         }
         bail!("unsupported Swift control transfer statement");
+    }
+
+    fn yield_stmt(&self, node: Node<'a>) -> Result<Value> {
+        let (yield_start, yield_end) = self
+            .yield_keyword_offsets(node)
+            .context("yield statement is missing yield keyword")?;
+        let mut children = vec![self.with_name(
+            self.token_with_range(
+                "keyword(SwiftSyntax.Keyword.yield)",
+                self.range_from_offsets(yield_start, yield_end),
+            ),
+            "yieldKeyword",
+        )];
+        if let Some(expression) = self
+            .field_child(node, "result")
+            .or_else(|| named_children(node).find(|child| child.start_byte() >= yield_end))
+        {
+            children.push(self.with_name(self.expr(expression)?, "yieldedExpressions"));
+        }
+        let range_end = children.last().map(end_offset).unwrap_or(yield_end);
+        Ok(self.syntax_node(
+            "YieldStmtSyntax",
+            self.range_from_offsets(yield_start, range_end),
+            children,
+        ))
+    }
+
+    fn yield_keyword_offsets(&self, node: Node<'a>) -> Option<(usize, usize)> {
+        if let Some(keyword) = self.first_descendant_any_kind(node, "yield") {
+            return Some((keyword.start_byte(), keyword.end_byte()));
+        }
+        let start = self.skip_horizontal_whitespace(node.start_byte(), node.end_byte());
+        let end = start + "yield".len();
+        (end <= node.end_byte()
+            && &self.source[start..end] == "yield"
+            && self
+                .source
+                .as_bytes()
+                .get(end)
+                .is_none_or(|byte| byte.is_ascii_whitespace()))
+        .then_some((start, end))
     }
 
     fn jump_stmt(
@@ -10750,9 +11080,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn accessor_keyword_node(&self, node: Node<'a>) -> Option<Node<'a>> {
-        ["get", "set", "_modify", "modify"]
+        ["get", "set", "_read", "read", "_modify", "modify"]
             .iter()
-            .find_map(|kind| self.first_descendant_any_kind(node, kind))
+            .find_map(|kind| {
+                self.first_descendant_any_kind(node, kind)
+                    .or_else(|| self.first_descendant_with_text(node, kind))
+            })
     }
 
     fn type_node_after(&self, node: Node<'a>, offset: usize) -> Option<Node<'a>> {
@@ -10864,6 +11197,35 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         None
     }
 
+    fn last_descendant_kind_before(
+        &self,
+        node: Node<'a>,
+        kinds: &[&str],
+        end: usize,
+    ) -> Option<Node<'a>> {
+        let mut found = None;
+        self.last_descendant_kind_before_into(node, kinds, end, &mut found);
+        found
+    }
+
+    fn last_descendant_kind_before_into(
+        &self,
+        node: Node<'a>,
+        kinds: &[&str],
+        end: usize,
+        found: &mut Option<Node<'a>>,
+    ) {
+        for child in children(node) {
+            if child.start_byte() >= end {
+                continue;
+            }
+            if kinds.contains(&child.kind()) && child.end_byte() <= end {
+                *found = Some(child);
+            }
+            self.last_descendant_kind_before_into(child, kinds, end, found);
+        }
+    }
+
     fn first_descendant_type_after(&self, node: Node<'a>, start: usize) -> Option<Node<'a>> {
         if is_type_syntax_node_kind(node.kind()) && node.start_byte() >= start {
             return Some(node);
@@ -10885,6 +11247,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
         for child in children(node) {
             if let Some(found) = self.first_descendant_any_kind(child, kind) {
+                return Some(found);
+            }
+        }
+        None
+    }
+
+    fn first_descendant_with_text(&self, node: Node<'a>, text: &str) -> Option<Node<'a>> {
+        if self.text(node) == text {
+            return Some(node);
+        }
+        for child in children(node) {
+            if let Some(found) = self.first_descendant_with_text(child, text) {
                 return Some(found);
             }
         }
@@ -13047,6 +13421,64 @@ if case let .Naught(value) = n {}
             .collect::<Vec<_>>();
         assert!(call_texts.contains(&"E<Int>.e(y)"));
         assert!(call_texts.contains(&".Naught(value)"));
+    }
+
+    #[test]
+    fn recovers_statement_suite_shapes() {
+        let if_source = "if let baz {}\nif let self = self {}\n";
+        let if_value = parse_source("If.swift", "/tmp/If.swift", if_source).unwrap();
+        let optional_bindings = find_node_types(&if_value, "OptionalBindingConditionSyntax");
+        assert_eq!(optional_bindings.len(), 2);
+        assert_eq!(
+            source_text(
+                if_source,
+                child_by_name(optional_bindings[0], "pattern").unwrap()
+            ),
+            "baz"
+        );
+        assert!(child_by_name(optional_bindings[0], "initializer").is_none());
+        assert!(child_by_name(optional_bindings[1], "initializer").is_some());
+
+        let catch_source = "do {\n  try foo()\n} catch {\n  bar()\n}\ndo { try foo() }\ncatch where (error as NSError) == NSError() {}\n";
+        let catch_value = parse_source("Catch.swift", "/tmp/Catch.swift", catch_source).unwrap();
+        assert_eq!(find_node_types(&catch_value, "CatchClauseSyntax").len(), 2);
+        let catch_items = find_node_types(&catch_value, "CatchItemSyntax");
+        assert_eq!(catch_items.len(), 1);
+        let where_clause = child_by_name(catch_items[0], "whereClause").unwrap();
+        assert_eq!(
+            child_by_name(where_clause, "condition").unwrap()["nodeType"],
+            "InfixOperatorExprSyntax"
+        );
+
+        let missing_if_source = "if _ = 42 {}\n";
+        let missing_if_value =
+            parse_source("MissingIf.swift", "/tmp/MissingIf.swift", missing_if_source).unwrap();
+        let recovered_if = find_first_node_type(&missing_if_value, "IfExprSyntax").unwrap();
+        assert_eq!(source_text(missing_if_source, recovered_if), "if _ = 42 {}");
+
+        let return_source = "return actor\n{ return 0 }\nreturn\n";
+        let return_value =
+            parse_source("Return.swift", "/tmp/Return.swift", return_source).unwrap();
+        let return_stmts = find_node_types(&return_value, "ReturnStmtSyntax");
+        let return_texts = return_stmts
+            .iter()
+            .map(|node| source_text(return_source, node))
+            .collect::<Vec<_>>();
+        assert!(return_texts.contains(&"return actor\n{ return 0 }"));
+        assert!(return_texts.contains(&"return 0"));
+        assert!(return_texts.contains(&"return"));
+        assert!(find_first_node_type(&return_value, "ClosureExprSyntax").is_some());
+
+        let yield_source =
+            "var x: Int {\n  _read {\n    yield &x\n  }\n}\nfunc f() -> Int {\n  yield 5\n}\n";
+        let yield_value = parse_source("Yield.swift", "/tmp/Yield.swift", yield_source).unwrap();
+        assert_eq!(find_node_types(&yield_value, "YieldStmtSyntax").len(), 2);
+        assert_eq!(find_node_types(&yield_value, "InOutExprSyntax").len(), 1);
+        let accessor = find_first_node_type(&yield_value, "AccessorDeclSyntax").unwrap();
+        assert_eq!(
+            child_by_name(accessor, "accessorSpecifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword._read)"
+        );
     }
 
     #[test]
