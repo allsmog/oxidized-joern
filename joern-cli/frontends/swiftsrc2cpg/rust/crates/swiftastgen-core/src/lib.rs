@@ -74,6 +74,16 @@ struct StringLiteralSpec {
     segment_specs: Vec<(usize, usize, String)>,
 }
 
+struct StringLiteralNodeSpec {
+    start: usize,
+    end: usize,
+    opening_pounds: Option<(usize, usize)>,
+    opening_quote: (usize, usize),
+    closing_quote: (usize, usize),
+    closing_pounds: Option<(usize, usize)>,
+    segments: Vec<Value>,
+}
+
 struct TernaryNodeParts<'a> {
     start: usize,
     end: usize,
@@ -6201,26 +6211,191 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         } else {
             1
         };
-        let segments = self
-            .field_children(node, "text")
-            .into_iter()
-            .map(|text| {
-                (
-                    text.start_byte(),
-                    text.end_byte(),
-                    normalize_escaped_raw_segment(self.text(text)),
-                )
-            })
-            .collect();
-        Ok(self.string_literal_node(StringLiteralSpec {
-            start: node.start_byte(),
-            end: node.end_byte(),
-            opening_pounds: None,
-            opening_quote: (node.start_byte(), node.start_byte() + quote_len),
-            closing_quote: (node.end_byte() - quote_len, node.end_byte()),
-            closing_pounds: None,
-            segment_specs: segments,
-        }))
+        let segments = if quote_len == 3 {
+            self.multiline_string_segment_nodes(node)
+        } else {
+            self.line_string_segment_nodes(node)?
+        };
+        Ok(
+            self.string_literal_node_with_segments(StringLiteralNodeSpec {
+                start: node.start_byte(),
+                end: node.end_byte(),
+                opening_pounds: None,
+                opening_quote: (node.start_byte(), node.start_byte() + quote_len),
+                closing_quote: (node.end_byte() - quote_len, node.end_byte()),
+                closing_pounds: None,
+                segments,
+            }),
+        )
+    }
+
+    fn line_string_segment_nodes(&self, node: Node<'a>) -> Result<Vec<Value>> {
+        let mut segments = Vec::new();
+        let mut pending_start = None;
+        let mut pending_end = 0;
+        let mut pending_text = String::new();
+
+        let segment_children = named_children(node).collect::<Vec<_>>();
+        for (index, child) in segment_children.iter().copied().enumerate() {
+            match child.kind() {
+                "line_str_text" | "str_escaped_char" => {
+                    pending_start.get_or_insert(child.start_byte());
+                    pending_end = child.end_byte();
+                    pending_text.push_str(&normalize_escaped_raw_segment(self.text(child)));
+                }
+                "interpolated_expression" => {
+                    self.flush_string_segment(
+                        &mut segments,
+                        &mut pending_start,
+                        &mut pending_end,
+                        &mut pending_text,
+                    );
+                    let expression_segment = self.expression_segment(node, child)?;
+                    let expression_end = end_offset(&expression_segment);
+                    segments.push(self.with_name(expression_segment, ""));
+                    if segment_children
+                        .get(index + 1)
+                        .is_none_or(|next| next.kind() == "interpolated_expression")
+                    {
+                        segments.push(self.with_name(
+                            self.string_segment_node(expression_end, expression_end, String::new()),
+                            "",
+                        ));
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        self.flush_string_segment(
+            &mut segments,
+            &mut pending_start,
+            &mut pending_end,
+            &mut pending_text,
+        );
+        Ok(segments)
+    }
+
+    fn multiline_string_segment_nodes(&self, node: Node<'a>) -> Vec<Value> {
+        let mut segments = Vec::new();
+        for text in self.field_children(node, "text") {
+            let content = self.text(text);
+            let mut line_start = 0;
+            for (offset, ch) in content.char_indices() {
+                if ch == '\n' {
+                    self.push_multiline_string_line(
+                        &mut segments,
+                        text.start_byte(),
+                        content,
+                        line_start,
+                        offset,
+                    );
+                    line_start = offset + ch.len_utf8();
+                }
+            }
+            self.push_multiline_string_line(
+                &mut segments,
+                text.start_byte(),
+                content,
+                line_start,
+                content.len(),
+            );
+        }
+        segments
+    }
+
+    fn push_multiline_string_line(
+        &self,
+        segments: &mut Vec<Value>,
+        base_offset: usize,
+        content: &str,
+        line_start: usize,
+        line_end: usize,
+    ) {
+        let mut start = line_start;
+        let mut end = line_end;
+        let bytes = content.as_bytes();
+        while start < end && matches!(bytes[start], b' ' | b'\t' | b'\r') {
+            start += 1;
+        }
+        while end > start && matches!(bytes[end - 1], b' ' | b'\t' | b'\r') {
+            end -= 1;
+        }
+        if start < end {
+            segments.push(self.with_name(
+                self.string_segment_node(
+                    base_offset + start,
+                    base_offset + end,
+                    content[start..end].to_string(),
+                ),
+                "",
+            ));
+        }
+    }
+
+    fn flush_string_segment(
+        &self,
+        segments: &mut Vec<Value>,
+        pending_start: &mut Option<usize>,
+        pending_end: &mut usize,
+        pending_text: &mut String,
+    ) {
+        if let Some(start) = pending_start.take() {
+            segments.push(self.with_name(
+                self.string_segment_node(start, *pending_end, std::mem::take(pending_text)),
+                "",
+            ));
+        }
+    }
+
+    fn expression_segment(&self, parent: Node<'a>, interpolation: Node<'a>) -> Result<Value> {
+        let backslash_left_paren = children(parent)
+            .filter(|child| child.kind() == "\\(" && child.end_byte() <= interpolation.start_byte())
+            .last()
+            .context("interpolated string segment is missing '\\('")?;
+        let right_paren = children(parent)
+            .find(|child| child.kind() == ")" && child.start_byte() >= interpolation.end_byte())
+            .context("interpolated string segment is missing ')'")?;
+        let expression = self
+            .value_field_child(interpolation)
+            .or_else(|| named_children(interpolation).next())
+            .context("interpolated string segment is missing expression")?;
+        let labeled_expr = self.with_name(self.labeled_expr_for_value(expression, None)?, "");
+        Ok(self.syntax_node(
+            "ExpressionSegmentSyntax",
+            self.range_from_offsets(backslash_left_paren.start_byte(), right_paren.end_byte()),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "backslash",
+                        self.range_from_offsets(
+                            backslash_left_paren.start_byte(),
+                            backslash_left_paren.start_byte() + 1,
+                        ),
+                    ),
+                    "backslash",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "leftParen",
+                        self.range_from_offsets(
+                            backslash_left_paren.start_byte() + 1,
+                            backslash_left_paren.end_byte(),
+                        ),
+                    ),
+                    "leftParen",
+                ),
+                self.with_name(
+                    self.syntax_node(
+                        "LabeledExprListSyntax",
+                        self.range_from_offsets(expression.start_byte(), expression.end_byte()),
+                        vec![labeled_expr],
+                    ),
+                    "expressions",
+                ),
+                self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
+            ],
+        ))
     }
 
     fn raw_string_literal(&self, node: Node<'a>) -> Result<Value> {
@@ -6460,6 +6635,36 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             closing_pounds,
             segment_specs,
         } = spec;
+        let segments = segment_specs
+            .into_iter()
+            .map(|(segment_start, segment_end, text)| {
+                self.with_name(
+                    self.string_segment_node(segment_start, segment_end, text),
+                    "",
+                )
+            })
+            .collect::<Vec<_>>();
+        self.string_literal_node_with_segments(StringLiteralNodeSpec {
+            start,
+            end,
+            opening_pounds,
+            opening_quote,
+            closing_quote,
+            closing_pounds,
+            segments,
+        })
+    }
+
+    fn string_literal_node_with_segments(&self, spec: StringLiteralNodeSpec) -> Value {
+        let StringLiteralNodeSpec {
+            start,
+            end,
+            opening_pounds,
+            opening_quote,
+            closing_quote,
+            closing_pounds,
+            segments,
+        } = spec;
         let quote_kind = if opening_quote.1.saturating_sub(opening_quote.0) == 3 {
             "multilineStringQuote"
         } else {
@@ -6482,25 +6687,6 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             ),
             "openingQuote",
         ));
-        let segments = segment_specs
-            .into_iter()
-            .map(|(segment_start, segment_end, text)| {
-                self.with_name(
-                    self.syntax_node(
-                        "StringSegmentSyntax",
-                        self.range_from_offsets(segment_start, segment_end),
-                        vec![self.with_name(
-                            self.token_with_range(
-                                &format!("stringSegment({})", quoted_text(&text)),
-                                self.range_from_offsets(segment_start, segment_end),
-                            ),
-                            "content",
-                        )],
-                    ),
-                    "",
-                )
-            })
-            .collect::<Vec<_>>();
         children.push(self.with_name(
             self.syntax_node(
                 "StringLiteralSegmentListSyntax",
@@ -6529,6 +6715,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "StringLiteralExprSyntax",
             self.range_from_offsets(start, end),
             children,
+        )
+    }
+
+    fn string_segment_node(&self, start: usize, end: usize, text: String) -> Value {
+        self.syntax_node(
+            "StringSegmentSyntax",
+            self.range_from_offsets(start, end),
+            vec![self.with_name(
+                self.token_with_range(
+                    &format!("stringSegment({})", quoted_text(&text)),
+                    self.range_from_offsets(start, end),
+                ),
+                "content",
+            )],
         )
     }
 
@@ -7010,6 +7210,43 @@ fn end_offset(value: &Value) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn emits_interpolated_string_segments() {
+        let source = "\"Fixit: \\(range.debugDescription)\"\n\"\\(x)\"\n\"Foo '\\(x)' bar\"\n";
+        let value = parse_source("Interpolated.swift", "/tmp/Interpolated.swift", source).unwrap();
+        let literals = find_node_types(&value, "StringLiteralExprSyntax");
+        assert_eq!(literals.len(), 3);
+
+        let first_expression_segments = find_node_types(literals[0], "ExpressionSegmentSyntax");
+        assert_eq!(first_expression_segments.len(), 1);
+        assert_eq!(
+            find_first_node_type(first_expression_segments[0], "MemberAccessExprSyntax").unwrap()
+                ["range"]["startOffset"],
+            10
+        );
+        assert_eq!(
+            find_node_types(literals[1], "ExpressionSegmentSyntax").len(),
+            1
+        );
+        assert_eq!(
+            find_node_types(literals[2], "ExpressionSegmentSyntax").len(),
+            1
+        );
+        assert_eq!(find_node_types(literals[2], "StringSegmentSyntax").len(), 2);
+    }
+
+    #[test]
+    fn merges_escaped_and_multiline_string_segments() {
+        let source = "\"\\\\\\\"abc\"\n\"abc\\\\\\\"\"\n\"\"\"\nabc\ndef\n\"\"\"\n";
+        let value =
+            parse_source("LiteralStrings.swift", "/tmp/LiteralStrings.swift", source).unwrap();
+        let literals = find_node_types(&value, "StringLiteralExprSyntax");
+        assert_eq!(literals.len(), 3);
+        assert_eq!(find_node_types(literals[0], "StringSegmentSyntax").len(), 1);
+        assert_eq!(find_node_types(literals[1], "StringSegmentSyntax").len(), 1);
+        assert_eq!(find_node_types(literals[2], "StringSegmentSyntax").len(), 2);
+    }
 
     #[test]
     fn recovers_array_literal_without_commas() {
