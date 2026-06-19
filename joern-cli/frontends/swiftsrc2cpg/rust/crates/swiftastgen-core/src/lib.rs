@@ -74,6 +74,25 @@ struct StringLiteralSpec {
     segment_specs: Vec<(usize, usize, String)>,
 }
 
+struct TernaryNodeParts<'a> {
+    start: usize,
+    end: usize,
+    question_mark: Node<'a>,
+    then_expression: Node<'a>,
+    colon: Node<'a>,
+    else_expression: Node<'a>,
+}
+
+struct TernaryValueParts<'a> {
+    start: usize,
+    end: usize,
+    condition: Value,
+    question_mark: Node<'a>,
+    then_expression: Value,
+    colon: Node<'a>,
+    else_expression: Value,
+}
+
 impl<'a> SwiftSyntaxEmitter<'a> {
     fn new(source: &'a str) -> Self {
         let mut line_starts = vec![0];
@@ -200,9 +219,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn is_ignorable_top_level_error(&self, node: Node<'a>) -> bool {
-        node.kind() == "ERROR"
-            && ((self.text(node).trim() == "}" && named_children(node).all(is_trivia_node))
-                || self.text(node).trim_start().starts_with(','))
+        if node.kind() != "ERROR" {
+            return false;
+        }
+        let trimmed = self.text(node).trim();
+        (trimmed == "}" && named_children(node).all(is_trivia_node))
+            || trimmed.starts_with(',')
+            || (!trimmed.is_empty() && trimmed.chars().all(|ch| ch == '!'))
     }
 
     fn is_regex_delimiter_error(&self, node: Node<'a>) -> bool {
@@ -302,10 +325,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "assignment"
             | "additive_expression"
             | "array_literal"
+            | "as_expression"
+            | "await_expression"
             | "boolean_literal"
             | "call_expression"
+            | "check_expression"
             | "comparison_expression"
             | "conjunction_expression"
+            | "constructor_expression"
             | "consume_expression"
             | "dictionary_literal"
             | "disjunction_expression"
@@ -324,7 +351,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "nil"
             | "self_expression"
             | "super_expression"
+            | "ternary_expression"
             | "tuple_expression"
+            | "try_expression"
+            | "user_type"
             | "navigation_expression" => self.expr(node),
             other => bail!("unsupported Swift syntax node '{other}'"),
         }
@@ -1579,7 +1609,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .field_child(node, "name")
             .context("property declaration is missing a name")?;
         let type_annotation_node = self.immediate_named_child_kind(node, "type_annotation");
-        let value_node = self.field_child(node, "value");
+        let value_node = self.value_field_child(node);
+        let value_end = value_node.map(|value| self.recovered_value_end(node, value));
         let accessor_block_node = self
             .field_child(node, "computed_value")
             .or_else(|| self.immediate_named_child_kind(node, "protocol_property_requirements"));
@@ -1593,8 +1624,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             let equal = self
                 .immediate_child_kind(node, "=")
                 .context("property initializer is missing '='")?;
-            binding_children
-                .push(self.with_name(self.initializer_clause(equal, value)?, "initializer"));
+            binding_children.push(self.with_name(
+                self.initializer_clause_with_end(
+                    equal,
+                    value,
+                    value_end.unwrap_or(value.end_byte()),
+                )?,
+                "initializer",
+            ));
         }
         if let Some(accessor_block) = accessor_block_node {
             binding_children.push(self.with_name(
@@ -1606,10 +1643,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let binding_range = self.range_from_offsets(
             pattern_node.start_byte(),
             accessor_block_node
-                .or(value_node)
-                .or(type_annotation_node)
-                .unwrap_or(pattern_node)
-                .end_byte(),
+                .map(|accessor_block| accessor_block.end_byte())
+                .or(value_end)
+                .or_else(|| type_annotation_node.map(|type_annotation| type_annotation.end_byte()))
+                .unwrap_or_else(|| pattern_node.end_byte()),
         );
         let binding = self.syntax_node("PatternBindingSyntax", binding_range, binding_children);
         let bindings = self.with_name(
@@ -1621,9 +1658,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "bindings",
         );
 
+        let declaration_end = accessor_block_node
+            .map(|accessor_block| accessor_block.end_byte())
+            .or(value_end)
+            .or_else(|| type_annotation_node.map(|type_annotation| type_annotation.end_byte()))
+            .unwrap_or_else(|| node.end_byte())
+            .max(node.end_byte());
+
         Ok(self.syntax_node(
             "VariableDeclSyntax",
-            self.range_for_node(node),
+            self.range_from_offsets(node.start_byte(), declaration_end),
             vec![
                 self.with_name(self.attribute_list(node)?, "attributes"),
                 self.with_name(self.modifier_list(node), "modifiers"),
@@ -2052,10 +2096,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let wrapped_type = named_children(node)
             .next()
             .context("optional type is missing wrapped type")?;
-        let marker = children(node)
-            .find(|child| matches!(self.text(*child), "?" | "!"))
-            .context("optional type is missing marker")?;
-        let (node_type, marker_name, token_kind) = if self.text(marker) == "!" {
+        let marker = children(node).find(|child| matches!(self.text(*child), "?" | "!"));
+        let marker_text = marker.map(|marker| self.text(marker)).or_else(|| {
+            self.text(node)
+                .trim_end()
+                .chars()
+                .last()
+                .filter(|ch| matches!(ch, '?' | '!'))
+                .map(|ch| if ch == '?' { "?" } else { "!" })
+        });
+        let marker_text = marker_text.context("optional type is missing marker")?;
+        let (node_type, marker_name, token_kind) = if marker_text == "!" {
             (
                 "ImplicitlyUnwrappedOptionalTypeSyntax",
                 "exclamationMark",
@@ -2064,12 +2115,22 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         } else {
             ("OptionalTypeSyntax", "questionMark", "postfixQuestionMark")
         };
+        let marker_token = marker.map_or_else(
+            || {
+                let marker_end = node.end_byte();
+                self.token_with_range(
+                    token_kind,
+                    self.range_from_offsets(marker_end.saturating_sub(1), marker_end),
+                )
+            },
+            |marker| self.token_for_node(marker, token_kind),
+        );
         Ok(self.syntax_node(
             node_type,
             self.range_for_node(node),
             vec![
                 self.with_name(self.type_syntax(wrapped_type)?, "wrappedType"),
-                self.with_name(self.token_for_node(marker, token_kind), marker_name),
+                self.with_name(marker_token, marker_name),
             ],
         ))
     }
@@ -2264,9 +2325,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn initializer_clause(&self, equal: Node<'a>, value: Node<'a>) -> Result<Value> {
+        self.initializer_clause_with_end(equal, value, value.end_byte())
+    }
+
+    fn initializer_clause_with_end(
+        &self,
+        equal: Node<'a>,
+        value: Node<'a>,
+        end: usize,
+    ) -> Result<Value> {
         Ok(self.syntax_node(
             "InitializerClauseSyntax",
-            self.range_from_offsets(equal.start_byte(), value.end_byte()),
+            self.range_from_offsets(equal.start_byte(), end),
             vec![
                 self.with_name(self.token_for_node(equal, "equal"), "equal"),
                 self.with_name(self.expr(value)?, "value"),
@@ -2686,6 +2756,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "assignment" => self.assignment_expr(node),
             "if_statement" => self.if_expr(node),
             "switch_statement" => self.switch_expr(node),
+            "as_expression" => self.as_expr(node),
+            "await_expression" => self.await_expr(node),
+            "check_expression" => self.is_expr(node),
             "additive_expression"
             | "comparison_expression"
             | "conjunction_expression"
@@ -2696,6 +2769,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "range_expression" => self.binary_operator_expr(node),
             "array_literal" => self.array_expr(node),
             "call_expression" => self.function_call_expr(node),
+            "constructor_expression" => self.constructor_expr(node),
             "consume_expression" => self.consume_expr(node),
             "dictionary_literal" => self.dictionary_expr(node),
             "lambda_literal" => self.closure_expr(node),
@@ -2779,6 +2853,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.regex_literal_expr(node)
             }
             "tuple_expression" => self.tuple_expr(node),
+            "ternary_expression" => self.ternary_expr(node),
+            "try_expression" => self.try_expr(node),
+            "user_type" => self.constructed_type_expr(node),
             "ERROR" if is_identifier_like_text(self.text(node)) => {
                 Ok(self.decl_reference_expr(node))
             }
@@ -3248,7 +3325,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let values = self.field_children(node, "value");
         let mut elements = Vec::new();
         for value in values {
-            if value.kind() == "bang" && value.start_byte() == value.end_byte() {
+            if self.is_recovery_bang_node(value) {
                 continue;
             }
             let trailing_comma = self.trailing_delimiter(node, value, ",");
@@ -3584,17 +3661,67 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn binary_operator_expr(&self, node: Node<'a>) -> Result<Value> {
-        let lhs = self
+        let raw_lhs = self
             .field_child(node, "lhs")
             .or_else(|| self.field_child(node, "start"))
             .context("binary expression is missing lhs")?;
         let op = self
             .field_child(node, "op")
             .context("binary expression is missing operator")?;
-        let rhs = self
+        let raw_rhs = self
             .field_child(node, "rhs")
             .or_else(|| self.field_child(node, "end"))
             .context("binary expression is missing rhs")?;
+        if self.is_recovery_bang_node(raw_lhs) {
+            return self.expr(raw_rhs);
+        }
+        if self.is_recovery_bang_node(raw_rhs) {
+            return self.expr(raw_lhs);
+        }
+        let lhs = self
+            .expression_field_child(node, "lhs")
+            .or_else(|| self.expression_field_child(node, "start"))
+            .unwrap_or(raw_lhs);
+        let rhs = self
+            .expression_field_child(node, "rhs")
+            .or_else(|| self.expression_field_child(node, "end"))
+            .unwrap_or(raw_rhs);
+        if lhs.kind() == "try_expression" && lhs.start_byte() == node.start_byte() {
+            let try_expression = self
+                .expression_field_child(lhs, "expr")
+                .context("try expression is missing expression")?;
+            let expression =
+                self.infix_operator_expr_from_parts(node, try_expression, op, rhs, rhs.end_byte())?;
+            return self.try_expr_wrapping_value(lhs, expression);
+        }
+        self.infix_operator_expr_from_parts(node, lhs, op, rhs, rhs.end_byte())
+    }
+
+    fn infix_operator_expr_from_parts(
+        &self,
+        original: Node<'a>,
+        lhs: Node<'a>,
+        op: Node<'a>,
+        rhs: Node<'a>,
+        end: usize,
+    ) -> Result<Value> {
+        self.infix_operator_expr_from_values(
+            lhs.start_byte().max(original.start_byte()),
+            end,
+            self.expr(lhs)?,
+            op,
+            self.expr(rhs)?,
+        )
+    }
+
+    fn infix_operator_expr_from_values(
+        &self,
+        start: usize,
+        end: usize,
+        lhs: Value,
+        op: Node<'a>,
+        rhs: Value,
+    ) -> Result<Value> {
         let operator = self.syntax_node(
             "BinaryOperatorExprSyntax",
             self.range_for_node(op),
@@ -3608,11 +3735,426 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         );
         Ok(self.syntax_node(
             "InfixOperatorExprSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(lhs, "leftOperand"),
+                self.with_name(operator, "operator"),
+                self.with_name(rhs, "rightOperand"),
+            ],
+        ))
+    }
+
+    fn ternary_expr(&self, node: Node<'a>) -> Result<Value> {
+        let condition = self
+            .field_child(node, "condition")
+            .context("ternary expression is missing condition")?;
+        let then_expression = self
+            .field_child(node, "if_true")
+            .context("ternary expression is missing then expression")?;
+        let else_expression = self
+            .field_child(node, "if_false")
+            .context("ternary expression is missing else expression")?;
+        let question_mark = children(node)
+            .find(|child| child.kind() == "?")
+            .context("ternary expression is missing '?'")?;
+        let colon = children(node)
+            .find(|child| child.kind() == ":")
+            .context("ternary expression is missing ':'")?;
+
+        if let Some(sequence) = self.recovered_arrow_sequence_expr(
+            node,
+            condition,
+            question_mark,
+            then_expression,
+            colon,
+            else_expression,
+        )? {
+            return Ok(sequence);
+        }
+
+        if let Some(reassociated) = self.reassociated_ternary_expr(
+            node,
+            condition,
+            question_mark,
+            then_expression,
+            colon,
+            else_expression,
+        )? {
+            return Ok(reassociated);
+        }
+
+        self.ternary_expr_from_condition_value(
+            self.expr(condition)?,
+            TernaryNodeParts {
+                start: condition.start_byte(),
+                end: node.end_byte(),
+                question_mark,
+                then_expression,
+                colon,
+                else_expression,
+            },
+        )
+    }
+
+    fn ternary_expr_from_values(&self, parts: TernaryValueParts<'a>) -> Value {
+        self.syntax_node(
+            "TernaryExprSyntax",
+            self.range_from_offsets(parts.start, parts.end),
+            vec![
+                self.with_name(parts.condition, "condition"),
+                self.with_name(
+                    self.token_for_node(parts.question_mark, "infixQuestionMark"),
+                    "questionMark",
+                ),
+                self.with_name(parts.then_expression, "thenExpression"),
+                self.with_name(self.token_for_node(parts.colon, "colon"), "colon"),
+                self.with_name(parts.else_expression, "elseExpression"),
+            ],
+        )
+    }
+
+    fn ternary_expr_from_condition_value(
+        &self,
+        condition: Value,
+        parts: TernaryNodeParts<'a>,
+    ) -> Result<Value> {
+        Ok(self.ternary_expr_from_values(TernaryValueParts {
+            start: parts.start,
+            end: parts.end,
+            condition,
+            question_mark: parts.question_mark,
+            then_expression: self.expr(parts.then_expression)?,
+            colon: parts.colon,
+            else_expression: self.expr(parts.else_expression)?,
+        }))
+    }
+
+    fn reassociated_ternary_expr(
+        &self,
+        node: Node<'a>,
+        condition: Node<'a>,
+        question_mark: Node<'a>,
+        then_expression: Node<'a>,
+        colon: Node<'a>,
+        else_expression: Node<'a>,
+    ) -> Result<Option<Value>> {
+        if condition.kind() != "ternary_expression" || condition.start_byte() != node.start_byte() {
+            return Ok(None);
+        }
+        let inner_condition = self
+            .field_child(condition, "condition")
+            .context("ternary expression is missing condition")?;
+        let inner_then_expression = self
+            .field_child(condition, "if_true")
+            .context("ternary expression is missing then expression")?;
+        let inner_else_expression = self
+            .field_child(condition, "if_false")
+            .context("ternary expression is missing else expression")?;
+        let inner_question_mark = children(condition)
+            .find(|child| child.kind() == "?")
+            .context("ternary expression is missing '?'")?;
+        let inner_colon = children(condition)
+            .find(|child| child.kind() == ":")
+            .context("ternary expression is missing ':'")?;
+
+        let nested_else = self.ternary_expr_from_condition_value(
+            self.expr(inner_else_expression)?,
+            TernaryNodeParts {
+                start: inner_else_expression.start_byte(),
+                end: node.end_byte(),
+                question_mark,
+                then_expression,
+                colon,
+                else_expression,
+            },
+        )?;
+        Ok(Some(self.ternary_expr_from_values(TernaryValueParts {
+            start: node.start_byte(),
+            end: node.end_byte(),
+            condition: self.expr(inner_condition)?,
+            question_mark: inner_question_mark,
+            then_expression: self.expr(inner_then_expression)?,
+            colon: inner_colon,
+            else_expression: nested_else,
+        })))
+    }
+
+    fn recovered_arrow_sequence_expr(
+        &self,
+        node: Node<'a>,
+        condition: Node<'a>,
+        question_mark: Node<'a>,
+        then_expression: Node<'a>,
+        colon: Node<'a>,
+        else_expression: Node<'a>,
+    ) -> Result<Option<Value>> {
+        if condition.kind() != "as_expression" {
+            return Ok(None);
+        }
+        let Some(check_expression) = self.expression_field_child(condition, "expr") else {
+            return Ok(None);
+        };
+        if check_expression.kind() != "check_expression" {
+            return Ok(None);
+        }
+        let Some(arrow_expression) = self.expression_field_child(check_expression, "target") else {
+            return Ok(None);
+        };
+        if !self.is_arrow_artifact_expression(arrow_expression) {
+            return Ok(None);
+        }
+        let Some(sequence_head) = self.field_child(arrow_expression, "lhs") else {
+            return Ok(None);
+        };
+        let Some(recovered_subject) = named_children(check_expression).find(|child| {
+            child.kind() == "ERROR"
+                && child.start_byte() >= arrow_expression.end_byte()
+                && is_identifier_like_text(self.text(*child))
+        }) else {
+            return Ok(None);
+        };
+        let is_keyword = self
+            .field_child(check_expression, "op")
+            .context("is expression is missing is keyword")?;
+        let is_type = self
+            .field_child(check_expression, "name")
+            .context("is expression is missing target type")?;
+        let as_operator = self
+            .immediate_named_child_kind(condition, "as_operator")
+            .or_else(|| named_children(condition).find(|child| child.kind() == "as_operator"))
+            .context("as expression is missing as operator")?;
+        let as_type = self
+            .field_child(condition, "name")
+            .context("as expression is missing target type")?;
+
+        let is_value =
+            self.is_expr_from_parts(check_expression, recovered_subject, is_keyword, is_type)?;
+        let condition_value = self.as_expr_from_value(
+            condition,
+            recovered_subject.start_byte(),
+            is_value,
+            as_operator,
+            as_type,
+        )?;
+        let ternary = self.ternary_expr_from_condition_value(
+            condition_value,
+            TernaryNodeParts {
+                start: recovered_subject.start_byte(),
+                end: node.end_byte(),
+                question_mark,
+                then_expression,
+                colon,
+                else_expression,
+            },
+        )?;
+        let sequence_head = self.expr(sequence_head)?;
+        let elements = self.syntax_node(
+            "ExprListSyntax",
+            self.range_from_offsets(arrow_expression.start_byte(), node.end_byte()),
+            vec![
+                self.with_name(sequence_head, ""),
+                self.with_name(ternary, ""),
+            ],
+        );
+        Ok(Some(self.syntax_node(
+            "SequenceExprSyntax",
+            self.range_from_offsets(arrow_expression.start_byte(), node.end_byte()),
+            vec![self.with_name(elements, "elements")],
+        )))
+    }
+
+    fn is_arrow_artifact_expression(&self, node: Node<'a>) -> bool {
+        node.kind() == "additive_expression"
+            && self
+                .field_child(node, "op")
+                .is_some_and(|op| self.text(op) == "-")
+            && self
+                .field_child(node, "rhs")
+                .is_some_and(|rhs| self.text(rhs) == ">")
+    }
+
+    fn try_expr(&self, node: Node<'a>) -> Result<Value> {
+        let expression = self
+            .expression_field_child(node, "expr")
+            .context("try expression is missing expression")?;
+        let value = self.expr(expression)?;
+        self.try_expr_wrapping_value(node, value)
+    }
+
+    fn try_expr_wrapping_value(&self, node: Node<'a>, expression: Value) -> Result<Value> {
+        let try_operator = self
+            .immediate_named_child_kind(node, "try_operator")
+            .or_else(|| named_children(node).find(|child| child.kind() == "try_operator"))
+            .context("try expression is missing try operator")?;
+        let mut children = vec![self.with_name(
+            self.token_with_range(
+                "keyword(SwiftSyntax.Keyword.try)",
+                self.range_from_offsets(try_operator.start_byte(), try_operator.start_byte() + 3),
+            ),
+            "tryKeyword",
+        )];
+
+        let operator_text = self.text(try_operator);
+        if let Some(mark_offset) = operator_text.find(['?', '!']) {
+            let mark_start = try_operator.start_byte() + mark_offset;
+            let mark_end = mark_start + 1;
+            let token_kind = if &operator_text[mark_offset..mark_offset + 1] == "?" {
+                "postfixQuestionMark"
+            } else {
+                "exclamationMark"
+            };
+            children.push(self.with_name(
+                self.token_with_range(token_kind, self.range_from_offsets(mark_start, mark_end)),
+                "questionOrExclamationMark",
+            ));
+        }
+
+        children.push(self.with_name(expression, "expression"));
+        Ok(self.syntax_node(
+            "TryExprSyntax",
+            self.range_from_offsets(node.start_byte(), end_offset(children.last().unwrap())),
+            children,
+        ))
+    }
+
+    fn await_expr(&self, node: Node<'a>) -> Result<Value> {
+        let await_keyword = self
+            .immediate_child_kind(node, "await")
+            .context("await expression is missing await keyword")?;
+        let expression = self
+            .expression_field_child(node, "expr")
+            .context("await expression is missing expression")?;
+        Ok(self.syntax_node(
+            "AwaitExprSyntax",
             self.range_for_node(node),
             vec![
-                self.with_name(self.expr(lhs)?, "leftOperand"),
-                self.with_name(operator, "operator"),
-                self.with_name(self.expr(rhs)?, "rightOperand"),
+                self.with_name(
+                    self.token_for_node(await_keyword, "keyword(SwiftSyntax.Keyword.await)"),
+                    "awaitKeyword",
+                ),
+                self.with_name(self.expr(expression)?, "expression"),
+            ],
+        ))
+    }
+
+    fn as_expr(&self, node: Node<'a>) -> Result<Value> {
+        let expression = self
+            .expression_field_child(node, "expr")
+            .context("as expression is missing expression")?;
+        let as_operator = self
+            .immediate_named_child_kind(node, "as_operator")
+            .or_else(|| named_children(node).find(|child| child.kind() == "as_operator"))
+            .context("as expression is missing as operator")?;
+        let type_node = self
+            .field_child(node, "name")
+            .context("as expression is missing target type")?;
+
+        if expression.kind() == "try_expression" && expression.start_byte() == node.start_byte() {
+            let try_expression = self
+                .expression_field_child(expression, "expr")
+                .context("try expression is missing expression")?;
+            let value = self.as_expr_from_parts(node, try_expression, as_operator, type_node)?;
+            return self.try_expr_wrapping_value(expression, value);
+        }
+
+        self.as_expr_from_parts(node, expression, as_operator, type_node)
+    }
+
+    fn as_expr_from_parts(
+        &self,
+        node: Node<'a>,
+        expression: Node<'a>,
+        as_operator: Node<'a>,
+        type_node: Node<'a>,
+    ) -> Result<Value> {
+        self.as_expr_from_value(
+            node,
+            expression.start_byte(),
+            self.expr(expression)?,
+            as_operator,
+            type_node,
+        )
+    }
+
+    fn as_expr_from_value(
+        &self,
+        node: Node<'a>,
+        start: usize,
+        expression: Value,
+        as_operator: Node<'a>,
+        type_node: Node<'a>,
+    ) -> Result<Value> {
+        let mut children = vec![
+            self.with_name(expression, "expression"),
+            self.with_name(
+                self.token_with_range(
+                    "keyword(SwiftSyntax.Keyword.as)",
+                    self.range_from_offsets(as_operator.start_byte(), as_operator.start_byte() + 2),
+                ),
+                "asKeyword",
+            ),
+        ];
+        let operator_text = self.text(as_operator);
+        if let Some(mark_offset) = operator_text.find(['?', '!']) {
+            let mark_start = as_operator.start_byte() + mark_offset;
+            let mark_end = mark_start + 1;
+            let token_kind = if &operator_text[mark_offset..mark_offset + 1] == "?" {
+                "postfixQuestionMark"
+            } else {
+                "exclamationMark"
+            };
+            children.push(self.with_name(
+                self.token_with_range(token_kind, self.range_from_offsets(mark_start, mark_end)),
+                "questionOrExclamationMark",
+            ));
+        }
+        children.push(self.with_name(self.type_syntax(type_node)?, "type"));
+        Ok(self.syntax_node(
+            "AsExprSyntax",
+            self.range_from_offsets(start, node.end_byte()),
+            children,
+        ))
+    }
+
+    fn is_expr(&self, node: Node<'a>) -> Result<Value> {
+        let expression = self
+            .expression_field_child(node, "target")
+            .context("is expression is missing expression")?;
+        let is_keyword = self
+            .field_child(node, "op")
+            .context("is expression is missing is keyword")?;
+        let type_node = self
+            .field_child(node, "name")
+            .context("is expression is missing target type")?;
+
+        if expression.kind() == "try_expression" && expression.start_byte() == node.start_byte() {
+            let try_expression = self
+                .expression_field_child(expression, "expr")
+                .context("try expression is missing expression")?;
+            let value = self.is_expr_from_parts(node, try_expression, is_keyword, type_node)?;
+            return self.try_expr_wrapping_value(expression, value);
+        }
+
+        self.is_expr_from_parts(node, expression, is_keyword, type_node)
+    }
+
+    fn is_expr_from_parts(
+        &self,
+        node: Node<'a>,
+        expression: Node<'a>,
+        is_keyword: Node<'a>,
+        type_node: Node<'a>,
+    ) -> Result<Value> {
+        Ok(self.syntax_node(
+            "IsExprSyntax",
+            self.range_from_offsets(expression.start_byte(), node.end_byte()),
+            vec![
+                self.with_name(self.expr(expression)?, "expression"),
+                self.with_name(
+                    self.token_for_node(is_keyword, "keyword(SwiftSyntax.Keyword.is)"),
+                    "isKeyword",
+                ),
+                self.with_name(self.type_syntax(type_node)?, "type"),
             ],
         ))
     }
@@ -4010,7 +4552,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .or_else(|| self.immediate_child_kind(node, "_move"))
             .context("consume expression is missing keyword")?;
         let expression = self
-            .field_child(node, "expr")
+            .expression_field_child(node, "expr")
             .or_else(|| named_children(node).find(|child| child.start_byte() >= keyword.end_byte()))
             .context("consume expression is missing expression")?;
         self.ownership_expr_from_parts("ConsumeExprSyntax", "consumeKeyword", keyword, expression)
@@ -4043,6 +4585,114 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn constructor_expr(&self, node: Node<'a>) -> Result<Value> {
+        let constructed_type = self
+            .field_child(node, "constructed_type")
+            .context("constructor expression is missing constructed type")?;
+        let suffix = self
+            .immediate_named_child_kind(node, "constructor_suffix")
+            .context("constructor expression is missing constructor suffix")?;
+        let value_arguments = self
+            .immediate_named_child_kind(suffix, "value_arguments")
+            .context("constructor expression is missing value arguments")?;
+        let left_paren = self
+            .immediate_child_kind(value_arguments, "(")
+            .context("constructor arguments are missing '('")?;
+        let right_paren = self
+            .immediate_child_kind(value_arguments, ")")
+            .context("constructor arguments are missing ')'")?;
+
+        Ok(self.syntax_node(
+            "FunctionCallExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.constructed_type_expr(constructed_type)?,
+                    "calledExpression",
+                ),
+                self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+                self.with_name(
+                    self.labeled_expr_list(value_arguments, left_paren, right_paren)?,
+                    "arguments",
+                ),
+                self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
+                self.with_name(
+                    self.empty_collection(
+                        "MultipleTrailingClosureElementListSyntax",
+                        node.end_byte(),
+                    ),
+                    "additionalTrailingClosures",
+                ),
+            ],
+        ))
+    }
+
+    fn constructed_type_expr(&self, node: Node<'a>) -> Result<Value> {
+        let name = self
+            .first_descendant_kind(node, "type_identifier")
+            .context("constructed type is missing type identifier")?;
+        let base = self.decl_reference_expr(name);
+        let Some(type_arguments) = self.immediate_named_child_kind(node, "type_arguments") else {
+            return Ok(base);
+        };
+        Ok(self.syntax_node(
+            "GenericSpecializationExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(base, "expression"),
+                self.with_name(
+                    self.generic_argument_clause(type_arguments)?,
+                    "genericArgumentClause",
+                ),
+            ],
+        ))
+    }
+
+    fn generic_argument_clause(&self, node: Node<'a>) -> Result<Value> {
+        let left_angle = self
+            .immediate_child_kind(node, "<")
+            .context("generic argument clause is missing '<'")?;
+        let right_angle = self
+            .immediate_child_kind(node, ">")
+            .context("generic argument clause is missing '>'")?;
+        let mut arguments = Vec::new();
+        for argument in named_children(node).filter(|child| {
+            child.start_byte() >= left_angle.end_byte()
+                && child.end_byte() <= right_angle.start_byte()
+        }) {
+            let trailing_comma = self.trailing_delimiter(node, argument, ",");
+            let mut children = vec![self.with_name(self.type_syntax(argument)?, "argument")];
+            if let Some(comma) = trailing_comma {
+                children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+            }
+            let argument_end = trailing_comma.map_or(argument.end_byte(), |comma| comma.end_byte());
+            arguments.push(self.with_name(
+                self.syntax_node(
+                    "GenericArgumentSyntax",
+                    self.range_from_offsets(argument.start_byte(), argument_end),
+                    children,
+                ),
+                "",
+            ));
+        }
+        Ok(self.syntax_node(
+            "GenericArgumentClauseSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_angle, "leftAngle"), "leftAngle"),
+                self.with_name(
+                    self.syntax_node(
+                        "GenericArgumentListSyntax",
+                        self.range_from_offsets(left_angle.end_byte(), right_angle.start_byte()),
+                        arguments,
+                    ),
+                    "arguments",
+                ),
+                self.with_name(self.token_for_node(right_angle, "rightAngle"), "rightAngle"),
+            ],
+        ))
+    }
+
     fn function_call_expr(&self, node: Node<'a>) -> Result<Value> {
         let callee = named_children(node)
             .find(|child| child.kind() != "call_suffix")
@@ -4050,6 +4700,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let suffix = self
             .immediate_named_child_kind(node, "call_suffix")
             .context("call expression is missing call suffix")?;
+
+        if let Some(binary_expr) = self.binary_expr_with_rhs_call_suffix(node, callee, suffix)? {
+            return Ok(binary_expr);
+        }
+
         let trailing_closures = named_children(suffix)
             .filter(|child| child.kind() == "lambda_literal")
             .collect::<Vec<_>>();
@@ -4114,6 +4769,119 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(self.syntax_node(
             "FunctionCallExprSyntax",
             self.range_for_node(node),
+            children,
+        ))
+    }
+
+    fn binary_expr_with_rhs_call_suffix(
+        &self,
+        node: Node<'a>,
+        callee: Node<'a>,
+        suffix: Node<'a>,
+    ) -> Result<Option<Value>> {
+        if !is_binary_expression_kind(callee.kind()) {
+            return Ok(None);
+        }
+        let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments")
+        else {
+            return Ok(None);
+        };
+        if self.subscript_delimiters(value_arguments).is_some() {
+            return Ok(None);
+        }
+
+        let lhs = self
+            .field_child(callee, "lhs")
+            .or_else(|| self.field_child(callee, "start"))
+            .context("binary expression is missing lhs")?;
+        let op = self
+            .field_child(callee, "op")
+            .context("binary expression is missing operator")?;
+        let rhs = self
+            .field_child(callee, "rhs")
+            .or_else(|| self.field_child(callee, "end"))
+            .context("binary expression is missing rhs")?;
+        let rhs_call =
+            self.expr_with_call_suffix(rhs, suffix, rhs.start_byte(), node.end_byte())?;
+
+        if lhs.kind() == "try_expression" && lhs.start_byte() == callee.start_byte() {
+            let try_expression = self
+                .expression_field_child(lhs, "expr")
+                .context("try expression is missing expression")?;
+            let expression = self.infix_operator_expr_from_values(
+                try_expression.start_byte(),
+                node.end_byte(),
+                self.expr(try_expression)?,
+                op,
+                rhs_call,
+            )?;
+            return self.try_expr_wrapping_value(lhs, expression).map(Some);
+        }
+
+        self.infix_operator_expr_from_values(
+            callee.start_byte(),
+            node.end_byte(),
+            self.expr(lhs)?,
+            op,
+            rhs_call,
+        )
+        .map(Some)
+    }
+
+    fn expr_with_call_suffix(
+        &self,
+        expression: Node<'a>,
+        suffix: Node<'a>,
+        start: usize,
+        end: usize,
+    ) -> Result<Value> {
+        if expression.kind() == "try_expression" {
+            let inner = self
+                .expression_field_child(expression, "expr")
+                .context("try expression is missing expression")?;
+            let call =
+                self.function_call_expr_with_suffix(inner, suffix, inner.start_byte(), end)?;
+            return self.try_expr_wrapping_value(expression, call);
+        }
+        self.function_call_expr_with_suffix(expression, suffix, start, end)
+    }
+
+    fn function_call_expr_with_suffix(
+        &self,
+        callee: Node<'a>,
+        suffix: Node<'a>,
+        start: usize,
+        end: usize,
+    ) -> Result<Value> {
+        let mut children = vec![self.with_name(self.expr(callee)?, "calledExpression")];
+        if let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments") {
+            let left_paren = self
+                .immediate_child_kind(value_arguments, "(")
+                .context("call arguments are missing '('")?;
+            let right_paren = self
+                .immediate_child_kind(value_arguments, ")")
+                .context("call arguments are missing ')'")?;
+            children
+                .push(self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"));
+            children.push(self.with_name(
+                self.labeled_expr_list(value_arguments, left_paren, right_paren)?,
+                "arguments",
+            ));
+            children
+                .push(self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"));
+        } else {
+            children.push(self.with_name(
+                self.empty_collection("LabeledExprListSyntax", suffix.start_byte()),
+                "arguments",
+            ));
+        }
+        children.push(self.with_name(
+            self.empty_collection("MultipleTrailingClosureElementListSyntax", end),
+            "additionalTrailingClosures",
+        ));
+        Ok(self.syntax_node(
+            "FunctionCallExprSyntax",
+            self.range_from_offsets(start, end),
             children,
         ))
     }
@@ -4295,8 +5063,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn labeled_expr(&self, node: Node<'a>, trailing_comma: Option<Node<'a>>) -> Result<Value> {
         let value = self
-            .field_child(node, "value")
-            .or_else(|| named_children(node).find(|child| child.kind() != "value_argument_label"))
+            .value_field_child(node)
+            .or_else(|| {
+                named_children(node).find(|child| {
+                    child.kind() != "value_argument_label" && !self.is_recovery_bang_node(*child)
+                })
+            })
             .context("call argument is missing value")?;
         let mut children = Vec::new();
         if let Some(label_node) = self.field_child(node, "name") {
@@ -5029,6 +5801,50 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         node.children_by_field_name(field, &mut cursor).collect()
     }
 
+    fn value_field_child(&self, node: Node<'a>) -> Option<Node<'a>> {
+        self.field_children(node, "value")
+            .into_iter()
+            .find(|child| !self.is_recovery_bang_node(*child))
+    }
+
+    fn expression_field_child(&self, node: Node<'a>, field: &str) -> Option<Node<'a>> {
+        self.field_children(node, field)
+            .into_iter()
+            .find(|child| is_expression_field_candidate(*child))
+    }
+
+    fn recovered_value_end(&self, node: Node<'a>, value: Node<'a>) -> usize {
+        let mut end = value.end_byte();
+        for child in self.field_children(node, "value") {
+            if child.start_byte() >= end && self.is_recovery_bang_node(child) {
+                end = child.end_byte();
+            }
+        }
+        let mut sibling = node.next_sibling();
+        while let Some(next) = sibling {
+            if next.start_byte() > end {
+                break;
+            }
+            if !self.is_recovery_bang_node(next) {
+                break;
+            }
+            end = end.max(next.end_byte());
+            sibling = next.next_sibling();
+        }
+        end
+    }
+
+    fn is_recovery_bang_node(&self, node: Node<'a>) -> bool {
+        if node.kind() == "bang" {
+            return true;
+        }
+        if matches!(node.kind(), "custom_operator" | "ERROR") {
+            let trimmed = self.text(node).trim();
+            return !trimmed.is_empty() && trimmed.chars().all(|ch| ch == '!');
+        }
+        false
+    }
+
     fn children_between(&self, node: Node<'a>, start: usize, end: usize) -> Vec<Node<'a>> {
         children(node)
             .filter(|child| child.start_byte() >= start && child.end_byte() <= end)
@@ -5218,10 +6034,14 @@ fn is_expression_like_node(node: Node<'_>) -> bool {
         node.kind(),
         "additive_expression"
             | "array_literal"
+            | "as_expression"
+            | "await_expression"
             | "boolean_literal"
             | "call_expression"
+            | "check_expression"
             | "comparison_expression"
             | "conjunction_expression"
+            | "constructor_expression"
             | "dictionary_literal"
             | "disjunction_expression"
             | "equality_expression"
@@ -5240,7 +6060,32 @@ fn is_expression_like_node(node: Node<'_>) -> bool {
             | "self_expression"
             | "simple_identifier"
             | "super_expression"
+            | "ternary_expression"
+            | "try_expression"
             | "tuple_expression"
+            | "user_type"
+    )
+}
+
+fn is_expression_field_candidate(node: Node<'_>) -> bool {
+    is_expression_like_node(node)
+        || matches!(
+            node.kind(),
+            "assignment" | "directly_assignable_expression" | "if_statement" | "switch_statement"
+        )
+}
+
+fn is_binary_expression_kind(kind: &str) -> bool {
+    matches!(
+        kind,
+        "additive_expression"
+            | "comparison_expression"
+            | "conjunction_expression"
+            | "disjunction_expression"
+            | "equality_expression"
+            | "infix_expression"
+            | "multiplicative_expression"
+            | "range_expression"
     )
 }
 
@@ -6883,6 +7728,52 @@ extension Foo: SomeProtocol, AnotherProtocol {
         assert!(prefixes
             .iter()
             .all(|node| node["children"][1]["nodeType"] == "DeclReferenceExprSyntax"));
+    }
+
+    #[test]
+    fn emits_try_ternary_cast_await_and_constructor_expressions() {
+        let bang_source = "let a = (try? foo())!!";
+        let bang_value = parse_source("Bang.swift", "/tmp/Bang.swift", bang_source).unwrap();
+        let first_initializer = find_node_types(&bang_value, "InitializerClauseSyntax")
+            .into_iter()
+            .find(|node| node["range"]["startOffset"].as_u64() == Some(6))
+            .unwrap();
+        assert_eq!(
+            first_initializer["range"]["endOffset"].as_u64(),
+            Some(bang_source.len() as u64)
+        );
+        assert_eq!(find_node_types(first_initializer, "TryExprSyntax").len(), 1);
+
+        let source = "\
+let b = true ? try? foo() : try? bar() + 0
+let c: Int? = try? produceAny() as? Int
+let d = await fetch()
+let e = Foo<Int>()
+let f = value is Foo
+";
+        let value = parse_source("Expressions.swift", "/tmp/Expressions.swift", source).unwrap();
+
+        assert_eq!(find_node_types(&value, "TernaryExprSyntax").len(), 1);
+        assert!(find_node_types(&value, "TryExprSyntax").len() >= 3);
+        assert_eq!(find_node_types(&value, "AsExprSyntax").len(), 1);
+        assert_eq!(find_node_types(&value, "IsExprSyntax").len(), 1);
+        assert_eq!(find_node_types(&value, "AwaitExprSyntax").len(), 1);
+        assert_eq!(
+            find_node_types(&value, "GenericSpecializationExprSyntax").len(),
+            1
+        );
+
+        let nested =
+            parse_source("Nested.swift", "/tmp/Nested.swift", "a ? b : c ? d : e").unwrap();
+        let outer_ternary = find_first_node_type(&nested, "TernaryExprSyntax").unwrap();
+        assert_eq!(
+            outer_ternary["children"][0]["children"][0]["tokenKind"],
+            "identifier(\"a\")"
+        );
+        assert_eq!(
+            outer_ternary["children"][4]["nodeType"],
+            "TernaryExprSyntax"
+        );
     }
 
     #[test]
