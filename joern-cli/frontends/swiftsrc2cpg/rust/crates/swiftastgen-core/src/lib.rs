@@ -722,6 +722,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 child.kind() == "custom_operator"
                     && child.start_byte() >= operator_keyword.end_byte()
             })
+            .or_else(|| self.unnamed_operator_decl_name(node, operator_keyword))
             .context("operator declaration is missing an operator name")?;
 
         let mut children = vec![
@@ -756,6 +757,19 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
 
         Ok(self.syntax_node("OperatorDeclSyntax", self.range_for_node(node), children))
+    }
+
+    fn unnamed_operator_decl_name(
+        &self,
+        node: Node<'a>,
+        operator_keyword: Node<'a>,
+    ) -> Option<Node<'a>> {
+        children(node).find(|child| {
+            child.start_byte() >= operator_keyword.end_byte()
+                && child.kind() != ":"
+                && !child.is_named()
+                && !self.text(*child).trim().is_empty()
+        })
     }
 
     fn operator_precedence_and_types(
@@ -3778,6 +3792,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "dictionary_literal" => self.dictionary_expr(node),
             "key_path_expression" => self.key_path_expr(node),
             "lambda_literal" => self.closure_expr(node),
+            "navigation_expression" if self.is_recoverable_prefix_slash_navigation(node) => self
+                .synthetic_prefix_slash_expr_from_offsets(node.start_byte(), node.end_byte())
+                .context("recoverable prefix slash expression is missing operand"),
             "navigation_expression" => self.member_access_expr(node),
             "prefix_expression" => self.prefix_expr(node),
             "super_expression" => Ok(self.super_expr(node)),
@@ -3825,6 +3842,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "baseName",
                 )],
             )),
+            "/" => Ok(self.decl_reference_expr(node)),
             "nil" => Ok(self.syntax_node(
                 "NilLiteralExprSyntax",
                 self.range_for_node(node),
@@ -4753,11 +4771,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if self.source[start..end].trim() == "_" {
             return self.discard_assignment_expr_from_offsets(start, end);
         }
+        if let Some(prefix) = self.synthetic_prefix_slash_expr_from_offsets(start, end) {
+            return prefix;
+        }
         if let Some(call) = self.synthetic_function_call_expr_from_offsets(start, end) {
             return call;
         }
         if let Some(member_access) = self.synthetic_member_access_expr_from_offsets(start, end) {
             return member_access;
+        }
+        if let Some(tuple) = self.synthetic_parenthesized_expr_from_offsets(start, end) {
+            return tuple;
         }
         let text = &self.source[start..end];
         if text.chars().all(|ch| ch.is_ascii_digit()) {
@@ -4796,6 +4820,45 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ),
                 "baseName",
             )],
+        )
+    }
+
+    fn synthetic_prefix_slash_expr_from_offsets(&self, start: usize, end: usize) -> Option<Value> {
+        let text = &self.source[start..end];
+        if end <= start + 1 || !text.starts_with('/') || self.is_regex_literal_text(text) {
+            return None;
+        }
+        let (operand_start, operand_end) = self.trim_offsets(start + 1, end);
+        if operand_start >= operand_end {
+            return None;
+        }
+        let operand = self.synthetic_expr_from_offsets(operand_start, operand_end);
+        Some(self.prefix_operator_expr_from_offsets(start, start + 1, operand, end))
+    }
+
+    fn prefix_operator_expr_from_offsets(
+        &self,
+        start: usize,
+        operator_end: usize,
+        expression: Value,
+        end: usize,
+    ) -> Value {
+        self.syntax_node(
+            "PrefixOperatorExprSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        &format!(
+                            "prefixOperator({})",
+                            quoted_text(&self.source[start..operator_end])
+                        ),
+                        self.range_from_offsets(start, operator_end),
+                    ),
+                    "operator",
+                ),
+                self.with_name(expression, "expression"),
+            ],
         )
     }
 
@@ -4878,6 +4941,37 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn synthetic_parenthesized_expr_from_offsets(&self, start: usize, end: usize) -> Option<Value> {
+        let (left_paren_start, right_paren_start) = self.enclosing_parens(start, end)?;
+        Some(self.syntax_node(
+            "TupleExprSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "leftParen",
+                        self.range_from_offsets(left_paren_start, left_paren_start + 1),
+                    ),
+                    "leftParen",
+                ),
+                self.with_name(
+                    self.synthetic_labeled_expr_list_from_offsets(
+                        left_paren_start + 1,
+                        right_paren_start,
+                    ),
+                    "elements",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "rightParen",
+                        self.range_from_offsets(right_paren_start, right_paren_start + 1),
+                    ),
+                    "rightParen",
+                ),
+            ],
+        ))
+    }
+
     fn synthetic_labeled_expr_list_from_offsets(&self, start: usize, end: usize) -> Value {
         let mut args = Vec::new();
         let mut element_start = start;
@@ -4954,6 +5048,32 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
         }
         None
+    }
+
+    fn enclosing_parens(&self, start: usize, end: usize) -> Option<(usize, usize)> {
+        if end <= start + 1
+            || self.source.as_bytes().get(start) != Some(&b'(')
+            || self.source.as_bytes().get(end.checked_sub(1)?) != Some(&b')')
+        {
+            return None;
+        }
+
+        let bytes = self.source.as_bytes();
+        let mut depth = 0usize;
+        let right_paren_start = end - 1;
+        for (offset, byte) in bytes.iter().enumerate().take(end).skip(start) {
+            match byte {
+                b'(' => depth += 1,
+                b')' => {
+                    depth = depth.checked_sub(1)?;
+                    if depth == 0 && offset != right_paren_start {
+                        return None;
+                    }
+                }
+                _ => {}
+            }
+        }
+        (depth == 0).then_some((start, right_paren_start))
     }
 
     fn last_top_level_dot(&self, start: usize, end: usize) -> Option<usize> {
@@ -5430,6 +5550,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn tuple_expr(&self, node: Node<'a>) -> Result<Value> {
+        if self.is_recoverable_prefix_slash_member_call_tuple(node) {
+            if let Some(call) =
+                self.synthetic_function_call_expr_from_offsets(node.start_byte(), node.end_byte())
+            {
+                return Ok(call);
+            }
+        }
         let left_paren = self
             .immediate_child_kind(node, "(")
             .context("tuple expression is missing '('")?;
@@ -5462,6 +5589,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
             ],
         ))
+    }
+
+    fn is_recoverable_prefix_slash_member_call_tuple(&self, node: Node<'a>) -> bool {
+        if node.kind() != "tuple_expression" {
+            return false;
+        }
+        let text = self.text(node);
+        text.starts_with("(/")
+            && text.contains(").")
+            && self
+                .field_children(node, "value")
+                .into_iter()
+                .any(|child| child.kind() == "regex_literal")
+            && named_children(node).any(|child| child.kind() == "ERROR")
     }
 
     fn labeled_expr_list_from_tuple_expr(
@@ -5897,6 +6038,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_for_node(node),
             children,
         ))
+    }
+
+    fn is_recoverable_prefix_slash_navigation(&self, node: Node<'a>) -> bool {
+        node.kind() == "navigation_expression"
+            && self.field_child(node, "target").is_some_and(|target| {
+                target.kind() == "/" && target.start_byte() == node.start_byte()
+            })
+            && self.field_child(node, "suffix").is_some()
+            && named_children(node)
+                .any(|child| child.kind() == "ERROR" && is_identifier_like_text(self.text(child)))
     }
 
     fn prefix_expr(&self, node: Node<'a>) -> Result<Value> {
@@ -12162,6 +12313,51 @@ if case let .Naught(value) = n {}
         assert!(prefixes
             .iter()
             .all(|node| node["children"][1]["nodeType"] == "DeclReferenceExprSyntax"));
+    }
+
+    #[test]
+    fn recovers_prefix_slash_operator_expressions() {
+        let source = "\
+prefix operator /
+prefix func / <T> (_ x: T) -> T { x }
+_ = /E.e
+(/E.e).foo(/0)
+foo(/E.e, /E.e)
+foo((/E.e), /E.e)
+foo((/)(E.e), /E.e)
+_ = bar(/E.e) / 2
+";
+        let value = parse_source("PrefixSlash.swift", "/tmp/PrefixSlash.swift", source).unwrap();
+
+        let operator = find_first_node_type(&value, "OperatorDeclSyntax").unwrap();
+        assert_eq!(
+            child_by_name(operator, "name").unwrap()["tokenKind"],
+            "prefixOperator(\"/\")"
+        );
+
+        let prefixes = find_node_types(&value, "PrefixOperatorExprSyntax");
+        let prefix_texts = prefixes
+            .iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert!(prefix_texts.contains(&"/E.e"));
+        assert!(prefix_texts.contains(&"/0"));
+        assert!(prefixes.iter().any(|node| {
+            source_text(source, node) == "/E.e"
+                && child_by_name(node, "expression")
+                    .is_some_and(|expression| expression["nodeType"] == "MemberAccessExprSyntax")
+        }));
+
+        let calls = find_node_types(&value, "FunctionCallExprSyntax");
+        let call_texts = calls
+            .iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert!(call_texts.contains(&"(/E.e).foo(/0)"));
+        assert!(call_texts.contains(&"foo(/E.e, /E.e)"));
+        assert!(call_texts.contains(&"foo((/E.e), /E.e)"));
+        assert!(call_texts.contains(&"foo((/)(E.e), /E.e)"));
+        assert!(call_texts.contains(&"bar(/E.e)"));
     }
 
     #[test]
