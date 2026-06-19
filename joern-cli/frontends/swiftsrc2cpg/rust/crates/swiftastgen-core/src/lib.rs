@@ -3743,6 +3743,35 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             ));
         }
 
+        if operation.kind() == "&" || self.text(operation) == "&" {
+            if is_binary_expression_kind(target.kind()) {
+                let lhs = self
+                    .expression_field_child(target, "lhs")
+                    .or_else(|| self.expression_field_child(target, "start"))
+                    .or_else(|| self.field_child(target, "lhs"))
+                    .or_else(|| self.field_child(target, "start"))
+                    .context("inout binary recovery is missing lhs")?;
+                let op = self
+                    .field_child(target, "op")
+                    .context("inout binary recovery is missing operator")?;
+                let rhs = self
+                    .expression_field_child(target, "rhs")
+                    .or_else(|| self.expression_field_child(target, "end"))
+                    .or_else(|| self.field_child(target, "rhs"))
+                    .or_else(|| self.field_child(target, "end"))
+                    .context("inout binary recovery is missing rhs")?;
+                let lhs_inout = self.in_out_expr(operation, lhs)?;
+                return self.infix_operator_expr_from_values(
+                    operation.start_byte(),
+                    rhs.end_byte(),
+                    lhs_inout,
+                    op,
+                    self.expr(rhs)?,
+                );
+            }
+            return self.in_out_expr(operation, target);
+        }
+
         Ok(self.syntax_node(
             "PrefixOperatorExprSyntax",
             self.range_for_node(node),
@@ -3755,6 +3784,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "operator",
                 ),
                 self.with_name(self.expr(target)?, "expression"),
+            ],
+        ))
+    }
+
+    fn in_out_expr(&self, ampersand: Node<'a>, expression: Node<'a>) -> Result<Value> {
+        Ok(self.syntax_node(
+            "InOutExprSyntax",
+            self.range_from_offsets(ampersand.start_byte(), expression.end_byte()),
+            vec![
+                self.with_name(
+                    self.token_for_node(ampersand, "prefixAmpersand"),
+                    "ampersand",
+                ),
+                self.with_name(self.expr(expression)?, "expression"),
             ],
         ))
     }
@@ -8077,6 +8120,31 @@ extension Foo: SomeProtocol, AnotherProtocol {
         assert!(prefixes
             .iter()
             .all(|node| node["children"][1]["nodeType"] == "DeclReferenceExprSyntax"));
+    }
+
+    #[test]
+    fn recovers_inout_operands_in_binary_arguments() {
+        let source = "let d = Data(a: &b + offset, count: &c - offset)\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let inouts = find_node_types(&value, "InOutExprSyntax");
+        let inout_texts = inouts
+            .iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert_eq!(inout_texts, vec!["&b", "&c"]);
+        assert!(inouts.iter().all(|node| {
+            node["children"][0]["name"] == "ampersand"
+                && node["children"][0]["tokenKind"] == "prefixAmpersand"
+                && node["children"][1]["nodeType"] == "DeclReferenceExprSyntax"
+        }));
+
+        let infixes = find_node_types(&value, "InfixOperatorExprSyntax");
+        let infix_texts = infixes
+            .iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert!(infix_texts.contains(&"&b + offset"));
+        assert!(infix_texts.contains(&"&c - offset"));
     }
 
     #[test]
