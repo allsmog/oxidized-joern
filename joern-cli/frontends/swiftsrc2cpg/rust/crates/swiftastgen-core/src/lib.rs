@@ -365,6 +365,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "disjunction_expression"
             | "equality_expression"
             | "integer_literal"
+            | "key_path_expression"
             | "lambda_literal"
             | "line_string_literal"
             | "multi_line_string_literal"
@@ -2804,6 +2805,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn expr(&self, node: Node<'a>) -> Result<Value> {
+        if self.is_key_path_expr_tree(node) {
+            return self.key_path_expr(node);
+        }
         match node.kind() {
             "directly_assignable_expression" => {
                 let child = named_children(node)
@@ -2830,6 +2834,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "constructor_expression" => self.constructor_expr(node),
             "consume_expression" => self.consume_expr(node),
             "dictionary_literal" => self.dictionary_expr(node),
+            "key_path_expression" => self.key_path_expr(node),
             "lambda_literal" => self.closure_expr(node),
             "navigation_expression" => self.member_access_expr(node),
             "prefix_expression" => self.prefix_expr(node),
@@ -2927,6 +2932,38 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     fn is_split_initializer_continuation(&self, node: Node<'a>) -> bool {
         (node.kind() == "call_expression" && self.text(node).trim_start().starts_with('='))
             || self.is_bare_macro_error(node)
+    }
+
+    fn key_path_expr(&self, node: Node<'a>) -> Result<Value> {
+        let backslash_start = node.start_byte()
+            + self
+                .text(node)
+                .find('\\')
+                .context("key path expression is missing backslash")?;
+        Ok(self.syntax_node(
+            "KeyPathExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "backslash",
+                        self.range_from_offsets(backslash_start, backslash_start + 1),
+                    ),
+                    "backslash",
+                ),
+                self.with_name(
+                    self.empty_collection("KeyPathComponentListSyntax", node.end_byte()),
+                    "components",
+                ),
+            ],
+        ))
+    }
+
+    fn is_key_path_expr_tree(&self, node: Node<'a>) -> bool {
+        matches!(
+            node.kind(),
+            "key_path_expression" | "navigation_expression" | "call_expression"
+        ) && self.text(node).trim_start().starts_with('\\')
     }
 
     fn expr_for_split_initializer(&self, node: Node<'a>) -> Result<Value> {
@@ -6355,6 +6392,7 @@ fn is_expression_like_node(node: Node<'_>) -> bool {
             | "disjunction_expression"
             | "equality_expression"
             | "integer_literal"
+            | "key_path_expression"
             | "lambda_literal"
             | "line_string_literal"
             | "macro_invocation"
@@ -8162,6 +8200,37 @@ let a = #embed(\"filename.txt\")
     }
 
     #[test]
+    fn emits_key_path_expressions() {
+        let source =
+            "\\a.b.c\n\\ABCProtocol[100]\nchildren.filter(\\.type.defaultInitialization.isEmpty)\n";
+        let value = parse_source("KeyPaths.swift", "/tmp/KeyPaths.swift", source).unwrap();
+        let key_paths = find_node_types(&value, "KeyPathExprSyntax");
+        let key_path_texts = key_paths
+            .iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            key_path_texts,
+            vec![
+                "\\a.b.c",
+                "\\ABCProtocol[100]",
+                "\\.type.defaultInitialization.isEmpty"
+            ]
+        );
+        assert!(key_paths.iter().all(|node| {
+            node["children"][0]["name"] == "backslash"
+                && node["children"][0]["tokenKind"] == "backslash"
+                && node["children"][1]["name"] == "components"
+                && node["children"][1]["nodeType"] == "KeyPathComponentListSyntax"
+        }));
+
+        let calls = find_node_types(&value, "FunctionCallExprSyntax");
+        assert!(calls.iter().any(|call| {
+            source_text(source, call) == "children.filter(\\.type.defaultInitialization.isEmpty)"
+        }));
+    }
+
+    #[test]
     fn emits_range_expressions() {
         let source =
             "let deps = [.package(url: \"https://github.com/DepC\", \"1.2.3\"..<\"1.2.6\"), .package(url: \"https://github.com/DepD\", \"1.2.3\"...\"1.2.6\")]\n";
@@ -8219,5 +8288,11 @@ let a = #embed(\"filename.txt\")
             }
         }
         values
+    }
+
+    fn source_text<'s>(source: &'s str, value: &Value) -> &'s str {
+        let start = value["range"]["startOffset"].as_u64().unwrap() as usize;
+        let end = end_offset(value);
+        &source[start..end]
     }
 }
