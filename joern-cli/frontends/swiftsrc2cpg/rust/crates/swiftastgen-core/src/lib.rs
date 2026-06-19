@@ -3450,10 +3450,6 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn closure_expr(&self, node: Node<'a>) -> Result<Value> {
-        if self.field_child(node, "captures").is_some() {
-            bail!("closure captures are not supported yet");
-        }
-
         let left_brace = self
             .immediate_child_kind(node, "{")
             .context("closure literal is missing '{'")?;
@@ -3498,6 +3494,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "attributes",
         )];
 
+        if let Some(captures) = self.field_child(closure, "captures") {
+            children.push(self.with_name(self.closure_capture_clause(captures)?, "capture"));
+        }
+
         if let Some(parameter_node) =
             named_children(node).find(|child| child.kind() == "lambda_function_type_parameters")
         {
@@ -3531,9 +3531,97 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
         Ok(self.syntax_node(
             "ClosureSignatureSyntax",
-            self.range_from_offsets(node.start_byte(), in_keyword.end_byte()),
+            self.range_from_offsets(
+                self.field_child(closure, "captures")
+                    .map_or(node.start_byte(), |captures| captures.start_byte()),
+                in_keyword.end_byte(),
+            ),
             children,
         ))
+    }
+
+    fn closure_capture_clause(&self, node: Node<'a>) -> Result<Value> {
+        let left_square = self
+            .immediate_child_kind(node, "[")
+            .context("closure capture clause is missing '['")?;
+        let right_square = self
+            .immediate_child_kind(node, "]")
+            .context("closure capture clause is missing ']'")?;
+        let mut captures = Vec::new();
+        for capture in named_children(node).filter(|child| child.kind() == "capture_list_item") {
+            let trailing_comma = self.trailing_delimiter(node, capture, ",");
+            captures.push(self.with_name(self.closure_capture(capture, trailing_comma)?, ""));
+        }
+        Ok(self.syntax_node(
+            "ClosureCaptureClauseSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_square, "leftSquare"), "leftSquare"),
+                self.with_name(
+                    self.syntax_node(
+                        "ClosureCaptureListSyntax",
+                        self.covering_range_or_point(&captures, left_square.end_byte()),
+                        captures,
+                    ),
+                    "items",
+                ),
+                self.with_name(
+                    self.token_for_node(right_square, "rightSquare"),
+                    "rightSquare",
+                ),
+            ],
+        ))
+    }
+
+    fn closure_capture(&self, node: Node<'a>, trailing_comma: Option<Node<'a>>) -> Result<Value> {
+        let mut children = Vec::new();
+        if let Some(specifier) = self.immediate_named_child_kind(node, "ownership_modifier") {
+            children.push(self.with_name(self.closure_capture_specifier(specifier), "specifier"));
+        }
+        let name = self
+            .field_child(node, "name")
+            .or_else(|| {
+                named_children(node)
+                    .find(|child| matches!(child.kind(), "simple_identifier" | "self_expression"))
+            })
+            .context("closure capture is missing a name")?;
+        children.push(self.with_name(self.capture_name_token(name), "name"));
+        if let Some(value) = self.field_child(node, "value") {
+            let equal = self
+                .immediate_child_kind(node, "=")
+                .context("closure capture initializer is missing '='")?;
+            children.push(self.with_name(self.initializer_clause(equal, value)?, "initializer"));
+        }
+        if let Some(comma) = trailing_comma {
+            children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+        }
+        Ok(self.syntax_node("ClosureCaptureSyntax", self.range_for_node(node), children))
+    }
+
+    fn closure_capture_specifier(&self, node: Node<'a>) -> Value {
+        let token_kind = match self.text(node) {
+            "weak" => "keyword(SwiftSyntax.Keyword.weak)",
+            "unowned" => "keyword(SwiftSyntax.Keyword.unowned)",
+            other => {
+                return self.token_for_node(node, &format!("identifier({})", quoted_text(other)))
+            }
+        };
+        self.syntax_node(
+            "ClosureCaptureSpecifierSyntax",
+            self.range_for_node(node),
+            vec![self.with_name(self.token_for_node(node, token_kind), "specifier")],
+        )
+    }
+
+    fn capture_name_token(&self, node: Node<'a>) -> Value {
+        if self.text(node) == "self" {
+            self.token_for_node(node, "keyword(SwiftSyntax.Keyword.self)")
+        } else {
+            self.token_for_node(
+                node,
+                &format!("identifier({})", quoted_text(self.text(node))),
+            )
+        }
     }
 
     fn closure_parameter_clause(&self, node: Node<'a>) -> Result<Value> {
@@ -3592,19 +3680,28 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn closure_parameter(&self, node: Node<'a>, trailing_comma: Option<Node<'a>>) -> Result<Value> {
-        let name = self.lambda_parameter_name(node)?;
+        let (first_name, second_name) = self.lambda_parameter_names(node)?;
         let type_node = self.lambda_parameter_type(node);
         let mut children = vec![
             self.with_name(self.attribute_list(node)?, "attributes"),
             self.with_name(self.modifier_list(node), "modifiers"),
             self.with_name(
                 self.token_for_node(
-                    name,
-                    &format!("identifier({})", quoted_text(self.text(name))),
+                    first_name,
+                    &format!("identifier({})", quoted_text(self.text(first_name))),
                 ),
                 "firstName",
             ),
         ];
+        if let Some(second_name) = second_name {
+            children.push(self.with_name(
+                self.token_for_node(
+                    second_name,
+                    &format!("identifier({})", quoted_text(self.text(second_name))),
+                ),
+                "secondName",
+            ));
+        }
         if let Some(type_node) = type_node {
             if let Some(colon) = self.immediate_child_kind(node, ":") {
                 children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
@@ -3651,18 +3748,29 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn lambda_parameter_name(&self, node: Node<'a>) -> Result<Node<'a>> {
+        let (first_name, second_name) = self.lambda_parameter_names(node)?;
+        Ok(second_name.unwrap_or(first_name))
+    }
+
+    fn lambda_parameter_names(&self, node: Node<'a>) -> Result<(Node<'a>, Option<Node<'a>>)> {
+        let mut name_cursor = node.walk();
+        let name_nodes = node
+            .children_by_field_name("name", &mut name_cursor)
+            .filter(|child| matches!(child.kind(), "simple_identifier" | "identifier" | "_"))
+            .collect::<Vec<_>>();
         if let Some(external_name) = self.field_child(node, "external_name") {
-            return Ok(external_name);
+            let second_name = name_nodes
+                .iter()
+                .copied()
+                .find(|name| name.start_byte() >= external_name.end_byte());
+            return Ok((external_name, second_name));
         }
-        let mut cursor = node.walk();
-        if let Some(name) = node
-            .children_by_field_name("name", &mut cursor)
-            .find(|child| matches!(child.kind(), "simple_identifier" | "identifier" | "_"))
-        {
-            return Ok(name);
+        if let Some(name) = name_nodes.first().copied() {
+            return Ok((name, None));
         }
         named_children(node)
             .find(|child| matches!(child.kind(), "simple_identifier" | "identifier" | "_"))
+            .map(|name| (name, None))
             .context("closure parameter is missing a name")
     }
 
@@ -7342,6 +7450,53 @@ extension Foo: SomeProtocol, AnotherProtocol {
             "FunctionCallExprSyntax"
         );
         assert_eq!(closure["children"][3]["tokenKind"], "rightBrace");
+    }
+
+    #[test]
+    fn emits_closure_captures_and_internal_parameter_names() {
+        let source = "\
+let g = { [weak self, weak weakB = b] foo in
+  return 0
+}
+_ = { (_const x: Int) in }
+_ = { (_ x: MyType) in }
+_ = { (x y: MyType) in }
+";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let capture_clause = find_first_node_type(&value, "ClosureCaptureClauseSyntax").unwrap();
+        assert_eq!(capture_clause["children"][0]["tokenKind"], "leftSquare");
+        assert_eq!(capture_clause["children"][2]["tokenKind"], "rightSquare");
+        let captures = find_node_types(capture_clause, "ClosureCaptureSyntax");
+        assert_eq!(captures.len(), 2);
+        assert_eq!(
+            captures[0]["children"][1]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.self)"
+        );
+        assert_eq!(
+            captures[1]["children"][1]["tokenKind"],
+            "identifier(\"weakB\")"
+        );
+        assert_eq!(
+            captures[1]["children"][2]["nodeType"],
+            "InitializerClauseSyntax"
+        );
+
+        let second_names = find_node_types(&value, "ClosureParameterSyntax")
+            .iter()
+            .filter_map(|parameter| {
+                parameter["children"].as_array().and_then(|children| {
+                    children
+                        .iter()
+                        .find(|child| child["name"] == "secondName")
+                        .and_then(|child| child["tokenKind"].as_str())
+                })
+            })
+            .collect::<Vec<_>>();
+        assert!(second_names.contains(&"identifier(\"x\")"));
+        assert!(second_names.contains(&"identifier(\"y\")"));
+
+        let shorthand = find_first_node_type(&value, "ClosureShorthandParameterSyntax").unwrap();
+        assert_eq!(shorthand["children"][0]["tokenKind"], "identifier(\"foo\")");
     }
 
     #[test]
