@@ -381,7 +381,7 @@ trait AstForExprSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
   private def astForFunctionCallExprSyntax(node: FunctionCallExprSyntax): Ast = {
     val callee     = node.calledExpression
     val calleeCode = code(callee)
-    if (GlobalBuiltins.builtins.contains(calleeCode)) {
+    if (GlobalBuiltins.builtins.contains(calleeCode) || isConflictMarkerOperatorCall(calleeCode)) {
       createBuiltinStaticCall(node, callee, calleeCode)
     } else {
       callee match {
@@ -422,6 +422,10 @@ trait AstForExprSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
           handleCallNodeArgs(node, astForNode(other), calleeCode)
       }
     }
+  }
+
+  private def isConflictMarkerOperatorCall(calleeCode: String): Boolean = {
+    calleeCode == "<<<<<<<" || calleeCode == ">>>>>>>"
   }
 
   private def astForClosureCall(expr: FunctionCallExprSyntax): Ast = {
