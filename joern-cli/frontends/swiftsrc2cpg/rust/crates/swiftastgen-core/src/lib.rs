@@ -184,6 +184,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "operator_declaration" => self.operator_decl(node),
             "precedence_group_declaration" => self.precedence_group_decl(node),
             "control_transfer_statement" => self.control_transfer_stmt(node),
+            "call_expression" if self.is_defer_stmt(node) => self.defer_stmt(node),
             "for_statement" => self.for_stmt(node),
             "guard_statement" => self.guard_stmt(node),
             "if_statement" => self.if_expr(node),
@@ -232,6 +233,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "protocol_declaration" => self.protocol_decl(node),
             "operator_declaration" => self.operator_decl(node),
             "precedence_group_declaration" => self.precedence_group_decl(node),
+            "call_expression" if self.is_defer_stmt(node) => self.defer_stmt(node),
             "enum_entry" => self.enum_case_decl(node),
             "deinit_declaration" => self.deinitializer_decl(node),
             "init_declaration" => self.initializer_decl(node),
@@ -3349,6 +3351,39 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn is_defer_stmt(&self, node: Node<'a>) -> bool {
+        if node.kind() != "call_expression" {
+            return false;
+        }
+        let Some(callee) = named_children(node).next() else {
+            return false;
+        };
+        callee.kind() == "simple_identifier"
+            && self.text(callee) == "defer"
+            && self.first_descendant_kind(node, "lambda_literal").is_some()
+    }
+
+    fn defer_stmt(&self, node: Node<'a>) -> Result<Value> {
+        let defer_keyword = named_children(node)
+            .find(|child| child.kind() == "simple_identifier" && self.text(*child) == "defer")
+            .context("defer statement is missing 'defer'")?;
+        let body = self
+            .first_descendant_kind(node, "lambda_literal")
+            .context("defer statement is missing a body")?;
+
+        Ok(self.syntax_node(
+            "DeferStmtSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(defer_keyword, "keyword(SwiftSyntax.Keyword.defer)"),
+                    "deferKeyword",
+                ),
+                self.with_name(self.code_block(body)?, "body"),
+            ],
+        ))
+    }
+
     fn guard_stmt(&self, node: Node<'a>) -> Result<Value> {
         let guard_keyword = self
             .immediate_child_kind(node, "guard")
@@ -4283,6 +4318,34 @@ fn end_offset(value: &Value) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn emits_defer_statements() {
+        let source = r#"
+if score < 10 {
+  defer {
+    print(score)
+  }
+  defer {
+    print("The score is:")
+  }
+  score += 5
+}
+"#;
+        let value = parse_source("Defer.swift", "/tmp/Defer.swift", source).unwrap();
+        let defers = find_node_types(&value, "DeferStmtSyntax");
+        assert_eq!(defers.len(), 2);
+        assert!(defers.iter().all(|defer_stmt| {
+            defer_stmt["children"][0]["tokenKind"] == "keyword(SwiftSyntax.Keyword.defer)"
+                && defer_stmt["children"][1]["nodeType"] == "CodeBlockSyntax"
+        }));
+        let calls = find_node_types(&value, "FunctionCallExprSyntax");
+        let call_names = calls
+            .iter()
+            .filter_map(|call| call["children"][0]["children"][0]["tokenKind"].as_str())
+            .collect::<Vec<_>>();
+        assert!(!call_names.contains(&"identifier(\"defer\")"));
+    }
 
     #[test]
     fn emits_typealias_declarations() {
