@@ -5294,11 +5294,63 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             vec![
                 self.with_name(label, "label"),
                 self.with_name(
-                    self.code_block_item_list_from_statements(statements, colon.end_byte())?,
+                    self.code_block_item_list_from_switch_case_body(
+                        node,
+                        statements,
+                        colon.end_byte(),
+                    )?,
                     "statements",
                 ),
             ],
         ))
+    }
+
+    fn code_block_item_list_from_switch_case_body(
+        &self,
+        node: Node<'a>,
+        statements: Option<Node<'a>>,
+        fallback_offset: usize,
+    ) -> Result<Value> {
+        let statement_nodes: Vec<_> = statements
+            .map(named_children)
+            .into_iter()
+            .flatten()
+            .filter(|child| !is_trivia_node(*child))
+            .collect();
+        if let Some(item) = self.recovered_switch_case_assignment_item(
+            fallback_offset,
+            node.end_byte(),
+            &statement_nodes,
+        ) {
+            let range = self.range_from_offsets(fallback_offset, end_offset(&item));
+            return Ok(self.syntax_node("CodeBlockItemListSyntax", range, vec![item]));
+        }
+        self.code_block_item_list_from_nodes(&statement_nodes, fallback_offset)
+    }
+
+    fn recovered_switch_case_assignment_item(
+        &self,
+        body_start: usize,
+        body_end: usize,
+        statement_nodes: &[Node<'a>],
+    ) -> Option<Value> {
+        if statement_nodes.len() != 1 {
+            return None;
+        }
+        let statement = statement_nodes[0];
+        let (start, end) = self.trim_offsets(body_start, statement.end_byte().min(body_end));
+        if start >= end || statement.start_byte() <= start {
+            return None;
+        }
+        let equal = self.top_level_single_equal(start, statement.start_byte())?;
+        let (lhs_start, lhs_end) = self.trim_offsets(start, equal);
+        let (rhs_start, _) = self.trim_offsets(equal + 1, end);
+        if lhs_start >= lhs_end || rhs_start != statement.start_byte() {
+            return None;
+        }
+        let assignment = self.synthetic_expr_from_offsets(start, end);
+        (assignment["nodeType"] == "InfixOperatorExprSyntax")
+            .then(|| self.code_block_item_for_value(assignment, "item"))
     }
 
     fn switch_case_where_clause(
@@ -5670,6 +5722,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 !is_trivia_node(*child) && child.start_byte() >= start && child.end_byte() <= end
             })
             .collect();
+        if let Some(item) = self.recovered_switch_case_assignment_item(start, end, &statement_nodes)
+        {
+            let range = self.range_from_offsets(fallback_offset, end_offset(&item));
+            return Ok(self.syntax_node("CodeBlockItemListSyntax", range, vec![item]));
+        }
         let mut items = Vec::new();
         self.push_code_block_items_from_nodes(&statement_nodes, &mut items)?;
         let range = self.covering_range_or_point(&items, fallback_offset);
@@ -5958,8 +6015,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn synthetic_expr_from_offsets(&self, start: usize, end: usize) -> Value {
+        let (start, end) = self.trim_offsets(start, end);
         if self.source[start..end].trim() == "_" {
             return self.discard_assignment_expr_from_offsets(start, end);
+        }
+        if let Some(assignment) = self.synthetic_assignment_expr_from_offsets(start, end) {
+            return assignment;
         }
         if let Some(prefix) = self.synthetic_prefix_slash_expr_from_offsets(start, end) {
             return prefix;
@@ -6011,6 +6072,68 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "baseName",
             )],
         )
+    }
+
+    fn synthetic_assignment_expr_from_offsets(&self, start: usize, end: usize) -> Option<Value> {
+        let equal = self.top_level_single_equal(start, end)?;
+        let (lhs_start, lhs_end) = self.trim_offsets(start, equal);
+        let (rhs_start, rhs_end) = self.trim_offsets(equal + 1, end);
+        if lhs_start >= lhs_end || rhs_start >= rhs_end {
+            return None;
+        }
+        let assignment_operator = self.syntax_node(
+            "AssignmentExprSyntax",
+            self.range_from_offsets(equal, equal + 1),
+            vec![self.with_name(
+                self.token_with_range("equal", self.range_from_offsets(equal, equal + 1)),
+                "equal",
+            )],
+        );
+        Some(self.syntax_node(
+            "InfixOperatorExprSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.synthetic_expr_from_offsets(lhs_start, lhs_end),
+                    "leftOperand",
+                ),
+                self.with_name(assignment_operator, "operator"),
+                self.with_name(
+                    self.synthetic_expr_from_offsets(rhs_start, rhs_end),
+                    "rightOperand",
+                ),
+            ],
+        ))
+    }
+
+    fn top_level_single_equal(&self, start: usize, end: usize) -> Option<usize> {
+        let mut paren_depth = 0usize;
+        let mut square_depth = 0usize;
+        let mut brace_depth = 0usize;
+        for offset in start..end {
+            match self.source.as_bytes()[offset] {
+                b'(' => paren_depth += 1,
+                b')' => paren_depth = paren_depth.saturating_sub(1),
+                b'[' => square_depth += 1,
+                b']' => square_depth = square_depth.saturating_sub(1),
+                b'{' => brace_depth += 1,
+                b'}' => brace_depth = brace_depth.saturating_sub(1),
+                b'=' if paren_depth == 0 && square_depth == 0 && brace_depth == 0 => {
+                    let prev = offset
+                        .checked_sub(1)
+                        .and_then(|idx| self.source.as_bytes().get(idx));
+                    let next = self.source.as_bytes().get(offset + 1);
+                    if prev.is_some_and(|byte| matches!(byte, b'=' | b'!' | b'<' | b'>'))
+                        || next.is_some_and(|byte| *byte == b'=')
+                    {
+                        continue;
+                    }
+                    return Some(offset);
+                }
+                _ => {}
+            }
+        }
+        None
     }
 
     fn synthetic_prefix_slash_expr_from_offsets(&self, start: usize, end: usize) -> Option<Value> {
@@ -12066,6 +12189,30 @@ mod tests {
         assert_eq!(
             child_by_name(&items[1], "pattern").unwrap()["children"][0]["nodeType"],
             "IntegerLiteralExprSyntax"
+        );
+    }
+
+    #[test]
+    fn recovers_switch_default_assignment_body() {
+        let source = "switch x {\n  case 0:\n  default:\n    x = 0\n}\n";
+        let value = parse_source("Switch.swift", "/tmp/Switch.swift", source).unwrap();
+        let switch_cases = find_node_types(&value, "SwitchCaseSyntax");
+        assert_eq!(switch_cases.len(), 2);
+        let default_case = switch_cases
+            .into_iter()
+            .find(|case| {
+                child_by_name(case, "label").unwrap()["nodeType"] == "SwitchDefaultLabelSyntax"
+            })
+            .unwrap();
+        let statements = child_by_name(default_case, "statements").unwrap();
+        let item = &statements["children"][0];
+        assert_eq!(
+            child_by_name(item, "item").unwrap()["nodeType"],
+            "InfixOperatorExprSyntax"
+        );
+        assert_eq!(
+            source_text(source, child_by_name(item, "item").unwrap()),
+            "x = 0"
         );
     }
 
