@@ -203,6 +203,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     continue;
                 }
             }
+            if let Some(calls) = self.recovered_conflict_marker_calls(child)? {
+                for call in calls {
+                    statement_items.push(self.code_block_item_for_value(call, "item"));
+                }
+                child_index += 1;
+                continue;
+            }
             if child.kind() == "macro_declaration" {
                 for fragment in self.macro_decl_fragments(child) {
                     statement_items.push(self.code_block_item_for_value(fragment, "item"));
@@ -699,6 +706,133 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             range,
             vec![self.with_name(value, child_name)],
         )
+    }
+
+    fn recovered_conflict_marker_calls(&self, node: Node<'a>) -> Result<Option<Vec<Value>>> {
+        if node.kind() != "comparison_expression" {
+            return Ok(None);
+        }
+        let children = named_children(node).collect::<Vec<_>>();
+        let Some(first_operator) = children
+            .iter()
+            .copied()
+            .find(|child| child.kind() == "custom_operator")
+        else {
+            return Ok(None);
+        };
+        let first_operator_start = node.start_byte();
+        let mut first_operator_end = first_operator.end_byte();
+        while first_operator_end < self.source.len()
+            && self.source.as_bytes()[first_operator_end] == b'<'
+            && first_operator_end - first_operator_start < 7
+        {
+            first_operator_end += 1;
+        }
+        if self.source.get(first_operator_start..first_operator_end) != Some("<<<<<<<") {
+            return Ok(None);
+        }
+        let Some(infix) = children
+            .iter()
+            .copied()
+            .find(|child| child.kind() == "infix_expression")
+        else {
+            return Ok(None);
+        };
+        let infix_children = named_children(infix).collect::<Vec<_>>();
+        let string_literals = infix_children
+            .iter()
+            .copied()
+            .filter(|child| self.is_string_literal_node(*child))
+            .collect::<Vec<_>>();
+        let Some(first_argument) = string_literals.first().copied() else {
+            return Ok(None);
+        };
+        let Some(second_argument) = string_literals.get(1).copied() else {
+            return Ok(None);
+        };
+        let Some((second_operator_start, second_operator_end)) = infix_children
+            .iter()
+            .copied()
+            .find_map(|child| self.conflict_marker_operator_range(child))
+        else {
+            return Ok(None);
+        };
+
+        Ok(Some(vec![
+            self.synthetic_unparenthesized_call(
+                first_operator_start,
+                first_operator_end,
+                first_argument,
+            )?,
+            self.synthetic_unparenthesized_call(
+                second_operator_start,
+                second_operator_end,
+                second_argument,
+            )?,
+        ]))
+    }
+
+    fn conflict_marker_operator_range(&self, node: Node<'a>) -> Option<(usize, usize)> {
+        if node.kind() != "custom_operator" {
+            return None;
+        }
+        match self.text(node) {
+            "<<<<<<"
+                if node.start_byte() > 0
+                    && self.source.as_bytes().get(node.start_byte() - 1) == Some(&b'<') =>
+            {
+                Some((node.start_byte() - 1, node.end_byte()))
+            }
+            "<<<<<<<" | ">>>>>>>" => Some((node.start_byte(), node.end_byte())),
+            _ => None,
+        }
+    }
+
+    fn is_string_literal_node(&self, node: Node<'a>) -> bool {
+        matches!(
+            node.kind(),
+            "line_string_literal" | "multi_line_string_literal" | "raw_string_literal"
+        )
+    }
+
+    fn synthetic_unparenthesized_call(
+        &self,
+        callee_start: usize,
+        callee_end: usize,
+        argument: Node<'a>,
+    ) -> Result<Value> {
+        Ok(self.syntax_node(
+            "FunctionCallExprSyntax",
+            self.range_from_offsets(callee_start, argument.end_byte()),
+            vec![
+                self.with_name(
+                    self.decl_reference_expr_from_offsets(callee_start, callee_end),
+                    "calledExpression",
+                ),
+                self.with_name(
+                    self.syntax_node(
+                        "LabeledExprListSyntax",
+                        self.range_for_node(argument),
+                        vec![self.with_name(
+                            self.syntax_node(
+                                "LabeledExprSyntax",
+                                self.range_for_node(argument),
+                                vec![self.with_name(self.expr(argument)?, "expression")],
+                            ),
+                            "",
+                        )],
+                    ),
+                    "arguments",
+                ),
+                self.with_name(
+                    self.empty_collection(
+                        "MultipleTrailingClosureElementListSyntax",
+                        argument.end_byte(),
+                    ),
+                    "additionalTrailingClosures",
+                ),
+            ],
+        ))
     }
 
     fn labeled_stmt(&self, label: Node<'a>, statement: Node<'a>) -> Result<Value> {
@@ -11861,6 +11995,37 @@ mod tests {
         assert_eq!(
             child_by_name(break_stmt, "label").unwrap()["tokenKind"],
             "identifier(\"loop\")"
+        );
+    }
+
+    #[test]
+    fn recovers_conflict_marker_operator_calls() {
+        let source = r#"
+<<<<<<<"HEAD:fake_conflict_markers.swift" // No error
+>>>>>>>"18844bc65229786b96b89a9fc7739c0fc897905e:fake_conflict_markers.swift" // No error
+"#;
+        let value = parse_source("Conflict.swift", "/tmp/Conflict.swift", source).unwrap();
+        let calls = find_node_types(&value, "FunctionCallExprSyntax");
+        assert_eq!(calls.len(), 2);
+        assert_eq!(
+            source_text(source, calls[0]),
+            "<<<<<<<\"HEAD:fake_conflict_markers.swift\""
+        );
+        assert_eq!(
+            child_by_name(calls[0], "calledExpression").unwrap()["children"][0]["tokenKind"],
+            "identifier(\"<<<<<<<\")"
+        );
+        assert_eq!(
+            child_by_name(calls[0], "arguments").unwrap()["children"][0]["children"][0]["nodeType"],
+            "StringLiteralExprSyntax"
+        );
+        assert_eq!(
+            source_text(source, calls[1]),
+            ">>>>>>>\"18844bc65229786b96b89a9fc7739c0fc897905e:fake_conflict_markers.swift\""
+        );
+        assert_eq!(
+            child_by_name(calls[1], "calledExpression").unwrap()["children"][0]["tokenKind"],
+            "identifier(\">>>>>>>\")"
         );
     }
 
