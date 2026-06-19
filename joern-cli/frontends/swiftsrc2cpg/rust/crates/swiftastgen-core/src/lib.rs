@@ -57,6 +57,18 @@ struct SwiftSyntaxEmitter<'a> {
     line_starts: Vec<usize>,
 }
 
+struct FunctionCallComponents<'tree, 'closures> {
+    parent: Node<'tree>,
+    callee: Node<'tree>,
+    callee_suffix: Node<'tree>,
+    value_arguments: Option<Node<'tree>>,
+    empty_arguments_offset: usize,
+    trailing_suffix: Node<'tree>,
+    trailing_closures: &'closures [Node<'tree>],
+    start: usize,
+    end: usize,
+}
+
 #[derive(Clone, Copy)]
 struct RegexListItem {
     literal_start: usize,
@@ -8978,12 +8990,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ));
             }
         } else if let Some(suffix) = suffix {
-            let trailing_closures = named_children(suffix)
-                .filter(|child| child.kind() == "lambda_literal")
-                .collect::<Vec<_>>();
-            if trailing_closures.len() > 1 {
-                bail!("multiple macro trailing closures are not supported yet");
-            }
+            let trailing_closures = self.trailing_closure_nodes(suffix);
 
             if let Some(value_arguments) =
                 self.immediate_named_child_kind(suffix, "value_arguments")
@@ -9023,7 +9030,22 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
 
         syntax_children.push(self.with_name(
-            self.empty_collection("MultipleTrailingClosureElementListSyntax", node.end_byte()),
+            suffix.map_or_else(
+                || {
+                    Ok(self.empty_collection(
+                        "MultipleTrailingClosureElementListSyntax",
+                        node.end_byte(),
+                    ))
+                },
+                |suffix| {
+                    let trailing_closures = self.trailing_closure_nodes(suffix);
+                    self.additional_trailing_closure_list(
+                        suffix,
+                        &trailing_closures,
+                        node.end_byte(),
+                    )
+                },
+            )?,
             "additionalTrailingClosures",
         ));
 
@@ -9147,11 +9169,27 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             return Ok(binary_expr);
         }
 
-        let trailing_closures = named_children(suffix)
-            .filter(|child| child.kind() == "lambda_literal")
-            .collect::<Vec<_>>();
-        if trailing_closures.len() > 1 {
-            bail!("multiple trailing closures are not supported yet");
+        let trailing_closures = self.trailing_closure_nodes(suffix);
+        if !trailing_closures.is_empty()
+            && self
+                .immediate_named_child_kind(suffix, "value_arguments")
+                .is_none()
+        {
+            if let Some((inner_callee, inner_suffix, inner_value_arguments)) =
+                self.parenthesized_call_parts(callee)
+            {
+                return self.function_call_expr_from_components(FunctionCallComponents {
+                    parent: callee,
+                    callee: inner_callee,
+                    callee_suffix: inner_suffix,
+                    value_arguments: Some(inner_value_arguments),
+                    empty_arguments_offset: inner_suffix.start_byte(),
+                    trailing_suffix: suffix,
+                    trailing_closures: &trailing_closures,
+                    start: node.start_byte(),
+                    end: node.end_byte(),
+                });
+            }
         }
 
         if let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments") {
@@ -9160,28 +9198,166 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     node,
                     callee,
                     value_arguments,
-                    trailing_closures.first().copied(),
+                    &trailing_closures,
                     true,
                 );
             }
-        } else if let Some(trailing_closure) = trailing_closures.first().copied() {
+        } else if !trailing_closures.is_empty() {
             if let Some((inner_callee, inner_value_arguments)) = self.subscript_call_parts(callee) {
                 return self.subscript_call_expr(
                     node,
                     inner_callee,
                     inner_value_arguments,
-                    Some(trailing_closure),
+                    &trailing_closures,
                     false,
                 );
             }
         }
 
+        self.function_call_expr_from_components(FunctionCallComponents {
+            parent: node,
+            callee,
+            callee_suffix: suffix,
+            value_arguments: self.immediate_named_child_kind(suffix, "value_arguments"),
+            empty_arguments_offset: suffix.start_byte(),
+            trailing_suffix: suffix,
+            trailing_closures: &trailing_closures,
+            start: node.start_byte(),
+            end: node.end_byte(),
+        })
+    }
+
+    fn trailing_closure_nodes(&self, suffix: Node<'a>) -> Vec<Node<'a>> {
+        named_children(suffix)
+            .filter(|child| child.kind() == "lambda_literal")
+            .collect()
+    }
+
+    fn additional_trailing_closure_list(
+        &self,
+        suffix: Node<'a>,
+        trailing_closures: &[Node<'a>],
+        empty_offset: usize,
+    ) -> Result<Value> {
+        let mut elements = Vec::new();
+        let mut list_start = None;
+        let mut list_end = empty_offset;
+        for closure in trailing_closures.iter().skip(1).copied() {
+            let (element, start, end) = self.multiple_trailing_closure_element(suffix, closure)?;
+            list_start.get_or_insert(start);
+            list_end = end;
+            elements.push(self.with_name(element, ""));
+        }
+
+        if let Some(start) = list_start {
+            Ok(self.syntax_node(
+                "MultipleTrailingClosureElementListSyntax",
+                self.range_from_offsets(start, list_end),
+                elements,
+            ))
+        } else {
+            Ok(self.empty_collection("MultipleTrailingClosureElementListSyntax", empty_offset))
+        }
+    }
+
+    fn multiple_trailing_closure_element(
+        &self,
+        suffix: Node<'a>,
+        closure: Node<'a>,
+    ) -> Result<(Value, usize, usize)> {
+        let label = self
+            .additional_trailing_closure_label(suffix, closure)
+            .context("additional trailing closure is missing a label")?;
+        let colon_start = self.source[label.end_byte()..closure.start_byte()]
+            .find(':')
+            .map(|offset| label.end_byte() + offset)
+            .context("additional trailing closure is missing ':'")?;
+        let end = closure.end_byte();
+        let label_token = if self.text(label) == "_" {
+            self.token_for_node(label, "wildcard")
+        } else {
+            self.token_for_node(
+                label,
+                &format!("identifier({})", quoted_text(self.text(label))),
+            )
+        };
+
+        Ok((
+            self.syntax_node(
+                "MultipleTrailingClosureElementSyntax",
+                self.range_from_offsets(label.start_byte(), end),
+                vec![
+                    self.with_name(label_token, "label"),
+                    self.with_name(
+                        self.token_with_range(
+                            "colon",
+                            self.range_from_offsets(colon_start, colon_start + 1),
+                        ),
+                        "colon",
+                    ),
+                    self.with_name(self.closure_expr(closure)?, "closure"),
+                ],
+            ),
+            label.start_byte(),
+            end,
+        ))
+    }
+
+    fn additional_trailing_closure_label(
+        &self,
+        suffix: Node<'a>,
+        closure: Node<'a>,
+    ) -> Option<Node<'a>> {
+        let label = children(suffix)
+            .take_while(|child| child.start_byte() < closure.start_byte())
+            .filter(|child| !is_trivia_node(*child) && child.kind() != ":")
+            .last()?;
+        if matches!(
+            label.kind(),
+            "identifier" | "simple_identifier" | "wildcard_pattern"
+        ) || self.text(label) == "_"
+        {
+            Some(label)
+        } else {
+            None
+        }
+    }
+
+    fn parenthesized_call_parts(&self, node: Node<'a>) -> Option<(Node<'a>, Node<'a>, Node<'a>)> {
+        if node.kind() != "call_expression" {
+            return None;
+        }
+        let callee = named_children(node).find(|child| child.kind() != "call_suffix")?;
+        let suffix = self.immediate_named_child_kind(node, "call_suffix")?;
+        let value_arguments = self.immediate_named_child_kind(suffix, "value_arguments")?;
+        if self.subscript_delimiters(value_arguments).is_some() {
+            return None;
+        }
+        Some((callee, suffix, value_arguments))
+    }
+
+    fn function_call_expr_from_components(
+        &self,
+        components: FunctionCallComponents<'a, '_>,
+    ) -> Result<Value> {
+        let FunctionCallComponents {
+            parent,
+            callee,
+            callee_suffix,
+            value_arguments,
+            empty_arguments_offset,
+            trailing_suffix,
+            trailing_closures,
+            start,
+            end,
+        } = components;
+
         let mut children = vec![self.with_name(
-            self.called_expression_with_optional_chaining(node, callee, suffix)?,
+            self.called_expression_with_optional_chaining(parent, callee, callee_suffix)?,
             "calledExpression",
         )];
 
-        if let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments") {
+        if let Some(value_arguments) = value_arguments {
             let left_paren = self
                 .immediate_child_kind(value_arguments, "(")
                 .context("call arguments are missing '('")?;
@@ -9198,7 +9374,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .push(self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"));
         } else {
             children.push(self.with_name(
-                self.empty_collection("LabeledExprListSyntax", suffix.start_byte()),
+                self.empty_collection("LabeledExprListSyntax", empty_arguments_offset),
                 "arguments",
             ));
         }
@@ -9207,13 +9383,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             children.push(self.with_name(self.closure_expr(*trailing_closure)?, "trailingClosure"));
         }
         children.push(self.with_name(
-            self.empty_collection("MultipleTrailingClosureElementListSyntax", node.end_byte()),
+            self.additional_trailing_closure_list(trailing_suffix, trailing_closures, end)?,
             "additionalTrailingClosures",
         ));
 
         Ok(self.syntax_node(
             "FunctionCallExprSyntax",
-            self.range_for_node(node),
+            self.range_from_offsets(start, end),
             children,
         ))
     }
@@ -9305,40 +9481,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         start: usize,
         end: usize,
     ) -> Result<Value> {
-        let mut children = vec![self.with_name(
-            self.called_expression_with_optional_chaining(parent, callee, suffix)?,
-            "calledExpression",
-        )];
-        if let Some(value_arguments) = self.immediate_named_child_kind(suffix, "value_arguments") {
-            let left_paren = self
-                .immediate_child_kind(value_arguments, "(")
-                .context("call arguments are missing '('")?;
-            let right_paren = self
-                .immediate_child_kind(value_arguments, ")")
-                .context("call arguments are missing ')'")?;
-            children
-                .push(self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"));
-            children.push(self.with_name(
-                self.labeled_expr_list(value_arguments, left_paren, right_paren)?,
-                "arguments",
-            ));
-            children
-                .push(self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"));
-        } else {
-            children.push(self.with_name(
-                self.empty_collection("LabeledExprListSyntax", suffix.start_byte()),
-                "arguments",
-            ));
-        }
-        children.push(self.with_name(
-            self.empty_collection("MultipleTrailingClosureElementListSyntax", end),
-            "additionalTrailingClosures",
-        ));
-        Ok(self.syntax_node(
-            "FunctionCallExprSyntax",
-            self.range_from_offsets(start, end),
-            children,
-        ))
+        let trailing_closures = self.trailing_closure_nodes(suffix);
+        self.function_call_expr_from_components(FunctionCallComponents {
+            parent,
+            callee,
+            callee_suffix: suffix,
+            value_arguments: self.immediate_named_child_kind(suffix, "value_arguments"),
+            empty_arguments_offset: suffix.start_byte(),
+            trailing_suffix: suffix,
+            trailing_closures: &trailing_closures,
+            start,
+            end,
+        })
     }
 
     fn subscript_call_expr(
@@ -9346,7 +9500,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         node: Node<'a>,
         callee: Node<'a>,
         value_arguments: Node<'a>,
-        trailing_closure: Option<Node<'a>>,
+        trailing_closures: &[Node<'a>],
         include_arguments: bool,
     ) -> Result<Value> {
         let (left_square, right_square) = self
@@ -9367,13 +9521,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "rightSquare",
             ),
         ];
-        if let Some(closure) = trailing_closure {
-            children.push(self.with_name(self.closure_expr(closure)?, "trailingClosure"));
+        if let Some(closure) = trailing_closures.first() {
+            children.push(self.with_name(self.closure_expr(*closure)?, "trailingClosure"));
         }
-        children.push(self.with_name(
-            self.empty_collection("MultipleTrailingClosureElementListSyntax", node.end_byte()),
-            "additionalTrailingClosures",
-        ));
+        children.push(
+            self.with_name(
+                self.additional_trailing_closure_list(
+                    self.immediate_named_child_kind(node, "call_suffix")
+                        .unwrap_or(value_arguments),
+                    trailing_closures,
+                    node.end_byte(),
+                )?,
+                "additionalTrailingClosures",
+            ),
+        );
 
         Ok(self.syntax_node(
             "SubscriptCallExprSyntax",
@@ -12452,6 +12613,82 @@ extension Foo: SomeProtocol, AnotherProtocol {
             "FunctionCallExprSyntax"
         );
         assert_eq!(closure["children"][3]["tokenKind"], "rightBrace");
+    }
+
+    #[test]
+    fn emits_multiple_trailing_closure_function_call() {
+        let source =
+            "func f() { routes.get(\"find\") { req in User() } onFailure: { req in Error() } }\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let call = find_node_types(&value, "FunctionCallExprSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node).starts_with("routes.get"))
+            .unwrap();
+
+        assert_eq!(
+            child_by_name(call, "arguments").unwrap()["children"]
+                .as_array()
+                .unwrap()
+                .len(),
+            1
+        );
+        assert_eq!(
+            source_text(source, child_by_name(call, "trailingClosure").unwrap()),
+            "{ req in User() }"
+        );
+
+        let additional = child_by_name(call, "additionalTrailingClosures").unwrap();
+        let elements = additional["children"].as_array().unwrap();
+        assert_eq!(elements.len(), 1);
+        assert_eq!(
+            elements[0]["nodeType"],
+            "MultipleTrailingClosureElementSyntax"
+        );
+        assert_eq!(
+            child_by_name(&elements[0], "label").unwrap()["tokenKind"],
+            "identifier(\"onFailure\")"
+        );
+        assert_eq!(
+            child_by_name(&elements[0], "colon").unwrap()["tokenKind"],
+            "colon"
+        );
+        assert_eq!(
+            source_text(source, child_by_name(&elements[0], "closure").unwrap()),
+            "{ req in Error() }"
+        );
+    }
+
+    #[test]
+    fn flattens_parenthesized_call_with_trailing_closure() {
+        let source =
+            "func f() {\n  let result = Helper.map(41) { value in\n    return value + 1\n  }\n}\n";
+        let value = parse_source("Sources/main.swift", "/tmp/Sources/main.swift", source).unwrap();
+        let calls = find_node_types(&value, "FunctionCallExprSyntax")
+            .into_iter()
+            .filter(|node| source_text(source, node).starts_with("Helper.map"))
+            .collect::<Vec<_>>();
+        assert_eq!(calls.len(), 1);
+
+        let call = calls[0];
+        assert_eq!(
+            child_by_name(call, "calledExpression").unwrap()["nodeType"],
+            "MemberAccessExprSyntax"
+        );
+        assert_eq!(
+            source_text(source, child_by_name(call, "calledExpression").unwrap()),
+            "Helper.map"
+        );
+        assert_eq!(
+            child_by_name(call, "arguments").unwrap()["children"]
+                .as_array()
+                .unwrap()
+                .len(),
+            1
+        );
+        assert_eq!(
+            source_text(source, child_by_name(call, "trailingClosure").unwrap()),
+            "{ value in\n    return value + 1\n  }"
+        );
     }
 
     #[test]
