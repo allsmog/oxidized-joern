@@ -79,7 +79,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     ) -> Result<Value> {
         let mut statement_items = Vec::new();
         for child in named_children(root) {
-            if is_trivia_node(child) {
+            if is_trivia_node(child) || self.is_ignorable_top_level_error(child) {
                 continue;
             }
             statement_items.push(self.code_block_item(child)?);
@@ -116,6 +116,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(root_obj)
     }
 
+    fn is_ignorable_top_level_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR"
+            && self.text(node).trim() == "}"
+            && named_children(node).all(is_trivia_node)
+    }
+
     fn code_block_item(&self, node: Node<'a>) -> Result<Value> {
         let item = self.with_name(self.syntax_for_statement(node)?, "item");
         Ok(self.syntax_node("CodeBlockItemSyntax", self.range_for_node(node), vec![item]))
@@ -144,6 +150,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "integer_literal"
             | "lambda_literal"
             | "multiplicative_expression"
+            | "prefix_expression"
+            | "range_expression"
             | "real_literal"
             | "simple_identifier"
             | "self_expression"
@@ -792,12 +800,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "conjunction_expression"
             | "disjunction_expression"
             | "equality_expression"
-            | "multiplicative_expression" => self.binary_operator_expr(node),
+            | "multiplicative_expression"
+            | "range_expression" => self.binary_operator_expr(node),
             "array_literal" => self.array_expr(node),
             "call_expression" => self.function_call_expr(node),
             "dictionary_literal" => self.dictionary_expr(node),
             "lambda_literal" => self.closure_expr(node),
             "navigation_expression" => self.member_access_expr(node),
+            "prefix_expression" => self.prefix_expr(node),
             "boolean_literal" => Ok(self.syntax_node(
                 "BooleanLiteralExprSyntax",
                 self.range_for_node(node),
@@ -1277,15 +1287,59 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn prefix_expr(&self, node: Node<'a>) -> Result<Value> {
+        let operation = self
+            .field_child(node, "operation")
+            .or_else(|| children(node).find(|child| !child.is_named()))
+            .context("prefix expression is missing operator")?;
+        let target = self
+            .field_child(node, "target")
+            .context("prefix expression is missing target")?;
+
+        if operation.kind() == "." || self.text(operation) == "." {
+            let decl_name = match target.kind() {
+                "identifier" | "integer_literal" | "simple_identifier" | "self_expression" => {
+                    target
+                }
+                other => bail!("unsupported implicit member target '{other}'"),
+            };
+            return Ok(self.syntax_node(
+                "MemberAccessExprSyntax",
+                self.range_for_node(node),
+                vec![
+                    self.with_name(self.token_for_node(operation, "period"), "period"),
+                    self.with_name(self.decl_reference_expr(decl_name), "declName"),
+                ],
+            ));
+        }
+
+        Ok(self.syntax_node(
+            "PrefixOperatorExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(
+                        operation,
+                        &format!("prefixOperator({})", quoted_text(self.text(operation))),
+                    ),
+                    "operator",
+                ),
+                self.with_name(self.expr(target)?, "expression"),
+            ],
+        ))
+    }
+
     fn binary_operator_expr(&self, node: Node<'a>) -> Result<Value> {
         let lhs = self
             .field_child(node, "lhs")
+            .or_else(|| self.field_child(node, "start"))
             .context("binary expression is missing lhs")?;
         let op = self
             .field_child(node, "op")
             .context("binary expression is missing operator")?;
         let rhs = self
             .field_child(node, "rhs")
+            .or_else(|| self.field_child(node, "end"))
             .context("binary expression is missing rhs")?;
         let operator = self.syntax_node(
             "BinaryOperatorExprSyntax",
@@ -2712,6 +2766,83 @@ mod tests {
         assert_eq!(
             member_access["children"][2]["children"][0]["tokenKind"],
             "identifier(\"x\")"
+        );
+    }
+
+    #[test]
+    fn emits_implicit_member_function_calls() {
+        let source = "let deps = [.package(name: \"DepA\", path: \"PathA\")]\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let call = find_first_node_type(&value, "FunctionCallExprSyntax").unwrap();
+        let callee = &call["children"][0];
+        assert_eq!(callee["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(callee["children"][0]["name"], "period");
+        assert_eq!(callee["children"][0]["tokenKind"], "period");
+        assert_eq!(callee["children"][1]["name"], "declName");
+        assert_eq!(
+            callee["children"][1]["children"][0]["tokenKind"],
+            "identifier(\"package\")"
+        );
+        assert_eq!(callee["children"].as_array().unwrap().len(), 2);
+
+        let arguments = &call["children"][2]["children"];
+        assert_eq!(arguments.as_array().unwrap().len(), 2);
+        assert_eq!(
+            arguments[0]["children"][0]["tokenKind"],
+            "identifier(\"name\")"
+        );
+        assert_eq!(
+            arguments[1]["children"][0]["tokenKind"],
+            "identifier(\"path\")"
+        );
+    }
+
+    #[test]
+    fn emits_prefix_operator_expressions() {
+        let source = "let value = !enabled\nlet other = -count\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let prefixes = find_node_types(&value, "PrefixOperatorExprSyntax");
+        let token_kinds = prefixes
+            .iter()
+            .map(|node| node["children"][0]["tokenKind"].as_str().unwrap())
+            .collect::<Vec<_>>();
+        assert!(token_kinds.contains(&"prefixOperator(\"!\")"));
+        assert!(token_kinds.contains(&"prefixOperator(\"-\")"));
+        assert!(prefixes
+            .iter()
+            .all(|node| node["children"][1]["nodeType"] == "DeclReferenceExprSyntax"));
+    }
+
+    #[test]
+    fn emits_range_expressions() {
+        let source =
+            "let deps = [.package(url: \"https://github.com/DepC\", \"1.2.3\"..<\"1.2.6\"), .package(url: \"https://github.com/DepD\", \"1.2.3\"...\"1.2.6\")]\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let binary_ops = find_node_types(&value, "BinaryOperatorExprSyntax");
+        let token_kinds = binary_ops
+            .iter()
+            .map(|node| node["children"][0]["tokenKind"].as_str().unwrap())
+            .collect::<Vec<_>>();
+        assert!(token_kinds.contains(&"binaryOperator(\"..<\")"));
+        assert!(token_kinds.contains(&"binaryOperator(\"...\")"));
+
+        let infix_ops = find_node_types(&value, "InfixOperatorExprSyntax");
+        assert!(infix_ops.iter().any(|node| {
+            node["children"][0]["nodeType"] == "StringLiteralExprSyntax"
+                && node["children"][1]["children"][0]["tokenKind"] == "binaryOperator(\"..<\")"
+                && node["children"][2]["nodeType"] == "StringLiteralExprSyntax"
+        }));
+    }
+
+    #[test]
+    fn skips_unmatched_top_level_right_brace() {
+        let source = "let x = 1\n}\n";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let statements = value["children"][0]["children"].as_array().unwrap();
+        assert_eq!(statements.len(), 1);
+        assert_eq!(
+            statements[0]["children"][0]["nodeType"],
+            "VariableDeclSyntax"
         );
     }
 
