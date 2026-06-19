@@ -168,6 +168,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 child_index = next_index;
                 continue;
             }
+            if self.is_recoverable_if_case_error(child) {
+                let if_expr = self.recovered_if_case_expr(child)?;
+                statement_items.push(self.code_block_item_for_value(if_expr, "item"));
+                child_index += 1;
+                continue;
+            }
             if is_trivia_node(child)
                 || is_ignorable_directive(child)
                 || self.is_ignorable_diagnostic(child)
@@ -517,6 +523,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "ERROR" if self.is_recoverable_array_expr_error(node) => {
                 self.recovered_array_expr(node)
             }
+            "ERROR" if self.is_recoverable_if_case_error(node) => self.recovered_if_case_expr(node),
             "ERROR" if self.is_bare_macro_error(node) => self.macro_expansion_decl(node),
             "diagnostic" => self.macro_expansion_decl(node),
             "macro_invocation" => self.macro_expansion_decl(node),
@@ -4049,62 +4056,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             let case_keyword = self
                 .immediate_child_kind(node, "case")
                 .context("switch case is missing 'case'")?;
-            let mut case_items = Vec::new();
-            let switch_patterns: Vec<_> = named_children(node)
-                .filter(|child| {
-                    child.kind() == "switch_pattern" && child.end_byte() <= colon.start_byte()
-                })
-                .collect();
-            let pattern_nodes: Vec<_> = if switch_patterns.is_empty() {
-                named_children(node)
-                    .filter(|child| {
-                        child.kind() == "pattern" && child.end_byte() <= colon.start_byte()
-                    })
-                    .map(|pattern| (pattern, pattern))
-                    .collect()
-            } else {
-                switch_patterns
-                    .iter()
-                    .filter_map(|switch_pattern| {
-                        self.immediate_named_child_kind(*switch_pattern, "pattern")
-                            .map(|pattern| (*switch_pattern, pattern))
-                    })
-                    .collect()
-            };
-            for (index, (switch_pattern, pattern)) in pattern_nodes.iter().copied().enumerate() {
-                let next_start = pattern_nodes
-                    .get(index + 1)
-                    .map(|(next, _)| next.start_byte())
-                    .unwrap_or_else(|| colon.start_byte());
-                let mut item_children = vec![self.with_name(self.pattern(pattern)?, "pattern")];
-                if let Some(where_clause) =
-                    self.switch_case_where_clause(node, switch_pattern.end_byte(), next_start)?
-                {
-                    item_children.push(self.with_name(where_clause, "whereClause"));
-                }
-                let item_core_end = item_children
-                    .last()
-                    .map(end_offset)
-                    .unwrap_or_else(|| pattern.end_byte());
-                let trailing_comma = children(node).find(|child| {
-                    child.kind() == ","
-                        && child.start_byte() >= item_core_end
-                        && child.end_byte() <= next_start
-                });
-                if let Some(comma) = trailing_comma {
-                    item_children
-                        .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
-                }
-                let item_end = trailing_comma.map_or(item_core_end, |comma| comma.end_byte());
-                case_items.push(self.with_name(
-                    self.syntax_node(
-                        "SwitchCaseItemSyntax",
-                        self.range_from_offsets(pattern.start_byte(), item_end),
-                        item_children,
-                    ),
-                    "",
-                ));
-            }
+            let case_items = self.switch_case_items_from_offsets(
+                node,
+                case_keyword.end_byte(),
+                colon.start_byte(),
+            )?;
             let item_range = self.covering_range_or_point(&case_items, case_keyword.end_byte());
             self.syntax_node(
                 "SwitchCaseLabelSyntax",
@@ -4168,6 +4124,139 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.with_name(self.expr(condition)?, "condition"),
             ],
         )))
+    }
+
+    fn switch_case_items_from_offsets(
+        &self,
+        node: Node<'a>,
+        start: usize,
+        end: usize,
+    ) -> Result<Vec<Value>> {
+        let mut case_items = Vec::new();
+        let mut item_start = start;
+        for comma in self.top_level_commas(start, end) {
+            if let Some(item) =
+                self.switch_case_item_from_source_offsets(node, item_start, comma, Some(comma))?
+            {
+                case_items.push(self.with_name(item, ""));
+            }
+            item_start = comma + 1;
+        }
+        if let Some(item) =
+            self.switch_case_item_from_source_offsets(node, item_start, end, None)?
+        {
+            case_items.push(self.with_name(item, ""));
+        }
+        Ok(case_items)
+    }
+
+    fn switch_case_item_from_source_offsets(
+        &self,
+        node: Node<'a>,
+        start: usize,
+        end: usize,
+        comma: Option<usize>,
+    ) -> Result<Option<Value>> {
+        let (item_start, item_end) = self.trim_offsets(start, end);
+        if item_start >= item_end {
+            return Ok(None);
+        }
+
+        let where_start = self.top_level_where_keyword(item_start, item_end);
+        let pattern_end = where_start.unwrap_or(item_end);
+        let (pattern_start, pattern_end) = self.trim_offsets(item_start, pattern_end);
+        if pattern_start >= pattern_end {
+            return Ok(None);
+        }
+
+        let mut item_children = vec![self.with_name(
+            self.synthetic_pattern_from_offsets(pattern_start, pattern_end),
+            "pattern",
+        )];
+        if let Some(where_start) = where_start {
+            let where_clause = self
+                .switch_case_where_clause(node, pattern_end, item_end)?
+                .unwrap_or_else(|| self.synthetic_where_clause_from_offsets(where_start, item_end));
+            item_children.push(self.with_name(where_clause, "whereClause"));
+        }
+        if let Some(comma_start) = comma {
+            item_children.push(self.with_name(
+                self.token_with_range(
+                    "comma",
+                    self.range_from_offsets(comma_start, comma_start + 1),
+                ),
+                "trailingComma",
+            ));
+        }
+        let item_range_end = comma.map_or_else(
+            || item_children.last().map(end_offset).unwrap_or(pattern_end),
+            |comma_start| comma_start + 1,
+        );
+        Ok(Some(self.syntax_node(
+            "SwitchCaseItemSyntax",
+            self.range_from_offsets(pattern_start, item_range_end),
+            item_children,
+        )))
+    }
+
+    fn synthetic_where_clause_from_offsets(&self, where_start: usize, end: usize) -> Value {
+        let where_end = where_start + "where".len();
+        let (condition_start, condition_end) = self.trim_offsets(where_end, end);
+        self.syntax_node(
+            "WhereClauseSyntax",
+            self.range_from_offsets(where_start, condition_end),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "keyword(SwiftSyntax.Keyword.where)",
+                        self.range_from_offsets(where_start, where_end),
+                    ),
+                    "whereKeyword",
+                ),
+                self.with_name(
+                    self.synthetic_expr_from_offsets(condition_start, condition_end),
+                    "condition",
+                ),
+            ],
+        )
+    }
+
+    fn top_level_where_keyword(&self, start: usize, end: usize) -> Option<usize> {
+        let bytes = self.source.as_bytes();
+        let mut paren_depth = 0usize;
+        let mut bracket_depth = 0usize;
+        let mut angle_depth = 0usize;
+        let mut offset = start;
+        while offset < end {
+            match bytes[offset] {
+                b'(' => paren_depth += 1,
+                b')' => paren_depth = paren_depth.saturating_sub(1),
+                b'[' => bracket_depth += 1,
+                b']' => bracket_depth = bracket_depth.saturating_sub(1),
+                b'<' if paren_depth == 0 && bracket_depth == 0 => angle_depth += 1,
+                b'>' if paren_depth == 0 && bracket_depth == 0 => {
+                    angle_depth = angle_depth.saturating_sub(1)
+                }
+                b'w' if paren_depth == 0
+                    && bracket_depth == 0
+                    && angle_depth == 0
+                    && self.source[offset..end].starts_with("where")
+                    && self.source.as_bytes()[start..offset]
+                        .last()
+                        .is_some_and(|byte| byte.is_ascii_whitespace())
+                    && self
+                        .source
+                        .as_bytes()
+                        .get(offset + "where".len())
+                        .is_some_and(|byte| byte.is_ascii_whitespace()) =>
+                {
+                    return Some(offset);
+                }
+                _ => {}
+            }
+            offset += 1;
+        }
+        None
     }
 
     fn recovered_switch_case_slices(
@@ -4406,7 +4495,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some((keyword, keyword_end, rest_start, rest_end)) =
             self.synthetic_binding_keyword(start, end)
         {
-            let child = self.synthetic_pattern_from_offsets(rest_start, rest_end);
+            let child = self.synthetic_bound_pattern_from_offsets(rest_start, rest_end);
             return self.syntax_node(
                 "ValueBindingPatternSyntax",
                 self.range_from_offsets(start, end_offset(&child)),
@@ -4423,6 +4512,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             );
         }
         if self.source[start..end].starts_with('(') && self.source[start..end].ends_with(')') {
+            if self.synthetic_tuple_is_expression_pattern(start, end) {
+                let tuple = self.synthetic_tuple_expr_from_offsets(start, end);
+                return self.syntax_node(
+                    "ExpressionPatternSyntax",
+                    self.range_from_offsets(start, end),
+                    vec![self.with_name(tuple, "expression")],
+                );
+            }
             return self.synthetic_tuple_pattern_from_offsets(start, end);
         }
         if is_identifier_like_text(&self.source[start..end]) {
@@ -4433,6 +4530,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_from_offsets(start, end),
             vec![self.with_name(self.synthetic_expr_from_offsets(start, end), "expression")],
         )
+    }
+
+    fn synthetic_bound_pattern_from_offsets(&self, start: usize, end: usize) -> Value {
+        if self.source[start..end].starts_with('(') && self.source[start..end].ends_with(')') {
+            self.synthetic_tuple_pattern_from_offsets(start, end)
+        } else {
+            self.synthetic_pattern_from_offsets(start, end)
+        }
     }
 
     fn synthetic_is_type_pattern_start(&self, start: usize, end: usize) -> Option<usize> {
@@ -4544,6 +4649,69 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         )
     }
 
+    fn synthetic_tuple_is_expression_pattern(&self, start: usize, end: usize) -> bool {
+        let inner_start = start + 1;
+        let inner_end = end.saturating_sub(1);
+        let mut element_start = inner_start;
+        for comma in self.top_level_commas(inner_start, inner_end) {
+            if !self.synthetic_tuple_element_is_expression(element_start, comma) {
+                return false;
+            }
+            element_start = comma + 1;
+        }
+        self.synthetic_tuple_element_is_expression(element_start, inner_end)
+    }
+
+    fn synthetic_tuple_element_is_expression(&self, start: usize, end: usize) -> bool {
+        let (start, end) = self.trim_offsets(start, end);
+        if start >= end {
+            return false;
+        }
+        let text = &self.source[start..end];
+        if text == "_" || self.synthetic_binding_keyword(start, end).is_some() {
+            return false;
+        }
+        let Some(rest) = text.strip_prefix("is") else {
+            return true;
+        };
+        !rest
+            .as_bytes()
+            .first()
+            .is_some_and(|byte| byte.is_ascii_whitespace())
+    }
+
+    fn synthetic_tuple_expr_from_offsets(&self, start: usize, end: usize) -> Value {
+        let left_paren_end = start + 1;
+        let right_paren_start = end - 1;
+        self.syntax_node(
+            "TupleExprSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "leftParen",
+                        self.range_from_offsets(start, left_paren_end),
+                    ),
+                    "leftParen",
+                ),
+                self.with_name(
+                    self.synthetic_labeled_expr_list_from_offsets(
+                        left_paren_end,
+                        right_paren_start,
+                    ),
+                    "elements",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "rightParen",
+                        self.range_from_offsets(right_paren_start, end),
+                    ),
+                    "rightParen",
+                ),
+            ],
+        )
+    }
+
     fn push_synthetic_tuple_pattern_element(
         &self,
         elements: &mut Vec<Value>,
@@ -4556,7 +4724,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             return;
         }
         let mut children = vec![self.with_name(
-            self.synthetic_pattern_from_offsets(pattern_start, pattern_end),
+            self.synthetic_bound_pattern_from_offsets(pattern_start, pattern_end),
             "pattern",
         )];
         let element_end = if let Some(comma_start) = comma {
@@ -4582,6 +4750,15 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn synthetic_expr_from_offsets(&self, start: usize, end: usize) -> Value {
+        if self.source[start..end].trim() == "_" {
+            return self.discard_assignment_expr_from_offsets(start, end);
+        }
+        if let Some(call) = self.synthetic_function_call_expr_from_offsets(start, end) {
+            return call;
+        }
+        if let Some(member_access) = self.synthetic_member_access_expr_from_offsets(start, end) {
+            return member_access;
+        }
         let text = &self.source[start..end];
         if text.chars().all(|ch| ch.is_ascii_digit()) {
             return self.syntax_node(
@@ -4618,6 +4795,235 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     self.range_from_offsets(start, end),
                 ),
                 "baseName",
+            )],
+        )
+    }
+
+    fn synthetic_function_call_expr_from_offsets(&self, start: usize, end: usize) -> Option<Value> {
+        let (left_paren_start, right_paren_start) = self.outer_call_parens(start, end)?;
+        let (callee_start, callee_end) = self.trim_offsets(start, left_paren_start);
+        if callee_start >= callee_end {
+            return None;
+        }
+        Some(self.syntax_node(
+            "FunctionCallExprSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.synthetic_expr_from_offsets(callee_start, callee_end),
+                    "calledExpression",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "leftParen",
+                        self.range_from_offsets(left_paren_start, left_paren_start + 1),
+                    ),
+                    "leftParen",
+                ),
+                self.with_name(
+                    self.synthetic_labeled_expr_list_from_offsets(
+                        left_paren_start + 1,
+                        right_paren_start,
+                    ),
+                    "arguments",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "rightParen",
+                        self.range_from_offsets(right_paren_start, right_paren_start + 1),
+                    ),
+                    "rightParen",
+                ),
+                self.with_name(
+                    self.empty_collection("MultipleTrailingClosureElementListSyntax", end),
+                    "additionalTrailingClosures",
+                ),
+            ],
+        ))
+    }
+
+    fn synthetic_member_access_expr_from_offsets(&self, start: usize, end: usize) -> Option<Value> {
+        let dot = self.last_top_level_dot(start, end)?;
+        if dot + 1 >= end {
+            return None;
+        }
+        let (member_start, member_end) = self.trim_offsets(dot + 1, end);
+        if member_start >= member_end
+            || !is_identifier_like_text(&self.source[member_start..member_end])
+        {
+            return None;
+        }
+
+        let mut children = Vec::new();
+        let (base_start, base_end) = self.trim_offsets(start, dot);
+        if base_start < base_end {
+            children.push(self.with_name(
+                self.synthetic_expr_from_offsets(base_start, base_end),
+                "base",
+            ));
+        }
+        children.push(self.with_name(
+            self.token_with_range("period", self.range_from_offsets(dot, dot + 1)),
+            "period",
+        ));
+        children.push(self.with_name(
+            self.decl_reference_expr_from_offsets(member_start, member_end),
+            "declName",
+        ));
+
+        Some(self.syntax_node(
+            "MemberAccessExprSyntax",
+            self.range_from_offsets(start, end),
+            children,
+        ))
+    }
+
+    fn synthetic_labeled_expr_list_from_offsets(&self, start: usize, end: usize) -> Value {
+        let mut args = Vec::new();
+        let mut element_start = start;
+        for comma in self.top_level_commas(start, end) {
+            self.push_synthetic_labeled_expr(&mut args, element_start, comma, Some(comma));
+            element_start = comma + 1;
+        }
+        self.push_synthetic_labeled_expr(&mut args, element_start, end, None);
+        self.syntax_node(
+            "LabeledExprListSyntax",
+            self.range_from_offsets(start, end),
+            args,
+        )
+    }
+
+    fn push_synthetic_labeled_expr(
+        &self,
+        args: &mut Vec<Value>,
+        start: usize,
+        end: usize,
+        comma: Option<usize>,
+    ) {
+        let (expr_start, expr_end) = self.trim_offsets(start, end);
+        if expr_start >= expr_end {
+            return;
+        }
+        let mut children = vec![self.with_name(
+            self.synthetic_expr_from_offsets(expr_start, expr_end),
+            "expression",
+        )];
+        let argument_end = if let Some(comma_start) = comma {
+            children.push(self.with_name(
+                self.token_with_range(
+                    "comma",
+                    self.range_from_offsets(comma_start, comma_start + 1),
+                ),
+                "trailingComma",
+            ));
+            comma_start + 1
+        } else {
+            expr_end
+        };
+        args.push(self.with_name(
+            self.syntax_node(
+                "LabeledExprSyntax",
+                self.range_from_offsets(expr_start, argument_end),
+                children,
+            ),
+            "",
+        ));
+    }
+
+    fn outer_call_parens(&self, start: usize, end: usize) -> Option<(usize, usize)> {
+        if start >= end || self.source.as_bytes().get(end.checked_sub(1)?) != Some(&b')') {
+            return None;
+        }
+        let bytes = self.source.as_bytes();
+        let mut depth = 0usize;
+        let mut angle_depth = 0usize;
+        let mut offset = end;
+        while offset > start {
+            offset -= 1;
+            match bytes[offset] {
+                b')' if angle_depth == 0 => depth += 1,
+                b'(' if angle_depth == 0 => {
+                    depth = depth.saturating_sub(1);
+                    if depth == 0 {
+                        return (offset > start).then_some((offset, end - 1));
+                    }
+                }
+                b'>' if depth == 0 => angle_depth += 1,
+                b'<' if depth == 0 => angle_depth = angle_depth.saturating_sub(1),
+                _ => {}
+            }
+        }
+        None
+    }
+
+    fn last_top_level_dot(&self, start: usize, end: usize) -> Option<usize> {
+        let bytes = self.source.as_bytes();
+        let mut paren_depth = 0usize;
+        let mut angle_depth = 0usize;
+        let mut result = None;
+        let mut offset = start;
+        while offset < end {
+            match bytes[offset] {
+                b'(' => paren_depth += 1,
+                b')' => paren_depth = paren_depth.saturating_sub(1),
+                b'<' if paren_depth == 0 => angle_depth += 1,
+                b'>' if paren_depth == 0 => angle_depth = angle_depth.saturating_sub(1),
+                b'.' if paren_depth == 0 && angle_depth == 0 => result = Some(offset),
+                _ => {}
+            }
+            offset += 1;
+        }
+        result
+    }
+
+    fn top_level_commas(&self, start: usize, end: usize) -> Vec<usize> {
+        let bytes = self.source.as_bytes();
+        let mut paren_depth = 0usize;
+        let mut bracket_depth = 0usize;
+        let mut angle_depth = 0usize;
+        let mut commas = Vec::new();
+        let mut offset = start;
+        while offset < end {
+            match bytes[offset] {
+                b'(' => paren_depth += 1,
+                b')' => paren_depth = paren_depth.saturating_sub(1),
+                b'[' => bracket_depth += 1,
+                b']' => bracket_depth = bracket_depth.saturating_sub(1),
+                b'<' if paren_depth == 0 && bracket_depth == 0 => angle_depth += 1,
+                b'>' if paren_depth == 0 && bracket_depth == 0 => {
+                    angle_depth = angle_depth.saturating_sub(1)
+                }
+                b',' if paren_depth == 0 && bracket_depth == 0 && angle_depth == 0 => {
+                    commas.push(offset)
+                }
+                _ => {}
+            }
+            offset += 1;
+        }
+        commas
+    }
+
+    fn decl_reference_expr_from_offsets(&self, start: usize, end: usize) -> Value {
+        self.syntax_node(
+            "DeclReferenceExprSyntax",
+            self.range_from_offsets(start, end),
+            vec![self.with_name(
+                self.token_with_range(
+                    &format!("identifier({})", quoted_text(&self.source[start..end])),
+                    self.range_from_offsets(start, end),
+                ),
+                "baseName",
+            )],
+        )
+    }
+
+    fn discard_assignment_expr_from_offsets(&self, start: usize, end: usize) -> Value {
+        self.syntax_node(
+            "DiscardAssignmentExprSyntax",
+            self.range_from_offsets(start, end),
+            vec![self.with_name(
+                self.token_with_range("wildcard", self.range_from_offsets(start, end)),
+                "wildcard",
             )],
         )
     }
@@ -6148,6 +6554,168 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(self.syntax_node("IfExprSyntax", self.range_for_node(node), children))
     }
 
+    fn is_recoverable_if_case_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR" && self.text(node).trim_start().starts_with("if case")
+    }
+
+    fn recovered_if_case_expr(&self, node: Node<'a>) -> Result<Value> {
+        let node_start = node.start_byte();
+        let node_end = node.end_byte();
+        let if_start = self.skip_horizontal_whitespace(node_start, node_end);
+        let if_end = if_start + "if".len();
+        let case_start = self.source[if_end..node_end]
+            .find("case")
+            .map(|offset| if_end + offset)
+            .context("recovered if case expression is missing 'case'")?;
+        let case_end = case_start + "case".len();
+        let equal_start = self.source[case_end..node_end]
+            .find('=')
+            .map(|offset| case_end + offset)
+            .context("recovered if case expression is missing '='")?;
+        let left_brace_start = self.source[equal_start..node_end]
+            .find('{')
+            .map(|offset| equal_start + offset)
+            .context("recovered if case expression body is missing '{'")?;
+        let right_brace_start = self.source[left_brace_start..node_end]
+            .rfind('}')
+            .map(|offset| left_brace_start + offset)
+            .context("recovered if case expression body is missing '}'")?;
+        let (pattern_start, pattern_end) = self.trim_offsets(case_end, equal_start);
+        let (value_start, value_end) = self.trim_offsets(equal_start + 1, left_brace_start);
+        if pattern_start >= pattern_end || value_start >= value_end {
+            bail!("recovered if case expression is missing pattern or initializer");
+        }
+
+        let pattern_condition = self.synthetic_matching_pattern_condition_from_offsets(
+            (case_start, case_end),
+            (pattern_start, pattern_end),
+            (equal_start, equal_start + 1),
+            (value_start, value_end),
+        );
+        let condition_element = self.syntax_node(
+            "ConditionElementSyntax",
+            self.range_from_offsets(case_start, end_offset(&pattern_condition)),
+            vec![self.with_name(pattern_condition, "condition")],
+        );
+        let condition_element_list = self.syntax_node(
+            "ConditionElementListSyntax",
+            self.range_from_offsets(case_start, end_offset(&condition_element)),
+            vec![self.with_name(condition_element, "")],
+        );
+        let body = if let Some(lambda) = self.first_descendant_kind(node, "lambda_literal") {
+            self.code_block(lambda)?
+        } else {
+            self.synthetic_code_block_from_offsets(left_brace_start, right_brace_start + 1)
+        };
+
+        Ok(self.syntax_node(
+            "IfExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "keyword(SwiftSyntax.Keyword.if)",
+                        self.range_from_offsets(if_start, if_end),
+                    ),
+                    "ifKeyword",
+                ),
+                self.with_name(condition_element_list, "conditions"),
+                self.with_name(body, "body"),
+            ],
+        ))
+    }
+
+    fn synthetic_matching_pattern_condition_from_offsets(
+        &self,
+        case_range: (usize, usize),
+        pattern_range: (usize, usize),
+        equal_range: (usize, usize),
+        value_range: (usize, usize),
+    ) -> Value {
+        let (case_start, case_end) = case_range;
+        let (pattern_start, pattern_end) = pattern_range;
+        let (equal_start, equal_end) = equal_range;
+        let (value_start, value_end) = value_range;
+        let initializer = self.synthetic_initializer_clause_from_offsets(
+            equal_start,
+            equal_end,
+            value_start,
+            value_end,
+        );
+        self.syntax_node(
+            "MatchingPatternConditionSyntax",
+            self.range_from_offsets(case_start, end_offset(&initializer)),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "keyword(SwiftSyntax.Keyword.case)",
+                        self.range_from_offsets(case_start, case_end),
+                    ),
+                    "caseKeyword",
+                ),
+                self.with_name(
+                    self.synthetic_pattern_from_offsets(pattern_start, pattern_end),
+                    "pattern",
+                ),
+                self.with_name(initializer, "initializer"),
+            ],
+        )
+    }
+
+    fn synthetic_initializer_clause_from_offsets(
+        &self,
+        equal_start: usize,
+        equal_end: usize,
+        value_start: usize,
+        value_end: usize,
+    ) -> Value {
+        let value = self.synthetic_expr_from_offsets(value_start, value_end);
+        self.syntax_node(
+            "InitializerClauseSyntax",
+            self.range_from_offsets(equal_start, end_offset(&value)),
+            vec![
+                self.with_name(
+                    self.token_with_range("equal", self.range_from_offsets(equal_start, equal_end)),
+                    "equal",
+                ),
+                self.with_name(value, "value"),
+            ],
+        )
+    }
+
+    fn synthetic_code_block_from_offsets(&self, start: usize, end: usize) -> Value {
+        let left_brace_end = start + 1;
+        let right_brace_start = end.saturating_sub(1);
+        self.syntax_node(
+            "CodeBlockSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "leftBrace",
+                        self.range_from_offsets(start, left_brace_end),
+                    ),
+                    "leftBrace",
+                ),
+                self.with_name(
+                    self.syntax_node(
+                        "CodeBlockItemListSyntax",
+                        self.point_range(left_brace_end),
+                        Vec::new(),
+                    ),
+                    "statements",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "rightBrace",
+                        self.range_from_offsets(right_brace_start, end),
+                    ),
+                    "rightBrace",
+                ),
+            ],
+        )
+    }
+
     fn while_stmt(&self, node: Node<'a>) -> Result<Value> {
         let while_keyword = self
             .immediate_child_kind(node, "while")
@@ -6734,16 +7302,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut index = 0;
         while index < condition_nodes.len() {
             let condition = condition_nodes[index];
-            if condition.kind() == "value_binding_pattern" {
-                let (element, next_index) =
-                    self.optional_binding_condition_element(parent, condition_nodes, index)?;
+            if let Some((element, next_index)) =
+                self.matching_pattern_condition_element(parent, condition_nodes, index)?
+            {
                 elements.push(self.with_name(element, ""));
                 index = next_index;
                 continue;
             }
-            if let Some((element, next_index)) =
-                self.matching_pattern_condition_element(parent, condition_nodes, index)?
-            {
+            if condition.kind() == "value_binding_pattern" {
+                let (element, next_index) =
+                    self.optional_binding_condition_element(parent, condition_nodes, index)?;
                 elements.push(self.with_name(element, ""));
                 index = next_index;
                 continue;
@@ -6789,24 +7357,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let binding_specifier = children(binding)
             .find(|child| matches!(child.kind(), "let" | "var"))
             .context("optional binding condition is missing binding specifier")?;
-        let pattern = condition_nodes
-            .iter()
-            .copied()
-            .skip(index + 1)
-            .find(|child| {
-                matches!(
-                    child.kind(),
-                    "simple_identifier" | "identifier" | "pattern" | "wildcard_pattern"
-                )
-            })
-            .context("optional binding condition is missing a pattern")?;
         let equal = children(parent)
             .find(|child| {
                 child.kind() == "="
-                    && child.start_byte() > pattern.end_byte()
+                    && child.start_byte() > binding_specifier.end_byte()
                     && condition_nodes
                         .get(index + 1)
-                        .is_none_or(|next| child.start_byte() >= next.end_byte())
+                        .is_none_or(|next| child.start_byte() >= next.start_byte())
             })
             .context("optional binding condition is missing '='")?;
         let value_index = condition_nodes
@@ -6819,9 +7376,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let value = condition_nodes[value_index];
         let type_annotation = condition_nodes.iter().copied().find(|child| {
             child.kind() == "type_annotation"
-                && child.start_byte() > pattern.end_byte()
+                && child.start_byte() > binding_specifier.end_byte()
                 && child.end_byte() < equal.start_byte()
         });
+        let pattern_end = type_annotation
+            .map(|annotation| annotation.start_byte())
+            .unwrap_or_else(|| equal.start_byte());
+        let (pattern_start, pattern_end) =
+            self.trim_offsets(binding_specifier.end_byte(), pattern_end);
+        if pattern_start >= pattern_end {
+            bail!("optional binding condition is missing a pattern");
+        }
         let trailing_comma = self.trailing_delimiter(parent, value, ",");
 
         let mut optional_children = vec![
@@ -6835,7 +7400,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ),
                 "bindingSpecifier",
             ),
-            self.with_name(self.pattern(pattern)?, "pattern"),
+            self.with_name(
+                self.synthetic_bound_pattern_from_offsets(pattern_start, pattern_end),
+                "pattern",
+            ),
         ];
         if let Some(type_annotation) = type_annotation {
             optional_children
@@ -6872,28 +7440,47 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         condition_nodes: &[Node<'a>],
         index: usize,
     ) -> Result<Option<(Value, usize)>> {
-        let assignment = condition_nodes[index];
-        if assignment.kind() != "assignment" {
-            return Ok(None);
-        }
-        let Some(case_keyword) = self.case_keyword_before(parent, assignment) else {
+        let first_condition = condition_nodes[index];
+        let Some(case_keyword) = self.case_keyword_before(parent, first_condition) else {
             return Ok(None);
         };
-        let target = self
-            .field_child(assignment, "target")
-            .context("matching pattern condition is missing pattern")?;
-        let pattern_node = if target.kind() == "directly_assignable_expression" {
-            named_children(target).next().unwrap_or(target)
+        let (equal, value, next_index, delimiter_node) = if first_condition.kind() == "assignment" {
+            (
+                self.immediate_child_kind(first_condition, "=")
+                    .context("matching pattern condition is missing '='")?,
+                self.field_child(first_condition, "result")
+                    .context("matching pattern condition is missing initializer")?,
+                index + 1,
+                first_condition,
+            )
         } else {
-            target
+            let equal = children(parent)
+                .find(|child| {
+                    child.kind() == "="
+                        && child.start_byte() > case_keyword.end_byte()
+                        && child.start_byte() >= first_condition.start_byte()
+                })
+                .context("matching pattern condition is missing '='")?;
+            let value_index = condition_nodes
+                .iter()
+                .enumerate()
+                .skip(index)
+                .find(|(_, child)| child.start_byte() > equal.end_byte())
+                .map(|(index, _)| index)
+                .context("matching pattern condition is missing initializer")?;
+            (
+                equal,
+                condition_nodes[value_index],
+                value_index + 1,
+                condition_nodes[value_index],
+            )
         };
-        let equal = self
-            .immediate_child_kind(assignment, "=")
-            .context("matching pattern condition is missing '='")?;
-        let value = self
-            .field_child(assignment, "result")
-            .context("matching pattern condition is missing initializer")?;
         let initializer = self.initializer_clause(equal, value)?;
+        let (pattern_start, pattern_end) =
+            self.trim_offsets(case_keyword.end_byte(), equal.start_byte());
+        if pattern_start >= pattern_end {
+            bail!("matching pattern condition is missing pattern");
+        }
         let pattern_condition_end = end_offset(&initializer);
         let pattern_condition = self.syntax_node(
             "MatchingPatternConditionSyntax",
@@ -6906,12 +7493,15 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     ),
                     "caseKeyword",
                 ),
-                self.with_name(self.pattern(pattern_node)?, "pattern"),
+                self.with_name(
+                    self.synthetic_pattern_from_offsets(pattern_start, pattern_end),
+                    "pattern",
+                ),
                 self.with_name(initializer, "initializer"),
             ],
         );
 
-        let trailing_comma = self.trailing_delimiter(parent, assignment, ",");
+        let trailing_comma = self.trailing_delimiter(parent, delimiter_node, ",");
         let mut element_children = vec![self.with_name(pattern_condition, "condition")];
         if let Some(comma) = trailing_comma {
             element_children
@@ -6924,13 +7514,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.range_from_offsets(case_keyword.start_byte(), element_end),
                 element_children,
             ),
-            index + 1,
+            next_index,
         )))
     }
 
     fn case_keyword_before(&self, parent: Node<'a>, condition: Node<'a>) -> Option<Node<'a>> {
+        let last_comma_end = self.source[parent.start_byte()..condition.start_byte()]
+            .rfind(',')
+            .map(|offset| parent.start_byte() + offset + 1)
+            .unwrap_or(parent.start_byte());
         children(parent)
             .filter(|child| child.end_byte() <= condition.start_byte())
+            .filter(|child| child.start_byte() >= last_comma_end)
             .filter(|child| self.text(*child).trim() == "case")
             .last()
     }
@@ -10936,6 +11531,57 @@ if #available(*) {}
             child_by_name(matching_pattern, "pattern").unwrap()["nodeType"],
             "ExpressionPatternSyntax"
         );
+    }
+
+    #[test]
+    fn emits_matching_pattern_and_tuple_binding_conditions() {
+        let source = "\
+if case let (a, b) = x {}
+if case (let c, 1) = x {}
+if let (d, e) = x {}
+if case let E<Int>.e(y) = x {}
+if case let .Naught(value) = n {}
+";
+        let value = parse_source("Patterns.swift", "/tmp/Patterns.swift", source).unwrap();
+        let matching_patterns = find_node_types(&value, "MatchingPatternConditionSyntax");
+        let matching_texts = matching_patterns
+            .iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            matching_texts,
+            vec![
+                "case let (a, b) = x",
+                "case (let c, 1) = x",
+                "case let E<Int>.e(y) = x",
+                "case let .Naught(value) = n"
+            ]
+        );
+
+        let first_pattern = child_by_name(matching_patterns[0], "pattern").unwrap();
+        assert_eq!(first_pattern["nodeType"], "ValueBindingPatternSyntax");
+        assert_eq!(
+            child_by_name(first_pattern, "pattern").unwrap()["nodeType"],
+            "TuplePatternSyntax"
+        );
+        assert_eq!(
+            child_by_name(matching_patterns[1], "pattern").unwrap()["nodeType"],
+            "TuplePatternSyntax"
+        );
+
+        let optional_binding =
+            find_first_node_type(&value, "OptionalBindingConditionSyntax").unwrap();
+        assert_eq!(
+            child_by_name(optional_binding, "pattern").unwrap()["nodeType"],
+            "TuplePatternSyntax"
+        );
+
+        let call_texts = find_node_types(&value, "FunctionCallExprSyntax")
+            .iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert!(call_texts.contains(&"E<Int>.e(y)"));
+        assert!(call_texts.contains(&".Naught(value)"));
     }
 
     #[test]
