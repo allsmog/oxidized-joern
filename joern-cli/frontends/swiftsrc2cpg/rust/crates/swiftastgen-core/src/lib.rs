@@ -127,6 +127,17 @@ struct RecoveredSwitchCaseSlice {
 }
 
 #[derive(Clone, Copy)]
+struct SourceIfConfigClause {
+    kind: DirectiveKind,
+    keyword_start: usize,
+    keyword_end: usize,
+    condition_start: usize,
+    condition_end: usize,
+    body_start: usize,
+    body_end: usize,
+}
+
+#[derive(Clone, Copy)]
 struct PostfixDirectiveCallParts<'a> {
     directive: Node<'a>,
     navigation: Node<'a>,
@@ -183,6 +194,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             if self.is_recoverable_if_case_error(child) {
                 let if_expr = self.recovered_if_case_expr(child)?;
                 statement_items.push(self.code_block_item_for_value(if_expr, "item"));
+                child_index += 1;
+                continue;
+            }
+            if let Some(switch_expr) = self.recovered_if_config_switch_expr(child)? {
+                statement_items.push(self.code_block_item_for_value(switch_expr, "item"));
                 child_index += 1;
                 continue;
             }
@@ -5179,6 +5195,273 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         )
     }
 
+    fn recovered_if_config_switch_expr(&self, node: Node<'a>) -> Result<Option<Value>> {
+        if node.kind() != "ERROR" {
+            return Ok(None);
+        }
+        let (start, end) = self.trim_offsets(node.start_byte(), node.end_byte());
+        if !self
+            .source
+            .get(start..end)
+            .is_some_and(|text| text.starts_with("switch"))
+        {
+            return Ok(None);
+        }
+        let Some((switch_start, switch_end, subject_start, subject_end, left_brace, right_brace)) =
+            self.switch_offsets_from_source_range(start, end)
+        else {
+            return Ok(None);
+        };
+        let Some(if_config) =
+            self.if_config_decl_from_switch_body_offsets(left_brace + 1, right_brace)?
+        else {
+            return Ok(None);
+        };
+
+        let cases = vec![self.with_name(if_config, "")];
+        let cases_range = self.covering_range_or_point(&cases, left_brace + 1);
+        Ok(Some(self.syntax_node(
+            "SwitchExprSyntax",
+            self.range_from_offsets(switch_start, right_brace + 1),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "keyword(SwiftSyntax.Keyword.switch)",
+                        self.range_from_offsets(switch_start, switch_end),
+                    ),
+                    "switchKeyword",
+                ),
+                self.with_name(
+                    self.synthetic_expr_from_offsets(subject_start, subject_end),
+                    "subject",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "leftBrace",
+                        self.range_from_offsets(left_brace, left_brace + 1),
+                    ),
+                    "leftBrace",
+                ),
+                self.with_name(
+                    self.syntax_node("SwitchCaseListSyntax", cases_range, cases),
+                    "cases",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "rightBrace",
+                        self.range_from_offsets(right_brace, right_brace + 1),
+                    ),
+                    "rightBrace",
+                ),
+            ],
+        )))
+    }
+
+    fn switch_offsets_from_source_range(
+        &self,
+        start: usize,
+        end: usize,
+    ) -> Option<(usize, usize, usize, usize, usize, usize)> {
+        let switch_end = start + "switch".len();
+        if !self
+            .source
+            .as_bytes()
+            .get(switch_end)
+            .is_some_and(|byte| byte.is_ascii_whitespace())
+        {
+            return None;
+        }
+        let left_brace = self.source.get(switch_end..end)?.find('{')? + switch_end;
+        let right_brace = self.source.get(left_brace + 1..end)?.rfind('}')? + left_brace + 1;
+        let (subject_start, subject_end) = self.trim_offsets(switch_end, left_brace);
+        (subject_start < subject_end).then_some((
+            start,
+            switch_end,
+            subject_start,
+            subject_end,
+            left_brace,
+            right_brace,
+        ))
+    }
+
+    fn if_config_decl_from_switch_body_offsets(
+        &self,
+        start: usize,
+        end: usize,
+    ) -> Result<Option<Value>> {
+        let Some(clauses) = self.source_if_config_clauses(start, end) else {
+            return Ok(None);
+        };
+        if clauses.is_empty() || clauses[0].kind != DirectiveKind::If {
+            return Ok(None);
+        }
+
+        let if_config_start = clauses[0].keyword_start;
+        let mut clause_values = Vec::new();
+        for clause in clauses {
+            clause_values.push(self.with_name(self.source_if_config_clause(clause)?, ""));
+        }
+        let clauses_range = self.covering_range_or_point(&clause_values, if_config_start);
+        let clause_list =
+            self.syntax_node("IfConfigClauseListSyntax", clauses_range, clause_values);
+        let pound_endif = self.token_with_range("poundEndif", self.point_range(end));
+        Ok(Some(self.syntax_node(
+            "IfConfigDeclSyntax",
+            self.range_from_offsets(if_config_start, end),
+            vec![
+                self.with_name(clause_list, "clauses"),
+                self.with_name(pound_endif, "poundEndif"),
+            ],
+        )))
+    }
+
+    fn source_if_config_clause(&self, clause: SourceIfConfigClause) -> Result<Value> {
+        let mut children = vec![self.with_name(
+            self.token_with_range(
+                directive_token_kind(clause.kind),
+                self.range_from_offsets(clause.keyword_start, clause.keyword_end),
+            ),
+            "poundKeyword",
+        )];
+        if matches!(clause.kind, DirectiveKind::If | DirectiveKind::ElseIf) {
+            let (condition_start, condition_end) =
+                self.trim_offsets(clause.condition_start, clause.condition_end);
+            if condition_start < condition_end {
+                children.push(self.with_name(
+                    self.synthetic_expr_from_offsets(condition_start, condition_end),
+                    "condition",
+                ));
+            }
+        }
+        let cases =
+            self.switch_case_list_from_source_offsets(clause.body_start, clause.body_end)?;
+        let clause_end = end_offset(&cases).max(clause.keyword_end);
+        children.push(self.with_name(cases, "elements"));
+        Ok(self.syntax_node(
+            "IfConfigClauseSyntax",
+            self.range_from_offsets(clause.keyword_start, clause_end),
+            children,
+        ))
+    }
+
+    fn source_if_config_clauses(
+        &self,
+        start: usize,
+        end: usize,
+    ) -> Option<Vec<SourceIfConfigClause>> {
+        let mut clauses = Vec::new();
+        let mut current: Option<(DirectiveKind, usize, usize, usize, usize)> = None;
+        let mut line_start = start;
+        let mut nested_depth = 0usize;
+        while line_start < end {
+            let line_end = self.source[line_start..end]
+                .find('\n')
+                .map(|relative| line_start + relative)
+                .unwrap_or(end);
+            if let Some((kind, keyword_start, keyword_end, condition_start, condition_end)) =
+                self.source_directive_line(line_start, line_end)
+            {
+                match kind {
+                    DirectiveKind::If if current.is_some() => nested_depth += 1,
+                    DirectiveKind::ElseIf | DirectiveKind::Else if nested_depth == 0 => {
+                        if let Some((
+                            current_kind,
+                            current_start,
+                            current_end,
+                            cond_start,
+                            cond_end,
+                        )) = current.replace((
+                            kind,
+                            keyword_start,
+                            keyword_end,
+                            condition_start,
+                            condition_end,
+                        )) {
+                            clauses.push(SourceIfConfigClause {
+                                kind: current_kind,
+                                keyword_start: current_start,
+                                keyword_end: current_end,
+                                condition_start: cond_start,
+                                condition_end: cond_end,
+                                body_start: self.next_line_start(cond_end, end),
+                                body_end: line_start,
+                            });
+                        }
+                    }
+                    DirectiveKind::EndIf if nested_depth == 0 => {
+                        if let Some((
+                            current_kind,
+                            current_start,
+                            current_end,
+                            cond_start,
+                            cond_end,
+                        )) = current.take()
+                        {
+                            clauses.push(SourceIfConfigClause {
+                                kind: current_kind,
+                                keyword_start: current_start,
+                                keyword_end: current_end,
+                                condition_start: cond_start,
+                                condition_end: cond_end,
+                                body_start: self.next_line_start(cond_end, end),
+                                body_end: line_start,
+                            });
+                            return Some(clauses);
+                        }
+                    }
+                    DirectiveKind::EndIf => nested_depth = nested_depth.saturating_sub(1),
+                    DirectiveKind::ElseIf | DirectiveKind::Else => {}
+                    DirectiveKind::If => {
+                        current = Some((
+                            kind,
+                            keyword_start,
+                            keyword_end,
+                            condition_start,
+                            condition_end,
+                        ));
+                    }
+                }
+            }
+            if line_end == end {
+                break;
+            }
+            line_start = line_end + 1;
+        }
+
+        if let Some((current_kind, current_start, current_end, cond_start, cond_end)) = current {
+            clauses.push(SourceIfConfigClause {
+                kind: current_kind,
+                keyword_start: current_start,
+                keyword_end: current_end,
+                condition_start: cond_start,
+                condition_end: cond_end,
+                body_start: self.next_line_start(cond_end, end),
+                body_end: end,
+            });
+        }
+        (!clauses.is_empty()).then_some(clauses)
+    }
+
+    fn source_directive_line(
+        &self,
+        line_start: usize,
+        line_end: usize,
+    ) -> Option<(DirectiveKind, usize, usize, usize, usize)> {
+        let keyword_start = self.skip_horizontal_whitespace(line_start, line_end);
+        let text = self.source.get(keyword_start..line_end)?;
+        let (kind, keyword, _) = source_directive_keyword(text)?;
+        let keyword_end = keyword_start + keyword.len();
+        Some((kind, keyword_start, keyword_end, keyword_end, line_end))
+    }
+
+    fn next_line_start(&self, offset: usize, limit: usize) -> usize {
+        if offset < limit && self.source.as_bytes().get(offset) == Some(&b'\n') {
+            offset + 1
+        } else {
+            self.line_end_offset(offset).saturating_add(1).min(limit)
+        }
+    }
+
     fn switch_expr(&self, node: Node<'a>) -> Result<Value> {
         let switch_keyword = self
             .immediate_child_kind(node, "switch")
@@ -5531,6 +5814,15 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         start: usize,
         end: usize,
     ) -> Option<Vec<RecoveredSwitchCaseSlice>> {
+        self.recovered_switch_case_slices_between_with_minimum(start, end, 2)
+    }
+
+    fn recovered_switch_case_slices_between_with_minimum(
+        &self,
+        start: usize,
+        end: usize,
+        minimum_labels: usize,
+    ) -> Option<Vec<RecoveredSwitchCaseSlice>> {
         let mut label_starts = Vec::new();
         let mut line_start = start;
         while line_start < end {
@@ -5546,7 +5838,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
             line_start = line_end + 1;
         }
-        if label_starts.len() <= 1 {
+        if label_starts.len() < minimum_labels {
             return None;
         }
 
@@ -5574,6 +5866,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             });
         }
         Some(slices)
+    }
+
+    fn switch_case_list_from_source_offsets(&self, start: usize, end: usize) -> Result<Value> {
+        let cases = self
+            .recovered_switch_case_slices_between_with_minimum(start, end, 1)
+            .unwrap_or_default()
+            .into_iter()
+            .map(|recovered| self.recovered_switch_case_from_source(recovered))
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .map(|case| self.with_name(case, ""))
+            .collect::<Vec<_>>();
+        let range = self.covering_range_or_point(&cases, start);
+        Ok(self.syntax_node("SwitchCaseListSyntax", range, cases))
     }
 
     fn switch_label_at(&self, line_start: usize, line_end: usize) -> Option<(usize, bool)> {
@@ -5644,7 +5950,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.trim_offsets(recovered.keyword_end, recovered.colon_start);
             let case_items = if pattern_start < pattern_end {
                 vec![self.with_name(
-                    self.switch_case_item_from_offsets(pattern_start, pattern_end),
+                    self.switch_case_item_from_recovered_source_offsets(pattern_start, pattern_end),
                     "",
                 )]
             } else {
@@ -5695,14 +6001,109 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
-    fn switch_case_item_from_offsets(&self, pattern_start: usize, pattern_end: usize) -> Value {
+    fn recovered_switch_case_from_source(
+        &self,
+        recovered: RecoveredSwitchCaseSlice,
+    ) -> Result<Value> {
+        let label = if recovered.is_default {
+            self.syntax_node(
+                "SwitchDefaultLabelSyntax",
+                self.range_from_offsets(recovered.label_start, recovered.colon_end),
+                vec![
+                    self.with_name(
+                        self.token_with_range(
+                            "keyword(SwiftSyntax.Keyword.default)",
+                            self.range_from_offsets(recovered.label_start, recovered.keyword_end),
+                        ),
+                        "defaultKeyword",
+                    ),
+                    self.with_name(
+                        self.token_with_range(
+                            "colon",
+                            self.range_from_offsets(recovered.colon_start, recovered.colon_end),
+                        ),
+                        "colon",
+                    ),
+                ],
+            )
+        } else {
+            let (pattern_start, pattern_end) =
+                self.trim_offsets(recovered.keyword_end, recovered.colon_start);
+            let case_items = if pattern_start < pattern_end {
+                vec![self.with_name(
+                    self.switch_case_item_from_recovered_source_offsets(pattern_start, pattern_end),
+                    "",
+                )]
+            } else {
+                Vec::new()
+            };
+            let item_range = self.covering_range_or_point(&case_items, recovered.keyword_end);
+            self.syntax_node(
+                "SwitchCaseLabelSyntax",
+                self.range_from_offsets(recovered.label_start, recovered.colon_end),
+                vec![
+                    self.with_name(
+                        self.token_with_range(
+                            "keyword(SwiftSyntax.Keyword.case)",
+                            self.range_from_offsets(recovered.label_start, recovered.keyword_end),
+                        ),
+                        "caseKeyword",
+                    ),
+                    self.with_name(
+                        self.syntax_node("SwitchCaseItemListSyntax", item_range, case_items),
+                        "caseItems",
+                    ),
+                    self.with_name(
+                        self.token_with_range(
+                            "colon",
+                            self.range_from_offsets(recovered.colon_start, recovered.colon_end),
+                        ),
+                        "colon",
+                    ),
+                ],
+            )
+        };
+
+        Ok(self.syntax_node(
+            "SwitchCaseSyntax",
+            self.range_from_offsets(recovered.label_start, recovered.end),
+            vec![
+                self.with_name(label, "label"),
+                self.with_name(
+                    self.code_block_item_list_from_source_range(
+                        recovered.body_start,
+                        recovered.end,
+                        recovered.body_start,
+                    ),
+                    "statements",
+                ),
+            ],
+        ))
+    }
+
+    fn switch_case_item_from_recovered_source_offsets(
+        &self,
+        pattern_start: usize,
+        pattern_end: usize,
+    ) -> Value {
+        let pattern = if self.source[pattern_start..pattern_end].starts_with('(')
+            && self.source[pattern_start..pattern_end].ends_with(')')
+        {
+            self.syntax_node(
+                "ExpressionPatternSyntax",
+                self.range_from_offsets(pattern_start, pattern_end),
+                vec![self.with_name(
+                    self.synthetic_tuple_expr_from_offsets(pattern_start, pattern_end),
+                    "expression",
+                )],
+            )
+        } else {
+            self.synthetic_pattern_from_offsets(pattern_start, pattern_end)
+        };
         self.syntax_node(
             "SwitchCaseItemSyntax",
             self.range_from_offsets(pattern_start, pattern_end),
-            vec![self.with_name(
-                self.synthetic_pattern_from_offsets(pattern_start, pattern_end),
-                "pattern",
-            )],
+            vec![self.with_name(pattern, "pattern")],
         )
     }
 
@@ -5731,6 +6132,35 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         self.push_code_block_items_from_nodes(&statement_nodes, &mut items)?;
         let range = self.covering_range_or_point(&items, fallback_offset);
         Ok(self.syntax_node("CodeBlockItemListSyntax", range, items))
+    }
+
+    fn code_block_item_list_from_source_range(
+        &self,
+        start: usize,
+        end: usize,
+        fallback_offset: usize,
+    ) -> Value {
+        let mut items = Vec::new();
+        let mut line_start = start;
+        while line_start < end {
+            let line_end = self.source[line_start..end]
+                .find('\n')
+                .map(|relative| line_start + relative)
+                .unwrap_or(end);
+            let (statement_start, statement_end) = self.trim_offsets(line_start, line_end);
+            if statement_start < statement_end
+                && !self.source[statement_start..statement_end].starts_with('#')
+            {
+                let expression = self.synthetic_expr_from_offsets(statement_start, statement_end);
+                items.push(self.code_block_item_for_value(expression, "item"));
+            }
+            if line_end == end {
+                break;
+            }
+            line_start = line_end + 1;
+        }
+        let range = self.covering_range_or_point(&items, fallback_offset);
+        self.syntax_node("CodeBlockItemListSyntax", range, items)
     }
 
     fn synthetic_pattern_from_offsets(&self, start: usize, end: usize) -> Value {
@@ -11951,6 +12381,29 @@ fn starts_directive_keyword(text: &str, keyword: &str) -> bool {
     })
 }
 
+fn source_directive_keyword(text: &str) -> Option<(DirectiveKind, &'static str, &'static str)> {
+    if starts_directive_keyword(text, "#elseif") {
+        Some((DirectiveKind::ElseIf, "#elseif", "poundElseif"))
+    } else if starts_directive_keyword(text, "#else") {
+        Some((DirectiveKind::Else, "#else", "poundElse"))
+    } else if starts_directive_keyword(text, "#endif") {
+        Some((DirectiveKind::EndIf, "#endif", "poundEndif"))
+    } else if starts_directive_keyword(text, "#if") {
+        Some((DirectiveKind::If, "#if", "poundIf"))
+    } else {
+        None
+    }
+}
+
+fn directive_token_kind(kind: DirectiveKind) -> &'static str {
+    match kind {
+        DirectiveKind::If => "poundIf",
+        DirectiveKind::ElseIf => "poundElseif",
+        DirectiveKind::Else => "poundElse",
+        DirectiveKind::EndIf => "poundEndif",
+    }
+}
+
 fn is_expression_like_node(node: Node<'_>) -> bool {
     matches!(
         node.kind(),
@@ -12214,6 +12667,48 @@ mod tests {
             source_text(source, child_by_name(item, "item").unwrap()),
             "x = 0"
         );
+    }
+
+    #[test]
+    fn recovers_if_config_switch_case_list_from_error_node() {
+        let source = "switch x {\n  #if ios\n  default: foo()\n  #else\n  case (1, 2):\n    foo()\n  case (var a, var b):\n    t = (b, a)\n}\n";
+        let value = parse_source("Switch.swift", "/tmp/Switch.swift", source).unwrap();
+        let switch_expr = find_first_node_type(&value, "SwitchExprSyntax").unwrap();
+        assert_eq!(
+            source_text(source, child_by_name(switch_expr, "subject").unwrap()),
+            "x"
+        );
+
+        let if_config = find_first_node_type(switch_expr, "IfConfigDeclSyntax").unwrap();
+        let clauses = child_by_name(if_config, "clauses").unwrap()["children"]
+            .as_array()
+            .unwrap();
+        assert_eq!(clauses.len(), 2);
+        assert_eq!(
+            child_by_name(&clauses[0], "poundKeyword").unwrap()["tokenKind"],
+            "poundIf"
+        );
+        assert_eq!(
+            source_text(source, child_by_name(&clauses[0], "condition").unwrap()),
+            "ios"
+        );
+        assert_eq!(
+            child_by_name(&clauses[1], "poundKeyword").unwrap()["tokenKind"],
+            "poundElse"
+        );
+        assert_eq!(
+            child_by_name(&clauses[1], "elements").unwrap()["nodeType"],
+            "SwitchCaseListSyntax"
+        );
+
+        let case_labels = find_node_types(
+            child_by_name(&clauses[1], "elements").unwrap(),
+            "SwitchCaseSyntax",
+        )
+        .into_iter()
+        .map(|switch_case| source_text(source, child_by_name(switch_case, "label").unwrap()))
+        .collect::<Vec<_>>();
+        assert_eq!(case_labels, vec!["case (1, 2):", "case (var a, var b):"]);
     }
 
     #[test]
