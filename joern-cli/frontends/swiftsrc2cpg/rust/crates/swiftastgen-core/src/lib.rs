@@ -352,6 +352,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "ERROR" if self.is_recoverable_precedence_group_error(node) => {
                 self.precedence_group_decl(node)
             }
+            "ERROR" if self.is_recoverable_array_expr_error(node) => {
+                self.recovered_array_expr(node)
+            }
             "ERROR" if self.is_bare_macro_error(node) => self.macro_expansion_decl(node),
             "diagnostic" => self.macro_expansion_decl(node),
             "macro_invocation" => self.macro_expansion_decl(node),
@@ -3086,6 +3089,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "ternary_expression" => self.ternary_expr(node),
             "try_expression" => self.try_expr(node),
             "user_type" => self.constructed_type_expr(node),
+            "ERROR" if self.is_recoverable_array_expr_error(node) => {
+                self.recovered_array_expr(node)
+            }
             "ERROR" if self.is_bare_macro_error(node) => self.macro_expansion_expr(node),
             "ERROR" if is_identifier_like_text(self.text(node)) => {
                 Ok(self.decl_reference_expr(node))
@@ -3384,6 +3390,106 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ),
             ],
         ))
+    }
+
+    fn is_recoverable_array_expr_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR"
+            && self
+                .immediate_named_child_kind(node, "array_type")
+                .is_some_and(|array_type| {
+                    self.immediate_child_kind(array_type, "[").is_some()
+                        && self.immediate_child_kind(array_type, "]").is_some()
+                        && !self.tuple_type_fragments(array_type).is_empty()
+                })
+    }
+
+    fn recovered_array_expr(&self, node: Node<'a>) -> Result<Value> {
+        let array_type = if node.kind() == "array_type" {
+            node
+        } else {
+            self.immediate_named_child_kind(node, "array_type")
+                .context("recovered array expression is missing array type")?
+        };
+        let left_square = self
+            .immediate_child_kind(array_type, "[")
+            .context("recovered array expression is missing '['")?;
+        let right_square = self
+            .immediate_child_kind(array_type, "]")
+            .context("recovered array expression is missing ']'")?;
+        let tuple_fragments = self.tuple_type_fragments(array_type);
+        let first_tuple = tuple_fragments
+            .first()
+            .copied()
+            .context("recovered array expression is missing tuple element")?;
+        let last_tuple = tuple_fragments
+            .last()
+            .copied()
+            .context("recovered array expression is missing tuple element")?;
+        let tuple = self.recovered_tuple_expr_from_type_fragments(first_tuple, last_tuple)?;
+        let element = self.with_name(
+            self.syntax_node(
+                "ArrayElementSyntax",
+                self.range_from_offsets(first_tuple.start_byte(), last_tuple.end_byte()),
+                vec![self.with_name(tuple, "expression")],
+            ),
+            "",
+        );
+        let elements = self.syntax_node(
+            "ArrayElementListSyntax",
+            self.range_from_offsets(left_square.end_byte(), right_square.start_byte()),
+            vec![element],
+        );
+        Ok(self.syntax_node(
+            "ArrayExprSyntax",
+            self.range_from_offsets(array_type.start_byte(), array_type.end_byte()),
+            vec![
+                self.with_name(self.token_for_node(left_square, "leftSquare"), "leftSquare"),
+                self.with_name(elements, "elements"),
+                self.with_name(
+                    self.token_for_node(right_square, "rightSquare"),
+                    "rightSquare",
+                ),
+            ],
+        ))
+    }
+
+    fn recovered_tuple_expr_from_type_fragments(
+        &self,
+        first_tuple: Node<'a>,
+        last_tuple: Node<'a>,
+    ) -> Result<Value> {
+        let left_paren = self
+            .immediate_child_kind(first_tuple, "(")
+            .context("recovered tuple expression is missing '('")?;
+        let right_paren = self
+            .immediate_child_kind(last_tuple, ")")
+            .context("recovered tuple expression is missing ')'")?;
+        Ok(self.syntax_node(
+            "TupleExprSyntax",
+            self.range_from_offsets(first_tuple.start_byte(), last_tuple.end_byte()),
+            vec![
+                self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
+                self.with_name(
+                    self.syntax_node(
+                        "LabeledExprListSyntax",
+                        self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
+                        Vec::new(),
+                    ),
+                    "elements",
+                ),
+                self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
+            ],
+        ))
+    }
+
+    fn tuple_type_fragments(&self, node: Node<'a>) -> Vec<Node<'a>> {
+        named_children(node)
+            .filter_map(|child| match child.kind() {
+                "tuple_type" => Some(child),
+                "ERROR" => self.immediate_named_child_kind(child, "tuple_type"),
+                _ => None,
+            })
+            .collect()
     }
 
     fn regex_array_element_list(
@@ -6904,6 +7010,26 @@ fn end_offset(value: &Value) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn recovers_array_literal_without_commas() {
+        let value =
+            parse_source("ArrayNoComma.swift", "/tmp/ArrayNoComma.swift", "[() ()]\n").unwrap();
+        let array = find_first_node_type(&value, "ArrayExprSyntax").unwrap();
+        assert_eq!(array["range"]["startOffset"], 0);
+        assert_eq!(array["range"]["endOffset"], 7);
+        let elements = array["children"][1]["children"].as_array().unwrap();
+        assert_eq!(elements.len(), 1);
+        let tuple = &elements[0]["children"][0];
+        assert_eq!(tuple["nodeType"], "TupleExprSyntax");
+        assert_eq!(tuple["range"]["startOffset"], 1);
+        assert_eq!(tuple["range"]["endOffset"], 6);
+        assert_eq!(tuple["children"][1]["nodeType"], "LabeledExprListSyntax");
+        assert!(tuple["children"][1]["children"]
+            .as_array()
+            .unwrap()
+            .is_empty());
+    }
 
     #[test]
     fn emits_nested_type_specialization_calls() {
