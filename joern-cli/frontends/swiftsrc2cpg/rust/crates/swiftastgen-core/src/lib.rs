@@ -265,6 +265,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 || self.is_ignorable_diagnostic(child)
                 || self.is_ignorable_directive_call(child)
                 || self.is_ignorable_top_level_error(child)
+                || self.is_ignorable_top_level_observer_call(child)
                 || self.is_ignorable_statement_error(child)
                 || self.is_ignorable_top_level_function_type_fragment(child)
                 || self.is_regex_delimiter_error(child)
@@ -395,11 +396,24 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
         let trimmed = self.text(node).trim();
         (trimmed == "}" && named_children(node).all(is_trivia_node))
+            || (trimmed.chars().all(|ch| ch == '}' || ch.is_whitespace())
+                && named_children(node).all(is_trivia_node))
             || (trimmed == "async" && named_children(node).all(is_trivia_node))
             || trimmed == "?"
             || trimmed.starts_with(',')
             || self.is_standalone_attribute_error(node)
             || (!trimmed.is_empty() && trimmed.chars().all(|ch| ch == '!'))
+    }
+
+    fn is_ignorable_top_level_observer_call(&self, node: Node<'a>) -> bool {
+        if node.kind() != "call_expression"
+            || self.first_descendant_kind(node, "lambda_literal").is_none()
+        {
+            return false;
+        }
+        named_children(node)
+            .next()
+            .is_some_and(|child| matches!(self.text(child), "willSet" | "didSet"))
     }
 
     fn is_ignorable_statement_error(&self, node: Node<'a>) -> bool {
@@ -4919,30 +4933,166 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         node.kind() == "ERROR" && self.accessor_keyword_node(node).is_some()
     }
 
+    fn source_accessor_decls_from_offsets(&self, start: usize, end: usize) -> Result<Vec<Value>> {
+        let mut accessors = Vec::new();
+        let mut offset = start;
+        let mut nested_depth = 0usize;
+        while offset < end {
+            let bytes = self.source.as_bytes();
+            let byte = bytes[offset];
+            if nested_depth == 0 {
+                if byte == b'/' && bytes.get(offset + 1) == Some(&b'/') {
+                    offset = self.line_end_offset(offset).min(end);
+                    continue;
+                }
+                if byte == b'/' && bytes.get(offset + 1) == Some(&b'*') {
+                    offset = self
+                        .source
+                        .get(offset + 2..end)
+                        .and_then(|rest| rest.find("*/"))
+                        .map(|relative| offset + 2 + relative + 2)
+                        .unwrap_or(end);
+                    continue;
+                }
+                let keyword_start = self.skip_ascii_whitespace(offset, end);
+                if let Some((keyword, keyword_end)) =
+                    self.source_accessor_keyword_at(keyword_start, end)
+                {
+                    let (accessor_end, body_range) =
+                        self.source_accessor_extent(keyword_end, end)?;
+                    accessors.push(self.source_accessor_decl(
+                        keyword,
+                        keyword_start,
+                        keyword_end,
+                        accessor_end,
+                        body_range,
+                    ));
+                    offset = accessor_end.max(keyword_end);
+                    continue;
+                }
+            }
+
+            match byte {
+                b'{' => nested_depth += 1,
+                b'}' => nested_depth = nested_depth.saturating_sub(1),
+                _ => {}
+            }
+            offset += 1;
+        }
+        Ok(accessors)
+    }
+
+    fn source_accessor_keyword_at(
+        &self,
+        start: usize,
+        end: usize,
+    ) -> Option<(&'static str, usize)> {
+        [
+            "willSet", "didSet", "_modify", "_read", "modify", "read", "init", "get", "set",
+        ]
+        .iter()
+        .find_map(|keyword| {
+            let keyword_end = start.checked_add(keyword.len())?;
+            if keyword_end <= end
+                && self.source.get(start..keyword_end) == Some(*keyword)
+                && self.is_keyword_boundary(start, keyword_end)
+            {
+                Some((*keyword, keyword_end))
+            } else {
+                None
+            }
+        })
+    }
+
+    fn source_accessor_extent(
+        &self,
+        keyword_end: usize,
+        end: usize,
+    ) -> Result<(usize, Option<(usize, usize)>)> {
+        let body_start = self.source[keyword_end..end]
+            .find('{')
+            .map(|relative| keyword_end + relative);
+        if let Some(body_start) = body_start {
+            if let Some(body_end) = self.matching_right_brace_offset(body_start, end) {
+                return Ok((body_end + 1, Some((body_start, body_end + 1))));
+            }
+        }
+        Ok((keyword_end, None))
+    }
+
+    fn source_accessor_decl(
+        &self,
+        keyword: &str,
+        keyword_start: usize,
+        keyword_end: usize,
+        accessor_end: usize,
+        body_range: Option<(usize, usize)>,
+    ) -> Value {
+        let mut children = vec![
+            self.with_name(
+                self.empty_collection("AttributeListSyntax", keyword_start),
+                "attributes",
+            ),
+            self.with_name(
+                self.token_with_range(
+                    &format!("keyword(SwiftSyntax.Keyword.{keyword})"),
+                    self.range_from_offsets(keyword_start, keyword_end),
+                ),
+                "accessorSpecifier",
+            ),
+        ];
+        if let Some((body_start, body_end)) = body_range {
+            children.push(self.with_name(
+                self.synthetic_code_block_from_offsets(body_start, body_end),
+                "body",
+            ));
+        }
+        self.syntax_node(
+            "AccessorDeclSyntax",
+            self.range_from_offsets(keyword_start, accessor_end),
+            children,
+        )
+    }
+
     fn protocol_property_accessor_block(&self, node: Node<'a>) -> Result<Value> {
         let left_brace = self
             .immediate_child_kind(node, "{")
             .context("protocol property accessor block is missing '{'")?;
-        let right_brace = self
+        let parsed_right_brace = self
             .immediate_child_kind(node, "}")
             .context("protocol property accessor block is missing '}'")?;
-        let mut accessor_items = Vec::new();
-        for accessor in named_children(node)
-            .filter(|child| matches!(child.kind(), "getter_specifier" | "setter_specifier"))
-        {
-            accessor_items.push(self.with_name(self.accessor_decl(accessor)?, ""));
+        let right_brace_start = self
+            .matching_right_brace_offset(left_brace.start_byte(), self.source.len())
+            .unwrap_or_else(|| parsed_right_brace.start_byte());
+        let mut accessor_items = self
+            .source_accessor_decls_from_offsets(left_brace.end_byte(), right_brace_start)?
+            .into_iter()
+            .map(|accessor| self.with_name(accessor, ""))
+            .collect::<Vec<_>>();
+        if accessor_items.is_empty() {
+            for accessor in named_children(node)
+                .filter(|child| matches!(child.kind(), "getter_specifier" | "setter_specifier"))
+            {
+                accessor_items.push(self.with_name(self.accessor_decl(accessor)?, ""));
+            }
         }
         let range = self.covering_range_or_point(&accessor_items, left_brace.end_byte());
         Ok(self.syntax_node(
             "AccessorBlockSyntax",
-            self.range_for_node(node),
+            self.range_from_offsets(left_brace.start_byte(), right_brace_start + 1),
             vec![
                 self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace"),
                 self.with_name(
                     self.syntax_node("AccessorDeclListSyntax", range, accessor_items),
                     "accessors",
                 ),
-                self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"),
+                self.with_name(
+                    self.token_with_range(
+                        "rightBrace",
+                        self.range_from_offsets(right_brace_start, right_brace_start + 1),
+                    ),
+                    "rightBrace",
+                ),
             ],
         ))
     }
@@ -12189,6 +12339,26 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         offset
     }
 
+    fn matching_right_brace_offset(&self, left_brace: usize, limit: usize) -> Option<usize> {
+        if self.source.as_bytes().get(left_brace) != Some(&b'{') {
+            return None;
+        }
+        let mut depth = 0usize;
+        for offset in left_brace..limit.min(self.source.len()) {
+            match self.source.as_bytes()[offset] {
+                b'{' => depth += 1,
+                b'}' => {
+                    depth = depth.saturating_sub(1);
+                    if depth == 0 {
+                        return Some(offset);
+                    }
+                }
+                _ => {}
+            }
+        }
+        None
+    }
+
     fn keyword_start_at_trimmed_start(&self, node: Node<'a>, keyword: &str) -> Option<usize> {
         let (start, end) = self.trim_offsets(node.start_byte(), node.end_byte());
         if self.source.get(start..end)?.starts_with(keyword) {
@@ -14981,6 +15151,68 @@ var prop3 : Bool {
                 json!("keyword(SwiftSyntax.Keyword.get)"),
                 json!("keyword(SwiftSyntax.Keyword.get)"),
                 json!("keyword(SwiftSyntax.Keyword.get)")
+            ]
+        );
+    }
+
+    #[test]
+    fn recovers_protocol_property_observers() {
+        let source = "\
+public protocol Foo {
+  var bar: Int {
+    get {}
+    set {}
+    willSet {} // runs before bar is set
+    didSet {} // runs after bar is set
+  }
+}
+";
+        let value = parse_source("Observers.swift", "/tmp/Observers.swift", source).unwrap();
+        let accessors = find_node_types(&value, "AccessorDeclSyntax");
+        let accessor_texts = accessors
+            .iter()
+            .map(|node| source_text(source, node))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            accessor_texts,
+            vec!["get {}", "set {}", "willSet {}", "didSet {}"]
+        );
+        let accessor_specifiers = accessors
+            .iter()
+            .map(|node| child_by_name(node, "accessorSpecifier").unwrap()["tokenKind"].clone())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            accessor_specifiers,
+            vec![
+                json!("keyword(SwiftSyntax.Keyword.get)"),
+                json!("keyword(SwiftSyntax.Keyword.set)"),
+                json!("keyword(SwiftSyntax.Keyword.willSet)"),
+                json!("keyword(SwiftSyntax.Keyword.didSet)")
+            ]
+        );
+    }
+
+    #[test]
+    fn recovers_protocol_property_effectful_requirements() {
+        let source = "\
+protocol P {
+  associatedtype T
+  var prop2 : T { get async throws set }
+  var prop7 : T { mutating get async nonmutating set }
+}
+";
+        let value = parse_source("Effectful.swift", "/tmp/Effectful.swift", source).unwrap();
+        let accessor_specifiers = find_node_types(&value, "AccessorDeclSyntax")
+            .iter()
+            .map(|node| child_by_name(node, "accessorSpecifier").unwrap()["tokenKind"].clone())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            accessor_specifiers,
+            vec![
+                json!("keyword(SwiftSyntax.Keyword.get)"),
+                json!("keyword(SwiftSyntax.Keyword.set)"),
+                json!("keyword(SwiftSyntax.Keyword.get)"),
+                json!("keyword(SwiftSyntax.Keyword.set)")
             ]
         );
     }
