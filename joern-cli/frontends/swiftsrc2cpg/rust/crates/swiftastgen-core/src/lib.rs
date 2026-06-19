@@ -113,6 +113,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     child_index += 2;
                     continue;
                 }
+                if self.is_split_copy_variable_decl(child, next) {
+                    let declaration = self.recovered_copy_variable_decl(child, next)?;
+                    statement_items.push(self.code_block_item_for_value(declaration, "item"));
+                    child_index += 2;
+                    continue;
+                }
+                if self.is_split_move_variable_decl(child, next) {
+                    statement_items.push(self.code_block_item(child)?);
+                    child_index += 2;
+                    continue;
+                }
             }
             if self.is_recoverable_escaped_raw_assignment(child) {
                 let mut end_node = child;
@@ -295,6 +306,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "call_expression"
             | "comparison_expression"
             | "conjunction_expression"
+            | "consume_expression"
             | "dictionary_literal"
             | "disjunction_expression"
             | "equality_expression"
@@ -1627,6 +1639,100 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn is_split_copy_variable_decl(&self, declaration: Node<'a>, continuation: Node<'a>) -> bool {
+        declaration.kind() == "property_declaration"
+            && continuation.kind() == "ERROR"
+            && self
+                .field_child(declaration, "value")
+                .is_some_and(|value| self.text(value) == "copy")
+            && is_identifier_like_text(self.text(continuation))
+    }
+
+    fn is_split_move_variable_decl(&self, declaration: Node<'a>, continuation: Node<'a>) -> bool {
+        declaration.kind() == "property_declaration"
+            && continuation.kind() == "ERROR"
+            && self
+                .field_child(declaration, "value")
+                .is_some_and(|value| self.text(value) == "_move")
+            && is_identifier_like_text(self.text(continuation))
+    }
+
+    fn recovered_copy_variable_decl(
+        &self,
+        declaration: Node<'a>,
+        continuation: Node<'a>,
+    ) -> Result<Value> {
+        let binding_keyword = self
+            .first_descendant_any_kind(declaration, "let")
+            .or_else(|| self.first_descendant_any_kind(declaration, "var"))
+            .context("recovered copy declaration is missing let/var")?;
+        let pattern_node = self
+            .field_child(declaration, "name")
+            .context("recovered copy declaration is missing a name")?;
+        let copy_keyword = self
+            .field_child(declaration, "value")
+            .context("recovered copy declaration is missing copy keyword")?;
+        let equal = self
+            .immediate_child_kind(declaration, "=")
+            .context("recovered copy declaration is missing '='")?;
+
+        let mut binding_children = vec![self.with_name(self.pattern(pattern_node)?, "pattern")];
+        if let Some(type_node) = self.immediate_named_child_kind(declaration, "type_annotation") {
+            binding_children
+                .push(self.with_name(self.type_annotation(type_node)?, "typeAnnotation"));
+        }
+
+        let value_expr = self.ownership_expr_from_parts(
+            "CopyExprSyntax",
+            "copyKeyword",
+            copy_keyword,
+            continuation,
+        )?;
+        let initializer = self.syntax_node(
+            "InitializerClauseSyntax",
+            self.range_from_offsets(equal.start_byte(), end_offset(&value_expr)),
+            vec![
+                self.with_name(self.token_for_node(equal, "equal"), "equal"),
+                self.with_name(value_expr, "value"),
+            ],
+        );
+        binding_children.push(self.with_name(initializer, "initializer"));
+
+        let binding_range = self.range_from_offsets(
+            pattern_node.start_byte(),
+            binding_children
+                .last()
+                .map(end_offset)
+                .unwrap_or_else(|| pattern_node.end_byte()),
+        );
+        let binding = self.syntax_node("PatternBindingSyntax", binding_range, binding_children);
+        let bindings = self.with_name(
+            self.syntax_node(
+                "PatternBindingListSyntax",
+                self.range_from_offsets(pattern_node.start_byte(), end_offset(&binding)),
+                vec![self.with_name(binding, "")],
+            ),
+            "bindings",
+        );
+
+        Ok(self.syntax_node(
+            "VariableDeclSyntax",
+            self.range_from_offsets(binding_keyword.start_byte(), end_offset(&bindings)),
+            vec![
+                self.with_name(self.attribute_list(declaration)?, "attributes"),
+                self.with_name(self.modifier_list(declaration), "modifiers"),
+                self.with_name(
+                    self.token_for_node(
+                        binding_keyword,
+                        &format!("keyword(SwiftSyntax.Keyword.{})", binding_keyword.kind()),
+                    ),
+                    "bindingSpecifier",
+                ),
+                bindings,
+            ],
+        ))
+    }
+
     fn is_recoverable_property_error(&self, node: Node<'a>) -> bool {
         if node.kind() != "ERROR" {
             return false;
@@ -2340,9 +2446,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .filter(|child| !is_trivia_node(*child))
             .collect();
         let mut items = Vec::new();
-        for child in statement_nodes {
-            items.push(self.code_block_item(child)?);
-        }
+        self.push_code_block_items_from_nodes(&statement_nodes, &mut items)?;
         let statements_range = self.covering_range_or_point(&items, left_brace.end_byte());
         Ok(self.syntax_node(
             "CodeBlockSyntax",
@@ -2370,11 +2474,36 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .filter(|child| !is_trivia_node(*child))
             .collect();
         let mut items = Vec::new();
-        for child in statement_nodes {
-            items.push(self.code_block_item(child)?);
-        }
+        self.push_code_block_items_from_nodes(&statement_nodes, &mut items)?;
         let range = self.covering_range_or_point(&items, fallback_offset);
         Ok(self.syntax_node("CodeBlockItemListSyntax", range, items))
+    }
+
+    fn push_code_block_items_from_nodes(
+        &self,
+        statement_nodes: &[Node<'a>],
+        items: &mut Vec<Value>,
+    ) -> Result<()> {
+        let mut index = 0;
+        while index < statement_nodes.len() {
+            let child = statement_nodes[index];
+            if let Some(next) = statement_nodes.get(index + 1).copied() {
+                if self.is_split_copy_variable_decl(child, next) {
+                    let declaration = self.recovered_copy_variable_decl(child, next)?;
+                    items.push(self.code_block_item_for_value(declaration, "item"));
+                    index += 2;
+                    continue;
+                }
+                if self.is_split_move_variable_decl(child, next) {
+                    items.push(self.code_block_item(child)?);
+                    index += 2;
+                    continue;
+                }
+            }
+            items.push(self.code_block_item(child)?);
+            index += 1;
+        }
+        Ok(())
     }
 
     fn subscript_accessor_block(&self, node: Node<'a>) -> Result<Option<Value>> {
@@ -2567,6 +2696,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "range_expression" => self.binary_operator_expr(node),
             "array_literal" => self.array_expr(node),
             "call_expression" => self.function_call_expr(node),
+            "consume_expression" => self.consume_expr(node),
             "dictionary_literal" => self.dictionary_expr(node),
             "lambda_literal" => self.closure_expr(node),
             "navigation_expression" => self.member_access_expr(node),
@@ -3163,13 +3293,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .push(self.with_name(self.closure_signature(function_type, node)?, "signature"));
         }
 
-        let statement_items = statements
+        let statement_nodes = statements
             .map(named_children)
             .into_iter()
             .flatten()
             .filter(|child| !is_trivia_node(*child))
-            .map(|child| self.code_block_item(child))
-            .collect::<Result<Vec<_>>>()?;
+            .collect::<Vec<_>>();
+        let mut statement_items = Vec::new();
+        self.push_code_block_items_from_nodes(&statement_nodes, &mut statement_items)?;
         let statements_range =
             self.covering_range_or_point(&statement_items, left_brace.end_byte());
         children.push(self.with_name(
@@ -3873,6 +4004,45 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         )
     }
 
+    fn consume_expr(&self, node: Node<'a>) -> Result<Value> {
+        let keyword = self
+            .immediate_child_kind(node, "consume")
+            .or_else(|| self.immediate_child_kind(node, "_move"))
+            .context("consume expression is missing keyword")?;
+        let expression = self
+            .field_child(node, "expr")
+            .or_else(|| named_children(node).find(|child| child.start_byte() >= keyword.end_byte()))
+            .context("consume expression is missing expression")?;
+        self.ownership_expr_from_parts("ConsumeExprSyntax", "consumeKeyword", keyword, expression)
+    }
+
+    fn borrow_expr_from_parts(&self, keyword: Node<'a>, expression: Node<'a>) -> Result<Value> {
+        self.ownership_expr_from_parts("BorrowExprSyntax", "borrowKeyword", keyword, expression)
+    }
+
+    fn ownership_expr_from_parts(
+        &self,
+        node_type: &str,
+        keyword_name: &str,
+        keyword: Node<'a>,
+        expression: Node<'a>,
+    ) -> Result<Value> {
+        Ok(self.syntax_node(
+            node_type,
+            self.range_from_offsets(keyword.start_byte(), expression.end_byte()),
+            vec![
+                self.with_name(
+                    self.token_for_node(
+                        keyword,
+                        &format!("keyword(SwiftSyntax.Keyword.{})", self.text(keyword)),
+                    ),
+                    keyword_name,
+                ),
+                self.with_name(self.expr(expression)?, "expression"),
+            ],
+        ))
+    }
+
     fn function_call_expr(&self, node: Node<'a>) -> Result<Value> {
         let callee = named_children(node)
             .find(|child| child.kind() != "call_suffix")
@@ -4012,6 +4182,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         left_paren: Node<'a>,
         right_paren: Node<'a>,
     ) -> Result<Value> {
+        if let Some(borrow_arguments) =
+            self.borrow_labeled_expr_list(value_arguments, left_paren, right_paren)?
+        {
+            return Ok(borrow_arguments);
+        }
         if let Some(regex_arguments) = self.regex_labeled_expr_list(left_paren, right_paren)? {
             return Ok(regex_arguments);
         }
@@ -4027,6 +4202,48 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
             args,
         ))
+    }
+
+    fn borrow_labeled_expr_list(
+        &self,
+        value_arguments: Node<'a>,
+        left_paren: Node<'a>,
+        right_paren: Node<'a>,
+    ) -> Result<Option<Value>> {
+        let children = named_children(value_arguments)
+            .filter(|child| !is_trivia_node(*child))
+            .collect::<Vec<_>>();
+        let [argument, continuation] = children.as_slice() else {
+            return Ok(None);
+        };
+        if argument.kind() != "value_argument" || continuation.kind() != "ERROR" {
+            return Ok(None);
+        }
+        let Some(keyword) =
+            named_children(*argument).find(|child| child.kind() != "value_argument_label")
+        else {
+            return Ok(None);
+        };
+        if !matches!(self.text(keyword), "borrow" | "_borrow")
+            || !is_identifier_like_text(self.text(*continuation))
+        {
+            return Ok(None);
+        }
+
+        let expression = self.borrow_expr_from_parts(keyword, *continuation)?;
+        let argument = self.with_name(
+            self.syntax_node(
+                "LabeledExprSyntax",
+                self.range_from_offsets(keyword.start_byte(), continuation.end_byte()),
+                vec![self.with_name(expression, "expression")],
+            ),
+            "",
+        );
+        Ok(Some(self.syntax_node(
+            "LabeledExprListSyntax",
+            self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
+            vec![argument],
+        )))
     }
 
     fn regex_labeled_expr_list(
@@ -5037,6 +5254,9 @@ fn is_identifier_like_text(text: &str) -> bool {
     let Some(first) = chars.next() else {
         return false;
     };
+    if first == '$' {
+        return chars.all(|ch| ch == '_' || ch.is_alphanumeric());
+    }
     (first == '_' || first.is_alphabetic()) && chars.all(|ch| ch == '_' || ch.is_alphanumeric())
 }
 
@@ -5144,6 +5364,30 @@ _ = #""Iota"\n\n\n\""#
         );
         assert_eq!(find_node_types(&value, "LabeledExprSyntax").len(), 3);
         assert_eq!(find_node_types(&value, "ArrayElementSyntax").len(), 3);
+    }
+
+    #[test]
+    fn recovers_ownership_expressions() {
+        let source = r#"
+useString(borrow global)
+let _ = copy global
+let _ = consume global
+let _ = _move global
+let _ = copy $0
+"#;
+        let value = parse_source("Ownership.swift", "/tmp/Ownership.swift", source).unwrap();
+        assert_eq!(find_node_types(&value, "BorrowExprSyntax").len(), 1);
+        assert_eq!(find_node_types(&value, "CopyExprSyntax").len(), 2);
+        assert_eq!(find_node_types(&value, "ConsumeExprSyntax").len(), 1);
+
+        let references = find_node_types(&value, "DeclReferenceExprSyntax");
+        let reference_tokens = references
+            .iter()
+            .filter_map(|reference| reference["children"][0]["tokenKind"].as_str())
+            .collect::<Vec<_>>();
+        assert!(reference_tokens.contains(&"identifier(\"global\")"));
+        assert!(reference_tokens.contains(&"identifier(\"_move\")"));
+        assert!(reference_tokens.contains(&"identifier(\"$0\")"));
     }
 
     #[test]
