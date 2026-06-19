@@ -86,6 +86,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 child_index += 1;
                 continue;
             }
+            if self.is_recoverable_precedence_group_error(child) {
+                let (decl, next_index) =
+                    self.recovered_precedence_group_decl(&root_children, child_index)?;
+                statement_items.push(self.code_block_item_for_value(decl, "item"));
+                child_index = next_index;
+                continue;
+            }
+            if self.is_operator_designated_types_recovery_error(child) {
+                child_index += 1;
+                continue;
+            }
             if self.is_recoverable_protocol_error(child) {
                 let (decl, next_index) =
                     self.recovered_protocol_decl(&root_children, child_index)?;
@@ -169,12 +180,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "protocol_function_declaration" => self.function_decl(node),
             "class_declaration" => self.nominal_type_decl(node),
             "protocol_declaration" => self.protocol_decl(node),
+            "operator_declaration" => self.operator_decl(node),
+            "precedence_group_declaration" => self.precedence_group_decl(node),
             "control_transfer_statement" => self.control_transfer_stmt(node),
             "for_statement" => self.for_stmt(node),
             "if_statement" => self.if_expr(node),
             "import_declaration" => self.import_decl(node),
             "switch_statement" => self.switch_expr(node),
             "while_statement" => self.while_stmt(node),
+            "ERROR" if self.is_recoverable_precedence_group_error(node) => {
+                self.precedence_group_decl(node)
+            }
             "assignment"
             | "additive_expression"
             | "array_literal"
@@ -211,6 +227,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "protocol_function_declaration" => self.function_decl(node),
             "class_declaration" => self.nominal_type_decl(node),
             "protocol_declaration" => self.protocol_decl(node),
+            "operator_declaration" => self.operator_decl(node),
+            "precedence_group_declaration" => self.precedence_group_decl(node),
             "enum_entry" => self.enum_case_decl(node),
             "deinit_declaration" => self.deinitializer_decl(node),
             "init_declaration" => self.initializer_decl(node),
@@ -223,6 +241,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
             "ERROR" if self.text(node).trim_start().starts_with("subscript") => {
                 self.subscript_decl(node)
+            }
+            "ERROR" if self.is_recoverable_precedence_group_error(node) => {
+                self.precedence_group_decl(node)
             }
             other => bail!("unsupported Swift member declaration node '{other}'"),
         }
@@ -330,6 +351,244 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         children.push(self.with_name(self.member_block(body)?, "memberBlock"));
 
         Ok(self.syntax_node("ProtocolDeclSyntax", self.range_for_node(node), children))
+    }
+
+    fn operator_decl(&self, node: Node<'a>) -> Result<Value> {
+        let fixity = ["prefix", "postfix", "infix"]
+            .iter()
+            .find_map(|kind| self.immediate_child_kind(node, kind))
+            .context("operator declaration is missing a fixity specifier")?;
+        let operator_keyword = self
+            .immediate_child_kind(node, "operator")
+            .context("operator declaration is missing 'operator'")?;
+        let name = named_children(node)
+            .find(|child| {
+                child.kind() == "custom_operator"
+                    && child.start_byte() >= operator_keyword.end_byte()
+            })
+            .context("operator declaration is missing an operator name")?;
+
+        let mut children = vec![
+            self.with_name(
+                self.token_for_node(
+                    fixity,
+                    &format!("keyword(SwiftSyntax.Keyword.{})", fixity.kind()),
+                ),
+                "fixitySpecifier",
+            ),
+            self.with_name(
+                self.token_for_node(operator_keyword, "keyword(SwiftSyntax.Keyword.operator)"),
+                "operatorKeyword",
+            ),
+            self.with_name(
+                self.token_for_node(
+                    name,
+                    &format!(
+                        "{}({})",
+                        operator_token_kind(fixity.kind()),
+                        quoted_text(self.text(name))
+                    ),
+                ),
+                "name",
+            ),
+        ];
+
+        if let Some(precedence_and_types) =
+            self.operator_precedence_and_types(node, name.end_byte())?
+        {
+            children.push(self.with_name(precedence_and_types, "operatorPrecedenceAndTypes"));
+        }
+
+        Ok(self.syntax_node("OperatorDeclSyntax", self.range_for_node(node), children))
+    }
+
+    fn operator_precedence_and_types(
+        &self,
+        node: Node<'a>,
+        name_end: usize,
+    ) -> Result<Option<Value>> {
+        let Some(colon) =
+            children(node).find(|child| child.kind() == ":" && child.start_byte() >= name_end)
+        else {
+            return Ok(None);
+        };
+        let Some(precedence_group) = named_children(node).find(|child| {
+            child.start_byte() >= colon.end_byte()
+                && matches!(child.kind(), "simple_identifier" | "type_identifier")
+        }) else {
+            return Ok(None);
+        };
+
+        Ok(Some(self.syntax_node(
+            "OperatorPrecedenceAndTypesSyntax",
+            self.range_from_offsets(colon.start_byte(), precedence_group.end_byte()),
+            vec![
+                self.with_name(self.token_for_node(colon, "colon"), "colon"),
+                self.with_name(
+                    self.token_for_node(
+                        precedence_group,
+                        &format!("identifier({})", quoted_text(self.text(precedence_group))),
+                    ),
+                    "precedenceGroup",
+                ),
+                self.with_name(
+                    self.empty_collection("DesignatedTypeListSyntax", precedence_group.end_byte()),
+                    "designatedTypes",
+                ),
+            ],
+        )))
+    }
+
+    fn precedence_group_decl(&self, node: Node<'a>) -> Result<Value> {
+        let precedencegroup_keyword = self
+            .immediate_child_kind(node, "precedencegroup")
+            .or_else(|| self.first_descendant_any_kind(node, "precedencegroup"))
+            .context("precedencegroup declaration is missing 'precedencegroup'")?;
+        let left_brace = self
+            .immediate_child_kind(node, "{")
+            .context("precedencegroup declaration is missing '{'")?;
+        let right_brace = self
+            .immediate_child_kind(node, "}")
+            .context("precedencegroup declaration is missing '}'")?;
+        let name = self
+            .first_descendant_kind_between(
+                node,
+                "simple_identifier",
+                precedencegroup_keyword.end_byte(),
+                left_brace.start_byte(),
+            )
+            .or_else(|| {
+                self.first_descendant_kind_between(
+                    node,
+                    "type_identifier",
+                    precedencegroup_keyword.end_byte(),
+                    left_brace.start_byte(),
+                )
+            })
+            .context("precedencegroup declaration is missing a name")?;
+
+        self.precedence_group_decl_from_parts(
+            node,
+            precedencegroup_keyword,
+            name,
+            left_brace,
+            right_brace,
+            (node.start_byte(), node.end_byte()),
+        )
+    }
+
+    fn recovered_precedence_group_decl(
+        &self,
+        siblings: &[Node<'a>],
+        start_index: usize,
+    ) -> Result<(Value, usize)> {
+        let header = siblings[start_index];
+        let precedencegroup_keyword = self
+            .immediate_child_kind(header, "precedencegroup")
+            .or_else(|| self.first_descendant_any_kind(header, "precedencegroup"))
+            .context("recovered precedencegroup declaration is missing 'precedencegroup'")?;
+        let left_brace = self
+            .immediate_child_kind(header, "{")
+            .context("recovered precedencegroup declaration is missing '{'")?;
+        let name = self
+            .first_descendant_kind_between(
+                header,
+                "simple_identifier",
+                precedencegroup_keyword.end_byte(),
+                left_brace.start_byte(),
+            )
+            .or_else(|| {
+                self.first_descendant_kind_between(
+                    header,
+                    "type_identifier",
+                    precedencegroup_keyword.end_byte(),
+                    left_brace.start_byte(),
+                )
+            })
+            .context("recovered precedencegroup declaration is missing a name")?;
+        let (right_brace, close_index) =
+            self.immediate_child_kind(header, "}")
+                .map(|right_brace| (right_brace, start_index))
+                .or_else(|| {
+                    siblings.iter().enumerate().skip(start_index + 1).find_map(
+                        |(index, sibling)| {
+                            self.immediate_child_kind(*sibling, "}")
+                                .map(|right_brace| (right_brace, index))
+                        },
+                    )
+                })
+                .context("recovered precedencegroup declaration is missing '}'")?;
+
+        Ok((
+            self.precedence_group_decl_from_parts(
+                header,
+                precedencegroup_keyword,
+                name,
+                left_brace,
+                right_brace,
+                (header.start_byte(), right_brace.end_byte()),
+            )?,
+            close_index + 1,
+        ))
+    }
+
+    fn precedence_group_decl_from_parts(
+        &self,
+        node: Node<'a>,
+        precedencegroup_keyword: Node<'a>,
+        name: Node<'a>,
+        left_brace: Node<'a>,
+        right_brace: Node<'a>,
+        range: (usize, usize),
+    ) -> Result<Value> {
+        Ok(self.syntax_node(
+            "PrecedenceGroupDeclSyntax",
+            self.range_from_offsets(range.0, range.1),
+            vec![
+                self.with_name(
+                    self.attribute_list_before(node, precedencegroup_keyword.start_byte())?,
+                    "attributes",
+                ),
+                self.with_name(
+                    self.modifier_list_before(node, precedencegroup_keyword.start_byte()),
+                    "modifiers",
+                ),
+                self.with_name(
+                    self.token_for_node(
+                        precedencegroup_keyword,
+                        "keyword(SwiftSyntax.Keyword.precedencegroup)",
+                    ),
+                    "precedencegroupKeyword",
+                ),
+                self.with_name(
+                    self.token_for_node(
+                        name,
+                        &format!("identifier({})", quoted_text(self.text(name))),
+                    ),
+                    "name",
+                ),
+                self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace"),
+                self.with_name(
+                    self.empty_collection(
+                        "PrecedenceGroupAttributeListSyntax",
+                        left_brace.end_byte(),
+                    ),
+                    "groupAttributes",
+                ),
+                self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"),
+            ],
+        ))
+    }
+
+    fn is_recoverable_precedence_group_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR"
+            && self
+                .first_descendant_any_kind(node, "precedencegroup")
+                .is_some()
+    }
+
+    fn is_operator_designated_types_recovery_error(&self, node: Node<'a>) -> bool {
+        node.kind() == "ERROR" && self.text(node).trim_start().starts_with(',')
     }
 
     fn is_recoverable_protocol_error(&self, node: Node<'a>) -> bool {
@@ -3553,6 +3812,14 @@ fn is_identifier_like_text(text: &str) -> bool {
     (first == '_' || first.is_alphabetic()) && chars.all(|ch| ch == '_' || ch.is_alphanumeric())
 }
 
+fn operator_token_kind(fixity: &str) -> &'static str {
+    match fixity {
+        "prefix" => "prefixOperator",
+        "postfix" => "postfixOperator",
+        _ => "binaryOperator",
+    }
+}
+
 fn quoted_text(text: &str) -> String {
     serde_json::to_string(text).expect("serializing a string cannot fail")
 }
@@ -3564,6 +3831,91 @@ fn end_offset(value: &Value) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn emits_operator_and_precedence_group_declarations() {
+        let source = r#"
+precedencegroup F {
+  higherThan: A, B
+}
+infix operator *-* : FunnyPrecedence
+infix operator  <*<<< : MediumPrecedence, &
+prefix operator ^^ : PrefixMagicOperatorProtocol
+infix operator  <*< : MediumPrecedence, InfixMagicOperatorProtocol
+postfix operator ^^ : PostfixMagicOperatorProtocol
+infix operator ^^ : PostfixMagicOperatorProtocol, Class, Struct
+protocol Proto {}
+infix operator *<*< : F, Proto
+class Foo {
+  infix operator |||
+}
+prefix operator /^/
+"#;
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+
+        let precedence_groups = find_node_types(&value, "PrecedenceGroupDeclSyntax");
+        assert_eq!(precedence_groups.len(), 1);
+        assert_eq!(
+            precedence_groups[0]["children"][3]["tokenKind"],
+            "identifier(\"F\")"
+        );
+
+        let operators = find_node_types(&value, "OperatorDeclSyntax");
+        assert_eq!(operators.len(), 9);
+        let token_kinds = operators
+            .iter()
+            .map(|node| node["children"][2]["tokenKind"].as_str().unwrap())
+            .collect::<Vec<_>>();
+        assert!(token_kinds.contains(&"binaryOperator(\"*-*\")"));
+        assert!(token_kinds.contains(&"binaryOperator(\"<*<<<\")"));
+        assert!(token_kinds.contains(&"prefixOperator(\"^^\")"));
+        assert!(token_kinds.contains(&"binaryOperator(\"<*<\")"));
+        assert!(token_kinds.contains(&"postfixOperator(\"^^\")"));
+        assert!(token_kinds.contains(&"binaryOperator(\"*<*<\")"));
+        assert!(token_kinds.contains(&"binaryOperator(\"|||\")"));
+        assert!(token_kinds.contains(&"prefixOperator(\"/^/\")"));
+
+        assert!(operators.iter().any(|node| {
+            node["children"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|child| child["name"] == "operatorPrecedenceAndTypes")
+        }));
+    }
+
+    #[test]
+    fn recovers_split_precedence_group_declarations() {
+        let source = r#"
+precedencegroup FooGroup {
+  higherThan: Group1, Group2
+  lowerThan: Group3, Group4
+  associativity: left
+  assignment: false
+}
+precedencegroup FunnyPrecedence {
+  associativity: left
+  higherThan: MultiplicationPrecedence
+}
+"#;
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let statements = value["children"][0]["children"].as_array().unwrap();
+        assert_eq!(statements.len(), 2);
+
+        let precedence_groups = find_node_types(&value, "PrecedenceGroupDeclSyntax");
+        assert_eq!(precedence_groups.len(), 2);
+        let names = precedence_groups
+            .iter()
+            .map(|node| node["children"][3]["tokenKind"].as_str().unwrap())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            names,
+            vec![
+                "identifier(\"FooGroup\")",
+                "identifier(\"FunnyPrecedence\")"
+            ]
+        );
+    }
 
     #[test]
     fn recovers_protocol_decl_split_by_invalid_initialized_members() {
