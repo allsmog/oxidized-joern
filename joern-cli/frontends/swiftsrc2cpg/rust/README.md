@@ -26,8 +26,9 @@ comparison, equality, and boolean operators, range expressions, ordinary prefix
 operator expressions, array, dictionary, and tuple literal expressions, simple
 import declarations, simple closure literals and trailing closures, simple
 subscript/index expressions, simple `if`/`else` control flow, simple `while`
-loops, simple identifier `for-in` loops, unlabeled `break`/`continue`, boolean
-literals, simple `class`/`struct` member blocks, class/struct inheritance
+loops, simple `guard` statements, simple identifier `for-in` loops, unlabeled
+`break`/`continue`, boolean literals, simple `class`/`struct` member blocks,
+class/struct inheritance
 clauses, simple enum declarations and enum case declarations, simple protocol
 declarations with protocol functions, protocol properties, and associated
 types, recovered initialized protocol members emitted for upstream test

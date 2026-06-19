@@ -184,6 +184,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "precedence_group_declaration" => self.precedence_group_decl(node),
             "control_transfer_statement" => self.control_transfer_stmt(node),
             "for_statement" => self.for_stmt(node),
+            "guard_statement" => self.guard_stmt(node),
             "if_statement" => self.if_expr(node),
             "import_declaration" => self.import_decl(node),
             "switch_statement" => self.switch_expr(node),
@@ -2190,6 +2191,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             | "conjunction_expression"
             | "disjunction_expression"
             | "equality_expression"
+            | "infix_expression"
             | "multiplicative_expression"
             | "range_expression" => self.binary_operator_expr(node),
             "array_literal" => self.array_expr(node),
@@ -3075,6 +3077,48 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    fn guard_stmt(&self, node: Node<'a>) -> Result<Value> {
+        let guard_keyword = self
+            .immediate_child_kind(node, "guard")
+            .context("guard statement is missing 'guard'")?;
+        let else_keyword = self
+            .immediate_child_kind(node, "else")
+            .context("guard statement is missing 'else'")?;
+        let left_brace = children(node)
+            .find(|child| child.kind() == "{" && child.start_byte() > else_keyword.end_byte())
+            .context("guard else body is missing '{'")?;
+        let statements = named_children(node)
+            .filter(|child| child.kind() == "statements")
+            .find(|child| child.start_byte() > left_brace.end_byte());
+        let right_brace = children(node)
+            .filter(|child| child.kind() == "}" && child.start_byte() >= left_brace.end_byte())
+            .last()
+            .context("guard else body is missing '}'")?;
+
+        Ok(self.syntax_node(
+            "GuardStmtSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(guard_keyword, "keyword(SwiftSyntax.Keyword.guard)"),
+                    "guardKeyword",
+                ),
+                self.with_name(
+                    self.guard_condition_element_list(node, guard_keyword, else_keyword)?,
+                    "conditions",
+                ),
+                self.with_name(
+                    self.token_for_node(else_keyword, "keyword(SwiftSyntax.Keyword.else)"),
+                    "elseKeyword",
+                ),
+                self.with_name(
+                    self.code_block_from_statements(statements, left_brace, right_brace)?,
+                    "body",
+                ),
+            ],
+        ))
+    }
+
     fn for_stmt(&self, node: Node<'a>) -> Result<Value> {
         let for_keyword = self
             .immediate_child_kind(node, "for")
@@ -3125,15 +3169,146 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn condition_element_list(&self, condition: Node<'a>) -> Result<Value> {
-        let element = self.syntax_node(
-            "ConditionElementSyntax",
-            self.range_for_node(condition),
-            vec![self.with_name(self.expr(condition)?, "condition")],
-        );
+        let element = self.condition_element(condition, None)?;
         Ok(self.syntax_node(
             "ConditionElementListSyntax",
             self.range_for_node(condition),
             vec![self.with_name(element, "")],
+        ))
+    }
+
+    fn guard_condition_element_list(
+        &self,
+        node: Node<'a>,
+        guard_keyword: Node<'a>,
+        else_keyword: Node<'a>,
+    ) -> Result<Value> {
+        let mut elements = Vec::new();
+        let condition_nodes = named_children(node)
+            .filter(|child| {
+                child.start_byte() > guard_keyword.end_byte()
+                    && child.end_byte() <= else_keyword.start_byte()
+            })
+            .collect::<Vec<_>>();
+
+        let mut index = 0;
+        while index < condition_nodes.len() {
+            let condition = condition_nodes[index];
+            if condition.kind() == "value_binding_pattern" {
+                let (element, next_index) =
+                    self.optional_binding_condition_element(node, &condition_nodes, index)?;
+                elements.push(self.with_name(element, ""));
+                index = next_index;
+                continue;
+            }
+            let trailing_comma = self.trailing_delimiter(node, condition, ",");
+            elements.push(self.with_name(self.condition_element(condition, trailing_comma)?, ""));
+            index += 1;
+        }
+
+        if elements.is_empty() {
+            bail!("guard statement is missing conditions");
+        }
+        let range = self.covering_range_or_point(&elements, guard_keyword.end_byte());
+        Ok(self.syntax_node("ConditionElementListSyntax", range, elements))
+    }
+
+    fn condition_element(
+        &self,
+        condition: Node<'a>,
+        trailing_comma: Option<Node<'a>>,
+    ) -> Result<Value> {
+        let mut children = vec![self.with_name(self.expr(condition)?, "condition")];
+        if let Some(comma) = trailing_comma {
+            children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+        }
+        let end = trailing_comma.map_or(condition.end_byte(), |comma| comma.end_byte());
+        Ok(self.syntax_node(
+            "ConditionElementSyntax",
+            self.range_from_offsets(condition.start_byte(), end),
+            children,
+        ))
+    }
+
+    fn optional_binding_condition_element(
+        &self,
+        parent: Node<'a>,
+        condition_nodes: &[Node<'a>],
+        index: usize,
+    ) -> Result<(Value, usize)> {
+        let binding = condition_nodes[index];
+        let binding_specifier = children(binding)
+            .find(|child| matches!(child.kind(), "let" | "var"))
+            .context("optional binding condition is missing binding specifier")?;
+        let pattern = condition_nodes
+            .iter()
+            .copied()
+            .skip(index + 1)
+            .find(|child| matches!(child.kind(), "simple_identifier" | "identifier" | "pattern"))
+            .context("optional binding condition is missing a pattern")?;
+        let equal = children(parent)
+            .find(|child| {
+                child.kind() == "="
+                    && child.start_byte() > pattern.end_byte()
+                    && condition_nodes
+                        .get(index + 1)
+                        .is_none_or(|next| child.start_byte() >= next.end_byte())
+            })
+            .context("optional binding condition is missing '='")?;
+        let value_index = condition_nodes
+            .iter()
+            .enumerate()
+            .skip(index + 1)
+            .find(|(_, child)| child.start_byte() > equal.end_byte())
+            .map(|(index, _)| index)
+            .context("optional binding condition is missing an initializer")?;
+        let value = condition_nodes[value_index];
+        let type_annotation = condition_nodes.iter().copied().find(|child| {
+            child.kind() == "type_annotation"
+                && child.start_byte() > pattern.end_byte()
+                && child.end_byte() < equal.start_byte()
+        });
+        let trailing_comma = self.trailing_delimiter(parent, value, ",");
+
+        let mut optional_children = vec![
+            self.with_name(
+                self.token_for_node(
+                    binding_specifier,
+                    &format!(
+                        "keyword(SwiftSyntax.Keyword.{})",
+                        self.text(binding_specifier)
+                    ),
+                ),
+                "bindingSpecifier",
+            ),
+            self.with_name(self.pattern(pattern)?, "pattern"),
+        ];
+        if let Some(type_annotation) = type_annotation {
+            optional_children
+                .push(self.with_name(self.type_annotation(type_annotation)?, "typeAnnotation"));
+        }
+        optional_children
+            .push(self.with_name(self.initializer_clause(equal, value)?, "initializer"));
+        let optional_end = end_offset(optional_children.last().unwrap());
+        let optional_binding = self.syntax_node(
+            "OptionalBindingConditionSyntax",
+            self.range_from_offsets(binding.start_byte(), optional_end),
+            optional_children,
+        );
+
+        let mut element_children = vec![self.with_name(optional_binding, "condition")];
+        if let Some(comma) = trailing_comma {
+            element_children
+                .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+        }
+        let element_end = trailing_comma.map_or(optional_end, |comma| comma.end_byte());
+        Ok((
+            self.syntax_node(
+                "ConditionElementSyntax",
+                self.range_from_offsets(binding.start_byte(), element_end),
+                element_children,
+            ),
+            value_index + 1,
         ))
     }
 
@@ -3836,6 +4011,64 @@ fn end_offset(value: &Value) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn emits_guard_statements() {
+        let source = r#"
+func noConditionNoElse() {
+  guard {} else {}
+}
+while (i <= 10) {
+  guard i % 2 == 0 else {
+    i = i + 1
+    continue
+  }
+  print(i)
+}
+func checkAge() {
+  guard let myAge = age else {
+    return
+  }
+}
+func checkJobEligibility() {
+  guard age >= 18, age <= 40 else {
+    return
+  }
+}
+"#;
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let guards = find_node_types(&value, "GuardStmtSyntax");
+        assert_eq!(guards.len(), 4);
+        assert!(guards.iter().all(|node| {
+            node["children"][0]["tokenKind"] == "keyword(SwiftSyntax.Keyword.guard)"
+                && node["children"][2]["tokenKind"] == "keyword(SwiftSyntax.Keyword.else)"
+                && node["children"][3]["nodeType"] == "CodeBlockSyntax"
+        }));
+
+        assert_eq!(
+            guards[0]["children"][1]["children"][0]["children"][0]["nodeType"],
+            "ClosureExprSyntax"
+        );
+        assert_eq!(
+            guards[2]["children"][1]["children"][0]["children"][0]["nodeType"],
+            "OptionalBindingConditionSyntax"
+        );
+        assert_eq!(
+            guards[2]["children"][1]["children"][0]["children"][0]["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.let)"
+        );
+        assert_eq!(
+            guards[3]["children"][1]["children"]
+                .as_array()
+                .unwrap()
+                .len(),
+            2
+        );
+        assert_eq!(
+            guards[3]["children"][1]["children"][0]["children"][1]["tokenKind"],
+            "comma"
+        );
+    }
 
     #[test]
     fn emits_operator_and_precedence_group_declarations() {
