@@ -227,11 +227,13 @@ fn collect_json_files(root: &Path, out: &mut Vec<PathBuf>) -> Result<(), String>
 
 /// Replaces machine-specific absolute paths (e.g. the emitted `fullFilePath`)
 /// with a stable placeholder so the comparison reflects structure, not the
-/// temp directory each tool ran in. Also strips the SwiftSyntax `name` keypath
-/// label (see [`strip_name_keys`]) from both trees so the comparison ignores
-/// that intentional, CPG-irrelevant divergence.
+/// temp directory each tool ran in.
+///
+/// NOTE: for the strict byte-identity gate we deliberately do NOT strip the
+/// SwiftSyntax `name` keypath label here — it must match the reference. The
+/// [`strip_name_keys`] helper is retained for an optional CPG-relevant-only
+/// comparison mode and exercised by its unit test.
 fn normalize_value(value: &mut Value, input_root: &Path) {
-    strip_name_keys(value);
     match value {
         Value::String(text) => {
             *text = normalize_string(text, input_root);
@@ -286,6 +288,116 @@ fn normalize_string(text: &str, input_root: &Path) -> String {
         .replace('\\', "/")
 }
 
+/// One byte-level divergence between the reference and rust JSON, tagged with a
+/// `kind` (index/name/tokenKind/range/structure/keys/value) and the nearest
+/// enclosing `nodeType` so deltas can be ranked and prioritised.
+struct DiffEntry {
+    path: String,
+    kind: String,
+    node_type: String,
+    detail: String,
+}
+
+/// Classify a leaf value-diff by the JSON field it sits on.
+fn classify_leaf(path: &str) -> &'static str {
+    if path.ends_with(".index") {
+        "index"
+    } else if path.ends_with(".name") {
+        "name"
+    } else if path.ends_with(".tokenKind") {
+        "tokenKind"
+    } else if path.contains(".range") {
+        "range"
+    } else {
+        "value"
+    }
+}
+
+/// Recursively collect ALL divergences (not just the first), tracking the
+/// nearest enclosing `nodeType`/`tokenKind` for ranking.
+fn collect_diffs(
+    path: &str,
+    node_type: &str,
+    reference: &Value,
+    rust: &Value,
+    out: &mut Vec<DiffEntry>,
+) {
+    match (reference, rust) {
+        (Value::Object(reference_obj), Value::Object(rust_obj)) => {
+            let nt = reference_obj
+                .get("nodeType")
+                .and_then(Value::as_str)
+                .filter(|s| !s.is_empty())
+                .or_else(|| {
+                    reference_obj
+                        .get("tokenKind")
+                        .and_then(Value::as_str)
+                        .filter(|s| !s.is_empty())
+                })
+                .map(str::to_string)
+                .unwrap_or_else(|| node_type.to_string());
+            let reference_keys = reference_obj.keys().cloned().collect::<BTreeSet<_>>();
+            let rust_keys = rust_obj.keys().cloned().collect::<BTreeSet<_>>();
+            if reference_keys != rust_keys {
+                out.push(DiffEntry {
+                    path: path.into(),
+                    kind: "keys".into(),
+                    node_type: nt.clone(),
+                    detail: format!("reference {reference_keys:?} vs rust {rust_keys:?}"),
+                });
+            }
+            for key in reference_keys.intersection(&rust_keys) {
+                collect_diffs(
+                    &format!("{path}.{key}"),
+                    &nt,
+                    &reference_obj[key],
+                    &rust_obj[key],
+                    out,
+                );
+            }
+        }
+        (Value::Array(reference_values), Value::Array(rust_values)) => {
+            if reference_values.len() != rust_values.len() {
+                out.push(DiffEntry {
+                    path: path.into(),
+                    kind: "structure".into(),
+                    node_type: node_type.into(),
+                    detail: format!(
+                        "array length reference {} vs rust {}",
+                        reference_values.len(),
+                        rust_values.len()
+                    ),
+                });
+            }
+            for (index, (reference_value, rust_value)) in
+                reference_values.iter().zip(rust_values.iter()).enumerate()
+            {
+                collect_diffs(
+                    &format!("{path}[{index}]"),
+                    node_type,
+                    reference_value,
+                    rust_value,
+                    out,
+                );
+            }
+        }
+        _ if reference == rust => {}
+        _ => out.push(DiffEntry {
+            path: path.into(),
+            kind: classify_leaf(path).into(),
+            node_type: node_type.into(),
+            detail: format!(
+                "reference {} vs rust {}",
+                short_json(reference),
+                short_json(rust)
+            ),
+        }),
+    }
+}
+
+/// Compare both JSON trees and, on divergence, return a ranked classification
+/// summary (by delta kind and by `kind @ nodeType`) plus sample paths — the
+/// work-list for driving the swift emitter to byte-identity.
 fn format_json_diff(
     corpus_name: &str,
     reference_json: &BTreeMap<String, Value>,
@@ -293,26 +405,67 @@ fn format_json_diff(
 ) -> Option<String> {
     let reference_files = reference_json.keys().cloned().collect::<Vec<_>>();
     let rust_files = rust_json.keys().cloned().collect::<Vec<_>>();
-    let mut message = format!("{corpus_name}: JSON output differs");
     if reference_files != rust_files {
-        message.push_str(&format!(
-            "\nreference files: {reference_files:?}\nrust files: {rust_files:?}"
+        return Some(format!(
+            "{corpus_name}: file set differs\nreference files: {reference_files:?}\nrust files: {rust_files:?}"
         ));
-        return Some(message);
     }
 
-    for key in reference_files {
-        match (reference_json.get(&key), rust_json.get(&key)) {
-            (Some(reference_value), Some(rust_value)) if reference_value != rust_value => {
-                if let Some(value_diff) = first_value_diff("$", reference_value, rust_value) {
-                    message.push_str(&format!("\nfirst differing file: {key}\n{value_diff}"));
-                    return Some(message);
-                }
-            }
-            _ => {}
+    let mut diffs = Vec::new();
+    for key in &reference_files {
+        if let (Some(reference_value), Some(rust_value)) =
+            (reference_json.get(key), rust_json.get(key))
+        {
+            collect_diffs(
+                &format!("{key}:$"),
+                "",
+                reference_value,
+                rust_value,
+                &mut diffs,
+            );
         }
     }
-    None
+    if diffs.is_empty() {
+        return None;
+    }
+
+    let mut by_kind: BTreeMap<String, usize> = BTreeMap::new();
+    let mut by_kind_node: BTreeMap<(String, String), usize> = BTreeMap::new();
+    for d in &diffs {
+        *by_kind.entry(d.kind.clone()).or_default() += 1;
+        *by_kind_node
+            .entry((d.kind.clone(), d.node_type.clone()))
+            .or_default() += 1;
+    }
+    let kind_lines = by_kind
+        .iter()
+        .map(|(k, c)| format!("  {k}: {c}"))
+        .collect::<Vec<_>>()
+        .join("\n");
+    let mut node_pairs = by_kind_node.into_iter().collect::<Vec<_>>();
+    node_pairs.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+    let top_nodes = node_pairs
+        .iter()
+        .take(15)
+        .map(|((kind, nt), c)| {
+            format!(
+                "  {kind} @ {}: {c}",
+                if nt.is_empty() { "<root>" } else { nt }
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let samples = diffs
+        .iter()
+        .take(12)
+        .map(|d| format!("  [{}] {}\n      {}", d.kind, d.path, d.detail))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    Some(format!(
+        "{corpus_name}: {} JSON delta(s) vs reference\nby kind:\n{kind_lines}\ntop (kind @ nodeType):\n{top_nodes}\nsamples:\n{samples}",
+        diffs.len()
+    ))
 }
 
 fn first_value_diff(path: &str, reference: &Value, rust: &Value) -> Option<String> {
