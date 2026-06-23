@@ -1,6 +1,6 @@
 use anyhow::{bail, Context, Result};
 use clap::Parser;
-use cxxastgen_core::{is_cxx_input, parse_file, write_json, ParseOptions};
+use cxxastgen_core::{is_cxx_input, parse_file, take_unmapped_summary, write_json, ParseOptions};
 use regex::Regex;
 use serde::Deserialize;
 use std::collections::{hash_map::Entry, HashMap};
@@ -84,6 +84,12 @@ fn run() -> Result<()> {
             ),
             Err(err) => println!("{} {}", file.display(), err),
         }
+    }
+
+    // One stderr summary of tree-sitter node kinds that fell through to a generic
+    // fallback. Kept off stdout so the emitted JSON files are never polluted.
+    if let Some(summary) = take_unmapped_summary() {
+        eprintln!("{summary}");
     }
 
     Ok(())

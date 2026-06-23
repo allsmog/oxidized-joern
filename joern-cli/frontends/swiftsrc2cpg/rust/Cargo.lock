@@ -502,6 +502,7 @@ dependencies = [
  "clap",
  "ignore",
  "regex",
+ "serde_json",
  "swiftastgen-core",
  "tempfile",
 ]

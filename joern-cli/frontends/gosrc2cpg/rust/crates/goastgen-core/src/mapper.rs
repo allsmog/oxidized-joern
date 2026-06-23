@@ -204,13 +204,13 @@ impl<'a> Mapper<'a> {
     fn declaration_specs(&self, node: Node<'a>, spec_kind: &str) -> Vec<Node<'a>> {
         let mut specs = Vec::new();
         for child in self.named_children(node) {
-            if child.kind() == spec_kind {
+            if is_spec_kind(child.kind(), spec_kind) {
                 specs.push(child);
             } else if child.kind().ends_with("_spec_list") {
                 specs.extend(
                     self.named_children(child)
                         .into_iter()
-                        .filter(|nested| nested.kind() == spec_kind),
+                        .filter(|nested| is_spec_kind(nested.kind(), spec_kind)),
                 );
             }
         }
@@ -261,7 +261,15 @@ impl<'a> Mapper<'a> {
         if pushed_type_param_scope {
             self.local_decl_scopes.pop();
         }
-        insert(&mut obj, "Assign", json!(0));
+        insert(
+            &mut obj,
+            "Assign",
+            json!(if node.kind() == "type_alias" {
+                self.operator_position(node, "=")
+            } else {
+                0
+            }),
+        );
         Value::Object(obj)
     }
 
@@ -2388,6 +2396,10 @@ fn insert(obj: &mut Map<String, Value>, key: &str, value: Value) {
     obj.insert(key.into(), value);
 }
 
+fn is_spec_kind(kind: &str, spec_kind: &str) -> bool {
+    kind == spec_kind || (spec_kind == "type_spec" && kind == "type_alias")
+}
+
 fn same_tree_sitter_node(left: Node<'_>, right: Node<'_>) -> bool {
     left.kind() == right.kind()
         && left.start_byte() == right.start_byte()
@@ -2411,7 +2423,7 @@ fn collect_type_identifiers(root: Node<'_>, source: &str) -> HashSet<String> {
 }
 
 fn collect_type_identifiers_inner(node: Node<'_>, source: &str, types: &mut HashSet<String>) {
-    if node.kind() == "type_spec" {
+    if is_spec_kind(node.kind(), "type_spec") {
         for ident in field_children_for(node, "name") {
             collect_declared_identifier(ident, source, types);
         }
@@ -2491,7 +2503,7 @@ fn collect_top_level_spec_identifiers(
 ) {
     let mut stack = vec![node];
     while let Some(current) = stack.pop() {
-        if current.kind() == spec_kind {
+        if is_spec_kind(current.kind(), spec_kind) {
             for ident in field_children_for(current, "name") {
                 collect_declared_identifier(ident, source, declared);
             }
@@ -2512,6 +2524,7 @@ fn collect_declared_identifiers_inner(
         "var_spec"
         | "const_spec"
         | "type_spec"
+        | "type_alias"
         | "function_declaration"
         | "parameter_declaration"
         | "variadic_parameter_declaration"

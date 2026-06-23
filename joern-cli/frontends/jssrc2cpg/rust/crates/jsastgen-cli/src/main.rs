@@ -1,7 +1,9 @@
 use anyhow::{bail, Context, Result};
 use clap::Parser;
 use ignore::WalkBuilder;
-use jsastgen_core::{parse_file_with_source, write_json, write_type_map, TypeMapProject};
+use jsastgen_core::{
+    parse_file_with_source, take_unmapped_summary, write_json, write_type_map, TypeMapProject,
+};
 use regex::Regex;
 use std::path::{Component, Path, PathBuf};
 
@@ -86,6 +88,10 @@ fn run() -> Result<()> {
             ),
             Err(err) => println!("{} {}", file.display(), err),
         }
+    }
+
+    if let Some(summary) = take_unmapped_summary() {
+        eprintln!("{summary}");
     }
 
     Ok(())
