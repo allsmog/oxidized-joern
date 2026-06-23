@@ -467,6 +467,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "loc".into(),
             json!(self.source.bytes().filter(|b| *b == b'\n').count() + 1),
         );
+        // The reference emits an empty `name` on the root SourceFileSyntax node.
+        obj.insert("name".into(), Value::String(String::new()));
+        // Empty leading attribute/modifier collections anchor at the start of
+        // the owning declaration's leading trivia, not its first-token offset.
+        self.fix_empty_leading_anchors(&mut root_obj, None);
+        // Reference `index` == position within a `*ListSyntax` parent's children
+        // (every other node, and the root, keeps -1). One post-pass.
+        Self::assign_child_indices(&mut root_obj);
         Ok(root_obj)
     }
 
@@ -13153,6 +13161,67 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         obj.insert("name".into(), Value::String(name.into()));
         obj.insert("index".into(), json!(index));
         value
+    }
+
+    /// Post-pass: set a node's `index` to its 0-based position **only when its
+    /// parent is a `*ListSyntax` collection** (the reference SwiftSyntax
+    /// convention — collection elements carry a positional index; every other
+    /// node, and the root, keeps the `-1` default). Confirmed against the
+    /// reference differential. Runs once over the finished document, so
+    /// individual builders need not compute positions.
+    fn assign_child_indices(value: &mut Value) {
+        let parent_is_list = value
+            .get("nodeType")
+            .and_then(Value::as_str)
+            .is_some_and(|nt| nt.ends_with("ListSyntax"));
+        if let Some(children) = value.get_mut("children").and_then(Value::as_array_mut) {
+            for (index, child) in children.iter_mut().enumerate() {
+                if parent_is_list {
+                    if let Some(obj) = child.as_object_mut() {
+                        obj.insert("index".into(), json!(index));
+                    }
+                }
+                Self::assign_child_indices(child);
+            }
+        }
+    }
+
+    /// Post-pass: an empty leading `AttributeListSyntax`/`DeclModifierListSyntax`
+    /// is anchored by the reference at the START of its owning declaration's
+    /// leading trivia (== the end of the previous token), i.e.
+    /// `trim_end(source[..decl_start])` as a zero-width range — not at the
+    /// declaration's first-token offset. Confirmed against the reference
+    /// differential (the dominant `range` divergence). `parent_start` is the
+    /// immediate parent's `startOffset`; the empty collection's parent is the
+    /// declaration, so that is exactly the decl start we anchor against.
+    fn fix_empty_leading_anchors(&self, value: &mut Value, parent_start: Option<usize>) {
+        let this_start = value
+            .get("range")
+            .and_then(|range| range.get("startOffset"))
+            .and_then(Value::as_u64)
+            .map(|offset| offset as usize);
+        let is_empty_leading = value
+            .get("nodeType")
+            .and_then(Value::as_str)
+            .is_some_and(|nt| matches!(nt, "AttributeListSyntax" | "DeclModifierListSyntax"))
+            && value
+                .get("children")
+                .and_then(Value::as_array)
+                .is_some_and(|children| children.is_empty());
+        if is_empty_leading {
+            if let Some(decl_start) = parent_start {
+                let anchor = self.source.get(..decl_start).unwrap_or("").trim_end().len();
+                let range = self.point_range(anchor);
+                if let Some(obj) = value.as_object_mut() {
+                    obj.insert("range".into(), range);
+                }
+            }
+        }
+        if let Some(children) = value.get_mut("children").and_then(Value::as_array_mut) {
+            for child in children.iter_mut() {
+                self.fix_empty_leading_anchors(child, this_start);
+            }
+        }
     }
 
     fn range_for_node(&self, node: Node<'a>) -> Value {
