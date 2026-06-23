@@ -1089,6 +1089,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    /// Wrap an expression that appears in statement position in an
+    /// `ExpressionStmtSyntax` (child named `expression`), matching the reference
+    /// SwiftSyntax tool. `if`/`switch` are expressions in modern Swift but are
+    /// wrapped in `ExpressionStmtSyntax` when used as statements; simple
+    /// call/assignment statements stay bare (per the reference).
+    fn expression_stmt(&self, expr: Value) -> Value {
+        let range = expr
+            .get("range")
+            .cloned()
+            .unwrap_or_else(|| self.point_range(0));
+        let child = self.with_name(expr, "expression");
+        self.syntax_node("ExpressionStmtSyntax", range, vec![child])
+    }
+
     fn syntax_for_statement(&self, node: Node<'a>) -> Result<Value> {
         match node.kind() {
             "property_declaration" => self.variable_decl(node),
@@ -1113,10 +1127,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "do_statement" => self.do_stmt(node),
             "for_statement" => self.for_stmt(node),
             "guard_statement" => self.guard_stmt(node),
-            "if_statement" => self.if_expr(node),
+            "if_statement" => Ok(self.expression_stmt(self.if_expr(node)?)),
             "import_declaration" => self.import_decl(node),
             "repeat_while_statement" => self.repeat_stmt(node),
-            "switch_statement" => self.switch_expr(node),
+            "switch_statement" => Ok(self.expression_stmt(self.switch_expr(node)?)),
             "while_statement" => self.while_stmt(node),
             "ERROR" if self.is_recoverable_precedence_group_error(node) => {
                 self.precedence_group_decl(node)
@@ -13917,8 +13931,12 @@ mod tests {
             child_by_name(labeled[1], "label").unwrap()["tokenKind"],
             "identifier(\"Gronk\")"
         );
+        // `switch` in statement position is wrapped in `ExpressionStmtSyntax`
+        // (child `expression`), matching the reference SwiftSyntax tool.
+        let labeled_switch = child_by_name(labeled[1], "statement").unwrap();
+        assert_eq!(labeled_switch["nodeType"], "ExpressionStmtSyntax");
         assert_eq!(
-            child_by_name(labeled[1], "statement").unwrap()["nodeType"],
+            child_by_name(labeled_switch, "expression").unwrap()["nodeType"],
             "SwitchExprSyntax"
         );
         let continue_stmt = find_first_node_type(&value, "ContinueStmtSyntax").unwrap();
