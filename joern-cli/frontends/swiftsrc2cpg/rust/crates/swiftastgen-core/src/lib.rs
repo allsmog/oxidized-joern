@@ -13179,6 +13179,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 if parent_is_list {
                     if let Some(obj) = child.as_object_mut() {
                         obj.insert("index".into(), json!(index));
+                        // Collection elements carry an empty `name` in the
+                        // reference (they are positional, not keypath-labelled).
+                        obj.insert("name".into(), Value::String(String::new()));
                     }
                 }
                 Self::assign_child_indices(child);
