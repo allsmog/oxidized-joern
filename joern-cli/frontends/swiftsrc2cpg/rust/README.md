@@ -44,6 +44,23 @@ declarations, parser-only precedence group declarations, simple declaration
 attributes, and simple declaration modifiers. Unsupported syntax fails per-file
 and is reported on stdout so the existing skipped-file handling can continue.
 
+## Reference differential divergences
+
+A reference differential against the upstream SwiftSyntax `SwiftAstGen` surfaced
+two root-`SourceFileSyntax` keys:
+
+- `projectFullPath` (root node only) — the absolute path of the input/project
+  (`--src`) root directory. This is a real field and is now emitted (threaded
+  from the CLI input root through `parse_file`).
+- `name` (on essentially every node) — the SwiftSyntax child-field/keypath
+  label a node occupies in its parent (e.g. `item`, `decl`, `signature`,
+  `body`, `''` on the root). It is a SwiftSyntax serialization artifact with no
+  tree-sitter equivalent, and the Scala `swiftsrc2cpg` CPG builder never
+  consumes it (the full swift CPG suite passes without it). It is treated as an
+  intentional, CPG-irrelevant divergence and is stripped from both trees by the
+  differential harness (`crates/swiftastgen-cli/tests/differential_json.rs`),
+  mirroring how gosrc2cpg documents its legacy-identity divergences.
+
 Run the Rust checks with:
 
 ```bash

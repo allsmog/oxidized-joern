@@ -37,10 +37,43 @@ pub fn parse_file(input_root: &Path, file: &Path) -> Result<Value> {
         .unwrap_or_else(|_| file.to_path_buf())
         .to_string_lossy()
         .into_owned();
-    parse_source(&relative, &full_path, &source)
+    // The reference SwiftSyntax tool emits `projectFullPath` (root node only) as
+    // the absolute path of the input/project root directory (the `--src` dir).
+    // Canonicalize the same way as `fullFilePath` so the value matches.
+    let project_full_path = input_root
+        .canonicalize()
+        .unwrap_or_else(|_| input_root.to_path_buf())
+        .to_string_lossy()
+        .into_owned();
+    parse_source_in_project(&relative, &full_path, &project_full_path, &source)
 }
 
+/// Parses `source` as a single Swift file, deriving the reference
+/// `projectFullPath` (the input/project root the reference emits on the root
+/// node) from the file's parent directory. Retained as the stable public
+/// entry point; [`parse_file`] threads the real `--src` root via
+/// [`parse_source_in_project`].
 pub fn parse_source(relative_file_path: &str, full_file_path: &str, source: &str) -> Result<Value> {
+    let project_full_path = Path::new(full_file_path)
+        .parent()
+        .map(|parent| parent.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    parse_source_in_project(
+        relative_file_path,
+        full_file_path,
+        &project_full_path,
+        source,
+    )
+}
+
+/// Parses `source` with an explicit `project_full_path`, emitted verbatim as
+/// the root node's `projectFullPath` to match the reference SwiftSyntax tool.
+pub fn parse_source_in_project(
+    relative_file_path: &str,
+    full_file_path: &str,
+    project_full_path: &str,
+    source: &str,
+) -> Result<Value> {
     let mut parser = Parser::new();
     parser
         .set_language(&tree_sitter_swift::LANGUAGE.into())
@@ -51,7 +84,7 @@ pub fn parse_source(relative_file_path: &str, full_file_path: &str, source: &str
     let root = tree.root_node();
 
     let emitter = SwiftSyntaxEmitter::new(source);
-    emitter.source_file(root, relative_file_path, full_file_path)
+    emitter.source_file(root, relative_file_path, full_file_path, project_full_path)
 }
 
 pub fn write_json(path: &Path, value: &Value) -> Result<()> {
@@ -230,6 +263,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         root: Node<'a>,
         relative_file_path: &str,
         full_file_path: &str,
+        project_full_path: &str,
     ) -> Result<Value> {
         let mut statement_items = Vec::new();
         let root_children = named_children(root).collect::<Vec<_>>();
@@ -421,6 +455,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             Value::String(relative_file_path.into()),
         );
         obj.insert("fullFilePath".into(), Value::String(full_file_path.into()));
+        // `projectFullPath` is emitted by the reference SwiftSyntax tool on the
+        // root `SourceFileSyntax` node only: the absolute path of the input
+        // (`--src`) directory threaded down from the CLI.
+        obj.insert(
+            "projectFullPath".into(),
+            Value::String(project_full_path.into()),
+        );
         obj.insert("content".into(), Value::String(self.source.into()));
         obj.insert(
             "loc".into(),
