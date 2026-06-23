@@ -6308,6 +6308,21 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    /// Like [`range_for_node`](Self::range_for_node) but trims trailing trivia
+    /// from the end: the tree-sitter `switch_entry` node extends to the start of
+    /// the next case, whereas the reference SwiftSyntax ends a `SwitchCaseSyntax`
+    /// at its last real token. End = `trim_end(source[..node.end])`.
+    fn trimmed_range_for_node(&self, node: Node<'a>) -> Value {
+        let end = self
+            .source
+            .get(..node.end_byte())
+            .unwrap_or("")
+            .trim_end()
+            .len()
+            .max(node.start_byte());
+        self.range_from_offsets(node.start_byte(), end)
+    }
+
     fn switch_case(&self, node: Node<'a>) -> Result<Value> {
         let colon = self
             .immediate_child_kind(node, ":")
@@ -6360,7 +6375,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let statements = self.immediate_named_child_kind(node, "statements");
         Ok(self.syntax_node(
             "SwitchCaseSyntax",
-            self.range_for_node(node),
+            self.trimmed_range_for_node(node),
             vec![
                 self.with_name(label, "label"),
                 self.with_name(
