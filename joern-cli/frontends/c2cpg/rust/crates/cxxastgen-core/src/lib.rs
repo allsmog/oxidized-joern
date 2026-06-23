@@ -1,12 +1,51 @@
 use anyhow::{Context, Result};
 use serde::Serialize;
-use std::collections::{HashMap, HashSet};
+use std::cell::RefCell;
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 use tree_sitter::{Node, Parser};
 
 pub const SCHEMA_VERSION: u32 = 1;
 pub const BACKEND_NAME: &str = "oxidized-cxxastgen";
+
+thread_local! {
+    /// Tallies tree-sitter node kinds that fall through to an `Unknown`/identifier
+    /// fallback while lowering statements and expressions. Accumulates across every
+    /// file processed in a single CLI run. The caller surfaces it as one stderr
+    /// summary line via [`take_unmapped_summary`]; it must never reach stdout or the
+    /// emitted JSON.
+    static UNMAPPED_KINDS: RefCell<BTreeMap<String, usize>> = const { RefCell::new(BTreeMap::new()) };
+}
+
+/// Records a single tree-sitter node `kind` that could not be mapped to a
+/// dedicated oxidized AST node and fell back to a generic representation.
+fn record_unmapped_kind(kind: &str) {
+    UNMAPPED_KINDS.with(|counts| {
+        *counts.borrow_mut().entry(kind.to_string()).or_insert(0) += 1;
+    });
+}
+
+/// Drains the accumulated unmapped-kind counts and renders a one-line human
+/// summary, e.g. `cxxastgen: 3 unmapped node(s): comma_expression(x2), goto_label(x1)`.
+/// Returns `None` when every node lowered in this run had a dedicated mapping.
+/// Calling this resets the counter, so the CLI should print it exactly once at
+/// the end of a run (to stderr only — never stdout or the emitted JSON).
+pub fn take_unmapped_summary() -> Option<String> {
+    UNMAPPED_KINDS.with(|counts| {
+        let counts = std::mem::take(&mut *counts.borrow_mut());
+        if counts.is_empty() {
+            return None;
+        }
+        let total: usize = counts.values().sum();
+        let details = counts
+            .iter()
+            .map(|(kind, count)| format!("{kind}(x{count})"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        Some(format!("cxxastgen: {total} unmapped node(s): {details}"))
+    })
+}
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -623,8 +662,8 @@ pub fn language_for_path(path: &Path) -> SourceLanguage {
 
     match extension.as_str() {
         "c" => SourceLanguage::C,
-        "cc" | "cpp" | "cxx" | "c++" => SourceLanguage::Cpp,
-        "h" | "hh" | "hpp" | "hxx" | "ipp" => SourceLanguage::Header,
+        "cc" | "cpp" | "cxx" | "cp" | "ccm" | "cxxm" | "c++" | "c++m" => SourceLanguage::Cpp,
+        "h" | "hh" | "hpp" | "hxx" | "hp" | "h++" | "ipp" | "tcc" => SourceLanguage::Header,
         "i" | "ii" => SourceLanguage::Preprocessed,
         _ => SourceLanguage::Unknown,
     }
@@ -1212,16 +1251,181 @@ fn eval_preproc_condition(node: Node, source: &[u8], symbols: &MacroSymbols) -> 
 
 fn eval_preproc_identifier(name: &str, symbols: &MacroSymbols) -> i64 {
     let Some(binding) = symbols.get(name) else {
+        // An identifier that is not a defined macro evaluates to 0 in a `#if`
+        // expression, matching the C preprocessor.
         return 0;
     };
     if !binding.parameters.is_empty() {
+        // Function-like macros require call syntax (`M(...)`) to expand. A bare
+        // reference in a condition cannot be evaluated here; preserve the legacy
+        // "treat as truthy" behavior rather than guessing a value.
         return 1;
     }
-    macro_body_integer_value(&binding.body).unwrap_or(1)
+    // Object-like macro: expand its replacement list (recursively, with a
+    // "blue paint" guard against self-reference) and evaluate the result.
+    let mut active = HashSet::new();
+    eval_object_like_macro(name, binding, symbols, &mut active).unwrap_or(1)
+}
+
+/// Evaluates an object-like macro reference inside a `#if`/`#elif` expression by
+/// performing real (lexical) macro expansion of its replacement list and then
+/// re-evaluating the substituted text. Returns `None` (so the caller can fall
+/// back to the legacy behavior) when the body uses preprocessor features we do
+/// not expand (`#`, `##`, `__VA_ARGS__`) or otherwise cannot be reduced to an
+/// integer. `active` carries the set of macro names currently being expanded so
+/// that recursive/self-referential macros terminate instead of looping forever.
+fn eval_object_like_macro<'a>(
+    name: &'a str,
+    binding: &'a MacroBinding,
+    symbols: &'a MacroSymbols,
+    active: &mut HashSet<&'a str>,
+) -> Option<i64> {
+    // Fast path: the body is already (parenthesized) integer literal.
+    if let Some(value) = macro_body_integer_value(&binding.body) {
+        return Some(value);
+    }
+    // Blue-paint rule: a macro is not expanded within its own expansion.
+    if !active.insert(name) {
+        return None;
+    }
+    let expanded = expand_object_like_text(&binding.body, symbols, active);
+    active.remove(name);
+    let expanded = expanded?;
+    if let Some(value) = macro_body_integer_value(&expanded) {
+        return Some(value);
+    }
+    // A fully expanded replacement list must not still reference any object-like
+    // macro. If it does, expansion hit a self-referential / mutually-recursive
+    // cycle (the blue-paint guard left the name in place); bail so the caller
+    // falls back rather than re-expanding and looping forever.
+    if expanded_text_references_object_like_macro(&expanded, symbols) {
+        return None;
+    }
+    eval_condition_text(&expanded, symbols)
+}
+
+/// Returns true when `text` still contains an identifier that names an
+/// object-like macro. Used to detect unresolved expansion cycles before handing
+/// the text back to the (macro-aware) condition evaluator.
+fn expanded_text_references_object_like_macro(text: &str, symbols: &MacroSymbols) -> bool {
+    split_preproc_identifier_tokens(text)
+        .into_iter()
+        .any(|token| match token {
+            PreprocToken::Identifier(ident) => symbols
+                .get(ident)
+                .is_some_and(|binding| binding.parameters.is_empty()),
+            PreprocToken::Other(_) => false,
+        })
 }
 
 fn macro_body_integer_value(body: &str) -> Option<i64> {
     integer_literal_value(strip_wrapping_parentheses(body.trim()))
+}
+
+/// Tokens that signal preprocessor operators we deliberately do not expand
+/// (stringize, token-paste, variadic). Macros whose replacement list uses them
+/// fall back to the legacy condition handling rather than risking a wrong value.
+fn body_uses_unsupported_preproc_features(body: &str) -> bool {
+    body.contains('#') || body.contains("__VA_ARGS__")
+}
+
+/// Recursively substitutes object-like macros referenced inside `text`,
+/// returning the fully expanded replacement text. Identifiers that are not
+/// object-like macros (including function-like macro names, which require call
+/// syntax) are left untouched. `active` provides the blue-paint guard shared
+/// with [`eval_object_like_macro`]. Returns `None` when an unsupported
+/// preprocessor feature is encountered so callers can fall back safely.
+fn expand_object_like_text<'a>(
+    text: &str,
+    symbols: &'a MacroSymbols,
+    active: &mut HashSet<&'a str>,
+) -> Option<String> {
+    if body_uses_unsupported_preproc_features(text) {
+        record_unmapped_kind("preproc_macro_stringize_or_paste");
+        return None;
+    }
+    let mut output = String::with_capacity(text.len());
+    for token in split_preproc_identifier_tokens(text) {
+        match token {
+            PreprocToken::Identifier(ident) => {
+                match symbols.get_key_value(ident) {
+                    // Object-like macro that is not already being expanded.
+                    Some((key, binding))
+                        if binding.parameters.is_empty() && !active.contains(key.as_str()) =>
+                    {
+                        active.insert(key.as_str());
+                        let nested = expand_object_like_text(&binding.body, symbols, active);
+                        active.remove(key.as_str());
+                        output.push_str(&nested?);
+                    }
+                    // Not a macro, function-like macro, or painted blue: keep it.
+                    _ => output.push_str(ident),
+                }
+            }
+            PreprocToken::Other(raw) => output.push_str(raw),
+        }
+    }
+    Some(output)
+}
+
+enum PreprocToken<'a> {
+    Identifier(&'a str),
+    Other(&'a str),
+}
+
+/// Splits `text` into a sequence of identifier and non-identifier spans. This is
+/// a minimal lexical scan sufficient for object-like macro substitution: it only
+/// needs to recognize C identifier boundaries so that, e.g., `FOObar` is not
+/// mistaken for the macro `FOO`.
+fn split_preproc_identifier_tokens(text: &str) -> Vec<PreprocToken<'_>> {
+    let bytes = text.as_bytes();
+    let mut tokens = Vec::new();
+    let mut index = 0usize;
+    while index < bytes.len() {
+        if is_identifier_start(bytes[index]) {
+            let start = index;
+            index += 1;
+            while index < bytes.len() && is_identifier_continue(bytes[index]) {
+                index += 1;
+            }
+            tokens.push(PreprocToken::Identifier(&text[start..index]));
+        } else {
+            let start = index;
+            index += 1;
+            while index < bytes.len() && !is_identifier_start(bytes[index]) {
+                index += 1;
+            }
+            tokens.push(PreprocToken::Other(&text[start..index]));
+        }
+    }
+    tokens
+}
+
+fn is_identifier_start(byte: u8) -> bool {
+    byte == b'_' || byte.is_ascii_alphabetic()
+}
+
+fn is_identifier_continue(byte: u8) -> bool {
+    byte == b'_' || byte.is_ascii_alphanumeric()
+}
+
+/// Re-parses an already-macro-expanded condition expression and evaluates it
+/// with the shared preprocessor evaluator. The expanded text no longer contains
+/// object-like macro references, so a fresh `MacroSymbols` is unnecessary here;
+/// `symbols` is still passed through so any residual `defined(...)` checks behave
+/// consistently. Returns `None` if tree-sitter cannot produce a usable
+/// condition node.
+fn eval_condition_text(text: &str, symbols: &MacroSymbols) -> Option<i64> {
+    let directive = format!("#if {text}\n#endif\n");
+    let mut parser = Parser::new();
+    parser.set_language(&tree_sitter_c::LANGUAGE.into()).ok()?;
+    let tree = parser.parse(&directive, None)?;
+    let bytes = directive.as_bytes();
+    let condition = named_children(tree.root_node())
+        .into_iter()
+        .find(|node| node.kind() == "preproc_if")
+        .and_then(|node| node.child_by_field_name("condition"))?;
+    Some(eval_preproc_condition(condition, bytes, symbols))
 }
 
 fn eval_unary_preproc_condition(node: Node, source: &[u8], symbols: &MacroSymbols) -> i64 {
@@ -2681,6 +2885,9 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
         "try_statement" => parse_try_statement(node, source, symbols)
             .into_iter()
             .collect(),
+        "seh_try_statement" => parse_seh_try_statement(node, source, symbols)
+            .into_iter()
+            .collect(),
         "expression_statement" => named_children(node)
             .into_iter()
             .next()
@@ -2747,11 +2954,14 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
             code: statement_code(node, source),
             line: line(node),
         }],
-        _ => vec![Statement::Expression {
-            code: statement_code(node, source),
-            line: line(node),
-            expression: parse_expression(node, source),
-        }],
+        _ => {
+            record_unmapped_kind(node.kind());
+            vec![Statement::Expression {
+                code: statement_code(node, source),
+                line: line(node),
+                expression: parse_expression(node, source),
+            }]
+        }
     }
 }
 
@@ -2834,6 +3044,64 @@ fn parse_try_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) ->
         body: parse_statement(body, source, symbols),
         catches,
     })
+}
+
+/// Lowers an MSVC structured-exception `__try`/`__except`/`__finally` statement
+/// onto the existing `try` shape: the guarded block becomes the body, each
+/// `__except` filter becomes a (parameterless) catch clause, and `__finally`
+/// statements are appended to the body since they always execute. No new JSON
+/// kind is introduced.
+fn parse_seh_try_statement(
+    node: Node,
+    source: &[u8],
+    symbols: &mut MacroSymbols,
+) -> Option<Statement> {
+    let body_node = node
+        .child_by_field_name("body")
+        .or_else(|| named_children(node).into_iter().find(is_compound_statement))?;
+    let mut body = parse_statement(body_node, source, symbols);
+    let mut catches = Vec::new();
+    for child in named_children(node) {
+        match child.kind() {
+            "seh_except_clause" => {
+                let except_body = child
+                    .child_by_field_name("body")
+                    .or_else(|| {
+                        named_children(child)
+                            .into_iter()
+                            .find(is_compound_statement)
+                    })
+                    .map(|body| parse_statement(body, source, symbols))
+                    .unwrap_or_default();
+                catches.push(CatchClause {
+                    code: statement_code(child, source),
+                    line: line(child),
+                    parameter: None,
+                    body: except_body,
+                });
+            }
+            "seh_finally_clause" => {
+                if let Some(finally_body) = child.child_by_field_name("body").or_else(|| {
+                    named_children(child)
+                        .into_iter()
+                        .find(is_compound_statement)
+                }) {
+                    body.extend(parse_statement(finally_body, source, symbols));
+                }
+            }
+            _ => {}
+        }
+    }
+    Some(Statement::Try {
+        code: statement_code(node, source),
+        line: line(node),
+        body,
+        catches,
+    })
+}
+
+fn is_compound_statement(node: &Node) -> bool {
+    node.kind() == "compound_statement"
 }
 
 fn parse_catch_clause(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> CatchClause {
@@ -3602,8 +3870,31 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
         "argument_list" => parse_initializer_list(node, source),
         "initializer_list" => parse_initializer_list(node, source),
         "initializer_pair" => parse_initializer_pair(node, source),
-        _ => identifier_expression(node, source),
+        "comma_expression" => parse_comma_expression(node, source),
+        _ => {
+            record_unmapped_kind(node.kind());
+            identifier_expression(node, source)
+        }
     }
+}
+
+/// Lowers a C/C++ comma operator (`a, b, c`) onto a left-associative chain of
+/// binary `,` expressions, reusing the existing `binary` JSON kind rather than
+/// collapsing the whole thing into a single bogus identifier.
+fn parse_comma_expression(node: Node, source: &[u8]) -> Expression {
+    let mut operands = named_children(node)
+        .into_iter()
+        .map(|child| parse_expression(child, source));
+    let Some(first) = operands.next() else {
+        return identifier_expression(node, source);
+    };
+    operands.fold(first, |left, right| Expression::Binary {
+        operator: ",".to_string(),
+        code: node_text(node, source).trim().to_string(),
+        line: line(node),
+        left: Box::new(left),
+        right: Box::new(right),
+    })
 }
 
 fn parse_binary_expression(node: Node, source: &[u8]) -> Expression {
@@ -5188,14 +5479,20 @@ mod tests {
     #[test]
     fn classifies_common_c_and_cpp_extensions() {
         assert_eq!(language_for_path(Path::new("main.c")), SourceLanguage::C);
-        assert_eq!(
-            language_for_path(Path::new("main.cpp")),
-            SourceLanguage::Cpp
-        );
-        assert_eq!(
-            language_for_path(Path::new("main.hxx")),
-            SourceLanguage::Header
-        );
+
+        for extension in ["cc", "cpp", "cxx", "cp", "ccm", "cxxm", "c++", "c++m"] {
+            let filename = format!("main.{extension}");
+            assert_eq!(language_for_path(Path::new(&filename)), SourceLanguage::Cpp);
+        }
+
+        for extension in ["h", "hh", "hpp", "hxx", "hp", "h++", "ipp", "tcc"] {
+            let filename = format!("main.{extension}");
+            assert_eq!(
+                language_for_path(Path::new(&filename)),
+                SourceLanguage::Header
+            );
+        }
+
         assert_eq!(
             language_for_path(Path::new("main.i")),
             SourceLanguage::Preprocessed
@@ -5579,6 +5876,119 @@ mod tests {
             .declarations
             .iter()
             .any(|declaration| matches!(declaration, Declaration::MacroUndef(value) if value.name == "DROP")));
+    }
+
+    fn macro_symbols(defines: &[(&str, &[&str], &str)]) -> MacroSymbols {
+        defines
+            .iter()
+            .map(|(name, params, body)| {
+                (
+                    (*name).to_string(),
+                    MacroBinding {
+                        parameters: params.iter().map(|param| (*param).to_string()).collect(),
+                        body: (*body).to_string(),
+                    },
+                )
+            })
+            .collect()
+    }
+
+    #[test]
+    fn object_like_macro_used_in_condition_expands_to_its_value() {
+        // `#if SIZE == 4` must compare against the macro's real replacement
+        // value (4), not the legacy "any defined object-like macro is 1".
+        let symbols = macro_symbols(&[("SIZE", &[], "4")]);
+        assert_eq!(eval_preproc_identifier("SIZE", &symbols), 4);
+        assert_eq!(
+            eval_condition_text("SIZE == 4", &symbols),
+            Some(1),
+            "SIZE should expand to 4 so the equality holds"
+        );
+        assert_eq!(eval_condition_text("SIZE == 5", &symbols), Some(0));
+    }
+
+    #[test]
+    fn chained_object_like_macros_expand_recursively() {
+        // ENABLED -> TRUE -> 1, exercising recursive object-like substitution.
+        let symbols = macro_symbols(&[("ENABLED", &[], "TRUE"), ("TRUE", &[], "1")]);
+        assert_eq!(eval_preproc_identifier("ENABLED", &symbols), 1);
+
+        // A nested arithmetic body: HALF -> (FULL / 2) -> (8 / 2) -> 4.
+        let arithmetic = macro_symbols(&[("HALF", &[], "(FULL / 2)"), ("FULL", &[], "8")]);
+        assert_eq!(eval_preproc_identifier("HALF", &arithmetic), 4);
+        assert_eq!(eval_condition_text("HALF == 4", &arithmetic), Some(1));
+    }
+
+    #[test]
+    fn function_like_macro_reference_in_condition_stays_truthy() {
+        // A function-like macro referenced without call syntax cannot be
+        // expanded in a condition; preserve the legacy truthy fallback.
+        let symbols = macro_symbols(&[("INC", &["x"], "((x) + 1)")]);
+        assert_eq!(eval_preproc_identifier("INC", &symbols), 1);
+    }
+
+    #[test]
+    fn self_referential_macro_expansion_is_guarded() {
+        // The "blue paint" rule stops `#define A A` and mutually recursive
+        // macros from looping forever; the unresolved name falls back to 1.
+        let direct = macro_symbols(&[("A", &[], "A")]);
+        assert_eq!(eval_preproc_identifier("A", &direct), 1);
+
+        let mutual = macro_symbols(&[("A", &[], "B"), ("B", &[], "A")]);
+        assert_eq!(eval_preproc_identifier("A", &mutual), 1);
+    }
+
+    #[test]
+    fn unexpandable_macro_body_falls_back_safely() {
+        // Stringize/token-paste/variadic bodies are not expanded; the evaluator
+        // falls back to the legacy truthy value and records the fallback.
+        let _ = take_unmapped_summary();
+        let stringize = macro_symbols(&[("STR", &[], "#x")]);
+        assert_eq!(eval_preproc_identifier("STR", &stringize), 1);
+
+        let paste = macro_symbols(&[("CAT", &[], "a ## b")]);
+        assert_eq!(eval_preproc_identifier("CAT", &paste), 1);
+
+        let summary = take_unmapped_summary().expect("fallback should be tallied");
+        assert!(
+            summary.contains("preproc_macro_stringize_or_paste"),
+            "unexpected summary: {summary}"
+        );
+    }
+
+    #[test]
+    fn object_like_macro_chain_selects_preprocessor_branch() {
+        // End-to-end: a chained object-like macro drives `#if` branch selection
+        // through parse_declarations, so the active branch's return is kept.
+        let source = r#"
+            #define FULL 8
+            #define HALF (FULL / 2)
+            int picks_branch() {
+            #if HALF == 4
+              return 4;
+            #else
+              return 0;
+            #endif
+            }
+        "#;
+        let document = CxxAstDocument {
+            schema_version: SCHEMA_VERSION,
+            backend: BACKEND_NAME,
+            path: "macro_chain.c".into(),
+            language: SourceLanguage::C,
+            source_bytes: 0,
+            source_lines: 0,
+            options: ParseOptions {
+                include_paths: Vec::new(),
+                defines: Vec::new(),
+                compilation_database: None,
+                skip_function_bodies: false,
+                import_header_declarations: false,
+            },
+            declarations: parse_declarations(source, SourceLanguage::C)
+                .expect("macro chain source should parse"),
+        };
+        assert_eq!(function_return_literal(&document, "picks_branch"), "4");
     }
 
     #[test]
@@ -10447,5 +10857,128 @@ mod tests {
             panic!("expected binary expression");
         };
         assert_eq!(operator, expected);
+    }
+
+    fn single_function_body(source: &str, language: SourceLanguage) -> Vec<Statement> {
+        let declarations = parse_declarations(source, language).expect("source should parse");
+        declarations
+            .into_iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.is_definition => Some(function.body),
+                _ => None,
+            })
+            .expect("expected a function definition")
+    }
+
+    #[test]
+    fn comma_expression_lowers_to_binary_chain() {
+        fn collect_literals(expression: &Expression, out: &mut Vec<String>) {
+            match expression {
+                Expression::Literal { value, .. } => out.push(value.clone()),
+                Expression::Binary { left, right, .. } => {
+                    collect_literals(left, out);
+                    collect_literals(right, out);
+                }
+                _ => {}
+            }
+        }
+
+        let body = single_function_body(
+            "int f() { int x; x = (1, 2, 3); return x; }",
+            SourceLanguage::C,
+        );
+        let Some(Statement::Assignment { right, .. }) = body
+            .iter()
+            .find(|statement| matches!(statement, Statement::Assignment { .. }))
+        else {
+            panic!("expected assignment statement, got {body:?}");
+        };
+        // The comma operator lowers onto the existing `binary` kind with operator
+        // `,`, preserving every operand rather than collapsing to one identifier.
+        assert_binary_operator(right, ",");
+        let mut literals = Vec::new();
+        collect_literals(right, &mut literals);
+        assert_eq!(literals, vec!["1", "2", "3"]);
+    }
+
+    #[test]
+    fn seh_try_statement_lowers_to_try_with_except_catch() {
+        let body = single_function_body(
+            "void f() { __try { g(); } __except(1) { handle(); } }",
+            SourceLanguage::Cpp,
+        );
+        let try_statement = body
+            .iter()
+            .find(|statement| matches!(statement, Statement::Try { .. }))
+            .expect("expected try statement");
+        let Statement::Try { body, catches, .. } = try_statement else {
+            unreachable!();
+        };
+        assert_eq!(catches.len(), 1);
+        assert!(catches[0].parameter.is_none());
+        // The guarded block and the `__except` body are both preserved.
+        assert_eq!(
+            collect_statement_call_names(try_statement),
+            vec!["g", "handle"]
+        );
+        assert!(!body.is_empty());
+    }
+
+    #[test]
+    fn seh_finally_statements_are_appended_to_try_body() {
+        let body = single_function_body(
+            "void f() { __try { g(); } __finally { cleanup(); } }",
+            SourceLanguage::C,
+        );
+        let try_statement = body
+            .into_iter()
+            .find(|statement| matches!(statement, Statement::Try { .. }))
+            .expect("expected try statement");
+        let Statement::Try { body, catches, .. } = &try_statement else {
+            unreachable!();
+        };
+        assert!(catches.is_empty());
+        // `__finally` statements always run, so they are folded onto the body.
+        assert_eq!(body.len(), 2);
+        assert_eq!(
+            collect_statement_call_names(&try_statement),
+            vec!["g", "cleanup"]
+        );
+    }
+
+    #[test]
+    fn unmapped_node_kinds_are_tallied_in_summary() {
+        // Drain any residue from earlier tests sharing this thread.
+        let _ = take_unmapped_summary();
+        // A GCC statement-expression (`({ ... })`) has no dedicated mapping and
+        // falls through to the recorded `Statement::Expression` fallback.
+        let _ = parse_declarations("int f() { int x = ({ 1; }); return x; }", SourceLanguage::C)
+            .expect("source should parse");
+        let summary = take_unmapped_summary().expect("expected an unmapped summary");
+        assert!(
+            summary.starts_with("cxxastgen: "),
+            "unexpected summary: {summary}"
+        );
+        assert!(
+            summary.contains("unmapped node(s):"),
+            "unexpected summary: {summary}"
+        );
+        assert!(
+            summary.contains("(x"),
+            "summary should carry per-kind counts: {summary}"
+        );
+        // The counter drains on read, so a clean follow-up reports nothing.
+        assert!(take_unmapped_summary().is_none());
+    }
+
+    #[test]
+    fn fully_mapped_source_produces_no_unmapped_summary() {
+        let _ = take_unmapped_summary();
+        let _ = parse_declarations(
+            "int add(int a, int b) { int total = a + b; return total; }",
+            SourceLanguage::C,
+        )
+        .expect("source should parse");
+        assert_eq!(take_unmapped_summary(), None);
     }
 }

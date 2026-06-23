@@ -351,6 +351,68 @@ const colorBlack = iota + 30
 }
 
 #[test]
+fn type_alias_declarations_emit_type_specs_and_bind_references() {
+    let go_json = render_single_file(
+        r#"package main
+
+type Alias = string
+type (
+  Reader = interface { Read([]byte) (int, error) }
+  Box[T any] = []T
+)
+
+func main() {
+  _ = Alias("x")
+  _ = Box[int]{}
+}
+"#,
+    );
+
+    let type_specs = collect_nodes_of_type(&go_json, "ast.TypeSpec");
+    let alias = type_specs
+        .iter()
+        .find(|node| node["Name"]["Name"] == "Alias")
+        .expect("missing simple type alias");
+    assert!(alias["Assign"].as_u64().unwrap() > alias["Name"]["NamePos"].as_u64().unwrap());
+    assert_eq!(alias["Type"]["Name"], "string");
+
+    let reader = type_specs
+        .iter()
+        .find(|node| node["Name"]["Name"] == "Reader")
+        .expect("missing grouped interface alias");
+    assert!(reader["Assign"].as_u64().unwrap() > 0);
+    assert_eq!(reader["Type"]["node_type"], "ast.InterfaceType");
+
+    let box_alias = type_specs
+        .iter()
+        .find(|node| node["Name"]["Name"] == "Box")
+        .expect("missing generic type alias");
+    assert!(box_alias["Assign"].as_u64().unwrap() > 0);
+    assert_eq!(box_alias["TypeParams"]["List"][0]["Names"][0]["Name"], "T");
+    assert_eq!(box_alias["Type"]["node_type"], "ast.ArrayType");
+
+    let grouped_type_decl = collect_nodes_of_type(&go_json, "ast.GenDecl")
+        .into_iter()
+        .find(|node| node["Tok"] == "type" && node["Lparen"].as_u64().unwrap() > 0)
+        .expect("missing grouped type declaration");
+    assert_eq!(grouped_type_decl["Specs"].as_array().unwrap().len(), 2);
+
+    let calls = collect_nodes_of_type(&go_json, "ast.CallExpr");
+    let alias_conversion = calls
+        .iter()
+        .find(|call| call["Fun"]["Name"] == "Alias")
+        .expect("missing alias conversion call");
+    assert!(alias_conversion["Fun"].get("Obj").is_some());
+
+    let box_literal = collect_nodes_of_type(&go_json, "ast.CompositeLit")
+        .into_iter()
+        .find(|node| node["Type"]["node_type"] == "ast.IndexExpr")
+        .expect("missing generic alias composite literal");
+    assert_eq!(box_literal["Type"]["X"]["Name"], "Box");
+    assert!(box_literal["Type"]["X"].get("Obj").is_some());
+}
+
+#[test]
 fn nested_binary_expressions_use_their_own_operator_position() {
     let go_json = render_single_file(
         r#"package main

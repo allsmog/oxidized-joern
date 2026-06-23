@@ -1,11 +1,45 @@
 use anyhow::{bail, Context, Result};
 use serde_json::{json, Map, Value};
+use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use tree_sitter::{Language, Node, Parser, Point, Tree};
 
 pub type TypeMap = BTreeMap<String, String>;
+
+thread_local! {
+    /// Counts tree-sitter node kinds that fell through to a `Noop` mapping so a
+    /// CLI run can surface a single diagnostic summary instead of silently
+    /// dropping unsupported constructs.
+    static UNMAPPED_KINDS: RefCell<BTreeMap<String, usize>> = const { RefCell::new(BTreeMap::new()) };
+}
+
+fn record_unmapped_kind(kind: &str) {
+    UNMAPPED_KINDS.with(|counts| {
+        *counts.borrow_mut().entry(kind.to_string()).or_insert(0) += 1;
+    });
+}
+
+/// Drains and formats the accumulated unmapped-node tally as a single line, e.g.
+/// `jsastgen: 3 unmapped node(s): debugger_statement(x1), hash_bang_line(x2)`.
+/// Returns `None` when every node was mapped. The counter is reset afterwards so
+/// repeated calls do not double-count.
+pub fn take_unmapped_summary() -> Option<String> {
+    UNMAPPED_KINDS.with(|counts| {
+        let counts = std::mem::take(&mut *counts.borrow_mut());
+        if counts.is_empty() {
+            return None;
+        }
+        let total: usize = counts.values().sum();
+        let detail = counts
+            .iter()
+            .map(|(kind, count)| format!("{kind}(x{count})"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        Some(format!("jsastgen: {total} unmapped node(s): {detail}"))
+    })
+}
 
 pub fn parse_file(root: &Path, path: &Path) -> Result<Value> {
     let content =
@@ -1714,7 +1748,9 @@ fn is_vue_shorthand_attribute_start(bytes: &[u8], index: usize) -> bool {
 fn stmt_json(node: Node, source: &str) -> Value {
     match node.kind() {
         "lexical_declaration" | "variable_declaration" => variable_declaration_json(node, source),
-        "function_declaration" => function_declaration_json(node, source),
+        "function_declaration" | "generator_function_declaration" => {
+            function_declaration_json(node, source)
+        }
         "class_declaration" | "abstract_class_declaration" => class_declaration_json(node, source),
         "ambient_declaration" => ambient_declaration_json(node, source),
         "import_statement" => import_statement_json(node, source),
@@ -1782,9 +1818,13 @@ fn expr_json(node: Node, source: &str) -> Value {
         "array_pattern" => array_pattern_json(node, source),
         "object_pattern" => object_pattern_json(node, source),
         "assignment_pattern" => assignment_pattern_json(node, source),
-        "function_expression" => function_expression_json(node, source),
-        "function_declaration" => function_declaration_json(node, source),
+        "function_expression" | "generator_function" => function_expression_json(node, source),
+        "function_declaration" | "generator_function_declaration" => {
+            function_declaration_json(node, source)
+        }
         "arrow_function" => arrow_function_json(node, source),
+        "yield_expression" => yield_expression_json(node, source),
+        "meta_property" => meta_property_json(node, source),
         "class" => class_expression_json(node, source),
         "non_null_expression" => ts_non_null_expression_json(node, source),
         "required_parameter" | "optional_parameter" => parameter_json(node, source),
@@ -2207,15 +2247,28 @@ fn function_like_json_with_span(
             "id": id,
             "params": params,
             "body": body,
-            "generator": false,
-            "async": false,
+            "generator": is_generator_function(function_node, source),
+            "async": has_keyword_child(function_node, source, "async"),
             "decorators": decorators_json(span_node, source)
     });
     if let Some(return_type) = return_type {
         fields = with_extra_field(fields, "returnType", return_type);
     }
+    if let Some(type_parameters) = function_node
+        .child_by_field_name("type_parameters")
+        .map(|child| ts_type_parameter_declaration_json(child, source))
+    {
+        fields = with_extra_field(fields, "typeParameters", type_parameters);
+    }
 
     with_span(kind, span_node, fields)
+}
+
+fn is_generator_function(node: Node, source: &str) -> bool {
+    matches!(
+        node.kind(),
+        "generator_function" | "generator_function_declaration"
+    ) || has_keyword_child(node, source, "*")
 }
 
 fn ts_module_declaration_json(node: Node, source: &str) -> Value {
@@ -3133,6 +3186,55 @@ fn await_expression_json(node: Node, source: &str) -> Value {
     with_span("AwaitExpression", node, json!({ "argument": argument }))
 }
 
+fn yield_expression_json(node: Node, source: &str) -> Value {
+    let argument = node
+        .named_child(0)
+        .map(|child| expr_json(child, source))
+        .unwrap_or(Value::Null);
+
+    with_span(
+        "YieldExpression",
+        node,
+        json!({
+            "argument": argument,
+            "delegate": has_keyword_child(node, source, "*")
+        }),
+    )
+}
+
+fn meta_property_json(node: Node, source: &str) -> Value {
+    let text = node_text(node, source);
+    let (meta, property) = text
+        .split_once('.')
+        .map(|(meta, property)| (meta.trim().to_string(), property.trim().to_string()))
+        .unwrap_or_else(|| (text.clone(), String::new()));
+    let meta_end = node.start_byte() + meta.len();
+    let property_start = node.end_byte().saturating_sub(property.len());
+
+    with_span(
+        "MetaProperty",
+        node,
+        json!({
+            "meta": with_span_bounds(
+                "Identifier",
+                node.start_byte(),
+                node.start_position(),
+                meta_end,
+                point_for_byte(source, meta_end),
+                json!({ "name": meta })
+            ),
+            "property": with_span_bounds(
+                "Identifier",
+                property_start,
+                point_for_byte(source, property_start),
+                node.end_byte(),
+                node.end_position(),
+                json!({ "name": property })
+            )
+        }),
+    )
+}
+
 fn ts_as_expression_json(node: Node, source: &str) -> Value {
     let expression = first_expression_child(node)
         .map(|child| expr_json(child, source))
@@ -3361,14 +3463,20 @@ fn call_expression_json(node: Node, source: &str) -> Value {
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
+    let optional = is_optional_chain(node);
+    let kind = if optional {
+        "OptionalCallExpression"
+    } else {
+        "CallExpression"
+    };
 
     with_span(
-        "CallExpression",
+        kind,
         node,
         json!({
             "callee": callee,
             "arguments": arguments,
-            "optional": false
+            "optional": optional
         }),
     )
 }
@@ -3417,18 +3525,28 @@ fn new_expression_json(node: Node, source: &str) -> Value {
     )
 }
 
+fn is_optional_chain(node: Node) -> bool {
+    node.child_by_field_name("optional_chain").is_some()
+}
+
 fn member_expression_json(node: Node, source: &str) -> Value {
     let object = field_json(node, "object", source).unwrap_or_else(|| noop_json(node));
     let property = field_json(node, "property", source).unwrap_or_else(|| noop_json(node));
+    let optional = is_optional_chain(node);
+    let kind = if optional {
+        "OptionalMemberExpression"
+    } else {
+        "MemberExpression"
+    };
 
     with_span(
-        "MemberExpression",
+        kind,
         node,
         json!({
             "object": object,
             "property": property,
             "computed": false,
-            "optional": false
+            "optional": optional
         }),
     )
 }
@@ -3436,15 +3554,21 @@ fn member_expression_json(node: Node, source: &str) -> Value {
 fn subscript_expression_json(node: Node, source: &str) -> Value {
     let object = field_json(node, "object", source).unwrap_or_else(|| noop_json(node));
     let property = field_json(node, "index", source).unwrap_or_else(|| noop_json(node));
+    let optional = is_optional_chain(node);
+    let kind = if optional {
+        "OptionalMemberExpression"
+    } else {
+        "MemberExpression"
+    };
 
     with_span(
-        "MemberExpression",
+        kind,
         node,
         json!({
             "object": object,
             "property": property,
             "computed": true,
-            "optional": false
+            "optional": optional
         }),
     )
 }
@@ -4062,15 +4186,14 @@ fn ts_type_json(node: Node, source: &str) -> Value {
                     .unwrap_or_else(|| with_span("TSAnyKeyword", node, json!({})))
             }),
         ),
-        "object_type" => with_span(
-            "TSTypeLiteral",
-            node,
-            json!({
-                "members": named_children(node)
-                    .filter_map(|child| ts_interface_member_json(child, source))
-                    .collect::<Vec<_>>()
-            }),
-        ),
+        "object_type" => ts_object_type_json(node, source),
+        "conditional_type" => ts_conditional_type_json(node, source),
+        "lookup_type" => ts_indexed_access_type_json(node, source),
+        "index_type_query" => ts_type_operator_json(node, "keyof", source),
+        "readonly_type" => ts_type_operator_json(node, "readonly", source),
+        "type_query" => ts_type_query_json(node, source),
+        "function_type" => ts_function_type_json("TSFunctionType", node, source),
+        "constructor_type" => ts_function_type_json("TSConstructorType", node, source),
         "literal_type" => with_span(
             "TSLiteralType",
             node,
@@ -4122,6 +4245,188 @@ fn ts_predefined_type_json(node: Node, source: &str) -> Value {
         _ => "TSAnyKeyword",
     };
     with_span(kind, node, json!({}))
+}
+
+fn ts_object_type_json(node: Node, source: &str) -> Value {
+    if let Some(mapped) = named_children(node)
+        .find(|child| child.kind() == "index_signature")
+        .and_then(|signature| {
+            named_children(signature).find(|child| child.kind() == "mapped_type_clause")
+        })
+    {
+        return ts_mapped_type_json(node, mapped, source);
+    }
+
+    with_span(
+        "TSTypeLiteral",
+        node,
+        json!({
+            "members": named_children(node)
+                .filter_map(|child| ts_interface_member_json(child, source))
+                .collect::<Vec<_>>()
+        }),
+    )
+}
+
+fn ts_mapped_type_json(node: Node, clause: Node, source: &str) -> Value {
+    let type_parameter = clause
+        .child_by_field_name("name")
+        .map(|name| {
+            let mut fields = json!({ "name": identifier_json(name, source) });
+            if let Some(constraint) = clause
+                .child_by_field_name("type")
+                .map(|child| ts_type_json(child, source))
+            {
+                fields = with_extra_field(fields, "constraint", constraint);
+            }
+            with_span("TSTypeParameter", clause, fields)
+        })
+        .unwrap_or_else(|| with_span("TSTypeParameter", clause, json!({})));
+    let type_annotation = named_children(node)
+        .find(|child| child.kind() == "index_signature")
+        .and_then(|signature| signature.child_by_field_name("type"))
+        .and_then(|annotation| annotation.named_child(0))
+        .map(|child| ts_type_json(child, source))
+        .unwrap_or_else(|| with_span("TSAnyKeyword", node, json!({})));
+
+    with_span(
+        "TSMappedType",
+        node,
+        json!({
+            "typeParameter": type_parameter,
+            "typeAnnotation": type_annotation
+        }),
+    )
+}
+
+fn ts_conditional_type_json(node: Node, source: &str) -> Value {
+    let type_for = |field: &str| {
+        node.child_by_field_name(field)
+            .map(|child| ts_type_json(child, source))
+            .unwrap_or_else(|| with_span("TSAnyKeyword", node, json!({})))
+    };
+
+    with_span(
+        "TSConditionalType",
+        node,
+        json!({
+            "checkType": type_for("left"),
+            "extendsType": type_for("right"),
+            "trueType": type_for("consequence"),
+            "falseType": type_for("alternative")
+        }),
+    )
+}
+
+fn ts_indexed_access_type_json(node: Node, source: &str) -> Value {
+    let mut types = named_children(node).filter(|child| is_type_like(*child));
+    let object_type = types
+        .next()
+        .map(|child| ts_type_json(child, source))
+        .unwrap_or_else(|| with_span("TSAnyKeyword", node, json!({})));
+    let index_type = types
+        .next()
+        .map(|child| ts_type_json(child, source))
+        .unwrap_or_else(|| with_span("TSAnyKeyword", node, json!({})));
+
+    with_span(
+        "TSIndexedAccessType",
+        node,
+        json!({
+            "objectType": object_type,
+            "indexType": index_type
+        }),
+    )
+}
+
+fn ts_type_operator_json(node: Node, operator: &str, source: &str) -> Value {
+    let type_annotation = named_children(node)
+        .find(|child| is_type_like(*child))
+        .map(|child| ts_type_json(child, source))
+        .unwrap_or_else(|| with_span("TSAnyKeyword", node, json!({})));
+
+    with_span(
+        "TSTypeOperator",
+        node,
+        json!({
+            "operator": operator,
+            "typeAnnotation": type_annotation
+        }),
+    )
+}
+
+fn ts_type_query_json(node: Node, source: &str) -> Value {
+    let expr_name = node
+        .named_child(0)
+        .map(|child| {
+            if is_type_like(child) {
+                ts_type_json(child, source)
+            } else {
+                expr_json(child, source)
+            }
+        })
+        .unwrap_or_else(|| with_span("TSAnyKeyword", node, json!({})));
+
+    with_span("TSTypeQuery", node, json!({ "exprName": expr_name }))
+}
+
+fn ts_function_type_json(kind: &str, node: Node, source: &str) -> Value {
+    let params = params_json(node, source);
+    let mut fields = json!({
+        "parameters": params.clone(),
+        "params": params
+    });
+    if let Some(return_type) = node
+        .child_by_field_name("return_type")
+        .map(|child| ts_type_json(child, source))
+    {
+        fields = with_extra_field(fields, "typeAnnotation", return_type);
+    }
+    if let Some(type_parameters) = node
+        .child_by_field_name("type_parameters")
+        .map(|child| ts_type_parameter_declaration_json(child, source))
+    {
+        fields = with_extra_field(fields, "typeParameters", type_parameters);
+    }
+
+    with_span(kind, node, fields)
+}
+
+fn ts_type_parameter_declaration_json(node: Node, source: &str) -> Value {
+    let params = named_children(node)
+        .filter(|child| child.kind() == "type_parameter")
+        .map(|child| ts_type_parameter_json(child, source))
+        .collect::<Vec<_>>();
+
+    with_span(
+        "TSTypeParameterDeclaration",
+        node,
+        json!({ "params": params }),
+    )
+}
+
+fn ts_type_parameter_json(node: Node, source: &str) -> Value {
+    let name = node
+        .child_by_field_name("name")
+        .map(|child| node_text(child, source))
+        .unwrap_or_default();
+    let mut fields = json!({ "name": name });
+    if let Some(constraint) = node
+        .child_by_field_name("constraint")
+        .and_then(|child| child.named_child(0))
+        .map(|child| ts_type_json(child, source))
+    {
+        fields = with_extra_field(fields, "constraint", constraint);
+    }
+    if let Some(default) = node
+        .child_by_field_name("value")
+        .and_then(|child| child.named_child(0))
+        .map(|child| ts_type_json(child, source))
+    {
+        fields = with_extra_field(fields, "default", default);
+    }
+
+    with_span("TSTypeParameter", node, fields)
 }
 
 fn numeric_literal_json(node: Node, source: &str) -> Value {
@@ -4480,6 +4785,7 @@ fn with_span_bounds(
 }
 
 fn noop_json(node: Node) -> Value {
+    record_unmapped_kind(node.kind());
     with_span("Noop", node, json!({}))
 }
 
@@ -4616,6 +4922,18 @@ fn is_type_like(node: Node) -> bool {
             | "intersection_type"
             | "object_type"
             | "tuple_type"
+            | "literal_type"
+            | "conditional_type"
+            | "lookup_type"
+            | "index_type_query"
+            | "readonly_type"
+            | "type_query"
+            | "function_type"
+            | "constructor_type"
+            | "parenthesized_type"
+            | "infer_type"
+            | "template_literal_type"
+            | "this_type"
     )
 }
 
@@ -5615,5 +5933,223 @@ mod tests {
             node["start"].as_u64().unwrap(),
             node["end"].as_u64().unwrap()
         )
+    }
+
+    fn collect_types(value: &Value, out: &mut Vec<String>) {
+        match value {
+            Value::Object(map) => {
+                if let Some(node_type) = map.get("type").and_then(Value::as_str) {
+                    out.push(node_type.to_string());
+                }
+                for child in map.values() {
+                    collect_types(child, out);
+                }
+            }
+            Value::Array(values) => values.iter().for_each(|child| collect_types(child, out)),
+            _ => {}
+        }
+    }
+
+    fn parsed_types(file: &str, source: &str) -> Vec<String> {
+        let root = Path::new("/repo");
+        let path = Path::new(file);
+        let json = parse_source(root, path, source).expect("parse succeeds");
+        let mut types = Vec::new();
+        collect_types(&json, &mut types);
+        assert!(
+            !types.iter().any(|node_type| node_type == "Noop"),
+            "unexpected Noop while parsing {source:?}: {types:?}"
+        );
+        types
+    }
+
+    fn first_statement_expression(file: &str, source: &str) -> Value {
+        let root = Path::new("/repo");
+        let path = Path::new(file);
+        let json = parse_source(root, path, source).expect("parse succeeds");
+        json["ast"]["program"]["body"][0]["expression"].clone()
+    }
+
+    #[test]
+    fn emits_optional_member_and_call_expressions() {
+        let expression = first_statement_expression("/repo/app.js", "a?.b;\n");
+        assert_eq!(expression["type"], "OptionalMemberExpression");
+        assert_eq!(expression["optional"], true);
+        assert_eq!(expression["object"]["name"], "a");
+        assert_eq!(expression["property"]["name"], "b");
+
+        let computed = first_statement_expression("/repo/app.js", "a?.[b];\n");
+        assert_eq!(computed["type"], "OptionalMemberExpression");
+        assert_eq!(computed["computed"], true);
+
+        let call = first_statement_expression("/repo/app.js", "fn?.();\n");
+        assert_eq!(call["type"], "OptionalCallExpression");
+        assert_eq!(call["optional"], true);
+        assert_eq!(call["callee"]["name"], "fn");
+
+        // Only the optional member access is optional, the trailing call is not.
+        let chained = first_statement_expression("/repo/app.js", "a?.b();\n");
+        assert_eq!(chained["type"], "CallExpression");
+        assert_eq!(chained["callee"]["type"], "OptionalMemberExpression");
+    }
+
+    #[test]
+    fn emits_yield_expressions_with_delegate_flag() {
+        let types = parsed_types(
+            "/repo/gen.js",
+            "function* counter() { yield 1; yield* other(); }\n",
+        );
+        assert!(types.iter().any(|node_type| node_type == "YieldExpression"));
+
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/gen.js");
+        let json = parse_source(
+            root,
+            path,
+            "function* counter() { yield 1; yield* other(); }\n",
+        )
+        .expect("parse succeeds");
+        let function = &json["ast"]["program"]["body"][0];
+        assert_eq!(function["type"], "FunctionDeclaration");
+        assert_eq!(function["generator"], true);
+        let statements = function["body"]["body"].as_array().unwrap();
+        let plain_yield = &statements[0]["expression"];
+        assert_eq!(plain_yield["type"], "YieldExpression");
+        assert_eq!(plain_yield["delegate"], false);
+        assert_eq!(plain_yield["argument"]["value"], 1.0);
+        let delegated_yield = &statements[1]["expression"];
+        assert_eq!(delegated_yield["type"], "YieldExpression");
+        assert_eq!(delegated_yield["delegate"], true);
+    }
+
+    #[test]
+    fn emits_meta_properties() {
+        let new_target = first_statement_expression("/repo/app.js", "new.target;\n");
+        assert_eq!(new_target["type"], "MetaProperty");
+        assert_eq!(new_target["meta"]["name"], "new");
+        assert_eq!(new_target["property"]["name"], "target");
+
+        let import_meta = first_statement_expression("/repo/app.mjs", "import.meta;\n");
+        assert_eq!(import_meta["type"], "MetaProperty");
+        assert_eq!(import_meta["meta"]["name"], "import");
+        assert_eq!(import_meta["property"]["name"], "meta");
+    }
+
+    #[test]
+    fn emits_tagged_template_expressions() {
+        let tagged = first_statement_expression("/repo/app.js", "tag`hello ${name}`;\n");
+        assert_eq!(tagged["type"], "TaggedTemplateExpression");
+        assert_eq!(tagged["tag"]["name"], "tag");
+        assert_eq!(tagged["quasi"]["type"], "TemplateLiteral");
+        assert_eq!(tagged["quasi"]["expressions"][0]["name"], "name");
+    }
+
+    #[test]
+    fn emits_ts_conditional_and_indexed_access_types() {
+        let conditional = parsed_types("/repo/types.ts", "type A = T extends U ? X : Y;\n");
+        assert!(conditional
+            .iter()
+            .any(|node_type| node_type == "TSConditionalType"));
+
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/types.ts");
+        let json =
+            parse_source(root, path, "type A = T extends U ? X : Y;\n").expect("parse succeeds");
+        let conditional_node = &json["ast"]["program"]["body"][0]["typeAnnotation"];
+        assert_eq!(conditional_node["type"], "TSConditionalType");
+        assert_eq!(conditional_node["checkType"]["typeName"]["name"], "T");
+        assert_eq!(conditional_node["extendsType"]["typeName"]["name"], "U");
+        assert_eq!(conditional_node["trueType"]["typeName"]["name"], "X");
+        assert_eq!(conditional_node["falseType"]["typeName"]["name"], "Y");
+
+        let indexed = parsed_types("/repo/types.ts", "type B = Lookup[Key];\n");
+        assert!(indexed
+            .iter()
+            .any(|node_type| node_type == "TSIndexedAccessType"));
+    }
+
+    #[test]
+    fn emits_ts_type_operators() {
+        let keyof = parsed_types("/repo/types.ts", "type C = keyof Target;\n");
+        assert!(keyof.iter().any(|node_type| node_type == "TSTypeOperator"));
+
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/types.ts");
+        let json = parse_source(root, path, "type C = keyof Target;\n").expect("parse succeeds");
+        let operator = &json["ast"]["program"]["body"][0]["typeAnnotation"];
+        assert_eq!(operator["type"], "TSTypeOperator");
+        assert_eq!(operator["operator"], "keyof");
+
+        let readonly = parse_source(
+            root,
+            Path::new("/repo/readonly.ts"),
+            "type D = readonly string[];\n",
+        )
+        .expect("parse succeeds");
+        let readonly_operator = &readonly["ast"]["program"]["body"][0]["typeAnnotation"];
+        assert_eq!(readonly_operator["type"], "TSTypeOperator");
+        assert_eq!(readonly_operator["operator"], "readonly");
+    }
+
+    #[test]
+    fn emits_ts_function_type() {
+        let types = parsed_types("/repo/types.ts", "type E = (value: number) => string;\n");
+        assert!(types.iter().any(|node_type| node_type == "TSFunctionType"));
+
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/types.ts");
+        let json = parse_source(root, path, "type E = (value: number) => string;\n")
+            .expect("parse succeeds");
+        let function_type = &json["ast"]["program"]["body"][0]["typeAnnotation"];
+        assert_eq!(function_type["type"], "TSFunctionType");
+        assert_eq!(function_type["params"][0]["name"], "value");
+        assert_eq!(function_type["typeAnnotation"]["type"], "TSStringKeyword");
+    }
+
+    #[test]
+    fn emits_ts_type_parameter_declaration() {
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/types.ts");
+        let json = parse_source(root, path, "function identity<T, U = number>(x: T) {}\n")
+            .expect("parse succeeds");
+        let function = &json["ast"]["program"]["body"][0];
+        let type_parameters = &function["typeParameters"];
+        assert_eq!(type_parameters["type"], "TSTypeParameterDeclaration");
+        assert_eq!(type_parameters["params"][0]["type"], "TSTypeParameter");
+        assert_eq!(type_parameters["params"][0]["name"], "T");
+        assert_eq!(type_parameters["params"][1]["name"], "U");
+        assert_eq!(
+            type_parameters["params"][1]["default"]["type"],
+            "TSNumberKeyword"
+        );
+    }
+
+    #[test]
+    fn emits_ts_mapped_type() {
+        let types = parsed_types("/repo/types.ts", "type G = { [K in keyof T]: T[K] };\n");
+        assert!(types.iter().any(|node_type| node_type == "TSMappedType"));
+
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/types.ts");
+        let json = parse_source(root, path, "type G = { [K in keyof T]: T[K] };\n")
+            .expect("parse succeeds");
+        let mapped = &json["ast"]["program"]["body"][0]["typeAnnotation"];
+        assert_eq!(mapped["type"], "TSMappedType");
+        assert_eq!(mapped["typeParameter"]["type"], "TSTypeParameter");
+        assert_eq!(mapped["typeAnnotation"]["type"], "TSIndexedAccessType");
+    }
+
+    #[test]
+    fn records_unmapped_kinds_in_summary() {
+        // Drain any state left over from earlier parses in this thread.
+        let _ = take_unmapped_summary();
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/debug.js");
+        let _ = parse_source(root, path, "debugger;\n").expect("parse succeeds");
+        let summary = take_unmapped_summary().expect("debugger statement is unmapped");
+        assert!(summary.starts_with("jsastgen: "));
+        assert!(summary.contains("debugger_statement"));
+        // Counter resets after draining.
+        assert!(take_unmapped_summary().is_none());
     }
 }

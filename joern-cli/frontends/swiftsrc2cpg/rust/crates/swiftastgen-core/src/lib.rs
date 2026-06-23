@@ -1,8 +1,32 @@
 use anyhow::{bail, Context, Result};
 use serde_json::{json, Value};
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
+use std::sync::Mutex;
 use tree_sitter::{Node, Parser};
+
+/// Process-wide tally of tree-sitter node kinds that could not be mapped to a
+/// precise SwiftSyntax node and were emitted as a best-effort `Missing*`
+/// placeholder instead. Recorded so the CLI can surface a single visibility
+/// summary on stderr without polluting stdout or the emitted JSON.
+static UNSUPPORTED_NODE_TALLY: Mutex<BTreeMap<String, usize>> = Mutex::new(BTreeMap::new());
+
+fn record_unsupported_node(kind: &str) {
+    if let Ok(mut tally) = UNSUPPORTED_NODE_TALLY.lock() {
+        *tally.entry(kind.to_string()).or_insert(0) += 1;
+    }
+}
+
+/// Drains and returns the unsupported-node tally accumulated since the last
+/// call, as `(kind, count)` pairs sorted by kind. Returns an empty vector when
+/// every node was mapped precisely.
+pub fn take_unsupported_node_tally() -> Vec<(String, usize)> {
+    match UNSUPPORTED_NODE_TALLY.lock() {
+        Ok(mut tally) => std::mem::take(&mut *tally).into_iter().collect(),
+        Err(_) => Vec::new(),
+    }
+}
 
 pub fn parse_file(input_root: &Path, file: &Path) -> Result<Value> {
     let source =
@@ -690,17 +714,24 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     .map(|(offset, _)| name_start + offset)
             })
             .unwrap_or(end);
-        if name_start >= name_end {
-            bail!("synthetic function declaration is missing a name");
-        }
+        // A recovered `func` fragment that has no name or no parameter
+        // parentheses (e.g. a stray `func` keyword on its own line in a
+        // malformed multi-declaration block) cannot be reassembled into a
+        // `FunctionDeclSyntax`. Degrade to a `MissingDeclSyntax` for that line
+        // instead of failing the whole file.
         let left_paren_start = self.source[name_end..end]
             .find('(')
-            .map(|offset| name_end + offset)
-            .context("synthetic function declaration is missing '('")?;
-        let right_paren_start = self.source[left_paren_start..end]
-            .find(')')
-            .map(|offset| left_paren_start + offset)
-            .context("synthetic function declaration is missing ')'")?;
+            .map(|offset| name_end + offset);
+        let right_paren_start = left_paren_start
+            .and_then(|left| self.source[left..end].find(')').map(|offset| left + offset));
+        let (Some(left_paren_start), Some(right_paren_start)) =
+            (left_paren_start, right_paren_start)
+        else {
+            return Ok(self.missing_decl_from_offsets(start, end, "synthetic_function_decl"));
+        };
+        if name_start >= name_end {
+            return Ok(self.missing_decl_from_offsets(start, end, "synthetic_function_decl"));
+        }
         let parameter_clause =
             self.synthetic_empty_function_parameter_clause(left_paren_start, right_paren_start);
         let signature = self.syntax_node(
@@ -1021,6 +1052,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "operator_declaration" => self.operator_decl(node),
             "precedence_group_declaration" => self.precedence_group_decl(node),
             "control_transfer_statement" => self.control_transfer_stmt(node),
+            "discard_statement" => self.discard_stmt(node),
             "call_expression" if self.is_return_do_expr_call(node) => {
                 self.recovered_return_do_stmt(node)
             }
@@ -1108,7 +1140,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 Ok(self.fallthrough_stmt(node))
             }
             "simple_identifier" => self.expr(node),
-            other => bail!("unsupported Swift syntax node '{other}'"),
+            // Unknown code-block items are routed through the (now total)
+            // expression mapper, which records the kind and degrades to a
+            // best-effort node rather than failing the whole file.
+            _ => self.expr(node),
         }
     }
 
@@ -1147,7 +1182,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .into_iter()
                 .next()
                 .unwrap_or_else(|| self.macro_decl_fragment(node.start_byte(), node.end_byte()))),
-            other => bail!("unsupported Swift member declaration node '{other}'"),
+            other => Ok(self.missing_decl(node, other)),
         }
     }
 
@@ -1188,7 +1223,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "actorKeyword",
                 "keyword(SwiftSyntax.Keyword.actor)",
             ),
-            other => bail!("unsupported nominal type declaration kind '{other}'"),
+            other => return Ok(self.missing_decl(node, other)),
         };
         let name_node = self
             .field_child(node, "name")
@@ -1653,7 +1688,27 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .context("enum case declaration is missing 'case'")?;
         let names = self.enum_case_name_ranges(node, case_keyword);
         if names.is_empty() {
-            bail!("enum case declaration is missing case elements");
+            // A `case` with no elements (e.g. `enum E { case }`) is malformed
+            // Swift. Emit an `EnumCaseDeclSyntax` with an empty element list (the
+            // Scala consumer iterates `elements.children`, so an empty list is
+            // tolerated) instead of failing the whole file.
+            record_unsupported_node("enum_case_decl_without_elements");
+            return Ok(self.syntax_node(
+                "EnumCaseDeclSyntax",
+                self.range_for_node(node),
+                vec![
+                    self.with_name(self.attribute_list(node)?, "attributes"),
+                    self.with_name(self.modifier_list(node), "modifiers"),
+                    self.with_name(
+                        self.token_for_node(case_keyword, "keyword(SwiftSyntax.Keyword.case)"),
+                        "caseKeyword",
+                    ),
+                    self.with_name(
+                        self.empty_collection("EnumCaseElementListSyntax", case_keyword.end_byte()),
+                        "elements",
+                    ),
+                ],
+            ));
         }
         let data_contents = self.field_children(node, "data_contents");
         let raw_values = self.field_children(node, "raw_value");
@@ -3001,12 +3056,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 }) {
                     return self.pattern(child);
                 }
-                bail!("pattern is empty")
+                Ok(self.missing_pattern(node, "pattern"))
             }
             "identifier" | "simple_identifier" => self.identifier_pattern(node),
             "wildcard_pattern" => self.wildcard_pattern(node),
             _ if is_expression_like_node(node) => self.expression_pattern(node),
-            other => bail!("unsupported Swift pattern node '{other}'"),
+            other => Ok(self.missing_pattern(node, other)),
         }
     }
 
@@ -3375,6 +3430,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "function_type" => self.function_type(node),
             "metatype" => self.metatype_type(node),
             "optional_type" => self.optional_type(node),
+            "protocol_composition_type" => self.composition_type(node),
             "suppressed_constraint" => self.suppressed_type(node),
             "tuple_type" => self.tuple_type(node),
             "type_pack_expansion" => self.pack_expansion_type(node),
@@ -3390,7 +3446,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     .context("tuple type item is missing a type")?;
                 self.type_syntax(type_node)
             }
-            other => bail!("unsupported Swift type node '{other}'"),
+            _ => Ok(self.missing_type(node, node.kind())),
         }
     }
 
@@ -3562,6 +3618,65 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    /// `A & B & ...` -> `CompositionTypeSyntax`. tree-sitter nests the operands
+    /// right-recursively (`A & (B & C)`); SwiftSyntax expects a single flat
+    /// element list, so we flatten and attach the trailing `&` to every element
+    /// except the last.
+    fn composition_type(&self, node: Node<'a>) -> Result<Value> {
+        let mut parts: Vec<(Node<'a>, Option<Node<'a>>)> = Vec::new();
+        self.collect_composition_elements(node, &mut parts);
+        if parts.is_empty() {
+            return Ok(self.missing_type(node, "protocol_composition_type"));
+        }
+        let mut elements = Vec::with_capacity(parts.len());
+        for (type_child, ampersand) in &parts {
+            let mut element_children = vec![self.with_name(self.type_syntax(*type_child)?, "type")];
+            let mut element_end = type_child.end_byte();
+            if let Some(ampersand) = ampersand {
+                element_end = ampersand.end_byte();
+                element_children.push(self.with_name(
+                    self.token_for_node(*ampersand, "binaryOperator(\"&\")"),
+                    "ampersand",
+                ));
+            }
+            elements.push(self.syntax_node(
+                "CompositionTypeElementSyntax",
+                self.range_from_offsets(type_child.start_byte(), element_end),
+                element_children,
+            ));
+        }
+        let list = self.syntax_node(
+            "CompositionTypeElementListSyntax",
+            self.range_for_node(node),
+            elements,
+        );
+        Ok(self.syntax_node(
+            "CompositionTypeSyntax",
+            self.range_for_node(node),
+            vec![self.with_name(list, "elements")],
+        ))
+    }
+
+    /// Flattens a (possibly nested) `protocol_composition_type` into `(type,
+    /// trailing-ampersand)` pairs in source order. tree-sitter may nest the tail
+    /// (`A & (B & C)`) and may also place multiple leaf operands at one level, so
+    /// we walk every child in order and recurse into nested compositions.
+    fn collect_composition_elements(
+        &self,
+        node: Node<'a>,
+        out: &mut Vec<(Node<'a>, Option<Node<'a>>)>,
+    ) {
+        for child in named_children(node) {
+            if child.kind() == "protocol_composition_type" {
+                self.collect_composition_elements(child, out);
+            } else if is_type_syntax_node_kind(child.kind()) {
+                let ampersand = children(node)
+                    .find(|sib| sib.kind() == "&" && sib.start_byte() >= child.end_byte());
+                out.push((child, ampersand));
+            }
+        }
+    }
+
     fn metatype_type(&self, node: Node<'a>) -> Result<Value> {
         let base_type = self
             .first_type_child(node)
@@ -3571,10 +3686,19 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .map(|offset| base_type.end_byte() + offset)
             .context("metatype is missing '.'")?;
         let (specifier_start, specifier_end) = self.trim_offsets(period_start + 1, node.end_byte());
-        if specifier_start >= specifier_end {
-            bail!("metatype is missing specifier");
-        }
-        let specifier = &self.source[specifier_start..specifier_end];
+        // `.Type` is the overwhelmingly common specifier; fall back to it when
+        // the grammar leaves the specifier slot empty rather than failing the
+        // whole file.
+        let specifier = if specifier_start >= specifier_end {
+            "Type"
+        } else {
+            &self.source[specifier_start..specifier_end]
+        };
+        let specifier_range = if specifier_start >= specifier_end {
+            self.range_from_offsets(period_start + 1, node.end_byte())
+        } else {
+            self.range_from_offsets(specifier_start, specifier_end)
+        };
         Ok(self.syntax_node(
             "MetatypeTypeSyntax",
             self.range_for_node(node),
@@ -3590,7 +3714,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.with_name(
                     self.token_with_range(
                         &format!("keyword(SwiftSyntax.Keyword.{specifier})"),
-                        self.range_from_offsets(specifier_start, specifier_end),
+                        specifier_range,
                     ),
                     "metatypeSpecifier",
                 ),
@@ -4645,9 +4769,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     ) -> Result<(Value, usize, Option<Node<'a>>)> {
         let mut clauses = Vec::new();
         let mut index = start_index;
-        let pound_endif;
+        // `None` means error recovery synthesized a missing `#endif`.
+        let mut pound_endif: Option<Node<'a>> = None;
         let next_index;
-        let trailing_call;
+        let mut trailing_call = None;
         loop {
             let branch_call = nodes[index];
             let parts = self
@@ -4666,50 +4791,69 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
             index += 1;
             let Some(next) = nodes.get(index).copied() else {
-                bail!("postfix if config declaration is missing #endif");
+                // No `#endif` follows the last branch. Recover by synthesizing a
+                // missing one instead of failing the whole file.
+                record_unsupported_node("postfix_if_config_decl_without_endif");
+                next_index = index;
+                break;
             };
             if let Some(next_parts) = self.postfix_directive_call_parts(next) {
                 match self.directive_keyword_info(next_parts.directive) {
                     Some((DirectiveKind::ElseIf | DirectiveKind::Else, _, _, _)) => continue,
                     Some((DirectiveKind::EndIf, _, _, _)) => {
-                        pound_endif = next_parts.directive;
+                        pound_endif = Some(next_parts.directive);
                         next_index = index + 1;
                         trailing_call = Some(next);
                         break;
                     }
-                    _ => bail!("unexpected directive call in postfix if config declaration"),
+                    // Anything else (e.g. a nested postfix `#if`) is unexpected
+                    // here. Close this declaration with a synthesized `#endif` and
+                    // let the caller reprocess `next` from `next_index`.
+                    _ => {
+                        record_unsupported_node("postfix_if_config_decl_unexpected_directive");
+                        next_index = index;
+                        break;
+                    }
                 }
-            }
-
-            match self.directive_keyword_info(next) {
-                Some((DirectiveKind::EndIf, _, _, _)) => {
-                    pound_endif = next;
-                    next_index = index + 1;
-                    trailing_call = None;
-                    break;
+            } else {
+                match self.directive_keyword_info(next) {
+                    Some((DirectiveKind::EndIf, _, _, _)) => {
+                        pound_endif = Some(next);
+                        next_index = index + 1;
+                        break;
+                    }
+                    // A non-directive node (e.g. an unrelated statement) follows
+                    // the branches without an intervening `#endif`. Close the
+                    // declaration with a synthesized `#endif` and let the caller
+                    // reprocess `next` from `next_index` instead of failing.
+                    _ => {
+                        record_unsupported_node("postfix_if_config_decl_unexpected_node");
+                        next_index = index;
+                        break;
+                    }
                 }
-                _ => bail!("unexpected node while parsing postfix if config declaration"),
             }
         }
 
         let clauses_range = self.covering_range_or_point(&clauses, nodes[start_index].end_byte());
+        let clauses_end = clauses_range["endOffset"].as_u64().unwrap_or_default() as usize;
+        let decl_end = pound_endif
+            .map(|endif| endif.end_byte())
+            .unwrap_or_else(|| clauses_end.max(nodes[start_index].end_byte()));
         let clause_list = self.syntax_node("IfConfigClauseListSyntax", clauses_range, clauses);
-        let (_, endif_start, endif_end, endif_kind) = self
-            .directive_keyword_info(pound_endif)
-            .context("postfix if config declaration is missing #endif")?;
+        let pound_endif_token =
+            match pound_endif.and_then(|endif| self.directive_keyword_info(endif)) {
+                Some((_, endif_start, endif_end, endif_kind)) => self
+                    .token_with_range(endif_kind, self.range_from_offsets(endif_start, endif_end)),
+                None => self.token_with_range("poundEndif", self.point_range(decl_end)),
+            };
         Ok((
             self.syntax_node(
                 "IfConfigDeclSyntax",
-                self.range_from_offsets(nodes[start_index].start_byte(), pound_endif.end_byte()),
+                self.range_from_offsets(nodes[start_index].start_byte(), decl_end),
                 vec![
                     self.with_name(clause_list, "clauses"),
-                    self.with_name(
-                        self.token_with_range(
-                            endif_kind,
-                            self.range_from_offsets(endif_start, endif_end),
-                        ),
-                        "poundEndif",
-                    ),
+                    self.with_name(pound_endif_token, "poundEndif"),
                 ],
             ),
             next_index,
@@ -4892,7 +5036,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
         let mut clauses = Vec::new();
         let mut index = start_index;
-        let pound_endif;
+        // `None` means error recovery synthesized a missing `#endif` (an
+        // unterminated or malformed `#if` block); we then anchor the `poundEndif`
+        // token at the end of the last consumed clause.
+        let mut pound_endif: Option<Node<'a>> = None;
         let next_index;
         loop {
             let directive = nodes[index];
@@ -4925,14 +5072,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             clauses.push(self.if_config_clause(directive, &nodes[body_start..body_end])?);
 
             if body_end >= nodes.len() {
-                bail!("if config declaration is missing #endif");
+                // No `#endif` before the code block ended. Recover by synthesizing
+                // a missing one (mirroring swift-syntax) instead of failing.
+                record_unsupported_node("if_config_decl_without_endif");
+                next_index = body_end;
+                break;
             }
             match self.directive_keyword_info(nodes[body_end]) {
                 Some((DirectiveKind::ElseIf | DirectiveKind::Else, _, _, _)) => {
                     index = body_end;
                 }
                 Some((DirectiveKind::EndIf, _, _, _)) => {
-                    pound_endif = nodes[body_end];
+                    pound_endif = Some(nodes[body_end]);
                     next_index = body_end + 1;
                     break;
                 }
@@ -4941,23 +5092,24 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
 
         let clauses_range = self.covering_range_or_point(&clauses, start.end_byte());
+        let clauses_end = clauses_range["endOffset"].as_u64().unwrap_or_default() as usize;
+        let decl_end = pound_endif
+            .map(|endif| endif.end_byte())
+            .unwrap_or_else(|| clauses_end.max(start.end_byte()));
         let clause_list = self.syntax_node("IfConfigClauseListSyntax", clauses_range, clauses);
-        let (_, endif_start, endif_end, endif_kind) = self
-            .directive_keyword_info(pound_endif)
-            .context("if config declaration is missing #endif")?;
+        let pound_endif_token =
+            match pound_endif.and_then(|endif| self.directive_keyword_info(endif)) {
+                Some((_, endif_start, endif_end, endif_kind)) => self
+                    .token_with_range(endif_kind, self.range_from_offsets(endif_start, endif_end)),
+                None => self.token_with_range("poundEndif", self.point_range(decl_end)),
+            };
         Ok((
             self.syntax_node(
                 "IfConfigDeclSyntax",
-                self.range_from_offsets(start.start_byte(), pound_endif.end_byte()),
+                self.range_from_offsets(start.start_byte(), decl_end),
                 vec![
                     self.with_name(clause_list, "clauses"),
-                    self.with_name(
-                        self.token_with_range(
-                            endif_kind,
-                            self.range_from_offsets(endif_start, endif_end),
-                        ),
-                        "poundEndif",
-                    ),
+                    self.with_name(pound_endif_token, "poundEndif"),
                 ],
             ),
             next_index,
@@ -5004,8 +5156,83 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         match node.kind() {
             "computed_property" => self.accessor_block_for_computed_property(node, "property"),
             "protocol_property_requirements" => self.protocol_property_accessor_block(node),
-            other => bail!("unsupported variable accessor block node '{other}'"),
+            // tree-sitter only ever produces `computed_property` /
+            // `protocol_property_requirements` here, but error recovery can route
+            // an unexpected node (e.g. an `ERROR` wrapping a malformed accessor)
+            // into this slot. Rather than failing the whole file, degrade to an
+            // `AccessorBlockSyntax` carrying whatever accessor declarations we can
+            // scrape out of the source. The Scala consumer maps the accessor list
+            // (possibly empty) into an `Ast`, so this is tolerated.
+            other => self.recovered_variable_accessor_block(node, other),
         }
+    }
+
+    /// Best-effort `AccessorBlockSyntax` for an accessor-block slot whose
+    /// tree-sitter node is neither `computed_property` nor
+    /// `protocol_property_requirements`. We synthesize braces around the node's
+    /// extent and recover any `get`/`set`/`willSet`/`didSet`/`_modify`/`_read`
+    /// accessors by scanning the source between them, falling back to an empty
+    /// accessor list when none are present.
+    fn recovered_variable_accessor_block(&self, node: Node<'a>, kind: &str) -> Result<Value> {
+        record_unsupported_node(kind);
+        let node_start = node.start_byte();
+        let node_end = node.end_byte();
+        let left_brace_start = self.source[node_start..node_end]
+            .find('{')
+            .map(|offset| node_start + offset);
+        let (body_start, left_brace) = match left_brace_start {
+            Some(brace) => (
+                brace + 1,
+                self.with_name(
+                    self.token_with_range("leftBrace", self.range_from_offsets(brace, brace + 1)),
+                    "leftBrace",
+                ),
+            ),
+            None => (
+                node_start,
+                self.with_name(
+                    self.token_with_range("leftBrace", self.point_range(node_start)),
+                    "leftBrace",
+                ),
+            ),
+        };
+        let right_brace_start = self.source[..node_end].rfind('}').filter(|brace| {
+            *brace >= body_start && left_brace_start.is_none_or(|left| *brace > left)
+        });
+        let (body_end, right_brace) = match right_brace_start {
+            Some(brace) => (
+                brace,
+                self.with_name(
+                    self.token_with_range("rightBrace", self.range_from_offsets(brace, brace + 1)),
+                    "rightBrace",
+                ),
+            ),
+            None => (
+                node_end,
+                self.with_name(
+                    self.token_with_range("rightBrace", self.point_range(node_end)),
+                    "rightBrace",
+                ),
+            ),
+        };
+        let accessor_items = self
+            .source_accessor_decls_from_offsets(body_start, body_end.max(body_start))?
+            .into_iter()
+            .map(|accessor| self.with_name(accessor, ""))
+            .collect::<Vec<_>>();
+        let accessors_range = self.covering_range_or_point(&accessor_items, body_start);
+        Ok(self.syntax_node(
+            "AccessorBlockSyntax",
+            self.range_for_node(node),
+            vec![
+                left_brace,
+                self.with_name(
+                    self.syntax_node("AccessorDeclListSyntax", accessors_range, accessor_items),
+                    "accessors",
+                ),
+                right_brace,
+            ],
+        ))
     }
 
     fn accessor_block_for_computed_property(
@@ -5417,6 +5644,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "consume_expression" => self.consume_expr(node),
             "dictionary_literal" => self.dictionary_expr(node),
             "key_path_expression" => self.key_path_expr(node),
+            "key_path_string_expression" => self.key_path_string_expr(node),
             "lambda_literal" => self.closure_expr(node),
             "navigation_expression" if self.is_recoverable_prefix_slash_navigation(node) => self
                 .synthetic_prefix_slash_expr_from_offsets(node.start_byte(), node.end_byte())
@@ -5517,8 +5745,40 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "ERROR" if is_identifier_like_text(self.text(node)) => {
                 Ok(self.decl_reference_expr(node))
             }
-            other => bail!("unsupported Swift expression node '{other}'"),
+            other => {
+                record_unsupported_node(other);
+                Ok(self.synthetic_expr_from_offsets(node.start_byte(), node.end_byte()))
+            }
         }
+    }
+
+    /// `#keyPath(Foo.bar)` -> `KeyPathExprSyntax`. tree-sitter models this as a
+    /// `key_path_string_expression` with a `#keyPath(...)` shape rather than the
+    /// `\Foo.bar` backslash form, so we anchor the synthesized `backslash`
+    /// keyword token at the leading `#`.
+    fn key_path_string_expr(&self, node: Node<'a>) -> Result<Value> {
+        let pound_start = node.start_byte()
+            + self
+                .text(node)
+                .find('#')
+                .context("key path string expression is missing '#'")?;
+        Ok(self.syntax_node(
+            "KeyPathExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "pound",
+                        self.range_from_offsets(pound_start, pound_start + 1),
+                    ),
+                    "backslash",
+                ),
+                self.with_name(
+                    self.empty_collection("KeyPathComponentListSyntax", node.end_byte()),
+                    "components",
+                ),
+            ],
+        ))
     }
 
     fn pack_element_expr(&self, node: Node<'a>) -> Result<Value> {
@@ -8404,18 +8664,30 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .context("prefix expression is missing target")?;
 
         if operation.kind() == "." || self.text(operation) == "." {
-            let decl_name = match target.kind() {
-                "binary_literal" | "bin_literal" | "hex_literal" | "identifier"
-                | "integer_literal" | "oct_literal" | "octal_literal" | "simple_identifier"
-                | "self_expression" => target,
-                other => bail!("unsupported implicit member target '{other}'"),
-            };
+            // `.member` implicit-member access. `decl_reference_expr` already
+            // renders any leaf node from its source text, so we accept whatever
+            // target the grammar produced rather than failing the file; only
+            // record genuinely unexpected (non-identifier-like) targets.
+            if !matches!(
+                target.kind(),
+                "binary_literal"
+                    | "bin_literal"
+                    | "hex_literal"
+                    | "identifier"
+                    | "integer_literal"
+                    | "oct_literal"
+                    | "octal_literal"
+                    | "simple_identifier"
+                    | "self_expression"
+            ) {
+                record_unsupported_node(target.kind());
+            }
             return Ok(self.syntax_node(
                 "MemberAccessExprSyntax",
                 self.range_for_node(node),
                 vec![
                     self.with_name(self.token_for_node(operation, "period"), "period"),
-                    self.with_name(self.decl_reference_expr(decl_name), "declName"),
+                    self.with_name(self.decl_reference_expr(target), "declName"),
                 ],
             ));
         }
@@ -10326,9 +10598,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         };
         let (pattern_start, pattern_end) =
             self.trim_offsets(binding_specifier.end_byte(), pattern_boundary);
-        if pattern_start >= pattern_end {
-            bail!("optional binding condition is missing a pattern");
-        }
+        // An `if let`/`guard let`/`while let` whose pattern text is missing
+        // (e.g. `if let = x {}`) is malformed Swift. Recover with a
+        // `MissingPatternSyntax` placeholder instead of failing the whole file.
+        let pattern = if pattern_start >= pattern_end {
+            self.missing_pattern_at_offset(pattern_start, "optional_binding_without_pattern")
+        } else {
+            self.synthetic_bound_pattern_from_offsets(pattern_start, pattern_end)
+        };
         let trailing_comma = self.trailing_delimiter(parent, trailing_delimiter_node, ",");
 
         let mut optional_children = vec![
@@ -10342,10 +10619,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ),
                 "bindingSpecifier",
             ),
-            self.with_name(
-                self.synthetic_bound_pattern_from_offsets(pattern_start, pattern_end),
-                "pattern",
-            ),
+            self.with_name(pattern, "pattern"),
         ];
         if let Some(type_annotation) = type_annotation {
             optional_children
@@ -10470,9 +10744,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let initializer = self.initializer_clause(equal, value)?;
         let (pattern_start, pattern_end) =
             self.trim_offsets(case_keyword.end_byte(), equal.start_byte());
-        if pattern_start >= pattern_end {
-            bail!("matching pattern condition is missing pattern");
-        }
+        // `if case = x {}` leaves the `case` pattern empty (malformed Swift).
+        // Recover with a `MissingPatternSyntax` placeholder instead of failing.
+        let pattern = if pattern_start >= pattern_end {
+            self.missing_pattern_at_offset(pattern_start, "matching_pattern_without_pattern")
+        } else {
+            self.synthetic_pattern_from_offsets(pattern_start, pattern_end)
+        };
         let pattern_condition_end = end_offset(&initializer);
         let pattern_condition = self.syntax_node(
             "MatchingPatternConditionSyntax",
@@ -10485,10 +10763,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     ),
                     "caseKeyword",
                 ),
-                self.with_name(
-                    self.synthetic_pattern_from_offsets(pattern_start, pattern_end),
-                    "pattern",
-                ),
+                self.with_name(pattern, "pattern"),
                 self.with_name(initializer, "initializer"),
             ],
         );
@@ -10533,11 +10808,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             + text
                 .rfind(')')
                 .context("availability condition is missing ')'")?;
-        let keyword_text = &self.source[start..left_paren_start];
+        let keyword_text = self.source[start..left_paren_start].trim();
         let keyword_kind = match keyword_text {
             "#available" => "poundAvailable",
             "#unavailable" => "poundUnavailable",
-            other => bail!("unsupported availability keyword '{other}'"),
+            // Unknown spellings degrade to the dominant `#available` form
+            // instead of failing the whole file.
+            _ => {
+                record_unsupported_node("availability_condition");
+                "poundAvailable"
+            }
         };
         Ok(self.syntax_node(
             "AvailabilityConditionSyntax",
@@ -10930,7 +11210,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if self.text(node).starts_with('#') {
             return self.macro_expansion_expr(node);
         }
-        bail!("unsupported Swift special literal '{}'", self.text(node))
+        // Non-`#` special literals are unexpected; degrade to a best-effort
+        // expression (recorded for visibility) rather than failing the file.
+        record_unsupported_node("special_literal");
+        Ok(self.synthetic_expr_from_offsets(node.start_byte(), node.end_byte()))
     }
 
     fn macro_expansion_expr(&self, node: Node<'a>) -> Result<Value> {
@@ -11971,7 +12254,34 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(fallthrough_keyword) = self.first_descendant_any_kind(node, "fallthrough") {
             return Ok(self.fallthrough_stmt(fallthrough_keyword));
         }
-        bail!("unsupported Swift control transfer statement");
+        if self.first_descendant_any_kind(node, "discard").is_some() {
+            return self.discard_stmt(node);
+        }
+        Ok(self.missing_stmt(node, "control_transfer_statement"))
+    }
+
+    /// `discard self` -> `DiscardStmtSyntax`. The grammar models the operand as
+    /// a single `self_expression` child.
+    fn discard_stmt(&self, node: Node<'a>) -> Result<Value> {
+        let keyword = self
+            .immediate_child_kind(node, "discard")
+            .or_else(|| self.first_descendant_any_kind(node, "discard"))
+            .context("discard statement is missing the discard keyword")?;
+        let expression = self
+            .immediate_named_child_kind(node, "self_expression")
+            .or_else(|| named_children(node).find(|child| child.start_byte() >= keyword.end_byte()))
+            .context("discard statement is missing its expression")?;
+        Ok(self.syntax_node(
+            "DiscardStmtSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(keyword, "keyword(SwiftSyntax.Keyword.discard)"),
+                    "discardKeyword",
+                ),
+                self.with_name(self.expr(expression)?, "expression"),
+            ],
+        ))
     }
 
     fn throw_stmt(&self, node: Node<'a>) -> Result<Value> {
@@ -12015,7 +12325,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .source
                 .as_bytes()
                 .get(throw_end)
-                .map_or(true, |byte| !is_identifier_byte(*byte))
+                .is_none_or(|byte| !is_identifier_byte(*byte))
         {
             Some((start, throw_end))
         } else {
@@ -12662,6 +12972,103 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn empty_collection(&self, node_type: &str, offset: usize) -> Value {
         self.syntax_node(node_type, self.point_range(offset), Vec::new())
+    }
+
+    /// Best-effort placeholder for a tree-sitter node we cannot yet map to a
+    /// precise SwiftSyntax node. The Scala consumer turns every `Missing*Syntax`
+    /// into an empty `Ast()`, so emitting one degrades gracefully (the file
+    /// still parses) instead of failing the whole file via `bail!`. The
+    /// unmapped kind is tallied so the CLI can report it on stderr.
+    fn missing_node(&self, node_type: &str, node: Node<'a>, kind: &str) -> Value {
+        record_unsupported_node(kind);
+        let (start, end) = self.trim_offsets(node.start_byte(), node.end_byte());
+        let placeholder = self.with_name(
+            self.token_with_range(
+                &format!("identifier({})", quoted_text(&self.source[start..end])),
+                self.range_from_offsets(start, end),
+            ),
+            "placeholder",
+        );
+        let children = if node_type == "MissingDeclSyntax" {
+            vec![
+                self.with_name(
+                    self.empty_collection("AttributeListSyntax", start),
+                    "attributes",
+                ),
+                self.with_name(
+                    self.empty_collection("DeclModifierListSyntax", start),
+                    "modifiers",
+                ),
+                placeholder,
+            ]
+        } else {
+            vec![placeholder]
+        };
+        self.syntax_node(node_type, self.range_for_node(node), children)
+    }
+
+    fn missing_type(&self, node: Node<'a>, kind: &str) -> Value {
+        self.missing_node("MissingTypeSyntax", node, kind)
+    }
+
+    fn missing_stmt(&self, node: Node<'a>, kind: &str) -> Value {
+        self.missing_node("MissingStmtSyntax", node, kind)
+    }
+
+    fn missing_decl(&self, node: Node<'a>, kind: &str) -> Value {
+        self.missing_node("MissingDeclSyntax", node, kind)
+    }
+
+    fn missing_pattern(&self, node: Node<'a>, kind: &str) -> Value {
+        self.missing_node("MissingPatternSyntax", node, kind)
+    }
+
+    /// `MissingPatternSyntax` placeholder anchored at a source offset (used when
+    /// error recovery leaves a binding/`case` condition without any pattern
+    /// text). The Scala consumer maps every `Missing*Syntax` to an empty `Ast`,
+    /// so this degrades gracefully instead of failing the file.
+    fn missing_pattern_at_offset(&self, offset: usize, kind: &str) -> Value {
+        record_unsupported_node(kind);
+        let placeholder = self.with_name(
+            self.token_with_range("identifier(\"\")", self.point_range(offset)),
+            "placeholder",
+        );
+        self.syntax_node(
+            "MissingPatternSyntax",
+            self.point_range(offset),
+            vec![placeholder],
+        )
+    }
+
+    /// `MissingDeclSyntax` placeholder spanning a source range (used when error
+    /// recovery produces a declaration fragment we cannot reassemble into a
+    /// precise node). Mirrors `missing_node("MissingDeclSyntax", ..)` but works
+    /// from offsets rather than a tree-sitter node.
+    fn missing_decl_from_offsets(&self, start: usize, end: usize, kind: &str) -> Value {
+        record_unsupported_node(kind);
+        let (start, end) = self.trim_offsets(start, end);
+        let placeholder = self.with_name(
+            self.token_with_range(
+                &format!("identifier({})", quoted_text(&self.source[start..end])),
+                self.range_from_offsets(start, end),
+            ),
+            "placeholder",
+        );
+        self.syntax_node(
+            "MissingDeclSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.empty_collection("AttributeListSyntax", start),
+                    "attributes",
+                ),
+                self.with_name(
+                    self.empty_collection("DeclModifierListSyntax", start),
+                    "modifiers",
+                ),
+                placeholder,
+            ],
+        )
     }
 
     fn token_for_node(&self, node: Node<'a>, token_kind: &str) -> Value {
@@ -16966,6 +17373,188 @@ let a = #embed(\"filename.txt\")
         assert_eq!(
             statements[0]["children"][0]["nodeType"],
             "VariableDeclSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_discard_statements() {
+        let source = "struct S: ~Copyable {\n  consuming func f() {\n    discard self\n  }\n}\n";
+        let value = parse_source("Discard.swift", "/tmp/Discard.swift", source).unwrap();
+        let discard = find_first_node_type(&value, "DiscardStmtSyntax")
+            .expect("discard self must not bail and must emit a DiscardStmtSyntax");
+        assert_eq!(source_text(source, discard), "discard self");
+        assert_eq!(
+            child_by_name(discard, "discardKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.discard)"
+        );
+        let expression = child_by_name(discard, "expression").unwrap();
+        assert_eq!(expression["nodeType"], "DeclReferenceExprSyntax");
+        assert_eq!(
+            expression["children"][0]["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.self)"
+        );
+    }
+
+    #[test]
+    fn emits_protocol_composition_types() {
+        let source = "func f(x: P & Q & R) {}\n";
+        let value = parse_source("Composition.swift", "/tmp/Composition.swift", source).unwrap();
+        let composition = find_first_node_type(&value, "CompositionTypeSyntax")
+            .expect("`P & Q & R` must map to a CompositionTypeSyntax instead of bailing");
+        assert_eq!(source_text(source, composition), "P & Q & R");
+        let elements = child_by_name(composition, "elements").unwrap();
+        let items = elements["children"].as_array().unwrap();
+        assert_eq!(items.len(), 3);
+        assert_eq!(items[0]["nodeType"], "CompositionTypeElementSyntax");
+        assert_eq!(
+            child_by_name(&items[0], "type").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+        // The first two elements carry a trailing ampersand, the last does not.
+        assert!(child_by_name(&items[0], "ampersand").is_some());
+        assert!(child_by_name(&items[1], "ampersand").is_some());
+        assert!(child_by_name(&items[2], "ampersand").is_none());
+    }
+
+    #[test]
+    fn degrades_unmapped_type_to_missing_type_and_tallies() {
+        let _ = take_unsupported_node_tally();
+        // `bracket_qualified_type` (`[Foo].Element`) is recognized as a type but
+        // not precisely mapped; it must degrade to MissingTypeSyntax (the Scala
+        // consumer turns that into an empty Ast) instead of failing the file.
+        let source = "let a: [Foo].Element = x\n";
+        let value = parse_source("Missing.swift", "/tmp/Missing.swift", source)
+            .expect("unmapped type nodes must degrade gracefully, not bail");
+        let missing = find_first_node_type(&value, "MissingTypeSyntax")
+            .expect("`[Foo].Element` must degrade to a MissingTypeSyntax placeholder");
+        assert!(child_by_name(missing, "placeholder").is_some());
+        let tally = take_unsupported_node_tally();
+        assert!(
+            tally
+                .iter()
+                .any(|(kind, count)| kind == "bracket_qualified_type" && *count >= 1),
+            "degraded node kind must be recorded in the tally, got {tally:?}"
+        );
+    }
+
+    #[test]
+    fn emits_key_path_string_expressions() {
+        let source = "let _ = #keyPath(Foo.bar)\n";
+        let value = parse_source("KeyPath.swift", "/tmp/KeyPath.swift", source).unwrap();
+        let key_path = find_first_node_type(&value, "KeyPathExprSyntax")
+            .expect("`#keyPath(...)` must not bail and must emit a KeyPathExprSyntax");
+        assert_eq!(source_text(source, key_path), "#keyPath(Foo.bar)");
+        assert_eq!(
+            child_by_name(key_path, "components").unwrap()["nodeType"],
+            "KeyPathComponentListSyntax"
+        );
+    }
+
+    #[test]
+    fn recovers_unterminated_if_config_decl() {
+        // A `#if` block with no `#endif` (e.g. a truncated file) must degrade to
+        // an `IfConfigDeclSyntax` with a synthesized `poundEndif` instead of
+        // failing the whole file. (The recovery is recorded in the process-wide
+        // unsupported-node tally; that plumbing is covered by
+        // `degrades_unmapped_type_to_missing_type_and_tallies`.)
+        let source = "#if DEBUG\nlet x = 1\n";
+        let value = parse_source("IfConfig.swift", "/tmp/IfConfig.swift", source)
+            .expect("unterminated `#if` must recover, not bail");
+        let decl = find_first_node_type(&value, "IfConfigDeclSyntax")
+            .expect("unterminated `#if` must still emit an IfConfigDeclSyntax");
+        assert!(child_by_name(decl, "poundEndif").is_some());
+        let clauses = child_by_name(decl, "clauses").unwrap();
+        assert_eq!(clauses["nodeType"], "IfConfigClauseListSyntax");
+        assert!(!clauses["children"].as_array().unwrap().is_empty());
+    }
+
+    #[test]
+    fn recovers_unterminated_postfix_if_config_expr() {
+        // A postfix `#if` configuration with no `#endif` must recover to an
+        // IfConfigDeclSyntax rather than failing the file.
+        let source = "foo\n#if DEBUG\n.bar()\n";
+        let value = parse_source("Postfix.swift", "/tmp/Postfix.swift", source)
+            .expect("unterminated postfix `#if` must recover, not bail");
+        let decl = find_first_node_type(&value, "IfConfigDeclSyntax")
+            .expect("postfix `#if` without #endif must still emit an IfConfigDeclSyntax");
+        assert!(child_by_name(decl, "poundEndif").is_some());
+    }
+
+    #[test]
+    fn recovers_enum_case_without_elements() {
+        // `enum E { case }` is malformed; it must degrade to an EnumCaseDeclSyntax
+        // with an empty element list instead of failing the file.
+        let source = "enum E { case }\n";
+        let value = parse_source("Enum.swift", "/tmp/Enum.swift", source)
+            .expect("empty enum `case` must recover, not bail");
+        let decl = find_first_node_type(&value, "EnumCaseDeclSyntax")
+            .expect("empty enum `case` must still emit an EnumCaseDeclSyntax");
+        let elements = child_by_name(decl, "elements").unwrap();
+        assert_eq!(elements["nodeType"], "EnumCaseElementListSyntax");
+        assert!(elements["children"].as_array().unwrap().is_empty());
+    }
+
+    #[test]
+    fn recovers_optional_binding_without_pattern() {
+        // `if let = x {}` has no binding pattern; it must degrade to a
+        // MissingPatternSyntax instead of failing the file.
+        let source = "func f() { if let = x { } }\n";
+        let value = parse_source("Binding.swift", "/tmp/Binding.swift", source)
+            .expect("patternless `if let` must recover, not bail");
+        let binding = find_first_node_type(&value, "OptionalBindingConditionSyntax")
+            .expect("patternless `if let` must still emit an OptionalBindingConditionSyntax");
+        assert_eq!(
+            child_by_name(binding, "pattern").unwrap()["nodeType"],
+            "MissingPatternSyntax"
+        );
+    }
+
+    #[test]
+    fn recovers_matching_pattern_without_pattern() {
+        // `guard case = x else {}` has no `case` pattern; it must degrade to a
+        // MissingPatternSyntax instead of failing the file.
+        let source = "func f() { guard case = x else { return } }\n";
+        let value = parse_source("Case.swift", "/tmp/Case.swift", source)
+            .expect("patternless `case` condition must recover, not bail");
+        let condition = find_first_node_type(&value, "MatchingPatternConditionSyntax").expect(
+            "patternless `case` condition must still emit a MatchingPatternConditionSyntax",
+        );
+        assert_eq!(
+            child_by_name(condition, "pattern").unwrap()["nodeType"],
+            "MissingPatternSyntax"
+        );
+    }
+
+    #[test]
+    fn maps_variable_accessor_blocks() {
+        // `variable_accessor_block` must map both of its real branches without
+        // bailing: a `computed_property` (`get`/`set`) and a
+        // `protocol_property_requirements` block. Each yields an
+        // `AccessorBlockSyntax` whose accessors carry the right specifiers.
+        let source = "\
+struct S {
+  var a: Int { get { 1 } set { } }
+}
+protocol P {
+  var b: Int { get set }
+}
+";
+        let value = parse_source("Accessors.swift", "/tmp/Accessors.swift", source)
+            .expect("accessor blocks must map, not bail");
+        let blocks = find_node_types(&value, "AccessorBlockSyntax");
+        assert_eq!(blocks.len(), 2);
+        let specifiers = find_node_types(&value, "AccessorDeclSyntax")
+            .iter()
+            .map(|node| child_by_name(node, "accessorSpecifier").unwrap()["tokenKind"].clone())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            specifiers,
+            vec![
+                json!("keyword(SwiftSyntax.Keyword.get)"),
+                json!("keyword(SwiftSyntax.Keyword.set)"),
+                json!("keyword(SwiftSyntax.Keyword.get)"),
+                json!("keyword(SwiftSyntax.Keyword.set)"),
+            ]
         );
     }
 

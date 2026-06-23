@@ -57,6 +57,78 @@ fn writes_one_json_document_per_cxx_input() {
 }
 
 #[test]
+fn reports_unmapped_node_kinds_on_stderr_only() {
+    let temp = tempdir().unwrap();
+    let input = temp.path().join("src");
+    let out = temp.path().join("out");
+    fs::create_dir_all(&input).unwrap();
+    // A GCC statement-expression has no dedicated mapping and falls through to the
+    // recorded fallback, so the run should surface a stderr summary.
+    fs::write(
+        input.join("main.c"),
+        "int main() { int x = ({ 1; }); return x; }\n",
+    )
+    .unwrap();
+
+    let output = Command::cargo_bin("cxxastgen")
+        .unwrap()
+        .arg("-out")
+        .arg(&out)
+        .arg(&input)
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    assert!(
+        stderr.contains("cxxastgen:") && stderr.contains("unmapped node(s):"),
+        "expected unmapped summary on stderr, got: {stderr:?}"
+    );
+
+    // The summary must never reach stdout or the emitted JSON document.
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        !stdout.contains("unmapped node(s)"),
+        "stdout was: {stdout:?}"
+    );
+    let document = fs::read_to_string(out.join("main.c.json")).unwrap();
+    assert!(
+        !document.contains("unmapped node(s)"),
+        "JSON document leaked the summary"
+    );
+    // The JSON is still valid.
+    let _: Value = serde_json::from_str(&document).unwrap();
+}
+
+#[test]
+fn fully_mapped_source_emits_no_unmapped_summary() {
+    let temp = tempdir().unwrap();
+    let input = temp.path().join("src");
+    let out = temp.path().join("out");
+    fs::create_dir_all(&input).unwrap();
+    fs::write(
+        input.join("main.c"),
+        "int add(int a, int b) { int total = a + b; return total; }\n",
+    )
+    .unwrap();
+
+    let output = Command::cargo_bin("cxxastgen")
+        .unwrap()
+        .arg("-out")
+        .arg(&out)
+        .arg(&input)
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    assert!(
+        !stderr.contains("unmapped node(s)"),
+        "did not expect an unmapped summary, got: {stderr:?}"
+    );
+}
+
+#[test]
 fn applies_exclude_regex() {
     let temp = tempdir().unwrap();
     let input = temp.path().join("src");

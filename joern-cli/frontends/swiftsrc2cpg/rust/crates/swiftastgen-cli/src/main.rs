@@ -2,8 +2,12 @@ use anyhow::{bail, Context, Result};
 use clap::Parser;
 use ignore::WalkBuilder;
 use regex::Regex;
+use std::io::{self, Write};
 use std::path::{Path, PathBuf};
-use swiftastgen_core::{parse_file, write_json};
+use swiftastgen_core::{parse_file, take_unsupported_node_tally, write_json};
+
+const SCALA_AST_SOURCE: &str =
+    include_str!("../../../../src/main/scala/io/joern/swiftsrc2cpg/parser/SwiftNodeSyntax.scala");
 
 #[derive(Parser, Debug)]
 #[command(name = "SwiftAstGen", disable_version_flag = true)]
@@ -38,7 +42,8 @@ fn run() -> Result<()> {
         return Ok(());
     }
     if args.scala_ast_only {
-        bail!("--scalaAstOnly is generated from upstream SwiftSyntax metadata and is not implemented by oxidized SwiftAstGen");
+        write_stdout(SCALA_AST_SOURCE)?;
+        return Ok(());
     }
 
     let out = args.out.context("missing -o <dir>")?;
@@ -56,7 +61,38 @@ fn run() -> Result<()> {
             Err(err) => println!("{} {}", file.display(), err),
         }
     }
+    report_unsupported_nodes();
     Ok(())
+}
+
+/// Emits a single stderr summary of node kinds that could not be mapped to a
+/// precise SwiftSyntax node and were degraded to a best-effort placeholder.
+/// Stays silent (and off stdout/JSON) when everything mapped cleanly so the
+/// `--scalaAstOnly` golden contract keeps an empty stderr.
+fn report_unsupported_nodes() {
+    let tally = take_unsupported_node_tally();
+    if tally.is_empty() {
+        return;
+    }
+    let total: usize = tally.iter().map(|(_, count)| count).sum();
+    let breakdown = tally
+        .iter()
+        .map(|(kind, count)| format!("{kind}(x{count})"))
+        .collect::<Vec<_>>()
+        .join(", ");
+    eprintln!("swiftastgen: {total} unsupported node(s) degraded to placeholders: {breakdown}");
+}
+
+fn write_stdout(value: &str) -> Result<()> {
+    let mut stdout = io::stdout().lock();
+    match stdout
+        .write_all(value.as_bytes())
+        .and_then(|_| stdout.flush())
+    {
+        Ok(()) => Ok(()),
+        Err(err) if err.kind() == io::ErrorKind::BrokenPipe => Ok(()),
+        Err(err) => Err(err).context("failed to write stdout"),
+    }
 }
 
 fn normalized_args() -> Vec<String> {
