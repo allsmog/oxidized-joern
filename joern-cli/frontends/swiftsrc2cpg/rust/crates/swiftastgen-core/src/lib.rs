@@ -1935,26 +1935,27 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
         // The parameters live between the parens as comma-separated groups. Each
         // group is an optional label (`simple_identifier` + `:`) followed by a
-        // type node; SwiftSyntax models each as an `EnumCaseParameterSyntax`.
-        let mut groups: Vec<Vec<Node<'a>>> = Vec::new();
+        // type node; SwiftSyntax models each as an `EnumCaseParameterSyntax`,
+        // attaching the separating comma to the group it follows.
+        let mut groups: Vec<(Vec<Node<'a>>, Option<Node<'a>>)> = Vec::new();
         let mut current: Vec<Node<'a>> = Vec::new();
         for child in children(node).filter(|child| {
             child.start_byte() >= left_paren.end_byte()
                 && child.end_byte() <= right_paren.start_byte()
         }) {
             if child.kind() == "," {
-                groups.push(std::mem::take(&mut current));
+                groups.push((std::mem::take(&mut current), Some(child)));
             } else {
                 current.push(child);
             }
         }
         if !current.is_empty() {
-            groups.push(current);
+            groups.push((current, None));
         }
 
         let mut parameters = Vec::new();
-        for group in &groups {
-            if let Some(parameter) = self.enum_case_parameter(group)? {
+        for (group, trailing_comma) in &groups {
+            if let Some(parameter) = self.enum_case_parameter(group, *trailing_comma)? {
                 let index = parameters.len();
                 parameters.push(self.with_name_and_index(parameter, "", index));
             }
@@ -1981,7 +1982,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     /// Build a single `EnumCaseParameterSyntax` from one comma-separated group
     /// of `enum_type_parameters` children (an optional label `firstName`/`colon`
     /// followed by the `type`). Returns `None` when the group carries no type.
-    fn enum_case_parameter(&self, group: &[Node<'a>]) -> Result<Option<Value>> {
+    fn enum_case_parameter(
+        &self,
+        group: &[Node<'a>],
+        trailing_comma: Option<Node<'a>>,
+    ) -> Result<Option<Value>> {
         let Some(type_node) = group
             .iter()
             .copied()
@@ -1996,7 +2001,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let colon = group.iter().copied().find(|child| child.kind() == ":");
 
         let start = first_name.map_or_else(|| type_node.start_byte(), |name| name.start_byte());
-        let end = type_node.end_byte();
+        let end = trailing_comma.map_or_else(|| type_node.end_byte(), |comma| comma.end_byte());
 
         let mut children = vec![self.with_name(
             self.empty_collection("DeclModifierListSyntax", start),
@@ -2010,6 +2015,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
         }
         children.push(self.with_name(self.type_syntax(type_node)?, "type"));
+        if let Some(comma) = trailing_comma {
+            children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+        }
 
         Ok(Some(self.syntax_node(
             "EnumCaseParameterSyntax",
@@ -2512,14 +2520,25 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn modifier_list(&self, node: Node<'a>) -> Value {
-        let mut modifiers = Vec::new();
+        let mut modifier_nodes: Vec<Node<'a>> = Vec::new();
         for modifier_container in named_children(node).filter(|child| child.kind() == "modifiers") {
             for modifier in
                 named_children(modifier_container).filter(|child| child.kind() != "attribute")
             {
-                modifiers.push(self.with_name(self.decl_modifier(modifier), ""));
+                modifier_nodes.push(modifier);
             }
         }
+        // `indirect` on an enum declaration is a direct keyword child rather than
+        // being wrapped in a `modifiers` container, but SwiftSyntax still models it
+        // as a DeclModifier.
+        if let Some(indirect) = self.immediate_child_kind(node, "indirect") {
+            modifier_nodes.push(indirect);
+        }
+        modifier_nodes.sort_by_key(|modifier| modifier.start_byte());
+        let modifiers: Vec<Value> = modifier_nodes
+            .iter()
+            .map(|modifier| self.with_name(self.decl_modifier(*modifier), ""))
+            .collect();
         let range = self.covering_range_or_point(&modifiers, node.start_byte());
         self.syntax_node("DeclModifierListSyntax", range, modifiers)
     }
@@ -15238,6 +15257,32 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(infix, "rightOperand").unwrap()["nodeType"],
             "DeclReferenceExprSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_enum_indirect_modifier_and_associated_value_commas() {
+        let source = "indirect enum Tree {\n  case node(Int, Int)\n}\n";
+        let value = parse_source("Enum.swift", "/tmp/Enum.swift", source).unwrap();
+
+        // `indirect` (a direct keyword child, not inside a `modifiers` container) is
+        // emitted as a DeclModifier on the enum.
+        let enum_decl = find_first_node_type(&value, "EnumDeclSyntax").unwrap();
+        let modifier = &child_by_name(enum_decl, "modifiers").unwrap()["children"][0];
+        assert_eq!(modifier["nodeType"], "DeclModifierSyntax");
+        assert_eq!(
+            child_by_name(modifier, "name").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.indirect)"
+        );
+
+        // The first associated-value parameter's range includes its trailing comma.
+        let clause = find_first_node_type(&value, "EnumCaseParameterClauseSyntax").unwrap();
+        let first = &child_by_name(clause, "parameters").unwrap()["children"][0];
+        assert_eq!(first["nodeType"], "EnumCaseParameterSyntax");
+        assert_eq!(source_text(source, first), "Int,");
+        assert_eq!(
+            child_by_name(first, "trailingComma").unwrap()["tokenKind"],
+            "comma"
         );
     }
 
