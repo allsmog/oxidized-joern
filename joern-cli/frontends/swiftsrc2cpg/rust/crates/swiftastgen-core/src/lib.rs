@@ -1413,13 +1413,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "operatorKeyword",
             ),
             self.with_name(
+                // An operator declaration always names the operator with a
+                // `binaryOperator` token, regardless of the declared fixity.
                 self.token_for_node(
                     name,
-                    &format!(
-                        "{}({})",
-                        operator_token_kind(fixity.kind()),
-                        quoted_text(self.text(name))
-                    ),
+                    &format!("binaryOperator({})", quoted_text(self.text(name))),
                 ),
                 "name",
             ),
@@ -15467,14 +15465,6 @@ fn is_identifier_byte(byte: u8) -> bool {
     byte == b'_' || byte.is_ascii_alphanumeric()
 }
 
-fn operator_token_kind(fixity: &str) -> &'static str {
-    match fixity {
-        "prefix" => "prefixOperator",
-        "postfix" => "postfixOperator",
-        _ => "binaryOperator",
-    }
-}
-
 fn quoted_text(text: &str) -> String {
     serde_json::to_string(text).expect("serializing a string cannot fail")
 }
@@ -16506,6 +16496,24 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(pattern_expr, "pattern").unwrap()["nodeType"],
             "ValueBindingPatternSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_operator_declaration_names_as_binary_operator() {
+        // Operator declarations always name the operator with a binaryOperator token,
+        // regardless of prefix/postfix/infix fixity.
+        let source = "prefix operator !!!\npostfix operator ^^^\n";
+        let value = parse_source("Op.swift", "/tmp/Op.swift", source).unwrap();
+
+        let names: Vec<String> = find_node_types(&value, "OperatorDeclSyntax")
+            .iter()
+            .filter_map(|op| child_by_name(op, "name").and_then(|n| n["tokenKind"].as_str()))
+            .map(str::to_string)
+            .collect();
+        assert_eq!(
+            names,
+            vec!["binaryOperator(\"!!!\")", "binaryOperator(\"^^^\")"]
         );
     }
 
@@ -17826,14 +17834,14 @@ prefix operator /^/
             .iter()
             .map(|node| node["children"][2]["tokenKind"].as_str().unwrap())
             .collect::<Vec<_>>();
+        // Operator declarations always name the operator with a binaryOperator token.
         assert!(token_kinds.contains(&"binaryOperator(\"*-*\")"));
         assert!(token_kinds.contains(&"binaryOperator(\"<*<<<\")"));
-        assert!(token_kinds.contains(&"prefixOperator(\"^^\")"));
+        assert!(token_kinds.contains(&"binaryOperator(\"^^\")"));
         assert!(token_kinds.contains(&"binaryOperator(\"<*<\")"));
-        assert!(token_kinds.contains(&"postfixOperator(\"^^\")"));
         assert!(token_kinds.contains(&"binaryOperator(\"*<*<\")"));
         assert!(token_kinds.contains(&"binaryOperator(\"|||\")"));
-        assert!(token_kinds.contains(&"prefixOperator(\"/^/\")"));
+        assert!(token_kinds.contains(&"binaryOperator(\"/^/\")"));
 
         assert!(operators.iter().any(|node| {
             node["children"]
@@ -19853,7 +19861,7 @@ _ = bar(/E.e) / 2
         let operator = find_first_node_type(&value, "OperatorDeclSyntax").unwrap();
         assert_eq!(
             child_by_name(operator, "name").unwrap()["tokenKind"],
-            "prefixOperator(\"/\")"
+            "binaryOperator(\"/\")"
         );
 
         let prefixes = find_node_types(&value, "PrefixOperatorExprSyntax");
