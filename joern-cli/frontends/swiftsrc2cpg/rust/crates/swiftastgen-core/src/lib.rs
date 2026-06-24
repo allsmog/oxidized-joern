@@ -11244,15 +11244,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let sequence = self
             .field_child(node, "collection")
             .context("for statement is missing collection expression")?;
-        let body_statements = named_children(node)
-            .find(|child| child.kind() == "statements")
-            .context("for statement is missing body statements")?;
-        let left_brace = self
-            .nearest_child_before(node, "{", body_statements.start_byte())
-            .context("for statement body is missing '{'")?;
-        let right_brace = self
-            .nearest_child_after(node, "}", body_statements.end_byte())
-            .context("for statement body is missing '}'")?;
+        // An empty for-body (`for x in xs {}`) has no `statements` child.
+        let body_statements = named_children(node).find(|child| child.kind() == "statements");
+        let left_brace = match body_statements {
+            Some(statements) => self.nearest_child_before(node, "{", statements.start_byte()),
+            None => self.nearest_child_after(node, "{", sequence.end_byte()),
+        }
+        .context("for statement body is missing '{'")?;
+        let right_brace = match body_statements {
+            Some(statements) => self.nearest_child_after(node, "}", statements.end_byte()),
+            None => children(node)
+                .filter(|child| child.kind() == "}" && child.start_byte() >= left_brace.end_byte())
+                .last(),
+        }
+        .context("for statement body is missing '}'")?;
 
         let mut children = vec![
             self.with_name(
@@ -11270,7 +11275,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             children.push(self.with_name(self.where_clause(where_clause)?, "whereClause"));
         }
         children.push(self.with_name(
-            self.code_block_from_statements(Some(body_statements), left_brace, right_brace)?,
+            self.code_block_from_statements(body_statements, left_brace, right_brace)?,
             "body",
         ));
 
@@ -15939,6 +15944,21 @@ repeat { sink() } while x < 1
             .as_u64()
             .unwrap();
         assert!(atc["range"]["startOffset"].as_u64().unwrap() > right_paren_end);
+    }
+
+    #[test]
+    fn emits_for_statement_with_empty_body_without_bailing() {
+        // `for _ in 0..<n {}` has no `statements` child; it must emit an empty
+        // CodeBlockItemListSyntax rather than bailing the file.
+        let source = "func f(_ n: Int) {\n  for _ in 0..<n {}\n}\n";
+        let value = parse_source("EmptyFor.swift", "/tmp/EmptyFor.swift", source).unwrap();
+
+        let for_stmt = find_first_node_type(&value, "ForStmtSyntax").unwrap();
+        let body = child_by_name(for_stmt, "body").unwrap();
+        assert_eq!(body["nodeType"], "CodeBlockSyntax");
+        let statements = child_by_name(body, "statements").unwrap();
+        assert_eq!(statements["nodeType"], "CodeBlockItemListSyntax");
+        assert!(statements["children"].as_array().unwrap().is_empty());
     }
 
     #[test]
