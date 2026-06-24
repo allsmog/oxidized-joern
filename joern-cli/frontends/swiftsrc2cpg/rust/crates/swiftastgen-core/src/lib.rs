@@ -10654,7 +10654,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "catchKeyword",
                 ),
                 self.with_name(
-                    self.catch_item_list_from_block(node, catch_keyword.end_byte())?,
+                    self.catch_item_list_from_block(
+                        node,
+                        // An empty catch-item list anchors after the catch keyword's
+                        // same-line trailing trivia (at the `{`), not right after the
+                        // keyword.
+                        self.skip_horizontal_whitespace(
+                            catch_keyword.end_byte(),
+                            self.source.len(),
+                        ),
+                    )?,
                     "catchItems",
                 ),
                 self.with_name(
@@ -10666,18 +10675,41 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn catch_item_list_from_block(&self, node: Node<'a>, fallback_offset: usize) -> Result<Value> {
-        let Some(where_clause_node) = self.immediate_named_child_kind(node, "where_clause") else {
+        // A catch clause may carry a pattern (`catch SomeError.case`), a where
+        // clause (`catch where …`), both, or neither (the catch-all `catch { }`).
+        let pattern_node = self.immediate_named_child_kind(node, "pattern");
+        let where_clause_node = self.immediate_named_child_kind(node, "where_clause");
+        if pattern_node.is_none() && where_clause_node.is_none() {
             return Ok(self.empty_collection("CatchItemListSyntax", fallback_offset));
-        };
-        let where_clause = self.where_clause(where_clause_node)?;
+        }
+
+        let mut item_children = Vec::new();
+        let mut item_start = None;
+        let mut item_end = None;
+        if let Some(pattern_node) = pattern_node {
+            let pattern = self
+                .synthetic_pattern_from_offsets(pattern_node.start_byte(), pattern_node.end_byte());
+            item_start = Some(pattern_node.start_byte());
+            item_end = Some(pattern_node.end_byte());
+            item_children.push(self.with_name(pattern, "pattern"));
+        }
+        if let Some(where_clause_node) = where_clause_node {
+            let where_clause = self.where_clause(where_clause_node)?;
+            item_start.get_or_insert(where_clause_node.start_byte());
+            item_end = Some(where_clause_node.end_byte());
+            item_children.push(self.with_name(where_clause, "whereClause"));
+        }
+
+        let start = item_start.unwrap_or(fallback_offset);
+        let end = item_end.unwrap_or(fallback_offset);
         let catch_item = self.syntax_node(
             "CatchItemSyntax",
-            self.range_for_node(where_clause_node),
-            vec![self.with_name(where_clause, "whereClause")],
+            self.range_from_offsets(start, end),
+            item_children,
         );
         Ok(self.syntax_node(
             "CatchItemListSyntax",
-            self.range_for_node(where_clause_node),
+            self.range_from_offsets(start, end),
             vec![self.with_name(catch_item, "")],
         ))
     }
@@ -15392,6 +15424,27 @@ repeat { sink() } while x < 1
         );
         // effectSpecifiers precedes the return clause.
         assert!(child_by_name(signature, "returnClause").is_some());
+    }
+
+    #[test]
+    fn emits_catch_clause_pattern_and_empty_catch_all() {
+        let source = "func run() {\n  do {\n    try f()\n  } catch E.timeout {\n    a()\n  } catch {\n    b()\n  }\n}\n";
+        let value = parse_source("Catch.swift", "/tmp/Catch.swift", source).unwrap();
+
+        let catches = find_node_types(&value, "CatchClauseSyntax");
+        assert_eq!(catches.len(), 2);
+
+        // The first catch carries an expression pattern (`E.timeout`).
+        let item0 = &child_by_name(catches[0], "catchItems").unwrap()["children"][0];
+        assert_eq!(item0["nodeType"], "CatchItemSyntax");
+        let pat = child_by_name(item0, "pattern").unwrap();
+        assert_eq!(pat["nodeType"], "ExpressionPatternSyntax");
+        assert_eq!(source_text(source, pat), "E.timeout");
+
+        // The catch-all has an empty catch-item list.
+        let items1 = child_by_name(catches[1], "catchItems").unwrap();
+        assert_eq!(items1["nodeType"], "CatchItemListSyntax");
+        assert!(items1["children"].as_array().unwrap().is_empty());
     }
 
     #[test]
