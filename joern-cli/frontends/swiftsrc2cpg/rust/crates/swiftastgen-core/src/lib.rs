@@ -1922,6 +1922,34 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let right_paren = self
             .immediate_child_kind(node, ")")
             .context("enum case parameter clause is missing ')'")?;
+
+        // The parameters live between the parens as comma-separated groups. Each
+        // group is an optional label (`simple_identifier` + `:`) followed by a
+        // type node; SwiftSyntax models each as an `EnumCaseParameterSyntax`.
+        let mut groups: Vec<Vec<Node<'a>>> = Vec::new();
+        let mut current: Vec<Node<'a>> = Vec::new();
+        for child in children(node).filter(|child| {
+            child.start_byte() >= left_paren.end_byte()
+                && child.end_byte() <= right_paren.start_byte()
+        }) {
+            if child.kind() == "," {
+                groups.push(std::mem::take(&mut current));
+            } else {
+                current.push(child);
+            }
+        }
+        if !current.is_empty() {
+            groups.push(current);
+        }
+
+        let mut parameters = Vec::new();
+        for group in &groups {
+            if let Some(parameter) = self.enum_case_parameter(group)? {
+                let index = parameters.len();
+                parameters.push(self.with_name_and_index(parameter, "", index));
+            }
+        }
+
         Ok(self.syntax_node(
             "EnumCaseParameterClauseSyntax",
             self.range_for_node(node),
@@ -1931,13 +1959,53 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     self.syntax_node(
                         "EnumCaseParameterListSyntax",
                         self.range_from_offsets(left_paren.end_byte(), right_paren.start_byte()),
-                        Vec::new(),
+                        parameters,
                     ),
                     "parameters",
                 ),
                 self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
             ],
         ))
+    }
+
+    /// Build a single `EnumCaseParameterSyntax` from one comma-separated group
+    /// of `enum_type_parameters` children (an optional label `firstName`/`colon`
+    /// followed by the `type`). Returns `None` when the group carries no type.
+    fn enum_case_parameter(&self, group: &[Node<'a>]) -> Result<Option<Value>> {
+        let Some(type_node) = group
+            .iter()
+            .copied()
+            .find(|child| is_type_syntax_node_kind(child.kind()))
+        else {
+            return Ok(None);
+        };
+        let first_name = group
+            .iter()
+            .copied()
+            .find(|child| child.kind() == "simple_identifier");
+        let colon = group.iter().copied().find(|child| child.kind() == ":");
+
+        let start = first_name.map_or_else(|| type_node.start_byte(), |name| name.start_byte());
+        let end = type_node.end_byte();
+
+        let mut children = vec![self.with_name(
+            self.empty_collection("DeclModifierListSyntax", start),
+            "modifiers",
+        )];
+        if let Some(first_name) = first_name {
+            children
+                .push(self.with_name(self.identifier_or_wildcard_token(first_name), "firstName"));
+            if let Some(colon) = colon {
+                children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
+            }
+        }
+        children.push(self.with_name(self.type_syntax(type_node)?, "type"));
+
+        Ok(Some(self.syntax_node(
+            "EnumCaseParameterSyntax",
+            self.range_from_offsets(start, end),
+            children,
+        )))
     }
 
     fn associated_type_decl(&self, node: Node<'a>) -> Result<Value> {
