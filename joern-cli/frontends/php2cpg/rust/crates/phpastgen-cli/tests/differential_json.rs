@@ -5,14 +5,22 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-/// Differential test against a reference PHP-Parser binary.
+/// Differential test against the reference PHP parser.
 ///
-/// This mirrors the gosrc2cpg `differential_json` harness but adapts to the
-/// phpastgen CLI, which emits each file's JSON tree to stdout (prefixed by a
-/// `==> JSON dump:` header) rather than to an `-out` directory. The test
-/// self-skips unless `PHPASTGEN_REFERENCE` points at a reference binary that
-/// accepts a single PHP file argument and prints the same dump format, so it is
-/// safe to run in CI without a reference present.
+/// Reference source + runtime: the upstream reference is `joernio/PHP-Parser`
+/// (a fork of nikic/PHP-Parser), shipped as the `php-parser.phar` archive that
+/// `php2cpg`'s `build.sbt` downloads from
+/// `github.com/joernio/PHP-Parser/releases` (`Versions.phpParser`). It is *not*
+/// a standalone binary: a `.phar`/`.php` reference is executed through the
+/// system `php` interpreter (see `PhpParser.scala`'s `phpParseCommand`), so this
+/// test needs a PHP runtime on `PATH` when pointed at one. `PHPASTGEN_REFERENCE`
+/// may instead point at a native `phpastgen`-shaped binary (no `php` needed).
+///
+/// Both reference and the freshly built `phpastgen` are invoked with PHP-Parser's
+/// flags (`--with-recovery --resolve-names --json-dump`) over each corpus file,
+/// and emit the JSON tree to stdout under a `==> JSON dump:` header rather than
+/// to an `-out` directory. The test self-skips unless `PHPASTGEN_REFERENCE` is
+/// set, so it is safe to run in CI without a reference present.
 #[test]
 fn rust_json_matches_reference_when_configured() {
     let Some(reference) = configured_reference_binary() else {
@@ -36,7 +44,7 @@ fn rust_json_matches_reference_when_configured() {
     for fixture in fixtures {
         let fixture = fixture.canonicalize().unwrap_or(fixture);
 
-        let reference_json = match run_and_read(Command::new(&reference), &fixture, &fixture) {
+        let reference_json = match run_and_read(reference_command(&reference), &fixture, &fixture) {
             Ok(value) => value,
             Err(err) => {
                 failures.push(format!("{}: reference failed\n{err}", display(&fixture)));
@@ -65,6 +73,24 @@ fn rust_json_matches_reference_when_configured() {
 
 fn configured_reference_binary() -> Option<PathBuf> {
     env::var_os("PHPASTGEN_REFERENCE").map(PathBuf::from)
+}
+
+/// Builds the reference invocation. PHP-Parser ships as a `.phar`/`.php` archive
+/// that must run under the system `php` interpreter; a native binary is invoked
+/// directly. This mirrors `PhpParser.scala`'s `isNativeParserPath` /
+/// `phpParseCommand` selection. PHP-Parser's flags are added by `run_and_read`.
+fn reference_command(reference: &Path) -> Command {
+    let is_phar = reference
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("php") || ext.eq_ignore_ascii_case("phar"));
+    if is_phar {
+        let mut command = Command::new(env::var_os("PHP_BIN").unwrap_or_else(|| "php".into()));
+        command.arg(reference);
+        command
+    } else {
+        Command::new(reference)
+    }
 }
 
 /// The freshly built phpastgen binary. Cargo exposes its path to integration
@@ -136,10 +162,16 @@ fn collect_php_files(root: &Path, out: &mut Vec<PathBuf>) {
     out.sort();
 }
 
-/// Runs `command` over `fixture`, returning the normalized JSON tree parsed from
-/// the CLI's `==> JSON dump:` stdout section.
+/// PHP-Parser CLI flags. `phpastgen` ignores `--`-prefixed args (see
+/// `source_files`), so the same flag set keeps the reference and Rust
+/// invocations symmetric.
+const PHP_PARSER_FLAGS: &[&str] = &["--with-recovery", "--resolve-names", "--json-dump"];
+
+/// Runs `command` over `fixture` with PHP-Parser's flags, returning the
+/// normalized JSON tree parsed from the CLI's `==> JSON dump:` stdout section.
 fn run_and_read(mut command: Command, fixture: &Path, input_root: &Path) -> Result<Value, String> {
     let output = command
+        .args(PHP_PARSER_FLAGS)
         .arg(fixture)
         .output()
         .map_err(|err| err.to_string())?;
@@ -157,13 +189,22 @@ fn run_and_read(mut command: Command, fixture: &Path, input_root: &Path) -> Resu
 }
 
 /// Extracts and parses the JSON array following the `==> JSON dump:` marker.
+///
+/// PHP-Parser may print a trailer (or further `====> File …` blocks) after the
+/// array, so a streaming deserializer reads just the first JSON value and
+/// tolerates trailing content instead of requiring the body to be pure JSON.
 fn parse_json_dump(stdout: &str) -> Result<Value, String> {
     const MARKER: &str = "==> JSON dump:";
     let body = stdout
         .split_once(MARKER)
         .map(|(_, rest)| rest.trim_start())
         .ok_or_else(|| format!("missing `{MARKER}` marker in stdout:\n{stdout}"))?;
-    serde_json::from_str(body).map_err(|err| format!("decoding JSON dump: {err}\nbody:\n{body}"))
+    let mut stream = serde_json::Deserializer::from_str(body).into_iter::<Value>();
+    match stream.next() {
+        Some(Ok(value)) => Ok(value),
+        Some(Err(err)) => Err(format!("decoding JSON dump: {err}\nbody:\n{body}")),
+        None => Err(format!("empty JSON dump after marker\nbody:\n{body}")),
+    }
 }
 
 /// Normalizes volatile fields: absolute paths are replaced with `$INPUT` and

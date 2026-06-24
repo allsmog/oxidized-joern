@@ -1,11 +1,18 @@
 //! Differential JSON comparison against a reference `pyastgen` implementation.
 //!
-//! This test is gated: it only runs when `PYASTGEN_REFERENCE` points at a
-//! reference binary. When unset it self-skips so the default `cargo test` run
-//! stays green. When set, it runs both the reference and the Rust CLI over a
-//! fixture directory, normalizes volatile fields (absolute paths, version), and
-//! asserts JSON equality with a readable first-diff. Modeled on the gosrc2cpg
-//! `differential_json.rs` harness.
+//! Reference source + runtime: `pysrc2cpg`'s production parser is the *in-tree*
+//! JavaCC grammar (`pythonGrammar.jj`, generated into `io.joern.pythonparser`)
+//! driven from the JVM frontend (see `PyAstGenRunner.scala`). There is therefore
+//! NO standalone reference binary to diff against by default — the reference is
+//! library code that runs inside the Scala/JVM process, not a CLI. Consequently
+//! this test is gated and self-skipping: it only runs when `PYASTGEN_REFERENCE`
+//! points at a reference CLI that honours the same `-out <dir> <input>`
+//! interface the oxidized `pyastgen` exposes (e.g. a previously built `pyastgen`
+//! revision). When unset it self-skips so the default `cargo test` run stays
+//! green. When set, it runs both the reference and the Rust CLI over the on-disk
+//! fixture corpus (`fixtures/py-corpus/<feature>/`), normalizes volatile fields
+//! (absolute paths, version), and asserts JSON equality with a readable
+//! first-diff. Modeled on the gosrc2cpg `differential_json.rs` harness.
 
 use assert_cmd::Command;
 use serde_json::Value;
@@ -15,27 +22,6 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command as StdCommand;
 use tempfile::tempdir;
-
-/// Inline corpus written to a temp dir for the differential run. Mirrors the
-/// breadth of the coverage gate so the comparison is meaningful.
-const DIFFERENTIAL_FIXTURES: &[(&str, &str)] = &[
-    (
-        "functions.py",
-        "@decorator\ndef f(a, b=1, *args, c, **kwargs) -> int:\n    return a + b\n\n\nasync def g(x):\n    return await h(x)\n",
-    ),
-    (
-        "classes.py",
-        "class C[T]:\n    field: int = 0\n\n    def method(self, value: T) -> T:\n        return value\n",
-    ),
-    (
-        "patterns.py",
-        "def m(cmd):\n    match cmd:\n        case [a, *rest]:\n            return a, rest\n        case {\"k\": v}:\n            return v\n        case _:\n            return None\n",
-    ),
-    (
-        "expressions.py",
-        "def e(xs):\n    total = [x for x in xs if x > 0]\n    if (n := len(total)) > 0:\n        return f\"{n} items\"\n    return None\n",
-    ),
-];
 
 #[test]
 fn rust_json_matches_reference_when_configured() {
@@ -49,32 +35,118 @@ fn rust_json_matches_reference_when_configured() {
         reference.display()
     );
 
-    let corpus = tempdir().expect("creating corpus dir");
-    for (name, source) in DIFFERENTIAL_FIXTURES {
-        fs::write(corpus.path().join(name), source).expect("writing fixture");
+    let corpus_root = fixture_root();
+    let corpus_dirs = configured_corpus_dirs(&corpus_root);
+    assert!(
+        !corpus_dirs.is_empty(),
+        "no fixture corpus directories under {}",
+        corpus_root.display()
+    );
+
+    let mut failures = Vec::new();
+    for corpus_dir in corpus_dirs {
+        let corpus_dir = corpus_dir
+            .canonicalize()
+            .unwrap_or_else(|_| corpus_dir.to_path_buf());
+        let tmp = tempdir().expect("creating temp dir");
+        let reference_out = tmp.path().join("reference");
+        let rust_out = tmp.path().join("rust");
+
+        if let Err(err) = run_reference(&reference, &corpus_dir, &reference_out) {
+            failures.push(format!("{}: reference failed\n{err}", display(&corpus_dir)));
+            continue;
+        }
+        if let Err(err) = run_rust(&corpus_dir, &rust_out) {
+            failures.push(format!("{}: rust failed\n{err}", display(&corpus_dir)));
+            continue;
+        }
+
+        let reference_json = match read_json_tree(&reference_out, &corpus_dir) {
+            Ok(value) => value,
+            Err(err) => {
+                failures.push(format!(
+                    "{}: reading reference\n{err}",
+                    display(&corpus_dir)
+                ));
+                continue;
+            }
+        };
+        let rust_json = match read_json_tree(&rust_out, &corpus_dir) {
+            Ok(value) => value,
+            Err(err) => {
+                failures.push(format!("{}: reading rust\n{err}", display(&corpus_dir)));
+                continue;
+            }
+        };
+
+        if let Some(diff) = format_json_diff(&reference_json, &rust_json) {
+            failures.push(format!("{}: {diff}", display(&corpus_dir)));
+        }
     }
-    let corpus_dir = corpus
-        .path()
-        .canonicalize()
-        .unwrap_or_else(|_| corpus.path().to_path_buf());
 
-    let tmp = tempdir().expect("creating temp dir");
-    let reference_out = tmp.path().join("reference");
-    let rust_out = tmp.path().join("rust");
-
-    run_reference(&reference, &corpus_dir, &reference_out).expect("reference run failed");
-    run_rust(&corpus_dir, &rust_out).expect("rust run failed");
-
-    let reference_json = read_json_tree(&reference_out, &corpus_dir).expect("reading reference");
-    let rust_json = read_json_tree(&rust_out, &corpus_dir).expect("reading rust");
-
-    if let Some(diff) = format_json_diff(&reference_json, &rust_json) {
-        panic!("differential JSON mismatch:\n\n{diff}");
-    }
+    assert!(
+        failures.is_empty(),
+        "differential JSON mismatches:\n\n{}",
+        failures.join("\n\n")
+    );
 }
 
 fn configured_reference_binary() -> Option<PathBuf> {
     env::var_os("PYASTGEN_REFERENCE").map(PathBuf::from)
+}
+
+/// Locates `fixtures/py-corpus` relative to the crate (compiled or via cwd).
+fn fixture_root() -> PathBuf {
+    let manifest = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    if manifest.join("src/main.rs").is_file() {
+        return manifest.join("../../fixtures/py-corpus");
+    }
+
+    let cwd = env::current_dir().expect("reading current dir");
+    for candidate in [cwd.join("crates/pyastgen-cli"), cwd] {
+        if candidate.join("src/main.rs").is_file() {
+            return candidate.join("../../fixtures/py-corpus");
+        }
+    }
+    manifest.join("../../fixtures/py-corpus")
+}
+
+/// Per-feature corpus directories, plus an optional `PYASTGEN_REAL_CORPUS`
+/// path-list override (matching the Go corpus env) for diffing larger trees.
+fn configured_corpus_dirs(fixture_root: &Path) -> Vec<PathBuf> {
+    let mut dirs = immediate_child_dirs(fixture_root);
+    if let Some(real_corpus) = env::var_os("PYASTGEN_REAL_CORPUS") {
+        let mut real_dirs = env::split_paths(&real_corpus)
+            .inspect(|path| {
+                assert!(
+                    path.is_dir(),
+                    "PYASTGEN_REAL_CORPUS entry is not a directory: {}",
+                    path.display()
+                );
+            })
+            .collect::<Vec<_>>();
+        real_dirs.sort();
+        dirs.extend(real_dirs);
+    }
+    dirs
+}
+
+fn immediate_child_dirs(root: &Path) -> Vec<PathBuf> {
+    let mut dirs = fs::read_dir(root)
+        .unwrap_or_else(|err| panic!("reading {}: {err}", root.display()))
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .filter(|path| path.is_dir())
+        .collect::<Vec<_>>();
+    dirs.sort();
+    dirs
+}
+
+fn display(path: &Path) -> String {
+    path.file_name()
+        .unwrap_or_else(|| std::ffi::OsStr::new("<unknown>"))
+        .to_string_lossy()
+        .into_owned()
 }
 
 fn run_reference(reference: &Path, input: &Path, out: &Path) -> Result<(), String> {

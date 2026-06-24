@@ -1,102 +1,32 @@
 use assert_cmd::Command;
+use std::env;
 use std::fs;
-use tempfile::tempdir;
+use std::path::PathBuf;
 
-/// PHP fixture exercising the common constructs the lowering passes must map.
+/// PHP fixture corpus exercising the common constructs the lowering passes must
+/// map: classes/interfaces, traits with adaptations, namespaces, `match`, and
+/// heredocs (see `fixtures/php-corpus/<feature>/`).
 ///
-/// Every construct here must lower without leaving an unmapped tree-sitter node,
-/// so the `phpastgen: N unmapped node(s): …` stderr summary acts as a coverage
-/// gate. Adding a construct that the core cannot yet map will fail this test with
-/// the offending kinds, prompting either Scala/Rust handling or a fixture change.
-const COVERAGE_FIXTURE: &str = r#"<?php
-
-namespace App\Demo;
-
-use App\Other\Helper;
-
-interface Greeter
-{
-    public function greet(string $name): string;
-}
-
-trait Loud
-{
-    public function shout(): string
-    {
-        return "LOUD";
-    }
-}
-
-trait Quiet
-{
-    public function shout(): string
-    {
-        return "quiet";
-    }
-
-    public function whisper(): string
-    {
-        return "...";
-    }
-}
-
-class Service implements Greeter
-{
-    use Loud, Quiet {
-        Loud::shout insteadof Quiet;
-        Quiet::shout as protected murmur;
-    }
-
-    const VERSION = "1.0";
-
-    public function greet(string $name): string
-    {
-        $where = __CLASS__;
-        $line = __LINE__;
-        $message = <<<TEXT
-Hello $name from {$where} at line $line
-TEXT;
-        return $message;
-    }
-}
-
-function run(?Service $service): string
-{
-    if ($service === null) {
-        return "none";
-    } else {
-        $names = ["a", "b", "c"];
-        foreach ($names as $name) {
-            $service->greet($name);
-        }
-        $kind = match (count($names)) {
-            0 => "empty",
-            default => "many",
-        };
-        $callback = function (string $value): string {
-            return strtoupper($value);
-        };
-        try {
-            $maybe = $service?->greet("x");
-            return $callback($maybe ?? $kind);
-        } catch (\Throwable $error) {
-            return $error->getMessage();
-        }
-    }
-}
-
-__halt_compiler();
-"#;
-
+/// Every construct in the corpus must lower without leaving an unmapped
+/// tree-sitter node, so the `phpastgen: N unmapped node(s): …` stderr summary
+/// acts as a coverage gate. Adding a construct that the core cannot yet map will
+/// fail this test with the offending kinds, prompting either Scala/Rust handling
+/// or a fixture change. The same corpus backs the differential parity harness in
+/// `differential_json.rs`.
 #[test]
-fn coverage_fixture_lowers_with_zero_unmapped_nodes() {
-    let dir = tempdir().expect("creating temp dir");
-    let fixture = dir.path().join("coverage.php");
-    fs::write(&fixture, COVERAGE_FIXTURE).expect("writing fixture");
+fn corpus_lowers_with_zero_unmapped_nodes() {
+    let root = fixture_root();
+    assert!(
+        root.is_dir(),
+        "missing PHP fixture corpus at {}",
+        root.display()
+    );
 
+    // Run the CLI over the whole corpus directory in one shot so a single run
+    // drains every fixture's unmapped-node tally.
     let assert = Command::cargo_bin("phpastgen")
         .expect("locating phpastgen binary")
-        .arg(&fixture)
+        .arg(&root)
         .assert()
         .success();
 
@@ -105,12 +35,12 @@ fn coverage_fixture_lowers_with_zero_unmapped_nodes() {
 
     if let Some(summary) = unmapped_summary_line(&stderr) {
         panic!(
-            "coverage fixture produced unmapped tree-sitter nodes; the corpus is a coverage \
-             gate, so either map these kinds or update the fixture.\n{summary}\nfull stderr:\n{stderr}"
+            "PHP corpus produced unmapped tree-sitter nodes; the corpus is a coverage \
+             gate, so either map these kinds or update the fixtures.\n{summary}\nfull stderr:\n{stderr}"
         );
     }
 
-    // Sanity check: the CLI must have emitted a JSON dump for the fixture.
+    // Sanity check: the CLI must have emitted a JSON dump for the corpus.
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(
         stdout.contains("==> JSON dump:"),
@@ -118,9 +48,52 @@ fn coverage_fixture_lowers_with_zero_unmapped_nodes() {
     );
 }
 
+/// Locates `fixtures/php-corpus` relative to the crate, matching the layout that
+/// `differential_json.rs` consumes.
+fn fixture_root() -> PathBuf {
+    let manifest = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    if manifest.join("src/main.rs").is_file() {
+        return manifest.join("../../fixtures/php-corpus");
+    }
+
+    let cwd = env::current_dir().expect("reading current dir");
+    for candidate in [cwd.join("crates/phpastgen-cli"), cwd] {
+        if candidate.join("src/main.rs").is_file() {
+            return candidate.join("../../fixtures/php-corpus");
+        }
+    }
+    manifest.join("../../fixtures/php-corpus")
+}
+
 /// Returns the `phpastgen: … unmapped node(s): …` summary line if present.
 fn unmapped_summary_line(stderr: &str) -> Option<&str> {
     stderr
         .lines()
         .find(|line| line.starts_with("phpastgen:") && line.contains("unmapped node(s)"))
+}
+
+/// Guards the corpus invariant that a meaningful set of feature directories
+/// exists, so the coverage gate cannot silently degrade to an empty corpus.
+#[test]
+fn corpus_has_expected_feature_dirs() {
+    let root = fixture_root();
+    for feature in ["classes", "traits", "namespaces", "match_expr", "heredoc"] {
+        let dir = root.join(feature);
+        assert!(
+            dir.is_dir(),
+            "expected PHP corpus feature dir {}",
+            dir.display()
+        );
+        let has_php = fs::read_dir(&dir)
+            .unwrap_or_else(|err| panic!("reading {}: {err}", dir.display()))
+            .filter_map(Result::ok)
+            .any(|entry| {
+                entry
+                    .path()
+                    .extension()
+                    .and_then(|ext| ext.to_str())
+                    .is_some_and(|ext| ext.eq_ignore_ascii_case("php"))
+            });
+        assert!(has_php, "no .php files under {}", dir.display());
+    }
 }
