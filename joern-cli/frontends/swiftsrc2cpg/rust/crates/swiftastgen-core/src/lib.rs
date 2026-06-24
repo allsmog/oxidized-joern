@@ -2066,6 +2066,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "initializer",
             ));
         }
+        if let Some(type_constraints) = self.immediate_named_child_kind(node, "type_constraints") {
+            if let Some(clause) = self.generic_where_clause(type_constraints)? {
+                decl_children.push(self.with_name(clause, "genericWhereClause"));
+            }
+        }
 
         Ok(self.syntax_node(
             "AssociatedTypeDeclSyntax",
@@ -16569,6 +16574,21 @@ repeat { sink() } while x < 1
             )
             .unwrap()["tokenKind"],
             "identifier(\"escaping\")"
+        );
+    }
+
+    #[test]
+    fn emits_associatedtype_generic_where_clause() {
+        // `associatedtype Item where Item: Equatable` keeps its where clause.
+        let source = "protocol P {\n  associatedtype Item where Item: Equatable\n}\n";
+        let value = parse_source("AT.swift", "/tmp/AT.swift", source).unwrap();
+
+        let decl = find_first_node_type(&value, "AssociatedTypeDeclSyntax").unwrap();
+        let where_clause = child_by_name(decl, "genericWhereClause").unwrap();
+        assert_eq!(where_clause["nodeType"], "GenericWhereClauseSyntax");
+        assert_eq!(
+            child_by_name(where_clause, "whereKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.where)"
         );
     }
 
