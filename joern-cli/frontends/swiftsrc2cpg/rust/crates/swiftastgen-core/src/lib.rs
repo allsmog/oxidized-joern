@@ -4794,11 +4794,22 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         } else {
             type_node
         };
-        // An `inout` (or other parameter specifier) wraps the base type in an
-        // AttributedTypeSyntax in SwiftSyntax.
+        // An ownership specifier (`inout`/`consuming`/`borrowing`/…) wraps the base
+        // type in an AttributedTypeSyntax in SwiftSyntax.
         if let Some(specifier) = self
             .immediate_named_child_kind(parameter, "parameter_modifiers")
-            .and_then(|modifiers| self.first_descendant_any_kind(modifiers, "inout"))
+            .and_then(|modifiers| {
+                [
+                    "inout",
+                    "consuming",
+                    "borrowing",
+                    "__owned",
+                    "__shared",
+                    "isolated",
+                ]
+                .iter()
+                .find_map(|keyword| self.first_descendant_any_kind(modifiers, keyword))
+            })
         {
             return self.attributed_type_with_specifier(specifier, base);
         }
@@ -15799,6 +15810,21 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(ty, "attributes").unwrap()["range"]["startOffset"],
             base["range"]["startOffset"]
+        );
+    }
+
+    #[test]
+    fn emits_attributed_type_for_consuming_parameter() {
+        let source = "func f(_ x: consuming String) -> String { return x }\n";
+        let value = parse_source("Consume.swift", "/tmp/Consume.swift", source).unwrap();
+
+        let param = find_first_node_type(&value, "FunctionParameterSyntax").unwrap();
+        let ty = child_by_name(param, "type").unwrap();
+        assert_eq!(ty["nodeType"], "AttributedTypeSyntax");
+        let spec = &child_by_name(ty, "specifiers").unwrap()["children"][0];
+        assert_eq!(
+            child_by_name(spec, "specifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.consuming)"
         );
     }
 
