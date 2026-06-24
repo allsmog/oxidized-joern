@@ -12614,7 +12614,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 elements,
             ))
         } else {
-            Ok(self.empty_collection("MultipleTrailingClosureElementListSyntax", empty_offset))
+            // An empty trailing-closure list anchors after the call's same-line
+            // trailing trivia (SwiftSyntax attaches it as trailing trivia), so e.g.
+            // `xs.enumerated() where …` anchors the list at `where`, not the `)`.
+            let anchor = self.skip_horizontal_whitespace(empty_offset, self.source.len());
+            Ok(self.empty_collection("MultipleTrailingClosureElementListSyntax", anchor))
         }
     }
 
@@ -15915,6 +15919,26 @@ repeat { sink() } while x < 1
             child_by_name(last, "argument").unwrap()["tokenKind"],
             "binaryOperator(\"*\")"
         );
+    }
+
+    #[test]
+    fn anchors_empty_trailing_closure_after_same_line_call() {
+        // `xs.enumerated() where …` — the call's empty additionalTrailingClosures
+        // anchors after its same-line trailing trivia (at `where`), past the `)`.
+        let source =
+            "func f(_ xs: [Int]) {\n  for x in xs.enumerated() where x.element > 0 {\n    print(x)\n  }\n}\n";
+        let value = parse_source("FW.swift", "/tmp/FW.swift", source).unwrap();
+
+        let call = find_node_types(&value, "FunctionCallExprSyntax")
+            .into_iter()
+            .find(|c| source_text(source, c).ends_with("enumerated()"))
+            .unwrap();
+        let atc = child_by_name(call, "additionalTrailingClosures").unwrap();
+        assert!(atc["children"].as_array().unwrap().is_empty());
+        let right_paren_end = child_by_name(call, "rightParen").unwrap()["range"]["endOffset"]
+            .as_u64()
+            .unwrap();
+        assert!(atc["range"]["startOffset"].as_u64().unwrap() > right_paren_end);
     }
 
     #[test]
