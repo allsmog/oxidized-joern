@@ -1,11 +1,21 @@
 //! Differential JSON parity test for the `rubyastgen` CLI.
 //!
+//! Reference source + runtime: the upstream reference is `ruby_ast_gen`
+//! (github.com/joernio/astgen-monorepo, `ruby-astgen`), a Ruby gem wrapped
+//! around the `parser` gem. It is embedded under `src/main/resources` and
+//! executed at runtime through JRuby (see `RubyAstGenRunner.scala` and the
+//! frontend README), so it is NOT a standalone native binary: running it needs a
+//! Ruby/JRuby runtime, and `rubysrc2cpg`'s build downloads it as a packaged gem
+//! ZIP (`ruby_ast_gen_v<version>.zip`) rather than as an executable.
+//!
 //! Gated and self-skipping: when `RUBYASTGEN_REFERENCE` is unset the test prints
-//! a skip notice and returns. When it points at a reference `rubyastgen` binary,
-//! both the reference and the freshly-built Rust binary are run over every
-//! fixture corpus directory, their JSON outputs are normalized (absolute input
-//! paths and path separators), and asserted equal with a first-difference
-//! report. Modeled on the gosrc2cpg `differential_json.rs` harness.
+//! a skip notice and returns. When it points at a reference that honours the
+//! same positional `<input> <output>` interface the runner uses (a `ruby_ast_gen`
+//! launcher or another `rubyastgen` revision), both the reference and the
+//! freshly-built Rust binary are run over every fixture corpus directory, their
+//! JSON outputs are normalized (absolute input paths and path separators), and
+//! asserted equal with a first-difference report. Modeled on the gosrc2cpg
+//! `differential_json.rs` harness.
 
 use assert_cmd::Command;
 use serde_json::Value;
@@ -125,11 +135,13 @@ fn immediate_child_dirs(root: &Path) -> Vec<PathBuf> {
     dirs
 }
 
+/// Invokes the reference with the positional `<input> <output>` interface that
+/// `RubyAstGenRunner.scala` uses (`Seq(astGenCommand) ++ Seq(in, out.toString)`),
+/// so a `ruby_ast_gen` launcher script is driven exactly as production does.
 fn run_reference(reference: &Path, input: &Path, out: &Path) -> Result<(), String> {
     let output = StdCommand::new(reference)
-        .arg("-o")
-        .arg(out)
         .arg(input)
+        .arg(out)
         .output()
         .map_err(|err| err.to_string())?;
     check_output(output, "reference")
@@ -138,9 +150,8 @@ fn run_reference(reference: &Path, input: &Path, out: &Path) -> Result<(), Strin
 fn run_rust(input: &Path, out: &Path) -> Result<(), String> {
     let mut command = Command::cargo_bin("rubyastgen").map_err(|err| err.to_string())?;
     let output = command
-        .arg("-o")
-        .arg(out)
         .arg(input)
+        .arg(out)
         .output()
         .map_err(|err| err.to_string())?;
     check_output(output, "rust")
