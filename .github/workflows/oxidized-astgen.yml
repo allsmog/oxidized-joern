@@ -163,3 +163,34 @@ jobs:
         continue-on-error: true
         working-directory: joern-cli/frontends/rust2cpg/rust
         run: RUSTASTGEN_REFERENCE=/tmp/rust_ast_gen cargo test --test differential_json -- --nocapture
+
+  php2cpg-differential:
+    # Reference: the joernio/PHP-Parser `php-parser.phar` (Versions.phpParser).
+    # It is a PHP archive (shebang `#!/usr/bin/env php`), so PHP must be on PATH;
+    # run_reference invokes it with --with-recovery --resolve-names --json-dump
+    # (matching PhpParser.scala).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+      - name: Download reference php-parser.phar
+        run: |
+          curl -L --fail -o /tmp/php-parser.phar \
+            https://github.com/joernio/PHP-Parser/releases/download/v4.15.10/php-parser.phar
+          chmod +x /tmp/php-parser.phar
+      - name: Differential vs reference (informational until byte-identity)
+        continue-on-error: true
+        working-directory: joern-cli/frontends/php2cpg/rust
+        run: PHPASTGEN_REFERENCE=/tmp/php-parser.phar cargo test --test differential_json -- --nocapture
+
+  # rubysrc2cpg and pysrc2cpg have no native CI differential job by design:
+  #  - ruby's reference (ruby_ast_gen, astgen-monorepo ruby-astgen) is a Ruby gem
+  #    run through JRuby — published as a gem ZIP, not an executable. Run locally
+  #    with RUBYASTGEN_REFERENCE pointing at a jruby wrapper; the harness
+  #    (rubysrc2cpg/rust/.../tests/differential_json.rs) is ready and self-skips.
+  #  - py's reference is the in-tree JavaCC parser io.joern.pythonparser (no
+  #    separate binary), so there is nothing external to differential against; its
+  #    harness self-skips by design and the coverage gate guards the emitter.
