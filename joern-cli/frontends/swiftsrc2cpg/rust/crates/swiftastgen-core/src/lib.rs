@@ -5821,10 +5821,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "DeclReferenceExprSyntax",
                 self.range_for_node(node),
                 vec![self.with_name(
-                    self.token_for_node(
-                        node,
-                        &format!("identifier({})", quoted_text(self.text(node))),
-                    ),
+                    self.token_for_node(node, &identifier_token_kind(self.text(node))),
                     "baseName",
                 )],
             )),
@@ -11158,7 +11155,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 format!("integerLiteral({})", quoted_text(self.text(node)))
             }
             "self_expression" => "keyword(SwiftSyntax.Keyword.self)".to_string(),
-            _ => format!("identifier({})", quoted_text(self.text(node))),
+            _ => identifier_token_kind(self.text(node)),
         };
         self.syntax_node(
             "DeclReferenceExprSyntax",
@@ -13980,6 +13977,26 @@ fn quoted_text(text: &str) -> String {
     serde_json::to_string(text).expect("serializing a string cannot fail")
 }
 
+/// Token kind for an identifier appearing in expression-reference position.
+///
+/// SwiftSyntax lexes the anonymous closure parameters `$0`, `$1`, ... (a `$`
+/// followed only by decimal digits) as a `dollarIdentifier` token. Other
+/// `$`-prefixed identifiers — notably property-wrapper projected values like
+/// `$foo` — are lexed as plain `identifier` tokens, so the dollar test must be
+/// restricted to the digit form to stay byte-identical with the reference.
+fn identifier_token_kind(text: &str) -> String {
+    if is_dollar_identifier(text) {
+        format!("dollarIdentifier({})", quoted_text(text))
+    } else {
+        format!("identifier({})", quoted_text(text))
+    }
+}
+
+fn is_dollar_identifier(text: &str) -> bool {
+    let mut chars = text.chars();
+    chars.next() == Some('$') && text.len() > 1 && chars.all(|c| c.is_ascii_digit())
+}
+
 fn normalize_escaped_raw_segment(text: &str) -> String {
     if let Some(suffix) = text.strip_prefix("\\\"\\\"\\\"") {
         format!("\\\"\\\"{suffix}")
@@ -14770,7 +14787,28 @@ let _ = copy $0
             .collect::<Vec<_>>();
         assert!(reference_tokens.contains(&"identifier(\"global\")"));
         assert!(reference_tokens.contains(&"identifier(\"_move\")"));
-        assert!(reference_tokens.contains(&"identifier(\"$0\")"));
+        // `$0` is a closure shorthand argument: SwiftSyntax lexes it as a
+        // `dollarIdentifier`, not a plain `identifier`.
+        assert!(reference_tokens.contains(&"dollarIdentifier(\"$0\")"));
+    }
+
+    #[test]
+    fn dollar_identifier_kind_only_matches_anonymous_closure_args() {
+        // Only `$` followed solely by decimal digits (the anonymous closure
+        // parameters `$0`, `$1`, ...) is a `dollarIdentifier`. Property-wrapper
+        // projected values such as `$value`/`$foo` stay plain `identifier`s,
+        // matching the reference SwiftAstGen lexer exactly.
+        assert!(is_dollar_identifier("$0"));
+        assert!(is_dollar_identifier("$12"));
+        assert!(!is_dollar_identifier("$value"));
+        assert!(!is_dollar_identifier("$foo"));
+        assert!(!is_dollar_identifier("$0a"));
+        assert!(!is_dollar_identifier("$"));
+        assert!(!is_dollar_identifier("global"));
+
+        assert_eq!(identifier_token_kind("$0"), "dollarIdentifier(\"$0\")");
+        assert_eq!(identifier_token_kind("$value"), "identifier(\"$value\")");
+        assert_eq!(identifier_token_kind("global"), "identifier(\"global\")");
     }
 
     #[test]
