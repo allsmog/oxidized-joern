@@ -7125,20 +7125,24 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         };
 
         let statements = self.immediate_named_child_kind(node, "statements");
+        let mut case_children = Vec::new();
+        // `@unknown default` (and other case attributes) attach as a leading
+        // `attribute` child of the SwitchCaseSyntax, before the label.
+        if let Some(attribute) = self
+            .immediate_named_child_kind(node, "modifiers")
+            .and_then(|modifiers| self.immediate_named_child_kind(modifiers, "attribute"))
+        {
+            case_children.push(self.with_name(self.attribute(attribute)?, "attribute"));
+        }
+        case_children.push(self.with_name(label, "label"));
+        case_children.push(self.with_name(
+            self.code_block_item_list_from_switch_case_body(node, statements, colon.end_byte())?,
+            "statements",
+        ));
         Ok(self.syntax_node(
             "SwitchCaseSyntax",
             self.trimmed_range_for_node(node),
-            vec![
-                self.with_name(label, "label"),
-                self.with_name(
-                    self.code_block_item_list_from_switch_case_body(
-                        node,
-                        statements,
-                        colon.end_byte(),
-                    )?,
-                    "statements",
-                ),
-            ],
+            case_children,
         ))
     }
 
@@ -16331,6 +16335,29 @@ repeat { sink() } while x < 1
             .as_u64()
             .unwrap();
         assert!(atc["range"]["startOffset"].as_u64().unwrap() > right_paren_end);
+    }
+
+    #[test]
+    fn emits_unknown_default_case_attribute() {
+        // `@unknown default` attaches an `attribute` child to the SwitchCaseSyntax.
+        let source =
+            "func f(_ x: Int) {\n  switch x {\n  case 0: break\n  @unknown default: break\n  }\n}\n";
+        let value = parse_source("UK.swift", "/tmp/UK.swift", source).unwrap();
+
+        let case = find_node_types(&value, "SwitchCaseSyntax")
+            .into_iter()
+            .find(|c| child_by_name(c, "attribute").is_some())
+            .unwrap();
+        let attribute = child_by_name(case, "attribute").unwrap();
+        assert_eq!(attribute["nodeType"], "AttributeSyntax");
+        assert_eq!(
+            child_by_name(
+                find_first_node_type(attribute, "IdentifierTypeSyntax").unwrap(),
+                "name"
+            )
+            .unwrap()["tokenKind"],
+            "identifier(\"unknown\")"
+        );
     }
 
     #[test]
