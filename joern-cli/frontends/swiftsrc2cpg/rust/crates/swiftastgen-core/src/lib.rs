@@ -4554,7 +4554,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .filter(|child| child.kind() == "parameter")
             .enumerate()
         {
-            parameters.push(self.with_name_and_index(self.function_parameter(param)?, "", index));
+            let trailing_comma = self.trailing_delimiter(node, param, ",");
+            parameters.push(self.with_name_and_index(
+                self.function_parameter(param, trailing_comma)?,
+                "",
+                index,
+            ));
         }
         let parameter_list = self.with_name(
             self.syntax_node(
@@ -4599,7 +4604,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(None)
     }
 
-    fn function_parameter(&self, node: Node<'a>) -> Result<Value> {
+    fn function_parameter(
+        &self,
+        node: Node<'a>,
+        trailing_comma: Option<Node<'a>>,
+    ) -> Result<Value> {
         let identifier_children = named_children(node)
             .filter(|child| matches!(child.kind(), "simple_identifier" | "identifier"))
             .collect::<Vec<_>>();
@@ -4659,10 +4668,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(ellipsis_start) = ellipsis_start {
             children.push(self.with_name(self.ellipsis_token(ellipsis_start), "ellipsis"));
         }
+        if let Some(comma) = trailing_comma {
+            children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+        }
 
+        let param_end = trailing_comma.map_or_else(|| node.end_byte(), |comma| comma.end_byte());
         Ok(self.syntax_node(
             "FunctionParameterSyntax",
-            self.range_for_node(node),
+            self.range_from_offsets(node.start_byte(), param_end),
             children,
         ))
     }
@@ -12393,13 +12406,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(closure) = trailing_closures.first() {
             children.push(self.with_name(self.closure_expr(*closure)?, "trailingClosure"));
         }
+        // An empty trailing-closure list anchors after the rightSquare's same-line
+        // trailing trivia (SwiftSyntax attaches same-line whitespace as trailing
+        // trivia, so e.g. `grid[i] = …` anchors the list at the `=`, not the `]`).
+        let trailing_anchor = self.skip_horizontal_whitespace(node.end_byte(), self.source.len());
         children.push(
             self.with_name(
                 self.additional_trailing_closure_list(
                     self.immediate_named_child_kind(node, "call_suffix")
                         .unwrap_or(value_arguments),
                     trailing_closures,
-                    node.end_byte(),
+                    trailing_anchor,
                 )?,
                 "additionalTrailingClosures",
             ),
@@ -15284,6 +15301,29 @@ repeat { sink() } while x < 1
             child_by_name(first, "trailingComma").unwrap()["tokenKind"],
             "comma"
         );
+    }
+
+    #[test]
+    fn emits_function_parameter_trailing_comma_for_multi_param_subscript() {
+        // A multi-parameter list (here a subscript) gives every non-last
+        // FunctionParameterSyntax a trailingComma whose range it spans.
+        let source =
+            "struct M {\n  var g: [Int] = []\n  subscript(row: Int, col: Int) -> Int {\n    return g[row]\n  }\n}\n";
+        let value = parse_source("Sub.swift", "/tmp/Sub.swift", source).unwrap();
+
+        let sub = find_first_node_type(&value, "SubscriptDeclSyntax").unwrap();
+        let params = child_by_name(child_by_name(sub, "parameterClause").unwrap(), "parameters")
+            .unwrap()["children"]
+            .clone();
+        let first = &params[0];
+        assert_eq!(first["nodeType"], "FunctionParameterSyntax");
+        assert_eq!(source_text(source, first), "row: Int,");
+        assert_eq!(
+            child_by_name(first, "trailingComma").unwrap()["tokenKind"],
+            "comma"
+        );
+        // The last parameter has no trailing comma.
+        assert!(child_by_name(&params[1], "trailingComma").is_none());
     }
 
     #[test]
