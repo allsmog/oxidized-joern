@@ -13310,7 +13310,25 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                         &mut pending_text,
                     );
                     let expression_segment = self.expression_segment(node, child)?;
+                    let expression_start = start_offset(&expression_segment);
                     let expression_end = end_offset(&expression_segment);
+                    // SwiftSyntax always places a (possibly empty) text segment
+                    // before an expression segment; emit one anchored at the
+                    // segment's start (the backslash) when none precedes it (e.g.
+                    // interpolation at the very start of the string).
+                    let needs_leading_segment = segments
+                        .last()
+                        .is_none_or(|segment| segment["nodeType"] != "StringSegmentSyntax");
+                    if needs_leading_segment {
+                        segments.push(self.with_name(
+                            self.string_segment_node(
+                                expression_start,
+                                expression_start,
+                                String::new(),
+                            ),
+                            "",
+                        ));
+                    }
                     segments.push(self.with_name(expression_segment, ""));
                     if segment_children
                         .get(index + 1)
@@ -15668,6 +15686,29 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(default_value, "equal").unwrap()["tokenKind"],
             "equal"
+        );
+    }
+
+    #[test]
+    fn emits_leading_segment_for_interpolation_at_string_start() {
+        // `"\(a) tail"` starts with interpolation: SwiftSyntax emits an empty
+        // StringSegmentSyntax (zero-width at the backslash) before the expression.
+        let source = "let a = 1\nlet s = \"\\(a) tail\"\n";
+        let value = parse_source("Interp.swift", "/tmp/Interp.swift", source).unwrap();
+
+        let literal = find_first_node_type(&value, "StringLiteralExprSyntax").unwrap();
+        let segments = child_by_name(literal, "segments").unwrap();
+        let kids = segments["children"].as_array().unwrap();
+        assert_eq!(kids[0]["nodeType"], "StringSegmentSyntax");
+        assert_eq!(kids[1]["nodeType"], "ExpressionSegmentSyntax");
+        // The leading segment is zero-width at the expression segment's start.
+        assert_eq!(
+            kids[0]["range"]["startOffset"],
+            kids[1]["range"]["startOffset"]
+        );
+        assert_eq!(
+            kids[0]["range"]["endOffset"],
+            kids[1]["range"]["startOffset"]
         );
     }
 
