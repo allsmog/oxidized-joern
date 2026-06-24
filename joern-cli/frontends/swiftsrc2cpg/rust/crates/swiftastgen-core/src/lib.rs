@@ -2513,20 +2513,28 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             children
                 .push(self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"));
             // `@available(...)` carries a structured availability argument list;
-            // most other attributes (`@Clamped(0)`, property wrappers, …) carry a
-            // LabeledExprListSyntax. `@objc(selector)` uses an ObjCSelectorPieceList
-            // that is not modelled yet, so it is left without arguments.
+            // `@objc(selector)` an ObjCSelectorPieceListSyntax; most other attributes
+            // (`@Clamped(0)`, property wrappers, …) a LabeledExprListSyntax.
             let attribute_name = self.text(name);
             if let Some(right_paren) = right_paren {
+                let has_content = left_paren.end_byte() < right_paren.start_byte();
                 if attribute_name == "available" {
                     if let Some(arguments) =
                         self.availability_arguments(node, left_paren, right_paren)?
                     {
                         children.push(self.with_name(arguments, "arguments"));
                     }
-                } else if attribute_name != "objc"
-                    && left_paren.end_byte() < right_paren.start_byte()
-                {
+                } else if attribute_name == "objc" {
+                    if has_content {
+                        children.push(self.with_name(
+                            self.objc_selector_arguments(
+                                left_paren.end_byte(),
+                                right_paren.start_byte(),
+                            ),
+                            "arguments",
+                        ));
+                    }
+                } else if has_content {
                     children.push(self.with_name(
                         self.synthetic_labeled_expr_list_from_offsets(
                             left_paren.end_byte(),
@@ -2543,6 +2551,74 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
 
         Ok(self.syntax_node("AttributeSyntax", self.range_for_node(node), children))
+    }
+
+    /// Build the `ObjCSelectorPieceListSyntax` for `@objc(selector)`. A bare name
+    /// (`@objc(Foo)`) is a single piece; a method selector (`@objc(doThing:with:)`)
+    /// splits into one piece per `name:` segment, each carrying its trailing colon.
+    fn objc_selector_arguments(&self, content_start: usize, content_end: usize) -> Value {
+        let bytes = self.source.as_bytes();
+        let mut pieces = Vec::new();
+        let mut name_start = content_start;
+        let mut offset = content_start;
+        while offset < content_end {
+            if bytes[offset] == b':' {
+                pieces.push(self.with_name(
+                    self.syntax_node(
+                        "ObjCSelectorPieceSyntax",
+                        self.range_from_offsets(name_start, offset + 1),
+                        vec![
+                            self.with_name(
+                                self.token_with_range(
+                                    &format!(
+                                        "identifier({})",
+                                        quoted_text(&self.source[name_start..offset])
+                                    ),
+                                    self.range_from_offsets(name_start, offset),
+                                ),
+                                "name",
+                            ),
+                            self.with_name(
+                                self.token_with_range(
+                                    "colon",
+                                    self.range_from_offsets(offset, offset + 1),
+                                ),
+                                "colon",
+                            ),
+                        ],
+                    ),
+                    "",
+                ));
+                name_start = offset + 1;
+            }
+            offset += 1;
+        }
+        // A trailing name with no colon (the whole bare-name form, or a final
+        // unlabeled piece).
+        if name_start < content_end {
+            pieces.push(self.with_name(
+                self.syntax_node(
+                    "ObjCSelectorPieceSyntax",
+                    self.range_from_offsets(name_start, content_end),
+                    vec![self.with_name(
+                        self.token_with_range(
+                            &format!(
+                                "identifier({})",
+                                quoted_text(&self.source[name_start..content_end])
+                            ),
+                            self.range_from_offsets(name_start, content_end),
+                        ),
+                        "name",
+                    )],
+                ),
+                "",
+            ));
+        }
+        self.syntax_node(
+            "ObjCSelectorPieceListSyntax",
+            self.range_from_offsets(content_start, content_end),
+            pieces,
+        )
     }
 
     /// Parse the flat token sequence inside `@available(...)` into the structured
@@ -16112,6 +16188,26 @@ repeat { sink() } while x < 1
     }
 
     #[test]
+    fn emits_objc_selector_attribute_arguments() {
+        // `@objc(doThing:with:)` carries an ObjCSelectorPieceListSyntax: one piece
+        // per `name:` segment, each with its trailing colon.
+        let source = "@objc(doThing:with:)\nfunc f() {}\n";
+        let value = parse_source("Objc.swift", "/tmp/Objc.swift", source).unwrap();
+
+        let attr = find_first_node_type(&value, "AttributeSyntax").unwrap();
+        let args = child_by_name(attr, "arguments").unwrap();
+        assert_eq!(args["nodeType"], "ObjCSelectorPieceListSyntax");
+        let pieces = args["children"].as_array().unwrap();
+        assert_eq!(pieces.len(), 2);
+        assert_eq!(
+            child_by_name(&pieces[0], "name").unwrap()["tokenKind"],
+            "identifier(\"doThing\")"
+        );
+        assert!(child_by_name(&pieces[0], "colon").is_some());
+        assert!(child_by_name(&pieces[1], "colon").is_some());
+    }
+
+    #[test]
     fn emits_for_statement_with_empty_body_without_bailing() {
         // `for _ in 0..<n {}` has no `statements` child; it must emit an empty
         // CodeBlockItemListSyntax rather than bailing the file.
@@ -19075,13 +19171,19 @@ someFunction(parameterLabel: 2)
             "identifier(\"x\")"
         );
         assert_eq!(attributes[0]["children"][4]["tokenKind"], "rightParen");
-        // `@objc(Foo)` uses an ObjC selector list that is not modelled, so it stays
-        // without an arguments child.
+        // `@objc(Foo)` carries an ObjC selector piece list (a single bare-name piece).
         assert_eq!(
             attributes[1]["children"][1]["children"][0]["tokenKind"],
             "identifier(\"objc\")"
         );
-        assert_eq!(attributes[1]["children"][3]["tokenKind"], "rightParen");
+        let objc_args = &attributes[1]["children"][3];
+        assert_eq!(objc_args["name"], "arguments");
+        assert_eq!(objc_args["nodeType"], "ObjCSelectorPieceListSyntax");
+        assert_eq!(
+            child_by_name(&objc_args["children"][0], "name").unwrap()["tokenKind"],
+            "identifier(\"Foo\")"
+        );
+        assert_eq!(attributes[1]["children"][4]["tokenKind"], "rightParen");
 
         let function = find_first_node_type(&value, "FunctionDeclSyntax").unwrap();
         assert_eq!(function["children"][0]["nodeType"], "AttributeListSyntax");
