@@ -106,7 +106,7 @@ fn emitted_statement_types(out: &Path) -> BTreeSet<String> {
 }
 
 fn fixture_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/control-flow")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/abap-corpus/control-flow")
 }
 
 fn collect_json_files(root: &Path, out: &mut Vec<PathBuf>) {
