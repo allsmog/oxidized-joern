@@ -11,3 +11,12 @@ func shorthandDemo() -> Int {
   }
   return combine(1, 2)
 }
+
+class Worker {
+  func setup() {
+    let task = { [weak self] in
+      print("done")
+    }
+    task()
+  }
+}

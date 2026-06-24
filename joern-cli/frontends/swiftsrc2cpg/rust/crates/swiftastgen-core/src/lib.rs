@@ -8368,7 +8368,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut children =
             vec![self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace")];
 
-        if let Some(function_type) = self.field_child(node, "type") {
+        // A closure has a signature when it has a function type (params/return) OR
+        // a capture list (`{ [weak self] in … }`) — both terminate at `in`.
+        let function_type = self.field_child(node, "type");
+        if function_type.is_some() || self.field_child(node, "captures").is_some() {
             children
                 .push(self.with_name(self.closure_signature(function_type, node)?, "signature"));
         }
@@ -8392,44 +8395,57 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(self.syntax_node("ClosureExprSyntax", self.range_for_node(node), children))
     }
 
-    fn closure_signature(&self, node: Node<'a>, closure: Node<'a>) -> Result<Value> {
+    fn closure_signature(
+        &self,
+        function_type: Option<Node<'a>>,
+        closure: Node<'a>,
+    ) -> Result<Value> {
         let in_keyword = self
             .immediate_child_kind(closure, "in")
             .or_else(|| self.nearest_child_before(closure, "in", closure.end_byte()))
             .context("closure signature is missing 'in'")?;
+        let captures = self.field_child(closure, "captures");
+        // The signature starts at its first element: the capture list `[` if
+        // present, else the function type (`(params) -> ret`), else `in`.
+        let signature_start = captures
+            .map(|c| c.start_byte())
+            .or_else(|| function_type.map(|n| n.start_byte()))
+            .unwrap_or_else(|| in_keyword.start_byte());
         let mut children = vec![self.with_name(
-            self.empty_collection("AttributeListSyntax", node.start_byte()),
+            self.empty_collection("AttributeListSyntax", signature_start),
             "attributes",
         )];
 
-        if let Some(captures) = self.field_child(closure, "captures") {
+        if let Some(captures) = captures {
             children.push(self.with_name(self.closure_capture_clause(captures)?, "capture"));
         }
 
-        if let Some(parameter_node) =
-            named_children(node).find(|child| child.kind() == "lambda_function_type_parameters")
-        {
-            children.push(self.with_name(
-                self.closure_parameter_clause(parameter_node, node)?,
-                "parameterClause",
-            ));
-        }
+        if let Some(node) = function_type {
+            if let Some(parameter_node) =
+                named_children(node).find(|child| child.kind() == "lambda_function_type_parameters")
+            {
+                children.push(self.with_name(
+                    self.closure_parameter_clause(parameter_node, node)?,
+                    "parameterClause",
+                ));
+            }
 
-        if let Some(return_type) = self.closure_return_type(node) {
-            let arrow = self
-                .immediate_child_kind(node, "->")
-                .context("closure return type is missing '->'")?;
-            children.push(self.with_name(
-                self.syntax_node(
-                    "ReturnClauseSyntax",
-                    self.range_from_offsets(arrow.start_byte(), return_type.end_byte()),
-                    vec![
-                        self.with_name(self.token_for_node(arrow, "arrow"), "arrow"),
-                        self.with_name(self.identifier_type(return_type)?, "type"),
-                    ],
-                ),
-                "returnClause",
-            ));
+            if let Some(return_type) = self.closure_return_type(node) {
+                let arrow = self
+                    .immediate_child_kind(node, "->")
+                    .context("closure return type is missing '->'")?;
+                children.push(self.with_name(
+                    self.syntax_node(
+                        "ReturnClauseSyntax",
+                        self.range_from_offsets(arrow.start_byte(), return_type.end_byte()),
+                        vec![
+                            self.with_name(self.token_for_node(arrow, "arrow"), "arrow"),
+                            self.with_name(self.identifier_type(return_type)?, "type"),
+                        ],
+                    ),
+                    "returnClause",
+                ));
+            }
         }
 
         children.push(self.with_name(
@@ -8439,11 +8455,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
         Ok(self.syntax_node(
             "ClosureSignatureSyntax",
-            self.range_from_offsets(
-                self.field_child(closure, "captures")
-                    .map_or(node.start_byte(), |captures| captures.start_byte()),
-                in_keyword.end_byte(),
-            ),
+            self.range_from_offsets(signature_start, in_keyword.end_byte()),
             children,
         ))
     }
@@ -15152,6 +15164,47 @@ repeat { sink() } while x < 1
         let second = &list["children"][1];
         assert_eq!(source_text(source, second), "x");
         assert!(child_by_name(second, "trailingComma").is_none());
+    }
+
+    #[test]
+    fn emits_closure_signature_for_capture_only_closure() {
+        // `{ [weak self] in … }` has a signature with only a capture clause (no
+        // function type); it must still emit ClosureSignatureSyntax carrying the
+        // ClosureCaptureClauseSyntax (weak self) and the `in` keyword.
+        let source = "class Worker {\n  func setup() {\n    let task = { [weak self] in\n      print(\"done\")\n    }\n    task()\n  }\n}\n";
+        let value = parse_source("Capture.swift", "/tmp/Capture.swift", source).unwrap();
+
+        let signature = find_first_node_type(&value, "ClosureSignatureSyntax").unwrap();
+        let capture = child_by_name(signature, "capture").unwrap();
+        assert_eq!(capture["nodeType"], "ClosureCaptureClauseSyntax");
+        assert_eq!(source_text(source, capture), "[weak self]");
+        assert_eq!(
+            child_by_name(capture, "leftSquare").unwrap()["tokenKind"],
+            "leftSquare"
+        );
+        assert_eq!(
+            child_by_name(capture, "rightSquare").unwrap()["tokenKind"],
+            "rightSquare"
+        );
+
+        let item = &child_by_name(capture, "items").unwrap()["children"][0];
+        assert_eq!(item["nodeType"], "ClosureCaptureSyntax");
+        let spec = child_by_name(item, "specifier").unwrap();
+        assert_eq!(
+            child_by_name(spec, "specifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.weak)"
+        );
+        assert_eq!(
+            child_by_name(item, "name").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.self)"
+        );
+
+        // Capture-only: no parameterClause, but the `in` keyword is present.
+        assert!(child_by_name(signature, "parameterClause").is_none());
+        assert_eq!(
+            child_by_name(signature, "inKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.in)"
+        );
     }
 
     #[test]
