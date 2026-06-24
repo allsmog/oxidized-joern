@@ -4616,8 +4616,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .enumerate()
         {
             let trailing_comma = self.trailing_delimiter(node, param, ",");
+            // A default value (`= expr`) is a sibling of the `parameter` node in the
+            // parent, before the next comma / closing paren.
+            let boundary =
+                trailing_comma.map_or_else(|| right_paren.start_byte(), |c| c.start_byte());
+            let default_value = self.parameter_default_value(node, param, boundary)?;
             parameters.push(self.with_name_and_index(
-                self.function_parameter(param, trailing_comma)?,
+                self.function_parameter(param, trailing_comma, default_value)?,
                 "",
                 index,
             ));
@@ -4665,10 +4670,35 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         Ok(None)
     }
 
+    /// Locate a parameter's default value (`= expr`), which tree-sitter places as
+    /// `=` + value siblings of the `parameter` node, before `boundary` (the next
+    /// comma or the closing paren). Returns the built `InitializerClauseSyntax`.
+    fn parameter_default_value(
+        &self,
+        parent: Node<'a>,
+        param: Node<'a>,
+        boundary: usize,
+    ) -> Result<Option<Value>> {
+        let Some(equal) = children(parent).find(|child| {
+            child.kind() == "="
+                && child.start_byte() >= param.end_byte()
+                && child.end_byte() <= boundary
+        }) else {
+            return Ok(None);
+        };
+        let Some(value) = named_children(parent)
+            .find(|child| child.start_byte() >= equal.end_byte() && child.end_byte() <= boundary)
+        else {
+            return Ok(None);
+        };
+        Ok(Some(self.initializer_clause(equal, value)?))
+    }
+
     fn function_parameter(
         &self,
         node: Node<'a>,
         trailing_comma: Option<Node<'a>>,
+        default_value: Option<Value>,
     ) -> Result<Value> {
         let identifier_children = named_children(node)
             .filter(|child| matches!(child.kind(), "simple_identifier" | "identifier"))
@@ -4729,11 +4759,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(ellipsis_start) = ellipsis_start {
             children.push(self.with_name(self.ellipsis_token(ellipsis_start), "ellipsis"));
         }
+        let default_value_end = default_value.as_ref().map(end_offset);
+        if let Some(default_value) = default_value {
+            children.push(self.with_name(default_value, "defaultValue"));
+        }
         if let Some(comma) = trailing_comma {
             children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
         }
 
-        let param_end = trailing_comma.map_or_else(|| node.end_byte(), |comma| comma.end_byte());
+        let param_end = trailing_comma.map_or_else(
+            || default_value_end.unwrap_or_else(|| node.end_byte()),
+            |comma| comma.end_byte(),
+        );
         Ok(self.syntax_node(
             "FunctionParameterSyntax",
             self.range_from_offsets(node.start_byte(), param_end),
@@ -15617,6 +15654,21 @@ repeat { sink() } while x < 1
 
         // `\.name`: the shorthand has no root type.
         assert!(child_by_name(kps[1], "root").is_none());
+    }
+
+    #[test]
+    fn emits_function_parameter_default_value() {
+        let source = "func g(count: Int = 1) -> Int { return count }\n";
+        let value = parse_source("Default.swift", "/tmp/Default.swift", source).unwrap();
+
+        let param = find_first_node_type(&value, "FunctionParameterSyntax").unwrap();
+        let default_value = child_by_name(param, "defaultValue").unwrap();
+        assert_eq!(default_value["nodeType"], "InitializerClauseSyntax");
+        assert_eq!(source_text(source, default_value), "= 1");
+        assert_eq!(
+            child_by_name(default_value, "equal").unwrap()["tokenKind"],
+            "equal"
+        );
     }
 
     #[test]
