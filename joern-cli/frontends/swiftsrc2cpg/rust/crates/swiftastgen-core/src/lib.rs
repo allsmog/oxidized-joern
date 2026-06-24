@@ -8410,7 +8410,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             named_children(node).find(|child| child.kind() == "lambda_function_type_parameters")
         {
             children.push(self.with_name(
-                self.closure_parameter_clause(parameter_node)?,
+                self.closure_parameter_clause(parameter_node, node)?,
                 "parameterClause",
             ));
         }
@@ -8532,7 +8532,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
     }
 
-    fn closure_parameter_clause(&self, node: Node<'a>) -> Result<Value> {
+    fn closure_parameter_clause(&self, node: Node<'a>, type_node: Node<'a>) -> Result<Value> {
         let parameters = named_children(node)
             .filter(|child| child.kind() == "lambda_parameter")
             .collect::<Vec<_>>();
@@ -8552,22 +8552,29 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             let parameter_list =
                 self.syntax_node("ClosureParameterListSyntax", params_range, parameter_values);
 
+            // The `(`/`)` wrap the `lambda_function_type_parameters` and are siblings
+            // of it under the enclosing `lambda_function_type` (`type_node`), not
+            // children of the parameter-list node itself.
+            let left_paren = self.immediate_child_kind(type_node, "(");
+            let right_paren = self.immediate_child_kind(type_node, ")");
             let mut children = Vec::new();
-            if let Some(left_paren) = self.immediate_child_kind(node, "(") {
+            if let Some(left_paren) = left_paren {
                 children.push(
                     self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"),
                 );
             }
             children.push(self.with_name(parameter_list, "parameters"));
-            if let Some(right_paren) = self.immediate_child_kind(node, ")") {
+            if let Some(right_paren) = right_paren {
                 children.push(
                     self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
                 );
             }
 
+            let clause_start = left_paren.map_or_else(|| node.start_byte(), |lp| lp.start_byte());
+            let clause_end = right_paren.map_or_else(|| node.end_byte(), |rp| rp.end_byte());
             Ok(self.syntax_node(
                 "ClosureParameterClauseSyntax",
-                self.range_for_node(node),
+                self.range_from_offsets(clause_start, clause_end),
                 children,
             ))
         } else {
@@ -8619,9 +8626,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(comma) = trailing_comma {
             children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
         }
+        let param_end = trailing_comma.map_or_else(|| node.end_byte(), |comma| comma.end_byte());
         Ok(self.syntax_node(
             "ClosureParameterSyntax",
-            self.range_for_node(node),
+            self.range_from_offsets(node.start_byte(), param_end),
             children,
         ))
     }
@@ -12525,7 +12533,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(comma) = trailing_comma {
             children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
         }
-        Ok(self.syntax_node("LabeledExprSyntax", self.range_for_node(node), children))
+        let element_end = trailing_comma.map_or_else(|| node.end_byte(), |comma| comma.end_byte());
+        Ok(self.syntax_node(
+            "LabeledExprSyntax",
+            self.range_from_offsets(node.start_byte(), element_end),
+            children,
+        ))
     }
 
     fn labeled_expr_for_value(
@@ -13711,7 +13724,21 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .is_some_and(|children| children.is_empty());
         if is_empty_leading {
             if let Some(decl_start) = parent_start {
-                let anchor = self.source.get(..decl_start).unwrap_or("").trim_end().len();
+                let preceding = self.source.get(..decl_start).unwrap_or("");
+                let trimmed_end = preceding.trim_end().len();
+                // SwiftSyntax attaches same-line whitespace as the PRECEDING token's
+                // trailing trivia, so an empty leading collection anchors at the
+                // parent's content start (decl_start). A gap that spans a newline is
+                // the NEXT token's leading trivia, so the collection anchors at the
+                // preceding token's end (trimmed_end).
+                let gap_spans_newline = preceding
+                    .get(trimmed_end..)
+                    .is_some_and(|gap| gap.contains('\n'));
+                let anchor = if gap_spans_newline {
+                    trimmed_end
+                } else {
+                    decl_start
+                };
                 let range = self.point_range(anchor);
                 if let Some(obj) = value.as_object_mut() {
                     obj.insert("range".into(), range);
@@ -15066,6 +15093,44 @@ repeat { sink() } while x < 1
                 "keyword(SwiftSyntax.Keyword.didSet)"
             ]
         );
+    }
+
+    #[test]
+    fn emits_closure_parameter_clause_parens_and_trailing_comma_ranges() {
+        let source = "func demo() -> Int {\n  let add = { (a: Int, b: Int) -> Int in\n    return a + b\n  }\n  return add(1, 2)\n}\n";
+        let value = parse_source("Closure.swift", "/tmp/Closure.swift", source).unwrap();
+
+        let signature = find_first_node_type(&value, "ClosureSignatureSyntax").unwrap();
+        let clause = child_by_name(signature, "parameterClause").unwrap();
+        assert_eq!(clause["nodeType"], "ClosureParameterClauseSyntax");
+        // The parenthesized parameter clause carries leftParen/rightParen and spans them.
+        assert_eq!(
+            child_by_name(clause, "leftParen").unwrap()["tokenKind"],
+            "leftParen"
+        );
+        assert_eq!(
+            child_by_name(clause, "rightParen").unwrap()["tokenKind"],
+            "rightParen"
+        );
+        assert_eq!(source_text(source, clause), "(a: Int, b: Int)");
+
+        // Empty signature attributes anchor at the '(' (same-line trivia belongs to
+        // the preceding token), not one byte before it.
+        let sig_attrs = child_by_name(signature, "attributes").unwrap();
+        assert_eq!(
+            sig_attrs["range"]["startOffset"],
+            clause["range"]["startOffset"]
+        );
+
+        // The first closure parameter's range includes its trailing comma.
+        let first = &child_by_name(clause, "parameters").unwrap()["children"][0];
+        assert_eq!(source_text(source, first), "a: Int,");
+
+        // A call argument's LabeledExprSyntax range includes its trailing comma too.
+        let call = find_first_node_type(&value, "FunctionCallExprSyntax").unwrap();
+        let arg0 = &child_by_name(call, "arguments").unwrap()["children"][0];
+        assert_eq!(arg0["nodeType"], "LabeledExprSyntax");
+        assert_eq!(source_text(source, arg0), "1,");
     }
 
     #[test]
