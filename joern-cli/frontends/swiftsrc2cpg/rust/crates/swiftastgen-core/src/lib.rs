@@ -12114,6 +12114,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 format!("integerLiteral({})", quoted_text(self.text(node)))
             }
             "self_expression" => "keyword(SwiftSyntax.Keyword.self)".to_string(),
+            // `init` as a declaration reference (`self.init`, `super.init`, `T.init`)
+            // is a contextual keyword, not a plain identifier.
+            _ if self.text(node) == "init" => "keyword(SwiftSyntax.Keyword.init)".to_string(),
             _ => identifier_token_kind(self.text(node)),
         };
         self.syntax_node(
@@ -16452,6 +16455,20 @@ repeat { sink() } while x < 1
             )
             .unwrap()["tokenKind"],
             "identifier(\"escaping\")"
+        );
+    }
+
+    #[test]
+    fn emits_init_declaration_reference_as_keyword() {
+        // `self.init` references `init` as a contextual keyword baseName.
+        let source = "class C {\n  init() {}\n  convenience init(x: Int) { self.init() }\n}\n";
+        let value = parse_source("Init.swift", "/tmp/Init.swift", source).unwrap();
+
+        let member = find_first_node_type(&value, "MemberAccessExprSyntax").unwrap();
+        let decl_name = child_by_name(member, "declName").unwrap();
+        assert_eq!(
+            child_by_name(decl_name, "baseName").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.init)"
         );
     }
 
