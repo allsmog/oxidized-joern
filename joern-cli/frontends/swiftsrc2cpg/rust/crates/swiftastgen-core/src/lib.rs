@@ -9018,13 +9018,25 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .immediate_child_kind(node, ")")
             .context("tuple expression is missing ')'")?;
         let values = self.field_children(node, "value");
+        let names = self.field_children(node, "name");
         let mut elements = Vec::new();
+        let mut cursor = left_paren.end_byte();
         for value in values {
             if self.is_recovery_bang_node(value) {
                 continue;
             }
+            // A tuple element may carry a `name: value` label (`(x: 1, y: 2)`); the
+            // `name` field sits between the previous element and this value.
+            let label = names
+                .iter()
+                .copied()
+                .find(|name| name.start_byte() >= cursor && name.end_byte() <= value.start_byte());
             let trailing_comma = self.trailing_delimiter(node, value, ",");
-            elements.push(self.with_name(self.labeled_expr_for_value(value, trailing_comma)?, ""));
+            elements.push(self.with_name(
+                self.labeled_tuple_element(node, label, value, trailing_comma)?,
+                "",
+            ));
+            cursor = trailing_comma.map_or(value.end_byte(), |comma| comma.end_byte());
         }
 
         Ok(self.syntax_node(
@@ -9042,6 +9054,43 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ),
                 self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"),
             ],
+        ))
+    }
+
+    fn labeled_tuple_element(
+        &self,
+        node: Node<'a>,
+        label: Option<Node<'a>>,
+        value: Node<'a>,
+        trailing_comma: Option<Node<'a>>,
+    ) -> Result<Value> {
+        let mut children = Vec::new();
+        let start = label.map_or(value.start_byte(), |label| label.start_byte());
+        if let Some(label) = label {
+            children.push(self.with_name(
+                self.token_for_node(
+                    label,
+                    &format!("identifier({})", quoted_text(self.text(label))),
+                ),
+                "label",
+            ));
+            if let Some(colon) = self
+                .children_between(node, label.end_byte(), value.start_byte())
+                .into_iter()
+                .find(|child| child.kind() == ":")
+            {
+                children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
+            }
+        }
+        children.push(self.with_name(self.expr(value)?, "expression"));
+        if let Some(comma) = trailing_comma {
+            children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+        }
+        let end = trailing_comma.map_or(value.end_byte(), |comma| comma.end_byte());
+        Ok(self.syntax_node(
+            "LabeledExprSyntax",
+            self.range_from_offsets(start, end),
+            children,
         ))
     }
 
@@ -16511,6 +16560,25 @@ repeat { sink() } while x < 1
             )
             .unwrap()["tokenKind"],
             "identifier(\"escaping\")"
+        );
+    }
+
+    #[test]
+    fn emits_labeled_tuple_expression_elements() {
+        // `(first: 1, second: 2)` keeps each element's label/colon.
+        let source = "let pair = (first: 1, second: 2)\n";
+        let value = parse_source("Tup.swift", "/tmp/Tup.swift", source).unwrap();
+
+        let tuple = find_first_node_type(&value, "TupleExprSyntax").unwrap();
+        let first = &child_by_name(tuple, "elements").unwrap()["children"][0];
+        assert_eq!(
+            child_by_name(first, "label").unwrap()["tokenKind"],
+            "identifier(\"first\")"
+        );
+        assert!(child_by_name(first, "colon").is_some());
+        assert_eq!(
+            child_by_name(first, "expression").unwrap()["nodeType"],
+            "IntegerLiteralExprSyntax"
         );
     }
 
