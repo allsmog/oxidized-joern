@@ -8662,6 +8662,32 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
         let mut children = Vec::new();
         if let Some(base) = self.field_child(node, "target") {
+            // tree-sitter groups `a + b.c` as `(a + b).c`, but Swift binds postfix
+            // `.member` tighter than any infix operator, so the suffix attaches to the
+            // binary expression's right-most operand: `a + (b.c)`. Re-associate to match
+            // SwiftSyntax. Parenthesised `(a + b).c` parses as a tuple target (not a bare
+            // binary), and a recovered generic `Foo<T>.m` parses as a comparison whose
+            // member access is already correct, so both are left untouched.
+            if is_binary_expression_kind(base.kind())
+                && self
+                    .optional_chain_question_between(
+                        node,
+                        base.end_byte(),
+                        suffix_node.start_byte(),
+                    )
+                    .is_none()
+                && self
+                    .recovered_generic_member_function_call_expr(base)
+                    .is_none()
+                && self.recovered_generic_member_access_expr(base).is_none()
+            {
+                return self.member_access_rebound_to_binary_rhs(
+                    base,
+                    period,
+                    suffix,
+                    node.end_byte(),
+                );
+            }
             let base_expr = if let Some(question_mark) = self.optional_chain_question_between(
                 node,
                 base.end_byte(),
@@ -8687,6 +8713,84 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_for_node(node),
             children,
         ))
+    }
+
+    /// Re-attach a postfix `.member` access to the right-most operand of a binary
+    /// expression, descending through nested binaries so that `a + b * c.d` rebinds
+    /// to `a + (b * (c.d))`. tree-sitter groups the member access around the whole
+    /// binary expression; SwiftSyntax binds it tighter than the operator.
+    fn member_access_rebound_to_binary_rhs(
+        &self,
+        binary: Node<'a>,
+        period: Node<'a>,
+        suffix: Node<'a>,
+        member_end: usize,
+    ) -> Result<Value> {
+        let raw_lhs = self
+            .field_child(binary, "lhs")
+            .or_else(|| self.field_child(binary, "start"))
+            .context("binary member rebind is missing lhs")?;
+        let op = self
+            .field_child(binary, "op")
+            .context("binary member rebind is missing operator")?;
+        let raw_rhs = self
+            .field_child(binary, "rhs")
+            .or_else(|| self.field_child(binary, "end"))
+            .context("binary member rebind is missing rhs")?;
+        let lhs = self
+            .expression_field_child(binary, "lhs")
+            .or_else(|| self.expression_field_child(binary, "start"))
+            .unwrap_or(raw_lhs);
+        let rhs = self
+            .expression_field_child(binary, "rhs")
+            .or_else(|| self.expression_field_child(binary, "end"))
+            .unwrap_or(raw_rhs);
+
+        let new_rhs = if is_binary_expression_kind(rhs.kind())
+            && self
+                .recovered_generic_member_function_call_expr(rhs)
+                .is_none()
+            && self.recovered_generic_member_access_expr(rhs).is_none()
+        {
+            self.member_access_rebound_to_binary_rhs(rhs, period, suffix, member_end)?
+        } else {
+            self.member_access_with_base(
+                self.expr(rhs)?,
+                rhs.start_byte(),
+                period,
+                suffix,
+                member_end,
+            )
+        };
+
+        self.infix_operator_expr_from_values(
+            binary.start_byte(),
+            member_end,
+            self.expr(lhs)?,
+            op,
+            new_rhs,
+        )
+    }
+
+    /// Build a `MemberAccessExprSyntax` from an already-rendered base value, the
+    /// period token, and the suffix name node.
+    fn member_access_with_base(
+        &self,
+        base: Value,
+        base_start: usize,
+        period: Node<'a>,
+        suffix: Node<'a>,
+        end: usize,
+    ) -> Value {
+        self.syntax_node(
+            "MemberAccessExprSyntax",
+            self.range_from_offsets(base_start, end),
+            vec![
+                self.with_name(base, "base"),
+                self.with_name(self.token_for_node(period, "period"), "period"),
+                self.with_name(self.decl_reference_expr(suffix), "declName"),
+            ],
+        )
     }
 
     fn optional_chaining_expr_from_value(
@@ -14444,6 +14548,53 @@ repeat { sink() } while x < 1
             .filter(|node| source_text(source, node).starts_with("do "))
             .count();
         assert_eq!(do_calls, 0);
+    }
+
+    #[test]
+    fn binds_member_access_tighter_than_binary_operator() {
+        // tree-sitter groups `a + b.c` as `(a + b).c`; SwiftSyntax binds the postfix
+        // member access tighter than the operator, yielding `a + (b.c)`. The whole
+        // expression must be an infix operator whose right operand is the member
+        // access — never a member access wrapping an infix operator.
+        let source = "let r = total + doubled.count\n";
+        let value = parse_source("Member.swift", "/tmp/Member.swift", source).unwrap();
+
+        let infix = find_first_node_type(&value, "InfixOperatorExprSyntax").unwrap();
+        assert_eq!(source_text(source, infix), "total + doubled.count");
+        assert_eq!(
+            child_by_name(infix, "leftOperand").unwrap()["nodeType"],
+            "DeclReferenceExprSyntax"
+        );
+        let right = child_by_name(infix, "rightOperand").unwrap();
+        assert_eq!(right["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(source_text(source, right), "doubled.count");
+        assert_eq!(
+            child_by_name(right, "base").unwrap()["nodeType"],
+            "DeclReferenceExprSyntax"
+        );
+
+        // No member access may keep a binary expression as its base.
+        for member in find_node_types(&value, "MemberAccessExprSyntax") {
+            if let Some(base) = child_by_name(member, "base") {
+                assert_ne!(base["nodeType"], "InfixOperatorExprSyntax");
+            }
+        }
+    }
+
+    #[test]
+    fn rebinds_member_access_through_nested_binary_operators() {
+        // `a + b * c.d` rebinds so `.d` attaches to `c` alone: `a + (b * (c.d))`.
+        let source = "let r = a + b * c.d\n";
+        let value = parse_source("Nested.swift", "/tmp/Nested.swift", source).unwrap();
+
+        let outer = find_first_node_type(&value, "InfixOperatorExprSyntax").unwrap();
+        assert_eq!(source_text(source, outer), "a + b * c.d");
+        let inner = child_by_name(outer, "rightOperand").unwrap();
+        assert_eq!(inner["nodeType"], "InfixOperatorExprSyntax");
+        assert_eq!(source_text(source, inner), "b * c.d");
+        let member = child_by_name(inner, "rightOperand").unwrap();
+        assert_eq!(member["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(source_text(source, member), "c.d");
     }
 
     #[test]
