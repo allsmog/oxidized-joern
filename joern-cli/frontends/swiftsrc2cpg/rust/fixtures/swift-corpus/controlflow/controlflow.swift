@@ -15,3 +15,9 @@ func process() {
     n += 1
   } while n < 3
 }
+
+func emptyLoops(_ n: Int) {
+  for _ in 0..<n {}
+  var i = 0
+  while i < n {}
+}
