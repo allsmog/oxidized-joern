@@ -2290,6 +2290,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(inheritance_clause) = self.inheritance_clause(node)? {
             children.push(self.with_name(inheritance_clause, "inheritanceClause"));
         }
+        if let Some(type_constraints) = self.immediate_named_child_kind(node, "type_constraints") {
+            if let Some(clause) = self.generic_where_clause(type_constraints)? {
+                children.push(self.with_name(clause, "genericWhereClause"));
+            }
+        }
         children.push(self.with_name(
             self.member_block_without_case_recovery(body)?,
             "memberBlock",
@@ -14965,6 +14970,31 @@ repeat { sink() } while x < 1
         let left = child_by_name(conformance, "leftType").unwrap();
         assert_eq!(left["nodeType"], "IdentifierTypeSyntax");
         assert_eq!(source_text(source, left), "T");
+    }
+
+    #[test]
+    fn emits_generic_where_clause_on_constrained_extension() {
+        // `extension Array where Element: Equatable` attaches a genericWhereClause
+        // to the ExtensionDeclSyntax (after extendedType, before memberBlock).
+        let source = "extension Array where Element: Equatable { func f() {} }\n";
+        let value = parse_source("ExtWhere.swift", "/tmp/ExtWhere.swift", source).unwrap();
+
+        let ext = find_first_node_type(&value, "ExtensionDeclSyntax").unwrap();
+        assert_eq!(
+            child_by_name(ext, "extendedType").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+        let clause = child_by_name(ext, "genericWhereClause").unwrap();
+        assert_eq!(clause["nodeType"], "GenericWhereClauseSyntax");
+        assert_eq!(source_text(source, clause), "where Element: Equatable");
+
+        let reqs = child_by_name(clause, "requirements").unwrap();
+        let conformance = child_by_name(&reqs["children"][0], "requirement").unwrap();
+        assert_eq!(conformance["nodeType"], "ConformanceRequirementSyntax");
+        assert_eq!(
+            child_by_name(conformance, "rightType").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
     }
 
     #[test]

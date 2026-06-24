@@ -25,3 +25,9 @@ func allSorted<C: Collection>(_ collection: C) -> Bool where C.Element: Comparab
 struct Box<T> where T: Equatable {
   let value: T
 }
+
+extension Stack where Element: Equatable {
+  func describe() -> String {
+    return "stack"
+  }
+}
