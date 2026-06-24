@@ -4527,6 +4527,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.with_name(self.function_parameter_clause(node)?, "parameterClause");
 
         let mut signature_children = vec![parameter_clause];
+        if let Some(effect_specifiers) = self.function_effect_specifiers(node) {
+            signature_children.push(self.with_name(effect_specifiers, "effectSpecifiers"));
+        }
         if let Some(return_clause) = self.return_clause(node)? {
             signature_children.push(self.with_name(return_clause, "returnClause"));
         }
@@ -4539,6 +4542,52 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "FunctionSignatureSyntax",
             self.range_from_offsets(start, end),
             signature_children,
+        ))
+    }
+
+    /// Build a `FunctionEffectSpecifiersSyntax` (`async`/`throws`/`rethrows`) from
+    /// a function-like declaration's direct keyword children, or `None` when the
+    /// function is non-effectful. Typed throws (`throws(E)`) is not modelled yet —
+    /// only the `throws`/`rethrows` keyword is emitted.
+    fn function_effect_specifiers(&self, node: Node<'a>) -> Option<Value> {
+        let async_specifier = self.immediate_child_kind(node, "async");
+        let throws_specifier = self
+            .immediate_child_kind(node, "throws")
+            .or_else(|| self.immediate_child_kind(node, "rethrows"));
+        if async_specifier.is_none() && throws_specifier.is_none() {
+            return None;
+        }
+        let mut children = Vec::new();
+        if let Some(async_node) = async_specifier {
+            children.push(self.with_name(
+                self.token_for_node(async_node, "keyword(SwiftSyntax.Keyword.async)"),
+                "asyncSpecifier",
+            ));
+        }
+        if let Some(throws_node) = throws_specifier {
+            let throws_clause = self.syntax_node(
+                "ThrowsClauseSyntax",
+                self.range_for_node(throws_node),
+                vec![self.with_name(
+                    self.token_for_node(
+                        throws_node,
+                        &format!("keyword(SwiftSyntax.Keyword.{})", self.text(throws_node)),
+                    ),
+                    "throwsSpecifier",
+                )],
+            );
+            children.push(self.with_name(throws_clause, "throwsClause"));
+        }
+        let start = async_specifier
+            .or(throws_specifier)
+            .map_or(node.start_byte(), |n| n.start_byte());
+        let end = throws_specifier
+            .or(async_specifier)
+            .map_or(node.end_byte(), |n| n.end_byte());
+        Some(self.syntax_node(
+            "FunctionEffectSpecifiersSyntax",
+            self.range_from_offsets(start, end),
+            children,
         ))
     }
 
@@ -15324,6 +15373,25 @@ repeat { sink() } while x < 1
         );
         // The last parameter has no trailing comma.
         assert!(child_by_name(&params[1], "trailingComma").is_none());
+    }
+
+    #[test]
+    fn emits_function_effect_specifiers_for_throws() {
+        let source = "func fetch() throws -> Int {\n  return 0\n}\n";
+        let value = parse_source("Throws.swift", "/tmp/Throws.swift", source).unwrap();
+
+        let signature = find_first_node_type(&value, "FunctionSignatureSyntax").unwrap();
+        let effects = child_by_name(signature, "effectSpecifiers").unwrap();
+        assert_eq!(effects["nodeType"], "FunctionEffectSpecifiersSyntax");
+        assert_eq!(source_text(source, effects), "throws");
+        let throws_clause = child_by_name(effects, "throwsClause").unwrap();
+        assert_eq!(throws_clause["nodeType"], "ThrowsClauseSyntax");
+        assert_eq!(
+            child_by_name(throws_clause, "throwsSpecifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.throws)"
+        );
+        // effectSpecifiers precedes the return clause.
+        assert!(child_by_name(signature, "returnClause").is_some());
     }
 
     #[test]
