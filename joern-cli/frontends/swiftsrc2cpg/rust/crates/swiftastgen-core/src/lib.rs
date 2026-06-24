@@ -10693,15 +10693,19 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let do_keyword = self
             .immediate_child_kind(node, "do")
             .context("do statement is missing 'do'")?;
-        let body_statements = named_children(node)
-            .find(|child| child.kind() == "statements")
-            .context("do statement is missing body statements")?;
-        let left_brace = self
-            .nearest_child_before(node, "{", body_statements.start_byte())
-            .context("do statement body is missing '{'")?;
-        let right_brace = self
-            .nearest_child_after(node, "}", body_statements.end_byte())
-            .context("do statement body is missing '}'")?;
+        // An empty do-body (`do {} catch {}`) has no `statements` child.
+        let body_statements = named_children(node).find(|child| child.kind() == "statements");
+        let left_brace = match body_statements {
+            Some(statements) => self.nearest_child_before(node, "{", statements.start_byte()),
+            None => self.nearest_child_after(node, "{", do_keyword.end_byte()),
+        }
+        .context("do statement body is missing '{'")?;
+        let right_brace = match body_statements {
+            Some(statements) => self.nearest_child_after(node, "}", statements.end_byte()),
+            None => children(node)
+                .find(|child| child.kind() == "}" && child.start_byte() >= left_brace.end_byte()),
+        }
+        .context("do statement body is missing '}'")?;
         let catch_blocks = named_children(node)
             .filter(|child| child.kind() == "catch_block")
             .collect::<Vec<_>>();
@@ -10715,11 +10719,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "doKeyword",
                 ),
                 self.with_name(
-                    self.code_block_from_statements(
-                        Some(body_statements),
-                        left_brace,
-                        right_brace,
-                    )?,
+                    self.code_block_from_statements(body_statements, left_brace, right_brace)?,
                     "body",
                 ),
                 self.with_name(
@@ -15956,6 +15956,20 @@ repeat { sink() } while x < 1
         let for_stmt = find_first_node_type(&value, "ForStmtSyntax").unwrap();
         let body = child_by_name(for_stmt, "body").unwrap();
         assert_eq!(body["nodeType"], "CodeBlockSyntax");
+        let statements = child_by_name(body, "statements").unwrap();
+        assert_eq!(statements["nodeType"], "CodeBlockItemListSyntax");
+        assert!(statements["children"].as_array().unwrap().is_empty());
+    }
+
+    #[test]
+    fn emits_empty_do_body_without_bailing() {
+        // `do {} catch {}` has no `statements` child in the do body; it must emit
+        // an empty CodeBlockItemListSyntax rather than bailing the file.
+        let source = "func f() {\n  do {} catch {}\n}\n";
+        let value = parse_source("EmptyDo.swift", "/tmp/EmptyDo.swift", source).unwrap();
+
+        let do_stmt = find_first_node_type(&value, "DoStmtSyntax").unwrap();
+        let body = child_by_name(do_stmt, "body").unwrap();
         let statements = child_by_name(body, "statements").unwrap();
         assert_eq!(statements["nodeType"], "CodeBlockItemListSyntax");
         assert!(statements["children"].as_array().unwrap().is_empty());
