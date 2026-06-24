@@ -6441,6 +6441,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "nil_coalescing_expression" => self.nil_coalescing_expr(node),
             "postfix_expression" => self.postfix_expr(node),
             "additive_expression"
+            | "bitwise_operation"
             | "comparison_expression"
             | "conjunction_expression"
             | "disjunction_expression"
@@ -16560,6 +16561,23 @@ repeat { sink() } while x < 1
             )
             .unwrap()["tokenKind"],
             "identifier(\"escaping\")"
+        );
+    }
+
+    #[test]
+    fn emits_bitwise_operation_as_infix_operator() {
+        // `1 << 0` is an InfixOperatorExprSyntax, not a single declaration reference.
+        let source = "let x = 1 << 0\n";
+        let value = parse_source("Bit.swift", "/tmp/Bit.swift", source).unwrap();
+
+        let infix = find_first_node_type(&value, "InfixOperatorExprSyntax").unwrap();
+        assert_eq!(
+            child_by_name(infix, "leftOperand").unwrap()["nodeType"],
+            "IntegerLiteralExprSyntax"
+        );
+        assert_eq!(
+            child_by_name(infix, "rightOperand").unwrap()["nodeType"],
+            "IntegerLiteralExprSyntax"
         );
     }
 
