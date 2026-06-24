@@ -561,6 +561,23 @@ pub enum Expression {
         line: usize,
         callee: Box<Expression>,
         arguments: Vec<Expression>,
+        /// Phase-1 semantic engine output: the fully-qualified method name this
+        /// call unambiguously resolves to, in the dotted form the Scala backend
+        /// builds (e.g. `Core.Widget.render:int(int)`). Populated only when the
+        /// symbol table finds exactly one *defined* candidate by qualified/simple
+        /// name plus argument count; left `None` when ambiguous or unknown. This
+        /// is strictly additive JSON: the hand-rolled ujson reader on the Scala
+        /// side ignores unknown object fields, so the CPG is unchanged until a
+        /// later, CDT-faithful phase opts in to consuming it.
+        #[serde(
+            rename = "resolvedMethodFullName",
+            skip_serializing_if = "Option::is_none"
+        )]
+        resolved_method_full_name: Option<String>,
+        /// Signature of the resolved candidate (e.g. `int(int)`), emitted only
+        /// alongside [`Expression::Call::resolved_method_full_name`].
+        #[serde(rename = "resolvedSignature", skip_serializing_if = "Option::is_none")]
+        resolved_signature: Option<String>,
     },
     FieldAccess {
         field: String,
@@ -629,6 +646,7 @@ pub fn parse_file(path: &Path, options: &ParseOptions) -> Result<CxxAstDocument>
     )?);
     declarations = dedupe_function_declarations(declarations);
     declarations.sort_by_key(declaration_sort_line);
+    resolve_call_targets(&mut declarations);
 
     Ok(CxxAstDocument {
         schema_version: SCHEMA_VERSION,
@@ -677,6 +695,414 @@ fn normalize_path(path: &Path) -> String {
     path.to_string_lossy().replace('\\', "/")
 }
 
+// ---------------------------------------------------------------------------
+// Phase-1 semantic engine: symbol table + unambiguous call resolution.
+//
+// A post-parse pass walks the declaration tree, records every plain
+// function/method declaration with its fully-qualified (dotted) name plus
+// parameter-arity and signature, and then walks every call expression. When a
+// call resolves to exactly one *defined* candidate by qualified-or-simple name
+// plus argument count, it stamps `resolvedMethodFullName`/`resolvedSignature`
+// onto the call node. Everything here is additive: ambiguous or unknown calls
+// are left untouched, and the emitted fields are simply ignored by the Scala
+// reader until a later, CDT-faithful phase opts in to consuming them.
+// ---------------------------------------------------------------------------
+
+/// One resolvable function/method declaration collected by the symbol table.
+#[derive(Debug, Clone)]
+struct SymbolEntry {
+    /// Dotted, fully-qualified name without the signature, e.g. `Core.Widget.render`.
+    qualified_name: String,
+    /// Trailing identifier only, e.g. `render`.
+    simple_name: String,
+    /// Number of declared parameters (excluding a trailing C variadic `...`).
+    arity: usize,
+    /// Whether any parameter is variadic (so arity is a lower bound, not exact).
+    has_variadic: bool,
+    /// The declaration signature verbatim, e.g. `int(int)`.
+    signature: String,
+    /// Whether this entry came from a definition (body present) rather than a
+    /// bare prototype. Only definitions are used to resolve calls, mirroring the
+    /// CDT backend which leaves prototype-only externals as bare names.
+    is_definition: bool,
+}
+
+/// Name -> candidate declarations, keyed by both dotted-qualified and simple name.
+#[derive(Debug, Default)]
+struct SymbolTable {
+    by_qualified_name: HashMap<String, Vec<SymbolEntry>>,
+    by_simple_name: HashMap<String, Vec<SymbolEntry>>,
+}
+
+impl SymbolTable {
+    fn insert(&mut self, entry: SymbolEntry) {
+        self.by_qualified_name
+            .entry(entry.qualified_name.clone())
+            .or_default()
+            .push(entry.clone());
+        self.by_simple_name
+            .entry(entry.simple_name.clone())
+            .or_default()
+            .push(entry);
+    }
+}
+
+/// A function name is only treated as a resolution target when it is a plain
+/// identifier path. Operator/conversion functions, out-of-line `A::B::f`
+/// definitions and the synthetic `requires` helper all have bespoke
+/// full-name formatting on the Scala side and are deferred to a later phase.
+fn is_plain_function_name(name: &str) -> bool {
+    !name.is_empty()
+        && !name.contains("::")
+        && !name.contains('<')
+        && !name.contains('~')
+        && !name.contains(' ')
+        && !name.contains('(')
+}
+
+/// Records `function` into `table` under the dotted `scope` (enclosing namespace
+/// and class path). Skips anything that is not a plain identifier function.
+fn collect_function_symbol(table: &mut SymbolTable, scope: &str, function: &FunctionDecl) {
+    if !is_plain_function_name(&function.name) {
+        return;
+    }
+    let simple_name = function.name.clone();
+    let qualified_name = if scope.is_empty() {
+        simple_name.clone()
+    } else {
+        format!("{scope}.{simple_name}")
+    };
+    let has_variadic = function.parameters.iter().any(|param| param.is_variadic);
+    let arity = function
+        .parameters
+        .iter()
+        .filter(|param| !param.is_variadic)
+        .count();
+    table.insert(SymbolEntry {
+        qualified_name,
+        simple_name,
+        arity,
+        has_variadic,
+        signature: function.signature.clone(),
+        is_definition: function.is_definition,
+    });
+}
+
+/// Walks a declaration subtree, extending `scope` for namespaces and aggregates,
+/// and records every plain function/method it finds.
+fn collect_symbols(table: &mut SymbolTable, scope: &str, declarations: &[Declaration]) {
+    for declaration in declarations {
+        match declaration {
+            Declaration::Function(function) => collect_function_symbol(table, scope, function),
+            Declaration::Namespace(namespace) => {
+                let nested = extend_scope(scope, &namespace.name);
+                collect_symbols(table, &nested, &namespace.declarations);
+            }
+            Declaration::Struct(struct_decl) => {
+                let nested = extend_scope(scope, &struct_decl.name);
+                collect_symbols(table, &nested, &struct_decl.nested_declarations);
+            }
+            _ => {}
+        }
+    }
+}
+
+/// Joins a dotted `scope` with a `name`, normalizing any `::` the name carries.
+fn extend_scope(scope: &str, name: &str) -> String {
+    let normalized = name.trim().replace("::", ".");
+    if normalized.is_empty() {
+        scope.to_string()
+    } else if scope.is_empty() {
+        normalized
+    } else {
+        format!("{scope}.{normalized}")
+    }
+}
+
+/// Resolves a call's callee to its lookup name. Returns `None` for calls whose
+/// callee is not a plain identifier / qualified identifier (e.g. member access,
+/// function pointers, operators), which are deferred to a later phase.
+fn call_lookup_name(name: &str) -> Option<(String, String)> {
+    let trimmed = name.trim();
+    if trimmed.is_empty() || trimmed.contains('<') || trimmed.contains('(') {
+        return None;
+    }
+    let qualified = trimmed.replace("::", ".");
+    let simple = qualified
+        .rsplit('.')
+        .next()
+        .unwrap_or(&qualified)
+        .to_string();
+    if simple.is_empty() || simple.contains(' ') {
+        return None;
+    }
+    Some((qualified, simple))
+}
+
+/// Finds the unique *defined* candidate for `name`/`arity`, preferring an exact
+/// dotted-qualified match before falling back to a simple-name match. Returns
+/// `None` whenever the match is ambiguous or unknown.
+fn resolve_unique_target<'a>(
+    table: &'a SymbolTable,
+    name: &str,
+    arity: usize,
+) -> Option<&'a SymbolEntry> {
+    let (qualified, simple) = call_lookup_name(name)?;
+    unique_definition(table.by_qualified_name.get(&qualified), arity)
+        .or_else(|| unique_definition(table.by_simple_name.get(&simple), arity))
+}
+
+/// From a candidate slice, returns the single arity-compatible definition, or
+/// `None` when there are zero or several such definitions.
+fn unique_definition(candidates: Option<&Vec<SymbolEntry>>, arity: usize) -> Option<&SymbolEntry> {
+    let candidates = candidates?;
+    let mut matches = candidates.iter().filter(|entry| {
+        entry.is_definition
+            && (entry.arity == arity || (entry.has_variadic && arity >= entry.arity))
+    });
+    let first = matches.next()?;
+    match matches.next() {
+        Some(_) => None,
+        None => Some(first),
+    }
+}
+
+/// Entry point: builds the symbol table from `declarations`, then rewrites every
+/// call expression in place with its resolved target when unambiguous.
+fn resolve_call_targets(declarations: &mut [Declaration]) {
+    let mut table = SymbolTable::default();
+    collect_symbols(&mut table, "", declarations);
+    annotate_declarations(&table, declarations);
+}
+
+fn annotate_declarations(table: &SymbolTable, declarations: &mut [Declaration]) {
+    for declaration in declarations.iter_mut() {
+        match declaration {
+            Declaration::Function(function) => {
+                for initializer in function.constructor_initializers.iter_mut() {
+                    for argument in initializer.arguments.iter_mut() {
+                        annotate_expression(table, argument);
+                    }
+                }
+                annotate_statements(table, &mut function.body);
+            }
+            Declaration::Namespace(namespace) => {
+                annotate_declarations(table, &mut namespace.declarations);
+            }
+            Declaration::Struct(struct_decl) => {
+                for field in struct_decl.fields.iter_mut() {
+                    if let Some(initializer) = field.initializer.as_mut() {
+                        annotate_expression(table, initializer);
+                    }
+                }
+                annotate_declarations(table, &mut struct_decl.nested_declarations);
+            }
+            Declaration::GlobalVariable(global) => {
+                if let Some(initializer) = global.initializer.as_mut() {
+                    annotate_expression(table, initializer);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+fn annotate_statements(table: &SymbolTable, statements: &mut [Statement]) {
+    for statement in statements.iter_mut() {
+        annotate_statement(table, statement);
+    }
+}
+
+fn annotate_statement(table: &SymbolTable, statement: &mut Statement) {
+    match statement {
+        Statement::Unknown { .. }
+        | Statement::UsingEnum { .. }
+        | Statement::Break { .. }
+        | Statement::Continue { .. }
+        | Statement::Goto { .. } => {}
+        Statement::LocalDecl { initializer, .. }
+        | Statement::StructuredBinding { initializer, .. } => {
+            if let Some(initializer) = initializer.as_mut() {
+                annotate_expression(table, initializer);
+            }
+        }
+        Statement::Assignment { left, right, .. } => {
+            annotate_expression(table, left);
+            annotate_expression(table, right);
+        }
+        Statement::Return { expression, .. } | Statement::Throw { expression, .. } => {
+            if let Some(expression) = expression.as_mut() {
+                annotate_expression(table, expression);
+            }
+        }
+        Statement::Try { body, catches, .. } => {
+            annotate_statements(table, body);
+            for catch in catches.iter_mut() {
+                annotate_statements(table, &mut catch.body);
+            }
+        }
+        Statement::If {
+            initializer,
+            condition_initializer,
+            condition,
+            then_body,
+            else_body,
+            ..
+        } => {
+            annotate_statements(table, initializer);
+            annotate_statements(table, condition_initializer);
+            annotate_expression(table, condition);
+            annotate_statements(table, then_body);
+            annotate_statements(table, else_body);
+        }
+        Statement::While {
+            initializer,
+            condition_initializer,
+            condition,
+            body,
+            ..
+        } => {
+            annotate_statements(table, initializer);
+            annotate_statements(table, condition_initializer);
+            annotate_expression(table, condition);
+            annotate_statements(table, body);
+        }
+        Statement::DoWhile {
+            condition, body, ..
+        } => {
+            annotate_expression(table, condition);
+            annotate_statements(table, body);
+        }
+        Statement::For {
+            initializer,
+            condition,
+            update,
+            body,
+            ..
+        } => {
+            annotate_statements(table, initializer);
+            if let Some(condition) = condition.as_mut() {
+                annotate_expression(table, condition);
+            }
+            if let Some(update) = update.as_mut() {
+                annotate_expression(table, update);
+            }
+            annotate_statements(table, body);
+        }
+        Statement::Label { body, .. } => annotate_statements(table, body),
+        Statement::Switch {
+            initializer,
+            condition_initializer,
+            condition,
+            body,
+            ..
+        } => {
+            annotate_statements(table, initializer);
+            annotate_statements(table, condition_initializer);
+            annotate_expression(table, condition);
+            annotate_statements(table, body);
+        }
+        Statement::Case { value, body, .. } => {
+            if let Some(value) = value.as_mut() {
+                annotate_expression(table, value);
+            }
+            annotate_statements(table, body);
+        }
+        Statement::Expression { expression, .. } => annotate_expression(table, expression),
+    }
+}
+
+fn annotate_expression(table: &SymbolTable, expression: &mut Expression) {
+    match expression {
+        Expression::Identifier { .. }
+        | Expression::Literal { .. }
+        | Expression::Designator { .. } => {}
+        Expression::Call {
+            name,
+            callee,
+            arguments,
+            resolved_method_full_name,
+            resolved_signature,
+            ..
+        } => {
+            annotate_expression(table, callee);
+            for argument in arguments.iter_mut() {
+                annotate_expression(table, argument);
+            }
+            // Only fill genuinely empty slots; never overwrite.
+            if resolved_method_full_name.is_none() {
+                if let Some(entry) = resolve_unique_target(table, name, arguments.len()) {
+                    *resolved_method_full_name =
+                        Some(format!("{}:{}", entry.qualified_name, entry.signature));
+                    *resolved_signature = Some(entry.signature.clone());
+                }
+            }
+        }
+        Expression::Binary { left, right, .. } | Expression::Assignment { left, right, .. } => {
+            annotate_expression(table, left);
+            annotate_expression(table, right);
+        }
+        Expression::Unary { argument, .. }
+        | Expression::PackExpansion {
+            pattern: argument, ..
+        }
+        | Expression::TypeOf { argument, .. }
+        | Expression::Delete { argument, .. } => annotate_expression(table, argument),
+        Expression::Conditional {
+            condition,
+            consequence,
+            alternative,
+            ..
+        } => {
+            annotate_expression(table, condition);
+            if let Some(consequence) = consequence.as_mut() {
+                annotate_expression(table, consequence);
+            }
+            annotate_expression(table, alternative);
+        }
+        Expression::Fold { left, right, .. } => {
+            if let Some(left) = left.as_mut() {
+                annotate_expression(table, left);
+            }
+            if let Some(right) = right.as_mut() {
+                annotate_expression(table, right);
+            }
+        }
+        Expression::Cast { value, .. } => annotate_expression(table, value),
+        Expression::SizeOf { value, .. } => {
+            if let Some(value) = value.as_mut() {
+                annotate_expression(table, value);
+            }
+        }
+        Expression::New {
+            arguments,
+            initializer_arguments,
+            ..
+        } => {
+            for argument in arguments.iter_mut().chain(initializer_arguments.iter_mut()) {
+                annotate_expression(table, argument);
+            }
+        }
+        Expression::Lambda { body, .. } => annotate_statements(table, body),
+        Expression::FieldAccess { base, .. } => annotate_expression(table, base),
+        Expression::IndexAccess { base, index, .. } => {
+            annotate_expression(table, base);
+            annotate_expression(table, index);
+        }
+        Expression::InitializerList { elements, .. } => {
+            for element in elements.iter_mut() {
+                annotate_expression(table, element);
+            }
+        }
+        Expression::DesignatedInitializer {
+            designator, value, ..
+        } => {
+            annotate_expression(table, designator);
+            annotate_expression(table, value);
+        }
+    }
+}
+
 #[cfg(test)]
 fn parse_declarations(source: &str, language: SourceLanguage) -> Result<Vec<Declaration>> {
     let mut symbols = MacroSymbols::new();
@@ -691,6 +1117,7 @@ fn parse_declarations(source: &str, language: SourceLanguage) -> Result<Vec<Decl
     )?;
     declarations = dedupe_function_declarations(declarations);
     declarations.sort_by_key(declaration_line);
+    resolve_call_targets(&mut declarations);
     Ok(declarations)
 }
 
@@ -3942,6 +4369,8 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
                 line,
             }),
             arguments,
+            resolved_method_full_name: None,
+            resolved_signature: None,
         }
     } else if literal_text_value(code) {
         Expression::Literal {
@@ -4251,6 +4680,8 @@ fn parse_call_expression(node: Node, source: &[u8]) -> Expression {
                 .unwrap_or_else(|| identifier_expression(node, source)),
         ),
         arguments,
+        resolved_method_full_name: None,
+        resolved_signature: None,
     }
 }
 
@@ -4326,6 +4757,8 @@ fn parse_compound_literal_expression(node: Node, source: &[u8]) -> Expression {
             line: line(type_node),
         }),
         arguments: initializer_list_elements(value, source),
+        resolved_method_full_name: None,
+        resolved_signature: None,
     }
 }
 
@@ -4436,6 +4869,8 @@ fn parse_offsetof_expression(node: Node, source: &[u8]) -> Expression {
             line,
         }),
         arguments,
+        resolved_method_full_name: None,
+        resolved_signature: None,
     }
 }
 
@@ -10980,5 +11415,243 @@ mod tests {
         )
         .expect("source should parse");
         assert_eq!(take_unmapped_summary(), None);
+    }
+
+    // ---- Phase-1 symbol table + call resolution -------------------------------
+
+    fn function_named<'a>(declarations: &'a [Declaration], name: &str) -> &'a FunctionDecl {
+        find_function_named(declarations, name)
+            .unwrap_or_else(|| panic!("expected function `{name}`"))
+    }
+
+    fn find_function_named<'a>(
+        declarations: &'a [Declaration],
+        name: &str,
+    ) -> Option<&'a FunctionDecl> {
+        declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == name => Some(function),
+                Declaration::Namespace(namespace) => {
+                    find_function_named(&namespace.declarations, name)
+                }
+                Declaration::Struct(struct_decl) => {
+                    find_function_named(&struct_decl.nested_declarations, name)
+                }
+                _ => None,
+            })
+    }
+
+    /// Returns `(resolvedMethodFullName, resolvedSignature)` for the first call
+    /// of `call_name` reachable from `function`'s body.
+    fn resolved_call(
+        function: &FunctionDecl,
+        call_name: &str,
+    ) -> Option<(Option<String>, Option<String>)> {
+        function.body.iter().find_map(|statement| {
+            statement_expressions(statement)
+                .into_iter()
+                .find_map(|expression| {
+                    find_call_by_name(expression, call_name).map(|call| match call {
+                        Expression::Call {
+                            resolved_method_full_name,
+                            resolved_signature,
+                            ..
+                        } => (
+                            resolved_method_full_name.clone(),
+                            resolved_signature.clone(),
+                        ),
+                        _ => unreachable!("find_call_by_name returns a call"),
+                    })
+                })
+        })
+    }
+
+    fn statement_expressions(statement: &Statement) -> Vec<&Expression> {
+        match statement {
+            Statement::Return { expression, .. } | Statement::Throw { expression, .. } => {
+                expression.iter().collect()
+            }
+            Statement::LocalDecl { initializer, .. }
+            | Statement::StructuredBinding { initializer, .. } => initializer.iter().collect(),
+            Statement::Expression { expression, .. } => vec![expression],
+            Statement::Assignment { left, right, .. } => vec![left, right],
+            _ => Vec::new(),
+        }
+    }
+
+    #[test]
+    fn symbol_table_collects_qualified_names_and_arity() {
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                int add(int a, int b) { return a + b; }
+                class Widget {
+                public:
+                  int render(int scale) { return scale; }
+                };
+                }
+                int top(void) { return 0; }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("symbol-table sample should parse");
+
+        let mut table = SymbolTable::default();
+        collect_symbols(&mut table, "", &declarations);
+
+        let add = &table.by_qualified_name.get("Core.add").expect("Core.add")[0];
+        assert_eq!(add.simple_name, "add");
+        assert_eq!(add.arity, 2);
+        assert!(add.is_definition);
+        assert_eq!(add.signature, "int(int,int)");
+
+        let render = &table
+            .by_qualified_name
+            .get("Core.Widget.render")
+            .expect("Core.Widget.render")[0];
+        assert_eq!(render.arity, 1);
+        assert_eq!(render.signature, "int(int)");
+
+        // Simple-name index carries every entry too.
+        assert!(table.by_simple_name.contains_key("render"));
+        assert!(table.by_simple_name.contains_key("top"));
+    }
+
+    #[test]
+    fn resolves_unambiguous_free_function_call() {
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                int helper(int value) { return value + 1; }
+                int run() { return helper(7); }
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("resolved-call sample should parse");
+
+        let run = function_named(&declarations, "run");
+        assert_eq!(
+            resolved_call(run, "helper"),
+            Some((
+                Some("Core.helper:int(int)".to_string()),
+                Some("int(int)".to_string())
+            ))
+        );
+    }
+
+    #[test]
+    fn resolves_overload_uniquely_by_arity() {
+        let declarations = parse_declarations(
+            r#"
+                int make(int a) { return a; }
+                int make(int a, int b) { return a + b; }
+                int use() { return make(1, 2); }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("overload sample should parse");
+
+        let use_fn = function_named(&declarations, "use");
+        let (full_name, signature) = resolved_call(use_fn, "make").expect("make call present");
+        assert_eq!(full_name, Some("make:int(int,int)".to_string()));
+        assert_eq!(signature, Some("int(int,int)".to_string()));
+    }
+
+    #[test]
+    fn leaves_ambiguous_same_arity_overload_unresolved() {
+        let declarations = parse_declarations(
+            r#"
+                int pick(int a) { return a; }
+                int pick(double a) { return 0; }
+                int use() { return pick(1); }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("ambiguous sample should parse");
+
+        let use_fn = function_named(&declarations, "use");
+        // Two arity-1 definitions => ambiguous => no resolution stamped.
+        assert_eq!(resolved_call(use_fn, "pick"), Some((None, None)));
+    }
+
+    #[test]
+    fn does_not_resolve_prototype_only_calls() {
+        // Mirrors the CDT parity behaviour: a prototype with no definition in
+        // the translation unit stays a bare external name, so we must not stamp
+        // a resolved full name onto its call sites.
+        let declarations = parse_declarations(
+            r#"
+                int external(int value);
+                int defined(int value) { return external(value); }
+            "#,
+            SourceLanguage::C,
+        )
+        .expect("prototype sample should parse");
+
+        let defined = function_named(&declarations, "defined");
+        assert_eq!(resolved_call(defined, "external"), Some((None, None)));
+    }
+
+    #[test]
+    fn resolves_member_call_by_simple_name() {
+        let declarations = parse_declarations(
+            r#"
+                struct Box {
+                  int area(int w) { return w; }
+                  int use(int w) { return area(w); }
+                };
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("member sample should parse");
+
+        let use_fn = function_named(&declarations, "use");
+        // `area` is reachable by simple name from the unique definition in `Box`.
+        assert_eq!(
+            resolved_call(use_fn, "area"),
+            Some((
+                Some("Box.area:int(int)".to_string()),
+                Some("int(int)".to_string())
+            ))
+        );
+    }
+
+    #[test]
+    fn resolved_fields_serialize_only_when_present() {
+        let resolved = Expression::Call {
+            name: "f".to_string(),
+            code: "f()".to_string(),
+            line: 1,
+            callee: Box::new(Expression::Identifier {
+                name: "f".to_string(),
+                code: "f".to_string(),
+                line: 1,
+            }),
+            arguments: Vec::new(),
+            resolved_method_full_name: Some("f:int()".to_string()),
+            resolved_signature: Some("int()".to_string()),
+        };
+        let json = serde_json::to_string(&resolved).expect("serialize resolved call");
+        assert!(json.contains("\"resolvedMethodFullName\":\"f:int()\""));
+        assert!(json.contains("\"resolvedSignature\":\"int()\""));
+
+        let unresolved = Expression::Call {
+            name: "f".to_string(),
+            code: "f()".to_string(),
+            line: 1,
+            callee: Box::new(Expression::Identifier {
+                name: "f".to_string(),
+                code: "f".to_string(),
+                line: 1,
+            }),
+            arguments: Vec::new(),
+            resolved_method_full_name: None,
+            resolved_signature: None,
+        };
+        let json = serde_json::to_string(&unresolved).expect("serialize unresolved call");
+        assert!(!json.contains("resolvedMethodFullName"));
+        assert!(!json.contains("resolvedSignature"));
     }
 }
