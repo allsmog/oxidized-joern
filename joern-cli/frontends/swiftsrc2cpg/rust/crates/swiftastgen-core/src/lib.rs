@@ -3790,10 +3790,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "IdentifierTypeSyntax",
             self.range_for_node(node),
             vec![self.with_name(
-                self.token_for_node(
-                    name,
-                    &format!("identifier({})", quoted_text(self.text(name))),
-                ),
+                self.token_for_node(name, &self.type_name_token_kind(self.text(name))),
                 "name",
             )],
         ))
@@ -3830,10 +3827,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.with_name(current, "baseType"),
                 self.with_name(self.token_for_node(period, "period"), "period"),
                 self.with_name(
-                    self.token_for_node(
-                        name,
-                        &format!("identifier({})", quoted_text(self.text(name))),
-                    ),
+                    self.token_for_node(name, &self.type_name_token_kind(self.text(name))),
                     "name",
                 ),
             ];
@@ -3868,10 +3862,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         generic_arguments: Option<Node<'a>>,
     ) -> Result<Value> {
         let mut children = vec![self.with_name(
-            self.token_for_node(
-                name,
-                &format!("identifier({})", quoted_text(self.text(name))),
-            ),
+            self.token_for_node(name, &self.type_name_token_kind(self.text(name))),
             "name",
         )];
         if let Some(arguments) = generic_arguments {
@@ -4726,18 +4717,26 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn identifier_type_from_offsets(&self, start: usize, end: usize) -> Value {
-        let name = &self.source[start..end];
         self.syntax_node(
             "IdentifierTypeSyntax",
             self.range_from_offsets(start, end),
             vec![self.with_name(
                 self.token_with_range(
-                    &format!("identifier({})", quoted_text(name)),
+                    &self.type_name_token_kind(&self.source[start..end]),
                     self.range_from_offsets(start, end),
                 ),
                 "name",
             )],
         )
+    }
+
+    /// The `name` token kind for a type identifier: `Any` and `Self` are contextual
+    /// keywords in type position, everything else is a plain identifier.
+    fn type_name_token_kind(&self, text: &str) -> String {
+        match text {
+            "Any" | "Self" => format!("keyword(SwiftSyntax.Keyword.{text})"),
+            _ => format!("identifier({})", quoted_text(text)),
+        }
     }
 
     fn initializer_clause(&self, equal: Node<'a>, value: Node<'a>) -> Result<Value> {
@@ -16327,6 +16326,21 @@ repeat { sink() } while x < 1
             child_by_name(&modifiers["children"][0], "name").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.async)"
         );
+    }
+
+    #[test]
+    fn emits_any_and_self_type_names_as_keywords() {
+        // `Any` and `Self` are contextual keywords in type position.
+        let source = "struct S {\n  func clone() -> Self { return self }\n  var v: Any = 0\n}\n";
+        let value = parse_source("AS.swift", "/tmp/AS.swift", source).unwrap();
+
+        let kinds: Vec<String> = find_node_types(&value, "IdentifierTypeSyntax")
+            .iter()
+            .filter_map(|ty| child_by_name(ty, "name").and_then(|n| n["tokenKind"].as_str()))
+            .map(str::to_string)
+            .collect();
+        assert!(kinds.contains(&"keyword(SwiftSyntax.Keyword.Self)".to_string()));
+        assert!(kinds.contains(&"keyword(SwiftSyntax.Keyword.Any)".to_string()));
     }
 
     #[test]
