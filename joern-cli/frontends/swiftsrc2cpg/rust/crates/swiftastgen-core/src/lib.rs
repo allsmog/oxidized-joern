@@ -1317,6 +1317,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "name",
             ),
         ];
+        if let Some(type_parameters) = self.immediate_named_child_kind(node, "type_parameters") {
+            if let Some(clause) = self.generic_parameter_clause(type_parameters)? {
+                children.push(self.with_name(clause, "genericParameterClause"));
+            }
+        }
         if let Some(inheritance_clause) = self.inheritance_clause(node)? {
             children.push(self.with_name(inheritance_clause, "inheritanceClause"));
         }
@@ -4469,8 +4474,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ),
                 "name",
             ),
-            self.with_name(self.function_signature(node)?, "signature"),
         ];
+        if let Some(type_parameters) = self.immediate_named_child_kind(node, "type_parameters") {
+            if let Some(clause) = self.generic_parameter_clause(type_parameters)? {
+                children.push(self.with_name(clause, "genericParameterClause"));
+            }
+        }
+        children.push(self.with_name(self.function_signature(node)?, "signature"));
         if let Some(body_node) = body {
             children.push(self.with_name(self.code_block(body_node)?, "body"));
         }
@@ -11453,6 +11463,89 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .context("generic type parameter is missing a type")
     }
 
+    /// Build a `GenericParameterClauseSyntax` from a tree-sitter `type_parameters`
+    /// node on a declaration (e.g. `struct Stack<Element>`, `func f<T: Equatable>`).
+    /// Mirrors `generic_argument_clause` but emits declaration-side
+    /// `GenericParameterSyntax` (attributes/name/colon?/inheritedType?) rather than
+    /// `GenericArgumentSyntax`.
+    ///
+    /// Returns `Ok(None)` when any parameter uses a form not yet modelled (e.g. a
+    /// variadic `each T` pack, which tree-sitter nests under `type_parameter_pack`),
+    /// so the caller simply omits the clause rather than emitting a malformed one.
+    fn generic_parameter_clause(&self, node: Node<'a>) -> Result<Option<Value>> {
+        let Some(left_angle) = self.immediate_child_kind(node, "<") else {
+            return Ok(None);
+        };
+        let Some(right_angle) = self.immediate_child_kind(node, ">") else {
+            return Ok(None);
+        };
+        let mut parameters = Vec::new();
+        for parameter in named_children(node).filter(|child| {
+            child.kind() == "type_parameter"
+                && child.start_byte() >= left_angle.end_byte()
+                && child.end_byte() <= right_angle.start_byte()
+        }) {
+            let Some(name) = named_children(parameter)
+                .find(|child| matches!(child.kind(), "type_identifier" | "simple_identifier"))
+            else {
+                // Variadic/pack parameter (`each T`) — not modelled yet; skip the
+                // whole clause so we never emit a partial one.
+                return Ok(None);
+            };
+            let mut children = vec![
+                self.with_name(
+                    self.empty_collection("AttributeListSyntax", parameter.start_byte()),
+                    "attributes",
+                ),
+                self.with_name(
+                    self.token_for_node(
+                        name,
+                        &format!("identifier({})", quoted_text(self.text(name))),
+                    ),
+                    "name",
+                ),
+            ];
+            if let Some(colon) = self.immediate_child_kind(parameter, ":") {
+                children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
+                if let Some(inherited) = named_children(parameter).find(|child| {
+                    child.start_byte() >= colon.end_byte() && is_type_syntax_node_kind(child.kind())
+                }) {
+                    children.push(self.with_name(self.type_syntax(inherited)?, "inheritedType"));
+                }
+            }
+            let trailing_comma = self.trailing_delimiter(node, parameter, ",");
+            if let Some(comma) = trailing_comma {
+                children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+            }
+            let parameter_end =
+                trailing_comma.map_or(parameter.end_byte(), |comma| comma.end_byte());
+            parameters.push(self.with_name(
+                self.syntax_node(
+                    "GenericParameterSyntax",
+                    self.range_from_offsets(parameter.start_byte(), parameter_end),
+                    children,
+                ),
+                "",
+            ));
+        }
+        Ok(Some(self.syntax_node(
+            "GenericParameterClauseSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_angle, "leftAngle"), "leftAngle"),
+                self.with_name(
+                    self.syntax_node(
+                        "GenericParameterListSyntax",
+                        self.range_from_offsets(left_angle.end_byte(), right_angle.start_byte()),
+                        parameters,
+                    ),
+                    "parameters",
+                ),
+                self.with_name(self.token_for_node(right_angle, "rightAngle"), "rightAngle"),
+            ],
+        )))
+    }
+
     fn special_literal_expr(&self, node: Node<'a>) -> Result<Value> {
         if self.text(node).starts_with('#') {
             return self.macro_expansion_expr(node);
@@ -14595,6 +14688,61 @@ repeat { sink() } while x < 1
         let member = child_by_name(inner, "rightOperand").unwrap();
         assert_eq!(member["nodeType"], "MemberAccessExprSyntax");
         assert_eq!(source_text(source, member), "c.d");
+    }
+
+    #[test]
+    fn emits_generic_parameter_clause_for_struct_and_function() {
+        // `struct Stack<Element>` and `func firstOf<T: Equatable>(...)` must emit a
+        // GenericParameterClauseSyntax (leftAngle / GenericParameterListSyntax /
+        // rightAngle) right after the declaration name, mirroring SwiftSyntax.
+        let source = "struct Stack<Element> {}\nfunc firstOf<T: Equatable>(_ v: [T]) -> T? { return v.first }\n";
+        let value = parse_source("Generics.swift", "/tmp/Generics.swift", source).unwrap();
+
+        // Struct: a single unconstrained parameter `Element`, no colon/inheritedType.
+        let struct_decl = find_first_node_type(&value, "StructDeclSyntax").unwrap();
+        let clause = child_by_name(struct_decl, "genericParameterClause").unwrap();
+        assert_eq!(clause["nodeType"], "GenericParameterClauseSyntax");
+        assert_eq!(source_text(source, clause), "<Element>");
+        assert_eq!(
+            child_by_name(clause, "leftAngle").unwrap()["tokenKind"],
+            "leftAngle"
+        );
+        assert_eq!(
+            child_by_name(clause, "rightAngle").unwrap()["tokenKind"],
+            "rightAngle"
+        );
+        let params = child_by_name(clause, "parameters").unwrap();
+        assert_eq!(params["nodeType"], "GenericParameterListSyntax");
+        let element = &params["children"][0];
+        assert_eq!(element["nodeType"], "GenericParameterSyntax");
+        assert_eq!(element["name"], "");
+        assert_eq!(
+            child_by_name(element, "name").unwrap()["tokenKind"],
+            "identifier(\"Element\")"
+        );
+        assert_eq!(
+            child_by_name(element, "attributes").unwrap()["nodeType"],
+            "AttributeListSyntax"
+        );
+        assert!(child_by_name(element, "colon").is_none());
+        assert!(child_by_name(element, "inheritedType").is_none());
+
+        // Function: a constrained parameter `T: Equatable` with colon + inheritedType.
+        let func_decl = find_first_node_type(&value, "FunctionDeclSyntax").unwrap();
+        let fclause = child_by_name(func_decl, "genericParameterClause").unwrap();
+        assert_eq!(source_text(source, fclause), "<T: Equatable>");
+        let fparam = &child_by_name(fclause, "parameters").unwrap()["children"][0];
+        assert_eq!(
+            child_by_name(fparam, "name").unwrap()["tokenKind"],
+            "identifier(\"T\")"
+        );
+        assert_eq!(
+            child_by_name(fparam, "colon").unwrap()["tokenKind"],
+            "colon"
+        );
+        let inherited = child_by_name(fparam, "inheritedType").unwrap();
+        assert_eq!(inherited["nodeType"], "IdentifierTypeSyntax");
+        assert_eq!(source_text(source, inherited), "Equatable");
     }
 
     #[test]
