@@ -20,3 +20,8 @@ class Worker {
     task()
   }
 }
+
+func discardDemo() {
+  let value = 1
+  _ = value
+}

@@ -5876,6 +5876,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "literal",
                 )],
             )),
+            // A bare `_` in expression position is always a discard (you cannot
+            // reference `_`), so SwiftSyntax models it as DiscardAssignmentExprSyntax
+            // (e.g. the left-hand side of `_ = value`), not a DeclReferenceExpr.
+            "simple_identifier" | "identifier" if self.text(node) == "_" => Ok(self.syntax_node(
+                "DiscardAssignmentExprSyntax",
+                self.range_for_node(node),
+                vec![self.with_name(self.token_for_node(node, "wildcard"), "wildcard")],
+            )),
             "simple_identifier" | "identifier" => Ok(self.syntax_node(
                 "DeclReferenceExprSyntax",
                 self.range_for_node(node),
@@ -15204,6 +15212,32 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(signature, "inKeyword").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.in)"
+        );
+    }
+
+    #[test]
+    fn emits_discard_assignment_for_wildcard_expression() {
+        // `_ = value` — a bare `_` in expression position is a discard, not a
+        // reference to a variable named `_`.
+        let source = "func f() {\n  let value = 1\n  _ = value\n}\n";
+        let value = parse_source("Discard.swift", "/tmp/Discard.swift", source).unwrap();
+
+        let discard = find_first_node_type(&value, "DiscardAssignmentExprSyntax").unwrap();
+        assert_eq!(
+            child_by_name(discard, "wildcard").unwrap()["tokenKind"],
+            "wildcard"
+        );
+        assert_eq!(source_text(source, discard), "_");
+
+        let infix = find_first_node_type(&value, "InfixOperatorExprSyntax").unwrap();
+        assert_eq!(
+            child_by_name(infix, "leftOperand").unwrap()["nodeType"],
+            "DiscardAssignmentExprSyntax"
+        );
+        // A normal identifier remains a DeclReferenceExpr (no false positive on `_`).
+        assert_eq!(
+            child_by_name(infix, "rightOperand").unwrap()["nodeType"],
+            "DeclReferenceExprSyntax"
         );
     }
 
