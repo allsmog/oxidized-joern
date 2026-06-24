@@ -196,6 +196,16 @@ pub struct FieldDecl {
     pub is_static: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub initializer: Option<Expression>,
+    /// Phase-2 semantic engine output: the field's declared type resolved to its
+    /// fully-qualified dotted name (e.g. `Core.Widget`) when the type is written
+    /// explicitly and resolves trivially against the type symbol table. Builtins
+    /// (`int`, `char`, ...) are kept verbatim. Left `None` for `auto`/`decltype`
+    /// or ambiguous/unknown types. Additive JSON ignored by the current reader.
+    #[serde(
+        rename = "resolvedTypeFullName",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub resolved_type_full_name: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -233,6 +243,14 @@ pub struct GlobalVariableDecl {
     #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
     pub visible_line: Option<usize>,
     pub initializer: Option<Expression>,
+    /// Phase-2: declared type resolved to its qualified dotted name when written
+    /// explicitly and trivially resolvable; builtins kept verbatim; `None` when
+    /// `auto`/ambiguous. See [`FieldDecl::resolved_type_full_name`].
+    #[serde(
+        rename = "resolvedTypeFullName",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub resolved_type_full_name: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -283,6 +301,14 @@ pub struct ParameterDecl {
     pub has_default: bool,
     pub code: String,
     pub line: usize,
+    /// Phase-2: declared parameter type resolved to its qualified dotted name
+    /// when written explicitly and trivially resolvable; builtins kept verbatim;
+    /// `None` when `auto`/ambiguous. See [`FieldDecl::resolved_type_full_name`].
+    #[serde(
+        rename = "resolvedTypeFullName",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub resolved_type_full_name: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -325,6 +351,14 @@ pub enum Statement {
         code: String,
         line: usize,
         initializer: Option<Expression>,
+        /// Phase-2: declared local type resolved to its qualified dotted name
+        /// when written explicitly and trivially resolvable; builtins kept
+        /// verbatim; `None` when `auto`/ambiguous. Additive JSON.
+        #[serde(
+            rename = "resolvedTypeFullName",
+            skip_serializing_if = "Option::is_none"
+        )]
+        resolved_type_full_name: Option<String>,
     },
     StructuredBinding {
         #[serde(rename = "typeName")]
@@ -465,6 +499,14 @@ pub enum Expression {
         value: String,
         code: String,
         line: usize,
+        /// Phase-2: the literal's unambiguous type (`int`, `double`, `char`,
+        /// `bool`, `char*`, ...) for the trivially classifiable cases; `None`
+        /// otherwise. Additive JSON ignored by the current reader.
+        #[serde(
+            rename = "resolvedTypeFullName",
+            skip_serializing_if = "Option::is_none"
+        )]
+        resolved_type_full_name: Option<String>,
     },
     Binary {
         operator: String,
@@ -519,6 +561,14 @@ pub enum Expression {
         code: String,
         line: usize,
         value: Box<Expression>,
+        /// Phase-2: the cast target type resolved to its qualified dotted name
+        /// when trivially resolvable; builtins kept verbatim; `None` otherwise.
+        /// Additive JSON ignored by the current reader.
+        #[serde(
+            rename = "resolvedTypeFullName",
+            skip_serializing_if = "Option::is_none"
+        )]
+        resolved_type_full_name: Option<String>,
     },
     SizeOf {
         code: String,
@@ -727,11 +777,24 @@ struct SymbolEntry {
     is_definition: bool,
 }
 
+/// One user-defined type declaration (struct/class/union/enum/typedef/alias)
+/// collected by the symbol table.
+#[derive(Debug, Clone)]
+struct TypeEntry {
+    /// Dotted, fully-qualified type name, e.g. `Core.Widget`.
+    qualified_name: String,
+    /// Trailing identifier only, e.g. `Widget`.
+    simple_name: String,
+}
+
 /// Name -> candidate declarations, keyed by both dotted-qualified and simple name.
+/// Functions and user types are indexed separately.
 #[derive(Debug, Default)]
 struct SymbolTable {
     by_qualified_name: HashMap<String, Vec<SymbolEntry>>,
     by_simple_name: HashMap<String, Vec<SymbolEntry>>,
+    types_by_qualified_name: HashMap<String, Vec<TypeEntry>>,
+    types_by_simple_name: HashMap<String, Vec<TypeEntry>>,
 }
 
 impl SymbolTable {
@@ -741,6 +804,17 @@ impl SymbolTable {
             .or_default()
             .push(entry.clone());
         self.by_simple_name
+            .entry(entry.simple_name.clone())
+            .or_default()
+            .push(entry);
+    }
+
+    fn insert_type(&mut self, entry: TypeEntry) {
+        self.types_by_qualified_name
+            .entry(entry.qualified_name.clone())
+            .or_default()
+            .push(entry.clone());
+        self.types_by_simple_name
             .entry(entry.simple_name.clone())
             .or_default()
             .push(entry);
@@ -788,8 +862,43 @@ fn collect_function_symbol(table: &mut SymbolTable, scope: &str, function: &Func
     });
 }
 
+/// Records a user-defined type named `name` (already a plain identifier) into
+/// `table` under the dotted `scope`.
+fn collect_type_symbol(table: &mut SymbolTable, scope: &str, name: &str) {
+    let simple_name = name.trim();
+    if !is_plain_type_name(simple_name) {
+        return;
+    }
+    let qualified_name = if scope.is_empty() {
+        simple_name.to_string()
+    } else {
+        format!("{scope}.{simple_name}")
+    };
+    table.insert_type(TypeEntry {
+        qualified_name,
+        simple_name: simple_name.to_string(),
+    });
+}
+
+/// A type name is only recorded when it is a plain identifier: anonymous,
+/// templated, or otherwise decorated names are skipped (deferred to a later
+/// phase) to keep resolution unambiguous and format-stable.
+fn is_plain_type_name(name: &str) -> bool {
+    !name.is_empty()
+        && !name.contains("::")
+        && !name.contains('<')
+        && !name.contains(' ')
+        && !name.contains('*')
+        && !name.contains('&')
+        && !name.contains('(')
+        && !name.starts_with('<')
+        && name
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '_' || c == '.')
+}
+
 /// Walks a declaration subtree, extending `scope` for namespaces and aggregates,
-/// and records every plain function/method it finds.
+/// and records every plain function/method and user-defined type it finds.
 fn collect_symbols(table: &mut SymbolTable, scope: &str, declarations: &[Declaration]) {
     for declaration in declarations {
         match declaration {
@@ -799,8 +908,15 @@ fn collect_symbols(table: &mut SymbolTable, scope: &str, declarations: &[Declara
                 collect_symbols(table, &nested, &namespace.declarations);
             }
             Declaration::Struct(struct_decl) => {
+                collect_type_symbol(table, scope, &struct_decl.name);
                 let nested = extend_scope(scope, &struct_decl.name);
                 collect_symbols(table, &nested, &struct_decl.nested_declarations);
+            }
+            Declaration::Enum(enum_decl) => {
+                collect_type_symbol(table, scope, &enum_decl.name);
+            }
+            Declaration::Typedef(typedef) => {
+                collect_type_symbol(table, scope, &typedef.name);
             }
             _ => {}
         }
@@ -867,8 +983,186 @@ fn unique_definition(candidates: Option<&Vec<SymbolEntry>>, arity: usize) -> Opt
     }
 }
 
+/// Fundamental C/C++ builtin type spellings that are left verbatim (never
+/// rewritten to a qualified name). Multi-word builtins (`unsigned int`, `long
+/// long`) are handled by stripping these words during normalization.
+const BUILTIN_TYPE_WORDS: &[&str] = &[
+    "void",
+    "bool",
+    "char",
+    "char8_t",
+    "char16_t",
+    "char32_t",
+    "wchar_t",
+    "short",
+    "int",
+    "long",
+    "signed",
+    "unsigned",
+    "float",
+    "double",
+    "nullptr_t",
+    "size_t",
+    "ptrdiff_t",
+    "int8_t",
+    "int16_t",
+    "int32_t",
+    "int64_t",
+    "uint8_t",
+    "uint16_t",
+    "uint32_t",
+    "uint64_t",
+];
+
+/// Splits a written type into its core object spelling and the pointer/reference
+/// suffix (`*`, `&`, `&&`, `[]`, possibly combined), after stripping leading
+/// `struct`/`union`/`enum` keywords and cv/storage qualifiers. Returns `None`
+/// when the type is not trivially resolvable (`auto`, `decltype(...)`,
+/// templated, function pointer, empty, or otherwise compound).
+fn split_core_type(written: &str) -> Option<(String, String)> {
+    let normalized = normalize_type(written);
+    let trimmed = normalized.trim();
+    if trimmed.is_empty()
+        || trimmed.contains('<')
+        || trimmed.contains('(')
+        || trimmed.contains(',')
+        || trimmed.starts_with("decltype")
+    {
+        return None;
+    }
+    // Peel a trailing run of pointer/reference/array decorators.
+    let mut core = trimmed;
+    let mut suffix = String::new();
+    loop {
+        let core_trimmed = core.trim_end();
+        if let Some(stripped) = core_trimmed.strip_suffix("[]") {
+            suffix.insert_str(0, "[]");
+            core = stripped;
+        } else if let Some(stripped) = core_trimmed.strip_suffix("&&") {
+            suffix.insert_str(0, "&&");
+            core = stripped;
+        } else if let Some(stripped) = core_trimmed.strip_suffix('&') {
+            suffix.insert(0, '&');
+            core = stripped;
+        } else if let Some(stripped) = core_trimmed.strip_suffix('*') {
+            suffix.insert(0, '*');
+            core = stripped;
+        } else {
+            core = core_trimmed;
+            break;
+        }
+    }
+    let core = core.trim();
+    if core.is_empty() || core == "auto" {
+        return None;
+    }
+    Some((core.to_string(), suffix))
+}
+
+/// True when `core` is a single fundamental builtin type spelling (after the
+/// multi-word qualifier words have been stripped by [`normalize_type`]).
+fn is_builtin_type(core: &str) -> bool {
+    core.split_whitespace()
+        .all(|word| BUILTIN_TYPE_WORDS.contains(&word))
+}
+
+/// Looks up the unique user type matching `core`, preferring an exact dotted
+/// qualified match before a unique simple-name match. Returns `None` when the
+/// match is ambiguous or unknown.
+fn unique_type_qualified_name(table: &SymbolTable, core: &str) -> Option<String> {
+    let dotted = core.replace("::", ".");
+    if let Some(entries) = table.types_by_qualified_name.get(&dotted) {
+        if !entries.is_empty() {
+            return Some(entries[0].qualified_name.clone());
+        }
+    }
+    let simple = dotted.rsplit('.').next().unwrap_or(&dotted);
+    let entries = table.types_by_simple_name.get(simple)?;
+    let mut qualified_names: Vec<&String> =
+        entries.iter().map(|entry| &entry.qualified_name).collect();
+    qualified_names.sort();
+    qualified_names.dedup();
+    match qualified_names.as_slice() {
+        [single] => Some((*single).clone()),
+        _ => None,
+    }
+}
+
+/// Resolves a written declaration type to a `resolvedTypeFullName` value when it
+/// is trivially determinable: builtins are kept verbatim, a unique user type is
+/// rewritten to its dotted qualified name, and pointer/reference/array suffixes
+/// are preserved. Returns `None` for `auto`/`decltype`/templated/ambiguous types.
+fn resolve_declared_type(table: &SymbolTable, written: &str) -> Option<String> {
+    let (core, suffix) = split_core_type(written)?;
+    if is_builtin_type(&core) {
+        return Some(format!("{core}{suffix}"));
+    }
+    let qualified = unique_type_qualified_name(table, &core)?;
+    Some(format!("{qualified}{suffix}"))
+}
+
+/// Infers the type of a literal from its source spelling for the trivially
+/// unambiguous cases. Returns `None` otherwise (e.g. user-defined literals).
+fn infer_literal_type(value: &str) -> Option<String> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    match trimmed {
+        "true" | "false" => return Some("bool".to_string()),
+        "nullptr" => return Some("std.nullptr_t".to_string()),
+        _ => {}
+    }
+    if is_string_literal_spelling(trimmed) {
+        return Some("char*".to_string());
+    }
+    if is_char_literal_spelling(trimmed) {
+        return Some("char".to_string());
+    }
+    if integer_literal_value(trimmed).is_some() {
+        return Some("int".to_string());
+    }
+    if is_floating_literal_spelling(trimmed) {
+        return Some("double".to_string());
+    }
+    None
+}
+
+/// True when `value` is spelled as a (possibly prefixed) string literal.
+fn is_string_literal_spelling(value: &str) -> bool {
+    [
+        "\"", "u8\"", "u\"", "U\"", "L\"", "R\"", "u8R\"", "uR\"", "UR\"", "LR\"",
+    ]
+    .iter()
+    .any(|prefix| value.starts_with(prefix))
+        && value.ends_with('"')
+}
+
+/// True when `value` is spelled as a (possibly prefixed) character literal.
+fn is_char_literal_spelling(value: &str) -> bool {
+    ["'", "u'", "U'", "L'", "u8'"]
+        .iter()
+        .any(|prefix| value.starts_with(prefix))
+        && value.ends_with('\'')
+}
+
+/// True when `value` is unambiguously a floating-point literal (contains a
+/// decimal point or exponent and parses as a float, and is not an integer).
+fn is_floating_literal_spelling(value: &str) -> bool {
+    if integer_literal_value(value).is_some() {
+        return false;
+    }
+    let body = value.trim().trim_end_matches(['f', 'F', 'l', 'L']);
+    if body.is_empty() {
+        return false;
+    }
+    let looks_floating = body.contains('.')
+        || ((body.contains('e') || body.contains('E')) && !body.starts_with("0x"));
+    looks_floating && body.parse::<f64>().is_ok()
+}
+
 /// Entry point: builds the symbol table from `declarations`, then rewrites every
-/// call expression in place with its resolved target when unambiguous.
+/// call expression and trivially-typed declaration/expression in place.
 fn resolve_call_targets(declarations: &mut [Declaration]) {
     let mut table = SymbolTable::default();
     collect_symbols(&mut table, "", declarations);
@@ -879,6 +1173,9 @@ fn annotate_declarations(table: &SymbolTable, declarations: &mut [Declaration]) 
     for declaration in declarations.iter_mut() {
         match declaration {
             Declaration::Function(function) => {
+                for parameter in function.parameters.iter_mut() {
+                    annotate_parameter(table, parameter);
+                }
                 for initializer in function.constructor_initializers.iter_mut() {
                     for argument in initializer.arguments.iter_mut() {
                         annotate_expression(table, argument);
@@ -891,6 +1188,10 @@ fn annotate_declarations(table: &SymbolTable, declarations: &mut [Declaration]) 
             }
             Declaration::Struct(struct_decl) => {
                 for field in struct_decl.fields.iter_mut() {
+                    if field.resolved_type_full_name.is_none() {
+                        field.resolved_type_full_name =
+                            resolve_declared_type(table, &field.type_name);
+                    }
                     if let Some(initializer) = field.initializer.as_mut() {
                         annotate_expression(table, initializer);
                     }
@@ -898,12 +1199,24 @@ fn annotate_declarations(table: &SymbolTable, declarations: &mut [Declaration]) 
                 annotate_declarations(table, &mut struct_decl.nested_declarations);
             }
             Declaration::GlobalVariable(global) => {
+                if global.resolved_type_full_name.is_none() {
+                    global.resolved_type_full_name =
+                        resolve_declared_type(table, &global.type_name);
+                }
                 if let Some(initializer) = global.initializer.as_mut() {
                     annotate_expression(table, initializer);
                 }
             }
             _ => {}
         }
+    }
+}
+
+/// Stamps a parameter's `resolvedTypeFullName` when its written type resolves
+/// trivially, then leaves it otherwise untouched.
+fn annotate_parameter(table: &SymbolTable, parameter: &mut ParameterDecl) {
+    if parameter.resolved_type_full_name.is_none() && !parameter.is_variadic {
+        parameter.resolved_type_full_name = resolve_declared_type(table, &parameter.type_name);
     }
 }
 
@@ -920,8 +1233,22 @@ fn annotate_statement(table: &SymbolTable, statement: &mut Statement) {
         | Statement::Break { .. }
         | Statement::Continue { .. }
         | Statement::Goto { .. } => {}
-        Statement::LocalDecl { initializer, .. }
-        | Statement::StructuredBinding { initializer, .. } => {
+        Statement::LocalDecl {
+            type_name,
+            initializer,
+            resolved_type_full_name,
+            ..
+        } => {
+            if resolved_type_full_name.is_none() {
+                *resolved_type_full_name = resolve_declared_type(table, type_name);
+            }
+            if let Some(initializer) = initializer.as_mut() {
+                annotate_expression(table, initializer);
+            }
+        }
+        Statement::StructuredBinding { initializer, .. } => {
+            // Structured bindings always carry `auto`; their element types are
+            // not trivially determinable, so the field is left absent.
             if let Some(initializer) = initializer.as_mut() {
                 annotate_expression(table, initializer);
             }
@@ -1014,9 +1341,16 @@ fn annotate_statement(table: &SymbolTable, statement: &mut Statement) {
 
 fn annotate_expression(table: &SymbolTable, expression: &mut Expression) {
     match expression {
-        Expression::Identifier { .. }
-        | Expression::Literal { .. }
-        | Expression::Designator { .. } => {}
+        Expression::Identifier { .. } | Expression::Designator { .. } => {}
+        Expression::Literal {
+            value,
+            resolved_type_full_name,
+            ..
+        } => {
+            if resolved_type_full_name.is_none() {
+                *resolved_type_full_name = infer_literal_type(value);
+            }
+        }
         Expression::Call {
             name,
             callee,
@@ -1068,7 +1402,17 @@ fn annotate_expression(table: &SymbolTable, expression: &mut Expression) {
                 annotate_expression(table, right);
             }
         }
-        Expression::Cast { value, .. } => annotate_expression(table, value),
+        Expression::Cast {
+            type_name,
+            value,
+            resolved_type_full_name,
+            ..
+        } => {
+            if resolved_type_full_name.is_none() {
+                *resolved_type_full_name = resolve_declared_type(table, type_name);
+            }
+            annotate_expression(table, value);
+        }
         Expression::SizeOf { value, .. } => {
             if let Some(value) = value.as_mut() {
                 annotate_expression(table, value);
@@ -2436,6 +2780,7 @@ fn parse_field(node: Node, source: &[u8]) -> Option<FieldDecl> {
             code: code.to_string(),
             is_static: is_static_field(node, source),
             initializer: field_initializer(node, source),
+            resolved_type_full_name: None,
         });
     }
     let (type_name, name) =
@@ -2454,6 +2799,7 @@ fn parse_field(node: Node, source: &[u8]) -> Option<FieldDecl> {
         code: code.to_string(),
         is_static: is_static_field(node, source),
         initializer: field_initializer(node, source),
+        resolved_type_full_name: None,
     })
 }
 
@@ -2627,6 +2973,7 @@ fn parse_global_variable_declarations(node: Node, source: &[u8]) -> Vec<GlobalVa
                 initializer: declarator
                     .child_by_field_name("value")
                     .map(|value| parse_expression(value, source)),
+                resolved_type_full_name: None,
             })
         })
         .collect()
@@ -3197,6 +3544,7 @@ fn parse_parameters_with_varargs(
                 || parameter.child_by_field_name("default_value").is_some(),
             code,
             line: line(parameter),
+            resolved_type_full_name: None,
         });
     }
     if include_varargs
@@ -3223,6 +3571,7 @@ fn parse_parameters_with_varargs(
             has_default: false,
             code: format!("{name}..."),
             line,
+            resolved_type_full_name: None,
         });
     }
     parameters
@@ -3648,6 +3997,7 @@ fn parse_local_declarations(node: Node, source: &[u8]) -> Vec<Statement> {
                 code: statement_code(node, source),
                 line: line(node),
                 initializer,
+                resolved_type_full_name: None,
             })
             .into_iter()
             .collect::<Vec<_>>()
@@ -3888,6 +4238,7 @@ fn parse_for_range_loop(
             code: node_text(declarator, source).trim().to_string(),
             line: line(declarator),
             initializer: None,
+            resolved_type_full_name: None,
         });
     }
     Some(Statement::For {
@@ -4071,6 +4422,7 @@ fn condition_declaration_from_text(node: Node, source: &[u8]) -> Option<Statemen
         code: code.to_string(),
         line: line(node),
         initializer: Some(parse_expression_text(right.trim(), line(node))),
+        resolved_type_full_name: None,
     })
 }
 
@@ -4273,6 +4625,7 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
             value: node_text(node, source).to_string(),
             code: node_text(node, source).to_string(),
             line: line(node),
+            resolved_type_full_name: None,
         },
         "binary_expression" => parse_binary_expression(node, source),
         "unary_expression" | "update_expression" | "pointer_expression" => {
@@ -4377,6 +4730,7 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
             value: code.to_string(),
             code: code.to_string(),
             line,
+            resolved_type_full_name: None,
         }
     } else {
         Expression::Identifier {
@@ -4665,6 +5019,7 @@ fn parse_call_expression(node: Node, source: &[u8]) -> Expression {
                 code: node_text(node, source).trim().to_string(),
                 line: line(node),
                 value: Box::new(value.clone()),
+                resolved_type_full_name: None,
             };
         }
     }
@@ -4824,6 +5179,7 @@ fn parse_cast_expression(node: Node, source: &[u8]) -> Expression {
                 code: node_text(node, source).trim().to_string(),
                 line: line(node),
                 value: Box::new(parse_expression(value, source)),
+                resolved_type_full_name: None,
             }
         }
         None => identifier_expression(node, source),
@@ -4857,6 +5213,7 @@ fn parse_offsetof_expression(node: Node, source: &[u8]) -> Expression {
         code: value.clone(),
         value,
         line,
+        resolved_type_full_name: None,
     })
     .collect();
     Expression::Call {
@@ -11653,5 +12010,260 @@ mod tests {
         let json = serde_json::to_string(&unresolved).expect("serialize unresolved call");
         assert!(!json.contains("resolvedMethodFullName"));
         assert!(!json.contains("resolvedSignature"));
+    }
+
+    // ---- Phase-2 type collection + trivial type inference ---------------------
+
+    /// Returns the `resolvedTypeFullName` of the first `LocalDecl` named `name`
+    /// in `function`'s body.
+    fn local_resolved_type(function: &FunctionDecl, name: &str) -> Option<Option<String>> {
+        function.body.iter().find_map(|statement| match statement {
+            Statement::LocalDecl {
+                name: local_name,
+                resolved_type_full_name,
+                ..
+            } if local_name == name => Some(resolved_type_full_name.clone()),
+            _ => None,
+        })
+    }
+
+    /// Returns the `resolvedTypeFullName` of the first literal with the given
+    /// source `value` reachable from `function`'s body.
+    fn literal_resolved_type(function: &FunctionDecl, value: &str) -> Option<Option<String>> {
+        function.body.iter().find_map(|statement| {
+            statement_expressions(statement)
+                .into_iter()
+                .find_map(|expression| find_literal_resolved_type(expression, value))
+        })
+    }
+
+    fn find_literal_resolved_type(expression: &Expression, value: &str) -> Option<Option<String>> {
+        match expression {
+            Expression::Literal {
+                value: literal_value,
+                resolved_type_full_name,
+                ..
+            } if literal_value == value => Some(resolved_type_full_name.clone()),
+            Expression::Cast { value: inner, .. } => find_literal_resolved_type(inner, value),
+            Expression::Binary { left, right, .. } => find_literal_resolved_type(left, value)
+                .or_else(|| find_literal_resolved_type(right, value)),
+            _ => None,
+        }
+    }
+
+    #[test]
+    fn symbol_table_collects_qualified_type_names() {
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                struct Widget { int value; };
+                enum Color { Red, Green };
+                typedef Widget WAlias;
+                }
+                using MyInt = int;
+                struct Plain {};
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("type-collection sample should parse");
+
+        let mut table = SymbolTable::default();
+        collect_symbols(&mut table, "", &declarations);
+
+        assert!(table.types_by_qualified_name.contains_key("Core.Widget"));
+        assert!(table.types_by_qualified_name.contains_key("Core.Color"));
+        assert!(table.types_by_qualified_name.contains_key("Core.WAlias"));
+        assert!(table.types_by_qualified_name.contains_key("MyInt"));
+        assert!(table.types_by_qualified_name.contains_key("Plain"));
+        // Simple-name index carries the trailing identifier.
+        assert!(table.types_by_simple_name.contains_key("Widget"));
+        assert!(table.types_by_simple_name.contains_key("Color"));
+    }
+
+    #[test]
+    fn resolves_explicit_local_type_to_qualified_user_type() {
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                struct Widget { int value; };
+                }
+                int use(Core::Widget seed) {
+                  Core::Widget local = seed;
+                  Core::Widget* ptr = &seed;
+                  int count = 0;
+                  return count;
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("explicit-type sample should parse");
+
+        let use_fn = function_named(&declarations, "use");
+        assert_eq!(
+            local_resolved_type(use_fn, "local"),
+            Some(Some("Core.Widget".to_string()))
+        );
+        // Pointer suffix is preserved on the qualified name.
+        assert_eq!(
+            local_resolved_type(use_fn, "ptr"),
+            Some(Some("Core.Widget*".to_string()))
+        );
+        // Builtins are kept verbatim.
+        assert_eq!(
+            local_resolved_type(use_fn, "count"),
+            Some(Some("int".to_string()))
+        );
+        // The parameter is resolved too.
+        assert_eq!(
+            use_fn.parameters[0].resolved_type_full_name,
+            Some("Core.Widget".to_string())
+        );
+    }
+
+    #[test]
+    fn infers_literal_types() {
+        assert_eq!(infer_literal_type("42"), Some("int".to_string()));
+        assert_eq!(infer_literal_type("0x1F"), Some("int".to_string()));
+        assert_eq!(infer_literal_type("3.14"), Some("double".to_string()));
+        assert_eq!(infer_literal_type("1e9"), Some("double".to_string()));
+        assert_eq!(infer_literal_type("2.0f"), Some("double".to_string()));
+        assert_eq!(infer_literal_type("'a'"), Some("char".to_string()));
+        assert_eq!(infer_literal_type("\"hi\""), Some("char*".to_string()));
+        assert_eq!(infer_literal_type("true"), Some("bool".to_string()));
+        assert_eq!(infer_literal_type("false"), Some("bool".to_string()));
+        assert_eq!(
+            infer_literal_type("nullptr"),
+            Some("std.nullptr_t".to_string())
+        );
+        // User-defined / unrecognized literals stay unresolved.
+        assert_eq!(infer_literal_type("12_km"), None);
+        assert_eq!(infer_literal_type(""), None);
+    }
+
+    #[test]
+    fn stamps_literal_type_on_expression() {
+        let declarations = parse_declarations(
+            r#"
+                int use() {
+                  int i = 7;
+                  return i;
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("literal sample should parse");
+
+        let use_fn = function_named(&declarations, "use");
+        assert_eq!(
+            literal_resolved_type(use_fn, "7"),
+            Some(Some("int".to_string()))
+        );
+    }
+
+    #[test]
+    fn resolves_cast_target_type() {
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                struct Widget { int value; };
+                }
+                int use(Core::Widget seed) {
+                  Core::Widget w = static_cast<Core::Widget>(seed);
+                  double d = 1.0;
+                  int n = (int) d;
+                  return n;
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("cast sample should parse");
+
+        let use_fn = function_named(&declarations, "use");
+        let casts = collect_casts(&use_fn.body);
+        // A user-type cast resolves to the qualified name; the builtin cast to `int`.
+        assert!(casts.contains(&("Core.Widget".to_string())));
+        assert!(casts.contains(&("int".to_string())));
+    }
+
+    fn collect_casts(statements: &[Statement]) -> Vec<String> {
+        let mut out = Vec::new();
+        for statement in statements {
+            for expression in statement_expressions(statement) {
+                collect_casts_in_expression(expression, &mut out);
+            }
+        }
+        out
+    }
+
+    fn collect_casts_in_expression(expression: &Expression, out: &mut Vec<String>) {
+        match expression {
+            Expression::Cast {
+                value,
+                resolved_type_full_name,
+                ..
+            } => {
+                if let Some(resolved) = resolved_type_full_name {
+                    out.push(resolved.clone());
+                }
+                collect_casts_in_expression(value, out);
+            }
+            Expression::Call {
+                callee, arguments, ..
+            } => {
+                collect_casts_in_expression(callee, out);
+                for argument in arguments {
+                    collect_casts_in_expression(argument, out);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    #[test]
+    fn leaves_ambiguous_and_auto_types_unresolved() {
+        let declarations = parse_declarations(
+            r#"
+                namespace A {
+                struct Dup { int x; };
+                }
+                namespace B {
+                struct Dup { int y; };
+                }
+                int use(A::Dup seed) {
+                  Dup ambiguous = seed;
+                  auto inferred = seed;
+                  return 0;
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("ambiguous sample should parse");
+
+        let use_fn = function_named(&declarations, "use");
+        // `Dup` matches two distinct qualified types by simple name => unresolved.
+        assert_eq!(local_resolved_type(use_fn, "ambiguous"), Some(None));
+        // `auto` is never trivially inferred.
+        assert_eq!(local_resolved_type(use_fn, "inferred"), Some(None));
+    }
+
+    #[test]
+    fn type_field_serializes_only_when_present() {
+        let resolved = Expression::Literal {
+            value: "1".to_string(),
+            code: "1".to_string(),
+            line: 1,
+            resolved_type_full_name: Some("int".to_string()),
+        };
+        let json = serde_json::to_string(&resolved).expect("serialize resolved literal");
+        assert!(json.contains("\"resolvedTypeFullName\":\"int\""));
+
+        let unresolved = Expression::Literal {
+            value: "x".to_string(),
+            code: "x".to_string(),
+            line: 1,
+            resolved_type_full_name: None,
+        };
+        let json = serde_json::to_string(&unresolved).expect("serialize unresolved literal");
+        assert!(!json.contains("resolvedTypeFullName"));
     }
 }
