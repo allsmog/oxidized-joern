@@ -2855,6 +2855,62 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn decl_modifier(&self, node: Node<'a>) -> Value {
+        let text = self.text(node);
+        // A parenthesised modifier (`private(set)`) splits into a keyword `name`
+        // plus a `detail` clause carrying the inner identifier.
+        if let Some(paren_offset) = text.find('(') {
+            let name_end = node.start_byte() + text[..paren_offset].trim_end().len();
+            let paren_start = node.start_byte() + paren_offset;
+            let right_paren_start = node.end_byte() - 1;
+            let (detail_start, detail_end) = self.trim_offsets(paren_start + 1, right_paren_start);
+            let detail = self.syntax_node(
+                "DeclModifierDetailSyntax",
+                self.range_from_offsets(paren_start, node.end_byte()),
+                vec![
+                    self.with_name(
+                        self.token_with_range(
+                            "leftParen",
+                            self.range_from_offsets(paren_start, paren_start + 1),
+                        ),
+                        "leftParen",
+                    ),
+                    self.with_name(
+                        self.token_with_range(
+                            &format!(
+                                "identifier({})",
+                                quoted_text(&self.source[detail_start..detail_end])
+                            ),
+                            self.range_from_offsets(detail_start, detail_end),
+                        ),
+                        "detail",
+                    ),
+                    self.with_name(
+                        self.token_with_range(
+                            "rightParen",
+                            self.range_from_offsets(right_paren_start, node.end_byte()),
+                        ),
+                        "rightParen",
+                    ),
+                ],
+            );
+            return self.syntax_node(
+                "DeclModifierSyntax",
+                self.range_for_node(node),
+                vec![
+                    self.with_name(
+                        self.token_with_range(
+                            &format!(
+                                "keyword(SwiftSyntax.Keyword.{})",
+                                &self.source[node.start_byte()..name_end]
+                            ),
+                            self.range_from_offsets(node.start_byte(), name_end),
+                        ),
+                        "name",
+                    ),
+                    self.with_name(detail, "detail"),
+                ],
+            );
+        }
         self.syntax_node(
             "DeclModifierSyntax",
             self.range_for_node(node),
@@ -16455,6 +16511,25 @@ repeat { sink() } while x < 1
             )
             .unwrap()["tokenKind"],
             "identifier(\"escaping\")"
+        );
+    }
+
+    #[test]
+    fn emits_parenthesised_modifier_with_detail() {
+        // `private(set)` → name keyword(private) + detail DeclModifierDetail(set).
+        let source = "struct S {\n  private(set) var x = 0\n}\n";
+        let value = parse_source("PS.swift", "/tmp/PS.swift", source).unwrap();
+
+        let modifier = find_first_node_type(&value, "DeclModifierSyntax").unwrap();
+        assert_eq!(
+            child_by_name(modifier, "name").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.private)"
+        );
+        let detail = child_by_name(modifier, "detail").unwrap();
+        assert_eq!(detail["nodeType"], "DeclModifierDetailSyntax");
+        assert_eq!(
+            child_by_name(detail, "detail").unwrap()["tokenKind"],
+            "identifier(\"set\")"
         );
     }
 
