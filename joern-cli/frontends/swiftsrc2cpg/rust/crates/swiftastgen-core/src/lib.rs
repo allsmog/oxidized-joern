@@ -9055,8 +9055,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .or_else(|| self.field_child(node, "expression"))
             .or_else(|| named_children(node).next())
             .context("postfix expression is missing operand")?;
+        // tree-sitter exposes the postfix `!`/`?` as the named `operation` field
+        // (kind `bang`); custom postfix operators arrive as `operator` or as a
+        // trailing unnamed child.
         let operator = self
-            .field_child(node, "operator")
+            .field_child(node, "operation")
+            .or_else(|| self.field_child(node, "operator"))
             .or_else(|| {
                 children(node)
                     .filter(|child| {
@@ -9065,6 +9069,35 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     .last()
             })
             .context("postfix expression is missing operator")?;
+
+        // `expr!` is a force unwrap and `expr?` an optional chain in SwiftSyntax,
+        // not generic postfix-operator expressions.
+        if operator.kind() == "bang" || self.text(operator) == "!" {
+            return Ok(self.syntax_node(
+                "ForceUnwrapExprSyntax",
+                self.range_for_node(node),
+                vec![
+                    self.with_name(self.expr(expression)?, "expression"),
+                    self.with_name(
+                        self.token_for_node(operator, "exclamationMark"),
+                        "exclamationMark",
+                    ),
+                ],
+            ));
+        }
+        if self.text(operator) == "?" {
+            return Ok(self.syntax_node(
+                "OptionalChainingExprSyntax",
+                self.range_for_node(node),
+                vec![
+                    self.with_name(self.expr(expression)?, "expression"),
+                    self.with_name(
+                        self.token_for_node(operator, "postfixQuestionMark"),
+                        "questionMark",
+                    ),
+                ],
+            ));
+        }
 
         Ok(self.syntax_node(
             "PostfixOperatorExprSyntax",
@@ -15477,6 +15510,25 @@ repeat { sink() } while x < 1
         assert_eq!(
             binding["range"]["startOffset"],
             pattern["range"]["startOffset"]
+        );
+    }
+
+    #[test]
+    fn emits_force_unwrap_without_bailing() {
+        // `a!` is a ForceUnwrapExprSyntax (not a generic postfix operator), and the
+        // file must parse rather than bail with "missing operator".
+        let source = "let a: Int? = nil\nlet f = a!\n";
+        let value = parse_source("Force.swift", "/tmp/Force.swift", source).unwrap();
+
+        let force = find_first_node_type(&value, "ForceUnwrapExprSyntax").unwrap();
+        assert_eq!(source_text(source, force), "a!");
+        assert_eq!(
+            child_by_name(force, "expression").unwrap()["nodeType"],
+            "DeclReferenceExprSyntax"
+        );
+        assert_eq!(
+            child_by_name(force, "exclamationMark").unwrap()["tokenKind"],
+            "exclamationMark"
         );
     }
 
