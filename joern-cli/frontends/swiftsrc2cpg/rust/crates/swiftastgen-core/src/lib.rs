@@ -4708,10 +4708,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.with_name(self.modifier_list(node), "modifiers"),
             self.with_name(func_keyword_token, "funcKeyword"),
             self.with_name(
-                self.token_for_node(
-                    name,
-                    &format!("identifier({})", quoted_text(self.text(name))),
-                ),
+                self.token_for_node(name, &self.function_name_token_kind(name)),
                 "name",
             ),
         ];
@@ -4730,6 +4727,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             children.push(self.with_name(self.code_block(body_node)?, "body"));
         }
         Ok(self.syntax_node("FunctionDeclSyntax", self.range_for_node(node), children))
+    }
+
+    /// The name token kind for a function declaration: an operator function
+    /// (`func <+>`) names a `binaryOperator`, otherwise an `identifier`.
+    fn function_name_token_kind(&self, name: Node<'a>) -> String {
+        if name.kind() == "custom_operator" {
+            format!("binaryOperator({})", quoted_text(self.text(name)))
+        } else {
+            format!("identifier({})", quoted_text(self.text(name)))
+        }
     }
 
     fn function_signature(&self, node: Node<'a>) -> Result<Value> {
@@ -16004,6 +16011,18 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(pattern_expr, "pattern").unwrap()["nodeType"],
             "ValueBindingPatternSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_operator_function_name_as_binary_operator() {
+        let source = "func <+> (a: Int, b: Int) -> Int { return a + b }\n";
+        let value = parse_source("Op.swift", "/tmp/Op.swift", source).unwrap();
+
+        let func = find_first_node_type(&value, "FunctionDeclSyntax").unwrap();
+        assert_eq!(
+            child_by_name(func, "name").unwrap()["tokenKind"],
+            "binaryOperator(\"<+>\")"
         );
     }
 
