@@ -2820,18 +2820,30 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
             }
 
+            // Start the binding at the built pattern (e.g. `count`), not the raw
+            // tree-sitter name node: for protocol property requirements that node
+            // spans back to the `var`, whereas SwiftSyntax anchors the
+            // PatternBindingSyntax at the pattern itself.
+            let binding_start = binding_children
+                .first()
+                .map(start_offset)
+                .unwrap_or_else(|| pattern_node.start_byte());
             let binding_end = binding_children
                 .last()
                 .map(end_offset)
                 .unwrap_or_else(|| pattern_node.end_byte());
             let binding = self.syntax_node(
                 "PatternBindingSyntax",
-                self.range_from_offsets(pattern_node.start_byte(), binding_end),
+                self.range_from_offsets(binding_start, binding_end),
                 binding_children,
             );
             binding_items.push(self.with_name(binding, ""));
         }
 
+        let bindings_start = binding_items
+            .first()
+            .map(start_offset)
+            .unwrap_or_else(|| pattern_nodes[0].start_byte());
         let bindings_end = binding_items
             .last()
             .map(end_offset)
@@ -2839,7 +2851,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let bindings = self.with_name(
             self.syntax_node(
                 "PatternBindingListSyntax",
-                self.range_from_offsets(pattern_nodes[0].start_byte(), bindings_end),
+                self.range_from_offsets(bindings_start, bindings_end),
                 binding_items,
             ),
             "bindings",
@@ -14581,6 +14593,10 @@ fn end_offset(value: &Value) -> usize {
     value["range"]["endOffset"].as_u64().unwrap_or_default() as usize
 }
 
+fn start_offset(value: &Value) -> usize {
+    value["range"]["startOffset"].as_u64().unwrap_or_default() as usize
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -15445,6 +15461,23 @@ repeat { sink() } while x < 1
         let items1 = child_by_name(catches[1], "catchItems").unwrap();
         assert_eq!(items1["nodeType"], "CatchItemListSyntax");
         assert!(items1["children"].as_array().unwrap().is_empty());
+    }
+
+    #[test]
+    fn anchors_protocol_property_binding_at_pattern_not_var() {
+        // A protocol property requirement's PatternBindingSyntax must start at the
+        // pattern (`count`), not the `var` keyword (the tree-sitter name node spans
+        // back to `var` for these, unlike ordinary properties).
+        let source = "protocol P {\n  var count: Int { get }\n}\n";
+        let value = parse_source("Proto.swift", "/tmp/Proto.swift", source).unwrap();
+
+        let binding = find_first_node_type(&value, "PatternBindingSyntax").unwrap();
+        assert_eq!(source_text(source, binding), "count: Int { get }");
+        let pattern = child_by_name(binding, "pattern").unwrap();
+        assert_eq!(
+            binding["range"]["startOffset"],
+            pattern["range"]["startOffset"]
+        );
     }
 
     #[test]
