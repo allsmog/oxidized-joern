@@ -494,6 +494,18 @@ pub enum Expression {
         name: String,
         code: String,
         line: usize,
+        /// Phase-3 semantic engine output: when this identifier is used as a
+        /// value/type-name *reference* and binds to exactly one in-scope
+        /// declaration, its fully-qualified dotted name (e.g. `Core.Widget`,
+        /// `use.local`, `Core.helper`). Left `None` when ambiguous, unknown,
+        /// overloaded, macro-derived, or template-dependent, and never set on
+        /// the callee identifier of a call (that is phase-1's `resolvedMethodFullName`).
+        /// Strictly additive JSON ignored by the current reader.
+        #[serde(
+            rename = "resolvedReferenceFullName",
+            skip_serializing_if = "Option::is_none"
+        )]
+        resolved_reference_full_name: Option<String>,
     },
     Literal {
         value: String,
@@ -1162,11 +1174,13 @@ fn is_floating_literal_spelling(value: &str) -> bool {
 }
 
 /// Entry point: builds the symbol table from `declarations`, then rewrites every
-/// call expression and trivially-typed declaration/expression in place.
+/// call expression and trivially-typed declaration/expression in place, and
+/// finally resolves in-scope value/type-name references.
 fn resolve_call_targets(declarations: &mut [Declaration]) {
     let mut table = SymbolTable::default();
     collect_symbols(&mut table, "", declarations);
     annotate_declarations(&table, declarations);
+    resolve_references_in_declarations(&table, "", declarations);
 }
 
 fn annotate_declarations(table: &SymbolTable, declarations: &mut [Declaration]) {
@@ -1443,6 +1457,561 @@ fn annotate_expression(table: &SymbolTable, expression: &mut Expression) {
         } => {
             annotate_expression(table, designator);
             annotate_expression(table, value);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Phase-3 semantic engine: reference resolution.
+//
+// A scope-aware pass that resolves identifier-reference expressions (plain
+// identifiers and qualified-ids `A::B::name`) to the qualified name of the
+// unique declaration they bind to, and stamps `resolvedReferenceFullName`.
+// A lexical scope stack tracks variable/parameter/field bindings so inner
+// declarations shadow outer ones; free functions and user types are looked up
+// in the phase-1/phase-2 symbol tables. Resolution happens only when exactly one
+// binding exists; everything else (ambiguity, overloads, unknown names, macro or
+// template-dependent names) leaves the field absent. ADL, using-directives, and
+// member-access-through-type are deliberately deferred. Purely additive.
+// ---------------------------------------------------------------------------
+
+/// A lexical scope stack mapping a simple identifier to the qualified name of the
+/// declaration currently bound to it. The last frame is the innermost scope.
+#[derive(Debug, Default)]
+struct ScopeStack {
+    frames: Vec<HashMap<String, String>>,
+}
+
+impl ScopeStack {
+    fn push(&mut self) {
+        self.frames.push(HashMap::new());
+    }
+
+    fn pop(&mut self) {
+        self.frames.pop();
+    }
+
+    /// Binds `name` to `qualified_name` in the innermost frame, shadowing any
+    /// outer binding of the same name.
+    fn bind(&mut self, name: &str, qualified_name: String) {
+        if name.is_empty() {
+            return;
+        }
+        if let Some(frame) = self.frames.last_mut() {
+            frame.insert(name.to_string(), qualified_name);
+        }
+    }
+
+    /// Looks up `name` from the innermost scope outward.
+    fn lookup(&self, name: &str) -> Option<&str> {
+        self.frames
+            .iter()
+            .rev()
+            .find_map(|frame| frame.get(name))
+            .map(String::as_str)
+    }
+}
+
+/// Joins a dotted `scope` with a simple `name` (e.g. a function-local variable
+/// qualified by its enclosing function's dotted name).
+fn join_scope(scope: &str, name: &str) -> String {
+    if scope.is_empty() {
+        name.to_string()
+    } else {
+        format!("{scope}.{name}")
+    }
+}
+
+/// True when an identifier spelling is a plain, single, lookup-able name (no
+/// qualifiers, template arguments, operators, or whitespace).
+fn is_plain_reference_name(name: &str) -> bool {
+    !name.is_empty()
+        && !name.contains("::")
+        && !name.contains('<')
+        && !name.contains('(')
+        && !name.contains(' ')
+        && !name.contains('.')
+        && !name.contains('*')
+        && !name.contains('&')
+        && name
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '_' || c == '~')
+}
+
+/// Resolves a reference `name` against the scope stack first (locals, parameters,
+/// fields) and then the symbol tables (a unique free function or user type used
+/// as a value/type-name). Returns `None` when ambiguous, overloaded, or unknown.
+fn resolve_reference_name(table: &SymbolTable, scope: &ScopeStack, name: &str) -> Option<String> {
+    let trimmed = name.trim();
+    // Qualified-id `A::B::name`: resolve against the type/function tables only.
+    if trimmed.contains("::") {
+        return resolve_qualified_reference(table, trimmed);
+    }
+    if !is_plain_reference_name(trimmed) {
+        return None;
+    }
+    // 1) A variable/parameter/field binding in scope wins (and shadows globals).
+    if let Some(qualified) = scope.lookup(trimmed) {
+        return Some(qualified.to_string());
+    }
+    // 2) Otherwise a unique, non-overloaded free function or a unique user type.
+    let function_match = unique_nonoverloaded_function(table, trimmed);
+    let type_match = unique_type_qualified_name(table, trimmed);
+    match (function_match, type_match) {
+        (Some(function), None) => Some(function),
+        (None, Some(type_name)) => Some(type_name),
+        // Both a function and a type, or neither: ambiguous/unknown.
+        _ => None,
+    }
+}
+
+/// Resolves a qualified-id (`A::B::name`) to the qualified name of a unique user
+/// type or free function. Returns `None` when ambiguous or unknown.
+fn resolve_qualified_reference(table: &SymbolTable, name: &str) -> Option<String> {
+    let dotted = name.replace("::", ".");
+    if dotted.is_empty() || dotted.contains('<') || dotted.contains('(') {
+        return None;
+    }
+    if let Some(type_name) = unique_type_qualified_name(table, &dotted) {
+        return Some(type_name);
+    }
+    // Exact, non-overloaded function by qualified name.
+    if let Some(entries) = table.by_qualified_name.get(&dotted) {
+        if let Some(qualified) = unique_function_qualified_name(entries) {
+            return Some(qualified.to_string());
+        }
+    }
+    None
+}
+
+/// Returns the qualified name of a function named `name` only when it denotes a
+/// single, non-overloaded target. Overloads (same qualified name, different
+/// signatures) and same-name functions in different scopes both make the
+/// reference ambiguous, so it stays unresolved. Distinct prototype + definition
+/// of the *same* function (identical qualified name and signature) collapse to
+/// one target and still resolve.
+fn unique_function_qualified_name(entries: &[SymbolEntry]) -> Option<&str> {
+    let mut distinct: Vec<(&str, &str)> = entries
+        .iter()
+        .map(|entry| (entry.qualified_name.as_str(), entry.signature.as_str()))
+        .collect();
+    distinct.sort_unstable();
+    distinct.dedup();
+    match distinct.as_slice() {
+        [(qualified, _)] => Some(qualified),
+        _ => None,
+    }
+}
+
+/// Looks up a unique, non-overloaded free function by simple `name`.
+fn unique_nonoverloaded_function(table: &SymbolTable, name: &str) -> Option<String> {
+    let entries = table.by_simple_name.get(name)?;
+    unique_function_qualified_name(entries).map(str::to_string)
+}
+
+/// Walks declarations, tracking the dotted lexical `scope`, and resolves
+/// references inside function bodies / initializers. Global variables declared
+/// at this level are bound first so sibling function bodies can see them.
+fn resolve_references_in_declarations(
+    table: &SymbolTable,
+    scope: &str,
+    declarations: &mut [Declaration],
+) {
+    // Gather global-variable bindings declared directly at this scope up front
+    // (owned), so they can be seeded into each sibling function's scope stack
+    // without borrowing the slice immutably during mutable iteration.
+    let global_bindings: Vec<(String, String)> = declarations
+        .iter()
+        .filter_map(|declaration| match declaration {
+            Declaration::GlobalVariable(global) if is_plain_reference_name(&global.name) => {
+                Some((global.name.clone(), join_scope(scope, &global.name)))
+            }
+            _ => None,
+        })
+        .collect();
+    for declaration in declarations.iter_mut() {
+        match declaration {
+            Declaration::Function(function) => {
+                let mut stack = ScopeStack::default();
+                stack.push();
+                for (name, qualified) in &global_bindings {
+                    stack.bind(name, qualified.clone());
+                }
+                resolve_references_in_function(table, scope, function, &mut stack);
+            }
+            Declaration::Namespace(namespace) => {
+                let nested = extend_scope(scope, &namespace.name);
+                resolve_references_in_declarations(table, &nested, &mut namespace.declarations);
+            }
+            Declaration::Struct(struct_decl) => {
+                let nested = extend_scope(scope, &struct_decl.name);
+                resolve_references_in_struct(table, &nested, struct_decl, &global_bindings);
+            }
+            Declaration::GlobalVariable(global) => {
+                if let Some(initializer) = global.initializer.as_mut() {
+                    let mut stack = ScopeStack::default();
+                    stack.push();
+                    for (name, qualified) in &global_bindings {
+                        stack.bind(name, qualified.clone());
+                    }
+                    resolve_references_in_expression(table, scope, &mut stack, initializer, false);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+/// Resolves references inside an aggregate: binds its fields (and visible
+/// `outer_bindings` such as globals), then recurses into member functions and
+/// nested declarations.
+fn resolve_references_in_struct(
+    table: &SymbolTable,
+    scope: &str,
+    struct_decl: &mut StructDecl,
+    outer_bindings: &[(String, String)],
+) {
+    // Visible bindings: outer (globals) first, then this aggregate's fields,
+    // which shadow same-named outer names.
+    let mut visible_bindings: Vec<(String, String)> = outer_bindings.to_vec();
+    visible_bindings.extend(
+        struct_decl
+            .fields
+            .iter()
+            .filter(|field| is_plain_reference_name(&field.name))
+            .map(|field| (field.name.clone(), join_scope(scope, &field.name))),
+    );
+    for field in struct_decl.fields.iter_mut() {
+        if let Some(initializer) = field.initializer.as_mut() {
+            let mut stack = ScopeStack::default();
+            stack.push();
+            for (name, qualified) in &visible_bindings {
+                stack.bind(name, qualified.clone());
+            }
+            resolve_references_in_expression(table, scope, &mut stack, initializer, false);
+        }
+    }
+    for declaration in struct_decl.nested_declarations.iter_mut() {
+        match declaration {
+            Declaration::Function(function) => {
+                let mut stack = ScopeStack::default();
+                stack.push();
+                for (name, qualified) in &visible_bindings {
+                    stack.bind(name, qualified.clone());
+                }
+                resolve_references_in_function(table, scope, function, &mut stack);
+            }
+            Declaration::Struct(nested) => {
+                let nested_scope = extend_scope(scope, &nested.name);
+                resolve_references_in_struct(table, &nested_scope, nested, &visible_bindings);
+            }
+            _ => {}
+        }
+    }
+}
+
+/// Resolves references inside a single function. The function's parameters are
+/// bound in a fresh inner scope, and locals are bound as the body is walked.
+fn resolve_references_in_function(
+    table: &SymbolTable,
+    scope: &str,
+    function: &mut FunctionDecl,
+    stack: &mut ScopeStack,
+) {
+    let function_scope = if is_plain_function_name(&function.name) {
+        join_scope(scope, &function.name)
+    } else {
+        scope.to_string()
+    };
+    stack.push();
+    for parameter in function.parameters.iter() {
+        if !parameter.is_variadic && is_plain_reference_name(&parameter.name) {
+            stack.bind(
+                &parameter.name,
+                join_scope(&function_scope, &parameter.name),
+            );
+        }
+    }
+    for initializer in function.constructor_initializers.iter_mut() {
+        for argument in initializer.arguments.iter_mut() {
+            resolve_references_in_expression(table, scope, stack, argument, false);
+        }
+    }
+    resolve_references_in_statements(table, &function_scope, stack, &mut function.body);
+    stack.pop();
+}
+
+fn resolve_references_in_statements(
+    table: &SymbolTable,
+    scope: &str,
+    stack: &mut ScopeStack,
+    statements: &mut [Statement],
+) {
+    for statement in statements.iter_mut() {
+        resolve_references_in_statement(table, scope, stack, statement);
+    }
+}
+
+/// Resolves references in one statement. Declarations introduce bindings into the
+/// current (innermost) scope; control-structure bodies open nested scopes.
+fn resolve_references_in_statement(
+    table: &SymbolTable,
+    scope: &str,
+    stack: &mut ScopeStack,
+    statement: &mut Statement,
+) {
+    match statement {
+        Statement::Unknown { .. }
+        | Statement::UsingEnum { .. }
+        | Statement::Break { .. }
+        | Statement::Continue { .. }
+        | Statement::Goto { .. } => {}
+        Statement::LocalDecl {
+            name, initializer, ..
+        } => {
+            if let Some(initializer) = initializer.as_mut() {
+                resolve_references_in_expression(table, scope, stack, initializer, false);
+            }
+            if is_plain_reference_name(name) {
+                stack.bind(name, join_scope(scope, name));
+            }
+        }
+        Statement::StructuredBinding {
+            names, initializer, ..
+        } => {
+            if let Some(initializer) = initializer.as_mut() {
+                resolve_references_in_expression(table, scope, stack, initializer, false);
+            }
+            for name in names.iter() {
+                if is_plain_reference_name(name) {
+                    stack.bind(name, join_scope(scope, name));
+                }
+            }
+        }
+        Statement::Assignment { left, right, .. } => {
+            resolve_references_in_expression(table, scope, stack, left, false);
+            resolve_references_in_expression(table, scope, stack, right, false);
+        }
+        Statement::Return { expression, .. } | Statement::Throw { expression, .. } => {
+            if let Some(expression) = expression.as_mut() {
+                resolve_references_in_expression(table, scope, stack, expression, false);
+            }
+        }
+        Statement::Try { body, catches, .. } => {
+            resolve_references_in_block(table, scope, stack, body);
+            for catch in catches.iter_mut() {
+                stack.push();
+                if let Some(parameter) = catch.parameter.as_ref() {
+                    if is_plain_reference_name(&parameter.name) {
+                        stack.bind(&parameter.name, join_scope(scope, &parameter.name));
+                    }
+                }
+                resolve_references_in_statements(table, scope, stack, &mut catch.body);
+                stack.pop();
+            }
+        }
+        Statement::If {
+            initializer,
+            condition_initializer,
+            condition,
+            then_body,
+            else_body,
+            ..
+        } => {
+            stack.push();
+            resolve_references_in_statements(table, scope, stack, initializer);
+            resolve_references_in_statements(table, scope, stack, condition_initializer);
+            resolve_references_in_expression(table, scope, stack, condition, false);
+            resolve_references_in_block(table, scope, stack, then_body);
+            resolve_references_in_block(table, scope, stack, else_body);
+            stack.pop();
+        }
+        Statement::While {
+            initializer,
+            condition_initializer,
+            condition,
+            body,
+            ..
+        } => {
+            stack.push();
+            resolve_references_in_statements(table, scope, stack, initializer);
+            resolve_references_in_statements(table, scope, stack, condition_initializer);
+            resolve_references_in_expression(table, scope, stack, condition, false);
+            resolve_references_in_block(table, scope, stack, body);
+            stack.pop();
+        }
+        Statement::DoWhile {
+            condition, body, ..
+        } => {
+            resolve_references_in_block(table, scope, stack, body);
+            resolve_references_in_expression(table, scope, stack, condition, false);
+        }
+        Statement::For {
+            initializer,
+            condition,
+            update,
+            body,
+            ..
+        } => {
+            stack.push();
+            resolve_references_in_statements(table, scope, stack, initializer);
+            if let Some(condition) = condition.as_mut() {
+                resolve_references_in_expression(table, scope, stack, condition, false);
+            }
+            if let Some(update) = update.as_mut() {
+                resolve_references_in_expression(table, scope, stack, update, false);
+            }
+            resolve_references_in_block(table, scope, stack, body);
+            stack.pop();
+        }
+        Statement::Label { body, .. } => {
+            resolve_references_in_statements(table, scope, stack, body)
+        }
+        Statement::Switch {
+            initializer,
+            condition_initializer,
+            condition,
+            body,
+            ..
+        } => {
+            stack.push();
+            resolve_references_in_statements(table, scope, stack, initializer);
+            resolve_references_in_statements(table, scope, stack, condition_initializer);
+            resolve_references_in_expression(table, scope, stack, condition, false);
+            resolve_references_in_block(table, scope, stack, body);
+            stack.pop();
+        }
+        Statement::Case { value, body, .. } => {
+            if let Some(value) = value.as_mut() {
+                resolve_references_in_expression(table, scope, stack, value, false);
+            }
+            resolve_references_in_statements(table, scope, stack, body);
+        }
+        Statement::Expression { expression, .. } => {
+            resolve_references_in_expression(table, scope, stack, expression, false)
+        }
+    }
+}
+
+/// Runs a nested block in its own lexical scope so its locals do not leak out.
+fn resolve_references_in_block(
+    table: &SymbolTable,
+    scope: &str,
+    stack: &mut ScopeStack,
+    statements: &mut [Statement],
+) {
+    stack.push();
+    resolve_references_in_statements(table, scope, stack, statements);
+    stack.pop();
+}
+
+/// Resolves references in an expression subtree. `is_callee` is `true` only for
+/// the direct callee position of a call: a bare identifier there is the function
+/// being invoked (handled by phase-1's `resolvedMethodFullName`) and is left
+/// untouched, while field-access/other callee shapes still recurse normally.
+fn resolve_references_in_expression(
+    table: &SymbolTable,
+    scope: &str,
+    stack: &mut ScopeStack,
+    expression: &mut Expression,
+    is_callee: bool,
+) {
+    match expression {
+        Expression::Identifier {
+            name,
+            resolved_reference_full_name,
+            ..
+        } => {
+            if !is_callee && resolved_reference_full_name.is_none() {
+                *resolved_reference_full_name = resolve_reference_name(table, stack, name);
+            }
+        }
+        Expression::Literal { .. } | Expression::Designator { .. } => {}
+        Expression::Call {
+            callee, arguments, ..
+        } => {
+            // The callee is the function name (phase-1 territory); descend but do
+            // not stamp a bare-identifier callee as a value reference.
+            resolve_references_in_expression(table, scope, stack, callee, true);
+            for argument in arguments.iter_mut() {
+                resolve_references_in_expression(table, scope, stack, argument, false);
+            }
+        }
+        Expression::Binary { left, right, .. } | Expression::Assignment { left, right, .. } => {
+            resolve_references_in_expression(table, scope, stack, left, false);
+            resolve_references_in_expression(table, scope, stack, right, false);
+        }
+        Expression::Unary { argument, .. }
+        | Expression::PackExpansion {
+            pattern: argument, ..
+        }
+        | Expression::TypeOf { argument, .. }
+        | Expression::Delete { argument, .. } => {
+            resolve_references_in_expression(table, scope, stack, argument, false)
+        }
+        Expression::Conditional {
+            condition,
+            consequence,
+            alternative,
+            ..
+        } => {
+            resolve_references_in_expression(table, scope, stack, condition, false);
+            if let Some(consequence) = consequence.as_mut() {
+                resolve_references_in_expression(table, scope, stack, consequence, false);
+            }
+            resolve_references_in_expression(table, scope, stack, alternative, false);
+        }
+        Expression::Fold { left, right, .. } => {
+            if let Some(left) = left.as_mut() {
+                resolve_references_in_expression(table, scope, stack, left, false);
+            }
+            if let Some(right) = right.as_mut() {
+                resolve_references_in_expression(table, scope, stack, right, false);
+            }
+        }
+        Expression::Cast { value, .. } => {
+            resolve_references_in_expression(table, scope, stack, value, false)
+        }
+        Expression::SizeOf { value, .. } => {
+            if let Some(value) = value.as_mut() {
+                resolve_references_in_expression(table, scope, stack, value, false);
+            }
+        }
+        Expression::New {
+            arguments,
+            initializer_arguments,
+            ..
+        } => {
+            for argument in arguments.iter_mut().chain(initializer_arguments.iter_mut()) {
+                resolve_references_in_expression(table, scope, stack, argument, false);
+            }
+        }
+        Expression::Lambda { body, .. } => {
+            // Lambda bodies open their own scope; captured names resolve via the
+            // enclosing stack, which remains visible.
+            resolve_references_in_block(table, scope, stack, body);
+        }
+        Expression::FieldAccess { base, .. } => {
+            // The base is a value reference; the member name is not resolved here
+            // (member-access-through-type is deferred).
+            resolve_references_in_expression(table, scope, stack, base, false);
+        }
+        Expression::IndexAccess { base, index, .. } => {
+            resolve_references_in_expression(table, scope, stack, base, false);
+            resolve_references_in_expression(table, scope, stack, index, false);
+        }
+        Expression::InitializerList { elements, .. } => {
+            for element in elements.iter_mut() {
+                resolve_references_in_expression(table, scope, stack, element, false);
+            }
+        }
+        Expression::DesignatedInitializer {
+            designator, value, ..
+        } => {
+            // The designator names a field, not a value reference; only the value
+            // is a reference position.
+            let _ = designator;
+            resolve_references_in_expression(table, scope, stack, value, false);
         }
     }
 }
@@ -4080,6 +4649,7 @@ fn direct_initializer_element(node: Node, source: &[u8]) -> Option<Expression> {
         name: text.to_string(),
         code: text.to_string(),
         line: line(node),
+        resolved_reference_full_name: None,
     })
 }
 
@@ -4509,6 +5079,7 @@ fn condition_expression_from_initializer(initializer: &[Statement]) -> Option<Ex
                 name: name.clone(),
                 code: name.clone(),
                 line: *line,
+                resolved_reference_full_name: None,
             }),
             Statement::StructuredBinding {
                 temp_name, line, ..
@@ -4516,6 +5087,7 @@ fn condition_expression_from_initializer(initializer: &[Statement]) -> Option<Ex
                 name: temp_name.clone(),
                 code: temp_name.clone(),
                 line: *line,
+                resolved_reference_full_name: None,
             }),
             _ => None,
         })
@@ -4720,6 +5292,7 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
                 name: name.clone(),
                 code: name,
                 line,
+                resolved_reference_full_name: None,
             }),
             arguments,
             resolved_method_full_name: None,
@@ -4737,6 +5310,7 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
             name: code.to_string(),
             code: code.to_string(),
             line,
+            resolved_reference_full_name: None,
         }
     }
 }
@@ -5110,6 +5684,7 @@ fn parse_compound_literal_expression(node: Node, source: &[u8]) -> Expression {
             name: name.clone(),
             code: name,
             line: line(type_node),
+            resolved_reference_full_name: None,
         }),
         arguments: initializer_list_elements(value, source),
         resolved_method_full_name: None,
@@ -5224,6 +5799,7 @@ fn parse_offsetof_expression(node: Node, source: &[u8]) -> Expression {
             name: "offsetof".to_string(),
             code: "offsetof".to_string(),
             line,
+            resolved_reference_full_name: None,
         }),
         arguments,
         resolved_method_full_name: None,
@@ -5732,6 +6308,7 @@ fn identifier_expression(node: Node, source: &[u8]) -> Expression {
         name: code.to_string(),
         code: code.to_string(),
         line: line(node),
+        resolved_reference_full_name: None,
     }
 }
 
@@ -11985,6 +12562,7 @@ mod tests {
                 name: "f".to_string(),
                 code: "f".to_string(),
                 line: 1,
+                resolved_reference_full_name: None,
             }),
             arguments: Vec::new(),
             resolved_method_full_name: Some("f:int()".to_string()),
@@ -12002,6 +12580,7 @@ mod tests {
                 name: "f".to_string(),
                 code: "f".to_string(),
                 line: 1,
+                resolved_reference_full_name: None,
             }),
             arguments: Vec::new(),
             resolved_method_full_name: None,
@@ -12265,5 +12844,331 @@ mod tests {
         };
         let json = serde_json::to_string(&unresolved).expect("serialize unresolved literal");
         assert!(!json.contains("resolvedTypeFullName"));
+    }
+
+    // ---- Phase-3 reference resolution -----------------------------------------
+
+    /// Collects `(identifier_name, line, resolvedReferenceFullName)` for every
+    /// identifier reachable in `declarations` (functions, structs, namespaces).
+    fn collect_references(declarations: &[Declaration]) -> Vec<(String, usize, Option<String>)> {
+        let mut out = Vec::new();
+        collect_references_in_declarations(declarations, &mut out);
+        out
+    }
+
+    fn collect_references_in_declarations(
+        declarations: &[Declaration],
+        out: &mut Vec<(String, usize, Option<String>)>,
+    ) {
+        for declaration in declarations {
+            match declaration {
+                Declaration::Function(function) => {
+                    for statement in &function.body {
+                        collect_references_in_statement(statement, out);
+                    }
+                }
+                Declaration::Namespace(namespace) => {
+                    collect_references_in_declarations(&namespace.declarations, out)
+                }
+                Declaration::Struct(struct_decl) => {
+                    collect_references_in_declarations(&struct_decl.nested_declarations, out)
+                }
+                _ => {}
+            }
+        }
+    }
+
+    fn collect_references_in_statement(
+        statement: &Statement,
+        out: &mut Vec<(String, usize, Option<String>)>,
+    ) {
+        match statement {
+            Statement::LocalDecl { initializer, .. }
+            | Statement::StructuredBinding { initializer, .. } => {
+                if let Some(initializer) = initializer {
+                    collect_references_in_expression(initializer, out);
+                }
+            }
+            Statement::Assignment { left, right, .. } => {
+                collect_references_in_expression(left, out);
+                collect_references_in_expression(right, out);
+            }
+            Statement::Return { expression, .. } | Statement::Throw { expression, .. } => {
+                if let Some(expression) = expression {
+                    collect_references_in_expression(expression, out);
+                }
+            }
+            Statement::Expression { expression, .. } => {
+                collect_references_in_expression(expression, out)
+            }
+            Statement::If {
+                condition,
+                then_body,
+                else_body,
+                ..
+            } => {
+                collect_references_in_expression(condition, out);
+                for statement in then_body.iter().chain(else_body.iter()) {
+                    collect_references_in_statement(statement, out);
+                }
+            }
+            Statement::For { body, .. }
+            | Statement::While { body, .. }
+            | Statement::DoWhile { body, .. }
+            | Statement::Switch { body, .. }
+            | Statement::Label { body, .. } => {
+                for statement in body {
+                    collect_references_in_statement(statement, out);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn collect_references_in_expression(
+        expression: &Expression,
+        out: &mut Vec<(String, usize, Option<String>)>,
+    ) {
+        match expression {
+            Expression::Identifier {
+                name,
+                line,
+                resolved_reference_full_name,
+                ..
+            } => out.push((name.clone(), *line, resolved_reference_full_name.clone())),
+            Expression::Binary { left, right, .. } | Expression::Assignment { left, right, .. } => {
+                collect_references_in_expression(left, out);
+                collect_references_in_expression(right, out);
+            }
+            Expression::Unary { argument, .. } | Expression::Delete { argument, .. } => {
+                collect_references_in_expression(argument, out)
+            }
+            Expression::Call {
+                callee, arguments, ..
+            } => {
+                collect_references_in_expression(callee, out);
+                for argument in arguments {
+                    collect_references_in_expression(argument, out);
+                }
+            }
+            Expression::Cast { value, .. } => collect_references_in_expression(value, out),
+            Expression::SizeOf {
+                value: Some(value), ..
+            } => collect_references_in_expression(value, out),
+            Expression::FieldAccess { base, .. } => collect_references_in_expression(base, out),
+            Expression::IndexAccess { base, index, .. } => {
+                collect_references_in_expression(base, out);
+                collect_references_in_expression(index, out);
+            }
+            _ => {}
+        }
+    }
+
+    /// Returns the resolved reference name of the first identifier `name` whose
+    /// `line` matches, or `None` if not found.
+    fn reference_at(
+        references: &[(String, usize, Option<String>)],
+        name: &str,
+        line: usize,
+    ) -> Option<String> {
+        references
+            .iter()
+            .find(|(n, l, _)| n == name && *l == line)
+            .and_then(|(_, _, resolved)| resolved.clone())
+    }
+
+    #[test]
+    fn resolves_local_and_parameter_references_with_shadowing() {
+        let declarations = parse_declarations(
+            r#"
+                int value = 1;
+                int shadows(int p) {
+                  int before = value;
+                  int value = 5;
+                  int after = value;
+                  return p + before + after;
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("shadowing sample should parse");
+
+        let references = collect_references(&declarations);
+        // `value` before the local declaration binds to the global.
+        assert_eq!(
+            reference_at(&references, "value", 4),
+            Some("value".to_string())
+        );
+        // `value` after the local declaration binds to the function-scoped local.
+        assert_eq!(
+            reference_at(&references, "value", 6),
+            Some("shadows.value".to_string())
+        );
+        // Parameters resolve to their function-qualified name.
+        assert_eq!(
+            reference_at(&references, "p", 7),
+            Some("shadows.p".to_string())
+        );
+        assert_eq!(
+            reference_at(&references, "before", 7),
+            Some("shadows.before".to_string())
+        );
+    }
+
+    #[test]
+    fn resolves_free_function_reference_used_as_value() {
+        let declarations = parse_declarations(
+            r#"
+                int single(int a) { return a; }
+                typedef int (*FnPtr)(int);
+                int driver() {
+                  FnPtr p = single;
+                  return p(1);
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("function-reference sample should parse");
+
+        let references = collect_references(&declarations);
+        assert_eq!(
+            reference_at(&references, "single", 5),
+            Some("single".to_string())
+        );
+    }
+
+    #[test]
+    fn resolves_type_name_reference_used_as_value() {
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                struct Widget {};
+                }
+                int probe() {
+                  int s = sizeof(Widget);
+                  return s;
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("type-reference sample should parse");
+
+        let references = collect_references(&declarations);
+        // `Widget` used as a value/type-name resolves to its qualified name.
+        assert_eq!(
+            reference_at(&references, "Widget", 6),
+            Some("Core.Widget".to_string())
+        );
+    }
+
+    #[test]
+    fn resolves_field_reference_inside_member_function() {
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                struct Holder {
+                  int field;
+                  int get() {
+                    int x = field;
+                    return field + x;
+                  }
+                };
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("field-reference sample should parse");
+
+        let references = collect_references(&declarations);
+        assert_eq!(
+            reference_at(&references, "field", 6),
+            Some("Core.Holder.field".to_string())
+        );
+        assert_eq!(
+            reference_at(&references, "x", 7),
+            Some("Core.Holder.get.x".to_string())
+        );
+    }
+
+    #[test]
+    fn resolves_qualified_id_reference_to_unique_type() {
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                struct Widget {};
+                }
+                int probe(Core::Widget* w) {
+                  Core::Widget* alias = w;
+                  return 0;
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("qualified-id sample should parse");
+
+        // `Core::Widget` as a value reference would appear if present; ensure the
+        // qualified resolver maps it to the dotted qualified type name directly.
+        let mut table = SymbolTable::default();
+        collect_symbols(&mut table, "", &declarations);
+        assert_eq!(
+            resolve_qualified_reference(&table, "Core::Widget"),
+            Some("Core.Widget".to_string())
+        );
+        // The parameter `w` resolves to the function-qualified parameter name.
+        let references = collect_references(&declarations);
+        assert_eq!(
+            reference_at(&references, "w", 6),
+            Some("probe.w".to_string())
+        );
+    }
+
+    #[test]
+    fn leaves_overloaded_and_ambiguous_references_unresolved() {
+        let declarations = parse_declarations(
+            r#"
+                namespace A { struct Dup {}; }
+                namespace B { struct Dup {}; }
+                int over(int a) { return a; }
+                int over(int a, int b) { return a + b; }
+                typedef int (*FnPtr)(int);
+                int probe() {
+                  FnPtr p = over;
+                  int s = sizeof(Dup);
+                  int u = nonexistent;
+                  return s + u + p(1);
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("ambiguous sample should parse");
+
+        let references = collect_references(&declarations);
+        // Overloaded function reference -> unresolved.
+        assert_eq!(reference_at(&references, "over", 8), None);
+        // Ambiguous simple type name (A::Dup vs B::Dup) -> unresolved.
+        assert_eq!(reference_at(&references, "Dup", 9), None);
+        // Unknown name -> unresolved.
+        assert_eq!(reference_at(&references, "nonexistent", 10), None);
+    }
+
+    #[test]
+    fn reference_field_serializes_only_when_present() {
+        let resolved = Expression::Identifier {
+            name: "x".to_string(),
+            code: "x".to_string(),
+            line: 1,
+            resolved_reference_full_name: Some("f.x".to_string()),
+        };
+        let json = serde_json::to_string(&resolved).expect("serialize resolved identifier");
+        assert!(json.contains("\"resolvedReferenceFullName\":\"f.x\""));
+
+        let unresolved = Expression::Identifier {
+            name: "x".to_string(),
+            code: "x".to_string(),
+            line: 1,
+            resolved_reference_full_name: None,
+        };
+        let json = serde_json::to_string(&unresolved).expect("serialize unresolved identifier");
+        assert!(!json.contains("resolvedReferenceFullName"));
     }
 }
