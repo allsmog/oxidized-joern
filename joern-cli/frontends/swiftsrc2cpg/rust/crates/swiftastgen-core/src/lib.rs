@@ -2822,6 +2822,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(indirect) = self.immediate_child_kind(node, "indirect") {
             modifier_nodes.push(indirect);
         }
+        // `async let` carries `async` as a direct child of the property declaration
+        // (a concurrency DeclModifier). A function's `async` is an effect specifier,
+        // not a modifier, so this is scoped to property declarations.
+        if node.kind() == "property_declaration" {
+            if let Some(async_keyword) = self.immediate_child_kind(node, "async") {
+                modifier_nodes.push(async_keyword);
+            }
+        }
         modifier_nodes.sort_by_key(|modifier| modifier.start_byte());
         let modifiers: Vec<Value> = modifier_nodes
             .iter()
@@ -16293,6 +16301,22 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(func, "name").unwrap()["tokenKind"],
             "binaryOperator(\"<+>\")"
+        );
+    }
+
+    #[test]
+    fn emits_async_let_as_decl_modifier() {
+        // `async let a = …` models `async` as a DeclModifier on the binding.
+        let source =
+            "func f() async {\n  async let a = g()\n  _ = await a\n}\nfunc g() async -> Int { return 0 }\n";
+        let value = parse_source("AL.swift", "/tmp/AL.swift", source).unwrap();
+
+        let var_decl = find_first_node_type(&value, "VariableDeclSyntax").unwrap();
+        let modifiers = child_by_name(var_decl, "modifiers").unwrap();
+        assert_eq!(modifiers["nodeType"], "DeclModifierListSyntax");
+        assert_eq!(
+            child_by_name(&modifiers["children"][0], "name").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.async)"
         );
     }
 
