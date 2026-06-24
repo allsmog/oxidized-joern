@@ -12106,11 +12106,27 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(recovered) = self.recovered_raw_string_assignment(node)? {
             return Ok(recovered);
         }
-        let assignment_operator = self.syntax_node(
-            "AssignmentExprSyntax",
-            self.range_for_node(equal),
-            vec![self.with_name(self.token_for_node(equal, "equal"), "equal")],
-        );
+        // Plain `=` is an AssignmentExprSyntax; compound assignments
+        // (`+=`, `-=`, `*=`, ...) are binary operators in SwiftSyntax.
+        let assignment_operator = if self.text(equal) == "=" {
+            self.syntax_node(
+                "AssignmentExprSyntax",
+                self.range_for_node(equal),
+                vec![self.with_name(self.token_for_node(equal, "equal"), "equal")],
+            )
+        } else {
+            self.syntax_node(
+                "BinaryOperatorExprSyntax",
+                self.range_for_node(equal),
+                vec![self.with_name(
+                    self.token_for_node(
+                        equal,
+                        &format!("binaryOperator({})", quoted_text(self.text(equal))),
+                    ),
+                    "operator",
+                )],
+            )
+        };
         Ok(self.syntax_node(
             "InfixOperatorExprSyntax",
             self.range_for_node(node),
