@@ -8,3 +8,14 @@ func fetch(_ ok: Bool) throws -> Int {
   }
   throw NetworkError.timeout
 }
+
+func run() {
+  do {
+    let code = try fetch(true)
+    print(code)
+  } catch NetworkError.timeout {
+    print("timeout")
+  } catch {
+    print(error)
+  }
+}
