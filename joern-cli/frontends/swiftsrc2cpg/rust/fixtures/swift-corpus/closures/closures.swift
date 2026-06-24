@@ -4,3 +4,10 @@ func demo() -> Int {
   }
   return add(1, 2)
 }
+
+func shorthandDemo() -> Int {
+  let combine = { acc, x in
+    return acc + x
+  }
+  return combine(1, 2)
+}
