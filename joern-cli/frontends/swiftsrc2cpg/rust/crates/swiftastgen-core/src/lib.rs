@@ -13918,25 +13918,153 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             raw_string_bounds(text).context("raw string literal is missing delimiters")?;
         let content_start = node.start_byte() + opening_pounds_len + quote_len;
         let content_end = node.start_byte() + closing_quote_start;
-        let segments = self.raw_string_segments(content_start, content_end);
+
+        let opening_pounds = (opening_pounds_len > 0)
+            .then_some((node.start_byte(), node.start_byte() + opening_pounds_len));
+        let opening_quote = (
+            node.start_byte() + opening_pounds_len,
+            node.start_byte() + opening_pounds_len + quote_len,
+        );
+        let closing_quote = (
+            node.start_byte() + closing_quote_start,
+            node.start_byte() + closing_quote_start + quote_len,
+        );
+        let closing_pounds = (opening_pounds_len > 0)
+            .then_some((node.end_byte() - opening_pounds_len, node.end_byte()));
+
+        // `#"… \#(expr) …"#` carries interpolation segments; build them from the
+        // tree-sitter `raw_str_interpolation` children. Plain raw strings keep the
+        // text-only segment path.
+        if named_children(node).any(|child| child.kind() == "raw_str_interpolation") {
+            let segments =
+                self.raw_string_interpolated_segments(node, content_start, content_end)?;
+            return Ok(
+                self.string_literal_node_with_segments(StringLiteralNodeSpec {
+                    start: node.start_byte(),
+                    end: node.end_byte(),
+                    opening_pounds,
+                    opening_quote,
+                    closing_quote,
+                    closing_pounds,
+                    segments,
+                }),
+            );
+        }
 
         Ok(self.string_literal_node(StringLiteralSpec {
             start: node.start_byte(),
             end: node.end_byte(),
-            opening_pounds: (opening_pounds_len > 0)
-                .then_some((node.start_byte(), node.start_byte() + opening_pounds_len)),
-            opening_quote: (
-                node.start_byte() + opening_pounds_len,
-                node.start_byte() + opening_pounds_len + quote_len,
-            ),
-            closing_quote: (
-                node.start_byte() + closing_quote_start,
-                node.start_byte() + closing_quote_start + quote_len,
-            ),
-            closing_pounds: (opening_pounds_len > 0)
-                .then_some((node.end_byte() - opening_pounds_len, node.end_byte())),
-            segment_specs: segments,
+            opening_pounds,
+            opening_quote,
+            closing_quote,
+            closing_pounds,
+            segment_specs: self.raw_string_segments(content_start, content_end),
         }))
+    }
+
+    /// Build the alternating segment list for an interpolated raw string. SwiftSyntax
+    /// always emits a (possibly empty) StringSegment before each ExpressionSegment and
+    /// one after the last, computed from the gaps between `\#(…)` interpolations.
+    fn raw_string_interpolated_segments(
+        &self,
+        node: Node<'a>,
+        content_start: usize,
+        content_end: usize,
+    ) -> Result<Vec<Value>> {
+        let interpolations: Vec<Node<'a>> = named_children(node)
+            .filter(|child| child.kind() == "raw_str_interpolation")
+            .collect();
+        let mut segments = Vec::new();
+        let mut cursor = content_start;
+        for interpolation in interpolations {
+            segments.push(self.with_name(
+                self.string_segment_node(
+                    cursor,
+                    interpolation.start_byte(),
+                    self.source[cursor..interpolation.start_byte()].to_string(),
+                ),
+                "",
+            ));
+            segments.push(self.with_name(self.raw_expression_segment(interpolation)?, ""));
+            cursor = interpolation.end_byte();
+        }
+        segments.push(self.with_name(
+            self.string_segment_node(
+                cursor,
+                content_end,
+                self.source[cursor..content_end].to_string(),
+            ),
+            "",
+        ));
+        Ok(segments)
+    }
+
+    /// An `ExpressionSegmentSyntax` for a raw-string `\#(expr)` interpolation. Like the
+    /// line-string form but with a `pounds` (rawStringPoundDelimiter) token between the
+    /// backslash and the left paren.
+    fn raw_expression_segment(&self, interpolation: Node<'a>) -> Result<Value> {
+        let start = self
+            .immediate_child_kind(interpolation, "raw_str_interpolation_start")
+            .context("raw string interpolation is missing '\\#('")?;
+        let expression = self
+            .field_child(interpolation, "interpolation")
+            .and_then(|inner| {
+                self.value_field_child(inner)
+                    .or_else(|| named_children(inner).next())
+            })
+            .or_else(|| {
+                named_children(interpolation).find(|c| c.kind() != "raw_str_interpolation_start")
+            })
+            .context("raw string interpolation is missing an expression")?;
+        let labeled_expr = self.with_name(self.labeled_expr_for_value(expression, None)?, "");
+        Ok(self.syntax_node(
+            "ExpressionSegmentSyntax",
+            self.range_from_offsets(start.start_byte(), interpolation.end_byte()),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "backslash",
+                        self.range_from_offsets(start.start_byte(), start.start_byte() + 1),
+                    ),
+                    "backslash",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        &format!(
+                            "rawStringPoundDelimiter({})",
+                            quoted_text(&self.source[start.start_byte() + 1..start.end_byte() - 1])
+                        ),
+                        self.range_from_offsets(start.start_byte() + 1, start.end_byte() - 1),
+                    ),
+                    "pounds",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "leftParen",
+                        self.range_from_offsets(start.end_byte() - 1, start.end_byte()),
+                    ),
+                    "leftParen",
+                ),
+                self.with_name(
+                    self.syntax_node(
+                        "LabeledExprListSyntax",
+                        self.range_from_offsets(expression.start_byte(), expression.end_byte()),
+                        vec![labeled_expr],
+                    ),
+                    "expressions",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "rightParen",
+                        self.range_from_offsets(
+                            interpolation.end_byte() - 1,
+                            interpolation.end_byte(),
+                        ),
+                    ),
+                    "rightParen",
+                ),
+            ],
+        ))
     }
 
     fn raw_string_segments(
@@ -16673,6 +16801,41 @@ _ = #""Iota"\n\n\n\""#
         assert!(segment_texts.contains(&"stringSegment(\"\\\"Eta\\\"\\\\#n\")"));
         assert!(segment_texts.contains(&"stringSegment(\"\\\\#\\\"\")"));
         assert!(segment_texts.contains(&"stringSegment(\"\\\"Iota\\\"\\\\n\\\\n\\\\n\\\\\\\"\")"));
+    }
+
+    #[test]
+    fn emits_raw_string_interpolation_segments() {
+        // `#"Hello \#(who)!"#` → StringSegment("Hello "), ExpressionSegment (with a
+        // rawStringPoundDelimiter `pounds` token), StringSegment("!").
+        let source = "let who = \"x\"\nlet s = #\"Hello \\#(who)!\"#\n";
+        let value = parse_source("RS.swift", "/tmp/RS.swift", source).unwrap();
+
+        let literal = find_node_types(&value, "StringLiteralExprSyntax")
+            .into_iter()
+            .find(|literal| {
+                literal["children"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .any(|child| child["name"] == "openingPounds")
+            })
+            .unwrap();
+        let kids = child_by_name(literal, "segments").unwrap()["children"]
+            .as_array()
+            .unwrap()
+            .clone();
+        assert_eq!(kids[0]["nodeType"], "StringSegmentSyntax");
+        assert_eq!(kids[1]["nodeType"], "ExpressionSegmentSyntax");
+        assert_eq!(
+            child_by_name(&kids[1], "pounds").unwrap()["tokenKind"],
+            "rawStringPoundDelimiter(\"#\")"
+        );
+        let expr = find_first_node_type(&kids[1], "DeclReferenceExprSyntax").unwrap();
+        assert_eq!(
+            child_by_name(expr, "baseName").unwrap()["tokenKind"],
+            "identifier(\"who\")"
+        );
+        assert_eq!(kids[2]["nodeType"], "StringSegmentSyntax");
     }
 
     #[test]
