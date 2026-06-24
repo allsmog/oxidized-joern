@@ -5115,7 +5115,80 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         {
             return self.attributed_type_with_specifier(specifier, base);
         }
+        // `@escaping` / `@autoclosure` parameter attributes wrap the base type in an
+        // AttributedTypeSyntax carrying an AttributeList.
+        let attribute_modifiers: Vec<Node<'a>> = self
+            .immediate_named_child_kind(parameter, "parameter_modifiers")
+            .map(|modifiers| {
+                named_children(modifiers)
+                    .filter(|modifier| self.text(*modifier).starts_with('@'))
+                    .collect()
+            })
+            .unwrap_or_default();
+        if !attribute_modifiers.is_empty() {
+            return self.attributed_type_with_attributes(&attribute_modifiers, base);
+        }
         self.type_syntax(base)
+    }
+
+    /// Wrap a base type in an `AttributedTypeSyntax` carrying `@escaping`-style type
+    /// attributes (each `parameter_modifier` node spans its `@name` token).
+    fn attributed_type_with_attributes(
+        &self,
+        attribute_modifiers: &[Node<'a>],
+        base: Node<'a>,
+    ) -> Result<Value> {
+        let base_type = self.type_syntax(base)?;
+        let attributes_start = attribute_modifiers[0].start_byte();
+        let attribute_nodes: Vec<Value> = attribute_modifiers
+            .iter()
+            .map(|modifier| {
+                let start = modifier.start_byte();
+                self.with_name(
+                    self.syntax_node(
+                        "AttributeSyntax",
+                        self.range_for_node(*modifier),
+                        vec![
+                            self.with_name(
+                                self.token_with_range(
+                                    "atSign",
+                                    self.range_from_offsets(start, start + 1),
+                                ),
+                                "atSign",
+                            ),
+                            self.with_name(
+                                self.identifier_type_from_offsets(start + 1, modifier.end_byte()),
+                                "attributeName",
+                            ),
+                        ],
+                    ),
+                    "",
+                )
+            })
+            .collect();
+        let attributes_end = end_offset(attribute_nodes.last().expect("at least one attribute"));
+        let attributes = self.syntax_node(
+            "AttributeListSyntax",
+            self.range_from_offsets(attributes_start, attributes_end),
+            attribute_nodes,
+        );
+        let base_start = start_offset(&base_type);
+        Ok(self.syntax_node(
+            "AttributedTypeSyntax",
+            self.range_from_offsets(attributes_start, end_offset(&base_type)),
+            vec![
+                self.with_name(
+                    self.empty_collection("TypeSpecifierListSyntax", attributes_start),
+                    "specifiers",
+                ),
+                self.with_name(attributes, "attributes"),
+                self.with_name(
+                    self.empty_collection("TypeSpecifierListSyntax", base_start),
+                    "lateSpecifiers",
+                ),
+                self.with_name(base_type, "baseType"),
+            ],
+        ))
     }
 
     /// Wrap a base type in an `AttributedTypeSyntax` carrying a leading type
@@ -16325,6 +16398,33 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(&modifiers["children"][0], "name").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.async)"
+        );
+    }
+
+    #[test]
+    fn emits_escaping_parameter_attribute_as_attributed_type() {
+        // `@escaping () -> Void` wraps the function type in an AttributedTypeSyntax
+        // whose attribute list carries the `@escaping` attribute.
+        let source = "func f(_ cb: @escaping () -> Void) {}\n";
+        let value = parse_source("Esc.swift", "/tmp/Esc.swift", source).unwrap();
+
+        let param = find_first_node_type(&value, "FunctionParameterSyntax").unwrap();
+        let ty = child_by_name(param, "type").unwrap();
+        assert_eq!(ty["nodeType"], "AttributedTypeSyntax");
+        assert_eq!(
+            child_by_name(ty, "baseType").unwrap()["nodeType"],
+            "FunctionTypeSyntax"
+        );
+        let attr =
+            find_first_node_type(child_by_name(ty, "attributes").unwrap(), "AttributeSyntax")
+                .unwrap();
+        assert_eq!(
+            child_by_name(
+                find_first_node_type(attr, "IdentifierTypeSyntax").unwrap(),
+                "name"
+            )
+            .unwrap()["tokenKind"],
+            "identifier(\"escaping\")"
         );
     }
 
