@@ -99,7 +99,7 @@ fn configured_reference_binary() -> Option<PathBuf> {
 }
 
 fn fixture_root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/abap-corpus")
 }
 
 fn immediate_child_dirs(root: &Path) -> Vec<PathBuf> {
@@ -113,6 +113,11 @@ fn immediate_child_dirs(root: &Path) -> Vec<PathBuf> {
     dirs
 }
 
+/// Invoke a CLI (the reference `abapgen` or this crate's own binary) with the
+/// exact argument shape the Scala frontend uses. `AbapAstGenRunner.runAstGenNative`
+/// runs `Seq(astGenCommand, in, out)` -- two positional arguments, input first
+/// then output, with no `-i`/`-o` flags -- and this crate's CLI mirrors that
+/// positional contract.
 fn run_cli(binary: &Path, input: &Path, out: &Path) -> Result<(), String> {
     let output = Command::new(binary)
         .arg(input)

@@ -98,7 +98,7 @@ fn configured_reference_binary() -> Option<PathBuf> {
 }
 
 fn fixture_root() -> PathBuf {
-    dotnetastgen_cli_dir().join("tests/fixtures")
+    dotnetastgen_cli_dir().join("../../fixtures/csharp-corpus")
 }
 
 fn dotnetastgen_cli_dir() -> PathBuf {
@@ -148,11 +148,17 @@ fn immediate_child_dirs(root: &Path) -> Vec<PathBuf> {
     dirs
 }
 
+/// Invoke the reference `dotnetastgen` binary with the exact flags the Scala
+/// frontend uses. `DotNetAstGenRunner.runAstGenNative` runs
+/// `Seq(astGenCommand, "-o", out, "-i", in)`, so the reference takes the input
+/// directory via `-i` and the output directory via `-o` (the long `--input` /
+/// `--out` aliases exist on this crate's own CLI, but the released reference
+/// binary is driven with the short flags).
 fn run_reference(reference: &Path, input: &Path, out: &Path) -> Result<(), String> {
     let output = Command::new(reference)
-        .arg("--input")
+        .arg("-i")
         .arg(input)
-        .arg("--out")
+        .arg("-o")
         .arg(out)
         .output()
         .map_err(|err| err.to_string())?;

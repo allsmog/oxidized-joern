@@ -33,12 +33,12 @@ fn rust_json_matches_reference_when_configured() {
         reference.display()
     );
 
-    let corpus_root = tempdir().expect("creating corpus dir");
-    let corpus_dirs = write_fixture_corpus(corpus_root.path());
+    let corpus_root = fixture_root();
+    let corpus_dirs = immediate_child_dirs(&corpus_root);
     assert!(
         !corpus_dirs.is_empty(),
         "no fixture corpus directories under {}",
-        corpus_root.path().display()
+        corpus_root.display()
     );
 
     let mut failures = Vec::new();
@@ -100,67 +100,28 @@ fn configured_reference_binary() -> Option<PathBuf> {
     env::var_os("JSASTGEN_REFERENCE").map(PathBuf::from)
 }
 
-/// Writes a small, self-contained fixture corpus and returns the directories to
-/// run the differential comparison over.
-fn write_fixture_corpus(root: &Path) -> Vec<PathBuf> {
-    let language_features = root.join("language_features");
-    fs::create_dir_all(&language_features).expect("creating fixture dir");
-    fs::write(language_features.join("classes.ts"), CLASSES_TS).expect("writing classes.ts");
-    fs::write(language_features.join("types.ts"), TYPES_TS).expect("writing types.ts");
-    fs::write(language_features.join("view.tsx"), VIEW_TSX).expect("writing view.tsx");
-    vec![language_features]
+/// Root of the checked-in fixture corpus (`fixtures/js-corpus/<feature>/`). Each
+/// immediate child directory is run through both CLIs and compared.
+fn fixture_root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/js-corpus")
 }
 
-const CLASSES_TS: &str = r#"abstract class Repository<T> {
-  private items: T[] = [];
-  constructor(public readonly name: string) {}
-  async load(id?: number): Promise<T> {
-    return await Promise.resolve(this.items[id ?? 0]);
-  }
-  *stream(other: Repository<T>): Generator<T> {
-    yield* other.stream(other);
-  }
+fn immediate_child_dirs(root: &Path) -> Vec<PathBuf> {
+    let mut dirs = fs::read_dir(root)
+        .unwrap_or_else(|err| panic!("reading {}: {err}", root.display()))
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .filter(|path| path.is_dir())
+        .collect::<Vec<_>>();
+    dirs.sort();
+    dirs
 }
-const transform = <U,>({ value, ...rest }: { value: U }, ...extra: U[]): U[] => [value, ...extra];
-function probe(o?: { run?: () => number }): number | null {
-  return o?.run?.() ?? null;
-}
-export { Repository, transform, probe };
-"#;
 
-const TYPES_TS: &str = r#"type Keys = keyof { a: number; b: string };
-type Indexed = { a: number; b: string }["a"];
-type Conditional<T> = T extends string ? number : boolean;
-type Mapped<T> = { [K in keyof T]: T[K] };
-interface Container<T extends object = {}> {
-  value: T;
-  read(): T;
-}
-enum Color {
-  Red,
-  Green = "green",
-}
-const label = `count=${1 + 2}`;
-function tag(s: TemplateStringsArray, ...v: number[]): string {
-  return s.join("") + v.length;
-}
-const tagged = tag`sum=${1}${2}`;
-export { Color, label, tagged };
-export type { Keys, Indexed, Conditional, Mapped, Container };
-"#;
-
-const VIEW_TSX: &str = r#"const meta = import.meta.url;
-const view = (
-  <div className="root" data-count={42}>
-    <span>{meta}</span>
-    {[1, 2].map((n) => (
-      <i key={n}>{n}</i>
-    ))}
-  </div>
-);
-export { view, meta };
-"#;
-
+/// Invoke the reference `astgen` binary with the exact flags the Scala frontend
+/// uses. `AstGenRunner` runs `astgen -t ts -o <out>` for every `.js/.ts/.tsx`
+/// input (there is no separate `tsx` type), relying on the working directory for
+/// the input root; the released binary also accepts the input directory as a
+/// trailing positional argument, which is how the harness passes it here.
 fn run_reference(reference: &Path, input: &Path, out: &Path) -> Result<(), String> {
     let output = StdCommand::new(reference)
         .args(["-t", "ts", "-o"])

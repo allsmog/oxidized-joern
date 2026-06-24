@@ -119,6 +119,11 @@ fn immediate_child_dirs(root: &Path) -> Vec<PathBuf> {
     dirs
 }
 
+/// Invoke a CLI (the reference `rust_ast_gen` or this crate's own binary) with
+/// the exact flags the Scala frontend uses. `RustAstGenRunner.runAstGenNative`
+/// builds `Seq(astGenCommand, "-i", in, "-o", out)` (optionally followed by
+/// `--exclude-regex`/`--no-sysroot`), so the reference takes the input via `-i`
+/// and the output directory via `-o`; this crate's CLI accepts the same flags.
 fn run_cli(binary: &Path, input: &Path, out: &Path) -> Result<(), String> {
     let output = Command::new(binary)
         .arg("-i")
