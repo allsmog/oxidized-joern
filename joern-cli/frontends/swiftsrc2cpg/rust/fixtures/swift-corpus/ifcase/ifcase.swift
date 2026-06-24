@@ -1,14 +1,14 @@
 enum Token {
-  case number
-  case word
+  case number(Int)
+  case word(String)
 }
 
 func describe(_ t: Token) -> Int {
-  if case .number = t {
-    return 1
+  if case .number(let n) = t {
+    return n
   }
-  guard case .word = t else {
+  guard case .word(let w) = t else {
     return 0
   }
-  return 2
+  return w.count
 }

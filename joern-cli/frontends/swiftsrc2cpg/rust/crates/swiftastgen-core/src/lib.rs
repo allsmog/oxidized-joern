@@ -8021,7 +8021,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "rightParen",
                 ),
                 self.with_name(
-                    self.empty_collection("MultipleTrailingClosureElementListSyntax", end),
+                    self.empty_collection(
+                        "MultipleTrailingClosureElementListSyntax",
+                        self.skip_horizontal_whitespace(end, self.source.len()),
+                    ),
                     "additionalTrailingClosures",
                 ),
             ],
@@ -15983,6 +15986,23 @@ repeat { sink() } while x < 1
         assert_eq!(expr["nodeType"], "PatternExprSyntax");
         assert_eq!(
             child_by_name(expr, "pattern").unwrap()["nodeType"],
+            "ValueBindingPatternSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_if_case_enum_payload_binding() {
+        // `if case .n(let x) = t` — the payload binding is a PatternExprSyntax
+        // wrapping a ValueBindingPatternSyntax inside the call-argument list.
+        let source = "enum T { case n(Int) }\nfunc f(_ t: T) {\n  if case .n(let x) = t {\n    _ = x\n  }\n}\n";
+        let value = parse_source("IC.swift", "/tmp/IC.swift", source).unwrap();
+
+        let cond = find_first_node_type(&value, "MatchingPatternConditionSyntax").unwrap();
+        let pattern = child_by_name(cond, "pattern").unwrap();
+        assert_eq!(pattern["nodeType"], "ExpressionPatternSyntax");
+        let pattern_expr = find_first_node_type(pattern, "PatternExprSyntax").unwrap();
+        assert_eq!(
+            child_by_name(pattern_expr, "pattern").unwrap()["nodeType"],
             "ValueBindingPatternSyntax"
         );
     }
