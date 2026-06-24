@@ -13715,11 +13715,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         } else {
             1
         };
-        let segments = if quote_len == 3 {
+        let mut segments = if quote_len == 3 {
             self.multiline_string_segment_nodes(node)
         } else {
             self.line_string_segment_nodes(node)?
         };
+        // An empty line string (`""`) still carries a single empty StringSegment,
+        // anchored between the quotes.
+        if quote_len == 1 && segments.is_empty() {
+            let content = node.start_byte() + quote_len;
+            segments.push(self.with_name(
+                self.string_segment_node(content, content, String::new()),
+                "",
+            ));
+        }
         Ok(
             self.string_literal_node_with_segments(StringLiteralNodeSpec {
                 start: node.start_byte(),
@@ -16825,6 +16834,23 @@ _ = #""Iota"\n\n\n\""#
         assert!(segment_texts.contains(&"stringSegment(\"\\\"Eta\\\"\\\\#n\")"));
         assert!(segment_texts.contains(&"stringSegment(\"\\\\#\\\"\")"));
         assert!(segment_texts.contains(&"stringSegment(\"\\\"Iota\\\"\\\\n\\\\n\\\\n\\\\\\\"\")"));
+    }
+
+    #[test]
+    fn emits_empty_string_literal_with_empty_segment() {
+        // `""` still carries one empty StringSegment between the quotes.
+        let value = parse_source("ES.swift", "/tmp/ES.swift", "let a = \"\"\n").unwrap();
+        let literal = find_first_node_type(&value, "StringLiteralExprSyntax").unwrap();
+        let kids = child_by_name(literal, "segments").unwrap()["children"]
+            .as_array()
+            .unwrap()
+            .clone();
+        assert_eq!(kids.len(), 1);
+        assert_eq!(kids[0]["nodeType"], "StringSegmentSyntax");
+        assert_eq!(
+            child_by_name(&kids[0], "content").unwrap()["tokenKind"],
+            "stringSegment(\"\")"
+        );
     }
 
     #[test]
