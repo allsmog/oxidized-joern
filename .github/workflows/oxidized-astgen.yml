@@ -1,0 +1,68 @@
+name: oxidized astgen
+
+# Cargo gates (fmt / test / clippy, incl. the per-frontend coverage tests that
+# assert zero unmapped nodes) for every oxidized Rust AST generator, plus the
+# reference differential for swift (the one whose reference runs on a hosted
+# runner). The differential is informational until the emitter reaches
+# byte-identity with the upstream reference; see each crate's
+# tests/differential_json.rs (gated on <LANG>ASTGEN_REFERENCE).
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/oxidized-astgen.yml"
+      - "joern-cli/frontends/*/rust/**"
+  workflow_dispatch:
+
+jobs:
+  rust-gates:
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - abap2cpg
+          - c2cpg
+          - csharpsrc2cpg
+          - gosrc2cpg
+          - jssrc2cpg
+          - php2cpg
+          - pysrc2cpg
+          - rubysrc2cpg
+          - rust2cpg
+          - swiftsrc2cpg
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          # rust2cpg's HIR-based enrichment needs the std source to load a
+          # sysroot; harmless for the other crates.
+          components: rust-src
+      - name: Check formatting
+        working-directory: joern-cli/frontends/${{ matrix.crate }}/rust
+        run: cargo fmt --check
+      - name: Test (includes the zero-unmapped coverage gate)
+        working-directory: joern-cli/frontends/${{ matrix.crate }}/rust
+        run: cargo test
+      - name: Lint
+        working-directory: joern-cli/frontends/${{ matrix.crate }}/rust
+        run: cargo clippy --all-targets -- -D warnings
+
+  swift-differential:
+    # The upstream SwiftSyntax reference is a macOS binary; run the byte-level
+    # differential against it. Informational (continue-on-error) until the
+    # emitter is byte-identical — it prints a ranked delta classification.
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Download reference SwiftAstGen
+        run: |
+          curl -L --fail -o /tmp/SwiftAstGen \
+            https://github.com/joernio/astgen-monorepo/releases/download/swift-astgen/v0.4.2/SwiftAstGen-mac
+          chmod +x /tmp/SwiftAstGen
+          /tmp/SwiftAstGen --version
+      - name: Differential vs reference (informational until byte-identity)
+        continue-on-error: true
+        working-directory: joern-cli/frontends/swiftsrc2cpg/rust
+        run: SWIFTASTGEN_REFERENCE=/tmp/SwiftAstGen cargo test --test differential_json -- --nocapture
