@@ -6,6 +6,12 @@ class Controller {
   }
 }
 
+@objc(MyController)
+class NamedController {
+  @objc(doThing:with:)
+  func doThing(_ a: Int, with b: Int) {}
+}
+
 @frozen
 public struct Point {
   let x: Int
