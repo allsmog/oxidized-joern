@@ -2745,7 +2745,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .collect::<Vec<_>>();
         let accessor_block_node = self
             .field_child(node, "computed_value")
-            .or_else(|| self.immediate_named_child_kind(node, "protocol_property_requirements"));
+            .or_else(|| self.immediate_named_child_kind(node, "protocol_property_requirements"))
+            .or_else(|| self.immediate_named_child_kind(node, "willset_didset_block"));
 
         let mut binding_items = Vec::new();
         for (index, pattern_node) in pattern_nodes.iter().copied().enumerate() {
@@ -5311,6 +5312,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     fn variable_accessor_block(&self, node: Node<'a>) -> Result<Value> {
         match node.kind() {
             "computed_property" => self.accessor_block_for_computed_property(node, "property"),
+            "willset_didset_block" => self.willset_didset_accessor_block(node),
             "protocol_property_requirements" => self.protocol_property_accessor_block(node),
             // tree-sitter only ever produces `computed_property` /
             // `protocol_property_requirements` here, but error recovery can route
@@ -5473,6 +5475,38 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             vec![
                 self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace"),
                 accessors,
+                self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"),
+            ],
+        ))
+    }
+
+    /// Build an `AccessorBlockSyntax` for an observed property's
+    /// `willset_didset_block` (`{ willSet { … } didSet { … } }`). Each
+    /// `willset_clause`/`didset_clause` becomes an `AccessorDeclSyntax`, reusing
+    /// `accessor_decl` (now that `accessor_keyword_node` recognises willSet/didSet).
+    fn willset_didset_accessor_block(&self, node: Node<'a>) -> Result<Value> {
+        let left_brace = self
+            .immediate_child_kind(node, "{")
+            .context("observed-property accessor block is missing '{'")?;
+        let right_brace = self
+            .immediate_child_kind(node, "}")
+            .context("observed-property accessor block is missing '}'")?;
+        let mut accessor_items = Vec::new();
+        for clause in named_children(node)
+            .filter(|child| matches!(child.kind(), "willset_clause" | "didset_clause"))
+        {
+            accessor_items.push(self.with_name(self.accessor_decl(clause)?, ""));
+        }
+        let accessors_range = self.covering_range_or_point(&accessor_items, left_brace.end_byte());
+        Ok(self.syntax_node(
+            "AccessorBlockSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(self.token_for_node(left_brace, "leftBrace"), "leftBrace"),
+                self.with_name(
+                    self.syntax_node("AccessorDeclListSyntax", accessors_range, accessor_items),
+                    "accessors",
+                ),
                 self.with_name(self.token_for_node(right_brace, "rightBrace"), "rightBrace"),
             ],
         ))
@@ -13920,12 +13954,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn accessor_keyword_node(&self, node: Node<'a>) -> Option<Node<'a>> {
-        ["get", "set", "_read", "read", "_modify", "modify", "init"]
-            .iter()
-            .find_map(|kind| {
-                self.first_descendant_any_kind(node, kind)
-                    .or_else(|| self.first_descendant_with_text(node, kind))
-            })
+        // `willSet`/`didSet` come last so they never shadow a `get`/`set` match in
+        // a computed accessor; they are the keywords for observer accessors.
+        [
+            "get", "set", "_read", "read", "_modify", "modify", "init", "willSet", "didSet",
+        ]
+        .iter()
+        .find_map(|kind| {
+            self.first_descendant_any_kind(node, kind)
+                .or_else(|| self.first_descendant_with_text(node, kind))
+        })
     }
 
     fn type_node_after(&self, node: Node<'a>, offset: usize) -> Option<Node<'a>> {
@@ -14994,6 +15032,39 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(conformance, "rightType").unwrap()["nodeType"],
             "IdentifierTypeSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_accessor_block_for_observed_property_with_initializer() {
+        // `var x: T = v { willSet {} didSet {} }` keeps BOTH the initializer and the
+        // accessorBlock on its PatternBindingSyntax; the accessors are willSet/didSet.
+        let source = "struct T {\n  var label: String = \"temp\" {\n    willSet { print(newValue) }\n    didSet { print(oldValue) }\n  }\n}\n";
+        let value = parse_source("Observed.swift", "/tmp/Observed.swift", source).unwrap();
+
+        let binding = find_first_node_type(&value, "PatternBindingSyntax").unwrap();
+        assert!(child_by_name(binding, "initializer").is_some());
+        let block = child_by_name(binding, "accessorBlock").unwrap();
+        assert_eq!(block["nodeType"], "AccessorBlockSyntax");
+
+        let accessors = child_by_name(block, "accessors").unwrap();
+        assert_eq!(accessors["nodeType"], "AccessorDeclListSyntax");
+        let specifiers: Vec<&str> = accessors["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|a| {
+                child_by_name(a, "accessorSpecifier").unwrap()["tokenKind"]
+                    .as_str()
+                    .unwrap()
+            })
+            .collect();
+        assert_eq!(
+            specifiers,
+            vec![
+                "keyword(SwiftSyntax.Keyword.willSet)",
+                "keyword(SwiftSyntax.Keyword.didSet)"
+            ]
         );
     }
 
