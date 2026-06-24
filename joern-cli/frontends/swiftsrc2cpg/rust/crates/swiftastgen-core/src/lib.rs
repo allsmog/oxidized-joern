@@ -8656,9 +8656,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(comma) = trailing_comma {
             children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
         }
+        let param_end = trailing_comma.map_or_else(|| node.end_byte(), |comma| comma.end_byte());
         Ok(self.syntax_node(
             "ClosureShorthandParameterSyntax",
-            self.range_for_node(node),
+            self.range_from_offsets(node.start_byte(), param_end),
             children,
         ))
     }
@@ -15131,6 +15132,26 @@ repeat { sink() } while x < 1
         let arg0 = &child_by_name(call, "arguments").unwrap()["children"][0];
         assert_eq!(arg0["nodeType"], "LabeledExprSyntax");
         assert_eq!(source_text(source, arg0), "1,");
+    }
+
+    #[test]
+    fn emits_closure_shorthand_parameter_with_trailing_comma_range() {
+        let source = "let combine = { acc, x in\n  return acc + x\n}\n";
+        let value = parse_source("Shorthand.swift", "/tmp/Shorthand.swift", source).unwrap();
+
+        let list = find_first_node_type(&value, "ClosureShorthandParameterListSyntax").unwrap();
+        let first = &list["children"][0];
+        assert_eq!(first["nodeType"], "ClosureShorthandParameterSyntax");
+        // The first shorthand parameter's range includes its trailing comma.
+        assert_eq!(source_text(source, first), "acc,");
+        assert_eq!(
+            child_by_name(first, "trailingComma").unwrap()["tokenKind"],
+            "comma"
+        );
+        // The last shorthand parameter has no trailing comma.
+        let second = &list["children"][1];
+        assert_eq!(source_text(source, second), "x");
+        assert!(child_by_name(second, "trailingComma").is_none());
     }
 
     #[test]
