@@ -15,3 +15,11 @@ public struct Point {
 struct Clamped {
   var wrappedValue: Int
 }
+
+struct Config {
+  @Clamped(0)
+  var level: Int = 0
+
+  @Clamped(min: 0, max: 10)
+  var ranged: Int = 0
+}
