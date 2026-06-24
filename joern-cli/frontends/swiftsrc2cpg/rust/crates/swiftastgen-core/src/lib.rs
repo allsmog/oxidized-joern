@@ -7740,7 +7740,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             return false;
         }
         let text = &self.source[start..end];
-        if text == "_" || self.synthetic_binding_keyword(start, end).is_some() {
+        // A bound element (`let x`) keeps the tuple an expression pattern (the
+        // binding becomes a PatternExprSyntax element); only `_` and `is` force a
+        // dedicated TuplePatternSyntax.
+        if text == "_" {
             return false;
         }
         let Some(rest) = text.strip_prefix("is") else {
@@ -8118,10 +8121,25 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if expr_start >= expr_end {
             return;
         }
-        let mut children = vec![self.with_name(
-            self.synthetic_expr_from_offsets(expr_start, expr_end),
-            "expression",
-        )];
+        // A value binding inside a pattern's argument/tuple list (`case .foo(let x)`
+        // / `case (let x, 0)`) is a PatternExprSyntax wrapping a ValueBindingPattern,
+        // not a plain expression.
+        let expression = if self
+            .synthetic_binding_keyword(expr_start, expr_end)
+            .is_some()
+        {
+            self.syntax_node(
+                "PatternExprSyntax",
+                self.range_from_offsets(expr_start, expr_end),
+                vec![self.with_name(
+                    self.synthetic_pattern_from_offsets(expr_start, expr_end),
+                    "pattern",
+                )],
+            )
+        } else {
+            self.synthetic_expr_from_offsets(expr_start, expr_end)
+        };
+        let mut children = vec![self.with_name(expression, "expression")];
         let argument_end = if let Some(comma_start) = comma {
             children.push(self.with_name(
                 self.token_with_range(
@@ -15947,6 +15965,29 @@ repeat { sink() } while x < 1
     }
 
     #[test]
+    fn emits_switch_tuple_binding_as_expression_pattern() {
+        // `case (let x, 0)` is an ExpressionPatternSyntax{TupleExprSyntax} where the
+        // binding element is a PatternExprSyntax{ValueBindingPatternSyntax}, not a
+        // TuplePatternSyntax.
+        let source =
+            "func f(_ p: (Int, Int)) {\n  switch p {\n  case (let x, 0):\n    _ = x\n  default:\n    break\n  }\n}\n";
+        let value = parse_source("SW.swift", "/tmp/SW.swift", source).unwrap();
+
+        let item = find_first_node_type(&value, "SwitchCaseItemSyntax").unwrap();
+        let pattern = child_by_name(item, "pattern").unwrap();
+        assert_eq!(pattern["nodeType"], "ExpressionPatternSyntax");
+        let tuple = child_by_name(pattern, "expression").unwrap();
+        assert_eq!(tuple["nodeType"], "TupleExprSyntax");
+        let first = &child_by_name(tuple, "elements").unwrap()["children"][0];
+        let expr = child_by_name(first, "expression").unwrap();
+        assert_eq!(expr["nodeType"], "PatternExprSyntax");
+        assert_eq!(
+            child_by_name(expr, "pattern").unwrap()["nodeType"],
+            "ValueBindingPatternSyntax"
+        );
+    }
+
+    #[test]
     fn emits_for_statement_with_empty_body_without_bailing() {
         // `for _ in 0..<n {}` has no `statements` child; it must emit an empty
         // CodeBlockItemListSyntax rather than bailing the file.
@@ -17986,6 +18027,10 @@ if case let .Naught(value) = n {}
             ]
         );
 
+        // `case let (a, b)` binds the whole tuple (ValueBindingPattern wrapping a
+        // TuplePattern), whereas `case (let c, 1)` binds an element, so the tuple is
+        // an ExpressionPattern{TupleExpr} with the binding as a PatternExpr element
+        // (matching SwiftSyntax).
         let first_pattern = child_by_name(matching_patterns[0], "pattern").unwrap();
         assert_eq!(first_pattern["nodeType"], "ValueBindingPatternSyntax");
         assert_eq!(
@@ -17994,7 +18039,7 @@ if case let .Naught(value) = n {}
         );
         assert_eq!(
             child_by_name(matching_patterns[1], "pattern").unwrap()["nodeType"],
-            "TuplePatternSyntax"
+            "ExpressionPatternSyntax"
         );
 
         let optional_binding =
