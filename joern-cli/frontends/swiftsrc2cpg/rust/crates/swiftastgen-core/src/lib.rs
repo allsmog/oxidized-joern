@@ -3943,6 +3943,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 if let Some(recovered) = self.recovered_function_type_from_modifiers(node, base)? {
                     return Ok(recovered);
                 }
+                // A type with leading attributes (`@Sendable (Int) -> Int`) wraps the
+                // base type in an AttributedTypeSyntax carrying the attribute list.
+                let attribute_nodes: Vec<Node<'a>> = named_children(node)
+                    .filter(|child| child.kind() == "attribute")
+                    .collect();
+                if !attribute_nodes.is_empty() {
+                    return self.attributed_type_with_attributes(&attribute_nodes, base);
+                }
             }
         }
 
@@ -16547,6 +16555,31 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(&modifiers["children"][0], "name").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.async)"
+        );
+    }
+
+    #[test]
+    fn emits_sendable_closure_type_as_attributed_type() {
+        // `@Sendable (Int) -> Int` in a type annotation wraps the function type in an
+        // AttributedTypeSyntax carrying the `@Sendable` attribute.
+        let source = "let h: @Sendable (Int) -> Int = { $0 }\n";
+        let value = parse_source("Snd.swift", "/tmp/Snd.swift", source).unwrap();
+
+        let annotation = find_first_node_type(&value, "TypeAnnotationSyntax").unwrap();
+        let ty = child_by_name(annotation, "type").unwrap();
+        assert_eq!(ty["nodeType"], "AttributedTypeSyntax");
+        assert_eq!(
+            child_by_name(ty, "baseType").unwrap()["nodeType"],
+            "FunctionTypeSyntax"
+        );
+        let name = find_first_node_type(
+            child_by_name(ty, "attributes").unwrap(),
+            "IdentifierTypeSyntax",
+        )
+        .unwrap();
+        assert_eq!(
+            child_by_name(name, "name").unwrap()["tokenKind"],
+            "identifier(\"Sendable\")"
         );
     }
 
