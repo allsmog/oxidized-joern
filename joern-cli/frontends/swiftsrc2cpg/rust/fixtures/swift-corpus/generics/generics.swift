@@ -17,3 +17,7 @@ func identity<T>(_ value: T) -> T {
 func firstOf<T: Equatable>(_ values: [T]) -> T? {
   return values.first
 }
+
+func allSorted<C: Collection>(_ collection: C) -> Bool where C.Element: Comparable {
+  return collection.count >= 0
+}

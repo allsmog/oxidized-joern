@@ -4481,6 +4481,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
         }
         children.push(self.with_name(self.function_signature(node)?, "signature"));
+        if let Some(type_constraints) = self.immediate_named_child_kind(node, "type_constraints") {
+            if let Some(clause) = self.generic_where_clause(type_constraints)? {
+                children.push(self.with_name(clause, "genericWhereClause"));
+            }
+        }
         if let Some(body_node) = body {
             children.push(self.with_name(self.code_block(body_node)?, "body"));
         }
@@ -11546,6 +11551,148 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         )))
     }
 
+    /// Build a `GenericWhereClauseSyntax` from a tree-sitter `type_constraints`
+    /// node (e.g. `where C.Element: Comparable`): whereKeyword /
+    /// GenericRequirementListSyntax of GenericRequirementSyntax, each wrapping a
+    /// `ConformanceRequirementSyntax` (leftType : rightType).
+    ///
+    /// Returns `Ok(None)` when a requirement uses a form not yet modelled (e.g. a
+    /// same-type `==` constraint) so the caller omits the clause rather than
+    /// emitting a partial one.
+    fn generic_where_clause(&self, node: Node<'a>) -> Result<Option<Value>> {
+        let Some(where_keyword) = self.immediate_named_child_kind(node, "where_keyword") else {
+            return Ok(None);
+        };
+        let constraints: Vec<Node<'a>> = named_children(node)
+            .filter(|child| child.kind() == "type_constraint")
+            .collect();
+        if constraints.is_empty() {
+            return Ok(None);
+        }
+        let mut requirements = Vec::new();
+        let (mut list_start, mut list_end) = (where_keyword.end_byte(), where_keyword.end_byte());
+        for (idx, constraint) in constraints.iter().copied().enumerate() {
+            let Some(inheritance) =
+                self.immediate_named_child_kind(constraint, "inheritance_constraint")
+            else {
+                // Same-type (`==`) and other constraint kinds are not modelled yet.
+                return Ok(None);
+            };
+            let Some(colon) = self.immediate_child_kind(inheritance, ":") else {
+                return Ok(None);
+            };
+            let Some(left) =
+                named_children(inheritance).find(|child| child.start_byte() < colon.start_byte())
+            else {
+                return Ok(None);
+            };
+            let Some(right) =
+                named_children(inheritance).find(|child| child.start_byte() >= colon.end_byte())
+            else {
+                return Ok(None);
+            };
+            let conformance = self.syntax_node(
+                "ConformanceRequirementSyntax",
+                self.range_for_node(inheritance),
+                vec![
+                    self.with_name(self.member_type_from_segments(left)?, "leftType"),
+                    self.with_name(self.token_for_node(colon, "colon"), "colon"),
+                    self.with_name(self.type_syntax(right)?, "rightType"),
+                ],
+            );
+            let mut req_children = vec![self.with_name(conformance, "requirement")];
+            let trailing_comma = self.trailing_delimiter(node, constraint, ",");
+            if let Some(comma) = trailing_comma {
+                req_children
+                    .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+            }
+            let constraint_end = trailing_comma.map_or(constraint.end_byte(), |c| c.end_byte());
+            if idx == 0 {
+                list_start = constraint.start_byte();
+            }
+            list_end = constraint_end;
+            requirements.push(self.with_name(
+                self.syntax_node(
+                    "GenericRequirementSyntax",
+                    self.range_from_offsets(constraint.start_byte(), constraint_end),
+                    req_children,
+                ),
+                "",
+            ));
+        }
+        Ok(Some(self.syntax_node(
+            "GenericWhereClauseSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_for_node(where_keyword, "keyword(SwiftSyntax.Keyword.where)"),
+                    "whereKeyword",
+                ),
+                self.with_name(
+                    self.syntax_node(
+                        "GenericRequirementListSyntax",
+                        self.range_from_offsets(list_start, list_end),
+                        requirements,
+                    ),
+                    "requirements",
+                ),
+            ],
+        )))
+    }
+
+    /// Build the type referenced by a where-clause constraint subject, whose
+    /// tree-sitter form is a bare `simple_identifier` or an `identifier` of
+    /// `simple_identifier` segments separated by `.` (e.g. `C.Element`). Produces
+    /// `IdentifierTypeSyntax` for a single segment, else a nested `MemberTypeSyntax`
+    /// chain mirroring `user_type_syntax`.
+    fn member_type_from_segments(&self, node: Node<'a>) -> Result<Value> {
+        if is_type_syntax_node_kind(node.kind()) {
+            return self.type_syntax(node);
+        }
+        let segments: Vec<Node<'a>> = if node.kind() == "simple_identifier" {
+            vec![node]
+        } else {
+            named_children(node)
+                .filter(|child| child.kind() == "simple_identifier")
+                .collect()
+        };
+        let first = segments
+            .first()
+            .copied()
+            .context("constraint subject is missing an identifier")?;
+        if segments.len() == 1 {
+            return self.identifier_type_for_name(first, node.start_byte(), node.end_byte(), None);
+        }
+        let mut current =
+            self.identifier_type_for_name(first, first.start_byte(), first.end_byte(), None)?;
+        let mut previous = first;
+        for name in segments.into_iter().skip(1) {
+            let period = self
+                .children_between(node, previous.end_byte(), name.start_byte())
+                .into_iter()
+                .find(|child| child.kind() == ".")
+                .context("member type is missing '.'")?;
+            let children = vec![
+                self.with_name(current, "baseType"),
+                self.with_name(self.token_for_node(period, "period"), "period"),
+                self.with_name(
+                    self.token_for_node(
+                        name,
+                        &format!("identifier({})", quoted_text(self.text(name))),
+                    ),
+                    "name",
+                ),
+            ];
+            current = self.syntax_node(
+                "MemberTypeSyntax",
+                self.range_from_offsets(node.start_byte(), name.end_byte()),
+                children,
+            );
+            previous = name;
+        }
+        Ok(current)
+    }
+
     fn special_literal_expr(&self, node: Node<'a>) -> Result<Value> {
         if self.text(node).starts_with('#') {
             return self.macro_expansion_expr(node);
@@ -14743,6 +14890,53 @@ repeat { sink() } while x < 1
         let inherited = child_by_name(fparam, "inheritedType").unwrap();
         assert_eq!(inherited["nodeType"], "IdentifierTypeSyntax");
         assert_eq!(source_text(source, inherited), "Equatable");
+    }
+
+    #[test]
+    fn emits_generic_where_clause_with_member_type_requirement() {
+        // `func f<C: Collection>(...) where C.Element: Comparable` must emit a
+        // GenericWhereClauseSyntax after the signature: whereKeyword + a
+        // ConformanceRequirementSyntax whose leftType is the MemberTypeSyntax
+        // `C.Element` and whose rightType is the IdentifierTypeSyntax `Comparable`.
+        let source =
+            "func allSorted<C: Collection>(_ c: C) -> Bool where C.Element: Comparable { return true }\n";
+        let value = parse_source("Where.swift", "/tmp/Where.swift", source).unwrap();
+
+        let func_decl = find_first_node_type(&value, "FunctionDeclSyntax").unwrap();
+        let clause = child_by_name(func_decl, "genericWhereClause").unwrap();
+        assert_eq!(clause["nodeType"], "GenericWhereClauseSyntax");
+        assert_eq!(source_text(source, clause), "where C.Element: Comparable");
+        assert_eq!(
+            child_by_name(clause, "whereKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.where)"
+        );
+        let reqs = child_by_name(clause, "requirements").unwrap();
+        assert_eq!(reqs["nodeType"], "GenericRequirementListSyntax");
+        let req = &reqs["children"][0];
+        assert_eq!(req["nodeType"], "GenericRequirementSyntax");
+        assert_eq!(req["name"], "");
+        let conformance = child_by_name(req, "requirement").unwrap();
+        assert_eq!(conformance["nodeType"], "ConformanceRequirementSyntax");
+
+        // leftType is the qualified member type `C.Element`.
+        let left = child_by_name(conformance, "leftType").unwrap();
+        assert_eq!(left["nodeType"], "MemberTypeSyntax");
+        assert_eq!(source_text(source, left), "C.Element");
+        assert_eq!(
+            child_by_name(left, "baseType").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+        assert_eq!(
+            child_by_name(left, "name").unwrap()["tokenKind"],
+            "identifier(\"Element\")"
+        );
+        assert_eq!(
+            child_by_name(conformance, "colon").unwrap()["tokenKind"],
+            "colon"
+        );
+        let right = child_by_name(conformance, "rightType").unwrap();
+        assert_eq!(right["nodeType"], "IdentifierTypeSyntax");
+        assert_eq!(source_text(source, right), "Comparable");
     }
 
     #[test]
