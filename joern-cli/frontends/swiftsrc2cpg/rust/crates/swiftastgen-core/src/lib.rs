@@ -4783,16 +4783,65 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         parameter: Node<'a>,
         type_node: Node<'a>,
     ) -> Result<Value> {
-        if type_node.kind() == "parameter_modifiers" {
-            if let Some(base) = named_children(parameter).find(|child| {
-                child.start_byte() >= type_node.end_byte()
-                    && is_type_syntax_node_kind(child.kind())
-                    && child.kind() != "parameter_modifiers"
-            }) {
-                return self.type_syntax(base);
-            }
+        let base = if type_node.kind() == "parameter_modifiers" {
+            named_children(parameter)
+                .find(|child| {
+                    child.start_byte() >= type_node.end_byte()
+                        && is_type_syntax_node_kind(child.kind())
+                        && child.kind() != "parameter_modifiers"
+                })
+                .unwrap_or(type_node)
+        } else {
+            type_node
+        };
+        // An `inout` (or other parameter specifier) wraps the base type in an
+        // AttributedTypeSyntax in SwiftSyntax.
+        if let Some(specifier) = self
+            .immediate_named_child_kind(parameter, "parameter_modifiers")
+            .and_then(|modifiers| self.first_descendant_any_kind(modifiers, "inout"))
+        {
+            return self.attributed_type_with_specifier(specifier, base);
         }
-        self.type_syntax(type_node)
+        self.type_syntax(base)
+    }
+
+    /// Wrap a base type in an `AttributedTypeSyntax` carrying a leading type
+    /// specifier such as `inout`.
+    fn attributed_type_with_specifier(&self, specifier: Node<'a>, base: Node<'a>) -> Result<Value> {
+        let base_type = self.type_syntax(base)?;
+        let base_start = start_offset(&base_type);
+        let simple_specifier = self.syntax_node(
+            "SimpleTypeSpecifierSyntax",
+            self.range_for_node(specifier),
+            vec![self.with_name(
+                self.token_for_node(
+                    specifier,
+                    &format!("keyword(SwiftSyntax.Keyword.{})", self.text(specifier)),
+                ),
+                "specifier",
+            )],
+        );
+        let specifiers = self.syntax_node(
+            "TypeSpecifierListSyntax",
+            self.range_for_node(specifier),
+            vec![self.with_name(simple_specifier, "")],
+        );
+        Ok(self.syntax_node(
+            "AttributedTypeSyntax",
+            self.range_from_offsets(specifier.start_byte(), end_offset(&base_type)),
+            vec![
+                self.with_name(specifiers, "specifiers"),
+                self.with_name(
+                    self.empty_collection("AttributeListSyntax", base_start),
+                    "attributes",
+                ),
+                self.with_name(
+                    self.empty_collection("TypeSpecifierListSyntax", base_start),
+                    "lateSpecifiers",
+                ),
+                self.with_name(base_type, "baseType"),
+            ],
+        ))
     }
 
     fn variadic_type_parts(
@@ -14001,7 +14050,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     /// differential (the dominant `range` divergence). `parent_start` is the
     /// immediate parent's `startOffset`; the empty collection's parent is the
     /// declaration, so that is exactly the decl start we anchor against.
-    fn fix_empty_leading_anchors(&self, value: &mut Value, parent_start: Option<usize>) {
+    fn fix_empty_leading_anchors(&self, value: &mut Value, leading_anchor: Option<usize>) {
         let this_start = value
             .get("range")
             .and_then(|range| range.get("startOffset"))
@@ -14016,22 +14065,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .and_then(Value::as_array)
                 .is_some_and(|children| children.is_empty());
         if is_empty_leading {
-            if let Some(decl_start) = parent_start {
-                let preceding = self.source.get(..decl_start).unwrap_or("");
-                let trimmed_end = preceding.trim_end().len();
-                // SwiftSyntax attaches same-line whitespace as the PRECEDING token's
-                // trailing trivia, so an empty leading collection anchors at the
-                // parent's content start (decl_start). A gap that spans a newline is
-                // the NEXT token's leading trivia, so the collection anchors at the
-                // preceding token's end (trimmed_end).
-                let gap_spans_newline = preceding
-                    .get(trimmed_end..)
-                    .is_some_and(|gap| gap.contains('\n'));
-                let anchor = if gap_spans_newline {
-                    trimmed_end
-                } else {
-                    decl_start
-                };
+            if let Some(anchor) = leading_anchor {
                 let range = self.point_range(anchor);
                 if let Some(obj) = value.as_object_mut() {
                     obj.insert("range".into(), range);
@@ -14039,9 +14073,41 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             }
         }
         if let Some(children) = value.get_mut("children").and_then(Value::as_array_mut) {
+            // The first child's empty-leading anchor is the parent's content start
+            // (gap-aware). A later empty collection sits after its preceding sibling,
+            // so it anchors at that sibling's end skipping same-line trailing trivia
+            // (e.g. the empty `attributes`/`lateSpecifiers` after an `inout`
+            // specifier in an AttributedTypeSyntax).
+            let mut preceding_sibling_end: Option<usize> = None;
             for child in children.iter_mut() {
-                self.fix_empty_leading_anchors(child, this_start);
+                let child_anchor = match preceding_sibling_end {
+                    None => this_start.map(|start| self.empty_leading_anchor_from_start(start)),
+                    Some(end) => Some(self.skip_horizontal_whitespace(end, self.source.len())),
+                };
+                self.fix_empty_leading_anchors(child, child_anchor);
+                preceding_sibling_end = child
+                    .get("range")
+                    .and_then(|range| range.get("endOffset"))
+                    .and_then(Value::as_u64)
+                    .map(|offset| offset as usize);
             }
+        }
+    }
+
+    /// Anchor for an empty leading collection that is the first child of a parent
+    /// starting at `decl_start`: the parent's content start, unless the gap before
+    /// it spans a newline (then the whitespace is the next token's leading trivia
+    /// and the collection sits at the preceding token's end).
+    fn empty_leading_anchor_from_start(&self, decl_start: usize) -> usize {
+        let preceding = self.source.get(..decl_start).unwrap_or("");
+        let trimmed_end = preceding.trim_end().len();
+        let gap_spans_newline = preceding
+            .get(trimmed_end..)
+            .is_some_and(|gap| gap.contains('\n'));
+        if gap_spans_newline {
+            trimmed_end
+        } else {
+            decl_start
         }
     }
 
@@ -15709,6 +15775,30 @@ repeat { sink() } while x < 1
         assert_eq!(
             kids[0]["range"]["endOffset"],
             kids[1]["range"]["startOffset"]
+        );
+    }
+
+    #[test]
+    fn emits_attributed_type_for_inout_parameter() {
+        let source = "func f(_ a: inout Int) { a += 1 }\n";
+        let value = parse_source("Inout.swift", "/tmp/Inout.swift", source).unwrap();
+
+        let param = find_first_node_type(&value, "FunctionParameterSyntax").unwrap();
+        let ty = child_by_name(param, "type").unwrap();
+        assert_eq!(ty["nodeType"], "AttributedTypeSyntax");
+        let spec = &child_by_name(ty, "specifiers").unwrap()["children"][0];
+        assert_eq!(spec["nodeType"], "SimpleTypeSpecifierSyntax");
+        assert_eq!(
+            child_by_name(spec, "specifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.inout)"
+        );
+        let base = child_by_name(ty, "baseType").unwrap();
+        assert_eq!(base["nodeType"], "IdentifierTypeSyntax");
+        // The non-first empty `attributes` is re-anchored after the specifier, at
+        // the baseType start (verifies the post-pass sibling-aware anchoring).
+        assert_eq!(
+            child_by_name(ty, "attributes").unwrap()["range"]["startOffset"],
+            base["range"]["startOffset"]
         );
     }
 
