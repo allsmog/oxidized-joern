@@ -2512,14 +2512,28 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(left_paren) = left_paren {
             children
                 .push(self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"));
-            // `@available(...)` carries a structured availability argument list.
-            if self.text(name) == "available" {
-                if let Some(right_paren) = right_paren {
+            // `@available(...)` carries a structured availability argument list;
+            // most other attributes (`@Clamped(0)`, property wrappers, …) carry a
+            // LabeledExprListSyntax. `@objc(selector)` uses an ObjCSelectorPieceList
+            // that is not modelled yet, so it is left without arguments.
+            let attribute_name = self.text(name);
+            if let Some(right_paren) = right_paren {
+                if attribute_name == "available" {
                     if let Some(arguments) =
                         self.availability_arguments(node, left_paren, right_paren)?
                     {
                         children.push(self.with_name(arguments, "arguments"));
                     }
+                } else if attribute_name != "objc"
+                    && left_paren.end_byte() < right_paren.start_byte()
+                {
+                    children.push(self.with_name(
+                        self.synthetic_labeled_expr_list_from_offsets(
+                            left_paren.end_byte(),
+                            right_paren.start_byte(),
+                        ),
+                        "arguments",
+                    ));
                 }
             }
         }
@@ -8131,25 +8145,53 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if expr_start >= expr_end {
             return;
         }
+        let mut children = Vec::new();
+        // An optional `label:` prefix (`@bar(x: "y")`, `f(label: value)`). A label is
+        // always the element's first token, which distinguishes it from a ternary's
+        // `:` (never first).
+        let (value_start, value_end) = if let Some((label_end, colon_start)) =
+            self.synthetic_arg_label(expr_start, expr_end)
+        {
+            children.push(self.with_name(
+                self.token_with_range(
+                    &format!(
+                        "identifier({})",
+                        quoted_text(&self.source[expr_start..label_end])
+                    ),
+                    self.range_from_offsets(expr_start, label_end),
+                ),
+                "label",
+            ));
+            children.push(self.with_name(
+                self.token_with_range(
+                    "colon",
+                    self.range_from_offsets(colon_start, colon_start + 1),
+                ),
+                "colon",
+            ));
+            self.trim_offsets(colon_start + 1, expr_end)
+        } else {
+            (expr_start, expr_end)
+        };
         // A value binding inside a pattern's argument/tuple list (`case .foo(let x)`
         // / `case (let x, 0)`) is a PatternExprSyntax wrapping a ValueBindingPattern,
         // not a plain expression.
         let expression = if self
-            .synthetic_binding_keyword(expr_start, expr_end)
+            .synthetic_binding_keyword(value_start, value_end)
             .is_some()
         {
             self.syntax_node(
                 "PatternExprSyntax",
-                self.range_from_offsets(expr_start, expr_end),
+                self.range_from_offsets(value_start, value_end),
                 vec![self.with_name(
-                    self.synthetic_pattern_from_offsets(expr_start, expr_end),
+                    self.synthetic_pattern_from_offsets(value_start, value_end),
                     "pattern",
                 )],
             )
         } else {
-            self.synthetic_expr_from_offsets(expr_start, expr_end)
+            self.synthetic_expr_from_offsets(value_start, value_end)
         };
-        let mut children = vec![self.with_name(expression, "expression")];
+        children.push(self.with_name(expression, "expression"));
         let argument_end = if let Some(comma_start) = comma {
             children.push(self.with_name(
                 self.token_with_range(
@@ -8170,6 +8212,30 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             ),
             "",
         ));
+    }
+
+    /// Detect a leading `label:` in a synthetic argument range. Returns
+    /// `(label_end, colon_offset)` when the range starts with an identifier
+    /// followed by a single `:` (not `::`), which can only be an argument label.
+    fn synthetic_arg_label(&self, start: usize, end: usize) -> Option<(usize, usize)> {
+        let bytes = self.source.as_bytes();
+        let first = *bytes.get(start)?;
+        if !(first.is_ascii_alphabetic() || first == b'_') {
+            return None;
+        }
+        let mut offset = start + 1;
+        while offset < end && (bytes[offset].is_ascii_alphanumeric() || bytes[offset] == b'_') {
+            offset += 1;
+        }
+        let label_end = offset;
+        while offset < end && matches!(bytes[offset], b' ' | b'\t') {
+            offset += 1;
+        }
+        if offset < end && bytes[offset] == b':' && bytes.get(offset + 1) != Some(&b':') {
+            Some((label_end, offset))
+        } else {
+            None
+        }
     }
 
     fn outer_call_parens(&self, start: usize, end: usize) -> Option<(usize, usize)> {
@@ -16027,6 +16093,25 @@ repeat { sink() } while x < 1
     }
 
     #[test]
+    fn emits_custom_attribute_labeled_arguments() {
+        // `@Clamped(0)` carries a LabeledExprListSyntax argument list.
+        let source = "struct S {\n  @Clamped(0)\n  var x: Int = 0\n}\n";
+        let value = parse_source("Attr.swift", "/tmp/Attr.swift", source).unwrap();
+
+        let attr = find_node_types(&value, "AttributeSyntax")
+            .into_iter()
+            .find(|a| source_text(source, a).starts_with("@Clamped"))
+            .unwrap();
+        let args = child_by_name(attr, "arguments").unwrap();
+        assert_eq!(args["nodeType"], "LabeledExprListSyntax");
+        let first = &args["children"][0];
+        assert_eq!(
+            child_by_name(first, "expression").unwrap()["nodeType"],
+            "IntegerLiteralExprSyntax"
+        );
+    }
+
+    #[test]
     fn emits_for_statement_with_empty_body_without_bailing() {
         // `for _ in 0..<n {}` has no `statements` child; it must emit an empty
         // CodeBlockItemListSyntax rather than bailing the file.
@@ -18981,11 +19066,22 @@ someFunction(parameterLabel: 2)
             "identifier(\"bar\")"
         );
         assert_eq!(attributes[0]["children"][2]["tokenKind"], "leftParen");
-        assert_eq!(attributes[0]["children"][3]["tokenKind"], "rightParen");
+        // `@bar(x: "y")` carries a labeled argument list.
+        let bar_args = &attributes[0]["children"][3];
+        assert_eq!(bar_args["name"], "arguments");
+        assert_eq!(bar_args["nodeType"], "LabeledExprListSyntax");
+        assert_eq!(
+            child_by_name(&bar_args["children"][0], "label").unwrap()["tokenKind"],
+            "identifier(\"x\")"
+        );
+        assert_eq!(attributes[0]["children"][4]["tokenKind"], "rightParen");
+        // `@objc(Foo)` uses an ObjC selector list that is not modelled, so it stays
+        // without an arguments child.
         assert_eq!(
             attributes[1]["children"][1]["children"][0]["tokenKind"],
             "identifier(\"objc\")"
         );
+        assert_eq!(attributes[1]["children"][3]["tokenKind"], "rightParen");
 
         let function = find_first_node_type(&value, "FunctionDeclSyntax").unwrap();
         assert_eq!(function["children"][0]["nodeType"], "AttributeListSyntax");
