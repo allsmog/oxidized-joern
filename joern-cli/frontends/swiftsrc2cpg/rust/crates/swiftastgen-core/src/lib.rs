@@ -2507,16 +2507,214 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.with_name(self.token_for_node(at_sign, "atSign"), "atSign"),
             self.with_name(self.identifier_type(name)?, "attributeName"),
         ];
-        if let Some(left_paren) = self.immediate_child_kind(node, "(") {
+        let left_paren = self.immediate_child_kind(node, "(");
+        let right_paren = self.immediate_child_kind(node, ")");
+        if let Some(left_paren) = left_paren {
             children
                 .push(self.with_name(self.token_for_node(left_paren, "leftParen"), "leftParen"));
+            // `@available(...)` carries a structured availability argument list.
+            if self.text(name) == "available" {
+                if let Some(right_paren) = right_paren {
+                    if let Some(arguments) =
+                        self.availability_arguments(node, left_paren, right_paren)?
+                    {
+                        children.push(self.with_name(arguments, "arguments"));
+                    }
+                }
+            }
         }
-        if let Some(right_paren) = self.immediate_child_kind(node, ")") {
+        if let Some(right_paren) = right_paren {
             children
                 .push(self.with_name(self.token_for_node(right_paren, "rightParen"), "rightParen"));
         }
 
         Ok(self.syntax_node("AttributeSyntax", self.range_for_node(node), children))
+    }
+
+    /// Parse the flat token sequence inside `@available(...)` into the structured
+    /// availability argument list (platform-version specs and the `*` wildcard).
+    /// Returns `None` for forms not yet modelled (labeled args like `deprecated`,
+    /// `message:`) so the attribute degrades to no arguments rather than a
+    /// malformed list.
+    fn availability_arguments(
+        &self,
+        node: Node<'a>,
+        left_paren: Node<'a>,
+        right_paren: Node<'a>,
+    ) -> Result<Option<Value>> {
+        let tokens: Vec<Node<'a>> = children(node)
+            .filter(|child| {
+                child.start_byte() >= left_paren.end_byte()
+                    && child.end_byte() <= right_paren.start_byte()
+            })
+            .collect();
+        if tokens.is_empty() {
+            return Ok(None);
+        }
+
+        let mut groups: Vec<(Vec<Node<'a>>, Option<Node<'a>>)> = Vec::new();
+        let mut current: Vec<Node<'a>> = Vec::new();
+        for token in &tokens {
+            if token.kind() == "," {
+                groups.push((std::mem::take(&mut current), Some(*token)));
+            } else {
+                current.push(*token);
+            }
+        }
+        if !current.is_empty() {
+            groups.push((current, None));
+        }
+
+        let mut arguments = Vec::new();
+        let mut list_start = left_paren.end_byte();
+        let mut list_end = left_paren.end_byte();
+        for (index, (group, comma)) in groups.iter().enumerate() {
+            let argument = if group.len() == 1 && group[0].kind() == "*" {
+                self.with_name(
+                    self.token_for_node(group[0], &format!("binaryOperator({})", quoted_text("*"))),
+                    "argument",
+                )
+            } else if let Some(platform_version) = self.platform_version(group)? {
+                self.with_name(platform_version, "argument")
+            } else {
+                // A labeled or otherwise unmodelled availability argument.
+                return Ok(None);
+            };
+            let mut argument_children = vec![argument];
+            if let Some(comma) = comma {
+                argument_children
+                    .push(self.with_name(self.token_for_node(*comma, "comma"), "trailingComma"));
+            }
+            let arg_start = group
+                .first()
+                .map_or(left_paren.end_byte(), |first| first.start_byte());
+            let arg_end = comma.map_or_else(
+                || group.last().map_or(arg_start, |last| last.end_byte()),
+                |comma| comma.end_byte(),
+            );
+            if index == 0 {
+                list_start = arg_start;
+            }
+            list_end = arg_end;
+            arguments.push(self.with_name(
+                self.syntax_node(
+                    "AvailabilityArgumentSyntax",
+                    self.range_from_offsets(arg_start, arg_end),
+                    argument_children,
+                ),
+                "",
+            ));
+        }
+        Ok(Some(self.syntax_node(
+            "AvailabilityArgumentListSyntax",
+            self.range_from_offsets(list_start, list_end),
+            arguments,
+        )))
+    }
+
+    /// Build a `PlatformVersionSyntax` (`iOS 13.0`) from a platform identifier
+    /// followed by a dotted version number. Returns `None` if the group is not a
+    /// platform + version (e.g. a bare label).
+    fn platform_version(&self, group: &[Node<'a>]) -> Result<Option<Value>> {
+        let Some(platform) = group
+            .iter()
+            .copied()
+            .find(|child| child.kind() == "simple_identifier")
+        else {
+            return Ok(None);
+        };
+        let version_tokens: Vec<Node<'a>> = group
+            .iter()
+            .copied()
+            .filter(|child| {
+                child.start_byte() >= platform.end_byte()
+                    && matches!(child.kind(), "integer_literal" | ".")
+            })
+            .collect();
+        let Some(major) = version_tokens
+            .iter()
+            .copied()
+            .find(|child| child.kind() == "integer_literal")
+        else {
+            return Ok(None);
+        };
+
+        let mut version_components = Vec::new();
+        let mut pending_period: Option<Node<'a>> = None;
+        for token in version_tokens.iter().copied() {
+            if token.start_byte() < major.end_byte() {
+                continue;
+            }
+            match token.kind() {
+                "." => pending_period = Some(token),
+                "integer_literal" => {
+                    if let Some(period) = pending_period.take() {
+                        version_components.push(self.with_name(
+                            self.syntax_node(
+                                "VersionComponentSyntax",
+                                self.range_from_offsets(period.start_byte(), token.end_byte()),
+                                vec![
+                                    self.with_name(self.token_for_node(period, "period"), "period"),
+                                    self.with_name(
+                                        self.token_for_node(
+                                            token,
+                                            &format!(
+                                                "integerLiteral({})",
+                                                quoted_text(self.text(token))
+                                            ),
+                                        ),
+                                        "number",
+                                    ),
+                                ],
+                            ),
+                            "",
+                        ));
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        let version_end = version_tokens
+            .last()
+            .map_or(major.end_byte(), |last| last.end_byte());
+        let components_range = self.covering_range_or_point(&version_components, major.end_byte());
+        let version = self.syntax_node(
+            "VersionTupleSyntax",
+            self.range_from_offsets(major.start_byte(), version_end),
+            vec![
+                self.with_name(
+                    self.token_for_node(
+                        major,
+                        &format!("integerLiteral({})", quoted_text(self.text(major))),
+                    ),
+                    "major",
+                ),
+                self.with_name(
+                    self.syntax_node(
+                        "VersionComponentListSyntax",
+                        components_range,
+                        version_components,
+                    ),
+                    "components",
+                ),
+            ],
+        );
+
+        Ok(Some(self.syntax_node(
+            "PlatformVersionSyntax",
+            self.range_from_offsets(platform.start_byte(), version_end),
+            vec![
+                self.with_name(
+                    self.token_for_node(
+                        platform,
+                        &format!("identifier({})", quoted_text(self.text(platform))),
+                    ),
+                    "platform",
+                ),
+                self.with_name(version, "version"),
+            ],
+        )))
     }
 
     fn modifier_list(&self, node: Node<'a>) -> Value {
@@ -15687,6 +15885,36 @@ repeat { sink() } while x < 1
         let items1 = child_by_name(catches[1], "catchItems").unwrap();
         assert_eq!(items1["nodeType"], "CatchItemListSyntax");
         assert!(items1["children"].as_array().unwrap().is_empty());
+    }
+
+    #[test]
+    fn emits_availability_platform_version_arguments() {
+        let source = "@available(iOS 13.0, *)\nfunc f() {}\n";
+        let value = parse_source("Avail.swift", "/tmp/Avail.swift", source).unwrap();
+
+        let attr = find_first_node_type(&value, "AttributeSyntax").unwrap();
+        let args = child_by_name(attr, "arguments").unwrap();
+        assert_eq!(args["nodeType"], "AvailabilityArgumentListSyntax");
+
+        let platform_version = child_by_name(&args["children"][0], "argument").unwrap();
+        assert_eq!(platform_version["nodeType"], "PlatformVersionSyntax");
+        assert_eq!(
+            child_by_name(platform_version, "platform").unwrap()["tokenKind"],
+            "identifier(\"iOS\")"
+        );
+        let version = child_by_name(platform_version, "version").unwrap();
+        assert_eq!(version["nodeType"], "VersionTupleSyntax");
+        assert_eq!(
+            child_by_name(version, "major").unwrap()["tokenKind"],
+            "integerLiteral(\"13\")"
+        );
+
+        // The trailing `*` wildcard is the final argument.
+        let last = args["children"].as_array().unwrap().last().unwrap();
+        assert_eq!(
+            child_by_name(last, "argument").unwrap()["tokenKind"],
+            "binaryOperator(\"*\")"
+        );
     }
 
     #[test]
