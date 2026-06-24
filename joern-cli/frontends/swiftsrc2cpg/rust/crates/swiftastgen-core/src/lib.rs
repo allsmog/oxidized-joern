@@ -1325,6 +1325,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(inheritance_clause) = self.inheritance_clause(node)? {
             children.push(self.with_name(inheritance_clause, "inheritanceClause"));
         }
+        if let Some(type_constraints) = self.immediate_named_child_kind(node, "type_constraints") {
+            if let Some(clause) = self.generic_where_clause(type_constraints)? {
+                children.push(self.with_name(clause, "genericWhereClause"));
+            }
+        }
         let member_block = match recovered_member_block {
             Some(member_block) => member_block,
             None => self.member_block(body)?,
@@ -14937,6 +14942,29 @@ repeat { sink() } while x < 1
         let right = child_by_name(conformance, "rightType").unwrap();
         assert_eq!(right["nodeType"], "IdentifierTypeSyntax");
         assert_eq!(source_text(source, right), "Comparable");
+    }
+
+    #[test]
+    fn emits_generic_where_clause_on_nominal_type_with_single_segment_subject() {
+        // `struct Box<T> where T: Equatable` attaches a genericWhereClause to the
+        // type decl (after genericParameterClause, before memberBlock); a
+        // single-segment subject `T` yields an IdentifierTypeSyntax leftType.
+        let source = "struct Box<T> where T: Equatable { let value: T }\n";
+        let value = parse_source("BoxWhere.swift", "/tmp/BoxWhere.swift", source).unwrap();
+
+        let struct_decl = find_first_node_type(&value, "StructDeclSyntax").unwrap();
+        assert!(child_by_name(struct_decl, "genericParameterClause").is_some());
+        let clause = child_by_name(struct_decl, "genericWhereClause").unwrap();
+        assert_eq!(clause["nodeType"], "GenericWhereClauseSyntax");
+        assert_eq!(source_text(source, clause), "where T: Equatable");
+
+        let reqs = child_by_name(clause, "requirements").unwrap();
+        let req = &reqs["children"][0];
+        let conformance = child_by_name(req, "requirement").unwrap();
+        assert_eq!(conformance["nodeType"], "ConformanceRequirementSyntax");
+        let left = child_by_name(conformance, "leftType").unwrap();
+        assert_eq!(left["nodeType"], "IdentifierTypeSyntax");
+        assert_eq!(source_text(source, left), "T");
     }
 
     #[test]

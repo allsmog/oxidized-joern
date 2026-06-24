@@ -21,3 +21,7 @@ func firstOf<T: Equatable>(_ values: [T]) -> T? {
 func allSorted<C: Collection>(_ collection: C) -> Bool where C.Element: Comparable {
   return collection.count >= 0
 }
+
+struct Box<T> where T: Equatable {
+  let value: T
+}
