@@ -13811,7 +13811,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some((pounds_start, pounds_end)) = opening_pounds {
             children.push(self.with_name(
                 self.token_with_range(
-                    "rawStringPoundDelimiter",
+                    &format!(
+                        "rawStringPoundDelimiter({})",
+                        quoted_text(&self.source[pounds_start..pounds_end])
+                    ),
                     self.range_from_offsets(pounds_start, pounds_end),
                 ),
                 "openingPounds",
@@ -13842,7 +13845,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some((pounds_start, pounds_end)) = closing_pounds {
             children.push(self.with_name(
                 self.token_with_range(
-                    "rawStringPoundDelimiter",
+                    &format!(
+                        "rawStringPoundDelimiter({})",
+                        quoted_text(&self.source[pounds_start..pounds_end])
+                    ),
                     self.range_from_offsets(pounds_start, pounds_end),
                 ),
                 "closingPounds",
@@ -15810,6 +15816,22 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(ty, "attributes").unwrap()["range"]["startOffset"],
             base["range"]["startOffset"]
+        );
+    }
+
+    #[test]
+    fn emits_raw_string_pound_delimiter_with_value() {
+        let source = "let s = #\"raw\"#\n";
+        let value = parse_source("Raw.swift", "/tmp/Raw.swift", source).unwrap();
+
+        let literal = find_first_node_type(&value, "StringLiteralExprSyntax").unwrap();
+        assert_eq!(
+            child_by_name(literal, "openingPounds").unwrap()["tokenKind"],
+            "rawStringPoundDelimiter(\"#\")"
+        );
+        assert_eq!(
+            child_by_name(literal, "closingPounds").unwrap()["tokenKind"],
+            "rawStringPoundDelimiter(\"#\")"
         );
     }
 
