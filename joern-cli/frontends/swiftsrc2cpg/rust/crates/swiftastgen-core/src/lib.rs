@@ -6118,23 +6118,78 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .text(node)
                 .find('\\')
                 .context("key path expression is missing backslash")?;
-        Ok(self.syntax_node(
-            "KeyPathExprSyntax",
-            self.range_for_node(node),
-            vec![
-                self.with_name(
-                    self.token_with_range(
-                        "backslash",
-                        self.range_from_offsets(backslash_start, backslash_start + 1),
-                    ),
-                    "backslash",
-                ),
-                self.with_name(
-                    self.empty_collection("KeyPathComponentListSyntax", node.end_byte()),
-                    "components",
-                ),
-            ],
-        ))
+        let backslash = self.with_name(
+            self.token_with_range(
+                "backslash",
+                self.range_from_offsets(backslash_start, backslash_start + 1),
+            ),
+            "backslash",
+        );
+
+        // tree-sitter nests `\Root.a.b` as navigation_expression(... suffix `.b`)
+        // over navigation_expression(... suffix `.a`) over key_path_expression
+        // (`\Root`). Walk down to the innermost key_path_expression, collecting the
+        // `.member` suffixes (reverse for source order).
+        let mut suffixes: Vec<Node<'a>> = Vec::new();
+        let mut current = node;
+        while current.kind() == "navigation_expression" {
+            if let Some(suffix) = self.field_child(current, "suffix") {
+                suffixes.push(suffix);
+            }
+            match self.field_child(current, "target") {
+                Some(target) => current = target,
+                None => break,
+            }
+        }
+        suffixes.reverse();
+
+        let mut children = vec![backslash];
+
+        // Optional root type (`\Person.…`); absent for the `\.member` shorthand.
+        if current.kind() == "key_path_expression" {
+            if let Some(root_type) =
+                named_children(current).find(|child| is_type_syntax_node_kind(child.kind()))
+            {
+                children.push(self.with_name(self.type_syntax(root_type)?, "root"));
+            }
+        }
+
+        let mut components = Vec::new();
+        for suffix in &suffixes {
+            if suffix.kind() != "navigation_suffix" {
+                continue;
+            }
+            let Some(period) = self.immediate_child_kind(*suffix, ".") else {
+                continue;
+            };
+            let Some(member) = self.field_child(*suffix, "suffix").or_else(|| {
+                named_children(*suffix)
+                    .find(|child| matches!(child.kind(), "simple_identifier" | "identifier"))
+            }) else {
+                continue;
+            };
+            let property = self.syntax_node(
+                "KeyPathPropertyComponentSyntax",
+                self.range_for_node(member),
+                vec![self.with_name(self.decl_reference_expr(member), "declName")],
+            );
+            let component = self.syntax_node(
+                "KeyPathComponentSyntax",
+                self.range_from_offsets(period.start_byte(), member.end_byte()),
+                vec![
+                    self.with_name(self.token_for_node(period, "period"), "period"),
+                    self.with_name(property, "component"),
+                ],
+            );
+            components.push(self.with_name(component, ""));
+        }
+        let components_range = self.covering_range_or_point(&components, node.end_byte());
+        children.push(self.with_name(
+            self.syntax_node("KeyPathComponentListSyntax", components_range, components),
+            "components",
+        ));
+
+        Ok(self.syntax_node("KeyPathExprSyntax", self.range_for_node(node), children))
     }
 
     fn is_key_path_expr_tree(&self, node: Node<'a>) -> bool {
@@ -15533,6 +15588,38 @@ repeat { sink() } while x < 1
     }
 
     #[test]
+    fn emits_key_path_root_and_components() {
+        let source = "struct P { var name: String }\nlet k = \\P.name\nlet s = \\.name\n";
+        let value = parse_source("KP.swift", "/tmp/KP.swift", source).unwrap();
+
+        let kps = find_node_types(&value, "KeyPathExprSyntax");
+        assert_eq!(kps.len(), 2);
+
+        // `\P.name`: backslash + root type P + one property component `name`.
+        let kp = kps[0];
+        assert_eq!(
+            child_by_name(kp, "backslash").unwrap()["tokenKind"],
+            "backslash"
+        );
+        assert_eq!(
+            child_by_name(kp, "root").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+        let comp = &child_by_name(kp, "components").unwrap()["children"][0];
+        assert_eq!(comp["nodeType"], "KeyPathComponentSyntax");
+        let prop = child_by_name(comp, "component").unwrap();
+        assert_eq!(prop["nodeType"], "KeyPathPropertyComponentSyntax");
+        let decl_name = child_by_name(prop, "declName").unwrap();
+        assert_eq!(
+            child_by_name(decl_name, "baseName").unwrap()["tokenKind"],
+            "identifier(\"name\")"
+        );
+
+        // `\.name`: the shorthand has no root type.
+        assert!(child_by_name(kps[1], "root").is_none());
+    }
+
+    #[test]
     fn emits_interpolated_string_segments() {
         let source = "\"Fixit: \\(range.debugDescription)\"\n\"\\(x)\"\n\"Foo '\\(x)' bar\"\n";
         let value = parse_source("Interpolated.swift", "/tmp/Interpolated.swift", source).unwrap();
@@ -18687,9 +18774,19 @@ let a = #embed(\"filename.txt\")
         assert!(key_paths.iter().all(|node| {
             node["children"][0]["name"] == "backslash"
                 && node["children"][0]["tokenKind"] == "backslash"
-                && node["children"][1]["name"] == "components"
-                && node["children"][1]["nodeType"] == "KeyPathComponentListSyntax"
+                && child_by_name(node, "components")
+                    .map(|components| components["nodeType"] == "KeyPathComponentListSyntax")
+                    .unwrap_or(false)
         }));
+        // `\a.b.c` carries an explicit root type (`a`); the `\.member` shorthand does not.
+        let rooted = key_paths
+            .iter()
+            .find(|node| source_text(source, node) == "\\a.b.c")
+            .unwrap();
+        assert_eq!(
+            child_by_name(rooted, "root").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
 
         let calls = find_node_types(&value, "FunctionCallExprSyntax");
         assert!(calls.iter().any(|call| {
