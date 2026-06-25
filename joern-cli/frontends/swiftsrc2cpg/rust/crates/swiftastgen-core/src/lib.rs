@@ -13363,8 +13363,30 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.empty_collection("LabeledExprListSyntax", left_square.end_byte())
         };
 
+        // `a?[0]` — a `?` between the callee and `[` wraps the callee in optional
+        // chaining.
+        let mut called_expression = self.expr(callee)?;
+        if let Some(question) = self.source[callee.end_byte()..left_square.start_byte()]
+            .find('?')
+            .map(|offset| callee.end_byte() + offset)
+        {
+            called_expression = self.syntax_node(
+                "OptionalChainingExprSyntax",
+                self.range_from_offsets(start_offset(&called_expression), question + 1),
+                vec![
+                    self.with_name(called_expression, "expression"),
+                    self.with_name(
+                        self.token_with_range(
+                            "postfixQuestionMark",
+                            self.range_from_offsets(question, question + 1),
+                        ),
+                        "questionMark",
+                    ),
+                ],
+            );
+        }
         let mut children = vec![
-            self.with_name(self.expr(callee)?, "calledExpression"),
+            self.with_name(called_expression, "calledExpression"),
             self.with_name(self.token_for_node(left_square, "leftSquare"), "leftSquare"),
             self.with_name(arguments, "arguments"),
             self.with_name(
@@ -16848,6 +16870,21 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(detail, "detail").unwrap()["tokenKind"],
             "identifier(\"set\")"
+        );
+    }
+
+    #[test]
+    fn wraps_optional_chaining_subscript_base() {
+        // `a?[0]` wraps the base in an OptionalChainingExprSyntax.
+        let source = "func f(_ a: [Int]?) -> Int? { return a?[0] }\n";
+        let value = parse_source("OCS.swift", "/tmp/OCS.swift", source).unwrap();
+
+        let subscript_call = find_first_node_type(&value, "SubscriptCallExprSyntax").unwrap();
+        let called = child_by_name(subscript_call, "calledExpression").unwrap();
+        assert_eq!(called["nodeType"], "OptionalChainingExprSyntax");
+        assert_eq!(
+            child_by_name(called, "questionMark").unwrap()["tokenKind"],
+            "postfixQuestionMark"
         );
     }
 
