@@ -5193,10 +5193,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .map_or((type_node, None), |(base, ellipsis_start)| {
                 (base, Some(ellipsis_start))
             });
-        children.push(self.with_name(
-            self.type_syntax_for_parameter_node(node, type_node)?,
-            "type",
-        ));
+        // `_ a: [Int]!` — a trailing `!`/`?` marker sibling makes the parameter type an
+        // (implicitly unwrapped) optional around the base type.
+        let trailing_marker = self
+            .immediate_child_kind(node, "!")
+            .or_else(|| self.immediate_child_kind(node, "?"))
+            .filter(|marker| marker.start_byte() >= type_node.end_byte());
+        let parameter_type = if let Some(marker) = trailing_marker {
+            self.optional_type_from_marker(type_node, marker)?
+        } else {
+            self.type_syntax_for_parameter_node(node, type_node)?
+        };
+        children.push(self.with_name(parameter_type, "type"));
         if let Some(ellipsis_start) = ellipsis_start {
             children.push(self.with_name(self.ellipsis_token(ellipsis_start), "ellipsis"));
         }
@@ -16985,6 +16993,21 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(decl_name, "baseName").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.init)"
+        );
+    }
+
+    #[test]
+    fn wraps_implicitly_unwrapped_optional_parameter_type() {
+        // `_ a: [Int]!` wraps the array type in an ImplicitlyUnwrappedOptionalType.
+        let source = "func f(_ a: [Int]!) {}\n";
+        let value = parse_source("IUP.swift", "/tmp/IUP.swift", source).unwrap();
+
+        let param = find_first_node_type(&value, "FunctionParameterSyntax").unwrap();
+        let ty = child_by_name(param, "type").unwrap();
+        assert_eq!(ty["nodeType"], "ImplicitlyUnwrappedOptionalTypeSyntax");
+        assert_eq!(
+            child_by_name(ty, "wrappedType").unwrap()["nodeType"],
+            "ArrayTypeSyntax"
         );
     }
 
