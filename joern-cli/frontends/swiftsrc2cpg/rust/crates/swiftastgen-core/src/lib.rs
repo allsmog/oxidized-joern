@@ -2386,28 +2386,45 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .context("inheritance clause is missing ':'")?;
 
         let mut inherited_types = Vec::new();
+        let mut cursor = colon.end_byte();
         for inherited_node in inherited_nodes {
             let type_node = self
                 .field_child(inherited_node, "inherits_from")
                 .or_else(|| self.first_named_child_excluding(inherited_node, &["attribute"]))
                 .context("inheritance specifier is missing a type")?;
             let trailing_comma = self.trailing_delimiter(node, inherited_node, ",");
+            // `: @retroactive P` — attributes precede the inherited type as siblings.
+            let attributes: Vec<Node<'a>> = named_children(node)
+                .filter(|child| {
+                    child.kind() == "attribute"
+                        && child.start_byte() >= cursor
+                        && child.end_byte() <= inherited_node.start_byte()
+                })
+                .collect();
             // `: ~Copyable` is a `suppressed_constraint`, which type_syntax maps to a
             // SuppressedTypeSyntax; ordinary inherited types stay identifier types.
             let inherited_type = if type_node.kind() == "suppressed_constraint" {
                 self.type_syntax(type_node)?
+            } else if !attributes.is_empty() {
+                self.attributed_type_with_attributes(&attributes, type_node)?
             } else {
                 self.identifier_type(type_node)?
             };
+            let type_start = attributes
+                .first()
+                .map_or(inherited_node.start_byte(), |attribute| {
+                    attribute.start_byte()
+                });
             let mut children = vec![self.with_name(inherited_type, "type")];
             if let Some(comma) = trailing_comma {
                 children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
             }
             let end = trailing_comma.map_or(inherited_node.end_byte(), |comma| comma.end_byte());
+            cursor = end;
             inherited_types.push(self.with_name(
                 self.syntax_node(
                     "InheritedTypeSyntax",
-                    self.range_from_offsets(inherited_node.start_byte(), end),
+                    self.range_from_offsets(type_start, end),
                     children,
                 ),
                 "",
@@ -11931,18 +11948,29 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
         .context("for statement body is missing '}'")?;
 
-        let mut children = vec![
-            self.with_name(
-                self.token_for_node(for_keyword, "keyword(SwiftSyntax.Keyword.for)"),
-                "forKeyword",
-            ),
-            self.with_name(self.pattern(pattern)?, "pattern"),
-            self.with_name(
-                self.token_for_node(in_keyword, "keyword(SwiftSyntax.Keyword.in)"),
-                "inKeyword",
-            ),
-            self.with_name(self.expr(sequence)?, "sequence"),
-        ];
+        let mut children = vec![self.with_name(
+            self.token_for_node(for_keyword, "keyword(SwiftSyntax.Keyword.for)"),
+            "forKeyword",
+        )];
+        // `for try await x in …` — optional effect keywords between `for` and pattern.
+        if let Some(try_keyword) = self.immediate_child_kind(node, "try") {
+            children.push(self.with_name(
+                self.token_for_node(try_keyword, "keyword(SwiftSyntax.Keyword.try)"),
+                "tryKeyword",
+            ));
+        }
+        if let Some(await_keyword) = self.immediate_child_kind(node, "await") {
+            children.push(self.with_name(
+                self.token_for_node(await_keyword, "keyword(SwiftSyntax.Keyword.await)"),
+                "awaitKeyword",
+            ));
+        }
+        children.push(self.with_name(self.pattern(pattern)?, "pattern"));
+        children.push(self.with_name(
+            self.token_for_node(in_keyword, "keyword(SwiftSyntax.Keyword.in)"),
+            "inKeyword",
+        ));
+        children.push(self.with_name(self.expr(sequence)?, "sequence"));
         if let Some(where_clause) = self.immediate_named_child_kind(node, "where_clause") {
             children.push(self.with_name(self.where_clause(where_clause)?, "whereClause"));
         }
@@ -17235,6 +17263,34 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(throws_clause, "throwsSpecifier").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.throws)"
+        );
+    }
+
+    #[test]
+    fn emits_for_await_keyword() {
+        // `for await x in …` carries an awaitKeyword between `for` and the pattern.
+        let source = "func f(_ s: AsyncStream<Int>) async {\n  for await x in s { print(x) }\n}\n";
+        let value = parse_source("FA.swift", "/tmp/FA.swift", source).unwrap();
+
+        let for_stmt = find_first_node_type(&value, "ForStmtSyntax").unwrap();
+        assert_eq!(
+            child_by_name(for_stmt, "awaitKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.await)"
+        );
+    }
+
+    #[test]
+    fn emits_retroactive_attribute_on_inherited_type() {
+        // `extension Int: @retroactive P` wraps the inherited type in an AttributedType.
+        let source = "protocol P {}\nextension Int: @retroactive P {}\n";
+        let value = parse_source("RT.swift", "/tmp/RT.swift", source).unwrap();
+
+        let inherited = find_first_node_type(&value, "InheritedTypeSyntax").unwrap();
+        let ty = child_by_name(inherited, "type").unwrap();
+        assert_eq!(ty["nodeType"], "AttributedTypeSyntax");
+        assert_eq!(
+            child_by_name(ty, "baseType").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
         );
     }
 
