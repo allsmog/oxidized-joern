@@ -12566,35 +12566,67 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut requirements = Vec::new();
         let (mut list_start, mut list_end) = (where_keyword.end_byte(), where_keyword.end_byte());
         for (idx, constraint) in constraints.iter().copied().enumerate() {
-            let Some(inheritance) =
+            let requirement = if let Some(inheritance) =
                 self.immediate_named_child_kind(constraint, "inheritance_constraint")
-            else {
-                // Same-type (`==`) and other constraint kinds are not modelled yet.
+            {
+                let Some(colon) = self.immediate_child_kind(inheritance, ":") else {
+                    return Ok(None);
+                };
+                let Some(left) = named_children(inheritance)
+                    .find(|child| child.start_byte() < colon.start_byte())
+                else {
+                    return Ok(None);
+                };
+                let Some(right) = named_children(inheritance)
+                    .find(|child| child.start_byte() >= colon.end_byte())
+                else {
+                    return Ok(None);
+                };
+                self.syntax_node(
+                    "ConformanceRequirementSyntax",
+                    self.range_for_node(inheritance),
+                    vec![
+                        self.with_name(self.member_type_from_segments(left)?, "leftType"),
+                        self.with_name(self.token_for_node(colon, "colon"), "colon"),
+                        self.with_name(self.type_syntax(right)?, "rightType"),
+                    ],
+                )
+            } else if let Some(equality) =
+                self.immediate_named_child_kind(constraint, "equality_constraint")
+            {
+                // Same-type requirement (`T == U`).
+                let Some(equal) = self.immediate_child_kind(equality, "==") else {
+                    return Ok(None);
+                };
+                let Some(left) =
+                    named_children(equality).find(|child| child.start_byte() < equal.start_byte())
+                else {
+                    return Ok(None);
+                };
+                let Some(right) =
+                    named_children(equality).find(|child| child.start_byte() >= equal.end_byte())
+                else {
+                    return Ok(None);
+                };
+                self.syntax_node(
+                    "SameTypeRequirementSyntax",
+                    self.range_for_node(equality),
+                    vec![
+                        self.with_name(self.member_type_from_segments(left)?, "leftType"),
+                        self.with_name(
+                            self.token_for_node(
+                                equal,
+                                &format!("binaryOperator({})", quoted_text(self.text(equal))),
+                            ),
+                            "equal",
+                        ),
+                        self.with_name(self.type_syntax(right)?, "rightType"),
+                    ],
+                )
+            } else {
                 return Ok(None);
             };
-            let Some(colon) = self.immediate_child_kind(inheritance, ":") else {
-                return Ok(None);
-            };
-            let Some(left) =
-                named_children(inheritance).find(|child| child.start_byte() < colon.start_byte())
-            else {
-                return Ok(None);
-            };
-            let Some(right) =
-                named_children(inheritance).find(|child| child.start_byte() >= colon.end_byte())
-            else {
-                return Ok(None);
-            };
-            let conformance = self.syntax_node(
-                "ConformanceRequirementSyntax",
-                self.range_for_node(inheritance),
-                vec![
-                    self.with_name(self.member_type_from_segments(left)?, "leftType"),
-                    self.with_name(self.token_for_node(colon, "colon"), "colon"),
-                    self.with_name(self.type_syntax(right)?, "rightType"),
-                ],
-            );
-            let mut req_children = vec![self.with_name(conformance, "requirement")];
+            let mut req_children = vec![self.with_name(requirement, "requirement")];
             let trailing_comma = self.trailing_delimiter(node, constraint, ",");
             if let Some(comma) = trailing_comma {
                 req_children
@@ -16641,6 +16673,27 @@ repeat { sink() } while x < 1
             )
             .unwrap()["tokenKind"],
             "identifier(\"escaping\")"
+        );
+    }
+
+    #[test]
+    fn emits_same_type_generic_requirement() {
+        // `where T == U` is a SameTypeRequirementSyntax with a binaryOperator `==`.
+        let source = "func f<T, U>(_ x: T, _ y: U) where T == U {}\n";
+        let value = parse_source("ST.swift", "/tmp/ST.swift", source).unwrap();
+
+        let requirement = find_first_node_type(&value, "SameTypeRequirementSyntax").unwrap();
+        assert_eq!(
+            child_by_name(requirement, "leftType").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+        assert_eq!(
+            child_by_name(requirement, "equal").unwrap()["tokenKind"],
+            "binaryOperator(\"==\")"
+        );
+        assert_eq!(
+            child_by_name(requirement, "rightType").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
         );
     }
 
