@@ -2543,7 +2543,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             let semicolon = self.trailing_semicolon(child);
             items.push(self.member_block_item_with_semicolon(child, semicolon)?);
         }
-        let members_range = self.covering_range_or_point(&items, left_brace.end_byte());
+        // An empty member block (`class C { }`) anchors its list past the `{`'s
+        // same-line trailing trivia, at the `}`.
+        let empty_anchor =
+            self.skip_horizontal_whitespace(left_brace.end_byte(), right_brace.start_byte());
+        let members_range = self.covering_range_or_point(&items, empty_anchor);
         Ok(self.syntax_node(
             "MemberBlockSyntax",
             self.range_for_node(node),
@@ -5820,7 +5824,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     ) -> Result<Value> {
         let mut items = Vec::new();
         self.push_code_block_items_from_nodes(statement_nodes, &mut items)?;
-        let statements_range = self.covering_range_or_point(&items, left_brace.end_byte());
+        // An empty body (`catch { }`) anchors its statement list past the `{`'s
+        // same-line trailing trivia, at the `}`.
+        let empty_anchor =
+            self.skip_horizontal_whitespace(left_brace.end_byte(), right_brace.start_byte());
+        let statements_range = self.covering_range_or_point(&items, empty_anchor);
         Ok(self.syntax_node(
             "CodeBlockSyntax",
             self.range_from_offsets(left_brace.start_byte(), right_brace.end_byte()),
@@ -17454,6 +17462,21 @@ repeat { sink() } while x < 1
             child_by_name(where_clause, "whereKeyword").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.where)"
         );
+    }
+
+    #[test]
+    fn anchors_empty_body_at_closing_brace() {
+        // `func f() { }` / `class C { }` anchor their empty lists at the `}`, not the `{`.
+        let source = "func f() { }\nclass C { }\n";
+        let value = parse_source("EB.swift", "/tmp/EB.swift", source).unwrap();
+
+        let block = find_first_node_type(&value, "CodeBlockSyntax").unwrap();
+        let statements = child_by_name(block, "statements").unwrap();
+        let left_brace_end = find_first_node_type(&value, "CodeBlockSyntax")
+            .and_then(|b| child_by_name(b, "leftBrace").cloned())
+            .map(|lb| lb["range"]["endOffset"].as_u64().unwrap())
+            .unwrap();
+        assert!(statements["range"]["startOffset"].as_u64().unwrap() > left_brace_end);
     }
 
     #[test]
