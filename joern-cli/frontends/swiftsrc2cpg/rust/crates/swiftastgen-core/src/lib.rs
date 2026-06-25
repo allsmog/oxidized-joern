@@ -3010,9 +3010,21 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.token_for_node(subscript_keyword, "keyword(SwiftSyntax.Keyword.subscript)"),
                 "subscriptKeyword",
             ),
-            self.with_name(self.function_parameter_clause(node)?, "parameterClause"),
-            self.with_name(return_clause, "returnClause"),
         ];
+        // `subscript<T>(…)` carries a generic parameter clause before the parameters.
+        if let Some(type_parameters) = self.immediate_named_child_kind(node, "type_parameters") {
+            if let Some(clause) = self.generic_parameter_clause(type_parameters)? {
+                children.push(self.with_name(clause, "genericParameterClause"));
+            }
+        }
+        children.push(self.with_name(self.function_parameter_clause(node)?, "parameterClause"));
+        children.push(self.with_name(return_clause, "returnClause"));
+        // `subscript … where T: P` carries a generic where clause after the return.
+        if let Some(type_constraints) = self.immediate_named_child_kind(node, "type_constraints") {
+            if let Some(clause) = self.generic_where_clause(type_constraints)? {
+                children.push(self.with_name(clause, "genericWhereClause"));
+            }
+        }
         if let Some(accessor_block) = self.subscript_accessor_block(node)? {
             children.push(self.with_name(accessor_block, "accessorBlock"));
         }
@@ -16781,6 +16793,24 @@ repeat { sink() } while x < 1
             )
             .unwrap()["tokenKind"],
             "identifier(\"escaping\")"
+        );
+    }
+
+    #[test]
+    fn emits_generic_subscript_clauses() {
+        // `subscript<T>(…) where T: P` carries generic parameter and where clauses.
+        let source =
+            "struct S {\n  subscript<T>(_ k: T) -> Int where T: Hashable { return 0 }\n}\n";
+        let value = parse_source("GS.swift", "/tmp/GS.swift", source).unwrap();
+
+        let sub = find_first_node_type(&value, "SubscriptDeclSyntax").unwrap();
+        assert_eq!(
+            child_by_name(sub, "genericParameterClause").unwrap()["nodeType"],
+            "GenericParameterClauseSyntax"
+        );
+        assert_eq!(
+            child_by_name(sub, "genericWhereClause").unwrap()["nodeType"],
+            "GenericWhereClauseSyntax"
         );
     }
 
