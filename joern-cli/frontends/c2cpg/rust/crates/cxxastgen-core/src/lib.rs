@@ -1566,6 +1566,123 @@ fn resolve_qualified_member_call(
     unique_member_method(table, &type_full_name, member.trim())
 }
 
+/// Splits a parenthesised parameter list (the part of a signature inside the
+/// outermost `(…)`) into its top-level parameter type spellings, respecting
+/// nested `<…>` and `(…)`.
+fn parameter_types(signature: &str) -> Vec<String> {
+    let Some(open) = signature.find('(') else {
+        return Vec::new();
+    };
+    let Some(close) = signature.rfind(')') else {
+        return Vec::new();
+    };
+    if close <= open {
+        return Vec::new();
+    }
+    let inner = signature[open + 1..close].trim();
+    if inner.is_empty() || inner == "void" {
+        return Vec::new();
+    }
+    let mut params = Vec::new();
+    let mut depth = 0i32;
+    let mut start = 0usize;
+    for (index, ch) in inner.char_indices() {
+        match ch {
+            '<' | '(' | '[' => depth += 1,
+            '>' | ')' | ']' => depth -= 1,
+            ',' if depth == 0 => {
+                params.push(inner[start..index].trim().to_string());
+                start = index + 1;
+            }
+            _ => {}
+        }
+    }
+    params.push(inner[start..].trim().to_string());
+    params
+}
+
+/// Whether a written parameter type spelling and an inferred argument type
+/// spelling denote the same type after normalization. Conservative: only exact
+/// (normalized) matches count — conversions/references are a later phase.
+fn types_match(parameter: &str, argument: &str) -> bool {
+    normalize_type(parameter) == normalize_type(argument)
+}
+
+/// The declared type of a data field referenced by its dotted full name
+/// (`Core.Widget.value` -> `int`). Methods and unknown members yield `None`.
+fn member_data_field_type(table: &SymbolTable, reference: &str) -> Option<String> {
+    let (type_part, member) = reference.rsplit_once('.')?;
+    let members = table.members_by_type.get(type_part)?;
+    match members.by_name.get(member)?.as_slice() {
+        [single] if !single.is_method => Some(single.descriptor.clone()),
+        _ => None,
+    }
+}
+
+/// Infers the type of a call argument expression for overload disambiguation.
+/// Handles trivially-typed literals and references to data fields; other forms
+/// (locals, member access, nested calls) yield `None`, which makes the overload
+/// unresolvable (left to the Scala fallback).
+fn infer_argument_type(table: &SymbolTable, argument: &Expression) -> Option<String> {
+    match argument {
+        Expression::Literal {
+            resolved_type_full_name,
+            ..
+        } => resolved_type_full_name.clone(),
+        Expression::Identifier {
+            resolved_reference_full_name: Some(reference),
+            ..
+        } => member_data_field_type(table, reference),
+        _ => None,
+    }
+}
+
+/// Resolves an overloaded call (two or more arity-compatible defined candidates)
+/// by matching each argument's inferred type against the candidates' parameter
+/// types. Returns the unique `(qualified_name, signature)` whose parameter types
+/// all match, or `None` when ambiguous, unknown, or any argument type is
+/// uninferable.
+fn resolve_overloaded_call(
+    table: &SymbolTable,
+    name: &str,
+    arguments: &[Expression],
+) -> Option<(String, String)> {
+    let (qualified, simple) = call_lookup_name(name)?;
+    let candidates = match table.by_qualified_name.get(&qualified) {
+        Some(entries) if !entries.is_empty() => entries,
+        _ => table.by_simple_name.get(&simple)?,
+    };
+    let arity = arguments.len();
+    let defined: Vec<&SymbolEntry> = candidates
+        .iter()
+        .filter(|entry| {
+            entry.is_definition
+                && (entry.arity == arity || (entry.has_variadic && arity >= entry.arity))
+        })
+        .collect();
+    // Unique targets are handled earlier; only disambiguate genuine overloads.
+    if defined.len() < 2 {
+        return None;
+    }
+    let argument_types = arguments
+        .iter()
+        .map(|argument| infer_argument_type(table, argument))
+        .collect::<Option<Vec<_>>>()?;
+    let mut matches = defined.iter().filter(|entry| {
+        let parameters = parameter_types(&entry.signature);
+        parameters.len() == argument_types.len()
+            && parameters
+                .iter()
+                .zip(&argument_types)
+                .all(|(parameter, argument)| types_match(parameter, argument))
+    });
+    let first = matches.next()?;
+    match matches.next() {
+        Some(_) => None,
+        None => Some((first.qualified_name.clone(), first.signature.clone())),
+    }
+}
+
 /// Infers the type of a literal from its source spelling for the trivially
 /// unambiguous cases. Returns `None` otherwise (e.g. user-defined literals).
 fn infer_literal_type(value: &str) -> Option<String> {
@@ -2630,13 +2747,29 @@ fn resolve_references_in_expression(
         Expression::Unknown { .. } | Expression::Literal { .. } | Expression::Designator { .. } => {
         }
         Expression::Call {
-            callee, arguments, ..
+            name,
+            callee,
+            arguments,
+            resolved_method_full_name,
+            resolved_signature,
+            ..
         } => {
             // The callee is the function name (phase-1 territory); descend but do
             // not stamp a bare-identifier callee as a value reference.
             resolve_references_in_expression(table, scope, stack, aliases, callee, true);
             for argument in arguments.iter_mut() {
                 resolve_references_in_expression(table, scope, stack, aliases, argument, false);
+            }
+            // Arguments now carry their resolved references, so an overloaded call
+            // can be disambiguated by argument type (the unique-target and qualified
+            // paths in annotate_declarations only handle non-overloaded callees).
+            if resolved_method_full_name.is_none() {
+                if let Some((member_full_name, signature)) =
+                    resolve_overloaded_call(table, name, arguments)
+                {
+                    *resolved_method_full_name = Some(format!("{member_full_name}:{signature}"));
+                    *resolved_signature = Some(signature);
+                }
             }
         }
         Expression::Binary { left, right, .. } | Expression::Assignment { left, right, .. } => {
@@ -14297,7 +14430,7 @@ mod tests {
     }
 
     #[test]
-    fn leaves_ambiguous_same_arity_overload_unresolved() {
+    fn resolves_same_arity_overload_by_argument_type() {
         let declarations = parse_declarations(
             r#"
                 int pick(int a) { return a; }
@@ -14306,11 +14439,59 @@ mod tests {
             "#,
             SourceLanguage::Cpp,
         )
-        .expect("ambiguous sample should parse");
+        .expect("overload sample should parse");
 
         let use_fn = function_named(&declarations, "use");
-        // Two arity-1 definitions => ambiguous => no resolution stamped.
+        // The `int` literal argument selects `pick(int)` over `pick(double)`.
+        assert_eq!(
+            resolved_call(use_fn, "pick"),
+            Some((
+                Some("pick:int(int)".to_string()),
+                Some("int(int)".to_string())
+            ))
+        );
+    }
+
+    #[test]
+    fn leaves_overload_with_uninferable_argument_unresolved() {
+        let declarations = parse_declarations(
+            r#"
+                int pick(int a) { return a; }
+                int pick(double a) { return 0; }
+                int compute();
+                int use() { return pick(compute()); }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("overload sample should parse");
+
+        let use_fn = function_named(&declarations, "use");
+        // The argument type (a prototype-only call) is unknown, so the overload
+        // stays ambiguous and unresolved.
         assert_eq!(resolved_call(use_fn, "pick"), Some((None, None)));
+    }
+
+    #[test]
+    fn resolves_member_overload_by_field_argument_type() {
+        // `pick(value)` inside a member selects pick(int) because the implicit
+        // `this->value` field is an int.
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Widget {
+                    int value;
+                    int pick(int seed) { return seed; }
+                    int pick(Widget& other) { return other.value; }
+                    int normalize() { return pick(value); }
+                  };
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("member overload sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.Widget.pick:int(int)\""));
     }
 
     #[test]
