@@ -3758,12 +3758,46 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .or_else(|| self.first_descendant_kind(node, "user_type"))
             .or_else(|| self.first_descendant_kind(node, "type_identifier"))
             .context("type annotation is missing a type")?;
+        // `var x: N!` (and `N?`) can surface the marker as a trailing `!`/`?` token
+        // sibling of the wrapped type rather than wrapping it; rebuild the optional
+        // type from both when that happens.
+        let trailing_marker = children(node).find(|child| {
+            child.start_byte() >= type_node.end_byte() && matches!(self.text(*child), "!" | "?")
+        });
+        let type_value = if let Some(marker) = trailing_marker {
+            self.optional_type_from_marker(type_node, marker)?
+        } else {
+            self.type_syntax(type_node)?
+        };
         Ok(self.syntax_node(
             "TypeAnnotationSyntax",
             self.range_for_node(node),
             vec![
                 self.with_name(self.token_for_node(colon, "colon"), "colon"),
-                self.with_name(self.type_syntax(type_node)?, "type"),
+                self.with_name(type_value, "type"),
+            ],
+        ))
+    }
+
+    /// Build an (implicitly unwrapped) optional type from a separate wrapped-type
+    /// node and a trailing `!`/`?` marker token.
+    fn optional_type_from_marker(&self, wrapped: Node<'a>, marker: Node<'a>) -> Result<Value> {
+        let wrapped_type = self.type_syntax(wrapped)?;
+        let (node_type, marker_name, token_kind) = if self.text(marker) == "!" {
+            (
+                "ImplicitlyUnwrappedOptionalTypeSyntax",
+                "exclamationMark",
+                "exclamationMark",
+            )
+        } else {
+            ("OptionalTypeSyntax", "questionMark", "postfixQuestionMark")
+        };
+        Ok(self.syntax_node(
+            node_type,
+            self.range_from_offsets(start_offset(&wrapped_type), marker.end_byte()),
+            vec![
+                self.with_name(wrapped_type, "wrappedType"),
+                self.with_name(self.token_for_node(marker, token_kind), marker_name),
             ],
         ))
     }
@@ -16691,6 +16725,24 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(decl_name, "baseName").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.init)"
+        );
+    }
+
+    #[test]
+    fn emits_implicitly_unwrapped_optional_type() {
+        // `var next: C!` is an ImplicitlyUnwrappedOptionalTypeSyntax even though the
+        // `!` surfaces as a sibling of the wrapped type.
+        let source = "class C {\n  var next: C!\n}\n";
+        let value = parse_source("IUO.swift", "/tmp/IUO.swift", source).unwrap();
+
+        let ty = find_first_node_type(&value, "ImplicitlyUnwrappedOptionalTypeSyntax").unwrap();
+        assert_eq!(
+            child_by_name(ty, "wrappedType").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+        assert_eq!(
+            child_by_name(ty, "exclamationMark").unwrap()["tokenKind"],
+            "exclamationMark"
         );
     }
 
