@@ -1146,9 +1146,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 self.recovered_array_expr(node)
             }
             "ERROR" if self.is_recoverable_if_case_error(node) => self.recovered_if_case_expr(node),
-            "ERROR" if self.is_bare_macro_error(node) => self.macro_expansion_decl(node),
-            "diagnostic" => self.macro_expansion_decl(node),
-            "macro_invocation" => self.macro_expansion_decl(node),
+            "ERROR" if self.is_bare_macro_error(node) => self.macro_expansion_in_context(node),
+            "diagnostic" => self.macro_expansion_in_context(node),
+            "macro_invocation" => self.macro_expansion_in_context(node),
             "macro_declaration" => Ok(self
                 .macro_decl_fragments(node)
                 .into_iter()
@@ -12811,6 +12811,27 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         self.macro_expansion(node, "MacroExpansionDeclSyntax", true)
     }
 
+    /// A freestanding macro (`#warning("…")`, `#foo()`) is a MacroExpansionExprSyntax
+    /// at file scope or in a function body / closure / accessor, but a
+    /// MacroExpansionDeclSyntax in type-member position.
+    fn macro_expansion_in_context(&self, node: Node<'a>) -> Result<Value> {
+        let mut current = node.parent();
+        while let Some(ancestor) = current {
+            match ancestor.kind() {
+                "function_body" | "lambda_literal" | "computed_getter" | "computed_setter"
+                | "computed_property" | "willset_clause" | "didset_clause" | "source_file" => {
+                    return self.macro_expansion_expr(node);
+                }
+                "class_body" | "enum_class_body" | "protocol_body" => {
+                    return self.macro_expansion_decl(node);
+                }
+                _ => {}
+            }
+            current = ancestor.parent();
+        }
+        self.macro_expansion_expr(node)
+    }
+
     fn macro_expansion(
         &self,
         node: Node<'a>,
@@ -20510,8 +20531,10 @@ let a = #embed(\"filename.txt\")
             .and_then(|child| child["tokenKind"].as_str());
         assert_eq!(bare_macro_name, Some("identifier(\"notAPound\")"));
 
+        // A top-level diagnostic macro is in expression position (SwiftSyntax models
+        // file-scope `#error(…)` as a MacroExpansionExprSyntax, not a declaration).
         let diagnostic =
-            find_first_node_type(&diagnostic_value, "MacroExpansionDeclSyntax").unwrap();
+            find_first_node_type(&diagnostic_value, "MacroExpansionExprSyntax").unwrap();
         let diagnostic_name = diagnostic["children"]
             .as_array()
             .unwrap()
