@@ -2676,8 +2676,18 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 )
             } else if let Some(platform_version) = self.platform_version(group)? {
                 self.with_name(platform_version, "argument")
+            } else if group.len() == 1 && group[0].kind() == "simple_identifier" {
+                // A bare availability keyword (`deprecated`, `unavailable`, `noasync`).
+                self.with_name(
+                    self.token_for_node(
+                        group[0],
+                        &format!("keyword(SwiftSyntax.Keyword.{})", self.text(group[0])),
+                    ),
+                    "argument",
+                )
+            } else if let Some(labeled) = self.availability_labeled_argument(group)? {
+                self.with_name(labeled, "argument")
             } else {
-                // A labeled or otherwise unmodelled availability argument.
                 return Ok(None);
             };
             let mut argument_children = vec![argument];
@@ -2710,6 +2720,96 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.range_from_offsets(list_start, list_end),
             arguments,
         )))
+    }
+
+    /// Build an `AvailabilityLabeledArgumentSyntax` (`message: "…"`, `renamed: "…"`)
+    /// from a `label : value` token group. Returns `None` for value kinds not yet
+    /// modelled (e.g. labeled version numbers).
+    fn availability_labeled_argument(&self, group: &[Node<'a>]) -> Result<Option<Value>> {
+        let Some(label) = group
+            .first()
+            .copied()
+            .filter(|n| n.kind() == "simple_identifier")
+        else {
+            return Ok(None);
+        };
+        let Some(colon) = group.iter().copied().find(|n| n.kind() == ":") else {
+            return Ok(None);
+        };
+        let Some(value) = group
+            .iter()
+            .copied()
+            .find(|n| n.start_byte() >= colon.end_byte())
+        else {
+            return Ok(None);
+        };
+        if value.kind() != "line_string_literal" {
+            return Ok(None);
+        }
+        Ok(Some(self.syntax_node(
+            "AvailabilityLabeledArgumentSyntax",
+            self.range_from_offsets(label.start_byte(), value.end_byte()),
+            vec![
+                self.with_name(
+                    self.token_for_node(
+                        label,
+                        &format!("keyword(SwiftSyntax.Keyword.{})", self.text(label)),
+                    ),
+                    "label",
+                ),
+                self.with_name(self.token_for_node(colon, "colon"), "colon"),
+                self.with_name(self.simple_string_literal(value), "value"),
+            ],
+        )))
+    }
+
+    /// Build a `SimpleStringLiteralExprSyntax` (a non-interpolated string used in
+    /// attribute arguments) from a `line_string_literal` node.
+    fn simple_string_literal(&self, node: Node<'a>) -> Value {
+        let content_start = node.start_byte() + 1;
+        let content_end = node.end_byte() - 1;
+        let segment = self.syntax_node(
+            "StringSegmentSyntax",
+            self.range_from_offsets(content_start, content_end),
+            vec![self.with_name(
+                self.token_with_range(
+                    &format!(
+                        "stringSegment({})",
+                        quoted_text(&self.source[content_start..content_end])
+                    ),
+                    self.range_from_offsets(content_start, content_end),
+                ),
+                "content",
+            )],
+        );
+        self.syntax_node(
+            "SimpleStringLiteralExprSyntax",
+            self.range_for_node(node),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "stringQuote",
+                        self.range_from_offsets(node.start_byte(), content_start),
+                    ),
+                    "openingQuote",
+                ),
+                self.with_name(
+                    self.syntax_node(
+                        "SimpleStringLiteralSegmentListSyntax",
+                        self.range_from_offsets(content_start, content_end),
+                        vec![self.with_name(segment, "")],
+                    ),
+                    "segments",
+                ),
+                self.with_name(
+                    self.token_with_range(
+                        "stringQuote",
+                        self.range_from_offsets(content_end, node.end_byte()),
+                    ),
+                    "closingQuote",
+                ),
+            ],
+        )
     }
 
     /// Build a `PlatformVersionSyntax` (`iOS 13.0`) from a platform identifier
@@ -16732,6 +16832,23 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(func, "name").unwrap()["tokenKind"],
             "binaryOperator(\"<+>\")"
+        );
+    }
+
+    #[test]
+    fn emits_available_labeled_argument() {
+        // `@available(*, deprecated, message: "…")` carries a labeled message argument.
+        let source = "@available(*, deprecated, message: \"gone\")\nfunc f() {}\n";
+        let value = parse_source("Av.swift", "/tmp/Av.swift", source).unwrap();
+
+        let labeled = find_first_node_type(&value, "AvailabilityLabeledArgumentSyntax").unwrap();
+        assert_eq!(
+            child_by_name(labeled, "label").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.message)"
+        );
+        assert_eq!(
+            child_by_name(labeled, "value").unwrap()["nodeType"],
+            "SimpleStringLiteralExprSyntax"
         );
     }
 
