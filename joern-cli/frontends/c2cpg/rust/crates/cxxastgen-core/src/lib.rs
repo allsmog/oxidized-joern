@@ -682,6 +682,14 @@ pub enum Expression {
         code: String,
         line: usize,
         base: Box<Expression>,
+        /// Phase-4: the member's declared type when the base type is known
+        /// (`w.value` -> `int`); `None` otherwise. Additive JSON ignored by the
+        /// current Scala reader until a later phase consumes it.
+        #[serde(
+            rename = "resolvedTypeFullName",
+            skip_serializing_if = "Option::is_none"
+        )]
+        resolved_type_full_name: Option<String>,
     },
     IndexAccess {
         code: String,
@@ -1721,24 +1729,37 @@ fn infer_argument_type(
         // `obj.field` / `h->inner` / `this->field`: resolve the base's type, then
         // the field's type.
         Expression::FieldAccess { base, field, .. } => {
-            let base_qualified = match base.as_ref() {
-                // `this` denotes the enclosing class (the parent of the function scope).
-                Expression::Identifier { name, .. } if name == "this" => {
-                    enclosing_type_scope(scope)?.to_string()
-                }
-                _ => {
-                    let base_type = infer_argument_type(table, stack, scope, base)?;
-                    unique_type_qualified_name_with_aliases(
-                        table,
-                        strip_reference(&base_type),
-                        &NamespaceAliasStack::default(),
-                    )?
-                }
-            };
-            type_member_field_type(table, &base_qualified, field)
+            field_access_member_type(table, stack, scope, base, field)
         }
         _ => None,
     }
+}
+
+/// The declared type of a member access `base.field`: resolve the base's type to
+/// its qualified name (treating `this` as the enclosing class), then look up the
+/// data field. `None` when any step is unresolvable.
+fn field_access_member_type(
+    table: &SymbolTable,
+    stack: &ScopeStack,
+    scope: &str,
+    base: &Expression,
+    field: &str,
+) -> Option<String> {
+    let base_qualified = match base {
+        // `this` denotes the enclosing class (the parent of the function scope).
+        Expression::Identifier { name, .. } if name == "this" => {
+            enclosing_type_scope(scope)?.to_string()
+        }
+        _ => {
+            let base_type = infer_argument_type(table, stack, scope, base)?;
+            unique_type_qualified_name_with_aliases(
+                table,
+                strip_reference(&base_type),
+                &NamespaceAliasStack::default(),
+            )?
+        }
+    };
+    type_member_field_type(table, &base_qualified, field)
 }
 
 /// The qualified name of the type enclosing a function `scope` (`Core.Widget.use`
@@ -2440,6 +2461,7 @@ fn namespace_alias_field_access_expression(
             resolved_reference_full_name: None,
             resolved_member_full_name: None,
         }),
+        resolved_type_full_name: None,
     })
 }
 
@@ -2946,10 +2968,18 @@ fn resolve_references_in_expression(
         Expression::StatementExpression { body, .. } => {
             resolve_references_in_block(table, scope, stack, aliases, body);
         }
-        Expression::FieldAccess { base, .. } => {
-            // The base is a value reference; the member name is not resolved here
-            // (member-access-through-type is deferred).
+        Expression::FieldAccess {
+            base,
+            field,
+            resolved_type_full_name,
+            ..
+        } => {
+            // The base is a value reference; resolve it first so its type is known.
             resolve_references_in_expression(table, scope, stack, aliases, base, false);
+            if resolved_type_full_name.is_none() {
+                *resolved_type_full_name =
+                    field_access_member_type(table, stack, scope, base, field);
+            }
         }
         Expression::IndexAccess { base, index, .. } => {
             resolve_references_in_expression(table, scope, stack, aliases, base, false);
@@ -6887,6 +6917,7 @@ fn parse_qualified_identifier_expression(node: Node, source: &[u8]) -> Expressio
             code: node_text(node, source).trim().to_string(),
             line: line(node),
             base: Box::new(parse_decltype_expression(scope, source)),
+            resolved_type_full_name: None,
         },
         _ => identifier_expression(node, source),
     }
@@ -7027,6 +7058,7 @@ fn parse_field_expression(node: Node, source: &[u8]) -> Expression {
             code: node_text(node, source).trim().to_string(),
             line: line(node),
             base: Box::new(parse_expression(base, source)),
+            resolved_type_full_name: None,
         },
         _ => identifier_expression(node, source),
     }
@@ -14586,6 +14618,28 @@ mod tests {
         // The argument type (a prototype-only call) is unknown, so the overload
         // stays ambiguous and unresolved.
         assert_eq!(resolved_call(use_fn, "pick"), Some((None, None)));
+    }
+
+    #[test]
+    fn emits_field_access_member_type() {
+        // Instance field access carries the member's declared type; method access
+        // (not a data field) does not.
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Widget {
+                    int value;
+                    int get() { return value; }
+                    int use(Widget& w) { return w.value + w.get(); }
+                  };
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("field access sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedTypeFullName\":\"int\""));
     }
 
     #[test]
