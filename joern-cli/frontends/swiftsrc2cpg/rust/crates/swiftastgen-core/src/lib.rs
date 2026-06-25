@@ -2784,14 +2784,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             } else if let Some(platform_version) = self.platform_version(group)? {
                 self.with_name(platform_version, "argument")
             } else if group.len() == 1 && group[0].kind() == "simple_identifier" {
-                // A bare availability keyword (`deprecated`, `unavailable`, `noasync`).
-                self.with_name(
-                    self.token_for_node(
-                        group[0],
-                        &format!("keyword(SwiftSyntax.Keyword.{})", self.text(group[0])),
-                    ),
-                    "argument",
-                )
+                // A bare availability keyword (`deprecated`/`unavailable`/`noasync`) is a
+                // keyword token; a bare platform name (`iOS`) stays an identifier.
+                let token_kind = if matches!(
+                    self.text(group[0]),
+                    "deprecated" | "unavailable" | "noasync"
+                ) {
+                    format!("keyword(SwiftSyntax.Keyword.{})", self.text(group[0]))
+                } else {
+                    format!("identifier({})", quoted_text(self.text(group[0])))
+                };
+                self.with_name(self.token_for_node(group[0], &token_kind), "argument")
             } else if let Some(labeled) = self.availability_labeled_argument(group)? {
                 self.with_name(labeled, "argument")
             } else {
@@ -2850,12 +2853,32 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         else {
             return Ok(None);
         };
-        if value.kind() != "line_string_literal" {
+        // The value is either a string (`message:`/`renamed:`) or a version number
+        // (`introduced:`/`deprecated:`/`obsoleted:`).
+        let (value_node, value_end) = if value.kind() == "line_string_literal" {
+            (self.simple_string_literal(value), value.end_byte())
+        } else if matches!(value.kind(), "integer_literal" | "real_literal") {
+            // A version number (`13.0`) — tree-sitter keeps it as one token, so split
+            // it on `.` into a VersionTupleSyntax.
+            let version_tokens: Vec<Node<'a>> = group
+                .iter()
+                .copied()
+                .filter(|n| {
+                    n.start_byte() >= colon.end_byte()
+                        && matches!(n.kind(), "integer_literal" | "real_literal" | ".")
+                })
+                .collect();
+            let v_start = value.start_byte();
+            let v_end = version_tokens
+                .last()
+                .map_or(value.end_byte(), |last| last.end_byte());
+            (self.version_tuple_from_range(v_start, v_end), v_end)
+        } else {
             return Ok(None);
-        }
+        };
         Ok(Some(self.syntax_node(
             "AvailabilityLabeledArgumentSyntax",
-            self.range_from_offsets(label.start_byte(), value.end_byte()),
+            self.range_from_offsets(label.start_byte(), value_end),
             vec![
                 self.with_name(
                     self.token_for_node(
@@ -2865,9 +2888,75 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     "label",
                 ),
                 self.with_name(self.token_for_node(colon, "colon"), "colon"),
-                self.with_name(self.simple_string_literal(value), "value"),
+                self.with_name(value_node, "value"),
             ],
         )))
+    }
+
+    /// Build a `VersionTupleSyntax` (`13.0.1`) from a source range, splitting on `.`
+    /// into the major number and dotted components.
+    fn version_tuple_from_range(&self, start: usize, end: usize) -> Value {
+        let bytes = self.source.as_bytes();
+        let major_end = self.source[start..end]
+            .find('.')
+            .map_or(end, |offset| start + offset);
+        let mut components = Vec::new();
+        let mut offset = major_end;
+        while offset < end && bytes[offset] == b'.' {
+            let number_start = offset + 1;
+            let mut number_end = number_start;
+            while number_end < end && bytes[number_end].is_ascii_digit() {
+                number_end += 1;
+            }
+            components.push(self.with_name(
+                self.syntax_node(
+                    "VersionComponentSyntax",
+                    self.range_from_offsets(offset, number_end),
+                    vec![
+                        self.with_name(
+                            self.token_with_range(
+                                "period",
+                                self.range_from_offsets(offset, offset + 1),
+                            ),
+                            "period",
+                        ),
+                        self.with_name(
+                            self.token_with_range(
+                                &format!(
+                                    "integerLiteral({})",
+                                    quoted_text(&self.source[number_start..number_end])
+                                ),
+                                self.range_from_offsets(number_start, number_end),
+                            ),
+                            "number",
+                        ),
+                    ],
+                ),
+                "",
+            ));
+            offset = number_end;
+        }
+        let components_range = self.covering_range_or_point(&components, major_end);
+        self.syntax_node(
+            "VersionTupleSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        &format!(
+                            "integerLiteral({})",
+                            quoted_text(&self.source[start..major_end])
+                        ),
+                        self.range_from_offsets(start, major_end),
+                    ),
+                    "major",
+                ),
+                self.with_name(
+                    self.syntax_node("VersionComponentListSyntax", components_range, components),
+                    "components",
+                ),
+            ],
+        )
     }
 
     /// Build a `SimpleStringLiteralExprSyntax` (a non-interpolated string used in
@@ -17023,6 +17112,26 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(func, "name").unwrap()["tokenKind"],
             "binaryOperator(\"<+>\")"
+        );
+    }
+
+    #[test]
+    fn emits_available_labeled_version_argument() {
+        // `@available(iOS, introduced: 13.0)` — bare `iOS` is an identifier and the
+        // labeled `introduced:` carries a VersionTupleSyntax value.
+        let source = "@available(iOS, introduced: 13.0)\nfunc f() {}\n";
+        let value = parse_source("AvV.swift", "/tmp/AvV.swift", source).unwrap();
+
+        let labeled = find_first_node_type(&value, "AvailabilityLabeledArgumentSyntax").unwrap();
+        assert_eq!(
+            child_by_name(labeled, "label").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.introduced)"
+        );
+        let version = child_by_name(labeled, "value").unwrap();
+        assert_eq!(version["nodeType"], "VersionTupleSyntax");
+        assert_eq!(
+            child_by_name(version, "major").unwrap()["tokenKind"],
+            "integerLiteral(\"13\")"
         );
     }
 
