@@ -11901,6 +11901,80 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
+    /// `catch let e as MyError` — the catch pattern is a binding cast, which
+    /// SwiftSyntax models as `ValueBindingPattern(let, ExpressionPattern(AsExpr(
+    /// PatternExpr(IdentifierPattern(e)), as, MyError)))`. Returns `None` for
+    /// catch patterns that are not a binding `as` cast.
+    fn catch_as_pattern(&self, pattern_node: Node<'a>) -> Option<Result<Value>> {
+        let as_token = self.immediate_child_kind(pattern_node, "as")?;
+        let type_node = self.field_child(pattern_node, "name")?;
+        let inner = self.immediate_named_child_kind(pattern_node, "pattern")?;
+        let identifier = self
+            .field_child(inner, "bound_identifier")
+            .or_else(|| self.first_descendant_kind(inner, "simple_identifier"))?;
+        Some(self.build_catch_as_pattern(pattern_node, inner, identifier, as_token, type_node))
+    }
+
+    fn build_catch_as_pattern(
+        &self,
+        pattern_node: Node<'a>,
+        inner: Node<'a>,
+        identifier: Node<'a>,
+        as_token: Node<'a>,
+        type_node: Node<'a>,
+    ) -> Result<Value> {
+        let identifier_pattern = self.syntax_node(
+            "IdentifierPatternSyntax",
+            self.range_for_node(identifier),
+            vec![self.with_name(
+                self.token_for_node(
+                    identifier,
+                    &format!("identifier({})", quoted_text(self.text(identifier))),
+                ),
+                "identifier",
+            )],
+        );
+        let pattern_expr = self.syntax_node(
+            "PatternExprSyntax",
+            self.range_for_node(identifier),
+            vec![self.with_name(identifier_pattern, "pattern")],
+        );
+        let as_expr = self.as_expr_from_value(
+            pattern_node,
+            identifier.start_byte(),
+            pattern_expr,
+            as_token,
+            type_node,
+        )?;
+        let expression_pattern = self.syntax_node(
+            "ExpressionPatternSyntax",
+            self.range_from_offsets(identifier.start_byte(), pattern_node.end_byte()),
+            vec![self.with_name(as_expr, "expression")],
+        );
+        // A `let`/`var` binding wraps the cast in a ValueBindingPattern.
+        if let Some(binding) = self
+            .first_descendant_any_kind(inner, "let")
+            .or_else(|| self.first_descendant_any_kind(inner, "var"))
+        {
+            Ok(self.syntax_node(
+                "ValueBindingPatternSyntax",
+                self.range_from_offsets(binding.start_byte(), pattern_node.end_byte()),
+                vec![
+                    self.with_name(
+                        self.token_for_node(
+                            binding,
+                            &format!("keyword(SwiftSyntax.Keyword.{})", self.text(binding)),
+                        ),
+                        "bindingSpecifier",
+                    ),
+                    self.with_name(expression_pattern, "pattern"),
+                ],
+            ))
+        } else {
+            Ok(expression_pattern)
+        }
+    }
+
     fn catch_item_list_from_block(&self, node: Node<'a>, fallback_offset: usize) -> Result<Value> {
         // A catch clause may carry a pattern (`catch SomeError.case`), a where
         // clause (`catch where …`), both, or neither (the catch-all `catch { }`).
@@ -11914,8 +11988,13 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let mut item_start = None;
         let mut item_end = None;
         if let Some(pattern_node) = pattern_node {
-            let pattern = self
-                .synthetic_pattern_from_offsets(pattern_node.start_byte(), pattern_node.end_byte());
+            let pattern = match self.catch_as_pattern(pattern_node) {
+                Some(result) => result?,
+                None => self.synthetic_pattern_from_offsets(
+                    pattern_node.start_byte(),
+                    pattern_node.end_byte(),
+                ),
+            };
             item_start = Some(pattern_node.start_byte());
             item_end = Some(pattern_node.end_byte());
             item_children.push(self.with_name(pattern, "pattern"));
@@ -17550,6 +17629,28 @@ repeat { sink() } while x < 1
         assert_eq!(ty["nodeType"], "AttributedTypeSyntax");
         assert_eq!(
             child_by_name(ty, "baseType").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_catch_binding_as_pattern() {
+        // `catch let e as MyError` → ValueBindingPattern wrapping an AsExpr cast.
+        let source = "enum E: Error { case bad }\nfunc f() {\n  do { try g() } catch let e as E { print(e) } catch { print(\"x\") }\n}\nfunc g() throws {}\n";
+        let value = parse_source("CA.swift", "/tmp/CA.swift", source).unwrap();
+
+        let binding = find_first_node_type(&value, "ValueBindingPatternSyntax").unwrap();
+        assert_eq!(
+            child_by_name(binding, "bindingSpecifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.let)"
+        );
+        let as_expr = find_first_node_type(binding, "AsExprSyntax").unwrap();
+        assert_eq!(
+            child_by_name(as_expr, "expression").unwrap()["nodeType"],
+            "PatternExprSyntax"
+        );
+        assert_eq!(
+            child_by_name(as_expr, "type").unwrap()["nodeType"],
             "IdentifierTypeSyntax"
         );
     }
