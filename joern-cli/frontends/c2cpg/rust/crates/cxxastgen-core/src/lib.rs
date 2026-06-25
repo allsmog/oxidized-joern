@@ -1658,6 +1658,7 @@ fn member_data_field_type(table: &SymbolTable, reference: &str) -> Option<String
 fn infer_argument_type(
     table: &SymbolTable,
     stack: &ScopeStack,
+    scope: &str,
     argument: &Expression,
 ) -> Option<String> {
     match argument {
@@ -1692,18 +1693,33 @@ fn infer_argument_type(
             resolved_signature: Some(signature),
             ..
         } => return_type_of_signature(signature),
-        // `obj.field` / `h->inner`: resolve the base's type, then the field's type.
+        // `obj.field` / `h->inner` / `this->field`: resolve the base's type, then
+        // the field's type.
         Expression::FieldAccess { base, field, .. } => {
-            let base_type = infer_argument_type(table, stack, base)?;
-            let base_qualified = unique_type_qualified_name_with_aliases(
-                table,
-                strip_reference(&base_type),
-                &NamespaceAliasStack::default(),
-            )?;
+            let base_qualified = match base.as_ref() {
+                // `this` denotes the enclosing class (the parent of the function scope).
+                Expression::Identifier { name, .. } if name == "this" => {
+                    enclosing_type_scope(scope)?.to_string()
+                }
+                _ => {
+                    let base_type = infer_argument_type(table, stack, scope, base)?;
+                    unique_type_qualified_name_with_aliases(
+                        table,
+                        strip_reference(&base_type),
+                        &NamespaceAliasStack::default(),
+                    )?
+                }
+            };
             type_member_field_type(table, &base_qualified, field)
         }
         _ => None,
     }
+}
+
+/// The qualified name of the type enclosing a function `scope` (`Core.Widget.use`
+/// -> `Core.Widget`), used to resolve `this`. Returns `None` at top level.
+fn enclosing_type_scope(scope: &str) -> Option<&str> {
+    scope.rsplit_once('.').map(|(parent, _)| parent)
 }
 
 /// Resolves an overloaded call (two or more arity-compatible defined candidates)
@@ -1714,6 +1730,7 @@ fn infer_argument_type(
 fn resolve_overloaded_call(
     table: &SymbolTable,
     stack: &ScopeStack,
+    scope: &str,
     name: &str,
     arguments: &[Expression],
 ) -> Option<(String, String)> {
@@ -1736,7 +1753,7 @@ fn resolve_overloaded_call(
     }
     let argument_types = arguments
         .iter()
-        .map(|argument| infer_argument_type(table, stack, argument))
+        .map(|argument| infer_argument_type(table, stack, scope, argument))
         .collect::<Option<Vec<_>>>()?;
     let mut matches = defined.iter().filter(|entry| {
         let parameters = parameter_types(&entry.signature);
@@ -2840,7 +2857,7 @@ fn resolve_references_in_expression(
             // paths in annotate_declarations only handle non-overloaded callees).
             if resolved_method_full_name.is_none() {
                 if let Some((member_full_name, signature)) =
-                    resolve_overloaded_call(table, stack, name, arguments)
+                    resolve_overloaded_call(table, stack, scope, name, arguments)
                 {
                     *resolved_method_full_name = Some(format!("{member_full_name}:{signature}"));
                     *resolved_signature = Some(signature);
@@ -14544,6 +14561,29 @@ mod tests {
         // The argument type (a prototype-only call) is unknown, so the overload
         // stays ambiguous and unresolved.
         assert_eq!(resolved_call(use_fn, "pick"), Some((None, None)));
+    }
+
+    #[test]
+    fn resolves_overload_by_this_member_argument() {
+        // `pick(this->o)` resolves `this` to the enclosing class, then the field.
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Other { int v; };
+                  struct Widget {
+                    Other o;
+                    int pick(int seed) { return seed; }
+                    int pick(Other& other) { return other.v; }
+                    int use() { return pick(this->o); }
+                  };
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("this member argument overload sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.Widget.pick:int(Other&)\""));
     }
 
     #[test]
