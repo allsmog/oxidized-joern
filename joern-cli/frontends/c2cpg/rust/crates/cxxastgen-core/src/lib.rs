@@ -1602,10 +1602,17 @@ fn parameter_types(signature: &str) -> Vec<String> {
 }
 
 /// Whether a written parameter type spelling and an inferred argument type
-/// spelling denote the same type after normalization. Conservative: only exact
-/// (normalized) matches count — conversions/references are a later phase.
+/// spelling denote the same type. A reference/cv-qualified parameter (`Widget&`,
+/// `const Widget&`) binds an argument of the referenced type, so the trailing
+/// reference is stripped and cv-qualifiers are normalized away before comparison.
+/// Non-reference conversions (promotions, derived-to-base) are a later phase.
 fn types_match(parameter: &str, argument: &str) -> bool {
-    normalize_type(parameter) == normalize_type(argument)
+    normalize_type(strip_reference(parameter)) == normalize_type(strip_reference(argument))
+}
+
+/// Drops a trailing `&`/`&&` (and any whitespace before it) from a type spelling.
+fn strip_reference(type_name: &str) -> &str {
+    type_name.trim().trim_end_matches('&').trim_end()
 }
 
 /// The declared type of a data field referenced by its dotted full name
@@ -14469,6 +14476,30 @@ mod tests {
         // The argument type (a prototype-only call) is unknown, so the overload
         // stays ambiguous and unresolved.
         assert_eq!(resolved_call(use_fn, "pick"), Some((None, None)));
+    }
+
+    #[test]
+    fn resolves_overload_with_reference_parameter() {
+        // A `Other&` parameter binds an `Other`-typed argument, selecting
+        // pick(Other&) over pick(int).
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Other { int v; };
+                  struct Widget {
+                    Other o;
+                    int pick(int seed) { return seed; }
+                    int pick(Other& other) { return other.v; }
+                    int normalize() { return pick(o); }
+                  };
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("reference parameter overload sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.Widget.pick:int(Other&)\""));
     }
 
     #[test]
