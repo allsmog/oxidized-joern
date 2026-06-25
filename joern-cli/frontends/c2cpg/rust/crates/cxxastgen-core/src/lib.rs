@@ -87,6 +87,7 @@ pub enum Declaration {
     MacroUndef(MacroUndefDecl),
     Include(IncludeDecl),
     Namespace(NamespaceDecl),
+    NamespaceAlias(NamespaceAliasDecl),
     Struct(StructDecl),
     Enum(EnumDecl),
     Typedef(TypedefDecl),
@@ -143,6 +144,19 @@ pub struct NamespaceDecl {
     #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
     pub visible_line: Option<usize>,
     pub declarations: Vec<Declaration>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NamespaceAliasDecl {
+    pub name: String,
+    pub target: String,
+    pub code: String,
+    pub line: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_path: Option<String>,
+    #[serde(rename = "visibleLine", skip_serializing_if = "Option::is_none")]
+    pub visible_line: Option<usize>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -342,6 +356,12 @@ pub enum Statement {
         code: String,
         line: usize,
     },
+    NamespaceAlias {
+        name: String,
+        target: String,
+        code: String,
+        line: usize,
+    },
     LocalDecl {
         name: String,
         #[serde(rename = "typeName")]
@@ -369,6 +389,9 @@ pub enum Statement {
         temp_name: String,
         names: Vec<String>,
         initializer: Option<Expression>,
+    },
+    FunctionDecl {
+        function: FunctionDecl,
     },
     Assignment {
         operator: String,
@@ -490,6 +513,10 @@ pub struct LambdaCapture {
 #[derive(Debug, Clone, Serialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum Expression {
+    Unknown {
+        code: String,
+        line: usize,
+    },
     Identifier {
         name: String,
         code: String,
@@ -506,6 +533,15 @@ pub enum Expression {
             skip_serializing_if = "Option::is_none"
         )]
         resolved_reference_full_name: Option<String>,
+        /// Phase-4 semantic engine output: for a `Type::member` static-access
+        /// identifier, the fully-qualified `<QualifiedType>.<member>` when the
+        /// type resolves uniquely and the member is unique. `None` otherwise.
+        /// Strictly additive JSON ignored by the current reader.
+        #[serde(
+            rename = "resolvedMemberFullName",
+            skip_serializing_if = "Option::is_none"
+        )]
+        resolved_member_full_name: Option<String>,
     },
     Literal {
         value: String,
@@ -658,6 +694,11 @@ pub enum Expression {
         line: usize,
         elements: Vec<Expression>,
     },
+    StatementExpression {
+        code: String,
+        line: usize,
+        body: Vec<Statement>,
+    },
     DesignatedInitializer {
         code: String,
         line: usize,
@@ -799,14 +840,37 @@ struct TypeEntry {
     simple_name: String,
 }
 
+/// One declared member (field or method) of a user type, recorded under that
+/// type's qualified name. Distinct method `descriptor`s (signatures) on the same
+/// name indicate an overload set and make member-access resolution ambiguous.
+#[derive(Debug, Clone)]
+struct MemberEntry {
+    /// A field's declared type, or a method's signature; used to distinguish
+    /// overloads. (Surfacing the member's type is left to a later phase.)
+    #[allow(dead_code)]
+    descriptor: String,
+    /// Whether this member is a method (vs a data field).
+    #[allow(dead_code)]
+    is_method: bool,
+}
+
+/// The members of a single user type, indexed by simple member name.
+#[derive(Debug, Default)]
+struct TypeMembers {
+    by_name: HashMap<String, Vec<MemberEntry>>,
+}
+
 /// Name -> candidate declarations, keyed by both dotted-qualified and simple name.
-/// Functions and user types are indexed separately.
+/// Functions and user types are indexed separately, and each type's directly
+/// declared members are recorded under its qualified name.
 #[derive(Debug, Default)]
 struct SymbolTable {
     by_qualified_name: HashMap<String, Vec<SymbolEntry>>,
     by_simple_name: HashMap<String, Vec<SymbolEntry>>,
     types_by_qualified_name: HashMap<String, Vec<TypeEntry>>,
     types_by_simple_name: HashMap<String, Vec<TypeEntry>>,
+    members_by_type: HashMap<String, TypeMembers>,
+    namespace_aliases: HashMap<String, String>,
 }
 
 impl SymbolTable {
@@ -831,6 +895,135 @@ impl SymbolTable {
             .or_default()
             .push(entry);
     }
+
+    /// Records member `name` (a field's type or a method's signature) under the
+    /// owning type's qualified name.
+    fn insert_member(&mut self, type_qualified_name: &str, name: &str, member: MemberEntry) {
+        self.members_by_type
+            .entry(type_qualified_name.to_string())
+            .or_default()
+            .by_name
+            .entry(name.to_string())
+            .or_default()
+            .push(member);
+    }
+
+    fn insert_namespace_alias(&mut self, scope: &str, alias: &NamespaceAliasDecl) {
+        let alias_name = extend_scope(scope, &alias.name);
+        let target = normalize_qualified_name(&alias.target);
+        if !alias_name.is_empty() && !target.is_empty() {
+            self.namespace_aliases.insert(alias_name, target);
+        }
+    }
+
+    fn expand_namespace_alias_once(&self, dotted_name: &str) -> Option<String> {
+        expand_namespace_alias_once_in_map(&self.namespace_aliases, dotted_name)
+    }
+
+    fn expand_namespace_aliases_with_locals(
+        &self,
+        dotted_name: &str,
+        locals: &NamespaceAliasStack,
+    ) -> String {
+        let mut current = dotted_name.to_string();
+        for _ in 0..16 {
+            let Some(expanded) = locals
+                .expand_namespace_alias_once(&current)
+                .or_else(|| self.expand_namespace_alias_once(&current))
+            else {
+                return current;
+            };
+            if expanded == current {
+                return current;
+            }
+            current = expanded;
+        }
+        current
+    }
+
+    fn namespace_alias_prefix(
+        &self,
+        dotted_name: &str,
+        locals: &NamespaceAliasStack,
+    ) -> Option<(String, String)> {
+        let parts: Vec<_> = dotted_name
+            .split('.')
+            .filter(|part| !part.is_empty())
+            .collect();
+        for prefix_len in (1..parts.len()).rev() {
+            let prefix = parts[..prefix_len].join(".");
+            if locals.contains(&prefix) || self.namespace_aliases.contains_key(&prefix) {
+                let suffix = parts[prefix_len..].join(".");
+                return Some((prefix, suffix));
+            }
+        }
+        None
+    }
+}
+
+#[derive(Debug, Default)]
+struct NamespaceAliasStack {
+    frames: Vec<HashMap<String, String>>,
+}
+
+impl NamespaceAliasStack {
+    fn push(&mut self) {
+        self.frames.push(HashMap::new());
+    }
+
+    fn pop(&mut self) {
+        self.frames.pop();
+    }
+
+    fn insert(&mut self, name: &str, target: &str) {
+        let name = normalize_qualified_name(name);
+        let target = normalize_qualified_name(target);
+        if name.is_empty() || target.is_empty() {
+            return;
+        }
+        if self.frames.is_empty() {
+            self.push();
+        }
+        if let Some(frame) = self.frames.last_mut() {
+            frame.insert(name, target);
+        }
+    }
+
+    fn expand_namespace_alias_once(&self, dotted_name: &str) -> Option<String> {
+        self.frames
+            .iter()
+            .rev()
+            .find_map(|frame| expand_namespace_alias_once_in_map(frame, dotted_name))
+    }
+
+    fn contains(&self, dotted_name: &str) -> bool {
+        self.frames
+            .iter()
+            .rev()
+            .any(|frame| frame.contains_key(dotted_name))
+    }
+}
+
+fn expand_namespace_alias_once_in_map(
+    aliases: &HashMap<String, String>,
+    dotted_name: &str,
+) -> Option<String> {
+    let parts: Vec<_> = dotted_name
+        .split('.')
+        .filter(|part| !part.is_empty())
+        .collect();
+    for prefix_len in (1..=parts.len()).rev() {
+        let prefix = parts[..prefix_len].join(".");
+        if let Some(target) = aliases.get(&prefix) {
+            let suffix = parts[prefix_len..].join(".");
+            return Some(if suffix.is_empty() {
+                target.clone()
+            } else {
+                format!("{target}.{suffix}")
+            });
+        }
+    }
+    None
 }
 
 /// A function name is only treated as a resolution target when it is a plain
@@ -892,6 +1085,45 @@ fn collect_type_symbol(table: &mut SymbolTable, scope: &str, name: &str) {
     });
 }
 
+/// Records the directly-declared members of `struct_decl` (whose dotted qualified
+/// name is `type_qualified_name`): data fields keyed by name with their declared
+/// type, and member functions keyed by name with their signature. Members
+/// inherited from base classes are NOT walked (deferred to a later phase).
+fn collect_type_members(
+    table: &mut SymbolTable,
+    type_qualified_name: &str,
+    struct_decl: &StructDecl,
+) {
+    for field in &struct_decl.fields {
+        if is_plain_reference_name(&field.name) {
+            table.insert_member(
+                type_qualified_name,
+                &field.name,
+                MemberEntry {
+                    descriptor: field.type_name.clone(),
+                    is_method: false,
+                },
+            );
+        }
+    }
+    for declaration in &struct_decl.nested_declarations {
+        if let Declaration::Function(function) = declaration {
+            // Only in-class, plain-named methods; out-of-line `A::f` and operator
+            // or destructor members are deferred.
+            if is_plain_function_name(&function.name) {
+                table.insert_member(
+                    type_qualified_name,
+                    &function.name,
+                    MemberEntry {
+                        descriptor: function.signature.clone(),
+                        is_method: true,
+                    },
+                );
+            }
+        }
+    }
+}
+
 /// A type name is only recorded when it is a plain identifier: anonymous,
 /// templated, or otherwise decorated names are skipped (deferred to a later
 /// phase) to keep resolution unambiguous and format-stable.
@@ -914,14 +1146,23 @@ fn is_plain_type_name(name: &str) -> bool {
 fn collect_symbols(table: &mut SymbolTable, scope: &str, declarations: &[Declaration]) {
     for declaration in declarations {
         match declaration {
-            Declaration::Function(function) => collect_function_symbol(table, scope, function),
+            Declaration::Function(function) => {
+                collect_function_symbol(table, scope, function);
+                collect_statement_function_symbols(table, scope, &function.body);
+            }
             Declaration::Namespace(namespace) => {
                 let nested = extend_scope(scope, &namespace.name);
                 collect_symbols(table, &nested, &namespace.declarations);
             }
+            Declaration::NamespaceAlias(alias) => {
+                table.insert_namespace_alias(scope, alias);
+            }
             Declaration::Struct(struct_decl) => {
                 collect_type_symbol(table, scope, &struct_decl.name);
                 let nested = extend_scope(scope, &struct_decl.name);
+                if is_plain_type_name(struct_decl.name.trim()) {
+                    collect_type_members(table, &nested, struct_decl);
+                }
                 collect_symbols(table, &nested, &struct_decl.nested_declarations);
             }
             Declaration::Enum(enum_decl) => {
@@ -935,9 +1176,70 @@ fn collect_symbols(table: &mut SymbolTable, scope: &str, declarations: &[Declara
     }
 }
 
+fn collect_statement_function_symbols(
+    table: &mut SymbolTable,
+    scope: &str,
+    statements: &[Statement],
+) {
+    for statement in statements {
+        match statement {
+            Statement::FunctionDecl { function } => {
+                collect_function_symbol(table, scope, function);
+                collect_statement_function_symbols(table, scope, &function.body);
+            }
+            Statement::Try { body, catches, .. } => {
+                collect_statement_function_symbols(table, scope, body);
+                for catch in catches {
+                    collect_statement_function_symbols(table, scope, &catch.body);
+                }
+            }
+            Statement::If {
+                initializer,
+                condition_initializer,
+                then_body,
+                else_body,
+                ..
+            } => {
+                collect_statement_function_symbols(table, scope, initializer);
+                collect_statement_function_symbols(table, scope, condition_initializer);
+                collect_statement_function_symbols(table, scope, then_body);
+                collect_statement_function_symbols(table, scope, else_body);
+            }
+            Statement::While {
+                initializer,
+                condition_initializer,
+                body,
+                ..
+            }
+            | Statement::Switch {
+                initializer,
+                condition_initializer,
+                body,
+                ..
+            } => {
+                collect_statement_function_symbols(table, scope, initializer);
+                collect_statement_function_symbols(table, scope, condition_initializer);
+                collect_statement_function_symbols(table, scope, body);
+            }
+            Statement::DoWhile { body, .. }
+            | Statement::Label { body, .. }
+            | Statement::Case { body, .. } => {
+                collect_statement_function_symbols(table, scope, body);
+            }
+            Statement::For {
+                initializer, body, ..
+            } => {
+                collect_statement_function_symbols(table, scope, initializer);
+                collect_statement_function_symbols(table, scope, body);
+            }
+            _ => {}
+        }
+    }
+}
+
 /// Joins a dotted `scope` with a `name`, normalizing any `::` the name carries.
 fn extend_scope(scope: &str, name: &str) -> String {
-    let normalized = name.trim().replace("::", ".");
+    let normalized = normalize_qualified_name(name);
     if normalized.is_empty() {
         scope.to_string()
     } else if scope.is_empty() {
@@ -945,6 +1247,14 @@ fn extend_scope(scope: &str, name: &str) -> String {
     } else {
         format!("{scope}.{normalized}")
     }
+}
+
+fn normalize_qualified_name(name: &str) -> String {
+    name.trim()
+        .trim_start_matches("::")
+        .trim_end_matches(';')
+        .trim()
+        .replace("::", ".")
 }
 
 /// Resolves a call's callee to its lookup name. Returns `None` for calls whose
@@ -970,12 +1280,15 @@ fn call_lookup_name(name: &str) -> Option<(String, String)> {
 /// Finds the unique *defined* candidate for `name`/`arity`, preferring an exact
 /// dotted-qualified match before falling back to a simple-name match. Returns
 /// `None` whenever the match is ambiguous or unknown.
-fn resolve_unique_target<'a>(
+fn resolve_unique_target_with_aliases<'a>(
     table: &'a SymbolTable,
     name: &str,
     arity: usize,
+    aliases: &NamespaceAliasStack,
 ) -> Option<&'a SymbolEntry> {
     let (qualified, simple) = call_lookup_name(name)?;
+    let qualified = table.expand_namespace_aliases_with_locals(&qualified, aliases);
+    let simple = qualified.rsplit('.').next().unwrap_or(&simple).to_string();
     unique_definition(table.by_qualified_name.get(&qualified), arity)
         .or_else(|| unique_definition(table.by_simple_name.get(&simple), arity))
 }
@@ -1081,8 +1394,13 @@ fn is_builtin_type(core: &str) -> bool {
 /// Looks up the unique user type matching `core`, preferring an exact dotted
 /// qualified match before a unique simple-name match. Returns `None` when the
 /// match is ambiguous or unknown.
-fn unique_type_qualified_name(table: &SymbolTable, core: &str) -> Option<String> {
-    let dotted = core.replace("::", ".");
+fn unique_type_qualified_name_with_aliases(
+    table: &SymbolTable,
+    core: &str,
+    aliases: &NamespaceAliasStack,
+) -> Option<String> {
+    let dotted =
+        table.expand_namespace_aliases_with_locals(&normalize_qualified_name(core), aliases);
     if let Some(entries) = table.types_by_qualified_name.get(&dotted) {
         if !entries.is_empty() {
             return Some(entries[0].qualified_name.clone());
@@ -1105,12 +1423,69 @@ fn unique_type_qualified_name(table: &SymbolTable, core: &str) -> Option<String>
 /// rewritten to its dotted qualified name, and pointer/reference/array suffixes
 /// are preserved. Returns `None` for `auto`/`decltype`/templated/ambiguous types.
 fn resolve_declared_type(table: &SymbolTable, written: &str) -> Option<String> {
+    resolve_declared_type_with_aliases(table, written, &NamespaceAliasStack::default())
+}
+
+fn resolve_declared_type_with_aliases(
+    table: &SymbolTable,
+    written: &str,
+    aliases: &NamespaceAliasStack,
+) -> Option<String> {
     let (core, suffix) = split_core_type(written)?;
     if is_builtin_type(&core) {
         return Some(format!("{core}{suffix}"));
     }
-    let qualified = unique_type_qualified_name(table, &core)?;
+    let qualified = unique_type_qualified_name_with_aliases(table, &core, aliases)?;
     Some(format!("{qualified}{suffix}"))
+}
+
+/// Reduces a resolved type spelling to the bare object type name a member access
+/// targets: a single pointer/reference is peeled (so `Core.Widget*` ->
+/// `Core.Widget`), cv-qualifiers are dropped, but multi-level pointers and arrays
+/// (which require pointer/array arithmetic, not direct member access) yield
+/// `None`.
+///
+/// TODO(oxidized WS3): groundwork for resolving *instance* member access
+/// (`obj.field` / `obj->field`) to a `resolvedMemberFullName`. That requires a
+/// resolved-member slot on `Expression::FieldAccess` (and matching Scala-side
+/// support), so it stays unwired for now — only static `Type::member` access is
+/// resolved (see `resolve_member_reference`).
+#[allow(dead_code)]
+fn member_access_base_type(resolved_type: &str) -> Option<String> {
+    let normalized = normalize_type(resolved_type);
+    let core = normalized.trim();
+    if core.contains("[]") || core.contains("**") {
+        return None;
+    }
+    let core = core.strip_suffix("&&").unwrap_or(core);
+    let core = core.strip_suffix('&').unwrap_or(core);
+    let core = core.strip_suffix('*').unwrap_or(core);
+    let core = core.trim();
+    if core.is_empty() || core.contains('*') || core.contains('&') {
+        return None;
+    }
+    Some(core.to_string())
+}
+
+/// Looks up `member` in the member table of the type named `type_full_name`
+/// (already a dotted qualified name). Returns `<type>.<member>` only when the
+/// type is known to the symbol table and the member is unique (exactly one
+/// non-overloaded field or method, with no field/method name clash). Inherited
+/// members are not consulted (base classes are deferred).
+fn unique_member_full_name(
+    table: &SymbolTable,
+    type_full_name: &str,
+    member: &str,
+) -> Option<String> {
+    if !is_plain_reference_name(member) {
+        return None;
+    }
+    let members = table.members_by_type.get(type_full_name)?;
+    let candidates = members.by_name.get(member)?;
+    match candidates.as_slice() {
+        [_single] => Some(format!("{type_full_name}.{member}")),
+        _ => None,
+    }
 }
 
 /// Infers the type of a literal from its source spelling for the trivially
@@ -1186,17 +1561,7 @@ fn resolve_call_targets(declarations: &mut [Declaration]) {
 fn annotate_declarations(table: &SymbolTable, declarations: &mut [Declaration]) {
     for declaration in declarations.iter_mut() {
         match declaration {
-            Declaration::Function(function) => {
-                for parameter in function.parameters.iter_mut() {
-                    annotate_parameter(table, parameter);
-                }
-                for initializer in function.constructor_initializers.iter_mut() {
-                    for argument in initializer.arguments.iter_mut() {
-                        annotate_expression(table, argument);
-                    }
-                }
-                annotate_statements(table, &mut function.body);
-            }
+            Declaration::Function(function) => annotate_function(table, function),
             Declaration::Namespace(namespace) => {
                 annotate_declarations(table, &mut namespace.declarations);
             }
@@ -1207,7 +1572,7 @@ fn annotate_declarations(table: &SymbolTable, declarations: &mut [Declaration]) 
                             resolve_declared_type(table, &field.type_name);
                     }
                     if let Some(initializer) = field.initializer.as_mut() {
-                        annotate_expression(table, initializer);
+                        annotate_expression_without_local_aliases(table, initializer);
                     }
                 }
                 annotate_declarations(table, &mut struct_decl.nested_declarations);
@@ -1218,7 +1583,7 @@ fn annotate_declarations(table: &SymbolTable, declarations: &mut [Declaration]) 
                         resolve_declared_type(table, &global.type_name);
                 }
                 if let Some(initializer) = global.initializer.as_mut() {
-                    annotate_expression(table, initializer);
+                    annotate_expression_without_local_aliases(table, initializer);
                 }
             }
             _ => {}
@@ -1226,27 +1591,81 @@ fn annotate_declarations(table: &SymbolTable, declarations: &mut [Declaration]) 
     }
 }
 
+fn annotate_expression_without_local_aliases(table: &SymbolTable, expression: &mut Expression) {
+    let mut aliases = NamespaceAliasStack::default();
+    annotate_expression(table, &mut aliases, expression);
+}
+
+fn annotate_function(table: &SymbolTable, function: &mut FunctionDecl) {
+    let mut aliases = NamespaceAliasStack::default();
+    annotate_function_with_aliases(table, function, &mut aliases);
+}
+
+fn annotate_function_with_aliases(
+    table: &SymbolTable,
+    function: &mut FunctionDecl,
+    aliases: &mut NamespaceAliasStack,
+) {
+    aliases.push();
+    for parameter in function.parameters.iter_mut() {
+        annotate_parameter(table, aliases, parameter);
+    }
+    for initializer in function.constructor_initializers.iter_mut() {
+        for argument in initializer.arguments.iter_mut() {
+            annotate_expression(table, aliases, argument);
+        }
+    }
+    annotate_statements(table, aliases, &mut function.body);
+    aliases.pop();
+}
+
 /// Stamps a parameter's `resolvedTypeFullName` when its written type resolves
 /// trivially, then leaves it otherwise untouched.
-fn annotate_parameter(table: &SymbolTable, parameter: &mut ParameterDecl) {
+fn annotate_parameter(
+    table: &SymbolTable,
+    aliases: &NamespaceAliasStack,
+    parameter: &mut ParameterDecl,
+) {
     if parameter.resolved_type_full_name.is_none() && !parameter.is_variadic {
-        parameter.resolved_type_full_name = resolve_declared_type(table, &parameter.type_name);
+        parameter.resolved_type_full_name =
+            resolve_declared_type_with_aliases(table, &parameter.type_name, aliases);
     }
 }
 
-fn annotate_statements(table: &SymbolTable, statements: &mut [Statement]) {
+fn annotate_statements(
+    table: &SymbolTable,
+    aliases: &mut NamespaceAliasStack,
+    statements: &mut [Statement],
+) {
     for statement in statements.iter_mut() {
-        annotate_statement(table, statement);
+        annotate_statement(table, aliases, statement);
     }
 }
 
-fn annotate_statement(table: &SymbolTable, statement: &mut Statement) {
+fn annotate_statement_block(
+    table: &SymbolTable,
+    aliases: &mut NamespaceAliasStack,
+    statements: &mut [Statement],
+) {
+    aliases.push();
+    annotate_statements(table, aliases, statements);
+    aliases.pop();
+}
+
+fn annotate_statement(
+    table: &SymbolTable,
+    aliases: &mut NamespaceAliasStack,
+    statement: &mut Statement,
+) {
     match statement {
         Statement::Unknown { .. }
-        | Statement::UsingEnum { .. }
         | Statement::Break { .. }
         | Statement::Continue { .. }
         | Statement::Goto { .. } => {}
+        Statement::UsingEnum { .. } => {}
+        Statement::NamespaceAlias { name, target, .. } => {
+            aliases.insert(name, target);
+        }
         Statement::LocalDecl {
             type_name,
             initializer,
@@ -1254,32 +1673,36 @@ fn annotate_statement(table: &SymbolTable, statement: &mut Statement) {
             ..
         } => {
             if resolved_type_full_name.is_none() {
-                *resolved_type_full_name = resolve_declared_type(table, type_name);
+                *resolved_type_full_name =
+                    resolve_declared_type_with_aliases(table, type_name, aliases);
             }
             if let Some(initializer) = initializer.as_mut() {
-                annotate_expression(table, initializer);
+                annotate_expression(table, aliases, initializer);
             }
         }
         Statement::StructuredBinding { initializer, .. } => {
             // Structured bindings always carry `auto`; their element types are
             // not trivially determinable, so the field is left absent.
             if let Some(initializer) = initializer.as_mut() {
-                annotate_expression(table, initializer);
+                annotate_expression(table, aliases, initializer);
             }
         }
+        Statement::FunctionDecl { function } => {
+            annotate_function_with_aliases(table, function, aliases)
+        }
         Statement::Assignment { left, right, .. } => {
-            annotate_expression(table, left);
-            annotate_expression(table, right);
+            annotate_expression(table, aliases, left);
+            annotate_expression(table, aliases, right);
         }
         Statement::Return { expression, .. } | Statement::Throw { expression, .. } => {
             if let Some(expression) = expression.as_mut() {
-                annotate_expression(table, expression);
+                annotate_expression(table, aliases, expression);
             }
         }
         Statement::Try { body, catches, .. } => {
-            annotate_statements(table, body);
+            annotate_statement_block(table, aliases, body);
             for catch in catches.iter_mut() {
-                annotate_statements(table, &mut catch.body);
+                annotate_statement_block(table, aliases, &mut catch.body);
             }
         }
         Statement::If {
@@ -1290,11 +1713,13 @@ fn annotate_statement(table: &SymbolTable, statement: &mut Statement) {
             else_body,
             ..
         } => {
-            annotate_statements(table, initializer);
-            annotate_statements(table, condition_initializer);
-            annotate_expression(table, condition);
-            annotate_statements(table, then_body);
-            annotate_statements(table, else_body);
+            aliases.push();
+            annotate_statements(table, aliases, initializer);
+            annotate_statements(table, aliases, condition_initializer);
+            annotate_expression(table, aliases, condition);
+            annotate_statement_block(table, aliases, then_body);
+            annotate_statement_block(table, aliases, else_body);
+            aliases.pop();
         }
         Statement::While {
             initializer,
@@ -1303,16 +1728,18 @@ fn annotate_statement(table: &SymbolTable, statement: &mut Statement) {
             body,
             ..
         } => {
-            annotate_statements(table, initializer);
-            annotate_statements(table, condition_initializer);
-            annotate_expression(table, condition);
-            annotate_statements(table, body);
+            aliases.push();
+            annotate_statements(table, aliases, initializer);
+            annotate_statements(table, aliases, condition_initializer);
+            annotate_expression(table, aliases, condition);
+            annotate_statement_block(table, aliases, body);
+            aliases.pop();
         }
         Statement::DoWhile {
             condition, body, ..
         } => {
-            annotate_expression(table, condition);
-            annotate_statements(table, body);
+            annotate_statement_block(table, aliases, body);
+            annotate_expression(table, aliases, condition);
         }
         Statement::For {
             initializer,
@@ -1321,16 +1748,18 @@ fn annotate_statement(table: &SymbolTable, statement: &mut Statement) {
             body,
             ..
         } => {
-            annotate_statements(table, initializer);
+            aliases.push();
+            annotate_statements(table, aliases, initializer);
             if let Some(condition) = condition.as_mut() {
-                annotate_expression(table, condition);
+                annotate_expression(table, aliases, condition);
             }
             if let Some(update) = update.as_mut() {
-                annotate_expression(table, update);
+                annotate_expression(table, aliases, update);
             }
-            annotate_statements(table, body);
+            annotate_statement_block(table, aliases, body);
+            aliases.pop();
         }
-        Statement::Label { body, .. } => annotate_statements(table, body),
+        Statement::Label { body, .. } => annotate_statements(table, aliases, body),
         Statement::Switch {
             initializer,
             condition_initializer,
@@ -1338,24 +1767,32 @@ fn annotate_statement(table: &SymbolTable, statement: &mut Statement) {
             body,
             ..
         } => {
-            annotate_statements(table, initializer);
-            annotate_statements(table, condition_initializer);
-            annotate_expression(table, condition);
-            annotate_statements(table, body);
+            aliases.push();
+            annotate_statements(table, aliases, initializer);
+            annotate_statements(table, aliases, condition_initializer);
+            annotate_expression(table, aliases, condition);
+            annotate_statement_block(table, aliases, body);
+            aliases.pop();
         }
         Statement::Case { value, body, .. } => {
             if let Some(value) = value.as_mut() {
-                annotate_expression(table, value);
+                annotate_expression(table, aliases, value);
             }
-            annotate_statements(table, body);
+            annotate_statements(table, aliases, body);
         }
-        Statement::Expression { expression, .. } => annotate_expression(table, expression),
+        Statement::Expression { expression, .. } => annotate_expression(table, aliases, expression),
     }
 }
 
-fn annotate_expression(table: &SymbolTable, expression: &mut Expression) {
+fn annotate_expression(
+    table: &SymbolTable,
+    aliases: &mut NamespaceAliasStack,
+    expression: &mut Expression,
+) {
     match expression {
-        Expression::Identifier { .. } | Expression::Designator { .. } => {}
+        Expression::Unknown { .. }
+        | Expression::Identifier { .. }
+        | Expression::Designator { .. } => {}
         Expression::Literal {
             value,
             resolved_type_full_name,
@@ -1373,13 +1810,20 @@ fn annotate_expression(table: &SymbolTable, expression: &mut Expression) {
             resolved_signature,
             ..
         } => {
-            annotate_expression(table, callee);
+            annotate_expression(table, aliases, callee);
             for argument in arguments.iter_mut() {
-                annotate_expression(table, argument);
+                annotate_expression(table, aliases, argument);
+            }
+            if let Some(expanded_name) =
+                expand_call_name_namespace_aliases_with_locals(table, name, aliases)
+            {
+                *name = expanded_name;
             }
             // Only fill genuinely empty slots; never overwrite.
             if resolved_method_full_name.is_none() {
-                if let Some(entry) = resolve_unique_target(table, name, arguments.len()) {
+                if let Some(entry) =
+                    resolve_unique_target_with_aliases(table, name, arguments.len(), aliases)
+                {
                     *resolved_method_full_name =
                         Some(format!("{}:{}", entry.qualified_name, entry.signature));
                     *resolved_signature = Some(entry.signature.clone());
@@ -1387,33 +1831,33 @@ fn annotate_expression(table: &SymbolTable, expression: &mut Expression) {
             }
         }
         Expression::Binary { left, right, .. } | Expression::Assignment { left, right, .. } => {
-            annotate_expression(table, left);
-            annotate_expression(table, right);
+            annotate_expression(table, aliases, left);
+            annotate_expression(table, aliases, right);
         }
         Expression::Unary { argument, .. }
         | Expression::PackExpansion {
             pattern: argument, ..
         }
         | Expression::TypeOf { argument, .. }
-        | Expression::Delete { argument, .. } => annotate_expression(table, argument),
+        | Expression::Delete { argument, .. } => annotate_expression(table, aliases, argument),
         Expression::Conditional {
             condition,
             consequence,
             alternative,
             ..
         } => {
-            annotate_expression(table, condition);
+            annotate_expression(table, aliases, condition);
             if let Some(consequence) = consequence.as_mut() {
-                annotate_expression(table, consequence);
+                annotate_expression(table, aliases, consequence);
             }
-            annotate_expression(table, alternative);
+            annotate_expression(table, aliases, alternative);
         }
         Expression::Fold { left, right, .. } => {
             if let Some(left) = left.as_mut() {
-                annotate_expression(table, left);
+                annotate_expression(table, aliases, left);
             }
             if let Some(right) = right.as_mut() {
-                annotate_expression(table, right);
+                annotate_expression(table, aliases, right);
             }
         }
         Expression::Cast {
@@ -1423,13 +1867,14 @@ fn annotate_expression(table: &SymbolTable, expression: &mut Expression) {
             ..
         } => {
             if resolved_type_full_name.is_none() {
-                *resolved_type_full_name = resolve_declared_type(table, type_name);
+                *resolved_type_full_name =
+                    resolve_declared_type_with_aliases(table, type_name, aliases);
             }
-            annotate_expression(table, value);
+            annotate_expression(table, aliases, value);
         }
         Expression::SizeOf { value, .. } => {
             if let Some(value) = value.as_mut() {
-                annotate_expression(table, value);
+                annotate_expression(table, aliases, value);
             }
         }
         Expression::New {
@@ -1438,27 +1883,46 @@ fn annotate_expression(table: &SymbolTable, expression: &mut Expression) {
             ..
         } => {
             for argument in arguments.iter_mut().chain(initializer_arguments.iter_mut()) {
-                annotate_expression(table, argument);
+                annotate_expression(table, aliases, argument);
             }
         }
-        Expression::Lambda { body, .. } => annotate_statements(table, body),
-        Expression::FieldAccess { base, .. } => annotate_expression(table, base),
+        Expression::Lambda { body, .. } => annotate_statement_block(table, aliases, body),
+        Expression::StatementExpression { body, .. } => {
+            annotate_statement_block(table, aliases, body)
+        }
+        Expression::FieldAccess { base, .. } => annotate_expression(table, aliases, base),
         Expression::IndexAccess { base, index, .. } => {
-            annotate_expression(table, base);
-            annotate_expression(table, index);
+            annotate_expression(table, aliases, base);
+            annotate_expression(table, aliases, index);
         }
         Expression::InitializerList { elements, .. } => {
             for element in elements.iter_mut() {
-                annotate_expression(table, element);
+                annotate_expression(table, aliases, element);
             }
         }
         Expression::DesignatedInitializer {
             designator, value, ..
         } => {
-            annotate_expression(table, designator);
-            annotate_expression(table, value);
+            annotate_expression(table, aliases, designator);
+            annotate_expression(table, aliases, value);
         }
     }
+}
+
+fn expand_call_name_namespace_aliases_with_locals(
+    table: &SymbolTable,
+    name: &str,
+    aliases: &NamespaceAliasStack,
+) -> Option<String> {
+    if name.contains('<') || name.contains('(') {
+        return None;
+    }
+    let dotted = normalize_qualified_name(name);
+    if dotted.is_empty() {
+        return None;
+    }
+    let expanded = table.expand_namespace_aliases_with_locals(&dotted, aliases);
+    (expanded != dotted).then_some(expanded.replace('.', "::"))
 }
 
 // ---------------------------------------------------------------------------
@@ -1475,11 +1939,23 @@ fn annotate_expression(table: &SymbolTable, expression: &mut Expression) {
 // member-access-through-type are deliberately deferred. Purely additive.
 // ---------------------------------------------------------------------------
 
-/// A lexical scope stack mapping a simple identifier to the qualified name of the
-/// declaration currently bound to it. The last frame is the innermost scope.
+/// One in-scope binding: the qualified name of the declaration plus, when known,
+/// its phase-2 resolved declared type (used for member-access resolution).
+#[derive(Debug, Clone)]
+struct Binding {
+    qualified_name: String,
+    /// TODO(oxidized WS3): the binding's declared type, for resolving instance
+    /// member access (`obj.field`) once `FieldAccess` carries a resolved-member
+    /// slot. Populated as `None` until that phase lands.
+    #[allow(dead_code)]
+    type_full_name: Option<String>,
+}
+
+/// A lexical scope stack mapping a simple identifier to its current [`Binding`].
+/// The last frame is the innermost scope.
 #[derive(Debug, Default)]
 struct ScopeStack {
-    frames: Vec<HashMap<String, String>>,
+    frames: Vec<HashMap<String, Binding>>,
 }
 
 impl ScopeStack {
@@ -1491,24 +1967,37 @@ impl ScopeStack {
         self.frames.pop();
     }
 
-    /// Binds `name` to `qualified_name` in the innermost frame, shadowing any
-    /// outer binding of the same name.
+    /// Binds `name` to `qualified_name` (with no known declared type) in the
+    /// innermost frame, shadowing any outer binding of the same name.
     fn bind(&mut self, name: &str, qualified_name: String) {
+        self.bind_typed(name, qualified_name, None);
+    }
+
+    /// Binds `name` with both its qualified name and its (optional) declared type.
+    fn bind_typed(&mut self, name: &str, qualified_name: String, type_full_name: Option<String>) {
         if name.is_empty() {
             return;
         }
         if let Some(frame) = self.frames.last_mut() {
-            frame.insert(name.to_string(), qualified_name);
+            frame.insert(
+                name.to_string(),
+                Binding {
+                    qualified_name,
+                    type_full_name,
+                },
+            );
         }
     }
 
-    /// Looks up `name` from the innermost scope outward.
+    /// Looks up the binding for `name` from the innermost scope outward.
+    fn lookup_binding(&self, name: &str) -> Option<&Binding> {
+        self.frames.iter().rev().find_map(|frame| frame.get(name))
+    }
+
+    /// Looks up the qualified name bound to `name`.
     fn lookup(&self, name: &str) -> Option<&str> {
-        self.frames
-            .iter()
-            .rev()
-            .find_map(|frame| frame.get(name))
-            .map(String::as_str)
+        self.lookup_binding(name)
+            .map(|binding| binding.qualified_name.as_str())
     }
 }
 
@@ -1541,11 +2030,32 @@ fn is_plain_reference_name(name: &str) -> bool {
 /// Resolves a reference `name` against the scope stack first (locals, parameters,
 /// fields) and then the symbol tables (a unique free function or user type used
 /// as a value/type-name). Returns `None` when ambiguous, overloaded, or unknown.
-fn resolve_reference_name(table: &SymbolTable, scope: &ScopeStack, name: &str) -> Option<String> {
+/// Resolves a static member access (`Type::member`, e.g. `Core::Widget::instances`)
+/// to its fully-qualified `<QualifiedType>.<member>` form. The type prefix must
+/// resolve to a unique user type and `member` must be a single, non-overloaded
+/// member of it; otherwise the reference stays unresolved.
+fn resolve_member_reference(
+    table: &SymbolTable,
+    scope: &ScopeStack,
+    aliases: &NamespaceAliasStack,
+    name: &str,
+) -> Option<String> {
+    let (type_part, member) = name.trim().rsplit_once("::")?;
+    let type_full_name =
+        resolve_reference_name_with_aliases(table, scope, aliases, type_part.trim())?;
+    unique_member_full_name(table, &type_full_name, member.trim())
+}
+
+fn resolve_reference_name_with_aliases(
+    table: &SymbolTable,
+    scope: &ScopeStack,
+    aliases: &NamespaceAliasStack,
+    name: &str,
+) -> Option<String> {
     let trimmed = name.trim();
     // Qualified-id `A::B::name`: resolve against the type/function tables only.
     if trimmed.contains("::") {
-        return resolve_qualified_reference(table, trimmed);
+        return resolve_qualified_reference_with_aliases(table, aliases, trimmed);
     }
     if !is_plain_reference_name(trimmed) {
         return None;
@@ -1556,7 +2066,7 @@ fn resolve_reference_name(table: &SymbolTable, scope: &ScopeStack, name: &str) -
     }
     // 2) Otherwise a unique, non-overloaded free function or a unique user type.
     let function_match = unique_nonoverloaded_function(table, trimmed);
-    let type_match = unique_type_qualified_name(table, trimmed);
+    let type_match = unique_type_qualified_name_with_aliases(table, trimmed, aliases);
     match (function_match, type_match) {
         (Some(function), None) => Some(function),
         (None, Some(type_name)) => Some(type_name),
@@ -1567,12 +2077,22 @@ fn resolve_reference_name(table: &SymbolTable, scope: &ScopeStack, name: &str) -
 
 /// Resolves a qualified-id (`A::B::name`) to the qualified name of a unique user
 /// type or free function. Returns `None` when ambiguous or unknown.
+#[cfg(test)]
 fn resolve_qualified_reference(table: &SymbolTable, name: &str) -> Option<String> {
-    let dotted = name.replace("::", ".");
+    resolve_qualified_reference_with_aliases(table, &NamespaceAliasStack::default(), name)
+}
+
+fn resolve_qualified_reference_with_aliases(
+    table: &SymbolTable,
+    aliases: &NamespaceAliasStack,
+    name: &str,
+) -> Option<String> {
+    let dotted =
+        table.expand_namespace_aliases_with_locals(&normalize_qualified_name(name), aliases);
     if dotted.is_empty() || dotted.contains('<') || dotted.contains('(') {
         return None;
     }
-    if let Some(type_name) = unique_type_qualified_name(table, &dotted) {
+    if let Some(type_name) = unique_type_qualified_name_with_aliases(table, &dotted, aliases) {
         return Some(type_name);
     }
     // Exact, non-overloaded function by qualified name.
@@ -1582,6 +2102,33 @@ fn resolve_qualified_reference(table: &SymbolTable, name: &str) -> Option<String
         }
     }
     None
+}
+
+fn namespace_alias_field_access_expression(
+    table: &SymbolTable,
+    aliases: &NamespaceAliasStack,
+    name: &str,
+    code: &str,
+    line: usize,
+) -> Option<Expression> {
+    let dotted = normalize_qualified_name(name);
+    let (prefix, suffix) = table.namespace_alias_prefix(&dotted, aliases)?;
+    if suffix.is_empty() {
+        return None;
+    }
+    let base_code = prefix.replace('.', "::");
+    Some(Expression::FieldAccess {
+        field: suffix.replace('.', "::"),
+        code: code.to_string(),
+        line,
+        base: Box::new(Expression::Identifier {
+            name: base_code.clone(),
+            code: base_code,
+            line,
+            resolved_reference_full_name: None,
+            resolved_member_full_name: None,
+        }),
+    })
 }
 
 /// Returns the qualified name of a function named `name` only when it denotes a
@@ -1637,7 +2184,8 @@ fn resolve_references_in_declarations(
                 for (name, qualified) in &global_bindings {
                     stack.bind(name, qualified.clone());
                 }
-                resolve_references_in_function(table, scope, function, &mut stack);
+                let mut aliases = NamespaceAliasStack::default();
+                resolve_references_in_function(table, scope, function, &mut stack, &mut aliases);
             }
             Declaration::Namespace(namespace) => {
                 let nested = extend_scope(scope, &namespace.name);
@@ -1654,7 +2202,15 @@ fn resolve_references_in_declarations(
                     for (name, qualified) in &global_bindings {
                         stack.bind(name, qualified.clone());
                     }
-                    resolve_references_in_expression(table, scope, &mut stack, initializer, false);
+                    let mut aliases = NamespaceAliasStack::default();
+                    resolve_references_in_expression(
+                        table,
+                        scope,
+                        &mut stack,
+                        &mut aliases,
+                        initializer,
+                        false,
+                    );
                 }
             }
             _ => {}
@@ -1688,7 +2244,15 @@ fn resolve_references_in_struct(
             for (name, qualified) in &visible_bindings {
                 stack.bind(name, qualified.clone());
             }
-            resolve_references_in_expression(table, scope, &mut stack, initializer, false);
+            let mut aliases = NamespaceAliasStack::default();
+            resolve_references_in_expression(
+                table,
+                scope,
+                &mut stack,
+                &mut aliases,
+                initializer,
+                false,
+            );
         }
     }
     for declaration in struct_decl.nested_declarations.iter_mut() {
@@ -1699,7 +2263,8 @@ fn resolve_references_in_struct(
                 for (name, qualified) in &visible_bindings {
                     stack.bind(name, qualified.clone());
                 }
-                resolve_references_in_function(table, scope, function, &mut stack);
+                let mut aliases = NamespaceAliasStack::default();
+                resolve_references_in_function(table, scope, function, &mut stack, &mut aliases);
             }
             Declaration::Struct(nested) => {
                 let nested_scope = extend_scope(scope, &nested.name);
@@ -1717,6 +2282,7 @@ fn resolve_references_in_function(
     scope: &str,
     function: &mut FunctionDecl,
     stack: &mut ScopeStack,
+    aliases: &mut NamespaceAliasStack,
 ) {
     let function_scope = if is_plain_function_name(&function.name) {
         join_scope(scope, &function.name)
@@ -1734,10 +2300,12 @@ fn resolve_references_in_function(
     }
     for initializer in function.constructor_initializers.iter_mut() {
         for argument in initializer.arguments.iter_mut() {
-            resolve_references_in_expression(table, scope, stack, argument, false);
+            resolve_references_in_expression(table, scope, stack, aliases, argument, false);
         }
     }
-    resolve_references_in_statements(table, &function_scope, stack, &mut function.body);
+    aliases.push();
+    resolve_references_in_statements(table, &function_scope, stack, aliases, &mut function.body);
+    aliases.pop();
     stack.pop();
 }
 
@@ -1745,10 +2313,11 @@ fn resolve_references_in_statements(
     table: &SymbolTable,
     scope: &str,
     stack: &mut ScopeStack,
+    aliases: &mut NamespaceAliasStack,
     statements: &mut [Statement],
 ) {
     for statement in statements.iter_mut() {
-        resolve_references_in_statement(table, scope, stack, statement);
+        resolve_references_in_statement(table, scope, stack, aliases, statement);
     }
 }
 
@@ -1758,19 +2327,23 @@ fn resolve_references_in_statement(
     table: &SymbolTable,
     scope: &str,
     stack: &mut ScopeStack,
+    aliases: &mut NamespaceAliasStack,
     statement: &mut Statement,
 ) {
     match statement {
         Statement::Unknown { .. }
-        | Statement::UsingEnum { .. }
         | Statement::Break { .. }
         | Statement::Continue { .. }
         | Statement::Goto { .. } => {}
+        Statement::UsingEnum { .. } => {}
+        Statement::NamespaceAlias { name, target, .. } => {
+            aliases.insert(name, target);
+        }
         Statement::LocalDecl {
             name, initializer, ..
         } => {
             if let Some(initializer) = initializer.as_mut() {
-                resolve_references_in_expression(table, scope, stack, initializer, false);
+                resolve_references_in_expression(table, scope, stack, aliases, initializer, false);
             }
             if is_plain_reference_name(name) {
                 stack.bind(name, join_scope(scope, name));
@@ -1780,7 +2353,7 @@ fn resolve_references_in_statement(
             names, initializer, ..
         } => {
             if let Some(initializer) = initializer.as_mut() {
-                resolve_references_in_expression(table, scope, stack, initializer, false);
+                resolve_references_in_expression(table, scope, stack, aliases, initializer, false);
             }
             for name in names.iter() {
                 if is_plain_reference_name(name) {
@@ -1788,25 +2361,33 @@ fn resolve_references_in_statement(
                 }
             }
         }
+        Statement::FunctionDecl { function } => {
+            resolve_references_in_function(table, scope, function, stack, aliases);
+            if is_plain_reference_name(&function.name) {
+                stack.bind(&function.name, join_scope(scope, &function.name));
+            }
+        }
         Statement::Assignment { left, right, .. } => {
-            resolve_references_in_expression(table, scope, stack, left, false);
-            resolve_references_in_expression(table, scope, stack, right, false);
+            resolve_references_in_expression(table, scope, stack, aliases, left, false);
+            resolve_references_in_expression(table, scope, stack, aliases, right, false);
         }
         Statement::Return { expression, .. } | Statement::Throw { expression, .. } => {
             if let Some(expression) = expression.as_mut() {
-                resolve_references_in_expression(table, scope, stack, expression, false);
+                resolve_references_in_expression(table, scope, stack, aliases, expression, false);
             }
         }
         Statement::Try { body, catches, .. } => {
-            resolve_references_in_block(table, scope, stack, body);
+            resolve_references_in_block(table, scope, stack, aliases, body);
             for catch in catches.iter_mut() {
                 stack.push();
+                aliases.push();
                 if let Some(parameter) = catch.parameter.as_ref() {
                     if is_plain_reference_name(&parameter.name) {
                         stack.bind(&parameter.name, join_scope(scope, &parameter.name));
                     }
                 }
-                resolve_references_in_statements(table, scope, stack, &mut catch.body);
+                resolve_references_in_statements(table, scope, stack, aliases, &mut catch.body);
+                aliases.pop();
                 stack.pop();
             }
         }
@@ -1819,11 +2400,13 @@ fn resolve_references_in_statement(
             ..
         } => {
             stack.push();
-            resolve_references_in_statements(table, scope, stack, initializer);
-            resolve_references_in_statements(table, scope, stack, condition_initializer);
-            resolve_references_in_expression(table, scope, stack, condition, false);
-            resolve_references_in_block(table, scope, stack, then_body);
-            resolve_references_in_block(table, scope, stack, else_body);
+            aliases.push();
+            resolve_references_in_statements(table, scope, stack, aliases, initializer);
+            resolve_references_in_statements(table, scope, stack, aliases, condition_initializer);
+            resolve_references_in_expression(table, scope, stack, aliases, condition, false);
+            resolve_references_in_block(table, scope, stack, aliases, then_body);
+            resolve_references_in_block(table, scope, stack, aliases, else_body);
+            aliases.pop();
             stack.pop();
         }
         Statement::While {
@@ -1834,17 +2417,19 @@ fn resolve_references_in_statement(
             ..
         } => {
             stack.push();
-            resolve_references_in_statements(table, scope, stack, initializer);
-            resolve_references_in_statements(table, scope, stack, condition_initializer);
-            resolve_references_in_expression(table, scope, stack, condition, false);
-            resolve_references_in_block(table, scope, stack, body);
+            aliases.push();
+            resolve_references_in_statements(table, scope, stack, aliases, initializer);
+            resolve_references_in_statements(table, scope, stack, aliases, condition_initializer);
+            resolve_references_in_expression(table, scope, stack, aliases, condition, false);
+            resolve_references_in_block(table, scope, stack, aliases, body);
+            aliases.pop();
             stack.pop();
         }
         Statement::DoWhile {
             condition, body, ..
         } => {
-            resolve_references_in_block(table, scope, stack, body);
-            resolve_references_in_expression(table, scope, stack, condition, false);
+            resolve_references_in_block(table, scope, stack, aliases, body);
+            resolve_references_in_expression(table, scope, stack, aliases, condition, false);
         }
         Statement::For {
             initializer,
@@ -1854,18 +2439,20 @@ fn resolve_references_in_statement(
             ..
         } => {
             stack.push();
-            resolve_references_in_statements(table, scope, stack, initializer);
+            aliases.push();
+            resolve_references_in_statements(table, scope, stack, aliases, initializer);
             if let Some(condition) = condition.as_mut() {
-                resolve_references_in_expression(table, scope, stack, condition, false);
+                resolve_references_in_expression(table, scope, stack, aliases, condition, false);
             }
             if let Some(update) = update.as_mut() {
-                resolve_references_in_expression(table, scope, stack, update, false);
+                resolve_references_in_expression(table, scope, stack, aliases, update, false);
             }
-            resolve_references_in_block(table, scope, stack, body);
+            resolve_references_in_block(table, scope, stack, aliases, body);
+            aliases.pop();
             stack.pop();
         }
         Statement::Label { body, .. } => {
-            resolve_references_in_statements(table, scope, stack, body)
+            resolve_references_in_statements(table, scope, stack, aliases, body)
         }
         Statement::Switch {
             initializer,
@@ -1875,20 +2462,22 @@ fn resolve_references_in_statement(
             ..
         } => {
             stack.push();
-            resolve_references_in_statements(table, scope, stack, initializer);
-            resolve_references_in_statements(table, scope, stack, condition_initializer);
-            resolve_references_in_expression(table, scope, stack, condition, false);
-            resolve_references_in_block(table, scope, stack, body);
+            aliases.push();
+            resolve_references_in_statements(table, scope, stack, aliases, initializer);
+            resolve_references_in_statements(table, scope, stack, aliases, condition_initializer);
+            resolve_references_in_expression(table, scope, stack, aliases, condition, false);
+            resolve_references_in_block(table, scope, stack, aliases, body);
+            aliases.pop();
             stack.pop();
         }
         Statement::Case { value, body, .. } => {
             if let Some(value) = value.as_mut() {
-                resolve_references_in_expression(table, scope, stack, value, false);
+                resolve_references_in_expression(table, scope, stack, aliases, value, false);
             }
-            resolve_references_in_statements(table, scope, stack, body);
+            resolve_references_in_statements(table, scope, stack, aliases, body);
         }
         Statement::Expression { expression, .. } => {
-            resolve_references_in_expression(table, scope, stack, expression, false)
+            resolve_references_in_expression(table, scope, stack, aliases, expression, false)
         }
     }
 }
@@ -1898,10 +2487,13 @@ fn resolve_references_in_block(
     table: &SymbolTable,
     scope: &str,
     stack: &mut ScopeStack,
+    aliases: &mut NamespaceAliasStack,
     statements: &mut [Statement],
 ) {
     stack.push();
-    resolve_references_in_statements(table, scope, stack, statements);
+    aliases.push();
+    resolve_references_in_statements(table, scope, stack, aliases, statements);
+    aliases.pop();
     stack.pop();
 }
 
@@ -1913,33 +2505,58 @@ fn resolve_references_in_expression(
     table: &SymbolTable,
     scope: &str,
     stack: &mut ScopeStack,
+    aliases: &mut NamespaceAliasStack,
     expression: &mut Expression,
     is_callee: bool,
 ) {
     match expression {
         Expression::Identifier {
             name,
+            code,
+            line,
             resolved_reference_full_name,
-            ..
+            resolved_member_full_name,
         } => {
-            if !is_callee && resolved_reference_full_name.is_none() {
-                *resolved_reference_full_name = resolve_reference_name(table, stack, name);
+            if !is_callee {
+                if let Some(mut field_access) =
+                    namespace_alias_field_access_expression(table, aliases, name, code, *line)
+                {
+                    resolve_references_in_expression(
+                        table,
+                        scope,
+                        stack,
+                        aliases,
+                        &mut field_access,
+                        false,
+                    );
+                    *expression = field_access;
+                } else {
+                    if resolved_reference_full_name.is_none() {
+                        *resolved_reference_full_name =
+                            resolve_reference_name_with_aliases(table, stack, aliases, name);
+                    }
+                    if resolved_member_full_name.is_none() {
+                        *resolved_member_full_name =
+                            resolve_member_reference(table, stack, aliases, name);
+                    }
+                }
             }
         }
-        Expression::Literal { .. } | Expression::Designator { .. } => {}
+        Expression::Unknown { .. } | Expression::Literal { .. } | Expression::Designator { .. } => {
+        }
         Expression::Call {
             callee, arguments, ..
         } => {
             // The callee is the function name (phase-1 territory); descend but do
             // not stamp a bare-identifier callee as a value reference.
-            resolve_references_in_expression(table, scope, stack, callee, true);
+            resolve_references_in_expression(table, scope, stack, aliases, callee, true);
             for argument in arguments.iter_mut() {
-                resolve_references_in_expression(table, scope, stack, argument, false);
+                resolve_references_in_expression(table, scope, stack, aliases, argument, false);
             }
         }
         Expression::Binary { left, right, .. } | Expression::Assignment { left, right, .. } => {
-            resolve_references_in_expression(table, scope, stack, left, false);
-            resolve_references_in_expression(table, scope, stack, right, false);
+            resolve_references_in_expression(table, scope, stack, aliases, left, false);
+            resolve_references_in_expression(table, scope, stack, aliases, right, false);
         }
         Expression::Unary { argument, .. }
         | Expression::PackExpansion {
@@ -1947,7 +2564,7 @@ fn resolve_references_in_expression(
         }
         | Expression::TypeOf { argument, .. }
         | Expression::Delete { argument, .. } => {
-            resolve_references_in_expression(table, scope, stack, argument, false)
+            resolve_references_in_expression(table, scope, stack, aliases, argument, false)
         }
         Expression::Conditional {
             condition,
@@ -1955,26 +2572,26 @@ fn resolve_references_in_expression(
             alternative,
             ..
         } => {
-            resolve_references_in_expression(table, scope, stack, condition, false);
+            resolve_references_in_expression(table, scope, stack, aliases, condition, false);
             if let Some(consequence) = consequence.as_mut() {
-                resolve_references_in_expression(table, scope, stack, consequence, false);
+                resolve_references_in_expression(table, scope, stack, aliases, consequence, false);
             }
-            resolve_references_in_expression(table, scope, stack, alternative, false);
+            resolve_references_in_expression(table, scope, stack, aliases, alternative, false);
         }
         Expression::Fold { left, right, .. } => {
             if let Some(left) = left.as_mut() {
-                resolve_references_in_expression(table, scope, stack, left, false);
+                resolve_references_in_expression(table, scope, stack, aliases, left, false);
             }
             if let Some(right) = right.as_mut() {
-                resolve_references_in_expression(table, scope, stack, right, false);
+                resolve_references_in_expression(table, scope, stack, aliases, right, false);
             }
         }
         Expression::Cast { value, .. } => {
-            resolve_references_in_expression(table, scope, stack, value, false)
+            resolve_references_in_expression(table, scope, stack, aliases, value, false)
         }
         Expression::SizeOf { value, .. } => {
             if let Some(value) = value.as_mut() {
-                resolve_references_in_expression(table, scope, stack, value, false);
+                resolve_references_in_expression(table, scope, stack, aliases, value, false);
             }
         }
         Expression::New {
@@ -1983,26 +2600,29 @@ fn resolve_references_in_expression(
             ..
         } => {
             for argument in arguments.iter_mut().chain(initializer_arguments.iter_mut()) {
-                resolve_references_in_expression(table, scope, stack, argument, false);
+                resolve_references_in_expression(table, scope, stack, aliases, argument, false);
             }
         }
         Expression::Lambda { body, .. } => {
             // Lambda bodies open their own scope; captured names resolve via the
             // enclosing stack, which remains visible.
-            resolve_references_in_block(table, scope, stack, body);
+            resolve_references_in_block(table, scope, stack, aliases, body);
+        }
+        Expression::StatementExpression { body, .. } => {
+            resolve_references_in_block(table, scope, stack, aliases, body);
         }
         Expression::FieldAccess { base, .. } => {
             // The base is a value reference; the member name is not resolved here
             // (member-access-through-type is deferred).
-            resolve_references_in_expression(table, scope, stack, base, false);
+            resolve_references_in_expression(table, scope, stack, aliases, base, false);
         }
         Expression::IndexAccess { base, index, .. } => {
-            resolve_references_in_expression(table, scope, stack, base, false);
-            resolve_references_in_expression(table, scope, stack, index, false);
+            resolve_references_in_expression(table, scope, stack, aliases, base, false);
+            resolve_references_in_expression(table, scope, stack, aliases, index, false);
         }
         Expression::InitializerList { elements, .. } => {
             for element in elements.iter_mut() {
-                resolve_references_in_expression(table, scope, stack, element, false);
+                resolve_references_in_expression(table, scope, stack, aliases, element, false);
             }
         }
         Expression::DesignatedInitializer {
@@ -2011,7 +2631,7 @@ fn resolve_references_in_expression(
             // The designator names a field, not a value reference; only the value
             // is a reference position.
             let _ = designator;
-            resolve_references_in_expression(table, scope, stack, value, false);
+            resolve_references_in_expression(table, scope, stack, aliases, value, false);
         }
     }
 }
@@ -2159,6 +2779,11 @@ fn parse_declaration_node(
                 declarations.push(Declaration::Namespace(namespace));
             }
         }
+        "namespace_alias_definition" => {
+            if let Some(alias) = parse_namespace_alias(node, source) {
+                declarations.push(Declaration::NamespaceAlias(alias));
+            }
+        }
         "declaration" => {
             declarations.extend(parse_type_declarations(node, source, symbols));
             if let Some(function) = parse_function_declaration(node, source) {
@@ -2260,6 +2885,7 @@ fn declaration_line(declaration: &Declaration) -> usize {
         Declaration::MacroUndef(value) => value.line,
         Declaration::Include(value) => value.line,
         Declaration::Namespace(value) => value.line,
+        Declaration::NamespaceAlias(value) => value.line,
         Declaration::Struct(value) => value.line,
         Declaration::Enum(value) => value.line,
         Declaration::Typedef(value) => value.line,
@@ -2274,6 +2900,7 @@ fn declaration_visible_line(declaration: &Declaration) -> Option<usize> {
         Declaration::MacroUndef(value) => value.visible_line,
         Declaration::Include(value) => value.visible_line,
         Declaration::Namespace(value) => value.visible_line,
+        Declaration::NamespaceAlias(value) => value.visible_line,
         Declaration::Struct(value) => value.visible_line,
         Declaration::Enum(value) => value.visible_line,
         Declaration::Typedef(value) => value.visible_line,
@@ -2432,6 +3059,12 @@ fn annotate_header_declaration(
                 .drain(..)
                 .map(|nested| annotate_header_declaration(nested, header_path, visible_line))
                 .collect();
+        }
+        Declaration::NamespaceAlias(value) => {
+            if value.source_path.is_none() {
+                value.source_path = Some(source_path.clone());
+            }
+            value.visible_line = Some(visible_line);
         }
         Declaration::Struct(value) => {
             if value.source_path.is_none() {
@@ -2609,11 +3242,14 @@ fn eval_preproc_identifier(name: &str, symbols: &MacroSymbols) -> i64 {
 
 /// Evaluates an object-like macro reference inside a `#if`/`#elif` expression by
 /// performing real (lexical) macro expansion of its replacement list and then
-/// re-evaluating the substituted text. Returns `None` (so the caller can fall
-/// back to the legacy behavior) when the body uses preprocessor features we do
-/// not expand (`#`, `##`, `__VA_ARGS__`) or otherwise cannot be reduced to an
-/// integer. `active` carries the set of macro names currently being expanded so
-/// that recursive/self-referential macros terminate instead of looping forever.
+/// re-evaluating the substituted text. Valid object-like token-paste (`##`) is
+/// collapsed before the replacement list is rescanned, matching preprocessor
+/// order for cases such as `#define A foo ## bar`. Returns `None` (so the
+/// caller can fall back to the legacy behavior) when the body uses preprocessor
+/// features we do not expand (`#`, `__VA_ARGS__`), has malformed token-paste, or
+/// otherwise cannot be reduced to an integer. `active` carries the set of macro
+/// names currently being expanded so that recursive/self-referential macros
+/// terminate instead of looping forever.
 fn eval_object_like_macro<'a>(
     name: &'a str,
     binding: &'a MacroBinding,
@@ -2663,29 +3299,54 @@ fn macro_body_integer_value(body: &str) -> Option<i64> {
 }
 
 /// Tokens that signal preprocessor operators we deliberately do not expand
-/// (stringize, token-paste, variadic). Macros whose replacement list uses them
+/// (stringize and variadic arguments). Macros whose replacement list uses them
 /// fall back to the legacy condition handling rather than risking a wrong value.
 fn body_uses_unsupported_preproc_features(body: &str) -> bool {
-    body.contains('#') || body.contains("__VA_ARGS__")
+    body_contains_stringize_operator(body) || body.contains("__VA_ARGS__")
+}
+
+fn body_contains_stringize_operator(body: &str) -> bool {
+    let bytes = body.as_bytes();
+    let mut index = 0usize;
+    while index < bytes.len() {
+        if bytes[index] == b'#' {
+            if bytes.get(index + 1) == Some(&b'#') {
+                index += 2;
+            } else {
+                return true;
+            }
+        } else {
+            index += 1;
+        }
+    }
+    false
 }
 
 /// Recursively substitutes object-like macros referenced inside `text`,
 /// returning the fully expanded replacement text. Identifiers that are not
 /// object-like macros (including function-like macro names, which require call
 /// syntax) are left untouched. `active` provides the blue-paint guard shared
-/// with [`eval_object_like_macro`]. Returns `None` when an unsupported
-/// preprocessor feature is encountered so callers can fall back safely.
+/// with [`eval_object_like_macro`]. Returns `None` when an unsupported or
+/// malformed preprocessor feature is encountered so callers can fall back
+/// safely.
 fn expand_object_like_text<'a>(
     text: &str,
     symbols: &'a MacroSymbols,
     active: &mut HashSet<&'a str>,
 ) -> Option<String> {
     if body_uses_unsupported_preproc_features(text) {
-        record_unmapped_kind("preproc_macro_stringize_or_paste");
+        record_unmapped_kind("preproc_macro_stringize_or_variadic");
         return None;
     }
+    let text = match collapse_object_like_token_paste(text) {
+        Some(text) => text,
+        None => {
+            record_unmapped_kind("preproc_macro_invalid_token_paste");
+            return None;
+        }
+    };
     let mut output = String::with_capacity(text.len());
-    for token in split_preproc_identifier_tokens(text) {
+    for token in split_preproc_identifier_tokens(&text) {
         match token {
             PreprocToken::Identifier(ident) => {
                 match symbols.get_key_value(ident) {
@@ -2706,6 +3367,97 @@ fn expand_object_like_text<'a>(
         }
     }
     Some(output)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum ReplacementToken {
+    Text(String),
+    Whitespace(String),
+    Paste,
+}
+
+fn collapse_object_like_token_paste(text: &str) -> Option<String> {
+    if !text.contains("##") {
+        return Some(text.to_string());
+    }
+
+    let tokens = tokenize_replacement_list(text);
+    let mut output: Vec<String> = Vec::new();
+    let mut index = 0usize;
+    while index < tokens.len() {
+        match &tokens[index] {
+            ReplacementToken::Text(value) | ReplacementToken::Whitespace(value) => {
+                output.push(value.clone());
+            }
+            ReplacementToken::Paste => {
+                while output.last().is_some_and(|value| value.trim().is_empty()) {
+                    output.pop();
+                }
+                let previous = output.pop()?;
+
+                index += 1;
+                while tokens
+                    .get(index)
+                    .is_some_and(|token| matches!(token, ReplacementToken::Whitespace(_)))
+                {
+                    index += 1;
+                }
+                let next = match tokens.get(index)? {
+                    ReplacementToken::Text(value) => value.clone(),
+                    ReplacementToken::Whitespace(_) | ReplacementToken::Paste => return None,
+                };
+                output.push(format!("{previous}{next}"));
+            }
+        }
+        index += 1;
+    }
+    Some(output.concat())
+}
+
+fn tokenize_replacement_list(text: &str) -> Vec<ReplacementToken> {
+    let bytes = text.as_bytes();
+    let mut tokens = Vec::new();
+    let mut index = 0usize;
+    while index < bytes.len() {
+        if bytes[index].is_ascii_whitespace() {
+            let start = index;
+            index += 1;
+            while index < bytes.len() && bytes[index].is_ascii_whitespace() {
+                index += 1;
+            }
+            tokens.push(ReplacementToken::Whitespace(text[start..index].to_string()));
+        } else if bytes[index] == b'#' && bytes.get(index + 1) == Some(&b'#') {
+            tokens.push(ReplacementToken::Paste);
+            index += 2;
+        } else if is_identifier_start(bytes[index]) {
+            let start = index;
+            index += 1;
+            while index < bytes.len() && is_identifier_continue(bytes[index]) {
+                index += 1;
+            }
+            tokens.push(ReplacementToken::Text(text[start..index].to_string()));
+        } else if bytes[index].is_ascii_digit() {
+            let start = index;
+            index += 1;
+            while index < bytes.len()
+                && (is_identifier_continue(bytes[index]) || bytes[index] == b'.')
+            {
+                index += 1;
+            }
+            tokens.push(ReplacementToken::Text(text[start..index].to_string()));
+        } else {
+            let width = text[index..]
+                .chars()
+                .next()
+                .map(char::len_utf8)
+                .unwrap_or(1);
+            tokens.push(ReplacementToken::Text(
+                text[index..index + width].to_string(),
+            ));
+            index += width;
+        }
+    }
+    tokens
 }
 
 enum PreprocToken<'a> {
@@ -2988,6 +3740,29 @@ fn parse_namespace(
         visible_line: None,
         declarations,
     }))
+}
+
+fn parse_namespace_alias(node: Node, source: &[u8]) -> Option<NamespaceAliasDecl> {
+    let code = node_text(node, source).trim().to_string();
+    let definition = code
+        .trim_end_matches(';')
+        .trim()
+        .strip_prefix("namespace")?
+        .trim();
+    let (name, target) = definition.split_once('=')?;
+    let name = name.trim().to_string();
+    let target = target.trim().to_string();
+    if name.is_empty() || target.is_empty() {
+        return None;
+    }
+    Some(NamespaceAliasDecl {
+        name,
+        target,
+        code,
+        line: line(node),
+        source_path: None,
+        visible_line: None,
+    })
 }
 
 fn include_name(path: &str) -> String {
@@ -4210,15 +4985,27 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
     }
     match node.kind() {
         "compound_statement" => parse_statement_block(node, source, symbols),
+        "function_definition" => parse_operator_cast(node, source, true, symbols)
+            .or_else(|| parse_function(node, source, symbols))
+            .map(|function| Statement::FunctionDecl { function })
+            .into_iter()
+            .collect(),
         "declaration" => parse_local_declarations(node, source),
-        "return_statement" => vec![Statement::Return {
-            code: statement_code(node, source),
-            line: line(node),
-            expression: named_children(node)
-                .into_iter()
-                .next()
-                .map(|expr| parse_expression(expr, source)),
-        }],
+        "return_statement" => {
+            let expression = named_children(node).into_iter().next();
+            if expression
+                .as_ref()
+                .is_some_and(|expr| is_requires_expression(*expr))
+            {
+                Vec::new()
+            } else {
+                vec![Statement::Return {
+                    code: statement_code(node, source),
+                    line: line(node),
+                    expression: expression.map(|expr| parse_expression(expr, source)),
+                }]
+            }
+        }
         "throw_statement" => vec![Statement::Throw {
             code: statement_code(node, source),
             line: line(node),
@@ -4237,6 +5024,18 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
             .into_iter()
             .next()
             .map(|expr| statement_from_expression(node, expr, source))
+            .into_iter()
+            .collect(),
+        "namespace_alias_definition" => parse_namespace_alias(node, source)
+            .map(|alias| Statement::NamespaceAlias {
+                name: alias.name,
+                target: alias.target,
+                code: alias.code,
+                line: alias.line,
+            })
+            .into_iter()
+            .collect(),
+        "static_assert_declaration" => parse_static_assert_statement(node, source)
             .into_iter()
             .collect(),
         "attributed_statement" => parse_attributed_statement(node, source, symbols),
@@ -4299,6 +5098,7 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
             code: statement_code(node, source),
             line: line(node),
         }],
+        "seh_leave_statement" => Vec::new(),
         _ => {
             record_unmapped_kind(node.kind());
             vec![Statement::Expression {
@@ -4308,6 +5108,51 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
             }]
         }
     }
+}
+
+fn parse_static_assert_statement(node: Node, source: &[u8]) -> Option<Statement> {
+    let named = named_children(node);
+    let condition = node
+        .child_by_field_name("condition")
+        .or_else(|| named.first().copied())?;
+    let message = node.child_by_field_name("message").or_else(|| {
+        named
+            .iter()
+            .copied()
+            .find(|child| *child != condition && is_string_literal_kind(child.kind()))
+    });
+    let mut arguments = vec![parse_expression(condition, source)];
+    if let Some(message) = message {
+        arguments.push(parse_expression(message, source));
+    }
+    let code = node_text(node, source).trim().to_string();
+    let line = line(node);
+    Some(Statement::Expression {
+        code: statement_code(node, source),
+        line,
+        expression: Expression::Call {
+            name: "<operator>.staticAssert".to_string(),
+            code: code.clone(),
+            line,
+            callee: Box::new(Expression::Identifier {
+                name: "<operator>.staticAssert".to_string(),
+                code: "static_assert".to_string(),
+                line,
+                resolved_reference_full_name: None,
+                resolved_member_full_name: None,
+            }),
+            arguments,
+            resolved_method_full_name: None,
+            resolved_signature: None,
+        },
+    })
+}
+
+fn is_string_literal_kind(kind: &str) -> bool {
+    matches!(
+        kind,
+        "string_literal" | "raw_string_literal" | "concatenated_string"
+    )
 }
 
 fn coroutine_statement(node: Node, source: &[u8]) -> Option<Statement> {
@@ -4447,6 +5292,10 @@ fn parse_seh_try_statement(
 
 fn is_compound_statement(node: &Node) -> bool {
     node.kind() == "compound_statement"
+}
+
+fn is_requires_expression(node: Node) -> bool {
+    node.kind() == "requires_expression"
 }
 
 fn parse_catch_clause(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> CatchClause {
@@ -4650,6 +5499,7 @@ fn direct_initializer_element(node: Node, source: &[u8]) -> Option<Expression> {
         code: text.to_string(),
         line: line(node),
         resolved_reference_full_name: None,
+        resolved_member_full_name: None,
     })
 }
 
@@ -4669,6 +5519,12 @@ fn is_simple_identifier(text: &str) -> bool {
 }
 
 fn statement_from_expression(statement: Node, expr: Node, source: &[u8]) -> Statement {
+    if contains_node_kind(expr, "gnu_asm_expression") {
+        return Statement::Unknown {
+            code: statement_code(statement, source),
+            line: line(expr),
+        };
+    }
     if expr.kind() == "assignment_expression" {
         if let (Some(left), Some(right)) = (
             expr.child_by_field_name("left"),
@@ -4688,6 +5544,13 @@ fn statement_from_expression(statement: Node, expr: Node, source: &[u8]) -> Stat
         line: line(expr),
         expression: parse_expression(expr, source),
     }
+}
+
+fn contains_node_kind(node: Node, kind: &str) -> bool {
+    node.kind() == kind
+        || named_children(node)
+            .into_iter()
+            .any(|child| contains_node_kind(child, kind))
 }
 
 fn parse_preproc_statements(
@@ -5080,6 +5943,7 @@ fn condition_expression_from_initializer(initializer: &[Statement]) -> Option<Ex
                 code: name.clone(),
                 line: *line,
                 resolved_reference_full_name: None,
+                resolved_member_full_name: None,
             }),
             Statement::StructuredBinding {
                 temp_name, line, ..
@@ -5088,6 +5952,7 @@ fn condition_expression_from_initializer(initializer: &[Statement]) -> Option<Ex
                 code: temp_name.clone(),
                 line: *line,
                 resolved_reference_full_name: None,
+                resolved_member_full_name: None,
             }),
             _ => None,
         })
@@ -5182,7 +6047,14 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
         "parenthesized_expression" | "condition_clause" => named_children(node)
             .into_iter()
             .next()
-            .map(|child| parse_expression(child, source))
+            .map(|child| {
+                if node.kind() == "parenthesized_expression" && child.kind() == "compound_statement"
+                {
+                    parse_statement_expression(node, child, source)
+                } else {
+                    parse_expression(child, source)
+                }
+            })
             .unwrap_or_else(|| parse_expression_text(node_text(node, source), line(node))),
         "identifier" | "this" => identifier_expression(node, source),
         "number_literal"
@@ -5204,11 +6076,21 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
             parse_unary_expression(node, source)
         }
         "conditional_expression" => parse_conditional_expression(node, source),
+        "extension_expression" => parse_extension_expression(node, source),
+        "gnu_asm_expression" => Expression::Unknown {
+            code: node_text(node, source).trim().to_string(),
+            line: line(node),
+        },
+        "requires_expression" => Expression::Unknown {
+            code: node_text(node, source).trim().to_string(),
+            line: line(node),
+        },
         "fold_expression" => parse_fold_expression(node, source),
         "parameter_pack_expansion" => parse_parameter_pack_expansion(node, source),
         "decltype" => parse_decltype_expression(node, source),
         "qualified_identifier" => parse_qualified_identifier_expression(node, source),
         "call_expression" => parse_call_expression(node, source),
+        "generic_expression" => parse_generic_expression(node, source),
         "compound_literal_expression" => parse_compound_literal_expression(node, source),
         "field_expression" => parse_field_expression(node, source),
         "subscript_expression" => parse_subscript_expression(node, source),
@@ -5223,11 +6105,121 @@ fn parse_expression(node: Node, source: &[u8]) -> Expression {
         "initializer_list" => parse_initializer_list(node, source),
         "initializer_pair" => parse_initializer_pair(node, source),
         "comma_expression" => parse_comma_expression(node, source),
+        "compound_statement" => parse_statement_expression(node, node, source),
         _ => {
             record_unmapped_kind(node.kind());
             identifier_expression(node, source)
         }
     }
+}
+
+fn parse_statement_expression(expression: Node, block: Node, source: &[u8]) -> Expression {
+    let mut symbols = MacroSymbols::new();
+    Expression::StatementExpression {
+        code: node_text(expression, source).trim().to_string(),
+        line: line(expression),
+        body: parse_statement_block(block, source, &mut symbols),
+    }
+}
+
+fn parse_extension_expression(node: Node, source: &[u8]) -> Expression {
+    named_children(node)
+        .into_iter()
+        .next()
+        .map(|child| parse_expression(child, source))
+        .unwrap_or_else(|| parse_expression_text(node_text(node, source), line(node)))
+}
+
+fn parse_generic_expression(node: Node, source: &[u8]) -> Expression {
+    let code = node_text(node, source).trim();
+    let line = line(node);
+    let value_children: Vec<_> = named_children(node)
+        .into_iter()
+        .filter(|child| {
+            child.kind() != "type_descriptor"
+                && child.kind() != "ERROR"
+                && node_text(*child, source).trim() != "default"
+        })
+        .collect();
+
+    let arguments: Vec<Expression> = match generic_selection_parts(code) {
+        Some(parts) => {
+            let mut value_children = value_children.into_iter();
+            parts
+                .into_iter()
+                .enumerate()
+                .map(|(index, part)| {
+                    value_children
+                        .next()
+                        .map(|child| parse_expression(child, source))
+                        .unwrap_or_else(|| {
+                            let value = if index == 0 {
+                                part
+                            } else {
+                                generic_association_value(part).unwrap_or(part)
+                            };
+                            parse_expression_text(value, line)
+                        })
+                })
+                .collect()
+        }
+        None => value_children
+            .into_iter()
+            .map(|child| parse_expression(child, source))
+            .collect(),
+    };
+
+    if arguments.is_empty() {
+        return identifier_expression(node, source);
+    }
+
+    Expression::Call {
+        name: "_Generic".to_string(),
+        code: code.to_string(),
+        line,
+        callee: Box::new(Expression::Identifier {
+            name: "_Generic".to_string(),
+            code: "_Generic".to_string(),
+            line,
+            resolved_reference_full_name: None,
+            resolved_member_full_name: None,
+        }),
+        arguments,
+        resolved_method_full_name: None,
+        resolved_signature: None,
+    }
+}
+
+fn generic_selection_parts(code: &str) -> Option<Vec<&str>> {
+    let code = code.trim();
+    if !code.ends_with(')') {
+        return None;
+    }
+    let open_index = top_level_call_open_index(code)?;
+    if code[..open_index].trim() != "_Generic" {
+        return None;
+    }
+    Some(split_top_level_arguments(
+        &code[open_index + 1..code.len() - 1],
+    ))
+}
+
+fn generic_association_value(association: &str) -> Option<&str> {
+    let mut depth = 0usize;
+    for (index, ch) in association.char_indices() {
+        match ch {
+            '(' | '[' | '{' => depth += 1,
+            ')' | ']' | '}' if depth > 0 => depth -= 1,
+            ':' if depth == 0 => {
+                let value = association[index + ch.len_utf8()..].trim();
+                if !value.is_empty() {
+                    return Some(value);
+                }
+            }
+            _ => {}
+        }
+    }
+    None
 }
 
 /// Lowers a C/C++ comma operator (`a, b, c`) onto a left-associative chain of
@@ -5293,6 +6285,7 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
                 code: name,
                 line,
                 resolved_reference_full_name: None,
+                resolved_member_full_name: None,
             }),
             arguments,
             resolved_method_full_name: None,
@@ -5311,6 +6304,7 @@ fn parse_expression_text(raw: &str, line: usize) -> Expression {
             code: code.to_string(),
             line,
             resolved_reference_full_name: None,
+            resolved_member_full_name: None,
         }
     }
 }
@@ -5685,6 +6679,7 @@ fn parse_compound_literal_expression(node: Node, source: &[u8]) -> Expression {
             code: name,
             line: line(type_node),
             resolved_reference_full_name: None,
+            resolved_member_full_name: None,
         }),
         arguments: initializer_list_elements(value, source),
         resolved_method_full_name: None,
@@ -5800,6 +6795,7 @@ fn parse_offsetof_expression(node: Node, source: &[u8]) -> Expression {
             code: "offsetof".to_string(),
             line,
             resolved_reference_full_name: None,
+            resolved_member_full_name: None,
         }),
         arguments,
         resolved_method_full_name: None,
@@ -6309,6 +7305,7 @@ fn identifier_expression(node: Node, source: &[u8]) -> Expression {
         code: code.to_string(),
         line: line(node),
         resolved_reference_full_name: None,
+        resolved_member_full_name: None,
     }
 }
 
@@ -7308,19 +8305,29 @@ mod tests {
     }
 
     #[test]
+    fn object_like_macro_token_paste_collapses_and_rescans() {
+        let _ = take_unmapped_summary();
+        let symbols = macro_symbols(&[("AB", &[], "4"), ("CAT", &[], "A ## B")]);
+
+        assert_eq!(eval_preproc_identifier("CAT", &symbols), 4);
+        assert_eq!(eval_condition_text("CAT == 4", &symbols), Some(1));
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
     fn unexpandable_macro_body_falls_back_safely() {
-        // Stringize/token-paste/variadic bodies are not expanded; the evaluator
-        // falls back to the legacy truthy value and records the fallback.
+        // Stringize/variadic bodies are not expanded; the evaluator falls back
+        // to the legacy truthy value and records the fallback.
         let _ = take_unmapped_summary();
         let stringize = macro_symbols(&[("STR", &[], "#x")]);
         assert_eq!(eval_preproc_identifier("STR", &stringize), 1);
 
-        let paste = macro_symbols(&[("CAT", &[], "a ## b")]);
-        assert_eq!(eval_preproc_identifier("CAT", &paste), 1);
+        let variadic = macro_symbols(&[("VAR", &[], "__VA_ARGS__")]);
+        assert_eq!(eval_preproc_identifier("VAR", &variadic), 1);
 
         let summary = take_unmapped_summary().expect("fallback should be tallied");
         assert!(
-            summary.contains("preproc_macro_stringize_or_paste"),
+            summary.contains("preproc_macro_stringize_or_variadic"),
             "unexpected summary: {summary}"
         );
     }
@@ -7358,6 +8365,43 @@ mod tests {
                 .expect("macro chain source should parse"),
         };
         assert_eq!(function_return_literal(&document, "picks_branch"), "4");
+    }
+
+    #[test]
+    fn token_pasted_object_like_macro_selects_preprocessor_branch() {
+        let _ = take_unmapped_summary();
+        let source = r#"
+            #define A foo ## bar
+            int picks_pasted_branch() {
+            #if A
+              return 1;
+            #else
+              return 0;
+            #endif
+            }
+        "#;
+        let document = CxxAstDocument {
+            schema_version: SCHEMA_VERSION,
+            backend: BACKEND_NAME,
+            path: "macro_token_paste.c".into(),
+            language: SourceLanguage::C,
+            source_bytes: 0,
+            source_lines: 0,
+            options: ParseOptions {
+                include_paths: Vec::new(),
+                defines: Vec::new(),
+                compilation_database: None,
+                skip_function_bodies: false,
+                import_header_declarations: false,
+            },
+            declarations: parse_declarations(source, SourceLanguage::C)
+                .expect("token-paste source should parse"),
+        };
+        assert_eq!(
+            function_return_literal(&document, "picks_pasted_branch"),
+            "0"
+        );
+        assert_eq!(take_unmapped_summary(), None);
     }
 
     #[test]
@@ -12065,7 +13109,14 @@ mod tests {
 
     fn collect_statement_call_names(statement: &Statement) -> Vec<String> {
         match statement {
-            Statement::Unknown { .. } | Statement::UsingEnum { .. } => Vec::new(),
+            Statement::Unknown { .. }
+            | Statement::UsingEnum { .. }
+            | Statement::NamespaceAlias { .. } => Vec::new(),
+            Statement::FunctionDecl { function } => function
+                .body
+                .iter()
+                .flat_map(collect_statement_call_names)
+                .collect(),
             Statement::LocalDecl { initializer, .. } => initializer
                 .as_ref()
                 .map(collect_call_names)
@@ -12201,6 +13252,7 @@ mod tests {
         match statement {
             Statement::Unknown { line, .. }
             | Statement::UsingEnum { line, .. }
+            | Statement::NamespaceAlias { line, .. }
             | Statement::LocalDecl { line, .. }
             | Statement::StructuredBinding { line, .. }
             | Statement::Assignment { line, .. }
@@ -12218,6 +13270,7 @@ mod tests {
             | Statement::Switch { line, .. }
             | Statement::Case { line, .. }
             | Statement::Expression { line, .. } => *line,
+            Statement::FunctionDecl { function } => function.line,
         }
     }
 
@@ -12271,6 +13324,640 @@ mod tests {
     }
 
     #[test]
+    fn statement_expression_lowers_to_block_expression() {
+        let _ = take_unmapped_summary();
+        let body =
+            single_function_body("int f() { return ({ int y = 1; y; }); }", SourceLanguage::C);
+        let Some(Statement::Return {
+            expression:
+                Some(Expression::StatementExpression {
+                    code,
+                    body: statement_body,
+                    ..
+                }),
+            ..
+        }) = body.first()
+        else {
+            panic!("expected statement expression return, got {body:?}");
+        };
+
+        assert_eq!(code, "({ int y = 1; y; })");
+        assert!(
+            matches!(
+                statement_body.as_slice(),
+                [
+                    Statement::LocalDecl {
+                        name,
+                        initializer: Some(Expression::Literal { value, .. }),
+                        ..
+                    },
+                    Statement::Expression {
+                        expression: Expression::Identifier { name: final_name, .. },
+                        ..
+                    }
+                ] if name == "y" && value == "1" && final_name == "y"
+            ),
+            "unexpected statement expression body: {statement_body:?}"
+        );
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
+    fn gnu_asm_lowers_to_unknown_statement_without_unmapped_summary() {
+        let _ = take_unmapped_summary();
+        let body = single_function_body(
+            r#"void f() { asm("paddh %0, %1, %2\n\t" : "=f" (x) : "f" (y), "f" (z)); }"#,
+            SourceLanguage::C,
+        );
+        let [Statement::Unknown { code, .. }] = body.as_slice() else {
+            panic!("expected one unknown asm statement, got {body:?}");
+        };
+
+        assert!(code.starts_with("asm("), "unexpected asm code: {code}");
+        assert!(code.contains(": \"=f\" (x)"), "unexpected asm code: {code}");
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
+    fn gnu_asm_expression_lowers_to_unknown_expression_without_unmapped_summary() {
+        let _ = take_unmapped_summary();
+        let body = single_function_body(
+            r#"int f() { int x = asm("nop"); return x; }"#,
+            SourceLanguage::C,
+        );
+        let [Statement::LocalDecl {
+            initializer: Some(Expression::Unknown { code, .. }),
+            ..
+        }, Statement::Return { .. }] = body.as_slice()
+        else {
+            panic!("expected local unknown initializer and return, got {body:?}");
+        };
+
+        assert_eq!(code, r#"asm("nop")"#);
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
+    fn requires_expression_lowers_to_unknown_local_initializer_without_unmapped_summary() {
+        let _ = take_unmapped_summary();
+        let body = single_function_body(
+            "template <typename T> bool f() { bool ok = requires(T t) { t + 1; }; return ok; }",
+            SourceLanguage::Cpp,
+        );
+        let [Statement::LocalDecl {
+            initializer: Some(Expression::Unknown { code, .. }),
+            ..
+        }, Statement::Return { .. }] = body.as_slice()
+        else {
+            panic!("expected local unknown initializer and return, got {body:?}");
+        };
+
+        assert_eq!(code, "requires(T t) { t + 1; }");
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
+    fn return_requires_expression_is_dropped_without_unmapped_summary() {
+        let _ = take_unmapped_summary();
+        let body = single_function_body(
+            "template <typename T> bool f() { return requires(T t) { t + 1; }; }",
+            SourceLanguage::Cpp,
+        );
+
+        assert!(
+            body.is_empty(),
+            "expected CDT-style dropped return, got {body:?}"
+        );
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
+    fn static_assert_lowers_to_operator_call_without_unmapped_summary() {
+        let _ = take_unmapped_summary();
+        let body = single_function_body(
+            r#"void foo(){ int a = 0; static_assert ( a == 0 , "not 0!"); static_assert(a == 0); }"#,
+            SourceLanguage::Cpp,
+        );
+        let [Statement::LocalDecl { .. }, first, second] = body.as_slice() else {
+            panic!("expected local plus two static assert statements, got {body:?}");
+        };
+        let Statement::Expression {
+            expression:
+                Expression::Call {
+                    name,
+                    code,
+                    arguments,
+                    ..
+                },
+            ..
+        } = first
+        else {
+            panic!("expected static assert call expression, got {first:?}");
+        };
+        assert_eq!(name, "<operator>.staticAssert");
+        assert_eq!(code, r#"static_assert ( a == 0 , "not 0!");"#);
+        assert!(matches!(
+            arguments.as_slice(),
+            [
+                Expression::Binary { operator, .. },
+                Expression::Literal { value, .. }
+            ] if operator == "==" && value == "\"not 0!\""
+        ));
+
+        let Statement::Expression {
+            expression: Expression::Call {
+                name, arguments, ..
+            },
+            ..
+        } = second
+        else {
+            panic!("expected single-argument static assert call, got {second:?}");
+        };
+        assert_eq!(name, "<operator>.staticAssert");
+        assert_eq!(arguments.len(), 1);
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
+    fn namespace_alias_expands_qualified_constructor_and_declared_type_names() {
+        let _ = take_unmapped_summary();
+        let declarations = parse_declarations(
+            r#"
+                namespace A { class Foo {}; }
+                namespace B = A;
+                auto f = B::Foo();
+                void use() { B::Foo local; }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("namespace alias sample should parse");
+
+        let alias = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::NamespaceAlias(alias) => Some(alias),
+                _ => None,
+            })
+            .expect("expected namespace alias declaration");
+        assert_eq!(alias.name, "B");
+        assert_eq!(alias.target, "A");
+
+        let global = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::GlobalVariable(global) if global.name == "f" => Some(global),
+                _ => None,
+            })
+            .expect("expected global f");
+        assert!(matches!(
+            global.initializer.as_ref(),
+            Some(Expression::Call { name, code, .. }) if name == "A::Foo" && code == "B::Foo()"
+        ));
+
+        let use_function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+        let [Statement::LocalDecl {
+            type_name,
+            resolved_type_full_name,
+            ..
+        }] = use_function.body.as_slice()
+        else {
+            panic!(
+                "expected one namespace-aliased local, got {:?}",
+                use_function.body
+            );
+        };
+        assert_eq!(type_name, "B::Foo");
+        assert_eq!(resolved_type_full_name.as_deref(), Some("A.Foo"));
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
+    fn local_namespace_aliases_scope_qualified_types_and_calls() {
+        let _ = take_unmapped_summary();
+        let declarations = parse_declarations(
+            r#"
+                namespace A { class Foo {}; }
+                namespace C { class Foo {}; }
+                void use(int flag) {
+                  namespace B = A;
+                  B::Foo local;
+                  auto made = B::Foo();
+                  if (flag) {
+                    namespace B = C;
+                    B::Foo inner;
+                  }
+                  B::Foo after;
+                }
+                void other() { B::Foo leak; }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("local namespace alias sample should parse");
+
+        let use_function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "use" => Some(function),
+                _ => None,
+            })
+            .expect("expected use function");
+
+        let [Statement::NamespaceAlias { name, target, .. }, Statement::LocalDecl {
+            name: local_name,
+            resolved_type_full_name: local_type,
+            ..
+        }, Statement::LocalDecl {
+            name: made_name,
+            initializer:
+                Some(Expression::Call {
+                    name: made_call_name,
+                    code: made_call_code,
+                    ..
+                }),
+            ..
+        }, Statement::If { then_body, .. }, Statement::LocalDecl {
+            name: after_name,
+            resolved_type_full_name: after_type,
+            ..
+        }] = use_function.body.as_slice()
+        else {
+            panic!(
+                "expected local namespace alias body shape, got {:?}",
+                use_function.body
+            );
+        };
+        assert_eq!(name, "B");
+        assert_eq!(target, "A");
+        assert_eq!(local_name, "local");
+        assert_eq!(local_type.as_deref(), Some("A.Foo"));
+        assert_eq!(made_name, "made");
+        assert_eq!(made_call_name, "A::Foo");
+        assert_eq!(made_call_code, "B::Foo()");
+
+        let [Statement::NamespaceAlias {
+            name: inner_alias,
+            target: inner_target,
+            ..
+        }, Statement::LocalDecl {
+            name: inner_name,
+            resolved_type_full_name: inner_type,
+            ..
+        }] = then_body.as_slice()
+        else {
+            panic!("expected shadowing alias in if body, got {then_body:?}");
+        };
+        assert_eq!(inner_alias, "B");
+        assert_eq!(inner_target, "C");
+        assert_eq!(inner_name, "inner");
+        assert_eq!(inner_type.as_deref(), Some("C.Foo"));
+        assert_eq!(after_name, "after");
+        assert_eq!(after_type.as_deref(), Some("A.Foo"));
+
+        let other_function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "other" => Some(function),
+                _ => None,
+            })
+            .expect("expected other function");
+        let [Statement::LocalDecl {
+            name: leak_name,
+            resolved_type_full_name: leak_type,
+            ..
+        }] = other_function.body.as_slice()
+        else {
+            panic!(
+                "expected other function leak local, got {:?}",
+                other_function.body
+            );
+        };
+        assert_eq!(leak_name, "leak");
+        assert_eq!(leak_type, &None);
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
+    fn namespace_alias_qualified_value_access_lowers_to_field_access() {
+        let _ = take_unmapped_summary();
+        let declarations = parse_declarations(
+            r#"
+                namespace foo { namespace bar { namespace baz { int qux = 42; } } }
+                namespace fbz = foo::bar::baz;
+                int main() {
+                  int x = fbz::qux;
+                  namespace local = foo::bar::baz;
+                  int y = local::qux;
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("namespace alias value access sample should parse");
+
+        let main_function = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "main" => Some(function),
+                _ => None,
+            })
+            .expect("expected main function");
+
+        let [Statement::LocalDecl {
+            name: x_name,
+            initializer:
+                Some(Expression::FieldAccess {
+                    field: x_field,
+                    code: x_code,
+                    base: x_base,
+                    ..
+                }),
+            ..
+        }, Statement::NamespaceAlias {
+            name: alias_name,
+            target,
+            ..
+        }, Statement::LocalDecl {
+            name: y_name,
+            initializer:
+                Some(Expression::FieldAccess {
+                    field: y_field,
+                    code: y_code,
+                    base: y_base,
+                    ..
+                }),
+            ..
+        }] = main_function.body.as_slice()
+        else {
+            panic!(
+                "expected namespace alias field-access body, got {:?}",
+                main_function.body
+            );
+        };
+        assert_eq!(x_name, "x");
+        assert_eq!(x_field, "qux");
+        assert_eq!(x_code, "fbz::qux");
+        assert!(matches!(
+            x_base.as_ref(),
+            Expression::Identifier { name, code, .. } if name == "fbz" && code == "fbz"
+        ));
+        assert_eq!(alias_name, "local");
+        assert_eq!(target, "foo::bar::baz");
+        assert_eq!(y_name, "y");
+        assert_eq!(y_field, "qux");
+        assert_eq!(y_code, "local::qux");
+        assert!(matches!(
+            y_base.as_ref(),
+            Expression::Identifier { name, code, .. } if name == "local" && code == "local"
+        ));
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
+    fn namespace_alias_qualified_calls_preserve_code_and_resolve_targets() {
+        let _ = take_unmapped_summary();
+        let declarations = parse_declarations(
+            r#"
+                namespace A {
+                  int fn() { return 1; }
+                  class Foo { public: static int make() { return 2; } };
+                }
+                namespace B = A;
+                int free_call() { return B::fn(); }
+                int static_call() { return B::Foo::make(); }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("namespace alias call sample should parse");
+
+        let free_call = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "free_call" => Some(function),
+                _ => None,
+            })
+            .expect("expected free_call function");
+        let [Statement::Return {
+            expression:
+                Some(Expression::Call {
+                    name,
+                    code,
+                    resolved_method_full_name,
+                    resolved_signature,
+                    ..
+                }),
+            ..
+        }] = free_call.body.as_slice()
+        else {
+            panic!(
+                "expected alias-qualified free function call, got {:?}",
+                free_call.body
+            );
+        };
+        assert_eq!(name, "A::fn");
+        assert_eq!(code, "B::fn()");
+        assert_eq!(resolved_method_full_name.as_deref(), Some("A.fn:int()"));
+        assert_eq!(resolved_signature.as_deref(), Some("int()"));
+
+        let static_call = declarations
+            .iter()
+            .find_map(|declaration| match declaration {
+                Declaration::Function(function) if function.name == "static_call" => Some(function),
+                _ => None,
+            })
+            .expect("expected static_call function");
+        let [Statement::Return {
+            expression:
+                Some(Expression::Call {
+                    name,
+                    code,
+                    resolved_method_full_name,
+                    resolved_signature,
+                    ..
+                }),
+            ..
+        }] = static_call.body.as_slice()
+        else {
+            panic!(
+                "expected alias-qualified static member call, got {:?}",
+                static_call.body
+            );
+        };
+        assert_eq!(name, "A::Foo::make");
+        assert_eq!(code, "B::Foo::make()");
+        assert_eq!(
+            resolved_method_full_name.as_deref(),
+            Some("A.Foo.make:int()")
+        );
+        assert_eq!(resolved_signature.as_deref(), Some("int()"));
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
+    fn generic_selection_lowers_to_call_with_value_arguments() {
+        let _ = take_unmapped_summary();
+        let body = single_function_body(
+            "int f(int x) { return _Generic(x, int: 1, default: 0); }",
+            SourceLanguage::C,
+        );
+        let Some(Statement::Return {
+            expression:
+                Some(Expression::Call {
+                    name,
+                    code,
+                    callee,
+                    arguments,
+                    ..
+                }),
+            ..
+        }) = body.first()
+        else {
+            panic!("expected _Generic return call, got {body:?}");
+        };
+
+        assert_eq!(name, "_Generic");
+        assert_eq!(code, "_Generic(x, int: 1, default: 0)");
+        assert!(
+            matches!(callee.as_ref(), Expression::Identifier { name, .. } if name == "_Generic"),
+            "unexpected _Generic callee: {callee:?}"
+        );
+        assert!(
+            matches!(
+                arguments.as_slice(),
+                [
+                    Expression::Identifier {
+                        name,
+                        resolved_reference_full_name: Some(full_name),
+                        ..
+                    },
+                    Expression::Literal { value: one, .. },
+                    Expression::Literal { value: zero, .. }
+                ] if name == "x" && full_name == "f.x" && one == "1" && zero == "0"
+            ),
+            "unexpected _Generic arguments: {arguments:?}"
+        );
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
+    fn extension_expression_lowers_transparently_to_child_expression() {
+        let _ = take_unmapped_summary();
+        let body = single_function_body(
+            "int f(int x) { int y = __extension__ (x + 1); return __extension__ y; }",
+            SourceLanguage::C,
+        );
+        let [Statement::LocalDecl {
+            initializer:
+                Some(Expression::Binary {
+                    operator,
+                    left,
+                    right,
+                    ..
+                }),
+            ..
+        }, Statement::Return {
+            expression:
+                Some(Expression::Identifier {
+                    name,
+                    resolved_reference_full_name,
+                    ..
+                }),
+            ..
+        }] = body.as_slice()
+        else {
+            panic!("expected transparent __extension__ expressions, got {body:?}");
+        };
+
+        assert_eq!(operator, "+");
+        assert!(
+            matches!(
+                left.as_ref(),
+                Expression::Identifier {
+                    name,
+                    resolved_reference_full_name: Some(full_name),
+                    ..
+                } if name == "x" && full_name == "f.x"
+            ),
+            "unexpected __extension__ left operand: {left:?}"
+        );
+        assert!(
+            matches!(right.as_ref(), Expression::Literal { value, .. } if value == "1"),
+            "unexpected __extension__ right operand: {right:?}"
+        );
+        assert_eq!(name, "y");
+        assert_eq!(resolved_reference_full_name.as_deref(), Some("f.y"));
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
+    fn nested_function_declarations_are_preserved_and_calls_resolve() {
+        let _ = take_unmapped_summary();
+        let body = single_function_body(
+            "int f(int x) { int g(int y) { return x + y; } return g(1); }",
+            SourceLanguage::C,
+        );
+        let [Statement::FunctionDecl { function }, Statement::Return {
+            expression:
+                Some(Expression::Call {
+                    name,
+                    resolved_method_full_name,
+                    resolved_signature,
+                    ..
+                }),
+            ..
+        }] = body.as_slice()
+        else {
+            panic!("expected nested function declaration and return call, got {body:?}");
+        };
+
+        assert_eq!(function.name, "g");
+        assert_eq!(function.signature, "int(int)");
+        assert!(
+            matches!(
+                function.body.as_slice(),
+                [
+                    Statement::Return {
+                        expression:
+                            Some(Expression::Binary {
+                                operator,
+                                left,
+                                right,
+                                ..
+                            }),
+                        ..
+                    }
+                ] if operator == "+"
+                    && matches!(
+                        left.as_ref(),
+                        Expression::Identifier {
+                            name,
+                            resolved_reference_full_name: Some(full_name),
+                            ..
+                        } if name == "x" && full_name == "f.x"
+                    )
+                    && matches!(
+                        right.as_ref(),
+                        Expression::Identifier {
+                            name,
+                            resolved_reference_full_name: Some(full_name),
+                            ..
+                        } if name == "y" && full_name == "f.g.y"
+                    )
+            ),
+            "unexpected nested function body: {:?}",
+            function.body
+        );
+        assert_eq!(name, "g");
+        assert_eq!(resolved_method_full_name.as_deref(), Some("g:int(int)"));
+        assert_eq!(resolved_signature.as_deref(), Some("int(int)"));
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
     fn seh_try_statement_lowers_to_try_with_except_catch() {
         let body = single_function_body(
             "void f() { __try { g(); } __except(1) { handle(); } }",
@@ -12316,13 +14003,39 @@ mod tests {
     }
 
     #[test]
+    fn seh_leave_statement_is_dropped_without_unmapped_summary() {
+        let _ = take_unmapped_summary();
+        let body = single_function_body(
+            "void f() { __try { g(); __leave; h(); } __finally { cleanup(); } }",
+            SourceLanguage::C,
+        );
+        let try_statement = body
+            .into_iter()
+            .find(|statement| matches!(statement, Statement::Try { .. }))
+            .expect("expected try statement");
+        let Statement::Try { body, catches, .. } = &try_statement else {
+            unreachable!();
+        };
+        assert!(catches.is_empty());
+        assert_eq!(body.len(), 3);
+        assert_eq!(
+            collect_statement_call_names(&try_statement),
+            vec!["g", "h", "cleanup"]
+        );
+        assert_eq!(take_unmapped_summary(), None);
+    }
+
+    #[test]
     fn unmapped_node_kinds_are_tallied_in_summary() {
         // Drain any residue from earlier tests sharing this thread.
         let _ = take_unmapped_summary();
-        // A GCC statement-expression (`({ ... })`) has no dedicated mapping and
-        // falls through to the recorded `Statement::Expression` fallback.
-        let _ = parse_declarations("int f() { int x = ({ 1; }); return x; }", SourceLanguage::C)
-            .expect("source should parse");
+        // Unsupported variadic marker inside an object-like macro still falls
+        // back to the legacy branch handling.
+        let _ = parse_declarations(
+            "#define A __VA_ARGS__\n#if A\nint f() { return 1; }\n#else\nint f() { return 0; }\n#endif",
+            SourceLanguage::C,
+        )
+        .expect("source should parse");
         let summary = take_unmapped_summary().expect("expected an unmapped summary");
         assert!(
             summary.starts_with("cxxastgen: "),
@@ -12331,6 +14044,10 @@ mod tests {
         assert!(
             summary.contains("unmapped node(s):"),
             "unexpected summary: {summary}"
+        );
+        assert!(
+            summary.contains("preproc_macro_stringize_or_variadic"),
+            "summary should carry the unmapped kind: {summary}"
         );
         assert!(
             summary.contains("(x"),
@@ -12410,6 +14127,7 @@ mod tests {
             | Statement::StructuredBinding { initializer, .. } => initializer.iter().collect(),
             Statement::Expression { expression, .. } => vec![expression],
             Statement::Assignment { left, right, .. } => vec![left, right],
+            Statement::FunctionDecl { .. } => Vec::new(),
             _ => Vec::new(),
         }
     }
@@ -12563,6 +14281,7 @@ mod tests {
                 code: "f".to_string(),
                 line: 1,
                 resolved_reference_full_name: None,
+                resolved_member_full_name: None,
             }),
             arguments: Vec::new(),
             resolved_method_full_name: Some("f:int()".to_string()),
@@ -12581,6 +14300,7 @@ mod tests {
                 code: "f".to_string(),
                 line: 1,
                 resolved_reference_full_name: None,
+                resolved_member_full_name: None,
             }),
             arguments: Vec::new(),
             resolved_method_full_name: None,
@@ -12901,6 +14621,11 @@ mod tests {
             Statement::Expression { expression, .. } => {
                 collect_references_in_expression(expression, out)
             }
+            Statement::FunctionDecl { function } => {
+                for statement in &function.body {
+                    collect_references_in_statement(statement, out);
+                }
+            }
             Statement::If {
                 condition,
                 then_body,
@@ -13158,6 +14883,7 @@ mod tests {
             code: "x".to_string(),
             line: 1,
             resolved_reference_full_name: Some("f.x".to_string()),
+            resolved_member_full_name: None,
         };
         let json = serde_json::to_string(&resolved).expect("serialize resolved identifier");
         assert!(json.contains("\"resolvedReferenceFullName\":\"f.x\""));
@@ -13167,8 +14893,54 @@ mod tests {
             code: "x".to_string(),
             line: 1,
             resolved_reference_full_name: None,
+            resolved_member_full_name: None,
         };
         let json = serde_json::to_string(&unresolved).expect("serialize unresolved identifier");
         assert!(!json.contains("resolvedReferenceFullName"));
+    }
+
+    #[test]
+    fn resolves_static_member_reference() {
+        // `Core::Widget::instances` resolves to the dotted member full name when the
+        // type is unique and the member is non-overloaded.
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Widget {
+                    static int instances;
+                    int value;
+                  };
+                }
+                int probe() {
+                  return Core::Widget::instances;
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("static member sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedMemberFullName\":\"Core.Widget.instances\""));
+    }
+
+    #[test]
+    fn leaves_namespace_qualified_nonmember_unresolved() {
+        // `Core::free` is a free function in a namespace, not a type member, so it
+        // gets no resolvedMemberFullName.
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  int free() { return 0; }
+                }
+                int probe() {
+                  return Core::free();
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("namespace function sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(!json.contains("resolvedMemberFullName"));
     }
 }
