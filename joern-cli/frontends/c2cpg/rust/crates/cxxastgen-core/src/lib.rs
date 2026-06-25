@@ -883,6 +883,16 @@ impl SymbolTable {
             .push(entry);
     }
 
+    /// Records an out-of-line definition under its dotted qualified name only,
+    /// leaving the simple-name index untouched so unqualified/instance-call
+    /// resolution is unaffected.
+    fn insert_qualified_definition(&mut self, entry: SymbolEntry) {
+        self.by_qualified_name
+            .entry(entry.qualified_name.clone())
+            .or_default()
+            .push(entry);
+    }
+
     fn insert_type(&mut self, entry: TypeEntry) {
         self.types_by_qualified_name
             .entry(entry.qualified_name.clone())
@@ -1037,32 +1047,65 @@ fn is_plain_function_name(name: &str) -> bool {
         && !name.contains('(')
 }
 
+/// A qualified out-of-line function/method definition name (`Core::make`,
+/// `Core::Widget::get`) composed solely of `::`-separated plain identifiers.
+/// Operators, destructors, and templates are excluded.
+fn is_qualified_plain_function_name(name: &str) -> bool {
+    name.contains("::")
+        && !name.contains('<')
+        && !name.contains('~')
+        && !name.contains(' ')
+        && !name.contains('(')
+        && name
+            .split("::")
+            .all(|segment| !segment.is_empty() && is_plain_function_name(segment))
+}
+
 /// Records `function` into `table` under the dotted `scope` (enclosing namespace
-/// and class path). Skips anything that is not a plain identifier function.
+/// and class path). Plain in-scope names are indexed by both simple and qualified
+/// name; out-of-line definitions (`int Core::make()`) carry their own qualified
+/// name and are indexed by qualified name only (so simple-name resolution, which
+/// the in-scope declaration already covers, is unaffected). Other forms are
+/// skipped.
 fn collect_function_symbol(table: &mut SymbolTable, scope: &str, function: &FunctionDecl) {
-    if !is_plain_function_name(&function.name) {
-        return;
-    }
-    let simple_name = function.name.clone();
-    let qualified_name = if scope.is_empty() {
-        simple_name.clone()
-    } else {
-        format!("{scope}.{simple_name}")
-    };
     let has_variadic = function.parameters.iter().any(|param| param.is_variadic);
     let arity = function
         .parameters
         .iter()
         .filter(|param| !param.is_variadic)
         .count();
-    table.insert(SymbolEntry {
-        qualified_name,
-        simple_name,
-        arity,
-        has_variadic,
-        signature: function.signature.clone(),
-        is_definition: function.is_definition,
-    });
+
+    if is_plain_function_name(&function.name) {
+        let simple_name = function.name.clone();
+        let qualified_name = if scope.is_empty() {
+            simple_name.clone()
+        } else {
+            format!("{scope}.{simple_name}")
+        };
+        table.insert(SymbolEntry {
+            qualified_name,
+            simple_name,
+            arity,
+            has_variadic,
+            signature: function.signature.clone(),
+            is_definition: function.is_definition,
+        });
+    } else if function.is_definition && is_qualified_plain_function_name(&function.name) {
+        let qualified_name = function.name.replace("::", ".");
+        let simple_name = qualified_name
+            .rsplit('.')
+            .next()
+            .unwrap_or(&qualified_name)
+            .to_string();
+        table.insert_qualified_definition(SymbolEntry {
+            qualified_name,
+            simple_name,
+            arity,
+            has_variadic,
+            signature: function.signature.clone(),
+            is_definition: function.is_definition,
+        });
+    }
 }
 
 /// Records a user-defined type named `name` (already a plain identifier) into
@@ -5035,18 +5078,11 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
         "declaration" => parse_local_declarations(node, source),
         "return_statement" => {
             let expression = named_children(node).into_iter().next();
-            if expression
-                .as_ref()
-                .is_some_and(|expr| is_requires_expression(*expr))
-            {
-                Vec::new()
-            } else {
-                vec![Statement::Return {
-                    code: statement_code(node, source),
-                    line: line(node),
-                    expression: expression.map(|expr| parse_expression(expr, source)),
-                }]
-            }
+            vec![Statement::Return {
+                code: statement_code(node, source),
+                line: line(node),
+                expression: expression.map(|expr| parse_expression(expr, source)),
+            }]
         }
         "throw_statement" => vec![Statement::Throw {
             code: statement_code(node, source),
@@ -5140,7 +5176,10 @@ fn parse_statement(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> Vec
             code: statement_code(node, source),
             line: line(node),
         }],
-        "seh_leave_statement" => Vec::new(),
+        "seh_leave_statement" => vec![Statement::Unknown {
+            code: statement_code(node, source),
+            line: line(node),
+        }],
         _ => {
             record_unmapped_kind(node.kind());
             vec![Statement::Expression {
@@ -5334,10 +5373,6 @@ fn parse_seh_try_statement(
 
 fn is_compound_statement(node: &Node) -> bool {
     node.kind() == "compound_statement"
-}
-
-fn is_requires_expression(node: Node) -> bool {
-    node.kind() == "requires_expression"
 }
 
 fn parse_catch_clause(node: Node, source: &[u8], symbols: &mut MacroSymbols) -> CatchClause {
@@ -13459,17 +13494,21 @@ mod tests {
     }
 
     #[test]
-    fn return_requires_expression_is_dropped_without_unmapped_summary() {
+    fn return_requires_expression_lowers_to_unknown_expression_without_unmapped_summary() {
         let _ = take_unmapped_summary();
         let body = single_function_body(
             "template <typename T> bool f() { return requires(T t) { t + 1; }; }",
             SourceLanguage::Cpp,
         );
+        let [Statement::Return {
+            expression: Some(Expression::Unknown { code, .. }),
+            ..
+        }] = body.as_slice()
+        else {
+            panic!("expected return with unknown requires expression, got {body:?}");
+        };
 
-        assert!(
-            body.is_empty(),
-            "expected CDT-style dropped return, got {body:?}"
-        );
+        assert_eq!(code, "requires(T t) { t + 1; }");
         assert_eq!(take_unmapped_summary(), None);
     }
 
@@ -14045,7 +14084,7 @@ mod tests {
     }
 
     #[test]
-    fn seh_leave_statement_is_dropped_without_unmapped_summary() {
+    fn seh_leave_statement_lowers_to_unknown_without_unmapped_summary() {
         let _ = take_unmapped_summary();
         let body = single_function_body(
             "void f() { __try { g(); __leave; h(); } __finally { cleanup(); } }",
@@ -14059,7 +14098,11 @@ mod tests {
             unreachable!();
         };
         assert!(catches.is_empty());
-        assert_eq!(body.len(), 3);
+        assert_eq!(body.len(), 4);
+        assert!(matches!(
+            body[1],
+            Statement::Unknown { ref code, .. } if code == "__leave"
+        ));
         assert_eq!(
             collect_statement_call_names(&try_statement),
             vec!["g", "h", "cleanup"]
@@ -14963,6 +15006,28 @@ mod tests {
 
         let json = serde_json::to_string(&declarations).expect("serialize declarations");
         assert!(json.contains("\"resolvedMemberFullName\":\"Core.Widget.instances\""));
+    }
+
+    #[test]
+    fn resolves_qualified_free_function_with_out_of_line_definition() {
+        // `Core::make()` resolves even though its definition is written out-of-line
+        // (the in-namespace declaration alone is not a definition).
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  int make();
+                }
+                int Core::make() { return 1; }
+                int use() {
+                  return Core::make();
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("qualified free function sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.make:int()\""));
     }
 
     #[test]
