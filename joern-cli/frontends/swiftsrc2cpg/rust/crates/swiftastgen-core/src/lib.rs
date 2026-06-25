@@ -2524,7 +2524,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             {
                 continue;
             }
-            items.push(self.member_block_item(child)?);
+            let semicolon = self.member_trailing_semicolon(child);
+            items.push(self.member_block_item_with_semicolon(child, semicolon)?);
         }
         let members_range = self.covering_range_or_point(&items, left_brace.end_byte());
         Ok(self.syntax_node(
@@ -2542,11 +2543,40 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn member_block_item(&self, node: Node<'a>) -> Result<Value> {
+        self.member_block_item_with_semicolon(node, None)
+    }
+
+    fn member_block_item_with_semicolon(
+        &self,
+        node: Node<'a>,
+        semicolon_start: Option<usize>,
+    ) -> Result<Value> {
+        let mut children = vec![self.with_name(self.syntax_for_member_decl(node)?, "decl")];
+        let mut end = node.end_byte();
+        // `var a = 0; var b = 0` — tree-sitter drops the `;` separator, so detect it
+        // from the source and emit it as a trailing semicolon.
+        if let Some(semicolon_start) = semicolon_start {
+            end = semicolon_start + 1;
+            children.push(self.with_name(
+                self.token_with_range(
+                    "semicolon",
+                    self.range_from_offsets(semicolon_start, semicolon_start + 1),
+                ),
+                "semicolon",
+            ));
+        }
         Ok(self.syntax_node(
             "MemberBlockItemSyntax",
-            self.range_for_node(node),
-            vec![self.with_name(self.syntax_for_member_decl(node)?, "decl")],
+            self.range_from_offsets(node.start_byte(), end),
+            children,
         ))
+    }
+
+    /// A member declaration may be followed by a `;` separator that tree-sitter
+    /// discards; locate it by skipping same-line whitespace after the member.
+    fn member_trailing_semicolon(&self, node: Node<'a>) -> Option<usize> {
+        let start = self.skip_horizontal_whitespace(node.end_byte(), self.source.len());
+        (self.source.as_bytes().get(start) == Some(&b';')).then_some(start)
     }
 
     fn member_block_item_for_value(&self, value: Value) -> Value {
@@ -17010,6 +17040,19 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(labeled, "value").unwrap()["nodeType"],
             "SimpleStringLiteralExprSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_member_trailing_semicolon() {
+        // `var a = 0; var b = 0` keeps the dropped `;` as a member separator.
+        let source = "struct S {\n  var a = 0; var b = 0\n}\n";
+        let value = parse_source("MS.swift", "/tmp/MS.swift", source).unwrap();
+
+        let item = find_first_node_type(&value, "MemberBlockItemSyntax").unwrap();
+        assert_eq!(
+            child_by_name(item, "semicolon").unwrap()["tokenKind"],
+            "semicolon"
         );
     }
 
