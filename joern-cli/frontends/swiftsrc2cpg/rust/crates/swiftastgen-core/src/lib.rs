@@ -2332,7 +2332,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .or_else(|| self.first_named_child_excluding(inherited_node, &["attribute"]))
                 .context("inheritance specifier is missing a type")?;
             let trailing_comma = self.trailing_delimiter(node, inherited_node, ",");
-            let mut children = vec![self.with_name(self.identifier_type(type_node)?, "type")];
+            // `: ~Copyable` is a `suppressed_constraint`, which type_syntax maps to a
+            // SuppressedTypeSyntax; ordinary inherited types stay identifier types.
+            let inherited_type = if type_node.kind() == "suppressed_constraint" {
+                self.type_syntax(type_node)?
+            } else {
+                self.identifier_type(type_node)?
+            };
+            let mut children = vec![self.with_name(inherited_type, "type")];
             if let Some(comma) = trailing_comma {
                 children.push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
             }
@@ -16805,6 +16812,21 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(detail, "detail").unwrap()["tokenKind"],
             "identifier(\"set\")"
+        );
+    }
+
+    #[test]
+    fn emits_suppressed_conformance_in_inheritance() {
+        // `struct S: ~Copyable` carries a SuppressedTypeSyntax inherited type.
+        let source = "struct S: ~Copyable {}\n";
+        let value = parse_source("NC.swift", "/tmp/NC.swift", source).unwrap();
+
+        let inherited = find_first_node_type(&value, "InheritedTypeSyntax").unwrap();
+        let ty = child_by_name(inherited, "type").unwrap();
+        assert_eq!(ty["nodeType"], "SuppressedTypeSyntax");
+        assert_eq!(
+            child_by_name(ty, "withoutTilde").unwrap()["tokenKind"],
+            "prefixOperator(\"~\")"
         );
     }
 
