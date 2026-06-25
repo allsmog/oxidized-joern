@@ -1665,22 +1665,26 @@ fn infer_argument_type(
             resolved_type_full_name,
             ..
         } => resolved_type_full_name.clone(),
-        Expression::Identifier { name, .. } => {
-            // A local/parameter binding's declared type wins; otherwise try a
-            // data-field reference.
+        Expression::Identifier {
+            name,
+            resolved_reference_full_name,
+            resolved_member_full_name,
+            ..
+        } => {
+            // A local/parameter binding's declared type wins; otherwise the
+            // identifier may reference a data field or a qualified static member.
             stack
                 .lookup_binding(name)
                 .and_then(|binding| binding.type_full_name.clone())
                 .or_else(|| {
-                    if let Expression::Identifier {
-                        resolved_reference_full_name: Some(reference),
-                        ..
-                    } = argument
-                    {
-                        member_data_field_type(table, reference)
-                    } else {
-                        None
-                    }
+                    resolved_reference_full_name
+                        .as_deref()
+                        .and_then(|reference| member_data_field_type(table, reference))
+                })
+                .or_else(|| {
+                    resolved_member_full_name
+                        .as_deref()
+                        .and_then(|member| member_data_field_type(table, member))
                 })
         }
         // A nested call argument contributes its (resolved) return type.
@@ -14540,6 +14544,28 @@ mod tests {
         // The argument type (a prototype-only call) is unknown, so the overload
         // stays ambiguous and unresolved.
         assert_eq!(resolved_call(use_fn, "pick"), Some((None, None)));
+    }
+
+    #[test]
+    fn resolves_overload_by_qualified_static_member_argument() {
+        // `Core::Config::level` (a static int) selects pick(int) over pick(double).
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Config { static int level; };
+                  struct Widget {
+                    int pick(int seed) { return seed; }
+                    int pick(double seed) { return 0; }
+                    int use() { return pick(Core::Config::level); }
+                  };
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("static member argument overload sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.Widget.pick:int(int)\""));
     }
 
     #[test]
