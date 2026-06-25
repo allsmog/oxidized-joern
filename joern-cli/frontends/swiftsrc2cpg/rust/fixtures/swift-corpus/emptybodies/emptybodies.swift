@@ -1,16 +1,12 @@
-func ifEmpty(_ c: Bool) {
-  if c {}
+func empty() { }
+
+func branches(_ flag: Bool) {
+  if flag { } else { }
+  while flag { }
 }
 
-func ifElseEmpty(_ c: Bool) {
-  if c {} else {}
+func handling() {
+  do { } catch { }
 }
 
-func closureEmpty() {
-  let g = {}
-  g()
-}
-
-func doEmpty() {
-  do {} catch {}
-}
+class Service { }
