@@ -5120,10 +5120,25 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     /// type (`AccessorEffectSpecifiersSyntax`).
     fn effect_specifiers(&self, node: Node<'a>, node_type: &str) -> Option<Value> {
         let async_specifier = self.immediate_child_kind(node, "async");
-        let throws_specifier = self
+        // Typed throws (`throws(E)`) nests the `throws` keyword inside a throws_clause.
+        let throws_clause_node = self.immediate_named_child_kind(node, "throws_clause");
+        // A `throws`/`rethrows` keyword may be a standalone child, or the leading
+        // `throws` of a typed `throws_clause` (which exposes no keyword child token).
+        let plain_throws = self
             .immediate_child_kind(node, "throws")
             .or_else(|| self.immediate_child_kind(node, "rethrows"));
-        if async_specifier.is_none() && throws_specifier.is_none() {
+        let throws_info: Option<(usize, usize, &str)> = plain_throws
+            .map(|throws| (throws.start_byte(), throws.end_byte(), self.text(throws)))
+            .or_else(|| {
+                throws_clause_node.map(|clause| {
+                    (
+                        clause.start_byte(),
+                        clause.start_byte() + "throws".len(),
+                        "throws",
+                    )
+                })
+            });
+        if async_specifier.is_none() && throws_info.is_none() {
             return None;
         }
         let mut children = Vec::new();
@@ -5133,26 +5148,52 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "asyncSpecifier",
             ));
         }
-        if let Some(throws_node) = throws_specifier {
-            let throws_clause = self.syntax_node(
+        let mut throws_end = throws_info.map(|(_, end, _)| end);
+        if let Some((throws_start, throws_kw_end, throws_text)) = throws_info {
+            let mut throws_children = vec![self.with_name(
+                self.token_with_range(
+                    &format!("keyword(SwiftSyntax.Keyword.{throws_text})"),
+                    self.range_from_offsets(throws_start, throws_kw_end),
+                ),
+                "throwsSpecifier",
+            )];
+            // `throws(E)` — emit the parenthesised thrown error type.
+            if let Some(clause) = throws_clause_node {
+                if let (Some(left_paren), Some(type_node), Some(right_paren)) = (
+                    self.immediate_child_kind(clause, "("),
+                    named_children(clause).find(|child| is_type_syntax_node_kind(child.kind())),
+                    self.immediate_child_kind(clause, ")"),
+                ) {
+                    if let Ok(type_value) = self.type_syntax(type_node) {
+                        throws_children.push(
+                            self.with_name(
+                                self.token_for_node(left_paren, "leftParen"),
+                                "leftParen",
+                            ),
+                        );
+                        throws_children.push(self.with_name(type_value, "type"));
+                        throws_children.push(self.with_name(
+                            self.token_for_node(right_paren, "rightParen"),
+                            "rightParen",
+                        ));
+                        throws_end = Some(right_paren.end_byte());
+                    }
+                }
+            }
+            let throws_clause_value = self.syntax_node(
                 "ThrowsClauseSyntax",
-                self.range_for_node(throws_node),
-                vec![self.with_name(
-                    self.token_for_node(
-                        throws_node,
-                        &format!("keyword(SwiftSyntax.Keyword.{})", self.text(throws_node)),
-                    ),
-                    "throwsSpecifier",
-                )],
+                self.range_from_offsets(throws_start, throws_end.unwrap_or(throws_kw_end)),
+                throws_children,
             );
-            children.push(self.with_name(throws_clause, "throwsClause"));
+            children.push(self.with_name(throws_clause_value, "throwsClause"));
         }
         let start = async_specifier
-            .or(throws_specifier)
-            .map_or(node.start_byte(), |n| n.start_byte());
-        let end = throws_specifier
-            .or(async_specifier)
-            .map_or(node.end_byte(), |n| n.end_byte());
+            .map(|n| n.start_byte())
+            .or(throws_info.map(|(start, _, _)| start))
+            .unwrap_or_else(|| node.start_byte());
+        let end = throws_end
+            .or_else(|| async_specifier.map(|n| n.end_byte()))
+            .unwrap_or_else(|| node.end_byte());
         Some(self.syntax_node(node_type, self.range_from_offsets(start, end), children))
     }
 
@@ -17085,6 +17126,23 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(called, "questionMark").unwrap()["tokenKind"],
             "postfixQuestionMark"
+        );
+    }
+
+    #[test]
+    fn emits_typed_throws_clause() {
+        // `throws(E)` carries a parenthesised thrown error type in the throws clause.
+        let source = "enum E: Error {}\nfunc f() throws(E) -> Int { return 0 }\n";
+        let value = parse_source("TT.swift", "/tmp/TT.swift", source).unwrap();
+
+        let throws_clause = find_first_node_type(&value, "ThrowsClauseSyntax").unwrap();
+        assert_eq!(
+            child_by_name(throws_clause, "throwsSpecifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.throws)"
+        );
+        assert_eq!(
+            child_by_name(throws_clause, "type").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
         );
     }
 
