@@ -846,11 +846,9 @@ struct TypeEntry {
 #[derive(Debug, Clone)]
 struct MemberEntry {
     /// A field's declared type, or a method's signature; used to distinguish
-    /// overloads. (Surfacing the member's type is left to a later phase.)
-    #[allow(dead_code)]
+    /// overloads and to build a resolved member-function full name.
     descriptor: String,
     /// Whether this member is a method (vs a data field).
-    #[allow(dead_code)]
     is_method: bool,
 }
 
@@ -1488,6 +1486,43 @@ fn unique_member_full_name(
     }
 }
 
+/// Resolves a static member-function call (`Type::method`) to its dotted
+/// `<QualifiedType>.<method>` name plus the method signature, when `method` names
+/// a single, non-overloaded member function of `type_full_name`. Overloaded or
+/// data members yield `None`.
+fn unique_member_method(
+    table: &SymbolTable,
+    type_full_name: &str,
+    member: &str,
+) -> Option<(String, String)> {
+    if !is_plain_reference_name(member) {
+        return None;
+    }
+    let members = table.members_by_type.get(type_full_name)?;
+    let candidates = members.by_name.get(member)?;
+    match candidates.as_slice() {
+        [single] if single.is_method => Some((
+            format!("{type_full_name}.{member}"),
+            single.descriptor.clone(),
+        )),
+        _ => None,
+    }
+}
+
+/// Resolves a qualified static member-function call name (`Core::Widget::identity`)
+/// to its `(<QualifiedType>.<method>, signature)` when the type prefix is a unique
+/// user type and the method is a single, non-overloaded member function.
+fn resolve_qualified_member_call(
+    table: &SymbolTable,
+    aliases: &NamespaceAliasStack,
+    name: &str,
+) -> Option<(String, String)> {
+    let (type_part, member) = name.trim().rsplit_once("::")?;
+    let type_full_name =
+        resolve_qualified_reference_with_aliases(table, aliases, type_part.trim())?;
+    unique_member_method(table, &type_full_name, member.trim())
+}
+
 /// Infers the type of a literal from its source spelling for the trivially
 /// unambiguous cases. Returns `None` otherwise (e.g. user-defined literals).
 fn infer_literal_type(value: &str) -> Option<String> {
@@ -1827,6 +1862,13 @@ fn annotate_expression(
                     *resolved_method_full_name =
                         Some(format!("{}:{}", entry.qualified_name, entry.signature));
                     *resolved_signature = Some(entry.signature.clone());
+                } else if let Some((member_full_name, signature)) =
+                    resolve_qualified_member_call(table, aliases, name)
+                {
+                    // `Core::Widget::identity(2)` — a qualified static member call whose
+                    // out-of-line definition is not indexed as a free function.
+                    *resolved_method_full_name = Some(format!("{member_full_name}:{signature}"));
+                    *resolved_signature = Some(signature);
                 }
             }
         }
@@ -14921,6 +14963,32 @@ mod tests {
 
         let json = serde_json::to_string(&declarations).expect("serialize declarations");
         assert!(json.contains("\"resolvedMemberFullName\":\"Core.Widget.instances\""));
+    }
+
+    #[test]
+    fn resolves_qualified_static_member_call() {
+        // `Core::Widget::identity(2)` resolves to the dotted member-function full
+        // name plus signature even though the out-of-line definition is not indexed
+        // as a free function.
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Widget {
+                    static int identity(int x);
+                    static int instances;
+                  };
+                }
+                int Core::Widget::identity(int x) { return instances + x; }
+                int use() {
+                  return Core::Widget::identity(2);
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("qualified static member call sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.Widget.identity:int(int)\""));
     }
 
     #[test]
