@@ -12509,26 +12509,32 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 && child.start_byte() >= left_angle.end_byte()
                 && child.end_byte() <= right_angle.start_byte()
         }) {
-            let Some(name) = named_children(parameter)
-                .find(|child| matches!(child.kind(), "type_identifier" | "simple_identifier"))
+            // The name may be wrapped in a `type_parameter_pack` (`each T`); descend
+            // to find the identifier.
+            let Some(name) = self
+                .first_descendant_kind(parameter, "type_identifier")
+                .or_else(|| self.first_descendant_kind(parameter, "simple_identifier"))
             else {
-                // Variadic/pack parameter (`each T`) — not modelled yet; skip the
-                // whole clause so we never emit a partial one.
                 return Ok(None);
             };
-            let mut children = vec![
-                self.with_name(
-                    self.empty_collection("AttributeListSyntax", parameter.start_byte()),
-                    "attributes",
+            let mut children = vec![self.with_name(
+                self.empty_collection("AttributeListSyntax", parameter.start_byte()),
+                "attributes",
+            )];
+            // A parameter pack carries an `each` specifier before the name.
+            if let Some(each) = self.first_descendant_any_kind(parameter, "each") {
+                children.push(self.with_name(
+                    self.token_for_node(each, "keyword(SwiftSyntax.Keyword.each)"),
+                    "specifier",
+                ));
+            }
+            children.push(self.with_name(
+                self.token_for_node(
+                    name,
+                    &format!("identifier({})", quoted_text(self.text(name))),
                 ),
-                self.with_name(
-                    self.token_for_node(
-                        name,
-                        &format!("identifier({})", quoted_text(self.text(name))),
-                    ),
-                    "name",
-                ),
-            ];
+                "name",
+            ));
             if let Some(colon) = self.immediate_child_kind(parameter, ":") {
                 children.push(self.with_name(self.token_for_node(colon, "colon"), "colon"));
                 if let Some(inherited) = named_children(parameter).find(|child| {
@@ -16708,6 +16714,23 @@ repeat { sink() } while x < 1
             )
             .unwrap()["tokenKind"],
             "identifier(\"escaping\")"
+        );
+    }
+
+    #[test]
+    fn emits_generic_parameter_pack() {
+        // `<each T>` is a GenericParameterSyntax with an `each` specifier.
+        let source = "func f<each T>() {}\n";
+        let value = parse_source("PP.swift", "/tmp/PP.swift", source).unwrap();
+
+        let param = find_first_node_type(&value, "GenericParameterSyntax").unwrap();
+        assert_eq!(
+            child_by_name(param, "specifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.each)"
+        );
+        assert_eq!(
+            child_by_name(param, "name").unwrap()["tokenKind"],
+            "identifier(\"T\")"
         );
     }
 
