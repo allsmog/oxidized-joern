@@ -10492,6 +10492,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         if let Some(member_access) = self.recovered_generic_member_access_expr(node) {
             return Ok(member_access);
         }
+        if let Some(reassociated) = self.reassociated_infix_operator_expr(node) {
+            return reassociated;
+        }
 
         let raw_lhs = self
             .field_child(node, "lhs")
@@ -10695,6 +10698,54 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         }
 
         (components.len() >= 2).then_some(components)
+    }
+
+    /// tree-sitter right-nests a custom-operator chain (`1 <+> 2 <+> 3` becomes
+    /// `1 <+> (2 <+> 3)`), but SwiftSyntax folds same-precedence operators to the
+    /// left. Flatten the right spine and rebuild left-associatively.
+    fn reassociated_infix_operator_expr(&self, node: Node<'a>) -> Option<Result<Value>> {
+        if node.kind() != "infix_expression" {
+            return None;
+        }
+        let rhs = self.field_child(node, "rhs")?;
+        if rhs.kind() != "infix_expression" {
+            return None;
+        }
+        let mut operands = Vec::new();
+        let mut operators = Vec::new();
+        let mut current = node;
+        loop {
+            let lhs = self.field_child(current, "lhs")?;
+            let op = self.field_child(current, "op")?;
+            operands.push(lhs);
+            operators.push(op);
+            let next = self.field_child(current, "rhs")?;
+            if next.kind() == "infix_expression" {
+                current = next;
+            } else {
+                operands.push(next);
+                break;
+            }
+        }
+        Some(self.fold_left_infix(&operands, &operators))
+    }
+
+    fn fold_left_infix(&self, operands: &[Node<'a>], operators: &[Node<'a>]) -> Result<Value> {
+        let first = *operands.first().context("infix chain has no operands")?;
+        let start = first.start_byte();
+        let mut current = self.expr(first)?;
+        for (index, op) in operators.iter().copied().enumerate() {
+            let rhs_node = operands[index + 1];
+            let rhs_value = self.expr(rhs_node)?;
+            current = self.infix_operator_expr_from_values(
+                start,
+                rhs_node.end_byte(),
+                current,
+                op,
+                rhs_value,
+            )?;
+        }
+        Ok(current)
     }
 
     fn infix_operator_expr_from_parts(
@@ -17292,6 +17343,24 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(pattern_expr, "pattern").unwrap()["nodeType"],
             "ValueBindingPatternSyntax"
+        );
+    }
+
+    #[test]
+    fn reassociates_custom_operator_chain_left() {
+        // `1 <+> 2 <+> 3` folds left: (1 <+> 2) <+> 3.
+        let source = "infix operator <+>\nlet r = 1 <+> 2 <+> 3\n";
+        let value = parse_source("CO.swift", "/tmp/CO.swift", source).unwrap();
+
+        let outer = find_first_node_type(&value, "InfixOperatorExprSyntax").unwrap();
+        // The outer's left operand is itself an infix expression (left-associative).
+        assert_eq!(
+            child_by_name(outer, "leftOperand").unwrap()["nodeType"],
+            "InfixOperatorExprSyntax"
+        );
+        assert_eq!(
+            child_by_name(outer, "rightOperand").unwrap()["nodeType"],
+            "IntegerLiteralExprSyntax"
         );
     }
 
