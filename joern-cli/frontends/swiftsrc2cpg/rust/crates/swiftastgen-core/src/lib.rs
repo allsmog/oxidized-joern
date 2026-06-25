@@ -4332,43 +4332,41 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let wrapped_type = named_children(node)
             .next()
             .context("optional type is missing wrapped type")?;
-        let marker = children(node).find(|child| matches!(self.text(*child), "?" | "!"));
-        let marker_text = marker.map(|marker| self.text(marker)).or_else(|| {
-            self.text(node)
-                .trim_end()
-                .chars()
-                .last()
-                .filter(|ch| matches!(ch, '?' | '!'))
-                .map(|ch| if ch == '?' { "?" } else { "!" })
-        });
-        let marker_text = marker_text.context("optional type is missing marker")?;
-        let (node_type, marker_name, token_kind) = if marker_text == "!" {
-            (
-                "ImplicitlyUnwrappedOptionalTypeSyntax",
-                "exclamationMark",
-                "exclamationMark",
-            )
-        } else {
-            ("OptionalTypeSyntax", "questionMark", "postfixQuestionMark")
-        };
-        let marker_token = marker.map_or_else(
-            || {
-                let marker_end = node.end_byte();
-                self.token_with_range(
-                    token_kind,
-                    self.range_from_offsets(marker_end.saturating_sub(1), marker_end),
-                )
-            },
-            |marker| self.token_for_node(marker, token_kind),
-        );
-        Ok(self.syntax_node(
-            node_type,
-            self.range_for_node(node),
-            vec![
-                self.with_name(self.type_syntax(wrapped_type)?, "wrappedType"),
-                self.with_name(marker_token, marker_name),
-            ],
-        ))
+        // Each trailing `?`/`!` is one optional level: `Int??` nests two
+        // OptionalTypeSyntax, `Int!` is an ImplicitlyUnwrappedOptionalTypeSyntax.
+        let markers: Vec<usize> = self.source[wrapped_type.end_byte()..node.end_byte()]
+            .char_indices()
+            .filter(|(_, ch)| matches!(ch, '?' | '!'))
+            .map(|(offset, _)| wrapped_type.end_byte() + offset)
+            .collect();
+        let mut current = self.type_syntax(wrapped_type)?;
+        for marker_start in markers {
+            let (node_type, marker_name, token_kind) =
+                if self.source.as_bytes()[marker_start] == b'!' {
+                    (
+                        "ImplicitlyUnwrappedOptionalTypeSyntax",
+                        "exclamationMark",
+                        "exclamationMark",
+                    )
+                } else {
+                    ("OptionalTypeSyntax", "questionMark", "postfixQuestionMark")
+                };
+            current = self.syntax_node(
+                node_type,
+                self.range_from_offsets(start_offset(&current), marker_start + 1),
+                vec![
+                    self.with_name(current, "wrappedType"),
+                    self.with_name(
+                        self.token_with_range(
+                            token_kind,
+                            self.range_from_offsets(marker_start, marker_start + 1),
+                        ),
+                        marker_name,
+                    ),
+                ],
+            );
+        }
+        Ok(current)
     }
 
     fn function_type(&self, node: Node<'a>) -> Result<Value> {
@@ -16852,6 +16850,21 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(decl_name, "baseName").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.init)"
+        );
+    }
+
+    #[test]
+    fn nests_double_optional_type() {
+        // `Int??` nests two OptionalTypeSyntax levels.
+        let source = "let x: Int?? = nil\n";
+        let value = parse_source("NO.swift", "/tmp/NO.swift", source).unwrap();
+
+        let outer = find_first_node_type(&value, "OptionalTypeSyntax").unwrap();
+        let inner = child_by_name(outer, "wrappedType").unwrap();
+        assert_eq!(inner["nodeType"], "OptionalTypeSyntax");
+        assert_eq!(
+            child_by_name(inner, "wrappedType").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
         );
     }
 
