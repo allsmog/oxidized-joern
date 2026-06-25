@@ -1623,15 +1623,31 @@ fn return_type_of_signature(signature: &str) -> Option<String> {
     (!return_type.is_empty()).then(|| return_type.to_string())
 }
 
+/// The declared type of data field `field` of the type whose dotted qualified
+/// name is `type_full_name` (`Core.Holder` + `inner` -> `Inner`). Methods,
+/// overloaded members, and unknown types yield `None`.
+fn type_member_field_type(
+    table: &SymbolTable,
+    type_full_name: &str,
+    field: &str,
+) -> Option<String> {
+    match table
+        .members_by_type
+        .get(type_full_name)?
+        .by_name
+        .get(field)?
+        .as_slice()
+    {
+        [single] if !single.is_method => Some(single.descriptor.clone()),
+        _ => None,
+    }
+}
+
 /// The declared type of a data field referenced by its dotted full name
 /// (`Core.Widget.value` -> `int`). Methods and unknown members yield `None`.
 fn member_data_field_type(table: &SymbolTable, reference: &str) -> Option<String> {
     let (type_part, member) = reference.rsplit_once('.')?;
-    let members = table.members_by_type.get(type_part)?;
-    match members.by_name.get(member)?.as_slice() {
-        [single] if !single.is_method => Some(single.descriptor.clone()),
-        _ => None,
-    }
+    type_member_field_type(table, type_part, member)
 }
 
 /// Infers the type of a call argument expression for overload disambiguation.
@@ -1672,6 +1688,16 @@ fn infer_argument_type(
             resolved_signature: Some(signature),
             ..
         } => return_type_of_signature(signature),
+        // `obj.field` / `h->inner`: resolve the base's type, then the field's type.
+        Expression::FieldAccess { base, field, .. } => {
+            let base_type = infer_argument_type(table, stack, base)?;
+            let base_qualified = unique_type_qualified_name_with_aliases(
+                table,
+                strip_reference(&base_type),
+                &NamespaceAliasStack::default(),
+            )?;
+            type_member_field_type(table, &base_qualified, field)
+        }
         _ => None,
     }
 }
@@ -14514,6 +14540,30 @@ mod tests {
         // The argument type (a prototype-only call) is unknown, so the overload
         // stays ambiguous and unresolved.
         assert_eq!(resolved_call(use_fn, "pick"), Some((None, None)));
+    }
+
+    #[test]
+    fn resolves_overload_by_member_access_argument_type() {
+        // `pick(h.inner)` resolves the base's type then the field's type to select
+        // the matching overload.
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Inner { int v; };
+                  struct Holder { Inner inner; };
+                  struct Widget {
+                    int pick(int seed) { return seed; }
+                    int pick(Inner& other) { return other.v; }
+                    int use(Holder& h) { return pick(h.inner); }
+                  };
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("member access overload sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.Widget.pick:int(Inner&)\""));
     }
 
     #[test]
