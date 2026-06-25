@@ -157,8 +157,9 @@ struct StringLiteralNodeSpec {
 struct GenericMemberComponent {
     name_start: usize,
     name_end: usize,
-    segment_end: usize,
     period_before: Option<usize>,
+    /// The `<…>` generic argument span (`Optional<Int>` → the `<Int>`), if any.
+    generic: Option<(usize, usize)>,
 }
 
 struct TernaryNodeParts<'a> {
@@ -9056,16 +9057,98 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn decl_reference_expr_from_offsets(&self, start: usize, end: usize) -> Value {
+        let text = &self.source[start..end];
+        // `self`/`init` are contextual keywords rather than plain identifiers.
+        let token_kind = if matches!(text, "init" | "self") {
+            format!("keyword(SwiftSyntax.Keyword.{text})")
+        } else {
+            identifier_token_kind(text)
+        };
         self.syntax_node(
             "DeclReferenceExprSyntax",
             self.range_from_offsets(start, end),
             vec![self.with_name(
-                self.token_with_range(
-                    &format!("identifier({})", quoted_text(&self.source[start..end])),
-                    self.range_from_offsets(start, end),
-                ),
+                self.token_with_range(&token_kind, self.range_from_offsets(start, end)),
                 "baseName",
             )],
+        )
+    }
+
+    /// Build a `GenericArgumentClauseSyntax` (`<Int>`, `<String, Int>`) from a source
+    /// span, splitting the comma-separated identifier-type arguments.
+    fn generic_argument_clause_from_offsets(&self, start: usize, end: usize) -> Value {
+        let bytes = self.source.as_bytes();
+        let inner_start = start + 1; // past `<`
+        let inner_end = end - 1; // before `>`
+                                 // Split on top-level commas (depth 0 outside any nested `<…>`).
+        let mut argument_spans = Vec::new();
+        let mut depth = 0i32;
+        let mut span_start = inner_start;
+        let mut offset = inner_start;
+        while offset < inner_end {
+            match bytes[offset] {
+                b'<' => depth += 1,
+                b'>' => depth -= 1,
+                b',' if depth == 0 => {
+                    argument_spans.push((span_start, offset, Some(offset)));
+                    span_start = offset + 1;
+                }
+                _ => {}
+            }
+            offset += 1;
+        }
+        argument_spans.push((span_start, inner_end, None));
+
+        let mut arguments = Vec::new();
+        for (raw_start, raw_end, comma) in argument_spans {
+            let (arg_start, arg_end) = self.trim_offsets(raw_start, raw_end);
+            // `G< >` carries no arguments — an empty (whitespace-only) span is skipped.
+            if arg_start >= arg_end {
+                continue;
+            }
+            let mut children = vec![self.with_name(
+                self.identifier_type_from_offsets(arg_start, arg_end),
+                "argument",
+            )];
+            let element_end = comma.map_or(arg_end, |comma_offset| comma_offset + 1);
+            if let Some(comma_offset) = comma {
+                children.push(self.with_name(
+                    self.token_with_range(
+                        "comma",
+                        self.range_from_offsets(comma_offset, comma_offset + 1),
+                    ),
+                    "trailingComma",
+                ));
+            }
+            arguments.push(self.with_name(
+                self.syntax_node(
+                    "GenericArgumentSyntax",
+                    self.range_from_offsets(arg_start, element_end),
+                    children,
+                ),
+                "",
+            ));
+        }
+        // An empty argument list anchors at the `>` (past the inner whitespace).
+        let list_anchor = self.skip_horizontal_whitespace(inner_start, inner_end);
+        let list_range = self.covering_range_or_point(&arguments, list_anchor);
+        self.syntax_node(
+            "GenericArgumentClauseSyntax",
+            self.range_from_offsets(start, end),
+            vec![
+                self.with_name(
+                    self.token_with_range("leftAngle", self.range_from_offsets(start, start + 1)),
+                    "leftAngle",
+                ),
+                self.with_name(
+                    self.syntax_node("GenericArgumentListSyntax", list_range, arguments),
+                    "arguments",
+                ),
+                self.with_name(
+                    self.token_with_range("rightAngle", self.range_from_offsets(end - 1, end)),
+                    "rightAngle",
+                ),
+            ],
         )
     }
 
@@ -10498,13 +10581,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
 
     fn generic_member_access_expr_from_offsets(&self, start: usize, end: usize) -> Option<Value> {
         let components = self.generic_member_chain_components(start, end)?;
-        let first = components.first().copied()?;
+        let mut iter = components.iter().copied();
+        let first = iter.next()?;
         let mut current = self.decl_reference_expr_from_offsets(first.name_start, first.name_end);
-        for component in components.iter().copied().skip(1) {
+        if let Some((generic_start, generic_end)) = first.generic {
+            current = self.generic_specialization_expr(start, generic_start, generic_end, current);
+        }
+        for component in iter {
             let period = component.period_before?;
             current = self.syntax_node(
                 "MemberAccessExprSyntax",
-                self.range_from_offsets(start, component.segment_end),
+                self.range_from_offsets(start, component.name_end),
                 vec![
                     self.with_name(current, "base"),
                     self.with_name(
@@ -10523,8 +10610,34 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                     ),
                 ],
             );
+            // `A<B>.C<D>` — the generics of an intermediate segment wrap the chain
+            // up to and including that member.
+            if let Some((generic_start, generic_end)) = component.generic {
+                current =
+                    self.generic_specialization_expr(start, generic_start, generic_end, current);
+            }
         }
         Some(current)
+    }
+
+    fn generic_specialization_expr(
+        &self,
+        start: usize,
+        generic_start: usize,
+        generic_end: usize,
+        expression: Value,
+    ) -> Value {
+        self.syntax_node(
+            "GenericSpecializationExprSyntax",
+            self.range_from_offsets(start, generic_end),
+            vec![
+                self.with_name(expression, "expression"),
+                self.with_name(
+                    self.generic_argument_clause_from_offsets(generic_start, generic_end),
+                    "genericArgumentClause",
+                ),
+            ],
+        )
     }
 
     fn generic_member_chain_components(
@@ -10555,18 +10668,20 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             while offset < end && bytes[offset].is_ascii_whitespace() {
                 offset += 1;
             }
+            let mut generic = None;
             if bytes.get(offset) == Some(&b'<') {
+                let angle_start = offset;
                 offset = self.matching_angle_offset(offset, end)? + 1;
+                generic = Some((angle_start, offset));
                 while offset < end && bytes[offset].is_ascii_whitespace() {
                     offset += 1;
                 }
             }
-            let segment_end = offset;
             components.push(GenericMemberComponent {
                 name_start,
                 name_end,
-                segment_end,
                 period_before,
+                generic,
             });
 
             if offset == end {
@@ -17394,6 +17509,28 @@ repeat { sink() } while x < 1
     }
 
     #[test]
+    fn recovers_generic_specialization_metatype() {
+        // `Optional<Int>.self` is mis-parsed as comparisons; recover the
+        // GenericSpecializationExpr base and the `.self` keyword.
+        let source = "let t = Optional<Int>.self\n";
+        let value = parse_source("GM.swift", "/tmp/GM.swift", source).unwrap();
+
+        let member = find_first_node_type(&value, "MemberAccessExprSyntax").unwrap();
+        let base = child_by_name(member, "base").unwrap();
+        assert_eq!(base["nodeType"], "GenericSpecializationExprSyntax");
+        let argument = find_first_node_type(base, "GenericArgumentSyntax").unwrap();
+        assert_eq!(
+            child_by_name(argument, "argument").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+        let decl_name = child_by_name(member, "declName").unwrap();
+        assert_eq!(
+            child_by_name(decl_name, "baseName").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.self)"
+        );
+    }
+
+    #[test]
     fn emits_generic_subscript_clauses() {
         // `subscript<T>(…) where T: P` carries generic parameter and where clauses.
         let source =
@@ -18206,10 +18343,13 @@ repeat { sink() } while x < 1
             .unwrap()["tokenKind"],
             json!("identifier(\"e\")")
         );
+        // `A<B>.C<D>` — the `<D>` specialization wraps the `A<B>.C` member access.
         let base = child_by_name(called_expression, "base").unwrap();
-        assert_eq!(base["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(base["nodeType"], "GenericSpecializationExprSyntax");
+        let inner_member = child_by_name(base, "expression").unwrap();
+        assert_eq!(inner_member["nodeType"], "MemberAccessExprSyntax");
         assert_eq!(
-            child_by_name(child_by_name(base, "declName").unwrap(), "baseName").unwrap()
+            child_by_name(child_by_name(inner_member, "declName").unwrap(), "baseName").unwrap()
                 ["tokenKind"],
             json!("identifier(\"C\")")
         );
@@ -18224,17 +18364,26 @@ repeat { sink() } while x < 1
             .iter()
             .copied()
             .find(|member| {
-                child_by_name(child_by_name(member, "declName").unwrap(), "baseName")
-                    .is_some_and(|name| name["tokenKind"] == json!("identifier(\"self\")"))
+                child_by_name(child_by_name(member, "declName").unwrap(), "baseName").is_some_and(
+                    |name| name["tokenKind"] == json!("keyword(SwiftSyntax.Keyword.self)"),
+                )
             })
             .unwrap();
         assert_eq!(source_text(source, outer), "A<B>.C<D>.self");
+        // `A<B>.C<D>` — the `<D>` generic specialization wraps the `A<B>.C` member access.
         let base = child_by_name(outer, "base").unwrap();
-        assert_eq!(base["nodeType"], "MemberAccessExprSyntax");
+        assert_eq!(base["nodeType"], "GenericSpecializationExprSyntax");
+        let inner_member = child_by_name(base, "expression").unwrap();
+        assert_eq!(inner_member["nodeType"], "MemberAccessExprSyntax");
         assert_eq!(
-            child_by_name(child_by_name(base, "declName").unwrap(), "baseName").unwrap()
+            child_by_name(child_by_name(inner_member, "declName").unwrap(), "baseName").unwrap()
                 ["tokenKind"],
             json!("identifier(\"C\")")
+        );
+        // `A<B>` — the inner member's base is itself a generic specialization over `A`.
+        assert_eq!(
+            child_by_name(inner_member, "base").unwrap()["nodeType"],
+            "GenericSpecializationExprSyntax"
         );
     }
 
@@ -18719,14 +18868,24 @@ let _ = G< >.self
             .into_iter()
             .find(|node| source_text(source, node) == "G< >.self")
             .unwrap();
+        // `G< >.self` — the base is a generic specialization over `G` with no arguments.
+        let empty_generic_base = child_by_name(empty_generic_member_access, "base").unwrap();
         assert_eq!(
-            child_by_name(empty_generic_member_access, "base").unwrap()["children"][0]["tokenKind"],
+            empty_generic_base["nodeType"],
+            "GenericSpecializationExprSyntax"
+        );
+        assert_eq!(
+            child_by_name(
+                child_by_name(empty_generic_base, "expression").unwrap(),
+                "baseName"
+            )
+            .unwrap()["tokenKind"],
             "identifier(\"G\")"
         );
         assert_eq!(
             child_by_name(empty_generic_member_access, "declName").unwrap()["children"][0]
                 ["tokenKind"],
-            "identifier(\"self\")"
+            "keyword(SwiftSyntax.Keyword.self)"
         );
 
         let some_or_any_texts = find_node_types(&value, "SomeOrAnyTypeSyntax")
