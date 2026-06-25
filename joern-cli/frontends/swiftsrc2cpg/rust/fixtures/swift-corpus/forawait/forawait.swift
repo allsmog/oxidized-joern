@@ -11,3 +11,9 @@ func sumUp(_ stream: AsyncStream<Int>) async -> Int {
   }
   return total
 }
+
+func drain(_ stream: AsyncThrowingStream<Int, Error>) async throws {
+  for try await value in stream {
+    print(value)
+  }
+}
