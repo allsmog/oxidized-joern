@@ -914,8 +914,24 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn code_block_item(&self, node: Node<'a>) -> Result<Value> {
-        let item = self.with_name(self.syntax_for_statement(node)?, "item");
-        Ok(self.syntax_node("CodeBlockItemSyntax", self.range_for_node(node), vec![item]))
+        let mut children = vec![self.with_name(self.syntax_for_statement(node)?, "item")];
+        let mut end = node.end_byte();
+        // `f(); g()` — tree-sitter drops the `;` statement separator; re-detect it.
+        if let Some(semicolon_start) = self.trailing_semicolon(node) {
+            end = semicolon_start + 1;
+            children.push(self.with_name(
+                self.token_with_range(
+                    "semicolon",
+                    self.range_from_offsets(semicolon_start, semicolon_start + 1),
+                ),
+                "semicolon",
+            ));
+        }
+        Ok(self.syntax_node(
+            "CodeBlockItemSyntax",
+            self.range_from_offsets(node.start_byte(), end),
+            children,
+        ))
     }
 
     fn code_block_item_for_value(&self, value: Value, child_name: &str) -> Value {
@@ -2524,7 +2540,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             {
                 continue;
             }
-            let semicolon = self.member_trailing_semicolon(child);
+            let semicolon = self.trailing_semicolon(child);
             items.push(self.member_block_item_with_semicolon(child, semicolon)?);
         }
         let members_range = self.covering_range_or_point(&items, left_brace.end_byte());
@@ -2572,9 +2588,9 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ))
     }
 
-    /// A member declaration may be followed by a `;` separator that tree-sitter
-    /// discards; locate it by skipping same-line whitespace after the member.
-    fn member_trailing_semicolon(&self, node: Node<'a>) -> Option<usize> {
+    /// A declaration or statement may be followed by a `;` separator that
+    /// tree-sitter discards; locate it by skipping same-line whitespace after it.
+    fn trailing_semicolon(&self, node: Node<'a>) -> Option<usize> {
         let start = self.skip_horizontal_whitespace(node.end_byte(), self.source.len());
         (self.source.as_bytes().get(start) == Some(&b';')).then_some(start)
     }
@@ -17155,6 +17171,22 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(labeled, "value").unwrap()["nodeType"],
             "SimpleStringLiteralExprSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_statement_trailing_semicolon() {
+        // `let a = 0; let b = 1` keeps the dropped `;` as a statement separator.
+        let source = "func m() {\n  let a = 0; let b = 1\n}\n";
+        let value = parse_source("SS.swift", "/tmp/SS.swift", source).unwrap();
+
+        let item = find_node_types(&value, "CodeBlockItemSyntax")
+            .into_iter()
+            .find(|i| child_by_name(i, "semicolon").is_some())
+            .unwrap();
+        assert_eq!(
+            child_by_name(item, "semicolon").unwrap()["tokenKind"],
+            "semicolon"
         );
     }
 
