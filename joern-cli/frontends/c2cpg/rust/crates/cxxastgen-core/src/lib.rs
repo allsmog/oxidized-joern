@@ -1615,6 +1615,14 @@ fn strip_reference(type_name: &str) -> &str {
     type_name.trim().trim_end_matches('&').trim_end()
 }
 
+/// The return type of a function signature (`int(int)` -> `int`, `Other()` ->
+/// `Other`): everything before the parameter list's opening `(`.
+fn return_type_of_signature(signature: &str) -> Option<String> {
+    let open = signature.find('(')?;
+    let return_type = signature[..open].trim();
+    (!return_type.is_empty()).then(|| return_type.to_string())
+}
+
 /// The declared type of a data field referenced by its dotted full name
 /// (`Core.Widget.value` -> `int`). Methods and unknown members yield `None`.
 fn member_data_field_type(table: &SymbolTable, reference: &str) -> Option<String> {
@@ -1659,6 +1667,11 @@ fn infer_argument_type(
                     }
                 })
         }
+        // A nested call argument contributes its (resolved) return type.
+        Expression::Call {
+            resolved_signature: Some(signature),
+            ..
+        } => return_type_of_signature(signature),
         _ => None,
     }
 }
@@ -14501,6 +14514,30 @@ mod tests {
         // The argument type (a prototype-only call) is unknown, so the overload
         // stays ambiguous and unresolved.
         assert_eq!(resolved_call(use_fn, "pick"), Some((None, None)));
+    }
+
+    #[test]
+    fn resolves_overload_by_nested_call_return_type() {
+        // The return type of a nested call argument selects the overload.
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Other { int v; };
+                  Other makeOther();
+                  Other makeOther() { return Other(); }
+                  struct Widget {
+                    int pick(int seed) { return seed; }
+                    int pick(Other& other) { return other.v; }
+                    int use() { return pick(makeOther()); }
+                  };
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("nested call overload sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.Widget.pick:int(Other&)\""));
     }
 
     #[test]
