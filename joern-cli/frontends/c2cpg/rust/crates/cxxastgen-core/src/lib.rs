@@ -1627,19 +1627,38 @@ fn member_data_field_type(table: &SymbolTable, reference: &str) -> Option<String
 }
 
 /// Infers the type of a call argument expression for overload disambiguation.
-/// Handles trivially-typed literals and references to data fields; other forms
-/// (locals, member access, nested calls) yield `None`, which makes the overload
+/// Handles trivially-typed literals, references to data fields, and references to
+/// locals/parameters (via the lexical scope's recorded declared types); other
+/// forms (member access, nested calls) yield `None`, which makes the overload
 /// unresolvable (left to the Scala fallback).
-fn infer_argument_type(table: &SymbolTable, argument: &Expression) -> Option<String> {
+fn infer_argument_type(
+    table: &SymbolTable,
+    stack: &ScopeStack,
+    argument: &Expression,
+) -> Option<String> {
     match argument {
         Expression::Literal {
             resolved_type_full_name,
             ..
         } => resolved_type_full_name.clone(),
-        Expression::Identifier {
-            resolved_reference_full_name: Some(reference),
-            ..
-        } => member_data_field_type(table, reference),
+        Expression::Identifier { name, .. } => {
+            // A local/parameter binding's declared type wins; otherwise try a
+            // data-field reference.
+            stack
+                .lookup_binding(name)
+                .and_then(|binding| binding.type_full_name.clone())
+                .or_else(|| {
+                    if let Expression::Identifier {
+                        resolved_reference_full_name: Some(reference),
+                        ..
+                    } = argument
+                    {
+                        member_data_field_type(table, reference)
+                    } else {
+                        None
+                    }
+                })
+        }
         _ => None,
     }
 }
@@ -1651,6 +1670,7 @@ fn infer_argument_type(table: &SymbolTable, argument: &Expression) -> Option<Str
 /// uninferable.
 fn resolve_overloaded_call(
     table: &SymbolTable,
+    stack: &ScopeStack,
     name: &str,
     arguments: &[Expression],
 ) -> Option<(String, String)> {
@@ -1673,7 +1693,7 @@ fn resolve_overloaded_call(
     }
     let argument_types = arguments
         .iter()
-        .map(|argument| infer_argument_type(table, argument))
+        .map(|argument| infer_argument_type(table, stack, argument))
         .collect::<Option<Vec<_>>>()?;
     let mut matches = defined.iter().filter(|entry| {
         let parameters = parameter_types(&entry.signature);
@@ -2153,10 +2173,8 @@ fn expand_call_name_namespace_aliases_with_locals(
 #[derive(Debug, Clone)]
 struct Binding {
     qualified_name: String,
-    /// TODO(oxidized WS3): the binding's declared type, for resolving instance
-    /// member access (`obj.field`) once `FieldAccess` carries a resolved-member
-    /// slot. Populated as `None` until that phase lands.
-    #[allow(dead_code)]
+    /// The binding's declared type spelling (e.g. `Widget&`), used to infer a
+    /// call argument's type for overload resolution. `None` when unknown.
     type_full_name: Option<String>,
 }
 
@@ -2501,9 +2519,10 @@ fn resolve_references_in_function(
     stack.push();
     for parameter in function.parameters.iter() {
         if !parameter.is_variadic && is_plain_reference_name(&parameter.name) {
-            stack.bind(
+            stack.bind_typed(
                 &parameter.name,
                 join_scope(&function_scope, &parameter.name),
+                Some(parameter.type_name.clone()),
             );
         }
     }
@@ -2772,7 +2791,7 @@ fn resolve_references_in_expression(
             // paths in annotate_declarations only handle non-overloaded callees).
             if resolved_method_full_name.is_none() {
                 if let Some((member_full_name, signature)) =
-                    resolve_overloaded_call(table, name, arguments)
+                    resolve_overloaded_call(table, stack, name, arguments)
                 {
                     *resolved_method_full_name = Some(format!("{member_full_name}:{signature}"));
                     *resolved_signature = Some(signature);
@@ -14476,6 +14495,29 @@ mod tests {
         // The argument type (a prototype-only call) is unknown, so the overload
         // stays ambiguous and unresolved.
         assert_eq!(resolved_call(use_fn, "pick"), Some((None, None)));
+    }
+
+    #[test]
+    fn resolves_overload_by_parameter_argument_type() {
+        // A call whose argument is a parameter uses the parameter's declared type
+        // to select the overload.
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Widget {
+                    int value;
+                    int pick(int seed) { return seed; }
+                    int pick(Widget& other) { return other.value; }
+                    int use(Widget& w) { return pick(w); }
+                  };
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("parameter argument overload sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.Widget.pick:int(Widget&)\""));
     }
 
     #[test]
