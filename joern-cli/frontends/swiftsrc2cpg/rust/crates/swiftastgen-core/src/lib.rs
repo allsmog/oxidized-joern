@@ -3916,6 +3916,27 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 .find(|child| child.kind() == ".")
                 .context("member type is missing '.'")?;
             let is_last = index + 1 == names.len();
+            // A trailing `.Type` / `.Protocol` segment is a MetatypeTypeSyntax, not a
+            // MemberTypeSyntax.
+            if is_last && type_arguments.is_none() && matches!(self.text(name), "Type" | "Protocol")
+            {
+                current = self.syntax_node(
+                    "MetatypeTypeSyntax",
+                    self.range_from_offsets(node.start_byte(), name.end_byte()),
+                    vec![
+                        self.with_name(current, "baseType"),
+                        self.with_name(self.token_for_node(period, "period"), "period"),
+                        self.with_name(
+                            self.token_for_node(
+                                name,
+                                &format!("keyword(SwiftSyntax.Keyword.{})", self.text(name)),
+                            ),
+                            "metatypeSpecifier",
+                        ),
+                    ],
+                );
+                break;
+            }
             let mut children = vec![
                 self.with_name(current, "baseType"),
                 self.with_name(self.token_for_node(period, "period"), "period"),
@@ -16786,6 +16807,23 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(detail, "detail").unwrap()["tokenKind"],
             "identifier(\"set\")"
+        );
+    }
+
+    #[test]
+    fn emits_metatype_type() {
+        // `Int.Type` is a MetatypeTypeSyntax, not a member type.
+        let source = "func f(_ t: Int.Type) {}\n";
+        let value = parse_source("Meta.swift", "/tmp/Meta.swift", source).unwrap();
+
+        let meta = find_first_node_type(&value, "MetatypeTypeSyntax").unwrap();
+        assert_eq!(
+            child_by_name(meta, "baseType").unwrap()["nodeType"],
+            "IdentifierTypeSyntax"
+        );
+        assert_eq!(
+            child_by_name(meta, "metatypeSpecifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.Type)"
         );
     }
 
