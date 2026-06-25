@@ -9471,7 +9471,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             self.with_name(
                 self.token_for_node(
                     first_name,
-                    &format!("identifier({})", quoted_text(self.text(first_name))),
+                    &closure_parameter_name_kind(self.text(first_name)),
                 ),
                 "firstName",
             ),
@@ -9480,7 +9480,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             children.push(self.with_name(
                 self.token_for_node(
                     second_name,
-                    &format!("identifier({})", quoted_text(self.text(second_name))),
+                    &closure_parameter_name_kind(self.text(second_name)),
                 ),
                 "secondName",
             ));
@@ -9515,10 +9515,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     ) -> Result<Value> {
         let name = self.lambda_parameter_name(node)?;
         let mut children = vec![self.with_name(
-            self.token_for_node(
-                name,
-                &format!("identifier({})", quoted_text(self.text(name))),
-            ),
+            self.token_for_node(name, &closure_parameter_name_kind(self.text(name))),
             "name",
         )];
         if let Some(comma) = trailing_comma {
@@ -15563,6 +15560,16 @@ fn identifier_token_kind(text: &str) -> String {
     }
 }
 
+/// The token kind for a closure parameter name: `_` is a `wildcard`, otherwise a
+/// plain identifier.
+fn closure_parameter_name_kind(text: &str) -> String {
+    if text == "_" {
+        "wildcard".to_string()
+    } else {
+        format!("identifier({})", quoted_text(text))
+    }
+}
+
 fn is_dollar_identifier(text: &str) -> bool {
     let mut chars = text.chars();
     chars.next() == Some('$') && text.len() > 1 && chars.all(|c| c.is_ascii_digit())
@@ -16709,6 +16716,19 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(where_clause, "whereKeyword").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.where)"
+        );
+    }
+
+    #[test]
+    fn emits_closure_wildcard_parameter() {
+        // A closure parameter named `_` is a `wildcard` token, not identifier("_").
+        let source = "let f: (Int) -> Int = { _ in 0 }\n";
+        let value = parse_source("WC.swift", "/tmp/WC.swift", source).unwrap();
+
+        let param = find_first_node_type(&value, "ClosureShorthandParameterSyntax").unwrap();
+        assert_eq!(
+            child_by_name(param, "name").unwrap()["tokenKind"],
+            "wildcard"
         );
     }
 
