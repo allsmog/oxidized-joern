@@ -4991,6 +4991,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     /// function is non-effectful. Typed throws (`throws(E)`) is not modelled yet —
     /// only the `throws`/`rethrows` keyword is emitted.
     fn function_effect_specifiers(&self, node: Node<'a>) -> Option<Value> {
+        self.effect_specifiers(node, "FunctionEffectSpecifiersSyntax")
+    }
+
+    /// `get async throws` on an accessor uses the same shape under a different node
+    /// type (`AccessorEffectSpecifiersSyntax`).
+    fn effect_specifiers(&self, node: Node<'a>, node_type: &str) -> Option<Value> {
         let async_specifier = self.immediate_child_kind(node, "async");
         let throws_specifier = self
             .immediate_child_kind(node, "throws")
@@ -5025,11 +5031,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let end = throws_specifier
             .or(async_specifier)
             .map_or(node.end_byte(), |n| n.end_byte());
-        Some(self.syntax_node(
-            "FunctionEffectSpecifiersSyntax",
-            self.range_from_offsets(start, end),
-            children,
-        ))
+        Some(self.syntax_node(node_type, self.range_from_offsets(start, end), children))
     }
 
     fn function_parameter_clause(&self, node: Node<'a>) -> Result<Value> {
@@ -6405,6 +6407,17 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         ));
         if let Some(parameters) = self.accessor_parameters(node)? {
             children.push(self.with_name(parameters, "parameters"));
+        }
+        // `get async throws` — the effect keywords live inside the getter/setter
+        // specifier node rather than directly on the accessor.
+        let specifier_node = self
+            .immediate_named_child_kind(node, "getter_specifier")
+            .or_else(|| self.immediate_named_child_kind(node, "setter_specifier"))
+            .unwrap_or(node);
+        if let Some(effects) =
+            self.effect_specifiers(specifier_node, "AccessorEffectSpecifiersSyntax")
+        {
+            children.push(self.with_name(effects, "effectSpecifiers"));
         }
         if let Some(left_brace) = self.immediate_child_kind(node, "{") {
             if let Some(right_brace) = self.immediate_child_kind(node, "}") {
@@ -16835,6 +16848,22 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(detail, "detail").unwrap()["tokenKind"],
             "identifier(\"set\")"
+        );
+    }
+
+    #[test]
+    fn emits_accessor_effect_specifiers() {
+        // `get throws` carries an AccessorEffectSpecifiersSyntax with a throws clause.
+        let source = "struct S {\n  var v: Int {\n    get throws { return 0 }\n  }\n}\n";
+        let value = parse_source("AE.swift", "/tmp/AE.swift", source).unwrap();
+
+        let accessor = find_first_node_type(&value, "AccessorDeclSyntax").unwrap();
+        let effects = child_by_name(accessor, "effectSpecifiers").unwrap();
+        assert_eq!(effects["nodeType"], "AccessorEffectSpecifiersSyntax");
+        let throws_clause = child_by_name(effects, "throwsClause").unwrap();
+        assert_eq!(
+            child_by_name(throws_clause, "throwsSpecifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.throws)"
         );
     }
 
