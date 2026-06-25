@@ -2568,13 +2568,19 @@ fn resolve_references_in_statement(
             aliases.insert(name, target);
         }
         Statement::LocalDecl {
-            name, initializer, ..
+            name,
+            type_name,
+            initializer,
+            ..
         } => {
             if let Some(initializer) = initializer.as_mut() {
                 resolve_references_in_expression(table, scope, stack, aliases, initializer, false);
             }
             if is_plain_reference_name(name) {
-                stack.bind(name, join_scope(scope, name));
+                // Record the written declared type so the local can be used to
+                // disambiguate overloads (`auto` carries no usable type).
+                let declared_type = (type_name != "auto").then(|| type_name.clone());
+                stack.bind_typed(name, join_scope(scope, name), declared_type);
             }
         }
         Statement::StructuredBinding {
@@ -14495,6 +14501,34 @@ mod tests {
         // The argument type (a prototype-only call) is unknown, so the overload
         // stays ambiguous and unresolved.
         assert_eq!(resolved_call(use_fn, "pick"), Some((None, None)));
+    }
+
+    #[test]
+    fn resolves_overload_by_local_variable_argument_type() {
+        // Local variables carry their declared type, so `pick(o)` and `pick(n)`
+        // select different overloads.
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Other { int v; };
+                  struct Widget {
+                    int pick(int seed) { return seed; }
+                    int pick(Other& other) { return other.v; }
+                    int use() {
+                      Other o;
+                      int n = 0;
+                      return pick(o) + pick(n);
+                    }
+                  };
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("local argument overload sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.Widget.pick:int(Other&)\""));
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.Widget.pick:int(int)\""));
     }
 
     #[test]
