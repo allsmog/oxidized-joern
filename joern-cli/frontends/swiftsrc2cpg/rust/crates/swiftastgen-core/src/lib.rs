@@ -2840,6 +2840,16 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 modifier_nodes.push(async_keyword);
             }
         }
+        // `class func`/`class var` carry `class` as a direct modifier child on type
+        // members (not the `class` declaration keyword itself).
+        if matches!(
+            node.kind(),
+            "function_declaration" | "property_declaration" | "subscript_declaration"
+        ) {
+            if let Some(class_keyword) = self.immediate_child_kind(node, "class") {
+                modifier_nodes.push(class_keyword);
+            }
+        }
         modifier_nodes.sort_by_key(|modifier| modifier.start_byte());
         let modifiers: Vec<Value> = modifier_nodes
             .iter()
@@ -16681,6 +16691,20 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(func, "name").unwrap()["tokenKind"],
             "binaryOperator(\"<+>\")"
+        );
+    }
+
+    #[test]
+    fn emits_class_member_modifier() {
+        // `class func` models `class` as a DeclModifier on the function.
+        let source = "class C {\n  class func f() {}\n}\n";
+        let value = parse_source("CF.swift", "/tmp/CF.swift", source).unwrap();
+
+        let func = find_first_node_type(&value, "FunctionDeclSyntax").unwrap();
+        let modifiers = child_by_name(func, "modifiers").unwrap();
+        assert_eq!(
+            child_by_name(&modifiers["children"][0], "name").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.class)"
         );
     }
 
