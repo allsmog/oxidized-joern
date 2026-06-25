@@ -12096,7 +12096,12 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "forKeyword",
         )];
         // `for try await x in …` — optional effect keywords between `for` and pattern.
-        if let Some(try_keyword) = self.immediate_child_kind(node, "try") {
+        // The `try` is wrapped in a `try_operator` node rather than a bare child.
+        let try_keyword = self.immediate_child_kind(node, "try").or_else(|| {
+            self.immediate_named_child_kind(node, "try_operator")
+                .and_then(|operator| self.immediate_child_kind(operator, "try"))
+        });
+        if let Some(try_keyword) = try_keyword {
             children.push(self.with_name(
                 self.token_for_node(try_keyword, "keyword(SwiftSyntax.Keyword.try)"),
                 "tryKeyword",
@@ -17511,6 +17516,23 @@ repeat { sink() } while x < 1
         let value = parse_source("FA.swift", "/tmp/FA.swift", source).unwrap();
 
         let for_stmt = find_first_node_type(&value, "ForStmtSyntax").unwrap();
+        assert_eq!(
+            child_by_name(for_stmt, "awaitKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.await)"
+        );
+    }
+
+    #[test]
+    fn emits_for_try_await_keywords() {
+        // `for try await x in …` — the `try` is wrapped in a try_operator node.
+        let source = "func f(_ s: S) async throws {\n  for try await x in s {}\n}\nstruct S {}\n";
+        let value = parse_source("FTA.swift", "/tmp/FTA.swift", source).unwrap();
+
+        let for_stmt = find_first_node_type(&value, "ForStmtSyntax").unwrap();
+        assert_eq!(
+            child_by_name(for_stmt, "tryKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.try)"
+        );
         assert_eq!(
             child_by_name(for_stmt, "awaitKeyword").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.await)"
