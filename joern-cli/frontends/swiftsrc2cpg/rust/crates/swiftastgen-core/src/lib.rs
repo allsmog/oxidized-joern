@@ -6894,6 +6894,8 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             "ERROR" if is_identifier_like_text(self.text(node)) => {
                 Ok(self.decl_reference_expr(node))
             }
+            // A bare operator used as a value (`reduce(0, +)`, `sorted(by: <)`).
+            _ if is_operator_text(self.text(node)) => Ok(self.decl_reference_expr(node)),
             other => {
                 record_unsupported_node(other);
                 Ok(self.synthetic_expr_from_offsets(node.start_byte(), node.end_byte()))
@@ -12565,6 +12567,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             _ if matches!(self.text(node), "init" | "self") => {
                 format!("keyword(SwiftSyntax.Keyword.{})", self.text(node))
             }
+            // A bare operator used as a value (`reduce(0, +)`) is a binaryOperator.
+            _ if is_operator_text(self.text(node)) => {
+                format!("binaryOperator({})", quoted_text(self.text(node)))
+            }
             _ => identifier_token_kind(self.text(node)),
         };
         self.syntax_node(
@@ -15909,6 +15915,13 @@ fn identifier_token_kind(text: &str) -> String {
     }
 }
 
+/// Whether `text` is a Swift operator (composed solely of operator characters),
+/// e.g. `+`, `<+>`, `==`. Used to distinguish a bare operator reference from an
+/// identifier.
+fn is_operator_text(text: &str) -> bool {
+    !text.is_empty() && text.chars().all(|ch| "/=-+!*%<>&|^~?.".contains(ch))
+}
+
 /// The token kind for a closure parameter name: `_` is a `wildcard`, otherwise a
 /// plain identifier.
 fn closure_parameter_name_kind(text: &str) -> String {
@@ -16931,6 +16944,25 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(pattern_expr, "pattern").unwrap()["nodeType"],
             "ValueBindingPatternSyntax"
+        );
+    }
+
+    #[test]
+    fn emits_bare_operator_argument_as_binary_operator() {
+        // `reduce(0, +)` passes `+` as a binaryOperator declaration reference.
+        let source = "func f(_ v: [Int]) -> Int { return v.reduce(0, +) }\n";
+        let value = parse_source("OA.swift", "/tmp/OA.swift", source).unwrap();
+
+        let plus = find_node_types(&value, "DeclReferenceExprSyntax")
+            .into_iter()
+            .find(|d| {
+                child_by_name(d, "baseName").and_then(|n| n["tokenKind"].as_str())
+                    == Some("binaryOperator(\"+\")")
+            })
+            .unwrap();
+        assert_eq!(
+            child_by_name(plus, "baseName").unwrap()["tokenKind"],
+            "binaryOperator(\"+\")"
         );
     }
 
