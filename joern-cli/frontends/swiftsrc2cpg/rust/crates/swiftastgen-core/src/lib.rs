@@ -1376,12 +1376,72 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 "name",
             ),
         ];
+        // `protocol P<Element>` carries a primary associated type clause after the name.
+        if let Some(type_parameters) = self.immediate_named_child_kind(node, "type_parameters") {
+            if let Some(clause) = self.primary_associated_type_clause(type_parameters)? {
+                children.push(self.with_name(clause, "primaryAssociatedTypeClause"));
+            }
+        }
         if let Some(inheritance_clause) = self.inheritance_clause(node)? {
             children.push(self.with_name(inheritance_clause, "inheritanceClause"));
         }
         children.push(self.with_name(self.member_block(body)?, "memberBlock"));
 
         Ok(self.syntax_node("ProtocolDeclSyntax", self.range_for_node(node), children))
+    }
+
+    /// Build a `PrimaryAssociatedTypeClauseSyntax` (`<Element>`) from a protocol's
+    /// `type_parameters` node.
+    fn primary_associated_type_clause(&self, node: Node<'a>) -> Result<Option<Value>> {
+        let Some(left_angle) = self.immediate_child_kind(node, "<") else {
+            return Ok(None);
+        };
+        let Some(right_angle) = self.immediate_child_kind(node, ">") else {
+            return Ok(None);
+        };
+        let mut types = Vec::new();
+        for parameter in named_children(node).filter(|child| child.kind() == "type_parameter") {
+            let Some(name) = self
+                .first_descendant_kind(parameter, "type_identifier")
+                .or_else(|| self.first_descendant_kind(parameter, "simple_identifier"))
+            else {
+                return Ok(None);
+            };
+            let trailing_comma = self.trailing_delimiter(node, parameter, ",");
+            let mut element_children = vec![self.with_name(
+                self.token_for_node(
+                    name,
+                    &format!("identifier({})", quoted_text(self.text(name))),
+                ),
+                "name",
+            )];
+            if let Some(comma) = trailing_comma {
+                element_children
+                    .push(self.with_name(self.token_for_node(comma, "comma"), "trailingComma"));
+            }
+            let end = trailing_comma.map_or(parameter.end_byte(), |comma| comma.end_byte());
+            types.push(self.with_name(
+                self.syntax_node(
+                    "PrimaryAssociatedTypeSyntax",
+                    self.range_from_offsets(parameter.start_byte(), end),
+                    element_children,
+                ),
+                "",
+            ));
+        }
+        let list_range = self.covering_range_or_point(&types, left_angle.end_byte());
+        Ok(Some(self.syntax_node(
+            "PrimaryAssociatedTypeClauseSyntax",
+            self.range_from_offsets(left_angle.start_byte(), right_angle.end_byte()),
+            vec![
+                self.with_name(self.token_for_node(left_angle, "leftAngle"), "leftAngle"),
+                self.with_name(
+                    self.syntax_node("PrimaryAssociatedTypeListSyntax", list_range, types),
+                    "primaryAssociatedTypes",
+                ),
+                self.with_name(self.token_for_node(right_angle, "rightAngle"), "rightAngle"),
+            ],
+        )))
     }
 
     fn operator_decl(&self, node: Node<'a>) -> Result<Value> {
@@ -16972,6 +17032,22 @@ repeat { sink() } while x < 1
             )
             .unwrap()["tokenKind"],
             "identifier(\"escaping\")"
+        );
+    }
+
+    #[test]
+    fn emits_primary_associated_type_clause() {
+        // `protocol P<Element>` carries a primary associated type clause.
+        let source = "protocol P<Element> {\n  associatedtype Element\n}\n";
+        let value = parse_source("PA.swift", "/tmp/PA.swift", source).unwrap();
+
+        let proto = find_first_node_type(&value, "ProtocolDeclSyntax").unwrap();
+        let clause = child_by_name(proto, "primaryAssociatedTypeClause").unwrap();
+        assert_eq!(clause["nodeType"], "PrimaryAssociatedTypeClauseSyntax");
+        let primary = find_first_node_type(clause, "PrimaryAssociatedTypeSyntax").unwrap();
+        assert_eq!(
+            child_by_name(primary, "name").unwrap()["tokenKind"],
+            "identifier(\"Element\")"
         );
     }
 
