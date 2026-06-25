@@ -1693,6 +1693,31 @@ fn infer_argument_type(
             resolved_signature: Some(signature),
             ..
         } => return_type_of_signature(signature),
+        // An explicit cast argument has the cast target type.
+        Expression::Cast { type_name, .. } => Some(type_name.clone()),
+        // A pointer dereference (`*op`) yields the pointee type.
+        Expression::Unary {
+            operator, argument, ..
+        } if operator == "*" => {
+            let operand = infer_argument_type(table, stack, scope, argument)?;
+            Some(operand.trim().strip_suffix('*')?.trim().to_string())
+        }
+        // A conditional (`c ? a : b`) yields its branch type when both branches
+        // agree (the only case we can match without modelling conversions).
+        Expression::Conditional {
+            consequence,
+            alternative,
+            ..
+        } => {
+            let alternative_type = infer_argument_type(table, stack, scope, alternative)?;
+            match consequence {
+                Some(consequence) => {
+                    let consequence_type = infer_argument_type(table, stack, scope, consequence)?;
+                    (consequence_type == alternative_type).then_some(alternative_type)
+                }
+                None => Some(alternative_type),
+            }
+        }
         // `obj.field` / `h->inner` / `this->field`: resolve the base's type, then
         // the field's type.
         Expression::FieldAccess { base, field, .. } => {
@@ -14561,6 +14586,34 @@ mod tests {
         // The argument type (a prototype-only call) is unknown, so the overload
         // stays ambiguous and unresolved.
         assert_eq!(resolved_call(use_fn, "pick"), Some((None, None)));
+    }
+
+    #[test]
+    fn resolves_overload_by_cast_deref_and_conditional_arguments() {
+        // Cast, pointer-dereference, and conditional arguments all contribute a
+        // type to overload selection.
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Other { int v; };
+                  struct Widget {
+                    Other o;
+                    Other* op;
+                    int pick(int seed) { return seed; }
+                    int pick(Other& other) { return other.v; }
+                    int useCast() { int x = 0; return pick((int)x); }
+                    int useDeref() { return pick(*op); }
+                    int useTernary(bool b) { Other a; return pick(b ? a : o); }
+                  };
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("cast/deref/conditional overload sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.Widget.pick:int(int)\""));
+        assert!(json.contains("\"resolvedMethodFullName\":\"Core.Widget.pick:int(Other&)\""));
     }
 
     #[test]
