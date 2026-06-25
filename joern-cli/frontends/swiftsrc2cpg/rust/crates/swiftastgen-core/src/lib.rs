@@ -9648,8 +9648,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .collect::<Vec<_>>();
         let mut statement_items = Vec::new();
         self.push_code_block_items_from_nodes(&statement_nodes, &mut statement_items)?;
-        let statements_range =
-            self.covering_range_or_point(&statement_items, left_brace.end_byte());
+        // An empty closure body anchors its statement list after the signature's `in`
+        // (and its same-line trailing trivia), not right after the `{`.
+        let empty_anchor_base = self
+            .immediate_child_kind(node, "in")
+            .map_or(left_brace.end_byte(), |in_keyword| in_keyword.end_byte());
+        let empty_anchor =
+            self.skip_horizontal_whitespace(empty_anchor_base, right_brace.start_byte());
+        let statements_range = self.covering_range_or_point(&statement_items, empty_anchor);
         children.push(self.with_name(
             self.syntax_node("CodeBlockItemListSyntax", statements_range, statement_items),
             "statements",
@@ -17332,6 +17338,22 @@ repeat { sink() } while x < 1
             child_by_name(where_clause, "whereKeyword").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.where)"
         );
+    }
+
+    #[test]
+    fn anchors_empty_closure_body_after_signature() {
+        // `{ _ in }` — the empty statement list anchors after the `in`, not the `{`.
+        let source = "let f: (Int) -> Void = { _ in }\n";
+        let value = parse_source("EC.swift", "/tmp/EC.swift", source).unwrap();
+
+        let closure = find_first_node_type(&value, "ClosureExprSyntax").unwrap();
+        let statements = child_by_name(closure, "statements").unwrap();
+        assert!(statements["children"].as_array().unwrap().is_empty());
+        let in_keyword_end = find_first_node_type(closure, "ClosureShorthandParameterSyntax")
+            .map(|p| p["range"]["endOffset"].as_u64().unwrap())
+            .unwrap();
+        // The empty statements anchor sits past the parameter/`in`, near the `}`.
+        assert!(statements["range"]["startOffset"].as_u64().unwrap() > in_keyword_end);
     }
 
     #[test]
