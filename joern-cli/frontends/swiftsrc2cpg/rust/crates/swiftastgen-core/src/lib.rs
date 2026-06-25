@@ -12262,9 +12262,11 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 format!("integerLiteral({})", quoted_text(self.text(node)))
             }
             "self_expression" => "keyword(SwiftSyntax.Keyword.self)".to_string(),
-            // `init` as a declaration reference (`self.init`, `super.init`, `T.init`)
-            // is a contextual keyword, not a plain identifier.
-            _ if self.text(node) == "init" => "keyword(SwiftSyntax.Keyword.init)".to_string(),
+            // `init`/`self` as a declaration reference (`self.init`, `T.self`) are
+            // contextual keywords, not plain identifiers.
+            _ if matches!(self.text(node), "init" | "self") => {
+                format!("keyword(SwiftSyntax.Keyword.{})", self.text(node))
+            }
             _ => identifier_token_kind(self.text(node)),
         };
         self.syntax_node(
@@ -16784,6 +16786,20 @@ repeat { sink() } while x < 1
         assert_eq!(
             child_by_name(detail, "detail").unwrap()["tokenKind"],
             "identifier(\"set\")"
+        );
+    }
+
+    #[test]
+    fn emits_self_member_reference_as_keyword() {
+        // `Int.self` references `self` as a contextual keyword baseName.
+        let source = "let t = Int.self\n";
+        let value = parse_source("Self.swift", "/tmp/Self.swift", source).unwrap();
+
+        let member = find_first_node_type(&value, "MemberAccessExprSyntax").unwrap();
+        let decl_name = child_by_name(member, "declName").unwrap();
+        assert_eq!(
+            child_by_name(decl_name, "baseName").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.self)"
         );
     }
 
