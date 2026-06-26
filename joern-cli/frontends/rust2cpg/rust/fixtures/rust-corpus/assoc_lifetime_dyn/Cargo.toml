@@ -1,0 +1,4 @@
+[package]
+name = "assoc_lifetime_dyn"
+version = "0.1.0"
+edition = "2021"
