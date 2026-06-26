@@ -1,0 +1,4 @@
+[package]
+name = "iterator_advanced"
+version = "0.1.0"
+edition = "2021"
