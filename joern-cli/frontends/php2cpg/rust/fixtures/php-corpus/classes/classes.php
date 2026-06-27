@@ -26,5 +26,6 @@ function run(?Service $service): string
     $callback = function (string $value): string {
         return strtoupper($value);
     };
-    return $callback($service->greet("x"));
+    $normalizer = strtoupper(...);
+    return $callback($normalizer($service->greet("x")));
 }

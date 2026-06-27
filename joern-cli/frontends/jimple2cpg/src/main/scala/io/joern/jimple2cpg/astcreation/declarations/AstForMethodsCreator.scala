@@ -64,13 +64,21 @@ trait AstForMethodsCreator(implicit withSchemaValidation: ValidationMode) { this
             methodBody.getParameterLocals.asScala.zipWithIndex.map { case (param, index) =>
               astForParameter(param, index + 1, methodDeclaration, parameterAnnotations)
             }
+        val parameterNames = methodBody.getParameterLocals.asScala.map(_.getName).toSet
 
         methodAstWithAnnotations(
           methodNode
             .lineNumberEnd(methodBody.toString.split('\n').filterNot(_.isBlank).length)
             .code(methodBody.toString),
           parameterAsts,
-          astForMethodBody(methodBody, bodyStatementsInfo),
+          rustMethodBodyAst(methodDeclaration, parameterNames)
+            .map { bodyAst =>
+              bodyAst.cfgEdges.foreach { case (source, destination) =>
+                diffGraph.addEdge(source, destination, EdgeTypes.CFG)
+              }
+              bodyAst.ast
+            }
+            .getOrElse(astForMethodBody(methodBody, bodyStatementsInfo)),
           astForMethodReturn(methodDeclaration),
           astsForModifiers(methodDeclaration),
           astsForHostTags(methodDeclaration)
@@ -99,7 +107,14 @@ trait AstForMethodsCreator(implicit withSchemaValidation: ValidationMode) { this
         methodAstWithAnnotations(
           methodNode,
           Seq.empty,
-          Ast(NewBlock()),
+          rustMethodBodyAst(methodDeclaration)
+            .map { bodyAst =>
+              bodyAst.cfgEdges.foreach { case (source, destination) =>
+                diffGraph.addEdge(source, destination, EdgeTypes.CFG)
+              }
+              bodyAst.ast
+            }
+            .getOrElse(Ast(NewBlock())),
           astForMethodReturn(methodDeclaration),
           astsForModifiers(methodDeclaration),
           astsForHostTags(methodDeclaration)

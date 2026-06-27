@@ -10,7 +10,8 @@
 //! the fixture corpus, reads every emitted JSON document, normalizes
 //! environment-specific fields (absolute paths in `fullFilePath`, etc.), and
 //! asserts the two trees are equal -- reporting the first divergence in a
-//! readable form.
+//! readable form. Set `RUSTASTGEN_CORPUS` to a path-list of fixture names or
+//! directories to run a targeted subset while iterating locally.
 
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
@@ -34,7 +35,7 @@ fn rust_json_matches_reference_when_configured() {
     );
 
     let corpus_root = fixture_root();
-    let corpus_dirs = immediate_child_dirs(&corpus_root);
+    let corpus_dirs = configured_corpus_dirs(&corpus_root);
     assert!(
         !corpus_dirs.is_empty(),
         "no fixture corpus directories under {}",
@@ -106,6 +107,31 @@ fn rust_cli() -> &'static Path {
 
 fn fixture_root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/rust-corpus")
+}
+
+fn configured_corpus_dirs(fixture_root: &Path) -> Vec<PathBuf> {
+    if let Some(selected) = env::var_os("RUSTASTGEN_CORPUS") {
+        let mut dirs = env::split_paths(&selected)
+            .map(|entry| {
+                if entry.is_dir() {
+                    entry
+                } else {
+                    fixture_root.join(entry)
+                }
+            })
+            .inspect(|path| {
+                assert!(
+                    path.is_dir(),
+                    "RUSTASTGEN_CORPUS entry is not a fixture directory: {}",
+                    path.display()
+                );
+            })
+            .collect::<Vec<_>>();
+        dirs.sort();
+        dirs
+    } else {
+        immediate_child_dirs(fixture_root)
+    }
 }
 
 fn immediate_child_dirs(root: &Path) -> Vec<PathBuf> {

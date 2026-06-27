@@ -31,6 +31,7 @@ class ConditionalsTests extends GoCodeToCpgSuite {
 
         }
         controlStruct.whenTrue.assignment.code.l shouldBe List("y = 0")
+        controlStruct.trueBodyOut.assignment.code.l shouldBe List("y = 0")
       }
     }
 
@@ -61,6 +62,12 @@ class ConditionalsTests extends GoCodeToCpgSuite {
           .map(x => (x.target.code, x.source.code))
           .headOption shouldBe Some(("y", "0"))
         ifStmt.whenFalse.assignment
+          .map(x => (x.target.code, x.source.code))
+          .headOption shouldBe Some(("y", "1"))
+        ifStmt.trueBodyOut.assignment
+          .map(x => (x.target.code, x.source.code))
+          .headOption shouldBe Some(("y", "0"))
+        ifStmt.falseBodyOut.assignment
           .map(x => (x.target.code, x.source.code))
           .headOption shouldBe Some(("y", "1"))
       }

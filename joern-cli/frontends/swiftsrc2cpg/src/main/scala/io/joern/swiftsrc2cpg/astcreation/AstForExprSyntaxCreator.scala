@@ -15,7 +15,9 @@ import scala.annotation.{tailrec, unused}
 trait AstForExprSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
   this: AstCreator =>
 
-  private val MaxInitializers = 1000
+  private val ImplicitMemberBase = "<implicit>"
+  private val KeyPathOperator    = "<operator>.keyPath"
+  private val MaxInitializers    = 1000
 
   private def astForEmptyListLikeExpr(node: SwiftNode): Ast = {
     val op  = Operators.arrayInitializer
@@ -560,7 +562,32 @@ trait AstForExprSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
     callAst(callNode_, argAsts)
   }
 
-  private def astForKeyPathExprSyntax(node: KeyPathExprSyntax): Ast = notHandledYet(node)
+  private def astForKeyPathExprSyntax(node: KeyPathExprSyntax): Ast = {
+    val rootAst      = node.root.map(astForNode)
+    val componentAst = node.components.children.flatMap(astForKeyPathComponentArgument)
+    val args = rootAst.toList ++ (if (rootAst.isEmpty && componentAst.isEmpty) {
+                                    List(Ast(literalNode(node, code(node), Option(Defines.String))))
+                                  } else {
+                                    componentAst
+                                  })
+
+    val callNode_ = createStaticCallNode(node, code(node), KeyPathOperator, KeyPathOperator, Defines.Any)
+    callAst(callNode_, args)
+  }
+
+  private def astForKeyPathComponentArgument(node: KeyPathComponentSyntax): Option[Ast] = {
+    node.component match {
+      case property: KeyPathPropertyComponentSyntax =>
+        val name = code(property.declName)
+        Option(Ast(fieldIdentifierNode(property, name, name)))
+      case method: KeyPathMethodComponentSyntax =>
+        Option(Ast(literalNode(method, code(method), Option(Defines.String))))
+      case optional: KeyPathOptionalComponentSyntax =>
+        Option(Ast(literalNode(optional, code(optional), Option(Defines.String))))
+      case subscript: KeyPathSubscriptComponentSyntax =>
+        Option(Ast(literalNode(subscript, code(subscript), Option(Defines.String))))
+    }
+  }
 
   private def astForMacroExpansionExprSyntax(node: MacroExpansionExprSyntax): Ast = {
     val nodeCode = code(node.macroName)
@@ -592,11 +619,20 @@ trait AstForExprSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
         // Swift's documentation refers to this as "implicit member expression" or "shorthand syntax for enumeration cases".
         // This syntax is not limited to enums. It works with several Swift types where the compiler can infer the type from context
         // to access static members. This is a commonly used pattern.
-        // For enums only we could emit a Literal AST node representing the enum member. But as it works for other types as well,
-        // we emit an unknown node here to avoid making potentially wrong assumptions.
-        val code_        = code(member.baseName)
-        val unknownNode_ = unknownNode(node, code_)
-        return Ast(unknownNode_)
+        val memberNode = fieldIdentifierNode(member.baseName, code(member.baseName), code(member.baseName))
+        val baseNode   = literalNode(node, ImplicitMemberBase, Option(Defines.Any))
+        val tpe        = fullnameProvider.typeFullname(node).getOrElse(Defines.Any)
+        registerType(tpe)
+        val callNode_ = callNode(
+          node,
+          code(node),
+          Operators.fieldAccess,
+          Operators.fieldAccess,
+          DispatchTypes.STATIC_DISPATCH,
+          None,
+          Some(tpe)
+        )
+        return callAst(callNode_, List(Ast(baseNode), Ast(memberNode)))
       case Some(otherBase) =>
         astForNode(otherBase)
     }
@@ -686,7 +722,9 @@ trait AstForExprSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
     createStaticCallForOperatorAst(node, op, node.expression)
   }
 
-  private def astForRegexLiteralExprSyntax(node: RegexLiteralExprSyntax): Ast = notHandledYet(node)
+  private def astForRegexLiteralExprSyntax(node: RegexLiteralExprSyntax): Ast = {
+    Ast(literalNode(node, code(node), Option(Defines.String)))
+  }
 
   private def astForSequenceExprSyntax(node: SequenceExprSyntax): Ast = {
     astForNode(node.elements)

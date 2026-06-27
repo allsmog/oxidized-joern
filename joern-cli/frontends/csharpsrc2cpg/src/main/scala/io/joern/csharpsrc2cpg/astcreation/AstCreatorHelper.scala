@@ -3,11 +3,11 @@ package io.joern.csharpsrc2cpg.astcreation
 import io.joern.csharpsrc2cpg.parser.DotNetJsonAst.*
 import io.joern.csharpsrc2cpg.parser.{DotNetJsonAst, DotNetNodeInfo, ParserKeys}
 import io.joern.csharpsrc2cpg.utils.Utils.withoutSignature
-import io.joern.csharpsrc2cpg.{CSharpDefines, Constants, astcreation}
+import io.joern.csharpsrc2cpg.{CSharpDefines, CSharpOperators, Constants, astcreation}
 import io.joern.x2cpg.utils.IntervalKeyPool
 import io.joern.x2cpg.{Ast, Defines, ValidationMode}
 import io.shiftleft.codepropertygraph.generated.nodes.*
-import io.shiftleft.codepropertygraph.generated.{Operators, PropertyNames}
+import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, DispatchTypes, Operators, PropertyNames}
 import ujson.Value
 
 import scala.annotation.tailrec
@@ -69,6 +69,52 @@ trait AstCreatorHelper(implicit withSchemaValidation: ValidationMode) { this: As
       .typeFullName(scope.surroundingTypeDeclFullName.getOrElse(Defines.Any))
   }
 
+  protected def finallyAstForUsingDisposals(
+    origin: DotNetNodeInfo,
+    declarationAsts: Seq[Ast],
+    isAwaitUsing: Boolean = false
+  ): Option[Ast] = {
+    val disposeAsts = declarationAsts
+      .flatMap(_.nodes)
+      .collect { case local: NewLocal => local }
+      .map { local =>
+        val id         = identifierFromDecl(local, Some(origin))
+        val methodName = if (isAwaitUsing) "DisposeAsync" else "Dispose"
+        val callCode   = s"${id.name}.$methodName()"
+        id.code(callCode)
+        val disposeCall = callNode(
+          origin,
+          callCode,
+          methodName,
+          if (isAwaitUsing) "System.IAsyncDisposable.DisposeAsync:System.Threading.Tasks.ValueTask()"
+          else "System.Disposable.Dispose:System.Void()",
+          DispatchTypes.DYNAMIC_DISPATCH,
+          if (isAwaitUsing) Option("System.Threading.Tasks.ValueTask()") else Option("System.Void()"),
+          if (isAwaitUsing) Option("System.Threading.Tasks.ValueTask") else Option("System.Void")
+        )
+        val disposeAst = callAst(disposeCall, receiver = Option(Ast(id)))
+        if (isAwaitUsing) {
+          val awaitCall = callNode(
+            origin,
+            s"await $callCode",
+            CSharpOperators.await,
+            CSharpOperators.await,
+            DispatchTypes.STATIC_DISPATCH
+          )
+          callAst(awaitCall, Seq(disposeAst))
+        } else {
+          disposeAst
+        }
+      }
+      .reverse
+
+    Option.when(disposeAsts.nonEmpty) {
+      val childrenAst = Ast(blockNode(origin)).withChildren(disposeAsts)
+      val finallyNode = controlStructureNode(origin, ControlStructureTypes.FINALLY, "finally")
+      Ast(finallyNode).withChild(childrenAst)
+    }
+  }
+
   protected def nameFromNode(identifierNode: DotNetNodeInfo): String = AstCreatorHelper.nameFromNode(identifierNode)
 
   protected def identifierFromDecl(decl: DeclarationNew, dotNetNode: Option[DotNetNodeInfo] = None): NewIdentifier = {
@@ -95,33 +141,40 @@ trait AstCreatorHelper(implicit withSchemaValidation: ValidationMode) { this: As
   )
 
   protected val binaryOperatorsMap: Map[String, String] = Map(
-    "+"   -> Operators.addition,
-    "-"   -> Operators.subtraction,
-    "*"   -> Operators.multiplication,
-    "/"   -> Operators.division,
-    "%"   -> Operators.modulo,
-    "=="  -> Operators.equals,
-    "!="  -> Operators.notEquals,
-    "&&"  -> Operators.logicalAnd,
-    "||"  -> Operators.logicalOr,
-    "="   -> Operators.assignment,
-    "+="  -> Operators.assignmentPlus,
-    "-="  -> Operators.assignmentMinus,
-    "*="  -> Operators.assignmentMultiplication,
-    "/="  -> Operators.assignmentDivision,
-    "%="  -> Operators.assignmentModulo,
-    "&="  -> Operators.assignmentAnd,
-    "|="  -> Operators.assignmentOr,
-    "^="  -> Operators.assignmentXor,
-    ">>=" -> Operators.assignmentLogicalShiftRight,
-    "<<=" -> Operators.assignmentShiftLeft,
-    ">"   -> Operators.greaterThan,
-    "<"   -> Operators.lessThan,
-    ">="  -> Operators.greaterEqualsThan,
-    "<="  -> Operators.lessEqualsThan,
-    "|"   -> Operators.or,
-    "&"   -> Operators.and,
-    "^"   -> Operators.xor
+    "+"    -> Operators.addition,
+    "-"    -> Operators.subtraction,
+    "*"    -> Operators.multiplication,
+    "/"    -> Operators.division,
+    "%"    -> Operators.modulo,
+    "=="   -> Operators.equals,
+    "!="   -> Operators.notEquals,
+    "&&"   -> Operators.logicalAnd,
+    "||"   -> Operators.logicalOr,
+    "??"   -> Operators.elvis,
+    "="    -> Operators.assignment,
+    "??="  -> Operators.assignment,
+    "+="   -> Operators.assignmentPlus,
+    "-="   -> Operators.assignmentMinus,
+    "*="   -> Operators.assignmentMultiplication,
+    "/="   -> Operators.assignmentDivision,
+    "%="   -> Operators.assignmentModulo,
+    "&="   -> Operators.assignmentAnd,
+    "|="   -> Operators.assignmentOr,
+    "^="   -> Operators.assignmentXor,
+    ">>="  -> Operators.assignmentLogicalShiftRight,
+    ">>>=" -> Operators.assignmentArithmeticShiftRight,
+    "<<="  -> Operators.assignmentShiftLeft,
+    ">"    -> Operators.greaterThan,
+    "<"    -> Operators.lessThan,
+    ">="   -> Operators.greaterEqualsThan,
+    "<="   -> Operators.lessEqualsThan,
+    "<<"   -> Operators.shiftLeft,
+    ">>"   -> Operators.logicalShiftRight,
+    ">>>"  -> Operators.arithmeticShiftRight,
+    "|"    -> Operators.or,
+    "&"    -> Operators.and,
+    "^"    -> Operators.xor,
+    ".."   -> Operators.range
   )
 
   protected def nodeTypeFullName(node: DotNetNodeInfo): String = {
@@ -145,11 +198,61 @@ trait AstCreatorHelper(implicit withSchemaValidation: ValidationMode) { this: As
           .getOrElse(typeName)
       case ThisExpression =>
         scope.surroundingTypeDeclFullName.getOrElse(Defines.Any)
+      case BaseExpression =>
+        currentBaseTypeFullName.getOrElse(Defines.Any)
       case PredefinedType | SimpleBaseType =>
         BuiltinTypes.DotNetTypeMap.getOrElse(node.code, Defines.Any)
+      case PrimaryConstructorBaseType =>
+        val typeNode = createDotNetNodeInfo(node.json(ParserKeys.Type))
+        nodeTypeFullName(typeNode)
+      case TypePattern =>
+        val typeNode = createDotNetNodeInfo(node.json(ParserKeys.Type))
+        nodeTypeFullName(typeNode)
       case ArrayType =>
         val elementTypeNode = createDotNetNodeInfo(node.json(ParserKeys.ElementType))
         s"${nodeTypeFullName(elementTypeNode)}[]"
+      case TupleType =>
+        val elementTypes = Try(node.json(ParserKeys.Elements).arr)
+          .map(_.map(element => nodeTypeFullName(createDotNetNodeInfo(element))).toSeq)
+          .getOrElse(Seq.empty)
+        if (elementTypes.isEmpty) "System.ValueTuple" else s"System.ValueTuple<${elementTypes.mkString(", ")}>"
+      case TupleElement =>
+        val elementTypeNode = createDotNetNodeInfo(node.json(ParserKeys.Type))
+        nodeTypeFullName(elementTypeNode)
+      case PointerType =>
+        val elementTypeNode = createDotNetNodeInfo(node.json(ParserKeys.ElementType))
+        s"${nodeTypeFullName(elementTypeNode)}*"
+      case FunctionPointerType =>
+        val parameterTypes = Try(node.json(ParserKeys.Parameters)).toOption
+          .collect { case parameters: ujson.Arr =>
+            parameters.arr.map(parameter => nodeTypeFullName(createDotNetNodeInfo(parameter))).toSeq
+          }
+          .getOrElse(Seq.empty)
+        val returnType = Try(node.json(ParserKeys.ReturnType)).toOption match {
+          case Some(returnType: ujson.Obj) => nodeTypeFullName(createDotNetNodeInfo(returnType))
+          case _                           => Defines.Any
+        }
+        val convention = Try(node.json(ParserKeys.CallingConvention)(ParserKeys.Value).str).toOption
+          .filter(_.nonEmpty)
+          .map(value => s" $value")
+          .getOrElse("")
+        s"delegate*$convention<${(parameterTypes :+ returnType).mkString(", ")}>"
+      case FunctionPointerParameter =>
+        val refPrefix = Try(node.json(ParserKeys.RefKind)(ParserKeys.Value).str).toOption
+          .filter(_.nonEmpty)
+          .map(value => s"$value ")
+          .getOrElse("")
+        val typeFullName = Try(node.json(ParserKeys.Type)).toOption match {
+          case Some(typ: ujson.Obj) => nodeTypeFullName(createDotNetNodeInfo(typ))
+          case _                    => Defines.Any
+        }
+        s"$refPrefix$typeFullName"
+      case RefType =>
+        val elementTypeNode = createDotNetNodeInfo(node.json(ParserKeys.ElementType))
+        s"ref ${nodeTypeFullName(elementTypeNode)}"
+      case ScopedType =>
+        val elementTypeNode = createDotNetNodeInfo(node.json(ParserKeys.ElementType))
+        nodeTypeFullName(elementTypeNode)
       case GenericName =>
         val typeName = nameFromNode(node)
         scope
@@ -222,14 +325,22 @@ object AstCreatorHelper {
   @tailrec
   def nameFromNode(node: DotNetNodeInfo): String = {
     node.node match {
-      case NamespaceDeclaration | UsingDirective | FileScopedNamespaceDeclaration => nameFromNamespaceDeclaration(node)
+      case NamespaceDeclaration | UsingDirective | ExternAliasDirective | FileScopedNamespaceDeclaration =>
+        nameFromNamespaceDeclaration(node)
       case IdentifierName | Parameter | _: DeclarationExpr | GenericName | SingleVariableDesignation =>
         nameFromIdentifier(node)
+      case TuplePattern | ParenthesizedVariableDesignation =>
+        node.code
+      case ExplicitInterfaceSpecifier =>
+        nameFromNode(createDotNetNodeInfo(node.json(ParserKeys.Name)))
       case QualifiedName => nameFromQualifiedName(node)
+      case TupleType | TupleElement =>
+        node.code
       case SimpleMemberAccessExpression | MemberBindingExpression | SuppressNullableWarningExpression | Attribute =>
         nameFromIdentifier(createDotNetNodeInfo(node.json(ParserKeys.Name)))
       case ObjectCreationExpression | CastExpression => nameFromNode(createDotNetNodeInfo(node.json(ParserKeys.Type)))
       case ThisExpression                            => Constants.This
+      case BaseExpression                            => Constants.Base
       case _                                         => "<empty>"
     }
   }

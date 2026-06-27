@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService
 final case class Config(
   inferenceJarPaths: Set[String] = Set.empty,
   fetchDependencies: Boolean = false,
+  parserBackend: JavaParserBackend = JavaParserBackend.JavaParser,
   javaFeatureSetVersion: Option[String] = None,
   delombokJavaHome: Option[String] = None,
   delombokMode: Option[String] = None,
@@ -47,6 +48,10 @@ final case class Config(
 
   def withFetchDependencies(value: Boolean): Config = {
     copy(fetchDependencies = value)
+  }
+
+  def withParserBackend(value: JavaParserBackend): Config = {
+    copy(parserBackend = value)
   }
 
   def withJavaFeatureSetVersion(version: String): Config = {
@@ -113,6 +118,13 @@ private object Frontend {
       opt[Unit]("fetch-dependencies")
         .text("attempt to fetch dependencies jars for extra type information")
         .action((_, c) => c.withFetchDependencies(true)),
+      opt[String]("parser-backend")
+        .hidden()
+        .validate { value =>
+          JavaParserBackend.fromString(value).fold(failure(s"Expected one of: javaparser, oxidized"))(_ => success)
+        }
+        .action((value, c) => JavaParserBackend.fromString(value).fold(c)(c.withParserBackend))
+        .text("parser backend to use. Options: javaparser, oxidized"),
       opt[String]("delombok-java-home")
         .text("Optional override to set java home used to run Delombok. Java 17 is recommended for the best results.")
         .action((path, c) => c.withDelombokJavaHome(path)),

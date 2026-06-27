@@ -73,6 +73,7 @@ class MatchingPatternsTests extends SwiftSrc2CpgSuite {
       val List(switchStructure) = cpg.controlStructure.controlStructureType(ControlStructureTypes.SWITCH).l
       switchStructure.code should startWith("switch (x,x)")
       switchStructure.ast.collectAll[JumpTarget].name.l shouldBe List("case (var a, var a)", "case _")
+      cpg.unknown.codeExact("_").l shouldBe empty
     }
 
     "testMatchingPatterns9" in {

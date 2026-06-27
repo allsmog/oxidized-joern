@@ -1,6 +1,7 @@
 package io.joern.rust2cpg.passes.ast
 
 import io.joern.rust2cpg.testfixtures.Rust2CpgSuite
+import io.joern.x2cpg.Defines
 import io.shiftleft.codepropertygraph.generated.NodeTypes
 import io.shiftleft.codepropertygraph.generated.nodes.*
 import io.shiftleft.semanticcpg.language.*
@@ -49,8 +50,7 @@ class MethodTests extends Rust2CpgSuite(noSysRoot = true) {
         inside(ret.astChildren.l) { case (ident: Identifier) :: Nil =>
           ident.name shouldBe "x"
           ident.code shouldBe "x"
-        // TODO: update once typeFullNames are recorded.
-        //  ident.typeFullName shouldBe "i32"
+          ident.typeFullName shouldBe "i32"
         }
       }
     }
@@ -73,6 +73,99 @@ class MethodTests extends Rust2CpgSuite(noSysRoot = true) {
         p3.index shouldBe 3
         p3.typeFullName shouldBe "f32"
       }
+    }
+  }
+
+  "methods with self parameters" should {
+    val cpg = code("""
+        |struct Widget;
+        |
+        |impl Widget {
+        | fn by_value(self, amount: i32) {}
+        | fn by_ref(&self, flag: bool) {}
+        | fn by_mut(&mut self, label: &str) {}
+        | fn typed(self: Box<Self>, count: i64) {}
+        |}
+        |""".stripMargin)
+
+    "preserve receiver parameters" in {
+      inside(cpg.method.name("by_value").parameter.sortBy(_.index).l) { case self :: amount :: Nil =>
+        self.name shouldBe "self"
+        self.code shouldBe "self"
+        self.index shouldBe 1
+        self.typeFullName should not be Defines.Any
+
+        amount.name shouldBe "amount"
+        amount.index shouldBe 2
+        amount.typeFullName shouldBe "i32"
+      }
+
+      inside(cpg.method.name("by_ref").parameter.sortBy(_.index).l) { case self :: flag :: Nil =>
+        self.name shouldBe "self"
+        self.code shouldBe "&self"
+        self.index shouldBe 1
+        self.typeFullName should not be Defines.Any
+
+        flag.name shouldBe "flag"
+        flag.index shouldBe 2
+        flag.typeFullName shouldBe "bool"
+      }
+
+      inside(cpg.method.name("by_mut").parameter.sortBy(_.index).l) { case self :: label :: Nil =>
+        self.name shouldBe "self"
+        self.code shouldBe "&mut self"
+        self.index shouldBe 1
+        self.typeFullName should not be Defines.Any
+
+        label.name shouldBe "label"
+        label.index shouldBe 2
+        label.typeFullName shouldBe "&str"
+      }
+    }
+
+    "preserve explicitly typed receivers" in {
+      inside(cpg.method.name("typed").parameter.sortBy(_.index).l) { case self :: count :: Nil =>
+        self.name shouldBe "self"
+        self.code shouldBe "self: Box<Self>"
+        self.index shouldBe 1
+        self.typeFullName should not be Defines.Any
+
+        count.name shouldBe "count"
+        count.index shouldBe 2
+        count.typeFullName shouldBe "i64"
+      }
+    }
+
+    "not create unknown nodes for self parameters" in {
+      cpg.all.collectAll[Unknown].codeExact("self", "&self", "&mut self", "self: Box<Self>").l shouldBe empty
+    }
+  }
+
+  "a fn with destructuring and wildcard parameters" should {
+    val cpg = code("""
+        |fn consume((left, right): (i32, i64), _: bool) {
+        | sink(left);
+        | sink(right);
+        |}
+        |""".stripMargin)
+
+    "create one parameter per binding" in {
+      inside(cpg.method.name("consume").parameter.sortBy(_.index).l) { case left :: right :: ignored :: Nil =>
+        left.name shouldBe "left"
+        left.index shouldBe 1
+
+        right.name shouldBe "right"
+        right.index shouldBe 2
+
+        ignored.name shouldBe "_"
+        ignored.code shouldBe "_: bool"
+        ignored.index shouldBe 3
+        ignored.typeFullName shouldBe "bool"
+      }
+    }
+
+    "not create unknown nodes for parameter patterns" in {
+      cpg.all.collectAll[Unknown].codeExact("(left, right): (i32, i64)", "_: bool").l shouldBe empty
     }
   }
 

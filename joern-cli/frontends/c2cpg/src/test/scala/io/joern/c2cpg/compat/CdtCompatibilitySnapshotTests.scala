@@ -326,8 +326,8 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             |}
             |""".stripMargin,
           filename = "Test0.cpp",
-          options =
-            CompatibilitySnapshot.RenderOptions(typeNames = Seq("Counter"), includeReturns = true, includeCallDetails = true)
+          options = CompatibilitySnapshot
+            .RenderOptions(typeNames = Seq("Counter"), includeReturns = true, includeCallDetails = true)
         ),
         BackendParitySnapshot.Case(
           "C++ virtual member dispatch",
@@ -346,11 +346,8 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             |}
             |""".stripMargin,
           filename = "Test0.cpp",
-          options = CompatibilitySnapshot.RenderOptions(
-            typeNames = Seq("Base", "Derived"),
-            includeReturns = true,
-            includeCallDetails = true
-          )
+          options = CompatibilitySnapshot
+            .RenderOptions(typeNames = Seq("Base", "Derived"), includeReturns = true, includeCallDetails = true)
         ),
         BackendParitySnapshot.Case(
           "C++ static member access",
@@ -368,8 +365,8 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             |}
             |""".stripMargin,
           filename = "Test0.cpp",
-          options =
-            CompatibilitySnapshot.RenderOptions(typeNames = Seq("Counter"), includeReturns = true, includeCallDetails = true)
+          options = CompatibilitySnapshot
+            .RenderOptions(typeNames = Seq("Counter"), includeReturns = true, includeCallDetails = true)
         ),
         BackendParitySnapshot.Case(
           "C++ overloaded operators",
@@ -390,7 +387,8 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             |}
             |""".stripMargin,
           filename = "Test0.cpp",
-          options = CompatibilitySnapshot.RenderOptions(typeNames = Seq("Box"), includeReturns = true, includeCallDetails = true)
+          options = CompatibilitySnapshot
+            .RenderOptions(typeNames = Seq("Box"), includeReturns = true, includeCallDetails = true)
         ),
         BackendParitySnapshot.Case(
           "C++ template declarations and instantiated receivers",
@@ -409,11 +407,8 @@ class BackendParitySnapshotTests extends C2CpgSuite {
             |}
             |""".stripMargin,
           filename = "Test0.cpp",
-          options = CompatibilitySnapshot.RenderOptions(
-            typeNames = Seq("Holder"),
-            includeReturns = true,
-            includeCallDetails = true
-          )
+          options = CompatibilitySnapshot
+            .RenderOptions(typeNames = Seq("Holder"), includeReturns = true, includeCallDetails = true)
         ),
         BackendParitySnapshot.Case(
           "C++ reference and pointer expressions",
@@ -480,7 +475,9 @@ class BackendParitySnapshotTests extends C2CpgSuite {
     val cdtSnapshot      = CompatibilitySnapshot.render(cdt, testCase.options)
     val oxidizedSnapshot = CompatibilitySnapshot.render(oxidized, testCase.options)
 
-    withClue(s"${testCase.name} parity snapshot differed\n${CompatibilitySnapshot.diff(oxidizedSnapshot, cdtSnapshot)}") {
+    withClue(
+      s"${testCase.name} parity snapshot differed\n${CompatibilitySnapshot.diff(oxidizedSnapshot, cdtSnapshot)}"
+    ) {
       oxidizedSnapshot shouldBe cdtSnapshot
     }
   }
@@ -513,8 +510,8 @@ object CompatibilitySnapshot {
         options.includeCallDetails && {
           val methodFullName = comparableTemplateMethodFullName(method.fullName, genericMethodFullNames)
           isSyntheticOperatorMethod(method.name) ||
-            isSyntheticTemplateInstantiation(method.lineNumber.isEmpty, methodFullName, genericMethodFullNames) ||
-            isSyntheticConstructorMethod(method.lineNumber.isEmpty, methodFullName)
+          isSyntheticTemplateInstantiation(method.lineNumber.isEmpty, methodFullName, genericMethodFullNames) ||
+          isSyntheticConstructorMethod(method.lineNumber.isEmpty, methodFullName)
         }
       )
       .map { method =>
@@ -549,13 +546,7 @@ object CompatibilitySnapshot {
     val locals = cpg.local.l
       .filterNot(local => isTypeOwnerLocal(cpg, local.name, local.typeFullName, local.code))
       .map { local =>
-        line(
-          "LOCAL",
-          local.name,
-          local.typeFullName,
-          local.code,
-          local.lineNumber.map(_.toString).getOrElse("?")
-        )
+        line("LOCAL", local.name, local.typeFullName, local.code, local.lineNumber.map(_.toString).getOrElse("?"))
       }
 
     val returns =
@@ -584,22 +575,14 @@ object CompatibilitySnapshot {
             call.lineNumber.map(_.toString).getOrElse("?")
           )
         } else
-          Seq(
-            call.name,
-            call.methodFullName,
-            call.code,
-            call.lineNumber.map(_.toString).getOrElse("?")
-          )
+          Seq(call.name, call.methodFullName, call.code, call.lineNumber.map(_.toString).getOrElse("?"))
       line("CALL", values*)
     }
 
-    val sections = Seq(
-      section("METHODS", methods),
-      section("TYPES", typeDecls),
-      section("LOCALS", locals)
-    ) ++ Option.when(options.includeReturns)(section("RETURNS", returns)) ++ Seq(
-      section("CALLS", calls)
-    )
+    val sections =
+      Seq(section("METHODS", methods), section("TYPES", typeDecls), section("LOCALS", locals)) ++ Option.when(
+        options.includeReturns
+      )(section("RETURNS", returns)) ++ Seq(section("CALLS", calls))
     sections.mkString("\n")
   }
 
@@ -635,10 +618,10 @@ object CompatibilitySnapshot {
   private def comparableMethodFullName(fullName: String): String = {
     val operatorNormalized =
       fullName
-      .replace(".operator():", ".():")
-      .replace(".operator+:", ".+:")
-      .replace(".operator=:", ".=:")
-      .replace(".operator[]:", ".[]:")
+        .replace(".operator():", ".():")
+        .replace(".operator+:", ".+:")
+        .replace(".operator=:", ".=:")
+        .replace(".operator[]:", ".[]:")
     normalizeConstructorAndDestructorFullName(normalizeFullNameSignature(operatorNormalized))
   }
 

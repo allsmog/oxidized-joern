@@ -40,6 +40,14 @@ object RubyExternalTypeRecoveryTests {
       |gem "logger"
       |gem "dummy_logger"
       |""".stripMargin
+
+  private val DBI_GEMFILE =
+    """
+      |# frozen_string_literal: true
+      |source "https://rubygems.org"
+      |
+      |gem "dbi"
+      |""".stripMargin
 }
 
 class RubyInternalTypeRecoveryTests extends RubyCode2CpgFixture(withPostProcessing = true) {
@@ -125,9 +133,8 @@ class RubyInternalTypeRecoveryTests extends RubyCode2CpgFixture(withPostProcessi
         "test1.rb"
       )
 
-    // TODO: Revisit
-    "propagate to assigned variable" ignore {
-      inside(cpg.file("test1.rb").method.name(":program").call.nameExact("<operator>.assignment").l) {
+    "propagate to assigned variable" in {
+      inside(cpg.file.nameExact("test1.rb").method.nameExact(Main).call.nameExact("<operator>.assignment").l) {
         case funcAssignment :: constructAssignment :: tmpAssignment :: Nil =>
           inside(funcAssignment.argument.l) { case (lhs: Identifier) :: rhs :: Nil =>
             lhs.typeFullName shouldBe Defines.prefixAsCoreType("String")
@@ -154,8 +161,7 @@ class RubyInternalTypeRecoveryTests extends RubyCode2CpgFixture(withPostProcessi
                      |b = func
                      |""".stripMargin)
 
-    // TODO: Revisit
-    "propagate to identifier" ignore {
+    "propagate to identifier" in {
       inside(cpg.identifier.name("(a|b)").l) { case aIdent :: bIdent :: Nil =>
         aIdent.typeFullName shouldBe s"Test0.rb:$Main.A"
         bIdent.typeFullName shouldBe s"Test0.rb:$Main.A"
@@ -182,10 +188,11 @@ class RubyExternalTypeRecoveryTests
     )
       .moreCode(RubyExternalTypeRecoveryTests.SENDGRID_GEMFILE, "Gemfile")
 
-    // TODO: Revisit
-    "be present in (Case 1)" ignore {
+    "be present in (Case 1)" in {
       cpg.identifier("sg").lineNumber(5).typeFullName.l shouldBe List("sendgrid-ruby.SendGrid.API")
-      cpg.call("client").methodFullName.headOption shouldBe Option("sendgrid-ruby.SendGrid.API.client")
+      inside(cpg.fieldAccess.codeExact("sg.client").l) { case clientAccess :: Nil =>
+        clientAccess.dynamicTypeHintFullName should contain("sendgrid-ruby.SendGrid.API.client")
+      }
     }
 
     "resolve correct imports via tag nodes" in {
@@ -203,23 +210,22 @@ class RubyExternalTypeRecoveryTests
       }
     }
 
-    "be present in (Case 2)" ignore {
+    "be present in (Case 2)" in {
       cpg.call("post").methodFullName.l shouldBe List(
-        s"sendgrid-ruby.$Main.SendGrid.API.client<returnValue>.mail<returnValue>.anonymous<returnValue>.post"
+        "sendgrid-ruby.SendGrid.API.client.<returnValue>.mail.<returnValue>.anonymous.<returnValue>.post"
       )
     }
   }
 
-  // TODO: Handle . versus :: Syntax needs to be resolved first
-  "Type information for module members across modules" ignore {
+  "Type information for module members across modules" should {
     val cpg = code(
       """
-        |# require "dbi"
+        |require "dbi"
         |
         |module FooModule
         | x = 1
         | y = "test"
-        | # db = DBI.connect("DBI:Mysql:TESTDB:localhost", "testuser", "test123")
+        | db = DBI.connect("DBI:Mysql:TESTDB:localhost", "testuser", "test123")
         |end
         |
         |""".stripMargin,
@@ -231,18 +237,19 @@ class RubyExternalTypeRecoveryTests
         |z = FooModule::x
         |z = FooModule::y
         |
-        |# d = FooModule::db
+        |d = FooModule::db
         |
-        |# row = d.select_one("SELECT VERSION()")
+        |row = d.select_one("SELECT VERSION()")
         |
         |""".stripMargin,
       "bar.rb"
-    ).cpg
+    ).moreCode(RubyExternalTypeRecoveryTests.DBI_GEMFILE, "Gemfile")
+      .cpg
 
     "resolve 'x' and 'y' locally under foo.rb" in {
-      val Some(x) = cpg.identifier("x").where(_.file.name(".*foo.*")).headOption: @unchecked
+      val Some(x) = cpg.typeDecl.fullName(".*FooModule<class>").member.nameExact("x").headOption: @unchecked
       x.typeFullName shouldBe Defines.prefixAsCoreType("Integer")
-      val Some(y) = cpg.identifier("y").where(_.file.name(".*foo.*")).headOption: @unchecked
+      val Some(y) = cpg.typeDecl.fullName(".*FooModule<class>").member.nameExact("y").headOption: @unchecked
       y.typeFullName shouldBe Defines.prefixAsCoreType("String")
     }
 
@@ -259,37 +266,53 @@ class RubyExternalTypeRecoveryTests
       z2.dynamicTypeHintFullName shouldBe Seq(Defines.prefixAsCoreType("Integer"), Defines.prefixAsCoreType("String"))
     }
 
-    "resolve 'FooModule.d' field access object types correctly" ignore {
+    "resolve 'FooModule.d' field access object types correctly" in {
+      val Some(db) = cpg.typeDecl.fullName(".*FooModule<class>").member.nameExact("db").headOption: @unchecked
+      db.typeFullName shouldBe "dbi.DBI.connect.<returnValue>"
       val Some(d) = cpg.file
         .name(".*bar.*")
         .ast
         .isIdentifier
         .name("d")
         .headOption: @unchecked
-      d.typeFullName shouldBe "dbi.$Main.DBI.connect.<returnValue>"
+      d.typeFullName shouldBe "dbi.DBI.connect.<returnValue>"
       d.dynamicTypeHintFullName shouldBe Seq()
     }
 
-    "resolve a 'select_one' call indirectly from 'FooModule.d' field access correctly" ignore {
+    "resolve a 'select_one' call indirectly from 'FooModule.d' field access correctly" in {
       val List(d) = cpg.file
         .name(".*bar.*")
         .ast
         .isCall
         .name("select_one")
         .l
-      d.methodFullName shouldBe "dbi.$Main.DBI.connect.<returnValue>.select_one"
+      d.methodFullName shouldBe "dbi.DBI.connect.<returnValue>.select_one"
       d.dynamicTypeHintFullName shouldBe Seq()
       d.callee(NoResolve).isExternal.headOption shouldBe Some(true)
     }
 
-    // TODO Waiting for Module modelling to be done
-    "resolve correct imports via tag nodes" ignore {
-      val List(foo: ResolvedTypeDecl) =
-        cpg.file(".*foo.rb").ast.isCall.where(_.referencedImports).tag._toEvaluatedImport.toList: @unchecked
-      foo.fullName shouldBe s"dbi.$Main.DBI"
-      val List(bar: ResolvedTypeDecl) =
-        cpg.file(".*bar.rb").ast.isCall.where(_.referencedImports).tag._toEvaluatedImport.toList: @unchecked
-      bar.fullName shouldBe s"foo.rb.$Main.FooModule"
+    "resolve correct imports via tag nodes" in {
+      val fooResolvedTypes = cpg
+        .file(".*foo.rb")
+        .ast
+        .isCall
+        .where(_.referencedImports)
+        .tag
+        ._toEvaluatedImport
+        .collect { case resolved: ResolvedTypeDecl => resolved.fullName }
+        .toSet
+      fooResolvedTypes should contain("dbi.DBI")
+
+      val barResolvedTypes = cpg
+        .file(".*bar.rb")
+        .ast
+        .isCall
+        .where(_.referencedImports)
+        .tag
+        ._toEvaluatedImport
+        .collect { case resolved: ResolvedTypeDecl => resolved.fullName }
+        .toSet
+      barResolvedTypes should contain(s"foo.rb:$Main.FooModule")
     }
 
   }
@@ -318,8 +341,7 @@ class RubyExternalTypeRecoveryTests
       }
     }
 
-    // TODO: Revisit
-    "provide a dummy type" ignore {
+    "provide a dummy type" in {
       val Some(log) = cpg.identifier("log").headOption: @unchecked
       log.typeFullName shouldBe "logger.Logger"
       val List(errorCall) = cpg.call("error").l
@@ -351,8 +373,7 @@ class RubyExternalTypeRecoveryTests
     }
   }
 
-  // TODO: revisit
-  "recovery of type for call having a method with same name" ignore {
+  "recovery of type for call having a method with same name" should {
     lazy val cpg = code("""
                           |require "logger"
                           |

@@ -10,6 +10,7 @@ case class DefaultContentRootJarPath(path: String, isResource: Boolean)
 final case class Config(
   classpath: Set[String] = Set.empty,
   withStdlibJarsInClassPath: Boolean = true,
+  parserBackend: KotlinParserBackend = KotlinParserBackend.KotlinCompiler,
   gradleProjectName: Option[String] = None,
   gradleConfigurationName: Option[String] = None,
   jar4importServiceUrl: Option[String] = None,
@@ -30,6 +31,10 @@ final case class Config(
 
   def withStdLibJars(value: Boolean): Config = {
     this.copy(withStdlibJarsInClassPath = value)
+  }
+
+  def withParserBackend(value: KotlinParserBackend): Config = {
+    this.copy(parserBackend = value)
   }
 
   def withGradleProjectName(name: String): Config = {
@@ -66,8 +71,7 @@ private object Frontend {
 
   val cmdLineParser: OParser[Unit, Config] = {
     val builder = OParser.builder[Config]
-    import builder.programName
-    import builder.opt
+    import builder.*
     OParser.sequence(
       programName("kotlin2cpg"),
       opt[String]("classpath")
@@ -77,6 +81,15 @@ private object Frontend {
       opt[Unit]("no-stdlib-jars")
         .text("Do not add local versions of Kotlin stdlib jars to classpath")
         .action((_, c) => c.withStdLibJars(false)),
+      opt[String]("parser-backend")
+        .hidden()
+        .validate { value =>
+          KotlinParserBackend
+            .fromString(value)
+            .fold(failure("Expected one of: kotlin-compiler, oxidized"))(_ => success)
+        }
+        .action((value, c) => KotlinParserBackend.fromString(value).fold(c)(c.withParserBackend))
+        .text("parser backend to use. Options: kotlin-compiler, oxidized"),
       opt[String]("jar4import-url")
         .text("Set URL of service which fetches necessary dependency jars for import names found in the project")
         .action((value, c) => c.withJar4ImportServiceUrl(value)),

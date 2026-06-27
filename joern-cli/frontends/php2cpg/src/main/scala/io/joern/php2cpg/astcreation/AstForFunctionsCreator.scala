@@ -165,9 +165,18 @@ trait AstForFunctionsCreator(implicit withSchemaValidation: ValidationMode) { th
     scope.pushNewScope(
       MethodScope(method, methodBodyNode, method.fullName, decl.params.map(_.name), methodRef, isArrowClosure)
     )
+    parameters.flatMap(_.root).collect { case parameter: NewMethodParameterIn =>
+      scope.addToScope(parameter.name, parameter)
+    }
+    bodyPrefixAsts.flatMap(_.root).collect { case local: NewLocal =>
+      scope.addToScope(local.name, local)
+    }
     scope.useFunctionDecl(methodName, fullName)
 
-    val returnType = decl.returnType.map(_.name).getOrElse(Defines.Any)
+    val returnType = decl.returnType
+      .map(typeName => resolveTypeName(typeName.name))
+      .orElse(docblockReturnType(decl))
+      .getOrElse(Defines.Any)
 
     val fieldInitAsts = scope.getFieldInits.map { fieldInit =>
       astForMemberAssignment(fieldInit.originNode, fieldInit.memberNode, fieldInit.value, isField = true)
@@ -235,6 +244,21 @@ trait AstForFunctionsCreator(implicit withSchemaValidation: ValidationMode) { th
       .withRefEdge(binding, method)
 
     scope.registerAstForInsertion(methodTypeDeclAst)
+  }
+
+  private def docblockReturnType(decl: PhpMethodDecl): Option[String] = {
+    val startOffset = decl.attributes.startFilePos
+    Option
+      .when(startOffset > 0) {
+        new String(fileContentBytes.slice(0, startOffset), fileCharset).takeRight(4096)
+      }
+      .flatMap { prefix =>
+        val pattern = """(?s).*/\*\*.*?@return\s+([^\s*]+).*?\*/\s*$""".r
+        prefix match {
+          case pattern(typeName) => Some(resolveTypeName(typeName.stripPrefix("\\")))
+          case _                 => None
+        }
+      }
   }
 
   private def thisParamAstForMethod(originNode: PhpNode): Ast = {
@@ -307,7 +331,7 @@ trait AstForFunctionsCreator(implicit withSchemaValidation: ValidationMode) { th
       else
         EvaluationStrategies.BY_VALUE
 
-    val typeFullName = param.paramType.map(_.name).getOrElse(Defines.Any)
+    val typeFullName = param.paramType.map(typeName => resolveTypeName(typeName.name)).getOrElse(Defines.Any)
 
     val byRefCodePrefix = if (param.byRef) "&" else ""
     val code            = s"$byRefCodePrefix$$${param.name}"

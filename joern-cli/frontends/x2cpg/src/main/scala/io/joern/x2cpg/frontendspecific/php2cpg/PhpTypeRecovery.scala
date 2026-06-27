@@ -11,6 +11,7 @@ import io.shiftleft.semanticcpg.language.operatorextension.OpNodes.{Assignment, 
 import io.shiftleft.codepropertygraph.generated.DiffGraphBuilder
 
 import scala.collection.mutable
+import scala.util.Try
 
 class PhpTypeRecoveryPassGenerator(cpg: Cpg, config: XTypeRecoveryConfig = XTypeRecoveryConfig(iterations = 3))
     extends XTypeRecoveryPassGenerator[NamespaceBlock](cpg, config) {
@@ -37,13 +38,44 @@ private class PhpTypeRecovery(cpg: Cpg, state: XTypeRecoveryState, iteration: In
 
 private class RecoverForPhpFile(cpg: Cpg, cu: NamespaceBlock, builder: DiffGraphBuilder, state: XTypeRecoveryState)
     extends RecoverForXCompilationUnit[NamespaceBlock](cpg, cu, builder, state) {
+  private def scopedLocalName(name: String, node: AstNode): String =
+    methodFullName(node) match {
+      case Some(methodFullName) => s"$methodFullName::$name"
+      case None                 => name
+    }
+
+  private def methodFullName(node: AstNode): Option[String] = node match {
+    case cfgNode: CfgNode => Try(cfgNode.method.fullName).toOption
+    case local: Local     => Try(local.method.headOption.map(_.fullName)).toOption.flatten
+    case _                => None
+  }
+
+  private def localVar(name: String, node: AstNode): LocalVar =
+    LocalVar(scopedLocalName(name, node))
+
+  override protected def fromNodeToLocalKey(node: AstNode): Option[LocalKey] = {
+    Option(node match {
+      case n: Identifier        => localVar(n.name, n)
+      case n: Local             => localVar(n.name, n)
+      case n: MethodParameterIn => localVar(n.name, n)
+      case n: Call =>
+        CallAlias(n.name, n.argument.collectFirst { case x: Identifier if x.argumentIndex == 0 => x.name })
+      case n: Method          => CallAlias(n.name, Option("this"))
+      case n: MethodRef       => CallAlias(n.code)
+      case n: FieldIdentifier => LocalVar(n.canonicalName)
+      case _ =>
+        logger.debug(s"Local node of type ${node.label} is not supported in the PHP type recovery pass.")
+        null
+    })
+  }
+
   override protected def prepopulateSymbolTableEntry(x: AstNode): Unit = x match {
     case x: Call =>
       x.methodFullName match {
         case Operators.alloc =>
           val allocRecv = x.code.takeWhile(_ != '.')
           symbolTable.append(CallAlias(allocRecv), Set(x.typeFullName))
-          symbolTable.append(LocalVar(allocRecv), Set(x.typeFullName))
+          symbolTable.append(localVar(allocRecv, x), Set(x.typeFullName))
         case s"<operator>.$_" =>
         case _                => symbolTable.append(x, (x.methodFullName +: x.dynamicTypeHintFullName).toSet)
       }
@@ -91,9 +123,9 @@ private class RecoverForPhpFile(cpg: Cpg, cu: NamespaceBlock, builder: DiffGraph
       associateTypes(i, callReturns)
     } else if (c.receiver.nonEmpty) {
       val callFullNames = (c.receiver.headOption match {
-        case Some(i: Identifier) if symbolTable.contains(LocalVar(i.name))  => symbolTable.get(LocalVar(i.name))
-        case Some(i: Identifier) if symbolTable.contains(CallAlias(i.name)) => symbolTable.get(CallAlias(i.name))
-        case _                                                              => Set.empty
+        case Some(i: Identifier) if symbolTable.contains(localVar(i.name, i)) => symbolTable.get(localVar(i.name, i))
+        case Some(i: Identifier) if symbolTable.contains(CallAlias(i.name))   => symbolTable.get(CallAlias(i.name))
+        case _                                                                => Set.empty
       }).map(_.concat(s"$pathSep${c.name}")).toSeq
       val callReturns = methodReturnValues(callFullNames)
       associateTypes(i, callReturns)
@@ -235,6 +267,18 @@ private class RecoverForPhpFile(cpg: Cpg, cu: NamespaceBlock, builder: DiffGraph
     }
   }
 
+  override protected def visitCallAssignedToLiteral(c: Call, l: Literal): Set[String] = {
+    if (c.name == Operators.indexAccess) {
+      val types = getLiteralType(l).filterNot(_ == Defines.Any)
+      if (types.nonEmpty) {
+        indexAccessToCollectionVar(c).foreach(symbolTable.append(_, types))
+        symbolTable.append(c, types)
+      } else Set.empty
+    } else {
+      super.visitCallAssignedToLiteral(c, l)
+    }
+  }
+
   override protected def indexAccessToCollectionVar(c: Call): Option[CollectionVar] = {
     def callName(x: Call) =
       if (x.name == Operators.fieldAccess)
@@ -246,8 +290,8 @@ private class RecoverForPhpFile(cpg: Cpg, cu: NamespaceBlock, builder: DiffGraph
       else x.name
 
     val collectionVar = Option(c.argumentOut.cast[CfgNode].l match {
-      case List(i: Identifier, idx: Literal)    => CollectionVar(i.name, idx.code)
-      case List(i: Identifier, idx: Identifier) => CollectionVar(i.name, idx.code)
+      case List(i: Identifier, idx: Literal)    => CollectionVar(scopedLocalName(i.name, i), idx.code)
+      case List(i: Identifier, idx: Identifier) => CollectionVar(scopedLocalName(i.name, i), idx.code)
       case List(c: Call, idx: Call)             => CollectionVar(callName(c), callName(idx))
       case List(c: Call, idx: Literal)          => CollectionVar(callName(c), idx.code)
       case List(c: Call, idx: Identifier)       => CollectionVar(callName(c), idx.code)
@@ -260,6 +304,9 @@ private class RecoverForPhpFile(cpg: Cpg, cu: NamespaceBlock, builder: DiffGraph
   }
   override protected def assignTypesToCall(x: Call, types: Set[String]): Set[String] = {
     if (types.nonEmpty) {
+      if (x.name == Operators.indexAccess) {
+        symbolTable.append(x, types)
+      }
       getSymbolFromCall(x) match {
         case (lhs, globalKeys) if globalKeys.nonEmpty => {
           globalKeys.foreach { (fieldVar: FieldPath) =>
@@ -270,6 +317,15 @@ private class RecoverForPhpFile(cpg: Cpg, cu: NamespaceBlock, builder: DiffGraph
         case (lhs, _) => symbolTable.append(lhs, types)
       }
     } else Set.empty
+  }
+
+  override protected def storeCallTypeInfo(c: Call, types: Seq[String]): Unit = {
+    val distinctTypes = types.distinct
+    if (c.name == Operators.indexAccess && distinctTypes.sizeIs == 1) {
+      builder.setNodeProperty(c, PropertyNames.TypeFullName, distinctTypes.head)
+    } else {
+      super.storeCallTypeInfo(c, types)
+    }
   }
 
   override protected def methodReturnValues(methodFullNames: Seq[String]): Set[String] = {

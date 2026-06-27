@@ -17,6 +17,7 @@ case class Py2CpgOnFileSystemConfig(
   ignorePaths: Seq[Path] = Nil,
   ignoreDirNames: Seq[String] = Nil,
   requirementsTxt: String = "requirements.txt",
+  parserBackend: PythonParserBackend = PythonParserBackend.JavaCc,
   override val genericConfig: X2CpgConfig.GenericConfig = X2CpgConfig.GenericConfig(),
   override val typeRecoveryParserConfig: TypeRecoveryParserConfig.Config = TypeRecoveryParserConfig.Config()
 ) extends X2CpgConfig[Py2CpgOnFileSystemConfig]
@@ -50,6 +51,10 @@ case class Py2CpgOnFileSystemConfig(
 
   def withRequirementsTxt(text: String): Py2CpgOnFileSystemConfig = {
     copy(requirementsTxt = text)
+  }
+
+  def withParserBackend(value: PythonParserBackend): Py2CpgOnFileSystemConfig = {
+    copy(parserBackend = value)
   }
 }
 
@@ -97,7 +102,7 @@ class Py2CpgOnFileSystem extends X2CpgFrontend {
           Py2Cpg.InputPair(content, inputPath.relativize(inputFile).toString)
         }
       }
-      val py2Cpg = new Py2Cpg(inputProviders, cpg, config)
+      val py2Cpg = new Py2Cpg(inputProviders, cpg, config, inputFiles)
       py2Cpg.buildCpg()
     }
   }
@@ -135,6 +140,7 @@ class Py2CpgOnFileSystem extends X2CpgFrontend {
     logger.info(s"IgnoreVenvDir: ${config.ignoreVenvDir}")
     logger.info(s"IgnorePaths: ${config.ignorePaths.mkString(", ")}")
     logger.info(s"IgnoreDirNames: ${config.ignoreDirNames.mkString(", ")}")
+    logger.info(s"Parser backend: ${config.parserBackend.name}")
     logger.info(s"No dummy types: ${config.disableDummyTypes}")
     logger.info(s"Enable file content: ${!config.disableFileContent}")
     logger.info(s"Version: ${this.getClass.getPackage.getImplementationVersion}")

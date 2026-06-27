@@ -11,14 +11,8 @@ use tempfile::TempDir;
 /// frontend invokes astgen (`AstGenRunner` passes `-t ts` for every `.js/.ts/.tsx`
 /// input; there is no separate `tsx` type).
 ///
-/// Deliberately excluded constructs (they currently fall through to `Noop` by
-/// design and would trip the zero-unmapped assertion):
-///   * `debugger` statements and hash-bang (`#!`) lines (see
-///     `jsastgen_core::take_unmapped_summary` doc comment).
-///   * The `undefined` keyword in *type* position inside a union (e.g.
-///     `number | undefined`). `undefined` as a value/standalone type is mapped,
-///     but the union-member path routes the keyword through `Noop`. `null` is
-///     used instead so the union/optional surface is still covered.
+/// Deliberately excluded constructs:
+///   * Hash-bang (`#!`) lines are treated as comments by tree-sitter and skipped.
 const COVERAGE_TSX: &str = r#"// Advanced TypeScript type machinery.
 type Keys = keyof { a: number; b: string };
 type Indexed = { a: number; b: string }["a"];
@@ -77,8 +71,8 @@ const label = `count=${1 + 2}`;
 const tagged = tag`sum=${1}${2}`;
 
 // Optional chaining including an optional call `a?.b?.()`.
-function probe(obj?: { nested?: { run?: () => number } }): number | null {
-  return obj?.nested?.run?.() ?? null;
+function probe(obj?: { nested?: { run?: () => number } }): number | undefined {
+  return obj?.nested?.run?.();
 }
 
 // new.target and import.meta.
@@ -88,6 +82,8 @@ function Widget(this: unknown): void {
   }
 }
 const metaUrl = import.meta.url;
+
+debugger;
 
 // JSX (the reason this fixture is .tsx).
 const view = (

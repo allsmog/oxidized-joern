@@ -43,8 +43,8 @@ object LiteralMethods {
     Languages.JAVASCRIPT -> List("\"", "'", "`"),
     Languages.JSSRC      -> List("\"", "'", "`"),
     Languages.GOLANG     -> List("\"", "`"),
-    Languages.CSHARP     -> List("\""),
-    Languages.CSHARPSRC  -> List("\""),
+    Languages.CSHARP     -> List("\"\"\"", "\""),
+    Languages.CSHARPSRC  -> List("\"\"\"", "\""),
     Languages.RUBYSRC    -> List("\"", "'"),
     Languages.PYTHON     -> List("\"\"\"", "'''", "\"", "'"),
     Languages.PYTHONSRC  -> List("\"\"\"", "'''", "\"", "'")

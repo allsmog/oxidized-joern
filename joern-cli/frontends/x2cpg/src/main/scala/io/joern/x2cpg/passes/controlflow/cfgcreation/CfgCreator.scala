@@ -212,8 +212,11 @@ class CfgCreator(entryNode: Method, diffGraph: DiffGraphBuilder) {
       .coalesce(
         _._jumpArgumentOut.cast[AstNode],
         { node =>
-          CfgCreator.warnOnce("Using order fallback for break statement jump argument")
-          node.astChildren.order(1)
+          val fallback = node.astChildren.order(1).l
+          if (fallback.nonEmpty) {
+            CfgCreator.warnOnce("Using order fallback for break statement jump argument")
+          }
+          fallback.iterator
         }
       )
       .headOption
@@ -241,8 +244,11 @@ class CfgCreator(entryNode: Method, diffGraph: DiffGraphBuilder) {
       .coalesce(
         _._jumpArgumentOut.cast[AstNode],
         { node =>
-          CfgCreator.warnOnce("Using order fallback for continue statement jump argument")
-          node.astChildren.order(1)
+          val fallback = node.astChildren.order(1).l
+          if (fallback.nonEmpty) {
+            CfgCreator.warnOnce("Using order fallback for continue statement jump argument")
+          }
+          fallback.iterator
         }
       )
       .headOption
@@ -289,8 +295,11 @@ class CfgCreator(entryNode: Method, diffGraph: DiffGraphBuilder) {
       .coalesce(
         _._jumpArgumentOut.cast[AstNode],
         { node =>
-          CfgCreator.warnOnce("Using order fallback for goto statement jump argument")
-          node.astChildren.order(1)
+          val fallback = node.astChildren.order(1).l
+          if (fallback.nonEmpty) {
+            CfgCreator.warnOnce("Using order fallback for goto statement jump argument")
+          }
+          fallback.iterator
         }
       )
       .headOption
@@ -416,14 +425,27 @@ class CfgCreator(entryNode: Method, diffGraph: DiffGraphBuilder) {
     * for the loop and a fringe.
     */
   protected def cfgForForStatement(node: ControlStructure): Cfg = {
-    val children = node.astChildren.l
-    val nLocals  = children.count(_.isLocal)
+    val children               = node.astChildren.l
+    val nLocals                = children.count(_.isLocal)
+    val explicitInitRoots      = node._forInitOut.cast[AstNode].toSet
+    val explicitConditionRoots = node._conditionOut.cast[AstNode].toSet
+    val explicitUpdateRoots    = node._forUpdateOut.cast[AstNode].toSet
+    val explicitBodyRoots      = node._forBodyOut.cast[AstNode].toSet
     val initExprCfg = Iterator(node)
       .coalesce(
         _._forInitOut.cast[AstNode],
         { node =>
-          CfgCreator.warnOnce("Using order fallback for for statement init")
-          node.astChildren.order(nLocals + 1)
+          val fallback =
+            node.astChildren
+              .order(nLocals + 1)
+              .filterNot(x =>
+                explicitConditionRoots.contains(x) || explicitUpdateRoots.contains(x) || explicitBodyRoots.contains(x)
+              )
+              .l
+          if (fallback.nonEmpty) {
+            CfgCreator.warnOnce("Using order fallback for for statement init")
+          }
+          fallback.iterator
         }
       )
       .headOption
@@ -433,8 +455,17 @@ class CfgCreator(entryNode: Method, diffGraph: DiffGraphBuilder) {
       .coalesce(
         _._conditionOut.cast[AstNode],
         { node =>
-          CfgCreator.warnOnce("Using order fallback for for statement condition")
-          node.astChildren.order(nLocals + 2)
+          val fallback =
+            node.astChildren
+              .order(nLocals + 2)
+              .filterNot(x =>
+                explicitInitRoots.contains(x) || explicitUpdateRoots.contains(x) || explicitBodyRoots.contains(x)
+              )
+              .l
+          if (fallback.nonEmpty) {
+            CfgCreator.warnOnce("Using order fallback for for statement condition")
+          }
+          fallback.iterator
         }
       )
       .headOption
@@ -444,8 +475,17 @@ class CfgCreator(entryNode: Method, diffGraph: DiffGraphBuilder) {
       .coalesce(
         _._forUpdateOut.cast[AstNode],
         { node =>
-          CfgCreator.warnOnce("Using order fallback for for statement update")
-          node.astChildren.order(nLocals + 3)
+          val fallback =
+            node.astChildren
+              .order(nLocals + 3)
+              .filterNot(x =>
+                explicitInitRoots.contains(x) || explicitConditionRoots.contains(x) || explicitBodyRoots.contains(x)
+              )
+              .l
+          if (fallback.nonEmpty) {
+            CfgCreator.warnOnce("Using order fallback for for statement update")
+          }
+          fallback.iterator
         }
       )
       .headOption
@@ -455,8 +495,11 @@ class CfgCreator(entryNode: Method, diffGraph: DiffGraphBuilder) {
       .coalesce(
         _._forBodyOut.cast[AstNode],
         { node =>
-          CfgCreator.warnOnce("Using order fallback for for statement body")
-          node.astChildren.order(nLocals + 4)
+          val fallback = node.astChildren.order(nLocals + 4).l
+          if (fallback.nonEmpty) {
+            CfgCreator.warnOnce("Using order fallback for for statement body")
+          }
+          fallback.iterator
         }
       )
       .headOption
@@ -613,48 +656,58 @@ class CfgCreator(entryNode: Method, diffGraph: DiffGraphBuilder) {
       .coalesce(
         _._tryBodyOut.cast[AstNode].filter(_.astChildren.nonEmpty),
         { node =>
-          CfgCreator.warnOnce("Using order fallback for try statement body")
-          node.astChildren.order(1).where(_.astChildren)
+          val fallback = node.astChildren.order(1).where(_.astChildren).l
+          if (fallback.nonEmpty) {
+            CfgCreator.warnOnce("Using order fallback for try statement body")
+          }
+          fallback.iterator
         }
       )
       .headOption
 
     val tryBodyCfg: Cfg = maybeTryBlock.map(cfgFor).getOrElse(Cfg.empty)
 
+    def isFinallyBody(astNode: AstNode): Boolean = astNode match {
+      case controlStructure: ControlStructure =>
+        controlStructure.controlStructureType == ControlStructureTypes.FINALLY
+      case block: Block => block.code == "finally"
+      case _            => false
+    }
+
+    val nonTryBodyChildren = node.astChildren.l.filterNot(child => maybeTryBlock.contains(child))
     val catchControlStructures =
       (node.astChildren.isControlStructure.isCatch ++ node.astChildren.isControlStructure.isElse).toList
-    val catchBodyFallback =
-      if (catchControlStructures.isEmpty) node.astChildren.order(2)
-      else catchControlStructures.iterator
+    val catchBodyFallback = {
+      if (catchControlStructures.isEmpty) nonTryBodyChildren.filterNot(isFinallyBody)
+      else catchControlStructures
+    }
 
     val catchBodyCfgs = Iterator(node)
       .coalesce(
         _._catchBodyOut.cast[AstNode],
         { _ =>
-          CfgCreator.warnOnce("Using order fallback for try statement catch body")
-          catchBodyFallback
+          if (catchBodyFallback.nonEmpty) {
+            CfgCreator.warnOnce("Using order fallback for try statement catch body")
+          }
+          catchBodyFallback.iterator
         }
       )
       .map(cfgFor)
-      .toList match {
-      case Nil  => List(Cfg.empty)
-      case asts => asts
-    }
+      .toList
 
     val finallyControlStructures = node.astChildren.isControlStructure.isFinally.toList
     val finallyBodyFallback =
-      if (catchControlStructures.isEmpty && finallyControlStructures.isEmpty) {
-        node.astChildren.order(3)
-      } else {
-        finallyControlStructures.iterator
-      }
+      if (finallyControlStructures.nonEmpty) finallyControlStructures
+      else nonTryBodyChildren.filter(isFinallyBody)
 
     val maybeFinallyBodyCfg = Iterator(node)
       .coalesce(
         _._finallyBodyOut.cast[AstNode],
         { _ =>
-          CfgCreator.warnOnce("Using order fallback for try statement finally body")
-          finallyBodyFallback
+          if (finallyBodyFallback.nonEmpty) {
+            CfgCreator.warnOnce("Using order fallback for try statement finally body")
+          }
+          finallyBodyFallback.iterator
         }
       )
       .map(cfgFor)

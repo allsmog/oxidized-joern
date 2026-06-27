@@ -65,8 +65,10 @@ trait AstForTypeDeclsCreator(implicit withSchemaValidation: ValidationMode) { th
       .collect { case x: VisibilityAnnotationTag => x }
       .flatMap(_.getAnnotations.asScala)
     val modifiers = astsForModifiers(field)
-    val constantValue = field.getTags.asScala.collectFirst { case tag: ConstantValueTag =>
-      tag.getConstant.toString
+    val constantValue = rustFieldConstantValue(field).orElse {
+      field.getTags.asScala.collectFirst { case tag: ConstantValueTag =>
+        tag.getConstant.toString
+      }
     }
     val code =
       if (field.getDeclaration.contains("enum")) name
@@ -79,6 +81,17 @@ trait AstForTypeDeclsCreator(implicit withSchemaValidation: ValidationMode) { th
     Ast(memberNode(field, name, code, typeFullName))
       .withChildren(annotations.map(astsForAnnotations(_, field)).toSeq)
       .withChildren(modifiers)
+  }
+
+  private def rustFieldConstantValue(field: SootField): Option[String] = {
+    val fieldType = field.getType.toQuotedString
+    classInfo
+      .flatMap { info =>
+        info.fields
+          .find(fieldInfo => fieldInfo.name == field.getName && fieldInfo.typeName.contains(fieldType))
+          .orElse(info.fields.find(_.name == field.getName))
+      }
+      .flatMap(_.constantValue)
   }
 
   /** Creates a list of all inherited classes and implemented interfaces. If there are none then a list with a single

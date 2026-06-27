@@ -76,13 +76,15 @@ class StructureExtensionTests extends SwiftSrc2CpgSuite {
     typeDeclFoo.fullName shouldBe "Test0.swift:<global>.Foo"
     typeDeclFoo.member.name.l.sorted shouldBe List("a", "b", "c", "d", "e", "f", "g")
 
-    /** TODO: Re-enable once extension methods are properly accessible via EXTENSION_BLOCK
-      * typeDeclFoo.boundMethod.fullName.l shouldBe List(
-      * "Test0.swift:<global>.Foo.init:(paramA:Swift.String,paramB:Swift.Int)->Test0.swift:<global>.Foo",
-      * "Test0.swift:<global>.Foo.someFunc:()->ANY", "Test0.swift:<global>.Foo.someMethod:()->ANY",
-      * "Test0.swift:<global>.Foo.square:()->ANY", "Test0.swift:<global>.Foo.<clinit>:()->Test0.swift:<global>.Foo",
-      * "Test0.swift:<global>.Foo<extension>.someOtherFunc:()->ANY" )
-      */
+    typeDeclFoo.boundMethod.fullName.sorted.l shouldBe List(
+      "Test0.swift:<global>.Foo.init:(paramA:Swift.String,paramB:Swift.Int)->Test0.swift:<global>.Foo",
+      "Test0.swift:<global>.Foo.g:Swift.Double",
+      "Test0.swift:<global>.Foo.someFunc:()->ANY",
+      "Test0.swift:<global>.Foo.someMethod:()->ANY",
+      "Test0.swift:<global>.Foo.square:()->ANY",
+      "Test0.swift:<global>.Foo.<clinit>:()->Test0.swift:<global>.Foo",
+      "Test0.swift:<global>.Foo<extension>.someOtherFunc:()->ANY"
+    ).sorted
 
     cpg.typ.name.l.distinct shouldBe cpg.typ.name.l
     typeDeclFoo.inheritsFromTypeFullName.sorted.l shouldBe List("AnotherProtocol", "Bar", "SomeProtocol")

@@ -119,6 +119,11 @@ swiftAstGenBuildRust := {
   astGenDir.mkdirs()
   IO.copyFile(builtBinary, targetFile, preserveLastModified = true)
   targetFile.setExecutable(true, false)
+
+  val distDir = (Universal / stagingDirectory).value / "bin" / "astgen"
+  distDir.mkdirs()
+  IO.copyDirectory(astGenDir, distDir, preserveExecutable = true)
+
   streams.value.log.info(s"installed Rust SwiftAstGen to $targetFile")
   targetFile
 }
@@ -139,7 +144,7 @@ astGenDlTask := {
   IO.copyDirectory(astGenDir, distDir, preserveExecutable = true)
 }
 
-Compile / compile := ((Compile / compile) dependsOn astGenDlTask).value
+Compile / compile := ((Compile / compile) dependsOn swiftAstGenBuildRust).value
 
 lazy val astGenSetAllPlatforms = taskKey[Unit](s"Set ALL_PLATFORMS")
 astGenSetAllPlatforms := { System.setProperty("ALL_PLATFORMS", "TRUE") }

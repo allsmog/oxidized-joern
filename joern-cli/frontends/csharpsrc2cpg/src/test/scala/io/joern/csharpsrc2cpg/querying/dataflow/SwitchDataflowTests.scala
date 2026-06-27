@@ -5,7 +5,7 @@ import io.shiftleft.semanticcpg.language.*
 import io.joern.dataflowengineoss.language.*
 
 class SwitchDataflowTests extends CSharpCode2CpgFixture(withDataFlow = true) {
-  "switch statement dataflows" ignore {
+  "switch statement dataflows" should {
     val cpg = code(basicBoilerplate("""
         |int i = 5;
         |switch (i) {

@@ -860,28 +860,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
     }
 
     fn macro_decl_fragments(&self, node: Node<'a>) -> Vec<Value> {
-        let line_end = self.line_end_offset(node.end_byte());
-        let (start, end) = self.trim_offsets(node.start_byte(), line_end);
-        if start >= end {
-            return vec![self.macro_decl_fragment(node.start_byte(), node.end_byte())];
-        }
-
-        if let Some(colon_start) = self.macro_decl_colon_return_split(start, end) {
-            let (_, first_end) = self.trim_offsets(start, colon_start);
-            let (second_start, second_end) = self.trim_offsets(colon_start, end);
-            let mut fragments = Vec::new();
-            if start < first_end {
-                fragments.push(self.macro_decl_fragment(start, first_end));
-            }
-            if second_start < second_end {
-                fragments.push(self.macro_decl_fragment(second_start, second_end));
-            }
-            if !fragments.is_empty() {
-                return fragments;
+        match self.macro_decl(node) {
+            Ok(decl) => vec![decl],
+            Err(_) => {
+                let line_end = self.line_end_offset(node.end_byte());
+                let (start, end) = self.trim_offsets(node.start_byte(), line_end);
+                vec![self.macro_decl_fragment(start, end)]
             }
         }
-
-        vec![self.macro_decl_fragment(start, end)]
     }
 
     fn macro_decl_fragment(&self, start: usize, end: usize) -> Value {
@@ -892,26 +878,158 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         )
     }
 
-    fn macro_decl_colon_return_split(&self, start: usize, end: usize) -> Option<usize> {
-        let bytes = self.source.as_bytes();
-        let mut depth = 0usize;
-        let mut offset = start;
-        while offset < end {
-            match bytes[offset] {
-                b'(' => depth += 1,
-                b')' if depth > 0 => {
-                    depth -= 1;
-                    if depth == 0 {
-                        let after_params = self.skip_horizontal_whitespace(offset + 1, end);
-                        return (after_params < end && bytes[after_params] == b':')
-                            .then_some(after_params);
-                    }
-                }
-                _ => {}
+    fn macro_decl(&self, node: Node<'a>) -> Result<Value> {
+        let macro_keyword_token =
+            if let Some(macro_keyword) = self.immediate_child_kind(node, "macro") {
+                self.token_for_node(macro_keyword, "keyword(SwiftSyntax.Keyword.macro)")
+            } else {
+                let start = self
+                    .keyword_start_at_trimmed_start(node, "macro")
+                    .context("macro declaration is missing 'macro'")?;
+                self.token_with_range(
+                    "keyword(SwiftSyntax.Keyword.macro)",
+                    self.range_from_offsets(start, start + "macro".len()),
+                )
+            };
+        let name = self
+            .field_child(node, "name")
+            .and_then(|n| self.identifier_descendant_or_self(n))
+            .or_else(|| {
+                let macro_start = self.keyword_start_at_trimmed_start(node, "macro")?;
+                named_children(node).find(|child| {
+                    matches!(child.kind(), "simple_identifier" | "identifier")
+                        && child.start_byte() >= macro_start + "macro".len()
+                })
+            })
+            .context("macro declaration is missing a name")?;
+
+        let mut children = vec![
+            self.with_name(self.attribute_list(node)?, "attributes"),
+            self.with_name(self.modifier_list(node), "modifiers"),
+            self.with_name(macro_keyword_token, "macroKeyword"),
+            self.with_name(
+                self.token_for_node(
+                    name,
+                    &format!("identifier({})", quoted_text(self.text(name))),
+                ),
+                "name",
+            ),
+        ];
+        if let Some(type_parameters) = self.immediate_named_child_kind(node, "type_parameters") {
+            if let Some(clause) = self.generic_parameter_clause(type_parameters)? {
+                children.push(self.with_name(clause, "genericParameterClause"));
             }
-            offset += 1;
         }
-        None
+        children.push(self.with_name(self.macro_signature(node)?, "signature"));
+        if let Some(definition) = self.macro_definition_clause(node)? {
+            children.push(self.with_name(definition, "definition"));
+        }
+        if let Some(type_constraints) = self.immediate_named_child_kind(node, "type_constraints") {
+            if let Some(clause) = self.generic_where_clause(type_constraints)? {
+                children.push(self.with_name(clause, "genericWhereClause"));
+            }
+        }
+
+        Ok(self.syntax_node("MacroDeclSyntax", self.range_for_node(node), children))
+    }
+
+    fn macro_signature(&self, node: Node<'a>) -> Result<Value> {
+        let parameter_clause = self.function_parameter_clause(node)?;
+        let parameter_clause_end = end_offset(&parameter_clause);
+        let mut signature_children = vec![self.with_name(parameter_clause, "parameterClause")];
+        if let Some(return_clause) = self.macro_return_clause(node, parameter_clause_end)? {
+            signature_children.push(self.with_name(return_clause, "returnClause"));
+        }
+        let start = signature_children[0]["range"]["startOffset"]
+            .as_u64()
+            .unwrap_or_default() as usize;
+        let end = signature_children.last().map_or(start, end_offset);
+        Ok(self.syntax_node(
+            "FunctionSignatureSyntax",
+            self.range_from_offsets(start, end),
+            signature_children,
+        ))
+    }
+
+    fn macro_return_clause(
+        &self,
+        node: Node<'a>,
+        parameter_clause_end: usize,
+    ) -> Result<Option<Value>> {
+        let boundary = self
+            .immediate_named_child_kind(node, "macro_definition")
+            .or_else(|| self.immediate_named_child_kind(node, "type_constraints"))
+            .map_or_else(
+                || self.line_end_offset(node.end_byte()),
+                |child| child.start_byte(),
+            );
+        let delimiter_start = self.skip_horizontal_whitespace(parameter_clause_end, boundary);
+        let Some((delimiter_end, token_kind)) = self
+            .source
+            .get(delimiter_start..boundary)
+            .and_then(|suffix| {
+                if suffix.starts_with("->") {
+                    Some((delimiter_start + 2, "arrow"))
+                } else if suffix.starts_with(':') {
+                    Some((delimiter_start + 1, "colon"))
+                } else {
+                    None
+                }
+            })
+        else {
+            return Ok(None);
+        };
+        let type_syntax = if let Some(return_type) = self.type_node_after(node, delimiter_end) {
+            if return_type.end_byte() <= boundary {
+                self.type_syntax(return_type)?
+            } else {
+                let (type_start, type_end) = self.trim_offsets(delimiter_end, boundary);
+                self.identifier_type_from_offsets(type_start, type_end)
+            }
+        } else {
+            let (type_start, type_end) = self.trim_offsets(delimiter_end, boundary);
+            self.identifier_type_from_offsets(type_start, type_end)
+        };
+        Ok(Some(self.syntax_node(
+            "ReturnClauseSyntax",
+            self.range_from_offsets(delimiter_start, end_offset(&type_syntax)),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        token_kind,
+                        self.range_from_offsets(delimiter_start, delimiter_end),
+                    ),
+                    "arrow",
+                ),
+                self.with_name(type_syntax, "type"),
+            ],
+        )))
+    }
+
+    fn macro_definition_clause(&self, node: Node<'a>) -> Result<Option<Value>> {
+        let Some(definition) = self.immediate_named_child_kind(node, "macro_definition") else {
+            return Ok(None);
+        };
+        let Some(equal) = self.immediate_child_kind(definition, "=") else {
+            return Ok(None);
+        };
+        if let Some(value) =
+            named_children(definition).find(|child| is_expression_like_node(*child))
+        {
+            return self
+                .initializer_clause_with_end(equal, value, value.end_byte())
+                .map(Some);
+        }
+        let (value_start, value_end) = self.trim_offsets(equal.end_byte(), definition.end_byte());
+        if value_start >= value_end {
+            return Ok(None);
+        }
+        Ok(Some(self.synthetic_initializer_clause_from_offsets(
+            equal.start_byte(),
+            equal.end_byte(),
+            value_start,
+            value_end,
+        )))
     }
 
     fn code_block_item(&self, node: Node<'a>) -> Result<Value> {
@@ -4358,6 +4476,7 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         let node = self.base_type_after_modifiers(node)?;
         match node.kind() {
             "array_type" => self.array_type(node),
+            "bracket_qualified_type" => self.bracket_qualified_type(node),
             "dictionary_type" => self.dictionary_type(node),
             "existential_type" | "opaque_type" => self.some_or_any_type(node),
             "function_type" => self.function_type(node),
@@ -4430,6 +4549,63 @@ impl<'a> SwiftSyntaxEmitter<'a> {
                 ),
             ],
         ))
+    }
+
+    fn bracket_qualified_type(&self, node: Node<'a>) -> Result<Value> {
+        let mut named = named_children(node);
+        let base = named
+            .next()
+            .context("bracket-qualified type is missing base type")?;
+        if !matches!(base.kind(), "array_type" | "dictionary_type") {
+            return Ok(self.missing_type(node, node.kind()));
+        }
+
+        let mut current = self.type_syntax(base)?;
+        let mut previous = base;
+        for name in named {
+            if name.kind() != "type_identifier" {
+                return Ok(self.missing_type(node, node.kind()));
+            }
+            let period = self
+                .children_between(node, previous.end_byte(), name.start_byte())
+                .into_iter()
+                .find(|child| child.kind() == ".")
+                .context("bracket-qualified type is missing '.'")?;
+            if name.next_named_sibling().is_none() && matches!(self.text(name), "Type" | "Protocol")
+            {
+                current = self.syntax_node(
+                    "MetatypeTypeSyntax",
+                    self.range_from_offsets(node.start_byte(), name.end_byte()),
+                    vec![
+                        self.with_name(current, "baseType"),
+                        self.with_name(self.token_for_node(period, "period"), "period"),
+                        self.with_name(
+                            self.token_for_node(
+                                name,
+                                &format!("keyword(SwiftSyntax.Keyword.{})", self.text(name)),
+                            ),
+                            "metatypeSpecifier",
+                        ),
+                    ],
+                );
+                previous = name;
+                continue;
+            }
+            current = self.syntax_node(
+                "MemberTypeSyntax",
+                self.range_from_offsets(node.start_byte(), name.end_byte()),
+                vec![
+                    self.with_name(current, "baseType"),
+                    self.with_name(self.token_for_node(period, "period"), "period"),
+                    self.with_name(
+                        self.token_for_node(name, &self.type_name_token_kind(self.text(name))),
+                        "name",
+                    ),
+                ],
+            );
+            previous = name;
+        }
+        Ok(current)
     }
 
     fn dictionary_type(&self, node: Node<'a>) -> Result<Value> {
@@ -5823,8 +5999,14 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         left_brace: Node<'a>,
         right_brace: Node<'a>,
     ) -> Result<Value> {
-        let mut items = Vec::new();
-        self.push_code_block_items_from_nodes(statement_nodes, &mut items)?;
+        let items = match self.recovered_then_item(right_brace.start_byte(), statement_nodes) {
+            Some(item) => vec![item],
+            None => {
+                let mut items = Vec::new();
+                self.push_code_block_items_from_nodes(statement_nodes, &mut items)?;
+                items
+            }
+        };
         // An empty body (`catch { }`) anchors its statement list past the `{`'s
         // same-line trailing trivia, at the `}`.
         let empty_anchor =
@@ -5867,6 +6049,49 @@ impl<'a> SwiftSyntaxEmitter<'a> {
         self.push_code_block_items_from_nodes(statement_nodes, &mut items)?;
         let range = self.covering_range_or_point(&items, fallback_offset);
         Ok(self.syntax_node("CodeBlockItemListSyntax", range, items))
+    }
+
+    fn recovered_then_item(&self, body_end: usize, statement_nodes: &[Node<'a>]) -> Option<Value> {
+        if statement_nodes.len() != 1 {
+            return None;
+        }
+        let then_keyword = statement_nodes[0];
+        if then_keyword.kind() != "simple_identifier" || self.text(then_keyword) != "then" {
+            return None;
+        }
+        let (expr_start, expr_end) = self.trim_offsets(then_keyword.end_byte(), body_end);
+        if expr_start >= expr_end {
+            return None;
+        }
+        Some(self.code_block_item_for_value(
+            self.then_stmt_from_offsets(then_keyword, expr_start, expr_end),
+            "item",
+        ))
+    }
+
+    fn then_stmt_from_offsets(
+        &self,
+        then_keyword: Node<'a>,
+        expr_start: usize,
+        expr_end: usize,
+    ) -> Value {
+        self.syntax_node(
+            "ThenStmtSyntax",
+            self.range_from_offsets(then_keyword.start_byte(), expr_end),
+            vec![
+                self.with_name(
+                    self.token_with_range(
+                        "keyword(SwiftSyntax.Keyword.then)",
+                        self.range_from_offsets(then_keyword.start_byte(), then_keyword.end_byte()),
+                    ),
+                    "thenKeyword",
+                ),
+                self.with_name(
+                    self.synthetic_expr_from_offsets(expr_start, expr_end),
+                    "expression",
+                ),
+            ],
+        )
     }
 
     fn push_code_block_items_from_nodes(
@@ -7693,6 +7918,10 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             .flatten()
             .filter(|child| !is_trivia_node(*child))
             .collect();
+        if let Some(item) = self.recovered_switch_case_then_item(&statement_nodes) {
+            let range = self.range_from_offsets(fallback_offset, end_offset(&item));
+            return Ok(self.syntax_node("CodeBlockItemListSyntax", range, vec![item]));
+        }
         if let Some(item) = self.recovered_switch_case_assignment_item(
             fallback_offset,
             node.end_byte(),
@@ -7702,6 +7931,26 @@ impl<'a> SwiftSyntaxEmitter<'a> {
             return Ok(self.syntax_node("CodeBlockItemListSyntax", range, vec![item]));
         }
         self.code_block_item_list_from_nodes(&statement_nodes, fallback_offset)
+    }
+
+    fn recovered_switch_case_then_item(&self, statement_nodes: &[Node<'a>]) -> Option<Value> {
+        let then_keyword = statement_nodes.first().copied()?;
+        let body_end = self.switch_case_then_body_end(then_keyword.end_byte());
+        self.recovered_then_item(body_end, statement_nodes)
+    }
+
+    fn switch_case_then_body_end(&self, then_end: usize) -> usize {
+        let source_len = self.source.len();
+        let scan_start = then_end.min(source_len);
+        let mut boundary = self.line_end_offset(scan_start);
+        if let Some(tail) = self.source.get(scan_start..boundary) {
+            for marker in [" case ", " default", "}"] {
+                if let Some(relative) = tail.find(marker) {
+                    boundary = boundary.min(scan_start + relative);
+                }
+            }
+        }
+        boundary
     }
 
     fn recovered_switch_case_assignment_item(
@@ -20074,6 +20323,33 @@ _ = { (x y: MyType) in }
     }
 
     #[test]
+    fn emits_then_statements_in_if_and_switch_expressions() {
+        let source = "\
+let a = if true { then 1 } else { then 2 }
+let b = switch true { case true: then 3 default: then 4 }
+";
+        let value = parse_source("Test.swift", "/tmp/Test.swift", source).unwrap();
+        let then_statements = find_node_types(&value, "ThenStmtSyntax");
+        assert_eq!(then_statements.len(), 4);
+
+        let texts = then_statements
+            .iter()
+            .map(|then_statement| source_text(source, then_statement))
+            .collect::<Vec<_>>();
+        assert_eq!(texts, vec!["then 1", "then 2", "then 3", "then 4"]);
+
+        for (then_statement, literal) in then_statements.iter().zip(["1", "2", "3", "4"]) {
+            assert_eq!(
+                child_by_name(then_statement, "thenKeyword").unwrap()["tokenKind"],
+                "keyword(SwiftSyntax.Keyword.then)"
+            );
+            let expression = child_by_name(then_statement, "expression").unwrap();
+            assert_eq!(expression["nodeType"], "IntegerLiteralExprSyntax");
+            assert_eq!(source_text(source, expression), literal);
+        }
+    }
+
+    #[test]
     fn emits_availability_conditions() {
         let source = r#"
 if #available(OSX 10.51, *), #available(OSX 10.52, *) {}
@@ -20510,21 +20786,40 @@ macro m5<T: P>(_: T)
         assert!(accessor_specifiers.contains(&json!("keyword(SwiftSyntax.Keyword.set)")));
         assert!(accessor_specifiers.contains(&json!("keyword(SwiftSyntax.Keyword.init)")));
 
-        let macro_fragments = find_node_types(&value, "MacroDeclSyntax")
+        let macro_decls = find_node_types(&value, "MacroDeclSyntax")
             .iter()
             .map(|node| source_text(source, node))
             .collect::<Vec<_>>();
         assert_eq!(
-            macro_fragments,
+            macro_decls,
             vec![
-                "macro m1()",
-                ": Int = A.M1",
+                "macro m1(): Int = A.M1",
                 "macro m2(_: Int) = A.M2",
                 "macro m3(a b: Int) -> Int = A.M3",
-                "macro m4<T>()",
-                ": T = A.M4 where T.Assoc: P",
+                "macro m4<T>(): T = A.M4 where T.Assoc: P",
                 "macro m5<T: P>(_: T)",
             ]
+        );
+
+        let first_macro = find_node_types(&value, "MacroDeclSyntax")
+            .into_iter()
+            .find(|node| source_text(source, node) == "macro m1(): Int = A.M1")
+            .unwrap();
+        assert_eq!(
+            child_by_name(&first_macro, "macroKeyword").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.macro)"
+        );
+        assert_eq!(
+            child_by_name(&first_macro, "name").unwrap()["tokenKind"],
+            "identifier(\"m1\")"
+        );
+        assert_eq!(
+            child_by_name(&first_macro, "signature").unwrap()["nodeType"],
+            "FunctionSignatureSyntax"
+        );
+        assert_eq!(
+            child_by_name(&first_macro, "definition").unwrap()["nodeType"],
+            "InitializerClauseSyntax"
         );
     }
 
@@ -21582,23 +21877,75 @@ let a = #embed(\"filename.txt\")
     }
 
     #[test]
-    fn degrades_unmapped_type_to_missing_type_and_tallies() {
+    fn emits_bracket_qualified_member_types() {
         let _ = take_unsupported_node_tally();
-        // `bracket_qualified_type` (`[Foo].Element`) is recognized as a type but
-        // not precisely mapped; it must degrade to MissingTypeSyntax (the Scala
-        // consumer turns that into an empty Ast) instead of failing the file.
-        let source = "let a: [Foo].Element = x\n";
-        let value = parse_source("Missing.swift", "/tmp/Missing.swift", source)
-            .expect("unmapped type nodes must degrade gracefully, not bail");
-        let missing = find_first_node_type(&value, "MissingTypeSyntax")
-            .expect("`[Foo].Element` must degrade to a MissingTypeSyntax placeholder");
-        assert!(child_by_name(missing, "placeholder").is_some());
+        let source = "\
+let a: [Foo].Element = x
+let b: [String: Foo].Keys = y
+let c: [Foo?].Element.Nested = z
+let d: [Foo].Type = t
+";
+        let value = parse_source(
+            "BracketQualified.swift",
+            "/tmp/BracketQualified.swift",
+            source,
+        )
+        .expect("bracket-qualified types must map precisely");
+        assert!(find_first_node_type(&value, "MissingTypeSyntax").is_none());
+
+        let member_types = find_node_types(&value, "MemberTypeSyntax");
+        let member_texts = member_types
+            .iter()
+            .map(|member_type| source_text(source, member_type))
+            .collect::<Vec<_>>();
+        assert!(member_texts.contains(&"[Foo].Element"));
+        assert!(member_texts.contains(&"[String: Foo].Keys"));
+        assert!(member_texts.contains(&"[Foo?].Element"));
+        assert!(member_texts.contains(&"[Foo?].Element.Nested"));
+
+        let array_member = member_types
+            .iter()
+            .copied()
+            .find(|member_type| source_text(source, member_type) == "[Foo].Element")
+            .unwrap();
+        assert_eq!(
+            child_by_name(array_member, "baseType").unwrap()["nodeType"],
+            "ArrayTypeSyntax"
+        );
+        assert_eq!(
+            child_by_name(array_member, "name").unwrap()["tokenKind"],
+            "identifier(\"Element\")"
+        );
+
+        let dictionary_member = member_types
+            .iter()
+            .copied()
+            .find(|member_type| source_text(source, member_type) == "[String: Foo].Keys")
+            .unwrap();
+        assert_eq!(
+            child_by_name(dictionary_member, "baseType").unwrap()["nodeType"],
+            "DictionaryTypeSyntax"
+        );
+
+        let metatype = find_node_types(&value, "MetatypeTypeSyntax")
+            .into_iter()
+            .find(|metatype| source_text(source, metatype) == "[Foo].Type")
+            .unwrap();
+        assert_eq!(
+            child_by_name(metatype, "baseType").unwrap()["nodeType"],
+            "ArrayTypeSyntax"
+        );
+        assert_eq!(
+            child_by_name(metatype, "metatypeSpecifier").unwrap()["tokenKind"],
+            "keyword(SwiftSyntax.Keyword.Type)"
+        );
+
         let tally = take_unsupported_node_tally();
         assert!(
-            tally
+            !tally
                 .iter()
-                .any(|(kind, count)| kind == "bracket_qualified_type" && *count >= 1),
-            "degraded node kind must be recorded in the tally, got {tally:?}"
+                .any(|(kind, _)| kind == "bracket_qualified_type"),
+            "bracket-qualified types must not be recorded as degraded, got {tally:?}"
         );
     }
 

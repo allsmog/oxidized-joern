@@ -41,8 +41,13 @@ case class CSharpProgramSummary(namespaceToType: NamespaceToTypeMap, imports: Se
 
   private def allImports: Set[String] = imports ++ globalImports
 
-  def appendImported(other: CSharpProgramSummary): CSharpProgramSummary =
-    this ++= other.filter(namespacePred = (ns, _) => allImports.contains(ns))
+  def appendImported(other: CSharpProgramSummary): CSharpProgramSummary = {
+    val importedSummary = other.filter(namespacePred = (ns, _) => allImports.contains(ns))
+    val referencedNamespaces =
+      importedSummary.namespaceToType.values.flatten.flatMap(CSharpProgramSummary.referencedNamespaces).toSet
+
+    this ++= other.filter(namespacePred = (ns, _) => allImports.contains(ns) || referencedNamespaces.contains(ns))
+  }
 
   /** Builds a new `CSharpProgramSummary` by filtering the current one's fields.
     *
@@ -76,6 +81,25 @@ object CSharpProgramSummary {
   // Although System is not included by default
   // the types and their methods are exposed through autoboxing of primitives
   def initialImports: Set[String] = Set("", "System")
+
+  private val FullyQualifiedTypeName = raw"[A-Za-z_][\w`]*(?:\.[A-Za-z_][\w`]*)+".r
+
+  private def namespacesInTypeName(typeName: String): Set[String] =
+    FullyQualifiedTypeName
+      .findAllIn(typeName)
+      .flatMap { fullName =>
+        val namespaceEnd = fullName.lastIndexOf('.')
+        Option.when(namespaceEnd > 0)(fullName.take(namespaceEnd))
+      }
+      .toSet
+
+  private def referencedNamespaces(t: CSharpType): Set[String] = {
+    val fieldTypes = t.fields.map(_.typeName)
+    val methodTypes = t.methods.flatMap { method =>
+      method.returnType +: method.parameterTypes.map(_._2)
+    }
+    (fieldTypes ++ methodTypes).flatMap(namespacesInTypeName).toSet
+  }
 
   def apply(
     namespaceToType: NamespaceToTypeMap = mutable.Map.empty,
@@ -221,9 +245,15 @@ object CSharpProgramSummary {
 
 case class CSharpField(name: String, typeName: String) extends FieldLike derives ReadWriter
 
-case class CSharpMethod(name: String, returnType: String, parameterTypes: List[(String, String)], isStatic: Boolean)
-    extends MethodLike
-    with OverloadableMethod derives ReadWriter
+case class CSharpMethod(
+  name: String,
+  returnType: String,
+  parameterTypes: List[(String, String)],
+  isStatic: Boolean,
+  fullName: Option[String] = None
+) extends MethodLike
+    with OverloadableMethod
+    derives ReadWriter
 
 case class CSharpType(name: String, methods: List[CSharpMethod], fields: List[CSharpField])
     extends TypeLike[CSharpMethod, CSharpField] derives ReadWriter {

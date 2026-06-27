@@ -52,7 +52,11 @@ object JimpleCodeToCpgFixture {
   /** Compiles the source code with debugging info.
     */
   def compileJava(root: Path, sourceCodeFiles: List[File]): Unit = {
-    val javac       = getJavaCompiler
+    val javac         = getJavaCompiler
+    val targetRelease = if (requiresModernJava(sourceCodeFiles)) "17" else "8"
+    val bytecodeTargetOptions =
+      if (javac.isSupportedOption("--release") >= 0) Seq("--release", targetRelease)
+      else Seq("-source", targetRelease, "-target", targetRelease)
     val fileManager = javac.getStandardFileManager(null, null, null)
     try {
       javac
@@ -60,13 +64,20 @@ object JimpleCodeToCpgFixture {
           null,
           fileManager,
           null,
-          Seq("-g", "-d", root.toString).asJava,
+          (Seq("-g", "-Xlint:-options") ++ bytecodeTargetOptions ++ Seq("-d", root.toString)).asJava,
           null,
           fileManager.getJavaFileObjectsFromFiles(sourceCodeFiles.asJava)
         )
         .call()
     } finally {
       fileManager.close()
+    }
+  }
+
+  private def requiresModernJava(sourceCodeFiles: List[File]): Boolean = {
+    sourceCodeFiles.exists { file =>
+      val content = java.nio.file.Files.readString(file.toPath)
+      content.contains("\"\"\"") || "\\bvar\\s+\\w+\\s*=".r.findFirstIn(content).nonEmpty
     }
   }
 

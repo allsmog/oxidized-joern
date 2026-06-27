@@ -4567,7 +4567,7 @@ object SwiftNodeSyntax {
   case class LabeledStmtSyntax(json: Value) extends StmtSyntax {
     def label: SwiftToken    = createSwiftNode(_childrenMap("label")).asInstanceOf[SwiftToken]
     def colon: SwiftToken    = createSwiftNode(_childrenMap("colon")).asInstanceOf[SwiftToken]
-    def statement: SwiftNode  = createSwiftNode(_childrenMap("statement"))
+    def statement: SwiftNode = createSwiftNode(_childrenMap("statement"))
   }
 
   /** ### Documentation

@@ -2177,6 +2177,8 @@ fn call_args(node: Node, source: &str) -> Vec<Value> {
         .filter_map(|child| {
             if child.kind() == "argument" {
                 call_arg(child, source)
+            } else if child.kind() == "variadic_placeholder" {
+                Some(object("VariadicPlaceholder", child, source, []))
             } else {
                 lower_expr(child, source).map(|value| {
                     object(
@@ -2198,6 +2200,13 @@ fn call_args(node: Node, source: &str) -> Vec<Value> {
 
 fn call_arg(node: Node, source: &str) -> Option<Value> {
     let children = named_children(node);
+    if children
+        .iter()
+        .any(|child| child.kind() == "variadic_placeholder")
+    {
+        return Some(object("VariadicPlaceholder", node, source, []));
+    }
+
     let name_node = node.child_by_field_name("name");
     let name = name_node
         .map(|name| identifier_node(name, source))
@@ -3412,15 +3421,28 @@ mod tests {
             with_unmapped_summary(|| generate_source("<?php\n$x = 1;\n").expect("json"));
         assert!(clean_summary.is_none());
 
-        // First-class callable syntax `strlen(...)` produces a tree-sitter
-        // `variadic_placeholder` that the lowering passes do not map.
         let (_json, summary) =
             with_unmapped_summary(|| generate_source("<?php\n$f = strlen(...);\n").expect("json"));
-        let summary = summary.expect("expected unmapped summary");
-        assert_eq!(
-            summary,
-            "phpastgen: 1 unmapped node(s): variadic_placeholder(x1)"
+        assert!(
+            summary.is_none(),
+            "unexpected unmapped summary: {summary:?}"
         );
+    }
+
+    #[test]
+    fn emits_first_class_callable_placeholder() {
+        let (json, summary) =
+            with_unmapped_summary(|| generate_source("<?php\n$f = strlen(...);\n").expect("json"));
+        assert!(
+            summary.is_none(),
+            "unexpected unmapped summary: {summary:?}"
+        );
+
+        let arr = json.as_array().expect("array");
+        let callable = &arr[0]["expr"]["expr"];
+        assert_eq!(callable["nodeType"], "Expr_FuncCall");
+        assert_eq!(callable["name"]["parts"][0], "strlen");
+        assert_eq!(callable["args"][0]["nodeType"], "VariadicPlaceholder");
     }
 
     #[test]

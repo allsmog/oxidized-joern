@@ -49,6 +49,175 @@ class CallTests extends Rust2CpgSuite(noSysRoot = true) {
     }
   }
 
+  "calls through imported aliases" should {
+    val cpg = code("""
+        |use crate::util::do_it as run;
+        |use std::fs as filesystem;
+        |extern crate serde_json as json;
+        |
+        |fn main() {
+        | run();
+        | filesystem::read("Cargo.toml");
+        | json::from_str("{}");
+        |}
+        |""".stripMargin)
+
+    "use the imported function fullName for a renamed single-segment call" in {
+      cpg.call.nameExact("run").methodFullName.l shouldBe List("crate::util::do_it")
+    }
+
+    "rewrite a module alias at the head of a qualified call" in {
+      cpg.call.nameExact("read").methodFullName.l shouldBe List("std::fs::read")
+    }
+
+    "rewrite an extern-crate alias at the head of a qualified call" in {
+      cpg.call.nameExact("from_str").methodFullName.l shouldBe List("serde_json::from_str")
+    }
+  }
+
+  "calls through wildcard imports" should {
+    val cpg = code("""
+        |use crate::tools::*;
+        |
+        |fn main() {
+        | run();
+        |}
+        |""".stripMargin)
+
+    "use the wildcard import prefix for an unqualified call" in {
+      cpg.call.nameExact("run").methodFullName.l shouldBe List("crate::tools::run")
+    }
+  }
+
+  "a block-local wildcard import" should {
+    val cpg = code("""
+        |use crate::outer::*;
+        |
+        |fn main() {
+        | use crate::inner::*;
+        | run();
+        |}
+        |""".stripMargin)
+
+    "shadow an outer module wildcard import" in {
+      cpg.call.nameExact("run").methodFullName.l shouldBe List("crate::inner::run")
+    }
+  }
+
+  "ambiguous wildcard imports" should {
+    val cpg = code("""
+        |use crate::left::*;
+        |use crate::right::*;
+        |
+        |fn main() {
+        | run();
+        |}
+        |""".stripMargin)
+
+    "leave the call unresolved" in {
+      cpg.call.nameExact("run").methodFullName.l shouldBe List(s"${Defines.UnresolvedNamespace}::run")
+    }
+  }
+
+  "a module-level import declared after a function" should {
+    val cpg = code("""
+        |fn main() {
+        | helper();
+        |}
+        |
+        |use crate::util::helper;
+        |""".stripMargin)
+
+    "apply to calls in the same module" in {
+      cpg.call.nameExact("helper").methodFullName.l shouldBe List("crate::util::helper")
+    }
+  }
+
+  "a block-local import" should {
+    val cpg = code("""
+        |use crate::outer::run;
+        |
+        |fn main() {
+        | use crate::inner::run;
+        | run();
+        |}
+        |""".stripMargin)
+
+    "shadow an outer module import" in {
+      cpg.call.nameExact("run").methodFullName.l shouldBe List("crate::inner::run")
+    }
+  }
+
+  "a type-qualified associated function call" should {
+    val callCode = "<Worker as Make>::make()"
+    val cpg = code(s"""
+        |trait Make {
+        | fn make() -> i32;
+        |}
+        |
+        |struct Worker;
+        |
+        |impl Make for Worker {
+        | fn make() -> i32 { 1 }
+        |}
+        |
+        |fn main() {
+        | let value = $callCode;
+        |}
+        |""".stripMargin)
+
+    "lower as a static call" in {
+      inside(cpg.call.nameExact("make").codeExact(callCode).l) { case make :: Nil =>
+        make.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+        make.methodFullName == Defines.DynamicCallUnknownFullName shouldBe false
+      }
+    }
+
+    "not create unknown nodes for the type-qualified path" in {
+      cpg.all.collectAll[Unknown].codeExact(callCode, "<Worker as Make>", "make").l shouldBe empty
+    }
+  }
+
+  "local receiver method calls without sysroot" should {
+    val cpg = code("""
+        |struct Point { x: i32 }
+        |
+        |impl Point {
+        | fn value(&self) -> i32 { self.x }
+        |}
+        |
+        |fn main() {
+        | let p: Point = Point { x: 1 };
+        | let r: &Point = &p;
+        | p.value();
+        | r.value();
+        |}
+        |""".stripMargin)
+
+    "resolve value receiver calls to the local impl method" in {
+      inside(cpg.call.nameExact("value").codeExact("p.value()").l) { case value :: Nil =>
+        value.methodFullName shouldBe "rust2cpgtest::Point::value"
+        value.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+      }
+    }
+
+    "resolve reference receiver calls to the local impl method" in {
+      inside(cpg.call.nameExact("value").codeExact("r.value()").l) { case value :: Nil =>
+        value.methodFullName shouldBe "rust2cpgtest::Point::value"
+        value.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+      }
+    }
+
+    "preserve concrete receiver types" in {
+      inside(cpg.call.nameExact("value").codeExact("p.value()").receiver.l) { case (receiver: Identifier) :: Nil =>
+        receiver.typeFullName shouldBe "rust2cpgtest::Point"
+      }
+      inside(cpg.call.nameExact("value").codeExact("r.value()").receiver.l) { case (receiver: Identifier) :: Nil =>
+        receiver.typeFullName shouldBe "&rust2cpgtest::Point"
+      }
+    }
+  }
+
   "an unresolved chained method call" should {
     val cpg = code("""
         |fn main() {
@@ -112,7 +281,7 @@ class CallTests extends Rust2CpgSuite(noSysRoot = true) {
       inside(cpg.call.nameExact("push").receiver.l) { case (receiver: Identifier) :: Nil =>
         receiver.code shouldBe "xs"
         receiver.argumentIndex shouldBe 0
-        receiver.typeFullName shouldBe Defines.Any
+        receiver.typeFullName shouldBe "Vec<i32>"
       }
     }
 
@@ -124,6 +293,111 @@ class CallTests extends Rust2CpgSuite(noSysRoot = true) {
         lit.argumentIndex shouldBe 1
         lit.typeFullName shouldBe "i32"
       }
+    }
+  }
+
+  "a compiler builtin format_args expression" should {
+    val cpg = code("""
+        |fn main(name: &str) {
+        | let args = builtin # format_args("hello {}", name);
+        |}
+        |""".stripMargin)
+
+    "lower to a static call" in {
+      inside(cpg.call.nameExact("format_args!").l) { case formatArgs :: Nil =>
+        formatArgs.code shouldBe """builtin # format_args("hello {}", name)"""
+        formatArgs.methodFullName shouldBe s"${Defines.UnresolvedNamespace}::format_args!"
+        formatArgs.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+      }
+    }
+
+    "preserve the format string and formatted arguments" in {
+      inside(cpg.call.nameExact("format_args!").argument.l) { case (format: Literal) :: (name: Identifier) :: Nil =>
+        format.code shouldBe """"hello {}""""
+        name.name shouldBe "name"
+      }
+    }
+
+    "not create an unknown node" in {
+      cpg.all
+        .collectAll[Unknown]
+        .codeExact("""builtin # format_args("hello {}", name)""")
+        .l shouldBe empty
+    }
+  }
+
+  "a compiler builtin offset_of expression" should {
+    val cpg = code("""
+        |struct Point { x: i32, y: i32 }
+        |
+        |fn main() {
+        | let offset = builtin # offset_of(Point, x);
+        |}
+        |""".stripMargin)
+
+    "lower to a static call returning usize" in {
+      inside(cpg.call.nameExact("offset_of!").l) { case offsetOf :: Nil =>
+        offsetOf.code shouldBe "builtin # offset_of(Point, x)"
+        offsetOf.methodFullName shouldBe s"${Defines.UnresolvedNamespace}::offset_of!"
+        offsetOf.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+        offsetOf.typeFullName shouldBe "usize"
+      }
+    }
+
+    "preserve the target type and field path" in {
+      inside(cpg.call.nameExact("offset_of!").argument.l) {
+        case (targetType: TypeRef) :: (field: FieldIdentifier) :: Nil =>
+          targetType.code shouldBe "Point"
+          field.code shouldBe "x"
+      }
+    }
+
+    "not create an unknown node" in {
+      cpg.all
+        .collectAll[Unknown]
+        .codeExact("builtin # offset_of(Point, x)")
+        .l shouldBe empty
+    }
+  }
+
+  "a call on a returned callable expression" should {
+    val cpg = code("""
+        |fn id(x: i32) -> i32 {
+        | x
+        |}
+        |
+        |fn make_adder() -> fn(i32) -> i32 {
+        | id
+        |}
+        |
+        |fn main() {
+        | let value = make_adder()(1);
+        |}
+        |""".stripMargin)
+
+    "lower the outer call as dynamic" in {
+      inside(cpg.call.codeExact("make_adder()(1)").l) { case returnedCall :: Nil =>
+        returnedCall.name shouldBe "make_adder()"
+        returnedCall.methodFullName shouldBe Defines.DynamicCallUnknownFullName
+        returnedCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+      }
+    }
+
+    "preserve the callee expression as receiver" in {
+      inside(cpg.call.codeExact("make_adder()(1)").receiver.l) { case (callee: Call) :: Nil =>
+        callee.name shouldBe "make_adder"
+        callee.code shouldBe "make_adder()"
+      }
+    }
+
+    "preserve explicit arguments" in {
+      inside(cpg.call.codeExact("make_adder()(1)").argument(1).l) { case (one: Literal) :: Nil =>
+        one.code shouldBe "1"
+      }
+    }
+
+    "not create an unknown node" in {
+      cpg.all.collectAll[Unknown].codeExact("make_adder()(1)").l shouldBe empty
     }
   }
 
@@ -191,6 +465,34 @@ class CallTestsWithSysroot extends Rust2CpgSuite(noSysRoot = false) {
     }
   }
 
+  "a resolved method call through a dyn trait receiver" should {
+    val cpg = code("""
+        |trait Draw {
+        | fn draw(&self);
+        |}
+        |
+        |fn run(x: &dyn Draw) {
+        | x.draw();
+        |}
+        |""".stripMargin)
+
+    "use dynamic dispatch even when astgen resolves the trait method" in {
+      inside(cpg.call.nameExact("draw").l) { case draw :: Nil =>
+        draw.methodFullName shouldBe "rust2cpgtest::Draw::draw"
+        draw.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+        draw.typeFullName shouldBe "()"
+      }
+    }
+
+    "preserve the dyn receiver as the call receiver" in {
+      inside(cpg.call.nameExact("draw").receiver.l) { case (receiver: Identifier) :: Nil =>
+        receiver.name shouldBe "x"
+        receiver.typeFullName shouldBe "&dyn Draw"
+        receiver.argumentIndex shouldBe 0
+      }
+    }
+  }
+
   "a `String` method chain resolved against the sysroot" should {
     val cpg = code("""
         |fn foo() -> String {
@@ -198,12 +500,10 @@ class CallTestsWithSysroot extends Rust2CpgSuite(noSysRoot = false) {
         |}
         |""".stripMargin)
 
-    // TODO: we would expect the typeFullName to be `String`, not `&str`.
-    //  Need to confirm if that's from rust-analyzer or rust_ast_gen.
     "resolve `from` to core::convert::From" in {
       inside(cpg.call.nameExact("from").l) { case from :: Nil =>
         from.methodFullName shouldBe "core::convert::From<T>::from"
-        from.typeFullName shouldBe "&str"
+        from.typeFullName shouldBe "alloc::string::String"
       }
     }
 

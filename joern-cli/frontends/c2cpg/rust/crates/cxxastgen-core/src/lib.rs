@@ -682,9 +682,16 @@ pub enum Expression {
         code: String,
         line: usize,
         base: Box<Expression>,
+        /// Phase-4: the fully-qualified `<QualifiedType>.<member>` when the
+        /// base type and data member resolve uniquely (`w.value` ->
+        /// `Core.Widget.value`); `None` otherwise.
+        #[serde(
+            rename = "resolvedMemberFullName",
+            skip_serializing_if = "Option::is_none"
+        )]
+        resolved_member_full_name: Option<String>,
         /// Phase-4: the member's declared type when the base type is known
-        /// (`w.value` -> `int`); `None` otherwise. Additive JSON ignored by the
-        /// current Scala reader until a later phase consumes it.
+        /// (`w.value` -> `int`); `None` otherwise.
         #[serde(
             rename = "resolvedTypeFullName",
             skip_serializing_if = "Option::is_none"
@@ -873,6 +880,7 @@ struct TypeMembers {
 struct SymbolTable {
     by_qualified_name: HashMap<String, Vec<SymbolEntry>>,
     by_simple_name: HashMap<String, Vec<SymbolEntry>>,
+    literal_operators_by_suffix: HashMap<String, Vec<SymbolEntry>>,
     types_by_qualified_name: HashMap<String, Vec<TypeEntry>>,
     types_by_simple_name: HashMap<String, Vec<TypeEntry>>,
     members_by_type: HashMap<String, TypeMembers>,
@@ -897,6 +905,13 @@ impl SymbolTable {
     fn insert_qualified_definition(&mut self, entry: SymbolEntry) {
         self.by_qualified_name
             .entry(entry.qualified_name.clone())
+            .or_default()
+            .push(entry);
+    }
+
+    fn insert_literal_operator(&mut self, suffix: String, entry: SymbolEntry) {
+        self.literal_operators_by_suffix
+            .entry(suffix)
             .or_default()
             .push(entry);
     }
@@ -1069,6 +1084,24 @@ fn is_qualified_plain_function_name(name: &str) -> bool {
             .all(|segment| !segment.is_empty() && is_plain_function_name(segment))
 }
 
+fn literal_operator_suffix(name: &str) -> Option<String> {
+    let trimmed = name.trim();
+    let suffix = trimmed
+        .strip_prefix("operator\"\"")
+        .or_else(|| trimmed.strip_prefix("operator \"\""))?
+        .trim();
+    is_user_defined_literal_suffix(suffix).then(|| suffix.to_string())
+}
+
+fn is_user_defined_literal_suffix(suffix: &str) -> bool {
+    let mut chars = suffix.chars();
+    matches!(chars.next(), Some('_'))
+        && chars.next().is_some()
+        && suffix
+            .chars()
+            .all(|ch| ch.is_ascii_alphanumeric() || ch == '_')
+}
+
 /// Records `function` into `table` under the dotted `scope` (enclosing namespace
 /// and class path). Plain in-scope names are indexed by both simple and qualified
 /// name; out-of-line definitions (`int Core::make()`) carry their own qualified
@@ -1083,7 +1116,24 @@ fn collect_function_symbol(table: &mut SymbolTable, scope: &str, function: &Func
         .filter(|param| !param.is_variadic)
         .count();
 
-    if is_plain_function_name(&function.name) {
+    if let Some(suffix) = literal_operator_suffix(&function.name) {
+        let qualified_name = if scope.is_empty() {
+            function.name.clone()
+        } else {
+            format!("{scope}.{}", function.name)
+        };
+        table.insert_literal_operator(
+            suffix,
+            SymbolEntry {
+                qualified_name,
+                simple_name: function.name.clone(),
+                arity,
+                has_variadic,
+                signature: function.signature.clone(),
+                is_definition: function.is_definition,
+            },
+        );
+    } else if is_plain_function_name(&function.name) {
         let simple_name = function.name.clone();
         let qualified_name = if scope.is_empty() {
             simple_name.clone()
@@ -1493,13 +1543,6 @@ fn resolve_declared_type_with_aliases(
 /// `Core.Widget`), cv-qualifiers are dropped, but multi-level pointers and arrays
 /// (which require pointer/array arithmetic, not direct member access) yield
 /// `None`.
-///
-/// TODO(oxidized WS3): groundwork for resolving *instance* member access
-/// (`obj.field` / `obj->field`) to a `resolvedMemberFullName`. That requires a
-/// resolved-member slot on `Expression::FieldAccess` (and matching Scala-side
-/// support), so it stays unwired for now — only static `Type::member` access is
-/// resolved (see `resolve_member_reference`).
-#[allow(dead_code)]
 fn member_access_base_type(resolved_type: &str) -> Option<String> {
     let normalized = normalize_type(resolved_type);
     let core = normalized.trim();
@@ -1745,6 +1788,19 @@ fn field_access_member_type(
     base: &Expression,
     field: &str,
 ) -> Option<String> {
+    field_access_member_target(table, stack, scope, base, field).map(|(_, field_type)| field_type)
+}
+
+/// The resolved member full name and declared type for a field access
+/// `base.field`. Both are returned only when the base's type and the data field
+/// are unambiguous.
+fn field_access_member_target(
+    table: &SymbolTable,
+    stack: &ScopeStack,
+    scope: &str,
+    base: &Expression,
+    field: &str,
+) -> Option<(String, String)> {
     let base_qualified = match base {
         // `this` denotes the enclosing class (the parent of the function scope).
         Expression::Identifier { name, .. } if name == "this" => {
@@ -1752,14 +1808,12 @@ fn field_access_member_type(
         }
         _ => {
             let base_type = infer_argument_type(table, stack, scope, base)?;
-            unique_type_qualified_name_with_aliases(
-                table,
-                strip_reference(&base_type),
-                &NamespaceAliasStack::default(),
-            )?
+            let object_type = member_access_base_type(strip_reference(&base_type))?;
+            unique_type_qualified_name_with_aliases(table, &object_type, &NamespaceAliasStack::default())?
         }
     };
-    type_member_field_type(table, &base_qualified, field)
+    let field_type = type_member_field_type(table, &base_qualified, field)?;
+    Some((format!("{base_qualified}.{field}"), field_type))
 }
 
 /// The qualified name of the type enclosing a function `scope` (`Core.Widget.use`
@@ -1841,6 +1895,195 @@ fn infer_literal_type(value: &str) -> Option<String> {
         return Some("double".to_string());
     }
     None
+}
+
+fn resolve_user_defined_literal_type(
+    table: &SymbolTable,
+    aliases: &NamespaceAliasStack,
+    value: &str,
+) -> Option<String> {
+    let info = user_defined_literal_info(value)?;
+    let candidates = table.literal_operators_by_suffix.get(&info.suffix)?;
+    let mut matches = candidates.iter().filter(|entry| {
+        entry.is_definition && literal_operator_matches_argument(entry, info.argument)
+    });
+    let first = matches.next()?;
+    if matches.next().is_some() {
+        return None;
+    }
+    let return_type = return_type_of_signature(&first.signature)?;
+    resolve_declared_type_with_aliases(table, &return_type, aliases).or(Some(return_type))
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum UserDefinedLiteralArgument {
+    Integer,
+    Floating,
+    Character(&'static str),
+    String(&'static str),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct UserDefinedLiteralInfo {
+    suffix: String,
+    argument: UserDefinedLiteralArgument,
+}
+
+fn user_defined_literal_info(value: &str) -> Option<UserDefinedLiteralInfo> {
+    let trimmed = value.trim();
+    string_literal_body_end_and_element_type(trimmed)
+        .or_else(|| char_literal_body_end_and_element_type(trimmed))
+        .and_then(|(body_end, argument)| {
+            let suffix = trimmed.get(body_end..)?.trim();
+            is_user_defined_literal_suffix(suffix).then(|| UserDefinedLiteralInfo {
+                suffix: suffix.to_string(),
+                argument,
+            })
+        })
+        .or_else(|| numeric_user_defined_literal_info(trimmed))
+}
+
+fn numeric_user_defined_literal_info(value: &str) -> Option<UserDefinedLiteralInfo> {
+    value.char_indices().find_map(|(index, ch)| {
+        if ch != '_' {
+            return None;
+        }
+        let (body, suffix) = value.split_at(index);
+        if !is_user_defined_literal_suffix(suffix) {
+            return None;
+        }
+        if integer_literal_value(body).is_some() {
+            Some(UserDefinedLiteralInfo {
+                suffix: suffix.to_string(),
+                argument: UserDefinedLiteralArgument::Integer,
+            })
+        } else if is_floating_literal_spelling(body) {
+            Some(UserDefinedLiteralInfo {
+                suffix: suffix.to_string(),
+                argument: UserDefinedLiteralArgument::Floating,
+            })
+        } else {
+            None
+        }
+    })
+}
+
+fn string_literal_body_end_and_element_type(
+    value: &str,
+) -> Option<(usize, UserDefinedLiteralArgument)> {
+    const RAW_PREFIXES: &[(&str, &str)] = &[
+        ("u8R\"", "char8_t"),
+        ("uR\"", "char16_t"),
+        ("UR\"", "char32_t"),
+        ("LR\"", "wchar_t"),
+        ("R\"", "char"),
+    ];
+    for (prefix, element_type) in RAW_PREFIXES {
+        if value.starts_with(prefix) {
+            let quote_index = prefix.len() - 1;
+            return raw_string_literal_body_end(value, quote_index)
+                .map(|end| (end, UserDefinedLiteralArgument::String(element_type)));
+        }
+    }
+
+    const PREFIXES: &[(&str, &str)] = &[
+        ("u8\"", "char8_t"),
+        ("u\"", "char16_t"),
+        ("U\"", "char32_t"),
+        ("L\"", "wchar_t"),
+        ("\"", "char"),
+    ];
+    for (prefix, element_type) in PREFIXES {
+        if value.starts_with(prefix) {
+            let quote_index = prefix.len() - 1;
+            return regular_quoted_literal_body_end(value, quote_index, '"')
+                .map(|end| (end, UserDefinedLiteralArgument::String(element_type)));
+        }
+    }
+    None
+}
+
+fn char_literal_body_end_and_element_type(
+    value: &str,
+) -> Option<(usize, UserDefinedLiteralArgument)> {
+    const PREFIXES: &[(&str, &str)] = &[
+        ("u8'", "char8_t"),
+        ("u'", "char16_t"),
+        ("U'", "char32_t"),
+        ("L'", "wchar_t"),
+        ("'", "char"),
+    ];
+    for (prefix, element_type) in PREFIXES {
+        if value.starts_with(prefix) {
+            let quote_index = prefix.len() - 1;
+            return regular_quoted_literal_body_end(value, quote_index, '\'')
+                .map(|end| (end, UserDefinedLiteralArgument::Character(element_type)));
+        }
+    }
+    None
+}
+
+fn raw_string_literal_body_end(value: &str, quote_index: usize) -> Option<usize> {
+    if value.as_bytes().get(quote_index) != Some(&b'"') {
+        return None;
+    }
+    let delimiter_start = quote_index + 1;
+    let open_paren = value.get(delimiter_start..)?.find('(')? + delimiter_start;
+    let delimiter = value.get(delimiter_start..open_paren)?;
+    let close = format!("){delimiter}\"");
+    let search_start = open_paren + 1;
+    Some(value.get(search_start..)?.find(&close)? + search_start + close.len())
+}
+
+fn regular_quoted_literal_body_end(value: &str, quote_index: usize, quote: char) -> Option<usize> {
+    let mut escaped = false;
+    for (index, ch) in value.get(quote_index + 1..)?.char_indices() {
+        if escaped {
+            escaped = false;
+        } else if ch == '\\' {
+            escaped = true;
+        } else if ch == quote {
+            return Some(quote_index + 1 + index + ch.len_utf8());
+        }
+    }
+    None
+}
+
+fn literal_operator_matches_argument(
+    entry: &SymbolEntry,
+    argument: UserDefinedLiteralArgument,
+) -> bool {
+    let parameters = parameter_types(&entry.signature);
+    match argument {
+        UserDefinedLiteralArgument::Integer => {
+            parameters.len() == 1 && literal_parameter_matches(&parameters[0], "unsigned long long")
+        }
+        UserDefinedLiteralArgument::Floating => {
+            parameters.len() == 1 && literal_parameter_matches(&parameters[0], "long double")
+        }
+        UserDefinedLiteralArgument::Character(element_type) => {
+            parameters.len() == 1 && literal_parameter_matches(&parameters[0], element_type)
+        }
+        UserDefinedLiteralArgument::String(element_type) => {
+            parameters.len() == 2
+                && literal_parameter_matches(&parameters[0], &format!("{element_type}*"))
+                && literal_size_parameter_matches(&parameters[1])
+        }
+    }
+}
+
+fn literal_parameter_matches(parameter: &str, expected: &str) -> bool {
+    normalize_type(strip_reference(parameter)).replace("::", ".")
+        == normalize_type(strip_reference(expected)).replace("::", ".")
+}
+
+fn literal_size_parameter_matches(parameter: &str) -> bool {
+    matches!(
+        normalize_type(strip_reference(parameter))
+            .replace("::", ".")
+            .as_str(),
+        "size_t" | "std.size_t" | "unsigned long"
+    )
 }
 
 /// True when `value` is spelled as a (possibly prefixed) string literal.
@@ -2127,7 +2370,8 @@ fn annotate_expression(
             ..
         } => {
             if resolved_type_full_name.is_none() {
-                *resolved_type_full_name = infer_literal_type(value);
+                *resolved_type_full_name = infer_literal_type(value)
+                    .or_else(|| resolve_user_defined_literal_type(table, aliases, value));
             }
         }
         Expression::Call {
@@ -2461,6 +2705,7 @@ fn namespace_alias_field_access_expression(
             resolved_reference_full_name: None,
             resolved_member_full_name: None,
         }),
+        resolved_member_full_name: None,
         resolved_type_full_name: None,
     })
 }
@@ -2971,14 +3216,20 @@ fn resolve_references_in_expression(
         Expression::FieldAccess {
             base,
             field,
+            resolved_member_full_name,
             resolved_type_full_name,
             ..
         } => {
             // The base is a value reference; resolve it first so its type is known.
             resolve_references_in_expression(table, scope, stack, aliases, base, false);
+            let resolved_member = field_access_member_target(table, stack, scope, base, field);
+            if resolved_member_full_name.is_none() {
+                *resolved_member_full_name = resolved_member
+                    .as_ref()
+                    .map(|(member_full_name, _)| member_full_name.clone());
+            }
             if resolved_type_full_name.is_none() {
-                *resolved_type_full_name =
-                    field_access_member_type(table, stack, scope, base, field);
+                *resolved_type_full_name = resolved_member.map(|(_, field_type)| field_type);
             }
         }
         Expression::IndexAccess { base, index, .. } => {
@@ -6917,6 +7168,7 @@ fn parse_qualified_identifier_expression(node: Node, source: &[u8]) -> Expressio
             code: node_text(node, source).trim().to_string(),
             line: line(node),
             base: Box::new(parse_decltype_expression(scope, source)),
+            resolved_member_full_name: None,
             resolved_type_full_name: None,
         },
         _ => identifier_expression(node, source),
@@ -7058,6 +7310,7 @@ fn parse_field_expression(node: Node, source: &[u8]) -> Expression {
             code: node_text(node, source).trim().to_string(),
             line: line(node),
             base: Box::new(parse_expression(base, source)),
+            resolved_member_full_name: None,
             resolved_type_full_name: None,
         },
         _ => identifier_expression(node, source),
@@ -15093,6 +15346,61 @@ mod tests {
     }
 
     #[test]
+    fn resolves_user_defined_literal_types_from_matching_literal_operators() {
+        let declarations = parse_declarations(
+            r#"
+                struct Distance {};
+                Distance operator"" _km(unsigned long long value) { return Distance{}; }
+                long double operator"" _rad(long double value) { return value; }
+                const char *operator"" _tag(const char *value, unsigned long size) { return value; }
+                Distance use() {
+                  auto d = 42_km;
+                  auto r = 1.5_rad;
+                  auto s = "x"_tag;
+                  return d;
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("user-defined literal sample should parse");
+
+        let use_fn = function_named(&declarations, "use");
+        assert_eq!(
+            literal_resolved_type(use_fn, "42_km"),
+            Some(Some("Distance".to_string()))
+        );
+        assert_eq!(
+            literal_resolved_type(use_fn, "1.5_rad"),
+            Some(Some("long double".to_string()))
+        );
+        assert_eq!(
+            literal_resolved_type(use_fn, "\"x\"_tag"),
+            Some(Some("char*".to_string()))
+        );
+    }
+
+    #[test]
+    fn leaves_ambiguous_user_defined_literals_unresolved() {
+        let declarations = parse_declarations(
+            r#"
+                struct A {};
+                struct B {};
+                A operator"" _u(unsigned long long value) { return A{}; }
+                B operator"" _u(unsigned long long value) { return B{}; }
+                int use() {
+                  auto value = 7_u;
+                  return 0;
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("ambiguous user-defined literal sample should parse");
+
+        let use_fn = function_named(&declarations, "use");
+        assert_eq!(literal_resolved_type(use_fn, "7_u"), Some(None));
+    }
+
+    #[test]
     fn resolves_cast_target_type() {
         let declarations = parse_declarations(
             r#"
@@ -15554,6 +15862,31 @@ mod tests {
 
         let json = serde_json::to_string(&declarations).expect("serialize declarations");
         assert!(json.contains("\"resolvedMemberFullName\":\"Core.Widget.instances\""));
+    }
+
+    #[test]
+    fn resolves_instance_member_references() {
+        // `w.value`, `p->value`, and `this->value` resolve to the same data
+        // member when the base type is unique.
+        let declarations = parse_declarations(
+            r#"
+                namespace Core {
+                  struct Widget {
+                    int value;
+                    int read(Widget *p) {
+                      Widget w;
+                      return w.value + p->value + this->value;
+                    }
+                  };
+                }
+            "#,
+            SourceLanguage::Cpp,
+        )
+        .expect("instance member sample should parse");
+
+        let json = serde_json::to_string(&declarations).expect("serialize declarations");
+        assert_eq!(json.matches("\"resolvedMemberFullName\":\"Core.Widget.value\"").count(), 3);
+        assert!(json.contains("\"resolvedTypeFullName\":\"int\""));
     }
 
     #[test]

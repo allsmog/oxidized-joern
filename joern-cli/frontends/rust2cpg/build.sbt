@@ -1,7 +1,7 @@
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.sbt.packager.Keys.stagingDirectory
 
-import scala.sys.process.stringToProcess
+import scala.sys.process.{Process, stringToProcess}
 import scala.util.Try
 
 name := "rust2cpg"
@@ -40,17 +40,24 @@ lazy val AstgenMacArm   = "rust_ast_gen-macos-arm"
 lazy val astGenDlUrl = settingKey[String]("rust_ast_gen download url")
 astGenDlUrl := s"https://github.com/joernio/astgen-monorepo/releases/download/rust-astgen/v${astGenVersion.value}/"
 
-def hasCompatibleAstGenVersion(astGenVersion: String): Boolean = {
-  Try("rust_ast_gen --version".!!).toOption.map(_.strip().stripPrefix("rust_ast_gen ")) match {
+def isCompatibleAstGen(command: Seq[String], astGenVersion: String): Boolean = {
+  Try(Process(command).!!).toOption.map(_.strip().stripPrefix("rust_ast_gen ")) match {
     case Some(installedVersion) if installedVersion.nonEmpty =>
       versionsort.VersionHelper.compare(installedVersion, astGenVersion) >= 0
     case _ => false
   }
 }
 
+def hasCompatibleAstGenVersion(astGenVersion: String): Boolean =
+  isCompatibleAstGen(Seq("rust_ast_gen", "--version"), astGenVersion)
+
 lazy val astGenBinaryNames = taskKey[Seq[String]]("rust_ast_gen binary names")
 astGenBinaryNames := {
-  if (hasCompatibleAstGenVersion(astGenVersion.value)) {
+  val bundledCurrentAstgen = baseDirectory.value / "bin" / "astgen" / astGenCurrentBinaryName.value
+  if (
+    hasCompatibleAstGenVersion(astGenVersion.value) ||
+    isCompatibleAstGen(Seq(bundledCurrentAstgen.getAbsolutePath, "--version"), astGenVersion.value)
+  ) {
     Seq.empty
   } else if (sys.props.get("ALL_PLATFORMS").contains("TRUE")) {
     Seq(AstgenWin, AstgenWinArm, AstgenLinux, AstgenLinuxArm, AstgenMac, AstgenMacArm)
@@ -77,6 +84,51 @@ astGenBinaryNames := {
   }
 }
 
+lazy val astGenCurrentBinaryName = taskKey[String]("rust_ast_gen binary name for the current host")
+astGenCurrentBinaryName := {
+  Environment.operatingSystem match {
+    case Environment.OperatingSystemType.Windows =>
+      Environment.architecture match {
+        case Environment.ArchitectureType.X86   => AstgenWin
+        case Environment.ArchitectureType.ARMv8 => AstgenWinArm
+      }
+    case Environment.OperatingSystemType.Linux =>
+      Environment.architecture match {
+        case Environment.ArchitectureType.X86   => AstgenLinux
+        case Environment.ArchitectureType.ARMv8 => AstgenLinuxArm
+      }
+    case Environment.OperatingSystemType.Mac =>
+      Environment.architecture match {
+        case Environment.ArchitectureType.X86   => AstgenMac
+        case Environment.ArchitectureType.ARMv8 => AstgenMacArm
+      }
+    case Environment.OperatingSystemType.Unknown =>
+      AstgenLinux
+  }
+}
+
+lazy val rustAstGenBuildRust = taskKey[File]("Build local Rust rust_ast_gen and install it under bin/astgen")
+rustAstGenBuildRust := {
+  val rustRoot = baseDirectory.value / "rust"
+  val localBinaryName =
+    if (Environment.operatingSystem == Environment.OperatingSystemType.Windows) "rust_ast_gen.exe" else "rust_ast_gen"
+  val exitCode = Process(Seq("cargo", "build", "--release", "--bin", "rust_ast_gen"), rustRoot).!
+  if (exitCode != 0) {
+    sys.error(s"cargo build failed with exit code $exitCode")
+  }
+  val built      = rustRoot / "target" / "release" / localBinaryName
+  val astGenDir  = baseDirectory.value / "bin" / "astgen"
+  val targetFile = astGenDir / astGenCurrentBinaryName.value
+  astGenDir.mkdirs()
+  IO.copyFile(built, targetFile, preserveLastModified = true)
+  targetFile.setExecutable(true, false)
+  val distDir = (Universal / stagingDirectory).value / "bin" / "astgen"
+  distDir.mkdirs()
+  IO.copyFile(targetFile, distDir / astGenCurrentBinaryName.value, preserveLastModified = true)
+  streams.value.log.info(s"installed Rust rust_ast_gen to $targetFile")
+  targetFile
+}
+
 lazy val astGenDlTask = taskKey[Unit](s"Download rust_ast_gen binaries")
 astGenDlTask := {
   val astGenDir = baseDirectory.value / "bin" / "astgen"
@@ -93,7 +145,7 @@ astGenDlTask := {
   IO.copyDirectory(astGenDir, distDir, preserveExecutable = true)
 }
 
-Compile / compile := ((Compile / compile) dependsOn astGenDlTask).value
+Compile / compile := ((Compile / compile) dependsOn rustAstGenBuildRust).value
 
 lazy val astGenSetAllPlatforms = taskKey[Unit](s"Set ALL_PLATFORMS")
 astGenSetAllPlatforms := { System.setProperty("ALL_PLATFORMS", "TRUE") }

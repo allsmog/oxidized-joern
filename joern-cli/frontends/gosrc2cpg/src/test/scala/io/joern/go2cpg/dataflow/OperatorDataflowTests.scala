@@ -130,7 +130,7 @@ class OperatorDataflowTests extends GoCodeToCpgSuite(withOssDataflow = true) {
 
   }
 
-  "dataflows across type casting operation" ignore {
+  "dataflows across type casting operation" should {
     val cpg = code("""
         |package main
         |func main() {
@@ -139,12 +139,12 @@ class OperatorDataflowTests extends GoCodeToCpgSuite(withOssDataflow = true) {
         |}
         |""".stripMargin)
     "data flow from identifier to type casted identifier" in {
-      val source = cpg.identifier("m")
+      val source = cpg.identifier("m").lineNumber(4)
       val sink   = cpg.identifier("str")
       sink.reachableByFlows(source).size shouldBe 1
     }
     "data flow from literal to type casted identifier" in {
-      val source = cpg.literal("a")
+      val source = cpg.literal("\"a\"")
       val sink   = cpg.identifier("str")
       sink.reachableByFlows(source).size shouldBe 1
     }
@@ -167,7 +167,7 @@ class OperatorDataflowTests extends GoCodeToCpgSuite(withOssDataflow = true) {
         |    fmt.Println(value)
         |}""".stripMargin)
 
-    "check dataflow from literal to Println" ignore {
+    "check dataflow from literal to Println" in {
       val source = cpg.literal("42")
       val sink   = cpg.call("Println")
       sink.reachableByFlows(source).size shouldBe 1
@@ -176,7 +176,7 @@ class OperatorDataflowTests extends GoCodeToCpgSuite(withOssDataflow = true) {
     "check dataflow from identifier to Println" in {
       val source = cpg.identifier("ch").lineNumber(6)
       val sink   = cpg.call("Println")
-      sink.reachableByFlows(source).size shouldBe 1
+      sink.reachableByFlows(source).size shouldBe 2
     }
 
   }

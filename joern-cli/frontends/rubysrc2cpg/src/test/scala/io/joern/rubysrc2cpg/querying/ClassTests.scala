@@ -755,18 +755,27 @@ class ClassTests extends RubyCode2CpgFixture {
     }
   }
 
-  // TODO: Fix when implementing calls vs field accesses, currently handled as a MemberAccess where the target becomes "Encoding"
-  //  which is resolved as `<__builtin.Encoding>`, and then adds the `Converter` as a function call, so type ends up being
-  //  `<__builtin.Encoding>:Converter`
-  "GlobalTypes::BundledClasses" ignore {
+  "GlobalTypes::BundledClasses" should {
     val cpg = code("""
         |a = Encoding::Converter.asciicompat_encoding("abc")
         |""".stripMargin)
 
-    "resolve call type" in {
-      inside(cpg.call.nameExact(Operators.assignment).l) { case assignCall :: Nil =>
-        inside(assignCall.argument.l) { case lhs :: (rhs: Call) :: Nil =>
-          rhs.typeFullName shouldBe "__builtin.Encoding.Converter.asciicompat_encoding"
+    "resolve nested bundled class call targets" in {
+      val converterType     = RubyDefines.prefixAsCoreType("Encoding.Converter")
+      val converterCallName = s"$converterType.asciicompat_encoding"
+
+      inside(cpg.assignment.codeExact("""a = Encoding::Converter.asciicompat_encoding("abc")""").l) {
+        case assignCall :: Nil =>
+          inside(assignCall.argument.l) { case _ :: (rhs: Call) :: Nil =>
+            rhs.name shouldBe "asciicompat_encoding"
+            rhs.methodFullName shouldBe converterCallName
+          }
+      }
+
+      inside(cpg.fieldAccess.codeExact("Encoding::Converter.asciicompat_encoding").l) { case receiver :: Nil =>
+        inside(receiver.argument.l) { case (base: TypeRef) :: (member: FieldIdentifier) :: Nil =>
+          base.typeFullName shouldBe converterType
+          member.canonicalName shouldBe "asciicompat_encoding"
         }
       }
     }

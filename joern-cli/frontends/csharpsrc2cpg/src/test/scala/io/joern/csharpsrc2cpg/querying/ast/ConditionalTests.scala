@@ -2,7 +2,7 @@ package io.joern.csharpsrc2cpg.querying.ast
 
 import io.joern.csharpsrc2cpg.testfixtures.CSharpCode2CpgFixture
 import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, Operators}
-import io.shiftleft.codepropertygraph.generated.nodes.{ControlStructure, Identifier, Literal, Call}
+import io.shiftleft.codepropertygraph.generated.nodes.{Call, ControlStructure, Identifier, Literal, Unknown}
 import io.shiftleft.semanticcpg.language.*
 
 class ConditionalTests extends CSharpCode2CpgFixture {
@@ -25,6 +25,8 @@ class ConditionalTests extends CSharpCode2CpgFixture {
           cndNode.code shouldBe "a == 1"
         }
         ifNode.whenTrue.assignment.code.l shouldBe List("a++")
+        ifNode.trueBodyOut.isBlock.l shouldBe ifNode.astChildren.isBlock.l
+        ifNode.falseBodyOut.l shouldBe Nil
 
         inside(ifNode.astChildren.isBlock.l) { case blockNode :: Nil =>
           val List(incCall) = blockNode.ast.isCall.l
@@ -33,6 +35,23 @@ class ConditionalTests extends CSharpCode2CpgFixture {
         }
 
       }
+    }
+
+    "lower empty statement bodies without unknown nodes" in {
+      val cpg = code(basicBoilerplate("""
+          |if (true)
+          |  ;
+          |;
+          |""".stripMargin))
+
+      inside(cpg.method("Main").controlStructure.l) { case ifNode :: Nil =>
+        ifNode.code shouldBe "if (true)"
+        ifNode.controlStructureType shouldBe ControlStructureTypes.IF
+        inside(ifNode.trueBodyOut.isBlock.l) { case body :: Nil =>
+          body.astChildren.l shouldBe Nil
+        }
+      }
+      cpg.all.collectAll[Unknown].l shouldBe Nil
     }
 
     "be correct for if-else statements" in {
@@ -71,6 +90,8 @@ class ConditionalTests extends CSharpCode2CpgFixture {
         }
 
         ifNode.whenTrue.assignment.code.l shouldBe List("a++")
+        ifNode.trueBodyOut.isBlock.l shouldBe ifNode.astChildren.isBlock.l
+        ifNode.falseBodyOut.l shouldBe List(elseNode)
 
       }
 

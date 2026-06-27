@@ -196,7 +196,9 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
           .order(1)
       )
     }
-    Ast(controlStructureNode(breakStmt, ControlStructureTypes.BREAK, code(breakStmt))).withChildren(labelAst)
+    val breakNode = controlStructureNode(breakStmt, ControlStructureTypes.BREAK, code(breakStmt))
+    val breakAst  = Ast(breakNode).withChildren(labelAst)
+    labelAst.headOption.flatMap(_.root).map(breakAst.withJumpArgumentEdge(breakNode, _)).getOrElse(breakAst)
   }
 
   protected def astForContinueStatement(continueStmt: BabelNodeInfo): Ast = {
@@ -214,7 +216,9 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
             .order(1)
         )
       }
-    Ast(controlStructureNode(continueStmt, ControlStructureTypes.CONTINUE, code(continueStmt))).withChildren(labelAst)
+    val continueNode = controlStructureNode(continueStmt, ControlStructureTypes.CONTINUE, code(continueStmt))
+    val continueAst  = Ast(continueNode).withChildren(labelAst)
+    labelAst.headOption.flatMap(_.root).map(continueAst.withJumpArgumentEdge(continueNode, _)).getOrElse(continueAst)
   }
 
   protected def astForThrowStatement(throwStmt: BabelNodeInfo): Ast = {

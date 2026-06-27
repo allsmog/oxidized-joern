@@ -1,6 +1,8 @@
 import os
 from typing import Iterable, Optional
 
+type Vector[T] = list[T]
+
 
 def decorate(fn):
     return fn

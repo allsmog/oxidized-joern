@@ -1,14 +1,30 @@
 package io.joern.c2cpg.compat
 
+import flatgraph.DiffGraphApplier
 import io.joern.c2cpg.{C2Cpg, Config}
 import io.joern.c2cpg.astcreation.Defines
+import io.joern.c2cpg.oxidized.{
+  OxCall,
+  OxCast,
+  OxDocument,
+  OxFieldAccess,
+  OxFunctionDecl,
+  OxGlobalVariableDecl,
+  OxIdentifier,
+  OxLocalDecl,
+  OxReturn,
+  OxStructDecl,
+  OxidizedAstCreator
+}
 import io.joern.c2cpg.parser.ParserBackend
 import io.joern.c2cpg.testfixtures.C2CpgSuite
 import io.shiftleft.codepropertygraph.generated.{
   ControlStructureTypes,
+  Cpg,
   DispatchTypes,
   EvaluationStrategies,
   ModifierTypes,
+  NodeTypes,
   Operators
 }
 import io.shiftleft.codepropertygraph.generated.nodes.JumpTarget
@@ -93,6 +109,686 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         fromDbCall.signature shouldBe "int(0)"
         fromDbCall.dispatchType shouldBe DispatchTypes.INLINED
         fromDbCall.argument.l shouldBe Nil
+      }
+    }
+
+    "read Rust-resolved field access types from oxidized JSON" in {
+      val document = OxDocument.fromJson("""
+          |{
+          |  "path": "field.cpp",
+          |  "declarations": [
+          |    {
+          |      "kind": "function",
+          |      "name": "read",
+          |      "returnType": "int",
+          |      "semanticReturnType": "int",
+          |      "signature": "int()",
+          |      "isDefinition": true,
+          |      "isStatic": false,
+          |      "isConst": false,
+          |      "isVirtual": false,
+          |      "code": "int read() { return holder.value; }",
+          |      "line": 1,
+          |      "parameters": [],
+          |      "constructorInitializers": [],
+          |      "body": [
+          |        {
+          |          "kind": "return",
+          |          "code": "return holder.value",
+          |          "line": 1,
+          |          "expression": {
+          |            "kind": "fieldAccess",
+          |            "field": "value",
+          |            "code": "holder.value",
+          |            "line": 1,
+          |            "base": { "kind": "identifier", "name": "holder", "code": "holder", "line": 1 },
+          |            "resolvedMemberFullName": "Core.Holder.value",
+          |            "resolvedTypeFullName": "Core.Value"
+          |          }
+          |        }
+          |      ]
+          |    }
+          |  ]
+          |}
+          |""".stripMargin)
+
+      val function = document.declarations.collectFirst { case function: OxFunctionDecl => function }.head
+      val fieldAccess = function.body.collectFirst {
+        case OxReturn(_, _, Some(fieldAccess: OxFieldAccess)) => fieldAccess
+      }.head
+      fieldAccess.resolvedMemberFullName.shouldBe(Some("Core.Holder.value"))
+      fieldAccess.resolvedTypeFullName.shouldBe(Some("Core.Value"))
+    }
+
+    "read Rust-resolved identifier references from oxidized JSON" in {
+      val document = OxDocument.fromJson("""
+          |{
+          |  "path": "reference.cpp",
+          |  "declarations": [
+          |    {
+          |      "kind": "function",
+          |      "name": "use",
+          |      "returnType": "int",
+          |      "semanticReturnType": "int",
+          |      "signature": "int()",
+          |      "isDefinition": true,
+          |      "isStatic": false,
+          |      "isConst": false,
+          |      "isVirtual": false,
+          |      "code": "int use() { return Core::Widget::instances; }",
+          |      "line": 1,
+          |      "parameters": [],
+          |      "constructorInitializers": [],
+          |      "body": [
+          |        {
+          |          "kind": "return",
+          |          "code": "return Core::Widget::instances",
+          |          "line": 1,
+          |          "expression": {
+          |            "kind": "identifier",
+          |            "name": "Core::Widget::instances",
+          |            "code": "Core::Widget::instances",
+          |            "line": 1,
+          |            "resolvedReferenceFullName": "Core.Widget.instances",
+          |            "resolvedMemberFullName": "Core.Widget.instances"
+          |          }
+          |        }
+          |      ]
+          |    }
+          |  ]
+          |}
+          |""".stripMargin)
+
+      val function = document.declarations.collectFirst { case function: OxFunctionDecl => function }.head
+      val identifier = function.body.collectFirst {
+        case OxReturn(_, _, Some(identifier: OxIdentifier)) => identifier
+      }.head
+      identifier.resolvedReferenceFullName.shouldBe(Some("Core.Widget.instances"))
+      identifier.resolvedMemberFullName.shouldBe(Some("Core.Widget.instances"))
+    }
+
+    "use Rust-resolved identifier references when building CPG refs" in {
+      val document = OxDocument.fromJson("""
+          |{
+          |  "path": "reference.cpp",
+          |  "declarations": [
+          |    {
+          |      "kind": "namespace",
+          |      "name": "Core",
+          |      "code": "namespace Core { int shared; }",
+          |      "line": 1,
+          |      "declarations": [
+          |        {
+          |          "kind": "globalVariable",
+          |          "name": "shared",
+          |          "typeName": "int",
+          |          "semanticTypeName": "int",
+          |          "code": "int shared",
+          |          "line": 1,
+          |          "initializer": null
+          |        }
+          |      ]
+          |    },
+          |    {
+          |      "kind": "globalVariable",
+          |      "name": "shared",
+          |      "typeName": "long",
+          |      "semanticTypeName": "long",
+          |      "code": "long shared",
+          |      "line": 2,
+          |      "initializer": null
+          |    },
+          |    {
+          |      "kind": "function",
+          |      "name": "use",
+          |      "returnType": "int",
+          |      "semanticReturnType": "int",
+          |      "signature": "int()",
+          |      "isDefinition": true,
+          |      "isStatic": false,
+          |      "isConst": false,
+          |      "isVirtual": false,
+          |      "code": "int use() { return shared; }",
+          |      "line": 3,
+          |      "parameters": [],
+          |      "constructorInitializers": [],
+          |      "body": [
+          |        {
+          |          "kind": "return",
+          |          "code": "return shared",
+          |          "line": 3,
+          |          "expression": {
+          |            "kind": "identifier",
+          |            "name": "shared",
+          |            "code": "shared",
+          |            "line": 3,
+          |            "resolvedReferenceFullName": "Core.shared"
+          |          }
+          |        }
+          |      ]
+          |    }
+          |  ]
+          |}
+          |""".stripMargin)
+
+      val cpg = cpgForOxidizedDocument(document)
+      inside(cpg.method.nameExact("use").ast.isIdentifier.nameExact("shared").l) {
+        case List(identifier) =>
+          identifier.typeFullName shouldBe "int"
+      }
+    }
+
+    "use Rust-resolved static member references when building CPG field accesses" in {
+      val document = OxDocument.fromJson("""
+          |{
+          |  "path": "reference.cpp",
+          |  "declarations": [
+          |    {
+          |      "kind": "namespace",
+          |      "name": "Core",
+          |      "code": "namespace Core { struct Widget { static int instances; }; }",
+          |      "line": 1,
+          |      "declarations": [
+          |        {
+          |          "kind": "struct",
+          |          "name": "Widget",
+          |          "code": "struct Widget { static int instances; };",
+          |          "line": 1,
+          |          "fields": [
+          |            {
+          |              "name": "instances",
+          |              "typeName": "int",
+          |              "semanticTypeName": "int",
+          |              "code": "static int instances",
+          |              "isStatic": true,
+          |              "initializer": null
+          |            }
+          |          ],
+          |          "nestedDeclarations": []
+          |        }
+          |      ]
+          |    },
+          |    {
+          |      "kind": "function",
+          |      "name": "use",
+          |      "returnType": "int",
+          |      "semanticReturnType": "int",
+          |      "signature": "int()",
+          |      "isDefinition": true,
+          |      "isStatic": false,
+          |      "isConst": false,
+          |      "isVirtual": false,
+          |      "code": "int use() { return Core::Widget::instances; }",
+          |      "line": 2,
+          |      "parameters": [],
+          |      "constructorInitializers": [],
+          |      "body": [
+          |        {
+          |          "kind": "return",
+          |          "code": "return Core::Widget::instances",
+          |          "line": 2,
+          |          "expression": {
+          |            "kind": "identifier",
+          |            "name": "Core::Widget::instances",
+          |            "code": "Core::Widget::instances",
+          |            "line": 2,
+          |            "resolvedMemberFullName": "Core.Widget.instances"
+          |          }
+          |        }
+          |      ]
+          |    }
+          |  ]
+          |}
+          |""".stripMargin)
+
+      inside(cpgForOxidizedDocument(document).call.nameExact(Operators.fieldAccess).codeExact("Core::Widget::instances").l) {
+        case List(call) =>
+          call.typeFullName shouldBe "int"
+          call.argument(1).code shouldBe "Core::Widget"
+          call.argument(2).code shouldBe "instances"
+      }
+    }
+
+    "read Rust-resolved call targets from oxidized JSON" in {
+      val document = OxDocument.fromJson("""
+          |{
+          |  "path": "call.cpp",
+          |  "declarations": [
+          |    {
+          |      "kind": "function",
+          |      "name": "use",
+          |      "returnType": "int",
+          |      "semanticReturnType": "int",
+          |      "signature": "int(int)",
+          |      "isDefinition": true,
+          |      "isStatic": false,
+          |      "isConst": false,
+          |      "isVirtual": false,
+          |      "code": "int use(int value) { return pick(value); }",
+          |      "line": 1,
+          |      "parameters": [
+          |        {
+          |          "name": "value",
+          |          "typeName": "int",
+          |          "semanticTypeName": "int",
+          |          "isVariadic": false,
+          |          "hasDefault": false,
+          |          "code": "int value",
+          |          "line": 1
+          |        }
+          |      ],
+          |      "constructorInitializers": [],
+          |      "body": [
+          |        {
+          |          "kind": "return",
+          |          "code": "return pick(value)",
+          |          "line": 1,
+          |          "expression": {
+          |            "kind": "call",
+          |            "name": "pick",
+          |            "code": "pick(value)",
+          |            "line": 1,
+          |            "callee": { "kind": "identifier", "name": "pick", "code": "pick", "line": 1 },
+          |            "arguments": [
+          |              { "kind": "identifier", "name": "value", "code": "value", "line": 1 }
+          |            ],
+          |            "resolvedMethodFullName": "Core.Widget.pick:int(int)",
+          |            "resolvedSignature": "int(int)"
+          |          }
+          |        }
+          |      ]
+          |    }
+          |  ]
+          |}
+          |""".stripMargin)
+
+      val function = document.declarations.collectFirst { case function: OxFunctionDecl => function }.head
+      val call = function.body.collectFirst {
+        case OxReturn(_, _, Some(call: OxCall)) => call
+      }.head
+      call.resolvedMethodFullName.shouldBe(Some("Core.Widget.pick:int(int)"))
+      call.resolvedSignature.shouldBe(Some("int(int)"))
+    }
+
+    "fall back to Rust-resolved call targets when local lookup has no target" in {
+      val document = OxDocument.fromJson("""
+          |{
+          |  "path": "call.cpp",
+          |  "declarations": [
+          |    {
+          |      "kind": "function",
+          |      "name": "use",
+          |      "returnType": "int",
+          |      "semanticReturnType": "int",
+          |      "signature": "int(int)",
+          |      "isDefinition": true,
+          |      "isStatic": false,
+          |      "isConst": false,
+          |      "isVirtual": false,
+          |      "code": "int use(int value) { return pick(value); }",
+          |      "line": 1,
+          |      "parameters": [
+          |        {
+          |          "name": "value",
+          |          "typeName": "int",
+          |          "semanticTypeName": "int",
+          |          "isVariadic": false,
+          |          "hasDefault": false,
+          |          "code": "int value",
+          |          "line": 1
+          |        }
+          |      ],
+          |      "constructorInitializers": [],
+          |      "body": [
+          |        {
+          |          "kind": "return",
+          |          "code": "return pick(value)",
+          |          "line": 1,
+          |          "expression": {
+          |            "kind": "call",
+          |            "name": "pick",
+          |            "code": "pick(value)",
+          |            "line": 1,
+          |            "callee": { "kind": "identifier", "name": "pick", "code": "pick", "line": 1 },
+          |            "arguments": [
+          |              { "kind": "identifier", "name": "value", "code": "value", "line": 1 }
+          |            ],
+          |            "resolvedMethodFullName": "Core.Widget.pick:int(int)",
+          |            "resolvedSignature": "int(int)"
+          |          }
+          |        }
+          |      ]
+          |    }
+          |  ]
+          |}
+          |""".stripMargin)
+
+      inside(cpgForOxidizedDocument(document).call.codeExact("pick(value)").l) {
+        case List(call) =>
+          call.name shouldBe "pick"
+          call.methodFullName shouldBe "Core.Widget.pick:int(int)"
+          call.signature shouldBe "int(int)"
+          call.typeFullName shouldBe "int"
+          call.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+      }
+    }
+
+    "read Rust-resolved cast types from oxidized JSON" in {
+      val document = OxDocument.fromJson("""
+          |{
+          |  "path": "cast.cpp",
+          |  "declarations": [
+          |    {
+          |      "kind": "function",
+          |      "name": "use",
+          |      "returnType": "int",
+          |      "semanticReturnType": "int",
+          |      "signature": "int(int)",
+          |      "isDefinition": true,
+          |      "isStatic": false,
+          |      "isConst": false,
+          |      "isVirtual": false,
+          |      "code": "int use(int value) { return (Alias::Widget*)value; }",
+          |      "line": 1,
+          |      "parameters": [
+          |        {
+          |          "name": "value",
+          |          "typeName": "int",
+          |          "semanticTypeName": "int",
+          |          "isVariadic": false,
+          |          "hasDefault": false,
+          |          "code": "int value",
+          |          "line": 1
+          |        }
+          |      ],
+          |      "constructorInitializers": [],
+          |      "body": [
+          |        {
+          |          "kind": "return",
+          |          "code": "return (Alias::Widget*)value",
+          |          "line": 1,
+          |          "expression": {
+          |            "kind": "cast",
+          |            "typeName": "Alias::Widget*",
+          |            "semanticTypeName": "Alias::Widget*",
+          |            "code": "(Alias::Widget*)value",
+          |            "line": 1,
+          |            "value": { "kind": "identifier", "name": "value", "code": "value", "line": 1 },
+          |            "resolvedTypeFullName": "Core.Widget*"
+          |          }
+          |        }
+          |      ]
+          |    }
+          |  ]
+          |}
+          |""".stripMargin)
+
+      val function = document.declarations.collectFirst { case function: OxFunctionDecl => function }.head
+      val cast = function.body.collectFirst { case OxReturn(_, _, Some(cast: OxCast)) => cast }.head
+      cast.resolvedTypeFullName.shouldBe(Some("Core.Widget*"))
+    }
+
+    "use Rust-resolved cast types when building CPG calls" in {
+      val document = OxDocument.fromJson("""
+          |{
+          |  "path": "cast.cpp",
+          |  "declarations": [
+          |    {
+          |      "kind": "function",
+          |      "name": "use",
+          |      "returnType": "int",
+          |      "semanticReturnType": "int",
+          |      "signature": "int(int)",
+          |      "isDefinition": true,
+          |      "isStatic": false,
+          |      "isConst": false,
+          |      "isVirtual": false,
+          |      "code": "int use(int value) { return (Alias::Widget*)value; }",
+          |      "line": 1,
+          |      "parameters": [
+          |        {
+          |          "name": "value",
+          |          "typeName": "int",
+          |          "semanticTypeName": "int",
+          |          "isVariadic": false,
+          |          "hasDefault": false,
+          |          "code": "int value",
+          |          "line": 1
+          |        }
+          |      ],
+          |      "constructorInitializers": [],
+          |      "body": [
+          |        {
+          |          "kind": "return",
+          |          "code": "return (Alias::Widget*)value",
+          |          "line": 1,
+          |          "expression": {
+          |            "kind": "cast",
+          |            "typeName": "Alias::Widget*",
+          |            "semanticTypeName": "Alias::Widget*",
+          |            "code": "(Alias::Widget*)value",
+          |            "line": 1,
+          |            "value": { "kind": "identifier", "name": "value", "code": "value", "line": 1 },
+          |            "resolvedTypeFullName": "Core.Widget*"
+          |          }
+          |        }
+          |      ]
+          |    }
+          |  ]
+          |}
+          |""".stripMargin)
+
+      inside(cpgForOxidizedDocument(document).call.nameExact(Operators.cast).codeExact("(Alias::Widget*)value").l) {
+        case List(castCall) =>
+          castCall.typeFullName shouldBe "Core.Widget*"
+          castCall.argument.code.l shouldBe List("value")
+      }
+    }
+
+    "read Rust-resolved declaration types from oxidized JSON" in {
+      val document = OxDocument.fromJson("""
+          |{
+          |  "path": "decl.cpp",
+          |  "declarations": [
+          |    {
+          |      "kind": "struct",
+          |      "name": "Holder",
+          |      "code": "struct Holder { Alias::Widget* field; };",
+          |      "line": 1,
+          |      "baseClasses": [],
+          |      "fields": [
+          |        {
+          |          "name": "field",
+          |          "typeName": "Alias::Widget*",
+          |          "semanticTypeName": "Alias::Widget*",
+          |          "code": "Alias::Widget* field",
+          |          "isStatic": false,
+          |          "initializer": null,
+          |          "resolvedTypeFullName": "Core.Widget*"
+          |        }
+          |      ]
+          |    },
+          |    {
+          |      "kind": "globalVariable",
+          |      "name": "global",
+          |      "typeName": "Alias::Widget*",
+          |      "semanticTypeName": "Alias::Widget*",
+          |      "code": "Alias::Widget* global",
+          |      "line": 2,
+          |      "initializer": null,
+          |      "resolvedTypeFullName": "Core.Widget*"
+          |    },
+          |    {
+          |      "kind": "function",
+          |      "name": "use",
+          |      "returnType": "int",
+          |      "semanticReturnType": "int",
+          |      "signature": "int(Alias::Widget*)",
+          |      "isDefinition": true,
+          |      "isStatic": false,
+          |      "isConst": false,
+          |      "isVirtual": false,
+          |      "code": "int use(Alias::Widget* seed) { Alias::Widget* local; return 0; }",
+          |      "line": 3,
+          |      "parameters": [
+          |        {
+          |          "name": "seed",
+          |          "typeName": "Alias::Widget*",
+          |          "semanticTypeName": "Alias::Widget*",
+          |          "isVariadic": false,
+          |          "hasDefault": false,
+          |          "code": "Alias::Widget* seed",
+          |          "line": 3,
+          |          "resolvedTypeFullName": "Core.Widget*"
+          |        }
+          |      ],
+          |      "constructorInitializers": [],
+          |      "body": [
+          |        {
+          |          "kind": "localDecl",
+          |          "name": "local",
+          |          "typeName": "Alias::Widget*",
+          |          "semanticTypeName": "Alias::Widget*",
+          |          "code": "Alias::Widget* local",
+          |          "line": 3,
+          |          "initializer": null,
+          |          "resolvedTypeFullName": "Core.Widget*"
+          |        },
+          |        {
+          |          "kind": "return",
+          |          "code": "return 0",
+          |          "line": 3,
+          |          "expression": { "kind": "literal", "value": "0", "code": "0", "line": 3 }
+          |        }
+          |      ]
+          |    }
+          |  ]
+          |}
+          |""".stripMargin)
+
+      val holder = document.declarations.collectFirst { case structDecl: OxStructDecl => structDecl }.head
+      holder.fields.head.resolvedTypeFullName.shouldBe(Some("Core.Widget*"))
+      val global = document.declarations.collectFirst { case global: OxGlobalVariableDecl => global }.head
+      global.resolvedTypeFullName.shouldBe(Some("Core.Widget*"))
+      val function = document.declarations.collectFirst { case function: OxFunctionDecl => function }.head
+      function.parameters.head.resolvedTypeFullName.shouldBe(Some("Core.Widget*"))
+      val local = function.body.collectFirst { case local: OxLocalDecl => local }.head
+      local.resolvedTypeFullName.shouldBe(Some("Core.Widget*"))
+    }
+
+    "use Rust-resolved declaration types when building CPG nodes" in {
+      val document = OxDocument.fromJson("""
+          |{
+          |  "path": "decl.cpp",
+          |  "declarations": [
+          |    {
+          |      "kind": "struct",
+          |      "name": "Holder",
+          |      "code": "struct Holder { Alias::Widget* field; };",
+          |      "line": 1,
+          |      "baseClasses": [],
+          |      "fields": [
+          |        {
+          |          "name": "field",
+          |          "typeName": "Alias::Widget*",
+          |          "semanticTypeName": "Alias::Widget*",
+          |          "code": "Alias::Widget* field",
+          |          "isStatic": false,
+          |          "initializer": null,
+          |          "resolvedTypeFullName": "Core.Widget*"
+          |        }
+          |      ]
+          |    },
+          |    {
+          |      "kind": "globalVariable",
+          |      "name": "global",
+          |      "typeName": "Alias::Widget*",
+          |      "semanticTypeName": "Alias::Widget*",
+          |      "code": "Alias::Widget* global",
+          |      "line": 2,
+          |      "initializer": null,
+          |      "resolvedTypeFullName": "Core.Widget*"
+          |    },
+          |    {
+          |      "kind": "function",
+          |      "name": "use",
+          |      "returnType": "int",
+          |      "semanticReturnType": "int",
+          |      "signature": "int(Alias::Widget*)",
+          |      "isDefinition": true,
+          |      "isStatic": false,
+          |      "isConst": false,
+          |      "isVirtual": false,
+          |      "code": "int use(Alias::Widget* seed) { Alias::Widget* local; return 0; }",
+          |      "line": 3,
+          |      "parameters": [
+          |        {
+          |          "name": "seed",
+          |          "typeName": "Alias::Widget*",
+          |          "semanticTypeName": "Alias::Widget*",
+          |          "isVariadic": false,
+          |          "hasDefault": false,
+          |          "code": "Alias::Widget* seed",
+          |          "line": 3,
+          |          "resolvedTypeFullName": "Core.Widget*"
+          |        }
+          |      ],
+          |      "constructorInitializers": [],
+          |      "body": [
+          |        {
+          |          "kind": "localDecl",
+          |          "name": "local",
+          |          "typeName": "Alias::Widget*",
+          |          "semanticTypeName": "Alias::Widget*",
+          |          "code": "Alias::Widget* local",
+          |          "line": 3,
+          |          "initializer": null,
+          |          "resolvedTypeFullName": "Core.Widget*"
+          |        },
+          |        {
+          |          "kind": "return",
+          |          "code": "return 0",
+          |          "line": 3,
+          |          "expression": { "kind": "literal", "value": "0", "code": "0", "line": 3 }
+          |        }
+          |      ]
+          |    }
+          |  ]
+          |}
+          |""".stripMargin)
+      val cpg = cpgForOxidizedDocument(document)
+
+      cpg.member.nameExact("field").typeFullName.l shouldBe List("Core.Widget*")
+      cpg.local.nameExact("global").typeFullName.l shouldBe List("Core.Widget*")
+      cpg.parameter.nameExact("seed").typeFullName.l shouldBe List("Core.Widget*")
+      cpg.local.nameExact("local").typeFullName.l shouldBe List("Core.Widget*")
+    }
+
+    "type nested namespace-aliased instance field accesses from the Rust parser backend" in {
+      val cpg = code(
+        """
+          |namespace A {
+          |  struct Inner { int value; };
+          |  struct Holder { Inner inner; };
+          |}
+          |namespace B = A;
+          |
+          |int read(B::Holder holder) {
+          |  return holder.inner.value;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("read").call.nameExact(Operators.fieldAccess).codeExact("holder.inner").l) {
+        case List(fieldAccess) =>
+          fieldAccess.typeFullName shouldBe "Inner"
+          fieldAccess.argument.code.l shouldBe List("holder", "inner")
+      }
+      inside(cpg.method.nameExact("read").call.nameExact(Operators.fieldAccess).codeExact("holder.inner.value").l) {
+        case List(fieldAccess) =>
+          fieldAccess.typeFullName shouldBe "int"
+          fieldAccess.argument.code.l shouldBe List("holder.inner", "value")
       }
     }
 
@@ -202,11 +898,23 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("Core.Widget.Widget:void()", "Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(int&)")
       cpg.method.fullNameExact("Core.Widget.Widget:void(int&)").call.nameExact(Operators.assignment).code.l shouldBe
         List("this->value = seed")
-      cpg.method.fullNameExact("Core.Widget.Widget:void(int&)").call.nameExact(Operators.assignment).argument.code.l shouldBe
+      cpg.method
+        .fullNameExact("Core.Widget.Widget:void(int&)")
+        .call
+        .nameExact(Operators.assignment)
+        .argument
+        .code
+        .l shouldBe
         List("this->value", "seed")
       cpg.method.fullNameExact("Core.Widget.Widget:void()").call.nameExact(Operators.assignment).code.l shouldBe
         List("this->value = 1")
-      cpg.method.fullNameExact("Core.Widget.Widget:void()").call.nameExact(Operators.assignment).argument.code.l shouldBe
+      cpg.method
+        .fullNameExact("Core.Widget.Widget:void()")
+        .call
+        .nameExact(Operators.assignment)
+        .argument
+        .code
+        .l shouldBe
         List("this->value", "1")
       cpg.method.nameExact("~Widget").internal.fullName.l shouldBe List("Core.Widget.~Widget:void()")
       cpg.method.nameExact("get").internal.fullName.l shouldBe List("Core.Widget.get:int()")
@@ -214,11 +922,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.fullNameExact("Core.Widget.stable:int()<const>").signature.l shouldBe List("int()<const>")
       cpg.method.fullNameExact("Core.Widget.stable:int()<const>").parameter.name.l shouldBe List("this")
       cpg.method.fullNameExact("Core.Widget.stable:int()<const>").parameter.index.l shouldBe List(0)
-      inside(cpg.method.fullNameExact("Core.Widget.stable:int()<const>").call.nameExact(Operators.indirectFieldAccess).l) {
-        case List(fieldAccess) =>
-          fieldAccess.code shouldBe "this->value"
-          fieldAccess.typeFullName shouldBe "int"
-          fieldAccess.argument.code.l shouldBe List("this", "value")
+      inside(
+        cpg.method.fullNameExact("Core.Widget.stable:int()<const>").call.nameExact(Operators.indirectFieldAccess).l
+      ) { case List(fieldAccess) =>
+        fieldAccess.code shouldBe "this->value"
+        fieldAccess.typeFullName shouldBe "int"
+        fieldAccess.argument.code.l shouldBe List("this", "value")
       }
       cpg.method.fullNameExact("Core.Widget.render:int(int)").modifier.modifierType.l shouldBe
         List(ModifierTypes.VIRTUAL)
@@ -228,11 +937,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.fullNameExact("Core.Widget.operator+:int(Widget&)<const>").parameter.name.l shouldBe
         List("this", "other")
       cpg.method.fullNameExact("Core.Widget.operator+:int(Widget&)<const>").parameter.typeFullName.l shouldBe
-        List("const Core.Widget*", "Widget&")
+        List("const Core.Widget*", "Core.Widget&")
       cpg.method.fullNameExact("Core.Widget.operator=:Widget&(Widget&)").parameter.name.l shouldBe
         List("this", "other")
       cpg.method.fullNameExact("Core.Widget.operator=:Widget&(Widget&)").parameter.typeFullName.l shouldBe
-        List("Core.Widget*", "Widget&")
+        List("Core.Widget*", "Core.Widget&")
       cpg.method.fullNameExact("Core.Widget.operator[]:int(int)<const>").parameter.name.l shouldBe
         List("this", "index")
       cpg.method.fullNameExact("Core.Invoker.operator():int(int)<const>").parameter.name.l shouldBe
@@ -241,11 +950,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List(ModifierTypes.VIRTUAL)
       cpg.method.fullNameExact("Core.Fancy.inheritedValue:int()").call.nameExact("get").methodFullName.l shouldBe
         List("Core.Widget.get:int()")
-      inside(cpg.method.fullNameExact("Core.Fancy.inheritedValue:int()").call.nameExact(Operators.indirectFieldAccess).l) {
-        case List(fieldAccess) =>
-          fieldAccess.code shouldBe "this->value"
-          fieldAccess.typeFullName shouldBe "int"
-          fieldAccess.argument.code.l shouldBe List("this", "value")
+      inside(
+        cpg.method.fullNameExact("Core.Fancy.inheritedValue:int()").call.nameExact(Operators.indirectFieldAccess).l
+      ) { case List(fieldAccess) =>
+        fieldAccess.code shouldBe "this->value"
+        fieldAccess.typeFullName shouldBe "int"
+        fieldAccess.argument.code.l shouldBe List("this", "value")
       }
       cpg.method.fullNameExact("Core.Fancy.explicitThis:int()").call.codeExact("this->get()").methodFullName.l shouldBe
         List("Core.Widget.get:int()")
@@ -257,7 +967,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           fieldAccess.typeFullName shouldBe "int"
           fieldAccess.argument.code.l shouldBe List("this", "value")
       }
-      cpg.method.fullNameExact("Core.Widget.identity:int(int)").modifier.modifierType.l shouldBe List(ModifierTypes.STATIC)
+      cpg.method.fullNameExact("Core.Widget.identity:int(int)").modifier.modifierType.l shouldBe List(
+        ModifierTypes.STATIC
+      )
       cpg.method.fullNameExact("Core.Widget.identity:int(int)").parameter.name.l shouldBe List("x")
       cpg.method.fullNameExact("Core.Widget.identity:int(int)").parameter.index.l shouldBe List(1)
       inside(cpg.method.fullNameExact("Core.Widget.identity:int(int)").call.nameExact(Operators.fieldAccess).l) {
@@ -266,7 +978,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           fieldAccess.typeFullName shouldBe "int"
           fieldAccess.argument.code.l shouldBe List("Core.Widget", "instances")
       }
-      cpg.method.nameExact("normalize").fullName.l.sorted shouldBe List("Core.Widget.normalize:int()", "Core.normalize:int()")
+      cpg.method.nameExact("normalize").fullName.l.sorted shouldBe List(
+        "Core.Widget.normalize:int()",
+        "Core.normalize:int()"
+      )
       cpg.method.nameExact("size").external.fullName.l shouldBe List("Core.Widget.size:int()<const>")
       cpg.method.nameExact("outside").internal.fullName.l shouldBe List("Core.Widget.outside:int()<const>")
       cpg.method.fullNameExact("Core.Widget.outside:int()<const>").call.nameExact("stable").methodFullName.l shouldBe
@@ -292,24 +1007,51 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("Core.Widget.identity:int(int)")
       inside(cpg.method.fullNameExact("Core.Widget.normalize:int()").call.nameExact(Operators.indirectFieldAccess).l) {
         case List(fieldAccess) =>
-        fieldAccess.code shouldBe "this->value"
-        fieldAccess.typeFullName shouldBe "int"
-        fieldAccess.argument.code.l shouldBe List("this", "value")
+          fieldAccess.code shouldBe "this->value"
+          fieldAccess.typeFullName shouldBe "int"
+          fieldAccess.argument.code.l shouldBe List("this", "value")
       }
       cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core.Widget.Widget(7)").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(int&)")
-      cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core.Widget.Widget(widget)").methodFullName.l shouldBe
+      cpg.method
+        .nameExact("use")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget(widget)")
+        .methodFullName
+        .l shouldBe
         List(
           "Core.Widget.Widget:void(Widget&)",
           "Core.Widget.Widget:void(Widget&)",
           "Core.Widget.Widget:void(Widget&)",
           "Core.Widget.Widget:void(Widget&)"
         )
-      cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("direct = Core.Widget.Widget(widget)").argument.code.l shouldBe
+      cpg.method
+        .nameExact("use")
+        .call
+        .nameExact(Operators.assignment)
+        .codeExact("direct = Core.Widget.Widget(widget)")
+        .argument
+        .code
+        .l shouldBe
         List("direct", "Core.Widget.Widget(widget)")
-      cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("copied = Core.Widget.Widget(widget)").argument.code.l shouldBe
+      cpg.method
+        .nameExact("use")
+        .call
+        .nameExact(Operators.assignment)
+        .codeExact("copied = Core.Widget.Widget(widget)")
+        .argument
+        .code
+        .l shouldBe
         List("copied", "Core.Widget.Widget(widget)")
-      cpg.method.nameExact("use").call.nameExact(Operators.assignment).codeExact("*ptr = &widget").argument.code.l shouldBe
+      cpg.method
+        .nameExact("use")
+        .call
+        .nameExact(Operators.assignment)
+        .codeExact("*ptr = &widget")
+        .argument
+        .code
+        .l shouldBe
         List("*ptr", "&widget")
       inside(cpg.method.nameExact("use").call.nameExact("~Widget").codeExact("ptr->~Widget()").l) {
         case List(destructorCall) =>
@@ -349,7 +1091,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").call.codeExact("widget.get()").methodFullName.l shouldBe
         List("Core.Widget.get:int()", "Core.Widget.get:int()")
       cpg.method.nameExact("use").call.codeExact("fancy.get()").methodFullName.l shouldBe List("Core.Widget.get:int()")
-      cpg.method.nameExact("use").call.nameExact("stable").methodFullName.l shouldBe List("Core.Widget.stable:int()<const>")
+      cpg.method.nameExact("use").call.nameExact("stable").methodFullName.l shouldBe List(
+        "Core.Widget.stable:int()<const>"
+      )
       cpg.method.nameExact("use").call.nameExact("outside").methodFullName.l shouldBe
         List("Core.Widget.outside:int()<const>")
       inside(cpg.method.nameExact("use").call.nameExact(Operators.fieldAccess).codeExact("fancy.value").l) {
@@ -357,17 +1101,19 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           fieldAccess.typeFullName shouldBe "int"
           fieldAccess.argument.code.l shouldBe List("fancy", "value")
       }
-      inside(cpg.method.nameExact("use").call.nameExact("render").codeExact("widget.render(3)").l) { case List(renderCall) =>
-        renderCall.methodFullName shouldBe "Core.Widget.render:int(int)"
-        renderCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
-        renderCall.argument.code.l shouldBe List("widget", "3")
-        renderCall.receiver.code.l shouldBe List("widget")
+      inside(cpg.method.nameExact("use").call.nameExact("render").codeExact("widget.render(3)").l) {
+        case List(renderCall) =>
+          renderCall.methodFullName shouldBe "Core.Widget.render:int(int)"
+          renderCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+          renderCall.argument.code.l shouldBe List("widget", "3")
+          renderCall.receiver.code.l shouldBe List("widget")
       }
-      inside(cpg.method.nameExact("use").call.nameExact("render").codeExact("fancy.render(5)").l) { case List(renderCall) =>
-        renderCall.methodFullName shouldBe "Core.Fancy.render:int(int)"
-        renderCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
-        renderCall.argument.code.l shouldBe List("fancy", "5")
-        renderCall.receiver.code.l shouldBe List("fancy")
+      inside(cpg.method.nameExact("use").call.nameExact("render").codeExact("fancy.render(5)").l) {
+        case List(renderCall) =>
+          renderCall.methodFullName shouldBe "Core.Fancy.render:int(int)"
+          renderCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+          renderCall.argument.code.l shouldBe List("fancy", "5")
+          renderCall.receiver.code.l shouldBe List("fancy")
       }
       inside(cpg.method.nameExact("use").call.nameExact("declared").codeExact("widget.declared(4)").l) {
         case List(declaredCall) =>
@@ -378,10 +1124,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
       inside(cpg.method.nameExact("use").call.nameExact("declared").codeExact("fancy.declared(6)").l) {
         case List(declaredCall) =>
-        declaredCall.methodFullName shouldBe "Core.Widget.declared:int(int)"
-        declaredCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
-        declaredCall.argument.code.l shouldBe List("fancy", "6")
-        declaredCall.receiver.code.l shouldBe List("fancy")
+          declaredCall.methodFullName shouldBe "Core.Widget.declared:int(int)"
+          declaredCall.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+          declaredCall.argument.code.l shouldBe List("fancy", "6")
+          declaredCall.receiver.code.l shouldBe List("fancy")
       }
       cpg.method.nameExact("use").call.codeExact("fancy.inheritedValue()").methodFullName.l shouldBe
         List("Core.Fancy.inheritedValue:int()")
@@ -428,6 +1174,66 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           operatorCall.typeFullName shouldBe "int"
           operatorCall.argument.code.l shouldBe List("invoker", "3")
       }
+    }
+
+    "resolve C++ namespace aliases through the Rust backend" in {
+      val cpg = code(
+        """
+          |namespace A {
+          |  class Foo {
+          |  public:
+          |    static int make() { return 2; }
+          |  };
+          |  int fn() { return 3; }
+          |}
+          |namespace foo {
+          |  namespace bar {
+          |    namespace baz {
+          |      int qux = 42;
+          |    }
+          |  }
+          |}
+          |
+          |namespace B = A;
+          |namespace fbz = foo::bar::baz;
+          |auto f = B::Foo();
+          |void use() {
+          |  namespace C = A;
+          |  B::Foo local;
+          |  auto made = C::Foo();
+          |}
+          |void scoped(int flag) {
+          |  if (flag) {
+          |    namespace D = A;
+          |    D::Foo inner;
+          |  }
+          |}
+          |int main() {
+          |  int x = fbz::qux;
+          |  return x;
+          |}
+          |int aliasCalls() {
+          |  return B::fn() + B::Foo::make();
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.typeDecl.nameExact("Foo").fullName.l shouldBe List("A.Foo")
+      cpg.local.nameExact("f").filter(_.code == "auto f").typeFullName.l shouldBe List("A.Foo")
+      cpg.method.nameExact("use").local.nameExact("local").typeFullName.l shouldBe List("A.Foo")
+      cpg.method.nameExact("use").local.nameExact("made").typeFullName.l shouldBe List("A.Foo")
+      cpg.method.nameExact("scoped").local.nameExact("inner").typeFullName.l shouldBe List("A.Foo")
+      cpg.method.nameExact("main").call.nameExact(Operators.fieldAccess).codeExact("fbz::qux").argument.code.l shouldBe
+        List("fbz", "qux")
+      cpg.method.nameExact("aliasCalls").call.nameExact("fn").codeExact("B::fn()").methodFullName.l shouldBe
+        List("A.fn:int()")
+      cpg.method.nameExact("aliasCalls").call.nameExact("make").codeExact("B::Foo::make()").methodFullName.l shouldBe
+        List("A.Foo.make:int()")
+      cpg.namespaceBlock.nameExact("B").l shouldBe Nil
+      cpg.namespaceBlock.nameExact("C").l shouldBe Nil
+      cpg.namespaceBlock.nameExact("D").l shouldBe Nil
+      cpg.namespaceBlock.nameExact("fbz").l shouldBe Nil
     }
 
     "capture C++ callable object references and pointer dereference calls" in {
@@ -653,9 +1459,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.fullNameExact(lambdaFullName).local.nameExact("this").typeFullName.l shouldBe List("Widget*")
       cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:this")).evaluationStrategy.l shouldBe
         List(EvaluationStrategies.BY_SHARING)
-      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:this")).l) {
-        case List(binding) =>
-          binding._refOut.l shouldBe cpg.method.nameExact("read").parameter.nameExact("this").l
+      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:this")).l) { case List(binding) =>
+        binding._refOut.l shouldBe cpg.method.nameExact("read").parameter.nameExact("this").l
       }
       cpg.method.fullNameExact(lambdaFullName).call.codeExact("this->value").argument.code.l shouldBe
         List("this", "value")
@@ -684,13 +1489,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List(EvaluationStrategies.BY_VALUE)
       cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:alias")).evaluationStrategy.l shouldBe
         List(EvaluationStrategies.BY_VALUE)
-      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:alias")).l) {
-        case List(binding) =>
-          binding._refOut.l shouldBe cpg.method.nameExact("use").parameter.nameExact("base").l
+      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:alias")).l) { case List(binding) =>
+        binding._refOut.l shouldBe cpg.method.nameExact("use").parameter.nameExact("base").l
       }
-      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:snap")).l) {
-        case List(binding) =>
-          binding._refOut.l shouldBe Nil
+      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$lambdaFullName:snap")).l) { case List(binding) =>
+        binding._refOut.l shouldBe Nil
       }
     }
 
@@ -849,10 +1652,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           capturedMapperCall.typeFullName shouldBe "int"
           capturedMapperCall.receiver.code.l shouldBe List("mapper")
       }
-      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$callerLambda:mapper")).l) {
-        case List(binding) =>
-          binding.evaluationStrategy shouldBe EvaluationStrategies.BY_VALUE
-          binding._refOut.l shouldBe cpg.method.nameExact("use").local.nameExact("mapper").l
+      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$callerLambda:mapper")).l) { case List(binding) =>
+        binding.evaluationStrategy shouldBe EvaluationStrategies.BY_VALUE
+        binding._refOut.l shouldBe cpg.method.nameExact("use").local.nameExact("mapper").l
       }
     }
 
@@ -889,13 +1691,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List(EvaluationStrategies.BY_REFERENCE)
       cpg.closureBinding.filter(_.closureBindingId.contains(s"$innerFullName:x")).evaluationStrategy.l shouldBe
         List(EvaluationStrategies.BY_REFERENCE)
-      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$innerFullName:base")).l) {
-        case List(binding) =>
-          binding._refOut.l shouldBe cpg.method.fullNameExact(outerFullName).local.nameExact("base").l
+      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$innerFullName:base")).l) { case List(binding) =>
+        binding._refOut.l shouldBe cpg.method.fullNameExact(outerFullName).local.nameExact("base").l
       }
-      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$innerFullName:x")).l) {
-        case List(binding) =>
-          binding._refOut.l shouldBe cpg.method.fullNameExact(outerFullName).parameter.nameExact("x").l
+      inside(cpg.closureBinding.filter(_.closureBindingId.contains(s"$innerFullName:x")).l) { case List(binding) =>
+        binding._refOut.l shouldBe cpg.method.fullNameExact(outerFullName).parameter.nameExact("x").l
       }
 
       inside(cpg.method.fullNameExact(outerFullName).call.nameExact(Defines.OperatorCall).codeExact("inner(1)").l) {
@@ -937,11 +1737,22 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
       cpg.method.nameExact("loop").local.nameExact("widget").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("loop").local.nameExact("guard").typeFullName.l shouldBe List("Core.Widget")
-      cpg.method.nameExact("loop").call.nameExact("Widget").codeExact("Core.Widget.Widget(widget)").methodFullName.l shouldBe
+      cpg.method
+        .nameExact("loop")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget(widget)")
+        .methodFullName
+        .l shouldBe
         List("Core.Widget.Widget:void(Widget&)")
       cpg.method.nameExact("loop").call.nameExact("~Widget").code.l shouldBe
         List("guard.~Widget()", "widget.~Widget()")
-      cpg.method.nameExact("loop").controlStructure.controlStructureType(ControlStructureTypes.FOR).ast.isCall
+      cpg.method
+        .nameExact("loop")
+        .controlStructure
+        .controlStructureType(ControlStructureTypes.FOR)
+        .ast
+        .isCall
         .nameExact("~Widget")
         .code
         .l shouldBe Nil
@@ -976,15 +1787,17 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("defaults").local.nameExact("outer").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("defaults").local.nameExact("scoped").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("defaults").local.nameExact("guard").typeFullName.l shouldBe List("Core.Widget")
-      cpg.method.nameExact("defaults").call.nameExact("Widget").codeExact("Core.Widget.Widget()").methodFullName.l shouldBe
+      cpg.method
+        .nameExact("defaults")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget()")
+        .methodFullName
+        .l shouldBe
         List("Core.Widget.Widget:void()", "Core.Widget.Widget:void()", "Core.Widget.Widget:void()")
       val defaultAssignments = cpg.method.nameExact("defaults").call.nameExact(Operators.assignment).code.l
       defaultAssignments.filterNot(_.startsWith("<tmp>")) shouldBe
-        List(
-          "outer = Core.Widget.Widget()",
-          "scoped = Core.Widget.Widget()",
-          "guard = Core.Widget.Widget()"
-        )
+        List("outer = Core.Widget.Widget()", "scoped = Core.Widget.Widget()", "guard = Core.Widget.Widget()")
       defaultAssignments.filter(_.startsWith("<tmp>")) shouldBe
         List("<tmp>0 = <operator>.alloc", "<tmp>1 = <operator>.alloc", "<tmp>2 = <operator>.alloc")
       cpg.method.nameExact("defaults").call.nameExact("~Widget").code.l.sorted shouldBe
@@ -1015,7 +1828,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       def globalMethod = cpg.method.fullNameExact("Test0.cpp:<global>")
-      cpg.method.nameExact("statics").call.nameExact("Widget").codeExact("Core.Widget.Widget()").methodFullName.l shouldBe
+      cpg.method
+        .nameExact("statics")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget()")
+        .methodFullName
+        .l shouldBe
         List(
           "Core.Widget.Widget:void()",
           "Core.Widget.Widget:void()",
@@ -1025,13 +1844,20 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         )
       cpg.method.nameExact("statics").controlStructure.controlStructureType(ControlStructureTypes.IF).code.l shouldBe
         List("if (!<static-init>cached)", "if (!<static-init>threadCached)", "if (!<static-init>slots)")
-      cpg.method.nameExact("statics").call.nameExact(Operators.assignment).code.l.filter(_.startsWith("<static-init>")) shouldBe
-        List(
-          "<static-init>cached = true",
-          "<static-init>threadCached = true",
-          "<static-init>slots = true"
-        )
-      cpg.method.nameExact("statics").call.nameExact(Operators.assignment).code.l
+      cpg.method
+        .nameExact("statics")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l
+        .filter(_.startsWith("<static-init>")) shouldBe
+        List("<static-init>cached = true", "<static-init>threadCached = true", "<static-init>slots = true")
+      cpg.method
+        .nameExact("statics")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l
         .filterNot(code => code.startsWith("<tmp>") || code.startsWith("<static-init>"))
         .sorted shouldBe
         List(
@@ -1042,7 +1868,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "threadCached = Core.Widget.Widget()"
         )
       cpg.method.nameExact("statics").call.nameExact("~Widget").code.l shouldBe List("automatic.~Widget()")
-      globalMethod.controlStructure.controlStructureType(ControlStructureTypes.IF).code.l
+      globalMethod.controlStructure
+        .controlStructureType(ControlStructureTypes.IF)
+        .code
+        .l
         .filter(_.startsWith("if (statics::")) shouldBe
         List(
           "if (statics::<static-init>slots)",
@@ -1079,11 +1908,14 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("localArrays").local.nameExact("slots").typeFullName.l shouldBe List("Core.Defaulted[]")
       cpg.method.nameExact("localArrays").call.nameExact("Defaulted").code.l shouldBe
         List("Core.Defaulted.Defaulted()", "Core.Defaulted.Defaulted()")
-      cpg.method.nameExact("localArrays").call.nameExact(Operators.assignment).code.l.filterNot(_.startsWith("<tmp>")) shouldBe
-        List(
-          "slots[0] = Core.Defaulted.Defaulted()",
-          "slots[1] = Core.Defaulted.Defaulted()"
-        )
+      cpg.method
+        .nameExact("localArrays")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l
+        .filterNot(_.startsWith("<tmp>")) shouldBe
+        List("slots[0] = Core.Defaulted.Defaulted()", "slots[1] = Core.Defaulted.Defaulted()")
       cpg.method.nameExact("localArrays").call.nameExact("~Defaulted").code.l shouldBe
         List("slots[1].~Defaulted()", "slots[0].~Defaulted()")
     }
@@ -1179,10 +2011,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .code
         .l
         .filterNot(_.startsWith("<tmp>")) should contain allElementsOf List(
-          "slots[0] = Core.Widget.Widget(source)",
-          "slots[1] = Core.Widget.Widget(Core::makeWidget())",
-          "slots[2] = Core.Widget.Widget()"
-        )
+        "slots[0] = Core.Widget.Widget(source)",
+        "slots[1] = Core.Widget.Widget(Core::makeWidget())",
+        "slots[2] = Core.Widget.Widget()"
+      )
       cpg.method.nameExact("arrayCopyMove").call.nameExact("~Widget").code.l shouldBe
         List(
           "Core::makeWidget().~Widget()",
@@ -1371,17 +2203,25 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       val bracedLocalNames = cpg.method.nameExact("braces").local.name.l
       bracedLocalNames.filterNot(_.startsWith("<tmp>")) shouldBe List("empty", "direct", "assigned")
       bracedLocalNames.filter(_.startsWith("<tmp>")) shouldBe List("<tmp>0", "<tmp>1", "<tmp>2")
-      cpg.method.nameExact("braces").call.nameExact("Widget").codeExact("Core.Widget.Widget()").methodFullName.l shouldBe
+      cpg.method
+        .nameExact("braces")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget()")
+        .methodFullName
+        .l shouldBe
         List("Core.Widget.Widget:void()")
-      cpg.method.nameExact("braces").call.nameExact("Widget").codeExact("Core.Widget.Widget(seed)").methodFullName.l shouldBe
+      cpg.method
+        .nameExact("braces")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget(seed)")
+        .methodFullName
+        .l shouldBe
         List("Core.Widget.Widget:void(int)", "Core.Widget.Widget:void(int)")
       val bracedAssignments = cpg.method.nameExact("braces").call.nameExact(Operators.assignment).code.l
       bracedAssignments.filterNot(_.startsWith("<tmp>")) shouldBe
-        List(
-          "empty = Core.Widget.Widget()",
-          "direct = Core.Widget.Widget(seed)",
-          "assigned = Core.Widget.Widget(seed)"
-        )
+        List("empty = Core.Widget.Widget()", "direct = Core.Widget.Widget(seed)", "assigned = Core.Widget.Widget(seed)")
       bracedAssignments.filter(_.startsWith("<tmp>")) shouldBe
         List("<tmp>0 = <operator>.alloc", "<tmp>1 = <operator>.alloc", "<tmp>2 = <operator>.alloc")
       cpg.method.nameExact("braces").call.nameExact("~Widget").code.l shouldBe
@@ -1454,7 +2294,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      cpg.method.fullNameExact("Core.accept:void(Widget&&)").parameter.typeFullName.l shouldBe List("Widget&&")
+      cpg.method.fullNameExact("Core.accept:void(Widget&&)").parameter.typeFullName.l shouldBe List("Core.Widget&&")
       cpg.method.nameExact("use").call.nameExact("accept").methodFullName.l shouldBe
         List("Core.accept:void(Widget&&)", "Core.accept:void(Widget&&)")
       cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core::Widget{}").methodFullName.l shouldBe
@@ -1494,10 +2334,16 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       cpg.method.fullNameExact("Core.Widget.Widget:void(Widget&)").parameter.typeFullName.l shouldBe
-        List("Core.Widget*", "Widget&")
+        List("Core.Widget*", "Core.Widget&")
       cpg.method.fullNameExact("Core.Widget.Widget:void(Widget&&)").parameter.typeFullName.l shouldBe
-        List("Core.Widget*", "Widget&&")
-      cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core.Widget.Widget(source)").methodFullName.l shouldBe
+        List("Core.Widget*", "Core.Widget&&")
+      cpg.method
+        .nameExact("use")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget(source)")
+        .methodFullName
+        .l shouldBe
         List("Core.Widget.Widget:void(Widget&)")
       cpg.method
         .nameExact("use")
@@ -1538,8 +2384,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      cpg.method.fullNameExact("Core.accept:void(Widget&&)").parameter.typeFullName.l shouldBe List("Widget&&")
-      cpg.method.fullNameExact("Core.consume:int(Widget&&)").parameter.typeFullName.l shouldBe List("Widget&&")
+      cpg.method.fullNameExact("Core.accept:void(Widget&&)").parameter.typeFullName.l shouldBe List("Core.Widget&&")
+      cpg.method.fullNameExact("Core.consume:int(Widget&&)").parameter.typeFullName.l shouldBe List("Core.Widget&&")
       cpg.method.nameExact("use").local.nameExact("local").typeFullName.l shouldBe List("Core.Widget")
       cpg.method.nameExact("use").local.nameExact("result").typeFullName.l shouldBe List("int")
       cpg.method.nameExact("use").call.nameExact("accept").methodFullName.l shouldBe
@@ -1552,7 +2398,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)")
       cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core::Widget(local)").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(Widget&)")
-      cpg.method.nameExact("use").call.nameExact("Widget").codeExact("Core.Widget.Widget(Core::Widget())").methodFullName.l shouldBe
+      cpg.method
+        .nameExact("use")
+        .call
+        .nameExact("Widget")
+        .codeExact("Core.Widget.Widget(Core::Widget())")
+        .methodFullName
+        .l shouldBe
         List("Core.Widget.Widget:void(Widget&&)")
       cpg.method.nameExact("use").call.nameExact("~Widget").code.l shouldBe
         List(
@@ -1663,9 +2515,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "this->first.~Member()",
         "this->~Base()"
       )
-      normalDestructorCalls.indexOf("Core::mark()") should be < normalDestructorCalls.indexOf(
-        "this->second.~Member()"
-      )
+      normalDestructorCalls.indexOf("Core::mark()") should be < normalDestructorCalls.indexOf("this->second.~Member()")
       normalDestructorCalls.indexOf("this->second.~Member()") should be < normalDestructorCalls.indexOf(
         "this->first.~Member()"
       )
@@ -1780,7 +2630,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       def ownerConstructor = cpg.method.fullNameExact("Core.Owner.Owner:void(int)")
-      ownerConstructor.controlStructure.controlStructureType(ControlStructureTypes.TRY).tryBodyOut.ast.isCall
+      ownerConstructor.controlStructure
+        .controlStructureType(ControlStructureTypes.TRY)
+        .tryBodyOut
+        .ast
+        .isCall
         .nameExact(Operators.assignment)
         .code
         .filterNot(_.startsWith("<tmp>"))
@@ -1791,7 +2645,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "this->slots[0] = Core.Field.Field(seed)",
           "this->slots[1] = Core.Field.Field(seed + 2)"
         )
-      ownerConstructor.controlStructure.controlStructureType(ControlStructureTypes.TRY).tryBodyOut.ast.isCall
+      ownerConstructor.controlStructure
+        .controlStructureType(ControlStructureTypes.TRY)
+        .tryBodyOut
+        .ast
+        .isCall
         .filter(call => Set("~Field", "~Base").contains(call.name))
         .code
         .l shouldBe
@@ -1807,7 +2665,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "this->first.~Field()",
           "this->~Base()"
         )
-      ownerConstructor.controlStructure.controlStructureType(ControlStructureTypes.TRY).tryBodyOut.ast.isControlStructure
+      ownerConstructor.controlStructure
+        .controlStructureType(ControlStructureTypes.TRY)
+        .tryBodyOut
+        .ast
+        .isControlStructure
         .controlStructureType(ControlStructureTypes.THROW)
         .code
         .l shouldBe List.fill(4)("throw;")
@@ -1848,10 +2710,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         .code
         .l
         .filterNot(_.startsWith("<tmp>")) shouldBe
-        List(
-          "this->slots[0] = Core.Member.Member()",
-          "this->slots[1] = Core.Member.Member()"
-        )
+        List("this->slots[0] = Core.Member.Member()", "this->slots[1] = Core.Member.Member()")
       cpg.method.fullNameExact("Core.Owner.~Owner:void()").call.nameExact("~Member").code.l shouldBe
         List("this->slots[1].~Member()", "this->slots[0].~Member()")
       cpg.method.nameExact("useMemberArrays").call.nameExact("~Owner").code.l shouldBe List("owner.~Owner()")
@@ -2036,7 +2895,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("refs").local.nameExact("rref").typeFullName.l shouldBe List("Core.Widget&&")
       cpg.method.nameExact("refs").local.nameExact("staticCref").typeFullName.l shouldBe List("Core.Widget&")
       cpg.method.nameExact("refs").local.nameExact("threadRref").typeFullName.l shouldBe List("Core.Widget&&")
-      globalMethod.controlStructure.controlStructureType(ControlStructureTypes.IF).code.l
+      globalMethod.controlStructure
+        .controlStructureType(ControlStructureTypes.IF)
+        .code
+        .l
         .filter(_.startsWith("if (refs::")) shouldBe
         List("if (refs::<static-init>threadRref)", "if (refs::<static-init>staticCref)")
       globalMethod.call.nameExact("~Widget").code.l shouldBe
@@ -2112,7 +2974,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      val castTemporaryDestructor = "(static_cast<Core::Widget>(source)).~Widget()"
+      val castTemporaryDestructor        = "(static_cast<Core::Widget>(source)).~Widget()"
       val castWrappedTemporaryDestructor = "(static_cast<Core::Widget>(Core::Widget(source))).~Widget()"
       cpg.method.nameExact("castUse").call.nameExact("~Widget").code.l shouldBe
         List(castTemporaryDestructor, castWrappedTemporaryDestructor, castTemporaryDestructor, "source.~Widget()")
@@ -2241,7 +3103,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("left", "right")
       cpg.method.nameExact("plusUse").call.nameExact("operator+=").codeExact("left += right").argument.code.l shouldBe
         List("left", "right")
-      cpg.method.nameExact("plusStmt").call.nameExact(Operators.assignmentPlus).codeExact("left += right").l shouldBe Nil
+      cpg.method
+        .nameExact("plusStmt")
+        .call
+        .nameExact(Operators.assignmentPlus)
+        .codeExact("left += right")
+        .l shouldBe Nil
       cpg.method.nameExact("assignStmt").call.nameExact("operator=").code.l shouldBe
         List("left = right")
     }
@@ -2442,7 +3309,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      val sourceConversion = "source.operator Widget()"
+      val sourceConversion  = "source.operator Widget()"
       val prvalueConversion = "Core::makeSource().operator Widget()"
       cpg.method
         .nameExact("init")
@@ -2700,20 +3567,40 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "Core::Widget(source).~Widget()",
           "source.~Widget()"
         )
-      cpg.method.nameExact("flow").controlStructure.controlStructureType(ControlStructureTypes.IF).ast.isCall
+      cpg.method
+        .nameExact("flow")
+        .controlStructure
+        .controlStructureType(ControlStructureTypes.IF)
+        .ast
+        .isCall
         .nameExact("~Widget")
         .code
         .l shouldBe List("Core::Widget().~Widget()")
-      cpg.method.nameExact("flow").controlStructure.controlStructureType(ControlStructureTypes.WHILE).ast.isCall
+      cpg.method
+        .nameExact("flow")
+        .controlStructure
+        .controlStructureType(ControlStructureTypes.WHILE)
+        .ast
+        .isCall
         .nameExact("~Widget")
         .code
         .l shouldBe List("Core::Widget(source).~Widget()")
-      cpg.method.nameExact("flow").controlStructure.controlStructureType(ControlStructureTypes.FOR).ast.isCall
+      cpg.method
+        .nameExact("flow")
+        .controlStructure
+        .controlStructureType(ControlStructureTypes.FOR)
+        .ast
+        .isCall
         .nameExact("~Widget")
         .code
         .l
         .sorted shouldBe List("Core::Widget().~Widget()", "Core::Widget(source).~Widget()")
-      cpg.method.nameExact("flow").controlStructure.controlStructureType(ControlStructureTypes.SWITCH).ast.isCall
+      cpg.method
+        .nameExact("flow")
+        .controlStructure
+        .controlStructureType(ControlStructureTypes.SWITCH)
+        .ast
+        .isCall
         .nameExact("~Widget")
         .code
         .l shouldBe List("Core::Widget(source).~Widget()")
@@ -2804,13 +3691,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("fail").call.nameExact("Widget").codeExact("Core::Widget(source)").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(Widget&)")
       cpg.method.nameExact("fail").call.nameExact("~Widget").code.l.sorted shouldBe
-        List(
-          "Core::Widget().~Widget()",
-          "Core::Widget(source).~Widget()",
-          "source.~Widget()",
-          "source.~Widget()"
-        )
-      cpg.method.nameExact("fail").controlStructure.controlStructureType(ControlStructureTypes.IF).ast.isCall
+        List("Core::Widget().~Widget()", "Core::Widget(source).~Widget()", "source.~Widget()", "source.~Widget()")
+      cpg.method
+        .nameExact("fail")
+        .controlStructure
+        .controlStructureType(ControlStructureTypes.IF)
+        .ast
+        .isCall
         .nameExact("~Widget")
         .code
         .l shouldBe List("Core::Widget(source).~Widget()", "source.~Widget()")
@@ -2849,12 +3736,22 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       cpg.method.nameExact("jumpOut").call.nameExact("~Widget").code.l shouldBe List("scoped.~Widget()")
-      cpg.method.nameExact("jumpOut").controlStructure.controlStructureType(ControlStructureTypes.IF).ast.isCall
+      cpg.method
+        .nameExact("jumpOut")
+        .controlStructure
+        .controlStructureType(ControlStructureTypes.IF)
+        .ast
+        .isCall
         .nameExact("~Widget")
         .code
         .l shouldBe List("scoped.~Widget()")
       cpg.method.nameExact("sameScope").call.nameExact("~Widget").code.l shouldBe List("outer.~Widget()")
-      cpg.method.nameExact("sameScope").controlStructure.controlStructureType(ControlStructureTypes.GOTO).ast.isCall
+      cpg.method
+        .nameExact("sameScope")
+        .controlStructure
+        .controlStructureType(ControlStructureTypes.GOTO)
+        .ast
+        .isCall
         .nameExact("~Widget")
         .code
         .l shouldBe Nil
@@ -2892,7 +3789,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
       inside(cpg.method.nameExact("guarded").controlStructure.controlStructureType(ControlStructureTypes.TRY).l) {
         case List(tryNode) =>
-          tryNode.tryBodyOut.astChildren.isControlStructure.controlStructureType(ControlStructureTypes.THROW).code.l shouldBe
+          tryNode.tryBodyOut.astChildren.isControlStructure
+            .controlStructureType(ControlStructureTypes.THROW)
+            .code
+            .l shouldBe
             List("throw Core::consume(source)")
           inside(tryNode.catchBodyOut.isControlStructure.l) { case List(typedCatch, catchAll) =>
             typedCatch.controlStructureType shouldBe ControlStructureTypes.CATCH
@@ -2994,21 +3894,36 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
       cpg.method.nameExact("returns").call.nameExact("~Widget").code.l.sorted shouldBe
         List("outer.~Widget()", "outer.~Widget()", "scoped.~Widget()")
-      cpg.method.nameExact("returns").controlStructure.controlStructureType(ControlStructureTypes.IF).ast.isCall
+      cpg.method
+        .nameExact("returns")
+        .controlStructure
+        .controlStructureType(ControlStructureTypes.IF)
+        .ast
+        .isCall
         .nameExact("~Widget")
         .code
         .l shouldBe List("scoped.~Widget()", "outer.~Widget()")
 
       cpg.method.nameExact("switches").call.nameExact("~Widget").code.l shouldBe
         List("caseLocal.~Widget()", "outer.~Widget()")
-      cpg.method.nameExact("switches").controlStructure.controlStructureType(ControlStructureTypes.SWITCH).ast.isCall
+      cpg.method
+        .nameExact("switches")
+        .controlStructure
+        .controlStructureType(ControlStructureTypes.SWITCH)
+        .ast
+        .isCall
         .nameExact("~Widget")
         .code
         .l shouldBe Nil
 
       cpg.method.nameExact("switchContinue").call.nameExact("~Widget").code.l.sorted shouldBe
         List("body.~Widget()", "body.~Widget()", "inSwitch.~Widget()", "inSwitch.~Widget()", "outer.~Widget()")
-      cpg.method.nameExact("switchContinue").controlStructure.controlStructureType(ControlStructureTypes.SWITCH).ast.isCall
+      cpg.method
+        .nameExact("switchContinue")
+        .controlStructure
+        .controlStructureType(ControlStructureTypes.SWITCH)
+        .ast
+        .isCall
         .nameExact("~Widget")
         .code
         .l shouldBe List("inSwitch.~Widget()", "body.~Widget()")
@@ -3072,7 +3987,10 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("first->~Widget()", "second->~Widget()")
       cpg.method.nameExact("heap").call.nameExact("~Widget").methodFullName.l shouldBe
         List("Core.Widget.~Widget:void()", "Core.Widget.~Widget:void()")
-      cpg.method.nameExact("heap").call.nameExact(Operators.delete).code.l shouldBe List("delete first", "delete second")
+      cpg.method.nameExact("heap").call.nameExact(Operators.delete).code.l shouldBe List(
+        "delete first",
+        "delete second"
+      )
     }
 
     "capture C++ implicit heap default constructors" in {
@@ -3241,7 +4159,8 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
     }
 
     "capture C++ selection initializers from the Rust parser backend" in {
-      val cpg = code("""
+      val cpg = code(
+        """
           |struct Pair {
           |  int first;
           |  int second;
@@ -3277,7 +4196,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |    return n;
           |  }
           |}
-          |""".stripMargin, "Test0.cpp").withConfig(Config(parserBackend = ParserBackend.Oxidized))
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       cpg.local.name.l should contain allElementsOf List("x", "q", "first", "second", "w", "left", "right", "y")
       cpg.local.nameExact("x").typeFullName.l shouldBe List("int")
@@ -3288,18 +4209,29 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.local.nameExact("left").typeFullName.l shouldBe List("int")
       cpg.local.nameExact("right").typeFullName.l shouldBe List("int")
       cpg.local.nameExact("y").typeFullName.l shouldBe List("int")
-      cpg.method.nameExact("use").ifBlock.condition.code.l should contain allElementsOf List("x != 0", "q != 0", "first != 0")
+      cpg.method.nameExact("use").ifBlock.condition.code.l should contain allElementsOf List(
+        "x != 0",
+        "q != 0",
+        "first != 0"
+      )
       cpg.method.nameExact("use").whileBlock.condition.code.l should contain("w != 0")
-      cpg.method.nameExact("use").controlStructure.controlStructureTypeExact(ControlStructureTypes.SWITCH).condition.code.l shouldBe
+      cpg.method
+        .nameExact("use")
+        .controlStructure
+        .controlStructureTypeExact(ControlStructureTypes.SWITCH)
+        .condition
+        .code
+        .l shouldBe
         List("y")
-      inside(cpg.method.nameExact("use").ifBlock.l) { case List(initStatementIf, conditionDeclarationIf, structuredIf) =>
-        initStatementIf.condition.ast.isLocal.name.l shouldBe Nil
-        initStatementIf.condition.ast.isCall.nameExact("seed").code.l shouldBe Nil
-        conditionDeclarationIf.condition.ast.isLocal.name.l shouldBe List("q")
-        conditionDeclarationIf.condition.ast.isCall.nameExact("seed").code.l shouldBe List("seed(n)")
-        structuredIf.condition.ast.isLocal.name.l shouldBe Nil
-        structuredIf.condition.ast.isIdentifier.nameExact("first").refsTo.l shouldBe
-          List(cpg.method.nameExact("use").local.nameExact("first").head)
+      inside(cpg.method.nameExact("use").ifBlock.l) {
+        case List(initStatementIf, conditionDeclarationIf, structuredIf) =>
+          initStatementIf.condition.ast.isLocal.name.l shouldBe Nil
+          initStatementIf.condition.ast.isCall.nameExact("seed").code.l shouldBe Nil
+          conditionDeclarationIf.condition.ast.isLocal.name.l shouldBe List("q")
+          conditionDeclarationIf.condition.ast.isCall.nameExact("seed").code.l shouldBe List("seed(n)")
+          structuredIf.condition.ast.isLocal.name.l shouldBe Nil
+          structuredIf.condition.ast.isIdentifier.nameExact("first").refsTo.l shouldBe
+            List(cpg.method.nameExact("use").local.nameExact("first").head)
       }
       inside(cpg.method.nameExact("use").whileBlock.l) { case List(simpleWhile, structuredWhile) =>
         simpleWhile.condition.ast.isLocal.name.l shouldBe List("w")
@@ -3381,10 +4313,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         whileBlock.ast.isCall.nameExact("~Widget").code.l.sorted shouldBe
           List("Core::make().~Widget()", "guard.~Widget()", "guard.~Widget()")
       }
-      inside(cpg.method.nameExact("conditionLifetime").controlStructure.controlStructureType(ControlStructureTypes.IF).l) {
-        case List(continueIf, breakIf) =>
-          continueIf.ast.isCall.nameExact("~Widget").code.l shouldBe List("guard.~Widget()")
-          breakIf.ast.isCall.nameExact("~Widget").code.l shouldBe Nil
+      inside(
+        cpg.method.nameExact("conditionLifetime").controlStructure.controlStructureType(ControlStructureTypes.IF).l
+      ) { case List(continueIf, breakIf) =>
+        continueIf.ast.isCall.nameExact("~Widget").code.l shouldBe List("guard.~Widget()")
+        breakIf.ast.isCall.nameExact("~Widget").code.l shouldBe Nil
       }
       cpg.method.nameExact("conditionLifetime").call.nameExact("~Widget").code.l.sorted shouldBe
         List("Core::make().~Widget()", "guard.~Widget()", "guard.~Widget()", "guard.~Widget()")
@@ -3492,7 +4425,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("sum").call.nameExact(Operators.assignmentPlus).code.l shouldBe List("total += value")
       cpg.identifier.nameExact("items").refsTo.l shouldBe
         List(cpg.method.nameExact("sum").parameter.nameExact("items").head)
-      cpg.identifier.nameExact("value").refsTo.l shouldBe List(cpg.method.nameExact("sum").local.nameExact("value").head)
+      cpg.identifier.nameExact("value").refsTo.l shouldBe List(
+        cpg.method.nameExact("sum").local.nameExact("value").head
+      )
     }
 
     "capture C++ range-based for loops with initializers from the Rust parser backend" in {
@@ -3553,10 +4488,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         s"first = ${temp.name}.first",
         s"second = ${temp.name}.second"
       )
-      cpg.method.nameExact("sumPairs").call.nameExact(Operators.fieldAccess).code.l should contain theSameElementsAs List(
-        s"${temp.name}.first",
-        s"${temp.name}.second"
-      )
+      cpg.method
+        .nameExact("sumPairs")
+        .call
+        .nameExact(Operators.fieldAccess)
+        .code
+        .l should contain theSameElementsAs List(s"${temp.name}.first", s"${temp.name}.second")
       cpg.method.nameExact("sumPairs").call.nameExact(Operators.assignmentPlus).code.l shouldBe
         List("total += first + second")
       cpg.identifier.nameExact("first").refsTo.dedup.l shouldBe List(
@@ -3585,7 +4522,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       cpg.method.nameExact("route").controlStructure.controlStructureType.l.sorted shouldBe
-        List(ControlStructureTypes.BREAK, ControlStructureTypes.DO, ControlStructureTypes.GOTO, ControlStructureTypes.SWITCH)
+        List(
+          ControlStructureTypes.BREAK,
+          ControlStructureTypes.DO,
+          ControlStructureTypes.GOTO,
+          ControlStructureTypes.SWITCH
+        )
       cpg.method.nameExact("route").doBlock.condition.code.l shouldBe List("x > 3")
       cpg.jumpTarget.name.l.sorted shouldBe List("case", "default", "retry")
       cpg.jumpTarget.code.l.sorted shouldBe List("case 1:", "default:", "retry:")
@@ -3680,6 +4622,11 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
     "capture C++ extended string literals from the Rust parser backend" in {
       val cpg = code(
         """
+          |struct Distance {};
+          |Distance operator"" _km(unsigned long long value) {
+          |  return Distance{};
+          |}
+          |
           |const char *strings() {
           |  const char *raw = R"(hello)";
           |  const char *joined = "a" "b";
@@ -3693,7 +4640,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.literal.code.l should contain allElementsOf List("R\"(hello)\"", "\"a\" \"b\"", "42_km")
       cpg.literal.codeExact("R\"(hello)\"").typeFullName.l shouldBe List("char[6]")
       cpg.literal.codeExact("\"a\" \"b\"").typeFullName.l shouldBe List("char[3]")
-      cpg.literal.codeExact("42_km").typeFullName.l shouldBe List(Defines.Any)
+      cpg.literal.codeExact("42_km").typeFullName.l shouldBe List("Distance")
       cpg.identifier.codeExact("42_km").l shouldBe Nil
     }
 
@@ -3985,6 +4932,36 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "lower C++20 requires expressions in expression positions through the Rust backend" in {
+      val cpg = code(
+        """
+          |template <typename T>
+          |bool direct() {
+          |  return requires(T t) { t + 1; };
+          |}
+          |
+          |template <typename T>
+          |bool local() {
+          |  bool ok = requires(T t) { t + 1; };
+          |  return ok;
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("direct").ast.isReturn.code.l shouldBe List("return requires(T t) { t + 1; }")
+      cpg.method.nameExact("direct").call.l shouldBe Nil
+      cpg.method.nameExact("direct").ast.filter(_.label == NodeTypes.UNKNOWN).code.l shouldBe List(
+        "requires(T t) { t + 1; }"
+      )
+
+      cpg.method.nameExact("local").local.nameExact("ok").code.l shouldBe List("<unknown> ok")
+      cpg.method.nameExact("local").ast.isReturn.code.l shouldBe List("return ok")
+      cpg.method.nameExact("local").call.l shouldBe Nil
+      cpg.method.nameExact("local").ast.isIdentifier.nameExact("requires").l shouldBe Nil
+      cpg.method.nameExact("local").ast.filter(_.label == NodeTypes.UNKNOWN).l shouldBe Nil
+    }
+
     "capture C++20 coroutine statements from the Rust parser backend" in {
       val cpg = code(
         """
@@ -4091,13 +5068,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "Test0.cpp"
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
-      cpg.method.nameExact("to_int").controlStructure.controlStructureTypeExact(ControlStructureTypes.SWITCH).size shouldBe 1
-      cpg.jumpTarget.code.l shouldBe List(
-        "case red:",
-        "case green:",
-        "case blue:",
-        "case alpha:"
-      )
+      cpg.method
+        .nameExact("to_int")
+        .controlStructure
+        .controlStructureTypeExact(ControlStructureTypes.SWITCH)
+        .size shouldBe 1
+      cpg.jumpTarget.code.l shouldBe List("case red:", "case green:", "case blue:", "case alpha:")
       cpg.call.nameExact(Operators.fieldAccess).code.l shouldBe List(
         "rgba_color_channel.red",
         "rgba_color_channel.green",
@@ -4265,7 +5241,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.method.nameExact("use").local.nameExact("x3").typeFullName.l shouldBe List("double")
       cpg.method.nameExact("use").local.nameExact("x4").typeFullName.l shouldBe List("float")
       cpg.method.nameExact("use").local.nameExact("x5").typeFullName.l shouldBe List("long double")
-      cpg.method.nameExact("use").call.nameExact(Operators.arrayInitializer).codeExact("{1, 2, 3}").typeFullName.l shouldBe
+      cpg.method
+        .nameExact("use")
+        .call
+        .nameExact(Operators.arrayInitializer)
+        .codeExact("{1, 2, 3}")
+        .typeFullName
+        .l shouldBe
         List("std.initializer_list<int>")
       cpg.literal.codeExact("3.0").typeFullName.l shouldBe List("double")
       cpg.literal.codeExact("3.0f").typeFullName.l shouldBe List("float")
@@ -4306,7 +5288,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         s"${temp.name}.first",
         s"${temp.name}.second"
       )
-      cpg.identifier.nameExact("first").refsTo.dedup.l shouldBe List(cpg.method.nameExact("use").local.nameExact("first").head)
+      cpg.identifier.nameExact("first").refsTo.dedup.l shouldBe List(
+        cpg.method.nameExact("use").local.nameExact("first").head
+      )
       cpg.identifier.nameExact("second").refsTo.dedup.l shouldBe List(
         cpg.method.nameExact("use").local.nameExact("second").head
       )
@@ -4315,15 +5299,22 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       arrayTemp.typeFullName shouldBe "int[]"
       cpg.method.nameExact("useArray").local.nameExact("left").typeFullName.l shouldBe List("int")
       cpg.method.nameExact("useArray").local.nameExact("right").typeFullName.l shouldBe List("int")
-      cpg.method.nameExact("useArray").call.nameExact(Operators.assignment).code.l should contain theSameElementsAs List(
+      cpg.method
+        .nameExact("useArray")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l should contain theSameElementsAs List(
         s"${arrayTemp.name} = values",
         s"left = ${arrayTemp.name}[0]",
         s"right = ${arrayTemp.name}[1]"
       )
-      cpg.method.nameExact("useArray").call.nameExact(Operators.indirectIndexAccess).code.l should contain theSameElementsAs List(
-        s"${arrayTemp.name}[0]",
-        s"${arrayTemp.name}[1]"
-      )
+      cpg.method
+        .nameExact("useArray")
+        .call
+        .nameExact(Operators.indirectIndexAccess)
+        .code
+        .l should contain theSameElementsAs List(s"${arrayTemp.name}[0]", s"${arrayTemp.name}[1]")
     }
 
     "preserve block scope when locals shadow outer declarations" in {
@@ -4468,9 +5459,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       val outer = cpg.typeDecl.nameExact("Outer").head
       outer.member.nameExact("flags").typeFullName.l shouldBe List("int")
       outer.member.nameExact("flags").code.l shouldBe List("int flags:3")
-      outer.member.nameExact("inline_field").typeFullName.l shouldBe List("inline_field")
-      val inner   = outer.astChildren.isTypeDecl.nameExact("Inner").head
-      val storage = outer.astChildren.isTypeDecl.nameExact("Storage").head
+      outer.member.nameExact("inline_field").typeFullName.l shouldBe List("Outer.inline_field")
+      val inner             = outer.astChildren.isTypeDecl.nameExact("Inner").head
+      val storage           = outer.astChildren.isTypeDecl.nameExact("Storage").head
       val embeddedAnonymous = outer.astChildren.isTypeDecl.nameExact("<type>0").head
       val inlineFieldType   = outer.astChildren.isTypeDecl.nameExact("inline_field").head
       inner.member.nameExact("a").typeFullName.l shouldBe List("int")
@@ -4505,7 +5496,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       cpg.local.nameExact("ptr").typeFullName.l shouldBe List("int*")
       cpg.call.nameExact(Operators.assignment).code.l should contain("global = 1")
       cpg.method.nameExact("read").block.ast.isIdentifier.nameExact("global").refsTo.l shouldBe List(readGlobal)
-      cpg.method.nameExact("shadow").block.ast.isIdentifier.nameExact("global").refsTo.dedup.l shouldBe List(shadowLocal)
+      cpg.method.nameExact("shadow").block.ast.isIdentifier.nameExact("global").refsTo.dedup.l shouldBe List(
+        shadowLocal
+      )
       val List(binding) = globalLocal.closureBinding.l
       binding.closureBindingId shouldBe readGlobal.closureBindingId
       binding._localViaRefOut.get shouldBe globalLocal
@@ -4650,7 +5643,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "second.x",
         "second.y"
       )
-      cpg.identifier.nameExact("first").refsTo.l should contain(cpg.method.nameExact("bar").local.nameExact("first").head)
+      cpg.identifier.nameExact("first").refsTo.l should contain(
+        cpg.method.nameExact("bar").local.nameExact("first").head
+      )
       cpg.identifier.nameExact("second").refsTo.l should contain(
         cpg.method.nameExact("bar").local.nameExact("second").head
       )
@@ -4819,7 +5814,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
       cpg.method.nameExact("expression_positions").local.nameExact("update").typeFullName.l shouldBe List("Board")
       cpg.method.nameExact("expression_positions").local.nameExact("other").typeFullName.l shouldBe List("Board")
-      cpg.method.nameExact("expression_positions").call.nameExact(Operators.assignment).code.l should contain allElementsOf
+      cpg.method
+        .nameExact("expression_positions")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l should contain allElementsOf
         List(
           "update = {{4, seed}, 6}",
           "update.cell = {4, seed}",
@@ -4838,20 +5838,16 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "update.z = 11",
           "other = (update = {{10, seed}, 11})"
         )
-      cpg.method.nameExact("expression_positions").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
-        List(
-          "update.cell",
-          "update.cell.x",
-          "update.cell.y",
-          "update.z"
-        )
+      cpg.method
+        .nameExact("expression_positions")
+        .call
+        .nameExact(Operators.fieldAccess)
+        .code
+        .l should contain allElementsOf
+        List("update.cell", "update.cell.x", "update.cell.y", "update.z")
       val callCodes = cpg.method.nameExact("expression_positions").call.code.l
-      callCodes.indexOf("update.cell.x = seed") should be < callCodes.indexOf(
-        "consume(update = {{seed, 8}, 9})"
-      )
-      callCodes.indexOf("update.cell.x = 10") should be < callCodes.indexOf(
-        "other = (update = {{10, seed}, 11})"
-      )
+      callCodes.indexOf("update.cell.x = seed") should be < callCodes.indexOf("consume(update = {{seed, 8}, 9})")
+      callCodes.indexOf("update.cell.x = 10") should be < callCodes.indexOf("other = (update = {{10, seed}, 11})")
     }
 
     "capture C++ aggregate assignment initializers in control conditions from the Rust parser backend" in {
@@ -4903,7 +5899,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       cpg.method.nameExact("condition_assignments").local.nameExact("check").typeFullName.l shouldBe List("Board")
-      cpg.method.nameExact("condition_assignments").call.nameExact(Operators.assignment).code.l should contain allElementsOf
+      cpg.method
+        .nameExact("condition_assignments")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l should contain allElementsOf
         List(
           "check = {{seed, 2}, 3}",
           "check.cell = {seed, 2}",
@@ -4951,29 +5952,19 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "check.cell.y = seed",
           "check.z = 19"
         )
-      cpg.method.nameExact("condition_assignments").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
-        List(
-          "check.cell",
-          "check.cell.x",
-          "check.cell.y",
-          "check.z"
-        )
+      cpg.method
+        .nameExact("condition_assignments")
+        .call
+        .nameExact(Operators.fieldAccess)
+        .code
+        .l should contain allElementsOf
+        List("check.cell", "check.cell.x", "check.cell.y", "check.z")
       val callCodes = cpg.method.nameExact("condition_assignments").call.code.l
-      callCodes.indexOf("check.cell.x = 10") should be < callCodes.indexOf(
-        "accept(check = {{10, seed}, 11})"
-      )
-      callCodes.indexOf("check.cell.x = 12") should be < callCodes.indexOf(
-        "accept(check = {{12, seed}, 13})"
-      )
-      callCodes.indexOf("check.cell.x = 14") should be < callCodes.indexOf(
-        "accept(check = {{14, seed}, 15})"
-      )
-      callCodes.indexOf("check.cell.x = 16") should be < callCodes.indexOf(
-        "accept(check = {{16, seed}, 17})"
-      )
-      callCodes.indexOf("check.cell.x = 18") should be < callCodes.indexOf(
-        "accept(check = {{18, seed}, 19})"
-      )
+      callCodes.indexOf("check.cell.x = 10") should be < callCodes.indexOf("accept(check = {{10, seed}, 11})")
+      callCodes.indexOf("check.cell.x = 12") should be < callCodes.indexOf("accept(check = {{12, seed}, 13})")
+      callCodes.indexOf("check.cell.x = 14") should be < callCodes.indexOf("accept(check = {{14, seed}, 15})")
+      callCodes.indexOf("check.cell.x = 16") should be < callCodes.indexOf("accept(check = {{16, seed}, 17})")
+      callCodes.indexOf("check.cell.x = 18") should be < callCodes.indexOf("accept(check = {{18, seed}, 19})")
     }
 
     "capture C++ aggregate assignment initializers in return and throw expressions from the Rust parser backend" in {
@@ -5017,7 +6008,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "failure.cell.y = seed",
           "failure.z = 5"
         )
-      cpg.method.nameExact("return_assignment").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
+      cpg.method
+        .nameExact("return_assignment")
+        .call
+        .nameExact(Operators.fieldAccess)
+        .code
+        .l should contain allElementsOf
         List("result.cell", "result.cell.x", "result.cell.y", "result.z")
       cpg.method.nameExact("throw_assignment").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
         List("failure.cell", "failure.cell.x", "failure.cell.y", "failure.z")
@@ -5048,7 +6044,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
       cpg.local.nameExact("globalTarget").filter(_.code == "Board globalTarget").typeFullName.l shouldBe List("Board")
       cpg.local.nameExact("globalCopy").filter(_.code == "Board globalCopy").typeFullName.l shouldBe List("Board")
-      cpg.method.nameExact("local_initializer_assignment").local.nameExact("target").typeFullName.l shouldBe List("Board")
+      cpg.method.nameExact("local_initializer_assignment").local.nameExact("target").typeFullName.l shouldBe List(
+        "Board"
+      )
       cpg.method.nameExact("local_initializer_assignment").local.nameExact("copy").typeFullName.l shouldBe List("Board")
       cpg.method.nameExact("local_initializer_assignment").local.nameExact("value").typeFullName.l shouldBe List("int")
       cpg.call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
@@ -5128,12 +6126,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "target.z = 7"
         )
       cpg.method.nameExact("constructor_initializer_assignment").call.nameExact(Operators.fieldAccess).code.l should
-        contain allElementsOf List(
-          "target.cell",
-          "target.cell.x",
-          "target.cell.y",
-          "target.z"
-        )
+        contain allElementsOf List("target.cell", "target.cell.x", "target.cell.y", "target.z")
       val assignmentCodes =
         cpg.method.nameExact("constructor_initializer_assignment").call.nameExact(Operators.assignment).code.l
       assignmentCodes.indexOf("target.cell.x = 6") should be < assignmentCodes.indexOf(
@@ -5176,12 +6169,7 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "target.z = 3"
         )
       cpg.method.fullNameExact("Wrapper.Wrapper:void(int)").call.nameExact(Operators.fieldAccess).code.l should
-        contain allElementsOf List(
-          "target.cell",
-          "target.cell.x",
-          "target.cell.y",
-          "target.z"
-        )
+        contain allElementsOf List("target.cell", "target.cell.x", "target.cell.y", "target.z")
       val assignmentCodes =
         cpg.method.fullNameExact("Wrapper.Wrapper:void(int)").call.nameExact(Operators.assignment).code.l
       assignmentCodes.indexOf("target.cell.x = seed") should be < assignmentCodes.indexOf(
@@ -5387,7 +6375,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
       cpg.method.nameExact("subobject_assignments").local.nameExact("board").typeFullName.l shouldBe List("Board")
       cpg.method.nameExact("subobject_assignments").local.nameExact("boards").typeFullName.l shouldBe List("Board[]")
-      cpg.method.nameExact("subobject_assignments").call.nameExact(Operators.assignment).code.l should contain allElementsOf
+      cpg.method
+        .nameExact("subobject_assignments")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l should contain allElementsOf
         List(
           "board.cell = {seed, 2}",
           "board.cell.x = seed",
@@ -5408,13 +6401,13 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "boards[0].cells[1].y = seed"
         )
       cpg.method.nameExact("subobject_assignments").call.nameExact(Operators.indirectIndexAccess).code.l should
-        contain allElementsOf List(
-          "board.cells[1]",
-          "boards[0]",
-          "boards[0].cells[0]",
-          "boards[0].cells[1]"
-        )
-      cpg.method.nameExact("subobject_assignments").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
+        contain allElementsOf List("board.cells[1]", "boards[0]", "boards[0].cells[0]", "boards[0].cells[1]")
+      cpg.method
+        .nameExact("subobject_assignments")
+        .call
+        .nameExact(Operators.fieldAccess)
+        .code
+        .l should contain allElementsOf
         List(
           "board.cell",
           "board.cell.x",
@@ -5443,17 +6436,9 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "ptr->cells[1].y = seed"
         )
       cpg.method.nameExact("pointer_subobject_assignments").call.nameExact(Operators.indirectFieldAccess).code.l should
-        contain allElementsOf List(
-          "ptr->cell",
-          "ptr->cells"
-        )
+        contain allElementsOf List("ptr->cell", "ptr->cells")
       cpg.method.nameExact("pointer_subobject_assignments").call.nameExact(Operators.fieldAccess).code.l should
-        contain allElementsOf List(
-          "ptr->cell.x",
-          "ptr->cell.y",
-          "ptr->cells[1].x",
-          "ptr->cells[1].y"
-        )
+        contain allElementsOf List("ptr->cell.x", "ptr->cell.y", "ptr->cells[1].x", "ptr->cells[1].y")
     }
 
     "capture C aggregate array initializer field assignments from the Rust parser backend" in {
@@ -5479,7 +6464,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
 
       cpg.method.nameExact("aggregate_arrays").local.nameExact("board").typeFullName.l shouldBe List("Board")
       cpg.method.nameExact("aggregate_arrays").local.nameExact("designated").typeFullName.l shouldBe List("Board")
-      cpg.method.nameExact("aggregate_arrays").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+      cpg.method
+        .nameExact("aggregate_arrays")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l should contain allElementsOf List(
         "board = {{{seed, 2}, {3, 4}}, {5, seed}, 9}",
         "board.cells = {{seed, 2}, {3, 4}}",
         "board.cells[0] = {seed, 2}",
@@ -5498,7 +6488,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         "designated.totals[0] = 4",
         "designated.z = 8"
       )
-      cpg.method.nameExact("aggregate_arrays").call.nameExact(Operators.indirectIndexAccess).code.l should contain allElementsOf
+      cpg.method
+        .nameExact("aggregate_arrays")
+        .call
+        .nameExact(Operators.indirectIndexAccess)
+        .code
+        .l should contain allElementsOf
         List(
           "board.cells[0]",
           "board.cells[1]",
@@ -5507,7 +6502,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "designated.cells[1]",
           "designated.totals[0]"
         )
-      cpg.method.nameExact("aggregate_arrays").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf List(
+      cpg.method
+        .nameExact("aggregate_arrays")
+        .call
+        .nameExact(Operators.fieldAccess)
+        .code
+        .l should contain allElementsOf List(
         "board.cells",
         "board.cells[0].x",
         "board.cells[0].y",
@@ -5646,21 +6646,23 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       )
       globalMethod.call.nameExact("Widget").codeExact("Core.Widget.Widget(nsSource)").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)")
-      globalMethod
-        .call
+      globalMethod.call
         .nameExact("Widget")
         .codeExact("Core.Widget.Widget(Registry::member)")
         .methodFullName
         .l shouldBe List("Core.Widget.Widget:void(Widget&)")
       globalMethod.call.nameExact("Widget").codeExact("Core.Widget.Widget(sourceGlobal)").methodFullName.l shouldBe
         List("Core.Widget.Widget:void(Widget&)", "Core.Widget.Widget:void(Widget&)")
-      globalMethod
-        .call
+      globalMethod.call
         .nameExact("Widget")
         .codeExact("Core.Widget.Widget(Core::makeWidget())")
         .methodFullName
         .l shouldBe List("Core.Widget.Widget:void(Widget&&)", "Core.Widget.Widget:void(Widget&&)")
-      globalMethod.call.nameExact(Operators.assignment).code.l.filterNot(_.startsWith("<tmp>")) should contain allElementsOf
+      globalMethod.call
+        .nameExact(Operators.assignment)
+        .code
+        .l
+        .filterNot(_.startsWith("<tmp>")) should contain allElementsOf
         List(
           "implicitGlobal = Core.Defaulted.Defaulted()",
           "sourceGlobal = Core.Widget.Widget()",
@@ -5813,7 +6815,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
         List("Container")
       cpg.method.nameExact("anonymous_aggregates").local.nameExact("positional").typeFullName.l shouldBe
         List("Container")
-      cpg.method.nameExact("anonymous_aggregates").call.nameExact(Operators.assignment).code.l should contain allElementsOf
+      cpg.method
+        .nameExact("anonymous_aggregates")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l should contain allElementsOf
         List(
           "designated = { .promoted = seed, .inline_x = 2, .inline_y = 3, .tail = 4 }",
           "designated.promoted = seed",
@@ -5826,7 +6833,12 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
           "positional.inline_y = 6",
           "positional.tail = 7"
         )
-      cpg.method.nameExact("anonymous_aggregates").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
+      cpg.method
+        .nameExact("anonymous_aggregates")
+        .call
+        .nameExact(Operators.fieldAccess)
+        .code
+        .l should contain allElementsOf
         List(
           "designated.promoted",
           "designated.inline_x",
@@ -5859,19 +6871,24 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
 
       cpg.method.nameExact("nested_designators").local.nameExact("item").typeFullName.l shouldBe List("Outer")
-      cpg.method.nameExact("nested_designators").call.nameExact(Operators.assignment).code.l should contain allElementsOf List(
+      cpg.method
+        .nameExact("nested_designators")
+        .call
+        .nameExact(Operators.assignment)
+        .code
+        .l should contain allElementsOf List(
         "item = { .inner.x = seed, .inner.y = 2, .z = 3 }",
         "item.inner.x = seed",
         "item.inner.y = 2",
         "item.z = 3"
       )
-      cpg.method.nameExact("nested_designators").call.nameExact(Operators.fieldAccess).code.l should contain allElementsOf
-        List(
-          "item.inner",
-          "item.inner.x",
-          "item.inner.y",
-          "item.z"
-        )
+      cpg.method
+        .nameExact("nested_designators")
+        .call
+        .nameExact(Operators.fieldAccess)
+        .code
+        .l should contain allElementsOf
+        List("item.inner", "item.inner.x", "item.inner.y", "item.z")
     }
 
     "capture function prototypes as external methods" in {
@@ -6008,6 +7025,207 @@ class OxidizedCompatibilitySnapshotTests extends C2CpgSuite {
       }
     }
 
+    "select token-pasted object-like macro branches through the Rust backend" in {
+      val cpg = code("""
+          |#define A foo ## bar
+          |int picks_pasted_branch() {
+          |#if A
+          |  return 1;
+          |#else
+          |  return 0;
+          |#endif
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("picks_pasted_branch").ast.isReturn.code.l shouldBe List("return 0")
+    }
+
+    "honor c2cpg C++ source and header extensions through the Rust backend" in {
+      FileUtil.usingTemporaryDirectory("oxidizedCompatibilitySnapshot") { dir =>
+        val extensionCases = Seq(
+          "cp"   -> "from_cp",
+          "ccm"  -> "from_ccm",
+          "cxxm" -> "from_cxxm",
+          "c++m" -> "from_cxx_module",
+          "hp"   -> "from_hp",
+          "h++"  -> "from_hpp_plus",
+          "tcc"  -> "from_tcc"
+        )
+        extensionCases.foreach { case (extension, methodName) =>
+          Files.writeString(dir / s"$methodName.$extension", s"int $methodName() { return 1; }\n")
+        }
+
+        val cpg = new C2Cpg()
+          .createCpg(Config(parserBackend = ParserBackend.Oxidized).withInputPath(dir.toString))
+          .get
+
+        try {
+          cpg.method.nameExact(extensionCases.map(_._2)*).name.l should contain theSameElementsAs extensionCases.map(
+            _._2
+          )
+          extensionCases.foreach { case (extension, methodName) =>
+            cpg.method.nameExact(methodName).filename.l shouldBe List(s"$methodName.$extension")
+          }
+        } finally {
+          cpg.close()
+        }
+      }
+    }
+
+    "lower C++ static assert statements through the Rust backend" in {
+      val cpg = code(
+        """
+          |void foo(){
+          |  int a = 0;
+          |  static_assert ( a == 0 , "not 0!");
+          |}
+          |""".stripMargin,
+        "Test0.cpp"
+      ).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.call.nameExact("<operator>.staticAssert").l) { case List(call) =>
+        call.code shouldBe "static_assert ( a == 0 , \"not 0!\");"
+        call.methodFullName shouldBe "<operator>.staticAssert"
+        call.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+        call.argument(1).code shouldBe "a == 0"
+        call.argument(2).code shouldBe "\"not 0!\""
+      }
+    }
+
+    "lower GNU statement expressions as block operands through the Rust backend" in {
+      val cpg = code("""
+          |int f() {
+          |  return ({int y = 1; y;}) + ({int z = 2; z;});
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("f").call.nameExact(Operators.addition).l) { case List(add) =>
+        inside(add.argument.l) { case List(yBlock, zBlock) =>
+          yBlock.argumentIndex shouldBe 1
+          yBlock.order shouldBe 1
+          yBlock.astChildren.isCall.code.l shouldBe List("y = 1")
+          yBlock.astChildren.isIdentifier.code.l shouldBe List("y")
+
+          zBlock.argumentIndex shouldBe 2
+          zBlock.order shouldBe 2
+          zBlock.astChildren.isCall.code.l shouldBe List("z = 2")
+          zBlock.astChildren.isIdentifier.code.l shouldBe List("z")
+        }
+      }
+    }
+
+    "lower GNU asm statements as unknown nodes through the Rust backend" in {
+      val cpg = code("""
+          |void simple() {
+          |  asm("nop");
+          |}
+          |void constrained() {
+          |  asm("paddh %0, %1, %2\n\t"
+          |      : "=f" (x)
+          |      : "f" (y), "f" (z)
+          |  );
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("simple").ast.filter(_.label == NodeTypes.UNKNOWN).code.l) { case List(code) =>
+        code should startWith("asm(")
+      }
+      inside(cpg.method.nameExact("constrained").ast.filter(_.label == NodeTypes.UNKNOWN).code.l) { case List(code) =>
+        code should startWith("asm(")
+        code should include(""": "=f" (x)""")
+      }
+      cpg.method.nameExact("constrained").call.nameExact("asm").l shouldBe Nil
+    }
+
+    "lower GNU asm expressions as unknown local initializers through the Rust backend" in {
+      val cpg = code("""
+          |int f() {
+          |  int x = asm("nop");
+          |  return x;
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("f").local.nameExact("x").code.l shouldBe List("<unknown> x")
+      cpg.method.nameExact("f").call.nameExact("asm").l shouldBe Nil
+      cpg.method.nameExact("f").call.nameExact(Operators.assignment).l shouldBe Nil
+      cpg.method.nameExact("f").ast.isIdentifier.nameExact("asm").l shouldBe Nil
+      cpg.method.nameExact("f").ast.isIdentifier.nameExact("x").code.l shouldBe List("x")
+    }
+
+    "lower C11 generic selections as clean call arguments through the Rust backend" in {
+      val cpg = code("""
+          |int f(int x) {
+          |  return _Generic(x, int: 1, default: 0);
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("f").call.nameExact("_Generic").l) { case List(genericCall) =>
+        genericCall.code shouldBe "_Generic(x, int: 1, default: 0)"
+        genericCall.argument.code.l shouldBe List("x", "1", "0")
+        genericCall.argument.isIdentifier.nameExact("int: 1").l shouldBe Nil
+        genericCall.argument.isIdentifier.nameExact("default: 0").l shouldBe Nil
+      }
+    }
+
+    "lower GNU extension expressions transparently through the Rust backend" in {
+      val cpg = code("""
+          |int f(int x) {
+          |  int y = __extension__ (x + 1);
+          |  return __extension__ y;
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("f").local.nameExact("y").code.l shouldBe List("int y")
+      cpg.method.nameExact("f").call.nameExact(Operators.assignment).code.l shouldBe List("y = __extension__ (x + 1)")
+      cpg.method.nameExact("f").call.nameExact(Operators.addition).code.l shouldBe List("x + 1")
+      cpg.method.nameExact("f").ast.isIdentifier.nameExact("__extension__").l.shouldBe(Nil)
+      cpg.method.nameExact("f").ast.isIdentifier.nameExact("y").code.l.should(contain("y"))
+      cpg.method.nameExact("f").ast.isReturn.code.l.shouldBe(List("return __extension__ y"))
+    }
+
+    "lower Microsoft SEH leave statements as unknown nodes through the Rust backend" in {
+      val cpg = code("""
+          |void f() {
+          |  __try {
+          |    g();
+          |    __leave;
+          |    h();
+          |  } __finally {
+          |    cleanup();
+          |  }
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      inside(cpg.method.nameExact("f").controlStructure.controlStructureType(ControlStructureTypes.TRY).l) {
+        case List(tryNode) =>
+          tryNode.tryBodyOut.ast.isCall.name.l shouldBe List("g", "h", "cleanup")
+          tryNode.tryBodyOut.ast.filter(_.label == NodeTypes.UNKNOWN).code.l shouldBe List("__leave")
+      }
+      cpg.method.nameExact("f").ast.filter(_.label == NodeTypes.UNKNOWN).code.l shouldBe List("__leave")
+    }
+
+    "lower GNU nested function declarations through the Rust backend" in {
+      val cpg = code("""
+          |int f() {
+          |  int g(int y) { return y + 1; }
+          |  return g(2);
+          |}
+          |""".stripMargin).withConfig(Config(parserBackend = ParserBackend.Oxidized))
+
+      cpg.method.nameExact("g").fullName.l shouldBe List("g")
+      cpg.method.nameExact("g").parameter.name.l shouldBe List("y")
+      cpg.method.nameExact("g").call.nameExact(Operators.addition).code.l shouldBe List("y + 1")
+      cpg.method.nameExact("f").call.nameExact("g").methodFullName.l shouldBe List("g")
+      cpg.method.nameExact("f").ast.isMethod.nameExact("g").l shouldBe Nil
+      cpg.method.nameExact("f").ast.filter(_.label == NodeTypes.UNKNOWN).l shouldBe Nil
+    }
+
+  }
+
+  private def cpgForOxidizedDocument(document: OxDocument): Cpg = {
+    val cpg = Cpg.empty
+    DiffGraphApplier.applyDiff(cpg.graph, new OxidizedAstCreator("call.cpp", document, Config()).createAst())
+    cpg
   }
 
 }

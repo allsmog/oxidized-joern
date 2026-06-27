@@ -204,6 +204,58 @@ class StructTests extends Rust2CpgSuite(noSysRoot = true) {
     }
   }
 
+  "a named-field struct literal" should {
+    val cpg = code("""
+        |struct Point { x: i32, y: i32 }
+        |
+        |fn main() {
+        | let x = 1;
+        | let p = Point { x, y: 2 };
+        | let q = Point { x: 3, ..p };
+        |}
+        |""".stripMargin)
+
+    "lower record expressions to alloc calls" in {
+      cpg.call.nameExact(Operators.alloc).code.toSet shouldBe Set("Point { x, y: 2 }", "Point { x: 3, ..p }")
+    }
+
+    "type the alloc calls as Point" in {
+      cpg.call.nameExact(Operators.alloc).typeFullName.toSet should contain("rust2cpgtest::Point")
+    }
+
+    "preserve shorthand field values as alloc arguments" in {
+      inside(cpg.call.nameExact(Operators.alloc).codeExact("Point { x, y: 2 }").argument(1).l) {
+        case (x: Identifier) :: Nil =>
+          x.name shouldBe "x"
+          x.typeFullName shouldBe "i32"
+      }
+    }
+
+    "preserve explicit field initializers as assignments" in {
+      inside(cpg.call.nameExact(Operators.alloc).codeExact("Point { x, y: 2 }").argument(2).l) {
+        case (assignment: Call) :: Nil =>
+          assignment.name shouldBe Operators.assignment
+          assignment.code shouldBe "y: 2"
+          inside(assignment.argument.l) { case (field: Identifier) :: (value: Literal) :: Nil =>
+            field.name shouldBe "y"
+            value.code shouldBe "2"
+          }
+      }
+    }
+
+    "preserve struct update expressions as alloc arguments" in {
+      inside(cpg.call.nameExact(Operators.alloc).codeExact("Point { x: 3, ..p }").argument(2).l) {
+        case (p: Identifier) :: Nil =>
+          p.name shouldBe "p"
+          p.typeFullName shouldBe "rust2cpgtest::Point"
+      }
+    }
+
+    "not create unknown nodes for record expressions" in {
+      cpg.all.collectAll[Unknown].codeExact("Point { x, y: 2 }", "Point { x: 3, ..p }").l shouldBe empty
+    }
+  }
+
   "a tuple-struct positional field access" should {
     val cpg = code("""
         |struct Pair(i32, bool);

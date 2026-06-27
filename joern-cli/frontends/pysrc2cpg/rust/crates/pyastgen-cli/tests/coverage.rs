@@ -111,6 +111,7 @@ fn corpus_parses_without_error_kinds_and_covers_constructs() {
         "Arg",
         "ArgWithDefault",
         "AnnAssign",
+        "TypeAlias",
         // async / await
         "Await",
         "AsyncFor",

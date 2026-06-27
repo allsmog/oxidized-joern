@@ -20,7 +20,7 @@ class BuiltInMethodCallTests extends GoCodeToCpgSuite {
       x.name shouldBe "myMap"
     }
 
-    "check identifier(LHS) properties type" ignore {
+    "check identifier(LHS) properties type" in {
       val List(x) = cpg.identifier("myMap").l
       x.typeFullName shouldBe "map"
     }

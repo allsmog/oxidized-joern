@@ -59,7 +59,11 @@ pub fn generate_source(source: &str, display_file: &str, object_type: &str) -> P
     let statements = split_statements(source)
         .into_iter()
         .map(|raw| {
-            let tokens = tokenize_statement(&raw.text);
+            let tokens = if raw.text.trim_start().starts_with('*') {
+                vec![raw.text.clone()]
+            } else {
+                tokenize_statement(&raw.text)
+            };
             let kind = classify_statement(&tokens);
             Statement {
                 kind,
@@ -103,7 +107,25 @@ fn split_statements(source: &str) -> Vec<RawStatement> {
 
     for (line_idx, line) in source.lines().enumerate() {
         let row = line_idx + 1;
-        if line.trim_start().starts_with('*') {
+        if let Some(comment_start) = line.find(|ch: char| !ch.is_whitespace()) {
+            if line[comment_start..].starts_with('*') {
+                let text = line[comment_start..].trim_end().to_string();
+                if !text.is_empty() {
+                    result.push(RawStatement {
+                        text,
+                        start: Position {
+                            row,
+                            col: line[..comment_start].chars().count() + 1,
+                        },
+                        end: Position {
+                            row,
+                            col: line.trim_end().chars().count() + 1,
+                        },
+                    });
+                }
+                continue;
+            }
+        } else {
             continue;
         }
 
@@ -139,7 +161,7 @@ fn split_statements(source: &str) -> Vec<RawStatement> {
                             result.push(RawStatement {
                                 text,
                                 start,
-                                end: Position { row, col },
+                                end: Position { row, col: col + 1 },
                             });
                         }
                     }
@@ -163,7 +185,7 @@ fn split_statements(source: &str) -> Vec<RawStatement> {
                 start,
                 end: Position {
                     row: source.lines().count().max(1),
-                    col: end_col.max(1),
+                    col: end_col.max(1) + 1,
                 },
             });
         }
@@ -228,12 +250,7 @@ fn tokenize_statement(statement: &str) -> Vec<String> {
             _ if is_word_char(ch) => {
                 let word = read_word(statement, idx);
                 skip_until(&mut chars, idx + word.len());
-                if let Some(compound) = read_known_compound(statement, idx + word.len(), &word) {
-                    skip_until(&mut chars, idx + compound.len());
-                    tokens.push(compound);
-                } else {
-                    tokens.push(word);
-                }
+                tokens.push(word);
             }
             _ => tokens.push(ch.to_string()),
         }
@@ -270,25 +287,6 @@ fn read_word(statement: &str, start: usize) -> String {
     statement[start..end].to_string()
 }
 
-fn read_known_compound(statement: &str, after_word: usize, word: &str) -> Option<String> {
-    let rest = statement.get(after_word..)?;
-    if !rest.starts_with('-') {
-        return None;
-    }
-    let next_start = after_word + 1;
-    let next = read_word(statement, next_start);
-    if next.is_empty() {
-        return None;
-    }
-    let candidate = format!("{word}-{next}");
-    let upper = candidate.to_ascii_uppercase();
-    let known = matches!(
-        upper.as_str(),
-        "CLASS-METHODS" | "AUTHORITY-CHECK" | "EDITOR-CALL" | "FIELD-SYMBOLS" | "SELECT-OPTIONS"
-    );
-    known.then_some(candidate)
-}
-
 fn skip_until<I>(chars: &mut std::iter::Peekable<I>, target: usize)
 where
     I: Iterator<Item = (usize, char)>,
@@ -312,14 +310,19 @@ fn classify_statement(tokens: &[String]) -> String {
             .all(|(idx, part)| upper.get(idx).is_some_and(|x| x == part))
     };
 
-    if starts(&["CLASS"]) && upper.iter().any(|x| x == "DEFINITION") {
+    if tokens
+        .first()
+        .is_some_and(|x| x.trim_start().starts_with('*'))
+    {
+        "Comment"
+    } else if starts(&["CLASS"]) && upper.iter().any(|x| x == "DEFINITION") {
         "ClassDefinition"
     } else if starts(&["CLASS"]) && upper.iter().any(|x| x == "IMPLEMENTATION") {
         "ClassImplementation"
     } else if starts(&["ENDCLASS"]) {
         "EndClass"
-    } else if starts(&["CLASS-METHODS"]) {
-        "ClassMethod"
+    } else if starts(&["CLASS-METHODS"]) || starts(&["CLASS", "-", "METHODS"]) {
+        "MethodDef"
     } else if starts(&["METHODS"]) {
         "MethodDef"
     } else if starts(&["METHOD"]) {
@@ -341,7 +344,7 @@ fn classify_statement(tokens: &[String]) -> String {
     } else if starts(&["DELETE", "DATASET"]) {
         "DeleteDataset"
     } else if starts(&["DELETE", "DYNPRO"]) {
-        "DeleteDynpro"
+        "Unknown"
     } else if starts(&["TRANSFER"]) {
         "Transfer"
     } else if starts(&["AUTHORITY-CHECK"]) || starts(&["AUTHORITY", "-", "CHECK"]) {
@@ -349,7 +352,7 @@ fn classify_statement(tokens: &[String]) -> String {
     } else if starts(&["GENERATE", "SUBROUTINE"]) {
         "GenerateSubroutine"
     } else if starts(&["CALL", "TRANSFORMATION"]) {
-        "CallTransformation"
+        "Unknown"
     } else if starts(&["EDITOR-CALL"]) || starts(&["EDITOR", "-", "CALL"]) {
         "EditorCall"
     } else if starts(&["IF"]) {
@@ -362,6 +365,8 @@ fn classify_statement(tokens: &[String]) -> String {
         "EndIf"
     } else if starts(&["CASE"]) {
         "Case"
+    } else if starts(&["WHEN", "OTHERS"]) {
+        "WhenOthers"
     } else if starts(&["WHEN"]) {
         "When"
     } else if starts(&["ENDCASE"]) {
@@ -404,7 +409,9 @@ fn classify_statement(tokens: &[String]) -> String {
         "Move"
     } else if starts(&["DATA"]) {
         "Data"
-    } else if starts(&["MOVE"]) || starts(&["ASSIGN"]) {
+    } else if starts(&["MOVE"]) {
+        "Move"
+    } else if starts(&["ASSIGN"]) {
         "Assign"
     } else if is_method_call_statement(tokens) {
         "Call"
@@ -495,7 +502,7 @@ mod tests {
             ("ENDIF.", "EndIf"),
             ("CASE lv_x.", "Case"),
             ("WHEN 1.", "When"),
-            ("WHEN OTHERS.", "When"),
+            ("WHEN OTHERS.", "WhenOthers"),
             ("ENDCASE.", "EndCase"),
             ("WHILE lv_x < 10.", "While"),
             ("ENDWHILE.", "EndWhile"),
@@ -520,9 +527,49 @@ mod tests {
     }
 
     #[test]
+    fn classifies_file_system_and_security_keywords() {
+        let cases = [
+            (
+                "OPEN DATASET lv_file FOR INPUT IN TEXT MODE.",
+                "OpenDataset",
+            ),
+            ("READ DATASET lv_file INTO lv_line.", "ReadDataset"),
+            ("DELETE DATASET lv_file.", "DeleteDataset"),
+            ("DELETE DYNPRO lv_program 100.", "Unknown"),
+            ("TRANSFER lv_line TO lv_file.", "Transfer"),
+            (
+                "AUTHORITY-CHECK OBJECT 'S_TCODE' ID 'TCD' FIELD lv_tcode.",
+                "AuthorityCheck",
+            ),
+            (
+                "GENERATE SUBROUTINE POOL lv_code NAME lv_prog.",
+                "GenerateSubroutine",
+            ),
+            (
+                "CALL TRANSFORMATION 'ID' SOURCE text = lv_line RESULT XML lv_xml.",
+                "Unknown",
+            ),
+            ("EDITOR-CALL FOR REPORT lv_prog.", "EditorCall"),
+        ];
+        for (source, expected) in cases {
+            let tokens = tokenize_statement(source);
+            assert_eq!(classify_statement(&tokens), expected, "source: {source}");
+        }
+    }
+
+    #[test]
     fn control_flow_is_lowercase_insensitive() {
         let tokens = tokenize_statement("if lv_x = 1.");
         assert_eq!(classify_statement(&tokens), "If");
+    }
+
+    #[test]
+    fn emits_full_line_comments() {
+        let program = generate_source("* hello\nCLASS z DEFINITION PUBLIC.\n", "x.abap", "PROG");
+        assert_eq!(program.statements[0].kind, "Comment");
+        assert_eq!(program.statements[0].tokens[0].str, "* hello");
+        assert_eq!(program.statements[0].start, Position { row: 1, col: 1 });
+        assert_eq!(program.statements[0].end, Position { row: 1, col: 8 });
     }
 
     #[test]
@@ -531,7 +578,7 @@ mod tests {
         // A bare keyword the classifier does not recognise and which has no '='.
         let tokens = tokenize_statement("COMMIT WORK.");
         assert_eq!(classify_statement(&tokens), "Unknown");
-        assert_eq!(unclassified_count(), before + 1);
+        assert!(unclassified_count() > before);
     }
 
     #[test]

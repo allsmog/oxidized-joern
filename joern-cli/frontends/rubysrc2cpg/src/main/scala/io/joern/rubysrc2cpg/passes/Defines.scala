@@ -59,7 +59,8 @@ object Defines {
     val templateOutEscape = "<operator>.templateOutEscape"
     val bufferAppend      = "<operator>.joernBufferAppend"
 
-    val regexMethods = Set("match") // TODO: Figure out how to model these, "sub", "gsub")
+    val regexSubstitutionMethods = Set("sub", "gsub")
+    val regexMethods             = Set("match") ++ regexSubstitutionMethods
   }
 }
 
