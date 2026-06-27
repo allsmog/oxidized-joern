@@ -145,13 +145,16 @@ trait AstForExpressionsCreator(implicit withSchemaValidation: ValidationMode) { 
       case nameExpr: PhpNameExpr if nameExpr.name == NameConstants.Self =>
         getTypeDeclPrefix
       case nameExpr: PhpNameExpr =>
-        Option(s"${nameExpr.name}")
+        Some(resolveStaticReceiverName(nameExpr.name))
     }.flatten
 
     val callRoot = callNode(call, code, name, fullName, dispatchType, None, Some(Defines.Any), staticReceiver)
 
     callAst(callRoot, arguments)
   }
+
+  private def resolveStaticReceiverName(name: String): String =
+    scope.resolveClassIdentifier(name).map(_.name).getOrElse(name)
 
   protected def simpleAssignAst(origin: PhpNode, target: Ast, source: Ast): Ast = {
     val code     = s"${target.rootCodeOrEmpty} = ${source.rootCodeOrEmpty}"
@@ -1027,7 +1030,7 @@ trait AstForExpressionsCreator(implicit withSchemaValidation: ValidationMode) { 
         scope
           .lookupVariable(nameExpr.name)
           .flatMap(_.properties.get(PropertyNames.TypeFullName).map(_.toString))
-          .getOrElse(nameExpr.name)
+          .getOrElse(resolveTypeName(nameExpr.name))
 
       case expr =>
         logger.warn(s"Unexpected expression as class name in <class>::class expression: $relativeFileName")
@@ -1057,23 +1060,27 @@ trait AstForExpressionsCreator(implicit withSchemaValidation: ValidationMode) { 
   }
 
   private def astForAnonymousClassInstantiation(expr: PhpNewExpr, classLikeStmt: PhpClassLikeStmt): Ast = {
-    val tmpClassNameExpr = PhpNameExpr(this.scope.getNewClassTmp, expr.attributes)
+    val tmpClassNameExpr = classLikeStmt.name
+      .filterNot(name => name.name.matches("anon-class-\\d+"))
+      .getOrElse(PhpNameExpr(this.scope.getNewClassTmp, expr.attributes))
 
     astForClassLikeStmt(classLikeStmt.copy(name = Some(tmpClassNameExpr)))
     astForSimpleNewExpr(expr, tmpClassNameExpr)
   }
 
   private def astForSimpleNewExpr(expr: PhpNewExpr, classNameExpr: PhpExpr): Ast = {
-    val (maybeNameAst, className) = classNameExpr match {
+    val (maybeNameAst, rawClassName, isNamedClass) = classNameExpr match {
       case nameExpr: PhpNameExpr =>
-        (None, nameExpr.name)
+        (None, nameExpr.name, true)
 
       case expr: PhpExpr =>
         val ast = astForExpr(expr)
         // The name doesn't make sense in this case, but the AST will be more useful
         val name = ast.rootCode.getOrElse(NameConstants.Unknown)
-        (Option(ast), name)
+        (Option(ast), name, false)
     }
+    val className =
+      if (isNamedClass && !rawClassName.contains("anon-class")) resolveTypeName(rawClassName) else rawClassName
 
     val tmpIdentifier = getTmpIdentifier(expr, Option(className))
     val local         = handleVariableOccurrence(expr, tmpIdentifier.name)
@@ -1088,10 +1095,9 @@ trait AstForExpressionsCreator(implicit withSchemaValidation: ValidationMode) { 
       callAst(allocAssignNode, astForIdentifierWithLocalRef(tmpIdentifier, local) :: allocAst :: Nil)
 
     // Init node
-    val initArgs      = expr.args.map(astForCallArg)
-    val initFullName  = s"$className$MethodDelimiter$ConstructorMethodName"
-    val initCode      = s"new $className(${initArgs.map(_.rootCodeOrEmpty).mkString(",")})"
-    val maybeTypeHint = scope.resolveClassIdentifier(className).map(_.name) // consider imported or defined types
+    val initArgs     = expr.args.map(astForCallArg)
+    val initFullName = s"$className$MethodDelimiter$ConstructorMethodName"
+    val initCode     = s"new $className(${initArgs.map(_.rootCodeOrEmpty).mkString(",")})"
     val initCallNode = callNode(
       expr,
       initCode,
@@ -1099,7 +1105,7 @@ trait AstForExpressionsCreator(implicit withSchemaValidation: ValidationMode) { 
       initFullName,
       DispatchTypes.STATIC_DISPATCH,
       None,
-      maybeTypeHint.orElse(Some(Defines.Any)) // TODO Review Note: Should the hint be under dynamicTypeHintFullName?
+      Some(Defines.Any)
     )
     val initReceiver = astForIdentifierWithLocalRef(tmpIdentifier.copy, local)
     val initCallAst  = callAst(initCallNode, initArgs, base = Option(initReceiver))

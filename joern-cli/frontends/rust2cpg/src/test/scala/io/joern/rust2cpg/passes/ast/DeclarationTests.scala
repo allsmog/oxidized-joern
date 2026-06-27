@@ -19,7 +19,7 @@ class DeclarationTests extends Rust2CpgSuite(noSysRoot = true) {
       inside(cpg.assignment.l) { case assignment :: Nil =>
         assignment.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
         assignment.code shouldBe "const MAX_SIZE: usize = 1024;"
-        assignment.typeFullName shouldBe Defines.Any
+        assignment.typeFullName shouldBe "usize"
         assignment.methodFullName shouldBe Operators.assignment
       }
     }
@@ -37,6 +37,68 @@ class DeclarationTests extends Rust2CpgSuite(noSysRoot = true) {
         rhs.code shouldBe "1024"
         rhs.typeFullName shouldBe "usize"
       }
+    }
+  }
+
+  "an anonymous const item" should {
+    val cpg = code("const _: i32 = 1;")
+
+    "create a typed placeholder local" in {
+      inside(cpg.local.nameExact("_").l) { case local :: Nil =>
+        local.typeFullName shouldBe "i32"
+        local.code shouldBe "_"
+      }
+    }
+
+    "lower the initializer into an assignment" in {
+      inside(cpg.assignment.codeExact("const _: i32 = 1;").argument.l) {
+        case (lhs: Identifier) :: (rhs: Literal) :: Nil =>
+          lhs.name shouldBe "_"
+          lhs.typeFullName shouldBe "i32"
+
+          rhs.code shouldBe "1"
+          rhs.typeFullName shouldBe "i32"
+      }
+    }
+
+    "not create an unknown node for the anonymous const" in {
+      cpg.all.collectAll[Unknown].codeExact("const _: i32 = 1;").l shouldBe empty
+    }
+  }
+
+  "a top-level static" should {
+    val cpg = code("static mut COUNTER: i32 = 0;")
+
+    "create a LOCAL with the annotated type" in {
+      cpg.local.name("COUNTER").typeFullName.l shouldBe List("i32")
+    }
+
+    "lower the initializer into an assignment" in {
+      inside(cpg.assignment.l) { case assignment :: Nil =>
+        assignment.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+        assignment.code shouldBe "static mut COUNTER: i32 = 0;"
+        assignment.typeFullName shouldBe "i32"
+        assignment.methodFullName shouldBe Operators.assignment
+      }
+    }
+
+    "have an Identifier as the assignment's first argument" in {
+      inside(cpg.assignment.argument(1).l) { case (lhs: Identifier) :: Nil =>
+        lhs.name shouldBe "COUNTER"
+        lhs.typeFullName shouldBe "i32"
+        lhs.code shouldBe "COUNTER"
+      }
+    }
+
+    "have a Literal as the assignment's second argument" in {
+      inside(cpg.assignment.argument(2).l) { case (rhs: Literal) :: Nil =>
+        rhs.code shouldBe "0"
+        rhs.typeFullName shouldBe "i32"
+      }
+    }
+
+    "not create an unknown node for the static declaration" in {
+      cpg.all.collectAll[Unknown].codeExact("static mut COUNTER: i32 = 0;").l shouldBe empty
     }
   }
 
@@ -95,7 +157,7 @@ class DeclarationTests extends Rust2CpgSuite(noSysRoot = true) {
       inside(cpg.method.name("main").block.assignment.l) { case assignment :: Nil =>
         assignment.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
         assignment.code shouldBe "let x = 1;"
-        assignment.typeFullName shouldBe Defines.Any
+        assignment.typeFullName shouldBe "i32"
         assignment.methodFullName shouldBe Operators.assignment
         assignment.lineNumber shouldBe Some(3)
       }
@@ -114,6 +176,51 @@ class DeclarationTests extends Rust2CpgSuite(noSysRoot = true) {
         rhs.code shouldBe "1"
         rhs.typeFullName shouldBe "i32"
       }
+    }
+  }
+
+  "destructuring let statements" should {
+    val tupleLet  = "let (left, (_, right)) = pair;"
+    val recordLet = "let Point { x, y: renamed } = point;"
+    val sliceLet  = "let [head, ..] = values;"
+    val cpg = code(s"""
+        |struct Point { x: i32, y: i32 }
+        |
+        |fn main(pair: (i32, (bool, i64)), point: Point, values: [i32; 3]) {
+        | $tupleLet
+        | $recordLet
+        | $sliceLet
+        |}
+        |""".stripMargin)
+
+    "create locals for every binding in the patterns" in {
+      cpg.method.name("main").block.local.nameExact("left", "right", "x", "renamed", "head").name.toSet shouldBe
+        Set("left", "right", "x", "renamed", "head")
+    }
+
+    "preserve tuple pattern assignments" in {
+      inside(cpg.assignment.codeExact(tupleLet).argument.l) { case (pattern: Literal) :: (rhs: Identifier) :: Nil =>
+        pattern.code shouldBe "(left, (_, right))"
+        rhs.code shouldBe "pair"
+      }
+    }
+
+    "preserve record pattern assignments" in {
+      inside(cpg.assignment.codeExact(recordLet).argument.l) { case (pattern: Literal) :: (rhs: Identifier) :: Nil =>
+        pattern.code shouldBe "Point { x, y: renamed }"
+        rhs.code shouldBe "point"
+      }
+    }
+
+    "preserve slice pattern assignments" in {
+      inside(cpg.assignment.codeExact(sliceLet).argument.l) { case (pattern: Literal) :: (rhs: Identifier) :: Nil =>
+        pattern.code shouldBe "[head, ..]"
+        rhs.code shouldBe "values"
+      }
+    }
+
+    "not create unknown nodes for destructuring patterns" in {
+      cpg.all.collectAll[Unknown].codeExact(tupleLet, recordLet, sliceLet).l shouldBe empty
     }
   }
 
@@ -224,6 +331,12 @@ class DeclarationTests extends Rust2CpgSuite(noSysRoot = true) {
       inside(cpg.method.name("main").block.local.name("x").l) { case local :: Nil =>
         local.typeFullName shouldBe "i32"
         local.code shouldBe "x"
+      }
+    }
+
+    "type the later assignment from the local" in {
+      inside(cpg.method.name("main").block.assignment.codeExact("x = 5").l) { case assignment :: Nil =>
+        assignment.typeFullName shouldBe "i32"
       }
     }
   }

@@ -18,6 +18,8 @@ import scala.annotation.unused
 trait AstForStmtSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
   this: AstCreator =>
 
+  private val DiscardOperator = "<operator>.discard"
+
   private def astForBreakStmtSyntax(node: BreakStmtSyntax): Ast = {
     val labelAst = node.label.fold(Ast())(l => {
       val labelCode = code(l)
@@ -54,7 +56,10 @@ trait AstForStmtSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
     astForNode(node.body)
   }
 
-  private def astForDiscardStmtSyntax(node: DiscardStmtSyntax): Ast = notHandledYet(node)
+  private def astForDiscardStmtSyntax(node: DiscardStmtSyntax): Ast = {
+    val callNode_ = createStaticCallNode(node, code(node), DiscardOperator, DiscardOperator, Defines.Void)
+    callAst(callNode_, List(astForNode(node.expression)))
+  }
 
   private def astForDoStmtSyntax(node: DoStmtSyntax): Ast = {
     val tryNode   = controlStructureNode(node, ControlStructureTypes.TRY, code(node))
@@ -612,7 +617,7 @@ trait AstForStmtSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
     }
   }
 
-  private def astForThenStmtSyntax(node: ThenStmtSyntax): Ast = notHandledYet(node)
+  private def astForThenStmtSyntax(node: ThenStmtSyntax): Ast = astForNode(node.expression)
 
   private def astForThrowStmtSyntax(node: ThrowStmtSyntax): Ast = {
     val op  = "<operator>.throw"

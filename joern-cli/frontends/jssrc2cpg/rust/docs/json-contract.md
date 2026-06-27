@@ -29,11 +29,12 @@ Each emitted document wraps a Babel `File` AST:
   "ast": {
     "type": "File",
     "start": <int>, "end": <int>,
-    "loc": { "start": {"line": <int>, "column": <int>},
-             "end":   {"line": <int>, "column": <int>} },
-    "program": { "type": "Program", "sourceType": "module", "body": [ ... ] },
+    "loc": { "start": {"line": <int>, "column": <int>, "index": <int>},
+             "end":   {"line": <int>, "column": <int>, "index": <int>} },
+    "program": { "type": "Program", "sourceType": "module",
+                 "extra": {"topLevelAwait": false}, "body": [ ... ] },
     "comments": [],
-    "tokens": []
+    "errors": []
   }
 }
 ```
@@ -54,7 +55,7 @@ a thread-local `UNMAPPED_KINDS` map. The CLI drains it via
 `take_unmapped_summary()` and prints a single loud line to **stderr**, e.g.:
 
 ```text
-jsastgen: 3 unmapped node(s): debugger_statement(x1), hash_bang_line(x2)
+jsastgen: 2 unmapped node(s): unsupported_node(x2)
 ```
 
 It never reaches stdout/JSON. The coverage test (`tests/coverage.rs`) gates on
@@ -63,10 +64,14 @@ runs.
 
 ## Known / Intentional Divergences
 
-There are currently no documented Scala-compatible divergences specific to this
-frontend beyond the path normalization the differential harness applies. The
-loud unmapped counter above is the coverage signal: any construct the emitter
-cannot map surfaces as an unmapped tally and fails the coverage gate, rather
-than silently dropping it. New emitted node types should track the Babel shapes
-that `jssrc2cpg`'s AST creation already consumes, or be deliberately recorded
-here.
+The differential harness normalizes `loc` objects before comparing against the
+reference `@joernio/astgen` JSON. Numeric `start`/`end` offsets remain part of
+the contract. This keeps byte-position parity gated while avoiding brittle
+matches on Babel's inconsistent nested `loc.start`/`loc.end` sparsity for
+synthetic TypeScript and JSX nodes.
+
+The loud unmapped counter above is the coverage signal: any construct the
+emitter cannot map surfaces as an unmapped tally and fails the coverage gate,
+rather than silently dropping it. New emitted node types should track the Babel
+shapes that `jssrc2cpg`'s AST creation already consumes, or be deliberately
+recorded here.

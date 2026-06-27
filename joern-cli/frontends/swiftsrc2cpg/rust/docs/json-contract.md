@@ -80,7 +80,7 @@ surfaced the following. These are resolved and treated as compatible:
   it (the full swift CPG suite passes without it). The differential harness
   strips it from both trees.
 
-The remaining differential tail (on the order of ~33 deltas over the fixture
-corpus) is **closure-internal** — divergences inside closure literals/bodies
-that do not affect the CPG. This is the open work item; everything above is
-considered stable.
+With those normalizations in place, the checked-in fixture corpus is expected to
+match the reference `SwiftAstGen` JSON. New mismatches are treated as either
+Rust compatibility bugs or newly discovered intentional divergences that must be
+documented here with a fixture-backed normalizer.

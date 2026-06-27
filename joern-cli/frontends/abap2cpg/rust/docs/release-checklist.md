@@ -6,13 +6,14 @@ frontend's specifics.
 
 ## Version Alignment
 
-Three values must agree:
+The release tag and local artifact metadata should agree:
 
 - `joern-cli/frontends/abap2cpg/src/main/resources/application.conf` sets
   `abap2cpg.abapgen_version = "0.3.0"`.
 - The Rust crate's `Cargo.toml` version matches that value.
-- `abapgen --version` prints the same version (the Scala `AbapAstGenRunner`
-  compares against `abap2cpg.abapgen_version`).
+- `abapgen --version` prints the same version for local Rust artifacts. The
+  released reference binary does not expose a version flag, and Scala's
+  `AbapAstGenRunner` deliberately bypasses runtime version checks for ABAP.
 
 `joern-cli/frontends/abap2cpg/build.sbt` downloads the upstream reference
 artifacts from:
@@ -43,8 +44,8 @@ self-skipping `tests/differential_json.rs`.
 
 ## Gated Differential
 
-The reference is the native `abapgen-linux` binary from the release above.
-Download it and run:
+The reference is the native `abapgen-linux` binary from the release above on
+Linux. On Apple Silicon, use `abapgen-macos-arm`. Download it and run:
 
 ```bash
 cd joern-cli/frontends/abap2cpg/rust

@@ -1,0 +1,20 @@
+[package]
+name = "javaastgen-cli"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[[bin]]
+name = "javaastgen"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+ignore.workspace = true
+javaastgen-core = { path = "../javaastgen-core" }
+regex.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+tempfile.workspace = true

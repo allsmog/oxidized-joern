@@ -136,10 +136,11 @@ trait AstForExpressionCreator(implicit withSchemaValidation: ValidationMode) { t
   }
 
   private def processIndexIdentifier(identNode: Value): (Seq[Ast], String) = {
-    val identifierAst = astForNode(identNode)
-    val identifierTypeFullName = getTypeFullNameFromAstNode(identifierAst)
-      .stripPrefix("*")
-      .stripPrefix("[]")
+    val identifierAst    = astForNode(identNode)
+    val baseTypeFullName = getTypeFullNameFromAstNode(identifierAst).stripPrefix("*")
+    val identifierTypeFullName =
+      if (baseTypeFullName.startsWith("map[]")) baseTypeFullName.stripPrefix("map[]")
+      else baseTypeFullName.stripPrefix("[]")
     (identifierAst, identifierTypeFullName)
   }
 //

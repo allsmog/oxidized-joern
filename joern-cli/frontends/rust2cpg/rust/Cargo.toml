@@ -3,6 +3,7 @@ members = [
   "crates/rustastgen-cli",
   "crates/rustastgen-core",
 ]
+exclude = ["fixtures/rust-corpus"]
 resolver = "2"
 
 [workspace.package]

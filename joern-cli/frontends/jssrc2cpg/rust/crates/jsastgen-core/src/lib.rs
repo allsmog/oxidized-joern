@@ -22,7 +22,7 @@ fn record_unmapped_kind(kind: &str) {
 }
 
 /// Drains and formats the accumulated unmapped-node tally as a single line, e.g.
-/// `jsastgen: 3 unmapped node(s): debugger_statement(x1), hash_bang_line(x2)`.
+/// `jsastgen: 2 unmapped node(s): unsupported_node(x2)`.
 /// Returns `None` when every node was mapped. The counter is reset afterwards so
 /// repeated calls do not double-count.
 pub fn take_unmapped_summary() -> Option<String> {
@@ -200,6 +200,9 @@ fn parse_vue_source(root: &Path, path: &Path, source: &str) -> Result<Value> {
             "sourceType": "module",
             "interpreter": Value::Null,
             "directives": [],
+            "extra": {
+                "topLevelAwait": false
+            },
             "body": body
         }),
     );
@@ -212,7 +215,7 @@ fn parse_vue_source(root: &Path, path: &Path, source: &str) -> Result<Value> {
         json!({
             "program": program,
             "comments": [],
-            "tokens": []
+            "errors": []
         }),
     );
 
@@ -1586,7 +1589,7 @@ fn file_json(root: &Path, path: &Path, source: &str, tree: &Tree) -> Value {
         json!({
             "program": program,
             "comments": [],
-            "tokens": []
+            "errors": []
         }),
     );
 
@@ -1617,6 +1620,9 @@ fn program_json(root: Node, source: &str) -> Value {
             "sourceType": "module",
             "interpreter": Value::Null,
             "directives": [],
+            "extra": {
+                "topLevelAwait": false
+            },
             "body": body
         }),
     )
@@ -1774,6 +1780,7 @@ fn stmt_json(node: Node, source: &str) -> Value {
         "try_statement" => try_statement_json(node, source),
         "throw_statement" => throw_statement_json(node, source),
         "expression_statement" => expression_statement_json(node, source),
+        "debugger_statement" => with_span("DebuggerStatement", node, json!({})),
         "empty_statement" => with_span("EmptyStatement", node, json!({})),
         _ => noop_json(node),
     }
@@ -1792,7 +1799,7 @@ fn expr_json(node: Node, source: &str) -> Value {
         "template_string" => template_string_json(node, source),
         "true" => boolean_literal_json(node, true),
         "false" => boolean_literal_json(node, false),
-        "null" => with_span("NullLiteral", node, json!({ "value": Value::Null })),
+        "null" => with_span("NullLiteral", node, json!({})),
         "this" => with_span("ThisExpression", node, json!({})),
         "binary_expression" => binary_expression_json(node, source),
         "unary_expression" => unary_expression_json(node, source),
@@ -1833,7 +1840,7 @@ fn expr_json(node: Node, source: &str) -> Value {
         "spread_element" => unary_argument_json("SpreadElement", node, source),
         "parenthesized_expression" => node
             .named_child(0)
-            .map(|child| expr_json(child, source))
+            .map(|child| with_parenthesized_extra(expr_json(child, source), node))
             .unwrap_or_else(|| noop_json(node)),
         "predefined_type" | "type_annotation" => ts_type_json(node, source),
         _ => noop_json(node),
@@ -1911,22 +1918,29 @@ fn class_like_json(kind: &str, node: Node, source: &str) -> Value {
         .map(|child| class_body_json(child, source))
         .unwrap_or_else(|| with_span("ClassBody", node, json!({ "body": [] })));
     let super_class = class_super_json(node, source).unwrap_or(Value::Null);
+    let mut fields = json!({
+        "id": id,
+        "superClass": super_class,
+        "body": body,
+        "abstract": node.kind() == "abstract_class_declaration"
+            || has_named_or_keyword_child(node, source, "abstract")
+    });
+    let decorators = decorators_json(node, source);
+    if !decorators.is_empty() {
+        fields = with_extra_field(fields, "decorators", Value::Array(decorators));
+    }
     let implements = class_implements_json(node, source);
+    if !implements.is_empty() {
+        fields = with_extra_field(fields, "implements", Value::Array(implements));
+    }
+    if let Some(type_parameters) = node
+        .child_by_field_name("type_parameters")
+        .map(|child| ts_type_parameter_declaration_json(child, source))
+    {
+        fields = with_extra_field(fields, "typeParameters", type_parameters);
+    }
 
-    with_span(
-        kind,
-        node,
-        json!({
-            "id": id,
-            "superClass": super_class,
-            "body": body,
-            "decorators": decorators_json(node, source),
-            "implements": implements,
-            "mixins": [],
-            "abstract": node.kind() == "abstract_class_declaration"
-                || has_named_or_keyword_child(node, source, "abstract")
-        }),
-    )
+    with_span(kind, node, fields)
 }
 
 fn class_super_json(node: Node, source: &str) -> Option<Value> {
@@ -2014,9 +2028,12 @@ fn class_method_json(node: Node, source: &str) -> Value {
             "computed": computed,
             "static": has_keyword_child(node, source, "static"),
             "generator": has_keyword_child(node, source, "*"),
-            "async": has_keyword_child(node, source, "async"),
-            "decorators": decorators_json(node, source)
+            "async": has_keyword_child(node, source, "async")
     });
+    let decorators = decorators_json(node, source);
+    if !decorators.is_empty() {
+        fields = with_extra_field(fields, "decorators", Value::Array(decorators));
+    }
     if let Some(return_type) = return_type {
         fields = with_extra_field(fields, "returnType", return_type);
     }
@@ -2044,11 +2061,18 @@ fn class_property_json(node: Node, source: &str) -> Value {
         "key": key,
         "value": value,
         "computed": computed,
-        "static": has_keyword_child(node, source, "static"),
-        "readonly": has_named_or_keyword_child(node, source, "readonly"),
-        "abstract": has_named_or_keyword_child(node, source, "abstract"),
-        "decorators": decorators_json(node, source)
+        "static": has_keyword_child(node, source, "static")
     });
+    if has_named_or_keyword_child(node, source, "readonly") {
+        fields = with_extra_field(fields, "readonly", Value::Bool(true));
+    }
+    if has_named_or_keyword_child(node, source, "abstract") {
+        fields = with_extra_field(fields, "abstract", Value::Bool(true));
+    }
+    let decorators = decorators_json(node, source);
+    if !decorators.is_empty() {
+        fields = with_extra_field(fields, "decorators", Value::Array(decorators));
+    }
     if let Some(type_annotation) = node
         .child_by_field_name("type")
         .map(|child| ts_type_annotation_json(child, source))
@@ -2105,24 +2129,41 @@ fn ts_method_signature_json(kind: &str, node: Node, source: &str) -> Value {
     } else {
         "method"
     };
-    let mut fields = json!({
-        "kind": method_kind,
-        "key": object_key_json(key_node, source),
-        "id": Value::Null,
-        "params": params.clone(),
-        "parameters": params,
-        "computed": computed,
-        "static": has_keyword_child(node, source, "static"),
-        "generator": false,
-        "async": false,
-        "abstract": has_named_or_keyword_child(node, source, "abstract"),
-        "decorators": decorators_json(node, source)
-    });
+    let mut fields = if kind == "TSMethodSignature" {
+        json!({
+            "kind": method_kind,
+            "key": object_key_json(key_node, source),
+            "parameters": params,
+            "computed": computed
+        })
+    } else {
+        json!({
+            "kind": method_kind,
+            "key": object_key_json(key_node, source),
+            "id": Value::Null,
+            "params": params.clone(),
+            "parameters": params,
+            "computed": computed,
+            "static": has_keyword_child(node, source, "static"),
+            "generator": false,
+            "async": false,
+            "abstract": has_named_or_keyword_child(node, source, "abstract"),
+            "decorators": decorators_json(node, source)
+        })
+    };
     if let Some(return_type) = node
         .child_by_field_name("return_type")
         .map(|child| ts_type_annotation_json(child, source))
     {
-        fields = with_extra_field(fields, "returnType", return_type);
+        let return_type_key = if kind == "TSMethodSignature" {
+            "typeAnnotation"
+        } else {
+            "returnType"
+        };
+        fields = with_extra_field(fields, return_type_key, return_type);
+    }
+    if kind == "TSMethodSignature" && has_keyword_child(node, source, "?") {
+        fields = with_extra_field(fields, "optional", Value::Bool(true));
     }
     if let Some(accessibility) = accessibility_modifier(node, source) {
         fields = with_extra_field(fields, "accessibility", Value::String(accessibility));
@@ -2135,10 +2176,14 @@ fn ts_property_signature_json(node: Node, source: &str) -> Value {
     let key_node = node.child_by_field_name("name").unwrap_or(node);
     let mut fields = json!({
         "key": object_key_json(key_node, source),
-        "computed": key_node.kind() == "computed_property_name",
-        "optional": has_keyword_child(node, source, "?"),
-        "readonly": has_named_or_keyword_child(node, source, "readonly")
+        "computed": key_node.kind() == "computed_property_name"
     });
+    if has_keyword_child(node, source, "?") {
+        fields = with_extra_field(fields, "optional", Value::Bool(true));
+    }
+    if has_named_or_keyword_child(node, source, "readonly") {
+        fields = with_extra_field(fields, "readonly", Value::Bool(true));
+    }
     if let Some(type_annotation) = node
         .child_by_field_name("type")
         .map(|child| ts_type_annotation_json(child, source))
@@ -2248,9 +2293,12 @@ fn function_like_json_with_span(
             "params": params,
             "body": body,
             "generator": is_generator_function(function_node, source),
-            "async": has_keyword_child(function_node, source, "async"),
-            "decorators": decorators_json(span_node, source)
+            "async": has_keyword_child(function_node, source, "async")
     });
+    let decorators = decorators_json(span_node, source);
+    if !decorators.is_empty() {
+        fields = with_extra_field(fields, "decorators", Value::Array(decorators));
+    }
     if let Some(return_type) = return_type {
         fields = with_extra_field(fields, "returnType", return_type);
     }
@@ -2381,16 +2429,21 @@ fn ts_interface_declaration_json(node: Node, source: &str) -> Value {
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
+    let mut fields = json!({
+        "id": id,
+        "body": body
+    });
+    if !extends.is_empty() {
+        fields = with_extra_field(fields, "extends", Value::Array(extends));
+    }
+    if let Some(type_parameters) = node
+        .child_by_field_name("type_parameters")
+        .map(|child| ts_type_parameter_declaration_json(child, source))
+    {
+        fields = with_extra_field(fields, "typeParameters", type_parameters);
+    }
 
-    with_span(
-        "TSInterfaceDeclaration",
-        node,
-        json!({
-            "id": id,
-            "body": body,
-            "extends": extends
-        }),
-    )
+    with_span("TSInterfaceDeclaration", node, fields)
 }
 
 fn ts_interface_body_json(node: Node, source: &str) -> Value {
@@ -2472,15 +2525,18 @@ fn ts_type_alias_declaration_json(node: Node, source: &str) -> Value {
         .child_by_field_name("value")
         .map(|child| ts_type_json(child, source))
         .unwrap_or_else(|| with_span("TSAnyKeyword", node, json!({})));
+    let mut fields = json!({
+        "id": id,
+        "typeAnnotation": type_annotation
+    });
+    if let Some(type_parameters) = node
+        .child_by_field_name("type_parameters")
+        .map(|child| ts_type_parameter_declaration_json(child, source))
+    {
+        fields = with_extra_field(fields, "typeParameters", type_parameters);
+    }
 
-    with_span(
-        "TSTypeAliasDeclaration",
-        node,
-        json!({
-            "id": id,
-            "typeAnnotation": type_annotation
-        }),
-    )
+    with_span("TSTypeAliasDeclaration", node, fields)
 }
 
 fn import_statement_json(node: Node, source: &str) -> Value {
@@ -2653,7 +2709,9 @@ fn export_statement_json(node: Node, source: &str) -> Value {
         json!({
             "declaration": declaration,
             "specifiers": specifiers,
-            "source": source_value
+            "source": source_value,
+            "exportKind": if has_keyword_child(node, source, "type") { "type" } else { "value" },
+            "attributes": []
         }),
     )
 }
@@ -2684,7 +2742,8 @@ fn export_specifier_json(node: Node, source: &str) -> Value {
         node,
         json!({
             "local": import_export_name_json(local_node, source),
-            "exported": import_export_name_json(exported_node, source)
+            "exported": import_export_name_json(exported_node, source),
+            "exportKind": "value"
         }),
     )
 }
@@ -3083,9 +3142,14 @@ fn binary_expression_json(node: Node, source: &str) -> Value {
         .child_by_field_name("operator")
         .map(|child| node_text(child, source))
         .unwrap_or_else(|| infer_operator(node, source));
+    let kind = if matches!(operator.as_str(), "&&" | "||" | "??") {
+        "LogicalExpression"
+    } else {
+        "BinaryExpression"
+    };
 
     with_span(
-        "BinaryExpression",
+        kind,
         node,
         json!({
             "left": left,
@@ -3387,29 +3451,48 @@ fn parameter_json(node: Node, source: &str) -> Value {
         .child_by_field_name("pattern")
         .or_else(|| node.child_by_field_name("name"))
         .or_else(|| node.named_child(0));
-    let type_annotation = node
-        .child_by_field_name("type")
-        .map(|child| ts_type_annotation_json(child, source));
-    let left = match left_node {
+    let type_node = node.child_by_field_name("type");
+    let type_annotation = type_node.map(|child| ts_type_annotation_json(child, source));
+    let mut left = match left_node {
         Some(child)
             if matches!(
                 child.kind(),
                 "identifier" | "property_identifier" | "type_identifier"
             ) =>
         {
-            let span_node = if parameter_property { child } else { node };
-            identifier_json_with_span(child, span_node, source, type_annotation.clone())
+            if parameter_property {
+                let end_node = node.child_by_field_name("type").unwrap_or(child);
+                identifier_json_with_bounds(
+                    child,
+                    child.start_byte(),
+                    child.start_position(),
+                    end_node.end_byte(),
+                    end_node.end_position(),
+                    source,
+                    type_annotation.clone(),
+                )
+            } else {
+                identifier_json_with_span(child, node, source, type_annotation.clone())
+            }
         }
         Some(child) => {
             let value = pattern_json(child, source);
             if let Some(annotation) = type_annotation.clone() {
-                with_extra_field(value, "typeAnnotation", annotation)
+                let value = with_extra_field(value, "typeAnnotation", annotation);
+                if let Some(type_node) = type_node {
+                    with_end_bound(value, type_node.end_byte(), type_node.end_position())
+                } else {
+                    value
+                }
             } else {
                 value
             }
         }
         None => noop_json(node),
     };
+    if has_keyword_child(node, source, "?") {
+        left = with_extra_field(left, "optional", Value::Bool(true));
+    }
 
     let parameter = if let Some(right) = node.child_by_field_name("value") {
         with_span(
@@ -3427,12 +3510,14 @@ fn parameter_json(node: Node, source: &str) -> Value {
 
     if parameter_property {
         let mut fields = json!({
-            "parameter": parameter,
-            "readonly": has_named_or_keyword_child(node, source, "readonly"),
-            "decorators": decorators_json(node, source)
+            "parameter": parameter
         });
-        if let Some(annotation) = type_annotation {
-            fields = with_extra_field(fields, "typeAnnotation", annotation);
+        if has_named_or_keyword_child(node, source, "readonly") {
+            fields = with_extra_field(fields, "readonly", Value::Bool(true));
+        }
+        let decorators = decorators_json(node, source);
+        if !decorators.is_empty() {
+            fields = with_extra_field(fields, "decorators", Value::Array(decorators));
         }
         if let Some(accessibility) = accessibility_modifier(node, source) {
             fields = with_extra_field(fields, "accessibility", Value::String(accessibility));
@@ -3463,22 +3548,25 @@ fn call_expression_json(node: Node, source: &str) -> Value {
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
-    let optional = is_optional_chain(node);
+    let optional = is_optional_chain(node)
+        || matches!(
+            node_type(&callee),
+            Some("OptionalMemberExpression" | "OptionalCallExpression")
+        );
     let kind = if optional {
         "OptionalCallExpression"
     } else {
         "CallExpression"
     };
+    let mut fields = json!({
+        "callee": callee,
+        "arguments": arguments
+    });
+    if optional {
+        fields = with_extra_field(fields, "optional", Value::Bool(true));
+    }
 
-    with_span(
-        kind,
-        node,
-        json!({
-            "callee": callee,
-            "arguments": arguments,
-            "optional": optional
-        }),
-    )
+    with_span(kind, node, fields)
 }
 
 fn tagged_template_expression_json(node: Node, source: &str) -> Value {
@@ -3538,17 +3626,16 @@ fn member_expression_json(node: Node, source: &str) -> Value {
     } else {
         "MemberExpression"
     };
+    let mut fields = json!({
+        "object": object,
+        "property": property,
+        "computed": false
+    });
+    if optional {
+        fields = with_extra_field(fields, "optional", Value::Bool(true));
+    }
 
-    with_span(
-        kind,
-        node,
-        json!({
-            "object": object,
-            "property": property,
-            "computed": false,
-            "optional": optional
-        }),
-    )
+    with_span(kind, node, fields)
 }
 
 fn subscript_expression_json(node: Node, source: &str) -> Value {
@@ -3560,17 +3647,16 @@ fn subscript_expression_json(node: Node, source: &str) -> Value {
     } else {
         "MemberExpression"
     };
+    let mut fields = json!({
+        "object": object,
+        "property": property,
+        "computed": true
+    });
+    if optional {
+        fields = with_extra_field(fields, "optional", Value::Bool(true));
+    }
 
-    with_span(
-        kind,
-        node,
-        json!({
-            "object": object,
-            "property": property,
-            "computed": true,
-            "optional": optional
-        }),
-    )
+    with_span(kind, node, fields)
 }
 
 fn array_expression_json(node: Node, source: &str) -> Value {
@@ -3690,19 +3776,28 @@ fn jsx_child_json(node: Node, source: &str) -> Value {
         "jsx_element" => jsx_element_json(node, source),
         "jsx_self_closing_element" => jsx_self_closing_element_json(node, source),
         "jsx_expression" => jsx_expression_container_json(node, source),
-        "jsx_text" | "html_character_reference" => with_span("JSXText", node, json!({})),
+        "jsx_text" | "html_character_reference" => {
+            jsx_text_json_bounds(node.start_byte(), node.end_byte(), source)
+        }
         _ => expr_json(node, source),
     }
 }
 
 fn jsx_text_json_bounds(start_byte: usize, end_byte: usize, source: &str) -> Value {
+    let raw = source.get(start_byte..end_byte).unwrap_or("").to_string();
     with_span_bounds(
         "JSXText",
         start_byte,
         point_for_byte(source, start_byte),
         end_byte,
         point_for_byte(source, end_byte),
-        json!({}),
+        json!({
+            "value": raw,
+            "extra": {
+                "raw": raw,
+                "rawValue": raw
+            }
+        }),
     )
 }
 
@@ -3858,6 +3953,7 @@ fn object_pair_json(node: Node, source: &str) -> Value {
             "key": key,
             "value": value,
             "computed": computed,
+            "method": false,
             "shorthand": false
         }),
     )
@@ -3879,6 +3975,7 @@ fn object_pair_pattern_json(node: Node, source: &str) -> Value {
             "key": key,
             "value": value,
             "computed": computed,
+            "method": false,
             "shorthand": false
         }),
     )
@@ -3912,6 +4009,10 @@ fn object_assignment_pattern_json(node: Node, source: &str) -> Value {
             "key": key,
             "value": value,
             "computed": false,
+            "method": false,
+            "extra": {
+                "shorthand": true
+            },
             "shorthand": true
         }),
     )
@@ -3966,6 +4067,10 @@ fn shorthand_object_property_json(node: Node, source: &str) -> Value {
             "key": identifier.clone(),
             "value": identifier,
             "computed": false,
+            "method": false,
+            "extra": {
+                "shorthand": true
+            },
             "shorthand": true
         }),
     )
@@ -4010,19 +4115,27 @@ fn arrow_function_json(node: Node, source: &str) -> Value {
     } else {
         stmt_json(body_node, source)
     };
+    let mut fields = json!({
+        "id": Value::Null,
+        "params": params,
+        "body": body,
+        "generator": false,
+        "async": has_keyword_child(node, source, "async")
+    });
+    if let Some(return_type) = node
+        .child_by_field_name("return_type")
+        .map(|child| ts_type_annotation_json(child, source))
+    {
+        fields = with_extra_field(fields, "returnType", return_type);
+    }
+    if let Some(type_parameters) = node
+        .child_by_field_name("type_parameters")
+        .map(|child| ts_type_parameter_declaration_json(child, source))
+    {
+        fields = with_extra_field(fields, "typeParameters", type_parameters);
+    }
 
-    with_span(
-        "ArrowFunctionExpression",
-        node,
-        json!({
-            "id": Value::Null,
-            "params": params,
-            "body": body,
-            "expression": expression,
-            "generator": false,
-            "async": has_keyword_child(node, source, "async")
-        }),
-    )
+    with_span("ArrowFunctionExpression", node, fields)
 }
 
 fn arrow_params_json(node: Node, source: &str) -> Vec<Value> {
@@ -4053,31 +4166,16 @@ fn unary_argument_json(kind: &str, node: Node, source: &str) -> Value {
         .or_else(|| node.named_child(0))
         .map(|child| expr_json(child, source))
         .unwrap_or_else(|| noop_json(node));
-    let fields = if kind == "RestElement" {
-        json!({
-            "argument": argument,
-            "typeAnnotation": array_type_annotation_json(node)
-        })
-    } else {
-        json!({ "argument": argument })
-    };
+    let mut fields = json!({ "argument": argument });
+    if kind == "RestElement" {
+        if let Some(type_annotation) = node
+            .child_by_field_name("type")
+            .map(|child| ts_type_annotation_json(child, source))
+        {
+            fields = with_extra_field(fields, "typeAnnotation", type_annotation);
+        }
+    }
     with_span(kind, node, fields)
-}
-
-fn array_type_annotation_json(node: Node) -> Value {
-    with_span(
-        "TSTypeAnnotation",
-        node,
-        json!({
-            "typeAnnotation": with_span(
-                "TSArrayType",
-                node,
-                json!({
-                    "elementType": with_span("TSAnyKeyword", node, json!({}))
-                })
-            )
-        }),
-    )
 }
 
 fn identifier_json(node: Node, source: &str) -> Value {
@@ -4090,11 +4188,38 @@ fn identifier_json_with_span(
     source: &str,
     type_annotation: Option<Value>,
 ) -> Value {
+    identifier_json_with_bounds(
+        name_node,
+        span_node.start_byte(),
+        span_node.start_position(),
+        span_node.end_byte(),
+        span_node.end_position(),
+        source,
+        type_annotation,
+    )
+}
+
+fn identifier_json_with_bounds(
+    name_node: Node,
+    start_byte: usize,
+    start_position: Point,
+    end_byte: usize,
+    end_position: Point,
+    source: &str,
+    type_annotation: Option<Value>,
+) -> Value {
     let mut fields = json!({ "name": node_text(name_node, source) });
     if let Some(annotation) = type_annotation {
         fields = with_extra_field(fields, "typeAnnotation", annotation);
     }
-    with_span("Identifier", span_node, fields)
+    with_span_bounds(
+        "Identifier",
+        start_byte,
+        start_position,
+        end_byte,
+        end_position,
+        fields,
+    )
 }
 
 fn decorators_json(node: Node, source: &str) -> Vec<Value> {
@@ -4154,6 +4279,21 @@ fn with_extra_field(value: Value, key: &str, field_value: Value) -> Value {
     Value::Object(object)
 }
 
+fn with_parenthesized_extra(value: Value, node: Node) -> Value {
+    let mut object = match value {
+        Value::Object(map) => map,
+        other => return other,
+    };
+    let mut extra = object
+        .remove("extra")
+        .and_then(|value| value.as_object().cloned())
+        .unwrap_or_default();
+    extra.insert("parenthesized".to_string(), Value::Bool(true));
+    extra.insert("parenStart".to_string(), Value::from(node.start_byte()));
+    object.insert("extra".to_string(), Value::Object(extra));
+    Value::Object(object)
+}
+
 fn ts_type_annotation_json(node: Node, source: &str) -> Value {
     let type_annotation = node
         .named_child(0)
@@ -4171,11 +4311,26 @@ fn ts_type_json(node: Node, source: &str) -> Value {
     match node.kind() {
         "type_annotation" => ts_type_annotation_json(node, source),
         "predefined_type" => ts_predefined_type_json(node, source),
-        "type_identifier" | "nested_type_identifier" | "generic_type" => with_span(
+        "undefined" => ts_predefined_type_json(node, source),
+        "type_identifier" | "nested_type_identifier" => with_span(
             "TSTypeReference",
             node,
             json!({ "typeName": type_name_json(node, source) }),
         ),
+        "generic_type" => {
+            let mut fields = json!({ "typeName": type_name_json(node, source) });
+            if let Some(type_arguments) = node
+                .child_by_field_name("type_arguments")
+                .or_else(|| named_children(node).find(|child| child.kind() == "type_arguments"))
+            {
+                fields = with_extra_field(
+                    fields,
+                    "typeParameters",
+                    ts_type_parameter_instantiation_json(type_arguments, source),
+                );
+            }
+            with_span("TSTypeReference", node, fields)
+        }
         "array_type" => with_span(
             "TSArrayType",
             node,
@@ -4194,16 +4349,23 @@ fn ts_type_json(node: Node, source: &str) -> Value {
         "type_query" => ts_type_query_json(node, source),
         "function_type" => ts_function_type_json("TSFunctionType", node, source),
         "constructor_type" => ts_function_type_json("TSConstructorType", node, source),
-        "literal_type" => with_span(
-            "TSLiteralType",
-            node,
-            json!({
-                "literal": node
-                    .named_child(0)
-                    .map(|child| expr_json(child, source))
-                    .unwrap_or_else(|| noop_json(node))
-            }),
-        ),
+        "literal_type" => {
+            if let Some(child) = node.named_child(0) {
+                if matches!(child.kind(), "null" | "undefined") {
+                    return ts_predefined_type_json(child, source);
+                }
+            }
+            with_span(
+                "TSLiteralType",
+                node,
+                json!({
+                    "literal": node
+                        .named_child(0)
+                        .map(|child| expr_json(child, source))
+                        .unwrap_or_else(|| noop_json(node))
+                }),
+            )
+        }
         "union_type" => with_span(
             "TSUnionType",
             node,
@@ -4272,7 +4434,7 @@ fn ts_mapped_type_json(node: Node, clause: Node, source: &str) -> Value {
     let type_parameter = clause
         .child_by_field_name("name")
         .map(|name| {
-            let mut fields = json!({ "name": identifier_json(name, source) });
+            let mut fields = json!({ "name": node_text(name, source) });
             if let Some(constraint) = clause
                 .child_by_field_name("type")
                 .map(|child| ts_type_json(child, source))
@@ -4294,7 +4456,8 @@ fn ts_mapped_type_json(node: Node, clause: Node, source: &str) -> Value {
         node,
         json!({
             "typeParameter": type_parameter,
-            "typeAnnotation": type_annotation
+            "typeAnnotation": type_annotation,
+            "nameType": Value::Null
         }),
     )
 }
@@ -4372,13 +4535,10 @@ fn ts_type_query_json(node: Node, source: &str) -> Value {
 
 fn ts_function_type_json(kind: &str, node: Node, source: &str) -> Value {
     let params = params_json(node, source);
-    let mut fields = json!({
-        "parameters": params.clone(),
-        "params": params
-    });
+    let mut fields = json!({ "parameters": params });
     if let Some(return_type) = node
         .child_by_field_name("return_type")
-        .map(|child| ts_type_json(child, source))
+        .map(|child| ts_function_type_return_annotation_json(node, child, source))
     {
         fields = with_extra_field(fields, "typeAnnotation", return_type);
     }
@@ -4392,14 +4552,59 @@ fn ts_function_type_json(kind: &str, node: Node, source: &str) -> Value {
     with_span(kind, node, fields)
 }
 
+fn ts_function_type_return_annotation_json(node: Node, return_type: Node, source: &str) -> Value {
+    let type_annotation = if return_type.kind() == "type_annotation" {
+        return_type
+            .named_child(0)
+            .map(|child| ts_type_json(child, source))
+            .unwrap_or_else(|| with_span("TSAnyKeyword", return_type, json!({})))
+    } else {
+        ts_type_json(return_type, source)
+    };
+    let arrow = (0..node.child_count())
+        .filter_map(|index| node.child(index))
+        .find(|child| !child.is_named() && node_text(*child, source) == "=>");
+    let (start_byte, start_position) = arrow
+        .map(|child| (child.start_byte(), child.start_position()))
+        .unwrap_or_else(|| (return_type.start_byte(), return_type.start_position()));
+
+    with_span_bounds(
+        "TSTypeAnnotation",
+        start_byte,
+        start_position,
+        return_type.end_byte(),
+        return_type.end_position(),
+        json!({ "typeAnnotation": type_annotation }),
+    )
+}
+
 fn ts_type_parameter_declaration_json(node: Node, source: &str) -> Value {
     let params = named_children(node)
         .filter(|child| child.kind() == "type_parameter")
         .map(|child| ts_type_parameter_json(child, source))
         .collect::<Vec<_>>();
+    let mut fields = json!({ "params": params });
+    if let Some(trailing_comma) = trailing_comma_offset(node, source) {
+        fields = with_extra_field(fields, "extra", json!({ "trailingComma": trailing_comma }));
+    }
 
+    with_span("TSTypeParameterDeclaration", node, fields)
+}
+
+fn trailing_comma_offset(node: Node, source: &str) -> Option<usize> {
+    let text = node_text(node, source);
+    let comma = text.rfind(',')?;
+    let after = text[comma + 1..].trim();
+    (after == ">").then_some(node.start_byte() + comma)
+}
+
+fn ts_type_parameter_instantiation_json(node: Node, source: &str) -> Value {
+    let params = named_children(node)
+        .filter(|child| is_type_like(*child))
+        .map(|child| ts_type_json(child, source))
+        .collect::<Vec<_>>();
     with_span(
-        "TSTypeParameterDeclaration",
+        "TSTypeParameterInstantiation",
         node,
         json!({ "params": params }),
     )
@@ -4431,12 +4636,51 @@ fn ts_type_parameter_json(node: Node, source: &str) -> Value {
 
 fn numeric_literal_json(node: Node, source: &str) -> Value {
     let raw = node_text(node, source);
-    let value = raw.parse::<f64>().ok().map_or(Value::Null, Value::from);
+    let value = numeric_literal_value(&raw);
     with_span(
         "NumericLiteral",
         node,
-        json!({ "value": value, "extra": { "raw": raw } }),
+        json!({ "value": value.clone(), "extra": { "raw": raw, "rawValue": value } }),
     )
+}
+
+fn numeric_literal_value(raw: &str) -> Value {
+    let normalized = raw.replace('_', "");
+    let unsigned = normalized
+        .strip_prefix('+')
+        .or_else(|| normalized.strip_prefix('-'))
+        .unwrap_or(&normalized);
+    if !unsigned.contains(['.', 'e', 'E']) {
+        let sign = if normalized.starts_with('-') {
+            -1_i64
+        } else {
+            1_i64
+        };
+        let parsed = unsigned
+            .strip_prefix("0x")
+            .or_else(|| unsigned.strip_prefix("0X"))
+            .and_then(|digits| i64::from_str_radix(digits, 16).ok())
+            .or_else(|| {
+                unsigned
+                    .strip_prefix("0b")
+                    .or_else(|| unsigned.strip_prefix("0B"))
+                    .and_then(|digits| i64::from_str_radix(digits, 2).ok())
+            })
+            .or_else(|| {
+                unsigned
+                    .strip_prefix("0o")
+                    .or_else(|| unsigned.strip_prefix("0O"))
+                    .and_then(|digits| i64::from_str_radix(digits, 8).ok())
+            })
+            .or_else(|| unsigned.parse::<i64>().ok());
+        if let Some(value) = parsed {
+            return Value::from(sign.saturating_mul(value));
+        }
+    }
+    normalized
+        .parse::<f64>()
+        .ok()
+        .map_or(Value::Null, Value::from)
 }
 
 fn string_literal_json(node: Node, source: &str) -> Value {
@@ -4445,7 +4689,7 @@ fn string_literal_json(node: Node, source: &str) -> Value {
     with_span(
         "StringLiteral",
         node,
-        json!({ "value": value, "extra": { "raw": raw } }),
+        json!({ "value": value.clone(), "extra": { "raw": raw, "rawValue": value } }),
     )
 }
 
@@ -4773,14 +5017,46 @@ fn with_span_bounds(
         json!({
             "start": {
                 "line": start_position.row + 1,
-                "column": start_position.column
+                "column": start_position.column,
+                "index": start_byte
             },
             "end": {
                 "line": end_position.row + 1,
-                "column": end_position.column
+                "column": end_position.column,
+                "index": end_byte
             }
         }),
     );
+    if kind == "Identifier" {
+        if let Some(identifier_name) = object
+            .get("name")
+            .and_then(Value::as_str)
+            .map(str::to_string)
+        {
+            if let Some(loc) = object.get_mut("loc").and_then(Value::as_object_mut) {
+                loc.insert("identifierName".into(), Value::String(identifier_name));
+            }
+        }
+    }
+    Value::Object(object)
+}
+
+fn with_end_bound(value: Value, end_byte: usize, end_position: Point) -> Value {
+    let mut object = match value {
+        Value::Object(map) => map,
+        other => return other,
+    };
+    object.insert("end".into(), Value::from(end_byte));
+    if let Some(loc) = object.get_mut("loc").and_then(Value::as_object_mut) {
+        loc.insert(
+            "end".into(),
+            json!({
+                "line": end_position.row + 1,
+                "column": end_position.column,
+                "index": end_byte
+            }),
+        );
+    }
     Value::Object(object)
 }
 
@@ -4796,17 +5072,27 @@ fn node_text(node: Node, source: &str) -> String {
 fn convert_spans_to_utf16(value: &mut Value, source: &str) {
     match value {
         Value::Object(map) => {
-            if let Some(start) = map.get("start").and_then(Value::as_u64) {
-                map.insert(
-                    "start".into(),
-                    Value::from(utf16_offset_for_byte(source, start as usize)),
-                );
+            let start_index = map
+                .get("start")
+                .and_then(Value::as_u64)
+                .map(|start| utf16_offset_for_byte(source, start as usize));
+            let end_index = map
+                .get("end")
+                .and_then(Value::as_u64)
+                .map(|end| utf16_offset_for_byte(source, end as usize));
+            if let Some(start_index) = start_index {
+                map.insert("start".into(), Value::from(start_index));
             }
-            if let Some(end) = map.get("end").and_then(Value::as_u64) {
-                map.insert(
-                    "end".into(),
-                    Value::from(utf16_offset_for_byte(source, end as usize)),
-                );
+            if let Some(end_index) = end_index {
+                map.insert("end".into(), Value::from(end_index));
+            }
+            if let Some(loc) = map.get_mut("loc").and_then(Value::as_object_mut) {
+                if let Some(start_index) = start_index {
+                    set_loc_index(loc, "start", start_index);
+                }
+                if let Some(end_index) = end_index {
+                    set_loc_index(loc, "end", end_index);
+                }
             }
             for child in map.values_mut() {
                 convert_spans_to_utf16(child, source);
@@ -4818,6 +5104,12 @@ fn convert_spans_to_utf16(value: &mut Value, source: &str) {
             }
         }
         _ => {}
+    }
+}
+
+fn set_loc_index(loc: &mut Map<String, Value>, key: &str, index: usize) {
+    if let Some(point) = loc.get_mut(key).and_then(Value::as_object_mut) {
+        point.insert("index".into(), Value::from(index));
     }
 }
 
@@ -4934,6 +5226,7 @@ fn is_type_like(node: Node) -> bool {
             | "infer_type"
             | "template_literal_type"
             | "this_type"
+            | "undefined"
     )
 }
 
@@ -5039,10 +5332,7 @@ mod tests {
         assert_eq!(params[0]["type"], "Identifier");
         assert_eq!(params[1]["type"], "RestElement");
         assert_eq!(params[1]["argument"]["name"], "args");
-        assert_eq!(
-            params[1]["typeAnnotation"]["typeAnnotation"]["type"],
-            "TSArrayType"
-        );
+        assert!(params[1].get("typeAnnotation").is_none());
     }
 
     #[test]
@@ -5356,13 +5646,13 @@ mod tests {
         assert_eq!(value["id"], Value::Null);
         assert_eq!(value["params"].as_array().unwrap().len(), 0);
         assert_eq!(value["body"]["type"], "NumericLiteral");
-        assert_eq!(value["expression"], true);
+        assert!(value.get("expression").is_none());
 
         let id = &json["ast"]["program"]["body"][1]["declarations"][0]["init"];
         assert_eq!(id["type"], "ArrowFunctionExpression");
         assert_eq!(id["params"][0]["name"], "x");
         assert_eq!(id["body"]["type"], "BlockStatement");
-        assert_eq!(id["expression"], false);
+        assert!(id.get("expression").is_none());
     }
 
     #[test]
@@ -5987,9 +6277,9 @@ mod tests {
         assert_eq!(call["optional"], true);
         assert_eq!(call["callee"]["name"], "fn");
 
-        // Only the optional member access is optional, the trailing call is not.
         let chained = first_statement_expression("/repo/app.js", "a?.b();\n");
-        assert_eq!(chained["type"], "CallExpression");
+        assert_eq!(chained["type"], "OptionalCallExpression");
+        assert_eq!(chained["optional"], true);
         assert_eq!(chained["callee"]["type"], "OptionalMemberExpression");
     }
 
@@ -6102,8 +6392,11 @@ mod tests {
             .expect("parse succeeds");
         let function_type = &json["ast"]["program"]["body"][0]["typeAnnotation"];
         assert_eq!(function_type["type"], "TSFunctionType");
-        assert_eq!(function_type["params"][0]["name"], "value");
-        assert_eq!(function_type["typeAnnotation"]["type"], "TSStringKeyword");
+        assert_eq!(function_type["parameters"][0]["name"], "value");
+        assert_eq!(
+            function_type["typeAnnotation"]["typeAnnotation"]["type"],
+            "TSStringKeyword"
+        );
     }
 
     #[test]
@@ -6140,16 +6433,41 @@ mod tests {
     }
 
     #[test]
+    fn emits_ts_union_type_with_undefined_keyword() {
+        let _ = take_unmapped_summary();
+        let root = Path::new("/repo");
+        let path = Path::new("/repo/types.ts");
+        let json =
+            parse_source(root, path, "type Maybe = number | undefined;\n").expect("parse succeeds");
+        let union = &json["ast"]["program"]["body"][0]["typeAnnotation"];
+        assert_eq!(union["type"], "TSUnionType");
+        assert_eq!(union["types"][0]["type"], "TSNumberKeyword");
+        assert_eq!(union["types"][1]["type"], "TSUndefinedKeyword");
+        assert!(take_unmapped_summary().is_none());
+    }
+
+    #[test]
     fn records_unmapped_kinds_in_summary() {
         // Drain any state left over from earlier parses in this thread.
         let _ = take_unmapped_summary();
+        record_unmapped_kind("synthetic_unmapped_node");
+        let summary = take_unmapped_summary().expect("synthetic node is unmapped");
+        assert!(summary.starts_with("jsastgen: "));
+        assert!(summary.contains("synthetic_unmapped_node"));
+        // Counter resets after draining.
+        assert!(take_unmapped_summary().is_none());
+    }
+
+    #[test]
+    fn emits_debugger_statement() {
+        let _ = take_unmapped_summary();
         let root = Path::new("/repo");
         let path = Path::new("/repo/debug.js");
-        let _ = parse_source(root, path, "debugger;\n").expect("parse succeeds");
-        let summary = take_unmapped_summary().expect("debugger statement is unmapped");
-        assert!(summary.starts_with("jsastgen: "));
-        assert!(summary.contains("debugger_statement"));
-        // Counter resets after draining.
+        let json = parse_source(root, path, "debugger;\n").expect("parse succeeds");
+        assert_eq!(
+            json["ast"]["program"]["body"][0]["type"],
+            "DebuggerStatement"
+        );
         assert!(take_unmapped_summary().is_none());
     }
 }

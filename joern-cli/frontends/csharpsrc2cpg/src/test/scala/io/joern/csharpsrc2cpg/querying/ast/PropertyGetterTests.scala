@@ -71,8 +71,7 @@ class PropertyGetterTests extends CSharpCode2CpgFixture {
     }
   }
 
-  // FIXME: Fails because without System.IO in scope, System.Console.Out can't be found.
-  "`System.Console.Out.WriteLine` call without importing `System.IO`" ignore {
+  "`System.Console.Out.WriteLine` call without importing `System.IO`" should {
     val cpg = code("""
         |System.Console.Out.WriteLine("X");
         |""".stripMargin)
@@ -272,6 +271,32 @@ class PropertyGetterTests extends CSharpCode2CpgFixture {
 
     "have empty body" in {
       cpg.method.nameExact("get_MyProperty").body.astChildren shouldBe empty
+    }
+  }
+
+  "expression-bodied property, accessor, and indexer declarations" should {
+    val cpg = code("""
+        |class C
+        |{
+        | int backing;
+        | public int MyProperty => backing + 1;
+        | public int Accessor
+        | {
+        |   get => backing + 2;
+        |   set => backing = value;
+        | }
+        | public int this[int i] => backing + i;
+        |}
+        |""".stripMargin)
+
+    "lower getter expression bodies into synthetic method bodies" in {
+      cpg.method.nameExact("get_MyProperty").ast.isReturn.code.l shouldBe List("backing + 1")
+      cpg.method.nameExact("get_Accessor").ast.isReturn.code.l shouldBe List("backing + 2")
+      cpg.method.nameExact("get_Item").ast.isReturn.code.l shouldBe List("backing + i")
+    }
+
+    "lower setter expression bodies into synthetic method bodies" in {
+      cpg.method.nameExact("set_Accessor").body.assignment.code.l shouldBe List("backing = value")
     }
   }
 }

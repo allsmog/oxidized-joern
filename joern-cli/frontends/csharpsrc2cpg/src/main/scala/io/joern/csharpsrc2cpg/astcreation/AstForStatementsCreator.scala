@@ -3,8 +3,8 @@ package io.joern.csharpsrc2cpg.astcreation
 import io.joern.csharpsrc2cpg.CSharpOperators
 import io.joern.csharpsrc2cpg.parser.DotNetJsonAst.*
 import io.joern.csharpsrc2cpg.parser.{DotNetNodeInfo, ParserKeys}
-import io.joern.x2cpg.{Ast, ValidationMode}
-import io.shiftleft.codepropertygraph.generated.nodes.{NewFieldIdentifier, NewIdentifier, NewLiteral, NewLocal}
+import io.joern.x2cpg.{Ast, Defines, ValidationMode}
+import io.shiftleft.codepropertygraph.generated.nodes.{NewFieldIdentifier, NewJumpLabel, NewLiteral, NewLocal}
 import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, DispatchTypes, ModifierTypes, Operators}
 
 import scala.::
@@ -55,13 +55,22 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
       case _                   => Ast()
     }
 
-    Seq(controlStructureAst(ifNode, Some(conditionAst), Seq(thenAst, elseAst)))
+    val ifAst       = controlStructureAst(ifNode, Some(conditionAst), Seq(thenAst, elseAst))
+    val astWithThen = thenAst.root.map(ifAst.withTrueBodyEdge(ifNode, _)).getOrElse(ifAst)
+    val astWithElse = elseAst.root.map(astWithThen.withFalseBodyEdge(ifNode, _)).getOrElse(astWithThen)
+    Seq(astWithElse)
   }
 
   protected def astForStatement(nodeInfo: DotNetNodeInfo): Seq[Ast] = {
     nodeInfo.node match {
       case ExpressionStatement    => astForExpressionStatement(nodeInfo)
+      case EmptyStatement         => Nil
       case GlobalStatement        => astForGlobalStatement(nodeInfo)
+      case LabeledStatement       => astForLabeledStatement(nodeInfo)
+      case LockStatement          => astForLockStatement(nodeInfo)
+      case CheckedStatement       => astForCheckedStatement(nodeInfo)
+      case UnsafeStatement        => astForUnsafeStatement(nodeInfo)
+      case FixedStatement         => astForFixedStatement(nodeInfo)
       case IfStatement            => astForIfStatement(nodeInfo)
       case ThrowStatement         => astForThrowStatement(nodeInfo)
       case TryStatement           => astForTryStatement(nodeInfo)
@@ -77,6 +86,63 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
     }
   }
 
+  private def astForLockStatement(lockStmt: DotNetNodeInfo): Seq[Ast] = {
+    val lockBlock = blockNode(lockStmt)
+    val modifier  = Ast(modifierNode(lockStmt, "SYNCHRONIZED"))
+    val expressionAst = Try(lockStmt.json(ParserKeys.Expression)).toOption
+      .collect { case expression: ujson.Obj => createDotNetNodeInfo(expression) }
+      .map(astForNode)
+      .getOrElse(Seq.empty)
+    val bodyAst = Try(lockStmt.json(ParserKeys.Statement)).toOption
+      .collect { case statement: ujson.Obj => createDotNetNodeInfo(statement) }
+      .map(statementNode => astForBlock(statementNode))
+      .getOrElse(Ast(blockNode(lockStmt)))
+
+    Seq(Ast(lockBlock).withChild(modifier).withChildren(expressionAst).withChild(bodyAst))
+  }
+
+  private def astForCheckedStatement(checkedStmt: DotNetNodeInfo): Seq[Ast] = {
+    val keyword = Try(checkedStmt.json(ParserKeys.Keyword)(ParserKeys.Value).str).getOrElse("checked")
+    val modifierType = keyword match {
+      case "unchecked" => "UNCHECKED"
+      case _           => "CHECKED"
+    }
+    val checkedBlock = blockNode(checkedStmt)
+    val modifier     = Ast(modifierNode(checkedStmt, modifierType))
+    val bodyAst = Try(checkedStmt.json(ParserKeys.Statement)).toOption
+      .collect { case statement: ujson.Obj => createDotNetNodeInfo(statement) }
+      .map(statementNode => astForBlock(statementNode))
+      .getOrElse(Ast(blockNode(checkedStmt)))
+
+    Seq(Ast(checkedBlock).withChild(modifier).withChild(bodyAst))
+  }
+
+  private def astForUnsafeStatement(unsafeStmt: DotNetNodeInfo): Seq[Ast] = {
+    val unsafeBlock = blockNode(unsafeStmt)
+    val modifier    = Ast(modifierNode(unsafeStmt, "UNSAFE"))
+    val bodyAst = Try(unsafeStmt.json(ParserKeys.Statement)).toOption
+      .collect { case statement: ujson.Obj => createDotNetNodeInfo(statement) }
+      .map(statementNode => astForBlock(statementNode))
+      .getOrElse(Ast(blockNode(unsafeStmt)))
+
+    Seq(Ast(unsafeBlock).withChild(modifier).withChild(bodyAst))
+  }
+
+  private def astForFixedStatement(fixedStmt: DotNetNodeInfo): Seq[Ast] = {
+    val fixedBlock = blockNode(fixedStmt)
+    val modifier   = Ast(modifierNode(fixedStmt, "FIXED"))
+    val declarationAsts = Try(fixedStmt.json(ParserKeys.Declaration)).toOption
+      .collect { case declaration: ujson.Obj => createDotNetNodeInfo(declaration) }
+      .map(astForNode)
+      .getOrElse(Seq.empty)
+    val bodyAst = Try(fixedStmt.json(ParserKeys.Statement)).toOption
+      .collect { case statement: ujson.Obj => createDotNetNodeInfo(statement) }
+      .map(statementNode => astForBlock(statementNode))
+      .getOrElse(Ast(blockNode(fixedStmt)))
+
+    Seq(Ast(fixedBlock).withChild(modifier).withChildren(declarationAsts).withChild(bodyAst))
+  }
+
   private def astForLocalFunctionStatement(nodeInfo: DotNetNodeInfo): Seq[Ast] = {
     astForMethodDeclaration(nodeInfo)
   }
@@ -85,11 +151,23 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
     val caseNode = jumpTargetNode(labelNode, "case", labelNode.code)
     labelNode.node match {
       case CasePatternSwitchLabel =>
-        val patternNode = createDotNetNodeInfo(labelNode.json(ParserKeys.Pattern)(ParserKeys.Expression))
-        Ast(caseNode) +: astForNode(patternNode)
+        val patternNode = createDotNetNodeInfo(labelNode.json(ParserKeys.Pattern))
+        val patternAsts = Try(patternNode.json(ParserKeys.Expression)).toOption
+          .collect { case expression: ujson.Obj =>
+            astForNode(expression)
+          }
+          .getOrElse {
+            Seq(Ast(literalNode(patternNode, patternNode.code, Defines.Any)))
+          }
+        Ast(caseNode) +: patternAsts
       case CaseSwitchLabel =>
         val valueNode = createDotNetNodeInfo(labelNode.json(ParserKeys.Value))
-        Ast(caseNode) +: astForNode(valueNode)
+        val valueAsts = valueNode.node match {
+          case ConstantPattern | RelationalPattern =>
+            astForNode(valueNode.json(ParserKeys.Expression))
+          case _ => astForNode(valueNode)
+        }
+        Ast(caseNode) +: valueAsts
       case DefaultSwitchLabel => Seq(Ast(caseNode))
       case _                  => Seq(Ast())
     }
@@ -114,59 +192,90 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
       .toSeq
 
     val switchNode = controlStructureNode(switchStmt, ControlStructureTypes.SWITCH, s"switch (${comparatorNode.code})")
-    Seq(controlStructureAst(switchNode, comparatorNodeAst, switchBodyAsts))
+    val switchBody = Ast(blockNode(switchStmt)).withChildren(switchBodyAsts)
+    val switchAst  = controlStructureAst(switchNode, comparatorNodeAst, switchBody :: Nil)
+    Seq(switchBody.root.map(switchAst.withTrueBodyEdge(switchNode, _)).getOrElse(switchAst))
   }
 
   private def astForWhileStatement(whileStmt: DotNetNodeInfo): Seq[Ast] = {
-    val whileBlock    = createDotNetNodeInfo(whileStmt.json(ParserKeys.Statement))
-    val whileBlockAst = astForBlock(whileBlock)
-
-    val condition    = createDotNetNodeInfo(whileStmt.json(ParserKeys.Condition))
-    val conditionAst = astForNode(condition)
+    val condition                                     = createDotNetNodeInfo(whileStmt.json(ParserKeys.Condition))
+    val ConditionAstResult(conditionAst, prependBody) = astForConditionNode(condition)
+    val whileBlock                                    = createDotNetNodeInfo(whileStmt.json(ParserKeys.Statement))
+    val whileBlockAst                                 = astForBlock(whileBlock, prefixAsts = prependBody)
 
     val code = s"while (${condition.code})"
 
     val whileNode = controlStructureNode(whileStmt, ControlStructureTypes.WHILE, code)
 
-    Seq(Ast(whileNode).withChild(whileBlockAst).withChildren(conditionAst))
+    val whileAst =
+      Ast(whileNode)
+        .withChild(whileBlockAst)
+        .withChild(conditionAst)
+        .withConditionEdges(whileNode, conditionAst.root.toList)
+
+    Seq(whileBlockAst.root.map(whileAst.withTrueBodyEdge(whileNode, _)).getOrElse(whileAst))
   }
 
   private def astForDoStatement(doStmt: DotNetNodeInfo): Seq[Ast] = {
-    val doBlock    = createDotNetNodeInfo(doStmt.json(ParserKeys.Statement))
-    val doBlockAst = astForBlock(doBlock)
-
-    val condition    = createDotNetNodeInfo(doStmt.json(ParserKeys.Condition))
-    val conditionAst = astForNode(condition)
+    val condition                                     = createDotNetNodeInfo(doStmt.json(ParserKeys.Condition))
+    val ConditionAstResult(conditionAst, prependBody) = astForConditionNode(condition)
+    val doBlock                                       = createDotNetNodeInfo(doStmt.json(ParserKeys.Statement))
+    val doBlockAst                                    = astForBlock(doBlock, prefixAsts = prependBody)
 
     val code        = s"do {...} while (${condition.code})"
     val doBlockNode = controlStructureNode(doStmt, ControlStructureTypes.DO, code)
 
-    Seq(Ast(doBlockNode).withChild(doBlockAst).withChildren(conditionAst))
+    val doAst =
+      Ast(doBlockNode)
+        .withChild(doBlockAst)
+        .withChild(conditionAst)
+        .withConditionEdges(doBlockNode, conditionAst.root.toList)
+
+    Seq(doBlockAst.root.map(doAst.withDoBodyEdge(doBlockNode, _)).getOrElse(doAst))
   }
 
   private def astForForStatement(forStmt: DotNetNodeInfo): Seq[Ast] = {
-    val initNode        = nullSafeCreateParserNodeInfo(forStmt.json.obj.get(ParserKeys.Declaration))
-    val conditionNode   = nullSafeCreateParserNodeInfo(forStmt.json.obj.get(ParserKeys.Condition))
-    val incrementorNode = nullSafeCreateParserNodeInfo(forStmt.json(ParserKeys.Incrementors).arr.headOption)
+    val initNode = forStmt.json.obj.get(ParserKeys.Declaration).collect { case declaration: ujson.Obj =>
+      createDotNetNodeInfo(declaration)
+    }
+    val conditionNode = forStmt.json.obj.get(ParserKeys.Condition).collect { case condition: ujson.Obj =>
+      createDotNetNodeInfo(condition)
+    }
+    val incrementorNodes = forStmt
+      .json(ParserKeys.Incrementors)
+      .arr
+      .collect { case incrementor: ujson.Obj =>
+        createDotNetNodeInfo(incrementor)
+      }
+      .toSeq
 
-    val forBodyAst = astForBlock(createDotNetNodeInfo(forStmt.json(ParserKeys.Statement)))
+    val ConditionAstResult(conditionAst, prependBody) =
+      conditionNode.map(astForConditionNode).getOrElse(ConditionAstResult(Ast(), List.empty))
 
-    val code = s"for (${initNode.code};${conditionNode.code};${incrementorNode.code})"
-    val forNode =
-      controlStructureNode(forStmt, ControlStructureTypes.FOR, code);
+    val forBodyAst = astForBlock(createDotNetNodeInfo(forStmt.json(ParserKeys.Statement)), prefixAsts = prependBody)
 
-    val initNodeAst    = astForNode(initNode)
-    val conditionAst   = astForNode(conditionNode)
-    val incrementorAst = astForNode(incrementorNode)
+    val initCode        = initNode.map(_.code).getOrElse("")
+    val conditionCode   = conditionNode.map(_.code).getOrElse("")
+    val incrementorCode = incrementorNodes.map(_.code).mkString(", ")
+    val code            = s"for ($initCode;$conditionCode;$incrementorCode)"
+    val forNode         = controlStructureNode(forStmt, ControlStructureTypes.FOR, code)
+
+    val initNodeAst    = initNode.toSeq.flatMap(astForNode)
+    val incrementorAst = incrementorNodes.flatMap(astForNode)
 
     val _forAst = Ast(forNode)
       .withChildren(initNodeAst)
-      .withChildren(conditionAst)
+      .withChild(conditionAst)
       .withChildren(incrementorAst)
       .withChild(forBodyAst)
-      .withConditionEdges(forNode, conditionAst.flatMap(_.root).toList)
+      .withConditionEdges(forNode, conditionAst.root.toList)
 
-    Seq(_forAst)
+    val astWithInit =
+      initNodeAst.flatMap(_.root).headOption.map(_forAst.withForInitEdge(forNode, _)).getOrElse(_forAst)
+    val astWithUpdate =
+      incrementorAst.flatMap(_.root).lastOption.map(astWithInit.withForUpdateEdge(forNode, _)).getOrElse(astWithInit)
+
+    Seq(forBodyAst.root.map(astWithUpdate.withForBodyEdge(forNode, _)).getOrElse(astWithUpdate))
   }
 
   private def astForForEachStatement(forEachStmt: DotNetNodeInfo): Seq[Ast] = {
@@ -253,7 +362,7 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
 
     val forEachBlockAst = astForBlock(createDotNetNodeInfo(forEachStmt.json(ParserKeys.Statement)))
 
-    forAst(
+    val forEachAst = forAst(
       forNode = forEachNode,
       locals = Ast(idxLocal)
         .withRefEdge(idxIdenAtAssign, idxLocal)
@@ -263,7 +372,13 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
       initAsts = idxAssignmentAst :: Nil,
       updateAsts = iteratorAssignmentAst :: Nil,
       bodyAst = forEachBlockAst
-    ) :: Nil
+    )
+
+    val isAwaitForEach =
+      Try(forEachStmt.json(ParserKeys.Await).bool).getOrElse(false) || forEachStmt.code.trim.startsWith(
+        "await foreach "
+      )
+    (if (isAwaitForEach) forEachAst.withChild(Ast(modifierNode(forEachStmt, "AWAIT"))) else forEachAst) :: Nil
   }
 
   private def astForElseStatement(elseParserNode: DotNetNodeInfo): Ast = {
@@ -290,25 +405,49 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
     }
   }
 
+  private def astForLabeledStatement(labeledStmt: DotNetNodeInfo): Seq[Ast] = {
+    val labelName = labeledStmt.json(ParserKeys.Identifier).obj(ParserKeys.Value).str
+    val labelAst  = Ast(jumpTargetNode(labeledStmt, labelName, s"$labelName:"))
+    val statementAsts = Try(labeledStmt.json(ParserKeys.Statement)).toOption match {
+      case Some(statement: ujson.Obj) => astForNode(createDotNetNodeInfo(statement))
+      case _                          => Seq.empty
+    }
+    labelAst +: statementAsts
+  }
+
   private def astForJumpStatement(jumpStmt: DotNetNodeInfo): Seq[Ast] = {
     jumpStmt.node match {
       case BreakStatement    => Seq(Ast(controlStructureNode(jumpStmt, ControlStructureTypes.BREAK, jumpStmt.code)))
       case ContinueStatement => Seq(Ast(controlStructureNode(jumpStmt, ControlStructureTypes.CONTINUE, jumpStmt.code)))
       case GotoStatement     => astForGotoStatement(jumpStmt)
       case ReturnStatement   => astForReturnStatement(jumpStmt)
+      case YieldStatement    => astForYieldStatement(jumpStmt)
       case _                 => Seq.empty
     }
   }
 
   private def astForGotoStatement(gotoStmt: DotNetNodeInfo): Seq[Ast] = {
-    val identifierAst = Option(gotoStmt.json(ParserKeys.Expression)) match {
-      case Some(value: ujson.Obj) => astForNode(createDotNetNodeInfo(value))
-      case _                      => Seq.empty
+    val gotoNode = controlStructureNode(gotoStmt, ControlStructureTypes.GOTO, gotoStmt.code)
+    val labelAst = Option(gotoStmt.json(ParserKeys.Expression)) match {
+      case Some(value: ujson.Obj) =>
+        val expressionNode = createDotNetNodeInfo(value)
+        val labelName      = nameFromNode(expressionNode)
+        Some(
+          Ast(
+            NewJumpLabel()
+              .parserTypeName(expressionNode.node.toString)
+              .name(labelName)
+              .code(labelName)
+              .lineNumber(expressionNode.lineNumber)
+              .columnNumber(expressionNode.columnNumber)
+              .order(1)
+          )
+        )
+      case _ => None
     }
 
-    val gotoAst = Ast(controlStructureNode(gotoStmt, ControlStructureTypes.GOTO, gotoStmt.code))
-
-    identifierAst :+ gotoAst
+    val gotoAst = Ast(gotoNode).withChildren(labelAst.toSeq)
+    Seq(labelAst.flatMap(_.root).map(gotoAst.withJumpArgumentEdge(gotoNode, _)).getOrElse(gotoAst))
   }
 
   private def astForReturnStatement(returnStmt: DotNetNodeInfo): Seq[Ast] = {
@@ -318,6 +457,15 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
     }
     val _returnNode = returnNode(returnStmt, returnStmt.code)
     Seq(returnAst(_returnNode, identifierAst))
+  }
+
+  private def astForYieldStatement(yieldStmt: DotNetNodeInfo): Seq[Ast] = {
+    val valueAst = Option(yieldStmt.json(ParserKeys.Expression)) match {
+      case Some(value: ujson.Obj) => astForNode(createDotNetNodeInfo(value))
+      case _                      => Seq.empty
+    }
+    val yieldNode = returnNode(yieldStmt, yieldStmt.code)
+    Seq(returnAst(yieldNode, valueAst))
   }
 
   protected def astForThrowStatement(throwStmt: DotNetNodeInfo): Seq[Ast] = {
@@ -373,44 +521,48 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
     val tryNodeInfo = createDotNetNodeInfo(usingStmt.json(ParserKeys.Statement))
     val tryAst      = astForBlock(tryNodeInfo, Option("try"))
 
-    val finallyAst = declAst.flatMap(_.nodes).collectFirst { case x: NewIdentifier => x.copy }.map { id =>
-      val callCode = s"${id.name}.Dispose()"
-      id.code(callCode)
-      val disposeCall = callNode(
-        usingStmt,
-        callCode,
-        "Dispose",
-        "System.Disposable.Dispose:System.Void()",
-        DispatchTypes.DYNAMIC_DISPATCH,
-        Option("System.Void()"),
-        Option("System.Void")
-      )
-      val disposeAst  = callAst(disposeCall, receiver = Option(Ast(id)))
-      val childrenAst = Ast(blockNode(usingStmt)).withChild(disposeAst)
-      val finallyNode = controlStructureNode(usingStmt, ControlStructureTypes.FINALLY, "finally")
-      Ast(finallyNode).withChild(childrenAst)
-    }
+    val finallyAst = finallyAstForUsingDisposals(
+      usingStmt,
+      declAst,
+      isAwaitUsing = Try(usingStmt.json(ParserKeys.Await).bool).getOrElse(false)
+    )
 
     declAst :+ tryCatchAst(tryNode, tryAst, Seq.empty, finallyAst)
   }
 
   protected def astForCatchClause(catchClause: DotNetNodeInfo): Seq[Ast] = {
     val declAst = astForNode(catchClause.json(ParserKeys.Declaration)).toList
+    val filterAst = Try(catchClause.json(ParserKeys.Filter)).toOption
+      .filterNot(_.isNull)
+      .map(createDotNetNodeInfo)
+      .flatMap(astForCatchFilterClause(_).headOption)
+      .toList
     val blockAst = astForBlock(
       createDotNetNodeInfo(catchClause.json(ParserKeys.Block)),
       code = Option(code(catchClause)),
-      prefixAsts = declAst
+      prefixAsts = declAst ++ filterAst
     )
     Seq(blockAst)
   }
 
+  protected def astForCatchFilterClause(catchFilterClause: DotNetNodeInfo): Seq[Ast] = {
+    astForNode(catchFilterClause.json(ParserKeys.Condition))
+  }
+
   protected def astForCatchDeclaration(catchDeclaration: DotNetNodeInfo): Seq[Ast] = {
-    val name         = nameFromNode(catchDeclaration)
-    val typeFullName = nodeTypeFullName(catchDeclaration)
-    val _localNode   = localNode(catchDeclaration, name, name, typeFullName)
-    val localNodeAst = Ast(_localNode)
-    scope.addToScope(name, _localNode)
-    Seq(localNodeAst)
+    Try(catchDeclaration.json(ParserKeys.Identifier)).toOption
+      .filterNot(_.isNull)
+      .flatMap(identifier => Try(identifier.obj(ParserKeys.Value).str).toOption)
+      .filter(_.nonEmpty)
+      .map { name =>
+        val typeFullName = Try(catchDeclaration.json(ParserKeys.Type)).toOption
+          .collect { case typeJson: ujson.Obj => nodeTypeFullName(createDotNetNodeInfo(typeJson)) }
+          .getOrElse(Defines.Any)
+        val local = localNode(catchDeclaration, name, name, typeFullName)
+        scope.addToScope(name, local)
+        Ast(local)
+      }
+      .toSeq
   }
 
 }

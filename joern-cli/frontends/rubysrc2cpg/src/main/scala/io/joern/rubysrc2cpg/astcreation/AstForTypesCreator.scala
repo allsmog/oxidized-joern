@@ -20,12 +20,57 @@ import scala.collection.mutable
 trait AstForTypesCreator(implicit withSchemaValidation: ValidationMode) { this: AstCreator =>
 
   protected def astForClassDeclaration(node: RubyExpression & TypeDeclaration): Seq[Ast] = {
-    node.name match {
-      case name: SimpleIdentifier => astForSimpleNamedClassDeclaration(node, name)
-      case name =>
-        logger.warn(s"Qualified class names are not supported yet: ${name.text} ($relativeFileName), skipping")
+    normalizeTypeDeclarationName(node) match {
+      case Some((normalizedNode, name)) => astForSimpleNamedClassDeclaration(normalizedNode, name)
+      case None =>
+        logger.warn(s"Qualified class names are not supported yet: ${node.name.text} ($relativeFileName), skipping")
         astForUnknown(node) :: Nil
     }
+  }
+
+  private def normalizeTypeDeclarationName(
+    node: RubyExpression & TypeDeclaration
+  ): Option[(RubyExpression & TypeDeclaration, SimpleIdentifier)] = {
+    node.name match {
+      case name: SimpleIdentifier => Some(node -> name)
+      case name =>
+        val parts = qualifiedNameParts(name)
+        parts.lastOption.map { simpleName =>
+          val simpleIdentifier = SimpleIdentifier()(name.span.spanStart(simpleName))
+          val namespaceParts   = Option(parts.dropRight(1)).filter(_.nonEmpty)
+          val normalizedNode: RubyExpression & TypeDeclaration = node match {
+            case classDecl: ClassDeclaration =>
+              classDecl.copy(name = simpleIdentifier, namespaceParts = classDecl.namespaceParts.orElse(namespaceParts))(
+                classDecl.span
+              )
+            case moduleDecl: ModuleDeclaration =>
+              moduleDecl.copy(
+                name = simpleIdentifier,
+                namespaceParts = moduleDecl.namespaceParts.orElse(namespaceParts)
+              )(moduleDecl.span)
+            case anonymousClassDecl: AnonymousClassDeclaration =>
+              anonymousClassDecl.copy(name = simpleIdentifier)(anonymousClassDecl.span)
+            case singletonClassDecl: SingletonClassDeclaration =>
+              singletonClassDecl.copy(name = simpleIdentifier)(singletonClassDecl.span)
+          }
+          normalizedNode -> simpleIdentifier
+        }
+    }
+  }
+
+  private def qualifiedNameParts(name: RubyExpression): List[String] = {
+    name match {
+      case memberAccess: MemberAccess => qualifiedMemberAccessParts(memberAccess)
+      case other                      => other.text.split("::").filter(_.nonEmpty).toList
+    }
+  }
+
+  private def qualifiedMemberAccessParts(memberAccess: MemberAccess): List[String] = {
+    val targetParts = memberAccess.target match {
+      case targetMemberAccess: MemberAccess => qualifiedMemberAccessParts(targetMemberAccess)
+      case target                           => target.text.split("::").filter(_.nonEmpty).toList
+    }
+    targetParts :+ memberAccess.memberName
   }
 
   private def getBaseClassName(node: RubyExpression): String = {
@@ -205,9 +250,19 @@ trait AstForTypesCreator(implicit withSchemaValidation: ValidationMode) { this: 
       .withChildren(fieldTypeMemberNodes.map(_._2))
       .withChildren(classBodyAsts)
     val singletonTypeDeclAst =
-      Ast(singletonTypeDecl)
-        .withChildren(singletonModifiers)
-        .withChildren(fieldSingletonMemberNodes.map(_._2))
+      pendingSingletonMethodBindings
+        .remove(singletonTypeDecl.fullName)
+        .map(_.toSeq)
+        .getOrElse(Seq.empty)
+        .foldLeft(
+          Ast(singletonTypeDecl)
+            .withChildren(singletonModifiers)
+            .withChildren(fieldSingletonMemberNodes.map(_._2))
+        ) { case (ast, (binding, method)) =>
+          ast
+            .merge(Ast(binding).withRefEdge(binding, method))
+            .withBindsEdge(singletonTypeDecl, binding)
+        }
     val bodyMemberCallAst =
       node.bodyMemberCall match {
         case Some(bodyMemberCall) => astForTypeDeclBodyCall(bodyMemberCall, classFullName)

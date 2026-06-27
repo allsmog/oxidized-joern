@@ -37,6 +37,15 @@ case class OxNamespaceDecl(
   declarations: Seq[OxDeclaration]
 ) extends OxDeclaration
 
+case class OxNamespaceAliasDecl(
+  name: String,
+  target: String,
+  code: String,
+  line: Int,
+  sourcePath: Option[String],
+  visibleLine: Int
+) extends OxDeclaration
+
 case class OxStructDecl(
   name: String,
   code: String,
@@ -60,7 +69,8 @@ case class OxFieldDecl(
   semanticTypeName: String,
   code: String,
   isStatic: Boolean,
-  initializer: Option[OxExpression]
+  initializer: Option[OxExpression],
+  resolvedTypeFullName: Option[String] = None
 )
 
 case class OxEnumDecl(
@@ -82,7 +92,8 @@ case class OxGlobalVariableDecl(
   line: Int,
   sourcePath: Option[String],
   visibleLine: Int,
-  initializer: Option[OxExpression]
+  initializer: Option[OxExpression],
+  resolvedTypeFullName: Option[String] = None
 ) extends OxDeclaration
 
 case class OxTypedefDecl(
@@ -119,7 +130,8 @@ case class OxParameterDecl(
   isVariadic: Boolean,
   hasDefault: Boolean,
   code: String,
-  line: Int
+  line: Int,
+  resolvedTypeFullName: Option[String] = None
 )
 
 case class OxConstructorInitializer(field: String, code: String, line: Int, arguments: Seq[OxExpression])
@@ -133,13 +145,21 @@ case class OxUnknownStatement(code: String, line: Int) extends OxStatement
 
 case class OxUsingEnumStatement(typeName: String, code: String, line: Int) extends OxStatement
 
+case class OxNamespaceAliasStatement(name: String, target: String, code: String, line: Int) extends OxStatement
+
+case class OxFunctionDeclStatement(function: OxFunctionDecl) extends OxStatement {
+  override def code: String = function.code
+  override def line: Int    = function.line
+}
+
 case class OxLocalDecl(
   name: String,
   typeName: String,
   semanticTypeName: String,
   code: String,
   line: Int,
-  initializer: Option[OxExpression]
+  initializer: Option[OxExpression],
+  resolvedTypeFullName: Option[String] = None
 ) extends OxStatement
 
 case class OxStructuredBinding(
@@ -219,9 +239,18 @@ sealed trait OxExpression {
   def line: Int
 }
 
-case class OxIdentifier(name: String, code: String, line: Int) extends OxExpression
+case class OxUnknownExpression(code: String, line: Int) extends OxExpression
 
-case class OxLiteral(value: String, code: String, line: Int) extends OxExpression
+case class OxIdentifier(
+  name: String,
+  code: String,
+  line: Int,
+  resolvedReferenceFullName: Option[String] = None,
+  resolvedMemberFullName: Option[String] = None
+) extends OxExpression
+
+case class OxLiteral(value: String, code: String, line: Int, resolvedTypeFullName: Option[String] = None)
+    extends OxExpression
 
 case class OxBinary(operator: String, code: String, line: Int, left: OxExpression, right: OxExpression)
     extends OxExpression
@@ -237,8 +266,14 @@ case class OxConditional(
   alternative: OxExpression
 ) extends OxExpression
 
-case class OxCast(typeName: String, semanticTypeName: String, code: String, line: Int, value: OxExpression)
-    extends OxExpression
+case class OxCast(
+  typeName: String,
+  semanticTypeName: String,
+  code: String,
+  line: Int,
+  value: OxExpression,
+  resolvedTypeFullName: Option[String] = None
+) extends OxExpression
 
 case class OxFold(operator: String, code: String, line: Int, left: Option[OxExpression], right: Option[OxExpression])
     extends OxExpression
@@ -273,14 +308,30 @@ case class OxLambda(
   body: Seq[OxStatement]
 ) extends OxExpression
 
-case class OxCall(name: String, code: String, line: Int, callee: OxExpression, arguments: Seq[OxExpression])
-    extends OxExpression
+case class OxCall(
+  name: String,
+  code: String,
+  line: Int,
+  callee: OxExpression,
+  arguments: Seq[OxExpression],
+  resolvedMethodFullName: Option[String] = None,
+  resolvedSignature: Option[String] = None
+) extends OxExpression
 
-case class OxFieldAccess(field: String, code: String, line: Int, base: OxExpression) extends OxExpression
+case class OxFieldAccess(
+  field: String,
+  code: String,
+  line: Int,
+  base: OxExpression,
+  resolvedMemberFullName: Option[String] = None,
+  resolvedTypeFullName: Option[String] = None
+) extends OxExpression
 
 case class OxIndexAccess(code: String, line: Int, base: OxExpression, index: OxExpression) extends OxExpression
 
 case class OxInitializerList(code: String, line: Int, elements: Seq[OxExpression]) extends OxExpression
+
+case class OxStatementExpression(code: String, line: Int, body: Seq[OxStatement]) extends OxExpression
 
 case class OxDesignatedInitializer(code: String, line: Int, designator: OxExpression, value: OxExpression)
     extends OxExpression
@@ -331,6 +382,15 @@ object OxDocument {
           visibleLine = visibleLine(value),
           declarations = value("declarations").arr.map(declaration).toSeq
         )
+      case "namespaceAlias" =>
+        OxNamespaceAliasDecl(
+          name = str(value, "name"),
+          target = str(value, "target"),
+          code = str(value, "code"),
+          line = int(value, "line"),
+          sourcePath = sourcePath(value),
+          visibleLine = visibleLine(value)
+        )
       case "struct" =>
         val structLine  = int(value, "line")
         val baseClasses = value.obj.get("baseClasses").map(_.arr.map(_.str).toSeq).getOrElse(Seq.empty)
@@ -369,7 +429,8 @@ object OxDocument {
           line = int(value, "line"),
           sourcePath = sourcePath(value),
           visibleLine = visibleLine(value),
-          initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
+          initializer = value.obj.get("initializer").filter(!_.isNull).map(expression),
+          resolvedTypeFullName = value.obj.get("resolvedTypeFullName").filter(!_.isNull).map(_.str)
         )
       case "typedef" =>
         OxTypedefDecl(
@@ -381,27 +442,31 @@ object OxDocument {
           visibleLine = visibleLine(value)
         )
       case "function" =>
-        OxFunctionDecl(
-          name = str(value, "name"),
-          returnType = str(value, "returnType"),
-          semanticReturnType = value.obj.get("semanticReturnType").map(_.str).getOrElse(str(value, "returnType")),
-          signature = str(value, "signature"),
-          isDefinition = value("isDefinition").bool,
-          isStatic = value.obj.get("isStatic").exists(_.bool),
-          isConst = value.obj.get("isConst").exists(_.bool),
-          isVirtual = value.obj.get("isVirtual").exists(_.bool),
-          code = str(value, "code"),
-          line = int(value, "line"),
-          sourcePath = sourcePath(value),
-          visibleLine = visibleLine(value),
-          parameters = value("parameters").arr.map(parameter).toSeq,
-          constructorInitializers =
-            value.obj.get("constructorInitializers").map(_.arr.map(constructorInitializer).toSeq).getOrElse(Seq.empty),
-          body = value("body").arr.map(statement).toSeq
-        )
+        functionDeclaration(value)
       case other =>
         throw new IllegalArgumentException(s"unsupported oxidized cxxastgen declaration kind '$other'")
     }
+  }
+
+  private def functionDeclaration(value: Value): OxFunctionDecl = {
+    OxFunctionDecl(
+      name = str(value, "name"),
+      returnType = str(value, "returnType"),
+      semanticReturnType = value.obj.get("semanticReturnType").map(_.str).getOrElse(str(value, "returnType")),
+      signature = str(value, "signature"),
+      isDefinition = value("isDefinition").bool,
+      isStatic = value.obj.get("isStatic").exists(_.bool),
+      isConst = value.obj.get("isConst").exists(_.bool),
+      isVirtual = value.obj.get("isVirtual").exists(_.bool),
+      code = str(value, "code"),
+      line = int(value, "line"),
+      sourcePath = sourcePath(value),
+      visibleLine = visibleLine(value),
+      parameters = value("parameters").arr.map(parameter).toSeq,
+      constructorInitializers =
+        value.obj.get("constructorInitializers").map(_.arr.map(constructorInitializer).toSeq).getOrElse(Seq.empty),
+      body = value("body").arr.map(statement).toSeq
+    )
   }
 
   private def field(value: Value): OxFieldDecl = {
@@ -411,7 +476,8 @@ object OxDocument {
       semanticTypeName = value.obj.get("semanticTypeName").map(_.str).getOrElse(str(value, "typeName")),
       code = str(value, "code"),
       isStatic = value.obj.get("isStatic").exists(_.bool),
-      initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
+      initializer = value.obj.get("initializer").filter(!_.isNull).map(expression),
+      resolvedTypeFullName = value.obj.get("resolvedTypeFullName").filter(!_.isNull).map(_.str)
     )
   }
 
@@ -451,7 +517,8 @@ object OxDocument {
       isVariadic = value.obj.get("isVariadic").exists(_.bool),
       hasDefault = value.obj.get("hasDefault").exists(_.bool),
       code = str(value, "code"),
-      line = int(value, "line")
+      line = int(value, "line"),
+      resolvedTypeFullName = value.obj.get("resolvedTypeFullName").filter(!_.isNull).map(_.str)
     )
   }
 
@@ -470,6 +537,13 @@ object OxDocument {
         OxUnknownStatement(code = str(value, "code"), line = int(value, "line"))
       case "usingEnum" =>
         OxUsingEnumStatement(typeName = str(value, "typeName"), code = str(value, "code"), line = int(value, "line"))
+      case "namespaceAlias" =>
+        OxNamespaceAliasStatement(
+          name = str(value, "name"),
+          target = str(value, "target"),
+          code = str(value, "code"),
+          line = int(value, "line")
+        )
       case "localDecl" =>
         val typeName = str(value, "typeName")
         OxLocalDecl(
@@ -478,7 +552,8 @@ object OxDocument {
           semanticTypeName = value.obj.get("semanticTypeName").map(_.str).getOrElse(typeName),
           code = str(value, "code"),
           line = int(value, "line"),
-          initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
+          initializer = value.obj.get("initializer").filter(!_.isNull).map(expression),
+          resolvedTypeFullName = value.obj.get("resolvedTypeFullName").filter(!_.isNull).map(_.str)
         )
       case "structuredBinding" =>
         OxStructuredBinding(
@@ -489,6 +564,8 @@ object OxDocument {
           names = value("names").arr.map(_.str).toSeq,
           initializer = value.obj.get("initializer").filter(!_.isNull).map(expression)
         )
+      case "functionDecl" =>
+        OxFunctionDeclStatement(functionDeclaration(value("function")))
       case "assignment" =>
         OxAssignment(
           operator = str(value, "operator"),
@@ -605,10 +682,23 @@ object OxDocument {
 
   private def expression(value: Value): OxExpression = {
     str(value, "kind") match {
+      case "unknown" =>
+        OxUnknownExpression(code = str(value, "code"), line = int(value, "line"))
       case "identifier" =>
-        OxIdentifier(name = str(value, "name"), code = str(value, "code"), line = int(value, "line"))
+        OxIdentifier(
+          name = str(value, "name"),
+          code = str(value, "code"),
+          line = int(value, "line"),
+          resolvedReferenceFullName = value.obj.get("resolvedReferenceFullName").filter(!_.isNull).map(_.str),
+          resolvedMemberFullName = value.obj.get("resolvedMemberFullName").filter(!_.isNull).map(_.str)
+        )
       case "literal" =>
-        OxLiteral(value = str(value, "value"), code = str(value, "code"), line = int(value, "line"))
+        OxLiteral(
+          value = str(value, "value"),
+          code = str(value, "code"),
+          line = int(value, "line"),
+          resolvedTypeFullName = value.obj.get("resolvedTypeFullName").filter(!_.isNull).map(_.str)
+        )
       case "binary" =>
         OxBinary(
           operator = str(value, "operator"),
@@ -647,7 +737,8 @@ object OxDocument {
           semanticTypeName = value.obj.get("semanticTypeName").map(_.str).getOrElse(str(value, "typeName")),
           code = str(value, "code"),
           line = int(value, "line"),
-          value = expression(value("value"))
+          value = expression(value("value")),
+          resolvedTypeFullName = value.obj.get("resolvedTypeFullName").filter(!_.isNull).map(_.str)
         )
       case "fold" =>
         OxFold(
@@ -698,14 +789,18 @@ object OxDocument {
           code = str(value, "code"),
           line = int(value, "line"),
           callee = expression(value("callee")),
-          arguments = value("arguments").arr.map(expression).toSeq
+          arguments = value("arguments").arr.map(expression).toSeq,
+          resolvedMethodFullName = value.obj.get("resolvedMethodFullName").filter(!_.isNull).map(_.str),
+          resolvedSignature = value.obj.get("resolvedSignature").filter(!_.isNull).map(_.str)
         )
       case "fieldAccess" =>
         OxFieldAccess(
           field = str(value, "field"),
           code = str(value, "code"),
           line = int(value, "line"),
-          base = expression(value("base"))
+          base = expression(value("base")),
+          resolvedMemberFullName = value.obj.get("resolvedMemberFullName").filter(!_.isNull).map(_.str),
+          resolvedTypeFullName = value.obj.get("resolvedTypeFullName").filter(!_.isNull).map(_.str)
         )
       case "indexAccess" =>
         OxIndexAccess(
@@ -719,6 +814,12 @@ object OxDocument {
           code = str(value, "code"),
           line = int(value, "line"),
           elements = value("elements").arr.map(expression).toSeq
+        )
+      case "statementExpression" =>
+        OxStatementExpression(
+          code = str(value, "code"),
+          line = int(value, "line"),
+          body = value("body").arr.map(statement).toSeq
         )
       case "designatedInitializer" =>
         OxDesignatedInitializer(

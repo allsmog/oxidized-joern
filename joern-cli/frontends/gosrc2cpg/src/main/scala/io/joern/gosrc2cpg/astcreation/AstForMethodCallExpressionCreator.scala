@@ -14,16 +14,17 @@ trait AstForMethodCallExpressionCreator(implicit withSchemaValidation: Validatio
   def astForCallExpression(expr: ParserNodeInfo): Seq[Ast] = {
     val (methodName, signature, fullName, typeFullName, receiverAst) =
       preReqForCallNode(createParserNodeInfo(expr.json(ParserKeys.Fun)))
+    val argumentAsts = astForArgs(expr.json(ParserKeys.Args))
     val cpgCall = callNode(
       expr,
       expr.code,
       methodName,
       fullName,
       DispatchTypes.STATIC_DISPATCH,
-      Some(signature),
+      Some(signatureWithArgumentTypes(signature, fullName, argumentAsts)),
       Some(typeFullName)
     )
-    Seq(callAst(cpgCall, astForArgs(expr.json(ParserKeys.Args)), receiverAst.headOption))
+    Seq(callAst(cpgCall, argumentAsts, receiverAst.headOption))
   }
 
   protected def astForConstructorCall(compositeLit: ParserNodeInfo): Seq[Ast] = {
@@ -51,7 +52,7 @@ trait AstForMethodCallExpressionCreator(implicit withSchemaValidation: Validatio
         (Some(xNode), funcDetails.json(ParserKeys.Sel)(ParserKeys.Name).str)
       case ParenExpr =>
         return preReqForCallNode(createParserNodeInfo(funcDetails.json(ParserKeys.X)))
-      case StarExpr =>
+      case StarExpr | ArrayType | MapType | InterfaceType =>
         return preReqForTypeConversionCall(funcDetails)
       case IndexExpr | IndexListExpr =>
         return preReqForCallNode(createParserNodeInfo(funcDetails.json(ParserKeys.X)))
@@ -190,5 +191,19 @@ trait AstForMethodCallExpressionCreator(implicit withSchemaValidation: Validatio
         )
       )
     (methodName, signatureCache, callMethodFullName, returnTypeFullNameCache, receiverAst)
+  }
+
+  private def signatureWithArgumentTypes(signature: String, fullName: String, argumentAsts: Seq[Ast]): String = {
+    if (signature.endsWith("()") && argumentAsts.nonEmpty && !fullName.startsWith(s"$fullyQualifiedPackage.")) {
+      val argumentTypes = argumentAsts.map { ast =>
+        ast.root
+          .flatMap(_.properties.get(PropertyNames.TypeFullName))
+          .map(_.toString)
+          .getOrElse(Defines.anyTypeName)
+      }
+      s"${signature.stripSuffix("()")}(${argumentTypes.mkString(", ")})"
+    } else {
+      signature
+    }
   }
 }

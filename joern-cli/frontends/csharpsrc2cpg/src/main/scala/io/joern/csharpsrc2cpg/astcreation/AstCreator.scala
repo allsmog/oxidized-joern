@@ -22,6 +22,7 @@ import ujson.Value
 
 import java.math.BigInteger
 import java.security.MessageDigest
+import scala.collection.mutable
 
 class AstCreator(
   val relativeFileName: String,
@@ -42,6 +43,16 @@ class AstCreator(
   protected val scope: CSharpScope = new CSharpScope(programSummary)
 
   protected var parseLevel: AstParseLevel = AstParseLevel.FULL_AST
+
+  protected val inheritedTypeFullNameStack: mutable.ArrayDeque[Seq[String]] = mutable.ArrayDeque.empty
+
+  protected def currentBaseTypeFullName: Option[String] = inheritedTypeFullNameStack.headOption.flatMap(_.headOption)
+
+  protected def withInheritedTypeFullNames[T](inheritedTypeFullNames: Seq[String])(body: => T): T = {
+    inheritedTypeFullNameStack.prepend(inheritedTypeFullNames)
+    try body
+    finally inheritedTypeFullNameStack.removeHead()
+  }
 
   override def createAst(): DiffGraphBuilder = {
     val hash = String.format(
@@ -160,27 +171,45 @@ class AstCreator(
       case InterfaceDeclaration                                  => astForClassDeclaration(nodeInfo)
       case StructDeclaration                                     => astForClassDeclaration(nodeInfo)
       case RecordDeclaration                                     => astForRecordDeclaration(nodeInfo)
+      case DelegateDeclaration                                   => astForDelegateDeclaration(nodeInfo)
       case EnumDeclaration                                       => astForEnumDeclaration(nodeInfo)
       case EnumMemberDeclaration                                 => astForEnumMemberDeclaration(nodeInfo)
       case MethodDeclaration                                     => astForMethodDeclaration(nodeInfo)
+      case OperatorDeclaration                                   => astForMethodDeclaration(nodeInfo)
+      case ConversionOperatorDeclaration                         => astForMethodDeclaration(nodeInfo)
+      case DestructorDeclaration                                 => astForMethodDeclaration(nodeInfo)
       case ConstructorDeclaration                                => astForConstructorDeclaration(nodeInfo)
       case FieldDeclaration                                      => astForFieldDeclaration(nodeInfo)
+      case EventFieldDeclaration                                 => astForFieldDeclaration(nodeInfo)
+      case EventDeclaration                                      => astForEventDeclaration(nodeInfo)
+      case IndexerDeclaration                                    => astForIndexerDeclaration(nodeInfo)
       case VariableDeclaration                                   => astForVariableDeclaration(nodeInfo)
       case EqualsValueClause                                     => astForEqualsValueClause(nodeInfo)
       case ArrayInitializerExpression                            => astForArrayInitializerExpression(nodeInfo)
       case CollectionExpression                                  => astForCollectionExpression(nodeInfo)
       case UsingDirective                                        => astForUsing(nodeInfo) :: Nil
+      case ExternAliasDirective                                  => astForUsing(nodeInfo) :: Nil
+      case GlobalAttribute                                       => astForGlobalAttribute(nodeInfo)
+      case PreprocessorDirective | ShebangDirective              => Nil
+      case _: PreprocessorBranch                                 => astForPreprocessorBranch(nodeInfo)
       case Block                                                 => Seq(astForBlock(nodeInfo))
       case IdentifierName                                        => Seq(astForIdentifier(nodeInfo))
       case LocalDeclarationStatement                             => astForLocalDeclarationStatement(nodeInfo)
       case FinallyClause                                         => astForFinallyClause(nodeInfo)
       case CatchClause                                           => astForCatchClause(nodeInfo)
       case CatchDeclaration                                      => astForCatchDeclaration(nodeInfo)
+      case CatchFilterClause                                     => astForCatchFilterClause(nodeInfo)
+      case _: ConstructorInitializer                             => astForConstructorInitializer(nodeInfo)
+      case ExplicitInterfaceSpecifier                            => Nil
       case PropertyDeclaration                                   => astForPropertyDeclaration(nodeInfo)
       case ExpressionElement                                     => astForExpressionElement(nodeInfo)
       case _: BaseExpr                                           => astForExpression(nodeInfo)
       case _                                                     => notHandledYet(nodeInfo)
     }
+  }
+
+  private def astForPreprocessorBranch(nodeInfo: DotNetNodeInfo): Seq[Ast] = {
+    nodeInfo.json(ParserKeys.Members).arr.flatMap(astForNode).toSeq
   }
 
 }

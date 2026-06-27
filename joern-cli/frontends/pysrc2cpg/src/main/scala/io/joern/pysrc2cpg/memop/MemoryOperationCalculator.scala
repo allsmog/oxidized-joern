@@ -102,7 +102,14 @@ class MemoryOperationCalculator extends AstVisitor[Unit] {
     pop()
   }
 
-  override def visit(typeAlias: TypeAlias): Unit = {}
+  override def visit(typeAlias: TypeAlias): Unit = {
+    push(Store)
+    accept(typeAlias.name)
+    pop()
+    push(Load)
+    accept(typeAlias.value)
+    pop()
+  }
 
   override def visit(annAssign: ast.AnnAssign): Unit = {
     push(Store)

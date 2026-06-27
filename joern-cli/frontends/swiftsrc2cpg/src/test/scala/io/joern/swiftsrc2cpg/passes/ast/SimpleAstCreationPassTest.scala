@@ -76,15 +76,33 @@ class SimpleAstCreationPassTest extends SwiftSrc2CpgSuite {
       val cpg = code("""
         |var (a, b): Int = foo()
         |""".stripMargin)
-      val List(method)           = cpg.method.nameExact("<global>").l
-      val List(assignA, assignB) = method.assignment.l
-      assignA.code shouldBe "var a: Int = foo()"
-      assignB.code shouldBe "var b: Int = foo()"
-      val List(localA, localB) = method.block.local.l
+      val List(method)                      = cpg.method.nameExact("<global>").l
+      val List(tmpAssign, assignA, assignB) = method.assignment.l
+      val List(tmpLocal)                    = method.block.local.name("^<tmp>.*").l
+      tmpAssign.code shouldBe s"${tmpLocal.name} = foo()"
+      assignA.code shouldBe s"a = ${tmpLocal.name}.0"
+      assignB.code shouldBe s"b = ${tmpLocal.name}.1"
+      cpg.call.nameExact("foo").size shouldBe 1
+      val List(localA, localB) = method.block.local.nameExact("a", "b").l
       localA.name shouldBe "a"
       localA.typeFullName shouldBe "Swift.Int"
       localB.name shouldBe "b"
       localB.typeFullName shouldBe "Swift.Int"
+    }
+
+    "have correct structure for nested tuple variable declarations" in {
+      val cpg = code("""
+        |let (a, (b, _)) = foo()
+        |""".stripMargin)
+      val List(method)                      = cpg.method.nameExact("<global>").l
+      val List(tmpAssign, assignA, assignB) = method.assignment.l
+      val List(tmpLocal)                    = method.block.local.name("^<tmp>.*").l
+      tmpAssign.code shouldBe s"${tmpLocal.name} = foo()"
+      assignA.code shouldBe s"a = ${tmpLocal.name}.0"
+      assignB.code shouldBe s"b = ${tmpLocal.name}.1.0"
+      method.block.local.nameExact("a", "b").size shouldBe 2
+      method.block.local.name("^<wildcard>.*").l shouldBe empty
+      cpg.unknown.l shouldBe empty
     }
 
     "have corresponding type decl with correct bindings for function" in {
@@ -210,7 +228,9 @@ class SimpleAstCreationPassTest extends SwiftSrc2CpgSuite {
           |}
           |""".stripMargin)
 
-      cpg.controlStructure.controlStructureType(ControlStructureTypes.WHILE).code.l shouldBe List("for item in items {\n    sink(item)\n  }")
+      cpg.controlStructure.controlStructureType(ControlStructureTypes.WHILE).code.l shouldBe List(
+        "for item in items {\n    sink(item)\n  }"
+      )
       cpg.call.nameExact(Operators.assignment).code.l should contain("item = <result>0.value")
       cpg.call.nameExact("sink").code.l shouldBe List("sink(item)")
     }

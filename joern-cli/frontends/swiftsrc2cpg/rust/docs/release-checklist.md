@@ -54,9 +54,8 @@ SWIFTASTGEN_REFERENCE=/path/to/SwiftAstGen-mac \
 ```
 
 The harness normalizes a small set of documented divergences (see
-`docs/json-contract.md`), then prints a ranked delta classification (by delta
-kind and by `kind @ nodeType`) so the remaining tail can be triaged. Each
-mismatch must be classified as one of:
+`docs/json-contract.md`) and the checked-in fixture corpus is expected to pass
+without mismatches. If a mismatch appears, classify it as one of:
 
 - A Rust JSON compatibility bug.
 - An intentional, CPG-irrelevant divergence documented in

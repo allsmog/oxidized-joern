@@ -7,6 +7,8 @@ import io.joern.x2cpg.{Ast, Defines, ValidationMode}
 import io.shiftleft.codepropertygraph.generated.nodes.{DeclarationNew, NewCall, NewFieldIdentifier, NewLocal}
 import io.shiftleft.codepropertygraph.generated.{DispatchTypes, Operators}
 
+import scala.util.Try
+
 trait AstForPrimitivesCreator(implicit withSchemaValidation: ValidationMode) { this: AstCreator =>
 
   protected def astForIdentifier(ident: DotNetNodeInfo, typeFullName: String = Defines.Any): Ast = {
@@ -53,11 +55,25 @@ trait AstForPrimitivesCreator(implicit withSchemaValidation: ValidationMode) { t
   }
 
   protected def astForUsing(usingNode: DotNetNodeInfo): Ast = {
-    val namespace  = nameFromNode(usingNode)
-    val alias      = namespace.split('.').last
+    val targetNode = createDotNetNodeInfo(usingNode.json(ParserKeys.Name))
+    val namespace = nameFromNode(targetNode) match {
+      case "<empty>" => targetNode.code
+      case name      => name
+    }
+    val alias = Try(usingNode.json(ParserKeys.Alias)).toOption
+      .collect { case alias: ujson.Obj => nameFromNode(createDotNetNodeInfo(alias)) }
+      .getOrElse(namespace.split('.').last)
     val importNode = newImportNode(code(usingNode), namespace, alias, usingNode)
-    scope.addImportedNamespace(namespace)
-    scope.addImportedTypeOrModule(namespace) // We cannot determine if the namespace refers to a type so we do both
+
+    if (Try(usingNode.json(ParserKeys.Static).bool).getOrElse(false)) {
+      scope.addImportedTypeOrModule(namespace)
+      scope.addImportedMember(namespace)
+    } else if (Try(usingNode.json(ParserKeys.Alias)).toOption.exists(_.isInstanceOf[ujson.Obj])) {
+      scope.addImportedAlias(alias, nodeTypeFullName(targetNode))
+    } else {
+      scope.addImportedNamespace(namespace)
+      scope.addImportedTypeOrModule(namespace) // We cannot determine if the namespace refers to a type so we do both
+    }
     Ast(importNode)
   }
 

@@ -63,7 +63,8 @@ class SwitchTests extends GoCodeToCpgSuite {
     inside(cpg.method.name("method").controlStructure.l) { case List(controlStruct: ControlStructure) =>
       controlStruct.code shouldBe "switch "
       controlStruct.controlStructureType shouldBe ControlStructureTypes.SWITCH
-      inside(controlStruct.astChildren.l) { case List(switchBlock: Block) =>
+      inside(controlStruct.astChildren.l) { case List(condition: Literal, switchBlock: Block) =>
+        condition.code shouldBe "true"
         switchBlock.astChildren.size shouldBe 6
         switchBlock.astChildren.code.l shouldBe List(
           "case grade == \"A\"",
@@ -148,8 +149,7 @@ class SwitchTests extends GoCodeToCpgSuite {
     )
   }
 
-  // TODO Need to handle `fallthrough` statements
-  "ast creation for fallthrough" ignore {
+  "ast creation for fallthrough" should {
     "be correct" in {
 
       val cpg = code("""package main

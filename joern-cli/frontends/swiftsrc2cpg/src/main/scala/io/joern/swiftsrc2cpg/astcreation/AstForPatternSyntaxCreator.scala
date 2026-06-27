@@ -82,7 +82,7 @@ trait AstForPatternSyntaxCreator(implicit withSchemaValidation: ValidationMode) 
     }
   }
 
-  private def astForWildcardPatternSyntax(node: WildcardPatternSyntax): Ast = notHandledYet(node)
+  private def astForWildcardPatternSyntax(@unused node: WildcardPatternSyntax): Ast = Ast()
 
   protected def astForPatternSyntax(patternSyntax: PatternSyntax): Ast = patternSyntax match {
     case node: ExpressionPatternSyntax   => astForExpressionPatternSyntax(node)

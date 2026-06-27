@@ -76,7 +76,7 @@ class CallTests extends RubyCode2CpgFixture(withPostProcessing = true, withDataF
     sink.reachableByFlows(source).size shouldBe 1
   }
 
-  "Data flow through variable params" ignore {
+  "Data flow through variable params" in {
     val cpg = code("""
                      |def foo(*args)
                      |  return args
@@ -212,7 +212,7 @@ class CallTests extends RubyCode2CpgFixture(withPostProcessing = true, withDataF
   }
 
   // No longer works after field access receiver/base
-  "Data flow through a keyword? named method usage" ignore {
+  "Data flow through a keyword? named method usage" in {
     val cpg = code("""
                      |x = 1
                      |y = x.nil?
@@ -221,11 +221,13 @@ class CallTests extends RubyCode2CpgFixture(withPostProcessing = true, withDataF
 
     val src  = cpg.literal.code("1").l
     val sink = cpg.call.name("puts").argument(1).l
-    sink.reachableByFlows(src).size shouldBe 1
+    sink.reachableByFlows(src).map(flowToResultPairs).distinct.l shouldBe List(
+      List(("x = 1", 2), ("y = x.nil?", 3), ("puts y", 4))
+    )
   }
 
   // No longer works after field access receiver/base
-  "Data flow through a keyword inside a association" ignore {
+  "Data flow through a keyword inside a association" in {
     val cpg = code("""
                      |def foo(arg)
                      |  puts arg
@@ -237,7 +239,9 @@ class CallTests extends RubyCode2CpgFixture(withPostProcessing = true, withDataF
 
     val src  = cpg.literal.code("1").l
     val sink = cpg.call.name("puts").argument(1).l
-    sink.reachableByFlows(src).size shouldBe 1
+    sink.reachableByFlows(src).map(flowToResultPairs).distinct.l shouldBe List(
+      List(("x = 1", 6), ("foo if: x.nil?", 7), ("foo(self, arg)", 2), ("puts arg", 3))
+    )
   }
 
   "flow through a method call with safe navigation operator with parentheses" in {
@@ -259,7 +263,7 @@ class CallTests extends RubyCode2CpgFixture(withPostProcessing = true, withDataF
   }
 
   // TODO: This does not create a call node, as AMPDOT is not recognized by the parser without parentheses
-  "flow through a method call with safe navigation operator without parentheses" ignore {
+  "flow through a method call with safe navigation operator without parentheses" in {
     val cpg = code("""
                      |class Foo
                      | def bar(arg)

@@ -59,7 +59,8 @@ trait AstForFunctionsCreator(implicit withSchemaValidation: ValidationMode) { th
       val paramNode = nodeInfo.node match {
         case RestElement =>
           val paramName     = nodeInfo.code.replace("...", "")
-          val tpe           = typeFor(nodeInfo)
+          val tpe =
+            if (hasKey(nodeInfo.json, "typeAnnotation")) typeFor(nodeInfo) else Defines.Array
           val typeFullName  = if (Defines.isBuiltinType(tpe)) tpe else Defines.Any
           val possibleTypes = Seq(tpe)
           if (createLocals) {

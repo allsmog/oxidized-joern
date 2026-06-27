@@ -126,7 +126,7 @@ class AstGenRunner(config: Config) extends io.joern.x2cpg.astgen.AstGenRunner(As
   }
 
   private def relativeSkippedFile(in: Path, fileName: String): String = {
-    val path = Paths.get(fileName)
+    val path      = Paths.get(fileName)
     val inputPath = Try(in.toRealPath()).getOrElse(in.toAbsolutePath.normalize())
     val skippedPath =
       if (path.isAbsolute) Try(path.toRealPath()).getOrElse(path.normalize())

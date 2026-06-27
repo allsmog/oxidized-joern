@@ -78,8 +78,7 @@ class ArraysAndMapTests extends GoCodeToCpgSuite {
       a.typeFullName shouldBe "[]int"
     }
 
-    // TODO need to be handled as part of initializer constructor implementation for package TypeDecl
-    "Check Array initializer CALL node" ignore {
+    "Check Array initializer CALL node" in {
       val List(x) = cpg.call(Operators.arrayInitializer).l
       x.typeFullName shouldBe "[]int"
       val List(arg1: Literal, arg2: Literal) = x.argument.l: @unchecked
@@ -87,16 +86,17 @@ class ArraysAndMapTests extends GoCodeToCpgSuite {
       arg2.code shouldBe "2"
     }
 
-    "Check assignment call node" ignore {
+    "Check assignment call node" in {
       val List(assignmentCallNode) = cpg.call(Operators.assignment).l
       assignmentCallNode.typeFullName shouldBe "[]int"
-      val List(arg1: Identifier, arg2: Call) = assignmentCallNode.argument.l: @unchecked
-      arg1.name shouldBe "a"
+      val List(arg1: Call, arg2: Call) = assignmentCallNode.argument.l: @unchecked
+      arg1.name shouldBe Operators.fieldAccess
+      arg1.code shouldBe "a"
       arg1.typeFullName shouldBe "[]int"
       arg2.typeFullName shouldBe "[]int"
     }
 
-    "be correct with code field" ignore {
+    "be correct with code field" in {
       val cpg = code("""
           |package main
           |var a = [5]int{1,2}
@@ -104,7 +104,6 @@ class ArraysAndMapTests extends GoCodeToCpgSuite {
           |}
           |""".stripMargin)
       val List(assignmentCallNode) = cpg.call(Operators.assignment).l
-      // TODO: Fix the code format - there should be a = in between
       assignmentCallNode.code shouldBe "var a = [5]int{1,2}"
     }
   }
@@ -707,7 +706,7 @@ class ArraysAndMapTests extends GoCodeToCpgSuite {
     }
   }
 
-  "be correct when map access using string having single index" ignore {
+  "be correct when map access using string having single index" should {
     val cpg = code("""
         |package main
         |func main() {
@@ -726,7 +725,7 @@ class ArraysAndMapTests extends GoCodeToCpgSuite {
       indexCall.methodFullName shouldBe "<operator>.indexAccess"
       indexCall.typeFullName shouldBe "int"
 
-      val List(indexLiteral: Literal, indexIdentifier: Identifier) = indexCall.argument.l: @unchecked
+      val List(indexIdentifier: Identifier, indexLiteral: Literal) = indexCall.argument.l: @unchecked
 
       indexIdentifier.code shouldBe "mymap"
       indexIdentifier.typeFullName shouldBe "map[]int"

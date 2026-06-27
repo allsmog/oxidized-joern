@@ -29,6 +29,84 @@ class AstCreator(val config: Config, val parseResult: ParseResult)(implicit with
   private val logger = LoggerFactory.getLogger(getClass)
 
   protected val methodAstParentStack = new Stack[NewNode]
+  private var lexicalTypeScopes      = List(Map.empty[String, String])
+  private var importScopes           = List(Map.empty[String, String])
+  private var wildcardImportScopes   = List(Vector.empty[String])
+
+  protected def withLexicalTypeScope[A](body: => A): A = {
+    lexicalTypeScopes = Map.empty[String, String] :: lexicalTypeScopes
+    importScopes = Map.empty[String, String] :: importScopes
+    wildcardImportScopes = Vector.empty[String] :: wildcardImportScopes
+    try body
+    finally {
+      lexicalTypeScopes = lexicalTypeScopes.tail
+      importScopes = importScopes.tail
+      wildcardImportScopes = wildcardImportScopes.tail
+    }
+  }
+
+  protected def withFreshLexicalTypeScope[A](body: => A): A = {
+    val savedScopes = lexicalTypeScopes
+    lexicalTypeScopes = List(Map.empty[String, String])
+    try body
+    finally lexicalTypeScopes = savedScopes
+  }
+
+  protected def bindLexicalType(name: String, typeFullName: String): Unit = {
+    if (name.nonEmpty) {
+      lexicalTypeScopes = lexicalTypeScopes match {
+        case frame :: rest => frame.updated(name, typeFullName) :: rest
+        case Nil           => List(Map(name -> typeFullName))
+      }
+    }
+  }
+
+  protected def lookupLexicalType(name: String): Option[String] = {
+    lexicalTypeScopes.collectFirst {
+      case frame if frame.contains(name) => frame(name)
+    }
+  }
+
+  protected def bindImportAlias(alias: String, importedEntity: String): Unit = {
+    if (alias.nonEmpty && alias != "*" && alias != "_" && importedEntity.nonEmpty) {
+      importScopes = importScopes match {
+        case frame :: rest => frame.updated(alias, importedEntity) :: rest
+        case Nil           => List(Map(alias -> importedEntity))
+      }
+    }
+  }
+
+  protected def lookupImportAlias(alias: String): Option[String] = {
+    importScopes.collectFirst {
+      case frame if frame.contains(alias) => frame(alias)
+    }
+  }
+
+  protected def bindWildcardImport(importedEntity: String): Unit = {
+    if (importedEntity.nonEmpty) {
+      wildcardImportScopes = wildcardImportScopes match {
+        case frame :: rest => (frame :+ importedEntity) :: rest
+        case Nil           => List(Vector(importedEntity))
+      }
+    }
+  }
+
+  protected def lookupWildcardImport(segments: Seq[String]): Option[String] = {
+    def loop(scopes: List[Vector[String]]): Option[String] = {
+      scopes match {
+        case Nil => None
+        case frame :: rest if frame.isEmpty =>
+          loop(rest)
+        case frame :: _ =>
+          frame.distinct match {
+            case prefix +: Nil => Some((prefix +: segments).mkString(RustFullNames.PathSep))
+            case _             => None
+          }
+      }
+    }
+
+    Option.when(segments.nonEmpty)(()).flatMap(_ => loop(wildcardImportScopes))
+  }
 
   override def createAst(): DiffGraphBuilder = {
     val sourceFile = parseResult.ast.asInstanceOf[RustNodeSyntax.SourceFile]
@@ -61,8 +139,12 @@ class AstCreator(val config: Config, val parseResult: ParseResult)(implicit with
     Ast(unknownNode(node, code(node)))
   }
 
-  protected def assignmentNode(node: RustNodeSyntax.RustNode, code: String): NewCall = {
-    operatorCallNode(node = node, name = Operators.assignment, code = code, typeFullName = None)
+  protected def assignmentNode(
+    node: RustNodeSyntax.RustNode,
+    code: String,
+    typeFullName: Option[String] = None
+  ): NewCall = {
+    operatorCallNode(node = node, name = Operators.assignment, code = code, typeFullName = typeFullName)
   }
 
   protected def methodNode(node: RustNode, name: String): NewMethod = {
@@ -112,18 +194,29 @@ class AstCreator(val config: Config, val parseResult: ParseResult)(implicit with
     )
   }
 
-  protected def typeDeclForStruct(struct: RustNodeSyntax.Struct): NewTypeDecl = {
-    val name   = code(struct.name)
+  protected def typeDeclForNamedItem(
+    node: RustNode,
+    name: String,
+    alias: Option[String] = None,
+    inherits: Seq[String] = Seq.empty,
+    fullName: Option[String] = None
+  ): NewTypeDecl = {
     val parent = methodAstParentStack.head
     typeDeclNode(
-      node = struct,
+      node = node,
       name = name,
-      fullName = composeRustFullName(name),
+      fullName = fullName.getOrElse(composeRustFullName(name)),
       filename = parseResult.filename,
-      code = code(struct),
+      code = code(node),
       astParentType = parent.label,
-      astParentFullName = parent.properties(PropertyNames.FullName).toString
+      astParentFullName = parent.properties(PropertyNames.FullName).toString,
+      inherits = inherits,
+      alias = alias
     )
+  }
+
+  protected def typeDeclForStruct(struct: RustNodeSyntax.Struct): NewTypeDecl = {
+    typeDeclForNamedItem(struct, code(struct.name))
   }
 
   protected def operatorNameFor(binExpr: RustNodeSyntax.BinExpr): Option[String] = binExpr.op match {

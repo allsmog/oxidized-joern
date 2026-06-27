@@ -169,13 +169,23 @@ class ExpressionTests extends SwiftSrc2CpgSuite {
       |\ABCProtocol[100]
       |children.filter(\.type.defaultInitialization.isEmpty)
       |""".stripMargin)
-      // KeyPath expressions are not modelled; they surface as Unknown nodes via notHandledYet.
-      val keypathUnknowns = cpg.unknown.code(".*\\\\.*").l
-      keypathUnknowns.code.l should contain allOf (
+      val keyPathCalls = cpg.call.nameExact("<operator>.keyPath").l
+      keyPathCalls.code.l should contain allOf (
         "\\a.b.c",
+        "\\ABCProtocol[100]",
+        "\\.type.defaultInitialization.isEmpty"
+      )
+      keyPathCalls.find(_.code == "\\a.b.c").get.argument.code.l shouldBe List("a", "b", "c")
+      keyPathCalls.find(_.code == "\\ABCProtocol[100]").get.argument.isLiteral.code.l shouldBe List(
         "\\ABCProtocol[100]"
       )
-      // The surrounding `children.filter(...)` call still resolves.
+      keyPathCalls
+        .find(_.code == "\\.type.defaultInitialization.isEmpty")
+        .get
+        .argument
+        .code
+        .l shouldBe List("type", "defaultInitialization", "isEmpty")
+      cpg.unknown.code(".*\\\\.*").l shouldBe empty
       cpg.call.nameExact("filter").code.l shouldBe List("children.filter(\\.type.defaultInitialization.isEmpty)")
     }
 
@@ -347,6 +357,23 @@ class ExpressionTests extends SwiftSrc2CpgSuite {
       switchStruct.controlStructureType shouldBe ControlStructureTypes.SWITCH
       switchStruct.code should startWith("switch Bool.random()")
       switchStruct.ast.collectAll[JumpTarget].code.l shouldBe List("case true:", "case false:")
+    }
+
+    "testThenStmtInIfExpression" in {
+      val cpg = code("let x = if true { then 1 } else { then 2 }")
+      cpg.unknown.code(".*then.*").l shouldBe empty
+      val List(ifStruct) = cpg.controlStructure.controlStructureType(ControlStructureTypes.IF).l
+      ifStruct.whenTrue.code.l shouldBe List("1")
+      ifStruct.whenFalse.code.l shouldBe List("2")
+    }
+
+    "testThenStmtInSwitchExpression" in {
+      val cpg = code("let x = switch true { case true: then 3 default: then 4 }")
+      cpg.unknown.code(".*then.*").l shouldBe empty
+      val List(switchStruct) = cpg.controlStructure.controlStructureType(ControlStructureTypes.SWITCH).l
+      switchStruct.ast.collectAll[JumpTarget].code.l shouldBe List("case true:", "default:")
+      val List(switchBlock) = switchStruct.astChildren.isBlock.l
+      switchBlock.astChildren.isLiteral.code.l should contain allOf ("3", "4")
     }
 
     "testTryIf1" in {
@@ -578,7 +605,9 @@ class ExpressionTests extends SwiftSrc2CpgSuite {
           |let (ids, (actions, tracking)) = state.withCriticalRegion { ($0.valueObservers(for: keyPath), $0.didSet(keyPath: keyPath)) }
           |""".stripMargin)
       val closureMethods = cpg.method.name("<lambda>.*").l
-      closureMethods.name.l shouldBe List("<lambda>0", "<lambda>1")
+      closureMethods.name.l shouldBe List("<lambda>0")
+      cpg.call.nameExact("withCriticalRegion").size shouldBe 1
+      cpg.call.nameExact("withCriticalRegion").argument.isMethodRef.methodFullName.l shouldBe closureMethods.fullName.l
       cpg.identifier.name.toSet should contain("$0")
     }
 

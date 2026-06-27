@@ -1,6 +1,7 @@
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.sbt.packager.Keys.stagingDirectory
-import java.net.URI
+
+import scala.sys.process.Process
 
 name := "rubysrc2cpg"
 
@@ -21,57 +22,71 @@ lazy val joernTypeStubsVersion = settingKey[String]("joern_type_stub version")
 joernTypeStubsVersion := appProperties.value.getString("rubysrc2cpg.joern_type_stubs_version")
 
 libraryDependencies ++= Seq(
-  "io.shiftleft" %% "codepropertygraph" % Versions.cpg,
+  "io.shiftleft"        %% "codepropertygraph" % Versions.cpg,
   "org.apache.commons" % "commons-compress" % Versions.commonsCompress, // For unpacking Gems with `--download-dependencies`
-  "org.jruby"      % "jruby-complete" % Versions.jRuby,
-  "org.scalatest" %% "scalatest"      % Versions.scalatest % Test
+  "org.scalatest"      %% "scalatest"         % Versions.scalatest % Test
 )
 
 enablePlugins(JavaAppPackaging, LauncherJarPlugin)
 
-libraryDependencies ++= Seq(
-  "io.shiftleft"  %% "codepropertygraph" % Versions.cpg,
-  "org.scalatest" %% "scalatest"         % Versions.scalatest % Test
-)
+lazy val astGenVersion = settingKey[String]("rubyastgen version")
+astGenVersion := appProperties.value.getString("rubysrc2cpg.rubyastgen_version")
 
-lazy val astGenVersion = settingKey[String]("`ruby_ast_gen` version")
-astGenVersion := appProperties.value.getString("rubysrc2cpg.ruby_ast_gen_version")
+// Differential reference (rust/crates/rubyastgen-cli/tests/differential_json.rs,
+// gated on RUBYASTGEN_REFERENCE): the upstream reference is `ruby_ast_gen`
+// (github.com/joernio/astgen-monorepo, `ruby-astgen`), a Ruby gem wrapped around
+// the `parser` gem. It is NOT a standalone native binary — it runs through JRuby
+// after being embedded under src/main/resources, and is published as a packaged
+// gem ZIP, not an executable. It was historically fetched via:
+//   https://github.com/joernio/astgen-monorepo/releases/download/ruby-astgen/v<ver>/ruby_ast_gen_v<ver>.zip
+// (unzipped into resources by an `astGenResourceTask`). The oxidized track builds
+// the Rust `rubyastgen` binary instead (rubyAstGenBuildRust below), so no gem
+// download task is wired in here. To run the differential test, point
+// RUBYASTGEN_REFERENCE at a `ruby_ast_gen` launcher (needs Ruby/JRuby) or another
+// `rubyastgen` revision honouring the positional `<input> <output>` interface.
 
-lazy val astGenDlUrl = settingKey[String]("astgen download url")
-astGenDlUrl := s"https://github.com/joernio/astgen-monorepo/releases/download/ruby-astgen/v${astGenVersion.value}/"
+lazy val RubyAstgenWin      = "rubyastgen-win.exe"
+lazy val RubyAstgenLinux    = "rubyastgen-linux"
+lazy val RubyAstgenLinuxArm = "rubyastgen-linux-arm"
+lazy val RubyAstgenMac      = "rubyastgen-macos"
+lazy val RubyAstgenMacArm   = "rubyastgen-macos-arm"
 
-def hasCompatibleAstGenVersion(astGenBaseDir: File, astGenVersion: String): Boolean = {
-  val versionFile = astGenBaseDir / "lib" / "ruby_ast_gen" / "version.rb"
-  if (!versionFile.exists) return false
-  val versionPattern = "VERSION = \"([0-9]+\\.[0-9]+\\.[0-9]+)\"".r
-  versionPattern.findFirstIn(IO.read(versionFile)) match {
-    case Some(versionString) =>
-      // Regex group matching doesn't appear to work in SBT
-      val version = versionString.stripPrefix("VERSION = \"").stripSuffix("\"")
-      version == astGenVersion
-    case _ => false
+lazy val rubyAstGenCurrentBinaryName = taskKey[String]("rubyastgen binary name for the current host")
+rubyAstGenCurrentBinaryName := {
+  (Environment.operatingSystem, Environment.architecture) match {
+    case (Environment.OperatingSystemType.Windows, _)                                => RubyAstgenWin
+    case (Environment.OperatingSystemType.Linux, Environment.ArchitectureType.X86)   => RubyAstgenLinux
+    case (Environment.OperatingSystemType.Linux, Environment.ArchitectureType.ARMv8) => RubyAstgenLinuxArm
+    case (Environment.OperatingSystemType.Mac, Environment.ArchitectureType.X86)     => RubyAstgenMac
+    case (Environment.OperatingSystemType.Mac, Environment.ArchitectureType.ARMv8)   => RubyAstgenMacArm
+    case _                                                                           => RubyAstgenLinux
   }
 }
 
-lazy val astGenResourceTask = taskKey[Seq[File]](s"Download `ruby_ast_gen` and package this under `resources`")
-astGenResourceTask := {
-  val targetDir           = baseDirectory.value / "src" / "main" / "resources"
-  val gemName             = s"ruby_ast_gen_v${astGenVersion.value}.zip"
-  val compressGemPath     = targetDir / gemName
-  val unpackedGemFullPath = targetDir / gemName.stripSuffix(s"_v${astGenVersion.value}.zip")
-  if (!hasCompatibleAstGenVersion(unpackedGemFullPath, astGenVersion.value)) {
-    if (unpackedGemFullPath.exists()) IO.delete(unpackedGemFullPath)
-    val url = s"${astGenDlUrl.value}$gemName"
-    sbt.io.Using.urlInputStream(new URI(url).toURL) { inputStream =>
-      sbt.IO.transfer(inputStream, compressGemPath)
-    }
-    IO.unzip(compressGemPath, unpackedGemFullPath)
-    IO.delete(compressGemPath)
+lazy val rubyAstGenBuildRust = taskKey[File]("Build local Rust rubyastgen and install it under bin/astgen")
+rubyAstGenBuildRust := {
+  val rustRoot = baseDirectory.value / "rust"
+  val localBinaryName =
+    if (Environment.operatingSystem == Environment.OperatingSystemType.Windows) "rubyastgen.exe" else "rubyastgen"
+  val exitCode = Process(Seq("cargo", "build", "--release", "--bin", "rubyastgen"), rustRoot).!
+  if (exitCode != 0) {
+    sys.error(s"cargo build failed with exit code $exitCode")
   }
-  (unpackedGemFullPath ** "*").get.filter(_.isFile)
-}
 
-Compile / resourceGenerators += astGenResourceTask
+  val builtBinary = rustRoot / "target" / "release" / localBinaryName
+  val astGenDir   = baseDirectory.value / "bin" / "astgen"
+  val targetFile  = astGenDir / rubyAstGenCurrentBinaryName.value
+  astGenDir.mkdirs()
+  IO.copyFile(builtBinary, targetFile, preserveLastModified = true)
+  targetFile.setExecutable(true, false)
+
+  val distDir = (Universal / stagingDirectory).value / "bin" / "astgen"
+  distDir.mkdirs()
+  IO.copyDirectory(astGenDir, distDir, preserveExecutable = true)
+
+  streams.value.log.info(s"installed Rust rubyastgen to $targetFile")
+  targetFile
+}
 
 lazy val joernTypeStubsDlUrl = settingKey[String]("joern_type_stubs download url")
 joernTypeStubsDlUrl := s"https://github.com/joernio/joern-type-stubs/releases/download/v${joernTypeStubsVersion.value}/"
@@ -108,7 +123,7 @@ joernTypeStubsDlTask := {
   IO.copyDirectory(joernTypeStubsDir, distDir)
 }
 
-Compile / compile := ((Compile / compile) dependsOn joernTypeStubsDlTask).value
+Compile / compile := ((Compile / compile) dependsOn (joernTypeStubsDlTask, rubyAstGenBuildRust)).value
 
 Universal / packageName       := name.value
 Universal / topLevelDirectory := None

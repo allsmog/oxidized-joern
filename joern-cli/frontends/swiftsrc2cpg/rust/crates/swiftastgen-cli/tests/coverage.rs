@@ -130,10 +130,8 @@ func sumOfSquares(_ values: [Int]) -> Int {
     // closure passed inline + trailing closure form
     let mapped = values.map({ (n: Int) -> Int in n * n })
     let filtered = mapped.filter { $0 > 1 }
-    // NOTE: excluded `reduce(0, +)` here. Passing a bare operator (`+`) as a
-    // first-class function value degrades to a placeholder under the current
-    // tree-sitter mapping (tallied as `+`), so we use an explicit closure.
-    return total + filtered.reduce(0, { acc, value in acc + value })
+    // bare operator reference as a first-class function value
+    return total + filtered.reduce(0, +)
 }
 
 // MARK: async / await, throws / try, do-catch
@@ -165,6 +163,12 @@ func keyPaths() {
     // explicit discard assignment
     _ = kp
     _ = area(of: .point)
+}
+
+// MARK: bracket-qualified types
+func bracketQualifiedTypes(_ item: [Point].Element, _ keys: [String: Point].Keys?) {
+    _ = item
+    _ = keys
 }
 
 // MARK: extension with a method + computed property

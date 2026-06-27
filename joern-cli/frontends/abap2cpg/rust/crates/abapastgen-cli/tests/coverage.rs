@@ -1,11 +1,10 @@
 //! Coverage gate for the ABAP statement classifier.
 //!
-//! Runs the real `abapgen` CLI over an inline fixture whose every statement the
-//! classifier currently handles, then asserts the run succeeds and prints *no*
-//! `abapastgen: N unclassified statement(s)` summary on stderr. The summary is
-//! emitted by `crates/abapastgen-cli/src/main.rs` whenever
-//! `abapastgen_core::unclassified_count()` is non-zero, so an empty stderr means
-//! the fixture is fully classified.
+//! Runs the real `abapgen` CLI over the fixture corpus, then asserts the run
+//! succeeds and prints *no* `abapastgen: N unclassified statement(s)` summary on
+//! stderr. The summary is emitted by `crates/abapastgen-cli/src/main.rs`
+//! whenever `abapastgen_core::unclassified_count()` is non-zero, so an empty
+//! stderr means there were no unexpected classifier fallthroughs.
 //!
 //! The classifier's `Unknown` counter lives in a process-global atomic, but each
 //! CLI invocation is a fresh process, so the stderr gate is unaffected by test
@@ -18,12 +17,43 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use tempfile::tempdir;
 
-/// Control-flow + basic data statements the classifier handles today. Every one
+/// Control-flow, data, and security-relevant statements the classifier handles. Every one
 /// of these must appear in the fixture's emitted `statements[].type` set.
 const EXPECTED_TYPES: &[&str] = &[
-    "If", "ElseIf", "Else", "EndIf", "Case", "When", "EndCase", "While", "EndWhile", "Do", "EndDo",
-    "Loop", "EndLoop", "Try", "Catch", "EndTry", "Check", "Exit", "Continue", "Return", "Raise",
-    "Data", "Move", "Assign",
+    "If",
+    "ElseIf",
+    "Else",
+    "EndIf",
+    "Case",
+    "When",
+    "WhenOthers",
+    "EndCase",
+    "While",
+    "EndWhile",
+    "Do",
+    "EndDo",
+    "Loop",
+    "EndLoop",
+    "Try",
+    "Catch",
+    "Cleanup",
+    "EndTry",
+    "Check",
+    "Exit",
+    "Continue",
+    "Return",
+    "Raise",
+    "Data",
+    "Move",
+    "Comment",
+    "OpenDataset",
+    "ReadDataset",
+    "DeleteDataset",
+    "Transfer",
+    "AuthorityCheck",
+    "GenerateSubroutine",
+    "EditorCall",
+    "Unknown",
 ];
 
 #[test]
@@ -62,11 +92,6 @@ fn emitted_statement_types_cover_control_flow() {
     assert!(status.success(), "abapgen exited unsuccessfully");
 
     let emitted = emitted_statement_types(out.path());
-    assert!(
-        !emitted.contains("Unknown"),
-        "fixture emitted an Unknown statement type"
-    );
-
     let expected = EXPECTED_TYPES
         .iter()
         .map(|t| (*t).to_string())

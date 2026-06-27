@@ -118,6 +118,11 @@ goAstGenBuildRust := {
   goAstGenDir.mkdirs()
   IO.copyFile(builtBinary, targetFile, preserveLastModified = true)
   targetFile.setExecutable(true, false)
+
+  val distDir = (Universal / stagingDirectory).value / "bin" / "astgen"
+  distDir.mkdirs()
+  IO.copyDirectory(goAstGenDir, distDir, preserveExecutable = true)
+
   streams.value.log.info(s"installed Rust goastgen to $targetFile")
   targetFile
 }
@@ -138,7 +143,7 @@ goAstGenDlTask := {
   IO.copyDirectory(goAstGenDir, distDir, preserveExecutable = true)
 }
 
-Compile / compile := ((Compile / compile) dependsOn goAstGenDlTask).value
+Compile / compile := ((Compile / compile) dependsOn goAstGenBuildRust).value
 
 lazy val goAstGenSetAllPlatforms = taskKey[Unit](s"Set ALL_PLATFORMS")
 goAstGenSetAllPlatforms := { System.setProperty("ALL_PLATFORMS", "TRUE") }

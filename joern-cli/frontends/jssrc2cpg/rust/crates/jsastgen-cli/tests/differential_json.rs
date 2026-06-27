@@ -120,13 +120,12 @@ fn immediate_child_dirs(root: &Path) -> Vec<PathBuf> {
 /// Invoke the reference `astgen` binary with the exact flags the Scala frontend
 /// uses. `AstGenRunner` runs `astgen -t ts -o <out>` for every `.js/.ts/.tsx`
 /// input (there is no separate `tsx` type), relying on the working directory for
-/// the input root; the released binary also accepts the input directory as a
-/// trailing positional argument, which is how the harness passes it here.
+/// the input root.
 fn run_reference(reference: &Path, input: &Path, out: &Path) -> Result<(), String> {
     let output = StdCommand::new(reference)
         .args(["-t", "ts", "-o"])
         .arg(out)
-        .arg(input)
+        .current_dir(input)
         .output()
         .map_err(|err| err.to_string())?;
     check_output(output, "reference")
@@ -192,8 +191,9 @@ fn collect_json_files(root: &Path, out: &mut Vec<PathBuf>) -> Result<(), String>
     Ok(())
 }
 
-/// Strips absolute input paths so reference and Rust trees compare equal
-/// regardless of where the corpus lives on disk.
+/// Strips absolute input paths and non-contractual `loc` sparsity so reference
+/// and Rust trees compare equal regardless of where the corpus lives on disk.
+/// Numeric `start`/`end` offsets remain under comparison.
 fn normalize_value(value: &mut Value, input_root: &Path) {
     match value {
         Value::String(text) => {
@@ -205,6 +205,7 @@ fn normalize_value(value: &mut Value, input_root: &Path) {
             }
         }
         Value::Object(values) => {
+            values.remove("loc");
             for value in values.values_mut() {
                 normalize_value(value, input_root);
             }

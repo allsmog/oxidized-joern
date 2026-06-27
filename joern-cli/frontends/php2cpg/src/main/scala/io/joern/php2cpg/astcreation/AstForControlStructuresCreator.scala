@@ -16,7 +16,8 @@ trait AstForControlStructuresCreator(implicit withSchemaValidation: ValidationMo
 
     val argument = breakStmt.num.map(intToLiteralAst)
 
-    controlStructureAst(breakNode, None, argument.toList)
+    val breakAst = controlStructureAst(breakNode, None, argument.toList)
+    argument.flatMap(_.root).map(breakAst.withJumpArgumentEdge(breakNode, _)).getOrElse(breakAst)
   }
 
   protected def astForContinueStmt(continueStmt: PhpContinueStmt): Ast = {
@@ -25,7 +26,8 @@ trait AstForControlStructuresCreator(implicit withSchemaValidation: ValidationMo
 
     val argument = continueStmt.num.map(intToLiteralAst)
 
-    controlStructureAst(continueNode, None, argument.toList)
+    val continueAst = controlStructureAst(continueNode, None, argument.toList)
+    argument.flatMap(_.root).map(continueAst.withJumpArgumentEdge(continueNode, _)).getOrElse(continueAst)
   }
 
   protected def astForWhileStmt(whileStmt: PhpWhileStmt): Ast = {
@@ -262,12 +264,18 @@ trait AstForControlStructuresCreator(implicit withSchemaValidation: ValidationMo
     val ampPrefix   = if (stmt.assignByRef) "&" else ""
     val foreachCode = s"foreach (${iterValue.rootCodeOrEmpty} as $ampPrefix${assignItemTargetString})"
     val foreachNode = controlStructureNode(stmt, ControlStructureTypes.FOR, foreachCode)
-    Ast(foreachNode)
-      .withChild(wrapMultipleInBlock(iteratorAssignAst :: itemInitAst :: Nil, line(stmt)))
+    val initAst     = wrapMultipleInBlock(iteratorAssignAst :: itemInitAst :: Nil, line(stmt))
+    val updateAst   = wrapMultipleInBlock(nextCallAst :: itemUpdateAst :: Nil, line(stmt))
+    val foreachAst = Ast(foreachNode)
+      .withChild(initAst)
       .withChild(conditionAst)
-      .withChild(wrapMultipleInBlock(nextCallAst :: itemUpdateAst :: Nil, line(stmt)))
+      .withChild(updateAst)
       .withChild(bodyAst)
       .withConditionEdges(foreachNode, conditionAst.root.toList)
+
+    val astWithInit   = initAst.root.map(foreachAst.withForInitEdge(foreachNode, _)).getOrElse(foreachAst)
+    val astWithUpdate = updateAst.root.map(astWithInit.withForUpdateEdge(foreachNode, _)).getOrElse(astWithInit)
+    bodyAst.root.map(astWithUpdate.withForBodyEdge(foreachNode, _)).getOrElse(astWithUpdate)
   }
 
   private def getItemAssignAstForForeach(stmt: PhpForeachStmt, iteratorIdentifier: NewIdentifier): Ast = {
@@ -331,7 +339,8 @@ trait AstForControlStructuresCreator(implicit withSchemaValidation: ValidationMo
 
     val throwNode = controlStructureNode(expr, ControlStructureTypes.THROW, code)
 
-    Ast(throwNode).withChild(thrownExpr)
+    val throwAst = Ast(throwNode).withChild(thrownExpr)
+    thrownExpr.root.map(throwAst.withArgEdge(throwNode, _)).getOrElse(throwAst)
   }
 
   protected def astForYieldFromExpr(expr: PhpYieldFromExpr): Ast = {
@@ -358,7 +367,9 @@ trait AstForControlStructuresCreator(implicit withSchemaValidation: ValidationMo
       .code(label)
       .lineNumber(line(stmt))
 
-    controlStructureAst(gotoNode, condition = None, children = Ast(jumpLabel) :: Nil)
+    val jumpLabelAst = Ast(jumpLabel)
+    val gotoAst      = controlStructureAst(gotoNode, condition = None, children = jumpLabelAst :: Nil)
+    jumpLabelAst.root.map(gotoAst.withJumpArgumentEdge(gotoNode, _)).getOrElse(gotoAst)
   }
 
   protected def astForLabelStmt(stmt: PhpLabelStmt): Ast = {

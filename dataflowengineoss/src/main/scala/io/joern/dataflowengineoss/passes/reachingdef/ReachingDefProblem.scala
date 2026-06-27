@@ -182,7 +182,7 @@ class ReachingDefTransferFunction(flowGraph: ReachingDefFlowGraph) extends Trans
     // taint unharmed.
 
     val defsForCalls = method.call
-      .filterNot(x => isFieldAccess(x.name))
+      .filterNot(x => isFieldAccess(x.name) && !isIndexAccess(x.name))
       .l
       .map { call =>
         call -> {
@@ -211,6 +211,9 @@ class ReachingDefTransferFunction(flowGraph: ReachingDefFlowGraph) extends Trans
       case _             => false
     }
   }
+
+  private def isIndexAccess(name: String): Boolean =
+    name == Operators.indexAccess || name == Operators.indirectIndexAccess
 
   /** Initialize the map `kill`, a map that contains killed definitions for each flow graph node.
     *

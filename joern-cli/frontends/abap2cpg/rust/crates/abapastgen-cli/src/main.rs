@@ -4,7 +4,7 @@ use ignore::WalkBuilder;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-const VERSION: &str = "0.1.0";
+const VERSION: &str = "0.3.0";
 
 #[derive(Debug, Parser)]
 #[command(name = "abapgen", disable_version_flag = true)]
@@ -52,10 +52,7 @@ fn write_file(input: &Path, out: &Path, file: &Path) -> Result<PathBuf> {
     let relative = relative_path(input, file);
     let display_file = relative.to_string_lossy().replace('\\', "/");
     let program = abapastgen_core::generate_file(file, &display_file)?;
-    let target = out.join(relative).with_extension(format!(
-        "{}.json",
-        file.extension().and_then(|x| x.to_str()).unwrap_or("abap")
-    ));
+    let target = out.join(relative).with_extension("json");
     if let Some(parent) = target.parent() {
         fs::create_dir_all(parent)?;
     }
@@ -114,13 +111,13 @@ mod tests {
     }
 
     #[test]
-    fn output_keeps_abap_extension() {
+    fn output_replaces_abap_extension() {
         let dir = tempfile::tempdir().expect("tempdir");
         let out = tempfile::tempdir().expect("out");
         let abap = dir.path().join("a.clas.abap");
         fs::write(&abap, "CLASS a DEFINITION. ENDCLASS.").expect("abap");
 
         let target = write_file(dir.path(), out.path(), &abap).expect("write");
-        assert_eq!(target, out.path().join("a.clas.abap.json"));
+        assert_eq!(target, out.path().join("a.clas.json"));
     }
 }

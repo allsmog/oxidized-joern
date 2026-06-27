@@ -6,6 +6,7 @@ import io.joern.kotlin2cpg.compiler.ErrorLoggingMessageCollector
 import io.joern.kotlin2cpg.files.SourceFilesPicker
 import io.joern.kotlin2cpg.interop.JavaSrcInterop
 import io.joern.kotlin2cpg.jar4import.UsesService
+import io.joern.kotlin2cpg.parser.KotlinAstGenRunner
 import io.joern.kotlin2cpg.passes.*
 import io.joern.kotlin2cpg.types.{ContentSourcesPicker, TypeInfoProvider}
 import io.joern.x2cpg.SourceFiles
@@ -210,6 +211,25 @@ class Kotlin2Cpg extends X2CpgFrontend with UsesService {
   }
 
   def createCpg(config: Config): Try[Cpg] = {
+    config.parserBackend match {
+      case KotlinParserBackend.KotlinCompiler => createCompilerCpg(config)
+      case KotlinParserBackend.Oxidized       => createOxidizedCpg(config)
+    }
+  }
+
+  private def createOxidizedCpg(config: Config): Try[Cpg] = {
+    withNewEmptyCpg(config.outputPath, config) { (cpg, config) =>
+      new MetaDataPass(cpg, Languages.KOTLIN, config.inputPath).createAndApply()
+      FileUtil.usingTemporaryDirectory("kotlinastgenOut") { astGenOut =>
+        val result          = new KotlinAstGenRunner(config).execute(astGenOut)
+        val astCreationPass = new OxidizedAstCreationPass(cpg, result.parsedFiles, config)
+        astCreationPass.createAndApply()
+        TypeNodePass.withRegisteredTypes(astCreationPass.usedTypes(), cpg).createAndApply()
+      }
+    }
+  }
+
+  private def createCompilerCpg(config: Config): Try[Cpg] = {
     withNewEmptyCpg(config.outputPath, config) { (cpg, config) =>
       val sourceDir = config.inputPath
       logger.info(s"Starting CPG generation for input directory `$sourceDir`.")

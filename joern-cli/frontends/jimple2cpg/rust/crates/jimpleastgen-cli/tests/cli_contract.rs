@@ -51,5 +51,9 @@ fn minimal_class(internal_name: &str) -> Vec<u8> {
     bytes.extend_from_slice(&0x0021u16.to_be_bytes());
     bytes.extend_from_slice(&2u16.to_be_bytes());
     bytes.extend_from_slice(&0u16.to_be_bytes());
+    bytes.extend_from_slice(&0u16.to_be_bytes());
+    bytes.extend_from_slice(&0u16.to_be_bytes());
+    bytes.extend_from_slice(&0u16.to_be_bytes());
+    bytes.extend_from_slice(&0u16.to_be_bytes());
     bytes
 }

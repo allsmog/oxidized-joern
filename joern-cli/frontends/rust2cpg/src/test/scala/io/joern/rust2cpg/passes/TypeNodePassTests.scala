@@ -1,6 +1,9 @@
 package io.joern.rust2cpg.passes
 
 import io.joern.rust2cpg.testfixtures.Rust2CpgSuite
+import io.joern.x2cpg.Defines
+import io.shiftleft.codepropertygraph.generated.DispatchTypes
+import io.shiftleft.codepropertygraph.generated.nodes.{Call, Unknown}
 import io.shiftleft.semanticcpg.language.*
 
 class TypeNodePassTests extends Rust2CpgSuite(noSysRoot = true) {
@@ -83,6 +86,87 @@ class TypeNodePassTests extends Rust2CpgSuite(noSysRoot = true) {
       inside(cpg.method.name("foo").parameter.name("y").l) { case param :: Nil =>
         param.evalType.l shouldBe List("rust2cpgtest::Foo")
         param.typ.referencedTypeDecl.l shouldBe cpg.typeDecl.fullNameExact("rust2cpgtest::Foo").l
+      }
+    }
+
+    "create correct types for imported type aliases" in {
+      val cpg = code("""
+          |fn consume(
+          | x: Renamed,
+          | y: models::Thing,
+          | xs: Vec<Renamed>,
+          | cb: fn(Renamed) -> models::Thing
+          |) -> Option<Renamed> {
+          | todo!()
+          |}
+          |
+          |trait Wrap<T> {}
+          |
+          |fn bounded(x: &dyn Wrap<Renamed>) -> impl Wrap<Renamed> {
+          | todo!()
+          |}
+          |
+          |fn callable(f: impl Fn(Renamed) -> models::Thing) -> impl Fn(Renamed) -> models::Thing {
+          | todo!()
+          |}
+          |
+          |use crate::models::Thing as Renamed;
+          |use crate::models as models;
+          |
+          |struct Holder {
+          | direct: Renamed,
+          | qualified: models::Thing,
+          | nested: Option<Renamed>,
+          | callback: fn(Renamed) -> models::Thing,
+          |}
+          |""".stripMargin)
+
+      cpg.method.nameExact("consume").parameter.nameExact("x").evalType.l shouldBe List("crate::models::Thing")
+      cpg.method.nameExact("consume").parameter.nameExact("y").evalType.l shouldBe List("crate::models::Thing")
+      cpg.method.nameExact("consume").parameter.nameExact("xs").evalType.l shouldBe List("Vec<crate::models::Thing>")
+      cpg.method.nameExact("consume").parameter.nameExact("cb").evalType.l shouldBe List(
+        "fn(crate::models::Thing) -> crate::models::Thing"
+      )
+      cpg.method.nameExact("consume").methodReturn.typeFullName.l shouldBe List("Option<crate::models::Thing>")
+
+      cpg.method.nameExact("bounded").parameter.nameExact("x").evalType.l shouldBe List("&dyn Wrap<crate::models::Thing>")
+      cpg.method.nameExact("bounded").methodReturn.typeFullName.l shouldBe List("impl Wrap<crate::models::Thing>")
+
+      cpg.method.nameExact("callable").parameter.nameExact("f").evalType.l shouldBe List(
+        "impl Fn(crate::models::Thing) -> crate::models::Thing"
+      )
+      cpg.method.nameExact("callable").methodReturn.typeFullName.l shouldBe List(
+        "impl Fn(crate::models::Thing) -> crate::models::Thing"
+      )
+
+      cpg.typeDecl.nameExact("Holder").member.nameExact("direct").typeFullName.l shouldBe List("crate::models::Thing")
+      cpg.typeDecl.nameExact("Holder").member.nameExact("qualified").typeFullName.l shouldBe List("crate::models::Thing")
+      cpg.typeDecl.nameExact("Holder").member.nameExact("nested").typeFullName.l shouldBe List("Option<crate::models::Thing>")
+      cpg.typeDecl.nameExact("Holder").member.nameExact("callback").typeFullName.l shouldBe List(
+        "fn(crate::models::Thing) -> crate::models::Thing"
+      )
+
+      inside(cpg.typ.fullNameExact("crate::models::Thing").l) { case typ :: Nil =>
+        typ.fullName shouldBe "crate::models::Thing"
+        typ.name shouldBe "Thing"
+      }
+    }
+
+    "create correct types for wildcard-imported type aliases" in {
+      val cpg = code("""
+          |fn consume(x: WildThing, y: Option<WildThing>) -> WildThing {
+          | todo!()
+          |}
+          |
+          |use crate::models::*;
+          |""".stripMargin)
+
+      cpg.method.nameExact("consume").parameter.nameExact("x").evalType.l shouldBe List("crate::models::WildThing")
+      cpg.method.nameExact("consume").parameter.nameExact("y").evalType.l shouldBe List("Option<crate::models::WildThing>")
+      cpg.method.nameExact("consume").methodReturn.typeFullName.l shouldBe List("crate::models::WildThing")
+
+      inside(cpg.typ.fullNameExact("crate::models::WildThing").l) { case typ :: Nil =>
+        typ.name shouldBe "WildThing"
       }
     }
 
@@ -294,6 +378,38 @@ class TypeNodePassTestsWithSysroot extends Rust2CpgSuite(noSysRoot = false) {
           typ.isExternal shouldBe true
         }
       }
+
+      inside(cpg.assignment.argument(2).l) { case (macroCall: Call) :: Nil =>
+        macroCall.name shouldBe "vec!"
+        macroCall.code shouldBe "vec![1, 2, 3]"
+        macroCall.methodFullName shouldBe s"${Defines.UnresolvedNamespace}::vec!"
+        macroCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+        macroCall.typeFullName shouldBe "alloc::vec::Vec<i32, alloc::alloc::Global>"
+      }
+
+      cpg.all.collectAll[Unknown].codeExact("vec![1, 2, 3]").l shouldBe empty
+    }
+
+    "create concrete types for inferred generic let annotations" in {
+      val cpg = code("""
+          |fn foo() {
+          | let xs: Vec<_> = Vec::<i32>::new();
+          |}
+          |""".stripMargin)
+
+      inside(cpg.method.name("foo").block.local.name("xs").l) { case local :: Nil =>
+        local.evalType.l shouldBe List("alloc::vec::Vec<i32, alloc::alloc::Global>")
+
+        inside(local.typ.referencedTypeDecl.l) { case typ :: Nil =>
+          typ.fullName shouldBe "alloc::vec::Vec<i32, alloc::alloc::Global>"
+          typ.name shouldBe "Vec"
+          typ.isExternal shouldBe true
+        }
+      }
+
+      inside(cpg.assignment.l) { case assignment :: Nil =>
+        assignment.typeFullName shouldBe "alloc::vec::Vec<i32, alloc::alloc::Global>"
+      }
     }
 
     "create correct types for generic Vec parameters" in {
@@ -325,6 +441,28 @@ class TypeNodePassTestsWithSysroot extends Rust2CpgSuite(noSysRoot = false) {
           typ.name shouldBe "String"
           typ.isExternal shouldBe true
         }
+      }
+    }
+
+    "create correct types for String::from locals" in {
+      val cpg = code("""
+          |fn foo() {
+          | let s = String::from("hello");
+          |}
+          |""".stripMargin)
+      inside(cpg.method.name("foo").block.local.name("s").l) { case local :: Nil =>
+        local.evalType.l shouldBe List("alloc::string::String")
+
+        inside(local.typ.referencedTypeDecl.l) { case typ :: Nil =>
+          typ.fullName shouldBe "alloc::string::String"
+          typ.name shouldBe "String"
+          typ.isExternal shouldBe true
+        }
+      }
+
+      inside(cpg.call.nameExact("from").l) { case from :: Nil =>
+        from.methodFullName shouldBe "core::convert::From<T>::from"
+        from.typeFullName shouldBe "alloc::string::String"
       }
     }
   }

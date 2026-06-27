@@ -3,10 +3,52 @@ package io.joern.csharpsrc2cpg.querying.ast
 import io.joern.csharpsrc2cpg.testfixtures.CSharpCode2CpgFixture
 import io.joern.x2cpg.Defines
 import io.shiftleft.codepropertygraph.generated.{DispatchTypes, ModifierTypes, Operators}
-import io.shiftleft.codepropertygraph.generated.nodes.Call
+import io.shiftleft.codepropertygraph.generated.nodes.{Call, Unknown}
 import io.shiftleft.semanticcpg.language.*
 
 class MemberTests extends CSharpCode2CpgFixture {
+
+  "special member declarations" should {
+    val cpg = code("""
+        |namespace Foo;
+        |
+        |public class FeatureProbe {
+        |  public event System.EventHandler Changed;
+        |  public event System.EventHandler CustomChanged {
+        |    add { }
+        |    remove { }
+        |  }
+        |
+        |  public int this[int index] {
+        |    get => index;
+        |    set { }
+        |  }
+        |
+        |  ~FeatureProbe() { }
+        |
+        |  public static FeatureProbe operator +(FeatureProbe left, FeatureProbe right) => left;
+        |  public static explicit operator int(FeatureProbe value) => 1;
+        |}
+        |""".stripMargin)
+
+    "create members and method-like declarations" in {
+      cpg.member.nameExact("Changed").typeFullName.l shouldBe List("System.EventHandler")
+      cpg.member.nameExact("CustomChanged").typeFullName.l shouldBe List("System.EventHandler")
+      cpg.member.nameExact("Item").typeFullName.l shouldBe List("System.Int32")
+
+      cpg.method.nameExact("add_CustomChanged").parameter.name.l shouldBe List("this", "value")
+      cpg.method.nameExact("add_CustomChanged").methodReturn.typeFullName.l shouldBe List("System.Void")
+      cpg.method.nameExact("remove_CustomChanged").parameter.name.l shouldBe List("this", "value")
+      cpg.method.nameExact("remove_CustomChanged").methodReturn.typeFullName.l shouldBe List("System.Void")
+      cpg.method.nameExact("get_Item").parameter.name.l shouldBe List("this", "index")
+      cpg.method.nameExact("set_Item").parameter.name.l shouldBe List("this", "index", "value")
+      cpg.method.nameExact("operator+").parameter.name.l shouldBe List("left", "right")
+      cpg.method.nameExact("explicit operator int").parameter.name.l shouldBe List("value")
+      cpg.method.nameExact("~FeatureProbe").methodReturn.typeFullName.l shouldBe List("System.Void")
+
+      cpg.all.collectAll[Unknown].code.l.shouldBe(Nil)
+    }
+  }
 
   "class with static and non-static members" should {
     val cpg = code("""
@@ -383,7 +425,7 @@ class MemberTests extends CSharpCode2CpgFixture {
 
   // TODO: Getters/Setters are currently being lowered into get_/set_ methods.
   //  Adapt this unit-test once that is finished.
-  "a basic class declaration with a PropertyDeclaration member" ignore {
+  "a basic class declaration with a PropertyDeclaration member" should {
     val cpg = code("""
         |public class Foo {
         | public int Bar {get; set;}
