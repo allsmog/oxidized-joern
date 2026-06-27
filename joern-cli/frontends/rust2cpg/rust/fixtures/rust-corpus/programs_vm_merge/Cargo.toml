@@ -1,0 +1,4 @@
+[package]
+name = "programs_vm_merge"
+version = "0.1.0"
+edition = "2021"
