@@ -14,8 +14,9 @@ Three values must agree:
 - `rust_ast_gen --version` prints the same version (the Scala
   `RustAstGenRunner` compares against `rust2cpg.rust_ast_gen_version`).
 
-`joern-cli/frontends/rust2cpg/build.sbt` downloads the upstream reference
-artifacts from:
+`joern-cli/frontends/rust2cpg/build.sbt` builds the local Rust `rust_ast_gen`
+by default. Set `RUST2CPG_ASTGEN_LEGACY=1` to download the upstream reference
+artifact for the current host instead. The legacy artifacts come from:
 
 ```text
 https://github.com/joernio/astgen-monorepo/releases/download/rust-astgen/v0.8.1/
@@ -64,23 +65,31 @@ Each mismatch must be classified as one of:
 
 ## Scala Integration
 
-Build the local Rust binary into `bin/astgen` and run the frontend tests from
-the repository root:
+Provision the Rust binary into `bin/astgen` and run the frontend tests from the
+repository root:
 
 ```bash
-sbt 'rust2cpg/scalafmtCheck' 'rust2cpg/rustAstGenBuildRust' 'rust2cpg/test'
+sbt 'rust2cpg/scalafmtCheck' 'rust2cpg/rustAstGenProvision' 'rust2cpg/test'
 ```
 
-`rustAstGenBuildRust` runs `cargo build --release --bin rust_ast_gen` and
-installs the host artifact under `bin/astgen`. The Scala `RustAstGenRunner`
-invokes it as `rust_ast_gen -i <in> -o <out>`.
+By default, `rustAstGenProvision` runs:
+
+```bash
+cargo build --release --bin rust_ast_gen
+```
+
+It then installs the host artifact under `bin/astgen`. With
+`RUST2CPG_ASTGEN_LEGACY=1`, it installs the downloaded upstream host artifact
+instead. The Scala `RustAstGenRunner` invokes it as
+`rust_ast_gen -i <in> -o <out>`.
 
 ## CI
 
 The job `rust2cpg-differential` in `.github/workflows/oxidized-astgen.yml` runs
 on `ubuntu-latest` with the `rust-src` component installed, downloads
 `rust_ast_gen-linux` from the release tag above, and runs the differential with
-`RUSTASTGEN_REFERENCE` set. It is `continue-on-error: true` (informational until
-byte-identity). The shared `rust-gates` matrix job also runs `cargo fmt
---check`, `cargo test`, and `cargo clippy` (with `rust-src`) for the `rust2cpg`
-crate.
+`RUSTASTGEN_REFERENCE` set. This job is gating: any differential mismatch fails
+CI. The shared `rust-gates` matrix job also runs `cargo fmt --check`, `cargo
+test`, and `cargo clippy` (with `rust-src`) for the `rust2cpg` crate. The
+`rust2cpg-scala-integration` job runs `sbt "rust2cpg/test"` against the local
+build default.
