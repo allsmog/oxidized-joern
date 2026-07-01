@@ -4765,6 +4765,7 @@ mod tests {
         bytes.extend_from_slice(&constant_value_index.to_be_bytes());
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn push_method_with_code_and_exceptions(
         bytes: &mut Vec<u8>,
         access_flags: u16,

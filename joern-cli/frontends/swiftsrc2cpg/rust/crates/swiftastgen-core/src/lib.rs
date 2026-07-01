@@ -20806,19 +20806,19 @@ macro m5<T: P>(_: T)
             .find(|node| source_text(source, node) == "macro m1(): Int = A.M1")
             .unwrap();
         assert_eq!(
-            child_by_name(&first_macro, "macroKeyword").unwrap()["tokenKind"],
+            child_by_name(first_macro, "macroKeyword").unwrap()["tokenKind"],
             "keyword(SwiftSyntax.Keyword.macro)"
         );
         assert_eq!(
-            child_by_name(&first_macro, "name").unwrap()["tokenKind"],
+            child_by_name(first_macro, "name").unwrap()["tokenKind"],
             "identifier(\"m1\")"
         );
         assert_eq!(
-            child_by_name(&first_macro, "signature").unwrap()["nodeType"],
+            child_by_name(first_macro, "signature").unwrap()["nodeType"],
             "FunctionSignatureSyntax"
         );
         assert_eq!(
-            child_by_name(&first_macro, "definition").unwrap()["nodeType"],
+            child_by_name(first_macro, "definition").unwrap()["nodeType"],
             "InitializerClauseSyntax"
         );
     }
