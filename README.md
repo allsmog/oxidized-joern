@@ -25,6 +25,13 @@ The first released Rust rewrite component is the Go AST generator used by
 - Scala `gosrc2cpg` integration is wired to download from this fork's release
   URL.
 
+The Rust frontend now builds the local Rust `rust_ast_gen` by default when the
+Scala `rust2cpg` project compiles or tests. Set `RUST2CPG_ASTGEN_LEGACY=1` to
+use the downloaded upstream `rust-astgen` host artifact instead. The
+`rust2cpg` differential against the upstream reference binary and
+`sbt "rust2cpg/test"` are CI gates. Fork release assets for `rust-astgen` have
+not been published yet.
+
 The C/C++ frontend still defaults to upstream Joern's Scala/Eclipse CDT
 implementation. The Rust `cxxastgen` workspace under
 `joern-cli/frontends/c2cpg/rust` is wired into the Scala frontend as an opt-in
@@ -91,6 +98,48 @@ Release notes and compatibility details are in:
 - [`joern-cli/frontends/gosrc2cpg/rust/README.md`](joern-cli/frontends/gosrc2cpg/rust/README.md)
 - [`joern-cli/frontends/gosrc2cpg/rust/docs/json-contract.md`](joern-cli/frontends/gosrc2cpg/rust/docs/json-contract.md)
 - [`joern-cli/frontends/gosrc2cpg/rust/docs/release-checklist.md`](joern-cli/frontends/gosrc2cpg/rust/docs/release-checklist.md)
+
+## Rust Frontend / `rust_ast_gen`
+
+The Rust AST generator workspace lives under:
+
+```text
+joern-cli/frontends/rust2cpg/rust
+```
+
+Useful commands:
+
+```bash
+cd joern-cli/frontends/rust2cpg/rust
+cargo fmt --check
+cargo test
+cargo clippy --all-targets -- -D warnings
+```
+
+Run the differential test when a reference `rust_ast_gen` binary is available:
+
+```bash
+RUSTASTGEN_REFERENCE=/path/to/reference/rust_ast_gen \
+cargo test --test differential_json -- --nocapture
+```
+
+Run the Scala Rust frontend suite against the locally built Rust binary:
+
+```bash
+sbt 'rust2cpg/rustAstGenProvision' 'rust2cpg/test'
+```
+
+Use the upstream reference binary instead of the local build when debugging
+legacy behavior:
+
+```bash
+RUST2CPG_ASTGEN_LEGACY=1 sbt 'rust2cpg/rustAstGenProvision' 'rust2cpg/test'
+```
+
+Release notes and compatibility details are in:
+
+- [`joern-cli/frontends/rust2cpg/rust/docs/json-contract.md`](joern-cli/frontends/rust2cpg/rust/docs/json-contract.md)
+- [`joern-cli/frontends/rust2cpg/rust/docs/release-checklist.md`](joern-cli/frontends/rust2cpg/rust/docs/release-checklist.md)
 
 ## JavaScript/TypeScript Frontend / Rust `astgen`
 
