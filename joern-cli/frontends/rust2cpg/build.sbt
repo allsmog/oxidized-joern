@@ -145,7 +145,41 @@ astGenDlTask := {
   IO.copyDirectory(astGenDir, distDir, preserveExecutable = true)
 }
 
-Compile / compile := ((Compile / compile) dependsOn rustAstGenBuildRust).value
+lazy val rustAstGenDownloadLegacy =
+  taskKey[File]("Download the legacy rust_ast_gen binary for the current host and install it under bin/astgen")
+rustAstGenDownloadLegacy := {
+  val astGenDir = baseDirectory.value / "bin" / "astgen"
+  val fileName  = astGenCurrentBinaryName.value
+  val file      = astGenDir / fileName
+  astGenDir.mkdirs()
+  IO.delete(file)
+  DownloadHelper.ensureIsAvailable(s"${astGenDlUrl.value}$fileName", file)
+  file.setExecutable(true, false)
+
+  val distDir = (Universal / stagingDirectory).value / "bin" / "astgen"
+  distDir.mkdirs()
+  IO.copyFile(file, distDir / fileName, preserveLastModified = true)
+  streams.value.log.info(s"installed legacy rust_ast_gen to $file")
+  file
+}
+
+lazy val rustAstGenProvision = taskKey[File]("Provision rust_ast_gen for rust2cpg")
+rustAstGenProvision := Def
+  .taskDyn {
+    if (sys.env.get("RUST2CPG_ASTGEN_LEGACY").contains("1")) {
+      Def.task {
+        streams.value.log.info("RUST2CPG_ASTGEN_LEGACY=1 set; using downloaded legacy rust_ast_gen")
+        rustAstGenDownloadLegacy.value
+      }
+    } else {
+      Def.task {
+        rustAstGenBuildRust.value
+      }
+    }
+  }
+  .value
+
+Compile / compile := ((Compile / compile) dependsOn rustAstGenProvision).value
 
 lazy val astGenSetAllPlatforms = taskKey[Unit](s"Set ALL_PLATFORMS")
 astGenSetAllPlatforms := { System.setProperty("ALL_PLATFORMS", "TRUE") }
