@@ -8,11 +8,12 @@ name: oxidized astgen
 # swift's reference is a macOS binary (runs on a hosted macOS runner); csharp
 # (dotnetastgen), abap (abapgen) and rust (rust_ast_gen) ship native linux
 # binaries; jssrc2cpg's reference (astgen) is Node-based, so its job provisions
-# Node first. Every differential is informational (continue-on-error) until the
-# emitter reaches byte-identity with the upstream reference; each one runs the
-# crate's tests/differential_json.rs gated on <LANG>ASTGEN_REFERENCE. The
-# reference release tag + version come from each frontend's build.sbt
-# (astGenDlUrl) and src/main/resources/application.conf.
+# Node first. rust2cpg's differential is gating because the local generator is
+# now the default; the other differentials remain informational
+# (continue-on-error) until their emitters reach byte-identity with the upstream
+# reference. Each one runs the crate's tests/differential_json.rs gated on
+# <LANG>ASTGEN_REFERENCE. The reference release tag + version come from each
+# frontend's build.sbt (astGenDlUrl) and src/main/resources/application.conf.
 
 on:
   pull_request:
@@ -27,6 +28,7 @@ on:
       - "joern-cli/frontends/abap2cpg/src/main/resources/application.conf"
       - "joern-cli/frontends/rust2cpg/build.sbt"
       - "joern-cli/frontends/rust2cpg/src/main/resources/application.conf"
+      - "joern-cli/frontends/rust2cpg/src/**"
   workflow_dispatch:
 
 jobs:
@@ -159,10 +161,28 @@ jobs:
           curl -L --fail -o /tmp/rust_ast_gen \
             https://github.com/joernio/astgen-monorepo/releases/download/rust-astgen/v0.8.1/rust_ast_gen-linux
           chmod +x /tmp/rust_ast_gen
-      - name: Differential vs reference (informational until byte-identity)
-        continue-on-error: true
+      - name: Differential vs reference
         working-directory: joern-cli/frontends/rust2cpg/rust
         run: RUSTASTGEN_REFERENCE=/tmp/rust_ast_gen cargo test --test differential_json -- --nocapture
+
+  rust2cpg-scala-integration:
+    # Build the local Rust rust_ast_gen via rust2cpg's default provisioning path
+    # and run the Scala frontend suite against it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rust-src
+      - name: Run rust2cpg tests with local Rust astgen
+        run: sbt "rust2cpg/test"
 
   php2cpg-differential:
     # Reference: the joernio/PHP-Parser `php-parser.phar` (Versions.phpParser).
