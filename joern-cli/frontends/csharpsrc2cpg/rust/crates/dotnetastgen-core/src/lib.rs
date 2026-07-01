@@ -337,7 +337,7 @@ impl<'a> Emitter<'a> {
             "is_expression" => self.binary_type_expression(node, "IsExpression"),
             "range_expression" => self.range_expression(node),
             "query_expression" => self.query_expression(node),
-            "from_clause" => self.from_clause(node),
+            "from_clause" => self.query_from_clause(node),
             "join_clause" => self.join_clause(node),
             "join_into_clause" => self.join_into_clause(node),
             "let_clause" => self.let_clause(node),
@@ -2544,7 +2544,7 @@ impl<'a> Emitter<'a> {
         )
     }
 
-    fn from_clause(&self, node: Node) -> Value {
+    fn query_from_clause(&self, node: Node) -> Value {
         let typ = node.child_by_field_name("type");
         let name = node.child_by_field_name("name");
         let expression = self

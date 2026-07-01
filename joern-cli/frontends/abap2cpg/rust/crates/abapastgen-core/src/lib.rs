@@ -321,9 +321,10 @@ fn classify_statement(tokens: &[String]) -> String {
         "ClassImplementation"
     } else if starts(&["ENDCLASS"]) {
         "EndClass"
-    } else if starts(&["CLASS-METHODS"]) || starts(&["CLASS", "-", "METHODS"]) {
-        "MethodDef"
-    } else if starts(&["METHODS"]) {
+    } else if starts(&["CLASS-METHODS"])
+        || starts(&["CLASS", "-", "METHODS"])
+        || starts(&["METHODS"])
+    {
         "MethodDef"
     } else if starts(&["METHOD"]) {
         "MethodImplementation"

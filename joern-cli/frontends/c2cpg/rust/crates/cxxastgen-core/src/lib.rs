@@ -1809,7 +1809,11 @@ fn field_access_member_target(
         _ => {
             let base_type = infer_argument_type(table, stack, scope, base)?;
             let object_type = member_access_base_type(strip_reference(&base_type))?;
-            unique_type_qualified_name_with_aliases(table, &object_type, &NamespaceAliasStack::default())?
+            unique_type_qualified_name_with_aliases(
+                table,
+                &object_type,
+                &NamespaceAliasStack::default(),
+            )?
         }
     };
     let field_type = type_member_field_type(table, &base_qualified, field)?;
@@ -15885,7 +15889,11 @@ mod tests {
         .expect("instance member sample should parse");
 
         let json = serde_json::to_string(&declarations).expect("serialize declarations");
-        assert_eq!(json.matches("\"resolvedMemberFullName\":\"Core.Widget.value\"").count(), 3);
+        assert_eq!(
+            json.matches("\"resolvedMemberFullName\":\"Core.Widget.value\"")
+                .count(),
+            3
+        );
         assert!(json.contains("\"resolvedTypeFullName\":\"int\""));
     }
 
