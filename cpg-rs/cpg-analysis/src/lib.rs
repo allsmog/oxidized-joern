@@ -7,6 +7,7 @@
 pub mod callgraph;
 pub mod cfg;
 pub mod pass;
+pub mod scan;
 pub mod summaries;
 pub mod symbols;
 pub mod taint;
@@ -14,6 +15,7 @@ pub mod taint;
 pub use callgraph::CallGraphPass;
 pub use cfg::CfgPass;
 pub use pass::{Pass, PassContext, PassManager};
+pub use scan::{ScanDelta, ScanSubscription};
 pub use summaries::{Flow, FunctionSummary, Point, SummaryStore};
 pub use symbols::SymbolResolutionPass;
 pub use taint::{find_flows, Finding, TaintSpec};
