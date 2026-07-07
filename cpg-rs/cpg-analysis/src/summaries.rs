@@ -15,6 +15,10 @@
 //!
 //! External/unanalysable functions (libc, third-party) get summaries from a
 //! declarative JSON file, mirroring Fraunhofer's DFG-function-summary format.
+//! The summary payload is deliberately richer than a bare param->return pair:
+//! labels and provenance are carried on the summary so later engines (LLM
+//! verdicts, sanitizer rule packs, IFDS summaries) can use the same cache and
+//! invalidation machinery without changing the interprocedural seam again.
 
 use crate::pass::ast_descendants;
 use cpg_core::{Cpg, NodeId, NodeKind, Query};
@@ -30,24 +34,121 @@ pub enum Point {
     Return,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+/// Qualifiers on a flow. Plain reachability is represented by an empty label
+/// set. A sanitized flow is still a real value-flow edge, but downstream taint
+/// queries may choose not to report it as exploitable.
+#[derive(Clone, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
+pub enum FlowLabel {
+    /// The flow passed through a named sanitizer.
+    Sanitized(String),
+    /// The flow was added or refined by a model-backed summary producer.
+    Model(String),
+    /// Free-form deterministic note for rule packs and external summaries.
+    Note(String),
+}
+
+impl FlowLabel {
+    pub fn sanitized_by(&self) -> Option<&str> {
+        match self {
+            FlowLabel::Sanitized(name) => Some(name.as_str()),
+            _ => None,
+        }
+    }
+
+    pub fn as_string(&self) -> String {
+        match self {
+            FlowLabel::Sanitized(name) => format!("sanitized:{name}"),
+            FlowLabel::Model(name) => format!("model:{name}"),
+            FlowLabel::Note(note) => note.clone(),
+        }
+    }
+
+    fn from_external(s: &str) -> Self {
+        if let Some(name) = s.strip_prefix("sanitized:") {
+            return FlowLabel::Sanitized(name.to_string());
+        }
+        if let Some(name) = s.strip_prefix("model:") {
+            return FlowLabel::Model(name.to_string());
+        }
+        FlowLabel::Note(s.to_string())
+    }
+}
+
+/// A flow between signature endpoints, plus deterministic labels describing how
+/// the value is transformed along the way. Keeping the type compact preserves
+/// the old summary-first API while leaving space for sanitizers, LLM verdicts,
+/// and future taint-kind qualifiers.
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Flow {
     pub from: Point,
     pub to: Point,
+    pub labels: Vec<FlowLabel>,
+}
+
+impl Flow {
+    pub fn plain(from: Point, to: Point) -> Self {
+        Flow { from, to, labels: Vec::new() }
+    }
+
+    pub fn with_labels(from: Point, to: Point, labels: Vec<FlowLabel>) -> Self {
+        Flow { from, to, labels: normalise_labels(labels) }
+    }
+
+    pub fn is_sanitized(&self) -> bool {
+        self.labels.iter().any(|l| l.sanitized_by().is_some())
+    }
+
+    pub fn label_strings(&self) -> Vec<String> {
+        self.labels.iter().map(FlowLabel::as_string).collect()
+    }
+}
+
+/// How a summary was produced. This is intentionally deterministic metadata:
+/// the fixpoint compares flow sets, while provenance is used for audit trails
+/// and finding explanations.
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum SummaryProvenance {
+    StaticAnalysis { engine: String },
+    External { source: String },
+    Model { model: String, prompt_hash: String, cache_key: String },
+}
+
+impl SummaryProvenance {
+    pub fn note(&self) -> String {
+        match self {
+            SummaryProvenance::StaticAnalysis { engine } => format!("static:{engine}"),
+            SummaryProvenance::External { source } => format!("external:{source}"),
+            SummaryProvenance::Model { model, prompt_hash, cache_key } => {
+                format!("model:{model}:prompt={prompt_hash}:cache={cache_key}")
+            }
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct FunctionSummary {
     pub fqn: String,
     pub flows: HashSet<Flow>,
+    pub provenance: Vec<SummaryProvenance>,
 }
 
 impl FunctionSummary {
+    /// Backwards-compatible helper for existing callers: all params whose value
+    /// can reach the return, regardless of labels.
     pub fn flows_to_return(&self) -> impl Iterator<Item = usize> + '_ {
         self.flows.iter().filter_map(|f| match (f.from, f.to) {
             (Point::Param(k), Point::Return) => Some(k),
             _ => None,
         })
+    }
+
+    /// Rich return flows, including labels such as `sanitized:<name>`.
+    pub fn return_flows(&self) -> impl Iterator<Item = &Flow> {
+        self.flows.iter().filter(|f| matches!(f.to, Point::Return))
+    }
+
+    pub fn provenance_notes(&self) -> Vec<String> {
+        self.provenance.iter().map(SummaryProvenance::note).collect()
     }
 }
 
@@ -84,7 +185,14 @@ impl SummaryStore {
         self.summaries.is_empty()
     }
 
-    /// Load external function summaries from JSON (Fraunhofer-style).
+    /// Load external function summaries from JSON (Fraunhofer-style, with
+    /// backwards-compatible extensions):
+    ///
+    /// ```json
+    /// [{"functionDeclaration":{"methodName":"escape"},
+    ///   "dataFlows":[{"from":"param0","to":"return",
+    ///                  "labels":["sanitized:escape"]}]}]
+    /// ```
     pub fn load_external_json(&mut self, json: &str) -> Result<usize, String> {
         let entries: Vec<ExternalEntry> =
             serde_json::from_str(json).map_err(|e| e.to_string())?;
@@ -94,10 +202,26 @@ impl SummaryStore {
             let mut flows = HashSet::new();
             for df in &e.data_flows {
                 if let (Some(from), Some(to)) = (parse_point(&df.from), parse_point(&df.to)) {
-                    flows.insert(Flow { from, to });
+                    let mut labels: Vec<FlowLabel> =
+                        df.labels.iter().map(|l| FlowLabel::from_external(l)).collect();
+                    if let Some(sanitizer) = &df.sanitizer {
+                        labels.push(FlowLabel::Sanitized(sanitizer.clone()));
+                    }
+                    if df.kind.as_deref() == Some("sanitized") {
+                        labels.push(FlowLabel::Sanitized(fqn.clone()));
+                    }
+                    flows.insert(Flow::with_labels(from, to, labels));
                 }
             }
-            self.external.insert(fqn.clone(), FunctionSummary { fqn, flows });
+            let source = e.provenance.unwrap_or_else(|| "external-json".to_string());
+            self.external.insert(
+                fqn.clone(),
+                FunctionSummary {
+                    fqn,
+                    flows,
+                    provenance: vec![SummaryProvenance::External { source }],
+                },
+            );
             n += 1;
         }
         Ok(n)
@@ -220,10 +344,10 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
         }
     }
 
-    // var name -> set of params that flow into it.
-    let mut taint: HashMap<String, HashSet<usize>> = HashMap::new();
+    // var name -> set of params/labels that flow into it.
+    let mut taint: HashMap<String, HashSet<ParamTaint>> = HashMap::new();
     for (name, &i) in &param_index {
-        taint.insert(name.clone(), HashSet::from([i]));
+        taint.insert(name.clone(), HashSet::from([ParamTaint::new(i)]));
     }
 
     let mut deps: HashSet<String> = HashSet::new();
@@ -254,11 +378,12 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
             }
             NodeKind::Return => {
                 for c in cpg.out_kind(n, cpg_core::EdgeKind::Ast) {
-                    for k in expr_taint(cpg, c, &taint, store, &mut deps) {
-                        result_flows.insert(Flow {
-                            from: Point::Param(k),
-                            to: Point::Return,
-                        });
+                    for t in expr_taint(cpg, c, &taint, store, &mut deps) {
+                        result_flows.insert(Flow::with_labels(
+                            Point::Param(t.param),
+                            Point::Return,
+                            t.labels,
+                        ));
                     }
                 }
             }
@@ -266,7 +391,16 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
         }
     }
 
-    (FunctionSummary { fqn, flows: result_flows }, deps)
+    (
+        FunctionSummary {
+            fqn,
+            flows: result_flows,
+            provenance: vec![SummaryProvenance::StaticAnalysis {
+                engine: "name-based-summary-v2".to_string(),
+            }],
+        },
+        deps,
+    )
 }
 
 /// The variable name an lvalue identifier refers to.
@@ -277,14 +411,32 @@ pub(crate) fn lhs_name(cpg: &Cpg, node: NodeId) -> Option<String> {
     None
 }
 
-/// Set of parameter indices that taint an expression.
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+struct ParamTaint {
+    param: usize,
+    labels: Vec<FlowLabel>,
+}
+
+impl ParamTaint {
+    fn new(param: usize) -> Self {
+        ParamTaint { param, labels: Vec::new() }
+    }
+
+    fn with_added_labels(&self, labels: &[FlowLabel]) -> Self {
+        let mut merged = self.labels.clone();
+        merged.extend_from_slice(labels);
+        ParamTaint { param: self.param, labels: normalise_labels(merged) }
+    }
+}
+
+/// Set of parameter indices and labels that taint an expression.
 fn expr_taint(
     cpg: &Cpg,
     node: NodeId,
-    taint: &HashMap<String, HashSet<usize>>,
+    taint: &HashMap<String, HashSet<ParamTaint>>,
     store: &SummaryStore,
     deps: &mut HashSet<String>,
-) -> HashSet<usize> {
+) -> HashSet<ParamTaint> {
     match cpg.kind_of(node) {
         NodeKind::Identifier => cpg
             .name_of(node)
@@ -294,7 +446,7 @@ fn expr_taint(
         NodeKind::Call => {
             let name = cpg.name_of(node).unwrap_or("");
             let args = cpg.arguments_of(node);
-            let arg_taints: Vec<HashSet<usize>> = args
+            let arg_taints: Vec<HashSet<ParamTaint>> = args
                 .iter()
                 .map(|&a| expr_taint(cpg, a, taint, store, deps))
                 .collect();
@@ -303,7 +455,7 @@ fn expr_taint(
                 // Operators propagate all operands (conservative, precise enough).
                 let mut out = HashSet::new();
                 for t in &arg_taints {
-                    out.extend(t.iter().copied());
+                    out.extend(t.iter().cloned());
                 }
                 return out;
             }
@@ -311,9 +463,13 @@ fn expr_taint(
             deps.insert(name.to_string());
             let mut out = HashSet::new();
             if let Some(summary) = store.get(name) {
-                for k in summary.flows_to_return() {
-                    if let Some(t) = arg_taints.get(k) {
-                        out.extend(t.iter().copied());
+                for flow in summary.return_flows() {
+                    if let Point::Param(k) = flow.from {
+                        if let Some(tset) = arg_taints.get(k) {
+                            for t in tset {
+                                out.insert(t.with_added_labels(&flow.labels));
+                            }
+                        }
                     }
                 }
             }
@@ -337,6 +493,12 @@ pub(crate) fn is_operator(name: &str) -> bool {
         .unwrap_or(true)
 }
 
+fn normalise_labels(mut labels: Vec<FlowLabel>) -> Vec<FlowLabel> {
+    labels.sort();
+    labels.dedup();
+    labels
+}
+
 fn parse_point(s: &str) -> Option<Point> {
     if s == "return" {
         return Some(Point::Return);
@@ -347,13 +509,15 @@ fn parse_point(s: &str) -> Option<Point> {
     None
 }
 
-// --- JSON shapes for external summaries (Fraunhofer-style) ---
+// --- JSON shapes for external summaries (Fraunhofer-style, extended) ---
 #[derive(Deserialize)]
 struct ExternalEntry {
     #[serde(rename = "functionDeclaration")]
     function_declaration: ExternalDecl,
     #[serde(rename = "dataFlows", default)]
     data_flows: Vec<ExternalFlow>,
+    #[serde(default)]
+    provenance: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -366,4 +530,10 @@ struct ExternalDecl {
 struct ExternalFlow {
     from: String,
     to: String,
+    #[serde(default)]
+    labels: Vec<String>,
+    #[serde(default)]
+    sanitizer: Option<String>,
+    #[serde(default)]
+    kind: Option<String>,
 }
