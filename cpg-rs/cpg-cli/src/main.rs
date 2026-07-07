@@ -1,23 +1,7 @@
 //! `cpg` — build a project and serve queries over a line-oriented JSON
-//! protocol (roadmap item #4: a query surface decoupled from the host
-//! language).
+//! protocol.
 //!
-//! Usage:
-//!     cpg serve <dir> [--lang c|python]
-//!
-//! Builds a CPG for every matching source file under `<dir>`, then reads one
-//! JSON request per line on stdin and writes one JSON response per line on
-//! stdout. Any client language with a JSON library can drive it; wrapping the
-//! same loop in a TCP/HTTP listener is transport plumbing, not architecture.
-//!
-//! Requests:
-//!     {"cmd":"stats"}
-//!     {"cmd":"methods","name":"main"}            (name optional)
-//!     {"cmd":"calls","name":"strcpy"}            (name optional)
-//!     {"cmd":"summary","fqn":"wrap"}
-//!     {"cmd":"taint","sources":["getenv"],"sinks":["system"]}
-//!     {"cmd":"update","path":"a.c","source":"int f(){}"}   (incremental!)
-//!     {"cmd":"quit"}
+//! The `taint` request accepts `sources`, `sinks`, and optional `sanitizers`.
 
 use cpg_core::{Cpg, Query};
 use cpg_analysis::standard_pipeline;
@@ -100,7 +84,6 @@ fn main() {
     }
 }
 
-/// `cpg build <dir> -o <out>`: build a CPG and persist it to disk.
 fn build_and_save(args: &[String]) {
     let Some(dir) = args.get(2) else {
         eprintln!("usage: cpg build <dir> -o <graph.cpg> [--lang c|python]");
@@ -121,9 +104,6 @@ fn build_and_save(args: &[String]) {
     }
 }
 
-/// `cpg serve`: either build from a directory or reopen a saved graph, then
-/// answer JSON queries on stdin. A reopened graph skips parsing entirely —
-/// the persistence payoff for a long-lived analysis service.
 fn serve(args: &[String]) {
     let lang = flag(args, "--lang").unwrap_or("c");
     let mut project = if let Some(load) = flag(args, "--load") {
@@ -221,12 +201,18 @@ fn handle(p: &mut Project, req: &Value) -> Value {
             };
             match p.summary_of(fqn) {
                 Some(s) => {
-                    let flows: Vec<String> = s
+                    let flows: Vec<Value> = s
                         .flows
                         .iter()
-                        .map(|f| format!("{:?} -> {:?}", f.from, f.to))
+                        .map(|f| {
+                            json!({
+                                "from": format!("{:?}", f.from),
+                                "to": format!("{:?}", f.to),
+                                "labels": f.label_strings(),
+                            })
+                        })
                         .collect();
-                    json!({"fqn": fqn, "flows": flows})
+                    json!({"fqn": fqn, "flows": flows, "provenance": s.provenance_notes()})
                 }
                 None => json!({"error": format!("no summary for {fqn}")}),
             }
@@ -240,10 +226,12 @@ fn handle(p: &mut Project, req: &Value) -> Value {
             };
             let sources = parse("sources");
             let sinks = parse("sinks");
+            let sanitizers = parse("sanitizers");
             let src_refs: Vec<&str> = sources.iter().map(|s| s.as_str()).collect();
             let sink_refs: Vec<&str> = sinks.iter().map(|s| s.as_str()).collect();
-            let findings: Vec<Value> = p
-                .find_taint(&src_refs, &sink_refs)
+            let sanitizer_refs: Vec<&str> = sanitizers.iter().map(|s| s.as_str()).collect();
+            let spec = cpg_analysis::TaintSpec::with_sanitizers(&src_refs, &sink_refs, &sanitizer_refs);
+            let findings: Vec<Value> = cpg_analysis::find_flows(&p.cpg, &p.summaries, &spec)
                 .iter()
                 .map(|f| {
                     let path: Vec<Value> = f
@@ -257,6 +245,8 @@ fn handle(p: &mut Project, req: &Value) -> Value {
                         "line": f.sink_line,
                         "origin": f.origin,
                         "path": path,
+                        "labels": f.labels,
+                        "provenance": f.provenance,
                     })
                 })
                 .collect();
