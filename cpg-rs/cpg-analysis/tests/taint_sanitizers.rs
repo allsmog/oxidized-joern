@@ -20,10 +20,21 @@ fn source_clean_sink_graph() -> Cpg {
     cpg
 }
 
+fn summaries_with_clean_passthrough() -> SummaryStore {
+    let mut summaries = SummaryStore::new();
+    summaries
+        .load_external_json(
+            r#"[{"functionDeclaration":{"language":"C","methodName":"clean"},
+                 "dataFlows":[{"from":"param0","to":"return"}]}]"#,
+        )
+        .expect("external clean summary loads");
+    summaries
+}
+
 #[test]
 fn explicit_sanitizer_blocks_source_to_sink() {
     let cpg = source_clean_sink_graph();
-    let summaries = SummaryStore::new();
+    let summaries = summaries_with_clean_passthrough();
 
     let unsanitized = TaintSpec::new(&["source"], &["sink"]);
     assert_eq!(find_flows(&cpg, &summaries, &unsanitized).len(), 1);
