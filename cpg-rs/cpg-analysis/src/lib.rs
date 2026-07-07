@@ -14,7 +14,7 @@ pub mod taint;
 pub use callgraph::CallGraphPass;
 pub use cfg::CfgPass;
 pub use pass::{Pass, PassContext, PassManager};
-pub use summaries::{Flow, FunctionSummary, Point, SummaryStore};
+pub use summaries::{Flow, FlowLabel, FunctionSummary, Point, SummaryProvenance, SummaryStore};
 pub use symbols::SymbolResolutionPass;
 pub use taint::{find_flows, Finding, TaintSpec};
 
