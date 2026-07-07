@@ -1,77 +1,73 @@
 # Architecture gap implementation map
 
-This document tracks the delta between the existing `cpg-rs` engine and the full
-performance-oriented architecture described in the design thread: in-process
-frontends, columnar facts, derived relations, sparse summary-based dataflow,
-compiled queries, and scan-as-subscription.
+This document maps the full performance-oriented architecture to concrete code in
+this branch. The goal is to make every gap category code-owned: storage, derived
+facts, sparse value flow, query planning, scan subscriptions, and auditability.
 
-## Landed in this branch
+## Implemented in this branch
 
-### Sanitizer-aware taint specs
+### In-process substrate
 
-`TaintSpec` now distinguishes sources, sinks, and sanitizers. Sanitizer calls are
-explicit taint barriers: if a configured sanitizer wraps tainted input, its return
-is treated as clean unless that same call is also configured as a source. This is
-the smallest safe step toward richer LLM/human summary verdicts because it avoids
-silently pruning flows unless the scan configuration names the sanitizer.
+The existing `cpg-rs` workspace already uses in-process frontends and the shared
+Rust `Cpg` graph. This branch does not change the frontend contract; it adds the
+missing storage/query/fact layers around it.
+
+### CSR freeze for query workloads
+
+`cpg-core::freeze` adds `FrozenCpg`, a dense CSR read snapshot built from the
+mutable graph. The mutable adjacency list remains the editing representation; the
+frozen view is the query-heavy representation and can be rebuilt after edits.
+
+### Segment manifest for content-addressed workspaces
+
+`cpg-core::segments` adds `SegmentManifest`, `SegmentDescriptor`, and stable file
+source digests. That is the first storage seam for per-file/function segments and
+future mmap/Arrow-compatible persistence.
+
+### Derived relation catalog
+
+`cpg-analysis::relations` adds named relations and tuple insertion for base and
+derived facts. `derive_transitive_closure` provides a small semi-naive-style
+binary closure primitive that query and value-flow code can reuse.
+
+### Auditable provenance graph
+
+`cpg-analysis::provenance` gives every fact a `FactId`, support list, and rule
+name. `invalidated_by` walks dependent facts so later invalidation can retract by
+support chain instead of whole-layer clearing.
+
+### Sparse value-flow view
+
+`cpg-analysis::value_flow` adds `SparseValueFlow`, a sparse DDG-backed view with
+reverse reachability. This is the production-facing abstraction needed to replace
+statement-order/name-based taint once the parity reaching-def builder is moved
+from `joern-parity` into `cpg-analysis`.
+
+### Query compiler skeleton
+
+`cpg-analysis::query` adds `QueryCompiler`, `LogicalPlan`, and `QueryExecutor`.
+It supports a small compatibility subset now (`cpg.method`, `cpg.call`, and
+`.name(...)`) and gives the codebase a real logical plan type to lower into
+relation rules later.
 
 ### Scan subscription primitive
 
-`cpg-analysis::ScanSubscription` materializes a finding set for a standing taint
-spec and returns only added/removed findings after a caller applies an edit. It is
-transport-agnostic, so the current stdio server, a future daemon, an LSP, and a CI
-adapter can all share the same diffing semantics.
+`cpg-analysis::scan` adds `ScanSubscription` and `ScanDelta`, a materialized view
+of findings that returns added/removed deltas after edits. This is the core API
+for a future daemon, LSP, CI adapter, or SARIF emitter.
 
-### Regression coverage
+### Sanitizer-aware taint
 
-`cpg-analysis/tests/taint_sanitizers.rs` builds a minimal graph for
-`source -> clean -> sink`, proves the finding exists without a sanitizer, and
-proves it disappears when `clean` is configured as a sanitizer barrier.
+`TaintSpec` now distinguishes sources, sinks, and sanitizers. Sanitizers are
+explicit barriers for the current name-based taint engine, and regression coverage
+pins the behavior.
 
-## Remaining implementation deltas
+## Still intentionally staged behind these seams
 
-### Rich summary payloads
-
-`FunctionSummary` is still a compact `HashSet<Flow>` where `Flow` is only
-`Param(i) -> Return`. The next step is to add sidecar metadata rather than
-breaking the public `Flow` shape immediately: `FlowEffect`, `SummaryTier`, and
-`FlowProvenance` keyed by `(fqn, Flow)`. That metadata should later let external,
-model, and human-reviewed summaries say whether a flow preserves taint, sanitizes
-it, or requires proof before suppression.
-
-### Derived facts instead of mutating overlays
-
-The pass framework already declares read/write layers, but passes still mutate
-edges directly. The next architecture slice is a relation catalog for pass output
-facts with stable fact IDs and provenance. Once pass outputs are facts, graph
-edges can be views over those facts, and invalidation can retract/rederive by
-support chain rather than by clearing all edges of one kind for a file.
-
-### Sparse value-flow path
-
-The parity harness has byte-level reaching-definition work, but the production
-`cpg-analysis` path still uses a deliberately simple CFG and name-based taint.
-The next code move is to port the parity CFG/reaching-def builder into
-`cpg-analysis`, populate `EdgeKind::Ddg`, and make taint consume the sparse
-value-flow/DDG layer instead of statement-order variable maps.
-
-### Query compiler / rule engine
-
-The current query surface is still command-shaped JSON and library calls. The
-full architecture needs a query compiler: a relation catalog, logical plans,
-join/index selection, and eventually CPGQL/querydb compatibility or compilation
-to the same derived-fact engine.
-
-### mmap/CSR/content-addressed storage
-
-`cpg-core` is columnar and persisted, but not yet mmap/Arrow-compatible or
-content-addressed by file/function segment. The next storage slice is `freeze()`
-to compact read-only CSR, followed by a versioned, mmap-friendly persistence
-header and content-addressed segment manifests.
-
-### Production scan daemon
-
-`ScanSubscription` is the core primitive; the product layer still needs a daemon
-or server command that keeps subscriptions alive across updates and emits SARIF or
-CI-friendly deltas. The stdio server can wrap this without changing the analysis
-crate.
+- Joern-loadable binary export remains M6 work in `GOAL.md`; the segment/freeze
+  APIs are the storage substrate for it.
+- Full CPGQL compatibility remains a compiler expansion task over `LogicalPlan`.
+- DDG-backed taint still depends on porting the byte-parity CFG/reaching-def code
+  from `joern-parity` into `cpg-analysis`; `SparseValueFlow` is the landing zone.
+- Dynamic-language precision remains frontend/rule-pack work; the relation and
+  provenance APIs give those rule packs a place to materialize facts.
