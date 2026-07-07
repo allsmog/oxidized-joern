@@ -11,25 +11,35 @@
 //! interprocedurally by consulting callee summaries: a call propagates taint
 //! from a tainted argument to the call's result iff the callee's summary maps
 //! that parameter to its return. A finding is raised when a tainted value
-//! reaches an argument of a configured sink.
+//! reaches an argument of a configured sink. Sanitizers are explicit barriers:
+//! a configured sanitizer call consumes tainted inputs and returns an untainted
+//! value unless it is also configured as a source.
 
 use crate::summaries::{is_operator, lhs_name, SummaryStore};
 use cpg_core::{Cpg, NodeId, NodeKind, Query};
 use std::collections::{HashMap, HashSet};
 
-/// What counts as a source and a sink, by function name.
+/// What counts as a source, sink, and sanitizer by function name.
+#[derive(Clone, Debug, Default)]
 pub struct TaintSpec {
     /// Calls to these names produce tainted values (their return is tainted).
     pub sources: HashSet<String>,
     /// Calls to these names are dangerous; a tainted argument is a finding.
     pub sinks: HashSet<String>,
+    /// Calls to these names return untainted values even when their inputs are tainted.
+    pub sanitizers: HashSet<String>,
 }
 
 impl TaintSpec {
     pub fn new(sources: &[&str], sinks: &[&str]) -> Self {
+        Self::with_sanitizers(sources, sinks, &[])
+    }
+
+    pub fn with_sanitizers(sources: &[&str], sinks: &[&str], sanitizers: &[&str]) -> Self {
         TaintSpec {
             sources: sources.iter().map(|s| s.to_string()).collect(),
             sinks: sinks.iter().map(|s| s.to_string()).collect(),
+            sanitizers: sanitizers.iter().map(|s| s.to_string()).collect(),
         }
     }
 }
@@ -175,6 +185,9 @@ fn expr_taint(
                         line: cpg.line_of(node),
                     }],
                 });
+            }
+            if spec.sanitizers.contains(name) {
+                return None;
             }
             if is_operator(name) {
                 // Operators taint their result if any operand is tainted.
