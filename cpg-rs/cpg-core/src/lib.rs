@@ -6,16 +6,20 @@
 //! build on these and nothing else.
 
 pub mod builder;
+pub mod freeze;
 pub mod graph;
 pub mod intern;
 pub mod persist;
 pub mod schema;
+pub mod segments;
 pub mod traversal;
 
 pub use builder::CpgBuilder;
+pub use freeze::{Freeze, FrozenCpg};
 pub use graph::{Cpg, FileId, HalfEdge, NodeId};
 pub use intern::Sym;
 pub use schema::{EdgeKind, Layer, NodeKind};
+pub use segments::{SegmentDescriptor, SegmentDigest, SegmentKey, SegmentManifest};
 pub use traversal::Query;
 
 #[cfg(test)]
