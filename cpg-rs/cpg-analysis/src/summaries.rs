@@ -15,14 +15,20 @@
 //!
 //! External/unanalysable functions (libc, third-party) get summaries from a
 //! declarative JSON file, mirroring Fraunhofer's DFG-function-summary format.
+//!
+//! Flows carry an optional sanitizer marker (`Flow::via`): a summary can say
+//! "param 0 reaches the return, but only through `escape`", which downstream
+//! taint queries treat as neutralised. Sanitizer names are registered on the
+//! [`SummaryStore`] (see [`SummaryStore::set_sanitizers`]) so summary
+//! computation records them; the query-time spec in `taint.rs` adds its own.
 
 use crate::pass::ast_descendants;
 use cpg_core::{Cpg, NodeId, NodeKind, Query};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
 /// An endpoint of a flow within a function's signature.
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug, Serialize, Deserialize)]
 pub enum Point {
     /// 0-based formal parameter.
     Param(usize),
@@ -30,10 +36,48 @@ pub enum Point {
     Return,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+/// A sanitizing function a flow passed through (by name).
+#[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Debug, Serialize, Deserialize)]
+pub struct Sanitizer(pub String);
+
+impl Sanitizer {
+    pub fn new(name: impl Into<String>) -> Self {
+        Sanitizer(name.into())
+    }
+
+    pub fn name(&self) -> &str {
+        &self.0
+    }
+}
+
+/// A single input→output flow in a function summary.
+///
+/// `via: None` is a *raw* flow — taint passes through unchanged. `via:
+/// Some(s)` means the data still flows, but every path goes through the
+/// sanitizer `s`: the dependency is real (useful for auditing and for "what
+/// sanitizes this?" queries) but it must not propagate raw taint.
+#[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Debug, Serialize)]
 pub struct Flow {
     pub from: Point,
     pub to: Point,
+    /// The sanitizer this flow is laundered through, if any.
+    pub via: Option<Sanitizer>,
+}
+
+impl Flow {
+    /// A raw (unsanitized) flow — the historical two-field shape.
+    pub fn direct(from: Point, to: Point) -> Self {
+        Flow { from, to, via: None }
+    }
+
+    /// A flow that only exists through the named sanitizer.
+    pub fn sanitized(from: Point, to: Point, sanitizer: impl Into<String>) -> Self {
+        Flow { from, to, via: Some(Sanitizer(sanitizer.into())) }
+    }
+
+    pub fn is_sanitized(&self) -> bool {
+        self.via.is_some()
+    }
 }
 
 #[derive(Clone, Debug, Default)]
@@ -43,12 +87,34 @@ pub struct FunctionSummary {
 }
 
 impl FunctionSummary {
+    /// Parameters with a *raw* (unsanitized) flow to the return value. This is
+    /// what taint propagation consults: sanitized flows are excluded, so a
+    /// callee whose only param→return path goes through a sanitizer does not
+    /// propagate raw taint.
     pub fn flows_to_return(&self) -> impl Iterator<Item = usize> + '_ {
-        self.flows.iter().filter_map(|f| match (f.from, f.to) {
-            (Point::Param(k), Point::Return) => Some(k),
+        self.flows.iter().filter_map(|f| match (f.from, f.to, &f.via) {
+            (Point::Param(k), Point::Return, None) => Some(k),
             _ => None,
         })
     }
+
+    /// Parameters that reach the return only through a sanitizer.
+    pub fn sanitized_flows_to_return(&self) -> impl Iterator<Item = (usize, &Sanitizer)> + '_ {
+        self.flows.iter().filter_map(|f| match (f.from, f.to, &f.via) {
+            (Point::Param(k), Point::Return, Some(s)) => Some((k, s)),
+            _ => None,
+        })
+    }
+}
+
+/// Where a summary served by the store came from — needed by findings'
+/// provenance so a result influenced by a non-computed tier is auditable.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize)]
+pub enum SummaryOrigin {
+    /// Computed from the method's body by this engine.
+    Computed,
+    /// Loaded from the external (JSON) corpus; there is no body to inspect.
+    External,
 }
 
 /// Cache of summaries plus the dependency graph needed to invalidate precisely.
@@ -63,8 +129,17 @@ pub struct SummaryStore {
     rdeps: HashMap<String, HashSet<String>>,
     /// External summaries loaded from JSON; never invalidated by source edits.
     external: HashMap<String, FunctionSummary>,
+    /// Function names that neutralise taint: a call to one of these produces a
+    /// *sanitized* flow rather than a raw one during summary computation.
+    sanitizers: HashSet<String>,
     /// Diagnostic: how many method summaries were (re)computed in the last call.
     pub last_recomputed: HashSet<String>,
+    /// Diagnostic: within-fixpoint memo hits during the last recomputation.
+    /// A hit means a method's summary was *replayed* rather than recomputed
+    /// because its inputs (callee summary states + sanitizer set) were
+    /// unchanged — the determinism guard for future non-deterministic summary
+    /// sources (e.g. an LLM tier).
+    pub last_memo_hits: usize,
 }
 
 impl SummaryStore {
@@ -76,6 +151,16 @@ impl SummaryStore {
         self.summaries.get(fqn).or_else(|| self.external.get(fqn))
     }
 
+    /// Like [`get`](Self::get) but also reports whether the summary was
+    /// computed from a body or loaded from the external corpus. Computed
+    /// summaries shadow external ones, as in `get`.
+    pub fn get_with_origin(&self, fqn: &str) -> Option<(&FunctionSummary, SummaryOrigin)> {
+        self.summaries
+            .get(fqn)
+            .map(|s| (s, SummaryOrigin::Computed))
+            .or_else(|| self.external.get(fqn).map(|s| (s, SummaryOrigin::External)))
+    }
+
     pub fn len(&self) -> usize {
         self.summaries.len()
     }
@@ -84,7 +169,26 @@ impl SummaryStore {
         self.summaries.is_empty()
     }
 
-    /// Load external function summaries from JSON (Fraunhofer-style).
+    /// Register the sanitizer function names summary computation should honour.
+    /// A call to one of these propagates its arguments' dependency *marked
+    /// sanitized* instead of as raw taint. Call before `compute_all` (or
+    /// recompute afterwards) — summaries already in the cache are not revised.
+    pub fn set_sanitizers<I, S>(&mut self, names: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.sanitizers = names.into_iter().map(Into::into).collect();
+    }
+
+    /// The sanitizer names summary computation honours.
+    pub fn sanitizer_names(&self) -> &HashSet<String> {
+        &self.sanitizers
+    }
+
+    /// Load external function summaries from JSON (Fraunhofer-style). Each
+    /// dataFlow entry may carry an optional `"via": "<sanitizer>"` field
+    /// marking the flow as sanitized.
     pub fn load_external_json(&mut self, json: &str) -> Result<usize, String> {
         let entries: Vec<ExternalEntry> =
             serde_json::from_str(json).map_err(|e| e.to_string())?;
@@ -94,7 +198,11 @@ impl SummaryStore {
             let mut flows = HashSet::new();
             for df in &e.data_flows {
                 if let (Some(from), Some(to)) = (parse_point(&df.from), parse_point(&df.to)) {
-                    flows.insert(Flow { from, to });
+                    flows.insert(Flow {
+                        from,
+                        to,
+                        via: df.via.clone().map(Sanitizer),
+                    });
                 }
             }
             self.external.insert(fqn.clone(), FunctionSummary { fqn, flows });
@@ -173,22 +281,81 @@ impl SummaryStore {
         self.recompute(cpg, &to_recompute);
     }
 
+    /// Hash of the summary states of `deps` (plus the sanitizer set): the
+    /// complete input state a method's summary computation depends on, beyond
+    /// the method's own body. Used as the within-fixpoint memo key.
+    fn dep_state_hash(&self, deps: &HashSet<String>) -> u64 {
+        use std::collections::hash_map::DefaultHasher;
+        use std::hash::{Hash, Hasher};
+        let mut h = DefaultHasher::new();
+        let mut names: Vec<&String> = deps.iter().collect();
+        names.sort();
+        for name in names {
+            name.hash(&mut h);
+            match self.get(name) {
+                Some(s) => {
+                    let mut flows: Vec<&Flow> = s.flows.iter().collect();
+                    flows.sort();
+                    flows.hash(&mut h);
+                }
+                None => 0u8.hash(&mut h),
+            }
+        }
+        let mut sans: Vec<&String> = self.sanitizers.iter().collect();
+        sans.sort();
+        sans.hash(&mut h);
+        h.finish()
+    }
+
     /// Fixpoint recomputation over `targets` only. Each round computes all
     /// targets in parallel against a snapshot of the store (Jacobi iteration),
     /// then applies updates serially; rounds repeat until no summary changes.
     /// Convergence needs one round per level of the call-dependency chain.
+    ///
+    /// Determinism guard: within one fixpoint, a method's summary is computed
+    /// at most once per (fqn, callee-summary-state) — repeats are replayed
+    /// from a memo. Convergence detection compares `prev.flows != new.flows`,
+    /// so a summary source that could answer differently on identical inputs
+    /// (a future LLM tier, a timeout-bounded solver) would otherwise be able
+    /// to oscillate forever; the memo makes each input state answered once.
     fn recompute(&mut self, cpg: &Cpg, targets: &[NodeId]) {
         use rayon::prelude::*;
         self.last_recomputed.clear();
+        self.last_memo_hits = 0;
+        let mut memo: HashMap<(String, u64), (FunctionSummary, HashSet<String>)> =
+            HashMap::new();
         let mut changed = true;
         let mut iterations = 0;
         while changed && iterations < targets.len() + 2 {
             changed = false;
             iterations += 1;
-            let results: Vec<(FunctionSummary, HashSet<String>)> = targets
+            // Replay memo hits; compute only the misses (in parallel).
+            let mut results: Vec<(FunctionSummary, HashSet<String>)> = Vec::new();
+            let mut to_compute: Vec<NodeId> = Vec::new();
+            for &m in targets {
+                let fqn = cpg.full_name_of(m).unwrap_or("<anon>");
+                let cached = self.deps.get(fqn).and_then(|d| {
+                    memo.get(&(fqn.to_string(), self.dep_state_hash(d))).cloned()
+                });
+                match cached {
+                    Some(r) => {
+                        self.last_memo_hits += 1;
+                        results.push(r);
+                    }
+                    None => to_compute.push(m),
+                }
+            }
+            let fresh: Vec<(FunctionSummary, HashSet<String>)> = to_compute
                 .par_iter()
                 .map(|&m| compute_method(cpg, m, self))
                 .collect();
+            // Memoise fresh results against the store state they were computed
+            // from (before this round's updates are applied).
+            for r in &fresh {
+                let key = (r.0.fqn.clone(), self.dep_state_hash(&r.1));
+                memo.insert(key, r.clone());
+            }
+            results.extend(fresh);
             for (summary, deps) in results {
                 let fqn = summary.fqn.clone();
                 let prev = self.summaries.get(&fqn);
@@ -201,6 +368,14 @@ impl SummaryStore {
             }
         }
     }
+}
+
+/// A taint mark during summary computation: which parameter the value derives
+/// from, and the sanitizer it went through (if any).
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+struct Tag {
+    param: usize,
+    via: Option<Sanitizer>,
 }
 
 /// Compute one method's summary by name-based taint over its body, using the
@@ -220,10 +395,10 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
         }
     }
 
-    // var name -> set of params that flow into it.
-    let mut taint: HashMap<String, HashSet<usize>> = HashMap::new();
+    // var name -> set of tagged params that flow into it.
+    let mut taint: HashMap<String, HashSet<Tag>> = HashMap::new();
     for (name, &i) in &param_index {
-        taint.insert(name.clone(), HashSet::from([i]));
+        taint.insert(name.clone(), HashSet::from([Tag { param: i, via: None }]));
     }
 
     let mut deps: HashSet<String> = HashSet::new();
@@ -254,10 +429,11 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
             }
             NodeKind::Return => {
                 for c in cpg.out_kind(n, cpg_core::EdgeKind::Ast) {
-                    for k in expr_taint(cpg, c, &taint, store, &mut deps) {
+                    for tag in expr_taint(cpg, c, &taint, store, &mut deps) {
                         result_flows.insert(Flow {
-                            from: Point::Param(k),
+                            from: Point::Param(tag.param),
                             to: Point::Return,
+                            via: tag.via,
                         });
                     }
                 }
@@ -277,14 +453,14 @@ pub(crate) fn lhs_name(cpg: &Cpg, node: NodeId) -> Option<String> {
     None
 }
 
-/// Set of parameter indices that taint an expression.
+/// Set of tagged parameters that taint an expression.
 fn expr_taint(
     cpg: &Cpg,
     node: NodeId,
-    taint: &HashMap<String, HashSet<usize>>,
+    taint: &HashMap<String, HashSet<Tag>>,
     store: &SummaryStore,
     deps: &mut HashSet<String>,
-) -> HashSet<usize> {
+) -> HashSet<Tag> {
     match cpg.kind_of(node) {
         NodeKind::Identifier => cpg
             .name_of(node)
@@ -294,7 +470,7 @@ fn expr_taint(
         NodeKind::Call => {
             let name = cpg.name_of(node).unwrap_or("");
             let args = cpg.arguments_of(node);
-            let arg_taints: Vec<HashSet<usize>> = args
+            let arg_taints: Vec<HashSet<Tag>> = args
                 .iter()
                 .map(|&a| expr_taint(cpg, a, taint, store, deps))
                 .collect();
@@ -303,17 +479,47 @@ fn expr_taint(
                 // Operators propagate all operands (conservative, precise enough).
                 let mut out = HashSet::new();
                 for t in &arg_taints {
-                    out.extend(t.iter().copied());
+                    out.extend(t.iter().cloned());
+                }
+                return out;
+            }
+            if store.sanitizers.contains(name) {
+                // Sanitizer call: the result still *derives from* its
+                // arguments (record the dependency, sanitized) but does not
+                // carry raw taint. An already-sanitized tag keeps its first
+                // sanitizer.
+                deps.insert(name.to_string());
+                let mut out = HashSet::new();
+                for t in &arg_taints {
+                    for tag in t {
+                        out.insert(Tag {
+                            param: tag.param,
+                            via: tag
+                                .via
+                                .clone()
+                                .or_else(|| Some(Sanitizer(name.to_string()))),
+                        });
+                    }
                 }
                 return out;
             }
             // Named function: drive result taint from the callee's summary.
+            // Raw callee flows preserve the argument's tag; sanitized callee
+            // flows mark it sanitized (so laundering is transitive).
             deps.insert(name.to_string());
             let mut out = HashSet::new();
             if let Some(summary) = store.get(name) {
-                for k in summary.flows_to_return() {
+                for f in &summary.flows {
+                    let (Point::Param(k), Point::Return) = (f.from, f.to) else {
+                        continue;
+                    };
                     if let Some(t) = arg_taints.get(k) {
-                        out.extend(t.iter().copied());
+                        for tag in t {
+                            out.insert(Tag {
+                                param: tag.param,
+                                via: tag.via.clone().or_else(|| f.via.clone()),
+                            });
+                        }
                     }
                 }
             }
@@ -366,4 +572,141 @@ struct ExternalDecl {
 struct ExternalFlow {
     from: String,
     to: String,
+    /// Optional sanitizer name: the flow exists but is neutralised by it.
+    #[serde(default)]
+    via: Option<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use cpg_frontend::Frontend;
+
+    /// Build a CPG from C sources and run the standard pass pipeline —
+    /// a minimal stand-in for the incremental driver, local to these tests.
+    fn build(files: &[(&str, &str)]) -> Cpg {
+        let mut cpg = Cpg::new();
+        let mut fe = cpg_lang_c::CFrontend::new();
+        let mut fids = Vec::new();
+        for (path, src) in files {
+            fids.push(fe.build_file(&mut cpg, path, src).file);
+        }
+        let pm = crate::standard_pipeline();
+        let idx = crate::pass::method_name_index(&cpg);
+        let ctx = crate::pass::PassContext { methods_by_name: Some(&idx) };
+        pm.run_all(&mut cpg, &fids, &ctx);
+        cpg
+    }
+
+    #[test]
+    fn sanitizer_call_marks_summary_flow_sanitized() {
+        // wrap launders its parameter through `escape`: the summary must still
+        // record param0 -> return (the dependency is real) but marked
+        // sanitized, and the raw-flow view must be empty.
+        let cpg = build(&[(
+            "s.c",
+            "char* wrap(char* s) {\n    return escape(s);\n}\n",
+        )]);
+        let mut store = SummaryStore::new();
+        store.set_sanitizers(["escape"]);
+        store.compute_all(&cpg);
+        let wrap = store.get("wrap").expect("wrap summarised");
+        assert!(
+            wrap.flows.contains(&Flow::sanitized(Point::Param(0), Point::Return, "escape")),
+            "expected sanitized param0->return, got {:?}",
+            wrap.flows
+        );
+        assert_eq!(wrap.flows_to_return().count(), 0, "no RAW flow may remain");
+        assert_eq!(
+            wrap.sanitized_flows_to_return().collect::<Vec<_>>(),
+            vec![(0, &Sanitizer::new("escape"))]
+        );
+    }
+
+    #[test]
+    fn sanitized_flow_propagates_transitively() {
+        // outer(y) { return wrap(y); } where wrap's flow is sanitized: outer's
+        // summary must carry the sanitized mark too, not resurrect raw taint.
+        let cpg = build(&[(
+            "t.c",
+            "char* wrap(char* s) {\n    return escape(s);\n}\nchar* outer(char* y) {\n    return wrap(y);\n}\n",
+        )]);
+        let mut store = SummaryStore::new();
+        store.set_sanitizers(["escape"]);
+        store.compute_all(&cpg);
+        let outer = store.get("outer").expect("outer summarised");
+        assert_eq!(outer.flows_to_return().count(), 0, "raw taint must not leak through wrap");
+        assert!(
+            outer
+                .sanitized_flows_to_return()
+                .any(|(k, s)| k == 0 && s.name() == "escape"),
+            "expected transitive sanitized flow, got {:?}",
+            outer.flows
+        );
+    }
+
+    #[test]
+    fn non_sanitized_flow_still_raw() {
+        let cpg = build(&[("r.c", "char* id(char* s) {\n    return s;\n}\n")]);
+        let mut store = SummaryStore::new();
+        store.set_sanitizers(["escape"]);
+        store.compute_all(&cpg);
+        let id = store.get("id").unwrap();
+        assert!(id.flows.contains(&Flow::direct(Point::Param(0), Point::Return)));
+        assert_eq!(id.flows_to_return().collect::<Vec<_>>(), vec![0]);
+    }
+
+    #[test]
+    fn external_json_flow_with_via_is_sanitized() {
+        let mut store = SummaryStore::new();
+        store
+            .load_external_json(
+                r#"[{"functionDeclaration":{"language":"C","methodName":"html_escape"},
+                     "dataFlows":[{"from":"param0","to":"return","via":"html_escape"}]},
+                    {"functionDeclaration":{"language":"C","methodName":"strdup"},
+                     "dataFlows":[{"from":"param0","to":"return"}]}]"#,
+            )
+            .unwrap();
+        let esc = store.get("html_escape").unwrap();
+        assert_eq!(esc.flows_to_return().count(), 0);
+        assert!(esc.sanitized_flows_to_return().any(|(k, s)| k == 0 && s.name() == "html_escape"));
+        // Backwards-compatible: entries without "via" stay raw.
+        let dup = store.get("strdup").unwrap();
+        assert_eq!(dup.flows_to_return().collect::<Vec<_>>(), vec![0]);
+        assert_eq!(
+            store.get_with_origin("strdup").map(|(_, o)| o),
+            Some(SummaryOrigin::External)
+        );
+    }
+
+    #[test]
+    fn fixpoint_memoises_repeat_computations() {
+        // A two-level chain forces multiple fixpoint rounds; later rounds must
+        // replay unchanged methods from the memo rather than recompute them.
+        let cpg = build(&[(
+            "m.c",
+            "int id(int x) {\n    return x;\n}\nint wrap(int y) {\n    return id(y);\n}\nint outer(int z) {\n    return wrap(z);\n}\n",
+        )]);
+        let mut store = SummaryStore::new();
+        store.compute_all(&cpg);
+        assert!(
+            store.last_memo_hits > 0,
+            "fixpoint rounds after the first should hit the memo"
+        );
+        // And the memo must not change results: converged summaries are correct.
+        for fqn in ["id", "wrap", "outer"] {
+            let s = store.get(fqn).unwrap_or_else(|| panic!("{fqn} summarised"));
+            assert!(
+                s.flows.contains(&Flow::direct(Point::Param(0), Point::Return)),
+                "{fqn}: expected raw param0->return, got {:?}",
+                s.flows
+            );
+        }
+        // Determinism: recomputing from scratch yields identical flows.
+        let mut store2 = SummaryStore::new();
+        store2.compute_all(&cpg);
+        for fqn in ["id", "wrap", "outer"] {
+            assert_eq!(store.get(fqn).unwrap().flows, store2.get(fqn).unwrap().flows);
+        }
+    }
 }
