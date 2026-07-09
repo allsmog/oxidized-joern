@@ -56,6 +56,7 @@ dependencies = [
  "cpg-lang-c",
  "cpg-lang-python",
  "cpg-lang-ts",
+ "serde",
  "serde_json",
 ]
 
