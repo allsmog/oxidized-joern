@@ -24,7 +24,11 @@ pub fn run_pack<'a>(project: &Project, pack: &'a RulePack) -> Vec<RuleFindings<'
         .map(|rule| {
             let sources: Vec<&str> = rule.sources.iter().map(String::as_str).collect();
             let sinks: Vec<&str> = rule.sinks.iter().map(String::as_str).collect();
-            RuleFindings { rule, findings: project.find_taint(&sources, &sinks) }
+            let sanitizers: Vec<&str> = rule.sanitizers.iter().map(String::as_str).collect();
+            RuleFindings {
+                rule,
+                findings: project.find_taint_with_sanitizers(&sources, &sinks, &sanitizers),
+            }
         })
         .collect()
 }
