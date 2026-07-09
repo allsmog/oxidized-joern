@@ -94,6 +94,11 @@ pub enum EdgeKind {
     Receiver,
     /// Structural containment (file -> method, method -> block, ...).
     Contains,
+    /// Reaching-definition edge (def -> use), the Joern REACHING_DEF
+    /// equivalent produced by the reaching-def pass over the CFG. Kept
+    /// distinct from [`EdgeKind::Ddg`] so coarser data-dependence layers can
+    /// coexist with the precise gen/kill result.
+    ReachingDef,
 }
 
 impl EdgeKind {
@@ -104,7 +109,7 @@ impl EdgeKind {
         EdgeKind::ALL[b as usize]
     }
 
-    pub const ALL: [EdgeKind; 8] = [
+    pub const ALL: [EdgeKind; 9] = [
         EdgeKind::Ast,
         EdgeKind::Cfg,
         EdgeKind::Call,
@@ -113,6 +118,7 @@ impl EdgeKind {
         EdgeKind::Argument,
         EdgeKind::Receiver,
         EdgeKind::Contains,
+        EdgeKind::ReachingDef,
     ];
 }
 

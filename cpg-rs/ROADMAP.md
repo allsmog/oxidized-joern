@@ -69,15 +69,21 @@ This is the highest-leverage remaining work and everything else stacks on it.
   emit through the shared builder so the same code produces both the
   canonical dump (the parity gate stays!) and a real columnar graph. The
   dump becomes a serializer over the graph, per GOAL.md M6.
-- [ ] **Replace the placeholder `CfgPass`** (`cpg-analysis/src/cfg.rs`,
+- [x] **Replace the placeholder `CfgPass`** (`cpg-analysis/src/cfg.rs`,
   source-order linearisation) with the parity-validated CfgBuilder semantics
   (evaluation-order chaining, transparent statement blocks, loop/switch/
   short-circuit shapes — all already reconstructed and green in Track A).
-- [ ] **Populate the empty DDG edge slot** with the validated reaching-def
+  *(2026-07-09: done — see cpg-analysis/src/cfg.rs; the C frontend now emits
+  a canonical control-structure shape the builder relies on.)*
+- [x] **Populate the empty DDG edge slot** with the validated reaching-def
   engine (`reaching_def_flows` in joern-parity): ReachingDefFlowGraph, the
   gen/kill fixpoint, EdgeValidator + the DefaultSemantics operator table,
   UsageAnalyzer.isUsing. This upgrades `cpg-analysis` from name-based taint
   to Joern-grade def-use.
+  *(2026-07-09: done — cpg-analysis/src/reaching_def.rs writes
+  EdgeKind::ReachingDef edges; paramOut routing and `<global>` capture
+  linking are N/A in the simplified schema, divergences documented in the
+  module docs. Follow-up: point summaries/taint at the new edges.)*
 - [ ] **Keep the byte-parity gate wired through the new path.** `check.sh`
   must diff the graph-backed dump, not a parallel legacy code path;
   otherwise the gate silently stops guarding the engine.
