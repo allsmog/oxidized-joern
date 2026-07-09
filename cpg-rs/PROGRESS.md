@@ -4,6 +4,22 @@ Single source of truth across sessions. Update in the same commit as the work.
 
 ## Current state
 
+- **M6/Gap 1 partial (2026-07-09): the engine's CFG + DDG passes are real.**
+  `cpg-analysis/src/cfg.rs` now ports the parity-validated CfgBuilder
+  semantics (evaluation-order chaining, if/else + loop back-edges +
+  break/continue + switch dispatch/fallthrough + short-circuit shapes) onto
+  the cpg-core graph; the C frontend emits a canonical control-structure
+  shape (cond first, arms as Block wrappers, four positional for-clause
+  Blocks) to carry the roles Joern encodes with condition/order edges. New
+  `cpg-analysis/src/reaching_def.rs` ports `reaching_def_flows` (gen/kill
+  fixpoint over the CFG, ReachingDefFlowGraph first-body-node quirk, lone
+  identifiers, DefaultSemantics operator table with token normalisation,
+  EdgeValidator + UsageAnalyzer.isUsing) and writes `EdgeKind::ReachingDef`
+  edges; registered in `standard_pipeline()` with Ast+Cfg reads / Ddg write
+  so incremental re-runs clear + recompute per file. Divergences (no
+  METHOD_PARAMETER_OUT/JUMP_TARGET/TYPE_REF/INLINED, no `<global>` capture)
+  are documented in the two modules' headers. joern-parity untouched, gate
+  still 95/95. Follow-up: point summaries.rs/taint.rs at ReachingDef edges.
 - **Milestone:** M5 (real-world corpus) + M7 (dataflow REACHING_DEF — **DONE,
   byte-zero**) — M1-M4 done.
   Goal reframed (see /root/.claude/plans/ + GOAL): self-hosted IRIS on cpg-rs.

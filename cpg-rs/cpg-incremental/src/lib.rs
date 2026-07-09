@@ -577,6 +577,67 @@ mod tests {
     }
 
     #[test]
+    fn reaching_def_edges_via_pipeline_and_stable_across_edits() {
+        use cpg_core::{EdgeKind, NodeKind};
+        // The standard pipeline must produce ReachingDef edges, and an edit to
+        // a file must clear + recompute them (idempotent re-runs, no
+        // duplicated edges).
+        let mut p = project();
+        let src = "void f() { x = source(); sink(x); }";
+        p.build(&[("r.c", src)]);
+
+        let rd_count = |cpg: &cpg_core::Cpg| -> usize {
+            cpg.nodes()
+                .map(|n| cpg.out_kind(n, EdgeKind::ReachingDef).count())
+                .sum()
+        };
+        // Identify an `x` identifier by its enclosing call (node ids get
+        // recycled across edits, so id order is meaningless after an update).
+        let x_in = |cpg: &cpg_core::Cpg, parent_code: &str| -> cpg_core::NodeId {
+            cpg.nodes()
+                .find(|&n| {
+                    cpg.kind_of(n) == NodeKind::Identifier
+                        && cpg.name_of(n) == Some("x")
+                        && cpg
+                            .in_kind(n, EdgeKind::Argument)
+                            .next()
+                            .is_some_and(|p| cpg.code_of(p) == Some(parent_code))
+                })
+                .unwrap_or_else(|| panic!("no x under {parent_code:?}"))
+        };
+        let def_use = |cpg: &cpg_core::Cpg| -> bool {
+            // The def of x (assignment lhs) reaches its use (sink's argument).
+            let def = x_in(cpg, "x = source()");
+            let us = x_in(cpg, "sink(x)");
+            cpg.out_kind(def, EdgeKind::ReachingDef).any(|d| d == us)
+        };
+
+        let first = rd_count(&p.cpg);
+        assert!(first > 0, "pipeline produced no ReachingDef edges");
+        assert!(def_use(&p.cpg), "def of x should reach its use");
+
+        // Re-analyse the same file (touched): edge count must not grow.
+        p.update_file("r.c", "void f() { x = source(); sink(x); } // touched");
+        assert_eq!(rd_count(&p.cpg), first, "re-run duplicated ReachingDef edges");
+        assert!(def_use(&p.cpg));
+
+        // An edit that kills the flow removes the def-use edge.
+        p.update_file("r.c", "void f() { x = source(); x = safe(); sink(x); }");
+        let cpg = &p.cpg;
+        let x1 = x_in(cpg, "x = source()");
+        let x2 = x_in(cpg, "x = safe()");
+        let x_use = x_in(cpg, "sink(x)");
+        assert!(
+            !cpg.out_kind(x1, EdgeKind::ReachingDef).any(|d| d == x_use),
+            "killed def must no longer reach the use after the edit"
+        );
+        assert!(
+            cpg.out_kind(x2, EdgeKind::ReachingDef).any(|d| d == x_use),
+            "the new def reaches the use"
+        );
+    }
+
+    #[test]
     fn external_json_summary_drives_taint() {
         let mut p = project();
         // Declare that libc's `strdup` flows param0 -> return.
