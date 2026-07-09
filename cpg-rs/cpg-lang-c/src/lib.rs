@@ -159,15 +159,115 @@ fn build_stmt(b: &mut cpg_core::CpgBuilder, parent: NodeId, node: Node, src: &[u
                 }
             }
         }
-        "if_statement" | "while_statement" | "for_statement" | "switch_statement"
-        | "do_statement" => {
+        // Control structures are built in a *canonical shape* the CFG pass can
+        // rely on: the condition expression is attached directly to the
+        // ControlStructure node, and each statement arm/clause is wrapped in
+        // its own Block child. (Joern instead distinguishes children by
+        // `order`/`condition` edges; the simplified cpg-core schema has
+        // neither, so child position + Block wrappers carry the roles.)
+        "if_statement" => {
+            // Children: [cond, Block(then), Block(else)?].
             let cs = b.control_structure(node.kind(), line(node));
             b.ast_child(parent, cs);
-            // Recurse into nested bodies/conditions for calls and refs.
-            let mut cur = node.walk();
-            for c in node.named_children(&mut cur) {
-                build_stmt(b, cs, c, src);
+            if let Some(e) = node.child_by_field_name("condition").and_then(|c| build_expr(b, c, src)) {
+                b.ast_child(cs, e);
             }
+            if let Some(cons) = node.child_by_field_name("consequence") {
+                let blk = b.block();
+                b.ast_child(cs, blk);
+                build_stmt(b, blk, cons, src);
+            }
+            if let Some(alt) = node.child_by_field_name("alternative") {
+                // `alternative` is an else_clause wrapping the else statement.
+                let blk = b.block();
+                b.ast_child(cs, blk);
+                for c in named_children(alt) {
+                    build_stmt(b, blk, c, src);
+                }
+            }
+        }
+        "while_statement" => {
+            // Children: [cond, Block(body)].
+            let cs = b.control_structure(node.kind(), line(node));
+            b.ast_child(parent, cs);
+            if let Some(e) = node.child_by_field_name("condition").and_then(|c| build_expr(b, c, src)) {
+                b.ast_child(cs, e);
+            }
+            let blk = b.block();
+            b.ast_child(cs, blk);
+            if let Some(body) = node.child_by_field_name("body") {
+                build_stmt(b, blk, body, src);
+            }
+        }
+        "do_statement" => {
+            // Children: [Block(body), cond] — body first, mirroring execution.
+            let cs = b.control_structure(node.kind(), line(node));
+            b.ast_child(parent, cs);
+            let blk = b.block();
+            b.ast_child(cs, blk);
+            if let Some(body) = node.child_by_field_name("body") {
+                build_stmt(b, blk, body, src);
+            }
+            if let Some(e) = node.child_by_field_name("condition").and_then(|c| build_expr(b, c, src)) {
+                b.ast_child(cs, e);
+            }
+        }
+        "for_statement" => {
+            // Children: always four Blocks [init, cond, update, body]; an
+            // absent clause leaves its Block empty. Positions are the truth,
+            // exactly like Joern's placeholder BLOCKs for empty for-clauses.
+            let cs = b.control_structure(node.kind(), line(node));
+            b.ast_child(parent, cs);
+            for field in ["initializer", "condition", "update"] {
+                let blk = b.block();
+                b.ast_child(cs, blk);
+                if let Some(c) = node.child_by_field_name(field) {
+                    build_stmt(b, blk, c, src);
+                }
+            }
+            let blk = b.block();
+            b.ast_child(cs, blk);
+            if let Some(body) = node.child_by_field_name("body") {
+                build_stmt(b, blk, body, src);
+            }
+        }
+        "switch_statement" => {
+            // Children: [cond, Block(body)]; the body Block holds the
+            // case/default ControlStructures in source order.
+            let cs = b.control_structure(node.kind(), line(node));
+            b.ast_child(parent, cs);
+            if let Some(e) = node.child_by_field_name("condition").and_then(|c| build_expr(b, c, src)) {
+                b.ast_child(cs, e);
+            }
+            let blk = b.block();
+            b.ast_child(cs, blk);
+            if let Some(body) = node.child_by_field_name("body") {
+                build_stmt(b, blk, body, src);
+            }
+        }
+        "case_statement" => {
+            // `case V: stmts` / `default: stmts`. Joern models the label as a
+            // JUMP_TARGET sibling; the simplified schema has no JumpTarget
+            // kind, so the case is a ControlStructure whose code distinguishes
+            // case from default and whose children are [value?, stmts...].
+            let value = node.child_by_field_name("value");
+            let code = if value.is_some() { "case_statement" } else { "default_statement" };
+            let cs = b.control_structure(code, line(node));
+            b.ast_child(parent, cs);
+            let value_id = value.map(|v| v.id());
+            if let Some(e) = value.and_then(|v| build_expr(b, v, src)) {
+                b.ast_child(cs, e);
+            }
+            for c in named_children(node) {
+                if Some(c.id()) != value_id {
+                    build_stmt(b, cs, c, src);
+                }
+            }
+        }
+        "break_statement" | "continue_statement" => {
+            // Needed for CFG loop/switch exits; previously invisible.
+            let cs = b.control_structure(node.kind(), line(node));
+            b.ast_child(parent, cs);
         }
         "compound_statement" => {
             let mut cur = node.walk();

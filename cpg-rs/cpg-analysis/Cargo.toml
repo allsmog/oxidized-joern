@@ -9,3 +9,9 @@ cpg-core.workspace = true
 rayon.workspace = true
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+[dev-dependencies]
+# Test fixtures are built with the C frontend (dev-only; no cycle: the
+# frontends do not depend on cpg-analysis).
+cpg-frontend.workspace = true
+cpg-lang-c.workspace = true
