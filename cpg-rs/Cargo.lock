@@ -38,6 +38,8 @@ name = "cpg-analysis"
 version = "0.1.0"
 dependencies = [
  "cpg-core",
+ "cpg-frontend",
+ "cpg-lang-c",
  "rayon",
  "serde",
  "serde_json",
