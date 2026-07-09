@@ -16,9 +16,9 @@ pub use callgraph::CallGraphPass;
 pub use cfg::{cfg_edges_for_method, CfgPass};
 pub use pass::{Pass, PassContext, PassManager};
 pub use reaching_def::{reaching_def_flows, ReachingDefFlow, ReachingDefPass};
-pub use summaries::{Flow, FunctionSummary, Point, SummaryStore};
+pub use summaries::{Flow, FunctionSummary, Point, Sanitizer, SummaryOrigin, SummaryStore};
 pub use symbols::SymbolResolutionPass;
-pub use taint::{find_flows, Finding, TaintSpec};
+pub use taint::{find_flows, Finding, Provenance, Step, TaintSpec, Trace};
 
 /// Build the standard pass pipeline. Order is derived from layer dependencies,
 /// so the sequence here is irrelevant — the manager sorts it (ReachingDefPass
