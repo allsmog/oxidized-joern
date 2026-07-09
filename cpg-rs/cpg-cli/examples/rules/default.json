@@ -1,0 +1,31 @@
+{
+  "rules": [
+    {
+      "id": "CPG-001",
+      "name": "env-to-system",
+      "cwe": "CWE-78",
+      "description": "environment variable reaches command execution",
+      "severity": "high",
+      "sources": ["getenv"],
+      "sinks": ["system", "popen", "execl", "execlp"]
+    },
+    {
+      "id": "CPG-002",
+      "name": "network-to-unbounded-copy",
+      "cwe": "CWE-120",
+      "description": "network or stdin data reaches an unbounded buffer copy",
+      "severity": "high",
+      "sources": ["recv", "read", "gets", "fgets"],
+      "sinks": ["strcpy", "strcat", "sprintf"]
+    },
+    {
+      "id": "CPG-003",
+      "name": "tainted-format-string",
+      "cwe": "CWE-134",
+      "description": "externally controlled data used as a format string argument",
+      "severity": "medium",
+      "sources": ["getenv", "recv", "gets"],
+      "sinks": ["printf", "fprintf", "syslog"]
+    }
+  ]
+}
