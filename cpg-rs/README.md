@@ -43,3 +43,23 @@ cargo run --release -p cpg-cli -- serve --load p.cpg             # reopen + quer
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the design, the rationale behind each
 choice, and the honest list of what's simplified and what's next.
+
+## CI
+
+GitHub Actions (`.github/workflows/cpg-rs.yml`) runs on any push or PR that
+touches `cpg-rs/`:
+
+- **test** — `cargo build` + `cargo test` for the whole workspace
+  (`--locked`, stable toolchain, cargo registry and target dir cached).
+- **fmt-clippy** — `cargo fmt --check` and `cargo clippy --workspace -- -D
+  warnings`. Currently advisory (`continue-on-error`) until the existing
+  formatting/lint debt is paid down.
+
+The **parity** job runs the differential oracle check
+(`joern-parity/setup-oracle.sh` then `joern-parity/check.sh`) against the
+pinned Joern release (v4.0.555, set in both the workflow and
+`setup-oracle.sh`). Because the oracle download is ~2GB it does not run on
+every push — trigger it manually from the Actions tab ("Run workflow" /
+`workflow_dispatch`); the unpacked distribution is cached keyed on the pinned
+version. To bump the oracle, change `JOERN_VERSION` in both places and record
+the upgrade in PROGRESS.md.
