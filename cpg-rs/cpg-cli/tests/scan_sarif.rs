@@ -153,3 +153,45 @@ fn server_scan_command_groups_findings_by_rule_id() {
     let missing = handle(&mut project, &json!({"cmd": "scan"}));
     assert!(missing["error"].as_str().is_some());
 }
+
+/// A rule whose `sanitizers` name a function on the only source→sink path must
+/// suppress the finding — the payoff of threading rule sanitizers into the
+/// taint query (`find_taint_with_sanitizers`). Same fixture, with vs. without
+/// the sanitizer named, to prove it is the sanitizer (not an absent flow) that
+/// removes the result.
+const SANITIZED_C: &str = r#"
+#include <stdlib.h>
+
+char *clean(char *s) { return s; }
+
+int main(void) {
+    char *c = getenv("USER_CMD");
+    char *safe = clean(c);
+    system(safe);
+    return 0;
+}
+"#;
+
+#[test]
+fn rule_sanitizer_suppresses_finding() {
+    let tmp = TempDir::new("sanitize");
+    std::fs::write(tmp.0.join("vuln.c"), SANITIZED_C).unwrap();
+    let project = build_project(tmp.0.to_str().unwrap(), "c");
+
+    let base = r#"{"rules":[{"id":"CPG-1","sources":["getenv"],"sinks":["system"]}]}"#;
+    let with_san = r#"{"rules":[{"id":"CPG-1","sources":["getenv"],"sinks":["system"],"sanitizers":["clean"]}]}"#;
+
+    let base_pack = RulePack::from_json(base).unwrap();
+    let no_san = scan::run_pack(&project, &base_pack);
+    assert!(
+        !no_san[0].findings.is_empty(),
+        "without a sanitizer, getenv->clean->system is a flow"
+    );
+
+    let san_pack = RulePack::from_json(with_san).unwrap();
+    let sanitized = scan::run_pack(&project, &san_pack);
+    assert!(
+        sanitized[0].findings.is_empty(),
+        "naming `clean` as a sanitizer must suppress the only path"
+    );
+}

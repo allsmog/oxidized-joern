@@ -44,9 +44,9 @@ pub struct Rule {
     /// Calls to these names are dangerous when reached by a tainted argument.
     #[serde(default)]
     pub sinks: Vec<String>,
-    /// Accepted for forward compatibility but NOT yet enforced: the taint
-    /// query API (`Project::find_taint`) takes only sources and sinks today.
-    /// Follow-up: thread sanitizers through `cpg_analysis::TaintSpec`.
+    /// Function names that neutralise taint: a flow whose only path passes
+    /// through one is not reported. Threaded into the query via
+    /// `Project::find_taint_with_sanitizers` (see `scan::run_pack`).
     #[serde(default)]
     pub sanitizers: Vec<String>,
 }

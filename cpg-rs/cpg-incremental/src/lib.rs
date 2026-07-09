@@ -296,7 +296,21 @@ impl Project {
     /// Because it reads the (incrementally-maintained) summary cache, results
     /// reflect the latest edits without any extra recomputation here.
     pub fn find_taint(&self, sources: &[&str], sinks: &[&str]) -> Vec<cpg_analysis::Finding> {
-        let spec = cpg_analysis::TaintSpec::new(sources, sinks);
+        self.find_taint_with_sanitizers(sources, sinks, &[])
+    }
+
+    /// Like [`find_taint`](Self::find_taint), but a call to any name in
+    /// `sanitizers` neither propagates taint nor lets a flow through it be
+    /// reported. Query-side sanitization: the spec's sanitizers are honoured at
+    /// call sites and via callee-summary chain rechecking, so a scan can supply
+    /// per-rule sanitizers without recomputing summaries.
+    pub fn find_taint_with_sanitizers(
+        &self,
+        sources: &[&str],
+        sinks: &[&str],
+        sanitizers: &[&str],
+    ) -> Vec<cpg_analysis::Finding> {
+        let spec = cpg_analysis::TaintSpec::with_sanitizers(sources, sinks, sanitizers);
         cpg_analysis::find_flows(&self.cpg, &self.summaries, &spec)
     }
 }
