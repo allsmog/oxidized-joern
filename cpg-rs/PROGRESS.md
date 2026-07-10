@@ -56,9 +56,13 @@ Single source of truth across sessions. Update in the same commit as the work.
   - Tooling: `rd_probe2.sc`/`rd_probe3.sc` dump Joern's actual gen/in/lone for
     ground truth; decompiled sources in /tmp (Ddg, EV2, UA, RDTF, OPT,
     MemberAccess) via CFR.
-- **Oracle:** Joern v4.0.555 (`setup-oracle.sh` fetches latest; if the version
-  drifts and output changes, record it here and in QUIRKS.md)
-- **Gate:** `joern-parity/check.sh` — green, 95/95 blocks byte-identical.
+- **Oracle:** Joern v4.0.555 (`setup-oracle.sh` now pins v4.0.555 by default;
+  override with `JOERN_VERSION=vX.Y.Z` only as a deliberate, recorded upgrade)
+- **Gate:** `joern-parity/check.sh` — green, 96/96 blocks byte-identical.
+  **(2026-07-10: check.sh now diffs the FLOWS section — the 1,458 REACHING_DEF
+  facts are a guarded block, and oracle regen preserves FLOWS lines; the M7(a)
+  "extend check.sh with a FLOWS diff block" task is done. Previously 95/95 with
+  FLOWS informational-only.)**
   Corpus includes THREE unmodified real-world musl files: bsearch.c,
   memcmp.c, strcmp.c — AST, nodes, and all 15 edge kinds incl. CFG. Previously 88/88 with
   macros.c (#define expansion as INLINED calls + #ifdef). Previously 84/84 with gotos.c
