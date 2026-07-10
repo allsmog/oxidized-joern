@@ -18,7 +18,7 @@ if [ -x "$JOERN/joern" ]; then
   TMP_ORACLE="$(mktemp)"
   if (cd "$JOERN" && rm -rf workspace && ./joern --script "$HERE/oracle.sc" \
        --param inputPath="$HERE/corpus" 2>/dev/null) \
-       | grep -E '^(AST|NODES|EDGES)\|' > "$TMP_ORACLE" && [ -s "$TMP_ORACLE" ]; then
+       | grep -E '^(AST|NODES|EDGES|FLOWS)\|' > "$TMP_ORACLE" && [ -s "$TMP_ORACLE" ]; then
     mv "$TMP_ORACLE" "$ORACLE"
   else
     rm -f "$TMP_ORACLE"
@@ -32,13 +32,15 @@ cargo run -q --manifest-path "$ROOT/Cargo.toml" -p joern-parity -- corpus/*.c > 
 
 # Each side splits into method walk (AST), scaffolding nodes (NODES), edges (EDGES).
 OAST="$(mktemp)"; ONODES="$(mktemp)"; MAST="$(mktemp)"; MNODES="$(mktemp)"
-OEDGES="$(mktemp)"; MEDGES="$(mktemp)"
+OEDGES="$(mktemp)"; MEDGES="$(mktemp)"; OFLOWS="$(mktemp)"; MFLOWS="$(mktemp)"
 sed -n 's/^AST|//p' "$ORACLE" > "$OAST"
 sed -n 's/^NODES|//p' "$ORACLE" > "$ONODES"
 sed -n 's/^EDGES|//p' "$ORACLE" > "$OEDGES"
-grep -vE '^(NODES|EDGES)\|' "$MINE" > "$MAST" || true
+sed -n 's/^FLOWS|//p' "$ORACLE" > "$OFLOWS"
+grep -vE '^(NODES|EDGES|FLOWS)\|' "$MINE" > "$MAST" || true
 sed -n 's/^NODES|//p' "$MINE" > "$MNODES"
 sed -n 's/^EDGES|//p' "$MINE" > "$MEDGES"
+sed -n 's/^FLOWS|//p' "$MINE" > "$MFLOWS"
 
 # Split a dump file into per-method blocks keyed by FULL_NAME (NAME collides:
 # every file has a <global> method).
@@ -78,6 +80,17 @@ for kind in $( (cut -d' ' -f1 "$OEDGES"; cut -d' ' -f1 "$MEDGES") | sort -u); do
   fi
   rm -f "$OK" "$MK"
 done
+# Dataflow parity: REACHING_DEF (DDG) flows. Diffed as one exact block so every
+# fact is compared (a per-method split risks silently dropping lines whose home
+# can't be parsed); on failure the head-capped diff localises the divergence.
+total=$((total+1))
+if diff -q "$OFLOWS" "$MFLOWS" >/dev/null; then
+  echo "PASS  (flows: REACHING_DEF, $(wc -l < "$OFLOWS"))"
+else
+  echo "FAIL  (flows: REACHING_DEF, $(diff "$OFLOWS" "$MFLOWS" | grep -c '^[<>]') line diffs)"
+  diff "$OFLOWS" "$MFLOWS" | sed 's/^/      /' | head -40; fail=$((fail+1))
+fi
+
 for m in "$MD"/*; do
   name=$(basename "$m"); total=$((total+1))
   if [ ! -f "$OD/$name" ]; then echo "NO ORACLE for $name"; fail=$((fail+1)); continue; fi
@@ -89,5 +102,5 @@ for m in "$MD"/*; do
 done
 echo "----"
 echo "$((total-fail))/$total methods byte-identical to Joern"
-rm -rf "$MINE" "$OD" "$MD" "$OAST" "$ONODES" "$MAST" "$MNODES" "$OEDGES" "$MEDGES"
+rm -rf "$MINE" "$OD" "$MD" "$OAST" "$ONODES" "$MAST" "$MNODES" "$OEDGES" "$MEDGES" "$OFLOWS" "$MFLOWS"
 exit $fail
