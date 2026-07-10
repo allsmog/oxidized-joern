@@ -29,21 +29,21 @@ ladders (Java first) → module-by-module Scala deletion.
 
 ---
 
-## Two urgent, cheap fixes (do first — they protect everything)
+## Two urgent, cheap fixes (do first — they protect everything) — DONE
 
-Both were found independently by two agents; both are near-free and both
-currently leave the headline parity number **unguarded**.
+Both were found independently by two agents; both left the headline parity
+number **unguarded**. Both are now fixed (2026-07-10).
 
-1. **The gate silently drops FLOWS on oracle regen.** `check.sh:21` greps only
-   `^(AST|NODES|EDGES)\|` when regenerating `oracle_all.txt`, then overwrites the
-   file — so the next regen against a live Joern **deletes all 1,458 committed
-   FLOWS lines**, and `check.sh` has no FLOWS diff block anyway. The verified
-   REACHING_DEF byte-parity is enforced by *nothing* today. Fix: add `FLOWS` to
-   the regen grep **and** add a per-method FLOWS diff block (already listed as
-   `PROGRESS.md` M7(a), never done). ~hours.
-2. **Pin the oracle version in `setup-oracle.sh`.** (Already done on the Gap 8
-   branch — `JOERN_VERSION=v4.0.555`.) Confirm it's merged; a `latest` fetch can
-   shift the spec mid-work. ~done, verify.
+1. **[DONE] The gate silently dropped FLOWS on oracle regen.** `check.sh` greps
+   only `^(AST|NODES|EDGES)\|` on regen and had no FLOWS diff block, so the 1,458
+   REACHING_DEF facts were enforced by nothing. Fixed: the regen grep now
+   includes `FLOWS`, and a new exact-block diff compares all 1,458 flow facts
+   (single block, not per-method — a split risked silently dropping lines whose
+   home can't be parsed). Gate 95/95 → **96/96**, still green. Closes the
+   `PROGRESS.md` M7(a) task.
+2. **[DONE] Oracle version pinned in `setup-oracle.sh`** — `JOERN_VERSION`
+   defaults to `v4.0.555`; a `latest` fetch can no longer shift the spec
+   mid-work. Verified merged.
 
 ---
 
