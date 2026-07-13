@@ -5,7 +5,21 @@ import io.joern.pysrc2cpg.memop.*
 import io.joern.pysrc2cpg.memop.MemoryOperation.{Del, Load, Store}
 import io.joern.x2cpg.frontendspecific.pysrc2cpg.Constants.builtinPrefix
 import io.joern.pythonparser.{AstPrinter, ast}
-import io.joern.pythonparser.ast.{Arguments, MatchAs, iast, iexpr, istmt}
+import io.joern.pythonparser.ast.{
+  Arguments,
+  MatchAs,
+  MatchClass,
+  MatchMapping,
+  MatchOr,
+  MatchSequence,
+  MatchSingleton,
+  MatchStar,
+  MatchValue,
+  iast,
+  iexpr,
+  ipattern,
+  istmt
+}
 import io.joern.x2cpg.frontendspecific.pysrc2cpg.Constants
 import io.joern.x2cpg.{AstCreatorBase, ValidationMode}
 import io.shiftleft.codepropertygraph.generated.*
@@ -1271,8 +1285,6 @@ class PythonAstVisitor(
     createBlock(blockStmts, lineAndCol)
   }
 
-  // TODO add case pattern and guard statements to not just as string in the JUMP_TARGET to the CPG
-  // but rather as proper AST constructs.
   def convert(matchStmt: ast.Match): NewNode = {
     val controlStructureNode =
       nodeBuilder.controlStructureNode("match ... : ...", ControlStructureTypes.MATCH, lineAndColOf(matchStmt))
@@ -1283,16 +1295,19 @@ class PythonAstVisitor(
       val jumpTargetCode =
         caseStmt.pattern match {
           case MatchAs(None, _, _) if caseStmt.guard.isEmpty =>
-            // TODO For the moment we have to use "default" because otherwise the CfgCreator does not detect
-            // the jump target as the default case.
+            // Use "default" because the CfgCreator detects the default case by checking
+            // JumpTarget.name == "default".
             "default"
           case pattern =>
             val printer = new AstPrinter("")
             "case " + printer.print(pattern) + caseStmt.guard.map(g => " if " + printer.print(g)).getOrElse("")
         }
-      val jumpTarget = nodeBuilder.jumpNode(jumpTargetCode)
-      val bodyNodes  = caseStmt.body.map(convert)
-      jumpTarget :: createBlock(bodyNodes, lineAndColOf(caseStmt.pattern)) :: Nil
+      val jumpTarget   = nodeBuilder.jumpNode(jumpTargetCode)
+      val patternNodes = convertMatchPattern(caseStmt.pattern)
+      val guardNodes   = caseStmt.guard.map(convert).toSeq
+      val bodyNodes    = caseStmt.body.map(convert)
+      val allBodyNodes = patternNodes ++ guardNodes ++ bodyNodes
+      jumpTarget :: createBlock(allBodyNodes, lineAndColOf(caseStmt.pattern)) :: Nil
     }
 
     val switchBodyBlock = createBlock(caseBlocks, lineAndColOf(matchStmt))
@@ -1302,6 +1317,23 @@ class PythonAstVisitor(
     addAstChildNodes(controlStructureNode, 2, switchBodyBlock)
 
     controlStructureNode
+  }
+
+  private def convertMatchPattern(pattern: ipattern): Seq[NewNode] = {
+    pattern match {
+      case MatchValue(value, _)                       => Seq(convert(value))
+      case singleton: MatchSingleton                   => Seq(convert(ast.Constant(singleton.value, singleton.attributeProvider)))
+      case MatchSequence(patterns, _)                  => patterns.flatMap(convertMatchPattern).toSeq
+      case MatchMapping(keys, _, _, _)                 => keys.map(convert).toSeq
+      case MatchClass(cls, _, _, _, _)                 => Seq(convert(cls))
+      case MatchStar(Some(name), _)                    => Seq(createIdentifierNode(name, Load, lineAndColOf(pattern)))
+      case MatchAs(Some(innerPattern), Some(name), _)  =>
+        convertMatchPattern(innerPattern) ++ Seq(createIdentifierNode(name, Store, lineAndColOf(pattern)))
+      case MatchAs(None, Some(name), _)                =>
+        Seq(createIdentifierNode(name, Store, lineAndColOf(pattern)))
+      case MatchOr(patterns, _)                        => patterns.flatMap(convertMatchPattern).toSeq
+      case _                                           => Seq.empty // default/wildcard (MatchStar(None), MatchAs(None, None))
+    }
   }
 
   def convert(raise: ast.Raise): NewNode = {
@@ -1782,16 +1814,29 @@ class PythonAstVisitor(
     convert(await.value)
   }
 
+  // `yield x` is modelled as a call to <operator>.yield with the yielded
+  // value as its argument, so data flows out of the generator through the
+  // yield. A bare `yield` has no argument. The call's own value represents
+  // what `generator.send(...)` passes back in.
   def convert(yieldExpr: ast.Yield): NewNode = {
-    val valueNode = yieldExpr.value.map(convert)
-    val code      = "yield" + valueNode.map(node => " " + codeOf(node)).getOrElse("")
-    createReturn(valueNode, Some(code), lineAndColOf(yieldExpr))
+    val operandNodes = yieldExpr.value.map(convert).toList
+    val argCode      = operandNodes.map(codeOf).mkString(", ")
+    val code         = if (argCode.isEmpty) "yield" else s"yield $argCode"
+    val callNode =
+      nodeBuilder.callNode(code, "<operator>.yield", DispatchTypes.STATIC_DISPATCH, lineAndColOf(yieldExpr))
+    addAstChildrenAsArguments(callNode, 1, operandNodes)
+    callNode
   }
 
+  // `yield from x` is modelled as a call to <operator>.yieldFrom with the
+  // delegated iterable as its argument.
   def convert(yieldFrom: ast.YieldFrom): NewNode = {
-    val valueNode = convert(yieldFrom.value)
-    val code      = "yield from " + codeOf(valueNode)
-    createReturn(Some(valueNode), Some(code), lineAndColOf(yieldFrom))
+    val operandNode = convert(yieldFrom.value)
+    val code        = s"yield from ${codeOf(operandNode)}"
+    val callNode =
+      nodeBuilder.callNode(code, "<operator>.yieldFrom", DispatchTypes.STATIC_DISPATCH, lineAndColOf(yieldFrom))
+    addAstChildrenAsArguments(callNode, 1, operandNode)
+    callNode
   }
 
   // In case of a single compare operation there is no lowering applied.
@@ -1890,7 +1935,7 @@ class PythonAstVisitor(
         // keyword.arg == None. This is the case for func(**dict) style arguments.
         // We use a synthetic argument name to preserve the unpacked dict as an argument
         // in the CPG so that data flow tracking can follow through it.
-        (keywordDictArgName, convert(keyword.value))
+        ("**", convert(keyword.value))
       }
     }
 
@@ -2184,7 +2229,9 @@ class PythonAstVisitor(
   }
 
   private def convertKwArg(arg: ast.Arg, index: AutoIncIndex): nodes.NewMethodParameterIn = {
-    nodeBuilder.methodParameterNode(arg.arg, isVariadic = false, lineAndColOf(arg), index.getAndInc)
+    val paramNode = nodeBuilder.methodParameterNode(arg.arg, isVariadic = true, lineAndColOf(arg), index.getAndInc)
+    paramNode.code(s"**${arg.arg}")
+    paramNode
   }
 
   def convert(keyword: ast.Keyword): NewNode = unhandled(keyword)

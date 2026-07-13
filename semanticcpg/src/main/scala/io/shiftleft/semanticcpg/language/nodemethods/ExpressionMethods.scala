@@ -65,6 +65,7 @@ class ExpressionMethods(val node: Expression) extends AnyVal with NodeExtension 
       param.index == node.argumentIndex || (param.isVariadic && param.index < node.argumentIndex)
 
     def predicate(param: MethodParameterIn): Boolean = node.argumentName match {
+      case Some("**") => isKeywordVariadicParameter(param)
       case Some(name) =>
         param.name == name || (isRuby && !param.method.parameter.exists(
           _.name == name
@@ -83,6 +84,9 @@ class ExpressionMethods(val node: Expression) extends AnyVal with NodeExtension 
       if predicate(paramIn)
     } yield paramIn
   }
+
+  private def isKeywordVariadicParameter(param: MethodParameterIn): Boolean =
+    param.isVariadic && param.code.startsWith("**")
 
   def typ: Iterator[Type] =
     node._evalTypeOut.cast[Type]

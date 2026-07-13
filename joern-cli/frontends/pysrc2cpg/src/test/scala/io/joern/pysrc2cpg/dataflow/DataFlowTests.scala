@@ -823,6 +823,24 @@ class DataFlowTests extends PySrc2CpgFixture(withOssDataflow = true) {
     )
   }
 
+  "taint flows from **kwargs unpacked dict into kwargs.get / kwargs[key] use" in {
+    val cpg = code("""
+        |def sink(x):
+        |    pass
+        |
+        |def inner(**kwargs):
+        |    sink(kwargs.get("k"))
+        |    sink(kwargs["k"])
+        |
+        |def outer():
+        |    options = source()
+        |    inner(**options)
+        |""".stripMargin)
+    val source = cpg.call("source")
+    val sink   = cpg.call("sink").argument(1)
+    sink.reachableByFlows(source).size should be >= 1
+  }
+
 }
 
 // Showcases that, even though `foo` is defined in the source-code, we are still able to override its semantics.

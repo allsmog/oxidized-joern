@@ -62,7 +62,7 @@ class DownloadDependencyTest extends GoCodeToCpgSuite {
 
     "Check CALL Node" in {
       val List(x) = cpg.call("NewClient").l
-      x.typeFullName shouldBe "*github.com/aerospike/aerospike-client-go/v6.Client"
+      x.typeFullName shouldBe "(*github.com/aerospike/aerospike-client-go/v6.Client, github.com/aerospike/aerospike-client-go/v6.Error)"
     }
 
     "Check if we are able to identify the type of constants accessible out side dependencies code" in {
