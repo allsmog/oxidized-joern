@@ -1,8 +1,9 @@
 package io.joern.swiftsrc2cpg.passes
 
+import io.joern.swiftsrc2cpg.astcreation.AstCreatorHelper
 import io.joern.swiftsrc2cpg.passes.AstCreationPass
 import io.shiftleft.codepropertygraph.generated.{Cpg, DispatchTypes, EdgeTypes, Operators, PropertyNames}
-import io.shiftleft.codepropertygraph.generated.nodes.{Expression, NewMember, TypeDecl}
+import io.shiftleft.codepropertygraph.generated.nodes.{Expression, Method, NewBinding, NewMember, TypeDecl}
 import io.shiftleft.passes.CpgPass
 import io.shiftleft.semanticcpg.language.*
 
@@ -31,10 +32,14 @@ class ExtensionsPass(
   inheritsMapping: Map[String, Set[String]]
 ) extends CpgPass(cpg) {
 
+  private val ExtensionMethodSeparator = "<extension>."
+
   override def run(diffGraph: DiffGraphBuilder): Unit = {
     handleSubscriptGetterCalls(diffGraph)
     handleExtensionMembers(diffGraph)
+    handleExtensionMethodBindings(diffGraph)
     handleExtensionCalls(diffGraph)
+    handleUnknownExtensionCalls(diffGraph)
     handleMemberPropertyGetterCalls(diffGraph)
     handleInherits(diffGraph)
   }
@@ -60,13 +65,20 @@ class ExtensionsPass(
     * The fallback exists for cases where type `fullName`s are not fully accurate due to missing compiler support.
     */
   private def findTypeDecl(fullName: String): Option[TypeDecl] = {
-    // If we cannot find the typeDecl by fullName, try looking it up by name (last part of fullName).
-    // This is a fallback / the best effort approach for cases where the fullName is not accurate due to missing compiler support.
-    cpg.typeDecl.fullNameExact(fullName).headOption.orElse {
-      val simpleName = fullName.split('.').last
-      cpg.typeDecl.nameExact(simpleName).headOption
+    val fullNameCandidates = normalizedTypeFullNameCandidates(fullName)
+    fullNameCandidates.view.flatMap(candidate => cpg.typeDecl.fullNameExact(candidate).headOption).headOption.orElse {
+      // If we cannot find the typeDecl by fullName, try looking it up by name (last part of fullName).
+      // This is a fallback / the best effort approach for cases where the fullName is not accurate due to missing compiler support.
+      val nameCandidates = fullNameCandidates
+        .map(_.split('.').last)
+        .flatMap(name => Seq(name, AstCreatorHelper.stripGenerics(name)))
+        .distinct
+      nameCandidates.view.flatMap(candidate => cpg.typeDecl.nameExact(candidate).headOption).headOption
     }
   }
+
+  private def normalizedTypeFullNameCandidates(fullName: String): Seq[String] =
+    Seq(fullName, AstCreatorHelper.stripGenerics(fullName)).distinct
 
   /** Create `MEMBER` nodes for the given extension members and attach them to the provided type declaration. */
   private def addMembers(
@@ -94,6 +106,80 @@ class ExtensionsPass(
           addMembers(diffGraph, typeDecl, members)
         }
       }
+    }
+  }
+
+  private def extensionTargetFullName(methodFullName: String): Option[String] = {
+    val extensionIndex = methodFullName.lastIndexOf(ExtensionMethodSeparator)
+    Option.when(extensionIndex >= 0)(methodFullName.substring(0, extensionIndex))
+  }
+
+  /** Adds `BINDS`/`REF` edges from extended type declarations to their extension-defined methods.
+    *
+    * Extension methods are emitted as regular methods with `<extension>` in their fullName, but their AST parent
+    * remains the surrounding file/global scope because the frontend does not materialize Swift extension blocks as
+    * TYPE_DECL nodes. These bindings make `typeDecl.boundMethod` expose extension methods on the extended type.
+    */
+  private def handleExtensionMethodBindings(diffGraph: DiffGraphBuilder): Unit = {
+    for {
+      method             <- cpg.method.filter(_.fullName.contains(ExtensionMethodSeparator))
+      targetTypeFullName <- extensionTargetFullName(method.fullName)
+      typeDecl           <- findTypeDecl(targetTypeFullName)
+      if typeDecl.boundMethod.fullNameExact(method.fullName).isEmpty
+    } {
+      val functionBinding = NewBinding()
+        .name(method.name)
+        .methodFullName(method.fullName)
+        .signature(method.signature)
+      diffGraph.addNode(functionBinding)
+      diffGraph.addEdge(typeDecl, functionBinding, EdgeTypes.BINDS)
+      diffGraph.addEdge(functionBinding, method, EdgeTypes.REF)
+    }
+  }
+
+  private def extensionMethodsByTargetAndName(): Map[(String, String), List[Method]] = {
+    cpg.method
+      .filter(_.fullName.contains(ExtensionMethodSeparator))
+      .flatMap { method =>
+        extensionTargetFullName(method.fullName).map { targetTypeFullName =>
+          (AstCreatorHelper.stripGenerics(targetTypeFullName), method.name) -> method
+        }
+      }
+      .l
+      .groupMap(_._1)(_._2)
+  }
+
+  private def matchingExtensionMethods(
+    baseTypeFullName: String,
+    callName: String,
+    extensionMethods: Map[(String, String), List[Method]]
+  ): List[Method] = {
+    normalizedTypeFullNameCandidates(baseTypeFullName)
+      .flatMap(candidate => extensionMethods.getOrElse((candidate, callName), Nil))
+      .distinct
+      .toList
+  }
+
+  /** Best-effort no-compiler fallback for calls to extension methods.
+    *
+    * Without compiler type maps, call nodes can remain dynamic/unknown even though the same source file declared an
+    * extension method with enough information to resolve the target. If the call receiver/base type and call name map
+    * to exactly one extension method, rewrite the call to match compiler-backed extension-call shape.
+    */
+  private def handleUnknownExtensionCalls(diffGraph: DiffGraphBuilder): Unit = {
+    val extensionMethods = extensionMethodsByTargetAndName()
+    for {
+      call             <- cpg.call.methodFullNameExact(io.joern.x2cpg.Defines.DynamicCallUnknownFullName)
+      baseNode         <- call.receiver.headOption.orElse(call.arguments(0).headOption)
+      baseTypeFullName <- typeFullNameOf(baseNode)
+      matches = matchingExtensionMethods(baseTypeFullName, call.name, extensionMethods)
+      if matches.size == 1
+    } {
+      val method = matches.head
+      diffGraph.setNodeProperty(call, PropertyNames.DispatchType, DispatchTypes.STATIC_DISPATCH)
+      diffGraph.setNodeProperty(call, PropertyNames.MethodFullName, method.fullName)
+      diffGraph.setNodeProperty(call, PropertyNames.Signature, method.signature)
+      call.outE(EdgeTypes.RECEIVER).foreach(diffGraph.removeEdge)
     }
   }
 
@@ -229,8 +315,8 @@ class ExtensionsPass(
   private def handleMemberPropertySetterCalls(diffGraph: DiffGraphBuilder): Unit = {
     for {
       assignmentCall      <- cpg.assignment
-      sourceNode          <- assignmentCall.source
-      fieldAccess         <- assignmentCall.target.fieldAccess
+      sourceNode          <- assignmentCall.arguments(2).headOption
+      fieldAccess         <- assignmentCall.arguments(1).fieldAccess
       baseNode            <- fieldAccess.arguments(1).headOption
       fieldIdentifierNode <- fieldAccess.arguments(2).headOption
       baseFullName        <- typeFullNameOf(baseNode)
@@ -276,7 +362,7 @@ class ExtensionsPass(
   private def handleSubscriptSetterCalls(diffGraph: DiffGraphBuilder): Unit = {
     for {
       assignmentCall    <- cpg.assignment
-      sourceNode        <- assignmentCall.source
+      sourceNode        <- assignmentCall.arguments(2).headOption
       indexAccess       <- assignmentCall.arguments(1).isCall.nameExact(Operators.indexAccess)
       baseNode          <- indexAccess.arguments(1).headOption
       indexNode         <- indexAccess.arguments(2).headOption

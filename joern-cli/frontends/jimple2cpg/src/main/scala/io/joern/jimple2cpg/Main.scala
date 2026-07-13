@@ -16,6 +16,7 @@ final case class Config(
   fullResolver: Boolean = false,
   recurse: Boolean = false,
   depth: Int = 1,
+  parserBackend: JimpleParserBackend = JimpleParserBackend.Soot,
   override val genericConfig: X2CpgConfig.GenericConfig = X2CpgConfig.GenericConfig()
 ) extends X2CpgConfig[Config] {
   override def withGenericConfig(value: X2CpgConfig.GenericConfig): Config = copy(genericConfig = value)
@@ -37,6 +38,9 @@ final case class Config(
   }
   def withDepth(value: Int): Config = {
     copy(depth = value)
+  }
+  def withParserBackend(value: JimpleParserBackend): Config = {
+    copy(parserBackend = value)
   }
 }
 
@@ -73,7 +77,15 @@ private object Frontend {
         .text(
           "Marks all class files belonging to the package pkg or any of its subpackages as classes which the application may load dynamically. Comma separated values for multiple packages."
         )
-        .action((dynamicPkgs, config) => config.withDynamicPkgs(dynamicPkgs))
+        .action((dynamicPkgs, config) => config.withDynamicPkgs(dynamicPkgs)),
+      opt[String]("parser-backend")
+        .hidden()
+        .validate { value =>
+          JimpleParserBackend.fromString(value).fold(failure(s"Expected one of: soot, oxidized"))(_ => success)
+        }
+        .action { (value, config) =>
+          JimpleParserBackend.fromString(value).fold(config)(config.withParserBackend)
+        }
     )
   }
 }

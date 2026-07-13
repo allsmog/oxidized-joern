@@ -1,7 +1,7 @@
 package io.joern.jimple2cpg.config
 
 import io.joern.jimple2cpg.Main
-import io.joern.jimple2cpg.Config
+import io.joern.jimple2cpg.{Config, JimpleParserBackend}
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
@@ -25,7 +25,9 @@ class ConfigTests extends AnyWordSpec with Matchers with Inside {
       "EXCLUDE_REGEX",
       // Frontend-specific args
       "--android",
-      "ANDROID"
+      "ANDROID",
+      "--parser-backend",
+      "oxidized"
     )
 
     def getSuffix(s: String, n: Int): String = {
@@ -38,6 +40,7 @@ class ConfigTests extends AnyWordSpec with Matchers with Inside {
       config.ignoredFiles.map(getSuffix(_, 13)).toSet shouldBe Set("1EXCLUDE_FILE", "2EXCLUDE_FILE")
       config.ignoredFilesRegex.toString shouldBe "EXCLUDE_REGEX"
       config.android shouldBe Some("ANDROID")
+      config.parserBackend shouldBe JimpleParserBackend.Oxidized
     }
   }
 }

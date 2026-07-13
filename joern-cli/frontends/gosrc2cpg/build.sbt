@@ -2,7 +2,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.sbt.packager.Keys.stagingDirectory
 import versionsort.VersionHelper
 
-import scala.sys.process.stringToProcess
+import scala.sys.process.Process
 import scala.util.Try
 
 name := "gosrc2cpg"
@@ -38,22 +38,30 @@ lazy val GoAstgenMac      = "goastgen-macos"
 lazy val GoAstgenMacArm   = "goastgen-macos-arm64"
 
 lazy val goAstGenDlUrl = settingKey[String]("goastgen download url")
-goAstGenDlUrl := s"https://github.com/joernio/astgen-monorepo/releases/download/go-astgen/v${goAstGenVersion.value}/"
+goAstGenDlUrl := s"https://github.com/allsmog/oxidized-joern/releases/download/go-astgen/v${goAstGenVersion.value}/"
 
-def hasCompatibleAstGenVersion(goAstGenVersion: String): Boolean = {
-  Try("goastgen -version".!!).toOption.map(_.strip()) match {
-    case Some(installedVersion) if installedVersion != "unknown" =>
-      VersionHelper.compare(installedVersion, goAstGenVersion) >= 0
-    case _ => false
+def isCompatibleAstGen(command: Seq[String], requiredVersion: String): Boolean =
+  Try(Process(command).!!.strip()).toOption.exists { installedVersion =>
+    val normalizedInstalledVersion = installedVersion.stripPrefix("v")
+    val normalizedRequiredVersion  = requiredVersion.stripPrefix("v")
+    installedVersion != "unknown" &&
+      VersionHelper.compare(normalizedInstalledVersion, normalizedRequiredVersion) >= 0
   }
-}
+
+def hasCompatibleAstGenVersion(goAstGenVersion: String): Boolean =
+  isCompatibleAstGen(Seq("goastgen", "-version"), goAstGenVersion)
 
 lazy val goAstGenBinaryNames = taskKey[Seq[String]]("goastgen binary names")
 goAstGenBinaryNames := {
-  if (hasCompatibleAstGenVersion(goAstGenVersion.value)) {
+  val requiredVersion      = goAstGenVersion.value
+  val allPlatforms         = sys.props.get("ALL_PLATFORMS").contains("TRUE")
+  val bundledCurrentAstgen = baseDirectory.value / "bin" / "astgen" / goAstGenCurrentBinaryName.value
+  if (hasCompatibleAstGenVersion(requiredVersion)) {
     Seq.empty
-  } else if (sys.props.get("ALL_PLATFORMS").contains("TRUE")) {
+  } else if (allPlatforms) {
     Seq(GoAstgenWin, GoAstgenLinux, GoAstgenLinuxArm, GoAstgenMac, GoAstgenMacArm)
+  } else if (isCompatibleAstGen(Seq(bundledCurrentAstgen.getAbsolutePath, "-version"), requiredVersion)) {
+    Seq.empty
   } else {
     Environment.operatingSystem match {
       case Environment.OperatingSystemType.Windows =>
@@ -74,6 +82,51 @@ goAstGenBinaryNames := {
   }
 }
 
+lazy val goAstGenCurrentBinaryName = taskKey[String]("goastgen binary name for the current host")
+goAstGenCurrentBinaryName := {
+  Environment.operatingSystem match {
+    case Environment.OperatingSystemType.Windows =>
+      GoAstgenWin
+    case Environment.OperatingSystemType.Linux =>
+      Environment.architecture match {
+        case Environment.ArchitectureType.X86   => GoAstgenLinux
+        case Environment.ArchitectureType.ARMv8 => GoAstgenLinuxArm
+      }
+    case Environment.OperatingSystemType.Mac =>
+      Environment.architecture match {
+        case Environment.ArchitectureType.X86   => GoAstgenMac
+        case Environment.ArchitectureType.ARMv8 => GoAstgenMacArm
+      }
+    case Environment.OperatingSystemType.Unknown =>
+      GoAstgenLinux
+  }
+}
+
+lazy val goAstGenBuildRust = taskKey[File]("Build local Rust goastgen and install it under bin/astgen")
+goAstGenBuildRust := {
+  val rustRoot       = baseDirectory.value / "rust"
+  val rustBinaryName =
+    if (Environment.operatingSystem == Environment.OperatingSystemType.Windows) "goastgen.exe" else "goastgen"
+  val exitCode       = Process(Seq("cargo", "build", "--release", "--bin", "goastgen"), rustRoot).!
+  if (exitCode != 0) {
+    sys.error(s"cargo build failed with exit code $exitCode")
+  }
+
+  val builtBinary = rustRoot / "target" / "release" / rustBinaryName
+  val goAstGenDir = baseDirectory.value / "bin" / "astgen"
+  val targetFile  = goAstGenDir / goAstGenCurrentBinaryName.value
+  goAstGenDir.mkdirs()
+  IO.copyFile(builtBinary, targetFile, preserveLastModified = true)
+  targetFile.setExecutable(true, false)
+
+  val distDir = (Universal / stagingDirectory).value / "bin" / "astgen"
+  distDir.mkdirs()
+  IO.copyDirectory(goAstGenDir, distDir, preserveExecutable = true)
+
+  streams.value.log.info(s"installed Rust goastgen to $targetFile")
+  targetFile
+}
+
 lazy val goAstGenDlTask = taskKey[Unit](s"Download goastgen binaries")
 goAstGenDlTask := {
   val goAstGenDir = baseDirectory.value / "bin" / "astgen"
@@ -90,7 +143,7 @@ goAstGenDlTask := {
   IO.copyDirectory(goAstGenDir, distDir, preserveExecutable = true)
 }
 
-Compile / compile := ((Compile / compile) dependsOn goAstGenDlTask).value
+Compile / compile := ((Compile / compile) dependsOn goAstGenBuildRust).value
 
 lazy val goAstGenSetAllPlatforms = taskKey[Unit](s"Set ALL_PLATFORMS")
 goAstGenSetAllPlatforms := { System.setProperty("ALL_PLATFORMS", "TRUE") }

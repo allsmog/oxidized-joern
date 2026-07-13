@@ -1,0 +1,22 @@
+[package]
+name = "kotlinastgen-cli"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[[bin]]
+name = "kotlinastgen"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+ignore.workspace = true
+kotlinastgen-core = { path = "../kotlinastgen-core" }
+regex.workspace = true
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"
+serde_json.workspace = true
+tempfile.workspace = true

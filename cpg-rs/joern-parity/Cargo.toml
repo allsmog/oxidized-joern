@@ -1,0 +1,13 @@
+[package]
+name = "joern-parity"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "joern-parity"
+path = "src/main.rs"
+
+[dependencies]
+tree-sitter.workspace = true
+tree-sitter-c.workspace = true

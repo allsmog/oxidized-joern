@@ -6,7 +6,6 @@ import io.joern.x2cpg.Defines
 import io.joern.x2cpg.datastructures.{OverloadableScope, Scope, ScopeElement, TypedScope, TypedScopeElement}
 import io.joern.x2cpg.utils.ListUtils.singleOrNone
 import io.shiftleft.codepropertygraph.generated.nodes.DeclarationNew
-import io.joern.x2cpg.utils.ListUtils.singleOrNone
 
 import scala.collection.mutable
 import scala.reflect.ClassTag
@@ -46,6 +45,28 @@ class CSharpScope(summary: CSharpProgramSummary)
       .count({ case (x, y) => x != y }) == 0
   }
 
+  override def tryResolveMethodInvocation(
+    callName: String,
+    argTypes: List[String],
+    typeFullName: Option[String] = None
+  )(implicit tag: ClassTag[CSharpMethod]): Option[CSharpMethod] = typeFullName match {
+    case None      => membersInScope.collectFirst(matchingM(callName)).orElse(tryResolveLocalMethod(callName, argTypes))
+    case Some(tfn) => super.tryResolveMethodInvocation(callName, argTypes, Option(tfn))
+  }
+
+  private def tryResolveLocalMethod(callName: String, argTypes: List[String]): Option[CSharpMethod] = {
+    val localNamespaces = stack.collect { case ScopeElement(NamespaceScope(fullName), _) => fullName }.toSet
+    val localTypes = typesInScope.filter { typ =>
+      summary.namespaceFor(typ).exists(localNamespaces.contains)
+    }
+    val methodsWithEqualArgs = localTypes
+      .flatMap(_.methods)
+      .filter(m => m.name == callName && m.parameterTypes.filterNot(_._1 == Constants.This).size == argTypes.size)
+      .toList
+
+    methodsWithEqualArgs.find(isOverloadedBy(_, argTypes)).orElse(methodsWithEqualArgs.headOption)
+  }
+
   /** @return
     *   the full name of the surrounding scope.
     */
@@ -72,8 +93,14 @@ class CSharpScope(summary: CSharpProgramSummary)
         case None    =>
           // typeName might be a fully-qualified name e.g. System.Console, in which case, even if we
           // don't import System (i.e. System is not in typesInScope), we should still find it if it's
-          // in the type summaries and there's exactly 1 match.
-          Some(typeName).filter(_.contains(".")).flatMap(summary.matchingTypes.andThen(singleOrNone))
+          // in the type summaries. Prefer exact full-name matches because bundled summaries may contain
+          // duplicate entries for the same framework type.
+          Some(typeName)
+            .filter(_.contains("."))
+            .flatMap { fullName =>
+              val matchingTypes = summary.matchingTypes(fullName)
+              matchingTypes.find(_.name == fullName).orElse(singleOrNone(matchingTypes))
+            }
       }
     }
   }
@@ -81,6 +108,11 @@ class CSharpScope(summary: CSharpProgramSummary)
   // TODO: Add inherits field in CSharpType and handle this in `pushNewScope`
   def pushTypeToScope(typeFullName: String): Unit = {
     typesInScope.addAll(summary.matchingTypes(typeFullName))
+  }
+
+  def addImportedAlias(alias: String, typeFullName: String): Unit = {
+    aliasedTypes(alias) = typeFullName
+    addImportedTypeOrModule(typeFullName)
   }
 
   def pushField(field: FieldDecl): Unit = {
@@ -168,7 +200,14 @@ class CSharpScope(summary: CSharpProgramSummary)
     callName: String,
     argTypes: List[String]
   ): Option[(CSharpMethod, String)] = {
-    baseTypeFullName.flatMap(extensionsInScopeFor(_, callName, argTypes).headOption).map(x => (x.methods.head, x.name))
+    baseTypeFullName.flatMap { extendedType =>
+      extensionsInScopeFor(extendedType, callName, argTypes).toSeq
+        .flatMap(extensionType => extensionType.methods.map(_ -> extensionType.name))
+        .sortBy { case (method, _) =>
+          if (method.fullName.exists(_.contains("<"))) 1 else 0
+        }
+        .headOption
+    }
   }
 
   def tryResolveGetterInvocation(

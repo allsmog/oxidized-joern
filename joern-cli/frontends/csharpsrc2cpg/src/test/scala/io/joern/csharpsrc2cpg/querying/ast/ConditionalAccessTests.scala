@@ -99,6 +99,37 @@ class ConditionalAccessTests extends CSharpCode2CpgFixture {
     }
   }
 
+  "`values?[0]` assigned to a variable" should {
+    val cpg = code("""
+        |class Foo
+        |{
+        | void DoStuff(int[] values)
+        | {
+        |   var x = values?[0];
+        | }
+        |}
+        |""".stripMargin)
+
+    "be lowered as an index access `values[0]`" in {
+      inside(cpg.call.methodFullNameExact(Operators.indexAccess).l) { case indexAccess :: Nil =>
+        indexAccess.code shouldBe "values[0]"
+        inside(indexAccess.argument(1)) { case receiver: Identifier =>
+          receiver.name shouldBe "values"
+          receiver.typeFullName shouldBe "System.Int32[]"
+        }
+        indexAccess.argument(2).code shouldBe "0"
+      }
+    }
+
+    "assigned variable has correct properties" in {
+      inside(cpg.assignment.where(_.target.isIdentifier.nameExact("x")).l) { case assign :: Nil =>
+        assign.code shouldBe "x = values?[0]"
+        assign.typeFullName shouldBe "System.Int32"
+        assign.target.start.isIdentifier.typeFullName.headOption shouldBe Some("System.Int32")
+      }
+    }
+  }
+
   "`this?.Bar()?.Baz()`" should {
     val cpg = code("""
         |class Foo

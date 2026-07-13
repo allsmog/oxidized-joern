@@ -65,7 +65,8 @@ trait AstSummaryVisitor(implicit withSchemaValidation: ValidationMode) { this: A
         m.name,
         m.methodReturn.typeFullName,
         m.parameter.map(x => x.name -> x.typeFullName).l,
-        m.isStatic.nonEmpty
+        m.isStatic.nonEmpty,
+        Option(m.fullName)
       )
     }
 

@@ -97,7 +97,7 @@ class ArrayTests extends RubyCode2CpgFixture(withPostProcessing = true, withData
   }
 
   // Works in deprecated
-  "Data flow through array assignments" ignore {
+  "Data flow through array assignments" in {
     val cpg = code("""
                      |x = 10
                      |array = [0, 1]

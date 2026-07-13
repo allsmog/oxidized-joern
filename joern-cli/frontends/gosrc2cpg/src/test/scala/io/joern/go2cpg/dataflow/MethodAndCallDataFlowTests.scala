@@ -211,10 +211,10 @@ class MethodAndCallDataFlowTests extends GoCodeToCpgSuite(withOssDataflow = true
     }
 
     // tuple return handling
-    "data flow to second tuple variable" ignore {
+    "data flow to second tuple variable" in {
       val srcfirst = cpg.identifier("a").l
       val sumsink  = cpg.identifier("sum").l
-      sumsink.reachableByFlows(srcfirst).size shouldBe 1
+      sumsink.reachableByFlows(srcfirst).size shouldBe 2
     }
   }
 }

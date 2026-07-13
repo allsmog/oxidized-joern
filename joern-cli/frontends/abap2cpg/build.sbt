@@ -1,6 +1,8 @@
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.sbt.packager.Keys.stagingDirectory
 
+import scala.sys.process.Process
+
 name := "abap2cpg"
 
 dependsOn(
@@ -35,6 +37,18 @@ lazy val AbapgenLinuxArm = "abapgen-linux-arm"
 lazy val AbapgenMacX86   = "abapgen-macos"
 lazy val AbapgenMacArm   = "abapgen-macos-arm"
 
+lazy val abapgenCurrentBinaryName = taskKey[String]("abapgen binary name for the current host")
+abapgenCurrentBinaryName := {
+  (Environment.operatingSystem, Environment.architecture) match {
+    case (Environment.OperatingSystemType.Windows, _)                                => AbapgenWinX86
+    case (Environment.OperatingSystemType.Linux, Environment.ArchitectureType.X86)   => AbapgenLinuxX86
+    case (Environment.OperatingSystemType.Linux, Environment.ArchitectureType.ARMv8) => AbapgenLinuxArm
+    case (Environment.OperatingSystemType.Mac, Environment.ArchitectureType.X86)     => AbapgenMacX86
+    case (Environment.OperatingSystemType.Mac, Environment.ArchitectureType.ARMv8)   => AbapgenMacArm
+    case _                                                                           => AbapgenLinuxX86
+  }
+}
+
 lazy val abapgenDlUrl = settingKey[String]("abapgen download url")
 abapgenDlUrl := s"https://github.com/joernio/astgen-monorepo/releases/download/abap-astgen/v${abapgenVersion.value}/"
 
@@ -54,6 +68,26 @@ abapgenBinaryNames := {
   }
 }
 
+lazy val abapgenBuildRust = taskKey[File]("Build local Rust abapgen and install it under bin/astgen")
+abapgenBuildRust := {
+  val rustRoot = baseDirectory.value / "rust"
+  val localBinaryName =
+    if (Environment.operatingSystem == Environment.OperatingSystemType.Windows) "abapgen.exe" else "abapgen"
+  val exitCode = Process(Seq("cargo", "build", "--release", "--bin", "abapgen"), rustRoot).!
+  if (exitCode != 0) {
+    sys.error(s"cargo build failed with exit code $exitCode")
+  }
+
+  val builtBinary = rustRoot / "target" / "release" / localBinaryName
+  val astGenDir   = baseDirectory.value / "bin" / "astgen"
+  val targetFile  = astGenDir / abapgenCurrentBinaryName.value
+  astGenDir.mkdirs()
+  IO.copyFile(builtBinary, targetFile, preserveLastModified = true)
+  targetFile.setExecutable(true, false)
+  streams.value.log.info(s"installed Rust abapgen to $targetFile")
+  targetFile
+}
+
 lazy val abapgenDlTask = taskKey[Unit]("Download abapgen binaries from joernio/astgen-monorepo release")
 abapgenDlTask := {
   val astGenDir = baseDirectory.value / "bin" / "astgen"
@@ -70,7 +104,7 @@ abapgenDlTask := {
   IO.copyDirectory(astGenDir, distDir, preserveExecutable = true)
 }
 
-Compile / compile := ((Compile / compile) dependsOn abapgenDlTask).value
+Compile / compile := ((Compile / compile) dependsOn abapgenBuildRust).value
 
 lazy val abapgenSetAllPlatforms = taskKey[Unit]("Set ALL_PLATFORMS flag")
 abapgenSetAllPlatforms := { System.setProperty("ALL_PLATFORMS", "TRUE") }

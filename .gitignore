@@ -102,3 +102,12 @@ flake.lock
 ##############
 user.bazelrc
 bazel-*
+
+# autonomous parity loop working files
+.oxidized-loop/
+.oxidized-loop.log
+.oxidized-loop.stop
+.oxidized-loop-notes.md
+
+# Claude Code session/worktree metadata
+.claude/

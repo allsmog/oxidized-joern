@@ -165,11 +165,10 @@ class ExtensionMethodTests extends CSharpCode2CpgFixture {
           |}
           |""".stripMargin)
 
-      cpg.call.nameExact("DoStuff").methodFullName.l shouldBe List("Extensions.DoStuff:System.Int32(List)")
+      cpg.call.nameExact("DoStuff").methodFullName.l shouldBe List("Extensions.DoStuff<T>:System.Int32(List)")
     }
 
-    // TODO: The two `DoStuff` methods have the same methodFullName.
-    "resolve correctly if there are 2 possible extensions, one for `List<string>` and another for `List<T>`" ignore {
+    "resolve correctly if there are 2 possible extensions, one for `List<string>` and another for `List<T>`" in {
       val cpg = code("""
           |using System.Collections.Generic;
           |

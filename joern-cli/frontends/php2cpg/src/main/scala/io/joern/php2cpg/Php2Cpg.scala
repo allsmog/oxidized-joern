@@ -44,7 +44,7 @@ class Php2Cpg extends X2CpgFrontend {
   override def createCpg(config: Config): Try[Cpg] = {
     val errorMessages = mutable.ListBuffer[String]()
 
-    if (!isPhpVersionSupported) {
+    if (PhpParser.requiresPhpRuntime(config) && !isPhpVersionSupported) {
       errorMessages.append("PHP version not supported. Is PHP 7.1.0 or above installed and available on your path?")
     }
 

@@ -77,6 +77,43 @@ trait AstCreatorHelper(disableFileContent: Boolean)(implicit withSchemaValidatio
     }
   }
 
+  protected def resolveTypeName(name: String): String = {
+    if (name.startsWith("?")) {
+      s"?${resolveTypeName(name.stripPrefix("?"))}"
+    } else if (name.contains("|")) {
+      name.split("\\|").map(resolveTypeName).mkString("|")
+    } else if (name.contains("&")) {
+      name.split("&").map(resolveTypeName).mkString("&")
+    } else if (isBuiltinTypeName(name)) {
+      name
+    } else {
+      scope.resolveClassIdentifier(name).map(_.name).getOrElse(prependNamespacePrefix(name))
+    }
+  }
+
+  private def isBuiltinTypeName(name: String): Boolean = {
+    Set(
+      TypeConstants.String,
+      TypeConstants.Int,
+      TypeConstants.Float,
+      TypeConstants.Bool,
+      TypeConstants.Void,
+      TypeConstants.Array,
+      TypeConstants.NullType,
+      Defines.Any,
+      "callable",
+      "iterable",
+      "mixed",
+      "never",
+      "object",
+      "parent",
+      "self",
+      "static",
+      "true",
+      "false"
+    ).map(_.toLowerCase).contains(name.toLowerCase)
+  }
+
   protected def getAstParentInfo: (String, String) = {
     scope.getEnclosingParentInfo
       .getOrElse((NameConstants.Unknown, NameConstants.Unknown))
@@ -152,7 +189,11 @@ trait AstCreatorHelper(disableFileContent: Boolean)(implicit withSchemaValidatio
     tfn: Option[String] = None,
     modifiers: List[String] = List.empty
   ): NewNode = {
-    scope.lookupVariable(name) match {
+    val maybeExistingVariable =
+      if (scope.isSurroundedByArrowClosure) scope.lookupVariable(name)
+      else scope.lookupVariableInCurrentMethod(name)
+
+    maybeExistingVariable match {
       case None =>
         val localCode = if (name == NameConstants.Self) NameConstants.Self else s"$$$name"
         val local     = localNode(expr, name, code.getOrElse(localCode), tfn.getOrElse(Defines.Any))
@@ -285,7 +326,7 @@ trait AstCreatorHelper(disableFileContent: Boolean)(implicit withSchemaValidatio
         // Static method call with a simple receiver
         if (nameExpr.name == NameConstants.Self)
           composeMethodFullNameForCall(name)
-        else s"${nameExpr.name}$MethodDelimiter$name"
+        else s"${scope.resolveClassIdentifier(nameExpr.name).map(_.name).getOrElse(nameExpr.name)}$MethodDelimiter$name"
       case Some(_) =>
         // As soon as we have a dynamic component to the call, we can't truly define a method full name
         default

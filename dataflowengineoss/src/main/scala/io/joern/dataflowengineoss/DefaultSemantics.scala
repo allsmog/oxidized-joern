@@ -57,6 +57,7 @@ object DefaultSemantics {
     F(Operators.indirection, List((1, -1))),
     F(Operators.memberAccess, List((1, -1))),
     F(Operators.pointerShift, List((1, -1))),
+    F("<operator>.channelSend", List((2, 1))),
     F(Operators.postDecrement, List((1, 1), (1, -1))),
     F(Operators.postIncrement, List((1, 1), (1, -1))),
     F(Operators.preDecrement, List((1, 1), (1, -1))),

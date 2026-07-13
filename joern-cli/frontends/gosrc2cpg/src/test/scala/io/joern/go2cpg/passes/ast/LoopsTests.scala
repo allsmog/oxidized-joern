@@ -207,7 +207,7 @@ class LoopsTests extends GoCodeToCpgSuite {
       identifier.name shouldBe "message"
     }
 
-    "TODO needs correction and non working" ignore {
+    "represent range locals, assignment, and body in order" in {
       val List(forStmt)           = cpg.method.name("main").controlStructure.l
       val List(localBlock: Block) = forStmt.astChildren.order(2).l: @unchecked
       localBlock.astChildren.isLocal.code.l shouldBe List("index", "char")
@@ -244,6 +244,9 @@ class LoopsTests extends GoCodeToCpgSuite {
       forStmt.controlStructureType shouldBe ControlStructureTypes.FOR
       val List(identifier: Identifier) = forStmt.astChildren.order(1).l: @unchecked
       identifier.name shouldBe "servers"
+      forStmt.forInitOut.code.l shouldBe List("servers")
+      forStmt.condition.code.l shouldBe List("servers")
+      forStmt.forBodyOut.astChildren.isLocal.name.l shouldBe List("b")
     }
   }
 }

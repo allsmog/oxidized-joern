@@ -1,5 +1,7 @@
 package io.shiftleft.semanticcpg.language.types.structure
 
+import io.shiftleft.codepropertygraph.Cpg
+import io.shiftleft.codepropertygraph.generated.Languages
 import io.shiftleft.codepropertygraph.generated.help.{Doc, Traversal}
 import io.shiftleft.codepropertygraph.generated.nodes.*
 import io.shiftleft.semanticcpg.language.*
@@ -31,9 +33,13 @@ class MethodParameterTraversal(val traversal: Iterator[MethodParameterIn]) exten
     for {
       paramIn <- traversal
       call    <- callResolver.getMethodCallsites(paramIn.method)
+      isRuby = Cpg(call.graph).metaData.language.headOption.contains(Languages.RUBYSRC)
       case (arg: Expression) <- call._argumentOut
       if arg.argumentName match {
-        case Some(name) => name == paramIn.name
+        case Some(name) =>
+          name == paramIn.name || (isRuby && !paramIn.method.parameter.exists(
+            _.name == name
+          ) && arg.argumentIndex == paramIn.index)
         case None => arg.argumentIndex == paramIn.index || (paramIn.isVariadic && arg.argumentIndex > paramIn.index)
       }
     } yield arg

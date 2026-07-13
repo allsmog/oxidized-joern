@@ -1,6 +1,6 @@
 package io.joern.php2cpg.querying
 
-import io.joern.php2cpg.astcreation.AstCreator.NameConstants
+import io.joern.php2cpg.astcreation.AstCreator.{NameConstants, TypeConstants}
 import io.joern.php2cpg.testfixtures.PhpCode2CpgFixture
 import io.joern.php2cpg.parser.Domain
 import io.joern.x2cpg.Defines
@@ -202,6 +202,22 @@ class CallTests extends PhpCode2CpgFixture {
         |""".stripMargin)
     val call = cpg.call("test").head
     call.code shouldBe "test(...$args)"
+  }
+
+  "the code field of Call with first-class callable placeholder should be correct" in {
+    val cpg = code("""<?php
+        |$normalizer = strtoupper(...);
+        |""".stripMargin)
+
+    inside(cpg.call.nameExact("strtoupper").l) { case List(call) =>
+      call.code shouldBe "strtoupper(...)"
+      inside(call.argument.l) { case List(placeholder: Identifier) =>
+        placeholder.name shouldBe "..."
+        placeholder.code shouldBe "..."
+        placeholder.typeFullName shouldBe TypeConstants.VariadicPlaceholder
+        placeholder.argumentIndex shouldBe 1
+      }
+    }
   }
 
   "static call in a static function to a static function" in {

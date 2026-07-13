@@ -46,6 +46,41 @@ class TypeTests extends CSharpCode2CpgFixture {
     }
   }
 
+  "resolve function pointer types" in {
+    val cpg = code("""
+        |class C {
+        |  delegate* unmanaged[Cdecl]<int, ref string, void> callback;
+        |
+        |  void M(delegate*<int, void> localCallback) {
+        |    delegate*<int, void> fp = localCallback;
+        |  }
+        |}
+        |""".stripMargin)
+
+    cpg.member.nameExact("callback").typeFullName.l shouldBe List(
+      "delegate* unmanaged[Cdecl]<System.Int32, ref System.String, System.Void>"
+    )
+    cpg.method.nameExact("M").parameter.nameExact("localCallback").typeFullName.l shouldBe List(
+      "delegate*<System.Int32, System.Void>"
+    )
+    cpg.local.nameExact("fp").typeFullName.l shouldBe List("delegate*<System.Int32, System.Void>")
+  }
+
+  "resolve scoped types" in {
+    val cpg = code("""
+        |using System;
+        |
+        |class C {
+        |  void M(scoped System.Span<int> span) {
+        |    scoped ref int first = ref span[0];
+        |  }
+        |}
+        |""".stripMargin)
+
+    cpg.method.nameExact("M").parameter.nameExact("span").typeFullName.l shouldBe List("System.Span")
+    cpg.local.nameExact("first").typeFullName.l shouldBe List("ref System.Int32")
+  }
+
   "resolve types for operators and propagate to others" in {
     val cpg = code(basicBoilerplate("""
         |int a = 10;

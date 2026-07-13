@@ -4,7 +4,7 @@ import io.joern.rubysrc2cpg.passes.Defines as RubyDefines
 import io.joern.rubysrc2cpg.testfixtures.RubyCode2CpgFixture
 import io.joern.x2cpg.frontendspecific.rubysrc2cpg.Constants
 import io.shiftleft.codepropertygraph.generated.Operators
-import io.shiftleft.codepropertygraph.generated.nodes.Literal
+import io.shiftleft.codepropertygraph.generated.nodes.{Literal, Unknown}
 import io.shiftleft.semanticcpg.language.*
 
 class LiteralTests extends RubyCode2CpgFixture {
@@ -136,6 +136,23 @@ class LiteralTests extends RubyCode2CpgFixture {
       z.code shouldBe "'z'"
       z.typeFullName shouldBe RubyDefines.prefixAsCoreType("String")
     }
+  }
+
+  "string interpolation with multiple statements preserves the interpolation block" in {
+    val cpg = code("""
+        |name = "ada"
+        |"hello #{tmp = name.upcase; tmp}"
+        |""".stripMargin)
+
+    inside(cpg.call.methodFullNameExact(Operators.formattedValue).l.filter(_.astChildren.isBlock.nonEmpty)) {
+      case formattedValue :: Nil =>
+        inside(formattedValue.astChildren.isBlock.astChildren.isCall.nameExact(Operators.assignment).l) {
+          case assignment :: Nil =>
+            assignment.code shouldBe "tmp = name.upcase"
+        }
+    }
+
+    cpg.all.collectAll[Unknown].codeExact("tmp = name.upcase; tmp").l shouldBe empty
   }
 
   "`\"hello\"` is represented by a LITERAL node" in {

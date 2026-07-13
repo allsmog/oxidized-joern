@@ -1,11 +1,76 @@
 package io.joern.csharpsrc2cpg.querying.ast
 
+import io.joern.csharpsrc2cpg.CSharpOperators
 import io.joern.csharpsrc2cpg.astcreation.BuiltinTypes
 import io.joern.csharpsrc2cpg.testfixtures.CSharpCode2CpgFixture
-import io.shiftleft.codepropertygraph.generated.nodes.{Call, Identifier}
+import io.shiftleft.codepropertygraph.generated.Operators
+import io.shiftleft.codepropertygraph.generated.nodes.{Call, Identifier, Unknown}
 import io.shiftleft.semanticcpg.language.*
 
 class MemberAccessTests extends CSharpCode2CpgFixture {
+
+  "base member access expressions" should {
+    val cpg = code("""
+        |class Base
+        |{
+        |  public int Count;
+        |  public void Touch() { }
+        |}
+        |
+        |class Derived : Base
+        |{
+        |  public void M()
+        |  {
+        |    base.Touch();
+        |    var count = base.Count;
+        |  }
+        |}
+        |""".stripMargin)
+
+    "resolve calls and field accesses through the base receiver" in {
+      inside(cpg.call.nameExact("Touch").l) { case touch :: Nil =>
+        touch.methodFullName shouldBe "Base.Touch:System.Void()"
+        inside(touch.argument.l) { case (base: Identifier) :: Nil =>
+          base.name shouldBe "base"
+          base.typeFullName shouldBe "Base"
+        }
+      }
+
+      inside(cpg.call.nameExact(Operators.fieldAccess).codeExact("base.Count").l) { case count :: Nil =>
+        count.typeFullName shouldBe BuiltinTypes.DotNetTypeMap(BuiltinTypes.Int)
+        inside(count.argument.l.collect { case base: Identifier => base }) { case base :: Nil =>
+          base.name shouldBe "base"
+          base.typeFullName shouldBe "Base"
+        }
+        count.referencedMember.l shouldBe cpg.typeDecl.nameExact("Base").member.nameExact("Count").l
+      }
+
+      cpg.all.collectAll[Unknown].code.l shouldBe Nil
+    }
+  }
+
+  "range and index-from-end element access expressions" should {
+    val cpg = code("""
+        |namespace Foo;
+        |public class Bar {
+        |  public int Main(int[] values) {
+        |    var last = values[^1];
+        |    var middle = values[1..^1];
+        |    return last + middle.Length;
+        |  }
+        |}
+        |""".stripMargin)
+
+    "lower to index, range, and index-from-end operator calls" in {
+      cpg.call.nameExact(Operators.indexAccess).code.l should contain theSameElementsAs List(
+        "values[^1]",
+        "values[1..^1]"
+      )
+      cpg.call.nameExact(CSharpOperators.indexFromEnd).code.l shouldBe List("^1", "^1")
+      cpg.call.nameExact(Operators.range).code.l shouldBe List("1..^1")
+      cpg.all.collectAll[Unknown].code.l.shouldBe(Nil)
+    }
+  }
 
   "conditional property access expressions" should {
     val cpg = code("""
@@ -259,11 +324,7 @@ class MemberAccessTests extends CSharpCode2CpgFixture {
     }
   }
 
-  // TODO: ConditionalAccessExpressions need some work to deal with nested chains.
-  // This particular test-case relies on the usage of getters, that are currently being
-  // reworked to be METHODs instead of MEMBERs.
-  // Revisit this test-case once getters are finished.
-  "conditional property access expression for chained fields" ignore {
+  "conditional property access expression for chained fields" should {
     val cpg = code("""
       |namespace Foo {
       | public class Baz {

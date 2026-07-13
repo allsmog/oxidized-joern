@@ -1,5 +1,7 @@
 package io.joern.jimple2cpg
 
+import io.joern.jimple2cpg.parser.JimpleAstGenRunner
+import io.joern.jimple2cpg.parser.JimpleAstGenRunner.JimpleClassInfo
 import io.joern.jimple2cpg.passes.{AstCreationPass, DeclarationRefPass, SootAstCreationPass}
 import io.joern.jimple2cpg.util.Decompiler
 import io.joern.jimple2cpg.util.ProgramHandlingUtil.{ClassFile, extractClassesInPackageLayout}
@@ -32,6 +34,11 @@ class Jimple2Cpg extends X2CpgFrontend {
 
   private val logger = LoggerFactory.getLogger(classOf[Jimple2Cpg])
 
+  private final case class LoadedClassFiles(
+    classFiles: List[ClassFile],
+    classInfoByName: Map[String, JimpleClassInfo] = Map.empty
+  )
+
   private def sootLoadApk(input: Path, framework: Option[String] = None): Unit = {
     Options.v().set_process_dir(List(input.absolutePathAsString).asJava)
     framework match {
@@ -56,16 +63,35 @@ class Jimple2Cpg extends X2CpgFrontend {
     *   The list of extracted class files whose package path could be extracted, placed on that package path relative to
     *   [[tmpDir]]
     */
-  private def loadClassFiles(src: Path, tmpDir: Path, recurse: Boolean, depth: Int): List[ClassFile] = {
-    extractClassesInPackageLayout(
-      src,
-      tmpDir,
-      isClass = e => e.extension.contains(".class"),
-      isArchive = e => e.isZipFile,
-      isConfigFile = e => e.isConfigFile,
-      recurse,
-      depth
-    )
+  private def loadClassFiles(src: Path, tmpDir: Path, config: Config): LoadedClassFiles = {
+    config.parserBackend match {
+      case JimpleParserBackend.Oxidized =>
+        val result = new JimpleAstGenRunner(config).execute(tmpDir)
+        LoadedClassFiles(result.classFiles, classInfoByName(result.classInfo))
+      case JimpleParserBackend.Soot =>
+        LoadedClassFiles(
+          extractClassesInPackageLayout(
+            src,
+            tmpDir,
+            isClass = e => e.extension.contains(".class"),
+            isArchive = e => e.isZipFile,
+            isConfigFile = e => e.isConfigFile,
+            config.recurse,
+            config.depth
+          )
+        )
+    }
+  }
+
+  private def classInfoByName(classInfo: List[JimpleClassInfo]): Map[String, JimpleClassInfo] = {
+    classInfo.flatMap { info =>
+      Seq(
+        info.fullyQualifiedName                 -> info,
+        info.internalName.replace('/', '.')     -> info,
+        info.outputPath.getFileName.toString    -> info,
+        info.outputPath.toAbsolutePath.toString -> info
+      )
+    }.toMap
   }
 
   /** Extract all class files found, place them in their package layout and load them into soot.
@@ -78,10 +104,11 @@ class Jimple2Cpg extends X2CpgFrontend {
     * @param depth
     *   Maximum depth of recursion
     */
-  private def sootLoad(input: Path, tmpDir: Path, recurse: Boolean, depth: Int): List[ClassFile] = {
+  private def sootLoad(input: Path, tmpDir: Path, config: Config): LoadedClassFiles = {
     Options.v().set_soot_classpath(tmpDir.absolutePathAsString)
-    Options.v().set_prepend_classpath(true)
-    val classFiles               = loadClassFiles(input, tmpDir, recurse, depth)
+    Options.v().set_prepend_classpath(config.fullResolver)
+    val loadedClasses            = loadClassFiles(input, tmpDir, config)
+    val classFiles               = loadedClasses.classFiles
     val fullyQualifiedClassNames = classFiles.flatMap(_.fullyQualifiedClassName)
     logger.info(s"Loading ${classFiles.size} program files")
     logger.debug(s"Source files are: ${classFiles.map(_.file.absolutePathAsString)}")
@@ -89,7 +116,7 @@ class Jimple2Cpg extends X2CpgFrontend {
       Scene.v().addBasicClass(fqcn)
       Scene.v().loadClassAndSupport(fqcn)
     }
-    classFiles
+    loadedClasses
   }
 
   /** Apply the soot passes
@@ -100,28 +127,36 @@ class Jimple2Cpg extends X2CpgFrontend {
     val input = Paths.get(config.inputPath)
     configureSoot(config, tmpDir)
     new MetaDataPass(cpg, language, config.inputPath).createAndApply()
-    val usedTypesFromAstCreation: () => Set[String] = input.extension() match {
+    val (usedTypesFromAstCreation, shouldLoadNecessaryClasses): (() => Set[String], Boolean) = input.extension() match {
       case Some(".apk" | ".dex") if Files.isRegularFile(input) =>
         sootLoadApk(input, config.android)
-        { () =>
-          val astCreator = SootAstCreationPass(cpg, config)
-          astCreator.createAndApply()
-          astCreator.usedTypes()
-        }
+        (
+          { () =>
+            val astCreator = SootAstCreationPass(cpg, config)
+            astCreator.createAndApply()
+            astCreator.usedTypes()
+          },
+          true
+        )
       case _ =>
-        val classFiles = sootLoad(input, tmpDir, config.recurse, config.depth)
-        decompileClassFiles(classFiles, !config.disableFileContent)
+        val loadedClasses = sootLoad(input, tmpDir, config)
+        decompileClassFiles(loadedClasses.classFiles, !config.disableFileContent)
 
-        { () =>
-          val astCreator = AstCreationPass(classFiles, cpg, config)
-          astCreator.createAndApply()
-          astCreator.usedTypes()
-        }
+        (
+          { () =>
+            val astCreator = AstCreationPass(loadedClasses.classFiles, cpg, config, loadedClasses.classInfoByName)
+            astCreator.createAndApply()
+            astCreator.usedTypes()
+          },
+          loadedClasses.classFiles.nonEmpty
+        )
     }
 
-    logger.info("Loading classes to soot")
-    Scene.v().loadNecessaryClasses()
-    logger.info(s"Loaded ${Scene.v().getApplicationClasses.size()} classes")
+    if (shouldLoadNecessaryClasses) {
+      logger.info("Loading classes to soot")
+      Scene.v().loadNecessaryClasses()
+      logger.info(s"Loaded ${Scene.v().getApplicationClasses.size()} classes")
+    }
 
     val usedTypes = usedTypesFromAstCreation()
     TypeNodePass

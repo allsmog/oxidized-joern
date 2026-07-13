@@ -47,10 +47,10 @@ class PhpTypeRecoveryPassTests extends PhpCode2CpgFixture(withPostProcessing = t
         |}
         |""".stripMargin).cpg
 
-    "resolve 'x' identifier types despite shadowing" ignore {
+    "resolve 'x' identifier types despite shadowing" in {
       val List(xOuterScope, xInnerScope) = cpg.identifier("x").take(2).l
-      xOuterScope.dynamicTypeHintFullName shouldBe Seq("int")
-      xInnerScope.dynamicTypeHintFullName shouldBe Seq("string")
+      xOuterScope.typeFullName shouldBe "int"
+      xInnerScope.typeFullName shouldBe "string"
     }
   }
 
@@ -155,9 +155,6 @@ class PhpTypeRecoveryPassTests extends PhpCode2CpgFixture(withPostProcessing = t
     }
   }
 
-  /* Joern's PHP front-end does not currently handle comments. This test is
-   * ignored, but should be revisited when comments are handled.
-   */
   "functions with docblock type information" should {
     lazy val cpg = code("""
       |<?php
@@ -169,7 +166,7 @@ class PhpTypeRecoveryPassTests extends PhpCode2CpgFixture(withPostProcessing = t
       |}
       |""".stripMargin).cpg
 
-    "identify function return from docblock" ignore {
+    "identify function return from docblock" in {
       val List(fooMethod) = cpg.method("foo_unknown_param").take(1).l
       fooMethod.methodReturn.dynamicTypeHintFullName shouldBe Seq("int")
     }
@@ -281,14 +278,14 @@ class PhpTypeRecoveryPassTests extends PhpCode2CpgFixture(withPostProcessing = t
       |}
       """.stripMargin).cpg
 
-    "identify correct types for scoped local variables" ignore {
+    "identify correct types for scoped local variables" in {
       val List(localFooIdentifier) = cpg.method("foo").ast.isIdentifier.name("local").take(1).l
       val List(localBarIdentifier) = cpg.method("bar").ast.isIdentifier.name("local").take(1).l
       localFooIdentifier.typeFullName shouldBe "int"
       localBarIdentifier.typeFullName shouldBe "string"
     }
 
-    "identify correct types for function returns based on local variable types" ignore {
+    "identify correct types for function returns based on local variable types" in {
       val List(fooMethod) = cpg.method("foo").take(1).l
       val List(barMethod) = cpg.method("bar").take(1).l
       fooMethod.methodReturn.dynamicTypeHintFullName shouldBe Seq("int")
@@ -312,7 +309,7 @@ class PhpTypeRecoveryPassTests extends PhpCode2CpgFixture(withPostProcessing = t
     }
 
     /* Consider where in the CPG that array type info should be stored */
-    "recover type of array field being assigned to" ignore {
+    "recover type of array field being assigned to" in {
       val List(indexAccessCall) = cpg.call("<operator>.indexAccess").take(1).l
       indexAccessCall.typeFullName shouldBe "int"
     }

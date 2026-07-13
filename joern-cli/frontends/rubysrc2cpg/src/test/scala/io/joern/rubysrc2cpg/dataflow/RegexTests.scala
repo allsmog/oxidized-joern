@@ -6,7 +6,7 @@ import io.shiftleft.semanticcpg.language.*
 
 class RegexTests extends RubyCode2CpgFixture(withPostProcessing = true, withDataFlow = true) {
   // Works in deprecated - could not represent expression /x#{x}b/ in new frontend
-  "Data flow through a regex interpolation" ignore {
+  "Data flow through a regex interpolation" in {
     val cpg = code(s"""
                       |x="abc"
                       |y=/x#{x}b/
@@ -19,7 +19,7 @@ class RegexTests extends RubyCode2CpgFixture(withPostProcessing = true, withData
   }
 
   // Works in deprecated - could not represent expression /x#{x}b#{x+'z}... in new frontend
-  "flow through a regex interpolation with multiple expressions" ignore {
+  "flow through a regex interpolation with multiple expressions" in {
     val cpg = code("""
                      |x="abc"
                      |y=/x#{x}b#{x+'z'}b{x+'y'+'z'}w/

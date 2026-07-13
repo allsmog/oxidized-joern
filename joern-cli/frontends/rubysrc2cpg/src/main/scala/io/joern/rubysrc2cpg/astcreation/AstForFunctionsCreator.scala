@@ -54,6 +54,15 @@ trait AstForFunctionsCreator(implicit withSchemaValidation: ValidationMode) { th
       if (useSurroundingTypeFullName || shouldUseSurroundingTypeFullName) scope.surroundingTypeFullName
       else scope.surroundingScopeFullName
 
+    val singletonBindingTypeFullName = node match {
+      case x: SingletonObjectMethodDeclaration =>
+        scope.surroundingTypeFullName.collect {
+          case typeFullName if typeFullName.split('.').lastOption.contains(x.baseClass.span.text) =>
+            s"$typeFullName<class>"
+        }
+      case _ => None
+    }
+
     val method = methodNode(
       node = node,
       name = methodName,
@@ -64,6 +73,13 @@ trait AstForFunctionsCreator(implicit withSchemaValidation: ValidationMode) { th
       astParentType = astParentType,
       astParentFullName = astParentFullName
     )
+
+    singletonBindingTypeFullName.foreach { typeFullName =>
+      val binding = bindingNode(method.name, method.signature, method.fullName)
+      pendingSingletonMethodBindings
+        .getOrElseUpdate(typeFullName, mutable.ArrayBuffer.empty)
+        .addOne(binding -> method)
+    }
 
     val isSurroundedByProgramScope = scope.isSurroundedByProgramScope
     if (isConstructor) scope.pushNewScope(ConstructorScope(fullName, scope.getNewProcParam))
@@ -424,6 +440,15 @@ trait AstForFunctionsCreator(implicit withSchemaValidation: ValidationMode) { th
           signature = None,
           fileName = relativeFileName
         )
+        astParentFullName
+          .filter(_ => astParentType.contains(NodeTypes.TYPE_DECL))
+          .map(fullName => s"$fullName<class>")
+          .foreach { typeFullName =>
+            val binding = bindingNode(method.name, method.signature, method.fullName)
+            pendingSingletonMethodBindings
+              .getOrElseUpdate(typeFullName, mutable.ArrayBuffer.empty)
+              .addOne(binding -> method)
+          }
         val methodTypeDecl_   = typeDeclNode(node, node.methodName, fullName, relativeFileName, code(node))
         val methodTypeDeclAst = Ast(methodTypeDecl_)
 

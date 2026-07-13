@@ -56,6 +56,8 @@ class AbapJsonParser {
               bodies(name.toUpperCase) = StatementList(methodBody.toSeq, methodSpan)
             }
             inMethod = false; methodName = None; methodBody.clear()
+          case "Comment" =>
+            ()
           case _ =>
             methodBody += parseBodyStatement(stmtType, tokens, span)
         }
@@ -185,17 +187,26 @@ class AbapJsonParser {
   private def parseMethodSignature(tokens: Seq[String], span: TextSpan): MethodDef = {
     val upper = tokens.map(_.toUpperCase)
 
-    // Method name is the token after METHODS or CLASS-METHODS
-    val kwIdx      = upper.indexWhere(t => t == "METHODS" || t == "CLASS-METHODS")
-    val isStatic   = kwIdx >= 0 && upper(kwIdx) == "CLASS-METHODS"
-    val methodName = if (kwIdx + 1 < tokens.size) tokens(kwIdx + 1) else "unknown"
+    // Method name is the token after METHODS, CLASS-METHODS, or reference-style CLASS - METHODS.
+    val splitStaticIdx = upper.sliding(3).zipWithIndex.collectFirst {
+      case (Seq("CLASS", "-", "METHODS"), idx) => idx
+    }
+    val compoundStaticIdx = upper.indexWhere(_ == "CLASS-METHODS")
+    val methodIdx         = upper.indexWhere(_ == "METHODS")
+    val kwIdx = splitStaticIdx
+      .orElse(Option.when(compoundStaticIdx >= 0)(compoundStaticIdx))
+      .orElse(Option.when(methodIdx >= 0)(methodIdx))
+      .getOrElse(-1)
+    val isStatic   = splitStaticIdx.nonEmpty || (kwIdx >= 0 && upper(kwIdx) == "CLASS-METHODS")
+    val nameIdx    = if (splitStaticIdx.contains(kwIdx)) kwIdx + 3 else kwIdx + 1
+    val methodName = if (nameIdx < tokens.size) tokens(nameIdx) else "unknown"
 
     var importing                    = Seq[Parameter]()
     var exporting                    = Seq[Parameter]()
     var changing                     = Seq[Parameter]()
     var returning: Option[Parameter] = None
     var section                      = ""
-    var i                            = kwIdx + 2
+    var i                            = nameIdx + 1
 
     while (i < upper.size) {
       upper(i) match {
@@ -303,6 +314,17 @@ class AbapJsonParser {
         val fileArg = tokens.lift(2).map(f => Argument(Some("FILENAME"), IdentifierExpr(f, span)))
         CallExpr("DELETE_DATASET", None, fileArg.toSeq, isStatic = true, span = span)
 
+      case "DeleteDynpro" =>
+        // DELETE DYNPRO <program> <screen>
+        val programArg = tokens.lift(2).map(p => Argument(Some("PROGRAM"), IdentifierExpr(p, span)))
+        val screenArg = tokens.lift(3).map { screen =>
+          val value =
+            if (screen.matches("\\d+")) LiteralExpr(screen, "NUMBER", span)
+            else IdentifierExpr(screen, span)
+          Argument(Some("SCREEN"), value)
+        }
+        CallExpr("DELETE_DYNPRO", None, programArg.toSeq ++ screenArg.toSeq, isStatic = true, span = span)
+
       case "Transfer" =>
         // TRANSFER <data> TO <file>
         val toIdx = tokens.indexWhere(_.equalsIgnoreCase("TO"))
@@ -349,9 +371,15 @@ class AbapJsonParser {
         val nameArg = tokens.lift(2).map(n => Argument(None, LiteralExpr(n, "STRING", span)))
         CallExpr("CALL_TRANSFORMATION", None, nameArg.toSeq, isStatic = true, span = span)
 
+      case "Comment" =>
+        UnknownNode(stmtType, span)
+
       case "EditorCall" =>
-        // EDITOR-CALL FOR REPORT <prog>  — tokens: ["EDITOR", "-", "CALL", "FOR", "REPORT", <prog>]
-        val progArg = tokens.lift(5).map(p => Argument(Some("REPORT"), IdentifierExpr(p, span)))
+        // EDITOR-CALL FOR REPORT <prog>; rust emits EDITOR-CALL as one compound token.
+        val reportIdx = tokens.indexWhere(_.equalsIgnoreCase("REPORT"))
+        val progArg =
+          if (reportIdx >= 0) tokens.lift(reportIdx + 1).map(p => Argument(Some("REPORT"), IdentifierExpr(p, span)))
+          else None
         CallExpr("EDITOR_CALL", None, progArg.toSeq, isStatic = true, span = span)
 
       case "Do" =>
@@ -369,16 +397,58 @@ class AbapJsonParser {
       case "Unknown" =>
         // abaplint emits Unknown for e.g. CALL FUNCTION 'SYSTEM' ID 'COMMAND' FIELD <var>
         // which is syntactically invalid ABAP but still used. Recover as a CallFunction.
-        if (
+        if (tokens.headOption.exists(_.equalsIgnoreCase("DELETE")) && tokens.lift(1).exists(_.equalsIgnoreCase("DYNPRO"))) {
+          val programArg = tokens.lift(2).map(p => Argument(Some("PROGRAM"), IdentifierExpr(p, span)))
+          val screenArg = tokens.lift(3).map { screen =>
+            val value =
+              if (screen.matches("\\d+")) LiteralExpr(screen, "NUMBER", span)
+              else IdentifierExpr(screen, span)
+            Argument(Some("SCREEN"), value)
+          }
+          CallExpr("DELETE_DYNPRO", None, programArg.toSeq ++ screenArg.toSeq, isStatic = true, span = span)
+        } else if (
+          tokens.headOption.exists(_.equalsIgnoreCase("CALL")) &&
+          tokens.lift(1).exists(_.equalsIgnoreCase("TRANSFORMATION"))
+        ) {
+          val nameArg = tokens.lift(2).map(n => Argument(None, LiteralExpr(n, "STRING", span)))
+          CallExpr("CALL_TRANSFORMATION", None, nameArg.toSeq, isStatic = true, span = span)
+        } else if (
           tokens.headOption.exists(_.equalsIgnoreCase("CALL")) &&
           tokens.lift(1).exists(_.equalsIgnoreCase("FUNCTION"))
         )
           parseCallStatement(tokens, "CallFunction", span)
+        else if (tokens.headOption.exists(_.equalsIgnoreCase("CALL")))
+          parseKernelCall(tokens, span).getOrElse(UnknownNode(stmtType, span))
         else
           UnknownNode(stmtType, span)
 
       case _ => UnknownNode(stmtType, span)
     }
+
+  private def parseKernelCall(tokens: Seq[String], span: TextSpan): Option[CallExpr] = {
+    val rawName = tokens
+      .drop(1)
+      .find(t => t.startsWith("'") || t.startsWith("`"))
+      .map(stripQuotes)
+      .filter(_.nonEmpty)
+      .map {
+        case name if name.equalsIgnoreCase("SYSTEM") => "CALL_SYSTEM_COMMAND"
+        case name                                    => name
+      }
+
+    rawName.map { name =>
+      val args = tokens.zipWithIndex.collect {
+        case (id, idx) if id.equalsIgnoreCase("ID") && idx + 3 < tokens.size =>
+          val argName = stripQuotes(tokens(idx + 1))
+          val value   = tokens(idx + 3)
+          Argument(Some(argName), parseExpression(Seq(value), span))
+      }
+      CallExpr(name, None, args, isStatic = true, span = span)
+    }
+  }
+
+  private def stripQuotes(value: String): String =
+    value.stripPrefix("'").stripSuffix("'").stripPrefix("`").stripSuffix("`")
 
   // ---------------------------------------------------------------------------
   // Text span from a statement JSON object
@@ -477,6 +547,20 @@ class AbapJsonParser {
   }
 
   private def parseMoveStatement(tokens: Seq[String], span: TextSpan): AbapNode = {
+    if (tokens.headOption.exists(_.equalsIgnoreCase("MOVE"))) {
+      val toIndex = tokens.indexWhere(_.equalsIgnoreCase("TO"))
+      if (toIndex <= 1 || toIndex >= tokens.length - 1) return UnknownNode("Move", span)
+      val source     = parseExpression(tokens.slice(1, toIndex), span)
+      val targetToks = tokens.drop(toIndex + 1).filterNot(_ == ".")
+      val target =
+        if (targetToks.isEmpty) IdentifierExpr("", span)
+        else if (targetToks.head.startsWith("<") && targetToks.head.endsWith(">"))
+          IdentifierExpr(targetToks.head, span)
+        else if (targetToks.contains("-")) parseFieldAccess(targetToks, span)
+        else IdentifierExpr(targetToks.head, span)
+      return AssignmentStmt(target, source, span)
+    }
+
     val assignIdx = tokens.indexOf("=")
     if (assignIdx <= 0 || assignIdx >= tokens.length - 1) return UnknownNode("Move", span)
     val targetToks = tokens.take(assignIdx)

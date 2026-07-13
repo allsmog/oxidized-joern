@@ -1,7 +1,7 @@
 package io.joern.kotlin2cpg.config
 
 import io.joern.kotlin2cpg.Main
-import io.joern.kotlin2cpg.Config
+import io.joern.kotlin2cpg.{Config, KotlinParserBackend}
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
@@ -27,6 +27,8 @@ class ConfigTests extends AnyWordSpec with Matchers with Inside {
       "--classpath",
       "CLASSPATH",
       "--no-stdlib-jars",
+      "--parser-backend",
+      "oxidized",
       "--jar4import-url",
       "URL",
       "--download-dependencies",
@@ -46,6 +48,7 @@ class ConfigTests extends AnyWordSpec with Matchers with Inside {
       config.ignoredFilesRegex.toString shouldBe "EXCLUDE_REGEX"
       config.classpath shouldBe Set("CLASSPATH")
       config.withStdlibJarsInClassPath shouldBe false
+      config.parserBackend shouldBe KotlinParserBackend.Oxidized
       config.downloadDependencies shouldBe true
       config.gradleProjectName shouldBe Some("GRADLE_PROJ_NAME")
       config.gradleConfigurationName shouldBe Some("GRADLE_CONF_NAME")

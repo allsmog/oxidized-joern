@@ -77,9 +77,10 @@ class SwitchTests extends SwiftSrc2CpgSuite {
 
       switchBlock.astChildren.isControlStructure.order(10).codeExact("break").size shouldBe 1
 
-      val List(when19) = cpg.controlStructure.controlStructureType(ControlStructureTypes.IF).order(19).l
-      when19.astChildren.code.l shouldBe List("!(x % 2 == 0)", "continue")
-      when19.whenTrue.code.l shouldBe List("continue")
+      val whereIfs     = switchBlock.ast.isControlStructure.controlStructureType(ControlStructureTypes.IF).l
+      val firstWhereIf = whereIfs.filter(_.astChildren.code.l == List("!(x % 2 == 0)", "continue")).head
+      firstWhereIf.whenTrue.code.l shouldBe List("continue")
+      cpg.unknown.codeExact("_").l shouldBe empty
     }
 
     "testSwitch11" in {

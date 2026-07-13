@@ -51,6 +51,7 @@ class OperatorsTests extends CSharpCode2CpgFixture {
       basicBoilerplate("""
         |int a = 3;
         |int b = 5;
+        |uint u = 8;
         |a+b;
         |a-b;
         |a/b;
@@ -62,11 +63,14 @@ class OperatorsTests extends CSharpCode2CpgFixture {
         |a&b;
         |a|b;
         |a^b;
+        |a<<b;
+        |a>>b;
+        |u>>>b;
         |""".stripMargin),
       fileName = "Program.cs"
     )
     val operatorCalls = cpg.method("Main").ast.isCall.nameNot(Operators.assignment).l
-    operatorCalls.size shouldBe 11
+    operatorCalls.size shouldBe 14
     operatorCalls.name.l shouldBe List(
       "<operator>.addition",
       "<operator>.subtraction",
@@ -78,9 +82,27 @@ class OperatorsTests extends CSharpCode2CpgFixture {
       "<operator>.logicalOr",
       "<operator>.and",
       "<operator>.or",
-      "<operator>.xor"
+      "<operator>.xor",
+      Operators.shiftLeft,
+      Operators.logicalShiftRight,
+      Operators.arithmeticShiftRight
     )
-    operatorCalls.code.l shouldBe List("a+b", "a-b", "a/b", "a%b", "a==b", "a!=b", "a&&b", "a||b", "a&b", "a|b", "a^b")
+    operatorCalls.code.l shouldBe List(
+      "a+b",
+      "a-b",
+      "a/b",
+      "a%b",
+      "a==b",
+      "a!=b",
+      "a&&b",
+      "a||b",
+      "a&b",
+      "a|b",
+      "a^b",
+      "a<<b",
+      "a>>b",
+      "u>>>b"
+    )
 
     inside(operatorCalls.nameExact(Operators.addition).astChildren.l) { case List(lhs: Identifier, rhs: Identifier) =>
       lhs.code shouldBe "a"
@@ -91,23 +113,25 @@ class OperatorsTests extends CSharpCode2CpgFixture {
   "be created for shorthand assignment operators" in {
     val cpg = code(
       basicBoilerplate("""
-          |int a = 3;
-          |int b = 5;
-          |a+=b;
-          |a-=b;
-          |a*=b;
-          |a/=b;
-          |a%=b;
+        |int a = 3;
+        |int b = 5;
+        |uint u = 8;
+        |a+=b;
+        |a-=b;
+        |a*=b;
+        |a/=b;
+        |a%=b;
           |a&=b;
           |a|=b;
-          |a^=b;
-          |a>>=b;
-          |a<<=b;
-          |""".stripMargin),
+        |a^=b;
+        |a>>=b;
+        |a<<=b;
+        |u>>>=b;
+        |""".stripMargin),
       fileName = "Program.cs"
     )
     val operatorCalls = cpg.method("Main").ast.isCall.nameNot(Operators.assignment).l
-    operatorCalls.size shouldBe 10
+    operatorCalls.size shouldBe 11
     operatorCalls.name.l shouldBe List(
       "<operator>.assignmentPlus",
       "<operator>.assignmentMinus",
@@ -118,9 +142,22 @@ class OperatorsTests extends CSharpCode2CpgFixture {
       "<operators>.assignmentOr",
       "<operators>.assignmentXor",
       "<operators>.assignmentLogicalShiftRight",
-      "<operators>.assignmentShiftLeft"
+      "<operators>.assignmentShiftLeft",
+      Operators.assignmentArithmeticShiftRight
     )
-    operatorCalls.code.l shouldBe List("a+=b", "a-=b", "a*=b", "a/=b", "a%=b", "a&=b", "a|=b", "a^=b", "a>>=b", "a<<=b")
+    operatorCalls.code.l shouldBe List(
+      "a+=b",
+      "a-=b",
+      "a*=b",
+      "a/=b",
+      "a%=b",
+      "a&=b",
+      "a|=b",
+      "a^=b",
+      "a>>=b",
+      "a<<=b",
+      "u>>>=b"
+    )
 
     inside(operatorCalls.nameExact(Operators.assignmentPlus).astChildren.l) {
       case List(lhs: Identifier, rhs: Identifier) =>
@@ -160,6 +197,25 @@ class OperatorsTests extends CSharpCode2CpgFixture {
     }
   }
 
+  "be created for pointer indirection operators" in {
+    val cpg = code(basicBoilerplate("""
+        |unsafe
+        |{
+        |  int* p = stackalloc int[1];
+        |  var value = *p;
+        |}
+        |""".stripMargin))
+
+    inside(cpg.call.nameExact(Operators.indirection).l) { case indirection :: Nil =>
+      indirection.code shouldBe "*p"
+      indirection.methodFullName shouldBe Operators.indirection
+
+      inside(indirection.argument.l) { case (pointer: Identifier) :: Nil =>
+        pointer.code shouldBe "p"
+      }
+    }
+  }
+
   "be created for `formatString` operator" in {
     val cpg = code(basicBoilerplate("""
         |var world = "World!";
@@ -181,6 +237,45 @@ class OperatorsTests extends CSharpCode2CpgFixture {
 
       inside(cpg.local("foo").l) { case foo :: Nil =>
         foo.typeFullName shouldBe BuiltinTypes.DotNetTypeMap(BuiltinTypes.String)
+      }
+    }
+  }
+
+  "preserve interpolation alignment and format operands" in {
+    val cpg = code(basicBoilerplate("""
+        |int value = 12;
+        |var foo = $"Value {value,10:X2}!";
+        |""".stripMargin))
+
+    inside(cpg.call(Operators.formatString).l) { case interpolatedString :: Nil =>
+      interpolatedString.code shouldBe "$\"Value {value,10:X2}!\""
+      interpolatedString.typeFullName shouldBe BuiltinTypes.DotNetTypeMap(BuiltinTypes.String)
+
+      inside(interpolatedString.argument.l) {
+        case (prefix: Literal) :: (value: Identifier) :: (alignment: Literal) :: (format: Literal) :: (suffix: Literal) :: Nil =>
+          prefix.code shouldBe "Value"
+          value.code shouldBe "value"
+          alignment.code shouldBe "10"
+          format.code shouldBe "X2"
+          suffix.code shouldBe "!"
+      }
+    }
+  }
+
+  "preserve raw interpolated string code" in {
+    val rawInterpolated = "$$\"\"\"Value {{value}}\"\"\""
+    val cpg = code(basicBoilerplate(s"""
+        |int value = 7;
+        |var raw = $rawInterpolated;
+        |""".stripMargin))
+
+    inside(cpg.call(Operators.formatString).l) { case interpolatedString :: Nil =>
+      interpolatedString.code shouldBe rawInterpolated
+      interpolatedString.typeFullName shouldBe BuiltinTypes.DotNetTypeMap(BuiltinTypes.String)
+
+      inside(interpolatedString.argument.l) { case (prefix: Literal) :: (value: Identifier) :: Nil =>
+        prefix.code shouldBe "Value"
+        value.code shouldBe "value"
       }
     }
   }

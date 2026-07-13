@@ -225,6 +225,11 @@ class DependencyDownloader(
         }
       }
       .map(CSharpProgramSummary(_))
-    CSharpProgramSummary(summaries)
+    val downloadedSummary    = CSharpProgramSummary(summaries)
+    val downloadedNamespaces = downloadedSummary.namespaceToType.keySet.toSet
+    val matchingBuiltins = CSharpProgramSummary.builtinTypesSummary.filter(namespacePred =
+      (namespace, _) => downloadedNamespaces.contains(namespace)
+    )
+    matchingBuiltins ++= downloadedSummary
   }
 }

@@ -109,17 +109,24 @@ class Scope(summary: Map[String, Seq[SymbolSummary]] = Map.empty)
   }
 
   def getNewClassTmp: String = {
-    stack.headOption match {
-      case Some(ScopeElement(namespace: NamespaceScope, _)) =>
-        s"${this.surroundingScopeFullName.getOrElse("<global>")}.${namespace.getNextClassTmp}"
-      case Some(ScopeElement(typeScope: TypeScope, _)) =>
-        s"${this.surroundingScopeFullName.getOrElse("<global>")}.${typeScope.getNextClassTmp}"
-      case Some(ScopeElement(methodScope: MethodScope, _)) =>
-        s"${this.surroundingScopeFullName.getOrElse("<global>")}.${methodScope.getNextClassTmp}"
-      case _ =>
+    stack
+      .collectFirst { case ScopeElement(methodScope: MethodScope, _) =>
+        s"${methodScope.fullName}.${methodScope.getNextClassTmp}"
+      }
+      .orElse {
+        stack.collectFirst { case ScopeElement(typeScope: TypeScope, _) =>
+          s"${typeScope.fullName}.${typeScope.getNextClassTmp}"
+        }
+      }
+      .orElse {
+        stack.collectFirst { case ScopeElement(namespace: NamespaceScope, _) =>
+          s"${namespace.fullName}.${namespace.getNextClassTmp}"
+        }
+      }
+      .getOrElse {
         logger.warn(s"Stack is empty - using global counter ")
         s"${this.surroundingScopeFullName.getOrElse("<global>")}.${this.getNextClassTmp}"
-    }
+      }
   }
 
   def getNewVarTmp(varPrefix: String = ""): String = {
@@ -137,6 +144,20 @@ class Scope(summary: Map[String, Seq[SymbolSummary]] = Map.empty)
 
   def addMethodRef(methodRefName: String, methodRef: NewMethodRef): Unit = methodRefsInAst.put(methodRefName, methodRef)
   def getMethodRef(methodRefName: String): Option[NewMethodRef]          = methodRefsInAst.get(methodRefName)
+
+  def lookupVariableInCurrentMethod(identifier: String): Option[NewNode] = {
+    def lookup(stackElems: List[ScopeElement[String, NewNode, TypedScopeElement]]): Option[NewNode] = {
+      stackElems match {
+        case Nil => None
+        case ScopeElement(scopeNode: MethodScope, variables) :: _ =>
+          variables.get(identifier)
+        case ScopeElement(_, variables) :: tail =>
+          variables.get(identifier).orElse(lookup(tail))
+      }
+    }
+
+    lookup(stack)
+  }
 
   def addVariableToMethodScope(identifier: String, variable: NewNode, methodFullName: String): Option[MethodScope] = {
     stack.collectFirst {

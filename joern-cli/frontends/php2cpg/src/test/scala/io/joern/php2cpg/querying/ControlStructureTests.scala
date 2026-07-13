@@ -3,7 +3,7 @@ package io.joern.php2cpg.querying
 import io.joern.php2cpg.astcreation.AstCreator.TypeConstants
 import io.joern.php2cpg.parser.Domain.PhpOperators
 import io.joern.php2cpg.testfixtures.PhpCode2CpgFixture
-import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, Operators}
+import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, EdgeTypes, Operators}
 import io.shiftleft.codepropertygraph.generated.nodes.{
   Block,
   Call,
@@ -479,6 +479,7 @@ class ControlStructureTests extends PhpCode2CpgFixture {
           num.code shouldBe "5"
           num.typeFullName shouldBe TypeConstants.Int
         }
+        breakStmt.out(EdgeTypes.JUMP_ARGUMENT).collectAll[Literal].code.l shouldBe List("5")
       }
     }
   }
@@ -507,6 +508,7 @@ class ControlStructureTests extends PhpCode2CpgFixture {
           num.code shouldBe "5"
           num.typeFullName shouldBe TypeConstants.Int
         }
+        continueStmt.out(EdgeTypes.JUMP_ARGUMENT).collectAll[Literal].code.l shouldBe List("5")
       }
     }
   }
@@ -897,6 +899,7 @@ class ControlStructureTests extends PhpCode2CpgFixture {
       throwExpr.lineNumber shouldBe Some(3)
       throwExpr.code shouldBe "throw $x"
       throwExpr.astChildren.code.l shouldBe List("$x")
+      throwExpr.out(EdgeTypes.ARGUMENT).collectAll[Identifier].code.l shouldBe List("$x")
     }
   }
 
@@ -918,6 +921,7 @@ class ControlStructureTests extends PhpCode2CpgFixture {
           jumpLabel.lineNumber shouldBe Some(2)
           jumpLabel.order shouldBe 1 // Important for CFG creation
         }
+        goto.out(EdgeTypes.JUMP_ARGUMENT).collectAll[JumpLabel].name.l shouldBe List("TARGET")
       }
     }
 
@@ -1194,6 +1198,10 @@ class ControlStructureTests extends PhpCode2CpgFixture {
       case List(initAsts: Block, conditionAst: Call, updateAsts: Block, body: Block) =>
         (initAsts, conditionAst, updateAsts, body)
     }
+
+    foreachStruct.forInitOut.l shouldBe List(initAsts)
+    foreachStruct.forUpdateOut.l shouldBe List(updateAsts)
+    foreachStruct.forBodyOut.l shouldBe List(body)
 
     inside(initAsts.astChildren.l) { case List(iterInit: Call, valInitBlock: Block) =>
       iterInit.name shouldBe Operators.assignment

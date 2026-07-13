@@ -2,7 +2,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.sbt.packager.Keys.stagingDirectory
 import versionsort.VersionHelper
 
-import scala.sys.process.stringToProcess
+import scala.sys.process.Process
 import scala.util.Try
 
 name := "csharpsrc2cpg"
@@ -45,17 +45,24 @@ lazy val AllPlatforms = Seq(AstgenWin, AstgenLinux, AstgenLinuxArm, AstgenMac)
 lazy val astGenDlUrl = settingKey[String]("astgen download url")
 astGenDlUrl := s"https://github.com/joernio/astgen-monorepo/releases/download/dotnet-astgen/v${astGenVersion.value}/"
 
-def hasCompatibleAstGenVersion(astGenVersion: String): Boolean = {
-  Try("dotnetastgen --version".!!).toOption.map(_.strip()) match {
+def isCompatibleAstGen(command: Seq[String], astGenVersion: String): Boolean = {
+  Try(Process(command).!!).toOption.map(_.strip()) match {
     case Some(installedVersion) if installedVersion != "unknown" =>
       VersionHelper.compare(installedVersion, astGenVersion) >= 0
     case _ => false
   }
 }
 
+def hasCompatibleAstGenVersion(astGenVersion: String): Boolean =
+  isCompatibleAstGen(Seq("dotnetastgen", "--version"), astGenVersion)
+
 lazy val astGenBinaryNames = taskKey[Seq[String]]("asstgen binary names")
 astGenBinaryNames := {
-  if (hasCompatibleAstGenVersion(astGenVersion.value)) {
+  val bundledCurrentAstgen = baseDirectory.value / "bin" / "astgen" / astGenCurrentBinaryName.value
+  if (
+    hasCompatibleAstGenVersion(astGenVersion.value) ||
+    isCompatibleAstGen(Seq(bundledCurrentAstgen.getAbsolutePath, "--version"), astGenVersion.value)
+  ) {
     Seq.empty
   } else if (sys.props.get("ALL_PLATFORMS").contains("TRUE")) {
     AllPlatforms
@@ -72,6 +79,45 @@ astGenBinaryNames := {
         AllPlatforms
     }
   }
+}
+
+lazy val astGenCurrentBinaryName = taskKey[String]("dotnetastgen binary name for the current host")
+astGenCurrentBinaryName := {
+  Environment.operatingSystem match {
+    case Environment.OperatingSystemType.Windows => AstgenWin
+    case Environment.OperatingSystemType.Linux =>
+      Environment.architecture match {
+        case Environment.ArchitectureType.X86   => AstgenLinux
+        case Environment.ArchitectureType.ARMv8 => AstgenLinuxArm
+      }
+    case Environment.OperatingSystemType.Mac     => AstgenMac
+    case Environment.OperatingSystemType.Unknown => AstgenLinux
+  }
+}
+
+lazy val dotNetAstGenBuildRust = taskKey[File]("Build local Rust dotnetastgen and install it under bin/astgen")
+dotNetAstGenBuildRust := {
+  val rustRoot = baseDirectory.value / "rust"
+  val localBinaryName =
+    if (Environment.operatingSystem == Environment.OperatingSystemType.Windows) "dotnetastgen.exe" else "dotnetastgen"
+  val exitCode = Process(Seq("cargo", "build", "--release", "--bin", "dotnetastgen"), rustRoot).!
+  if (exitCode != 0) {
+    sys.error(s"cargo build failed with exit code $exitCode")
+  }
+
+  val builtBinary = rustRoot / "target" / "release" / localBinaryName
+  val astGenDir   = baseDirectory.value / "bin" / "astgen"
+  val targetFile  = astGenDir / astGenCurrentBinaryName.value
+  astGenDir.mkdirs()
+  IO.copyFile(builtBinary, targetFile, preserveLastModified = true)
+  targetFile.setExecutable(true, false)
+
+  val distDir = (Universal / stagingDirectory).value / "bin" / "astgen"
+  distDir.mkdirs()
+  IO.copyDirectory(astGenDir, distDir, preserveExecutable = true)
+
+  streams.value.log.info(s"installed Rust dotnetastgen to $targetFile")
+  targetFile
 }
 
 lazy val astGenDlTask = taskKey[Unit](s"Download astgen binaries")
@@ -91,7 +137,7 @@ astGenDlTask := {
   IO.copyDirectory(astGenDir, distDir, preserveExecutable = true)
 }
 
-Compile / compile := ((Compile / compile) dependsOn astGenDlTask).value
+Compile / compile := ((Compile / compile) dependsOn dotNetAstGenBuildRust).value
 
 lazy val astGenSetAllPlatforms = taskKey[Unit](s"Set ALL_PLATFORMS")
 astGenSetAllPlatforms := { System.setProperty("ALL_PLATFORMS", "TRUE") }

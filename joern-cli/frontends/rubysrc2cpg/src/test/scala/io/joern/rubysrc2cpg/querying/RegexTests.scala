@@ -117,13 +117,14 @@ class RegexTests extends RubyCode2CpgFixture(withPostProcessing = false) {
       assertLoweredStructure(cpg)
     }
 
-    "be assigned to the match using `sub` (or `gsub`) calls" ignore {
-      // fixme: This cannot simply be lowered as it returns a string result not a MatchData object
-      val cpg = code("""
-          |"hello".sub(/h(el)lo/)
-          |""".stripMargin)
+    "be assigned to the match using `sub` (or `gsub`) calls" in {
+      List("sub", "gsub").foreach { methodName =>
+        val cpg = code(s"""
+            |"hello".$methodName(/h(el)lo/)
+            |""".stripMargin)
 
-      assertLoweredStructure(cpg)
+        assertLoweredStructure(cpg)
+      }
     }
 
   }

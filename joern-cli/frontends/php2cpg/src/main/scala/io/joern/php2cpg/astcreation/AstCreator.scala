@@ -211,12 +211,44 @@ class AstCreator(
   }
 
   private def astforTraitUseStmt(stmt: PhpTraitUseStmt): Ast = {
-    // TODO Actually implement this
-    logger.debug(
-      s"Trait use statement encountered. This is not yet supported. Location: $relativeFileName:${line(stmt)}"
-    )
+    val traitUseAst    = astForTraitUseCall(stmt)
+    val adaptationAsts = stmt.adaptations.map(astForTraitUseAdaptation)
+    wrapMultipleInBlock(traitUseAst :: adaptationAsts, line(stmt))
+  }
 
-    Ast(unknownNode(stmt, code(stmt)).typeFullName(Defines.Any))
+  private def astForTraitUseCall(stmt: PhpTraitUseStmt): Ast = {
+    val traitRefs = stmt.traits.map(astForTraitTypeRef)
+    val callNode =
+      operatorCallNode(
+        stmt,
+        s"use ${stmt.traits.map(_.name).mkString(", ")}",
+        PhpOperators.traitUse,
+        Some(TypeConstants.Void)
+      )
+    callAst(callNode, traitRefs)
+  }
+
+  private def astForTraitUseAdaptation(adaptation: PhpTraitUseAdaptation): Ast = {
+    adaptation match {
+      case precedence: PhpPrecedenceAdaptation =>
+        val code =
+          s"${precedence.traitName.name}$StaticMethodDelimiter${precedence.methodName.name} insteadof ${precedence.insteadOf.map(_.name).mkString(", ")}"
+        val callNode = operatorCallNode(precedence, code, PhpOperators.traitUseInsteadOf, Some(TypeConstants.Void))
+        callAst(callNode, astForTraitTypeRef(precedence.traitName) :: precedence.insteadOf.map(astForTraitTypeRef))
+
+      case alias: PhpAliasAdaptation =>
+        val traitPrefix = alias.traitName.map(name => s"${name.name}$StaticMethodDelimiter").getOrElse("")
+        val modifier    = alias.newModifier.map(modifier => s" ${modifier.toLowerCase}").getOrElse("")
+        val newName     = alias.newName.map(name => s" ${name.name}").getOrElse("")
+        val code        = s"$traitPrefix${alias.methodName.name} as$modifier$newName"
+        val callNode    = operatorCallNode(alias, code, PhpOperators.traitUseAlias, Some(TypeConstants.Void))
+        callAst(callNode, alias.traitName.toList.map(astForTraitTypeRef))
+    }
+  }
+
+  private def astForTraitTypeRef(name: PhpNameExpr): Ast = {
+    val typeFullName = resolveTypeName(name.name)
+    Ast(typeRefNode(name, name.name, typeFullName))
   }
 
   private def astForUseUse(stmt: PhpUseUse, namePrefix: String = ""): Ast = {

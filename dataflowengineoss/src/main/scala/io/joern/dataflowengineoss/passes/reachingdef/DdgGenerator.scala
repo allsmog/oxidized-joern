@@ -3,8 +3,9 @@ package io.joern.dataflowengineoss.passes.reachingdef
 import io.joern.dataflowengineoss.{globalFromLiteral, identifierToFirstUsages}
 import io.joern.dataflowengineoss.queryengine.AccessPathUsage.toTrackedBaseAndAccessPathSimple
 import io.joern.dataflowengineoss.semanticsloader.Semantics
+import io.shiftleft.codepropertygraph.generated.Cpg
 import io.shiftleft.codepropertygraph.generated.nodes.*
-import io.shiftleft.codepropertygraph.generated.{EdgeTypes, Operators}
+import io.shiftleft.codepropertygraph.generated.{EdgeTypes, EvaluationStrategies, Languages, Operators}
 import io.shiftleft.semanticcpg.accesspath.MatchResult
 import io.shiftleft.semanticcpg.language.*
 import io.shiftleft.codepropertygraph.generated.DiffGraphBuilder
@@ -13,7 +14,7 @@ import scala.collection.{Set, mutable}
 
 /** Creation of data dependence edges based on solution of the ReachingDefProblem.
   */
-class DdgGenerator(semantics: Semantics) {
+class DdgGenerator(semantics: Semantics, cpg: Cpg) {
 
   implicit val s: Semantics = semantics
 
@@ -40,7 +41,7 @@ class DdgGenerator(semantics: Semantics) {
     val gen          = solution.problem.transferFunction.asInstanceOf[ReachingDefTransferFunction].gen
 
     val allNodes      = in.keys.toList
-    val usageAnalyzer = new UsageAnalyzer(problem, in)
+    val usageAnalyzer = new UsageAnalyzer(problem, in, cpg.metaData.language.headOption)
 
     /** Add an edge from the entry node to each node that does not have other incoming definitions.
       */
@@ -183,6 +184,32 @@ class DdgGenerator(semantics: Semantics) {
         }
       }
 
+      method.local.foreach { capturedLocal =>
+        capturedLocal.closureBindingId.toSeq
+          .flatMap(closureBindingId => cpg.closureBinding.filter(_.closureBindingId.contains(closureBindingId)))
+          .filter(_.evaluationStrategy == EvaluationStrategies.BY_REFERENCE)
+          .foreach { closureBinding =>
+            val captureLine         = closureBinding._captureIn.collectAll[MethodRef].lineNumber.headOption
+            val capturedIdentifiers = capturedLocal.referencingIdentifiers.l
+            val outerIdentifiers = closureBinding._refOut
+              .collectAll[Declaration]
+              .flatMap {
+                case local: Local             => local.referencingIdentifiers
+                case param: MethodParameterIn => param.referencingIdentifiers
+                case _                        => Iterator.empty
+              }
+              .filter { identifier =>
+                captureLine.forall(line => identifier.lineNumber.forall(_ >= line))
+              }
+              .l
+            capturedIdentifiers.foreach { capturedIdentifier =>
+              outerIdentifiers.foreach { outerIdentifier =>
+                addEdge(capturedIdentifier, outerIdentifier, nodeToEdgeLabel(capturedIdentifier))
+              }
+            }
+          }
+      }
+
       // NOTE: Below connects REACHING_DEF edges between method boundaries of closures. In the case of PARENT -> CHILD
       // this brings no inconsistent flows, but from CHILD -> PARENT we have observed inconsistencies. This form of
       // modelling data-flow is unsound as the engine assumes REACHING_DEF edges are intraprocedural.
@@ -254,14 +281,24 @@ class DdgGenerator(semantics: Semantics) {
   * `n` of the flow graph. This component determines those of the incoming definitions that are relevant as the value
   * they define is actually used by `n`.
   */
-private class UsageAnalyzer(problem: DataFlowProblem[CfgNode, mutable.BitSet], in: Map[CfgNode, Set[Definition]]) {
+private class UsageAnalyzer(
+  problem: DataFlowProblem[CfgNode, mutable.BitSet],
+  in: Map[CfgNode, Set[Definition]],
+  language: Option[String]
+) {
 
   val numberToNode: Map[Definition, CfgNode] = problem.flowGraph.asInstanceOf[ReachingDefFlowGraph].numberToNode
 
   private val allNodes = in.keys.toList
   private val containerSet =
     Set(Operators.fieldAccess, Operators.indexAccess, Operators.indirectIndexAccess, Operators.indirectFieldAccess)
-  private val indirectionAccessSet                                  = Set(Operators.addressOf, Operators.indirection)
+  private val baseContainerSet =
+    Set(Operators.fieldAccess, Operators.indirectFieldAccess)
+  private val indexAccessSet =
+    Set(Operators.indexAccess, Operators.indirectIndexAccess)
+  private val indirectionAccessSet = Set(Operators.addressOf, Operators.indirection)
+  private val allowIndexAccessBaseApproximation =
+    language.exists(Set(Languages.JAVASRC, Languages.GOLANG, Languages.SWIFTSRC))
   val usedIncomingDefs: Map[CfgNode, Map[CfgNode, Set[Definition]]] = initUsedIncomingDefs()
 
   def initUsedIncomingDefs(): Map[CfgNode, Map[CfgNode, Set[Definition]]] = {
@@ -287,9 +324,56 @@ private class UsageAnalyzer(problem: DataFlowProblem[CfgNode, mutable.BitSet], i
     */
   private def isContainer(use: CfgNode, inElement: CfgNode): Boolean = {
     inElement match {
-      case call: Call if containerSet.contains(call.name) =>
+      case call: Call if baseContainerSet.contains(call.name) =>
         call.argument.headOption.exists { base =>
           nodeToString(use) == nodeToString(base)
+        }
+      case call: Call if indexAccessSet.contains(call.name) =>
+        call.argument.headOption.exists { base =>
+          nodeToString(base).exists { baseName =>
+            nodeToString(use).exists { useName =>
+              (useName == baseName && (base.isInstanceOf[Call] || canUseIndexAccessBaseAsContainer(use, call))) ||
+              (allowIndexAccessBaseApproximation && isIndexAccessWithBase(use, baseName)) ||
+              (useName.contains(baseName) && isSyntheticAggregateTempName(baseName))
+            }
+          }
+        }
+      case _ => false
+    }
+  }
+
+  private def isSyntheticAggregateTempName(name: String): Boolean =
+    name.matches("\\$stack\\d+") || name.matches("tmp\\d+")
+
+  private def canUseIndexAccessBaseAsContainer(node: CfgNode, inElement: Call): Boolean =
+    parentIndexAccess(node).forall { parent =>
+      allowIndexAccessBaseApproximation && {
+        (nodeToString(parent), nodeToString(inElement)) match {
+          case (Some(parentName), Some(inElementName)) => parentName == inElementName
+          case _                                       => false
+        }
+      }
+    }
+
+  private def isBaseArgumentOfIndexAccess(node: CfgNode): Boolean = {
+    parentIndexAccess(node).isDefined
+  }
+
+  private def parentIndexAccess(node: CfgNode): Option[Call] = {
+    node match {
+      case expression: Expression =>
+        scala.util.Try(expression.astParent).toOption.collect {
+          case call: Call if indexAccessSet.contains(call.name) && expression.argumentIndex == 1 => call
+        }
+      case _ => None
+    }
+  }
+
+  private def isIndexAccessWithBase(node: CfgNode, baseName: String): Boolean = {
+    node match {
+      case call: Call if indexAccessSet.contains(call.name) =>
+        call.argument.headOption.exists { base =>
+          nodeToString(base).contains(baseName)
         }
       case _ => false
     }

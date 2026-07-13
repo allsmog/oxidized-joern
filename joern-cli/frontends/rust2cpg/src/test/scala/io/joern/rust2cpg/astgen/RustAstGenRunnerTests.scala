@@ -15,7 +15,48 @@ class RustAstGenRunnerTests extends AnyWordSpec with Matchers {
     Files.writeString(file, content)
   }
 
+  private class TestableRustAstGenRunner extends RustAstGenRunner(Config()) {
+    def skippedFileList(in: Path, astGenOut: List[String]): List[String] = skippedFiles(in, astGenOut)
+  }
+
   "RustAstGenRunner" should {
+
+    "extract skipped files from explicit skip records" in {
+      FileUtil.usingTemporaryDirectory("rust2cpgTestInput") { inputDir =>
+        val absoluteSkipped = inputDir / "src" / "broken.rs"
+        writeFile(absoluteSkipped, "fn broken( {}")
+
+        val skipped = new TestableRustAstGenRunner().skippedFileList(
+          inputDir,
+          List(
+            s"Converted AST for ${inputDir / "src" / "ok.rs"} to /tmp/ok.rs.json",
+            s"Skipped: $absoluteSkipped",
+            "Skipped: src/relative.rs",
+            ""
+          )
+        )
+
+        skipped shouldBe List(inputDir.relativize(absoluteSkipped).toString, "src/relative.rs")
+      }
+    }
+
+    "extract skipped files from rust_ast_gen failure records" in {
+      FileUtil.usingTemporaryDirectory("rust2cpgTestInput") { inputDir =>
+        val absoluteSkipped = inputDir / "src" / "broken.rs"
+        writeFile(absoluteSkipped, "fn broken( {}")
+
+        val skipped = new TestableRustAstGenRunner().skippedFileList(
+          inputDir,
+          List(
+            s"Converted AST for ${inputDir / "src" / "ok.rs"} to /tmp/ok.rs.json",
+            s"$absoluteSkipped failed to parse source file",
+            "src/relative.rs failed to parse source file"
+          )
+        )
+
+        skipped shouldBe List(inputDir.relativize(absoluteSkipped).toString, "src/relative.rs")
+      }
+    }
 
     "parse a single-crate project" in {
       FileUtil.usingTemporaryDirectory("rust2cpgTestInput") { inputDir =>
@@ -43,8 +84,7 @@ class RustAstGenRunnerTests extends AnyWordSpec with Matchers {
       }
     }
 
-    // TODO: flaky on CI (Windows). When it fails, consistently returns `main.rs.json` but not `lib.rs.json`.
-    "parse a workspace project with crates/" ignore {
+    "parse a workspace project with crates/" in {
       FileUtil.usingTemporaryDirectory("rust2cpgTestInput") { inputDir =>
         writeFile(
           inputDir / "Cargo.toml",

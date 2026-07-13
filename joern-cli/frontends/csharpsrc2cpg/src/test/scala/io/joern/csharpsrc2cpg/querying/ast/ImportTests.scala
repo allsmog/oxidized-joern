@@ -46,4 +46,40 @@ class ImportTests extends CSharpCode2CpgFixture {
 
   }
 
+  "alias and static using statements" should {
+
+    val cpg = code("""
+        |using Alias = System.String;
+        |using static System.Math;
+        |
+        |class Program
+        |{
+        |  static void Main(string[] args)
+        |  {
+        |    Alias text = "Hey!";
+        |    var value = Abs(-1);
+        |  }
+        |}
+        |""".stripMargin)
+
+    "create import nodes with source-faithful aliases" in {
+      inside(cpg.imports.l) { case aliasImport :: staticImport :: Nil =>
+        aliasImport.code shouldBe "using Alias = System.String;"
+        aliasImport.importedEntity shouldBe Option("System.String")
+        aliasImport.importedAs shouldBe Option("Alias")
+
+        staticImport.code shouldBe "using static System.Math;"
+        staticImport.importedEntity shouldBe Option("System.Math")
+        staticImport.importedAs shouldBe Option("Math")
+      }
+    }
+
+    "resolve aliased type names" in {
+      inside(cpg.local.nameExact("text").l) { case text :: Nil =>
+        text.typeFullName shouldBe "System.String"
+      }
+    }
+
+  }
+
 }

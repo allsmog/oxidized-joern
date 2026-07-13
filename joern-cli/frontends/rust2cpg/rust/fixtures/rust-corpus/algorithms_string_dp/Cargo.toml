@@ -1,0 +1,4 @@
+[package]
+name = "algorithms_string_dp"
+version = "0.1.0"
+edition = "2021"

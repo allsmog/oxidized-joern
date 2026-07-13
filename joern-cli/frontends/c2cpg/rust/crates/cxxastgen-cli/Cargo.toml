@@ -1,0 +1,23 @@
+[package]
+name = "cxxastgen"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[[bin]]
+name = "cxxastgen"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+cxxastgen-core = { path = "../cxxastgen-core" }
+regex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+shlex = "2"
+
+[dev-dependencies]
+assert_cmd = "2"
+serde_json.workspace = true
+tempfile.workspace = true

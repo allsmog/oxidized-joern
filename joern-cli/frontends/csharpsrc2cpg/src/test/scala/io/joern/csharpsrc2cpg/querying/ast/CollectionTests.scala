@@ -1,9 +1,10 @@
 package io.joern.csharpsrc2cpg.querying.ast
 
+import io.joern.csharpsrc2cpg.CSharpOperators
 import io.joern.csharpsrc2cpg.testfixtures.CSharpCode2CpgFixture
 import io.joern.x2cpg.Defines
 import io.shiftleft.codepropertygraph.generated.Operators
-import io.shiftleft.codepropertygraph.generated.nodes.{Call, Identifier, Literal}
+import io.shiftleft.codepropertygraph.generated.nodes.{Call, Identifier, Literal, Unknown}
 import io.shiftleft.semanticcpg.language.*
 
 class CollectionTests extends CSharpCode2CpgFixture {
@@ -179,6 +180,42 @@ class CollectionTests extends CSharpCode2CpgFixture {
           }
         }
       }
+    }
+  }
+
+  "Tuple expression AST" should {
+    val cpg = code(basicBoilerplate("""
+        |var pair = (a: 1, b: 2);
+        |""".stripMargin))
+
+    "create a tuple operator call" in {
+      inside(cpg.call.nameExact(CSharpOperators.tuple).l) { case tuple :: Nil =>
+        tuple.code shouldBe "(a: 1, b: 2)"
+        tuple.argument.code.l shouldBe List("1", "2")
+      }
+      cpg.all.collectAll[Unknown].code.l.shouldBe(Nil)
+    }
+  }
+
+  "Tuple type AST" should {
+    val cpg = code("""
+        |class C {
+        |  (int a, int b) Echo((int a, int b) pair) {
+        |    (string name, int count) local = ("x", 1);
+        |    return pair;
+        |  }
+        |}
+        |""".stripMargin)
+
+    "resolve tuple return, parameter, and local types" in {
+      cpg.method.nameExact("Echo").methodReturn.typeFullName.l shouldBe List(
+        "System.ValueTuple<System.Int32, System.Int32>"
+      )
+      cpg.method.nameExact("Echo").parameter.nameExact("pair").typeFullName.l shouldBe List(
+        "System.ValueTuple<System.Int32, System.Int32>"
+      )
+      cpg.local.nameExact("local").typeFullName.l shouldBe List("System.ValueTuple<System.String, System.Int32>")
+      cpg.all.collectAll[Unknown].code.l.shouldBe(Nil)
     }
   }
 

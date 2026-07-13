@@ -100,27 +100,44 @@ class CallTests extends RubyCode2CpgFixture(withPostProcessing = true) {
     two.code shouldBe "2"
   }
 
-  "`x.y(1)` is represented by a `y` CALL with argument `1` and receiver `x.y`" ignore {
+  "`x.y(1)` is represented by a `y` CALL with argument `1` and a lowered receiver" in {
     val cpg = code("""
                      |x.y(1)
                      |""".stripMargin)
 
-    val List(fieldAccess) = cpg.fieldAccess.l
+    val List(fieldAccess) = cpg.fieldAccess.codeExact("(<tmp-0> = x).y").l
 
-    fieldAccess.code shouldBe "x.y"
-    fieldAccess.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
+    fieldAccess.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
     fieldAccess.lineNumber shouldBe Some(2)
     fieldAccess.fieldIdentifier.code.l shouldBe List("y")
 
+    inside(fieldAccess.argument.l) { case (assignment: Call) :: (fieldIdentifier: FieldIdentifier) :: Nil =>
+      assignment.code shouldBe "<tmp-0> = x"
+      assignment.methodFullName shouldBe Operators.assignment
+      fieldIdentifier.canonicalName shouldBe "y"
+
+      inside(assignment.argument.l) { case (tmp: Identifier) :: (xCall: Call) :: Nil =>
+        tmp.name shouldBe "<tmp-0>"
+        tmp.argumentIndex shouldBe 1
+        xCall.name shouldBe "x"
+        xCall.code shouldBe "x"
+        xCall.argument(0).asInstanceOf[Identifier].name shouldBe RubyDefines.Self
+        xCall.receiver.isCall.code.l shouldBe List("self.x")
+      }
+    }
+
     val List(call: Call) = fieldAccess.astParent.toList: @unchecked
 
-    call.code shouldBe "x.y(1)"
+    call.code shouldBe "(<tmp-0> = x).y(1)"
     call.name shouldBe "y"
     call.receiver.l shouldBe List(fieldAccess)
     call.lineNumber shouldBe Some(2)
 
-    val List(one) = call.argument.l
+    val List(base: Identifier, one: Literal) = call.argument.l: @unchecked
+    base.name shouldBe "<tmp-0>"
+    base.argumentIndex shouldBe 0
     one.code shouldBe "1"
+    one.argumentIndex shouldBe 1
     one.lineNumber shouldBe Some(2)
   }
 

@@ -1,0 +1,18 @@
+[package]
+name = "jimpleastgen-cli"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[[bin]]
+name = "jimpleastgen"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+jimpleastgen-core = { path = "../jimpleastgen-core" }
+regex.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

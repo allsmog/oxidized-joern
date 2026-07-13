@@ -1,6 +1,7 @@
 package io.joern.c2cpg
 
 import io.joern.c2cpg.Frontend.*
+import io.joern.c2cpg.parser.ParserBackend
 import io.joern.x2cpg.utils.server.FrontendHTTPServer
 import io.joern.x2cpg.{SourceFiles, X2CpgConfig, X2CpgMain}
 import org.slf4j.LoggerFactory
@@ -17,6 +18,7 @@ final case class Config(
   skipFunctionBodies: Boolean = false,
   withPreprocessedFiles: Boolean = false,
   compilationDatabaseFilename: Option[String] = None,
+  parserBackend: ParserBackend = ParserBackend.Default,
   override val genericConfig: X2CpgConfig.GenericConfig = X2CpgConfig.GenericConfig()
 ) extends X2CpgConfig[Config] {
 
@@ -60,6 +62,10 @@ final case class Config(
 
   def withCompilationDatabase(value: String): Config = {
     this.copy(compilationDatabaseFilename = Option(value))
+  }
+
+  def withParserBackend(value: ParserBackend): Config = {
+    this.copy(parserBackend = value)
   }
 }
 
@@ -113,7 +119,15 @@ private object Frontend {
             | For a cmake based build such a file is generated with the environment variable CMAKE_EXPORT_COMPILE_COMMANDS being present.
             | Clang based build are supported e.g., with https://github.com/rizsotto/Bear
             | """.stripMargin)
-        .action((d, c) => c.withCompilationDatabase(SourceFiles.toAbsolutePath(d, c.inputPath)))
+        .action((d, c) => c.withCompilationDatabase(SourceFiles.toAbsolutePath(d, c.inputPath))),
+      opt[String]("parser-backend")
+        .hidden()
+        .validate { value =>
+          ParserBackend.fromString(value).fold(failure, _ => success)
+        }
+        .action { (value, c) =>
+          ParserBackend.fromString(value).fold(_ => c, c.withParserBackend)
+        }
     )
   }
 

@@ -128,7 +128,7 @@ class TypeDeclTests extends GoCodeToCpgSuite {
       typeDeclNode.columnNumber shouldBe Some(7)
     }
 
-    "test fullName of TypeDecl nodes" ignore {
+    "test fullName of TypeDecl nodes" in {
       typeDeclNode.fullName shouldBe "main.main.Sample"
     }
 

@@ -40,6 +40,15 @@ class TypeTests extends SwiftSrc2CpgSuite {
       bodyAlias.aliasTypeFullName shouldBe Some("ANY")
     }
 
+    "testBracketQualifiedTypes" in {
+      val cpg = code("""
+        |let a: [Foo].Element = x
+        |let b: [String: Foo].Keys? = y
+        |""".stripMargin)
+
+      cpg.local.nameExact("a", "b").typeFullName.l shouldBe List("[Foo].Element", "[String: Foo].Keys")
+    }
+
     "testVariadics" in {
       val cpg = code("""
         |func takesVariadicFnWithGenericRet<T>(_ fn: (S...) -> T) {}

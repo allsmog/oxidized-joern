@@ -1,4 +1,15 @@
+import com.typesafe.sbt.packager.Keys.stagingDirectory
+
+import scala.sys.process.Process
+
 name := "javasrc2cpg"
+
+lazy val JavaAstgenWin      = "javaastgen-win.exe"
+lazy val JavaAstgenWinArm   = "javaastgen-win-arm.exe"
+lazy val JavaAstgenLinux    = "javaastgen-linux"
+lazy val JavaAstgenLinuxArm = "javaastgen-linux-arm"
+lazy val JavaAstgenMac      = "javaastgen-macos"
+lazy val JavaAstgenMacArm   = "javaastgen-macos-arm"
 
 dependsOn(
   Projects.dataflowengineoss  % "test->test",
@@ -8,6 +19,7 @@ dependsOn(
 
 libraryDependencies ++= Seq(
   "io.shiftleft"           %% "codepropertygraph"             % Versions.cpg,
+  "com.lihaoyi"            %% "ujson"                         % Versions.upickle,
   "com.github.javaparser"   % "javaparser-symbol-solver-core" % Versions.javaParser,
   "org.gradle"              % "gradle-tooling-api"            % Versions.gradleTooling,
   "org.scalatest"          %% "scalatest"                     % Versions.scalatest % Test,
@@ -55,3 +67,43 @@ packTestCode := {
   }
 }
 packTestCode := packTestCode.triggeredBy(Test / compile).value
+
+lazy val javaAstGenCurrentBinaryName = taskKey[String]("javaastgen binary name for the current host")
+javaAstGenCurrentBinaryName := {
+  (Environment.operatingSystem, Environment.architecture) match {
+    case (Environment.OperatingSystemType.Windows, Environment.ArchitectureType.X86)   => JavaAstgenWin
+    case (Environment.OperatingSystemType.Windows, Environment.ArchitectureType.ARMv8) => JavaAstgenWinArm
+    case (Environment.OperatingSystemType.Linux, Environment.ArchitectureType.X86)     => JavaAstgenLinux
+    case (Environment.OperatingSystemType.Linux, Environment.ArchitectureType.ARMv8)   => JavaAstgenLinuxArm
+    case (Environment.OperatingSystemType.Mac, Environment.ArchitectureType.X86)       => JavaAstgenMac
+    case (Environment.OperatingSystemType.Mac, Environment.ArchitectureType.ARMv8)     => JavaAstgenMacArm
+    case _                                                                             => JavaAstgenLinux
+  }
+}
+
+lazy val javaAstGenBuildRust = taskKey[File]("Build local Rust javaastgen and install it under bin/astgen")
+javaAstGenBuildRust := {
+  val rustRoot = baseDirectory.value / "rust"
+  val localBinaryName =
+    if (Environment.operatingSystem == Environment.OperatingSystemType.Windows) "javaastgen.exe" else "javaastgen"
+  val exitCode = Process(Seq("cargo", "build", "--release", "--bin", "javaastgen"), rustRoot).!
+  if (exitCode != 0) {
+    sys.error(s"cargo build failed with exit code $exitCode")
+  }
+
+  val builtBinary = rustRoot / "target" / "release" / localBinaryName
+  val astGenDir   = baseDirectory.value / "bin" / "astgen"
+  val targetFile  = astGenDir / javaAstGenCurrentBinaryName.value
+  astGenDir.mkdirs()
+  IO.copyFile(builtBinary, targetFile, preserveLastModified = true)
+  targetFile.setExecutable(true, false)
+
+  val distDir = (Universal / stagingDirectory).value / "bin" / "astgen"
+  distDir.mkdirs()
+  IO.copyDirectory(astGenDir, distDir, preserveExecutable = true)
+
+  streams.value.log.info(s"installed Rust javaastgen to $targetFile")
+  targetFile
+}
+
+Compile / compile := ((Compile / compile) dependsOn javaAstGenBuildRust).value

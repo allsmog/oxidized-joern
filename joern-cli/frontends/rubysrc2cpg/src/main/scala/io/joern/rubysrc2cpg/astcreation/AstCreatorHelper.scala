@@ -228,7 +228,12 @@ trait AstCreatorHelper(implicit withSchemaValidation: ValidationMode) { this: As
     *
     * { tmp = 'hello'.match(/h(el)lo/); if tmp; $~ = tmp; $& = tmp[0]; tmp.begin(0); else $~= nil; $& = nil; nil end; }
     */
-  def lowerRegexMatch(target: RubyExpression, regex: RubyExpression, originSpan: TextSpan): RubyExpression = {
+  def lowerRegexMatch(
+    target: RubyExpression,
+    regex: RubyExpression,
+    originSpan: TextSpan,
+    resultExpression: Option[RubyExpression] = None
+  ): RubyExpression = {
     // Create tmpName that takes the regex match result
     val tmpName     = scope.getNewVarTmp
     val tmpGenLocal = NewLocal().name(tmpName).code(tmpName).typeFullName(Defines.Any)
@@ -274,7 +279,7 @@ trait AstCreatorHelper(implicit withSchemaValidation: ValidationMode) { this: As
 
         // tmp.begin(0) is the lowered return value of `~=`
         val beginCall = MemberCall(tmp, ".", "begin", intLiteral(0) :: Nil)(originSpan.spanStart(s"$tmpName.begin(0)"))
-        StatementList(tildeAssign :: ampersandAssign :: Nil ++ matchGroups :+ beginCall)(
+        StatementList(tildeAssign :: ampersandAssign :: Nil ++ matchGroups :+ resultExpression.getOrElse(beginCall))(
           originSpan.spanStart(s"$tildeCode; $ampersandCode")
         )
       },
@@ -286,8 +291,9 @@ trait AstCreatorHelper(implicit withSchemaValidation: ValidationMode) { this: As
         val ampersandCode   = s"$$& = nil"
         val ampersandAssign = SingleAssignment(globalAmpersand, "=", nil)(originSpan.spanStart(ampersandCode))
 
-        val elseSpan = originSpan.spanStart(s"$tildeCode; $ampersandCode; nil")
-        ElseClause(StatementList(tildeAssign :: ampersandAssign :: nil :: Nil)(elseSpan))(elseSpan)
+        val result   = resultExpression.getOrElse(nil)
+        val elseSpan = originSpan.spanStart(s"$tildeCode; $ampersandCode; ${code(result)}")
+        ElseClause(StatementList(tildeAssign :: ampersandAssign :: result :: Nil)(elseSpan))(elseSpan)
       }
     )(originSpan.spanStart(s"if $tmpName ... else ... end"))
 

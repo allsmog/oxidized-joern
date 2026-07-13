@@ -1,7 +1,8 @@
 package io.joern.csharpsrc2cpg.querying.ast
 
 import io.joern.csharpsrc2cpg.testfixtures.CSharpCode2CpgFixture
-import io.shiftleft.codepropertygraph.generated.ControlStructureTypes
+import io.shiftleft.codepropertygraph.generated.nodes.JumpLabel
+import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, EdgeTypes}
 import io.shiftleft.semanticcpg.language.*
 
 class JumpStatementsTests extends CSharpCode2CpgFixture {
@@ -89,6 +90,19 @@ class JumpStatementsTests extends CSharpCode2CpgFixture {
               .isBlock
               .l
               .head
+
+          inside(gotoStatement.astChildren.collectAll[JumpLabel].l) { case jumpLabel :: Nil =>
+            jumpLabel.name shouldBe "End"
+            jumpLabel.code shouldBe "End"
+            jumpLabel.order shouldBe 1
+          }
+
+          gotoStatement.out(EdgeTypes.JUMP_ARGUMENT).collectAll[JumpLabel].name.l shouldBe List("End")
+      }
+
+      inside(cpg.jumpTarget.l) { case jumpTarget :: Nil =>
+        jumpTarget.name shouldBe "End"
+        jumpTarget.code shouldBe "End:"
       }
     }
 
@@ -113,6 +127,21 @@ class JumpStatementsTests extends CSharpCode2CpgFixture {
             .isBlock
             .l
             .head
+      }
+    }
+
+    "be correct for yield" in {
+      val cpg = code(basicBoilerplate("""
+          |yield return 1;
+          |yield break;
+          |""".stripMargin))
+
+      inside(cpg.method("Main").ast.isReturn.sortBy(_.lineNumber).l) { case yieldReturn :: yieldBreak :: Nil =>
+        yieldReturn.code shouldBe "yield return 1;"
+        yieldReturn.astChildren.isLiteral.code.l shouldBe List("1")
+
+        yieldBreak.code shouldBe "yield break;"
+        yieldBreak.astChildren.l shouldBe empty
       }
     }
   }

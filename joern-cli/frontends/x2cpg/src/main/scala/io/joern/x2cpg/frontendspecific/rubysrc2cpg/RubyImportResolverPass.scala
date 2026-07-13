@@ -40,14 +40,17 @@ class RubyImportResolverPass(cpg: Cpg) extends XImportResolverPass(cpg) {
       val filePattern = s"${Pattern.quote(expResolvedPath)}\\.?.*"
       val resolvedTypeDecls = cpg.typeDecl
         .where(_.file.name(filePattern))
-        .whereNot(_.isModule)
-        .fullName
-        .flatMap(fullName =>
+        .whereNot(_.methodBinding)
+        .flatMap { typeDecl =>
+          val fullName     = typeDecl.fullName
+          val receiverName = typeDecl.name.stripSuffix("<class>")
           Seq(
             ResolvedTypeDecl(fullName),
-            ResolvedMethod(s"$fullName.${Initialize}", "new", fullName.split("[.]").lastOption)
-          )
-        )
+            ResolvedMethod(s"$fullName.${Initialize}", "new", Option(receiverName))
+          ) ++ typeDecl.method
+            .whereNot(_.nameExact(Main, Initialize))
+            .map(method => ResolvedMethod(method.fullName, method.name, Option(receiverName)))
+        }
         .toSet
 
       val resolvedModules = cpg.namespaceBlock

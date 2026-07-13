@@ -29,6 +29,27 @@ swift build
 ```
 (requires `swift`).
 
+### Rust AST Generator
+
+This fork also contains an opt-in Rust implementation under `rust/`. It is the
+oxidized replacement track for the Swift frontend and emits the existing
+SwiftSyntax-shaped JSON consumed by `swiftsrc2cpg`.
+
+Run the Rust checks with:
+
+```bash
+cd joern-cli/frontends/swiftsrc2cpg/rust
+cargo fmt --check
+cargo test
+cargo clippy --all-targets -- -D warnings
+```
+
+Install the locally built Rust binary into `bin/astgen/` with:
+
+```bash
+sbt 'swiftsrc2cpg/swiftAstGenBuildRust'
+```
+
 ### Binary Resolution Order
 
 At runtime swiftsrc2cpg locates the `SwiftAstGen` binary in this order:

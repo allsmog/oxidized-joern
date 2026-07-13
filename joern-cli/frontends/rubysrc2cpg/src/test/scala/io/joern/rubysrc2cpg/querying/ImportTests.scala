@@ -101,7 +101,8 @@ class ImportTests extends RubyCode2CpgFixture(withPostProcessing = true) with In
           .filename("t1.rb")
           .ast
           .isCall
-          .dynamicTypeHintFullName
+          .nameExact(Initialize)
+          .methodFullName
           .filter(x => x.startsWith(path) && x.endsWith(Initialize))
           .l
 

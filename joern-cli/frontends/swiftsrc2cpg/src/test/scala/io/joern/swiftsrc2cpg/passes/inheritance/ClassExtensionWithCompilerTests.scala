@@ -56,9 +56,10 @@ class ClassExtensionWithCompilerTests extends SwiftCompilerSrc2CpgSuite {
         "SwiftTest.SomeProtocol"
       )
 
-      /** TODO: Re-enable once extension methods are properly accessible via EXTENSION_BLOCK foo.boundMethod.fullName.l
-        * shouldBe List( "SwiftTest.Foo.init:()->SwiftTest.Foo", "SwiftTest.Foo<extension>.foo:()->()" )
-        */
+      foo.boundMethod.fullName.sorted.l shouldBe List(
+        "SwiftTest.Foo.init:()->SwiftTest.Foo",
+        "SwiftTest.Foo<extension>.foo:()->()"
+      ).sorted
 
       cpg.typ.name.l.distinct shouldBe cpg.typ.name.l
       cpg.typ.nameExact("AnotherProtocol")._typeDeclViaInheritsFromIn.fullName.l shouldBe List("SwiftTest.Foo")

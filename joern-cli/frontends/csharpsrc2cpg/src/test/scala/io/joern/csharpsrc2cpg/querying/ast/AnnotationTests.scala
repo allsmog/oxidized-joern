@@ -25,6 +25,58 @@ class AnnotationTests extends CSharpCode2CpgFixture {
         obsolete.fullName shouldBe "System.ObsoleteAttribute"
       }
     }
+
+    "preserve target specifiers" in {
+      val cpg = code("""
+          |using System;
+          |[assembly: CLSCompliant(true)]
+          |
+          |namespace Foo {
+          | public class Bar {
+          |   [return: Sample]
+          |   public static int M([param: Sample] int x) { return x; }
+          | }
+          |
+          | public class SampleAttribute : Attribute {}
+          |}
+          |""".stripMargin)
+
+      inside(cpg.annotation.codeExact("assembly: CLSCompliant(true)").l) { case assembly :: Nil =>
+        assembly.name shouldBe "CLSCompliant"
+      }
+
+      inside(cpg.method("M").annotation.codeExact("return: Sample").l) { case returnSample :: Nil =>
+        returnSample.name shouldBe "Sample"
+      }
+
+      inside(cpg.method("M").parameter.nameExact("x").annotation.l) { case paramSample :: Nil =>
+        paramSample.code shouldBe "param: Sample"
+        paramSample.name shouldBe "Sample"
+      }
+    }
+
+    "create parameter assignments for named arguments" in {
+      val cpg = code("""
+          |using System;
+          |
+          |namespace Foo {
+          | public class Bar {
+          |   [Example(positional: "ctor", Name = "prop")]
+          |   public static void Main() {}
+          | }
+          |
+          | public class ExampleAttribute : Attribute {
+          |   public ExampleAttribute(string positional) {}
+          |   public string Name { get; set; }
+          | }
+          |}
+          |""".stripMargin)
+
+      inside(cpg.method("Main").annotation.l) { case example :: Nil =>
+        example.parameterAssign.code.l.toSet shouldBe Set("positional: \"ctor\"", "Name = \"prop\"")
+        example.parameterAssign.parameter.code.l.toSet shouldBe Set("positional", "Name")
+      }
+    }
   }
 
   "annotations for classes" should {

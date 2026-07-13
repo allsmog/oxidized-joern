@@ -1,7 +1,7 @@
 package io.joern.csharpsrc2cpg.querying.ast
 
 import io.joern.csharpsrc2cpg.testfixtures.CSharpCode2CpgFixture
-import io.shiftleft.codepropertygraph.generated.nodes.{Block, Call, Local}
+import io.shiftleft.codepropertygraph.generated.nodes.{Block, Call, Identifier, Literal, Local, Unknown}
 import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, Operators}
 import io.shiftleft.semanticcpg.language.*
 
@@ -46,6 +46,31 @@ class LoopsTests extends CSharpCode2CpgFixture(withDataFlow = true) {
       }
     }
 
+    "preserve await foreach markers" in {
+      val cpg = code("""
+          |using System.Collections.Generic;
+          |using System.Threading.Tasks;
+          |
+          |namespace Foo;
+          |
+          |class Bar {
+          |  async Task M(IAsyncEnumerable<string> values) {
+          |    await foreach (var value in values) {
+          |      value.ToString();
+          |    }
+          |  }
+          |}
+          |""".stripMargin)
+
+      inside(cpg.method.nameExact("M").controlStructure.controlStructureTypeExact(ControlStructureTypes.FOR).l) {
+        case forEachNode :: Nil =>
+          forEachNode.code shouldBe "await foreach (var value in values) {\n      value.ToString();\n    }"
+          forEachNode.astChildren.isModifier.modifierType.l shouldBe List("AWAIT")
+          forEachNode.astChildren.isCall.code.l should contain("value = values[_idx_++]")
+      }
+      cpg.all.collectAll[Unknown].code.l shouldBe Nil
+    }
+
     "be correct for `for` statement (case 1)" in {
       val cpg = code(basicBoilerplate("""
           |for (int i = 0; i < 10;i++) {
@@ -78,6 +103,10 @@ class LoopsTests extends CSharpCode2CpgFixture(withDataFlow = true) {
             blockNode.astParent shouldBe forNode
 
           }
+
+          forNode.forInitOut.code.l shouldBe List("i = 0")
+          forNode.forUpdateOut.code.l shouldBe List("i++")
+          forNode.forBodyOut.isBlock.l shouldBe forNode.astChildren.isBlock.l
       }
     }
 
@@ -100,6 +129,12 @@ class LoopsTests extends CSharpCode2CpgFixture(withDataFlow = true) {
             blockNode.astParent shouldBe forNode
 
           }
+
+          forNode.astChildren.collectAll[Unknown].l shouldBe Nil
+          forNode.condition.l shouldBe Nil
+          forNode.forInitOut.l shouldBe Nil
+          forNode.forUpdateOut.l shouldBe Nil
+          forNode.forBodyOut.isBlock.l shouldBe forNode.astChildren.isBlock.l
       }
     }
 
@@ -127,8 +162,15 @@ class LoopsTests extends CSharpCode2CpgFixture(withDataFlow = true) {
 
           }
 
+          doNode.doBodyOut.isBlock.l shouldBe doNode.astChildren.isBlock.l
+
           inside(doNode.astChildren.isCall.name(Operators.lessThan).l) { case lessThanExpression :: Nil =>
             lessThanExpression.code shouldBe "n < 5"
+          }
+
+          inside(doNode.condition.l) { case (lessThanExpression: Call) :: Nil =>
+            lessThanExpression.code shouldBe "n < 5"
+            lessThanExpression.name shouldBe Operators.lessThan
           }
 
       }
@@ -158,10 +200,47 @@ class LoopsTests extends CSharpCode2CpgFixture(withDataFlow = true) {
 
           }
 
+          whileNode.trueBodyOut.isBlock.l shouldBe whileNode.astChildren.isBlock.l
+
           inside(whileNode.astChildren.isCall.name(Operators.lessThan).l) { case lessThanExpression :: Nil =>
             lessThanExpression.code shouldBe "n < 5"
           }
 
+          inside(whileNode.condition.l) { case (lessThanExpression: Call) :: Nil =>
+            lessThanExpression.code shouldBe "n < 5"
+            lessThanExpression.name shouldBe Operators.lessThan
+          }
+
+      }
+    }
+
+    "be correct for while statement with negated constant pattern" in {
+      val cpg = code(basicBoilerplate("""
+          |string line = "first";
+          |while (line is not null)
+          |{
+          |    Console.Write(line);
+          |    line = null;
+          |}
+          |""".stripMargin))
+
+      inside(cpg.method("Main").controlStructure.controlStructureTypeExact(ControlStructureTypes.WHILE).l) {
+        case whileNode :: Nil =>
+          whileNode.code shouldBe "while (line is not null)"
+          whileNode.trueBodyOut.isBlock.l shouldBe whileNode.astChildren.isBlock.l
+
+          inside(whileNode.condition.l) { case (notEquals: Call) :: Nil =>
+            notEquals.code shouldBe "not null"
+            notEquals.name shouldBe Operators.notEquals
+
+            inside(notEquals.argument.l) { case (line: Identifier) :: (nullLiteral: Literal) :: Nil =>
+              line.name shouldBe "line"
+              line.typeFullName shouldBe "System.String"
+
+              nullLiteral.code shouldBe "null"
+              nullLiteral.typeFullName shouldBe "null"
+            }
+          }
       }
     }
 

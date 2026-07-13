@@ -36,6 +36,20 @@ class MoveExprTests extends SwiftSrc2CpgSuite {
       assigns shouldBe List("var global: Int = 5", "let <wildcard>0 = consume global")
     }
 
+    "testDiscardStatement" in {
+      val cpg = code("""
+        |struct S: ~Copyable {
+        |  consuming func f() {
+        |    discard self
+        |  }
+        |}
+        |""".stripMargin)
+      val List(discardCall) = cpg.call.nameExact("<operator>.discard").l
+      discardCall.code shouldBe "discard self"
+      discardCall.argument.isIdentifier.name.l shouldBe List("self")
+      cpg.unknown.codeExact("discard self").l shouldBe empty
+    }
+
   }
 
 }

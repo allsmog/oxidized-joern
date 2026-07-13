@@ -475,20 +475,24 @@ class DeclarationTests extends SwiftSrc2CpgSuite {
       |macro m4<T>(): T = A.M4 where T.Assoc: P
       |macro m5<T: P>(_: T)
       |""".stripMargin)
-      // Macro declarations are not lowered into structured AST yet — they surface as Unknown
-      // nodes (one per parser fragment) under <global> and produce no TypeDecls.
-      val List(globalMethod) = cpg.method.nameExact("<global>").filename("Test0.swift").l
-      val unknowns           = globalMethod.block.astChildren.collectAll[Unknown].l
-      unknowns.code.l shouldBe List(
-        "macro m1()",
-        ": Int = A.M1",
-        "macro m2(_: Int) = A.M2",
-        "macro m3(a b: Int) -> Int = A.M3",
-        "macro m4<T>()",
-        ": T = A.M4 where T.Assoc: P",
-        "macro m5<T: P>(_: T)"
+      val macroMethods = cpg.method.nameNot("<global>").l
+      macroMethods.name.l shouldBe List("m1", "m2", "m3", "m4", "m5")
+      macroMethods.fullName.l shouldBe List(
+        "Test0.swift:<global>.m1:()->Swift.Int",
+        "Test0.swift:<global>.m2:(_:Swift.Int)->ANY",
+        "Test0.swift:<global>.m3:(a:Swift.Int)->Swift.Int",
+        "Test0.swift:<global>.m4:()->T",
+        "Test0.swift:<global>.m5:(_:T)->ANY"
       )
-      globalMethod.block.astChildren.label.toSet shouldBe Set("UNKNOWN")
+      macroMethods.signature.l shouldBe List(
+        "()->Swift.Int",
+        "(_:Swift.Int)->ANY",
+        "(a:Swift.Int)->Swift.Int",
+        "()->T",
+        "(_:T)->ANY"
+      )
+      cpg.method.nameExact("m3").parameter.name.l shouldBe List("b")
+      cpg.unknown.code.l shouldBe empty
       cpg.typeDecl.filename("Test0.swift").nameNot("<global>").l shouldBe empty
     }
 

@@ -39,7 +39,10 @@ object Domain {
     val emptyArrayIdx = "<operator>.emptyArrayIdx"
     val errorSuppress = "<operator>.errorSuppress"
     // Double arrow operator used to represent key/value pairs: key => value
-    val doubleArrow = "<operator>.doubleArrow"
+    val doubleArrow       = "<operator>.doubleArrow"
+    val traitUse          = "<operator>.traitUse"
+    val traitUseInsteadOf = "<operator>.traitUseInsteadOf"
+    val traitUseAlias     = "<operator>.traitUseAlias"
 
     val assignmentCoalesceOp = "<operator>.assignmentCoalesce"
     val assignmentConcatOp   = "<operator>.assignmentConcat"

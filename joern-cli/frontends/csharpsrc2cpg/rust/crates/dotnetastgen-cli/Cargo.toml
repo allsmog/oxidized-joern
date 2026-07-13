@@ -1,0 +1,20 @@
+[package]
+name = "dotnetastgen-cli"
+version = "0.43.0"
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "dotnetastgen"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+dotnetastgen-core = { path = "../dotnetastgen-core" }
+ignore.workspace = true
+regex.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

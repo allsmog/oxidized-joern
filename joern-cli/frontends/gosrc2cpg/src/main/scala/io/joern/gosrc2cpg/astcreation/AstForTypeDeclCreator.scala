@@ -1,5 +1,5 @@
 package io.joern.gosrc2cpg.astcreation
-import io.joern.gosrc2cpg.datastructures.LambdaTypeInfo
+import io.joern.gosrc2cpg.datastructures.{LambdaTypeInfo, MethodCacheMetaData}
 import io.joern.gosrc2cpg.parser.ParserAst.*
 import io.joern.gosrc2cpg.parser.{ParserKeys, ParserNodeInfo}
 import io.joern.x2cpg
@@ -12,9 +12,10 @@ import scala.util.{Success, Try}
 trait AstForTypeDeclCreator(implicit withSchemaValidation: ValidationMode) { this: AstCreator =>
 
   protected def astForTypeSpec(typeSpecNode: ParserNodeInfo): Seq[Ast] = {
-    val (name, fullName, memberAsts) = processTypeSepc(createParserNodeInfo(typeSpecNode.json))
+    val (name, fullName, memberAsts)       = processTypeSepc(createParserNodeInfo(typeSpecNode.json))
+    val (astParentType, astParentFullName) = typeSpecAstParent
     val typeDeclNode_ =
-      typeDeclNode(typeSpecNode, name, fullName, relPathFileName, typeSpecNode.code)
+      typeDeclNode(typeSpecNode, name, fullName, relPathFileName, typeSpecNode.code, astParentType, astParentFullName)
     val modifier = addModifier(typeSpecNode, typeDeclNode_, name)
     Seq(Ast(typeDeclNode_).withChild(Ast(modifier)).withChildren(memberAsts))
   }
@@ -23,6 +24,40 @@ trait AstForTypeDeclCreator(implicit withSchemaValidation: ValidationMode) { thi
     val LambdaFunctionMetaData(signature, returnTypeFullName, _, _, _) = generateLambdaSignature(typeNode)
     goGlobal.recordLambdaSigntureToLambdaType(signature, LambdaTypeInfo(typeDeclFullName, returnTypeFullName))
     Seq.empty
+  }
+
+  protected def astForInterfaceType(interfaceNode: ParserNodeInfo, typeDeclFullName: String): Seq[Ast] = {
+    Try(interfaceNode.json(ParserKeys.Methods)(ParserKeys.List)) match {
+      case Success(methods) if !methods.isNull =>
+        methods.arr.foreach { methodField =>
+          val methodNames = methodField(ParserKeys.Names).arrOpt.getOrElse(Seq.empty)
+          val methodType  = createParserNodeInfo(methodField(ParserKeys.Type))
+          if (methodType.node == FuncType) {
+            val params      = methodType.json(ParserKeys.Params)(ParserKeys.List)
+            val returnTypes = getReturnType(methodType.json).map(_._1)
+            methodNames.foreach { methodNameJson =>
+              val methodName = methodNameJson(ParserKeys.Name).str
+              if (goGlobal.checkForDependencyFlags(methodName)) {
+                val signature =
+                  s"$typeDeclFullName.$methodName(${parameterSignature(params, Map.empty)})${returnTypeSignature(returnTypes)}"
+                val returnType = returnTypes.headOption.getOrElse(Defines.voidTypeName)
+                goGlobal.recordMethodMetadata(typeDeclFullName, methodName, MethodCacheMetaData(returnType, signature))
+              }
+            }
+          }
+        }
+      case _ =>
+    }
+    Seq.empty
+  }
+
+  private def returnTypeSignature(returnTypes: Seq[String]): String = {
+    returnTypes match {
+      case Seq()                     => ""
+      case Seq(Defines.voidTypeName) => ""
+      case Seq(singleReturnType)     => singleReturnType
+      case multipleReturnTypes       => multipleReturnTypes.mkString("(", ",", ")")
+    }
   }
 
   protected def astForStructType(expr: ParserNodeInfo, typeDeclFullName: String): Seq[Ast] = {

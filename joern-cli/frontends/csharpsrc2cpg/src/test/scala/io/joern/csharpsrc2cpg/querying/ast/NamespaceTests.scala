@@ -80,8 +80,7 @@ class NamespaceTests extends CSharpCode2CpgFixture {
       n2.file.head shouldBe n3.file.head
     }
 
-    "create three namespaces under a single file" ignore {
-      // TODO: The presence of N1 is implicit and needs to be handled separately
+    "create three namespaces under a single file" in {
       val List(n1, n2, n3) = cpg.file("Program.cs").namespaceBlock.name.sorted.l
     }
   }

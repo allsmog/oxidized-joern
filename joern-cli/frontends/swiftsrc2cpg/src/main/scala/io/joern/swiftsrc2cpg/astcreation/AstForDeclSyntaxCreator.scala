@@ -19,7 +19,7 @@ trait AstForDeclSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
     ActorDeclSyntax
 
   protected type FunctionDeclLike = FunctionDeclSyntax | AccessorDeclSyntax | InitializerDeclSyntax |
-    DeinitializerDeclSyntax | ClosureExprSyntax | SubscriptDeclSyntax
+    DeinitializerDeclSyntax | ClosureExprSyntax | MacroDeclSyntax | SubscriptDeclSyntax
 
   private def astForAssociatedTypeDeclSyntax(node: AssociatedTypeDeclSyntax): Ast = {
     // TODO:
@@ -530,6 +530,8 @@ trait AstForDeclSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
       case a: AccessorDeclSyntax => a.modifier.toSeq.flatMap(c => astForNode(c).root.map(_.asInstanceOf[NewModifier]))
       case i: InitializerDeclSyntax =>
         i.modifiers.children.flatMap(c => astForNode(c).root.map(_.asInstanceOf[NewModifier]))
+      case m: MacroDeclSyntax =>
+        m.modifiers.children.flatMap(c => astForNode(c).root.map(_.asInstanceOf[NewModifier]))
       case d: DeinitializerDeclSyntax =>
         d.modifiers.children.flatMap(c => astForNode(c).root.map(_.asInstanceOf[NewModifier]))
       case s: SubscriptDeclSyntax =>
@@ -578,6 +580,7 @@ trait AstForDeclSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
       case f: FunctionDeclSyntax      => f.attributes.children.map(astForNode)
       case a: AccessorDeclSyntax      => a.attributes.children.map(astForNode)
       case i: InitializerDeclSyntax   => i.attributes.children.map(astForNode)
+      case m: MacroDeclSyntax         => m.attributes.children.map(astForNode)
       case d: DeinitializerDeclSyntax => d.attributes.children.map(astForNode)
       case s: SubscriptDeclSyntax     => s.attributes.children.map(astForNode)
       case c: ClosureExprSyntax =>
@@ -647,10 +650,12 @@ trait AstForDeclSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
     val methodFullNameAndSignature                                    = methodInfo.fullNameAndSignature
     val isStatic = modifiers.exists(_.modifierType == ModifierTypes.STATIC)
 
-    val shouldCreateFunctionReference = typeRefIdStack.isEmpty ||
-      methodAstParentStack.headOption.exists(_.isInstanceOf[NewMethod]) ||
-      node.isInstanceOf[ClosureExprSyntax] ||
-      node.isInstanceOf[AccessorDeclSyntax]
+    val shouldCreateFunctionReference = !node.isInstanceOf[MacroDeclSyntax] && (
+      typeRefIdStack.isEmpty ||
+        methodAstParentStack.headOption.exists(_.isInstanceOf[NewMethod]) ||
+        node.isInstanceOf[ClosureExprSyntax] ||
+        node.isInstanceOf[AccessorDeclSyntax]
+    )
     val methodRefNode_ = if (!shouldCreateFunctionReference) { None }
     else { Option(methodRefNode(node, methodName, methodFullNameAndSignature, methodFullNameAndSignature)) }
     val capturingRefNode = methodRefNode_.orElse(typeRefIdStack.headOption)
@@ -721,6 +726,8 @@ trait AstForDeclSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
           parameterInNode(node, "self", "self", 0, false, EvaluationStrategies.BY_SHARING, selfTpe)
         scope.addVariable("self", parameterNode, selfTpe, VariableScopeManager.ScopeType.MethodScope)
         Ast(parameterNode) +: i.signature.parameterClause.parameters.children.map(astForNode)
+      case m: MacroDeclSyntax =>
+        m.signature.parameterClause.parameters.children.map(astForNode)
       case _: DeinitializerDeclSyntax =>
         val parameterNode =
           parameterInNode(node, "self", "self", 0, false, EvaluationStrategies.BY_SHARING, selfTpe)
@@ -743,6 +750,7 @@ trait AstForDeclSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
       case f: FunctionDeclSyntax      => f.body
       case a: AccessorDeclSyntax      => a.body
       case i: InitializerDeclSyntax   => i.body
+      case _: MacroDeclSyntax         => None
       case d: DeinitializerDeclSyntax => d.body
       case s: SubscriptDeclSyntax =>
         s.accessorBlock.map(_.accessors match {
@@ -879,7 +887,9 @@ trait AstForDeclSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
     astForNode(node)
   }
 
-  private def astForMacroDeclSyntax(node: MacroDeclSyntax): Ast = notHandledYet(node)
+  private def astForMacroDeclSyntax(node: MacroDeclSyntax): Ast = {
+    astForFunctionLike(node, List.empty, None)
+  }
 
   private def astForMacroExpansionDeclSyntax(node: MacroExpansionDeclSyntax): Ast = {
     val nodeCode = code(node.macroName)
@@ -905,7 +915,7 @@ trait AstForDeclSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
 
   private def astForOperatorDeclSyntax(@unused node: OperatorDeclSyntax): Ast = Ast()
 
-  private def astForPoundSourceLocationSyntax(node: PoundSourceLocationSyntax): Ast = notHandledYet(node)
+  private def astForPoundSourceLocationSyntax(@unused node: PoundSourceLocationSyntax): Ast = Ast()
 
   private def astForPrecedenceGroupDeclSyntax(@unused node: PrecedenceGroupDeclSyntax): Ast = Ast()
 
@@ -1210,154 +1220,178 @@ trait AstForDeclSyntaxCreator(implicit withSchemaValidation: ValidationMode) {
     diffGraph.addEdge(methodAstParentStack.head, methodNode_, EdgeTypes.AST)
   }
 
+  private case class TupleVariableTarget(name: String, node: SwiftNode, fieldPath: List[String])
+
+  private def tupleVariableTargets(pattern: PatternSyntax, fieldPath: List[String]): Seq[TupleVariableTarget] = {
+    pattern match {
+      case ident: IdentifierPatternSyntax =>
+        Seq(TupleVariableTarget(code(ident.identifier), ident, fieldPath))
+      case tuple: TuplePatternSyntax =>
+        tuple.elements.children.zipWithIndex.flatMap { case (element, idx) =>
+          tupleVariableTargets(element.pattern, fieldPath :+ idx.toString)
+        }
+      case valueBinding: ValueBindingPatternSyntax =>
+        tupleVariableTargets(valueBinding.pattern, fieldPath)
+      case _: WildcardPatternSyntax | _: MissingPatternSyntax =>
+        Seq.empty
+      case other =>
+        Seq(TupleVariableTarget(code(other), other, fieldPath))
+    }
+  }
+
+  private def astsForTupleVariableDeclSyntax(
+    binding: PatternBindingSyntax,
+    tuplePattern: TuplePatternSyntax,
+    scopeType: VariableScopeManager.ScopeType
+  ): Seq[Ast] = {
+    val targets = tupleVariableTargets(tuplePattern, List.empty).map { target =>
+      val cleanedName    = AstCreatorHelper.cleanName(target.name)
+      val tpeFromTypeMap = fullnameProvider.typeFullname(target.node)
+      val tpeFromAst     = binding.typeAnnotation.map(t => AstCreatorHelper.cleanType(code(t.`type`)))
+      val typeFullName   = tpeFromTypeMap.orElse(tpeFromAst).getOrElse(Defines.Any)
+      registerType(typeFullName)
+
+      val nLocalNode = localNode(binding, cleanedName, cleanedName, typeFullName).order(0)
+      scope.addVariable(cleanedName, nLocalNode, typeFullName, scopeType)
+      diffGraph.addEdge(localAstParentStack.head, nLocalNode, EdgeTypes.AST)
+
+      target.copy(name = cleanedName)
+    }
+
+    binding.initializer match {
+      case None => Seq.empty
+      case Some(initializer) =>
+        val tmpName      = scopeLocalUniqueName("tmp")
+        val tmpLocalNode = localNode(binding, tmpName, tmpName, Defines.Any).order(0)
+        scope.addVariable(tmpName, tmpLocalNode, Defines.Any, VariableScopeManager.ScopeType.BlockScope)
+        diffGraph.addEdge(localAstParentStack.head, tmpLocalNode, EdgeTypes.AST)
+
+        val tmpIdentNode = identifierNode(binding, tmpName, tmpName, Defines.Any)
+        scope.addVariableReference(tmpName, tmpIdentNode, Defines.Any, EvaluationStrategies.BY_REFERENCE)
+        val tmpAssignAst =
+          createAssignmentCallAst(
+            binding,
+            Ast(tmpIdentNode),
+            astForNode(initializer.value),
+            s"$tmpName = ${code(initializer.value)}"
+          )
+
+        val assignmentAsts = targets.map { target =>
+          val targetType = scope.lookupVariable(target.name).map(_._2).getOrElse(Defines.Any)
+          val lhsNode    = identifierNode(target.node, target.name, target.name, targetType)
+          scope.addVariableReference(target.name, lhsNode, targetType, EvaluationStrategies.BY_REFERENCE)
+          val rhsAst     = createFieldAccessChain(tmpName, target.fieldPath, binding)
+          val assignCode = s"${target.name} = $tmpName.${target.fieldPath.mkString(".")}"
+          createAssignmentCallAst(binding, Ast(lhsNode), rhsAst, assignCode)
+        }
+
+        tmpAssignAst +: assignmentAsts
+    }
+  }
+
   private def astForVariableDeclSyntax(variableDecl: VariableDeclSyntax, isTypeDeclMember: Boolean = false): Ast = {
     val kind = code(variableDecl.bindingSpecifier)
     val scopeType = if (kind == "let") { VariableScopeManager.ScopeType.BlockScope }
     else { VariableScopeManager.ScopeType.MethodScope }
 
     val bindingAsts = variableDecl.bindings.children.flatMap { binding =>
-      // Detect a tuple pattern at the binding root.
-      // All non-tuple cases (IdentifierPattern, WildcardPattern, etc.) return None and are
-      // handled by the fallthrough `case _` branch below.
-      val maybeTuplePattern: Option[TuplePatternSyntax] = binding.pattern match {
-        case tp: TuplePatternSyntax => Some(tp)
-        case vb: ValueBindingPatternSyntax =>
-          vb.pattern match {
-            case tp: TuplePatternSyntax => Some(tp)
-            case _                      => None
-          }
-        case _ => None
-      }
+      if (!isTypeDeclMember && binding.pattern.isInstanceOf[TuplePatternSyntax]) {
+        astsForTupleVariableDeclSyntax(binding, binding.pattern.asInstanceOf[TuplePatternSyntax], scopeType)
+      } else {
+        val namesWithNode = binding.pattern match {
+          case expr: ExpressionPatternSyntax =>
+            notHandledYet(expr)
+            Seq((code(expr), expr))
+          case ident: IdentifierPatternSyntax =>
+            Seq((code(ident.identifier), ident))
+          case isType: IsTypePatternSyntax =>
+            notHandledYet(isType)
+            Seq((code(isType), isType))
+          case missing: MissingPatternSyntax =>
+            Seq((code(missing.placeholder), missing))
+          case tuple: TuplePatternSyntax =>
+            tuple.elements.children.map(c => (code(c.pattern), c))
+          case valueBinding: ValueBindingPatternSyntax =>
+            Seq((code(valueBinding.pattern), valueBinding))
+          case w: WildcardPatternSyntax =>
+            Seq((scopeLocalUniqueName("wildcard"), w))
+        }
 
-      maybeTuplePattern match {
-        case Some(tuplePat) if binding.initializer.isDefined =>
-          // De-sugar: let/var (a, b) = source
-          //   => <tmp>N = source
-          //      a = <tmp>N.0
-          //      b = <tmp>N.1
-          //      (wildcards produce no local and no assignment)
-          val tmpName      = scopeLocalUniqueName("tmp")
-          val tmpLocalNode = localNode(binding, tmpName, tmpName, Defines.Any).order(0)
-          diffGraph.addEdge(localAstParentStack.head, tmpLocalNode, EdgeTypes.AST)
-          scope.addVariable(tmpName, tmpLocalNode, Defines.Any, VariableScopeManager.ScopeType.BlockScope)
+        namesWithNode.map { case (name, node) =>
+          val cleanedName    = AstCreatorHelper.cleanName(name)
+          val tpeFromTypeMap = fullnameProvider.typeFullname(node)
+          val tpeFromAst     = binding.typeAnnotation.map(t => AstCreatorHelper.cleanType(code(t.`type`)))
+          val typeFullName   = tpeFromTypeMap.orElse(tpeFromAst).getOrElse(Defines.Any)
+          registerType(typeFullName)
 
-          val tmpIdentNode = identifierNode(binding, tmpName, tmpName, Defines.Any)
-          scope.addVariableReference(tmpName, tmpIdentNode, Defines.Any, EvaluationStrategies.BY_REFERENCE)
-          val initAst = astForNode(binding.initializer.get.value)
-          val tmpAssign = createAssignmentCallAst(
-            binding,
-            Ast(tmpIdentNode),
-            initAst,
-            s"$tmpName = ${code(binding.initializer.get.value)}"
-          )
-          val elemAssigns = astsForBindingTuplePattern(tuplePat, tmpName, List.empty, binding)
-          tmpAssign +: elemAssigns
-        case Some(tuplePat) =>
-          // No initializer: declare locals for every leaf, recursing into nested tuples.
-          def registerTupleLocals(pat: PatternSyntax): Seq[Ast] = pat match {
-            case innerTuple: TuplePatternSyntax =>
-              innerTuple.elements.children.flatMap(elem => registerTupleLocals(elem.pattern)).toSeq
-            case vb: ValueBindingPatternSyntax => registerTupleLocals(vb.pattern)
-            case _: WildcardPatternSyntax      => Seq.empty
-            case leafPat =>
-              val cleanedName  = AstCreatorHelper.cleanName(code(leafPat))
-              val typeFullName = fullnameProvider.typeFullname(leafPat).getOrElse(Defines.Any)
-              registerType(typeFullName)
-              val nLocalNode = localNode(binding, cleanedName, cleanedName, typeFullName).order(0)
-              scope.addVariable(cleanedName, nLocalNode, typeFullName, scopeType)
-              diffGraph.addEdge(localAstParentStack.head, nLocalNode, EdgeTypes.AST)
-              Seq.empty
-          }
-          registerTupleLocals(tuplePat)
-        case _ =>
-          val namesWithNode = binding.pattern match {
-            case expr: ExpressionPatternSyntax =>
-              notHandledYet(expr)
-              Seq((code(expr), expr))
-            case ident: IdentifierPatternSyntax =>
-              Seq((code(ident.identifier), ident))
-            case isType: IsTypePatternSyntax =>
-              notHandledYet(isType)
-              Seq((code(isType), isType))
-            case missing: MissingPatternSyntax =>
-              Seq((code(missing.placeholder), missing))
-            case valueBinding: ValueBindingPatternSyntax =>
-              Seq((code(valueBinding.pattern), valueBinding))
-            case w: WildcardPatternSyntax =>
-              Seq((scopeLocalUniqueName("wildcard"), w))
-            case other =>
-              notHandledYet(other)
-              Seq((code(other), other))
+          if (!isTypeDeclMember) {
+            val nLocalNode = localNode(binding, cleanedName, cleanedName, typeFullName).order(0)
+            scope.addVariable(cleanedName, nLocalNode, typeFullName, scopeType)
+            diffGraph.addEdge(localAstParentStack.head, nLocalNode, EdgeTypes.AST)
           }
 
-          namesWithNode.map { case (name, node) =>
-            val cleanedName    = AstCreatorHelper.cleanName(name)
-            val tpeFromTypeMap = fullnameProvider.typeFullname(node)
-            val tpeFromAst =
-              binding.typeAnnotation.map(typeAnnotation => AstCreatorHelper.cleanType(code(typeAnnotation.`type`)))
-            val typeFullName =
-              tpeFromTypeMap.orElse(tpeFromAst).getOrElse(Defines.Any)
-            registerType(typeFullName)
+          binding.accessorBlock.map(_.accessors).collect {
+            case accessorList: AccessorDeclListSyntax =>
+              accessorList.children.foreach(astForAccessor(_, name, typeFullName))
+            case block: CodeBlockItemListSyntax =>
+              astForAccessorBlock(block, name, typeFullName, binding)
+          }
 
-            if (!isTypeDeclMember) {
-              val nLocalNode = localNode(binding, cleanedName, cleanedName, typeFullName).order(0)
-              scope.addVariable(cleanedName, nLocalNode, typeFullName, scopeType)
-              diffGraph.addEdge(localAstParentStack.head, nLocalNode, EdgeTypes.AST)
-            }
+          val initAsts = binding.initializer.map(astForNode).toSeq
+          if (initAsts.isEmpty) {
+            Ast()
+          } else {
+            val patternAst = if (!isTypeDeclMember) {
+              val attributeAsts = variableDecl.attributes.children.map(astForNode)
+              val modifiers =
+                variableDecl.modifiers.children.flatMap(c => astForNode(c).root.map(_.asInstanceOf[NewModifier]))
 
-            binding.accessorBlock.map(_.accessors).collect {
-              case accessorList: AccessorDeclListSyntax =>
-                accessorList.children.foreach(astForAccessor(_, name, typeFullName))
-              case block: CodeBlockItemListSyntax =>
-                astForAccessorBlock(block, name, typeFullName, binding)
-            }
-
-            val initAsts = binding.initializer.map(astForNode).toSeq
-            if (initAsts.isEmpty) {
-              Ast()
+              val patternIdentifier = identifierNode(binding.pattern, cleanedName).typeFullName(typeFullName)
+              scope.addVariableReference(
+                cleanedName,
+                patternIdentifier,
+                typeFullName,
+                EvaluationStrategies.BY_REFERENCE
+              )
+              modifiers.foreach { mod =>
+                diffGraph.addEdge(patternIdentifier, mod, EdgeTypes.AST)
+              }
+              attributeAsts.foreach { attrAst =>
+                Ast.storeInDiffGraph(attrAst, diffGraph)
+                attrAst.root.foreach { attr => diffGraph.addEdge(patternIdentifier, attr, EdgeTypes.AST) }
+              }
+              Ast(patternIdentifier)
             } else {
-              val patternAst = if (!isTypeDeclMember) {
-                val attributesAsts    = variableDecl.attributes.children.map(astForNode)
-                val modifiersAsts     = modifierAstsForDecl(variableDecl)
-                val patternIdentifier = identifierNode(binding.pattern, cleanedName).typeFullName(typeFullName)
+              val tpe = fullNameOfEnclosingTypeDecl()
+              val selfNode = if (scope.isInStaticMethodScope) {
+                typeRefNode(node, "Self", tpe)
+              } else {
+                val selfIdNode = identifierNode(node, "self", "self", tpe)
                 scope.addVariableReference(
-                  cleanedName,
-                  patternIdentifier,
-                  typeFullName,
+                  "self",
+                  selfIdNode,
+                  selfIdNode.typeFullName,
                   EvaluationStrategies.BY_REFERENCE
                 )
-                Ast(patternIdentifier).withChildren(attributesAsts).withChildren(modifiersAsts)
-              } else {
-                val tpe = fullNameOfEnclosingTypeDecl()
-                val selfNode = if (scope.isInStaticMethodScope) {
-                  typeRefNode(node, "Self", tpe)
-                } else {
-                  val selfIdNode = identifierNode(node, "self", "self", tpe)
-                  scope.addVariableReference(
-                    "self",
-                    selfIdNode,
-                    selfIdNode.typeFullName,
-                    EvaluationStrategies.BY_REFERENCE
-                  )
-                  selfIdNode
-                }
-                fieldAccessAst(node, node, Ast(selfNode), s"${selfNode.code}.$name", name, typeFullName)
+                selfIdNode
               }
-
-              val initCode = binding.initializer.map(init => s" ${code(init).strip()}").getOrElse("")
-              val typeCode = binding.typeAnnotation.map(typeAnnotation => code(typeAnnotation).strip()).getOrElse("")
-
-              val rhsAst = initAsts match {
-                case Nil         => Ast()
-                case head :: Nil => head
-                case others =>
-                  val block = blockNode(node, code(node), Defines.Any)
-                  blockAst(block, others.toList)
-              }
-
-              createAssignmentCallAst(binding, patternAst, rhsAst, s"$kind $cleanedName$typeCode$initCode".strip())
+              fieldAccessAst(node, node, Ast(selfNode), s"${selfNode.code}.$name", name, typeFullName)
             }
+
+            val initCode = binding.initializer.fold("")(i => s" ${code(i).strip()}")
+            val typeCode = binding.typeAnnotation.fold("")(t => code(t).strip())
+
+            val rhsAst = initAsts match {
+              case Nil         => Ast()
+              case head :: Nil => head
+              case others =>
+                val block = blockNode(node, code(node), Defines.Any)
+                blockAst(block, others.toList)
+            }
+
+            createAssignmentCallAst(binding, patternAst, rhsAst, s"$kind $cleanedName$typeCode$initCode".strip())
           }
+        }
       }
     }
 

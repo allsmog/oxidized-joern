@@ -57,7 +57,7 @@ object Frontend {
         .text("php.ini path used by php-parser. Defaults to php.ini shipped with Joern."),
       opt[String]("php-parser-bin")
         .action((x, c) => c.withPhpParserBin(x))
-        .text("path to php-parser.phar binary. Defaults to php-parser shipped with Joern."),
+        .text("path to phpastgen or php-parser.phar binary. Defaults to phpastgen shipped with Joern."),
       XTypeRecoveryConfig.parserOptionsForParserConfig,
       XTypeStubsParser.parserOptions,
       DependencyDownloadConfig.parserOptions

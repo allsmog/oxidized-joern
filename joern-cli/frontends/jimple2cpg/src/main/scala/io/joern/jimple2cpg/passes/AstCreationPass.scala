@@ -2,6 +2,7 @@ package io.joern.jimple2cpg.passes
 
 import io.joern.jimple2cpg.Config
 import io.joern.jimple2cpg.astcreation.AstCreator
+import io.joern.jimple2cpg.parser.JimpleAstGenRunner.JimpleClassInfo
 import io.joern.jimple2cpg.util.ProgramHandlingUtil.ClassFile
 import io.shiftleft.semanticcpg.utils.FileUtil.*
 import io.shiftleft.codepropertygraph.generated.Cpg
@@ -21,8 +22,12 @@ import scala.util.Try
   * @param cpg
   *   The CPG to add to
   */
-class AstCreationPass(classFiles: List[ClassFile], cpg: Cpg, config: Config)
-    extends ForkJoinParallelCpgPassWithAccumulator[ClassFile, AstCreationPass.Accumulator](cpg) {
+class AstCreationPass(
+  classFiles: List[ClassFile],
+  cpg: Cpg,
+  config: Config,
+  classInfoByName: Map[String, JimpleClassInfo] = Map.empty
+) extends ForkJoinParallelCpgPassWithAccumulator[ClassFile, AstCreationPass.Accumulator](cpg) {
 
   private val logger = LoggerFactory.getLogger(classOf[AstCreationPass])
 
@@ -63,9 +68,13 @@ class AstCreationPass(classFiles: List[ClassFile], cpg: Cpg, config: Config)
         .flatten
 
       val localDiff =
-        AstCreator(classFile.file.absolutePathAsString, sootClass, accumulator, fileContent = fileContent)(
-          config.schemaValidation
-        )
+        AstCreator(
+          classFile.file.absolutePathAsString,
+          sootClass,
+          accumulator,
+          fileContent = fileContent,
+          classInfo = classInfoFor(classFile)
+        )(config.schemaValidation)
           .createAst()
       builder.absorb(localDiff)
     } catch {
@@ -73,6 +82,13 @@ class AstCreationPass(classFiles: List[ClassFile], cpg: Cpg, config: Config)
         logger.warn(s"Exception on AST creation for ${classFile.file.absolutePathAsString}", e)
         Iterator()
     }
+  }
+
+  private def classInfoFor(classFile: ClassFile): Option[JimpleClassInfo] = {
+    classFile.fullyQualifiedClassName
+      .flatMap(classInfoByName.get)
+      .orElse(classInfoByName.get(classFile.file.getFileName.toString))
+      .orElse(classInfoByName.get(classFile.file.toAbsolutePath.toString))
   }
 
 }

@@ -204,7 +204,7 @@ class PythonAstVisitor(
       case node: ast.Return           => convert(node)
       case node: ast.Delete           => convert(node)
       case node: ast.Assign           => convert(node)
-      case node: ast.TypeAlias        => unhandled(node)
+      case node: ast.TypeAlias        => convert(node)
       case node: ast.AnnAssign        => convert(node)
       case node: ast.AugAssign        => convert(node)
       case node: ast.For              => convert(node)
@@ -889,6 +889,34 @@ class PythonAstVisitor(
       combinedLoweredNodes.head
     } else {
       createBlock(combinedLoweredNodes, lineAndColOf(assign))
+    }
+  }
+
+  def convert(typeAlias: ast.TypeAlias): NewNode = {
+    val targetNode = convert(typeAlias.name)
+    val valueNode  = convert(typeAlias.value)
+    val assignment = createAssignment(targetNode, valueNode, lineAndColOf(typeAlias))
+
+    val assignmentsToMembers =
+      if (contextStack.isClassContext) {
+        typeAlias.name match {
+          case nameTarget: ast.Name =>
+            val lineAndColumn     = lineAndColOf(nameTarget)
+            val classIdentifier   = createIdentifierNode("cls", Load, lineAndColumn)
+            val targetFieldAccess = createFieldAccess(classIdentifier, nameTarget.id, lineAndColumn)
+            val targetIdentifier  = createIdentifierNode(nameTarget.id, Load, lineAndColumn)
+            createAssignment(targetFieldAccess, targetIdentifier, lineAndColumn) :: Nil
+          case _ =>
+            Nil
+        }
+      } else {
+        Nil
+      }
+
+    if (assignmentsToMembers.isEmpty) {
+      assignment
+    } else {
+      createBlock(assignment :: assignmentsToMembers, lineAndColOf(typeAlias))
     }
   }
 

@@ -20,6 +20,13 @@ class SimpleAstCreationPassTests extends JsSrc2CpgSuite {
       fileTest.order shouldBe 0
     }
 
+    "ignore debugger statements without dropping following code" in {
+      val cpg              = code("debugger; const x = 1;")
+      val List(assignment) = cpg.call(Operators.assignment).l
+      assignment.code shouldBe "const x = 1"
+      cpg.method.nameExact(":program").ast.collectAll[Unknown].l shouldBe empty
+    }
+
     "have correct structure for with statement with block" in {
       val cpg = code("""
         |with(foo()) {
@@ -1342,6 +1349,7 @@ class SimpleAstCreationPassTests extends JsSrc2CpgSuite {
         inside(cpg.controlStructure.code("continue.*").l) { case List(continue) =>
           continue.code shouldBe "continue loop1;"
           continue.controlStructureType shouldBe ControlStructureTypes.CONTINUE
+          continue.out(EdgeTypes.JUMP_ARGUMENT).collectAll[JumpLabel].name.l shouldBe List("loop1")
         }
       }
 

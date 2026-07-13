@@ -1,3 +1,7 @@
+import com.typesafe.sbt.packager.Keys.stagingDirectory
+
+import scala.sys.process.Process
+
 name := "c2cpg"
 
 dependsOn(
@@ -42,6 +46,51 @@ compile / javacOptions ++= Seq("-Xlint:all", "-Xlint:-cast", "-g")
 Test / fork := true
 
 enablePlugins(JavaAppPackaging, LauncherJarPlugin)
+
+lazy val CxxAstgenWin      = "cxxastgen-win.exe"
+lazy val CxxAstgenLinux    = "cxxastgen-linux"
+lazy val CxxAstgenLinuxArm = "cxxastgen-linux-arm64"
+lazy val CxxAstgenMac      = "cxxastgen-macos"
+lazy val CxxAstgenMacArm   = "cxxastgen-macos-arm64"
+
+lazy val cxxAstGenCurrentBinaryName = taskKey[String]("cxxastgen binary name for the current host")
+cxxAstGenCurrentBinaryName := {
+  (Environment.operatingSystem, Environment.architecture) match {
+    case (Environment.OperatingSystemType.Windows, _)                                => CxxAstgenWin
+    case (Environment.OperatingSystemType.Linux, Environment.ArchitectureType.X86)   => CxxAstgenLinux
+    case (Environment.OperatingSystemType.Linux, Environment.ArchitectureType.ARMv8) => CxxAstgenLinuxArm
+    case (Environment.OperatingSystemType.Mac, Environment.ArchitectureType.X86)     => CxxAstgenMac
+    case (Environment.OperatingSystemType.Mac, Environment.ArchitectureType.ARMv8)   => CxxAstgenMacArm
+    case _                                                                           => CxxAstgenLinux
+  }
+}
+
+lazy val cxxAstGenBuildRust = taskKey[File]("Build local Rust cxxastgen and install it under bin/astgen")
+cxxAstGenBuildRust := {
+  val rustRoot = baseDirectory.value / "rust"
+  val localBinaryName =
+    if (Environment.operatingSystem == Environment.OperatingSystemType.Windows) "cxxastgen.exe" else "cxxastgen"
+  val exitCode = Process(Seq("cargo", "build", "--release", "--bin", "cxxastgen"), rustRoot).!
+  if (exitCode != 0) {
+    sys.error(s"cargo build failed with exit code $exitCode")
+  }
+
+  val builtBinary = rustRoot / "target" / "release" / localBinaryName
+  val astGenDir   = baseDirectory.value / "bin" / "astgen"
+  val targetFile  = astGenDir / cxxAstGenCurrentBinaryName.value
+  astGenDir.mkdirs()
+  IO.copyFile(builtBinary, targetFile, preserveLastModified = true)
+  targetFile.setExecutable(true, false)
+
+  val distDir = (Universal / stagingDirectory).value / "bin" / "astgen"
+  distDir.mkdirs()
+  IO.copyDirectory(astGenDir, distDir, preserveExecutable = true)
+
+  streams.value.log.info(s"installed Rust cxxastgen to $targetFile")
+  targetFile
+}
+
+Compile / compile := ((Compile / compile) dependsOn cxxAstGenBuildRust).value
 
 Universal / packageName       := name.value
 Universal / topLevelDirectory := None
