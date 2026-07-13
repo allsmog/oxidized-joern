@@ -4,7 +4,8 @@ import io.joern.gosrc2cpg.parser.ParserAst.*
 import io.joern.gosrc2cpg.parser.{ParserKeys, ParserNodeInfo}
 import io.joern.gosrc2cpg.utils.Operator
 import io.joern.x2cpg.{Ast, ValidationMode}
-import io.shiftleft.codepropertygraph.generated.nodes.{ExpressionNew, NewIdentifier, NewLocal}
+import io.joern.x2cpg.utils.AstPropertiesUtil.RootProperties
+import io.shiftleft.codepropertygraph.generated.nodes.{ExpressionNew, NewBlock, NewIdentifier, NewLocal}
 import io.shiftleft.codepropertygraph.generated.{ControlStructureTypes, DispatchTypes, Operators}
 import ujson.Value
 
@@ -35,12 +36,17 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
       case BranchStmt     => Seq(astForBranchStatement(statement))
       case BlockStmt      => Seq(astForBlockStatement(statement, argIndex))
       case CaseClause     => astForCaseClause(statement)
+      case CommClause     => astForCommClause(statement)
       case DeclStmt       => astForNode(statement.json(ParserKeys.Decl))
+      case DeferStmt      => Seq(astForCallWrapperStatement(statement, Operator.deferCall))
       case ExprStmt       => astsForExpression(createParserNodeInfo(statement.json(ParserKeys.X)))
       case ForStmt        => Seq(astForForStatement(statement))
+      case GoStmt         => Seq(astForCallWrapperStatement(statement, Operator.goRoutine))
       case IfStmt         => astForIfStatement(statement)
       case IncDecStmt     => Seq(astForIncDecStatement(statement))
       case RangeStmt      => Seq(astForRangeStatement(statement))
+      case SelectStmt     => Seq(astForSelectStatement(statement))
+      case SendStmt       => Seq(astForSendStatement(statement))
       case SwitchStmt     => Seq(astForSwitchStatement(statement))
       case TypeSwitchStmt => Seq(astForTypeSwitchStatement(statement))
       case ReturnStmt     => Seq(astForReturnStatement(statement))
@@ -51,7 +57,6 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
   }
 
   private def astForReturnStatement(returnStmt: ParserNodeInfo): Ast = {
-    // TODO: Need to handle the tuple return node handling
     val cpgReturn = returnNode(returnStmt, returnStmt.code)
     val expast = returnStmt
       .json(ParserKeys.Results)
@@ -167,7 +172,7 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
     val conditionParserNode = Try(createParserNodeInfo(switchStmt.json(ParserKeys.Tag)))
     val (code, conditionAst) = conditionParserNode.toOption match {
       case Some(node) => (node.code, Some(astForConditionExpression(node)))
-      case _          => ("", None)
+      case _          => ("", Some(Ast(literalNode(switchStmt, "true", Defines.Bool))))
     }
     val stmtAsts = astsForStatement(createParserNodeInfo(switchStmt.json(ParserKeys.Body)))
     switchAst(switchStmt, conditionAst, stmtAsts, Some(s"switch $code"))
@@ -235,19 +240,96 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
   private def astForRangeStatement(rangeStmt: ParserNodeInfo): Ast = {
     rangeStmt.json.obj.contains(ParserKeys.Key) match {
       case true =>
-        val keyParserNode  = createParserNodeInfo(rangeStmt.json(ParserKeys.Key))
-        val declParserNode = createParserNodeInfo(keyParserNode.json(ParserKeys.Obj)(ParserKeys.Decl))
-        val code           = s"for ${declParserNode.code}"
-        val declAst        = astsForStatement(declParserNode)
-        val initAst        = astForNode(rangeStmt.json(ParserKeys.X))
-        val stmtAst        = astsForStatement(rangeStmt.json(ParserKeys.Body))
-        forAst(rangeStmt, Nil, initAst, Nil, declAst, stmtAst, Some(code))
+        val rangeTargetAsts = rangeTargets(rangeStmt)
+        val rangeSourceAst  = withRootOrder(astForNode(rangeStmt.json(ParserKeys.X)).headOption.getOrElse(Ast()), 1)
+        val localBlockAst = withRootOrder(
+          blockAst(blockNode(rangeStmt, Defines.empty, Defines.voidTypeName), rangeTargetAsts.localAsts.toList),
+          2
+        )
+        val assignmentAst = withRootOrder(astForRangeAssignment(rangeStmt, rangeTargetAsts.targetAsts), 3)
+        val bodyAst       = astForBlockStatement(createParserNodeInfo(rangeStmt.json(ParserKeys.Body)), 4)
+        val code =
+          s"for ${rangeTargetAsts.code} ${rangeStmt.json(ParserKeys.Tok).str} range ${rangeSourceAst.rootCode.getOrElse("")}"
+        val forNode = controlStructureNode(rangeStmt, ControlStructureTypes.FOR, code)
+        val rangeAst =
+          Ast(forNode).withChildren(Seq(rangeSourceAst, localBlockAst, assignmentAst, bodyAst))
+        val withInitEdge = rangeSourceAst.root match {
+          case Some(initRoot) => rangeAst.withForInitEdge(forNode, initRoot)
+          case None           => rangeAst
+        }
+        val withConditionEdge = rangeSourceAst.root match {
+          case Some(conditionRoot) => withInitEdge.withConditionEdges(forNode, List(conditionRoot))
+          case None                => withInitEdge
+        }
+        val withUpdateEdge = assignmentAst.root match {
+          case Some(updateRoot) => withConditionEdge.withForUpdateEdge(forNode, updateRoot)
+          case None             => withConditionEdge
+        }
+        bodyAst.root match {
+          case Some(bodyRoot) => withUpdateEdge.withForBodyEdge(forNode, bodyRoot)
+          case None           => withUpdateEdge
+        }
       case false =>
-        val initAst = astForNode(rangeStmt.json(ParserKeys.X))
-        val code    = s"for range ${createParserNodeInfo(rangeStmt.json(ParserKeys.X)).code}"
-        val stmtAst = astsForStatement(rangeStmt.json(ParserKeys.Body))
-        forAst(rangeStmt, Nil, initAst, Nil, Nil, stmtAst, Some(code))
+        val initAst  = astForNode(rangeStmt.json(ParserKeys.X))
+        val code     = s"for range ${createParserNodeInfo(rangeStmt.json(ParserKeys.X)).code}"
+        val forNode  = controlStructureNode(rangeStmt, ControlStructureTypes.FOR, code)
+        val stmtAst  = astsForStatement(rangeStmt.json(ParserKeys.Body))
+        val rangeAst = Ast(forNode).withChildren(initAst ++ stmtAst)
+        val withInitEdge = initAst.headOption.flatMap(_.root) match {
+          case Some(initRoot) => rangeAst.withForInitEdge(forNode, initRoot)
+          case None           => rangeAst
+        }
+        val withConditionEdge = initAst.headOption.flatMap(_.root) match {
+          case Some(conditionRoot) => withInitEdge.withConditionEdges(forNode, List(conditionRoot))
+          case None                => withInitEdge
+        }
+        stmtAst.headOption.flatMap(_.root) match {
+          case Some(bodyRoot) => withConditionEdge.withForBodyEdge(forNode, bodyRoot)
+          case None           => withConditionEdge
+        }
     }
+  }
+
+  private def rangeTargets(rangeStmt: ParserNodeInfo): RangeTargetAsts = {
+    val targetNodes = Seq(
+      Some(createParserNodeInfo(rangeStmt.json(ParserKeys.Key))),
+      rangeStmt.json.obj.get(ParserKeys.Value).filterNot(_.isNull).map(createParserNodeInfo)
+    ).flatten
+    val localAsts = targetNodes.flatMap(astForRangeLocal)
+    val targetAsts = targetNodes.flatMap { targetNode =>
+      if (targetNode.json(ParserKeys.Name).str == "_") Seq.empty else astForNode(targetNode)
+    }
+    RangeTargetAsts(localAsts, targetAsts, targetNodes.map(_.code).mkString(", "))
+  }
+
+  private def astForRangeLocal(rangeVariable: ParserNodeInfo): Option[Ast] = {
+    val name = rangeVariable.json(ParserKeys.Name).str
+    Option.when(name != "_") {
+      val local = localNode(rangeVariable, name, rangeVariable.code, Defines.anyTypeName)
+      scope.addToScope(name, (local, Defines.anyTypeName))
+      Ast(local)
+    }
+  }
+
+  private def astForRangeAssignment(rangeStmt: ParserNodeInfo, targetAsts: Seq[Ast]): Ast = {
+    val rangeSourceAsts = astForNode(rangeStmt.json(ParserKeys.X))
+    val assignmentCode =
+      s"${targetAsts.flatMap(_.rootCode).mkString(", ")} ${rangeStmt.json(ParserKeys.Tok).str} range ${rangeSourceAsts.headOption.flatMap(_.rootCode).getOrElse("")}"
+    val assignmentNode =
+      callNode(rangeStmt, assignmentCode, Operators.assignment, Operators.assignment, DispatchTypes.STATIC_DISPATCH)
+    callAst(assignmentNode, targetAsts ++ rangeSourceAsts)
+  }
+
+  private def withRootOrder(ast: Ast, order: Int): Ast = {
+    ast.root.foreach {
+      case block: NewBlock =>
+        block.order(order).argumentIndex(order)
+      case expression: ExpressionNew =>
+        expression.order = order
+        expression.argumentIndex = order
+      case _ =>
+    }
+    ast
   }
 
   private def astForBranchStatement(branchStmt: ParserNodeInfo): Ast = {
@@ -259,8 +341,61 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
         Try(createParserNodeInfo(branchStmt.json(ParserKeys.Label)(ParserKeys.Obj)(ParserKeys.Decl)))
         val labelName = branchStmt.json(ParserKeys.Label)(ParserKeys.Name).str
         gotoAst(branchStmt, branchStmt.code, labelName)
-      case "fallthrough" => // TODO handling for FALLTHROUGH
-        Ast()
+      case "fallthrough" =>
+        Ast(controlStructureNode(branchStmt, "fallthrough", branchStmt.code))
     }
   }
+
+  private def astForCallWrapperStatement(statement: ParserNodeInfo, operator: String): Ast = {
+    val callAsts = Try(statement.json(ParserKeys.Call)).toOption.toSeq.flatMap(astForNode)
+    val cNode = callNode(
+      statement,
+      statement.code,
+      operator,
+      operator,
+      DispatchTypes.STATIC_DISPATCH,
+      None,
+      Some(Defines.anyTypeName)
+    )
+    callAst(cNode, callAsts)
+  }
+
+  private def astForSendStatement(sendStmt: ParserNodeInfo): Ast = {
+    val chanAst  = Try(sendStmt.json(ParserKeys.Chan)).toOption.toSeq.flatMap(astForNode)
+    val valueAst = Try(sendStmt.json(ParserKeys.Value)).toOption.toSeq.flatMap(astForNode)
+    val cNode = callNode(
+      sendStmt,
+      sendStmt.code,
+      Operator.channelSend,
+      Operator.channelSend,
+      DispatchTypes.STATIC_DISPATCH,
+      None,
+      Some(Defines.anyTypeName)
+    )
+    callAst(cNode, chanAst ++ valueAst)
+  }
+
+  private def astForSelectStatement(selectStmt: ParserNodeInfo): Ast = {
+    val selectNode = controlStructureNode(selectStmt, ControlStructureTypes.SWITCH, s"select")
+    val stmtAsts   = astsForStatement(createParserNodeInfo(selectStmt.json(ParserKeys.Body)))
+    Ast(selectNode).withChildren(stmtAsts)
+  }
+
+  private def astForCommClause(commClause: ParserNodeInfo): Seq[Ast] = {
+    val commAst = Try(commClause.json(ParserKeys.Comm)).toOption match {
+      case Some(commJson) =>
+        val commParserNode = createParserNodeInfo(commJson)
+        val jumpTarget     = jumpTargetNode(commClause, "case", s"case ${commParserNode.code}")
+        val commStmtAsts   = astsForStatement(commParserNode).toList
+        Ast(jumpTarget) :: commStmtAsts
+      case _ =>
+        val target = jumpTargetNode(commClause, "default", "default")
+        Seq(Ast(target))
+    }
+
+    val bodyAst = commClause.json(ParserKeys.Body).arr.map(createParserNodeInfo).flatMap(astsForStatement(_)).toList
+    commAst ++: bodyAst
+  }
 }
+
+private case class RangeTargetAsts(localAsts: Seq[Ast], targetAsts: Seq[Ast], code: String)

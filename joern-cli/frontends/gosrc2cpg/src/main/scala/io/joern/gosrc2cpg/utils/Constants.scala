@@ -11,4 +11,5 @@ object Operator {
   val channelSend = "<operator>.channelSend"
   val deferCall   = "<operator>.defer"
   val goRoutine   = "<operator>.go"
+  val send        = "<operator>.send"
 }

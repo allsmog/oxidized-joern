@@ -36,6 +36,7 @@ class MethodParameterTraversal(val traversal: Iterator[MethodParameterIn]) exten
       isRuby = Cpg(call.graph).metaData.language.headOption.contains(Languages.RUBYSRC)
       case (arg: Expression) <- call._argumentOut
       if arg.argumentName match {
+        case Some("**") => isKeywordVariadicParameter(paramIn)
         case Some(name) =>
           name == paramIn.name || (isRuby && !paramIn.method.parameter.exists(
             _.name == name
@@ -44,5 +45,8 @@ class MethodParameterTraversal(val traversal: Iterator[MethodParameterIn]) exten
       }
     } yield arg
   }
+
+  private def isKeywordVariadicParameter(paramIn: MethodParameterIn): Boolean =
+    paramIn.isVariadic && paramIn.code.startsWith("**")
 
 }
