@@ -25,7 +25,9 @@ trait AstCreatorHelper { this: AstCreator =>
             ParserKeys.NodeType
           ).str == "ast.ValueSpec" || obj(ParserKeys.NodeType).str == "ast.FuncLit" || obj(
             ParserKeys.NodeType
-          ).str == "ast.TypeSpec") && !json.obj.contains(ParserKeys.NodeReferenceId)
+          ).str == "ast.TypeSpec" || obj(ParserKeys.NodeType).str == "ast.Ident") && !json.obj.contains(
+            ParserKeys.NodeReferenceId
+          )
         ) {
           createParserNodeInfo(obj)
         }
@@ -183,7 +185,7 @@ trait AstCreatorHelper { this: AstCreator =>
             if (genericTypeMethodMap.contains(typname)) {
               genericTypeMethodMap(typname).mkString("|")
             } else {
-              Defines.primitiveTypeMap.getOrElse(typname, s"$fullyQualifiedPackage.$typname")
+              Defines.primitiveTypeMap.getOrElse(typname, dotImportedTypeFullName(typname))
             }
           case Some(alias) =>
             s"${resolveAliasToFullName(alias)}.$typname"
@@ -243,8 +245,8 @@ trait AstCreatorHelper { this: AstCreator =>
   ): (String, String, String) = {
     nodeInfo.node match {
       case StarExpr =>
-        // TODO: Need to handle pointer to pointer use case.
-        val (fullName, typeNameForcode) = internalArrayTypeHandler(createParserNodeInfo(nodeInfo.json(ParserKeys.X)))
+        val (fullName, typeNameForcode, _) =
+          internalStarExpHandler(createParserNodeInfo(nodeInfo.json(ParserKeys.X)), genericTypeMethodMap)
         (s"*$fullName", s"*$typeNameForcode", EvaluationStrategies.BY_SHARING)
       case _ =>
         val (fullName, typeNameForcode) = internalArrayTypeHandler(nodeInfo, genericTypeMethodMap)
@@ -257,6 +259,12 @@ trait AstCreatorHelper { this: AstCreator =>
     genericTypeMethodMap: Map[String, List[String]] = Map.empty
   ): (String, String, Boolean, String) = {
     nodeInfo.node match {
+      case MapType =>
+        val keyTypeInfo                         = createParserNodeInfo(nodeInfo.json(ParserKeys.Key))
+        val valueTypeInfo                       = createParserNodeInfo(nodeInfo.json(ParserKeys.Value))
+        val (_, keyTypeNameForCode, _, _)       = processTypeInfo(keyTypeInfo, genericTypeMethodMap)
+        val (valueFullName, valueCode, _, eval) = processTypeInfo(valueTypeInfo, genericTypeMethodMap)
+        (s"map[]$valueFullName", s"map[$keyTypeNameForCode]$valueCode", false, eval)
       case ArrayType =>
         val (fullName, typeNameForcode, evaluationStrategy) = internalStarExpHandler(
           createParserNodeInfo(nodeInfo.json(ParserKeys.Elt))
@@ -280,5 +288,12 @@ trait AstCreatorHelper { this: AstCreator =>
 
   protected def fixQualifiedName(name: String): String =
     name.stripPrefix(Defines.qualifiedNameSeparator).replace(Defines.qualifiedNameSeparator, ".")
+
+  private def dotImportedTypeFullName(typeName: String): String = {
+    aliasToNameSpaceMapping.get(".") match {
+      case Some(namespace) if typeName.headOption.exists(_.isUpper) => s"$namespace.$typeName"
+      case _                                                        => s"$fullyQualifiedPackage.$typeName"
+    }
+  }
 
 }

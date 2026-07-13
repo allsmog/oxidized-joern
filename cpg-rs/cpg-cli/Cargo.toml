@@ -1,0 +1,24 @@
+[package]
+name = "cpg-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "cpg"
+path = "src/main.rs"
+
+[lib]
+name = "cpg_cli"
+path = "src/lib.rs"
+
+[dependencies]
+cpg-core.workspace = true
+cpg-frontend.workspace = true
+cpg-lang-c.workspace = true
+cpg-lang-python.workspace = true
+cpg-lang-ts.workspace = true
+cpg-analysis.workspace = true
+cpg-incremental.workspace = true
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

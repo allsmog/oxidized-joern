@@ -1,0 +1,4 @@
+[package]
+name = "format_async_dp"
+version = "0.1.0"
+edition = "2021"

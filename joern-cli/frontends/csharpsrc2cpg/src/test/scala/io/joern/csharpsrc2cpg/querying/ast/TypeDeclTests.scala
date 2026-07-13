@@ -1,10 +1,12 @@
 package io.joern.csharpsrc2cpg.querying.ast
 
+import io.joern.csharpsrc2cpg.CSharpModifiers
 import io.joern.csharpsrc2cpg.astcreation.BuiltinTypes
 import io.joern.csharpsrc2cpg.astcreation.BuiltinTypes.DotNetTypeMap
 import io.joern.csharpsrc2cpg.testfixtures.CSharpCode2CpgFixture
 import io.joern.x2cpg.Defines
 import io.shiftleft.codepropertygraph.generated.ModifierTypes
+import io.shiftleft.codepropertygraph.generated.nodes.Unknown
 import io.shiftleft.semanticcpg.language.*
 
 class TypeDeclTests extends CSharpCode2CpgFixture {
@@ -80,6 +82,44 @@ class TypeDeclTests extends CSharpCode2CpgFixture {
     }
   }
 
+  "modern type and member modifiers" should {
+    val cpg = code("""
+        |file class Hidden { }
+        |public sealed partial class Closed { }
+        |public ref struct Buffer
+        |{
+        |    public required string Name { get; init; }
+        |}
+        |public readonly record struct Point(int X, int Y);
+        |""".stripMargin)
+
+    "preserve C#-specific modifiers" in {
+      cpg.typeDecl.nameExact("Hidden").modifier.modifierType.toSet shouldBe Set(CSharpModifiers.FILE)
+      cpg.typeDecl.nameExact("Closed").modifier.modifierType.toSet shouldBe Set(
+        ModifierTypes.PUBLIC,
+        ModifierTypes.FINAL,
+        CSharpModifiers.PARTIAL
+      )
+      cpg.typeDecl.nameExact("Buffer").modifier.modifierType.toSet shouldBe Set(
+        ModifierTypes.PUBLIC,
+        CSharpModifiers.REF
+      )
+      cpg.typeDecl.nameExact("Point").modifier.modifierType.toSet shouldBe Set(
+        ModifierTypes.PUBLIC,
+        ModifierTypes.READONLY,
+        CSharpModifiers.STRUCT
+      )
+      cpg.typeDecl
+        .nameExact("Buffer")
+        .member
+        .nameExact("Name")
+        .modifier
+        .modifierType
+        .toSet shouldBe Set(ModifierTypes.PUBLIC, CSharpModifiers.REQUIRED)
+      cpg.all.collectAll[Unknown].code.l shouldBe Nil
+    }
+  }
+
   "basic records declaration" should {
     val cpg = code("""
         |private record Person(string Name, string Mood);
@@ -109,6 +149,26 @@ class TypeDeclTests extends CSharpCode2CpgFixture {
         rec.modifier.modifierType.head shouldBe ModifierTypes.PUBLIC
 
       }
+    }
+  }
+
+  "generic declarations with constraints" should {
+    val cpg = code("""
+        |public class Box<T, U> where T : class where U : new()
+        |{
+        |  public T Echo<V>(T item, V other) where V : struct { return item; }
+        |}
+        |
+        |public delegate TResult Projector<T, TResult>(T item) where T : class;
+        |""".stripMargin)
+
+    "preserve type declaration generic signatures" in {
+      cpg.typeDecl.nameExact("Box").genericSignature.l shouldBe List("<T,U> where T : class where U : new()")
+      cpg.typeDecl.nameExact("Projector").genericSignature.l shouldBe List("<T,TResult> where T : class")
+    }
+
+    "preserve method generic signatures" in {
+      cpg.method.nameExact("Echo").genericSignature.l shouldBe List("<V> where V : struct")
     }
   }
 
@@ -151,6 +211,38 @@ class TypeDeclTests extends CSharpCode2CpgFixture {
     }
   }
 
+  "a basic delegate declaration" should {
+    val cpg = code(
+      """
+        |namespace Sample
+        |{
+        |    public delegate string Transformer(int value);
+        |}
+        |""".stripMargin,
+      "Delegates.cs"
+    )
+
+    "generate a delegate type declaration and Invoke signature" in {
+      inside(cpg.typeDecl.nameExact("Transformer").headOption) { case Some(delegate) =>
+        delegate.fullName shouldBe "Sample.Transformer"
+        delegate.filename shouldBe "Delegates.cs"
+        delegate.inheritsFromTypeFullName shouldBe Seq("System.MulticastDelegate")
+        delegate.modifier.modifierType.l should contain(ModifierTypes.PUBLIC)
+      }
+
+      inside(cpg.method.fullNameExact("Sample.Transformer.Invoke:System.String(System.Int32)").headOption) {
+        case Some(invoke) =>
+          invoke.name shouldBe "Invoke"
+          invoke.signature shouldBe "System.String(System.Int32)"
+          invoke.methodReturn.typeFullName shouldBe "System.String"
+          invoke.parameter.sortBy(_.index).map(p => p.name -> p.typeFullName).l shouldBe List(
+            "this"  -> "Sample.Transformer",
+            "value" -> "System.Int32"
+          )
+      }
+    }
+  }
+
   "enum types cast as an integer type" should {
 
     val cpg = code("""
@@ -187,10 +279,9 @@ class TypeDeclTests extends CSharpCode2CpgFixture {
       }
     }
 
-    // TODO: Requires <clinit> issue to be done
-    "initialize the members in a <clinit> class" ignore {
+    "initialize the members in a <clinit> class" in {
       inside(cpg.typeDecl.nameExact("ErrorCode").method.nameExact(Defines.StaticInitMethodName).l) { case m :: Nil =>
-        m.fullName shouldBe s"ErrorCode.${Defines.StaticInitMethodName}"
+        m.fullName shouldBe s"ErrorCode.${Defines.StaticInitMethodName}:System.Void()"
         inside(m.assignment.l) { case none :: unknown :: connectionLost :: outlierReading :: Nil =>
           none.code shouldBe "None = 0"
           unknown.code shouldBe "Unknown = 1"
@@ -251,9 +342,10 @@ class TypeDeclTests extends CSharpCode2CpgFixture {
       }
     }
 
-    "be inherited by the implementation class" ignore {
+    "be inherited by the implementation class" in {
       inside(cpg.typeDecl.name("ISampleInterface", "ImplementationClass").l) {
-        case interface :: implementation :: Nil => // TODO: For issue #3992
+        case interface :: implementation :: Nil =>
+          implementation.inheritsFromTypeFullName shouldBe Seq(interface.fullName)
       }
     }
   }
@@ -360,6 +452,38 @@ class TypeDeclTests extends CSharpCode2CpgFixture {
         loc.typeFullName shouldBe "HelloWorld.Program.Main.<anon>0"
         loc2.typeFullName shouldBe "HelloWorld.Program.Main.<anon>1"
       }
+    }
+  }
+
+  "preprocessor directives" should {
+    val cpg = code("""#!/usr/bin/env dotnet-script
+        |#define FEATURE
+        |#pragma warning disable CS0168
+        |#nullable enable
+        |#region R
+        |#if FEATURE
+        |namespace Foo {
+        |  public class Enabled {
+        |    public void M() {
+        |#if FEATURE
+        |      int value = 1;
+        |#endif
+        |    }
+        |  }
+        |}
+        |#else
+        |public class Disabled {}
+        |#endif
+        |#endregion
+        |#undef FEATURE
+        |#line 200 "Generated.cs"
+        |#warning generated
+        |""".stripMargin)
+
+    "flatten branch members without unknown nodes" in {
+      cpg.typeDecl.nameExact("Enabled").fullName.l shouldBe List("Foo.Enabled")
+      cpg.method.nameExact("M").local.nameExact("value").typeFullName.l shouldBe List("System.Int32")
+      cpg.all.collectAll[Unknown].code.l shouldBe Nil
     }
   }
 

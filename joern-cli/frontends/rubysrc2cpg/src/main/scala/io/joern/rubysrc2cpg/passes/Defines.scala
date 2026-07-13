@@ -64,7 +64,8 @@ object Defines {
     val privateClassMethod = "<operator>.privateClassMethod"
     val publicClassMethod  = "<operator>.publicClassMethod"
 
-    val regexMethods = Set("match") // TODO: Figure out how to model these, "sub", "gsub")
+    val regexSubstitutionMethods = Set("sub", "gsub")
+    val regexMethods             = Set("match") ++ regexSubstitutionMethods
   }
 }
 

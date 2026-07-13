@@ -344,6 +344,7 @@ trait AstCreatorHelper(implicit withSchemaValidation: ValidationMode) { this: As
       case a: AccessorDeclSyntax      => a.modifier
       case d: DeinitializerDeclSyntax => d.modifiers.children.lastOption
       case i: InitializerDeclSyntax   => i.modifiers.children.lastOption
+      case m: MacroDeclSyntax         => m.modifiers.children.lastOption
       case s: SubscriptDeclSyntax     => s.modifiers.children.lastOption
       case c: ClosureExprSyntax       => None
     }).map(l => transferEndOffsetToStartOffset(l, node))
@@ -382,6 +383,9 @@ trait AstCreatorHelper(implicit withSchemaValidation: ValidationMode) { this: As
             case i: InitializerDeclSyntax =>
               val returnType = fullNameOfEnclosingTypeDecl()
               (s"${paramSignature(i.signature.parameterClause)}->$returnType", returnType)
+            case m: MacroDeclSyntax =>
+              val returnType = m.signature.returnClause.fold(Defines.Any)(c => cleanType(code(c.`type`)))
+              (s"${paramSignature(m.signature.parameterClause)}->$returnType", returnType)
             case _: DeinitializerDeclSyntax =>
               val returnType = Defines.Any
               (s"()->$returnType", returnType)
@@ -575,6 +579,7 @@ trait AstCreatorHelper(implicit withSchemaValidation: ValidationMode) { this: As
       case a: AccessorDeclSyntax      => code(a.accessorSpecifier)
       case d: DeinitializerDeclSyntax => "deinit"
       case i: InitializerDeclSyntax   => "init"
+      case m: MacroDeclSyntax         => cleanName(code(m.name))
       case s: SubscriptDeclSyntax     => "subscript"
       case _                          => nextClosureName()
     }

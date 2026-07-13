@@ -270,7 +270,10 @@ object ProgramHandlingUtil {
           }
           Files.createDirectories(destFile.getParent)
           file.copyTo(destFile, StandardCopyOption.REPLACE_EXISTING)
-          ClassFile(destFile, packagePath)
+          this match {
+            case _: ClassFile  => ClassFile(destFile, packagePath)
+            case _: ConfigFile => ConfigFile(destFile)
+          }
         }
         .orElse {
           logger.warn(

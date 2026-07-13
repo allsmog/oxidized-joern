@@ -207,29 +207,34 @@ class CallTests extends SwiftCompilerSrc2CpgSuite {
           |  }
           |}
           |""".stripMargin
-      pendingUntilFixed {
-        val cpg = code(testCode)
+      val cpg = code(testCode)
 
-        // These extension calls should be static calls.
-        // Currently, there is no way to detect this as we have no correct method fullnames at calls without compiler support at all.
-        val List(fooCall) = cpg.call.nameExact("foo").l
-        fooCall.methodFullName shouldBe x2cpg.Defines.DynamicCallUnknownFullName
-        fooCall.signature shouldBe ""
-        fooCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH // Should be STATIC_DISPATCH for extension methods, but it is not
+      val List(fooMethod) = cpg.method.nameExact("foo").l
+      val List(barMethod) = cpg.method.nameExact("bar").l
+      cpg.typeDecl.nameExact("Foo").boundMethod.fullName.l should contain allElementsOf List(
+        fooMethod.fullName,
+        barMethod.fullName
+      )
 
-        val List(fooCallReceiver) = fooCall.receiver.isIdentifier.l
-        fooCallReceiver.name shouldBe "self"
-        fooCallReceiver.typeFullName shouldBe "Sources/main.swift:<global>.Foo"
+      val List(fooCall) = cpg.call.nameExact("foo").l
+      fooCall.methodFullName shouldBe fooMethod.fullName
+      fooCall.signature shouldBe fooMethod.signature
+      fooCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+      fooCall.receiver shouldBe empty
 
-        val List(barCall) = cpg.call.nameExact("bar").l
-        barCall.methodFullName shouldBe x2cpg.Defines.DynamicCallUnknownFullName
-        barCall.signature shouldBe ""
-        barCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH // Should be STATIC_DISPATCH for extension methods, but it is not
+      val List(fooCallBase) = fooCall.arguments(0).isIdentifier.l
+      fooCallBase.name shouldBe "self"
+      fooCallBase.typeFullName shouldBe "Sources/main.swift:<global>.Foo"
 
-        val List(barCallReceiverCall) = barCall.receiver.isIdentifier.l
-        barCallReceiverCall.name shouldBe "self"
-        barCallReceiverCall.typeFullName shouldBe "Sources/main.swift:<global>.Foo"
-      }
+      val List(barCall) = cpg.call.nameExact("bar").l
+      barCall.methodFullName shouldBe barMethod.fullName
+      barCall.signature shouldBe barMethod.signature
+      barCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
+      barCall.receiver shouldBe empty
+
+      val List(barCallBase) = barCall.arguments(0).isIdentifier.l
+      barCallBase.name shouldBe "self"
+      barCallBase.typeFullName shouldBe "Sources/main.swift:<global>.Foo"
     }
 
     "be correct for simple calls to functions from extensions with compiler support" in {
@@ -249,14 +254,16 @@ class CallTests extends SwiftCompilerSrc2CpgSuite {
 
       val cpg = codeWithSwiftSetup(testCode)
 
-      /** TODO: Re-enable once extension methods are properly accessible via EXTENSION_BLOCK
-        * cpg.typeDecl.nameExact("Foo").boundMethod.fullName.l shouldBe List( "SwiftTest.Foo.init:()->SwiftTest.Foo",
-        * "SwiftTest.Foo.main:()->()", "SwiftTest.Foo<extension>.foo:()->()", "SwiftTest.Foo<extension>.bar:()->()" )
-        */
       val List(fooMethod) = cpg.method.nameExact("foo").l
       fooMethod.fullName shouldBe "SwiftTest.Foo<extension>.foo:()->()"
       val List(barMethod) = cpg.method.nameExact("bar").l
       barMethod.fullName shouldBe "SwiftTest.Foo<extension>.bar:()->()"
+      cpg.typeDecl.nameExact("Foo").boundMethod.fullName.sorted.l shouldBe List(
+        "SwiftTest.Foo.init:()->SwiftTest.Foo",
+        "SwiftTest.Foo.main:()->()",
+        "SwiftTest.Foo<extension>.foo:()->()",
+        "SwiftTest.Foo<extension>.bar:()->()"
+      ).sorted
 
       val List(fooCall) = cpg.call.nameExact("foo").l
       fooCall.methodFullName shouldBe fooMethod.fullName
@@ -336,7 +343,7 @@ class CallTests extends SwiftCompilerSrc2CpgSuite {
        |    static func source() -> Int {
        |        return 1
        |    }
-       |    
+       |
        |    func foo() {
        |        print(Foo.aaa)
        |    }
@@ -513,10 +520,11 @@ class CallTests extends SwiftCompilerSrc2CpgSuite {
       val cpg = code(testCode)
 
       val List(takesColorCall) = cpg.call.nameExact("takesColor").l
-      val implicitMemberArg    = takesColorCall.arguments(1).loneElement.asInstanceOf[Unknown]
-      implicitMemberArg.code shouldBe "red"
-
-      cpg.fieldAccess.l shouldBe empty
+      val List(implicitMemberArg) =
+        takesColorCall.arguments(1).isCall.nameExact(Operators.fieldAccess).l
+      implicitMemberArg.code shouldBe ".red"
+      implicitMemberArg.argument.code.l shouldBe List("<implicit>", "red")
+      cpg.unknown.codeExact("red").l shouldBe empty
     }
 
     "be correct for implicit member expressions in assignments" in {
@@ -533,10 +541,24 @@ class CallTests extends SwiftCompilerSrc2CpgSuite {
       val cpg = code(testCode)
 
       val List(assignCall) = cpg.call.nameExact(Operators.assignment).l
-      val rhs              = assignCall.arguments(2).loneElement.asInstanceOf[Unknown]
-      rhs.code shouldBe "red"
+      val List(rhs)        = assignCall.arguments(2).isCall.nameExact(Operators.fieldAccess).l
+      rhs.code shouldBe ".red"
+      rhs.argument.code.l shouldBe List("<implicit>", "red")
+      cpg.unknown.codeExact("red").l shouldBe empty
+    }
 
-      cpg.fieldAccess.l shouldBe empty
+    "be correct for bare operator references passed as call arguments" in {
+      val testCode =
+        """
+          |func main(values: [Int]) -> Int {
+          |  return values.reduce(0, +)
+          |}
+          |""".stripMargin
+      val cpg = code(testCode)
+
+      val List(reduceCall) = cpg.call.nameExact("reduce").l
+      reduceCall.code shouldBe "values.reduce(0, +)"
+      reduceCall.argument.isIdentifier.name.l should contain("+")
     }
 
   }

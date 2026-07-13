@@ -11,6 +11,7 @@ import io.shiftleft.codepropertygraph.generated.DispatchTypes
 import io.shiftleft.codepropertygraph.generated.EdgeTypes
 import io.shiftleft.codepropertygraph.generated.Operators
 import io.shiftleft.codepropertygraph.generated.EvaluationStrategies
+import io.shiftleft.codepropertygraph.generated.nodes.NewJumpLabel
 import ujson.Obj
 import ujson.Value
 
@@ -171,13 +172,42 @@ trait AstForStatementsCreator(implicit withSchemaValidation: ValidationMode) { t
   }
 
   protected def astForBreakStatement(breakStmt: BabelNodeInfo): Ast = {
-    val labelName = safeObj(breakStmt.json, "label").map(label => code(Obj(label)))
-    breakAst(breakStmt, code(breakStmt), labelName)
+    val labelAst = safeObj(breakStmt.json, "label").toList.map { label =>
+      val labelNode = Obj(label)
+      val labelCode = code(labelNode)
+      Ast(
+        NewJumpLabel()
+          .parserTypeName(breakStmt.node.toString)
+          .name(labelCode)
+          .code(labelCode)
+          .lineNumber(breakStmt.lineNumber)
+          .columnNumber(breakStmt.columnNumber)
+          .order(1)
+      )
+    }
+    val breakNode = controlStructureNode(breakStmt, ControlStructureTypes.BREAK, code(breakStmt))
+    val breakAst  = Ast(breakNode).withChildren(labelAst)
+    labelAst.headOption.flatMap(_.root).map(breakAst.withJumpArgumentEdge(breakNode, _)).getOrElse(breakAst)
   }
 
   protected def astForContinueStatement(continueStmt: BabelNodeInfo): Ast = {
-    val labelName = safeObj(continueStmt.json, "label").map(label => code(Obj(label)))
-    continueAst(continueStmt, code(continueStmt), labelName)
+    val labelAst = safeObj(continueStmt.json, "label").toList
+      .map { label =>
+        val labelNode = Obj(label)
+        val labelCode = code(labelNode)
+        Ast(
+          NewJumpLabel()
+            .parserTypeName(continueStmt.node.toString)
+            .name(labelCode)
+            .code(labelCode)
+            .lineNumber(continueStmt.lineNumber)
+            .columnNumber(continueStmt.columnNumber)
+            .order(1)
+        )
+      }
+    val continueNode = controlStructureNode(continueStmt, ControlStructureTypes.CONTINUE, code(continueStmt))
+    val continueAst  = Ast(continueNode).withChildren(labelAst)
+    labelAst.headOption.flatMap(_.root).map(continueAst.withJumpArgumentEdge(continueNode, _)).getOrElse(continueAst)
   }
 
   protected def astForThrowStatement(throwStmt: BabelNodeInfo): Ast = {

@@ -1,0 +1,5 @@
+let smiley = "\u{1F600}"
+let tab = "a\u{9}b"
+let letter = "\u{0041}"
+let combined = "start \u{2764} end \u{1F44D}"
+let interpolated = "value: \u{41}\(smiley)"

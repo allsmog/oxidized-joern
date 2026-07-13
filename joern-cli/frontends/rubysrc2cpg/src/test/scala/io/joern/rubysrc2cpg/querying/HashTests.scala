@@ -193,7 +193,7 @@ class HashTests extends RubyCode2CpgFixture {
         |""".stripMargin)
 
     inside(cpg.call.name(RubyOperators.hashInitializer).l) { case hashCall :: Nil =>
-      val List(xSplatCall, ySplatCall) = hashCall.inCall.astSiblings.isCall.l
+      val List(xSplatCall, ySplatCall) = hashCall.inCall.astSiblings.isCall.name(RubyOperators.splat).l
       xSplatCall.code shouldBe "**x"
       xSplatCall.methodFullName shouldBe RubyOperators.splat
 
@@ -209,7 +209,7 @@ class HashTests extends RubyCode2CpgFixture {
         |""".stripMargin)
 
     inside(cpg.call.name(RubyOperators.hashInitializer).l) { case hashInitializer :: Nil =>
-      val List(splatCall) = hashInitializer.inCall.astSiblings.isCall.l
+      val List(splatCall) = hashInitializer.inCall.astSiblings.isCall.name(RubyOperators.splat).l
       splatCall.code shouldBe "**foo(bar)"
       splatCall.name shouldBe RubyOperators.splat
 
@@ -228,7 +228,7 @@ class HashTests extends RubyCode2CpgFixture {
         |""".stripMargin)
 
     inside(cpg.call.name(RubyOperators.hashInitializer).l) { case hashInitializer :: Nil =>
-      val List(splatCall) = hashInitializer.inCall.astSiblings.isCall.l
+      val List(splatCall) = hashInitializer.inCall.astSiblings.isCall.name(RubyOperators.splat).l
       splatCall.code shouldBe "**(foo 13)"
       splatCall.name shouldBe RubyOperators.splat
 

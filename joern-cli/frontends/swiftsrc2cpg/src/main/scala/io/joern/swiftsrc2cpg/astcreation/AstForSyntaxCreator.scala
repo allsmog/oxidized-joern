@@ -9,6 +9,7 @@ import io.shiftleft.codepropertygraph.generated.*
 import io.shiftleft.codepropertygraph.generated.nodes.*
 
 import scala.annotation.unused
+import scala.util.Try
 
 trait AstForSyntaxCreator(implicit withSchemaValidation: ValidationMode) { this: AstCreator =>
 
@@ -463,9 +464,7 @@ trait AstForSyntaxCreator(implicit withSchemaValidation: ValidationMode) { this:
   private def astForPatternBindingSyntax(node: PatternBindingSyntax): Ast           = notHandledYet(node)
   private def astForPlatformVersionItemSyntax(node: PlatformVersionItemSyntax): Ast = notHandledYet(node)
   private def astForPlatformVersionSyntax(node: PlatformVersionSyntax): Ast         = notHandledYet(node)
-  private def astForPoundSourceLocationArgumentsSyntax(node: PoundSourceLocationArgumentsSyntax): Ast = notHandledYet(
-    node
-  )
+  private def astForPoundSourceLocationArgumentsSyntax(@unused node: PoundSourceLocationArgumentsSyntax): Ast = Ast()
   private def astForPrecedenceGroupAssignmentSyntax(node: PrecedenceGroupAssignmentSyntax): Ast = notHandledYet(node)
   private def astForPrecedenceGroupAssociativitySyntax(node: PrecedenceGroupAssociativitySyntax): Ast = notHandledYet(
     node
@@ -502,7 +501,18 @@ trait AstForSyntaxCreator(implicit withSchemaValidation: ValidationMode) { this:
     notHandledYet(node)
 
   private def astForStringSegmentSyntax(node: StringSegmentSyntax): Ast = {
-    Ast(literalNode(node, s"\"${code(node)}\"", Option(Defines.String)))
+    Ast(literalNode(node, s"\"${stringSegmentCode(node)}\"", Option(Defines.String)))
+  }
+
+  private def stringSegmentCode(node: StringSegmentSyntax): String = {
+    val prefix    = "stringSegment("
+    val tokenKind = node.content.json("tokenKind").str
+    Option
+      .when(tokenKind.startsWith(prefix) && tokenKind.endsWith(")")) {
+        tokenKind.substring(prefix.length, tokenKind.length - 1)
+      }
+      .flatMap(payload => Try(ujson.read(payload).str).toOption)
+      .getOrElse(code(node))
   }
 
   private def astForSwitchCaseItemSyntax(node: SwitchCaseItemSyntax): Ast   = notHandledYet(node)

@@ -34,6 +34,14 @@ private object Frontend {
           "Excludes all files where the relative path from input-dir contains at least one of names specified here."
         )
         .action((value, config) => config.withIgnoreDirNames(value)),
+      opt[String]("parser-backend")
+        .hidden()
+        .validate(value =>
+          PythonParserBackend.fromString(value).map(_ => success).getOrElse {
+            failure(s"Expected one of: ${PythonParserBackend.values.map(_.name).mkString(", ")}")
+          }
+        )
+        .action((value, config) => config.withParserBackend(PythonParserBackend.fromString(value).get)),
       XTypeRecoveryConfig.parserOptionsForParserConfig
     )
   }

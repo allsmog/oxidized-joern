@@ -59,21 +59,21 @@ class ArrayDataflowTests extends GoCodeToCpgSuite(withOssDataflow = true) {
         |}
         |""".stripMargin)
 
-    "data flow check one" ignore {
+    "data flow check one" in {
       val src  = cpg.identifier("myArray").l
       val sink = cpg.identifier("first")
       sink.reachableByFlows(src).size shouldBe 2
     }
-    "data flow check two" ignore {
+    "data flow check two" in {
       val src  = cpg.literal("\"2\"").l
       val sink = cpg.identifier("first")
       sink.reachableByFlows(src).size shouldBe 1
     }
 
     "data flow check three" in {
-      val src  = cpg.identifier("myArray").l
+      val src  = cpg.identifier("myArray").lineNumber(7).l
       val sink = cpg.identifier("third")
-      sink.reachableByFlows(src).size shouldBe 2
+      sink.reachableByFlows(src).size shouldBe 1
     }
   }
 }

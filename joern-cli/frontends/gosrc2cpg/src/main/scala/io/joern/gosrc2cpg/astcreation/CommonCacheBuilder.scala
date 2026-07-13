@@ -4,6 +4,8 @@ import io.joern.gosrc2cpg.datastructures.MethodCacheMetaData
 import io.joern.gosrc2cpg.parser.ParserAst.*
 import io.joern.gosrc2cpg.parser.{ParserKeys, ParserNodeInfo}
 import io.joern.x2cpg.{Ast, ValidationMode}
+import io.shiftleft.codepropertygraph.generated.{NodeTypes, PropertyNames}
+import io.shiftleft.codepropertygraph.generated.nodes.NewMethod
 import ujson.Value
 
 import scala.util.Try
@@ -54,11 +56,10 @@ trait CommonCacheBuilder(implicit withSchemaValidation: ValidationMode) { this: 
       // Ignoring recording the Type details when we are processing dependencies code with Type name starting with lower case letter
       // As the Types starting with lower case letters will only be accessible within that package. Which means
       // these Types are not going to get referred from main source code.
-      val fullName = fullyQualifiedPackage + Defines.dot + name
+      val fullName = typeSpecFullName(name)
       val typeNode = createParserNodeInfo(typeSepc.json(ParserKeys.Type))
       val ast = typeNode.node match {
-        // As of don't see any use case where InterfaceType needs to be handled.
-        case InterfaceType => Seq.empty
+        case InterfaceType => astForInterfaceType(typeNode, fullName)
         // astForStructType() function will record the member types
         case StructType => astForStructType(typeNode, fullName)
         // Process lambda function types to record lambda function signature mapped to TypeFullName
@@ -68,6 +69,22 @@ trait CommonCacheBuilder(implicit withSchemaValidation: ValidationMode) { this: 
       (name, fullName, ast)
     } else
       ("", "", Seq.empty)
+  }
+
+  protected def typeSpecAstParent: (String, String) = {
+    methodAstParentStack.headOption
+      .map {
+        case parent: NewMethod if parent.fullName.startsWith(s"$relPathFileName:") =>
+          (NodeTypes.TYPE_DECL, fullyQualifiedPackage)
+        case parent =>
+          (parent.label, parent.properties(PropertyNames.FullName).toString)
+      }
+      .getOrElse((NodeTypes.TYPE_DECL, fullyQualifiedPackage))
+  }
+
+  private def typeSpecFullName(name: String): String = {
+    val (_, parentFullName) = typeSpecAstParent
+    s"$parentFullName${Defines.dot}$name"
   }
 
   protected def processFuncDecl(funcDeclVal: Value): MethodMetadata = {
@@ -83,20 +100,25 @@ trait CommonCacheBuilder(implicit withSchemaValidation: ValidationMode) { this: 
         case _ =>
           (s"$fullyQualifiedPackage.$name", fullyQualifiedPackage)
       }
-      // TODO: handle multiple return type or tuple (int, int)
       val genericTypeMethodMap = processTypeParams(funcDeclVal(ParserKeys.Type))
-      val (returnTypeStr, _) =
-        getReturnType(funcDeclVal(ParserKeys.Type), genericTypeMethodMap).headOption
-          .getOrElse((Defines.voidTypeName, null))
-      val params = funcDeclVal(ParserKeys.Type)(ParserKeys.Params)(ParserKeys.List)
+      val returnTypes          = getReturnType(funcDeclVal(ParserKeys.Type), genericTypeMethodMap).map(_._1)
+      val returnTypeStr        = returnTypes.headOption.getOrElse(Defines.voidTypeName)
+      val params               = funcDeclVal(ParserKeys.Type)(ParserKeys.Params)(ParserKeys.List)
       val signature =
-        s"$methodFullname(${parameterSignature(params, genericTypeMethodMap)})${
-            if (returnTypeStr == Defines.voidTypeName) "" else returnTypeStr
-          }"
+        s"$methodFullname(${parameterSignature(params, genericTypeMethodMap)})${returnTypeSignature(returnTypes)}"
       goGlobal.recordMethodMetadata(recordNamespace, name, MethodCacheMetaData(returnTypeStr, signature))
       MethodMetadata(name, methodFullname, signature, params, receiverInfo, genericTypeMethodMap)
     } else
       MethodMetadata()
+  }
+
+  private def returnTypeSignature(returnTypes: Seq[String]): String = {
+    returnTypes match {
+      case Seq()                            => ""
+      case Seq(Defines.voidTypeName)        => ""
+      case Seq(singleReturnType)            => singleReturnType
+      case multipleReturnTypes: Seq[String] => multipleReturnTypes.mkString("(", ",", ")")
+    }
   }
 
   protected def processImports(importDecl: Value): (String, String) = {

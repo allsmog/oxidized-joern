@@ -10,21 +10,26 @@ import scala.util.Try
 
 class ClosureTests extends PhpCode2CpgFixture {
 
-  "long-form closures without uses " ignore {
-    val cpg = code("""<?php
+  "long-form closures without uses " should {
+    val cpg = code(
+      """<?php
      |$x = function($value) {
      |  echo $value;
      |};
-     |""".stripMargin)
+     |""".stripMargin,
+      fileName = "foo.php"
+    )
 
     "have the correct method AST" in {
-      val closureMethod = inside(cpg.method.name(".*closure.*").l) { case List(closureMethod) =>
+      val closureMethod = inside(cpg.method.name(".*<lambda>.*").l) { case List(closureMethod) =>
         closureMethod
       }
 
-      closureMethod.name shouldBe "<lambda>0"
-      closureMethod.fullName shouldBe s"<lambda>0:${Defines.UnresolvedSignature}(1)"
-      closureMethod.code shouldBe "function <lambda>0($value)"
+      val expectedName = s"foo.php:<global>.<lambda>0"
+      closureMethod.name shouldBe expectedName
+      closureMethod.fullName shouldBe expectedName
+      closureMethod.signature shouldBe ""
+      closureMethod.code shouldBe s"function $expectedName($$value)"
       closureMethod.parameter.size shouldBe 1
 
       inside(closureMethod.parameter.l) { case List(valueParam) =>
@@ -38,8 +43,9 @@ class ClosureTests extends PhpCode2CpgFixture {
 
     "have a correct MethodRef added to the AST where the closure is defined" in {
       inside(cpg.assignment.argument.l) { case List(_: Identifier, methodRef: MethodRef) =>
-        methodRef.methodFullName shouldBe s"<lambda>0:${Defines.UnresolvedSignature}(1)"
-        methodRef.code shouldBe s"<lambda>0:${Defines.UnresolvedSignature}(1)"
+        val expectedName = s"foo.php:<global>.<lambda>0"
+        methodRef.methodFullName shouldBe expectedName
+        methodRef.code shouldBe expectedName
         methodRef.lineNumber shouldBe Some(2)
       }
     }

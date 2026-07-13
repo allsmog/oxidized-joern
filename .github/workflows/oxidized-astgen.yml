@@ -1,0 +1,216 @@
+name: oxidized astgen
+
+# Cargo gates (fmt / test / clippy, incl. the per-frontend coverage tests that
+# assert zero unmapped nodes) for every oxidized Rust AST generator, plus the
+# reference differentials that download each frontend's upstream reference
+# binary and compare emitted JSON over the checked-in fixture corpus.
+#
+# swift's reference is a macOS binary (runs on a hosted macOS runner); csharp
+# (dotnetastgen), abap (abapgen) and rust (rust_ast_gen) ship native linux
+# binaries; jssrc2cpg's reference (astgen) is Node-based, so its job provisions
+# Node first. rust2cpg's differential is gating because the local generator is
+# now the default; the other differentials remain informational
+# (continue-on-error) until their emitters reach byte-identity with the upstream
+# reference. Each one runs the crate's tests/differential_json.rs gated on
+# <LANG>ASTGEN_REFERENCE. The reference release tag + version come from each
+# frontend's build.sbt (astGenDlUrl) and src/main/resources/application.conf.
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/oxidized-astgen.yml"
+      - "joern-cli/frontends/*/rust/**"
+      - "joern-cli/frontends/csharpsrc2cpg/build.sbt"
+      - "joern-cli/frontends/csharpsrc2cpg/src/main/resources/application.conf"
+      - "joern-cli/frontends/jssrc2cpg/build.sbt"
+      - "joern-cli/frontends/jssrc2cpg/src/main/resources/application.conf"
+      - "joern-cli/frontends/abap2cpg/build.sbt"
+      - "joern-cli/frontends/abap2cpg/src/main/resources/application.conf"
+      - "joern-cli/frontends/rust2cpg/build.sbt"
+      - "joern-cli/frontends/rust2cpg/src/main/resources/application.conf"
+      - "joern-cli/frontends/rust2cpg/src/**"
+  workflow_dispatch:
+
+jobs:
+  rust-gates:
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - abap2cpg
+          - c2cpg
+          - csharpsrc2cpg
+          - gosrc2cpg
+          - jssrc2cpg
+          - php2cpg
+          - pysrc2cpg
+          - rubysrc2cpg
+          - rust2cpg
+          - swiftsrc2cpg
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          # rust2cpg's HIR-based enrichment needs the std source to load a
+          # sysroot; harmless for the other crates.
+          components: rust-src
+      - name: Check formatting
+        working-directory: joern-cli/frontends/${{ matrix.crate }}/rust
+        run: cargo fmt --check
+      - name: Test (includes the zero-unmapped coverage gate)
+        working-directory: joern-cli/frontends/${{ matrix.crate }}/rust
+        run: cargo test
+      - name: Lint
+        working-directory: joern-cli/frontends/${{ matrix.crate }}/rust
+        run: cargo clippy --all-targets -- -D warnings
+
+  swift-differential:
+    # The upstream SwiftSyntax reference is a macOS binary; run the byte-level
+    # differential against it. Informational (continue-on-error) until the
+    # emitter is byte-identical — it prints a ranked delta classification.
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Download reference SwiftAstGen
+        run: |
+          curl -L --fail -o /tmp/SwiftAstGen \
+            https://github.com/joernio/astgen-monorepo/releases/download/swift-astgen/v0.4.2/SwiftAstGen-mac
+          chmod +x /tmp/SwiftAstGen
+          /tmp/SwiftAstGen --version
+      - name: Differential vs reference (informational until byte-identity)
+        continue-on-error: true
+        working-directory: joern-cli/frontends/swiftsrc2cpg/rust
+        run: SWIFTASTGEN_REFERENCE=/tmp/SwiftAstGen cargo test --test differential_json -- --nocapture
+
+  csharpsrc2cpg-differential:
+    # Reference: native linux dotnetastgen from the dotnet-astgen release
+    # (joern-cli/frontends/csharpsrc2cpg/build.sbt astGenDlUrl + application.conf
+    # dotnetastgen_version). Driven with `-i <in> -o <out>`, matching
+    # DotNetAstGenRunner.runAstGenNative.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Download reference dotnetastgen
+        run: |
+          curl -L --fail -o /tmp/dotnetastgen \
+            https://github.com/joernio/astgen-monorepo/releases/download/dotnet-astgen/v0.43.0/dotnetastgen-linux
+          chmod +x /tmp/dotnetastgen
+      - name: Differential vs reference (informational until byte-identity)
+        continue-on-error: true
+        working-directory: joern-cli/frontends/csharpsrc2cpg/rust
+        run: DOTNETASTGEN_REFERENCE=/tmp/dotnetastgen cargo test --test differential_json -- --nocapture
+
+  jssrc2cpg-differential:
+    # Reference: the Node-based astgen from the javascript-astgen release
+    # (joern-cli/frontends/jssrc2cpg/build.sbt astGenDlUrl + application.conf
+    # astgen_version). Node is provisioned first because the reference relies on
+    # a Node runtime. Driven with `-t ts -o <out>`, matching AstGenRunner.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Download reference astgen
+        run: |
+          curl -L --fail -o /tmp/astgen \
+            https://github.com/joernio/astgen-monorepo/releases/download/javascript-astgen/v3.46.0/astgen-linux
+          chmod +x /tmp/astgen
+      - name: Differential vs reference (informational until byte-identity)
+        continue-on-error: true
+        working-directory: joern-cli/frontends/jssrc2cpg/rust
+        run: JSASTGEN_REFERENCE=/tmp/astgen cargo test --test differential_json -- --nocapture
+
+  abap2cpg-differential:
+    # Reference: native linux abapgen from the abap-astgen release
+    # (joern-cli/frontends/abap2cpg/build.sbt abapgenDlUrl + application.conf
+    # abapgen_version). Driven with positional `<in> <out>` arguments, matching
+    # AbapAstGenRunner.runAstGenNative.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Download reference abapgen
+        run: |
+          curl -L --fail -o /tmp/abapgen \
+            https://github.com/joernio/astgen-monorepo/releases/download/abap-astgen/v0.3.0/abapgen-linux
+          chmod +x /tmp/abapgen
+      - name: Differential vs reference (informational until byte-identity)
+        continue-on-error: true
+        working-directory: joern-cli/frontends/abap2cpg/rust
+        run: ABAPASTGEN_REFERENCE=/tmp/abapgen cargo test --test differential_json -- --nocapture
+
+  rust2cpg-differential:
+    # Reference: native linux rust_ast_gen from the rust-astgen release
+    # (joern-cli/frontends/rust2cpg/build.sbt astGenDlUrl + application.conf
+    # rust_ast_gen_version). Driven with `-i <in> -o <out>`, matching
+    # RustAstGenRunner.runAstGenNative. rust-src is installed because the
+    # HIR-based enrichment loads a sysroot.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rust-src
+      - name: Download reference rust_ast_gen
+        run: |
+          curl -L --fail -o /tmp/rust_ast_gen \
+            https://github.com/joernio/astgen-monorepo/releases/download/rust-astgen/v0.8.1/rust_ast_gen-linux
+          chmod +x /tmp/rust_ast_gen
+      - name: Differential vs reference
+        working-directory: joern-cli/frontends/rust2cpg/rust
+        run: RUSTASTGEN_REFERENCE=/tmp/rust_ast_gen cargo test --test differential_json -- --nocapture
+
+  rust2cpg-scala-integration:
+    # Build the local Rust rust_ast_gen via rust2cpg's default provisioning path
+    # and run the Scala frontend suite against it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rust-src
+      - name: Run rust2cpg tests with local Rust astgen
+        run: sbt "rust2cpg/test"
+
+  php2cpg-differential:
+    # Reference: the joernio/PHP-Parser `php-parser.phar` (Versions.phpParser).
+    # It is a PHP archive (shebang `#!/usr/bin/env php`), so PHP must be on PATH;
+    # run_reference invokes it with --with-recovery --resolve-names --json-dump
+    # (matching PhpParser.scala).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+      - name: Download reference php-parser.phar
+        run: |
+          curl -L --fail -o /tmp/php-parser.phar \
+            https://github.com/joernio/PHP-Parser/releases/download/v4.15.10/php-parser.phar
+          chmod +x /tmp/php-parser.phar
+      - name: Differential vs reference (informational until byte-identity)
+        continue-on-error: true
+        working-directory: joern-cli/frontends/php2cpg/rust
+        run: PHPASTGEN_REFERENCE=/tmp/php-parser.phar cargo test --test differential_json -- --nocapture
+
+  # rubysrc2cpg and pysrc2cpg have no native CI differential job by design:
+  #  - ruby's reference (ruby_ast_gen, astgen-monorepo ruby-astgen) is a Ruby gem
+  #    run through JRuby — published as a gem ZIP, not an executable. Run locally
+  #    with RUBYASTGEN_REFERENCE pointing at a jruby wrapper; the harness
+  #    (rubysrc2cpg/rust/.../tests/differential_json.rs) is ready and self-skips.
+  #  - py's reference is the in-tree JavaCC parser io.joern.pythonparser (no
+  #    separate binary), so there is nothing external to differential against; its
+  #    harness self-skips by design and the coverage gate guards the emitter.

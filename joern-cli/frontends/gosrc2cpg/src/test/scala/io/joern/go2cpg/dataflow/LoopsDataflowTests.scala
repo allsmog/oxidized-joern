@@ -30,8 +30,7 @@ class LoopsDataflowTests extends GoCodeToCpgSuite(withOssDataflow = true) {
       sink2.reachableByFlows(source2).size shouldBe 1
     }
 
-    // TODO Looks like some issue due to `range` being a unaryExpr here
-    "be reachable for range statement" ignore {
+    "be reachable for range statement" in {
       val cpg = code("""package main
           |func main() {
           |   var message string = "Hello, Gophers!"
@@ -44,7 +43,7 @@ class LoopsDataflowTests extends GoCodeToCpgSuite(withOssDataflow = true) {
           |}
           |""".stripMargin)
       val source1 = cpg.identifier("counter").lineNumber(5).l
-      val sink1   = cpg.identifier("z").l
+      val sink1   = cpg.identifier("indexSum").l
       sink1.reachableByFlows(source1).size shouldBe 1
 
       val source2 = cpg.identifier("counter").lineNumber(7).l

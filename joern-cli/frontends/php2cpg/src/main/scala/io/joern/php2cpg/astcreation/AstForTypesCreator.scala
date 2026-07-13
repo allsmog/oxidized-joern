@@ -37,7 +37,7 @@ trait AstForTypesCreator(implicit withSchemaValidation: ValidationMode) { this: 
   }
 
   protected def astForGlobalDecl(stmt: PhpClassLikeStmt, name: PhpNameExpr): Ast = {
-    val inheritsFrom = (stmt.extendsNames ++ stmt.implementedInterfaces).map(_.name)
+    val inheritsFrom = (stmt.extendsNames ++ stmt.implementedInterfaces).map(resolvedInheritedTypeName)
     val code         = codeForClassStmt(stmt, name)
 
     val fullName                           = globalNamespace.fullName
@@ -71,7 +71,7 @@ trait AstForTypesCreator(implicit withSchemaValidation: ValidationMode) { this: 
     staticStmts: List[PhpStmt]
   ): Ast = {
     val useTraitNames = dynamicStmts.collect { case x: PhpTraitUseStmt => x }.flatMap(_.traits)
-    val inheritsFrom  = (stmt.extendsNames ++ useTraitNames ++ stmt.implementedInterfaces).map(_.name)
+    val inheritsFrom = (stmt.extendsNames ++ useTraitNames ++ stmt.implementedInterfaces).map(resolvedInheritedTypeName)
 
     val className = stmt.name match {
       case Some(name) => name.name
@@ -183,6 +183,10 @@ trait AstForTypesCreator(implicit withSchemaValidation: ValidationMode) { this: 
     callAst(assignment, Seq(typeRefIdent, typeRefNode))
   }
 
+  private def resolvedInheritedTypeName(name: PhpNameExpr): String = {
+    resolveTypeName(name.name)
+  }
+
   private def astForNamedClass(
     stmt: PhpClassLikeStmt,
     name: PhpNameExpr,
@@ -205,8 +209,8 @@ trait AstForTypesCreator(implicit withSchemaValidation: ValidationMode) { this: 
      ```
      */
     val useTraitNames = dynamicStmts.collect { case x: PhpTraitUseStmt => x }.flatMap(_.traits)
-    val inheritsFrom  = (stmt.extendsNames ++ useTraitNames ++ stmt.implementedInterfaces).map(_.name)
-    val code          = codeForClassStmt(stmt, name)
+    val inheritsFrom = (stmt.extendsNames ++ useTraitNames ++ stmt.implementedInterfaces).map(resolvedInheritedTypeName)
+    val code         = codeForClassStmt(stmt, name)
 
     val (dedupedName, fullName) =
       if (name.name == NamespaceTraversal.globalNamespaceName)

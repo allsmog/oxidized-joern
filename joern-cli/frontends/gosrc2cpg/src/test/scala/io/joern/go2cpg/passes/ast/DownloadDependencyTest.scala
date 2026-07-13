@@ -39,7 +39,7 @@ class DownloadDependencyTest extends GoCodeToCpgSuite {
 
   // NOTE: With respect to conversation on this PR - https://github.com/joernio/joern/pull/3753
   // ignoring the below uni tests, which tries to download the dependencies.
-  "Download dependency example with different package and namespace name" ignore {
+  "Download dependency example with different package and namespace name" should {
     val config = Config().withFetchDependencies(true).withIgnoredFilesRegex(IGNORE_TEST_FILE_REGEX)
     val cpg = code(
       """
@@ -130,7 +130,7 @@ class DownloadDependencyTest extends GoCodeToCpgSuite {
 
   // NOTE: With respect to conversation on this PR - https://github.com/joernio/joern/pull/3753
   // ignoring the below uni tests, which tries to download the dependencies.
-  "dependency resolution having type struct" ignore {
+  "dependency resolution having type struct" should {
     val config = Config().withFetchDependencies(true).withIgnoredFilesRegex(IGNORE_TEST_FILE_REGEX)
     val cpg = code(
       """
@@ -165,11 +165,11 @@ class DownloadDependencyTest extends GoCodeToCpgSuite {
       typeDeclNode.member.head.typeFullName shouldBe "github.com/redis/go-redis/v9.UniversalClient"
     }
 
-    "Test call node" ignore {
+    "Test call node" in {
       // TODO: Need to handle interface Type for caching the meta data to make this test work.
       val List(callNode) = cpg.call.name("Close").l
       callNode.typeFullName shouldBe "error"
-      callNode.methodFullName shouldBe "github.com/redis/go-redis/v9.UnversalClient.Close"
+      callNode.methodFullName shouldBe "github.com/redis/go-redis/v9.UniversalClient.Close"
     }
   }
 
@@ -294,24 +294,26 @@ class DownloadDependencyTest extends GoCodeToCpgSuite {
       goGlobal.pkgLevelVarAndConstantAstMap.size() shouldBe 0
     }
 
-    // TODO: Need to update these tests with some more improvements
-    "not create any entry in method full name to return type map" ignore {
-      // This should only contain the `main` method return type mapping as main source code is not invoking any of the dependency method.
-      goGlobal.nameSpaceMetaDataMap.size() shouldBe 1
-      val Array(metadata) = goGlobal.nameSpaceMetaDataMap.values().iterator().asScala.toArray
-      metadata.methodMetaMap.size() shouldBe 1
-      val List(mainfullname) = metadata.methodMetaMap.keys().asIterator().asScala.toList
-      mainfullname shouldBe "main"
-      val Array(returnType) = metadata.methodMetaMap.values().toArray
-      returnType shouldBe MethodCacheMetaData(Defines.voidTypeName, "main.main()")
+    "record method metadata for imported dependencies only" in {
+      val metadataByNamespace = goGlobal.nameSpaceMetaDataMap.asScala.toMap
+      metadataByNamespace("main").methodMetaMap.get("main") shouldBe MethodCacheMetaData(
+        Defines.voidTypeName,
+        "main.main()"
+      )
+      metadataByNamespace.keys.exists(_.startsWith("github.com/rs/zerolog")) shouldBe true
+      metadataByNamespace.keys.exists(_.startsWith("github.com/google/uuid")) shouldBe false
+      metadataByNamespace.collect {
+        case (namespace, metadata) if namespace.startsWith("github.com/rs/zerolog") => metadata.methodMetaMap.size()
+      }.sum should be > 0
     }
 
-    // TODO: Need to update these tests with some more improvements
-    "not create any entry in struct member to type map" ignore {
-      // This should be empty as neither main code has defined any struct type nor we are accessing the third party struct type.
-      goGlobal.nameSpaceMetaDataMap.size() shouldBe 1
-      val Array(metadata) = goGlobal.nameSpaceMetaDataMap.values().iterator().asScala.toArray
-      metadata.structTypeMembers.size() shouldBe 0
+    "record struct metadata for imported dependencies only" in {
+      val metadataByNamespace = goGlobal.nameSpaceMetaDataMap.asScala.toMap
+      metadataByNamespace.keys.exists(_.startsWith("github.com/rs/zerolog")) shouldBe true
+      metadataByNamespace.keys.exists(_.startsWith("github.com/google/uuid")) shouldBe false
+      metadataByNamespace.collect {
+        case (namespace, metadata) if namespace.startsWith("github.com/rs/zerolog") => metadata.structTypeMembers.size()
+      }.sum should be > 0
     }
   }
 
@@ -391,29 +393,26 @@ class DownloadDependencyTest extends GoCodeToCpgSuite {
       goGlobal.pkgLevelVarAndConstantAstMap.size() shouldBe 0
     }
 
-    // TODO: Need to update these tests with some more improvements
-    "not create any entry in method full name to return type map" ignore {
-      // This should only contain the `main` method return type mapping as main source code is not invoking any of the dependency method.
-      // TODO: While doing the implementation we need update this test
-      // Lambda expression return types are also getting recorded under this map
-      goGlobal.nameSpaceMetaDataMap.size() shouldBe 1
-      val Array(metadata) = goGlobal.nameSpaceMetaDataMap.values().iterator().asScala.toArray
-      metadata.methodMetaMap.size() shouldBe 1
-      val List(mainfullname) = metadata.methodMetaMap.keys().asIterator().asScala.toList
-      mainfullname shouldBe "main"
-      val Array(returnType) = metadata.methodMetaMap.values().toArray
-      returnType shouldBe MethodCacheMetaData(Defines.voidTypeName, "main.main()")
+    "record method metadata for imported dependencies only" in {
+      val metadataByNamespace = goGlobal.nameSpaceMetaDataMap.asScala.toMap
+      metadataByNamespace("main").methodMetaMap.get("main") shouldBe MethodCacheMetaData(
+        Defines.voidTypeName,
+        "main.main()"
+      )
+      metadataByNamespace.keys.exists(_.startsWith("github.com/rs/zerolog")) shouldBe true
+      metadataByNamespace.keys.exists(_.startsWith("github.com/google/uuid")) shouldBe false
+      metadataByNamespace.collect {
+        case (namespace, metadata) if namespace.startsWith("github.com/rs/zerolog") => metadata.methodMetaMap.size()
+      }.sum should be > 0
     }
 
-    // TODO: Need to update these tests with some more improvements
-    "not create any entry in struct member to type map" ignore {
-      // TODO: This test might require to update when we implement
-      // 1. Struct Type is directly being used
-      // 2. Struct Type is being passed as parameter or returned as value of method that is being used.
-      // 3. A method of Struct Type being used.
-      goGlobal.nameSpaceMetaDataMap.size() shouldBe 1
-      val Array(metadata) = goGlobal.nameSpaceMetaDataMap.values().iterator().asScala.toArray
-      metadata.structTypeMembers.size() shouldBe 0
+    "record struct metadata for imported dependencies only" in {
+      val metadataByNamespace = goGlobal.nameSpaceMetaDataMap.asScala.toMap
+      metadataByNamespace.keys.exists(_.startsWith("github.com/rs/zerolog")) shouldBe true
+      metadataByNamespace.keys.exists(_.startsWith("github.com/google/uuid")) shouldBe false
+      metadataByNamespace.collect {
+        case (namespace, metadata) if namespace.startsWith("github.com/rs/zerolog") => metadata.structTypeMembers.size()
+      }.sum should be > 0
     }
   }
 }

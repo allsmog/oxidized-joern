@@ -15,4 +15,12 @@ class LiteralTests extends CSharpCode2CpgFixture {
 
     cpg.literal.strippedCode.l shouldBe List("abc", "\\\"abc", "abc\\\"", "\\\"abc\\\"", "a\\\"b\\\"c")
   }
+
+  "inner text in raw string literals" in {
+    val rawLiteral = "\"\"\"abc\"\"\""
+    val cpg        = code(basicBoilerplate(s"var raw = $rawLiteral;"))
+
+    cpg.literal.code.l shouldBe List(rawLiteral)
+    cpg.literal.strippedCode.l shouldBe List("abc")
+  }
 }

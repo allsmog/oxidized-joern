@@ -3,6 +3,9 @@ package io.joern.jimple2cpg.astcreation
 import io.joern.jimple2cpg.astcreation.declarations.AstForDeclarationsCreator
 import io.joern.jimple2cpg.astcreation.expressions.AstForExpressionsCreator
 import io.joern.jimple2cpg.astcreation.statements.AstForStatementsCreator
+import io.joern.jimple2cpg.parser.JimpleAstGenRunner.{JimpleClassInfo, JimpleMethodInfo}
+import io.joern.jimple2cpg.parser.JimpleBodyIrAstBuilder
+import io.joern.jimple2cpg.parser.JimpleBodyIrAstBuilder.MethodBodyAst
 import io.joern.jimple2cpg.passes.AstCreationPass
 import io.joern.x2cpg.Ast.storeInDiffGraph
 import io.joern.x2cpg.*
@@ -24,7 +27,8 @@ class AstCreator(
   protected val filename: String,
   protected val cls: SootClass,
   accumulator: AstCreationPass.Accumulator,
-  fileContent: Option[String] = None
+  fileContent: Option[String] = None,
+  protected val classInfo: Option[JimpleClassInfo] = None
 )(implicit withSchemaValidation: ValidationMode)
     extends AstCreatorBase[Host, AstCreator](filename)
     with AstForDeclarationsCreator
@@ -39,6 +43,34 @@ class AstCreator(
   protected def registerType(typeName: String): String = {
     accumulator.registerType(typeName)
     typeName
+  }
+
+  protected def rustMethodBodyAst(
+    methodDeclaration: SootMethod,
+    excludedLocalNames: Set[String] = Set.empty
+  ): Option[MethodBodyAst] = {
+    rustMethodInfo(methodDeclaration)
+      .filter(_.code.exists(_.bodyIr.nonEmpty))
+      .map { methodInfo =>
+        methodInfo.code.foreach { codeInfo =>
+          codeInfo.localVariables.flatMap(_.typeName).foreach(registerType)
+          methodInfo.parameterTypes.foreach(registerType)
+          methodInfo.returnType.foreach(registerType)
+        }
+        JimpleBodyIrAstBuilder.methodBodyAstWithCfg(methodInfo, excludedLocalNames)
+      }
+  }
+
+  private def rustMethodInfo(methodDeclaration: SootMethod): Option[JimpleMethodInfo] = {
+    val parameterTypes = methodDeclaration.getParameterTypes.asScala.map(_.toQuotedString).toList
+    val returnType     = methodDeclaration.getReturnType.toQuotedString
+    classInfo.flatMap {
+      _.methods.find { methodInfo =>
+        methodInfo.name == methodDeclaration.getName &&
+        methodInfo.parameterTypes == parameterTypes &&
+        methodInfo.returnType.contains(returnType)
+      }
+    }
   }
 
   /** Entry point of AST creation. Translates a compilation unit created by JavaParser into a DiffGraph containing the

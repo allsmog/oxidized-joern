@@ -1,5 +1,7 @@
 package io.shiftleft.semanticcpg.language.nodemethods
 
+import io.shiftleft.codepropertygraph.Cpg
+import io.shiftleft.codepropertygraph.generated.Languages
 import io.shiftleft.codepropertygraph.generated.nodes.*
 import io.shiftleft.semanticcpg.NodeExtension
 import io.shiftleft.semanticcpg.language.ICallResolver
@@ -57,9 +59,17 @@ class ExpressionMethods(val node: Expression) extends AnyVal with NodeExtension 
     }
 
   def parameter(implicit callResolver: ICallResolver): Iterator[MethodParameterIn] = {
-    val predicate: MethodParameterIn => Boolean = node.argumentName match {
-      case Some(name) => _.name == name
-      case None => param => param.index == node.argumentIndex || (param.isVariadic && param.index < node.argumentIndex)
+    val isRuby = Cpg(node.graph).metaData.language.headOption.contains(Languages.RUBYSRC)
+
+    def matchesByIndex(param: MethodParameterIn): Boolean =
+      param.index == node.argumentIndex || (param.isVariadic && param.index < node.argumentIndex)
+
+    def predicate(param: MethodParameterIn): Boolean = node.argumentName match {
+      case Some(name) =>
+        param.name == name || (isRuby && !param.method.parameter.exists(
+          _.name == name
+        ) && param.index == node.argumentIndex)
+      case None => matchesByIndex(param)
     }
 
     for {

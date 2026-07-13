@@ -3,19 +3,19 @@ package io.joern.c2cpg.passes
 import io.joern.c2cpg.C2Cpg
 import io.joern.c2cpg.Config
 import io.joern.c2cpg.astcreation.AstCreator
-import io.joern.c2cpg.parser.CdtParser
 import io.joern.c2cpg.parser.CdtParser.HeaderFileParserLanguage
 import io.joern.c2cpg.parser.FileDefaults
 import io.joern.c2cpg.parser.HeaderFileFinder
 import io.joern.c2cpg.parser.JSONCompilationDatabaseParser
 import io.joern.c2cpg.parser.JSONCompilationDatabaseParser.CompilationDatabase
+import io.joern.c2cpg.parser.TranslationUnitLanguage
+import io.joern.c2cpg.parser.TranslationUnitParseInput
+import io.joern.c2cpg.parser.TranslationUnitProvider
 import io.joern.x2cpg.SourceFiles
 import io.joern.x2cpg.utils.{Report, TimeUtils}
 import io.shiftleft.codepropertygraph.generated.Cpg
 import io.shiftleft.passes.ForkJoinParallelCpgPassWithAccumulator
 import org.apache.commons.lang3.StringUtils
-import org.eclipse.cdt.core.dom.ast.gnu.cpp.GPPLanguage
-import org.eclipse.cdt.core.model.ILanguage
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.nio.file.{Path, Paths}
@@ -76,7 +76,7 @@ class AstCreationPass(
   config: Config,
   previousAccumulator: Option[AstCreationPass.Accumulator] = None,
   report: Report = new Report()
-) extends ForkJoinParallelCpgPassWithAccumulator[(Path, ILanguage), AstCreationPass.Accumulator](cpg) {
+) extends ForkJoinParallelCpgPassWithAccumulator[TranslationUnitParseInput, AstCreationPass.Accumulator](cpg) {
 
   import AstCreationPass.Accumulator
 
@@ -86,7 +86,8 @@ class AstCreationPass(
   private val logger: Logger = LoggerFactory.getLogger(classOf[AstCreationPass])
 
   private val headerFileFinder: HeaderFileFinder = new HeaderFileFinder(config)
-  private val parser: CdtParser                  = new CdtParser(config, headerFileFinder, compilationDatabase)
+  private val translationUnitProvider: TranslationUnitProvider =
+    TranslationUnitProvider.forConfig(config, headerFileFinder, compilationDatabase)
 
   private var _finalAccumulator: Accumulator = Accumulator()
 
@@ -110,7 +111,7 @@ class AstCreationPass(
     _finalAccumulator = accumulator
   }
 
-  override def generateParts(): Array[(Path, ILanguage)] = {
+  override def generateParts(): Array[TranslationUnitParseInput] = {
     val sourceFiles = if (config.compilationDatabaseFilename.isEmpty) {
       sourceFilesFromDirectory()
     } else {
@@ -118,7 +119,10 @@ class AstCreationPass(
     }
     sourceFiles.flatMap { file =>
       val path = Paths.get(file).toAbsolutePath
-      CdtParser.languageMappingForSourceFile(path, previousAccumulator.fold(Map.empty)(_.headerIncludes.toMap), config)
+      translationUnitProvider.languageMappingForSourceFile(
+        path,
+        previousAccumulator.fold(Map.empty)(_.headerIncludes.toMap)
+      )
     }
   }
 
@@ -164,28 +168,29 @@ class AstCreationPass(
     }
   }
 
-  private def suffixFromLanguage(relPath: String, language: ILanguage): String = {
-    if (FileDefaults.hasCHeaderFileExtension(relPath) && language.isInstanceOf[GPPLanguage]) { "<cpp>" }
+  private def suffixFromLanguage(relPath: String, language: TranslationUnitLanguage): String = {
+    if (FileDefaults.hasCHeaderFileExtension(relPath) && language == TranslationUnitLanguage.Cpp) { "<cpp>" }
     else ""
   }
 
   override def runOnPart(
     diffGraph: DiffGraphBuilder,
-    fileAndLanguage: (Path, ILanguage),
+    input: TranslationUnitParseInput,
     accumulator: Accumulator
   ): Unit = {
-    val (path, language) = fileAndLanguage
-    val relPath          = SourceFiles.toRelativePath(path.toString, config.inputPath)
+    val path    = input.path
+    val relPath = SourceFiles.toRelativePath(path.toString, config.inputPath)
     val (gotCpg, duration) = TimeUtils.time {
-      val parseResult = parser.parse(path, language, accumulator)
+      val parseResult = translationUnitProvider.parse(input, accumulator)
       parseResult match {
         case Some(translationUnit) =>
-          val fileLOC = translationUnit.getRawSignature.linesIterator.size
+          val cdtAst  = translationUnit.cdtAst
+          val fileLOC = cdtAst.getRawSignature.linesIterator.size
           report.addReportInfo(relPath, fileLOC, parsed = true)
           try {
-            val languageSuffix = suffixFromLanguage(relPath, language)
+            val languageSuffix = suffixFromLanguage(relPath, input.language)
             val localDiff =
-              new AstCreator(relPath, accumulator, config, translationUnit, headerFileFinder, languageSuffix)(
+              new AstCreator(relPath, accumulator, config, cdtAst, headerFileFinder, languageSuffix)(
                 config.schemaValidation
               ).createAst()
             diffGraph.absorb(localDiff)

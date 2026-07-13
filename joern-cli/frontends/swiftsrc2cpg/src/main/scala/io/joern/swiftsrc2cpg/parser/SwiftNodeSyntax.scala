@@ -4560,14 +4560,14 @@ object SwiftNodeSyntax {
     *
     *   - `label`: `<identifier>`
     *   - `colon`: `:`
-    *   - `statement`: ``StmtSyntax``
+    *   - `statement`: ``SwiftNode``
     *
     * ### Nowhere contained in
     */
   case class LabeledStmtSyntax(json: Value) extends StmtSyntax {
-    def label: SwiftToken     = createSwiftNode(_childrenMap("label")).asInstanceOf[SwiftToken]
-    def colon: SwiftToken     = createSwiftNode(_childrenMap("colon")).asInstanceOf[SwiftToken]
-    def statement: StmtSyntax = createSwiftNode(_childrenMap("statement")).asInstanceOf[StmtSyntax]
+    def label: SwiftToken    = createSwiftNode(_childrenMap("label")).asInstanceOf[SwiftToken]
+    def colon: SwiftToken    = createSwiftNode(_childrenMap("colon")).asInstanceOf[SwiftToken]
+    def statement: SwiftNode = createSwiftNode(_childrenMap("statement"))
   }
 
   /** ### Documentation
