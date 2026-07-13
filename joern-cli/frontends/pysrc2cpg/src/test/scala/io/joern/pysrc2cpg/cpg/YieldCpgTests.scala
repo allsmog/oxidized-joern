@@ -5,19 +5,22 @@ import io.shiftleft.semanticcpg.language.*
 import org.scalatest.matchers.should.Matchers
 
 class YieldCpgTests extends PySrc2CpgFixture with Matchers {
+  // In the oxidized model `yield` is lowered to a call to `<operator>.yield`
+  // (and `yield from` to `<operator>.yieldFrom`) carrying the yielded value as
+  // its argument, rather than to a RETURN node. See passes/YieldTests.scala.
   "bare yield" should {
     val cpg = code("""def gen():
         |  yield
         |""".stripMargin)
 
-    "test return node properties" in {
-      val returnNode = cpg.ret.head
-      returnNode.code shouldBe "yield"
-      returnNode.lineNumber shouldBe Some(2)
+    "test yield call node properties" in {
+      val yieldCall = cpg.call.nameExact("<operator>.yield").head
+      yieldCall.code shouldBe "yield"
+      yieldCall.lineNumber shouldBe Some(2)
     }
 
-    "have no ast children as arguments" in {
-      cpg.ret.astChildren.isIdentifier.l shouldBe empty
+    "have no arguments" in {
+      cpg.call.nameExact("<operator>.yield").argument.l shouldBe empty
     }
   }
 
@@ -26,14 +29,14 @@ class YieldCpgTests extends PySrc2CpgFixture with Matchers {
         |  yield x
         |""".stripMargin)
 
-    "test return node properties" in {
-      val returnNode = cpg.ret.head
-      returnNode.code shouldBe "yield x"
-      returnNode.lineNumber shouldBe Some(2)
+    "test yield call node properties" in {
+      val yieldCall = cpg.call.nameExact("<operator>.yield").head
+      yieldCall.code shouldBe "yield x"
+      yieldCall.lineNumber shouldBe Some(2)
     }
 
-    "test return node ast children" in {
-      cpg.ret.astChildren.order(1).isIdentifier.head.code shouldBe "x"
+    "test yield call argument" in {
+      cpg.call.nameExact("<operator>.yield").argument(1).isIdentifier.head.code shouldBe "x"
     }
   }
 
@@ -43,9 +46,9 @@ class YieldCpgTests extends PySrc2CpgFixture with Matchers {
         |    yield x
         |""".stripMargin)
 
-    "have a return node with yield code" in {
-      val returnNode = cpg.ret.code("yield.*").head
-      returnNode.code shouldBe "yield x"
+    "have a yield call with yield code" in {
+      val yieldCall = cpg.call.nameExact("<operator>.yield").head
+      yieldCall.code shouldBe "yield x"
     }
   }
 
@@ -54,14 +57,14 @@ class YieldCpgTests extends PySrc2CpgFixture with Matchers {
         |  yield from other_gen()
         |""".stripMargin)
 
-    "test return node properties" in {
-      val returnNode = cpg.ret.code("yield from.*").head
-      returnNode.code shouldBe "yield from other_gen()"
-      returnNode.lineNumber shouldBe Some(2)
+    "test yieldFrom call node properties" in {
+      val yieldFromCall = cpg.call.nameExact("<operator>.yieldFrom").head
+      yieldFromCall.code shouldBe "yield from other_gen()"
+      yieldFromCall.lineNumber shouldBe Some(2)
     }
 
-    "test return node ast children" in {
-      cpg.ret.code("yield from.*").astChildren.order(1).isCall.head.code shouldBe "other_gen()"
+    "test yieldFrom call argument" in {
+      cpg.call.nameExact("<operator>.yieldFrom").argument(1).isCall.head.code shouldBe "other_gen()"
     }
   }
 
@@ -70,14 +73,14 @@ class YieldCpgTests extends PySrc2CpgFixture with Matchers {
         |  yield from items
         |""".stripMargin)
 
-    "test return node properties" in {
-      val returnNode = cpg.ret.code("yield from.*").head
-      returnNode.code shouldBe "yield from items"
-      returnNode.lineNumber shouldBe Some(2)
+    "test yieldFrom call node properties" in {
+      val yieldFromCall = cpg.call.nameExact("<operator>.yieldFrom").head
+      yieldFromCall.code shouldBe "yield from items"
+      yieldFromCall.lineNumber shouldBe Some(2)
     }
 
-    "test return node ast children" in {
-      cpg.ret.code("yield from.*").astChildren.order(1).isIdentifier.head.code shouldBe "items"
+    "test yieldFrom call argument" in {
+      cpg.call.nameExact("<operator>.yieldFrom").argument(1).isIdentifier.head.code shouldBe "items"
     }
   }
 }
