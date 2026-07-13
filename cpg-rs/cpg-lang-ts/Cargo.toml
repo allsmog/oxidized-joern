@@ -1,0 +1,16 @@
+[package]
+name = "cpg-lang-ts"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+cpg-core.workspace = true
+cpg-frontend.workspace = true
+tree-sitter.workspace = true
+tree-sitter-java = "0.23.5"
+tree-sitter-go = "0.25.0"
+tree-sitter-javascript = "0.25.0"
+tree-sitter-ruby = "0.23.1"
+tree-sitter-rust = "0.24.2"
+tree-sitter-python.workspace = true

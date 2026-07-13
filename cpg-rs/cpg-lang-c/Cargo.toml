@@ -1,0 +1,11 @@
+[package]
+name = "cpg-lang-c"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+cpg-core.workspace = true
+cpg-frontend.workspace = true
+tree-sitter.workspace = true
+tree-sitter-c.workspace = true
