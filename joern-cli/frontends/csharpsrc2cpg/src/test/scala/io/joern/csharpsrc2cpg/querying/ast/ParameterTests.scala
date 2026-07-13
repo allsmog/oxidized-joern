@@ -1,6 +1,8 @@
 package io.joern.csharpsrc2cpg.querying.ast
 
+import io.joern.csharpsrc2cpg.CSharpModifiers
 import io.joern.csharpsrc2cpg.testfixtures.CSharpCode2CpgFixture
+import io.shiftleft.codepropertygraph.generated.EvaluationStrategies
 import io.shiftleft.codepropertygraph.generated.ModifierTypes
 import io.shiftleft.semanticcpg.language.*
 
@@ -63,6 +65,48 @@ class ParameterTests extends CSharpCode2CpgFixture {
       b.isVariadic shouldBe false
     }
 
+  }
+
+  "parameter modifiers" should {
+    val cpg = code("""
+        |static class Ext
+        |{
+        |  public static void M(this string text, ref int value, out int written, in int read, params string[] rest)
+        |  {
+        |    written = value + read;
+        |  }
+        |}
+        |""".stripMargin)
+
+    "preserve modifier nodes, variadic params, and by-reference evaluation" in {
+      inside(cpg.method.nameExact("M").parameter.l) { case text :: value :: written :: read :: rest :: Nil =>
+        text.name shouldBe "text"
+        text.astChildren.isModifier.modifierType.l shouldBe List(CSharpModifiers.THIS)
+        text.evaluationStrategy shouldBe EvaluationStrategies.BY_SHARING
+        text.isVariadic shouldBe false
+
+        value.name shouldBe "value"
+        value.astChildren.isModifier.modifierType.l shouldBe List(CSharpModifiers.REF)
+        value.evaluationStrategy shouldBe EvaluationStrategies.BY_REFERENCE
+        value.isVariadic shouldBe false
+
+        written.name shouldBe "written"
+        written.astChildren.isModifier.modifierType.l shouldBe List(CSharpModifiers.OUT)
+        written.evaluationStrategy shouldBe EvaluationStrategies.BY_REFERENCE
+        written.isVariadic shouldBe false
+
+        read.name shouldBe "read"
+        read.astChildren.isModifier.modifierType.l shouldBe List(CSharpModifiers.IN)
+        read.evaluationStrategy shouldBe EvaluationStrategies.BY_REFERENCE
+        read.isVariadic shouldBe false
+
+        rest.name shouldBe "rest"
+        rest.astChildren.isModifier.modifierType.l shouldBe List(CSharpModifiers.PARAMS)
+        rest.evaluationStrategy shouldBe EvaluationStrategies.BY_SHARING
+        rest.isVariadic shouldBe true
+        rest.typeFullName shouldBe "System.String[]"
+      }
+    }
   }
 
 }

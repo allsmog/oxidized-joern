@@ -5,6 +5,7 @@ import io.joern.dataflowengineoss.language.Path
 import io.joern.dataflowengineoss.semanticsloader.Semantics
 import io.joern.dataflowengineoss.testfixtures.SemanticCpgTestFixture
 import io.joern.dataflowengineoss.testfixtures.SemanticTestCpg
+import io.joern.pysrc2cpg.PythonParserBackend
 import io.joern.pysrc2cpg.Py2CpgOnFileSystem
 import io.joern.pysrc2cpg.Py2CpgOnFileSystemConfig
 import io.joern.x2cpg.ValidationMode
@@ -24,13 +25,25 @@ import io.shiftleft.semanticcpg.language.ICallResolver
 import io.shiftleft.semanticcpg.language.NoResolve
 import io.shiftleft.semanticcpg.validation.{PostFrontendValidator, ValidationLevel}
 
+object PySrc2CpgFixture {
+  private val parserBackendProperty = "pysrc2cpg.parserBackend"
+
+  def configuredParserBackend: PythonParserBackend = {
+    sys.props
+      .get(parserBackendProperty)
+      .flatMap(PythonParserBackend.fromString)
+      .getOrElse(PythonParserBackend.JavaCc)
+  }
+}
+
 trait PythonFrontend extends LanguageFrontend {
   override type ConfigType = Py2CpgOnFileSystemConfig
 
   override val fileSuffix: String = ".py"
 
-  def schemaValidation: ValidationMode = ValidationMode.Enabled
-  def withFileContent: Boolean         = true
+  def schemaValidation: ValidationMode   = ValidationMode.Enabled
+  def withFileContent: Boolean           = true
+  def parserBackend: PythonParserBackend = PythonParserBackend.JavaCc
 
   override def execute(sourceCodePath: java.io.File): Cpg = {
     val tmp = new Py2CpgOnFileSystem()
@@ -38,6 +51,7 @@ trait PythonFrontend extends LanguageFrontend {
         Py2CpgOnFileSystemConfig()
           .withSchemaValidation(schemaValidation)
           .withDisableFileContent(!withFileContent)
+          .withParserBackend(parserBackend)
           .withInputPath(sourceCodePath.getAbsolutePath)
       )
       .get
@@ -46,13 +60,17 @@ trait PythonFrontend extends LanguageFrontend {
   }
 }
 
-class PySrcTestCpg(schemaValidationMode: ValidationMode, fileContentEnabled: Boolean)
-    extends DefaultTestCpg
+class PySrcTestCpg(
+  schemaValidationMode: ValidationMode,
+  fileContentEnabled: Boolean,
+  parserBackendOverride: PythonParserBackend
+) extends DefaultTestCpg
     with PythonFrontend
     with SemanticTestCpg {
 
-  override def schemaValidation: ValidationMode = schemaValidationMode
-  override def withFileContent: Boolean         = fileContentEnabled
+  override def schemaValidation: ValidationMode   = schemaValidationMode
+  override def withFileContent: Boolean           = fileContentEnabled
+  override def parserBackend: PythonParserBackend = parserBackendOverride
 
   override protected def applyPasses(): Unit = {
     super.applyPasses()
@@ -81,9 +99,10 @@ class PySrc2CpgFixture(
   semantics: Semantics = DefaultSemantics(),
   withPostProcessing: Boolean = true,
   withSchemaValidation: ValidationMode = ValidationMode.Enabled,
-  withFileContent: Boolean = true
+  withFileContent: Boolean = true,
+  withParserBackend: PythonParserBackend = PySrc2CpgFixture.configuredParserBackend
 ) extends Code2CpgFixture(() =>
-      new PySrcTestCpg(withSchemaValidation, withFileContent)
+      new PySrcTestCpg(withSchemaValidation, withFileContent, withParserBackend)
         .withOssDataflow(withOssDataflow)
         .withSemantics(semantics)
         .withPostProcessingPasses(withPostProcessing)

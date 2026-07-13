@@ -26,8 +26,7 @@ class SwitchDataflowTests extends GoCodeToCpgSuite(withOssDataflow = true) {
 
     }
 
-    "be reachable for empty condition" ignore {
-      // TODO (BUG)dataflow doesn't work for empty condition in switch case
+    "be reachable for empty condition" in {
       val cpg = code("""
           |package main
           |func method() {

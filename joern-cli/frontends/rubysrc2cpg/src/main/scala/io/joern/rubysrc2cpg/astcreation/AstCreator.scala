@@ -11,6 +11,7 @@ import io.shiftleft.semanticcpg.language.types.structure.NamespaceTraversal
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.util.regex.Matcher
+import scala.collection.mutable
 
 class AstCreator(
   val fileName: String,
@@ -35,6 +36,9 @@ class AstCreator(
   /* Used to track variable names and their LOCAL nodes.
    */
   protected val scope: RubyScope = new RubyScope(programSummary, projectRoot)
+
+  protected val pendingSingletonMethodBindings: mutable.Map[String, mutable.ArrayBuffer[(NewBinding, NewMethod)]] =
+    mutable.Map.empty
 
   protected val logger: Logger = LoggerFactory.getLogger(getClass)
 

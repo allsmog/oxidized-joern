@@ -35,14 +35,14 @@ class TypeDeclConstructorDataflowTests extends GoCodeToCpgSuite(withOssDataflow 
       sink.reachableByFlows(source).size shouldBe 2
     }
 
-    "Check constructor parameter to println dataflow" ignore {
-      val sink = cpg.call("Println")
+    "Check constructor parameter to println dataflow" in {
+      val sink = cpg.call("Println").l
 
-      var source = cpg.literal("\"1234567890\"")
-      sink.reachableByFlows(source).size shouldBe 1
+      val phone = cpg.literal("\"1234567890\"").l
+      sink.reachableByFlows(phone).size shouldBe 2
 
-      source = cpg.literal("\"Home\"")
-      sink.reachableByFlows(source).size shouldBe 2
+      val phoneType = cpg.literal("\"Home\"").l
+      sink.reachableByFlows(phoneType).size shouldBe 2
     }
 
   }

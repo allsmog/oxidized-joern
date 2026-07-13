@@ -7,16 +7,17 @@ import io.joern.c2cpg.parser.FileDefaults
 import io.joern.c2cpg.parser.HeaderFileFinder
 import io.joern.c2cpg.parser.JSONCompilationDatabaseParser
 import io.joern.c2cpg.parser.JSONCompilationDatabaseParser.CompilationDatabase
+import io.joern.c2cpg.parser.ParserBackend
+import io.joern.c2cpg.parser.TranslationUnitParseInput
 import io.joern.x2cpg.SourceFiles
 import org.eclipse.cdt.core.dom.ast.{
   IASTPreprocessorIfStatement,
   IASTPreprocessorIfdefStatement,
   IASTPreprocessorStatement
 }
-import org.eclipse.cdt.core.model.ILanguage
 import org.slf4j.LoggerFactory
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.Paths
 
 class PreprocessorPass(config: Config) {
 
@@ -30,6 +31,11 @@ class PreprocessorPass(config: Config) {
   private val accumulator      = AstCreationPass.Accumulator()
 
   def run(): Iterable[String] = {
+    if (config.parserBackend != ParserBackend.Cdt) {
+      throw new UnsupportedOperationException(
+        "The oxidized c2cpg parser backend does not support --print-ifdef-only yet. Use --parser-backend cdt."
+      )
+    }
     val sourceFiles = if (config.compilationDatabaseFilename.isEmpty) {
       sourceFilesFromDirectory()
     } else {
@@ -81,9 +87,8 @@ class PreprocessorPass(config: Config) {
     }
   }
 
-  private def runOnPart(fileAndLanguage: (Path, ILanguage)): Iterable[String] = {
-    val (path, language) = fileAndLanguage
-    parser.preprocessorStatements(path, language, accumulator).flatMap(preprocessorStatement2String).toSet
+  private def runOnPart(input: TranslationUnitParseInput): Iterable[String] = {
+    parser.preprocessorStatements(input.path, input.language, accumulator).flatMap(preprocessorStatement2String).toSet
   }
 
 }

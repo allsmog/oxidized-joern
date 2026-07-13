@@ -50,14 +50,14 @@ object CdtParser {
     * @param config
     *   The configuration settings
     * @return
-    *   A sequence of (Path, ILanguage) pairs. For some header files, this may return both C and C++ parsers. Returns
-    *   empty sequence for non-existent files.
+    *   A sequence of parser inputs. For some header files, this may return both C and C++ parsers. Returns empty
+    *   sequence for non-existent files.
     */
   def languageMappingForSourceFile(
     path: Path,
     headerIncludes: Map[String, HeaderFileParserLanguage],
     config: Config
-  ): Seq[(Path, ILanguage)] = {
+  ): Seq[TranslationUnitParseInput] = {
     if (!Files.isRegularFile(path)) {
       logger.warn(s"File '${path.toString}' does not exist. Check for broken symlinks!")
       return Seq.empty
@@ -65,20 +65,24 @@ object CdtParser {
     val filePath = path.toString
     if (!FileDefaults.hasCHeaderFileExtension(filePath)) {
       val code = IOUtils.readLinesInFile(path).mkString("\n")
-      return Seq((path, createParseLanguage(path, code, config)))
+      return Seq(TranslationUnitParseInput(path, createParseLanguage(path, code, config)))
     }
     headerIncludes.get(filePath) match {
-      case None | Some(HeaderFileParserLanguage.C) => Seq((path, GCCLanguage.getDefault))
-      case Some(HeaderFileParserLanguage.Cpp)      => Seq((path, GPPLanguage.getDefault))
-      case _ => Seq((path, GCCLanguage.getDefault), (path, GPPLanguage.getDefault))
+      case None | Some(HeaderFileParserLanguage.C) => Seq(TranslationUnitParseInput(path, TranslationUnitLanguage.C))
+      case Some(HeaderFileParserLanguage.Cpp)      => Seq(TranslationUnitParseInput(path, TranslationUnitLanguage.Cpp))
+      case _ =>
+        Seq(
+          TranslationUnitParseInput(path, TranslationUnitLanguage.C),
+          TranslationUnitParseInput(path, TranslationUnitLanguage.Cpp)
+        )
     }
   }
 
-  private def createParseLanguage(file: Path, code: String, config: Config): ILanguage = {
+  private def createParseLanguage(file: Path, code: String, config: Config): TranslationUnitLanguage = {
     if (FileDefaults.hasCppFileExtension(file.toString) || preprocessedFileIsFromCPPFile(file, code, config)) {
-      GPPLanguage.getDefault
+      TranslationUnitLanguage.Cpp
     } else {
-      GCCLanguage.getDefault
+      TranslationUnitLanguage.C
     }
   }
 
@@ -113,7 +117,7 @@ class CdtParser(config: Config, headerFileFinder: HeaderFileFinder, compilationD
 
   def preprocessorStatements(
     file: Path,
-    language: ILanguage,
+    language: TranslationUnitLanguage,
     accumulator: AstCreationPass.Accumulator
   ): Iterable[IASTPreprocessorStatement] = {
     parse(file, language, accumulator).map(t => preprocessorStatements(t)).getOrElse(Iterable.empty)
@@ -133,7 +137,11 @@ class CdtParser(config: Config, headerFileFinder: HeaderFileFinder, compilationD
     )
   }
 
-  def parse(file: Path, language: ILanguage, accumulator: AstCreationPass.Accumulator): Option[IASTTranslationUnit] = {
+  def parse(
+    file: Path,
+    language: TranslationUnitLanguage,
+    accumulator: AstCreationPass.Accumulator
+  ): Option[IASTTranslationUnit] = {
     handleParseResult(file, parseInternal(file, language, accumulator))
   }
 
@@ -156,17 +164,21 @@ class CdtParser(config: Config, headerFileFinder: HeaderFileFinder, compilationD
 
   private def prepareAndParse(
     file: Path,
-    lang: ILanguage,
+    lang: TranslationUnitLanguage,
     fileContent: FileContent,
     accumulator: AstCreationPass.Accumulator
   ): ParseResult = {
     val relativeFilePath    = SourceFiles.toRelativePath(file.toString, config.inputPath)
     val fileContentProvider = new CustomFileContentProvider(headerFileFinder, file.toString, accumulator)
     val scannerInfo         = createScannerInfo(file)
-    safeParseInternal(fileContent, scannerInfo, fileContentProvider, lang, relativeFilePath)
+    safeParseInternal(fileContent, scannerInfo, fileContentProvider, cdtLanguage(lang), relativeFilePath)
   }
 
-  private def parseInternal(file: Path, lang: ILanguage, accumulator: AstCreationPass.Accumulator): ParseResult = {
+  private def parseInternal(
+    file: Path,
+    lang: TranslationUnitLanguage,
+    accumulator: AstCreationPass.Accumulator
+  ): ParseResult = {
     val fileContent = readFileAsFileContent(file)
     prepareAndParse(file, lang, fileContent, accumulator)
   }
@@ -175,6 +187,13 @@ class CdtParser(config: Config, headerFileFinder: HeaderFileFinder, compilationD
     val lang        = CdtParser.createParseLanguage(file, code, config)
     val fileContent = FileContent.create(file.toString, true, code.toCharArray)
     prepareAndParse(file, lang, fileContent, accumulator)
+  }
+
+  private def cdtLanguage(language: TranslationUnitLanguage): ILanguage = {
+    language match {
+      case TranslationUnitLanguage.C   => GCCLanguage.getDefault
+      case TranslationUnitLanguage.Cpp => GPPLanguage.getDefault
+    }
   }
 
   private def safeParseInternal(

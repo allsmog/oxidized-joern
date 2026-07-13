@@ -135,16 +135,15 @@ class MethodTests extends GoCodeToCpgSuite {
         |}
         |""".stripMargin)
 
-    "Be correct with method node properties" ignore {
+    "Be correct with method node properties" in {
       val List(x) = cpg.method.name("foo").l
       x.name shouldBe "foo"
       x.fullName shouldBe "main.foo"
       x.code should startWith("func foo() (fpkg.Sample,error){")
-      // TODO: Tuple handling needs to be done properly to return both the types.
       x.signature shouldBe "main.foo()(joern.io/sample/fpkg.Sample,error)"
       x.isExternal shouldBe false
 
-      x.order shouldBe 2
+      x.order shouldBe 1
       x.filename shouldBe "Test0.go"
       x.lineNumber shouldBe Option(4)
       x.lineNumberEnd shouldBe Option(6)
@@ -478,12 +477,11 @@ class MethodTests extends GoCodeToCpgSuite {
         |}
         |""".stripMargin)
 
-    "Be correct with method node properties" ignore {
+    "Be correct with method node properties" in {
       val List(x) = cpg.method.name("foo").l
       x.name shouldBe "foo"
       x.fullName shouldBe "main.foo"
       x.code should startWith("func foo(argc int, argv **string)")
-      // TODO: pointer to pointer use cae need to be hanled
       x.signature shouldBe "main.foo(int, **string)"
       x.isExternal shouldBe false
 
@@ -493,7 +491,7 @@ class MethodTests extends GoCodeToCpgSuite {
       x.lineNumberEnd shouldBe Option(4)
     }
 
-    "be correct for parameter nodes" ignore {
+    "be correct for parameter nodes" in {
       cpg.parameter.name.l shouldBe List("argc", "argv")
       val List(argc) = cpg.parameter.name("argc").l
       argc.code shouldBe "argc int"
@@ -505,7 +503,6 @@ class MethodTests extends GoCodeToCpgSuite {
       val List(argv) = cpg.parameter.name("argv").l
       argv.code shouldBe "argv **string"
       argv.order shouldBe 2
-      // TODO: pointer to pointer use cae need to be hanled
       argv.typeFullName shouldBe "**string"
       argv.isVariadic shouldBe false
       argv.evaluationStrategy shouldBe EvaluationStrategies.BY_SHARING
@@ -1448,22 +1445,21 @@ class MethodTests extends GoCodeToCpgSuite {
       "main.go"
     )
 
-    "Be correct with method node properties" ignore {
+    "Be correct with method node properties" in {
       val List(x) = cpg.method.name("foo").l
       x.name shouldBe "foo"
       x.fullName shouldBe "main.foo"
       x.code should startWith("func foo(argc int, argv Sample)")
-      // TODO: wrong methodfull name being genearted when the packaged is imported with '.'
       x.signature shouldBe "main.foo(int, privado.ai/test/fpkg.Sample)"
       x.isExternal shouldBe false
 
-      x.order shouldBe 2
+      x.order shouldBe 1
       x.filename shouldBe "main.go"
       x.lineNumber shouldBe Option(4)
       x.lineNumberEnd shouldBe Option(5)
     }
 
-    "be correct for parameter nodes" ignore {
+    "be correct for parameter nodes" in {
       cpg.parameter.name.l shouldBe List("argc", "argv")
       val List(argc) = cpg.parameter.name("argc").l
       argc.code shouldBe "argc int"
@@ -1475,7 +1471,6 @@ class MethodTests extends GoCodeToCpgSuite {
       val List(argv) = cpg.parameter.name("argv").l
       argv.code shouldBe "argv Sample"
       argv.order shouldBe 2
-      // TODO: wrong methodfull name being genearted when the packaged is imported with '.'
       argv.typeFullName shouldBe "privado.ai/test/fpkg.Sample"
       argv.isVariadic shouldBe false
       argv.evaluationStrategy shouldBe EvaluationStrategies.BY_VALUE

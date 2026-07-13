@@ -29,7 +29,7 @@ class ReachingDefPass(cpg: Cpg, maxNumberOfDefinitions: Int = 4000)(implicit s: 
     }
 
     val solution     = new DataFlowSolver().calculateMopSolutionForwards(problem)
-    val ddgGenerator = new DdgGenerator(s)
+    val ddgGenerator = new DdgGenerator(s, cpg)
     ddgGenerator.addReachingDefEdges(dstGraph, method, problem, solution)
   }
 

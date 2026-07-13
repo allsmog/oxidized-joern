@@ -188,8 +188,11 @@ trait AstForTypesCreator(implicit withSchemaValidation: ValidationMode) { this: 
     typeDeclNode: NewTypeDecl,
     ignoreInitCalls: Boolean = false
   ): Ast = {
-    val nodeInfo      = createBabelNodeInfo(classElement)
-    val tpe           = typeFor(nodeInfo)
+    val nodeInfo = createBabelNodeInfo(classElement)
+    val tpe = nodeInfo.node match {
+      case TSParameterProperty => typeFor(createBabelNodeInfo(nodeInfo.json("parameter")))
+      case _                   => typeFor(nodeInfo)
+    }
     val possibleTypes = Seq(tpe)
     val typeFullName  = if (Defines.isBuiltinType(tpe)) tpe else Defines.Any
     val memberNode_ = nodeInfo.node match {

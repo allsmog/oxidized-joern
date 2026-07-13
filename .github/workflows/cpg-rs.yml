@@ -1,0 +1,83 @@
+name: cpg-rs
+
+on:
+  push:
+    paths:
+      - 'cpg-rs/**'
+      - '.github/workflows/cpg-rs.yml'
+  pull_request:
+    paths:
+      - 'cpg-rs/**'
+      - '.github/workflows/cpg-rs.yml'
+  workflow_dispatch:
+
+env:
+  # Byte-parity spec is pinned to this Joern release (see cpg-rs/PROGRESS.md).
+  # Keep in sync with the default in cpg-rs/joern-parity/setup-oracle.sh.
+  JOERN_VERSION: v4.0.555
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: cpg-rs
+      - name: Build
+        run: cargo build --workspace --locked
+        working-directory: cpg-rs
+      - name: Test
+        run: cargo test --workspace --locked
+        working-directory: cpg-rs
+
+  fmt-clippy:
+    runs-on: ubuntu-latest
+    # The tree does not currently pass fmt/clippy (223 rustfmt diffs, 6 clippy
+    # warnings in joern-parity as of 2026-07-09). Advisory until cleaned up;
+    # drop continue-on-error once the workspace is clean.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: cpg-rs
+      - name: rustfmt
+        run: cargo fmt --check
+        working-directory: cpg-rs
+      - name: clippy
+        run: cargo clippy --workspace -- -D warnings
+        working-directory: cpg-rs
+
+  # Differential parity against the pinned Joern oracle. The oracle download
+  # is ~2GB, so this job is manual-only (workflow_dispatch) rather than
+  # running on every push. The unpacked distribution is cached keyed on the
+  # pinned version.
+  parity:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: cpg-rs
+      - name: Set up JDK (Joern needs a JVM)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Cache Joern oracle
+        uses: actions/cache@v4
+        with:
+          path: /tmp/joern-cli-dist
+          key: joern-oracle-${{ env.JOERN_VERSION }}
+      - name: Install Joern oracle
+        run: ./cpg-rs/joern-parity/setup-oracle.sh
+      - name: Run parity check
+        run: ./check.sh
+        working-directory: cpg-rs/joern-parity

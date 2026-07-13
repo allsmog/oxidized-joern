@@ -37,6 +37,47 @@ class TypeNodeTests extends PhpCode2CpgFixture {
     }
   }
 
+  "Trait use statements" should {
+    val cpg = code("""<?php
+        |trait Loud {}
+        |trait Quiet {}
+        |class Speaker {
+        |  use Loud, Quiet {
+        |    Loud::shout insteadof Quiet;
+        |    Quiet::shout as protected murmur;
+        |  }
+        |}
+        |""".stripMargin)
+
+    "emit trait-use calls and type references" in {
+      cpg.call.nameExact(Domain.PhpOperators.traitUse).code.l shouldBe List("use Loud, Quiet")
+      cpg.call
+        .nameExact(Domain.PhpOperators.traitUse)
+        .argument
+        .isTypeRef
+        .code
+        .l shouldBe List("Loud", "Quiet")
+    }
+
+    "emit trait-use adaptation calls and type references" in {
+      cpg.call.nameExact(Domain.PhpOperators.traitUseInsteadOf).code.l shouldBe List("Loud::shout insteadof Quiet")
+      cpg.call
+        .nameExact(Domain.PhpOperators.traitUseInsteadOf)
+        .argument
+        .isTypeRef
+        .code
+        .l shouldBe List("Loud", "Quiet")
+
+      cpg.call.nameExact(Domain.PhpOperators.traitUseAlias).code.l shouldBe List("Quiet::shout as protected murmur")
+      cpg.call
+        .nameExact(Domain.PhpOperators.traitUseAlias)
+        .argument
+        .isTypeRef
+        .code
+        .l shouldBe List("Quiet")
+    }
+  }
+
   "known types without explicit typeDecls" should {
     val cpg = code("""<?php
         |$x = 3;

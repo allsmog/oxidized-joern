@@ -187,6 +187,7 @@ object RustNodeSyntax {
     "BANG"                   -> (json => BangToken(json)),
     "NEQ"                    -> (json => NeqToken(json)),
     "POUND"                  -> (json => PoundToken(json)),
+    "DOLLAR"                 -> (json => DollarToken(json)),
     "FRONTMATTER"            -> (json => FrontmatterToken(json)),
     "IDENT"                  -> (json => IdentToken(json)),
     "LIFETIME_IDENT"         -> (json => LifetimeIdentToken(json)),
@@ -1692,8 +1693,8 @@ object RustNodeSyntax {
 
   final case class RangeExpr(json: Value) extends RustNode with Expr {
     def attr: Seq[Attr] = _childrenByKind.getOrElse("ATTR", Seq.empty).map(createRustNode(_).asInstanceOf[Attr])
-    def expr: Option[Expr] =
-      _children.find(child => _exprKinds.contains(child("nodeKind").str)).map(createRustNode(_).asInstanceOf[Expr])
+    def expr: Seq[Expr] =
+      _children.filter(child => _exprKinds.contains(child("nodeKind").str)).map(createRustNode(_).asInstanceOf[Expr])
     def dot2Token: Option[Dot2Token] =
       _childrenByKind.get("DOT2").flatMap(_.headOption).map(createRustNode(_).asInstanceOf[Dot2Token])
     def dot2eqToken: Option[Dot2eqToken] =
@@ -2329,6 +2330,8 @@ object RustNodeSyntax {
   final case class NeqToken(json: Value) extends RustToken
 
   final case class PoundToken(json: Value) extends RustToken
+
+  final case class DollarToken(json: Value) extends RustToken
 
   final case class FrontmatterToken(json: Value) extends RustToken
 

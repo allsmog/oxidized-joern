@@ -1,5 +1,6 @@
 package io.joern.javasrc2cpg
 
+import io.joern.javasrc2cpg.oxidized.OxidizedAstCreationPass
 import io.joern.javasrc2cpg.passes.{AstCreationPass, OuterClassRefPass, TypeInferencePass}
 import io.joern.x2cpg.X2Cpg.withNewEmptyCpg
 import io.joern.x2cpg.passes.frontend.{JavaConfigFileCreationPass, MetaDataPass, TypeNodePass}
@@ -21,15 +22,23 @@ class JavaSrc2Cpg extends X2CpgFrontend {
   override def createCpg(config: Config): Try[Cpg] = {
     withNewEmptyCpg(config.outputPath, config: Config) { (cpg, config) =>
       new MetaDataPass(cpg, language, config.inputPath).createAndApply()
-      val astCreationPass = new AstCreationPass(config, cpg)
-      astCreationPass.createAndApply()
-      astCreationPass.sourceParser.cleanupDelombokOutput()
-      astCreationPass.clearJavaParserCaches()
-      astCreationPass.closeTypeSolvers()
+      val usedTypes = config.parserBackend match {
+        case JavaParserBackend.JavaParser =>
+          val astCreationPass = new AstCreationPass(config, cpg)
+          astCreationPass.createAndApply()
+          astCreationPass.sourceParser.cleanupDelombokOutput()
+          astCreationPass.clearJavaParserCaches()
+          astCreationPass.closeTypeSolvers()
+          astCreationPass.usedTypes()
+        case JavaParserBackend.Oxidized =>
+          val oxidizedPass = new OxidizedAstCreationPass(cpg, config)
+          oxidizedPass.createAndApply()
+          oxidizedPass.usedTypes()
+      }
       new OuterClassRefPass(cpg).createAndApply()
       JavaConfigFileCreationPass(cpg, config = config).createAndApply()
       if (!config.skipTypeInfPass) {
-        TypeNodePass.withRegisteredTypes(astCreationPass.usedTypes(), cpg).createAndApply()
+        TypeNodePass.withRegisteredTypes(usedTypes, cpg).createAndApply()
         new TypeInferencePass(cpg).createAndApply()
       }
     }

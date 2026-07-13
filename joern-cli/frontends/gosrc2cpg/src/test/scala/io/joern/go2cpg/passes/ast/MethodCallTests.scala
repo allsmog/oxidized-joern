@@ -439,8 +439,7 @@ class MethodCallTests extends GoCodeToCpgSuite(withOssDataflow = true) {
       x.typeFullName shouldBe "joern.io/sample/fpkg.bar.<ReturnType>.<unknown>"
     }
 
-    "Signature property should be updated with argument types" ignore {
-      // TODO: update the signature, keeping it on low priority until we find it is required for flows.
+    "Signature property should be updated with argument types" in {
       val List(x) = cpg.call("bar").l
       x.signature shouldBe "joern.io/sample/fpkg.bar(int, string)"
     }
@@ -561,7 +560,7 @@ class MethodCallTests extends GoCodeToCpgSuite(withOssDataflow = true) {
     }
   }
 
-  "Method call check with parameters being passed while they are casted to another type" ignore {
+  "Method call check with parameters being passed while they are casted to another type" should {
     val cpg = code("""
         |package main
         |func foo() {
@@ -570,10 +569,36 @@ class MethodCallTests extends GoCodeToCpgSuite(withOssDataflow = true) {
         |   var c = bar(reflect.TypeOf((*MockDB)(nil).CheckHealth))
         |}
         |""".stripMargin)
-    // TODO: Need to work on how this casting should get translated to AST
     "Check call node properties" in {
       cpg.call("bar").size shouldBe 3
       val List(a, b, c) = cpg.call("bar").l
+      a.argument.isCall.name.l shouldBe List("[]byte")
+      a.argument.isCall.methodFullName.l shouldBe List("[]uint8")
+      a.argument.isCall.argument.code.l shouldBe List("\"test\"")
+
+      b.argument.isCall.name.l shouldBe List("map[string]interface{}")
+      b.argument.isCall.methodFullName.l shouldBe List("map[]any")
+      b.argument.isCall.argument.code.l shouldBe List("labels")
+    }
+  }
+
+  "Pointer type conversion call" should {
+    val cpg = code("""
+        |package main
+        |
+        |type MockDB struct{}
+        |
+        |func foo() {
+        |   var db = (*MockDB)(nil)
+        |   println(db)
+        |}
+        |""".stripMargin)
+
+    "create a call node for the conversion without dropping the pointer type callee" in {
+      val List(conversionCall) = cpg.call.codeExact("(*MockDB)(nil)").l
+      conversionCall.name shouldBe "*MockDB"
+      conversionCall.methodFullName shouldBe "*main.MockDB"
+      conversionCall.argument.code.l shouldBe List("nil")
     }
   }
 }

@@ -101,4 +101,36 @@ class LambdaTests extends CSharpCode2CpgFixture {
     }
   }
 
+  "an anonymous method expression" should {
+    val cpg = code("""
+        |using System;
+        |namespace HelloWorld
+        |{
+        |  class Program
+        |  {
+        |    static void Main()
+        |    {
+        |      Predicate<int> pred = delegate (int x) { return x > 0; };
+        |    }
+        |  }
+        |}
+        |""".stripMargin)
+
+    "create an anonymous method declaration and method reference" in {
+      inside(cpg.method("Main").astChildren.collectAll[Method].l) { case anon :: Nil =>
+        anon.name shouldBe "<lambda>0"
+        inside(anon.parameter.l) { case x :: Nil =>
+          x.name shouldBe "x"
+          x.typeFullName shouldBe DotNetTypeMap(BuiltinTypes.Int)
+          x.index shouldBe 1
+        }
+      }
+
+      inside(cpg.methodRef.l) { case closure :: Nil =>
+        closure.methodFullName shouldBe "HelloWorld.Program.Main.<lambda>0:<unresolvedSignature>"
+        closure.referencedMethod.name shouldBe "<lambda>0"
+      }
+    }
+  }
+
 }

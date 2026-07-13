@@ -2,6 +2,7 @@ package io.joern.php2cpg.parser
 
 import io.joern.php2cpg.Config
 import io.joern.php2cpg.parser.Domain.PhpFile
+import io.joern.x2cpg.utils.Environment
 import io.joern.x2cpg.utils.JoernRunfilesLocator
 import io.shiftleft.semanticcpg.utils.FileUtil.*
 import io.shiftleft.semanticcpg.utils.{ExternalCommand, FileUtil}
@@ -21,7 +22,11 @@ class PhpParser private (phpParserPath: String, phpIniPath: String, disableFileC
 
   private def phpParseCommand(filenames: collection.Seq[String]): Seq[String] = {
     val phpParserCommands = Seq("--with-recovery", "--resolve-names", "--json-dump")
-    Seq("php", "--php-ini", phpIniPath, phpParserPath) ++ phpParserCommands ++ filenames
+    if (PhpParser.isNativeParserPath(phpParserPath)) {
+      Seq(phpParserPath) ++ phpParserCommands ++ filenames
+    } else {
+      Seq("php", "--php-ini", phpIniPath, phpParserPath) ++ phpParserCommands ++ filenames
+    }
   }
 
   def parseFiles(inputPaths: collection.Seq[String]): collection.Seq[PhpParseResult] = {
@@ -167,11 +172,38 @@ object PhpParser {
   private def defaultPhpParserBin: String = {
     JoernRunfilesLocator.resolve("php-parser/file/downloaded").getOrElse {
       val packagePath = Paths.get(this.getClass.getProtectionDomain.getCodeSource.getLocation.toURI)
-      ExternalCommand
+      val parserDir = ExternalCommand
         .executableDir(packagePath)
-        .resolve("php-parser/php-parser.php")
-        .toString
+        .resolve("php-parser")
+      val nativeParser = parserDir.resolve(nativeParserBinaryName)
+      if (Files.exists(nativeParser)) {
+        nativeParser.toString
+      } else {
+        parserDir.resolve("php-parser.php").toString
+      }
     }
+  }
+
+  private def nativeParserBinaryName: String = {
+    (Environment.operatingSystem, Environment.architecture) match {
+      case (Environment.OperatingSystemType.Windows, _)                                => "phpastgen-win.exe"
+      case (Environment.OperatingSystemType.Linux, Environment.ArchitectureType.X86)   => "phpastgen-linux"
+      case (Environment.OperatingSystemType.Linux, Environment.ArchitectureType.ARMv8) => "phpastgen-linux-arm"
+      case (Environment.OperatingSystemType.Mac, Environment.ArchitectureType.X86)     => "phpastgen-macos"
+      case (Environment.OperatingSystemType.Mac, Environment.ArchitectureType.ARMv8)   => "phpastgen-macos-arm"
+      case _                                                                           => "phpastgen-linux"
+    }
+  }
+
+  private[php2cpg] def isNativeParserPath(pathString: String): Boolean = {
+    val lower = pathString.toLowerCase
+    !(lower.endsWith(".php") || lower.endsWith(".phar"))
+  }
+
+  def requiresPhpRuntime(config: Config): Boolean = {
+    val parserPath =
+      config.phpParserBin.orElse(Option(System.getenv(PhpParserBinEnvVar))).getOrElse(defaultPhpParserBin)
+    !isNativeParserPath(parserPath)
   }
 
   private def configOverrideOrDefaultPath(

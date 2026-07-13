@@ -1,0 +1,7 @@
+let nums = [1, 2, 3]
+let empty: [Int] = []
+let dict = ["a": 1, "b": 2]
+let emptyDict: [String: Int] = [:]
+let nested = [[1, 2], [3, 4]]
+let set: Set<Int> = [1, 2, 3]
+let mixed = [("a", 1), ("b", 2)]

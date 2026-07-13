@@ -1,6 +1,8 @@
 package io.joern.c2cpg
 
+import io.joern.c2cpg.oxidized.OxidizedAstCreationPass
 import io.joern.c2cpg.parser.FileDefaults
+import io.joern.c2cpg.parser.ParserBackend
 import io.joern.c2cpg.passes.*
 import io.joern.x2cpg.X2Cpg.withNewEmptyCpg
 import io.joern.x2cpg.{SourceFiles, X2CpgFrontend}
@@ -25,28 +27,36 @@ class C2Cpg extends X2CpgFrontend {
       val report = new Report()
       new MetaDataPass(cpg, Languages.NEWC, config.inputPath).createAndApply()
 
-      val preprocessedFiles    = allPreprocessedFiles(config)
-      val srcFileExtensions    = gatherFileExtensions(config)
-      val headerFileExtensions = Set(FileDefaults.CHeaderFileExtension)
+      if (config.parserBackend == ParserBackend.Oxidized) {
+        val oxidizedPass = new OxidizedAstCreationPass(cpg, config)
+        oxidizedPass.createAndApply()
+        TypeNodePass.withRegisteredTypes(oxidizedPass.typesSeen(), cpg).createAndApply()
+        new TypeDeclNodePass(cpg, config).createAndApply()
+        new FullNameUniquenessPass(cpg).createAndApply()
+      } else {
+        val preprocessedFiles    = allPreprocessedFiles(config)
+        val srcFileExtensions    = gatherFileExtensions(config)
+        val headerFileExtensions = Set(FileDefaults.CHeaderFileExtension)
 
-      val sourcePass = new AstCreationPass(cpg, preprocessedFiles, srcFileExtensions, config, report = report)
-      sourcePass.createAndApply()
+        val sourcePass = new AstCreationPass(cpg, preprocessedFiles, srcFileExtensions, config, report = report)
+        sourcePass.createAndApply()
 
-      val headerPass = new AstCreationPass(
-        cpg,
-        preprocessedFiles,
-        headerFileExtensions,
-        config,
-        previousAccumulator = Some(sourcePass.accumulatedState()),
-        report = report
-      )
-      headerPass.createAndApply()
+        val headerPass = new AstCreationPass(
+          cpg,
+          preprocessedFiles,
+          headerFileExtensions,
+          config,
+          previousAccumulator = Some(sourcePass.accumulatedState()),
+          report = report
+        )
+        headerPass.createAndApply()
 
-      TypeNodePass.withRegisteredTypes(headerPass.typesSeen(), cpg).createAndApply()
-      new TypeDeclNodePass(cpg, config).createAndApply()
-      new FunctionDeclNodePass(cpg, headerPass.unhandledMethodDeclarations(), config).createAndApply()
-      new FullNameUniquenessPass(cpg).createAndApply()
-      report.print()
+        TypeNodePass.withRegisteredTypes(headerPass.typesSeen(), cpg).createAndApply()
+        new TypeDeclNodePass(cpg, config).createAndApply()
+        new FunctionDeclNodePass(cpg, headerPass.unhandledMethodDeclarations(), config).createAndApply()
+        new FullNameUniquenessPass(cpg).createAndApply()
+        report.print()
+      }
     }
   }
 

@@ -72,6 +72,39 @@ class SimpleAstCreationPassTest extends SwiftSrc2CpgSuite {
       localD.typeFullName shouldBe Defines.String
     }
 
+    "have correct structure for tuple variable declarations" in {
+      val cpg = code("""
+        |var (a, b): Int = foo()
+        |""".stripMargin)
+      val List(method)                      = cpg.method.nameExact("<global>").l
+      val List(tmpAssign, assignA, assignB) = method.assignment.l
+      val List(tmpLocal)                    = method.block.local.name("^<tmp>.*").l
+      tmpAssign.code shouldBe s"${tmpLocal.name} = foo()"
+      assignA.code shouldBe s"a = ${tmpLocal.name}.0"
+      assignB.code shouldBe s"b = ${tmpLocal.name}.1"
+      cpg.call.nameExact("foo").size shouldBe 1
+      val List(localA, localB) = method.block.local.nameExact("a", "b").l
+      localA.name shouldBe "a"
+      localA.typeFullName shouldBe "Swift.Int"
+      localB.name shouldBe "b"
+      localB.typeFullName shouldBe "Swift.Int"
+    }
+
+    "have correct structure for nested tuple variable declarations" in {
+      val cpg = code("""
+        |let (a, (b, _)) = foo()
+        |""".stripMargin)
+      val List(method)                      = cpg.method.nameExact("<global>").l
+      val List(tmpAssign, assignA, assignB) = method.assignment.l
+      val List(tmpLocal)                    = method.block.local.name("^<tmp>.*").l
+      tmpAssign.code shouldBe s"${tmpLocal.name} = foo()"
+      assignA.code shouldBe s"a = ${tmpLocal.name}.0"
+      assignB.code shouldBe s"b = ${tmpLocal.name}.1.0"
+      method.block.local.nameExact("a", "b").size shouldBe 2
+      method.block.local.name("^<wildcard>.*").l shouldBe empty
+      cpg.unknown.l shouldBe empty
+    }
+
     "have corresponding type decl with correct bindings for function" in {
       val cpg            = code("func method() {}")
       val List(typeDecl) = cpg.typeDecl.nameExact("method").l
@@ -93,6 +126,127 @@ class SimpleAstCreationPassTest extends SwiftSrc2CpgSuite {
       val List(localX) = cpg.local.nameExact("x").l
       val List(idX)    = cpg.identifier.nameExact("x").l
       idX.refOut.head shouldBe localX
+    }
+
+    "have correct structure for simple calls, returns, and reassignment" in {
+      val cpg = code("""
+          |func foo() -> Int {
+          |  return 1
+          |}
+          |var a = 0
+          |a = foo()
+          |foo(1, bar: "x")
+          |""".stripMargin)
+
+      cpg.method.nameExact("foo").ast.isReturn.code.l shouldBe List("return 1")
+      cpg.call.nameExact("foo").code.l should contain allOf ("foo()", """foo(1, bar: "x")""")
+      cpg.call.nameExact(Operators.assignment).code.l should contain("a = foo()")
+
+      inside(cpg.call.nameExact("foo").codeExact("""foo(1, bar: "x")""").l) { case List(call) =>
+        call.argument.code.l should contain allOf ("1", """"x"""")
+      }
+    }
+
+    "have correct structure for simple class members and member access" in {
+      val cpg = code("""
+          |class Foo {
+          |  var x = 1
+          |  func baz() {}
+          |  func bar() {
+          |    x = self.x
+          |    baz()
+          |    self.baz()
+          |  }
+          |}
+          |""".stripMargin)
+
+      inside(cpg.typeDecl.nameExact("Foo").l) { case List(foo) =>
+        foo.fullName shouldBe "Test0.swift:<global>.Foo"
+        foo.member.nameExact("x").typeFullName.l shouldBe List(Defines.Any)
+      }
+      cpg.method.nameExact("bar").fullName.l should contain("Test0.swift:<global>.Foo.bar:()->ANY")
+      cpg.call.nameExact(Operators.fieldAccess).code.l should contain("self.x")
+      cpg.call.nameExact("baz").code.l should contain allOf ("baz()", "self.baz()")
+    }
+
+    "have correct structure for simple if else control flow" in {
+      val cpg = code("""
+          |func pick(flag: Bool) {
+          |  if flag {
+          |    foo()
+          |  } else {
+          |    bar()
+          |  }
+          |}
+          |""".stripMargin)
+
+      inside(cpg.controlStructure.controlStructureType(ControlStructureTypes.IF).l) { case List(ifNode) =>
+        ifNode.condition.code.l shouldBe List("flag")
+        ifNode.trueBodyOut.ast.isCall.nameExact("foo").code.l shouldBe List("foo()")
+        ifNode.falseBodyOut.ast.isCall.nameExact("bar").code.l shouldBe List("bar()")
+      }
+    }
+
+    "have correct structure for simple binary operators" in {
+      val cpg = code("""
+          |func bump(x: Int) {
+          |  var y = x + 1
+          |  if y > 0 {
+          |    y = y - 1
+          |  }
+          |}
+          |""".stripMargin)
+
+      cpg.call.nameExact(Operators.addition).code.l should contain("x + 1")
+      cpg.call.nameExact(Operators.greaterThan).code.l should contain("y > 0")
+      cpg.call.nameExact(Operators.subtraction).code.l should contain("y - 1")
+      cpg.controlStructure.controlStructureType(ControlStructureTypes.IF).condition.code.l shouldBe List("y > 0")
+    }
+
+    "have correct structure for simple while loops" in {
+      val cpg = code("""
+          |func count() {
+          |  var i = 0
+          |  while i < 3 {
+          |    i = i + 1
+          |  }
+          |}
+          |""".stripMargin)
+
+      inside(cpg.controlStructure.controlStructureType(ControlStructureTypes.WHILE).l) { case List(whileNode) =>
+        whileNode.condition.code.l shouldBe List("i < 3")
+        whileNode.whenTrue.ast.isCall.nameExact(Operators.assignment).code.l should contain("i = i + 1")
+      }
+    }
+
+    "have correct structure for simple for in loops" in {
+      val cpg = code("""
+          |func visit(items: Int) {
+          |  for item in items {
+          |    sink(item)
+          |  }
+          |}
+          |""".stripMargin)
+
+      cpg.controlStructure.controlStructureType(ControlStructureTypes.WHILE).code.l shouldBe List(
+        "for item in items {\n    sink(item)\n  }"
+      )
+      cpg.call.nameExact(Operators.assignment).code.l should contain("item = <result>0.value")
+      cpg.call.nameExact("sink").code.l shouldBe List("sink(item)")
+    }
+
+    "have correct structure for simple break and continue" in {
+      val cpg = code("""
+          |func loop(flag: Bool) {
+          |  while flag {
+          |    continue
+          |    break
+          |  }
+          |}
+          |""".stripMargin)
+
+      cpg.controlStructure.controlStructureType(ControlStructureTypes.CONTINUE).code.l shouldBe List("continue")
+      cpg.controlStructure.controlStructureType(ControlStructureTypes.BREAK).code.l shouldBe List("break")
     }
 
     "have correct closure bindings" in {

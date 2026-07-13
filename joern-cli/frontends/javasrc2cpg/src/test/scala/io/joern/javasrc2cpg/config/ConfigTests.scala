@@ -1,7 +1,7 @@
 package io.joern.javasrc2cpg.config
 
 import io.joern.javasrc2cpg.Main
-import io.joern.javasrc2cpg.Config
+import io.joern.javasrc2cpg.{Config, JavaParserBackend}
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
@@ -27,6 +27,8 @@ class ConfigTests extends AnyWordSpec with Matchers with Inside {
       "--inference-jar-paths",
       "INFERENCE_JARS",
       "--fetch-dependencies",
+      "--parser-backend",
+      "oxidized",
       "--delombok-java-home",
       "DELOMBOK_HOME",
       "--delombok-mode",
@@ -46,6 +48,7 @@ class ConfigTests extends AnyWordSpec with Matchers with Inside {
       config.ignoredFilesRegex.toString shouldBe "EXCLUDE_REGEX"
       config.inferenceJarPaths shouldBe Set("INFERENCE_JARS")
       config.fetchDependencies shouldBe true
+      config.parserBackend shouldBe JavaParserBackend.Oxidized
       config.delombokJavaHome shouldBe Some("DELOMBOK_HOME")
       config.delombokMode shouldBe Some("DELOMBOK_MODE")
       config.enableTypeRecovery shouldBe true

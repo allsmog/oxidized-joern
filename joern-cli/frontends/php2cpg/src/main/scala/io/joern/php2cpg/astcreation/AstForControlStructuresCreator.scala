@@ -297,7 +297,8 @@ trait AstForControlStructuresCreator(implicit withSchemaValidation: ValidationMo
 
     val throwNode = controlStructureNode(expr, ControlStructureTypes.THROW, code)
 
-    Ast(throwNode).withChild(thrownExpr)
+    val throwAst = Ast(throwNode).withChild(thrownExpr)
+    thrownExpr.root.map(throwAst.withArgEdge(throwNode, _)).getOrElse(throwAst)
   }
 
   protected def astForYieldFromExpr(expr: PhpYieldFromExpr): Ast = {
