@@ -278,15 +278,20 @@ pub(crate) fn receiver_is_router(cpg: &Cpg, c: NodeId) -> bool {
     cpg.type_full_name_of(c).is_some_and(is_router_type)
 }
 
+/// The base segment of a (possibly package-/pointer-qualified) type
+/// spelling: `*mux.Router` -> `Router`, `pkg.MyHandler` -> `MyHandler`.
+fn type_base(t: &str) -> &str {
+    t.rsplit(|ch: char| ch == '.' || ch == ':' || ch == '/' || ch == '*' || ch == '&')
+        .next()
+        .unwrap_or(t)
+}
+
 /// Router-shaped type name, by base segment: shared by the verb-call
 /// receiver gate above and the mount-forwarding PARAMETER gate (a route
 /// group forwarded into a callee only registers through a router-typed
 /// parameter — `gin.IRouter`, `chi.Router`, `*mux.Router`, `EchoRouter`).
 pub(crate) fn is_router_type(t: &str) -> bool {
-    let base = t
-        .rsplit(|ch: char| ch == '.' || ch == ':' || ch == '/' || ch == '*' || ch == '&')
-        .next()
-        .unwrap_or(t);
+    let base = type_base(t);
     matches!(base, "Router" | "Engine" | "ServeMux" | "RouterGroup" | "Mux")
         || base.ends_with("Router")
 }
@@ -310,6 +315,34 @@ fn collect_function_refs(
     mined: &mut BTreeSet<String>,
     descend: bool,
 ) {
+    // http.Handler VALUES: a registration argument that is a typed struct
+    // value (`Handle("/x", &MyHandler{})`, `Handle("/x", h)` with `h`
+    // locally typed) registers the TYPE — the entry is its ServeHTTP
+    // method, per the http.Handler contract. Two evidence forms: a type
+    // hint stamped on the argument, or a constructor-shaped call named
+    // after the type (`&MyHandler{}` / `NewStyleHandler` both name it).
+    // Either way the type must actually DEFINE a ServeHTTP for anything
+    // to be mined, so a plain function value never matches here.
+    let mut hint_bases: Vec<&str> = Vec::new();
+    if let Some(hint) = cpg.type_full_name_of(n) {
+        hint_bases.push(type_base(hint));
+    }
+    if cpg.kind_of(n) == NodeKind::Call {
+        if let Some(name) = cpg.name_of(n) {
+            hint_bases.push(type_base(name));
+        }
+    }
+    for base in hint_bases {
+        if base.is_empty() {
+            continue;
+        }
+        let want = format!("{base}.ServeHTTP");
+        for &m in by_name.get("ServeHTTP").map(Vec::as_slice).unwrap_or(&[]) {
+            if cpg.full_name_of(m) == Some(want.as_str()) {
+                mined.insert(want.clone());
+            }
+        }
+    }
     match cpg.kind_of(n) {
         NodeKind::Identifier => record(cpg, n, cpg.name_of(n), by_name, mined),
         // An inline closure (`HandleFunc("/x", func(w, r) {...})`) is lowered
