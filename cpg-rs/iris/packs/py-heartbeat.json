@@ -1,0 +1,146 @@
+{
+ "rules": [
+  {
+   "id": "IRIS-PY-78",
+   "name": "request-to-shell",
+   "cwe": "CWE-78",
+   "severity": "critical",
+   "description": "HTTP request data reaches shell/command execution",
+   "sourceIdents": [
+    "request",
+    "argv",
+    "environ"
+   ],
+   "sources": [
+    "get_json",
+    "getenv"
+   ],
+   "sinks": [
+    "system@0",
+    "popen@0",
+    "call@0",
+    "run@0",
+    "check_output@0",
+    "check_call@0",
+    "Popen@0"
+   ],
+   "sanitizers": [
+    "quote",
+    "shlex_quote"
+   ]
+  },
+  {
+   "id": "IRIS-PY-95",
+   "name": "request-to-eval",
+   "cwe": "CWE-95",
+   "severity": "critical",
+   "description": "HTTP request data reaches eval/exec/deserialization",
+   "sourceIdents": [
+    "request"
+   ],
+   "sinks": [
+    "eval@0",
+    "exec@0",
+    "loads@0",
+    "load@0"
+   ],
+   "sanitizers": [
+    "safe_load",
+    "literal_eval"
+   ]
+  },
+  {
+   "id": "IRIS-PY-22",
+   "name": "request-to-path",
+   "cwe": "CWE-22",
+   "severity": "high",
+   "description": "HTTP request data reaches a filesystem path operation",
+   "sourceIdents": [
+    "request"
+   ],
+   "sinks": [
+    "open@0",
+    "remove@0",
+    "unlink@0",
+    "rmtree@0",
+    "makedirs@0",
+    "rename@0",
+    "send_file@0",
+    "save@0"
+   ],
+   "sanitizers": [
+    "secure_filename",
+    "basename"
+   ]
+  },
+  {
+   "id": "IRIS-PY-89",
+   "name": "request-to-sql",
+   "cwe": "CWE-89",
+   "severity": "high",
+   "description": "HTTP request data reaches SQL execution",
+   "sourceIdents": [
+    "request"
+   ],
+   "sinks": [
+    "execute@0",
+    "executemany@0"
+   ]
+  },
+  {
+   "id": "IRIS-PY-918",
+   "name": "request-to-url",
+   "cwe": "CWE-918",
+   "severity": "medium",
+   "description": "HTTP request data controls an outbound URL (SSRF)",
+   "sourceIdents": [
+    "request"
+   ],
+   "sinks": [
+    "urlopen@0"
+   ]
+  },
+  {
+   "id": "IRIS-PY-601",
+   "name": "request-to-redirect",
+   "cwe": "CWE-601",
+   "severity": "medium",
+   "description": "HTTP request data controls a redirect target",
+   "sourceIdents": [
+    "request"
+   ],
+   "sinks": [
+    "redirect@0"
+   ]
+  },
+  {
+   "id": "IRIS-PY-S3",
+   "name": "request-to-s3-key",
+   "cwe": "CWE-22",
+   "severity": "medium",
+   "description": "HTTP request data controls an object-store key/path",
+   "sourceIdents": [
+    "request"
+   ],
+   "sinks": [
+    "upload_fileobj@2",
+    "upload_file@2",
+    "put_object",
+    "download_file@1"
+   ]
+  },
+  {
+   "id": "IRIS-PY-SSTI",
+   "name": "request-to-template",
+   "cwe": "CWE-1336",
+   "severity": "high",
+   "description": "HTTP request data reaches template rendering as code",
+   "sourceIdents": [
+    "request"
+   ],
+   "sinks": [
+    "render_template_string@0"
+   ]
+  }
+ ]
+}

@@ -26,6 +26,12 @@ pub struct TsLangSpec {
     pub extensions: &'static [&'static str],
     /// Built tree-sitter grammar.
     pub language: Language,
+    /// Per-extension grammar overrides for languages whose dialects need a
+    /// different grammar over the same node-kind vocabulary (TypeScript's
+    /// `tsx`: JSX syntax is not parseable by the plain grammar, and the TSX
+    /// grammar mis-parses `<T>x` casts — so the extension picks the grammar).
+    /// The override's node kinds must be handled by the same spec fields.
+    pub dialects: &'static [(&'static str, fn() -> Language)],
 
     /// Node kinds that declare a function/method.
     pub function_kinds: &'static [&'static str],
@@ -46,6 +52,74 @@ pub struct TsLangSpec {
     /// value (Rust, Ruby). The engine then wraps that tail expression in a
     /// Return node so the shared dataflow engine sees the param→return flow.
     pub implicit_return: bool,
+    /// Node kinds that define a named type/namespace container (class, object,
+    /// trait). The engine tracks the enclosing container name while scanning so
+    /// constructor-sugar methods can be qualified. Empty = no tracking.
+    pub type_container_kinds: &'static [&'static str],
+    /// Field on a function-definition node holding its receiver (Go's
+    /// `receiver`). The receiver's type qualifies the method for
+    /// type-aware call resolution. None = no explicit receivers.
+    pub receiver_field: Option<&'static str>,
+    /// A method name the language sugars onto its enclosing container's name at
+    /// call sites (Scala: `object Foo { def apply(..) }` is called as
+    /// `Foo(..)`). Such a method is registered under the container's name so
+    /// the sugar call resolves; `fullName` keeps the `Container.method` form.
+    pub ctor_sugar_method: Option<&'static str>,
+    /// Field on a function-definition node holding a C-style declarator chain
+    /// (C++: `declarator`). The method's name, qualifying scope
+    /// (`Foo::bar`), and parameter list all live inside that subtree rather
+    /// than in `name`/`parameters` fields. None = names are direct fields.
+    pub declarator_field: Option<&'static str>,
+    /// Type-container kinds that also emit a TypeDecl node (with base classes
+    /// and members). Subset of `type_container_kinds`: namespaces qualify
+    /// names but are not type declarations. Empty = no TypeDecl emission.
+    pub type_decl_kinds: &'static [&'static str],
+    /// Node kinds holding a type declaration's base-class list
+    /// (C++: `base_class_clause`). Only read for `type_decl_kinds` nodes.
+    pub base_clause_kinds: &'static [&'static str],
+    /// Node kinds declaring a data member inside a type body
+    /// (C++: `field_declaration`). Members carry declared types for
+    /// receiver-hint resolution of member calls.
+    pub member_kinds: &'static [&'static str],
+    /// Wrapper type names whose single template argument is the type that
+    /// matters for call resolution (`shared_ptr<FileServiceIf>` →
+    /// `FileServiceIf`). Applied when extracting declared types of
+    /// members/params/locals; empty = no unwrapping.
+    pub smart_ptr_names: &'static [&'static str],
+    /// Constructor-factory helper names (C++ `make_shared`/`make_unique`):
+    /// standard-library functions whose constructed type lives in their
+    /// template argument, not their own name. Calls to these are lowered
+    /// under the constructed type's name so type-named sink specs match
+    /// (`make_shared<SimpleRandomAccessFile>(path)` must be visible as a
+    /// `SimpleRandomAccessFile` construction); empty = no rewriting.
+    pub ctor_factories: &'static [&'static str],
+    /// Optional source-level shim applied before parsing. Returns None when
+    /// the file needs no transformation. MUST be line/column-preserving so
+    /// every location in the CPG still points at the real source.
+    pub preprocess: Option<fn(&str) -> Option<String>>,
+}
+
+/// C++/CLI (managed C++) uses syntax the standard grammar cannot parse —
+/// `String^ s`, `gcnew`, `ref class` — which silently drops whole method
+/// bodies from the graph (the Windows agent's PowerShell/AD code is written
+/// in it). Rewrite the managed tokens to same-LENGTH standard spellings so
+/// the grammar parses and every byte offset is preserved. `^` → `*` is safe
+/// even for the XOR operator: both parse as binary expressions.
+fn cpp_cli_shim(src: &str) -> Option<String> {
+    let managed = src.contains("gcnew")
+        || src.contains("ref class")
+        || src.contains("ref struct")
+        || src.contains("#using")
+        || src.contains("msclr");
+    if !managed {
+        return None;
+    }
+    let s = src
+        .replace('^', "*")
+        .replace("gcnew", "new  ")
+        .replace("ref class", "    class")
+        .replace("ref struct", "    struct");
+    Some(s)
 }
 
 impl TsLangSpec {
@@ -71,7 +145,7 @@ const CONTROL: &[&str] = &[
     "while_statement", "while_expression", "loop_expression", "enhanced_for_statement",
     "switch_statement", "switch_expression", "match_expression", "expression_switch_statement",
     "try_statement", "with_statement", "do_statement", "unless", "until", "case", "when",
-    "for_in_statement", "for_of_statement", "labeled_statement",
+    "for_in_statement", "for_of_statement", "labeled_statement", "for_range_loop",
 ];
 
 const RETURNS: &[&str] = &["return_statement", "return_expression"];
@@ -95,6 +169,17 @@ pub fn java() -> TsLangSpec {
         control_kinds: CONTROL,
         return_kinds: RETURNS,
         implicit_return: false,
+        type_container_kinds: &[],
+        receiver_field: None,
+        ctor_sugar_method: None,
+        declarator_field: None,
+        type_decl_kinds: &[],
+        base_clause_kinds: &[],
+        member_kinds: &[],
+        smart_ptr_names: &[],
+        ctor_factories: &[],
+        preprocess: None,
+        dialects: &[],
     }
 }
 
@@ -105,7 +190,7 @@ pub fn go() -> TsLangSpec {
         traits: LanguageTraits::HAS_FUNCTION_POINTERS | LanguageTraits::STRUCTURAL_TYPING,
         extensions: &["go"],
         language: tree_sitter_go::LANGUAGE.into(),
-        function_kinds: &["function_declaration", "method_declaration"],
+        function_kinds: &["function_declaration", "method_declaration", "func_literal"],
         param_container_kinds: &["parameter_list"],
         call_kinds: &["call_expression"],
         callee_field: "function",
@@ -117,6 +202,17 @@ pub fn go() -> TsLangSpec {
         control_kinds: CONTROL,
         return_kinds: RETURNS,
         implicit_return: false,
+        type_container_kinds: &[],
+        receiver_field: Some("receiver"),
+        ctor_sugar_method: None,
+        declarator_field: None,
+        type_decl_kinds: &[],
+        base_clause_kinds: &[],
+        member_kinds: &[],
+        smart_ptr_names: &[],
+        ctor_factories: &[],
+        preprocess: None,
+        dialects: &[],
     }
 }
 
@@ -143,8 +239,65 @@ pub fn javascript() -> TsLangSpec {
         control_kinds: CONTROL,
         return_kinds: RETURNS,
         implicit_return: false,
+        type_container_kinds: &[],
+        receiver_field: None,
+        ctor_sugar_method: None,
+        declarator_field: None,
+        type_decl_kinds: &[],
+        base_clause_kinds: &[],
+        member_kinds: &[],
+        smart_ptr_names: &[],
+        ctor_factories: &[],
+        preprocess: None,
+        dialects: &[],
     }
 }
+
+pub fn typescript() -> TsLangSpec {
+    TsLangSpec {
+        name: "TypeScript",
+        namespace_delim: ".",
+        traits: LanguageTraits::HAS_CLASSES | LanguageTraits::HAS_GENERICS
+            | LanguageTraits::HAS_FUNCTION_POINTERS | LanguageTraits::ALLOWS_FORWARD_REFS
+            | LanguageTraits::HAS_DEFAULT_ARGS,
+        extensions: &["ts", "tsx", "mts", "cts"],
+        language: tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
+        dialects: TS_DIALECTS,
+        function_kinds: &[
+            "function_declaration", "function_expression", "method_definition",
+            "arrow_function", "generator_function_declaration",
+        ],
+        param_container_kinds: &["formal_parameters"],
+        call_kinds: &["call_expression"],
+        callee_field: "function",
+        assign_forms: &[
+            AssignForm { kind: "variable_declarator", lhs_field: "name", rhs_field: "value" },
+            AssignForm { kind: "assignment_expression", lhs_field: "left", rhs_field: "right" },
+        ],
+        control_kinds: CONTROL,
+        return_kinds: RETURNS,
+        implicit_return: false,
+        type_container_kinds: &["class_declaration"],
+        receiver_field: None,
+        ctor_sugar_method: None,
+        declarator_field: None,
+        type_decl_kinds: &["class_declaration"],
+        base_clause_kinds: &["class_heritage"],
+        member_kinds: &["public_field_definition", "property_signature"],
+        smart_ptr_names: &[],
+        ctor_factories: &[],
+        preprocess: None,
+    }
+}
+
+/// `.tsx` files carry JSX, which the plain TypeScript grammar cannot parse
+/// (whole component bodies would silently drop from the graph, exactly the
+/// C++/CLI failure mode). The TSX grammar shares its node-kind vocabulary
+/// with TypeScript, so only the parser changes.
+fn tsx_language() -> Language {
+    tree_sitter_typescript::LANGUAGE_TSX.into()
+}
+const TS_DIALECTS: &[(&str, fn() -> Language)] = &[("tsx", tsx_language)];
 
 pub fn ruby() -> TsLangSpec {
     TsLangSpec {
@@ -165,6 +318,17 @@ pub fn ruby() -> TsLangSpec {
         control_kinds: CONTROL,
         return_kinds: RETURNS,
         implicit_return: true,
+        type_container_kinds: &[],
+        receiver_field: None,
+        ctor_sugar_method: None,
+        declarator_field: None,
+        type_decl_kinds: &[],
+        base_clause_kinds: &[],
+        member_kinds: &[],
+        smart_ptr_names: &[],
+        ctor_factories: &[],
+        preprocess: None,
+        dialects: &[],
     }
 }
 
@@ -187,6 +351,17 @@ pub fn rust() -> TsLangSpec {
         control_kinds: CONTROL,
         return_kinds: RETURNS,
         implicit_return: true,
+        type_container_kinds: &[],
+        receiver_field: None,
+        ctor_sugar_method: None,
+        declarator_field: None,
+        type_decl_kinds: &[],
+        base_clause_kinds: &[],
+        member_kinds: &[],
+        smart_ptr_names: &[],
+        ctor_factories: &[],
+        preprocess: None,
+        dialects: &[],
     }
 }
 
@@ -209,5 +384,90 @@ pub fn python() -> TsLangSpec {
         control_kinds: CONTROL,
         return_kinds: RETURNS,
         implicit_return: false,
+        type_container_kinds: &[],
+        receiver_field: None,
+        ctor_sugar_method: None,
+        declarator_field: None,
+        type_decl_kinds: &[],
+        base_clause_kinds: &[],
+        member_kinds: &[],
+        smart_ptr_names: &[],
+        ctor_factories: &[],
+        preprocess: None,
+        dialects: &[],
+    }
+}
+
+pub fn scala() -> TsLangSpec {
+    TsLangSpec {
+        name: "Scala",
+        namespace_delim: ".",
+        traits: LanguageTraits::HAS_CLASSES | LanguageTraits::HAS_GENERICS
+            | LanguageTraits::HAS_OVERLOADING | LanguageTraits::HAS_DEFAULT_ARGS,
+        extensions: &["scala", "sc"],
+        language: tree_sitter_scala::LANGUAGE.into(),
+        function_kinds: &["function_definition", "lambda_expression"],
+        param_container_kinds: &["parameters"],
+        call_kinds: &["call_expression"],
+        callee_field: "function",
+        assign_forms: &[
+            AssignForm { kind: "val_definition", lhs_field: "pattern", rhs_field: "value" },
+            AssignForm { kind: "var_definition", lhs_field: "pattern", rhs_field: "value" },
+            AssignForm { kind: "assignment_expression", lhs_field: "left", rhs_field: "right" },
+        ],
+        control_kinds: CONTROL,
+        return_kinds: RETURNS,
+        implicit_return: true,
+        type_container_kinds: &[
+            "object_definition", "class_definition", "trait_definition",
+        ],
+        receiver_field: None,
+        ctor_sugar_method: Some("apply"),
+        declarator_field: None,
+        type_decl_kinds: &[],
+        base_clause_kinds: &[],
+        member_kinds: &[],
+        smart_ptr_names: &[],
+        ctor_factories: &[],
+        preprocess: None,
+        dialects: &[],
+    }
+}
+
+pub fn cpp() -> TsLangSpec {
+    TsLangSpec {
+        name: "C++",
+        namespace_delim: "::",
+        traits: LanguageTraits::HAS_CLASSES | LanguageTraits::HAS_GENERICS
+            | LanguageTraits::HAS_OVERLOADING | LanguageTraits::HAS_FUNCTION_POINTERS,
+        extensions: &["cpp", "cc", "cxx", "hpp", "hxx", "hh", "h", "ipp"],
+        language: tree_sitter_cpp::LANGUAGE.into(),
+        // Pure declarations (`void f(int);`) are `declaration` nodes, not
+        // function_definitions, so header prototypes never become methods —
+        // only real bodies (including inline/template ones) do.
+        function_kinds: &["function_definition", "lambda_expression"],
+        param_container_kinds: &["parameter_list"],
+        call_kinds: &["call_expression"],
+        callee_field: "function",
+        assign_forms: &[
+            AssignForm { kind: "init_declarator", lhs_field: "declarator", rhs_field: "value" },
+            AssignForm { kind: "assignment_expression", lhs_field: "left", rhs_field: "right" },
+        ],
+        control_kinds: CONTROL,
+        return_kinds: RETURNS,
+        implicit_return: false,
+        type_container_kinds: &["class_specifier", "struct_specifier", "namespace_definition"],
+        receiver_field: None,
+        ctor_sugar_method: None,
+        declarator_field: Some("declarator"),
+        type_decl_kinds: &["class_specifier", "struct_specifier"],
+        base_clause_kinds: &["base_class_clause"],
+        member_kinds: &["field_declaration"],
+        smart_ptr_names: &[
+            "shared_ptr", "unique_ptr", "weak_ptr", "scoped_ptr", "intrusive_ptr",
+        ],
+        ctor_factories: &["make_shared", "make_unique", "allocate_shared", "make_scoped"],
+        preprocess: Some(cpp_cli_shim),
+        dialects: &[],
     }
 }

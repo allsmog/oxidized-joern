@@ -1,0 +1,171 @@
+#!/usr/bin/env bash
+# cpgx — one-command CPG analysis for ANY codebase via cpg-rs.
+#
+#   cpgx [-C <root>] build <path> [lang]            build (or refresh) a CPG
+#   cpgx [-C <root>] scan <path> [rules.json]       security scan (built-in rules by default)
+#   cpgx [-C <root>] apis <path> [--min-count N]    external-API inventory (IRIS spec-inference input)
+#   cpgx [-C <root>] slice <path> --call <sink> ... backward slice (auto-builds)
+#   cpgx [-C <root>] taint <path> <sources> <sinks> taint query, comma-separated names
+#   cpgx [-C <root>] serve <path>                   interactive JSON query server
+#   cpgx [-C <root>] merge <out> <path1> [path2...]  merged CPG (1+ inputs) with gRPC
+#                                                   + thrift stitching (auto-discovered IDL)
+#   cpgx list                                       cached CPGs
+#
+# <path> is relative to the project root (default: $PWD, or -C / $CPGX_ROOT).
+# Use "." for the whole root. CPGs are cached in ~/cpgs/ keyed by absolute
+# path, and rebuilt automatically when any source file is newer than the
+# cache. Language is auto-detected from file counts when not given.
+#
+# Env: CPGX_ROOT, CPG_BIN, CPG_CACHE.
+
+set -euo pipefail
+ROOT="${CPGX_ROOT:-$PWD}"
+if [[ "${1:-}" == "-C" ]]; then ROOT="$2"; shift 2; fi
+ROOT=$(cd "$ROOT" && pwd)
+CPG_BIN="${CPG_BIN:-$HOME/oxidized-joern/cpg-rs/target/release/cpg}"
+CACHE="${CPG_CACHE:-$HOME/cpgs}"
+mkdir -p "$CACHE"
+# Cache filenames carry the engine's graph-shape version, so shape changes
+# rebuild automatically (pack/rule additions don't bump it — no churn).
+SHAPE=$("$CPG_BIN" shape-version 2>/dev/null || echo 0)
+
+# Vendored, generated, and test code has no place in a security CPG.
+EXCLUDES_GO=(--exclude /vendor/ --exclude _test.go --exclude .pb.go
+             --exclude /mocks/ --exclude /testdata/ --exclude /tests/
+             --exclude /node_modules/)
+EXCLUDES_SCALA=(--exclude /target/ --exclude Test.scala --exclude Spec.scala
+                --exclude /node_modules/)
+EXCLUDES_PY=(--exclude /vendor/ --exclude _pb2.py --exclude /node_modules/
+             --exclude _test.py --exclude /testdata/ --exclude /test/
+             --exclude /tests/ --exclude conftest.py --exclude test_)
+EXCLUDES_JAVA=(--exclude /target/ --exclude /build/ --exclude Test.java
+               --exclude /node_modules/)
+EXCLUDES_JS=(--exclude /node_modules/ --exclude .min.js --exclude /dist/
+             --exclude .test.js --exclude .spec.js)
+EXCLUDES_TS=(--exclude /node_modules/ --exclude /dist/ --exclude /build/
+             --exclude .test.ts --exclude .spec.ts --exclude .d.ts)
+EXCLUDES_CPP=(--exclude /thirdparty/ --exclude /third-party/ --exclude /third_party/
+              --exclude /build/ --exclude /generated/ --exclude _test. --exclude /test/
+              --exclude /tests/ --exclude /testdata/ --exclude /node_modules/
+              --exclude /test_util/ --exclude test_util. --exclude test_utils. --exclude /simulator/
+              --exclude /mock/ --exclude mock_ --exclude _mock. --exclude flaky_
+              --exclude /GUnitTest/ --exclude Tests.cpp --exclude Test.cpp
+              --exclude /Mock --exclude Mock.h --exclude Mocks.h)
+EXCLUDES_DEFAULT=(--exclude /vendor/ --exclude /node_modules/)
+
+detect_lang() { # most common source extension under the path
+  local dir="$1" best=go best_n=0 n
+  local -A exts=([go]=go [scala]=scala [py]=python [java]=java [js]=javascript [c]=c [rs]=rust [rb]=ruby [cpp]=cpp [cc]=cpp [ts]=typescript)
+  for ext in "${!exts[@]}"; do
+    n=$(find "$dir" -name "*.$ext" -not -path '*/vendor/*' -not -path '*/node_modules/*' 2>/dev/null | head -500 | wc -l)
+    if (( n > best_n )); then best_n=$n; best="${exts[$ext]}"; fi
+  done
+  echo "$best"
+}
+
+ext_of() { # primary source extension for a language
+  case "$1" in
+    go) echo go;; scala) echo scala;; python) echo py;; java) echo java;;
+    javascript|js) echo js;; rust|rs) echo rs;; ruby|rb) echo rb;;
+    typescript|ts) echo ts;;
+    cpp|c++|cxx) echo cpp;; *) echo c;;
+  esac
+}
+
+excludes_of() {
+  case "$1" in
+    go) printf '%s\n' "${EXCLUDES_GO[@]}";;
+    scala) printf '%s\n' "${EXCLUDES_SCALA[@]}";;
+    python) printf '%s\n' "${EXCLUDES_PY[@]}";;
+    java) printf '%s\n' "${EXCLUDES_JAVA[@]}";;
+    javascript|js) printf '%s\n' "${EXCLUDES_JS[@]}";;
+    typescript|ts) printf '%s\n' "${EXCLUDES_TS[@]}";;
+    cpp|c++|cxx) printf '%s\n' "${EXCLUDES_CPP[@]}";;
+    *) printf '%s\n' "${EXCLUDES_DEFAULT[@]}";;
+  esac
+}
+
+build_path() { # <path> [lang] -> echoes cpg path
+  local rel="$1" lang="${2:-}"
+  local dir="$ROOT/$rel"
+  [[ "$rel" == "." ]] && dir="$ROOT"
+  [[ -d "$dir" ]] || { echo "no such directory: $dir" >&2; exit 1; }
+  dir=$(cd "$dir" && pwd)
+  [[ -n "$lang" ]] || lang=$(detect_lang "$dir")
+  # Cache key: sanitized absolute path, so the same name in two projects
+  # never collides.
+  local key="${dir#/}"; key="${key//\//_}"
+  local cpg="$CACHE/$key.$lang.v$SHAPE.cpg"
+  local excl; mapfile -t excl < <(excludes_of "$lang")
+  if [[ ! -f "$cpg" ]] || [[ -n $(find "$dir" -name "*.$(ext_of "$lang")" -newer "$cpg" -print -quit 2>/dev/null) ]]; then
+    echo "building $dir ($lang) -> $cpg" >&2
+    "$CPG_BIN" build "$dir" -o "$cpg" --lang "$lang" "${excl[@]}" >&2
+  fi
+  echo "$cpg"
+}
+
+lang_of_cpg() { local l="${1%.cpg}"; l="${l%.v[0-9]*}"; echo "${l##*.}"; }
+
+# Thrift IDL usually lives in a sibling tree of the code that implements it
+# (e.g. src/thrift next to src/cpp), so discovery is $ROOT-wide, not
+# module-scoped like the .proto search.
+thrift_dirs() {
+  find "$ROOT" -name '*.thrift' -not -path '*/vendor/*' -not -path '*/node_modules/*' 2>/dev/null \
+    | xargs -rn1 dirname | sort -u
+}
+
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+  build)
+    build_path "$@" ;;
+  scan)
+    rel="$1"; shift
+    rules=(); [[ $# -gt 0 && "$1" != -* ]] && { rules=(--rules "$1"); shift; }
+    cpg=$(build_path "$rel")
+    # gRPC-aware by default: rpc methods declared in the module's protos are
+    # entry points whose parameters count as attacker-controlled.
+    d="$ROOT/$rel"; [[ "$rel" == "." ]] && d="$ROOT"
+    rpc_args=()
+    while IFS= read -r pd; do rpc_args+=(--rpc-sources "$pd"); done \
+      < <(find "$d" -name '*.proto' -not -path '*/vendor/*' 2>/dev/null | xargs -rn1 dirname | sort -u)
+    while IFS= read -r td; do rpc_args+=(--thrift-sources "$td"); done < <(thrift_dirs)
+    # Play routes: the miner recursively finds `routes`/`*.routes` files
+    # under the module and no-ops when there are none.
+    rpc_args+=(--play-routes "$d")
+    exec "$CPG_BIN" scan --load "$cpg" --lang "$(lang_of_cpg "$cpg")" "${rules[@]}" "${rpc_args[@]}" "$@" ;;
+  apis)
+    rel="$1"; shift
+    cpg=$(build_path "$rel")
+    exec "$CPG_BIN" apis --load "$cpg" --lang "$(lang_of_cpg "$cpg")" "$@" ;;
+  slice)
+    rel="$1"; shift
+    cpg=$(build_path "$rel")
+    exec "$CPG_BIN" slice --load "$cpg" --lang "$(lang_of_cpg "$cpg")" "$@" ;;
+  taint)
+    rel="$1" sources="$2" sinks="$3"
+    cpg=$(build_path "$rel")
+    printf '{"cmd":"taint","sources":[%s],"sinks":[%s]}\n{"cmd":"quit"}\n' \
+      "$(echo "$sources" | sed 's/[^,]*/"&"/g')" \
+      "$(echo "$sinks" | sed 's/[^,]*/"&"/g')" \
+      | "$CPG_BIN" serve --load "$cpg" --lang "$(lang_of_cpg "$cpg")" 2>/dev/null ;;
+  serve)
+    rel="$1"; shift
+    cpg=$(build_path "$rel")
+    exec "$CPG_BIN" serve --load "$cpg" --lang "$(lang_of_cpg "$cpg")" "$@" ;;
+  merge)
+    out_name="$1"; shift
+    cpgs=(); proto_args=()
+    for rel in "$@"; do
+      cpgs+=("$(build_path "$rel")")
+      d="$ROOT/$rel"; [[ "$rel" == "." ]] && d="$ROOT"
+      while IFS= read -r pd; do proto_args+=(--protos "$pd"); done \
+        < <(find "$d" -name '*.proto' -not -path '*/vendor/*' 2>/dev/null | xargs -rn1 dirname | sort -u)
+    done
+    while IFS= read -r td; do proto_args+=(--thrifts "$td"); done < <(thrift_dirs)
+    "$CPG_BIN" merge -o "$CACHE/$out_name.cpg" "${proto_args[@]}" "${cpgs[@]}" >&2
+    echo "$CACHE/$out_name.cpg" ;;
+  list)
+    ls -lh "$CACHE"/*.cpg 2>/dev/null || echo "no cached CPGs" ;;
+  *)
+    sed -n '2,19p' "$0"; exit 2 ;;
+esac

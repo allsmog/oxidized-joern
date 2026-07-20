@@ -426,12 +426,10 @@ trait PluginHandling { this: BridgeBase =>
       io.joern.console.cpgcreation
         .guessLanguage(src)
         .map {
-          case Languages.C | Languages.NEWC => "c"
-          case Languages.JAVA               => "jvm"
-          case Languages.JAVASRC            => "java"
-          case lang                         => lang.toLowerCase
+          case Languages.JAVA => "jvm"
+          case lang           => lang.toLowerCase
         }
-        .getOrElse("c")
+        .getOrElse("jvm")
     )
   }
 

@@ -341,8 +341,19 @@ fn build_expr(b: &mut cpg_core::CpgBuilder, node: Node, src: &[u8]) -> Option<No
         }
         "assignment_expression" => {
             // Model as a call `=`(lhs, rhs) so dataflow sees rhs -> lhs.
+            // The LHS of a member store (`cfg.key = t`) collapses to its base
+            // object so assignment taint lands on `cfg` — the field READ
+            // lowering below must not apply here or `lhs_name` would see a
+            // Call and drop the assignment entirely.
             let call = b.call("=", text(node, src), line(node));
-            if let Some(lhs) = node.child_by_field_name("left").and_then(|n| build_expr(b, n, src)) {
+            let mut lhs_node = node.child_by_field_name("left");
+            while let Some(l) = lhs_node {
+                if l.kind() != "field_expression" {
+                    break;
+                }
+                lhs_node = l.child_by_field_name("argument");
+            }
+            if let Some(lhs) = lhs_node.and_then(|n| build_expr(b, n, src)) {
                 b.add_argument(call, lhs, 1);
             }
             if let Some(rhs) = node.child_by_field_name("right").and_then(|n| build_expr(b, n, src)) {
@@ -364,6 +375,23 @@ fn build_expr(b: &mut cpg_core::CpgBuilder, node: Node, src: &[u8]) -> Option<No
         "parenthesized_expression" => {
             let children = named_children(node);
             children.into_iter().find_map(|c| build_expr(b, c, src))
+        }
+        "field_expression" => {
+            // Field READ (`cfg.key` / `p->key`): a Call named after the field
+            // with the base as its argument — mirrors the cpg-lang-ts
+            // lowering so the field name is matchable by taint specs and the
+            // persistence stitch, while base taint still flows through the
+            // opaque named call.
+            let field = node.child_by_field_name("field").map(|f| text(f, src)).unwrap_or("");
+            let base = node.child_by_field_name("argument").and_then(|n| build_expr(b, n, src));
+            match (field.is_empty(), base) {
+                (false, Some(base)) => {
+                    let call = b.call(field, text(node, src), line(node));
+                    b.add_argument(call, base, 1);
+                    Some(call)
+                }
+                (_, base) => base,
+            }
         }
         "identifier" => Some(b.identifier(text(node, src), line(node))),
         "number_literal" | "string_literal" | "char_literal" | "true" | "false"

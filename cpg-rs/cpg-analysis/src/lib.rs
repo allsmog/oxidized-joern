@@ -4,21 +4,27 @@
 //! incremental re-runs are derived rather than hand-wired. Dataflow is
 //! summary-first and the summary cache is precisely invalidatable.
 
+pub mod authz;
 pub mod callgraph;
 pub mod cfg;
+pub mod entries;
+pub mod middleware;
 pub mod pass;
 pub mod reaching_def;
 pub mod summaries;
 pub mod symbols;
 pub mod taint;
 
+pub use authz::{annotate_authz, is_authz_name};
 pub use callgraph::CallGraphPass;
 pub use cfg::{cfg_edges_for_method, CfgPass};
+pub use entries::{mine_registration_entries, mine_routes, RouteEntry};
+pub use middleware::{authz_census, AuthzCensus, MiddlewareGate};
 pub use pass::{Pass, PassContext, PassManager};
 pub use reaching_def::{reaching_def_flows, ReachingDefFlow, ReachingDefPass};
 pub use summaries::{Flow, FunctionSummary, Point, Sanitizer, SummaryOrigin, SummaryStore};
 pub use symbols::SymbolResolutionPass;
-pub use taint::{find_flows, Finding, Provenance, Step, TaintSpec, Trace};
+pub use taint::{annotate_confined, find_flows, Finding, Provenance, Step, TaintSpec, Trace};
 
 /// Build the standard pass pipeline. Order is derived from layer dependencies,
 /// so the sequence here is irrelevant — the manager sorts it (ReachingDefPass

@@ -1,2 +1,0 @@
-# gosrc2cpg
-

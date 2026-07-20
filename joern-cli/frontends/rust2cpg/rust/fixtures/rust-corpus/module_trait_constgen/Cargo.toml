@@ -1,4 +1,0 @@
-[package]
-name = "module_trait_constgen"
-version = "0.1.0"
-edition = "2021"

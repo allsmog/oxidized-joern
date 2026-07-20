@@ -67,15 +67,43 @@ impl Pass for ReachingDefPass {
         Some(EdgeKind::ReachingDef)
     }
     fn run_file(&self, cpg: &mut Cpg, file: FileId, _ctx: &PassContext) {
-        let methods: Vec<NodeId> = cpg
-            .nodes_in_file(file)
+        self.run_batch(cpg, &[file], _ctx);
+    }
+
+    /// Flow computation is a pure per-method query; only the edge writes
+    /// mutate the graph. Compute all methods' flows in parallel, then apply
+    /// serially — same edges, same order within a method, as the serial loop.
+    fn run_batch(&self, cpg: &mut Cpg, files: &[FileId], _ctx: &PassContext) {
+        use rayon::prelude::*;
+        let methods: Vec<NodeId> = files
             .iter()
-            .copied()
-            .filter(|&n| cpg.is_live(n) && cpg.kind_of(n) == NodeKind::Method)
+            .flat_map(|&file| {
+                cpg.nodes_in_file(file)
+                    .iter()
+                    .copied()
+                    .filter(|&n| cpg.is_live(n) && cpg.kind_of(n) == NodeKind::Method)
+                    .collect::<Vec<_>>()
+            })
             .collect();
-        for m in methods {
+        let slow_log = std::env::var_os("CPG_SLOW_METHODS").is_some();
+        let per_method: Vec<Vec<ReachingDefFlow>> = methods
+            .par_iter()
+            .map(|&m| {
+                let t = std::time::Instant::now();
+                let flows = reaching_def_flows(cpg, m);
+                if slow_log && t.elapsed().as_millis() > 200 {
+                    eprintln!(
+                        "slow method {:?} ({:?})",
+                        cpg.name_of(m).unwrap_or("?"),
+                        t.elapsed()
+                    );
+                }
+                flows
+            })
+            .collect();
+        for flows in per_method {
             let mut seen: HashSet<(NodeId, NodeId)> = HashSet::new();
-            for f in reaching_def_flows(cpg, m) {
+            for f in flows {
                 // The generator can propose one edge via several routines
                 // (e.g. return-use and exit); the graph keeps one copy.
                 if seen.insert((f.src, f.dst)) {
@@ -245,6 +273,9 @@ struct MethodView<'a> {
     cpg: &'a Cpg,
     /// AST descendants of the method, excluding nested Method subtrees.
     own: HashSet<NodeId>,
+    /// Sorted argument lists of every Call in `own`, computed once — the
+    /// usage/validity predicates ask for these O(uses x defs) times.
+    call_args: HashMap<NodeId, Vec<NodeId>>,
 }
 
 impl<'a> MethodView<'a> {
@@ -263,7 +294,18 @@ impl<'a> MethodView<'a> {
                 stack.push(c);
             }
         }
-        MethodView { cpg, own }
+        let mut call_args = HashMap::new();
+        for &i in &own {
+            if cpg.kind_of(i) == NodeKind::Call {
+                let mut v: Vec<NodeId> = cpg
+                    .out_kind(i, EdgeKind::Argument)
+                    .filter(|&k| cpg.kind_of(k) != NodeKind::FieldIdentifier)
+                    .collect();
+                v.sort_by_key(|&k| cpg.argument_index_of(k));
+                call_args.insert(i, v);
+            }
+        }
+        MethodView { cpg, own, call_args }
     }
 
     fn kind(&self, n: NodeId) -> NodeKind {
@@ -286,14 +328,10 @@ impl<'a> MethodView<'a> {
     /// call.argument: Argument-edge children minus FieldIdentifier, sorted by
     /// argument index. (Receivers carry no Argument edge and are excluded —
     /// same as Joern's `call.argument` excluding the receiver-only edge.)
-    fn args_of(&self, c: NodeId) -> Vec<NodeId> {
-        let mut v: Vec<NodeId> = self
-            .cpg
-            .out_kind(c, EdgeKind::Argument)
-            .filter(|&k| self.kind(k) != NodeKind::FieldIdentifier)
-            .collect();
-        v.sort_by_key(|&k| self.cpg.argument_index_of(k));
-        v
+    /// Served from the per-method cache; a call outside `own` (never happens
+    /// via the generator's paths) would return empty.
+    fn args_of(&self, c: NodeId) -> &[NodeId] {
+        self.call_args.get(&c).map(|v| v.as_slice()).unwrap_or(&[])
     }
 
     fn arg_index(&self, n: NodeId) -> i64 {
@@ -302,12 +340,13 @@ impl<'a> MethodView<'a> {
 
     /// call.argument at a given index (`argumentOption(idx)`).
     fn arg_at(&self, c: NodeId, idx: i64) -> Option<NodeId> {
-        self.args_of(c).into_iter().find(|&k| self.arg_index(k) == idx)
+        self.args_of(c).iter().copied().find(|&k| self.arg_index(k) == idx)
     }
 
     /// call.argument headOption (lowest index: the base of an access).
     fn head_arg(&self, c: NodeId) -> Option<NodeId> {
-        self.args_of(c).into_iter().min_by_key(|&k| self.arg_index(k))
+        // The cached list is sorted by argument index.
+        self.args_of(c).first().copied()
     }
 
     /// DdgGenerator.nodeToEdgeLabel: parameters use their name, everything
@@ -322,9 +361,13 @@ impl<'a> MethodView<'a> {
 
     // ---- UsageAnalyzer.isUsing (v4.0.555) ----
     // nodeToString: Identifier/ParamIn -> NAME; Expression -> CODE; else None.
-    fn node_str(&self, n: NodeId) -> Option<String> {
+    // Borrows from the graph — this runs O(uses x defs) times per method, so
+    // it must not allocate.
+    fn node_str(&self, n: NodeId) -> Option<&'a str> {
         match self.kind(n) {
-            NodeKind::Identifier | NodeKind::MethodParameterIn => Some(self.name(n).to_string()),
+            NodeKind::Identifier | NodeKind::MethodParameterIn => {
+                Some(self.cpg.name_of(n).unwrap_or(""))
+            }
             NodeKind::Method
             | NodeKind::MethodReturn
             | NodeKind::ControlStructure
@@ -333,7 +376,7 @@ impl<'a> MethodView<'a> {
             | NodeKind::TypeDecl
             | NodeKind::Member
             | NodeKind::Local => None,
-            _ => Some(self.code(n).to_string()),
+            _ => Some(self.cpg.code_of(n).unwrap_or("")),
         }
     }
 
@@ -342,16 +385,16 @@ impl<'a> MethodView<'a> {
         let us = self.node_str(use_i);
         match self.kind(in_i) {
             NodeKind::MethodParameterIn | NodeKind::Identifier => {
-                us.as_deref() == Some(self.name(in_i))
+                us == Some(self.name(in_i))
             }
             NodeKind::Call => {
                 if is_indirection_access(self.name(in_i)) {
                     match self.arg_at(in_i, 1) {
-                        Some(op) => us.as_deref() == Some(self.code(op)),
+                        Some(op) => us == Some(self.code(op)),
                         None => false,
                     }
                 } else {
-                    us.as_deref() == Some(self.code(in_i))
+                    us == Some(self.code(in_i))
                 }
             }
             _ => false,
@@ -377,7 +420,7 @@ impl<'a> MethodView<'a> {
                 let bs = self.node_str(base);
                 return match self.kind(in_i) {
                     NodeKind::MethodParameterIn | NodeKind::Identifier => {
-                        bs.as_deref() == Some(self.name(in_i))
+                        bs == Some(self.name(in_i))
                     }
                     _ => false,
                 };
@@ -509,7 +552,7 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
     // --- uses helpers ---
     let uses_of = |i: NodeId| -> Vec<NodeId> {
         match v.kind(i) {
-            NodeKind::Call => v.args_of(i),
+            NodeKind::Call => v.args_of(i).to_vec(),
             NodeKind::Return => cpg.out_kind(i, EdgeKind::Ast).collect(),
             _ => Vec::new(),
         }
@@ -544,7 +587,7 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
         // super.initGen: gen(call) = {call} ++ {Call|Identifier arguments}.
         let mut g = vec![c];
         def_var.insert(c, v.node_var(c));
-        for a in v.args_of(c) {
+        for &a in v.args_of(c) {
             if is_gen_arg(a) {
                 def_var.insert(a, v.node_var(a));
                 g.push(a);
@@ -575,7 +618,7 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
         }
         let mut by_name: HashMap<String, Vec<(NodeId, NodeId)>> = HashMap::new();
         for &c in &calls {
-            for a in v.args_of(c) {
+            for &a in v.args_of(c) {
                 if v.kind(a) == NodeKind::Identifier && !name_excluded.contains(v.name(a)) {
                     by_name.entry(v.name(a).to_string()).or_default().push((c, a));
                 }
@@ -593,17 +636,22 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
     }
     // kill(call) = other defs of the variables in gen(call); skipped for
     // generic-member-access calls (`&v` kills no prior def of v).
-    let mut kill: HashMap<NodeId, Vec<NodeId>> = HashMap::new();
+    // Served by a var -> defs index so kill construction is O(defs killed),
+    // not O(calls x defs).
+    let mut defs_of_var: HashMap<&String, Vec<NodeId>> = HashMap::new();
+    for (d, var) in &def_var {
+        defs_of_var.entry(var).or_default().push(*d);
+    }
+    let mut kill: HashMap<NodeId, HashSet<NodeId>> = HashMap::new();
     for &c in &gen_calls {
         if is_generic_member_access(v.name(c)) {
             continue;
         }
-        let vars: HashSet<&String> = gen[&c].iter().map(|d| &def_var[d]).collect();
         let g: HashSet<NodeId> = gen[&c].iter().copied().collect();
-        let k: Vec<NodeId> = def_var
+        let k: HashSet<NodeId> = gen[&c]
             .iter()
-            .filter(|(d, var)| !g.contains(d) && vars.contains(var))
-            .map(|(d, _)| *d)
+            .flat_map(|d| defs_of_var[&def_var[d]].iter().copied())
+            .filter(|d| !g.contains(d))
             .collect();
         kill.insert(c, k);
     }
@@ -636,26 +684,82 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
         }
     }
     let empty_p: Vec<NodeId> = Vec::new();
-    let empty: Vec<NodeId> = Vec::new();
-    let mut out: HashMap<NodeId, HashSet<NodeId>> = HashMap::new();
-    out.insert(method, entry_gen.iter().copied().collect());
+    // The def universe is exactly def_var's keys (params + gen members).
+    // Dense def indices -> per-node bitsets, so the fixpoint is word-wise
+    // OR/AND-NOT instead of per-element hashing — same sets, orders of
+    // magnitude cheaper on methods with thousands of defs.
+    let mut defs: Vec<NodeId> = def_var.keys().copied().collect();
+    defs.sort();
+    let def_idx: HashMap<NodeId, usize> =
+        defs.iter().enumerate().map(|(i, &d)| (d, i)).collect();
+    let words = defs.len().div_ceil(64);
+    let mk_bits = |ids: &mut dyn Iterator<Item = NodeId>| -> Vec<u64> {
+        let mut b = vec![0u64; words];
+        for id in ids {
+            let i = def_idx[&id];
+            b[i / 64] |= 1u64 << (i % 64);
+        }
+        b
+    };
+    let entry_bits = mk_bits(&mut entry_gen.iter().copied());
+    let gen_bits: HashMap<NodeId, Vec<u64>> = gen
+        .iter()
+        .map(|(&n, g)| (n, mk_bits(&mut g.iter().copied())))
+        .collect();
+    let kill_bits: HashMap<NodeId, Vec<u64>> = kill
+        .iter()
+        .map(|(&n, k)| (n, mk_bits(&mut k.iter().copied())))
+        .collect();
+    /// Decode a bitset back to node ids, ascending (defs is sorted).
+    fn to_ids(bits: &[u64], defs: &[NodeId]) -> Vec<NodeId> {
+        let mut v = Vec::new();
+        for (wi, &word) in bits.iter().enumerate() {
+            let mut w = word;
+            while w != 0 {
+                v.push(defs[wi * 64 + w.trailing_zeros() as usize]);
+                w &= w - 1;
+            }
+        }
+        v
+    }
+    let mut out: HashMap<NodeId, Vec<u64>> = HashMap::new();
+    out.insert(method, entry_bits.clone());
+    // Only nodes whose out-set is ever read matter: CFG participants (preds
+    // values are CFG sources) plus the method entry. Iterating the rest just
+    // recomputes sets nobody reads — on big methods that's most of the AST.
+    let fixpoint_nodes: Vec<NodeId> = nodes
+        .iter()
+        .copied()
+        .filter(|i| *i == method || cfg_nodes.contains(i))
+        .collect();
     let mut changed = true;
+    let mut in_bits = vec![0u64; words];
     while changed {
         changed = false;
-        for &i in &nodes {
-            let mut in_set: HashSet<NodeId> = HashSet::new();
+        for &i in &fixpoint_nodes {
+            in_bits.iter_mut().for_each(|w| *w = 0);
             for p in preds.get(&i).unwrap_or(&empty_p) {
                 if let Some(po) = out.get(p) {
-                    in_set.extend(po);
+                    for (a, b) in in_bits.iter_mut().zip(po) {
+                        *a |= b;
+                    }
                 }
             }
-            let g = gen.get(&i).unwrap_or(&empty);
-            let k = kill.get(&i).unwrap_or(&empty);
-            let mut new_out: HashSet<NodeId> =
-                in_set.into_iter().filter(|d| !k.contains(d)).collect();
-            new_out.extend(g.iter().copied());
+            let mut new_out = in_bits.clone();
+            if let Some(k) = kill_bits.get(&i) {
+                for (a, b) in new_out.iter_mut().zip(k) {
+                    *a &= !b;
+                }
+            }
+            if let Some(g) = gen_bits.get(&i) {
+                for (a, b) in new_out.iter_mut().zip(g) {
+                    *a |= b;
+                }
+            }
             if i == method {
-                new_out.extend(entry_gen.iter().copied());
+                for (a, b) in new_out.iter_mut().zip(&entry_bits) {
+                    *a |= b;
+                }
             }
             if out.get(&i) != Some(&new_out) {
                 out.insert(i, new_out);
@@ -663,14 +767,16 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
             }
         }
     }
-    let in_of = |i: NodeId| -> HashSet<NodeId> {
-        let mut s = HashSet::new();
+    let in_of = |i: NodeId| -> Vec<NodeId> {
+        let mut bits = vec![0u64; words];
         for p in preds.get(&i).unwrap_or(&empty_p) {
             if let Some(po) = out.get(p) {
-                s.extend(po);
+                for (a, b) in bits.iter_mut().zip(po) {
+                    *a |= b;
+                }
             }
         }
-        s
+        to_ids(&bits, &defs)
     };
 
     // method exit node.
@@ -681,9 +787,9 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
     // Defs live at exit come from the single `lastActualCfgNode` (the earliest
     // cfg-predecessor of METHOD_RETURN), not the union of all returns — the
     // ReachingDefFlowGraph param-out chain (see joern-parity).
-    let exit_in: HashSet<NodeId> = exit
+    let exit_in: Vec<NodeId> = exit
         .and_then(|e| preds.get(&e).and_then(|ps| ps.iter().copied().min()))
-        .and_then(|la| out.get(&la).cloned())
+        .and_then(|la| out.get(&la).map(|b| to_ids(b, &defs)))
         .unwrap_or_default();
 
     let mut flows: Vec<ReachingDefFlow> = Vec::new();
@@ -728,7 +834,7 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
     let mut assign_lhs: HashSet<NodeId> = HashSet::new();
     for &c in &calls {
         if let Some(maps) = operator_semantics(v.name(c)) {
-            for a in v.args_of(c) {
+            for &a in v.args_of(c) {
                 let idx = v.arg_index(a);
                 let used = maps.iter().any(|&(s, _)| s == idx);
                 let defined = maps.iter().any(|&(_, d)| d == idx);
@@ -773,7 +879,7 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
         // flow semantics (arg -> call output is always valid; arg -> sibling
         // arg needs a (src,dst) mapping; pass-through when no semantics).
         let sem = operator_semantics(v.name(c));
-        for u in v.args_of(c) {
+        for &u in v.args_of(c) {
             if !is_ddg(u) {
                 continue;
             }
@@ -794,7 +900,7 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
         }
         // addEdgeForBlock: an expression-block argument (comma operator)
         // routes its value — its last AST child — into the enclosing call.
-        for b in v.args_of(c) {
+        for &b in v.args_of(c) {
             if v.kind(b) != NodeKind::Block || !cfg_nodes.contains(&b) {
                 continue;
             }

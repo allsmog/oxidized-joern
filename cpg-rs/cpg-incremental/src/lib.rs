@@ -310,7 +310,72 @@ impl Project {
         sinks: &[&str],
         sanitizers: &[&str],
     ) -> Vec<cpg_analysis::Finding> {
-        let spec = cpg_analysis::TaintSpec::with_sanitizers(sources, sinks, sanitizers);
+        self.find_taint_entry(sources, sinks, sanitizers, &[])
+    }
+
+    /// Like [`find_taint_with_sanitizers`](Self::find_taint_with_sanitizers),
+    /// plus the entry-point model: every parameter of a method named in
+    /// `entry_methods` is treated as attacker-controlled (the RPC/handler
+    /// case, where input arrives as a request object, not via a source call).
+    pub fn find_taint_entry(
+        &self,
+        sources: &[&str],
+        sinks: &[&str],
+        sanitizers: &[&str],
+        entry_methods: &[&str],
+    ) -> Vec<cpg_analysis::Finding> {
+        self.find_taint_full(sources, sinks, sanitizers, entry_methods, &[])
+    }
+
+    /// The full spec surface: entry methods (tainted parameters) plus source
+    /// identifiers (framework globals tainted at every read, e.g. Flask's
+    /// `request` or `sys.argv`).
+    pub fn find_taint_full(
+        &self,
+        sources: &[&str],
+        sinks: &[&str],
+        sanitizers: &[&str],
+        entry_methods: &[&str],
+        source_idents: &[&str],
+    ) -> Vec<cpg_analysis::Finding> {
+        self.find_taint_spec(
+            sources,
+            sinks,
+            sanitizers,
+            entry_methods,
+            &[],
+            &[],
+            source_idents,
+            &[],
+            &[],
+        )
+    }
+
+    /// Everything: curated entries (trusted verbatim), IDL-mined entries
+    /// (handler-shape guarded), registration-mined entries (router/consumer
+    /// call sites), source identifiers, authz-check names (advisory
+    /// authz-dominance annotation), and component-confiner names (advisory
+    /// confinement annotation) — the last two never affect recall.
+    pub fn find_taint_spec(
+        &self,
+        sources: &[&str],
+        sinks: &[&str],
+        sanitizers: &[&str],
+        entry_methods: &[&str],
+        idl_entries: &[&str],
+        registered_entries: &[&str],
+        source_idents: &[&str],
+        authz_methods: &[&str],
+        confiners: &[&str],
+    ) -> Vec<cpg_analysis::Finding> {
+        let mut spec = cpg_analysis::TaintSpec::with_sanitizers(sources, sinks, sanitizers);
+        spec.source_methods = entry_methods.iter().map(|s| s.to_string()).collect();
+        spec.source_methods_guarded = idl_entries.iter().map(|s| s.to_string()).collect();
+        spec.source_methods_registered =
+            registered_entries.iter().map(|s| s.to_string()).collect();
+        spec.source_idents = source_idents.iter().map(|s| s.to_string()).collect();
+        spec.authz_methods = authz_methods.iter().map(|s| s.to_string()).collect();
+        spec.confiners = confiners.iter().map(|s| s.to_string()).collect();
         cpg_analysis::find_flows(&self.cpg, &self.summaries, &spec)
     }
 }

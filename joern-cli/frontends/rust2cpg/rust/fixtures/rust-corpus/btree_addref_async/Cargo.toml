@@ -1,4 +1,0 @@
-[package]
-name = "btree_addref_async"
-version = "0.1.0"
-edition = "2021"

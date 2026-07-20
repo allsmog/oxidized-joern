@@ -15,3 +15,6 @@ serde_json = "1"
 # frontends do not depend on cpg-analysis).
 cpg-frontend.workspace = true
 cpg-lang-c.workspace = true
+# Scala fixtures for the persistence-stitch end-to-end test (generic job configuration
+# config.copy(executionUser = ..) shape has no C equivalent).
+cpg-lang-ts.workspace = true

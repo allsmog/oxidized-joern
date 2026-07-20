@@ -11,21 +11,19 @@ object Projects {
   lazy val macros            = project.in(file("macros"))
   lazy val semanticcpg       = project.in(file("semanticcpg"))
 
-  lazy val c2cpg         = project.in(frontendsRoot / "c2cpg")
+  // Frontends with cpg-rs (Rust) parity removed: c2cpg, gosrc2cpg, jssrc2cpg,
+  // pysrc2cpg, rubysrc2cpg, rust2cpg — use cpg-rs for those languages.
+  // javasrc2cpg is retained ONLY as a library for kotlin2cpg's mixed-source
+  // interop (standalone Java-source scanning also lives in cpg-rs).
+  lazy val javasrc2cpg   = project.in(frontendsRoot / "javasrc2cpg")
   lazy val ghidra2cpg    = project.in(frontendsRoot / "ghidra2cpg")
   lazy val x2cpg         = project.in(frontendsRoot / "x2cpg")
-  lazy val pysrc2cpg     = project.in(frontendsRoot / "pysrc2cpg")
   lazy val php2cpg       = project.in(frontendsRoot / "php2cpg")
-  lazy val jssrc2cpg     = project.in(frontendsRoot / "jssrc2cpg")
   lazy val swiftsrc2cpg  = project.in(frontendsRoot / "swiftsrc2cpg")
-  lazy val javasrc2cpg   = project.in(frontendsRoot / "javasrc2cpg")
   lazy val jimple2cpg    = project.in(frontendsRoot / "jimple2cpg")
   lazy val kotlin2cpg    = project.in(frontendsRoot / "kotlin2cpg")
-  lazy val rubysrc2cpg   = project.in(frontendsRoot / "rubysrc2cpg")
-  lazy val gosrc2cpg     = project.in(frontendsRoot / "gosrc2cpg")
   lazy val csharpsrc2cpg = project.in(frontendsRoot / "csharpsrc2cpg")
   lazy val abap2cpg      = project.in(frontendsRoot / "abap2cpg")
-  lazy val rust2cpg      = project.in(frontendsRoot / "rust2cpg")
 
   lazy val linterRules = project.in(file("linter-rules"))
 

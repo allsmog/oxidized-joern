@@ -1,0 +1,56 @@
+{
+ "rules": [
+  {
+   "id": "IRIS-WIN-78",
+   "name": "rpc-to-process",
+   "cwe": "CWE-78",
+   "severity": "critical",
+   "description": "thrift request data reaches process/PowerShell execution",
+   "sinks": [
+    "CreateProcess@1",
+    "CreateProcessW@1",
+    "CreateProcessAsUser@2",
+    "ShellExecute",
+    "_wsystem@0",
+    "system@0",
+    "Invoke@recv",
+    "InvokeAsync@recv",
+    "Execute@recv"
+   ]
+  },
+  {
+   "id": "IRIS-WIN-120",
+   "name": "data-to-memcpy",
+   "cwe": "CWE-120",
+   "severity": "high",
+   "description": "parsed/request data controls a raw memory copy",
+   "sinks": [
+    "::memcpy@2",
+    "::memmove@2",
+    "CopyMemory@2",
+    "RtlCopyMemory@2",
+    "::wcscpy@1",
+    "::strcpy@1",
+    "::alloca@0"
+   ]
+  },
+  {
+   "id": "IRIS-WIN-22",
+   "name": "rpc-to-path",
+   "cwe": "CWE-22",
+   "severity": "high",
+   "description": "thrift request data reaches file operations",
+   "sinks": [
+    "CreateFileW@0",
+    "CreateFileA@0",
+    "DeleteFileW@0",
+    "DeleteFileA@0",
+    "MoveFileW@0",
+    "MoveFileExW@0",
+    "RemoveDirectoryW@0",
+    "::fopen@0",
+    "::_wfopen@0"
+   ]
+  }
+ ]
+}

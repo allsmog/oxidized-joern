@@ -124,11 +124,22 @@ impl PassManager {
     /// Run the full pipeline over every given file. Idempotent: clears each
     /// pass's prior output for a file before recomputing it.
     pub fn run_all(&self, cpg: &mut Cpg, files: &[FileId], ctx: &PassContext) {
+        let timing = std::env::var_os("CPG_PASS_TIMING").is_some();
         for &p in &self.ordered() {
+            let t0 = std::time::Instant::now();
             for &f in files {
                 self.clear_output(cpg, f, p);
             }
+            let cleared = t0.elapsed();
             self.passes[p].run_batch(cpg, files, ctx);
+            if timing {
+                eprintln!(
+                    "pass {}: {:?} (clear {:?})",
+                    self.passes[p].name(),
+                    t0.elapsed(),
+                    cleared
+                );
+            }
         }
     }
 

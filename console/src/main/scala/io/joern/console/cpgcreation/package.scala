@@ -20,28 +20,21 @@ package object cpgcreation {
     args: List[String]
   ): Option[CpgGenerator] = {
     lazy val conf = config.withArgs(args)
+    // Languages with cpg-rs (Rust) parity — C/C++, Go, Java source, JS/TS,
+    // Python source, Ruby, Rust — are handled by cpg-rs; their Scala
+    // frontends and generators (including the external js2cpg/py shims)
+    // have been removed.
     language match {
-      case Languages.CSHARP             => Some(CSharpCpgGenerator(conf, rootPath))
-      case Languages.CSHARPSRC          => Some(CSharpSrcCpgGenerator(conf, rootPath))
-      case Languages.C | Languages.NEWC => Some(CCpgGenerator(conf, rootPath))
-      case Languages.LLVM               => Some(LlvmCpgGenerator(conf, rootPath))
-      case Languages.GOLANG             => Some(GoCpgGenerator(conf, rootPath))
-      case Languages.JAVA               => Some(JavaCpgGenerator(conf, rootPath))
-      case Languages.JAVASRC            => Some(JavaSrcCpgGenerator(conf, rootPath))
-      case Languages.JSSRC | Languages.JAVASCRIPT =>
-        val jssrc = JsSrcCpgGenerator(conf, rootPath)
-        if (jssrc.isAvailable) Some(jssrc)
-        else Some(JsCpgGenerator(conf, rootPath))
-      case Languages.PYTHONSRC => Some(PythonSrcCpgGenerator(conf, rootPath))
-      case Languages.PYTHON    => Some(PyCpgGenerator(conf, rootPath))
-      case Languages.PHP       => Some(PhpCpgGenerator(conf, rootPath))
-      case Languages.GHIDRA    => Some(GhidraCpgGenerator(conf, rootPath))
-      case Languages.KOTLIN    => Some(KotlinCpgGenerator(conf, rootPath))
-      case Languages.RUBYSRC   => Some(RubyCpgGenerator(conf, rootPath))
-      case Languages.SWIFTSRC  => Some(SwiftSrcCpgGenerator(conf, rootPath))
-      case Languages.RUST      => Some(RustCpgGenerator(conf, rootPath))
-      case Languages.ABAP      => Some(AbapSrcCpgGenerator(conf, rootPath))
-      case _                   => None
+      case Languages.CSHARP    => Some(CSharpCpgGenerator(conf, rootPath))
+      case Languages.CSHARPSRC => Some(CSharpSrcCpgGenerator(conf, rootPath))
+      case Languages.LLVM      => Some(LlvmCpgGenerator(conf, rootPath))
+      case Languages.JAVA      => Some(JavaCpgGenerator(conf, rootPath))
+      case Languages.PHP      => Some(PhpCpgGenerator(conf, rootPath))
+      case Languages.GHIDRA   => Some(GhidraCpgGenerator(conf, rootPath))
+      case Languages.KOTLIN   => Some(KotlinCpgGenerator(conf, rootPath))
+      case Languages.SWIFTSRC => Some(SwiftSrcCpgGenerator(conf, rootPath))
+      case Languages.ABAP     => Some(AbapSrcCpgGenerator(conf, rootPath))
+      case _                  => None
     }
   }
 
@@ -82,40 +75,20 @@ package object cpgcreation {
   private def isCsharpFile(filename: String): Boolean =
     Seq(".csproj", ".cs").exists(filename.endsWith)
 
-  private def isGoFile(filename: String): Boolean =
-    filename.endsWith(".go") || Set("gopkg.lock", "gopkg.toml", "go.mod", "go.sum").contains(filename)
-
   private def isLlvmFile(filename: String): Boolean =
     Seq(".bc", ".ll").exists(filename.endsWith)
 
-  private def isJsFile(filename: String): Boolean =
-    Seq(".js", ".ts", ".jsx", ".tsx").exists(filename.endsWith) || filename == "package.json"
-
-  /** check if given filename looks like it might be a C/CPP source or header file mostly copied from
-    * io.joern.c2cpg.parser.FileDefaults
-    */
-  private def isCFile(filename: String): Boolean =
-    Seq(".c", ".cc", ".cpp", ".h", ".hpp", ".hh").exists(filename.endsWith)
-
-  private def isRustFile(filename: String): Boolean =
-    filename.endsWith(".rs") || Set("cargo.toml", "cargo.lock").contains(filename)
-
+  // Extensions of cpg-rs-covered languages (go/js/ts/py/rb/rs/c/cpp/java-src)
+  // deliberately guess to None here: no Scala generator exists for them.
   private def guessLanguageForRegularFile(file: Path): Option[String] = {
     file.fileName.toLowerCase match {
       case fileName if isJavaBinary(fileName)      => Some(Languages.JAVA)
       case fileName if isCsharpFile(fileName)      => Some(Languages.CSHARPSRC)
-      case fileName if isGoFile(fileName)          => Some(Languages.GOLANG)
-      case fileName if isJsFile(fileName)          => Some(Languages.JSSRC)
-      case fileName if fileName.endsWith(".java")  => Some(Languages.JAVASRC)
       case fileName if fileName.endsWith(".class") => Some(Languages.JAVA)
       case fileName if fileName.endsWith(".kt")    => Some(Languages.KOTLIN)
       case fileName if fileName.endsWith(".php")   => Some(Languages.PHP)
-      case fileName if fileName.endsWith(".py")    => Some(Languages.PYTHONSRC)
-      case fileName if fileName.endsWith(".rb")    => Some(Languages.RUBYSRC)
       case fileName if fileName.endsWith(".swift") => Some(Languages.SWIFTSRC)
       case fileName if isLlvmFile(fileName)        => Some(Languages.LLVM)
-      case fileName if isCFile(fileName)           => Some(Languages.NEWC)
-      case fileName if isRustFile(fileName)        => Some(Languages.RUST)
       case fileName if fileName.endsWith(".abap")  => Some(Languages.ABAP)
       case _                                       => None
     }

@@ -280,8 +280,8 @@ class Console[T <: Project](loader: WorkspaceLoader[T], baseDir: Path = FileUtil
                  |
                  |By default, `importCode` attempts to guess the source language of
                  |the code you provide. You can also specify the source language
-                 |manually, by running `importCode.<language>`. For example, `importCode.c`
-                 |runs the C/C++ frontend.
+                 |manually, by running `importCode.<language>`. For example, `importCode.kotlin`
+                 |runs the Kotlin frontend.
                  |
                  |Type `importCode` alone to get an overview of all available language modules.
                  |

@@ -19,15 +19,50 @@ pub struct RuleFindings<'a> {
 /// Run every rule in the pack against the project (one taint query per rule,
 /// all reading the same incrementally-maintained summary cache).
 pub fn run_pack<'a>(project: &Project, pack: &'a RulePack) -> Vec<RuleFindings<'a>> {
+    run_pack_entry(project, pack, &[], &[], &[])
+}
+
+/// Like [`run_pack`], plus the entry-point model: parameters of any method
+/// named in `entry_methods` (typically the RPC names from a service's .proto
+/// files) are treated as attacker-controlled for every rule.
+pub fn run_pack_entry<'a>(
+    project: &Project,
+    pack: &'a RulePack,
+    entry_methods: &[String],
+    idl_entries: &[String],
+    registered_entries: &[String],
+) -> Vec<RuleFindings<'a>> {
     pack.rules
         .iter()
         .map(|rule| {
             let sources: Vec<&str> = rule.sources.iter().map(String::as_str).collect();
             let sinks: Vec<&str> = rule.sinks.iter().map(String::as_str).collect();
             let sanitizers: Vec<&str> = rule.sanitizers.iter().map(String::as_str).collect();
+            // CLI-level entry methods plus the rule's own.
+            let entries: Vec<&str> = entry_methods
+                .iter()
+                .map(String::as_str)
+                .chain(rule.entry_methods.iter().map(String::as_str))
+                .collect();
+            let idents: Vec<&str> = rule.source_idents.iter().map(String::as_str).collect();
+            let idl: Vec<&str> = idl_entries.iter().map(String::as_str).collect();
+            let registered: Vec<&str> =
+                registered_entries.iter().map(String::as_str).collect();
+            let authz: Vec<&str> = rule.authz.iter().map(String::as_str).collect();
+            let confiners: Vec<&str> = rule.confiners.iter().map(String::as_str).collect();
             RuleFindings {
                 rule,
-                findings: project.find_taint_with_sanitizers(&sources, &sinks, &sanitizers),
+                findings: project.find_taint_spec(
+                    &sources,
+                    &sinks,
+                    &sanitizers,
+                    &entries,
+                    &idl,
+                    &registered,
+                    &idents,
+                    &authz,
+                    &confiners,
+                ),
             }
         })
         .collect()
@@ -48,7 +83,19 @@ pub fn file_of_method(cpg: &Cpg, method_full_name: &str) -> Option<String> {
 /// (typically the scanned project path) is used for findings whose method
 /// cannot be mapped back to a file.
 pub fn scan_to_sarif(project: &Project, pack: &RulePack, fallback_uri: &str) -> SarifLog {
-    let per_rule = run_pack(project, pack);
+    scan_to_sarif_entry(project, pack, fallback_uri, &[], &[], &[])
+}
+
+/// [`scan_to_sarif`] with entry-point methods (see [`run_pack_entry`]).
+pub fn scan_to_sarif_entry(
+    project: &Project,
+    pack: &RulePack,
+    fallback_uri: &str,
+    entry_methods: &[String],
+    idl_entries: &[String],
+    registered_entries: &[String],
+) -> SarifLog {
+    let per_rule = run_pack_entry(project, pack, entry_methods, idl_entries, registered_entries);
     sarif::build_log(
         pack,
         &per_rule,
