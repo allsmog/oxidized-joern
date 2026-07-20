@@ -194,6 +194,10 @@ pub fn build_log(
     for (rule_index, rf) in per_rule.iter().enumerate() {
         for f in &rf.findings {
             let uri = resolve_file(&f.method).unwrap_or_else(|| fallback_uri.to_string());
+            // The sink of an interprocedural finding is often in a DIFFERENT
+            // file than the entry method — the result location must use the
+            // sink's own file, or the reported (file, line) pair is a lie.
+            let sink_uri = f.sink_file.clone().unwrap_or_else(|| uri.clone());
             let steps: Vec<ThreadFlowLocation> = f
                 .path
                 .iter()
@@ -212,7 +216,7 @@ pub fn build_log(
                         f.origin, f.sink, f.method
                     ),
                 },
-                locations: vec![location(&uri, f.sink_line, None)],
+                locations: vec![location(&sink_uri, f.sink_line, None)],
                 code_flows: vec![CodeFlow { thread_flows: vec![ThreadFlow { locations: steps }] }],
             });
         }

@@ -62,6 +62,20 @@ pub struct TaintSpec {
     pub sinks: HashSet<String>,
     /// Parsed `name@k` restrictions: sink name → the only dangerous argument.
     pub sink_arg: HashMap<String, usize>,
+    /// Sinks written `=<pattern>`: ASSIGNMENT sinks. Fire when a tainted
+    /// value is STORED under a key whose lowercased name contains
+    /// `<pattern>` — a member store (`r.Account = tenantID`), a setter
+    /// (`SetAccount(tainted)`), or a named argument
+    /// (`AuthzContext(accountId = tainted)`). Plain local rebinds
+    /// (`account := x`) deliberately do NOT fire: the dangerous shape is
+    /// identity persisted into an authority-carrying object, not a temp.
+    /// Patterns are stored lowercased; matching is case-insensitive
+    /// substring, so the pack names the identity vocabulary (`=account`,
+    /// `=tenant`) and the code spells it any way it likes (`Account`,
+    /// `TenantId`, `accountUuid`). Born from two confirmed cross-tenant
+    /// escalations of exactly this shape: an authz/account field
+    /// overwritten from an attacker-decoded payload after the front door.
+    pub assign_sinks: HashSet<String>,
     /// Sinks written `::name` fire only on bare (non-member) calls — the
     /// libc syscall `unlink(p)`, not a same-named client stub
     /// `client->unlink(req)`.
@@ -216,7 +230,16 @@ impl TaintSpec {
         let mut bare_only = HashSet::new();
         let mut recv_sinks = HashSet::new();
         let mut recv_qual: HashMap<String, HashSet<String>> = HashMap::new();
+        let mut assign_sinks = HashSet::new();
         for s in sinks {
+            // `=<pattern>`: an assignment sink — matched against store keys,
+            // not call names, so it never enters the name-keyed sets below.
+            if let Some(pat) = s.strip_prefix('=') {
+                if !pat.is_empty() {
+                    assign_sinks.insert(pat.to_ascii_lowercase());
+                    continue;
+                }
+            }
             let (s, bare) = match s.strip_prefix("::") {
                 Some(rest) => (rest, true),
                 None => (*s, false),
@@ -274,6 +297,7 @@ impl TaintSpec {
             out_param_sources,
             sinks: names,
             sink_arg,
+            assign_sinks,
             bare_only,
             recv_sinks,
             recv_qual,
@@ -335,6 +359,17 @@ impl TaintSpec {
     /// Is argument position `k` of sink `name` a dangerous position?
     fn sink_arg_matches(&self, name: &str, k: usize) -> bool {
         self.sink_arg.get(name).map_or(true, |&want| want == k)
+    }
+
+    /// Does store key `key` (a member-store field, setter suffix, or named
+    /// argument) match an `=<pattern>` assignment sink? Case-insensitive
+    /// substring over the pack's identity vocabulary.
+    fn assign_sink_match(&self, key: &str) -> bool {
+        if self.assign_sinks.is_empty() {
+            return false;
+        }
+        let k = key.to_ascii_lowercase();
+        self.assign_sinks.iter().any(|p| k.contains(p.as_str()))
     }
 }
 
@@ -1267,6 +1302,23 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
                     // survives in cfg — harvest the field key.
                     if let Some(k) = &store_key {
                         ctx.stored.borrow_mut().entry(k.clone()).or_default().insert(n);
+                        // Assignment sink: attacker data stored into an
+                        // identity-named field (`r.Account = tenantID`).
+                        if ctx.spec.assign_sink_match(k) {
+                            out.push(Finding {
+                                method: method_name.clone(),
+                                sink: format!("={k}"),
+                                sink_line: cpg.line_of(n),
+                                sink_file: cpg.path_of(cpg.file_of(n)).map(str::to_string),
+                                origin: trace.origin.clone(),
+                                path: trace
+                                    .extend(code, cpg.line_of(n), Provenance::IntraProc, 0)
+                                    .steps,
+                                guard: None,
+                                authz: None,
+                                confined: None,
+                            });
+                        }
                     }
                     if let Some(name) = lhs_name(cpg, args[0]) {
                         let trace = trace.extend(
@@ -1316,9 +1368,32 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
             // Persistence phase-1: a tainted value stored through a setter
             // is re-readable elsewhere — harvest the field key.
             if (name.starts_with("set") || name.starts_with("Set")) && name.len() > 3 {
-                if cpg.arguments_of(n).into_iter().any(|a| expr_taint(ctx, a, &taint).is_some())
+                if let Some(trace) =
+                    cpg.arguments_of(n).into_iter().find_map(|a| expr_taint(ctx, a, &taint))
                 {
-                    ctx.stored.borrow_mut().entry(name[3..].to_string()).or_default().insert(n);
+                    let k = &name[3..];
+                    ctx.stored.borrow_mut().entry(k.to_string()).or_default().insert(n);
+                    // Assignment sink: setter form (`SetAccount(tainted)`).
+                    if ctx.spec.assign_sink_match(k) {
+                        out.push(Finding {
+                            method: method_name.clone(),
+                            sink: format!("={k}"),
+                            sink_line: cpg.line_of(n),
+                            sink_file: cpg.path_of(cpg.file_of(n)).map(str::to_string),
+                            origin: trace.origin.clone(),
+                            path: trace
+                                .extend(
+                                    cpg.code_of(n).unwrap_or(name),
+                                    cpg.line_of(n),
+                                    Provenance::IntraProc,
+                                    0,
+                                )
+                                .steps,
+                            guard: None,
+                            authz: None,
+                            confined: None,
+                        });
+                    }
                 }
             }
             // Persistence phase-1 (named-arg store): `copy(executionUser = v)` /
@@ -1330,12 +1405,39 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
                         continue;
                     }
                     let aa = cpg.arguments_of(a);
-                    if aa.len() == 2
-                        && cpg.kind_of(aa[0]) == NodeKind::Identifier
-                        && expr_taint(ctx, aa[1], &taint).is_some()
-                    {
-                        if let Some(k) = cpg.name_of(aa[0]) {
-                            ctx.stored.borrow_mut().entry(k.to_string()).or_default().insert(n);
+                    if aa.len() == 2 && cpg.kind_of(aa[0]) == NodeKind::Identifier {
+                        if let Some(trace) = expr_taint(ctx, aa[1], &taint) {
+                            if let Some(k) = cpg.name_of(aa[0]) {
+                                ctx.stored
+                                    .borrow_mut()
+                                    .entry(k.to_string())
+                                    .or_default()
+                                    .insert(n);
+                                // Assignment sink: named-argument form
+                                // (`AuthzContext(accountId = tainted)`).
+                                if ctx.spec.assign_sink_match(k) {
+                                    out.push(Finding {
+                                        method: method_name.clone(),
+                                        sink: format!("={k}"),
+                                        sink_line: cpg.line_of(n),
+                                        sink_file: cpg
+                                            .path_of(cpg.file_of(n))
+                                            .map(str::to_string),
+                                        origin: trace.origin.clone(),
+                                        path: trace
+                                            .extend(
+                                                cpg.code_of(n).unwrap_or(name),
+                                                cpg.line_of(n),
+                                                Provenance::IntraProc,
+                                                0,
+                                            )
+                                            .steps,
+                                        guard: None,
+                                        authz: None,
+                                        confined: None,
+                                    });
+                                }
+                            }
                         }
                     }
                 }
@@ -1842,6 +1944,17 @@ fn param_to_sink(
                             // analyse_method.
                             if let Some(k) = &store_key {
                                 ctx.stored.borrow_mut().entry(k.clone()).or_default().insert(n);
+                                // Assignment sink (mirrors analyse_method).
+                                if first_hit.is_none() && ctx.spec.assign_sink_match(k) {
+                                    let mut steps = c.clone();
+                                    steps.push(Step::intra(code, cpg.line_of(n), depth));
+                                    first_hit = Some(SinkHit {
+                                        sink: format!("={k}"),
+                                        line: cpg.line_of(n),
+                                        file: cpg.path_of(cpg.file_of(n)).map(str::to_string),
+                                        steps,
+                                    });
+                                }
                             }
                             if let Some(lhs) = lhs_name(cpg, args[0]) {
                                 c.push(Step::intra(cpg.code_of(n).unwrap_or(&lhs), cpg.line_of(n), depth));
@@ -1867,9 +1980,20 @@ fn param_to_sink(
                 let hit = cpg
                     .arguments_of(n)
                     .into_iter()
-                    .any(|a| chain_expr(ctx, a, &chains, depth, visiting).is_some());
-                if hit {
-                    ctx.stored.borrow_mut().entry(name[3..].to_string()).or_default().insert(n);
+                    .find_map(|a| chain_expr(ctx, a, &chains, depth, visiting));
+                if let Some(mut c) = hit {
+                    let k = &name[3..];
+                    ctx.stored.borrow_mut().entry(k.to_string()).or_default().insert(n);
+                    // Assignment sink: setter form (mirrors analyse_method).
+                    if first_hit.is_none() && ctx.spec.assign_sink_match(k) {
+                        c.push(Step::intra(cpg.code_of(n).unwrap_or(name), cpg.line_of(n), depth));
+                        first_hit = Some(SinkHit {
+                            sink: format!("={k}"),
+                            line: cpg.line_of(n),
+                            file: cpg.path_of(cpg.file_of(n)).map(str::to_string),
+                            steps: c,
+                        });
+                    }
                 }
             }
             // Persistence phase-1 (named-arg store), mirrors analyse_method.
@@ -1879,12 +2003,30 @@ fn param_to_sink(
                         continue;
                     }
                     let aa = cpg.arguments_of(a);
-                    if aa.len() == 2
-                        && cpg.kind_of(aa[0]) == NodeKind::Identifier
-                        && chain_expr(ctx, aa[1], &chains, depth, visiting).is_some()
-                    {
-                        if let Some(k) = cpg.name_of(aa[0]) {
-                            ctx.stored.borrow_mut().entry(k.to_string()).or_default().insert(n);
+                    if aa.len() == 2 && cpg.kind_of(aa[0]) == NodeKind::Identifier {
+                        if let Some(mut c) = chain_expr(ctx, aa[1], &chains, depth, visiting) {
+                            if let Some(k) = cpg.name_of(aa[0]) {
+                                ctx.stored
+                                    .borrow_mut()
+                                    .entry(k.to_string())
+                                    .or_default()
+                                    .insert(n);
+                                // Assignment sink: named-argument form
+                                // (mirrors analyse_method).
+                                if first_hit.is_none() && ctx.spec.assign_sink_match(k) {
+                                    c.push(Step::intra(
+                                        cpg.code_of(n).unwrap_or(name),
+                                        cpg.line_of(n),
+                                        depth,
+                                    ));
+                                    first_hit = Some(SinkHit {
+                                        sink: format!("={k}"),
+                                        line: cpg.line_of(n),
+                                        file: cpg.path_of(cpg.file_of(n)).map(str::to_string),
+                                        steps: c,
+                                    });
+                                }
+                            }
                         }
                     }
                 }
@@ -2922,6 +3064,89 @@ mod tests {
         assert_eq!(findings[0].sink, "system");
         assert!(findings[0].path.last().unwrap().code.contains("system(buf)"));
         assert_eq!(findings[0].origin, "read");
+    }
+
+    #[test]
+    fn assign_sink_fires_on_member_store_not_local_rebind() {
+        // `r->account = t` stores attacker data into an identity-named
+        // field — the `=account` assignment sink fires. A plain local
+        // rebind (`account = t`) and an unrelated field (`r->color = t`)
+        // must NOT fire.
+        let cpg = build(&[(
+            "a.c",
+            "void h() {\n    char* t = getenv(\"X\");\n    char* account = t;\n    r->color = t;\n    r->account = t;\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["=account"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert_eq!(findings[0].sink, "=account");
+        assert_eq!(findings[0].origin, "getenv");
+        assert!(findings[0].path.last().unwrap().code.contains("r->account = t"));
+    }
+
+    #[test]
+    fn assign_sink_fires_on_setter_form() {
+        let cpg = build(&[(
+            "b.c",
+            "void h() {\n    char* t = getenv(\"X\");\n    SetAccount(t);\n    SetColor(t);\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["=account"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert_eq!(findings[0].sink, "=Account", "setter key keeps its spelling");
+    }
+
+    #[test]
+    fn assign_sink_fires_from_entry_param_walk() {
+        // The interprocedural walker (entry-model param_to_sink) must hit
+        // assignment sinks too: handler's request data lands in an
+        // identity field of an object another method trusts.
+        let cpg = build(&[(
+            "c.c",
+            "void handler(char* q) {\n    r->tenant = q;\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let mut spec = TaintSpec::new(&[], &["=tenant"]);
+        spec.source_methods.insert("handler".into());
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert_eq!(findings[0].sink, "=tenant");
+        assert_eq!(findings[0].origin, "handler(q)");
+    }
+
+    #[test]
+    fn assign_sink_matches_go_if_init_tenant_overwrite() {
+        // Event-consumer tenant-isolation regression: a generated getter
+        // feeds the account field through a Go if-init binding.
+        // Matching is case-insensitive substring (`=account` ~ `Account`).
+        let cpg = build_go(&[(
+            "d.go",
+            "package p\n\nfunc handle(evt *Evt, r *Req) {\n\tif tenantID := evt.GetTenantId(); tenantID != \"\" {\n\t\tr.Account = tenantID\n\t}\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["GetTenantId"], &["=account"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert_eq!(findings[0].sink, "=Account");
+        assert_eq!(findings[0].origin, "GetTenantId");
+    }
+
+    #[test]
+    fn assign_sink_fires_on_scala_named_argument() {
+        // Policy-context regression: an authorization context is constructed
+        // with a body-derived accountId named argument.
+        let cpg = build_scala(&[(
+            "E.scala",
+            "class C {\n  def h(request: Request): Unit = {\n    val ctx = AuthzContext(accountId = request.body)\n  }\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let mut spec = TaintSpec::new(&[], &["=account"]);
+        spec.source_methods.insert("h".into());
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert_eq!(findings[0].sink, "=accountId");
     }
 
     #[test]

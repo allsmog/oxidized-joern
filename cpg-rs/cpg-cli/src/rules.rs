@@ -120,6 +120,7 @@ impl RulePack {
 /// a codebase family, usually entry-driven (empty or placeholder sources —
 /// pair them with `--rpc-sources`/`--thrift-sources`/`--entry`).
 pub const IRIS_PACKS: &[(&str, &str)] = &[
+    ("authz-overwrite", include_str!("../../iris/packs/authz-overwrite.json")),
     ("file-wrappers", include_str!("../../iris/packs/file-wrappers.json")),
     ("safe-exec", include_str!("../../iris/packs/safe-exec.json")),
     ("go-cql", include_str!("../../iris/packs/go-cql.json")),
