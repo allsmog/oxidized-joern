@@ -127,9 +127,10 @@ pub fn coverage_report(
             [(&rule.sources, &mut dead_sources), (&rule.sinks, &mut dead_sinks)]
         {
             for raw in list.iter() {
-                // Pseudo-sinks (`<shellform>`) match SHAPES, not call names —
+                // Pseudo-sinks (`<shellform>`) and assignment sinks
+                // (`=account`) match SHAPES/store keys, not call names —
                 // no call site is ever named after them.
-                if raw.starts_with('<') {
+                if raw.starts_with('<') || raw.starts_with('=') {
                     continue;
                 }
                 // A `recv.Name` spec entry can fire two ways: by simple name

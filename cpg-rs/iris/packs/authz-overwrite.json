@@ -1,0 +1,11 @@
+{"rules":[
+  {"id":"AUTHZ-OVR-GO","name":"payload-to-identity-field","cwe":"CWE-639","severity":"high",
+   "description":"attacker-decoded payload field overwrites an authz/account/tenant identity slot after the front door (cross-tenant confused-deputy shape: the consumer/handler re-derives WHO it is acting for from data the peer controls)",
+   "sources":["GetTenantId","GetAccountId","GetAccount","GetTenant","GetOrgId","GetOrganizationId","GetCustomerId","GetUserId","GetTenantID","GetAccountID","GetOrgID","GetUserID","Unmarshal@out1","UnmarshalVT@out0","Decode@out0","ReadAll"],
+   "sinks":["=account","=tenant","=organizationid","=organization_id","=orgid","=org_id","=customerid","=customer_id","=userid","=user_id","=principal"],
+   "sanitizers":["len","cap"]},
+  {"id":"AUTHZ-OVR-SCALA","name":"body-to-identity-arg","cwe":"CWE-639","severity":"high",
+   "description":"request-body value bound into an authz-context identity argument (accountId/tenantId) in a handler",
+   "sources":["body","asJson","asFormUrlEncoded","queryString","getQueryString"],
+   "sinks":["=account","=tenant","=organizationid","=organization_id","=orgid","=org_id","=customerid","=customer_id","=userid","=user_id","=principal"]}
+]}
