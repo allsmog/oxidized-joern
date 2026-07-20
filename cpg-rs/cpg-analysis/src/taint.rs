@@ -2260,6 +2260,34 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
                     }
                 }
             }
+            // Returns-tainted: the callee manufactures data from a source
+            // call inside its own body (`fn f() { return getenv(..) }`) —
+            // no param→return flow exists, so the loop above cannot see it.
+            // Match the summary's raw call-returns against the spec sources
+            // and originate taint AT THIS CALL SITE. Persisted phase-2
+            // getter names are excluded: their read-site shape gates
+            // (persisted_read_shape_ok) inspect the read call's code, which
+            // a buried call cannot be checked against here.
+            let mut srcs: Vec<&str> = summary
+                .raw_call_returns()
+                .filter(|s| ctx.spec.sources.contains(*s))
+                .filter(|s| !ctx.spec.persisted_sources.contains(*s))
+                .collect();
+            srcs.sort(); // set order is arbitrary; the winning origin must not be
+            for src in srcs {
+                let mut visiting = HashSet::new();
+                if let Some((inner, prov)) =
+                    lift_source(ctx, name, &fqn, origin, src, &mut visiting)
+                {
+                    let t = Trace { origin: src.to_string(), steps: inner };
+                    return Some(t.extend(
+                        cpg.code_of(node).unwrap_or(name),
+                        cpg.line_of(node),
+                        prov,
+                        0,
+                    ));
+                }
+            }
             recv_taint(cpg)
         }
         _ => {
@@ -2550,6 +2578,217 @@ fn lift_nested(
             let chain = callee_chain(ctx, body, k, depth + 1, visiting);
             visiting.remove(fqn);
             chain.map(|steps| (steps, prov))
+        }
+    }
+}
+
+/// `lift` for a returns-tainted flow (source call `src` → return of `name`):
+/// decide the hop's provenance and reconstruct the callee's internal witness
+/// from the source call to its return. Returns `None` when every occurrence
+/// of the source inside the body is laundered per the QUERY's sanitizer set
+/// (which may be larger than the one the summary was computed with).
+fn lift_source(
+    ctx: &Ctx,
+    name: &str,
+    fqn: &str,
+    origin: SummaryOrigin,
+    src: &str,
+    visiting: &mut HashSet<String>,
+) -> Option<(Vec<Step>, Provenance)> {
+    match origin {
+        SummaryOrigin::External => Some((
+            Vec::new(),
+            Provenance::ExternalSummary { callee_fqn: fqn.to_string() },
+        )),
+        SummaryOrigin::Computed => {
+            let prov = Provenance::SummaryFlow { callee_fqn: fqn.to_string() };
+            let Some(body) = ctx.body_of(name, fqn) else {
+                return Some((Vec::new(), prov)); // no body located: summary-only hop
+            };
+            if !visiting.insert(fqn.to_string()) {
+                return Some((Vec::new(), prov)); // recursion: don't re-expand
+            }
+            let chain = source_chain(ctx, body, src, 1, visiting);
+            visiting.remove(fqn);
+            chain.map(|steps| (steps, prov))
+        }
+    }
+}
+
+/// Reconstruct the intraprocedural witness chain inside `method` from a call
+/// to `src` (directly, or through a callee that itself returns `src`'s
+/// result) to the method's return, honouring the query's sanitizers. The
+/// returns-tainted counterpart of [`callee_chain`]: `None` means no
+/// sanitizer-free source→return path exists.
+fn source_chain(
+    ctx: &Ctx,
+    method: NodeId,
+    src: &str,
+    depth: u32,
+    visiting: &mut HashSet<String>,
+) -> Option<Vec<Step>> {
+    if depth > MAX_SPLICE_DEPTH {
+        return Some(Vec::new()); // too deep: keep the hop, drop the expansion
+    }
+    let cpg = ctx.cpg;
+
+    // var name -> witness chain from the source call to that var.
+    let mut chains: HashMap<String, Vec<Step>> = HashMap::new();
+
+    let mut stmts: Vec<NodeId> = crate::pass::ast_descendants(cpg, method)
+        .into_iter()
+        .filter(|&n| matches!(cpg.kind_of(n), NodeKind::Call | NodeKind::Return))
+        .filter(|&n| cpg.line_of(n).is_some())
+        .collect();
+    stmts.sort_by_key(|&n| (cpg.line_of(n).unwrap_or(0), n.0));
+
+    let mut found: Option<Vec<Step>> = None;
+    for n in stmts {
+        match cpg.kind_of(n) {
+            NodeKind::Call if cpg.name_of(n) == Some("=") => {
+                let args = cpg.arguments_of(n);
+                if args.len() == 2 {
+                    // A fresh source occurrence in the rhs seeds a chain;
+                    // otherwise an already-seeded chain propagates exactly
+                    // as in callee_chain.
+                    let c = source_expr(ctx, args[1], src, depth, visiting)
+                        .or_else(|| chain_expr(ctx, args[1], &chains, depth, visiting));
+                    match c {
+                        Some(mut c) => {
+                            if let Some(lhs) = lhs_name(cpg, args[0]) {
+                                c.push(Step::intra(
+                                    cpg.code_of(n).unwrap_or(&lhs),
+                                    cpg.line_of(n),
+                                    depth,
+                                ));
+                                chains.insert(lhs, c);
+                            }
+                        }
+                        None => {
+                            if let Some(lhs) = lhs_name(cpg, args[0]) {
+                                if !is_compound_assign(cpg.code_of(n).unwrap_or("")) {
+                                    chains.remove(&lhs); // reassignment clears
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            NodeKind::Return if found.is_none() => {
+                for c in cpg.out_kind(n, cpg_core::EdgeKind::Ast) {
+                    let chain = source_expr(ctx, c, src, depth, visiting)
+                        .or_else(|| chain_expr(ctx, c, &chains, depth, visiting));
+                    if let Some(mut chain) = chain {
+                        chain.push(Step::intra(
+                            cpg.code_of(n).unwrap_or("return"),
+                            cpg.line_of(n),
+                            depth,
+                        ));
+                        found = Some(chain);
+                        break;
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    found // None = no sanitizer-free source -> return path found
+}
+
+/// The witness chain to a fresh occurrence of source call `src` inside an
+/// expression, if any: the source call itself, a call whose summary says it
+/// returns `src`'s result (expanded one level deeper), or either buried in
+/// arguments/receiver/wrapper nodes — with sanitizer calls killing the path.
+fn source_expr(
+    ctx: &Ctx,
+    node: NodeId,
+    src: &str,
+    depth: u32,
+    visiting: &mut HashSet<String>,
+) -> Option<Vec<Step>> {
+    let cpg = ctx.cpg;
+    match cpg.kind_of(node) {
+        NodeKind::Identifier | NodeKind::Literal => None,
+        NodeKind::Call => {
+            let name = cpg.name_of(node).unwrap_or("");
+            if ctx.is_sanitizer(name) {
+                return None; // laundered here: this occurrence doesn't count
+            }
+            if name == src {
+                return Some(vec![Step::intra(
+                    cpg.code_of(node).unwrap_or(name),
+                    cpg.line_of(node),
+                    depth,
+                )]);
+            }
+            // Direct occurrence somewhere in the arguments or receiver.
+            for a in cpg
+                .arguments_of(node)
+                .into_iter()
+                .chain(cpg.out_kind(node, EdgeKind::Receiver))
+            {
+                if let Some(mut c) = source_expr(ctx, a, src, depth, visiting) {
+                    c.push(Step::intra(
+                        cpg.code_of(node).unwrap_or(name),
+                        cpg.line_of(node),
+                        depth,
+                    ));
+                    return Some(c);
+                }
+            }
+            // Transitive: this callee's own summary returns src's result.
+            if is_operator(name) {
+                return None;
+            }
+            let key = cpg
+                .call_targets(node)
+                .into_iter()
+                .filter_map(|m| cpg.full_name_of(m))
+                .find(|f| ctx.summaries.get(f).is_some())
+                .unwrap_or(name);
+            let untrusted_dispatch =
+                cpg.signature_of(node).is_some() && cpg.type_full_name_of(node).is_none();
+            if untrusted_dispatch {
+                return None;
+            }
+            let (summary, origin) = ctx.summaries.get_with_origin(key)?;
+            if !summary.raw_call_returns().any(|s| s == src) {
+                return None;
+            }
+            let fqn = summary.fqn.clone();
+            let (inner, prov) = match origin {
+                SummaryOrigin::External => (
+                    Vec::new(),
+                    Provenance::ExternalSummary { callee_fqn: fqn.clone() },
+                ),
+                SummaryOrigin::Computed => {
+                    let prov = Provenance::SummaryFlow { callee_fqn: fqn.clone() };
+                    match ctx.body_of(name, &fqn) {
+                        Some(body) if visiting.insert(fqn.clone()) => {
+                            let chain = source_chain(ctx, body, src, depth + 1, visiting);
+                            visiting.remove(&fqn);
+                            (chain?, prov)
+                        }
+                        _ => (Vec::new(), prov), // unlocatable/recursive: summary-only
+                    }
+                }
+            };
+            let mut c = inner;
+            c.push(Step {
+                code: cpg.code_of(node).unwrap_or(name).to_string(),
+                line: cpg.line_of(node),
+                provenance: prov,
+                depth,
+            });
+            Some(c)
+        }
+        _ => {
+            for c in cpg.out_kind(node, cpg_core::EdgeKind::Ast) {
+                if let Some(chain) = source_expr(ctx, c, src, depth, visiting) {
+                    return Some(chain);
+                }
+            }
+            None
         }
     }
 }
@@ -4285,5 +4524,144 @@ func setup(s *Server, mux *Mux) {
         assert!(!super::contains_call("ReEncode(v)", "Encode"), "substring is not a call");
         assert!(!super::contains_call("EncodeBase64(v)", "Encode"), "prefix is not a call");
         assert!(!super::contains_call("x.Encode", "Encode"), "field read is not a call");
+    }
+
+    #[test]
+    fn alias_after_member_store_carries_object_taint() {
+        // The store happens FIRST, the alias second: plain rhs propagation
+        // must hand cfg's object taint to y, and the field read through y
+        // must fire.
+        let cpg = build(&[(
+            "f.c",
+            "void h() {\n    struct C cfg;\n    cfg.key = getenv(\"X\");\n    struct C *y = &cfg;\n    system(y->key);\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert_eq!(findings[0].sink_line, Some(5), "{findings:?}");
+    }
+
+    #[test]
+    fn field_read_accessor_summary_carries_param_flow() {
+        // `get` returns a FIELD READ of its parameter — the member-read
+        // lowering makes that a Call named "key" which has no summary, so
+        // without field-read pass-through in summary computation the
+        // param0→return flow is silently lost and the caller-side taint
+        // dies at get() (empty summaries suppress the conservative
+        // fallback by design).
+        let cpg = build(&[(
+            "g.c",
+            "char* get(struct C *c) { return c->key; }\nvoid h() {\n    struct C cfg;\n    cfg.key = getenv(\"X\");\n    system(get(&cfg));\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert!(findings[0].method.contains('h'), "{findings:?}");
+    }
+
+    #[test]
+    fn serve_http_struct_handler_is_mined_as_entry() {
+        // `mux.Handle("/x", &H{})` registers the TYPE — the mined entry
+        // must be its ServeHTTP method (the http.Handler contract), both
+        // for the composite-literal form and a locally-typed variable.
+        // A struct without a ServeHTTP must mine nothing.
+        let cpg = build_go(&[(
+            "h.go",
+            "package main\n\ntype H struct{}\n\nfunc (h *H) ServeHTTP(w http.ResponseWriter, r *http.Request) {\n\tprocess(r)\n}\n\ntype NoHandler struct{}\n\nfunc wire(mux *http.ServeMux) {\n\tmux.Handle(\"/x\", &H{})\n\tmux.Handle(\"/y\", &NoHandler{})\n\tvar h2 *H\n\tmux.Handle(\"/z\", h2)\n}\n",
+        )]);
+        let mined = crate::entries::mine_registration_entries(&cpg);
+        assert!(
+            mined.iter().any(|e| e == "H.ServeHTTP"),
+            "H.ServeHTTP must be mined: {mined:?}"
+        );
+        assert!(
+            !mined.iter().any(|e| e.contains("NoHandler")),
+            "a type without ServeHTTP mines nothing: {mined:?}"
+        );
+    }
+
+    #[test]
+    fn wrapper_returning_source_result_originates_taint_at_call_site() {
+        // readcfg() has NO param→return flow — it manufactures taint from a
+        // source inside its body. Calling it must originate taint at the
+        // call site; the unrelated wrapper must not fire for this spec.
+        let cpg = build(&[(
+            "w.c",
+            "char* readcfg() { return getenv(\"X\"); }\nchar* readver() { return version(); }\nvoid handler() {\n    char* v = readcfg();\n    char* w = readver();\n    system(v);\n    printf(w);\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["system", "printf"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "only system(v) may report: {findings:?}");
+        assert_eq!(findings[0].origin, "getenv");
+        assert_eq!(findings[0].sink, "system");
+        assert!(findings[0].method.contains("handler"), "{findings:?}");
+        // Witness must include the buried source call spliced from readcfg.
+        assert!(
+            findings[0].path.iter().any(|s| s.code.contains("getenv") && s.depth > 0),
+            "{:?}",
+            findings[0].path
+        );
+    }
+
+    #[test]
+    fn wrapper_source_return_lifts_transitively() {
+        // outer() returns inner()'s result which returns getenv's — two
+        // summary levels between the source and the calling method.
+        let cpg = build(&[(
+            "t.c",
+            "char* inner() { return getenv(\"X\"); }\nchar* outer() {\n    char* t = inner();\n    return t;\n}\nvoid handler() { system(outer()); }\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert_eq!(findings[0].origin, "getenv");
+        assert!(findings[0].method.contains("handler"), "{findings:?}");
+    }
+
+    #[test]
+    fn query_time_sanitizer_kills_wrapper_source_return() {
+        // The summary store was computed WITHOUT sanitizers, so readcfg's
+        // call-returns carry getenv raw — but the QUERY declares `clean` a
+        // sanitizer, and the witness reconstruction must honour it: every
+        // source→return path inside readcfg is laundered, so no lift.
+        let cpg = build(&[(
+            "q.c",
+            "char* clean(char* s) { return s; }\nchar* readcfg() { return clean(getenv(\"X\")); }\nvoid handler() { system(readcfg()); }\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::with_sanitizers(&["getenv"], &["system"], &["clean"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 0, "laundered wrapper must not lift: {findings:?}");
+    }
+
+    #[test]
+    fn external_summary_call_return_originates_taint() {
+        // vendorRead has no body anywhere — an external JSON declaration
+        // says it returns getenv's result. The hop must be summary-only
+        // with external provenance.
+        let cpg = build(&[("e.c", "void handler() { system(vendorRead()); }\n")]);
+        let mut store = summarise(&cpg);
+        store
+            .load_external_json(
+                r#"[{"functionDeclaration": {"methodName": "vendorRead"},
+                     "callReturns": [{"call": "getenv"}]}]"#,
+            )
+            .unwrap();
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert_eq!(findings[0].origin, "getenv");
+        assert!(
+            findings[0]
+                .path
+                .iter()
+                .any(|s| matches!(&s.provenance, Provenance::ExternalSummary { callee_fqn } if callee_fqn == "vendorRead")),
+            "{:?}",
+            findings[0].path
+        );
     }
 }

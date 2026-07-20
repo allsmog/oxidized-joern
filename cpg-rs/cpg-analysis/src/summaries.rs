@@ -80,10 +80,28 @@ impl Flow {
     }
 }
 
+/// A call whose *result* flows to this function's return — the
+/// returns-tainted summary tier. A wrapper like `fn readEnv() { return
+/// getenv("X") }` has no param→return flow at all, so callers could never
+/// see the taint it manufactures; recording the originating call's name
+/// lets a query-time source match ("getenv" ∈ spec.sources) originate
+/// taint at the *call site of the wrapper*. `via: Some(s)` means the
+/// result only reaches the return through sanitizer `s` (recorded for
+/// auditing, never lifted raw).
+#[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Debug, Serialize)]
+pub struct CallReturn {
+    /// Simple (call-site) name of the originating call — spec source names
+    /// are simple names, so matching happens on this form.
+    pub call: String,
+    pub via: Option<Sanitizer>,
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct FunctionSummary {
     pub fqn: String,
     pub flows: HashSet<Flow>,
+    /// Calls whose results flow to the return (see [`CallReturn`]).
+    pub call_returns: HashSet<CallReturn>,
 }
 
 impl FunctionSummary {
@@ -104,6 +122,13 @@ impl FunctionSummary {
             (Point::Param(k), Point::Return, Some(s)) => Some((k, s)),
             _ => None,
         })
+    }
+
+    /// Names of calls whose results flow *raw* to the return — what
+    /// returns-tainted source matching consults; sanitized entries are
+    /// excluded (the wrapper laundered the value).
+    pub fn raw_call_returns(&self) -> impl Iterator<Item = &str> {
+        self.call_returns.iter().filter(|c| c.via.is_none()).map(|c| c.call.as_str())
     }
 }
 
@@ -205,7 +230,15 @@ impl SummaryStore {
                     });
                 }
             }
-            self.external.insert(fqn.clone(), FunctionSummary { fqn, flows });
+            let call_returns = e
+                .call_returns
+                .iter()
+                .map(|cr| CallReturn {
+                    call: cr.call.clone(),
+                    via: cr.via.clone().map(Sanitizer),
+                })
+                .collect();
+            self.external.insert(fqn.clone(), FunctionSummary { fqn, flows, call_returns });
             n += 1;
         }
         Ok(n)
@@ -297,6 +330,9 @@ impl SummaryStore {
                     let mut flows: Vec<&Flow> = s.flows.iter().collect();
                     flows.sort();
                     flows.hash(&mut h);
+                    let mut crs: Vec<&CallReturn> = s.call_returns.iter().collect();
+                    crs.sort();
+                    crs.hash(&mut h);
                 }
                 None => 0u8.hash(&mut h),
             }
@@ -359,7 +395,9 @@ impl SummaryStore {
             for (summary, deps) in results {
                 let fqn = summary.fqn.clone();
                 let prev = self.summaries.get(&fqn);
-                if prev.map(|p| &p.flows) != Some(&summary.flows) {
+                if prev.map(|p| (&p.flows, &p.call_returns))
+                    != Some((&summary.flows, &summary.call_returns))
+                {
                     changed = true;
                 }
                 self.set_deps(&fqn, deps);
@@ -370,11 +408,21 @@ impl SummaryStore {
     }
 }
 
-/// A taint mark during summary computation: which parameter the value derives
-/// from, and the sanitizer it went through (if any).
+/// What a taint mark during summary computation derives from: a formal
+/// parameter (the classic param→return tier) or the result of a named call
+/// (the returns-tainted tier — the call's simple name is what query-time
+/// source matching compares against).
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+enum TagOrigin {
+    Param(usize),
+    Call(String),
+}
+
+/// A taint mark during summary computation: what the value derives from,
+/// and the sanitizer it went through (if any).
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 struct Tag {
-    param: usize,
+    origin: TagOrigin,
     via: Option<Sanitizer>,
 }
 
@@ -395,14 +443,18 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
         }
     }
 
-    // var name -> set of tagged params that flow into it.
+    // var name -> set of tagged origins that flow into it.
     let mut taint: HashMap<String, HashSet<Tag>> = HashMap::new();
     for (name, &i) in &param_index {
-        taint.insert(name.clone(), HashSet::from([Tag { param: i, via: None }]));
+        taint.insert(
+            name.clone(),
+            HashSet::from([Tag { origin: TagOrigin::Param(i), via: None }]),
+        );
     }
 
     let mut deps: HashSet<String> = HashSet::new();
     let mut result_flows: HashSet<Flow> = HashSet::new();
+    let mut call_returns: HashSet<CallReturn> = HashSet::new();
 
     // Statements in source order under the method.
     let mut stmts: Vec<NodeId> = ast_descendants(cpg, method)
@@ -430,11 +482,18 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
             NodeKind::Return => {
                 for c in cpg.out_kind(n, cpg_core::EdgeKind::Ast) {
                     for tag in expr_taint(cpg, c, &taint, store, &mut deps) {
-                        result_flows.insert(Flow {
-                            from: Point::Param(tag.param),
-                            to: Point::Return,
-                            via: tag.via,
-                        });
+                        match tag.origin {
+                            TagOrigin::Param(k) => {
+                                result_flows.insert(Flow {
+                                    from: Point::Param(k),
+                                    to: Point::Return,
+                                    via: tag.via,
+                                });
+                            }
+                            TagOrigin::Call(name) => {
+                                call_returns.insert(CallReturn { call: name, via: tag.via });
+                            }
+                        }
                     }
                 }
             }
@@ -442,8 +501,21 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
         }
     }
 
-    (FunctionSummary { fqn, flows: result_flows }, deps)
+    // Bound the returns-tainted set: a method whose return derives from very
+    // many distinct calls is an aggregator, not a source wrapper — keep the
+    // lexicographically-first entries so the cap is deterministic.
+    if call_returns.len() > MAX_CALL_RETURNS {
+        let mut v: Vec<CallReturn> = call_returns.into_iter().collect();
+        v.sort();
+        v.truncate(MAX_CALL_RETURNS);
+        call_returns = v.into_iter().collect();
+    }
+
+    (FunctionSummary { fqn, flows: result_flows, call_returns }, deps)
 }
+
+/// Cap on distinct [`CallReturn`] entries per summary (see `compute_method`).
+const MAX_CALL_RETURNS: usize = 64;
 
 /// The variable name an lvalue identifier refers to.
 pub(crate) fn lhs_name(cpg: &Cpg, node: NodeId) -> Option<String> {
@@ -483,6 +555,23 @@ fn expr_taint(
                 }
                 return out;
             }
+            // Field-read pass-through: the member-read lowering emits
+            // `c->key` as a Call named "key" carrying the base — a field
+            // name never has a summary, so without this the base's tags die
+            // here and the `return c->key` accessor shape loses its
+            // param→return flow. Only NON-invoked shapes qualify (no `(` in
+            // the code — a spelled invocation always carries parens):
+            // `c.method()` stays summary-driven. No self-tag either — a
+            // field name is a read, not an originating call. (Gate on code
+            // text, not the receiver stamp: the C frontend's field reads
+            // carry no signature.)
+            if cpg.code_of(node).is_some_and(|c| !c.contains('(')) {
+                let mut out = HashSet::new();
+                for t in &arg_taints {
+                    out.extend(t.iter().cloned());
+                }
+                return out;
+            }
             if store.sanitizers.contains(name) {
                 // Sanitizer call: the result still *derives from* its
                 // arguments (record the dependency, sanitized) but does not
@@ -493,7 +582,7 @@ fn expr_taint(
                 for t in &arg_taints {
                     for tag in t {
                         out.insert(Tag {
-                            param: tag.param,
+                            origin: tag.origin.clone(),
                             via: tag
                                 .via
                                 .clone()
@@ -521,6 +610,13 @@ fn expr_taint(
             };
             deps.insert(key.clone());
             let mut out = HashSet::new();
+            // Returns-tainted self-tag: this call's result derives from the
+            // call itself — if its (simple) name is a spec source at query
+            // time, the summary carrying this tag to its return is exactly
+            // the `fn f() { return getenv(..) }` wrapper shape.
+            if !name.is_empty() {
+                out.insert(Tag { origin: TagOrigin::Call(name.to_string()), via: None });
+            }
             if let Some(summary) = store.get(&key) {
                 for f in &summary.flows {
                     let (Point::Param(k), Point::Return) = (f.from, f.to) else {
@@ -529,11 +625,20 @@ fn expr_taint(
                     if let Some(t) = arg_taints.get(k) {
                         for tag in t {
                             out.insert(Tag {
-                                param: tag.param,
+                                origin: tag.origin.clone(),
                                 via: tag.via.clone().or_else(|| f.via.clone()),
                             });
                         }
                     }
+                }
+                // Transitivity: the callee itself returns some call's result
+                // (its own returns-tainted tier) — our result then derives
+                // from that same originating call, one level further up.
+                for cr in &summary.call_returns {
+                    out.insert(Tag {
+                        origin: TagOrigin::Call(cr.call.clone()),
+                        via: cr.via.clone(),
+                    });
                 }
             }
             out
@@ -573,6 +678,17 @@ struct ExternalEntry {
     function_declaration: ExternalDecl,
     #[serde(rename = "dataFlows", default)]
     data_flows: Vec<ExternalFlow>,
+    /// Optional returns-tainted declarations: calls whose results this
+    /// function returns (e.g. a vendored wrapper around `getenv`).
+    #[serde(rename = "callReturns", default)]
+    call_returns: Vec<ExternalCallReturn>,
+}
+
+#[derive(Deserialize)]
+struct ExternalCallReturn {
+    call: String,
+    #[serde(default)]
+    via: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -721,5 +837,44 @@ mod tests {
         for fqn in ["id", "wrap", "outer"] {
             assert_eq!(store.get(fqn).unwrap().flows, store2.get(fqn).unwrap().flows);
         }
+    }
+
+    #[test]
+    fn call_returns_record_source_wrappers_raw_and_sanitized() {
+        // readcfg returns getenv's result raw; readsafe only through the
+        // sanitizer — the entry is recorded (auditable) but never raw.
+        // relay returns readcfg's result: the originating call's name must
+        // propagate transitively through the fixpoint.
+        let cpg = build(&[(
+            "cr.c",
+            "char* clean(char* s) {\n    return s;\n}\nchar* readcfg() {\n    return getenv(\"X\");\n}\nchar* readsafe() {\n    return clean(getenv(\"X\"));\n}\nchar* relay() {\n    char* t = readcfg();\n    return t;\n}\n",
+        )]);
+        let mut store = SummaryStore::new();
+        store.set_sanitizers(["clean"]);
+        store.compute_all(&cpg);
+
+        let cfg = store.get("readcfg").unwrap();
+        assert!(cfg.raw_call_returns().any(|c| c == "getenv"), "{:?}", cfg.call_returns);
+
+        let safe = store.get("readsafe").unwrap();
+        assert!(
+            !safe.raw_call_returns().any(|c| c == "getenv"),
+            "sanitized wrapper must not expose getenv raw: {:?}",
+            safe.call_returns
+        );
+        assert!(
+            safe.call_returns
+                .iter()
+                .any(|c| c.call == "getenv" && c.via.as_ref().is_some_and(|s| s.name() == "clean")),
+            "{:?}",
+            safe.call_returns
+        );
+
+        let relay = store.get("relay").unwrap();
+        assert!(
+            relay.raw_call_returns().any(|c| c == "getenv"),
+            "transitive call-return through readcfg: {:?}",
+            relay.call_returns
+        );
     }
 }
