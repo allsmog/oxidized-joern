@@ -1,0 +1,23 @@
+{"rules": [
+  {"id": "PY-CMD-001", "name": "user-input-to-shell", "cwe": "CWE-78", "severity": "critical",
+   "description": "HTTP/CLI input reaching command execution",
+   "sources": ["get_json", "get_argument", "get_body_argument", "get_query_argument", "argv", "input", "request"],
+   "sourceIdents": ["request"],
+   "sinks": ["system@0", "popen@0", "subprocess.call@0", "subprocess.run@0", "check_output@0", "check_call@0", "Popen@0", "exec_command@0"],
+   "sanitizers": ["quote"]},
+  {"id": "PY-EVAL-002", "name": "user-input-to-eval", "cwe": "CWE-95", "severity": "critical",
+   "description": "HTTP/CLI input reaching eval/exec",
+   "sources": ["get_json", "get_argument", "get_body_argument", "get_query_argument", "argv", "input", "request"],
+   "sourceIdents": ["request"],
+   "sinks": ["eval@0", "exec@0"]},
+  {"id": "PY-DESER-003", "name": "user-input-to-deserialization", "cwe": "CWE-502", "severity": "critical",
+   "description": "HTTP/CLI input reaching unsafe deserialization",
+   "sources": ["get_json", "get_argument", "get_body_argument", "get_query_argument", "argv", "request", "read", "recv"],
+   "sourceIdents": ["request"],
+   "sinks": ["pickle.loads@0", "cPickle.loads@0", "yaml.load@0", "marshal.loads@0"]},
+  {"id": "PY-SQL-004", "name": "user-input-to-sql", "cwe": "CWE-89", "severity": "high",
+   "description": "HTTP/CLI input reaching SQL execution",
+   "sources": ["get_json", "get_argument", "get_body_argument", "get_query_argument", "argv", "request"],
+   "sourceIdents": ["request"],
+   "sinks": ["execute@0", "executemany@0", "executescript@0"]}
+]}

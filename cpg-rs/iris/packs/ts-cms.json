@@ -1,0 +1,18 @@
+{"rules":[
+ {"id":"IRIS-TS-89","name":"ctx-to-query","cwe":"CWE-89","severity":"high",
+  "description":"HTTP request data reaches DB query/raw SQL",
+  "sourceIdents":["ctx","request"],
+  "sinks":["raw@0","execute@0","executeRaw@0"]},
+ {"id":"IRIS-TS-78","name":"ctx-to-exec","cwe":"CWE-78","severity":"critical",
+  "description":"HTTP request data reaches process execution",
+  "sourceIdents":["ctx","request"],
+  "sinks":["exec@0","execSync@0","spawn@0","spawnSync@0"]},
+ {"id":"IRIS-TS-22","name":"ctx-to-path","cwe":"CWE-22","severity":"high",
+  "description":"HTTP request data reaches filesystem paths",
+  "sourceIdents":["ctx","request"],
+  "sinks":["readFile@0","readFileSync@0","writeFile@0","writeFileSync@0","unlink@0","unlinkSync@0","createReadStream@0"]},
+ {"id":"IRIS-TS-918","name":"ctx-to-url","cwe":"CWE-918","severity":"medium",
+  "description":"HTTP request data controls outbound URLs",
+  "sourceIdents":["ctx","request"],
+  "sinks":["fetch@0","axios","get@0","post@0"]}
+]}

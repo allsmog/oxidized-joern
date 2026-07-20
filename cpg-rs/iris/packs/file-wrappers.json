@@ -1,0 +1,26 @@
+{
+ "rules": [
+  {
+   "id": "FILE-OPEN-001",
+   "name": "request-path-to-file-wrapper",
+   "cwe": "CWE-73",
+   "severity": "high",
+   "description": "attacker-influenced path reaches the path position of a file-wrapper construction or a classic open",
+   "sources": [],
+   "sinks": [
+    "ScopedFD@0",
+    "SimpleRandomAccessFile@0",
+    "SimpleWritableFile@0",
+    "MmappedRandomAccessFile@0",
+    "PrefetchingSimpleRandomAccessFile@0",
+    "ProxyingSimpleRandomAccessFile@1",
+    "FileByteStream@0",
+    "fopen@0",
+    "open@0",
+    "unlink@0",
+    "rename@0",
+    "rename@1"
+   ]
+  }
+ ]
+}

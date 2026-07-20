@@ -1,0 +1,42 @@
+{
+ "rules": [
+  {
+   "id": "JVM-EXEC-001",
+   "name": "api-to-agent-exec",
+   "cwe": "CWE-78",
+   "severity": "high",
+   "description": "REST API handler input reaches agent process execution without escaping",
+   "sources": [
+    "getenv"
+   ],
+   "sinks": [
+    "executeProcess",
+    "executeProcessHelper",
+    "executeProcessOnAgentAccessible",
+    "executeScript",
+    "executeCommandOnHost",
+    "runHostScriptToCompletion",
+    "executeRmanScript",
+    "runOracleTestQuery"
+   ],
+   "sanitizers": [
+    "bashEscapeString"
+   ]
+  },
+  {
+   "id": "JVM-PATH-002",
+   "name": "api-to-file",
+   "cwe": "CWE-22",
+   "severity": "medium",
+   "description": "REST API handler input reaches filesystem operations",
+   "sources": [
+    "getenv"
+   ],
+   "sinks": [
+    "deleteRecursively",
+    "createDirectory",
+    "fromFile@0"
+   ]
+  }
+ ]
+}

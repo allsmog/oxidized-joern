@@ -49,21 +49,13 @@ class ImportCode[T <: Project](console: io.joern.console.Console[T])(implicit
     }
   }
 
-  def c: SourceBasedFrontend    = new CFrontend("c")
-  def cpp: SourceBasedFrontend  = new CFrontend("cpp", extension = "cpp")
-  def java: SourceBasedFrontend = new SourceBasedFrontend("java", Languages.JAVASRC, "Java Source Frontend", "java")
+  // Source frontends for cpg-rs-covered languages (c/cpp/java-src/js/ts/
+  // python/go/ruby/rust) have been removed — use cpg-rs for those.
   def jvm: Frontend =
     new BinaryFrontend("jvm", Languages.JAVA, "Java/Dalvik Bytecode Frontend (based on SOOT's jimple)")
   def ghidra: Frontend = new BinaryFrontend("ghidra", Languages.GHIDRA, "ghidra reverse engineering frontend")
   def kotlin: SourceBasedFrontend =
     new SourceBasedFrontend("kotlin", Languages.KOTLIN, "Kotlin Source Frontend", "kt")
-  def python: SourceBasedFrontend =
-    new SourceBasedFrontend("python", Languages.PYTHONSRC, "Python Source Frontend", "py")
-  def golang: SourceBasedFrontend = new SourceBasedFrontend("golang", Languages.GOLANG, "Golang Source Frontend", "go")
-  def javascript: SourceBasedFrontend =
-    new JsFrontend("javascript", Languages.JAVASCRIPT, "Javascript Source Frontend", "js")
-  def jssrc: SourceBasedFrontend =
-    new JsFrontend("jssrc", Languages.JSSRC, "Javascript/Typescript Source Frontend based on astgen", "js")
   def swiftsrc: SourceBasedFrontend =
     new SwiftSrcFrontend("swiftsrc", Languages.SWIFTSRC, "Swift Source Frontend based on swiftastgen", "swift")
   def csharp: Frontend = new BinaryFrontend("csharp", Languages.CSHARP, "C# Source Frontend (Roslyn)")
@@ -71,31 +63,10 @@ class ImportCode[T <: Project](console: io.joern.console.Console[T])(implicit
     new SourceBasedFrontend("csharpsrc", Languages.CSHARPSRC, "C# Source Frontend based on DotNetAstGen", "cs")
   def llvm: Frontend            = new BinaryFrontend("llvm", Languages.LLVM, "LLVM Bitcode Frontend")
   def php: SourceBasedFrontend  = new SourceBasedFrontend("php", Languages.PHP, "PHP source frontend", "php")
-  def ruby: SourceBasedFrontend = SourceBasedFrontend("ruby", Languages.RUBYSRC, "Ruby source frontend", "rb")
-  def rust: RustFrontend        = new RustFrontend()
   def abap: SourceBasedFrontend = new SourceBasedFrontend("abap", Languages.ABAP, "ABAP Source Frontend", "abap")
 
   private def allFrontends: List[Frontend] =
-    List(
-      c,
-      cpp,
-      ghidra,
-      kotlin,
-      java,
-      jvm,
-      javascript,
-      jssrc,
-      swiftsrc,
-      golang,
-      llvm,
-      php,
-      python,
-      csharp,
-      ruby,
-      csharpsrc,
-      abap,
-      rust
-    )
+    List(ghidra, kotlin, jvm, swiftsrc, llvm, php, csharp, csharpsrc, abap)
 
   // this is only abstract to force people adding frontends to make a decision whether the frontend consumes binaries or source
   abstract class Frontend(val name: String, val language: String, val description: String = "")(implicit
@@ -159,52 +130,6 @@ class ImportCode[T <: Project](console: io.joern.console.Console[T])(implicit
         super.fromFile(inputPath, projectName, args)
       } else {
         super.apply(inputPath, projectName, args)
-      }
-    }
-  }
-
-  class JsFrontend(name: String, language: String, description: String, extension: String)
-      extends SourceBasedFrontend(name, language, description, extension) {
-    override def apply(inputPath: String, projectName: String, args: List[String]): Cpg = {
-      if (!Files.isDirectory(Paths.get(inputPath))) {
-        // The JS frontend does not support importing a single file.
-        // Hence, we have to copy it into a temporary folder with super.fromFile and import that folder.
-        super.fromFile(inputPath, projectName, args)
-      } else {
-        super.apply(inputPath, projectName, args)
-      }
-    }
-  }
-
-  class CFrontend(name: String, extension: String = "c")
-      extends SourceBasedFrontend(name, Languages.NEWC, "Eclipse CDT Based Frontend for C/C++", extension)
-
-  class RustFrontend extends SourceBasedFrontend("rust", Languages.RUST, "Rust Source Frontend", "rs") {
-    override def fromString(str: String, args: List[String] = List()): Cpg = {
-      fromStringWithExtraDeps(str, Nil, args)
-    }
-
-    def fromStringWithExtraDeps(
-      str: String,
-      extraDeps: collection.Seq[String],
-      args: collection.Seq[String] = Nil
-    ): Cpg = {
-      FileUtil.usingTemporaryDirectory("console") { dir =>
-        Files.writeString(
-          dir / "Cargo.toml",
-          s"""[package]
-             |name = "importCode"
-             |version = "0.1.0"
-             |edition = "2021"
-             |
-             |
-             |[dependencies]
-             |${extraDeps.mkString("\n")}
-             |""".stripMargin
-        )
-        Files.createDirectory(dir / "src")
-        Files.writeString(dir / "src" / "lib.rs", str)
-        super.apply(dir.toString, args = args.toList)
       }
     }
   }

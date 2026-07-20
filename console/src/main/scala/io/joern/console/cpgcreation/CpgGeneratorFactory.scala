@@ -10,23 +10,17 @@ import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 import scala.util.Try
 
 object CpgGeneratorFactory {
+  // cpg-rs-covered languages (C/NEWC, GOLANG, JAVASCRIPT/JSSRC,
+  // PYTHON/PYTHONSRC, JAVASRC, RUST, ruby) are intentionally absent.
   private val KNOWN_LANGUAGES = Set(
-    Languages.C,
     Languages.CSHARP,
-    Languages.GOLANG,
+    Languages.CSHARPSRC,
     Languages.GHIDRA,
     Languages.JAVA,
-    Languages.JAVASCRIPT,
-    Languages.JSSRC,
-    Languages.PYTHON,
-    Languages.PYTHONSRC,
     Languages.LLVM,
     Languages.PHP,
     Languages.KOTLIN,
-    Languages.NEWC,
-    Languages.JAVASRC,
     Languages.SWIFTSRC,
-    Languages.RUST,
     Languages.ABAP
   )
 }

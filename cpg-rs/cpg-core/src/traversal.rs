@@ -17,6 +17,10 @@ pub trait Query {
     fn parameters_of(&self, method: NodeId) -> Vec<NodeId>;
     fn arguments_of(&self, call: NodeId) -> Vec<NodeId>;
     fn call_target(&self, call: NodeId) -> Option<NodeId>;
+    /// All resolved targets of a call. RPC stitching adds fan-out Call edges
+    /// (one per candidate handler), so consumers that follow dataflow across
+    /// call sites must walk every edge, not just the first.
+    fn call_targets(&self, call: NodeId) -> Vec<NodeId>;
 }
 
 impl Query for Cpg {
@@ -35,7 +39,9 @@ impl Query for Cpg {
     fn method_named(&self, name: &str) -> Vec<NodeId> {
         self.methods()
             .into_iter()
-            .filter(|&m| self.name_of(m) == Some(name))
+            .filter(|&m| {
+                self.name_of(m) == Some(name) || self.full_name_of(m) == Some(name)
+            })
             .collect()
     }
 
@@ -63,5 +69,9 @@ impl Query for Cpg {
 
     fn call_target(&self, call: NodeId) -> Option<NodeId> {
         self.out_kind(call, EdgeKind::Call).next()
+    }
+
+    fn call_targets(&self, call: NodeId) -> Vec<NodeId> {
+        self.out_kind(call, EdgeKind::Call).collect()
     }
 }

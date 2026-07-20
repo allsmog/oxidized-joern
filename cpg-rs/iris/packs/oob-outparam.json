@@ -1,0 +1,33 @@
+{
+ "rules": [
+  {
+   "id": "OOB-OUT-001",
+   "name": "content-bytes-to-sized-copy",
+   "cwe": "CWE-125",
+   "severity": "high",
+   "description": "bytes read from backed-up content reach a size/offset position of a copy or allocation",
+   "sources": [
+    "read@out1",
+    "pread@out1",
+    "fread@out0",
+    "Read@out*",
+    "ReadFull@out*",
+    "ReadExact@out*",
+    "ReadAt@out*",
+    "ReadRecord@out*",
+    "ReadRecords@out*",
+    "ReadData@out*",
+    "ReadDWORD@out*",
+    "ReadFileIntoString@out*",
+    "JetRetrieveColumn@out3"
+   ],
+   "sinks": [
+    "memcpy@2",
+    "memmove@2",
+    "alloca@0",
+    "strcpy@1",
+    "strcat@1"
+   ]
+  }
+ ]
+}

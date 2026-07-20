@@ -57,6 +57,40 @@ impl<'a> CpgBuilder<'a> {
         n
     }
 
+    /// A type declaration (class/struct/trait) with a body. `bases` are the
+    /// direct base-class simple names; they are stored comma-joined in the
+    /// signature column so no serialization format change is needed. RPC
+    /// stitching reads them to find handler classes (subclasses of a
+    /// generated interface that is not itself in the graph).
+    pub fn type_decl(&mut self, name: &str, full_name: &str, bases: &[String], line: Option<u32>) -> NodeId {
+        let n = self.node(NodeKind::TypeDecl);
+        let nm = self.cpg.intern(name);
+        let fnm = self.cpg.intern(full_name);
+        self.cpg.set_name(n, nm);
+        self.cpg.set_full_name(n, fnm);
+        if !bases.is_empty() {
+            let sig = self.cpg.intern(&bases.join(","));
+            self.cpg.set_signature(n, sig);
+        }
+        if let Some(l) = line {
+            self.cpg.set_line(n, l);
+        }
+        n
+    }
+
+    /// A field of a type declaration. The declared type feeds receiver-type
+    /// hints for member calls (`this->field_->m(...)`), which local/param
+    /// tracking cannot see because fields are declared in another file.
+    pub fn member(&mut self, owner: NodeId, name: &str, type_full_name: &str) -> NodeId {
+        let n = self.node(NodeKind::Member);
+        let nm = self.cpg.intern(name);
+        let ty = self.cpg.intern(type_full_name);
+        self.cpg.set_name(n, nm);
+        self.cpg.set_type_full_name(n, ty);
+        self.cpg.add_edge(owner, n, EdgeKind::Ast);
+        n
+    }
+
     pub fn parameter(&mut self, name: &str, type_full_name: &str, index: i32) -> NodeId {
         let n = self.node(NodeKind::MethodParameterIn);
         let nm = self.cpg.intern(name);
@@ -95,6 +129,20 @@ impl<'a> CpgBuilder<'a> {
 
     pub fn identifier(&mut self, name: &str, line: Option<u32>) -> NodeId {
         let n = self.node(NodeKind::Identifier);
+        let nm = self.cpg.intern(name);
+        self.cpg.set_name(n, nm);
+        self.cpg.set_code(n, nm);
+        if let Some(l) = line {
+            self.cpg.set_line(n, l);
+        }
+        n
+    }
+
+    /// A reference to a method as a value (lambda passed as argument, function
+    /// pointer). Participates in dataflow as an expression; `name` ties it to
+    /// the Method node built for the referenced function.
+    pub fn method_ref(&mut self, name: &str, line: Option<u32>) -> NodeId {
+        let n = self.node(NodeKind::MethodRef);
         let nm = self.cpg.intern(name);
         self.cpg.set_name(n, nm);
         self.cpg.set_code(n, nm);
