@@ -7,9 +7,7 @@ dependsOn(
   Projects.macros,
   Projects.dataflowengineoss,
   Projects.ghidra2cpg         % "test->test",
-  Projects.javasrc2cpg        % "test->test",
   Projects.kotlin2cpg         % "test->test",
-  Projects.c2cpg              % "test->test",
   Projects.php2cpg            % "test->test",
   Projects.linterRules % ScalafixConfig
 )

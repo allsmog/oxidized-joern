@@ -23,63 +23,11 @@ class LanguageHelperTests extends AnyWordSpec with Matchers {
       guessLanguage("foo.csproj") shouldBe Some(Languages.CSHARPSRC)
     }
 
-    "guess `Go` for a .go file" in {
-      guessLanguage("foo.go") shouldBe Some(Languages.GOLANG)
-    }
-
-    "guess `JavaSrc` for a directory containing `.java`" in {
-      FileUtil.usingTemporaryDirectory("oculartests") { tmpDir =>
-        val subdir = Files.createDirectory(tmpDir / "subdir")
-        (subdir / "ServiceIdentifierComposerVisitorBasedStrategy.java").createWithParentsIfNotExists()
-        guessLanguage(tmpDir.toString) shouldBe Some(Languages.JAVASRC)
-      }
-    }
-
-    "guess `Go` for a directory containing `Gopkg.lock`" in {
-      FileUtil.usingTemporaryDirectory("oculartests") { tmpDir =>
-        val subdir = Files.createDirectory(tmpDir / "subdir")
-        (subdir / "Gopkg.lock").createWithParentsIfNotExists()
-        guessLanguage(tmpDir.toString) shouldBe Some(Languages.GOLANG)
-      }
-    }
-
-    "guess `Go` for a directory containing `Gopkg.toml`" in {
-      FileUtil.usingTemporaryDirectory("oculartests") { tmpDir =>
-        val subdir = Files.createDirectory(tmpDir / "subdir")
-        (subdir / "Gopkg.toml").createWithParentsIfNotExists()
-        guessLanguage(tmpDir.toString) shouldBe Some(Languages.GOLANG)
-      }
-    }
-
-    "guess `Javascript` for a directory containing `package.json`" in {
-      FileUtil.usingTemporaryDirectory("oculartests") { tmpDir =>
-        val subdir = Files.createDirectory(tmpDir / "subdir")
-        (subdir / "package.json").createWithParentsIfNotExists()
-        guessLanguage(tmpDir.toString) shouldBe Some(Languages.JSSRC)
-      }
-    }
-
     "guess `Swift` for a directory containing `.swift`" in {
       FileUtil.usingTemporaryDirectory("oculartests") { tmpDir =>
         val subdir = Files.createDirectory(tmpDir / "subdir")
         (subdir / "main.swift").createWithParentsIfNotExists()
         guessLanguage(tmpDir.toString) shouldBe Some(Languages.SWIFTSRC)
-      }
-    }
-
-    "guess `Rust` for a directory containing `.rs`" in {
-      FileUtil.usingTemporaryDirectory("oculartests") { tmpDir =>
-        val subdir = Files.createDirectory(tmpDir / "subdir")
-        (subdir / "main.rs").createWithParentsIfNotExists()
-        guessLanguage(tmpDir.toString) shouldBe Some(Languages.RUST)
-      }
-    }
-
-    "guess `Rust` for a directory containing `Cargo.toml`" in {
-      FileUtil.usingTemporaryDirectory("oculartests") { tmpDir =>
-        val subdir = Files.createDirectory(tmpDir / "subdir")
-        (subdir / "Cargo.toml").createWithParentsIfNotExists()
-        guessLanguage(tmpDir.toString) shouldBe Some(Languages.RUST)
       }
     }
 
@@ -94,13 +42,24 @@ class LanguageHelperTests extends AnyWordSpec with Matchers {
     "guess the language with the largest number of files" in {
       FileUtil.usingTemporaryDirectory("oculartests") { tmpDir =>
         val subdir = Files.createDirectory(tmpDir / "subdir")
+        (subdir / "source.kt").createWithParentsIfNotExists()
+        (subdir / "one.php").createWithParentsIfNotExists()
+        (subdir / "two.php").createWithParentsIfNotExists()
+        guessLanguage(tmpDir.toString) shouldBe Some(Languages.PHP)
+      }
+    }
+
+    "guess nothing for cpg-rs-covered languages (go/js/py/rb/rs/c/java-src)" in {
+      FileUtil.usingTemporaryDirectory("oculartests") { tmpDir =>
+        val subdir = Files.createDirectory(tmpDir / "subdir")
         (subdir / "source.c").createWithParentsIfNotExists()
         (subdir / "source.java").createWithParentsIfNotExists()
         (subdir / "source.py").createWithParentsIfNotExists()
         (subdir / "source.js").createWithParentsIfNotExists()
-        (subdir / "package.json").createWithParentsIfNotExists() // also counts towards javascript
-        (subdir / "source.py").createWithParentsIfNotExists()
-        guessLanguage(tmpDir.toString) shouldBe Some(Languages.JSSRC)
+        (subdir / "package.json").createWithParentsIfNotExists()
+        (subdir / "main.go").createWithParentsIfNotExists()
+        (subdir / "main.rs").createWithParentsIfNotExists()
+        guessLanguage(tmpDir.toString) shouldBe None
       }
     }
 

@@ -1,0 +1,79 @@
+{
+ "rules": [
+  {
+   "id": "IRIS-SC-89",
+   "name": "rpc-to-sql",
+   "cwe": "CWE-89",
+   "severity": "high",
+   "description": "request data reaches SQL execution",
+   "sinks": [
+    "SQL@0",
+    "executeQuery@0",
+    "executeUpdate@0",
+    "execute@0",
+    "sqlu@0"
+   ]
+  },
+  {
+   "id": "IRIS-SC-78",
+   "name": "rpc-to-exec",
+   "cwe": "CWE-78",
+   "severity": "critical",
+   "description": "request data reaches process execution",
+   "sinks": [
+    "Process@0",
+    "ProcessBuilder@0",
+    "exec@0"
+   ]
+  },
+  {
+   "id": "IRIS-SC-22",
+   "name": "rpc-to-path",
+   "cwe": "CWE-22",
+   "severity": "high",
+   "description": "request data reaches filesystem paths",
+   "sinks": [
+    "File@0",
+    "Paths.get",
+    "delete@0",
+    "deleteRecursively@0",
+    "FileInputStream@0",
+    "FileOutputStream@0",
+    "fromFile@0",
+    "delete@recv",
+    "mkdirs@recv"
+   ]
+  },
+  {
+   "id": "IRIS-SC-918",
+   "name": "rpc-to-url",
+   "cwe": "CWE-918",
+   "severity": "medium",
+   "description": "request data controls outbound URLs",
+   "sinks": [
+    "URL@0",
+    "URI@0",
+    "singleRequest@0"
+   ]
+  },
+  {
+   "id": "IRIS-SC-601",
+   "name": "rpc-to-redirect",
+   "cwe": "CWE-601",
+   "severity": "medium",
+   "description": "request data controls an HTTP redirect target",
+   "sinks": [
+    "Redirect@0",
+    "Found@0",
+    "SeeOther@0",
+    "TemporaryRedirect@0",
+    "PermanentRedirect@0",
+    "MovedPermanently@0"
+   ]
+  }
+ ],
+ "entryGlobs": [
+  "Queries.*@*/schema/resolvers/*",
+  "Mutations.*@*/schema/resolvers/*"
+ ]
+}

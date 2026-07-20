@@ -1,0 +1,7 @@
+{"rules":[
+  {"id":"SSRF-001","name":"request-to-outbound-url","cwe":"CWE-918","severity":"high",
+   "description":"Request-derived value reaches the URL argument of an outbound HTTP request constructor",
+   "sources":["getenv"],
+   "sinks":["NewRequest@1","NewRequestWithContext@2"],
+   "confiners":["QueryEscape","PathEscape","Encode","RawQuery","RawPath","Fragment"]}
+]}

@@ -506,9 +506,22 @@ fn expr_taint(
             // Named function: drive result taint from the callee's summary.
             // Raw callee flows preserve the argument's tag; sanitized callee
             // flows mark it sanitized (so laundering is transitive).
-            deps.insert(name.to_string());
+            // Summaries are stored under the callee's FULL name
+            // (`filesystem::JoinPaths`) while the call site carries the simple
+            // name — resolve through the Call edge when there is one, so
+            // qualified C++/Scala summaries actually compose. (This also keys
+            // the dependency web by fqn, which is what incremental
+            // invalidation matches against.)
+            let key: String = {
+                use cpg_core::Query;
+                cpg.call_target(node)
+                    .and_then(|m| cpg.full_name_of(m))
+                    .unwrap_or(name)
+                    .to_string()
+            };
+            deps.insert(key.clone());
             let mut out = HashSet::new();
-            if let Some(summary) = store.get(name) {
+            if let Some(summary) = store.get(&key) {
                 for f in &summary.flows {
                     let (Point::Param(k), Point::Return) = (f.from, f.to) else {
                         continue;

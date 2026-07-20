@@ -1,0 +1,69 @@
+{
+ "rules": [
+  {
+   "id": "IRIS-GO-89",
+   "name": "rpc-to-sql",
+   "cwe": "CWE-89",
+   "severity": "high",
+   "description": "gRPC request data reaches SQL/CQL execution",
+   "sinks": [
+    "Exec@0",
+    "Query@0",
+    "QueryRow@0",
+    "ExecContext@1",
+    "QueryContext@1",
+    "QueryRowContext@1"
+   ]
+  },
+  {
+   "id": "IRIS-GO-78",
+   "name": "rpc-to-exec",
+   "cwe": "CWE-78",
+   "severity": "critical",
+   "description": "gRPC request data reaches process execution",
+   "sinks": [
+    "Command@0",
+    "CommandContext@1",
+    "StartProcess@0"
+   ]
+  },
+  {
+   "id": "IRIS-GO-22",
+   "name": "rpc-to-path",
+   "cwe": "CWE-22",
+   "severity": "high",
+   "description": "gRPC request data reaches filesystem paths",
+   "sinks": [
+    "Remove@0",
+    "RemoveAll@0",
+    "OpenFile@0",
+    "Create@0",
+    "Rename@0",
+    "Mkdir@0",
+    "MkdirAll@0",
+    "ReadFile@0",
+    "WriteFile@0"
+   ],
+   "sanitizers": [
+    "Clean",
+    "Base"
+   ]
+  },
+  {
+   "id": "IRIS-GO-918",
+   "name": "rpc-to-url",
+   "cwe": "CWE-918",
+   "severity": "medium",
+   "description": "gRPC request data controls outbound requests",
+   "sinks": [
+    "Get@0",
+    "Post@0",
+    "NewRequest@1"
+   ]
+  }
+ ],
+ "entryGlobs": [
+  "*Handler.handle*",
+  "*Handler.Handle*"
+ ]
+}

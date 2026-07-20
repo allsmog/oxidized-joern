@@ -1,0 +1,77 @@
+{
+ "rules": [
+  {
+   "id": "XSVC-SQL-001",
+   "name": "resolver-to-sql",
+   "cwe": "CWE-89",
+   "severity": "high",
+   "description": "GraphQL resolver input crosses the gRPC boundary and reaches backend SQL execution",
+   "sources": [
+    "getenv"
+   ],
+   "sinks": [
+    "Raw",
+    "ExecContext@1",
+    "QueryContext@1",
+    "QueryRowContext@1"
+   ],
+   "sanitizers": [
+    "CreateContextWithSqlComment"
+   ],
+   "authz": [
+    "NewEnforcer",
+    "Enforce",
+    "EnforceAccess",
+    "EnforceAny",
+    "CheckAccess"
+   ]
+  },
+  {
+   "id": "XSVC-CMD-002",
+   "name": "resolver-to-exec",
+   "cwe": "CWE-78",
+   "severity": "high",
+   "description": "GraphQL resolver input crosses the gRPC boundary and reaches command execution",
+   "sources": [
+    "getenv"
+   ],
+   "sinks": [
+    "Command",
+    "CommandContext@1",
+    "StartProcess@0",
+    "<shellform>"
+   ],
+   "authz": [
+    "NewEnforcer",
+    "Enforce",
+    "EnforceAccess",
+    "EnforceAny",
+    "CheckAccess"
+   ]
+  },
+  {
+   "id": "XSVC-PATH-003",
+   "name": "resolver-to-file",
+   "cwe": "CWE-22",
+   "severity": "medium",
+   "description": "GraphQL resolver input crosses the gRPC boundary and reaches filesystem operations",
+   "sources": [
+    "getenv"
+   ],
+   "sinks": [
+    "os.Open@0",
+    "os.OpenFile@0",
+    "os.Rename",
+    "os.RemoveAll@0",
+    "os.Create@0"
+   ],
+   "authz": [
+    "NewEnforcer",
+    "Enforce",
+    "EnforceAccess",
+    "EnforceAny",
+    "CheckAccess"
+   ]
+  }
+ ]
+}

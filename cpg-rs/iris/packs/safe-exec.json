@@ -1,0 +1,22 @@
+{
+ "rules": [
+  {
+   "id": "SAFEEXEC-001",
+   "name": "tainted-command-to-safeexec",
+   "cwe": "CWE-78",
+   "severity": "critical",
+   "description": "attacker-influenced string reaches the command position of a SafeExec*-style wrapper family with quote-only escaping ($(), backticks and ; still execute)",
+   "sources": [],
+   "sinks": [
+    "SafeExec@0",
+    "SafeExecWithTimeout@0",
+    "SafeExecWithOutputAndTimeout@0",
+    "SafeExecWithTimeoutAndPrefix@0",
+    "SafeExecWithRetryAndTimeout@0",
+    "ExecWithOutputAndTimeout@0",
+    "SafeExecInternal@0"
+   ],
+   "sanitizers": []
+  }
+ ]
+}

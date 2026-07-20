@@ -1,0 +1,11 @@
+{"rules": [
+  {"id": "WEB-XSS-001", "name": "url-to-html-injection", "cwe": "CWE-79", "severity": "high",
+   "description": "URL-derived value reaching an HTML-injection sink",
+   "sources": ["useSearchParams", "useParams", "useLocation", "useRouter", "URLSearchParams", "decodeURIComponent"],
+   "sinks": ["dangerouslySetInnerHTML@0", "insertAdjacentHTML@1", "document.write@0", "srcDoc@0", "eval@0", "Function@0"],
+   "sanitizers": ["sanitize", "escapeHtml", "encodeURIComponent"]},
+  {"id": "WEB-REDIR-002", "name": "url-to-redirect-or-href", "cwe": "CWE-601", "severity": "medium",
+   "description": "URL-derived value reaching navigation/href (javascript: URL / open redirect)",
+   "sources": ["useSearchParams", "useParams", "useLocation", "useRouter", "URLSearchParams"],
+   "sinks": ["window.open@0", "location.assign@0", "location.replace@0", "href@0"]}
+]}
