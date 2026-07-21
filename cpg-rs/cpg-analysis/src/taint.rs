@@ -512,6 +512,169 @@ fn spread_to_aliases<V: Clone>(
     }
 }
 
+/// FIELD-SENSITIVE taint keys. A member store `cfg.key = tainted` used to
+/// taint the whole base object, so `sink(cfg.other)` false-fired. The taint
+/// maps now also hold DOTTED keys (`"cfg.key"`, `"p.cfg.key"`): a member
+/// store with a clean identifier chain taints only its path; whole-object
+/// entries (plain rebinds, object-state transfer, out-param writes,
+/// unparseable store bases) keep their plain keys and always win. The
+/// helpers below are the entire dotted-key algebra.
+///
+/// Full dotted LHS path of a member store (`x.a.b = v` / `p->cfg.key = v`
+/// -> `x.a.b` / `p.cfg.key`), when EVERY segment is a plain identifier.
+/// Subscripted/deref'd/parenthesised bases return None — those stores fall
+/// back to whole-object taint on the base.
+fn member_store_path(code: &str) -> Option<String> {
+    let i = code.find('=')?;
+    let bytes = code.as_bytes();
+    if i == 0 || bytes.get(i + 1) == Some(&b'=') {
+        return None;
+    }
+    if matches!(
+        bytes[i - 1],
+        b'+' | b'-' | b'*' | b'/' | b'%' | b'&' | b'|' | b'^' | b'<' | b'>' | b'!' | b'='
+    ) {
+        return None;
+    }
+    let lhs = code[..i].trim_end().replace("->", ".");
+    if !lhs.contains('.') {
+        return None;
+    }
+    let segs: Vec<&str> = lhs.split('.').map(str::trim).collect();
+    if segs.len() < 2
+        || !segs.iter().all(|s| {
+            let mut ch = s.chars();
+            ch.next().is_some_and(|c| c.is_alphabetic() || c == '_' || c == '$')
+                && ch.all(|c| c.is_alphanumeric() || c == '_' || c == '$')
+        })
+    {
+        return None;
+    }
+    Some(segs.join("."))
+}
+
+/// First field key strictly under `name.` — the deterministic witness that
+/// the object CONTAINS tainted data (lowest path wins; map order is
+/// arbitrary).
+fn field_key_under<'a, V>(map: &'a HashMap<String, V>, name: &str) -> Option<&'a V> {
+    map.iter()
+        .filter(|(k, _)| {
+            k.len() > name.len() + 1
+                && k.starts_with(name)
+                && k.as_bytes()[name.len()] == b'.'
+        })
+        .min_by(|a, b| a.0.cmp(b.0))
+        .map(|(_, v)| v)
+}
+
+/// Whole-name lookup extended with field CONTAINMENT: a variable whose
+/// object holds a tainted field is itself tainted when it flows as a whole
+/// value (`f(cfg)`, `return cfg`, `cfg.Method()`).
+fn lookup_contained<'a, V>(map: &'a HashMap<String, V>, name: &str) -> Option<&'a V> {
+    map.get(name).or_else(|| field_key_under(map, name))
+}
+
+/// Root identifier + selected fields of a member-READ chain
+/// (`cfg.sub.key` = Call "key"(Call "sub"(Ident cfg)) after the field-read
+/// lowering). None when the chain passes through anything but no-paren
+/// single-argument member reads over a plain identifier — those keep the
+/// generic conservative rules.
+fn member_read_path(cpg: &Cpg, node: NodeId) -> Option<(String, Vec<String>)> {
+    let mut fields: Vec<String> = Vec::new();
+    let mut cur = node;
+    loop {
+        match cpg.kind_of(cur) {
+            NodeKind::Identifier => {
+                let root = cpg.name_of(cur)?.to_string();
+                fields.reverse();
+                return Some((root, fields));
+            }
+            NodeKind::Call => {
+                if cpg.code_of(cur).unwrap_or("").contains('(') {
+                    return None;
+                }
+                let name = cpg.name_of(cur)?;
+                if name == "=" || is_operator(name) {
+                    return None;
+                }
+                let args = cpg.arguments_of(cur);
+                if args.len() != 1 {
+                    return None;
+                }
+                fields.push(name.to_string());
+                cur = args[0];
+            }
+            _ => return None,
+        }
+    }
+}
+
+/// Taint of a member-read chain over `root` selecting `fields`: whole-object
+/// (or stored-prefix) taint on any prefix of the path wins — reading a field
+/// of a tainted object yields tainted data; a stored key EXTENDING the path
+/// means the read returns a struct containing the tainted field.
+fn read_path_taint<'a, V>(
+    map: &'a HashMap<String, V>,
+    root: &str,
+    fields: &[String],
+) -> Option<&'a V> {
+    let mut path = root.to_string();
+    if let Some(v) = map.get(&path) {
+        return Some(v);
+    }
+    for f in fields {
+        path.push('.');
+        path.push_str(f);
+        if let Some(v) = map.get(&path) {
+            return Some(v);
+        }
+    }
+    field_key_under(map, &path)
+}
+
+/// The source-origination test shared by expr_taint's call arm and the
+/// member-read chain walk: a spec-source name, minus persisted reads that
+/// fail their read-site shape gates.
+fn call_is_source(ctx: &Ctx, node: NodeId, name: &str) -> bool {
+    ctx.spec.sources.contains(name)
+        && !(ctx.spec.persisted_sources.contains(name) && {
+            let code = ctx.cpg.code_of(node).unwrap_or("");
+            is_schema_metadata_read(code) || !persisted_read_shape_ok(name, code)
+        })
+}
+
+/// Remove a variable's whole-object entry AND every field entry under it —
+/// a plain rebind replaces the value, stale field taint included.
+fn remove_subtree<V>(map: &mut HashMap<String, V>, name: &str) {
+    map.remove(name);
+    map.retain(|k, _| {
+        !(k.len() > name.len() && k.starts_with(name) && k.as_bytes()[name.len()] == b'.')
+    });
+}
+
+/// Field-suffixed sibling of [`spread_to_aliases`]: a member store through
+/// one alias is visible through the others at the SAME field path
+/// (`p := &cfg; p.key = t` taints `cfg.key`, not all of `cfg`).
+fn spread_field_to_aliases<V: Clone>(
+    alias: &HashMap<String, HashSet<String>>,
+    map: &mut HashMap<String, V>,
+    root: &str,
+    suffix: &str,
+    v: &V,
+) {
+    let mut seen: HashSet<&str> = HashSet::from([root]);
+    let mut work: Vec<&str> = vec![root];
+    while let Some(cur) = work.pop() {
+        let Some(partners) = alias.get(cur) else { continue };
+        for p in partners {
+            if seen.insert(p.as_str()) {
+                map.insert(format!("{p}{suffix}"), v.clone());
+                work.push(p.as_str());
+            }
+        }
+    }
+}
+
 /// The provenance of a tainted value: where it originated and the chain of
 /// expressions that carried it. Cloned as taint propagates.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -1290,9 +1453,14 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
             if args.len() == 2 {
                 let code = cpg.code_of(n).unwrap_or("");
                 let store_key = member_store_key(code);
+                // The parsed store path decides store-vs-rebind; store_key
+                // (with its length gate) only feeds the persistence harvest.
+                let store_path = member_store_path(code);
+                let is_member_store = store_key.is_some() || store_path.is_some();
                 // Alias bookkeeping is shape-based, taint-independent: a
-                // plain rebind re-links (or dissolves) lhs's alias.
-                if store_key.is_none() && !is_compound_assign(code) {
+                // plain rebind re-links (or dissolves) lhs's alias — a
+                // member store writes THROUGH lhs and must not touch it.
+                if !is_member_store && !is_compound_assign(code) {
                     if let Some(l) = lhs_name(cpg, args[0]) {
                         record_alias(&mut alias, &l, rhs_ident(cpg, args[1]).as_deref());
                     }
@@ -1327,18 +1495,46 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
                             Provenance::IntraProc,
                             0,
                         );
-                        // A member store writes THROUGH the variable — the
-                        // write is visible through its aliases too.
-                        if store_key.is_some() {
-                            spread_to_aliases(&alias, &mut taint, &name, &trace);
+                        match store_path
+                            .as_ref()
+                            .filter(|p| p.starts_with(&name) && p.as_bytes().get(name.len()) == Some(&b'.'))
+                        {
+                            // Field-sensitive member store: taint the dotted
+                            // path (visible through aliases at the SAME
+                            // path), not the whole base object.
+                            Some(path) => {
+                                let suffix = path[name.len()..].to_string();
+                                spread_field_to_aliases(&alias, &mut taint, &name, &suffix, &trace);
+                                taint.insert(path.clone(), trace);
+                            }
+                            // Member store with an unparseable base
+                            // (subscript/deref): whole-object, through
+                            // aliases — the pre-field-sensitivity behavior.
+                            None if is_member_store => {
+                                spread_to_aliases(&alias, &mut taint, &name, &trace);
+                                taint.insert(name, trace);
+                            }
+                            // Plain rebind: replaces the whole value, stale
+                            // field taint included.
+                            None => {
+                                remove_subtree(&mut taint, &name);
+                                taint.insert(name, trace);
+                            }
                         }
-                        taint.insert(name, trace);
                     }
                 } else if let Some(name) = lhs_name(cpg, args[0]) {
                     // Reassignment clears taint — but `x += clean` reads x,
-                    // so compound assignment keeps whatever x already had.
-                    if !is_compound_assign(cpg.code_of(n).unwrap_or("")) {
-                        taint.remove(&name);
+                    // so compound assignment keeps whatever x already had. A
+                    // clean MEMBER store clears only its own path: writing
+                    // one clean field never launders the rest of the object.
+                    if !is_compound_assign(code) {
+                        match &store_path {
+                            Some(path) => remove_subtree(&mut taint, path),
+                            None if is_member_store => {
+                                taint.remove(&name);
+                            }
+                            None => remove_subtree(&mut taint, &name),
+                        }
                     }
                 }
             }
@@ -1451,7 +1647,7 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
                 if ctx.spec.recv_sinks.contains(name) {
                     let recv_trace = cpg
                         .signature_of(n)
-                        .and_then(|r| taint.get(r).cloned())
+                        .and_then(|r| lookup_contained(&taint, r).cloned())
                         .or_else(|| {
                             cpg.out_kind(n, EdgeKind::Receiver)
                                 .next()
@@ -1932,8 +2128,12 @@ fn param_to_sink(
                 if args.len() == 2 {
                     let code = cpg.code_of(n).unwrap_or("");
                     let store_key = member_store_key(code);
+                    // Store-vs-rebind decided by the parsed path (mirrors
+                    // analyse_method); store_key only feeds the harvest.
+                    let store_path = member_store_path(code);
+                    let is_member_store = store_key.is_some() || store_path.is_some();
                     // Alias bookkeeping (mirrors analyse_method).
-                    if store_key.is_none() && !is_compound_assign(code) {
+                    if !is_member_store && !is_compound_assign(code) {
                         if let Some(l) = lhs_name(cpg, args[0]) {
                             record_alias(&mut alias, &l, rhs_ident(cpg, args[1]).as_deref());
                         }
@@ -1958,16 +2158,40 @@ fn param_to_sink(
                             }
                             if let Some(lhs) = lhs_name(cpg, args[0]) {
                                 c.push(Step::intra(cpg.code_of(n).unwrap_or(&lhs), cpg.line_of(n), depth));
-                                if store_key.is_some() {
-                                    spread_to_aliases(&alias, &mut chains, &lhs, &c);
+                                match store_path.as_ref().filter(|p| {
+                                    p.starts_with(&lhs)
+                                        && p.as_bytes().get(lhs.len()) == Some(&b'.')
+                                }) {
+                                    // Field-sensitive member store (mirrors
+                                    // analyse_method).
+                                    Some(path) => {
+                                        let suffix = path[lhs.len()..].to_string();
+                                        spread_field_to_aliases(
+                                            &alias, &mut chains, &lhs, &suffix, &c,
+                                        );
+                                        chains.insert(path.clone(), c);
+                                    }
+                                    None if is_member_store => {
+                                        spread_to_aliases(&alias, &mut chains, &lhs, &c);
+                                        chains.insert(lhs, c);
+                                    }
+                                    None => {
+                                        remove_subtree(&mut chains, &lhs);
+                                        chains.insert(lhs, c);
+                                    }
                                 }
-                                chains.insert(lhs, c);
                             }
                         }
                         None => {
                             if let Some(lhs) = lhs_name(cpg, args[0]) {
-                                if !is_compound_assign(cpg.code_of(n).unwrap_or("")) {
-                                    chains.remove(&lhs);
+                                if !is_compound_assign(code) {
+                                    match &store_path {
+                                        Some(path) => remove_subtree(&mut chains, path),
+                                        None if is_member_store => {
+                                            chains.remove(&lhs);
+                                        }
+                                        None => remove_subtree(&mut chains, &lhs),
+                                    }
                                 }
                             }
                         }
@@ -2036,7 +2260,7 @@ fn param_to_sink(
                 if ctx.spec.recv_sinks.contains(name) {
                     let recv_chain = cpg
                         .signature_of(n)
-                        .and_then(|r| chains.get(r).cloned())
+                        .and_then(|r| lookup_contained(&chains, r).cloned())
                         .or_else(|| {
                             cpg.out_kind(n, EdgeKind::Receiver)
                                 .next()
@@ -2264,7 +2488,9 @@ fn format_verb_carriers(cpg: &Cpg, name: &str, args: &[NodeId]) -> Option<Vec<us
 fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option<Trace> {
     let cpg = ctx.cpg;
     match cpg.kind_of(node) {
-        NodeKind::Identifier => cpg.name_of(node).and_then(|n| taint.get(n).cloned()),
+        // A bare identifier is tainted whole-object, or by CONTAINMENT when
+        // one of its fields is (the value flowing here carries the field).
+        NodeKind::Identifier => cpg.name_of(node).and_then(|n| lookup_contained(taint, n).cloned()),
         NodeKind::Literal => None,
         NodeKind::Call => {
             let name = cpg.name_of(node).unwrap_or("");
@@ -2273,12 +2499,7 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
                 // A sanitizer's result never carries its arguments' taint.
                 return None;
             }
-            if ctx.spec.sources.contains(name)
-                && !(ctx.spec.persisted_sources.contains(name) && {
-                    let code = cpg.code_of(node).unwrap_or("");
-                    is_schema_metadata_read(code) || !persisted_read_shape_ok(name, code)
-                })
-            {
+            if call_is_source(ctx, node, name) {
                 return Some(Trace {
                     origin: name.to_string(),
                     steps: vec![Step::intra(
@@ -2292,6 +2513,52 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
             // (handled at statement level); the return is a count/status,
             // so the conservative arg pass-through below must not fire.
             if ctx.spec.out_param_sources.contains_key(name) {
+                return None;
+            }
+            // Member READ (a no-paren Call chain over a plain identifier —
+            // `cfg.sub.key`): FIELD-SENSITIVE selection. Whole-object taint
+            // on any prefix still taints the read; otherwise the selected
+            // path must hit a member-store key. Chains through anything
+            // else (real calls, subscripts) keep the generic rules below.
+            if let Some((root, fields)) = member_read_path(cpg, node) {
+                if let Some(t) = read_path_taint(taint, &root, &fields) {
+                    return Some(t.extend(
+                        cpg.code_of(node).unwrap_or(name),
+                        cpg.line_of(node),
+                        Provenance::IntraProc,
+                        0,
+                    ));
+                }
+                // A dead path may still ORIGINATE: an inner link can be a
+                // source-named read (persisted getters ride member chains —
+                // `cfg.executionUser.get`). Only origination is checked here;
+                // descending generically would resurrect the sibling-field
+                // FP this branch exists to kill.
+                let mut cur = node;
+                while cpg.kind_of(cur) == NodeKind::Call {
+                    let Some(&base) = cpg.arguments_of(cur).first() else { break };
+                    if cpg.kind_of(base) == NodeKind::Call {
+                        if let Some(nm) = cpg.name_of(base) {
+                            if call_is_source(ctx, base, nm) {
+                                let t = Trace {
+                                    origin: nm.to_string(),
+                                    steps: vec![Step::intra(
+                                        cpg.code_of(base).unwrap_or(nm),
+                                        cpg.line_of(base),
+                                        0,
+                                    )],
+                                };
+                                return Some(t.extend(
+                                    cpg.code_of(node).unwrap_or(name),
+                                    cpg.line_of(node),
+                                    Provenance::IntraProc,
+                                    0,
+                                ));
+                            }
+                        }
+                    }
+                    cur = base;
+                }
                 return None;
             }
             // Sprintf-family with a LITERAL format: only arguments landing
@@ -2341,7 +2608,7 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
             let recv_taint = |cpg: &Cpg| {
                 let t = cpg
                     .signature_of(node)
-                    .and_then(|recv| taint.get(recv).cloned())
+                    .and_then(|recv| lookup_contained(taint, recv).cloned())
                     .or_else(|| {
                         // Fluent chain: the receiver is an expression
                         // (`new Builder(evil).build()`), not a variable.
@@ -2581,7 +2848,10 @@ fn chain_expr(
 ) -> Option<Vec<Step>> {
     let cpg = ctx.cpg;
     match cpg.kind_of(node) {
-        NodeKind::Identifier => cpg.name_of(node).and_then(|n| chains.get(n).cloned()),
+        // Containment lookup mirrors expr_taint's Identifier arm.
+        NodeKind::Identifier => {
+            cpg.name_of(node).and_then(|n| lookup_contained(chains, n).cloned())
+        }
         NodeKind::Literal => None,
         NodeKind::Call => {
             let name = cpg.name_of(node).unwrap_or("");
@@ -2601,6 +2871,18 @@ fn chain_expr(
             // expr_taint).
             if ctx.spec.out_param_sources.contains_key(name) {
                 return None;
+            }
+            // Member READ: field-sensitive selection (mirrors expr_taint).
+            if let Some((root, fields)) = member_read_path(cpg, node) {
+                return read_path_taint(chains, &root, &fields).map(|c| {
+                    let mut c = c.clone();
+                    c.push(Step::intra(
+                        cpg.code_of(node).unwrap_or(name),
+                        cpg.line_of(node),
+                        depth,
+                    ));
+                    c
+                });
             }
             // Format-verb filter (mirrors expr_taint).
             if let Some(carriers) = format_verb_carriers(cpg, name, &args) {
@@ -2631,7 +2913,7 @@ fn chain_expr(
                               visiting: &mut HashSet<String>| {
                 let mut c = cpg
                     .signature_of(node)
-                    .and_then(|recv| chains.get(recv).cloned())
+                    .and_then(|recv| lookup_contained(chains, recv).cloned())
                     .or_else(|| {
                         cpg.out_kind(node, EdgeKind::Receiver)
                             .next()
@@ -3117,6 +3399,92 @@ mod tests {
     }
 
     #[test]
+    fn field_store_taints_only_its_path() {
+        // The field-sensitivity contract: `c.a = tainted` reaches reads of
+        // c.a and whole-value uses of c (containment), but NOT sibling
+        // fields — the measured FP class of whole-object member stores.
+        let cpg = build(&[(
+            "f.c",
+            "void hit(void) {\n    struct C c;\n    c.a = getenv(\"X\");\n    system(c.a);\n}\n\nvoid sibling(void) {\n    struct C c;\n    c.a = getenv(\"X\");\n    system(c.b);\n}\n\nvoid contained(void) {\n    struct C c;\n    c.a = getenv(\"X\");\n    system(c);\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        let methods: Vec<&str> = findings.iter().map(|f| f.method.as_str()).collect();
+        assert_eq!(findings.len(), 2, "{findings:?}");
+        assert!(methods.iter().any(|m| m.contains("hit")), "{methods:?}");
+        assert!(methods.iter().any(|m| m.contains("contained")), "{methods:?}");
+        assert!(!methods.iter().any(|m| m.contains("sibling")), "{methods:?}");
+    }
+
+    #[test]
+    fn nested_field_store_selects_and_contains() {
+        // `x.sub.key = tainted`: the exact path fires, reading the
+        // intermediate struct fires (it contains the field), a sibling
+        // under the same intermediate does not.
+        let cpg = build(&[(
+            "n.c",
+            "void hit(void) {\n    struct A x;\n    x.sub.key = getenv(\"X\");\n    system(x.sub.key);\n}\n\nvoid contained(void) {\n    struct A x;\n    x.sub.key = getenv(\"X\");\n    system(x.sub);\n}\n\nvoid sibling(void) {\n    struct A x;\n    x.sub.key = getenv(\"X\");\n    system(x.sub.other);\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        let methods: Vec<&str> = findings.iter().map(|f| f.method.as_str()).collect();
+        assert_eq!(findings.len(), 2, "{findings:?}");
+        assert!(!methods.iter().any(|m| m.contains("sibling")), "{methods:?}");
+    }
+
+    #[test]
+    fn alias_field_store_lands_on_partner_field() {
+        // `p = &c; p->a = tainted` taints c.a (same path through the alias),
+        // not all of c.
+        let cpg = build(&[(
+            "a.c",
+            "void hit(void) {\n    struct C c;\n    struct C *p = &c;\n    p->a = getenv(\"X\");\n    system(c.a);\n}\n\nvoid sibling(void) {\n    struct C c;\n    struct C *p = &c;\n    p->a = getenv(\"X\");\n    system(c.b);\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert!(findings[0].method.contains("hit"), "{findings:?}");
+    }
+
+    #[test]
+    fn clean_field_store_does_not_launder_object() {
+        // Writing one CLEAN field used to erase the whole object's taint
+        // (whole-object member-store semantics); now it clears only its own
+        // path. A plain rebind still clears everything, fields included.
+        let cpg = build(&[(
+            "l.c",
+            "void kept(struct C c) {\n    c = parse(getenv(\"X\"));\n    c.a = \"s\";\n    system(c);\n}\n\nvoid rebound(struct C c) {\n    c.a = getenv(\"X\");\n    c = fresh();\n    system(c.a);\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert!(findings[0].method.contains("kept"), "{findings:?}");
+    }
+
+    #[test]
+    fn entry_param_field_store_is_field_sensitive_too() {
+        // The same contract holds in the entry-param walker: handler request
+        // data stored into cfg.a must not fire a sink fed by cfg.b, while
+        // cfg.a and whole-cfg uses do.
+        let cpg = build(&[(
+            "e.c",
+            "void handler(char* q) {\n    struct C cfg;\n    cfg.a = q;\n    system(cfg.a);\n}\n\nvoid handler2(char* q) {\n    struct C cfg;\n    cfg.a = q;\n    system(cfg.b);\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let mut spec = TaintSpec::new(&[], &["system"]);
+        spec.source_methods.insert("handler".into());
+        spec.source_methods.insert("handler2".into());
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert!(findings[0].method.contains("handler"), "{findings:?}");
+        assert!(!findings[0].method.contains("handler2"), "{findings:?}");
+    }
+
+    #[test]
     fn assign_sink_matches_go_if_init_tenant_overwrite() {
         // Event-consumer tenant-isolation regression: a generated getter
         // feeds the account field through a Go if-init binding.
@@ -3197,6 +3565,21 @@ mod tests {
         let cpg = build(&[(
             "m.c",
             "void writer(struct C* cfg) {\n    char* t = getenv(\"X\");\n    cfg->key = t;\n}\nvoid reader(struct C* cfg) {\n    system(cfg->key);\n}\n",
+        )]);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        assert_persist_stitch(&cpg, &spec, "persisted:key", "reader");
+    }
+
+    #[test]
+    fn persistence_stitch_read_nested_in_member_chain_still_originates() {
+        // The persisted read is an INNER link of a longer member chain
+        // (`box.key.inner` — the Scala `cfg.executionUser.get` shape): the
+        // field-sensitive chain branch must fall back to origination on the
+        // inner source-named read, not kill the whole chain because the
+        // path lookup is dead.
+        let cpg = build(&[(
+            "nm.c",
+            "void writer(struct C* cfg) {\n    char* t = getenv(\"X\");\n    cfg->key = t;\n}\nvoid reader(struct C* box) {\n    system(box->key.inner);\n}\n",
         )]);
         let spec = TaintSpec::new(&["getenv"], &["system"]);
         assert_persist_stitch(&cpg, &spec, "persisted:key", "reader");
