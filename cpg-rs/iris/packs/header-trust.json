@@ -1,0 +1,8 @@
+{"rules":[
+  {"id":"HDR-APPEND","name":"trust-header-append-without-delete","cwe":"CWE-444","severity":"high",
+   "kind":"append-without-delete",
+   "description":"a trust-decision header is APPENDED (Header.Add, or append() of a Header{Key: ...} struct onto a proto/tunnel header list) in a method that never Dels/Sets that key: on a proxy that copies inbound headers wholesale, the pinned value lands AFTER the client's copies, every hop that preserves order keeps the client's copy first, and downstream Header.Get readers (first-value semantics) obey the CLIENT. The duplicate-header smuggling shape. FP class: methods building a fresh outbound request from scratch (nothing inherited to delete) — triage by asking whether the target header container ever held client data.",
+   "sources":["X-*","x-*","Authorization","Forwarded","*-Token*","*-Account*","*-Tenant*","*-User*","*-Org*","*-Site*","*-Method","*-Path*","*-Query*","*-Role*","*-Permission*","*-Identity*"],
+   "sinks":["Add","append"],
+   "sanitizers":["Del","Set"]}
+]}
