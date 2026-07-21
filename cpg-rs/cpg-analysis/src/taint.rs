@@ -634,12 +634,20 @@ fn read_path_taint<'a, V>(
 
 /// The source-origination test shared by expr_taint's call arm and the
 /// member-read chain walk: a spec-source name, minus persisted reads that
-/// fail their read-site shape gates.
+/// fail their read-site shape gates or sit in test code — phase-2 keys are
+/// generic getter names, so a test harness reading the same key is noise,
+/// not a production store→load chain (same demotion class as the call
+/// graph's test-double handling). Explicit spec sources are unaffected.
 fn call_is_source(ctx: &Ctx, node: NodeId, name: &str) -> bool {
     ctx.spec.sources.contains(name)
         && !(ctx.spec.persisted_sources.contains(name) && {
             let code = ctx.cpg.code_of(node).unwrap_or("");
-            is_schema_metadata_read(code) || !persisted_read_shape_ok(name, code)
+            is_schema_metadata_read(code)
+                || !persisted_read_shape_ok(name, code)
+                || ctx
+                    .cpg
+                    .path_of(ctx.cpg.file_of(node))
+                    .is_some_and(crate::callgraph::is_test_path)
         })
 }
 
@@ -2600,11 +2608,13 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
                 .filter_map(|m| cpg.full_name_of(m))
                 .find(|f| ctx.summaries.get(f).is_some())
                 .unwrap_or(name);
-            // Receiver pass-through applies with OR without a summary:
-            // summaries model argument→return flows only — the receiver is
-            // not an argument, so no summary can rule out `tainted.method()`
-            // producing a tainted result (`path.c_str()`, `request.args`).
-            // The receiver's variable name was stamped into signature.
+            // Receiver pass-through applies with or without a summary,
+            // UNLESS the summary positively models the receiver and shows
+            // no raw Recv→Return flow (Point::Recv, external entries only).
+            // Absence of a summary — or of receiver modeling in one — can
+            // never rule out `tainted.method()` producing a tainted result
+            // (`path.c_str()`, `request.args`). The receiver's variable
+            // name was stamped into signature.
             let recv_taint = |cpg: &Cpg| {
                 let t = cpg
                     .signature_of(node)
@@ -2697,7 +2707,7 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
                     ));
                 }
             }
-            recv_taint(cpg)
+            if summary.receiver_passes_through() { recv_taint(cpg) } else { None }
         }
         _ => {
             for c in cpg.out_kind(node, cpg_core::EdgeKind::Ast) {
@@ -2906,9 +2916,10 @@ fn chain_expr(
                 .filter_map(|m| cpg.full_name_of(m))
                 .find(|f| ctx.summaries.get(f).is_some())
                 .unwrap_or(name);
-            // Mirrors expr_taint: receiver pass-through regardless of
-            // summary (summaries never model the receiver), argument
-            // pass-through only when no summary exists.
+            // Mirrors expr_taint: receiver pass-through with or without a
+            // summary — unless the summary positively models the receiver
+            // and shows no raw Recv→Return flow; argument pass-through only
+            // when no summary exists.
             let recv_chain = |chains: &HashMap<String, Vec<Step>>,
                               visiting: &mut HashSet<String>| {
                 let mut c = cpg
@@ -2962,7 +2973,11 @@ fn chain_expr(
                     }
                 }
             }
-            recv_chain(chains, visiting)
+            if summary.receiver_passes_through() {
+                recv_chain(chains, visiting)
+            } else {
+                None
+            }
         }
         _ => {
             for c in cpg.out_kind(node, cpg_core::EdgeKind::Ast) {
@@ -3568,6 +3583,103 @@ mod tests {
         )]);
         let spec = TaintSpec::new(&["getenv"], &["system"]);
         assert_persist_stitch(&cpg, &spec, "persisted:key", "reader");
+    }
+
+    /// Scala fixture shared by the Point::Recv tests: a TYPED entry param
+    /// (the type hint is what makes the callee summary trustworthy) whose
+    /// method result feeds the sink only via receiver pass-through.
+    fn recv_fixture() -> Cpg {
+        build_scala(&[(
+            "R.scala",
+            "class C {\n  def h(t: Payload): Unit = {\n    val n = t.size()\n    system(n)\n  }\n}\n",
+        )])
+    }
+
+    #[test]
+    fn recv_modeled_summary_suppresses_receiver_pass_through() {
+        // Without receiver knowledge `t.size()` conservatively carries t's
+        // taint (the count could be anything). An external summary that
+        // POSITIVELY models the receiver and declares no recv->return flow
+        // licenses dropping it.
+        let cpg = recv_fixture();
+        let mut spec = TaintSpec::new(&[], &["system"]);
+        spec.source_methods.insert("h".into());
+        let store = summarise(&cpg);
+        assert_eq!(find_flows(&cpg, &store, &spec).len(), 1, "baseline pass-through");
+        let mut store = summarise(&cpg);
+        store
+            .load_external_json(
+                r#"[{"functionDeclaration":{"language":"Scala","methodName":"size"},
+                     "receiverModeled":true}]"#,
+            )
+            .unwrap();
+        assert_eq!(find_flows(&cpg, &store, &spec).len(), 0, "recv-modeled: count is clean");
+    }
+
+    #[test]
+    fn declared_recv_flow_keeps_pass_through_sanitized_does_not() {
+        let cpg = recv_fixture();
+        let mut spec = TaintSpec::new(&[], &["system"]);
+        spec.source_methods.insert("h".into());
+        let mut store = summarise(&cpg);
+        store
+            .load_external_json(
+                r#"[{"functionDeclaration":{"language":"Scala","methodName":"size"},
+                     "dataFlows":[{"from":"recv","to":"return"}]}]"#,
+            )
+            .unwrap();
+        assert_eq!(find_flows(&cpg, &store, &spec).len(), 1, "declared recv->return flows");
+        let mut store = summarise(&cpg);
+        store
+            .load_external_json(
+                r#"[{"functionDeclaration":{"language":"Scala","methodName":"size"},
+                     "dataFlows":[{"from":"recv","to":"return","via":"clean"}]}]"#,
+            )
+            .unwrap();
+        assert_eq!(
+            find_flows(&cpg, &store, &spec).len(),
+            0,
+            "sanitized-only recv flow must not pass raw taint"
+        );
+    }
+
+    #[test]
+    fn untyped_receiver_ignores_recv_model() {
+        // No type evidence on the receiver = dynamic dispatch: the summary
+        // (matched by bare name) may belong to an unrelated method, so the
+        // narrowing must NOT apply — pass-through stays conservative.
+        let cpg = build_scala(&[(
+            "U.scala",
+            "class C {\n  def h(): Unit = {\n    val t = getenv(\"X\")\n    val n = t.size()\n    system(n)\n  }\n}\n",
+        )]);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        let mut store = summarise(&cpg);
+        store
+            .load_external_json(
+                r#"[{"functionDeclaration":{"language":"Scala","methodName":"size"},
+                     "receiverModeled":true}]"#,
+            )
+            .unwrap();
+        assert_eq!(find_flows(&cpg, &store, &spec).len(), 1, "{:?}", find_flows(&cpg, &store, &spec));
+    }
+
+    #[test]
+    fn persisted_read_in_test_file_is_demoted() {
+        // Phase-2 origination is a production-code contract: the SAME
+        // getKey read sitting in a test harness (the DaoWrapperTest shape)
+        // must not originate — only the production reader reports.
+        let cpg = build(&[
+            (
+                "s.c",
+                "void writer() {\n    char* t = getenv(\"X\");\n    setKey(t);\n}\nvoid reader() {\n    char* v = getKey();\n    system(v);\n}\n",
+            ),
+            (
+                "dao_test.c",
+                "void checkRoundTrip() {\n    char* v = getKey();\n    system(v);\n}\n",
+            ),
+        ]);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        assert_persist_stitch(&cpg, &spec, "persisted:getKey", "reader");
     }
 
     #[test]
