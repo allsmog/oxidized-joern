@@ -11,6 +11,7 @@ pub mod entries;
 pub mod middleware;
 pub mod pass;
 pub mod reaching_def;
+pub mod structural;
 pub mod summaries;
 pub mod symbols;
 pub mod taint;
