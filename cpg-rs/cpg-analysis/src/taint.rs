@@ -2659,7 +2659,14 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
                 });
             };
             let fqn = summary.fqn.clone();
-            for k in summary.flows_to_return() {
+            // Deterministic witness choice: flows is a HashSet and the FIRST
+            // param whose argument is tainted wins — iterate in index order
+            // or the byte-identical-rerun contract breaks (seen live: same
+            // finding, witness flipping between two tainted args across
+            // runs). Same discipline as the sorted call-returns below.
+            let mut ks: Vec<usize> = summary.flows_to_return().collect();
+            ks.sort_unstable();
+            for k in ks {
                 if let Some(a) = arg_for_param(cpg, node, &fqn, &args, k) {
                     if let Some(t) = expr_taint(ctx, a, taint) {
                         let mut visiting = HashSet::new();
@@ -2954,7 +2961,10 @@ fn chain_expr(
                 return None;
             };
             let fqn = summary.fqn.clone();
-            for k in summary.flows_to_return() {
+            // Sorted for deterministic witness choice — see expr_taint.
+            let mut ks: Vec<usize> = summary.flows_to_return().collect();
+            ks.sort_unstable();
+            for k in ks {
                 if let Some(a) = arg_for_param(cpg, node, &fqn, &args, k) {
                     if let Some(mut c) = chain_expr(ctx, a, chains, depth, visiting) {
                         match lift_nested(ctx, name, &fqn, origin, k, depth, visiting) {
@@ -3418,6 +3428,11 @@ mod tests {
         // The field-sensitivity contract: `c.a = tainted` reaches reads of
         // c.a and whole-value uses of c (containment), but NOT sibling
         // fields — the measured FP class of whole-object member stores.
+        // Holds PERSIST_LOCK (as do the other member-store count tests):
+        // the fixture stores AND reads the same fields, so a concurrent
+        // test's CPG_PERSIST=1 window would stitch extra phase-2 findings
+        // into the exact counts below.
+        let _g = PERSIST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
         let cpg = build(&[(
             "f.c",
             "void hit(void) {\n    struct C c;\n    c.a = getenv(\"X\");\n    system(c.a);\n}\n\nvoid sibling(void) {\n    struct C c;\n    c.a = getenv(\"X\");\n    system(c.b);\n}\n\nvoid contained(void) {\n    struct C c;\n    c.a = getenv(\"X\");\n    system(c);\n}\n",
@@ -3436,7 +3451,9 @@ mod tests {
     fn nested_field_store_selects_and_contains() {
         // `x.sub.key = tainted`: the exact path fires, reading the
         // intermediate struct fires (it contains the field), a sibling
-        // under the same intermediate does not.
+        // under the same intermediate does not. PERSIST_LOCK: see
+        // field_store_taints_only_its_path.
+        let _g = PERSIST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
         let cpg = build(&[(
             "n.c",
             "void hit(void) {\n    struct A x;\n    x.sub.key = getenv(\"X\");\n    system(x.sub.key);\n}\n\nvoid contained(void) {\n    struct A x;\n    x.sub.key = getenv(\"X\");\n    system(x.sub);\n}\n\nvoid sibling(void) {\n    struct A x;\n    x.sub.key = getenv(\"X\");\n    system(x.sub.other);\n}\n",
@@ -3452,7 +3469,8 @@ mod tests {
     #[test]
     fn alias_field_store_lands_on_partner_field() {
         // `p = &c; p->a = tainted` taints c.a (same path through the alias),
-        // not all of c.
+        // not all of c. PERSIST_LOCK: see field_store_taints_only_its_path.
+        let _g = PERSIST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
         let cpg = build(&[(
             "a.c",
             "void hit(void) {\n    struct C c;\n    struct C *p = &c;\n    p->a = getenv(\"X\");\n    system(c.a);\n}\n\nvoid sibling(void) {\n    struct C c;\n    struct C *p = &c;\n    p->a = getenv(\"X\");\n    system(c.b);\n}\n",
@@ -3469,6 +3487,8 @@ mod tests {
         // Writing one CLEAN field used to erase the whole object's taint
         // (whole-object member-store semantics); now it clears only its own
         // path. A plain rebind still clears everything, fields included.
+        // PERSIST_LOCK: see field_store_taints_only_its_path.
+        let _g = PERSIST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
         let cpg = build(&[(
             "l.c",
             "void kept(struct C c) {\n    c = parse(getenv(\"X\"));\n    c.a = \"s\";\n    system(c);\n}\n\nvoid rebound(struct C c) {\n    c.a = getenv(\"X\");\n    c = fresh();\n    system(c.a);\n}\n",
@@ -3484,7 +3504,9 @@ mod tests {
     fn entry_param_field_store_is_field_sensitive_too() {
         // The same contract holds in the entry-param walker: handler request
         // data stored into cfg.a must not fire a sink fed by cfg.b, while
-        // cfg.a and whole-cfg uses do.
+        // cfg.a and whole-cfg uses do. PERSIST_LOCK: see
+        // field_store_taints_only_its_path.
+        let _g = PERSIST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
         let cpg = build(&[(
             "e.c",
             "void handler(char* q) {\n    struct C cfg;\n    cfg.a = q;\n    system(cfg.a);\n}\n\nvoid handler2(char* q) {\n    struct C cfg;\n    cfg.a = q;\n    system(cfg.b);\n}\n",
@@ -3583,6 +3605,31 @@ mod tests {
         )]);
         let spec = TaintSpec::new(&["getenv"], &["system"]);
         assert_persist_stitch(&cpg, &spec, "persisted:key", "reader");
+    }
+
+    #[test]
+    fn witness_choice_among_tainted_args_is_deterministic() {
+        // Both of pick()'s params flow to its return and BOTH arguments are
+        // tainted: the reported witness must ride the LOWEST param index
+        // (flows is a HashSet — unsorted iteration made the witness flip
+        // between the two valid paths across runs).
+        let cpg = build(&[(
+            "w.c",
+            "char* pick(char* a, char* b) {\n    if (a) return a;\n    return b;\n}\nvoid h() {\n    char* x = getenv(\"X\");\n    char* y = getenv(\"Y\");\n    char* r = pick(x, y);\n    system(r);\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        let path: Vec<&str> = findings[0].path.iter().map(|s| s.code.as_str()).collect();
+        assert!(
+            path.iter().any(|c| c.contains("\"X\"")),
+            "witness must ride param 0 (x): {path:?}"
+        );
+        assert!(
+            !path.iter().any(|c| c.contains("\"Y\"")),
+            "param 1 (y) must not be the witness: {path:?}"
+        );
     }
 
     /// Scala fixture shared by the Point::Recv tests: a TYPED entry param
