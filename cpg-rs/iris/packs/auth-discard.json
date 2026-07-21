@@ -1,0 +1,6 @@
+{"rules":[
+  {"id":"AUTH-DISCARD","name":"auth-reply-field-discarded","cwe":"CWE-345","severity":"high",
+   "kind":"discarded-return",
+   "description":"a token/session verification call binds part of its reply to blank `_` — either the VERIFIED principal is discarded (callers then substitute a caller-controlled header/cookie value for the same role: the cache-hit account-swap shape) or the verification error is. Census rule: every hit needs the one-line triage question 'where does the value filling that role actually come from?'",
+   "sinks":["CheckToken","Check*Token","VerifyToken","Verify*Token","ValidateToken","Validate*Token","Authenticate*","ParseToken","Parse*Token","ParseWithClaims","VerifyJWT","ValidateJWT","CheckSession","VerifySession","Validate*Session","CheckAuth","VerifyAuth","VerifyServiceToken"]}
+]}

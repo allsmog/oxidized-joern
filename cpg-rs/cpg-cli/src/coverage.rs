@@ -173,6 +173,7 @@ mod tests {
     fn rule(sources: &[&str], sinks: &[&str]) -> Rule {
         Rule {
             id: "T-1".into(),
+            kind: String::new(),
             name: "t".into(),
             description: String::new(),
             severity: "high".into(),

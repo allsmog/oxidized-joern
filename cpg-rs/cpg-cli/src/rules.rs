@@ -33,6 +33,17 @@ pub struct RulePack {
 pub struct Rule {
     /// Stable rule identifier (becomes SARIF `ruleId`), e.g. "CPG-001".
     pub id: String,
+    /// Rule kind. Empty or "taint" (the default) = interprocedural
+    /// source→sink taint query. Structural kinds reinterpret the name lists:
+    /// "discarded-return" — flag calls named in `sinks` whose multi-assign
+    /// binds a blank `_` (verified-value-discarded shape);
+    /// "append-without-delete" — flag `sinks`-named calls appending a
+    /// constant key matching `sources` with no `sanitizers`-named call
+    /// clearing that key in the same method (duplicate-header smuggling
+    /// shape). Unknown kinds produce no findings (a warning, not an error,
+    /// so newer packs degrade gracefully on older binaries).
+    #[serde(default)]
+    pub kind: String,
     /// Short human name, e.g. "env-to-system".
     #[serde(default)]
     pub name: String,
@@ -120,7 +131,9 @@ impl RulePack {
 /// a codebase family, usually entry-driven (empty or placeholder sources —
 /// pair them with `--rpc-sources`/`--thrift-sources`/`--entry`).
 pub const IRIS_PACKS: &[(&str, &str)] = &[
+    ("auth-discard", include_str!("../../iris/packs/auth-discard.json")),
     ("authz-overwrite", include_str!("../../iris/packs/authz-overwrite.json")),
+    ("header-trust", include_str!("../../iris/packs/header-trust.json")),
     ("file-wrappers", include_str!("../../iris/packs/file-wrappers.json")),
     ("safe-exec", include_str!("../../iris/packs/safe-exec.json")),
     ("go-cql", include_str!("../../iris/packs/go-cql.json")),

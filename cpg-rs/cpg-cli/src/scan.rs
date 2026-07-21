@@ -38,6 +38,35 @@ pub fn run_pack_entry<'a>(
             let sources: Vec<&str> = rule.sources.iter().map(String::as_str).collect();
             let sinks: Vec<&str> = rule.sinks.iter().map(String::as_str).collect();
             let sanitizers: Vec<&str> = rule.sanitizers.iter().map(String::as_str).collect();
+            // Structural kinds short-circuit: no taint query, the name lists
+            // parameterise an AST census instead (see `cpg_analysis::structural`).
+            match rule.kind.as_str() {
+                "" | "taint" => {}
+                "discarded-return" => {
+                    return RuleFindings {
+                        rule,
+                        findings: cpg_analysis::structural::discarded_returns(
+                            &project.cpg,
+                            &sinks,
+                        ),
+                    };
+                }
+                "append-without-delete" => {
+                    return RuleFindings {
+                        rule,
+                        findings: cpg_analysis::structural::append_without_delete(
+                            &project.cpg,
+                            &sinks,
+                            &sanitizers,
+                            &sources,
+                        ),
+                    };
+                }
+                other => {
+                    eprintln!("rule {}: unknown kind '{other}', skipping", rule.id);
+                    return RuleFindings { rule, findings: Vec::new() };
+                }
+            }
             // CLI-level entry methods plus the rule's own.
             let entries: Vec<&str> = entry_methods
                 .iter()
