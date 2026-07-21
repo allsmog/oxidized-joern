@@ -34,6 +34,13 @@ pub enum Point {
     Param(usize),
     /// The method's return value.
     Return,
+    /// The method's receiver (`this`/`self`/Go's named receiver). Only
+    /// external summaries emit it today: the body walk cannot soundly claim
+    /// a receiver NON-flow (implicit-`this` field access in JVM/C-family
+    /// bodies is invisible to name-based taint), and a `Recv` point is only
+    /// useful as part of a complete receiver model (see
+    /// [`FunctionSummary::models_receiver`]).
+    Recv,
 }
 
 /// A sanitizing function a flow passed through (by name).
@@ -102,6 +109,15 @@ pub struct FunctionSummary {
     pub flows: HashSet<Flow>,
     /// Calls whose results flow to the return (see [`CallReturn`]).
     pub call_returns: HashSet<CallReturn>,
+    /// Whether this summary POSITIVELY models the receiver. Flows are
+    /// positive facts, so the absence of a `Recv -> Return` flow cannot by
+    /// itself mean "the result is independent of the receiver" — most
+    /// summaries simply never looked. Only when this is true may the query
+    /// side suppress receiver pass-through (`tainted.len()` no longer
+    /// taints the count). Set by external entries (`"receiverModeled":
+    /// true`, or implied by declaring any `recv` flow); never by the body
+    /// walk, which cannot soundly claim a receiver non-flow.
+    pub models_receiver: bool,
 }
 
 impl FunctionSummary {
@@ -129,6 +145,19 @@ impl FunctionSummary {
     /// excluded (the wrapper laundered the value).
     pub fn raw_call_returns(&self) -> impl Iterator<Item = &str> {
         self.call_returns.iter().filter(|c| c.via.is_none()).map(|c| c.call.as_str())
+    }
+
+    /// Whether a call's result may carry its RECEIVER's taint under this
+    /// summary: true unless the summary positively models the receiver
+    /// ([`models_receiver`](Self::models_receiver)) and shows no raw
+    /// `Recv -> Return` flow. A sanitized recv flow does not pass raw taint,
+    /// same as sanitized param flows.
+    pub fn receiver_passes_through(&self) -> bool {
+        !self.models_receiver
+            || self
+                .flows
+                .iter()
+                .any(|f| f.from == Point::Recv && f.to == Point::Return && f.via.is_none())
     }
 }
 
@@ -238,7 +267,15 @@ impl SummaryStore {
                     via: cr.via.clone().map(Sanitizer),
                 })
                 .collect();
-            self.external.insert(fqn.clone(), FunctionSummary { fqn, flows, call_returns });
+            // Declaring any recv flow implies the author considered the
+            // receiver — the explicit field covers the "considered it,
+            // declares nothing flows" case.
+            let models_receiver = e.receiver_modeled
+                || flows.iter().any(|f: &Flow| f.from == Point::Recv || f.to == Point::Recv);
+            self.external.insert(
+                fqn.clone(),
+                FunctionSummary { fqn, flows, call_returns, models_receiver },
+            );
             n += 1;
         }
         Ok(n)
@@ -511,7 +548,14 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
         call_returns = v.into_iter().collect();
     }
 
-    (FunctionSummary { fqn, flows: result_flows, call_returns }, deps)
+    // models_receiver stays false for every computed summary: implicit-`this`
+    // field access (bare `cmd` meaning `this.cmd` in JVM/C-family bodies) is
+    // invisible to the name-based walk, so a computed "no Recv -> Return"
+    // would be an unsound licence to drop receiver pass-through.
+    (
+        FunctionSummary { fqn, flows: result_flows, call_returns, models_receiver: false },
+        deps,
+    )
 }
 
 /// Cap on distinct [`CallReturn`] entries per summary (see `compute_method`).
@@ -665,6 +709,9 @@ fn parse_point(s: &str) -> Option<Point> {
     if s == "return" {
         return Some(Point::Return);
     }
+    if s == "recv" || s == "receiver" {
+        return Some(Point::Recv);
+    }
     if let Some(rest) = s.strip_prefix("param") {
         return rest.parse::<usize>().ok().map(Point::Param);
     }
@@ -682,6 +729,11 @@ struct ExternalEntry {
     /// function returns (e.g. a vendored wrapper around `getenv`).
     #[serde(rename = "callReturns", default)]
     call_returns: Vec<ExternalCallReturn>,
+    /// Declares that this entry's flows are complete WITH RESPECT TO the
+    /// receiver: no `recv` flow listed means the result really is
+    /// independent of the receiver (`tainted.len()` -> clean count).
+    #[serde(rename = "receiverModeled", default)]
+    receiver_modeled: bool,
 }
 
 #[derive(Deserialize)]
@@ -837,6 +889,47 @@ mod tests {
         for fqn in ["id", "wrap", "outer"] {
             assert_eq!(store.get(fqn).unwrap().flows, store2.get(fqn).unwrap().flows);
         }
+    }
+
+    #[test]
+    fn recv_point_parsing_and_pass_through_truth_table() {
+        let mut store = SummaryStore::new();
+        store
+            .load_external_json(
+                r#"[{"functionDeclaration":{"language":"Go","methodName":"Len"},
+                     "receiverModeled":true},
+                    {"functionDeclaration":{"language":"Go","methodName":"String"},
+                     "dataFlows":[{"from":"recv","to":"return"}]},
+                    {"functionDeclaration":{"language":"Go","methodName":"Hash"},
+                     "dataFlows":[{"from":"receiver","to":"return","via":"sha256"}]},
+                    {"functionDeclaration":{"language":"Go","methodName":"Trim"},
+                     "dataFlows":[{"from":"param0","to":"return"}]}]"#,
+            )
+            .unwrap();
+        // Modeled, no flow: the result is independent of the receiver.
+        let len = store.get("Len").unwrap();
+        assert!(len.models_receiver && !len.receiver_passes_through());
+        // A declared recv flow implies modeling AND keeps pass-through.
+        let s = store.get("String").unwrap();
+        assert!(s.models_receiver && s.receiver_passes_through());
+        assert!(s.flows.contains(&Flow::direct(Point::Recv, Point::Return)));
+        // "receiver" spelling parses; sanitized-only recv flow passes no raw taint.
+        let h = store.get("Hash").unwrap();
+        assert!(h.models_receiver && !h.receiver_passes_through());
+        // Unmarked entries keep today's conservative pass-through.
+        let t = store.get("Trim").unwrap();
+        assert!(!t.models_receiver && t.receiver_passes_through());
+    }
+
+    #[test]
+    fn computed_summaries_never_claim_receiver_modeling() {
+        // Implicit-`this` field access is invisible to the body walk, so a
+        // computed summary must never license dropping receiver pass-through.
+        let cpg = build(&[("c.c", "char* id(char* s) {\n    return s;\n}\n")]);
+        let mut store = SummaryStore::new();
+        store.compute_all(&cpg);
+        let id = store.get("id").unwrap();
+        assert!(!id.models_receiver && id.receiver_passes_through());
     }
 
     #[test]

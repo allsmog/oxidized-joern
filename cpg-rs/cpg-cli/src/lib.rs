@@ -96,7 +96,19 @@ pub fn build_project(dir: &str, lang: &str) -> Project {
 /// `excludes` substrings (vendored, generated, and test code have no place
 /// in a security CPG and often dominate the file count).
 pub fn build_project_filtered(dir: &str, lang: &str, excludes: &[&str]) -> Project {
+    build_project_ext(dir, lang, excludes, None)
+}
+
+/// [`build_project_filtered`] plus optional external summaries JSON — loaded
+/// BEFORE the build so computed summaries compose with the declared ones.
+pub fn build_project_ext(
+    dir: &str,
+    lang: &str,
+    excludes: &[&str],
+    external_summaries: Option<&str>,
+) -> Project {
     let (mut project, exts) = make_project(lang);
+    load_externals(&mut project, external_summaries);
     let mut sources: Vec<(String, String)> = Vec::new();
     collect_sources_filtered(std::path::Path::new(dir), exts, excludes, &mut sources);
     let refs: Vec<(&str, &str)> = sources.iter().map(|(p, s)| (p.as_str(), s.as_str())).collect();
@@ -113,13 +125,36 @@ pub fn build_project_filtered(dir: &str, lang: &str, excludes: &[&str]) -> Proje
     project
 }
 
+/// Load `--summaries <file>` external-summary JSON into a project (no-op
+/// when None). Must run before build/reopen so the summary fixpoint
+/// composes with the declared entries.
+fn load_externals(project: &mut Project, json: Option<&str>) {
+    if let Some(json) = json {
+        match project.load_external_summaries(json) {
+            Ok(n) => eprintln!("loaded {n} external function summaries"),
+            Err(e) => {
+                eprintln!("--summaries: {e}");
+                std::process::exit(2);
+            }
+        }
+    }
+}
+
 /// Open a project the way `serve` and `scan` both do: `--load <graph.cpg>`
 /// reopens a persisted CPG (skipping parsing), otherwise the positional
-/// directory at `args[2]` is built from source.
+/// directory at `args[2]` is built from source. `--summaries <file>` loads
+/// external function summaries (Fraunhofer-style JSON) either way.
 pub fn open_project(args: &[String]) -> Result<Project, String> {
     let lang = flag(args, "--lang").unwrap_or("c");
+    let ext_json: Option<String> = match flag(args, "--summaries") {
+        Some(path) => Some(
+            std::fs::read_to_string(path).map_err(|e| format!("--summaries {path}: {e}"))?,
+        ),
+        None => None,
+    };
     if let Some(load) = flag(args, "--load") {
         let (mut p, _) = make_project(lang);
+        load_externals(&mut p, ext_json.as_deref());
         let cpg = Cpg::load(load).map_err(|e| format!("load failed: {e}"))?;
         p.reopen(cpg);
         eprintln!("loaded {} nodes from {load}", p.cpg.live_count());
@@ -128,7 +163,7 @@ pub fn open_project(args: &[String]) -> Result<Project, String> {
         let Some(dir) = args.get(2).filter(|d| !d.starts_with("--")) else {
             return Err("missing <dir> (or --load <graph.cpg>)".to_string());
         };
-        Ok(build_project_filtered(dir, lang, &flags(args, "--exclude")))
+        Ok(build_project_ext(dir, lang, &flags(args, "--exclude"), ext_json.as_deref()))
     }
 }
 
