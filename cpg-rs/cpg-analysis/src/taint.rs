@@ -1569,6 +1569,28 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
                     taint.insert(var, tr);
                 }
             }
+            // Copy-family propagation: `strcpy(buf, user)` relays user's
+            // taint into buf (and buf's aliases). Fires only when a
+            // source-position argument is already tainted.
+            if !ctx.is_sanitizer(name) {
+                if let Some((dst, first_src)) = copy_propagation(name) {
+                    let args = cpg.arguments_of(n);
+                    if let Some(tr) =
+                        args.iter().skip(first_src).find_map(|&a| expr_taint(ctx, a, &taint))
+                    {
+                        let tr = tr.extend(
+                            cpg.code_of(n).unwrap_or(name),
+                            cpg.line_of(n),
+                            Provenance::IntraProc,
+                            0,
+                        );
+                        for var in out_arg_names(cpg, n, dst) {
+                            spread_to_aliases(&alias, &mut taint, &var, &tr);
+                            taint.insert(var, tr.clone());
+                        }
+                    }
+                }
+            }
             // Persistence phase-1: a tainted value stored through a setter
             // is re-readable elsewhere — harvest the field key.
             if (name.starts_with("set") || name.starts_with("Set")) && name.len() > 3 {
@@ -1861,6 +1883,23 @@ fn shellform_payload_start(cpg: &Cpg, args: &[NodeId]) -> Option<usize> {
         .map(|i| i + 2)
 }
 
+/// libc copy-family calls move bytes — and therefore taint — from a source
+/// argument into a destination buffer argument: after `strcpy(dst, src)`,
+/// `dst` carries `src`'s taint. Joern models these with per-function
+/// `1->0` semantics files; here it's a fixed table of the C/C++ copy
+/// idioms. Unlike an `@out` source the call introduces no taint of its
+/// own — it only relays taint already present at a source position.
+/// Returns `(dst_arg, first_src_arg)` (0-based).
+fn copy_propagation(name: &str) -> Option<(usize, usize)> {
+    match name {
+        "strcpy" | "strcat" | "stpcpy" | "strlcpy" | "strlcat" | "wcscpy" | "wcscat"
+        | "strncpy" | "strncat" | "wcsncpy" | "memcpy" | "memmove" | "mempcpy" | "wmemcpy"
+        | "sprintf" | "vsprintf" => Some((0, 1)),
+        "snprintf" | "vsnprintf" | "swprintf" => Some((0, 2)),
+        _ => None,
+    }
+}
+
 /// The variables an out-parameter call writes into: the root identifier of
 /// the argument at position `k`, or of EVERY argument for `@out*`
 /// ([`OUT_ALL_ARGS`]).
@@ -2129,6 +2168,23 @@ fn param_to_sink(
                         vec![Step::intra(cpg.code_of(n).unwrap_or(name), cpg.line_of(n), depth)];
                     spread_to_aliases(&alias, &mut chains, &var, &c);
                     chains.insert(var, c);
+                }
+            }
+            // Copy-family propagation in callees (mirrors analyse_method).
+            if !ctx.is_sanitizer(name) {
+                if let Some((dst, first_src)) = copy_propagation(name) {
+                    let args = cpg.arguments_of(n);
+                    if let Some(mut c) = args
+                        .iter()
+                        .skip(first_src)
+                        .find_map(|&a| chain_expr(ctx, a, &chains, depth, visiting))
+                    {
+                        c.push(Step::intra(cpg.code_of(n).unwrap_or(name), cpg.line_of(n), depth));
+                        for var in out_arg_names(cpg, n, dst) {
+                            spread_to_aliases(&alias, &mut chains, &var, &c);
+                            chains.insert(var, c.clone());
+                        }
+                    }
                 }
             }
             if name == "=" {
@@ -3779,6 +3835,40 @@ object JobConfigOps {
         )]);
         let spec = TaintSpec::new(&["userInput"], &["exec"]);
         assert_persist_stitch(&cpg, &spec, "persisted:executionUser", "scheduledTask");
+    }
+
+    #[test]
+    fn c_copy_family_propagates_through_strcpy() {
+        // The joern-parity fixture: getenv → strcpy into a stack buffer →
+        // callee that runs system. Joern's `1->0` strcpy semantics carry
+        // the taint into `buf`; without the copy table the flow died at
+        // the copy.
+        let cpg = build(&[(
+            "cp.c",
+            "void run_cmd(char *cmd) {\n    system(cmd);\n}\nint main() {\n    char buf[256];\n    char *user = getenv(\"X\");\n    strcpy(buf, user);\n    run_cmd(buf);\n    return 0;\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert_eq!(findings[0].origin, "getenv");
+        assert_eq!(findings[0].sink, "system");
+    }
+
+    #[test]
+    fn c_copy_family_propagates_inside_callee_summary() {
+        // The copy happens INSIDE the callee whose summary lifts the
+        // taint: param → snprintf into a local buffer → sink. Exercises
+        // the summary walker's copy arm, not just analyse_method's.
+        let cpg = build(&[(
+            "cps.c",
+            "void helper(char *in) {\n    char b[64];\n    snprintf(b, 64, \"%s\", in);\n    system(b);\n}\nint main() {\n    char *u = getenv(\"X\");\n    helper(u);\n    return 0;\n}\n",
+        )]);
+        let store = summarise(&cpg);
+        let spec = TaintSpec::new(&["getenv"], &["system"]);
+        let findings = find_flows(&cpg, &store, &spec);
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert_eq!(findings[0].origin, "getenv");
     }
 
     #[test]
