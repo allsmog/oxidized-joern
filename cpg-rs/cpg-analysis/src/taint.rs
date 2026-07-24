@@ -42,7 +42,7 @@ const MAX_SPLICE_DEPTH: u32 = 8;
 pub const OUT_ALL_ARGS: usize = usize::MAX;
 
 /// What counts as a source, a sink, and a sanitizer, by function name.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaintSpec {
     /// Calls to these names produce tainted values (their return is tainted).
     pub sources: HashSet<String>,
@@ -2571,7 +2571,7 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
                         cpg.line_of(node),
                         0,
                     )],
-                });
+                    });
             }
             // An @out source is an explicit model: data goes INTO arg k
             // (handled at statement level); the return is a count/status,
