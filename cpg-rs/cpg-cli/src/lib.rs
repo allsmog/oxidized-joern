@@ -335,8 +335,17 @@ pub fn finding_json(f: &cpg_analysis::Finding) -> Value {
     let path: Vec<Value> = f
         .path
         .iter()
-        .map(|s| json!({"code": s.code, "line": s.line}))
+        .map(|s| {
+            json!({
+                "code": s.code,
+                "line": s.line,
+                "provenance": s.provenance,
+                "depth": s.depth,
+            })
+        })
         .collect();
+    let provenance: Vec<String> =
+        f.path.iter().map(|s| format!("{:?}", s.provenance)).collect();
     json!({
         "method": f.method,
         "sink": f.sink,
@@ -344,6 +353,8 @@ pub fn finding_json(f: &cpg_analysis::Finding) -> Value {
         "sinkFile": f.sink_file,
         "origin": f.origin,
         "path": path,
+        "labels": Vec::<String>::new(),
+        "provenance": provenance,
     })
 }
 
@@ -416,14 +427,21 @@ pub fn handle(p: &mut Project, req: &Value) -> Value {
             let Some(fqn) = req.get("fqn").and_then(|n| n.as_str()) else {
                 return json!({"error": "summary requires fqn"});
             };
-            match p.summary_of(fqn) {
-                Some(s) => {
-                    let flows: Vec<String> = s
-                        .flows
-                        .iter()
-                        .map(|f| format!("{:?} -> {:?}", f.from, f.to))
+            match p.summaries.get_with_origin(fqn) {
+                Some((summary, origin)) => {
+                    let mut ordered: Vec<_> = summary.flows.iter().collect();
+                    ordered.sort();
+                    let flows: Vec<Value> = ordered
+                        .into_iter()
+                        .map(|flow| {
+                            json!({
+                                "from": flow.from,
+                                "to": flow.to,
+                                "labels": flow.label_strings(),
+                            })
+                        })
                         .collect();
-                    json!({"fqn": fqn, "flows": flows})
+                    json!({"fqn": fqn, "flows": flows, "provenance": [origin]})
                 }
                 None => json!({"error": format!("no summary for {fqn}")}),
             }
@@ -437,10 +455,15 @@ pub fn handle(p: &mut Project, req: &Value) -> Value {
             };
             let sources = parse("sources");
             let sinks = parse("sinks");
+            let sanitizers = parse("sanitizers");
             let src_refs: Vec<&str> = sources.iter().map(|s| s.as_str()).collect();
             let sink_refs: Vec<&str> = sinks.iter().map(|s| s.as_str()).collect();
-            let findings: Vec<Value> =
-                p.find_taint(&src_refs, &sink_refs).iter().map(finding_json).collect();
+            let sanitizer_refs: Vec<&str> = sanitizers.iter().map(|s| s.as_str()).collect();
+            let findings: Vec<Value> = p
+                .find_taint_with_sanitizers(&src_refs, &sink_refs, &sanitizer_refs)
+                .iter()
+                .map(finding_json)
+                .collect();
             json!({"findings": findings})
         }
         Some("scan") => {
@@ -557,5 +580,51 @@ mod glob_tests {
         assert_eq!(hits, vec!["Queries.clusterDns".to_string()]);
         let all = entries_from_glob(&cpg, "*.helper");
         assert_eq!(all, vec!["Helpers.helper".to_string()]);
+    }
+
+    #[test]
+    fn json_taint_request_honours_sanitizers() {
+        let (mut project, _) = make_project("c");
+        project.build(&[(
+            "v.c",
+            "char* clean(char* s) { return s; }\n\
+             char* source(void) { return \"x\"; }\n\
+             void sink(char* s) {}\n\
+             void run(void) { sink(clean(source())); }\n",
+        )]);
+
+        let without = handle(
+            &mut project,
+            &json!({"cmd":"taint", "sources":["source"], "sinks":["sink"]}),
+        );
+        assert_eq!(without["findings"].as_array().unwrap().len(), 1);
+
+        let with = handle(
+            &mut project,
+            &json!({
+                "cmd":"taint",
+                "sources":["source"],
+                "sinks":["sink"],
+                "sanitizers":["clean"],
+            }),
+        );
+        assert!(with["findings"].as_array().unwrap().is_empty());
+    }
+
+    #[test]
+    fn json_summary_exposes_labels_and_provenance() {
+        let (mut project, _) = make_project("c");
+        project
+            .summaries
+            .load_external_json(
+                r#"[{"functionDeclaration":{"methodName":"escape"},
+                     "dataFlows":[{"from":"param0","to":"return",
+                                   "labels":["sanitized:escape"]}]}]"#,
+            )
+            .unwrap();
+
+        let response = handle(&mut project, &json!({"cmd":"summary", "fqn":"escape"}));
+        assert_eq!(response["flows"][0]["labels"][0], "sanitized:escape");
+        assert_eq!(response["provenance"][0], "External");
     }
 }

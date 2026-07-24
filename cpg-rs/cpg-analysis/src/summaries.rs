@@ -85,6 +85,16 @@ impl Flow {
     pub fn is_sanitized(&self) -> bool {
         self.via.is_some()
     }
+
+    /// Stable external label spelling used by the JSON service. The current
+    /// engine models sanitizer provenance directly, while accepting the older
+    /// label-oriented summary format at its boundaries.
+    pub fn label_strings(&self) -> Vec<String> {
+        self.via
+            .iter()
+            .map(|sanitizer| format!("sanitized:{}", sanitizer.name()))
+            .collect()
+    }
 }
 
 /// A call whose *result* flows to this function's return — the
@@ -241,8 +251,10 @@ impl SummaryStore {
     }
 
     /// Load external function summaries from JSON (Fraunhofer-style). Each
-    /// dataFlow entry may carry an optional `"via": "<sanitizer>"` field
-    /// marking the flow as sanitized.
+    /// dataFlow entry may mark a sanitizer with the current
+    /// `"via": "<sanitizer>"` field or the older label-oriented spellings
+    /// (`"labels": ["sanitized:<name>"]`, `"sanitizer": "<name>"`, or
+    /// `"kind": "sanitized"`).
     pub fn load_external_json(&mut self, json: &str) -> Result<usize, String> {
         let entries: Vec<ExternalEntry> =
             serde_json::from_str(json).map_err(|e| e.to_string())?;
@@ -252,10 +264,25 @@ impl SummaryStore {
             let mut flows = HashSet::new();
             for df in &e.data_flows {
                 if let (Some(from), Some(to)) = (parse_point(&df.from), parse_point(&df.to)) {
+                    let via = df
+                        .via
+                        .clone()
+                        .or_else(|| df.sanitizer.clone())
+                        .or_else(|| {
+                            df.labels.iter().find_map(|label| {
+                                label
+                                    .strip_prefix("sanitized:")
+                                    .filter(|name| !name.is_empty())
+                                    .map(str::to_string)
+                            })
+                        })
+                        .or_else(|| {
+                            (df.kind.as_deref() == Some("sanitized")).then(|| fqn.clone())
+                        });
                     flows.insert(Flow {
                         from,
                         to,
-                        via: df.via.clone().map(Sanitizer),
+                        via: via.map(Sanitizer),
                     });
                 }
             }
@@ -756,6 +783,13 @@ struct ExternalFlow {
     /// Optional sanitizer name: the flow exists but is neutralised by it.
     #[serde(default)]
     via: Option<String>,
+    /// Compatibility with the label-oriented external summary schema.
+    #[serde(default)]
+    labels: Vec<String>,
+    #[serde(default)]
+    sanitizer: Option<String>,
+    #[serde(default)]
+    kind: Option<String>,
 }
 
 #[cfg(test)]
@@ -858,6 +892,33 @@ mod tests {
             store.get_with_origin("strdup").map(|(_, o)| o),
             Some(SummaryOrigin::External)
         );
+    }
+
+    #[test]
+    fn external_json_accepts_label_or_sanitizer_spelling() {
+        let mut store = SummaryStore::new();
+        store
+            .load_external_json(
+                r#"[{"functionDeclaration":{"methodName":"labelled"},
+                     "dataFlows":[{"from":"param0","to":"return",
+                                   "labels":["sanitized:escape"]}]},
+                    {"functionDeclaration":{"methodName":"aliased"},
+                     "dataFlows":[{"from":"param0","to":"return",
+                                   "sanitizer":"clean"}]}]"#,
+            )
+            .unwrap();
+
+        for (fqn, sanitizer) in [("labelled", "escape"), ("aliased", "clean")] {
+            let summary = store.get(fqn).unwrap();
+            assert_eq!(summary.flows_to_return().count(), 0);
+            assert!(
+                summary
+                    .sanitized_flows_to_return()
+                    .any(|(param, via)| param == 0 && via.name() == sanitizer),
+                "{fqn}: {:?}",
+                summary.flows
+            );
+        }
     }
 
     #[test]
