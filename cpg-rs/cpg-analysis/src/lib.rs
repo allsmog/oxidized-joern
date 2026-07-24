@@ -10,11 +10,16 @@ pub mod cfg;
 pub mod entries;
 pub mod middleware;
 pub mod pass;
+pub mod provenance;
+pub mod query;
 pub mod reaching_def;
+pub mod relations;
+pub mod scan;
 pub mod structural;
 pub mod summaries;
 pub mod symbols;
 pub mod taint;
+pub mod value_flow;
 
 pub use authz::{annotate_authz, is_authz_name};
 pub use callgraph::CallGraphPass;
@@ -22,10 +27,15 @@ pub use cfg::{cfg_edges_for_method, CfgPass};
 pub use entries::{mine_registration_entries, mine_routes, RouteEntry};
 pub use middleware::{authz_census, AuthzCensus, MiddlewareGate};
 pub use pass::{Pass, PassContext, PassManager};
+pub use provenance::{Fact, FactId, FactKind, ProvenanceGraph};
+pub use query::{LogicalPlan, NodeSelector, Predicate, QueryCompiler, QueryError, QueryExecutor};
 pub use reaching_def::{reaching_def_flows, ReachingDefFlow, ReachingDefPass};
+pub use relations::{Relation, RelationStore, Tuple};
+pub use scan::{ScanDelta, ScanSubscription};
 pub use summaries::{Flow, FunctionSummary, Point, Sanitizer, SummaryOrigin, SummaryStore};
 pub use symbols::SymbolResolutionPass;
 pub use taint::{annotate_confined, find_flows, Finding, Provenance, Step, TaintSpec, Trace};
+pub use value_flow::{SparseValueFlow, ValueFlowEdge, ValueFlowKind};
 
 /// Build the standard pass pipeline. Order is derived from layer dependencies,
 /// so the sequence here is irrelevant — the manager sorts it (ReachingDefPass
