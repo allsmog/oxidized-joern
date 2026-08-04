@@ -53,6 +53,41 @@ jobs:
         run: cargo clippy --workspace -- -D warnings
         working-directory: cpg-rs
 
+  # Repository-local, one-day validation artifact for the exact pinned engine.
+  # The workflow itself lives on current master so the PR is mergeable, while
+  # checkout is locked to the dependency revision named in Cargo.toml.
+  export-pinned-cpg-snapshot:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: b24a355995f1f1085a7a523f46f93f02cb70e1f8
+          fetch-depth: 1
+      - name: Archive exact cpg-rs source
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "b24a355995f1f1085a7a523f46f93f02cb70e1f8"
+          test -f cpg-rs/Cargo.toml
+          tar --sort=name \
+            --mtime='UTC 1970-01-01' \
+            --owner=0 --group=0 --numeric-owner \
+            -czf "${RUNNER_TEMP}/oxidized-joern-cpg-rs-b24a3559.tar.gz" \
+            cpg-rs
+          sha256sum "${RUNNER_TEMP}/oxidized-joern-cpg-rs-b24a3559.tar.gz" \
+            | tee "${RUNNER_TEMP}/oxidized-joern-cpg-rs-b24a3559.tar.gz.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oxidized-joern-cpg-rs-b24a3559
+          path: |
+            ${{ runner.temp }}/oxidized-joern-cpg-rs-b24a3559.tar.gz
+            ${{ runner.temp }}/oxidized-joern-cpg-rs-b24a3559.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 1
+
   # Differential parity against the pinned Joern oracle. The oracle download
   # is ~2GB, so this job is manual-only (workflow_dispatch) rather than
   # running on every push. The unpacked distribution is cached keyed on the
