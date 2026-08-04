@@ -1,6 +1,6 @@
 # PROGRESS — 1:1 Joern port (see GOAL.md for the rules)
 
-Single source of truth across sessions. Update in the same commit as the work.
+Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
@@ -22,12 +22,13 @@ Single source of truth across sessions. Update in the same commit as the work.
   still 95/95. Follow-up: point summaries.rs/taint.rs at ReachingDef edges.
 - **Milestone:** M5 (real-world corpus) + M7 (dataflow REACHING_DEF — **DONE,
   byte-zero**) — M1-M4 done.
-  Goal reframed (see /root/.claude/plans/ + GOAL): self-hosted IRIS on cpg-rs.
+  Goal reframed (see GOAL.md): self-hosted IRIS on cpg-rs.
   Two parallel tracks: A = byte-parity expansion (gate), B = dataflow + IRIS loop.
 - **M7/Track B (2026-06-10): REACHING_DEF byte-parity COMPLETE — all 1,458
   FLOWS facts byte-identical to Joern v4.0.555, AST/NODES/EDGES unchanged.**
   The reaching-def engine in `reaching_def_flows` is now a verbatim port of the
-  decompiled v4.0.555 internals. Load-bearing facts pinned this session
+  decompiled v4.0.555 internals. Load-bearing facts pinned by the byte-parity
+  investigation
   (progression 31→19→11→10→9→7→4→2→1→0):
   - `MemberAccess.isFieldAccess` (the GEN exclusion in `initGen`) is BROAD:
     memberAccess + all variants + `indirection` + `getElementPtr` + `sizeOf`.
@@ -54,8 +55,8 @@ Single source of truth across sessions. Update in the same commit as the work.
     global) links to its first same-name usage in each method-ref-captured
     method (`g` → `first#8`) — the only interprocedural edge.
   - Tooling: `rd_probe2.sc`/`rd_probe3.sc` dump Joern's actual gen/in/lone for
-    ground truth; decompiled sources in /tmp (Ddg, EV2, UA, RDTF, OPT,
-    MemberAccess) via CFR.
+    ground truth; Ddg, EV2, UA, RDTF, OPT, and MemberAccess were decompiled via
+    CFR from the pinned artifacts.
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` now pins v4.0.555 by default;
   override with `JOERN_VERSION=vX.Y.Z` only as a deliberate, recorded upgrade)
 - **Gate:** `joern-parity/check.sh` — green, 96/96 blocks byte-identical.
@@ -145,7 +146,7 @@ Next, in preference order:
   every node's in/out against rd_solver_probe.sc. Plus the ~14 residual access
   cases (field/index substring is in; indirection `*l` def-use still needs the
   exact isUsing). Tooling ready: rd_solver_probe.sc dumps Joern's per-node
-  in/out; /tmp/dfx has the decompiled classes.
+  in/out; the required classes can be re-extracted from the pinned artifact.
 - **M7/Track B — loop-liveness ROOT CAUSE found (2026-06-10):** The blocker is
   NOT irreducible. By scripting Joern (rd_solver_probe.sc — constructs
   ReachingDefProblem + DataFlowSolver and dumps in/out per node) I obtained the
@@ -163,8 +164,8 @@ Next, in preference order:
   instead of cfg_index_edges. Captured in(exit) for bsearch =
   {5,8,13,14,15,16,18,19,20,21,24,25,26,27,30,31,33} (flow-graph def numbers;
   rerun the probe for the mapping). This + the residual access-substring cases
-  (~38, gated to field/index uses) closes the remaining 82. Decompiled classes
-  staged in /tmp/dfx (re-extract via cfr from the dataflowengineoss jar).
+  (~38, gated to field/index uses) closes the remaining 82. The decompiled
+  classes are reproducible with CFR from the dataflowengineoss jar.
 - **M7/Track B faithful isValidEdge + liveness wall (2026-06-10):** Added the
   decompiled v4.0.555 EdgeValidator.isValidEdge as a push-filter on every edge
   (rd_valid_edge in main.rs): 94->85. Cast operands generate defs (pinned: `l`
@@ -179,12 +180,12 @@ Next, in preference order:
   live on the loop-bypass / last-iteration-exit path, so our fixpoint emits
   them; Joern's DataFlowSolver merge kills them. This is a non-standard solver
   behaviour not derivable from the oracle — needs replicating Joern's actual
-  DataFlowSolver worklist/merge (the .class is staged at /tmp/dfx). The
+  DataFlowSolver worklist/merge from the pinned class artifact. The
   remaining ~38 are residual access def-use (agg q.x container, macros). NOTE:
   plain/indirection-gated substring isUsing OVER-produces strcmp `*l` uses
   without an even more exact isValidEdge — field/index gating is the safe subset.
 - **M7/Track B breakthrough — semantics-gated edges (2026-06-10):** Decompiled
-  the v4.0.555 dataflow classes (CFR; staged in /tmp/dfx, /tmp/dsem) and found
+  the v4.0.555 dataflow classes with CFR and found
   the REAL mechanism: every REACHING_DEF edge is gated by EdgeValidator.
   isValidEdge using Joern's DefaultSemantics flow mappings. Extracted the exact
   operator flow table (operator_semantics() in main.rs, verbatim from
@@ -200,7 +201,8 @@ Next, in preference order:
   METHOD_RETURN after a loop) and isUsing's access-path container/part/alias
   (for fieldAccess `q.x`/indexAccess `vals[0]`/indirection `*l` def-use across
   statements). The decompiled isUsing (sameVariable via `contains`, isContainer,
-  isPart, isAlias over access paths) is in /tmp/Ddg.java + my notes; the
+  isPart, isAlias over access paths) is captured in the decompiled Ddg
+  implementation; the
   fieldAccess gen nuance (fieldAccess calls excluded from defsForCalls but
   included as Call-args in the parent's gen) is the agg/struct gap. These are a
   faithful-port finish, not more heuristics.
@@ -353,7 +355,7 @@ Next, in preference order:
 
 (none)
 
-## Architecture notes for future sessions
+## Architecture notes for future work
 
 - Frontend strategy is **pure Rust** (tree-sitter), decided early; do not
   re-litigate. Joern's runtime is used only as the test oracle.

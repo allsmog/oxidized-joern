@@ -75,7 +75,8 @@ fn scan(
 /// TypeDecl node for a class/struct body: base-class simple names (stored
 /// comma-joined in the signature column) and Member children with declared
 /// types. Base names strip namespaces/templates the same way receiver hints
-/// do, so `public example::gateway::GatewayServerIf` matches a `GatewayServerIf` key.
+/// do, so `public example::gateway::GatewayServerIf` matches a
+/// `GatewayServerIf` key.
 fn emit_type_decl(
     spec: &TsLangSpec,
     b: &mut CpgBuilder,
@@ -855,7 +856,7 @@ fn build_expr(
     // Expression wrappers that delegate to an inner expression.
     // prefix/postfix/ascription/generic_function are Scala (`!x`, `x_=`,
     // `x: T`, `f[T]`), type_assertion_expression is Go (`x.(T)`) — all were
-    // observed dropping assignment values in a multi-language validation corpus.
+    // measured dropping assignment values in a multi-language validation corpus.
     if matches!(
         k,
         "parenthesized_expression" | "expression_list" | "unary_expression" | "unary_operator"
@@ -901,8 +902,8 @@ fn is_value_branch(k: &str) -> bool {
 /// returning None for these is correct in STATEMENT position (walk_stmts
 /// descends), but in value position (assignment rhs, call argument, return)
 /// it used to drop the whole link — observed at scale in a Scala validation
-/// corpus, each one invisible to dataflow AND to plain
-/// call visibility (walk_stmts does not descend into failed assignments).
+/// corpus, where each dropped assignment was invisible to dataflow AND to
+/// plain call visibility (walk_stmts does not descend into failed assignments).
 /// Callers in value position use `build_expr(..).or_else(|| build_value_shape(..))`.
 fn build_value_shape(
     spec: &TsLangSpec,

@@ -25,14 +25,13 @@
 //!   common one-server-per-module layout; read it as "a chain exists",
 //!   not "this route provably sits behind it".
 //! - `subject-gated@<line>` — a non-dominating authz invocation whose
-//!   enforcement is parameterized by caller-supplied caller claims
-//!   (`if len(callerClaims) > 0 { rbac }` / RBAC call taking
-//!   `CallerClaims`). The configured convention "some authenticated callers omit
-//!   claims and delegate the decision at account scope" — RBAC is delegated to the
-//!   caller population, not bypassed. Validation-corpus-dominant partial shape
-//!   (validation-corpus ground truth); triage = verify the caller convention once, not
-//!   per-site. Over-approximates: a caller-parameterized check that fails
-//!   to dominate for an unrelated reason also lands here.
+//!   enforcement is parameterized by caller-supplied context, such as a
+//!   caller-claims collection. Some systems delegate access decisions to
+//!   the authenticated caller population when that collection is empty.
+//!   Triage = verify the configured caller convention once, not per-site.
+//!   Over-approximates: a caller-parameterized check that fails to dominate
+//!   for an unrelated reason also lands here. The serialized label is kept
+//!   for backward compatibility.
 //! - `inline-partial@<line>` — an authz invocation exists in the body but
 //!   does not dominate the final return (branch-only check, or check after
 //!   the work). The authz-bypass shape — but note guard-clause-heavy
@@ -72,16 +71,32 @@ const SCOPE_MW_CALLS: &[&str] = &[
     "Use",
 ];
 
-/// Framework server-constructor names (a configurable Go gRPC service
-/// framework shape): the framework wires the JWT authn interceptor inside
-/// these constructors, so a module-local call is
-/// evidence the module's gRPC surface sits behind the framework authn tier.
-/// The wiring itself lives OUTSIDE the module CPG, so these gates are
-/// reported with scope `framework` and `enforcing: false` — evidence, not
-/// proof; they never change entry verdicts. (Replaces the validation sweeps'
-/// external `service.NewServer` grep.)
-const FRAMEWORK_SERVER_CALLS: &[&str] =
-    &["NewGRPCServer", "NewWrappedGRPCServer", "NewGRPCServerByConfig"];
+/// Configuration for product-neutral authorization-census conventions.
+///
+/// Caller-context markers are compared after removing non-alphanumeric
+/// characters and folding ASCII case. This lets a phrase such as
+/// `"caller claims"` match camelCase, snake_case, or concatenated spellings.
+/// An empty marker list disables the caller-context classification. Framework
+/// constructor names are exact call-name matches; an empty list disables
+/// framework-construction evidence.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AuthzCensusConfig {
+    pub caller_context_markers: Vec<String>,
+    pub framework_server_calls: Vec<String>,
+}
+
+impl Default for AuthzCensusConfig {
+    fn default() -> Self {
+        Self {
+            caller_context_markers: vec!["subject context".into()],
+            framework_server_calls: vec![
+                "NewGRPCServer".into(),
+                "NewWrappedGRPCServer".into(),
+                "NewGRPCServerByConfig".into(),
+            ],
+        }
+    }
+}
 
 /// A mined server/router-scope middleware registration.
 #[derive(Debug, Clone, serde::Serialize)]
@@ -142,7 +157,8 @@ fn gate_body_enforces(
     // The factory + every closure reachable through MethodRefs (same
     // traversal contract as `authz_calls`, but per-method granularity),
     // plus one extra edge kind: invoking a LOCAL VALUE bound from a defined
-    // function (`verify := requestsignature.NewRequestVerifier(kp); ... return verify(w, req)`)
+    // function (`verify := requestsignature.NewRequestVerifier(kp); ...`
+    // `return verify(w, req)`)
     // chases into that function — the near-universal way an anonymous
     // middleware delegates its enforcement to a verifier built earlier in
     // the same file.
@@ -194,7 +210,7 @@ fn gate_body_enforces(
                     return false;
                 };
                 // `With*` is the derive-new-value convention
-                // (`context.WithValue`, `WithElevatedRole`, `WithManagementPlane`):
+                // (`context.WithValue`, `WithElevatedRole`, `WithControlPlane`):
                 // a middleware invoking one CONSTRUCTS authz context — often an
                 // ELEVATION — and enforces nothing. The head can't be banned in
                 // the global name shape because `WithOauth`-style route WRAPPERS
@@ -249,7 +265,7 @@ fn gate_body_enforces(
 /// a mis-rooted gate under-claims (`none`), never over-claims.
 /// A file directly in `cmd/` (`cmd/run.go`) is the single-binary module
 /// layout — the gate covers the module. A file in a `cmd/<bin>/` SUBDIR is
-/// the multi-binary layout (`cmd/gateway/`, `cmd/webhooks/`, ... in one
+/// the multi-binary layout (`cmd/gateway/`, `cmd/eventdelivery/`, ... in one
 /// module): the gate binds to its own binary's subtree only, else one
 /// binary's auth gate claims every other binary's handlers.
 pub(crate) fn binary_root(gate_file: &str) -> String {
@@ -320,10 +336,28 @@ pub fn authz_census(
     entries: &[String],
     idl_entries: &[String],
 ) -> AuthzCensus {
+    authz_census_with_config(
+        cpg,
+        authz_names,
+        entries,
+        idl_entries,
+        &AuthzCensusConfig::default(),
+    )
+}
+
+/// Run the census with configurable caller-context and framework-constructor
+/// conventions. See [`authz_census`] for entry matching and verdict semantics.
+pub fn authz_census_with_config(
+    cpg: &Cpg,
+    authz_names: &HashSet<String>,
+    entries: &[String],
+    idl_entries: &[String],
+    config: &AuthzCensusConfig,
+) -> AuthzCensus {
     let by_name = methods_by_name(cpg);
     let bindings = local_value_bindings(cpg);
     let mut gates = mine_middleware_gates(cpg, authz_names, &by_name, &bindings);
-    gates.extend(mine_framework_gates(cpg));
+    gates.extend(mine_framework_gates(cpg, &config.framework_server_calls));
     let wrapped = mine_route_wrappers(cpg, authz_names, &by_name);
     let group_gated = group_gated_entries(cpg, &gates, authz_names, &by_name, &bindings);
     // Binary-root binding is the lane for server-option gates (gRPC
@@ -331,13 +365,19 @@ pub fn authz_census(
     // or `Before` gate's blast radius IS visible — its receiver group/router
     // — so those gates bind only through the route-group lane; letting them
     // claim by binary root blanket-credits every handler in the binary
-    // (observed: a webhooks binary's auth gate claiming all gateway routes
+    // (observed: an event-delivery binary's auth gate claiming all gateway routes
     // in a multi-binary monorepo).
     let enforcing_gates: Vec<(String, String)> = gates
         .iter()
         .filter(|g| g.enforcing && g.scope != "Use" && g.scope != "Before")
         .map(|g| (g.name.clone(), binary_root(&g.file)))
         .collect();
+    let verdict_evidence = EntryVerdictEvidence {
+        wrapped: &wrapped,
+        group_gated: &group_gated,
+        enforcing_gates: &enforcing_gates,
+        caller_context_markers: &config.caller_context_markers,
+    };
 
     // Resolve each entry name once; BTreeMap keeps output deterministic and
     // collapses duplicate spellings of the same method.
@@ -362,8 +402,13 @@ pub fn authz_census(
             } else {
                 cpg.full_name_of(m).or(cpg.name_of(m)).unwrap_or(e).to_string()
             };
-            let verdict =
-                entry_verdict(cpg, authz_names, &wrapped, &group_gated, &enforcing_gates, m, &key);
+            let verdict = entry_verdict(
+                cpg,
+                authz_names,
+                &verdict_evidence,
+                m,
+                &key,
+            );
             rows.entry(key).or_insert(verdict);
         }
         // Unmatched entries are the coverage report's job.
@@ -381,16 +426,15 @@ pub fn authz_census(
     }
 }
 
-/// Mine framework server-constructor call sites ([`FRAMEWORK_SERVER_CALLS`])
-/// as non-enforcing `framework`-scope gates: module-local evidence that the
-/// gRPC surface is framework-constructed (JWT authn tier), without claiming
-/// the out-of-module wiring. Test/mock files are skipped; deterministic
-/// order.
-fn mine_framework_gates(cpg: &Cpg) -> Vec<MiddlewareGate> {
+/// Mine configured server-constructor call sites as non-enforcing
+/// `framework`-scope gates: module-local evidence that the service surface is
+/// framework-constructed, without claiming out-of-module wiring. Test/mock
+/// files are skipped; deterministic order.
+fn mine_framework_gates(cpg: &Cpg, framework_server_calls: &[String]) -> Vec<MiddlewareGate> {
     let mut gates = Vec::new();
     for c in cpg.calls() {
         let Some(name) = cpg.name_of(c) else { continue };
-        if !FRAMEWORK_SERVER_CALLS.contains(&name) {
+        if !framework_server_calls.iter().any(|candidate| candidate == name) {
             continue;
         }
         if cpg
@@ -412,12 +456,17 @@ fn mine_framework_gates(cpg: &Cpg) -> Vec<MiddlewareGate> {
     gates
 }
 
+struct EntryVerdictEvidence<'a> {
+    wrapped: &'a HashMap<String, String>,
+    group_gated: &'a HashMap<String, String>,
+    enforcing_gates: &'a [(String, String)],
+    caller_context_markers: &'a [String],
+}
+
 fn entry_verdict(
     cpg: &Cpg,
     authz_names: &HashSet<String>,
-    wrapped: &HashMap<String, String>,
-    group_gated: &HashMap<String, String>,
-    enforcing_gates: &[(String, String)],
+    evidence: &EntryVerdictEvidence<'_>,
     m: NodeId,
     key: &str,
 ) -> String {
@@ -427,26 +476,40 @@ fn entry_verdict(
         return format!("inline@{line}");
     }
     let simple = cpg.name_of(m).unwrap_or(key);
-    if let Some(w) = wrapped.get(key).or_else(|| wrapped.get(simple)) {
+    if let Some(w) = evidence
+        .wrapped
+        .get(key)
+        .or_else(|| evidence.wrapped.get(simple))
+    {
         return format!("wrapped@{w}");
     }
     // Route-group binding: the entry was registered on a router group whose
     // middleware chain (its own or an ancestor group's) carries an enforcing
     // authz gate.
-    if let Some(g) = group_gated.get(key).or_else(|| group_gated.get(simple)) {
+    if let Some(g) = evidence
+        .group_gated
+        .get(key)
+        .or_else(|| evidence.group_gated.get(simple))
+    {
         return format!("middleware@{g}");
     }
     // Binary-root binding: an enforcing gate claims this entry only when the
     // entry's file sits under the gate's binary root (see [`binary_root`]).
     let entry_file = cpg.path_of(cpg.file_of(m)).unwrap_or("");
-    if let Some((g, _)) = enforcing_gates
+    if let Some((g, _)) = evidence
+        .enforcing_gates
         .iter()
         .find(|(_, root)| entry_file.starts_with(root.as_str()))
     {
         return format!("middleware@{g}");
     }
     if partial_line.is_some() {
-        if let Some(l) = caller_context_gated_line(cpg, m, &checks) {
+        if let Some(l) = caller_context_gated_line(
+            cpg,
+            m,
+            &checks,
+            evidence.caller_context_markers,
+        ) {
             return format!("subject-gated@{l}");
         }
     }
@@ -456,33 +519,59 @@ fn entry_verdict(
     }
 }
 
-/// Is the non-dominating check the caller-claims convention rather than a
-/// bypass? Evidence tiers: (1) a check whose own code carries a
-/// caller-claims token (`ObjectRbacQueryMod(ctx, acct, in.CallerClaims,
-/// ...)`); (2) the handler pulls caller claims anywhere (the common
-/// `sc := req.GetAuthzCtx().GetCallerClaims(); if len(sc) > 0 {...}` shape
-/// renames the variable, hiding it from the check's code). Matching is
-/// case/underscore-insensitive on the `callerclaims` token.
-fn caller_context_gated_line(cpg: &Cpg, m: NodeId, checks: &[NodeId]) -> Option<u32> {
-    fn mentions(s: &str) -> bool {
-        let mut t = s.to_ascii_lowercase();
-        t.retain(|c| c != '_');
-        t.contains("callerclaims")
-    }
+/// Is the non-dominating check governed by a configured caller-context
+/// convention rather than a bypass? Evidence tiers: (1) a check whose own
+/// code carries a configured marker; (2) the handler pulls a marked value
+/// anywhere, even when a local rename hides the marker from the check call.
+fn caller_context_gated_line(
+    cpg: &Cpg,
+    m: NodeId,
+    checks: &[NodeId],
+    caller_context_markers: &[String],
+) -> Option<u32> {
+    let normalized_markers: Vec<String> = caller_context_markers
+        .iter()
+        .map(|marker| normalize_marker(marker))
+        .filter(|marker| !marker.is_empty())
+        .collect();
+    let mentions = |candidate: &str| mentions_marker(candidate, &normalized_markers);
     if let Some(&a) = checks
         .iter()
-        .find(|&&a| cpg.code_of(a).is_some_and(mentions))
+        .find(|&&a| cpg.code_of(a).is_some_and(&mentions))
     {
         return cpg.line_of(a);
     }
-    let pulls_subjects = ast_descendants(cpg, m)
+    let pulls_context = ast_descendants(cpg, m)
         .into_iter()
-        .any(|n| cpg.name_of(n).is_some_and(mentions));
-    if pulls_subjects {
+        .any(|n| cpg.name_of(n).is_some_and(&mentions));
+    if pulls_context {
         checks.first().and_then(|&a| cpg.line_of(a))
     } else {
         None
     }
+}
+
+fn normalize_marker(value: &str) -> String {
+    value
+        .chars()
+        .filter(|c| c.is_ascii_alphanumeric())
+        .map(|c| c.to_ascii_lowercase())
+        .collect()
+}
+
+/// Match within one identifier-like token at a time. Normalizing an entire
+/// expression would incorrectly join unrelated arguments across punctuation:
+/// `enforce(subject, context)` is not a `subject_context` identifier.
+fn mentions_marker(value: &str, normalized_markers: &[String]) -> bool {
+    value
+        .split(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))
+        .map(normalize_marker)
+        .filter(|token| !token.is_empty())
+        .any(|token| {
+            normalized_markers
+                .iter()
+                .any(|marker| token.contains(marker))
+        })
 }
 
 /// Does any of `checks` dominate the handler's normal completion? Anchor =
@@ -595,7 +684,8 @@ fn mine_middleware_gates(
                         .any(|&m| gate_body_enforces(cpg, authz_names, by_name, bindings, m));
                 // An enforcing anonymous middleware reads as `<anon>` in the
                 // census; name it after the local verifier its body invokes
-                // (`verify := requestsignature.NewRequestVerifier(..)` -> `NewRequestVerifier`).
+                // (`verify := requestsignature.NewRequestVerifier(..)` ->
+                // `NewRequestVerifier`).
                 let name = if enforcing && (r.name.is_empty() || r.name.starts_with('<')) {
                     binding_alias(cpg, bindings, &r.methods).unwrap_or(r.name)
                 } else {
@@ -641,9 +731,10 @@ fn binding_alias(
 }
 
 /// (file, local identifier) -> the callee NAME its value was bound from:
-/// `verify := requestsignature.NewRequestVerifier(kp)` yields `("main.go", "verify") ->
-/// "NewRequestVerifier"`. Fuel for the local-value-invocation hop in
-/// [`gate_body_enforces`] and the anonymous-gate alias.
+/// `verify := requestsignature.NewRequestVerifier(kp)` yields
+/// `("main.go", "verify") -> "NewRequestVerifier"`. Fuel for the
+/// local-value-invocation hop in [`gate_body_enforces`] and the anonymous-gate
+/// alias.
 fn local_value_bindings(cpg: &Cpg) -> HashMap<(&str, &str), &str> {
     let mut bindings: HashMap<(&str, &str), &str> = HashMap::new();
     for c in cpg.calls() {
@@ -839,7 +930,7 @@ fn group_gated_entries(
             // oapi-codegen package defines `RegisterHandlersWithOptions`)
             // are broken by path-segment affinity with the CALLING file: the
             // caller's own neighborhood is the package it imports. A wrong
-            // pick here is a wrong GATE CREDIT (observed: a webhooks
+            // pick here is a wrong GATE CREDIT (observed: an event-delivery
             // binary's auth gate claiming the gateway's generated v2
             // surface), so only best-affinity candidates bind, and only when
             // few remain.
@@ -1411,14 +1502,13 @@ func (siw *ServerInterfaceWrapper) ListAccelerators(c *GinContext) {
         // `r.GlobalMiddleware().Before(fn)` runs fn before dispatch for
         // every route on r — a committing fn is a router-scope gate. The
         // enforcing case is an ANONYMOUS func delegating to a local value
-        // bound from a signature verifier (`verify := requestsignature.NewRequestVerifier(kp)`)
-        // whose returned closure rejects with 401s. Controls: an
-        // elevation-only Before (`DefaultElevationHandler` grants admin via
-        // `WithElevatedRole`, checks nothing) must NOT gate its router, and
-        // a time comparison named `Before` must not mine at all.
+        // bound from a request-signature verifier. Its returned closure
+        // rejects with 401s. Controls: an elevation-only Before constructs
+        // a privileged context but checks nothing, so it must NOT gate its
+        // router; a time comparison named `Before` must not mine at all.
         let cpg = build_go(&[
             (
-                "requestsignature/requestsignature.go",
+                "requestsignature/verifier.go",
                 r#"package requestsignature
 
 func NewRequestVerifier(kp KeyProvider) func(w ResponseWriter, req *Request) error {
@@ -1493,7 +1583,7 @@ func (h *StatusHandler) GetStatus(w ResponseWriter, req *Request) error { return
         assert_eq!(
             verdict_of(&census, "HandleMembers"),
             "none",
-            "elevation-only Before (DefaultElevationHandler) must NOT gate: {census:?}"
+            "elevation-only Before must NOT gate: {census:?}"
         );
         assert_eq!(
             verdict_of(&census, "GetStatus"),
@@ -1522,8 +1612,8 @@ func (h *StatusHandler) GetStatus(w ResponseWriter, req *Request) error { return
         assert_eq!(binary_root("cmd/run.go"), "");
         assert_eq!(binary_root("broker-service/cmd/run.go"), "broker-service/");
         // Multi-binary layout: gate binds to its own binary dir only.
-        assert_eq!(binary_root("cmd/webhooks/main.go"), "cmd/webhooks/");
-        assert_eq!(binary_root("go/cmd/webhooks/main.go"), "go/cmd/webhooks/");
+        assert_eq!(binary_root("cmd/eventdelivery/main.go"), "cmd/eventdelivery/");
+        assert_eq!(binary_root("go/cmd/eventdelivery/main.go"), "go/cmd/eventdelivery/");
         assert_eq!(
             binary_root("go/cmd/gateway/sub/main.go"),
             "go/cmd/gateway/"
@@ -1582,7 +1672,7 @@ func doWork(r string)              {}
     }
 
     #[test]
-    fn census_subject_gated_and_field_read_shapes() {
+    fn census_caller_context_gated_and_field_read_shapes() {
         let cpg = build_go(&[(
             "sg.go",
             r#"package main
@@ -1598,9 +1688,9 @@ func handleCallerGated(req string, callerClaims []string) string {
 }
 
 func handleRenamedClaims(req string) string {
-	sc := GetCallerClaims(req)
-	if len(sc) > 0 {
-		if !enforcePolicyForCaller(sc, req) {
+	claims := GetCallerClaims(req)
+	if len(claims) > 0 {
+		if !enforcePolicyForCaller(claims, req) {
 			return "denied"
 		}
 	}
@@ -1615,29 +1705,34 @@ func handleFieldRead(in Req) string {
 }
 
 func enforceRbacAccess(sc []string, r string) bool  { return len(sc) > 0 }
-func enforcePolicyForCaller(sc []string, r string) bool { return len(sc) > 0 }
-func GetCallerClaims(r string) []string          { return nil }
+func enforcePolicyForCaller(claims []string, r string) bool { return len(claims) > 0 }
+func GetCallerClaims(r string) []string             { return nil }
 func doWork(r string)                               {}
 "#,
         )]);
-        let none = HashSet::new();
-        let census = authz_census(
+        let authz = HashSet::from(["enforcePolicyForCaller".to_string()]);
+        let config = AuthzCensusConfig {
+            caller_context_markers: vec!["caller claims".into()],
+            ..AuthzCensusConfig::default()
+        };
+        let census = authz_census_with_config(
             &cpg,
-            &none,
+            &authz,
             &[
                 "handleCallerGated".into(),
                 "handleRenamedClaims".into(),
                 "handleFieldRead".into(),
             ],
             &[],
+            &config,
         );
         assert!(
             verdict_of(&census, "handleCallerGated").starts_with("subject-gated@"),
-            "check parameterized by callerClaims: {census:?}"
+            "check parameterized by caller claims: {census:?}"
         );
         assert!(
             verdict_of(&census, "handleRenamedClaims").starts_with("subject-gated@"),
-            "renamed `sc` variable still detected via the GetCallerClaims pull: {census:?}"
+            "renamed local still detected via the GetCallerClaims pull: {census:?}"
         );
         assert_eq!(
             verdict_of(&census, "handleFieldRead"),
@@ -1647,10 +1742,163 @@ func doWork(r string)                               {}
     }
 
     #[test]
+    fn census_caller_context_markers_are_configurable_and_disableable() {
+        let cpg = build_go(&[(
+            "custom.go",
+            r#"package main
+
+func handleCustomContext(req string, accessTags []string) string {
+	if len(accessTags) > 0 {
+		if !enforceRbacAccess(accessTags, req) {
+			return "denied"
+		}
+	}
+	doWork(req)
+	return "ok"
+}
+
+func enforceRbacAccess(tags []string, req string) bool { return len(tags) > 0 }
+func doWork(req string)                                {}
+"#,
+        )]);
+        let none = HashSet::new();
+        let entries = ["handleCustomContext".to_string()];
+        let custom = AuthzCensusConfig {
+            caller_context_markers: vec!["access tag".into()],
+            ..AuthzCensusConfig::default()
+        };
+        let custom_census = authz_census_with_config(&cpg, &none, &entries, &[], &custom);
+        assert!(
+            verdict_of(&custom_census, "handleCustomContext").starts_with("subject-gated@"),
+            "custom marker should classify the conditional check: {custom_census:?}"
+        );
+
+        let disabled = AuthzCensusConfig {
+            caller_context_markers: vec![],
+            ..AuthzCensusConfig::default()
+        };
+        let disabled_census = authz_census_with_config(&cpg, &none, &entries, &[], &disabled);
+        assert!(
+            verdict_of(&disabled_census, "handleCustomContext").starts_with("inline-partial@"),
+            "empty markers should disable caller-context classification: {disabled_census:?}"
+        );
+    }
+
+    #[test]
+    fn census_marker_does_not_join_separate_expression_tokens() {
+        let cpg = build_go(&[(
+            "separate.go",
+            r#"package main
+
+func handleSeparateArguments(req string, subject string, context string) string {
+	if shouldCheck(req) {
+		enforceRbacAccess(subject, context)
+	}
+	doWork(req)
+	return "ok"
+}
+
+func shouldCheck(req string) bool                    { return true }
+func enforceRbacAccess(subject string, context string) bool { return true }
+func doWork(req string)                              {}
+"#,
+        )]);
+        let none = HashSet::new();
+        let census = authz_census(
+            &cpg,
+            &none,
+            &["handleSeparateArguments".to_string()],
+            &[],
+        );
+        assert!(
+            verdict_of(&census, "handleSeparateArguments").starts_with("inline-partial@"),
+            "separate subject and context arguments must not form one marker: {census:?}"
+        );
+    }
+
+    #[test]
+    fn census_default_marker_accepts_concatenated_spelling() {
+        // Construct the historical spelling from generic words so the
+        // compatibility check does not retain a product-shaped identifier.
+        let marker = ["Subject", "Contexts"].concat();
+        let source = format!(
+            r#"package main
+
+func handleConcatenated(req string, {marker} []string) string {{
+	if len({marker}) > 0 {{
+		if !enforceRbacAccess({marker}, req) {{
+			return "denied"
+		}}
+	}}
+	doWork(req)
+	return "ok"
+}}
+
+func enforceRbacAccess(values []string, req string) bool {{ return len(values) > 0 }}
+func doWork(req string)                                {{}}
+"#
+        );
+        let cpg = build_go(&[("compat.go", source.as_str())]);
+        let none = HashSet::new();
+        let census = authz_census(
+            &cpg,
+            &none,
+            &["handleConcatenated".to_string()],
+            &[],
+        );
+        assert!(
+            verdict_of(&census, "handleConcatenated").starts_with("subject-gated@"),
+            "default phrase should match concatenated, case-varied spellings: {census:?}"
+        );
+    }
+
+    #[test]
+    fn census_framework_server_calls_are_configurable_and_disableable() {
+        let cpg = build_go(&[(
+            "server.go",
+            r#"package main
+
+func main() {
+	server := BuildControlPlaneServer()
+	server.Run()
+}
+
+func BuildControlPlaneServer() Server { return Server{} }
+func handleThing(req string) string   { return req }
+"#,
+        )]);
+        let none = HashSet::new();
+        let entries = ["handleThing".to_string()];
+        let custom = AuthzCensusConfig {
+            framework_server_calls: vec!["BuildControlPlaneServer".into()],
+            ..AuthzCensusConfig::default()
+        };
+        let custom_census = authz_census_with_config(&cpg, &none, &entries, &[], &custom);
+        assert!(
+            custom_census.gates.iter().any(|gate| {
+                gate.scope == "framework"
+                    && gate.name == "BuildControlPlaneServer"
+                    && !gate.enforcing
+            }),
+            "custom framework constructor should be reported: {custom_census:?}"
+        );
+
+        let disabled = AuthzCensusConfig {
+            framework_server_calls: vec![],
+            ..AuthzCensusConfig::default()
+        };
+        let disabled_census = authz_census_with_config(&cpg, &none, &entries, &[], &disabled);
+        assert!(
+            disabled_census.gates.iter().all(|gate| gate.scope != "framework"),
+            "empty framework calls should disable framework evidence: {disabled_census:?}"
+        );
+    }
+
+    #[test]
     fn census_switch_before_check_still_dominates() {
-        // synthetic service update shape: an
-        // enum-mapping switch precedes an unconditional check that gates the
-        // only success return — the switch CFG must not break dominance.
+        // Service-validation example: an enum-mapping switch precedes an
+        // unconditional check that gates the only success return. The switch
+        // CFG must not break dominance.
         let cpg = build_go(&[(
             "sw.go",
             r#"package main

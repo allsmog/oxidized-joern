@@ -67,9 +67,9 @@ service Leaf
     assert_eq!(leaf.methods, vec!["own", "middle", "ancestral"]);
 }
 
-/// CPG mirroring a generated C++ Thrift service shape: one handler subclassing the generated If, a
-/// Mock and a Client subclass that must not stitch, a hinted client call,
-/// and an unhinted libc-style call that must stay untouched.
+/// CPG mirroring a generated C++ Thrift service shape: one handler subclassing
+/// the generated If, a Mock and a Client subclass that must not stitch, a
+/// hinted client call, and an unhinted libc-style call that must stay untouched.
 fn stitch_graph() -> (Cpg, NodeId, NodeId, NodeId) {
     let mut cpg = Cpg::new();
     let f = cpg.file_id("all.cpp");

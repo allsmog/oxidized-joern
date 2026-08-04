@@ -876,8 +876,14 @@ fn scan_cmd(args: &[String]) {
         let mut census_idl: Vec<String> = idl_entries.clone();
         census_idl.sort();
         census_idl.dedup();
-        let census =
-            cpg_analysis::authz_census(&project.cpg, &authz_names, &census_entries, &census_idl);
+        let census_config = pack.authz_census_config();
+        let census = cpg_analysis::authz_census_with_config(
+            &project.cpg,
+            &authz_names,
+            &census_entries,
+            &census_idl,
+            &census_config,
+        );
         let (inline, wrapped, mw, subject_gated, partial, none) = census.counts();
         eprintln!(
             "authz census: {} entries -> {inline} inline / {wrapped} wrapped / {mw} middleware / {subject_gated} subject-gated / {partial} inline-partial / {none} none ({} routes)",

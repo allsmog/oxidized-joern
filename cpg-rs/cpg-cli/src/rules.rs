@@ -24,6 +24,16 @@ pub struct RulePack {
     /// come from IDL mining or explicit flags.
     #[serde(default, rename = "entryGlobs", alias = "entry_globs")]
     pub entry_globs: Vec<String>,
+    /// Caller-context marker phrases used by the authorization census.
+    /// Absent preserves the engine defaults; an explicit empty array disables
+    /// the caller-context verdict tier.
+    #[serde(default, rename = "callerContextMarkers", alias = "caller_context_markers")]
+    pub caller_context_markers: Option<Vec<String>>,
+    /// Service-framework constructor call names reported by the authorization
+    /// census as non-enforcing framework evidence. Absent preserves the engine
+    /// defaults; an explicit empty array disables this evidence.
+    #[serde(default, rename = "frameworkServerCalls", alias = "framework_server_calls")]
+    pub framework_server_calls: Option<Vec<String>>,
 }
 
 /// One named taint rule. Every field except `id` has a sensible default so
@@ -121,6 +131,22 @@ impl RulePack {
                 format!("no IRIS pack named '{name}'; available: {}", names.join(", "))
             }),
             None => RulePack::from_file(arg),
+        }
+    }
+
+    /// Resolve optional pack-level authorization-census conventions. Missing
+    /// fields inherit engine defaults, while explicit empty arrays stay empty.
+    pub fn authz_census_config(&self) -> cpg_analysis::AuthzCensusConfig {
+        let defaults = cpg_analysis::AuthzCensusConfig::default();
+        cpg_analysis::AuthzCensusConfig {
+            caller_context_markers: self
+                .caller_context_markers
+                .clone()
+                .unwrap_or(defaults.caller_context_markers),
+            framework_server_calls: self
+                .framework_server_calls
+                .clone()
+                .unwrap_or(defaults.framework_server_calls),
         }
     }
 }
@@ -375,6 +401,40 @@ mod tests {
             RulePack::from_json(r#"{"rules":[{"id":"Y","sources":["a"],"sinks":["b"]}]}"#)
                 .unwrap();
         assert!(bare.entry_globs.is_empty());
+    }
+
+    #[test]
+    fn parses_authorization_census_conventions() {
+        let absent = RulePack::from_json(r#"{"rules":[]}"#).unwrap();
+        assert!(absent.caller_context_markers.is_none());
+        assert!(absent.framework_server_calls.is_none());
+        let defaults = absent.authz_census_config();
+        assert!(defaults
+            .caller_context_markers
+            .iter()
+            .any(|m| m == "subject context"));
+        assert!(defaults.framework_server_calls.iter().any(|m| m == "NewGRPCServer"));
+
+        let disabled = RulePack::from_json(
+            r#"{"callerContextMarkers":[],"frameworkServerCalls":[],"rules":[]}"#,
+        )
+        .unwrap();
+        assert_eq!(disabled.caller_context_markers, Some(vec![]));
+        assert_eq!(disabled.framework_server_calls, Some(vec![]));
+        let disabled_config = disabled.authz_census_config();
+        assert!(disabled_config.caller_context_markers.is_empty());
+        assert!(disabled_config.framework_server_calls.is_empty());
+
+        let custom = RulePack::from_json(
+            r#"{"caller_context_markers":["access tag"],
+                 "framework_server_calls":["BuildControlPlaneServer"],"rules":[]}"#,
+        )
+        .unwrap();
+        assert_eq!(custom.caller_context_markers, Some(vec!["access tag".into()]));
+        assert_eq!(
+            custom.framework_server_calls,
+            Some(vec!["BuildControlPlaneServer".into()])
+        );
     }
 
     #[test]
