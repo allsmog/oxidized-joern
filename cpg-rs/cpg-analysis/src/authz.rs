@@ -26,7 +26,7 @@
 //! is removed. Two anchor methods are checked per finding — the ENTRY method
 //! (does a check dominate the call site that continues the flow?) and the
 //! SINK's own method (does a check dominate the sink call itself?) — which
-//! covers the two real-world placements: the handler-level gate and the
+//! covers the two common placements: the handler-level gate and the
 //! sink-adjacent gate. Recorded limits: intermediate spliced callees are not
 //! walked, and dominance of the CALL does not prove its RESULT gates
 //! anything (`authorize(u); sink(x)` with an ignored result still counts) —
@@ -236,8 +236,8 @@ pub(crate) fn is_invocation(code: &str, name: &str) -> bool {
 /// match `can`, `accessor` must not match `access`). Accessor-verb leading
 /// tokens disqualify the match: `GetAuthzContext()` / `ListPermissions()`
 /// READ authz data, they do not enforce it — counting them as checks would
-/// wrongly deprioritize unenforced flows (observed in a synthetic data-governance handler where
-/// `req.GetAuthzContext().AccountId`). Spec-listed names bypass this.
+/// wrongly deprioritize unenforced flows (observed when a context accessor
+/// supplied an account identifier). Spec-listed names bypass this.
 pub fn is_authz_name(name: &str) -> bool {
     // Single tokens that are authz vocabulary on their own.
     const SINGLE: &[&str] = &[
@@ -284,12 +284,12 @@ fn name_shape_ok(toks: &[String]) -> bool {
         "deserialize", "to", "from", "compute", "recompute", "union", "merge",
     ];
     // Leading tokens that MUTATE authz data. `upsertRolesForNestedTenant`,
-    // `updatePolicyGroupVersion`, `ArchivePolicyGroupsByRuleIDs`,
+    // `updatePolicyGroupVersion`, `ArchivePolicyGroupsByRuleIDs`, and
     // `modifyPermissions` are operations ON permission/entitlement rows — the
     // very actions a check would gate, never the gate itself. Enforcement
     // names lead with check/require/validate/enforce/has/is/can/verify/...,
-    // so a mutation-verb head disqualifies (validation-corpus-validated: this class alone
-    // was ~20 of 66 false inline-partial census verdicts).
+    // so a mutation-verb head disqualifies. Validation-corpus review found
+    // this to be a recurring source of false inline-partial census verdicts.
     const MUTATION_VERBS: &[&str] = &[
         "upsert", "update", "insert", "delete", "remove", "add", "archive", "send",
         "publish", "emit", "provision", "modify", "save", "store", "write", "sync",
@@ -435,8 +435,9 @@ mod tests {
             // Shaping/constructing authz data is not enforcing it.
             "NormalizeAuthzContextFromReqCtx", "toAuthzProto", "NewAuthorizer",
             "parsePermissions",
-            // Mutating authz data is the gated ACTION, not the gate
-            // (validation-corpus triage: ~20/66 false partials were this class).
+            // Mutating authz data is the gated ACTION, not the gate. A
+            // validation-corpus review found this to be a recurring class of
+            // false partials.
             "upsertRolesForNestedTenant", "updatePolicyGroupVersion",
             "ArchivePolicyGroupsByRuleIDs", "modifyPermissions",
             "UpdateServiceAccountPrivileges", "upsertExternalAppAuthenticationStatus",

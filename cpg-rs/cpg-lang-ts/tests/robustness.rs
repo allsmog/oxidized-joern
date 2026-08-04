@@ -439,7 +439,7 @@ fn member_chain_receiver_is_built() {
 /// Blocks and branches in VALUE position must keep their value link.
 /// Before build_value_shape, an assignment whose rhs was a `{ .. }` block or
 /// an if/match expression dropped ENTIRELY (walk_stmts returns without
-/// descending on failed assignments) — a failure observed at scale in the
+/// descending on failed assignments), a failure observed at scale in the
 /// Scala validation corpus.
 #[test]
 fn scala_value_shapes_keep_assignments() {
