@@ -53,13 +53,13 @@ jobs:
         run: cargo clippy --workspace -- -D warnings
         working-directory: cpg-rs
 
-  # Repository-local, one-day validation artifact for the exact pinned engine.
+  # Repository-local, one-day validation artifacts for the exact pinned engine.
   # The workflow itself lives on current master so the PR is mergeable, while
   # checkout is locked to the dependency revision named in Cargo.toml.
   export-pinned-cpg-snapshot:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -67,6 +67,10 @@ jobs:
         with:
           ref: b24a355995f1f1085a7a523f46f93f02cb70e1f8
           fetch-depth: 1
+      - uses: dtolnay/rust-toolchain@1.96.1
+      - name: Resolve the exact CPG dependency graph
+        run: cargo fetch --locked
+        working-directory: cpg-rs
       - name: Archive exact cpg-rs source
         run: |
           set -euo pipefail
@@ -79,12 +83,38 @@ jobs:
             cpg-rs
           sha256sum "${RUNNER_TEMP}/oxidized-joern-cpg-rs-b24a3559.tar.gz" \
             | tee "${RUNNER_TEMP}/oxidized-joern-cpg-rs-b24a3559.tar.gz.sha256"
+      - name: Archive offline CPG Cargo cache
+        run: |
+          set -euo pipefail
+          cargo_home="${CARGO_HOME:-${HOME}/.cargo}"
+          staging="${RUNNER_TEMP}/oxidized-offline-cargo"
+          mkdir -p "${staging}/cargo-home"
+          for directory in registry git; do
+            if [[ -d "${cargo_home}/${directory}" ]]; then
+              cp -a "${cargo_home}/${directory}" "${staging}/cargo-home/${directory}"
+            fi
+          done
+          archive="${RUNNER_TEMP}/oxidized-joern-cpg-rs-offline-b24a3559.tar.gz"
+          tar --sort=name \
+            --mtime='UTC 1970-01-01' \
+            --owner=0 --group=0 --numeric-owner \
+            -czf "${archive}" \
+            -C "${staging}" .
+          sha256sum "${archive}" | tee "${archive}.sha256"
       - uses: actions/upload-artifact@v4
         with:
           name: oxidized-joern-cpg-rs-b24a3559
           path: |
             ${{ runner.temp }}/oxidized-joern-cpg-rs-b24a3559.tar.gz
             ${{ runner.temp }}/oxidized-joern-cpg-rs-b24a3559.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oxidized-joern-cpg-rs-offline-b24a3559
+          path: |
+            ${{ runner.temp }}/oxidized-joern-cpg-rs-offline-b24a3559.tar.gz
+            ${{ runner.temp }}/oxidized-joern-cpg-rs-offline-b24a3559.tar.gz.sha256
           if-no-files-found: error
           retention-days: 1
 
