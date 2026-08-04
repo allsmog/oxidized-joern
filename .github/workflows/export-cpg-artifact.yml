@@ -1,0 +1,221 @@
+name: Export CPG validation artifacts
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'cpg-rs/**'
+      - '.github/actions/export-cpg-source/**'
+      - '.github/workflows/export-cpg-artifact.yml'
+  workflow_dispatch:
+    inputs:
+      source_revision:
+        description: Full repository commit containing the cpg-rs snapshot
+        required: true
+        default: b24a355995f1f1085a7a523f46f93f02cb70e1f8
+
+permissions:
+  contents: read
+
+env:
+  DEFAULT_SOURCE_REVISION: b24a355995f1f1085a7a523f46f93f02cb70e1f8
+
+jobs:
+  validate-embedded-source-export:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify embedded revision and tree binding
+        env:
+          REPOSITORY_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          manifest='.github/actions/export-cpg-source/embedded-source.env'
+          revision="$(sed -n 's/^engine-base-sha=//p' "${manifest}")"
+          expected_tree="$(sed -n 's/^cpg-rs-tree=//p' "${manifest}")"
+          [[ "${revision}" =~ ^[0-9a-f]{40}$ ]]
+          [[ "${expected_tree}" =~ ^[0-9a-f]{40}$ ]]
+
+          authorization="$(printf 'x-access-token:%s' "${REPOSITORY_TOKEN}" | base64 | tr -d '\n')"
+          export GIT_CONFIG_COUNT=1
+          export GIT_CONFIG_KEY_0='http.extraHeader'
+          export GIT_CONFIG_VALUE_0="AUTHORIZATION: basic ${authorization}"
+          git fetch --quiet --no-tags --depth=1 origin "${revision}"
+          unset authorization GIT_CONFIG_COUNT GIT_CONFIG_KEY_0 GIT_CONFIG_VALUE_0
+
+          test "$(git rev-parse FETCH_HEAD)" = "${revision}"
+          test "$(git rev-parse "${revision}:cpg-rs")" = "${expected_tree}"
+      - id: export
+        uses: ./.github/actions/export-cpg-source
+        with:
+          destination: ${{ runner.temp }}/embedded-cpg-rs
+      - name: Verify exported snapshot contract
+        env:
+          ENGINE_BASE_SHA: ${{ steps.export.outputs.engine-base-sha }}
+          SOURCE_ROOT: ${{ steps.export.outputs.source-root }}
+          SOURCE_REVISION: ${{ steps.export.outputs.source-revision }}
+          TREE_SHA256: ${{ steps.export.outputs.tree-sha256 }}
+        run: |
+          set -euo pipefail
+          expected_revision="$(sed -n 's/^engine-base-sha=//p' .github/actions/export-cpg-source/embedded-source.env)"
+          test "${SOURCE_REVISION}" = "${expected_revision}"
+          test "${ENGINE_BASE_SHA}" = "${expected_revision}"
+          [[ "${TREE_SHA256}" =~ ^[0-9a-f]{64}$ ]]
+          test -f "${SOURCE_ROOT}/Cargo.toml"
+
+  export-validation-artifacts:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       contains(github.event.pull_request.labels.*.name, 'export-cpg-snapshot'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - id: revision
+        name: Resolve exact source revision
+        env:
+          REQUESTED_SOURCE_REVISION: ${{ inputs.source_revision }}
+        run: |
+          set -euo pipefail
+          revision="${REQUESTED_SOURCE_REVISION:-${DEFAULT_SOURCE_REVISION}}"
+          if [[ ! "${revision}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::source revision must be a full lowercase commit SHA"
+            exit 1
+          fi
+          echo "value=${revision}" >> "${GITHUB_OUTPUT}"
+          echo "short=${revision:0:12}" >> "${GITHUB_OUTPUT}"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.revision.outputs.value }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Verify exact source checkout
+        env:
+          SOURCE_REVISION: ${{ steps.revision.outputs.value }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${SOURCE_REVISION}"
+          test -f cpg-rs/Cargo.toml
+      - uses: dtolnay/rust-toolchain@1.96.1
+      - name: Resolve exact CPG dependency graph
+        env:
+          CARGO_HOME: ${{ runner.temp }}/cargo-home
+        run: cargo fetch --locked
+        working-directory: cpg-rs
+      - id: source
+        name: Archive and attest exact cpg-rs source
+        env:
+          SHORT_REVISION: ${{ steps.revision.outputs.short }}
+          SOURCE_REVISION: ${{ steps.revision.outputs.value }}
+        run: |
+          set -euo pipefail
+          archive="${RUNNER_TEMP}/oxidized-joern-cpg-rs-${SHORT_REVISION}.tar.gz"
+          tar --sort=name \
+            --mtime='UTC 1970-01-01' \
+            --owner=0 --group=0 --numeric-owner \
+            -cf - \
+            cpg-rs | gzip -n > "${archive}"
+          (
+            cd "$(dirname "${archive}")"
+            sha256sum "$(basename "${archive}")" > "$(basename "${archive}").sha256"
+          )
+          printf '%s\n' "${SOURCE_REVISION}" > "${RUNNER_TEMP}/source-revision.txt"
+          git rev-parse 'HEAD:cpg-rs' > "${RUNNER_TEMP}/cpg-rs-tree.txt"
+          python3 - cpg-rs > "${RUNNER_TEMP}/cpg-rs-tree.sha256" <<'PY'
+          import hashlib
+          import os
+          import sys
+          from pathlib import Path
+
+          source = Path(sys.argv[1])
+          digest = hashlib.sha256()
+          paths = sorted(
+              source.rglob("*"),
+              key=lambda item: item.relative_to(source).as_posix(),
+          )
+          for path in paths:
+              if not (path.is_file() or path.is_symlink()):
+                  continue
+              relative = path.relative_to(source).as_posix().encode("utf-8")
+              if path.is_symlink():
+                  kind = b"L"
+                  payload = os.readlink(path).encode("utf-8")
+              else:
+                  kind = b"F"
+                  payload = path.read_bytes()
+              digest.update(len(relative).to_bytes(8, "big"))
+              digest.update(relative)
+              digest.update(kind)
+              digest.update(len(payload).to_bytes(8, "big"))
+              digest.update(payload)
+          print(digest.hexdigest())
+          PY
+          echo "archive=${archive}" >> "${GITHUB_OUTPUT}"
+      - id: offline
+        name: Archive locked offline CPG dependencies
+        env:
+          CARGO_HOME: ${{ runner.temp }}/cargo-home
+          SHORT_REVISION: ${{ steps.revision.outputs.short }}
+        run: |
+          set -euo pipefail
+          staging="${RUNNER_TEMP}/oxidized-offline-cargo"
+          mkdir -p "${staging}/.cargo"
+          (
+            cd "${staging}"
+            cargo vendor --locked --versioned-dirs vendor \
+              --manifest-path "${GITHUB_WORKSPACE}/cpg-rs/Cargo.toml" \
+              > .cargo/config.toml
+          )
+          if grep -Fq "${RUNNER_TEMP}" "${staging}/.cargo/config.toml"; then
+            echo "::error::vendored Cargo configuration contains a runner-local path"
+            exit 1
+          fi
+          (
+            cd "${staging}"
+            CARGO_HOME="${staging}/verification-cargo-home" \
+              CARGO_NET_OFFLINE=true \
+              cargo metadata --locked --format-version=1 \
+                --manifest-path "${GITHUB_WORKSPACE}/cpg-rs/Cargo.toml" \
+                --config .cargo/config.toml \
+                > /dev/null
+          )
+          if [[ -d "${staging}/verification-cargo-home" ]]; then
+            find "${staging}/verification-cargo-home" -depth -delete
+          fi
+
+          archive="${RUNNER_TEMP}/oxidized-joern-cpg-rs-offline-${SHORT_REVISION}.tar.gz"
+          tar --sort=name \
+            --mtime='UTC 1970-01-01' \
+            --owner=0 --group=0 --numeric-owner \
+            -cf - \
+            -C "${staging}" . | gzip -n > "${archive}"
+          (
+            cd "$(dirname "${archive}")"
+            sha256sum "$(basename "${archive}")" > "$(basename "${archive}").sha256"
+          )
+          echo "archive=${archive}" >> "${GITHUB_OUTPUT}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oxidized-joern-cpg-rs-${{ steps.revision.outputs.short }}
+          path: |
+            ${{ steps.source.outputs.archive }}
+            ${{ steps.source.outputs.archive }}.sha256
+            ${{ runner.temp }}/source-revision.txt
+            ${{ runner.temp }}/cpg-rs-tree.txt
+            ${{ runner.temp }}/cpg-rs-tree.sha256
+          if-no-files-found: error
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oxidized-joern-cpg-rs-offline-${{ steps.revision.outputs.short }}
+          path: |
+            ${{ steps.offline.outputs.archive }}
+            ${{ steps.offline.outputs.archive }}.sha256
+          if-no-files-found: error
+          retention-days: 1
