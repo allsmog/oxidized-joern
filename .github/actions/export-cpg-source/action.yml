@@ -1,0 +1,225 @@
+name: Export CPG source snapshot
+description: >-
+  Copy and attest an exact cpg-rs source snapshot. The source embedded in a
+  SHA-pinned action needs no repository credential; another exact revision can
+  be fetched with an optional read-only token while the repository is private.
+
+inputs:
+  destination:
+    description: Empty destination directory for the copied cpg-rs workspace
+    required: true
+  source-revision:
+    description: Full repository commit to export (defaults to the embedded source)
+    required: false
+  expected-engine-base-sha:
+    description: Compatibility alias for source-revision
+    required: false
+  repository-token:
+    description: Optional read-only token for fetching a non-embedded private revision
+    required: false
+
+outputs:
+  source-root:
+    description: Absolute path to the copied cpg-rs workspace
+    value: ${{ steps.export.outputs.source-root }}
+  source-revision:
+    description: Full repository commit represented by the copied source
+    value: ${{ steps.export.outputs.source-revision }}
+  engine-base-sha:
+    description: Compatibility alias for source-revision
+    value: ${{ steps.export.outputs.engine-base-sha }}
+  tree-sha256:
+    description: Deterministic SHA-256 over copied relative paths and bytes
+    value: ${{ steps.export.outputs.tree-sha256 }}
+
+runs:
+  using: composite
+  steps:
+    - id: export
+      name: Copy and attest the requested engine snapshot
+      shell: bash
+      env:
+        ACTION_REF: ${{ github.action_ref }}
+        ACTION_REPOSITORY: ${{ github.action_repository }}
+        CALLER_REPOSITORY: ${{ github.repository }}
+        DESTINATION: ${{ inputs.destination }}
+        EXPECTED_ENGINE_BASE_SHA: ${{ inputs['expected-engine-base-sha'] }}
+        REPOSITORY_TOKEN: ${{ inputs['repository-token'] }}
+        SERVER_URL: ${{ github.server_url }}
+        SOURCE_REVISION: ${{ inputs['source-revision'] }}
+      run: |
+        set -euo pipefail
+
+        action_root="$(cd "${GITHUB_ACTION_PATH}/../../.." && pwd -P)"
+        readonly action_root
+        readonly manifest="${GITHUB_ACTION_PATH}/embedded-source.env"
+        if [[ ! -f "${manifest}" ]]; then
+          echo "::error::embedded source manifest is missing"
+          exit 1
+        fi
+
+        embedded_revision=""
+        embedded_tree=""
+        embedded_digest=""
+        while IFS='=' read -r key value; do
+          case "${key}" in
+            engine-base-sha) embedded_revision="${value}" ;;
+            cpg-rs-tree) embedded_tree="${value}" ;;
+            cpg-rs-sha256) embedded_digest="${value}" ;;
+            ''|'#'*) ;;
+            *)
+              echo "::error::unknown embedded source manifest key: ${key}"
+              exit 1
+              ;;
+          esac
+        done < "${manifest}"
+
+        readonly full_sha_pattern='^[0-9a-f]{40}$'
+        readonly sha256_pattern='^[0-9a-f]{64}$'
+        if [[ ! "${embedded_revision}" =~ ${full_sha_pattern} ]] ||
+           [[ ! "${embedded_tree}" =~ ${full_sha_pattern} ]] ||
+           [[ ! "${embedded_digest}" =~ ${sha256_pattern} ]]; then
+          echo "::error::embedded source manifest contains an invalid object ID or digest"
+          exit 1
+        fi
+        if [[ -n "${SOURCE_REVISION}" && -n "${EXPECTED_ENGINE_BASE_SHA}" &&
+              "${SOURCE_REVISION}" != "${EXPECTED_ENGINE_BASE_SHA}" ]]; then
+          echo "::error::source-revision and expected-engine-base-sha disagree"
+          exit 1
+        fi
+
+        readonly requested_revision="${SOURCE_REVISION:-${EXPECTED_ENGINE_BASE_SHA:-${embedded_revision}}}"
+        if [[ ! "${requested_revision}" =~ ${full_sha_pattern} ]]; then
+          echo "::error::source revision must be a full lowercase commit SHA"
+          exit 1
+        fi
+
+        source_root="${action_root}/cpg-rs"
+        fetch_root=""
+        cleanup() {
+          if [[ -n "${fetch_root}" && "${fetch_root}" == "${RUNNER_TEMP%/}/cpg-source-fetch."* ]]; then
+            rm -rf -- "${fetch_root}"
+          fi
+        }
+        trap cleanup EXIT
+
+        if [[ "${requested_revision}" == "${embedded_revision}" ]]; then
+          if repository_root="$(git -C "${action_root}" rev-parse --show-toplevel 2>/dev/null)"; then
+            repository_root="$(cd "${repository_root}" && pwd -P)"
+            if [[ "${repository_root}" == "${action_root}" ]]; then
+              if ! git -C "${action_root}" cat-file -e "${embedded_revision}^{commit}" 2>/dev/null; then
+                echo "::error::embedded engine revision is unavailable in the local Git repository"
+                exit 1
+              fi
+              current_tree="$(git -C "${action_root}" rev-parse 'HEAD:cpg-rs')"
+              recorded_tree="$(git -C "${action_root}" rev-parse "${embedded_revision}:cpg-rs")"
+              readonly current_tree recorded_tree
+              if [[ "${current_tree}" != "${embedded_tree}" || "${recorded_tree}" != "${embedded_tree}" ]]; then
+                echo "::error::embedded cpg-rs tree does not match its manifest"
+                exit 1
+              fi
+              fetch_root="$(mktemp -d "${RUNNER_TEMP%/}/cpg-source-fetch.XXXXXX")"
+              git -C "${action_root}" archive --format=tar HEAD cpg-rs \
+                | tar -xf - -C "${fetch_root}"
+              source_root="${fetch_root}/cpg-rs"
+            fi
+          fi
+        else
+          readonly repository="${ACTION_REPOSITORY:-${CALLER_REPOSITORY}}"
+          if [[ ! "${repository}" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+            echo "::error::unable to resolve the action repository"
+            exit 1
+          fi
+
+          fetch_root="$(mktemp -d "${RUNNER_TEMP%/}/cpg-source-fetch.XXXXXX")"
+          git -C "${fetch_root}" init --quiet repository
+          git -C "${fetch_root}/repository" remote add origin "${SERVER_URL%/}/${repository}.git"
+          if [[ -n "${REPOSITORY_TOKEN}" ]]; then
+            authorization="$(printf 'x-access-token:%s' "${REPOSITORY_TOKEN}" | base64 | tr -d '\n')"
+            export GIT_CONFIG_COUNT=1
+            export GIT_CONFIG_KEY_0='http.extraHeader'
+            export GIT_CONFIG_VALUE_0="AUTHORIZATION: basic ${authorization}"
+            git -C "${fetch_root}/repository" \
+              fetch --quiet --no-tags --depth=1 origin "${requested_revision}"
+            unset authorization GIT_CONFIG_COUNT GIT_CONFIG_KEY_0 GIT_CONFIG_VALUE_0
+          else
+            git -C "${fetch_root}/repository" \
+              fetch --quiet --no-tags --depth=1 origin "${requested_revision}"
+          fi
+          fetched_revision="$(git -C "${fetch_root}/repository" rev-parse FETCH_HEAD)"
+          readonly fetched_revision
+          if [[ "${fetched_revision}" != "${requested_revision}" ]]; then
+            echo "::error::fetched revision does not match the requested source"
+            exit 1
+          fi
+          mkdir -p "${fetch_root}/snapshot"
+          git -C "${fetch_root}/repository" archive --format=tar FETCH_HEAD cpg-rs \
+            | tar -xf - -C "${fetch_root}/snapshot"
+          source_root="${fetch_root}/snapshot/cpg-rs"
+        fi
+
+        if [[ ! -f "${source_root}/Cargo.toml" ]]; then
+          echo "::error::requested snapshot does not contain cpg-rs/Cargo.toml"
+          exit 1
+        fi
+
+        readarray -t export_result < <(python3 - "${source_root}" "${DESTINATION}" <<'PY'
+        import hashlib
+        import os
+        import shutil
+        import sys
+        from pathlib import Path
+
+        source = Path(sys.argv[1]).resolve(strict=True)
+        destination = Path(sys.argv[2]).resolve(strict=False)
+        if destination == source or source in destination.parents:
+            raise SystemExit(f"destination must not be inside the source tree: {destination}")
+        if destination.exists():
+            if not destination.is_dir() or any(destination.iterdir()):
+                raise SystemExit(f"destination must be an empty directory: {destination}")
+            destination.rmdir()
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(source, destination, symlinks=True)
+
+        digest = hashlib.sha256()
+        paths = sorted(
+            destination.rglob("*"),
+            key=lambda item: item.relative_to(destination).as_posix(),
+        )
+        for path in paths:
+            if not (path.is_file() or path.is_symlink()):
+                continue
+            relative = path.relative_to(destination).as_posix().encode("utf-8")
+            if path.is_symlink():
+                kind = b"L"
+                payload = os.readlink(path).encode("utf-8")
+            else:
+                kind = b"F"
+                payload = path.read_bytes()
+            digest.update(len(relative).to_bytes(8, "big"))
+            digest.update(relative)
+            digest.update(kind)
+            digest.update(len(payload).to_bytes(8, "big"))
+            digest.update(payload)
+
+        print(destination)
+        print(digest.hexdigest())
+        PY
+        )
+
+        if [[ "${#export_result[@]}" -ne 2 ]]; then
+          echo "::error::source export did not return a path and digest"
+          exit 1
+        fi
+        if [[ "${requested_revision}" == "${embedded_revision}" &&
+              "${export_result[1]}" != "${embedded_digest}" ]]; then
+          echo "::error::embedded source bytes do not match the manifest digest"
+          exit 1
+        fi
+
+        {
+          echo "source-root=${export_result[0]}"
+          echo "source-revision=${requested_revision}"
+          echo "engine-base-sha=${requested_revision}"
+          echo "tree-sha256=${export_result[1]}"
+        } >> "${GITHUB_OUTPUT}"
