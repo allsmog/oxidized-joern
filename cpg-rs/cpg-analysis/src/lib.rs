@@ -25,7 +25,9 @@ pub use authz::{annotate_authz, is_authz_name};
 pub use callgraph::CallGraphPass;
 pub use cfg::{cfg_edges_for_method, CfgPass};
 pub use entries::{mine_registration_entries, mine_routes, RouteEntry};
-pub use middleware::{authz_census, AuthzCensus, MiddlewareGate};
+pub use middleware::{
+    authz_census, authz_census_with_config, AuthzCensus, AuthzCensusConfig, MiddlewareGate,
+};
 pub use pass::{Pass, PassContext, PassManager};
 pub use provenance::{Fact, FactId, FactKind, ProvenanceGraph};
 pub use query::{LogicalPlan, NodeSelector, Predicate, QueryCompiler, QueryError, QueryExecutor};

@@ -136,7 +136,7 @@ pub struct TaintSpec {
     /// Source names added by the persistence stitch's phase 2 (getter
     /// variants of stored keys). Reads matching these are DATA reads only —
     /// ORM schema-metadata accessors spelling the same field name
-    /// (`XColumns.ChildAccountUUID`, `TableNames.X`) are excluded at match
+    /// (`ResourceColumns.ResourceUUID`, `TableNames.X`) are excluded at match
     /// time (see [`is_schema_metadata_read`]). Empty outside phase 2.
     pub persisted_sources: HashSet<String>,
 }
@@ -147,7 +147,7 @@ pub struct TaintSpec {
 /// is the column/table NAME CONSTANT — stitching them taints every query
 /// built from generated schema constants (observed: fully-parameterized
 /// `queries.Raw(insertQuery, args...)` flagged because the INSERT's column
-/// list was "tainted" by `ChildAccountUserRoleColumns.ChildAccountUUID`).
+/// list was "tainted" by `ResourceRoleColumns.ResourceUUID`).
 fn is_schema_metadata_read(code: &str) -> bool {
     code.contains("Columns.") || code.contains("TableNames.")
 }
@@ -801,9 +801,9 @@ fn persist_variants(k: &str) -> Vec<String> {
     // Casing bases first, then get/Get accessor forms over EVERY base — the
     // groups must be symmetric (variants(lcfirst(K)) ⊇ the heavy names in
     // variants(K)), or the read-ubiquity filter counts different sums for
-    // keys that stitch the same reads (observed: `AssetStore` dropped at 180
-    // reads while `assetStore` — same reads minus its GetAssetStore getter
-    // count — passed and stitched a DB-handle key).
+    // keys that stitch the same reads (observed: `AssetStore` crossed the
+    // ubiquity threshold while `assetStore` — the same reads minus its
+    // GetAssetStore getter count — passed and stitched a storage-handle key).
     let mut bases = vec![k.to_string()];
     let mut cs = k.chars();
     if let Some(c0) = cs.next() {
@@ -3580,7 +3580,7 @@ mod tests {
     #[test]
     fn assign_sink_matches_go_if_init_tenant_overwrite() {
         // Event-consumer tenant-isolation regression: a generated getter
-        // feeds the account field through a Go if-init binding.
+        // feeds an account field through a Go if-init binding.
         // Matching is case-insensitive substring (`=account` ~ `Account`).
         let cpg = build_go(&[(
             "d.go",
@@ -4277,7 +4277,7 @@ object JobConfigOps {
 
     #[test]
     fn persistence_stitch_go_struct_literal_store_to_field_read() {
-        // The event-delivery service shape: the API handler stores attacker input
+        // Event-delivery service shape: the API handler stores attacker input
         // through a struct literal (`Endpoint{Url: u}` — Go's named-arg
         // spelling); the delivery path reads the field back in a different
         // method with no dataflow between them.
@@ -4310,7 +4310,7 @@ object JobConfigOps {
 
     #[test]
     fn persistence_harvest_through_return_and_splice() {
-        // The full event-delivery service shape: taint crosses a helper's RETURN,
+        // Full event-delivery service shape: taint crosses a helper's RETURN,
         // then a spliced callee stores it through a struct literal whose
         // value is a FIELD READ of the tainted param. Harvest must fire in
         // the param_to_sink chain, not just in the entry method itself.
@@ -4325,9 +4325,8 @@ object JobConfigOps {
     #[test]
     fn persistence_stitch_initialism_cross_casing() {
         // Go initialism lint splits the SAME field across casings: the DB
-        // model stores `URL` (event-delivery service a persistence model), the
-        // proto-gen read side spells it `Url` (gp.Url). The variant set
-        // must bridge the two spellings.
+        // persistence model stores `URL`, while the generated read side
+        // spells it `Url`. The variant set must bridge the two spellings.
         let cpg = build_go(&[(
             "i.go",
             "package main\n\nfunc create() {\n\tu := getenv(\"X\")\n\tsave(Hook{URL: u})\n}\n\nfunc deliver(g Prov) {\n\tfetch(g.Url)\n}\n",
@@ -4365,10 +4364,10 @@ object JobConfigOps {
     fn persistence_ubiquity_counts_methods_not_store_sites() {
         // `Key` is stored from TWO sites in ONE method — a copy-chain shape,
         // and exactly what better recall surfaces more of. Under a site
-        // count the key would cross a threshold of 2 and vanish (a validation-corpus
-        // regression: recall gains ate confirmed keys); under the method
-        // count it stays. Read and sink are in different methods so the
-        // rescue cannot mask a metric bug.
+        // count the key would cross a threshold of 2 and vanish (a validation
+        // corpus regression where recall gains hid confirmed keys); under the
+        // method count it stays. Read and sink are in different methods so
+        // the rescue cannot mask a metric bug.
         let cpg = build(&[(
             "mc.c",
             "void writer() {\n    char* t = getenv(\"X\");\n    setKey(t);\n    char* u = getenv(\"Y\");\n    setKey(u);\n}\nvoid reader() {\n    char* v = getKey();\n    helper(v);\n}\nvoid helper(char* x) {\n    system(x);\n}\n",

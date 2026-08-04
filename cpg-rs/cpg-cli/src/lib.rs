@@ -475,7 +475,12 @@ pub fn handle(p: &mut Project, req: &Value) -> Value {
             };
             let parsed: Result<Vec<rules::Rule>, _> = serde_json::from_value(rules_val.clone());
             let pack = match parsed {
-                Ok(r) => rules::RulePack { rules: r, entry_globs: vec![] },
+                Ok(r) => rules::RulePack {
+                    rules: r,
+                    entry_globs: vec![],
+                    caller_context_markers: None,
+                    framework_server_calls: None,
+                },
                 Err(e) => return json!({"error": format!("bad rules: {e}")}),
             };
             let per_rule = scan::run_pack(p, &pack);

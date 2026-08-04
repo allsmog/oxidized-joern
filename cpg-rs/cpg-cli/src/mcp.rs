@@ -242,7 +242,12 @@ impl Server {
             Some(Value::Array(rules)) => {
                 let parsed: Result<Vec<crate::rules::Rule>, _> =
                     serde_json::from_value(Value::Array(rules.clone()));
-                RulePack { rules: parsed.map_err(|e| format!("bad rules: {e}"))?, entry_globs: vec![] }
+                RulePack {
+                    rules: parsed.map_err(|e| format!("bad rules: {e}"))?,
+                    entry_globs: vec![],
+                    caller_context_markers: None,
+                    framework_server_calls: None,
+                }
             }
             Some(other) => {
                 return Err(format!(

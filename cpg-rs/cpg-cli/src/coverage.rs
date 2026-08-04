@@ -208,7 +208,12 @@ mod tests {
         let m = b.method("Handle", "Svc::Handle", "", Some(1));
         let c = b.call("Query", "Query(x)", Some(2));
         b.contains(m, c);
-        let pack = RulePack { rules: vec![rule(&["getenv"], &["Query@1", "Exec"])], entry_globs: vec![] };
+        let pack = RulePack {
+            rules: vec![rule(&["getenv"], &["Query@1", "Exec"])],
+            entry_globs: vec![],
+            caller_context_markers: None,
+            framework_server_calls: None,
+        };
         let report = coverage_report(
             &cpg,
             &["Handle".to_string(), "NoSuchEntry".to_string()],
