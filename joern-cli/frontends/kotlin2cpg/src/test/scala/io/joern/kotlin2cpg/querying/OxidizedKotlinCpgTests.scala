@@ -2926,58 +2926,58 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
 
         val localTypes = arrayAggregations.ast.isLocal.map(local => local.name -> local.typeFullName).toMap
         Map(
-          "iSum"                -> "int",
-          "iAverage"            -> "double",
-          "iMin"                -> "int",
-          "iMax"                -> "int",
-          "sMin"                -> "java.lang.String",
-          "sMax"                -> "java.lang.String",
-          "sMaxBy"              -> "java.lang.String",
-          "iMaxBy"              -> "int",
-          "sMinBy"              -> "java.lang.String",
-          "iMinBy"              -> "int",
-          "sMaxOf"              -> "int",
-          "iMaxOf"              -> "int",
-          "sMaxOfOrNull"        -> "int",
-          "iMaxOfOrNull"        -> "int",
-          "sSumOf"              -> "int",
-          "iSumOf"              -> "int",
-          "sReduce"             -> "java.lang.String",
-          "iReduce"             -> "int",
-          "sReduceOrNull"       -> "java.lang.String",
-          "iReduceOrNull"       -> "int",
-          "sReduceIndexed"      -> "java.lang.String",
-          "iReduceIndexed"      -> "int",
-          "sReduceIndexedOrNull" -> "java.lang.String",
-          "iReduceIndexedOrNull" -> "int",
-          "sReduceRight"        -> "java.lang.String",
-          "iReduceRight"        -> "int",
-          "sReduceRightOrNull"  -> "java.lang.String",
-          "iReduceRightOrNull"  -> "int",
-          "sReduceRightIndexed" -> "java.lang.String",
-          "iReduceRightIndexed" -> "int",
+          "iSum"                      -> "int",
+          "iAverage"                  -> "double",
+          "iMin"                      -> "int",
+          "iMax"                      -> "int",
+          "sMin"                      -> "java.lang.String",
+          "sMax"                      -> "java.lang.String",
+          "sMaxBy"                    -> "java.lang.String",
+          "iMaxBy"                    -> "int",
+          "sMinBy"                    -> "java.lang.String",
+          "iMinBy"                    -> "int",
+          "sMaxOf"                    -> "int",
+          "iMaxOf"                    -> "int",
+          "sMaxOfOrNull"              -> "int",
+          "iMaxOfOrNull"              -> "int",
+          "sSumOf"                    -> "int",
+          "iSumOf"                    -> "int",
+          "sReduce"                   -> "java.lang.String",
+          "iReduce"                   -> "int",
+          "sReduceOrNull"             -> "java.lang.String",
+          "iReduceOrNull"             -> "int",
+          "sReduceIndexed"            -> "java.lang.String",
+          "iReduceIndexed"            -> "int",
+          "sReduceIndexedOrNull"      -> "java.lang.String",
+          "iReduceIndexedOrNull"      -> "int",
+          "sReduceRight"              -> "java.lang.String",
+          "iReduceRight"              -> "int",
+          "sReduceRightOrNull"        -> "java.lang.String",
+          "iReduceRightOrNull"        -> "int",
+          "sReduceRightIndexed"       -> "java.lang.String",
+          "iReduceRightIndexed"       -> "int",
           "sReduceRightIndexedOrNull" -> "java.lang.String",
           "iReduceRightIndexedOrNull" -> "int",
-          "sFold"               -> "java.lang.String",
-          "iFold"               -> "int",
-          "sFoldIndexed"        -> "java.lang.String",
-          "iFoldIndexed"        -> "int",
-          "sSorted"             -> "java.util.List",
-          "iSorted"             -> "java.util.List",
-          "sSortedDescending"   -> "java.util.List",
-          "iSortedDescending"   -> "java.util.List",
-          "sSortedBy"           -> "java.util.List",
-          "iSortedBy"           -> "java.util.List",
-          "sSortedByDescending" -> "java.util.List",
-          "iSortedByDescending" -> "java.util.List",
-          "sDistinct"           -> "java.util.List",
-          "iDistinct"           -> "java.util.List",
-          "sDistinctBy"         -> "java.util.List",
-          "iDistinctBy"         -> "java.util.List",
-          "sReversed"           -> "java.util.List",
-          "iReversed"           -> "java.util.List",
-          "sJoin"               -> "java.lang.String",
-          "iJoin"               -> "java.lang.String"
+          "sFold"                     -> "java.lang.String",
+          "iFold"                     -> "int",
+          "sFoldIndexed"              -> "java.lang.String",
+          "iFoldIndexed"              -> "int",
+          "sSorted"                   -> "java.util.List",
+          "iSorted"                   -> "java.util.List",
+          "sSortedDescending"         -> "java.util.List",
+          "iSortedDescending"         -> "java.util.List",
+          "sSortedBy"                 -> "java.util.List",
+          "iSortedBy"                 -> "java.util.List",
+          "sSortedByDescending"       -> "java.util.List",
+          "iSortedByDescending"       -> "java.util.List",
+          "sDistinct"                 -> "java.util.List",
+          "iDistinct"                 -> "java.util.List",
+          "sDistinctBy"               -> "java.util.List",
+          "iDistinctBy"               -> "java.util.List",
+          "sReversed"                 -> "java.util.List",
+          "iReversed"                 -> "java.util.List",
+          "sJoin"                     -> "java.lang.String",
+          "iJoin"                     -> "java.lang.String"
         ).foreach { case (name, typeFullName) =>
           localTypes should contain(name -> typeFullName)
         }
@@ -3047,12 +3047,12 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
           |""".stripMargin) { cpg =>
         val List(arrayDestinations) = cpg.method.nameExact("arrayDestinations").l: @unchecked
 
-        val objectArray                  = "java.lang.Object[]"
-        val intArray                     = "int[]"
-        val collectionFunction1Signature = (receiver: String) =>
-          s"java.util.Collection($receiver,java.util.Collection,kotlin.jvm.functions.Function1)"
-        val collectionFunction2Signature = (receiver: String) =>
-          s"java.util.Collection($receiver,java.util.Collection,kotlin.jvm.functions.Function2)"
+        val objectArray = "java.lang.Object[]"
+        val intArray    = "int[]"
+        val collectionFunction1Signature =
+          (receiver: String) => s"java.util.Collection($receiver,java.util.Collection,kotlin.jvm.functions.Function1)"
+        val collectionFunction2Signature =
+          (receiver: String) => s"java.util.Collection($receiver,java.util.Collection,kotlin.jvm.functions.Function2)"
         val mapFunction1Signature =
           (receiver: String) => s"java.util.Map($receiver,java.util.Map,kotlin.jvm.functions.Function1)"
         val mapFunction2Signature = (receiver: String) =>
@@ -3080,9 +3080,24 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
             s"kotlin.Pair($objectArray,kotlin.jvm.functions.Function1)",
             "kotlin.Pair"
           ),
-          ("ints.partition { it > 0 }", "partition", s"kotlin.Pair($intArray,kotlin.jvm.functions.Function1)", "kotlin.Pair"),
-          ("strings.groupBy { it.length }", "groupBy", s"java.util.Map($objectArray,kotlin.jvm.functions.Function1)", "java.util.Map"),
-          ("ints.groupBy { it }", "groupBy", s"java.util.Map($intArray,kotlin.jvm.functions.Function1)", "java.util.Map"),
+          (
+            "ints.partition { it > 0 }",
+            "partition",
+            s"kotlin.Pair($intArray,kotlin.jvm.functions.Function1)",
+            "kotlin.Pair"
+          ),
+          (
+            "strings.groupBy { it.length }",
+            "groupBy",
+            s"java.util.Map($objectArray,kotlin.jvm.functions.Function1)",
+            "java.util.Map"
+          ),
+          (
+            "ints.groupBy { it }",
+            "groupBy",
+            s"java.util.Map($intArray,kotlin.jvm.functions.Function1)",
+            "java.util.Map"
+          ),
           (
             "strings.groupBy({ it.length }, { it })",
             "groupBy",
@@ -3107,10 +3122,30 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
             s"kotlin.collections.Grouping($intArray,kotlin.jvm.functions.Function1)",
             "kotlin.collections.Grouping"
           ),
-          ("strings.associate { it to it.length }", "associate", s"java.util.Map($objectArray,kotlin.jvm.functions.Function1)", "java.util.Map"),
-          ("ints.associate { it to it.toString() }", "associate", s"java.util.Map($intArray,kotlin.jvm.functions.Function1)", "java.util.Map"),
-          ("strings.associateBy { it.length }", "associateBy", s"java.util.Map($objectArray,kotlin.jvm.functions.Function1)", "java.util.Map"),
-          ("ints.associateBy { it }", "associateBy", s"java.util.Map($intArray,kotlin.jvm.functions.Function1)", "java.util.Map"),
+          (
+            "strings.associate { it to it.length }",
+            "associate",
+            s"java.util.Map($objectArray,kotlin.jvm.functions.Function1)",
+            "java.util.Map"
+          ),
+          (
+            "ints.associate { it to it.toString() }",
+            "associate",
+            s"java.util.Map($intArray,kotlin.jvm.functions.Function1)",
+            "java.util.Map"
+          ),
+          (
+            "strings.associateBy { it.length }",
+            "associateBy",
+            s"java.util.Map($objectArray,kotlin.jvm.functions.Function1)",
+            "java.util.Map"
+          ),
+          (
+            "ints.associateBy { it }",
+            "associateBy",
+            s"java.util.Map($intArray,kotlin.jvm.functions.Function1)",
+            "java.util.Map"
+          ),
           (
             "strings.associateBy({ it.length }, { it })",
             "associateBy",
@@ -3123,15 +3158,50 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
             s"java.util.Map($intArray,kotlin.jvm.functions.Function1,kotlin.jvm.functions.Function1)",
             "java.util.Map"
           ),
-          ("strings.associateWith { it.length }", "associateWith", s"java.util.Map($objectArray,kotlin.jvm.functions.Function1)", "java.util.Map"),
-          ("ints.associateWith { it.toString() }", "associateWith", s"java.util.Map($intArray,kotlin.jvm.functions.Function1)", "java.util.Map"),
+          (
+            "strings.associateWith { it.length }",
+            "associateWith",
+            s"java.util.Map($objectArray,kotlin.jvm.functions.Function1)",
+            "java.util.Map"
+          ),
+          (
+            "ints.associateWith { it.toString() }",
+            "associateWith",
+            s"java.util.Map($intArray,kotlin.jvm.functions.Function1)",
+            "java.util.Map"
+          ),
           ("nested.flatten()", "flatten", "java.util.List(java.lang.Object[][])", "java.util.List"),
           ("pairs.toMap()", "toMap", "java.util.Map(kotlin.Pair[])", "java.util.Map"),
-          ("pairs.toMap(mutableMapOf<String, Int>())", "toMap", "java.util.Map(kotlin.Pair[],java.util.Map)", "java.util.Map"),
-          ("strings.filterTo(mutableListOf<String>()) { it.isNotEmpty() }", "filterTo", collectionFunction1Signature(objectArray), "java.util.List"),
-          ("ints.filterTo(mutableListOf<Int>()) { it > 0 }", "filterTo", collectionFunction1Signature(intArray), "java.util.List"),
-          ("strings.filterNotTo(mutableListOf<String>()) { it.isEmpty() }", "filterNotTo", collectionFunction1Signature(objectArray), "java.util.List"),
-          ("ints.filterNotTo(mutableListOf<Int>()) { it == 0 }", "filterNotTo", collectionFunction1Signature(intArray), "java.util.List"),
+          (
+            "pairs.toMap(mutableMapOf<String, Int>())",
+            "toMap",
+            "java.util.Map(kotlin.Pair[],java.util.Map)",
+            "java.util.Map"
+          ),
+          (
+            "strings.filterTo(mutableListOf<String>()) { it.isNotEmpty() }",
+            "filterTo",
+            collectionFunction1Signature(objectArray),
+            "java.util.List"
+          ),
+          (
+            "ints.filterTo(mutableListOf<Int>()) { it > 0 }",
+            "filterTo",
+            collectionFunction1Signature(intArray),
+            "java.util.List"
+          ),
+          (
+            "strings.filterNotTo(mutableListOf<String>()) { it.isEmpty() }",
+            "filterNotTo",
+            collectionFunction1Signature(objectArray),
+            "java.util.List"
+          ),
+          (
+            "ints.filterNotTo(mutableListOf<Int>()) { it == 0 }",
+            "filterNotTo",
+            collectionFunction1Signature(intArray),
+            "java.util.List"
+          ),
           (
             "strings.filterIndexedTo(mutableListOf<String>()) { index, item -> index > 0 && item.isNotEmpty() }",
             "filterIndexedTo",
@@ -3144,10 +3214,30 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
             collectionFunction2Signature(intArray),
             "java.util.List"
           ),
-          ("strings.filterNotNullTo(mutableListOf<String>())", "filterNotNullTo", s"java.util.Collection($objectArray,java.util.Collection)", "java.util.List"),
-          ("strings.mapTo(mutableListOf<Int>()) { it.length }", "mapTo", collectionFunction1Signature(objectArray), "java.util.List"),
-          ("ints.mapTo(mutableListOf<String>()) { it.toString() }", "mapTo", collectionFunction1Signature(intArray), "java.util.List"),
-          ("strings.mapNotNullTo(mutableListOf<Int>()) { it.length }", "mapNotNullTo", collectionFunction1Signature(objectArray), "java.util.List"),
+          (
+            "strings.filterNotNullTo(mutableListOf<String>())",
+            "filterNotNullTo",
+            s"java.util.Collection($objectArray,java.util.Collection)",
+            "java.util.List"
+          ),
+          (
+            "strings.mapTo(mutableListOf<Int>()) { it.length }",
+            "mapTo",
+            collectionFunction1Signature(objectArray),
+            "java.util.List"
+          ),
+          (
+            "ints.mapTo(mutableListOf<String>()) { it.toString() }",
+            "mapTo",
+            collectionFunction1Signature(intArray),
+            "java.util.List"
+          ),
+          (
+            "strings.mapNotNullTo(mutableListOf<Int>()) { it.length }",
+            "mapNotNullTo",
+            collectionFunction1Signature(objectArray),
+            "java.util.List"
+          ),
           (
             "ints.mapNotNullTo(mutableListOf<String>()) { it.toString() }",
             "mapNotNullTo",
@@ -3287,61 +3377,61 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
 
         val localTypes = arrayDestinations.ast.isLocal.map(local => local.name -> local.typeFullName).toMap
         Map(
-          "sZipList"               -> "java.util.List",
-          "iZipList"               -> "java.util.List",
-          "sZipTransform"          -> "java.util.List",
-          "iZipTransform"          -> "java.util.List",
-          "unzipped"               -> "kotlin.Pair",
-          "partitioned"            -> "kotlin.Pair",
-          "iPartitioned"           -> "kotlin.Pair",
-          "grouped"                -> "java.util.Map",
-          "iGrouped"               -> "java.util.Map",
-          "groupedValue"           -> "java.util.Map",
-          "iGroupedValue"          -> "java.util.Map",
-          "sGrouping"              -> "kotlin.collections.Grouping",
-          "iGrouping"              -> "kotlin.collections.Grouping",
-          "associated"             -> "java.util.Map",
-          "iAssociated"            -> "java.util.Map",
-          "associatedBy"           -> "java.util.Map",
-          "iAssociatedBy"          -> "java.util.Map",
-          "associatedByValue"      -> "java.util.Map",
-          "iAssociatedByValue"     -> "java.util.Map",
-          "associatedWith"         -> "java.util.Map",
-          "iAssociatedWith"        -> "java.util.Map",
-          "flattened"              -> "java.util.List",
-          "pairMap"                -> "java.util.Map",
-          "pairMapTo"              -> "java.util.Map",
-          "sFilterTo"              -> "java.util.List",
-          "iFilterTo"              -> "java.util.List",
-          "sFilterNotTo"           -> "java.util.List",
-          "iFilterNotTo"           -> "java.util.List",
-          "sFilterIndexedTo"       -> "java.util.List",
-          "iFilterIndexedTo"       -> "java.util.List",
-          "sFilterNotNullTo"       -> "java.util.List",
-          "sMapTo"                 -> "java.util.List",
-          "iMapTo"                 -> "java.util.List",
-          "sMapNotNullTo"          -> "java.util.List",
-          "iMapNotNullTo"          -> "java.util.List",
-          "sMapIndexedTo"          -> "java.util.List",
-          "iMapIndexedTo"          -> "java.util.List",
-          "sMapIndexedNotNullTo"   -> "java.util.List",
-          "iMapIndexedNotNullTo"   -> "java.util.List",
-          "sFlatMapTo"             -> "java.util.List",
-          "iFlatMapTo"             -> "java.util.List",
-          "sFlatMapIndexedTo"      -> "java.util.List",
-          "iFlatMapIndexedTo"      -> "java.util.List",
-          "sAssociateTo"           -> "java.util.Map",
-          "iAssociateTo"           -> "java.util.Map",
-          "sAssociateByTo"         -> "java.util.Map",
-          "iAssociateByTo"         -> "java.util.Map",
-          "sAssociateByValueTo"    -> "java.util.Map",
-          "iAssociateByValueTo"    -> "java.util.Map",
-          "sAssociateWithTo"       -> "java.util.Map",
-          "iAssociateWithTo"       -> "java.util.Map",
-          "sGroupByTo"             -> "java.util.Map",
-          "iGroupByTo"             -> "java.util.Map",
-          "sGroupByValueTo"        -> "java.util.Map",
-          "iGroupByValueTo"        -> "java.util.Map"
+          "sZipList"             -> "java.util.List",
+          "iZipList"             -> "java.util.List",
+          "sZipTransform"        -> "java.util.List",
+          "iZipTransform"        -> "java.util.List",
+          "unzipped"             -> "kotlin.Pair",
+          "partitioned"          -> "kotlin.Pair",
+          "iPartitioned"         -> "kotlin.Pair",
+          "grouped"              -> "java.util.Map",
+          "iGrouped"             -> "java.util.Map",
+          "groupedValue"         -> "java.util.Map",
+          "iGroupedValue"        -> "java.util.Map",
+          "sGrouping"            -> "kotlin.collections.Grouping",
+          "iGrouping"            -> "kotlin.collections.Grouping",
+          "associated"           -> "java.util.Map",
+          "iAssociated"          -> "java.util.Map",
+          "associatedBy"         -> "java.util.Map",
+          "iAssociatedBy"        -> "java.util.Map",
+          "associatedByValue"    -> "java.util.Map",
+          "iAssociatedByValue"   -> "java.util.Map",
+          "associatedWith"       -> "java.util.Map",
+          "iAssociatedWith"      -> "java.util.Map",
+          "flattened"            -> "java.util.List",
+          "pairMap"              -> "java.util.Map",
+          "pairMapTo"            -> "java.util.Map",
+          "sFilterTo"            -> "java.util.List",
+          "iFilterTo"            -> "java.util.List",
+          "sFilterNotTo"         -> "java.util.List",
+          "iFilterNotTo"         -> "java.util.List",
+          "sFilterIndexedTo"     -> "java.util.List",
+          "iFilterIndexedTo"     -> "java.util.List",
+          "sFilterNotNullTo"     -> "java.util.List",
+          "sMapTo"               -> "java.util.List",
+          "iMapTo"               -> "java.util.List",
+          "sMapNotNullTo"        -> "java.util.List",
+          "iMapNotNullTo"        -> "java.util.List",
+          "sMapIndexedTo"        -> "java.util.List",
+          "iMapIndexedTo"        -> "java.util.List",
+          "sMapIndexedNotNullTo" -> "java.util.List",
+          "iMapIndexedNotNullTo" -> "java.util.List",
+          "sFlatMapTo"           -> "java.util.List",
+          "iFlatMapTo"           -> "java.util.List",
+          "sFlatMapIndexedTo"    -> "java.util.List",
+          "iFlatMapIndexedTo"    -> "java.util.List",
+          "sAssociateTo"         -> "java.util.Map",
+          "iAssociateTo"         -> "java.util.Map",
+          "sAssociateByTo"       -> "java.util.Map",
+          "iAssociateByTo"       -> "java.util.Map",
+          "sAssociateByValueTo"  -> "java.util.Map",
+          "iAssociateByValueTo"  -> "java.util.Map",
+          "sAssociateWithTo"     -> "java.util.Map",
+          "iAssociateWithTo"     -> "java.util.Map",
+          "sGroupByTo"           -> "java.util.Map",
+          "iGroupByTo"           -> "java.util.Map",
+          "sGroupByValueTo"      -> "java.util.Map",
+          "iGroupByValueTo"      -> "java.util.Map"
         ).foreach { case (name, typeFullName) =>
           localTypes should contain(name -> typeFullName)
         }
@@ -3407,12 +3497,7 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
           ("ints.copyOf()", "copyOf", "int[](int[])", "int[]"),
           ("strings.copyOf(4)", "copyOf", s"$objectArray($objectArray,int)", "java.lang.String[]"),
           ("ints.copyOf(4)", "copyOf", "int[](int[],int)", "int[]"),
-          (
-            "strings.copyOfRange(0, 1)",
-            "copyOfRange",
-            s"$objectArray($objectArray,int,int)",
-            "java.lang.String[]"
-          ),
+          ("strings.copyOfRange(0, 1)", "copyOfRange", s"$objectArray($objectArray,int,int)", "java.lang.String[]"),
           ("ints.copyOfRange(0, 1)", "copyOfRange", "int[](int[],int,int)", "int[]"),
           (
             "strings.sliceArray(0..1)",
@@ -3430,19 +3515,9 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
           ("ints.sliceArray(listOf(0, 1))", "sliceArray", "int[](int[],java.util.Collection)", "int[]"),
           ("strings.plus(\"x\")", "plus", s"$objectArray($objectArray,java.lang.Object)", "java.lang.String[]"),
           ("ints.plus(1)", "plus", "int[](int[],int)", "int[]"),
-          (
-            "strings.plus(moreStrings)",
-            "plus",
-            s"$objectArray($objectArray,$objectArray)",
-            "java.lang.String[]"
-          ),
+          ("strings.plus(moreStrings)", "plus", s"$objectArray($objectArray,$objectArray)", "java.lang.String[]"),
           ("ints.plus(moreInts)", "plus", "int[](int[],int[])", "int[]"),
-          (
-            "strings.contentEquals(moreStrings)",
-            "contentEquals",
-            s"boolean($objectArray,$objectArray)",
-            "boolean"
-          ),
+          ("strings.contentEquals(moreStrings)", "contentEquals", s"boolean($objectArray,$objectArray)", "boolean"),
           ("ints.contentEquals(moreInts)", "contentEquals", "boolean(int[],int[])", "boolean"),
           (
             "nested.contentDeepEquals(moreNested)",
@@ -3594,12 +3669,7 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
             s"java.lang.Object($objectArray&java.lang.Object,kotlin.jvm.functions.Function0)",
             "java.lang.String[]"
           ),
-          (
-            """ints.ifEmpty { intArrayOf(1) }""",
-            "ifEmpty",
-            "int[](int[],kotlin.jvm.functions.Function0)",
-            "int[]"
-          ),
+          ("""ints.ifEmpty { intArrayOf(1) }""", "ifEmpty", "int[](int[],kotlin.jvm.functions.Function0)", "int[]"),
           (
             """seq.ifEmpty { sequenceOf("fallback") }""",
             "ifEmpty",
@@ -3619,7 +3689,7 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
           ("ints.randomOrNull()", "randomOrNull", "int(int[])", "int")
         ).foreach { case (code, name, signature, typeFullName) =>
           val List(call) = defaults.ast.isCall.nameExact(name).codeExact(code).l: @unchecked
-          val namespace = if (signature.startsWith("kotlin.sequences.")) "kotlin.sequences" else "kotlin.collections"
+          val namespace  = if (signature.startsWith("kotlin.sequences.")) "kotlin.sequences" else "kotlin.collections"
           call.methodFullName shouldBe s"$namespace.$name:$signature"
           call.signature shouldBe signature
           call.typeFullName shouldBe typeFullName
@@ -4836,7 +4906,12 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
             "java.lang.Object(java.util.Map,kotlin.jvm.functions.Function1)",
             "java.lang.String"
           ),
-          ("values.sumOf { entry -> entry.value }", "sumOf", "int(java.util.Map,kotlin.jvm.functions.Function1)", "int"),
+          (
+            "values.sumOf { entry -> entry.value }",
+            "sumOf",
+            "int(java.util.Map,kotlin.jvm.functions.Function1)",
+            "int"
+          ),
           (
             "values.sumOf { entry -> entry.value.toLong() }",
             "sumOf",
@@ -4858,7 +4933,12 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
           ),
           ("values.toMutableMap()", "toMutableMap", "java.util.Map(java.util.Map)", "java.util.Map"),
           ("values.asIterable()", "asIterable", "java.lang.Iterable(java.util.Map)", "java.lang.Iterable"),
-          ("values.asSequence()", "asSequence", "kotlin.sequences.Sequence(java.util.Map)", "kotlin.sequences.Sequence"),
+          (
+            "values.asSequence()",
+            "asSequence",
+            "kotlin.sequences.Sequence(java.util.Map)",
+            "kotlin.sequences.Sequence"
+          ),
           ("values.toList()", "toList", "java.util.List(java.util.Map)", "java.util.List"),
           (
             "stringValues.toProperties()",
@@ -5203,7 +5283,12 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
           ("values.toMutableSet()", "toMutableSet", "java.util.Set(java.util.Map)", "java.util.Set"),
           ("values.filterNotNull()", "filterNotNull", "java.util.List(java.util.Map)", "java.util.List"),
           ("values.requireNoNulls()", "requireNoNulls", "java.util.List(java.util.Map)", "java.util.List"),
-          ("values.groupBy { entry -> entry.value }", "groupBy", "java.util.Map(java.util.Map,kotlin.jvm.functions.Function1)", "java.util.Map"),
+          (
+            "values.groupBy { entry -> entry.value }",
+            "groupBy",
+            "java.util.Map(java.util.Map,kotlin.jvm.functions.Function1)",
+            "java.util.Map"
+          ),
           (
             "values.groupBy({ entry -> entry.value }, { entry -> entry.key })",
             "groupBy",
@@ -6205,7 +6290,12 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
         List(
           ("strings.asList()", "asList", s"java.util.List($objectArray)", "java.util.List"),
           ("ints.asList()", "asList", "java.util.List(int[])", "java.util.List"),
-          ("strings.toSortedSet()", "toSortedSet", "java.util.SortedSet(java.lang.Comparable[])", "java.util.SortedSet"),
+          (
+            "strings.toSortedSet()",
+            "toSortedSet",
+            "java.util.SortedSet(java.lang.Comparable[])",
+            "java.util.SortedSet"
+          ),
           ("ints.toSortedSet()", "toSortedSet", "java.util.SortedSet(int[])", "java.util.SortedSet"),
           (
             "strings.toSortedSet(comparator)",
@@ -6213,12 +6303,7 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
             "java.util.SortedSet(java.lang.Object[],java.util.Comparator)",
             "java.util.SortedSet"
           ),
-          (
-            "ints.toSortedSet(intComparator)",
-            "toSortedSet",
-            "java.util.SortedSet(int[])",
-            "java.util.SortedSet"
-          ),
+          ("ints.toSortedSet(intComparator)", "toSortedSet", "java.util.SortedSet(int[])", "java.util.SortedSet"),
           ("values.toTypedArray()", "toTypedArray", "java.lang.Object[](java.util.Collection)", "java.lang.String[]"),
           ("numbers.toTypedArray()", "toTypedArray", "java.lang.Object[](java.util.Collection)", "int[]"),
           ("ints.toTypedArray()", "toTypedArray", "int[](int[])", "int[]"),
@@ -6254,31 +6339,32 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
           call.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
         }
 
-        val localTypes = cpg.method.nameExact("conversions").ast.isLocal.map(local => local.name -> local.typeFullName).toMap
+        val localTypes =
+          cpg.method.nameExact("conversions").ast.isLocal.map(local => local.name -> local.typeFullName).toMap
         Map(
-          "stringsAsList"        -> "java.util.List",
-          "intsAsList"           -> "java.util.List",
-          "stringsSortedSet"      -> "java.util.SortedSet",
-          "intsSortedSet"         -> "java.util.SortedSet",
+          "stringsAsList"                  -> "java.util.List",
+          "intsAsList"                     -> "java.util.List",
+          "stringsSortedSet"               -> "java.util.SortedSet",
+          "intsSortedSet"                  -> "java.util.SortedSet",
           "stringsSortedSetWithComparator" -> "java.util.SortedSet",
           "intsSortedSetWithComparator"    -> "java.util.SortedSet",
-          "valuesTyped"          -> "java.lang.String[]",
-          "numbersTyped"         -> "int[]",
-          "intsTyped"            -> "int[]",
-          "booleansBooleanArray" -> "boolean[]",
-          "bytesByteArray"       -> "byte[]",
-          "shortsShortArray"     -> "short[]",
-          "charsCharArray"       -> "char[]",
-          "numbersIntArray"      -> "int[]",
-          "longsLongArray"       -> "long[]",
-          "floatsFloatArray"     -> "float[]",
-          "doublesDoubleArray"   -> "double[]",
-          "valuesSliceRange"     -> "java.util.List",
-          "valuesSliceIndices"   -> "java.util.List",
-          "stringsSliceRange"    -> "java.util.List",
-          "stringsSliceIndices"  -> "java.util.List",
-          "intsSliceRange"       -> "java.util.List",
-          "intsSliceIndices"     -> "java.util.List"
+          "valuesTyped"                    -> "java.lang.String[]",
+          "numbersTyped"                   -> "int[]",
+          "intsTyped"                      -> "int[]",
+          "booleansBooleanArray"           -> "boolean[]",
+          "bytesByteArray"                 -> "byte[]",
+          "shortsShortArray"               -> "short[]",
+          "charsCharArray"                 -> "char[]",
+          "numbersIntArray"                -> "int[]",
+          "longsLongArray"                 -> "long[]",
+          "floatsFloatArray"               -> "float[]",
+          "doublesDoubleArray"             -> "double[]",
+          "valuesSliceRange"               -> "java.util.List",
+          "valuesSliceIndices"             -> "java.util.List",
+          "stringsSliceRange"              -> "java.util.List",
+          "stringsSliceIndices"            -> "java.util.List",
+          "intsSliceRange"                 -> "java.util.List",
+          "intsSliceIndices"               -> "java.util.List"
         ).foreach { case (name, typeFullName) =>
           localTypes should contain(name -> typeFullName)
         }
@@ -6332,7 +6418,8 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
           call.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
         }
 
-        val localTypes = cpg.method.nameExact("defaults").ast.isLocal.map(local => local.name -> local.typeFullName).toMap
+        val localTypes =
+          cpg.method.nameExact("defaults").ast.isLocal.map(local => local.name -> local.typeFullName).toMap
         Map(
           "valueOrNull"  -> "java.lang.String",
           "valueOrElse"  -> "java.lang.String",
@@ -6727,7 +6814,14 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
         }
 
         cpg.local
-          .nameExact("listFirst", "listFirstOrNull", "arrayFirst", "arrayFirstOrNull", "sequenceFirst", "sequenceFirstOrNull")
+          .nameExact(
+            "listFirst",
+            "listFirstOrNull",
+            "arrayFirst",
+            "arrayFirstOrNull",
+            "sequenceFirst",
+            "sequenceFirstOrNull"
+          )
           .typeFullName
           .l shouldBe List.fill(6)("int")
         cpg.local.nameExact("intArrayFirst", "intArrayFirstOrNull").typeFullName.l shouldBe
@@ -6967,7 +7061,12 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
           ("seq.first()", "first", "java.lang.Object(kotlin.sequences.Sequence)", "java.lang.String"),
           ("seq.firstOrNull()", "firstOrNull", "java.lang.Object(kotlin.sequences.Sequence)", "java.lang.String"),
           ("seq.elementAt(1)", "elementAt", "java.lang.Object(kotlin.sequences.Sequence,int)", "java.lang.String"),
-          ("seq.elementAtOrNull(1)", "elementAtOrNull", "java.lang.Object(kotlin.sequences.Sequence,int)", "java.lang.String"),
+          (
+            "seq.elementAtOrNull(1)",
+            "elementAtOrNull",
+            "java.lang.Object(kotlin.sequences.Sequence,int)",
+            "java.lang.String"
+          ),
           (
             """seq.elementAtOrElse(1) { "fallback" }""",
             "elementAtOrElse",
@@ -7039,18 +7138,18 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
             "int"
           ),
           ("seq.asIterable()", "asIterable", "java.lang.Iterable(kotlin.sequences.Sequence)", "java.lang.Iterable"),
-          ("seq.constrainOnce()", "constrainOnce", "kotlin.sequences.Sequence(kotlin.sequences.Sequence)", "kotlin.sequences.Sequence"),
+          (
+            "seq.constrainOnce()",
+            "constrainOnce",
+            "kotlin.sequences.Sequence(kotlin.sequences.Sequence)",
+            "kotlin.sequences.Sequence"
+          ),
           ("seq.toList()", "toList", "java.util.List(kotlin.sequences.Sequence)", "java.util.List"),
           ("seq.toMutableList()", "toMutableList", "java.util.List(kotlin.sequences.Sequence)", "java.util.List"),
           ("seq.toSet()", "toSet", "java.util.Set(kotlin.sequences.Sequence)", "java.util.Set"),
           ("seq.toMutableSet()", "toMutableSet", "java.util.Set(kotlin.sequences.Sequence)", "java.util.Set"),
           ("seq.toHashSet()", "toHashSet", "java.util.HashSet(kotlin.sequences.Sequence)", "java.util.HashSet"),
-          (
-            "seq.toSortedSet()",
-            "toSortedSet",
-            "java.util.SortedSet(kotlin.sequences.Sequence)",
-            "java.util.SortedSet"
-          ),
+          ("seq.toSortedSet()", "toSortedSet", "java.util.SortedSet(kotlin.sequences.Sequence)", "java.util.SortedSet"),
           (
             "seq.toSortedSet(comparator)",
             "toSortedSet",
@@ -7076,7 +7175,12 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
             sequenceFunction2Signature,
             "kotlin.sequences.Sequence"
           ),
-          ("seq.withIndex()", "withIndex", "kotlin.sequences.Sequence(kotlin.sequences.Sequence)", "kotlin.sequences.Sequence"),
+          (
+            "seq.withIndex()",
+            "withIndex",
+            "kotlin.sequences.Sequence(kotlin.sequences.Sequence)",
+            "kotlin.sequences.Sequence"
+          ),
           (
             "seq.forEach { println(it) }",
             "forEach",
@@ -7140,7 +7244,9 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
         cpg.local.nameExact("indexFirst", "indexLast", "countPlain", "countMatch").typeFullName.l shouldBe
           List.fill(4)("int")
         cpg.local.nameExact("iterableView").typeFullName.l shouldBe List("java.lang.Iterable")
-        cpg.local.nameExact("listed", "mutableListed", "collected").typeFullName.l shouldBe List.fill(3)("java.util.List")
+        cpg.local.nameExact("listed", "mutableListed", "collected").typeFullName.l shouldBe List.fill(3)(
+          "java.util.List"
+        )
         cpg.local.nameExact("set", "mutableSet").typeFullName.l shouldBe List.fill(2)("java.util.Set")
         cpg.local.nameExact("hashSet").typeFullName.l shouldBe List("java.util.HashSet")
         cpg.local.nameExact("sortedSet", "sortedSetWithComparator").typeFullName.l shouldBe
@@ -7847,7 +7953,15 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
         cpg.local.nameExact("joined", "joinedSep").typeFullName.l shouldBe List.fill(2)("java.lang.String")
         cpg.local.nameExact("joinedTo").typeFullName.l shouldBe List("java.lang.StringBuilder")
         cpg.local
-          .nameExact("folded", "foldedIndexed", "reduced", "reducedIndexed", "reducedOrNull", "reducedIndexedOrNull", "total")
+          .nameExact(
+            "folded",
+            "foldedIndexed",
+            "reduced",
+            "reducedIndexed",
+            "reducedOrNull",
+            "reducedIndexedOrNull",
+            "total"
+          )
           .typeFullName
           .l shouldBe List.fill(7)("int")
         cpg.local.nameExact("average").typeFullName.l shouldBe List("double")
@@ -7883,16 +7997,8 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
             "chunked",
             "kotlin.sequences.Sequence(kotlin.sequences.Sequence,int,kotlin.jvm.functions.Function1)"
           ),
-          (
-            "values.windowed(2)",
-            "windowed",
-            "kotlin.sequences.Sequence(kotlin.sequences.Sequence,int,int,boolean)"
-          ),
-          (
-            "values.windowed(2, 1)",
-            "windowed",
-            "kotlin.sequences.Sequence(kotlin.sequences.Sequence,int,int,boolean)"
-          ),
+          ("values.windowed(2)", "windowed", "kotlin.sequences.Sequence(kotlin.sequences.Sequence,int,int,boolean)"),
+          ("values.windowed(2, 1)", "windowed", "kotlin.sequences.Sequence(kotlin.sequences.Sequence,int,int,boolean)"),
           (
             "values.windowed(2, 1, true)",
             "windowed",
@@ -9705,7 +9811,10 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
         methodRef.referencedMethod.fullName shouldBe expectedMethodFullName
 
         val List(assignment) =
-          cpg.call.nameExact(Operators.assignment).codeExact("val ref: (Int, Int) -> String = ::globalFunction").l: @unchecked
+          cpg.call
+            .nameExact(Operators.assignment)
+            .codeExact("val ref: (Int, Int) -> String = ::globalFunction")
+            .l: @unchecked
         assignment.argument.isMethodRef.codeExact("::globalFunction").l shouldBe List(methodRef)
         cpg.local.nameExact("ref").typeFullName.l shouldBe List("(Int, Int) -> String")
       }
@@ -9776,11 +9885,13 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
           "java.lang.Object(java.lang.Object)"
         )
 
-        val List(utilsInvoke) = utilsTypeDecl.method.fullNameExact(utilsInvokeFullName).l: @unchecked
+        val List(utilsInvoke)  = utilsTypeDecl.method.fullNameExact(utilsInvokeFullName).l: @unchecked
         val List(validateCall) = utilsInvoke.ast.isCall.nameExact("validate").l: @unchecked
         validateCall.methodFullName shouldBe "demo.Utils$Companion.validate:boolean(int)"
         validateCall.dispatchType shouldBe DispatchTypes.STATIC_DISPATCH
-        validateCall.receiver.isCall.nameExact(Operators.fieldAccess).typeFullName.l shouldBe List("demo.Utils$Companion")
+        validateCall.receiver.isCall.nameExact(Operators.fieldAccess).typeFullName.l shouldBe List(
+          "demo.Utils$Companion"
+        )
 
         val List(utilsCtorCall) = cpg.call.methodFullNameExact(utilsCtorFullName).l: @unchecked
         utilsCtorCall.signature.shouldBe("void(demo.Utils$Companion)")
@@ -9826,21 +9937,22 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
           |  println(ref3)
           |}
           |""".stripMargin) { cpg =>
-        val counterSamType = "demo.Counter.increment$kotlin.jvm.functions.Function0Impl.invoke:int()"
-        val counterCtor    = s"$counterSamType.<init>:void(demo.Counter)"
+        val counterSamType        = "demo.Counter.increment$kotlin.jvm.functions.Function0Impl.invoke:int()"
+        val counterCtor           = s"$counterSamType.<init>:void(demo.Counter)"
         val List(counterTypeDecl) = cpg.typeDecl.fullNameExact(counterSamType).l: @unchecked
         counterTypeDecl.method.nameExact("invoke").signature.l shouldBe List("int()")
         counterTypeDecl.method.nameExact("invoke").parameter.typeFullName.l shouldBe List(counterSamType)
         counterTypeDecl.method.nameExact("<init>").signature.l shouldBe List("void(demo.Counter)")
         val List(counterCtorCall) = cpg.call.methodFullNameExact(counterCtor).l: @unchecked
         counterCtorCall.argument.isIdentifier.nameExact("counter").typeFullName.l shouldBe List("demo.Counter")
-        val List(incrementCall) = counterTypeDecl.method.nameExact("invoke").ast.isCall.nameExact("increment").l: @unchecked
+        val List(incrementCall) =
+          counterTypeDecl.method.nameExact("invoke").ast.isCall.nameExact("increment").l: @unchecked
         incrementCall.methodFullName shouldBe "demo.Counter.increment:int()"
         incrementCall.signature shouldBe "int()"
         incrementCall.argument.isIdentifier.size shouldBe 0
 
-        val thisSamType = "demo.MyClass.method$kotlin.jvm.functions.Function1Impl.invoke:void(int)"
-        val thisCtor    = s"$thisSamType.<init>:void(demo.MyClass)"
+        val thisSamType        = "demo.MyClass.method$kotlin.jvm.functions.Function1Impl.invoke:void(int)"
+        val thisCtor           = s"$thisSamType.<init>:void(demo.MyClass)"
         val List(thisTypeDecl) = cpg.typeDecl.fullNameExact(thisSamType).l: @unchecked
         thisTypeDecl.method.nameExact("invoke").signature.l shouldBe List("void(int)")
         thisTypeDecl.method.nameExact("<init>").signature.l shouldBe List("void(demo.MyClass)")
@@ -9854,7 +9966,9 @@ class OxidizedKotlinCpgTests extends AnyWordSpec with Matchers {
         val calculatorSamType = "demo.Calculator.add$kotlin.jvm.functions.Function2Impl.invoke:int(int,int)"
         val calculatorCtor    = s"$calculatorSamType.<init>:void(demo.Calculator)"
         cpg.typeDecl.fullNameExact(calculatorSamType).size shouldBe 1
-        cpg.typeDecl.fullNameExact(calculatorSamType).method.nameExact("invoke").signature.l shouldBe List("int(int,int)")
+        cpg.typeDecl.fullNameExact(calculatorSamType).method.nameExact("invoke").signature.l shouldBe List(
+          "int(int,int)"
+        )
         cpg.call.methodFullNameExact(calculatorCtor).size shouldBe 3
       }
     }

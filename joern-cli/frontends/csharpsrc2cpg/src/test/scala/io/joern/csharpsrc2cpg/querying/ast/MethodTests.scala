@@ -231,7 +231,9 @@ class MethodTests extends CSharpCode2CpgFixture {
           ctor.modifier.modifierType.toSet should contain(ModifierTypes.CONSTRUCTOR)
           ctor.parameter.name.l shouldBe List("this", "seed")
           ctor.parameter.nameExact("seed").typeFullName.l shouldBe List("System.Int32")
-          ctor.body.astChildren.isCall.nameExact(Defines.ConstructorMethodName).code.l should contain("WorkerBase(seed)")
+          ctor.body.astChildren.isCall.nameExact(Defines.ConstructorMethodName).code.l should contain(
+            "WorkerBase(seed)"
+          )
       }
     }
 
@@ -264,13 +266,14 @@ class MethodTests extends CSharpCode2CpgFixture {
     }
 
     "create a constructor method for positional record parameters" in {
-      inside(cpg.method.fullNameExact(s"Employee.${Defines.ConstructorMethodName}:System.Void(System.String,System.Int32)").l) {
-        case ctor :: Nil =>
-          ctor.modifier.modifierType.toSet should contain(ModifierTypes.CONSTRUCTOR)
-          ctor.parameter.name.l shouldBe List("this", "Name", "Id")
-          ctor.parameter.nameExact("Name").typeFullName.l shouldBe List("System.String")
-          ctor.parameter.nameExact("Id").typeFullName.l shouldBe List("System.Int32")
-          ctor.body.astChildren.isCall.nameExact(Defines.ConstructorMethodName).code.l should contain("Person(Name)")
+      inside(
+        cpg.method.fullNameExact(s"Employee.${Defines.ConstructorMethodName}:System.Void(System.String,System.Int32)").l
+      ) { case ctor :: Nil =>
+        ctor.modifier.modifierType.toSet should contain(ModifierTypes.CONSTRUCTOR)
+        ctor.parameter.name.l shouldBe List("this", "Name", "Id")
+        ctor.parameter.nameExact("Name").typeFullName.l shouldBe List("System.String")
+        ctor.parameter.nameExact("Id").typeFullName.l shouldBe List("System.Int32")
+        ctor.body.astChildren.isCall.nameExact(Defines.ConstructorMethodName).code.l should contain("Person(Name)")
       }
     }
   }

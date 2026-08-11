@@ -90,13 +90,13 @@ object CpgEquivalence {
   }
 
   private def normalizeValue(value: Any, depth: Int = 0): String = value match {
-    case null                 => "<null>"
-    case None                 => "<none>"
-    case Some(inner)          => normalizeValue(inner, depth)
-    case node: StoredNode     => normalizeNodeRef(node, depth)
-    case values: Array[?]     => values.iterator.map(normalizeValue(_, depth)).mkString("[", ",", "]")
-    case values: Iterable[?]  => values.iterator.map(normalizeValue(_, depth)).mkString("[", ",", "]")
-    case other                => escape(other.toString)
+    case null                => "<null>"
+    case None                => "<none>"
+    case Some(inner)         => normalizeValue(inner, depth)
+    case node: StoredNode    => normalizeNodeRef(node, depth)
+    case values: Array[?]    => values.iterator.map(normalizeValue(_, depth)).mkString("[", ",", "]")
+    case values: Iterable[?] => values.iterator.map(normalizeValue(_, depth)).mkString("[", ",", "]")
+    case other               => escape(other.toString)
   }
 
   private def normalizeNodeRef(node: StoredNode, depth: Int): String = {
@@ -107,11 +107,9 @@ object CpgEquivalence {
   private def multisetDiff(left: Seq[String], right: Seq[String]): Seq[String] = {
     val leftCounts  = counts(left)
     val rightCounts = counts(right)
-    leftCounts.toSeq
-      .flatMap { case (value, count) =>
-        Seq.fill(count - rightCounts.getOrElse(value, 0))(value)
-      }
-      .sorted
+    leftCounts.toSeq.flatMap { case (value, count) =>
+      Seq.fill(count - rightCounts.getOrElse(value, 0))(value)
+    }.sorted
   }
 
   private def counts(values: Seq[String]): Map[String, Int] =

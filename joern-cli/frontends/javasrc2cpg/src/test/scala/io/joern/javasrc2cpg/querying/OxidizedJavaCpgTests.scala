@@ -171,7 +171,8 @@ class OxidizedJavaCpgTests extends JavaSrcCode2CpgFixture(withOssDataflow = fals
         receiver.refsTo.l shouldBe useMethod.parameter.nameExact("this").l
       }
 
-      val List(superField) = useMethod.ast.isCall.nameExact(Operators.fieldAccess).codeExact("super.baseValue").l: @unchecked
+      val List(superField) =
+        useMethod.ast.isCall.nameExact(Operators.fieldAccess).codeExact("super.baseValue").l: @unchecked
       superField.typeFullName shouldBe "int"
       inside(superField.argument.l) { case List(receiver: Identifier, field: FieldIdentifier) =>
         receiver.name shouldBe "this"
@@ -219,7 +220,7 @@ class OxidizedJavaCpgTests extends JavaSrcCode2CpgFixture(withOssDataflow = fals
         "demo/InheritedReceiver.java"
       ).withConfig(Config(parserBackend = JavaParserBackend.Oxidized, skipTypeInfPass = true))
 
-      val List(useMethod) = cpg.method.fullNameExact("demo.Use.use:int(demo.GrandChild)").l: @unchecked
+      val List(useMethod)   = cpg.method.fullNameExact("demo.Use.use:int(demo.GrandChild)").l: @unchecked
       val List(computeCall) = useMethod.ast.isCall.nameExact("compute").l: @unchecked
       computeCall.methodFullName shouldBe "demo.GrandChild.compute:int(int)"
       computeCall.signature shouldBe "int(int)"
@@ -241,7 +242,8 @@ class OxidizedJavaCpgTests extends JavaSrcCode2CpgFixture(withOssDataflow = fals
         field.canonicalName shouldBe "baseValue"
       }
 
-      val List(labelCall) = cpg.method.fullNameExact("demo.Use.label:java.lang.String()").call.nameExact("label").l: @unchecked
+      val List(labelCall) =
+        cpg.method.fullNameExact("demo.Use.label:java.lang.String()").call.nameExact("label").l: @unchecked
       labelCall.methodFullName shouldBe "demo.Base.label:java.lang.String()"
       labelCall.signature shouldBe "java.lang.String()"
       labelCall.typeFullName shouldBe "java.lang.String"
@@ -2868,7 +2870,7 @@ class OxidizedJavaCpgTests extends JavaSrcCode2CpgFixture(withOssDataflow = fals
         cpg.method.fullNameExact("demo.Exprs.decode:byte[](java.util.Base64$Decoder,java.lang.String)").l: @unchecked
       decodeMethod.parameter.nameExact("decoder").typeFullName.l shouldBe List("java.util.Base64$Decoder")
       decodeMethod.local.nameExact("localDecoder").typeFullName.l shouldBe List("java.util.Base64$Decoder")
-      val decodeCalls                 = decodeMethod.ast.collectAll[Call].l
+      val decodeCalls = decodeMethod.ast.collectAll[Call].l
       val List(getDecoderCall: Call) = decodeCalls
         .filter(call => call.name == "getDecoder" && call.code == "Base64.getDecoder()"): @unchecked
       getDecoderCall.methodFullName shouldBe "java.util.Base64.getDecoder:java.util.Base64$Decoder()"

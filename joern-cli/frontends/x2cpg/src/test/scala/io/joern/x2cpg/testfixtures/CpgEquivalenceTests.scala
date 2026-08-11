@@ -17,10 +17,7 @@ class CpgEquivalenceTests extends AnyWordSpec with Matchers {
       CpgEquivalence.compare(actual, expected).isEquivalent shouldBe true
     }
 
-    "report a mutated node property" in withCpgs(
-      sampleCpg(methodName = "renamed"),
-      sampleCpg()
-    ) { (actual, expected) =>
+    "report a mutated node property" in withCpgs(sampleCpg(methodName = "renamed"), sampleCpg()) { (actual, expected) =>
       val comparison = CpgEquivalence.compare(actual, expected)
 
       comparison.isEquivalent shouldBe false
@@ -30,15 +27,13 @@ class CpgEquivalenceTests extends AnyWordSpec with Matchers {
       comparison.diff should include("NAME=main")
     }
 
-    "report an edge mismatch" in withCpgs(
-      sampleCpg(includeCallAstEdge = false),
-      sampleCpg(includeCallAstEdge = true)
-    ) { (actual, expected) =>
-      val comparison = CpgEquivalence.compare(actual, expected)
+    "report an edge mismatch" in withCpgs(sampleCpg(includeCallAstEdge = false), sampleCpg(includeCallAstEdge = true)) {
+      (actual, expected) =>
+        val comparison = CpgEquivalence.compare(actual, expected)
 
-      comparison.isEquivalent shouldBe false
-      comparison.diff should include("[Edges only in expected]")
-      comparison.diff should include("EDGE|")
+        comparison.isEquivalent shouldBe false
+        comparison.diff should include("[Edges only in expected]")
+        comparison.diff should include("EDGE|")
     }
   }
 

@@ -127,8 +127,15 @@ class AbapJsonParserTests extends AnyWordSpec with Matchers {
           assignment
         }.get
 
-        assignment.target shouldBe IdentifierExpr("lv_y", TextSpan(Some(Position(2, 1)), Some(Position(2, 16)), "MOVE 2 TO lv_y ."))
-        assignment.value shouldBe LiteralExpr("2", "NUMBER", TextSpan(Some(Position(2, 1)), Some(Position(2, 16)), "MOVE 2 TO lv_y ."))
+        assignment.target shouldBe IdentifierExpr(
+          "lv_y",
+          TextSpan(Some(Position(2, 1)), Some(Position(2, 16)), "MOVE 2 TO lv_y .")
+        )
+        assignment.value shouldBe LiteralExpr(
+          "2",
+          "NUMBER",
+          TextSpan(Some(Position(2, 1)), Some(Position(2, 16)), "MOVE 2 TO lv_y .")
+        )
       } finally {
         Files.deleteIfExists(path)
       }
