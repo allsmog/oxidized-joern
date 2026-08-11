@@ -72,6 +72,15 @@ Note the ordering constraint: steps 1 and 2 are coupled in the opposite
 direction from intuition — collecting the objects is what breaks the dependent
 build, so re-pin first.
 
+### Additional object for the same request
+
+`34ca2478bfe31a1d433c935eacbe2d263ee6df20` — a superseded draft of this memo
+that quoted the codename verbatim in an example command. It was corrected by
+rewriting `master` on 2026-08-11, so it is reachable from no ref, but GitHub's
+API still resolves it. It belongs in the same garbage-collection request, and it
+is a live demonstration of the point this section makes: **on GitHub, replacing
+a commit does not remove it.**
+
 ## Scrub verification — complete
 
 Scanned the entire object database, not just the current tree, and the live
