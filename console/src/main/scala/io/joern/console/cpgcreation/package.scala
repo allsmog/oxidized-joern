@@ -29,12 +29,12 @@ package object cpgcreation {
       case Languages.CSHARPSRC => Some(CSharpSrcCpgGenerator(conf, rootPath))
       case Languages.LLVM      => Some(LlvmCpgGenerator(conf, rootPath))
       case Languages.JAVA      => Some(JavaCpgGenerator(conf, rootPath))
-      case Languages.PHP      => Some(PhpCpgGenerator(conf, rootPath))
-      case Languages.GHIDRA   => Some(GhidraCpgGenerator(conf, rootPath))
-      case Languages.KOTLIN   => Some(KotlinCpgGenerator(conf, rootPath))
-      case Languages.SWIFTSRC => Some(SwiftSrcCpgGenerator(conf, rootPath))
-      case Languages.ABAP     => Some(AbapSrcCpgGenerator(conf, rootPath))
-      case _                  => None
+      case Languages.PHP       => Some(PhpCpgGenerator(conf, rootPath))
+      case Languages.GHIDRA    => Some(GhidraCpgGenerator(conf, rootPath))
+      case Languages.KOTLIN    => Some(KotlinCpgGenerator(conf, rootPath))
+      case Languages.SWIFTSRC  => Some(SwiftSrcCpgGenerator(conf, rootPath))
+      case Languages.ABAP      => Some(AbapSrcCpgGenerator(conf, rootPath))
+      case _                   => None
     }
   }
 

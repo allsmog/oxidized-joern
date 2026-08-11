@@ -188,8 +188,8 @@ class AbapJsonParser {
     val upper = tokens.map(_.toUpperCase)
 
     // Method name is the token after METHODS, CLASS-METHODS, or reference-style CLASS - METHODS.
-    val splitStaticIdx = upper.sliding(3).zipWithIndex.collectFirst {
-      case (Seq("CLASS", "-", "METHODS"), idx) => idx
+    val splitStaticIdx = upper.sliding(3).zipWithIndex.collectFirst { case (Seq("CLASS", "-", "METHODS"), idx) =>
+      idx
     }
     val compoundStaticIdx = upper.indexWhere(_ == "CLASS-METHODS")
     val methodIdx         = upper.indexWhere(_ == "METHODS")
@@ -397,7 +397,9 @@ class AbapJsonParser {
       case "Unknown" =>
         // abaplint emits Unknown for e.g. CALL FUNCTION 'SYSTEM' ID 'COMMAND' FIELD <var>
         // which is syntactically invalid ABAP but still used. Recover as a CallFunction.
-        if (tokens.headOption.exists(_.equalsIgnoreCase("DELETE")) && tokens.lift(1).exists(_.equalsIgnoreCase("DYNPRO"))) {
+        if (
+          tokens.headOption.exists(_.equalsIgnoreCase("DELETE")) && tokens.lift(1).exists(_.equalsIgnoreCase("DYNPRO"))
+        ) {
           val programArg = tokens.lift(2).map(p => Argument(Some("PROGRAM"), IdentifierExpr(p, span)))
           val screenArg = tokens.lift(3).map { screen =>
             val value =

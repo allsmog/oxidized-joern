@@ -1591,15 +1591,7 @@ final class OxidizedAstCreator(document: JavaAstDocument, config: Config)
       } else if (exposure.thenBranch) {
         restorePatternLocals(conditionPatternLocals)
       }
-      forAst(
-        node,
-        Nil,
-        initAsts,
-        conditionAsts,
-        updateAsts,
-        Seq(bodyAst),
-        Some(declarationHeader(node))
-      )
+      forAst(node, Nil, initAsts, conditionAsts, updateAsts, Seq(bodyAst), Some(declarationHeader(node)))
     }
     if (conditionPatternLocalsAfterLoop.nonEmpty) {
       bindPatternLocals(conditionPatternLocalsAfterLoop)
@@ -1621,15 +1613,7 @@ final class OxidizedAstCreator(document: JavaAstDocument, config: Config)
       val bodyAst = childByField(node, "body")
         .map(astForStatementBody)
         .getOrElse(emptyBlockAst(node))
-      forAst(
-        node,
-        localAsts,
-        Nil,
-        iterableAst,
-        Nil,
-        Seq(bodyAst),
-        Some(declarationHeader(node))
-      )
+      forAst(node, localAsts, Nil, iterableAst, Nil, Seq(bodyAst), Some(declarationHeader(node)))
     }
   }
 
@@ -1707,26 +1691,14 @@ final class OxidizedAstCreator(document: JavaAstDocument, config: Config)
       .map { guardNode =>
         val guardAst  = astForExpression(guardNode)
         val guardBody = blockAst(blockNode(entryNode), statementAsts.toList)
-        val guardIf = ifThenElseAst(
-          guardNode,
-          Some(guardAst),
-          guardBody,
-          None,
-          Some(s"if (${guardNode.code})")
-        )
+        val guardIf   = ifThenElseAst(guardNode, Some(guardAst), guardBody, None, Some(s"if (${guardNode.code})"))
         blockAst(blockNode(entryNode), List(guardIf))
       }
       .getOrElse(blockAst(blockNode(entryNode), statementAsts.toList))
     restorePatternLocals(patternLocals)
     pendingPatternLocals = pendingPatternLocals.drop(patternLocals.size)
 
-    val ifAst = ifThenElseAst(
-      labelNode,
-      Some(conditionAst),
-      ifBody,
-      None,
-      Some(s"if (${astRootCode(conditionAst)})")
-    )
+    val ifAst = ifThenElseAst(labelNode, Some(conditionAst), ifBody, None, Some(s"if (${astRootCode(conditionAst)})"))
     Seq(
       Ast(jumpTargetNode(labelNode, "case", patternNode.code)),
       blockAst(blockNode(entryNode), (patternLocalAsts :+ ifAst).toList)

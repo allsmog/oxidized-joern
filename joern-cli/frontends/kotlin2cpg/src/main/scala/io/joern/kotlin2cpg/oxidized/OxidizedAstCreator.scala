@@ -1480,10 +1480,10 @@ final class OxidizedAstCreator(document: KotlinAstDocument, config: Config)
   }
 
   private def astForIfExpression(ifExpression: KotlinAstNode, context: BodyContext): Ast = {
-    val conditionAst    = conditionExpression(ifExpression).map(astForExpression(_, context))
-    val bodies          = ifExpression.children.filter(_.kind == "control_structure_body")
-    val thenAst         = bodies.headOption.map(body => astForControlStructureBody(body, childContext(context)))
-    val elseAst         = bodies.drop(1).headOption.map(body => astForControlStructureBody(body, childContext(context)))
+    val conditionAst = conditionExpression(ifExpression).map(astForExpression(_, context))
+    val bodies       = ifExpression.children.filter(_.kind == "control_structure_body")
+    val thenAst      = bodies.headOption.map(body => astForControlStructureBody(body, childContext(context)))
+    val elseAst      = bodies.drop(1).headOption.map(body => astForControlStructureBody(body, childContext(context)))
     ifThenElseAst(ifExpression, conditionAst, thenAst.getOrElse(Ast()), elseAst, Some(ifExpression.code))
   }
 
