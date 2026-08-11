@@ -19,32 +19,30 @@ jobs:
           java-version: 21
           cache: sbt
       - uses: sbt/setup-sbt@v1
-      - run: sudo apt update && sudo apt install -y gnupg
-      - run: echo $PGP_SECRET | base64 --decode | gpg --batch --import
-        env:
-          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+      # No GPG import: this fork does not publish signed artifacts to Maven
+      # Central (see build.sbt). Releases are GitHub Releases only.
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.7
       - name: Set up Swift
-        uses: SwiftyLab/setup-swift@latest
+        uses: SwiftyLab/setup-swift@4a988e04f3cea0df6f7ef4cae33463026c27e8c1 # v1.9.1
         with:
           swift-version: "6.1"
       - name: Install Bundler
         run: gem install bundler -v 2.4.22
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
       - run: sbt scalafmtCheck test
       - name: Test distribution
         run: |
           python -m pip install requests pexpect
           sbt joerncli/stage querydb/createDistribution
           python -u ./testDistro.py
-      - run: sbt ciReleaseSkipIfAlreadyReleased ciReleaseTagNextVersion ciReleaseSonatype createDistribution
-        env:
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+      # `ciReleaseSonatype` intentionally omitted — publishing to Maven Central
+      # under upstream's `io.joern` coordinates is not something this fork does.
+      # Tag the next version and build the distribution for the GitHub release.
+      - run: sbt ciReleaseSkipIfAlreadyReleased ciReleaseTagNextVersion createDistribution
       - name: get tagged version
         run: echo "LATEST_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
       - name: Trigger release-github workflow
