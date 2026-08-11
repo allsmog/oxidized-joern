@@ -80,8 +80,8 @@ pub(crate) const STRONG_CALLS: &[&str] = &[
 /// query-builder or mock API (`qb.Delete(table, cols)`, mockery's
 /// `m.On("Method", ...)`) does not.
 pub(crate) const VERB_CALLS: &[&str] = &[
-    "GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "ALL", "Any", "Get", "Post",
-    "Put", "Patch", "Delete", "get", "post", "put", "patch", "delete", "all", "use", "on", "On",
+    "GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "ALL", "Any", "Get", "Post", "Put",
+    "Patch", "Delete", "get", "post", "put", "patch", "delete", "all", "use", "on", "On",
 ];
 
 /// A name matching more methods than this is too ambiguous to mine.
@@ -248,7 +248,10 @@ pub(crate) fn mine_registrations(cpg: &Cpg) -> Vec<Registration> {
         let route = args.first().and_then(|&a| {
             let t = cpg.code_of(a)?.trim();
             if cpg.kind_of(a) == NodeKind::Literal {
-                Some(t.trim_matches(|q| q == '"' || q == '\'' || q == '`').to_string())
+                Some(
+                    t.trim_matches(|q| q == '"' || q == '\'' || q == '`')
+                        .to_string(),
+                )
             } else {
                 // Route constant / template expression — keep it verbatim
                 // (`utils.ClusterIDEndpoint`, `Resources.X.Template()`).
@@ -281,9 +284,7 @@ pub(crate) fn receiver_is_router(cpg: &Cpg, c: NodeId) -> bool {
 /// The base segment of a (possibly package-/pointer-qualified) type
 /// spelling: `*mux.Router` -> `Router`, `pkg.MyHandler` -> `MyHandler`.
 fn type_base(t: &str) -> &str {
-    t.rsplit(|ch: char| ch == '.' || ch == ':' || ch == '/' || ch == '*' || ch == '&')
-        .next()
-        .unwrap_or(t)
+    t.rsplit(['.', ':', '/', '*', '&']).next().unwrap_or(t)
 }
 
 /// Router-shaped type name, by base segment: shared by the verb-call
@@ -292,8 +293,10 @@ fn type_base(t: &str) -> &str {
 /// parameter — `gin.IRouter`, `chi.Router`, `*mux.Router`, `EchoRouter`).
 pub(crate) fn is_router_type(t: &str) -> bool {
     let base = type_base(t);
-    matches!(base, "Router" | "Engine" | "ServeMux" | "RouterGroup" | "Mux")
-        || base.ends_with("Router")
+    matches!(
+        base,
+        "Router" | "Engine" | "ServeMux" | "RouterGroup" | "Mux"
+    ) || base.ends_with("Router")
 }
 
 /// A string literal whose text begins with `/` — the universal route shape.
@@ -391,7 +394,9 @@ fn record(
     mined: &mut BTreeSet<String>,
 ) {
     let Some(name) = name else { return };
-    let Some(methods) = by_name.get(name) else { return };
+    let Some(methods) = by_name.get(name) else {
+        return;
+    };
     if methods.len() > MAX_MATCHES {
         // Ambiguity rescue: a member-value reference whose base is locally
         // typed carries the receiver TYPE as its hint (`tokenController.
@@ -404,8 +409,10 @@ fn record(
             // The hint may name the INTERFACE the base is declared as
             // (`tokenController middleware.TokenControllerInterface`); Go's
             // `XInterface` naming convention bridges it to the impl type.
-            let prefixes =
-                [format!("{hint}."), format!("{}.", hint.strip_suffix("Interface").unwrap_or(hint))];
+            let prefixes = [
+                format!("{hint}."),
+                format!("{}.", hint.strip_suffix("Interface").unwrap_or(hint)),
+            ];
             for &m in methods {
                 if cpg
                     .full_name_of(m)

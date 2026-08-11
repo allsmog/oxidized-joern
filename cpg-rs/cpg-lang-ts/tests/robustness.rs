@@ -34,14 +34,20 @@ fn assert_has(cpg: &Cpg, methods: &[&str], calls: &[&str], lang: &str) {
         assert!(
             !cpg.method_named(m).is_empty(),
             "{lang}: expected method `{m}`, methods = {:?}",
-            cpg.methods().iter().filter_map(|&x| cpg.name_of(x)).collect::<Vec<_>>()
+            cpg.methods()
+                .iter()
+                .filter_map(|&x| cpg.name_of(x))
+                .collect::<Vec<_>>()
         );
     }
     for c in calls {
         assert!(
             !cpg.calls_named(c).is_empty(),
             "{lang}: expected call `{c}`, calls = {:?}",
-            cpg.calls().iter().filter_map(|&x| cpg.name_of(x)).collect::<Vec<_>>()
+            cpg.calls()
+                .iter()
+                .filter_map(|&x| cpg.name_of(x))
+                .collect::<Vec<_>>()
         );
     }
 }
@@ -107,7 +113,12 @@ fn javascript_rich() {
         "#,
     );
     // class method, arrow bound to `handler`, member calls get + member access.
-    assert_has(&cpg, &["fetchUser", "handler", "wrap"], &["wrap", "get", "sink"], "JavaScript");
+    assert_has(
+        &cpg,
+        &["fetchUser", "handler", "wrap"],
+        &["wrap", "get", "sink"],
+        "JavaScript",
+    );
 }
 
 #[test]
@@ -129,7 +140,12 @@ fn ruby_rich() {
         "#,
     );
     // command call (logger.info), member call, methods with params.
-    assert_has(&cpg, &["perform", "transform"], &["fetch", "info", "transform"], "Ruby");
+    assert_has(
+        &cpg,
+        &["perform", "transform"],
+        &["fetch", "info", "transform"],
+        "Ruby",
+    );
     assert_eq!(cpg.parameters_of(cpg.method_named("perform")[0]).len(), 2);
 }
 
@@ -152,7 +168,12 @@ fn rust_rich() {
     );
     // impl method, macro call (println! args via token_tree), member call,
     // tail-expression method call, free fn.
-    assert_has(&cpg, &["run", "sanitize"], &["sanitize", "println", "process"], "Rust");
+    assert_has(
+        &cpg,
+        &["run", "sanitize"],
+        &["sanitize", "println", "process"],
+        "Rust",
+    );
     // `sanitize(s: String)` — the param is `s`, not the type `String`.
     assert_param_names(&cpg, "sanitize", &["s"], "Rust");
     assert_param_names(&cpg, "run", &["input"], "Rust");
@@ -180,7 +201,12 @@ class Handler:
         return d.upper()
 "#,
     );
-    assert_has(&cpg, &["process", "transform"], &["parse", "info", "transform"], "Python");
+    assert_has(
+        &cpg,
+        &["process", "transform"],
+        &["parse", "info", "transform"],
+        "Python",
+    );
     // `self` is dropped, so process has 2 real params (request, config).
     assert_eq!(cpg.parameters_of(cpg.method_named("process")[0]).len(), 2);
 }
@@ -218,7 +244,11 @@ void GatewayServer::mkdir(common::Status& response, const MkdirRequest& request)
     let td = tds[0];
     assert_eq!(cpg.name_of(td), Some("GatewayServer"));
     assert_eq!(cpg.full_name_of(td), Some("example::GatewayServer"));
-    assert_eq!(cpg.signature_of(td), Some("GatewayServerIf"), "base simple name, ns stripped");
+    assert_eq!(
+        cpg.signature_of(td),
+        Some("GatewayServerIf"),
+        "base simple name, ns stripped"
+    );
     // Members: the method prototype is skipped; the smart pointer unwraps to
     // its pointee; a multi-declarator line yields one Member each.
     let members: Vec<_> = cpg.nodes_of_kind(NodeKind::Member);
@@ -229,7 +259,10 @@ void GatewayServer::mkdir(common::Status& response, const MkdirRequest& request)
     assert_eq!(by_name.get("file_service_client_"), Some(&"FileServiceIf"));
     assert_eq!(by_name.get("count_"), Some(&"int"));
     assert_eq!(by_name.get("total_"), Some(&"int"));
-    assert!(!by_name.contains_key("mkdir"), "prototype must not be a Member");
+    assert!(
+        !by_name.contains_key("mkdir"),
+        "prototype must not be a Member"
+    );
     // The client call carries its receiver variable name in the signature
     // column (the hook the call-graph pass uses for member-type hints).
     let calls = cpg.calls_named("mkdir");
@@ -262,7 +295,12 @@ class Tool {
 }
 "#,
     );
-    assert_has(&cpg, &["download", "run"], &["readFileSync", "exec", "Builder", "build"], "TypeScript");
+    assert_has(
+        &cpg,
+        &["download", "run"],
+        &["readFileSync", "exec", "Builder", "build"],
+        "TypeScript",
+    );
     // Param types survive TS annotations (drives entry guards + hints).
     let run = cpg.method_named("run");
     let p = cpg.parameters_of(run[0])[0];
@@ -290,16 +328,27 @@ object JobConfigOps {
     // argument, receiver root stamped in signature — the shape the
     // persistence stitch matches getter-sources against.
     let reads = cpg.calls_named("executionUser");
-    assert!(!reads.is_empty(), "field read `executionUser` must surface as a call");
+    assert!(
+        !reads.is_empty(),
+        "field read `executionUser` must surface as a call"
+    );
     let read = reads
         .iter()
         .copied()
         .find(|&c| cpg.code_of(c) == Some("config.executionSettings.executionUser"))
         .expect("chained read with full code text");
-    assert_eq!(cpg.signature_of(read), Some("config"), "receiver root in signature");
+    assert_eq!(
+        cpg.signature_of(read),
+        Some("config"),
+        "receiver root in signature"
+    );
     let inner = cpg.arguments_of(read);
     assert_eq!(inner.len(), 1);
-    assert_eq!(cpg.name_of(inner[0]), Some("executionSettings"), "chain nests");
+    assert_eq!(
+        cpg.name_of(inner[0]),
+        Some("executionSettings"),
+        "chain nests"
+    );
     // A named argument survives as a nested `=` call: arg 1 names the
     // parameter, arg 2 carries the value (and its taint).
     let copy = cpg.calls_named("copy");
@@ -355,12 +404,23 @@ void factory(const char* path) {
     // `make_shared<ScopedFD>(path)` / `make_unique<...>` surface under the
     // constructed type's name (one more from the direct-init's inner `new`).
     let ctors = cpg.calls_named("ScopedFD");
-    assert_eq!(ctors.len(), 3, "make_shared/make_unique/new must all name ScopedFD");
-    assert!(cpg.calls_named("make_shared").is_empty(), "factory name must be rewritten");
+    assert_eq!(
+        ctors.len(),
+        3,
+        "make_shared/make_unique/new must all name ScopedFD"
+    );
+    assert!(
+        cpg.calls_named("make_shared").is_empty(),
+        "factory name must be rewritten"
+    );
     // Direct-init `shared_ptr<ScopedFD> fd(new ...)` must not be swallowed:
     // it lowers to fd = shared_ptr(ScopedFD(path)) with the argument built.
     let outers = cpg.calls_named("shared_ptr");
-    assert_eq!(outers.len(), 1, "direct-init declaration must lower to a typed ctor call");
+    assert_eq!(
+        outers.len(),
+        1,
+        "direct-init declaration must lower to a typed ctor call"
+    );
     let inner = cpg.arguments_of(outers[0]);
     assert_eq!(inner.len(), 1);
     assert_eq!(cpg.name_of(inner[0]), Some("ScopedFD"));
@@ -427,9 +487,18 @@ fn member_chain_receiver_is_built() {
 }
 "#,
     );
-    assert!(!cpg.calls_named("getOrElse").is_empty(), "getOrElse call missing");
-    assert!(!cpg.calls_named("asJson").is_empty(), "asJson field read not built");
-    assert!(!cpg.calls_named("body").is_empty(), "body field read not built");
+    assert!(
+        !cpg.calls_named("getOrElse").is_empty(),
+        "getOrElse call missing"
+    );
+    assert!(
+        !cpg.calls_named("asJson").is_empty(),
+        "asJson field read not built"
+    );
+    assert!(
+        !cpg.calls_named("body").is_empty(),
+        "body field read not built"
+    );
     assert!(
         !cpg.calls_named("asFormUrlEncoded").is_empty(),
         "multiline (indented_block) chain not built"
@@ -476,7 +545,10 @@ object V {
         assert!(
             !cpg.calls_named(want).is_empty(),
             "scala: `{want}` call missing — value-shape rhs dropped; calls = {:?}",
-            cpg.calls().iter().filter_map(|&x| cpg.name_of(x)).collect::<Vec<_>>()
+            cpg.calls()
+                .iter()
+                .filter_map(|&x| cpg.name_of(x))
+                .collect::<Vec<_>>()
         );
     }
     // Each val must lower to a `=` whose rhs argument exists (2 args).
@@ -498,7 +570,10 @@ object V {
         );
     }
     // Branch values lower to `<branch>` calls whose args are branch values.
-    assert!(!cpg.calls_named("<branch>").is_empty(), "branch value call missing");
+    assert!(
+        !cpg.calls_named("<branch>").is_empty(),
+        "branch value call missing"
+    );
     // Implicit return of a bare-if body: the method must contain a Return
     // wrapping a <branch> value (summaries need the return link).
     let m = cpg.method_named("implicitBranchReturn");
@@ -529,9 +604,16 @@ func f(x interface{}) string {
         .filter(|&a| cpg.code_of(a).unwrap_or("").starts_with("s :="))
         .collect();
     assert_eq!(assigns.len(), 1, "type-assertion assignment must exist");
-    assert_eq!(cpg.arguments_of(assigns[0]).len(), 2, "rhs value must survive x.(T)");
+    assert_eq!(
+        cpg.arguments_of(assigns[0]).len(),
+        2,
+        "rhs value must survive x.(T)"
+    );
     // The rhs of `v, ok := producer().(...)` keeps the producer() call.
-    assert!(!cpg.calls_named("producer").is_empty(), "call under type assertion dropped");
+    assert!(
+        !cpg.calls_named("producer").is_empty(),
+        "call under type assertion dropped"
+    );
 }
 
 #[test]
@@ -557,9 +639,15 @@ end
         assert!(
             !cpg.calls_named(want).is_empty(),
             "ruby: `{want}` call missing; calls = {:?}",
-            cpg.calls().iter().filter_map(|&x| cpg.name_of(x)).collect::<Vec<_>>()
+            cpg.calls()
+                .iter()
+                .filter_map(|&x| cpg.name_of(x))
+                .collect::<Vec<_>>()
         );
     }
     // Ternary and if-as-value lower to <branch> calls.
-    assert!(cpg.calls_named("<branch>").len() >= 2, "ruby ternary/if value calls missing");
+    assert!(
+        cpg.calls_named("<branch>").len() >= 2,
+        "ruby ternary/if value calls missing"
+    );
 }

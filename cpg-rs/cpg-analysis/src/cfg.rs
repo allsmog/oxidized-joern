@@ -241,7 +241,11 @@ impl CfgBuilder<'_> {
                 // condition is one arm and the condition also exits directly
                 // (divergence 3 in the module docs).
                 let cond = kids.iter().copied().find(|&c| !is_block(self, c));
-                let arms: Vec<NodeId> = kids.iter().copied().filter(|&c| is_block(self, c)).collect();
+                let arms: Vec<NodeId> = kids
+                    .iter()
+                    .copied()
+                    .filter(|&c| is_block(self, c))
+                    .collect();
                 let (ce, co) = match cond {
                     Some(c) => self.build(c),
                     None => (None, vec![]),
@@ -516,7 +520,10 @@ mod tests {
         assert!(has_cfg_edge(&cpg, a, done), "then arm -> continuation");
         assert!(has_cfg_edge(&cpg, b, done), "else arm -> continuation");
         // The condition must NOT skip to the continuation (there IS an else).
-        assert!(!has_cfg_edge(&cpg, cond, done), "no cond -> continuation with else present");
+        assert!(
+            !has_cfg_edge(&cpg, cond, done),
+            "no cond -> continuation with else present"
+        );
     }
 
     #[test]
@@ -530,7 +537,10 @@ mod tests {
         let a = call_named(&cpg, "a");
         let done = call_named(&cpg, "done");
         assert!(has_cfg_edge(&cpg, cond, a));
-        assert!(has_cfg_edge(&cpg, cond, done), "false branch skips the then arm");
+        assert!(
+            has_cfg_edge(&cpg, cond, done),
+            "false branch skips the then arm"
+        );
     }
 
     #[test]
@@ -550,7 +560,10 @@ mod tests {
     #[test]
     fn cfg_do_while_executes_body_first() {
         let cpg = build("void f(int n) { do { g(); } while (n); }");
-        let method = cpg.nodes().find(|&n| cpg.kind_of(n) == NodeKind::Method).unwrap();
+        let method = cpg
+            .nodes()
+            .find(|&n| cpg.kind_of(n) == NodeKind::Method)
+            .unwrap();
         let mret = cpg
             .out_kind(method, EdgeKind::Ast)
             .find(|&c| cpg.kind_of(c) == NodeKind::MethodReturn)
@@ -560,7 +573,10 @@ mod tests {
             .find(|&n| cpg.kind_of(n) == NodeKind::Identifier && cpg.name_of(n) == Some("n"))
             .unwrap();
         let g = call_named(&cpg, "g");
-        assert!(has_cfg_edge(&cpg, method, g), "method entry -> body (not cond)");
+        assert!(
+            has_cfg_edge(&cpg, method, g),
+            "method entry -> body (not cond)"
+        );
         assert!(has_cfg_edge(&cpg, g, cond), "body -> cond");
         assert!(has_cfg_edge(&cpg, cond, g), "cond -> body (back-edge)");
         assert!(has_cfg_edge(&cpg, cond, mret), "cond false -> exit");
@@ -579,21 +595,33 @@ mod tests {
             .out_kind(init, EdgeKind::Cfg)
             .find(|&d| cpg.kind_of(d) == NodeKind::Identifier && cpg.name_of(d) == Some("i"))
             .expect("init flows into the condition's first leaf");
-        assert!(has_cfg_edge(&cpg, cond_i, cpg.out_kind(cond_i, EdgeKind::Cfg).next().unwrap()));
+        assert!(has_cfg_edge(
+            &cpg,
+            cond_i,
+            cpg.out_kind(cond_i, EdgeKind::Cfg).next().unwrap()
+        ));
         assert!(has_cfg_edge(&cpg, cond, g), "cond true -> body");
-        assert!(has_cfg_edge(&cpg, cond, after), "cond false -> continuation");
+        assert!(
+            has_cfg_edge(&cpg, cond, after),
+            "cond false -> continuation"
+        );
         // body -> update entry -> ... -> update root -> cond entry (back-edge).
         let update_entry = cpg
             .out_kind(g, EdgeKind::Cfg)
             .next()
             .expect("body flows onward");
         assert!(
-            std::iter::successors(Some(update_entry), |&n| cpg.out_kind(n, EdgeKind::Cfg).next())
-                .take(8)
-                .any(|n| n == update),
+            std::iter::successors(Some(update_entry), |&n| cpg
+                .out_kind(n, EdgeKind::Cfg)
+                .next())
+            .take(8)
+            .any(|n| n == update),
             "body chains through the update expression"
         );
-        assert!(has_cfg_edge(&cpg, update, cond_i), "update -> cond (back-edge)");
+        assert!(
+            has_cfg_edge(&cpg, update, cond_i),
+            "update -> cond (back-edge)"
+        );
     }
 
     #[test]
@@ -608,8 +636,14 @@ mod tests {
             .find(|&n| cpg.kind_of(n) == NodeKind::Identifier && cpg.name_of(n) == Some("v"))
             .unwrap();
         let h = call_named(&cpg, "h");
-        let method = cpg.nodes().find(|&n| cpg.kind_of(n) == NodeKind::Method).unwrap();
-        assert!(has_cfg_edge(&cpg, method, u), "method entry -> first argument");
+        let method = cpg
+            .nodes()
+            .find(|&n| cpg.kind_of(n) == NodeKind::Method)
+            .unwrap();
+        assert!(
+            has_cfg_edge(&cpg, method, u),
+            "method entry -> first argument"
+        );
         assert!(has_cfg_edge(&cpg, u, v), "arguments evaluate in order");
         assert!(has_cfg_edge(&cpg, v, h), "last argument -> the call itself");
         assert!(!has_cfg_edge(&cpg, method, h), "the call is not the entry");
@@ -618,7 +652,10 @@ mod tests {
     #[test]
     fn cfg_return_flows_to_method_return_only() {
         let cpg = build("int f(int x) { if (x) { return 1; } return 2; }");
-        let method = cpg.nodes().find(|&n| cpg.kind_of(n) == NodeKind::Method).unwrap();
+        let method = cpg
+            .nodes()
+            .find(|&n| cpg.kind_of(n) == NodeKind::Method)
+            .unwrap();
         let mret = cpg
             .out_kind(method, EdgeKind::Ast)
             .find(|&c| cpg.kind_of(c) == NodeKind::MethodReturn)
@@ -639,9 +676,7 @@ mod tests {
 
     #[test]
     fn cfg_break_and_continue() {
-        let cpg = build(
-            "void f(int n) { while (n) { if (n) { break; } continue; } after(); }",
-        );
+        let cpg = build("void f(int n) { while (n) { if (n) { break; } continue; } after(); }");
         let after = call_named(&cpg, "after");
         let brk = node_with_code(&cpg, NodeKind::ControlStructure, "break_statement");
         let cont = node_with_code(&cpg, NodeKind::ControlStructure, "continue_statement");
@@ -681,6 +716,9 @@ mod tests {
         let brk = node_with_code(&cpg, NodeKind::ControlStructure, "break_statement");
         assert!(has_cfg_edge(&cpg, brk, after));
         assert!(has_cfg_edge(&cpg, c, after), "default arm -> continuation");
-        assert!(!has_cfg_edge(&cpg, cond, after), "default present: no cond -> continuation");
+        assert!(
+            !has_cfg_edge(&cpg, cond, after),
+            "default present: no cond -> continuation"
+        );
     }
 }

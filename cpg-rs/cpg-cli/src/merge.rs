@@ -108,7 +108,11 @@ pub fn link_rpcs(cpg: &mut Cpg, rpcs: &[String]) -> (usize, Vec<String>) {
             continue;
         }
         let stub = lc_first(rpc);
-        let mut clients: Vec<NodeId> = if stub != *rpc { cpg.calls_named(&stub) } else { Vec::new() };
+        let mut clients: Vec<NodeId> = if stub != *rpc {
+            cpg.calls_named(&stub)
+        } else {
+            Vec::new()
+        };
         // Same-case client calls that stayed unresolved (e.g. only the stub
         // interface, not the handler, was in that donor's graph).
         clients.extend(

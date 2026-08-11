@@ -195,7 +195,12 @@ pub fn criterion_location(cpg: &Cpg, method_name: &str, line: u32) -> Vec<NodeId
     crit
 }
 
-pub fn slice_json(cpg: &Cpg, criteria: &[NodeId], entries: &[SliceEntry], truncated: bool) -> Value {
+pub fn slice_json(
+    cpg: &Cpg,
+    criteria: &[NodeId],
+    entries: &[SliceEntry],
+    truncated: bool,
+) -> Value {
     let crit: Vec<Value> = criteria
         .iter()
         .map(|&n| {

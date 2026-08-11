@@ -1,9 +1,7 @@
 //! Thrift parsing + stitching, against builder-constructed CPGs — the same
 //! `cpg_cli::thrift` code paths `cpg merge --thrifts` runs in production.
 
-use cpg_cli::thrift::{
-    link_thrift, parse_thrift, resolve_extends, thrift_entries, ThriftService,
-};
+use cpg_cli::thrift::{link_thrift, parse_thrift, resolve_extends, thrift_entries, ThriftService};
 use cpg_core::{Cpg, CpgBuilder, NodeId, Query};
 
 #[test]
@@ -80,7 +78,10 @@ fn stitch_graph() -> (Cpg, NodeId, NodeId, NodeId) {
         for (class, bases) in [
             ("FileServiceHandler", vec!["FileServiceIf".to_string()]),
             ("MockFileServiceHandler", vec!["FileServiceIf".to_string()]),
-            ("GatewayFileServiceClient", vec!["FileServiceIf".to_string()]),
+            (
+                "GatewayFileServiceClient",
+                vec!["FileServiceIf".to_string()],
+            ),
         ] {
             let td = b.type_decl(class, class, &bases, Some(1));
             b.contains(file, td);
@@ -96,9 +97,18 @@ fn stitch_graph() -> (Cpg, NodeId, NodeId, NodeId) {
             let sym = b.cpg.intern(cls);
             b.cpg.set_type_full_name(m, sym);
         }
-        let caller = b.method("HandleMkdir", "GatewayServer::HandleMkdir", "HandleMkdir()", Some(30));
+        let caller = b.method(
+            "HandleMkdir",
+            "GatewayServer::HandleMkdir",
+            "HandleMkdir()",
+            Some(30),
+        );
         b.contains(file, caller);
-        hinted_call = b.call("mkdir", "file_service_client_->mkdir(response, request)", Some(31));
+        hinted_call = b.call(
+            "mkdir",
+            "file_service_client_->mkdir(response, request)",
+            Some(31),
+        );
         b.ast_child(caller, hinted_call);
         bare_call = b.call("mkdir", "mkdir(path, 0755)", Some(32));
         b.ast_child(caller, bare_call);
@@ -181,6 +191,9 @@ fn slice_walks_all_fanout_targets() {
     assert!(
         has_caller_arg,
         "slice from the second fan-out target must hop to the caller's argument; got {:?}",
-        entries.iter().map(|e| (&e.code, e.line)).collect::<Vec<_>>()
+        entries
+            .iter()
+            .map(|e| (&e.code, e.line))
+            .collect::<Vec<_>>()
     );
 }

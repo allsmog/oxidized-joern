@@ -13,8 +13,8 @@
 //! This is the property the architecture review flagged as the highest-value
 //! lever and the one neither Joern nor Fraunhofer's CPG has today.
 
-use cpg_core::{Cpg, FileId, NodeId, NodeKind};
 use cpg_analysis::{PassManager, SummaryStore};
+use cpg_core::{Cpg, FileId, NodeId, NodeKind};
 use cpg_frontend::Frontend;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{HashMap, HashSet};
@@ -356,6 +356,9 @@ impl Project {
     /// call sites), source identifiers, authz-check names (advisory
     /// authz-dominance annotation), and component-confiner names (advisory
     /// confinement annotation) — the last two never affect recall.
+    // Each argument is an independent, caller-supplied rule-pack dimension;
+    // bundling them into one struct would just move the arity to the caller.
+    #[allow(clippy::too_many_arguments)]
     pub fn find_taint_spec(
         &self,
         sources: &[&str],
@@ -371,8 +374,7 @@ impl Project {
         let mut spec = cpg_analysis::TaintSpec::with_sanitizers(sources, sinks, sanitizers);
         spec.source_methods = entry_methods.iter().map(|s| s.to_string()).collect();
         spec.source_methods_guarded = idl_entries.iter().map(|s| s.to_string()).collect();
-        spec.source_methods_registered =
-            registered_entries.iter().map(|s| s.to_string()).collect();
+        spec.source_methods_registered = registered_entries.iter().map(|s| s.to_string()).collect();
         spec.source_idents = source_idents.iter().map(|s| s.to_string()).collect();
         spec.authz_methods = authz_methods.iter().map(|s| s.to_string()).collect();
         spec.confiners = confiners.iter().map(|s| s.to_string()).collect();
@@ -409,7 +411,10 @@ mod tests {
             "#,
         )]);
         let wrap = p.summary_of("wrap").expect("wrap summarised");
-        assert!(wrap.flows.iter().any(|f| f.from == Point::Param(0) && f.to == Point::Return));
+        assert!(wrap
+            .flows
+            .iter()
+            .any(|f| f.from == Point::Param(0) && f.to == Point::Return));
     }
 
     #[test]
@@ -432,7 +437,9 @@ mod tests {
         // NOT b.c (unrelated). 3 files total; we expect 2 reanalysed.
         let out = p.update_file("a.c", "int helper(int x){ return x; }  // touched");
         match out {
-            UpdateOutcome::Rebuilt { files_reanalysed, .. } => {
+            UpdateOutcome::Rebuilt {
+                files_reanalysed, ..
+            } => {
                 assert_eq!(files_reanalysed, 2, "should touch a.c + c.c, not b.c");
             }
             _ => panic!("expected rebuild"),
@@ -456,7 +463,11 @@ mod tests {
             "#,
         )]);
         let findings = p.find_taint(&["getenv"], &["system"]);
-        assert_eq!(findings.len(), 1, "expected one source->sink flow: {findings:?}");
+        assert_eq!(
+            findings.len(),
+            1,
+            "expected one source->sink flow: {findings:?}"
+        );
         assert_eq!(findings[0].sink, "system");
         assert_eq!(findings[0].origin, "getenv");
         // The witness path runs from the getenv source to the system sink.
@@ -582,13 +593,19 @@ mod tests {
                 .summary_of("wrap")
                 .unwrap_or_else(|| panic!("{lang}: wrap not summarised"));
             assert!(
-                wrap.flows.iter().any(|f| f.from == Point::Param(0) && f.to == Point::Return),
+                wrap.flows
+                    .iter()
+                    .any(|f| f.from == Point::Param(0) && f.to == Point::Return),
                 "{lang}: wrap should flow param0 -> return, got {:?}",
                 wrap.flows
             );
             // The interprocedural source->sink flow must be found.
             let findings = p.find_taint(&["source"], &["sink"]);
-            assert_eq!(findings.len(), 1, "{lang}: expected one flow, got {findings:?}");
+            assert_eq!(
+                findings.len(),
+                1,
+                "{lang}: expected one flow, got {findings:?}"
+            );
             assert_eq!(findings[0].origin, "source", "{lang}: wrong origin");
         }
     }
@@ -606,37 +623,72 @@ mod tests {
         {
             let mut p = Project::new(|| Box::new(TsFrontend::go()), standard_pipeline());
             p.build(&[
-                ("util.go", "package m\nfunc passthrough(p string) string { return p }"),
+                (
+                    "util.go",
+                    "package m\nfunc passthrough(p string) string { return p }",
+                ),
                 (
                     "main.go",
                     "package m\nfunc run(){ t := source(); sink(passthrough(t)) }",
                 ),
             ]);
-            assert_eq!(p.find_taint(&["source"], &["sink"]).len(), 1, "Go: initial flow");
+            assert_eq!(
+                p.find_taint(&["source"], &["sink"]).len(),
+                1,
+                "Go: initial flow"
+            );
 
             // Break it: passthrough no longer returns its argument.
-            p.update_file("util.go", "package m\nfunc passthrough(p string) string { return \"\" }");
-            assert_eq!(p.find_taint(&["source"], &["sink"]).len(), 0, "Go: flow after fix");
+            p.update_file(
+                "util.go",
+                "package m\nfunc passthrough(p string) string { return \"\" }",
+            );
+            assert_eq!(
+                p.find_taint(&["source"], &["sink"]).len(),
+                0,
+                "Go: flow after fix"
+            );
 
             // Restore it.
-            p.update_file("util.go", "package m\nfunc passthrough(p string) string { return p }");
-            assert_eq!(p.find_taint(&["source"], &["sink"]).len(), 1, "Go: flow restored");
+            p.update_file(
+                "util.go",
+                "package m\nfunc passthrough(p string) string { return p }",
+            );
+            assert_eq!(
+                p.find_taint(&["source"], &["sink"]).len(),
+                1,
+                "Go: flow restored"
+            );
         }
 
         // Java: same shape across two files/classes.
         {
             let mut p = Project::new(|| Box::new(TsFrontend::java()), standard_pipeline());
             p.build(&[
-                ("Util.java", "class Util { static String pass(String p){ return p; } }"),
+                (
+                    "Util.java",
+                    "class Util { static String pass(String p){ return p; } }",
+                ),
                 (
                     "Main.java",
                     "class Main { static void run(){ String t = source(); sink(Util.pass(t)); } }",
                 ),
             ]);
-            assert_eq!(p.find_taint(&["source"], &["sink"]).len(), 1, "Java: initial flow");
+            assert_eq!(
+                p.find_taint(&["source"], &["sink"]).len(),
+                1,
+                "Java: initial flow"
+            );
 
-            p.update_file("Util.java", "class Util { static String pass(String p){ return \"\"; } }");
-            assert_eq!(p.find_taint(&["source"], &["sink"]).len(), 0, "Java: flow after fix");
+            p.update_file(
+                "Util.java",
+                "class Util { static String pass(String p){ return \"\"; } }",
+            );
+            assert_eq!(
+                p.find_taint(&["source"], &["sink"]).len(),
+                0,
+                "Java: flow after fix"
+            );
         }
     }
 
@@ -652,7 +704,10 @@ mod tests {
             "def ident(x):\n    return x\n\ndef wrap(y):\n    return ident(y)\n",
         )]);
         let wrap = p.summary_of("wrap").expect("wrap summarised");
-        assert!(wrap.flows.iter().any(|f| f.from == Point::Param(0) && f.to == Point::Return));
+        assert!(wrap
+            .flows
+            .iter()
+            .any(|f| f.from == Point::Param(0) && f.to == Point::Return));
     }
 
     #[test]
@@ -697,7 +752,11 @@ mod tests {
 
         // Re-analyse the same file (touched): edge count must not grow.
         p.update_file("r.c", "void f() { x = source(); sink(x); } // touched");
-        assert_eq!(rd_count(&p.cpg), first, "re-run duplicated ReachingDef edges");
+        assert_eq!(
+            rd_count(&p.cpg),
+            first,
+            "re-run duplicated ReachingDef edges"
+        );
         assert!(def_use(&p.cpg));
 
         // An edit that kills the flow removes the def-use edge.
@@ -727,6 +786,9 @@ mod tests {
         .unwrap();
         p.build(&[("d.c", "char* g(char* s){ return strdup(s); }")]);
         let g = p.summary_of("g").unwrap();
-        assert!(g.flows.iter().any(|f| f.from == Point::Param(0) && f.to == Point::Return));
+        assert!(g
+            .flows
+            .iter()
+            .any(|f| f.from == Point::Param(0) && f.to == Point::Return));
     }
 }

@@ -42,14 +42,21 @@ pub fn parse_thrift(src: &str, out: &mut Vec<ThriftService>) {
     for line in src.lines() {
         let t = line.trim();
         if current.is_none() {
-            if let Some(rest) = t.strip_prefix("service ").or_else(|| t.strip_prefix("service\t")) {
+            if let Some(rest) = t
+                .strip_prefix("service ")
+                .or_else(|| t.strip_prefix("service\t"))
+            {
                 let name: String = rest
                     .trim_start()
                     .chars()
                     .take_while(|c| c.is_alphanumeric() || *c == '_')
                     .collect();
                 if !name.is_empty() {
-                    pending = Some(ThriftService { name, extends: None, methods: Vec::new() });
+                    pending = Some(ThriftService {
+                        name,
+                        extends: None,
+                        methods: Vec::new(),
+                    });
                 }
             }
             if let Some(p) = &mut pending {
@@ -190,7 +197,7 @@ pub fn thrift_services(dir: &std::path::Path, out: &mut Vec<ThriftService>) {
 /// Fold parent-service methods into children (`service A extends common.B`).
 /// The `file.` include prefix is stripped: thrift service names are unique
 /// enough in practice, and the stitch only needs the method list.
-pub fn resolve_extends(services: &mut Vec<ThriftService>) {
+pub fn resolve_extends(services: &mut [ThriftService]) {
     let by_name: HashMap<String, (Option<String>, Vec<String>)> = services
         .iter()
         .map(|s| (s.name.clone(), (s.extends.clone(), s.methods.clone())))
@@ -204,7 +211,9 @@ pub fn resolve_extends(services: &mut Vec<ThriftService>) {
             if !seen.insert(simple.clone()) {
                 break; // cycle guard
             }
-            let Some((grandparent, methods)) = by_name.get(&simple) else { break };
+            let Some((grandparent, methods)) = by_name.get(&simple) else {
+                break;
+            };
             svc.methods.extend(methods.iter().cloned());
             parent = grandparent.clone();
         }
@@ -221,15 +230,22 @@ fn handler_classes<'a>(cpg: &Cpg, services: &'a [ThriftService]) -> HashMap<&'a 
         if !cpg.is_live(td) {
             continue;
         }
-        let Some(name) = cpg.name_of(td) else { continue };
+        let Some(name) = cpg.name_of(td) else {
+            continue;
+        };
         if name.ends_with("Client") || name.starts_with("Mock") {
             continue;
         }
-        let Some(bases) = cpg.signature_of(td) else { continue };
+        let Some(bases) = cpg.signature_of(td) else {
+            continue;
+        };
         for base in bases.split(',') {
             for svc in services {
                 if base == format!("{}If", svc.name) || base == format!("{}Null", svc.name) {
-                    handlers.entry(svc.name.as_str()).or_default().push(name.to_string());
+                    handlers
+                        .entry(svc.name.as_str())
+                        .or_default()
+                        .push(name.to_string());
                 }
             }
         }
@@ -252,7 +268,10 @@ pub fn link_thrift(cpg: &mut Cpg, services: &[ThriftService]) -> (usize, Vec<Str
     let mut methods_by_class: HashMap<(String, String), Vec<NodeId>> = HashMap::new();
     for m in cpg.methods() {
         if let (Some(cls), Some(name)) = (cpg.type_full_name_of(m), cpg.name_of(m)) {
-            methods_by_class.entry((cls.to_string(), name.to_string())).or_default().push(m);
+            methods_by_class
+                .entry((cls.to_string(), name.to_string()))
+                .or_default()
+                .push(m);
         }
     }
     let handlers = handler_classes(cpg, services);
@@ -261,7 +280,9 @@ pub fn link_thrift(cpg: &mut Cpg, services: &[ThriftService]) -> (usize, Vec<Str
     let mut skipped: Vec<String> = Vec::new();
     let mut new_edges: Vec<(NodeId, NodeId)> = Vec::new();
     for svc in services {
-        let Some(classes) = handlers.get(svc.name.as_str()) else { continue };
+        let Some(classes) = handlers.get(svc.name.as_str()) else {
+            continue;
+        };
         let iface = format!("{}If", svc.name);
         let mut methods = svc.methods.clone();
         methods.sort();
@@ -270,7 +291,11 @@ pub fn link_thrift(cpg: &mut Cpg, services: &[ThriftService]) -> (usize, Vec<Str
             let impls: Vec<NodeId> = classes
                 .iter()
                 .flat_map(|c| {
-                    methods_by_class.get(&(c.clone(), m.clone())).into_iter().flatten().copied()
+                    methods_by_class
+                        .get(&(c.clone(), m.clone()))
+                        .into_iter()
+                        .flatten()
+                        .copied()
                 })
                 .collect();
             if impls.is_empty() {
@@ -315,7 +340,9 @@ pub fn thrift_entries(cpg: &Cpg, services: &[ThriftService]) -> Vec<String> {
     let handlers = handler_classes(cpg, services);
     let mut out = Vec::new();
     for svc in services {
-        let Some(classes) = handlers.get(svc.name.as_str()) else { continue };
+        let Some(classes) = handlers.get(svc.name.as_str()) else {
+            continue;
+        };
         for class in classes {
             for m in &svc.methods {
                 if methods_by_class.contains(&(class.clone(), m.clone())) {

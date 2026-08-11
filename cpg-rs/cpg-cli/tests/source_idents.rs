@@ -54,5 +54,8 @@ fn request_reaches_system_through_format_and_helper() {
 
 #[test]
 fn no_idents_no_findings() {
-    assert!(scan(&[]).is_empty(), "without sourceIdents nothing is tainted");
+    assert!(
+        scan(&[]).is_empty(),
+        "without sourceIdents nothing is tainted"
+    );
 }

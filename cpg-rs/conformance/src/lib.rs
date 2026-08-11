@@ -68,7 +68,11 @@ pub fn run_suite(fixture: &mut LangFixture, cases: &[ConformanceCase]) -> Vec<Ca
         let path = format!("case_{}.src", case.name);
         let file = cpg.file_id(&path);
         fixture.frontend.build_file(&mut cpg, &path, src);
-        cpg_analysis::standard_pipeline().run_all(&mut cpg, &[file], &cpg_analysis::PassContext::empty());
+        cpg_analysis::standard_pipeline().run_all(
+            &mut cpg,
+            &[file],
+            &cpg_analysis::PassContext::empty(),
+        );
         results.push(CaseResult {
             language: fixture.language.to_string(),
             case: case.name.to_string(),
@@ -86,7 +90,10 @@ pub fn standard_cases() -> Vec<ConformanceCase> {
             assert: |cpg| {
                 let ms = cpg.method_named("two_params");
                 if ms.len() != 1 {
-                    return Err(format!("expected 1 method `two_params`, found {}", ms.len()));
+                    return Err(format!(
+                        "expected 1 method `two_params`, found {}",
+                        ms.len()
+                    ));
                 }
                 let n = cpg.parameters_of(ms[0]).len();
                 if n != 2 {
@@ -153,7 +160,10 @@ pub fn standard_cases() -> Vec<ConformanceCase> {
                 if cs.len() == 1 {
                     Ok(())
                 } else {
-                    Err(format!("expected 1 `guarded` call inside branch, found {}", cs.len()))
+                    Err(format!(
+                        "expected 1 `guarded` call inside branch, found {}",
+                        cs.len()
+                    ))
                 }
             },
         },
@@ -166,7 +176,9 @@ pub fn standard_cases() -> Vec<ConformanceCase> {
                 if a == 1 && b == 1 {
                     Ok(())
                 } else {
-                    Err(format!("expected methods alpha(×1) and beta(×1), found {a} and {b}"))
+                    Err(format!(
+                        "expected methods alpha(×1) and beta(×1), found {a} and {b}"
+                    ))
                 }
             },
         },
@@ -184,10 +196,7 @@ mod tests {
                 "method_with_two_params",
                 "int two_params(int a, int b) { return a; }",
             )
-            .with_source(
-                "call_with_two_args",
-                "void f() { callee(1, 2); }",
-            )
+            .with_source("call_with_two_args", "void f() { callee(1, 2); }")
             .with_source(
                 "intraprocedural_call_resolves",
                 "int target(int x){ return x; } void f(){ target(3); }",
@@ -197,10 +206,7 @@ mod tests {
                 "call_inside_branch",
                 "void f(int c){ if (c) { guarded(c); } }",
             )
-            .with_source(
-                "two_methods",
-                "void alpha(){} void beta(){}",
-            )
+            .with_source("two_methods", "void alpha(){} void beta(){}")
     }
 
     #[test]
@@ -208,8 +214,7 @@ mod tests {
         let cases = standard_cases();
         let mut fx = c_fixture();
         let results = run_suite(&mut fx, &cases);
-        let failures: Vec<&CaseResult> =
-            results.iter().filter(|r| r.outcome.is_err()).collect();
+        let failures: Vec<&CaseResult> = results.iter().filter(|r| r.outcome.is_err()).collect();
         assert!(
             failures.is_empty(),
             "C frontend failed conformance: {:#?}",
@@ -238,7 +243,10 @@ mod tests {
                 "call_inside_branch",
                 "def f(c):\n    if c:\n        guarded(c)\n",
             )
-            .with_source("two_methods", "def alpha():\n    pass\n\ndef beta():\n    pass\n")
+            .with_source(
+                "two_methods",
+                "def alpha():\n    pass\n\ndef beta():\n    pass\n",
+            )
     }
 
     #[test]
@@ -246,8 +254,7 @@ mod tests {
         let cases = standard_cases();
         let mut fx = python_fixture();
         let results = run_suite(&mut fx, &cases);
-        let failures: Vec<&CaseResult> =
-            results.iter().filter(|r| r.outcome.is_err()).collect();
+        let failures: Vec<&CaseResult> = results.iter().filter(|r| r.outcome.is_err()).collect();
         assert!(
             failures.is_empty(),
             "Python frontend failed conformance: {:#?}",
@@ -271,12 +278,18 @@ mod tests {
                 "method_with_two_params",
                 "class C { int two_params(int a, int b){ return a; } }",
             )
-            .with_source("call_with_two_args", "class C { void f(){ callee(1, 2); } }")
+            .with_source(
+                "call_with_two_args",
+                "class C { void f(){ callee(1, 2); } }",
+            )
             .with_source(
                 "intraprocedural_call_resolves",
                 "class C { int target(int x){ return x; } void f(){ target(3); } }",
             )
-            .with_source("nested_call_is_argument", "class C { void f(){ outer(inner(1)); } }")
+            .with_source(
+                "nested_call_is_argument",
+                "class C { void f(){ outer(inner(1)); } }",
+            )
             .with_source(
                 "call_inside_branch",
                 "class C { void f(int c){ if (c > 0) { guarded(c); } } }",
@@ -295,7 +308,10 @@ mod tests {
                 "intraprocedural_call_resolves",
                 "package m\nfunc target(x int) int { return x }\nfunc f(){ target(3) }",
             )
-            .with_source("nested_call_is_argument", "package m\nfunc f(){ outer(inner(1)) }")
+            .with_source(
+                "nested_call_is_argument",
+                "package m\nfunc f(){ outer(inner(1)) }",
+            )
             .with_source(
                 "call_inside_branch",
                 "package m\nfunc f(c int){ if c > 0 { guarded(c) } }",
@@ -305,14 +321,23 @@ mod tests {
 
     fn javascript_fixture() -> LangFixture {
         LangFixture::new("JavaScript", Box::new(TsFrontend::javascript()))
-            .with_source("method_with_two_params", "function two_params(a, b){ return a; }")
+            .with_source(
+                "method_with_two_params",
+                "function two_params(a, b){ return a; }",
+            )
             .with_source("call_with_two_args", "function f(){ callee(1, 2); }")
             .with_source(
                 "intraprocedural_call_resolves",
                 "function target(x){ return x; } function f(){ target(3); }",
             )
-            .with_source("nested_call_is_argument", "function f(){ outer(inner(1)); }")
-            .with_source("call_inside_branch", "function f(c){ if (c) { guarded(c); } }")
+            .with_source(
+                "nested_call_is_argument",
+                "function f(){ outer(inner(1)); }",
+            )
+            .with_source(
+                "call_inside_branch",
+                "function f(c){ if (c) { guarded(c); } }",
+            )
             .with_source("two_methods", "function alpha(){} function beta(){}")
     }
 
@@ -334,14 +359,20 @@ mod tests {
 
     fn rust_fixture() -> LangFixture {
         LangFixture::new("Rust", Box::new(TsFrontend::rust()))
-            .with_source("method_with_two_params", "fn two_params(a: i32, b: i32) -> i32 { a }")
+            .with_source(
+                "method_with_two_params",
+                "fn two_params(a: i32, b: i32) -> i32 { a }",
+            )
             .with_source("call_with_two_args", "fn f(){ callee(1, 2); }")
             .with_source(
                 "intraprocedural_call_resolves",
                 "fn target(x: i32) -> i32 { x } fn f(){ target(3); }",
             )
             .with_source("nested_call_is_argument", "fn f(){ outer(inner(1)); }")
-            .with_source("call_inside_branch", "fn f(c: bool){ if c { guarded(c); } }")
+            .with_source(
+                "call_inside_branch",
+                "fn f(c: bool){ if c { guarded(c); } }",
+            )
             .with_source("two_methods", "fn alpha(){} fn beta(){}")
     }
 

@@ -42,11 +42,16 @@ impl Workspace {
     /// Resolve the workspace: `root` argument, else `$CPGX_ROOT`, else cwd.
     /// Cache: `$CPG_CACHE`, else `$XDG_CACHE_HOME/cpg`, else `~/.cache/cpg`.
     pub fn open(root: Option<&str>) -> Result<Workspace, String> {
-        let root = match root.map(String::from).or_else(|| std::env::var("CPGX_ROOT").ok()) {
+        let root = match root
+            .map(String::from)
+            .or_else(|| std::env::var("CPGX_ROOT").ok())
+        {
             Some(r) => PathBuf::from(r),
             None => std::env::current_dir().map_err(|e| format!("no cwd: {e}"))?,
         };
-        let root = root.canonicalize().map_err(|e| format!("bad root {}: {e}", root.display()))?;
+        let root = root
+            .canonicalize()
+            .map_err(|e| format!("bad root {}: {e}", root.display()))?;
         let cache = match std::env::var("CPG_CACHE").ok() {
             Some(c) => PathBuf::from(c),
             None => match std::env::var("XDG_CACHE_HOME").ok() {
@@ -64,9 +69,14 @@ impl Workspace {
 
     /// Absolute directory for a root-relative module path (`.` = the root).
     pub fn module_dir(&self, rel: &str) -> Result<PathBuf, String> {
-        let dir = if rel == "." { self.root.clone() } else { self.root.join(rel) };
-        let dir =
-            dir.canonicalize().map_err(|e| format!("no such directory {}: {e}", dir.display()))?;
+        let dir = if rel == "." {
+            self.root.clone()
+        } else {
+            self.root.join(rel)
+        };
+        let dir = dir
+            .canonicalize()
+            .map_err(|e| format!("no such directory {}: {e}", dir.display()))?;
         if !dir.is_dir() {
             return Err(format!("not a directory: {}", dir.display()));
         }
@@ -83,7 +93,8 @@ impl Workspace {
             .chars()
             .map(|c| if c == '/' || c == '\\' { '_' } else { c })
             .collect();
-        self.cache.join(format!("{key}.{lang}.v{GRAPH_SHAPE_VERSION}.cpg"))
+        self.cache
+            .join(format!("{key}.{lang}.v{GRAPH_SHAPE_VERSION}.cpg"))
     }
 
     /// Build-or-reuse the CPG for a module: returns `(cpg_path, lang)`.
@@ -105,7 +116,11 @@ impl Workspace {
             }
         };
         if stale {
-            eprintln!("building {} ({lang}) -> {}", dir.display(), cpg_path.display());
+            eprintln!(
+                "building {} ({lang}) -> {}",
+                dir.display(),
+                cpg_path.display()
+            );
             let project = crate::build_project_filtered(&dir.to_string_lossy(), &lang, excludes);
             project
                 .cpg
@@ -128,7 +143,11 @@ impl Workspace {
     /// `--thrift-sources`). Root-wide because thrift IDL usually lives in a
     /// sibling tree of the code that implements it.
     pub fn thrift_dirs(&self) -> Vec<String> {
-        dirs_containing(&self.root, "thrift", &["/vendor/", "/node_modules/", "/.git/"])
+        dirs_containing(
+            &self.root,
+            "thrift",
+            &["/vendor/", "/node_modules/", "/.git/"],
+        )
     }
 
     /// Cached CPG files, sorted by name.
@@ -147,7 +166,10 @@ impl Workspace {
 
 /// The language a cache file was built for (`<key>.<lang>.v<N>.cpg`).
 pub fn lang_of_cpg(path: &Path) -> String {
-    let name = path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+    let name = path
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_default();
     let mut parts: Vec<&str> = name.split('.').collect();
     // strip trailing "cpg" and "v<N>"
     parts.pop();
@@ -175,15 +197,19 @@ pub fn detect_lang(dir: &Path) -> &'static str {
         ("cc", "cpp"),
     ];
     let mut counts = vec![0usize; EXT_LANG.len()];
-    walk(dir, &["/vendor/", "/node_modules/", "/.git/"], &mut |path| {
-        if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
-            for (i, (e, _)) in EXT_LANG.iter().enumerate() {
-                if *e == ext {
-                    counts[i] += 1;
+    walk(
+        dir,
+        &["/vendor/", "/node_modules/", "/.git/"],
+        &mut |path| {
+            if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
+                for (i, (e, _)) in EXT_LANG.iter().enumerate() {
+                    if *e == ext {
+                        counts[i] += 1;
+                    }
                 }
             }
-        }
-    });
+        },
+    );
     let mut best = "c";
     let mut best_n = 0usize;
     for (i, (_, lang)) in EXT_LANG.iter().enumerate() {
@@ -221,8 +247,21 @@ pub fn excludes_for(lang: &str) -> &'static [&'static str] {
             "test_",
         ],
         "java" => &["/target/", "/build/", "Test.java", "/node_modules/"],
-        "javascript" | "js" => &["/node_modules/", ".min.js", "/dist/", ".test.js", ".spec.js"],
-        "typescript" | "ts" => &["/node_modules/", "/dist/", "/build/", ".test.ts", ".spec.ts", ".d.ts"],
+        "javascript" | "js" => &[
+            "/node_modules/",
+            ".min.js",
+            "/dist/",
+            ".test.js",
+            ".spec.js",
+        ],
+        "typescript" | "ts" => &[
+            "/node_modules/",
+            "/dist/",
+            "/build/",
+            ".test.ts",
+            ".spec.ts",
+            ".d.ts",
+        ],
         "cpp" | "c++" | "cxx" => &[
             "/thirdparty/",
             "/third-party/",
@@ -262,7 +301,11 @@ fn newest_source_mtime(
 ) -> Option<std::time::SystemTime> {
     let mut newest: Option<std::time::SystemTime> = None;
     walk(dir, excludes, &mut |path| {
-        if path.extension().and_then(|e| e.to_str()).is_some_and(|e| exts.contains(&e)) {
+        if path
+            .extension()
+            .and_then(|e| e.to_str())
+            .is_some_and(|e| exts.contains(&e))
+        {
             if let Ok(m) = std::fs::metadata(path).and_then(|m| m.modified()) {
                 if newest.is_none_or(|n| m > n) {
                     newest = Some(m);
@@ -347,7 +390,10 @@ mod tests {
         };
         let p = ws.cache_path(Path::new("/some/repo/module"), "go");
         let name = p.file_name().unwrap().to_string_lossy().into_owned();
-        assert_eq!(name, format!("some_repo_module.go.v{GRAPH_SHAPE_VERSION}.cpg"));
+        assert_eq!(
+            name,
+            format!("some_repo_module.go.v{GRAPH_SHAPE_VERSION}.cpg")
+        );
         assert_eq!(lang_of_cpg(&p), "go");
     }
 
@@ -357,17 +403,26 @@ mod tests {
         let cache = tmpdir("cache");
         std::fs::create_dir_all(root.join("m")).unwrap();
         std::fs::write(root.join("m/a.c"), "int main() { return 0; }").unwrap();
-        let ws = Workspace { root: root.clone(), cache };
+        let ws = Workspace {
+            root: root.clone(),
+            cache,
+        };
         let (cpg1, lang) = ws.ensure_cpg("m", None).expect("build");
         assert_eq!(lang, "c");
         assert!(cpg1.exists());
         let mtime1 = std::fs::metadata(&cpg1).unwrap().modified().unwrap();
         // unchanged source -> cache reused
         let (cpg2, _) = ws.ensure_cpg("m", None).expect("reuse");
-        assert_eq!(std::fs::metadata(&cpg2).unwrap().modified().unwrap(), mtime1);
+        assert_eq!(
+            std::fs::metadata(&cpg2).unwrap().modified().unwrap(),
+            mtime1
+        );
         // touch the source into the future -> rebuild
         let future = std::time::SystemTime::now() + std::time::Duration::from_secs(5);
-        let f = std::fs::File::options().write(true).open(root.join("m/a.c")).unwrap();
+        let f = std::fs::File::options()
+            .write(true)
+            .open(root.join("m/a.c"))
+            .unwrap();
         f.set_modified(future).unwrap();
         drop(f);
         let (cpg3, _) = ws.ensure_cpg("m", None).expect("rebuild");
@@ -385,7 +440,10 @@ mod tests {
         std::fs::write(root.join("svc/protos/a.proto"), "syntax = \"proto3\";").unwrap();
         std::fs::write(root.join("idl/thrift/b.thrift"), "service S {}").unwrap();
         std::fs::write(root.join("vendor/protos/c.proto"), "syntax = \"proto3\";").unwrap();
-        let ws = Workspace { root: root.clone(), cache: tmpdir("idl-cache") };
+        let ws = Workspace {
+            root: root.clone(),
+            cache: tmpdir("idl-cache"),
+        };
         let protos = ws.proto_dirs(".");
         assert_eq!(protos.len(), 1, "vendored protos excluded: {protos:?}");
         assert!(protos[0].ends_with("svc/protos"));

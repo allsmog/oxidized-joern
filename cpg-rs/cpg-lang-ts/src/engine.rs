@@ -63,8 +63,11 @@ fn scan(
             // A new container ends any active recovery region; a bodyless
             // one becomes the next recovery candidate.
             recovered = None;
-            pending =
-                if has_body { None } else { name.filter(|n| !n.is_empty()).map(str::to_string) };
+            pending = if has_body {
+                None
+            } else {
+                name.filter(|n| !n.is_empty()).map(str::to_string)
+            };
             scan(spec, b, file, c, src, count, name.or(enc));
         } else {
             scan(spec, b, file, c, src, count, enc);
@@ -107,7 +110,9 @@ fn emit_type_decl(
     }
     let td = b.type_decl(name, &full_name, &bases, line(node));
     b.contains(file, td);
-    let Some(body) = node.child_by_field_name("body") else { return };
+    let Some(body) = node.child_by_field_name("body") else {
+        return;
+    };
     for field in named_children(body) {
         if !spec.member_kinds.contains(&field.kind()) {
             continue;
@@ -117,7 +122,9 @@ fn emit_type_decl(
         if find_descendant_of_kinds(field, &["function_declarator"]).is_some() {
             continue;
         }
-        let Some(ty) = field.child_by_field_name("type").and_then(|t| resolved_type(spec, t, src))
+        let Some(ty) = field
+            .child_by_field_name("type")
+            .and_then(|t| resolved_type(spec, t, src))
         else {
             continue;
         };
@@ -217,13 +224,19 @@ fn build_method(
                 .find(|c| spec.param_container_kinds.contains(&c.kind()))
         })
         .or_else(|| {
-            let d = spec.declarator_field.and_then(|df| node.child_by_field_name(df))?;
+            let d = spec
+                .declarator_field
+                .and_then(|df| node.child_by_field_name(df))?;
             find_descendant_of_kinds(d, spec.param_container_kinds)
         });
     if let Some(params) = params {
         // A bare-identifier parameter list (Scala's `x => …`): the parameters
         // field IS the single parameter, not a container.
-        let plist = if is_identifier(params.kind()) { vec![params] } else { named_children(params) };
+        let plist = if is_identifier(params.kind()) {
+            vec![params]
+        } else {
+            named_children(params)
+        };
         let mut idx = 1;
         for p in plist {
             // Prefer the explicit name/pattern field: in several grammars (e.g.
@@ -297,7 +310,7 @@ fn build_method(
         named_children(node)
             .into_iter()
             .last()
-            .filter(|c| params.map_or(true, |p| c.id() != p.id()))
+            .filter(|c| params.is_none_or(|p| c.id() != p.id()))
     });
     if let Some(body) = body {
         if spec.implicit_return {
@@ -460,6 +473,9 @@ fn bind_loop_var(
 /// (`for name, info in cfg.items()`) carries its values. Each binding
 /// rebuilds the iterated expression: a shared node would give one
 /// expression several AST parents.
+// Threads the shared mapping context (spec, builder, file, node, source,
+// type map) that every emit_* helper in this module takes.
+#[allow(clippy::too_many_arguments)]
 fn emit_loop_bindings(
     spec: &TsLangSpec,
     b: &mut CpgBuilder,
@@ -473,7 +489,9 @@ fn emit_loop_bindings(
     let lhs = holder
         .child_by_field_name("declarator")
         .or_else(|| holder.child_by_field_name("left"));
-    let (Some(lhs), Some(rhs)) = (lhs, holder.child_by_field_name("right")) else { return };
+    let (Some(lhs), Some(rhs)) = (lhs, holder.child_by_field_name("right")) else {
+        return;
+    };
     let mut names = Vec::new();
     pattern_identifiers(lhs, src, &mut names);
     names.truncate(8);
@@ -500,9 +518,15 @@ fn pattern_identifiers<'a>(node: Node<'a>, src: &'a [u8], out: &mut Vec<&'a str>
     }
     if matches!(
         node.kind(),
-        "pattern_list" | "tuple_pattern" | "list_pattern" | "expression_list"
-            | "array_pattern" | "parenthesized_expression" | "structured_binding_declarator"
-            | "variable_declaration_list" | "tuple_expression"
+        "pattern_list"
+            | "tuple_pattern"
+            | "list_pattern"
+            | "expression_list"
+            | "array_pattern"
+            | "parenthesized_expression"
+            | "structured_binding_declarator"
+            | "variable_declaration_list"
+            | "tuple_expression"
     ) {
         for c in named_children(node) {
             pattern_identifiers(c, src, out);
@@ -538,7 +562,16 @@ fn build_expr(
         return Some(build_call(spec, b, node, src, file, types));
     }
     if let Some(form) = spec.assign_form(k) {
-        return build_assignment(spec, b, file, node, form.lhs_field, form.rhs_field, src, types);
+        return build_assignment(
+            spec,
+            b,
+            file,
+            node,
+            form.lhs_field,
+            form.rhs_field,
+            src,
+            types,
+        );
     }
     // NOTE: blocks/branches in VALUE position (indented_block, block,
     // if_expression, match ...) are handled by `build_value_shape`, called
@@ -573,8 +606,11 @@ fn build_expr(
             if matches!(c.kind(), "for_in_clause" | "if_clause") {
                 continue;
             }
-            let kids: Vec<Node> =
-                if c.kind() == "pair" { named_children(c) } else { vec![c] };
+            let kids: Vec<Node> = if c.kind() == "pair" {
+                named_children(c)
+            } else {
+                vec![c]
+            };
             for kid in kids {
                 if let Some(e) = build_expr(spec, b, file, kid, src, types) {
                     b.add_argument(call, e, idx);
@@ -614,13 +650,21 @@ fn build_expr(
         // Go wraps every composite-literal element in a `literal_element`;
         // unwrap it here (it must be handled before `is_literal`, whose
         // substring match would otherwise swallow it as a constant).
-        return named_children(node).into_iter().find_map(|c| build_expr(spec, b, file, c, src, types));
+        return named_children(node)
+            .into_iter()
+            .find_map(|c| build_expr(spec, b, file, c, src, types));
     }
     if k == "composite_literal"
         || k == "literal_value"
         || matches!(
             k,
-            "object" | "array" | "list" | "tuple" | "set" | "dictionary" | "hash"
+            "object"
+                | "array"
+                | "list"
+                | "tuple"
+                | "set"
+                | "dictionary"
+                | "hash"
                 | "tuple_expression"
         )
     {
@@ -763,7 +807,10 @@ fn build_expr(
         return Some(b.identifier(&name, line(node)));
     }
     if is_binary(k) {
-        let op = node.child_by_field_name("operator").map(|n| text(n, src)).unwrap_or("<op>");
+        let op = node
+            .child_by_field_name("operator")
+            .map(|n| text(n, src))
+            .unwrap_or("<op>");
         let call = b.call(op, text(node, src), line(node));
         let mut idx = 1;
         for c in named_children(node) {
@@ -780,7 +827,10 @@ fn build_expr(
     // new_expression, Scala instance_expression, Java
     // object_creation_expression; the type lives in a field or (Scala)
     // positionally before the arguments.
-    if matches!(k, "new_expression" | "instance_expression" | "object_creation_expression") {
+    if matches!(
+        k,
+        "new_expression" | "instance_expression" | "object_creation_expression"
+    ) {
         let ctor = node
             .child_by_field_name("type")
             .or_else(|| node.child_by_field_name("constructor"))
@@ -812,20 +862,30 @@ fn build_expr(
     // and everything inside the markup drops out of the dataflow.
     if k == "jsx_expression" {
         // The `{...}` brace container: a transparent wrapper.
-        return named_children(node).into_iter().find_map(|c| build_expr(spec, b, file, c, src, types));
+        return named_children(node)
+            .into_iter()
+            .find_map(|c| build_expr(spec, b, file, c, src, types));
     }
     if k == "jsx_attribute" {
         let mut kids = named_children(node).into_iter();
-        let name = kids.next().map(|n| text(n, src).to_string()).filter(|s| !s.is_empty());
-        let Some(name) = name else { return None };
+        let name = kids
+            .next()
+            .map(|n| text(n, src).to_string())
+            .filter(|s| !s.is_empty());
+        let name = name?;
         let call = b.call(&name, text(node, src), line(node));
         if let Some(v) = kids.find_map(|c| build_expr(spec, b, file, c, src, types)) {
             b.add_argument(call, v, 1);
         }
         return Some(call);
     }
-    if matches!(k, "jsx_element" | "jsx_self_closing_element" | "jsx_fragment") {
-        let open = named_children(node).into_iter().find(|c| c.kind() == "jsx_opening_element");
+    if matches!(
+        k,
+        "jsx_element" | "jsx_self_closing_element" | "jsx_fragment"
+    ) {
+        let open = named_children(node)
+            .into_iter()
+            .find(|c| c.kind() == "jsx_opening_element");
         let tag_holder = open.unwrap_or(node);
         let tag = tag_holder
             .child_by_field_name("name")
@@ -837,8 +897,11 @@ fn build_expr(
         let mut parts: Vec<Node> = Vec::new();
         for c in named_children(node) {
             match c.kind() {
-                "jsx_opening_element" => parts
-                    .extend(named_children(c).into_iter().filter(|a| Some(a.id()) != name_id)),
+                "jsx_opening_element" => parts.extend(
+                    named_children(c)
+                        .into_iter()
+                        .filter(|a| Some(a.id()) != name_id),
+                ),
                 "jsx_closing_element" => {}
                 _ if Some(c.id()) == name_id => {}
                 _ => parts.push(c),
@@ -869,7 +932,9 @@ fn build_expr(
             // (measured: exec.Command(name, args...) lost `args`).
             | "variadic_argument"
     ) {
-        return named_children(node).into_iter().find_map(|c| build_expr(spec, b, file, c, src, types));
+        return named_children(node)
+            .into_iter()
+            .find_map(|c| build_expr(spec, b, file, c, src, types));
     }
     // Not an expression (block, statement, declaration container, …). Returning
     // None lets `walk_stmts` descend and process each child as a statement —
@@ -882,7 +947,10 @@ fn build_expr(
 /// in VALUE position (`val x = { a; b }`, ruby `begin..end`, then/else
 /// bodies). In statement position these stay walk_stmts territory.
 fn is_value_block(k: &str) -> bool {
-    matches!(k, "block" | "indented_block" | "begin" | "then" | "else" | "body_statement")
+    matches!(
+        k,
+        "block" | "indented_block" | "begin" | "then" | "else" | "body_statement"
+    )
 }
 
 /// Whether a kind is a branch construct that yields one of its branches'
@@ -891,9 +959,20 @@ fn is_value_block(k: &str) -> bool {
 fn is_value_branch(k: &str) -> bool {
     matches!(
         k,
-        "if_expression" | "match_expression" | "case_block" | "try_expression"
-            | "for_expression" | "conditional_expression" | "conditional" | "if" | "unless"
-            | "case" | "elsif" | "ternary_expression" | "switch_expression" | "rescue_modifier"
+        "if_expression"
+            | "match_expression"
+            | "case_block"
+            | "try_expression"
+            | "for_expression"
+            | "conditional_expression"
+            | "conditional"
+            | "if"
+            | "unless"
+            | "case"
+            | "elsif"
+            | "ternary_expression"
+            | "switch_expression"
+            | "rescue_modifier"
     )
 }
 
@@ -1002,13 +1081,17 @@ fn build_call(
     let callee = node
         .child_by_field_name(spec.callee_field)
         .or_else(|| node.child_by_field_name("macro"));
-    let mut name = callee.map(|c| callee_name(c, src)).unwrap_or_else(|| "<anon>".into());
+    let mut name = callee
+        .map(|c| callee_name(c, src))
+        .unwrap_or_else(|| "<anon>".into());
     // Constructor factories (`std::make_shared<T>(args)`): the constructed
     // type is a template argument, not the callee name — surface the call
     // under T so type-named source/sink specs can match the construction.
     if spec.ctor_factories.contains(&name.as_str()) {
         if let Some(t) = callee
-            .and_then(|c| find_descendant_of_kinds(c, &["template_argument_list", "type_arguments"]))
+            .and_then(|c| {
+                find_descendant_of_kinds(c, &["template_argument_list", "type_arguments"])
+            })
             .and_then(|args| named_children(args).into_iter().last())
             .map(|last| innermost_type_identifier(last, src))
             .filter(|t| !t.is_empty())
@@ -1021,9 +1104,11 @@ fn build_call(
     // Arguments: the `arguments` field for normal calls, or a Rust macro's
     // `token_tree` child (println!/format!/… carry their args there as an
     // unnamed child, not in a field).
-    let args = node
-        .child_by_field_name("arguments")
-        .or_else(|| named_children(node).into_iter().find(|c| c.kind() == "token_tree"));
+    let args = node.child_by_field_name("arguments").or_else(|| {
+        named_children(node)
+            .into_iter()
+            .find(|c| c.kind() == "token_tree")
+    });
     if let Some(args) = args {
         let mut idx = 1;
         for a in named_children(args) {
@@ -1062,7 +1147,8 @@ fn build_call(
                             || is_member(base.kind())
                             || matches!(
                                 base.kind(),
-                                "new_expression" | "instance_expression"
+                                "new_expression"
+                                    | "instance_expression"
                                     | "object_creation_expression"
                             )
                     })
@@ -1139,6 +1225,8 @@ fn build_call(
     call
 }
 
+// Threads the shared mapping context; see `emit_loop_bindings`.
+#[allow(clippy::too_many_arguments)]
 fn build_assignment(
     spec: &TsLangSpec,
     b: &mut CpgBuilder,
@@ -1158,16 +1246,16 @@ fn build_assignment(
     // (`x := Foo{..}` / `&Foo{..}`), a constructor call (`x := NewFoo(..)`),
     // or a type-named call (`Foo(..)`: Go conversion / Scala apply).
     if !name.is_empty() {
-        let declared = node.child_by_field_name("type").and_then(|t| resolved_type(spec, t, src));
+        let declared = node
+            .child_by_field_name("type")
+            .and_then(|t| resolved_type(spec, t, src));
         let inferred = declared.or_else(|| {
             let mut v = node.child_by_field_name(rhs_field)?;
-            loop {
-                match v.kind() {
-                    "unary_expression" | "parenthesized_expression" | "expression_list" => {
-                        v = first_named_child(v)?;
-                    }
-                    _ => break,
-                }
+            while matches!(
+                v.kind(),
+                "unary_expression" | "parenthesized_expression" | "expression_list"
+            ) {
+                v = first_named_child(v)?;
             }
             if v.kind() == "composite_literal" {
                 return v
@@ -1177,7 +1265,8 @@ fn build_assignment(
             if spec.is_call(v.kind()) {
                 let cn = callee_name(v.child_by_field_name(spec.callee_field)?, src);
                 let stripped = cn.strip_prefix("New").unwrap_or(&cn);
-                if !stripped.is_empty() && stripped.chars().next().is_some_and(|c| c.is_uppercase()) {
+                if !stripped.is_empty() && stripped.chars().next().is_some_and(|c| c.is_uppercase())
+                {
                     return Some(stripped.to_string());
                 }
             }
@@ -1197,8 +1286,9 @@ fn build_assignment(
     // `var = Type(args)`: a call named after the declared type carrying the
     // built arguments, so the constructor and its dataflow stay visible.
     if value.is_none() {
-        if let Some(args) =
-            named_children(node).into_iter().find(|c| c.kind() == "argument_list")
+        if let Some(args) = named_children(node)
+            .into_iter()
+            .find(|c| c.kind() == "argument_list")
         {
             let tyname = node
                 .parent()
@@ -1225,7 +1315,11 @@ fn build_assignment(
         // repos instead of guessed.
         if std::env::var_os("CPG_DEBUG_DROPPED_RHS").is_some() {
             if let Some(r) = node.child_by_field_name(rhs_field) {
-                eprintln!("dropped-rhs\t{}\t{}", r.kind(), text(node, src).lines().next().unwrap_or(""));
+                eprintln!(
+                    "dropped-rhs\t{}\t{}",
+                    r.kind(),
+                    text(node, src).lines().next().unwrap_or("")
+                );
             }
         }
     }
@@ -1235,7 +1329,9 @@ fn build_assignment(
             let lhs = b.identifier(&name, line(node));
             b.add_argument(assign, lhs, 1);
             b.add_argument(assign, v, 2);
-            bind_extra_targets(spec, b, file, node, lhs_field, rhs_field, assign, src, types);
+            bind_extra_targets(
+                spec, b, file, node, lhs_field, rhs_field, assign, src, types,
+            );
             Some(assign)
         }
         (true, Some(v)) => Some(v),
@@ -1250,6 +1346,8 @@ fn build_assignment(
 /// have the same length. Secondary bindings attach as AST children of the
 /// primary assignment: the descendant walk sees them, and they are not
 /// arguments, so they never leak into the primary's value.
+// Threads the shared mapping context; see `emit_loop_bindings`.
+#[allow(clippy::too_many_arguments)]
 fn bind_extra_targets(
     spec: &TsLangSpec,
     b: &mut CpgBuilder,
@@ -1261,24 +1359,30 @@ fn bind_extra_targets(
     src: &[u8],
     types: &mut std::collections::HashMap<String, String>,
 ) {
-    let Some(lhs) = node.child_by_field_name(lhs_field) else { return };
+    let Some(lhs) = node.child_by_field_name(lhs_field) else {
+        return;
+    };
     let mut names = Vec::new();
     pattern_identifiers(lhs, src, &mut names);
     if names.len() < 2 {
         return;
     }
     names.truncate(8);
-    let Some(rhs) = node.child_by_field_name(rhs_field) else { return };
-    let vals: Vec<Node> =
-        if matches!(rhs.kind(), "expression_list" | "tuple" | "tuple_expression") {
-            named_children(rhs)
-        } else {
-            Vec::new()
-        };
+    let Some(rhs) = node.child_by_field_name(rhs_field) else {
+        return;
+    };
+    let vals: Vec<Node> = if matches!(rhs.kind(), "expression_list" | "tuple" | "tuple_expression")
+    {
+        named_children(rhs)
+    } else {
+        Vec::new()
+    };
     let pairwise = vals.len() == names.len();
     for (i, nm) in names.iter().enumerate().skip(1) {
         let src_node = if pairwise { vals[i] } else { rhs };
-        let Some(v) = build_value(spec, b, file, src_node, src, types) else { continue };
+        let Some(v) = build_value(spec, b, file, src_node, src, types) else {
+            continue;
+        };
         let assign = b.call("=", text(node, src), line(node));
         let lid = b.identifier(nm, line(node));
         b.add_argument(assign, lid, 1);
@@ -1324,10 +1428,20 @@ fn is_member(k: &str) -> bool {
     // instead of the whole expression being dropped from the argument list.
     matches!(
         k,
-        "selector_expression" | "member_expression" | "field_expression" | "scoped_identifier"
-            | "attribute" | "field_access" | "scoped_call_expression" | "qualified_identifier"
-            | "subscript" | "subscript_expression" | "index_expression" | "element_access_expression"
-            | "element_reference" | "slice_expression"
+        "selector_expression"
+            | "member_expression"
+            | "field_expression"
+            | "scoped_identifier"
+            | "attribute"
+            | "field_access"
+            | "scoped_call_expression"
+            | "qualified_identifier"
+            | "subscript"
+            | "subscript_expression"
+            | "index_expression"
+            | "element_access_expression"
+            | "element_reference"
+            | "slice_expression"
     )
 }
 
@@ -1337,8 +1451,12 @@ fn is_binary(k: &str) -> bool {
     // operand's taint) are right for all of them.
     matches!(
         k,
-        "binary_expression" | "binary_operator" | "boolean_operator" | "comparison_operator"
-            | "infix_expression" | "binary"
+        "binary_expression"
+            | "binary_operator"
+            | "boolean_operator"
+            | "comparison_operator"
+            | "infix_expression"
+            | "binary"
     )
 }
 
@@ -1352,8 +1470,19 @@ fn is_literal(k: &str) -> bool {
         || k.contains("string")
         || matches!(
             k,
-            "number" | "integer" | "float" | "true" | "false" | "nil" | "null"
-                | "none" | "boolean" | "character" | "simple_symbol" | "regex" | "unit"
+            "number"
+                | "integer"
+                | "float"
+                | "true"
+                | "false"
+                | "nil"
+                | "null"
+                | "none"
+                | "boolean"
+                | "character"
+                | "simple_symbol"
+                | "regex"
+                | "unit"
         )
 }
 
@@ -1460,7 +1589,9 @@ fn find_descendant_of_kinds<'a>(node: Node<'a>, kinds: &[&str]) -> Option<Node<'
     if kinds.contains(&node.kind()) {
         return Some(node);
     }
-    named_children(node).into_iter().find_map(|c| find_descendant_of_kinds(c, kinds))
+    named_children(node)
+        .into_iter()
+        .find_map(|c| find_descendant_of_kinds(c, kinds))
 }
 
 /// Name + qualifying scope from a C-style declarator chain. Descends through

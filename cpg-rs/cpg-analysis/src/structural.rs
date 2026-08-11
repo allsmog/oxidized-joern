@@ -23,16 +23,20 @@ use crate::taint::{Finding, Provenance, Step};
 use cpg_core::{Cpg, EdgeKind, NodeKind, Query};
 use std::collections::{HashMap, HashSet};
 
+/// Discarded-return groups keyed by `(line, callee, statement code)`, each
+/// holding the lhs names in binding order plus one witness call node.
+type DiscardGroups = HashMap<(Option<u32>, String, String), (Vec<String>, cpg_core::NodeId)>;
+
 /// Case-sensitive name match with `*` wildcards anywhere in the pattern
 /// (`Check*Token`, `X-*`, `*Authenticate*`). A lone `*` matches everything.
 fn pat_match(pat: &str, s: &str) -> bool {
     fn rec(p: &[u8], t: &[u8]) -> bool {
         match p.split_first() {
             None => t.is_empty(),
-            Some((b'*', rest)) => {
-                (0..=t.len()).any(|i| rec(rest, &t[i..]))
-            }
-            Some((c, rest)) => t.split_first().is_some_and(|(tc, tr)| tc == c && rec(rest, tr)),
+            Some((b'*', rest)) => (0..=t.len()).any(|i| rec(rest, &t[i..])),
+            Some((c, rest)) => t
+                .split_first()
+                .is_some_and(|(tc, tr)| tc == c && rec(rest, tr)),
         }
     }
     rec(pat.as_bytes(), s.as_bytes())
@@ -109,7 +113,10 @@ fn lhs_bindings(code: &str) -> Option<Vec<String>> {
         }
     }
     // Tuple-pattern parens: `(_, _, ok)`.
-    if let Some(inner) = s.strip_prefix('(').and_then(|t| t.trim_end().strip_suffix(')')) {
+    if let Some(inner) = s
+        .strip_prefix('(')
+        .and_then(|t| t.trim_end().strip_suffix(')'))
+    {
         s = inner;
     }
     let parts: Vec<String> = s
@@ -149,9 +156,7 @@ pub fn discarded_returns(cpg: &Cpg, callee_pats: &[&str]) -> Vec<Finding> {
         if in_test_file(cpg, m) {
             continue;
         }
-        // (line, callee, statement code) -> (lhs names in binding order, one witness call node)
-        let mut groups: HashMap<(Option<u32>, String, String), (Vec<String>, cpg_core::NodeId)> =
-            HashMap::new();
+        let mut groups: DiscardGroups = HashMap::new();
         let mut stmt_hits: Vec<cpg_core::NodeId> = Vec::new();
         let mut stmt_seen: HashSet<(Option<u32>, String)> = HashSet::new();
         for n in ast_descendants(cpg, m) {
@@ -175,11 +180,15 @@ pub fn discarded_returns(cpg: &Cpg, callee_pats: &[&str]) -> Vec<Finding> {
                 continue;
             }
             let args = cpg.arguments_of(n);
-            let (Some(&lhs), Some(&rhs)) = (args.first(), args.get(1)) else { continue };
+            let (Some(&lhs), Some(&rhs)) = (args.first(), args.get(1)) else {
+                continue;
+            };
             if cpg.kind_of(lhs) != NodeKind::Identifier || cpg.kind_of(rhs) != NodeKind::Call {
                 continue;
             }
-            let Some(callee) = cpg.name_of(rhs) else { continue };
+            let Some(callee) = cpg.name_of(rhs) else {
+                continue;
+            };
             if callee == "=" || !matches_any(callee_pats, callee) {
                 continue;
             }
@@ -297,7 +306,9 @@ pub fn append_without_delete(
             let args = cpg.arguments_of(n);
             let Some(&k) = args.first() else { continue };
             if cpg.kind_of(k) == NodeKind::Literal {
-                let Some(key) = cpg.code_of(k).and_then(literal_string) else { continue };
+                let Some(key) = cpg.code_of(k).and_then(literal_string) else {
+                    continue;
+                };
                 if is_clear {
                     cleared.insert(key.to_ascii_lowercase());
                 }
@@ -313,7 +324,9 @@ pub fn append_without_delete(
                     if cpg.kind_of(d) != NodeKind::Literal {
                         continue;
                     }
-                    let Some(key) = cpg.code_of(d).and_then(literal_string) else { continue };
+                    let Some(key) = cpg.code_of(d).and_then(literal_string) else {
+                        continue;
+                    };
                     if matches_any(key_pats, key) {
                         adds.push((n, name.to_string(), key.to_string()));
                     }
@@ -367,7 +380,9 @@ mod tests {
         }
         let pm = crate::standard_pipeline();
         let idx = crate::pass::method_name_index(&cpg);
-        let ctx = crate::pass::PassContext { methods_by_name: Some(&idx) };
+        let ctx = crate::pass::PassContext {
+            methods_by_name: Some(&idx),
+        };
         pm.run_all(&mut cpg, &fids, &ctx);
         cpg
     }
@@ -390,7 +405,10 @@ mod tests {
             lhs_bindings("val (_, _, ok) = cache.CheckToken(t, u)"),
             Some(vec!["_".into(), "_".into(), "ok".into()])
         );
-        assert_eq!(lhs_bindings("acct, err := f()"), Some(vec!["acct".into(), "err".into()]));
+        assert_eq!(
+            lhs_bindings("acct, err := f()"),
+            Some(vec!["acct".into(), "err".into()])
+        );
         assert_eq!(lhs_bindings("val ok = f()"), Some(vec!["ok".into()]));
         // Comparison / compound heads are not bindings.
         assert_eq!(lhs_bindings("ok == f()"), None);
@@ -447,7 +465,11 @@ func wrapper(tok string) (string, string, bool) {
         // wrapper (sits under Return, not Block) and must not flag.
         assert_eq!(f.len(), 1, "{f:#?}");
         assert!(f[0].method.contains("hitStmt"), "{}", f[0].method);
-        assert!(f[0].origin.contains("statement-position"), "{}", f[0].origin);
+        assert!(
+            f[0].origin.contains("statement-position"),
+            "{}",
+            f[0].origin
+        );
 
         // Scala spelling: mid-block statement flags; a last-expression call
         // (the method's value) does not.
@@ -531,9 +553,16 @@ func unrelated() {
         // and the acct-keeping one (still discards a return). `os.Open` is
         // out of vocabulary.
         assert_eq!(f.len(), 2, "{f:#?}");
-        let hit = f.iter().find(|f| f.method.contains("hit")).expect("hit finding");
+        let hit = f
+            .iter()
+            .find(|f| f.method.contains("hit"))
+            .expect("hit finding");
         assert_eq!(hit.sink, "CheckToken");
-        assert!(hit.origin.contains("_,_,ok"), "origin lists bindings: {}", hit.origin);
+        assert!(
+            hit.origin.contains("_,_,ok"),
+            "origin lists bindings: {}",
+            hit.origin
+        );
         assert_eq!(hit.sink_file.as_deref(), Some("auth.go"));
         // No finding for a binding with no blanks at all.
         let none = discarded_returns(&cpg, &["Open"]);
@@ -607,8 +636,14 @@ func unrelatedAppend(xs []int) []int {
         let f = append_without_delete(&cpg, &["Add", "append"], &["Del", "Set"], &["X-*"]);
         assert_eq!(f.len(), 2, "{f:#?}");
         let keys: Vec<&str> = f.iter().map(|f| f.origin.as_str()).collect();
-        assert!(keys.contains(&"append-without-delete key=X-Method"), "{keys:?}");
-        assert!(keys.contains(&"append-without-delete key=X-ActualURLPath"), "{keys:?}");
+        assert!(
+            keys.contains(&"append-without-delete key=X-Method"),
+            "{keys:?}"
+        );
+        assert!(
+            keys.contains(&"append-without-delete key=X-ActualURLPath"),
+            "{keys:?}"
+        );
         // The wholesale-copy append (dynamic key) and the []int append carry
         // no vocabulary literal; with an empty key vocabulary the struct
         // shape is disabled entirely.

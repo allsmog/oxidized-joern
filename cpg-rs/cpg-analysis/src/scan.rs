@@ -72,7 +72,11 @@ impl ScanSubscription {
             .map(|(_, finding)| finding.clone())
             .collect();
         self.last = next;
-        ScanDelta { added, removed, total: self.last.len() }
+        ScanDelta {
+            added,
+            removed,
+            total: self.last.len(),
+        }
     }
 }
 
@@ -90,5 +94,8 @@ fn finding_key(f: &Finding) -> String {
         .map(|step| format!("{}@{:?}", step.code, step.line))
         .collect::<Vec<_>>()
         .join("->");
-    format!("{}|{}|{:?}|{}|{}", f.method, f.sink, f.sink_line, f.origin, path)
+    format!(
+        "{}|{}|{:?}|{}|{}",
+        f.method, f.sink, f.sink_line, f.origin, path
+    )
 }

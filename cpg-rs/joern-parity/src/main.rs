@@ -17,7 +17,9 @@ fn main() {
         std::process::exit(2);
     }
     let mut parser = Parser::new();
-    parser.set_language(&tree_sitter_c::LANGUAGE.into()).unwrap();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
 
     struct Unit {
         file: String,
@@ -57,7 +59,10 @@ fn main() {
                 "struct_specifier" | "union_specifier" | "enum_specifier"
                     if f.child_by_field_name("body").is_some() =>
                 {
-                    let tag = f.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                    let tag = f
+                        .child_by_field_name("name")
+                        .map(|x| text(x, b).to_string())
+                        .unwrap_or_default();
                     struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
                 }
                 "type_definition" => {
@@ -110,26 +115,49 @@ fn main() {
         for f in named_children(root) {
             match f.kind() {
                 "preproc_def" => {
-                    let name = f.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
-                    let body = f.child_by_field_name("value").map(|x| text(x, b).to_string()).unwrap_or_default();
-                    macros.insert(name, MacroDef {
-                        params: None,
-                        body,
-                        directive: text(f, b).trim_end().to_string(),
-                    });
+                    let name = f
+                        .child_by_field_name("name")
+                        .map(|x| text(x, b).to_string())
+                        .unwrap_or_default();
+                    let body = f
+                        .child_by_field_name("value")
+                        .map(|x| text(x, b).to_string())
+                        .unwrap_or_default();
+                    macros.insert(
+                        name,
+                        MacroDef {
+                            params: None,
+                            body,
+                            directive: text(f, b).trim_end().to_string(),
+                        },
+                    );
                 }
                 "preproc_function_def" => {
-                    let name = f.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                    let name = f
+                        .child_by_field_name("name")
+                        .map(|x| text(x, b).to_string())
+                        .unwrap_or_default();
                     let params = f
                         .child_by_field_name("parameters")
-                        .map(|ps| named_children(ps).iter().map(|p| text(*p, b).to_string()).collect())
+                        .map(|ps| {
+                            named_children(ps)
+                                .iter()
+                                .map(|p| text(*p, b).to_string())
+                                .collect()
+                        })
                         .unwrap_or_default();
-                    let body = f.child_by_field_name("value").map(|x| text(x, b).to_string()).unwrap_or_default();
-                    macros.insert(name, MacroDef {
-                        params: Some(params),
-                        body,
-                        directive: text(f, b).trim_end().to_string(),
-                    });
+                    let body = f
+                        .child_by_field_name("value")
+                        .map(|x| text(x, b).to_string())
+                        .unwrap_or_default();
+                    macros.insert(
+                        name,
+                        MacroDef {
+                            params: Some(params),
+                            body,
+                            directive: text(f, b).trim_end().to_string(),
+                        },
+                    );
                 }
                 _ => {}
             }
@@ -157,12 +185,17 @@ fn main() {
                 }
                 "declaration" => {
                     let base = normalize_type(
-                        &f.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into()),
+                        &f.child_by_field_name("type")
+                            .map(|t| text(t, b).to_string())
+                            .unwrap_or("ANY".into()),
                     );
                     for d in named_children(f) {
                         let decl = if d.kind() == "init_declarator" {
                             d.child_by_field_name("declarator")
-                        } else if matches!(d.kind(), "identifier" | "pointer_declarator" | "array_declarator") {
+                        } else if matches!(
+                            d.kind(),
+                            "identifier" | "pointer_declarator" | "array_declarator"
+                        ) {
                             Some(d)
                         } else {
                             None
@@ -216,7 +249,10 @@ fn main() {
                     }
                 }
                 "struct_specifier" | "union_specifier" | "enum_specifier" if needs_clinit(f, b) => {
-                    let tag = f.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                    let tag = f
+                        .child_by_field_name("name")
+                        .map(|x| text(x, b).to_string())
+                        .unwrap_or_default();
                     let members = count_members(f);
                     let key = format!("{tag}.<clinit>:{tag}()");
                     ctx.begin_block(&key);
@@ -287,7 +323,11 @@ fn main() {
     }
     sctx.begin_block("<includes>:<global>");
     sctx.emit_includes_global();
-    sctx.edge("SOURCE_FILE", "M:<includes>:<global>".into(), "F:<includes>".into());
+    sctx.edge(
+        "SOURCE_FILE",
+        "M:<includes>:<global>".into(),
+        "F:<includes>".into(),
+    );
     dumps.push(("<includes>:<global>".into(), std::mem::take(&mut sctx.out)));
     drop(sctx);
 
@@ -307,7 +347,9 @@ fn main() {
     for f in &files {
         out.push_str(&format!("NODES|FILE NAME={f} ORDER=0\n"));
     }
-    out.push_str("NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1\n");
+    out.push_str(
+        "NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1\n",
+    );
     out.push_str("NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1\n");
     for f in &files {
         out.push_str(&format!(
@@ -351,7 +393,9 @@ fn main() {
         out.push_str(&l);
     }
     for t in &used_types {
-        out.push_str(&format!("NODES|TYPE NAME={t} FULL_NAME={t} TYPE_DECL_FULL_NAME={t}\n"));
+        out.push_str(&format!(
+            "NODES|TYPE NAME={t} FULL_NAME={t} TYPE_DECL_FULL_NAME={t}\n"
+        ));
     }
 
     // ---- EDGES section ----
@@ -389,32 +433,76 @@ fn main() {
     }
     // NAMESPACE_BLOCK -> NAMESPACE, and NAMESPACE_BLOCK -> its FILE.
     edges.push(("REF".into(), "NB:<global>".into(), "NS:<global>".into()));
-    edges.push(("REF".into(), "NB:<includes>:<global>".into(), "NS:<global>".into()));
-    edges.push(("SOURCE_FILE".into(), "NB:<global>".into(), "F:<unknown>".into()));
-    edges.push(("SOURCE_FILE".into(), "NB:<includes>:<global>".into(), "F:<includes>".into()));
+    edges.push((
+        "REF".into(),
+        "NB:<includes>:<global>".into(),
+        "NS:<global>".into(),
+    ));
+    edges.push((
+        "SOURCE_FILE".into(),
+        "NB:<global>".into(),
+        "F:<unknown>".into(),
+    ));
+    edges.push((
+        "SOURCE_FILE".into(),
+        "NB:<includes>:<global>".into(),
+        "F:<includes>".into(),
+    ));
     for f in &files {
-        edges.push(("REF".into(), format!("NB:{f}:<global>"), "NS:<global>".into()));
-        edges.push(("SOURCE_FILE".into(), format!("NB:{f}:<global>"), format!("F:{f}")));
+        edges.push((
+            "REF".into(),
+            format!("NB:{f}:<global>"),
+            "NS:<global>".into(),
+        ));
+        edges.push((
+            "SOURCE_FILE".into(),
+            format!("NB:{f}:<global>"),
+            format!("F:{f}"),
+        ));
     }
     // Macro methods: SOURCE_FILE to their defining file and CONTAINS from the
     // file-global TYPE_DECL.
     for full in used_macros.keys() {
         if let Some(file) = full.split(':').next() {
-            edges.push(("SOURCE_FILE".into(), format!("M:{full}"), format!("F:{file}")));
-            edges.push(("CONTAINS".into(), format!("D:{file}:<global>"), format!("M:{full}")));
+            edges.push((
+                "SOURCE_FILE".into(),
+                format!("M:{full}"),
+                format!("F:{file}"),
+            ));
+            edges.push((
+                "CONTAINS".into(),
+                format!("D:{file}:<global>"),
+                format!("M:{full}"),
+            ));
         }
     }
     // The per-file <global> TYPE_DECL CONTAINS the file-global METHOD and the
     // method TYPE_DECLs of that file; each FILE contains its <global>
     // TYPE_DECL, and <includes> contains its method + external TYPE_DECLs.
     for f in &files {
-        edges.push(("CONTAINS".into(), format!("D:{f}:<global>"), format!("M:{f}:<global>")));
-        edges.push(("CONTAINS".into(), format!("F:{f}"), format!("D:{f}:<global>")));
+        edges.push((
+            "CONTAINS".into(),
+            format!("D:{f}:<global>"),
+            format!("M:{f}:<global>"),
+        ));
+        edges.push((
+            "CONTAINS".into(),
+            format!("F:{f}"),
+            format!("D:{f}:<global>"),
+        ));
     }
     for (name, file) in &fn_decls {
-        edges.push(("CONTAINS".into(), format!("D:{file}:<global>"), format!("D:{name}")));
+        edges.push((
+            "CONTAINS".into(),
+            format!("D:{file}:<global>"),
+            format!("D:{name}"),
+        ));
     }
-    edges.push(("CONTAINS".into(), "F:<includes>".into(), "M:<includes>:<global>".into()));
+    edges.push((
+        "CONTAINS".into(),
+        "F:<includes>".into(),
+        "M:<includes>:<global>".into(),
+    ));
     for t in &used_types {
         if !struct_tags.contains(&t) && !defined.contains(t) {
             edges.push(("CONTAINS".into(), "F:<includes>".into(), format!("D:{t}")));
@@ -422,17 +510,33 @@ fn main() {
     }
     // SOURCE_FILE for the TYPE_DECL population.
     for (tag, _, file) in &struct_decls {
-        edges.push(("SOURCE_FILE".into(), format!("TD:{tag}"), format!("F:{file}")));
+        edges.push((
+            "SOURCE_FILE".into(),
+            format!("TD:{tag}"),
+            format!("F:{file}"),
+        ));
     }
     for (name, file) in &fn_decls {
-        edges.push(("SOURCE_FILE".into(), format!("D:{name}"), format!("F:{file}")));
+        edges.push((
+            "SOURCE_FILE".into(),
+            format!("D:{name}"),
+            format!("F:{file}"),
+        ));
     }
     for f in &files {
-        edges.push(("SOURCE_FILE".into(), format!("D:{f}:<global>"), format!("F:{f}")));
+        edges.push((
+            "SOURCE_FILE".into(),
+            format!("D:{f}:<global>"),
+            format!("F:{f}"),
+        ));
     }
     for t in &used_types {
         if !struct_tags.contains(&t) && !defined.contains(t) {
-            edges.push(("SOURCE_FILE".into(), format!("D:{t}"), "F:<includes>".into()));
+            edges.push((
+                "SOURCE_FILE".into(),
+                format!("D:{t}"),
+                "F:<includes>".into(),
+            ));
         }
     }
 
@@ -470,13 +574,20 @@ fn main() {
 }
 
 fn count_members(n: Node) -> i64 {
-    let Some(body) = n.child_by_field_name("body") else { return 0 };
+    let Some(body) = n.child_by_field_name("body") else {
+        return 0;
+    };
     named_children(body)
         .iter()
         .map(|f| match f.kind() {
             "field_declaration" => named_children(*f)
                 .iter()
-                .filter(|d| matches!(d.kind(), "field_identifier" | "pointer_declarator" | "array_declarator"))
+                .filter(|d| {
+                    matches!(
+                        d.kind(),
+                        "field_identifier" | "pointer_declarator" | "array_declarator"
+                    )
+                })
                 .count() as i64,
             "enumerator" => 1,
             _ => 0,
@@ -530,9 +641,19 @@ struct Ctx<'a> {
 /// type-decl context (Joern's ContainsEdgePass destination list — note that
 /// LOCAL, parameters, METHOD_RETURN, MODIFIER and MEMBER are absent).
 const CONTAINS_DST: [&str; 13] = [
-    "BLOCK", "IDENTIFIER", "FIELD_IDENTIFIER", "RETURN", "METHOD", "TYPE_DECL",
-    "CALL", "LITERAL", "METHOD_REF", "TYPE_REF", "CONTROL_STRUCTURE",
-    "JUMP_TARGET", "UNKNOWN",
+    "BLOCK",
+    "IDENTIFIER",
+    "FIELD_IDENTIFIER",
+    "RETURN",
+    "METHOD",
+    "TYPE_DECL",
+    "CALL",
+    "LITERAL",
+    "METHOD_REF",
+    "TYPE_REF",
+    "CONTROL_STRUCTURE",
+    "JUMP_TARGET",
+    "UNKNOWN",
 ];
 
 struct Phantom {
@@ -581,7 +702,7 @@ impl Ctx<'_> {
             self.types.insert(t.clone());
         }
         // -- addressing & suppression --
-        let suppressed = self.suppress_below.map_or(false, |nd| depth > nd);
+        let suppressed = self.suppress_below.is_some_and(|nd| depth > nd);
         if !suppressed {
             self.suppress_below = None;
         }
@@ -599,8 +720,15 @@ impl Ctx<'_> {
         }
         if !suppressed {
             if let ("METHOD" | "TYPE_DECL", Some(f)) = (label, &p.full) {
-                let key = if label == "METHOD" { format!("M:{f}") } else { format!("TD:{f}") };
-                self.placements.entry(key).or_default().push((self.block.clone(), idx));
+                let key = if label == "METHOD" {
+                    format!("M:{f}")
+                } else {
+                    format!("TD:{f}")
+                };
+                self.placements
+                    .entry(key)
+                    .or_default()
+                    .push((self.block.clone(), idx));
             }
             if CONTAINS_DST.contains(&label) {
                 if let Some((_, src)) = self.ctx_stack.last() {
@@ -612,23 +740,25 @@ impl Ctx<'_> {
                 // Receivers (no ARGUMENT_INDEX) and the expansion BLOCK of an
                 // INLINED macro call get no ARGUMENT edge.
                 let is_expansion = *pinlined && label == "BLOCK";
-                if ((plabel == "CALL" && p.arg.is_some() && !is_expansion) || plabel == "RETURN")
-                {
+                if (plabel == "CALL" && p.arg.is_some() && !is_expansion) || plabel == "RETURN" {
                     let paddr = paddr.clone();
                     self.edges.push(("ARGUMENT".into(), paddr, my_addr.clone()));
                 }
             }
             if let Some(t) = &p.tfn {
-                self.edges.push(("EVAL_TYPE".into(), my_addr.clone(), format!("T:{t}")));
+                self.edges
+                    .push(("EVAL_TYPE".into(), my_addr.clone(), format!("T:{t}")));
             }
             if label == "CALL" && p.dispatch.as_deref() != Some("DYNAMIC_DISPATCH") {
                 if let Some(mfn) = &p.mfn {
-                    self.edges.push(("CALL".into(), my_addr.clone(), format!("M:{mfn}")));
+                    self.edges
+                        .push(("CALL".into(), my_addr.clone(), format!("M:{mfn}")));
                 }
             }
             if label == "METHOD_REF" {
                 if let Some(mfn) = &p.mfn {
-                    self.edges.push(("REF".into(), my_addr.clone(), format!("M:{mfn}")));
+                    self.edges
+                        .push(("REF".into(), my_addr.clone(), format!("M:{mfn}")));
                 }
             }
             // CDT quirk: the *arguments* of an INLINED macro call carry no
@@ -654,7 +784,8 @@ impl Ctx<'_> {
             if let ("METHOD_PARAMETER_OUT", Some(n)) = (label, &p.name) {
                 if let Some(i) = self.param_in_line.get(n) {
                     let src = format!("{}#{}", self.block, i);
-                    self.edges.push(("PARAMETER_LINK".into(), src, my_addr.clone()));
+                    self.edges
+                        .push(("PARAMETER_LINK".into(), src, my_addr.clone()));
                 }
             }
         }
@@ -662,19 +793,38 @@ impl Ctx<'_> {
             self.ctx_stack.push((depth, my_addr.clone()));
         }
         let inlined = p.dispatch.as_deref() == Some("INLINED");
-        self.parent_stack.push((depth, label.to_string(), my_addr, inlined));
+        self.parent_stack
+            .push((depth, label.to_string(), my_addr, inlined));
         self.line_no += 1;
         let mut s = format!("{}{label}", "  ".repeat(depth));
         let mut kv = |k: &str, v: &str| s.push_str(&format!(" {k}={v}"));
-        if let Some(v) = &p.name { kv("NAME", v); }
-        if let Some(v) = &p.code { kv("CODE", v); }
-        if let Some(v) = &p.tfn { kv("TYPE_FULL_NAME", v); }
-        if let Some(v) = &p.full { kv("FULL_NAME", v); }
-        if let Some(v) = &p.mfn { kv("METHOD_FULL_NAME", v); }
-        if let Some(v) = &p.sig { kv("SIGNATURE", v); }
-        if let Some(v) = p.order { kv("ORDER", &v.to_string()); }
-        if let Some(v) = p.arg { kv("ARGUMENT_INDEX", &v.to_string()); }
-        if let Some(v) = &p.dispatch { kv("DISPATCH_TYPE", v); }
+        if let Some(v) = &p.name {
+            kv("NAME", v);
+        }
+        if let Some(v) = &p.code {
+            kv("CODE", v);
+        }
+        if let Some(v) = &p.tfn {
+            kv("TYPE_FULL_NAME", v);
+        }
+        if let Some(v) = &p.full {
+            kv("FULL_NAME", v);
+        }
+        if let Some(v) = &p.mfn {
+            kv("METHOD_FULL_NAME", v);
+        }
+        if let Some(v) = &p.sig {
+            kv("SIGNATURE", v);
+        }
+        if let Some(v) = p.order {
+            kv("ORDER", &v.to_string());
+        }
+        if let Some(v) = p.arg {
+            kv("ARGUMENT_INDEX", &v.to_string());
+        }
+        if let Some(v) = &p.dispatch {
+            kv("DISPATCH_TYPE", v);
+        }
         self.out.push_str(&s);
         self.out.push('\n');
     }
@@ -692,16 +842,24 @@ impl Ctx<'_> {
         let nested = d > 0;
         let sig = format!(
             "{ret}({})",
-            params.iter().map(|p| p.ty.clone()).collect::<Vec<_>>().join(",")
+            params
+                .iter()
+                .map(|p| p.ty.clone())
+                .collect::<Vec<_>>()
+                .join(",")
         );
-        self.line(d, "METHOD", P {
-            name: Some(name.clone()),
-            code: Some(esc(text(f, b))),
-            full: Some(name.clone()),
-            sig: Some(sig),
-            order: Some(1),
-            ..Default::default()
-        });
+        self.line(
+            d,
+            "METHOD",
+            P {
+                name: Some(name.clone()),
+                code: Some(esc(text(f, b))),
+                full: Some(name.clone()),
+                sig: Some(sig),
+                order: Some(1),
+                ..Default::default()
+            },
+        );
         if nested {
             // A nested method's interior is addressed (and produces edges) in
             // its own standalone walk; only the METHOD line itself belongs here.
@@ -713,13 +871,17 @@ impl Ctx<'_> {
             self.symbols.insert(p.name.clone(), p.ty.clone());
             let order = (i + 1) as i64;
             for label in ["METHOD_PARAMETER_IN", "METHOD_PARAMETER_OUT"] {
-                self.line(d + 1, label, P {
-                    name: Some(p.name.clone()),
-                    code: Some(esc(&p.code)),
-                    tfn: Some(p.ty.clone()),
-                    order: Some(order),
-                    ..Default::default()
-                });
+                self.line(
+                    d + 1,
+                    label,
+                    P {
+                        name: Some(p.name.clone()),
+                        code: Some(esc(&p.code)),
+                        tfn: Some(p.ty.clone()),
+                        order: Some(order),
+                        ..Default::default()
+                    },
+                );
             }
         }
 
@@ -729,23 +891,31 @@ impl Ctx<'_> {
             self.collect_phantoms(body, b);
             self.emit_block(body, b, block_order, d + 1);
         }
-        self.line(d + 1, "METHOD_RETURN", P {
-            code: Some("RET".into()),
-            tfn: Some(ret),
-            order: Some((params.len() + 2) as i64),
-            ..Default::default()
-        });
+        self.line(
+            d + 1,
+            "METHOD_RETURN",
+            P {
+                code: Some("RET".into()),
+                tfn: Some(ret),
+                order: Some((params.len() + 2) as i64),
+                ..Default::default()
+            },
+        );
     }
 
     /// A `<operator>.*` stub method. Layout mirrors Joern's stable sort by
     /// ORDER over insertion order [IN p1..pn, BLOCK(1), RET(2), OUT p1..pn].
     fn emit_stub(&mut self, name: &str, arity: usize) {
-        self.line(0, "METHOD", P {
-            name: Some(name.into()),
-            full: Some(name.into()),
-            order: Some(0),
-            ..Default::default()
-        });
+        self.line(
+            0,
+            "METHOD",
+            P {
+                name: Some(name.into()),
+                full: Some(name.into()),
+                order: Some(0),
+                ..Default::default()
+            },
+        );
         let pin = |k: usize| P {
             name: Some(format!("p{k}")),
             code: Some(format!("p{k}")),
@@ -754,12 +924,16 @@ impl Ctx<'_> {
             ..Default::default()
         };
         self.line(1, "METHOD_PARAMETER_IN", pin(1));
-        self.line(1, "BLOCK", P {
-            tfn: Some("ANY".into()),
-            order: Some(1),
-            arg: Some(1),
-            ..Default::default()
-        });
+        self.line(
+            1,
+            "BLOCK",
+            P {
+                tfn: Some("ANY".into()),
+                order: Some(1),
+                arg: Some(1),
+                ..Default::default()
+            },
+        );
         self.line(1, "METHOD_PARAMETER_OUT", pin(1));
         let ret = P {
             code: Some("RET".into()),
@@ -781,24 +955,36 @@ impl Ctx<'_> {
     }
 
     fn emit_includes_global(&mut self) {
-        self.line(0, "METHOD", P {
-            name: Some("<global>".into()),
-            code: Some("<global>".into()),
-            full: Some("<includes>:<global>".into()),
-            order: Some(1),
-            ..Default::default()
-        });
-        self.line(1, "BLOCK", P {
-            tfn: Some("ANY".into()),
-            order: Some(1),
-            ..Default::default()
-        });
-        self.line(1, "METHOD_RETURN", P {
-            code: Some("RET".into()),
-            tfn: Some("ANY".into()),
-            order: Some(2),
-            ..Default::default()
-        });
+        self.line(
+            0,
+            "METHOD",
+            P {
+                name: Some("<global>".into()),
+                code: Some("<global>".into()),
+                full: Some("<includes>:<global>".into()),
+                order: Some(1),
+                ..Default::default()
+            },
+        );
+        self.line(
+            1,
+            "BLOCK",
+            P {
+                tfn: Some("ANY".into()),
+                order: Some(1),
+                ..Default::default()
+            },
+        );
+        self.line(
+            1,
+            "METHOD_RETURN",
+            P {
+                code: Some("RET".into()),
+                tfn: Some("ANY".into()),
+                order: Some(2),
+                ..Default::default()
+            },
+        );
     }
 
     /// The per-file `<global>` wrapper: TYPE_DECLs and nested METHOD dumps in
@@ -807,13 +993,17 @@ impl Ctx<'_> {
     /// per global object declarator, METHOD_REF per function definition;
     /// prototypes consume no slot — then METHOD_RETURN.
     fn emit_file_global(&mut self, root: Node, b: &[u8], file: &str) {
-        self.line(0, "METHOD", P {
-            name: Some("<global>".into()),
-            code: Some("<global>".into()),
-            full: Some(format!("{file}:<global>")),
-            order: Some(1),
-            ..Default::default()
-        });
+        self.line(
+            0,
+            "METHOD",
+            P {
+                name: Some("<global>".into()),
+                code: Some("<global>".into()),
+                full: Some(format!("{file}:<global>")),
+                order: Some(1),
+                ..Default::default()
+            },
+        );
         for n in named_children(root) {
             match n.kind() {
                 "struct_specifier" | "union_specifier" | "enum_specifier"
@@ -825,24 +1015,35 @@ impl Ctx<'_> {
                 _ => {}
             }
         }
-        self.line(1, "BLOCK", P {
-            tfn: Some("ANY".into()),
-            order: Some(1),
-            ..Default::default()
-        });
+        self.line(
+            1,
+            "BLOCK",
+            P {
+                tfn: Some("ANY".into()),
+                order: Some(1),
+                ..Default::default()
+            },
+        );
         let mut slot = 1i64;
         for n in named_children(root) {
             match n.kind() {
                 "struct_specifier" | "union_specifier" | "enum_specifier"
                     if n.child_by_field_name("body").is_some() =>
                 {
-                    let name = n.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
-                    self.line(2, "TYPE_REF", P {
-                        code: Some(esc(text(n, b))),
-                        tfn: Some(name),
-                        order: Some(slot),
-                        ..Default::default()
-                    });
+                    let name = n
+                        .child_by_field_name("name")
+                        .map(|x| text(x, b).to_string())
+                        .unwrap_or_default();
+                    self.line(
+                        2,
+                        "TYPE_REF",
+                        P {
+                            code: Some(esc(text(n, b))),
+                            tfn: Some(name),
+                            order: Some(slot),
+                            ..Default::default()
+                        },
+                    );
                     slot += 1;
                 }
                 "type_definition" => {
@@ -852,45 +1053,60 @@ impl Ctx<'_> {
                         .child_by_field_name("declarator")
                         .map(|x| text(x, b).to_string())
                         .unwrap_or_default();
-                    self.line(2, "TYPE_DECL", P {
-                        name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
-                        full: Some(name),
-                        order: Some(slot),
-                        ..Default::default()
-                    });
+                    self.line(
+                        2,
+                        "TYPE_DECL",
+                        P {
+                            name: Some(name.clone()),
+                            code: Some(esc(text(n, b))),
+                            full: Some(name),
+                            order: Some(slot),
+                            ..Default::default()
+                        },
+                    );
                     slot += 1;
                 }
                 "declaration" => {
                     // Same lowering as in a method body: LOCAL per declarator,
                     // plus an assignment CALL when initialised (`int g = 5;`).
                     // Prototypes contribute nothing and consume no slot.
-                    if named_children(n).iter().any(|d| find_function_declarator(*d).is_some()) {
+                    if named_children(n)
+                        .iter()
+                        .any(|d| find_function_declarator(*d).is_some())
+                    {
                         continue;
                     }
                     self.emit_declaration(n, b, &mut slot, 2, None);
                 }
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(n, b) {
-                        self.line(2, "METHOD_REF", P {
-                            code: Some(name.clone()),
-                            tfn: Some(name.clone()),
-                            mfn: Some(name),
-                            order: Some(slot),
-                            ..Default::default()
-                        });
+                        self.line(
+                            2,
+                            "METHOD_REF",
+                            P {
+                                code: Some(name.clone()),
+                                tfn: Some(name.clone()),
+                                mfn: Some(name),
+                                order: Some(slot),
+                                ..Default::default()
+                            },
+                        );
                         slot += 1;
                     }
                 }
                 _ => {}
             }
         }
-        self.line(1, "METHOD_RETURN", P {
-            code: Some("RET".into()),
-            tfn: Some("ANY".into()),
-            order: Some(2),
-            ..Default::default()
-        });
+        self.line(
+            1,
+            "METHOD_RETURN",
+            P {
+                code: Some("RET".into()),
+                tfn: Some("ANY".into()),
+                order: Some(2),
+                ..Default::default()
+            },
+        );
     }
 
     /// `struct T { ... }` → TYPE_DECL with one MEMBER per field (CODE is the
@@ -898,29 +1114,45 @@ impl Ctx<'_> {
     /// sized array, a `<clinit>` method follows the members to host the
     /// `<operator>.arrayInitializer` calls.
     fn emit_type_decl(&mut self, n: Node, b: &[u8], depth: usize) {
-        let name = n.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
-        self.line(depth, "TYPE_DECL", P {
-            name: Some(name.clone()),
-            code: Some(esc(text(n, b))),
-            full: Some(name.clone()),
-            order: Some(1),
-            ..Default::default()
-        });
-        let Some(body) = n.child_by_field_name("body") else { return };
+        let name = n
+            .child_by_field_name("name")
+            .map(|x| text(x, b).to_string())
+            .unwrap_or_default();
+        self.line(
+            depth,
+            "TYPE_DECL",
+            P {
+                name: Some(name.clone()),
+                code: Some(esc(text(n, b))),
+                full: Some(name.clone()),
+                order: Some(1),
+                ..Default::default()
+            },
+        );
+        let Some(body) = n.child_by_field_name("body") else {
+            return;
+        };
         let mut order = 1i64;
         // enum: one ANY-typed MEMBER per enumerator (CODE keeps `GREEN = 5`).
         for e in named_children(body) {
             if e.kind() != "enumerator" {
                 continue;
             }
-            let ename = e.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
-            self.line(depth + 1, "MEMBER", P {
-                name: Some(ename),
-                code: Some(esc(text(e, b))),
-                tfn: Some("ANY".into()),
-                order: Some(order),
-                ..Default::default()
-            });
+            let ename = e
+                .child_by_field_name("name")
+                .map(|x| text(x, b).to_string())
+                .unwrap_or_default();
+            self.line(
+                depth + 1,
+                "MEMBER",
+                P {
+                    name: Some(ename),
+                    code: Some(esc(text(e, b))),
+                    tfn: Some("ANY".into()),
+                    order: Some(order),
+                    ..Default::default()
+                },
+            );
             order += 1;
         }
         for f in named_children(body) {
@@ -928,21 +1160,30 @@ impl Ctx<'_> {
                 continue;
             }
             let ty = normalize_type(
-                &f.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into()),
+                &f.child_by_field_name("type")
+                    .map(|t| text(t, b).to_string())
+                    .unwrap_or("ANY".into()),
             );
             for d in named_children(f) {
-                if matches!(d.kind(), "field_identifier" | "pointer_declarator" | "array_declarator") {
+                if matches!(
+                    d.kind(),
+                    "field_identifier" | "pointer_declarator" | "array_declarator"
+                ) {
                     let mname = innermost_id(d, b);
                     let key = format!("MB:{name}.{mname}");
                     let placement = (self.block.clone(), self.line_no);
                     self.placements.entry(key).or_default().push(placement);
-                    self.line(depth + 1, "MEMBER", P {
-                        name: Some(mname),
-                        code: Some(text(d, b).to_string()),
-                        tfn: Some(format!("{ty}{}", decl_suffix(d, b))),
-                        order: Some(order),
-                        ..Default::default()
-                    });
+                    self.line(
+                        depth + 1,
+                        "MEMBER",
+                        P {
+                            name: Some(mname),
+                            code: Some(text(d, b).to_string()),
+                            tfn: Some(format!("{ty}{}", decl_suffix(d, b))),
+                            order: Some(order),
+                            ..Default::default()
+                        },
+                    );
                     order += 1;
                 }
             }
@@ -957,18 +1198,32 @@ impl Ctx<'_> {
     /// `<operator>.arrayInitializer` call per sized array, two bare MODIFIERs,
     /// and a METHOD_RETURN typed as the struct.
     fn emit_clinit(&mut self, n: Node, b: &[u8], depth: usize, order: i64) {
-        let tag = n.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
-        self.line(depth, "METHOD", P {
-            name: Some("<clinit>".into()),
-            code: Some("<clinit>".into()),
-            full: Some(format!("{tag}.<clinit>:{tag}()")),
-            order: Some(order),
-            ..Default::default()
-        });
+        let tag = n
+            .child_by_field_name("name")
+            .map(|x| text(x, b).to_string())
+            .unwrap_or_default();
+        self.line(
+            depth,
+            "METHOD",
+            P {
+                name: Some("<clinit>".into()),
+                code: Some("<clinit>".into()),
+                full: Some(format!("{tag}.<clinit>:{tag}()")),
+                order: Some(order),
+                ..Default::default()
+            },
+        );
         if depth > 0 {
             self.suppress_below = Some(depth);
         }
-        self.line(depth + 1, "BLOCK", P { order: Some(1), ..Default::default() });
+        self.line(
+            depth + 1,
+            "BLOCK",
+            P {
+                order: Some(1),
+                ..Default::default()
+            },
+        );
         let mut co = 1i64;
         if let Some(body) = n.child_by_field_name("body") {
             // enum mode: phantom ANY LOCALs (ORDER=0) for the initialised
@@ -978,35 +1233,53 @@ impl Ctx<'_> {
                 .filter(|e| e.kind() == "enumerator" && e.child_by_field_name("value").is_some())
                 .collect();
             for e in &inits {
-                let ename = e.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
-                self.line(depth + 2, "LOCAL", P {
-                    name: Some(ename.clone()),
-                    code: Some(ename),
-                    tfn: Some("ANY".into()),
-                    order: Some(0),
-                    ..Default::default()
-                });
+                let ename = e
+                    .child_by_field_name("name")
+                    .map(|x| text(x, b).to_string())
+                    .unwrap_or_default();
+                self.line(
+                    depth + 2,
+                    "LOCAL",
+                    P {
+                        name: Some(ename.clone()),
+                        code: Some(ename),
+                        tfn: Some("ANY".into()),
+                        order: Some(0),
+                        ..Default::default()
+                    },
+                );
             }
             for e in &inits {
-                let ename = e.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                let ename = e
+                    .child_by_field_name("name")
+                    .map(|x| text(x, b).to_string())
+                    .unwrap_or_default();
                 self.note_call("<operator>.assignment", 2);
-                self.line(depth + 2, "CALL", P {
-                    name: Some("<operator>.assignment".into()),
-                    code: Some(esc(text(*e, b))),
-                    tfn: Some("void".into()),
-                    mfn: Some("<operator>.assignment".into()),
-                    order: Some(co),
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
-                self.line(depth + 3, "IDENTIFIER", P {
-                    name: Some(ename.clone()),
-                    code: Some(ename),
-                    tfn: Some("ANY".into()),
-                    order: Some(1),
-                    arg: Some(1),
-                    ..Default::default()
-                });
+                self.line(
+                    depth + 2,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.assignment".into()),
+                        code: Some(esc(text(*e, b))),
+                        tfn: Some("void".into()),
+                        mfn: Some("<operator>.assignment".into()),
+                        order: Some(co),
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 3,
+                    "IDENTIFIER",
+                    P {
+                        name: Some(ename.clone()),
+                        code: Some(ename),
+                        tfn: Some("ANY".into()),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    },
+                );
                 if let Some(v) = e.child_by_field_name("value") {
                     self.emit_expr(v, b, depth + 3, 2, Some(2));
                 }
@@ -1020,15 +1293,19 @@ impl Ctx<'_> {
                     if d.kind() == "array_declarator" {
                         if let Some(sz) = d.child_by_field_name("size") {
                             self.note_call("<operator>.arrayInitializer", 1);
-                            self.line(depth + 2, "CALL", P {
-                                name: Some("<operator>.arrayInitializer".into()),
-                                code: Some(esc(text(d, b))),
-                                tfn: Some("ANY".into()),
-                                mfn: Some("<operator>.arrayInitializer".into()),
-                                order: Some(co),
-                                dispatch: Some("STATIC_DISPATCH".into()),
-                                ..Default::default()
-                            });
+                            self.line(
+                                depth + 2,
+                                "CALL",
+                                P {
+                                    name: Some("<operator>.arrayInitializer".into()),
+                                    code: Some(esc(text(d, b))),
+                                    tfn: Some("ANY".into()),
+                                    mfn: Some("<operator>.arrayInitializer".into()),
+                                    order: Some(co),
+                                    dispatch: Some("STATIC_DISPATCH".into()),
+                                    ..Default::default()
+                                },
+                            );
                             self.emit_expr(sz, b, depth + 3, 1, Some(1));
                             co += 1;
                         }
@@ -1036,14 +1313,32 @@ impl Ctx<'_> {
                 }
             }
         }
-        self.line(depth + 1, "MODIFIER", P { order: Some(2), ..Default::default() });
-        self.line(depth + 1, "MODIFIER", P { order: Some(3), ..Default::default() });
-        self.line(depth + 1, "METHOD_RETURN", P {
-            code: Some("RET".into()),
-            tfn: Some(tag),
-            order: Some(4),
-            ..Default::default()
-        });
+        self.line(
+            depth + 1,
+            "MODIFIER",
+            P {
+                order: Some(2),
+                ..Default::default()
+            },
+        );
+        self.line(
+            depth + 1,
+            "MODIFIER",
+            P {
+                order: Some(3),
+                ..Default::default()
+            },
+        );
+        self.line(
+            depth + 1,
+            "METHOD_RETURN",
+            P {
+                code: Some("RET".into()),
+                tfn: Some(tag),
+                order: Some(4),
+                ..Default::default()
+            },
+        );
     }
 
     /// An INLINED macro invocation: CALL (NAME = macro, CODE = the original
@@ -1064,37 +1359,56 @@ impl Ctx<'_> {
     ) {
         let (params, body, directive) = {
             let m = &self.macros[name];
-            (m.params.clone().unwrap_or_default(), m.body.clone(), m.directive.clone())
+            (
+                m.params.clone().unwrap_or_default(),
+                m.body.clone(),
+                m.directive.clone(),
+            )
         };
         let arg_texts: Vec<String> = arg_nodes.iter().map(|a| text(*a, b).to_string()).collect();
         let expansion = substitute(&body, &params, &arg_texts);
         let ret = expansion_type(&expansion, &self.symbols, self.functions);
         let full = format!("{}:{name}:{ret}({})", self.file, params.len());
-        self.used_macros
-            .entry(full.clone())
-            .or_insert((name.to_string(), directive, params.len(), ret.clone()));
-        self.line(depth, "CALL", P {
-            name: Some(name.to_string()),
-            code: Some(code.to_string()),
-            tfn: Some(ret),
-            mfn: Some(full),
-            sig: Some(format!("{}({})", expansion_type(&expansion, &self.symbols, self.functions), params.len())),
-            order: Some(order),
-            arg,
-            dispatch: Some("INLINED".into()),
-            ..Default::default()
-        });
+        self.used_macros.entry(full.clone()).or_insert((
+            name.to_string(),
+            directive,
+            params.len(),
+            ret.clone(),
+        ));
+        self.line(
+            depth,
+            "CALL",
+            P {
+                name: Some(name.to_string()),
+                code: Some(code.to_string()),
+                tfn: Some(ret),
+                mfn: Some(full),
+                sig: Some(format!(
+                    "{}({})",
+                    expansion_type(&expansion, &self.symbols, self.functions),
+                    params.len()
+                )),
+                order: Some(order),
+                arg,
+                dispatch: Some("INLINED".into()),
+                ..Default::default()
+            },
+        );
         for (i, a) in arg_nodes.iter().enumerate() {
             let k = (i + 1) as i64;
             self.emit_expr(*a, b, depth + 1, k, Some(k));
         }
         let bk = (arg_nodes.len() + 1) as i64;
-        self.line(depth + 1, "BLOCK", P {
-            tfn: Some("ANY".into()),
-            order: Some(bk),
-            arg: Some(bk),
-            ..Default::default()
-        });
+        self.line(
+            depth + 1,
+            "BLOCK",
+            P {
+                tfn: Some("ANY".into()),
+                order: Some(bk),
+                arg: Some(bk),
+                ..Default::default()
+            },
+        );
         self.emit_expansion(&expansion, depth + 2);
     }
 
@@ -1103,25 +1417,42 @@ impl Ctx<'_> {
     fn emit_expansion(&mut self, expansion: &str, depth: usize) {
         let src = format!("void __m() {{ {expansion}; }}");
         let mut parser = Parser::new();
-        parser.set_language(&tree_sitter_c::LANGUAGE.into()).unwrap();
-        let Some(tree) = parser.parse(&src, None) else { return };
+        parser
+            .set_language(&tree_sitter_c::LANGUAGE.into())
+            .unwrap();
+        let Some(tree) = parser.parse(&src, None) else {
+            return;
+        };
         let b = src.as_bytes();
-        let Some(expr) = expansion_expr_node(tree.root_node()) else { return };
+        let Some(expr) = expansion_expr_node(tree.root_node()) else {
+            return;
+        };
         self.emit_expr(expr, b, depth, 1, None);
     }
 
     /// METHOD for a used macro: CODE is the #define directive, params p1..pn,
     /// an empty ANY BLOCK after the params (no ARGUMENT_INDEX), RET typed as
     /// the expansion.
-    fn emit_macro_method(&mut self, full: &str, name: &str, directive: &str, nparams: usize, ret: &str) {
-        self.line(0, "METHOD", P {
-            name: Some(name.to_string()),
-            code: Some(esc(directive)),
-            full: Some(full.to_string()),
-            sig: Some(format!("{ret}({nparams})")),
-            order: Some(1),
-            ..Default::default()
-        });
+    fn emit_macro_method(
+        &mut self,
+        full: &str,
+        name: &str,
+        directive: &str,
+        nparams: usize,
+        ret: &str,
+    ) {
+        self.line(
+            0,
+            "METHOD",
+            P {
+                name: Some(name.to_string()),
+                code: Some(esc(directive)),
+                full: Some(full.to_string()),
+                sig: Some(format!("{ret}({nparams})")),
+                order: Some(1),
+                ..Default::default()
+            },
+        );
         for k in 1..=nparams {
             let pk = P {
                 name: Some(format!("p{k}")),
@@ -1131,25 +1462,37 @@ impl Ctx<'_> {
                 ..Default::default()
             };
             self.line(1, "METHOD_PARAMETER_IN", P { ..pk });
-            self.line(1, "METHOD_PARAMETER_OUT", P {
-                name: Some(format!("p{k}")),
-                code: Some(format!("p{k}")),
-                tfn: Some("ANY".into()),
-                order: Some(k as i64),
-                ..Default::default()
-            });
+            self.line(
+                1,
+                "METHOD_PARAMETER_OUT",
+                P {
+                    name: Some(format!("p{k}")),
+                    code: Some(format!("p{k}")),
+                    tfn: Some("ANY".into()),
+                    order: Some(k as i64),
+                    ..Default::default()
+                },
+            );
         }
-        self.line(1, "BLOCK", P {
-            tfn: Some("ANY".into()),
-            order: Some((nparams + 1) as i64),
-            ..Default::default()
-        });
-        self.line(1, "METHOD_RETURN", P {
-            code: Some("RET".into()),
-            tfn: Some(ret.to_string()),
-            order: Some((nparams + 2) as i64),
-            ..Default::default()
-        });
+        self.line(
+            1,
+            "BLOCK",
+            P {
+                tfn: Some("ANY".into()),
+                order: Some((nparams + 1) as i64),
+                ..Default::default()
+            },
+        );
+        self.line(
+            1,
+            "METHOD_RETURN",
+            P {
+                code: Some("RET".into()),
+                tfn: Some(ret.to_string()),
+                order: Some((nparams + 2) as i64),
+                ..Default::default()
+            },
+        );
     }
 
     /// Pre-scan the method body for names that Joern's local-creation pass
@@ -1181,7 +1524,9 @@ impl Ctx<'_> {
                                 ty: "ANY".into(),
                                 name,
                             });
-                        } else if !self.macros.contains_key(&name) && !self.functions.contains_key(&name) {
+                        } else if !self.macros.contains_key(&name)
+                            && !self.functions.contains_key(&name)
+                        {
                             // Fully unresolved identifier: phantom LOCAL with
                             // CODE `<unknown> name` (e.g. NULL).
                             seen.push(name.clone());
@@ -1208,7 +1553,11 @@ impl Ctx<'_> {
                         let ts = text(t, b).to_string();
                         if !seen.contains(&ts) {
                             seen.push(ts.clone());
-                            self.phantoms.push(Phantom { name: ts.clone(), code: ts.clone(), ty: ts });
+                            self.phantoms.push(Phantom {
+                                name: ts.clone(),
+                                code: ts.clone(),
+                                ty: ts,
+                            });
                         }
                     }
                 }
@@ -1216,7 +1565,10 @@ impl Ctx<'_> {
                 // (and directive name identifiers never do).
                 "preproc_ifdef" => {
                     let neg = n.child(0).map(|t| text(t, b) == "#ifndef").unwrap_or(false);
-                    let pname = n.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                    let pname = n
+                        .child_by_field_name("name")
+                        .map(|x| text(x, b).to_string())
+                        .unwrap_or_default();
                     let take = self.macros.contains_key(&pname) != neg;
                     let mut cs = named_children(n);
                     cs.reverse();
@@ -1251,20 +1603,28 @@ impl Ctx<'_> {
 
     /// Emit a BLOCK node and its statements, with a fresh child ORDER sequence.
     fn emit_block(&mut self, body: Node, b: &[u8], order: i64, depth: usize) {
-        self.line(depth, "BLOCK", P {
-            code: Some(esc(text(body, b))),
-            tfn: Some("void".into()),
-            order: Some(order),
-            ..Default::default()
-        });
-        for ph in std::mem::take(&mut self.phantoms) {
-            self.line(depth + 1, "LOCAL", P {
-                name: Some(ph.name),
-                code: Some(ph.code),
-                tfn: Some(ph.ty),
-                order: Some(0),
+        self.line(
+            depth,
+            "BLOCK",
+            P {
+                code: Some(esc(text(body, b))),
+                tfn: Some("void".into()),
+                order: Some(order),
                 ..Default::default()
-            });
+            },
+        );
+        for ph in std::mem::take(&mut self.phantoms) {
+            self.line(
+                depth + 1,
+                "LOCAL",
+                P {
+                    name: Some(ph.name),
+                    code: Some(ph.code),
+                    tfn: Some(ph.ty),
+                    order: Some(0),
+                    ..Default::default()
+                },
+            );
         }
         let mut so = 1i64;
         for s in named_children(body) {
@@ -1282,7 +1642,10 @@ impl Ctx<'_> {
                 // #ifdef/#ifndef: CDT keeps or drops the guarded statements;
                 // they splice into the surrounding block when kept.
                 let neg = n.child(0).map(|t| text(t, b) == "#ifndef").unwrap_or(false);
-                let name = n.child_by_field_name("name").map(|x| text(x, b).to_string()).unwrap_or_default();
+                let name = n
+                    .child_by_field_name("name")
+                    .map(|x| text(x, b).to_string())
+                    .unwrap_or_default();
                 let defined = self.macros.contains_key(&name);
                 let take = defined != neg;
                 for c in named_children(n) {
@@ -1305,13 +1668,20 @@ impl Ctx<'_> {
                 // the whole labeled statement) then the statement as sibling.
                 let o = *order;
                 *order += 1;
-                let lname = n.child_by_field_name("label").map(|l| text(l, b).to_string()).unwrap_or_default();
-                self.line(depth, "JUMP_TARGET", P {
-                    name: Some(lname),
-                    code: Some(esc(text(n, b))),
-                    order: Some(o),
-                    ..Default::default()
-                });
+                let lname = n
+                    .child_by_field_name("label")
+                    .map(|l| text(l, b).to_string())
+                    .unwrap_or_default();
+                self.line(
+                    depth,
+                    "JUMP_TARGET",
+                    P {
+                        name: Some(lname),
+                        code: Some(esc(text(n, b))),
+                        order: Some(o),
+                        ..Default::default()
+                    },
+                );
                 for c in named_children(n) {
                     if c.kind() != "statement_identifier" {
                         self.emit_stmt(c, b, order, depth);
@@ -1321,30 +1691,42 @@ impl Ctx<'_> {
             "goto_statement" => {
                 let o = *order;
                 *order += 1;
-                self.line(depth, "CONTROL_STRUCTURE", P {
-                    code: Some(esc(text(n, b))),
-                    order: Some(o),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CONTROL_STRUCTURE",
+                    P {
+                        code: Some(esc(text(n, b))),
+                        order: Some(o),
+                        ..Default::default()
+                    },
+                );
             }
             "break_statement" | "continue_statement" => {
                 let o = *order;
                 *order += 1;
-                self.line(depth, "CONTROL_STRUCTURE", P {
-                    code: Some(esc(text(n, b))),
-                    order: Some(o),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CONTROL_STRUCTURE",
+                    P {
+                        code: Some(esc(text(n, b))),
+                        order: Some(o),
+                        ..Default::default()
+                    },
+                );
             }
             "switch_statement" => {
                 let o = *order;
                 *order += 1;
                 let cs = self.line_no;
-                self.line(depth, "CONTROL_STRUCTURE", P {
-                    code: Some(esc(text(n, b))),
-                    order: Some(o),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CONTROL_STRUCTURE",
+                    P {
+                        code: Some(esc(text(n, b))),
+                        order: Some(o),
+                        ..Default::default()
+                    },
+                );
                 if let Some(cond) = n.child_by_field_name("condition") {
                     let ci = self.line_no;
                     self.emit_expr(unwrap_paren(cond), b, depth + 1, 1, None);
@@ -1367,12 +1749,16 @@ impl Ctx<'_> {
                 };
                 let o = *order;
                 *order += 1;
-                self.line(depth, "JUMP_TARGET", P {
-                    name: Some(name.into()),
-                    code: Some(esc(&code)),
-                    order: Some(o),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "JUMP_TARGET",
+                    P {
+                        name: Some(name.into()),
+                        code: Some(esc(&code)),
+                        order: Some(o),
+                        ..Default::default()
+                    },
+                );
                 if let Some(v) = value {
                     let vo = *order;
                     *order += 1;
@@ -1389,11 +1775,15 @@ impl Ctx<'_> {
                 *order += 1;
                 // c2cpg quirk: a do-while's CODE is the entire statement,
                 // trailing semicolon included (unlike while, header only).
-                self.line(depth, "CONTROL_STRUCTURE", P {
-                    code: Some(esc(text(n, b))),
-                    order: Some(o),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CONTROL_STRUCTURE",
+                    P {
+                        code: Some(esc(text(n, b))),
+                        order: Some(o),
+                        ..Default::default()
+                    },
+                );
                 let cs = self.line_no - 1;
                 if let Some(body) = n.child_by_field_name("body") {
                     if body.kind() == "compound_statement" {
@@ -1414,12 +1804,18 @@ impl Ctx<'_> {
                 let cs = self.line_no;
                 let cond = n.child_by_field_name("condition");
                 // c2cpg quirk: a while's CODE is just `while <cond>`, not the body.
-                let code = cond.map(|c| format!("while {}", text(c, b))).unwrap_or("while".into());
-                self.line(depth, "CONTROL_STRUCTURE", P {
-                    code: Some(esc(&code)),
-                    order: Some(o),
-                    ..Default::default()
-                });
+                let code = cond
+                    .map(|c| format!("while {}", text(c, b)))
+                    .unwrap_or("while".into());
+                self.line(
+                    depth,
+                    "CONTROL_STRUCTURE",
+                    P {
+                        code: Some(esc(&code)),
+                        order: Some(o),
+                        ..Default::default()
+                    },
+                );
                 if let Some(c) = cond {
                     let ci = self.line_no;
                     self.emit_expr(unwrap_paren(c), b, depth + 1, 1, None);
@@ -1436,11 +1832,15 @@ impl Ctx<'_> {
             "return_statement" => {
                 let o = *order;
                 *order += 1;
-                self.line(depth, "RETURN", P {
-                    code: Some(esc(text(n, b))),
-                    order: Some(o),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "RETURN",
+                    P {
+                        code: Some(esc(text(n, b))),
+                        order: Some(o),
+                        ..Default::default()
+                    },
+                );
                 // The returned expression is a single child, ORDER=1, no arg index.
                 if let Some(e) = named_children(n).into_iter().next() {
                     self.emit_expr(e, b, depth + 1, 1, None);
@@ -1464,11 +1864,15 @@ impl Ctx<'_> {
         let o = *order;
         *order += 1;
         let cs = self.line_no;
-        self.line(depth, "CONTROL_STRUCTURE", P {
-            code: Some(esc(text(n, b))),
-            order: Some(o),
-            ..Default::default()
-        });
+        self.line(
+            depth,
+            "CONTROL_STRUCTURE",
+            P {
+                code: Some(esc(text(n, b))),
+                order: Some(o),
+                ..Default::default()
+            },
+        );
         if let Some(cond) = n.child_by_field_name("condition") {
             let ci = self.line_no;
             self.emit_expr(unwrap_paren(cond), b, depth + 1, 1, None);
@@ -1483,22 +1887,33 @@ impl Ctx<'_> {
         }
         if let Some(alt) = n.child_by_field_name("alternative") {
             let ei = self.line_no;
-            self.line(depth + 1, "CONTROL_STRUCTURE", P {
-                code: Some("else".into()),
-                order: Some(3),
-                ..Default::default()
-            });
+            self.line(
+                depth + 1,
+                "CONTROL_STRUCTURE",
+                P {
+                    code: Some("else".into()),
+                    order: Some(3),
+                    ..Default::default()
+                },
+            );
             self.edge("FALSE_BODY", self.at(cs), self.at(ei));
-            if let Some(body) = named_children(alt).into_iter().find(|c| c.kind() == "compound_statement") {
+            if let Some(body) = named_children(alt)
+                .into_iter()
+                .find(|c| c.kind() == "compound_statement")
+            {
                 self.emit_block(body, b, 1, depth + 2);
             } else if let Some(stmt) = named_children(alt).into_iter().next() {
                 // `else if`: a synthetic CODE-less ANY BLOCK wraps the
                 // nested statement.
-                self.line(depth + 2, "BLOCK", P {
-                    tfn: Some("ANY".into()),
-                    order: Some(1),
-                    ..Default::default()
-                });
+                self.line(
+                    depth + 2,
+                    "BLOCK",
+                    P {
+                        tfn: Some("ANY".into()),
+                        order: Some(1),
+                        ..Default::default()
+                    },
+                );
                 let mut so = 1i64;
                 self.emit_stmt(stmt, b, &mut so, depth + 3);
             }
@@ -1515,26 +1930,40 @@ impl Ctx<'_> {
         let cond = n.child_by_field_name("condition");
         let update = n.child_by_field_name("update");
         let part = |x: Option<Node>| {
-            x.map(|c| text(c, b).trim_end_matches(';').trim().to_string()).unwrap_or_default()
+            x.map(|c| text(c, b).trim_end_matches(';').trim().to_string())
+                .unwrap_or_default()
         };
         let o = *order;
         *order += 1;
         let cs = self.line_no;
-        self.line(depth, "CONTROL_STRUCTURE", P {
-            code: Some(esc(&format!("for ({};{};{})", part(init), part(cond), part(update)))),
-            order: Some(o),
-            ..Default::default()
-        });
+        self.line(
+            depth,
+            "CONTROL_STRUCTURE",
+            P {
+                code: Some(esc(&format!(
+                    "for ({};{};{})",
+                    part(init),
+                    part(cond),
+                    part(update)
+                ))),
+                order: Some(o),
+                ..Default::default()
+            },
+        );
         let mut co = 1i64;
         if init.is_none() {
             // Empty init clause: a CODE-less ANY BLOCK placeholder, which
             // still receives the FOR_INIT edge.
             let pi = self.line_no;
-            self.line(depth + 1, "BLOCK", P {
-                tfn: Some("ANY".into()),
-                order: Some(co),
-                ..Default::default()
-            });
+            self.line(
+                depth + 1,
+                "BLOCK",
+                P {
+                    tfn: Some("ANY".into()),
+                    order: Some(co),
+                    ..Default::default()
+                },
+            );
             self.edge("FOR_INIT", self.at(cs), self.at(pi));
             co += 1;
         }
@@ -1576,8 +2005,19 @@ impl Ctx<'_> {
 
     /// A C declaration `T x = init;` → a LOCAL plus, if initialised, an
     /// `<operator>.assignment` CALL — exactly as c2cpg lowers it.
-    fn emit_declaration(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize, assign_arg: Option<i64>) {
-        let ty = normalize_type(&n.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into()));
+    fn emit_declaration(
+        &mut self,
+        n: Node,
+        b: &[u8],
+        order: &mut i64,
+        depth: usize,
+        assign_arg: Option<i64>,
+    ) {
+        let ty = normalize_type(
+            &n.child_by_field_name("type")
+                .map(|t| text(t, b).to_string())
+                .unwrap_or("ANY".into()),
+        );
         // CDT registers the decl-SPECIFIER type separately from the declared
         // type: `unsigned char c` also registers bare `unsigned` (pinned by
         // musl memcmp.c); a pointer decl registers its base.
@@ -1585,7 +2025,10 @@ impl Ctx<'_> {
         // LOCAL CODE is rebuilt per declarator: the decl-specifier source text
         // (keeps `const`/`struct`/`unsigned ...` spellings the type drops)
         // plus that declarator alone — so `int a, b = 1;` yields `int a`,`int b`.
-        let spec_end = n.child_by_field_name("type").map(|t| t.end_byte()).unwrap_or(n.start_byte());
+        let spec_end = n
+            .child_by_field_name("type")
+            .map(|t| t.end_byte())
+            .unwrap_or(n.start_byte());
         let decl_code = |d: Node| {
             let spec = std::str::from_utf8(&b[n.start_byte()..spec_end]).unwrap_or("");
             esc(&format!("{spec} {}", text(d, b)))
@@ -1602,7 +2045,10 @@ impl Ctx<'_> {
         let mut items: Vec<DeclItem> = Vec::new();
         for d in named_children(n) {
             let (decl, init) = match d.kind() {
-                "init_declarator" => (d.child_by_field_name("declarator"), d.child_by_field_name("value")),
+                "init_declarator" => (
+                    d.child_by_field_name("declarator"),
+                    d.child_by_field_name("value"),
+                ),
                 "identifier" | "pointer_declarator" | "array_declarator" => (Some(d), None),
                 _ => (None, None),
             };
@@ -1612,14 +2058,24 @@ impl Ctx<'_> {
             self.symbols.insert(name.clone(), full_ty.clone());
             let lo = *order;
             *order += 1;
-            self.line(depth, "LOCAL", P {
-                name: Some(name.clone()),
-                code: Some(decl_code(decl)),
-                tfn: Some(full_ty.clone()),
-                order: Some(lo),
-                ..Default::default()
+            self.line(
+                depth,
+                "LOCAL",
+                P {
+                    name: Some(name.clone()),
+                    code: Some(decl_code(decl)),
+                    tfn: Some(full_ty.clone()),
+                    order: Some(lo),
+                    ..Default::default()
+                },
+            );
+            items.push(DeclItem {
+                decl,
+                outer: d,
+                init,
+                name,
+                full_ty,
             });
-            items.push(DeclItem { decl, outer: d, init, name, full_ty });
         }
         // Pass 2: initialiser assignments / alloc lowerings, in order.
         for it in items {
@@ -1627,25 +2083,33 @@ impl Ctx<'_> {
                 let ao = *order;
                 *order += 1;
                 self.note_call("<operator>.assignment", 2);
-                self.line(depth, "CALL", P {
-                    name: Some("<operator>.assignment".into()),
-                    // CODE is the raw init_declarator text (`*l=vl`, `b = 1`).
-                    code: Some(esc(text(it.outer, b))),
-                    tfn: Some("void".into()),
-                    mfn: Some("<operator>.assignment".into()),
-                    order: Some(ao),
-                    arg: assign_arg,
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
-                self.line(depth + 1, "IDENTIFIER", P {
-                    name: Some(it.name.clone()),
-                    code: Some(it.name.clone()),
-                    tfn: Some(it.full_ty.clone()),
-                    order: Some(1),
-                    arg: Some(1),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.assignment".into()),
+                        // CODE is the raw init_declarator text (`*l=vl`, `b = 1`).
+                        code: Some(esc(text(it.outer, b))),
+                        tfn: Some("void".into()),
+                        mfn: Some("<operator>.assignment".into()),
+                        order: Some(ao),
+                        arg: assign_arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 1,
+                    "IDENTIFIER",
+                    P {
+                        name: Some(it.name.clone()),
+                        code: Some(it.name.clone()),
+                        tfn: Some(it.full_ty.clone()),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    },
+                );
                 self.emit_expr(v, b, depth + 1, 2, Some(2));
                 continue;
             }
@@ -1655,42 +2119,58 @@ impl Ctx<'_> {
                 *order += 1;
                 self.note_call("<operator>.assignment", 2);
                 self.note_call("<operator>.alloc", sizes.len() + 1);
-                self.line(depth, "CALL", P {
-                    name: Some("<operator>.assignment".into()),
-                    code: Some(esc(text(it.decl, b))),
-                    tfn: Some("void".into()),
-                    mfn: Some("<operator>.assignment".into()),
-                    order: Some(ao),
-                    arg: assign_arg,
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
-                self.line(depth + 1, "IDENTIFIER", P {
-                    name: Some(it.name.clone()),
-                    code: Some(it.name),
-                    tfn: Some(it.full_ty.clone()),
-                    order: Some(1),
-                    arg: Some(1),
-                    ..Default::default()
-                });
-                self.line(depth + 1, "CALL", P {
-                    name: Some("<operator>.alloc".into()),
-                    code: Some(esc(text(it.decl, b))),
-                    tfn: Some(it.full_ty.clone()),
-                    mfn: Some("<operator>.alloc".into()),
-                    order: Some(2),
-                    arg: Some(2),
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
-                self.line(depth + 2, "IDENTIFIER", P {
-                    name: Some(it.full_ty.clone()),
-                    code: Some(it.full_ty.clone()),
-                    tfn: Some(it.full_ty),
-                    order: Some(1),
-                    arg: Some(1),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.assignment".into()),
+                        code: Some(esc(text(it.decl, b))),
+                        tfn: Some("void".into()),
+                        mfn: Some("<operator>.assignment".into()),
+                        order: Some(ao),
+                        arg: assign_arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 1,
+                    "IDENTIFIER",
+                    P {
+                        name: Some(it.name.clone()),
+                        code: Some(it.name),
+                        tfn: Some(it.full_ty.clone()),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 1,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.alloc".into()),
+                        code: Some(esc(text(it.decl, b))),
+                        tfn: Some(it.full_ty.clone()),
+                        mfn: Some("<operator>.alloc".into()),
+                        order: Some(2),
+                        arg: Some(2),
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 2,
+                    "IDENTIFIER",
+                    P {
+                        name: Some(it.full_ty.clone()),
+                        code: Some(it.full_ty.clone()),
+                        tfn: Some(it.full_ty),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    },
+                );
                 for (i, sz) in sizes.into_iter().enumerate() {
                     let k = (i + 2) as i64;
                     self.emit_expr(sz, b, depth + 2, k, Some(k));
@@ -1706,16 +2186,20 @@ impl Ctx<'_> {
                 let op = n.child(1).map(|o| text(o, b)).unwrap_or("?");
                 let name = operator_name(op);
                 self.note_call(&name, 2);
-                self.line(depth, "CALL", P {
-                    name: Some(name.clone()),
-                    code: Some(esc(text(n, b))),
-                    tfn: Some("ANY".into()),
-                    mfn: Some(name),
-                    order: Some(order),
-                    arg,
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some(name.clone()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some(name),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
                 if let Some(l) = n.child_by_field_name("left") {
                     self.emit_expr(l, b, depth + 1, 1, Some(1));
                 }
@@ -1726,19 +2210,26 @@ impl Ctx<'_> {
             "assignment_expression" => {
                 // A bare assignment statement; typed ANY (unlike a declaration's
                 // initialiser assignment, which c2cpg types `void`).
-                let op = n.child_by_field_name("operator").map(|o| text(o, b)).unwrap_or("=");
+                let op = n
+                    .child_by_field_name("operator")
+                    .map(|o| text(o, b))
+                    .unwrap_or("=");
                 let name = assignment_name(op);
                 self.note_call(&name, 2);
-                self.line(depth, "CALL", P {
-                    name: Some(name.clone()),
-                    code: Some(esc(text(n, b))),
-                    tfn: Some("ANY".into()),
-                    mfn: Some(name),
-                    order: Some(order),
-                    arg,
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some(name.clone()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some(name),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
                 if let Some(l) = n.child_by_field_name("left") {
                     self.emit_expr(l, b, depth + 1, 1, Some(1));
                 }
@@ -1750,16 +2241,20 @@ impl Ctx<'_> {
                 let op = n.child(0).map(|o| text(o, b)).unwrap_or("?");
                 let name = unary_name(op);
                 self.note_call(&name, 1);
-                self.line(depth, "CALL", P {
-                    name: Some(name.clone()),
-                    code: Some(esc(text(n, b))),
-                    tfn: Some("ANY".into()),
-                    mfn: Some(name),
-                    order: Some(order),
-                    arg,
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some(name.clone()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some(name),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
                 if let Some(a) = n.child_by_field_name("argument") {
                     self.emit_expr(a, b, depth + 1, 1, Some(1));
                 }
@@ -1778,33 +2273,44 @@ impl Ctx<'_> {
                     if op == "++" { "Increment" } else { "Decrement" }
                 );
                 self.note_call(&name, 1);
-                self.line(depth, "CALL", P {
-                    name: Some(name.clone()),
-                    code: Some(esc(text(n, b))),
-                    tfn: Some("ANY".into()),
-                    mfn: Some(name),
-                    order: Some(order),
-                    arg,
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some(name.clone()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some(name),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
                 if let Some(a) = arg_node {
                     self.emit_expr(a, b, depth + 1, 1, Some(1));
                 }
             }
             "conditional_expression" => {
                 self.note_call("<operator>.conditional", 3);
-                self.line(depth, "CALL", P {
-                    name: Some("<operator>.conditional".into()),
-                    code: Some(esc(text(n, b))),
-                    tfn: Some("ANY".into()),
-                    mfn: Some("<operator>.conditional".into()),
-                    order: Some(order),
-                    arg,
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
-                for (i, field) in ["condition", "consequence", "alternative"].iter().enumerate() {
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.conditional".into()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some("<operator>.conditional".into()),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                for (i, field) in ["condition", "consequence", "alternative"]
+                    .iter()
+                    .enumerate()
+                {
                     if let Some(c) = n.child_by_field_name(*field) {
                         let k = (i + 1) as i64;
                         self.emit_expr(c, b, depth + 1, k, Some(k));
@@ -1814,7 +2320,10 @@ impl Ctx<'_> {
             "field_expression" => {
                 // `.` → fieldAccess, `->` → indirectFieldAccess; the member is
                 // a FIELD_IDENTIFIER child with CODE only (no NAME).
-                let op = n.child_by_field_name("operator").map(|o| text(o, b)).unwrap_or(".");
+                let op = n
+                    .child_by_field_name("operator")
+                    .map(|o| text(o, b))
+                    .unwrap_or(".");
                 let name = if op == "->" {
                     "<operator>.indirectFieldAccess".to_string()
                 } else {
@@ -1833,40 +2342,52 @@ impl Ctx<'_> {
                         self.edge("REF", call_at, format!("MB:{t}.{}", text(f, b)));
                     }
                 }
-                self.line(depth, "CALL", P {
-                    name: Some(name.clone()),
-                    code: Some(esc(text(n, b))),
-                    tfn: Some("ANY".into()),
-                    mfn: Some(name),
-                    order: Some(order),
-                    arg,
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some(name.clone()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some(name),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
                 if let Some(a) = n.child_by_field_name("argument") {
                     self.emit_expr(a, b, depth + 1, 1, Some(1));
                 }
                 if let Some(f) = n.child_by_field_name("field") {
-                    self.line(depth + 1, "FIELD_IDENTIFIER", P {
-                        code: Some(text(f, b).to_string()),
-                        order: Some(2),
-                        arg: Some(2),
-                        ..Default::default()
-                    });
+                    self.line(
+                        depth + 1,
+                        "FIELD_IDENTIFIER",
+                        P {
+                            code: Some(text(f, b).to_string()),
+                            order: Some(2),
+                            arg: Some(2),
+                            ..Default::default()
+                        },
+                    );
                 }
             }
             "subscript_expression" => {
                 self.note_call("<operator>.indirectIndexAccess", 2);
-                self.line(depth, "CALL", P {
-                    name: Some("<operator>.indirectIndexAccess".into()),
-                    code: Some(esc(text(n, b))),
-                    tfn: Some("ANY".into()),
-                    mfn: Some("<operator>.indirectIndexAccess".into()),
-                    order: Some(order),
-                    arg,
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.indirectIndexAccess".into()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some("<operator>.indirectIndexAccess".into()),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
                 if let Some(a) = n.child_by_field_name("argument") {
                     self.emit_expr(a, b, depth + 1, 1, Some(1));
                 }
@@ -1876,7 +2397,9 @@ impl Ctx<'_> {
             }
             "call_expression" => {
                 let callee = n.child_by_field_name("function");
-                let name = callee.map(|c| text(c, b).to_string()).unwrap_or("<anon>".into());
+                let name = callee
+                    .map(|c| text(c, b).to_string())
+                    .unwrap_or("<anon>".into());
                 let args = n.child_by_field_name("arguments");
                 let argc = args.map(|a| named_children(a).len()).unwrap_or(0);
                 if self.macros.get(&name).is_some_and(|m| m.params.is_some()) {
@@ -1892,17 +2415,25 @@ impl Ctx<'_> {
                     // DYNAMIC_DISPATCH, receiver at ORDER=1 with no
                     // ARGUMENT_INDEX, args shifted to ORDER=2.. / INDEX=1..
                     self.note_call("<operator>.pointerCall", argc);
-                    let ty = self.symbols.get(&name).or_else(|| self.globals.get(&name)).cloned();
-                    self.line(depth, "CALL", P {
-                        name: Some("<operator>.pointerCall".into()),
-                        code: Some(esc(text(n, b))),
-                        tfn: ty,
-                        mfn: Some("<operator>.pointerCall".into()),
-                        order: Some(order),
-                        arg,
-                        dispatch: Some("DYNAMIC_DISPATCH".into()),
-                        ..Default::default()
-                    });
+                    let ty = self
+                        .symbols
+                        .get(&name)
+                        .or_else(|| self.globals.get(&name))
+                        .cloned();
+                    self.line(
+                        depth,
+                        "CALL",
+                        P {
+                            name: Some("<operator>.pointerCall".into()),
+                            code: Some(esc(text(n, b))),
+                            tfn: ty,
+                            mfn: Some("<operator>.pointerCall".into()),
+                            order: Some(order),
+                            arg,
+                            dispatch: Some("DYNAMIC_DISPATCH".into()),
+                            ..Default::default()
+                        },
+                    );
                     if let Some(c) = callee {
                         self.emit_expr(c, b, depth + 1, 1, None);
                     }
@@ -1914,16 +2445,20 @@ impl Ctx<'_> {
                 } else {
                     let ty = self.functions.get(&name).cloned().unwrap_or("ANY".into());
                     self.note_call(&name, argc);
-                    self.line(depth, "CALL", P {
-                        name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
-                        tfn: Some(ty),
-                        mfn: Some(name),
-                        order: Some(order),
-                        arg,
-                        dispatch: Some("STATIC_DISPATCH".into()),
-                        ..Default::default()
-                    });
+                    self.line(
+                        depth,
+                        "CALL",
+                        P {
+                            name: Some(name.clone()),
+                            code: Some(esc(text(n, b))),
+                            tfn: Some(ty),
+                            mfn: Some(name),
+                            order: Some(order),
+                            arg,
+                            dispatch: Some("STATIC_DISPATCH".into()),
+                            ..Default::default()
+                        },
+                    );
                     if let Some(args) = args {
                         for (i, a) in named_children(args).into_iter().enumerate() {
                             let k = (i + 1) as i64;
@@ -1948,14 +2483,18 @@ impl Ctx<'_> {
                     // Fully unresolved (e.g. NULL with unresolved includes).
                     (format!("<unknown> {name}"), "ANY".to_string())
                 };
-                self.line(depth, "IDENTIFIER", P {
-                    name: Some(name),
-                    code: Some(code),
-                    tfn: Some(ty),
-                    order: Some(order),
-                    arg,
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "IDENTIFIER",
+                    P {
+                        name: Some(name),
+                        code: Some(code),
+                        tfn: Some(ty),
+                        order: Some(order),
+                        arg,
+                        ..Default::default()
+                    },
+                );
             }
             "number_literal" => {
                 // tree-sitter folds a leading sign into the literal; Joern
@@ -1964,23 +2503,31 @@ impl Ctx<'_> {
                 if let Some(rest) = t.strip_prefix('-').or_else(|| t.strip_prefix('+')) {
                     let name = unary_name(&t[..1]);
                     self.note_call(&name, 1);
-                    self.line(depth, "CALL", P {
-                        name: Some(name.clone()),
-                        code: Some(t.clone()),
-                        tfn: Some("ANY".into()),
-                        mfn: Some(name),
-                        order: Some(order),
-                        arg,
-                        dispatch: Some("STATIC_DISPATCH".into()),
-                        ..Default::default()
-                    });
-                    self.line(depth + 1, "LITERAL", P {
-                        code: Some(rest.to_string()),
-                        tfn: Some("int".into()),
-                        order: Some(1),
-                        arg: Some(1),
-                        ..Default::default()
-                    });
+                    self.line(
+                        depth,
+                        "CALL",
+                        P {
+                            name: Some(name.clone()),
+                            code: Some(t.clone()),
+                            tfn: Some("ANY".into()),
+                            mfn: Some(name),
+                            order: Some(order),
+                            arg,
+                            dispatch: Some("STATIC_DISPATCH".into()),
+                            ..Default::default()
+                        },
+                    );
+                    self.line(
+                        depth + 1,
+                        "LITERAL",
+                        P {
+                            code: Some(rest.to_string()),
+                            tfn: Some("int".into()),
+                            order: Some(1),
+                            arg: Some(1),
+                            ..Default::default()
+                        },
+                    );
                 } else {
                     let tfn = if t.starts_with("0x") || t.starts_with("0X") {
                         "int"
@@ -1991,32 +2538,44 @@ impl Ctx<'_> {
                     } else {
                         "int"
                     };
-                    self.line(depth, "LITERAL", P {
-                        code: Some(t),
-                        tfn: Some(tfn.into()),
-                        order: Some(order),
-                        arg,
-                        ..Default::default()
-                    });
+                    self.line(
+                        depth,
+                        "LITERAL",
+                        P {
+                            code: Some(t),
+                            tfn: Some(tfn.into()),
+                            order: Some(order),
+                            arg,
+                            ..Default::default()
+                        },
+                    );
                 }
             }
             "char_literal" => {
-                self.line(depth, "LITERAL", P {
-                    code: Some(text(n, b).to_string()),
-                    tfn: Some("char".into()),
-                    order: Some(order),
-                    arg,
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "LITERAL",
+                    P {
+                        code: Some(text(n, b).to_string()),
+                        tfn: Some("char".into()),
+                        order: Some(order),
+                        arg,
+                        ..Default::default()
+                    },
+                );
             }
             "string_literal" => {
-                self.line(depth, "LITERAL", P {
-                    code: Some(esc(text(n, b))),
-                    tfn: Some("char*".into()),
-                    order: Some(order),
-                    arg,
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "LITERAL",
+                    P {
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("char*".into()),
+                        order: Some(order),
+                        arg,
+                        ..Default::default()
+                    },
+                );
             }
             "cast_expression" => {
                 // `(T)e` → <operator>.cast. CDT quirk: the type is the BASE
@@ -2029,51 +2588,67 @@ impl Ctx<'_> {
                     .map(|t| normalize_type(text(t, b)))
                     .unwrap_or_else(|| normalize_type(&raw));
                 self.note_call("<operator>.cast", 2);
-                self.line(depth, "CALL", P {
-                    name: Some("<operator>.cast".into()),
-                    code: Some(esc(text(n, b))),
-                    tfn: Some(ty.clone()),
-                    mfn: Some("<operator>.cast".into()),
-                    order: Some(order),
-                    arg,
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
-                self.line(depth + 1, "TYPE_REF", P {
-                    code: Some(esc(&raw)),
-                    tfn: Some(ty),
-                    order: Some(1),
-                    arg: Some(1),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.cast".into()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some(ty.clone()),
+                        mfn: Some("<operator>.cast".into()),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 1,
+                    "TYPE_REF",
+                    P {
+                        code: Some(esc(&raw)),
+                        tfn: Some(ty),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    },
+                );
                 if let Some(v) = n.child_by_field_name("value") {
                     self.emit_expr(v, b, depth + 1, 2, Some(2));
                 }
             }
             "sizeof_expression" => {
                 self.note_call("<operator>.sizeOf", 1);
-                self.line(depth, "CALL", P {
-                    name: Some("<operator>.sizeOf".into()),
-                    code: Some(esc(text(n, b))),
-                    tfn: Some("ANY".into()),
-                    mfn: Some("<operator>.sizeOf".into()),
-                    order: Some(order),
-                    arg,
-                    dispatch: Some("STATIC_DISPATCH".into()),
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.sizeOf".into()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some("<operator>.sizeOf".into()),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
                 if let Some(t) = n.child_by_field_name("type") {
                     // sizeof(T): the type name appears as an IDENTIFIER typed
                     // as itself (and spawns the ORDER=0 phantom LOCAL).
                     let ts = text(t, b).to_string();
-                    self.line(depth + 1, "IDENTIFIER", P {
-                        name: Some(ts.clone()),
-                        code: Some(ts.clone()),
-                        tfn: Some(ts),
-                        order: Some(1),
-                        arg: Some(1),
-                        ..Default::default()
-                    });
+                    self.line(
+                        depth + 1,
+                        "IDENTIFIER",
+                        P {
+                            name: Some(ts.clone()),
+                            code: Some(ts.clone()),
+                            tfn: Some(ts),
+                            order: Some(1),
+                            arg: Some(1),
+                            ..Default::default()
+                        },
+                    );
                 } else if let Some(v) = n.child_by_field_name("value") {
                     self.emit_expr(unwrap_paren(v), b, depth + 1, 1, Some(1));
                 }
@@ -2081,12 +2656,16 @@ impl Ctx<'_> {
             "comma_expression" => {
                 // `(a, b)` → a CODE-less BLOCK typed ANY whose children carry
                 // ORDER but no ARGUMENT_INDEX.
-                self.line(depth, "BLOCK", P {
-                    tfn: Some("ANY".into()),
-                    order: Some(order),
-                    arg,
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "BLOCK",
+                    P {
+                        tfn: Some("ANY".into()),
+                        order: Some(order),
+                        arg,
+                        ..Default::default()
+                    },
+                );
                 let mut parts = Vec::new();
                 flatten_comma(n, &mut parts);
                 for (i, part) in parts.into_iter().enumerate() {
@@ -2096,14 +2675,18 @@ impl Ctx<'_> {
             "null" => {
                 // tree-sitter parses NULL as its own node kind; with
                 // unresolved includes CDT sees an unresolved identifier.
-                self.line(depth, "IDENTIFIER", P {
-                    name: Some("NULL".into()),
-                    code: Some("<unknown> NULL".into()),
-                    tfn: Some("ANY".into()),
-                    order: Some(order),
-                    arg,
-                    ..Default::default()
-                });
+                self.line(
+                    depth,
+                    "IDENTIFIER",
+                    P {
+                        name: Some("NULL".into()),
+                        code: Some("<unknown> NULL".into()),
+                        tfn: Some("ANY".into()),
+                        order: Some(order),
+                        arg,
+                        ..Default::default()
+                    },
+                );
             }
             "parenthesized_expression" => {
                 if let Some(inner) = named_children(n).into_iter().next() {
@@ -2125,7 +2708,10 @@ struct Param {
 
 /// (name, return type, params) for a function_definition.
 fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
-    let base = f.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into());
+    let base = f
+        .child_by_field_name("type")
+        .map(|t| text(t, b).to_string())
+        .unwrap_or("ANY".into());
     let decl = f.child_by_field_name("declarator")?;
     // `void *bsearch(...)`: pointer levels wrap the function declarator.
     let mut stars = 0;
@@ -2139,17 +2725,30 @@ fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
     }
     let ret = format!("{}{}", normalize_type(&base), "*".repeat(stars));
     let fd = find_function_declarator(decl)?;
-    let name = fd.child_by_field_name("declarator").map(|d| innermost_id(d, b))?;
+    let name = fd
+        .child_by_field_name("declarator")
+        .map(|d| innermost_id(d, b))?;
     let mut params = Vec::new();
     if let Some(pl) = fd.child_by_field_name("parameters") {
         for p in named_children(pl) {
             if p.kind() == "parameter_declaration" {
-                let base = normalize_type(&p.child_by_field_name("type").map(|t| text(t, b).to_string()).unwrap_or("ANY".into()));
+                let base = normalize_type(
+                    &p.child_by_field_name("type")
+                        .map(|t| text(t, b).to_string())
+                        .unwrap_or("ANY".into()),
+                );
                 let decl = p.child_by_field_name("declarator");
-                let ty = format!("{base}{}", decl.map(|d| decl_suffix(d, b)).unwrap_or_default());
+                let ty = format!(
+                    "{base}{}",
+                    decl.map(|d| decl_suffix(d, b)).unwrap_or_default()
+                );
                 let name = decl.map(|d| innermost_id(d, b)).unwrap_or_default();
                 if !name.is_empty() {
-                    params.push(Param { name, ty, code: text(p, b).to_string() });
+                    params.push(Param {
+                        name,
+                        ty,
+                        code: text(p, b).to_string(),
+                    });
                 }
             }
         }
@@ -2161,7 +2760,9 @@ fn find_function_declarator(n: Node) -> Option<Node> {
     if n.kind() == "function_declarator" {
         return Some(n);
     }
-    named_children(n).into_iter().find_map(find_function_declarator)
+    named_children(n)
+        .into_iter()
+        .find_map(find_function_declarator)
 }
 
 fn unwrap_paren(n: Node) -> Node {
@@ -2198,7 +2799,10 @@ fn decl_suffix(n: Node, b: &[u8]) -> String {
             "array_declarator" => {
                 // CDT keeps the size: `int grid[2][3]` types as `int[2][3]`
                 // (declarator nesting is outermost-last, so reverse).
-                let size = cur.child_by_field_name("size").map(|sz| text(sz, b).to_string()).unwrap_or_default();
+                let size = cur
+                    .child_by_field_name("size")
+                    .map(|sz| text(sz, b).to_string())
+                    .unwrap_or_default();
                 parts.push(format!("[{size}]"));
             }
             _ => break,
@@ -2323,12 +2927,14 @@ fn flatten_comma<'t>(n: Node<'t>, out: &mut Vec<Node<'t>>) {
 }
 
 fn needs_clinit(n: Node, _b: &[u8]) -> bool {
-    let Some(body) = n.child_by_field_name("body") else { return false };
+    let Some(body) = n.child_by_field_name("body") else {
+        return false;
+    };
     named_children(body).iter().any(|f| {
         (f.kind() == "field_declaration"
-            && named_children(*f).iter().any(|d| {
-                d.kind() == "array_declarator" && d.child_by_field_name("size").is_some()
-            }))
+            && named_children(*f)
+                .iter()
+                .any(|d| d.kind() == "array_declarator" && d.child_by_field_name("size").is_some()))
             || (f.kind() == "enumerator" && f.child_by_field_name("value").is_some())
     })
 }
@@ -2360,7 +2966,9 @@ fn substitute(body: &str, params: &[String], args: &[String]) -> String {
 
 /// The expression node of a parsed expansion (`void __m() { <exp>; }`).
 fn expansion_expr_node(root: Node) -> Option<Node> {
-    let f = named_children(root).into_iter().find(|n| n.kind() == "function_definition")?;
+    let f = named_children(root)
+        .into_iter()
+        .find(|n| n.kind() == "function_definition")?;
     let body = f.child_by_field_name("body")?;
     let stmt = named_children(body).into_iter().next()?;
     named_children(stmt).into_iter().next()
@@ -2374,9 +2982,15 @@ fn expansion_type(
 ) -> String {
     let src = format!("void __m() {{ {expansion}; }}");
     let mut parser = Parser::new();
-    parser.set_language(&tree_sitter_c::LANGUAGE.into()).unwrap();
-    let Some(tree) = parser.parse(&src, None) else { return "ANY".into() };
-    let Some(mut e) = expansion_expr_node(tree.root_node()) else { return "ANY".into() };
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let Some(tree) = parser.parse(&src, None) else {
+        return "ANY".into();
+    };
+    let Some(mut e) = expansion_expr_node(tree.root_node()) else {
+        return "ANY".into();
+    };
     let b = src.as_bytes();
     while e.kind() == "parenthesized_expression" {
         match named_children(e).into_iter().next() {
@@ -2397,7 +3011,10 @@ fn expansion_type(
         "string_literal" => "char*".into(),
         "identifier" => symbols.get(text(e, b)).cloned().unwrap_or("ANY".into()),
         "call_expression" => {
-            let name = e.child_by_field_name("function").map(|c| text(c, b).to_string()).unwrap_or_default();
+            let name = e
+                .child_by_field_name("function")
+                .map(|c| text(c, b).to_string())
+                .unwrap_or_default();
             functions.get(&name).cloned().unwrap_or("ANY".into())
         }
         _ => "ANY".into(),
@@ -2481,7 +3098,9 @@ struct DNode {
 /// ` UPPERCASE_KEY=` property (CODE values are C code — lowercase/operators —
 /// so an uppercase-keyed `=` reliably marks the boundary).
 fn extract_code(rest: &str) -> String {
-    let Some(start) = rest.find(" CODE=").map(|i| i + 6) else { return String::new() };
+    let Some(start) = rest.find(" CODE=").map(|i| i + 6) else {
+        return String::new();
+    };
     let tail = &rest[start..];
     let bytes = tail.as_bytes();
     let mut i = 0;
@@ -2513,7 +3132,13 @@ fn parse_dump_block(text: &str) -> Vec<DNode> {
         let label = rest.split(' ').next().unwrap_or("").to_string();
         let grab = |key: &str| -> String {
             rest.find(key)
-                .map(|i| rest[i + key.len()..].split(' ').next().unwrap_or("").to_string())
+                .map(|i| {
+                    rest[i + key.len()..]
+                        .split(' ')
+                        .next()
+                        .unwrap_or("")
+                        .to_string()
+                })
                 .unwrap_or_default()
         };
         let id = arena.len();
@@ -2561,8 +3186,8 @@ struct CfgBuilder<'a> {
     block: &'a str,
     mret: String,
     edges: Vec<(String, String)>,
-    breaks: Vec<Vec<String>>,    // per breakable construct
-    continues: Vec<Vec<String>>, // per loop
+    breaks: Vec<Vec<String>>,        // per breakable construct
+    continues: Vec<Vec<String>>,     // per loop
     labels: HashMap<String, String>, // label name -> JUMP_TARGET addr
 }
 
@@ -2646,7 +3271,7 @@ impl CfgBuilder<'_> {
                         let bkids = self.arena[blk].children.clone();
                         let (xe, xo) = self.seq(&bkids);
                         if let Some(xe) = &xe {
-                            self.connect(&[me.clone()], xe);
+                            self.connect(std::slice::from_ref(&me), xe);
                         }
                         outs.extend(xo);
                     }
@@ -2683,17 +3308,26 @@ impl CfgBuilder<'_> {
         }
     }
 
-    fn build_control(&mut self, id: usize, me: String, kids: &[usize]) -> (Option<String>, Vec<String>) {
-        let kind = self.arena[id].code1.split(['(', ';', ' ']).next().unwrap_or("").to_string();
+    fn build_control(
+        &mut self,
+        id: usize,
+        me: String,
+        kids: &[usize],
+    ) -> (Option<String>, Vec<String>) {
+        let kind = self.arena[id]
+            .code1
+            .split(['(', ';', ' '])
+            .next()
+            .unwrap_or("")
+            .to_string();
         let block_child = |b: &Self| kids.iter().copied().find(|&c| b.arena[c].label == "BLOCK");
         match kind.as_str() {
             "if" => {
                 let (ce, co) = self.build(kids[0]);
                 let then = block_child(self);
-                let els = kids
-                    .iter()
-                    .copied()
-                    .find(|&c| self.arena[c].label == "CONTROL_STRUCTURE" && self.arena[c].code1 == "else");
+                let els = kids.iter().copied().find(|&c| {
+                    self.arena[c].label == "CONTROL_STRUCTURE" && self.arena[c].code1 == "else"
+                });
                 let mut outs = Vec::new();
                 if let Some(t) = then {
                     let (te, to) = self.build(t);
@@ -2703,7 +3337,11 @@ impl CfgBuilder<'_> {
                     outs.extend(to);
                 }
                 if let Some(e) = els {
-                    let eb = self.arena[e].children.iter().copied().find(|&c| self.arena[c].label == "BLOCK");
+                    let eb = self.arena[e]
+                        .children
+                        .iter()
+                        .copied()
+                        .find(|&c| self.arena[c].label == "BLOCK");
                     if let Some(eb) = eb {
                         let (ee, eo) = self.build(eb);
                         if let Some(ee) = &ee {
@@ -2743,7 +3381,10 @@ impl CfgBuilder<'_> {
                 self.breaks.push(Vec::new());
                 self.continues.push(Vec::new());
                 let body = block_child(self);
-                let cond = kids.iter().copied().find(|&c| self.arena[c].label != "BLOCK");
+                let cond = kids
+                    .iter()
+                    .copied()
+                    .find(|&c| self.arena[c].label != "BLOCK");
                 let (be, bo) = body.map(|b| self.build(b)).unwrap_or((None, vec![]));
                 let (ce, co) = cond.map(|c| self.build(c)).unwrap_or((None, vec![]));
                 if let Some(ce) = &ce {
@@ -2864,8 +3505,11 @@ fn cfg_edges_for_block(block: &str, text: &str) -> Vec<(String, String)> {
     let mret = root_kids
         .iter()
         .copied()
-        .find(|&c| arena[c].label == "METHOD_RETURN" );
-    let body = root_kids.iter().copied().find(|&c| arena[c].label == "BLOCK");
+        .find(|&c| arena[c].label == "METHOD_RETURN");
+    let body = root_kids
+        .iter()
+        .copied()
+        .find(|&c| arena[c].label == "BLOCK");
     let Some(mret) = mret else { return Vec::new() };
     let mut labels: HashMap<String, String> = HashMap::new();
     for n in &arena {
@@ -2909,7 +3553,8 @@ fn cfg_index_edges(block: &str, text: &str, n: usize) -> Vec<(usize, usize)> {
         if a.starts_with("M:") {
             Some(0)
         } else {
-            a.strip_prefix(&prefix).and_then(|s| s.parse::<usize>().ok())
+            a.strip_prefix(&prefix)
+                .and_then(|s| s.parse::<usize>().ok())
         }
     };
     cfg_edges_for_block(block, text)
@@ -3058,7 +3703,11 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     }
     let method_addr = format!("M:{}", arena[0].full);
     let addr = |i: usize| -> String {
-        if i == 0 { method_addr.clone() } else { format!("{block}#{i}") }
+        if i == 0 {
+            method_addr.clone()
+        } else {
+            format!("{block}#{i}")
+        }
     };
 
     // Own nodes only: a file-global/`<clinit>` dump embeds the full nested
@@ -3106,7 +3755,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // def id == node index. Each def carries a variable.
     let mut def_var: HashMap<usize, String> = HashMap::new();
     let mut gen: HashMap<usize, Vec<usize>> = HashMap::new(); // node -> defs generated
-    // parameters
+                                                              // parameters
     let params: Vec<usize> = arena[0]
         .children
         .iter()
@@ -3156,6 +3805,8 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     {
         let mut name_excluded: HashSet<String> =
             params.iter().map(|&p| arena[p].name.clone()).collect();
+        // `i` is a node id, not just an arena index: it keys `own` too.
+        #[allow(clippy::needless_range_loop)]
         for i in 0..n {
             if own.contains(&i) && arena[i].label == "LOCAL" {
                 name_excluded.insert(arena[i].name.clone());
@@ -3178,7 +3829,10 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         for &c in &calls {
             for a in args_of(c) {
                 if arena[a].label == "IDENTIFIER" && !name_excluded.contains(&arena[a].name) {
-                    by_name.entry(arena[a].name.clone()).or_default().push((c, a));
+                    by_name
+                        .entry(arena[a].name.clone())
+                        .or_default()
+                        .push((c, a));
                 }
             }
         }
@@ -3244,11 +3898,8 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
             }
             let g = gen.get(&i).unwrap_or(&empty);
             let k = kill.get(&i).unwrap_or(&empty);
-            let mut new_out: HashSet<usize> = in_set
-                .iter()
-                .copied()
-                .filter(|d| !k.contains(d))
-                .collect();
+            let mut new_out: HashSet<usize> =
+                in_set.iter().copied().filter(|d| !k.contains(d)).collect();
             new_out.extend(g.iter().copied());
             if i == 0 {
                 new_out.extend(entry_gen.iter().copied());
@@ -3283,9 +3934,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // sameVariable || isContainer || isPart || isAlias. Joern compares
     // `nodeToString(use)` (NAME for identifier/param, CODE for expression)
     // against a target string via `Option.contains`, i.e. EXACT equality.
-    let is_using = |use_i: usize, def_i: usize| -> bool {
-        rd_is_using(&arena, use_i, def_i)
-    };
+    let is_using = |use_i: usize, def_i: usize| -> bool { rd_is_using(&arena, use_i, def_i) };
 
     let mut flows: Vec<(String, String, String)> = Vec::new();
     // Gate every candidate edge addEdge(from=s, to=d) through
@@ -3305,7 +3954,12 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // comma-operator `(b++, b+1)`); statement blocks (method/loop bodies) are
     // not in the CFG and never get def-use edges.
     let is_ddg = |i: usize| match arena[i].label.as_str() {
-        "CALL" | "IDENTIFIER" | "LITERAL" | "RETURN" | "METHOD_PARAMETER_IN" | "METHOD_REF"
+        "CALL"
+        | "IDENTIFIER"
+        | "LITERAL"
+        | "RETURN"
+        | "METHOD_PARAMETER_IN"
+        | "METHOD_REF"
         | "TYPE_REF" => true,
         "BLOCK" => cfg_nodes.contains(&i),
         _ => false,
@@ -3348,6 +4002,9 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // (the call is a reaching def). Non-INLINED calls (function calls,
     // operators) never get an entry edge; INLINED macro calls do (when their
     // args carry no reaching def). isValidEdge in push drops write-only targets.
+    // `i` is a node id, not just an arena index: it keys `own`, `assign_lhs`,
+    // `is_ddg` and `used_incoming` as well.
+    #[allow(clippy::needless_range_loop)]
     for i in 0..n {
         if i == 0 || !own.contains(&i) || !is_ddg(i) || assign_lhs.contains(&i) {
             continue;
@@ -3414,7 +4071,9 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
             if arena[b].label != "BLOCK" || !cfg_nodes.contains(&b) {
                 continue;
             }
-            let Some(&last) = arena[b].children.last() else { continue };
+            let Some(&last) = arena[b].children.last() else {
+                continue;
+            };
             match arena[last].label.as_str() {
                 "IDENTIFIER" => {
                     let ins = in_of(b);
@@ -3448,7 +4107,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
             continue;
         }
         for (u, ins) in used_incoming(i) {
-            push(arena[*&u].fullcode.clone(), u, i, &mut flows);
+            push(arena[u].fullcode.clone(), u, i, &mut flows);
             for d in ins {
                 if d != u {
                     push(node_var(&arena[d]), d, u, &mut flows);
@@ -3669,8 +4328,12 @@ fn rd_is_using(arena: &[DNode], use_i: usize, in_i: usize) -> bool {
 
 // ---- EdgeValidator.isValidEdge (v4.0.555) ----
 fn rd_args(arena: &[DNode], c: usize) -> Vec<usize> {
-    let mut v: Vec<usize> = arena[c].children.iter().copied()
-        .filter(|&k| arena[k].has_arg && arena[k].label != "FIELD_IDENTIFIER").collect();
+    let mut v: Vec<usize> = arena[c]
+        .children
+        .iter()
+        .copied()
+        .filter(|&k| arena[k].has_arg && arena[k].label != "FIELD_IDENTIFIER")
+        .collect();
     v.sort_by_key(|&k| arena[k].arg_index);
     v
 }
@@ -3678,48 +4341,83 @@ fn rd_in_call(arena: &[DNode], node: usize) -> Option<usize> {
     arena[node].parent.filter(|&p| arena[p].label == "CALL")
 }
 fn rd_is_expr(arena: &[DNode], node: usize) -> bool {
-    matches!(arena[node].label.as_str(),
-        "CALL"|"IDENTIFIER"|"LITERAL"|"BLOCK"|"FIELD_IDENTIFIER"|"METHOD_REF"|"TYPE_REF")
+    matches!(
+        arena[node].label.as_str(),
+        "CALL"
+            | "IDENTIFIER"
+            | "LITERAL"
+            | "BLOCK"
+            | "FIELD_IDENTIFIER"
+            | "METHOD_REF"
+            | "TYPE_REF"
+    )
 }
-fn rd_sem(arena: &[DNode], c: usize) -> Option<Vec<(i64,i64)>> {
-    if arena[c].label == "CALL" { operator_semantics(&arena[c].name) } else { None }
+fn rd_sem(arena: &[DNode], c: usize) -> Option<Vec<(i64, i64)>> {
+    if arena[c].label == "CALL" {
+        operator_semantics(&arena[c].name)
+    } else {
+        None
+    }
 }
 fn rd_is_call_retval(arena: &[DNode], node: usize) -> bool {
-    if arena[node].label != "CALL" { return false; }
-    match rd_sem(arena, node) { Some(m) => !m.iter().any(|&(_,d)| d == -1), None => false }
+    if arena[node].label != "CALL" {
+        return false;
+    }
+    match rd_sem(arena, node) {
+        Some(m) => !m.iter().any(|&(_, d)| d == -1),
+        None => false,
+    }
 }
 fn rd_is_used(arena: &[DNode], e: usize) -> bool {
     match rd_in_call(arena, e).and_then(|c| rd_sem(arena, c)) {
-        Some(m) => m.iter().any(|&(s,_)| s == arena[e].arg_index), None => true }
+        Some(m) => m.iter().any(|&(s, _)| s == arena[e].arg_index),
+        None => true,
+    }
 }
 fn rd_is_defined(arena: &[DNode], e: usize) -> bool {
     match rd_in_call(arena, e).and_then(|c| rd_sem(arena, c)) {
-        Some(m) => m.iter().any(|&(_,d)| d == arena[e].arg_index), None => true }
+        Some(m) => m.iter().any(|&(_, d)| d == arena[e].arg_index),
+        None => true,
+    }
 }
 fn rd_has_flow(arena: &[DNode], parent: usize, child: usize) -> bool {
     match rd_in_call(arena, parent).and_then(|c| rd_sem(arena, c)) {
-        Some(m) => m.contains(&(arena[parent].arg_index, arena[child].arg_index)), None => true }
+        Some(m) => m.contains(&(arena[parent].arg_index, arena[child].arg_index)),
+        None => true,
+    }
 }
 fn rd_same_call(arena: &[DNode], a: usize, b: usize) -> bool {
-    let ca = rd_in_call(arena, a); ca.is_some() && ca == rd_in_call(arena, b)
+    let ca = rd_in_call(arena, a);
+    ca.is_some() && ca == rd_in_call(arena, b)
 }
 fn rd_valid_to_expr(arena: &[DNode], par: usize, cur: usize) -> bool {
     if rd_is_expr(arena, par) {
         let same = rd_same_call(arena, par, cur);
-        (same && rd_is_used(arena, par) && rd_is_defined(arena, cur)) || (!same && rd_is_used(arena, cur))
-    } else { rd_is_used(arena, cur) }
+        (same && rd_is_used(arena, par) && rd_is_defined(arena, cur))
+            || (!same && rd_is_used(arena, cur))
+    } else {
+        rd_is_used(arena, cur)
+    }
 }
 fn rd_valid_edge(arena: &[DNode], child: usize, parent: usize) -> bool {
-    if rd_is_expr(arena, child) && (rd_is_call_retval(arena, parent) || !rd_valid_to_expr(arena, parent, child)) {
+    if rd_is_expr(arena, child)
+        && (rd_is_call_retval(arena, parent) || !rd_valid_to_expr(arena, parent, child))
+    {
         return false;
     }
-    if arena[child].label == "CALL" && rd_is_expr(arena, parent)
-        && rd_is_call_retval(arena, child) && rd_args(arena, child).contains(&parent) {
+    if arena[child].label == "CALL"
+        && rd_is_expr(arena, parent)
+        && rd_is_call_retval(arena, child)
+        && rd_args(arena, child).contains(&parent)
+    {
         return false;
     }
     if rd_is_expr(arena, child) {
         if rd_is_expr(arena, parent) {
-            if rd_same_call(arena, parent, child) && rd_is_defined(arena, child) && rd_is_used(arena, parent) {
+            if rd_same_call(arena, parent, child)
+                && rd_is_defined(arena, child)
+                && rd_is_used(arena, parent)
+            {
                 return rd_has_flow(arena, parent, child);
             }
             return true;

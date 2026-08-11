@@ -38,7 +38,10 @@ impl Pass for SymbolResolutionPass {
             // Declarations visible in this method, by name.
             let mut decls: HashMap<String, NodeId> = HashMap::new();
             for &d in &descendants {
-                if matches!(cpg.kind_of(d), NodeKind::MethodParameterIn | NodeKind::Local) {
+                if matches!(
+                    cpg.kind_of(d),
+                    NodeKind::MethodParameterIn | NodeKind::Local
+                ) {
                     if let Some(name) = cpg.name_of(d) {
                         decls.insert(name.to_string(), d);
                     }
