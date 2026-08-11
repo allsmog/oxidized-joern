@@ -43,7 +43,13 @@ impl<'a> CpgBuilder<'a> {
         n
     }
 
-    pub fn method(&mut self, name: &str, full_name: &str, signature: &str, line: Option<u32>) -> NodeId {
+    pub fn method(
+        &mut self,
+        name: &str,
+        full_name: &str,
+        signature: &str,
+        line: Option<u32>,
+    ) -> NodeId {
         let n = self.node(NodeKind::Method);
         let nm = self.cpg.intern(name);
         let fnm = self.cpg.intern(full_name);
@@ -62,7 +68,13 @@ impl<'a> CpgBuilder<'a> {
     /// signature column so no serialization format change is needed. RPC
     /// stitching reads them to find handler classes (subclasses of a
     /// generated interface that is not itself in the graph).
-    pub fn type_decl(&mut self, name: &str, full_name: &str, bases: &[String], line: Option<u32>) -> NodeId {
+    pub fn type_decl(
+        &mut self,
+        name: &str,
+        full_name: &str,
+        bases: &[String],
+        line: Option<u32>,
+    ) -> NodeId {
         let n = self.node(NodeKind::TypeDecl);
         let nm = self.cpg.intern(name);
         let fnm = self.cpg.intern(full_name);

@@ -22,10 +22,18 @@ pub struct Relation {
 }
 
 impl Relation {
-    pub fn len(&self) -> usize { self.tuples.len() }
-    pub fn is_empty(&self) -> bool { self.tuples.is_empty() }
-    pub fn contains(&self, tuple: &Tuple) -> bool { self.tuples.contains_key(tuple) }
-    pub fn tuples(&self) -> impl Iterator<Item = (&Tuple, &FactId)> { self.tuples.iter() }
+    pub fn len(&self) -> usize {
+        self.tuples.len()
+    }
+    pub fn is_empty(&self) -> bool {
+        self.tuples.is_empty()
+    }
+    pub fn contains(&self, tuple: &Tuple) -> bool {
+        self.tuples.contains_key(tuple)
+    }
+    pub fn tuples(&self) -> impl Iterator<Item = (&Tuple, &FactId)> {
+        self.tuples.iter()
+    }
 }
 
 #[derive(Clone, Debug, Default)]
@@ -35,25 +43,53 @@ pub struct RelationStore {
 }
 
 impl RelationStore {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     pub fn insert_base(&mut self, relation: impl Into<String>, tuple: Tuple) -> FactId {
         let relation = relation.into();
-        if let Some(id) = self.relations.get(&relation).and_then(|r| r.tuples.get(&tuple)).copied() {
+        if let Some(id) = self
+            .relations
+            .get(&relation)
+            .and_then(|r| r.tuples.get(&tuple))
+            .copied()
+        {
             return id;
         }
         let id = self.provenance.insert_base(relation.clone(), tuple.key());
-        self.relations.entry(relation).or_default().tuples.insert(tuple, id);
+        self.relations
+            .entry(relation)
+            .or_default()
+            .tuples
+            .insert(tuple, id);
         id
     }
 
-    pub fn insert_derived(&mut self, relation: impl Into<String>, tuple: Tuple, supports: Vec<FactId>, rule: impl Into<String>) -> FactId {
+    pub fn insert_derived(
+        &mut self,
+        relation: impl Into<String>,
+        tuple: Tuple,
+        supports: Vec<FactId>,
+        rule: impl Into<String>,
+    ) -> FactId {
         let relation = relation.into();
-        if let Some(id) = self.relations.get(&relation).and_then(|r| r.tuples.get(&tuple)).copied() {
+        if let Some(id) = self
+            .relations
+            .get(&relation)
+            .and_then(|r| r.tuples.get(&tuple))
+            .copied()
+        {
             return id;
         }
-        let id = self.provenance.insert_derived(relation.clone(), tuple.key(), supports, rule);
-        self.relations.entry(relation).or_default().tuples.insert(tuple, id);
+        let id = self
+            .provenance
+            .insert_derived(relation.clone(), tuple.key(), supports, rule);
+        self.relations
+            .entry(relation)
+            .or_default()
+            .tuples
+            .insert(tuple, id);
         id
     }
 
@@ -69,8 +105,15 @@ impl RelationStore {
         invalid
     }
 
-    pub fn derive_transitive_closure(&mut self, source: &str, target: &str, rule_name: &str) -> usize {
-        let Some(source_rel) = self.relations.get(source).cloned() else { return 0 };
+    pub fn derive_transitive_closure(
+        &mut self,
+        source: &str,
+        target: &str,
+        rule_name: &str,
+    ) -> usize {
+        let Some(source_rel) = self.relations.get(source).cloned() else {
+            return 0;
+        };
         let mut added = 0;
         let mut edges: Vec<(String, String, FactId)> = source_rel
             .tuples()
@@ -88,10 +131,20 @@ impl RelationStore {
                 for (c, d, bid) in &snapshot {
                     if b == c {
                         let tuple = Tuple(vec![a.clone(), d.clone()]);
-                        if self.relations.get(target).map(|r| r.contains(&tuple)).unwrap_or(false) {
+                        if self
+                            .relations
+                            .get(target)
+                            .map(|r| r.contains(&tuple))
+                            .unwrap_or(false)
+                        {
                             continue;
                         }
-                        let id = self.insert_derived(target.to_string(), tuple, vec![*aid, *bid], rule_name.to_string());
+                        let id = self.insert_derived(
+                            target.to_string(),
+                            tuple,
+                            vec![*aid, *bid],
+                            rule_name.to_string(),
+                        );
                         edges.push((a.clone(), d.clone(), id));
                         added += 1;
                         changed = true;

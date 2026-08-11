@@ -151,7 +151,9 @@ fn path_to_uri(path: &str) -> String {
 fn location(uri: &str, line: Option<u32>, message: Option<String>) -> Location {
     Location {
         physical_location: PhysicalLocation {
-            artifact_location: ArtifactLocation { uri: path_to_uri(uri) },
+            artifact_location: ArtifactLocation {
+                uri: path_to_uri(uri),
+            },
             // SARIF requires startLine >= 1; omit the region when unknown.
             region: line.filter(|&l| l >= 1).map(|l| Region { start_line: l }),
         },
@@ -185,8 +187,13 @@ pub fn build_log(
             full_description: (!r.description.is_empty()).then(|| Text {
                 text: r.description.clone(),
             }),
-            default_configuration: ReportingConfiguration { level: r.sarif_level().to_string() },
-            properties: RuleProperties { cwe: r.cwe.clone(), severity: r.severity.clone() },
+            default_configuration: ReportingConfiguration {
+                level: r.sarif_level().to_string(),
+            },
+            properties: RuleProperties {
+                cwe: r.cwe.clone(),
+                severity: r.severity.clone(),
+            },
         })
         .collect();
 
@@ -205,7 +212,11 @@ pub fn build_log(
                     location: location(&uri, s.line, Some(s.code.clone())),
                 })
                 .collect();
-            let what = if rf.rule.name.is_empty() { rf.rule.id.as_str() } else { rf.rule.name.as_str() };
+            let what = if rf.rule.name.is_empty() {
+                rf.rule.id.as_str()
+            } else {
+                rf.rule.name.as_str()
+            };
             results.push(SarifResult {
                 rule_id: rf.rule.id.clone(),
                 rule_index,
@@ -217,7 +228,9 @@ pub fn build_log(
                     ),
                 },
                 locations: vec![location(&sink_uri, f.sink_line, None)],
-                code_flows: vec![CodeFlow { thread_flows: vec![ThreadFlow { locations: steps }] }],
+                code_flows: vec![CodeFlow {
+                    thread_flows: vec![ThreadFlow { locations: steps }],
+                }],
             });
         }
     }

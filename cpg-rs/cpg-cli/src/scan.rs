@@ -45,10 +45,7 @@ pub fn run_pack_entry<'a>(
                 "discarded-return" => {
                     return RuleFindings {
                         rule,
-                        findings: cpg_analysis::structural::discarded_returns(
-                            &project.cpg,
-                            &sinks,
-                        ),
+                        findings: cpg_analysis::structural::discarded_returns(&project.cpg, &sinks),
                     };
                 }
                 "append-without-delete" => {
@@ -64,7 +61,10 @@ pub fn run_pack_entry<'a>(
                 }
                 other => {
                     eprintln!("rule {}: unknown kind '{other}', skipping", rule.id);
-                    return RuleFindings { rule, findings: Vec::new() };
+                    return RuleFindings {
+                        rule,
+                        findings: Vec::new(),
+                    };
                 }
             }
             // CLI-level entry methods plus the rule's own.
@@ -75,8 +75,7 @@ pub fn run_pack_entry<'a>(
                 .collect();
             let idents: Vec<&str> = rule.source_idents.iter().map(String::as_str).collect();
             let idl: Vec<&str> = idl_entries.iter().map(String::as_str).collect();
-            let registered: Vec<&str> =
-                registered_entries.iter().map(String::as_str).collect();
+            let registered: Vec<&str> = registered_entries.iter().map(String::as_str).collect();
             let authz: Vec<&str> = rule.authz.iter().map(String::as_str).collect();
             let confiners: Vec<&str> = rule.confiners.iter().map(String::as_str).collect();
             RuleFindings {
@@ -124,7 +123,13 @@ pub fn scan_to_sarif_entry(
     idl_entries: &[String],
     registered_entries: &[String],
 ) -> SarifLog {
-    let per_rule = run_pack_entry(project, pack, entry_methods, idl_entries, registered_entries);
+    let per_rule = run_pack_entry(
+        project,
+        pack,
+        entry_methods,
+        idl_entries,
+        registered_entries,
+    );
     sarif::build_log(
         pack,
         &per_rule,

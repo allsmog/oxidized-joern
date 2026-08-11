@@ -146,7 +146,12 @@ impl PassManager {
     /// Run the pipeline over only the changed files. Returns the set of layers
     /// that were rewritten, so downstream consumers (e.g. the summary cache)
     /// know what to invalidate.
-    pub fn run_incremental(&self, cpg: &mut Cpg, changed: &[FileId], ctx: &PassContext) -> HashSet<Layer> {
+    pub fn run_incremental(
+        &self,
+        cpg: &mut Cpg,
+        changed: &[FileId],
+        ctx: &PassContext,
+    ) -> HashSet<Layer> {
         let mut dirtied = HashSet::new();
         for &p in &self.ordered() {
             for &f in changed {
@@ -159,7 +164,10 @@ impl PassManager {
     }
 
     pub fn pass_names(&self) -> Vec<&'static str> {
-        self.ordered().iter().map(|&i| self.passes[i].name()).collect()
+        self.ordered()
+            .iter()
+            .map(|&i| self.passes[i].name())
+            .collect()
     }
 }
 

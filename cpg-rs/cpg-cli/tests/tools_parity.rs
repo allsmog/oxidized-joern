@@ -29,13 +29,20 @@ fn export_splits_by_method_and_writes_dot() {
     let dir = std::env::temp_dir().join(format!("cpgx-export-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
     let stats = export(&project.cpg, Repr::Cpg14, Format::Dot, &dir).expect("export");
-    assert!(stats.files >= 2, "one file per method (main, doit): {}", stats.files);
+    assert!(
+        stats.files >= 2,
+        "one file per method (main, doit): {}",
+        stats.files
+    );
     assert!(stats.nodes > 0 && stats.edges > 0);
     let main_dot = dir.join("app.c/main.dot");
     let text = std::fs::read_to_string(&main_dot).expect("main.dot written");
     assert!(text.starts_with("digraph"), "dot header: {text}");
     assert!(text.contains("getenv"), "main's subgraph carries its calls");
-    assert!(!text.contains("system("), "doit's body must not leak into main's subgraph");
+    assert!(
+        !text.contains("system("),
+        "doit's body must not leak into main's subgraph"
+    );
     let _ = std::fs::remove_dir_all(&dir);
 }
 
@@ -95,7 +102,9 @@ fn glob_flow_query_finds_interprocedural_flow() {
     let findings: Vec<&cpg_analysis::Finding> =
         per_rule.iter().flat_map(|rf| rf.findings.iter()).collect();
     assert!(
-        findings.iter().any(|f| f.method == "main" && f.sink == "system"),
+        findings
+            .iter()
+            .any(|f| f.method == "main" && f.sink == "system"),
         "getenv->doit->system must be found: {findings:?}"
     );
 }
@@ -114,5 +123,8 @@ fn vectors_document_covers_every_node() {
         doc["objects"].as_array().unwrap().len(),
         doc["vectors"].as_array().unwrap().len()
     );
-    assert!(doc.get("dimToFeature").is_none(), "--features off by default");
+    assert!(
+        doc.get("dimToFeature").is_none(),
+        "--features off by default"
+    );
 }

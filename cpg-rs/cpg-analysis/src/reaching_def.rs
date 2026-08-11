@@ -305,7 +305,11 @@ impl<'a> MethodView<'a> {
                 call_args.insert(i, v);
             }
         }
-        MethodView { cpg, own, call_args }
+        MethodView {
+            cpg,
+            own,
+            call_args,
+        }
     }
 
     fn kind(&self, n: NodeId) -> NodeKind {
@@ -340,7 +344,10 @@ impl<'a> MethodView<'a> {
 
     /// call.argument at a given index (`argumentOption(idx)`).
     fn arg_at(&self, c: NodeId, idx: i64) -> Option<NodeId> {
-        self.args_of(c).iter().copied().find(|&k| self.arg_index(k) == idx)
+        self.args_of(c)
+            .iter()
+            .copied()
+            .find(|&k| self.arg_index(k) == idx)
     }
 
     /// call.argument headOption (lowest index: the base of an access).
@@ -384,9 +391,7 @@ impl<'a> MethodView<'a> {
     fn same_var(&self, use_i: NodeId, in_i: NodeId) -> bool {
         let us = self.node_str(use_i);
         match self.kind(in_i) {
-            NodeKind::MethodParameterIn | NodeKind::Identifier => {
-                us == Some(self.name(in_i))
-            }
+            NodeKind::MethodParameterIn | NodeKind::Identifier => us == Some(self.name(in_i)),
             NodeKind::Call => {
                 if is_indirection_access(self.name(in_i)) {
                     match self.arg_at(in_i, 1) {
@@ -523,10 +528,7 @@ impl<'a> MethodView<'a> {
         }
         if self.is_expr(child) {
             if self.is_expr(parent) {
-                if self.same_call(parent, child)
-                    && self.is_defined(child)
-                    && self.is_used(parent)
-                {
+                if self.same_call(parent, child) && self.is_defined(child) && self.is_used(parent) {
                     return self.has_flow(parent, child);
                 }
                 return true;
@@ -620,12 +622,18 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
         for &c in &calls {
             for &a in v.args_of(c) {
                 if v.kind(a) == NodeKind::Identifier && !name_excluded.contains(v.name(a)) {
-                    by_name.entry(v.name(a).to_string()).or_default().push((c, a));
+                    by_name
+                        .entry(v.name(a).to_string())
+                        .or_default()
+                        .push((c, a));
                 }
             }
         }
-        let mut lone: Vec<(NodeId, NodeId)> =
-            by_name.values().filter(|occ| occ.len() == 1).map(|occ| occ[0]).collect();
+        let mut lone: Vec<(NodeId, NodeId)> = by_name
+            .values()
+            .filter(|occ| occ.len() == 1)
+            .map(|occ| occ[0])
+            .collect();
         lone.sort();
         for (c, a) in lone {
             lone_idents.push(a);
@@ -690,8 +698,7 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
     // magnitude cheaper on methods with thousands of defs.
     let mut defs: Vec<NodeId> = def_var.keys().copied().collect();
     defs.sort();
-    let def_idx: HashMap<NodeId, usize> =
-        defs.iter().enumerate().map(|(i, &d)| (d, i)).collect();
+    let def_idx: HashMap<NodeId, usize> = defs.iter().enumerate().map(|(i, &d)| (d, i)).collect();
     let words = defs.len().div_ceil(64);
     let mk_bits = |ids: &mut dyn Iterator<Item = NodeId>| -> Vec<u64> {
         let mut b = vec![0u64; words];
@@ -797,7 +804,11 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
     // parent=s), exactly as DdgGenerator.addEdge does.
     let push = |var: String, s: NodeId, d: NodeId, flows: &mut Vec<ReachingDefFlow>| {
         if v.valid_edge(d, s) {
-            flows.push(ReachingDefFlow { var, src: s, dst: d });
+            flows.push(ReachingDefFlow {
+                var,
+                src: s,
+                dst: d,
+            });
         }
     };
 
@@ -904,7 +915,9 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
             if v.kind(b) != NodeKind::Block || !cfg_nodes.contains(&b) {
                 continue;
             }
-            let Some(last) = cpg.out_kind(b, EdgeKind::Ast).last() else { continue };
+            let Some(last) = cpg.out_kind(b, EdgeKind::Ast).last() else {
+                continue;
+            };
             match v.kind(last) {
                 NodeKind::Identifier => {
                     let ins = in_of(b);
@@ -955,7 +968,7 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
 
     // 5. exit node: every def live at exit -> exit.
     if let Some(e) = exit {
-        let mut ds: Vec<NodeId> = exit_in.iter().copied().collect();
+        let mut ds: Vec<NodeId> = exit_in.to_vec();
         ds.sort();
         for d in ds {
             push(v.node_var(d), d, e, &mut flows);
@@ -1061,7 +1074,10 @@ mod tests {
         let assign = call_named(&cpg, "=");
         let y_lhs = idents(&cpg, "y")[0];
         let x_rhs = idents(&cpg, "x")[0];
-        assert!(has_rd_edge(&cpg, x_rhs, y_lhs), "rhs -> lhs under assignment semantics");
+        assert!(
+            has_rd_edge(&cpg, x_rhs, y_lhs),
+            "rhs -> lhs under assignment semantics"
+        );
         assert!(!has_rd_edge(&cpg, y_lhs, x_rhs), "no lhs -> rhs flow");
         let _ = assign;
     }
@@ -1072,7 +1088,10 @@ mod tests {
         let cpg = build("void f(int c) { x = source(); if (c) { a(); } else { b(); } sink(x); }");
         let xs = idents(&cpg, "x");
         assert_eq!(xs.len(), 2);
-        assert!(has_rd_edge(&cpg, xs[0], xs[1]), "def flows across the branch join");
+        assert!(
+            has_rd_edge(&cpg, xs[0], xs[1]),
+            "def flows across the branch join"
+        );
     }
 
     #[test]
@@ -1082,25 +1101,40 @@ mod tests {
         let xs = idents(&cpg, "x");
         assert_eq!(xs.len(), 3);
         let (x_then, x_else, x_use) = (xs[0], xs[1], xs[2]);
-        assert!(has_rd_edge(&cpg, x_then, x_use), "then-arm def reaches the join use");
-        assert!(has_rd_edge(&cpg, x_else, x_use), "else-arm def reaches the join use");
+        assert!(
+            has_rd_edge(&cpg, x_then, x_use),
+            "then-arm def reaches the join use"
+        );
+        assert!(
+            has_rd_edge(&cpg, x_else, x_use),
+            "else-arm def reaches the join use"
+        );
     }
 
     #[test]
     fn return_use_and_exit_edges() {
         let cpg = build("int f(int p) { return p; }");
-        let method = cpg.nodes().find(|&n| cpg.kind_of(n) == NodeKind::Method).unwrap();
+        let method = cpg
+            .nodes()
+            .find(|&n| cpg.kind_of(n) == NodeKind::Method)
+            .unwrap();
         let mret = cpg
             .out_kind(method, EdgeKind::Ast)
             .find(|&c| cpg.kind_of(c) == NodeKind::MethodReturn)
             .unwrap();
-        let ret = cpg.nodes().find(|&n| cpg.kind_of(n) == NodeKind::Return).unwrap();
+        let ret = cpg
+            .nodes()
+            .find(|&n| cpg.kind_of(n) == NodeKind::Return)
+            .unwrap();
         let param = cpg
             .nodes()
             .find(|&n| cpg.kind_of(n) == NodeKind::MethodParameterIn)
             .unwrap();
         let p_use = idents(&cpg, "p")[0];
-        assert!(has_rd_edge(&cpg, param, p_use), "param def -> return operand");
+        assert!(
+            has_rd_edge(&cpg, param, p_use),
+            "param def -> return operand"
+        );
         assert!(has_rd_edge(&cpg, p_use, ret), "return operand -> RETURN");
         assert!(has_rd_edge(&cpg, ret, mret), "RETURN -> METHOD_RETURN");
     }

@@ -73,9 +73,20 @@ fn mcp_session_covers_the_iris_loop() {
         .iter()
         .map(|t| t["name"].as_str().unwrap())
         .collect();
-    for expected in ["build_cpg", "scan", "flow", "taint", "slice", "apis", "merge", "list_rules"]
-    {
-        assert!(names.contains(&expected), "missing tool {expected}: {names:?}");
+    for expected in [
+        "build_cpg",
+        "scan",
+        "flow",
+        "taint",
+        "slice",
+        "apis",
+        "merge",
+        "list_rules",
+    ] {
+        assert!(
+            names.contains(&expected),
+            "missing tool {expected}: {names:?}"
+        );
     }
 
     // -- build_cpg
@@ -108,7 +119,9 @@ fn mcp_session_covers_the_iris_loop() {
         serde_json::from_str(flowed["result"]["content"][0]["text"].as_str().unwrap()).unwrap();
     let findings = flow["findings"].as_array().unwrap();
     assert!(
-        findings.iter().any(|f| f["method"] == "main" && f["sink"] == "system"),
+        findings
+            .iter()
+            .any(|f| f["method"] == "main" && f["sink"] == "system"),
         "getenv->doit->system: {findings:?}"
     );
 
@@ -119,8 +132,10 @@ fn mcp_session_covers_the_iris_loop() {
     assert_eq!(iris["result"]["isError"], false, "{iris}");
 
     // -- methodology resource
-    send(json!({"jsonrpc": "2.0", "id": 7, "method": "resources/read",
-        "params": {"uri": "iris://methodology"}}));
+    send(
+        json!({"jsonrpc": "2.0", "id": 7, "method": "resources/read",
+        "params": {"uri": "iris://methodology"}}),
+    );
     let doc = recv();
     assert!(doc["result"]["contents"][0]["text"]
         .as_str()

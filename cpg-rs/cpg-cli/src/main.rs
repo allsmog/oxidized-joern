@@ -91,7 +91,11 @@ fn rules_cmd() {
     for (name, json) in cpg_cli::rules::IRIS_PACKS {
         let p = RulePack::from_json(json).expect("compiled-in pack parses");
         let ids: Vec<&str> = p.rules.iter().map(|r| r.id.as_str()).collect();
-        out.push_str(&format!("  iris:{name}: {} rules [{}]\n", p.rules.len(), ids.join(", ")));
+        out.push_str(&format!(
+            "  iris:{name}: {} rules [{}]\n",
+            p.rules.len(),
+            ids.join(", ")
+        ));
     }
     let _ = std::io::stdout().write_all(out.as_bytes());
 }
@@ -164,7 +168,10 @@ fn x_cmd(args: &[String]) {
         }
         "build" => {
             let path = need_path(rest);
-            let lang = rest.get(1).filter(|l| !l.starts_with("--")).map(String::as_str);
+            let lang = rest
+                .get(1)
+                .filter(|l| !l.starts_with("--"))
+                .map(String::as_str);
             let (cpg, _) = ws.ensure_cpg(&path, lang).unwrap_or_else(|e| die(e));
             println!("{}", cpg.display());
         }
@@ -172,8 +179,9 @@ fn x_cmd(args: &[String]) {
             let path = need_path(rest);
             let mut pass: Vec<String> = rest[1..].to_vec();
             let lang_opt = flag(&pass, "--lang").map(String::from);
-            let (cpg, lang) =
-                ws.ensure_cpg(&path, lang_opt.as_deref()).unwrap_or_else(|e| die(e));
+            let (cpg, lang) = ws
+                .ensure_cpg(&path, lang_opt.as_deref())
+                .unwrap_or_else(|e| die(e));
             let mut argv = synth("scan", &cpg, &lang);
             // positional rules argument (a file or iris:<pack>), cpgx-style
             if pass.first().is_some_and(|a| !a.starts_with("--")) {
@@ -201,8 +209,9 @@ fn x_cmd(args: &[String]) {
             let path = need_path(rest);
             let pass: Vec<String> = rest[1..].to_vec();
             let lang_opt = flag(&pass, "--lang").map(String::from);
-            let (cpg, lang) =
-                ws.ensure_cpg(&path, lang_opt.as_deref()).unwrap_or_else(|e| die(e));
+            let (cpg, lang) = ws
+                .ensure_cpg(&path, lang_opt.as_deref())
+                .unwrap_or_else(|e| die(e));
             let mut argv = synth(&sub, &cpg, &lang);
             argv.extend(pass);
             match sub.as_str() {
@@ -221,9 +230,15 @@ fn x_cmd(args: &[String]) {
             };
             let pass: Vec<String> = rest[3..].to_vec();
             let lang_opt = flag(&pass, "--lang").map(String::from);
-            let (cpg, lang) =
-                ws.ensure_cpg(&path, lang_opt.as_deref()).unwrap_or_else(|e| die(e));
-            let mut argv = vec!["cpg".to_string(), "flow".to_string(), src.clone(), sink.clone()];
+            let (cpg, lang) = ws
+                .ensure_cpg(&path, lang_opt.as_deref())
+                .unwrap_or_else(|e| die(e));
+            let mut argv = vec![
+                "cpg".to_string(),
+                "flow".to_string(),
+                src.clone(),
+                sink.clone(),
+            ];
             argv.push("--load".to_string());
             argv.push(cpg.to_string_lossy().into_owned());
             argv.push("--lang".to_string());
@@ -249,8 +264,11 @@ fn x_cmd(args: &[String]) {
         }
         "merge" => {
             let out_name = need_path(rest);
-            let modules: Vec<String> =
-                rest[1..].iter().filter(|a| !a.starts_with("--")).cloned().collect();
+            let modules: Vec<String> = rest[1..]
+                .iter()
+                .filter(|a| !a.starts_with("--"))
+                .cloned()
+                .collect();
             if modules.is_empty() {
                 eprintln!("merge needs <out-name> <path1> [path2...]\n{usage}");
                 std::process::exit(2);
@@ -299,7 +317,10 @@ fn build_and_save(args: &[String]) {
     match project.cpg.save(out) {
         Ok(()) => {
             let size = std::fs::metadata(out).map(|m| m.len()).unwrap_or(0);
-            eprintln!("saved {} nodes to {out} ({size} bytes)", project.cpg.live_count());
+            eprintln!(
+                "saved {} nodes to {out} ({size} bytes)",
+                project.cpg.live_count()
+            );
         }
         Err(e) => {
             eprintln!("save failed: {e}");
@@ -323,10 +344,20 @@ fn slice_cmd(args: &[String]) {
     };
     let cpg = &project.cpg;
     let line = flag(args, "--line").and_then(|l| l.parse::<u32>().ok());
-    let depth = flag(args, "--depth").and_then(|d| d.parse::<usize>().ok()).unwrap_or(3);
-    let max_nodes = flag(args, "--max").and_then(|m| m.parse::<usize>().ok()).unwrap_or(5000);
+    let depth = flag(args, "--depth")
+        .and_then(|d| d.parse::<usize>().ok())
+        .unwrap_or(3);
+    let max_nodes = flag(args, "--max")
+        .and_then(|m| m.parse::<usize>().ok())
+        .unwrap_or(5000);
     let criteria = if let Some(call) = flag(args, "--call") {
-        criterion_calls(cpg, call, flag(args, "--file"), line, flag(args, "--method"))
+        criterion_calls(
+            cpg,
+            call,
+            flag(args, "--file"),
+            line,
+            flag(args, "--method"),
+        )
     } else if let (Some(m), Some(l)) = (flag(args, "--method"), line) {
         criterion_location(cpg, m, l)
     } else {
@@ -344,9 +375,14 @@ fn slice_cmd(args: &[String]) {
         criteria.len(),
         entries.len(),
         files.len(),
-        if truncated { " (TRUNCATED at --max)" } else { "" }
+        if truncated {
+            " (TRUNCATED at --max)"
+        } else {
+            ""
+        }
     );
-    let out = serde_json::to_string_pretty(&slice_json(cpg, &criteria, &entries, truncated)).unwrap();
+    let out =
+        serde_json::to_string_pretty(&slice_json(cpg, &criteria, &entries, truncated)).unwrap();
     match flag(args, "-o") {
         Some(path) => {
             if let Err(e) = std::fs::write(path, out) {
@@ -413,7 +449,10 @@ fn merge_cmd(args: &[String]) {
     rpcs.dedup();
     if !rpcs.is_empty() {
         let (added, skipped) = link_rpcs(&mut merged, &rpcs);
-        eprintln!("rpc stitch: {} declared rpcs, {added} client->handler edges", rpcs.len());
+        eprintln!(
+            "rpc stitch: {} declared rpcs, {added} client->handler edges",
+            rpcs.len()
+        );
         for s in &skipped {
             eprintln!("  skipped over-generic rpc name: {s}");
         }
@@ -460,9 +499,15 @@ fn apis_cmd(args: &[String]) {
             std::process::exit(2);
         }
     };
-    let examples = flag(args, "--examples").and_then(|s| s.parse().ok()).unwrap_or(3);
-    let top: usize = flag(args, "--top").and_then(|s| s.parse().ok()).unwrap_or(usize::MAX);
-    let min_count: usize = flag(args, "--min-count").and_then(|s| s.parse().ok()).unwrap_or(1);
+    let examples = flag(args, "--examples")
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(3);
+    let top: usize = flag(args, "--top")
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(usize::MAX);
+    let min_count: usize = flag(args, "--min-count")
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(1);
     let mut inv = cpg_cli::apis::inventory(&project.cpg, examples);
     inv.retain(|e| e.count >= min_count);
     inv.truncate(top);
@@ -625,7 +670,9 @@ fn flow_cmd(args: &[String]) {
             f.origin,
             f.sink,
             f.sink_file.as_deref().unwrap_or("?"),
-            f.sink_line.map(|l| l.to_string()).unwrap_or_else(|| "?".to_string())
+            f.sink_line
+                .map(|l| l.to_string())
+                .unwrap_or_else(|| "?".to_string())
         );
     }
     eprintln!("{} flows", findings.len());
@@ -736,7 +783,10 @@ fn scan_cmd(args: &[String]) {
     // Scala/Java gRPC handlers are lowerCamel while proto rpcs are
     // PascalCase — admit both spellings (the handler-shape guard keeps
     // collisions out).
-    let camel: Vec<String> = idl_entries.iter().map(|e| cpg_cli::merge::lc_first(e)).collect();
+    let camel: Vec<String> = idl_entries
+        .iter()
+        .map(|e| cpg_cli::merge::lc_first(e))
+        .collect();
     idl_entries.extend(camel);
     idl_entries.sort();
     idl_entries.dedup();
@@ -811,20 +861,32 @@ fn scan_cmd(args: &[String]) {
         cpg_analysis::mine_registration_entries(&project.cpg)
     };
     if !registered_entries.is_empty() {
-        let shown: Vec<&str> =
-            registered_entries.iter().take(20).map(String::as_str).collect();
+        let shown: Vec<&str> = registered_entries
+            .iter()
+            .take(20)
+            .map(String::as_str)
+            .collect();
         let more = registered_entries.len().saturating_sub(shown.len());
         eprintln!(
             "{} registration-mined entry-point methods: {}{}",
             registered_entries.len(),
             shown.join(", "),
-            if more > 0 { format!(" (+{more} more)") } else { String::new() }
+            if more > 0 {
+                format!(" (+{more} more)")
+            } else {
+                String::new()
+            }
         );
     }
     // One pack run feeds flows-json, SARIF, and the coverage report alike —
     // the taint query is the expensive part and must not repeat.
-    let per_rule =
-        scan::run_pack_entry(&project, &pack, &entry_methods, &idl_entries, &registered_entries);
+    let per_rule = scan::run_pack_entry(
+        &project,
+        &pack,
+        &entry_methods,
+        &idl_entries,
+        &registered_entries,
+    );
     // --flows-json <path>: full witness paths + rule metadata, the input to
     // an LLM triage pass (IRIS's contextual filtering stage).
     if let Some(flows_out) = flag(args, "--flows-json") {
@@ -896,7 +958,11 @@ fn scan_cmd(args: &[String]) {
                 g.scope,
                 g.name,
                 g.line,
-                if g.enforcing { "ENFORCING" } else { "not-enforcing" }
+                if g.enforcing {
+                    "ENFORCING"
+                } else {
+                    "not-enforcing"
+                }
             );
         }
         let nones: Vec<&str> = census
@@ -911,7 +977,11 @@ fn scan_cmd(args: &[String]) {
             eprintln!(
                 "  none (triage first): {}{}",
                 shown.join(", "),
-                if more > 0 { format!(" (+{more} more)") } else { String::new() }
+                if more > 0 {
+                    format!(" (+{more} more)")
+                } else {
+                    String::new()
+                }
             );
         }
         if let Some(out) = flag(args, "--authz-census-json") {
@@ -952,7 +1022,11 @@ fn scan_cmd(args: &[String]) {
                 eprintln!("cannot write {out}: {e}");
                 std::process::exit(1);
             }
-            eprintln!("{} rules, {} findings -> {out}", pack.rules.len(), n_results);
+            eprintln!(
+                "{} rules, {} findings -> {out}",
+                pack.rules.len(),
+                n_results
+            );
         }
         None => {
             println!("{sarif}");
@@ -968,7 +1042,9 @@ fn serve(args: &[String]) {
     let mut project = match open_project(args) {
         Ok(p) => p,
         Err(e) => {
-            eprintln!("{e}\nusage: cpg serve <dir> [--lang c|python]  |  cpg serve --load <graph.cpg>");
+            eprintln!(
+                "{e}\nusage: cpg serve <dir> [--lang c|python]  |  cpg serve --load <graph.cpg>"
+            );
             std::process::exit(2);
         }
     };

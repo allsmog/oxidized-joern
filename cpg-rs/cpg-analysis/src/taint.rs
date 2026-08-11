@@ -34,6 +34,11 @@ use cpg_core::{Cpg, EdgeKind, NodeId, NodeKind, Query};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 
+/// Taint keys paired with a count — distinct enclosing methods for a stored
+/// key, or read sites for a persisted one. Partitioned into kept/dropped
+/// halves at several demotion steps below.
+type KeyCounts = Vec<(String, usize)>;
+
 /// Callee-splicing recursion bound: beyond this depth a lifted hop is shown
 /// summary-only (no internal steps) rather than expanded further.
 const MAX_SPLICE_DEPTH: u32 = 8;
@@ -248,11 +253,13 @@ impl TaintSpec {
                 recv_sinks.insert(n.to_string());
                 continue;
             }
-            let (name, arg_k) =
-                match s.split_once('@').and_then(|(n, k)| Some((n, k.parse::<usize>().ok()?))) {
-                    Some((n, k)) => (n, Some(k)),
-                    None => (s, None),
-                };
+            let (name, arg_k) = match s
+                .split_once('@')
+                .and_then(|(n, k)| Some((n, k.parse::<usize>().ok()?)))
+            {
+                Some((n, k)) => (n, Some(k)),
+                None => (s, None),
+            };
             let mut register = |n: &str| {
                 names.insert(n.to_string());
                 if let Some(k) = arg_k {
@@ -269,7 +276,10 @@ impl TaintSpec {
             if let Some((recv, simple)) = name.rsplit_once('.') {
                 if !recv.is_empty() && !simple.is_empty() {
                     register(simple);
-                    recv_qual.entry(simple.to_string()).or_default().insert(recv.to_string());
+                    recv_qual
+                        .entry(simple.to_string())
+                        .or_default()
+                        .insert(recv.to_string());
                 }
             }
         }
@@ -353,12 +363,13 @@ impl TaintSpec {
         }
         let head = code.trim_start();
         let head = head.strip_prefix("::").unwrap_or(head);
-        head.strip_prefix(name).is_some_and(|rest| rest.trim_start().starts_with('('))
+        head.strip_prefix(name)
+            .is_some_and(|rest| rest.trim_start().starts_with('('))
     }
 
     /// Is argument position `k` of sink `name` a dangerous position?
     fn sink_arg_matches(&self, name: &str, k: usize) -> bool {
-        self.sink_arg.get(name).map_or(true, |&want| want == k)
+        self.sink_arg.get(name).is_none_or(|&want| want == k)
     }
 
     /// Does store key `key` (a member-store field, setter suffix, or named
@@ -402,7 +413,12 @@ pub struct Step {
 
 impl Step {
     fn intra(code: &str, line: Option<u32>, depth: u32) -> Step {
-        Step { code: code.to_string(), line, provenance: Provenance::IntraProc, depth }
+        Step {
+            code: code.to_string(),
+            line,
+            provenance: Provenance::IntraProc,
+            depth,
+        }
     }
 }
 
@@ -450,8 +466,12 @@ fn member_store_key(code: &str) -> Option<String> {
         .chars()
         .rev()
         .collect();
-    (key.len() >= 2 && key.chars().next().is_some_and(|c| c.is_alphabetic() || c == '_'))
-        .then_some(key)
+    (key.len() >= 2
+        && key
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_alphabetic() || c == '_'))
+    .then_some(key)
 }
 
 /// The bare identifier an assignment's rhs reduces to, if it is one. `p = x`,
@@ -478,8 +498,14 @@ fn record_alias(alias: &mut HashMap<String, HashSet<String>>, lhs: &str, rhs: Op
         }
     }
     if let Some(r) = rhs.filter(|r| *r != lhs) {
-        alias.entry(lhs.to_string()).or_default().insert(r.to_string());
-        alias.entry(r.to_string()).or_default().insert(lhs.to_string());
+        alias
+            .entry(lhs.to_string())
+            .or_default()
+            .insert(r.to_string());
+        alias
+            .entry(r.to_string())
+            .or_default()
+            .insert(lhs.to_string());
     }
 }
 
@@ -502,7 +528,9 @@ fn spread_to_aliases<V: Clone>(
     let mut seen: HashSet<&str> = HashSet::from([name]);
     let mut work: Vec<&str> = vec![name];
     while let Some(cur) = work.pop() {
-        let Some(partners) = alias.get(cur) else { continue };
+        let Some(partners) = alias.get(cur) else {
+            continue;
+        };
         for p in partners {
             if seen.insert(p.as_str()) {
                 map.insert(p.clone(), v.clone());
@@ -544,7 +572,8 @@ fn member_store_path(code: &str) -> Option<String> {
     if segs.len() < 2
         || !segs.iter().all(|s| {
             let mut ch = s.chars();
-            ch.next().is_some_and(|c| c.is_alphabetic() || c == '_' || c == '$')
+            ch.next()
+                .is_some_and(|c| c.is_alphabetic() || c == '_' || c == '$')
                 && ch.all(|c| c.is_alphanumeric() || c == '_' || c == '$')
         })
     {
@@ -559,9 +588,7 @@ fn member_store_path(code: &str) -> Option<String> {
 fn field_key_under<'a, V>(map: &'a HashMap<String, V>, name: &str) -> Option<&'a V> {
     map.iter()
         .filter(|(k, _)| {
-            k.len() > name.len() + 1
-                && k.starts_with(name)
-                && k.as_bytes()[name.len()] == b'.'
+            k.len() > name.len() + 1 && k.starts_with(name) && k.as_bytes()[name.len()] == b'.'
         })
         .min_by(|a, b| a.0.cmp(b.0))
         .map(|(_, v)| v)
@@ -673,7 +700,9 @@ fn spread_field_to_aliases<V: Clone>(
     let mut seen: HashSet<&str> = HashSet::from([root]);
     let mut work: Vec<&str> = vec![root];
     while let Some(cur) = work.pop() {
-        let Some(partners) = alias.get(cur) else { continue };
+        let Some(partners) = alias.get(cur) else {
+            continue;
+        };
         for p in partners {
             if seen.insert(p.as_str()) {
                 map.insert(format!("{p}{suffix}"), v.clone());
@@ -694,15 +723,26 @@ pub struct Trace {
 impl Trace {
     fn extend(&self, code: &str, line: Option<u32>, provenance: Provenance, depth: u32) -> Trace {
         let mut steps = self.steps.clone();
-        steps.push(Step { code: code.to_string(), line, provenance, depth });
-        Trace { origin: self.origin.clone(), steps }
+        steps.push(Step {
+            code: code.to_string(),
+            line,
+            provenance,
+            depth,
+        });
+        Trace {
+            origin: self.origin.clone(),
+            steps,
+        }
     }
 
     /// Append pre-built steps (a callee's internal chain) before a hop.
     fn splice(&self, inner: Vec<Step>) -> Trace {
         let mut steps = self.steps.clone();
         steps.extend(inner);
-        Trace { origin: self.origin.clone(), steps }
+        Trace {
+            origin: self.origin.clone(),
+            steps,
+        }
     }
 }
 
@@ -810,11 +850,16 @@ fn persist_variants(k: &str) -> Vec<String> {
         bases.push(c0.to_lowercase().chain(cs.clone()).collect());
         bases.push(c0.to_uppercase().chain(cs).collect());
     }
-    if k.len() > 1 && k.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit()) {
+    if k.len() > 1
+        && k.chars()
+            .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit())
+    {
         bases.push(k[..1].to_string() + &k[1..].to_ascii_lowercase());
     } else if (2..=5).contains(&k.len())
         && k.chars().next().is_some_and(|c| c.is_ascii_uppercase())
-        && k.chars().skip(1).all(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
+        && k.chars()
+            .skip(1)
+            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
     {
         bases.push(k.to_ascii_uppercase());
     }
@@ -879,13 +924,12 @@ pub fn find_flows(cpg: &Cpg, summaries: &SummaryStore, spec: &TaintSpec) -> Vec<
             }
             n
         };
-        let (keys, over): (Vec<(String, usize)>, Vec<(String, usize)>) = ctx
+        let (keys, over): (KeyCounts, KeyCounts) = ctx
             .stored
             .borrow()
             .iter()
             .map(|(k, sites)| {
-                let methods: HashSet<NodeId> =
-                    sites.iter().map(|&s| enclosing_method(s)).collect();
+                let methods: HashSet<NodeId> = sites.iter().map(|&s| enclosing_method(s)).collect();
                 (k.clone(), methods.len())
             })
             .partition(|&(_, n)| n < ubiq);
@@ -901,21 +945,22 @@ pub fn find_flows(cpg: &Cpg, summaries: &SummaryStore, spec: &TaintSpec) -> Vec<
                 sink_methods.insert(enclosing_method(c));
             }
         }
-        let (rescued, skipped): (Vec<(String, usize)>, Vec<(String, usize)>) =
-            over.into_iter().partition(|(k, _)| {
-                persist_variants(k).iter().any(|v| {
-                    calls_by_name
-                        .get(v.as_str())
-                        .into_iter()
-                        .flatten()
-                        .any(|&c| sink_methods.contains(&enclosing_method(c)))
-                })
-            });
+        let (rescued, skipped): (KeyCounts, KeyCounts) = over.into_iter().partition(|(k, _)| {
+            persist_variants(k).iter().any(|v| {
+                calls_by_name
+                    .get(v.as_str())
+                    .into_iter()
+                    .flatten()
+                    .any(|&c| sink_methods.contains(&enclosing_method(c)))
+            })
+        });
         if !skipped.is_empty() {
             let mut skipped = skipped;
             skipped.sort();
-            let list: Vec<String> =
-                skipped.iter().map(|(k, n)| format!("{k}({n} methods)")).collect();
+            let list: Vec<String> = skipped
+                .iter()
+                .map(|(k, n)| format!("{k}({n} methods)"))
+                .collect();
             eprintln!(
                 "persist: ubiquity filter dropped {} key(s) stored in >= {ubiq} methods: {}",
                 list.len(),
@@ -925,8 +970,10 @@ pub fn find_flows(cpg: &Cpg, summaries: &SummaryStore, spec: &TaintSpec) -> Vec<
         if !rescued.is_empty() {
             let mut listed = rescued.clone();
             listed.sort();
-            let list: Vec<String> =
-                listed.iter().map(|(k, n)| format!("{k}({n} methods)")).collect();
+            let list: Vec<String> = listed
+                .iter()
+                .map(|(k, n)| format!("{k}({n} methods)"))
+                .collect();
             eprintln!(
                 "persist: sink-relevance rescued {} over-threshold key(s): {}",
                 list.len(),
@@ -949,15 +996,20 @@ pub fn find_flows(cpg: &Cpg, summaries: &SummaryStore, spec: &TaintSpec) -> Vec<
                 .map(|v| calls_by_name.get(v.as_str()).map_or(0, |cs| cs.len()))
                 .sum()
         };
-        let (keys, read_skipped): (Vec<(String, usize)>, Vec<(String, usize)>) = keys
+        let (keys, read_skipped): (KeyCounts, KeyCounts) = keys
             .into_iter()
-            .map(|(k, _)| { let r = read_count(&k); (k, r) })
+            .map(|(k, _)| {
+                let r = read_count(&k);
+                (k, r)
+            })
             .partition(|&(_, r)| r < max_reads);
         if !read_skipped.is_empty() {
             let mut read_skipped = read_skipped;
             read_skipped.sort();
-            let list: Vec<String> =
-                read_skipped.iter().map(|(k, r)| format!("{k}({r} reads)")).collect();
+            let list: Vec<String> = read_skipped
+                .iter()
+                .map(|(k, r)| format!("{k}({r} reads)"))
+                .collect();
             eprintln!(
                 "persist: read-ubiquity filter dropped {} key(s) with >= {max_reads} read sites: {}",
                 list.len(),
@@ -968,9 +1020,9 @@ pub fn find_flows(cpg: &Cpg, summaries: &SummaryStore, spec: &TaintSpec) -> Vec<
         // primitive (`uint`, `int64`, `string`) is cast-shaped harvest noise
         // — no real persisted field is named after a bare primitive.
         const PRIMITIVE_KEYS: &[&str] = &[
-            "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16",
-            "uint32", "uint64", "float32", "float64", "string", "bool", "byte",
-            "rune", "uintptr", "long", "short", "double", "float", "char",
+            "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32",
+            "uint64", "float32", "float64", "string", "bool", "byte", "rune", "uintptr", "long",
+            "short", "double", "float", "char",
         ];
         let keys: Vec<String> = keys
             .into_iter()
@@ -980,7 +1032,11 @@ pub fn find_flows(cpg: &Cpg, summaries: &SummaryStore, spec: &TaintSpec) -> Vec<
         if !keys.is_empty() {
             let mut sorted = keys.clone();
             sorted.sort();
-            eprintln!("persist: stitching {} key(s): {}", sorted.len(), sorted.join(", "));
+            eprintln!(
+                "persist: stitching {} key(s): {}",
+                sorted.len(),
+                sorted.join(", ")
+            );
         }
         if !keys.is_empty() {
             let mut added: HashSet<String> = HashSet::new();
@@ -1173,7 +1229,9 @@ fn run_analysis(ctx: &Ctx) -> Vec<Finding> {
             // this heuristic — the user named the method deliberately (a Koa
             // `ctx` IS the request).
             if !trusted
-                && cpg.type_full_name_of(p).is_some_and(|t| t.ends_with("Context"))
+                && cpg
+                    .type_full_name_of(p)
+                    .is_some_and(|t| t.ends_with("Context"))
             {
                 continue;
             }
@@ -1229,7 +1287,9 @@ pub fn annotate_guards(cpg: &Cpg, findings: &mut [Finding]) {
             }
         }
         let Some((_, method)) = best else { continue };
-        let Some(sink_code) = f.path.last().map(|s| s.code.clone()) else { continue };
+        let Some(sink_code) = f.path.last().map(|s| s.code.clone()) else {
+            continue;
+        };
         let idents = ident_tokens(&sink_code, &f.sink);
         if idents.is_empty() {
             continue;
@@ -1258,13 +1318,13 @@ pub fn annotate_guards(cpg: &Cpg, findings: &mut [Finding]) {
                     // must tie to the sink's, directly or one assignment hop
                     // away (`required = len + n; Expand(required)`).
                     let hit = grow_idents.is_empty() || {
-                        let map = assign_map
-                            .get_or_insert_with(|| assignment_ident_map(cpg, method));
+                        let map =
+                            assign_map.get_or_insert_with(|| assignment_ident_map(cpg, method));
                         grow_idents.iter().any(|gi| {
                             idents.contains(gi)
-                                || map.get(gi).is_some_and(|rhs| {
-                                    rhs.iter().any(|ri| idents.contains(ri))
-                                })
+                                || map
+                                    .get(gi)
+                                    .is_some_and(|rhs| rhs.iter().any(|ri| idents.contains(ri)))
                         })
                     };
                     if hit && grow.is_none_or(|p| line > p) {
@@ -1275,7 +1335,9 @@ pub fn annotate_guards(cpg: &Cpg, findings: &mut [Finding]) {
             let is_guard_shape = if kind == NodeKind::ControlStructure {
                 // Some frontends store only the node kind as code; the
                 // comparison itself then appears as an operator Call below.
-                ["<", ">", "<=", ">=", "=="].iter().any(|op| code.contains(op))
+                ["<", ">", "<=", ">=", "=="]
+                    .iter()
+                    .any(|op| code.contains(op))
             } else {
                 let g = cpg.name_of(n).unwrap_or("").trim_start_matches("::");
                 // A bare comparison (if-condition, loop bound) is an
@@ -1360,11 +1422,15 @@ fn assignment_ident_map(cpg: &Cpg, method: NodeId) -> HashMap<String, Vec<String
             continue;
         }
         let args = cpg.arguments_of(n);
-        let (Some(&l), Some(&r)) = (args.first(), args.get(1)) else { continue };
+        let (Some(&l), Some(&r)) = (args.first(), args.get(1)) else {
+            continue;
+        };
         if cpg.kind_of(l) != NodeKind::Identifier {
             continue;
         }
-        let Some(lname) = cpg.name_of(l) else { continue };
+        let Some(lname) = cpg.name_of(l) else {
+            continue;
+        };
         let rhs_code = cpg.code_of(r).or_else(|| cpg.code_of(n)).unwrap_or("");
         map.insert(lname.to_string(), ident_tokens(rhs_code, lname));
     }
@@ -1375,8 +1441,23 @@ fn assignment_ident_map(cpg: &Cpg, method: NodeId) -> HashMap<String, Vec<String
 /// keywords too common to be guard evidence.
 fn ident_tokens(code: &str, skip: &str) -> Vec<String> {
     const STOP: &[&str] = &[
-        "if", "else", "return", "new", "const", "void", "char", "int", "auto", "static",
-        "size_t", "uint8", "uint32", "uint64", "reinterpret_cast", "static_cast", "cast",
+        "if",
+        "else",
+        "return",
+        "new",
+        "const",
+        "void",
+        "char",
+        "int",
+        "auto",
+        "static",
+        "size_t",
+        "uint8",
+        "uint32",
+        "uint64",
+        "reinterpret_cast",
+        "static_cast",
+        "cast",
     ];
     let mut out: Vec<String> = Vec::new();
     let mut cur = String::new();
@@ -1404,11 +1485,10 @@ fn contains_word(hay: &str, word: &str) -> bool {
     let mut start = 0;
     while let Some(pos) = hay[start..].find(word) {
         let i = start + pos;
-        let before_ok = i == 0
-            || !(bytes[i - 1].is_ascii_alphanumeric() || bytes[i - 1] == b'_');
+        let before_ok = i == 0 || !(bytes[i - 1].is_ascii_alphanumeric() || bytes[i - 1] == b'_');
         let end = i + word.len();
-        let after_ok = end >= bytes.len()
-            || !(bytes[end].is_ascii_alphanumeric() || bytes[end] == b'_');
+        let after_ok =
+            end >= bytes.len() || !(bytes[end].is_ascii_alphanumeric() || bytes[end] == b'_');
         if before_ok && after_ok {
             return true;
         }
@@ -1477,7 +1557,11 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
                     // Persistence phase-1 (member store): `cfg.key = tainted`
                     // survives in cfg — harvest the field key.
                     if let Some(k) = &store_key {
-                        ctx.stored.borrow_mut().entry(k.clone()).or_default().insert(n);
+                        ctx.stored
+                            .borrow_mut()
+                            .entry(k.clone())
+                            .or_default()
+                            .insert(n);
                         // Assignment sink: attacker data stored into an
                         // identity-named field (`r.Account = tenantID`).
                         if ctx.spec.assign_sink_match(k) {
@@ -1503,10 +1587,9 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
                             Provenance::IntraProc,
                             0,
                         );
-                        match store_path
-                            .as_ref()
-                            .filter(|p| p.starts_with(&name) && p.as_bytes().get(name.len()) == Some(&b'.'))
-                        {
+                        match store_path.as_ref().filter(|p| {
+                            p.starts_with(&name) && p.as_bytes().get(name.len()) == Some(&b'.')
+                        }) {
                             // Field-sensitive member store: taint the dotted
                             // path (visible through aliases at the SAME
                             // path), not the whole base object.
@@ -1561,7 +1644,11 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
                 for var in out_arg_names(cpg, n, k) {
                     let tr = Trace {
                         origin: name.to_string(),
-                        steps: vec![Step::intra(cpg.code_of(n).unwrap_or(name), cpg.line_of(n), 0)],
+                        steps: vec![Step::intra(
+                            cpg.code_of(n).unwrap_or(name),
+                            cpg.line_of(n),
+                            0,
+                        )],
                     };
                     // The write into `var` is visible through its aliases
                     // (`p = buf; read(fd, p, n)` fills buf).
@@ -1575,8 +1662,10 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
             if !ctx.is_sanitizer(name) {
                 if let Some((dst, first_src)) = copy_propagation(name) {
                     let args = cpg.arguments_of(n);
-                    if let Some(tr) =
-                        args.iter().skip(first_src).find_map(|&a| expr_taint(ctx, a, &taint))
+                    if let Some(tr) = args
+                        .iter()
+                        .skip(first_src)
+                        .find_map(|&a| expr_taint(ctx, a, &taint))
                     {
                         let tr = tr.extend(
                             cpg.code_of(n).unwrap_or(name),
@@ -1594,11 +1683,17 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
             // Persistence phase-1: a tainted value stored through a setter
             // is re-readable elsewhere — harvest the field key.
             if (name.starts_with("set") || name.starts_with("Set")) && name.len() > 3 {
-                if let Some(trace) =
-                    cpg.arguments_of(n).into_iter().find_map(|a| expr_taint(ctx, a, &taint))
+                if let Some(trace) = cpg
+                    .arguments_of(n)
+                    .into_iter()
+                    .find_map(|a| expr_taint(ctx, a, &taint))
                 {
                     let k = &name[3..];
-                    ctx.stored.borrow_mut().entry(k.to_string()).or_default().insert(n);
+                    ctx.stored
+                        .borrow_mut()
+                        .entry(k.to_string())
+                        .or_default()
+                        .insert(n);
                     // Assignment sink: setter form (`SetAccount(tainted)`).
                     if ctx.spec.assign_sink_match(k) {
                         out.push(Finding {
@@ -1646,9 +1741,7 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
                                         method: method_name.clone(),
                                         sink: format!("={k}"),
                                         sink_line: cpg.line_of(n),
-                                        sink_file: cpg
-                                            .path_of(cpg.file_of(n))
-                                            .map(str::to_string),
+                                        sink_file: cpg.path_of(cpg.file_of(n)).map(str::to_string),
                                         origin: trace.origin.clone(),
                                         path: trace
                                             .extend(
@@ -1767,8 +1860,11 @@ fn named_arg(cpg: &Cpg, a: NodeId) -> Option<(&str, NodeId)> {
 /// named arg is the VALUE, not the `=` wrapper, so a tainted local sharing
 /// the KEY's name can't leak in.
 fn args_to_params(cpg: &Cpg, callee: NodeId, args: &[NodeId]) -> Vec<(usize, NodeId)> {
-    let pnames: Vec<Option<&str>> =
-        cpg.parameters_of(callee).iter().map(|&p| cpg.name_of(p)).collect();
+    let pnames: Vec<Option<&str>> = cpg
+        .parameters_of(callee)
+        .iter()
+        .map(|&p| cpg.name_of(p))
+        .collect();
     args.iter()
         .enumerate()
         .map(|(k, &a)| match named_arg(cpg, a) {
@@ -1800,12 +1896,17 @@ fn arg_for_param(
             .find(|&m| cpg.full_name_of(m) == Some(callee_fqn))
         {
             if let Some(pn) = cpg.parameters_of(m).get(k).and_then(|&p| cpg.name_of(p)) {
-                if let Some((_, val)) =
-                    args.iter().filter_map(|&a| named_arg(cpg, a)).find(|(key, _)| *key == pn)
+                if let Some((_, val)) = args
+                    .iter()
+                    .filter_map(|&a| named_arg(cpg, a))
+                    .find(|(key, _)| *key == pn)
                 {
                     return Some(val);
                 }
-                return args.get(k).copied().filter(|&a| named_arg(cpg, a).is_none());
+                return args
+                    .get(k)
+                    .copied()
+                    .filter(|&a| named_arg(cpg, a).is_none());
             }
         }
     }
@@ -1822,9 +1923,22 @@ fn is_query_call(name: &str) -> bool {
     matches!(
         crate::authz::word_tokens(name).first().map(|s| s.as_str()),
         Some(
-            "match" | "contains" | "has" | "is" | "equal" | "equals" | "lookup"
-                | "find" | "index" | "count" | "len" | "starts" | "ends"
-                | "validate" | "verify" | "check"
+            "match"
+                | "contains"
+                | "has"
+                | "is"
+                | "equal"
+                | "equals"
+                | "lookup"
+                | "find"
+                | "index"
+                | "count"
+                | "len"
+                | "starts"
+                | "ends"
+                | "validate"
+                | "verify"
+                | "check"
         )
     )
 }
@@ -1845,8 +1959,17 @@ fn is_invoked(cpg: &Cpg, n: NodeId, name: &str) -> bool {
 /// "tainted binary"; `Command("sh", "-c", t)` moves the danger to arg 2).
 /// Windows spells the flag `/c`.
 const SHELL_NAMES: &[&str] = &[
-    "sh", "bash", "zsh", "dash", "ksh", "ash", "cmd", "cmd.exe", "powershell",
-    "powershell.exe", "pwsh",
+    "sh",
+    "bash",
+    "zsh",
+    "dash",
+    "ksh",
+    "ash",
+    "cmd",
+    "cmd.exe",
+    "powershell",
+    "powershell.exe",
+    "pwsh",
 ];
 
 /// The unquoted text of a string-literal node.
@@ -1906,9 +2029,14 @@ fn copy_propagation(name: &str) -> Option<(usize, usize)> {
 fn out_arg_names(cpg: &Cpg, call: NodeId, k: usize) -> Vec<String> {
     let args = cpg.arguments_of(call);
     if k == OUT_ALL_ARGS {
-        args.into_iter().filter_map(|a| out_arg_name(cpg, a)).collect()
+        args.into_iter()
+            .filter_map(|a| out_arg_name(cpg, a))
+            .collect()
     } else {
-        args.get(k).and_then(|&a| out_arg_name(cpg, a)).into_iter().collect()
+        args.get(k)
+            .and_then(|&a| out_arg_name(cpg, a))
+            .into_iter()
+            .collect()
     }
 }
 
@@ -1921,8 +2049,10 @@ fn out_arg_name(cpg: &Cpg, node: NodeId) -> Option<String> {
     }
     let code = cpg.code_of(node)?;
     let trimmed = code.trim_start_matches(['&', '*', '(', ' ', '\t']);
-    let root: String =
-        trimmed.chars().take_while(|c| c.is_alphanumeric() || *c == '_').collect();
+    let root: String = trimmed
+        .chars()
+        .take_while(|c| c.is_alphanumeric() || *c == '_')
+        .collect();
     if root.is_empty() || root.chars().next().is_some_and(|c| c.is_ascii_digit()) {
         return None;
     }
@@ -1968,7 +2098,9 @@ fn check_sinks(
     }
     let name = cpg.name_of(node).unwrap_or("");
     let is_sink_here = ctx.spec.sinks.contains(name)
-        && ctx.spec.sink_shape_matches(name, cpg.code_of(node).unwrap_or(""));
+        && ctx
+            .spec
+            .sink_shape_matches(name, cpg.code_of(node).unwrap_or(""));
     let args_all = cpg.arguments_of(node);
     let shell_payload = shellform_payload_start(cpg, &args_all);
     let mut fired = false;
@@ -1977,9 +2109,7 @@ fn check_sinks(
             // A position-qualified exec sink still fires on the payload of a
             // `<shell> -c` spelling: the qualifier models "tainted binary",
             // and `Command("sh", "-c", t)` moves the injection to arg 2.
-            if !ctx.spec.sink_arg_matches(name, k)
-                && !shell_payload.is_some_and(|s| k >= s)
-            {
+            if !ctx.spec.sink_arg_matches(name, k) && !shell_payload.is_some_and(|s| k >= s) {
                 continue;
             }
             if let Some(trace) = expr_taint(ctx, arg, taint) {
@@ -2047,10 +2177,7 @@ fn check_sinks(
     // not in the caller. Gated on the SHAPE-matched sink test, not the bare
     // name: `client->unlink(req)` shares a name with the libc sink but is a
     // stitched RPC hop that must still hand off into its handlers.
-    if !is_sink_here
-        && !ctx.is_sanitizer(name)
-        && !is_operator(name)
-        && is_invoked(cpg, node, name)
+    if !is_sink_here && !ctx.is_sanitizer(name) && !is_operator(name) && is_invoked(cpg, node, name)
     {
         // Every resolved target: a stitched RPC call fans out to several
         // handlers, and the sink may live in any of them. First hit wins.
@@ -2125,7 +2252,11 @@ fn param_to_sink(
         let mut chains: HashMap<String, Vec<Step>> = HashMap::new();
         chains.insert(
             pname.clone(),
-            vec![Step::intra(cpg.code_of(pnode).unwrap_or(&pname), cpg.line_of(pnode), depth)],
+            vec![Step::intra(
+                cpg.code_of(pnode).unwrap_or(&pname),
+                cpg.line_of(pnode),
+                depth,
+            )],
         );
         // Intra-method alias pairs (mirrors analyse_method).
         let mut alias: HashMap<String, HashSet<String>> = HashMap::new();
@@ -2164,8 +2295,11 @@ fn param_to_sink(
             // Out-parameter sources fire in callees too (mirrors analyse_method).
             if let Some(&k) = ctx.spec.out_param_sources.get(name) {
                 for var in out_arg_names(cpg, n, k) {
-                    let c =
-                        vec![Step::intra(cpg.code_of(n).unwrap_or(name), cpg.line_of(n), depth)];
+                    let c = vec![Step::intra(
+                        cpg.code_of(n).unwrap_or(name),
+                        cpg.line_of(n),
+                        depth,
+                    )];
                     spread_to_aliases(&alias, &mut chains, &var, &c);
                     chains.insert(var, c);
                 }
@@ -2179,7 +2313,11 @@ fn param_to_sink(
                         .skip(first_src)
                         .find_map(|&a| chain_expr(ctx, a, &chains, depth, visiting))
                     {
-                        c.push(Step::intra(cpg.code_of(n).unwrap_or(name), cpg.line_of(n), depth));
+                        c.push(Step::intra(
+                            cpg.code_of(n).unwrap_or(name),
+                            cpg.line_of(n),
+                            depth,
+                        ));
                         for var in out_arg_names(cpg, n, dst) {
                             spread_to_aliases(&alias, &mut chains, &var, &c);
                             chains.insert(var, c.clone());
@@ -2207,7 +2345,11 @@ fn param_to_sink(
                             // Persistence phase-1 (member store), mirrors
                             // analyse_method.
                             if let Some(k) = &store_key {
-                                ctx.stored.borrow_mut().entry(k.clone()).or_default().insert(n);
+                                ctx.stored
+                                    .borrow_mut()
+                                    .entry(k.clone())
+                                    .or_default()
+                                    .insert(n);
                                 // Assignment sink (mirrors analyse_method).
                                 if first_hit.is_none() && ctx.spec.assign_sink_match(k) {
                                     let mut steps = c.clone();
@@ -2221,7 +2363,11 @@ fn param_to_sink(
                                 }
                             }
                             if let Some(lhs) = lhs_name(cpg, args[0]) {
-                                c.push(Step::intra(cpg.code_of(n).unwrap_or(&lhs), cpg.line_of(n), depth));
+                                c.push(Step::intra(
+                                    cpg.code_of(n).unwrap_or(&lhs),
+                                    cpg.line_of(n),
+                                    depth,
+                                ));
                                 match store_path.as_ref().filter(|p| {
                                     p.starts_with(&lhs)
                                         && p.as_bytes().get(lhs.len()) == Some(&b'.')
@@ -2231,7 +2377,11 @@ fn param_to_sink(
                                     Some(path) => {
                                         let suffix = path[lhs.len()..].to_string();
                                         spread_field_to_aliases(
-                                            &alias, &mut chains, &lhs, &suffix, &c,
+                                            &alias,
+                                            &mut chains,
+                                            &lhs,
+                                            &suffix,
+                                            &c,
                                         );
                                         chains.insert(path.clone(), c);
                                     }
@@ -2271,10 +2421,18 @@ fn param_to_sink(
                     .find_map(|a| chain_expr(ctx, a, &chains, depth, visiting));
                 if let Some(mut c) = hit {
                     let k = &name[3..];
-                    ctx.stored.borrow_mut().entry(k.to_string()).or_default().insert(n);
+                    ctx.stored
+                        .borrow_mut()
+                        .entry(k.to_string())
+                        .or_default()
+                        .insert(n);
                     // Assignment sink: setter form (mirrors analyse_method).
                     if first_hit.is_none() && ctx.spec.assign_sink_match(k) {
-                        c.push(Step::intra(cpg.code_of(n).unwrap_or(name), cpg.line_of(n), depth));
+                        c.push(Step::intra(
+                            cpg.code_of(n).unwrap_or(name),
+                            cpg.line_of(n),
+                            depth,
+                        ));
                         first_hit = Some(SinkHit {
                             sink: format!("={k}"),
                             line: cpg.line_of(n),
@@ -2364,7 +2522,11 @@ fn param_to_sink(
                             .into_iter()
                             .find_map(|a| chain_expr(ctx, a, &chains, depth, visiting));
                         if let Some(mut c) = hit {
-                            c.push(Step::intra(cpg.code_of(n).unwrap_or(name), cpg.line_of(n), depth));
+                            c.push(Step::intra(
+                                cpg.code_of(n).unwrap_or(name),
+                                cpg.line_of(n),
+                                depth,
+                            ));
                             spread_to_aliases(&alias, &mut chains, &recv, &c);
                             chains.insert(recv, c);
                         }
@@ -2372,7 +2534,9 @@ fn param_to_sink(
                 }
             }
             if ctx.spec.sinks.contains(name)
-                && ctx.spec.sink_shape_matches(name, cpg.code_of(n).unwrap_or(""))
+                && ctx
+                    .spec
+                    .sink_shape_matches(name, cpg.code_of(n).unwrap_or(""))
             {
                 for (k, arg) in cpg.arguments_of(n).into_iter().enumerate() {
                     if !ctx.spec.sink_arg_matches(name, k) {
@@ -2462,7 +2626,11 @@ fn resolve_format_literal(cpg: &Cpg, fmt_node: NodeId, depth: u32) -> Option<Nod
     if cpg.kind_of(m) != NodeKind::Method {
         return None;
     }
-    if cpg.parameters_of(m).iter().any(|&p| cpg.name_of(p) == Some(name)) {
+    if cpg
+        .parameters_of(m)
+        .iter()
+        .any(|&p| cpg.name_of(p) == Some(name))
+    {
         return None;
     }
     // One pass over the method subtree for `=` calls whose lhs is `name`.
@@ -2554,7 +2722,9 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
     match cpg.kind_of(node) {
         // A bare identifier is tainted whole-object, or by CONTAINMENT when
         // one of its fields is (the value flowing here carries the field).
-        NodeKind::Identifier => cpg.name_of(node).and_then(|n| lookup_contained(taint, n).cloned()),
+        NodeKind::Identifier => cpg
+            .name_of(node)
+            .and_then(|n| lookup_contained(taint, n).cloned()),
         NodeKind::Literal => None,
         NodeKind::Call => {
             let name = cpg.name_of(node).unwrap_or("");
@@ -2571,7 +2741,7 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
                         cpg.line_of(node),
                         0,
                     )],
-                    });
+                });
             }
             // An @out source is an explicit model: data goes INTO arg k
             // (handled at statement level); the return is a count/status,
@@ -2600,7 +2770,9 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
                 // FP this branch exists to kill.
                 let mut cur = node;
                 while cpg.kind_of(cur) == NodeKind::Call {
-                    let Some(&base) = cpg.arguments_of(cur).first() else { break };
+                    let Some(&base) = cpg.arguments_of(cur).first() else {
+                        break;
+                    };
                     if cpg.kind_of(base) == NodeKind::Call {
                         if let Some(nm) = cpg.name_of(base) {
                             if call_is_source(ctx, base, nm) {
@@ -2695,8 +2867,11 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
             // `"{}".format(..)` must not bind to a log Formatter's `format`.
             let untrusted_dispatch =
                 cpg.signature_of(node).is_some() && cpg.type_full_name_of(node).is_none();
-            let looked_up =
-                if untrusted_dispatch { None } else { ctx.summaries.get_with_origin(key) };
+            let looked_up = if untrusted_dispatch {
+                None
+            } else {
+                ctx.summaries.get_with_origin(key)
+            };
             let Some((summary, origin)) = looked_up else {
                 // No (trustworthy) summary: an opaque call. Conservative
                 // pass-through — its result carries the receiver's taint, or
@@ -2705,14 +2880,17 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
                 if let Some(t) = recv_taint(cpg) {
                     return Some(t);
                 }
-                return args.iter().find_map(|&a| expr_taint(ctx, a, taint)).map(|t| {
-                    t.extend(
-                        cpg.code_of(node).unwrap_or(name),
-                        cpg.line_of(node),
-                        Provenance::IntraProc,
-                        0,
-                    )
-                });
+                return args
+                    .iter()
+                    .find_map(|&a| expr_taint(ctx, a, taint))
+                    .map(|t| {
+                        t.extend(
+                            cpg.code_of(node).unwrap_or(name),
+                            cpg.line_of(node),
+                            Provenance::IntraProc,
+                            0,
+                        )
+                    });
             };
             let fqn = summary.fqn.clone();
             // Deterministic witness choice: flows is a HashSet and the FIRST
@@ -2761,7 +2939,10 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
                 if let Some((inner, prov)) =
                     lift_source(ctx, name, &fqn, origin, src, &mut visiting)
                 {
-                    let t = Trace { origin: src.to_string(), steps: inner };
+                    let t = Trace {
+                        origin: src.to_string(),
+                        steps: inner,
+                    };
                     return Some(t.extend(
                         cpg.code_of(node).unwrap_or(name),
                         cpg.line_of(node),
@@ -2770,7 +2951,11 @@ fn expr_taint(ctx: &Ctx, node: NodeId, taint: &HashMap<String, Trace>) -> Option
                     ));
                 }
             }
-            if summary.receiver_passes_through() { recv_taint(cpg) } else { None }
+            if summary.receiver_passes_through() {
+                recv_taint(cpg)
+            } else {
+                None
+            }
         }
         _ => {
             for c in cpg.out_kind(node, cpg_core::EdgeKind::Ast) {
@@ -2801,10 +2986,14 @@ fn lift(
     match origin {
         SummaryOrigin::External => Some((
             Vec::new(),
-            Provenance::ExternalSummary { callee_fqn: fqn.to_string() },
+            Provenance::ExternalSummary {
+                callee_fqn: fqn.to_string(),
+            },
         )),
         SummaryOrigin::Computed => {
-            let prov = Provenance::SummaryFlow { callee_fqn: fqn.to_string() };
+            let prov = Provenance::SummaryFlow {
+                callee_fqn: fqn.to_string(),
+            };
             let Some(body) = ctx.body_of(name, fqn) else {
                 return Some((Vec::new(), prov)); // no body located: summary-only hop
             };
@@ -2844,7 +3033,11 @@ fn callee_chain(
     let mut chains: HashMap<String, Vec<Step>> = HashMap::new();
     chains.insert(
         pname.clone(),
-        vec![Step::intra(cpg.code_of(pnode).unwrap_or(&pname), cpg.line_of(pnode), depth)],
+        vec![Step::intra(
+            cpg.code_of(pnode).unwrap_or(&pname),
+            cpg.line_of(pnode),
+            depth,
+        )],
     );
 
     let mut stmts: Vec<NodeId> = crate::pass::ast_descendants(cpg, method)
@@ -2922,9 +3115,9 @@ fn chain_expr(
     let cpg = ctx.cpg;
     match cpg.kind_of(node) {
         // Containment lookup mirrors expr_taint's Identifier arm.
-        NodeKind::Identifier => {
-            cpg.name_of(node).and_then(|n| lookup_contained(chains, n).cloned())
-        }
+        NodeKind::Identifier => cpg
+            .name_of(node)
+            .and_then(|n| lookup_contained(chains, n).cloned()),
         NodeKind::Literal => None,
         NodeKind::Call => {
             let name = cpg.name_of(node).unwrap_or("");
@@ -2993,13 +3186,20 @@ fn chain_expr(
                             .next()
                             .and_then(|r| chain_expr(ctx, r, chains, depth, visiting))
                     })?;
-                c.push(Step::intra(cpg.code_of(node).unwrap_or(name), cpg.line_of(node), depth));
+                c.push(Step::intra(
+                    cpg.code_of(node).unwrap_or(name),
+                    cpg.line_of(node),
+                    depth,
+                ));
                 Some(c)
             };
             let untrusted_dispatch =
                 cpg.signature_of(node).is_some() && cpg.type_full_name_of(node).is_none();
-            let looked_up =
-                if untrusted_dispatch { None } else { ctx.summaries.get_with_origin(key) };
+            let looked_up = if untrusted_dispatch {
+                None
+            } else {
+                ctx.summaries.get_with_origin(key)
+            };
             let Some((summary, origin)) = looked_up else {
                 if let Some(c) = recv_chain(chains, visiting) {
                     return Some(c);
@@ -3070,10 +3270,14 @@ fn lift_nested(
     match origin {
         SummaryOrigin::External => Some((
             Vec::new(),
-            Provenance::ExternalSummary { callee_fqn: fqn.to_string() },
+            Provenance::ExternalSummary {
+                callee_fqn: fqn.to_string(),
+            },
         )),
         SummaryOrigin::Computed => {
-            let prov = Provenance::SummaryFlow { callee_fqn: fqn.to_string() };
+            let prov = Provenance::SummaryFlow {
+                callee_fqn: fqn.to_string(),
+            };
             let Some(body) = ctx.body_of(name, fqn) else {
                 return Some((Vec::new(), prov));
             };
@@ -3103,10 +3307,14 @@ fn lift_source(
     match origin {
         SummaryOrigin::External => Some((
             Vec::new(),
-            Provenance::ExternalSummary { callee_fqn: fqn.to_string() },
+            Provenance::ExternalSummary {
+                callee_fqn: fqn.to_string(),
+            },
         )),
         SummaryOrigin::Computed => {
-            let prov = Provenance::SummaryFlow { callee_fqn: fqn.to_string() };
+            let prov = Provenance::SummaryFlow {
+                callee_fqn: fqn.to_string(),
+            };
             let Some(body) = ctx.body_of(name, fqn) else {
                 return Some((Vec::new(), prov)); // no body located: summary-only hop
             };
@@ -3264,10 +3472,14 @@ fn source_expr(
             let (inner, prov) = match origin {
                 SummaryOrigin::External => (
                     Vec::new(),
-                    Provenance::ExternalSummary { callee_fqn: fqn.clone() },
+                    Provenance::ExternalSummary {
+                        callee_fqn: fqn.clone(),
+                    },
                 ),
                 SummaryOrigin::Computed => {
-                    let prov = Provenance::SummaryFlow { callee_fqn: fqn.clone() };
+                    let prov = Provenance::SummaryFlow {
+                        callee_fqn: fqn.clone(),
+                    };
                     match ctx.body_of(name, &fqn) {
                         Some(body) if visiting.insert(fqn.clone()) => {
                             let chain = source_chain(ctx, body, src, depth + 1, visiting);
@@ -3314,7 +3526,9 @@ mod tests {
         }
         let pm = crate::standard_pipeline();
         let idx = crate::pass::method_name_index(&cpg);
-        let ctx = crate::pass::PassContext { methods_by_name: Some(&idx) };
+        let ctx = crate::pass::PassContext {
+            methods_by_name: Some(&idx),
+        };
         pm.run_all(&mut cpg, &fids, &ctx);
         cpg
     }
@@ -3336,7 +3550,9 @@ mod tests {
         }
         let pm = crate::standard_pipeline();
         let idx = crate::pass::method_name_index(&cpg);
-        let ctx = crate::pass::PassContext { methods_by_name: Some(&idx) };
+        let ctx = crate::pass::PassContext {
+            methods_by_name: Some(&idx),
+        };
         pm.run_all(&mut cpg, &fids, &ctx);
         cpg
     }
@@ -3352,7 +3568,9 @@ mod tests {
         }
         let pm = crate::standard_pipeline();
         let idx = crate::pass::method_name_index(&cpg);
-        let ctx = crate::pass::PassContext { methods_by_name: Some(&idx) };
+        let ctx = crate::pass::PassContext {
+            methods_by_name: Some(&idx),
+        };
         pm.run_all(&mut cpg, &fids, &ctx);
         cpg
     }
@@ -3368,7 +3586,9 @@ mod tests {
         }
         let pm = crate::standard_pipeline();
         let idx = crate::pass::method_name_index(&cpg);
-        let ctx = crate::pass::PassContext { methods_by_name: Some(&idx) };
+        let ctx = crate::pass::PassContext {
+            methods_by_name: Some(&idx),
+        };
         pm.run_all(&mut cpg, &fids, &ctx);
         cpg
     }
@@ -3384,7 +3604,9 @@ mod tests {
         }
         let pm = crate::standard_pipeline();
         let idx = crate::pass::method_name_index(&cpg);
-        let ctx = crate::pass::PassContext { methods_by_name: Some(&idx) };
+        let ctx = crate::pass::PassContext {
+            methods_by_name: Some(&idx),
+        };
         pm.run_all(&mut cpg, &fids, &ctx);
         cpg
     }
@@ -3420,12 +3642,24 @@ mod tests {
         )]);
         let store = summarise(&cpg);
         let spec = TaintSpec::new(&["read@out1"], &["system", "printf"]);
-        assert!(spec.sources.is_empty(), "@out source must not be a return source");
+        assert!(
+            spec.sources.is_empty(),
+            "@out source must not be a return source"
+        );
         assert_eq!(spec.out_param_sources.get("read"), Some(&1));
         let findings = find_flows(&cpg, &store, &spec);
-        assert_eq!(findings.len(), 1, "only system(buf) may report: {findings:?}");
+        assert_eq!(
+            findings.len(),
+            1,
+            "only system(buf) may report: {findings:?}"
+        );
         assert_eq!(findings[0].sink, "system");
-        assert!(findings[0].path.last().unwrap().code.contains("system(buf)"));
+        assert!(findings[0]
+            .path
+            .last()
+            .unwrap()
+            .code
+            .contains("system(buf)"));
         assert_eq!(findings[0].origin, "read");
     }
 
@@ -3445,7 +3679,12 @@ mod tests {
         assert_eq!(findings.len(), 1, "{findings:?}");
         assert_eq!(findings[0].sink, "=account");
         assert_eq!(findings[0].origin, "getenv");
-        assert!(findings[0].path.last().unwrap().code.contains("r->account = t"));
+        assert!(findings[0]
+            .path
+            .last()
+            .unwrap()
+            .code
+            .contains("r->account = t"));
     }
 
     #[test]
@@ -3458,7 +3697,10 @@ mod tests {
         let spec = TaintSpec::new(&["getenv"], &["=account"]);
         let findings = find_flows(&cpg, &store, &spec);
         assert_eq!(findings.len(), 1, "{findings:?}");
-        assert_eq!(findings[0].sink, "=Account", "setter key keeps its spelling");
+        assert_eq!(
+            findings[0].sink, "=Account",
+            "setter key keeps its spelling"
+        );
     }
 
     #[test]
@@ -3466,10 +3708,7 @@ mod tests {
         // The interprocedural walker (entry-model param_to_sink) must hit
         // assignment sinks too: handler's request data lands in an
         // identity field of an object another method trusts.
-        let cpg = build(&[(
-            "c.c",
-            "void handler(char* q) {\n    r->tenant = q;\n}\n",
-        )]);
+        let cpg = build(&[("c.c", "void handler(char* q) {\n    r->tenant = q;\n}\n")]);
         let store = summarise(&cpg);
         let mut spec = TaintSpec::new(&[], &["=tenant"]);
         spec.source_methods.insert("handler".into());
@@ -3499,8 +3738,14 @@ mod tests {
         let methods: Vec<&str> = findings.iter().map(|f| f.method.as_str()).collect();
         assert_eq!(findings.len(), 2, "{findings:?}");
         assert!(methods.iter().any(|m| m.contains("hit")), "{methods:?}");
-        assert!(methods.iter().any(|m| m.contains("contained")), "{methods:?}");
-        assert!(!methods.iter().any(|m| m.contains("sibling")), "{methods:?}");
+        assert!(
+            methods.iter().any(|m| m.contains("contained")),
+            "{methods:?}"
+        );
+        assert!(
+            !methods.iter().any(|m| m.contains("sibling")),
+            "{methods:?}"
+        );
     }
 
     #[test]
@@ -3519,7 +3764,10 @@ mod tests {
         let findings = find_flows(&cpg, &store, &spec);
         let methods: Vec<&str> = findings.iter().map(|f| f.method.as_str()).collect();
         assert_eq!(findings.len(), 2, "{findings:?}");
-        assert!(!methods.iter().any(|m| m.contains("sibling")), "{methods:?}");
+        assert!(
+            !methods.iter().any(|m| m.contains("sibling")),
+            "{methods:?}"
+        );
     }
 
     #[test]
@@ -3638,13 +3886,19 @@ mod tests {
         let mut spec = TaintSpec::new(&[], &["system"]);
         spec.source_methods.insert("handler".into());
         let store = summarise(&cpg);
-        assert_eq!(find_flows(&cpg, &store, &spec).len(), 1, "direct finding only");
+        assert_eq!(
+            find_flows(&cpg, &store, &spec).len(),
+            1,
+            "direct finding only"
+        );
         std::env::set_var("CPG_PERSIST", "1");
         let findings = find_flows(&cpg, &store, &spec);
         std::env::remove_var("CPG_PERSIST");
         assert_eq!(findings.len(), 2, "{findings:?}");
         assert!(
-            findings.iter().any(|f| f.origin == "persisted:later" && f.method.contains("job")),
+            findings
+                .iter()
+                .any(|f| f.origin == "persisted:later" && f.method.contains("job")),
             "{findings:?}"
         );
     }
@@ -3708,7 +3962,11 @@ mod tests {
         let mut spec = TaintSpec::new(&[], &["system"]);
         spec.source_methods.insert("h".into());
         let store = summarise(&cpg);
-        assert_eq!(find_flows(&cpg, &store, &spec).len(), 1, "baseline pass-through");
+        assert_eq!(
+            find_flows(&cpg, &store, &spec).len(),
+            1,
+            "baseline pass-through"
+        );
         let mut store = summarise(&cpg);
         store
             .load_external_json(
@@ -3716,7 +3974,11 @@ mod tests {
                      "receiverModeled":true}]"#,
             )
             .unwrap();
-        assert_eq!(find_flows(&cpg, &store, &spec).len(), 0, "recv-modeled: count is clean");
+        assert_eq!(
+            find_flows(&cpg, &store, &spec).len(),
+            0,
+            "recv-modeled: count is clean"
+        );
     }
 
     #[test]
@@ -3731,7 +3993,11 @@ mod tests {
                      "dataFlows":[{"from":"recv","to":"return"}]}]"#,
             )
             .unwrap();
-        assert_eq!(find_flows(&cpg, &store, &spec).len(), 1, "declared recv->return flows");
+        assert_eq!(
+            find_flows(&cpg, &store, &spec).len(),
+            1,
+            "declared recv->return flows"
+        );
         let mut store = summarise(&cpg);
         store
             .load_external_json(
@@ -3763,7 +4029,12 @@ mod tests {
                      "receiverModeled":true}]"#,
             )
             .unwrap();
-        assert_eq!(find_flows(&cpg, &store, &spec).len(), 1, "{:?}", find_flows(&cpg, &store, &spec));
+        assert_eq!(
+            find_flows(&cpg, &store, &spec).len(),
+            1,
+            "{:?}",
+            find_flows(&cpg, &store, &spec)
+        );
     }
 
     #[test]
@@ -3900,7 +4171,11 @@ object JobConfigOps {
         let spec = TaintSpec::new(&["getenv"], &["system"]);
         let findings = find_flows(&cpg, &store, &spec);
         assert_eq!(findings.len(), 1, "{findings:?}");
-        assert_eq!(findings[0].sink_line, Some(7), "must fire on cfg.key, not other.key");
+        assert_eq!(
+            findings[0].sink_line,
+            Some(7),
+            "must fire on cfg.key, not other.key"
+        );
     }
 
     #[test]
@@ -3928,7 +4203,11 @@ object JobConfigOps {
         let spec = TaintSpec::new(&["getenv"], &["system"]);
         let findings = find_flows(&cpg, &store, &spec);
         assert_eq!(findings.len(), 1, "{findings:?}");
-        assert_eq!(findings[0].sink_line, Some(8), "must fire on other.key, not cfg.key");
+        assert_eq!(
+            findings[0].sink_line,
+            Some(8),
+            "must fire on other.key, not cfg.key"
+        );
     }
 
     #[test]
@@ -3960,7 +4239,11 @@ object JobConfigOps {
         let spec = TaintSpec::new(&["getenv"], &["system"]);
         let findings = find_flows(&cpg, &store, &spec);
         assert_eq!(findings.len(), 1, "{findings:?}");
-        assert_eq!(findings[0].sink_line, Some(6), "cfg.key fires through the 2-hop chain");
+        assert_eq!(
+            findings[0].sink_line,
+            Some(6),
+            "cfg.key fires through the 2-hop chain"
+        );
     }
 
     #[test]
@@ -4007,8 +4290,14 @@ object JobConfigOps {
         let lower = persist_variants("assetStore");
         let upper = persist_variants("AssetStore");
         for heavy in ["GetAssetStore", "getAssetStore", "AssetStore", "assetStore"] {
-            assert!(lower.iter().any(|v| v == heavy), "lower missing {heavy}: {lower:?}");
-            assert!(upper.iter().any(|v| v == heavy), "upper missing {heavy}: {upper:?}");
+            assert!(
+                lower.iter().any(|v| v == heavy),
+                "lower missing {heavy}: {lower:?}"
+            );
+            assert!(
+                upper.iter().any(|v| v == heavy),
+                "upper missing {heavy}: {upper:?}"
+            );
         }
     }
 
@@ -4067,7 +4356,8 @@ object JobConfigOps {
         // `subprocess.check_output([binary, q])` — the list literal must not
         // swallow its elements; sink_arg 0 sees the collection call whose
         // taint comes from the tainted element.
-        let src = "def handler():\n    q = request.args\n    subprocess.check_output([\"convert\", q])\n";
+        let src =
+            "def handler():\n    q = request.args\n    subprocess.check_output([\"convert\", q])\n";
         let cpg = build_python(&[("h.py", src)]);
         let store = summarise(&cpg);
         let mut spec = TaintSpec::new(&[], &["check_output@0"]);
@@ -4299,7 +4589,9 @@ object JobConfigOps {
         )]);
         let store = summarise(&cpg);
         assert!(
-            store.get("pass").is_some_and(|s| s.flows_to_return().count() > 0),
+            store
+                .get("pass")
+                .is_some_and(|s| s.flows_to_return().count() > 0),
             "pass summary missing param->return flow: {:?}",
             store.get("pass")
         );
@@ -4355,8 +4647,16 @@ object JobConfigOps {
         std::env::remove_var("CPG_PERSIST_UBIQ");
         let stitched = find_flows(&cpg, &store, &spec);
         std::env::remove_var("CPG_PERSIST");
-        assert_eq!(dropped.len(), 0, "ubiquitous key must be filtered: {dropped:?}");
-        assert_eq!(stitched.len(), 1, "default threshold must keep 2-method keys: {stitched:?}");
+        assert_eq!(
+            dropped.len(),
+            0,
+            "ubiquitous key must be filtered: {dropped:?}"
+        );
+        assert_eq!(
+            stitched.len(),
+            1,
+            "default threshold must keep 2-method keys: {stitched:?}"
+        );
         assert_eq!(stitched[0].origin, "persisted:getKey");
     }
 
@@ -4380,7 +4680,11 @@ object JobConfigOps {
         let findings = find_flows(&cpg, &store, &spec);
         std::env::remove_var("CPG_PERSIST_UBIQ");
         std::env::remove_var("CPG_PERSIST");
-        assert_eq!(findings.len(), 1, "1 store method < threshold 2: {findings:?}");
+        assert_eq!(
+            findings.len(),
+            1,
+            "1 store method < threshold 2: {findings:?}"
+        );
         assert_eq!(findings[0].origin, "persisted:getKey");
     }
 
@@ -4402,7 +4706,11 @@ object JobConfigOps {
         let findings = find_flows(&cpg, &store, &spec);
         std::env::remove_var("CPG_PERSIST_UBIQ");
         std::env::remove_var("CPG_PERSIST");
-        assert_eq!(findings.len(), 1, "sink-relevant key must be rescued: {findings:?}");
+        assert_eq!(
+            findings.len(),
+            1,
+            "sink-relevant key must be rescued: {findings:?}"
+        );
         assert_eq!(findings[0].origin, "persisted:getKey");
         assert!(findings[0].method.contains("reader"), "{findings:?}");
     }
@@ -4427,7 +4735,11 @@ object JobConfigOps {
         std::env::remove_var("CPG_PERSIST_READS");
         std::env::remove_var("CPG_PERSIST_UBIQ");
         std::env::remove_var("CPG_PERSIST");
-        assert_eq!(findings.len(), 0, "read backstop must still apply: {findings:?}");
+        assert_eq!(
+            findings.len(),
+            0,
+            "read backstop must still apply: {findings:?}"
+        );
     }
 
     #[test]
@@ -4441,7 +4753,11 @@ object JobConfigOps {
         let store = summarise(&cpg);
         let spec = TaintSpec::new(&["getenv"], &["system"]);
         let findings = find_flows(&cpg, &store, &spec);
-        assert_eq!(findings.len(), 1, "only the %s flow may survive: {findings:?}");
+        assert_eq!(
+            findings.len(),
+            1,
+            "only the %s flow may survive: {findings:?}"
+        );
         assert!(findings[0].path.iter().any(|s| s.code.contains("%s")));
     }
 
@@ -4464,10 +4780,22 @@ object JobConfigOps {
         let spec = TaintSpec::new(&["getenv"], &["system"]);
         let findings = find_flows(&cpg, &store, &spec);
         let hit = |m: &str| findings.iter().any(|f| f.method.contains(m));
-        assert!(!hit("h1"), "int-verb local format must be filtered: {findings:?}");
-        assert!(hit("h2"), "string-verb local format must survive: {findings:?}");
-        assert!(hit("h3"), "reassigned local must stay conservative: {findings:?}");
-        assert!(hit("h4"), "parameter format must stay conservative: {findings:?}");
+        assert!(
+            !hit("h1"),
+            "int-verb local format must be filtered: {findings:?}"
+        );
+        assert!(
+            hit("h2"),
+            "string-verb local format must survive: {findings:?}"
+        );
+        assert!(
+            hit("h3"),
+            "reassigned local must stay conservative: {findings:?}"
+        );
+        assert!(
+            hit("h4"),
+            "parameter format must stay conservative: {findings:?}"
+        );
     }
 
     #[test]
@@ -4481,7 +4809,11 @@ object JobConfigOps {
         let store = summarise(&cpg);
         let spec = TaintSpec::new(&["getenv"], &["system"]);
         let findings = find_flows(&cpg, &store, &spec);
-        assert_eq!(findings.len(), 0, "two-hop literal chain must be filtered: {findings:?}");
+        assert_eq!(
+            findings.len(),
+            0,
+            "two-hop literal chain must be filtered: {findings:?}"
+        );
     }
 
     #[test]
@@ -4502,10 +4834,21 @@ object JobConfigOps {
         let findings = find_flows(&cpg, &store, &spec);
         assert_eq!(findings.len(), 3, "{findings:?}");
         let by_m = |m: &str| {
-            findings.iter().find(|f| f.method.contains(m)).unwrap().guard.clone()
+            findings
+                .iter()
+                .find(|f| f.method.contains(m))
+                .unwrap()
+                .guard
+                .clone()
         };
-        assert!(by_m("g1").is_some_and(|g| g.starts_with("guarded@")), "{findings:?}");
-        assert!(by_m("g2").is_some_and(|g| g.starts_with("post-sink-check@")), "{findings:?}");
+        assert!(
+            by_m("g1").is_some_and(|g| g.starts_with("guarded@")),
+            "{findings:?}"
+        );
+        assert!(
+            by_m("g2").is_some_and(|g| g.starts_with("post-sink-check@")),
+            "{findings:?}"
+        );
         assert_eq!(by_m("g3"), None, "{findings:?}");
     }
 
@@ -4528,11 +4871,25 @@ object JobConfigOps {
         let findings = find_flows(&cpg, &store, &spec);
         assert_eq!(findings.len(), 3, "{findings:?}");
         let by_m = |m: &str| {
-            findings.iter().find(|f| f.method.contains(m)).unwrap().guard.clone()
+            findings
+                .iter()
+                .find(|f| f.method.contains(m))
+                .unwrap()
+                .guard
+                .clone()
         };
-        assert!(by_m("n1").is_some_and(|g| g.starts_with("grow-guarded@")), "{findings:?}");
-        assert!(by_m("n2").is_some_and(|g| g.starts_with("grow-guarded@")), "{findings:?}");
-        assert!(by_m("n3").is_some_and(|g| g.starts_with("grow-guarded@")), "{findings:?}");
+        assert!(
+            by_m("n1").is_some_and(|g| g.starts_with("grow-guarded@")),
+            "{findings:?}"
+        );
+        assert!(
+            by_m("n2").is_some_and(|g| g.starts_with("grow-guarded@")),
+            "{findings:?}"
+        );
+        assert!(
+            by_m("n3").is_some_and(|g| g.starts_with("grow-guarded@")),
+            "{findings:?}"
+        );
     }
 
     #[test]
@@ -4570,9 +4927,13 @@ object JobConfigOps {
         let order: Vec<&str> = findings
             .iter()
             .map(|f| {
-                if f.method.contains("g1") { "g1" }
-                else if f.method.contains("g2") { "g2" }
-                else { "g3" }
+                if f.method.contains("g1") {
+                    "g1"
+                } else if f.method.contains("g2") {
+                    "g2"
+                } else {
+                    "g3"
+                }
             })
             .collect();
         assert_eq!(order, vec!["g2", "g3", "g1"], "{findings:?}");
@@ -4606,7 +4967,9 @@ object JobConfigOps {
         let spec = TaintSpec::new(&["read@out1"], &["system"]);
         let findings = find_flows(&cpg, &store, &spec);
         assert!(
-            findings.iter().any(|f| f.sink == "system" && f.method.contains('h')),
+            findings
+                .iter()
+                .any(|f| f.sink == "system" && f.method.contains('h')),
             "read(&buf) -> run(buf) -> system must report: {findings:?}"
         );
     }
@@ -4622,7 +4985,11 @@ object JobConfigOps {
         let store = summarise(&cpg);
         let spec = TaintSpec::with_sanitizers(&["getenv"], &["system"], &["clean"]);
         let findings = find_flows(&cpg, &store, &spec);
-        assert_eq!(findings.len(), 1, "only the raw path may report: {findings:?}");
+        assert_eq!(
+            findings.len(),
+            1,
+            "only the raw path may report: {findings:?}"
+        );
         assert_eq!(findings[0].sink, "system");
         assert!(
             findings[0].path.last().unwrap().code.contains("system(t)"),
@@ -4643,9 +5010,17 @@ object JobConfigOps {
             .unwrap();
         store2.compute_all(&cpg);
         let no_san = TaintSpec::new(&["getenv"], &["system"]);
-        assert_eq!(find_flows(&cpg, &store2, &no_san).len(), 2, "both paths report without sanitizer");
+        assert_eq!(
+            find_flows(&cpg, &store2, &no_san).len(),
+            2,
+            "both paths report without sanitizer"
+        );
         let with_san = TaintSpec::with_sanitizers(&["getenv"], &["system"], &["clean"]);
-        assert_eq!(find_flows(&cpg, &store2, &with_san).len(), 1, "sanitizer kills the laundered path");
+        assert_eq!(
+            find_flows(&cpg, &store2, &with_san).len(),
+            1,
+            "sanitizer kills the laundered path"
+        );
     }
 
     #[test]
@@ -4687,7 +5062,10 @@ object JobConfigOps {
             .unwrap();
         store.compute_all(&cpg);
         // Sanity: without the sanitizer the flow reports.
-        assert_eq!(find_flows(&cpg, &store, &TaintSpec::new(&["getenv"], &["system"])).len(), 1);
+        assert_eq!(
+            find_flows(&cpg, &store, &TaintSpec::new(&["getenv"], &["system"])).len(),
+            1
+        );
         // With it, the only path is through clean() inside wrap(): killed.
         let spec = TaintSpec::with_sanitizers(&["getenv"], &["system"], &["clean"]);
         assert_eq!(find_flows(&cpg, &store, &spec).len(), 0);
@@ -4713,18 +5091,23 @@ object JobConfigOps {
 
         // The callee's internal chain is spliced in at depth 1.
         assert!(
-            path.iter().any(|s| s.depth == 1 && s.code.contains("r = s")),
+            path.iter()
+                .any(|s| s.depth == 1 && s.code.contains("r = s")),
             "expected wrap's internal assignment in the witness: {path:?}"
         );
         assert!(
-            path.iter().any(|s| s.depth == 1 && s.code.contains("return r")),
+            path.iter()
+                .any(|s| s.depth == 1 && s.code.contains("return r")),
             "expected wrap's return in the witness: {path:?}"
         );
 
         // The hop through wrap carries computed-summary provenance at depth 0.
         assert!(
             path.iter().any(|s| s.depth == 0
-                && s.provenance == Provenance::SummaryFlow { callee_fqn: "wrap".into() }),
+                && s.provenance
+                    == Provenance::SummaryFlow {
+                        callee_fqn: "wrap".into()
+                    }),
             "expected a SummaryFlow hop for wrap: {path:?}"
         );
         // Internal steps are ordered between the source and the hop.
@@ -4734,7 +5117,10 @@ object JobConfigOps {
             .iter()
             .position(|s| matches!(s.provenance, Provenance::SummaryFlow { .. }))
             .unwrap();
-        assert!(src < internal && internal < hop, "splice order wrong: {path:?}");
+        assert!(
+            src < internal && internal < hop,
+            "splice order wrong: {path:?}"
+        );
     }
 
     #[test]
@@ -4757,7 +5143,9 @@ object JobConfigOps {
         let path = &findings[0].path;
         assert!(
             path.iter().any(|s| s.provenance
-                == Provenance::ExternalSummary { callee_fqn: "strdup".into() }),
+                == Provenance::ExternalSummary {
+                    callee_fqn: "strdup".into()
+                }),
             "expected an ExternalSummary hop: {path:?}"
         );
         // External summaries have no body: nothing spliced below depth 0.
@@ -4799,17 +5187,24 @@ object JobConfigOps {
         assert_eq!(findings.len(), 1, "{findings:?}");
         let path = &findings[0].path;
         assert!(
-            path.iter().any(|s| s.depth == 2 && s.code.contains("return a")),
+            path.iter()
+                .any(|s| s.depth == 2 && s.code.contains("return a")),
             "inner's return should appear at depth 2: {path:?}"
         );
         assert!(
             path.iter().any(|s| s.depth == 1
-                && s.provenance == Provenance::SummaryFlow { callee_fqn: "inner".into() }),
+                && s.provenance
+                    == Provenance::SummaryFlow {
+                        callee_fqn: "inner".into()
+                    }),
             "the inner() hop inside outer should be at depth 1: {path:?}"
         );
         assert!(
             path.iter().any(|s| s.depth == 0
-                && s.provenance == Provenance::SummaryFlow { callee_fqn: "outer".into() }),
+                && s.provenance
+                    == Provenance::SummaryFlow {
+                        callee_fqn: "outer".into()
+                    }),
             "the outer() hop should be at depth 0: {path:?}"
         );
     }
@@ -4826,9 +5221,15 @@ object JobConfigOps {
         let findings = find_flows(&cpg, &store, &TaintSpec::new(&["getenv"], &["system"]));
         assert_eq!(findings.len(), 1, "{findings:?}");
         assert_eq!(findings[0].sink, "system");
-        assert_eq!(findings[0].method, "h", "reported in the caller where the taint enters");
+        assert_eq!(
+            findings[0].method, "h",
+            "reported in the caller where the taint enters"
+        );
         assert!(
-            findings[0].path.iter().any(|s| s.depth == 1 && s.code.contains("system(c)")),
+            findings[0]
+                .path
+                .iter()
+                .any(|s| s.depth == 1 && s.code.contains("system(c)")),
             "callee-internal sink step expected: {:?}",
             findings[0].path
         );
@@ -4840,8 +5241,15 @@ object JobConfigOps {
         let store2 = summarise(&cpg2);
         let spec = TaintSpec::with_sanitizers(&["getenv"], &["system"], &["clean"]);
         let findings2 = find_flows(&cpg2, &store2, &spec);
-        assert_eq!(findings2.len(), 1, "only the unsanitized 2-hop path: {findings2:?}");
-        assert!(findings2[0].path.iter().any(|s| s.depth == 2 && s.code.contains("system(c)")));
+        assert_eq!(
+            findings2.len(),
+            1,
+            "only the unsanitized 2-hop path: {findings2:?}"
+        );
+        assert!(findings2[0]
+            .path
+            .iter()
+            .any(|s| s.depth == 2 && s.code.contains("system(c)")));
     }
 
     #[test]
@@ -4875,7 +5283,9 @@ object JobConfigOps {
         let step = Step {
             code: "wrap(t)".into(),
             line: Some(3),
-            provenance: Provenance::SummaryFlow { callee_fqn: "wrap".into() },
+            provenance: Provenance::SummaryFlow {
+                callee_fqn: "wrap".into(),
+            },
             depth: 0,
         };
         let js = serde_json::to_value(&step).unwrap();
@@ -4898,10 +5308,18 @@ func main() {
 "#,
         )]);
         let mined = crate::entries::mine_registration_entries(&cpg);
-        assert_eq!(mined, vec!["handleQ".to_string()], "bare function ref mined");
+        assert_eq!(
+            mined,
+            vec!["handleQ".to_string()],
+            "bare function ref mined"
+        );
         let store = summarise(&cpg);
         let mut spec = TaintSpec::new(&[], &["system"]);
-        assert_eq!(find_flows(&cpg, &store, &spec).len(), 0, "no entries, no flow");
+        assert_eq!(
+            find_flows(&cpg, &store, &spec).len(),
+            0,
+            "no entries, no flow"
+        );
         spec.source_methods_registered = mined.into_iter().collect();
         let findings = find_flows(&cpg, &store, &spec);
         assert_eq!(findings.len(), 1, "{findings:?}");
@@ -5109,10 +5527,18 @@ func lookup() {
         )]);
         let store = summarise(&cpg);
         let without = TaintSpec::new(&["Getenv"], &["Raw"]);
-        assert_eq!(find_flows(&cpg, &store, &without).len(), 2, "both flows without sanitizer");
+        assert_eq!(
+            find_flows(&cpg, &store, &without).len(),
+            2,
+            "both flows without sanitizer"
+        );
         let with_len = TaintSpec::with_sanitizers(&["Getenv"], &["Raw"], &["len"]);
         let findings = find_flows(&cpg, &store, &with_len);
-        assert_eq!(findings.len(), 1, "length-only flow killed, direct flow kept: {findings:?}");
+        assert_eq!(
+            findings.len(),
+            1,
+            "length-only flow killed, direct flow kept: {findings:?}"
+        );
         assert!(
             findings[0].path.iter().any(|s| s.code.contains("Raw(ids)")),
             "the surviving flow is the direct one: {findings:?}"
@@ -5267,7 +5693,9 @@ func setup(s *Server, mux *Mux) {
         )]);
         let f = one_finding(&cpg, &TaintSpec::new(&["getenv"], &["system"]));
         assert!(
-            f.authz.as_deref().is_some_and(|a| a.starts_with("authz-dominated@3")),
+            f.authz
+                .as_deref()
+                .is_some_and(|a| a.starts_with("authz-dominated@3")),
             "{f:?}"
         );
     }
@@ -5282,7 +5710,9 @@ func setup(s *Server, mux *Mux) {
         )]);
         let f = one_finding(&cpg, &TaintSpec::new(&["getenv"], &["system"]));
         assert!(
-            f.authz.as_deref().is_some_and(|a| a.starts_with("authz-partial@")),
+            f.authz
+                .as_deref()
+                .is_some_and(|a| a.starts_with("authz-partial@")),
             "{f:?}"
         );
     }
@@ -5296,7 +5726,9 @@ func setup(s *Server, mux *Mux) {
         )]);
         let f = one_finding(&cpg, &TaintSpec::new(&["getenv"], &["system"]));
         assert!(
-            f.authz.as_deref().is_some_and(|a| a.starts_with("authz-partial@")),
+            f.authz
+                .as_deref()
+                .is_some_and(|a| a.starts_with("authz-partial@")),
             "{f:?}"
         );
     }
@@ -5325,7 +5757,9 @@ func setup(s *Server, mux *Mux) {
         let f = one_finding(&cpg, &spec);
         assert!(f.method.contains("handle_req"), "{f:?}");
         assert!(
-            f.authz.as_deref().is_some_and(|a| a.starts_with("authz-dominated@2")),
+            f.authz
+                .as_deref()
+                .is_some_and(|a| a.starts_with("authz-dominated@2")),
             "{f:?}"
         );
     }
@@ -5337,11 +5771,17 @@ func setup(s *Server, mux *Mux) {
         let src = "void f() {\n    char* q = getenv(\"Q\");\n    if (!gate_keeper(q)) { return; }\n    system(q);\n}\n";
         let cpg = build(&[("a.c", src)]);
         let mut spec = TaintSpec::new(&["getenv"], &["system"]);
-        assert_eq!(one_finding(&cpg, &spec).authz, None, "not authz-shaped by name");
+        assert_eq!(
+            one_finding(&cpg, &spec).authz,
+            None,
+            "not authz-shaped by name"
+        );
         spec.authz_methods.insert("gate_keeper".into());
         let f = one_finding(&cpg, &spec);
         assert!(
-            f.authz.as_deref().is_some_and(|a| a.starts_with("authz-dominated@")),
+            f.authz
+                .as_deref()
+                .is_some_and(|a| a.starts_with("authz-dominated@")),
             "{f:?}"
         );
     }
@@ -5353,10 +5793,18 @@ func setup(s *Server, mux *Mux) {
         let src = "void f() {\n    char* q = getenv(\"Q\");\n    char* e = query_escape(q);\n    system(e);\n}\n";
         let cpg = build(&[("a.c", src)]);
         let mut spec = TaintSpec::new(&["getenv"], &["system"]);
-        assert_eq!(one_finding(&cpg, &spec).confined, None, "no confiners declared");
+        assert_eq!(
+            one_finding(&cpg, &spec).confined,
+            None,
+            "no confiners declared"
+        );
         spec.confiners.insert("query_escape".into());
         let f = one_finding(&cpg, &spec);
-        assert_eq!(f.confined.as_deref(), Some("confined@3:query_escape"), "{f:?}");
+        assert_eq!(
+            f.confined.as_deref(),
+            Some("confined@3:query_escape"),
+            "{f:?}"
+        );
     }
 
     #[test]
@@ -5377,9 +5825,18 @@ func setup(s *Server, mux *Mux) {
         assert!(super::contains_call("query.Encode()", "Encode"));
         assert!(super::contains_call("Encode(v)", "Encode"));
         assert!(super::contains_call("url.QueryEscape (v)", "QueryEscape"));
-        assert!(!super::contains_call("ReEncode(v)", "Encode"), "substring is not a call");
-        assert!(!super::contains_call("EncodeBase64(v)", "Encode"), "prefix is not a call");
-        assert!(!super::contains_call("x.Encode", "Encode"), "field read is not a call");
+        assert!(
+            !super::contains_call("ReEncode(v)", "Encode"),
+            "substring is not a call"
+        );
+        assert!(
+            !super::contains_call("EncodeBase64(v)", "Encode"),
+            "prefix is not a call"
+        );
+        assert!(
+            !super::contains_call("x.Encode", "Encode"),
+            "field read is not a call"
+        );
     }
 
     #[test]
@@ -5456,7 +5913,10 @@ func setup(s *Server, mux *Mux) {
         assert!(findings[0].method.contains("handler"), "{findings:?}");
         // Witness must include the buried source call spliced from readcfg.
         assert!(
-            findings[0].path.iter().any(|s| s.code.contains("getenv") && s.depth > 0),
+            findings[0]
+                .path
+                .iter()
+                .any(|s| s.code.contains("getenv") && s.depth > 0),
             "{:?}",
             findings[0].path
         );
@@ -5491,7 +5951,11 @@ func setup(s *Server, mux *Mux) {
         let store = summarise(&cpg);
         let spec = TaintSpec::with_sanitizers(&["getenv"], &["system"], &["clean"]);
         let findings = find_flows(&cpg, &store, &spec);
-        assert_eq!(findings.len(), 0, "laundered wrapper must not lift: {findings:?}");
+        assert_eq!(
+            findings.len(),
+            0,
+            "laundered wrapper must not lift: {findings:?}"
+        );
     }
 
     #[test]

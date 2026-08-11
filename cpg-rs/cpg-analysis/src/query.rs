@@ -21,7 +21,10 @@ pub enum Predicate {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum LogicalPlan {
     Scan(NodeSelector),
-    Filter { input: Box<LogicalPlan>, predicate: Predicate },
+    Filter {
+        input: Box<LogicalPlan>,
+        predicate: Predicate,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -61,7 +64,11 @@ fn parse_name_filter(q: &str, prefix: &str) -> Option<String> {
     let end = quoted.find('"')?;
     let name = quoted[..end].to_string();
     let after = &quoted[end + 1..];
-    if after == ")" { Some(name) } else { None }
+    if after == ")" {
+        Some(name)
+    } else {
+        None
+    }
 }
 
 pub struct QueryExecutor<'a> {

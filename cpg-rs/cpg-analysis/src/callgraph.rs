@@ -84,7 +84,14 @@ struct ResolveAux {
 /// names (`DomainRecoverySpec.scala`, `SelfTest`-style product features).
 pub(crate) fn is_test_path(path: &str) -> bool {
     const SEGMENTS: &[&str] = &[
-        "test", "tests", "testing", "testdata", "mocks", "fakes", "__tests__", "__mocks__",
+        "test",
+        "tests",
+        "testing",
+        "testdata",
+        "mocks",
+        "fakes",
+        "__tests__",
+        "__mocks__",
     ];
     let mut segs = path.split(['/', '\\']).filter(|s| !s.is_empty()).peekable();
     let mut base = "";
@@ -129,8 +136,14 @@ impl ResolveAux {
                 NodeKind::TypeDecl => {
                     if let (Some(name), Some(bases)) = (cpg.name_of(n), cpg.signature_of(n)) {
                         for base in bases.split(',').filter(|b| !b.is_empty()) {
-                            subclasses.entry(base.to_string()).or_default().push(name.to_string());
-                            bases_map.entry(name.to_string()).or_default().push(base.to_string());
+                            subclasses
+                                .entry(base.to_string())
+                                .or_default()
+                                .push(name.to_string());
+                            bases_map
+                                .entry(name.to_string())
+                                .or_default()
+                                .push(base.to_string());
                         }
                     }
                 }
@@ -171,7 +184,12 @@ impl ResolveAux {
                 }
             }
         }
-        ResolveAux { member_types, subclasses, bases: bases_map, test_files }
+        ResolveAux {
+            member_types,
+            subclasses,
+            bases: bases_map,
+            test_files,
+        }
     }
 
     /// All (transitive) subclasses of `base`, minus mocks. The set a call
@@ -228,8 +246,10 @@ impl CallGraphPass {
                 if cpg.kind_of(n) != NodeKind::Call {
                     continue;
                 }
-                let mut hint =
-                    cpg.type_full_name_of(n).filter(|h| !h.is_empty()).map(str::to_string);
+                let mut hint = cpg
+                    .type_full_name_of(n)
+                    .filter(|h| !h.is_empty())
+                    .map(str::to_string);
                 if hint.is_none() {
                     // The frontend stamped the receiver's variable name into
                     // the signature column; if it names a field of the
@@ -287,8 +307,12 @@ impl CallGraphPass {
     ) -> Vec<NodeId> {
         use cpg_core::Query;
         const MAX_VIRTUAL: usize = 16;
-        let Some(name) = cpg.name_of(call) else { return Vec::new() };
-        let Some(targets) = index.get(name) else { return Vec::new() };
+        let Some(name) = cpg.name_of(call) else {
+            return Vec::new();
+        };
+        let Some(targets) = index.get(name) else {
+            return Vec::new();
+        };
         // A call site in production code never dispatches into test doubles
         // (mock_*.go, FakeStorageClient, *Spec.scala) at runtime, so test-file
         // candidates are dropped outright for production callers — even when
@@ -325,7 +349,10 @@ impl CallGraphPass {
                 targets
                     .iter()
                     .copied()
-                    .filter(|&m| cpg.type_full_name_of(m).is_some_and(|t| classes.contains(t)))
+                    .filter(|&m| {
+                        cpg.type_full_name_of(m)
+                            .is_some_and(|t| classes.contains(t))
+                    })
                     .collect()
             };
             let inherited = of_classes(&aux.ancestors(hint));
@@ -339,8 +366,11 @@ impl CallGraphPass {
             return Vec::new();
         }
         let here = cpg.file_of(call);
-        let local: Vec<NodeId> =
-            targets.iter().copied().filter(|&m| cpg.file_of(m) == here).collect();
+        let local: Vec<NodeId> = targets
+            .iter()
+            .copied()
+            .filter(|&m| cpg.file_of(m) == here)
+            .collect();
         if local.len() == 1 {
             return local;
         }
@@ -360,7 +390,7 @@ impl CallGraphPass {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use cpg_core::{CpgBuilder, Cpg, Query};
+    use cpg_core::{Cpg, CpgBuilder, Query};
 
     /// Two same-named handler methods in one graph, a caller whose class has
     /// a member of a known type, and one call dispatching through that
@@ -374,10 +404,19 @@ mod tests {
             let file = b.file_node("gateway_server.cpp");
             caller = b.method("mkdir", "GatewayServer::mkdir", "mkdir()", Some(10));
             b.contains(file, caller);
-            let td = b.type_decl("GatewayServer", "GatewayServer", &["GatewayServerIf".into()], Some(1));
+            let td = b.type_decl(
+                "GatewayServer",
+                "GatewayServer",
+                &["GatewayServerIf".into()],
+                Some(1),
+            );
             b.contains(file, td);
             b.member(td, "file_service_client_", member_type);
-            call = b.call("mkdir", "file_service_client_->mkdir(response, request)", Some(12));
+            call = b.call(
+                "mkdir",
+                "file_service_client_->mkdir(response, request)",
+                Some(12),
+            );
             b.ast_child(caller, call);
         }
         let sym = cpg.intern("GatewayServer");
@@ -438,11 +477,20 @@ mod tests {
             let f = cpg.file_id("file_service_handler.h");
             let mut b = CpgBuilder::new(&mut cpg, f);
             let file = b.file_node("file_service_handler.h");
-            let td = b.type_decl("FileServiceHandler", "FileServiceHandler", &["FileServiceIf".into()], Some(1));
+            let td = b.type_decl(
+                "FileServiceHandler",
+                "FileServiceHandler",
+                &["FileServiceIf".into()],
+                Some(1),
+            );
             b.contains(file, td);
         }
         resolve(&mut cpg);
-        assert_eq!(cpg.call_targets(call), vec![file_service_mkdir], "dispatch to the implementor only");
+        assert_eq!(
+            cpg.call_targets(call),
+            vec![file_service_mkdir],
+            "dispatch to the implementor only"
+        );
     }
 
     #[test]
@@ -575,11 +623,19 @@ mod tests {
             let f = cpg.file_id("derived.h");
             let mut b = CpgBuilder::new(&mut cpg, f);
             let file = b.file_node("derived.h");
-            let td =
-                b.type_decl("DerivedServer", "DerivedServer", &["FileServiceHandler".into()], Some(1));
+            let td = b.type_decl(
+                "DerivedServer",
+                "DerivedServer",
+                &["FileServiceHandler".into()],
+                Some(1),
+            );
             b.contains(file, td);
         }
         resolve(&mut cpg);
-        assert_eq!(cpg.call_targets(call), vec![file_service_mkdir], "resolved on the base class");
+        assert_eq!(
+            cpg.call_targets(call),
+            vec![file_service_mkdir],
+            "resolved on the base class"
+        );
     }
 }

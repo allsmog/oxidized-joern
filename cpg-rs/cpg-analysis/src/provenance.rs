@@ -49,7 +49,11 @@ impl ProvenanceGraph {
 
     pub fn insert_base(&mut self, relation: impl Into<String>, key: impl Into<String>) -> FactId {
         self.insert(
-            Fact { relation: relation.into(), key: key.into(), kind: FactKind::Base },
+            Fact {
+                relation: relation.into(),
+                key: key.into(),
+                kind: FactKind::Base,
+            },
             Vec::new(),
             None,
         )
@@ -63,7 +67,11 @@ impl ProvenanceGraph {
         rule: impl Into<String>,
     ) -> FactId {
         self.insert(
-            Fact { relation: relation.into(), key: key.into(), kind: FactKind::Derived },
+            Fact {
+                relation: relation.into(),
+                key: key.into(),
+                kind: FactKind::Derived,
+            },
             supports,
             Some(rule.into()),
         )
@@ -79,7 +87,15 @@ impl ProvenanceGraph {
             self.users_by_support.entry(support).or_default().insert(id);
         }
         self.ids_by_fact.insert(fact.clone(), id);
-        self.entries.insert(id, ProvenanceEntry { id, fact, supports, rule });
+        self.entries.insert(
+            id,
+            ProvenanceEntry {
+                id,
+                fact,
+                supports,
+                rule,
+            },
+        );
         id
     }
 

@@ -103,7 +103,11 @@ pub fn export(
     out_dir: &std::path::Path,
 ) -> std::io::Result<ExportStats> {
     std::fs::create_dir_all(out_dir)?;
-    let mut stats = ExportStats { nodes: 0, edges: 0, files: 0 };
+    let mut stats = ExportStats {
+        nodes: 0,
+        edges: 0,
+        files: 0,
+    };
     if repr == Repr::All {
         let nodes: Vec<NodeId> = cpg.nodes().collect();
         let path = out_dir.join(format!("export.{}", format.extension()));
@@ -160,7 +164,7 @@ fn edges_within(
             if !set.contains(&e.other) {
                 continue;
             }
-            if kinds.map_or(true, |ks| ks.contains(&e.kind)) {
+            if kinds.is_none_or(|ks| ks.contains(&e.kind)) {
                 edges.push((n, e.other, e.kind));
             }
         }
@@ -170,13 +174,14 @@ fn edges_within(
 
 fn node_label(cpg: &Cpg, n: NodeId) -> String {
     let kind = format!("{:?}", cpg.kind_of(n));
-    let detail = cpg
-        .name_of(n)
-        .or_else(|| cpg.code_of(n))
-        .unwrap_or("");
+    let detail = cpg.name_of(n).or_else(|| cpg.code_of(n)).unwrap_or("");
     // Long code strings make dot unreadable; clip like Joern's dumps do.
     let clipped: String = detail.chars().take(40).collect();
-    if clipped.is_empty() { kind } else { format!("{kind}: {clipped}") }
+    if clipped.is_empty() {
+        kind
+    } else {
+        format!("{kind}: {clipped}")
+    }
 }
 
 fn write_subgraph(
@@ -215,10 +220,19 @@ fn write_dot(
 ) -> std::io::Result<()> {
     writeln!(w, "digraph \"{}\" {{", dot_escape(name))?;
     for &n in nodes {
-        writeln!(w, "  \"{}\" [label = \"{}\"]", n.0, dot_escape(&node_label(cpg, n)))?;
+        writeln!(
+            w,
+            "  \"{}\" [label = \"{}\"]",
+            n.0,
+            dot_escape(&node_label(cpg, n))
+        )?;
     }
     for (src, dst, kind) in edges {
-        writeln!(w, "  \"{}\" -> \"{}\" [label = \"{:?}\"]", src.0, dst.0, kind)?;
+        writeln!(
+            w,
+            "  \"{}\" -> \"{}\" [label = \"{:?}\"]",
+            src.0, dst.0, kind
+        )?;
     }
     writeln!(w, "}}")
 }
@@ -241,8 +255,14 @@ fn write_graphml(
         w,
         "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\">"
     )?;
-    writeln!(w, "  <key id=\"label\" for=\"node\" attr.name=\"label\" attr.type=\"string\"/>")?;
-    writeln!(w, "  <key id=\"kind\" for=\"edge\" attr.name=\"kind\" attr.type=\"string\"/>")?;
+    writeln!(
+        w,
+        "  <key id=\"label\" for=\"node\" attr.name=\"label\" attr.type=\"string\"/>"
+    )?;
+    writeln!(
+        w,
+        "  <key id=\"kind\" for=\"edge\" attr.name=\"kind\" attr.type=\"string\"/>"
+    )?;
     writeln!(w, "  <graph id=\"G\" edgedefault=\"directed\">")?;
     for &n in nodes {
         writeln!(
@@ -289,7 +309,11 @@ fn write_json(
         })
         .collect();
     let doc = serde_json::json!({"nodes": node_objs, "edges": edge_objs});
-    write!(w, "{}", serde_json::to_string_pretty(&doc).expect("serialize"))
+    write!(
+        w,
+        "{}",
+        serde_json::to_string_pretty(&doc).expect("serialize")
+    )
 }
 
 /// JoernExport's filename sanitisation: anything outside [a-zA-Z0-9-_./]
@@ -298,7 +322,13 @@ fn write_json(
 fn sanitize(s: &str) -> String {
     let cleaned: String = s
         .chars()
-        .map(|c| if c.is_ascii_alphanumeric() || "-_./".contains(c) { c } else { '_' })
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || "-_./".contains(c) {
+                c
+            } else {
+                '_'
+            }
+        })
         .collect();
     let no_traversal = cleaned.replace("..", "_");
     if let Some(rest) = no_traversal.strip_prefix('/') {
