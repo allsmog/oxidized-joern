@@ -176,13 +176,10 @@ Fork-PR safety was already correct: workflows use `pull_request` rather than
 
 ## Still open
 
-1. **No adversarial review of the generalization.** `b24a35599` changed 705
-   lines, 416 of them in `middleware.rs` — exactly where the audit located the
-   embedded product assumptions. The test suite passes, but the suite was
-   changed in the same commit. Nothing has independently confirmed that no
-   detector, rule, fixture path, or assertion lost coverage. **This is the
-   highest remaining risk and it is not a leakage risk — it is a silent
-   capability-regression risk.**
+1. ~~No adversarial review of the generalization.~~ **Done — see "Adversarial
+   review of the generalization" below.** One confirmed default-configuration
+   regression, mitigable via rule-pack config; the taint and authz detection
+   logic is untouched.
 2. **Scala workspace not re-validated here.** Unaffected by the generalization,
    but the audit recorded pre-existing Java 21 failures that remain unexamined.
 3. **Remaining third-party actions** pinned to major-version tags rather than
@@ -198,3 +195,72 @@ GitHub's retention of unreferenced objects was probed directly rather than
 assumed, and **was found to be non-empty** — see the blocker section above. It
 cannot cover copies in third-party clones. At the time of writing the repository
 is private with zero forks, so that exposure is nil.
+
+## Adversarial review of the generalization (`b24a35599`)
+
+Method: structural diff of the commit; per-file classification of functional vs
+comment-only change; reading both the pre- and post-change matcher
+implementations; building the **parent commit** `13c3b260b` in a worktree and
+running its own suite for ground truth; and an isolation matrix over
+(marker × `authz_names` × variable spelling) against the current engine.
+
+### What was not touched
+
+Of the twelve changed `.rs` files, six are **comment-only** once comments are
+stripped and content hashed — including `taint.rs` and `authz.rs`. The taint
+engine and the authorization heuristics themselves were not modified; only their
+prose was degreased of private vocabulary.
+
+The `middleware.rs` change is net-additive (+332/−84). Exactly one item was
+removed: the `FRAMEWORK_SERVER_CALLS` const, replaced by `AuthzCensusConfig`
+whose `framework_server_calls` default is **byte-identical** to it. Tests grew
+from 13 functions / 42 assertions to 17 / 48.
+
+### Finding — default caller-context vocabulary regressed (confirmed)
+
+Before, the caller-context marker was hard-coded as `callerclaims`, matched as a
+substring of the whole expression with underscores stripped. After, it is
+configurable with default `["subject context"]`, matched per identifier token.
+
+The vocabulary change is not behavior-preserving under the default config, which
+is the path `authz_census()` and therefore the CLI takes:
+
+| Fixture (unchanged between versions) | Parent, default | Current, default | Current, marker `caller claims` |
+| --- | --- | --- | --- |
+| `handleCallerGated` | `subject-gated@5` | **`inline-partial@5`** | `subject-gated@5` |
+
+**Impact is precision, not recall.** Handlers gated by a `CallerClaims`-style
+convention are no longer recognised as convention-gated and are downgraded to
+`inline-partial` — which `authz.rs`'s own comments identify as a recurring class
+of *false* partial verdicts. Nothing is missed outright; verdict fidelity drops.
+
+**Mitigation exists and is wired up**: a rule pack may set `callerContextMarkers`
+(`rules.rs`), which restores the previous classification exactly.
+
+**Test gap**: no test exercises the default marker against the pre-change
+vocabulary. `census_default_marker_accepts_concatenated_spelling` only asserts
+the default against `SubjectContexts`, the new vocabulary.
+
+### Correction — one suspected regression is not one
+
+`handleRenamedClaims` returns `none` under the current engine, and the
+pre-change test asserted `subject-gated@`. That looks like a regression and is
+not: **the parent commit's own suite was already failing this assertion**
+(`13c3b260b`: 164 passed, 1 failed, the failure being
+`census_subject_gated_and_field_read_shapes`). The renamed-variable path was
+already broken before the generalization.
+
+The generalization commit made that test pass by supplying `authz_names`, which
+is defensible — the old test expected `enforcePolicyForCaller` to count as a
+check without declaring it an authz name. Worth recording plainly all the same:
+**master was red before this commit, and the commit turned it green by changing
+the test's inputs rather than the code.**
+
+### Verdict
+
+The generalization preserved detection capability apart from one default-config
+precision regression, which is configurable back. The detectors, rules, taint
+propagation, and assertions are otherwise intact, and test coverage increased.
+Recommended follow-up: add the pre-change vocabulary to the default marker list,
+or document that packs analysing that convention must set
+`callerContextMarkers`.
