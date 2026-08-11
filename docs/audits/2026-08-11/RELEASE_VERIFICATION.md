@@ -10,9 +10,67 @@ pre-change findings and explicitly deferred final verification.
 
 ## Verdict
 
-**Terminology and history are clean. The engine's own CI gates were red and are
-now green.** Remaining risk is concentrated in one place: no adversarial review
-has yet proven that the generalization pass preserved detection capability.
+**DO NOT make this repository public yet.** Terminology and history are clean in
+every ref and every reachable object, and the engine's CI gates are now green —
+but pre-rewrite commits carrying the removed codename are **still retrievable
+from GitHub by direct SHA**, and one of those SHAs is published in a sibling
+repository. See "Blocker: unreferenced objects retained by GitHub" below.
+
+## Blocker: unreferenced objects retained by GitHub
+
+The 2026-08-04 history rewrite removed nine `Co-Authored-By` trailers carrying
+the codename and pruned the superseded commits locally. Local pruning was
+verified complete (`git fsck`: zero unreachable, zero dangling). **GitHub did not
+garbage-collect its copies.**
+
+Demonstrated, not inferred:
+
+```
+$ git fetch origin 9ab43859f0c3342c734ff38ea6366711d216c8fd    # succeeds
+$ git log 9ab43859 --format='%b' | grep -cif codename.txt      # 9
+```
+
+(The scan term is kept in an untracked file on purpose: this memo must not
+reintroduce the very string the rewrite removed.)
+
+`9ab43859f0c3342c734ff38ea6366711d216c8fd` is not reachable from any of the
+6,029 advertised refs, yet GitHub's API resolves it and `git fetch` retrieves it
+along with its full ancestry — which includes all nine unsanitized commits:
+
+| Commit | Date | Subject |
+| --- | --- | --- |
+| `eabf0303873d7edcc701e344f4f36c650cd9786a` | 2026-07-21 | docs: add sanitized engine session log (s115-s130) |
+| `4ae2de6cffdaba1048dd4105159b3c68b01acd75` | 2026-07-21 | analysis: deterministic witness choice + receiver-modeled summaries |
+| `8fd33550c4ed1e92f93595197bc641a3bef0553c` | 2026-07-21 | analysis: test-file demotion for persisted reads |
+| `f4573dc2b5193500539275e42867bd6580bf1227` | 2026-07-21 | taint: field-sensitive object flow via dotted taint keys |
+| `25070007d55216f09834a4e8d52bdea4d372a4e2` | 2026-07-21 | analysis: discarded-return v2 |
+| `f9048b1712307877dc2464c61d5b687bea675cd8` | 2026-07-21 | analysis: structural rule kinds |
+| `f3bb6322c6683d62707ec8347fa0620c793da9ec` | 2026-07-20 | taint: assignment sinks |
+| `e61db21b2859cf0913dce26bcebd0735b00615c1` | 2026-07-20 | cpg-analysis: returns-tainted summaries |
+| `75ab94722e4128831843ca770693d37382c99154` | 2026-07-20 | cpg-rs: Rust CPG engine |
+
+The trees of those commits are clean; the exposure is in **commit messages**.
+
+This is not a theoretical SHA-guessing concern. The revision is published in a
+sibling repository's `Cargo.toml`, `deny.toml`, and `CONTRIBUTING.md` as a git
+dependency pin. Anyone reading those files has the SHA.
+
+### Required remediation, in order
+
+1. **Re-pin the dependent repository** to a revision reachable from `master`.
+   Its four `cpg-*` git dependencies currently pin `9ab43859…`, which exists
+   only as an unreferenced object — that build works today *because* GitHub has
+   not collected it, and will break the moment GitHub does.
+2. **Ask GitHub Support to garbage-collect unreferenced objects** in this
+   repository. Force-pushing does not do this; GitHub documents Support
+   involvement for removing data that remains reachable by SHA.
+3. **Re-verify** that `git fetch origin 9ab43859…` fails and the API returns 404
+   for each of the nine commits above.
+4. Only then flip the repository to public.
+
+Note the ordering constraint: steps 1 and 2 are coupled in the opposite
+direction from intuition — collecting the objects is what breaks the dependent
+build, so re-pin first.
 
 ## Scrub verification — complete
 
@@ -126,7 +184,8 @@ Fork-PR safety was already correct: workflows use `pull_request` rather than
 
 ## Limits
 
-This covers the local object database and everything the remote advertises. It
-cannot cover GitHub's internal retention of unreferenced objects, or copies in
-clones and forks. At the time of writing the repository is private with zero
-forks, so that exposure is nil.
+This covers the local object database and everything the remote advertises.
+GitHub's retention of unreferenced objects was probed directly rather than
+assumed, and **was found to be non-empty** — see the blocker section above. It
+cannot cover copies in third-party clones. At the time of writing the repository
+is private with zero forks, so that exposure is nil.
