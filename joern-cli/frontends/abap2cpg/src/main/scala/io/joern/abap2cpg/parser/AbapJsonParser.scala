@@ -400,7 +400,8 @@ class AbapJsonParser {
         if (
           tokens.headOption.exists(_.equalsIgnoreCase("DELETE")) && tokens.lift(1).exists(_.equalsIgnoreCase("DYNPRO"))
         ) {
-          val programArg = tokens.lift(2).map(p => Argument(Some("PROGRAM"), IdentifierExpr(p, span)))
+          val programArg =
+            tokens.lift(2).map(programName => Argument(Some("PROGRAM"), IdentifierExpr(programName, span)))
           val screenArg = tokens.lift(3).map { screen =>
             val value =
               if (screen.matches("\\d+")) LiteralExpr(screen, "NUMBER", span)
