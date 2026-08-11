@@ -2,6 +2,8 @@
 
 Date: 2026-08-04
 Starting branch: `master` at `69e4801b574d81c1603851bf8cecab72f5e33320`
+(that commit no longer resolves: the generalization pass rewrote this lineage.
+The equivalent post-generalization revision is `b24a355995f1f1085a7a523f46f93f02cb70e1f8`.)
 Status: pre-change audit and implementation map; final verification is pending
 
 ## Executive verdict

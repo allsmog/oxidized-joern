@@ -1,5 +1,6 @@
 name                     := "joern"
-ThisBuild / organization := "io.joern"
+// Fork coordinates. NOT `io.joern` — that namespace belongs to upstream.
+ThisBuild / organization := "io.github.allsmog"
 ThisBuild / scalaVersion := "3.7.4"
 
 val cpgVersion = "1.7.70"
@@ -98,17 +99,26 @@ ThisBuild / Test / fork := true
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-// publishing info for sonatype / maven central
-ThisBuild / publishTo              := sonatypePublishToBundle.value
-ThisBuild / sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeCentralHost
+// This fork does NOT publish to Maven Central. Upstream Joern owns the
+// `io.joern` coordinates on Sonatype; publishing from here would push fork
+// artifacts under upstream's identity. Distribution is via GitHub Releases
+// only (see .github/workflows/release-github.yml).
+//
+// To re-enable publishing, claim your own Sonatype namespace first, then
+// restore `publishTo`/`sonatypeCredentialHost` and set `organization` above
+// to that namespace — do not reuse `io.joern`.
+ThisBuild / publishArtifact := false
+ThisBuild / publish         := {}
+ThisBuild / publishLocal    := {}
 
-ThisBuild / scmInfo  := Some(ScmInfo(url("https://github.com/joernio/joern"), "scm:git@github.com:joernio/joern.git"))
-ThisBuild / homepage := Some(url("https://joern.io/"))
-ThisBuild / licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
-ThisBuild / developers := List(
-  /* sonatype requires this to be non-empty */
-  Developer("fabsx00", "Fabian Yamaguchi", "fabs@shiftleft.io", url("https://github.com/fabsx00"))
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/allsmog/oxidized-joern"),
+    "scm:git@github.com:allsmog/oxidized-joern.git"
+  )
 )
+ThisBuild / homepage := Some(url("https://github.com/allsmog/oxidized-joern"))
+ThisBuild / licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 
 publish / skip := true // don't publish the root project
 

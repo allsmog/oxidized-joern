@@ -111,15 +111,19 @@ runs:
                 echo "::error::embedded engine revision is unavailable in the local Git repository"
                 exit 1
               fi
-              current_tree="$(git -C "${action_root}" rev-parse 'HEAD:cpg-rs')"
+              # Validate the manifest against the revision it names — NOT
+              # against HEAD. The caller's HEAD legitimately differs whenever a
+              # PR touches cpg-rs, which is exactly when this runs; checking
+              # HEAD here made the job fail on its own trigger.
               recorded_tree="$(git -C "${action_root}" rev-parse "${embedded_revision}:cpg-rs")"
-              readonly current_tree recorded_tree
-              if [[ "${current_tree}" != "${embedded_tree}" || "${recorded_tree}" != "${embedded_tree}" ]]; then
+              readonly recorded_tree
+              if [[ "${recorded_tree}" != "${embedded_tree}" ]]; then
                 echo "::error::embedded cpg-rs tree does not match its manifest"
                 exit 1
               fi
               fetch_root="$(mktemp -d "${RUNNER_TEMP%/}/cpg-source-fetch.XXXXXX")"
-              git -C "${action_root}" archive --format=tar HEAD cpg-rs \
+              # Export the embedded revision's tree, not HEAD's.
+              git -C "${action_root}" archive --format=tar "${embedded_revision}" cpg-rs \
                 | tar -xf - -C "${fetch_root}"
               source_root="${fetch_root}/cpg-rs"
             fi
