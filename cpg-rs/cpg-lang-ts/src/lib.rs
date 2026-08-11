@@ -101,16 +101,29 @@ impl Frontend for TsFrontend {
         let ext = path.rsplit_once('.').map(|(_, e)| e).unwrap_or("");
         let dialect = self.spec.dialects.iter().find(|(e, _)| *e == ext);
         if let Some((_, lang)) = dialect {
-            self.parser.set_language(&lang()).expect("load dialect grammar");
+            self.parser
+                .set_language(&lang())
+                .expect("load dialect grammar");
         }
         let tree = self.parser.parse(source, None).expect("parse");
         if dialect.is_some() {
-            self.parser.set_language(&self.spec.language).expect("restore grammar");
+            self.parser
+                .set_language(&self.spec.language)
+                .expect("restore grammar");
         }
         let file = cpg.file_id(path);
         let mut b = CpgBuilder::new(cpg, file);
-        let methods = engine::build(&self.spec, &mut b, tree.root_node(), source.as_bytes(), path);
-        BuildResult { file, methods_built: methods }
+        let methods = engine::build(
+            &self.spec,
+            &mut b,
+            tree.root_node(),
+            source.as_bytes(),
+            path,
+        );
+        BuildResult {
+            file,
+            methods_built: methods,
+        }
     }
 }
 
@@ -181,7 +194,11 @@ mod tests {
             "m.cpp",
             "int add(int a, char* b) { return a; }\nvoid f() { puts(add(1, x)); }\n",
         );
-        assert_eq!(cpg.method_named("add").len(), 1, "free function by declarator name");
+        assert_eq!(
+            cpg.method_named("add").len(),
+            1,
+            "free function by declarator name"
+        );
         assert_eq!(cpg.parameters_of(cpg.method_named("add")[0]).len(), 2);
         assert_eq!(cpg.calls_named("add").len(), 1);
         assert_eq!(cpg.calls_named("puts").len(), 1);
@@ -220,8 +237,16 @@ mod tests {
             "function Comp(props) { const h = props.html; return <div className=\"x\" dangerouslySetInnerHTML={{__html: h}}>{h}</div>; }",
         );
         assert_eq!(cpg.method_named("Comp").len(), 1);
-        assert_eq!(cpg.calls_named("dangerouslySetInnerHTML").len(), 1, "jsx attribute is a named call");
-        assert_eq!(cpg.calls_named("div").len(), 1, "jsx element is a call named after the tag");
+        assert_eq!(
+            cpg.calls_named("dangerouslySetInnerHTML").len(),
+            1,
+            "jsx attribute is a named call"
+        );
+        assert_eq!(
+            cpg.calls_named("div").len(),
+            1,
+            "jsx element is a call named after the tag"
+        );
     }
 
     #[test]
@@ -247,7 +272,11 @@ mod tests {
             "function f(u){ query(`select ${u}`); }",
         );
         assert_eq!(cpg.calls_named("query").len(), 1);
-        assert_eq!(cpg.calls_named("+").len(), 1, "substitution lowers to a concat-shaped call");
+        assert_eq!(
+            cpg.calls_named("+").len(),
+            1,
+            "substitution lowers to a concat-shaped call"
+        );
     }
 
     #[test]

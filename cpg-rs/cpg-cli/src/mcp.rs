@@ -33,8 +33,15 @@ struct Server {
 /// Run the server until stdin closes. `root` as in `Workspace::open`.
 pub fn run(root: Option<&str>) -> std::io::Result<()> {
     let ws = Workspace::open(root).map_err(std::io::Error::other)?;
-    eprintln!("cpg mcp: root {}, cache {}", ws.root.display(), ws.cache.display());
-    let mut srv = Server { ws, projects: HashMap::new() };
+    eprintln!(
+        "cpg mcp: root {}, cache {}",
+        ws.root.display(),
+        ws.cache.display()
+    );
+    let mut srv = Server {
+        ws,
+        projects: HashMap::new(),
+    };
     let stdin = std::io::stdin();
     for line in stdin.lock().lines() {
         let line = line?;
@@ -91,7 +98,10 @@ impl Server {
             "tools/list" => Ok(json!({"tools": tool_descriptors()})),
             "tools/call" => {
                 let name = params.get("name").and_then(|n| n.as_str()).unwrap_or("");
-                let args = params.get("arguments").cloned().unwrap_or_else(|| json!({}));
+                let args = params
+                    .get("arguments")
+                    .cloned()
+                    .unwrap_or_else(|| json!({}));
                 match self.call_tool(name, &args) {
                     Ok(v) => Ok(json!({"content": [{"type": "text",
                         "text": serde_json::to_string_pretty(&v).unwrap_or_default()}],
@@ -146,7 +156,9 @@ impl Server {
                 if !p.is_file() {
                     return Err(format!("no such cpg: {cpg}"));
                 }
-                let lang = lang_arg.map(String::from).unwrap_or_else(|| lang_of_cpg(&p));
+                let lang = lang_arg
+                    .map(String::from)
+                    .unwrap_or_else(|| lang_of_cpg(&p));
                 (p, lang)
             }
             None => {
@@ -166,13 +178,18 @@ impl Server {
                 .map_err(|e| format!("load failed: {e}"))?;
             let (mut project, _) = crate::make_project(&lang);
             project.reopen(cpg);
-            self.projects.insert(cpg_path.clone(), (mtime, lang.clone(), project));
+            self.projects
+                .insert(cpg_path.clone(), (mtime, lang.clone(), project));
         }
         Ok((cpg_path, lang))
     }
 
     fn project(&mut self, cpg_path: &PathBuf) -> &mut Project {
-        &mut self.projects.get_mut(cpg_path).expect("loaded by project_for").2
+        &mut self
+            .projects
+            .get_mut(cpg_path)
+            .expect("loaded by project_for")
+            .2
     }
 
     fn call_tool(&mut self, name: &str, args: &Value) -> Result<Value, String> {
@@ -251,8 +268,8 @@ impl Server {
             }
             Some(other) => {
                 return Err(format!(
-                    "rules must be \"iris:<name>\", a rules-file path, or an inline array; got {other}"
-                ))
+                "rules must be \"iris:<name>\", a rules-file path, or an inline array; got {other}"
+            ))
             }
         };
         // IDL-mined entries — auto-discovery only when the target is a module
@@ -272,7 +289,10 @@ impl Server {
                 crate::merge::rpc_names(&dir, &mut idl_entries);
             }
         }
-        let camel: Vec<String> = idl_entries.iter().map(|e| crate::merge::lc_first(e)).collect();
+        let camel: Vec<String> = idl_entries
+            .iter()
+            .map(|e| crate::merge::lc_first(e))
+            .collect();
         idl_entries.extend(camel);
         idl_entries.sort();
         idl_entries.dedup();
@@ -285,7 +305,11 @@ impl Server {
         let str_list = |key: &str| -> Vec<String> {
             args.get(key)
                 .and_then(|v| v.as_array())
-                .map(|a| a.iter().filter_map(|x| x.as_str().map(String::from)).collect())
+                .map(|a| {
+                    a.iter()
+                        .filter_map(|x| x.as_str().map(String::from))
+                        .collect()
+                })
                 .unwrap_or_default()
         };
         let mut curated: Vec<String> = str_list("entries");
@@ -312,8 +336,13 @@ impl Server {
             }
             grouped.insert(rf.rule.id.clone(), Value::Array(items));
         }
-        let coverage =
-            crate::coverage::coverage_report(&p.cpg, &curated, &idl_entries, &pack, &finding_methods);
+        let coverage = crate::coverage::coverage_report(
+            &p.cpg,
+            &curated,
+            &idl_entries,
+            &pack,
+            &finding_methods,
+        );
         Ok(json!({
             "cpg": cpg_path.to_string_lossy(),
             "rules": pack.rules.len(),
@@ -333,12 +362,18 @@ impl Server {
             .get("source_glob")
             .and_then(|v| v.as_str())
             .ok_or("flow requires source_glob")?;
-        let sink =
-            args.get("sink_glob").and_then(|v| v.as_str()).ok_or("flow requires sink_glob")?;
+        let sink = args
+            .get("sink_glob")
+            .and_then(|v| v.as_str())
+            .ok_or("flow requires sink_glob")?;
         let sanitizers: Vec<String> = args
             .get("sanitizers")
             .and_then(|v| v.as_array())
-            .map(|a| a.iter().filter_map(|x| x.as_str().map(String::from)).collect())
+            .map(|a| {
+                a.iter()
+                    .filter_map(|x| x.as_str().map(String::from))
+                    .collect()
+            })
             .unwrap_or_default();
         let (cpg_path, _) = self.project_for(args)?;
         let p = self.project(&cpg_path);
@@ -417,12 +452,18 @@ impl Server {
     /// returns the merged cpg path, scannable via the scan tool's `cpg` arg.
     fn merge_tool(&mut self, args: &Value) -> Result<Value, String> {
         use crate::merge::{link_rpcs, relink_calls, rpc_names};
-        let out_name =
-            args.get("out_name").and_then(|v| v.as_str()).ok_or("merge requires out_name")?;
+        let out_name = args
+            .get("out_name")
+            .and_then(|v| v.as_str())
+            .ok_or("merge requires out_name")?;
         let paths: Vec<String> = args
             .get("paths")
             .and_then(|v| v.as_array())
-            .map(|a| a.iter().filter_map(|x| x.as_str().map(String::from)).collect())
+            .map(|a| {
+                a.iter()
+                    .filter_map(|x| x.as_str().map(String::from))
+                    .collect()
+            })
             .unwrap_or_default();
         if paths.is_empty() {
             return Err("merge requires paths (module paths relative to the root)".to_string());
@@ -458,7 +499,9 @@ impl Server {
             thrift_edges = added;
         }
         let out = self.ws.cache.join(format!("{out_name}.cpg"));
-        merged.save(&out.to_string_lossy()).map_err(|e| format!("save failed: {e}"))?;
+        merged
+            .save(&out.to_string_lossy())
+            .map_err(|e| format!("save failed: {e}"))?;
         Ok(json!({
             "cpg": out.to_string_lossy(),
             "nodes": merged.live_count(),
@@ -470,9 +513,7 @@ impl Server {
 }
 
 fn tool_descriptors() -> Vec<Value> {
-    let obj = |props: Value, required: &[&str]| {
-        json!({"type": "object", "properties": props, "required": required})
-    };
+    let obj = |props: Value, required: &[&str]| json!({"type": "object", "properties": props, "required": required});
     let target = json!({
         "path": {"type": "string", "description":
             "module path relative to the workspace root ('.' = whole root); CPG builds/caches automatically"},

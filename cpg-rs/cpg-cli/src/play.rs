@@ -33,12 +33,16 @@ pub fn parse_routes(src: &str, out: &mut Vec<PlayRoute>) {
         if t.is_empty() || t.starts_with('#') || t.starts_with('+') || t.starts_with("->") {
             continue;
         }
-        let Some((verb, rest)) = t.split_once(char::is_whitespace) else { continue };
+        let Some((verb, rest)) = t.split_once(char::is_whitespace) else {
+            continue;
+        };
         if !VERBS.contains(&verb) {
             continue;
         }
         let rest = rest.trim_start();
-        let Some((path, action)) = rest.split_once(char::is_whitespace) else { continue };
+        let Some((path, action)) = rest.split_once(char::is_whitespace) else {
+            continue;
+        };
         if !path.starts_with('/') {
             continue;
         }
@@ -46,7 +50,9 @@ pub fn parse_routes(src: &str, out: &mut Vec<PlayRoute>) {
         // routing syntax, not part of the name.
         let action = action.trim_start().trim_start_matches('@');
         let target = action.split('(').next().unwrap_or("").trim();
-        let Some((controller, method)) = target.rsplit_once('.') else { continue };
+        let Some((controller, method)) = target.rsplit_once('.') else {
+            continue;
+        };
         if controller.is_empty()
             || method.is_empty()
             || !method.chars().all(|c| c.is_alphanumeric() || c == '_')
@@ -102,9 +108,16 @@ pub fn play_entries(cpg: &Cpg, routes: &[PlayRoute]) -> (Vec<String>, usize) {
     // (class, method) -> full names present in the graph.
     let mut by_pair: HashMap<(String, String), HashSet<String>> = HashMap::new();
     for m in cpg.methods() {
-        let (Some(name), Some(full)) = (cpg.name_of(m), cpg.full_name_of(m)) else { continue };
-        let Some(prefix) = full.strip_suffix(name) else { continue };
-        let Some(class) = prefix.strip_suffix("::").or_else(|| prefix.strip_suffix('.')) else {
+        let (Some(name), Some(full)) = (cpg.name_of(m), cpg.full_name_of(m)) else {
+            continue;
+        };
+        let Some(prefix) = full.strip_suffix(name) else {
+            continue;
+        };
+        let Some(class) = prefix
+            .strip_suffix("::")
+            .or_else(|| prefix.strip_suffix('.'))
+        else {
             continue;
         };
         // Nested qualifiers (`pkg.Outer.Inner`): the route names the

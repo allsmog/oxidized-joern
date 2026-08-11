@@ -45,7 +45,12 @@ impl SegmentManifest {
         Self::default()
     }
 
-    pub fn record_file(&mut self, cpg: &Cpg, file: FileId, source: &str) -> Option<&SegmentDescriptor> {
+    pub fn record_file(
+        &mut self,
+        cpg: &Cpg,
+        file: FileId,
+        source: &str,
+    ) -> Option<&SegmentDescriptor> {
         let path = cpg.path_of(file)?.to_string();
         let digest = SegmentDigest::from_bytes(source.as_bytes());
         let nodes = cpg
@@ -54,7 +59,11 @@ impl SegmentManifest {
             .copied()
             .filter(|&n| cpg.is_live(n))
             .collect();
-        let descriptor = SegmentDescriptor { key: SegmentKey { path, digest }, file, nodes };
+        let descriptor = SegmentDescriptor {
+            key: SegmentKey { path, digest },
+            file,
+            nodes,
+        };
         self.by_digest.insert(digest, file);
         self.by_file.insert(file, descriptor);
         self.by_file.get(&file)
@@ -65,7 +74,9 @@ impl SegmentManifest {
     }
 
     pub fn by_digest(&self, digest: SegmentDigest) -> Option<&SegmentDescriptor> {
-        self.by_digest.get(&digest).and_then(|file| self.by_file.get(file))
+        self.by_digest
+            .get(&digest)
+            .and_then(|file| self.by_file.get(file))
     }
 
     pub fn remove_file(&mut self, file: FileId) -> Option<SegmentDescriptor> {

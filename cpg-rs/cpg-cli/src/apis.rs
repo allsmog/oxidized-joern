@@ -56,8 +56,11 @@ fn qualified_spelling(code: &str, name: &str) -> Option<String> {
 /// Build the inventory. `internal` is the set of names with a defining
 /// method in the CPG; calls resolving to them are project code, not APIs.
 pub fn inventory(cpg: &Cpg, max_examples: usize) -> Vec<ApiEntry> {
-    let internal: HashSet<&str> =
-        cpg.methods().into_iter().filter_map(|m| cpg.name_of(m)).collect();
+    let internal: HashSet<&str> = cpg
+        .methods()
+        .into_iter()
+        .filter_map(|m| cpg.name_of(m))
+        .collect();
 
     struct Acc {
         qualified: HashMap<String, usize>,
@@ -72,7 +75,11 @@ pub fn inventory(cpg: &Cpg, max_examples: usize) -> Vec<ApiEntry> {
         let Some(name) = cpg.name_of(c) else { continue };
         // Operators, assignments, and calls the project itself defines are
         // not external APIs.
-        if name.len() <= 1 || !name.chars().next().is_some_and(|ch| ch.is_alphabetic() || ch == '_')
+        if name.len() <= 1
+            || !name
+                .chars()
+                .next()
+                .is_some_and(|ch| ch.is_alphabetic() || ch == '_')
         {
             continue;
         }
@@ -97,7 +104,8 @@ pub fn inventory(cpg: &Cpg, max_examples: usize) -> Vec<ApiEntry> {
         }
         if acc.examples.len() < max_examples {
             let file = cpg.path_of(cpg.file_of(c)).unwrap_or("").to_string();
-            acc.examples.push((c, file, cpg.line_of(c), code.to_string()));
+            acc.examples
+                .push((c, file, cpg.line_of(c), code.to_string()));
         }
     }
 

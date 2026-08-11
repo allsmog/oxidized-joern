@@ -72,7 +72,10 @@ impl Frontend for CFrontend {
                 }
             }
         }
-        BuildResult { file, methods_built: methods }
+        BuildResult {
+            file,
+            methods_built: methods,
+        }
     }
 }
 
@@ -169,7 +172,10 @@ fn build_stmt(b: &mut cpg_core::CpgBuilder, parent: NodeId, node: Node, src: &[u
             // Children: [cond, Block(then), Block(else)?].
             let cs = b.control_structure(node.kind(), line(node));
             b.ast_child(parent, cs);
-            if let Some(e) = node.child_by_field_name("condition").and_then(|c| build_expr(b, c, src)) {
+            if let Some(e) = node
+                .child_by_field_name("condition")
+                .and_then(|c| build_expr(b, c, src))
+            {
                 b.ast_child(cs, e);
             }
             if let Some(cons) = node.child_by_field_name("consequence") {
@@ -190,7 +196,10 @@ fn build_stmt(b: &mut cpg_core::CpgBuilder, parent: NodeId, node: Node, src: &[u
             // Children: [cond, Block(body)].
             let cs = b.control_structure(node.kind(), line(node));
             b.ast_child(parent, cs);
-            if let Some(e) = node.child_by_field_name("condition").and_then(|c| build_expr(b, c, src)) {
+            if let Some(e) = node
+                .child_by_field_name("condition")
+                .and_then(|c| build_expr(b, c, src))
+            {
                 b.ast_child(cs, e);
             }
             let blk = b.block();
@@ -208,7 +217,10 @@ fn build_stmt(b: &mut cpg_core::CpgBuilder, parent: NodeId, node: Node, src: &[u
             if let Some(body) = node.child_by_field_name("body") {
                 build_stmt(b, blk, body, src);
             }
-            if let Some(e) = node.child_by_field_name("condition").and_then(|c| build_expr(b, c, src)) {
+            if let Some(e) = node
+                .child_by_field_name("condition")
+                .and_then(|c| build_expr(b, c, src))
+            {
                 b.ast_child(cs, e);
             }
         }
@@ -236,7 +248,10 @@ fn build_stmt(b: &mut cpg_core::CpgBuilder, parent: NodeId, node: Node, src: &[u
             // case/default ControlStructures in source order.
             let cs = b.control_structure(node.kind(), line(node));
             b.ast_child(parent, cs);
-            if let Some(e) = node.child_by_field_name("condition").and_then(|c| build_expr(b, c, src)) {
+            if let Some(e) = node
+                .child_by_field_name("condition")
+                .and_then(|c| build_expr(b, c, src))
+            {
                 b.ast_child(cs, e);
             }
             let blk = b.block();
@@ -251,7 +266,11 @@ fn build_stmt(b: &mut cpg_core::CpgBuilder, parent: NodeId, node: Node, src: &[u
             // kind, so the case is a ControlStructure whose code distinguishes
             // case from default and whose children are [value?, stmts...].
             let value = node.child_by_field_name("value");
-            let code = if value.is_some() { "case_statement" } else { "default_statement" };
+            let code = if value.is_some() {
+                "case_statement"
+            } else {
+                "default_statement"
+            };
             let cs = b.control_structure(code, line(node));
             b.ast_child(parent, cs);
             let value_id = value.map(|v| v.id());
@@ -287,7 +306,9 @@ fn build_stmt(b: &mut cpg_core::CpgBuilder, parent: NodeId, node: Node, src: &[u
             // and taint see the binding, mirroring how assignment_expression is
             // handled. Without this, a declaration's initialiser would not taint
             // the declared variable.
-            let value = node.child_by_field_name("value").and_then(|v| build_expr(b, v, src));
+            let value = node
+                .child_by_field_name("value")
+                .and_then(|v| build_expr(b, v, src));
             let name = node
                 .child_by_field_name("declarator")
                 .map(|d| innermost_identifier(d, src))
@@ -356,7 +377,10 @@ fn build_expr(b: &mut cpg_core::CpgBuilder, node: Node, src: &[u8]) -> Option<No
             if let Some(lhs) = lhs_node.and_then(|n| build_expr(b, n, src)) {
                 b.add_argument(call, lhs, 1);
             }
-            if let Some(rhs) = node.child_by_field_name("right").and_then(|n| build_expr(b, n, src)) {
+            if let Some(rhs) = node
+                .child_by_field_name("right")
+                .and_then(|n| build_expr(b, n, src))
+            {
                 b.add_argument(call, rhs, 2);
             }
             Some(call)
@@ -364,10 +388,16 @@ fn build_expr(b: &mut cpg_core::CpgBuilder, node: Node, src: &[u8]) -> Option<No
         "binary_expression" => {
             let op = node.child(1).map(|n| text(n, src)).unwrap_or("<op>");
             let call = b.call(op, text(node, src), line(node));
-            if let Some(lhs) = node.child_by_field_name("left").and_then(|n| build_expr(b, n, src)) {
+            if let Some(lhs) = node
+                .child_by_field_name("left")
+                .and_then(|n| build_expr(b, n, src))
+            {
                 b.add_argument(call, lhs, 1);
             }
-            if let Some(rhs) = node.child_by_field_name("right").and_then(|n| build_expr(b, n, src)) {
+            if let Some(rhs) = node
+                .child_by_field_name("right")
+                .and_then(|n| build_expr(b, n, src))
+            {
                 b.add_argument(call, rhs, 2);
             }
             Some(call)
@@ -382,8 +412,13 @@ fn build_expr(b: &mut cpg_core::CpgBuilder, node: Node, src: &[u8]) -> Option<No
             // lowering so the field name is matchable by taint specs and the
             // persistence stitch, while base taint still flows through the
             // opaque named call.
-            let field = node.child_by_field_name("field").map(|f| text(f, src)).unwrap_or("");
-            let base = node.child_by_field_name("argument").and_then(|n| build_expr(b, n, src));
+            let field = node
+                .child_by_field_name("field")
+                .map(|f| text(f, src))
+                .unwrap_or("");
+            let base = node
+                .child_by_field_name("argument")
+                .and_then(|n| build_expr(b, n, src));
             match (field.is_empty(), base) {
                 (false, Some(base)) => {
                     let call = b.call(field, text(node, src), line(node));
@@ -394,7 +429,11 @@ fn build_expr(b: &mut cpg_core::CpgBuilder, node: Node, src: &[u8]) -> Option<No
             }
         }
         "identifier" => Some(b.identifier(text(node, src), line(node))),
-        "number_literal" | "string_literal" | "char_literal" | "true" | "false"
+        "number_literal"
+        | "string_literal"
+        | "char_literal"
+        | "true"
+        | "false"
         | "concatenated_string" => Some(b.literal(text(node, src), line(node))),
         _ => {
             // Unknown wrapper: descend to its first buildable child.

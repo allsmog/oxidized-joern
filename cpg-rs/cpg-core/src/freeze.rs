@@ -25,7 +25,10 @@ pub struct CsrEdges {
 
 impl CsrEdges {
     pub fn empty(nodes: usize) -> Self {
-        CsrEdges { offsets: vec![0; nodes + 1], targets: Vec::new() }
+        CsrEdges {
+            offsets: vec![0; nodes + 1],
+            targets: Vec::new(),
+        }
     }
 
     pub fn targets_from_dense(&self, dense: usize) -> &[u32] {
@@ -49,7 +52,11 @@ impl FrozenCpg {
         for n in cpg.nodes() {
             let dense = nodes.len() as u32;
             dense_of.insert(n, dense);
-            nodes.push(FrozenNode { original: n, kind: cpg.kind_of(n), file: cpg.file_of(n) });
+            nodes.push(FrozenNode {
+                original: n,
+                kind: cpg.kind_of(n),
+                file: cpg.file_of(n),
+            });
         }
 
         let mut edges = HashMap::new();
@@ -70,7 +77,11 @@ impl FrozenCpg {
             edges.insert(kind, CsrEdges { offsets, targets });
         }
 
-        FrozenCpg { nodes, dense_of, edges }
+        FrozenCpg {
+            nodes,
+            dense_of,
+            edges,
+        }
     }
 
     pub fn len(&self) -> usize {
@@ -97,7 +108,9 @@ impl FrozenCpg {
     }
 
     pub fn out(&self, n: NodeId, kind: EdgeKind) -> Vec<NodeId> {
-        let Some(dense) = self.dense_id(n) else { return Vec::new() };
+        let Some(dense) = self.dense_id(n) else {
+            return Vec::new();
+        };
         self.out_dense(dense, kind)
             .iter()
             .filter_map(|&d| self.original_id(d))

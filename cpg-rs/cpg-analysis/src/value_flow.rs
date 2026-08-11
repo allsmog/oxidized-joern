@@ -29,7 +29,9 @@ pub struct SparseValueFlow {
 }
 
 impl SparseValueFlow {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     pub fn from_ddg(cpg: &Cpg) -> Self {
         let mut graph = SparseValueFlow::new();
@@ -56,7 +58,11 @@ impl SparseValueFlow {
     }
 
     /// Demand-driven reverse reachability from target nodes to origin nodes.
-    pub fn reverse_reachable(&self, origins: &HashSet<NodeId>, targets: &[NodeId]) -> HashSet<NodeId> {
+    pub fn reverse_reachable(
+        &self,
+        origins: &HashSet<NodeId>,
+        targets: &[NodeId],
+    ) -> HashSet<NodeId> {
         let mut reached = HashSet::new();
         let mut q: VecDeque<NodeId> = targets.iter().copied().collect();
         while let Some(n) = q.pop_front() {

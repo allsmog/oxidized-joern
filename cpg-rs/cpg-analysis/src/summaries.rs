@@ -74,12 +74,20 @@ pub struct Flow {
 impl Flow {
     /// A raw (unsanitized) flow — the historical two-field shape.
     pub fn direct(from: Point, to: Point) -> Self {
-        Flow { from, to, via: None }
+        Flow {
+            from,
+            to,
+            via: None,
+        }
     }
 
     /// A flow that only exists through the named sanitizer.
     pub fn sanitized(from: Point, to: Point, sanitizer: impl Into<String>) -> Self {
-        Flow { from, to, via: Some(Sanitizer(sanitizer.into())) }
+        Flow {
+            from,
+            to,
+            via: Some(Sanitizer(sanitizer.into())),
+        }
     }
 
     pub fn is_sanitized(&self) -> bool {
@@ -136,25 +144,32 @@ impl FunctionSummary {
     /// callee whose only param→return path goes through a sanitizer does not
     /// propagate raw taint.
     pub fn flows_to_return(&self) -> impl Iterator<Item = usize> + '_ {
-        self.flows.iter().filter_map(|f| match (f.from, f.to, &f.via) {
-            (Point::Param(k), Point::Return, None) => Some(k),
-            _ => None,
-        })
+        self.flows
+            .iter()
+            .filter_map(|f| match (f.from, f.to, &f.via) {
+                (Point::Param(k), Point::Return, None) => Some(k),
+                _ => None,
+            })
     }
 
     /// Parameters that reach the return only through a sanitizer.
     pub fn sanitized_flows_to_return(&self) -> impl Iterator<Item = (usize, &Sanitizer)> + '_ {
-        self.flows.iter().filter_map(|f| match (f.from, f.to, &f.via) {
-            (Point::Param(k), Point::Return, Some(s)) => Some((k, s)),
-            _ => None,
-        })
+        self.flows
+            .iter()
+            .filter_map(|f| match (f.from, f.to, &f.via) {
+                (Point::Param(k), Point::Return, Some(s)) => Some((k, s)),
+                _ => None,
+            })
     }
 
     /// Names of calls whose results flow *raw* to the return — what
     /// returns-tainted source matching consults; sanitized entries are
     /// excluded (the wrapper laundered the value).
     pub fn raw_call_returns(&self) -> impl Iterator<Item = &str> {
-        self.call_returns.iter().filter(|c| c.via.is_none()).map(|c| c.call.as_str())
+        self.call_returns
+            .iter()
+            .filter(|c| c.via.is_none())
+            .map(|c| c.call.as_str())
     }
 
     /// Whether a call's result may carry its RECEIVER's taint under this
@@ -256,8 +271,7 @@ impl SummaryStore {
     /// (`"labels": ["sanitized:<name>"]`, `"sanitizer": "<name>"`, or
     /// `"kind": "sanitized"`).
     pub fn load_external_json(&mut self, json: &str) -> Result<usize, String> {
-        let entries: Vec<ExternalEntry> =
-            serde_json::from_str(json).map_err(|e| e.to_string())?;
+        let entries: Vec<ExternalEntry> = serde_json::from_str(json).map_err(|e| e.to_string())?;
         let mut n = 0;
         for e in entries {
             let fqn = e.function_declaration.method_name.clone();
@@ -276,9 +290,7 @@ impl SummaryStore {
                                     .map(str::to_string)
                             })
                         })
-                        .or_else(|| {
-                            (df.kind.as_deref() == Some("sanitized")).then(|| fqn.clone())
-                        });
+                        .or_else(|| (df.kind.as_deref() == Some("sanitized")).then(|| fqn.clone()));
                     flows.insert(Flow {
                         from,
                         to,
@@ -298,10 +310,17 @@ impl SummaryStore {
             // receiver — the explicit field covers the "considered it,
             // declares nothing flows" case.
             let models_receiver = e.receiver_modeled
-                || flows.iter().any(|f: &Flow| f.from == Point::Recv || f.to == Point::Recv);
+                || flows
+                    .iter()
+                    .any(|f: &Flow| f.from == Point::Recv || f.to == Point::Recv);
             self.external.insert(
                 fqn.clone(),
-                FunctionSummary { fqn, flows, call_returns, models_receiver },
+                FunctionSummary {
+                    fqn,
+                    flows,
+                    call_returns,
+                    models_receiver,
+                },
             );
             n += 1;
         }
@@ -422,8 +441,7 @@ impl SummaryStore {
         use rayon::prelude::*;
         self.last_recomputed.clear();
         self.last_memo_hits = 0;
-        let mut memo: HashMap<(String, u64), (FunctionSummary, HashSet<String>)> =
-            HashMap::new();
+        let mut memo: HashMap<(String, u64), (FunctionSummary, HashSet<String>)> = HashMap::new();
         let mut changed = true;
         let mut iterations = 0;
         while changed && iterations < targets.len() + 2 {
@@ -435,7 +453,8 @@ impl SummaryStore {
             for &m in targets {
                 let fqn = cpg.full_name_of(m).unwrap_or("<anon>");
                 let cached = self.deps.get(fqn).and_then(|d| {
-                    memo.get(&(fqn.to_string(), self.dep_state_hash(d))).cloned()
+                    memo.get(&(fqn.to_string(), self.dep_state_hash(d)))
+                        .cloned()
                 });
                 match cached {
                     Some(r) => {
@@ -492,11 +511,12 @@ struct Tag {
 
 /// Compute one method's summary by name-based taint over its body, using the
 /// store's existing summaries for callees (summaries-first interprocedural).
-fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionSummary, HashSet<String>) {
-    let fqn = cpg
-        .full_name_of(method)
-        .unwrap_or("<anon>")
-        .to_string();
+fn compute_method(
+    cpg: &Cpg,
+    method: NodeId,
+    store: &SummaryStore,
+) -> (FunctionSummary, HashSet<String>) {
+    let fqn = cpg.full_name_of(method).unwrap_or("<anon>").to_string();
 
     // Map parameter name -> 0-based index.
     let params = cpg.parameters_of(method);
@@ -512,7 +532,10 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
     for (name, &i) in &param_index {
         taint.insert(
             name.clone(),
-            HashSet::from([Tag { origin: TagOrigin::Param(i), via: None }]),
+            HashSet::from([Tag {
+                origin: TagOrigin::Param(i),
+                via: None,
+            }]),
         );
     }
 
@@ -555,7 +578,10 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
                                 });
                             }
                             TagOrigin::Call(name) => {
-                                call_returns.insert(CallReturn { call: name, via: tag.via });
+                                call_returns.insert(CallReturn {
+                                    call: name,
+                                    via: tag.via,
+                                });
                             }
                         }
                     }
@@ -580,7 +606,12 @@ fn compute_method(cpg: &Cpg, method: NodeId, store: &SummaryStore) -> (FunctionS
     // invisible to the name-based walk, so a computed "no Recv -> Return"
     // would be an unsound licence to drop receiver pass-through.
     (
-        FunctionSummary { fqn, flows: result_flows, call_returns, models_receiver: false },
+        FunctionSummary {
+            fqn,
+            flows: result_flows,
+            call_returns,
+            models_receiver: false,
+        },
         deps,
     )
 }
@@ -686,7 +717,10 @@ fn expr_taint(
             // time, the summary carrying this tag to its return is exactly
             // the `fn f() { return getenv(..) }` wrapper shape.
             if !name.is_empty() {
-                out.insert(Tag { origin: TagOrigin::Call(name.to_string()), via: None });
+                out.insert(Tag {
+                    origin: TagOrigin::Call(name.to_string()),
+                    via: None,
+                });
             }
             if let Some(summary) = store.get(&key) {
                 for f in &summary.flows {
@@ -808,7 +842,9 @@ mod tests {
         }
         let pm = crate::standard_pipeline();
         let idx = crate::pass::method_name_index(&cpg);
-        let ctx = crate::pass::PassContext { methods_by_name: Some(&idx) };
+        let ctx = crate::pass::PassContext {
+            methods_by_name: Some(&idx),
+        };
         pm.run_all(&mut cpg, &fids, &ctx);
         cpg
     }
@@ -818,16 +854,14 @@ mod tests {
         // wrap launders its parameter through `escape`: the summary must still
         // record param0 -> return (the dependency is real) but marked
         // sanitized, and the raw-flow view must be empty.
-        let cpg = build(&[(
-            "s.c",
-            "char* wrap(char* s) {\n    return escape(s);\n}\n",
-        )]);
+        let cpg = build(&[("s.c", "char* wrap(char* s) {\n    return escape(s);\n}\n")]);
         let mut store = SummaryStore::new();
         store.set_sanitizers(["escape"]);
         store.compute_all(&cpg);
         let wrap = store.get("wrap").expect("wrap summarised");
         assert!(
-            wrap.flows.contains(&Flow::sanitized(Point::Param(0), Point::Return, "escape")),
+            wrap.flows
+                .contains(&Flow::sanitized(Point::Param(0), Point::Return, "escape")),
             "expected sanitized param0->return, got {:?}",
             wrap.flows
         );
@@ -850,7 +884,11 @@ mod tests {
         store.set_sanitizers(["escape"]);
         store.compute_all(&cpg);
         let outer = store.get("outer").expect("outer summarised");
-        assert_eq!(outer.flows_to_return().count(), 0, "raw taint must not leak through wrap");
+        assert_eq!(
+            outer.flows_to_return().count(),
+            0,
+            "raw taint must not leak through wrap"
+        );
         assert!(
             outer
                 .sanitized_flows_to_return()
@@ -867,7 +905,9 @@ mod tests {
         store.set_sanitizers(["escape"]);
         store.compute_all(&cpg);
         let id = store.get("id").unwrap();
-        assert!(id.flows.contains(&Flow::direct(Point::Param(0), Point::Return)));
+        assert!(id
+            .flows
+            .contains(&Flow::direct(Point::Param(0), Point::Return)));
         assert_eq!(id.flows_to_return().collect::<Vec<_>>(), vec![0]);
     }
 
@@ -884,7 +924,9 @@ mod tests {
             .unwrap();
         let esc = store.get("html_escape").unwrap();
         assert_eq!(esc.flows_to_return().count(), 0);
-        assert!(esc.sanitized_flows_to_return().any(|(k, s)| k == 0 && s.name() == "html_escape"));
+        assert!(esc
+            .sanitized_flows_to_return()
+            .any(|(k, s)| k == 0 && s.name() == "html_escape"));
         // Backwards-compatible: entries without "via" stay raw.
         let dup = store.get("strdup").unwrap();
         assert_eq!(dup.flows_to_return().collect::<Vec<_>>(), vec![0]);
@@ -939,7 +981,8 @@ mod tests {
         for fqn in ["id", "wrap", "outer"] {
             let s = store.get(fqn).unwrap_or_else(|| panic!("{fqn} summarised"));
             assert!(
-                s.flows.contains(&Flow::direct(Point::Param(0), Point::Return)),
+                s.flows
+                    .contains(&Flow::direct(Point::Param(0), Point::Return)),
                 "{fqn}: expected raw param0->return, got {:?}",
                 s.flows
             );
@@ -948,7 +991,10 @@ mod tests {
         let mut store2 = SummaryStore::new();
         store2.compute_all(&cpg);
         for fqn in ["id", "wrap", "outer"] {
-            assert_eq!(store.get(fqn).unwrap().flows, store2.get(fqn).unwrap().flows);
+            assert_eq!(
+                store.get(fqn).unwrap().flows,
+                store2.get(fqn).unwrap().flows
+            );
         }
     }
 
@@ -1008,7 +1054,11 @@ mod tests {
         store.compute_all(&cpg);
 
         let cfg = store.get("readcfg").unwrap();
-        assert!(cfg.raw_call_returns().any(|c| c == "getenv"), "{:?}", cfg.call_returns);
+        assert!(
+            cfg.raw_call_returns().any(|c| c == "getenv"),
+            "{:?}",
+            cfg.call_returns
+        );
 
         let safe = store.get("readsafe").unwrap();
         assert!(

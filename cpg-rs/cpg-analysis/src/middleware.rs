@@ -216,7 +216,10 @@ fn gate_body_enforces(
                 // the global name shape because `WithOauth`-style route WRAPPERS
                 // are legitimately authz-shaped; only a gate body's own
                 // invocations carry this reading.
-                if crate::authz::word_tokens(nm).first().is_some_and(|t| t == "with") {
+                if crate::authz::word_tokens(nm)
+                    .first()
+                    .is_some_and(|t| t == "with")
+                {
                     return false;
                 }
                 (authz_names.contains(nm) || is_authz_name(nm) || REJECTION_CALLS.contains(&nm))
@@ -230,7 +233,8 @@ fn gate_body_enforces(
             .into_iter()
             .filter(|&n| cpg.kind_of(n) == NodeKind::Call)
             .filter(|&n| {
-                cpg.name_of(n).is_some_and(|nm| CONTINUATION_CALLS.contains(&nm))
+                cpg.name_of(n)
+                    .is_some_and(|nm| CONTINUATION_CALLS.contains(&nm))
                     && cpg
                         .code_of(n)
                         .zip(cpg.name_of(n))
@@ -271,7 +275,8 @@ fn gate_body_enforces(
 pub(crate) fn binary_root(gate_file: &str) -> String {
     let per_binary = |cmd_end: usize| -> Option<String> {
         let rest = &gate_file[cmd_end..];
-        rest.find('/').map(|j| gate_file[..cmd_end + j + 1].to_string())
+        rest.find('/')
+            .map(|j| gate_file[..cmd_end + j + 1].to_string())
     };
     if let Some(rest) = gate_file.strip_prefix("cmd/") {
         let _ = rest;
@@ -400,15 +405,12 @@ pub fn authz_census_with_config(
             let key = if crate::entries::parse_positional(e).is_some() {
                 e.clone()
             } else {
-                cpg.full_name_of(m).or(cpg.name_of(m)).unwrap_or(e).to_string()
+                cpg.full_name_of(m)
+                    .or(cpg.name_of(m))
+                    .unwrap_or(e)
+                    .to_string()
             };
-            let verdict = entry_verdict(
-                cpg,
-                authz_names,
-                &verdict_evidence,
-                m,
-                &key,
-            );
+            let verdict = entry_verdict(cpg, authz_names, &verdict_evidence, m, &key);
             rows.entry(key).or_insert(verdict);
         }
         // Unmatched entries are the coverage report's job.
@@ -434,7 +436,10 @@ fn mine_framework_gates(cpg: &Cpg, framework_server_calls: &[String]) -> Vec<Mid
     let mut gates = Vec::new();
     for c in cpg.calls() {
         let Some(name) = cpg.name_of(c) else { continue };
-        if !framework_server_calls.iter().any(|candidate| candidate == name) {
+        if !framework_server_calls
+            .iter()
+            .any(|candidate| candidate == name)
+        {
             continue;
         }
         if cpg
@@ -504,12 +509,8 @@ fn entry_verdict(
         return format!("middleware@{g}");
     }
     if partial_line.is_some() {
-        if let Some(l) = caller_context_gated_line(
-            cpg,
-            m,
-            &checks,
-            evidence.caller_context_markers,
-        ) {
+        if let Some(l) = caller_context_gated_line(cpg, m, &checks, evidence.caller_context_markers)
+        {
             return format!("subject-gated@{l}");
         }
     }
@@ -615,7 +616,10 @@ fn dominating_check(cpg: &Cpg, method: NodeId, checks: &[NodeId]) -> Option<u32>
         if reachable_targets.is_empty() {
             continue; // no CFG evidence either way
         }
-        if reachable_targets.iter().all(|&t| !reaches(&adj, method, t, Some(a))) {
+        if reachable_targets
+            .iter()
+            .all(|&t| !reaches(&adj, method, t, Some(a)))
+        {
             return cpg.line_of(a);
         }
     }
@@ -642,7 +646,9 @@ fn mine_middleware_gates(
 ) -> Vec<MiddlewareGate> {
     let mut gates = Vec::new();
     for c in cpg.calls() {
-        let Some(scope) = cpg.name_of(c) else { continue };
+        let Some(scope) = cpg.name_of(c) else {
+            continue;
+        };
         // `Before` is the pre-routing hook of builder-style middleware
         // chains (`router.GlobalMiddleware().Before(verify)` — the chain
         // runs before dispatch, so a committing Before handler gates every
@@ -666,8 +672,10 @@ fn mine_middleware_gates(
         // `r`).
         let recv = cpg.signature_of(c).map(str::to_string).or_else(|| {
             let code = cpg.code_of(c)?;
-            let head: String =
-                code.chars().take_while(|ch| ch.is_alphanumeric() || *ch == '_').collect();
+            let head: String = code
+                .chars()
+                .take_while(|ch| ch.is_alphanumeric() || *ch == '_')
+                .collect();
             (!head.is_empty() && code[head.len()..].starts_with('.')).then_some(head)
         });
         for a in cpg.arguments_of(c) {
@@ -800,8 +808,7 @@ fn group_gated_entries(
         {
             continue;
         }
-        let (Some(child), Some(par)) = (cpg.name_of(args[0]), cpg.signature_of(args[1]))
-        else {
+        let (Some(child), Some(par)) = (cpg.name_of(args[0]), cpg.signature_of(args[1])) else {
             continue;
         };
         if let Some(file) = cpg.path_of(cpg.file_of(c)) {
@@ -838,7 +845,9 @@ fn group_gated_entries(
     // here (only invocations/member-values): an authz-NAMED plain identifier
     // sibling is more often a service handle than a middleware value.
     for c in cpg.calls() {
-        let Some(cname) = cpg.name_of(c) else { continue };
+        let Some(cname) = cpg.name_of(c) else {
+            continue;
+        };
         if cname == "=" || cname == "Group" {
             continue;
         }
@@ -846,7 +855,9 @@ fn group_gated_entries(
         if args.len() < 2 {
             continue;
         }
-        let Some(file) = cpg.path_of(cpg.file_of(c)) else { continue };
+        let Some(file) = cpg.path_of(cpg.file_of(c)) else {
+            continue;
+        };
         let Some(target) = args.iter().find_map(|&a| {
             if cpg.kind_of(a) != NodeKind::Identifier {
                 return None;
@@ -902,11 +913,15 @@ fn group_gated_entries(
     loop {
         let mut additions: Vec<((&str, &str), String)> = Vec::new();
         for c in cpg.calls() {
-            let Some(cname) = cpg.name_of(c) else { continue };
+            let Some(cname) = cpg.name_of(c) else {
+                continue;
+            };
             if cname == "=" || cname == "Group" {
                 continue;
             }
-            let Some(file) = cpg.path_of(cpg.file_of(c)) else { continue };
+            let Some(file) = cpg.path_of(cpg.file_of(c)) else {
+                continue;
+            };
             // Gate-bound identifier arguments first — they are rare, and
             // callee resolution below is only worth doing when one exists.
             let bound: Vec<(usize, String)> = cpg
@@ -922,7 +937,9 @@ fn group_gated_entries(
             if bound.is_empty() {
                 continue;
             }
-            let Some(all) = by_name.get(cname) else { continue };
+            let Some(all) = by_name.get(cname) else {
+                continue;
+            };
             // Forwarding a route group only registers through a ROUTER-TYPED
             // parameter, so candidates whose matching param is anything else
             // (`Register(worker worker.Worker, ..)`) never bind. Among the
@@ -959,9 +976,13 @@ fn group_gated_entries(
                     continue;
                 }
                 for m in callees {
-                    let Some(&p) = cpg.parameters_of(m).get(i) else { continue };
+                    let Some(&p) = cpg.parameters_of(m).get(i) else {
+                        continue;
+                    };
                     let Some(pn) = cpg.name_of(p) else { continue };
-                    let Some(pf) = cpg.path_of(cpg.file_of(m)) else { continue };
+                    let Some(pf) = cpg.path_of(cpg.file_of(m)) else {
+                        continue;
+                    };
                     if !gate_by.contains_key(&(pf, pn)) {
                         additions.push(((pf, pn), g.clone()));
                     }
@@ -982,7 +1003,9 @@ fn group_gated_entries(
     let mut out = HashMap::new();
     for reg in crate::entries::mine_registrations(cpg) {
         let Some(recv) = reg.recv else { continue };
-        let Some(file) = cpg.path_of(reg.file) else { continue };
+        let Some(file) = cpg.path_of(reg.file) else {
+            continue;
+        };
         if let Some(g) = chain_gate(&gate_by, file, &recv) {
             for e in &reg.entries {
                 out.entry(e.clone()).or_insert_with(|| g.clone());
@@ -1002,8 +1025,12 @@ fn chain_variable_refs(
     gate_call: NodeId,
     ident: NodeId,
 ) -> Vec<FnRef> {
-    let Some(var) = cpg.name_of(ident) else { return Vec::new() };
-    let Some(method) = enclosing_method(cpg, gate_call) else { return Vec::new() };
+    let Some(var) = cpg.name_of(ident) else {
+        return Vec::new();
+    };
+    let Some(method) = enclosing_method(cpg, gate_call) else {
+        return Vec::new();
+    };
     let mut out = Vec::new();
     for n in ast_descendants(cpg, method) {
         if cpg.kind_of(n) != NodeKind::Call {
@@ -1059,7 +1086,9 @@ fn mine_route_wrappers(
         }
         let args = cpg.arguments_of(c);
         if !strong
-            && !args.first().is_some_and(|&a| crate::entries::is_route_literal(cpg, a))
+            && !args
+                .first()
+                .is_some_and(|&a| crate::entries::is_route_literal(cpg, a))
             && !crate::entries::receiver_is_router(cpg, c)
         {
             continue;
@@ -1091,7 +1120,7 @@ fn mine_route_wrappers(
                         continue; // the guard itself is not a wrapped handler
                     }
                     for &m in &r.methods {
-                        record_wrapped(cpg, &mut wrapped, m, &g);
+                        record_wrapped(cpg, &mut wrapped, m, g);
                     }
                 }
             }
@@ -1138,7 +1167,6 @@ fn record_wrapped(cpg: &Cpg, wrapped: &mut HashMap<String, String>, m: NodeId, w
     if let Some(snm) = cpg.name_of(m) {
         if !anon(snm) {
             wrapped.insert(snm.to_string(), w.to_string());
-            keyed = true;
         } else if !keyed {
             if let (Some(f), Some(l)) = (cpg.path_of(cpg.file_of(m)), cpg.line_of(m)) {
                 wrapped.insert(format!("{snm}@{f}:{l}"), w.to_string());
@@ -1176,9 +1204,7 @@ fn function_refs(
             .filter(|ms| ms.len() <= MAX_MATCHES)
             .cloned()
             .unwrap_or_default();
-        if !methods.is_empty()
-            || is_authz_name(name)
-            || crate::authz::is_authz_qualified(spelling)
+        if !methods.is_empty() || is_authz_name(name) || crate::authz::is_authz_qualified(spelling)
         {
             out.push(FnRef {
                 name: name.to_string(),
@@ -1335,7 +1361,9 @@ mod tests {
         }
         let pm = crate::standard_pipeline();
         let idx = crate::pass::method_name_index(&cpg);
-        let ctx = crate::pass::PassContext { methods_by_name: Some(&idx) };
+        let ctx = crate::pass::PassContext {
+            methods_by_name: Some(&idx),
+        };
         pm.run_all(&mut cpg, &fids, &ctx);
         cpg
     }
@@ -1408,7 +1436,10 @@ func (a *AuthMiddleware) Authorize() func(c *GinContext) {
             .iter()
             .find(|r| r.handler.contains("GetUsers"))
             .expect("route row for GetUsers");
-        assert_eq!((users.route.as_str(), users.verb.as_str()), ("/users", "GET"));
+        assert_eq!(
+            (users.route.as_str(), users.verb.as_str()),
+            ("/users", "GET")
+        );
         assert!(
             census.routes.iter().any(|r| r.route == "/status"),
             "{:?}",
@@ -1487,10 +1518,9 @@ func (siw *ServerInterfaceWrapper) ListAccelerators(c *GinContext) {
         );
         // The generated registration's route expression is kept verbatim.
         assert!(
-            census
-                .routes
-                .iter()
-                .any(|r| r.route.contains("/accelerators") && r.handler.contains("ListAccelerators")),
+            census.routes.iter().any(
+                |r| r.route.contains("/accelerators") && r.handler.contains("ListAccelerators")
+            ),
             "{:?}",
             census.routes
         );
@@ -1592,7 +1622,10 @@ func (h *StatusHandler) GetStatus(w ResponseWriter, req *Request) error { return
         );
         // The time comparison must not surface as a gate at all.
         assert!(
-            !census.gates.iter().any(|g| g.scope == "Before" && g.file.is_empty()),
+            !census
+                .gates
+                .iter()
+                .any(|g| g.scope == "Before" && g.file.is_empty()),
             "{:?}",
             census.gates
         );
@@ -1612,12 +1645,15 @@ func (h *StatusHandler) GetStatus(w ResponseWriter, req *Request) error { return
         assert_eq!(binary_root("cmd/run.go"), "");
         assert_eq!(binary_root("broker-service/cmd/run.go"), "broker-service/");
         // Multi-binary layout: gate binds to its own binary dir only.
-        assert_eq!(binary_root("cmd/eventdelivery/main.go"), "cmd/eventdelivery/");
-        assert_eq!(binary_root("go/cmd/eventdelivery/main.go"), "go/cmd/eventdelivery/");
         assert_eq!(
-            binary_root("go/cmd/gateway/sub/main.go"),
-            "go/cmd/gateway/"
+            binary_root("cmd/eventdelivery/main.go"),
+            "cmd/eventdelivery/"
         );
+        assert_eq!(
+            binary_root("go/cmd/eventdelivery/main.go"),
+            "go/cmd/eventdelivery/"
+        );
+        assert_eq!(binary_root("go/cmd/gateway/sub/main.go"), "go/cmd/gateway/");
         // No cmd segment: the gate file's directory.
         assert_eq!(binary_root("pkg/server/setup.go"), "pkg/server/");
     }
@@ -1657,7 +1693,11 @@ func doWork(r string)              {}
         let census = authz_census(
             &cpg,
             &none,
-            &["handleGated".into(), "handleBranchy".into(), "handleOpen".into()],
+            &[
+                "handleGated".into(),
+                "handleBranchy".into(),
+                "handleOpen".into(),
+            ],
             &[],
         );
         assert!(
@@ -1804,12 +1844,7 @@ func doWork(req string)                              {}
 "#,
         )]);
         let none = HashSet::new();
-        let census = authz_census(
-            &cpg,
-            &none,
-            &["handleSeparateArguments".to_string()],
-            &[],
-        );
+        let census = authz_census(&cpg, &none, &["handleSeparateArguments".to_string()], &[]);
         assert!(
             verdict_of(&census, "handleSeparateArguments").starts_with("inline-partial@"),
             "separate subject and context arguments must not form one marker: {census:?}"
@@ -1840,12 +1875,7 @@ func doWork(req string)                                {{}}
         );
         let cpg = build_go(&[("compat.go", source.as_str())]);
         let none = HashSet::new();
-        let census = authz_census(
-            &cpg,
-            &none,
-            &["handleConcatenated".to_string()],
-            &[],
-        );
+        let census = authz_census(&cpg, &none, &["handleConcatenated".to_string()], &[]);
         assert!(
             verdict_of(&census, "handleConcatenated").starts_with("subject-gated@"),
             "default phrase should match concatenated, case-varied spellings: {census:?}"
@@ -1889,7 +1919,10 @@ func handleThing(req string) string   { return req }
         };
         let disabled_census = authz_census_with_config(&cpg, &none, &entries, &[], &disabled);
         assert!(
-            disabled_census.gates.iter().all(|gate| gate.scope != "framework"),
+            disabled_census
+                .gates
+                .iter()
+                .all(|gate| gate.scope != "framework"),
             "empty framework calls should disable framework evidence: {disabled_census:?}"
         );
     }
@@ -1943,7 +1976,10 @@ func doWork(r string)               {}
         let census = authz_census(
             &cpg,
             &none,
-            &["handleSwitchThenCheck".into(), "handleBareSwitchThenCheck".into()],
+            &[
+                "handleSwitchThenCheck".into(),
+                "handleBareSwitchThenCheck".into(),
+            ],
             &[],
         );
         assert!(
@@ -1999,7 +2035,10 @@ func doWork(r string)             {}
             "{census:?}"
         );
         // The non-enforcing sibling is mined but must not be the attributed gate.
-        assert!(census.gates.iter().any(|g| g.name == "logInterceptor" && !g.enforcing));
+        assert!(census
+            .gates
+            .iter()
+            .any(|g| g.name == "logInterceptor" && !g.enforcing));
     }
 
     #[test]
@@ -2172,7 +2211,10 @@ func doWork(r string) {}
             .iter()
             .find(|g| g.name == "JWTUnaryValidator")
             .unwrap_or_else(|| panic!("JWT gate must be mined via append-chase: {census:?}"));
-        assert!(gate.enforcing, "JWTUnaryValidator is authz-shaped by name: {census:?}");
+        assert!(
+            gate.enforcing,
+            "JWTUnaryValidator is authz-shaped by name: {census:?}"
+        );
         assert!(
             verdict_of(&census, "handleThing").starts_with("middleware@JWTUnaryValidator"),
             "{census:?}"
@@ -2206,8 +2248,17 @@ func doWork(r string) {}
 "#,
         )]);
         let none = HashSet::new();
-        let census = authz_census(&cpg, &none, &["handleThing".into(), "handleOther".into()], &[]);
-        assert_eq!(verdict_of(&census, "handleThing"), "wrapped@requireAuth", "{census:?}");
+        let census = authz_census(
+            &cpg,
+            &none,
+            &["handleThing".into(), "handleOther".into()],
+            &[],
+        );
+        assert_eq!(
+            verdict_of(&census, "handleThing"),
+            "wrapped@requireAuth",
+            "{census:?}"
+        );
         assert_eq!(verdict_of(&census, "handleOther"), "none", "{census:?}");
     }
 }

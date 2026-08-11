@@ -48,7 +48,10 @@ impl PythonFrontend {
         parser
             .set_language(&tree_sitter_python::LANGUAGE.into())
             .expect("load Python grammar");
-        PythonFrontend { lang: Python, parser }
+        PythonFrontend {
+            lang: Python,
+            parser,
+        }
     }
 }
 
@@ -78,7 +81,10 @@ impl Frontend for PythonFrontend {
                 _ => build_stmt(&mut b, file_node, child, src),
             }
         }
-        BuildResult { file, methods_built: methods }
+        BuildResult {
+            file,
+            methods_built: methods,
+        }
     }
 }
 
@@ -221,10 +227,16 @@ fn build_expr(b: &mut cpg_core::CpgBuilder, node: Node, src: &[u8]) -> Option<No
         }
         "assignment" | "augmented_assignment" => {
             let call = b.call("=", text(node, src), line(node));
-            if let Some(lhs) = node.child_by_field_name("left").and_then(|n| build_expr(b, n, src)) {
+            if let Some(lhs) = node
+                .child_by_field_name("left")
+                .and_then(|n| build_expr(b, n, src))
+            {
                 b.add_argument(call, lhs, 1);
             }
-            if let Some(rhs) = node.child_by_field_name("right").and_then(|n| build_expr(b, n, src)) {
+            if let Some(rhs) = node
+                .child_by_field_name("right")
+                .and_then(|n| build_expr(b, n, src))
+            {
                 b.add_argument(call, rhs, 2);
             }
             Some(call)

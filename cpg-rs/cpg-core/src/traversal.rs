@@ -39,9 +39,7 @@ impl Query for Cpg {
     fn method_named(&self, name: &str) -> Vec<NodeId> {
         self.methods()
             .into_iter()
-            .filter(|&m| {
-                self.name_of(m) == Some(name) || self.full_name_of(m) == Some(name)
-            })
+            .filter(|&m| self.name_of(m) == Some(name) || self.full_name_of(m) == Some(name))
             .collect()
     }
 

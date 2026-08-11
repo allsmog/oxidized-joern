@@ -126,7 +126,11 @@ fn entry_anchor(cpg: &Cpg, f: &Finding) -> Option<(NodeId, NodeId)> {
                 .into_iter()
                 .find(|&m| cpg.name_of(m) == Some(f.method.as_str()))
         })?;
-    let step = f.path.iter().rev().find(|s| s.depth == 0 && s.line.is_some())?;
+    let step = f
+        .path
+        .iter()
+        .rev()
+        .find(|s| s.depth == 0 && s.line.is_some())?;
     let line = step.line?;
     let at_line: Vec<NodeId> = ast_descendants(cpg, method)
         .into_iter()
@@ -152,11 +156,7 @@ fn entry_anchor(cpg: &Cpg, f: &Finding) -> Option<(NodeId, NodeId)> {
 /// position, so a plain subtree walk never sees its body. Follow every
 /// MethodRef descendant to its Method (matched by name AND line — lambda
 /// names like `<anon>` are ambiguous on their own), visited-bounded.
-pub(crate) fn authz_calls(
-    cpg: &Cpg,
-    authz_names: &HashSet<String>,
-    method: NodeId,
-) -> Vec<NodeId> {
+pub(crate) fn authz_calls(cpg: &Cpg, authz_names: &HashSet<String>, method: NodeId) -> Vec<NodeId> {
     let mut ref_index: Option<HashMap<(&str, u32), Vec<NodeId>>> = None;
     let mut visited: HashSet<NodeId> = HashSet::new();
     let mut work = vec![method];
@@ -171,8 +171,7 @@ pub(crate) fn authz_calls(
                     let (Some(nm), Some(code)) = (cpg.name_of(n), cpg.code_of(n)) else {
                         continue;
                     };
-                    if (authz_names.contains(nm) || is_authz_name(nm)) && is_invocation(code, nm)
-                    {
+                    if (authz_names.contains(nm) || is_authz_name(nm)) && is_invocation(code, nm) {
                         out.push(n);
                     }
                 }
@@ -217,8 +216,8 @@ pub(crate) fn is_invocation(code: &str, name: &str) -> bool {
         let start = from + pos;
         let end = start + name.len();
         from = start + 1;
-        let boundary_before = start == 0
-            || !(bytes[start - 1].is_ascii_alphanumeric() || bytes[start - 1] == b'_');
+        let boundary_before =
+            start == 0 || !(bytes[start - 1].is_ascii_alphanumeric() || bytes[start - 1] == b'_');
         if !boundary_before {
             continue;
         }
@@ -241,21 +240,69 @@ pub(crate) fn is_invocation(code: &str, name: &str) -> bool {
 pub fn is_authz_name(name: &str) -> bool {
     // Single tokens that are authz vocabulary on their own.
     const SINGLE: &[&str] = &[
-        "authz", "authn", "acl", "rbac", "authorize", "authorized", "authorizes",
-        "authorization", "authorise", "authorised", "authorisation", "authenticate",
-        "authenticated", "authentication", "permission", "permissions", "permitted",
-        "privilege", "privileges", "entitlement", "entitlements", "entitled",
+        "authz",
+        "authn",
+        "acl",
+        "rbac",
+        "authorize",
+        "authorized",
+        "authorizes",
+        "authorization",
+        "authorise",
+        "authorised",
+        "authorisation",
+        "authenticate",
+        "authenticated",
+        "authentication",
+        "permission",
+        "permissions",
+        "permitted",
+        "privilege",
+        "privileges",
+        "entitlement",
+        "entitlements",
+        "entitled",
     ];
     // A check-verb combined with an access-control noun (hasRole, IsAdmin,
     // checkAccess, requireAuth, validateScope, ensureOwner, canAccess...).
     const VERBS: &[&str] = &[
-        "check", "checks", "has", "have", "require", "requires", "required", "verify",
-        "validate", "validator", "validators", "assert", "ensure", "must", "is", "can",
-        "may", "enforce", "with", "guard",
+        "check",
+        "checks",
+        "has",
+        "have",
+        "require",
+        "requires",
+        "required",
+        "verify",
+        "validate",
+        "validator",
+        "validators",
+        "assert",
+        "ensure",
+        "must",
+        "is",
+        "can",
+        "may",
+        "enforce",
+        "with",
+        "guard",
     ];
     const NOUNS: &[&str] = &[
-        "auth", "access", "admin", "role", "roles", "scope", "scopes", "owner",
-        "ownership", "allowed", "perm", "perms", "jwt", "capability", "capabilities",
+        "auth",
+        "access",
+        "admin",
+        "role",
+        "roles",
+        "scope",
+        "scopes",
+        "owner",
+        "ownership",
+        "allowed",
+        "perm",
+        "perms",
+        "jwt",
+        "capability",
+        "capabilities",
         "oauth",
     ];
     let toks = word_tokens(name);
@@ -278,10 +325,36 @@ fn name_shape_ok(toks: &[String]) -> bool {
     // (`NormalizeAuthzContextFromReqCtx`, `toAuthzProto`), constructors
     // (`NewEnforcer` builds the checker; the check is a later call on it).
     const ACCESSOR_VERBS: &[&str] = &[
-        "get", "set", "list", "fetch", "load", "lookup", "new", "make", "create",
-        "init", "parse", "convert", "normalize", "extract", "derive", "build", "wrap",
-        "unwrap", "marshal", "unmarshal", "encode", "decode", "serialize",
-        "deserialize", "to", "from", "compute", "recompute", "union", "merge",
+        "get",
+        "set",
+        "list",
+        "fetch",
+        "load",
+        "lookup",
+        "new",
+        "make",
+        "create",
+        "init",
+        "parse",
+        "convert",
+        "normalize",
+        "extract",
+        "derive",
+        "build",
+        "wrap",
+        "unwrap",
+        "marshal",
+        "unmarshal",
+        "encode",
+        "decode",
+        "serialize",
+        "deserialize",
+        "to",
+        "from",
+        "compute",
+        "recompute",
+        "union",
+        "merge",
     ];
     // Leading tokens that MUTATE authz data. `upsertRolesForNestedTenant`,
     // `updatePolicyGroupVersion`, `ArchivePolicyGroupsByRuleIDs`, and
@@ -291,26 +364,78 @@ fn name_shape_ok(toks: &[String]) -> bool {
     // so a mutation-verb head disqualifies. Validation-corpus review found
     // this to be a recurring source of false inline-partial census verdicts.
     const MUTATION_VERBS: &[&str] = &[
-        "upsert", "update", "insert", "delete", "remove", "add", "archive", "send",
-        "publish", "emit", "provision", "modify", "save", "store", "write", "sync",
-        "persist", "assign", "apply", "grant", "revoke", "terminate", "reset",
-        "enable", "disable",
+        "upsert",
+        "update",
+        "insert",
+        "delete",
+        "remove",
+        "add",
+        "archive",
+        "send",
+        "publish",
+        "emit",
+        "provision",
+        "modify",
+        "save",
+        "store",
+        "write",
+        "sync",
+        "persist",
+        "assign",
+        "apply",
+        "grant",
+        "revoke",
+        "terminate",
+        "reset",
+        "enable",
+        "disable",
     ];
     // A name ENDING in a data-descriptor token names an authz-adjacent
     // value or component (`aclDeserializerFactory`, `authzContext`,
     // `AuthorizationError`), not an enforcement point.
     const DATA_SUFFIXES: &[&str] = &[
-        "factory", "builder", "resolver", "context", "ctx", "config", "conf", "dao",
-        "client", "provider", "serializer", "deserializer", "util", "utils", "helper",
-        "error", "err", "string", "type", "types", "id", "ids", "key", "keys", "name",
-        "names", "info", "group", "groups", "db", "database", "callback", "callbacks",
+        "factory",
+        "builder",
+        "resolver",
+        "context",
+        "ctx",
+        "config",
+        "conf",
+        "dao",
+        "client",
+        "provider",
+        "serializer",
+        "deserializer",
+        "util",
+        "utils",
+        "helper",
+        "error",
+        "err",
+        "string",
+        "type",
+        "types",
+        "id",
+        "ids",
+        "key",
+        "keys",
+        "name",
+        "names",
+        "info",
+        "group",
+        "groups",
+        "db",
+        "database",
+        "callback",
+        "callbacks",
     ];
     if toks.first().is_some_and(|t| {
         ACCESSOR_VERBS.contains(&t.as_str()) || MUTATION_VERBS.contains(&t.as_str())
     }) {
         return false;
     }
-    !toks.last().is_some_and(|t| DATA_SUFFIXES.contains(&t.as_str()))
+    !toks
+        .last()
+        .is_some_and(|t| DATA_SUFFIXES.contains(&t.as_str()))
 }
 
 /// Authz classification for a QUALIFIED spelling (`rbac.UnaryServerInterceptor`,
@@ -359,8 +484,9 @@ pub(crate) fn word_tokens(name: &str) -> Vec<String> {
         }
         if c.is_uppercase() {
             let prev_lower = i > 0 && (chars[i - 1].is_lowercase() || chars[i - 1].is_numeric());
-            let acronym_end =
-                i > 0 && chars[i - 1].is_uppercase() && chars.get(i + 1).is_some_and(|n| n.is_lowercase());
+            let acronym_end = i > 0
+                && chars[i - 1].is_uppercase()
+                && chars.get(i + 1).is_some_and(|n| n.is_lowercase());
             if (prev_lower || acronym_end) && !cur.is_empty() {
                 out.push(std::mem::take(&mut cur));
             }
@@ -415,36 +541,76 @@ mod tests {
     #[test]
     fn authz_name_heuristic_matches_words_not_substrings() {
         for yes in [
-            "authorize", "Authorized", "checkPermission", "check_acl", "RBACCheck",
-            "hasRole", "IsAdmin", "requireAuth", "canAccess", "validateScope",
-            "ensureOwner", "isAllowed", "WithAuthorization", "verifyEntitlements",
-            "JWTUnaryValidator", "checkCapability", "validateJWT",
+            "authorize",
+            "Authorized",
+            "checkPermission",
+            "check_acl",
+            "RBACCheck",
+            "hasRole",
+            "IsAdmin",
+            "requireAuth",
+            "canAccess",
+            "validateScope",
+            "ensureOwner",
+            "isAllowed",
+            "WithAuthorization",
+            "verifyEntitlements",
+            "JWTUnaryValidator",
+            "checkCapability",
+            "validateJWT",
         ] {
             assert!(is_authz_name(yes), "{yes} should look like authz");
         }
         for no in [
-            "cancel", "accessor", "rolling", "hash", "IsEmpty", "checkError",
-            "requireNonNull", "GetRole", "basicConfig", "canonicalize", "withContext",
+            "cancel",
+            "accessor",
+            "rolling",
+            "hash",
+            "IsEmpty",
+            "checkError",
+            "requireNonNull",
+            "GetRole",
+            "basicConfig",
+            "canonicalize",
+            "withContext",
             "administer",
             // Accessors READ authz state; they never enforce it.
-            "GetAuthzContext", "getPermissions", "ListRoles", "loadACL", "SetPermission",
+            "GetAuthzContext",
+            "getPermissions",
+            "ListRoles",
+            "loadACL",
+            "SetPermission",
             // Data-descriptor names carry authz values, they don't check them.
-            "aclDeserializerFactory", "aclResolverFactory", "authzContext",
-            "AuthorizationError", "permissionDao", "roleId", "AuthzCtx",
+            "aclDeserializerFactory",
+            "aclResolverFactory",
+            "authzContext",
+            "AuthorizationError",
+            "permissionDao",
+            "roleId",
+            "AuthzCtx",
             "LoginSessionInfo",
             // Shaping/constructing authz data is not enforcing it.
-            "NormalizeAuthzContextFromReqCtx", "toAuthzProto", "NewAuthorizer",
+            "NormalizeAuthzContextFromReqCtx",
+            "toAuthzProto",
+            "NewAuthorizer",
             "parsePermissions",
             // Mutating authz data is the gated ACTION, not the gate. A
             // validation-corpus review found this to be a recurring class of
             // false partials.
-            "upsertRolesForNestedTenant", "updatePolicyGroupVersion",
-            "ArchivePolicyGroupsByRuleIDs", "modifyPermissions",
-            "UpdateServiceAccountPrivileges", "upsertExternalAppAuthenticationStatus",
-            "sendAccessGrantSuccessOrFailureEvent", "grantRole",
-            "revokePermissions", "assignRoleToUser", "enableAdminConsoleWithoutPermission",
+            "upsertRolesForNestedTenant",
+            "updatePolicyGroupVersion",
+            "ArchivePolicyGroupsByRuleIDs",
+            "modifyPermissions",
+            "UpdateServiceAccountPrivileges",
+            "upsertExternalAppAuthenticationStatus",
+            "sendAccessGrantSuccessOrFailureEvent",
+            "grantRole",
+            "revokePermissions",
+            "assignRoleToUser",
+            "enableAdminConsoleWithoutPermission",
             // Type/enum conversions and groupings name authz-adjacent data.
-            "PermissionGroup", "ResourceWithPermissionGroups",
+            "PermissionGroup",
+            "ResourceWithPermissionGroups",
         ] {
             assert!(!is_authz_name(no), "{no} must NOT look like authz");
         }

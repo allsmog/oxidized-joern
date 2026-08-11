@@ -81,7 +81,10 @@ pub fn make_project(lang: &str) -> (Project, &'static [&'static str]) {
             &["cpp", "cc", "cxx", "hpp", "hxx", "hh", "h", "ipp"],
         ),
         _ => (
-            Project::new(|| Box::new(cpg_lang_c::CFrontend::new()), standard_pipeline()),
+            Project::new(
+                || Box::new(cpg_lang_c::CFrontend::new()),
+                standard_pipeline(),
+            ),
             &["c", "h"],
         ),
     }
@@ -111,7 +114,10 @@ pub fn build_project_ext(
     load_externals(&mut project, external_summaries);
     let mut sources: Vec<(String, String)> = Vec::new();
     collect_sources_filtered(std::path::Path::new(dir), exts, excludes, &mut sources);
-    let refs: Vec<(&str, &str)> = sources.iter().map(|(p, s)| (p.as_str(), s.as_str())).collect();
+    let refs: Vec<(&str, &str)> = sources
+        .iter()
+        .map(|(p, s)| (p.as_str(), s.as_str()))
+        .collect();
     let stats = project.build(&refs);
     eprintln!(
         "built {} files in {:?} (parallel {:?}, merge {:?}, passes {:?}, summaries {:?})",
@@ -147,9 +153,9 @@ fn load_externals(project: &mut Project, json: Option<&str>) {
 pub fn open_project(args: &[String]) -> Result<Project, String> {
     let lang = flag(args, "--lang").unwrap_or("c");
     let ext_json: Option<String> = match flag(args, "--summaries") {
-        Some(path) => Some(
-            std::fs::read_to_string(path).map_err(|e| format!("--summaries {path}: {e}"))?,
-        ),
+        Some(path) => {
+            Some(std::fs::read_to_string(path).map_err(|e| format!("--summaries {path}: {e}"))?)
+        }
         None => None,
     };
     if let Some(load) = flag(args, "--load") {
@@ -163,7 +169,12 @@ pub fn open_project(args: &[String]) -> Result<Project, String> {
         let Some(dir) = args.get(2).filter(|d| !d.starts_with("--")) else {
             return Err("missing <dir> (or --load <graph.cpg>)".to_string());
         };
-        Ok(build_project_ext(dir, lang, &flags(args, "--exclude"), ext_json.as_deref()))
+        Ok(build_project_ext(
+            dir,
+            lang,
+            &flags(args, "--exclude"),
+            ext_json.as_deref(),
+        ))
     }
 }
 
@@ -287,7 +298,8 @@ pub fn entries_from_glob(cpg: &Cpg, pat: &str) -> Vec<String> {
         .filter(|&m| {
             cpg.full_name_of(m).is_some_and(|f| glob_match(name_pat, f))
                 && file_pat.is_none_or(|fp| {
-                    cpg.path_of(cpg.file_of(m)).is_some_and(|p| glob_match(fp, p))
+                    cpg.path_of(cpg.file_of(m))
+                        .is_some_and(|p| glob_match(fp, p))
                 })
         })
         .filter_map(|m| cpg.full_name_of(m).map(str::to_string))
@@ -344,8 +356,11 @@ pub fn finding_json(f: &cpg_analysis::Finding) -> Value {
             })
         })
         .collect();
-    let provenance: Vec<String> =
-        f.path.iter().map(|s| format!("{:?}", s.provenance)).collect();
+    let provenance: Vec<String> = f
+        .path
+        .iter()
+        .map(|s| format!("{:?}", s.provenance))
+        .collect();
     json!({
         "method": f.method,
         "sink": f.sink,
@@ -450,7 +465,11 @@ pub fn handle(p: &mut Project, req: &Value) -> Value {
             let parse = |key: &str| -> Vec<String> {
                 req.get(key)
                     .and_then(|v| v.as_array())
-                    .map(|a| a.iter().filter_map(|x| x.as_str().map(String::from)).collect())
+                    .map(|a| {
+                        a.iter()
+                            .filter_map(|x| x.as_str().map(String::from))
+                            .collect()
+                    })
                     .unwrap_or_default()
             };
             let sources = parse("sources");
@@ -500,7 +519,10 @@ pub fn handle(p: &mut Project, req: &Value) -> Value {
             };
             match p.update_file(path, source) {
                 UpdateOutcome::Unchanged => json!({"updated": false}),
-                UpdateOutcome::Rebuilt { files_reanalysed, summaries_recomputed } => json!({
+                UpdateOutcome::Rebuilt {
+                    files_reanalysed,
+                    summaries_recomputed,
+                } => json!({
                     "updated": true,
                     "filesReanalysed": files_reanalysed,
                     "summariesRecomputed": summaries_recomputed,
@@ -508,7 +530,9 @@ pub fn handle(p: &mut Project, req: &Value) -> Value {
             }
         }
         Some("quit") => json!({"quit": true}),
-        _ => json!({"error": "unknown cmd; one of stats|methods|calls|summary|taint|scan|update|quit"}),
+        _ => {
+            json!({"error": "unknown cmd; one of stats|methods|calls|summary|taint|scan|update|quit"})
+        }
     }
 }
 
@@ -558,7 +582,10 @@ mod glob_tests {
     #[test]
     fn glob_match_star_semantics() {
         assert!(glob_match("Queries.*", "Queries.clusterDns"));
-        assert!(glob_match("*/schema/resolvers/*", "app/apps/cluster/schema/resolvers/Queries.scala"));
+        assert!(glob_match(
+            "*/schema/resolvers/*",
+            "app/apps/cluster/schema/resolvers/Queries.scala"
+        ));
         assert!(glob_match("*", "anything"));
         assert!(glob_match("exact", "exact"));
         assert!(!glob_match("Queries.*", "Mutations.removeVlans"));

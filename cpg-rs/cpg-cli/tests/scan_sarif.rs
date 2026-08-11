@@ -65,10 +65,15 @@ fn scan_emits_valid_sarif_with_codeflows() {
     // The emitted SARIF must parse back as JSON.
     let parsed: Value = serde_json::from_str(&text).expect("SARIF output is valid JSON");
     assert_eq!(parsed["version"], "2.1.0");
-    assert!(parsed["$schema"].as_str().unwrap().contains("sarif-schema-2.1.0"));
+    assert!(parsed["$schema"]
+        .as_str()
+        .unwrap()
+        .contains("sarif-schema-2.1.0"));
 
     // The rule pack is mapped onto tool.driver.rules with metadata.
-    let rules = parsed["runs"][0]["tool"]["driver"]["rules"].as_array().unwrap();
+    let rules = parsed["runs"][0]["tool"]["driver"]["rules"]
+        .as_array()
+        .unwrap();
     let cpg001 = rules
         .iter()
         .find(|r| r["id"] == "CPG-001")
@@ -91,15 +96,28 @@ fn scan_emits_valid_sarif_with_codeflows() {
     let steps = hit["codeFlows"][0]["threadFlows"][0]["locations"]
         .as_array()
         .unwrap();
-    assert!(steps.len() >= 2, "witness path must have >= 2 steps, got {}", steps.len());
+    assert!(
+        steps.len() >= 2,
+        "witness path must have >= 2 steps, got {}",
+        steps.len()
+    );
     for step in steps {
-        assert!(step["location"]["message"]["text"].as_str().unwrap().len() > 0);
+        assert!(!step["location"]["message"]["text"]
+            .as_str()
+            .unwrap()
+            .is_empty());
         let uri = step["location"]["physicalLocation"]["artifactLocation"]["uri"]
             .as_str()
             .unwrap();
-        assert!(uri.ends_with("vuln.c"), "step uri should point at the fixture, got {uri}");
         assert!(
-            step["location"]["physicalLocation"]["region"]["startLine"].as_u64().unwrap() >= 1
+            uri.ends_with("vuln.c"),
+            "step uri should point at the fixture, got {uri}"
+        );
+        assert!(
+            step["location"]["physicalLocation"]["region"]["startLine"]
+                .as_u64()
+                .unwrap()
+                >= 1
         );
     }
     let codes: Vec<&str> = steps
@@ -117,7 +135,10 @@ fn scan_emits_valid_sarif_with_codeflows() {
 
     // The top-level result location points at the sink line.
     assert!(
-        hit["locations"][0]["physicalLocation"]["region"]["startLine"].as_u64().unwrap() >= 1
+        hit["locations"][0]["physicalLocation"]["region"]["startLine"]
+            .as_u64()
+            .unwrap()
+            >= 1
     );
 }
 
@@ -138,7 +159,9 @@ fn server_scan_command_groups_findings_by_rule_id() {
         ]}),
     );
 
-    let grouped = resp["findings"].as_object().expect("findings grouped by rule id");
+    let grouped = resp["findings"]
+        .as_object()
+        .expect("findings grouped by rule id");
     let hits = grouped["CPG-001"].as_array().unwrap();
     assert!(!hits.is_empty(), "CPG-001 should fire on the fixture");
     assert_eq!(hits[0]["sink"], "system");
@@ -148,7 +171,10 @@ fn server_scan_command_groups_findings_by_rule_id() {
     assert_eq!(grouped["CPG-XXX"].as_array().unwrap().len(), 0);
 
     // Malformed rules are rejected with an error, not a panic.
-    let bad = handle(&mut project, &json!({"cmd": "scan", "rules": [{"name": "no-id"}]}));
+    let bad = handle(
+        &mut project,
+        &json!({"cmd": "scan", "rules": [{"name": "no-id"}]}),
+    );
     assert!(bad["error"].as_str().unwrap().contains("bad rules"));
     let missing = handle(&mut project, &json!({"cmd": "scan"}));
     assert!(missing["error"].as_str().is_some());

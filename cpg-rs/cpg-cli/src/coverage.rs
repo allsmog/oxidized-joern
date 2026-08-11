@@ -56,8 +56,15 @@ pub fn coverage_report(
                 .is_some_and(|ch| ch.is_alphabetic() || ch == '_')
         })
         .collect();
-    let unresolved = named.iter().filter(|&&c| cpg.call_target(c).is_none()).count();
-    let pct = if named.is_empty() { 0.0 } else { 100.0 * unresolved as f64 / named.len() as f64 };
+    let unresolved = named
+        .iter()
+        .filter(|&&c| cpg.call_target(c).is_none())
+        .count();
+    let pct = if named.is_empty() {
+        0.0
+    } else {
+        100.0 * unresolved as f64 / named.len() as f64
+    };
     let _ = writeln!(
         out,
         "coverage: {} named calls, {unresolved} unresolved ({pct:.0}%) — unresolved calls \
@@ -85,9 +92,13 @@ pub fn coverage_report(
     }
     let is_match = |e: &str| simple.contains(e) || full.contains(e);
     if !curated.is_empty() {
-        let unmatched: Vec<&str> =
-            curated.iter().map(String::as_str).filter(|e| !is_match(e)).collect();
-        let quiet = curated.len() - unmatched.len()
+        let unmatched: Vec<&str> = curated
+            .iter()
+            .map(String::as_str)
+            .filter(|e| !is_match(e))
+            .collect();
+        let quiet = curated.len()
+            - unmatched.len()
             - curated
                 .iter()
                 .filter(|e| is_match(e) && finding_simple.contains(e.as_str()))
@@ -123,9 +134,10 @@ pub fn coverage_report(
     let mut dead_sinks: Vec<&str> = Vec::new();
     let mut seen: HashSet<&str> = HashSet::new();
     for rule in &pack.rules {
-        for (list, dead) in
-            [(&rule.sources, &mut dead_sources), (&rule.sinks, &mut dead_sinks)]
-        {
+        for (list, dead) in [
+            (&rule.sources, &mut dead_sources),
+            (&rule.sinks, &mut dead_sinks),
+        ] {
             for raw in list.iter() {
                 // Pseudo-sinks (`<shellform>`) and assignment sinks
                 // (`=account`) match SHAPES/store keys, not call names —
@@ -158,8 +170,11 @@ pub fn coverage_report(
     }
     if !dead_sinks.is_empty() {
         dead_sinks.sort_unstable();
-        let _ =
-            writeln!(out, "coverage: sinks with zero call sites: {}", brief(&dead_sinks, 15));
+        let _ = writeln!(
+            out,
+            "coverage: sinks with zero call sites: {}",
+            brief(&dead_sinks, 15)
+        );
     }
     out
 }
@@ -225,8 +240,14 @@ mod tests {
         assert!(report.contains("UNMATCHED curated entries"), "{report}");
         assert!(report.contains("NoSuchEntry"), "{report}");
         // Query resolves via @1 normalization and exists; Exec and getenv do not.
-        assert!(report.contains("sources with zero call sites: getenv"), "{report}");
-        assert!(report.contains("sinks with zero call sites: Exec"), "{report}");
+        assert!(
+            report.contains("sources with zero call sites: getenv"),
+            "{report}"
+        );
+        assert!(
+            report.contains("sinks with zero call sites: Exec"),
+            "{report}"
+        );
         assert!(!report.contains("Query,"), "{report}");
     }
 }

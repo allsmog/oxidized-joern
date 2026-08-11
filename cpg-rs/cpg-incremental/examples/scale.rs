@@ -29,8 +29,14 @@ fn gen_file(file_idx: usize, fns_per_file: usize) -> String {
 }
 
 fn main() {
-    let n_files: usize = std::env::var("FILES").ok().and_then(|v| v.parse().ok()).unwrap_or(2000);
-    let fns_per_file: usize = std::env::var("FNS").ok().and_then(|v| v.parse().ok()).unwrap_or(20);
+    let n_files: usize = std::env::var("FILES")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(2000);
+    let fns_per_file: usize = std::env::var("FNS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(20);
 
     // A shared helper so call resolution has cross-file work to do.
     let mut sources: Vec<(String, String)> = vec![(
@@ -43,7 +49,10 @@ fn main() {
     let total_fns = n_files * fns_per_file + 1;
     let approx_lines: usize = sources.iter().map(|(_, s)| s.lines().count()).sum();
 
-    let refs: Vec<(&str, &str)> = sources.iter().map(|(p, s)| (p.as_str(), s.as_str())).collect();
+    let refs: Vec<(&str, &str)> = sources
+        .iter()
+        .map(|(p, s)| (p.as_str(), s.as_str()))
+        .collect();
 
     let mut p = Project::new(|| Box::new(CFrontend::new()), standard_pipeline());
 
@@ -52,8 +61,10 @@ fn main() {
     let build = t0.elapsed();
 
     println!("== full build ==");
-    println!("phase parse+build: {:?}  (parallel {:?} + merge {:?})",
-        stats.parse_build, stats.parallel_frontend, stats.merge);
+    println!(
+        "phase parse+build: {:?}  (parallel {:?} + merge {:?})",
+        stats.parse_build, stats.parallel_frontend, stats.merge
+    );
     println!("phase passes:      {:?}", stats.passes);
     println!("phase summaries:   {:?}", stats.summaries);
     println!("files:            {}", refs.len());
@@ -82,7 +93,10 @@ fn main() {
     println!("on-disk size:     {} MB", size / (1024 * 1024));
     println!("bytes/node:       {}", size / node_count(&p).max(1) as u64);
     println!("save time:        {save:?}");
-    println!("load time:        {load:?}  ({} nodes, no parsing)", reloaded.live_count());
+    println!(
+        "load time:        {load:?}  ({} nodes, no parsing)",
+        reloaded.live_count()
+    );
     let _ = std::fs::remove_file(path);
 
     // Now edit ONE file and measure.
@@ -93,9 +107,15 @@ fn main() {
 
     println!("\n== incremental edit (1 file of {}) ==", refs.len());
     match outcome {
-        UpdateOutcome::Rebuilt { files_reanalysed, summaries_recomputed } => {
+        UpdateOutcome::Rebuilt {
+            files_reanalysed,
+            summaries_recomputed,
+        } => {
             println!("files re-analysed:     {files_reanalysed}");
-            println!("summaries recomputed:  {summaries_recomputed}  (vs {} total)", p.summaries.len());
+            println!(
+                "summaries recomputed:  {summaries_recomputed}  (vs {} total)",
+                p.summaries.len()
+            );
         }
         UpdateOutcome::Unchanged => println!("unchanged"),
     }

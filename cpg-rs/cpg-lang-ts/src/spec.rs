@@ -10,6 +10,10 @@
 use cpg_frontend::LanguageTraits;
 use tree_sitter::Language;
 
+/// Per-extension grammar overrides: file extension -> grammar constructor.
+/// The override's node kinds must be handled by the same spec fields.
+type DialectTable = &'static [(&'static str, fn() -> Language)];
+
 /// One assignment/declaration form: a node kind plus the fields holding the
 /// left-hand target and the right-hand value.
 #[derive(Clone, Copy)]
@@ -31,7 +35,7 @@ pub struct TsLangSpec {
     /// `tsx`: JSX syntax is not parseable by the plain grammar, and the TSX
     /// grammar mis-parses `<T>x` casts — so the extension picks the grammar).
     /// The override's node kinds must be handled by the same spec fields.
-    pub dialects: &'static [(&'static str, fn() -> Language)],
+    pub dialects: DialectTable,
 
     /// Node kinds that declare a function/method.
     pub function_kinds: &'static [&'static str],
@@ -141,11 +145,29 @@ impl TsLangSpec {
 }
 
 const CONTROL: &[&str] = &[
-    "if_statement", "if_expression", "for_statement", "for_expression",
-    "while_statement", "while_expression", "loop_expression", "enhanced_for_statement",
-    "switch_statement", "switch_expression", "match_expression", "expression_switch_statement",
-    "try_statement", "with_statement", "do_statement", "unless", "until", "case", "when",
-    "for_in_statement", "for_of_statement", "labeled_statement", "for_range_loop",
+    "if_statement",
+    "if_expression",
+    "for_statement",
+    "for_expression",
+    "while_statement",
+    "while_expression",
+    "loop_expression",
+    "enhanced_for_statement",
+    "switch_statement",
+    "switch_expression",
+    "match_expression",
+    "expression_switch_statement",
+    "try_statement",
+    "with_statement",
+    "do_statement",
+    "unless",
+    "until",
+    "case",
+    "when",
+    "for_in_statement",
+    "for_of_statement",
+    "labeled_statement",
+    "for_range_loop",
 ];
 
 const RETURNS: &[&str] = &["return_statement", "return_expression"];
@@ -154,7 +176,8 @@ pub fn java() -> TsLangSpec {
     TsLangSpec {
         name: "Java",
         namespace_delim: ".",
-        traits: LanguageTraits::HAS_CLASSES | LanguageTraits::HAS_GENERICS
+        traits: LanguageTraits::HAS_CLASSES
+            | LanguageTraits::HAS_GENERICS
             | LanguageTraits::HAS_OVERLOADING,
         extensions: &["java"],
         language: tree_sitter_java::LANGUAGE.into(),
@@ -163,8 +186,16 @@ pub fn java() -> TsLangSpec {
         call_kinds: &["method_invocation"],
         callee_field: "name",
         assign_forms: &[
-            AssignForm { kind: "variable_declarator", lhs_field: "name", rhs_field: "value" },
-            AssignForm { kind: "assignment_expression", lhs_field: "left", rhs_field: "right" },
+            AssignForm {
+                kind: "variable_declarator",
+                lhs_field: "name",
+                rhs_field: "value",
+            },
+            AssignForm {
+                kind: "assignment_expression",
+                lhs_field: "left",
+                rhs_field: "right",
+            },
         ],
         control_kinds: CONTROL,
         return_kinds: RETURNS,
@@ -195,9 +226,21 @@ pub fn go() -> TsLangSpec {
         call_kinds: &["call_expression"],
         callee_field: "function",
         assign_forms: &[
-            AssignForm { kind: "short_var_declaration", lhs_field: "left", rhs_field: "right" },
-            AssignForm { kind: "assignment_statement", lhs_field: "left", rhs_field: "right" },
-            AssignForm { kind: "var_spec", lhs_field: "name", rhs_field: "value" },
+            AssignForm {
+                kind: "short_var_declaration",
+                lhs_field: "left",
+                rhs_field: "right",
+            },
+            AssignForm {
+                kind: "assignment_statement",
+                lhs_field: "left",
+                rhs_field: "right",
+            },
+            AssignForm {
+                kind: "var_spec",
+                lhs_field: "name",
+                rhs_field: "value",
+            },
         ],
         control_kinds: CONTROL,
         return_kinds: RETURNS,
@@ -220,21 +263,34 @@ pub fn javascript() -> TsLangSpec {
     TsLangSpec {
         name: "JavaScript",
         namespace_delim: ".",
-        traits: LanguageTraits::HAS_CLASSES | LanguageTraits::HAS_FUNCTION_POINTERS
-            | LanguageTraits::ALLOWS_FORWARD_REFS | LanguageTraits::STRUCTURAL_TYPING
+        traits: LanguageTraits::HAS_CLASSES
+            | LanguageTraits::HAS_FUNCTION_POINTERS
+            | LanguageTraits::ALLOWS_FORWARD_REFS
+            | LanguageTraits::STRUCTURAL_TYPING
             | LanguageTraits::HAS_DEFAULT_ARGS,
         extensions: &["js", "mjs", "cjs"],
         language: tree_sitter_javascript::LANGUAGE.into(),
         function_kinds: &[
-            "function_declaration", "function_expression", "method_definition",
-            "arrow_function", "generator_function_declaration",
+            "function_declaration",
+            "function_expression",
+            "method_definition",
+            "arrow_function",
+            "generator_function_declaration",
         ],
         param_container_kinds: &["formal_parameters"],
         call_kinds: &["call_expression"],
         callee_field: "function",
         assign_forms: &[
-            AssignForm { kind: "variable_declarator", lhs_field: "name", rhs_field: "value" },
-            AssignForm { kind: "assignment_expression", lhs_field: "left", rhs_field: "right" },
+            AssignForm {
+                kind: "variable_declarator",
+                lhs_field: "name",
+                rhs_field: "value",
+            },
+            AssignForm {
+                kind: "assignment_expression",
+                lhs_field: "left",
+                rhs_field: "right",
+            },
         ],
         control_kinds: CONTROL,
         return_kinds: RETURNS,
@@ -257,22 +313,35 @@ pub fn typescript() -> TsLangSpec {
     TsLangSpec {
         name: "TypeScript",
         namespace_delim: ".",
-        traits: LanguageTraits::HAS_CLASSES | LanguageTraits::HAS_GENERICS
-            | LanguageTraits::HAS_FUNCTION_POINTERS | LanguageTraits::ALLOWS_FORWARD_REFS
+        traits: LanguageTraits::HAS_CLASSES
+            | LanguageTraits::HAS_GENERICS
+            | LanguageTraits::HAS_FUNCTION_POINTERS
+            | LanguageTraits::ALLOWS_FORWARD_REFS
             | LanguageTraits::HAS_DEFAULT_ARGS,
         extensions: &["ts", "tsx", "mts", "cts"],
         language: tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
         dialects: TS_DIALECTS,
         function_kinds: &[
-            "function_declaration", "function_expression", "method_definition",
-            "arrow_function", "generator_function_declaration",
+            "function_declaration",
+            "function_expression",
+            "method_definition",
+            "arrow_function",
+            "generator_function_declaration",
         ],
         param_container_kinds: &["formal_parameters"],
         call_kinds: &["call_expression"],
         callee_field: "function",
         assign_forms: &[
-            AssignForm { kind: "variable_declarator", lhs_field: "name", rhs_field: "value" },
-            AssignForm { kind: "assignment_expression", lhs_field: "left", rhs_field: "right" },
+            AssignForm {
+                kind: "variable_declarator",
+                lhs_field: "name",
+                rhs_field: "value",
+            },
+            AssignForm {
+                kind: "assignment_expression",
+                lhs_field: "left",
+                rhs_field: "right",
+            },
         ],
         control_kinds: CONTROL,
         return_kinds: RETURNS,
@@ -297,14 +366,16 @@ pub fn typescript() -> TsLangSpec {
 fn tsx_language() -> Language {
     tree_sitter_typescript::LANGUAGE_TSX.into()
 }
-const TS_DIALECTS: &[(&str, fn() -> Language)] = &[("tsx", tsx_language)];
+const TS_DIALECTS: DialectTable = &[("tsx", tsx_language)];
 
 pub fn ruby() -> TsLangSpec {
     TsLangSpec {
         name: "Ruby",
         namespace_delim: "::",
-        traits: LanguageTraits::HAS_CLASSES | LanguageTraits::ALLOWS_FORWARD_REFS
-            | LanguageTraits::STRUCTURAL_TYPING | LanguageTraits::HAS_DEFAULT_ARGS,
+        traits: LanguageTraits::HAS_CLASSES
+            | LanguageTraits::ALLOWS_FORWARD_REFS
+            | LanguageTraits::STRUCTURAL_TYPING
+            | LanguageTraits::HAS_DEFAULT_ARGS,
         extensions: &["rb"],
         language: tree_sitter_ruby::LANGUAGE.into(),
         function_kinds: &["method", "singleton_method"],
@@ -312,8 +383,16 @@ pub fn ruby() -> TsLangSpec {
         call_kinds: &["call", "command", "command_call"],
         callee_field: "method",
         assign_forms: &[
-            AssignForm { kind: "assignment", lhs_field: "left", rhs_field: "right" },
-            AssignForm { kind: "operator_assignment", lhs_field: "left", rhs_field: "right" },
+            AssignForm {
+                kind: "assignment",
+                lhs_field: "left",
+                rhs_field: "right",
+            },
+            AssignForm {
+                kind: "operator_assignment",
+                lhs_field: "left",
+                rhs_field: "right",
+            },
         ],
         control_kinds: CONTROL,
         return_kinds: RETURNS,
@@ -336,7 +415,8 @@ pub fn rust() -> TsLangSpec {
     TsLangSpec {
         name: "Rust",
         namespace_delim: "::",
-        traits: LanguageTraits::HAS_GENERICS | LanguageTraits::HAS_FUNCTION_POINTERS
+        traits: LanguageTraits::HAS_GENERICS
+            | LanguageTraits::HAS_FUNCTION_POINTERS
             | LanguageTraits::STRUCTURAL_TYPING,
         extensions: &["rs"],
         language: tree_sitter_rust::LANGUAGE.into(),
@@ -345,8 +425,16 @@ pub fn rust() -> TsLangSpec {
         call_kinds: &["call_expression", "macro_invocation"],
         callee_field: "function",
         assign_forms: &[
-            AssignForm { kind: "let_declaration", lhs_field: "pattern", rhs_field: "value" },
-            AssignForm { kind: "assignment_expression", lhs_field: "left", rhs_field: "right" },
+            AssignForm {
+                kind: "let_declaration",
+                lhs_field: "pattern",
+                rhs_field: "value",
+            },
+            AssignForm {
+                kind: "assignment_expression",
+                lhs_field: "left",
+                rhs_field: "right",
+            },
         ],
         control_kinds: CONTROL,
         return_kinds: RETURNS,
@@ -369,8 +457,10 @@ pub fn python() -> TsLangSpec {
     TsLangSpec {
         name: "Python",
         namespace_delim: ".",
-        traits: LanguageTraits::HAS_CLASSES | LanguageTraits::ALLOWS_FORWARD_REFS
-            | LanguageTraits::STRUCTURAL_TYPING | LanguageTraits::HAS_DEFAULT_ARGS,
+        traits: LanguageTraits::HAS_CLASSES
+            | LanguageTraits::ALLOWS_FORWARD_REFS
+            | LanguageTraits::STRUCTURAL_TYPING
+            | LanguageTraits::HAS_DEFAULT_ARGS,
         extensions: &["py"],
         language: tree_sitter_python::LANGUAGE.into(),
         function_kinds: &["function_definition"],
@@ -378,8 +468,16 @@ pub fn python() -> TsLangSpec {
         call_kinds: &["call"],
         callee_field: "function",
         assign_forms: &[
-            AssignForm { kind: "assignment", lhs_field: "left", rhs_field: "right" },
-            AssignForm { kind: "augmented_assignment", lhs_field: "left", rhs_field: "right" },
+            AssignForm {
+                kind: "assignment",
+                lhs_field: "left",
+                rhs_field: "right",
+            },
+            AssignForm {
+                kind: "augmented_assignment",
+                lhs_field: "left",
+                rhs_field: "right",
+            },
         ],
         control_kinds: CONTROL,
         return_kinds: RETURNS,
@@ -402,8 +500,10 @@ pub fn scala() -> TsLangSpec {
     TsLangSpec {
         name: "Scala",
         namespace_delim: ".",
-        traits: LanguageTraits::HAS_CLASSES | LanguageTraits::HAS_GENERICS
-            | LanguageTraits::HAS_OVERLOADING | LanguageTraits::HAS_DEFAULT_ARGS,
+        traits: LanguageTraits::HAS_CLASSES
+            | LanguageTraits::HAS_GENERICS
+            | LanguageTraits::HAS_OVERLOADING
+            | LanguageTraits::HAS_DEFAULT_ARGS,
         extensions: &["scala", "sc"],
         language: tree_sitter_scala::LANGUAGE.into(),
         function_kinds: &["function_definition", "lambda_expression"],
@@ -411,16 +511,26 @@ pub fn scala() -> TsLangSpec {
         call_kinds: &["call_expression"],
         callee_field: "function",
         assign_forms: &[
-            AssignForm { kind: "val_definition", lhs_field: "pattern", rhs_field: "value" },
-            AssignForm { kind: "var_definition", lhs_field: "pattern", rhs_field: "value" },
-            AssignForm { kind: "assignment_expression", lhs_field: "left", rhs_field: "right" },
+            AssignForm {
+                kind: "val_definition",
+                lhs_field: "pattern",
+                rhs_field: "value",
+            },
+            AssignForm {
+                kind: "var_definition",
+                lhs_field: "pattern",
+                rhs_field: "value",
+            },
+            AssignForm {
+                kind: "assignment_expression",
+                lhs_field: "left",
+                rhs_field: "right",
+            },
         ],
         control_kinds: CONTROL,
         return_kinds: RETURNS,
         implicit_return: true,
-        type_container_kinds: &[
-            "object_definition", "class_definition", "trait_definition",
-        ],
+        type_container_kinds: &["object_definition", "class_definition", "trait_definition"],
         receiver_field: None,
         ctor_sugar_method: Some("apply"),
         declarator_field: None,
@@ -438,8 +548,10 @@ pub fn cpp() -> TsLangSpec {
     TsLangSpec {
         name: "C++",
         namespace_delim: "::",
-        traits: LanguageTraits::HAS_CLASSES | LanguageTraits::HAS_GENERICS
-            | LanguageTraits::HAS_OVERLOADING | LanguageTraits::HAS_FUNCTION_POINTERS,
+        traits: LanguageTraits::HAS_CLASSES
+            | LanguageTraits::HAS_GENERICS
+            | LanguageTraits::HAS_OVERLOADING
+            | LanguageTraits::HAS_FUNCTION_POINTERS,
         extensions: &["cpp", "cc", "cxx", "hpp", "hxx", "hh", "h", "ipp"],
         language: tree_sitter_cpp::LANGUAGE.into(),
         // Pure declarations (`void f(int);`) are `declaration` nodes, not
@@ -450,13 +562,25 @@ pub fn cpp() -> TsLangSpec {
         call_kinds: &["call_expression"],
         callee_field: "function",
         assign_forms: &[
-            AssignForm { kind: "init_declarator", lhs_field: "declarator", rhs_field: "value" },
-            AssignForm { kind: "assignment_expression", lhs_field: "left", rhs_field: "right" },
+            AssignForm {
+                kind: "init_declarator",
+                lhs_field: "declarator",
+                rhs_field: "value",
+            },
+            AssignForm {
+                kind: "assignment_expression",
+                lhs_field: "left",
+                rhs_field: "right",
+            },
         ],
         control_kinds: CONTROL,
         return_kinds: RETURNS,
         implicit_return: false,
-        type_container_kinds: &["class_specifier", "struct_specifier", "namespace_definition"],
+        type_container_kinds: &[
+            "class_specifier",
+            "struct_specifier",
+            "namespace_definition",
+        ],
         receiver_field: None,
         ctor_sugar_method: None,
         declarator_field: Some("declarator"),
@@ -464,9 +588,18 @@ pub fn cpp() -> TsLangSpec {
         base_clause_kinds: &["base_class_clause"],
         member_kinds: &["field_declaration"],
         smart_ptr_names: &[
-            "shared_ptr", "unique_ptr", "weak_ptr", "scoped_ptr", "intrusive_ptr",
+            "shared_ptr",
+            "unique_ptr",
+            "weak_ptr",
+            "scoped_ptr",
+            "intrusive_ptr",
         ],
-        ctor_factories: &["make_shared", "make_unique", "allocate_shared", "make_scoped"],
+        ctor_factories: &[
+            "make_shared",
+            "make_unique",
+            "allocate_shared",
+            "make_scoped",
+        ],
         preprocess: Some(cpp_cli_shim),
         dialects: &[],
     }

@@ -83,7 +83,11 @@ pub fn write_vectors(cpg: &Cpg, dim_to_feature: bool, w: &mut impl Write) -> std
             *counts.entry(format!("{k}:{v}")).or_insert(0.0) += 1.0;
         }
         let sep = if i + 1 == nodes.len() { "" } else { "," };
-        writeln!(w, "{}{sep}", serde_json::to_string(&counts).expect("serialize"))?;
+        writeln!(
+            w,
+            "{}{sep}",
+            serde_json::to_string(&counts).expect("serialize")
+        )?;
     }
     writeln!(w, "]")?;
 

@@ -380,7 +380,9 @@ impl Cpg {
             .into_iter()
             .map(NodeKind::from_u8)
             .collect();
-        cpg.file = (0..n).map(|_| r.u32().map(FileId)).collect::<Result<_, _>>()?;
+        cpg.file = (0..n)
+            .map(|_| r.u32().map(FileId))
+            .collect::<Result<_, _>>()?;
         let mut sym_col = || -> Result<Vec<Option<Sym>>, DecodeError> {
             (0..n).map(|_| r.opt_u32().map(|o| o.map(Sym))).collect()
         };
@@ -393,7 +395,9 @@ impl Cpg {
         cpg.line = (0..n).map(|_| r.opt_u32()).collect::<Result<_, _>>()?;
         cpg.order = (0..n).map(|_| r.i32()).collect::<Result<_, _>>()?;
         cpg.argument_index = (0..n).map(|_| r.i32()).collect::<Result<_, _>>()?;
-        cpg.live = (0..n).map(|_| Ok(r.u8()? != 0)).collect::<Result<_, DecodeError>>()?;
+        cpg.live = (0..n)
+            .map(|_| Ok(r.u8()? != 0))
+            .collect::<Result<_, DecodeError>>()?;
 
         cpg.out_edges = Vec::with_capacity(n);
         cpg.in_edges = vec![Vec::new(); n];
@@ -450,7 +454,8 @@ impl Cpg {
     /// Load from a file path.
     pub fn load(path: &str) -> std::io::Result<Cpg> {
         let data = std::fs::read(path)?;
-        Cpg::from_bytes(&data).map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.0))
+        Cpg::from_bytes(&data)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.0))
     }
 
     /// Merge another graph into this one, remapping node ids, file ids and

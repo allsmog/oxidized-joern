@@ -27,12 +27,20 @@ pub struct RulePack {
     /// Caller-context marker phrases used by the authorization census.
     /// Absent preserves the engine defaults; an explicit empty array disables
     /// the caller-context verdict tier.
-    #[serde(default, rename = "callerContextMarkers", alias = "caller_context_markers")]
+    #[serde(
+        default,
+        rename = "callerContextMarkers",
+        alias = "caller_context_markers"
+    )]
     pub caller_context_markers: Option<Vec<String>>,
     /// Service-framework constructor call names reported by the authorization
     /// census as non-enforcing framework evidence. Absent preserves the engine
     /// defaults; an explicit empty array disables this evidence.
-    #[serde(default, rename = "frameworkServerCalls", alias = "framework_server_calls")]
+    #[serde(
+        default,
+        rename = "frameworkServerCalls",
+        alias = "framework_server_calls"
+    )]
     pub framework_server_calls: Option<Vec<String>>,
 }
 
@@ -128,7 +136,10 @@ impl RulePack {
         match arg.strip_prefix("iris:") {
             Some(name) => iris_pack(name).ok_or_else(|| {
                 let names: Vec<&str> = IRIS_PACKS.iter().map(|(n, _)| *n).collect();
-                format!("no IRIS pack named '{name}'; available: {}", names.join(", "))
+                format!(
+                    "no IRIS pack named '{name}'; available: {}",
+                    names.join(", ")
+                )
             }),
             None => RulePack::from_file(arg),
         }
@@ -157,16 +168,34 @@ impl RulePack {
 /// a codebase family, usually entry-driven (empty or placeholder sources —
 /// pair them with `--rpc-sources`/`--thrift-sources`/`--entry`).
 pub const IRIS_PACKS: &[(&str, &str)] = &[
-    ("auth-discard", include_str!("../../iris/packs/auth-discard.json")),
-    ("authz-overwrite", include_str!("../../iris/packs/authz-overwrite.json")),
-    ("header-trust", include_str!("../../iris/packs/header-trust.json")),
-    ("file-wrappers", include_str!("../../iris/packs/file-wrappers.json")),
+    (
+        "auth-discard",
+        include_str!("../../iris/packs/auth-discard.json"),
+    ),
+    (
+        "authz-overwrite",
+        include_str!("../../iris/packs/authz-overwrite.json"),
+    ),
+    (
+        "header-trust",
+        include_str!("../../iris/packs/header-trust.json"),
+    ),
+    (
+        "file-wrappers",
+        include_str!("../../iris/packs/file-wrappers.json"),
+    ),
     ("safe-exec", include_str!("../../iris/packs/safe-exec.json")),
     ("go-cql", include_str!("../../iris/packs/go-cql.json")),
     ("msvs", include_str!("../../iris/packs/msvs.json")),
-    ("oob-outparam", include_str!("../../iris/packs/oob-outparam.json")),
+    (
+        "oob-outparam",
+        include_str!("../../iris/packs/oob-outparam.json"),
+    ),
     ("py", include_str!("../../iris/packs/py.json")),
-    ("py-heartbeat", include_str!("../../iris/packs/py-heartbeat.json")),
+    (
+        "py-heartbeat",
+        include_str!("../../iris/packs/py-heartbeat.json"),
+    ),
     ("scala-api", include_str!("../../iris/packs/scala-api.json")),
     ("jvm-exec", include_str!("../../iris/packs/jvm-exec.json")),
     ("ssrf", include_str!("../../iris/packs/ssrf.json")),
@@ -398,8 +427,7 @@ mod tests {
         );
         // Absent field defaults to empty (older packs unaffected).
         let bare =
-            RulePack::from_json(r#"{"rules":[{"id":"Y","sources":["a"],"sinks":["b"]}]}"#)
-                .unwrap();
+            RulePack::from_json(r#"{"rules":[{"id":"Y","sources":["a"],"sinks":["b"]}]}"#).unwrap();
         assert!(bare.entry_globs.is_empty());
     }
 
@@ -413,7 +441,10 @@ mod tests {
             .caller_context_markers
             .iter()
             .any(|m| m == "subject context"));
-        assert!(defaults.framework_server_calls.iter().any(|m| m == "NewGRPCServer"));
+        assert!(defaults
+            .framework_server_calls
+            .iter()
+            .any(|m| m == "NewGRPCServer"));
 
         let disabled = RulePack::from_json(
             r#"{"callerContextMarkers":[],"frameworkServerCalls":[],"rules":[]}"#,
@@ -430,7 +461,10 @@ mod tests {
                  "framework_server_calls":["BuildControlPlaneServer"],"rules":[]}"#,
         )
         .unwrap();
-        assert_eq!(custom.caller_context_markers, Some(vec!["access tag".into()]));
+        assert_eq!(
+            custom.caller_context_markers,
+            Some(vec!["access tag".into()])
+        );
         assert_eq!(
             custom.framework_server_calls,
             Some(vec!["BuildControlPlaneServer".into()])
@@ -455,13 +489,25 @@ mod tests {
     fn resolve_dispatches_iris_prefix_and_paths() {
         assert!(RulePack::resolve("iris:jvm-exec").is_ok());
         let err = RulePack::resolve("iris:bogus").unwrap_err();
-        assert!(err.contains("jvm-exec"), "error lists available packs: {err}");
+        assert!(
+            err.contains("jvm-exec"),
+            "error lists available packs: {err}"
+        );
         assert!(RulePack::resolve("/nonexistent/rules.json").is_err());
     }
 
     #[test]
     fn builtin_packs_parse_and_are_complete() {
-        for lang in ["go", "scala", "python", "java", "javascript", "js", "c", "cpp"] {
+        for lang in [
+            "go",
+            "scala",
+            "python",
+            "java",
+            "javascript",
+            "js",
+            "c",
+            "cpp",
+        ] {
             let pack = builtin_pack(lang).unwrap_or_else(|| panic!("no builtin pack for {lang}"));
             assert!(!pack.rules.is_empty(), "{lang} pack is empty");
             for rule in &pack.rules {
