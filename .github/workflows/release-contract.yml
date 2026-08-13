@@ -11,13 +11,7 @@ on:
       - .github/workflows/release.yml
       - .github/workflows/release-contract.yml
   pull_request:
-    paths:
-      - cpg-install.sh
-      - cpg-rs/**
-      - ci/Dockerfile
-      - .dockerignore
-      - .github/workflows/release.yml
-      - .github/workflows/release-contract.yml
+    branches: [master, main]
   workflow_dispatch:
 
 permissions:
