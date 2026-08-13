@@ -1,0 +1,72 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+  - package-ecosystem: cargo
+    directory: /cpg-rs
+    schedule:
+      interval: weekly
+    groups:
+      rust-dependencies:
+        patterns: ["*"]
+  - package-ecosystem: cargo
+    directory: /oxidized
+    schedule:
+      interval: weekly
+    groups:
+      rust-dependencies:
+        patterns: ["*"]
+  - package-ecosystem: cargo
+    directory: /joern-cli/frontends/abap2cpg/rust
+    schedule:
+      interval: weekly
+    groups:
+      rust-dependencies:
+        patterns: ["*"]
+  - package-ecosystem: cargo
+    directory: /joern-cli/frontends/csharpsrc2cpg/rust
+    schedule:
+      interval: weekly
+    groups:
+      rust-dependencies:
+        patterns: ["*"]
+  - package-ecosystem: cargo
+    directory: /joern-cli/frontends/javasrc2cpg/rust
+    schedule:
+      interval: weekly
+    groups:
+      rust-dependencies:
+        patterns: ["*"]
+  - package-ecosystem: cargo
+    directory: /joern-cli/frontends/jimple2cpg/rust
+    schedule:
+      interval: weekly
+    groups:
+      rust-dependencies:
+        patterns: ["*"]
+  - package-ecosystem: cargo
+    directory: /joern-cli/frontends/kotlin2cpg/rust
+    schedule:
+      interval: weekly
+    groups:
+      rust-dependencies:
+        patterns: ["*"]
+  - package-ecosystem: cargo
+    directory: /joern-cli/frontends/php2cpg/rust
+    schedule:
+      interval: weekly
+    groups:
+      rust-dependencies:
+        patterns: ["*"]
+  - package-ecosystem: cargo
+    directory: /joern-cli/frontends/swiftsrc2cpg/rust
+    schedule:
+      interval: weekly
+    groups:
+      rust-dependencies:
+        patterns: ["*"]

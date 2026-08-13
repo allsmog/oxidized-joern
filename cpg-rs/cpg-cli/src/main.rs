@@ -27,10 +27,30 @@ use cpg_cli::{build_project_filtered, flag, flags, handle, open_project, rules::
 use serde_json::{json, Value};
 use std::io::{BufRead, Write};
 
+const USAGE: &str = "usage (langs: c|cpp|go|java|javascript|typescript|python|ruby|rust|scala):
+  cpg build <dir> -o <graph.cpg> [--lang L] [--exclude S]...    build and persist a CPG
+  cpg serve <dir> [--lang L]                                    build then serve queries
+  cpg serve --load <graph.cpg>                                  reopen a saved CPG and serve
+  cpg scan <dir> [--rules <rules.json>] [--lang L] [-o out.sarif] rule-pack scan, emit SARIF
+  cpg scan --load <graph.cpg> [--rules <rules.json>] [--lang L]  scan a saved CPG
+  cpg slice --load <graph.cpg> --call <name> [--file S] [--line N] [--method M] [--depth D] [-o out.json]
+  cpg slice --load <graph.cpg> --method <name> --line <N>        backward slice from a location
+  cpg merge -o <merged.cpg> [--protos <dir>]... [--thrifts <dir>]... <a.cpg> [b.cpg ...]
+  cpg apis <dir>|--load <graph.cpg> [--lang L] [--top N] [-o out.json]
+  cpg export <dir>|--load <graph.cpg> [--lang L] [--repr ast|cfg|ddg|cpg14|all] [--format dot|graphml|json] -o <outdir>
+  cpg flow <src-glob> <sink-glob> <dir>|--load <graph.cpg> [--lang L] [--sanitizer S]... [-o out.json]
+  cpg vectors <dir>|--load <graph.cpg> [--lang L] [--features] [-o out.json]
+  cpg rules                                                     list compiled-in rule packs
+  cpg x [-C <root>] <build|scan|apis|slice|flow|serve|taint|merge|list> <path> ...
+  cpg mcp [--root <repo>]                                       Model Context Protocol server over stdio
+  cpg shape-version                                             print the saved-graph shape version";
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let cmd = args.get(1).map(|s| s.as_str()).unwrap_or("");
     match cmd {
+        "--version" | "-V" => println!("cpg {}", env!("CARGO_PKG_VERSION")),
+        "--help" | "-h" => println!("{USAGE}"),
         "serve" => serve(&args),
         "build" => build_and_save(&args),
         "scan" => scan_cmd(&args),
@@ -53,23 +73,7 @@ fn main() {
             }
         }
         _ => {
-            eprintln!(
-                "usage (langs: c|python|java|go|javascript|ruby|rust|scala):\n  \
-                 cpg build <dir> -o <graph.cpg> [--lang L] [--exclude S]...    build and persist a CPG\n  \
-                 cpg serve <dir> [--lang L]                                    build then serve queries\n  \
-                 cpg serve --load <graph.cpg>                                  reopen a saved CPG and serve\n  \
-                 cpg scan <dir> [--rules <rules.json>] [--lang L] [-o out.sarif] rule-pack scan, emit SARIF (default: built-in pack for lang)\n  \
-                 cpg scan --load <graph.cpg> [--rules <rules.json>] [--lang L]  scan a saved CPG\n  \
-                 cpg slice --load <graph.cpg> --call <name> [--file S] [--line N] [--method M] [--depth D] [-o out.json]\n  \
-                 cpg slice --load <graph.cpg> --method <name> --line <N>       backward slice from a location\n  \
-                 cpg merge -o <merged.cpg> [--protos <dir>]... [--thrifts <dir>]... <a.cpg> [b.cpg ...]  merge CPGs + stitch gRPC/thrift boundaries\n  \
-                 cpg export <dir>|--load <graph.cpg> [--lang L] [--repr ast|cfg|ddg|cpg14|all] [--format dot|graphml|json] -o <outdir>\n  \
-                 cpg flow <src-glob> <sink-glob> <dir>|--load <graph.cpg> [--lang L] [--sanitizer S]... [-o out.json]  quick source->sink query, no rules file\n  \
-                 cpg vectors <dir>|--load <graph.cpg> [--lang L] [--features] [-o out.json]  bag-of-properties embedding + edges\n  \
-                 cpg rules                                                     list compiled-in rule packs (built-in + iris:<name>)\n  \
-                 cpg x [-C <root>] <build|scan|apis|slice|flow|serve|taint|merge|list> <path> ...  root-relative front with CPG cache + IDL auto-discovery\n  \
-                 cpg mcp [--root <repo>]                                       Model Context Protocol server over stdio (tools + IRIS resources)"
-            );
+            eprintln!("{USAGE}");
             std::process::exit(2);
         }
     }

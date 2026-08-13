@@ -1,54 +1,215 @@
-name: release
+name: Rust-native release
+
 on:
-  schedule:
-    - cron: "0 7 * * *" # run once daily - will not create a new release if the current HEAD already has a version tag
-  workflow_dispatch:    # allow to manually trigger this workflow
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  release:
-    if: github.repository == 'allsmog/oxidized-joern'
-    concurrency: release
+  validate-tag:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.value }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          fetch-depth: 0
-      - name: Set up JDK
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 21
-          cache: sbt
-      - uses: sbt/setup-sbt@v1
-      # No GPG import: this fork does not publish signed artifacts to Maven
-      # Central (see build.sbt). Releases are GitHub Releases only.
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.7
-      - name: Set up Swift
-        uses: SwiftyLab/setup-swift@4a988e04f3cea0df6f7ef4cae33463026c27e8c1 # v1.9.1
-        with:
-          swift-version: "6.1"
-      - name: Install Bundler
-        run: gem install bundler -v 2.4.22
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
-      - run: sbt scalafmtCheck test
-      - name: Test distribution
+          persist-credentials: false
+      - id: version
+        name: Match the tag to the Cargo version
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          python -m pip install requests pexpect
-          sbt joerncli/stage querydb/createDistribution
-          python -u ./testDistro.py
-      # `ciReleaseSonatype` intentionally omitted — publishing to Maven Central
-      # under upstream's `io.joern` coordinates is not something this fork does.
-      # Tag the next version and build the distribution for the GitHub release.
-      - run: sbt ciReleaseSkipIfAlreadyReleased ciReleaseTagNextVersion createDistribution
-      - name: get tagged version
-        run: echo "LATEST_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
-      - name: Trigger release-github workflow
+          set -euo pipefail
+          if [[ ! "${RELEASE_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::release tags must use the form vMAJOR.MINOR.PATCH"
+            exit 1
+          fi
+          version="$(sed -n 's/^version = "\([0-9][0-9.]*\)"$/\1/p' cpg-rs/Cargo.toml)"
+          if [[ "${RELEASE_TAG}" != "v${version}" ]]; then
+            echo "::error::tag ${RELEASE_TAG} does not match cpg-rs version ${version}"
+            exit 1
+          fi
+          echo "value=${version}" >> "${GITHUB_OUTPUT}"
+
+  rust:
+    needs: validate-tag
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # 1.97.0
+        with:
+          toolchain: 1.97.0
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: cpg-rs
+      - name: Check, lint, and test the released workspace
+        working-directory: cpg-rs
         run: |
-          curl -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/release-github.yml/dispatches \
-            -d '{"ref":"${{ env.LATEST_TAG }}"}'
+          cargo fmt --all --check
+          cargo clippy --workspace --all-targets --locked -- -D warnings
+          cargo test --workspace --locked
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --version 0.22.2 --locked
+      - name: Audit the released dependency graph
+        run: cargo audit --deny warnings --file cpg-rs/Cargo.lock
+
+  build:
+    needs: [validate-tag, rust]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            platform: linux-amd64
+            binary-suffix: ""
+          - runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            platform: linux-arm64
+            binary-suffix: ""
+          - runner: macos-15-intel
+            target: x86_64-apple-darwin
+            platform: macos-amd64
+            binary-suffix: ""
+          - runner: macos-15
+            target: aarch64-apple-darwin
+            platform: macos-arm64
+            binary-suffix: ""
+          - runner: windows-latest
+            target: x86_64-pc-windows-msvc
+            platform: windows-amd64
+            binary-suffix: .exe
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    env:
+      MACOSX_DEPLOYMENT_TARGET: '13.0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # 1.97.0
+        with:
+          toolchain: 1.97.0
+          target: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: cpg-rs
+          key: ${{ matrix.target }}-release
+      - name: Build the Rust-native CLI
+        working-directory: cpg-rs
+        run: cargo build --release --locked -p cpg-cli --target ${{ matrix.target }}
+      - name: Package and smoke-test the release asset
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ needs.validate-tag.outputs.version }}
+        run: |
+          python cpg-rs/scripts/package-release.py \
+            --binary "cpg-rs/target/${{ matrix.target }}/release/cpg${{ matrix.binary-suffix }}" \
+            --output release \
+            --platform "${{ matrix.platform }}" \
+            --version "${RELEASE_VERSION}"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rust-native-${{ matrix.platform }}
+          path: release/*
+          if-no-files-found: error
+
+  publish:
+    if: github.repository == 'allsmog/oxidized-joern'
+    needs: [validate-tag, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: rust-native-*
+          path: release
+          merge-multiple: true
+      - name: Verify staged checksums
+        working-directory: release
+        run: sha256sum --check ./*.sha256
+      - name: Attest release assets
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: |
+            cpg-install.sh
+            release/*.tar.gz
+            release/*.zip
+      - name: Publish preview release
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Oxidized Joern cpg ${{ github.ref_name }}
+          generate_release_notes: true
+          body: |
+            Rust-native preview release of the `cpg` command-line tool.
+
+            Each archive contains only the `cpg` executable, its license, and the current compatibility notes. This preview does not claim full Joern compatibility.
+          files: |
+            cpg-install.sh
+            release/*
+
+  container:
+    if: github.repository == 'allsmog/oxidized-joern'
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: rust-native-linux-*
+          path: ci
+          merge-multiple: true
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: metadata
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=preview
+            type=sha
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: ci/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          cache-from: type=gha,scope=release-container
+          cache-to: type=gha,mode=max,scope=release-container
+          provenance: mode=max
+          sbom: true

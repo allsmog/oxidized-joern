@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 use quick_xml::events::Event;
-use quick_xml::Reader;
+use quick_xml::{Reader, XmlVersion};
 use serde_json::{json, Map, Value};
 use std::cell::RefCell;
 use std::collections::BTreeMap;
@@ -95,7 +95,10 @@ pub fn generate_xml_summary(source: &str) -> Result<Value> {
             Event::Start(event) | Event::Empty(event) if event.name().as_ref() == b"member" => {
                 for attr in event.attributes().flatten() {
                     if attr.key.as_ref() == b"name" {
-                        let name = attr.decode_and_unescape_value(reader.decoder())?;
+                        let name = attr.decoded_and_normalized_value(
+                            XmlVersion::Implicit1_0,
+                            reader.decoder(),
+                        )?;
                         summary.add_doc_member(&name);
                     }
                 }
@@ -5468,6 +5471,27 @@ mod tests {
             2
         );
         assert_eq!(typ["fields"][0]["name"], "Text");
+    }
+
+    #[test]
+    fn parses_xml_tags_with_many_distinct_attributes_in_bounded_time() {
+        use std::time::{Duration, Instant};
+
+        let mut attributes = String::new();
+        for index in 0..20_000 {
+            attributes.push_str(&format!(r#" attribute{index}="value""#));
+        }
+        let xml =
+            format!(r#"<doc><members><member name="T:Example.Type"{attributes}/></members></doc>"#);
+
+        let started = Instant::now();
+        let summary = generate_xml_summary(&xml).expect("summary");
+
+        assert_eq!(summary["Example"][0]["name"], "Example.Type");
+        assert!(
+            started.elapsed() < Duration::from_secs(2),
+            "attribute parsing exceeded the regression bound"
+        );
     }
 
     #[test]

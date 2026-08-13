@@ -88,7 +88,7 @@ pub struct AuthzCensusConfig {
 impl Default for AuthzCensusConfig {
     fn default() -> Self {
         Self {
-            caller_context_markers: vec!["subject context".into()],
+            caller_context_markers: vec!["subject context".into(), "caller claims".into()],
             framework_server_calls: vec![
                 "NewGRPCServer".into(),
                 "NewWrappedGRPCServer".into(),
@@ -1879,6 +1879,34 @@ func doWork(req string)                                {{}}
         assert!(
             verdict_of(&census, "handleConcatenated").starts_with("subject-gated@"),
             "default phrase should match concatenated, case-varied spellings: {census:?}"
+        );
+    }
+
+    #[test]
+    fn census_default_marker_preserves_caller_claims_compatibility() {
+        let cpg = build_go(&[(
+            "caller.go",
+            r#"package main
+
+func handleCallerGated(req string, callerClaims []string) string {
+	if len(callerClaims) > 0 {
+		if !enforceRbacAccess(callerClaims, req) {
+			return "denied"
+		}
+	}
+	doWork(req)
+	return "ok"
+}
+
+func enforceRbacAccess(values []string, req string) bool { return len(values) > 0 }
+func doWork(req string)                                  {}
+"#,
+        )]);
+        let none = HashSet::new();
+        let census = authz_census(&cpg, &none, &["handleCallerGated".to_string()], &[]);
+        assert!(
+            verdict_of(&census, "handleCallerGated").starts_with("subject-gated@"),
+            "the default configuration must preserve caller-claims classification: {census:?}"
         );
     }
 

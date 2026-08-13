@@ -13,7 +13,7 @@ lazy val macros            = Projects.macros
 lazy val semanticcpg       = Projects.semanticcpg
 lazy val ghidra2cpg        = Projects.ghidra2cpg
 lazy val x2cpg             = Projects.x2cpg
-// library for kotlin2cpg interop only; standalone java-src scanning is in cpg-rs
+// Library for kotlin2cpg interop. cpg-rs also has a preview Java mode.
 lazy val javasrc2cpg       = Projects.javasrc2cpg
 lazy val php2cpg           = Projects.php2cpg
 lazy val jimple2cpg        = Projects.jimple2cpg

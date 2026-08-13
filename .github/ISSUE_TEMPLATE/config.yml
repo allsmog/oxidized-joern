@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/allsmog/oxidized-joern/security/advisories/new
+    about: Report vulnerabilities privately.
+  - name: Upstream Joern support
+    url: https://github.com/joernio/joern/issues
+    about: Report issues that reproduce only in upstream Joern.

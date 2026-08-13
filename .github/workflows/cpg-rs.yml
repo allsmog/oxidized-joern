@@ -1,15 +1,20 @@
-name: cpg-rs
+name: Rust core
 
 on:
   push:
     paths:
       - 'cpg-rs/**'
+      - 'oxidized/**'
       - '.github/workflows/cpg-rs.yml'
   pull_request:
     paths:
       - 'cpg-rs/**'
+      - 'oxidized/**'
       - '.github/workflows/cpg-rs.yml'
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
   # Byte-parity spec is pinned to this Joern release (see cpg-rs/PROGRESS.md).
@@ -18,40 +23,61 @@ env:
 
 jobs:
   test:
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: [cpg-rs, oxidized]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
-      - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: cpg-rs
+          toolchain: 1.97.0
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: ${{ matrix.workspace }}
       - name: Build
         run: cargo build --workspace --locked
-        working-directory: cpg-rs
+        working-directory: ${{ matrix.workspace }}
       - name: Test
         run: cargo test --workspace --locked
-        working-directory: cpg-rs
+        working-directory: ${{ matrix.workspace }}
 
   fmt-clippy:
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: [cpg-rs, oxidized]
     runs-on: ubuntu-latest
-    # The tree does not currently pass fmt/clippy (223 rustfmt diffs, 6 clippy
-    # warnings in joern-parity as of 2026-07-09). Advisory until cleaned up;
-    # drop continue-on-error once the workspace is clean.
-    continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
         with:
+          toolchain: 1.97.0
           components: rustfmt, clippy
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
-          workspaces: cpg-rs
+          workspaces: ${{ matrix.workspace }}
       - name: rustfmt
-        run: cargo fmt --check
-        working-directory: cpg-rs
+        run: cargo fmt --all --check
+        working-directory: ${{ matrix.workspace }}
       - name: clippy
-        run: cargo clippy --workspace -- -D warnings
-        working-directory: cpg-rs
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+        working-directory: ${{ matrix.workspace }}
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        with:
+          toolchain: 1.97.0
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --version 0.22.2 --locked
+      - name: Audit locked dependencies
+        run: |
+          cargo audit --deny warnings --file cpg-rs/Cargo.lock
+          cargo audit --deny warnings --no-fetch --file oxidized/Cargo.lock
 
   # Differential parity against the pinned Joern oracle. The oracle download
   # is ~2GB, so this job is manual-only (workflow_dispatch) rather than
@@ -61,18 +87,20 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
-      - uses: Swatinem/rust-cache@v2
+        with:
+          toolchain: 1.97.0
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           workspaces: cpg-rs
       - name: Set up JDK (Joern needs a JVM)
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: '21'
       - name: Cache Joern oracle
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: /tmp/joern-cli-dist
           key: joern-oracle-${{ env.JOERN_VERSION }}
