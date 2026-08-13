@@ -10,6 +10,8 @@ tests/**/node_modules
 tests/**/package-lock.json
 tests/**/package.json
 joern-cli.zip
+ci/oxidized-joern-cpg-*.tar.gz
+ci/oxidized-joern-cpg-*.tar.gz.sha256
 joern-server.zip
 cpg.bin.zip
 cpg.bin

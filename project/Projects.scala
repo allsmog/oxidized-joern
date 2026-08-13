@@ -11,10 +11,10 @@ object Projects {
   lazy val macros            = project.in(file("macros"))
   lazy val semanticcpg       = project.in(file("semanticcpg"))
 
-  // Frontends with cpg-rs (Rust) parity removed: c2cpg, gosrc2cpg, jssrc2cpg,
-  // pysrc2cpg, rubysrc2cpg, rust2cpg — use cpg-rs for those languages.
-  // javasrc2cpg is retained ONLY as a library for kotlin2cpg's mixed-source
-  // interop (standalone Java-source scanning also lives in cpg-rs).
+  // The Rust-only project scope removed c2cpg, gosrc2cpg, jssrc2cpg,
+  // pysrc2cpg, rubysrc2cpg, and rust2cpg. This is a scope decision, not a
+  // claim that every cpg-rs language mode has reached Joern parity.
+  // javasrc2cpg remains as a library for kotlin2cpg mixed-source interop.
   lazy val javasrc2cpg   = project.in(frontendsRoot / "javasrc2cpg")
   lazy val ghidra2cpg    = project.in(frontendsRoot / "ghidra2cpg")
   lazy val x2cpg         = project.in(frontendsRoot / "x2cpg")

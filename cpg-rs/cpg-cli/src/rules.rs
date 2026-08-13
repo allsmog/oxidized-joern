@@ -442,6 +442,10 @@ mod tests {
             .iter()
             .any(|m| m == "subject context"));
         assert!(defaults
+            .caller_context_markers
+            .iter()
+            .any(|m| m == "caller claims"));
+        assert!(defaults
             .framework_server_calls
             .iter()
             .any(|m| m == "NewGRPCServer"));

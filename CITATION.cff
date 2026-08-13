@@ -1,8 +1,25 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below. Reminder to update the `version` and `date-released` as needed."
-title: "Joern: The Bug Hunter's Workbench"
+type: software
+message: >-
+  If you use Oxidized Joern, cite this software and acknowledge the upstream
+  Joern project from which the fork derives.
+title: Oxidized Joern
+abstract: >-
+  A Rust-native command-line tool for building, saving, and analyzing code
+  property graphs.
 authors:
-  - given-names: joern.io
-url: "https://github.com/joernio/joern"
-version: 2.0
-date-released: 2024-01-18
+  - name: Oxidized Joern contributors
+repository-code: https://github.com/allsmog/oxidized-joern
+url: https://github.com/allsmog/oxidized-joern
+license: Apache-2.0
+keywords:
+  - code property graph
+  - static analysis
+  - Rust
+references:
+  - type: software
+    title: "Joern: The Bug Hunter's Workbench"
+    authors:
+      - name: joern.io
+    repository-code: https://github.com/joernio/joern
+    url: https://joern.io

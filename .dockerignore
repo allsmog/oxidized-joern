@@ -1,0 +1,5 @@
+**
+!ci
+!ci/Dockerfile
+!ci/oxidized-joern-cpg-linux-amd64.tar.gz
+!ci/oxidized-joern-cpg-linux-arm64.tar.gz
