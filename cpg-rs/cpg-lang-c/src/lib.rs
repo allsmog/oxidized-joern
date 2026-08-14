@@ -34,6 +34,7 @@ impl Language for C {
 pub struct CFrontend {
     lang: C,
     parser: Parser,
+    preprocessor: exact::PreprocessorConfig,
 }
 
 impl Default for CFrontend {
@@ -48,7 +49,17 @@ impl CFrontend {
         parser
             .set_language(&tree_sitter_c::LANGUAGE.into())
             .expect("load C grammar");
-        CFrontend { lang: C, parser }
+        CFrontend {
+            lang: C,
+            parser,
+            preprocessor: exact::PreprocessorConfig::default(),
+        }
+    }
+
+    pub fn with_preprocessor(preprocessor: exact::PreprocessorConfig) -> Self {
+        let mut frontend = Self::new();
+        frontend.preprocessor = preprocessor;
+        frontend
     }
 }
 
@@ -66,7 +77,7 @@ impl Frontend for CFrontend {
             .iter()
             .map(|(path, source)| ((*path).to_string(), (*source).to_string()))
             .collect();
-        let dump = exact::canonical_dump_sources(&sources);
+        let dump = exact::canonical_dump_sources_with_config(&sources, &self.preprocessor);
         Some(import::graph_from_canonical_dump(&dump, &sources))
     }
 
@@ -528,5 +539,38 @@ mod tests {
         let r = fe.build_file(&mut cpg, "broken.c", code);
         assert_eq!(r.methods_built, 1);
         assert_eq!(cpg.calls_named("g").len(), 1);
+    }
+
+    #[test]
+    fn resolves_include_paths_nested_headers_forced_includes_and_defines() {
+        let sources = [
+            (
+                "src/main.c",
+                "#include <config.h>\n#if HEADER_SWITCH && FORCED_SWITCH && CLI_SWITCH\nint selected(int x) { return SCALE(x); }\n#else\nint dead(void) { return 0; }\n#endif\n",
+            ),
+            (
+                "include/config.h",
+                "#include \"nested.h\"\n#define SCALE(value) ((value) * NESTED_SCALE)\n",
+            ),
+            (
+                "include/nested.h",
+                "#define HEADER_SWITCH 1\n#define NESTED_SCALE 3\n",
+            ),
+            ("config/forced.h", "#define FORCED_SWITCH 1\n"),
+        ];
+        let config = exact::PreprocessorConfig {
+            include_paths: vec!["include".to_string()],
+            forced_includes: vec!["config/forced.h".to_string()],
+            defines: vec!["CLI_SWITCH=1".to_string()],
+        };
+        let mut frontend = CFrontend::with_preprocessor(config);
+        let cpg = frontend.build_project(&sources).expect("project graph");
+
+        assert_eq!(cpg.method_named("selected").len(), 1);
+        assert!(cpg.method_named("dead").is_empty());
+        assert_eq!(cpg.calls_named("SCALE").len(), 1);
+        assert!(cpg.method_named("SCALE").iter().any(|&method| cpg
+            .full_name_of(method)
+            .is_some_and(|name| { name.starts_with("include/config.h:SCALE:") })));
     }
 }

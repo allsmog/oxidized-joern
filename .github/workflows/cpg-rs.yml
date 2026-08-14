@@ -140,6 +140,9 @@ jobs:
       - name: Run native CPGQL differential
         run: ./acceptance/cpgql/check.sh
         working-directory: cpg-rs
+      - name: Run C compiler-input differential
+        run: ./acceptance/c-semantics/check.sh
+        working-directory: cpg-rs
       - name: Run Flatgraph interoperability differential
         run: ./acceptance/flatgraph/check.sh
         working-directory: cpg-rs

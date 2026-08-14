@@ -51,9 +51,11 @@ The release contract covers these C operations:
 - pinned zlib and Lua builds under recorded wall-time and peak-RSS ceilings.
 
 The committed C oracle is exact for its corpus, not a claim that every valid C
-program has already been compared with Joern. Complex preprocessor behavior,
-include/type resolution, aliasing, and points-to precision remain areas where a
-new construct can require another fixture and implementation slice.
+program has already been compared with Joern. Conditional and advanced macro
+expansion plus nested include paths, forced includes, and command-line defines
+have pinned coverage. Compiler-informed type resolution, aliasing, and
+points-to precision remain areas where a new construct can require another
+fixture and implementation slice.
 
 ## Deliberate incompatibilities
 
