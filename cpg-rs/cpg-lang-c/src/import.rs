@@ -273,7 +273,11 @@ pub fn canonical_dump(cpg: &Cpg) -> String {
         for edge in cpg.out(source) {
             if matches!(
                 edge.kind,
-                EdgeKind::Ast | EdgeKind::Ddg | EdgeKind::Receiver
+                EdgeKind::Ast
+                    | EdgeKind::Ddg
+                    | EdgeKind::Receiver
+                    | EdgeKind::Dominate
+                    | EdgeKind::PostDominate
             ) {
                 continue;
             }
