@@ -29,12 +29,8 @@ def main() -> None:
         args.fixture,
         "--lang",
         "c",
-        "--include-path",
-        "include",
-        "--force-include",
-        "config/forced.h",
-        "--define",
-        "CLI_ON=1",
+        "--compile-commands",
+        "compile_commands.json",
     ]
     for case_id, query in CASES:
         completed = subprocess.run(
