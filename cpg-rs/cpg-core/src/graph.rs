@@ -24,7 +24,7 @@
 use crate::intern::{Interner, Sym};
 use crate::persist::{ByteReader, ByteWriter, DecodeError};
 use crate::schema::{EdgeKind, Layer, NodeKind};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs::File;
 use std::io::{self, Read, Write};
 use std::path::Path;
@@ -41,12 +41,14 @@ const FLAG_AUTHORITATIVE_CALL_GRAPH: u32 = 1 << 2;
 const FLAG_AUTHORITATIVE_CFG: u32 = 1 << 3;
 const FLAG_AUTHORITATIVE_DDG: u32 = 1 << 4;
 const FLAG_AUTHORITATIVE_SUMMARIES: u32 = 1 << 5;
+const FLAG_PASSTHROUGH_PROPERTIES: u32 = 1 << 6;
 const KNOWN_ENVELOPE_FLAGS: u32 = FLAG_AUTHORITATIVE_AST
     | FLAG_AUTHORITATIVE_SYMBOL_REF
     | FLAG_AUTHORITATIVE_CALL_GRAPH
     | FLAG_AUTHORITATIVE_CFG
     | FLAG_AUTHORITATIVE_DDG
-    | FLAG_AUTHORITATIVE_SUMMARIES;
+    | FLAG_AUTHORITATIVE_SUMMARIES
+    | FLAG_PASSTHROUGH_PROPERTIES;
 const ENVELOPE_LEN: usize = 24;
 
 /// The recorded 3.6-million-node benchmark occupies 184 MiB on disk at about
@@ -59,6 +61,8 @@ const MAX_STRINGS: u64 = 10_000_000;
 const MAX_NODES: u64 = 25_000_000;
 const MAX_EDGES: u64 = 100_000_000;
 const MAX_FILES: u64 = 1_000_000;
+const MAX_PASSTHROUGH_PROPERTIES: u64 = 100_000_000;
+const MAX_PASSTHROUGH_VALUES: u64 = 250_000_000;
 const MAX_STRING_BYTES: usize = 16 * 1024 * 1024;
 const MAX_PATH_BYTES: usize = 64 * 1024;
 const MIN_NODE_PAYLOAD_BYTES: usize = 42;
@@ -76,6 +80,17 @@ pub struct FileId(pub u32);
 pub struct HalfEdge {
     pub kind: EdgeKind,
     pub other: NodeId,
+    pub property: Option<Sym>,
+}
+
+/// A lossless passthrough property used by external graph formats. Hot,
+/// language-independent CPG properties remain in dedicated columns; this
+/// sparse map preserves schema fields that native analyses do not interpret.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum PropertyValue {
+    Strings(Vec<Option<Sym>>),
+    Ints(Vec<i32>),
+    Bools(Vec<bool>),
 }
 
 /// The columnar property store + adjacency, partitioned by file.
@@ -94,6 +109,8 @@ pub struct Cpg {
     line: Vec<Option<u32>>,
     order: Vec<i32>,
     argument_index: Vec<i32>,
+    external_label: Vec<Option<Sym>>,
+    passthrough_properties: Vec<BTreeMap<Sym, PropertyValue>>,
     live: Vec<bool>,
 
     // --- mutable adjacency ---
@@ -152,6 +169,8 @@ impl Cpg {
             self.line[i] = None;
             self.order[i] = 0;
             self.argument_index[i] = -1;
+            self.external_label[i] = None;
+            self.passthrough_properties[i].clear();
             self.live[i] = true;
             self.out_edges[i].clear();
             self.in_edges[i].clear();
@@ -168,6 +187,8 @@ impl Cpg {
             self.line.push(None);
             self.order.push(0);
             self.argument_index.push(-1);
+            self.external_label.push(None);
+            self.passthrough_properties.push(BTreeMap::new());
             self.live.push(true);
             self.out_edges.push(Vec::new());
             self.in_edges.push(Vec::new());
@@ -178,8 +199,26 @@ impl Cpg {
     }
 
     pub fn add_edge(&mut self, src: NodeId, dst: NodeId, kind: EdgeKind) {
-        self.out_edges[src.0 as usize].push(HalfEdge { kind, other: dst });
-        self.in_edges[dst.0 as usize].push(HalfEdge { kind, other: src });
+        self.add_edge_with_property(src, dst, kind, None);
+    }
+
+    pub fn add_edge_with_property(
+        &mut self,
+        src: NodeId,
+        dst: NodeId,
+        kind: EdgeKind,
+        property: Option<Sym>,
+    ) {
+        self.out_edges[src.0 as usize].push(HalfEdge {
+            kind,
+            other: dst,
+            property,
+        });
+        self.in_edges[dst.0 as usize].push(HalfEdge {
+            kind,
+            other: src,
+            property,
+        });
     }
 
     /// Remove all out-edges of a given kind from `n` (and their mirror in-edges).
@@ -217,6 +256,8 @@ impl Cpg {
                 let nb = &mut self.out_edges[e.other.0 as usize];
                 nb.retain(|h| h.other != n);
             }
+            self.external_label[i] = None;
+            self.passthrough_properties[i].clear();
             self.live[i] = false;
             self.free_list.push(n);
         }
@@ -247,6 +288,12 @@ impl Cpg {
     }
     pub fn set_argument_index(&mut self, n: NodeId, idx: i32) {
         self.argument_index[n.0 as usize] = idx;
+    }
+    pub fn set_external_label(&mut self, n: NodeId, label: Sym) {
+        self.external_label[n.0 as usize] = Some(label);
+    }
+    pub fn set_passthrough_property(&mut self, n: NodeId, label: Sym, value: PropertyValue) {
+        self.passthrough_properties[n.0 as usize].insert(label, value);
     }
 
     // --- property getters ---
@@ -282,6 +329,12 @@ impl Cpg {
     }
     pub fn argument_index_of(&self, n: NodeId) -> i32 {
         self.argument_index[n.0 as usize]
+    }
+    pub fn external_label_of(&self, n: NodeId) -> Option<&str> {
+        self.external_label[n.0 as usize].map(|s| self.strings.resolve(s))
+    }
+    pub fn passthrough_properties_of(&self, n: NodeId) -> &BTreeMap<Sym, PropertyValue> {
+        &self.passthrough_properties[n.0 as usize]
     }
 
     // --- adjacency access ---
@@ -373,6 +426,7 @@ impl Cpg {
 
     fn payload_bytes(&self) -> Vec<u8> {
         let mut w = ByteWriter::new();
+        let has_passthrough = self.envelope_flags() & FLAG_PASSTHROUGH_PROPERTIES != 0;
 
         // String table.
         w.u64(self.strings.len() as u64);
@@ -419,6 +473,9 @@ impl Cpg {
             for e in &self.out_edges[i] {
                 w.u8(e.kind.to_u8());
                 w.u32(e.other.0);
+                if has_passthrough {
+                    w.opt_u32(e.property.map(|symbol| symbol.0));
+                }
             }
         }
 
@@ -431,11 +488,45 @@ impl Cpg {
             w.u32(id.0);
             w.bytes(path.as_bytes());
         }
+        if self.envelope_flags() & FLAG_PASSTHROUGH_PROPERTIES != 0 {
+            for value in &self.external_label {
+                w.opt_u32(value.map(|symbol| symbol.0));
+            }
+            for properties in &self.passthrough_properties {
+                w.u32(properties.len() as u32);
+                for (label, value) in properties {
+                    w.u32(label.0);
+                    match value {
+                        PropertyValue::Strings(values) => {
+                            w.u8(0);
+                            w.u32(values.len() as u32);
+                            for value in values {
+                                w.opt_u32(value.map(|symbol| symbol.0));
+                            }
+                        }
+                        PropertyValue::Ints(values) => {
+                            w.u8(1);
+                            w.u32(values.len() as u32);
+                            for value in values {
+                                w.i32(*value);
+                            }
+                        }
+                        PropertyValue::Bools(values) => {
+                            w.u8(2);
+                            w.u32(values.len() as u32);
+                            for value in values {
+                                w.u8(u8::from(*value));
+                            }
+                        }
+                    }
+                }
+            }
+        }
         w.buf
     }
 
     fn envelope_flags(&self) -> u32 {
-        self.authoritative_layers.iter().fold(0, |flags, layer| {
+        let layer_flags = self.authoritative_layers.iter().fold(0, |flags, layer| {
             flags
                 | match layer {
                     Layer::Ast => FLAG_AUTHORITATIVE_AST,
@@ -445,7 +536,22 @@ impl Cpg {
                     Layer::Ddg => FLAG_AUTHORITATIVE_DDG,
                     Layer::Summaries => FLAG_AUTHORITATIVE_SUMMARIES,
                 }
-        })
+        });
+        if self.external_label.iter().any(Option::is_some)
+            || self
+                .passthrough_properties
+                .iter()
+                .any(|properties| !properties.is_empty())
+            || self
+                .out_edges
+                .iter()
+                .flatten()
+                .any(|edge| edge.property.is_some())
+        {
+            layer_flags | FLAG_PASSTHROUGH_PROPERTIES
+        } else {
+            layer_flags
+        }
     }
 
     fn layers_from_flags(flags: u32) -> HashSet<Layer> {
@@ -498,6 +604,8 @@ impl Cpg {
 
         let string_count = self.strings.len();
         let mut edge_count = 0_u64;
+        let mut passthrough_property_count = 0_u64;
+        let mut passthrough_value_count = 0_u64;
         for i in 0..self.kind.len() {
             if !self.path_of_file.contains_key(&self.file[i]) {
                 return Err(invalid_input(format!(
@@ -511,6 +619,7 @@ impl Cpg {
                 self.code[i],
                 self.type_full_name[i],
                 self.signature[i],
+                self.external_label[i],
             ]
             .into_iter()
             .flatten()
@@ -519,6 +628,56 @@ impl Cpg {
                     return Err(invalid_input(format!(
                         "node {i} references invalid string index {}",
                         sym.0
+                    )));
+                }
+            }
+            if u32::try_from(self.passthrough_properties[i].len()).is_err() {
+                return Err(invalid_input(format!(
+                    "node {i} has too many passthrough properties"
+                )));
+            }
+            passthrough_property_count = passthrough_property_count
+                .checked_add(self.passthrough_properties[i].len() as u64)
+                .ok_or_else(|| invalid_input("passthrough property count overflow"))?;
+            if passthrough_property_count > MAX_PASSTHROUGH_PROPERTIES {
+                return Err(invalid_input(format!(
+                    "passthrough property count exceeds {MAX_PASSTHROUGH_PROPERTIES}"
+                )));
+            }
+            for (label, value) in &self.passthrough_properties[i] {
+                if label.0 as usize >= string_count {
+                    return Err(invalid_input(format!(
+                        "node {i} passthrough label references invalid string {}",
+                        label.0
+                    )));
+                }
+                let value_count = match value {
+                    PropertyValue::Strings(values) => {
+                        for symbol in values.iter().flatten() {
+                            if symbol.0 as usize >= string_count {
+                                return Err(invalid_input(format!(
+                                    "node {i} passthrough value references invalid string {}",
+                                    symbol.0
+                                )));
+                            }
+                        }
+                        values.len()
+                    }
+                    PropertyValue::Ints(values) => values.len(),
+                    PropertyValue::Bools(values) => values.len(),
+                };
+                if u32::try_from(value_count).is_err() {
+                    return Err(invalid_input(format!(
+                        "node {i} passthrough property has too many values"
+                    )));
+                }
+                passthrough_value_count =
+                    passthrough_value_count
+                        .checked_add(value_count as u64)
+                        .ok_or_else(|| invalid_input("passthrough value count overflow"))?;
+                if passthrough_value_count > MAX_PASSTHROUGH_VALUES {
+                    return Err(invalid_input(format!(
+                        "passthrough value count exceeds {MAX_PASSTHROUGH_VALUES}"
                     )));
                 }
             }
@@ -544,6 +703,14 @@ impl Cpg {
                     return Err(invalid_input(format!(
                         "edge from node {i} references invalid or dead node {}",
                         edge.other.0
+                    )));
+                }
+                if edge
+                    .property
+                    .is_some_and(|symbol| symbol.0 as usize >= string_count)
+                {
+                    return Err(invalid_input(format!(
+                        "edge from node {i} references an invalid property string"
                     )));
                 }
             }
@@ -680,7 +847,12 @@ impl Cpg {
                     "edges count {total_edges} exceeds maximum {MAX_EDGES}"
                 )));
             }
-            require_remaining(&r, count, 5, "edges")?;
+            let edge_bytes = if flags & FLAG_PASSTHROUGH_PROPERTIES != 0 {
+                9
+            } else {
+                5
+            };
+            require_remaining(&r, count, edge_bytes, "edges")?;
             if !live[src] && count != 0 {
                 return Err(DecodeError(format!("dead node {src} has outgoing edges")));
             }
@@ -701,9 +873,17 @@ impl Cpg {
                         "edge from node {src} targets dead node {target}"
                     )));
                 }
+                let property = if flags & FLAG_PASSTHROUGH_PROPERTIES != 0 {
+                    r.opt_u32()?
+                        .map(|raw| validate_sym(raw, str_count, "edge property"))
+                        .transpose()?
+                } else {
+                    None
+                };
                 edges.push(HalfEdge {
                     kind: edge_kind,
                     other: NodeId(target as u32),
+                    property,
                 });
             }
             out_edges.push(edges);
@@ -739,6 +919,87 @@ impl Cpg {
             }
             nodes_of_file.insert(id, Vec::new());
         }
+        let (external_label, passthrough_properties) = if flags & FLAG_PASSTHROUGH_PROPERTIES != 0 {
+            let labels = read_sym_column(&mut r, n, str_count, "external_label")?;
+            let mut all_properties = Vec::with_capacity(n);
+            let mut total_properties = 0_u64;
+            let mut total_values = 0_u64;
+            for node in 0..n {
+                let count = r.u32()? as usize;
+                total_properties = total_properties
+                    .checked_add(count as u64)
+                    .ok_or_else(|| DecodeError("passthrough property count overflow".into()))?;
+                if total_properties > MAX_PASSTHROUGH_PROPERTIES {
+                    return Err(DecodeError(format!(
+                        "passthrough property count exceeds {MAX_PASSTHROUGH_PROPERTIES}"
+                    )));
+                }
+                let mut properties = BTreeMap::new();
+                for _ in 0..count {
+                    let label = read_sym(&mut r, str_count, "passthrough property label")?;
+                    let kind = r.u8()?;
+                    let value_count = r.u32()? as usize;
+                    total_values = total_values
+                        .checked_add(value_count as u64)
+                        .ok_or_else(|| DecodeError("passthrough value count overflow".into()))?;
+                    if total_values > MAX_PASSTHROUGH_VALUES {
+                        return Err(DecodeError(format!(
+                            "passthrough value count exceeds {MAX_PASSTHROUGH_VALUES}"
+                        )));
+                    }
+                    let value = match kind {
+                        0 => PropertyValue::Strings(
+                            (0..value_count)
+                                .map(|_| r.opt_u32())
+                                .collect::<Result<Vec<_>, _>>()?
+                                .into_iter()
+                                .map(|value| {
+                                    value
+                                        .map(|raw| {
+                                            validate_sym(raw, str_count, "passthrough string")
+                                        })
+                                        .transpose()
+                                })
+                                .collect::<Result<Vec<_>, _>>()?,
+                        ),
+                        1 => PropertyValue::Ints(
+                            (0..value_count)
+                                .map(|_| r.i32())
+                                .collect::<Result<Vec<_>, _>>()?,
+                        ),
+                        2 => {
+                            let mut values = Vec::with_capacity(value_count);
+                            for _ in 0..value_count {
+                                match r.u8()? {
+                                    0 => values.push(false),
+                                    1 => values.push(true),
+                                    byte => {
+                                        return Err(DecodeError(format!(
+                                            "invalid passthrough bool {byte} at node {node}"
+                                        )))
+                                    }
+                                }
+                            }
+                            PropertyValue::Bools(values)
+                        }
+                        other => {
+                            return Err(DecodeError(format!(
+                                "invalid passthrough property kind {other} at node {node}"
+                            )))
+                        }
+                    };
+                    if properties.insert(label, value).is_some() {
+                        return Err(DecodeError(format!(
+                            "duplicate passthrough property label at node {node}"
+                        )));
+                    }
+                }
+                all_properties.push(properties);
+            }
+            (labels, all_properties)
+        } else {
+            (vec![None; n], vec![BTreeMap::new(); n])
+        };
         if r.remaining() != 0 {
             return Err(DecodeError(format!(
                 "{} trailing payload bytes at offset {}",
@@ -761,6 +1022,7 @@ impl Cpg {
                 in_edges[edge.other.0 as usize].push(HalfEdge {
                     kind: edge.kind,
                     other: NodeId(src as u32),
+                    property: edge.property,
                 });
             }
         }
@@ -789,6 +1051,8 @@ impl Cpg {
             line,
             order,
             argument_index,
+            external_label,
+            passthrough_properties,
             live,
             out_edges,
             in_edges,
@@ -896,12 +1160,38 @@ impl Cpg {
             }
             self.set_order(nn, donor.order[i]);
             self.set_argument_index(nn, donor.argument_index[i]);
+            if let Some(label) = donor.external_label[i] {
+                let label = map_sym(self, label);
+                self.set_external_label(nn, label);
+            }
+            for (label, value) in &donor.passthrough_properties[i] {
+                let label = map_sym(self, *label);
+                let value = match value {
+                    PropertyValue::Strings(values) => PropertyValue::Strings(
+                        values
+                            .iter()
+                            .map(|value| value.map(|symbol| map_sym(self, symbol)))
+                            .collect(),
+                    ),
+                    PropertyValue::Ints(values) => PropertyValue::Ints(values.clone()),
+                    PropertyValue::Bools(values) => PropertyValue::Bools(values.clone()),
+                };
+                self.set_passthrough_property(nn, label, value);
+            }
             node_map[i] = nn;
         }
         // Out-edges only; add_edge mirrors the in-edge.
         for &n in &donor_nodes {
             for e in donor.out(n) {
-                self.add_edge(node_map[n.0 as usize], node_map[e.other.0 as usize], e.kind);
+                let property = e
+                    .property
+                    .map(|symbol| self.strings.intern(donor.strings.resolve(symbol)));
+                self.add_edge_with_property(
+                    node_map[n.0 as usize],
+                    node_map[e.other.0 as usize],
+                    e.kind,
+                    property,
+                );
             }
         }
     }
@@ -999,6 +1289,23 @@ fn read_sym_column(
         }
     }
     Ok(column)
+}
+
+fn read_sym(
+    reader: &mut ByteReader<'_>,
+    string_count: usize,
+    label: &str,
+) -> Result<Sym, DecodeError> {
+    validate_sym(reader.u32()?, string_count, label)
+}
+
+fn validate_sym(raw: u32, string_count: usize, label: &str) -> Result<Sym, DecodeError> {
+    if raw as usize >= string_count {
+        return Err(DecodeError(format!(
+            "{label} references string {raw}, but count is {string_count}"
+        )));
+    }
+    Ok(Sym(raw))
 }
 
 fn read_bounded<R: Read>(reader: R, maximum: u64) -> io::Result<Vec<u8>> {

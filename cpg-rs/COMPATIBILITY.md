@@ -66,8 +66,8 @@ The following are unsupported in `0.1.x`:
 - JVM/Scala plugins and Maven-based extension workflows;
 - loading internal CPG2 files directly in Joern. The explicit
   `cpg export-joern` and `cpg import-joern` conversions use Joern v4's current
-  Flatgraph format and pass bidirectional C, Java, and Python fixtures, but
-  unsupported Joern node/property kinds are not yet lossless;
+  Flatgraph format; C, Java, and Python pass bidirectional load probes and
+  content-exact persisted round-trip digests;
 - a parity claim for non-C frontends;
 - every rule from Joern querydb.
 

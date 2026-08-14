@@ -58,6 +58,26 @@ pub enum NodeKind {
     Type,
     /// Graph metadata such as the source language.
     MetaData,
+    /// A method dispatch binding present in Joern's schema.
+    Binding,
+    /// A captured-variable binding used by closure-capable frontends.
+    ClosureBinding,
+    Annotation,
+    AnnotationLiteral,
+    AnnotationParameter,
+    AnnotationParameterAssign,
+    ArrayInitializer,
+    Comment,
+    ConfigFile,
+    Dependency,
+    Finding,
+    Import,
+    JumpLabel,
+    KeyValuePair,
+    Tag,
+    TagNodePair,
+    TemplateDom,
+    TypeArgument,
 }
 
 impl NodeKind {
@@ -91,6 +111,24 @@ impl NodeKind {
             21 => NamespaceBlock,
             22 => Type,
             23 => MetaData,
+            24 => Binding,
+            25 => ClosureBinding,
+            26 => Annotation,
+            27 => AnnotationLiteral,
+            28 => AnnotationParameter,
+            29 => AnnotationParameterAssign,
+            30 => ArrayInitializer,
+            31 => Comment,
+            32 => ConfigFile,
+            33 => Dependency,
+            34 => Finding,
+            35 => Import,
+            36 => JumpLabel,
+            37 => KeyValuePair,
+            38 => Tag,
+            39 => TagNodePair,
+            40 => TemplateDom,
+            41 => TypeArgument,
             _ => return None,
         })
     }
@@ -141,6 +179,16 @@ pub enum EdgeKind {
     SourceFile,
     /// Input-parameter to output-parameter link.
     ParameterLink,
+    /// Type declaration to method binding.
+    Binds,
+    /// Dominator relation materialized by Joern overlays.
+    Dominate,
+    /// Post-dominator relation materialized by Joern overlays.
+    PostDominate,
+    /// Type inheritance relation.
+    InheritsFrom,
+    /// Closure/method reference capture relation.
+    Capture,
 }
 
 impl EdgeKind {
@@ -151,7 +199,7 @@ impl EdgeKind {
         EdgeKind::ALL.get(b as usize).copied()
     }
 
-    pub const ALL: [EdgeKind; 19] = [
+    pub const ALL: [EdgeKind; 24] = [
         EdgeKind::Ast,
         EdgeKind::Cfg,
         EdgeKind::Call,
@@ -171,6 +219,11 @@ impl EdgeKind {
         EdgeKind::EvalType,
         EdgeKind::SourceFile,
         EdgeKind::ParameterLink,
+        EdgeKind::Binds,
+        EdgeKind::Dominate,
+        EdgeKind::PostDominate,
+        EdgeKind::InheritsFrom,
+        EdgeKind::Capture,
     ];
 }
 

@@ -44,6 +44,20 @@ for case_index in "${!cases[@]}"; do
   rg -q "\"$expected_a\"" <<<"$imported_names"
   rg -q "\"$expected_b\"" <<<"$imported_names"
 
+  # Persisted Joern -> native -> Joern round trip. This catches schema,
+  # overlay-edge, and passthrough-property loss across the native CPG2 layer.
+  "$cpg" export-joern --load "$prefix.native.cpg" --lang "$native_lang" -o "$prefix.roundtrip.bin"
+  oracle_digest="$("$cpg" joern-digest "$prefix.joern.bin")"
+  roundtrip_digest="$("$cpg" joern-digest "$prefix.roundtrip.bin")"
+  if [[ "$oracle_digest" != "$roundtrip_digest" ]]; then
+    echo "$native_lang Flatgraph content digest changed: $oracle_digest -> $roundtrip_digest" >&2
+    exit 1
+  fi
+  roundtrip_probe="$("$joern" --nocolors --script "$repo_root/acceptance/flatgraph/probe.sc" --param "cpgPath=$prefix.roundtrip.bin")"
+  rg -q 'FLATGRAPH_OK methods=[1-9][0-9]* calls=[1-9][0-9]* files=[1-9][0-9]*' <<<"$roundtrip_probe"
+  rg -q "METHOD_NAMES=.*$expected_a" <<<"$roundtrip_probe"
+  rg -q "METHOD_NAMES=.*$expected_b" <<<"$roundtrip_probe"
+
   # Native -> Joern: export the language frontend's graph and load it directly
   # with Joern's v4.0.555 CpgLoader (no workspace conversion).
   "$cpg" export-joern "$fixture" --lang "$native_lang" -o "$prefix.export.bin"
@@ -53,4 +67,4 @@ for case_index in "${!cases[@]}"; do
   rg -q "METHOD_NAMES=.*$expected_b" <<<"$probe"
 done
 
-echo "Flatgraph interoperability: PASS (3/3 languages, both directions, Joern v4.0.555)"
+echo "Flatgraph interoperability: PASS (3/3 languages, both directions plus persisted round trips, Joern v4.0.555)"
