@@ -10,12 +10,41 @@
 use std::collections::{HashMap, HashSet};
 use tree_sitter::{Node, Parser};
 
+mod production;
+
 fn main() {
-    let paths: Vec<String> = std::env::args().skip(1).collect();
+    let mut args = std::env::args().skip(1);
+    let mode = match args.next() {
+        Some(arg) if arg == "--production" => production::Mode::Production,
+        Some(arg) if arg == "--migration-report" => production::Mode::MigrationReport,
+        Some(arg) => {
+            let mut paths = vec![arg];
+            paths.extend(args);
+            print!("{}", standalone_dump(&paths));
+            return;
+        }
+        None => {
+            eprintln!("usage: joern-parity [--production|--migration-report] <file.c>...");
+            std::process::exit(2);
+        }
+    };
+    let paths: Vec<String> = args.collect();
     if paths.is_empty() {
-        eprintln!("usage: joern-parity <file.c>...");
+        eprintln!("usage: joern-parity [--production|--migration-report] <file.c>...");
         std::process::exit(2);
     }
+
+    match mode {
+        production::Mode::Production => print!("{}", production::dump_paths(&paths)),
+        production::Mode::MigrationReport => {
+            let standalone = standalone_dump(&paths);
+            let shipped = production::dump_paths(&paths);
+            print!("{}", production::migration_report(&standalone, &shipped));
+        }
+    }
+}
+
+fn standalone_dump(paths: &[String]) -> String {
     let mut parser = Parser::new();
     parser
         .set_language(&tree_sitter_c::LANGUAGE.into())
@@ -570,7 +599,7 @@ fn main() {
     for l in &flow_lines {
         out.push_str(&format!("FLOWS|{l}\n"));
     }
-    print!("{out}");
+    out
 }
 
 fn count_members(n: Node) -> i64 {

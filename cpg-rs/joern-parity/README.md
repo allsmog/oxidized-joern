@@ -14,6 +14,19 @@ against a real Joern install as the oracle**, not by eyeballing.
 3. `check.sh` runs both over `corpus/*.c` and diffs per method. Exit 0 ⇔ every
    method is byte-identical to Joern.
 
+The released-engine migration is observable separately while convergence is in
+progress:
+
+```bash
+cargo run -p joern-parity -- --production corpus/*.c
+cargo run -p joern-parity -- --migration-report corpus/*.c
+```
+
+Both commands construct `cpg-lang-c` through the same incremental project and
+standard analysis pipeline used by `cpg build --lang c`. The historical
+standalone path remains the required oracle until that production report is
+exact; differences are not normalised away.
+
 ```bash
 JOERN=/path/to/joern-cli ./check.sh   # regenerate oracle from Joern, then diff
 ```
