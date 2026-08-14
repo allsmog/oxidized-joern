@@ -7,6 +7,7 @@
 //!     cpg serve <dir> [--lang L]  |  cpg serve --load <graph.cpg>
 //!     cpg scan <dir> --rules <rules.json> [--lang L] [-o findings.sarif]
 //!     cpg scan --load <graph.cpg> --rules <rules.json> [-o findings.sarif]
+//!     cpg query <dir>|--load <graph.cpg> --query '<cpg.method.name("main")>'
 //!
 //! `serve` reads one JSON request per line on stdin and writes one JSON
 //! response per line on stdout. Requests:
@@ -38,10 +39,13 @@ const USAGE: &str = "usage (langs: c|cpp|go|java|javascript|typescript|python|ru
   cpg merge -o <merged.cpg> [--protos <dir>]... [--thrifts <dir>]... <a.cpg> [b.cpg ...]
   cpg apis <dir>|--load <graph.cpg> [--lang L] [--top N] [-o out.json]
   cpg export <dir>|--load <graph.cpg> [--lang L] [--repr ast|cfg|ddg|cpg14|all] [--format dot|graphml|json] -o <outdir>
+  cpg export-joern <dir>|--load <graph.cpg> [--lang L] -o <cpg.bin>
+  cpg import-joern <cpg.bin> -o <graph.cpg>                       convert Joern v4 Flatgraph to CPG2
   cpg flow <src-glob> <sink-glob> <dir>|--load <graph.cpg> [--lang L] [--sanitizer S]... [-o out.json]
   cpg vectors <dir>|--load <graph.cpg> [--lang L] [--features] [-o out.json]
+  cpg query <dir>|--load <graph.cpg> [--lang L] --query <CPGQL> [-o out.json]
   cpg rules                                                     list compiled-in rule packs
-  cpg x [-C <root>] <build|scan|apis|slice|flow|serve|taint|merge|list> <path> ...
+  cpg x [-C <root>] <build|scan|apis|slice|flow|query|serve|taint|merge|list> <path> ...
   cpg mcp [--root <repo>]                                       Model Context Protocol server over stdio
   cpg shape-version                                             print the saved-graph shape version";
 
@@ -58,8 +62,11 @@ fn main() {
         "merge" => merge_cmd(&args),
         "apis" => apis_cmd(&args),
         "export" => export_cmd(&args),
+        "export-joern" => export_joern_cmd(&args),
+        "import-joern" => import_joern_cmd(&args),
         "flow" => flow_cmd(&args),
         "vectors" => vectors_cmd(&args),
+        "query" => query_cmd(&args),
         "rules" => rules_cmd(),
         // Machine-readable graph-shape version: cache wrappers (cpgx) key
         // cache filenames on it so engine shape changes invalidate caches
@@ -112,7 +119,7 @@ fn x_cmd(args: &[String]) {
     use cpg_cli::workspace::Workspace;
     let usage = "usage: cpg x [-C <root>] build <path> [lang]\n       \
                  cpg x [-C <root>] scan <path> [rules.json|iris:<pack>] [scan flags...]\n       \
-                 cpg x [-C <root>] apis|slice|export|vectors|serve <path> [flags...]\n       \
+                 cpg x [-C <root>] apis|slice|export|vectors|query|serve <path> [flags...]\n       \
                  cpg x [-C <root>] flow <path> <src-glob> <sink-glob> [flags...]\n       \
                  cpg x [-C <root>] taint <path> <sources,csv> <sinks,csv>\n       \
                  cpg x [-C <root>] merge <out-name> <path1> [path2...]\n       \
@@ -209,7 +216,7 @@ fn x_cmd(args: &[String]) {
             argv.extend(pass);
             scan_cmd(&argv);
         }
-        "apis" | "slice" | "export" | "vectors" | "serve" => {
+        "apis" | "slice" | "export" | "vectors" | "query" | "serve" => {
             let path = need_path(rest);
             let pass: Vec<String> = rest[1..].to_vec();
             let lang_opt = flag(&pass, "--lang").map(String::from);
@@ -223,6 +230,7 @@ fn x_cmd(args: &[String]) {
                 "slice" => slice_cmd(&argv),
                 "export" => export_cmd(&argv),
                 "vectors" => vectors_cmd(&argv),
+                "query" => query_cmd(&argv),
                 _ => serve(&argv),
             }
         }
@@ -583,6 +591,60 @@ fn export_cmd(args: &[String]) {
     }
 }
 
+/// Export the native graph in the current Joern v4 Flatgraph format.
+fn export_joern_cmd(args: &[String]) {
+    let usage = "usage: cpg export-joern <dir>|--load <graph.cpg> [--lang L] -o <cpg.bin>";
+    let Some(output) = flag(args, "-o") else {
+        eprintln!("missing -o <cpg.bin>\n{usage}");
+        std::process::exit(2);
+    };
+    let language = flag(args, "--lang").unwrap_or("c");
+    let project = match open_project(args) {
+        Ok(project) => project,
+        Err(e) => {
+            eprintln!("{e}\n{usage}");
+            std::process::exit(2);
+        }
+    };
+    if let Err(e) = cpg_cli::flatgraph::export(&project.cpg, language, std::path::Path::new(output))
+    {
+        eprintln!("Joern export failed: {e}");
+        std::process::exit(1);
+    }
+    eprintln!(
+        "exported {} nodes to Joern Flatgraph {output}",
+        project.cpg.live_count()
+    );
+}
+
+/// Import the supported portion of a Joern v4 Flatgraph into native CPG2.
+fn import_joern_cmd(args: &[String]) {
+    let usage = "usage: cpg import-joern <cpg.bin> -o <graph.cpg>";
+    let Some(input) = args.get(2).filter(|value| !value.starts_with('-')) else {
+        eprintln!("missing <cpg.bin>\n{usage}");
+        std::process::exit(2);
+    };
+    let Some(output) = flag(args, "-o") else {
+        eprintln!("missing -o <graph.cpg>\n{usage}");
+        std::process::exit(2);
+    };
+    let graph = match cpg_cli::flatgraph::import(std::path::Path::new(input)) {
+        Ok(graph) => graph,
+        Err(e) => {
+            eprintln!("Joern import failed: {e}");
+            std::process::exit(1);
+        }
+    };
+    if let Err(e) = graph.save(output) {
+        eprintln!("cannot save {output}: {e}");
+        std::process::exit(1);
+    }
+    eprintln!(
+        "imported {} supported nodes to {output}",
+        graph.live_count()
+    );
+}
+
 /// `cpg flow`: one-off source→sink taint query without writing a rules file.
 /// JoernFlow parity, with globs instead of regexes (same matcher as
 /// --entry-glob): call names matching <src-glob> are sources, methods
@@ -736,6 +798,77 @@ fn vectors_cmd(args: &[String]) {
     if let Err(e) = result {
         eprintln!("vectors failed: {e}");
         std::process::exit(1);
+    }
+}
+
+/// `cpg query`: compile a CPGQL-compatible traversal and execute it over a
+/// source tree or persisted graph. Results are deterministic JSON: node
+/// traversals return rich node records, property projections return arrays,
+/// and `.size`/`.count` return a JSON integer.
+fn query_cmd(args: &[String]) {
+    use cpg_analysis::{node_kind_label, QueryCompiler, QueryExecutor, QueryResult};
+    let usage =
+        "usage: cpg query <dir>|--load <graph.cpg> [--lang L] --query <CPGQL> [-o out.json]";
+    let Some(query) = flag(args, "--query") else {
+        eprintln!("missing --query\n{usage}");
+        std::process::exit(2);
+    };
+    let project = match open_project(args) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("{e}\n{usage}");
+            std::process::exit(2);
+        }
+    };
+    let plan = match QueryCompiler::compile(query) {
+        Ok(plan) => plan,
+        Err(e) => {
+            eprintln!("query compile failed: {e}");
+            std::process::exit(2);
+        }
+    };
+    let result = match QueryExecutor::new(&project.cpg).execute(&plan) {
+        Ok(result) => result,
+        Err(e) => {
+            eprintln!("query execution failed: {e}");
+            std::process::exit(1);
+        }
+    };
+    let value = match result {
+        QueryResult::Nodes(nodes) => Value::Array(
+            nodes
+                .into_iter()
+                .map(|node| {
+                    json!({
+                        "id": node.0,
+                        "label": node_kind_label(project.cpg.kind_of(node)),
+                        "name": project.cpg.name_of(node),
+                        "fullName": project.cpg.full_name_of(node),
+                        "code": project.cpg.code_of(node),
+                        "typeFullName": project.cpg.type_full_name_of(node),
+                        "signature": project.cpg.signature_of(node),
+                        "filename": project.cpg.path_of(project.cpg.file_of(node)),
+                        "lineNumber": project.cpg.line_of(node),
+                        "order": project.cpg.order_of(node),
+                        "argumentIndex": project.cpg.argument_index_of(node),
+                    })
+                })
+                .collect(),
+        ),
+        QueryResult::Strings(values) => json!(values),
+        QueryResult::Integers(values) => json!(values),
+        QueryResult::Count(count) => json!(count),
+    };
+    let output = serde_json::to_string_pretty(&value).expect("query result serializes");
+    match flag(args, "-o") {
+        Some(path) => {
+            if let Err(e) = std::fs::write(path, output) {
+                eprintln!("cannot write {path}: {e}");
+                std::process::exit(1);
+            }
+            eprintln!("wrote {path}");
+        }
+        None => println!("{output}"),
     }
 }
 

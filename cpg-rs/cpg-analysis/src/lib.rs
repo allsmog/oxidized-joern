@@ -30,7 +30,10 @@ pub use middleware::{
 };
 pub use pass::{Pass, PassContext, PassManager};
 pub use provenance::{Fact, FactId, FactKind, ProvenanceGraph};
-pub use query::{LogicalPlan, NodeSelector, Predicate, QueryCompiler, QueryError, QueryExecutor};
+pub use query::{
+    node_kind_label, Direction, LogicalPlan, NodeSelector, Predicate, Property, QueryCompiler,
+    QueryError, QueryExecutor, QueryResult, Traversal,
+};
 pub use reaching_def::{reaching_def_flows, ReachingDefFlow, ReachingDefPass};
 pub use relations::{Relation, RelationStore, Tuple};
 pub use scan::{ScanDelta, ScanSubscription};
