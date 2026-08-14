@@ -119,3 +119,27 @@ int macro_advanced(int input) {
             .all(|node| cpg.name_of(node) != Some(consumed)));
     }
 }
+
+#[test]
+fn recursive_and_incomplete_macro_expansions_are_bounded() {
+    let cpg = graph(
+        r#"
+#define FIRST(value) SECOND(value)
+#define SECOND(value) FIRST(value)
+#define INCOMPLETE(value) ((value) ? (value))
+
+int recursive_macro(int value) {
+    return FIRST(value);
+}
+
+int incomplete_macro(int value) {
+    return INCOMPLETE(value);
+}
+"#,
+    );
+
+    assert_eq!(cpg.method_named("recursive_macro").len(), 1);
+    assert_eq!(cpg.method_named("incomplete_macro").len(), 1);
+    assert_eq!(cpg.calls_named("FIRST").len(), 2);
+    assert_eq!(cpg.calls_named("INCOMPLETE").len(), 1);
+}
