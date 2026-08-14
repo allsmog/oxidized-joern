@@ -265,7 +265,12 @@ pub fn collect_sources_filtered(
     }
     Ok(sources
         .into_iter()
-        .map(|(path, source)| (path.to_string_lossy().into_owned(), source))
+        .map(|(path, source)| {
+            let relative = path
+                .strip_prefix(&root)
+                .expect("collector confines every canonical path to root");
+            (relative.to_string_lossy().replace('\\', "/"), source)
+        })
         .collect())
 }
 
@@ -765,8 +770,8 @@ mod glob_tests {
         let first = collect_sources(&root, &["c"]).unwrap();
         let second = collect_sources(&root, &["c"]).unwrap();
         assert_eq!(first, second);
-        assert!(first[0].0.ends_with("a.c"));
-        assert!(first[1].0.ends_with("z.c"));
+        assert_eq!(first[0].0, "a.c");
+        assert_eq!(first[1].0, "z.c");
 
         std::fs::write(root.join("bad.c"), [0xff, 0xfe]).unwrap();
         let error = collect_sources(&root, &["c"]).unwrap_err();

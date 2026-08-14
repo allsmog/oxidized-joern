@@ -341,6 +341,81 @@ mod tests {
             .with_source("two_methods", "function alpha(){} function beta(){}")
     }
 
+    fn typescript_fixture() -> LangFixture {
+        LangFixture::new("TypeScript", Box::new(TsFrontend::typescript()))
+            .with_source(
+                "method_with_two_params",
+                "function two_params(a: number, b: number): number { return a; }",
+            )
+            .with_source(
+                "call_with_two_args",
+                "function f(): void { callee(1, 2); }",
+            )
+            .with_source(
+                "intraprocedural_call_resolves",
+                "function target(x: number): number { return x; } function f(): void { target(3); }",
+            )
+            .with_source(
+                "nested_call_is_argument",
+                "function f(): void { outer(inner(1)); }",
+            )
+            .with_source(
+                "call_inside_branch",
+                "function f(c: boolean): void { if (c) { guarded(c); } }",
+            )
+            .with_source(
+                "two_methods",
+                "function alpha(): void {} function beta(): void {}",
+            )
+    }
+
+    fn cpp_fixture() -> LangFixture {
+        LangFixture::new("C++", Box::new(TsFrontend::cpp()))
+            .with_source(
+                "method_with_two_params",
+                "int two_params(int a, int b) { return a; }",
+            )
+            .with_source("call_with_two_args", "void f() { callee(1, 2); }")
+            .with_source(
+                "intraprocedural_call_resolves",
+                "int target(int x){ return x; } void f(){ target(3); }",
+            )
+            .with_source("nested_call_is_argument", "void f(){ outer(inner(1)); }")
+            .with_source(
+                "call_inside_branch",
+                "void f(bool c){ if (c) { guarded(c); } }",
+            )
+            .with_source("two_methods", "void alpha(){} void beta(){}")
+    }
+
+    fn scala_fixture() -> LangFixture {
+        LangFixture::new("Scala", Box::new(TsFrontend::scala()))
+            .with_source(
+                "method_with_two_params",
+                "object C { def two_params(a: Int, b: Int): Int = a }",
+            )
+            .with_source(
+                "call_with_two_args",
+                "object C { def f(): Unit = { callee(1, 2) } }",
+            )
+            .with_source(
+                "intraprocedural_call_resolves",
+                "object C { def target(x: Int): Int = x; def f(): Unit = { target(3) } }",
+            )
+            .with_source(
+                "nested_call_is_argument",
+                "object C { def f(): Unit = { outer(inner(1)) } }",
+            )
+            .with_source(
+                "call_inside_branch",
+                "object C { def f(c: Boolean): Unit = { if (c) guarded(c) } }",
+            )
+            .with_source(
+                "two_methods",
+                "object C { def alpha(): Unit = {}; def beta(): Unit = {} }",
+            )
+    }
+
     fn ruby_fixture() -> LangFixture {
         LangFixture::new("Ruby", Box::new(TsFrontend::ruby()))
             .with_source("method_with_two_params", "def two_params(a, b)\n  a\nend")
@@ -386,8 +461,11 @@ mod tests {
             java_fixture(),
             go_fixture(),
             javascript_fixture(),
+            typescript_fixture(),
             ruby_fixture(),
             rust_fixture(),
+            cpp_fixture(),
+            scala_fixture(),
         ];
         let mut all_failures: Vec<CaseResult> = Vec::new();
         for fx in &mut fixtures {

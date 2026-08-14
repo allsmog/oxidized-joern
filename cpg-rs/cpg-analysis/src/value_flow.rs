@@ -15,6 +15,9 @@ pub enum ValueFlowKind {
     DataDependence,
     Summary,
     External,
+    /// A write to a canonical C global proxy reaching reads of that same
+    /// global in another method/translation-unit scope.
+    Global,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
@@ -95,7 +98,37 @@ impl SparseValueFlow {
                 }
             }
         }
+        graph.add_c_global_bridges(cpg);
         graph
+    }
+
+    fn add_c_global_bridges(&mut self, cpg: &Cpg) {
+        let mut reads: HashMap<&str, Vec<NodeId>> = HashMap::new();
+        for node in cpg.nodes().filter(|&node| {
+            cpg.kind_of(node) == NodeKind::Identifier
+                && cpg
+                    .code_of(node)
+                    .is_some_and(|code| code.starts_with("<global> "))
+        }) {
+            if let Some(name) = cpg.name_of(node) {
+                reads.entry(name).or_default().push(node);
+            }
+        }
+        for assignment in cpg.calls().into_iter().filter(|&call| {
+            cpg.name_of(call)
+                .is_some_and(crate::summaries::is_plain_assignment)
+        }) {
+            let args = cpg.arguments_of(assignment);
+            let [lhs, rhs] = args.as_slice() else {
+                continue;
+            };
+            let Some(name) = global_lvalue_name(cpg, *lhs) else {
+                continue;
+            };
+            for &read in reads.get(name).into_iter().flatten() {
+                self.add_edge(*rhs, read, ValueFlowKind::Global);
+            }
+        }
     }
 
     pub fn add_edge(&mut self, from: NodeId, to: NodeId, kind: ValueFlowKind) {
@@ -168,4 +201,21 @@ impl SparseValueFlow {
         }
         false
     }
+}
+
+fn global_lvalue_name(cpg: &Cpg, node: NodeId) -> Option<&str> {
+    if cpg.kind_of(node) == NodeKind::Identifier
+        && cpg
+            .code_of(node)
+            .is_some_and(|code| code.starts_with("<global> "))
+    {
+        return cpg.name_of(node);
+    }
+    if cpg.kind_of(node) == NodeKind::Call {
+        return cpg
+            .arguments_of(node)
+            .first()
+            .and_then(|&base| global_lvalue_name(cpg, base));
+    }
+    None
 }
