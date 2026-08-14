@@ -23,19 +23,34 @@ trap cleanup EXIT
 cargo build --manifest-path "$repo_root/Cargo.toml" --release --locked -p cpg-cli
 cpg="$repo_root/target/release/cpg"
 
-# Joern -> native: parse with the pinned oracle, decode its actual v4
-# Flatgraph, persist CPG2, and execute a native query over the imported graph.
-"$joern_parse" "$repo_root/joern-parity/corpus/add.c" --output "$scratch/joern.cpg.bin" >/dev/null
-"$cpg" import-joern "$scratch/joern.cpg.bin" -o "$scratch/native.cpg"
-imported_names="$("$cpg" query --load "$scratch/native.cpg" --lang c --query 'cpg.method.name("add|main").name')"
-rg -q '"add"' <<<"$imported_names"
-rg -q '"main"' <<<"$imported_names"
+# Each row is oracle-language|native-language|fixture|two expected methods.
+# C plus one JVM and one dynamic language is the minimum replacement contract;
+# every row is exercised in both directions.
+cases=(
+  "newc|c|$repo_root/acceptance/flatgraph/fixtures/c|add|main"
+  "javasrc|java|$repo_root/acceptance/flatgraph/fixtures/java|main|twice"
+  "pythonsrc|python|$repo_root/acceptance/flatgraph/fixtures/python|main|twice"
+)
 
-# Native -> Joern: emit Flatgraph from the production C frontend and load it
-# directly with Joern's v4.0.555 CpgLoader (no workspace conversion).
-"$cpg" export-joern "$repo_root/joern-parity/corpus" --lang c -o "$scratch/native.cpg.bin"
-probe="$($joern --nocolors --script "$repo_root/acceptance/flatgraph/probe.sc" --param "cpgPath=$scratch/native.cpg.bin")"
-rg -q 'FLATGRAPH_OK methods=[1-9][0-9]* calls=[1-9][0-9]* files=[1-9][0-9]*' <<<"$probe"
-rg -q 'METHOD_NAMES=.*main' <<<"$probe"
+for case_index in "${!cases[@]}"; do
+  IFS='|' read -r oracle_lang native_lang fixture expected_a expected_b <<<"${cases[$case_index]}"
+  prefix="$scratch/$native_lang"
 
-echo "Flatgraph interoperability: PASS (Joern v4.0.555, both directions)"
+  # Joern -> native: decode the oracle's actual v4 Flatgraph, persist CPG2,
+  # then run native queries over the imported supported schema.
+  "$joern_parse" "$fixture" --language "$oracle_lang" --output "$prefix.joern.bin" >/dev/null
+  "$cpg" import-joern "$prefix.joern.bin" -o "$prefix.native.cpg"
+  imported_names="$("$cpg" query --load "$prefix.native.cpg" --lang "$native_lang" --query "cpg.method(\"$expected_a|$expected_b\").name")"
+  rg -q "\"$expected_a\"" <<<"$imported_names"
+  rg -q "\"$expected_b\"" <<<"$imported_names"
+
+  # Native -> Joern: export the language frontend's graph and load it directly
+  # with Joern's v4.0.555 CpgLoader (no workspace conversion).
+  "$cpg" export-joern "$fixture" --lang "$native_lang" -o "$prefix.export.bin"
+  probe="$("$joern" --nocolors --script "$repo_root/acceptance/flatgraph/probe.sc" --param "cpgPath=$prefix.export.bin")"
+  rg -q 'FLATGRAPH_OK methods=[1-9][0-9]* calls=[1-9][0-9]* files=[1-9][0-9]*' <<<"$probe"
+  rg -q "METHOD_NAMES=.*$expected_a" <<<"$probe"
+  rg -q "METHOD_NAMES=.*$expected_b" <<<"$probe"
+done
+
+echo "Flatgraph interoperability: PASS (3/3 languages, both directions, Joern v4.0.555)"
