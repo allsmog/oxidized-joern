@@ -4,7 +4,10 @@
 //! Driven from rule packs via the rule `kind` field (see `cpg-cli::rules`);
 //! findings reuse [`Finding`] so SARIF/serve output needs no new plumbing.
 //!
-//! Two shapes, both distilled from confirmed cross-tenant bugs:
+//! Three shapes:
+//!
+//! * [`forbidden_calls`] — a call is unsafe by construction, regardless of
+//!   where its arguments came from (`gets`, for example, cannot be bounded).
 //!
 //! * [`discarded_returns`] — a verification call's return values are bound to
 //!   blank identifiers (`_, _, ok := cache.CheckToken(tok, uuid)`): the
@@ -18,7 +21,7 @@
 //!   after the client's copies, and downstream `Get` readers see the FIRST
 //!   (client) value. The duplicate-header smuggling shape.
 
-use crate::pass::ast_descendants;
+use crate::pass::{ast_descendants, is_analysis_method};
 use crate::taint::{Finding, Provenance, Step};
 use cpg_core::{Cpg, EdgeKind, NodeKind, Query};
 use std::collections::{HashMap, HashSet};
@@ -62,6 +65,53 @@ fn is_test_path(path: &str) -> bool {
 
 fn in_test_file(cpg: &Cpg, method: cpg_core::NodeId) -> bool {
     cpg.path_of(cpg.file_of(method)).is_some_and(is_test_path)
+}
+
+/// Findings for calls whose names match `callee_pats`. This is intentionally
+/// structural rather than taint-driven: every invocation of an API in this
+/// rule class is a defect, including calls with a local or constant argument.
+///
+/// One finding is emitted per call site. Test files are excluded consistently
+/// with the other structural censuses.
+pub fn forbidden_calls(cpg: &Cpg, callee_pats: &[&str]) -> Vec<Finding> {
+    let mut findings = Vec::new();
+    for method in cpg.methods() {
+        if !is_analysis_method(cpg, method) || in_test_file(cpg, method) {
+            continue;
+        }
+        let method_name = cpg.full_name_of(method).unwrap_or("<unknown>").to_string();
+        for call in ast_descendants(cpg, method) {
+            if cpg.kind_of(call) != NodeKind::Call {
+                continue;
+            }
+            let Some(name) = cpg.name_of(call) else {
+                continue;
+            };
+            if !matches_any(callee_pats, name) {
+                continue;
+            }
+            let line = cpg.line_of(call);
+            findings.push(Finding {
+                method: method_name.clone(),
+                sink: name.to_string(),
+                sink_line: line,
+                sink_file: cpg.path_of(cpg.file_of(call)).map(str::to_string),
+                origin: format!("forbidden-call {name}"),
+                path: vec![Step {
+                    code: cpg.code_of(call).unwrap_or("").to_string(),
+                    line,
+                    provenance: Provenance::IntraProc,
+                    depth: 0,
+                }],
+                guard: None,
+                authz: None,
+                confined: None,
+            });
+        }
+    }
+    findings
+        .sort_by(|a, b| (&a.method, a.sink_line, &a.sink).cmp(&(&b.method, b.sink_line, &b.sink)));
+    findings
 }
 
 /// Strip one layer of matching string quotes from a literal's code
@@ -153,7 +203,7 @@ fn lhs_bindings(code: &str) -> Option<Vec<String>> {
 pub fn discarded_returns(cpg: &Cpg, callee_pats: &[&str]) -> Vec<Finding> {
     let mut findings = Vec::new();
     for m in cpg.methods() {
-        if in_test_file(cpg, m) {
+        if !is_analysis_method(cpg, m) || in_test_file(cpg, m) {
             continue;
         }
         let mut groups: DiscardGroups = HashMap::new();
@@ -288,7 +338,7 @@ pub fn append_without_delete(
 ) -> Vec<Finding> {
     let mut findings = Vec::new();
     for m in cpg.methods() {
-        if in_test_file(cpg, m) {
+        if !is_analysis_method(cpg, m) || in_test_file(cpg, m) {
             continue;
         }
         let mut adds: Vec<(cpg_core::NodeId, String, String)> = Vec::new(); // (call, name, key)
@@ -503,11 +553,25 @@ func wrapper(tok string) (string, string, bool) {
     }
 
     #[test]
+    fn forbidden_call_flags_every_matching_call_but_not_near_misses() {
+        let cpg = build_go(&[(
+            "unsafe.go",
+            "package a\nfunc hit() { gets(buf); targetGets(buf) }\nfunc clean() { fgets(buf, 8, stdin) }\n",
+        )]);
+        let findings = forbidden_calls(&cpg, &["gets"]);
+        assert_eq!(findings.len(), 1, "{findings:#?}");
+        assert_eq!(findings[0].sink, "gets");
+        assert_eq!(findings[0].origin, "forbidden-call gets");
+        assert_eq!(findings[0].sink_file.as_deref(), Some("unsafe.go"));
+    }
+
+    #[test]
     fn test_files_are_excluded() {
         let cpg = build_go(&[(
             "auth_test.go",
             "package a\nfunc TestHit(t *T) {\n    _, _, ok := cache.CheckToken(\"t\", \"u\")\n    _ = ok\n    h.Add(\"X-Method\", \"GET\")\n}\n",
         )]);
+        assert!(forbidden_calls(&cpg, &["CheckToken"]).is_empty());
         assert!(discarded_returns(&cpg, &["CheckToken"]).is_empty());
         assert!(append_without_delete(&cpg, &["Add"], &["Del"], &["X-*"]).is_empty());
     }
