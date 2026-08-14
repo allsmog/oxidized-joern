@@ -97,6 +97,14 @@ jobs:
       - name: Check committed Joern parity
         run: ./check.sh --committed-only
         working-directory: cpg-rs/joern-parity
+      - name: Check canonical C security outcomes
+        run: cargo test -p cpg-analysis --test canonical_c_flow --locked
+        working-directory: cpg-rs
+      - name: Check every accepted language workflow
+        run: |
+          cargo test -p conformance --locked all_languages_conform
+          cargo test -p cpg-incremental --locked taint_through_summary_in_every_language
+        working-directory: cpg-rs
 
   # Regenerating the differential oracle downloads ~2GB of pinned Joern, so
   # keep integrity regeneration as a separate manual operation.

@@ -198,7 +198,7 @@ which is exactly what de-risks consolidating frontend logic.
 
 The current cases cover method/parameter shape, call arguments, intraprocedural
 call resolution, nested calls as arguments, calls inside control structures, and
-multiple top-level methods. **All seven languages pass all six cases.** The
+multiple top-level methods. **All ten accepted languages pass all six cases.** The
 contract is stressed at three further levels beyond structure:
 
 * **Dataflow** (`cpg-incremental`): the shared summaries-first taint engine
