@@ -32,6 +32,8 @@ tree-sitter-python = "0.25"
 rayon = "1.12.0"
 crc32fast = "1.5.0"
 tempfile = "3.27.0"
+blake3 = "1.8.2"
+fs2 = "0.4.3"
 
 [profile.release]
 lto = "thin"
