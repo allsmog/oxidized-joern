@@ -173,7 +173,7 @@ fn skip_ascii_whitespace(line: &str, mut index: usize) -> usize {
 fn node_json(node: Node<'_>, field_name: Option<String>, source: &str) -> JavaAstNode {
     let mut children = Vec::new();
     for index in 0..node.child_count() {
-        if let Some(child) = node.child(index) {
+        if let Some(child) = node.child(index as u32) {
             let child_field_name = node.field_name_for_child(index as u32).map(str::to_string);
             children.push(node_json(child, child_field_name, source));
         }
