@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "language": "c",
+  "thresholds": {
+    "aggregatePrecision": 1.0,
+    "aggregateRecall": 1.0,
+    "perRulePrecision": 1.0,
+    "perRuleRecall": 1.0
+  },
+  "rules": [
+    "C-CMD-001",
+    "C-BUF-002",
+    "C-FMT-003",
+    "C-API-004",
+    "C-SQL-005",
+    "C-PATH-006",
+    "C-LIB-007"
+  ],
+  "cases": [
+    {
+      "id": "positive",
+      "category": "positive",
+      "path": "fixtures/positive",
+      "expected": {
+        "C-CMD-001": 1,
+        "C-BUF-002": 1,
+        "C-FMT-003": 1,
+        "C-API-004": 1,
+        "C-SQL-005": 1,
+        "C-PATH-006": 1,
+        "C-LIB-007": 1
+      }
+    },
+    {
+      "id": "near-miss",
+      "category": "near-miss-negative",
+      "path": "fixtures/near-miss",
+      "expected": {}
+    },
+    {
+      "id": "fixed",
+      "category": "fix-negative",
+      "path": "fixtures/fixed",
+      "expected": {}
+    },
+    {
+      "id": "multi-file",
+      "category": "multi-file",
+      "path": "fixtures/multi-file",
+      "expected": {
+        "C-CMD-001": 1,
+        "C-BUF-002": 1,
+        "C-FMT-003": 1,
+        "C-API-004": 1,
+        "C-SQL-005": 1,
+        "C-PATH-006": 1,
+        "C-LIB-007": 1
+      }
+    }
+  ]
+}

@@ -42,6 +42,10 @@ The release contract covers these C operations:
   SARIF output;
 - canonical flow facts and final findings for branches, kills, loops, returns,
   globals, pointer/member access, sanitizers, cross-calls, and recursion;
+- a labeled 28-expectation default-rule corpus covering command injection,
+  unbounded copies, uncontrolled format strings, `gets`, SQL injection, path
+  traversal, and dynamic-library loading, including near-miss, fixed, and
+  cross-file cases at 100% committed precision and recall;
 - distinct call identities for same-named translation-unit-local functions;
 - content-correct project updates whose result equals a clean rebuild;
 - pinned zlib and Lua builds under recorded wall-time and peak-RSS ceilings.
@@ -72,9 +76,10 @@ the supported integration surfaces.
 ## Release-blocking gates
 
 Every release must pass the locked Rust workspace tests, formatting, Clippy,
-dependency audit, 101/101 committed C parity, canonical C scanner outcomes, the
-all-language acceptance test, pinned zlib/Lua acceptance, and packaged binary
-and container tests. The zlib/Lua suite also runs nightly.
+dependency audit, 101/101 committed C parity, canonical C scanner outcomes,
+the labeled default-C-rule quality gate, the all-language acceptance test,
+pinned zlib/Lua acceptance, and packaged binary and container tests. The
+zlib/Lua suite also runs nightly.
 
 The stricter requirements for promoting the project from C production preview
 to a production Joern replacement are tracked in `REPLACEMENT_CONTRACT.md`.
