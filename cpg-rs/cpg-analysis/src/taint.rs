@@ -28,9 +28,10 @@
 //! path at `depth + 1`; external (JSON) summaries have no body, so those hops
 //! appear as a single summary-only step.
 
-use crate::pass::method_name_index;
-use crate::summaries::{is_operator, lhs_name, SummaryOrigin, SummaryStore};
-use cpg_core::{Cpg, EdgeKind, NodeId, NodeKind, Query};
+use crate::pass::{is_analysis_method, method_name_index};
+use crate::summaries::{is_operator, is_plain_assignment, lhs_name, SummaryOrigin, SummaryStore};
+use crate::SparseValueFlow;
+use cpg_core::{Cpg, EdgeKind, Layer, NodeId, NodeKind, Query};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 
@@ -186,7 +187,7 @@ fn method_local_names(cpg: &Cpg, method: NodeId) -> HashSet<String> {
         }
     }
     for n in crate::pass::ast_descendants(cpg, method) {
-        if cpg.kind_of(n) == NodeKind::Call && cpg.name_of(n) == Some("=") {
+        if cpg.kind_of(n) == NodeKind::Call && cpg.name_of(n).is_some_and(is_plain_assignment) {
             if let Some(&lhs) = cpg.arguments_of(n).first() {
                 if cpg.kind_of(lhs) == NodeKind::Identifier {
                     if let Some(nm) = cpg.name_of(lhs) {
@@ -621,7 +622,7 @@ fn member_read_path(cpg: &Cpg, node: NodeId) -> Option<(String, Vec<String>)> {
                     return None;
                 }
                 let name = cpg.name_of(cur)?;
-                if name == "=" || is_operator(name) {
+                if is_plain_assignment(name) || is_operator(name) {
                     return None;
                 }
                 let args = cpg.arguments_of(cur);
@@ -876,6 +877,9 @@ fn persist_variants(k: &str) -> Vec<String> {
 
 /// Run the taint query across every method, returning all findings.
 pub fn find_flows(cpg: &Cpg, summaries: &SummaryStore, spec: &TaintSpec) -> Vec<Finding> {
+    let canonical_flow = cpg
+        .is_layer_authoritative(Layer::Ddg)
+        .then(|| SparseValueFlow::from_cpg(cpg, summaries));
     let ctx = Ctx {
         cpg,
         summaries,
@@ -1061,6 +1065,49 @@ pub fn find_flows(cpg: &Cpg, summaries: &SummaryStore, spec: &TaintSpec) -> Vec<
             }
         }
     }
+    // For the production C graph, ordinary call-source -> call-sink findings
+    // are accepted only when the parity-validated ReachingDef layer (plus
+    // resolved summary bridges) contains a sanitizer-free path. Entry-point,
+    // out-param, identifier, persistence, assignment, receiver, and shell
+    // policy models are intentionally independent scanner semantics.
+    if let Some(flow) = &canonical_flow {
+        let blocked: HashSet<NodeId> = cpg
+            .calls()
+            .into_iter()
+            .filter(|&call| {
+                cpg.name_of(call).is_some_and(|name| {
+                    spec.sanitizers.contains(name) || summaries.sanitizer_names().contains(name)
+                })
+            })
+            .collect();
+        findings.retain(|finding| {
+            if !spec.sources.contains(&finding.origin) || !spec.sinks.contains(&finding.sink) {
+                return true;
+            }
+            let origins: HashSet<NodeId> = cpg
+                .calls()
+                .into_iter()
+                .filter(|&call| cpg.name_of(call) == Some(finding.origin.as_str()))
+                .collect();
+            let mut targets = HashSet::new();
+            for sink in cpg.calls().into_iter().filter(|&call| {
+                cpg.name_of(call) == Some(finding.sink.as_str())
+                    && finding
+                        .sink_line
+                        .is_none_or(|line| cpg.line_of(call) == Some(line))
+                    && finding
+                        .sink_file
+                        .as_deref()
+                        .is_none_or(|file| cpg.path_of(cpg.file_of(call)) == Some(file))
+            }) {
+                targets.insert(sink);
+                targets.extend(cpg.arguments_of(sink));
+            }
+            origins.is_empty()
+                || targets.is_empty()
+                || flow.reaches_avoiding(&origins, &targets, &blocked)
+        });
+    }
     annotate_guards(cpg, &mut findings);
     crate::authz::annotate_authz(cpg, spec, &mut findings);
     annotate_confined(spec, &mut findings);
@@ -1168,7 +1215,9 @@ fn run_analysis(ctx: &Ctx) -> Vec<Finding> {
     let spec = ctx.spec;
     let mut findings = Vec::new();
     for m in cpg.methods() {
-        analyse_method(ctx, m, &mut findings);
+        if is_analysis_method(cpg, m) {
+            analyse_method(ctx, m, &mut findings);
+        }
     }
     // Entry-point model: every parameter of a source method is tainted; a
     // sanitizer-free path from one to a sink (here or in a callee) reports.
@@ -1418,7 +1467,7 @@ fn is_grow_name(g: &str) -> bool {
 fn assignment_ident_map(cpg: &Cpg, method: NodeId) -> HashMap<String, Vec<String>> {
     let mut map: HashMap<String, Vec<String>> = HashMap::new();
     for n in crate::pass::ast_descendants(cpg, method) {
-        if cpg.kind_of(n) != NodeKind::Call || cpg.name_of(n) != Some("=") {
+        if cpg.kind_of(n) != NodeKind::Call || !cpg.name_of(n).is_some_and(is_plain_assignment) {
             continue;
         }
         let args = cpg.arguments_of(n);
@@ -1536,7 +1585,7 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
     }
 
     for n in stmts {
-        if cpg.kind_of(n) == NodeKind::Call && cpg.name_of(n) == Some("=") {
+        if cpg.kind_of(n) == NodeKind::Call && cpg.name_of(n).is_some_and(is_plain_assignment) {
             let args = cpg.arguments_of(n);
             if args.len() == 2 {
                 let code = cpg.code_of(n).unwrap_or("");
@@ -1720,9 +1769,11 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
             // Persistence phase-1 (named-arg store): `copy(executionUser = v)` /
             // `Config(user = v)` — an argument that is itself a `=` call
             // with a tainted rhs stores the field named by its lhs.
-            if name != "=" && !is_operator(name) {
+            if !is_plain_assignment(name) && !is_operator(name) {
                 for a in cpg.arguments_of(n) {
-                    if cpg.kind_of(a) != NodeKind::Call || cpg.name_of(a) != Some("=") {
+                    if cpg.kind_of(a) != NodeKind::Call
+                        || !cpg.name_of(a).is_some_and(is_plain_assignment)
+                    {
                         continue;
                     }
                     let aa = cpg.arguments_of(a);
@@ -1761,7 +1812,7 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
                     }
                 }
             }
-            if name != "=" && !ctx.is_sanitizer(name) && !is_operator(name) {
+            if !is_plain_assignment(name) && !ctx.is_sanitizer(name) && !is_operator(name) {
                 // Receiver-sink: a dangerous call on a tainted OBJECT
                 // (`ps.Invoke()`), where the payload arrived earlier via
                 // object-state transfer, or — fluent chaining — the receiver
@@ -1844,7 +1895,7 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
 /// Identifier, arg 2 = value) that python keyword_argument, Scala named
 /// args, and Go keyed literal elements all lower to.
 fn named_arg(cpg: &Cpg, a: NodeId) -> Option<(&str, NodeId)> {
-    if cpg.kind_of(a) != NodeKind::Call || cpg.name_of(a) != Some("=") {
+    if cpg.kind_of(a) != NodeKind::Call || !cpg.name_of(a).is_some_and(is_plain_assignment) {
         return None;
     }
     let aa = cpg.arguments_of(a);
@@ -2072,7 +2123,7 @@ fn shadowed_names(ctx: &Ctx, method: NodeId, stmts: &[NodeId]) -> HashSet<String
         .map(str::to_string)
         .collect();
     for &n in stmts {
-        if cpg.kind_of(n) == NodeKind::Call && cpg.name_of(n) == Some("=") {
+        if cpg.kind_of(n) == NodeKind::Call && cpg.name_of(n).is_some_and(is_plain_assignment) {
             let args = cpg.arguments_of(n);
             if args.len() == 2 {
                 if let Some(l) = lhs_name(cpg, args[0]) {
@@ -2143,7 +2194,7 @@ fn check_sinks(
     // a call whose elements are arguments, so assembling a shell script
     // from tainted data reports even when the executing side is out of
     // reach (Kubernetes runs it, not this process).
-    if !fired && ctx.spec.sinks.contains("<shellform>") && name != "=" {
+    if !fired && ctx.spec.sinks.contains("<shellform>") && !is_plain_assignment(name) {
         if let Some(start) = shell_payload {
             for &arg in args_all.iter().skip(start) {
                 if let Some(trace) = expr_taint(ctx, arg, taint) {
@@ -2325,7 +2376,7 @@ fn param_to_sink(
                     }
                 }
             }
-            if name == "=" {
+            if is_plain_assignment(name) {
                 let args = cpg.arguments_of(n);
                 if args.len() == 2 {
                     let code = cpg.code_of(n).unwrap_or("");
@@ -2445,7 +2496,9 @@ fn param_to_sink(
             // Persistence phase-1 (named-arg store), mirrors analyse_method.
             if !is_operator(name) {
                 for a in cpg.arguments_of(n) {
-                    if cpg.kind_of(a) != NodeKind::Call || cpg.name_of(a) != Some("=") {
+                    if cpg.kind_of(a) != NodeKind::Call
+                        || !cpg.name_of(a).is_some_and(is_plain_assignment)
+                    {
                         continue;
                     }
                     let aa = cpg.arguments_of(a);
@@ -2642,7 +2695,7 @@ fn resolve_format_literal(cpg: &Cpg, fmt_node: NodeId, depth: u32) -> Option<Nod
         if visited > 50_000 {
             return None; // pathological method — stay conservative
         }
-        if cpg.kind_of(n) == NodeKind::Call && cpg.name_of(n) == Some("=") {
+        if cpg.kind_of(n) == NodeKind::Call && cpg.name_of(n).is_some_and(is_plain_assignment) {
             let args = cpg.arguments_of(n);
             if args.first().is_some_and(|&l| {
                 cpg.kind_of(l) == NodeKind::Identifier && cpg.name_of(l) == Some(name)
@@ -3054,7 +3107,7 @@ fn callee_chain(
     let mut found: Option<Vec<Step>> = None;
     for n in stmts {
         match cpg.kind_of(n) {
-            NodeKind::Call if cpg.name_of(n) == Some("=") => {
+            NodeKind::Call if cpg.name_of(n).is_some_and(is_plain_assignment) => {
                 let args = cpg.arguments_of(n);
                 if args.len() == 2 {
                     match chain_expr(ctx, args[1], &chains, depth, visiting) {
@@ -3358,7 +3411,7 @@ fn source_chain(
     let mut found: Option<Vec<Step>> = None;
     for n in stmts {
         match cpg.kind_of(n) {
-            NodeKind::Call if cpg.name_of(n) == Some("=") => {
+            NodeKind::Call if cpg.name_of(n).is_some_and(is_plain_assignment) => {
                 let args = cpg.arguments_of(n);
                 if args.len() == 2 {
                     // A fresh source occurrence in the rhs seeds a chain;

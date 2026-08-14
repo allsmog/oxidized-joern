@@ -23,8 +23,8 @@
 
 use crate::intern::{Interner, Sym};
 use crate::persist::{ByteReader, ByteWriter, DecodeError};
-use crate::schema::{EdgeKind, NodeKind};
-use std::collections::HashMap;
+use crate::schema::{EdgeKind, Layer, NodeKind};
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{self, Read, Write};
 use std::path::Path;
@@ -35,7 +35,18 @@ const MAGIC_V2: &[u8; 4] = b"CPG2";
 const FORMAT_VERSION: u16 = 1;
 const CHECKSUM_ALGORITHM_CRC32: u8 = 1;
 const CHECKSUM_VERSION: u8 = 1;
-const ENVELOPE_FLAGS: u32 = 0;
+const FLAG_AUTHORITATIVE_AST: u32 = 1 << 0;
+const FLAG_AUTHORITATIVE_SYMBOL_REF: u32 = 1 << 1;
+const FLAG_AUTHORITATIVE_CALL_GRAPH: u32 = 1 << 2;
+const FLAG_AUTHORITATIVE_CFG: u32 = 1 << 3;
+const FLAG_AUTHORITATIVE_DDG: u32 = 1 << 4;
+const FLAG_AUTHORITATIVE_SUMMARIES: u32 = 1 << 5;
+const KNOWN_ENVELOPE_FLAGS: u32 = FLAG_AUTHORITATIVE_AST
+    | FLAG_AUTHORITATIVE_SYMBOL_REF
+    | FLAG_AUTHORITATIVE_CALL_GRAPH
+    | FLAG_AUTHORITATIVE_CFG
+    | FLAG_AUTHORITATIVE_DDG
+    | FLAG_AUTHORITATIVE_SUMMARIES;
 const ENVELOPE_LEN: usize = 24;
 
 /// The recorded 3.6-million-node benchmark occupies 184 MiB on disk at about
@@ -95,6 +106,10 @@ pub struct Cpg {
     file_of_path: HashMap<String, FileId>,
     free_list: Vec<NodeId>,
     next_file: u32,
+    /// Layers supplied as authoritative facts by a project-wide frontend.
+    /// The standard pass manager leaves these intact instead of replacing
+    /// them with a lower-fidelity generic reconstruction.
+    authoritative_layers: HashSet<Layer>,
 }
 
 impl Cpg {
@@ -315,6 +330,14 @@ impl Cpg {
         self.live.iter().filter(|&&l| l).count()
     }
 
+    pub fn mark_layer_authoritative(&mut self, layer: Layer) {
+        self.authoritative_layers.insert(layer);
+    }
+
+    pub fn is_layer_authoritative(&self, layer: Layer) -> bool {
+        self.authoritative_layers.contains(&layer)
+    }
+
     /// Serialise the whole graph to a CPG2 envelope (see `persist`). In-edges,
     /// per-file node lists and the free list are derived structures and are
     /// rebuilt on load rather than stored.
@@ -341,7 +364,7 @@ impl Cpg {
         w.u16(FORMAT_VERSION);
         w.u8(CHECKSUM_ALGORITHM_CRC32);
         w.u8(CHECKSUM_VERSION);
-        w.u32(ENVELOPE_FLAGS);
+        w.u32(self.envelope_flags());
         w.u64(payload.len() as u64);
         w.u32(crc32fast::hash(&payload));
         w.buf.extend_from_slice(&payload);
@@ -407,6 +430,34 @@ impl Cpg {
             w.bytes(path.as_bytes());
         }
         w.buf
+    }
+
+    fn envelope_flags(&self) -> u32 {
+        self.authoritative_layers.iter().fold(0, |flags, layer| {
+            flags
+                | match layer {
+                    Layer::Ast => FLAG_AUTHORITATIVE_AST,
+                    Layer::SymbolRef => FLAG_AUTHORITATIVE_SYMBOL_REF,
+                    Layer::CallGraph => FLAG_AUTHORITATIVE_CALL_GRAPH,
+                    Layer::Cfg => FLAG_AUTHORITATIVE_CFG,
+                    Layer::Ddg => FLAG_AUTHORITATIVE_DDG,
+                    Layer::Summaries => FLAG_AUTHORITATIVE_SUMMARIES,
+                }
+        })
+    }
+
+    fn layers_from_flags(flags: u32) -> HashSet<Layer> {
+        [
+            (FLAG_AUTHORITATIVE_AST, Layer::Ast),
+            (FLAG_AUTHORITATIVE_SYMBOL_REF, Layer::SymbolRef),
+            (FLAG_AUTHORITATIVE_CALL_GRAPH, Layer::CallGraph),
+            (FLAG_AUTHORITATIVE_CFG, Layer::Cfg),
+            (FLAG_AUTHORITATIVE_DDG, Layer::Ddg),
+            (FLAG_AUTHORITATIVE_SUMMARIES, Layer::Summaries),
+        ]
+        .into_iter()
+        .filter_map(|(flag, layer)| (flags & flag != 0).then_some(layer))
+        .collect()
     }
 
     fn validate_for_persistence(&self) -> io::Result<()> {
@@ -511,7 +562,7 @@ impl Cpg {
             .get(..4)
             .ok_or_else(|| DecodeError("unexpected EOF while reading CPG magic".into()))?;
         if magic == MAGIC_V1 {
-            return Self::decode_payload(&data[4..]);
+            return Self::decode_payload(&data[4..], 0);
         }
         if magic != MAGIC_V2 {
             return Err(DecodeError("bad magic; expected CPG1 or CPG2".into()));
@@ -532,7 +583,7 @@ impl Cpg {
             )));
         }
         let flags = envelope.u32()?;
-        if flags != ENVELOPE_FLAGS {
+        if flags & !KNOWN_ENVELOPE_FLAGS != 0 {
             return Err(DecodeError(format!(
                 "unsupported CPG2 envelope flags 0x{flags:08x}"
             )));
@@ -563,10 +614,10 @@ impl Cpg {
                 "CPG2 checksum mismatch: expected {expected_checksum:08x}, got {actual_checksum:08x}"
             )));
         }
-        Self::decode_payload(payload)
+        Self::decode_payload(payload, flags)
     }
 
-    fn decode_payload(payload: &[u8]) -> Result<Cpg, DecodeError> {
+    fn decode_payload(payload: &[u8], flags: u32) -> Result<Cpg, DecodeError> {
         let mut r = ByteReader::new(payload);
         let str_count = read_count(&mut r, "strings", MAX_STRINGS, 4)?;
         let mut strings = Interner::new();
@@ -744,6 +795,7 @@ impl Cpg {
             file_of_path,
             free_list,
             next_file,
+            authoritative_layers: Self::layers_from_flags(flags),
         })
     }
 
@@ -788,6 +840,8 @@ impl Cpg {
     /// build standalone per-file graphs concurrently, then the driver absorbs
     /// them serially (the merge is cheap relative to parsing+building).
     pub fn absorb(&mut self, donor: Cpg) {
+        self.authoritative_layers
+            .extend(donor.authoritative_layers.iter().copied());
         // Remap donor files onto this graph's file table by path.
         let mut file_map: HashMap<FileId, FileId> = HashMap::new();
         for (donor_file, path) in &donor.path_of_file {
@@ -1124,7 +1178,7 @@ mod persistence_tests {
         writer.u16(FORMAT_VERSION);
         writer.u8(CHECKSUM_ALGORITHM_CRC32);
         writer.u8(CHECKSUM_VERSION);
-        writer.u32(ENVELOPE_FLAGS);
+        writer.u32(0);
         writer.u64(payload.len() as u64);
         writer.u32(crc32fast::hash(payload));
         writer.buf.extend_from_slice(payload);
@@ -1151,14 +1205,22 @@ mod persistence_tests {
 
     #[test]
     fn persistence_envelope_accepts_cpg2_and_validated_cpg1() {
-        let cpg = sample_cpg("main");
+        let mut cpg = sample_cpg("main");
+        cpg.mark_layer_authoritative(Layer::Cfg);
+        cpg.mark_layer_authoritative(Layer::Ddg);
         let bytes = cpg.to_bytes();
         assert_eq!(&bytes[..4], MAGIC_V2);
         assert_eq!(u16::from_le_bytes([bytes[4], bytes[5]]), FORMAT_VERSION);
-        assert_eq!(Cpg::from_bytes(&bytes).unwrap().methods().len(), 1);
+        let reopened = Cpg::from_bytes(&bytes).unwrap();
+        assert_eq!(reopened.methods().len(), 1);
+        assert!(reopened.is_layer_authoritative(Layer::Cfg));
+        assert!(reopened.is_layer_authoritative(Layer::Ddg));
+        assert!(!reopened.is_layer_authoritative(Layer::CallGraph));
 
         let legacy = legacy_cpg1(&cpg.payload_bytes());
-        assert_eq!(Cpg::from_bytes(&legacy).unwrap().methods().len(), 1);
+        let legacy = Cpg::from_bytes(&legacy).unwrap();
+        assert_eq!(legacy.methods().len(), 1);
+        assert!(!legacy.is_layer_authoritative(Layer::Cfg));
     }
 
     #[test]
@@ -1185,7 +1247,7 @@ mod persistence_tests {
         cases.push(("checksum version", bad_checksum_version));
 
         let mut bad_flags = valid.clone();
-        bad_flags[8..12].copy_from_slice(&1_u32.to_le_bytes());
+        bad_flags[8..12].copy_from_slice(&(1_u32 << 31).to_le_bytes());
         cases.push(("flags", bad_flags));
 
         let mut short_length = valid.clone();

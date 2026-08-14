@@ -33,14 +33,14 @@ pub fn dump_paths(paths: &[String]) -> String {
 }
 
 pub fn dump_sources(sources: &[(String, String)]) -> String {
-    let mut project = cpg_incremental::Project::new(
-        || Box::new(cpg_lang_c::CFrontend::new()),
-        cpg_analysis::standard_pipeline(),
-    );
     let refs: Vec<(&str, &str)> = sources
         .iter()
         .map(|(path, source)| (path.as_str(), source.as_str()))
         .collect();
+    let mut project = cpg_incremental::Project::new(
+        || Box::new(cpg_lang_c::CFrontend::new()),
+        cpg_analysis::standard_pipeline(),
+    );
     project.build(&refs);
     cpg_lang_c::import::canonical_dump(&project.cpg)
 }

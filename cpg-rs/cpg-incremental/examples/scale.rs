@@ -118,6 +118,7 @@ fn main() {
             );
         }
         UpdateOutcome::Unchanged => println!("unchanged"),
+        UpdateOutcome::FullRebuildRequired => println!("full source rebuild required"),
     }
     println!("incremental time:      {:?}", inc);
     println!(

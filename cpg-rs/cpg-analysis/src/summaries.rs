@@ -22,7 +22,7 @@
 //! [`SummaryStore`] (see [`SummaryStore::set_sanitizers`]) so summary
 //! computation records them; the query-time spec in `taint.rs` adds its own.
 
-use crate::pass::ast_descendants;
+use crate::pass::{ast_descendants, is_analysis_method};
 use cpg_core::{Cpg, NodeId, NodeKind, Query};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -227,17 +227,22 @@ impl SummaryStore {
     }
 
     pub fn get(&self, fqn: &str) -> Option<&FunctionSummary> {
-        self.summaries.get(fqn).or_else(|| self.external.get(fqn))
+        self.external.get(fqn).or_else(|| self.summaries.get(fqn))
     }
 
     /// Like [`get`](Self::get) but also reports whether the summary was
-    /// computed from a body or loaded from the external corpus. Computed
-    /// summaries shadow external ones, as in `get`.
+    /// computed from a body or loaded from the external corpus. An explicitly
+    /// loaded external model is authoritative and shadows an inferred body
+    /// summary, as in `get`.
     pub fn get_with_origin(&self, fqn: &str) -> Option<(&FunctionSummary, SummaryOrigin)> {
-        self.summaries
+        self.external
             .get(fqn)
-            .map(|s| (s, SummaryOrigin::Computed))
-            .or_else(|| self.external.get(fqn).map(|s| (s, SummaryOrigin::External)))
+            .map(|s| (s, SummaryOrigin::External))
+            .or_else(|| {
+                self.summaries
+                    .get(fqn)
+                    .map(|s| (s, SummaryOrigin::Computed))
+            })
     }
 
     pub fn len(&self) -> usize {
@@ -353,7 +358,14 @@ impl SummaryStore {
     /// Compute summaries for every user method from scratch (fixpoint, so a
     /// caller benefits from its callee's summary regardless of file order).
     pub fn compute_all(&mut self, cpg: &Cpg) {
-        let all: Vec<NodeId> = cpg.nodes_of_kind(NodeKind::Method);
+        self.summaries.clear();
+        self.deps.clear();
+        self.rdeps.clear();
+        let all: Vec<NodeId> = cpg
+            .nodes_of_kind(NodeKind::Method)
+            .into_iter()
+            .filter(|&method| is_analysis_method(cpg, method))
+            .collect();
         self.recompute(cpg, &all);
     }
 
@@ -556,7 +568,7 @@ fn compute_method(
 
     for n in stmts {
         match cpg.kind_of(n) {
-            NodeKind::Call if cpg.name_of(n) == Some("=") => {
+            NodeKind::Call if cpg.name_of(n).is_some_and(is_plain_assignment) => {
                 // assignment: arg0 = lhs, arg1 = rhs
                 let args = cpg.arguments_of(n);
                 if args.len() == 2 {
@@ -764,6 +776,12 @@ pub(crate) fn is_operator(name: &str) -> bool {
         .next()
         .map(|c| !c.is_alphabetic() && c != '_')
         .unwrap_or(true)
+}
+
+/// Plain assignment has a compact spelling in the lightweight frontends and
+/// Joern's canonical spelling in schema-complete graphs.
+pub(crate) fn is_plain_assignment(name: &str) -> bool {
+    matches!(name, "=" | "<operator>.assignment")
 }
 
 fn parse_point(s: &str) -> Option<Point> {

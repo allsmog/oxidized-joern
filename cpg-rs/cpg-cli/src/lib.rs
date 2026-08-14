@@ -667,6 +667,9 @@ pub fn handle(p: &mut Project, req: &Value) -> Value {
                     "filesReanalysed": files_reanalysed,
                     "summariesRecomputed": summaries_recomputed,
                 }),
+                UpdateOutcome::FullRebuildRequired => json!({
+                    "error": "update requires a full source rebuild for this language"
+                }),
             }
         }
         Some("quit") => json!({"quit": true}),

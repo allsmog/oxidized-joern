@@ -5,7 +5,7 @@
 //! schema, and every edge address must resolve. That makes schema omissions a
 //! build failure instead of silently dropping semantics.
 
-use cpg_core::{Cpg, EdgeKind, NodeId, NodeKind};
+use cpg_core::{Cpg, EdgeKind, Layer, NodeId, NodeKind};
 use std::collections::{BTreeSet, HashMap, HashSet};
 
 #[derive(Debug)]
@@ -14,6 +14,7 @@ struct RawNode {
     props: HashMap<String, String>,
     address: Option<String>,
     parent: Option<usize>,
+    depth: usize,
 }
 
 #[derive(Debug)]
@@ -26,8 +27,12 @@ struct RawEdge {
 pub fn graph_from_canonical_dump(dump: &str, sources: &[(String, String)]) -> Cpg {
     let mut raw_nodes = Vec::new();
     let mut raw_edges = Vec::new();
+    let mut raw_ast_edges = Vec::new();
     let mut address_to_raw = HashMap::new();
     let mut ast_stack: Vec<(usize, usize)> = Vec::new();
+    let mut methods_by_full: HashMap<String, usize> = HashMap::new();
+    let mut type_decls_by_full: HashMap<String, usize> = HashMap::new();
+    let mut reuse: Option<(usize, Vec<usize>, usize)> = None;
     let mut block = String::new();
     let mut block_line = 0usize;
 
@@ -41,15 +46,32 @@ pub fn graph_from_canonical_dump(dump: &str, sources: &[(String, String)]) -> Cp
         if let Some(line) = original.strip_prefix("NODES|") {
             let (kind, props) = parse_node(line);
             let address = external_address(kind, &props);
+            if kind == NodeKind::TypeDecl {
+                if let Some(&existing) = props
+                    .get("FULL_NAME")
+                    .and_then(|full| type_decls_by_full.get(full))
+                {
+                    for alias in address_aliases(kind, &props, address.as_deref()) {
+                        address_to_raw.entry(alias).or_insert(existing);
+                    }
+                    continue;
+                }
+            }
             let raw = raw_nodes.len();
             raw_nodes.push(RawNode {
                 kind,
                 props,
                 address: address.clone(),
                 parent: None,
+                depth: 0,
             });
             for alias in address_aliases(kind, &raw_nodes[raw].props, address.as_deref()) {
                 address_to_raw.entry(alias).or_insert(raw);
+            }
+            if kind == NodeKind::TypeDecl {
+                if let Some(full) = raw_nodes[raw].props.get("FULL_NAME") {
+                    type_decls_by_full.insert(full.clone(), raw);
+                }
             }
             continue;
         }
@@ -73,26 +95,71 @@ pub fn graph_from_canonical_dump(dump: &str, sources: &[(String, String)]) -> Cp
             block_line = 0;
             ast_stack.clear();
         }
+        if reuse
+            .as_ref()
+            .is_some_and(|(base_depth, _, _)| depth <= *base_depth)
+        {
+            reuse = None;
+        }
         while ast_stack.last().is_some_and(|(d, _)| *d >= depth) {
             ast_stack.pop();
         }
         let parent = ast_stack.last().map(|(_, raw)| *raw);
         let address = format!("{block}#{block_line}");
         block_line += 1;
+
+        if let Some((_, template, next)) = reuse.as_mut() {
+            let raw = *template
+                .get(*next)
+                .unwrap_or_else(|| panic!("duplicate method view is longer than its template"));
+            assert_eq!(
+                raw_nodes[raw].kind, kind,
+                "duplicate method node kind drift"
+            );
+            assert_eq!(
+                raw_nodes[raw].props, props,
+                "duplicate method node properties drift"
+            );
+            address_to_raw.insert(address, raw);
+            ast_stack.push((depth, raw));
+            *next += 1;
+            continue;
+        }
+
+        if kind == NodeKind::Method {
+            if let Some(full) = props.get("FULL_NAME") {
+                if let Some(&existing) = methods_by_full.get(full) {
+                    if let Some(parent) = parent {
+                        raw_ast_edges.push((parent, existing));
+                    }
+                    let template = raw_subtree(existing, &raw_nodes);
+                    address_to_raw.insert(address, existing);
+                    ast_stack.push((depth, existing));
+                    reuse = Some((depth, template, 1));
+                    continue;
+                }
+            }
+        }
         let raw = raw_nodes.len();
         raw_nodes.push(RawNode {
             kind,
             props,
             address: Some(address.clone()),
             parent,
+            depth,
         });
+        if let Some(parent) = parent {
+            raw_ast_edges.push((parent, raw));
+        }
         if kind == NodeKind::Method {
             if let Some(full) = raw_nodes[raw].props.get("FULL_NAME") {
+                methods_by_full.insert(full.clone(), raw);
                 address_to_raw.entry(format!("M:{full}")).or_insert(raw);
             }
         }
         if kind == NodeKind::TypeDecl {
             if let Some(full) = raw_nodes[raw].props.get("FULL_NAME") {
+                type_decls_by_full.insert(full.clone(), raw);
                 address_to_raw.entry(format!("TD:{full}")).or_insert(raw);
             }
         }
@@ -127,10 +194,8 @@ pub fn graph_from_canonical_dump(dump: &str, sources: &[(String, String)]) -> Cp
         raw_to_node.push(node);
     }
 
-    for (raw, node) in raw_nodes.iter().zip(raw_to_node.iter().copied()) {
-        if let Some(parent) = raw.parent {
-            cpg.add_edge(raw_to_node[parent], node, EdgeKind::Ast);
-        }
+    for (parent, child) in raw_ast_edges {
+        cpg.add_edge(raw_to_node[parent], raw_to_node[child], EdgeKind::Ast);
     }
 
     for edge in raw_edges {
@@ -139,8 +204,20 @@ pub fn graph_from_canonical_dump(dump: &str, sources: &[(String, String)]) -> Cp
         cpg.add_edge(raw_to_node[source], raw_to_node[target], edge.kind);
     }
 
+    for layer in [Layer::SymbolRef, Layer::CallGraph, Layer::Cfg, Layer::Ddg] {
+        cpg.mark_layer_authoritative(layer);
+    }
+
     assign_source_lines(&mut cpg, sources);
     cpg
+}
+
+fn raw_subtree(root: usize, nodes: &[RawNode]) -> Vec<usize> {
+    let depth = nodes[root].depth;
+    let end = (root + 1..nodes.len())
+        .find(|&index| nodes[index].depth <= depth)
+        .unwrap_or(nodes.len());
+    (root..end).collect()
 }
 
 /// Render the exact compatibility view from the shared graph. This is a graph
@@ -149,35 +226,40 @@ pub fn graph_from_canonical_dump(dump: &str, sources: &[(String, String)]) -> Cp
 pub fn canonical_dump(cpg: &Cpg) -> String {
     let mut roots: Vec<NodeId> = cpg
         .nodes()
-        .filter(|&node| {
-            cpg.kind_of(node) == NodeKind::Method
-                && cpg.in_kind(node, EdgeKind::Ast).next().is_none()
-        })
+        .filter(|&node| cpg.kind_of(node) == NodeKind::Method)
         .collect();
     roots.sort_by_key(|&node| (cpg.full_name_of(node).unwrap_or(""), node));
 
     let mut out = String::new();
-    let mut emitted = HashSet::new();
+    let mut ast_nodes = HashSet::new();
     let mut addresses = HashMap::new();
     for root in roots {
         let block = cpg.full_name_of(root).unwrap_or("<anonymous>");
         let mut index = 0usize;
+        let mut block_seen = HashSet::new();
         render_ast(
             cpg,
             root,
             block,
             0,
+            false,
             &mut index,
-            &mut emitted,
+            &mut block_seen,
+            &mut ast_nodes,
             &mut addresses,
             &mut out,
         );
         out.push('\n');
     }
 
-    for node in cpg.nodes().filter(|node| !emitted.contains(node)) {
+    let mut scaffolding: Vec<NodeId> = cpg
+        .nodes()
+        .filter(|node| !ast_nodes.contains(node) || cpg.kind_of(*node) == NodeKind::TypeDecl)
+        .collect();
+    scaffolding.sort_by_key(|&node| scaffolding_key(cpg, node));
+    for node in scaffolding {
         if let Some(address) = graph_external_address(cpg, node) {
-            addresses.insert(node, address);
+            addresses.entry(node).or_insert(address);
         }
         out.push_str("NODES|");
         out.push_str(&render_scaffolding_node(cpg, node));
@@ -186,6 +268,7 @@ pub fn canonical_dump(cpg: &Cpg) -> String {
 
     let mut edges = BTreeSet::new();
     let mut flows = BTreeSet::new();
+    let mut seen_flow_pairs = HashSet::new();
     for source in cpg.nodes() {
         for edge in cpg.out(source) {
             if matches!(
@@ -203,10 +286,21 @@ pub fn canonical_dump(cpg: &Cpg) -> String {
             if edge.kind == EdgeKind::ReachingDef {
                 flows.insert(format!(
                     "REACHING_DEF[{}] {} -> {}",
-                    flow_variable(cpg, source),
+                    escape(&flow_variable(cpg, source)),
                     source_address,
                     target_address
                 ));
+                if !seen_flow_pairs.insert((source, edge.other))
+                    && cpg.kind_of(source) == NodeKind::Block
+                    && cpg.code_of(source).is_none()
+                {
+                    // Joern emits both the empty expression-block label and
+                    // an unlabeled fact for this one duplicate endpoint.
+                    flows.insert(format!(
+                        "REACHING_DEF[] {} -> {}",
+                        source_address, target_address
+                    ));
+                }
             } else {
                 edges.insert(format!(
                     "{} {} -> {}",
@@ -230,21 +324,47 @@ pub fn canonical_dump(cpg: &Cpg) -> String {
     out
 }
 
+fn scaffolding_key(cpg: &Cpg, node: NodeId) -> (u8, String, u32) {
+    let category = match cpg.kind_of(node) {
+        NodeKind::MetaData => 0,
+        NodeKind::File => 1,
+        NodeKind::NamespaceBlock => 2,
+        NodeKind::Namespace => 3,
+        NodeKind::TypeDecl => 4,
+        NodeKind::Type => 5,
+        kind => panic!("unexpected scaffolding node {kind:?}"),
+    };
+    let identity = if matches!(cpg.kind_of(node), NodeKind::TypeDecl | NodeKind::Type) {
+        cpg.full_name_of(node).unwrap_or("").to_string()
+    } else {
+        String::new()
+    };
+    (category, identity, node.0)
+}
+
 #[allow(clippy::too_many_arguments)]
 fn render_ast(
     cpg: &Cpg,
     node: NodeId,
     block: &str,
     depth: usize,
+    foreign_method: bool,
     index: &mut usize,
-    emitted: &mut HashSet<NodeId>,
+    block_seen: &mut HashSet<NodeId>,
+    ast_nodes: &mut HashSet<NodeId>,
     addresses: &mut HashMap<NodeId, String>,
     out: &mut String,
 ) {
-    if !emitted.insert(node) {
+    if !block_seen.insert(node) {
         return;
     }
-    addresses.insert(node, format!("{block}#{}", *index));
+    ast_nodes.insert(node);
+    let address = format!("{block}#{}", *index);
+    if depth == 0 || cpg.kind_of(node) == NodeKind::Method {
+        addresses.entry(node).or_insert(address);
+    } else if !foreign_method {
+        addresses.insert(node, address);
+    }
     *index += 1;
     out.push_str(&"  ".repeat(depth));
     out.push_str(canonical_node_name(cpg.kind_of(node)));
@@ -266,8 +386,20 @@ fn render_ast(
         out.push_str(dispatch_type(cpg, node));
     }
     out.push('\n');
+    let child_is_foreign = foreign_method || (depth > 0 && cpg.kind_of(node) == NodeKind::Method);
     for child in cpg.out_kind(node, EdgeKind::Ast) {
-        render_ast(cpg, child, block, depth + 1, index, emitted, addresses, out);
+        render_ast(
+            cpg,
+            child,
+            block,
+            depth + 1,
+            child_is_foreign,
+            index,
+            block_seen,
+            ast_nodes,
+            addresses,
+            out,
+        );
     }
 }
 
@@ -358,10 +490,13 @@ fn flow_variable(cpg: &Cpg, node: NodeId) -> String {
         NodeKind::MethodParameterIn | NodeKind::MethodParameterOut
     ) {
         cpg.name_of(node).unwrap_or("").to_string()
-    } else if cpg.kind_of(node) == NodeKind::Block && cpg.code_of(node).is_none() {
-        "<empty>".to_string()
     } else {
-        cpg.code_of(node).unwrap_or("").to_string()
+        match cpg.kind_of(node) {
+            NodeKind::Method => String::new(),
+            NodeKind::Return => "<RET>".to_string(),
+            NodeKind::Block if cpg.code_of(node).is_none() => "<empty>".to_string(),
+            _ => cpg.code_of(node).unwrap_or("").to_string(),
+        }
     }
 }
 
@@ -526,9 +661,10 @@ fn parse_edge(line: &str) -> RawEdge {
 }
 
 fn parse_flow(line: &str) -> RawEdge {
-    let (_, rest) = line
-        .split_once("] ")
+    let split = line
+        .rfind("] ")
         .unwrap_or_else(|| panic!("malformed exact flow: {line}"));
+    let rest = &line[split + 2..];
     let (source, target) = rest
         .split_once(" -> ")
         .unwrap_or_else(|| panic!("malformed exact flow endpoints: {line}"));

@@ -57,6 +57,19 @@ impl Frontend for CFrontend {
         &self.lang
     }
 
+    fn requires_project_build(&self) -> bool {
+        true
+    }
+
+    fn build_project(&mut self, files: &[(&str, &str)]) -> Option<Cpg> {
+        let sources: Vec<(String, String)> = files
+            .iter()
+            .map(|(path, source)| ((*path).to_string(), (*source).to_string()))
+            .collect();
+        let dump = exact::canonical_dump_sources(&sources);
+        Some(import::graph_from_canonical_dump(&dump, &sources))
+    }
+
     fn build_file(&mut self, cpg: &mut Cpg, path: &str, source: &str) -> BuildResult {
         let tree = self.parser.parse(source, None).expect("parse");
         let root = tree.root_node();

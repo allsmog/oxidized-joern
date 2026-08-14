@@ -1,7 +1,8 @@
 //! The incremental driver — the end-to-end realisation of roadmap item #1.
 //!
 //! A [`Project`] owns the CPG, a frontend, the pass pipeline, and the summary
-//! cache. Editing one file does the minimum work:
+//! cache. Frontends with file-local semantics edit the minimum affected
+//! region:
 //!
 //! 1. Hash the new source; if unchanged, do nothing.
 //! 2. Delete exactly that file's subgraph and rebuild it (`O(changed file)`).
@@ -10,14 +11,16 @@
 //! 4. Invalidate and recompute only the affected dataflow summaries; everything
 //!    else is served from the cache.
 //!
-//! This is the property the architecture review flagged as the highest-value
-//! lever and the one neither Joern nor Fraunhofer's CPG has today.
+//! Schema-complete frontends with project-wide registries rebuild the graph
+//! from the retained source set instead. That is deliberately
+//! correctness-first: an incremental optimisation may replace it only when it
+//! proves graph and finding equivalence against a clean rebuild.
 
 use cpg_analysis::{PassManager, SummaryStore};
 use cpg_core::{Cpg, FileId, NodeId, NodeKind};
 use cpg_frontend::Frontend;
 use std::collections::hash_map::DefaultHasher;
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 
 /// Per-phase timings for a full build.
@@ -42,6 +45,10 @@ pub enum UpdateOutcome {
         files_reanalysed: usize,
         summaries_recomputed: usize,
     },
+    /// A persisted project does not contain source text, so a project-wide
+    /// frontend cannot perform a sound edit until callers provide a full
+    /// source set through `build`.
+    FullRebuildRequired,
 }
 
 /// Creates fresh frontend instances. Each parallel build worker needs its own
@@ -70,6 +77,10 @@ pub struct Project {
     /// Makes "which files does this edit affect?" O(affected), removing the
     /// last whole-graph scan from the edit path.
     callers_of_name: HashMap<String, HashSet<FileId>>,
+    /// Retained only in memory, enabling correctness-first project rebuilds
+    /// for frontends whose lowering depends on cross-file registries.
+    sources: BTreeMap<String, String>,
+    requires_project_build: bool,
 }
 
 impl Project {
@@ -78,6 +89,7 @@ impl Project {
         pipeline: PassManager,
     ) -> Self {
         let frontend = factory();
+        let requires_project_build = frontend.requires_project_build();
         Project {
             cpg: Cpg::new(),
             factory: Box::new(factory),
@@ -92,6 +104,8 @@ impl Project {
             method_nodes_by_file: HashMap::new(),
             call_names_by_file: HashMap::new(),
             callers_of_name: HashMap::new(),
+            sources: BTreeMap::new(),
+            requires_project_build,
         }
     }
 
@@ -108,6 +122,7 @@ impl Project {
     pub fn reopen(&mut self, cpg: Cpg) {
         self.cpg = cpg;
         self.file_hashes.clear();
+        self.sources.clear();
         self.methods_by_file.clear();
         self.method_fqns_by_file.clear();
         self.node_of_fqn.clear();
@@ -138,6 +153,13 @@ impl Project {
     pub fn build(&mut self, files: &[(&str, &str)]) -> BuildStats {
         use rayon::prelude::*;
         let t0 = std::time::Instant::now();
+        self.cpg = Cpg::new();
+        self.clear_indices();
+        self.file_hashes.clear();
+        self.sources = files
+            .iter()
+            .map(|(path, source)| ((*path).to_string(), (*source).to_string()))
+            .collect();
         let mut project_frontend = (self.factory)();
         let project_graph = project_frontend.build_project(files);
         let parallel_done;
@@ -201,6 +223,48 @@ impl Project {
         let h = hash(source);
         if self.file_hashes.get(path) == Some(&h) {
             return UpdateOutcome::Unchanged;
+        }
+
+        if self.requires_project_build {
+            if self.sources.is_empty() {
+                return UpdateOutcome::FullRebuildRequired;
+            }
+            self.sources.insert(path.to_string(), source.to_string());
+            let owned: Vec<(String, String)> = self
+                .sources
+                .iter()
+                .map(|(path, source)| (path.clone(), source.clone()))
+                .collect();
+            let refs: Vec<(&str, &str)> = owned
+                .iter()
+                .map(|(path, source)| (path.as_str(), source.as_str()))
+                .collect();
+            let mut frontend = (self.factory)();
+            let Some(graph) = frontend.build_project(&refs) else {
+                return UpdateOutcome::FullRebuildRequired;
+            };
+            self.cpg = graph;
+            self.clear_indices();
+            self.file_hashes = self
+                .sources
+                .iter()
+                .map(|(path, source)| (path.clone(), hash(source)))
+                .collect();
+            let mut files = self.cpg.files();
+            files.sort_by_key(|file| self.cpg.path_of(*file).unwrap_or("").to_string());
+            for &file in &files {
+                self.record_methods(file);
+                self.record_calls(file);
+            }
+            let ctx = cpg_analysis::PassContext {
+                methods_by_name: Some(&self.method_nodes_by_name),
+            };
+            self.pipeline.run_all(&mut self.cpg, &files, &ctx);
+            self.summaries.compute_all(&self.cpg);
+            return UpdateOutcome::Rebuilt {
+                files_reanalysed: self.sources.len(),
+                summaries_recomputed: self.summaries.last_recomputed.len(),
+            };
         }
 
         let file = self.cpg.file_id(path);
@@ -283,6 +347,16 @@ impl Project {
         self.methods_by_file.insert(file, names);
         self.method_fqns_by_file.insert(file, fqns);
         self.method_nodes_by_file.insert(file, named_nodes);
+    }
+
+    fn clear_indices(&mut self) {
+        self.methods_by_file.clear();
+        self.method_fqns_by_file.clear();
+        self.node_of_fqn.clear();
+        self.method_nodes_by_name.clear();
+        self.method_nodes_by_file.clear();
+        self.call_names_by_file.clear();
+        self.callers_of_name.clear();
     }
 
     /// Refresh the reverse-dependency index for one file: unhook its previous
@@ -449,21 +523,22 @@ mod tests {
     }
 
     #[test]
-    fn edit_reanalyses_only_affected_files() {
+    fn project_wide_c_edit_rebuilds_the_retained_source_set() {
         let mut p = project();
         p.build(&[
             ("a.c", "int helper(int x){ return x; }"),
             ("b.c", "int unrelated(int z){ return z; }"),
             ("c.c", "int caller(int q){ return helper(q); }"),
         ]);
-        // Editing a.c (defines `helper`) should pull in c.c (calls helper) but
-        // NOT b.c (unrelated). 3 files total; we expect 2 reanalysed.
+        // Exact C lowering owns project-wide registries. Until a proven
+        // equivalent incremental lowerer exists, edits deliberately rebuild
+        // every retained source rather than mixing graph dialects.
         let out = p.update_file("a.c", "int helper(int x){ return x; }  // touched");
         match out {
             UpdateOutcome::Rebuilt {
                 files_reanalysed, ..
             } => {
-                assert_eq!(files_reanalysed, 2, "should touch a.c + c.c, not b.c");
+                assert_eq!(files_reanalysed, 3, "all retained C sources are rebuilt");
             }
             _ => panic!("expected rebuild"),
         }

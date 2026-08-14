@@ -303,8 +303,6 @@ dependencies = [
  "cpg-incremental",
  "cpg-lang-c",
  "tempfile",
- "tree-sitter",
- "tree-sitter-c",
 ]
 
 [[package]]
