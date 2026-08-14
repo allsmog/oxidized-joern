@@ -1,0 +1,14 @@
+[
+  {
+    "directory": ".",
+    "file": "main.c",
+    "arguments": [
+      "cc",
+      "-Iinclude",
+      "-DFORCE_ON=1",
+      "-DCLI_ON=1",
+      "-c",
+      "main.c"
+    ]
+  }
+]

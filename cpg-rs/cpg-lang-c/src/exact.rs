@@ -8,7 +8,7 @@
 //! simple type resolution — all emitted in Joern's canonical AST-dump format so
 //! the output diffs cleanly against the oracle.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::path::Path;
 use tree_sitter::{Node, Parser};
 
@@ -21,11 +21,54 @@ pub struct PreprocessorConfig {
     pub forced_includes: Vec<String>,
     /// Command-line definitions in `NAME` or `NAME=VALUE` form.
     pub defines: Vec<String>,
+    /// Translation-unit-specific compiler inputs keyed by normalized,
+    /// source-snapshot-relative file path. These are populated from a
+    /// compilation database; the global fields above are applied afterward
+    /// as explicit CLI overrides.
+    pub translation_units: BTreeMap<String, TranslationUnitConfig>,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct TranslationUnitConfig {
+    pub include_paths: Vec<String>,
+    pub forced_includes: Vec<String>,
+    pub defines: Vec<String>,
+}
+
+impl PreprocessorConfig {
+    fn for_translation_unit(&self, file: &str) -> TranslationUnitConfig {
+        let mut effective = self
+            .translation_units
+            .get(&normalize_source_path(file))
+            .cloned()
+            .unwrap_or_default();
+        effective
+            .include_paths
+            .extend(self.include_paths.iter().cloned());
+        effective
+            .forced_includes
+            .extend(self.forced_includes.iter().cloned());
+        for definition in &self.defines {
+            let name = definition
+                .split_once('=')
+                .map_or(definition.as_str(), |v| v.0);
+            effective.defines.retain(|existing| {
+                existing.split_once('=').map_or(existing.as_str(), |v| v.0) != name
+            });
+            effective.defines.push(definition.clone());
+        }
+        effective
+    }
 }
 
 struct PreprocessorEnvironment<'a> {
     sources: HashMap<String, &'a str>,
     config: &'a PreprocessorConfig,
+}
+
+struct TranslationUnitEnvironment<'a, 'sources> {
+    project: &'a PreprocessorEnvironment<'sources>,
+    inputs: &'a TranslationUnitConfig,
 }
 
 pub fn canonical_dump_paths(paths: &[String]) -> String {
@@ -645,12 +688,22 @@ fn preprocess_translation_unit<'tree>(
     file: &str,
     environment: &PreprocessorEnvironment<'_>,
 ) -> (Vec<Node<'tree>>, HashMap<String, MacroDef>) {
-    let mut macros = command_line_macros(environment.config, file);
+    let inputs = environment.config.for_translation_unit(file);
+    let mut macros = command_line_macros(&inputs, file);
+    let translation_unit = TranslationUnitEnvironment {
+        project: environment,
+        inputs: &inputs,
+    };
     let mut active = Vec::new();
     let mut include_stack = HashSet::from([normalize_source_path(file)]);
-    for forced in &environment.config.forced_includes {
-        if let Some(included) = resolve_include(file, forced, false, environment) {
-            apply_include_file(&included, environment, &mut macros, &mut include_stack);
+    for forced in &inputs.forced_includes {
+        if let Some(included) = resolve_include(file, forced, false, &translation_unit) {
+            apply_include_file(
+                &included,
+                &translation_unit,
+                &mut macros,
+                &mut include_stack,
+            );
         }
     }
     for child in named_children(root) {
@@ -658,7 +711,7 @@ fn preprocess_translation_unit<'tree>(
             child,
             b,
             file,
-            environment,
+            &translation_unit,
             &mut macros,
             &mut active,
             &mut include_stack,
@@ -671,7 +724,7 @@ fn preprocess_child<'tree>(
     child: Node<'tree>,
     b: &[u8],
     file: &str,
-    environment: &PreprocessorEnvironment<'_>,
+    environment: &TranslationUnitEnvironment<'_, '_>,
     macros: &mut HashMap<String, MacroDef>,
     active: &mut Vec<Node<'tree>>,
     include_stack: &mut HashSet<String>,
@@ -750,7 +803,7 @@ fn macro_definition(node: Node, b: &[u8], file: &str) -> Option<(String, MacroDe
     ))
 }
 
-fn command_line_macros(config: &PreprocessorConfig, file: &str) -> HashMap<String, MacroDef> {
+fn command_line_macros(config: &TranslationUnitConfig, file: &str) -> HashMap<String, MacroDef> {
     config
         .defines
         .iter()
@@ -789,7 +842,7 @@ fn resolve_include(
     current_file: &str,
     target: &str,
     angled: bool,
-    environment: &PreprocessorEnvironment<'_>,
+    environment: &TranslationUnitEnvironment<'_, '_>,
 ) -> Option<String> {
     let target = normalize_source_path(target);
     let mut candidates = Vec::new();
@@ -802,19 +855,19 @@ fn resolve_include(
         ));
     }
     candidates.extend(
-        environment.config.include_paths.iter().map(|include| {
+        environment.inputs.include_paths.iter().map(|include| {
             normalize_source_path(&Path::new(include).join(&target).to_string_lossy())
         }),
     );
     candidates.push(target);
     candidates
         .into_iter()
-        .find(|candidate| environment.sources.contains_key(candidate))
+        .find(|candidate| environment.project.sources.contains_key(candidate))
 }
 
 fn apply_include_file(
     included: &str,
-    environment: &PreprocessorEnvironment<'_>,
+    environment: &TranslationUnitEnvironment<'_, '_>,
     macros: &mut HashMap<String, MacroDef>,
     include_stack: &mut HashSet<String>,
 ) {
@@ -822,7 +875,7 @@ fn apply_include_file(
     if !include_stack.insert(included.clone()) {
         return;
     }
-    let Some(source) = environment.sources.get(&included).copied() else {
+    let Some(source) = environment.project.sources.get(&included).copied() else {
         include_stack.remove(&included);
         return;
     };
