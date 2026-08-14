@@ -11,7 +11,7 @@
 //! cache and reload incrementally across calls.
 
 use crate::rules::{RulePack, IRIS_PACKS};
-use crate::workspace::{lang_of_cpg, Workspace};
+use crate::workspace::{graph_content_digest, language_for_cpg, Workspace};
 use cpg_core::Query;
 use cpg_incremental::Project;
 use serde_json::{json, Value};
@@ -27,7 +27,7 @@ const PROTOCOL_VERSION: &str = "2025-03-26";
 struct Server {
     ws: Workspace,
     /// Loaded projects keyed by cpg path, invalidated when the file changes.
-    projects: HashMap<PathBuf, (std::time::SystemTime, String, Project)>,
+    projects: HashMap<PathBuf, (String, String, Project)>,
 }
 
 /// Run the server until stdin closes. `root` as in `Workspace::open`.
@@ -156,9 +156,7 @@ impl Server {
                 if !p.is_file() {
                     return Err(format!("no such cpg: {cpg}"));
                 }
-                let lang = lang_arg
-                    .map(String::from)
-                    .unwrap_or_else(|| lang_of_cpg(&p));
+                let lang = language_for_cpg(&p, lang_arg)?;
                 (p, lang)
             }
             None => {
@@ -166,20 +164,18 @@ impl Server {
                 self.ws.ensure_cpg(path, lang_arg)?
             }
         };
-        let mtime = std::fs::metadata(&cpg_path)
-            .and_then(|m| m.modified())
-            .map_err(|e| format!("stat {}: {e}", cpg_path.display()))?;
+        let identity = graph_content_digest(&cpg_path)?;
         let fresh = self
             .projects
             .get(&cpg_path)
-            .is_some_and(|(t, l, _)| *t == mtime && *l == lang);
+            .is_some_and(|(digest, cached_lang, _)| *digest == identity && *cached_lang == lang);
         if !fresh {
             let cpg = cpg_core::Cpg::load(&cpg_path.to_string_lossy())
                 .map_err(|e| format!("load failed: {e}"))?;
             let (mut project, _) = crate::make_project(&lang)?;
             project.reopen(cpg);
             self.projects
-                .insert(cpg_path.clone(), (mtime, lang.clone(), project));
+                .insert(cpg_path.clone(), (identity, lang.clone(), project));
         }
         Ok((cpg_path, lang))
     }
