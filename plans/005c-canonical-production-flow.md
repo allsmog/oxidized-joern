@@ -2,7 +2,7 @@
 
 ## Status
 
-- **Status**: TODO
+- **Status**: DONE
 - **Depends on**: 005b
 
 Make sparse flow, CLI flow, taint rules, and summaries consume facts derived

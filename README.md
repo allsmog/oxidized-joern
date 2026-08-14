@@ -11,18 +11,19 @@ distribution.
 
 ## Release status
 
-The current `0.1.x` line is a preview. It is useful for evaluation and
-development, but it is not yet a drop-in Joern replacement.
+The current `0.1.x` line is production-ready for the documented C workflows.
+It is not a drop-in Joern replacement.
 
 The CLI accepts C, C++, Go, Java, JavaScript, TypeScript, Python, Ruby, Rust,
-and Scala source. Language support currently shares a tree-sitter-based graph
-builder, so coverage and type resolution vary by language. The differential
-test harness has exact output parity for its standalone C fixture path. That
-validated path has not yet been integrated into every production engine path
-or extended to every language.
+and Scala source. C's production graph path is guarded by 96/96 exact Joern
+v4.0.555 corpus blocks, including 1,458/1,458 ReachingDef facts, plus pinned
+zlib and Lua workflow gates and labeled scanner outcomes. Other language
+frontends remain experimental and have their own shared acceptance gate, not a
+Joern-parity claim.
 
-See [`cpg-rs/README.md`](cpg-rs/README.md) for commands and compatibility
-details.
+See [`cpg-rs/COMPATIBILITY.md`](cpg-rs/COMPATIBILITY.md) for the precise
+language/workflow contract and [`cpg-rs/README.md`](cpg-rs/README.md) for
+commands.
 
 ## Install a preview release
 

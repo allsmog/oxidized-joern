@@ -2,7 +2,7 @@
 
 ## Status
 
-- **Status**: TODO
+- **Status**: DONE
 - **Depends on**: 005c
 
 After the shipped graph passes all 96 committed oracle blocks, make it the

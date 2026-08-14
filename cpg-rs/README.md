@@ -7,18 +7,19 @@ SARIF, JSON, and MCP interfaces.
 
 ## Status
 
-The `0.1.x` release line is a preview, not a drop-in Joern replacement.
+The `0.1.x` release line is production-ready for its documented C workflows,
+but it is not a drop-in Joern replacement.
 
 The CLI accepts C, C++, Go, Java, JavaScript, TypeScript, Python, Ruby, Rust,
-and Scala. Most modes use a shared tree-sitter frontend with a language
-specification. C also has a dedicated frontend. Parsing tolerates incomplete
-source, but type resolution and graph detail do not yet match a compiler or
-Joern across every language.
+and Scala. C's shipped build/analysis path is the same path guarded by 96/96
+exact Joern v4.0.555 corpus blocks, including 1,458/1,458 ReachingDef facts.
+Its deterministic build, persistence, export, flow, scan, SARIF, and update
+workflows are also gated on pinned zlib and Lua releases and labeled security
+outcomes. The other language frontends remain experimental.
 
-The standalone C differential harness has exact output parity for its pinned
-fixtures. The production engine still needs the convergence work described in
-[`ROADMAP.md`](ROADMAP.md) before that result can support a broader parity
-claim. [`GOAL.md`](GOAL.md) defines the differential-testing gate.
+[`COMPATIBILITY.md`](COMPATIBILITY.md) is the authoritative language/workflow
+matrix and states the exact production boundary. [`ROADMAP.md`](ROADMAP.md)
+lists the remaining work without treating Scala/JVM compatibility as a goal.
 
 ## Install
 
@@ -71,9 +72,9 @@ export, flow, vectors, workspace, and MCP commands.
 
 [`ARCHITECTURE.md`](ARCHITECTURE.md) describes storage, incrementality,
 summaries, and known simplifications. [`PROGRESS.md`](PROGRESS.md) records work
-against the pinned Joern oracle. The manual parity CI job runs the large
-differential suite; regular pull requests run locked build, test, formatting,
-Clippy, audit, archive, and container checks.
+against the pinned Joern oracle. Pull requests run the committed parity and
+semantic outcome gates; releases additionally run pinned zlib/Lua acceptance,
+archive tests, and container tests. The real-project suite also runs nightly.
 
 Treat benchmark results as measurements of their named fixtures. Run the
 examples in `cpg-incremental/examples` on your own corpus before making
