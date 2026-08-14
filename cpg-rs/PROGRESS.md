@@ -5,13 +5,12 @@ Single source of truth across iterations. Update in the same commit as the work.
 ## Current state
 
 - **Native query and Flatgraph replacement track started (2026-08-14).**
-  `cpg query` now compiles a committed 26-case CPGQL core tier to native Rust
-  logical plans (node types, regex/property filters, AST/call/CFG/dataflow-edge
-  traversals, projections, dedup, limits, counts). `cpg import-joern` decodes
-  Joern v4 Flatgraph and `cpg export-joern` emits it; the pinned v4.0.555 gate
-  passes a real C fixture in both directions. Full CPGQL, lossless schema/
-  overlay fidelity, JVM/dynamic Flatgraph fixtures, wider C semantics, rules,
-  and per-language promotions remain open in `REPLACEMENT_CONTRACT.md`.
+  `cpg query` now compiles a committed 55-case CPGQL tier to native Rust
+  logical plans, with a 20-case zero-diff gate against Joern v4.0.555.
+  `cpg import-joern` decodes Joern v4 Flatgraph and `cpg export-joern` emits
+  it; the pinned gate passes C, Java, and Python fixtures in both directions.
+  Full CPGQL, lossless schema/overlay fidelity, wider C semantics, rules, and
+  per-language promotions remain open in `REPLACEMENT_CONTRACT.md`.
 - **Production C convergence complete (2026-08-14).** The released
   `CFrontend`/`Project`/`standard_pipeline` path is the 107/107 committed Joern
   v4.0.555 oracle path, including 1,545/1,545 ReachingDef facts. Canonical
