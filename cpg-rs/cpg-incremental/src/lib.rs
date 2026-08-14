@@ -123,6 +123,12 @@ impl Project {
         self.summaries.compute_all(&self.cpg);
     }
 
+    /// Re-run the summary fixpoint after changing non-persisted summary
+    /// inputs, such as loading external library summaries on a reopened graph.
+    pub fn recompute_summaries(&mut self) {
+        self.summaries.compute_all(&self.cpg);
+    }
+
     /// Initial bulk build of a whole project. Parsing+building is the dominant
     /// phase (~70% of a cold build) and is embarrassingly parallel: each worker
     /// builds a standalone per-file graph with its own frontend instance, then

@@ -3,15 +3,20 @@
 //! This is the former `cpgx` shell wrapper absorbed into the binary, so a
 //! single self-contained executable runs the whole IRIS loop anywhere:
 //! module paths relative to a project root, language auto-detection by file
-//! census, per-language exclude sets for vendored/generated/test code, a
-//! versioned mtime CPG cache, and gRPC/thrift IDL auto-discovery for
+//! census, per-language exclude sets for vendored/generated/test code, an
+//! exact content-manifest CPG cache, and gRPC/thrift IDL auto-discovery for
 //! entry-point mining.
 //!
 //! Nothing here is tied to a machine or project: the root comes from
 //! `-C`/`$CPGX_ROOT`/cwd, the cache from `$CPG_CACHE`/`$XDG_CACHE_HOME/cpg`/
 //! `~/.cache/cpg`.
 
+use fs2::FileExt;
+use serde::{Deserialize, Serialize};
+use std::fs::{File, OpenOptions};
+use std::io::{Read, Write};
 use std::path::{Component, Path, PathBuf};
+use std::time::{Duration, Instant};
 
 /// Bumped whenever an engine change alters the shape of built graphs
 /// (lowering, new node/edge kinds, persist layout). Part of every cache file
@@ -32,7 +37,55 @@ use std::path::{Component, Path, PathBuf};
 /// file-set change, same staleness hazard as a shape change.
 pub const GRAPH_SHAPE_VERSION: u32 = 11;
 
+const CACHE_MANIFEST_VERSION: u32 = 1;
+const CACHE_GRAPH_FORMAT: &str = "CPG2";
+const MAX_MANIFEST_BYTES: u64 = 64 * 1024 * 1024;
+const LOCK_WAIT: Duration = Duration::from_secs(30);
+const LOCK_RETRY: Duration = Duration::from_millis(25);
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+struct SourceManifestEntry {
+    path: String,
+    digest: String,
+}
+
+/// Metadata binding a cached graph to the exact source snapshot and frontend
+/// policy that produced it. The graph digest makes graph + manifest a pair:
+/// an interrupted publication can never advertise an older or partial graph.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+struct CacheManifest {
+    manifest_version: u32,
+    graph_format: String,
+    graph_shape_version: u32,
+    workspace_root_digest: String,
+    module_path_digest: String,
+    language: String,
+    excludes: Vec<String>,
+    sources: Vec<SourceManifestEntry>,
+    graph_digest: String,
+}
+
+impl CacheManifest {
+    fn source_state_matches(&self, expected: &Self) -> bool {
+        self.manifest_version == expected.manifest_version
+            && self.graph_format == expected.graph_format
+            && self.graph_shape_version == expected.graph_shape_version
+            && self.workspace_root_digest == expected.workspace_root_digest
+            && self.module_path_digest == expected.module_path_digest
+            && self.language == expected.language
+            && self.excludes == expected.excludes
+            && self.sources == expected.sources
+    }
+}
+
+struct CacheLock {
+    _file: File,
+}
+
 /// A project root plus the CPG cache directory.
+#[derive(Clone, Debug)]
 pub struct Workspace {
     pub root: PathBuf,
     pub cache: PathBuf,
@@ -146,58 +199,116 @@ impl Workspace {
         Ok(target)
     }
 
-    /// The cache file a module/lang pair maps to. Keyed by sanitized absolute
-    /// path (same module name in two projects never collides), language, and
-    /// [`GRAPH_SHAPE_VERSION`].
-    pub fn cache_path(&self, dir: &Path, lang: &str) -> PathBuf {
-        let key: String = dir
-            .to_string_lossy()
-            .trim_start_matches('/')
-            .chars()
-            .map(|c| if c == '/' || c == '\\' { '_' } else { c })
-            .collect();
-        self.cache
-            .join(format!("{key}.{lang}.v{GRAPH_SHAPE_VERSION}.cpg"))
+    /// The cache file a module/lang pair maps to. The canonical module path is
+    /// hashed rather than rewritten with separators, so distinct paths cannot
+    /// alias and absolute paths are not disclosed in cache filenames.
+    pub fn cache_path(&self, dir: &Path, lang: &str) -> Result<PathBuf, String> {
+        let dir = dir
+            .canonicalize()
+            .map_err(|e| format!("bad module {}: {e}", dir.display()))?;
+        let key = digest_text(&dir.to_string_lossy());
+        Ok(self
+            .cache
+            .join(format!("module-{key}.{lang}.v{GRAPH_SHAPE_VERSION}.cpg")))
     }
 
     /// Build-or-reuse the CPG for a module: returns `(cpg_path, lang)`.
-    /// Rebuilds when the cache is missing or any in-scope source file is
-    /// newer than it.
+    /// Rebuilds unless the graph and its adjacent manifest match the exact
+    /// path/content/language/exclude/version snapshot of the sources.
     pub fn ensure_cpg(&self, rel: &str, lang: Option<&str>) -> Result<(PathBuf, String), String> {
+        let parsed_lang = match lang {
+            Some(lang) => crate::Language::parse(lang)?,
+            None => {
+                let dir = self.module_dir(rel)?;
+                crate::Language::parse(detect_lang(&dir))?
+            }
+        };
+        self.ensure_cpg_with_excludes(rel, parsed_lang, excludes_for(parsed_lang.canonical_name()))
+    }
+
+    fn ensure_cpg_with_excludes(
+        &self,
+        rel: &str,
+        parsed_lang: crate::Language,
+        excludes: &[&str],
+    ) -> Result<(PathBuf, String), String> {
         let dir = self.module_dir(rel)?;
-        let parsed_lang = crate::Language::parse(lang.unwrap_or_else(|| detect_lang(&dir)))?;
         let lang_name = parsed_lang.canonical_name();
         let lang = lang_name.to_string();
-        let cpg_path = self.cache_path(&dir, &lang);
-        let excludes = excludes_for(&lang);
+        let cpg_path = self.cache_path(&dir, &lang)?;
+        let _lock = acquire_cache_lock(&lock_path(&cpg_path))?;
+
+        // Collect exactly once while holding the per-key lock. These strings
+        // are both hashed into the manifest and passed to the frontend, so a
+        // concurrent edit cannot make the graph and metadata describe
+        // different source snapshots.
         let sources = crate::collect_sources_filtered(&dir, parsed_lang.extensions(), excludes)?;
-        let newest_source = sources
-            .iter()
-            .map(|(path, _)| {
-                std::fs::metadata(path)
-                    .and_then(|metadata| metadata.modified())
-                    .map_err(|e| format!("cannot inspect source {path}: {e}"))
-            })
-            .collect::<Result<Vec<_>, _>>()?
-            .into_iter()
-            .max();
-        let stale = match std::fs::metadata(&cpg_path).and_then(|m| m.modified()) {
-            Err(_) => true, // no cache yet
-            Ok(cache_mtime) => newest_source.is_some_and(|src| src > cache_mtime),
-        };
-        if stale {
-            eprintln!(
-                "building {} ({lang}) -> {}",
-                dir.display(),
-                cpg_path.display()
-            );
-            let project = crate::build_project_filtered(&dir.to_string_lossy(), &lang, excludes)?;
-            project
-                .cpg
-                .save(&cpg_path.to_string_lossy())
-                .map_err(|e| format!("save failed: {e}"))?;
+        let mut manifest = self.source_manifest(&dir, &lang, excludes, &sources)?;
+        if cached_pair_is_fresh(&cpg_path, &manifest) {
+            return Ok((cpg_path, lang));
         }
+
+        eprintln!(
+            "building {} ({lang}) -> {}",
+            dir.display(),
+            cpg_path.display()
+        );
+        let project = crate::build_project_from_sources(&lang, &sources, None)?;
+        project
+            .cpg
+            .save(&cpg_path.to_string_lossy())
+            .map_err(|e| format!("save failed: {e}"))?;
+
+        manifest.graph_digest = graph_content_digest(&cpg_path)?;
+        // Publish the graph first and the manifest last. If the process exits
+        // between these operations, the old manifest's graph digest cannot
+        // match and the next process rebuilds under the same lock.
+        write_manifest_atomically(&manifest_path(&cpg_path), &manifest)?;
         Ok((cpg_path, lang))
+    }
+
+    fn source_manifest(
+        &self,
+        dir: &Path,
+        lang: &str,
+        excludes: &[&str],
+        sources: &[(String, String)],
+    ) -> Result<CacheManifest, String> {
+        let root = self
+            .root
+            .canonicalize()
+            .map_err(|e| format!("bad root {}: {e}", self.root.display()))?;
+        let dir = dir
+            .canonicalize()
+            .map_err(|e| format!("bad module {}: {e}", dir.display()))?;
+        let mut entries = Vec::with_capacity(sources.len());
+        for (path, source) in sources {
+            let relative = Path::new(path).strip_prefix(&dir).map_err(|_| {
+                format!(
+                    "collected source is outside module {}: {path}",
+                    dir.display()
+                )
+            })?;
+            entries.push(SourceManifestEntry {
+                path: relative.to_string_lossy().replace('\\', "/"),
+                digest: blake3::hash(source.as_bytes()).to_hex().to_string(),
+            });
+        }
+        entries.sort_by(|a, b| a.path.cmp(&b.path));
+        let mut excludes: Vec<String> = excludes.iter().map(|s| (*s).to_string()).collect();
+        excludes.sort();
+        excludes.dedup();
+        Ok(CacheManifest {
+            manifest_version: CACHE_MANIFEST_VERSION,
+            graph_format: CACHE_GRAPH_FORMAT.to_string(),
+            graph_shape_version: GRAPH_SHAPE_VERSION,
+            workspace_root_digest: digest_text(&root.to_string_lossy()),
+            module_path_digest: digest_text(&dir.to_string_lossy()),
+            language: lang.to_string(),
+            excludes,
+            sources: entries,
+            graph_digest: String::new(),
+        })
     }
 
     /// Directories under the module containing `.proto` files (for
@@ -234,19 +345,273 @@ impl Workspace {
     }
 }
 
-/// The language a cache file was built for (`<key>.<lang>.v<N>.cpg`).
-pub fn lang_of_cpg(path: &Path) -> String {
-    let name = path
+fn digest_text(text: &str) -> String {
+    blake3::hash(text.as_bytes()).to_hex().to_string()
+}
+
+/// Adjacent metadata path for a persisted graph.
+pub fn manifest_path(cpg_path: &Path) -> PathBuf {
+    let name = cpg_path
         .file_name()
-        .map(|n| n.to_string_lossy().into_owned())
-        .unwrap_or_default();
-    let mut parts: Vec<&str> = name.split('.').collect();
-    // strip trailing "cpg" and "v<N>"
-    parts.pop();
-    if parts.last().is_some_and(|p| p.starts_with('v')) {
-        parts.pop();
+        .map(|name| name.to_string_lossy().into_owned())
+        .unwrap_or_else(|| "graph.cpg".to_string());
+    cpg_path.with_file_name(format!("{name}.manifest.json"))
+}
+
+fn lock_path(cpg_path: &Path) -> PathBuf {
+    let name = cpg_path
+        .file_name()
+        .map(|name| name.to_string_lossy().into_owned())
+        .unwrap_or_else(|| "graph.cpg".to_string());
+    cpg_path.with_file_name(format!("{name}.lock"))
+}
+
+fn acquire_cache_lock(path: &Path) -> Result<CacheLock, String> {
+    match std::fs::symlink_metadata(path) {
+        Ok(metadata) if metadata.file_type().is_symlink() || !metadata.is_file() => {
+            return Err(format!(
+                "cache lock is not a regular file: {}",
+                path.display()
+            ));
+        }
+        Ok(_) => {}
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => {
+            return Err(format!(
+                "cannot inspect cache lock {}: {error}",
+                path.display()
+            ))
+        }
     }
-    parts.pop().unwrap_or("c").to_string()
+    let file = OpenOptions::new()
+        .create(true)
+        .truncate(false)
+        .read(true)
+        .write(true)
+        .open(path)
+        .map_err(|e| format!("cannot open cache lock {}: {e}", path.display()))?;
+    let started = Instant::now();
+    loop {
+        match FileExt::try_lock_exclusive(&file) {
+            Ok(()) => return Ok(CacheLock { _file: file }),
+            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                if started.elapsed() >= LOCK_WAIT {
+                    return Err(format!(
+                        "timed out after {}s waiting for cache lock {}",
+                        LOCK_WAIT.as_secs(),
+                        path.display()
+                    ));
+                }
+                std::thread::sleep(LOCK_RETRY);
+            }
+            Err(error) => {
+                return Err(format!("cannot lock cache key {}: {error}", path.display()));
+            }
+        }
+    }
+}
+
+fn read_manifest(path: &Path) -> Result<CacheManifest, String> {
+    let file = File::open(path).map_err(|e| format!("cannot open {}: {e}", path.display()))?;
+    let len = file
+        .metadata()
+        .map_err(|e| format!("cannot inspect {}: {e}", path.display()))?
+        .len();
+    if len > MAX_MANIFEST_BYTES {
+        return Err(format!(
+            "cache manifest {} is {len} bytes; maximum is {MAX_MANIFEST_BYTES}",
+            path.display()
+        ));
+    }
+    let mut text = String::new();
+    file.take(MAX_MANIFEST_BYTES + 1)
+        .read_to_string(&mut text)
+        .map_err(|e| format!("cannot read {}: {e}", path.display()))?;
+    if text.len() as u64 > MAX_MANIFEST_BYTES {
+        return Err(format!(
+            "cache manifest {} exceeds {MAX_MANIFEST_BYTES} bytes",
+            path.display()
+        ));
+    }
+    serde_json::from_str(&text)
+        .map_err(|e| format!("invalid cache manifest {}: {e}", path.display()))
+}
+
+fn write_manifest_atomically(path: &Path, manifest: &CacheManifest) -> Result<(), String> {
+    let parent = path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+        .unwrap_or_else(|| Path::new("."));
+    let mut bytes = serde_json::to_vec_pretty(manifest)
+        .map_err(|e| format!("cannot serialize cache manifest: {e}"))?;
+    bytes.push(b'\n');
+    let mut temporary = tempfile::Builder::new()
+        .prefix(".cpg-manifest-tmp-")
+        .tempfile_in(parent)
+        .map_err(|e| {
+            format!(
+                "cannot create temporary manifest for {}: {e}",
+                path.display()
+            )
+        })?;
+    temporary
+        .write_all(&bytes)
+        .and_then(|_| temporary.flush())
+        .and_then(|_| temporary.as_file().sync_all())
+        .map_err(|e| {
+            format!(
+                "cannot write temporary manifest for {}: {e}",
+                path.display()
+            )
+        })?;
+    temporary.persist(path).map_err(|e| {
+        format!(
+            "cannot publish cache manifest {}: {}",
+            path.display(),
+            e.error
+        )
+    })?;
+    File::open(parent)
+        .and_then(|directory| directory.sync_all())
+        .map_err(|e| format!("cannot sync cache directory {}: {e}", parent.display()))
+}
+
+fn is_cpg2(path: &Path) -> Result<bool, String> {
+    let mut file = File::open(path).map_err(|e| format!("cannot open {}: {e}", path.display()))?;
+    let mut magic = [0_u8; 4];
+    file.read_exact(&mut magic)
+        .map_err(|e| format!("cannot read graph header {}: {e}", path.display()))?;
+    Ok(&magic == b"CPG2")
+}
+
+/// Stream a persisted graph through BLAKE3 without loading a second copy into
+/// memory. MCP uses this identity to invalidate an in-process reopened graph
+/// even on filesystems whose mtimes are coarse.
+pub(crate) fn graph_content_digest(path: &Path) -> Result<String, String> {
+    let file = File::open(path).map_err(|e| format!("cannot open {}: {e}", path.display()))?;
+    let len = file
+        .metadata()
+        .map_err(|e| format!("cannot inspect {}: {e}", path.display()))?
+        .len();
+    if len > cpg_core::graph::MAX_CPG_BYTES {
+        return Err(format!(
+            "graph {} is {len} bytes; maximum is {}",
+            path.display(),
+            cpg_core::graph::MAX_CPG_BYTES
+        ));
+    }
+    let mut file = file.take(cpg_core::graph::MAX_CPG_BYTES + 1);
+    let mut hasher = blake3::Hasher::new();
+    let mut buffer = [0_u8; 64 * 1024];
+    let mut total = 0_u64;
+    loop {
+        let count = file
+            .read(&mut buffer)
+            .map_err(|e| format!("cannot read {}: {e}", path.display()))?;
+        if count == 0 {
+            break;
+        }
+        total += count as u64;
+        if total > cpg_core::graph::MAX_CPG_BYTES {
+            return Err(format!(
+                "graph {} exceeds {} bytes",
+                path.display(),
+                cpg_core::graph::MAX_CPG_BYTES
+            ));
+        }
+        hasher.update(&buffer[..count]);
+    }
+    Ok(hasher.finalize().to_hex().to_string())
+}
+
+fn validate_manifest_graph(path: &Path, manifest: &CacheManifest) -> Result<(), String> {
+    let canonical_language = crate::Language::parse(&manifest.language)?;
+    let sources_are_canonical = !manifest.sources.is_empty()
+        && manifest.sources.iter().all(|source| {
+            !source.path.is_empty()
+                && !source.path.contains('\\')
+                && Path::new(&source.path)
+                    .components()
+                    .all(|component| matches!(component, Component::Normal(_)))
+                && valid_digest(&source.digest)
+        })
+        && manifest
+            .sources
+            .windows(2)
+            .all(|pair| pair[0].path < pair[1].path);
+    let excludes_are_canonical = manifest.excludes.windows(2).all(|pair| pair[0] < pair[1]);
+    if manifest.manifest_version != CACHE_MANIFEST_VERSION
+        || manifest.graph_format != CACHE_GRAPH_FORMAT
+        || manifest.graph_shape_version != GRAPH_SHAPE_VERSION
+        || canonical_language.canonical_name() != manifest.language
+        || !valid_digest(&manifest.workspace_root_digest)
+        || !valid_digest(&manifest.module_path_digest)
+        || !valid_digest(&manifest.graph_digest)
+        || !sources_are_canonical
+        || !excludes_are_canonical
+    {
+        return Err(format!(
+            "cache manifest for {} has unsupported or incomplete version metadata",
+            path.display()
+        ));
+    }
+    if !is_cpg2(path)? {
+        return Err(format!("cached graph {} is not CPG2", path.display()));
+    }
+    let actual = graph_content_digest(path)?;
+    if actual != manifest.graph_digest {
+        return Err(format!(
+            "cached graph digest mismatch for {}",
+            path.display()
+        ));
+    }
+    cpg_core::Cpg::load(&path.to_string_lossy())
+        .map_err(|e| format!("invalid cached graph {}: {e}", path.display()))?;
+    Ok(())
+}
+
+fn valid_digest(digest: &str) -> bool {
+    digest.len() == 64 && digest.bytes().all(|byte| byte.is_ascii_hexdigit())
+}
+
+fn cached_pair_is_fresh(path: &Path, expected: &CacheManifest) -> bool {
+    let manifest = match read_manifest(&manifest_path(path)) {
+        Ok(manifest) => manifest,
+        Err(_) => return false,
+    };
+    manifest.source_state_matches(expected) && validate_manifest_graph(path, &manifest).is_ok()
+}
+
+/// Resolve the frontend for a reopened graph. Cache filenames are never
+/// parsed: the caller must provide a supported language or the graph must have
+/// valid adjacent metadata. If both exist they must agree.
+pub fn language_for_cpg(path: &Path, explicit: Option<&str>) -> Result<String, String> {
+    let explicit = explicit
+        .map(crate::Language::parse)
+        .transpose()?
+        .map(|language| language.canonical_name().to_string());
+    let metadata_path = manifest_path(path);
+    if !metadata_path.exists() {
+        return explicit.ok_or_else(|| {
+            format!(
+                "--load {} has no validated language metadata; pass --lang <language>",
+                path.display()
+            )
+        });
+    }
+    let manifest = read_manifest(&metadata_path)?;
+    validate_manifest_graph(path, &manifest)?;
+    if let Some(explicit) = explicit {
+        if explicit != manifest.language {
+            return Err(format!(
+                "--lang {explicit} conflicts with cached graph language {} for {}",
+                manifest.language,
+                path.display()
+            ));
+        }
+        return Ok(explicit);
+    }
+    Ok(manifest.language)
 }
 
 /// Auto-detect the dominant language of a directory by counting source files
@@ -404,6 +769,7 @@ fn walk(dir: &Path, excludes: &[&str], visit: &mut impl FnMut(&Path)) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Language;
 
     fn tmpdir(name: &str) -> PathBuf {
         let d = std::env::temp_dir().join(format!("cpg-ws-{name}-{}", std::process::id()));
@@ -429,18 +795,26 @@ mod tests {
     }
 
     #[test]
-    fn cache_key_embeds_path_lang_and_shape_version() {
+    fn manifest_cache_key_hashes_canonical_path_lang_and_shape_version() {
+        let root = tmpdir("key-root");
+        let cache = tmpdir("key-cache");
+        let left = root.join("a_b/c");
+        let right = root.join("a/b_c");
+        std::fs::create_dir_all(&left).unwrap();
+        std::fs::create_dir_all(&right).unwrap();
         let ws = Workspace {
-            root: PathBuf::from("/"),
-            cache: PathBuf::from("/tmp/cache"),
+            root: root.clone(),
+            cache: cache.clone(),
         };
-        let p = ws.cache_path(Path::new("/some/repo/module"), "go");
+        let p = ws.cache_path(&left, "go").unwrap();
         let name = p.file_name().unwrap().to_string_lossy().into_owned();
-        assert_eq!(
-            name,
-            format!("some_repo_module.go.v{GRAPH_SHAPE_VERSION}.cpg")
-        );
-        assert_eq!(lang_of_cpg(&p), "go");
+        assert!(name.starts_with("module-"), "{name}");
+        assert!(name.ends_with(&format!(".go.v{GRAPH_SHAPE_VERSION}.cpg")));
+        assert!(!name.contains("a_b"), "absolute path leaked into {name}");
+        assert_ne!(p, ws.cache_path(&right, "go").unwrap());
+        assert_ne!(p, ws.cache_path(&left, "python").unwrap());
+        let _ = std::fs::remove_dir_all(root);
+        let _ = std::fs::remove_dir_all(cache);
     }
 
     #[test]
@@ -532,11 +906,70 @@ mod tests {
     }
 
     #[test]
-    fn ensure_cpg_builds_then_reuses_then_rebuilds_on_edit() {
+    fn manifest_is_order_independent_and_covers_all_identity_inputs() {
+        let root = tmpdir("manifest-root");
+        let cache = tmpdir("manifest-cache");
+        let module = root.join("m");
+        std::fs::create_dir_all(&module).unwrap();
+        let module = module.canonicalize().unwrap();
+        let a = module.join("a.c").to_string_lossy().into_owned();
+        let b = module.join("b.c").to_string_lossy().into_owned();
+        let ws = Workspace {
+            root: root.clone(),
+            cache: cache.clone(),
+        };
+        let one = ws
+            .source_manifest(
+                &module,
+                "c",
+                &["/vendor/", "/tests/"],
+                &[(a.clone(), "a".into()), (b.clone(), "b".into())],
+            )
+            .unwrap();
+        let reordered = ws
+            .source_manifest(
+                &module,
+                "c",
+                &["/tests/", "/vendor/"],
+                &[(b.clone(), "b".into()), (a.clone(), "a".into())],
+            )
+            .unwrap();
+        assert_eq!(one, reordered);
+        assert_eq!(
+            serde_json::to_vec(&one).unwrap(),
+            serde_json::to_vec(&reordered).unwrap()
+        );
+
+        let mut changed = one.clone();
+        changed.sources[0].digest = digest_text("changed");
+        assert!(!one.source_state_matches(&changed));
+        changed = one.clone();
+        changed.sources[0].path = "renamed.c".into();
+        assert!(!one.source_state_matches(&changed));
+        changed = one.clone();
+        changed.language = "python".into();
+        assert!(!one.source_state_matches(&changed));
+        changed = one.clone();
+        changed.excludes.push("/generated/".into());
+        assert!(!one.source_state_matches(&changed));
+        changed = one.clone();
+        changed.graph_shape_version += 1;
+        assert!(!one.source_state_matches(&changed));
+        let _ = std::fs::remove_dir_all(root);
+        let _ = std::fs::remove_dir_all(cache);
+    }
+
+    fn cached_manifest(path: &Path) -> CacheManifest {
+        read_manifest(&manifest_path(path)).unwrap()
+    }
+
+    #[test]
+    fn manifest_cache_reuses_then_rebuilds_for_content_deletion_and_rename() {
         let root = tmpdir("root");
         let cache = tmpdir("cache");
         std::fs::create_dir_all(root.join("m")).unwrap();
         std::fs::write(root.join("m/a.c"), "int main() { return 0; }").unwrap();
+        std::fs::write(root.join("m/b.c"), "int b() { return 0; }").unwrap();
         let ws = Workspace {
             root: root.clone(),
             cache,
@@ -544,23 +977,115 @@ mod tests {
         let (cpg1, lang) = ws.ensure_cpg("m", None).expect("build");
         assert_eq!(lang, "c");
         assert!(cpg1.exists());
-        let mtime1 = std::fs::metadata(&cpg1).unwrap().modified().unwrap();
+        let first = cached_manifest(&cpg1);
         // unchanged source -> cache reused
         let (cpg2, _) = ws.ensure_cpg("m", None).expect("reuse");
-        assert_eq!(
-            std::fs::metadata(&cpg2).unwrap().modified().unwrap(),
-            mtime1
-        );
-        // touch the source into the future -> rebuild
-        let future = std::time::SystemTime::now() + std::time::Duration::from_secs(5);
+        assert_eq!(cached_manifest(&cpg2), first);
+
+        // A content edit with the original timestamp still invalidates.
+        let original_time = std::fs::metadata(root.join("m/a.c"))
+            .unwrap()
+            .modified()
+            .unwrap();
+        std::fs::write(root.join("m/a.c"), "int main() { return 1; }").unwrap();
         let f = std::fs::File::options()
             .write(true)
             .open(root.join("m/a.c"))
             .unwrap();
-        f.set_modified(future).unwrap();
+        f.set_modified(original_time).unwrap();
         drop(f);
-        let (cpg3, _) = ws.ensure_cpg("m", None).expect("rebuild");
-        assert!(std::fs::metadata(&cpg3).unwrap().modified().unwrap() > mtime1);
+        ws.ensure_cpg("m", None).expect("content rebuild");
+        let after_content = cached_manifest(&cpg1);
+        assert_ne!(after_content.sources, first.sources);
+
+        std::fs::remove_file(root.join("m/b.c")).unwrap();
+        ws.ensure_cpg("m", None).expect("deletion rebuild");
+        let after_delete = cached_manifest(&cpg1);
+        assert_ne!(after_delete.sources, after_content.sources);
+
+        std::fs::rename(root.join("m/a.c"), root.join("m/renamed.c")).unwrap();
+        ws.ensure_cpg("m", None).expect("rename rebuild");
+        let after_rename = cached_manifest(&cpg1);
+        assert_ne!(after_rename.sources, after_delete.sources);
+        let _ = std::fs::remove_dir_all(&root);
+        let _ = std::fs::remove_dir_all(&ws.cache);
+    }
+
+    #[test]
+    fn manifest_cache_rebuilds_for_policy_and_broken_pairs() {
+        let root = tmpdir("broken-root");
+        let cache = tmpdir("broken-cache");
+        std::fs::create_dir_all(root.join("m/ignored")).unwrap();
+        std::fs::write(root.join("m/a.c"), "int a() { return 0; }").unwrap();
+        std::fs::write(root.join("m/ignored/b.c"), "int b() { return 0; }").unwrap();
+        let ws = Workspace {
+            root: root.clone(),
+            cache,
+        };
+        let (cpg, _) = ws.ensure_cpg_with_excludes("m", Language::C, &[]).unwrap();
+        let with_all = cached_manifest(&cpg);
+        ws.ensure_cpg_with_excludes("m", Language::C, &["/ignored/"])
+            .unwrap();
+        assert_ne!(cached_manifest(&cpg).excludes, with_all.excludes);
+
+        std::fs::write(&cpg, b"not a graph").unwrap();
+        ws.ensure_cpg_with_excludes("m", Language::C, &["/ignored/"])
+            .expect("corrupt graph rebuilds");
+        assert!(is_cpg2(&cpg).unwrap());
+
+        std::fs::write(manifest_path(&cpg), b"not json").unwrap();
+        ws.ensure_cpg_with_excludes("m", Language::C, &["/ignored/"])
+            .expect("corrupt manifest rebuilds");
+        validate_manifest_graph(&cpg, &cached_manifest(&cpg)).unwrap();
+
+        std::fs::remove_file(manifest_path(&cpg)).unwrap();
+        ws.ensure_cpg_with_excludes("m", Language::C, &["/ignored/"])
+            .expect("missing manifest rebuilds");
+        std::fs::remove_file(&cpg).unwrap();
+        ws.ensure_cpg_with_excludes("m", Language::C, &["/ignored/"])
+            .expect("missing graph rebuilds");
+        validate_manifest_graph(&cpg, &cached_manifest(&cpg)).unwrap();
+        let _ = std::fs::remove_dir_all(&root);
+        let _ = std::fs::remove_dir_all(&ws.cache);
+    }
+
+    #[test]
+    fn manifest_cache_serializes_concurrent_builders() {
+        let root = tmpdir("concurrent-root");
+        let cache = tmpdir("concurrent-cache");
+        std::fs::create_dir_all(root.join("m")).unwrap();
+        std::fs::write(root.join("m/a.c"), "int main() { return 0; }").unwrap();
+        let ws = Workspace {
+            root: root.clone(),
+            cache,
+        };
+        let first = ws.clone();
+        let second = ws.clone();
+        let a = std::thread::spawn(move || first.ensure_cpg("m", Some("c")));
+        let b = std::thread::spawn(move || second.ensure_cpg("m", Some("c")));
+        let (a_path, _) = a.join().unwrap().unwrap();
+        let (b_path, _) = b.join().unwrap().unwrap();
+        assert_eq!(a_path, b_path);
+        validate_manifest_graph(&a_path, &cached_manifest(&a_path)).unwrap();
+        let _ = std::fs::remove_dir_all(&root);
+        let _ = std::fs::remove_dir_all(&ws.cache);
+    }
+
+    #[test]
+    fn manifest_language_is_validated_and_conflicts_fail() {
+        let root = tmpdir("language-root");
+        let cache = tmpdir("language-cache");
+        std::fs::create_dir_all(root.join("m")).unwrap();
+        std::fs::write(root.join("m/a.py"), "def f():\n    return 1\n").unwrap();
+        let ws = Workspace {
+            root: root.clone(),
+            cache,
+        };
+        let (cpg, lang) = ws.ensure_cpg("m", Some("python")).unwrap();
+        assert_eq!(lang, "python");
+        assert_eq!(language_for_cpg(&cpg, None).unwrap(), "python");
+        let conflict = language_for_cpg(&cpg, Some("c")).unwrap_err();
+        assert!(conflict.contains("conflicts"), "{conflict}");
         let _ = std::fs::remove_dir_all(&root);
         let _ = std::fs::remove_dir_all(&ws.cache);
     }

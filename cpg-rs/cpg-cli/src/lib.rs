@@ -155,9 +155,21 @@ pub fn build_project_ext(
     excludes: &[&str],
     external_summaries: Option<&str>,
 ) -> Result<Project, String> {
-    let (mut project, exts) = make_project(lang)?;
-    load_externals(&mut project, external_summaries)?;
+    let (_, exts) = make_project(lang)?;
     let sources = collect_sources_filtered(Path::new(dir), exts, excludes)?;
+    build_project_from_sources(lang, &sources, external_summaries)
+}
+
+/// Build from an already-collected source snapshot. Workspace caching uses
+/// this path so the exact strings hashed into its manifest are the strings the
+/// frontend parses, with no second filesystem read between identity and build.
+pub fn build_project_from_sources(
+    lang: &str,
+    sources: &[(String, String)],
+    external_summaries: Option<&str>,
+) -> Result<Project, String> {
+    let (mut project, _) = make_project(lang)?;
+    load_externals(&mut project, external_summaries)?;
     let refs: Vec<(&str, &str)> = sources
         .iter()
         .map(|(p, s)| (p.as_str(), s.as_str()))
@@ -191,9 +203,10 @@ fn load_externals(project: &mut Project, json: Option<&str>) -> Result<(), Strin
 /// Open a project the way `serve` and `scan` both do: `--load <graph.cpg>`
 /// reopens a persisted CPG (skipping parsing), otherwise the positional
 /// directory at `args[2]` is built from source. `--summaries <file>` loads
-/// external function summaries (Fraunhofer-style JSON) either way.
+/// external function summaries (Fraunhofer-style JSON) either way. Reopened
+/// graphs require validated adjacent language metadata or an explicit
+/// `--lang`; filenames are never interpreted as frontend identity.
 pub fn open_project(args: &[String]) -> Result<Project, String> {
-    let lang = flag(args, "--lang").unwrap_or("c");
     let ext_json: Option<String> = match flag(args, "--summaries") {
         Some(path) => {
             Some(std::fs::read_to_string(path).map_err(|e| format!("--summaries {path}: {e}"))?)
@@ -201,16 +214,21 @@ pub fn open_project(args: &[String]) -> Result<Project, String> {
         None => None,
     };
     if let Some(load) = flag(args, "--load") {
-        let (mut p, _) = make_project(lang)?;
-        load_externals(&mut p, ext_json.as_deref())?;
+        let lang = workspace::language_for_cpg(Path::new(load), flag(args, "--lang"))?;
+        let (mut p, _) = make_project(&lang)?;
         let cpg = Cpg::load(load).map_err(|e| format!("load failed: {e}"))?;
         p.reopen(cpg);
+        if ext_json.is_some() {
+            load_externals(&mut p, ext_json.as_deref())?;
+            p.recompute_summaries();
+        }
         eprintln!("loaded {} nodes from {load}", p.cpg.live_count());
         Ok(p)
     } else {
         let Some(dir) = args.get(2).filter(|d| !d.starts_with("--")) else {
             return Err("missing <dir> (or --load <graph.cpg>)".to_string());
         };
+        let lang = flag(args, "--lang").unwrap_or("c");
         build_project_ext(dir, lang, &flags(args, "--exclude"), ext_json.as_deref())
     }
 }
@@ -933,5 +951,84 @@ mod glob_tests {
         let response = handle(&mut project, &json!({"cmd":"summary", "fqn":"escape"}));
         assert_eq!(response["flows"][0]["labels"][0], "sanitized:escape");
         assert_eq!(response["provenance"][0], "External");
+    }
+
+    #[test]
+    fn external_summaries_are_equivalent_after_save_and_load() {
+        let root = source_tmpdir("external-summaries");
+        let source = root.join("flow.c");
+        let summaries = root.join("summaries.json");
+        let graph = root.join("flow.cpg");
+        std::fs::write(&source, "char* wrap(char* s) { return vendor_copy(s); }\n").unwrap();
+        std::fs::write(
+            &summaries,
+            r#"[{"functionDeclaration":{"language":"C","methodName":"vendor_copy"},
+                  "dataFlows":[{"from":"param0","to":"return"}]}]"#,
+        )
+        .unwrap();
+
+        let direct_args = vec![
+            "cpg".into(),
+            "serve".into(),
+            root.to_string_lossy().into_owned(),
+            "--lang".into(),
+            "c".into(),
+            "--summaries".into(),
+            summaries.to_string_lossy().into_owned(),
+        ];
+        let direct = open_project(&direct_args).unwrap();
+        let direct_flow: Vec<usize> = direct
+            .summaries
+            .get("wrap")
+            .expect("wrap summary")
+            .flows_to_return()
+            .collect();
+        assert_eq!(direct_flow, vec![0]);
+        direct.cpg.save(&graph.to_string_lossy()).unwrap();
+
+        let loaded_args = vec![
+            "cpg".into(),
+            "serve".into(),
+            "--load".into(),
+            graph.to_string_lossy().into_owned(),
+            "--lang".into(),
+            "c".into(),
+            "--summaries".into(),
+            summaries.to_string_lossy().into_owned(),
+        ];
+        let loaded = open_project(&loaded_args).unwrap();
+        let loaded_flow: Vec<usize> = loaded
+            .summaries
+            .get("wrap")
+            .expect("wrap summary after reopen")
+            .flows_to_return()
+            .collect();
+        assert_eq!(loaded_flow, direct_flow);
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn generic_graph_load_requires_explicit_language() {
+        let root = source_tmpdir("generic-load-language");
+        let graph = root.join("generic.cpg");
+        let (mut project, _) = make_project("c").unwrap();
+        project.build(&[("a.c", "int main(void) { return 0; }")]);
+        project.cpg.save(&graph.to_string_lossy()).unwrap();
+
+        let implicit = vec![
+            "cpg".into(),
+            "serve".into(),
+            "--load".into(),
+            graph.to_string_lossy().into_owned(),
+        ];
+        let error = open_project(&implicit)
+            .err()
+            .expect("implicit load rejected");
+        assert!(error.contains("pass --lang"), "{error}");
+
+        let mut explicit = implicit;
+        explicit.extend(["--lang".into(), "c".into()]);
+        assert!(open_project(&explicit).is_ok());
+        let _ = std::fs::remove_dir_all(root);
     }
 }
