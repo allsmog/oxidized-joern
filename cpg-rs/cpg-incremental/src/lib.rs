@@ -489,6 +489,7 @@ fn hash(s: &str) -> u64 {
 mod tests {
     use super::*;
     use cpg_analysis::{standard_pipeline, Point};
+    use cpg_core::Query;
     use cpg_lang_c::CFrontend;
 
     fn project() -> Project {
@@ -635,16 +636,27 @@ mod tests {
 
     /// The shared summaries-first dataflow + taint engine, driven by the
     /// generic tree-sitter frontend, must find a source→sink flow that passes
-    /// through an interprocedural passthrough — in every language. This stresses
-    /// the contract at its deepest: not just graph shape, but that summaries and
-    /// taint compute identically across six grammars (including Rust/Ruby
-    /// implicit returns).
+    /// through an interprocedural passthrough — in every accepted CLI language.
+    /// This stresses the contract at its deepest: not just graph shape, but
+    /// that summaries, persistence, and taint compose across all ten parsers.
     #[test]
     fn taint_through_summary_in_every_language() {
         use cpg_lang_ts::TsFrontend;
         type FeFactory = fn() -> Box<dyn cpg_frontend::Frontend>;
         // (language label, builder, file path, source code with wrap()=passthrough)
         let cases: Vec<(&str, FeFactory, &str, &str)> = vec![
+            (
+                "C",
+                || Box::new(cpg_lang_c::CFrontend::new()),
+                "m.c",
+                "int source(void); void sink(int); int wrap(int s){ return s; } void run(void){ int t = source(); sink(wrap(t)); }",
+            ),
+            (
+                "C++",
+                || Box::new(TsFrontend::cpp()),
+                "m.cpp",
+                "int wrap(int s){ return s; } void run(){ int t = source(); sink(wrap(t)); }",
+            ),
             (
                 "Java",
                 || Box::new(TsFrontend::java()),
@@ -664,6 +676,12 @@ mod tests {
                 "function wrap(s){ return s; } function run(){ let t = source(); sink(wrap(t)); }",
             ),
             (
+                "TypeScript",
+                || Box::new(TsFrontend::typescript()),
+                "m.ts",
+                "function wrap(s: number): number { return s; } function run(): void { const t = source(); sink(wrap(t)); }",
+            ),
+            (
                 "Ruby",
                 || Box::new(TsFrontend::ruby()),
                 "m.rb",
@@ -681,15 +699,28 @@ mod tests {
                 "m.py",
                 "def wrap(s):\n    return s\n\ndef run():\n    t = source()\n    sink(wrap(t))\n",
             ),
+            (
+                "Scala",
+                || Box::new(TsFrontend::scala()),
+                "m.scala",
+                "object C { def wrap(s: Int): Int = s; def run(): Unit = { val t = source(); sink(wrap(t)) } }",
+            ),
         ];
 
         for (lang, factory, path, code) in cases {
             let mut p = Project::new(factory, standard_pipeline());
             p.build(&[(path, code)]);
             // wrap must summarise as Param(0) -> Return.
+            let wrap_method = p
+                .cpg
+                .method_named("wrap")
+                .into_iter()
+                .next()
+                .unwrap_or_else(|| panic!("{lang}: wrap method missing"));
+            let wrap_fqn = p.cpg.full_name_of(wrap_method).unwrap_or("wrap");
             let wrap = p
-                .summary_of("wrap")
-                .unwrap_or_else(|| panic!("{lang}: wrap not summarised"));
+                .summary_of(wrap_fqn)
+                .unwrap_or_else(|| panic!("{lang}: {wrap_fqn} not summarised"));
             assert!(
                 wrap.flows
                     .iter()
@@ -705,6 +736,22 @@ mod tests {
                 "{lang}: expected one flow, got {findings:?}"
             );
             assert_eq!(findings[0].origin, "source", "{lang}: wrong origin");
+
+            let reopened = Cpg::from_bytes(&p.cpg.to_bytes()).unwrap_or_else(|error| {
+                panic!("{lang}: persisted graph did not reopen: {error:?}")
+            });
+            let mut reopened_summaries = SummaryStore::new();
+            reopened_summaries.compute_all(&reopened);
+            let reopened_findings = cpg_analysis::find_flows(
+                &reopened,
+                &reopened_summaries,
+                &cpg_analysis::TaintSpec::new(&["source"], &["sink"]),
+            );
+            assert_eq!(
+                reopened_findings.len(),
+                1,
+                "{lang}: source-to-sink flow changed after save/load"
+            );
         }
     }
 

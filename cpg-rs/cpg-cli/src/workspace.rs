@@ -283,12 +283,30 @@ impl Workspace {
             .map_err(|e| format!("bad module {}: {e}", dir.display()))?;
         let mut entries = Vec::with_capacity(sources.len());
         for (path, source) in sources {
-            let relative = Path::new(path).strip_prefix(&dir).map_err(|_| {
-                format!(
-                    "collected source is outside module {}: {path}",
+            let collected = Path::new(path);
+            let relative = if collected.is_absolute() {
+                collected
+                    .strip_prefix(&dir)
+                    .map(Path::to_path_buf)
+                    .map_err(|_| {
+                        format!(
+                            "collected source is outside module {}: {path}",
+                            dir.display()
+                        )
+                    })?
+            } else {
+                collected.to_path_buf()
+            };
+            if relative.as_os_str().is_empty()
+                || !relative
+                    .components()
+                    .all(|component| matches!(component, Component::Normal(_)))
+            {
+                return Err(format!(
+                    "collected source is not a normal module-relative path for {}: {path}",
                     dir.display()
-                )
-            })?;
+                ));
+            }
             entries.push(SourceManifestEntry {
                 path: relative.to_string_lossy().replace('\\', "/"),
                 digest: blake3::hash(source.as_bytes()).to_hex().to_string(),

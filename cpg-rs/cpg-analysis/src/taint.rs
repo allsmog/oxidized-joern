@@ -397,6 +397,8 @@ pub enum Provenance {
     /// Taint lifted through an external (JSON) summary — no body exists, so
     /// the hop is summary-only and cannot be expanded.
     ExternalSummary { callee_fqn: String },
+    /// Taint crossed a canonical C global write/read boundary.
+    GlobalFlow { name: String },
 }
 
 /// One step along a taint witness (a tainted expression and where it occurs).
@@ -622,6 +624,22 @@ fn member_read_path(cpg: &Cpg, node: NodeId) -> Option<(String, Vec<String>)> {
                     return None;
                 }
                 let name = cpg.name_of(cur)?;
+                if matches!(
+                    name,
+                    "<operator>.fieldAccess" | "<operator>.indirectFieldAccess"
+                ) {
+                    let args = cpg.arguments_of(cur);
+                    if args.len() != 2 {
+                        return None;
+                    }
+                    let field = cpg
+                        .name_of(args[1])
+                        .or_else(|| cpg.code_of(args[1]))?
+                        .to_string();
+                    fields.push(field);
+                    cur = args[0];
+                    continue;
+                }
                 if is_plain_assignment(name) || is_operator(name) {
                     return None;
                 }
@@ -808,6 +826,11 @@ struct Ctx<'a> {
     /// (jobInstance, requestContext) would taint every same-named read
     /// program-wide and drowns the report.
     stored: std::cell::RefCell<HashMap<String, HashSet<NodeId>>>,
+    /// Canonical C globals whose writes derive from a configured source.
+    /// Exact C marks global proxy identifiers with `<global> ` in CODE;
+    /// these seeds make the query walk agree with the global bridges in the
+    /// authoritative sparse value-flow graph.
+    global_taint: std::cell::RefCell<HashMap<String, Trace>>,
 }
 
 impl Ctx<'_> {
@@ -886,7 +909,9 @@ pub fn find_flows(cpg: &Cpg, summaries: &SummaryStore, spec: &TaintSpec) -> Vec<
         spec,
         methods_by_name: method_name_index(cpg),
         stored: Default::default(),
+        global_taint: Default::default(),
     };
+    harvest_global_taint(&ctx);
     let mut findings = run_analysis(&ctx);
     // Persistence stitching (opt-in: CPG_PERSIST=1): treat getters of every
     // key that was STORED with tainted data as sources and re-run. Findings
@@ -1056,7 +1081,9 @@ pub fn find_flows(cpg: &Cpg, summaries: &SummaryStore, spec: &TaintSpec) -> Vec<
                 spec: &spec2,
                 methods_by_name: method_name_index(cpg),
                 stored: Default::default(),
+                global_taint: Default::default(),
             };
+            harvest_global_taint(&ctx2);
             for mut f in run_analysis(&ctx2) {
                 if added.contains(&f.origin) {
                     f.origin = format!("persisted:{}", f.origin);
@@ -1302,6 +1329,93 @@ fn run_analysis(ctx: &Ctx) -> Vec<Finding> {
         }
     }
     findings
+}
+
+/// Harvest source-derived writes to exact C global proxies before analysing
+/// individual methods. This is deliberately restricted to the canonical
+/// `<global> name` marker, so locals with the same spelling are never seeded.
+fn harvest_global_taint(ctx: &Ctx) {
+    let cpg = ctx.cpg;
+    let mut globals: HashMap<String, Trace> = HashMap::new();
+    for method in cpg
+        .methods()
+        .into_iter()
+        .filter(|&m| is_analysis_method(cpg, m))
+    {
+        let visible: HashSet<String> = method_global_names(cpg, method).collect();
+        let mut local: HashMap<String, Trace> = globals
+            .iter()
+            .filter(|(name, _)| visible.contains(*name))
+            .map(|(name, trace)| (name.clone(), trace.clone()))
+            .collect();
+        let mut assignments: Vec<NodeId> = crate::pass::ast_descendants(cpg, method)
+            .into_iter()
+            .filter(|&node| {
+                cpg.kind_of(node) == NodeKind::Call
+                    && cpg.name_of(node).is_some_and(is_plain_assignment)
+            })
+            .collect();
+        assignments.sort_by_key(|&node| (cpg.line_of(node).unwrap_or(0), node.0));
+        for assignment in assignments {
+            let args = cpg.arguments_of(assignment);
+            let [lhs, rhs] = args.as_slice() else {
+                continue;
+            };
+            let rhs_trace = expr_taint(ctx, *rhs, &local);
+            if let Some(name) = global_lvalue_name(cpg, *lhs) {
+                if let Some(trace) = rhs_trace {
+                    globals.insert(
+                        name.clone(),
+                        trace.extend(
+                            cpg.code_of(assignment).unwrap_or(name.as_str()),
+                            cpg.line_of(assignment),
+                            Provenance::GlobalFlow { name: name.clone() },
+                            0,
+                        ),
+                    );
+                }
+            } else if let Some(name) = lhs_name(cpg, *lhs) {
+                match rhs_trace {
+                    Some(trace) => {
+                        local.insert(name, trace);
+                    }
+                    None => {
+                        local.remove(&name);
+                    }
+                }
+            }
+        }
+    }
+    *ctx.global_taint.borrow_mut() = globals;
+}
+
+fn global_lvalue_name(cpg: &Cpg, node: NodeId) -> Option<String> {
+    if cpg.kind_of(node) == NodeKind::Identifier
+        && cpg
+            .code_of(node)
+            .is_some_and(|code| code.starts_with("<global> "))
+    {
+        return cpg.name_of(node).map(str::to_string);
+    }
+    if cpg.kind_of(node) == NodeKind::Call {
+        return cpg
+            .arguments_of(node)
+            .first()
+            .and_then(|&base| global_lvalue_name(cpg, base));
+    }
+    None
+}
+
+fn method_global_names(cpg: &Cpg, method: NodeId) -> impl Iterator<Item = String> + '_ {
+    crate::pass::ast_descendants(cpg, method)
+        .into_iter()
+        .filter(|&node| {
+            cpg.kind_of(node) == NodeKind::Local
+                && cpg
+                    .code_of(node)
+                    .is_some_and(|code| code.starts_with("<global> "))
+        })
+        .filter_map(|node| cpg.name_of(node).map(str::to_string))
 }
 
 /// Post-pass: attach guard evidence to each finding. A "guard" is a
@@ -1551,7 +1665,14 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
     let method_name = cpg.full_name_of(method).unwrap_or("<anon>").to_string();
 
     // Tainted variable names, each carrying the provenance that tainted it.
-    let mut taint: HashMap<String, Trace> = HashMap::new();
+    let visible_globals: HashSet<String> = method_global_names(cpg, method).collect();
+    let mut taint: HashMap<String, Trace> = ctx
+        .global_taint
+        .borrow()
+        .iter()
+        .filter(|(name, _)| visible_globals.contains(*name))
+        .map(|(name, trace)| (name.clone(), trace.clone()))
+        .collect();
     // Intra-method alias pairs (`p := &cfg`) — object-state taint events on
     // one side spread to the other.
     let mut alias: HashMap<String, HashSet<String>> = HashMap::new();

@@ -636,6 +636,23 @@ pub(crate) fn lhs_name(cpg: &Cpg, node: NodeId) -> Option<String> {
     if cpg.kind_of(node) == NodeKind::Identifier {
         return cpg.name_of(node).map(|s| s.to_string());
     }
+    if cpg.kind_of(node) == NodeKind::Call
+        && cpg.name_of(node).is_some_and(|name| {
+            matches!(
+                name,
+                "<operator>.fieldAccess"
+                    | "<operator>.indirectFieldAccess"
+                    | "<operator>.indexAccess"
+                    | "<operator>.indirectIndexAccess"
+                    | "<operator>.indirection"
+            )
+        })
+    {
+        return cpg
+            .arguments_of(node)
+            .first()
+            .and_then(|&base| lhs_name(cpg, base));
+    }
     None
 }
 

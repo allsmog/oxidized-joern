@@ -54,7 +54,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     // Project-wide registries: defined functions (calls to these never become
     // stubs; each also gets a method TYPE_DECL) and struct definitions.
     let mut defined: Vec<String> = Vec::new();
-    let mut fn_decls: Vec<(String, String)> = Vec::new(); // (name, file)
+    let mut raw_fn_decls: Vec<(String, String)> = Vec::new(); // (name, file)
     let mut struct_decls: Vec<(String, String, String)> = Vec::new(); // (tag, code, file)
     let mut used_types: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     for u in &units {
@@ -64,7 +64,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(f, b) {
                         defined.push(name.clone());
-                        fn_decls.push((name, u.file.clone()));
+                        raw_fn_decls.push((name, u.file.clone()));
                     }
                 }
                 "struct_specifier" | "union_specifier" | "enum_specifier"
@@ -86,13 +86,32 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                     // with its RAW source spelling (`unsigned int` is not
                     // normalised here, unlike variable types).
                     if let Some(t) = f.child_by_field_name("type") {
-                        used_types.insert(text(t, b).to_string());
+                        used_types.insert(normalize_type(text(t, b)));
                     }
                 }
                 _ => {}
             }
         }
     }
+    let mut definition_counts: HashMap<String, usize> = HashMap::new();
+    for (name, _) in &raw_fn_decls {
+        *definition_counts.entry(name.clone()).or_default() += 1;
+    }
+    let ambiguous_functions: HashSet<String> = definition_counts
+        .iter()
+        .filter_map(|(name, &count)| (count > 1).then_some(name.clone()))
+        .collect();
+    let method_full = |name: &str, file: &str| {
+        if ambiguous_functions.contains(name) {
+            format!("{file}:{name}")
+        } else {
+            name.to_string()
+        }
+    };
+    let fn_decls: Vec<(String, String)> = raw_fn_decls
+        .iter()
+        .map(|(name, file)| (method_full(name, file), file.clone()))
+        .collect();
 
     // Each dump is one method subtree keyed by FULL_NAME; Joern's oracle sorts
     // all methods (user, <global> wrappers, <operator> stubs) by fullName.
@@ -121,6 +140,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
 
         // Per-file tables (c2cpg resolves within the translation unit).
         let mut functions: HashMap<String, String> = HashMap::new();
+        let mut function_full_names: HashMap<String, String> = HashMap::new();
         let mut globals: HashMap<String, String> = HashMap::new();
         let mut macros: HashMap<String, MacroDef> = HashMap::new();
         for f in named_children(root) {
@@ -191,6 +211,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, ret, _)) = fn_header(f, b) {
+                        function_full_names.insert(name.clone(), method_full(&name, &u.file));
                         functions.insert(name, ret);
                     }
                 }
@@ -227,6 +248,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
 
         let mut ctx = Ctx {
             functions: &functions,
+            function_full_names: &function_full_names,
+            ambiguous_functions: &ambiguous_functions,
             globals: &globals,
             enumerators: &enumerators,
             macros: &macros,
@@ -253,10 +276,15 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(f, b) {
-                        ctx.begin_block(&name);
+                        let full = ctx
+                            .function_full_names
+                            .get(&name)
+                            .cloned()
+                            .unwrap_or_else(|| name.clone());
+                        ctx.begin_block(&full);
                         ctx.emit_method(f, b, 0);
-                        ctx.edge("SOURCE_FILE", format!("M:{name}"), format!("F:{}", u.file));
-                        dumps.push((name, std::mem::take(&mut ctx.out)));
+                        ctx.edge("SOURCE_FILE", format!("M:{full}"), format!("F:{}", u.file));
+                        dumps.push((full, std::mem::take(&mut ctx.out)));
                     }
                 }
                 "struct_specifier" | "union_specifier" | "enum_specifier" if needs_clinit(f, b) => {
@@ -286,12 +314,16 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     // Operator stubs and the synthetic <includes>:<global>, emitted through
     // an instrumented Ctx so they too produce addresses and edges.
     let empty_fns: HashMap<String, String> = HashMap::new();
+    let empty_full_names: HashMap<String, String> = HashMap::new();
+    let empty_ambiguous: HashSet<String> = HashSet::new();
     let empty_globals: HashMap<String, String> = HashMap::new();
     let mut stub_uses2: HashMap<String, usize> = HashMap::new();
     let empty_enums: Vec<String> = Vec::new();
     let empty_macros: HashMap<String, MacroDef> = HashMap::new();
     let mut sctx = Ctx {
         functions: &empty_fns,
+        function_full_names: &empty_full_names,
+        ambiguous_functions: &empty_ambiguous,
         globals: &empty_globals,
         enumerators: &empty_enums,
         macros: &empty_macros,
@@ -617,6 +649,13 @@ struct MacroDef {
 /// Per-function emission context.
 struct Ctx<'a> {
     functions: &'a HashMap<String, String>,
+    /// Translation-unit-local method identities. Duplicate C names are valid
+    /// for `static` helpers across files; qualify those identities by file so
+    /// they remain distinct and local calls resolve deterministically.
+    function_full_names: &'a HashMap<String, String>,
+    /// Project-wide duplicate definition names. A call without a local target
+    /// stays unresolved instead of acquiring an arbitrary first candidate.
+    ambiguous_functions: &'a HashSet<String>,
     globals: &'a HashMap<String, String>,
     enumerators: &'a Vec<String>,
     macros: &'a HashMap<String, MacroDef>,
@@ -762,8 +801,10 @@ impl Ctx<'_> {
             }
             if label == "CALL" && p.dispatch.as_deref() != Some("DYNAMIC_DISPATCH") {
                 if let Some(mfn) = &p.mfn {
-                    self.edges
-                        .push(("CALL".into(), my_addr.clone(), format!("M:{mfn}")));
+                    if !self.ambiguous_functions.contains(mfn) || mfn.contains(':') {
+                        self.edges
+                            .push(("CALL".into(), my_addr.clone(), format!("M:{mfn}")));
+                    }
                 }
             }
             if label == "METHOD_REF" {
@@ -813,7 +854,13 @@ impl Ctx<'_> {
             kv("NAME", v);
         }
         if let Some(v) = &p.code {
-            kv("CODE", v);
+            // Keep the neutral transport one-node-per-line even for real
+            // project constructs whose tree-sitter span crosses physical
+            // lines (multiline declarations and macro arguments). Most
+            // emitters already escape eagerly for Joern formatting; doing it
+            // at the single output boundary closes every remaining path and
+            // is idempotent for the existing corpus.
+            kv("CODE", &esc(v));
         }
         if let Some(v) = &p.tfn {
             kv("TYPE_FULL_NAME", v);
@@ -850,6 +897,11 @@ impl Ctx<'_> {
     fn emit_method(&mut self, f: Node, b: &[u8], d: usize) {
         self.symbols.clear();
         let (name, ret, params) = fn_header(f, b).expect("function header");
+        let full = self
+            .function_full_names
+            .get(&name)
+            .cloned()
+            .unwrap_or_else(|| name.clone());
         let nested = d > 0;
         let sig = format!(
             "{ret}({})",
@@ -865,7 +917,7 @@ impl Ctx<'_> {
             P {
                 name: Some(name.clone()),
                 code: Some(esc(text(f, b))),
-                full: Some(name.clone()),
+                full: Some(full),
                 sig: Some(sig),
                 order: Some(1),
                 ..Default::default()
@@ -1091,13 +1143,18 @@ impl Ctx<'_> {
                 }
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(n, b) {
+                        let full = self
+                            .function_full_names
+                            .get(&name)
+                            .cloned()
+                            .unwrap_or_else(|| name.clone());
                         self.line(
                             2,
                             "METHOD_REF",
                             P {
                                 code: Some(name.clone()),
-                                tfn: Some(name.clone()),
-                                mfn: Some(name),
+                                tfn: Some(full.clone()),
+                                mfn: Some(full),
                                 order: Some(slot),
                                 ..Default::default()
                             },
@@ -2455,6 +2512,11 @@ impl Ctx<'_> {
                     }
                 } else {
                     let ty = self.functions.get(&name).cloned().unwrap_or("ANY".into());
+                    let method_full_name = self
+                        .function_full_names
+                        .get(&name)
+                        .cloned()
+                        .unwrap_or_else(|| name.clone());
                     self.note_call(&name, argc);
                     self.line(
                         depth,
@@ -2463,7 +2525,7 @@ impl Ctx<'_> {
                             name: Some(name.clone()),
                             code: Some(esc(text(n, b))),
                             tfn: Some(ty),
-                            mfn: Some(name),
+                            mfn: Some(method_full_name),
                             order: Some(order),
                             arg,
                             dispatch: Some("STATIC_DISPATCH".into()),
@@ -2885,11 +2947,19 @@ fn normalize_type(base: &str) -> String {
     // CDT inconsistency: `struct X`/`enum X` strip the keyword but `union X`
     // concatenates to `unionX` (pinned by corpus/types2.c).
     if let Some(rest) = t.strip_prefix("union ") {
-        return format!("union{}", rest.trim());
+        let name = rest.split_whitespace().next().unwrap_or(rest);
+        return format!("union{name}");
     }
     for tag in ["struct ", "enum "] {
         if let Some(rest) = t.strip_prefix(tag) {
-            return rest.trim().into();
+            if rest.trim_start().starts_with('{') {
+                // Anonymous aggregate specifiers have no stable declaration
+                // name. Carrying their whole multiline body as a type name
+                // corrupts the one-record-per-line transport and is not a
+                // usable type identity; keep the uncertainty explicit.
+                return "ANY".into();
+            }
+            return rest.split_whitespace().next().unwrap_or(rest).into();
         }
     }
     match t {
