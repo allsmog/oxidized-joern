@@ -125,7 +125,7 @@ def assert_saved_graph(target: ReleaseTarget, graph: Path) -> None:
         raise SystemExit("cpg build did not create a non-empty saved graph")
 
     result = target.run(
-        ["serve", "--load", graph.name],
+        ["serve", "--load", graph.name, "--lang", "c"],
         input_text='{"cmd":"stats"}\n{"cmd":"quit"}\n',
     )
     responses = [json.loads(line) for line in result.stdout.splitlines() if line]
@@ -175,7 +175,9 @@ def assert_scan(target: ReleaseTarget, graph: Path, rules: Path, sarif: Path) ->
 
 def assert_malformed_graph_rejected(target: ReleaseTarget, malformed: Path) -> None:
     malformed.write_bytes(b"not-a-cpg")
-    result = target.run(["serve", "--load", malformed.name], check=False)
+    result = target.run(
+        ["serve", "--load", malformed.name, "--lang", "c"], check=False
+    )
     if result.returncode == 0:
         raise SystemExit("malformed saved graph was accepted")
     if result.returncode < 0:
