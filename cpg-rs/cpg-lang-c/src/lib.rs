@@ -10,6 +10,8 @@ use cpg_core::{Cpg, NodeId};
 use cpg_frontend::{BuildResult, Frontend, Language, LanguageTraits};
 use tree_sitter::{Node, Parser};
 
+pub mod exact;
+
 pub struct C;
 
 impl Language for C {
