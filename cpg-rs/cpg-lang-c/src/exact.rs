@@ -242,6 +242,7 @@ pub fn canonical_dump_sources_with_config(
             preprocessor: &preprocessor,
             used_macros: &mut used_macros,
             symbols: HashMap::new(),
+            expanding_macros: HashSet::new(),
             phantoms: Vec::new(),
             stubs: &mut stub_uses,
             types: &mut used_types,
@@ -316,6 +317,7 @@ pub fn canonical_dump_sources_with_config(
         preprocessor: &preprocessor,
         used_macros: &mut used_macros,
         symbols: HashMap::new(),
+        expanding_macros: HashSet::new(),
         phantoms: Vec::new(),
         stubs: &mut stub_uses2,
         types: &mut used_types,
@@ -1145,6 +1147,11 @@ struct Ctx<'a> {
     // used macros: full_name -> (name, directive, nparams, ret type)
     used_macros: &'a mut std::collections::BTreeMap<String, (String, String, usize, String)>,
     symbols: HashMap<String, String>, // local/param name -> type
+    /// Macro names disabled while their replacement list is being lowered.
+    /// The C preprocessor leaves a recursively encountered name unexpanded;
+    /// carrying that state into AST emission prevents recursive macro pairs
+    /// from re-entering `emit_macro_call` until the process stack overflows.
+    expanding_macros: HashSet<String>,
     // Joern's local-creation pass materialises a LOCAL at ORDER=0 atop the
     // method body BLOCK for each referenced global (CODE `<global> name`)
     // and each type name used as a sizeof(T) argument.
@@ -1436,13 +1443,26 @@ impl Ctx<'_> {
             self.collect_phantoms(body, b);
             self.emit_block(body, b, block_order, d + 1);
         }
+        let static_modifier = named_children(f).iter().any(|child| {
+            child.kind() == "storage_class_specifier" && text(*child, b).trim() == "static"
+        });
+        if static_modifier {
+            self.line(
+                d + 1,
+                "MODIFIER",
+                P {
+                    order: Some((params.len() + 2) as i64),
+                    ..Default::default()
+                },
+            );
+        }
         self.line(
             d + 1,
             "METHOD_RETURN",
             P {
                 code: Some("RET".into()),
                 tfn: Some(ret),
-                order: Some((params.len() + 2) as i64),
+                order: Some((params.len() + 2 + usize::from(static_modifier)) as i64),
                 ..Default::default()
             },
         );
@@ -1985,7 +2005,9 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
+        self.expanding_macros.insert(name.to_string());
         self.emit_expansion(&expansion, depth + 2);
+        self.expanding_macros.remove(name);
     }
 
     /// Parse a macro expansion as an expression and emit it (ORDER=1, no
@@ -2126,13 +2148,14 @@ impl Ctx<'_> {
                 }
                 "sizeof_expression" => {
                     if let Some(t) = n.child_by_field_name("type") {
-                        let ts = text(t, b).to_string();
-                        if !seen.contains(&ts) {
-                            seen.push(ts.clone());
+                        let code = text(t, b).to_string();
+                        let name = normalize_type(&code);
+                        if !seen.contains(&name) {
+                            seen.push(name.clone());
                             self.phantoms.push(Phantom {
-                                name: ts.clone(),
-                                code: ts.clone(),
-                                ty: ts,
+                                name: name.clone(),
+                                code,
+                                ty: name,
                             });
                         }
                     }
@@ -2630,6 +2653,7 @@ impl Ctx<'_> {
             init: Option<Node<'t>>,
             name: String,
             full_ty: String,
+            function_pointer: bool,
         }
         let mut items: Vec<DeclItem> = Vec::new();
         for d in named_children(n) {
@@ -2643,7 +2667,10 @@ impl Ctx<'_> {
             };
             let Some(decl) = decl else { continue };
             let name = innermost_id(decl, b);
-            let full_ty = format!("{ty}{}", decl_suffix(decl, b));
+            let pointer_type = function_pointer_type(&ty, decl, b);
+            let full_ty = pointer_type
+                .clone()
+                .unwrap_or_else(|| format!("{ty}{}", decl_suffix(decl, b)));
             self.symbols.insert(name.clone(), full_ty.clone());
             let lo = *order;
             *order += 1;
@@ -2652,7 +2679,11 @@ impl Ctx<'_> {
                 "LOCAL",
                 P {
                     name: Some(name.clone()),
-                    code: Some(decl_code(decl)),
+                    code: Some(if pointer_type.is_some() {
+                        esc(text(n, b))
+                    } else {
+                        decl_code(decl)
+                    }),
                     tfn: Some(full_ty.clone()),
                     order: Some(lo),
                     ..Default::default()
@@ -2664,6 +2695,7 @@ impl Ctx<'_> {
                 init,
                 name,
                 full_ty,
+                function_pointer: pointer_type.is_some(),
             });
         }
         // Pass 2: initialiser assignments / alloc lowerings, in order.
@@ -2692,7 +2724,11 @@ impl Ctx<'_> {
                     "IDENTIFIER",
                     P {
                         name: Some(it.name.clone()),
-                        code: Some(it.name.clone()),
+                        code: Some(if it.function_pointer {
+                            String::new()
+                        } else {
+                            it.name.clone()
+                        }),
                         tfn: Some(it.full_ty.clone()),
                         order: Some(1),
                         arg: Some(1),
@@ -2991,7 +3027,9 @@ impl Ctx<'_> {
                     .unwrap_or("<anon>".into());
                 let args = n.child_by_field_name("arguments");
                 let argc = args.map(|a| named_children(a).len()).unwrap_or(0);
-                if self.macros.get(&name).is_some_and(|m| m.params.is_some()) {
+                if self.macros.get(&name).is_some_and(|m| m.params.is_some())
+                    && !self.expanding_macros.contains(&name)
+                {
                     let arg_nodes: Vec<Node> = args.map(|a| named_children(a)).unwrap_or_default();
                     let code = esc(text(n, b));
                     self.emit_macro_call(&name, &code, &arg_nodes, n, b, depth, order, arg);
@@ -3008,7 +3046,7 @@ impl Ctx<'_> {
                         .symbols
                         .get(&name)
                         .or_else(|| self.globals.get(&name))
-                        .cloned();
+                        .map(|value| function_pointer_return_type(value).to_string());
                     self.line(
                         depth,
                         "CALL",
@@ -3063,8 +3101,30 @@ impl Ctx<'_> {
             }
             "identifier" => {
                 let name = text(n, b).to_string();
-                if self.macros.get(&name).is_some_and(|m| m.params.is_none()) {
+                if self.macros.get(&name).is_some_and(|m| m.params.is_none())
+                    && !self.expanding_macros.contains(&name)
+                {
                     self.emit_macro_call(&name, &name, &[], n, b, depth, order, arg);
+                    return;
+                }
+                if let Some(return_type) = self.functions.get(&name) {
+                    let method_full_name = self
+                        .function_full_names
+                        .get(&name)
+                        .cloned()
+                        .unwrap_or_else(|| name.clone());
+                    self.line(
+                        depth,
+                        "METHOD_REF",
+                        P {
+                            code: Some(name),
+                            tfn: Some(return_type.clone()),
+                            mfn: Some(method_full_name),
+                            order: Some(order),
+                            arg,
+                            ..Default::default()
+                        },
+                    );
                     return;
                 }
                 let (code, ty) = if let Some(t) = self.symbols.get(&name) {
@@ -3230,14 +3290,15 @@ impl Ctx<'_> {
                 if let Some(t) = n.child_by_field_name("type") {
                     // sizeof(T): the type name appears as an IDENTIFIER typed
                     // as itself (and spawns the ORDER=0 phantom LOCAL).
-                    let ts = text(t, b).to_string();
+                    let code = text(t, b).to_string();
+                    let name = normalize_type(&code);
                     self.line(
                         depth + 1,
                         "IDENTIFIER",
                         P {
-                            name: Some(ts.clone()),
-                            code: Some(ts.clone()),
-                            tfn: Some(ts),
+                            name: Some(name.clone()),
+                            code: Some(code),
+                            tfn: Some(name),
                             order: Some(1),
                             arg: Some(1),
                             ..Default::default()
@@ -3406,6 +3467,49 @@ fn decl_suffix(n: Node, b: &[u8]) -> String {
     }
     parts.reverse();
     parts.concat()
+}
+
+/// CDT gives local function-pointer objects a signature-shaped type such as
+/// `int(*)(int,int)`, while function-pointer parameters retain only their base
+/// type. Keep this helper on the declaration path so the established parameter
+/// quirk remains byte-identical to Joern.
+fn function_pointer_type(base: &str, declaration: Node, b: &[u8]) -> Option<String> {
+    let function = find_function_declarator(declaration)?;
+    let target = function.child_by_field_name("declarator")?;
+    if !has_pointer_declarator(target) {
+        return None;
+    }
+    let parameters = function
+        .child_by_field_name("parameters")
+        .map(named_children)
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|parameter| parameter.kind() == "parameter_declaration")
+        .map(|parameter| {
+            let parameter_base = parameter
+                .child_by_field_name("type")
+                .map(|node| normalize_type(text(node, b)))
+                .unwrap_or_else(|| "ANY".to_string());
+            let suffix = parameter
+                .child_by_field_name("declarator")
+                .map(|node| decl_suffix(node, b))
+                .unwrap_or_default();
+            format!("{parameter_base}{suffix}")
+        })
+        .collect::<Vec<_>>()
+        .join(",");
+    Some(format!("{base}(*)({parameters})"))
+}
+
+fn function_pointer_return_type(declared_type: &str) -> &str {
+    declared_type
+        .split_once("(*)")
+        .map_or(declared_type, |(return_type, _)| return_type)
+}
+
+fn has_pointer_declarator(node: Node) -> bool {
+    node.kind() == "pointer_declarator"
+        || named_children(node).into_iter().any(has_pointer_declarator)
 }
 
 /// Size expressions of a (possibly multi-dim) array declarator, source order.
@@ -4097,6 +4201,9 @@ impl CfgBuilder<'_> {
             | "UNKNOWN" | "JUMP_TARGET" => (Some(me.clone()), vec![me]),
             "CALL" => match self.arena[id].name.as_str() {
                 "<operator>.conditional" => {
+                    if kids.len() != 3 {
+                        return self.build_sequential_call(&kids, &me);
+                    }
                     let (e1, o1) = self.build(kids[0]);
                     let (e2, o2) = self.build(kids[1]);
                     let (e3, o3) = self.build(kids[2]);
@@ -4111,6 +4218,9 @@ impl CfgBuilder<'_> {
                     (e1, vec![me])
                 }
                 "<operator>.logicalAnd" | "<operator>.logicalOr" => {
+                    if kids.len() != 2 {
+                        return self.build_sequential_call(&kids, &me);
+                    }
                     // Short-circuit: the lhs root branches to the rhs entry
                     // and directly past it to the call node.
                     let (e1, o1) = self.build(kids[0]);
@@ -4140,11 +4250,7 @@ impl CfgBuilder<'_> {
                     }
                     (ae.or(Some(me)), outs)
                 }
-                _ => {
-                    let (entry, outs) = self.seq(&kids);
-                    self.connect(&outs, &me);
-                    (entry.or(Some(me.clone())), vec![me])
-                }
+                _ => self.build_sequential_call(&kids, &me),
             },
             "BLOCK" => {
                 // An expression block (comma operator) is a child of a CALL;
@@ -4169,6 +4275,19 @@ impl CfgBuilder<'_> {
             "CONTROL_STRUCTURE" => self.build_control(id, me, &kids),
             _ => (None, vec![]), // LOCAL, MODIFIER, METHOD, TYPE_DECL, params, ...
         }
+    }
+
+    fn build_sequential_call(
+        &mut self,
+        children: &[usize],
+        call: &str,
+    ) -> (Option<String>, Vec<String>) {
+        let (entry, outs) = self.seq(children);
+        self.connect(&outs, call);
+        (
+            entry.or_else(|| Some(call.to_string())),
+            vec![call.to_string()],
+        )
     }
 
     fn build_control(
@@ -4535,6 +4654,7 @@ fn operator_semantics(name: &str) -> Option<Vec<(i64, i64)>> {
         | "<operator>.preDecrement"
         | "<operator>.preIncrement" => incdec,
         "<operator>.sizeOf" => vec![],
+        "free" => vec![(1, 1)],
         // modulo, arrayInitializer, the literals: PTF (pass-through) — and any
         // operator not listed (subtraction, multiplication, comparisons,
         // logicalAnd/Or, …) — get no explicit semantics: pass-through.
@@ -5042,6 +5162,9 @@ fn captured_identifier_flows(dumps: &[(String, String)]) -> Vec<(String, String,
     let mut out: Vec<(String, String, String)> = Vec::new();
     for (key, arena) in &parsed {
         if arena.is_empty() || arena[0].label != "METHOD" {
+            continue;
+        }
+        if !key.ends_with(":<global>") {
             continue;
         }
         // own nodes (do not descend into nested METHOD subtrees).
