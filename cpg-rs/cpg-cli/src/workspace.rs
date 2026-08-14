@@ -14,7 +14,7 @@
 use fs2::FileExt;
 use serde::{Deserialize, Serialize};
 use std::fs::{File, OpenOptions};
-use std::io::{Read, Write};
+use std::io::{self, Read, Write};
 use std::path::{Component, Path, PathBuf};
 use std::time::{Duration, Instant};
 
@@ -438,6 +438,14 @@ fn read_manifest(path: &Path) -> Result<CacheManifest, String> {
 }
 
 fn write_manifest_atomically(path: &Path, manifest: &CacheManifest) -> Result<(), String> {
+    write_manifest_atomically_with_limit(path, manifest, MAX_MANIFEST_BYTES)
+}
+
+fn write_manifest_atomically_with_limit(
+    path: &Path,
+    manifest: &CacheManifest,
+    maximum: u64,
+) -> Result<(), String> {
     let parent = path
         .parent()
         .filter(|parent| !parent.as_os_str().is_empty())
@@ -445,6 +453,14 @@ fn write_manifest_atomically(path: &Path, manifest: &CacheManifest) -> Result<()
     let mut bytes = serde_json::to_vec_pretty(manifest)
         .map_err(|e| format!("cannot serialize cache manifest: {e}"))?;
     bytes.push(b'\n');
+    let serialized_len = u64::try_from(bytes.len()).unwrap_or(u64::MAX);
+    if serialized_len > maximum {
+        return Err(format!(
+            "serialized cache manifest for {} is {} bytes; maximum is {maximum}",
+            path.display(),
+            serialized_len
+        ));
+    }
     let mut temporary = tempfile::Builder::new()
         .prefix(".cpg-manifest-tmp-")
         .tempfile_in(parent)
@@ -464,16 +480,35 @@ fn write_manifest_atomically(path: &Path, manifest: &CacheManifest) -> Result<()
                 path.display()
             )
         })?;
-    temporary.persist(path).map_err(|e| {
-        format!(
-            "cannot publish cache manifest {}: {}",
-            path.display(),
-            e.error
-        )
-    })?;
-    File::open(parent)
-        .and_then(|directory| directory.sync_all())
+    if let Err(error) = temporary.persist(path) {
+        let publish_error = error.error;
+        let cleanup_error = error.file.close().err();
+        return Err(match cleanup_error {
+            Some(cleanup_error) => format!(
+                "cannot publish cache manifest {}: {publish_error}; also failed to remove temporary manifest: {cleanup_error}",
+                path.display()
+            ),
+            None => format!(
+                "cannot publish cache manifest {}: {publish_error}",
+                path.display()
+            ),
+        });
+    }
+    sync_parent_directory(parent)
         .map_err(|e| format!("cannot sync cache directory {}: {e}", parent.display()))
+}
+
+// Unix exposes directories as syncable file descriptors. Windows does not
+// support opening directories through std::fs::File, so durability there is
+// limited to the synced temporary file plus atomic rename, matching cpg-core.
+#[cfg(unix)]
+fn sync_parent_directory(parent: &Path) -> io::Result<()> {
+    File::open(parent)?.sync_all()
+}
+
+#[cfg(not(unix))]
+fn sync_parent_directory(_parent: &Path) -> io::Result<()> {
+    Ok(())
 }
 
 fn is_cpg2(path: &Path) -> Result<bool, String> {
@@ -1088,6 +1123,48 @@ mod tests {
         assert!(conflict.contains("conflicts"), "{conflict}");
         let _ = std::fs::remove_dir_all(&root);
         let _ = std::fs::remove_dir_all(&ws.cache);
+    }
+
+    #[test]
+    fn manifest_atomic_writer_enforces_bound_and_cleans_failed_publish() {
+        let root = tmpdir("manifest-write-root");
+        let manifest = CacheManifest {
+            manifest_version: CACHE_MANIFEST_VERSION,
+            graph_format: CACHE_GRAPH_FORMAT.into(),
+            graph_shape_version: GRAPH_SHAPE_VERSION,
+            workspace_root_digest: digest_text("root"),
+            module_path_digest: digest_text("module"),
+            language: "c".into(),
+            excludes: Vec::new(),
+            sources: vec![SourceManifestEntry {
+                path: "a.c".into(),
+                digest: digest_text("source"),
+            }],
+            graph_digest: digest_text("graph"),
+        };
+
+        let oversized = root.join("oversized.json");
+        let error = write_manifest_atomically_with_limit(&oversized, &manifest, 1).unwrap_err();
+        assert!(error.contains("maximum is 1"), "{error}");
+        assert!(!oversized.exists());
+
+        let blocked = root.join("blocked.json");
+        std::fs::create_dir(&blocked).unwrap();
+        let error = write_manifest_atomically(&blocked, &manifest).unwrap_err();
+        assert!(error.contains("cannot publish cache manifest"), "{error}");
+        let leftovers: Vec<PathBuf> = std::fs::read_dir(&root)
+            .unwrap()
+            .map(|entry| entry.unwrap().path())
+            .filter(|path| {
+                path.file_name()
+                    .is_some_and(|name| name.to_string_lossy().starts_with(".cpg-manifest-tmp-"))
+            })
+            .collect();
+        assert!(
+            leftovers.is_empty(),
+            "temporary manifests leaked: {leftovers:?}"
+        );
+        let _ = std::fs::remove_dir_all(root);
     }
 
     #[test]
