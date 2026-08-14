@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create and smoke-test a deterministic Rust-native cpg release archive."""
+"""Create and acceptance-test a deterministic Rust-native cpg release archive."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ import os
 import shutil
 import stat
 import subprocess
+import sys
 import tarfile
 import tempfile
 import zipfile
@@ -92,10 +93,12 @@ def normalized_zip(archive: Path, root: Path, package: str, epoch: int) -> None:
             output.writestr(info, path.read_bytes(), compresslevel=9)
 
 
-def extract_and_smoke_test(
-    archive: Path, package: str, executable: str, version: str
+def extract_and_accept(
+    archive: Path, package: str, executable: str, version: str, repo: Path
 ) -> None:
-    with tempfile.TemporaryDirectory(prefix="cpg-release-smoke-") as temp:
+    # The spaces are deliberate: release acceptance must prove callers pass
+    # executable and fixture paths as arguments instead of shell fragments.
+    with tempfile.TemporaryDirectory(prefix="cpg release smoke ") as temp:
         destination = Path(temp)
         if archive.suffix == ".zip":
             with zipfile.ZipFile(archive) as source:
@@ -108,7 +111,17 @@ def extract_and_smoke_test(
             binary.chmod(
                 binary.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
             )
-        verify_version(binary, version)
+        subprocess.run(
+            [
+                sys.executable,
+                str(repo / "cpg-rs" / "scripts" / "test-release.py"),
+                "--binary",
+                str(binary),
+                "--version",
+                version,
+            ],
+            check=True,
+        )
 
 
 def main() -> None:
@@ -148,7 +161,7 @@ def main() -> None:
     archive.with_name(f"{archive.name}.sha256").write_bytes(
         f"{digest}  {archive.name}\n".encode("utf-8")
     )
-    extract_and_smoke_test(archive, package, executable, args.version)
+    extract_and_accept(archive, package, executable, args.version, repo)
     print(archive)
 
 
