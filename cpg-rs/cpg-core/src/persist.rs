@@ -7,10 +7,9 @@
 //! and reload, so a tool builds the CPG once and reopens it for fast
 //! incremental updates instead of reparsing from cold every run.
 //!
-//! The format is little-endian and self-describing enough to reject mismatched
-//! files via a magic header. It is intentionally not versioned for forward
-//! compatibility yet — that is a clearly-scoped extension (bump the magic,
-//! branch on it).
+//! The format is little-endian. New files use a versioned envelope around the
+//! columnar payload so incompatible and corrupt files can be rejected before
+//! graph construction.
 
 /// Append-only little-endian writer.
 #[derive(Default)]
@@ -24,6 +23,9 @@ impl ByteWriter {
     }
     pub fn u8(&mut self, v: u8) {
         self.buf.push(v);
+    }
+    pub fn u16(&mut self, v: u16) {
+        self.buf.extend_from_slice(&v.to_le_bytes());
     }
     pub fn u32(&mut self, v: u32) {
         self.buf.extend_from_slice(&v.to_le_bytes());
@@ -57,8 +59,16 @@ impl<'a> ByteReader<'a> {
     pub fn new(buf: &'a [u8]) -> Self {
         ByteReader { buf, pos: 0 }
     }
-    fn take(&mut self, n: usize) -> Result<&'a [u8], DecodeError> {
-        if self.pos + n > self.buf.len() {
+    pub fn take(&mut self, n: usize) -> Result<&'a [u8], DecodeError> {
+        let end = self.pos.checked_add(n).ok_or_else(|| {
+            DecodeError(format!(
+                "byte range overflow at {} (+{}), len {}",
+                self.pos,
+                n,
+                self.buf.len()
+            ))
+        })?;
+        if end > self.buf.len() {
             return Err(DecodeError(format!(
                 "unexpected EOF at {} (+{}), len {}",
                 self.pos,
@@ -66,12 +76,16 @@ impl<'a> ByteReader<'a> {
                 self.buf.len()
             )));
         }
-        let s = &self.buf[self.pos..self.pos + n];
-        self.pos += n;
+        let s = &self.buf[self.pos..end];
+        self.pos = end;
         Ok(s)
     }
     pub fn u8(&mut self) -> Result<u8, DecodeError> {
         Ok(self.take(1)?[0])
+    }
+    pub fn u16(&mut self) -> Result<u16, DecodeError> {
+        let b = self.take(2)?;
+        Ok(u16::from_le_bytes([b[0], b[1]]))
     }
     pub fn u32(&mut self) -> Result<u32, DecodeError> {
         let b = self.take(4)?;
@@ -94,5 +108,11 @@ impl<'a> ByteReader<'a> {
     pub fn opt_u32(&mut self) -> Result<Option<u32>, DecodeError> {
         let v = self.u32()?;
         Ok(if v == u32::MAX { None } else { Some(v) })
+    }
+    pub fn remaining(&self) -> usize {
+        self.buf.len() - self.pos
+    }
+    pub fn position(&self) -> usize {
+        self.pos
     }
 }

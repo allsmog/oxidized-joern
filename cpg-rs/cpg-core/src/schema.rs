@@ -50,9 +50,9 @@ impl NodeKind {
     pub fn to_u8(self) -> u8 {
         self as u8
     }
-    pub fn from_u8(b: u8) -> NodeKind {
+    pub fn from_u8(b: u8) -> Option<NodeKind> {
         use NodeKind::*;
-        match b {
+        Some(match b {
             0 => File,
             1 => Namespace,
             2 => TypeDecl,
@@ -69,8 +69,9 @@ impl NodeKind {
             13 => ControlStructure,
             14 => Return,
             15 => MethodRef,
-            _ => Unknown,
-        }
+            16 => Unknown,
+            _ => return None,
+        })
     }
 }
 
@@ -105,8 +106,8 @@ impl EdgeKind {
     pub fn to_u8(self) -> u8 {
         self as u8
     }
-    pub fn from_u8(b: u8) -> EdgeKind {
-        EdgeKind::ALL[b as usize]
+    pub fn from_u8(b: u8) -> Option<EdgeKind> {
+        EdgeKind::ALL.get(b as usize).copied()
     }
 
     pub const ALL: [EdgeKind; 9] = [

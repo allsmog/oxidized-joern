@@ -5,3 +5,5 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+atomic-write-file.workspace = true
+crc32fast.workspace = true
