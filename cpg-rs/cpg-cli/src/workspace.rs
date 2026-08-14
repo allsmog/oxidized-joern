@@ -35,7 +35,7 @@ use std::time::{Duration, Instant};
 /// v9: generated Go files that register HTTP routes (oapi-codegen server
 /// stubs) are KEPT at collection time (`go_generated_registers_routes`) —
 /// file-set change, same staleness hazard as a shape change.
-pub const GRAPH_SHAPE_VERSION: u32 = 11;
+pub const GRAPH_SHAPE_VERSION: u32 = 12;
 
 const CACHE_MANIFEST_VERSION: u32 = 1;
 const CACHE_GRAPH_FORMAT: &str = "CPG2";

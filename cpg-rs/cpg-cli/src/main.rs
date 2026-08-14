@@ -41,6 +41,7 @@ const USAGE: &str = "usage (langs: c|cpp|go|java|javascript|typescript|python|ru
   cpg export <dir>|--load <graph.cpg> [--lang L] [--repr ast|cfg|ddg|cpg14|all] [--format dot|graphml|json] -o <outdir>
   cpg export-joern <dir>|--load <graph.cpg> [--lang L] -o <cpg.bin>
   cpg import-joern <cpg.bin> -o <graph.cpg>                       convert Joern v4 Flatgraph to CPG2
+  cpg joern-digest <cpg.bin>                                     canonical Flatgraph content digest
   cpg flow <src-glob> <sink-glob> <dir>|--load <graph.cpg> [--lang L] [--sanitizer S]... [-o out.json]
   cpg vectors <dir>|--load <graph.cpg> [--lang L] [--features] [-o out.json]
   cpg query <dir>|--load <graph.cpg> [--lang L] --query <CPGQL> [-o out.json]
@@ -64,6 +65,7 @@ fn main() {
         "export" => export_cmd(&args),
         "export-joern" => export_joern_cmd(&args),
         "import-joern" => import_joern_cmd(&args),
+        "joern-digest" => joern_digest_cmd(&args),
         "flow" => flow_cmd(&args),
         "vectors" => vectors_cmd(&args),
         "query" => query_cmd(&args),
@@ -617,6 +619,35 @@ fn export_joern_cmd(args: &[String]) {
     );
 }
 
+fn joern_digest_cmd(args: &[String]) {
+    let usage = "usage: cpg joern-digest <cpg.bin> [--lines]";
+    let Some(input) = args.get(2).filter(|value| !value.starts_with('-')) else {
+        eprintln!("missing <cpg.bin>\n{usage}");
+        std::process::exit(2);
+    };
+    if args.iter().any(|arg| arg == "--lines") {
+        match cpg_cli::flatgraph::content_lines(std::path::Path::new(input)) {
+            Ok(lines) => {
+                for line in lines {
+                    println!("{line}");
+                }
+            }
+            Err(error) => {
+                eprintln!("Joern digest failed: {error}");
+                std::process::exit(1);
+            }
+        }
+        return;
+    }
+    match cpg_cli::flatgraph::content_digest(std::path::Path::new(input)) {
+        Ok(digest) => println!("{digest}"),
+        Err(error) => {
+            eprintln!("Joern digest failed: {error}");
+            std::process::exit(1);
+        }
+    }
+}
+
 /// Import the supported portion of a Joern v4 Flatgraph into native CPG2.
 fn import_joern_cmd(args: &[String]) {
     let usage = "usage: cpg import-joern <cpg.bin> -o <graph.cpg>";
@@ -639,10 +670,7 @@ fn import_joern_cmd(args: &[String]) {
         eprintln!("cannot save {output}: {e}");
         std::process::exit(1);
     }
-    eprintln!(
-        "imported {} supported nodes to {output}",
-        graph.live_count()
-    );
+    eprintln!("imported {} nodes to {output}", graph.live_count());
 }
 
 /// `cpg flow`: one-off source→sink taint query without writing a rules file.

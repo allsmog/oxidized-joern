@@ -9,9 +9,10 @@ Single source of truth across iterations. Update in the same commit as the work.
   logical plans, with a 27-case zero-diff gate against Joern v4.0.555,
   including path-producing `reachableByFlows`.
   `cpg import-joern` decodes Joern v4 Flatgraph and `cpg export-joern` emits
-  it; the pinned gate passes C, Java, and Python fixtures in both directions.
-  Full CPGQL, lossless schema/overlay fidelity, wider C semantics, rules, and
-  per-language promotions remain open in `REPLACEMENT_CONTRACT.md`.
+  it; the pinned gate passes C, Java, and Python fixtures in both directions,
+  including content-exact Joern-to-CPG2-to-Joern round-trip digests. Full
+  CPGQL, wider C semantics, rules, and per-language promotions remain open in
+  `REPLACEMENT_CONTRACT.md`.
 - **Production C convergence complete (2026-08-14).** The released
   `CFrontend`/`Project`/`standard_pipeline` path is the 107/107 committed Joern
   v4.0.555 oracle path, including 1,545/1,545 ReachingDef facts. Canonical

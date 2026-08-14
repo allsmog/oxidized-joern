@@ -16,7 +16,7 @@ pub mod traversal;
 
 pub use builder::CpgBuilder;
 pub use freeze::{Freeze, FrozenCpg};
-pub use graph::{Cpg, FileId, HalfEdge, NodeId};
+pub use graph::{Cpg, FileId, HalfEdge, NodeId, PropertyValue};
 pub use intern::Sym;
 pub use schema::{EdgeKind, Layer, NodeKind};
 pub use segments::{SegmentDescriptor, SegmentDigest, SegmentKey, SegmentManifest};
@@ -81,6 +81,17 @@ mod tests {
         }
         cpg.remove_file(g);
 
+        let call = cpg.calls_named("puts")[0];
+        let external_label = cpg.intern("CALL");
+        let property_label = cpg.intern("DYNAMIC_TYPE_HINT_FULL_NAME");
+        let property_value = cpg.intern("java.lang.String");
+        cpg.set_external_label(call, external_label);
+        cpg.set_passthrough_property(
+            call,
+            property_label,
+            PropertyValue::Strings(vec![Some(property_value)]),
+        );
+
         let bytes = cpg.to_bytes();
         let restored = Cpg::from_bytes(&bytes).expect("decode");
 
@@ -89,6 +100,10 @@ mod tests {
         let m = restored.method_named("main")[0];
         assert_eq!(restored.parameters_of(m).len(), 1);
         let call = restored.calls_named("puts")[0];
+        assert_eq!(restored.external_label_of(call), Some("CALL"));
+        let passthrough = restored.passthrough_properties_of(call);
+        let (_, value) = passthrough.iter().next().expect("passthrough property");
+        assert!(matches!(value, PropertyValue::Strings(values) if values.len() == 1));
         assert_eq!(restored.arguments_of(call).len(), 1);
         // In-edges were rebuilt: the literal knows its incident Argument edge.
         let lit = restored.arguments_of(call)[0];
