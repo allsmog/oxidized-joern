@@ -24,9 +24,29 @@
 use crate::intern::{Interner, Sym};
 use crate::persist::{ByteReader, ByteWriter, DecodeError};
 use crate::schema::{EdgeKind, NodeKind};
+use atomic_write_file::AtomicWriteFile;
 use std::collections::HashMap;
+use std::io::{self, Write};
+use std::path::Path;
 
-const MAGIC: &[u8; 4] = b"CPG1";
+const MAGIC_V1: &[u8; 4] = b"CPG1";
+const MAGIC_V2: &[u8; 4] = b"CPG2";
+const FORMAT_VERSION: u16 = 1;
+const CHECKSUM_ALGORITHM_CRC32: u8 = 1;
+const CHECKSUM_VERSION: u8 = 1;
+const ENVELOPE_FLAGS: u32 = 0;
+const ENVELOPE_LEN: usize = 24;
+
+/// Persistence ceilings are deliberately generous enough for very large CPGs,
+/// while still giving the decoder explicit, architecture-independent bounds.
+pub const MAX_CPG_BYTES: u64 = 64 * 1024 * 1024 * 1024;
+const MAX_STRINGS: u64 = 100_000_000;
+const MAX_NODES: u64 = 1_000_000_000;
+const MAX_EDGES: u64 = 4_000_000_000;
+const MAX_FILES: u64 = 10_000_000;
+const MAX_STRING_BYTES: usize = 64 * 1024 * 1024;
+const MAX_PATH_BYTES: usize = 1024 * 1024;
+const MIN_NODE_PAYLOAD_BYTES: usize = 42;
 
 /// Stable handle to a node. Index into the columnar arrays.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
@@ -291,12 +311,41 @@ impl Cpg {
         self.live.iter().filter(|&&l| l).count()
     }
 
-    /// Serialise the whole graph to bytes (see `persist` for the format).
-    /// In-edges, per-file node lists and the free list are derived structures
-    /// and are rebuilt on load rather than stored.
+    /// Serialise the whole graph to a CPG2 envelope (see `persist`). In-edges,
+    /// per-file node lists and the free list are derived structures and are
+    /// rebuilt on load rather than stored.
     pub fn to_bytes(&self) -> Vec<u8> {
+        self.try_to_bytes()
+            .expect("graph exceeds the persisted CPG format limits")
+    }
+
+    fn try_to_bytes(&self) -> io::Result<Vec<u8>> {
+        self.validate_for_persistence()?;
+        let payload = self.payload_bytes();
+        let total_len = ENVELOPE_LEN
+            .checked_add(payload.len())
+            .ok_or_else(|| invalid_input("CPG byte length overflow"))?;
+        if u64::try_from(total_len).unwrap_or(u64::MAX) > MAX_CPG_BYTES {
+            return Err(invalid_input(format!(
+                "CPG is {total_len} bytes; maximum is {MAX_CPG_BYTES}"
+            )));
+        }
+
         let mut w = ByteWriter::new();
-        w.buf.extend_from_slice(MAGIC);
+        w.buf.reserve(total_len);
+        w.buf.extend_from_slice(MAGIC_V2);
+        w.u16(FORMAT_VERSION);
+        w.u8(CHECKSUM_ALGORITHM_CRC32);
+        w.u8(CHECKSUM_VERSION);
+        w.u32(ENVELOPE_FLAGS);
+        w.u64(payload.len() as u64);
+        w.u32(crc32fast::hash(&payload));
+        w.buf.extend_from_slice(&payload);
+        Ok(w.buf)
+    }
+
+    fn payload_bytes(&self) -> Vec<u8> {
+        let mut w = ByteWriter::new();
 
         // String table.
         w.u64(self.strings.len() as u64);
@@ -356,106 +405,373 @@ impl Cpg {
         w.buf
     }
 
-    /// Reconstruct a graph from `to_bytes` output.
-    pub fn from_bytes(data: &[u8]) -> Result<Cpg, DecodeError> {
-        let mut r = ByteReader::new(data);
-        let magic = (0..4).map(|_| r.u8()).collect::<Result<Vec<_>, _>>()?;
-        if magic.as_slice() != MAGIC {
-            return Err(DecodeError("bad magic; not a CPG1 file".into()));
-        }
-        let mut cpg = Cpg::new();
-
-        let str_count = r.u64()? as usize;
-        for _ in 0..str_count {
-            let b = r.bytes()?;
-            let s = std::str::from_utf8(b).map_err(|e| DecodeError(e.to_string()))?;
-            cpg.strings.intern(s);
+    fn validate_for_persistence(&self) -> io::Result<()> {
+        check_encode_count("strings", self.strings.len(), MAX_STRINGS)?;
+        check_encode_count("nodes", self.kind.len(), MAX_NODES)?;
+        check_encode_count("files", self.path_of_file.len(), MAX_FILES)?;
+        if self.path_of_file.len() as u64 != u64::from(self.next_file) {
+            return Err(invalid_input(
+                "file table is not dense or next_file is inconsistent",
+            ));
         }
 
-        let n = r.u64()? as usize;
-        let read_col_u8 = |r: &mut ByteReader, n: usize| -> Result<Vec<u8>, DecodeError> {
-            (0..n).map(|_| r.u8()).collect()
-        };
-        cpg.kind = read_col_u8(&mut r, n)?
-            .into_iter()
-            .map(NodeKind::from_u8)
-            .collect();
-        cpg.file = (0..n)
-            .map(|_| r.u32().map(FileId))
-            .collect::<Result<_, _>>()?;
-        let mut sym_col = || -> Result<Vec<Option<Sym>>, DecodeError> {
-            (0..n).map(|_| r.opt_u32().map(|o| o.map(Sym))).collect()
-        };
-        // Order matches the write side: name, full_name, code, type_full_name, signature.
-        cpg.name = sym_col()?;
-        cpg.full_name = sym_col()?;
-        cpg.code = sym_col()?;
-        cpg.type_full_name = sym_col()?;
-        cpg.signature = sym_col()?;
-        cpg.line = (0..n).map(|_| r.opt_u32()).collect::<Result<_, _>>()?;
-        cpg.order = (0..n).map(|_| r.i32()).collect::<Result<_, _>>()?;
-        cpg.argument_index = (0..n).map(|_| r.i32()).collect::<Result<_, _>>()?;
-        cpg.live = (0..n)
-            .map(|_| Ok(r.u8()? != 0))
-            .collect::<Result<_, DecodeError>>()?;
-
-        cpg.out_edges = Vec::with_capacity(n);
-        cpg.in_edges = vec![Vec::new(); n];
-        for _ in 0..n {
-            let m = r.u32()? as usize;
-            let mut outs = Vec::with_capacity(m);
-            for _ in 0..m {
-                let kind = EdgeKind::from_u8(r.u8()?);
-                let other = NodeId(r.u32()?);
-                outs.push(HalfEdge { kind, other });
+        for i in 0..self.strings.len() {
+            let len = self.strings.resolve(Sym(i as u32)).len();
+            if len > MAX_STRING_BYTES || u32::try_from(len).is_err() {
+                return Err(invalid_input(format!(
+                    "string {i} is {len} bytes; maximum is {MAX_STRING_BYTES}"
+                )));
             }
-            cpg.out_edges.push(outs);
         }
-        // Rebuild in-edges as the mirror of out-edges.
+        for (id, path) in &self.path_of_file {
+            if id.0 >= self.next_file {
+                return Err(invalid_input(format!(
+                    "file id {} is not below next_file {}",
+                    id.0, self.next_file
+                )));
+            }
+            if path.len() > MAX_PATH_BYTES {
+                return Err(invalid_input(format!(
+                    "file path for id {} is {} bytes; maximum is {MAX_PATH_BYTES}",
+                    id.0,
+                    path.len()
+                )));
+            }
+        }
+
+        let string_count = self.strings.len();
+        let mut edge_count = 0_u64;
+        for i in 0..self.kind.len() {
+            if !self.path_of_file.contains_key(&self.file[i]) {
+                return Err(invalid_input(format!(
+                    "node {i} references unregistered file id {}",
+                    self.file[i].0
+                )));
+            }
+            for sym in [
+                self.name[i],
+                self.full_name[i],
+                self.code[i],
+                self.type_full_name[i],
+                self.signature[i],
+            ]
+            .into_iter()
+            .flatten()
+            {
+                if sym.0 as usize >= string_count {
+                    return Err(invalid_input(format!(
+                        "node {i} references invalid string index {}",
+                        sym.0
+                    )));
+                }
+            }
+            if !self.live[i] && !self.out_edges[i].is_empty() {
+                return Err(invalid_input(format!("dead node {i} has outgoing edges")));
+            }
+            edge_count = edge_count
+                .checked_add(self.out_edges[i].len() as u64)
+                .ok_or_else(|| invalid_input("edge count overflow"))?;
+            if edge_count > MAX_EDGES {
+                return Err(invalid_input(format!(
+                    "edges count {edge_count} exceeds maximum {MAX_EDGES}"
+                )));
+            }
+            if u32::try_from(self.out_edges[i].len()).is_err() {
+                return Err(invalid_input(format!(
+                    "node {i} has too many outgoing edges"
+                )));
+            }
+            for edge in &self.out_edges[i] {
+                let target = edge.other.0 as usize;
+                if target >= self.kind.len() || !self.live[target] {
+                    return Err(invalid_input(format!(
+                        "edge from node {i} references invalid or dead node {}",
+                        edge.other.0
+                    )));
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// Reconstruct a graph from CPG2 output. Legacy CPG1 payloads remain
+    /// readable, but pass through the same bounded, validating decoder.
+    pub fn from_bytes(data: &[u8]) -> Result<Cpg, DecodeError> {
+        if u64::try_from(data.len()).unwrap_or(u64::MAX) > MAX_CPG_BYTES {
+            return Err(DecodeError(format!(
+                "CPG is {} bytes; maximum is {MAX_CPG_BYTES}",
+                data.len()
+            )));
+        }
+        let magic = data
+            .get(..4)
+            .ok_or_else(|| DecodeError("unexpected EOF while reading CPG magic".into()))?;
+        if magic == MAGIC_V1 {
+            return Self::decode_payload(&data[4..]);
+        }
+        if magic != MAGIC_V2 {
+            return Err(DecodeError("bad magic; expected CPG1 or CPG2".into()));
+        }
+
+        let mut envelope = ByteReader::new(&data[4..]);
+        let version = envelope.u16()?;
+        if version != FORMAT_VERSION {
+            return Err(DecodeError(format!(
+                "unsupported CPG2 format version {version}; expected {FORMAT_VERSION}"
+            )));
+        }
+        let algorithm = envelope.u8()?;
+        let checksum_version = envelope.u8()?;
+        if algorithm != CHECKSUM_ALGORITHM_CRC32 || checksum_version != CHECKSUM_VERSION {
+            return Err(DecodeError(format!(
+                "unsupported checksum algorithm/version {algorithm}/{checksum_version}"
+            )));
+        }
+        let flags = envelope.u32()?;
+        if flags != ENVELOPE_FLAGS {
+            return Err(DecodeError(format!(
+                "unsupported CPG2 envelope flags 0x{flags:08x}"
+            )));
+        }
+        let payload_len_u64 = envelope.u64()?;
+        if payload_len_u64 > MAX_CPG_BYTES - ENVELOPE_LEN as u64 {
+            return Err(DecodeError(format!(
+                "CPG payload is {payload_len_u64} bytes; maximum is {}",
+                MAX_CPG_BYTES - ENVELOPE_LEN as u64
+            )));
+        }
+        let payload_len = usize::try_from(payload_len_u64)
+            .map_err(|_| DecodeError("CPG payload does not fit this architecture".into()))?;
+        let expected_checksum = envelope.u32()?;
+        if envelope.position() + 4 != ENVELOPE_LEN {
+            return Err(DecodeError("internal CPG2 envelope layout mismatch".into()));
+        }
+        if envelope.remaining() != payload_len {
+            return Err(DecodeError(format!(
+                "CPG2 payload length is {payload_len}, but {} bytes remain",
+                envelope.remaining()
+            )));
+        }
+        let payload = envelope.take(payload_len)?;
+        let actual_checksum = crc32fast::hash(payload);
+        if actual_checksum != expected_checksum {
+            return Err(DecodeError(format!(
+                "CPG2 checksum mismatch: expected {expected_checksum:08x}, got {actual_checksum:08x}"
+            )));
+        }
+        Self::decode_payload(payload)
+    }
+
+    fn decode_payload(payload: &[u8]) -> Result<Cpg, DecodeError> {
+        let mut r = ByteReader::new(payload);
+        let str_count = read_count(&mut r, "strings", MAX_STRINGS, 4)?;
+        let mut strings = Interner::new();
+        for i in 0..str_count {
+            let bytes = read_bounded_bytes(&mut r, "string", MAX_STRING_BYTES)?;
+            let text = std::str::from_utf8(bytes)
+                .map_err(|e| DecodeError(format!("string {i} is not UTF-8: {e}")))?;
+            let sym = strings.intern(text);
+            if sym.0 as usize != i {
+                return Err(DecodeError(format!(
+                    "duplicate string table entry at index {i}"
+                )));
+            }
+        }
+
+        let n = read_count(&mut r, "nodes", MAX_NODES, MIN_NODE_PAYLOAD_BYTES)?;
+        let mut kind = Vec::with_capacity(n);
+        for i in 0..n {
+            let raw = r.u8()?;
+            kind.push(
+                NodeKind::from_u8(raw)
+                    .ok_or_else(|| DecodeError(format!("invalid node kind {raw} at node {i}")))?,
+            );
+        }
+        let file = (0..n)
+            .map(|_| r.u32().map(FileId))
+            .collect::<Result<Vec<_>, _>>()?;
+        let name = read_sym_column(&mut r, n, str_count, "name")?;
+        let full_name = read_sym_column(&mut r, n, str_count, "full_name")?;
+        let code = read_sym_column(&mut r, n, str_count, "code")?;
+        let type_full_name = read_sym_column(&mut r, n, str_count, "type_full_name")?;
+        let signature = read_sym_column(&mut r, n, str_count, "signature")?;
+        let line = (0..n).map(|_| r.opt_u32()).collect::<Result<Vec<_>, _>>()?;
+        let order = (0..n).map(|_| r.i32()).collect::<Result<Vec<_>, _>>()?;
+        let argument_index = (0..n).map(|_| r.i32()).collect::<Result<Vec<_>, _>>()?;
+        let mut live = Vec::with_capacity(n);
+        for i in 0..n {
+            match r.u8()? {
+                0 => live.push(false),
+                1 => live.push(true),
+                value => {
+                    return Err(DecodeError(format!(
+                        "invalid live byte {value} at node {i}; expected 0 or 1"
+                    )))
+                }
+            }
+        }
+
+        let mut out_edges = Vec::with_capacity(n);
+        let mut total_edges = 0_u64;
         for src in 0..n {
-            for e in cpg.out_edges[src].clone() {
-                cpg.in_edges[e.other.0 as usize].push(HalfEdge {
-                    kind: e.kind,
+            let count = r.u32()? as usize;
+            total_edges = total_edges
+                .checked_add(count as u64)
+                .ok_or_else(|| DecodeError("edge count overflow".into()))?;
+            if total_edges > MAX_EDGES {
+                return Err(DecodeError(format!(
+                    "edges count {total_edges} exceeds maximum {MAX_EDGES}"
+                )));
+            }
+            require_remaining(&r, count, 5, "edges")?;
+            if !live[src] && count != 0 {
+                return Err(DecodeError(format!("dead node {src} has outgoing edges")));
+            }
+            let mut edges = Vec::with_capacity(count);
+            for _ in 0..count {
+                let raw_kind = r.u8()?;
+                let edge_kind = EdgeKind::from_u8(raw_kind).ok_or_else(|| {
+                    DecodeError(format!("invalid edge kind {raw_kind} at node {src}"))
+                })?;
+                let target = r.u32()? as usize;
+                if target >= n {
+                    return Err(DecodeError(format!(
+                        "edge from node {src} targets out-of-range node {target} (count {n})"
+                    )));
+                }
+                if !live[target] {
+                    return Err(DecodeError(format!(
+                        "edge from node {src} targets dead node {target}"
+                    )));
+                }
+                edges.push(HalfEdge {
+                    kind: edge_kind,
+                    other: NodeId(target as u32),
+                });
+            }
+            out_edges.push(edges);
+        }
+
+        let next_file = r.u32()?;
+        let file_count = read_count(&mut r, "files", MAX_FILES, 8)?;
+        if file_count as u64 != u64::from(next_file) {
+            return Err(DecodeError(format!(
+                "file count {file_count} is inconsistent with next_file {next_file}"
+            )));
+        }
+        let mut path_of_file = HashMap::with_capacity(file_count);
+        let mut file_of_path = HashMap::with_capacity(file_count);
+        let mut nodes_of_file = HashMap::with_capacity(file_count);
+        for _ in 0..file_count {
+            let id = FileId(r.u32()?);
+            if id.0 >= next_file {
+                return Err(DecodeError(format!(
+                    "file id {} is not below next_file {next_file}",
+                    id.0
+                )));
+            }
+            let bytes = read_bounded_bytes(&mut r, "file path", MAX_PATH_BYTES)?;
+            let path = std::str::from_utf8(bytes)
+                .map_err(|e| DecodeError(format!("file path for id {} is not UTF-8: {e}", id.0)))?
+                .to_string();
+            if path_of_file.insert(id, path.clone()).is_some() {
+                return Err(DecodeError(format!("duplicate file id {}", id.0)));
+            }
+            if file_of_path.insert(path.clone(), id).is_some() {
+                return Err(DecodeError(format!("duplicate file path {path:?}")));
+            }
+            nodes_of_file.insert(id, Vec::new());
+        }
+        if r.remaining() != 0 {
+            return Err(DecodeError(format!(
+                "{} trailing payload bytes at offset {}",
+                r.remaining(),
+                r.position()
+            )));
+        }
+        for (i, node_file) in file.iter().enumerate() {
+            if !path_of_file.contains_key(node_file) {
+                return Err(DecodeError(format!(
+                    "node {i} references missing file id {}",
+                    node_file.0
+                )));
+            }
+        }
+
+        let mut in_edges = vec![Vec::new(); n];
+        for (src, edges) in out_edges.iter().enumerate() {
+            for edge in edges {
+                in_edges[edge.other.0 as usize].push(HalfEdge {
+                    kind: edge.kind,
                     other: NodeId(src as u32),
                 });
             }
         }
-
-        // File table.
-        cpg.next_file = r.u32()?;
-        let file_count = r.u64()? as usize;
-        for _ in 0..file_count {
-            let id = FileId(r.u32()?);
-            let path = std::str::from_utf8(r.bytes()?)
-                .map_err(|e| DecodeError(e.to_string()))?
-                .to_string();
-            cpg.path_of_file.insert(id, path.clone());
-            cpg.file_of_path.insert(path, id);
-            cpg.nodes_of_file.insert(id, Vec::new());
-        }
-
-        // Rebuild per-file node lists and the free list from liveness.
+        let mut free_list = Vec::new();
         for i in 0..n {
             let node = NodeId(i as u32);
-            if cpg.live[i] {
-                cpg.nodes_of_file.entry(cpg.file[i]).or_default().push(node);
+            if live[i] {
+                nodes_of_file
+                    .get_mut(&file[i])
+                    .expect("validated file id")
+                    .push(node);
             } else {
-                cpg.free_list.push(node);
+                free_list.push(node);
             }
         }
-        Ok(cpg)
+
+        Ok(Cpg {
+            strings,
+            kind,
+            file,
+            name,
+            full_name,
+            code,
+            type_full_name,
+            signature,
+            line,
+            order,
+            argument_index,
+            live,
+            out_edges,
+            in_edges,
+            nodes_of_file,
+            path_of_file,
+            file_of_path,
+            free_list,
+            next_file,
+        })
     }
 
-    /// Save to a file path.
-    pub fn save(&self, path: &str) -> std::io::Result<()> {
-        std::fs::write(path, self.to_bytes())
+    /// Save through a same-directory temporary file and atomically publish it.
+    /// Existing Unix permissions are preserved when the platform allows it;
+    /// newly created files use the platform's normal owner-writable defaults.
+    pub fn save(&self, path: &str) -> io::Result<()> {
+        let data = self.try_to_bytes()?;
+        write_atomically(Path::new(path), &data, || Ok(()))
     }
 
     /// Load from a file path.
-    pub fn load(path: &str) -> std::io::Result<Cpg> {
-        let data = std::fs::read(path)?;
-        Cpg::from_bytes(&data)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.0))
+    pub fn load(path: &str) -> io::Result<Cpg> {
+        let path = Path::new(path);
+        let metadata = std::fs::metadata(path).map_err(|e| path_error("inspect", path, e))?;
+        if metadata.len() > MAX_CPG_BYTES {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!(
+                    "CPG file {} is {} bytes; maximum is {MAX_CPG_BYTES}",
+                    path.display(),
+                    metadata.len()
+                ),
+            ));
+        }
+        let data = std::fs::read(path).map_err(|e| path_error("read", path, e))?;
+        Cpg::from_bytes(&data).map_err(|e| {
+            io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("invalid CPG file {}: {}", path.display(), e.0),
+            )
+        })
     }
 
     /// Merge another graph into this one, remapping node ids, file ids and
@@ -523,5 +839,494 @@ impl Cpg {
                 self.add_edge(node_map[n.0 as usize], node_map[e.other.0 as usize], e.kind);
             }
         }
+    }
+}
+
+fn invalid_input(message: impl Into<String>) -> io::Error {
+    io::Error::new(io::ErrorKind::InvalidInput, message.into())
+}
+
+fn path_error(operation: &str, path: &Path, error: io::Error) -> io::Error {
+    io::Error::new(
+        error.kind(),
+        format!("failed to {operation} {}: {error}", path.display()),
+    )
+}
+
+fn check_encode_count(label: &str, count: usize, maximum: u64) -> io::Result<()> {
+    let count = u64::try_from(count).unwrap_or(u64::MAX);
+    if count > maximum {
+        return Err(invalid_input(format!(
+            "{label} count {count} exceeds maximum {maximum}"
+        )));
+    }
+    Ok(())
+}
+
+fn require_remaining(
+    reader: &ByteReader<'_>,
+    count: usize,
+    bytes_per_item: usize,
+    label: &str,
+) -> Result<(), DecodeError> {
+    let required = count
+        .checked_mul(bytes_per_item)
+        .ok_or_else(|| DecodeError(format!("{label} byte length overflow for count {count}")))?;
+    if required > reader.remaining() {
+        return Err(DecodeError(format!(
+            "impossible {label} count {count}: requires at least {required} bytes, {} remain",
+            reader.remaining()
+        )));
+    }
+    Ok(())
+}
+
+fn read_count(
+    reader: &mut ByteReader<'_>,
+    label: &str,
+    maximum: u64,
+    minimum_bytes_per_item: usize,
+) -> Result<usize, DecodeError> {
+    let count_u64 = reader.u64()?;
+    if count_u64 > maximum {
+        return Err(DecodeError(format!(
+            "{label} count {count_u64} exceeds maximum {maximum}"
+        )));
+    }
+    let count = usize::try_from(count_u64)
+        .map_err(|_| DecodeError(format!("{label} count does not fit this architecture")))?;
+    require_remaining(reader, count, minimum_bytes_per_item, label)?;
+    Ok(count)
+}
+
+fn read_bounded_bytes<'a>(
+    reader: &mut ByteReader<'a>,
+    label: &str,
+    maximum: usize,
+) -> Result<&'a [u8], DecodeError> {
+    let len = reader.u32()? as usize;
+    if len > maximum {
+        return Err(DecodeError(format!(
+            "{label} length {len} exceeds maximum {maximum}"
+        )));
+    }
+    reader.take(len)
+}
+
+fn read_sym_column(
+    reader: &mut ByteReader<'_>,
+    count: usize,
+    string_count: usize,
+    label: &str,
+) -> Result<Vec<Option<Sym>>, DecodeError> {
+    let mut column = Vec::with_capacity(count);
+    for node in 0..count {
+        let sym = reader.opt_u32()?;
+        if let Some(sym) = sym {
+            if sym as usize >= string_count {
+                return Err(DecodeError(format!(
+                    "{label} at node {node} references string {sym}, but count is {string_count}"
+                )));
+            }
+            column.push(Some(Sym(sym)));
+        } else {
+            column.push(None);
+        }
+    }
+    Ok(column)
+}
+
+fn write_atomically<F>(path: &Path, data: &[u8], before_commit: F) -> io::Result<()>
+where
+    F: FnOnce() -> io::Result<()>,
+{
+    let mut file = AtomicWriteFile::open(path).map_err(|e| path_error("open", path, e))?;
+    file.write_all(data)
+        .map_err(|e| path_error("write", path, e))?;
+    file.flush().map_err(|e| path_error("flush", path, e))?;
+    file.sync_all().map_err(|e| path_error("sync", path, e))?;
+    before_commit().map_err(|e| path_error("prepare to publish", path, e))?;
+    file.commit()
+        .map_err(|e| path_error("atomically publish", path, e))
+}
+
+#[cfg(test)]
+mod persistence_tests {
+    use super::*;
+    use crate::builder::CpgBuilder;
+    use crate::traversal::Query;
+    #[cfg(unix)]
+    use std::os::unix::fs::PermissionsExt;
+    use std::path::PathBuf;
+    use std::sync::{Arc, Barrier};
+
+    const PAYLOAD_STRING_BYTE: usize = 12;
+    const PAYLOAD_NODE_KIND: usize = 21;
+    const PAYLOAD_NODE_FILE: usize = 22;
+    const PAYLOAD_NAME_SYM: usize = 26;
+    const PAYLOAD_LIVE: usize = 58;
+    const PAYLOAD_EDGE_COUNT: usize = 59;
+    const PAYLOAD_EDGE_KIND: usize = 63;
+    const PAYLOAD_EDGE_TARGET: usize = 64;
+    const PAYLOAD_NEXT_FILE: usize = 68;
+    const PAYLOAD_FILE_COUNT: usize = 72;
+    const PAYLOAD_FILE_ID: usize = 80;
+    const PAYLOAD_PATH_BYTE: usize = 88;
+
+    fn sample_cpg(method_name: &str) -> Cpg {
+        let mut cpg = Cpg::new();
+        let file = cpg.file_id("a.c");
+        let mut builder = CpgBuilder::new(&mut cpg, file);
+        let root = builder.file_node("a.c");
+        let method = builder.method(method_name, method_name, "int(void)", Some(1));
+        builder.contains(root, method);
+        cpg
+    }
+
+    /// One string, one live node with one self-edge, and one registered file.
+    /// The fixed shape makes field-targeted corruptions easy to audit.
+    fn valid_payload() -> Vec<u8> {
+        let mut writer = ByteWriter::new();
+        writer.u64(1);
+        writer.bytes(b"x");
+        writer.u64(1);
+        writer.u8(NodeKind::Method.to_u8());
+        writer.u32(0);
+        writer.opt_u32(Some(0));
+        for _ in 0..4 {
+            writer.opt_u32(None);
+        }
+        writer.opt_u32(None);
+        writer.i32(0);
+        writer.i32(-1);
+        writer.u8(1);
+        writer.u32(1);
+        writer.u8(EdgeKind::Ast.to_u8());
+        writer.u32(0);
+        writer.u32(1);
+        writer.u64(1);
+        writer.u32(0);
+        writer.bytes(b"a.c");
+        assert_eq!(writer.buf.len(), 91);
+        writer.buf
+    }
+
+    fn cpg2(payload: &[u8]) -> Vec<u8> {
+        let mut writer = ByteWriter::new();
+        writer.buf.extend_from_slice(MAGIC_V2);
+        writer.u16(FORMAT_VERSION);
+        writer.u8(CHECKSUM_ALGORITHM_CRC32);
+        writer.u8(CHECKSUM_VERSION);
+        writer.u32(ENVELOPE_FLAGS);
+        writer.u64(payload.len() as u64);
+        writer.u32(crc32fast::hash(payload));
+        writer.buf.extend_from_slice(payload);
+        writer.buf
+    }
+
+    fn legacy_cpg1(payload: &[u8]) -> Vec<u8> {
+        let mut bytes = MAGIC_V1.to_vec();
+        bytes.extend_from_slice(payload);
+        bytes
+    }
+
+    fn with_payload_mutation(mut mutate: impl FnMut(&mut Vec<u8>)) -> Vec<u8> {
+        let mut payload = valid_payload();
+        mutate(&mut payload);
+        cpg2(&payload)
+    }
+
+    fn assert_decode_error_without_panic(label: &str, bytes: &[u8]) {
+        let result = std::panic::catch_unwind(|| Cpg::from_bytes(bytes));
+        assert!(result.is_ok(), "{label} panicked");
+        assert!(result.unwrap().is_err(), "{label} unexpectedly decoded");
+    }
+
+    #[test]
+    fn persistence_envelope_accepts_cpg2_and_validated_cpg1() {
+        let cpg = sample_cpg("main");
+        let bytes = cpg.to_bytes();
+        assert_eq!(&bytes[..4], MAGIC_V2);
+        assert_eq!(u16::from_le_bytes([bytes[4], bytes[5]]), FORMAT_VERSION);
+        assert_eq!(Cpg::from_bytes(&bytes).unwrap().methods().len(), 1);
+
+        let legacy = legacy_cpg1(&cpg.payload_bytes());
+        assert_eq!(Cpg::from_bytes(&legacy).unwrap().methods().len(), 1);
+    }
+
+    #[test]
+    fn persistence_envelope_rejects_incompatible_or_corrupt_files() {
+        let valid = cpg2(&valid_payload());
+        let mut cases = Vec::new();
+
+        cases.push(("empty", Vec::new()));
+
+        let mut bad_magic = valid.clone();
+        bad_magic[..4].copy_from_slice(b"NOPE");
+        cases.push(("magic", bad_magic));
+
+        let mut bad_version = valid.clone();
+        bad_version[4..6].copy_from_slice(&(FORMAT_VERSION + 1).to_le_bytes());
+        cases.push(("version", bad_version));
+
+        let mut bad_algorithm = valid.clone();
+        bad_algorithm[6] = 99;
+        cases.push(("checksum algorithm", bad_algorithm));
+
+        let mut bad_checksum_version = valid.clone();
+        bad_checksum_version[7] = CHECKSUM_VERSION + 1;
+        cases.push(("checksum version", bad_checksum_version));
+
+        let mut bad_flags = valid.clone();
+        bad_flags[8..12].copy_from_slice(&1_u32.to_le_bytes());
+        cases.push(("flags", bad_flags));
+
+        let mut short_length = valid.clone();
+        short_length[12..20].copy_from_slice(&90_u64.to_le_bytes());
+        cases.push(("short declared length", short_length));
+
+        let mut long_length = valid.clone();
+        long_length[12..20].copy_from_slice(&92_u64.to_le_bytes());
+        cases.push(("long declared length", long_length));
+
+        let mut bad_checksum = valid.clone();
+        bad_checksum[20] ^= 0x80;
+        cases.push(("checksum", bad_checksum));
+
+        let mut envelope_trailing = valid.clone();
+        envelope_trailing.push(0);
+        cases.push(("envelope trailing byte", envelope_trailing));
+
+        let payload_trailing = with_payload_mutation(|payload| payload.push(0));
+        cases.push(("payload trailing byte", payload_trailing));
+
+        for (label, bytes) in cases {
+            assert_decode_error_without_panic(label, &bytes);
+        }
+    }
+
+    #[test]
+    fn persistence_malformed_fields_are_rejected_before_graph_construction() {
+        let mut cases = Vec::new();
+
+        cases.push((
+            "string count",
+            with_payload_mutation(|p| p[0..8].copy_from_slice(&u64::MAX.to_le_bytes())),
+        ));
+        cases.push((
+            "string length",
+            with_payload_mutation(|p| p[8..12].copy_from_slice(&u32::MAX.to_le_bytes())),
+        ));
+        cases.push((
+            "invalid UTF-8 string",
+            with_payload_mutation(|p| p[PAYLOAD_STRING_BYTE] = 0xff),
+        ));
+        cases.push((
+            "node count",
+            with_payload_mutation(|p| p[13..21].copy_from_slice(&u64::MAX.to_le_bytes())),
+        ));
+        cases.push((
+            "node kind",
+            with_payload_mutation(|p| p[PAYLOAD_NODE_KIND] = 0xff),
+        ));
+        cases.push((
+            "missing node file",
+            with_payload_mutation(|p| {
+                p[PAYLOAD_NODE_FILE..PAYLOAD_NODE_FILE + 4].copy_from_slice(&1_u32.to_le_bytes())
+            }),
+        ));
+        cases.push((
+            "symbol index",
+            with_payload_mutation(|p| {
+                p[PAYLOAD_NAME_SYM..PAYLOAD_NAME_SYM + 4].copy_from_slice(&1_u32.to_le_bytes())
+            }),
+        ));
+        cases.push(("live byte", with_payload_mutation(|p| p[PAYLOAD_LIVE] = 2)));
+        cases.push((
+            "edge count",
+            with_payload_mutation(|p| {
+                p[PAYLOAD_EDGE_COUNT..PAYLOAD_EDGE_COUNT + 4]
+                    .copy_from_slice(&u32::MAX.to_le_bytes())
+            }),
+        ));
+        cases.push((
+            "edge kind",
+            with_payload_mutation(|p| p[PAYLOAD_EDGE_KIND] = 0xff),
+        ));
+        cases.push((
+            "edge target",
+            with_payload_mutation(|p| {
+                p[PAYLOAD_EDGE_TARGET..PAYLOAD_EDGE_TARGET + 4]
+                    .copy_from_slice(&1_u32.to_le_bytes())
+            }),
+        ));
+        cases.push((
+            "next file",
+            with_payload_mutation(|p| {
+                p[PAYLOAD_NEXT_FILE..PAYLOAD_NEXT_FILE + 4].copy_from_slice(&0_u32.to_le_bytes())
+            }),
+        ));
+        cases.push((
+            "file count",
+            with_payload_mutation(|p| {
+                p[PAYLOAD_FILE_COUNT..PAYLOAD_FILE_COUNT + 8]
+                    .copy_from_slice(&u64::MAX.to_le_bytes())
+            }),
+        ));
+        cases.push((
+            "file id",
+            with_payload_mutation(|p| {
+                p[PAYLOAD_FILE_ID..PAYLOAD_FILE_ID + 4].copy_from_slice(&1_u32.to_le_bytes())
+            }),
+        ));
+        cases.push((
+            "invalid UTF-8 path",
+            with_payload_mutation(|p| p[PAYLOAD_PATH_BYTE] = 0xff),
+        ));
+
+        let duplicate_file_id = with_payload_mutation(|p| {
+            p[PAYLOAD_NEXT_FILE..PAYLOAD_NEXT_FILE + 4].copy_from_slice(&2_u32.to_le_bytes());
+            p[PAYLOAD_FILE_COUNT..PAYLOAD_FILE_COUNT + 8].copy_from_slice(&2_u64.to_le_bytes());
+            p.extend_from_slice(&0_u32.to_le_bytes());
+            p.extend_from_slice(&3_u32.to_le_bytes());
+            p.extend_from_slice(b"b.c");
+        });
+        cases.push(("duplicate file id", duplicate_file_id));
+
+        let duplicate_path = with_payload_mutation(|p| {
+            p[PAYLOAD_NEXT_FILE..PAYLOAD_NEXT_FILE + 4].copy_from_slice(&2_u32.to_le_bytes());
+            p[PAYLOAD_FILE_COUNT..PAYLOAD_FILE_COUNT + 8].copy_from_slice(&2_u64.to_le_bytes());
+            p.extend_from_slice(&1_u32.to_le_bytes());
+            p.extend_from_slice(&3_u32.to_le_bytes());
+            p.extend_from_slice(b"a.c");
+        });
+        cases.push(("duplicate file path", duplicate_path));
+
+        let mut legacy_trailing = legacy_cpg1(&valid_payload());
+        legacy_trailing.push(0);
+        cases.push(("legacy trailing byte", legacy_trailing));
+
+        for (label, bytes) in cases {
+            assert_decode_error_without_panic(label, &bytes);
+        }
+    }
+
+    #[test]
+    fn persistence_malformed_bytes_never_panic() {
+        let valid = cpg2(&valid_payload());
+        for end in 0..valid.len() {
+            let label = format!("truncation at {end}");
+            assert_decode_error_without_panic(&label, &valid[..end]);
+        }
+        for index in 0..valid.len() {
+            for replacement in [0_u8, 1, 0x7f, 0xff] {
+                let mut mutated = valid.clone();
+                mutated[index] = replacement;
+                let result = std::panic::catch_unwind(|| Cpg::from_bytes(&mutated));
+                assert!(
+                    result.is_ok(),
+                    "single-byte mutation panicked at {index} with {replacement:#04x}"
+                );
+            }
+        }
+    }
+
+    struct TestDir(PathBuf);
+
+    impl TestDir {
+        fn new(label: &str) -> Self {
+            static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+            let sequence = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            let path = std::env::temp_dir().join(format!(
+                "cpg-core-{label}-{}-{sequence}",
+                std::process::id()
+            ));
+            std::fs::create_dir(&path).expect("create test directory");
+            TestDir(path)
+        }
+    }
+
+    impl Drop for TestDir {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+
+    fn assert_only_destination_remains(directory: &Path, destination: &Path) {
+        let entries = std::fs::read_dir(directory)
+            .unwrap()
+            .map(|entry| entry.unwrap().path())
+            .collect::<Vec<_>>();
+        assert_eq!(entries, [destination]);
+    }
+
+    #[test]
+    fn persistence_atomic_overwrite_and_failed_publication_are_complete() {
+        let directory = TestDir::new("atomic");
+        let destination = directory.0.join("graph.cpg");
+        let destination_str = destination.to_str().unwrap();
+        let old = sample_cpg("old");
+        old.save(destination_str).unwrap();
+        let old_bytes = std::fs::read(&destination).unwrap();
+
+        #[cfg(unix)]
+        {
+            let mut permissions = std::fs::metadata(&destination).unwrap().permissions();
+            permissions.set_mode(0o600);
+            std::fs::set_permissions(&destination, permissions).unwrap();
+        }
+
+        let new = sample_cpg("new");
+        let new_bytes = new.try_to_bytes().unwrap();
+        let error = write_atomically(&destination, &new_bytes, || {
+            Err(io::Error::other("injected prepublication failure"))
+        })
+        .unwrap_err();
+        assert_eq!(error.kind(), io::ErrorKind::Other);
+        assert_eq!(std::fs::read(&destination).unwrap(), old_bytes);
+        assert_only_destination_remains(&directory.0, &destination);
+
+        new.save(destination_str).unwrap();
+        let restored = Cpg::load(destination_str).unwrap();
+        assert_eq!(restored.method_named("new").len(), 1);
+        assert_eq!(&std::fs::read(&destination).unwrap()[..4], MAGIC_V2);
+        #[cfg(unix)]
+        assert_eq!(
+            std::fs::metadata(&destination)
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o777,
+            0o600
+        );
+        assert_only_destination_remains(&directory.0, &destination);
+    }
+
+    #[test]
+    fn persistence_atomic_concurrent_writers_never_mix_graphs() {
+        let directory = TestDir::new("atomic-concurrent");
+        let destination = directory.0.join("graph.cpg");
+        let barrier = Arc::new(Barrier::new(8));
+        let mut writers = Vec::new();
+        for index in 0..8 {
+            let destination = destination.clone();
+            let barrier = Arc::clone(&barrier);
+            writers.push(std::thread::spawn(move || {
+                let name = if index % 2 == 0 { "alpha" } else { "beta" };
+                let graph = sample_cpg(name);
+                barrier.wait();
+                graph.save(destination.to_str().unwrap())
+            }));
+        }
+        for writer in writers {
+            writer.join().unwrap().unwrap();
+        }
+
+        let restored = Cpg::load(destination.to_str().unwrap()).unwrap();
+        assert_eq!(
+            restored.method_named("alpha").len() + restored.method_named("beta").len(),
+            1
+        );
+        assert_only_destination_remains(&directory.0, &destination);
     }
 }
