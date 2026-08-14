@@ -13,8 +13,6 @@ cpg-analysis.workspace = true
 cpg-core.workspace = true
 cpg-incremental.workspace = true
 cpg-lang-c.workspace = true
-tree-sitter.workspace = true
-tree-sitter-c.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true

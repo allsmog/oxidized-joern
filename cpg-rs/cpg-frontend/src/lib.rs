@@ -83,6 +83,13 @@ pub struct BuildResult {
 pub trait Frontend {
     fn language(&self) -> &dyn Language;
 
+    /// Whether edits require rebuilding the whole frontend graph. Languages
+    /// with project-wide registries cannot safely splice a lightweight
+    /// single-file graph into their canonical project graph.
+    fn requires_project_build(&self) -> bool {
+        false
+    }
+
     /// Build a whole-project graph when semantics require project-wide
     /// registries (for example C globals, preprocessor methods, and external
     /// operator stubs). The default keeps the parallel per-file path. A
