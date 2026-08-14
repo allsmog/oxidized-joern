@@ -18,7 +18,7 @@
         "graphSha256": "19328b2456587bf7c87fa6a54c19c67660ccc475475648b6f4577b6cb013277d",
         "edgesSha256": "d452dd58cfb2795f198bfa9f5fe04271845447d3c15c21a4307a2a5c81d37504",
         "exportSha256": "8eb9dcf497ebba7eeafe5173bc157921c28aab223c6b8639c81ed0d5c6cce4d4",
-        "sarifSha256": "26bc14c50dc2c2afebab67c5eef3450980a34536045663e0b7b52dc0c7a13241",
+        "sarifSha256": "015e445008cb5eccc53cabc61390c7f0bbf715cc6cbbcb7cdb2f5d3f9cc155fb",
         "findings": 0
       },
       "budgets": {"buildSeconds": 20, "peakRssMiB": 512}
@@ -40,7 +40,7 @@
         "graphSha256": "6d4f3a4a6b89a67b99e61d04be59dc9b3bae56c21168767426b9a79bf87954bf",
         "edgesSha256": "e6f788405c99a8843ada89caaf27872f8644c2245047669ec0cdbcf554f6703c",
         "exportSha256": "385376228260b45349f55126b5d0b90cc3414927c6c7028ed364915170f1815e",
-        "sarifSha256": "26bc14c50dc2c2afebab67c5eef3450980a34536045663e0b7b52dc0c7a13241",
+        "sarifSha256": "015e445008cb5eccc53cabc61390c7f0bbf715cc6cbbcb7cdb2f5d3f9cc155fb",
         "findings": 0
       },
       "budgets": {"buildSeconds": 20, "peakRssMiB": 1536}

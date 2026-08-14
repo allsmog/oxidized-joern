@@ -54,7 +54,9 @@ pub struct Rule {
     /// Rule kind. Empty or "taint" (the default) = interprocedural
     /// source→sink taint query. Structural kinds reinterpret the name lists:
     /// "forbidden-call" — flag every call named in `sinks`, without requiring
-    /// a taint path; "discarded-return" — flag calls named in `sinks` whose multi-assign
+    /// a taint path; "unbounded-scanf" — flag scanf-family calls described by
+    /// `name@format-index` entries in `sinks` when a literal format has an
+    /// unbounded string/scanset conversion; "discarded-return" — flag calls named in `sinks` whose multi-assign
     /// binds a blank `_` (verified-value-discarded shape);
     /// "append-without-delete" — flag `sinks`-named calls appending a
     /// constant key matching `sources` with no `sanitizers`-named call
@@ -394,7 +396,16 @@ const C_RULES: &str = r#"{"rules":[
   {"id":"C-LIB-007","name":"input-to-dlopen","cwe":"CWE-114","severity":"high",
    "description":"external input controls a dynamically loaded library path",
    "sources":["getenv","gets","gets@out0","fgets","fgets@out0","scanf@out1","read@out1","recv@out1","fread@out0"],
-   "sinks":["dlopen@0","LoadLibraryA@0","LoadLibraryW@0","LoadLibraryExA@0","LoadLibraryExW@0"]}
+   "sinks":["dlopen@0","LoadLibraryA@0","LoadLibraryW@0","LoadLibraryExA@0","LoadLibraryExW@0"]},
+  {"id":"C-TMP-008","kind":"forbidden-call","name":"insecure-temporary-file","cwe":"CWE-377","severity":"high",
+   "description":"temporary filename APIs create a predictable or race-prone file path",
+   "sinks":["mktemp","tmpnam","tempnam"]},
+  {"id":"C-SCAN-009","kind":"unbounded-scanf","name":"unbounded-scanf-input","cwe":"CWE-120","severity":"high",
+   "description":"scanf-family string input has no destination field width",
+   "sinks":["scanf@0","fscanf@1","sscanf@1","vscanf@0","vfscanf@1","vsscanf@1"]},
+  {"id":"C-BUF-010","kind":"forbidden-call","name":"unbounded-format-output","cwe":"CWE-120","severity":"high",
+   "description":"sprintf-family output cannot enforce the destination buffer capacity",
+   "sinks":["sprintf","vsprintf"]}
 ]}"#;
 
 #[cfg(test)]

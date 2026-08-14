@@ -12,4 +12,7 @@ void positive_cases(void *db, char *dst) {
     sqlite3_exec(db, input, 0, 0, 0);
     fopen(input, "r");
     dlopen(input, RTLD_NOW);
+    tmpnam(dst);
+    scanf("%s", dst);
+    sprintf(dst, "%s", "constant");
 }
