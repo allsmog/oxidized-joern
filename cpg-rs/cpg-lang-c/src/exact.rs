@@ -9,7 +9,24 @@
 //! the output diffs cleanly against the oracle.
 
 use std::collections::{HashMap, HashSet};
+use std::path::Path;
 use tree_sitter::{Node, Parser};
+
+/// Deterministic compiler inputs that affect C preprocessing. Paths are
+/// source-snapshot-relative: callers must include every referenced header in
+/// `sources`, so cached builds hash exactly what the frontend reads.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct PreprocessorConfig {
+    pub include_paths: Vec<String>,
+    pub forced_includes: Vec<String>,
+    /// Command-line definitions in `NAME` or `NAME=VALUE` form.
+    pub defines: Vec<String>,
+}
+
+struct PreprocessorEnvironment<'a> {
+    sources: HashMap<String, &'a str>,
+    config: &'a PreprocessorConfig,
+}
 
 pub fn canonical_dump_paths(paths: &[String]) -> String {
     let sources: Vec<(String, String)> = paths
@@ -29,6 +46,13 @@ pub fn canonical_dump_paths(paths: &[String]) -> String {
 }
 
 pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
+    canonical_dump_sources_with_config(sources, &PreprocessorConfig::default())
+}
+
+pub fn canonical_dump_sources_with_config(
+    sources: &[(String, String)],
+    config: &PreprocessorConfig,
+) -> String {
     let mut parser = Parser::new();
     parser
         .set_language(&tree_sitter_c::LANGUAGE.into())
@@ -50,6 +74,13 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             }
         })
         .collect();
+    let preprocessor = PreprocessorEnvironment {
+        sources: sources
+            .iter()
+            .map(|(path, source)| (normalize_source_path(path), source.as_str()))
+            .collect(),
+        config,
+    };
 
     // Project-wide registries: defined functions (calls to these never become
     // stubs; each also gets a method TYPE_DECL) and struct definitions.
@@ -59,7 +90,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let mut used_types: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     for u in &units {
         let b = u.src.as_bytes();
-        let (top_level, _) = preprocess_translation_unit(u.tree.root_node(), b);
+        let (top_level, _) =
+            preprocess_translation_unit(u.tree.root_node(), b, &u.file, &preprocessor);
         for f in top_level {
             match f.kind() {
                 "function_definition" => {
@@ -128,7 +160,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         .iter()
         .map(|u| {
             let b = u.src.as_bytes();
-            let (top_level, _) = preprocess_translation_unit(u.tree.root_node(), b);
+            let (top_level, _) =
+                preprocess_translation_unit(u.tree.root_node(), b, &u.file, &preprocessor);
             let n = top_level
                 .iter()
                 .filter(|f| f.kind() == "preproc_include")
@@ -145,7 +178,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         let mut functions: HashMap<String, String> = HashMap::new();
         let mut function_full_names: HashMap<String, String> = HashMap::new();
         let mut globals: HashMap<String, String> = HashMap::new();
-        let (top_level, macros) = preprocess_translation_unit(root, b);
+        let (top_level, macros) = preprocess_translation_unit(root, b, &u.file, &preprocessor);
         let mut enumerators: Vec<String> = Vec::new();
         for &f in &top_level {
             if f.kind() == "enum_specifier" {
@@ -206,7 +239,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             globals: &globals,
             enumerators: &enumerators,
             macros: &macros,
-            file: u.file.clone(),
+            preprocessor: &preprocessor,
             used_macros: &mut used_macros,
             symbols: HashMap::new(),
             phantoms: Vec::new(),
@@ -280,7 +313,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         globals: &empty_globals,
         enumerators: &empty_enums,
         macros: &empty_macros,
-        file: String::new(),
+        preprocessor: &preprocessor,
         used_macros: &mut used_macros,
         symbols: HashMap::new(),
         phantoms: Vec::new(),
@@ -598,6 +631,7 @@ struct MacroDef {
     params: Option<Vec<String>>, // None = object-like
     body: String,
     directive: String,
+    origin: String,
 }
 
 /// Preprocess top-level nodes and collect the final active macro environment
@@ -606,11 +640,27 @@ struct MacroDef {
 fn preprocess_translation_unit<'tree>(
     root: Node<'tree>,
     b: &[u8],
+    file: &str,
+    environment: &PreprocessorEnvironment<'_>,
 ) -> (Vec<Node<'tree>>, HashMap<String, MacroDef>) {
-    let mut macros = HashMap::new();
+    let mut macros = command_line_macros(environment.config, file);
     let mut active = Vec::new();
+    let mut include_stack = HashSet::from([normalize_source_path(file)]);
+    for forced in &environment.config.forced_includes {
+        if let Some(included) = resolve_include(file, forced, false, environment) {
+            apply_include_file(&included, environment, &mut macros, &mut include_stack);
+        }
+    }
     for child in named_children(root) {
-        preprocess_child(child, b, &mut macros, &mut active);
+        preprocess_child(
+            child,
+            b,
+            file,
+            environment,
+            &mut macros,
+            &mut active,
+            &mut include_stack,
+        );
     }
     (active, macros)
 }
@@ -618,19 +668,38 @@ fn preprocess_translation_unit<'tree>(
 fn preprocess_child<'tree>(
     child: Node<'tree>,
     b: &[u8],
+    file: &str,
+    environment: &PreprocessorEnvironment<'_>,
     macros: &mut HashMap<String, MacroDef>,
     active: &mut Vec<Node<'tree>>,
+    include_stack: &mut HashSet<String>,
 ) {
     match child.kind() {
         "preproc_def" | "preproc_function_def" => {
-            if let Some((name, definition)) = macro_definition(child, b) {
+            if let Some((name, definition)) = macro_definition(child, b, file) {
                 macros.insert(name, definition);
+            }
+            active.push(child);
+        }
+        "preproc_include" => {
+            if let Some((target, angled)) = include_target(text(child, b)) {
+                if let Some(included) = resolve_include(file, &target, angled, environment) {
+                    apply_include_file(&included, environment, macros, include_stack);
+                }
             }
             active.push(child);
         }
         "preproc_if" | "preproc_ifdef" => {
             for selected in selected_preproc_children(child, b, macros) {
-                preprocess_child(selected, b, macros, active);
+                preprocess_child(
+                    selected,
+                    b,
+                    file,
+                    environment,
+                    macros,
+                    active,
+                    include_stack,
+                );
             }
         }
         "preproc_call" if text(child, b).trim_start().starts_with("#undef") => {
@@ -643,7 +712,7 @@ fn preprocess_child<'tree>(
     }
 }
 
-fn macro_definition(node: Node, b: &[u8]) -> Option<(String, MacroDef)> {
+fn macro_definition(node: Node, b: &[u8], file: &str) -> Option<(String, MacroDef)> {
     let name = node
         .child_by_field_name("name")
         .map(|value| text(value, b).to_string())?;
@@ -674,8 +743,133 @@ fn macro_definition(node: Node, b: &[u8]) -> Option<(String, MacroDef)> {
             params,
             body,
             directive: text(node, b).trim_end().to_string(),
+            origin: normalize_source_path(file),
         },
     ))
+}
+
+fn command_line_macros(config: &PreprocessorConfig, file: &str) -> HashMap<String, MacroDef> {
+    config
+        .defines
+        .iter()
+        .filter_map(|definition| {
+            let (name, body) = definition
+                .split_once('=')
+                .map_or((definition.as_str(), "1"), |(name, value)| (name, value));
+            let name = name.trim();
+            (!name.is_empty()).then(|| {
+                (
+                    name.to_string(),
+                    MacroDef {
+                        params: None,
+                        body: body.to_string(),
+                        directive: format!("#define {name} {body}"),
+                        origin: normalize_source_path(file),
+                    },
+                )
+            })
+        })
+        .collect()
+}
+
+fn include_target(directive: &str) -> Option<(String, bool)> {
+    let directive = directive.trim();
+    if let Some(start) = directive.find('"') {
+        let rest = &directive[start + 1..];
+        return rest.find('"').map(|end| (rest[..end].to_string(), false));
+    }
+    let start = directive.find('<')?;
+    let rest = &directive[start + 1..];
+    rest.find('>').map(|end| (rest[..end].to_string(), true))
+}
+
+fn resolve_include(
+    current_file: &str,
+    target: &str,
+    angled: bool,
+    environment: &PreprocessorEnvironment<'_>,
+) -> Option<String> {
+    let target = normalize_source_path(target);
+    let mut candidates = Vec::new();
+    if !angled {
+        let parent = Path::new(current_file)
+            .parent()
+            .unwrap_or_else(|| Path::new(""));
+        candidates.push(normalize_source_path(
+            &parent.join(&target).to_string_lossy(),
+        ));
+    }
+    candidates.extend(
+        environment.config.include_paths.iter().map(|include| {
+            normalize_source_path(&Path::new(include).join(&target).to_string_lossy())
+        }),
+    );
+    candidates.push(target);
+    candidates
+        .into_iter()
+        .find(|candidate| environment.sources.contains_key(candidate))
+}
+
+fn apply_include_file(
+    included: &str,
+    environment: &PreprocessorEnvironment<'_>,
+    macros: &mut HashMap<String, MacroDef>,
+    include_stack: &mut HashSet<String>,
+) {
+    let included = normalize_source_path(included);
+    if !include_stack.insert(included.clone()) {
+        return;
+    }
+    let Some(source) = environment.sources.get(&included).copied() else {
+        include_stack.remove(&included);
+        return;
+    };
+    let mut parser = Parser::new();
+    if parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .is_err()
+    {
+        include_stack.remove(&included);
+        return;
+    }
+    if let Some(tree) = parser.parse(source, None) {
+        let mut ignored = Vec::new();
+        for child in named_children(tree.root_node()) {
+            preprocess_child(
+                child,
+                source.as_bytes(),
+                &included,
+                environment,
+                macros,
+                &mut ignored,
+                include_stack,
+            );
+        }
+    }
+    include_stack.remove(&included);
+}
+
+fn normalize_source_path(path: &str) -> String {
+    let path = path.replace('\\', "/");
+    let absolute = path.starts_with('/');
+    let mut parts = Vec::new();
+    for part in path.split('/') {
+        match part {
+            "" | "." => {}
+            ".." if parts.last().is_some_and(|part| *part != "..") => {
+                parts.pop();
+            }
+            ".." if !absolute => parts.push(part),
+            ".." => {}
+            _ => parts.push(part),
+        }
+    }
+    let normalized = parts.join("/");
+    if absolute {
+        format!("/{normalized}")
+    } else {
+        normalized
+    }
 }
 
 fn selected_preproc_children<'tree>(
@@ -947,7 +1141,7 @@ struct Ctx<'a> {
     globals: &'a HashMap<String, String>,
     enumerators: &'a Vec<String>,
     macros: &'a HashMap<String, MacroDef>,
-    file: String,
+    preprocessor: &'a PreprocessorEnvironment<'a>,
     // used macros: full_name -> (name, directive, nparams, ret type)
     used_macros: &'a mut std::collections::BTreeMap<String, (String, String, usize, String)>,
     symbols: HashMap<String, String>, // local/param name -> type
@@ -1361,7 +1555,7 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
-        let (top_level, _) = preprocess_translation_unit(root, b);
+        let (top_level, _) = preprocess_translation_unit(root, b, file, self.preprocessor);
         for &n in &top_level {
             match n.kind() {
                 "struct_specifier" | "union_specifier" | "enum_specifier"
@@ -1733,7 +1927,8 @@ impl Ctx<'_> {
         let mut expanding = HashSet::from([name.to_string()]);
         let expansion = expand_macros_text(&substituted, self.macros, 0, &mut expanding);
         let ret = expansion_type(&expansion, &self.symbols, self.functions);
-        let full = format!("{}:{name}:{ret}({})", self.file, params.len());
+        let origin = &self.macros[name].origin;
+        let full = format!("{origin}:{name}:{ret}({})", params.len());
         self.used_macros.entry(full.clone()).or_insert((
             name.to_string(),
             directive,
@@ -5104,6 +5299,7 @@ mod macro_tests {
             params: Some(params.iter().map(|value| (*value).to_string()).collect()),
             body: body.to_string(),
             directive: String::new(),
+            origin: "test.c".to_string(),
         }
     }
 

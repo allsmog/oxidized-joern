@@ -21,7 +21,9 @@ Single source of truth across iterations. Update in the same commit as the work.
   pointer/member access, sanitizers, cross-calls, recursion, persistence, and
   duplicate translation-unit-local identities. Pinned zlib 1.3.1 and Lua 5.4.7
   builds gate deterministic graph/edge/export/SARIF output, resource budgets,
-  and incremental-vs-clean equivalence. See `COMPATIBILITY.md` for the release
+  and incremental-vs-clean equivalence. Nested quoted/angle include paths,
+  forced includes, and command-line definitions also pass a live 4/4
+  differential against Joern v4.0.555. See `COMPATIBILITY.md` for the release
   boundary.
 - **All-language acceptance complete (2026-08-14).** C, C++, Go, Java,
   JavaScript, TypeScript, Python, Ruby, Rust, and Scala pass the shared schema,

@@ -107,10 +107,21 @@ impl Language {
     }
 
     fn project(self) -> Project {
+        self.project_with_c_preprocessor(cpg_lang_c::exact::PreprocessorConfig::default())
+    }
+
+    fn project_with_c_preprocessor(
+        self,
+        c_preprocessor: cpg_lang_c::exact::PreprocessorConfig,
+    ) -> Project {
         use cpg_lang_ts::TsFrontend;
         match self {
             Self::C => Project::new(
-                || Box::new(cpg_lang_c::CFrontend::new()),
+                move || {
+                    Box::new(cpg_lang_c::CFrontend::with_preprocessor(
+                        c_preprocessor.clone(),
+                    ))
+                },
                 standard_pipeline(),
             ),
             Self::Python => Project::new(|| Box::new(TsFrontend::python()), standard_pipeline()),
@@ -136,6 +147,19 @@ pub fn make_project(lang: &str) -> Result<(Project, &'static [&'static str]), St
     Ok((lang.project(), lang.extensions()))
 }
 
+/// Construct a project with deterministic C compiler inputs. Supplying these
+/// options for another language is rejected instead of silently ignored.
+pub fn make_project_with_c_preprocessor(
+    lang: &str,
+    config: cpg_lang_c::exact::PreprocessorConfig,
+) -> Result<(Project, &'static [&'static str]), String> {
+    let lang = Language::parse(lang)?;
+    if lang != Language::C && config != cpg_lang_c::exact::PreprocessorConfig::default() {
+        return Err("C preprocessor options require --lang c".to_string());
+    }
+    Ok((lang.project_with_c_preprocessor(config), lang.extensions()))
+}
+
 /// Build a project by parsing every matching source file under `dir`.
 pub fn build_project(dir: &str, lang: &str) -> Result<Project, String> {
     build_project_filtered(dir, lang, &[])
@@ -156,9 +180,32 @@ pub fn build_project_ext(
     excludes: &[&str],
     external_summaries: Option<&str>,
 ) -> Result<Project, String> {
+    build_project_ext_with_c_preprocessor(
+        dir,
+        lang,
+        excludes,
+        external_summaries,
+        cpg_lang_c::exact::PreprocessorConfig::default(),
+    )
+}
+
+pub fn build_project_ext_with_c_preprocessor(
+    dir: &str,
+    lang: &str,
+    excludes: &[&str],
+    external_summaries: Option<&str>,
+    config: cpg_lang_c::exact::PreprocessorConfig,
+) -> Result<Project, String> {
     let (_, exts) = make_project(lang)?;
     let sources = collect_sources_filtered(Path::new(dir), exts, excludes)?;
-    build_project_from_sources(lang, &sources, external_summaries)
+    for forced in &config.forced_includes {
+        if !sources.iter().any(|(path, _)| path == forced) {
+            return Err(format!(
+                "forced include is not part of the source snapshot: {forced}"
+            ));
+        }
+    }
+    build_project_from_sources_with_c_preprocessor(lang, &sources, external_summaries, config)
 }
 
 /// Build from an already-collected source snapshot. Workspace caching uses
@@ -169,7 +216,21 @@ pub fn build_project_from_sources(
     sources: &[(String, String)],
     external_summaries: Option<&str>,
 ) -> Result<Project, String> {
-    let (mut project, _) = make_project(lang)?;
+    build_project_from_sources_with_c_preprocessor(
+        lang,
+        sources,
+        external_summaries,
+        cpg_lang_c::exact::PreprocessorConfig::default(),
+    )
+}
+
+pub fn build_project_from_sources_with_c_preprocessor(
+    lang: &str,
+    sources: &[(String, String)],
+    external_summaries: Option<&str>,
+    config: cpg_lang_c::exact::PreprocessorConfig,
+) -> Result<Project, String> {
+    let (mut project, _) = make_project_with_c_preprocessor(lang, config)?;
     load_externals(&mut project, external_summaries)?;
     let refs: Vec<(&str, &str)> = sources
         .iter()
@@ -230,8 +291,89 @@ pub fn open_project(args: &[String]) -> Result<Project, String> {
             return Err("missing <dir> (or --load <graph.cpg>)".to_string());
         };
         let lang = flag(args, "--lang").unwrap_or("c");
-        build_project_ext(dir, lang, &flags(args, "--exclude"), ext_json.as_deref())
+        let config = c_preprocessor_config(args, Path::new(dir), lang)?;
+        build_project_ext_with_c_preprocessor(
+            dir,
+            lang,
+            &flags(args, "--exclude"),
+            ext_json.as_deref(),
+            config,
+        )
     }
+}
+
+fn c_preprocessor_config(
+    args: &[String],
+    source_root: &Path,
+    lang: &str,
+) -> Result<cpg_lang_c::exact::PreprocessorConfig, String> {
+    let include_values: Vec<&str> = flags(args, "--include-path")
+        .into_iter()
+        .chain(flags(args, "-I"))
+        .collect();
+    let forced_values = flags(args, "--force-include");
+    let defines: Vec<String> = flags(args, "--define")
+        .into_iter()
+        .chain(flags(args, "-D"))
+        .map(str::to_string)
+        .collect();
+    if include_values.is_empty() && forced_values.is_empty() && defines.is_empty() {
+        return Ok(cpg_lang_c::exact::PreprocessorConfig::default());
+    }
+    if Language::parse(lang)? != Language::C {
+        return Err("--include-path, --force-include, and --define require --lang c".to_string());
+    }
+    let root = source_root
+        .canonicalize()
+        .map_err(|error| format!("invalid source root {}: {error}", source_root.display()))?;
+    let source_relative = |value: &str, expect_directory: bool| -> Result<String, String> {
+        let candidate = Path::new(value);
+        let candidate = if candidate.is_absolute() {
+            candidate.to_path_buf()
+        } else {
+            root.join(candidate)
+        };
+        let canonical = candidate
+            .canonicalize()
+            .map_err(|error| format!("invalid C preprocessor path {value}: {error}"))?;
+        if expect_directory && !canonical.is_dir() {
+            return Err(format!("C include path is not a directory: {value}"));
+        }
+        if !expect_directory && !canonical.is_file() {
+            return Err(format!("forced include is not a file: {value}"));
+        }
+        let relative = canonical.strip_prefix(&root).map_err(|_| {
+            format!(
+                "C preprocessor path must be inside source root {}: {value}",
+                root.display()
+            )
+        })?;
+        Ok(relative.to_string_lossy().replace('\\', "/"))
+    };
+    for definition in &defines {
+        let name = definition
+            .split_once('=')
+            .map_or(definition.as_str(), |(name, _)| name)
+            .trim();
+        if name.is_empty()
+            || !name.bytes().enumerate().all(|(index, byte)| {
+                byte == b'_' || byte.is_ascii_alphabetic() || (index > 0 && byte.is_ascii_digit())
+            })
+        {
+            return Err(format!("invalid C preprocessor definition: {definition}"));
+        }
+    }
+    Ok(cpg_lang_c::exact::PreprocessorConfig {
+        include_paths: include_values
+            .into_iter()
+            .map(|value| source_relative(value, true))
+            .collect::<Result<_, _>>()?,
+        forced_includes: forced_values
+            .into_iter()
+            .map(|value| source_relative(value, false))
+            .collect::<Result<_, _>>()?,
+        defines,
+    })
 }
 
 pub fn collect_sources(dir: &Path, exts: &[&str]) -> Result<Vec<(String, String)>, String> {
@@ -778,6 +920,43 @@ mod glob_tests {
         let error = collect_sources(&root, &["c"]).unwrap_err();
         assert!(error.contains("bad.c"), "{error}");
         assert!(error.contains("cannot read source"), "{error}");
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn source_build_threads_c_preprocessor_inputs_into_the_frontend() {
+        let root = source_tmpdir("c-preprocessor-inputs");
+        std::fs::create_dir_all(root.join("include")).unwrap();
+        std::fs::create_dir_all(root.join("config")).unwrap();
+        std::fs::write(
+            root.join("main.c"),
+            "#include <feature.h>\n#if HEADER_ON && FORCE_ON && CLI_ON\nint live(void) { return VALUE(2); }\n#else\nint dead(void) { return 0; }\n#endif\n",
+        )
+        .unwrap();
+        std::fs::write(
+            root.join("include/feature.h"),
+            "#define HEADER_ON 1\n#define VALUE(x) ((x) + 1)\n",
+        )
+        .unwrap();
+        std::fs::write(root.join("config/force.h"), "#define FORCE_ON 1\n").unwrap();
+        let args = vec![
+            "cpg".to_string(),
+            "build".to_string(),
+            root.to_string_lossy().into_owned(),
+            "--lang".to_string(),
+            "c".to_string(),
+            "--include-path".to_string(),
+            "include".to_string(),
+            "--force-include".to_string(),
+            "config/force.h".to_string(),
+            "--define".to_string(),
+            "CLI_ON=1".to_string(),
+        ];
+
+        let project = open_project(&args).expect("configured C build");
+        assert_eq!(project.cpg.method_named("live").len(), 1);
+        assert!(project.cpg.method_named("dead").is_empty());
+        assert_eq!(project.cpg.calls_named("VALUE").len(), 1);
         let _ = std::fs::remove_dir_all(root);
     }
 
