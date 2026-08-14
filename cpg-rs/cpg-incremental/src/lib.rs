@@ -138,24 +138,41 @@ impl Project {
     pub fn build(&mut self, files: &[(&str, &str)]) -> BuildStats {
         use rayon::prelude::*;
         let t0 = std::time::Instant::now();
-        let donors: Vec<Cpg> = files
-            .par_iter()
-            .map(|(path, src)| {
-                let mut fe = (self.factory)();
-                let mut g = Cpg::new();
-                fe.build_file(&mut g, path, src);
-                g
-            })
-            .collect();
-        let parallel_done = t0.elapsed();
+        let mut project_frontend = (self.factory)();
+        let project_graph = project_frontend.build_project(files);
+        let parallel_done;
         let mut ids = Vec::new();
-        for ((path, src), donor) in files.iter().zip(donors) {
-            self.cpg.absorb(donor);
-            let id = self.cpg.file_id(path);
-            self.file_hashes.insert((*path).to_string(), hash(src));
-            ids.push(id);
-            self.record_methods(id);
-            self.record_calls(id);
+        if let Some(graph) = project_graph {
+            self.cpg = graph;
+            parallel_done = t0.elapsed();
+            for (path, src) in files {
+                self.file_hashes.insert((*path).to_string(), hash(src));
+            }
+            ids = self.cpg.files();
+            ids.sort_by_key(|file| self.cpg.path_of(*file).unwrap_or("").to_string());
+            for &id in &ids {
+                self.record_methods(id);
+                self.record_calls(id);
+            }
+        } else {
+            let donors: Vec<Cpg> = files
+                .par_iter()
+                .map(|(path, src)| {
+                    let mut fe = (self.factory)();
+                    let mut g = Cpg::new();
+                    fe.build_file(&mut g, path, src);
+                    g
+                })
+                .collect();
+            parallel_done = t0.elapsed();
+            for ((path, src), donor) in files.iter().zip(donors) {
+                self.cpg.absorb(donor);
+                let id = self.cpg.file_id(path);
+                self.file_hashes.insert((*path).to_string(), hash(src));
+                ids.push(id);
+                self.record_methods(id);
+                self.record_calls(id);
+            }
         }
         let parse_build = t0.elapsed();
 

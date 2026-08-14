@@ -11,6 +11,7 @@ use cpg_frontend::{BuildResult, Frontend, Language, LanguageTraits};
 use tree_sitter::{Node, Parser};
 
 pub mod exact;
+pub mod import;
 
 pub struct C;
 

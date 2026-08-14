@@ -83,6 +83,15 @@ pub struct BuildResult {
 pub trait Frontend {
     fn language(&self) -> &dyn Language;
 
+    /// Build a whole-project graph when semantics require project-wide
+    /// registries (for example C globals, preprocessor methods, and external
+    /// operator stubs). The default keeps the parallel per-file path. A
+    /// frontend returning `Some` owns only AST/schema construction; the driver
+    /// still runs the shared production pass pipeline afterward.
+    fn build_project(&mut self, _files: &[(&str, &str)]) -> Option<Cpg> {
+        None
+    }
+
     /// Parse `source` for `path` and emit its subgraph into `cpg`. The frontend
     /// must attribute every node it creates to the returned file's `FileId`
     /// (the builder enforces this) so the driver can later delete and rebuild
