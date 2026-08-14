@@ -100,6 +100,9 @@ jobs:
       - name: Check canonical C security outcomes
         run: cargo test -p cpg-analysis --test canonical_c_flow --locked
         working-directory: cpg-rs
+      - name: Check labeled C rule precision and recall
+        run: cargo test -p cpg-cli --test rule_quality --locked
+        working-directory: cpg-rs
       - name: Check every accepted language workflow
         run: |
           cargo test -p conformance --locked all_languages_conform

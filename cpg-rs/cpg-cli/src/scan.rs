@@ -42,6 +42,12 @@ pub fn run_pack_entry<'a>(
             // parameterise an AST census instead (see `cpg_analysis::structural`).
             match rule.kind.as_str() {
                 "" | "taint" => {}
+                "forbidden-call" => {
+                    return RuleFindings {
+                        rule,
+                        findings: cpg_analysis::structural::forbidden_calls(&project.cpg, &sinks),
+                    };
+                }
                 "discarded-return" => {
                     return RuleFindings {
                         rule,

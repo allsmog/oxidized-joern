@@ -53,7 +53,8 @@ pub struct Rule {
     pub id: String,
     /// Rule kind. Empty or "taint" (the default) = interprocedural
     /// source→sink taint query. Structural kinds reinterpret the name lists:
-    /// "discarded-return" — flag calls named in `sinks` whose multi-assign
+    /// "forbidden-call" — flag every call named in `sinks`, without requiring
+    /// a taint path; "discarded-return" — flag calls named in `sinks` whose multi-assign
     /// binds a blank `_` (verified-value-discarded shape);
     /// "append-without-delete" — flag `sinks`-named calls appending a
     /// constant key matching `sources` with no `sanitizers`-named call
@@ -238,7 +239,7 @@ pub fn builtin_pack(lang: &str) -> Option<RulePack> {
         "scala" => SCALA_RULES,
         "python" => PYTHON_RULES,
         "java" => JAVA_RULES,
-        "javascript" | "js" => JS_RULES,
+        "javascript" | "js" | "typescript" | "ts" | "tsx" => JS_RULES,
         "c" => C_RULES,
         "cpp" | "c++" | "cxx" => CPP_RULES,
         _ => return None,
@@ -370,15 +371,30 @@ const C_RULES: &str = r#"{"rules":[
   {"id":"C-CMD-001","name":"input-to-system","cwe":"CWE-78","severity":"high",
    "description":"external input reaches shell execution",
    "sources":["getenv","gets","gets@out0","fgets","fgets@out0","scanf@out1","read@out1","recv@out1","fread@out0"],
-   "sinks":["system","popen","execl","execlp","execv","execvp","execve"]},
+   "sinks":["system@0","popen@0","execl@0","execlp@0","execv@0","execvp@0","execve@0"]},
   {"id":"C-BUF-002","name":"input-to-unbounded-copy","cwe":"CWE-120","severity":"high",
    "description":"external input reaches an unbounded string copy",
    "sources":["getenv","gets","gets@out0","fgets","fgets@out0","scanf@out1","read@out1","recv@out1","fread@out0"],
-   "sinks":["strcpy","strcat","sprintf","vsprintf"]},
+   "sinks":["strcpy@1","strcat@1","sprintf@1","vsprintf@1"]},
   {"id":"C-FMT-003","name":"input-to-format","cwe":"CWE-134","severity":"medium",
    "description":"external input reaches a format string position",
    "sources":["getenv","gets","gets@out0","fgets","fgets@out0","scanf@out1","read@out1","recv@out1","fread@out0"],
-   "sinks":["printf","fprintf","syslog"]}
+   "sinks":["printf@0","fprintf@1","sprintf@1","snprintf@2","syslog@1","vsnprintf@2"]},
+  {"id":"C-API-004","kind":"forbidden-call","name":"unbounded-line-input","cwe":"CWE-242","severity":"critical",
+   "description":"gets cannot limit input and is always unsafe",
+   "sinks":["gets"]},
+  {"id":"C-SQL-005","name":"input-to-sql","cwe":"CWE-89","severity":"high",
+   "description":"external input reaches SQL execution text",
+   "sources":["getenv","gets","gets@out0","fgets","fgets@out0","scanf@out1","read@out1","recv@out1","fread@out0"],
+   "sinks":["sqlite3_exec@1","sqlite3_prepare@1","sqlite3_prepare_v2@1","mysql_query@1","PQexec@1"]},
+  {"id":"C-PATH-006","name":"input-to-file","cwe":"CWE-22","severity":"high",
+   "description":"external input reaches a filesystem path operation",
+   "sources":["getenv","gets","gets@out0","fgets","fgets@out0","scanf@out1","read@out1","recv@out1","fread@out0"],
+   "sinks":["fopen@0","open@0","unlink@0","remove@0","rmdir@0","mkdir@0","rename@0","rename@1","chmod@0","chown@0"]},
+  {"id":"C-LIB-007","name":"input-to-dlopen","cwe":"CWE-114","severity":"high",
+   "description":"external input controls a dynamically loaded library path",
+   "sources":["getenv","gets","gets@out0","fgets","fgets@out0","scanf@out1","read@out1","recv@out1","fread@out0"],
+   "sinks":["dlopen@0","LoadLibraryA@0","LoadLibraryW@0","LoadLibraryExA@0","LoadLibraryExW@0"]}
 ]}"#;
 
 #[cfg(test)]
@@ -509,13 +525,18 @@ mod tests {
             "java",
             "javascript",
             "js",
+            "typescript",
+            "ts",
+            "tsx",
             "c",
             "cpp",
         ] {
             let pack = builtin_pack(lang).unwrap_or_else(|| panic!("no builtin pack for {lang}"));
             assert!(!pack.rules.is_empty(), "{lang} pack is empty");
             for rule in &pack.rules {
-                assert!(!rule.sources.is_empty(), "{}: no sources", rule.id);
+                if rule.kind.is_empty() || rule.kind == "taint" {
+                    assert!(!rule.sources.is_empty(), "{}: no sources", rule.id);
+                }
                 assert!(!rule.sinks.is_empty(), "{}: no sinks", rule.id);
                 assert!(rule.cwe.is_some(), "{}: no CWE", rule.id);
             }
