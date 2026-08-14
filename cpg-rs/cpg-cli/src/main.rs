@@ -857,6 +857,27 @@ fn query_cmd(args: &[String]) {
         ),
         QueryResult::Strings(values) => json!(values),
         QueryResult::Integers(values) => json!(values),
+        QueryResult::Paths(paths) => Value::Array(
+            paths
+                .into_iter()
+                .map(|path| {
+                    Value::Array(
+                        path.into_iter()
+                            .map(|node| {
+                                json!({
+                                    "id": node.0,
+                                    "label": node_kind_label(project.cpg.kind_of(node)),
+                                    "name": project.cpg.name_of(node),
+                                    "code": project.cpg.code_of(node),
+                                    "filename": project.cpg.path_of(project.cpg.file_of(node)),
+                                    "lineNumber": project.cpg.line_of(node),
+                                })
+                            })
+                            .collect(),
+                    )
+                })
+                .collect(),
+        ),
         QueryResult::Count(count) => json!(count),
     };
     let output = serde_json::to_string_pretty(&value).expect("query result serializes");
