@@ -18,7 +18,7 @@ int main() {
 "#;
 
 fn build() -> cpg_incremental::Project {
-    let (mut project, _) = make_project("c");
+    let (mut project, _) = make_project("c").unwrap();
     project.build(&[("app.c", SRC)]);
     project
 }

@@ -57,7 +57,7 @@ fn scan_emits_valid_sarif_with_codeflows() {
     let src = tmp.0.join("vuln.c");
     std::fs::write(&src, VULN_C).unwrap();
 
-    let project = build_project(tmp.0.to_str().unwrap(), "c");
+    let project = build_project(tmp.0.to_str().unwrap(), "c").unwrap();
     let pack = example_pack();
     let log = scan::scan_to_sarif(&project, &pack, tmp.0.to_str().unwrap());
     let text = log.to_json_pretty();
@@ -146,7 +146,7 @@ fn scan_emits_valid_sarif_with_codeflows() {
 fn server_scan_command_groups_findings_by_rule_id() {
     let tmp = TempDir::new("serve");
     std::fs::write(tmp.0.join("vuln.c"), VULN_C).unwrap();
-    let mut project = build_project(tmp.0.to_str().unwrap(), "c");
+    let mut project = build_project(tmp.0.to_str().unwrap(), "c").unwrap();
 
     // Inline rules, including forward-compat keys the loader must ignore.
     let resp = handle(
@@ -202,7 +202,7 @@ int main(void) {
 fn rule_sanitizer_suppresses_finding() {
     let tmp = TempDir::new("sanitize");
     std::fs::write(tmp.0.join("vuln.c"), SANITIZED_C).unwrap();
-    let project = build_project(tmp.0.to_str().unwrap(), "c");
+    let project = build_project(tmp.0.to_str().unwrap(), "c").unwrap();
 
     let base = r#"{"rules":[{"id":"CPG-1","sources":["getenv"],"sinks":["system"]}]}"#;
     let with_san = r#"{"rules":[{"id":"CPG-1","sources":["getenv"],"sinks":["system"],"sanitizers":["clean"]}]}"#;
