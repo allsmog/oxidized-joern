@@ -21,6 +21,8 @@ use cpg_analysis::standard_pipeline;
 use cpg_core::{Cpg, Query};
 use cpg_incremental::{Project, UpdateOutcome};
 use serde_json::{json, Value};
+use std::collections::{BTreeMap, HashSet};
+use std::path::{Path, PathBuf};
 
 /// Look up the value following a `--flag` in an argv slice.
 pub fn flag<'a>(args: &'a [String], name: &str) -> Option<&'a str> {
@@ -40,65 +42,108 @@ pub fn flags<'a>(args: &'a [String], name: &str) -> Vec<&'a str> {
         .collect()
 }
 
-/// An empty project for `lang` plus the source-file extensions it owns.
-pub fn make_project(lang: &str) -> (Project, &'static [&'static str]) {
-    use cpg_lang_ts::TsFrontend;
-    match lang {
-        "python" => (
-            Project::new(|| Box::new(TsFrontend::python()), standard_pipeline()),
-            &["py"],
-        ),
-        "java" => (
-            Project::new(|| Box::new(TsFrontend::java()), standard_pipeline()),
-            &["java"],
-        ),
-        "go" => (
-            Project::new(|| Box::new(TsFrontend::go()), standard_pipeline()),
-            &["go"],
-        ),
-        "javascript" | "js" => (
-            Project::new(|| Box::new(TsFrontend::javascript()), standard_pipeline()),
-            &["js", "mjs", "cjs"],
-        ),
-        "ruby" | "rb" => (
-            Project::new(|| Box::new(TsFrontend::ruby()), standard_pipeline()),
-            &["rb"],
-        ),
-        "rust" | "rs" => (
-            Project::new(|| Box::new(TsFrontend::rust()), standard_pipeline()),
-            &["rs"],
-        ),
-        "scala" => (
-            Project::new(|| Box::new(TsFrontend::scala()), standard_pipeline()),
-            &["scala", "sc"],
-        ),
-        "typescript" | "ts" => (
-            Project::new(|| Box::new(TsFrontend::typescript()), standard_pipeline()),
-            &["ts", "tsx", "mts", "cts"],
-        ),
-        "cpp" | "c++" | "cxx" => (
-            Project::new(|| Box::new(TsFrontend::cpp()), standard_pipeline()),
-            &["cpp", "cc", "cxx", "hpp", "hxx", "hh", "h", "ipp"],
-        ),
-        _ => (
-            Project::new(
+/// A supported source language. Parsing this closed set prevents misspelled
+/// language names from silently selecting an unrelated frontend.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Language {
+    C,
+    Python,
+    Java,
+    Go,
+    JavaScript,
+    Ruby,
+    Rust,
+    Scala,
+    TypeScript,
+    Cpp,
+}
+
+impl Language {
+    pub fn parse(value: &str) -> Result<Self, String> {
+        match value {
+            "c" => Ok(Self::C),
+            "python" => Ok(Self::Python),
+            "java" => Ok(Self::Java),
+            "go" => Ok(Self::Go),
+            "javascript" | "js" => Ok(Self::JavaScript),
+            "ruby" | "rb" => Ok(Self::Ruby),
+            "rust" | "rs" => Ok(Self::Rust),
+            "scala" => Ok(Self::Scala),
+            "typescript" | "ts" => Ok(Self::TypeScript),
+            "cpp" | "c++" | "cxx" => Ok(Self::Cpp),
+            _ => Err(format!("unsupported language '{value}'")),
+        }
+    }
+
+    pub fn canonical_name(self) -> &'static str {
+        match self {
+            Self::C => "c",
+            Self::Python => "python",
+            Self::Java => "java",
+            Self::Go => "go",
+            Self::JavaScript => "javascript",
+            Self::Ruby => "ruby",
+            Self::Rust => "rust",
+            Self::Scala => "scala",
+            Self::TypeScript => "typescript",
+            Self::Cpp => "cpp",
+        }
+    }
+
+    pub fn extensions(self) -> &'static [&'static str] {
+        match self {
+            Self::C => &["c", "h"],
+            Self::Python => &["py"],
+            Self::Java => &["java"],
+            Self::Go => &["go"],
+            Self::JavaScript => &["js", "mjs", "cjs"],
+            Self::Ruby => &["rb"],
+            Self::Rust => &["rs"],
+            Self::Scala => &["scala", "sc"],
+            Self::TypeScript => &["ts", "tsx", "mts", "cts"],
+            Self::Cpp => &["cpp", "cc", "cxx", "hpp", "hxx", "hh", "h", "ipp"],
+        }
+    }
+
+    fn project(self) -> Project {
+        use cpg_lang_ts::TsFrontend;
+        match self {
+            Self::C => Project::new(
                 || Box::new(cpg_lang_c::CFrontend::new()),
                 standard_pipeline(),
             ),
-            &["c", "h"],
-        ),
+            Self::Python => Project::new(|| Box::new(TsFrontend::python()), standard_pipeline()),
+            Self::Java => Project::new(|| Box::new(TsFrontend::java()), standard_pipeline()),
+            Self::Go => Project::new(|| Box::new(TsFrontend::go()), standard_pipeline()),
+            Self::JavaScript => {
+                Project::new(|| Box::new(TsFrontend::javascript()), standard_pipeline())
+            }
+            Self::Ruby => Project::new(|| Box::new(TsFrontend::ruby()), standard_pipeline()),
+            Self::Rust => Project::new(|| Box::new(TsFrontend::rust()), standard_pipeline()),
+            Self::Scala => Project::new(|| Box::new(TsFrontend::scala()), standard_pipeline()),
+            Self::TypeScript => {
+                Project::new(|| Box::new(TsFrontend::typescript()), standard_pipeline())
+            }
+            Self::Cpp => Project::new(|| Box::new(TsFrontend::cpp()), standard_pipeline()),
+        }
     }
 }
 
+/// An empty project for `lang` plus the source-file extensions it owns.
+pub fn make_project(lang: &str) -> Result<(Project, &'static [&'static str]), String> {
+    let lang = Language::parse(lang)?;
+    Ok((lang.project(), lang.extensions()))
+}
+
 /// Build a project by parsing every matching source file under `dir`.
-pub fn build_project(dir: &str, lang: &str) -> Project {
+pub fn build_project(dir: &str, lang: &str) -> Result<Project, String> {
     build_project_filtered(dir, lang, &[])
 }
 
 /// Build a project, skipping any file whose path contains one of the
 /// `excludes` substrings (vendored, generated, and test code have no place
 /// in a security CPG and often dominate the file count).
-pub fn build_project_filtered(dir: &str, lang: &str, excludes: &[&str]) -> Project {
+pub fn build_project_filtered(dir: &str, lang: &str, excludes: &[&str]) -> Result<Project, String> {
     build_project_ext(dir, lang, excludes, None)
 }
 
@@ -109,11 +154,10 @@ pub fn build_project_ext(
     lang: &str,
     excludes: &[&str],
     external_summaries: Option<&str>,
-) -> Project {
-    let (mut project, exts) = make_project(lang);
-    load_externals(&mut project, external_summaries);
-    let mut sources: Vec<(String, String)> = Vec::new();
-    collect_sources_filtered(std::path::Path::new(dir), exts, excludes, &mut sources);
+) -> Result<Project, String> {
+    let (mut project, exts) = make_project(lang)?;
+    load_externals(&mut project, external_summaries)?;
+    let sources = collect_sources_filtered(Path::new(dir), exts, excludes)?;
     let refs: Vec<(&str, &str)> = sources
         .iter()
         .map(|(p, s)| (p.as_str(), s.as_str()))
@@ -128,22 +172,20 @@ pub fn build_project_ext(
         stats.passes,
         stats.summaries
     );
-    project
+    Ok(project)
 }
 
 /// Load `--summaries <file>` external-summary JSON into a project (no-op
 /// when None). Must run before build/reopen so the summary fixpoint
 /// composes with the declared entries.
-fn load_externals(project: &mut Project, json: Option<&str>) {
+fn load_externals(project: &mut Project, json: Option<&str>) -> Result<(), String> {
     if let Some(json) = json {
-        match project.load_external_summaries(json) {
-            Ok(n) => eprintln!("loaded {n} external function summaries"),
-            Err(e) => {
-                eprintln!("--summaries: {e}");
-                std::process::exit(2);
-            }
-        }
+        let n = project
+            .load_external_summaries(json)
+            .map_err(|e| format!("--summaries: {e}"))?;
+        eprintln!("loaded {n} external function summaries");
     }
+    Ok(())
 }
 
 /// Open a project the way `serve` and `scan` both do: `--load <graph.cpg>`
@@ -159,8 +201,8 @@ pub fn open_project(args: &[String]) -> Result<Project, String> {
         None => None,
     };
     if let Some(load) = flag(args, "--load") {
-        let (mut p, _) = make_project(lang);
-        load_externals(&mut p, ext_json.as_deref());
+        let (mut p, _) = make_project(lang)?;
+        load_externals(&mut p, ext_json.as_deref())?;
         let cpg = Cpg::load(load).map_err(|e| format!("load failed: {e}"))?;
         p.reopen(cpg);
         eprintln!("loaded {} nodes from {load}", p.cpg.live_count());
@@ -169,48 +211,119 @@ pub fn open_project(args: &[String]) -> Result<Project, String> {
         let Some(dir) = args.get(2).filter(|d| !d.starts_with("--")) else {
             return Err("missing <dir> (or --load <graph.cpg>)".to_string());
         };
-        Ok(build_project_ext(
-            dir,
-            lang,
-            &flags(args, "--exclude"),
-            ext_json.as_deref(),
-        ))
+        build_project_ext(dir, lang, &flags(args, "--exclude"), ext_json.as_deref())
     }
 }
 
-pub fn collect_sources(dir: &std::path::Path, exts: &[&str], out: &mut Vec<(String, String)>) {
-    collect_sources_filtered(dir, exts, &[], out)
+pub fn collect_sources(dir: &Path, exts: &[&str]) -> Result<Vec<(String, String)>, String> {
+    collect_sources_filtered(dir, exts, &[])
 }
 
 pub fn collect_sources_filtered(
-    dir: &std::path::Path,
+    dir: &Path,
     exts: &[&str],
     excludes: &[&str],
-    out: &mut Vec<(String, String)>,
-) {
-    let Ok(entries) = std::fs::read_dir(dir) else {
-        return;
-    };
-    for entry in entries.flatten() {
+) -> Result<Vec<(String, String)>, String> {
+    let root = dir
+        .canonicalize()
+        .map_err(|e| format!("invalid source root {}: {e}", dir.display()))?;
+    let root_meta = std::fs::metadata(&root)
+        .map_err(|e| format!("cannot inspect source root {}: {e}", root.display()))?;
+    if !root_meta.is_dir() {
+        return Err(format!(
+            "source root is not a directory: {}",
+            root.display()
+        ));
+    }
+
+    let mut visited = HashSet::new();
+    let mut sources = BTreeMap::new();
+    collect_sources_dir(&root, &root, exts, excludes, &mut visited, &mut sources)?;
+    if sources.is_empty() {
+        return Err(format!(
+            "no matching readable source files under {}",
+            root.display()
+        ));
+    }
+    Ok(sources
+        .into_iter()
+        .map(|(path, source)| (path.to_string_lossy().into_owned(), source))
+        .collect())
+}
+
+fn collect_sources_dir(
+    dir: &Path,
+    root: &Path,
+    exts: &[&str],
+    excludes: &[&str],
+    visited: &mut HashSet<PathBuf>,
+    sources: &mut BTreeMap<PathBuf, String>,
+) -> Result<(), String> {
+    let dir = dir
+        .canonicalize()
+        .map_err(|e| format!("cannot resolve directory {}: {e}", dir.display()))?;
+    if !dir.starts_with(root) {
+        return Err(format!(
+            "source path escapes root {}: {}",
+            root.display(),
+            dir.display()
+        ));
+    }
+    if !visited.insert(dir.clone()) {
+        return Ok(());
+    }
+
+    let entries = std::fs::read_dir(&dir)
+        .map_err(|e| format!("cannot read directory {}: {e}", dir.display()))?;
+    let mut entries = entries
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| format!("cannot read directory entry in {}: {e}", dir.display()))?;
+    entries.sort_by_key(|entry| entry.file_name());
+
+    for entry in entries {
         let path = entry.path();
-        let path_str = path.to_string_lossy();
-        if excludes.iter().any(|e| path_str.contains(e)) {
+        if excludes
+            .iter()
+            .any(|exclude| path.to_string_lossy().contains(exclude))
+        {
             continue;
         }
-        if path.is_dir() {
-            collect_sources_filtered(&path, exts, excludes, out);
-        } else if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
-            if exts.contains(&ext) {
-                if let Ok(src) = std::fs::read_to_string(&path) {
-                    if ext == "go" && is_go_generated(&src) && !go_generated_registers_routes(&src)
-                    {
-                        continue;
-                    }
-                    out.push((path.to_string_lossy().into_owned(), src));
-                }
+        let link_meta = std::fs::symlink_metadata(&path)
+            .map_err(|e| format!("cannot inspect {}: {e}", path.display()))?;
+        let canonical = path
+            .canonicalize()
+            .map_err(|e| format!("cannot resolve {}: {e}", path.display()))?;
+        if !canonical.starts_with(root) {
+            return Err(format!(
+                "source path escapes root {}: {}",
+                root.display(),
+                path.display()
+            ));
+        }
+        let meta = if link_meta.file_type().is_symlink() {
+            std::fs::metadata(&canonical)
+                .map_err(|e| format!("cannot inspect {}: {e}", path.display()))?
+        } else {
+            link_meta
+        };
+        if meta.is_dir() {
+            collect_sources_dir(&canonical, root, exts, excludes, visited, sources)?;
+        } else if meta.is_file()
+            && canonical
+                .extension()
+                .and_then(|ext| ext.to_str())
+                .is_some_and(|ext| exts.contains(&ext))
+        {
+            let source = std::fs::read_to_string(&canonical)
+                .map_err(|e| format!("cannot read source {}: {e}", path.display()))?;
+            let ext = canonical.extension().and_then(|e| e.to_str()).unwrap_or("");
+            if ext == "go" && is_go_generated(&source) && !go_generated_registers_routes(&source) {
+                continue;
             }
+            sources.entry(canonical).or_insert(source);
         }
     }
+    Ok(())
 }
 
 /// The Go generated-code convention (golang.org/s/generatedcode): a line
@@ -540,6 +653,137 @@ pub fn handle(p: &mut Project, req: &Value) -> Value {
 mod glob_tests {
     use super::*;
 
+    fn source_tmpdir(name: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!(
+            "cpg-source-{name}-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn language_parser_accepts_every_alias_and_canonicalizes() {
+        let cases = [
+            ("c", "c", &["c", "h"][..]),
+            ("python", "python", &["py"][..]),
+            ("java", "java", &["java"][..]),
+            ("go", "go", &["go"][..]),
+            ("javascript", "javascript", &["js", "mjs", "cjs"][..]),
+            ("js", "javascript", &["js", "mjs", "cjs"][..]),
+            ("ruby", "ruby", &["rb"][..]),
+            ("rb", "ruby", &["rb"][..]),
+            ("rust", "rust", &["rs"][..]),
+            ("rs", "rust", &["rs"][..]),
+            ("scala", "scala", &["scala", "sc"][..]),
+            ("typescript", "typescript", &["ts", "tsx", "mts", "cts"][..]),
+            ("ts", "typescript", &["ts", "tsx", "mts", "cts"][..]),
+            (
+                "cpp",
+                "cpp",
+                &["cpp", "cc", "cxx", "hpp", "hxx", "hh", "h", "ipp"][..],
+            ),
+            (
+                "c++",
+                "cpp",
+                &["cpp", "cc", "cxx", "hpp", "hxx", "hh", "h", "ipp"][..],
+            ),
+            (
+                "cxx",
+                "cpp",
+                &["cpp", "cc", "cxx", "hpp", "hxx", "hh", "h", "ipp"][..],
+            ),
+        ];
+        for (alias, canonical, extensions) in cases {
+            let language = Language::parse(alias).unwrap();
+            assert_eq!(language.canonical_name(), canonical, "alias {alias}");
+            assert_eq!(language.extensions(), extensions, "alias {alias}");
+        }
+        assert!(make_project("c").is_ok(), "C must be an explicit frontend");
+    }
+
+    #[test]
+    fn language_parser_rejects_unknown_spellings() {
+        for invalid in ["pyhton", "C", ""] {
+            assert_eq!(
+                Language::parse(invalid).unwrap_err(),
+                format!("unsupported language '{invalid}'")
+            );
+        }
+    }
+
+    #[test]
+    fn source_collection_rejects_missing_and_empty_roots() {
+        let root = source_tmpdir("missing-empty");
+        let missing = root.join("missing");
+        assert!(collect_sources(&missing, &["c"])
+            .unwrap_err()
+            .contains("invalid source root"));
+        assert!(collect_sources(&root, &["c"])
+            .unwrap_err()
+            .contains("no matching readable source files"));
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn source_collection_is_deterministic_and_rejects_invalid_utf8() {
+        let root = source_tmpdir("ordering");
+        std::fs::write(root.join("z.c"), "int z(void) { return 0; }").unwrap();
+        std::fs::write(root.join("a.c"), "int a(void) { return 0; }").unwrap();
+        let first = collect_sources(&root, &["c"]).unwrap();
+        let second = collect_sources(&root, &["c"]).unwrap();
+        assert_eq!(first, second);
+        assert!(first[0].0.ends_with("a.c"));
+        assert!(first[1].0.ends_with("z.c"));
+
+        std::fs::write(root.join("bad.c"), [0xff, 0xfe]).unwrap();
+        let error = collect_sources(&root, &["c"]).unwrap_err();
+        assert!(error.contains("bad.c"), "{error}");
+        assert!(error.contains("cannot read source"), "{error}");
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn source_collection_handles_symlinks_without_escape_or_cycles() {
+        use std::os::unix::fs::symlink;
+
+        let root = source_tmpdir("symlinks");
+        let outside = source_tmpdir("outside");
+        std::fs::create_dir_all(root.join("real/nested")).unwrap();
+        std::fs::write(root.join("real/nested/a.c"), "int a(void) { return 0; }").unwrap();
+        symlink(root.join("real"), root.join("alias")).unwrap();
+        symlink(&root, root.join("real/nested/loop")).unwrap();
+        let sources = collect_sources(&root, &["c"]).unwrap();
+        assert_eq!(sources.len(), 1, "canonical files are deduplicated");
+
+        std::fs::write(outside.join("outside.c"), "int x(void) { return 0; }").unwrap();
+        symlink(&outside, root.join("escape")).unwrap();
+        let error = collect_sources(&root, &["c"]).unwrap_err();
+        assert!(error.contains("escapes root"), "{error}");
+        let _ = std::fs::remove_dir_all(root);
+        let _ = std::fs::remove_dir_all(outside);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn source_collection_rejects_unreadable_matching_file_when_enforced() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let root = source_tmpdir("unreadable");
+        let source = root.join("secret.c");
+        std::fs::write(&source, "int secret(void) { return 0; }").unwrap();
+        std::fs::set_permissions(&source, std::fs::Permissions::from_mode(0o0)).unwrap();
+        if std::fs::read_to_string(&source).is_err() {
+            let error = collect_sources(&root, &["c"]).unwrap_err();
+            assert!(error.contains("secret.c"), "{error}");
+        }
+        std::fs::set_permissions(&source, std::fs::Permissions::from_mode(0o600)).unwrap();
+        let _ = std::fs::remove_dir_all(root);
+    }
+
     #[test]
     fn go_generated_header_detection() {
         // The canonical convention: header line before the package clause.
@@ -616,7 +860,7 @@ mod glob_tests {
 
     #[test]
     fn json_taint_request_honours_sanitizers() {
-        let (mut project, _) = make_project("c");
+        let (mut project, _) = make_project("c").unwrap();
         project.build(&[(
             "v.c",
             "char* clean(char* s) { return s; }\n\
@@ -645,7 +889,7 @@ mod glob_tests {
 
     #[test]
     fn json_summary_exposes_labels_and_provenance() {
-        let (mut project, _) = make_project("c");
+        let (mut project, _) = make_project("c").unwrap();
         project
             .summaries
             .load_external_json(

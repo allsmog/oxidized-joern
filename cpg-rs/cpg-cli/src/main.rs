@@ -277,7 +277,7 @@ fn x_cmd(args: &[String]) {
                 eprintln!("merge needs <out-name> <path1> [path2...]\n{usage}");
                 std::process::exit(2);
             }
-            let out = ws.cache.join(format!("{out_name}.cpg"));
+            let out = ws.merge_output_path(&out_name).unwrap_or_else(|e| die(e));
             let mut argv = vec![
                 "cpg".to_string(),
                 "merge".to_string(),
@@ -316,7 +316,13 @@ fn build_and_save(args: &[String]) {
     };
     let out = flag(args, "-o").unwrap_or("graph.cpg");
     let lang = flag(args, "--lang").unwrap_or("c");
-    let project = build_project_filtered(dir, lang, &flags(args, "--exclude"));
+    let project = match build_project_filtered(dir, lang, &flags(args, "--exclude")) {
+        Ok(project) => project,
+        Err(e) => {
+            eprintln!("{e}");
+            std::process::exit(2);
+        }
+    };
     cpg_cli::dump_edges_if_requested(&project.cpg);
     match project.cpg.save(out) {
         Ok(()) => {
