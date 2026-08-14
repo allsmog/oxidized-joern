@@ -3,17 +3,29 @@
 # Joern's, per method, for every C file in corpus/.
 #
 #   JOERN=/path/to/joern-cli ./check.sh
+#   ./check.sh --committed-only
 #
 # Regenerates the oracle from a real Joern install if JOERN is set and reachable;
-# otherwise reuses the committed oracle_all.txt. Exits non-zero on any mismatch.
+# otherwise reuses the committed oracle_all.txt. --committed-only guarantees
+# that no locally installed oracle can rewrite the committed reference.
+# Exits non-zero on any mismatch.
 set -uo pipefail
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit 1
 HERE="$(pwd)"
 ROOT=".."
+COMMITTED_ONLY=0
+if [ "${1:-}" = "--committed-only" ]; then
+  COMMITTED_ONLY=1
+  shift
+fi
+if [ "$#" -ne 0 ]; then
+  echo "usage: $0 [--committed-only]" >&2
+  exit 2
+fi
 JOERN="${JOERN:-/tmp/joern-cli-dist/joern-cli}"
 
 ORACLE="oracle_all.txt"
-if [ -x "$JOERN/joern" ]; then
+if [ "$COMMITTED_ONLY" -eq 0 ] && [ -x "$JOERN/joern" ]; then
   echo "regenerating oracle from $JOERN ..."
   TMP_ORACLE="$(mktemp)"
   if (cd "$JOERN" && rm -rf workspace && ./joern --script "$HERE/oracle.sc" \
