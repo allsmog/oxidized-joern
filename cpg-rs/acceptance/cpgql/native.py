@@ -11,7 +11,7 @@ from pathlib import Path
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--cpg", required=True)
-    parser.add_argument("--fixture", required=True)
+    parser.add_argument("--graph", required=True)
     parser.add_argument("--catalog", required=True)
     args = parser.parse_args()
 
@@ -21,7 +21,8 @@ def main() -> None:
             [
                 args.cpg,
                 "query",
-                args.fixture,
+                "--load",
+                args.graph,
                 "--lang",
                 "c",
                 "--query",
@@ -36,7 +37,12 @@ def main() -> None:
             raise SystemExit(f"{case['id']}: differential query did not return a list")
         if case["id"] == "flow-paths":
             value = [" -> ".join(str(node.get("code")) for node in path) for path in value]
-        normalized = "\x1f".join(sorted(str(item) for item in value))
+        def render(item: object) -> str:
+            if isinstance(item, bool):
+                return str(item).lower()
+            return str(item)
+
+        normalized = "\x1f".join(sorted(render(item) for item in value))
         encoded = base64.b64encode(normalized.encode("utf-8")).decode("ascii")
         print(f"CPGQL\t{case['id']}\t{encoded}")
 

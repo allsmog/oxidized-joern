@@ -885,6 +885,7 @@ fn query_cmd(args: &[String]) {
         ),
         QueryResult::Strings(values) => json!(values),
         QueryResult::Integers(values) => json!(values),
+        QueryResult::Booleans(values) => json!(values),
         QueryResult::Paths(paths) => Value::Array(
             paths
                 .into_iter()

@@ -5,7 +5,7 @@
 //! shell out to Joern or embed Scala.  The supported surface is kept explicit
 //! and is differential-tested before it is advertised as compatible.
 
-use cpg_core::{Cpg, EdgeKind, NodeId, NodeKind, Query};
+use cpg_core::{Cpg, EdgeKind, NodeId, NodeKind, PropertyValue, Query};
 use regex::Regex;
 use std::collections::HashSet;
 
@@ -34,6 +34,11 @@ pub enum Property {
     Order,
     ArgumentIndex,
     Id,
+    MethodFullName,
+    TypeDeclFullName,
+    StringPassthrough(&'static str),
+    NumberPassthrough(&'static str),
+    BoolPassthrough(&'static str),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -47,6 +52,10 @@ pub enum Predicate {
         property: Property,
         comparison: NumberComparison,
         value: i64,
+    },
+    BoolEquals {
+        property: Property,
+        value: bool,
     },
     Kind(NodeKind),
 }
@@ -144,6 +153,7 @@ pub enum QueryResult {
     Nodes(Vec<NodeId>),
     Strings(Vec<String>),
     Integers(Vec<i64>),
+    Booleans(Vec<bool>),
     Paths(Vec<Vec<NodeId>>),
     Count(usize),
 }
@@ -162,6 +172,7 @@ impl QueryResult {
             QueryResult::Nodes(v) => v.len(),
             QueryResult::Strings(v) => v.len(),
             QueryResult::Integers(v) => v.len(),
+            QueryResult::Booleans(v) => v.len(),
             QueryResult::Paths(v) => v.len(),
             QueryResult::Count(_) => 1,
         }
@@ -348,6 +359,13 @@ fn compile_parts(parts: &[String], relative: bool) -> Result<LogicalPlan, QueryE
             };
             continue;
         }
+        if let Some((property, value)) = parse_bool_filter(step)? {
+            plan = LogicalPlan::Filter {
+                input: Box::new(plan),
+                predicate: Predicate::BoolEquals { property, value },
+            };
+            continue;
+        }
         if let Some(index) = parse_optional_usize_call(step, "argument")? {
             plan = LogicalPlan::Traverse {
                 input: Box::new(plan),
@@ -500,7 +518,7 @@ fn parse_selector(step: &str) -> Result<NodeSelector, QueryError> {
         "namespace" => NodeKind::Namespace,
         "namespaceBlock" => NodeKind::NamespaceBlock,
         "typeDecl" => NodeKind::TypeDecl,
-        "type" => NodeKind::Type,
+        "type" | "typ" => NodeKind::Type,
         "typeRef" => NodeKind::TypeRef,
         "member" => NodeKind::Member,
         "method" => NodeKind::Method,
@@ -519,6 +537,24 @@ fn parse_selector(step: &str) -> Result<NodeSelector, QueryError> {
         "jumpTarget" => NodeKind::JumpTarget,
         "modifier" => NodeKind::Modifier,
         "metaData" => NodeKind::MetaData,
+        "binding" => NodeKind::Binding,
+        "closureBinding" => NodeKind::ClosureBinding,
+        "annotation" => NodeKind::Annotation,
+        "annotationLiteral" => NodeKind::AnnotationLiteral,
+        "annotationParameter" => NodeKind::AnnotationParameter,
+        "annotationParameterAssign" => NodeKind::AnnotationParameterAssign,
+        "arrayInitializer" => NodeKind::ArrayInitializer,
+        "comment" => NodeKind::Comment,
+        "configFile" => NodeKind::ConfigFile,
+        "dependency" => NodeKind::Dependency,
+        "finding" => NodeKind::Finding,
+        "import" | "imports" => NodeKind::Import,
+        "jumpLabel" => NodeKind::JumpLabel,
+        "keyValuePair" => NodeKind::KeyValuePair,
+        "tag" => NodeKind::Tag,
+        "tagNodePair" => NodeKind::TagNodePair,
+        "templateDom" => NodeKind::TemplateDom,
+        "typeArgument" => NodeKind::TypeArgument,
         "unknown" => NodeKind::Unknown,
         _ => return Err(QueryError(format!("unsupported node-type step `{step}`"))),
     };
@@ -538,6 +574,29 @@ fn parse_property(step: &str) -> Option<Property> {
         "order" => Property::Order,
         "argumentIndex" => Property::ArgumentIndex,
         "id" => Property::Id,
+        "methodFullName" => Property::MethodFullName,
+        "typeDeclFullName" => Property::TypeDeclFullName,
+        "aliasTypeFullName" => Property::StringPassthrough("ALIAS_TYPE_FULL_NAME"),
+        "canonicalName" => Property::StringPassthrough("CANONICAL_NAME"),
+        "content" => Property::StringPassthrough("CONTENT"),
+        "controlStructureType" => Property::StringPassthrough("CONTROL_STRUCTURE_TYPE"),
+        "dispatchType" => Property::StringPassthrough("DISPATCH_TYPE"),
+        "dynamicTypeHintFullName" => Property::StringPassthrough("DYNAMIC_TYPE_HINT_FULL_NAME"),
+        "evaluationStrategy" => Property::StringPassthrough("EVALUATION_STRATEGY"),
+        "inheritsFromTypeFullName" => Property::StringPassthrough("INHERITS_FROM_TYPE_FULL_NAME"),
+        "language" => Property::StringPassthrough("LANGUAGE"),
+        "modifierType" => Property::StringPassthrough("MODIFIER_TYPE"),
+        "parserTypeName" => Property::StringPassthrough("PARSER_TYPE_NAME"),
+        "possibleTypes" => Property::StringPassthrough("POSSIBLE_TYPES"),
+        "root" => Property::StringPassthrough("ROOT"),
+        "value" => Property::StringPassthrough("VALUE"),
+        "version" => Property::StringPassthrough("VERSION"),
+        "columnNumber" => Property::NumberPassthrough("COLUMN_NUMBER"),
+        "columnNumberEnd" => Property::NumberPassthrough("COLUMN_NUMBER_END"),
+        "index" => Property::NumberPassthrough("INDEX"),
+        "lineNumberEnd" => Property::NumberPassthrough("LINE_NUMBER_END"),
+        "isExternal" => Property::BoolPassthrough("IS_EXTERNAL"),
+        "isVariadic" => Property::BoolPassthrough("IS_VARIADIC"),
         _ => return None,
     })
 }
@@ -551,6 +610,30 @@ fn parse_string_filter(step: &str) -> Result<Option<(Property, String, bool)>, Q
         ("signature", Property::Signature),
         ("filename", Property::Filename),
         ("label", Property::Label),
+        ("methodFullName", Property::MethodFullName),
+        ("typeDeclFullName", Property::TypeDeclFullName),
+        (
+            "canonicalName",
+            Property::StringPassthrough("CANONICAL_NAME"),
+        ),
+        ("content", Property::StringPassthrough("CONTENT")),
+        (
+            "controlStructureType",
+            Property::StringPassthrough("CONTROL_STRUCTURE_TYPE"),
+        ),
+        ("dispatchType", Property::StringPassthrough("DISPATCH_TYPE")),
+        (
+            "evaluationStrategy",
+            Property::StringPassthrough("EVALUATION_STRATEGY"),
+        ),
+        ("language", Property::StringPassthrough("LANGUAGE")),
+        ("modifierType", Property::StringPassthrough("MODIFIER_TYPE")),
+        (
+            "parserTypeName",
+            Property::StringPassthrough("PARSER_TYPE_NAME"),
+        ),
+        ("value", Property::StringPassthrough("VALUE")),
+        ("version", Property::StringPassthrough("VERSION")),
     ] {
         for (suffix, exact, negated) in [
             ("Exact", true, false),
@@ -584,6 +667,16 @@ fn parse_number_filter(
         ("order", Property::Order),
         ("argumentIndex", Property::ArgumentIndex),
         ("id", Property::Id),
+        ("columnNumber", Property::NumberPassthrough("COLUMN_NUMBER")),
+        (
+            "columnNumberEnd",
+            Property::NumberPassthrough("COLUMN_NUMBER_END"),
+        ),
+        ("index", Property::NumberPassthrough("INDEX")),
+        (
+            "lineNumberEnd",
+            Property::NumberPassthrough("LINE_NUMBER_END"),
+        ),
     ] {
         for (suffix, comparison) in [
             ("Gt", NumberComparison::GreaterThan),
@@ -601,6 +694,24 @@ fn parse_number_filter(
                 return Ok(Some((property, comparison, value)));
             }
         }
+    }
+    Ok(None)
+}
+
+fn parse_bool_filter(step: &str) -> Result<Option<(Property, bool)>, QueryError> {
+    for (name, property) in [
+        ("isExternal", Property::BoolPassthrough("IS_EXTERNAL")),
+        ("isVariadic", Property::BoolPassthrough("IS_VARIADIC")),
+    ] {
+        let Some(argument) = call_argument(step, name) else {
+            continue;
+        };
+        let value = match argument.trim() {
+            "true" => true,
+            "false" => false,
+            _ => return Err(QueryError(format!("`{name}` expects one boolean argument"))),
+        };
+        return Ok(Some((property, value)));
     }
     Ok(None)
 }
@@ -873,14 +984,37 @@ fn parse_traversal(step: &str) -> Option<Traversal> {
         "astParent" => edge(Direction::In, EdgeKind::Ast, None),
         "inAst" | "inAstMinusLeaf" => Traversal::AstAncestors,
         "block" => Traversal::DescendantsOfKind(NodeKind::Block),
+        "annotation" => Traversal::DescendantsOfKind(NodeKind::Annotation),
+        "annotationLiteral" => Traversal::DescendantsOfKind(NodeKind::AnnotationLiteral),
+        "annotationParameter" => Traversal::DescendantsOfKind(NodeKind::AnnotationParameter),
+        "annotationParameterAssign" => {
+            Traversal::DescendantsOfKind(NodeKind::AnnotationParameterAssign)
+        }
+        "arrayInitializer" => Traversal::DescendantsOfKind(NodeKind::ArrayInitializer),
+        "binding" => Traversal::DescendantsOfKind(NodeKind::Binding),
         "call" => Traversal::DescendantsOfKind(NodeKind::Call),
+        "closureBinding" => Traversal::DescendantsOfKind(NodeKind::ClosureBinding),
+        "comment" => Traversal::DescendantsOfKind(NodeKind::Comment),
+        "configFile" => Traversal::DescendantsOfKind(NodeKind::ConfigFile),
         "controlStructure" => Traversal::DescendantsOfKind(NodeKind::ControlStructure),
+        "dependency" => Traversal::DescendantsOfKind(NodeKind::Dependency),
         "fieldIdentifier" => Traversal::DescendantsOfKind(NodeKind::FieldIdentifier),
+        "finding" => Traversal::DescendantsOfKind(NodeKind::Finding),
         "identifier" => Traversal::DescendantsOfKind(NodeKind::Identifier),
+        "import" => Traversal::DescendantsOfKind(NodeKind::Import),
+        "jumpLabel" => Traversal::DescendantsOfKind(NodeKind::JumpLabel),
+        "jumpTarget" => Traversal::DescendantsOfKind(NodeKind::JumpTarget),
+        "keyValuePair" => Traversal::DescendantsOfKind(NodeKind::KeyValuePair),
         "literal" => Traversal::DescendantsOfKind(NodeKind::Literal),
         "local" => Traversal::DescendantsOfKind(NodeKind::Local),
+        "member" => Traversal::DescendantsOfKind(NodeKind::Member),
         "methodRef" => Traversal::DescendantsOfKind(NodeKind::MethodRef),
+        "modifier" => Traversal::DescendantsOfKind(NodeKind::Modifier),
         "return" => Traversal::DescendantsOfKind(NodeKind::Return),
+        "tag" => Traversal::DescendantsOfKind(NodeKind::Tag),
+        "tagNodePair" => Traversal::DescendantsOfKind(NodeKind::TagNodePair),
+        "templateDom" => Traversal::DescendantsOfKind(NodeKind::TemplateDom),
+        "typeArgument" => Traversal::DescendantsOfKind(NodeKind::TypeArgument),
         "typeRef" => Traversal::DescendantsOfKind(NodeKind::TypeRef),
         "parameter" => edge(
             Direction::Out,
@@ -915,6 +1049,21 @@ fn parse_traversal(step: &str) -> Option<Traversal> {
         "referencedType" | "typ" => edge(Direction::Out, EdgeKind::EvalType, Some(NodeKind::Type)),
         "evalType" => edge(Direction::Out, EdgeKind::EvalType, None),
         "parameterLink" => edge(Direction::Out, EdgeKind::ParameterLink, None),
+        "sourceFile" => edge(Direction::Out, EdgeKind::SourceFile, Some(NodeKind::File)),
+        "baseTypeDecl" => edge(
+            Direction::Out,
+            EdgeKind::InheritsFrom,
+            Some(NodeKind::TypeDecl),
+        ),
+        "derivedTypeDecl" => edge(
+            Direction::In,
+            EdgeKind::InheritsFrom,
+            Some(NodeKind::TypeDecl),
+        ),
+        "bindingOut" => edge(Direction::Out, EdgeKind::Binds, Some(NodeKind::Binding)),
+        "bindingIn" => edge(Direction::In, EdgeKind::Binds, None),
+        "captureOut" => edge(Direction::Out, EdgeKind::Capture, None),
+        "captureIn" => edge(Direction::In, EdgeKind::Capture, None),
         "condition" => edge(Direction::Out, EdgeKind::Condition, None),
         "whenTrue" => edge(Direction::Out, EdgeKind::TrueBody, None),
         "whenFalse" => edge(Direction::Out, EdgeKind::FalseBody, None),
@@ -1099,8 +1248,14 @@ impl<'a> QueryExecutor<'a> {
                 Ok(nodes
                     .into_iter()
                     .filter(|&node| {
-                        self.string_property(node, *property)
-                            .is_some_and(|value| regex.is_match(&value) != *negated)
+                        let values = self.string_properties(node, *property);
+                        if values.is_empty() {
+                            false
+                        } else if *negated {
+                            values.iter().all(|value| !regex.is_match(value))
+                        } else {
+                            values.iter().any(|value| regex.is_match(value))
+                        }
                     })
                     .collect())
             }
@@ -1113,6 +1268,14 @@ impl<'a> QueryExecutor<'a> {
                 .filter(|&node| {
                     self.number_property(node, *property)
                         .is_some_and(|actual| compare_number(actual, *comparison, *value))
+                })
+                .collect()),
+            Predicate::BoolEquals { property, value } => Ok(nodes
+                .into_iter()
+                .filter(|&node| {
+                    self.bool_properties(node, *property)
+                        .into_iter()
+                        .any(|actual| actual == *value)
                 })
                 .collect()),
             Predicate::Kind(kind) => Ok(nodes
@@ -1466,47 +1629,113 @@ impl<'a> QueryExecutor<'a> {
     }
 
     fn project(&self, nodes: &[NodeId], property: Property) -> QueryResult {
-        if matches!(
-            property,
-            Property::LineNumber | Property::Order | Property::ArgumentIndex | Property::Id
-        ) {
-            QueryResult::Integers(
+        match property {
+            Property::LineNumber
+            | Property::Order
+            | Property::ArgumentIndex
+            | Property::Id
+            | Property::NumberPassthrough(_) => QueryResult::Integers(
                 nodes
                     .iter()
-                    .filter_map(|&node| self.number_property(node, property))
+                    .flat_map(|&node| self.number_properties(node, property))
                     .collect(),
-            )
-        } else {
-            QueryResult::Strings(
+            ),
+            Property::BoolPassthrough(_) => QueryResult::Booleans(
                 nodes
                     .iter()
-                    .filter_map(|&node| self.string_property(node, property))
+                    .flat_map(|&node| self.bool_properties(node, property))
                     .collect(),
-            )
+            ),
+            _ => QueryResult::Strings(
+                nodes
+                    .iter()
+                    .flat_map(|&node| self.string_properties(node, property))
+                    .collect(),
+            ),
         }
     }
 
-    fn string_property(&self, node: NodeId, property: Property) -> Option<String> {
-        Some(match property {
-            Property::Name => self.cpg.name_of(node)?.to_string(),
-            Property::FullName => self.cpg.full_name_of(node)?.to_string(),
-            Property::Code => self.cpg.code_of(node)?.to_string(),
-            Property::TypeFullName => self.cpg.type_full_name_of(node)?.to_string(),
-            Property::Signature => self.cpg.signature_of(node)?.to_string(),
-            Property::Filename => self.cpg.path_of(self.cpg.file_of(node))?.to_string(),
-            Property::Label => node_kind_label(self.cpg.kind_of(node)).to_string(),
-            _ => return None,
-        })
+    fn string_properties(&self, node: NodeId, property: Property) -> Vec<String> {
+        let scalar = match property {
+            Property::Name => self.cpg.name_of(node),
+            Property::FullName => self.cpg.full_name_of(node),
+            Property::MethodFullName => {
+                return self
+                    .passthrough_strings(node, "METHOD_FULL_NAME")
+                    .or_else(|| {
+                        self.cpg
+                            .full_name_of(node)
+                            .map(|value| vec![value.to_string()])
+                    })
+                    .unwrap_or_default();
+            }
+            Property::TypeDeclFullName => {
+                return self
+                    .passthrough_strings(node, "TYPE_DECL_FULL_NAME")
+                    .or_else(|| {
+                        self.cpg
+                            .full_name_of(node)
+                            .map(|value| vec![value.to_string()])
+                    })
+                    .unwrap_or_default();
+            }
+            Property::Code => self.cpg.code_of(node),
+            Property::TypeFullName => self.cpg.type_full_name_of(node),
+            Property::Signature => self.cpg.signature_of(node),
+            Property::Filename => self.cpg.path_of(self.cpg.file_of(node)),
+            Property::Label => return vec![node_kind_label(self.cpg.kind_of(node)).to_string()],
+            Property::StringPassthrough(label) => {
+                return self.passthrough_strings(node, label).unwrap_or_default();
+            }
+            _ => None,
+        };
+        scalar.map(str::to_string).into_iter().collect()
+    }
+
+    fn passthrough_strings(&self, node: NodeId, label: &str) -> Option<Vec<String>> {
+        match self.cpg.passthrough_property_named(node, label) {
+            Some(PropertyValue::Strings(values)) => Some(
+                values
+                    .iter()
+                    .filter_map(|value| value.map(|symbol| self.cpg.strings.resolve(symbol)))
+                    .map(str::to_string)
+                    .collect(),
+            ),
+            _ => None,
+        }
     }
 
     fn number_property(&self, node: NodeId, property: Property) -> Option<i64> {
-        Some(match property {
-            Property::LineNumber => self.cpg.line_of(node)? as i64,
-            Property::Order => self.cpg.order_of(node) as i64,
-            Property::ArgumentIndex => self.cpg.argument_index_of(node) as i64,
-            Property::Id => node.0 as i64,
-            _ => return None,
-        })
+        self.number_properties(node, property).into_iter().next()
+    }
+
+    fn number_properties(&self, node: NodeId, property: Property) -> Vec<i64> {
+        let scalar = match property {
+            Property::LineNumber => self.cpg.line_of(node).map(i64::from),
+            Property::Order => Some(self.cpg.order_of(node) as i64),
+            Property::ArgumentIndex => Some(self.cpg.argument_index_of(node) as i64),
+            Property::Id => Some(node.0 as i64),
+            Property::NumberPassthrough(label) => {
+                return match self.cpg.passthrough_property_named(node, label) {
+                    Some(PropertyValue::Ints(values)) => {
+                        values.iter().copied().map(i64::from).collect()
+                    }
+                    _ => Vec::new(),
+                };
+            }
+            _ => None,
+        };
+        scalar.into_iter().collect()
+    }
+
+    fn bool_properties(&self, node: NodeId, property: Property) -> Vec<bool> {
+        let Property::BoolPassthrough(label) = property else {
+            return Vec::new();
+        };
+        match self.cpg.passthrough_property_named(node, label) {
+            Some(PropertyValue::Bools(values)) => values.clone(),
+            _ => Vec::new(),
+        }
     }
 }
 
@@ -1525,6 +1754,7 @@ fn deduplicate(value: QueryResult) -> QueryResult {
         QueryResult::Nodes(values) => QueryResult::Nodes(stable_dedup(values)),
         QueryResult::Strings(values) => QueryResult::Strings(stable_dedup(values)),
         QueryResult::Integers(values) => QueryResult::Integers(stable_dedup(values)),
+        QueryResult::Booleans(values) => QueryResult::Booleans(stable_dedup(values)),
         QueryResult::Paths(values) => QueryResult::Paths(stable_dedup(values)),
         count @ QueryResult::Count(_) => count,
     }
@@ -1551,6 +1781,10 @@ fn limit(value: QueryResult, count: usize) -> QueryResult {
         QueryResult::Integers(mut values) => {
             values.truncate(count);
             QueryResult::Integers(values)
+        }
+        QueryResult::Booleans(mut values) => {
+            values.truncate(count);
+            QueryResult::Booleans(values)
         }
         QueryResult::Paths(mut values) => {
             values.truncate(count);
@@ -1779,6 +2013,57 @@ mod tests {
     }
 
     #[test]
+    fn projects_and_filters_sparse_joern_schema_properties() {
+        let mut cpg = fixture();
+        let call = cpg.calls_named("strcpy")[0];
+        let method = cpg.method_named("main")[0];
+
+        let dispatch = cpg.intern("DISPATCH_TYPE");
+        let static_dispatch = cpg.intern("STATIC_DISPATCH");
+        cpg.set_passthrough_property(
+            call,
+            dispatch,
+            PropertyValue::Strings(vec![Some(static_dispatch)]),
+        );
+        let hints = cpg.intern("DYNAMIC_TYPE_HINT_FULL_NAME");
+        let first_hint = cpg.intern("char*(char*,char*)");
+        let second_hint = cpg.intern("void*(void*)");
+        cpg.set_passthrough_property(
+            call,
+            hints,
+            PropertyValue::Strings(vec![Some(first_hint), Some(second_hint)]),
+        );
+        let external = cpg.intern("IS_EXTERNAL");
+        cpg.set_passthrough_property(method, external, PropertyValue::Bools(vec![false]));
+        let column = cpg.intern("COLUMN_NUMBER");
+        cpg.set_passthrough_property(call, column, PropertyValue::Ints(vec![7]));
+
+        let execute = |query: &str| {
+            let plan = QueryCompiler::compile(query).expect("compile");
+            QueryExecutor::new(&cpg).execute(&plan).expect("execute")
+        };
+        assert_eq!(
+            execute(r#"cpg.call("strcpy").dispatchType"#),
+            QueryResult::Strings(vec!["STATIC_DISPATCH".to_string()])
+        );
+        assert_eq!(
+            execute(r#"cpg.call("strcpy").dynamicTypeHintFullName"#),
+            QueryResult::Strings(vec![
+                "char*(char*,char*)".to_string(),
+                "void*(void*)".to_string()
+            ])
+        );
+        assert_eq!(
+            execute(r#"cpg.method.isExternal(false).name"#),
+            QueryResult::Strings(vec!["main".to_string()])
+        );
+        assert_eq!(
+            execute(r#"cpg.call.columnNumberGte(7).columnNumber"#),
+            QueryResult::Integers(vec![7])
+        );
+    }
+
+    #[test]
     fn committed_compatibility_catalog_compiles() {
         let catalog: serde_json::Value =
             serde_json::from_str(include_str!("../../acceptance/cpgql/catalog.json"))
@@ -1795,8 +2080,29 @@ mod tests {
             }
         }
         assert!(
-            implemented_cases >= 70,
+            implemented_cases >= 108,
             "implemented catalog must not silently shrink"
         );
+    }
+
+    #[test]
+    fn committed_error_catalog_fails_closed() {
+        let cases: serde_json::Value =
+            serde_json::from_str(include_str!("../../acceptance/cpgql/errors.json"))
+                .expect("error catalog JSON");
+        let cases = cases.as_array().expect("error cases");
+        assert!(cases.len() >= 17, "error catalog must not silently shrink");
+        for case in cases {
+            let id = case["id"].as_str().expect("case id");
+            let query = case["query"].as_str().expect("case query");
+            let expected = case["error"].as_str().expect("expected error");
+            let error = QueryCompiler::compile(query)
+                .expect_err("committed invalid query must be rejected")
+                .to_string();
+            assert!(
+                error.contains(expected),
+                "{id}: expected error containing {expected:?}, got {error:?}"
+            );
+        }
     }
 }
