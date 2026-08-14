@@ -336,6 +336,16 @@ impl Cpg {
     pub fn passthrough_properties_of(&self, n: NodeId) -> &BTreeMap<Sym, PropertyValue> {
         &self.passthrough_properties[n.0 as usize]
     }
+    /// Look up a sparse external-schema property by its original label.
+    /// Native analyses keep hot properties in dedicated columns; query and
+    /// interoperability layers use this accessor for the remaining Joern
+    /// schema without exposing interner implementation details.
+    pub fn passthrough_property_named(&self, n: NodeId, label: &str) -> Option<&PropertyValue> {
+        self.passthrough_properties[n.0 as usize]
+            .iter()
+            .find(|(symbol, _)| self.strings.resolve(**symbol) == label)
+            .map(|(_, value)| value)
+    }
 
     // --- adjacency access ---
     pub fn out(&self, n: NodeId) -> &[HalfEdge] {

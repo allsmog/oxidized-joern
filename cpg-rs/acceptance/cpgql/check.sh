@@ -25,6 +25,7 @@ cpg="$repo_root/target/release/cpg"
 fixture="$repo_root/acceptance/cpgql/fixture"
 
 "$joern_parse" "$fixture" --output "$scratch/oracle.cpg.bin" >/dev/null
+"$cpg" import-joern "$scratch/oracle.cpg.bin" -o "$scratch/oracle.cpg" >/dev/null
 "$joern" --nocolors --script "$repo_root/acceptance/cpgql/probe.sc" \
   --param "cpgPath=$scratch/oracle.cpg.bin" \
   | rg '^CPGQL\t' \
@@ -32,9 +33,9 @@ fixture="$repo_root/acceptance/cpgql/fixture"
 
 python3 "$repo_root/acceptance/cpgql/native.py" \
   --cpg "$cpg" \
-  --fixture "$fixture" \
+  --graph "$scratch/oracle.cpg" \
   --catalog "$repo_root/acceptance/cpgql/differential.json" \
   | sort > "$scratch/native.tsv"
 
 diff -u "$scratch/oracle.tsv" "$scratch/native.tsv"
-echo "CPGQL differential: PASS (33/33, Joern v4.0.555)"
+echo "CPGQL differential: PASS (65/65, Joern v4.0.555)"
