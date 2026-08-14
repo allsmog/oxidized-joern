@@ -11,6 +11,7 @@ use std::collections::HashSet;
 
 const MAX_QUERY_BYTES: usize = 64 * 1024;
 const MAX_REPEAT_DEPTH: usize = 4096;
+const MAX_FLOW_PATHS: usize = 10_000;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum NodeSelector {
@@ -80,6 +81,7 @@ pub enum Traversal {
     Caller,
     CallOut,
     ParentBlock,
+    InCall,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -102,11 +104,21 @@ pub enum LogicalPlan {
         sinks: Box<LogicalPlan>,
         sources: Box<LogicalPlan>,
     },
+    ReachableByFlows {
+        sinks: Box<LogicalPlan>,
+        sources: Box<LogicalPlan>,
+    },
+    BooleanWhere {
+        input: Box<LogicalPlan>,
+        predicates: Vec<LogicalPlan>,
+        require_all: bool,
+    },
     Repeat {
         input: Box<LogicalPlan>,
         body: Box<LogicalPlan>,
         until: Option<Box<LogicalPlan>>,
         emit_all: bool,
+        emit_when: Option<Box<LogicalPlan>>,
         times: Option<usize>,
     },
     Deduplicate(Box<LogicalPlan>),
@@ -126,7 +138,16 @@ pub enum QueryResult {
     Nodes(Vec<NodeId>),
     Strings(Vec<String>),
     Integers(Vec<i64>),
+    Paths(Vec<Vec<NodeId>>),
     Count(usize),
+}
+
+struct RepeatSpec {
+    body: LogicalPlan,
+    until: Option<LogicalPlan>,
+    emit_all: bool,
+    emit_when: Option<LogicalPlan>,
+    times: Option<usize>,
 }
 
 impl QueryResult {
@@ -135,6 +156,7 @@ impl QueryResult {
             QueryResult::Nodes(v) => v.len(),
             QueryResult::Strings(v) => v.len(),
             QueryResult::Integers(v) => v.len(),
+            QueryResult::Paths(v) => v.len(),
             QueryResult::Count(_) => 1,
         }
     }
@@ -199,7 +221,10 @@ fn compile_parts(parts: &[String], relative: bool) -> Result<LogicalPlan, QueryE
     let mut projected = false;
     for (offset, step) in parts[selector_index..].iter().enumerate() {
         let position = selector_index + offset + 1;
-        if matches!(step.as_str(), "l" | "toList") {
+        if matches!(
+            step.as_str(),
+            "l" | "toList" | "toJson" | "toJsonPretty" | "p" | "browse" | "clone"
+        ) {
             continue;
         }
         if step == "size" || step == "count" {
@@ -232,13 +257,28 @@ fn compile_parts(parts: &[String], relative: bool) -> Result<LogicalPlan, QueryE
         }
 
         if step.starts_with("repeat") {
-            let (body, until, emit_all, times) = parse_repeat_step(step)?;
+            let RepeatSpec {
+                body,
+                until,
+                emit_all,
+                emit_when,
+                times,
+            } = parse_repeat_step(step)?;
             plan = LogicalPlan::Repeat {
                 input: Box::new(plan),
                 body: Box::new(body),
                 until: until.map(Box::new),
                 emit_all,
+                emit_when: emit_when.map(Box::new),
                 times,
+            };
+            continue;
+        }
+        if let Some(argument) = call_argument(step, "reachableByFlows") {
+            let sources = QueryCompiler::compile(argument.trim())?;
+            plan = LogicalPlan::ReachableByFlows {
+                sinks: Box::new(plan),
+                sources: Box::new(sources),
             };
             continue;
         }
@@ -250,10 +290,20 @@ fn compile_parts(parts: &[String], relative: bool) -> Result<LogicalPlan, QueryE
             };
             continue;
         }
+        if let Some((predicates, require_all)) = parse_boolean_where(step)? {
+            plan = LogicalPlan::BooleanWhere {
+                input: Box::new(plan),
+                predicates,
+                require_all,
+            };
+            continue;
+        }
         let where_expression = ["where", "filter"]
             .iter()
             .find_map(|name| call_argument(step, name));
-        let where_not_expression = call_argument(step, "whereNot");
+        let where_not_expression = ["whereNot", "filterNot"]
+            .iter()
+            .find_map(|name| call_argument(step, name));
         if let Some(expression) = where_expression.or(where_not_expression) {
             plan = LogicalPlan::Where {
                 input: Box::new(plan),
@@ -350,6 +400,16 @@ fn compile_parts(parts: &[String], relative: bool) -> Result<LogicalPlan, QueryE
 }
 
 fn parse_selector_plan(step: &str) -> Result<LogicalPlan, QueryError> {
+    if step == "assignment" {
+        return Ok(LogicalPlan::Filter {
+            input: Box::new(LogicalPlan::Scan(NodeSelector::Kind(NodeKind::Call))),
+            predicate: Predicate::StringRegex {
+                property: Property::Name,
+                pattern: "(?:<operator>\\.)?(?:assignment|assignmentPlus|assignmentMinus|assignmentMultiplication|assignmentDivision|assignmentModulo|assignmentAnd|assignmentOr|assignmentXor|assignmentShiftLeft|assignmentArithmeticShiftRight|assignmentLogicalShiftRight)|=".to_string(),
+                negated: false,
+            },
+        });
+    }
     if let Ok(selector) = parse_selector(step) {
         return Ok(LogicalPlan::Scan(selector));
     }
@@ -448,7 +508,7 @@ fn parse_selector(step: &str) -> Result<NodeSelector, QueryError> {
         "local" => NodeKind::Local,
         "fieldIdentifier" => NodeKind::FieldIdentifier,
         "controlStructure" => NodeKind::ControlStructure,
-        "return" => NodeKind::Return,
+        "return" | "returns" => NodeKind::Return,
         "methodRef" => NodeKind::MethodRef,
         "jumpTarget" => NodeKind::JumpTarget,
         "modifier" => NodeKind::Modifier,
@@ -556,9 +616,7 @@ fn call_argument<'a>(step: &'a str, name: &str) -> Option<&'a str> {
         .strip_suffix(')')
 }
 
-fn parse_repeat_step(
-    step: &str,
-) -> Result<(LogicalPlan, Option<LogicalPlan>, bool, Option<usize>), QueryError> {
+fn parse_repeat_step(step: &str) -> Result<RepeatSpec, QueryError> {
     let groups = call_groups(step, "repeat")?;
     if groups.len() != 2 {
         return Err(QueryError(
@@ -574,13 +632,18 @@ fn parse_repeat_step(
     }
     let mut until = None;
     let mut emit_all = false;
+    let mut emit_when = None;
     let mut times = None;
     for option in &option_parts[1..] {
         if option == "emit" {
             emit_all = true;
+        } else if let Some(expression) = call_argument(option, "emit") {
+            emit_when = Some(compile_relative(expression.trim())?);
         } else if let Some(expression) = call_argument(option, "until") {
             until = Some(compile_relative(expression.trim())?);
-        } else if let Some(count) = parse_usize_call(option, "times")? {
+        } else if let Some(count) =
+            parse_usize_call(option, "times")?.or(parse_usize_call(option, "maxDepth")?)
+        {
             if count > MAX_REPEAT_DEPTH {
                 return Err(QueryError(format!(
                     "repeat depth {count} exceeds maximum {MAX_REPEAT_DEPTH}"
@@ -591,12 +654,85 @@ fn parse_repeat_step(
             return Err(QueryError(format!("unsupported repeat option `{option}`")));
         }
     }
-    if until.is_none() && times.is_none() && !emit_all {
+    if until.is_none() && times.is_none() && !emit_all && emit_when.is_none() {
         return Err(QueryError(
             "repeat requires `until`, `times`, or `emit`".to_string(),
         ));
     }
-    Ok((body, until, emit_all, times))
+    Ok(RepeatSpec {
+        body,
+        until,
+        emit_all,
+        emit_when,
+        times,
+    })
+}
+
+fn parse_boolean_where(step: &str) -> Result<Option<(Vec<LogicalPlan>, bool)>, QueryError> {
+    for (name, require_all) in [("and", true), ("or", false)] {
+        let Some(arguments) = call_argument(step, name) else {
+            continue;
+        };
+        let expressions = split_top_level_arguments(arguments)?;
+        if expressions.len() < 2 {
+            return Err(QueryError(format!(
+                "`{name}` expects at least two traversal predicates"
+            )));
+        }
+        let predicates = expressions
+            .into_iter()
+            .map(|expression| compile_relative(expression.trim()))
+            .collect::<Result<Vec<_>, _>>()?;
+        return Ok(Some((predicates, require_all)));
+    }
+    Ok(None)
+}
+
+fn split_top_level_arguments(input: &str) -> Result<Vec<&str>, QueryError> {
+    let mut arguments = Vec::new();
+    let mut start = 0;
+    let mut depth = 0_u32;
+    let mut quote = None;
+    let mut escaped = false;
+    for (index, ch) in input.char_indices() {
+        if let Some(delimiter) = quote {
+            if escaped {
+                escaped = false;
+            } else if ch == '\\' {
+                escaped = true;
+            } else if ch == delimiter {
+                quote = None;
+            }
+            continue;
+        }
+        match ch {
+            '\'' | '"' => quote = Some(ch),
+            '(' => depth = depth.saturating_add(1),
+            ')' => {
+                depth = depth
+                    .checked_sub(1)
+                    .ok_or_else(|| QueryError("unmatched `)` in arguments".to_string()))?;
+            }
+            ',' if depth == 0 => {
+                let argument = input[start..index].trim();
+                if argument.is_empty() {
+                    return Err(QueryError("empty argument".to_string()));
+                }
+                arguments.push(argument);
+                start = index + 1;
+            }
+            _ => {}
+        }
+    }
+    if quote.is_some() || depth != 0 {
+        return Err(QueryError("unclosed argument expression".to_string()));
+    }
+    let final_argument = input[start..].trim();
+    if final_argument.is_empty() {
+        return Err(QueryError("empty argument".to_string()));
+    }
+    arguments.push(final_argument);
+    Ok(arguments)
 }
 
 fn call_groups<'a>(step: &'a str, name: &str) -> Result<Vec<&'a str>, QueryError> {
@@ -755,6 +891,7 @@ fn parse_traversal(step: &str) -> Option<Traversal> {
         "callee" => edge(Direction::Out, EdgeKind::Call, Some(NodeKind::Method)),
         "callIn" => edge(Direction::In, EdgeKind::Call, Some(NodeKind::Call)),
         "callOut" => Traversal::CallOut,
+        "inCall" => Traversal::InCall,
         "cfgNext" => edge(Direction::Out, EdgeKind::Cfg, None),
         "cfgPrev" => edge(Direction::In, EdgeKind::Cfg, None),
         "ddgOut" => edge(Direction::Out, EdgeKind::Ddg, None),
@@ -861,11 +998,45 @@ impl<'a> QueryExecutor<'a> {
                         .collect(),
                 ))
             }
+            LogicalPlan::ReachableByFlows { sinks, sources } => {
+                let sinks = self.nodes(sinks, seed)?;
+                let sources = self.nodes(sources, seed)?;
+                let source_set: HashSet<NodeId> = sources.into_iter().collect();
+                let mut paths = Vec::new();
+                for sink in sinks {
+                    self.reaching_paths(sink, &source_set, &mut paths)?;
+                }
+                Ok(QueryResult::Paths(stable_dedup(paths)))
+            }
+            LogicalPlan::BooleanWhere {
+                input,
+                predicates,
+                require_all,
+            } => {
+                let nodes = self.nodes(input, seed)?;
+                let mut out = Vec::new();
+                for node in nodes {
+                    let mut matches = predicates.iter().map(|predicate| {
+                        self.execute_seeded(predicate, &[node])
+                            .map(|result| !result.is_empty())
+                    });
+                    let matched = if *require_all {
+                        matches.try_fold(true, |state, value| value.map(|value| state && value))?
+                    } else {
+                        matches.try_fold(false, |state, value| value.map(|value| state || value))?
+                    };
+                    if matched {
+                        out.push(node);
+                    }
+                }
+                Ok(QueryResult::Nodes(out))
+            }
             LogicalPlan::Repeat {
                 input,
                 body,
                 until,
                 emit_all,
+                emit_when,
                 times,
             } => {
                 let starts = self.nodes(input, seed)?;
@@ -874,6 +1045,7 @@ impl<'a> QueryExecutor<'a> {
                     body,
                     until.as_deref(),
                     *emit_all,
+                    emit_when.as_deref(),
                     *times,
                 )?))
             }
@@ -1022,6 +1194,11 @@ impl<'a> QueryExecutor<'a> {
                         out.push(block);
                     }
                 }
+                Traversal::InCall => {
+                    if let Some(call) = self.nearest_ast_ancestor(node, NodeKind::Call) {
+                        out.push(call);
+                    }
+                }
             }
         }
         out
@@ -1087,12 +1264,57 @@ impl<'a> QueryExecutor<'a> {
         matched
     }
 
+    fn reaching_paths(
+        &self,
+        sink: NodeId,
+        sources: &HashSet<NodeId>,
+        output: &mut Vec<Vec<NodeId>>,
+    ) -> Result<(), QueryError> {
+        let mut stack = vec![(sink, vec![sink], HashSet::from([sink]))];
+        while let Some((node, reverse_path, seen)) = stack.pop() {
+            if sources.contains(&node) {
+                let mut path = reverse_path;
+                path.reverse();
+                output.push(path);
+                if output.len() >= MAX_FLOW_PATHS {
+                    return Err(QueryError(format!(
+                        "reachableByFlows exceeded {MAX_FLOW_PATHS} paths"
+                    )));
+                }
+                continue;
+            }
+            if reverse_path.len() >= MAX_REPEAT_DEPTH {
+                return Err(QueryError(format!(
+                    "reachableByFlows exceeded {MAX_REPEAT_DEPTH} nodes in one path"
+                )));
+            }
+            let mut predecessors: Vec<NodeId> = self
+                .cpg
+                .in_kind(node, EdgeKind::ReachingDef)
+                .chain(self.cpg.in_kind(node, EdgeKind::Ddg))
+                .collect();
+            predecessors.reverse();
+            for predecessor in predecessors {
+                if seen.contains(&predecessor) {
+                    continue;
+                }
+                let mut next_path = reverse_path.clone();
+                next_path.push(predecessor);
+                let mut next_seen = seen.clone();
+                next_seen.insert(predecessor);
+                stack.push((predecessor, next_path, next_seen));
+            }
+        }
+        Ok(())
+    }
+
     fn repeat(
         &self,
         starts: Vec<NodeId>,
         body: &LogicalPlan,
         until: Option<&LogicalPlan>,
         emit_all: bool,
+        emit_when: Option<&LogicalPlan>,
         times: Option<usize>,
     ) -> Result<Vec<NodeId>, QueryError> {
         if times == Some(0) {
@@ -1121,7 +1343,16 @@ impl<'a> QueryExecutor<'a> {
                 } else {
                     false
                 };
-                if emit_all || terminal || (at_limit && !emit_all) {
+                let selected = if let Some(predicate) = emit_when {
+                    !self.execute_seeded(predicate, &[node])?.is_empty()
+                } else {
+                    false
+                };
+                if emit_all
+                    || selected
+                    || terminal
+                    || (at_limit && !emit_all && emit_when.is_none())
+                {
                     emitted.push(node);
                 }
                 if !terminal && !at_limit && seen.insert(node) {
@@ -1222,6 +1453,7 @@ fn deduplicate(value: QueryResult) -> QueryResult {
         QueryResult::Nodes(values) => QueryResult::Nodes(stable_dedup(values)),
         QueryResult::Strings(values) => QueryResult::Strings(stable_dedup(values)),
         QueryResult::Integers(values) => QueryResult::Integers(stable_dedup(values)),
+        QueryResult::Paths(values) => QueryResult::Paths(stable_dedup(values)),
         count @ QueryResult::Count(_) => count,
     }
 }
@@ -1247,6 +1479,10 @@ fn limit(value: QueryResult, count: usize) -> QueryResult {
         QueryResult::Integers(mut values) => {
             values.truncate(count);
             QueryResult::Integers(values)
+        }
+        QueryResult::Paths(mut values) => {
+            values.truncate(count);
+            QueryResult::Paths(values)
         }
         value @ QueryResult::Count(_) => value,
     }
@@ -1420,6 +1656,39 @@ mod tests {
     }
 
     #[test]
+    fn supports_flow_paths_boolean_filters_and_standard_aliases() {
+        assert_eq!(
+            run(r#"cpg.call.and(_.name("strcpy"), _.argument(2)).name"#),
+            QueryResult::Strings(vec!["strcpy".to_string()])
+        );
+        assert_eq!(
+            run(r#"cpg.call.or(_.name("missing"), _.name("getenv")).name"#),
+            QueryResult::Strings(vec!["getenv".to_string()])
+        );
+        assert_eq!(
+            run(r#"cpg.call.filterNot(_.name("strcpy")).name"#),
+            QueryResult::Strings(vec!["getenv".to_string()])
+        );
+        assert_eq!(
+            run(r#"cpg.identifier("src").inCall.name"#),
+            QueryResult::Strings(vec!["strcpy".to_string()])
+        );
+        assert_eq!(run("cpg.assignment.size"), QueryResult::Count(0));
+        assert_eq!(
+            run(r#"cpg.call("strcpy").argument(2).reachableByFlows(cpg.call("getenv")).p"#),
+            QueryResult::Paths(vec![vec![NodeId(6), NodeId(5)]])
+        );
+    }
+
+    #[test]
+    fn supports_repeat_max_depth_and_predicated_emit() {
+        assert_eq!(
+            run(r#"cpg.method("main").repeat(_.astChildren)(_.emit(_.isCall).maxDepth(2)).name"#),
+            QueryResult::Strings(vec!["strcpy".to_string(), "getenv".to_string()])
+        );
+    }
+
+    #[test]
     fn committed_compatibility_catalog_compiles() {
         let catalog: serde_json::Value =
             serde_json::from_str(include_str!("../../acceptance/cpgql/catalog.json"))
@@ -1436,7 +1705,7 @@ mod tests {
             }
         }
         assert!(
-            implemented_cases >= 55,
+            implemented_cases >= 64,
             "implemented catalog must not silently shrink"
         );
     }

@@ -32,5 +32,12 @@ def emit(id: String, values: List[Any]): Unit = {
     emit("repeat", cpg.call("strcpy").repeat(_.astParent)(_.until(_.isMethod)).isMethod.name.l)
     emit("condition", cpg.controlStructure.condition.code.l)
     emit("empty", cpg.call("strcpy").argument(1).reachableBy(cpg.call("getenv")).code.l)
+    emit("assignments", cpg.assignment.code.l)
+    emit("returns", cpg.method("main").ast.isReturn.code.l)
+    emit("boolean-and", cpg.method.and(_.name("main"), _.call("strcpy")).name.l)
+    emit("boolean-or", cpg.method.or(_.name("main"), _.name("helper")).name.l)
+    emit("in-call", cpg.identifier("input").where(_.method.name("main")).inCall.name.l)
+    emit("repeat-max-depth", cpg.method("main").repeat(_.astChildren)(_.emit(_.isCall).maxDepth(2)).isCall.name.l)
+    emit("flow-paths", cpg.call("strcpy").argument(2).reachableByFlows(cpg.call("getenv")).map(_.elements.map(_.code).mkString(" -> ")).l)
   } finally cpg.close()
 }
