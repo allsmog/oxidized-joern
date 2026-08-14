@@ -258,6 +258,7 @@ pub fn operator_semantics(name: &str) -> Option<Vec<(i64, i64)>> {
         | "<operator>.preDecrement"
         | "<operator>.preIncrement" => incdec,
         "<operator>.sizeOf" => vec![],
+        "free" => vec![(1, 1)],
         // Everything else (named calls, subtraction, comparisons, ...):
         // no explicit semantics = pass-through.
         _ => return None,

@@ -14,11 +14,11 @@
       "excludes": ["/contrib/", "/test/", "/examples/", "/amiga/", "/msdos/", "/win32/"],
       "expected": {
         "sourceFiles": 26,
-        "nodes": 12348,
-        "graphSha256": "f8976ac22dcffeda298da9f16a02f09f18e63ec4fb013aa57d137824723b6dec",
-        "edgesSha256": "ff4559e89684009e76d3510a52b7b13a42dadfa28b159499b96eec251c430967",
-        "exportSha256": "390ddce0bc900aa61ab33951f31a1d3634fcb37f418b9131913d4f7a685ad66e",
-        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "nodes": 15088,
+        "graphSha256": "19328b2456587bf7c87fa6a54c19c67660ccc475475648b6f4577b6cb013277d",
+        "edgesSha256": "d452dd58cfb2795f198bfa9f5fe04271845447d3c15c21a4307a2a5c81d37504",
+        "exportSha256": "8eb9dcf497ebba7eeafe5173bc157921c28aab223c6b8639c81ed0d5c6cce4d4",
+        "sarifSha256": "26bc14c50dc2c2afebab67c5eef3450980a34536045663e0b7b52dc0c7a13241",
         "findings": 0
       },
       "budgets": {"buildSeconds": 20, "peakRssMiB": 512}
@@ -36,14 +36,14 @@
       "excludes": [],
       "expected": {
         "sourceFiles": 61,
-        "nodes": 71157,
-        "graphSha256": "7bde158c6e9f00978c8d6f33f06dd798c8a2ce6520439a1ef015e6bc9d0b1349",
-        "edgesSha256": "5f21033f0daba394eba409b683b054a0e5647dfc623be7984a47cff1f205b197",
-        "exportSha256": "d1f8fea88f25aa1e31de7cc4e8caa84dbff08c0413cae7631decc165178812fb",
-        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "nodes": 94858,
+        "graphSha256": "6d4f3a4a6b89a67b99e61d04be59dc9b3bae56c21168767426b9a79bf87954bf",
+        "edgesSha256": "e6f788405c99a8843ada89caaf27872f8644c2245047669ec0cdbcf554f6703c",
+        "exportSha256": "385376228260b45349f55126b5d0b90cc3414927c6c7028ed364915170f1815e",
+        "sarifSha256": "26bc14c50dc2c2afebab67c5eef3450980a34536045663e0b7b52dc0c7a13241",
         "findings": 0
       },
-      "budgets": {"buildSeconds": 20, "peakRssMiB": 1024}
+      "budgets": {"buildSeconds": 20, "peakRssMiB": 1536}
     }
   ]
 }

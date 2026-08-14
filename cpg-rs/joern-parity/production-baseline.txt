@@ -1,5 +1,5 @@
-SECTION AST standalone=1268 production=1268 common=1268 removed=0 added=0 exact=true
-SECTION NODES standalone=158 production=158 common=158 removed=0 added=0 exact=true
-SECTION EDGES standalone=3666 production=3666 common=3666 removed=0 added=0 exact=true
-SECTION FLOWS standalone=1545 production=1545 common=1545 removed=0 added=0 exact=true
+SECTION AST standalone=1415 production=1415 common=1415 removed=0 added=0 exact=true
+SECTION NODES standalone=177 production=177 common=177 removed=0 added=0 exact=true
+SECTION EDGES standalone=4076 production=4076 common=4076 removed=0 added=0 exact=true
+SECTION FLOWS standalone=1702 production=1702 common=1702 removed=0 added=0 exact=true
 TOTAL removed=0 added=0 exact=true

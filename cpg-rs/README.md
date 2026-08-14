@@ -11,8 +11,8 @@ The `0.1.x` release line is production-ready for its documented C workflows,
 but it is not a drop-in Joern replacement.
 
 The CLI accepts C, C++, Go, Java, JavaScript, TypeScript, Python, Ruby, Rust,
-and Scala. C's shipped build/analysis path is the same path guarded by 107/107
-exact Joern v4.0.555 corpus blocks, including 1,545/1,545 ReachingDef facts.
+and Scala. C's shipped build/analysis path is the same path guarded by 114/114
+exact Joern v4.0.555 corpus blocks, including 1,702/1,702 ReachingDef facts.
 Its deterministic build, persistence, export, flow, scan, SARIF, and update
 workflows are also gated on pinned zlib and Lua releases and labeled security
 outcomes. The other language frontends remain experimental.

@@ -87,7 +87,9 @@ def sources(project: dict, source_root: Path) -> list[Path]:
     return sorted(selected)
 
 
-def validate_project(project: dict, binary: Path, parity: Path, cache: Path) -> None:
+def validate_project(
+    project: dict, binary: Path, parity: Path, cache: Path, *, measure: bool = False
+) -> dict:
     archive = fetch(project, cache)
     expected = project["expected"]
     with tempfile.TemporaryDirectory(prefix=f"cpg-{project['id']}-") as temp_name:
@@ -118,7 +120,7 @@ def validate_project(project: dict, binary: Path, parity: Path, cache: Path) -> 
                 raise RuntimeError(f"{project['id']}: build took {elapsed:.2f}s")
             marker = "saved "
             nodes = int(output.split(marker, 1)[1].split(" nodes", 1)[0])
-            if nodes != expected["nodes"]:
+            if not measure and nodes != expected["nodes"]:
                 raise RuntimeError(f"{project['id']}: {nodes} nodes, expected {expected['nodes']}")
 
             export_dir = temp / f"export-{iteration}"
@@ -126,7 +128,7 @@ def validate_project(project: dict, binary: Path, parity: Path, cache: Path) -> 
             sarif = temp / f"scan-{iteration}.sarif"
             run([str(binary), "scan", "--load", str(graph), "--lang", "c", "-o", str(sarif)])
             findings = len(json.loads(sarif.read_text())["runs"][0]["results"])
-            if findings != expected["findings"]:
+            if not measure and findings != expected["findings"]:
                 raise RuntimeError(f"{project['id']}: {findings} findings, expected {expected['findings']}")
             outputs.append({
                 "graph": sha256(graph),
@@ -138,9 +140,9 @@ def validate_project(project: dict, binary: Path, parity: Path, cache: Path) -> 
         if outputs[0] != outputs[1]:
             raise RuntimeError(f"{project['id']}: repeated outputs differ: {outputs}")
         for key, manifest_key in [("graph", "graphSha256"), ("edges", "edgesSha256"), ("export", "exportSha256"), ("sarif", "sarifSha256")]:
-            if outputs[0][key] != expected[manifest_key]:
+            if not measure and outputs[0][key] != expected[manifest_key]:
                 raise RuntimeError(f"{project['id']}: {key} hash {outputs[0][key]}, expected {expected[manifest_key]}")
-        if peak_rss > project["budgets"]["peakRssMiB"]:
+        if not measure and peak_rss > project["budgets"]["peakRssMiB"]:
             raise RuntimeError(f"{project['id']}: peak RSS {peak_rss:.1f} MiB exceeds budget")
 
         _, update_elapsed, _ = run(
@@ -148,10 +150,21 @@ def validate_project(project: dict, binary: Path, parity: Path, cache: Path) -> 
             timeout=project["budgets"]["buildSeconds"] * 6,
         )
         print(
-            f"PASS {project['id']}: {len(selected)} files, {expected['nodes']} nodes, "
+            f"PASS {project['id']}: {len(selected)} files, {nodes} nodes, "
             f"build <= {project['budgets']['buildSeconds']}s, peak RSS {peak_rss:.1f} MiB, "
             f"incremental equivalence {update_elapsed:.2f}s"
         )
+        return {
+            "id": project["id"],
+            "sourceFiles": len(selected),
+            "nodes": nodes,
+            "graphSha256": outputs[0]["graph"],
+            "edgesSha256": outputs[0]["edges"],
+            "exportSha256": outputs[0]["export"],
+            "sarifSha256": outputs[0]["sarif"],
+            "findings": findings,
+            "peakRssMiB": round(peak_rss, 1),
+        }
 
 
 def main() -> int:
@@ -161,14 +174,30 @@ def main() -> int:
     parser.add_argument("--parity", type=Path, default=ROOT / "target" / "release" / "joern-parity")
     parser.add_argument("--cache", type=Path, default=Path(tempfile.gettempdir()) / "cpg-real-project-cache")
     parser.add_argument("--project", action="append")
+    parser.add_argument(
+        "--measure",
+        action="store_true",
+        help="print deterministic actuals without accepting changed baselines",
+    )
     args = parser.parse_args()
     manifest = json.loads(args.manifest.read_text())
     chosen = set(args.project or [])
     projects = [p for p in manifest["projects"] if not chosen or p["id"] in chosen]
     if chosen - {p["id"] for p in projects}:
         raise RuntimeError(f"unknown project(s): {sorted(chosen - {p['id'] for p in projects})}")
+    actuals = []
     for project in projects:
-        validate_project(project, args.binary.resolve(), args.parity.resolve(), args.cache)
+        actuals.append(
+            validate_project(
+                project,
+                args.binary.resolve(),
+                args.parity.resolve(),
+                args.cache,
+                measure=args.measure,
+            )
+        )
+    if args.measure:
+        print(json.dumps({"actuals": actuals}, indent=2, sort_keys=True))
     return 0
 
 
