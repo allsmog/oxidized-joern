@@ -10,11 +10,14 @@ use regex::Regex;
 use std::collections::HashSet;
 
 const MAX_QUERY_BYTES: usize = 64 * 1024;
+const MAX_REPEAT_DEPTH: usize = 4096;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum NodeSelector {
     Kind(NodeKind),
     All,
+    /// Relative traversal seed used inside `where`/`whereNot` lambdas.
+    Input,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -34,8 +37,26 @@ pub enum Property {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Predicate {
-    StringRegex { property: Property, pattern: String },
-    NumberEquals { property: Property, value: i64 },
+    StringRegex {
+        property: Property,
+        pattern: String,
+        negated: bool,
+    },
+    NumberCompare {
+        property: Property,
+        comparison: NumberComparison,
+        value: i64,
+    },
+    Kind(NodeKind),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum NumberComparison {
+    Equals,
+    GreaterThan,
+    GreaterThanOrEqual,
+    LessThan,
+    LessThanOrEqual,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -51,9 +72,14 @@ pub enum Traversal {
         edge: EdgeKind,
         target: Option<NodeKind>,
     },
+    AstDescendants,
+    AstAncestors,
+    DescendantsOfKind(NodeKind),
     ContainingMethod,
     File,
     Caller,
+    CallOut,
+    ParentBlock,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -66,6 +92,22 @@ pub enum LogicalPlan {
     Filter {
         input: Box<LogicalPlan>,
         predicate: Predicate,
+    },
+    Where {
+        input: Box<LogicalPlan>,
+        predicate: Box<LogicalPlan>,
+        negated: bool,
+    },
+    ReachableBy {
+        sinks: Box<LogicalPlan>,
+        sources: Box<LogicalPlan>,
+    },
+    Repeat {
+        input: Box<LogicalPlan>,
+        body: Box<LogicalPlan>,
+        until: Option<Box<LogicalPlan>>,
+        emit_all: bool,
+        times: Option<usize>,
     },
     Deduplicate(Box<LogicalPlan>),
     Limit {
@@ -128,98 +170,212 @@ impl QueryCompiler {
         if parts.is_empty() {
             return Err(QueryError("query is empty".to_string()));
         }
-        let (selector_index, selector) = if parts[0] == "cpg" {
-            let selector = parts
-                .get(1)
-                .ok_or_else(|| QueryError("missing node-type step after `cpg`".to_string()))?;
-            (2, parse_selector(selector)?)
-        } else {
-            (1, parse_selector(&parts[0])?)
-        };
+        compile_parts(&parts, false)
+    }
+}
 
-        let mut plan = LogicalPlan::Scan(selector);
-        let mut projected = false;
-        for (offset, step) in parts[selector_index..].iter().enumerate() {
-            let position = selector_index + offset + 1;
-            if matches!(step.as_str(), "l" | "toList") {
-                continue;
-            }
-            if step == "size" || step == "count" {
-                plan = LogicalPlan::Count(Box::new(plan));
-                projected = true;
-                continue;
-            }
-            if let Some(n) = parse_usize_call(step, "limit")? {
-                plan = LogicalPlan::Limit {
-                    input: Box::new(plan),
-                    count: n,
-                };
-                continue;
-            }
-            if matches!(step.as_str(), "dedup" | "distinct") {
-                plan = LogicalPlan::Deduplicate(Box::new(plan));
-                continue;
-            }
-            if projected {
-                return Err(QueryError(format!(
-                    "step {position} `{step}` cannot follow a scalar projection"
-                )));
-            }
+fn compile_relative(input: &str) -> Result<LogicalPlan, QueryError> {
+    let parts = split_steps(input.trim())?;
+    if parts.first().map(String::as_str) != Some("_") {
+        return Err(QueryError(
+            "where/filter expressions must use the `_` traversal parameter".to_string(),
+        ));
+    }
+    compile_parts(&parts, true)
+}
 
-            if let Some((property, pattern)) = parse_string_filter(step)? {
-                validate_regex(&pattern)?;
+fn compile_parts(parts: &[String], relative: bool) -> Result<LogicalPlan, QueryError> {
+    let (selector_index, mut plan) = if relative {
+        (1, LogicalPlan::Scan(NodeSelector::Input))
+    } else if parts[0] == "cpg" {
+        let selector = parts
+            .get(1)
+            .ok_or_else(|| QueryError("missing node-type step after `cpg`".to_string()))?;
+        (2, parse_selector_plan(selector)?)
+    } else {
+        (1, parse_selector_plan(&parts[0])?)
+    };
+
+    let mut projected = false;
+    for (offset, step) in parts[selector_index..].iter().enumerate() {
+        let position = selector_index + offset + 1;
+        if matches!(step.as_str(), "l" | "toList") {
+            continue;
+        }
+        if step == "size" || step == "count" {
+            plan = LogicalPlan::Count(Box::new(plan));
+            projected = true;
+            continue;
+        }
+        if let Some(n) = parse_usize_call(step, "limit")?.or(parse_usize_call(step, "take")?) {
+            plan = LogicalPlan::Limit {
+                input: Box::new(plan),
+                count: n,
+            };
+            continue;
+        }
+        if matches!(step.as_str(), "head" | "headOption") {
+            plan = LogicalPlan::Limit {
+                input: Box::new(plan),
+                count: 1,
+            };
+            continue;
+        }
+        if matches!(step.as_str(), "dedup" | "distinct") {
+            plan = LogicalPlan::Deduplicate(Box::new(plan));
+            continue;
+        }
+        if projected {
+            return Err(QueryError(format!(
+                "step {position} `{step}` cannot follow a scalar projection"
+            )));
+        }
+
+        if step.starts_with("repeat") {
+            let (body, until, emit_all, times) = parse_repeat_step(step)?;
+            plan = LogicalPlan::Repeat {
+                input: Box::new(plan),
+                body: Box::new(body),
+                until: until.map(Box::new),
+                emit_all,
+                times,
+            };
+            continue;
+        }
+        if let Some(argument) = call_argument(step, "reachableBy") {
+            let sources = QueryCompiler::compile(argument.trim())?;
+            plan = LogicalPlan::ReachableBy {
+                sinks: Box::new(plan),
+                sources: Box::new(sources),
+            };
+            continue;
+        }
+        let where_expression = ["where", "filter"]
+            .iter()
+            .find_map(|name| call_argument(step, name));
+        let where_not_expression = call_argument(step, "whereNot");
+        if let Some(expression) = where_expression.or(where_not_expression) {
+            plan = LogicalPlan::Where {
+                input: Box::new(plan),
+                predicate: Box::new(compile_relative(expression.trim())?),
+                negated: where_not_expression.is_some(),
+            };
+            continue;
+        }
+        if let Some(kind) = parse_kind_filter(step) {
+            plan = LogicalPlan::Filter {
+                input: Box::new(plan),
+                predicate: Predicate::Kind(kind),
+            };
+            continue;
+        }
+        if let Some((property, pattern, negated)) = parse_string_filter(step)? {
+            validate_regex(&pattern)?;
+            plan = LogicalPlan::Filter {
+                input: Box::new(plan),
+                predicate: Predicate::StringRegex {
+                    property,
+                    pattern,
+                    negated,
+                },
+            };
+            continue;
+        }
+        if let Some((property, comparison, value)) = parse_number_filter(step)? {
+            plan = LogicalPlan::Filter {
+                input: Box::new(plan),
+                predicate: Predicate::NumberCompare {
+                    property,
+                    comparison,
+                    value,
+                },
+            };
+            continue;
+        }
+        if let Some(index) = parse_optional_usize_call(step, "argument")? {
+            plan = LogicalPlan::Traverse {
+                input: Box::new(plan),
+                traversal: Traversal::Edge {
+                    direction: Direction::Out,
+                    edge: EdgeKind::Argument,
+                    target: None,
+                },
+            };
+            if let Some(index) = index {
                 plan = LogicalPlan::Filter {
                     input: Box::new(plan),
-                    predicate: Predicate::StringRegex { property, pattern },
-                };
-                continue;
-            }
-            if let Some((property, value)) = parse_number_filter(step)? {
-                plan = LogicalPlan::Filter {
-                    input: Box::new(plan),
-                    predicate: Predicate::NumberEquals { property, value },
-                };
-                continue;
-            }
-            if let Some(index) = parse_optional_usize_call(step, "argument")? {
-                plan = LogicalPlan::Traverse {
-                    input: Box::new(plan),
-                    traversal: Traversal::Edge {
-                        direction: Direction::Out,
-                        edge: EdgeKind::Argument,
-                        target: None,
+                    predicate: Predicate::NumberCompare {
+                        property: Property::ArgumentIndex,
+                        comparison: NumberComparison::Equals,
+                        value: index as i64,
                     },
                 };
-                if let Some(index) = index {
-                    plan = LogicalPlan::Filter {
-                        input: Box::new(plan),
-                        predicate: Predicate::NumberEquals {
-                            property: Property::ArgumentIndex,
-                            value: index as i64,
-                        },
-                    };
-                }
-                continue;
             }
-            if let Some(traversal) = parse_traversal(step) {
-                plan = LogicalPlan::Traverse {
-                    input: Box::new(plan),
-                    traversal,
-                };
-                continue;
-            }
-            if let Some(property) = parse_property(step) {
-                plan = LogicalPlan::Project {
-                    input: Box::new(plan),
-                    property,
-                };
-                projected = true;
-                continue;
-            }
-            return Err(QueryError(format!("unsupported step {position} `{step}`")));
+            continue;
         }
-        Ok(plan)
+        if let Some((traversal, pattern)) = parse_named_traversal(step)? {
+            validate_regex(&pattern)?;
+            plan = LogicalPlan::Traverse {
+                input: Box::new(plan),
+                traversal,
+            };
+            plan = LogicalPlan::Filter {
+                input: Box::new(plan),
+                predicate: Predicate::StringRegex {
+                    property: Property::Name,
+                    pattern,
+                    negated: false,
+                },
+            };
+            continue;
+        }
+        if let Some(traversal) = parse_traversal(step) {
+            plan = LogicalPlan::Traverse {
+                input: Box::new(plan),
+                traversal,
+            };
+            continue;
+        }
+        if let Some(property) = parse_property(step) {
+            plan = LogicalPlan::Project {
+                input: Box::new(plan),
+                property,
+            };
+            projected = true;
+            continue;
+        }
+        return Err(QueryError(format!("unsupported step {position} `{step}`")));
     }
+    Ok(plan)
+}
+
+fn parse_selector_plan(step: &str) -> Result<LogicalPlan, QueryError> {
+    if let Ok(selector) = parse_selector(step) {
+        return Ok(LogicalPlan::Scan(selector));
+    }
+    let Some(open) = step.find('(') else {
+        return Err(QueryError(format!("unsupported node-type step `{step}`")));
+    };
+    let name = &step[..open];
+    let selector = parse_selector(name)?;
+    let argument = call_argument(step, name)
+        .ok_or_else(|| QueryError(format!("invalid node-type filter `{step}`")))?;
+    let values = parse_string_arguments(argument)?;
+    if values.is_empty() {
+        return Err(QueryError(format!(
+            "node-type filter `{name}` expects at least one quoted string"
+        )));
+    }
+    let pattern = values.join("|");
+    validate_regex(&pattern)?;
+    Ok(LogicalPlan::Filter {
+        input: Box::new(LogicalPlan::Scan(selector)),
+        predicate: Predicate::StringRegex {
+            property: Property::Name,
+            pattern,
+            negated: false,
+        },
+    })
 }
 
 fn split_steps(input: &str) -> Result<Vec<String>, QueryError> {
@@ -320,7 +476,7 @@ fn parse_property(step: &str) -> Option<Property> {
     })
 }
 
-fn parse_string_filter(step: &str) -> Result<Option<(Property, String)>, QueryError> {
+fn parse_string_filter(step: &str) -> Result<Option<(Property, String, bool)>, QueryError> {
     for (name, property) in [
         ("name", Property::Name),
         ("fullName", Property::FullName),
@@ -330,35 +486,163 @@ fn parse_string_filter(step: &str) -> Result<Option<(Property, String)>, QueryEr
         ("filename", Property::Filename),
         ("label", Property::Label),
     ] {
-        if let Some(argument) = call_argument(step, name) {
-            return Ok(Some((property, parse_string_literal(argument)?)));
+        for (suffix, exact, negated) in [
+            ("Exact", true, false),
+            ("Not", false, true),
+            ("", false, false),
+        ] {
+            let method = format!("{name}{suffix}");
+            if let Some(argument) = call_argument(step, &method) {
+                let values = parse_string_arguments(argument)?;
+                if values.is_empty() {
+                    return Err(QueryError(format!(
+                        "`{method}` expects at least one quoted string"
+                    )));
+                }
+                let patterns: Vec<String> = values
+                    .into_iter()
+                    .map(|value| if exact { regex::escape(&value) } else { value })
+                    .collect();
+                return Ok(Some((property, patterns.join("|"), negated)));
+            }
         }
     }
     Ok(None)
 }
 
-fn parse_number_filter(step: &str) -> Result<Option<(Property, i64)>, QueryError> {
+fn parse_number_filter(
+    step: &str,
+) -> Result<Option<(Property, NumberComparison, i64)>, QueryError> {
     for (name, property) in [
         ("lineNumber", Property::LineNumber),
         ("order", Property::Order),
         ("argumentIndex", Property::ArgumentIndex),
         ("id", Property::Id),
     ] {
-        if let Some(argument) = call_argument(step, name) {
-            let value = argument
-                .trim()
-                .parse::<i64>()
-                .map_err(|_| QueryError(format!("`{name}` expects one integer argument")))?;
-            return Ok(Some((property, value)));
+        for (suffix, comparison) in [
+            ("Gt", NumberComparison::GreaterThan),
+            ("Gte", NumberComparison::GreaterThanOrEqual),
+            ("Lt", NumberComparison::LessThan),
+            ("Lte", NumberComparison::LessThanOrEqual),
+            ("", NumberComparison::Equals),
+        ] {
+            let method = format!("{name}{suffix}");
+            if let Some(argument) = call_argument(step, &method) {
+                let value = argument
+                    .trim()
+                    .parse::<i64>()
+                    .map_err(|_| QueryError(format!("`{method}` expects one integer argument")))?;
+                return Ok(Some((property, comparison, value)));
+            }
         }
     }
     Ok(None)
+}
+
+fn parse_kind_filter(step: &str) -> Option<NodeKind> {
+    let selector = step.strip_prefix("is")?;
+    let mut chars = selector.chars();
+    let first = chars.next()?.to_ascii_lowercase();
+    let selector = format!("{first}{}", chars.as_str());
+    match parse_selector(&selector).ok()? {
+        NodeSelector::Kind(kind) => Some(kind),
+        NodeSelector::All | NodeSelector::Input => None,
+    }
 }
 
 fn call_argument<'a>(step: &'a str, name: &str) -> Option<&'a str> {
     step.strip_prefix(name)?
         .strip_prefix('(')?
         .strip_suffix(')')
+}
+
+fn parse_repeat_step(
+    step: &str,
+) -> Result<(LogicalPlan, Option<LogicalPlan>, bool, Option<usize>), QueryError> {
+    let groups = call_groups(step, "repeat")?;
+    if groups.len() != 2 {
+        return Err(QueryError(
+            "`repeat` expects a traversal and one options group".to_string(),
+        ));
+    }
+    let body = compile_relative(groups[0].trim())?;
+    let option_parts = split_steps(groups[1].trim())?;
+    if option_parts.first().map(String::as_str) != Some("_") {
+        return Err(QueryError(
+            "repeat options must use the `_` traversal parameter".to_string(),
+        ));
+    }
+    let mut until = None;
+    let mut emit_all = false;
+    let mut times = None;
+    for option in &option_parts[1..] {
+        if option == "emit" {
+            emit_all = true;
+        } else if let Some(expression) = call_argument(option, "until") {
+            until = Some(compile_relative(expression.trim())?);
+        } else if let Some(count) = parse_usize_call(option, "times")? {
+            if count > MAX_REPEAT_DEPTH {
+                return Err(QueryError(format!(
+                    "repeat depth {count} exceeds maximum {MAX_REPEAT_DEPTH}"
+                )));
+            }
+            times = Some(count);
+        } else {
+            return Err(QueryError(format!("unsupported repeat option `{option}`")));
+        }
+    }
+    if until.is_none() && times.is_none() && !emit_all {
+        return Err(QueryError(
+            "repeat requires `until`, `times`, or `emit`".to_string(),
+        ));
+    }
+    Ok((body, until, emit_all, times))
+}
+
+fn call_groups<'a>(step: &'a str, name: &str) -> Result<Vec<&'a str>, QueryError> {
+    let mut rest = step
+        .strip_prefix(name)
+        .ok_or_else(|| QueryError(format!("expected `{name}`")))?;
+    let mut groups = Vec::new();
+    while !rest.is_empty() {
+        if !rest.starts_with('(') {
+            return Err(QueryError(format!("invalid `{name}` argument groups")));
+        }
+        let mut depth = 0_u32;
+        let mut quote = None;
+        let mut escaped = false;
+        let mut end = None;
+        for (index, ch) in rest.char_indices() {
+            if let Some(delimiter) = quote {
+                if escaped {
+                    escaped = false;
+                } else if ch == '\\' {
+                    escaped = true;
+                } else if ch == delimiter {
+                    quote = None;
+                }
+                continue;
+            }
+            match ch {
+                '\'' | '"' => quote = Some(ch),
+                '(' => depth += 1,
+                ')' => {
+                    depth = depth.checked_sub(1).ok_or_else(|| {
+                        QueryError(format!("unmatched `)` in `{name}` arguments"))
+                    })?;
+                    if depth == 0 {
+                        end = Some(index);
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+        let end = end.ok_or_else(|| QueryError(format!("unclosed `{name}` argument")))?;
+        groups.push(&rest[1..end]);
+        rest = &rest[end + 1..];
+    }
+    Ok(groups)
 }
 
 fn parse_string_literal(value: &str) -> Result<String, QueryError> {
@@ -373,6 +657,40 @@ fn parse_string_literal(value: &str) -> Result<String, QueryError> {
     Err(QueryError(
         "property filters require a quoted string".to_string(),
     ))
+}
+
+fn parse_string_arguments(arguments: &str) -> Result<Vec<String>, QueryError> {
+    let mut values = Vec::new();
+    let mut start = 0;
+    let mut quote = None;
+    let mut escaped = false;
+    for (index, ch) in arguments.char_indices() {
+        if let Some(delimiter) = quote {
+            if escaped {
+                escaped = false;
+            } else if ch == '\\' {
+                escaped = true;
+            } else if ch == delimiter {
+                quote = None;
+            }
+        } else {
+            match ch {
+                '\'' | '"' => quote = Some(ch),
+                ',' => {
+                    values.push(parse_string_literal(arguments[start..index].trim())?);
+                    start = index + 1;
+                }
+                _ => {}
+            }
+        }
+    }
+    if quote.is_some() {
+        return Err(QueryError("unterminated string literal".to_string()));
+    }
+    if !arguments[start..].trim().is_empty() {
+        values.push(parse_string_literal(arguments[start..].trim())?);
+    }
+    Ok(values)
 }
 
 fn validate_regex(pattern: &str) -> Result<(), QueryError> {
@@ -408,31 +726,75 @@ fn parse_traversal(step: &str) -> Option<Traversal> {
         target,
     };
     Some(match step {
-        "ast" | "astChildren" => edge(Direction::Out, EdgeKind::Ast, None),
+        "ast" => Traversal::AstDescendants,
+        "astChildren" => edge(Direction::Out, EdgeKind::Ast, None),
         "astParent" => edge(Direction::In, EdgeKind::Ast, None),
+        "inAst" | "inAstMinusLeaf" => Traversal::AstAncestors,
+        "block" => Traversal::DescendantsOfKind(NodeKind::Block),
+        "call" => Traversal::DescendantsOfKind(NodeKind::Call),
+        "controlStructure" => Traversal::DescendantsOfKind(NodeKind::ControlStructure),
+        "fieldIdentifier" => Traversal::DescendantsOfKind(NodeKind::FieldIdentifier),
+        "identifier" => Traversal::DescendantsOfKind(NodeKind::Identifier),
+        "literal" => Traversal::DescendantsOfKind(NodeKind::Literal),
+        "local" => Traversal::DescendantsOfKind(NodeKind::Local),
+        "methodRef" => Traversal::DescendantsOfKind(NodeKind::MethodRef),
+        "return" => Traversal::DescendantsOfKind(NodeKind::Return),
+        "typeRef" => Traversal::DescendantsOfKind(NodeKind::TypeRef),
         "parameter" => edge(
             Direction::Out,
             EdgeKind::Ast,
             Some(NodeKind::MethodParameterIn),
         ),
+        "parameterOut" => edge(
+            Direction::Out,
+            EdgeKind::Ast,
+            Some(NodeKind::MethodParameterOut),
+        ),
         "methodReturn" => edge(Direction::Out, EdgeKind::Ast, Some(NodeKind::MethodReturn)),
         "receiver" => edge(Direction::Out, EdgeKind::Receiver, None),
         "callee" => edge(Direction::Out, EdgeKind::Call, Some(NodeKind::Method)),
         "callIn" => edge(Direction::In, EdgeKind::Call, Some(NodeKind::Call)),
+        "callOut" => Traversal::CallOut,
         "cfgNext" => edge(Direction::Out, EdgeKind::Cfg, None),
         "cfgPrev" => edge(Direction::In, EdgeKind::Cfg, None),
         "ddgOut" => edge(Direction::Out, EdgeKind::Ddg, None),
         "ddgIn" => edge(Direction::In, EdgeKind::Ddg, None),
         "reachingDefOut" => edge(Direction::Out, EdgeKind::ReachingDef, None),
         "reachingDefIn" => edge(Direction::In, EdgeKind::ReachingDef, None),
-        "ref" => edge(Direction::Out, EdgeKind::Ref, None),
+        "ref" | "refsTo" => edge(Direction::Out, EdgeKind::Ref, None),
         "referencingIdentifiers" => edge(Direction::In, EdgeKind::Ref, None),
-        "referencedType" => edge(Direction::Out, EdgeKind::EvalType, Some(NodeKind::Type)),
+        "referencedType" | "typ" => edge(Direction::Out, EdgeKind::EvalType, Some(NodeKind::Type)),
+        "evalType" => edge(Direction::Out, EdgeKind::EvalType, None),
+        "parameterLink" => edge(Direction::Out, EdgeKind::ParameterLink, None),
+        "condition" => edge(Direction::Out, EdgeKind::Condition, None),
+        "whenTrue" => edge(Direction::Out, EdgeKind::TrueBody, None),
+        "whenFalse" => edge(Direction::Out, EdgeKind::FalseBody, None),
         "method" => Traversal::ContainingMethod,
         "file" => Traversal::File,
         "caller" => Traversal::Caller,
+        "parentBlock" => Traversal::ParentBlock,
         _ => return None,
     })
+}
+
+fn parse_named_traversal(step: &str) -> Result<Option<(Traversal, String)>, QueryError> {
+    let Some(open) = step.find('(') else {
+        return Ok(None);
+    };
+    let name = &step[..open];
+    let Some(traversal) = parse_traversal(name) else {
+        return Ok(None);
+    };
+    let Some(arguments) = call_argument(step, name) else {
+        return Err(QueryError(format!("invalid traversal filter `{step}`")));
+    };
+    let values = parse_string_arguments(arguments)?;
+    if values.is_empty() {
+        return Err(QueryError(format!(
+            "traversal filter `{name}` expects at least one quoted string"
+        )));
+    }
+    Ok(Some((traversal, values.join("|"))))
 }
 
 pub struct QueryExecutor<'a> {
@@ -445,6 +807,14 @@ impl<'a> QueryExecutor<'a> {
     }
 
     pub fn execute(&self, plan: &LogicalPlan) -> Result<QueryResult, QueryError> {
+        self.execute_seeded(plan, &[])
+    }
+
+    fn execute_seeded(
+        &self,
+        plan: &LogicalPlan,
+        seed: &[NodeId],
+    ) -> Result<QueryResult, QueryError> {
         match plan {
             LogicalPlan::Scan(NodeSelector::Kind(kind)) => {
                 Ok(QueryResult::Nodes(self.cpg.nodes_of_kind(*kind)))
@@ -452,32 +822,81 @@ impl<'a> QueryExecutor<'a> {
             LogicalPlan::Scan(NodeSelector::All) => {
                 Ok(QueryResult::Nodes(self.cpg.nodes().collect()))
             }
+            LogicalPlan::Scan(NodeSelector::Input) => Ok(QueryResult::Nodes(seed.to_vec())),
             LogicalPlan::Traverse { input, traversal } => {
-                let nodes = self.nodes(input)?;
+                let nodes = self.nodes(input, seed)?;
                 Ok(QueryResult::Nodes(self.traverse(&nodes, *traversal)))
             }
             LogicalPlan::Filter { input, predicate } => {
-                let nodes = self.nodes(input)?;
+                let nodes = self.nodes(input, seed)?;
                 Ok(QueryResult::Nodes(self.filter(nodes, predicate)?))
             }
+            LogicalPlan::Where {
+                input,
+                predicate,
+                negated,
+            } => {
+                let nodes = self.nodes(input, seed)?;
+                let mut out = Vec::new();
+                for node in nodes {
+                    let matched = !self.execute_seeded(predicate, &[node])?.is_empty();
+                    if matched != *negated {
+                        out.push(node);
+                    }
+                }
+                Ok(QueryResult::Nodes(out))
+            }
+            LogicalPlan::ReachableBy { sinks, sources } => {
+                let sinks = self.nodes(sinks, seed)?;
+                let source_nodes = self.nodes(sources, seed)?;
+                let source_set: HashSet<NodeId> = source_nodes.iter().copied().collect();
+                let mut matched = HashSet::new();
+                for sink in sinks {
+                    matched.extend(self.reaching_sources(sink, &source_set));
+                }
+                Ok(QueryResult::Nodes(
+                    source_nodes
+                        .into_iter()
+                        .filter(|source| matched.contains(source))
+                        .collect(),
+                ))
+            }
+            LogicalPlan::Repeat {
+                input,
+                body,
+                until,
+                emit_all,
+                times,
+            } => {
+                let starts = self.nodes(input, seed)?;
+                Ok(QueryResult::Nodes(self.repeat(
+                    starts,
+                    body,
+                    until.as_deref(),
+                    *emit_all,
+                    *times,
+                )?))
+            }
             LogicalPlan::Deduplicate(input) => {
-                let value = self.execute(input)?;
+                let value = self.execute_seeded(input, seed)?;
                 Ok(deduplicate(value))
             }
             LogicalPlan::Limit { input, count } => {
-                let value = self.execute(input)?;
+                let value = self.execute_seeded(input, seed)?;
                 Ok(limit(value, *count))
             }
             LogicalPlan::Project { input, property } => {
-                let nodes = self.nodes(input)?;
+                let nodes = self.nodes(input, seed)?;
                 Ok(self.project(&nodes, *property))
             }
-            LogicalPlan::Count(input) => Ok(QueryResult::Count(self.execute(input)?.len())),
+            LogicalPlan::Count(input) => {
+                Ok(QueryResult::Count(self.execute_seeded(input, seed)?.len()))
+            }
         }
     }
 
-    fn nodes(&self, plan: &LogicalPlan) -> Result<Vec<NodeId>, QueryError> {
-        match self.execute(plan)? {
+    fn nodes(&self, plan: &LogicalPlan, seed: &[NodeId]) -> Result<Vec<NodeId>, QueryError> {
+        match self.execute_seeded(plan, seed)? {
             QueryResult::Nodes(nodes) => Ok(nodes),
             _ => Err(QueryError(
                 "node traversal cannot follow a scalar projection".to_string(),
@@ -487,19 +906,34 @@ impl<'a> QueryExecutor<'a> {
 
     fn filter(&self, nodes: Vec<NodeId>, predicate: &Predicate) -> Result<Vec<NodeId>, QueryError> {
         match predicate {
-            Predicate::StringRegex { property, pattern } => {
+            Predicate::StringRegex {
+                property,
+                pattern,
+                negated,
+            } => {
                 let regex = anchored_regex(pattern)?;
                 Ok(nodes
                     .into_iter()
                     .filter(|&node| {
                         self.string_property(node, *property)
-                            .is_some_and(|value| regex.is_match(&value))
+                            .is_some_and(|value| regex.is_match(&value) != *negated)
                     })
                     .collect())
             }
-            Predicate::NumberEquals { property, value } => Ok(nodes
+            Predicate::NumberCompare {
+                property,
+                comparison,
+                value,
+            } => Ok(nodes
                 .into_iter()
-                .filter(|&node| self.number_property(node, *property) == Some(*value))
+                .filter(|&node| {
+                    self.number_property(node, *property)
+                        .is_some_and(|actual| compare_number(actual, *comparison, *value))
+                })
+                .collect()),
+            Predicate::Kind(kind) => Ok(nodes
+                .into_iter()
+                .filter(|&node| self.cpg.kind_of(node) == *kind)
                 .collect()),
         }
     }
@@ -521,6 +955,29 @@ impl<'a> QueryExecutor<'a> {
                         neighbours
                             .filter(|&n| target.is_none_or(|kind| self.cpg.kind_of(n) == kind)),
                     );
+                }
+                Traversal::AstDescendants => {
+                    out.extend(self.ast_descendants(node, None));
+                }
+                Traversal::AstAncestors => {
+                    let mut stack: Vec<NodeId> = self.cpg.in_kind(node, EdgeKind::Ast).collect();
+                    let mut seen = HashSet::new();
+                    while let Some(parent) = stack.pop() {
+                        if !seen.insert(parent) {
+                            continue;
+                        }
+                        out.push(parent);
+                        // Joern's inAst traversal stops at the enclosing
+                        // method. C's schema-faithful per-file `<global>`
+                        // wrapper has an AST edge to each real method, but it
+                        // is not an ancestor exposed by semantic CPGQL.
+                        if self.cpg.kind_of(parent) != NodeKind::Method {
+                            stack.extend(self.cpg.in_kind(parent, EdgeKind::Ast));
+                        }
+                    }
+                }
+                Traversal::DescendantsOfKind(kind) => {
+                    out.extend(self.ast_descendants(node, Some(kind)));
                 }
                 Traversal::ContainingMethod => {
                     if let Some(method) = self.containing_method(node) {
@@ -546,9 +1003,139 @@ impl<'a> QueryExecutor<'a> {
                         }
                     }
                 }
+                Traversal::CallOut => {
+                    let calls = if self.cpg.kind_of(node) == NodeKind::Call {
+                        vec![node]
+                    } else {
+                        self.ast_descendants(node, Some(NodeKind::Call))
+                    };
+                    for call in calls {
+                        out.extend(
+                            self.cpg
+                                .out_kind(call, EdgeKind::Call)
+                                .filter(|&target| self.cpg.kind_of(target) == NodeKind::Method),
+                        );
+                    }
+                }
+                Traversal::ParentBlock => {
+                    if let Some(block) = self.nearest_ast_ancestor(node, NodeKind::Block) {
+                        out.push(block);
+                    }
+                }
             }
         }
         out
+    }
+
+    fn ast_descendants(&self, root: NodeId, target: Option<NodeKind>) -> Vec<NodeId> {
+        let mut out = Vec::new();
+        let mut seen = HashSet::new();
+        let mut stack: Vec<NodeId> = self.cpg.out_kind(root, EdgeKind::Ast).collect();
+        while let Some(node) = stack.pop() {
+            if !seen.insert(node) {
+                continue;
+            }
+            if target.is_none_or(|kind| self.cpg.kind_of(node) == kind) {
+                out.push(node);
+            }
+            stack.extend(self.cpg.out_kind(node, EdgeKind::Ast));
+        }
+        out
+    }
+
+    fn nearest_ast_ancestor(&self, start: NodeId, target: NodeKind) -> Option<NodeId> {
+        let mut frontier: Vec<NodeId> = self.cpg.in_kind(start, EdgeKind::Ast).collect();
+        let mut seen = HashSet::new();
+        while !frontier.is_empty() {
+            let mut next = Vec::new();
+            for node in frontier {
+                if !seen.insert(node) {
+                    continue;
+                }
+                if self.cpg.kind_of(node) == target {
+                    return Some(node);
+                }
+                next.extend(self.cpg.in_kind(node, EdgeKind::Ast));
+            }
+            frontier = next;
+        }
+        None
+    }
+
+    fn reaching_sources(&self, sink: NodeId, sources: &HashSet<NodeId>) -> HashSet<NodeId> {
+        let mut matched = HashSet::new();
+        let mut seen = HashSet::new();
+        let mut stack = vec![sink];
+        while let Some(node) = stack.pop() {
+            if !seen.insert(node) {
+                continue;
+            }
+            if sources.contains(&node) {
+                matched.insert(node);
+            }
+            for predecessor in self
+                .cpg
+                .in_kind(node, EdgeKind::ReachingDef)
+                .chain(self.cpg.in_kind(node, EdgeKind::Ddg))
+            {
+                if sources.contains(&predecessor) {
+                    matched.insert(predecessor);
+                }
+                stack.push(predecessor);
+            }
+        }
+        matched
+    }
+
+    fn repeat(
+        &self,
+        starts: Vec<NodeId>,
+        body: &LogicalPlan,
+        until: Option<&LogicalPlan>,
+        emit_all: bool,
+        times: Option<usize>,
+    ) -> Result<Vec<NodeId>, QueryError> {
+        if times == Some(0) {
+            return Ok(if emit_all { Vec::new() } else { starts });
+        }
+        let mut emitted = Vec::new();
+        let mut frontier = starts.clone();
+        let mut seen: HashSet<NodeId> = starts.into_iter().collect();
+        for depth in 1..=times.unwrap_or(MAX_REPEAT_DEPTH) {
+            let next = match self.execute_seeded(body, &frontier)? {
+                QueryResult::Nodes(nodes) => stable_dedup(nodes),
+                _ => {
+                    return Err(QueryError(
+                        "repeat body must produce a node traversal".to_string(),
+                    ));
+                }
+            };
+            if next.is_empty() {
+                return Ok(stable_dedup(emitted));
+            }
+            let at_limit = times == Some(depth);
+            let mut continuing = Vec::new();
+            for node in next {
+                let terminal = if let Some(predicate) = until {
+                    !self.execute_seeded(predicate, &[node])?.is_empty()
+                } else {
+                    false
+                };
+                if emit_all || terminal || (at_limit && !emit_all) {
+                    emitted.push(node);
+                }
+                if !terminal && !at_limit && seen.insert(node) {
+                    continuing.push(node);
+                }
+            }
+            if continuing.is_empty() {
+                return Ok(stable_dedup(emitted));
+            }
+            frontier = continuing;
+        }
+        Err(QueryError(format!(
+            "repeat did not terminate within {MAX_REPEAT_DEPTH} traversals"
+        )))
     }
 
     fn containing_method(&self, start: NodeId) -> Option<NodeId> {
@@ -617,6 +1204,16 @@ impl<'a> QueryExecutor<'a> {
             Property::Id => node.0 as i64,
             _ => return None,
         })
+    }
+}
+
+fn compare_number(actual: i64, comparison: NumberComparison, expected: i64) -> bool {
+    match comparison {
+        NumberComparison::Equals => actual == expected,
+        NumberComparison::GreaterThan => actual > expected,
+        NumberComparison::GreaterThanOrEqual => actual >= expected,
+        NumberComparison::LessThan => actual < expected,
+        NumberComparison::LessThanOrEqual => actual <= expected,
     }
 }
 
@@ -704,6 +1301,12 @@ mod tests {
         let src = b.identifier("src", Some(4));
         b.add_argument(call, dst, 1);
         b.add_argument(call, src, 2);
+        let source = b.call("getenv", "getenv(\"INPUT\")", Some(3));
+        b.ast_child(method, source);
+        b.cpg.add_edge(source, src, EdgeKind::ReachingDef);
+        let callee = b.method("strcpy", "strcpy", "char*(char*,char*)", None);
+        b.contains(file_node, callee);
+        b.cpg.add_edge(call, callee, EdgeKind::Call);
         cpg
     }
 
@@ -720,6 +1323,14 @@ mod tests {
             1
         );
         assert_eq!(run(r#"cpg.call.name("copy")"#).len(), 0);
+        assert_eq!(
+            run(r#"cpg.call("strcpy").code"#),
+            QueryResult::Strings(vec!["strcpy(dst, src)".to_string()])
+        );
+        assert_eq!(
+            run(r#"cpg.method("main").call("getenv").code"#),
+            QueryResult::Strings(vec!["getenv(\"INPUT\")".to_string()])
+        );
     }
 
     #[test]
@@ -746,7 +1357,7 @@ mod tests {
         );
         assert_eq!(
             run(r#"cpg.call.file.filename"#),
-            QueryResult::Strings(vec!["query.c".to_string()])
+            QueryResult::Strings(vec!["query.c".to_string(), "query.c".to_string()])
         );
     }
 
@@ -758,18 +1369,75 @@ mod tests {
     }
 
     #[test]
+    fn supports_exact_negative_kind_numeric_and_where_filters() {
+        assert_eq!(
+            run(r#"cpg.call.nameExact("strcpy", "getenv").name"#),
+            QueryResult::Strings(vec!["strcpy".to_string(), "getenv".to_string()])
+        );
+        assert_eq!(
+            run(r#"cpg.call.nameNot("str.*").name"#),
+            QueryResult::Strings(vec!["getenv".to_string()])
+        );
+        assert_eq!(run("cpg.method.ast.isCall.size"), QueryResult::Count(2));
+        assert_eq!(
+            run(r#"cpg.method.where(_.call.name("strcpy")).name"#),
+            QueryResult::Strings(vec!["main".to_string()])
+        );
+        assert_eq!(
+            run(r#"cpg.method.whereNot(_.call.name("strcpy")).name"#),
+            QueryResult::Strings(vec!["strcpy".to_string()])
+        );
+        assert_eq!(run("cpg.call.lineNumberGt(3).size"), QueryResult::Count(1));
+    }
+
+    #[test]
+    fn supports_call_out_and_reachable_by() {
+        assert_eq!(
+            run(r#"cpg.method.name("main").callOut.fullName"#),
+            QueryResult::Strings(vec!["strcpy".to_string()])
+        );
+        assert_eq!(
+            run(r#"cpg.call.name("strcpy").argument(2).reachableBy(cpg.call.name("getenv")).code"#),
+            QueryResult::Strings(vec!["getenv(\"INPUT\")".to_string()])
+        );
+        assert_eq!(
+            run(r#"cpg.call.name("strcpy").argument(1).reachableBy(cpg.call.name("getenv")).size"#),
+            QueryResult::Count(0)
+        );
+    }
+
+    #[test]
+    fn supports_bounded_repeat_with_until_and_emit() {
+        assert_eq!(
+            run(r#"cpg.call.name("strcpy").repeat(_.astParent)(_.until(_.isMethod)).name"#),
+            QueryResult::Strings(vec!["main".to_string()])
+        );
+        assert_eq!(
+            run(r#"cpg.method.name("main").repeat(_.astChildren)(_.emit.times(1)).size"#),
+            QueryResult::Count(3)
+        );
+        assert!(QueryCompiler::compile("cpg.call.repeat(_.astParent)(_.times(999999))").is_err());
+    }
+
+    #[test]
     fn committed_compatibility_catalog_compiles() {
         let catalog: serde_json::Value =
             serde_json::from_str(include_str!("../../acceptance/cpgql/catalog.json"))
                 .expect("catalog JSON");
-        let cases = catalog["tiers"][0]["cases"]
-            .as_array()
-            .expect("catalog cases");
-        assert!(cases.len() >= 25, "core tier must not silently shrink");
-        for case in cases {
-            let id = case["id"].as_str().expect("case id");
-            let query = case["query"].as_str().expect("case query");
-            QueryCompiler::compile(query).unwrap_or_else(|e| panic!("{id}: {e}"));
+        let tiers = catalog["tiers"].as_array().expect("catalog tiers");
+        let mut implemented_cases = 0;
+        for tier in tiers.iter().filter(|tier| tier["status"] == "implemented") {
+            let cases = tier["cases"].as_array().expect("catalog cases");
+            implemented_cases += cases.len();
+            for case in cases {
+                let id = case["id"].as_str().expect("case id");
+                let query = case["query"].as_str().expect("case query");
+                QueryCompiler::compile(query).unwrap_or_else(|e| panic!("{id}: {e}"));
+            }
         }
+        assert!(
+            implemented_cases >= 55,
+            "implemented catalog must not silently shrink"
+        );
     }
 }

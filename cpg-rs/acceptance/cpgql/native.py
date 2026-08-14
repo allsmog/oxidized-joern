@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""Run the committed differential CPGQL cases through the native CLI."""
+
+import argparse
+import base64
+import json
+import subprocess
+from pathlib import Path
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cpg", required=True)
+    parser.add_argument("--fixture", required=True)
+    parser.add_argument("--catalog", required=True)
+    args = parser.parse_args()
+
+    cases = json.loads(Path(args.catalog).read_text(encoding="utf-8"))
+    for case in cases:
+        completed = subprocess.run(
+            [
+                args.cpg,
+                "query",
+                args.fixture,
+                "--lang",
+                "c",
+                "--query",
+                case["query"],
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        value = json.loads(completed.stdout)
+        if not isinstance(value, list):
+            raise SystemExit(f"{case['id']}: differential query did not return a list")
+        normalized = "\x1f".join(sorted(str(item) for item in value))
+        encoded = base64.b64encode(normalized.encode("utf-8")).decode("ascii")
+        print(f"CPGQL\t{case['id']}\t{encoded}")
+
+
+if __name__ == "__main__":
+    main()
