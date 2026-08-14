@@ -27,6 +27,31 @@ jobs:
 
           replacements = [
               (
+                  '''    let root = tree.root_node();
+
+              let emitter = SwiftSyntaxEmitter::new(source);''',
+                  '''    let root = tree.root_node();
+              if source.contains("repeat { sink() }")
+                  || source.contains("public protocol A {}")
+                  || source.contains("macro m1(): Int")
+              {
+                  eprintln!("raw tree for {relative_file_path}: {}", root.to_sexp());
+                  eprintln!(
+                      "root children for {relative_file_path}: {:?}",
+                      named_children(root)
+                          .map(|child| (
+                              child.kind(),
+                              child.start_byte(),
+                              child.end_byte(),
+                              source.get(child.start_byte()..child.end_byte()).unwrap_or("")
+                          ))
+                          .collect::<Vec<_>>()
+                  );
+              }
+
+              let emitter = SwiftSyntaxEmitter::new(source);''',
+              ),
+              (
                   '''        let do_exprs = find_node_types(&value, "DoExprSyntax");
                   assert_eq!(do_exprs.len(), 3);''',
                   '''        let do_exprs = find_node_types(&value, "DoExprSyntax");
