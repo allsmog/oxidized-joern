@@ -654,10 +654,17 @@ fn macro_definition(node: Node, b: &[u8]) -> Option<(String, MacroDef)> {
     let params = (node.kind() == "preproc_function_def").then(|| {
         node.child_by_field_name("parameters")
             .map(|parameters| {
-                named_children(parameters)
+                let mut names: Vec<String> = named_children(parameters)
                     .iter()
                     .map(|parameter| text(*parameter, b).to_string())
-                    .collect()
+                    .collect();
+                // The tree-sitter C grammar keeps `...` anonymous. Model it
+                // as the standard replacement parameter so variadic arity,
+                // substitution, and macro-method signatures stay explicit.
+                if text(parameters, b).contains("...") {
+                    names.push("__VA_ARGS__".to_string());
+                }
+                names
             })
             .unwrap_or_default()
     });
@@ -1722,7 +1729,9 @@ impl Ctx<'_> {
             )
         };
         let arg_texts: Vec<String> = arg_nodes.iter().map(|a| text(*a, b).to_string()).collect();
-        let expansion = substitute(&body, &params, &arg_texts);
+        let substituted = substitute(&body, &params, &arg_texts);
+        let mut expanding = HashSet::from([name.to_string()]);
+        let expansion = expand_macros_text(&substituted, self.macros, 0, &mut expanding);
         let ret = expansion_type(&expansion, &self.symbols, self.functions);
         let full = format!("{}:{name}:{ret}({})", self.file, params.len());
         self.used_macros.entry(full.clone()).or_insert((
@@ -1750,11 +1759,27 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
-        for (i, a) in arg_nodes.iter().enumerate() {
+        let ordinary = ordinary_macro_parameters(&body, &params);
+        let fixed_count = params
+            .iter()
+            .position(|param| param == "__VA_ARGS__")
+            .unwrap_or(params.len());
+        let mut visible_args = Vec::new();
+        for (index, used) in ordinary.into_iter().enumerate() {
+            if !used {
+                continue;
+            }
+            if params.get(index).is_some_and(|p| p == "__VA_ARGS__") {
+                visible_args.extend(arg_nodes.iter().skip(fixed_count).copied());
+            } else if let Some(argument) = arg_nodes.get(index) {
+                visible_args.push(*argument);
+            }
+        }
+        for (i, a) in visible_args.iter().enumerate() {
             let k = (i + 1) as i64;
             self.emit_expr(*a, b, depth + 1, k, Some(k));
         }
-        let bk = (arg_nodes.len() + 1) as i64;
+        let bk = (visible_args.len() + 1) as i64;
         self.line(
             depth + 1,
             "BLOCK",
@@ -1918,6 +1943,39 @@ impl Ctx<'_> {
                     }
                 }
                 "call_expression" => {
+                    if let Some(function) = n.child_by_field_name("function") {
+                        let name = text(function, b);
+                        if let Some(definition) = self
+                            .macros
+                            .get(name)
+                            .filter(|definition| definition.params.is_some())
+                        {
+                            let params = definition.params.as_ref().unwrap();
+                            let ordinary = ordinary_macro_parameters(&definition.body, params);
+                            let arguments = n
+                                .child_by_field_name("arguments")
+                                .map(named_children)
+                                .unwrap_or_default();
+                            let fixed_count = params
+                                .iter()
+                                .position(|param| param == "__VA_ARGS__")
+                                .unwrap_or(params.len());
+                            let mut visible = Vec::new();
+                            for (index, used) in ordinary.into_iter().enumerate() {
+                                if !used {
+                                    continue;
+                                }
+                                if params.get(index).is_some_and(|p| p == "__VA_ARGS__") {
+                                    visible.extend(arguments.iter().skip(fixed_count).copied());
+                                } else if let Some(argument) = arguments.get(index) {
+                                    visible.push(*argument);
+                                }
+                            }
+                            visible.reverse();
+                            stack.extend(visible);
+                            continue;
+                        }
+                    }
                     // A plain callee name denotes an unresolved function, not
                     // a local variable. Function-pointer globals still need
                     // their ordinary phantom-local treatment.
@@ -3286,29 +3344,292 @@ fn needs_clinit(n: Node, _b: &[u8]) -> bool {
     })
 }
 
-/// Whole-word substitution of macro parameters with argument source text.
+/// C-preprocessor substitution for a single macro body. Parameters inside
+/// ordinary string/character literals are untouched; `#param` stringizes the
+/// raw argument, `left ## right` pastes tokens, and `__VA_ARGS__` receives all
+/// arguments after the fixed parameters. Nested macro expansion is a separate
+/// pass ([`expand_macros_text`]) so the outer invocation remains the only
+/// INLINED call in the CPG, matching CDT/Joern.
 fn substitute(body: &str, params: &[String], args: &[String]) -> String {
+    const EMPTY_VARIADIC: char = '\u{1e}';
+    let variadic = params.iter().position(|param| param == "__VA_ARGS__");
+    let bindings: HashMap<&str, String> = params
+        .iter()
+        .enumerate()
+        .map(|(index, parameter)| {
+            let value = if Some(index) == variadic {
+                args.iter()
+                    .skip(index)
+                    .cloned()
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            } else {
+                args.get(index).cloned().unwrap_or_default()
+            };
+            (parameter.as_str(), value)
+        })
+        .collect();
     let mut out = String::new();
     let bytes = body.as_bytes();
     let mut i = 0;
     while i < bytes.len() {
         let c = bytes[i] as char;
-        if c.is_alphabetic() || c == '_' {
+        if c == '"' || c == '\'' {
+            let quote = bytes[i];
+            out.push(c);
+            i += 1;
+            while i < bytes.len() {
+                let current = bytes[i];
+                out.push(current as char);
+                i += 1;
+                if current == b'\\' && i < bytes.len() {
+                    out.push(bytes[i] as char);
+                    i += 1;
+                } else if current == quote {
+                    break;
+                }
+            }
+        } else if c == '#'
+            && bytes.get(i + 1) != Some(&b'#')
+            && i.checked_sub(1).and_then(|index| bytes.get(index)) != Some(&b'#')
+        {
+            let mut name_start = i + 1;
+            while bytes.get(name_start).is_some_and(u8::is_ascii_whitespace) {
+                name_start += 1;
+            }
+            let mut name_end = name_start;
+            while bytes
+                .get(name_end)
+                .is_some_and(|byte| byte.is_ascii_alphanumeric() || *byte == b'_')
+            {
+                name_end += 1;
+            }
+            let name = &body[name_start..name_end];
+            if let Some(argument) = bindings.get(name) {
+                let normalized = argument.split_whitespace().collect::<Vec<_>>().join(" ");
+                out.push('"');
+                out.push_str(&normalized.replace('\\', "\\\\").replace('"', "\\\""));
+                out.push('"');
+                i = name_end;
+            } else {
+                out.push('#');
+                i += 1;
+            }
+        } else if c.is_ascii_alphabetic() || c == '_' {
             let start = i;
-            while i < bytes.len() && ((bytes[i] as char).is_alphanumeric() || bytes[i] == b'_') {
+            while i < bytes.len()
+                && ((bytes[i] as char).is_ascii_alphanumeric() || bytes[i] == b'_')
+            {
                 i += 1;
             }
             let word = &body[start..i];
-            match params.iter().position(|p| p == word) {
-                Some(k) if k < args.len() => out.push_str(&args[k]),
-                _ => out.push_str(word),
+            if let Some(argument) = bindings.get(word) {
+                if word == "__VA_ARGS__" && argument.is_empty() {
+                    out.push(EMPTY_VARIADIC);
+                } else {
+                    out.push_str(argument);
+                }
+            } else {
+                out.push_str(word);
             }
         } else {
             out.push(c);
             i += 1;
         }
     }
+
+    while let Some(paste) = out.find("##") {
+        let left = out[..paste].trim_end();
+        let right = out[paste + 2..].trim_start();
+        let mut joined = left.to_string();
+        let right = if let Some(rest) = right.strip_prefix(EMPTY_VARIADIC) {
+            if joined.ends_with(',') {
+                joined.pop();
+                joined = joined.trim_end().to_string();
+            }
+            rest
+        } else {
+            right
+        };
+        joined.push_str(right);
+        out = joined;
+    }
+    out.replace(EMPTY_VARIADIC, "")
+}
+
+/// Parameters that survive as ordinary expressions in the replacement list.
+/// Stringized and pasted parameters are consumed by preprocessing and do not
+/// appear as argument AST children in Joern's INLINED call.
+fn ordinary_macro_parameters(body: &str, params: &[String]) -> Vec<bool> {
+    let mut used = vec![false; params.len()];
+    let bytes = body.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        if matches!(bytes[i], b'"' | b'\'') {
+            let quote = bytes[i];
+            i += 1;
+            while i < bytes.len() {
+                if bytes[i] == b'\\' {
+                    i = (i + 2).min(bytes.len());
+                } else {
+                    let done = bytes[i] == quote;
+                    i += 1;
+                    if done {
+                        break;
+                    }
+                }
+            }
+            continue;
+        }
+        if !bytes[i].is_ascii_alphabetic() && bytes[i] != b'_' {
+            i += 1;
+            continue;
+        }
+        let start = i;
+        while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_') {
+            i += 1;
+        }
+        let word = &body[start..i];
+        let Some(index) = params.iter().position(|param| param == word) else {
+            continue;
+        };
+        let left = body[..start].trim_end().as_bytes();
+        let right = body[i..].trim_start().as_bytes();
+        let stringized = left.ends_with(b"#") && !left.ends_with(b"##");
+        let pasted = left.ends_with(b"##") || right.starts_with(b"##");
+        if !stringized && !pasted {
+            used[index] = true;
+        }
+    }
+    used
+}
+
+/// Recursively expand object/function macros in replacement text. The active
+/// macro is kept in `expanding`, reproducing the preprocessor's recursion
+/// suppression and bounding malformed/cyclic definitions.
+fn expand_macros_text(
+    input: &str,
+    macros: &HashMap<String, MacroDef>,
+    depth: usize,
+    expanding: &mut HashSet<String>,
+) -> String {
+    if depth >= 64 {
+        return input.to_string();
+    }
+    let bytes = input.as_bytes();
+    let mut out = String::new();
+    let mut i = 0;
+    while i < bytes.len() {
+        if matches!(bytes[i], b'"' | b'\'') {
+            let quote = bytes[i];
+            let start = i;
+            i += 1;
+            while i < bytes.len() {
+                if bytes[i] == b'\\' {
+                    i = (i + 2).min(bytes.len());
+                } else {
+                    let done = bytes[i] == quote;
+                    i += 1;
+                    if done {
+                        break;
+                    }
+                }
+            }
+            out.push_str(&input[start..i]);
+            continue;
+        }
+        if !bytes[i].is_ascii_alphabetic() && bytes[i] != b'_' {
+            out.push(bytes[i] as char);
+            i += 1;
+            continue;
+        }
+        let start = i;
+        while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_') {
+            i += 1;
+        }
+        let name = &input[start..i];
+        let Some(definition) = macros.get(name) else {
+            out.push_str(name);
+            continue;
+        };
+        if expanding.contains(name) {
+            out.push_str(name);
+            continue;
+        }
+        let (arguments, end) = if let Some(parameters) = definition.params.as_ref() {
+            let mut open = i;
+            while bytes.get(open).is_some_and(u8::is_ascii_whitespace) {
+                open += 1;
+            }
+            if bytes.get(open) != Some(&b'(') {
+                out.push_str(name);
+                continue;
+            }
+            let Some((arguments, end)) = parse_macro_arguments(input, open) else {
+                out.push_str(name);
+                continue;
+            };
+            (substitute(&definition.body, parameters, &arguments), end)
+        } else {
+            (definition.body.clone(), i)
+        };
+        expanding.insert(name.to_string());
+        out.push_str(&expand_macros_text(
+            &arguments,
+            macros,
+            depth + 1,
+            expanding,
+        ));
+        expanding.remove(name);
+        i = end;
+    }
     out
+}
+
+fn parse_macro_arguments(input: &str, open: usize) -> Option<(Vec<String>, usize)> {
+    let bytes = input.as_bytes();
+    if bytes.get(open) != Some(&b'(') {
+        return None;
+    }
+    let mut arguments = Vec::new();
+    let mut depth = 1_u32;
+    let mut start = open + 1;
+    let mut i = start;
+    let mut quote = None;
+    while i < bytes.len() {
+        if let Some(delimiter) = quote {
+            if bytes[i] == b'\\' {
+                i = (i + 2).min(bytes.len());
+                continue;
+            }
+            if bytes[i] == delimiter {
+                quote = None;
+            }
+            i += 1;
+            continue;
+        }
+        match bytes[i] {
+            b'"' | b'\'' => quote = Some(bytes[i]),
+            b'(' => depth += 1,
+            b')' => {
+                depth -= 1;
+                if depth == 0 {
+                    let final_argument = input[start..i].trim();
+                    if !final_argument.is_empty() || !arguments.is_empty() {
+                        arguments.push(final_argument.to_string());
+                    }
+                    return Some((arguments, i + 1));
+                }
+            }
+            b',' if depth == 1 => {
+                arguments.push(input[start..i].trim().to_string());
+                start = i + 1;
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    None
 }
 
 /// The expression node of a parsed expansion (`void __m() { <exp>; }`).
@@ -4772,4 +5093,71 @@ fn rd_valid_edge(arena: &[DNode], child: usize, parent: usize) -> bool {
         return rd_is_used(arena, child);
     }
     !rd_is_call_retval(arena, parent)
+}
+
+#[cfg(test)]
+mod macro_tests {
+    use super::*;
+
+    fn function_macro(params: &[&str], body: &str) -> MacroDef {
+        MacroDef {
+            params: Some(params.iter().map(|value| (*value).to_string()).collect()),
+            body: body.to_string(),
+            directive: String::new(),
+        }
+    }
+
+    #[test]
+    fn substitutes_stringize_paste_and_variadics() {
+        assert_eq!(
+            substitute("#value", &["value".into()], &["hello   world".into()]),
+            "\"hello world\""
+        );
+        assert_eq!(
+            substitute(
+                "left ## right",
+                &["left".into(), "right".into()],
+                &["token_".into(), "value".into()]
+            ),
+            "token_value"
+        );
+        assert_eq!(
+            substitute(
+                "first",
+                &["first".into(), "__VA_ARGS__".into()],
+                &["input".into(), "11".into(), "12".into()]
+            ),
+            "input"
+        );
+        assert_eq!(
+            substitute(
+                "log(format, ## __VA_ARGS__)",
+                &["format".into(), "__VA_ARGS__".into()],
+                &["\"ok\"".into()]
+            ),
+            "log(\"ok\")"
+        );
+    }
+
+    #[test]
+    fn fully_expands_nested_macros_and_tracks_visible_arguments() {
+        let macros = HashMap::from([
+            ("INNER".to_string(), function_macro(&["x"], "((x) + 1)")),
+            ("OUTER".to_string(), function_macro(&["x"], "INNER(x)")),
+        ]);
+        let mut expanding = HashSet::from(["OUTER".to_string()]);
+        assert_eq!(
+            expand_macros_text("INNER(input)", &macros, 0, &mut expanding),
+            "((input) + 1)"
+        );
+        assert_eq!(ordinary_macro_parameters("#x", &["x".into()]), vec![false]);
+        assert_eq!(
+            ordinary_macro_parameters("left ## right", &["left".into(), "right".into()]),
+            vec![false, false]
+        );
+        assert_eq!(
+            ordinary_macro_parameters("first", &["first".into(), "__VA_ARGS__".into()]),
+            vec![true, false]
+        );
+    }
 }

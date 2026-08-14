@@ -78,3 +78,44 @@ int live_after_undef(void) { return 3; }
         .into_iter()
         .all(|node| cpg.name_of(node) != Some("missing_global")));
 }
+
+#[test]
+fn expands_nested_variadic_stringized_and_pasted_macros() {
+    let cpg = graph(
+        r#"
+#define INNER(x) ((x) + 1)
+#define OUTER(x) INNER(x)
+#define STRINGIZE(x) #x
+#define CONCAT(left, right) left ## right
+#define FIRST(first, ...) first
+
+int macro_advanced(int input) {
+    int token_value = 3;
+    const char *text = STRINGIZE(input);
+    return OUTER(input) + CONCAT(token_, value) + FIRST(input, 11, 12);
+}
+"#,
+    );
+
+    for invocation in ["OUTER", "STRINGIZE", "CONCAT", "FIRST"] {
+        assert_eq!(cpg.calls_named(invocation).len(), 1, "missing {invocation}");
+    }
+    assert!(
+        cpg.calls_named("INNER").is_empty(),
+        "nested replacement is expanded inside OUTER, not emitted as another invocation"
+    );
+    assert!(cpg
+        .nodes_of_kind(NodeKind::Literal)
+        .into_iter()
+        .any(|node| cpg.code_of(node) == Some("\"input\"")));
+    assert!(cpg
+        .nodes_of_kind(NodeKind::Identifier)
+        .into_iter()
+        .any(|node| cpg.name_of(node) == Some("token_value")));
+    for consumed in ["token_", "value"] {
+        assert!(cpg
+            .nodes_of_kind(NodeKind::Local)
+            .into_iter()
+            .all(|node| cpg.name_of(node) != Some(consumed)));
+    }
+}

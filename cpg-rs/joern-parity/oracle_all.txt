@@ -1145,6 +1145,102 @@ AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
 AST|    METHOD_REF CODE=sum TYPE_FULL_NAME=sum METHOD_FULL_NAME=sum ORDER=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|
+AST|METHOD NAME=macro_advanced CODE=int macro_advanced(int input) {\n    int token_value = 3;\n    const char *text = STRINGIZE(input);\n    return OUTER(input) + CONCAT(token_, value) + FIRST(input, 11, 12);\n} FULL_NAME=macro_advanced SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=input CODE=int input TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=input CODE=int input TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int token_value = 3;\n    const char *text = STRINGIZE(input);\n    return OUTER(input) + CONCAT(token_, value) + FIRST(input, 11, 12);\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=token_value CODE=int token_value TYPE_FULL_NAME=int ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=token_value = 3 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=token_value CODE=token_value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    LOCAL NAME=text CODE=const char *text TYPE_FULL_NAME=char* ORDER=3
+AST|    CALL NAME=<operator>.assignment CODE=*text = STRINGIZE(input) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=text CODE=text TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=STRINGIZE CODE=STRINGIZE(input) TYPE_FULL_NAME=char* METHOD_FULL_NAME=macro_advanced.c:STRINGIZE:char*(1) SIGNATURE=char*(1) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE="input" TYPE_FULL_NAME=char* ORDER=1
+AST|    RETURN CODE=return OUTER(input) + CONCAT(token_, value) + FIRST(input, 11, 12); ORDER=5
+AST|      CALL NAME=<operator>.addition CODE=OUTER(input) + CONCAT(token_, value) + FIRST(input, 11, 12) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.addition CODE=OUTER(input) + CONCAT(token_, value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=OUTER CODE=OUTER(input) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=macro_advanced.c:OUTER:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|            IDENTIFIER NAME=input CODE=input TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|              CALL NAME=<operator>.addition CODE=(input) + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                IDENTIFIER NAME=input CODE=input TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=CONCAT CODE=CONCAT(token_, value) TYPE_FULL_NAME=int METHOD_FULL_NAME=macro_advanced.c:CONCAT:int(2) SIGNATURE=int(2) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=token_value CODE=token_value TYPE_FULL_NAME=int ORDER=1
+AST|        CALL NAME=FIRST CODE=FIRST(input, 11, 12) TYPE_FULL_NAME=int METHOD_FULL_NAME=macro_advanced.c:FIRST:int(2) SIGNATURE=int(2) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|          IDENTIFIER NAME=input CODE=input TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|            IDENTIFIER NAME=input CODE=input TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=macro_advanced.c:<global> ORDER=1
+AST|  METHOD NAME=macro_advanced CODE=int macro_advanced(int input) {\n    int token_value = 3;\n    const char *text = STRINGIZE(input);\n    return OUTER(input) + CONCAT(token_, value) + FIRST(input, 11, 12);\n} FULL_NAME=macro_advanced SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=input CODE=int input TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=input CODE=int input TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int token_value = 3;\n    const char *text = STRINGIZE(input);\n    return OUTER(input) + CONCAT(token_, value) + FIRST(input, 11, 12);\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=token_value CODE=int token_value TYPE_FULL_NAME=int ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=token_value = 3 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=token_value CODE=token_value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LOCAL NAME=text CODE=const char *text TYPE_FULL_NAME=char* ORDER=3
+AST|      CALL NAME=<operator>.assignment CODE=*text = STRINGIZE(input) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=text CODE=text TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=STRINGIZE CODE=STRINGIZE(input) TYPE_FULL_NAME=char* METHOD_FULL_NAME=macro_advanced.c:STRINGIZE:char*(1) SIGNATURE=char*(1) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE="input" TYPE_FULL_NAME=char* ORDER=1
+AST|      RETURN CODE=return OUTER(input) + CONCAT(token_, value) + FIRST(input, 11, 12); ORDER=5
+AST|        CALL NAME=<operator>.addition CODE=OUTER(input) + CONCAT(token_, value) + FIRST(input, 11, 12) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.addition CODE=OUTER(input) + CONCAT(token_, value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=OUTER CODE=OUTER(input) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=macro_advanced.c:OUTER:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|              IDENTIFIER NAME=input CODE=input TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|              BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|                CALL NAME=<operator>.addition CODE=(input) + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  IDENTIFIER NAME=input CODE=input TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                  LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=CONCAT CODE=CONCAT(token_, value) TYPE_FULL_NAME=int METHOD_FULL_NAME=macro_advanced.c:CONCAT:int(2) SIGNATURE=int(2) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|                IDENTIFIER NAME=token_value CODE=token_value TYPE_FULL_NAME=int ORDER=1
+AST|          CALL NAME=FIRST CODE=FIRST(input, 11, 12) TYPE_FULL_NAME=int METHOD_FULL_NAME=macro_advanced.c:FIRST:int(2) SIGNATURE=int(2) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|            IDENTIFIER NAME=input CODE=input TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|              IDENTIFIER NAME=input CODE=input TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=macro_advanced TYPE_FULL_NAME=macro_advanced METHOD_FULL_NAME=macro_advanced ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=CONCAT CODE=#define CONCAT(left, right) left ## right FULL_NAME=macro_advanced.c:CONCAT:int(2) SIGNATURE=int(2) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|
+AST|METHOD NAME=FIRST CODE=#define FIRST(first, ...) first FULL_NAME=macro_advanced.c:FIRST:int(2) SIGNATURE=int(2) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|
+AST|METHOD NAME=OUTER CODE=#define OUTER(x) INNER(x) FULL_NAME=macro_advanced.c:OUTER:ANY(1) SIGNATURE=ANY(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+AST|
+AST|METHOD NAME=STRINGIZE CODE=#define STRINGIZE(x) #x FULL_NAME=macro_advanced.c:STRINGIZE:char*(1) SIGNATURE=char*(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+AST|
 AST|METHOD NAME=macros CODE=int macros(int n) {\n    if (n > LIMIT) {\n        return SQR(n);\n    }\n#ifdef UNUSED_FLAG\n    n = n + LIMIT;\n#endif\n#ifdef NOT_DEFINED\n    n = 999;\n#endif\n    return 0;\n} FULL_NAME=macros SIGNATURE=int(int) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
 AST|  METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
@@ -1950,6 +2046,7 @@ NODES|FILE NAME=forloop.c ORDER=0
 NODES|FILE NAME=gotos.c ORDER=0
 NODES|FILE NAME=logic.c ORDER=0
 NODES|FILE NAME=loop.c ORDER=0
+NODES|FILE NAME=macro_advanced.c ORDER=0
 NODES|FILE NAME=macros.c ORDER=0
 NODES|FILE NAME=memcmp.c ORDER=0
 NODES|FILE NAME=ops.c ORDER=0
@@ -1969,6 +2066,7 @@ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=forloop.c:<global> FILENAME=forloo
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=gotos.c:<global> FILENAME=gotos.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=logic.c:<global> FILENAME=logic.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=loop.c:<global> FILENAME=loop.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=macro_advanced.c:<global> FILENAME=macro_advanced.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=macros.c:<global> FILENAME=macros.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=memcmp.c:<global> FILENAME=memcmp.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=ops.c:<global> FILENAME=ops.c ORDER=1
@@ -2011,6 +2109,8 @@ NODES|TYPE_DECL NAME=<global> FULL_NAME=logic.c:<global> CODE=<global> AST_PAREN
 NODES|TYPE_DECL NAME=long FULL_NAME=long CODE=long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=longunsigned FULL_NAME=longunsigned CODE=longunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=<global> FULL_NAME=loop.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=loop.c:<global> FILENAME=loop.c ORDER=1
+NODES|TYPE_DECL NAME=macro_advanced FULL_NAME=macro_advanced CODE=macro_advanced AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=macro_advanced.c:<global> FILENAME=macro_advanced.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=macro_advanced.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=macro_advanced.c:<global> FILENAME=macro_advanced.c ORDER=1
 NODES|TYPE_DECL NAME=macros FULL_NAME=macros CODE=macros AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=macros.c:<global> FILENAME=macros.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=macros.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=macros.c:<global> FILENAME=macros.c ORDER=1
 NODES|TYPE_DECL NAME=main FULL_NAME=main CODE=main AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
@@ -2069,6 +2169,7 @@ NODES|TYPE NAME=int[] FULL_NAME=int[] TYPE_DECL_FULL_NAME=int[]
 NODES|TYPE NAME=logic FULL_NAME=logic TYPE_DECL_FULL_NAME=logic
 NODES|TYPE NAME=long FULL_NAME=long TYPE_DECL_FULL_NAME=long
 NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
+NODES|TYPE NAME=macro_advanced FULL_NAME=macro_advanced TYPE_DECL_FULL_NAME=macro_advanced
 NODES|TYPE NAME=macros FULL_NAME=macros TYPE_DECL_FULL_NAME=macros
 NODES|TYPE NAME=main FULL_NAME=main TYPE_DECL_FULL_NAME=main
 NODES|TYPE NAME=memcmp FULL_NAME=memcmp TYPE_DECL_FULL_NAME=memcmp
@@ -2300,6 +2401,19 @@ EDGES|ARGUMENT logic#79 -> logic#81
 EDGES|ARGUMENT logic#84 -> logic#85
 EDGES|ARGUMENT logic#84 -> logic#86
 EDGES|ARGUMENT logic#88 -> logic#89
+EDGES|ARGUMENT macro_advanced#14 -> macro_advanced#15
+EDGES|ARGUMENT macro_advanced#15 -> macro_advanced#16
+EDGES|ARGUMENT macro_advanced#15 -> macro_advanced#26
+EDGES|ARGUMENT macro_advanced#16 -> macro_advanced#17
+EDGES|ARGUMENT macro_advanced#16 -> macro_advanced#23
+EDGES|ARGUMENT macro_advanced#17 -> macro_advanced#18
+EDGES|ARGUMENT macro_advanced#20 -> macro_advanced#21
+EDGES|ARGUMENT macro_advanced#20 -> macro_advanced#22
+EDGES|ARGUMENT macro_advanced#26 -> macro_advanced#27
+EDGES|ARGUMENT macro_advanced#5 -> macro_advanced#6
+EDGES|ARGUMENT macro_advanced#5 -> macro_advanced#7
+EDGES|ARGUMENT macro_advanced#9 -> macro_advanced#10
+EDGES|ARGUMENT macro_advanced#9 -> macro_advanced#11
 EDGES|ARGUMENT macros#11 -> macros#12
 EDGES|ARGUMENT macros#12 -> macros#13
 EDGES|ARGUMENT macros#15 -> macros#16
@@ -2546,6 +2660,15 @@ EDGES|CALL logic#7 -> <operator>.assignment#0
 EDGES|CALL logic#71 -> <operator>.addition#0
 EDGES|CALL logic#79 -> <operator>.assignment#0
 EDGES|CALL logic#84 -> <operator>.assignment#0
+EDGES|CALL macro_advanced#11 -> macro_advanced.c:STRINGIZE:char*(1)#0
+EDGES|CALL macro_advanced#15 -> <operator>.addition#0
+EDGES|CALL macro_advanced#16 -> <operator>.addition#0
+EDGES|CALL macro_advanced#17 -> macro_advanced.c:OUTER:ANY(1)#0
+EDGES|CALL macro_advanced#20 -> <operator>.addition#0
+EDGES|CALL macro_advanced#23 -> macro_advanced.c:CONCAT:int(2)#0
+EDGES|CALL macro_advanced#26 -> macro_advanced.c:FIRST:int(2)#0
+EDGES|CALL macro_advanced#5 -> <operator>.assignment#0
+EDGES|CALL macro_advanced#9 -> <operator>.assignment#0
 EDGES|CALL macros#12 -> macros.c:SQR:ANY(1)#0
 EDGES|CALL macros#15 -> <operator>.multiplication#0
 EDGES|CALL macros#18 -> <operator>.assignment#0
@@ -3016,6 +3139,37 @@ EDGES|CFG logic.c:<global>#93 -> logic.c:<global>#94
 EDGES|CFG loop.c:<global>#0 -> loop.c:<global>#32
 EDGES|CFG loop.c:<global>#1 -> sum#6
 EDGES|CFG loop.c:<global>#32 -> loop.c:<global>#33
+EDGES|CFG macro_advanced#0 -> macro_advanced#6
+EDGES|CFG macro_advanced#10 -> macro_advanced#11
+EDGES|CFG macro_advanced#11 -> macro_advanced#13
+EDGES|CFG macro_advanced#11 -> macro_advanced#9
+EDGES|CFG macro_advanced#13 -> macro_advanced#9
+EDGES|CFG macro_advanced#14 -> macro_advanced#30
+EDGES|CFG macro_advanced#15 -> macro_advanced#14
+EDGES|CFG macro_advanced#16 -> macro_advanced#27
+EDGES|CFG macro_advanced#17 -> macro_advanced#21
+EDGES|CFG macro_advanced#17 -> macro_advanced#23
+EDGES|CFG macro_advanced#18 -> macro_advanced#17
+EDGES|CFG macro_advanced#20 -> macro_advanced#23
+EDGES|CFG macro_advanced#21 -> macro_advanced#22
+EDGES|CFG macro_advanced#22 -> macro_advanced#20
+EDGES|CFG macro_advanced#23 -> macro_advanced#16
+EDGES|CFG macro_advanced#23 -> macro_advanced#25
+EDGES|CFG macro_advanced#25 -> macro_advanced#16
+EDGES|CFG macro_advanced#26 -> macro_advanced#15
+EDGES|CFG macro_advanced#26 -> macro_advanced#29
+EDGES|CFG macro_advanced#27 -> macro_advanced#26
+EDGES|CFG macro_advanced#29 -> macro_advanced#15
+EDGES|CFG macro_advanced#5 -> macro_advanced#10
+EDGES|CFG macro_advanced#6 -> macro_advanced#7
+EDGES|CFG macro_advanced#7 -> macro_advanced#5
+EDGES|CFG macro_advanced#9 -> macro_advanced#18
+EDGES|CFG macro_advanced.c:<global>#0 -> macro_advanced.c:<global>#33
+EDGES|CFG macro_advanced.c:<global>#33 -> macro_advanced.c:<global>#34
+EDGES|CFG macro_advanced.c:CONCAT:int(2)#0 -> macro_advanced.c:CONCAT:int(2)#6
+EDGES|CFG macro_advanced.c:FIRST:int(2)#0 -> macro_advanced.c:FIRST:int(2)#6
+EDGES|CFG macro_advanced.c:OUTER:ANY(1)#0 -> macro_advanced.c:OUTER:ANY(1)#4
+EDGES|CFG macro_advanced.c:STRINGIZE:char*(1)#0 -> macro_advanced.c:STRINGIZE:char*(1)#4
 EDGES|CFG macros#0 -> macros#6
 EDGES|CFG macros#11 -> macros#27
 EDGES|CFG macros#12 -> macros#11
@@ -3361,6 +3515,12 @@ EDGES|CONTAINS D:logic.c:<global> -> D:logic
 EDGES|CONTAINS D:logic.c:<global> -> logic.c:<global>#0
 EDGES|CONTAINS D:loop.c:<global> -> D:sum
 EDGES|CONTAINS D:loop.c:<global> -> loop.c:<global>#0
+EDGES|CONTAINS D:macro_advanced.c:<global> -> D:macro_advanced
+EDGES|CONTAINS D:macro_advanced.c:<global> -> macro_advanced.c:<global>#0
+EDGES|CONTAINS D:macro_advanced.c:<global> -> macro_advanced.c:CONCAT:int(2)#0
+EDGES|CONTAINS D:macro_advanced.c:<global> -> macro_advanced.c:FIRST:int(2)#0
+EDGES|CONTAINS D:macro_advanced.c:<global> -> macro_advanced.c:OUTER:ANY(1)#0
+EDGES|CONTAINS D:macro_advanced.c:<global> -> macro_advanced.c:STRINGIZE:char*(1)#0
 EDGES|CONTAINS D:macros.c:<global> -> D:macros
 EDGES|CONTAINS D:macros.c:<global> -> macros.c:<global>#0
 EDGES|CONTAINS D:macros.c:<global> -> macros.c:LIMIT:int(0)#0
@@ -3416,6 +3576,7 @@ EDGES|CONTAINS F:forloop.c -> D:forloop.c:<global>
 EDGES|CONTAINS F:gotos.c -> D:gotos.c:<global>
 EDGES|CONTAINS F:logic.c -> D:logic.c:<global>
 EDGES|CONTAINS F:loop.c -> D:loop.c:<global>
+EDGES|CONTAINS F:macro_advanced.c -> D:macro_advanced.c:<global>
 EDGES|CONTAINS F:macros.c -> D:macros.c:<global>
 EDGES|CONTAINS F:memcmp.c -> D:memcmp.c:<global>
 EDGES|CONTAINS F:ops.c -> D:ops.c:<global>
@@ -3827,6 +3988,38 @@ EDGES|CONTAINS loop.c:<global>#1 -> sum#5
 EDGES|CONTAINS loop.c:<global>#1 -> sum#6
 EDGES|CONTAINS loop.c:<global>#1 -> sum#7
 EDGES|CONTAINS loop.c:<global>#1 -> sum#9
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#10
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#11
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#12
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#13
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#14
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#15
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#16
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#17
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#18
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#19
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#20
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#21
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#22
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#23
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#24
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#25
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#26
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#27
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#28
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#29
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#3
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#5
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#6
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#7
+EDGES|CONTAINS macro_advanced#0 -> macro_advanced#9
+EDGES|CONTAINS macro_advanced.c:<global>#0 -> macro_advanced#0
+EDGES|CONTAINS macro_advanced.c:<global>#0 -> macro_advanced.c:<global>#32
+EDGES|CONTAINS macro_advanced.c:<global>#0 -> macro_advanced.c:<global>#33
+EDGES|CONTAINS macro_advanced.c:CONCAT:int(2)#0 -> macro_advanced.c:CONCAT:int(2)#5
+EDGES|CONTAINS macro_advanced.c:FIRST:int(2)#0 -> macro_advanced.c:FIRST:int(2)#5
+EDGES|CONTAINS macro_advanced.c:OUTER:ANY(1)#0 -> macro_advanced.c:OUTER:ANY(1)#3
+EDGES|CONTAINS macro_advanced.c:STRINGIZE:char*(1)#0 -> macro_advanced.c:STRINGIZE:char*(1)#3
 EDGES|CONTAINS macros#0 -> macros#10
 EDGES|CONTAINS macros#0 -> macros#11
 EDGES|CONTAINS macros#0 -> macros#12
@@ -4714,6 +4907,58 @@ EDGES|EVAL_TYPE logic.c:<global>#94 -> T:ANY
 EDGES|EVAL_TYPE loop.c:<global>#31 -> T:ANY
 EDGES|EVAL_TYPE loop.c:<global>#32 -> T:sum
 EDGES|EVAL_TYPE loop.c:<global>#33 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced#1 -> T:int
+EDGES|EVAL_TYPE macro_advanced#10 -> T:char*
+EDGES|EVAL_TYPE macro_advanced#11 -> T:char*
+EDGES|EVAL_TYPE macro_advanced#12 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced#13 -> T:char*
+EDGES|EVAL_TYPE macro_advanced#15 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced#16 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced#17 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced#18 -> T:int
+EDGES|EVAL_TYPE macro_advanced#19 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced#2 -> T:int
+EDGES|EVAL_TYPE macro_advanced#20 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced#21 -> T:int
+EDGES|EVAL_TYPE macro_advanced#22 -> T:int
+EDGES|EVAL_TYPE macro_advanced#23 -> T:int
+EDGES|EVAL_TYPE macro_advanced#24 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced#25 -> T:int
+EDGES|EVAL_TYPE macro_advanced#26 -> T:int
+EDGES|EVAL_TYPE macro_advanced#27 -> T:int
+EDGES|EVAL_TYPE macro_advanced#28 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced#29 -> T:int
+EDGES|EVAL_TYPE macro_advanced#3 -> T:void
+EDGES|EVAL_TYPE macro_advanced#30 -> T:int
+EDGES|EVAL_TYPE macro_advanced#4 -> T:int
+EDGES|EVAL_TYPE macro_advanced#5 -> T:void
+EDGES|EVAL_TYPE macro_advanced#6 -> T:int
+EDGES|EVAL_TYPE macro_advanced#7 -> T:int
+EDGES|EVAL_TYPE macro_advanced#8 -> T:char*
+EDGES|EVAL_TYPE macro_advanced#9 -> T:void
+EDGES|EVAL_TYPE macro_advanced.c:<global>#32 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:<global>#33 -> T:macro_advanced
+EDGES|EVAL_TYPE macro_advanced.c:<global>#34 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:CONCAT:int(2)#1 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:CONCAT:int(2)#2 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:CONCAT:int(2)#3 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:CONCAT:int(2)#4 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:CONCAT:int(2)#5 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:CONCAT:int(2)#6 -> T:int
+EDGES|EVAL_TYPE macro_advanced.c:FIRST:int(2)#1 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:FIRST:int(2)#2 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:FIRST:int(2)#3 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:FIRST:int(2)#4 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:FIRST:int(2)#5 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:FIRST:int(2)#6 -> T:int
+EDGES|EVAL_TYPE macro_advanced.c:OUTER:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:OUTER:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:OUTER:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:OUTER:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:STRINGIZE:char*(1)#1 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:STRINGIZE:char*(1)#2 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:STRINGIZE:char*(1)#3 -> T:ANY
+EDGES|EVAL_TYPE macro_advanced.c:STRINGIZE:char*(1)#4 -> T:char*
 EDGES|EVAL_TYPE macros#1 -> T:int
 EDGES|EVAL_TYPE macros#10 -> T:void
 EDGES|EVAL_TYPE macros#12 -> T:ANY
@@ -5145,6 +5390,13 @@ EDGES|PARAMETER_LINK live_not_defined#1 -> live_not_defined#2
 EDGES|PARAMETER_LINK live_primary#1 -> live_primary#2
 EDGES|PARAMETER_LINK logic#1 -> logic#2
 EDGES|PARAMETER_LINK logic#3 -> logic#4
+EDGES|PARAMETER_LINK macro_advanced#1 -> macro_advanced#2
+EDGES|PARAMETER_LINK macro_advanced.c:CONCAT:int(2)#1 -> macro_advanced.c:CONCAT:int(2)#2
+EDGES|PARAMETER_LINK macro_advanced.c:CONCAT:int(2)#3 -> macro_advanced.c:CONCAT:int(2)#4
+EDGES|PARAMETER_LINK macro_advanced.c:FIRST:int(2)#1 -> macro_advanced.c:FIRST:int(2)#2
+EDGES|PARAMETER_LINK macro_advanced.c:FIRST:int(2)#3 -> macro_advanced.c:FIRST:int(2)#4
+EDGES|PARAMETER_LINK macro_advanced.c:OUTER:ANY(1)#1 -> macro_advanced.c:OUTER:ANY(1)#2
+EDGES|PARAMETER_LINK macro_advanced.c:STRINGIZE:char*(1)#1 -> macro_advanced.c:STRINGIZE:char*(1)#2
 EDGES|PARAMETER_LINK macros#1 -> macros#2
 EDGES|PARAMETER_LINK macros.c:SQR:ANY(1)#1 -> macros.c:SQR:ANY(1)#2
 EDGES|PARAMETER_LINK memcmp#1 -> memcmp#2
@@ -5168,6 +5420,7 @@ EDGES|REF NB:forloop.c:<global> -> NS:<global>
 EDGES|REF NB:gotos.c:<global> -> NS:<global>
 EDGES|REF NB:logic.c:<global> -> NS:<global>
 EDGES|REF NB:loop.c:<global> -> NS:<global>
+EDGES|REF NB:macro_advanced.c:<global> -> NS:<global>
 EDGES|REF NB:macros.c:<global> -> NS:<global>
 EDGES|REF NB:memcmp.c:<global> -> NS:<global>
 EDGES|REF NB:ops.c:<global> -> NS:<global>
@@ -5202,6 +5455,7 @@ EDGES|REF T:int[] -> D:int[]
 EDGES|REF T:logic -> D:logic
 EDGES|REF T:long -> D:long
 EDGES|REF T:longunsigned -> D:longunsigned
+EDGES|REF T:macro_advanced -> D:macro_advanced
 EDGES|REF T:macros -> D:macros
 EDGES|REF T:main -> D:main
 EDGES|REF T:memcmp -> D:memcmp
@@ -5357,6 +5611,12 @@ EDGES|REF logic#85 -> logic#6
 EDGES|REF logic#89 -> logic#6
 EDGES|REF logic.c:<global>#93 -> logic#0
 EDGES|REF loop.c:<global>#32 -> loop.c:<global>#1
+EDGES|REF macro_advanced#10 -> macro_advanced#8
+EDGES|REF macro_advanced#21 -> macro_advanced#1
+EDGES|REF macro_advanced#25 -> macro_advanced#4
+EDGES|REF macro_advanced#29 -> macro_advanced#1
+EDGES|REF macro_advanced#6 -> macro_advanced#4
+EDGES|REF macro_advanced.c:<global>#33 -> macro_advanced#0
 EDGES|REF macros#16 -> macros#1
 EDGES|REF macros#17 -> macros#1
 EDGES|REF macros#19 -> macros#1
@@ -5478,6 +5738,8 @@ EDGES|SOURCE_FILE D:logic.c:<global> -> F:logic.c
 EDGES|SOURCE_FILE D:long -> F:<includes>
 EDGES|SOURCE_FILE D:longunsigned -> F:<includes>
 EDGES|SOURCE_FILE D:loop.c:<global> -> F:loop.c
+EDGES|SOURCE_FILE D:macro_advanced -> F:macro_advanced.c
+EDGES|SOURCE_FILE D:macro_advanced.c:<global> -> F:macro_advanced.c
 EDGES|SOURCE_FILE D:macros -> F:macros.c
 EDGES|SOURCE_FILE D:macros.c:<global> -> F:macros.c
 EDGES|SOURCE_FILE D:main -> F:add.c
@@ -5517,6 +5779,7 @@ EDGES|SOURCE_FILE NB:forloop.c:<global> -> F:forloop.c
 EDGES|SOURCE_FILE NB:gotos.c:<global> -> F:gotos.c
 EDGES|SOURCE_FILE NB:logic.c:<global> -> F:logic.c
 EDGES|SOURCE_FILE NB:loop.c:<global> -> F:loop.c
+EDGES|SOURCE_FILE NB:macro_advanced.c:<global> -> F:macro_advanced.c
 EDGES|SOURCE_FILE NB:macros.c:<global> -> F:macros.c
 EDGES|SOURCE_FILE NB:memcmp.c:<global> -> F:memcmp.c
 EDGES|SOURCE_FILE NB:ops.c:<global> -> F:ops.c
@@ -5548,6 +5811,12 @@ EDGES|SOURCE_FILE logic#0 -> F:logic.c
 EDGES|SOURCE_FILE logic.c:<global>#0 -> F:logic.c
 EDGES|SOURCE_FILE loop.c:<global>#0 -> F:loop.c
 EDGES|SOURCE_FILE loop.c:<global>#1 -> F:loop.c
+EDGES|SOURCE_FILE macro_advanced#0 -> F:macro_advanced.c
+EDGES|SOURCE_FILE macro_advanced.c:<global>#0 -> F:macro_advanced.c
+EDGES|SOURCE_FILE macro_advanced.c:CONCAT:int(2)#0 -> F:macro_advanced.c
+EDGES|SOURCE_FILE macro_advanced.c:FIRST:int(2)#0 -> F:macro_advanced.c
+EDGES|SOURCE_FILE macro_advanced.c:OUTER:ANY(1)#0 -> F:macro_advanced.c
+EDGES|SOURCE_FILE macro_advanced.c:STRINGIZE:char*(1)#0 -> F:macro_advanced.c
 EDGES|SOURCE_FILE macros#0 -> F:macros.c
 EDGES|SOURCE_FILE macros.c:<global>#0 -> F:macros.c
 EDGES|SOURCE_FILE macros.c:LIMIT:int(0)#0 -> F:macros.c
@@ -5610,6 +5879,7 @@ FLOWS|REACHING_DEF[(char *)base] bsearch#23 -> bsearch#72
 FLOWS|REACHING_DEF[(char *)try + width] bsearch#54 -> bsearch#52
 FLOWS|REACHING_DEF[(char *)try + width] bsearch#54 -> bsearch#53
 FLOWS|REACHING_DEF[(char *)try] bsearch#55 -> bsearch#54
+FLOWS|REACHING_DEF[(input) + 1] macro_advanced#20 -> macro_advanced#30
 FLOWS|REACHING_DEF[(long)a] exprs#40 -> exprs#38
 FLOWS|REACHING_DEF[(long)a] exprs#40 -> exprs#39
 FLOWS|REACHING_DEF[(long)a] exprs#40 -> exprs#70
@@ -5684,6 +5954,7 @@ FLOWS|REACHING_DEF[*r] strcmp#12 -> strcmp#30
 FLOWS|REACHING_DEF[*r] strcmp#12 -> strcmp#31
 FLOWS|REACHING_DEF[*r] strcmp#12 -> strcmp#4
 FLOWS|REACHING_DEF[*r] strcmp#12 -> strcmp#9
+FLOWS|REACHING_DEF[*text = STRINGIZE(input)] macro_advanced#9 -> macro_advanced#30
 FLOWS|REACHING_DEF[--b] unary#21 -> unary#25
 FLOWS|REACHING_DEF[-1] logic#33 -> logic#31
 FLOWS|REACHING_DEF[-1] logic#33 -> logic#32
@@ -5763,6 +6034,7 @@ FLOWS|REACHING_DEF[1] logic#21 -> logic#19
 FLOWS|REACHING_DEF[1] logic#21 -> logic#20
 FLOWS|REACHING_DEF[1] logic#34 -> logic#33
 FLOWS|REACHING_DEF[1] logic#73 -> logic#71
+FLOWS|REACHING_DEF[1] macro_advanced#22 -> macro_advanced#20
 FLOWS|REACHING_DEF[1] main#6 -> main#5
 FLOWS|REACHING_DEF[1] pick#27 -> pick#26
 FLOWS|REACHING_DEF[1] second#12 -> second#11
@@ -5791,6 +6063,8 @@ FLOWS|REACHING_DEF[3] exprs#21 -> exprs#19
 FLOWS|REACHING_DEF[3] exprs#21 -> exprs#20
 FLOWS|REACHING_DEF[3] logic#60 -> logic#58
 FLOWS|REACHING_DEF[3] logic#60 -> logic#59
+FLOWS|REACHING_DEF[3] macro_advanced#7 -> macro_advanced#5
+FLOWS|REACHING_DEF[3] macro_advanced#7 -> macro_advanced#6
 FLOWS|REACHING_DEF[3] use#27 -> use#24
 FLOWS|REACHING_DEF[4] pair.<clinit>:pair()#3 -> pair.<clinit>:pair()#2
 FLOWS|REACHING_DEF[5] color.<clinit>:color()#5 -> color.<clinit>:color()#3
@@ -5815,6 +6089,7 @@ FLOWS|REACHING_DEF[<RET>] first#5 -> first#9
 FLOWS|REACHING_DEF[<RET>] gotos#31 -> gotos#33
 FLOWS|REACHING_DEF[<RET>] helper#5 -> helper#9
 FLOWS|REACHING_DEF[<RET>] logic#88 -> logic#90
+FLOWS|REACHING_DEF[<RET>] macro_advanced#14 -> macro_advanced#30
 FLOWS|REACHING_DEF[<RET>] macros#11 -> macros#27
 FLOWS|REACHING_DEF[<RET>] macros#25 -> macros#27
 FLOWS|REACHING_DEF[<RET>] main#8 -> main#10
@@ -5836,6 +6111,10 @@ FLOWS|REACHING_DEF[<global> gcounter] agg#35 -> agg#40
 FLOWS|REACHING_DEF[<global> gcounter] helper#8 -> helper#6
 FLOWS|REACHING_DEF[<global> gcounter] helper#8 -> helper#9
 FLOWS|REACHING_DEF[<unknown> NULL] bsearch#71 -> bsearch#70
+FLOWS|REACHING_DEF[CONCAT(token_, value)] macro_advanced#23 -> macro_advanced#16
+FLOWS|REACHING_DEF[CONCAT(token_, value)] macro_advanced#23 -> macro_advanced#30
+FLOWS|REACHING_DEF[FIRST(input, 11, 12)] macro_advanced#26 -> macro_advanced#15
+FLOWS|REACHING_DEF[FIRST(input, 11, 12)] macro_advanced#26 -> macro_advanced#30
 FLOWS|REACHING_DEF[GREEN = 5] color.<clinit>:color()#3 -> color.<clinit>:color()#8
 FLOWS|REACHING_DEF[GREEN] color.<clinit>:color()#4 -> color.<clinit>:color()#3
 FLOWS|REACHING_DEF[GREEN] color.<clinit>:color()#4 -> color.<clinit>:color()#8
@@ -5846,8 +6125,17 @@ FLOWS|REACHING_DEF[LIMIT] macros#22 -> macros#20
 FLOWS|REACHING_DEF[LIMIT] macros#7 -> macros#27
 FLOWS|REACHING_DEF[LIMIT] macros#7 -> macros#5
 FLOWS|REACHING_DEF[LIMIT] macros#7 -> macros#6
+FLOWS|REACHING_DEF[OUTER(input) + CONCAT(token_, value) + FIRST(input, 11, 12)] macro_advanced#15 -> macro_advanced#14
+FLOWS|REACHING_DEF[OUTER(input) + CONCAT(token_, value) + FIRST(input, 11, 12)] macro_advanced#15 -> macro_advanced#30
+FLOWS|REACHING_DEF[OUTER(input) + CONCAT(token_, value)] macro_advanced#16 -> macro_advanced#15
+FLOWS|REACHING_DEF[OUTER(input) + CONCAT(token_, value)] macro_advanced#16 -> macro_advanced#30
+FLOWS|REACHING_DEF[OUTER(input)] macro_advanced#17 -> macro_advanced#16
+FLOWS|REACHING_DEF[OUTER(input)] macro_advanced#17 -> macro_advanced#30
 FLOWS|REACHING_DEF[SQR(n)] macros#12 -> macros#11
 FLOWS|REACHING_DEF[SQR(n)] macros#12 -> macros#27
+FLOWS|REACHING_DEF[STRINGIZE(input)] macro_advanced#11 -> macro_advanced#10
+FLOWS|REACHING_DEF[STRINGIZE(input)] macro_advanced#11 -> macro_advanced#30
+FLOWS|REACHING_DEF[STRINGIZE(input)] macro_advanced#11 -> macro_advanced#9
 FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
 FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
 FLOWS|REACHING_DEF[] <operator>.addressOf#0 -> <operator>.addressOf#1
@@ -6099,6 +6387,24 @@ FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#25
 FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#26
 FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#28
 FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#7
+FLOWS|REACHING_DEF[] macro_advanced#0 -> macro_advanced#1
+FLOWS|REACHING_DEF[] macro_advanced#0 -> macro_advanced#11
+FLOWS|REACHING_DEF[] macro_advanced#0 -> macro_advanced#13
+FLOWS|REACHING_DEF[] macro_advanced#0 -> macro_advanced#18
+FLOWS|REACHING_DEF[] macro_advanced#0 -> macro_advanced#21
+FLOWS|REACHING_DEF[] macro_advanced#0 -> macro_advanced#22
+FLOWS|REACHING_DEF[] macro_advanced#0 -> macro_advanced#23
+FLOWS|REACHING_DEF[] macro_advanced#0 -> macro_advanced#25
+FLOWS|REACHING_DEF[] macro_advanced#0 -> macro_advanced#27
+FLOWS|REACHING_DEF[] macro_advanced#0 -> macro_advanced#29
+FLOWS|REACHING_DEF[] macro_advanced#0 -> macro_advanced#7
+FLOWS|REACHING_DEF[] macro_advanced.c:<global>#0 -> macro_advanced.c:<global>#33
+FLOWS|REACHING_DEF[] macro_advanced.c:CONCAT:int(2)#0 -> macro_advanced.c:CONCAT:int(2)#1
+FLOWS|REACHING_DEF[] macro_advanced.c:CONCAT:int(2)#0 -> macro_advanced.c:CONCAT:int(2)#3
+FLOWS|REACHING_DEF[] macro_advanced.c:FIRST:int(2)#0 -> macro_advanced.c:FIRST:int(2)#1
+FLOWS|REACHING_DEF[] macro_advanced.c:FIRST:int(2)#0 -> macro_advanced.c:FIRST:int(2)#3
+FLOWS|REACHING_DEF[] macro_advanced.c:OUTER:ANY(1)#0 -> macro_advanced.c:OUTER:ANY(1)#1
+FLOWS|REACHING_DEF[] macro_advanced.c:STRINGIZE:char*(1)#0 -> macro_advanced.c:STRINGIZE:char*(1)#1
 FLOWS|REACHING_DEF[] macros#0 -> macros#1
 FLOWS|REACHING_DEF[] macros#0 -> macros#13
 FLOWS|REACHING_DEF[] macros#0 -> macros#16
@@ -6470,6 +6776,16 @@ FLOWS|REACHING_DEF[i] sum#21 -> sum#25
 FLOWS|REACHING_DEF[i] sum#23 -> sum#14
 FLOWS|REACHING_DEF[i] sum#23 -> sum#22
 FLOWS|REACHING_DEF[i] sum#25 -> sum#24
+FLOWS|REACHING_DEF[input] macro_advanced#1 -> macro_advanced#18
+FLOWS|REACHING_DEF[input] macro_advanced#1 -> macro_advanced#2
+FLOWS|REACHING_DEF[input] macro_advanced#18 -> macro_advanced#17
+FLOWS|REACHING_DEF[input] macro_advanced#18 -> macro_advanced#21
+FLOWS|REACHING_DEF[input] macro_advanced#18 -> macro_advanced#27
+FLOWS|REACHING_DEF[input] macro_advanced#21 -> macro_advanced#20
+FLOWS|REACHING_DEF[input] macro_advanced#21 -> macro_advanced#27
+FLOWS|REACHING_DEF[input] macro_advanced#27 -> macro_advanced#2
+FLOWS|REACHING_DEF[input] macro_advanced#27 -> macro_advanced#26
+FLOWS|REACHING_DEF[input] macro_advanced#27 -> macro_advanced#30
 FLOWS|REACHING_DEF[int[2][3]] use#25 -> use#24
 FLOWS|REACHING_DEF[int[2][3]] use#25 -> use#41
 FLOWS|REACHING_DEF[j < b] logic#51 -> logic#90
@@ -6728,6 +7044,14 @@ FLOWS|REACHING_DEF[p1] <operators>.assignmentShiftLeft#1 -> <operators>.assignme
 FLOWS|REACHING_DEF[p1] <operators>.assignmentShiftLeft#1 -> <operators>.assignmentShiftLeft#5
 FLOWS|REACHING_DEF[p1] <operators>.assignmentXor#1 -> <operators>.assignmentXor#3
 FLOWS|REACHING_DEF[p1] <operators>.assignmentXor#1 -> <operators>.assignmentXor#5
+FLOWS|REACHING_DEF[p1] macro_advanced.c:CONCAT:int(2)#1 -> macro_advanced.c:CONCAT:int(2)#2
+FLOWS|REACHING_DEF[p1] macro_advanced.c:CONCAT:int(2)#1 -> macro_advanced.c:CONCAT:int(2)#6
+FLOWS|REACHING_DEF[p1] macro_advanced.c:FIRST:int(2)#1 -> macro_advanced.c:FIRST:int(2)#2
+FLOWS|REACHING_DEF[p1] macro_advanced.c:FIRST:int(2)#1 -> macro_advanced.c:FIRST:int(2)#6
+FLOWS|REACHING_DEF[p1] macro_advanced.c:OUTER:ANY(1)#1 -> macro_advanced.c:OUTER:ANY(1)#2
+FLOWS|REACHING_DEF[p1] macro_advanced.c:OUTER:ANY(1)#1 -> macro_advanced.c:OUTER:ANY(1)#4
+FLOWS|REACHING_DEF[p1] macro_advanced.c:STRINGIZE:char*(1)#1 -> macro_advanced.c:STRINGIZE:char*(1)#2
+FLOWS|REACHING_DEF[p1] macro_advanced.c:STRINGIZE:char*(1)#1 -> macro_advanced.c:STRINGIZE:char*(1)#4
 FLOWS|REACHING_DEF[p1] macros.c:SQR:ANY(1)#1 -> macros.c:SQR:ANY(1)#2
 FLOWS|REACHING_DEF[p1] macros.c:SQR:ANY(1)#1 -> macros.c:SQR:ANY(1)#4
 FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
@@ -6784,6 +7108,10 @@ FLOWS|REACHING_DEF[p2] <operators>.assignmentShiftLeft#4 -> <operators>.assignme
 FLOWS|REACHING_DEF[p2] <operators>.assignmentShiftLeft#4 -> <operators>.assignmentShiftLeft#6
 FLOWS|REACHING_DEF[p2] <operators>.assignmentXor#4 -> <operators>.assignmentXor#5
 FLOWS|REACHING_DEF[p2] <operators>.assignmentXor#4 -> <operators>.assignmentXor#6
+FLOWS|REACHING_DEF[p2] macro_advanced.c:CONCAT:int(2)#3 -> macro_advanced.c:CONCAT:int(2)#4
+FLOWS|REACHING_DEF[p2] macro_advanced.c:CONCAT:int(2)#3 -> macro_advanced.c:CONCAT:int(2)#6
+FLOWS|REACHING_DEF[p2] macro_advanced.c:FIRST:int(2)#3 -> macro_advanced.c:FIRST:int(2)#4
+FLOWS|REACHING_DEF[p2] macro_advanced.c:FIRST:int(2)#3 -> macro_advanced.c:FIRST:int(2)#6
 FLOWS|REACHING_DEF[p3] <operator>.alloc#7 -> <operator>.alloc#5
 FLOWS|REACHING_DEF[p3] <operator>.alloc#7 -> <operator>.alloc#8
 FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#5
@@ -6968,6 +7296,11 @@ FLOWS|REACHING_DEF[t] count#38 -> count#42
 FLOWS|REACHING_DEF[t] count#6 -> count#22
 FLOWS|REACHING_DEF[t] count#6 -> count#27
 FLOWS|REACHING_DEF[t] count#6 -> count#5
+FLOWS|REACHING_DEF[text] macro_advanced#10 -> macro_advanced#30
+FLOWS|REACHING_DEF[text] macro_advanced#10 -> macro_advanced#9
+FLOWS|REACHING_DEF[token_value = 3] macro_advanced#5 -> macro_advanced#30
+FLOWS|REACHING_DEF[token_value] macro_advanced#6 -> macro_advanced#30
+FLOWS|REACHING_DEF[token_value] macro_advanced#6 -> macro_advanced#5
 FLOWS|REACHING_DEF[total + i] sum#19 -> sum#17
 FLOWS|REACHING_DEF[total + i] sum#19 -> sum#18
 FLOWS|REACHING_DEF[total + i] sum#19 -> sum#29
