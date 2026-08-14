@@ -2,7 +2,7 @@
 
 ## Status
 
-- **Status**: IN PROGRESS
+- **Status**: DONE
 - **Depends on**: 005a
 
 Close production-oracle differences in small gated slices: qualified method

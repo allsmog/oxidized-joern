@@ -15,13 +15,13 @@ frontend remain outside the documented product boundary.
 | [002](002-harden-cpg-persistence.md) | Version, validate, and transactionally save CPG files | DONE | — |
 | [003](003-content-correct-cache-and-reopen.md) | Make cache reuse and graph reopening content-correct | DONE | 001, 002 |
 | [004](004-enforce-release-acceptance-gates.md) | Enforce semantic and packaged-binary release gates | DONE | —; rerun after 001–003 |
-| [005](005-converge-production-c-engine.md) | Make the shipped C engine the parity-validated engine | IN PROGRESS | 002, 004 |
+| [005](005-converge-production-c-engine.md) | Make the shipped C engine the parity-validated engine | DONE | 002, 004 |
 | [005a](005a-production-parity-adapter.md) | Dump the shipped C graph through the parity harness | DONE | 005 |
-| [005b](005b-converge-c-schema.md) | Converge production C schema and AST semantics | IN PROGRESS | 005a |
-| [005c](005c-canonical-production-flow.md) | Route production analysis through canonical flow facts | TODO | 005b |
-| [005d](005d-remove-duplicate-parity-builder.md) | Switch the gate and remove the duplicate C builder | TODO | 005c |
-| [005e](005e-real-project-acceptance.md) | Validate pinned real C projects and scanner outcomes | TODO | 005d |
-| [005f](005f-compatibility-matrix.md) | Publish the language/workflow compatibility matrix | TODO | 005e |
+| [005b](005b-converge-c-schema.md) | Converge production C schema and AST semantics | DONE | 005a |
+| [005c](005c-canonical-production-flow.md) | Route production analysis through canonical flow facts | DONE | 005b |
+| [005d](005d-remove-duplicate-parity-builder.md) | Switch the gate and remove the duplicate C builder | DONE | 005c |
+| [005e](005e-real-project-acceptance.md) | Validate pinned real C projects and scanner outcomes | DONE | 005d |
+| [005f](005f-compatibility-matrix.md) | Publish the language/workflow compatibility matrix | DONE | 005e |
 
 Plans 001, 002, and 004 are independent at the planning level. For a single
 reviewable release-hardening branch, execute 001, then stack 002, then 003, then

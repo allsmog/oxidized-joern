@@ -4,6 +4,22 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Production C convergence complete (2026-08-14).** The released
+  `CFrontend`/`Project`/`standard_pipeline` path is the 96/96 committed Joern
+  v4.0.555 oracle path, including 1,458/1,458 ReachingDef facts. Canonical
+  scanner outcomes cover branches, kills, loops, returns, globals,
+  pointer/member access, sanitizers, cross-calls, recursion, persistence, and
+  duplicate translation-unit-local identities. Pinned zlib 1.3.1 and Lua 5.4.7
+  builds gate deterministic graph/edge/export/SARIF output, resource budgets,
+  and incremental-vs-clean equivalence. See `COMPATIBILITY.md` for the release
+  boundary.
+- **All-language acceptance complete (2026-08-14).** C, C++, Go, Java,
+  JavaScript, TypeScript, Python, Ruby, Rust, and Scala pass the shared schema,
+  interprocedural summary/taint, and save/load contract. Only C is promoted to
+  production preview; the remaining frontends are explicitly experimental.
+
+## Historical milestone log
+
 - **M6/Gap 1 partial (2026-07-09): the engine's CFG + DDG passes are real.**
   `cpg-analysis/src/cfg.rs` now ports the parity-validated CfgBuilder
   semantics (evaluation-order chaining, if/else + loop back-edges +

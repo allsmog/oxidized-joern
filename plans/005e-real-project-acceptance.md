@@ -2,7 +2,7 @@
 
 ## Status
 
-- **Status**: TODO
+- **Status**: DONE
 - **Depends on**: 005d
 
 Add two immutable, license-recorded C project fixtures and enforce deterministic

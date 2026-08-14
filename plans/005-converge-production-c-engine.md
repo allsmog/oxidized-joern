@@ -13,7 +13,7 @@
 
 ## Status
 
-- **Status**: TODO
+- **Status**: DONE
 - **Depends on**: `plans/002-harden-cpg-persistence.md`,
   `plans/004-enforce-release-acceptance-gates.md`
 - **Planned at**: commit `6913b3ac1`, 2026-08-13
@@ -274,4 +274,3 @@ The decisive invariant is not that two code paths print the same fixture; it is
 that the released CLI and parity harness instantiate the same frontend,
 pipeline, and graph. Reject duplicated configuration or compatibility shims
 that allow the sidecar to stay green while production diverges.
-
