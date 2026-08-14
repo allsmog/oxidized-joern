@@ -282,10 +282,7 @@ fn collect_sources_dir(
 
     for entry in entries {
         let path = entry.path();
-        if excludes
-            .iter()
-            .any(|exclude| path.to_string_lossy().contains(exclude))
-        {
+        if source_path_is_excluded(&path, excludes) {
             continue;
         }
         let link_meta = std::fs::symlink_metadata(&path)
@@ -299,6 +296,9 @@ fn collect_sources_dir(
                 root.display(),
                 path.display()
             ));
+        }
+        if source_path_is_excluded(&canonical, excludes) {
+            continue;
         }
         let meta = if link_meta.file_type().is_symlink() {
             std::fs::metadata(&canonical)
@@ -324,6 +324,15 @@ fn collect_sources_dir(
         }
     }
     Ok(())
+}
+
+fn source_path_is_excluded(path: &Path, excludes: &[&str]) -> bool {
+    let normalized = path.to_string_lossy().replace('\\', "/");
+    excludes.iter().any(|exclude| {
+        let exclude = exclude.replace('\\', "/");
+        normalized.contains(&exclude)
+            || (exclude.ends_with('/') && normalized.ends_with(exclude.trim_end_matches('/')))
+    })
 }
 
 /// The Go generated-code convention (golang.org/s/generatedcode): a line
@@ -765,6 +774,28 @@ mod glob_tests {
         assert!(error.contains("escapes root"), "{error}");
         let _ = std::fs::remove_dir_all(root);
         let _ = std::fs::remove_dir_all(outside);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn source_collection_applies_excludes_to_symlink_targets() {
+        use std::os::unix::fs::symlink;
+
+        let root = source_tmpdir("excluded-symlink");
+        std::fs::create_dir_all(root.join("vendor")).unwrap();
+        std::fs::write(
+            root.join("vendor/hidden.c"),
+            "int hidden(void) { return 0; }",
+        )
+        .unwrap();
+        std::fs::write(root.join("visible.c"), "int visible(void) { return 0; }").unwrap();
+        symlink(root.join("vendor"), root.join("alias")).unwrap();
+        symlink(root.join("vendor/hidden.c"), root.join("file-alias.c")).unwrap();
+
+        let sources = collect_sources_filtered(&root, &["c"], &["/vendor/"]).unwrap();
+        assert_eq!(sources.len(), 1);
+        assert!(sources[0].0.ends_with("visible.c"), "{sources:?}");
+        let _ = std::fs::remove_dir_all(root);
     }
 
     #[cfg(unix)]
