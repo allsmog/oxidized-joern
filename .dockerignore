@@ -1,4 +1,8 @@
 **
+!cpg-rs
+!cpg-rs/**
+cpg-rs/target
+cpg-rs/**/target
 !ci
 !ci/Dockerfile
 !ci/oxidized-joern-cpg-linux-amd64.tar.gz
