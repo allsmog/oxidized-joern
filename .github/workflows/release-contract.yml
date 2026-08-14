@@ -18,10 +18,73 @@ permissions:
   contents: read
 
 jobs:
-  linux-package:
+  semantic-quality:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # 1.97.0
+        with:
+          toolchain: 1.97.0
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: cpg-rs
+          key: linux-release-quality
+      - name: Check formatting
+        working-directory: cpg-rs
+        run: cargo fmt --all --check
+      - name: Lint all targets
+        working-directory: cpg-rs
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Test the workspace
+        working-directory: cpg-rs
+        run: cargo test --workspace --locked
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --version 0.22.2 --locked
+      - name: Audit locked dependencies
+        run: cargo audit --deny warnings --file cpg-rs/Cargo.lock
+
+  committed-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # 1.97.0
+        with:
+          toolchain: 1.97.0
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: cpg-rs
+          key: linux-release-parity
+      - name: Check the committed Joern parity contract
+        working-directory: cpg-rs/joern-parity
+        run: ./check.sh --committed-only
+
+  # Keep this exact job id: it is the stable protected-branch context. Running
+  # under always() prevents failed prerequisites from turning it into a
+  # branch-protection-compatible skipped result; the first step fails closed.
+  linux-package:
+    if: ${{ always() }}
+    needs: [semantic-quality, committed-parity]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Require every semantic prerequisite
+        shell: bash
+        env:
+          SEMANTIC_RESULT: ${{ needs.semantic-quality.result }}
+          PARITY_RESULT: ${{ needs.committed-parity.result }}
+        run: |
+          set -euo pipefail
+          if [[ "${SEMANTIC_RESULT}" != "success" || "${PARITY_RESULT}" != "success" ]]; then
+            echo "::error::semantic-quality=${SEMANTIC_RESULT}, committed-parity=${PARITY_RESULT}"
+            exit 1
+          fi
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
@@ -40,7 +103,7 @@ jobs:
       - name: Build the release binary
         working-directory: cpg-rs
         run: cargo build --release --locked -p cpg-cli
-      - name: Package and smoke-test the archive
+      - name: Package and acceptance-test the archive
         run: |
           version="$(sed -n 's/^version = "\([0-9][0-9.]*\)"$/\1/p' cpg-rs/Cargo.toml)"
           python cpg-rs/scripts/package-release.py \
@@ -49,7 +112,10 @@ jobs:
             --platform linux-amd64 \
             --version "${version}"
           (cd ci && sha256sum --check oxidized-joern-cpg-linux-amd64.tar.gz.sha256)
-      - name: Build and smoke-test the container
+      - name: Build and acceptance-test the container
         run: |
           docker build --file ci/Dockerfile --tag oxidized-joern-cpg:contract .
-          docker run --rm oxidized-joern-cpg:contract --version
+          version="$(sed -n 's/^version = "\([0-9][0-9.]*\)"$/\1/p' cpg-rs/Cargo.toml)"
+          python cpg-rs/scripts/test-release.py \
+            --container oxidized-joern-cpg:contract \
+            --version "${version}"

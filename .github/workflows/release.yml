@@ -21,6 +21,7 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+          fetch-depth: 0
       - id: version
         name: Match the tag to the Cargo version
         shell: bash
@@ -38,6 +39,22 @@ jobs:
             exit 1
           fi
           echo "value=${version}" >> "${GITHUB_OUTPUT}"
+      - name: Require the tag commit to be on the default branch
+        shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          TAG_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          default_ref="refs/remotes/origin/${DEFAULT_BRANCH}"
+          if ! git show-ref --verify --quiet "${default_ref}"; then
+            git fetch --no-tags origin "+refs/heads/${DEFAULT_BRANCH}:${default_ref}"
+          fi
+          tag_commit="$(git rev-parse "${TAG_SHA}^{commit}")"
+          if ! git merge-base --is-ancestor "${tag_commit}" "${default_ref}"; then
+            echo "::error::tag commit ${tag_commit} is not reachable from origin/${DEFAULT_BRANCH}"
+            exit 1
+          fi
 
   rust:
     needs: validate-tag
@@ -64,6 +81,9 @@ jobs:
         run: cargo install cargo-audit --version 0.22.2 --locked
       - name: Audit the released dependency graph
         run: cargo audit --deny warnings --file cpg-rs/Cargo.lock
+      - name: Check the committed Joern parity contract
+        working-directory: cpg-rs/joern-parity
+        run: ./check.sh --committed-only
 
   build:
     needs: [validate-tag, rust]
@@ -113,7 +133,7 @@ jobs:
       - name: Build the Rust-native CLI
         working-directory: cpg-rs
         run: cargo build --release --locked -p cpg-cli --target ${{ matrix.target }}
-      - name: Package and smoke-test the release asset
+      - name: Package and acceptance-test the release asset
         shell: bash
         env:
           RELEASE_VERSION: ${{ needs.validate-tag.outputs.version }}
@@ -131,7 +151,7 @@ jobs:
 
   publish:
     if: github.repository == 'allsmog/oxidized-joern'
-    needs: [validate-tag, build]
+    needs: [validate-tag, rust, build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
