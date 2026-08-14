@@ -1,19 +1,23 @@
-FROM ubuntu:24.04
+FROM rust:1.97-bookworm AS build
 
-ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /src
+COPY cpg-rs ./cpg-rs
+RUN cargo build --manifest-path cpg-rs/Cargo.toml --release --locked -p cpg-cli
 
-# Install all dependencies (including nss, ncurses, php)
-RUN apt-get update && apt-get install -y openjdk-21-jdk python3 python3-pip git curl gnupg bash libnss3 libncurses6 php-cli build-essential clang libclang-dev libffi-dev pkg-config ca-certificates wget unzip
+FROM debian:bookworm-slim
 
-# Python compatibility
-RUN ln -sf /usr/bin/python3 /usr/bin/python
+LABEL org.opencontainers.image.source="https://github.com/allsmog/oxidized-joern" \
+      org.opencontainers.image.licenses="Apache-2.0" \
+      org.opencontainers.image.title="Oxidized Joern cpg"
 
-# sbt
-ENV SBT_VERSION 1.12.1
-ENV SBT_HOME /usr/local/sbt
-ENV PATH ${PATH}:${SBT_HOME}/bin
-RUN curl -sL "https://github.com/sbt/sbt/releases/download/v$SBT_VERSION/sbt-$SBT_VERSION.tgz" | gunzip | tar -x -C /usr/local
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /workspace \
+    && chown 65532:65532 /workspace
 
-# building joern
-RUN git clone https://github.com/joernio/joern && cd joern && sbt stage
-WORKDIR /joern
+COPY --from=build /src/cpg-rs/target/release/cpg /usr/local/bin/cpg
+
+USER 65532:65532
+WORKDIR /workspace
+ENTRYPOINT ["cpg"]

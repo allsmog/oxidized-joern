@@ -142,7 +142,7 @@ From PROGRESS.md, still unpinned:
 
 ## Gap 4 — Language coverage beyond C
 
-Upstream Joern ships 13 frontends (`joern-cli/frontends/`): c2cpg,
+The pinned upstream Joern reference ships 13 frontends: c2cpg,
 csharpsrc2cpg, ghidra2cpg, gosrc2cpg, javasrc2cpg, jimple2cpg, jssrc2cpg,
 kotlin2cpg, php2cpg, pysrc2cpg, rubysrc2cpg, swiftsrc2cpg, x2cpg (plus
 rust2cpg landing upstream). cpg-rs has seven languages at

@@ -1,115 +1,37 @@
-###################
-# Joern-specifics #
-###################
+# Rust build output
+target/
+**/target/
 
-project/project
-project/target
-target
-tests/smoke-test-repos
-tests/**/node_modules
-tests/**/package-lock.json
-tests/**/package.json
-joern-cli.zip
+# Release-contract output
 ci/oxidized-joern-cpg-*.tar.gz
 ci/oxidized-joern-cpg-*.tar.gz.sha256
-joern-server.zip
-cpg.bin.zip
+
+# Generated graph and analysis output
+*.cpg
 cpg.bin
-ast-for-funcs.json
-cfg-for-funcs.json
-pdg-for-funcs.json
-joern-cli/workspace
-/workspace
-null
-/gnupg-*
-/joern-cli/${sys:LOG_DIR}/
-.local
-**/astgen-win.exe
-**/astgen-macos
-**/astgen-macos-arm
-**/astgen-linux
-**/SwiftAstGen-win.exe
-**/SwiftAstGen-mac
-**/SwiftAstGen-linux
-**/php2cpg/bin
-/foo.c
-/woo.c
-/cpg_*.bin.zip
-**/goastgen-windows.exe
-**/goastgen-linux
-**/goastgen-linux-arm64
-**/goastgen-macos
-**/goastgen-macos-arm64
-**/dotnetastgen-linux
-**/dotnetastgen-linux-arm
-**/dotnetastgen-win.exe
-**/dotnetastgen-win-arm.exe
-**/dotnetastgen-macos
-**/dotnetastgen-macos-arm
-**/*_builtin_types.zip
-**/*_builtin_types.zip.sha512
+cpg.bin.zip
+*.sarif
 slices.json
-**/.antlr
-/joern-cli/frontends/*/bin
-/joern-cli/frontends/*/type_stubs
-/joern-cli/frontends/*/node_modules
-/joern-cli/frontends/*/package-lock.json
-**/.gradle
-**/build/gatheredDependencies
-**/abapgen-win.exe
-**/abapgen-linux
-**/abapgen-linux-arm
-**/abapgen-macos
-**/abapgen-macos-arm
-/joern-cli/frontends/x2cpg/src/test/resources/code/**/build/
-/joern-cli/frontends/x2cpg/src/test/resources/code/**/gradle/wrapper/gradle-wrapper.jar
 
-# Explicitly track specific abap2cpg documentation only
-!/joern-cli/frontends/abap2cpg/architecture.md
-!/joern-cli/frontends/abap2cpg/README.md
-
-##############
-# Nix flakes #
-##############
+# Local workspaces and caches
+.local/
+workspace/
+.ruff_cache/
+.pytest_cache/
+__pycache__/
+.direnv/
 .envrc
-flake.nix
-flake.lock
-.direnv
 
-##############
-# Metals LSP #
-##############
-**/.metals
-**/metals.sbt
-*.semanticdb
-.vscode/settings.json
-
-##############
-# IDE/OS     #
-##############
-
-.vscode
+# Editors and operating systems
 .idea/
-.bloop
+.vscode/
 **/.DS_Store
-**/.bsp
 
-
-/joern-cli/frontends/c2cpg/eclipse-cdt/build/
-/joern-cli/frontends/c2cpg/eclipse-cdt/org.eclipse.cdt.core-*.jar
-
-
-##############
-# Bazel      #
-##############
-user.bazelrc
-bazel-*
-
-# autonomous parity loop working files
+# Local parity-loop state
 .oxidized-loop/
 .oxidized-loop.log
 .oxidized-loop.stop
 .oxidized-loop-notes.md
 
-# Claude Code session/worktree metadata
+# Agent session metadata
 .claude/
