@@ -6,6 +6,7 @@
 pub mod apis;
 pub mod coverage;
 pub mod export;
+pub mod flatgraph;
 pub mod mcp;
 pub mod merge;
 pub mod play;

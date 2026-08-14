@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "oracle": "joern-v4.0.555",
+  "tiers": [
+    {
+      "id": "native-core-1",
+      "status": "implemented",
+      "cases": [
+        {"id": "all-methods", "query": "cpg.method"},
+        {"id": "method-regex", "query": "cpg.method.name(\"main|helper\")"},
+        {"id": "method-full-name", "query": "cpg.method.fullName(\".*main.*\")"},
+        {"id": "method-parameter-names", "query": "cpg.method.name(\"main\").parameter.name.l"},
+        {"id": "method-return", "query": "cpg.method.name(\"main\").methodReturn"},
+        {"id": "all-calls", "query": "cpg.call"},
+        {"id": "call-regex", "query": "cpg.call.name(\"getenv|strcpy\")"},
+        {"id": "call-code", "query": "cpg.call.code(\"strcpy\\\\(.*\")"},
+        {"id": "call-line", "query": "cpg.call.lineNumber(4)"},
+        {"id": "call-argument", "query": "cpg.call.name(\"strcpy\").argument"},
+        {"id": "call-second-argument", "query": "cpg.call.name(\"strcpy\").argument(2).code"},
+        {"id": "call-owner", "query": "cpg.call.method.fullName.dedup"},
+        {"id": "call-file", "query": "cpg.call.file.filename.dedup"},
+        {"id": "call-count", "query": "cpg.call.size"},
+        {"id": "call-limit", "query": "cpg.call.limit(10).name"},
+        {"id": "callee", "query": "cpg.call.callee.fullName"},
+        {"id": "callers", "query": "cpg.method.callIn.method.name.dedup"},
+        {"id": "ast-children", "query": "cpg.method.ast"},
+        {"id": "ast-parent", "query": "cpg.identifier.astParent"},
+        {"id": "cfg-successor", "query": "cpg.call.cfgNext"},
+        {"id": "cfg-predecessor", "query": "cpg.call.cfgPrev"},
+        {"id": "symbol-reference", "query": "cpg.identifier.ref"},
+        {"id": "referenced-type", "query": "cpg.identifier.referencedType.fullName"},
+        {"id": "reaching-def-in", "query": "cpg.call.reachingDefIn"},
+        {"id": "reaching-def-out", "query": "cpg.call.reachingDefOut"},
+        {"id": "labels", "query": "cpg.all.label.dedup"}
+      ]
+    }
+  ]
+}

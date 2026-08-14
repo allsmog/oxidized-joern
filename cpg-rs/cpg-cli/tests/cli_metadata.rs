@@ -36,7 +36,19 @@ fn help_is_successful_and_lists_public_commands() {
     assert!(output.status.success());
     let help = String::from_utf8(output.stdout).expect("help is UTF-8");
     for command in [
-        "build", "scan", "slice", "merge", "apis", "export", "flow", "vectors", "serve", "mcp",
+        "build",
+        "scan",
+        "slice",
+        "merge",
+        "apis",
+        "export",
+        "export-joern",
+        "import-joern",
+        "flow",
+        "vectors",
+        "query",
+        "serve",
+        "mcp",
     ] {
         assert!(
             help.contains(&format!("cpg {command}")),
