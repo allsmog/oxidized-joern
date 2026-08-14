@@ -59,7 +59,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let mut used_types: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     for u in &units {
         let b = u.src.as_bytes();
-        for f in named_children(u.tree.root_node()) {
+        let (top_level, _) = preprocess_translation_unit(u.tree.root_node(), b);
+        for f in top_level {
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(f, b) {
@@ -126,7 +127,9 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let include_counts: HashMap<String, usize> = units
         .iter()
         .map(|u| {
-            let n = named_children(u.tree.root_node())
+            let b = u.src.as_bytes();
+            let (top_level, _) = preprocess_translation_unit(u.tree.root_node(), b);
+            let n = top_level
                 .iter()
                 .filter(|f| f.kind() == "preproc_include")
                 .count();
@@ -142,59 +145,9 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         let mut functions: HashMap<String, String> = HashMap::new();
         let mut function_full_names: HashMap<String, String> = HashMap::new();
         let mut globals: HashMap<String, String> = HashMap::new();
-        let mut macros: HashMap<String, MacroDef> = HashMap::new();
-        for f in named_children(root) {
-            match f.kind() {
-                "preproc_def" => {
-                    let name = f
-                        .child_by_field_name("name")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    let body = f
-                        .child_by_field_name("value")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    macros.insert(
-                        name,
-                        MacroDef {
-                            params: None,
-                            body,
-                            directive: text(f, b).trim_end().to_string(),
-                        },
-                    );
-                }
-                "preproc_function_def" => {
-                    let name = f
-                        .child_by_field_name("name")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    let params = f
-                        .child_by_field_name("parameters")
-                        .map(|ps| {
-                            named_children(ps)
-                                .iter()
-                                .map(|p| text(*p, b).to_string())
-                                .collect()
-                        })
-                        .unwrap_or_default();
-                    let body = f
-                        .child_by_field_name("value")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    macros.insert(
-                        name,
-                        MacroDef {
-                            params: Some(params),
-                            body,
-                            directive: text(f, b).trim_end().to_string(),
-                        },
-                    );
-                }
-                _ => {}
-            }
-        }
+        let (top_level, macros) = preprocess_translation_unit(root, b);
         let mut enumerators: Vec<String> = Vec::new();
-        for f in named_children(root) {
+        for &f in &top_level {
             if f.kind() == "enum_specifier" {
                 if let Some(body) = f.child_by_field_name("body") {
                     for e in named_children(body) {
@@ -207,7 +160,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                 }
             }
         }
-        for f in named_children(root) {
+        for &f in &top_level {
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, ret, _)) = fn_header(f, b) {
@@ -272,7 +225,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         };
 
         // Standalone dump per user method, plus one per struct <clinit>.
-        for f in named_children(root) {
+        for &f in &top_level {
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(f, b) {
@@ -640,10 +593,338 @@ fn count_members(n: Node) -> i64 {
 
 /// An in-file #define. CDT expands these; invocations become INLINED calls
 /// and each *used* macro also gets a METHOD whose CODE is the directive.
+#[derive(Clone, Debug)]
 struct MacroDef {
     params: Option<Vec<String>>, // None = object-like
     body: String,
     directive: String,
+}
+
+/// Preprocess top-level nodes and collect the final active macro environment
+/// in one source-ordered pass. Directives in inactive branches never leak,
+/// and a later `#undef` cannot retroactively change an earlier branch choice.
+fn preprocess_translation_unit<'tree>(
+    root: Node<'tree>,
+    b: &[u8],
+) -> (Vec<Node<'tree>>, HashMap<String, MacroDef>) {
+    let mut macros = HashMap::new();
+    let mut active = Vec::new();
+    for child in named_children(root) {
+        preprocess_child(child, b, &mut macros, &mut active);
+    }
+    (active, macros)
+}
+
+fn preprocess_child<'tree>(
+    child: Node<'tree>,
+    b: &[u8],
+    macros: &mut HashMap<String, MacroDef>,
+    active: &mut Vec<Node<'tree>>,
+) {
+    match child.kind() {
+        "preproc_def" | "preproc_function_def" => {
+            if let Some((name, definition)) = macro_definition(child, b) {
+                macros.insert(name, definition);
+            }
+            active.push(child);
+        }
+        "preproc_if" | "preproc_ifdef" => {
+            for selected in selected_preproc_children(child, b, macros) {
+                preprocess_child(selected, b, macros, active);
+            }
+        }
+        "preproc_call" if text(child, b).trim_start().starts_with("#undef") => {
+            if let Some(name) = text(child, b).split_whitespace().nth(1) {
+                macros.remove(name);
+            }
+            active.push(child);
+        }
+        _ => active.push(child),
+    }
+}
+
+fn macro_definition(node: Node, b: &[u8]) -> Option<(String, MacroDef)> {
+    let name = node
+        .child_by_field_name("name")
+        .map(|value| text(value, b).to_string())?;
+    let body = node
+        .child_by_field_name("value")
+        .map(|value| text(value, b).to_string())
+        .unwrap_or_default();
+    let params = (node.kind() == "preproc_function_def").then(|| {
+        node.child_by_field_name("parameters")
+            .map(|parameters| {
+                named_children(parameters)
+                    .iter()
+                    .map(|parameter| text(*parameter, b).to_string())
+                    .collect()
+            })
+            .unwrap_or_default()
+    });
+    Some((
+        name,
+        MacroDef {
+            params,
+            body,
+            directive: text(node, b).trim_end().to_string(),
+        },
+    ))
+}
+
+fn selected_preproc_children<'tree>(
+    directive: Node<'tree>,
+    b: &[u8],
+    macros: &HashMap<String, MacroDef>,
+) -> Vec<Node<'tree>> {
+    let take =
+        match directive.kind() {
+            "preproc_if" | "preproc_elif" => directive
+                .child_by_field_name("condition")
+                .is_some_and(|condition| {
+                    eval_pp_node(condition, b, macros, 0, &mut HashSet::new()) != 0
+                }),
+            "preproc_ifdef" | "preproc_elifdef" => {
+                let name = directive
+                    .child_by_field_name("name")
+                    .map(|value| text(value, b))
+                    .unwrap_or_default();
+                let negated = directive
+                    .child(0)
+                    .map(|token| matches!(text(token, b), "#ifndef" | "#elifndef"))
+                    .unwrap_or(false);
+                macros.contains_key(name) != negated
+            }
+            "preproc_else" => true,
+            _ => false,
+        };
+    if !take {
+        return directive
+            .child_by_field_name("alternative")
+            .map(|alternative| selected_preproc_children(alternative, b, macros))
+            .unwrap_or_default();
+    }
+    let condition = directive
+        .child_by_field_name("condition")
+        .map(|node| node.id());
+    let name = directive.child_by_field_name("name").map(|node| node.id());
+    let alternative = directive
+        .child_by_field_name("alternative")
+        .map(|node| node.id());
+    named_children(directive)
+        .into_iter()
+        .filter(|child| {
+            ![condition, name, alternative]
+                .into_iter()
+                .flatten()
+                .any(|excluded| excluded == child.id())
+        })
+        .collect()
+}
+
+/// Evaluate the integer constant-expression subset accepted by the C
+/// preprocessor. Undefined identifiers are zero; object/function macros are
+/// recursively expanded with a hard depth/cycle bound.
+fn eval_pp_node(
+    node: Node,
+    b: &[u8],
+    macros: &HashMap<String, MacroDef>,
+    depth: usize,
+    expanding: &mut HashSet<String>,
+) -> i64 {
+    if depth >= 64 {
+        return 0;
+    }
+    match node.kind() {
+        "number_literal" => parse_pp_integer(text(node, b)).unwrap_or(0),
+        "char_literal" => parse_pp_char(text(node, b)),
+        "identifier" => {
+            let name = text(node, b);
+            let Some(definition) = macros
+                .get(name)
+                .filter(|definition| definition.params.is_none())
+            else {
+                return 0;
+            };
+            if !expanding.insert(name.to_string()) {
+                return 0;
+            }
+            let value = if definition.body.trim().is_empty() {
+                1
+            } else {
+                eval_pp_text(&definition.body, macros, depth + 1, expanding)
+            };
+            expanding.remove(name);
+            value
+        }
+        "preproc_defined" => named_children(node)
+            .first()
+            .map(|name| i64::from(macros.contains_key(text(*name, b))))
+            .unwrap_or(0),
+        "parenthesized_expression" => named_children(node)
+            .first()
+            .map(|child| eval_pp_node(*child, b, macros, depth + 1, expanding))
+            .unwrap_or(0),
+        "unary_expression" => {
+            let Some(argument) = node
+                .child_by_field_name("argument")
+                .or_else(|| named_children(node).last().copied())
+            else {
+                return 0;
+            };
+            let value = eval_pp_node(argument, b, macros, depth + 1, expanding);
+            let operator = text(node, b)[..argument.start_byte() - node.start_byte()].trim();
+            match operator {
+                "!" => i64::from(value == 0),
+                "~" => !value,
+                "-" => value.wrapping_neg(),
+                "+" => value,
+                _ => 0,
+            }
+        }
+        "binary_expression" => {
+            let (Some(left), Some(right)) = (
+                node.child_by_field_name("left"),
+                node.child_by_field_name("right"),
+            ) else {
+                return 0;
+            };
+            let lhs = eval_pp_node(left, b, macros, depth + 1, expanding);
+            let operator = text(node, b)
+                [left.end_byte() - node.start_byte()..right.start_byte() - node.start_byte()]
+                .trim();
+            if operator == "&&" && lhs == 0 {
+                return 0;
+            }
+            if operator == "||" && lhs != 0 {
+                return 1;
+            }
+            let rhs = eval_pp_node(right, b, macros, depth + 1, expanding);
+            match operator {
+                "*" => lhs.wrapping_mul(rhs),
+                "/" => lhs.checked_div(rhs).unwrap_or(0),
+                "%" => lhs.checked_rem(rhs).unwrap_or(0),
+                "+" => lhs.wrapping_add(rhs),
+                "-" => lhs.wrapping_sub(rhs),
+                "<<" => lhs.wrapping_shl(rhs.clamp(0, 63) as u32),
+                ">>" => lhs.wrapping_shr(rhs.clamp(0, 63) as u32),
+                "<" => i64::from(lhs < rhs),
+                "<=" => i64::from(lhs <= rhs),
+                ">" => i64::from(lhs > rhs),
+                ">=" => i64::from(lhs >= rhs),
+                "==" => i64::from(lhs == rhs),
+                "!=" => i64::from(lhs != rhs),
+                "&" => lhs & rhs,
+                "^" => lhs ^ rhs,
+                "|" => lhs | rhs,
+                "&&" => i64::from(lhs != 0 && rhs != 0),
+                "||" => i64::from(lhs != 0 || rhs != 0),
+                _ => 0,
+            }
+        }
+        "call_expression" => {
+            let Some(function) = node.child_by_field_name("function") else {
+                return 0;
+            };
+            let name = text(function, b);
+            let Some(definition) = macros.get(name) else {
+                return 0;
+            };
+            let Some(parameters) = definition.params.as_ref() else {
+                return 0;
+            };
+            let arguments: Vec<String> = node
+                .child_by_field_name("arguments")
+                .map(named_children)
+                .unwrap_or_default()
+                .iter()
+                .map(|argument| text(*argument, b).to_string())
+                .collect();
+            if !expanding.insert(name.to_string()) {
+                return 0;
+            }
+            let expanded = substitute(&definition.body, parameters, &arguments);
+            let value = eval_pp_text(&expanded, macros, depth + 1, expanding);
+            expanding.remove(name);
+            value
+        }
+        _ => 0,
+    }
+}
+
+fn eval_pp_text(
+    expression: &str,
+    macros: &HashMap<String, MacroDef>,
+    depth: usize,
+    expanding: &mut HashSet<String>,
+) -> i64 {
+    if depth >= 64 {
+        return 0;
+    }
+    let source = format!("#if {expression}\nint __cpg_pp;\n#endif\n");
+    let mut parser = Parser::new();
+    if parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .is_err()
+    {
+        return 0;
+    }
+    let Some(tree) = parser.parse(&source, None) else {
+        return 0;
+    };
+    let Some(directive) = named_children(tree.root_node())
+        .into_iter()
+        .find(|child| child.kind() == "preproc_if")
+    else {
+        return 0;
+    };
+    directive
+        .child_by_field_name("condition")
+        .map(|condition| eval_pp_node(condition, source.as_bytes(), macros, depth + 1, expanding))
+        .unwrap_or(0)
+}
+
+fn parse_pp_integer(token: &str) -> Option<i64> {
+    let token = token.trim();
+    let end = token
+        .char_indices()
+        .rev()
+        .find(|(_, ch)| !matches!(ch, 'u' | 'U' | 'l' | 'L'))
+        .map(|(index, ch)| index + ch.len_utf8())
+        .unwrap_or(0);
+    let token = &token[..end];
+    if let Some(value) = token
+        .strip_prefix("0x")
+        .or_else(|| token.strip_prefix("0X"))
+    {
+        i64::from_str_radix(value, 16).ok()
+    } else if let Some(value) = token
+        .strip_prefix("0b")
+        .or_else(|| token.strip_prefix("0B"))
+    {
+        i64::from_str_radix(value, 2).ok()
+    } else if token.len() > 1 && token.starts_with('0') {
+        i64::from_str_radix(&token[1..], 8).ok()
+    } else {
+        token.parse().ok()
+    }
+}
+
+fn parse_pp_char(token: &str) -> i64 {
+    let Some(inner) = token
+        .strip_prefix('\'')
+        .and_then(|value| value.strip_suffix('\''))
+    else {
+        return 0;
+    };
+    match inner {
+        "\\n" => '\n' as i64,
+        "\\r" => '\r' as i64,
+        "\\t" => '\t' as i64,
+        "\\0" => 0,
+        "\\\\" => '\\' as i64,
+        "\\'" => '\'' as i64,
+        value => value.chars().next().map(|value| value as i64).unwrap_or(0),
+    }
 }
 
 /// Per-function emission context.
@@ -986,7 +1267,11 @@ impl Ctx<'_> {
             order: Some(k as i64),
             ..Default::default()
         };
-        self.line(1, "METHOD_PARAMETER_IN", pin(1));
+        let first = if arity == 0 { 0 } else { 1 };
+        self.line(1, "METHOD_PARAMETER_IN", pin(first));
+        if arity == 0 {
+            self.line(1, "METHOD_PARAMETER_OUT", pin(first));
+        }
         self.line(
             1,
             "BLOCK",
@@ -997,7 +1282,9 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
-        self.line(1, "METHOD_PARAMETER_OUT", pin(1));
+        if arity != 0 {
+            self.line(1, "METHOD_PARAMETER_OUT", pin(first));
+        }
         let ret = P {
             code: Some("RET".into()),
             tfn: Some("ANY".into()),
@@ -1067,7 +1354,8 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
-        for n in named_children(root) {
+        let (top_level, _) = preprocess_translation_unit(root, b);
+        for &n in &top_level {
             match n.kind() {
                 "struct_specifier" | "union_specifier" | "enum_specifier"
                     if n.child_by_field_name("body").is_some() =>
@@ -1088,7 +1376,7 @@ impl Ctx<'_> {
             },
         );
         let mut slot = 1i64;
-        for n in named_children(root) {
+        for &n in &top_level {
             match n.kind() {
                 "struct_specifier" | "union_specifier" | "enum_specifier"
                     if n.child_by_field_name("body").is_some() =>
@@ -1629,32 +1917,30 @@ impl Ctx<'_> {
                         }
                     }
                 }
-                // Preprocessor structure: only KEPT #ifdef branches contribute
-                // (and directive name identifiers never do).
-                "preproc_ifdef" => {
-                    let neg = n.child(0).map(|t| text(t, b) == "#ifndef").unwrap_or(false);
-                    let pname = n
-                        .child_by_field_name("name")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    let take = self.macros.contains_key(&pname) != neg;
-                    let mut cs = named_children(n);
+                "call_expression" => {
+                    // A plain callee name denotes an unresolved function, not
+                    // a local variable. Function-pointer globals still need
+                    // their ordinary phantom-local treatment.
+                    if let Some(function) = n.child_by_field_name("function") {
+                        let name = text(function, b);
+                        if self.globals.contains_key(name) || self.symbols.contains_key(name) {
+                            stack.push(function);
+                        }
+                    }
+                    if let Some(arguments) = n.child_by_field_name("arguments") {
+                        let mut children = named_children(arguments);
+                        children.reverse();
+                        stack.extend(children);
+                    }
+                    continue;
+                }
+                // Preprocessor structure: only the selected #if/#elif/#ifdef
+                // branch contributes (directive identifiers never do).
+                "preproc_if" | "preproc_ifdef" => {
+                    let mut cs = selected_preproc_children(n, b, self.macros);
                     cs.reverse();
                     for c in cs {
-                        match c.kind() {
-                            "identifier" => {}
-                            "preproc_else" => {
-                                if !take {
-                                    let mut es = named_children(c);
-                                    es.reverse();
-                                    for e in es {
-                                        stack.push(e);
-                                    }
-                                }
-                            }
-                            _ if take => stack.push(c),
-                            _ => {}
-                        }
+                        stack.push(c);
                     }
                     continue;
                 }
@@ -1706,29 +1992,11 @@ impl Ctx<'_> {
             "declaration" => self.emit_declaration(n, b, order, depth, None),
             "if_statement" => self.emit_if(n, b, order, depth),
             "for_statement" => self.emit_for(n, b, order, depth),
-            "preproc_ifdef" => {
-                // #ifdef/#ifndef: CDT keeps or drops the guarded statements;
-                // they splice into the surrounding block when kept.
-                let neg = n.child(0).map(|t| text(t, b) == "#ifndef").unwrap_or(false);
-                let name = n
-                    .child_by_field_name("name")
-                    .map(|x| text(x, b).to_string())
-                    .unwrap_or_default();
-                let defined = self.macros.contains_key(&name);
-                let take = defined != neg;
-                for c in named_children(n) {
-                    match c.kind() {
-                        "identifier" => {}
-                        "preproc_else" => {
-                            if !take {
-                                for e in named_children(c) {
-                                    self.emit_stmt(e, b, order, depth);
-                                }
-                            }
-                        }
-                        _ if take => self.emit_stmt(c, b, order, depth),
-                        _ => {}
-                    }
+            "preproc_if" | "preproc_ifdef" => {
+                // The selected branch splices directly into the surrounding
+                // block, matching the preprocessed source seen by c2cpg.
+                for child in selected_preproc_children(n, b, self.macros) {
+                    self.emit_stmt(child, b, order, depth);
                 }
             }
             "labeled_statement" => {
@@ -2816,13 +3084,11 @@ fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
                     decl.map(|d| decl_suffix(d, b)).unwrap_or_default()
                 );
                 let name = decl.map(|d| innermost_id(d, b)).unwrap_or_default();
-                if !name.is_empty() {
-                    params.push(Param {
-                        name,
-                        ty,
-                        code: text(p, b).to_string(),
-                    });
-                }
+                params.push(Param {
+                    name,
+                    ty,
+                    code: text(p, b).to_string(),
+                });
             }
         }
     }
@@ -4090,7 +4356,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         if i == 0 || !own.contains(&i) || !is_ddg(i) || assign_lhs.contains(&i) {
             continue;
         }
-        if arena[i].label == "CALL" && !arena[i].inlined {
+        if arena[i].label == "CALL" && !arena[i].inlined && !args_of(i).is_empty() {
             continue;
         }
         if used_incoming(i).iter().all(|(_, ds)| ds.is_empty()) {
