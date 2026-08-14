@@ -82,6 +82,12 @@ pub enum Traversal {
     CallOut,
     ParentBlock,
     InCall,
+    Dominates,
+    DominatedBy,
+    PostDominates,
+    PostDominatedBy,
+    Controls,
+    ControlledBy,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -894,6 +900,12 @@ fn parse_traversal(step: &str) -> Option<Traversal> {
         "inCall" => Traversal::InCall,
         "cfgNext" => edge(Direction::Out, EdgeKind::Cfg, None),
         "cfgPrev" => edge(Direction::In, EdgeKind::Cfg, None),
+        "dominates" => Traversal::Dominates,
+        "dominatedBy" => Traversal::DominatedBy,
+        "postDominates" => Traversal::PostDominates,
+        "postDominatedBy" => Traversal::PostDominatedBy,
+        "controls" => Traversal::Controls,
+        "controlledBy" => Traversal::ControlledBy,
         "ddgOut" => edge(Direction::Out, EdgeKind::Ddg, None),
         "ddgIn" => edge(Direction::In, EdgeKind::Ddg, None),
         "reachingDefOut" => edge(Direction::Out, EdgeKind::ReachingDef, None),
@@ -1199,6 +1211,26 @@ impl<'a> QueryExecutor<'a> {
                         out.push(call);
                     }
                 }
+                Traversal::Dominates => {
+                    out.extend(self.transitive_edge(node, Direction::Out, EdgeKind::Dominate));
+                }
+                Traversal::DominatedBy => {
+                    out.extend(self.transitive_edge(node, Direction::In, EdgeKind::Dominate));
+                }
+                Traversal::PostDominates => {
+                    out.extend(self.transitive_edge(node, Direction::Out, EdgeKind::PostDominate));
+                }
+                Traversal::PostDominatedBy => {
+                    out.extend(self.transitive_edge(node, Direction::In, EdgeKind::PostDominate));
+                }
+                Traversal::Controls => out.extend(self.controlled_nodes(node)),
+                Traversal::ControlledBy => {
+                    out.extend(
+                        self.cpg
+                            .nodes()
+                            .filter(|&candidate| self.controlled_nodes(candidate).contains(&node)),
+                    );
+                }
             }
         }
         out
@@ -1237,6 +1269,46 @@ impl<'a> QueryExecutor<'a> {
             frontier = next;
         }
         None
+    }
+
+    fn transitive_edge(&self, start: NodeId, direction: Direction, edge: EdgeKind) -> Vec<NodeId> {
+        let mut output = Vec::new();
+        let mut seen = HashSet::new();
+        let mut stack: Vec<NodeId> = match direction {
+            Direction::Out => self.cpg.out_kind(start, edge).collect(),
+            Direction::In => self.cpg.in_kind(start, edge).collect(),
+        };
+        while let Some(node) = stack.pop() {
+            if !seen.insert(node) {
+                continue;
+            }
+            output.push(node);
+            match direction {
+                Direction::Out => stack.extend(self.cpg.out_kind(node, edge)),
+                Direction::In => stack.extend(self.cpg.in_kind(node, edge)),
+            }
+        }
+        output
+    }
+
+    fn controlled_nodes(&self, controller: NodeId) -> Vec<NodeId> {
+        let immediate_postdominator = self.cpg.in_kind(controller, EdgeKind::PostDominate).next();
+        let mut output = Vec::new();
+        let mut emitted = HashSet::new();
+        for successor in self.cpg.out_kind(controller, EdgeKind::Cfg) {
+            let mut runner = Some(successor);
+            let mut branch_seen = HashSet::new();
+            while let Some(node) = runner {
+                if Some(node) == immediate_postdominator || !branch_seen.insert(node) {
+                    break;
+                }
+                if emitted.insert(node) {
+                    output.push(node);
+                }
+                runner = self.cpg.in_kind(node, EdgeKind::PostDominate).next();
+            }
+        }
+        output
     }
 
     fn reaching_sources(&self, sink: NodeId, sources: &HashSet<NodeId>) -> HashSet<NodeId> {
@@ -1723,7 +1795,7 @@ mod tests {
             }
         }
         assert!(
-            implemented_cases >= 64,
+            implemented_cases >= 70,
             "implemented catalog must not silently shrink"
         );
     }

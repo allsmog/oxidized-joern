@@ -60,8 +60,8 @@ new construct can require another fixture and implementation slice.
 The following are unsupported in `0.1.x`:
 
 - Joern's Scala console and full CPGQL source compatibility; `cpg query`
-  currently implements the 64-case native subset cataloged in
-  `acceptance/cpgql/catalog.json`, with 27 representative expressions at
+  currently implements the 70-case native subset cataloged in
+  `acceptance/cpgql/catalog.json`, with 33 representative expressions at
   zero diff against Joern v4.0.555;
 - JVM/Scala plugins and Maven-based extension workflows;
 - loading internal CPG2 files directly in Joern. The explicit

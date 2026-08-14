@@ -7,6 +7,7 @@
 pub mod authz;
 pub mod callgraph;
 pub mod cfg;
+pub mod dominance;
 pub mod entries;
 pub mod middleware;
 pub mod pass;
@@ -24,6 +25,7 @@ pub mod value_flow;
 pub use authz::{annotate_authz, is_authz_name};
 pub use callgraph::CallGraphPass;
 pub use cfg::{cfg_edges_for_method, CfgPass};
+pub use dominance::{immediate_dominance_edges, DominancePass, PostDominancePass};
 pub use entries::{mine_registration_entries, mine_routes, RouteEntry};
 pub use middleware::{
     authz_census, authz_census_with_config, AuthzCensus, AuthzCensusConfig, MiddlewareGate,
@@ -49,6 +51,8 @@ pub fn standard_pipeline() -> PassManager {
     let mut pm = PassManager::new();
     pm.add(Box::new(CallGraphPass))
         .add(Box::new(CfgPass))
+        .add(Box::new(DominancePass))
+        .add(Box::new(PostDominancePass))
         .add(Box::new(ReachingDefPass))
         .add(Box::new(SymbolResolutionPass));
     pm
