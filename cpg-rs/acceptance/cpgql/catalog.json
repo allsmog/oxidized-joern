@@ -89,6 +89,56 @@
         {"id": "controls", "query": "cpg.call.code(\"argc > 1\").controls.code"},
         {"id": "controlled-by", "query": "cpg.call(\"strcpy\").controlledBy.code"}
       ]
+    },
+    {
+      "id": "native-schema-4",
+      "status": "implemented",
+      "cases": [
+        {"id":"select-annotation","query":"cpg.annotation"},
+        {"id":"select-annotation-literal","query":"cpg.annotationLiteral"},
+        {"id":"select-annotation-parameter","query":"cpg.annotationParameter"},
+        {"id":"select-annotation-parameter-assign","query":"cpg.annotationParameterAssign"},
+        {"id":"select-array-initializer","query":"cpg.arrayInitializer"},
+        {"id":"select-binding","query":"cpg.binding"},
+        {"id":"select-closure-binding","query":"cpg.closureBinding"},
+        {"id":"select-comment","query":"cpg.comment"},
+        {"id":"select-config-file","query":"cpg.configFile"},
+        {"id":"select-dependency","query":"cpg.dependency"},
+        {"id":"select-finding","query":"cpg.finding"},
+        {"id":"select-import","query":"cpg.imports"},
+        {"id":"select-jump-label","query":"cpg.jumpLabel"},
+        {"id":"select-key-value-pair","query":"cpg.keyValuePair"},
+        {"id":"select-tag","query":"cpg.tag"},
+        {"id":"select-tag-node-pair","query":"cpg.tagNodePair"},
+        {"id":"select-template-dom","query":"cpg.templateDom"},
+        {"id":"select-type-argument","query":"cpg.typeArgument"},
+        {"id":"descendant-annotation","query":"cpg.all.annotation"},
+        {"id":"descendant-member","query":"cpg.typeDecl.member"},
+        {"id":"source-file-edge","query":"cpg.method.sourceFile.filename"},
+        {"id":"base-type-declaration","query":"cpg.typeDecl.baseTypeDecl.fullName"},
+        {"id":"derived-type-declaration","query":"cpg.typeDecl.derivedTypeDecl.fullName"},
+        {"id":"capture-edges","query":"cpg.closureBinding.captureOut"}
+      ]
+    },
+    {
+      "id": "native-properties-5",
+      "status": "implemented",
+      "cases": [
+        {"id":"call-method-full-name","query":"cpg.call.methodFullName"},
+        {"id":"call-dispatch-type","query":"cpg.call.dispatchType"},
+        {"id":"method-external","query":"cpg.method.isExternal"},
+        {"id":"method-external-filter","query":"cpg.method.isExternal(false).name"},
+        {"id":"parameter-index","query":"cpg.parameter.index"},
+        {"id":"parameter-variadic","query":"cpg.parameter.isVariadic"},
+        {"id":"parameter-evaluation-strategy","query":"cpg.parameter.evaluationStrategy"},
+        {"id":"metadata-language","query":"cpg.metaData.language"},
+        {"id":"metadata-version","query":"cpg.metaData.version"},
+        {"id":"column-number","query":"cpg.call.columnNumber"},
+        {"id":"type-declaration-full-name","query":"cpg.typ.typeDeclFullName"},
+        {"id":"inheritance-names","query":"cpg.typeDecl.inheritsFromTypeFullName"},
+        {"id":"dynamic-type-hints","query":"cpg.call.dynamicTypeHintFullName"},
+        {"id":"modifier-type","query":"cpg.modifier.modifierType"}
+      ]
     }
   ]
 }
