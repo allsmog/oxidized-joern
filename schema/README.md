@@ -1,14 +1,11 @@
-# CPG Schema
+# CPG schema
 
-`cpg-schema.json` is generated from the Scala CPG schema classes on the build
-classpath. Do not edit it by hand.
+`cpg-schema.json` is the pinned schema snapshot used by the Rust
+`oxidized/crates/cpg-schema` validator. The snapshot records node labels,
+properties, cardinalities, edge labels, and allowed endpoints.
 
-Regenerate it from the repository root:
+Schema updates must include the updated JSON snapshot and pass:
 
 ```bash
-sbt "semanticcpg/runMain io.joern.oxidized.schema.SchemaDump"
+cargo test --manifest-path oxidized/Cargo.toml --locked
 ```
-
-The dump records the CPG dependency version, node labels, per-node properties,
-property value types and cardinalities, edge labels, and allowed edge endpoints
-derived from the generated `New*` node validators.

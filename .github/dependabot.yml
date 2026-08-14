@@ -22,49 +22,49 @@ updates:
       rust-dependencies:
         patterns: ["*"]
   - package-ecosystem: cargo
-    directory: /joern-cli/frontends/abap2cpg/rust
+    directory: /astgen-rs/abap2cpg
     schedule:
       interval: weekly
     groups:
       rust-dependencies:
         patterns: ["*"]
   - package-ecosystem: cargo
-    directory: /joern-cli/frontends/csharpsrc2cpg/rust
+    directory: /astgen-rs/csharpsrc2cpg
     schedule:
       interval: weekly
     groups:
       rust-dependencies:
         patterns: ["*"]
   - package-ecosystem: cargo
-    directory: /joern-cli/frontends/javasrc2cpg/rust
+    directory: /astgen-rs/javasrc2cpg
     schedule:
       interval: weekly
     groups:
       rust-dependencies:
         patterns: ["*"]
   - package-ecosystem: cargo
-    directory: /joern-cli/frontends/jimple2cpg/rust
+    directory: /astgen-rs/jimple2cpg
     schedule:
       interval: weekly
     groups:
       rust-dependencies:
         patterns: ["*"]
   - package-ecosystem: cargo
-    directory: /joern-cli/frontends/kotlin2cpg/rust
+    directory: /astgen-rs/kotlin2cpg
     schedule:
       interval: weekly
     groups:
       rust-dependencies:
         patterns: ["*"]
   - package-ecosystem: cargo
-    directory: /joern-cli/frontends/php2cpg/rust
+    directory: /astgen-rs/php2cpg
     schedule:
       interval: weekly
     groups:
       rust-dependencies:
         patterns: ["*"]
   - package-ecosystem: cargo
-    directory: /joern-cli/frontends/swiftsrc2cpg/rust
+    directory: /astgen-rs/swiftsrc2cpg
     schedule:
       interval: weekly
     groups:
