@@ -1,0 +1,22 @@
+[
+  {"id":"methods","query":"cpg.method(\"helper|main\").name"},
+  {"id":"parameters","query":"cpg.method(\"main\").parameter.name"},
+  {"id":"calls","query":"cpg.method(\"main\").call.name"},
+  {"id":"argument","query":"cpg.call(\"strcpy\").argument(2).code"},
+  {"id":"name-exact","query":"cpg.call.nameExact(\"getenv\", \"strcpy\").name"},
+  {"id":"name-not","query":"cpg.method(\"main\").call.nameNot(\"<operator>.*\").name"},
+  {"id":"line-range","query":"cpg.method(\"main\").call.lineNumberGt(8).lineNumberLte(13).code"},
+  {"id":"where","query":"cpg.method(\"helper|main\").where(_.call.name(\"strcpy\")).name"},
+  {"id":"where-not","query":"cpg.method(\"helper|main\").whereNot(_.call.name(\"strcpy\")).name"},
+  {"id":"ast-kind","query":"cpg.method(\"main\").ast.isCall.name"},
+  {"id":"in-ast","query":"cpg.call(\"strcpy\").inAst.isMethod.name"},
+  {"id":"call-out","query":"cpg.method(\"main\").callOut.name"},
+  {"id":"cfg-next","query":"cpg.call(\"strcpy\").cfgNext.code"},
+  {"id":"ref","query":"cpg.identifier(\"input\").where(_.method.name(\"main\")).refsTo.name"},
+  {"id":"type","query":"cpg.identifier(\"input\").where(_.method.name(\"main\")).typ.fullName"},
+  {"id":"reaching-def","query":"cpg.call(\"getenv\").reachingDefOut.code"},
+  {"id":"reachable-by","query":"cpg.call(\"strcpy\").argument(2).reachableBy(cpg.call(\"getenv\")).code"},
+  {"id":"repeat","query":"cpg.call(\"strcpy\").repeat(_.astParent)(_.until(_.isMethod)).isMethod.name"},
+  {"id":"condition","query":"cpg.controlStructure.condition.code"},
+  {"id":"empty","query":"cpg.call(\"strcpy\").argument(1).reachableBy(cpg.call(\"getenv\")).code"}
+]

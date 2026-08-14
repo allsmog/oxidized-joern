@@ -27,11 +27,46 @@
         {"id": "ast-parent", "query": "cpg.identifier.astParent"},
         {"id": "cfg-successor", "query": "cpg.call.cfgNext"},
         {"id": "cfg-predecessor", "query": "cpg.call.cfgPrev"},
-        {"id": "symbol-reference", "query": "cpg.identifier.ref"},
-        {"id": "referenced-type", "query": "cpg.identifier.referencedType.fullName"},
+        {"id": "symbol-reference", "query": "cpg.identifier.refsTo"},
+        {"id": "referenced-type", "query": "cpg.identifier.typ.fullName"},
         {"id": "reaching-def-in", "query": "cpg.call.reachingDefIn"},
         {"id": "reaching-def-out", "query": "cpg.call.reachingDefOut"},
         {"id": "labels", "query": "cpg.all.label.dedup"}
+      ]
+    },
+    {
+      "id": "native-core-2",
+      "status": "implemented",
+      "cases": [
+        {"id": "selector-shorthand", "query": "cpg.method(\"main\").name"},
+        {"id": "traversal-shorthand", "query": "cpg.method(\"main\").call(\"getenv|strcpy\").name"},
+        {"id": "name-exact", "query": "cpg.call.nameExact(\"getenv\", \"strcpy\").name"},
+        {"id": "name-not", "query": "cpg.call.nameNot(\"<operator>.*\").name"},
+        {"id": "line-greater", "query": "cpg.call.lineNumberGt(3).code"},
+        {"id": "line-greater-equal", "query": "cpg.call.lineNumberGte(3).code"},
+        {"id": "line-less", "query": "cpg.call.lineNumberLt(20).code"},
+        {"id": "line-less-equal", "query": "cpg.call.lineNumberLte(20).code"},
+        {"id": "kind-filter", "query": "cpg.method(\"main\").ast.isCall.name"},
+        {"id": "ast-descendants", "query": "cpg.method(\"main\").ast.code"},
+        {"id": "ast-direct-children", "query": "cpg.method(\"main\").astChildren.label"},
+        {"id": "ast-ancestors", "query": "cpg.call(\"strcpy\").inAst.isMethod.name"},
+        {"id": "parent-block", "query": "cpg.call(\"strcpy\").parentBlock.code"},
+        {"id": "contained-calls", "query": "cpg.method(\"main\").call.name"},
+        {"id": "contained-identifiers", "query": "cpg.method(\"main\").identifier.name"},
+        {"id": "where-positive", "query": "cpg.method.where(_.call.name(\"strcpy\")).name"},
+        {"id": "where-negative", "query": "cpg.method.whereNot(_.call.name(\"strcpy\")).name"},
+        {"id": "call-out", "query": "cpg.method(\"main\").callOut.name"},
+        {"id": "parameter-out", "query": "cpg.method(\"main\").parameterOut.name"},
+        {"id": "parameter-link", "query": "cpg.method(\"main\").parameter.parameterLink.name"},
+        {"id": "condition", "query": "cpg.controlStructure.condition.code"},
+        {"id": "true-body", "query": "cpg.controlStructure.whenTrue.code"},
+        {"id": "false-body", "query": "cpg.controlStructure.whenFalse.code"},
+        {"id": "take", "query": "cpg.call.take(2).name"},
+        {"id": "head", "query": "cpg.method(\"main\").call.head.name"},
+        {"id": "reachable-by-positive", "query": "cpg.call(\"strcpy\").argument(2).reachableBy(cpg.call(\"getenv\")).code"},
+        {"id": "reachable-by-empty", "query": "cpg.call(\"strcpy\").argument(1).reachableBy(cpg.call(\"getenv\")).code"},
+        {"id": "repeat-until", "query": "cpg.call(\"strcpy\").repeat(_.astParent)(_.until(_.isMethod)).name"},
+        {"id": "repeat-times-emit", "query": "cpg.method(\"main\").repeat(_.astChildren)(_.emit.times(2)).label"}
       ]
     }
   ]

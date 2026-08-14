@@ -137,3 +137,9 @@ jobs:
       - name: Run parity check
         run: ./check.sh
         working-directory: cpg-rs/joern-parity
+      - name: Run native CPGQL differential
+        run: ./acceptance/cpgql/check.sh
+        working-directory: cpg-rs
+      - name: Run Flatgraph interoperability differential
+        run: ./acceptance/flatgraph/check.sh
+        working-directory: cpg-rs
