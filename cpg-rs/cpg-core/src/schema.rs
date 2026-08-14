@@ -44,6 +44,20 @@ pub enum NodeKind {
     MethodRef,
     /// Anything a frontend could not classify; keeps the graph total.
     Unknown,
+    /// A formal output parameter mirrored from a method input parameter.
+    MethodParameterOut,
+    /// A reference to a type used as an expression (for example `sizeof(T)`).
+    TypeRef,
+    /// A label or switch/case jump target.
+    JumpTarget,
+    /// A declaration modifier such as `static` or `virtual`.
+    Modifier,
+    /// A namespace block tied to a source file.
+    NamespaceBlock,
+    /// A materialized type node linked to its declaration.
+    Type,
+    /// Graph metadata such as the source language.
+    MetaData,
 }
 
 impl NodeKind {
@@ -70,6 +84,13 @@ impl NodeKind {
             14 => Return,
             15 => MethodRef,
             16 => Unknown,
+            17 => MethodParameterOut,
+            18 => TypeRef,
+            19 => JumpTarget,
+            20 => Modifier,
+            21 => NamespaceBlock,
+            22 => Type,
+            23 => MetaData,
             _ => return None,
         })
     }
@@ -100,6 +121,26 @@ pub enum EdgeKind {
     /// distinct from [`EdgeKind::Ddg`] so coarser data-dependence layers can
     /// coexist with the precise gen/kill result.
     ReachingDef,
+    /// Control-structure condition expression.
+    Condition,
+    /// True branch of a conditional.
+    TrueBody,
+    /// False branch of a conditional.
+    FalseBody,
+    /// Initializer portion of a `for` loop.
+    ForInit,
+    /// Update portion of a `for` loop.
+    ForUpdate,
+    /// Body of a `for` loop.
+    ForBody,
+    /// Body of a `do` loop.
+    DoBody,
+    /// Expression-to-materialized-type link.
+    EvalType,
+    /// Node-to-owning-source-file link.
+    SourceFile,
+    /// Input-parameter to output-parameter link.
+    ParameterLink,
 }
 
 impl EdgeKind {
@@ -110,7 +151,7 @@ impl EdgeKind {
         EdgeKind::ALL.get(b as usize).copied()
     }
 
-    pub const ALL: [EdgeKind; 9] = [
+    pub const ALL: [EdgeKind; 19] = [
         EdgeKind::Ast,
         EdgeKind::Cfg,
         EdgeKind::Call,
@@ -120,6 +161,16 @@ impl EdgeKind {
         EdgeKind::Receiver,
         EdgeKind::Contains,
         EdgeKind::ReachingDef,
+        EdgeKind::Condition,
+        EdgeKind::TrueBody,
+        EdgeKind::FalseBody,
+        EdgeKind::ForInit,
+        EdgeKind::ForUpdate,
+        EdgeKind::ForBody,
+        EdgeKind::DoBody,
+        EdgeKind::EvalType,
+        EdgeKind::SourceFile,
+        EdgeKind::ParameterLink,
     ];
 }
 
