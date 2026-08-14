@@ -13,8 +13,8 @@ Single source of truth across iterations. Update in the same commit as the work.
   overlay fidelity, JVM/dynamic Flatgraph fixtures, wider C semantics, rules,
   and per-language promotions remain open in `REPLACEMENT_CONTRACT.md`.
 - **Production C convergence complete (2026-08-14).** The released
-  `CFrontend`/`Project`/`standard_pipeline` path is the 101/101 committed Joern
-  v4.0.555 oracle path, including 1,481/1,481 ReachingDef facts. Canonical
+  `CFrontend`/`Project`/`standard_pipeline` path is the 107/107 committed Joern
+  v4.0.555 oracle path, including 1,545/1,545 ReachingDef facts. Canonical
   scanner outcomes cover branches, kills, loops, returns, globals,
   pointer/member access, sanitizers, cross-calls, recursion, persistence, and
   duplicate translation-unit-local identities. Pinned zlib 1.3.1 and Lua 5.4.7
@@ -83,10 +83,11 @@ Single source of truth across iterations. Update in the same commit as the work.
     CFR from the pinned artifacts.
 - **Oracle:** Joern v4.0.555 (`setup-oracle.sh` now pins v4.0.555 by default;
   override with `JOERN_VERSION=vX.Y.Z` only as a deliberate, recorded upgrade)
-- **Gate:** `joern-parity/check.sh` — green, 101/101 blocks byte-identical.
-  The newest fixture covers source-ordered `#if/#elif`, `defined`, undefined
-  identifiers, function-macro conditions, inactive-branch exclusion, zero-arg
-  external stubs, and `(void)` parameter lowering.
+- **Gate:** `joern-parity/check.sh` — green, 107/107 blocks byte-identical.
+  The newest fixtures cover source-ordered `#if/#elif`, `defined`, undefined
+  identifiers, function-macro conditions, inactive-branch exclusion, nested
+  and variadic expansion, stringizing, token pasting, zero-arg external stubs,
+  and `(void)` parameter lowering.
   **(2026-07-10: check.sh now diffs the FLOWS section — the 1,458 REACHING_DEF
   facts are a guarded block, and oracle regen preserves FLOWS lines; the M7(a)
   "extend check.sh with a FLOWS diff block" task is done. Previously 95/95 with
