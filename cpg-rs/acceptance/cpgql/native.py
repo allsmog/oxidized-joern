@@ -34,6 +34,8 @@ def main() -> None:
         value = json.loads(completed.stdout)
         if not isinstance(value, list):
             raise SystemExit(f"{case['id']}: differential query did not return a list")
+        if case["id"] == "flow-paths":
+            value = [" -> ".join(str(node.get("code")) for node in path) for path in value]
         normalized = "\x1f".join(sorted(str(item) for item in value))
         encoded = base64.b64encode(normalized.encode("utf-8")).decode("ascii")
         print(f"CPGQL\t{case['id']}\t{encoded}")

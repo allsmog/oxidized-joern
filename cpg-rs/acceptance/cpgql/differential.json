@@ -18,5 +18,12 @@
   {"id":"reachable-by","query":"cpg.call(\"strcpy\").argument(2).reachableBy(cpg.call(\"getenv\")).code"},
   {"id":"repeat","query":"cpg.call(\"strcpy\").repeat(_.astParent)(_.until(_.isMethod)).isMethod.name"},
   {"id":"condition","query":"cpg.controlStructure.condition.code"},
-  {"id":"empty","query":"cpg.call(\"strcpy\").argument(1).reachableBy(cpg.call(\"getenv\")).code"}
+  {"id":"empty","query":"cpg.call(\"strcpy\").argument(1).reachableBy(cpg.call(\"getenv\")).code"},
+  {"id":"assignments","query":"cpg.assignment.code"},
+  {"id":"returns","query":"cpg.method(\"main\").ast.isReturn.code"},
+  {"id":"boolean-and","query":"cpg.method.and(_.name(\"main\"), _.call(\"strcpy\")).name"},
+  {"id":"boolean-or","query":"cpg.method.or(_.name(\"main\"), _.name(\"helper\")).name"},
+  {"id":"in-call","query":"cpg.identifier(\"input\").where(_.method.name(\"main\")).inCall.name"},
+  {"id":"repeat-max-depth","query":"cpg.method(\"main\").repeat(_.astChildren)(_.emit(_.isCall).maxDepth(2)).isCall.name"},
+  {"id":"flow-paths","query":"cpg.call(\"strcpy\").argument(2).reachableByFlows(cpg.call(\"getenv\")).p"}
 ]

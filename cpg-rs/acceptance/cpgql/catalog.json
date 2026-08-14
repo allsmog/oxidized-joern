@@ -68,6 +68,21 @@
         {"id": "repeat-until", "query": "cpg.call(\"strcpy\").repeat(_.astParent)(_.until(_.isMethod)).name"},
         {"id": "repeat-times-emit", "query": "cpg.method(\"main\").repeat(_.astChildren)(_.emit.times(2)).label"}
       ]
+    },
+    {
+      "id": "native-core-3",
+      "status": "implemented",
+      "cases": [
+        {"id": "all-assignments", "query": "cpg.assignment.code"},
+        {"id": "all-returns-alias", "query": "cpg.returns.code"},
+        {"id": "filter-not", "query": "cpg.method.filterNot(_.call(\"strcpy\")).name"},
+        {"id": "boolean-and", "query": "cpg.method.and(_.name(\"main\"), _.call(\"strcpy\")).name"},
+        {"id": "boolean-or", "query": "cpg.method.or(_.name(\"main\"), _.name(\"helper\")).name"},
+        {"id": "surrounding-call", "query": "cpg.identifier(\"input\").where(_.method(\"main\")).inCall.name"},
+        {"id": "json-execution", "query": "cpg.method(\"main\").name.toJson"},
+        {"id": "flow-paths", "query": "cpg.call(\"strcpy\").argument(2).reachableByFlows(cpg.call(\"getenv\")).p"},
+        {"id": "repeat-max-depth", "query": "cpg.method(\"main\").repeat(_.astChildren)(_.emit(_.isCall).maxDepth(2)).name"}
+      ]
     }
   ]
 }

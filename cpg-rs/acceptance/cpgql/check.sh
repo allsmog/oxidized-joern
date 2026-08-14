@@ -37,4 +37,4 @@ python3 "$repo_root/acceptance/cpgql/native.py" \
   | sort > "$scratch/native.tsv"
 
 diff -u "$scratch/oracle.tsv" "$scratch/native.tsv"
-echo "CPGQL differential: PASS (20/20, Joern v4.0.555)"
+echo "CPGQL differential: PASS (27/27, Joern v4.0.555)"
