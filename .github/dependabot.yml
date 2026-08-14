@@ -67,6 +67,12 @@ updates:
     directory: /astgen-rs/swiftsrc2cpg
     schedule:
       interval: weekly
+    # tree-sitter 0.26 changes malformed-Swift recovery shapes and currently
+    # breaks the SwiftSyntax compatibility contract. Keep the tested 0.25 line
+    # until the adapter has an explicit parser-runtime migration.
+    ignore:
+      - dependency-name: tree-sitter
+        versions: [">= 0.26.0"]
     groups:
       rust-dependencies:
         patterns: ["*"]
