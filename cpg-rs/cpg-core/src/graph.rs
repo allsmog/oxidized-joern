@@ -24,10 +24,11 @@
 use crate::intern::{Interner, Sym};
 use crate::persist::{ByteReader, ByteWriter, DecodeError};
 use crate::schema::{EdgeKind, NodeKind};
-use atomic_write_file::AtomicWriteFile;
 use std::collections::HashMap;
-use std::io::{self, Write};
+use std::fs::File;
+use std::io::{self, Read, Write};
 use std::path::Path;
+use tempfile::NamedTempFile;
 
 const MAGIC_V1: &[u8; 4] = b"CPG1";
 const MAGIC_V2: &[u8; 4] = b"CPG2";
@@ -37,15 +38,18 @@ const CHECKSUM_VERSION: u8 = 1;
 const ENVELOPE_FLAGS: u32 = 0;
 const ENVELOPE_LEN: usize = 24;
 
-/// Persistence ceilings are deliberately generous enough for very large CPGs,
-/// while still giving the decoder explicit, architecture-independent bounds.
-pub const MAX_CPG_BYTES: u64 = 64 * 1024 * 1024 * 1024;
-const MAX_STRINGS: u64 = 100_000_000;
-const MAX_NODES: u64 = 1_000_000_000;
-const MAX_EDGES: u64 = 4_000_000_000;
-const MAX_FILES: u64 = 10_000_000;
-const MAX_STRING_BYTES: usize = 64 * 1024 * 1024;
-const MAX_PATH_BYTES: usize = 1024 * 1024;
+/// The recorded 3.6-million-node benchmark occupies 184 MiB on disk at about
+/// 53 bytes per node (`ARCHITECTURE.md`). One GiB leaves more than 5x measured
+/// headroom (roughly 20 million nodes at that density) while bounding both the
+/// input buffer and the larger decoded graph on ordinary production systems.
+/// This operational ceiling is intentionally below the `u32` `NodeId` limit.
+pub const MAX_CPG_BYTES: u64 = 1024 * 1024 * 1024;
+const MAX_STRINGS: u64 = 10_000_000;
+const MAX_NODES: u64 = 25_000_000;
+const MAX_EDGES: u64 = 100_000_000;
+const MAX_FILES: u64 = 1_000_000;
+const MAX_STRING_BYTES: usize = 16 * 1024 * 1024;
+const MAX_PATH_BYTES: usize = 64 * 1024;
 const MIN_NODE_PAYLOAD_BYTES: usize = 42;
 
 /// Stable handle to a node. Index into the columnar arrays.
@@ -748,13 +752,16 @@ impl Cpg {
     /// newly created files use the platform's normal owner-writable defaults.
     pub fn save(&self, path: &str) -> io::Result<()> {
         let data = self.try_to_bytes()?;
-        write_atomically(Path::new(path), &data, || Ok(()))
+        write_atomically(Path::new(path), &data)
     }
 
     /// Load from a file path.
     pub fn load(path: &str) -> io::Result<Cpg> {
         let path = Path::new(path);
-        let metadata = std::fs::metadata(path).map_err(|e| path_error("inspect", path, e))?;
+        let file = File::open(path).map_err(|e| path_error("open", path, e))?;
+        let metadata = file
+            .metadata()
+            .map_err(|e| path_error("inspect", path, e))?;
         if metadata.len() > MAX_CPG_BYTES {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidData,
@@ -765,7 +772,9 @@ impl Cpg {
                 ),
             ));
         }
-        let data = std::fs::read(path).map_err(|e| path_error("read", path, e))?;
+        // The handle, not the path, is authoritative. A bounded reader closes
+        // the metadata/read race if the opened file grows after this check.
+        let data = read_bounded(file, MAX_CPG_BYTES).map_err(|e| path_error("read", path, e))?;
         Cpg::from_bytes(&data).map_err(|e| {
             io::Error::new(
                 io::ErrorKind::InvalidData,
@@ -936,18 +945,116 @@ fn read_sym_column(
     Ok(column)
 }
 
-fn write_atomically<F>(path: &Path, data: &[u8], before_commit: F) -> io::Result<()>
+fn read_bounded<R: Read>(reader: R, maximum: u64) -> io::Result<Vec<u8>> {
+    let limit = maximum
+        .checked_add(1)
+        .ok_or_else(|| invalid_input("CPG read limit overflow"))?;
+    let mut reader = reader.take(limit);
+    let mut data = Vec::new();
+    reader.read_to_end(&mut data)?;
+    if u64::try_from(data.len()).unwrap_or(u64::MAX) > maximum {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("CPG input exceeds maximum {maximum} bytes"),
+        ));
+    }
+    Ok(data)
+}
+
+fn parent_directory(path: &Path) -> &Path {
+    path.parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+        .unwrap_or_else(|| Path::new("."))
+}
+
+fn write_atomically(path: &Path, data: &[u8]) -> io::Result<()> {
+    write_atomically_with(path, data, |file, destination| file.persist(destination))
+}
+
+fn write_atomically_with<F>(path: &Path, data: &[u8], publish: F) -> io::Result<()>
 where
-    F: FnOnce() -> io::Result<()>,
+    F: FnOnce(NamedTempFile, &Path) -> Result<File, tempfile::PersistError>,
 {
-    let mut file = AtomicWriteFile::open(path).map_err(|e| path_error("open", path, e))?;
-    file.write_all(data)
-        .map_err(|e| path_error("write", path, e))?;
-    file.flush().map_err(|e| path_error("flush", path, e))?;
-    file.sync_all().map_err(|e| path_error("sync", path, e))?;
-    before_commit().map_err(|e| path_error("prepare to publish", path, e))?;
-    file.commit()
-        .map_err(|e| path_error("atomically publish", path, e))
+    if path.file_name().is_none() {
+        return Err(invalid_input(format!(
+            "CPG destination {} has no file name",
+            path.display()
+        )));
+    }
+    let parent = parent_directory(path);
+    let existing_permissions = match std::fs::metadata(path) {
+        Ok(metadata) if metadata.is_file() => Some(metadata.permissions()),
+        Ok(_) => None,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => None,
+        Err(error) => return Err(path_error("inspect", path, error)),
+    };
+    let mut file = tempfile::Builder::new()
+        .prefix(".cpg-tmp-")
+        .tempfile_in(parent)
+        .map_err(|e| path_error("create temporary file for", path, e))?;
+    if let Some(permissions) = existing_permissions {
+        if let Err(error) = file.as_file().set_permissions(permissions) {
+            return Err(cleanup_temporary_after_failure(
+                file,
+                path,
+                "preserve permissions for",
+                error,
+            ));
+        }
+    }
+    if let Err(error) = file.write_all(data) {
+        return Err(cleanup_temporary_after_failure(file, path, "write", error));
+    }
+    if let Err(error) = file.flush() {
+        return Err(cleanup_temporary_after_failure(file, path, "flush", error));
+    }
+    if let Err(error) = file.as_file().sync_all() {
+        return Err(cleanup_temporary_after_failure(file, path, "sync", error));
+    }
+    match publish(file, path) {
+        Ok(published_file) => {
+            drop(published_file);
+            sync_parent_directory(parent)
+                .map_err(|e| path_error("sync parent directory for", path, e))
+        }
+        Err(error) => Err(cleanup_temporary_after_failure(
+            error.file,
+            path,
+            "atomically publish",
+            error.error,
+        )),
+    }
+}
+
+fn cleanup_temporary_after_failure(
+    file: NamedTempFile,
+    destination: &Path,
+    operation: &str,
+    error: io::Error,
+) -> io::Error {
+    let temporary_path = file.path().to_path_buf();
+    let kind = error.kind();
+    let message = format!("failed to {operation} {}: {error}", destination.display());
+    match file.close() {
+        Ok(()) => io::Error::new(kind, message),
+        Err(cleanup_error) => io::Error::new(
+            kind,
+            format!(
+                "{message}; also failed to remove temporary file {}: {cleanup_error}",
+                temporary_path.display()
+            ),
+        ),
+    }
+}
+
+#[cfg(unix)]
+fn sync_parent_directory(parent: &Path) -> io::Result<()> {
+    File::open(parent)?.sync_all()
+}
+
+#[cfg(not(unix))]
+fn sync_parent_directory(_parent: &Path) -> io::Result<()> {
+    Ok(())
 }
 
 #[cfg(test)]
@@ -1260,6 +1367,18 @@ mod persistence_tests {
         assert_eq!(entries, [destination]);
     }
 
+    fn assert_no_temporary_files(directory: &Path) {
+        let temporary = std::fs::read_dir(directory)
+            .unwrap()
+            .map(|entry| entry.unwrap().file_name())
+            .filter(|name| name.to_string_lossy().starts_with(".cpg-tmp-"))
+            .collect::<Vec<_>>();
+        assert!(
+            temporary.is_empty(),
+            "temporary files remain: {temporary:?}"
+        );
+    }
+
     #[test]
     fn persistence_atomic_overwrite_and_failed_publication_are_complete() {
         let directory = TestDir::new("atomic");
@@ -1278,13 +1397,29 @@ mod persistence_tests {
 
         let new = sample_cpg("new");
         let new_bytes = new.try_to_bytes().unwrap();
-        let error = write_atomically(&destination, &new_bytes, || {
-            Err(io::Error::other("injected prepublication failure"))
+        let error = write_atomically_with(&destination, &new_bytes, |file, _| {
+            Err(tempfile::PersistError {
+                error: io::Error::other("injected publish failure"),
+                file,
+            })
         })
         .unwrap_err();
         assert_eq!(error.kind(), io::ErrorKind::Other);
+        assert!(error.to_string().contains("injected publish failure"));
         assert_eq!(std::fs::read(&destination).unwrap(), old_bytes);
         assert_only_destination_remains(&directory.0, &destination);
+
+        // Exercise the real platform replace primitive too: replacing a
+        // non-empty directory with a file must fail, and the owned temp must
+        // still be removed.
+        let blocked_destination = directory.0.join("blocked.cpg");
+        std::fs::create_dir(&blocked_destination).unwrap();
+        let sentinel = blocked_destination.join("old-graph-still-here");
+        std::fs::write(&sentinel, b"old").unwrap();
+        let error = write_atomically(&blocked_destination, &new_bytes).unwrap_err();
+        assert!(!error.to_string().is_empty());
+        assert_eq!(std::fs::read(&sentinel).unwrap(), b"old");
+        assert_no_temporary_files(&directory.0);
 
         new.save(destination_str).unwrap();
         let restored = Cpg::load(destination_str).unwrap();
@@ -1299,7 +1434,37 @@ mod persistence_tests {
                 & 0o777,
             0o600
         );
-        assert_only_destination_remains(&directory.0, &destination);
+        assert_no_temporary_files(&directory.0);
+    }
+
+    #[test]
+    fn persistence_load_reader_rejects_growth_beyond_size_cap() {
+        assert_eq!(
+            read_bounded(std::io::Cursor::new(vec![0_u8; 16]), 16)
+                .unwrap()
+                .len(),
+            16
+        );
+        let input = std::io::Cursor::new(vec![0_u8; 17]);
+        let error = read_bounded(input, 16).unwrap_err();
+        assert_eq!(error.kind(), io::ErrorKind::InvalidData);
+        assert!(error.to_string().contains("exceeds maximum 16 bytes"));
+    }
+
+    #[test]
+    fn persistence_load_rejects_oversized_file_before_allocating() {
+        let directory = TestDir::new("oversized-load");
+        let path = directory.0.join("oversized.cpg");
+        File::create(&path)
+            .unwrap()
+            .set_len(MAX_CPG_BYTES + 1)
+            .unwrap();
+        let error = match Cpg::load(path.to_str().unwrap()) {
+            Ok(_) => panic!("oversized CPG unexpectedly loaded"),
+            Err(error) => error,
+        };
+        assert_eq!(error.kind(), io::ErrorKind::InvalidData);
+        assert!(error.to_string().contains("maximum"));
     }
 
     #[test]
