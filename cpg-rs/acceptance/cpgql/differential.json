@@ -25,5 +25,11 @@
   {"id":"boolean-or","query":"cpg.method.or(_.name(\"main\"), _.name(\"helper\")).name"},
   {"id":"in-call","query":"cpg.identifier(\"input\").where(_.method.name(\"main\")).inCall.name"},
   {"id":"repeat-max-depth","query":"cpg.method(\"main\").repeat(_.astChildren)(_.emit(_.isCall).maxDepth(2)).isCall.name"},
-  {"id":"flow-paths","query":"cpg.call(\"strcpy\").argument(2).reachableByFlows(cpg.call(\"getenv\")).p"}
+  {"id":"flow-paths","query":"cpg.call(\"strcpy\").argument(2).reachableByFlows(cpg.call(\"getenv\")).p"},
+  {"id":"dominates","query":"cpg.call(\"getenv\").dominates.code"},
+  {"id":"dominated-by","query":"cpg.call(\"strcpy\").dominatedBy.code"},
+  {"id":"post-dominates","query":"cpg.call(\"strcpy\").postDominates.code"},
+  {"id":"post-dominated-by","query":"cpg.call(\"strcpy\").postDominatedBy.code"},
+  {"id":"controls","query":"cpg.call.code(\"argc > 1\").controls.code"},
+  {"id":"controlled-by","query":"cpg.call(\"strcpy\").controlledBy.code"}
 ]

@@ -39,5 +39,11 @@ def emit(id: String, values: List[Any]): Unit = {
     emit("in-call", cpg.identifier("input").where(_.method.name("main")).inCall.name.l)
     emit("repeat-max-depth", cpg.method("main").repeat(_.astChildren)(_.emit(_.isCall).maxDepth(2)).isCall.name.l)
     emit("flow-paths", cpg.call("strcpy").argument(2).reachableByFlows(cpg.call("getenv")).map(_.elements.map(_.code).mkString(" -> ")).l)
+    emit("dominates", cpg.call("getenv").dominates.code.l)
+    emit("dominated-by", cpg.call("strcpy").dominatedBy.code.l)
+    emit("post-dominates", cpg.call("strcpy").postDominates.code.l)
+    emit("post-dominated-by", cpg.call("strcpy").postDominatedBy.code.l)
+    emit("controls", cpg.call.code("argc > 1").controls.code.l)
+    emit("controlled-by", cpg.call("strcpy").controlledBy.code.l)
   } finally cpg.close()
 }
