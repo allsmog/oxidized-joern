@@ -110,9 +110,11 @@ lang_of_cpg() { local l="${1%.cpg}"; l="${l%.v[0-9]*}"; echo "${l##*.}"; }
 # (e.g. src/thrift next to src/cpp), so discovery is $ROOT-wide, not
 # module-scoped like the .proto search.
 thrift_dirs() {
-  find "$ROOT" -name '*.thrift' -not -path '*/vendor/*' -not -path '*/node_modules/*' 2>/dev/null \
-    | xargs -rn1 dirname | sort -u
+  find "$ROOT" -name '*.thrift' -not -path '*/vendor/*' -not -path '*/node_modules/*' \
+    -exec dirname {} \; 2>/dev/null | sort -u
 }
+
+csv_json_strings() { printf '"%s"' "${1//,/\",\"}"; }
 
 cmd="${1:-help}"; shift || true
 case "$cmd" in
@@ -127,7 +129,7 @@ case "$cmd" in
     d="$ROOT/$rel"; [[ "$rel" == "." ]] && d="$ROOT"
     rpc_args=()
     while IFS= read -r pd; do rpc_args+=(--rpc-sources "$pd"); done \
-      < <(find "$d" -name '*.proto' -not -path '*/vendor/*' 2>/dev/null | xargs -rn1 dirname | sort -u)
+      < <(find "$d" -name '*.proto' -not -path '*/vendor/*' -exec dirname {} \; 2>/dev/null | sort -u)
     while IFS= read -r td; do rpc_args+=(--thrift-sources "$td"); done < <(thrift_dirs)
     # Play routes: the miner recursively finds `routes`/`*.routes` files
     # under the module and no-ops when there are none.
@@ -145,8 +147,8 @@ case "$cmd" in
     rel="$1" sources="$2" sinks="$3"
     cpg=$(build_path "$rel")
     printf '{"cmd":"taint","sources":[%s],"sinks":[%s]}\n{"cmd":"quit"}\n' \
-      "$(echo "$sources" | sed 's/[^,]*/"&"/g')" \
-      "$(echo "$sinks" | sed 's/[^,]*/"&"/g')" \
+      "$(csv_json_strings "$sources")" \
+      "$(csv_json_strings "$sinks")" \
       | "$CPG_BIN" serve --load "$cpg" --lang "$(lang_of_cpg "$cpg")" 2>/dev/null ;;
   serve)
     rel="$1"; shift
@@ -159,7 +161,7 @@ case "$cmd" in
       cpgs+=("$(build_path "$rel")")
       d="$ROOT/$rel"; [[ "$rel" == "." ]] && d="$ROOT"
       while IFS= read -r pd; do proto_args+=(--protos "$pd"); done \
-        < <(find "$d" -name '*.proto' -not -path '*/vendor/*' 2>/dev/null | xargs -rn1 dirname | sort -u)
+        < <(find "$d" -name '*.proto' -not -path '*/vendor/*' -exec dirname {} \; 2>/dev/null | sort -u)
     done
     while IFS= read -r td; do proto_args+=(--thrifts "$td"); done < <(thrift_dirs)
     "$CPG_BIN" merge -o "$CACHE/$out_name.cpg" "${proto_args[@]}" "${cpgs[@]}" >&2

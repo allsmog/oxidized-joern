@@ -77,9 +77,10 @@ ARM64, plus Windows on x86-64. Each archive has a SHA-256 checksum and GitHub
 build attestations. The multi-architecture container includes attestations and an
 SBOM.
 
-Only the Rust-native `cpg` executable is packaged. Other source retained in
-the repository is migration and reference material, not part of the binary
-release.
+Only the Rust-native `cpg` executable is packaged. The repository also contains
+standalone native AST-generator workspaces under [`astgen-rs`](astgen-rs) and a
+Rust schema-validation crate under [`oxidized`](oxidized); neither introduces a
+JVM runtime dependency.
 
 ## Contributing and security
 

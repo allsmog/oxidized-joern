@@ -18,8 +18,7 @@ Joern across every language.
 The standalone C differential harness has exact output parity for its pinned
 fixtures. The production engine still needs the convergence work described in
 [`ROADMAP.md`](ROADMAP.md) before that result can support a broader parity
-claim. [`GOAL.md`](GOAL.md) defines the deletion gate, and
-[`WHATS_LEFT.md`](WHATS_LEFT.md) records the remaining compatibility work.
+claim. [`GOAL.md`](GOAL.md) defines the differential-testing gate.
 
 ## Install
 

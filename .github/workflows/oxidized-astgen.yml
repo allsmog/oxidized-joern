@@ -4,13 +4,11 @@ on:
   push:
     paths:
       - ".github/workflows/oxidized-astgen.yml"
-      - "joern-cli/frontends/*/rust/**"
-      - "joern-cli/frontends/*/build.sbt"
+      - "astgen-rs/**"
   pull_request:
     paths:
       - ".github/workflows/oxidized-astgen.yml"
-      - "joern-cli/frontends/*/rust/**"
-      - "joern-cli/frontends/*/build.sbt"
+      - "astgen-rs/**"
   workflow_dispatch:
 
 permissions:
@@ -38,16 +36,16 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
-          workspaces: joern-cli/frontends/${{ matrix.frontend }}/rust
+          workspaces: astgen-rs/${{ matrix.frontend }}
       - name: Check formatting
         run: cargo fmt --all --check
-        working-directory: joern-cli/frontends/${{ matrix.frontend }}/rust
+        working-directory: astgen-rs/${{ matrix.frontend }}
       - name: Test
         run: cargo test --workspace --locked
-        working-directory: joern-cli/frontends/${{ matrix.frontend }}/rust
+        working-directory: astgen-rs/${{ matrix.frontend }}
       - name: Lint
         run: cargo clippy --workspace --all-targets --locked -- -D warnings
-        working-directory: joern-cli/frontends/${{ matrix.frontend }}/rust
+        working-directory: astgen-rs/${{ matrix.frontend }}
 
   audit:
     runs-on: ubuntu-latest
@@ -63,7 +61,7 @@ jobs:
         run: |
           set -euo pipefail
           first_lock=true
-          for lockfile in joern-cli/frontends/*/rust/Cargo.lock; do
+          for lockfile in astgen-rs/*/Cargo.lock; do
             if [[ "${first_lock}" == true ]]; then
               cargo audit --deny warnings --file "${lockfile}"
               first_lock=false
