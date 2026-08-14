@@ -10,7 +10,7 @@ fn main() {
         Some(arg) => {
             let mut paths = vec![arg];
             paths.extend(args);
-            print!("{}", cpg_lang_c::exact::canonical_dump_paths(&paths));
+            print!("{}", production::dump_paths(&paths));
             return;
         }
         None => {

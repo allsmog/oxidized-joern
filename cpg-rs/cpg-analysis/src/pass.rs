@@ -126,6 +126,14 @@ impl PassManager {
     pub fn run_all(&self, cpg: &mut Cpg, files: &[FileId], ctx: &PassContext) {
         let timing = std::env::var_os("CPG_PASS_TIMING").is_some();
         for &p in &self.ordered() {
+            if self.passes[p]
+                .writes()
+                .iter()
+                .copied()
+                .any(|layer| cpg.is_layer_authoritative(layer))
+            {
+                continue;
+            }
             let t0 = std::time::Instant::now();
             for &f in files {
                 self.clear_output(cpg, f, p);
@@ -154,6 +162,14 @@ impl PassManager {
     ) -> HashSet<Layer> {
         let mut dirtied = HashSet::new();
         for &p in &self.ordered() {
+            if self.passes[p]
+                .writes()
+                .iter()
+                .copied()
+                .any(|layer| cpg.is_layer_authoritative(layer))
+            {
+                continue;
+            }
             for &f in changed {
                 self.clear_output(cpg, f, p);
                 self.passes[p].run_file(cpg, f, ctx);
@@ -188,6 +204,16 @@ pub fn ast_descendants(cpg: &Cpg, root: cpg_core::NodeId) -> Vec<cpg_core::NodeI
         }
     }
     out
+}
+
+/// Whether `method` is a synthetic container/operator rather than an
+/// analysable body. C frontends expose file-global wrappers and Joern
+/// operator stubs as Methods for schema parity; walking those wrappers would
+/// visit real methods a second time, while summarising the stubs would create
+/// empty summaries that mask explicit library models.
+pub fn is_analysis_method(cpg: &Cpg, method: cpg_core::NodeId) -> bool {
+    let name = cpg.name_of(method).unwrap_or("");
+    name != "<global>" && !name.starts_with("<operator>.")
 }
 
 /// Index methods by name across the whole graph (for call resolution).
