@@ -12,4 +12,11 @@ void fixed_cases(void *db, char *dst, size_t dst_size) {
     sqlite3_bind_text(statement, 1, input, -1, 0);
     fopen("/srv/allowlisted/data.txt", "r");
     dlopen("/usr/lib/liballowlisted.so", RTLD_NOW);
+    char template[] = "/tmp/cpg.XXXXXX";
+    int fd = mkstemp(template);
+    scanf("%31s", dst);
+    snprintf(dst, dst_size, "%s", "constant");
+    if (fd >= 0) {
+        close(fd);
+    }
 }

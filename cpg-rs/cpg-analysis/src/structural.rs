@@ -4,10 +4,15 @@
 //! Driven from rule packs via the rule `kind` field (see `cpg-cli::rules`);
 //! findings reuse [`Finding`] so SARIF/serve output needs no new plumbing.
 //!
-//! Three shapes:
+//! Four shapes:
 //!
 //! * [`forbidden_calls`] — a call is unsafe by construction, regardless of
 //!   where its arguments came from (`gets`, for example, cannot be bounded).
+//!
+//! * [`unbounded_scanf_calls`] — a scanf-family format contains an `%s` or
+//!   `%[` conversion without a field width, allowing the destination buffer
+//!   to be overrun. Literal formats are inspected precisely; dynamic formats
+//!   are left to the format-string taint rule.
 //!
 //! * [`discarded_returns`] — a verification call's return values are bound to
 //!   blank identifiers (`_, _, ok := cache.CheckToken(tok, uuid)`): the
@@ -97,6 +102,123 @@ pub fn forbidden_calls(cpg: &Cpg, callee_pats: &[&str]) -> Vec<Finding> {
                 sink_line: line,
                 sink_file: cpg.path_of(cpg.file_of(call)).map(str::to_string),
                 origin: format!("forbidden-call {name}"),
+                path: vec![Step {
+                    code: cpg.code_of(call).unwrap_or("").to_string(),
+                    line,
+                    provenance: Provenance::IntraProc,
+                    depth: 0,
+                }],
+                guard: None,
+                authz: None,
+                confined: None,
+            });
+        }
+    }
+    findings
+        .sort_by(|a, b| (&a.method, a.sink_line, &a.sink).cmp(&(&b.method, b.sink_line, &b.sink)));
+    findings
+}
+
+/// Split a call specification such as `scanf@0` into its callee pattern and
+/// zero-based format-argument index. A missing suffix means argument zero.
+fn call_arg_spec(spec: &str) -> (&str, usize) {
+    match spec.rsplit_once('@') {
+        Some((name, index)) => index
+            .parse::<usize>()
+            .map_or((spec, 0), |index| (name, index)),
+        None => (spec, 0),
+    }
+}
+
+/// Whether a scanf-family format contains a string or scanset conversion
+/// without a decimal maximum field width. `%%` consumes no argument and is
+/// skipped. Assignment suppression (`%*s`) still reads an unbounded token but
+/// writes nowhere, so it is not a destination-buffer overflow and is clean.
+fn has_unbounded_scanf_conversion(format: &str) -> bool {
+    let bytes = format.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] != b'%' {
+            i += 1;
+            continue;
+        }
+        i += 1;
+        if bytes.get(i) == Some(&b'%') {
+            i += 1;
+            continue;
+        }
+        let suppressed = bytes.get(i) == Some(&b'*');
+        if suppressed {
+            i += 1;
+        }
+        let width_start = i;
+        while bytes.get(i).is_some_and(u8::is_ascii_digit) {
+            i += 1;
+        }
+        let has_width = i > width_start;
+        // Length modifiers precede the conversion. They do not make an
+        // otherwise-unbounded string conversion safe.
+        while bytes
+            .get(i)
+            .is_some_and(|b| matches!(*b, b'h' | b'l' | b'j' | b'z' | b't' | b'L'))
+        {
+            i += 1;
+        }
+        if !suppressed && !has_width && matches!(bytes.get(i), Some(b's' | b'[')) {
+            return true;
+        }
+        i += 1;
+    }
+    false
+}
+
+/// Findings for scanf-family calls whose literal format contains an
+/// unbounded string/scanset conversion. Each `callee_specs` entry may carry a
+/// zero-based format argument (`scanf@0`, `fscanf@1`, ...). Non-literal
+/// formats are deliberately excluded: the default format-string taint rule
+/// owns attacker-controlled formats, while a structural detector cannot
+/// prove the effective conversion width.
+pub fn unbounded_scanf_calls(cpg: &Cpg, callee_specs: &[&str]) -> Vec<Finding> {
+    let mut findings = Vec::new();
+    for method in cpg.methods() {
+        if !is_analysis_method(cpg, method) || in_test_file(cpg, method) {
+            continue;
+        }
+        let method_name = cpg.full_name_of(method).unwrap_or("<unknown>").to_string();
+        for call in ast_descendants(cpg, method) {
+            if cpg.kind_of(call) != NodeKind::Call {
+                continue;
+            }
+            let Some(name) = cpg.name_of(call) else {
+                continue;
+            };
+            let Some((_, format_index)) = callee_specs
+                .iter()
+                .map(|spec| call_arg_spec(spec))
+                .find(|(pattern, _)| pat_match(pattern, name))
+            else {
+                continue;
+            };
+            let args = cpg.arguments_of(call);
+            let Some(&format_node) = args.get(format_index) else {
+                continue;
+            };
+            if cpg.kind_of(format_node) != NodeKind::Literal {
+                continue;
+            }
+            let Some(format) = cpg.code_of(format_node).and_then(literal_string) else {
+                continue;
+            };
+            if !has_unbounded_scanf_conversion(format) {
+                continue;
+            }
+            let line = cpg.line_of(call);
+            findings.push(Finding {
+                method: method_name.clone(),
+                sink: name.to_string(),
+                sink_line: line,
+                sink_file: cpg.path_of(cpg.file_of(call)).map(str::to_string),
+                origin: format!("unbounded-scanf {name} format={format}"),
                 path: vec![Step {
                     code: cpg.code_of(call).unwrap_or("").to_string(),
                     line,
@@ -563,6 +685,46 @@ func wrapper(tok string) (string, string, bool) {
         assert_eq!(findings[0].sink, "gets");
         assert_eq!(findings[0].origin, "forbidden-call gets");
         assert_eq!(findings[0].sink_file.as_deref(), Some("unsafe.go"));
+    }
+
+    #[test]
+    fn scanf_format_parser_distinguishes_bounded_and_suppressed_conversions() {
+        assert!(has_unbounded_scanf_conversion("%s"));
+        assert!(has_unbounded_scanf_conversion("id=%d name=%[a-z]"));
+        assert!(has_unbounded_scanf_conversion("%ls"));
+        assert!(!has_unbounded_scanf_conversion("%31s"));
+        assert!(!has_unbounded_scanf_conversion("%15[a-z]"));
+        assert!(!has_unbounded_scanf_conversion("%*s"));
+        assert!(!has_unbounded_scanf_conversion("%%s"));
+    }
+
+    #[test]
+    fn unbounded_scanf_flags_only_literal_unbounded_destinations() {
+        let mut fe = cpg_lang_c::CFrontend::new();
+        let mut cpg = Cpg::new();
+        let file = fe
+            .build_file(
+                &mut cpg,
+                "scan.c",
+                r#"void hit(char *out) { scanf("%s", out); }
+void scanset(char *out) { fscanf(stdin, "%[a-z]", out); }
+void bounded(char *out) { scanf("%31s", out); }
+void suppressed(void) { scanf("%*s"); }
+void dynamic(char *fmt, char *out) { scanf(fmt, out); }
+void near(char *out) { my_scanf("%s", out); }
+"#,
+            )
+            .file;
+        let pm = crate::standard_pipeline();
+        let idx = crate::pass::method_name_index(&cpg);
+        let ctx = crate::pass::PassContext {
+            methods_by_name: Some(&idx),
+        };
+        pm.run_all(&mut cpg, &[file], &ctx);
+        let findings = unbounded_scanf_calls(&cpg, &["scanf@0", "fscanf@1"]);
+        assert_eq!(findings.len(), 2, "{findings:#?}");
+        assert!(findings.iter().any(|finding| finding.sink == "scanf"));
+        assert!(findings.iter().any(|finding| finding.sink == "fscanf"));
     }
 
     #[test]
