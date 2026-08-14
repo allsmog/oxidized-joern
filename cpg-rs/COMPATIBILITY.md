@@ -1,8 +1,9 @@
 # Compatibility and release contract
 
 Oxidized Joern `0.1.x` is production-ready for the C workflows explicitly
-listed below. It is not a drop-in replacement for every Joern frontend,
-CPGQL, the Scala console, plugins, or Joern's binary graph format.
+listed below. It is not yet a drop-in replacement for every Joern frontend,
+the full CPGQL surface, the Scala console, plugins, or every Joern graph
+property.
 
 Status meanings:
 
@@ -54,9 +55,14 @@ new construct can require another fixture and implementation slice.
 
 The following are unsupported in `0.1.x`:
 
-- Joern's Scala console and CPGQL source compatibility;
+- Joern's Scala console and full CPGQL source compatibility; `cpg query`
+  currently implements the native subset cataloged in
+  `acceptance/cpgql/catalog.json`;
 - JVM/Scala plugins and Maven-based extension workflows;
-- loading this project's CPG2 files in Joern, or loading Joern `cpg.bin` files;
+- loading internal CPG2 files directly in Joern. The explicit
+  `cpg export-joern` and `cpg import-joern` conversions use Joern v4's current
+  Flatgraph format and pass the bidirectional C fixture, but unsupported Joern
+  node/property kinds are not yet lossless;
 - a parity claim for non-C frontends;
 - every rule from Joern querydb.
 
@@ -69,3 +75,6 @@ Every release must pass the locked Rust workspace tests, formatting, Clippy,
 dependency audit, 96/96 committed C parity, canonical C scanner outcomes, the
 all-language acceptance test, pinned zlib/Lua acceptance, and packaged binary
 and container tests. The zlib/Lua suite also runs nightly.
+
+The stricter requirements for promoting the project from C production preview
+to a production Joern replacement are tracked in `REPLACEMENT_CONTRACT.md`.
