@@ -9,121 +9,37 @@ permissions:
   contents: read
 
 jobs:
-  diagnose:
+  inspect-recovery-helpers:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
-        with:
-          toolchain: 1.97.0
-      - name: Add local-only diagnostics
+      - name: Print relevant Swift recovery helpers
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
 
           path = Path("joern-cli/frontends/swiftsrc2cpg/rust/crates/swiftastgen-core/src/lib.rs")
-          source = path.read_text()
-
-          replacements = [
-              (
-                  '''    let root = tree.root_node();
-
-              let emitter = SwiftSyntaxEmitter::new(source);''',
-                  '''    let root = tree.root_node();
-              if source.contains("repeat { sink() }")
-                  || source.contains("public protocol A {}")
-                  || source.contains("macro m1(): Int")
-              {
-                  eprintln!("raw tree for {relative_file_path}: {}", root.to_sexp());
-                  eprintln!(
-                      "root children for {relative_file_path}: {:?}",
-                      named_children(root)
-                          .map(|child| (
-                              child.kind(),
-                              child.start_byte(),
-                              child.end_byte(),
-                              source.get(child.start_byte()..child.end_byte()).unwrap_or("")
-                          ))
-                          .collect::<Vec<_>>()
-                  );
-              }
-
-              let emitter = SwiftSyntaxEmitter::new(source);''',
-              ),
-              (
-                  '''        let do_exprs = find_node_types(&value, "DoExprSyntax");
-                  assert_eq!(do_exprs.len(), 3);''',
-                  '''        let do_exprs = find_node_types(&value, "DoExprSyntax");
-                  eprintln!(
-                      "do exprs: {:#?}",
-                      do_exprs
-                          .iter()
-                          .map(|node| source_text(source, node))
-                          .collect::<Vec<_>>()
-                  );
-                  eprintln!(
-                      "do stmts: {:#?}",
-                      find_node_types(&value, "DoStmtSyntax")
-                          .iter()
-                          .map(|node| source_text(source, node))
-                          .collect::<Vec<_>>()
-                  );
-                  assert_eq!(do_exprs.len(), 3);''',
-              ),
-              (
-                  '''        let function_texts = find_node_types(&value, "FunctionDeclSyntax")
-                      .iter()
-                      .map(|node| source_text(source, node))
-                      .collect::<Vec<_>>();''',
-                  '''        let function_texts = find_node_types(&value, "FunctionDeclSyntax")
-                      .iter()
-                      .map(|node| source_text(source, node))
-                      .collect::<Vec<_>>();
-                  eprintln!("function texts: {function_texts:#?}");''',
-              ),
-              (
-                  '''        let value = named_children(node)
-                      .filter(|child| child.start_byte() >= equal.end_byte())
-                      .find(|child| is_expression_like_node(*child))
-                      .context("recovered property initializer is missing a value")?;''',
-                  '''        let value = named_children(node)
-                      .filter(|child| child.start_byte() >= equal.end_byte())
-                      .find(|child| is_expression_like_node(*child));
-                  if value.is_none() {
-                      eprintln!(
-                          "missing recovered initializer: node=({:?}, {}, {}), pattern=({:?}, {}, {}), equal=({}, {}), continuation={:?}, children={:?}",
-                          node.kind(),
-                          node.start_byte(),
-                          node.end_byte(),
-                          pattern_node.kind(),
-                          pattern_node.start_byte(),
-                          pattern_node.end_byte(),
-                          equal.start_byte(),
-                          equal.end_byte(),
-                          initializer_continuation.map(|child| (child.kind(), child.start_byte(), child.end_byte())),
-                          named_children(node)
-                              .map(|child| (child.kind(), child.start_byte(), child.end_byte()))
-                              .collect::<Vec<_>>()
-                      );
-                  }
-                  let value = value.context("recovered property initializer is missing a value")?;''',
-              ),
+          lines = path.read_text().splitlines()
+          needles = [
+              "fn source_file(",
+              "fn recovered_split_nested_nominal_decl(",
+              "fn is_recoverable_function_error(",
+              "fn recovered_function_error_decls(",
+              "fn function_line_ranges(",
+              "fn recovered_property_initializer(",
+              "fn is_recoverable_do_error(",
+              "fn recovered_do_syntax_from_error(",
+              "fn recovered_do_expr_from_error(",
+              "fn skip_do_cast_artifacts(",
+              "fn is_do_cast_artifact_start(",
           ]
-
-          for old, new in replacements:
-              if source.count(old) != 1:
-                  raise SystemExit(f"expected exactly one diagnostic replacement, found {source.count(old)}")
-              source = source.replace(old, new, 1)
-
-          path.write_text(source)
+          for needle in needles:
+              matches = [index for index, line in enumerate(lines) if needle in line]
+              print(f"\n===== {needle} matches={matches} =====")
+              for index in matches:
+                  start = max(0, index - 20)
+                  end = min(len(lines), index + 140)
+                  for line_number in range(start, end):
+                      print(f"{line_number + 1:05d}: {lines[line_number]}")
           PY
-      - name: Run changed Swift tests with diagnostics
-        shell: bash
-        working-directory: joern-cli/frontends/swiftsrc2cpg/rust
-        run: |
-          set +e
-          cargo test --workspace emits_do_and_repeat_control_syntax -- --nocapture
-          cargo test --workspace recovers_protocol_decl_split_by_invalid_initialized_members -- --nocapture
-          cargo test --workspace recovers_declaration_suite_shapes -- --nocapture
-          exit 0
