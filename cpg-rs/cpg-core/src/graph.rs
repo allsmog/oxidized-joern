@@ -425,7 +425,9 @@ impl Cpg {
         // File table.
         w.u32(self.next_file);
         w.u64(self.path_of_file.len() as u64);
-        for (id, path) in &self.path_of_file {
+        let mut files: Vec<(&FileId, &String)> = self.path_of_file.iter().collect();
+        files.sort_by_key(|(id, _)| id.0);
+        for (id, path) in files {
             w.u32(id.0);
             w.bytes(path.as_bytes());
         }

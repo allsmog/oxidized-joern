@@ -33,6 +33,10 @@ pub fn dump_paths(paths: &[String]) -> String {
 }
 
 pub fn dump_sources(sources: &[(String, String)]) -> String {
+    canonical_project(sources)
+}
+
+fn canonical_project(sources: &[(String, String)]) -> String {
     let refs: Vec<(&str, &str)> = sources
         .iter()
         .map(|(path, source)| (path.as_str(), source.as_str()))
@@ -43,6 +47,48 @@ pub fn dump_sources(sources: &[(String, String)]) -> String {
     );
     project.build(&refs);
     cpg_lang_c::import::canonical_dump(&project.cpg)
+}
+
+/// Exercise the production incremental API on a real source set and compare
+/// its complete canonical graph to a clean rebuild of the edited snapshot.
+pub fn update_equivalence(paths: &[String]) -> Result<usize, String> {
+    let mut sources: Vec<(String, String)> = paths
+        .iter()
+        .map(|path| {
+            let source = std::fs::read_to_string(path)
+                .map_err(|error| format!("read update-equivalence input {path}: {error}"))?;
+            let name = Path::new(path)
+                .file_name()
+                .ok_or_else(|| format!("input has no filename: {path}"))?
+                .to_string_lossy()
+                .into_owned();
+            Ok((name, source))
+        })
+        .collect::<Result<_, String>>()?;
+    sources.sort_by(|a, b| a.0.cmp(&b.0));
+    let refs: Vec<(&str, &str)> = sources
+        .iter()
+        .map(|(path, source)| (path.as_str(), source.as_str()))
+        .collect();
+    let mut incremental = cpg_incremental::Project::new(
+        || Box::new(cpg_lang_c::CFrontend::new()),
+        cpg_analysis::standard_pipeline(),
+    );
+    incremental.build(&refs);
+
+    sources[0]
+        .1
+        .push_str("\n/* cpg real-project incremental acceptance */\n");
+    let outcome = incremental.update_file(&sources[0].0, &sources[0].1);
+    if !matches!(outcome, cpg_incremental::UpdateOutcome::Rebuilt { .. }) {
+        return Err(format!("production edit did not rebuild: {outcome:?}"));
+    }
+    let incremental_dump = cpg_lang_c::import::canonical_dump(&incremental.cpg);
+    let clean_dump = canonical_project(&sources);
+    if incremental_dump != clean_dump {
+        return Err("incremental graph differs from a clean rebuild".to_string());
+    }
+    Ok(sources.len())
 }
 
 pub fn migration_report(standalone: &str, production: &str) -> String {
@@ -134,5 +180,19 @@ mod tests {
             "SECTION NODES standalone=1 production=1 common=1 removed=0 added=0 exact=true"
         ));
         assert!(report.ends_with("TOTAL removed=1 added=1 exact=false\n"));
+    }
+
+    #[test]
+    fn production_update_matches_a_clean_rebuild() {
+        let dir = tempfile::tempdir().unwrap();
+        let a = dir.path().join("a.c");
+        let b = dir.path().join("b.c");
+        std::fs::write(&a, "int id(int x) { return x; }").unwrap();
+        std::fs::write(&b, "int main(void) { return id(1); }").unwrap();
+        let paths = vec![
+            a.to_string_lossy().into_owned(),
+            b.to_string_lossy().into_owned(),
+        ];
+        assert_eq!(update_equivalence(&paths).unwrap(), 2);
     }
 }
