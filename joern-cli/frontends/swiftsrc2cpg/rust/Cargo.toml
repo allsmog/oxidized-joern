@@ -17,5 +17,5 @@ ignore = "0.4"
 regex = "1"
 serde_json = { version = "1", features = ["preserve_order"] }
 tempfile = "3"
-tree-sitter = "0.26"
+tree-sitter = "0.25"
 tree-sitter-swift = "0.7"
