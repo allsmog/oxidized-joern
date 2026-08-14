@@ -72,16 +72,15 @@ pub fn canonical_dump(cpg: &Cpg) -> String {
             .or_else(|| cpg.name_of(method))
             .unwrap_or("<anonymous>");
         let mut line = 0usize;
-        render_ast(
+        let mut renderer = AstRenderer {
             cpg,
-            method,
             block,
-            0,
-            &mut line,
-            &mut addresses,
-            &mut emitted,
-            &mut out,
-        );
+            line: &mut line,
+            addresses: &mut addresses,
+            emitted: &mut emitted,
+            out: &mut out,
+        };
+        renderer.render(method, 0);
         out.push('\n');
     }
 
@@ -140,28 +139,37 @@ pub fn canonical_dump(cpg: &Cpg) -> String {
     out
 }
 
-fn render_ast(
-    cpg: &Cpg,
-    node: NodeId,
-    block: &str,
-    depth: usize,
-    line: &mut usize,
-    addresses: &mut HashMap<NodeId, String>,
-    emitted: &mut HashSet<NodeId>,
-    out: &mut String,
-) {
-    if !emitted.insert(node) {
-        return;
-    }
-    addresses.insert(node, format!("{block}#{}", *line));
-    *line += 1;
-    out.push_str(&render_node(cpg, node, depth));
-    out.push('\n');
+struct AstRenderer<'a> {
+    cpg: &'a Cpg,
+    block: &'a str,
+    line: &'a mut usize,
+    addresses: &'a mut HashMap<NodeId, String>,
+    emitted: &'a mut HashSet<NodeId>,
+    out: &'a mut String,
+}
 
-    let mut children: Vec<NodeId> = cpg.out_kind(node, EdgeKind::Ast).collect();
-    children.sort_by_key(|&child| (cpg.order_of(child), cpg.argument_index_of(child), child));
-    for child in children {
-        render_ast(cpg, child, block, depth + 1, line, addresses, emitted, out);
+impl AstRenderer<'_> {
+    fn render(&mut self, node: NodeId, depth: usize) {
+        if !self.emitted.insert(node) {
+            return;
+        }
+        self.addresses
+            .insert(node, format!("{}#{}", self.block, *self.line));
+        *self.line += 1;
+        self.out.push_str(&render_node(self.cpg, node, depth));
+        self.out.push('\n');
+
+        let mut children: Vec<NodeId> = self.cpg.out_kind(node, EdgeKind::Ast).collect();
+        children.sort_by_key(|&child| {
+            (
+                self.cpg.order_of(child),
+                self.cpg.argument_index_of(child),
+                child,
+            )
+        });
+        for child in children {
+            self.render(child, depth + 1);
+        }
     }
 }
 
