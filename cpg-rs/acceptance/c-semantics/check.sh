@@ -18,11 +18,21 @@ trap 'rm -rf "$scratch"' EXIT
 
 cargo build --release --locked --manifest-path "$repo_root/Cargo.toml" -p cpg-cli
 
+python3 - "$fixture/compile_commands.json" "$scratch/compile_commands.json" "$fixture" <<'PY'
+import json
+import pathlib
+import sys
+
+source, destination, fixture = map(pathlib.Path, sys.argv[1:])
+entries = json.loads(source.read_text(encoding="utf-8"))
+for entry in entries:
+    entry["directory"] = str(fixture.resolve())
+destination.write_text(json.dumps(entries, indent=2) + "\n", encoding="utf-8")
+PY
+
 "$c2cpg" "$fixture" \
   -o "$scratch/oracle.cpg.bin" \
-  --include "$fixture/include" \
-  --define FORCE_ON=1 \
-  --define CLI_ON=1 >/dev/null
+  --compilation-database "$scratch/compile_commands.json" >/dev/null
 
 "$joern" --script "$here/probe.sc" \
   --param cpgPath="$scratch/oracle.cpg.bin" \

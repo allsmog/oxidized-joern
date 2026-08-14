@@ -30,7 +30,7 @@ use std::io::{BufRead, Write};
 
 const USAGE: &str = "usage (langs: c|cpp|go|java|javascript|typescript|python|ruby|rust|scala):
   cpg build <dir> -o <graph.cpg> [--lang L] [--exclude S]...    build and persist a CPG
-      C compiler inputs: [--include-path DIR]... [--force-include FILE]... [--define NAME[=VALUE]]...
+      C compiler inputs: [--compile-commands FILE] [--include-path DIR]... [--force-include FILE]... [--define NAME[=VALUE]]...
   cpg serve <dir> [--lang L]                                    build then serve queries
   cpg serve --load <graph.cpg>                                  reopen a saved CPG and serve
   cpg scan <dir> [--rules <rules.json>] [--lang L] [-o out.sarif] rule-pack scan, emit SARIF

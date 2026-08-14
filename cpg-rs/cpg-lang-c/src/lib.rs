@@ -562,6 +562,7 @@ mod tests {
             include_paths: vec!["include".to_string()],
             forced_includes: vec!["config/forced.h".to_string()],
             defines: vec!["CLI_SWITCH=1".to_string()],
+            translation_units: Default::default(),
         };
         let mut frontend = CFrontend::with_preprocessor(config);
         let cpg = frontend.build_project(&sources).expect("project graph");

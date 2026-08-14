@@ -21,6 +21,7 @@ pub mod workspace;
 use cpg_analysis::standard_pipeline;
 use cpg_core::{Cpg, Query};
 use cpg_incremental::{Project, UpdateOutcome};
+use serde::Deserialize;
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
@@ -205,6 +206,20 @@ pub fn build_project_ext_with_c_preprocessor(
             ));
         }
     }
+    for (translation_unit, inputs) in &config.translation_units {
+        if !sources.iter().any(|(path, _)| path == translation_unit) {
+            return Err(format!(
+                "compilation database source is not part of the source snapshot: {translation_unit}"
+            ));
+        }
+        for forced in &inputs.forced_includes {
+            if !sources.iter().any(|(path, _)| path == forced) {
+                return Err(format!(
+                    "compilation database forced include is not part of the source snapshot: {forced}"
+                ));
+            }
+        }
+    }
     build_project_from_sources_with_c_preprocessor(lang, &sources, external_summaries, config)
 }
 
@@ -317,11 +332,19 @@ fn c_preprocessor_config(
         .chain(flags(args, "-D"))
         .map(str::to_string)
         .collect();
-    if include_values.is_empty() && forced_values.is_empty() && defines.is_empty() {
+    let compilation_database = flag(args, "--compile-commands");
+    if include_values.is_empty()
+        && forced_values.is_empty()
+        && defines.is_empty()
+        && compilation_database.is_none()
+    {
         return Ok(cpg_lang_c::exact::PreprocessorConfig::default());
     }
     if Language::parse(lang)? != Language::C {
-        return Err("--include-path, --force-include, and --define require --lang c".to_string());
+        return Err(
+            "--include-path, --force-include, --define, and --compile-commands require --lang c"
+                .to_string(),
+        );
     }
     let root = source_root
         .canonicalize()
@@ -351,18 +374,12 @@ fn c_preprocessor_config(
         Ok(relative.to_string_lossy().replace('\\', "/"))
     };
     for definition in &defines {
-        let name = definition
-            .split_once('=')
-            .map_or(definition.as_str(), |(name, _)| name)
-            .trim();
-        if name.is_empty()
-            || !name.bytes().enumerate().all(|(index, byte)| {
-                byte == b'_' || byte.is_ascii_alphabetic() || (index > 0 && byte.is_ascii_digit())
-            })
-        {
-            return Err(format!("invalid C preprocessor definition: {definition}"));
-        }
+        validate_c_definition(definition)?;
     }
+    let translation_units = compilation_database
+        .map(|path| load_compilation_database(&root, path))
+        .transpose()?
+        .unwrap_or_default();
     Ok(cpg_lang_c::exact::PreprocessorConfig {
         include_paths: include_values
             .into_iter()
@@ -373,7 +390,278 @@ fn c_preprocessor_config(
             .map(|value| source_relative(value, false))
             .collect::<Result<_, _>>()?,
         defines,
+        translation_units,
     })
+}
+
+const MAX_COMPILATION_DATABASE_BYTES: u64 = 64 * 1024 * 1024;
+
+#[derive(Debug, Deserialize)]
+struct CompilationCommand {
+    directory: Option<String>,
+    file: String,
+    arguments: Option<Vec<String>>,
+    command: Option<String>,
+}
+
+fn validate_c_definition(definition: &str) -> Result<(), String> {
+    let name = definition
+        .split_once('=')
+        .map_or(definition, |(name, _)| name)
+        .trim();
+    if name.is_empty()
+        || !name.bytes().enumerate().all(|(index, byte)| {
+            byte == b'_' || byte.is_ascii_alphabetic() || (index > 0 && byte.is_ascii_digit())
+        })
+    {
+        return Err(format!("invalid C preprocessor definition: {definition}"));
+    }
+    Ok(())
+}
+
+/// Tokenize the `command` form of a compile command without invoking a shell.
+/// The JSON `arguments` form remains preferable because it is unambiguous;
+/// this parser covers the POSIX quoting/backslash forms emitted by CMake,
+/// Meson, Ninja, and Bear and rejects unterminated input.
+fn tokenize_compiler_command(command: &str) -> Result<Vec<String>, String> {
+    let mut words = Vec::new();
+    let mut word = String::new();
+    let mut quote = None;
+    let mut escaped = false;
+    let mut started = false;
+    for character in command.chars() {
+        if escaped {
+            word.push(character);
+            escaped = false;
+            started = true;
+            continue;
+        }
+        match quote {
+            Some('\'') => {
+                if character == '\'' {
+                    quote = None;
+                } else {
+                    word.push(character);
+                }
+                started = true;
+            }
+            Some('"') => match character {
+                '"' => quote = None,
+                '\\' => escaped = true,
+                _ => word.push(character),
+            },
+            Some(_) => unreachable!(),
+            None => match character {
+                '\'' | '"' => {
+                    quote = Some(character);
+                    started = true;
+                }
+                '\\' => {
+                    escaped = true;
+                    started = true;
+                }
+                c if c.is_whitespace() => {
+                    if started {
+                        words.push(std::mem::take(&mut word));
+                        started = false;
+                    }
+                }
+                _ => {
+                    word.push(character);
+                    started = true;
+                }
+            },
+        }
+    }
+    if escaped || quote.is_some() {
+        return Err("unterminated quote or escape in compilation command".to_string());
+    }
+    if started {
+        words.push(word);
+    }
+    Ok(words)
+}
+
+fn load_compilation_database(
+    root: &Path,
+    database_path: &str,
+) -> Result<BTreeMap<String, cpg_lang_c::exact::TranslationUnitConfig>, String> {
+    let requested = Path::new(database_path);
+    let requested = if requested.is_absolute() {
+        requested.to_path_buf()
+    } else {
+        root.join(requested)
+    };
+    let database = requested
+        .canonicalize()
+        .map_err(|error| format!("invalid compilation database {database_path}: {error}"))?;
+    if !database.starts_with(root) || !database.is_file() {
+        return Err(format!(
+            "compilation database must be a regular file inside source root {}: {database_path}",
+            root.display()
+        ));
+    }
+    let metadata = std::fs::metadata(&database)
+        .map_err(|error| format!("cannot stat compilation database: {error}"))?;
+    if metadata.len() > MAX_COMPILATION_DATABASE_BYTES {
+        return Err(format!(
+            "compilation database is {} bytes; maximum is {MAX_COMPILATION_DATABASE_BYTES}",
+            metadata.len()
+        ));
+    }
+    let text = std::fs::read_to_string(&database)
+        .map_err(|error| format!("cannot read compilation database: {error}"))?;
+    let entries: Vec<CompilationCommand> = serde_json::from_str(&text)
+        .map_err(|error| format!("invalid compilation database JSON: {error}"))?;
+    let mut units = BTreeMap::new();
+    for (entry_index, entry) in entries.into_iter().enumerate() {
+        let directory = entry.directory.as_deref().unwrap_or(".");
+        let directory = Path::new(directory);
+        let directory = if directory.is_absolute() {
+            directory.to_path_buf()
+        } else {
+            root.join(directory)
+        };
+        let directory = directory.canonicalize().map_err(|error| {
+            format!("compile_commands entry {entry_index} has invalid directory: {error}")
+        })?;
+        if !directory.starts_with(root) || !directory.is_dir() {
+            return Err(format!(
+                "compile_commands entry {entry_index} directory must be inside source root {}",
+                root.display()
+            ));
+        }
+        let source = Path::new(&entry.file);
+        let source = if source.is_absolute() {
+            source.to_path_buf()
+        } else {
+            directory.join(source)
+        };
+        let source = source.canonicalize().map_err(|error| {
+            format!("compile_commands entry {entry_index} has invalid file: {error}")
+        })?;
+        let source = source.strip_prefix(root).map_err(|_| {
+            format!(
+                "compile_commands entry {entry_index} source is outside source root {}",
+                root.display()
+            )
+        })?;
+        let source = source.to_string_lossy().replace('\\', "/");
+
+        let arguments = match (entry.arguments, entry.command) {
+            (Some(arguments), _) => arguments,
+            (None, Some(command)) => tokenize_compiler_command(&command)
+                .map_err(|error| format!("compile_commands entry {entry_index}: {error}"))?,
+            (None, None) => {
+                return Err(format!(
+                    "compile_commands entry {entry_index} has neither arguments nor command"
+                ))
+            }
+        };
+        let mut config = cpg_lang_c::exact::TranslationUnitConfig::default();
+        let mut index = 0;
+        while index < arguments.len() {
+            let argument = &arguments[index];
+            let next_value = |flag: &str, index: &mut usize| -> Result<&str, String> {
+                *index += 1;
+                arguments.get(*index).map(String::as_str).ok_or_else(|| {
+                    format!("compile_commands entry {entry_index}: {flag} is missing its value")
+                })
+            };
+            let resolve_input_path = |value: &str, directory_expected: bool| {
+                let value_path = Path::new(value);
+                let value_path = if value_path.is_absolute() {
+                    value_path.to_path_buf()
+                } else {
+                    directory.join(value_path)
+                };
+                let canonical = value_path.canonicalize().map_err(|error| {
+                    format!(
+                        "compile_commands entry {entry_index} has invalid compiler path {value}: {error}"
+                    )
+                })?;
+                if !canonical.starts_with(root)
+                    || (directory_expected && !canonical.is_dir())
+                    || (!directory_expected && !canonical.is_file())
+                {
+                    return Err(format!(
+                        "compile_commands entry {entry_index} compiler path must be a {} inside source root {}: {value}",
+                        if directory_expected { "directory" } else { "file" },
+                        root.display()
+                    ));
+                }
+                Ok(canonical
+                    .strip_prefix(root)
+                    .expect("prefix checked")
+                    .to_string_lossy()
+                    .replace('\\', "/"))
+            };
+            if argument == "-I" || argument == "-isystem" {
+                let value = next_value(argument, &mut index)?;
+                config.include_paths.push(resolve_input_path(value, true)?);
+            } else if let Some(value) = argument
+                .strip_prefix("-I")
+                .filter(|value| !value.is_empty())
+                .or_else(|| {
+                    argument
+                        .strip_prefix("-isystem")
+                        .filter(|value| !value.is_empty())
+                })
+            {
+                config.include_paths.push(resolve_input_path(value, true)?);
+            } else if argument == "-include" {
+                let value = next_value(argument, &mut index)?;
+                config
+                    .forced_includes
+                    .push(resolve_input_path(value, false)?);
+            } else if let Some(value) = argument.strip_prefix("-include").filter(|v| !v.is_empty())
+            {
+                config
+                    .forced_includes
+                    .push(resolve_input_path(value, false)?);
+            } else if argument == "-D" {
+                let definition = next_value(argument, &mut index)?.to_string();
+                validate_c_definition(&definition)?;
+                replace_definition(&mut config.defines, definition);
+            } else if let Some(definition) = argument.strip_prefix("-D").filter(|v| !v.is_empty()) {
+                validate_c_definition(definition)?;
+                replace_definition(&mut config.defines, definition.to_string());
+            } else if argument == "-U" {
+                let name = next_value(argument, &mut index)?;
+                validate_c_definition(name)?;
+                remove_definition(&mut config.defines, name);
+            } else if let Some(name) = argument.strip_prefix("-U").filter(|v| !v.is_empty()) {
+                validate_c_definition(name)?;
+                remove_definition(&mut config.defines, name);
+            }
+            index += 1;
+        }
+        if let Some(existing) = units.get(&source) {
+            if existing != &config {
+                return Err(format!(
+                    "compile_commands contains conflicting entries for {source}"
+                ));
+            }
+        } else {
+            units.insert(source, config);
+        }
+    }
+    Ok(units)
+}
+
+fn definition_name(definition: &str) -> &str {
+    definition
+        .split_once('=')
+        .map_or(definition, |(name, _)| name)
+}
+
+fn remove_definition(definitions: &mut Vec<String>, name: &str) {
+    definitions.retain(|definition| definition_name(definition) != name);
+}
+
+fn replace_definition(definitions: &mut Vec<String>, definition: String) {
+    remove_definition(definitions, definition_name(&definition));
+    definitions.push(definition);
 }
 
 pub fn collect_sources(dir: &Path, exts: &[&str]) -> Result<Vec<(String, String)>, String> {
@@ -890,6 +1178,80 @@ mod glob_tests {
                 format!("unsupported language '{invalid}'")
             );
         }
+    }
+
+    #[test]
+    fn compiler_command_tokenizer_handles_quotes_and_rejects_incomplete_input() {
+        assert_eq!(
+            tokenize_compiler_command(r#"clang -I "include dir" '-DNAME=hello world' -c src/a.c"#)
+                .unwrap(),
+            vec![
+                "clang",
+                "-I",
+                "include dir",
+                "-DNAME=hello world",
+                "-c",
+                "src/a.c"
+            ]
+        );
+        assert!(tokenize_compiler_command("clang -I 'unterminated").is_err());
+        assert!(tokenize_compiler_command("clang trailing\\").is_err());
+    }
+
+    #[test]
+    fn compilation_database_applies_inputs_per_translation_unit() {
+        let root = source_tmpdir("compile-commands");
+        for directory in ["src", "include/a", "include/b", "config"] {
+            std::fs::create_dir_all(root.join(directory)).unwrap();
+        }
+        std::fs::write(
+            root.join("src/a.c"),
+            "#include <mode.h>\n#if HEADER_MODE == MODE && FORCED\nint selected_a(void) { return MODE; }\n#else\nint dead_a(void) { return 0; }\n#endif\n",
+        )
+        .unwrap();
+        std::fs::write(
+            root.join("src/b.c"),
+            "#include <mode.h>\n#if HEADER_MODE == MODE && FORCED\nint selected_b(void) { return MODE; }\n#else\nint dead_b(void) { return 0; }\n#endif\n",
+        )
+        .unwrap();
+        std::fs::write(root.join("include/a/mode.h"), "#define HEADER_MODE 1\n").unwrap();
+        std::fs::write(root.join("include/b/mode.h"), "#define HEADER_MODE 2\n").unwrap();
+        std::fs::write(root.join("config/forced.h"), "#define FORCED 1\n").unwrap();
+        let database = json!([
+            {
+                "directory": root,
+                "file": "src/a.c",
+                "arguments": [
+                    "clang", "-I", "include/a", "-include", "config/forced.h",
+                    "-DMODE=9", "-UMODE", "-DMODE=1", "-c", "src/a.c"
+                ]
+            },
+            {
+                "directory": root,
+                "file": "src/b.c",
+                "command": "clang -I include/b -include config/forced.h -DMODE=2 -c src/b.c"
+            }
+        ]);
+        std::fs::write(
+            root.join("compile_commands.json"),
+            serde_json::to_vec_pretty(&database).unwrap(),
+        )
+        .unwrap();
+        let args = vec![
+            "cpg".to_string(),
+            "serve".to_string(),
+            root.to_string_lossy().into_owned(),
+            "--lang".to_string(),
+            "c".to_string(),
+            "--compile-commands".to_string(),
+            "compile_commands.json".to_string(),
+        ];
+        let project = open_project(&args).unwrap();
+        assert_eq!(project.cpg.method_named("selected_a").len(), 1);
+        assert_eq!(project.cpg.method_named("selected_b").len(), 1);
+        assert!(project.cpg.method_named("dead_a").is_empty());
+        assert!(project.cpg.method_named("dead_b").is_empty());
+        let _ = std::fs::remove_dir_all(root);
     }
 
     #[test]
