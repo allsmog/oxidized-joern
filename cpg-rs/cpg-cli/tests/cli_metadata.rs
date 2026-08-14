@@ -1,5 +1,16 @@
 use std::process::Command;
 
+fn scratch(name: &str) -> std::path::PathBuf {
+    let dir = std::env::temp_dir().join(format!(
+        "cpg-cli-{name}-{}-{:?}",
+        std::process::id(),
+        std::thread::current().id()
+    ));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    dir
+}
+
 #[test]
 fn version_matches_the_cargo_package() {
     let output = Command::new(env!("CARGO_BIN_EXE_cpg"))
@@ -33,4 +44,53 @@ fn help_is_successful_and_lists_public_commands() {
         );
     }
     assert!(output.stderr.is_empty());
+}
+
+#[test]
+fn build_rejects_invalid_language_without_creating_output() {
+    let root = scratch("invalid-language");
+    std::fs::write(root.join("main.c"), "int main(void) { return 0; }").unwrap();
+    let graph = root.join("should-not-exist.cpg");
+    let output = Command::new(env!("CARGO_BIN_EXE_cpg"))
+        .args([
+            "build",
+            &root.to_string_lossy(),
+            "-o",
+            &graph.to_string_lossy(),
+            "--lang",
+            "pyhton",
+        ])
+        .output()
+        .expect("run cpg build");
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("unsupported language 'pyhton'"));
+    assert!(!graph.exists());
+    let _ = std::fs::remove_dir_all(root);
+}
+
+#[test]
+fn build_rejects_missing_or_empty_root_without_creating_output() {
+    let root = scratch("missing-empty");
+    let missing = root.join("missing");
+    let graph = root.join("should-not-exist.cpg");
+    for source_root in [&missing, &root] {
+        let output = Command::new(env!("CARGO_BIN_EXE_cpg"))
+            .args([
+                "build",
+                &source_root.to_string_lossy(),
+                "-o",
+                &graph.to_string_lossy(),
+                "--lang",
+                "c",
+            ])
+            .output()
+            .expect("run cpg build");
+        assert!(
+            !output.status.success(),
+            "accepted {}",
+            source_root.display()
+        );
+        assert!(!graph.exists());
+    }
+    let _ = std::fs::remove_dir_all(root);
 }

@@ -32,7 +32,7 @@ class LogFormatter:
 "#;
 
 fn scan(sources_idents: &[&str]) -> Vec<cpg_analysis::Finding> {
-    let (mut project, _) = make_project("python");
+    let (mut project, _) = make_project("python").unwrap();
     project.build(&[("app.py", APP), ("fmt.py", DECOY)]);
     project.find_taint_full(&[], &["system@0"], &[], &[], sources_idents)
 }
