@@ -24,12 +24,13 @@
 //! (to stdout, or to the `-o` file). See `examples/rules/default.json` for
 //! the rule format.
 
-use cpg_cli::{build_project_filtered, flag, flags, handle, open_project, rules::RulePack, scan};
+use cpg_cli::{flag, flags, handle, open_project, rules::RulePack, scan};
 use serde_json::{json, Value};
 use std::io::{BufRead, Write};
 
 const USAGE: &str = "usage (langs: c|cpp|go|java|javascript|typescript|python|ruby|rust|scala):
   cpg build <dir> -o <graph.cpg> [--lang L] [--exclude S]...    build and persist a CPG
+      C compiler inputs: [--include-path DIR]... [--force-include FILE]... [--define NAME[=VALUE]]...
   cpg serve <dir> [--lang L]                                    build then serve queries
   cpg serve --load <graph.cpg>                                  reopen a saved CPG and serve
   cpg scan <dir> [--rules <rules.json>] [--lang L] [-o out.sarif] rule-pack scan, emit SARIF
@@ -320,13 +321,12 @@ fn x_cmd(args: &[String]) {
 
 /// `cpg build <dir> -o <out>`: build a CPG and persist it to disk.
 fn build_and_save(args: &[String]) {
-    let Some(dir) = args.get(2) else {
+    if args.get(2).is_none() {
         eprintln!("usage: cpg build <dir> -o <graph.cpg> [--lang c|python]");
         std::process::exit(2);
-    };
+    }
     let out = flag(args, "-o").unwrap_or("graph.cpg");
-    let lang = flag(args, "--lang").unwrap_or("c");
-    let project = match build_project_filtered(dir, lang, &flags(args, "--exclude")) {
+    let project = match open_project(args) {
         Ok(project) => project,
         Err(e) => {
             eprintln!("{e}");
