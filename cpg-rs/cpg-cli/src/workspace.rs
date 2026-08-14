@@ -11,7 +11,7 @@
 //! `-C`/`$CPGX_ROOT`/cwd, the cache from `$CPG_CACHE`/`$XDG_CACHE_HOME/cpg`/
 //! `~/.cache/cpg`.
 
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 /// Bumped whenever an engine change alters the shape of built graphs
 /// (lowering, new node/edge kinds, persist layout). Part of every cache file
@@ -64,23 +64,86 @@ impl Workspace {
         };
         std::fs::create_dir_all(&cache)
             .map_err(|e| format!("cannot create cache {}: {e}", cache.display()))?;
+        let cache = cache
+            .canonicalize()
+            .map_err(|e| format!("bad cache {}: {e}", cache.display()))?;
         Ok(Workspace { root, cache })
     }
 
     /// Absolute directory for a root-relative module path (`.` = the root).
     pub fn module_dir(&self, rel: &str) -> Result<PathBuf, String> {
+        let root = self
+            .root
+            .canonicalize()
+            .map_err(|e| format!("bad root {}: {e}", self.root.display()))?;
         let dir = if rel == "." {
-            self.root.clone()
+            root.clone()
         } else {
-            self.root.join(rel)
+            let path = Path::new(rel);
+            if rel.is_empty()
+                || path.is_absolute()
+                || rel
+                    .split(['/', '\\'])
+                    .any(|segment| segment.is_empty() || segment == "." || segment == "..")
+                || !path
+                    .components()
+                    .all(|component| matches!(component, Component::Normal(_)))
+            {
+                return Err(format!("module path must be root-relative: {rel}"));
+            }
+            root.join(path)
         };
         let dir = dir
             .canonicalize()
             .map_err(|e| format!("no such directory {}: {e}", dir.display()))?;
+        if dir != root && !dir.starts_with(&root) {
+            return Err(format!(
+                "module path escapes workspace root {}: {rel}",
+                root.display()
+            ));
+        }
         if !dir.is_dir() {
             return Err(format!("not a directory: {}", dir.display()));
         }
         Ok(dir)
+    }
+
+    /// A validated merge target directly inside the canonical cache.
+    pub fn merge_output_path(&self, out_name: &str) -> Result<PathBuf, String> {
+        if out_name.is_empty()
+            || out_name == "."
+            || out_name == ".."
+            || out_name.contains(['/', '\\', '\0'])
+        {
+            return Err(format!("invalid merge output name: {out_name:?}"));
+        }
+        let mut components = Path::new(out_name).components();
+        if !matches!(components.next(), Some(Component::Normal(_))) || components.next().is_some() {
+            return Err(format!("invalid merge output name: {out_name:?}"));
+        }
+
+        std::fs::create_dir_all(&self.cache)
+            .map_err(|e| format!("cannot create cache {}: {e}", self.cache.display()))?;
+        let cache = self
+            .cache
+            .canonicalize()
+            .map_err(|e| format!("bad cache {}: {e}", self.cache.display()))?;
+        let target = cache.join(format!("{out_name}.cpg"));
+        if target.parent() != Some(cache.as_path()) {
+            return Err(format!("merge output escapes cache: {out_name:?}"));
+        }
+        match std::fs::symlink_metadata(&target) {
+            Ok(meta) if meta.file_type().is_symlink() || !meta.is_file() => {
+                return Err(format!(
+                    "merge output is not a regular file: {}",
+                    target.display()
+                ));
+            }
+            Ok(_) => {}
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+            Err(e) => return Err(format!("cannot inspect {}: {e}", target.display())),
+        }
+        Ok(target)
     }
 
     /// The cache file a module/lang pair maps to. Keyed by sanitized absolute
@@ -102,18 +165,25 @@ impl Workspace {
     /// newer than it.
     pub fn ensure_cpg(&self, rel: &str, lang: Option<&str>) -> Result<(PathBuf, String), String> {
         let dir = self.module_dir(rel)?;
-        let lang = match lang {
-            Some(l) => l.to_string(),
-            None => detect_lang(&dir).to_string(),
-        };
+        let parsed_lang = crate::Language::parse(lang.unwrap_or_else(|| detect_lang(&dir)))?;
+        let lang_name = parsed_lang.canonical_name();
+        let lang = lang_name.to_string();
         let cpg_path = self.cache_path(&dir, &lang);
         let excludes = excludes_for(&lang);
+        let sources = crate::collect_sources_filtered(&dir, parsed_lang.extensions(), excludes)?;
+        let newest_source = sources
+            .iter()
+            .map(|(path, _)| {
+                std::fs::metadata(path)
+                    .and_then(|metadata| metadata.modified())
+                    .map_err(|e| format!("cannot inspect source {path}: {e}"))
+            })
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .max();
         let stale = match std::fs::metadata(&cpg_path).and_then(|m| m.modified()) {
             Err(_) => true, // no cache yet
-            Ok(cache_mtime) => {
-                let exts = crate::make_project(&lang).1;
-                newest_source_mtime(&dir, exts, excludes).is_some_and(|src| src > cache_mtime)
-            }
+            Ok(cache_mtime) => newest_source.is_some_and(|src| src > cache_mtime),
         };
         if stale {
             eprintln!(
@@ -121,7 +191,7 @@ impl Workspace {
                 dir.display(),
                 cpg_path.display()
             );
-            let project = crate::build_project_filtered(&dir.to_string_lossy(), &lang, excludes);
+            let project = crate::build_project_filtered(&dir.to_string_lossy(), &lang, excludes)?;
             project
                 .cpg
                 .save(&cpg_path.to_string_lossy())
@@ -292,30 +362,6 @@ pub fn excludes_for(lang: &str) -> &'static [&'static str] {
     }
 }
 
-/// Newest modification time of any file under `dir` with one of `exts`,
-/// skipping `excludes` substrings. None when no such file exists.
-fn newest_source_mtime(
-    dir: &Path,
-    exts: &[&str],
-    excludes: &[&str],
-) -> Option<std::time::SystemTime> {
-    let mut newest: Option<std::time::SystemTime> = None;
-    walk(dir, excludes, &mut |path| {
-        if path
-            .extension()
-            .and_then(|e| e.to_str())
-            .is_some_and(|e| exts.contains(&e))
-        {
-            if let Ok(m) = std::fs::metadata(path).and_then(|m| m.modified()) {
-                if newest.is_none_or(|n| m > n) {
-                    newest = Some(m);
-                }
-            }
-        }
-    });
-    newest
-}
-
 /// Sorted, deduplicated parent directories of every `*.{ext}` file under
 /// `dir` (skipping `excludes` path substrings).
 fn dirs_containing(dir: &Path, ext: &str, excludes: &[&str]) -> Vec<String> {
@@ -395,6 +441,94 @@ mod tests {
             format!("some_repo_module.go.v{GRAPH_SHAPE_VERSION}.cpg")
         );
         assert_eq!(lang_of_cpg(&p), "go");
+    }
+
+    #[test]
+    fn workspace_module_paths_are_normal_and_root_confined() {
+        let root = tmpdir("module-root");
+        let cache = tmpdir("module-cache");
+        std::fs::create_dir_all(root.join("nested/module")).unwrap();
+        let ws = Workspace {
+            root: root.clone(),
+            cache: cache.clone(),
+        };
+        assert_eq!(ws.module_dir(".").unwrap(), root.canonicalize().unwrap());
+        assert_eq!(
+            ws.module_dir("nested/module").unwrap(),
+            root.join("nested/module").canonicalize().unwrap()
+        );
+        for invalid in ["", "..", "nested/../nested", "nested/./module"] {
+            assert!(ws.module_dir(invalid).is_err(), "accepted {invalid:?}");
+        }
+        assert!(ws.module_dir(&root.to_string_lossy()).is_err());
+        let _ = std::fs::remove_dir_all(root);
+        let _ = std::fs::remove_dir_all(cache);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn workspace_module_paths_reject_outward_symlinks() {
+        use std::os::unix::fs::symlink;
+
+        let root = tmpdir("module-symlink-root");
+        let outside = tmpdir("module-symlink-outside");
+        let cache = tmpdir("module-symlink-cache");
+        symlink(&outside, root.join("outside-link")).unwrap();
+        let ws = Workspace {
+            root: root.clone(),
+            cache: cache.clone(),
+        };
+        let error = ws.module_dir("outside-link").unwrap_err();
+        assert!(error.contains("escapes workspace root"), "{error}");
+        let _ = std::fs::remove_dir_all(root);
+        let _ = std::fs::remove_dir_all(outside);
+        let _ = std::fs::remove_dir_all(cache);
+    }
+
+    #[test]
+    fn workspace_merge_output_accepts_only_safe_regular_targets() {
+        let root = tmpdir("merge-root");
+        let cache = tmpdir("merge-cache");
+        let ws = Workspace {
+            root: root.clone(),
+            cache: cache.clone(),
+        };
+        assert_eq!(
+            ws.merge_output_path("combined").unwrap(),
+            cache.canonicalize().unwrap().join("combined.cpg")
+        );
+        std::fs::write(cache.join("existing.cpg"), b"CPG1").unwrap();
+        assert!(ws.merge_output_path("existing").is_ok());
+        for invalid in ["", ".", "..", "nested/out", "nested\\out", "bad\0name"] {
+            assert!(
+                ws.merge_output_path(invalid).is_err(),
+                "accepted {invalid:?}"
+            );
+        }
+        std::fs::create_dir(cache.join("directory.cpg")).unwrap();
+        assert!(ws.merge_output_path("directory").is_err());
+        let _ = std::fs::remove_dir_all(root);
+        let _ = std::fs::remove_dir_all(cache);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn workspace_merge_output_rejects_symlink_target() {
+        use std::os::unix::fs::symlink;
+
+        let root = tmpdir("merge-link-root");
+        let cache = tmpdir("merge-link-cache");
+        let outside = root.join("outside.cpg");
+        std::fs::write(&outside, b"do not overwrite").unwrap();
+        symlink(&outside, cache.join("escaped.cpg")).unwrap();
+        let ws = Workspace {
+            root: root.clone(),
+            cache: cache.clone(),
+        };
+        assert!(ws.merge_output_path("escaped").is_err());
+        assert_eq!(std::fs::read(&outside).unwrap(), b"do not overwrite");
+        let _ = std::fs::remove_dir_all(root);
+        let _ = std::fs::remove_dir_all(cache);
     }
 
     #[test]

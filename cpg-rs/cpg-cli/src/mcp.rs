@@ -176,7 +176,7 @@ impl Server {
         if !fresh {
             let cpg = cpg_core::Cpg::load(&cpg_path.to_string_lossy())
                 .map_err(|e| format!("load failed: {e}"))?;
-            let (mut project, _) = crate::make_project(&lang);
+            let (mut project, _) = crate::make_project(&lang)?;
             project.reopen(cpg);
             self.projects
                 .insert(cpg_path.clone(), (mtime, lang.clone(), project));
@@ -456,6 +456,7 @@ impl Server {
             .get("out_name")
             .and_then(|v| v.as_str())
             .ok_or("merge requires out_name")?;
+        let out = self.ws.merge_output_path(out_name)?;
         let paths: Vec<String> = args
             .get("paths")
             .and_then(|v| v.as_array())
@@ -498,7 +499,6 @@ impl Server {
             let (added, _skipped) = crate::thrift::link_thrift(&mut merged, &services);
             thrift_edges = added;
         }
-        let out = self.ws.cache.join(format!("{out_name}.cpg"));
         merged
             .save(&out.to_string_lossy())
             .map_err(|e| format!("save failed: {e}"))?;

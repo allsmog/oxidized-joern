@@ -23,6 +23,22 @@ fn scratch(name: &str) -> std::path::PathBuf {
     d
 }
 
+fn mcp_request(
+    stdin: &mut impl Write,
+    stdout: &mut impl BufRead,
+    id: u64,
+    name: &str,
+    arguments: Value,
+) -> Value {
+    let value = json!({"jsonrpc": "2.0", "id": id, "method": "tools/call",
+        "params": {"name": name, "arguments": arguments}});
+    writeln!(stdin, "{value}").unwrap();
+    stdin.flush().unwrap();
+    let mut line = String::new();
+    stdout.read_line(&mut line).expect("read response");
+    serde_json::from_str(&line).expect("valid json-rpc")
+}
+
 #[test]
 fn mcp_session_covers_the_iris_loop() {
     let root = scratch("root");
@@ -152,4 +168,158 @@ fn mcp_session_covers_the_iris_loop() {
     assert!(status.success());
     let _ = std::fs::remove_dir_all(&root);
     let _ = std::fs::remove_dir_all(&cache);
+}
+
+#[test]
+fn mcp_rejects_path_and_merge_output_escape_attempts() {
+    let root = scratch("boundary-root");
+    let cache = scratch("boundary-cache");
+    let outside = scratch("boundary-outside");
+    std::fs::create_dir_all(root.join("svc")).unwrap();
+    std::fs::write(root.join("svc/app.c"), SRC).unwrap();
+    std::fs::write(outside.join("outside.c"), SRC).unwrap();
+
+    let mut child = Command::new(env!("CARGO_BIN_EXE_cpg"))
+        .args(["mcp", "--root", &root.to_string_lossy()])
+        .env("CPG_CACHE", &cache)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("spawn cpg mcp");
+    let mut stdin = child.stdin.take().unwrap();
+    let mut stdout = BufReader::new(child.stdout.take().unwrap());
+
+    let traversal = mcp_request(
+        &mut stdin,
+        &mut stdout,
+        1,
+        "build_cpg",
+        json!({"path": "../boundary-outside"}),
+    );
+    assert_eq!(traversal["result"]["isError"], true, "{traversal}");
+    let absolute = mcp_request(
+        &mut stdin,
+        &mut stdout,
+        2,
+        "build_cpg",
+        json!({"path": outside.to_string_lossy()}),
+    );
+    assert_eq!(absolute["result"]["isError"], true, "{absolute}");
+    let invalid_language = mcp_request(
+        &mut stdin,
+        &mut stdout,
+        9,
+        "build_cpg",
+        json!({"path": "svc", "lang": "pyhton"}),
+    );
+    assert_eq!(
+        invalid_language["result"]["isError"], true,
+        "{invalid_language}"
+    );
+
+    let cache_name = cache.file_name().unwrap().to_string_lossy();
+    let traversal_name = format!("../{cache_name}-escaped");
+    let traversal_target = cache
+        .parent()
+        .unwrap()
+        .join(format!("{cache_name}-escaped.cpg"));
+    assert!(!traversal_target.exists());
+    let traversal_output = mcp_request(
+        &mut stdin,
+        &mut stdout,
+        3,
+        "merge",
+        json!({"out_name": traversal_name, "paths": ["svc"]}),
+    );
+    assert_eq!(
+        traversal_output["result"]["isError"], true,
+        "{traversal_output}"
+    );
+    assert!(!traversal_target.exists());
+
+    for (id, out_name) in [
+        (4, "nested/escaped"),
+        (5, "nested\\escaped"),
+        (6, "."),
+        (7, ".."),
+    ] {
+        let reply = mcp_request(
+            &mut stdin,
+            &mut stdout,
+            id,
+            "merge",
+            json!({"out_name": out_name, "paths": ["svc"]}),
+        );
+        assert_eq!(reply["result"]["isError"], true, "{out_name}: {reply}");
+    }
+    assert!(!cache.join("nested/escaped.cpg").exists());
+
+    let safe = mcp_request(
+        &mut stdin,
+        &mut stdout,
+        8,
+        "merge",
+        json!({"out_name": "combined", "paths": ["svc"]}),
+    );
+    assert_eq!(safe["result"]["isError"], false, "{safe}");
+    assert!(cache.join("combined.cpg").is_file());
+
+    drop(stdin);
+    let status = child.wait().expect("server exits when stdin closes");
+    assert!(status.success());
+    let _ = std::fs::remove_dir_all(root);
+    let _ = std::fs::remove_dir_all(cache);
+    let _ = std::fs::remove_dir_all(outside);
+}
+
+#[cfg(unix)]
+#[test]
+fn mcp_rejects_outward_module_and_output_symlinks() {
+    use std::os::unix::fs::symlink;
+
+    let root = scratch("symlink-root");
+    let cache = scratch("symlink-cache");
+    let outside = scratch("symlink-outside");
+    std::fs::create_dir_all(root.join("svc")).unwrap();
+    std::fs::write(root.join("svc/app.c"), SRC).unwrap();
+    std::fs::write(outside.join("outside.c"), SRC).unwrap();
+    symlink(&outside, root.join("outside-link")).unwrap();
+    let outside_graph = outside.join("outside.cpg");
+    std::fs::write(&outside_graph, b"unchanged").unwrap();
+    symlink(&outside_graph, cache.join("linked.cpg")).unwrap();
+
+    let mut child = Command::new(env!("CARGO_BIN_EXE_cpg"))
+        .args(["mcp", "--root", &root.to_string_lossy()])
+        .env("CPG_CACHE", &cache)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("spawn cpg mcp");
+    let mut stdin = child.stdin.take().unwrap();
+    let mut stdout = BufReader::new(child.stdout.take().unwrap());
+    let module = mcp_request(
+        &mut stdin,
+        &mut stdout,
+        1,
+        "build_cpg",
+        json!({"path": "outside-link"}),
+    );
+    assert_eq!(module["result"]["isError"], true, "{module}");
+    let output = mcp_request(
+        &mut stdin,
+        &mut stdout,
+        2,
+        "merge",
+        json!({"out_name": "linked", "paths": ["svc"]}),
+    );
+    assert_eq!(output["result"]["isError"], true, "{output}");
+    assert_eq!(std::fs::read(&outside_graph).unwrap(), b"unchanged");
+
+    drop(stdin);
+    assert!(child.wait().unwrap().success());
+    let _ = std::fs::remove_dir_all(root);
+    let _ = std::fs::remove_dir_all(cache);
+    let _ = std::fs::remove_dir_all(outside);
 }
