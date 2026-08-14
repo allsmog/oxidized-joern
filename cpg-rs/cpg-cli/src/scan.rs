@@ -48,6 +48,15 @@ pub fn run_pack_entry<'a>(
                         findings: cpg_analysis::structural::forbidden_calls(&project.cpg, &sinks),
                     };
                 }
+                "unbounded-scanf" => {
+                    return RuleFindings {
+                        rule,
+                        findings: cpg_analysis::structural::unbounded_scanf_calls(
+                            &project.cpg,
+                            &sinks,
+                        ),
+                    };
+                }
                 "discarded-return" => {
                     return RuleFindings {
                         rule,
