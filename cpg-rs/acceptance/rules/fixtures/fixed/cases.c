@@ -22,6 +22,9 @@ void fixed_cases(void *db, char *dst, size_t dst_size) {
 
     size_t safe_size = validated_size(input);
     memcpy(dst, input, safe_size);
+    size_t prepared_size = getenv("ATTACKER_PREPARED_COUNT");
+    char *grown_dst = prepbuffsize(dst, prepared_size);
+    memcpy(grown_dst, input, prepared_size);
     void *allocation = malloc(safe_size);
     getaddrinfo("localhost", "443", 0, 0);
     ssize_t received = recv(0, dst, dst_size, 0);

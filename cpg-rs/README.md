@@ -64,6 +64,10 @@ cargo run --release -p cpg-cli -- \
 cargo run --release -p cpg-cli -- \
   flow 'getenv' 'exec*' --load project.cpg -o flows.json
 
+# Run native CPGQL as JSON, or use `.p` for annotated terminal rows.
+cargo run --release -p cpg-cli -- \
+  query --load project.cpg --lang rust --query 'cpg.method.name' --format json
+
 # Serve the saved graph or expose the MCP server over stdio.
 cargo run --release -p cpg-cli -- serve --load project.cpg
 cargo run --release -p cpg-cli -- mcp --root ./src
