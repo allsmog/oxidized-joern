@@ -64,6 +64,10 @@ pub struct TsLangSpec {
     /// `receiver`). The receiver's type qualifies the method for
     /// type-aware call resolution. None = no explicit receivers.
     pub receiver_field: Option<&'static str>,
+    /// Joern models some language-level implicit receivers as a parameter at
+    /// index zero (JavaScript/TypeScript `this`). Explicit source parameters
+    /// continue at index one.
+    pub implicit_receiver: Option<(&'static str, &'static str)>,
     /// A method name the language sugars onto its enclosing container's name at
     /// call sites (Scala: `object Foo { def apply(..) }` is called as
     /// `Foo(..)`). Such a method is registered under the container's name so
@@ -202,6 +206,7 @@ pub fn java() -> TsLangSpec {
         implicit_return: false,
         type_container_kinds: &[],
         receiver_field: None,
+        implicit_receiver: None,
         ctor_sugar_method: None,
         declarator_field: None,
         type_decl_kinds: &[],
@@ -247,6 +252,7 @@ pub fn go() -> TsLangSpec {
         implicit_return: false,
         type_container_kinds: &[],
         receiver_field: Some("receiver"),
+        implicit_receiver: None,
         ctor_sugar_method: None,
         declarator_field: None,
         type_decl_kinds: &[],
@@ -297,6 +303,7 @@ pub fn javascript() -> TsLangSpec {
         implicit_return: false,
         type_container_kinds: &[],
         receiver_field: None,
+        implicit_receiver: Some(("this", "program")),
         ctor_sugar_method: None,
         declarator_field: None,
         type_decl_kinds: &[],
@@ -348,6 +355,7 @@ pub fn typescript() -> TsLangSpec {
         implicit_return: false,
         type_container_kinds: &["class_declaration"],
         receiver_field: None,
+        implicit_receiver: Some(("this", "program")),
         ctor_sugar_method: None,
         declarator_field: None,
         type_decl_kinds: &["class_declaration"],
@@ -399,6 +407,7 @@ pub fn ruby() -> TsLangSpec {
         implicit_return: true,
         type_container_kinds: &[],
         receiver_field: None,
+        implicit_receiver: Some(("self", "rb:<main>")),
         ctor_sugar_method: None,
         declarator_field: None,
         type_decl_kinds: &[],
@@ -441,6 +450,7 @@ pub fn rust() -> TsLangSpec {
         implicit_return: true,
         type_container_kinds: &[],
         receiver_field: None,
+        implicit_receiver: None,
         ctor_sugar_method: None,
         declarator_field: None,
         type_decl_kinds: &[],
@@ -484,6 +494,7 @@ pub fn python() -> TsLangSpec {
         implicit_return: false,
         type_container_kinds: &[],
         receiver_field: None,
+        implicit_receiver: None,
         ctor_sugar_method: None,
         declarator_field: None,
         type_decl_kinds: &[],
@@ -532,6 +543,7 @@ pub fn scala() -> TsLangSpec {
         implicit_return: true,
         type_container_kinds: &["object_definition", "class_definition", "trait_definition"],
         receiver_field: None,
+        implicit_receiver: None,
         ctor_sugar_method: Some("apply"),
         declarator_field: None,
         type_decl_kinds: &[],
@@ -582,6 +594,7 @@ pub fn cpp() -> TsLangSpec {
             "namespace_definition",
         ],
         receiver_field: None,
+        implicit_receiver: None,
         ctor_sugar_method: None,
         declarator_field: Some("declarator"),
         type_decl_kinds: &["class_specifier", "struct_specifier"],

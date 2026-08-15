@@ -4,7 +4,7 @@
 //! grammars.
 
 use crate::spec::TsLangSpec;
-use cpg_core::{CpgBuilder, NodeId};
+use cpg_core::{CpgBuilder, EdgeKind, NodeId, NodeKind};
 use tree_sitter::Node;
 
 pub fn build(spec: &TsLangSpec, b: &mut CpgBuilder, root: Node, src: &[u8], path: &str) -> usize {
@@ -213,6 +213,11 @@ fn build_method(
     // the body walk so call sites can carry a receiver-type hint.
     let mut types: std::collections::HashMap<String, String> = std::collections::HashMap::new();
 
+    if let Some((receiver, receiver_type)) = spec.implicit_receiver {
+        let parameter = b.parameter(receiver, receiver_type, 0);
+        b.ast_child(method, parameter);
+    }
+
     // Parameters: prefer the `parameters` field, else a known container kind,
     // else (declarator grammars) the first container inside the declarator
     // chain — which cannot contain a nested function, so the search is safe.
@@ -257,7 +262,7 @@ fn build_method(
             }
             let ptype = p
                 .child_by_field_name("type")
-                .and_then(|t| resolved_type(spec, t, src))
+                .and_then(|t| schema_type(spec, t, src))
                 .unwrap_or_else(|| "ANY".to_string());
             if ptype != "ANY" {
                 types.insert(pname.to_string(), ptype.clone());
@@ -275,7 +280,7 @@ fn build_method(
             }
         }
     }
-    let ret = b.method_return("ANY");
+    let ret = b.method_return(&method_return_type(spec, node, src));
     b.ast_child(method, ret);
 
     let block = b.block();
@@ -419,8 +424,11 @@ fn walk_stmts(
         }
         return;
     }
-    if spec.assign_form(k).is_some() {
+    if let Some(form) = spec.assign_form(k) {
         if let Some(e) = build_expr(spec, b, file, node, src, types) {
+            if declares_locals(spec, k) {
+                emit_local_declarations(b, parent, node, form.lhs_field, src, types);
+            }
             b.ast_child(parent, e);
         }
         return;
@@ -432,6 +440,70 @@ fn walk_stmts(
     // Structural node (block, statement_list, expression_statement, …): descend.
     for c in named_children(node) {
         walk_stmts(spec, b, file, parent, c, src, types);
+    }
+}
+
+/// Language declaration forms which introduce local bindings. A plain
+/// assignment is declaration-shaped only in Python and Ruby; in the other
+/// grammars it must not manufacture a Local for a rebind.
+fn declares_locals(spec: &TsLangSpec, kind: &str) -> bool {
+    (kind == "assignment" && matches!(spec.name, "Python" | "Ruby"))
+        || matches!(
+            kind,
+            "variable_declarator"
+                | "short_var_declaration"
+                | "var_spec"
+                | "let_declaration"
+                | "init_declarator"
+                | "val_definition"
+                | "var_definition"
+        )
+}
+
+fn emit_local_declarations(
+    b: &mut CpgBuilder,
+    parent: NodeId,
+    node: Node,
+    lhs_field: &str,
+    src: &[u8],
+    types: &std::collections::HashMap<String, String>,
+) {
+    let Some(lhs) = node.child_by_field_name(lhs_field) else {
+        return;
+    };
+    let mut names = Vec::new();
+    if is_identifier(lhs.kind()) {
+        names.push(text(lhs, src));
+    } else if matches!(
+        lhs.kind(),
+        "pattern_list"
+            | "tuple_pattern"
+            | "list_pattern"
+            | "expression_list"
+            | "array_pattern"
+            | "parenthesized_expression"
+            | "structured_binding_declarator"
+            | "variable_declaration_list"
+            | "tuple_expression"
+    ) {
+        pattern_identifiers(lhs, src, &mut names);
+    }
+    names.sort_unstable();
+    names.dedup();
+    names.truncate(64);
+    for name in names {
+        if name.is_empty() {
+            continue;
+        }
+        let already_declared = b.cpg.out_kind(parent, EdgeKind::Ast).any(|child| {
+            b.cpg.kind_of(child) == NodeKind::Local && b.cpg.name_of(child) == Some(name)
+        });
+        if already_declared {
+            continue;
+        }
+        let ty = types.get(name).map(String::as_str).unwrap_or("ANY");
+        let local = b.local(name, ty);
+        b.ast_child(parent, local);
     }
 }
 
@@ -1549,6 +1621,70 @@ fn resolved_type(spec: &TsLangSpec, node: Node, src: &[u8]) -> Option<String> {
         }
     }
     Some(head.to_string())
+}
+
+/// Declared method result type in the shared schema. Tree-sitter grammars use
+/// three field names for this concept; unannotated dynamic-language methods
+/// remain ANY, while statically typed functions without a result are void.
+fn method_return_type(spec: &TsLangSpec, node: Node, src: &[u8]) -> String {
+    let declared = ["return_type", "result", "type"]
+        .iter()
+        .find_map(|field| node.child_by_field_name(field));
+    if let Some(declared) = declared {
+        if let Some(resolved) = schema_type(spec, declared, src) {
+            return resolved;
+        }
+        let raw = text(declared, src)
+            .trim()
+            .trim_start_matches(':')
+            .trim_start_matches("->")
+            .trim();
+        if !raw.is_empty() {
+            return raw.to_string();
+        }
+    }
+    match spec.name {
+        "JavaScript" if !has_return_statement(spec, node) => "void".to_string(),
+        "Rust" => "()".to_string(),
+        "Java" | "Go" | "C++" => "void".to_string(),
+        _ => "ANY".to_string(),
+    }
+}
+
+fn schema_type(spec: &TsLangSpec, node: Node, src: &[u8]) -> Option<String> {
+    let mut value = resolved_type(spec, node, src).unwrap_or_else(|| {
+        text(node, src)
+            .trim()
+            .trim_start_matches(':')
+            .trim_start_matches("->")
+            .trim()
+            .to_string()
+    });
+    if value.is_empty() {
+        return None;
+    }
+    if spec.name == "TypeScript" {
+        value = match value.as_str() {
+            "string" => "String".to_string(),
+            "number" => "Number".to_string(),
+            "boolean" => "Boolean".to_string(),
+            "void" => "ANY".to_string(),
+            _ => value,
+        };
+    }
+    Some(value)
+}
+
+fn has_return_statement(spec: &TsLangSpec, node: Node) -> bool {
+    for child in named_children(node) {
+        if spec.is_return(child.kind()) {
+            return true;
+        }
+        if !spec.is_function(child.kind()) && has_return_statement(spec, child) {
+            return true;
+        }
+    }
+    false
 }
 
 /// The leftmost identifier a member chain hangs off: `request.args.files` →
