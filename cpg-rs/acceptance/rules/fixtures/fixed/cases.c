@@ -19,4 +19,18 @@ void fixed_cases(void *db, char *dst, size_t dst_size) {
     if (fd >= 0) {
         close(fd);
     }
+
+    size_t safe_size = validated_size(input);
+    memcpy(dst, input, safe_size);
+    void *allocation = malloc(safe_size);
+    getaddrinfo("localhost", "443", 0, 0);
+    ssize_t received = recv(0, dst, dst_size, 0);
+    unsigned int nonce = arc4random();
+    EVP_sha256();
+    char *save = 0;
+    strtok_r(dst, ":", &save);
+    getcwd(dst, dst_size);
+    if (received >= 0 && allocation != 0 && nonce != 0) {
+        free(allocation);
+    }
 }
