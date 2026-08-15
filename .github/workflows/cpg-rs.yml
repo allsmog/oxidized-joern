@@ -100,6 +100,9 @@ jobs:
       - name: Check committed cross-language frontend parity
         run: ./acceptance/languages/check.sh --committed-only
         working-directory: cpg-rs
+      - name: Check complete committed CPGQL contract
+        run: ./acceptance/cpgql/check.sh --committed-only
+        working-directory: cpg-rs
       - name: Check canonical C security outcomes
         run: cargo test -p cpg-analysis --test canonical_c_flow --locked
         working-directory: cpg-rs

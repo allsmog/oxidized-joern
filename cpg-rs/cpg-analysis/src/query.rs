@@ -1294,17 +1294,48 @@ impl<'a> QueryExecutor<'a> {
                     edge,
                     target,
                 } => {
-                    let neighbours: Box<dyn Iterator<Item = NodeId>> = match direction {
-                        Direction::Out => Box::new(self.cpg.out_kind(node, edge)),
-                        Direction::In => Box::new(self.cpg.in_kind(node, edge)),
+                    let mut neighbours: Vec<NodeId> = match direction {
+                        Direction::Out => self.cpg.out_kind(node, edge).collect(),
+                        Direction::In => self.cpg.in_kind(node, edge).collect(),
                     };
+                    // Joern derives branch-body steps from AST order even when
+                    // a serialized frontend omits the optional TRUE_BODY /
+                    // FALSE_BODY convenience edge. Imported Flatgraph CPGs
+                    // therefore need the same schema-level fallback.
+                    if neighbours.is_empty()
+                        && direction == Direction::Out
+                        && matches!(edge, EdgeKind::TrueBody | EdgeKind::FalseBody)
+                        && self.cpg.kind_of(node) == NodeKind::ControlStructure
+                    {
+                        let condition: HashSet<NodeId> =
+                            self.cpg.out_kind(node, EdgeKind::Condition).collect();
+                        let bodies: Vec<NodeId> = self
+                            .cpg
+                            .out_kind(node, EdgeKind::Ast)
+                            .filter(|child| !condition.contains(child))
+                            .filter(|&child| {
+                                matches!(
+                                    self.cpg.kind_of(child),
+                                    NodeKind::Block | NodeKind::ControlStructure
+                                )
+                            })
+                            .collect();
+                        let index = usize::from(edge == EdgeKind::FalseBody);
+                        if let Some(&body) = bodies.get(index) {
+                            neighbours.push(body);
+                        }
+                    }
                     out.extend(
                         neighbours
+                            .into_iter()
                             .filter(|&n| target.is_none_or(|kind| self.cpg.kind_of(n) == kind)),
                     );
                 }
                 Traversal::AstDescendants => {
-                    out.extend(self.ast_descendants(node, None));
+                    // Joern's `.ast` is reflexive-transitive: the starting
+                    // AST node is included before its descendants.
+                    out.push(node);
+                    out.extend(self.ast_descendants(node, None, false));
                 }
                 Traversal::AstAncestors => {
                     let mut stack: Vec<NodeId> = self.cpg.in_kind(node, EdgeKind::Ast).collect();
@@ -1324,7 +1355,11 @@ impl<'a> QueryExecutor<'a> {
                     }
                 }
                 Traversal::DescendantsOfKind(kind) => {
-                    out.extend(self.ast_descendants(node, Some(kind)));
+                    out.extend(self.ast_descendants(
+                        node,
+                        Some(kind),
+                        self.cpg.kind_of(node) == NodeKind::Method,
+                    ));
                 }
                 Traversal::ContainingMethod => {
                     if let Some(method) = self.containing_method(node) {
@@ -1332,16 +1367,30 @@ impl<'a> QueryExecutor<'a> {
                     }
                 }
                 Traversal::File => {
-                    let file_id = self.cpg.file_of(node);
-                    if let Some(file) = self
+                    let mut files: Vec<NodeId> = self
                         .cpg
-                        .nodes_in_file(file_id)
-                        .iter()
-                        .copied()
-                        .find(|&n| self.cpg.kind_of(n) == NodeKind::File)
-                    {
-                        out.push(file);
+                        .out_kind(node, EdgeKind::SourceFile)
+                        .filter(|&candidate| self.cpg.kind_of(candidate) == NodeKind::File)
+                        .collect();
+                    if files.is_empty() {
+                        if let Some(method) = self.containing_method(node) {
+                            files.extend(self.cpg.out_kind(method, EdgeKind::SourceFile).filter(
+                                |&candidate| self.cpg.kind_of(candidate) == NodeKind::File,
+                            ));
+                        }
                     }
+                    if files.is_empty() {
+                        let file_id = self.cpg.file_of(node);
+                        files.extend(
+                            self.cpg
+                                .nodes_in_file(file_id)
+                                .iter()
+                                .copied()
+                                .filter(|&candidate| self.cpg.kind_of(candidate) == NodeKind::File)
+                                .take(1),
+                        );
+                    }
+                    out.extend(files);
                 }
                 Traversal::Caller => {
                     for call in self.cpg.in_kind(node, EdgeKind::Call) {
@@ -1354,7 +1403,11 @@ impl<'a> QueryExecutor<'a> {
                     let calls = if self.cpg.kind_of(node) == NodeKind::Call {
                         vec![node]
                     } else {
-                        self.ast_descendants(node, Some(NodeKind::Call))
+                        self.ast_descendants(
+                            node,
+                            Some(NodeKind::Call),
+                            self.cpg.kind_of(node) == NodeKind::Method,
+                        )
                     };
                     for call in calls {
                         out.extend(
@@ -1399,10 +1452,16 @@ impl<'a> QueryExecutor<'a> {
         out
     }
 
-    fn ast_descendants(&self, root: NodeId, target: Option<NodeKind>) -> Vec<NodeId> {
+    fn ast_descendants(
+        &self,
+        root: NodeId,
+        target: Option<NodeKind>,
+        stop_at_nested_methods: bool,
+    ) -> Vec<NodeId> {
         let mut out = Vec::new();
         let mut seen = HashSet::new();
         let mut stack: Vec<NodeId> = self.cpg.out_kind(root, EdgeKind::Ast).collect();
+        stack.reverse();
         while let Some(node) = stack.pop() {
             if !seen.insert(node) {
                 continue;
@@ -1410,7 +1469,12 @@ impl<'a> QueryExecutor<'a> {
             if target.is_none_or(|kind| self.cpg.kind_of(node) == kind) {
                 out.push(node);
             }
-            stack.extend(self.cpg.out_kind(node, EdgeKind::Ast));
+            if stop_at_nested_methods && self.cpg.kind_of(node) == NodeKind::Method {
+                continue;
+            }
+            let mut children: Vec<NodeId> = self.cpg.out_kind(node, EdgeKind::Ast).collect();
+            children.reverse();
+            stack.extend(children);
         }
         out
     }
@@ -1928,6 +1992,63 @@ mod tests {
         assert_eq!(
             run(r#"cpg.call.file.filename"#),
             QueryResult::Strings(vec!["query.c".to_string(), "query.c".to_string()])
+        );
+    }
+
+    #[test]
+    fn semantic_descendants_preserve_order_and_stop_at_nested_methods() {
+        let mut cpg = fixture();
+        let file = cpg.file_id("query.c");
+        let file_node = cpg
+            .nodes_in_file(file)
+            .iter()
+            .copied()
+            .find(|&node| cpg.kind_of(node) == NodeKind::File)
+            .expect("file node");
+        let main = cpg.method_named("main")[0];
+        let mut b = CpgBuilder::new(&mut cpg, file);
+        let global = b.method("<global>", "query.c:<global>", "", None);
+        b.contains(file_node, global);
+        b.ast_child(global, main);
+
+        let execute = |query: &str| {
+            let plan = QueryCompiler::compile(query).expect("compile");
+            QueryExecutor::new(&cpg).execute(&plan).expect("execute")
+        };
+        assert_eq!(
+            execute(r#"cpg.method("main").call.head.name"#),
+            QueryResult::Strings(vec!["strcpy".to_string()])
+        );
+        assert_eq!(
+            execute(r#"cpg.method.where(_.call("strcpy")).name"#),
+            QueryResult::Strings(vec!["main".to_string()]),
+            "method.call must not inherit calls from nested methods"
+        );
+        assert_eq!(
+            execute(r#"cpg.method("<global>").ast.isCall.name"#),
+            QueryResult::Strings(vec!["strcpy".to_string(), "getenv".to_string()]),
+            "raw ast traversal still crosses the serialized global wrapper"
+        );
+    }
+
+    #[test]
+    fn branch_body_steps_fall_back_to_ast_order() {
+        let mut cpg = fixture();
+        let file = cpg.file_id("query.c");
+        let main = cpg.method_named("main")[0];
+        let mut b = CpgBuilder::new(&mut cpg, file);
+        let control = b.control_structure("if", Some(7));
+        b.ast_child(main, control);
+        let condition = b.identifier("ready", Some(7));
+        b.ast_child(control, condition);
+        b.cpg.add_edge(control, condition, EdgeKind::Condition);
+        let body = b.block();
+        b.ast_child(control, body);
+
+        let plan = QueryCompiler::compile("cpg.controlStructure.whenTrue").expect("compile");
+        assert_eq!(
+            QueryExecutor::new(&cpg).execute(&plan).expect("execute"),
+            QueryResult::Nodes(vec![body])
         );
     }
 

@@ -5,8 +5,8 @@ Single source of truth across iterations. Update in the same commit as the work.
 ## Current state
 
 - **Native query and Flatgraph replacement track started (2026-08-14).**
-  `cpg query` now compiles a committed 70-case CPGQL tier to native Rust
-  logical plans, with a 33-case zero-diff gate against Joern v4.0.555,
+  `cpg query` now compiles a committed 108-case CPGQL tier to native Rust
+  logical plans, with all 108 cases at zero diff against Joern v4.0.555,
   including path-producing `reachableByFlows`, dominance, post-dominance,
   and control-dependence traversals.
   `cpg import-joern` decodes Joern v4 Flatgraph and `cpg export-joern` emits
