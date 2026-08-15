@@ -50,7 +50,8 @@ it.
 
 ## 4. Optional interoperability
 
-- Add a Joern-loadable export only if a real migration workflow needs it.
+- Extend the current Joern-v4 Flatgraph import/export corpus when a real
+  migration workflow needs another language, property, or overlay.
 - Add network transport around the existing stdio/MCP surfaces only when a
   multi-client deployment requires it.
 - Consider additional frontends only with a named user and acceptance corpus.

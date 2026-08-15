@@ -45,7 +45,7 @@ const USAGE: &str = "usage (langs: c|cpp|go|java|javascript|typescript|python|ru
   cpg joern-digest <cpg.bin>                                     canonical Flatgraph content digest
   cpg flow <src-glob> <sink-glob> <dir>|--load <graph.cpg> [--lang L] [--sanitizer S]... [-o out.json]
   cpg vectors <dir>|--load <graph.cpg> [--lang L] [--features] [-o out.json]
-  cpg query <dir>|--load <graph.cpg> [--lang L] --query <CPGQL> [-o out.json]
+  cpg query <dir>|--load <graph.cpg> [--lang L] --query <CPGQL> [--format json|table] [-o out]
   cpg rules                                                     list compiled-in rule packs
   cpg x [-C <root>] <build|scan|apis|slice|flow|query|serve|taint|merge|list> <path> ...
   cpg mcp [--root <repo>]                                       Model Context Protocol server over stdio
@@ -839,14 +839,138 @@ fn vectors_cmd(args: &[String]) {
     }
 }
 
+fn query_json(cpg: &cpg_core::Cpg, result: cpg_analysis::QueryResult) -> Value {
+    use cpg_analysis::{node_kind_label, QueryResult};
+    match result {
+        QueryResult::Nodes(nodes) => Value::Array(
+            nodes
+                .into_iter()
+                .map(|node| {
+                    json!({
+                        "id": node.0,
+                        "label": node_kind_label(cpg.kind_of(node)),
+                        "name": cpg.name_of(node),
+                        "fullName": cpg.full_name_of(node),
+                        "code": cpg.code_of(node),
+                        "typeFullName": cpg.type_full_name_of(node),
+                        "signature": cpg.signature_of(node),
+                        "filename": cpg.path_of(cpg.file_of(node)),
+                        "lineNumber": cpg.line_of(node),
+                        "order": cpg.order_of(node),
+                        "argumentIndex": cpg.argument_index_of(node),
+                    })
+                })
+                .collect(),
+        ),
+        QueryResult::Strings(values) => json!(values),
+        QueryResult::Integers(values) => json!(values),
+        QueryResult::Booleans(values) => json!(values),
+        QueryResult::Paths(paths) => Value::Array(
+            paths
+                .into_iter()
+                .map(|path| {
+                    Value::Array(
+                        path.into_iter()
+                            .map(|node| {
+                                json!({
+                                    "id": node.0,
+                                    "label": node_kind_label(cpg.kind_of(node)),
+                                    "name": cpg.name_of(node),
+                                    "code": cpg.code_of(node),
+                                    "filename": cpg.path_of(cpg.file_of(node)),
+                                    "lineNumber": cpg.line_of(node),
+                                })
+                            })
+                            .collect(),
+                    )
+                })
+                .collect(),
+        ),
+        QueryResult::Count(count) => json!(count),
+    }
+}
+
+fn table_cell(value: Option<&str>) -> String {
+    const MAX_CHARS: usize = 120;
+    let flat = value
+        .unwrap_or("")
+        .chars()
+        .map(|character| {
+            if character.is_control() {
+                ' '
+            } else {
+                character
+            }
+        })
+        .collect::<String>();
+    if flat.chars().count() <= MAX_CHARS {
+        return flat;
+    }
+    let mut shortened = flat.chars().take(MAX_CHARS - 1).collect::<String>();
+    shortened.push('…');
+    shortened
+}
+
+fn node_table_row(cpg: &cpg_core::Cpg, node: cpg_core::NodeId) -> String {
+    let filename = cpg.path_of(cpg.file_of(node)).unwrap_or("");
+    let location = match cpg.line_of(node) {
+        Some(line) if !filename.is_empty() => format!("{filename}:{line}"),
+        Some(line) => line.to_string(),
+        None => filename.to_string(),
+    };
+    format!(
+        "{}\t{}\t{}\t{}\t{}",
+        node.0,
+        cpg_analysis::node_kind_label(cpg.kind_of(node)),
+        table_cell(Some(&location)),
+        table_cell(cpg.name_of(node).or_else(|| cpg.full_name_of(node))),
+        table_cell(cpg.code_of(node))
+    )
+}
+
+fn query_table(cpg: &cpg_core::Cpg, result: &cpg_analysis::QueryResult) -> String {
+    use cpg_analysis::QueryResult;
+    const HEADER: &str = "ID\tLABEL\tLOCATION\tNAME\tCODE";
+    match result {
+        QueryResult::Nodes(nodes) => std::iter::once(HEADER.to_string())
+            .chain(nodes.iter().map(|node| node_table_row(cpg, *node)))
+            .collect::<Vec<_>>()
+            .join("\n"),
+        QueryResult::Paths(paths) => paths
+            .iter()
+            .enumerate()
+            .flat_map(|(index, path)| {
+                std::iter::once(format!("PATH {}", index + 1))
+                    .chain(std::iter::once(HEADER.to_string()))
+                    .chain(path.iter().map(|node| node_table_row(cpg, *node)))
+                    .chain(std::iter::once(String::new()))
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
+            .trim_end()
+            .to_string(),
+        QueryResult::Strings(values) => values.join("\n"),
+        QueryResult::Integers(values) => values
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join("\n"),
+        QueryResult::Booleans(values) => values
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join("\n"),
+        QueryResult::Count(count) => count.to_string(),
+    }
+}
+
 /// `cpg query`: compile a CPGQL-compatible traversal and execute it over a
-/// source tree or persisted graph. Results are deterministic JSON: node
-/// traversals return rich node records, property projections return arrays,
-/// and `.size`/`.count` return a JSON integer.
+/// source tree or persisted graph. JSON is the stable machine interface.
+/// Explicit `--format table`, plus Joern-compatible `.p` and `.browse`
+/// terminals, render deterministic annotated rows for interactive use.
 fn query_cmd(args: &[String]) {
-    use cpg_analysis::{node_kind_label, QueryCompiler, QueryExecutor, QueryResult};
-    let usage =
-        "usage: cpg query <dir>|--load <graph.cpg> [--lang L] --query <CPGQL> [-o out.json]";
+    use cpg_analysis::{QueryCompiler, QueryExecutor};
+    let usage = "usage: cpg query <dir>|--load <graph.cpg> [--lang L] --query <CPGQL> [--format json|table] [-o out]";
     let Some(query) = flag(args, "--query") else {
         eprintln!("missing --query\n{usage}");
         std::process::exit(2);
@@ -872,54 +996,22 @@ fn query_cmd(args: &[String]) {
             std::process::exit(1);
         }
     };
-    let value = match result {
-        QueryResult::Nodes(nodes) => Value::Array(
-            nodes
-                .into_iter()
-                .map(|node| {
-                    json!({
-                        "id": node.0,
-                        "label": node_kind_label(project.cpg.kind_of(node)),
-                        "name": project.cpg.name_of(node),
-                        "fullName": project.cpg.full_name_of(node),
-                        "code": project.cpg.code_of(node),
-                        "typeFullName": project.cpg.type_full_name_of(node),
-                        "signature": project.cpg.signature_of(node),
-                        "filename": project.cpg.path_of(project.cpg.file_of(node)),
-                        "lineNumber": project.cpg.line_of(node),
-                        "order": project.cpg.order_of(node),
-                        "argumentIndex": project.cpg.argument_index_of(node),
-                    })
-                })
-                .collect(),
-        ),
-        QueryResult::Strings(values) => json!(values),
-        QueryResult::Integers(values) => json!(values),
-        QueryResult::Booleans(values) => json!(values),
-        QueryResult::Paths(paths) => Value::Array(
-            paths
-                .into_iter()
-                .map(|path| {
-                    Value::Array(
-                        path.into_iter()
-                            .map(|node| {
-                                json!({
-                                    "id": node.0,
-                                    "label": node_kind_label(project.cpg.kind_of(node)),
-                                    "name": project.cpg.name_of(node),
-                                    "code": project.cpg.code_of(node),
-                                    "filename": project.cpg.path_of(project.cpg.file_of(node)),
-                                    "lineNumber": project.cpg.line_of(node),
-                                })
-                            })
-                            .collect(),
-                    )
-                })
-                .collect(),
-        ),
-        QueryResult::Count(count) => json!(count),
+    let pretty_terminal = query.trim_end().ends_with(".p") || query.trim_end().ends_with(".browse");
+    let table = match flag(args, "--format") {
+        Some("json") => false,
+        Some("table") => true,
+        Some(format) => {
+            eprintln!("unknown query --format {format}; expected json or table\n{usage}");
+            std::process::exit(2);
+        }
+        None => pretty_terminal,
     };
-    let output = serde_json::to_string_pretty(&value).expect("query result serializes");
+    let output = if table {
+        query_table(&project.cpg, &result)
+    } else {
+        serde_json::to_string_pretty(&query_json(&project.cpg, result))
+            .expect("query result serializes")
+    };
     match flag(args, "-o") {
         Some(path) => {
             if let Err(e) = std::fs::write(path, output) {

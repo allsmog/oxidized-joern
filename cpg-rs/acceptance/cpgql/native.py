@@ -28,6 +28,8 @@ def main() -> None:
                 "c",
                 "--query",
                 case["query"],
+                "--format",
+                "json",
             ],
             check=True,
             capture_output=True,

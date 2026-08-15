@@ -88,6 +88,16 @@ pub struct Rule {
     /// `Project::find_taint_with_sanitizers` (see `scan::run_pack`).
     #[serde(default)]
     pub sanitizers: Vec<String>,
+    /// When true, suppress a finding only when a preceding capacity call is
+    /// tied to both the sink destination and its qualified size argument.
+    /// Ordinary bounds checks remain advisory because a comparison alone does
+    /// not prove that the unsafe operation is bounded.
+    #[serde(
+        default,
+        rename = "capacityProvisioningIsFix",
+        alias = "capacity_provisioning_is_fix"
+    )]
+    pub capacity_provisioning_is_fix: bool,
     /// Entry-point methods for this rule: every parameter of a method with
     /// one of these names is attacker-controlled (RPC/handler model). Merged
     /// with any entry methods given on the command line (`--rpc-sources`,
@@ -442,6 +452,7 @@ const C_RULES: &str = r#"{"rules":[
    "description":"external input controls the byte count of a memory or bounded string copy",
    "sources":["getenv","gets","gets@out0","fgets","fgets@out0","scanf@out1","read@out1","recv@out1","fread@out0"],
    "sinks":["memcpy@2","memmove@2","strncpy@2","strncat@2"],
+   "capacityProvisioningIsFix":true,
    "sanitizers":["validated_size"]},
   {"id":"C-ALLOC-012","name":"input-to-allocation-size","cwe":"CWE-789","severity":"high",
    "description":"external input controls a heap or stack allocation size",

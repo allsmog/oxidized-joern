@@ -818,25 +818,26 @@ fn columns(
     }
     for (label, column) in &mut columns {
         for (index, &node) in nodes.iter().enumerate() {
-            if cpg.external_label_of(node).is_none() {
-                continue;
-            }
             let value = cpg
                 .passthrough_properties_of(node)
                 .iter()
                 .find(|(symbol, _)| cpg.strings.resolve(**symbol) == label)
                 .map(|(_, value)| value);
-            column.replace_cell(index, value, cpg)?;
+            // Imported nodes must reproduce the oracle's exact column
+            // presence, including an absent mandatory-looking column. Native
+            // nodes instead treat sparse properties as an overlay and retain
+            // hot columns when there is no sparse value for that label.
+            if cpg.external_label_of(node).is_some() || value.is_some() {
+                column.replace_cell(index, value, cpg)?;
+            }
         }
     }
     columns.retain(|label, column| {
         column.has_values()
             || nodes.iter().any(|&node| {
-                cpg.external_label_of(node).is_some()
-                    && cpg
-                        .passthrough_properties_of(node)
-                        .keys()
-                        .any(|symbol| cpg.strings.resolve(*symbol) == label)
+                cpg.passthrough_properties_of(node)
+                    .keys()
+                    .any(|symbol| cpg.strings.resolve(*symbol) == label)
             })
     });
     Ok(columns.into_iter().collect())
@@ -1459,6 +1460,33 @@ mod tests {
         assert_eq!(
             digest_bytes(&bytes).expect("first digest"),
             digest_bytes(&reencoded).expect("second digest")
+        );
+    }
+
+    #[test]
+    fn native_sparse_properties_overlay_without_erasing_hot_columns() {
+        let mut source = fixture();
+        let call = source.calls_named("puts")[0];
+        let label = source.intern("DYNAMIC_TYPE_HINT_FULL_NAME");
+        let value = source.intern("fixture.Dynamic");
+        source.set_passthrough_property(call, label, PropertyValue::Strings(vec![Some(value)]));
+
+        let restored = decode(&encode(&source, "c").expect("encode")).expect("decode");
+        let call = restored.calls_named("puts")[0];
+        assert_eq!(restored.name_of(call), Some("puts"));
+        assert_eq!(restored.code_of(call), Some("puts(\"ok\")"));
+        let PropertyValue::Strings(values) = restored
+            .passthrough_property_named(call, "DYNAMIC_TYPE_HINT_FULL_NAME")
+            .expect("sparse property")
+        else {
+            panic!("wrong sparse property type");
+        };
+        assert_eq!(
+            values
+                .iter()
+                .filter_map(|value| value.map(|symbol| restored.strings.resolve(symbol)))
+                .collect::<Vec<_>>(),
+            vec!["fixture.Dynamic"]
         );
     }
 
