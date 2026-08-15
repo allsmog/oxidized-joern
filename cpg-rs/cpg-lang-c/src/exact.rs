@@ -5072,9 +5072,9 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         // second loop: every arg use -> every gen member, then filtered by
         // the call's flow SEMANTICS (Joern's EdgeValidator.isValidEdge). For a
         // call with explicit semantics, an arg->arg edge is valid iff there is
-        // a flow mapping (srcArgIdx -> dstArgIdx) and arg->return iff
-        // (srcArgIdx -> -1). Operators with no semantics are pass-through
-        // (all edges valid); `sizeOf` has empty semantics (no flows).
+        // a flow mapping (srcArgIdx -> dstArgIdx). Operators with no explicit
+        // semantics are pass-through; named calls default to input -> return
+        // only, so their actual arguments do not become sibling definitions.
         let _ = is_gen_arg_node;
         let sem = operator_semantics(&arena[c].name);
         for u in args_of(c) {
@@ -5088,10 +5088,11 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
                 }
                 // An argument always taints its call's output node. An
                 // argument -> sibling-argument edge is gated by the call's
-                // flow semantics (pass-through when the operator has none).
+                // flow semantics (pass-through only for operators with no
+                // explicit semantics).
                 let valid = gnode == c
                     || match &sem {
-                        None => true,
+                        None => arena[c].name.starts_with("<operator"),
                         Some(maps) => maps.contains(&(u_idx, arena[gnode].arg_index)),
                     };
                 if valid {
