@@ -42,10 +42,12 @@ The release contract covers these C operations:
   SARIF output;
 - canonical flow facts and final findings for branches, kills, loops, returns,
   globals, pointer/member access, sanitizers, cross-calls, and recursion;
-- a labeled 40-expectation default-rule corpus covering command injection,
-  unbounded copies, uncontrolled format strings, `gets`, SQL injection, path
-  traversal, and dynamic-library loading, including near-miss, fixed, and
-  cross-file cases at 100% committed precision and recall;
+- a labeled 68-expectation, 17-rule default corpus covering command injection,
+  unbounded and attacker-sized copies, uncontrolled format strings, `gets`,
+  SQL injection, path traversal, dynamic-library loading, attacker-sized
+  allocation, network destinations, unchecked critical returns, weak random
+  and cryptographic primitives, and legacy string APIs, including near-miss,
+  fixed, and cross-file cases at 100% committed precision and recall;
 - distinct call identities for same-named translation-unit-local functions;
 - content-correct project updates whose result equals a clean rebuild;
 - pinned zlib and Lua builds under recorded wall-time and peak-RSS ceilings.
@@ -54,8 +56,8 @@ The committed C oracle is exact for its corpus, not a claim that every valid C
 program has already been compared with Joern. Conditional and advanced macro
 expansion plus nested include paths, forced includes, and command-line defines
 have pinned coverage. Compiler-informed type resolution, aliasing, and
-points-to precision remain areas where a new construct can require another
-fixture and implementation slice.
+points-to behavior are pinned for the committed corpus; a newly supported
+construct must add another fixture and return the exact differential to zero.
 
 ## Deliberate incompatibilities
 
