@@ -18,3 +18,15 @@ void multi_file_cases(void *db, char *dst) {
     fscanf(stdin, "%[a-z]", dst);
     vsprintf(dst, "%s", "constant");
 }
+
+void expanded_multi_file_cases(int fd, char *dst, const char *src, void *digest) {
+    char *input = external_input();
+    memcpy(dst, src, input);
+    void *allocation = malloc(input);
+    getaddrinfo(input, "443", 0, 0);
+    recv(fd, dst, 64, 0);
+    random();
+    SHA1(src, 1, digest);
+    strtok(dst, ":");
+    free(allocation);
+}

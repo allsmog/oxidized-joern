@@ -12,8 +12,8 @@ Single source of truth across iterations. Update in the same commit as the work.
   `cpg import-joern` decodes Joern v4 Flatgraph and `cpg export-joern` emits
   it; the pinned gate passes C, Java, and Python fixtures in both directions,
   including content-exact Joern-to-CPG2-to-Joern round-trip digests. Full
-  CPGQL, wider C semantics, rules, and per-language promotions remain open in
-  `REPLACEMENT_CONTRACT.md`.
+  CPGQL error/rendering completeness, specialized legacy rules, and
+  per-language promotions remain open in `REPLACEMENT_CONTRACT.md`.
 - **Production C convergence complete (2026-08-14).** The released
   `CFrontend`/`Project`/`standard_pipeline` path is the 122/122 committed Joern
   v4.0.555 oracle path, including 1,961/1,961 ReachingDef facts. Canonical
@@ -25,6 +25,11 @@ Single source of truth across iterations. Update in the same commit as the work.
   forced includes, and command-line definitions also pass a live 4/4
   differential against Joern v4.0.555. See `COMPATIBILITY.md` for the release
   boundary.
+- **Default C security catalog expanded (2026-08-14).** Seventeen native rules
+  are guarded by 68 positive, near-miss, fixed, and multi-file expectations at
+  100% committed precision and recall. The added families cover tainted copy
+  and allocation sizes, network destinations, unchecked critical returns,
+  weak RNG/crypto, and legacy unsafe string APIs.
 - **All-language acceptance complete (2026-08-14).** C, C++, Go, Java,
   JavaScript, TypeScript, Python, Ruby, Rust, and Scala pass the shared schema,
   interprocedural summary/taint, and save/load contract. Only C is promoted to
