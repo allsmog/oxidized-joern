@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the committed differential CPGQL cases through the native CLI."""
+"""Run the complete committed CPGQL catalog through the native CLI."""
 
 import argparse
 import base64
@@ -15,7 +15,8 @@ def main() -> None:
     parser.add_argument("--catalog", required=True)
     args = parser.parse_args()
 
-    cases = json.loads(Path(args.catalog).read_text(encoding="utf-8"))
+    document = json.loads(Path(args.catalog).read_text(encoding="utf-8"))
+    cases = [case for tier in document["tiers"] for case in tier["cases"]]
     for case in cases:
         completed = subprocess.run(
             [
@@ -34,12 +35,15 @@ def main() -> None:
         )
         value = json.loads(completed.stdout)
         if not isinstance(value, list):
-            raise SystemExit(f"{case['id']}: differential query did not return a list")
-        if case["id"] == "flow-paths":
-            value = [" -> ".join(str(node.get("code")) for node in path) for path in value]
+            value = [value]
+
         def render(item: object) -> str:
             if isinstance(item, bool):
                 return str(item).lower()
+            if isinstance(item, dict) and "id" in item and "label" in item:
+                return f"node:{item['label']}"
+            if isinstance(item, list):
+                return " -> ".join(render(element) for element in item)
             return str(item)
 
         normalized = "\x1f".join(sorted(render(item) for item in value))
