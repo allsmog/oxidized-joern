@@ -96,7 +96,17 @@ fn rules_cmd() {
     // broken pipe when the reader closes early.
     let mut out = String::new();
     out.push_str("built-in language packs (used when scan has no --rules):\n");
-    for lang in ["c", "cpp", "go", "java", "javascript", "python", "scala"] {
+    for lang in [
+        "c",
+        "cpp",
+        "go",
+        "java",
+        "javascript",
+        "python",
+        "ruby",
+        "rust",
+        "scala",
+    ] {
         if let Some(p) = cpg_cli::rules::builtin_pack(lang) {
             out.push_str(&format!("  {lang}: {} rules\n", p.rules.len()));
         }

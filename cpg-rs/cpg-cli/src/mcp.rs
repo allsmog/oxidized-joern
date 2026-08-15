@@ -233,7 +233,7 @@ impl Server {
                     })
                     .collect();
                 Ok(json!({
-                    "builtinLangs": ["c", "cpp", "go", "java", "javascript", "python", "scala"],
+                    "builtinLangs": ["c", "cpp", "go", "java", "javascript", "python", "ruby", "rust", "scala"],
                     "irisPacks": iris,
                 }))
             }
