@@ -242,6 +242,8 @@ pub fn builtin_pack(lang: &str) -> Option<RulePack> {
         "python" => PYTHON_RULES,
         "java" => JAVA_RULES,
         "javascript" | "js" | "typescript" | "ts" | "tsx" => JS_RULES,
+        "ruby" | "rb" => RUBY_RULES,
+        "rust" | "rs" => RUST_RULES,
         "c" => C_RULES,
         "cpp" | "c++" | "cxx" => CPP_RULES,
         _ => return None,
@@ -340,6 +342,36 @@ const JS_RULES: &str = r#"{"rules":[
    "description":"request input reaches a filesystem path operation",
    "sources":["query","param","body","get"],
    "sinks":["readFile","readFileSync","writeFile","writeFileSync","createReadStream"]}
+]}"#;
+
+const RUBY_RULES: &str = r#"{"rules":[
+  {"id":"RB-CMD-001","name":"input-to-command","cwe":"CWE-78","severity":"high",
+   "description":"request, console, or stream input reaches process execution",
+   "sources":["gets","readpartial","params","param"],
+   "sinks":["system","exec","spawn","popen"]},
+  {"id":"RB-EVAL-002","name":"input-to-eval","cwe":"CWE-95","severity":"critical",
+   "description":"request, console, or stream input reaches dynamic evaluation",
+   "sources":["gets","readpartial","params","param"],
+   "sinks":["eval","class_eval","module_eval","instance_eval"]},
+  {"id":"RB-SQL-003","name":"input-to-sql","cwe":"CWE-89","severity":"high",
+   "description":"request, console, or stream input reaches SQL execution",
+   "sources":["gets","readpartial","params","param"],
+   "sinks":["execute@0","exec_query@0","find_by_sql@0"]}
+]}"#;
+
+const RUST_RULES: &str = r#"{"rules":[
+  {"id":"RS-CMD-001","name":"input-to-command-ffi","cwe":"CWE-78","severity":"high",
+   "description":"environment or stream input reaches a C process-execution interface",
+   "sources":["var","var_os","read_line","read_to_string"],
+   "sinks":["system@0","popen@0","execve@0"]},
+  {"id":"RS-SQL-002","name":"input-to-sql-ffi","cwe":"CWE-89","severity":"high",
+   "description":"environment or stream input reaches a native SQL execution interface",
+   "sources":["var","var_os","read_line","read_to_string"],
+   "sinks":["sqlite3_exec@1","mysql_query@1","PQexec@1"]},
+  {"id":"RS-PATH-003","name":"input-to-filesystem","cwe":"CWE-22","severity":"medium",
+   "description":"environment or stream input reaches a filesystem operation",
+   "sources":["var","var_os","read_line","read_to_string"],
+   "sinks":["open@0","remove_file@0","remove_dir_all@0","rename@0"]}
 ]}"#;
 
 const CPP_RULES: &str = r#"{"rules":[
@@ -566,6 +598,10 @@ mod tests {
             "typescript",
             "ts",
             "tsx",
+            "ruby",
+            "rb",
+            "rust",
+            "rs",
             "c",
             "cpp",
         ] {

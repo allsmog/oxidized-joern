@@ -30,10 +30,13 @@ Single source of truth across iterations. Update in the same commit as the work.
   100% committed precision and recall. The added families cover tainted copy
   and allocation sizes, network destinations, unchecked critical returns,
   weak RNG/crypto, and legacy unsafe string APIs.
-- **All-language acceptance complete (2026-08-14).** C, C++, Go, Java,
-  JavaScript, TypeScript, Python, Ruby, Rust, and Scala pass the shared schema,
-  interprocedural summary/taint, and save/load contract. Only C is promoted to
-  production preview; the remaining frontends are explicitly experimental.
+- **Oracle-backed language promotion complete (2026-08-14).** C++, Go, Java,
+  JavaScript, TypeScript, Python, Ruby, and Rust combine 13/13 live Joern
+  semantic probes with two immutable real-project workflows each. The 16
+  projects repeat build, save/load, export, CPGQL query, scan, and SARIF with
+  exact hashes; 30 default rules add 120 labeled outcomes. Scala remains
+  native-only Experimental because the pinned Joern release has no Scala
+  source frontend.
 
 ## Historical milestone log
 

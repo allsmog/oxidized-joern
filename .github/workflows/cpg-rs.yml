@@ -109,6 +109,9 @@ jobs:
       - name: Check labeled C rule precision and recall
         run: cargo test -p cpg-cli --test rule_quality --locked
         working-directory: cpg-rs
+      - name: Check promoted-language rule precision and recall
+        run: cargo test -p cpg-cli --test language_rule_quality --locked
+        working-directory: cpg-rs
       - name: Check every accepted language workflow
         run: |
           cargo test -p conformance --locked all_languages_conform
@@ -154,4 +157,27 @@ jobs:
         working-directory: cpg-rs
       - name: Run Flatgraph interoperability differential
         run: ./acceptance/flatgraph/check.sh
+        working-directory: cpg-rs
+
+  real-language-projects:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # 1.97.0
+        with:
+          toolchain: 1.97.0
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: cpg-rs
+          key: linux-real-language-projects
+      - name: Build production CLI
+        run: cargo build --release --locked -p cpg-cli
+        working-directory: cpg-rs
+      - name: Validate 16 pinned non-C projects
+        run: ./scripts/language-project-acceptance.py
         working-directory: cpg-rs

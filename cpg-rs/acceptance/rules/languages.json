@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "thresholds": {
+    "aggregatePrecision": 1.0,
+    "aggregateRecall": 1.0,
+    "perRulePrecision": 1.0,
+    "perRuleRecall": 1.0
+  },
+  "languages": [
+    {"id":"cpp","extension":"cpp","rules":[
+      {"id":"CPP-CMD-001","source":"getenv","sink":"system@0"},
+      {"id":"CPP-FMT-002","source":"getenv","sink":"printf@0"},
+      {"id":"CPP-BUF-003","source":"getenv","sink":"strcpy@1"},
+      {"id":"CPP-SQL-004","source":"getenv","sink":"sqlite3_exec@1"},
+      {"id":"CPP-PATH-005","source":"getenv","sink":"fopen@0"},
+      {"id":"CPP-LIB-006","source":"getenv","sink":"LoadLibraryA@0"}
+    ]},
+    {"id":"go","extension":"go","rules":[
+      {"id":"GO-CMD-001","source":"FormValue","sink":"Command@0"},
+      {"id":"GO-SQL-002","source":"FormValue","sink":"Query@0"},
+      {"id":"GO-PATH-003","source":"FormValue","sink":"Open@0"},
+      {"id":"GO-SSRF-004","source":"FormValue","sink":"NewRequest@1"},
+      {"id":"GO-SQLFMT-005","source":"Sprintf","sink":"Query@0"}
+    ]},
+    {"id":"java","extension":"java","rules":[
+      {"id":"JV-CMD-001","source":"getParameter","sink":"exec@0"},
+      {"id":"JV-SQL-002","source":"getParameter","sink":"executeQuery@0"},
+      {"id":"JV-PATH-003","source":"getParameter","sink":"FileInputStream@0"},
+      {"id":"JV-REDIR-004","source":"getParameter","sink":"sendRedirect@0"}
+    ]},
+    {"id":"javascript","extension":"js","rules":[
+      {"id":"JS-CMD-001","source":"query","sink":"exec@0"},
+      {"id":"JS-EVAL-002","source":"query","sink":"eval@0"},
+      {"id":"JS-PATH-003","source":"query","sink":"readFile@0"}
+    ]},
+    {"id":"typescript","extension":"ts","rules":[
+      {"id":"JS-CMD-001","source":"query","sink":"exec@0"},
+      {"id":"JS-EVAL-002","source":"query","sink":"eval@0"},
+      {"id":"JS-PATH-003","source":"query","sink":"readFile@0"}
+    ]},
+    {"id":"python","extension":"py","rules":[
+      {"id":"PY-CMD-001","source":"input","sink":"system@0"},
+      {"id":"PY-EVAL-002","source":"input","sink":"eval@0"},
+      {"id":"PY-SQL-003","source":"input","sink":"execute@0"}
+    ]},
+    {"id":"ruby","extension":"rb","rules":[
+      {"id":"RB-CMD-001","source":"gets","sink":"system@0"},
+      {"id":"RB-EVAL-002","source":"gets","sink":"eval@0"},
+      {"id":"RB-SQL-003","source":"gets","sink":"execute@0"}
+    ]},
+    {"id":"rust","extension":"rs","rules":[
+      {"id":"RS-CMD-001","source":"var","sink":"system@0"},
+      {"id":"RS-SQL-002","source":"var","sink":"sqlite3_exec@1"},
+      {"id":"RS-PATH-003","source":"var","sink":"open@0"}
+    ]}
+  ]
+}

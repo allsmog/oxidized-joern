@@ -1,9 +1,9 @@
-# Roadmap after the production C convergence
+# Roadmap after native frontend convergence
 
-The Rust-native `0.1.x` line has a release-blocking production contract for
-the C workflows in [`COMPATIBILITY.md`](COMPATIBILITY.md). The production C
-frontend and analysis pipeline are now the same path that passes the committed
-Joern oracle; there is no second standalone parity implementation to merge.
+The Rust-native `0.1.x` line has release-blocking production-preview contracts
+for the workflows in [`COMPATIBILITY.md`](COMPATIBILITY.md). C passes the exact
+oracle; eight additional frontends combine normalized live differentials with
+two real projects and labeled security outcomes apiece.
 
 This roadmap is for expanding capability and confidence. None of these items
 requires restoring Scala implementation code, Maven, a JVM runtime, or the
@@ -32,11 +32,10 @@ Joern Scala console.
 - Benchmark build, load, flow, and scan against larger named repositories on
   fixed CI hardware.
 
-## 3. Promote other languages one at a time
+## 3. Expand promoted-language confidence
 
-C++, Go, Java, JavaScript, TypeScript, Python, Ruby, Rust, and Scala currently
-pass the shared schema, summary/taint, and persistence acceptance test but
-remain experimental. Promotion requires a separate ladder for each language:
+C++, Go, Java, JavaScript, TypeScript, Python, Ruby, and Rust have completed
+the current promotion ladder:
 
 1. pin a representative language-specific corpus and oracle;
 2. qualify namespaces, packages, types, imports, overloads, and dispatch;
@@ -44,9 +43,10 @@ remain experimental. Promotion requires a separate ladder for each language:
 4. add at least two immutable real-project fixtures with performance budgets;
 5. publish the resulting workflow boundary in `COMPATIBILITY.md`.
 
-The suggested order is Java, JavaScript/TypeScript, Python, Go, then C++.
-Demand can change that order. Passing the shared test alone never promotes a
-language to production status.
+Future work grows those corpora and moves from normalized probes toward wider
+whole-graph comparisons. Scala remains Experimental until an independently
+maintained source oracle exists; shared smoke coverage alone does not promote
+it.
 
 ## 4. Optional interoperability
 
@@ -60,5 +60,6 @@ language to production status.
 - Restoring the Scala implementation, Maven build, or JVM runtime.
 - Recreating Joern's Scala console, full CPGQL semantics, or JVM plugin model.
 - Claiming full Joern parity from a finite C corpus.
-- Promoting every accepted parser to production simultaneously.
+- Promoting a parser without language-specific oracle, real-project, and
+  security evidence.
 - Matching internal overlays that do not affect documented output or findings.

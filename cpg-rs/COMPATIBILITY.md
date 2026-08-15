@@ -1,9 +1,8 @@
 # Compatibility and release contract
 
-Oxidized Joern `0.1.x` is production-ready for the C workflows explicitly
-listed below. It is not yet a drop-in replacement for every Joern frontend,
-the full CPGQL surface, the Scala console, plugins, or every Joern graph
-property.
+Oxidized Joern `0.1.x` is production-ready for the language workflows
+explicitly listed below. It is not yet a universal drop-in replacement for
+the full CPGQL/Scala-console/plugin surface or every Joern graph property.
 
 Status meanings:
 
@@ -18,19 +17,25 @@ Status meanings:
 | Language | Build and query | Save/load | Flow and scan | Incremental update | Evidence | Status |
 |---|---|---|---|---|---|---|
 | C | Yes | Yes | Yes, including SARIF | Yes; correctness-first full-project rebuild | 122/122 Joern v4.0.555 graph blocks; 1,961/1,961 ReachingDef facts; canonical outcome suite; pinned zlib 1.3.1 and Lua 5.4.7 | **Production preview** |
-| C++ | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus shared acceptance | Experimental |
-| Go | Yes | Yes | Yes | File-local incremental path | 13/13 live Joern v4.0.555 semantic probes plus cross-file update tests | Experimental |
-| Java | Yes | Yes | Yes | File-local incremental path | 13/13 live Joern v4.0.555 semantic probes plus cross-file update tests | Experimental |
-| JavaScript | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus shared acceptance | Experimental |
-| TypeScript/TSX | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus dialect tests | Experimental |
-| Python | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus shared acceptance | Experimental |
-| Ruby | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus shared acceptance | Experimental |
-| Rust | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus shared acceptance | Experimental |
+| C++ | Yes | Yes | Yes | Generic frontend | 13/13 live Joern probes; cxxopts and expected deterministic workflows; labeled default rules | **Production preview** |
+| Go | Yes | Yes | Yes | File-local incremental path | 13/13 live Joern probes; google/uuid and gjson deterministic workflows; labeled default rules | **Production preview** |
+| Java | Yes | Yes | Yes | File-local incremental path | 13/13 live Joern probes; Gson and jsoup deterministic workflows; labeled default rules | **Production preview** |
+| JavaScript | Yes | Yes | Yes | Generic frontend | 13/13 live Joern probes; minimist and escape-string-regexp deterministic workflows; labeled default rules | **Production preview** |
+| TypeScript/TSX | Yes | Yes | Yes | Generic frontend | 13/13 live Joern probes; ts-pattern and Zod deterministic workflows; labeled default rules | **Production preview** |
+| Python | Yes | Yes | Yes | Generic frontend | 13/13 live Joern probes; MarkupSafe and ItsDangerous deterministic workflows; labeled default rules | **Production preview** |
+| Ruby | Yes | Yes | Yes | Generic frontend | 13/13 live Joern probes; ruby/json and Rack deterministic workflows; labeled default rules | **Production preview** |
+| Rust | Yes | Yes | Yes | Generic frontend | 13/13 live Joern probes; itoa and anyhow deterministic workflows; labeled default rules | **Production preview** |
 | Scala | Yes | Yes | Yes | Generic frontend | Shared schema, summary/taint, and persistence acceptance | Experimental |
 
 Scala in this table means that the native Rust executable can parse and
 analyse Scala source. The implementation and release contain no Scala runtime,
 JVM, Maven, or Scala console.
+
+The eight promoted non-C frontends additionally run a 16-project gate that
+repeats build, CPG2 save/load, complete JSON export, CPGQL query, built-in scan,
+and SARIF output and compares immutable hashes. Their 30 default rules have
+120 positive, near-miss, fixed, and multi-file expectations at 100% committed
+precision and recall.
 
 ## C production-preview boundary
 
@@ -72,9 +77,9 @@ The following are unsupported in `0.1.x`:
   `cpg export-joern` and `cpg import-joern` conversions use Joern v4's current
   Flatgraph format; C, Java, and Python pass bidirectional load probes and
   content-exact persisted round-trip digests;
-- production parity claims for non-C frontends; eight frontends have a pinned
-  13-probe source-semantic differential, but not the required real-project and
-  security-outcome corpora yet;
+- whole-graph byte-identity claims for non-C frontends; their production
+  preview boundary is the normalized live differential, pinned real-project
+  workflows, and labeled security outcomes listed above;
 - every rule from Joern querydb.
 
 Use the native CLI, JSON/SARIF outputs, stdio query server, or MCP interface as
@@ -84,9 +89,9 @@ the supported integration surfaces.
 
 Every release must pass the locked Rust workspace tests, formatting, Clippy,
 dependency audit, 122/122 committed C parity, canonical C scanner outcomes,
-the labeled default-C-rule quality gate, the all-language acceptance test,
-pinned zlib/Lua acceptance, and packaged binary and container tests. The
-zlib/Lua suite also runs nightly.
+the 188-label default-rule quality gates, the all-language acceptance test,
+pinned zlib/Lua and 16-project non-C acceptance, and packaged binary and
+container tests. The real-project suites also run on ordinary CI changes.
 
 The stricter requirements for promoting the project from C production preview
 to a production Joern replacement are tracked in `REPLACEMENT_CONTRACT.md`.
