@@ -75,10 +75,24 @@ ORACLE_EQUIVALENTS = {
     "source-file-edge": (
         "cpg.method.flatMap(_._sourceFileOut).collectAll[File].name"
     ),
+    "positive-source-file-edge": (
+        "cpg.method.flatMap(_._sourceFileOut).collectAll[File].name"
+    ),
+    "positive-base-type-declaration": (
+        'cpg.typeDecl.name("Derived").flatMap(_._inheritsFromOut)'
+        ".collectAll[TypeDecl].fullName"
+    ),
+    "positive-derived-type-declaration": (
+        'cpg.typeDecl.name("Base").flatMap(_._inheritsFromIn)'
+        ".collectAll[TypeDecl].fullName"
+    ),
     # The C fixture has no closure bindings; selection still proves the empty
     # traversal behavior while the positive CAPTURE edge is covered by the
     # Flatgraph interoperability corpus.
     "capture-edges": 'cpg.closureBinding.flatMap(_._captureOut)',
+    "positive-capture-edge": (
+        'cpg.closureBinding.flatMap(_._captureOut).map(_.label)'
+    ),
 }
 
 

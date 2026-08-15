@@ -18,6 +18,9 @@ on:
 permissions:
   contents: read
 
+env:
+  JOERN_VERSION: v4.0.555
+
 jobs:
   semantic-quality:
     runs-on: ubuntu-24.04
@@ -78,6 +81,48 @@ jobs:
         working-directory: cpg-rs
         run: cargo test -p cpg-cli --test language_rule_quality --locked
 
+  oracle-differentials:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # 1.97.0
+        with:
+          toolchain: 1.97.0
+      - name: Set up JDK for the pinned Joern oracle
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: cpg-rs
+          key: linux-release-oracle
+      - name: Cache the pinned Joern oracle
+        uses: actions/cache@55cc8345863c7cc4f66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: /tmp/joern-cli-dist
+          key: joern-oracle-${{ env.JOERN_VERSION }}
+      - name: Install the pinned Joern oracle
+        run: ./cpg-rs/joern-parity/setup-oracle.sh
+      - name: Run exact C graph and flow differential
+        working-directory: cpg-rs/joern-parity
+        run: ./check.sh
+      - name: Run cross-language frontend differential
+        working-directory: cpg-rs
+        run: ./acceptance/languages/check.sh
+      - name: Run C compiler-input differential
+        working-directory: cpg-rs
+        run: ./acceptance/c-semantics/check.sh
+      - name: Run native CPGQL differential
+        working-directory: cpg-rs
+        run: ./acceptance/cpgql/check.sh
+      - name: Run Flatgraph interoperability differential
+        working-directory: cpg-rs
+        run: ./acceptance/flatgraph/check.sh
+
   real-c-projects:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -131,7 +176,7 @@ jobs:
   # branch-protection-compatible skipped result; the first step fails closed.
   linux-package:
     if: ${{ always() }}
-    needs: [semantic-quality, committed-parity, real-c-projects, real-language-projects]
+    needs: [semantic-quality, committed-parity, oracle-differentials, real-c-projects, real-language-projects]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -140,12 +185,13 @@ jobs:
         env:
           SEMANTIC_RESULT: ${{ needs.semantic-quality.result }}
           PARITY_RESULT: ${{ needs.committed-parity.result }}
+          ORACLE_RESULT: ${{ needs.oracle-differentials.result }}
           REAL_C_RESULT: ${{ needs.real-c-projects.result }}
           REAL_LANG_RESULT: ${{ needs.real-language-projects.result }}
         run: |
           set -euo pipefail
-          if [[ "${SEMANTIC_RESULT}" != "success" || "${PARITY_RESULT}" != "success" || "${REAL_C_RESULT}" != "success" || "${REAL_LANG_RESULT}" != "success" ]]; then
-            echo "::error::semantic-quality=${SEMANTIC_RESULT}, committed-parity=${PARITY_RESULT}, real-c-projects=${REAL_C_RESULT}, real-language-projects=${REAL_LANG_RESULT}"
+          if [[ "${SEMANTIC_RESULT}" != "success" || "${PARITY_RESULT}" != "success" || "${ORACLE_RESULT}" != "success" || "${REAL_C_RESULT}" != "success" || "${REAL_LANG_RESULT}" != "success" ]]; then
+            echo "::error::semantic-quality=${SEMANTIC_RESULT}, committed-parity=${PARITY_RESULT}, oracle-differentials=${ORACLE_RESULT}, real-c-projects=${REAL_C_RESULT}, real-language-projects=${REAL_LANG_RESULT}"
             exit 1
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

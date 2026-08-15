@@ -36,11 +36,15 @@ cleanup() {
 }
 trap cleanup EXIT
 
-cargo build --manifest-path "$repo_root/Cargo.toml" --release --locked -p cpg-cli
+cargo build --manifest-path "$repo_root/Cargo.toml" --release --locked -p cpg-cli --bin cpg --example cpgql_schema_fixture
 cpg="$repo_root/target/release/cpg"
+schema_fixture="$repo_root/target/release/examples/cpgql_schema_fixture"
 fixture="$repo_root/acceptance/cpgql/fixture"
 catalog="$repo_root/acceptance/cpgql/catalog.json"
+positive_catalog="$repo_root/acceptance/cpgql/positive.json"
+error_catalog="$repo_root/acceptance/cpgql/errors.json"
 expected="$(jq '[.tiers[].cases[]] | length' "$catalog")"
+positive_expected="$(jq '[.tiers[].cases[]] | length' "$positive_catalog")"
 
 "$cpg" build "$fixture" --lang c -o "$scratch/native-source.cpg" >/dev/null
 python3 "$repo_root/acceptance/cpgql/native.py" \
@@ -59,8 +63,30 @@ if [[ "$source_digest" != "$expected_digest" ]]; then
   echo "committed CPGQL result changed: expected $expected_digest, found $source_digest" >&2
   exit 1
 fi
+
+"$schema_fixture" "$scratch/schema.cpg"
+python3 "$repo_root/acceptance/cpgql/native.py" \
+  --cpg "$cpg" \
+  --graph "$scratch/schema.cpg" \
+  --catalog "$positive_catalog" \
+  | sort > "$scratch/native-positive.tsv"
+positive_actual="$(wc -l < "$scratch/native-positive.tsv" | tr -d ' ')"
+if [[ "$positive_actual" -ne "$positive_expected" ]]; then
+  echo "incomplete populated CPGQL run: expected $positive_expected cases, found $positive_actual" >&2
+  exit 1
+fi
+if awk -F '\t' 'NF != 3 || $3 == "" { found=1 } END { exit !found }' "$scratch/native-positive.tsv"; then
+  echo "populated CPGQL corpus contains an empty result" >&2
+  exit 1
+fi
+positive_digest="$(python3 -c 'import hashlib, sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' "$scratch/native-positive.tsv")"
+positive_expected_digest="$(tr -d '[:space:]' < "$repo_root/acceptance/cpgql/positive.sha256")"
+if [[ "$positive_digest" != "$positive_expected_digest" ]]; then
+  echo "populated CPGQL result changed: expected $positive_expected_digest, found $positive_digest" >&2
+  exit 1
+fi
 if [[ "$committed_only" -eq 1 ]]; then
-  echo "CPGQL committed contract: PASS ($source_actual/$expected native cases)"
+  echo "CPGQL committed contract: PASS ($source_actual/$expected source cases, $positive_actual/$positive_expected populated schema cases)"
   exit 0
 fi
 
@@ -74,6 +100,15 @@ python3 "$repo_root/acceptance/cpgql/generate_probe.py" \
   | rg '^CPGQL\t' \
   | sort > "$scratch/oracle.tsv"
 
+"$cpg" export-joern --load "$scratch/schema.cpg" --lang c -o "$scratch/schema.cpg.bin" >/dev/null
+python3 "$repo_root/acceptance/cpgql/generate_probe.py" \
+  --catalog "$positive_catalog" \
+  --output "$scratch/positive-probe.sc"
+"$joern" --nocolors --script "$scratch/positive-probe.sc" \
+  --param "cpgPath=$scratch/schema.cpg.bin" \
+  | rg '^CPGQL\t' \
+  | sort > "$scratch/oracle-positive.tsv"
+
 python3 "$repo_root/acceptance/cpgql/native.py" \
   --cpg "$cpg" \
   --graph "$scratch/oracle.cpg" \
@@ -86,4 +121,16 @@ if [[ "$actual" -ne "$expected" ]]; then
   exit 1
 fi
 diff -u "$scratch/oracle.tsv" "$scratch/native.tsv"
-echo "CPGQL differential: PASS ($actual/$expected, Joern v4.0.555)"
+diff -u "$scratch/oracle-positive.tsv" "$scratch/native-positive.tsv"
+python3 "$repo_root/acceptance/cpgql/oracle_errors.py" \
+  --joern "$joern" \
+  --graph "$scratch/oracle.cpg.bin" \
+  --catalog "$error_catalog" \
+  > "$scratch/oracle-errors.tsv"
+error_expected="$(jq 'length' "$error_catalog")"
+error_actual="$(wc -l < "$scratch/oracle-errors.tsv" | tr -d ' ')"
+if [[ "$error_actual" -ne "$error_expected" ]]; then
+  echo "incomplete CPGQL error classification: expected $error_expected cases, found $error_actual" >&2
+  exit 1
+fi
+echo "CPGQL differential: PASS ($actual/$expected source results, $positive_actual/$positive_expected populated schema results, $error_actual/$error_expected error classifications, Joern v4.0.555)"

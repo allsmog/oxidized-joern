@@ -69,9 +69,11 @@ construct must add another fixture and return the exact differential to zero.
 The following are unsupported in `0.1.x`:
 
 - Joern's Scala console and full CPGQL source compatibility; `cpg query`
-  currently implements the 108-case native subset cataloged in
-  `acceptance/cpgql/catalog.json`, with all 108 expressions at
-  zero diff against Joern v4.0.555;
+  implements the native subset cataloged in `acceptance/cpgql`: 108 source
+  expressions and 37 populated sparse-schema/property/edge expressions pass
+  at zero diff against Joern v4.0.555, while 18 malformed or unsafe forms are
+  classified live and rejected fail-closed. `.p` and `.browse` provide
+  annotated terminal output; JSON remains the machine interface;
 - JVM/Scala plugins and Maven-based extension workflows;
 - loading internal CPG2 files directly in Joern. The explicit
   `cpg export-joern` and `cpg import-joern` conversions use Joern v4's current
@@ -91,7 +93,9 @@ Every release must pass the locked Rust workspace tests, formatting, Clippy,
 dependency audit, 122/122 committed C parity, canonical C scanner outcomes,
 the 188-label default-rule quality gates, the all-language acceptance test,
 pinned zlib/Lua and 16-project non-C acceptance, and packaged binary and
-container tests. The real-project suites also run on ordinary CI changes.
+container tests. Release CI also reruns the live Joern C, cross-language,
+CPGQL, compiler-input, and Flatgraph differentials. The real-project suites
+also run on ordinary CI changes.
 
-The stricter requirements for promoting the project from C production preview
-to a production Joern replacement are tracked in `REPLACEMENT_CONTRACT.md`.
+All five bounded replacement tracks are green in `REPLACEMENT_CONTRACT.md`.
+The deliberate incompatibilities above remain outside that release claim.

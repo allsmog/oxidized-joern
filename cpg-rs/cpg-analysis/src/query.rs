@@ -242,6 +242,11 @@ fn compile_parts(parts: &[String], relative: bool) -> Result<LogicalPlan, QueryE
             step.as_str(),
             "l" | "toList" | "toJson" | "toJsonPretty" | "p" | "browse" | "clone"
         ) {
+            if offset + 1 != parts[selector_index..].len() {
+                return Err(QueryError(format!(
+                    "step {position} `{step}` is terminal and cannot be followed by another step"
+                )));
+            }
             continue;
         }
         if step == "size" || step == "count" {

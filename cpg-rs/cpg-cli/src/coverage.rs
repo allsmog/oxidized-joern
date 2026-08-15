@@ -196,6 +196,7 @@ mod tests {
             sources: sources.iter().map(|s| s.to_string()).collect(),
             sinks: sinks.iter().map(|s| s.to_string()).collect(),
             sanitizers: vec![],
+            capacity_provisioning_is_fix: false,
             entry_methods: vec![],
             source_idents: vec![],
             authz: vec![],
