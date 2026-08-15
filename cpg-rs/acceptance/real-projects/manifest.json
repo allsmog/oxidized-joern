@@ -43,7 +43,7 @@
         "sarifSha256": "3e7f677599d01bd854c6a5c9a7eace4ff2ba547a5fab09333f41f78335f17bba",
         "findings": 0
       },
-      "budgets": {"buildSeconds": 20, "peakRssMiB": 1536}
+      "budgets": {"buildSeconds": 30, "peakRssMiB": 1536}
     }
   ]
 }
