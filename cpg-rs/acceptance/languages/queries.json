@@ -1,0 +1,15 @@
+[
+  {"id": "user-methods", "query": "cpg.method.isExternal(false).nameExact(\"source\", \"transform\", \"sink\", \"main\").name"},
+  {"id": "source-parameter", "query": "cpg.method.isExternal(false).nameExact(\"source\").parameter.name"},
+  {"id": "transform-parameter", "query": "cpg.method.isExternal(false).nameExact(\"transform\").parameter.name"},
+  {"id": "sink-parameter", "query": "cpg.method.isExternal(false).nameExact(\"sink\").parameter.name"},
+  {"id": "main-parameter", "query": "cpg.method.isExternal(false).nameExact(\"main\").parameter.name"},
+  {"id": "user-calls", "query": "cpg.call.nameExact(\"source\", \"transform\", \"sink\").name"},
+  {"id": "main-calls", "query": "cpg.method.isExternal(false).nameExact(\"main\").call.nameExact(\"source\", \"transform\", \"sink\").name"},
+  {"id": "call-targets", "query": "cpg.call.nameExact(\"source\", \"transform\", \"sink\").callee.name"},
+  {"id": "parameter-types", "query": "cpg.method.isExternal(false).nameExact(\"source\", \"transform\", \"sink\", \"main\").parameter.typeFullName"},
+  {"id": "return-types", "query": "cpg.method.isExternal(false).nameExact(\"source\", \"transform\", \"sink\", \"main\").methodReturn.typeFullName"},
+  {"id": "returns", "query": "cpg.method.isExternal(false).nameExact(\"source\", \"transform\", \"sink\", \"main\").return.code"},
+  {"id": "references", "query": "cpg.identifier.nameExact(\"raw\", \"clean\").refsTo.name.dedup"},
+  {"id": "source-flow", "query": "cpg.call.nameExact(\"sink\").argument(1).reachableBy(cpg.call.nameExact(\"source\")).code"}
+]

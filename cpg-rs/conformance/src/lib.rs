@@ -95,7 +95,11 @@ pub fn standard_cases() -> Vec<ConformanceCase> {
                         ms.len()
                     ));
                 }
-                let n = cpg.parameters_of(ms[0]).len();
+                let n = cpg
+                    .parameters_of(ms[0])
+                    .into_iter()
+                    .filter(|parameter| cpg.argument_index_of(*parameter) > 0)
+                    .count();
                 if n != 2 {
                     return Err(format!("expected 2 params, found {n}"));
                 }

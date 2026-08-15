@@ -14,6 +14,10 @@ pub trait Query {
     fn calls(&self) -> Vec<NodeId>;
     fn method_named(&self, name: &str) -> Vec<NodeId>;
     fn calls_named(&self, name: &str) -> Vec<NodeId>;
+    /// Explicit source parameters, ordered by positive AST order.
+    /// Joern-compatible implicit receiver parameters live at index zero and
+    /// remain visible through raw AST/CPGQL traversal without shifting the
+    /// positional mapping used by native analyses.
     fn parameters_of(&self, method: NodeId) -> Vec<NodeId>;
     fn arguments_of(&self, call: NodeId) -> Vec<NodeId>;
     fn call_target(&self, call: NodeId) -> Option<NodeId>;
@@ -53,7 +57,7 @@ impl Query for Cpg {
     fn parameters_of(&self, method: NodeId) -> Vec<NodeId> {
         let mut ps: Vec<NodeId> = self
             .out_kind(method, EdgeKind::Ast)
-            .filter(|&n| self.kind_of(n) == NodeKind::MethodParameterIn)
+            .filter(|&n| self.kind_of(n) == NodeKind::MethodParameterIn && self.order_of(n) > 0)
             .collect();
         ps.sort_by_key(|&p| self.order_of(p));
         ps
