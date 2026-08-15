@@ -17,7 +17,7 @@ Status meanings:
 
 | Language | Build and query | Save/load | Flow and scan | Incremental update | Evidence | Status |
 |---|---|---|---|---|---|---|
-| C | Yes | Yes | Yes, including SARIF | Yes; correctness-first full-project rebuild | 114/114 Joern v4.0.555 graph blocks; 1,702/1,702 ReachingDef facts; canonical outcome suite; pinned zlib 1.3.1 and Lua 5.4.7 | **Production preview** |
+| C | Yes | Yes | Yes, including SARIF | Yes; correctness-first full-project rebuild | 122/122 Joern v4.0.555 graph blocks; 1,961/1,961 ReachingDef facts; canonical outcome suite; pinned zlib 1.3.1 and Lua 5.4.7 | **Production preview** |
 | C++ | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus shared acceptance | Experimental |
 | Go | Yes | Yes | Yes | File-local incremental path | 13/13 live Joern v4.0.555 semantic probes plus cross-file update tests | Experimental |
 | Java | Yes | Yes | Yes | File-local incremental path | 13/13 live Joern v4.0.555 semantic probes plus cross-file update tests | Experimental |
@@ -81,7 +81,7 @@ the supported integration surfaces.
 ## Release-blocking gates
 
 Every release must pass the locked Rust workspace tests, formatting, Clippy,
-dependency audit, 114/114 committed C parity, canonical C scanner outcomes,
+dependency audit, 122/122 committed C parity, canonical C scanner outcomes,
 the labeled default-C-rule quality gate, the all-language acceptance test,
 pinned zlib/Lua acceptance, and packaged binary and container tests. The
 zlib/Lua suite also runs nightly.

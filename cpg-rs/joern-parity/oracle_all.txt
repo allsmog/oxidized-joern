@@ -364,6 +364,24 @@ AST|      CALL NAME=helper CODE=helper(a) TYPE_FULL_NAME=int METHOD_FULL_NAME=he
 AST|        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
 AST|
+AST|METHOD NAME=aliased_function_pointer CODE=int aliased_function_pointer(int value) {\n    int (*callback)(int) = increment;\n    int (*alias)(int) = callback;\n    return alias(value);\n} FULL_NAME=aliased_function_pointer SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int (*callback)(int) = increment;\n    int (*alias)(int) = callback;\n    return alias(value);\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=callback CODE=int (*callback)(int) = increment; TYPE_FULL_NAME=int(*)(int) ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=(*callback)(int) = increment TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=callback CODE= TYPE_FULL_NAME=int(*)(int) ORDER=1 ARGUMENT_INDEX=1
+AST|      METHOD_REF CODE=increment TYPE_FULL_NAME=int METHOD_FULL_NAME=increment ORDER=2 ARGUMENT_INDEX=2
+AST|    LOCAL NAME=alias CODE=int (*alias)(int) = callback; TYPE_FULL_NAME=int(*)(int) ORDER=3
+AST|    CALL NAME=<operator>.assignment CODE=(*alias)(int) = callback TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=alias CODE= TYPE_FULL_NAME=int(*)(int) ORDER=1 ARGUMENT_INDEX=1
+AST|      IDENTIFIER NAME=callback CODE=callback TYPE_FULL_NAME=int(*)(int) ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return alias(value); ORDER=5
+AST|      CALL NAME=<operator>.pointerCall CODE=alias(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+AST|        IDENTIFIER NAME=alias CODE=alias TYPE_FULL_NAME=int(*)(int) ORDER=1
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
 AST|METHOD NAME=apply CODE=int apply(int (*fn)(int, int), int x) {\n    return fn(x, x);\n} FULL_NAME=apply SIGNATURE=int(int,int) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=fn CODE=int (*fn)(int, int) TYPE_FULL_NAME=int ORDER=1
 AST|  METHOD_PARAMETER_OUT NAME=fn CODE=int (*fn)(int, int) TYPE_FULL_NAME=int ORDER=1
@@ -1605,6 +1623,22 @@ AST|    TYPE_REF CODE=struct pair {\n    int *ptr;\n    int arr[4];\n} TYPE_FULL
 AST|    METHOD_REF CODE=second TYPE_FULL_NAME=second METHOD_FULL_NAME=second ORDER=5
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|
+AST|METHOD NAME=out_parameter_alias CODE=int out_parameter_alias(int value) {\n    int result = 0;\n    store_through_pointer(&result, value);\n    return result;\n} FULL_NAME=out_parameter_alias SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int result = 0;\n    store_through_pointer(&result, value);\n    return result;\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=result CODE=int result TYPE_FULL_NAME=int ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    CALL NAME=store_through_pointer CODE=store_through_pointer(&result, value) TYPE_FULL_NAME=void METHOD_FULL_NAME=store_through_pointer ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.addressOf CODE=&result TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return result; ORDER=4
+AST|      IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
 AST|METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=pair.<clinit>:pair() ORDER=3
 AST|  BLOCK ORDER=1
 AST|    CALL NAME=<operator>.arrayInitializer CODE=arr[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
@@ -1665,10 +1699,95 @@ AST|    RETURN CODE=return r; ORDER=5
 AST|      IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
 AST|
+AST|METHOD NAME=pointer_field_alias CODE=int pointer_field_alias(int value) {\n    int result = 0;\n    struct pointer_box box;\n    box.value = &result;\n    *box.value = value;\n    return result;\n} FULL_NAME=pointer_field_alias SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int result = 0;\n    struct pointer_box box;\n    box.value = &result;\n    *box.value = value;\n    return result;\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=result CODE=int result TYPE_FULL_NAME=int ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    LOCAL NAME=box CODE=struct pointer_box box TYPE_FULL_NAME=pointer_box ORDER=3
+AST|    CALL NAME=<operator>.assignment CODE=box.value = &result TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.fieldAccess CODE=box.value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=box CODE=box TYPE_FULL_NAME=pointer_box ORDER=1 ARGUMENT_INDEX=1
+AST|        FIELD_IDENTIFIER CODE=value ORDER=2 ARGUMENT_INDEX=2
+AST|      CALL NAME=<operator>.addressOf CODE=&result TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    CALL NAME=<operator>.assignment CODE=*box.value = value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirection CODE=*box.value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.fieldAccess CODE=box.value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=box CODE=box TYPE_FULL_NAME=pointer_box ORDER=1 ARGUMENT_INDEX=1
+AST|          FIELD_IDENTIFIER CODE=value ORDER=2 ARGUMENT_INDEX=2
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return result; ORDER=6
+AST|      IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=pointer_rebind CODE=int pointer_rebind(int value) {\n    int first = 0;\n    int second = 0;\n    int *cursor = &first;\n    cursor = &second;\n    *cursor = value;\n    return second - first;\n} FULL_NAME=pointer_rebind SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int first = 0;\n    int second = 0;\n    int *cursor = &first;\n    cursor = &second;\n    *cursor = value;\n    return second - first;\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=first = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    LOCAL NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=3
+AST|    CALL NAME=<operator>.assignment CODE=second = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    LOCAL NAME=cursor CODE=int *cursor TYPE_FULL_NAME=int* ORDER=5
+AST|    CALL NAME=<operator>.assignment CODE=*cursor = &first TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.addressOf CODE=&first TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    CALL NAME=<operator>.assignment CODE=cursor = &second TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.addressOf CODE=&second TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    CALL NAME=<operator>.assignment CODE=*cursor = value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=8 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirection CODE=*cursor TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return second - first; ORDER=9
+AST|      CALL NAME=<operator>.subtraction CODE=second - first TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=pointer_to_pointer CODE=int pointer_to_pointer(int value) {\n    int result = 0;\n    int *cursor = &result;\n    int **slot = &cursor;\n    **slot = value;\n    return result;\n} FULL_NAME=pointer_to_pointer SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int result = 0;\n    int *cursor = &result;\n    int **slot = &cursor;\n    **slot = value;\n    return result;\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=result CODE=int result TYPE_FULL_NAME=int ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    LOCAL NAME=cursor CODE=int *cursor TYPE_FULL_NAME=int* ORDER=3
+AST|    CALL NAME=<operator>.assignment CODE=*cursor = &result TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.addressOf CODE=&result TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    LOCAL NAME=slot CODE=int **slot TYPE_FULL_NAME=int** ORDER=5
+AST|    CALL NAME=<operator>.assignment CODE=**slot = &cursor TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int** ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.addressOf CODE=&cursor TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|    CALL NAME=<operator>.assignment CODE=**slot = value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirection CODE=**slot TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirection CODE=*slot TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int** ORDER=1 ARGUMENT_INDEX=1
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return result; ORDER=8
+AST|      IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
 AST|METHOD NAME=<global> CODE=<global> FULL_NAME=pointers.c:<global> ORDER=1
 AST|  TYPE_DECL NAME=record CODE=struct record {\n    int left;\n    int right;\n} FULL_NAME=record ORDER=1
 AST|    MEMBER NAME=left CODE=left TYPE_FULL_NAME=int ORDER=1
 AST|    MEMBER NAME=right CODE=right TYPE_FULL_NAME=int ORDER=2
+AST|  TYPE_DECL NAME=pointer_box CODE=struct pointer_box {\n    int *value;\n} FULL_NAME=pointer_box ORDER=1
+AST|    MEMBER NAME=value CODE=*value TYPE_FULL_NAME=int* ORDER=1
 AST|  METHOD NAME=increment CODE=static int increment(int value) {\n    return value + 1;\n} FULL_NAME=increment SIGNATURE=int(int) ORDER=1
 AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
 AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
@@ -1765,12 +1884,174 @@ AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[1] TYPE_FULL_NA
 AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
 AST|          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
 AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=pointer_to_pointer CODE=int pointer_to_pointer(int value) {\n    int result = 0;\n    int *cursor = &result;\n    int **slot = &cursor;\n    **slot = value;\n    return result;\n} FULL_NAME=pointer_to_pointer SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int result = 0;\n    int *cursor = &result;\n    int **slot = &cursor;\n    **slot = value;\n    return result;\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=result CODE=int result TYPE_FULL_NAME=int ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LOCAL NAME=cursor CODE=int *cursor TYPE_FULL_NAME=int* ORDER=3
+AST|      CALL NAME=<operator>.assignment CODE=*cursor = &result TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.addressOf CODE=&result TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      LOCAL NAME=slot CODE=int **slot TYPE_FULL_NAME=int** ORDER=5
+AST|      CALL NAME=<operator>.assignment CODE=**slot = &cursor TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int** ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.addressOf CODE=&cursor TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.assignment CODE=**slot = value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirection CODE=**slot TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.indirection CODE=*slot TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int** ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return result; ORDER=8
+AST|        IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=return_alias CODE=static int *return_alias(int *value) {\n    return value;\n} FULL_NAME=return_alias SIGNATURE=int*(int*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int *value TYPE_FULL_NAME=int* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int *value TYPE_FULL_NAME=int* ORDER=1
+AST|    BLOCK CODE={\n    return value;\n} TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return value; ORDER=1
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int* ORDER=1
+AST|    MODIFIER ORDER=3
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int* ORDER=4
+AST|  METHOD NAME=returned_alias CODE=int returned_alias(int value) {\n    int result = 0;\n    int *cursor = return_alias(&result);\n    *cursor = value;\n    return result;\n} FULL_NAME=returned_alias SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int result = 0;\n    int *cursor = return_alias(&result);\n    *cursor = value;\n    return result;\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=result CODE=int result TYPE_FULL_NAME=int ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LOCAL NAME=cursor CODE=int *cursor TYPE_FULL_NAME=int* ORDER=3
+AST|      CALL NAME=<operator>.assignment CODE=*cursor = return_alias(&result) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=return_alias CODE=return_alias(&result) TYPE_FULL_NAME=int* METHOD_FULL_NAME=return_alias ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.addressOf CODE=&result TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.assignment CODE=*cursor = value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirection CODE=*cursor TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return result; ORDER=6
+AST|        IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=pointer_field_alias CODE=int pointer_field_alias(int value) {\n    int result = 0;\n    struct pointer_box box;\n    box.value = &result;\n    *box.value = value;\n    return result;\n} FULL_NAME=pointer_field_alias SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int result = 0;\n    struct pointer_box box;\n    box.value = &result;\n    *box.value = value;\n    return result;\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=result CODE=int result TYPE_FULL_NAME=int ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LOCAL NAME=box CODE=struct pointer_box box TYPE_FULL_NAME=pointer_box ORDER=3
+AST|      CALL NAME=<operator>.assignment CODE=box.value = &result TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.fieldAccess CODE=box.value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=box CODE=box TYPE_FULL_NAME=pointer_box ORDER=1 ARGUMENT_INDEX=1
+AST|          FIELD_IDENTIFIER CODE=value ORDER=2 ARGUMENT_INDEX=2
+AST|        CALL NAME=<operator>.addressOf CODE=&result TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.assignment CODE=*box.value = value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirection CODE=*box.value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.fieldAccess CODE=box.value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=box CODE=box TYPE_FULL_NAME=pointer_box ORDER=1 ARGUMENT_INDEX=1
+AST|            FIELD_IDENTIFIER CODE=value ORDER=2 ARGUMENT_INDEX=2
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return result; ORDER=6
+AST|        IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=pointer_rebind CODE=int pointer_rebind(int value) {\n    int first = 0;\n    int second = 0;\n    int *cursor = &first;\n    cursor = &second;\n    *cursor = value;\n    return second - first;\n} FULL_NAME=pointer_rebind SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int first = 0;\n    int second = 0;\n    int *cursor = &first;\n    cursor = &second;\n    *cursor = value;\n    return second - first;\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=first = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LOCAL NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=3
+AST|      CALL NAME=<operator>.assignment CODE=second = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LOCAL NAME=cursor CODE=int *cursor TYPE_FULL_NAME=int* ORDER=5
+AST|      CALL NAME=<operator>.assignment CODE=*cursor = &first TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.addressOf CODE=&first TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.assignment CODE=cursor = &second TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.addressOf CODE=&second TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.assignment CODE=*cursor = value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=8 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirection CODE=*cursor TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return second - first; ORDER=9
+AST|        CALL NAME=<operator>.subtraction CODE=second - first TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=aliased_function_pointer CODE=int aliased_function_pointer(int value) {\n    int (*callback)(int) = increment;\n    int (*alias)(int) = callback;\n    return alias(value);\n} FULL_NAME=aliased_function_pointer SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int (*callback)(int) = increment;\n    int (*alias)(int) = callback;\n    return alias(value);\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=callback CODE=int (*callback)(int) = increment; TYPE_FULL_NAME=int(*)(int) ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=(*callback)(int) = increment TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=callback CODE= TYPE_FULL_NAME=int(*)(int) ORDER=1 ARGUMENT_INDEX=1
+AST|        METHOD_REF CODE=increment TYPE_FULL_NAME=int METHOD_FULL_NAME=increment ORDER=2 ARGUMENT_INDEX=2
+AST|      LOCAL NAME=alias CODE=int (*alias)(int) = callback; TYPE_FULL_NAME=int(*)(int) ORDER=3
+AST|      CALL NAME=<operator>.assignment CODE=(*alias)(int) = callback TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=alias CODE= TYPE_FULL_NAME=int(*)(int) ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=callback CODE=callback TYPE_FULL_NAME=int(*)(int) ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return alias(value); ORDER=5
+AST|        CALL NAME=<operator>.pointerCall CODE=alias(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+AST|          IDENTIFIER NAME=alias CODE=alias TYPE_FULL_NAME=int(*)(int) ORDER=1
+AST|          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=store_through_pointer CODE=static void store_through_pointer(int *output, int value) {\n    *output = value;\n} FULL_NAME=store_through_pointer SIGNATURE=void(int*,int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=output CODE=int *output TYPE_FULL_NAME=int* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=output CODE=int *output TYPE_FULL_NAME=int* ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=2
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=2
+AST|    BLOCK CODE={\n    *output = value;\n} TYPE_FULL_NAME=void ORDER=3
+AST|      CALL NAME=<operator>.assignment CODE=*output = value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirection CODE=*output TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=output CODE=output TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    MODIFIER ORDER=4
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=5
+AST|  METHOD NAME=out_parameter_alias CODE=int out_parameter_alias(int value) {\n    int result = 0;\n    store_through_pointer(&result, value);\n    return result;\n} FULL_NAME=out_parameter_alias SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int result = 0;\n    store_through_pointer(&result, value);\n    return result;\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=result CODE=int result TYPE_FULL_NAME=int ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      CALL NAME=store_through_pointer CODE=store_through_pointer(&result, value) TYPE_FULL_NAME=void METHOD_FULL_NAME=store_through_pointer ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.addressOf CODE=&result TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return result; ORDER=4
+AST|        IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
 AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
 AST|    TYPE_REF CODE=struct record {\n    int left;\n    int right;\n} TYPE_FULL_NAME=record ORDER=1
-AST|    METHOD_REF CODE=increment TYPE_FULL_NAME=increment METHOD_FULL_NAME=increment ORDER=2
-AST|    METHOD_REF CODE=function_pointer TYPE_FULL_NAME=function_pointer METHOD_FULL_NAME=function_pointer ORDER=3
-AST|    METHOD_REF CODE=heap_alias TYPE_FULL_NAME=heap_alias METHOD_FULL_NAME=heap_alias ORDER=4
-AST|    METHOD_REF CODE=array_alias TYPE_FULL_NAME=array_alias METHOD_FULL_NAME=array_alias ORDER=5
+AST|    TYPE_REF CODE=struct pointer_box {\n    int *value;\n} TYPE_FULL_NAME=pointer_box ORDER=2
+AST|    METHOD_REF CODE=increment TYPE_FULL_NAME=increment METHOD_FULL_NAME=increment ORDER=3
+AST|    METHOD_REF CODE=function_pointer TYPE_FULL_NAME=function_pointer METHOD_FULL_NAME=function_pointer ORDER=4
+AST|    METHOD_REF CODE=heap_alias TYPE_FULL_NAME=heap_alias METHOD_FULL_NAME=heap_alias ORDER=5
+AST|    METHOD_REF CODE=array_alias TYPE_FULL_NAME=array_alias METHOD_FULL_NAME=array_alias ORDER=6
+AST|    METHOD_REF CODE=pointer_to_pointer TYPE_FULL_NAME=pointer_to_pointer METHOD_FULL_NAME=pointer_to_pointer ORDER=7
+AST|    METHOD_REF CODE=return_alias TYPE_FULL_NAME=return_alias METHOD_FULL_NAME=return_alias ORDER=8
+AST|    METHOD_REF CODE=returned_alias TYPE_FULL_NAME=returned_alias METHOD_FULL_NAME=returned_alias ORDER=9
+AST|    METHOD_REF CODE=pointer_field_alias TYPE_FULL_NAME=pointer_field_alias METHOD_FULL_NAME=pointer_field_alias ORDER=10
+AST|    METHOD_REF CODE=pointer_rebind TYPE_FULL_NAME=pointer_rebind METHOD_FULL_NAME=pointer_rebind ORDER=11
+AST|    METHOD_REF CODE=aliased_function_pointer TYPE_FULL_NAME=aliased_function_pointer METHOD_FULL_NAME=aliased_function_pointer ORDER=12
+AST|    METHOD_REF CODE=store_through_pointer TYPE_FULL_NAME=store_through_pointer METHOD_FULL_NAME=store_through_pointer ORDER=13
+AST|    METHOD_REF CODE=out_parameter_alias TYPE_FULL_NAME=out_parameter_alias METHOD_FULL_NAME=out_parameter_alias ORDER=14
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|
 AST|METHOD NAME=preprocessor CODE=int preprocessor(void) {\n#if LEVEL >= 3 && defined(ENABLED)\n    live_primary();\n#elif LEVEL == 2\n    dead_elif();\n#else\n    dead_else();\n#endif\n#if VERSION_AT_LEAST(3, 2)\n    live_function_macro();\n#endif\n#if UNDEFINED_NAME\n    dead_undefined();\n#endif\n#if !defined(MISSING)\n    live_not_defined();\n#endif\n    return 0;\n} FULL_NAME=preprocessor SIGNATURE=int(void) ORDER=1
@@ -1820,6 +2101,37 @@ AST|          IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDE
 AST|        IDENTIFIER NAME=v CODE=v TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
 AST|
+AST|METHOD NAME=return_alias CODE=static int *return_alias(int *value) {\n    return value;\n} FULL_NAME=return_alias SIGNATURE=int*(int*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int *value TYPE_FULL_NAME=int* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int *value TYPE_FULL_NAME=int* ORDER=1
+AST|  BLOCK CODE={\n    return value;\n} TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return value; ORDER=1
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int* ORDER=1
+AST|  MODIFIER ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int* ORDER=4
+AST|
+AST|METHOD NAME=returned_alias CODE=int returned_alias(int value) {\n    int result = 0;\n    int *cursor = return_alias(&result);\n    *cursor = value;\n    return result;\n} FULL_NAME=returned_alias SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int result = 0;\n    int *cursor = return_alias(&result);\n    *cursor = value;\n    return result;\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=result CODE=int result TYPE_FULL_NAME=int ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    LOCAL NAME=cursor CODE=int *cursor TYPE_FULL_NAME=int* ORDER=3
+AST|    CALL NAME=<operator>.assignment CODE=*cursor = return_alias(&result) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=return_alias CODE=return_alias(&result) TYPE_FULL_NAME=int* METHOD_FULL_NAME=return_alias ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.addressOf CODE=&result TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    CALL NAME=<operator>.assignment CODE=*cursor = value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirection CODE=*cursor TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=cursor CODE=cursor TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return result; ORDER=6
+AST|      IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
 AST|METHOD NAME=second CODE=int second(struct pair pr) {\n    return pr.arr[0] + first(1);\n} FULL_NAME=second SIGNATURE=int(pair) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=pr CODE=struct pair pr TYPE_FULL_NAME=pair ORDER=1
 AST|  METHOD_PARAMETER_OUT NAME=pr CODE=struct pair pr TYPE_FULL_NAME=pair ORDER=1
@@ -1834,6 +2146,19 @@ AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
 AST|        CALL NAME=first CODE=first(1) TYPE_FULL_NAME=int METHOD_FULL_NAME=first ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
 AST|          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=store_through_pointer CODE=static void store_through_pointer(int *output, int value) {\n    *output = value;\n} FULL_NAME=store_through_pointer SIGNATURE=void(int*,int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=output CODE=int *output TYPE_FULL_NAME=int* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=output CODE=int *output TYPE_FULL_NAME=int* ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=2
+AST|  BLOCK CODE={\n    *output = value;\n} TYPE_FULL_NAME=void ORDER=3
+AST|    CALL NAME=<operator>.assignment CODE=*output = value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirection CODE=*output TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=output CODE=output TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  MODIFIER ORDER=4
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=5
 AST|
 AST|METHOD NAME=strcmp CODE=int strcmp(const char *l, const char *r)\n{\n	for (; *l==*r && *l; l++, r++);\n	return *(unsigned char *)l - *(unsigned char *)r;\n} FULL_NAME=strcmp SIGNATURE=int(char*,char*) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=l CODE=const char *l TYPE_FULL_NAME=char* ORDER=1
@@ -2304,6 +2629,7 @@ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE
 NODES|TYPE_DECL NAME=add FULL_NAME=add CODE=add AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=add.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
 NODES|TYPE_DECL NAME=agg FULL_NAME=agg CODE=agg AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=structs.c:<global> FILENAME=structs.c ORDER=1
+NODES|TYPE_DECL NAME=aliased_function_pointer FULL_NAME=aliased_function_pointer CODE=aliased_function_pointer AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=pointers.c:<global> FILENAME=pointers.c ORDER=1
 NODES|TYPE_DECL NAME=apply FULL_NAME=apply CODE=apply AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types2.c:<global> FILENAME=types2.c ORDER=1
 NODES|TYPE_DECL NAME=array_alias FULL_NAME=array_alias CODE=array_alias AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=pointers.c:<global> FILENAME=pointers.c ORDER=1
 NODES|TYPE_DECL NAME=bsearch FULL_NAME=bsearch CODE=bsearch AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=bsearch.c:<global> FILENAME=bsearch.c ORDER=1
@@ -2328,6 +2654,7 @@ NODES|TYPE_DECL NAME=increment FULL_NAME=increment CODE=increment AST_PARENT_TYP
 NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=int(*)(int) FULL_NAME=int(*)(int) CODE=int(*)(int) IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=int* FULL_NAME=int* CODE=int* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int** FULL_NAME=int** CODE=int** IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=int[2] FULL_NAME=int[2] CODE=int[2] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=int[2][3] FULL_NAME=int[2][3] CODE=int[2][3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=int[4] FULL_NAME=int[4] CODE=int[4] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
@@ -2346,18 +2673,26 @@ NODES|TYPE_DECL NAME=memcmp FULL_NAME=memcmp CODE=memcmp AST_PARENT_TYPE=TYPE_DE
 NODES|TYPE_DECL NAME=<global> FULL_NAME=memcmp.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=memcmp.c:<global> FILENAME=memcmp.c ORDER=2
 NODES|TYPE_DECL NAME=<global> FULL_NAME=ops.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=ops.c:<global> FILENAME=ops.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=order.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=order.c:<global> FILENAME=order.c ORDER=1
+NODES|TYPE_DECL NAME=out_parameter_alias FULL_NAME=out_parameter_alias CODE=out_parameter_alias AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=pointers.c:<global> FILENAME=pointers.c ORDER=1
 NODES|TYPE_DECL NAME=pair FULL_NAME=pair CODE=struct pair {\n    int *ptr;\n    int arr[4];\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=order.c ORDER=1
 NODES|TYPE_DECL NAME=pick FULL_NAME=pick CODE=pick AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=switch.c:<global> FILENAME=switch.c ORDER=1
 NODES|TYPE_DECL NAME=point FULL_NAME=point CODE=struct point {\n    int x;\n    int y;\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=structs.c ORDER=1
 NODES|TYPE_DECL NAME=point* FULL_NAME=point* CODE=point* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=pointer_box FULL_NAME=pointer_box CODE=struct pointer_box {\n    int *value;\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=pointers.c ORDER=1
+NODES|TYPE_DECL NAME=pointer_field_alias FULL_NAME=pointer_field_alias CODE=pointer_field_alias AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=pointers.c:<global> FILENAME=pointers.c ORDER=1
+NODES|TYPE_DECL NAME=pointer_rebind FULL_NAME=pointer_rebind CODE=pointer_rebind AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=pointers.c:<global> FILENAME=pointers.c ORDER=1
+NODES|TYPE_DECL NAME=pointer_to_pointer FULL_NAME=pointer_to_pointer CODE=pointer_to_pointer AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=pointers.c:<global> FILENAME=pointers.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=pointers.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=pointers.c:<global> FILENAME=pointers.c ORDER=2
 NODES|TYPE_DECL NAME=preprocessor FULL_NAME=preprocessor CODE=preprocessor AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=preprocessor.c:<global> FILENAME=preprocessor.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=preprocessor.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=preprocessor.c:<global> FILENAME=preprocessor.c ORDER=1
 NODES|TYPE_DECL NAME=ptr FULL_NAME=ptr CODE=ptr AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=unary.c:<global> FILENAME=unary.c ORDER=1
 NODES|TYPE_DECL NAME=record FULL_NAME=record CODE=struct record {\n    int left;\n    int right;\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=pointers.c ORDER=1
 NODES|TYPE_DECL NAME=record* FULL_NAME=record* CODE=record* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=return_alias FULL_NAME=return_alias CODE=return_alias AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=pointers.c:<global> FILENAME=pointers.c ORDER=1
+NODES|TYPE_DECL NAME=returned_alias FULL_NAME=returned_alias CODE=returned_alias AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=pointers.c:<global> FILENAME=pointers.c ORDER=1
 NODES|TYPE_DECL NAME=second FULL_NAME=second CODE=second AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=order.c:<global> FILENAME=order.c ORDER=1
 NODES|TYPE_DECL NAME=size_t FULL_NAME=size_t CODE=size_t IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=store_through_pointer FULL_NAME=store_through_pointer CODE=store_through_pointer AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=pointers.c:<global> FILENAME=pointers.c ORDER=1
 NODES|TYPE_DECL NAME=strcmp FULL_NAME=strcmp CODE=strcmp AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strcmp.c:<global> FILENAME=strcmp.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=strcmp.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=strcmp.c:<global> FILENAME=strcmp.c ORDER=2
 NODES|TYPE_DECL NAME=<global> FULL_NAME=structs.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=structs.c:<global> FILENAME=structs.c ORDER=1
@@ -2379,6 +2714,7 @@ NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PAREN
 NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
 NODES|TYPE NAME=add FULL_NAME=add TYPE_DECL_FULL_NAME=add
 NODES|TYPE NAME=agg FULL_NAME=agg TYPE_DECL_FULL_NAME=agg
+NODES|TYPE NAME=aliased_function_pointer FULL_NAME=aliased_function_pointer TYPE_DECL_FULL_NAME=aliased_function_pointer
 NODES|TYPE NAME=apply FULL_NAME=apply TYPE_DECL_FULL_NAME=apply
 NODES|TYPE NAME=array_alias FULL_NAME=array_alias TYPE_DECL_FULL_NAME=array_alias
 NODES|TYPE NAME=bsearch FULL_NAME=bsearch TYPE_DECL_FULL_NAME=bsearch
@@ -2399,6 +2735,7 @@ NODES|TYPE NAME=increment FULL_NAME=increment TYPE_DECL_FULL_NAME=increment
 NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
 NODES|TYPE NAME=int(*)(int) FULL_NAME=int(*)(int) TYPE_DECL_FULL_NAME=int(*)(int)
 NODES|TYPE NAME=int* FULL_NAME=int* TYPE_DECL_FULL_NAME=int*
+NODES|TYPE NAME=int** FULL_NAME=int** TYPE_DECL_FULL_NAME=int**
 NODES|TYPE NAME=int[2] FULL_NAME=int[2] TYPE_DECL_FULL_NAME=int[2]
 NODES|TYPE NAME=int[2][3] FULL_NAME=int[2][3] TYPE_DECL_FULL_NAME=int[2][3]
 NODES|TYPE NAME=int[4] FULL_NAME=int[4] TYPE_DECL_FULL_NAME=int[4]
@@ -2410,16 +2747,24 @@ NODES|TYPE NAME=macro_advanced FULL_NAME=macro_advanced TYPE_DECL_FULL_NAME=macr
 NODES|TYPE NAME=macros FULL_NAME=macros TYPE_DECL_FULL_NAME=macros
 NODES|TYPE NAME=main FULL_NAME=main TYPE_DECL_FULL_NAME=main
 NODES|TYPE NAME=memcmp FULL_NAME=memcmp TYPE_DECL_FULL_NAME=memcmp
+NODES|TYPE NAME=out_parameter_alias FULL_NAME=out_parameter_alias TYPE_DECL_FULL_NAME=out_parameter_alias
 NODES|TYPE NAME=pair FULL_NAME=pair TYPE_DECL_FULL_NAME=pair
 NODES|TYPE NAME=pick FULL_NAME=pick TYPE_DECL_FULL_NAME=pick
 NODES|TYPE NAME=point FULL_NAME=point TYPE_DECL_FULL_NAME=point
 NODES|TYPE NAME=point* FULL_NAME=point* TYPE_DECL_FULL_NAME=point*
+NODES|TYPE NAME=pointer_box FULL_NAME=pointer_box TYPE_DECL_FULL_NAME=pointer_box
+NODES|TYPE NAME=pointer_field_alias FULL_NAME=pointer_field_alias TYPE_DECL_FULL_NAME=pointer_field_alias
+NODES|TYPE NAME=pointer_rebind FULL_NAME=pointer_rebind TYPE_DECL_FULL_NAME=pointer_rebind
+NODES|TYPE NAME=pointer_to_pointer FULL_NAME=pointer_to_pointer TYPE_DECL_FULL_NAME=pointer_to_pointer
 NODES|TYPE NAME=preprocessor FULL_NAME=preprocessor TYPE_DECL_FULL_NAME=preprocessor
 NODES|TYPE NAME=ptr FULL_NAME=ptr TYPE_DECL_FULL_NAME=ptr
 NODES|TYPE NAME=record FULL_NAME=record TYPE_DECL_FULL_NAME=record
 NODES|TYPE NAME=record* FULL_NAME=record* TYPE_DECL_FULL_NAME=record*
+NODES|TYPE NAME=return_alias FULL_NAME=return_alias TYPE_DECL_FULL_NAME=return_alias
+NODES|TYPE NAME=returned_alias FULL_NAME=returned_alias TYPE_DECL_FULL_NAME=returned_alias
 NODES|TYPE NAME=second FULL_NAME=second TYPE_DECL_FULL_NAME=second
 NODES|TYPE NAME=size_t FULL_NAME=size_t TYPE_DECL_FULL_NAME=size_t
+NODES|TYPE NAME=store_through_pointer FULL_NAME=store_through_pointer TYPE_DECL_FULL_NAME=store_through_pointer
 NODES|TYPE NAME=strcmp FULL_NAME=strcmp TYPE_DECL_FULL_NAME=strcmp
 NODES|TYPE NAME=sum FULL_NAME=sum TYPE_DECL_FULL_NAME=sum
 NODES|TYPE NAME=uint_t FULL_NAME=uint_t TYPE_DECL_FULL_NAME=uint_t
@@ -2460,6 +2805,12 @@ EDGES|ARGUMENT agg#8 -> agg#12
 EDGES|ARGUMENT agg#8 -> agg#9
 EDGES|ARGUMENT agg#9 -> agg#10
 EDGES|ARGUMENT agg#9 -> agg#11
+EDGES|ARGUMENT aliased_function_pointer#12 -> aliased_function_pointer#13
+EDGES|ARGUMENT aliased_function_pointer#13 -> aliased_function_pointer#15
+EDGES|ARGUMENT aliased_function_pointer#5 -> aliased_function_pointer#6
+EDGES|ARGUMENT aliased_function_pointer#5 -> aliased_function_pointer#7
+EDGES|ARGUMENT aliased_function_pointer#9 -> aliased_function_pointer#10
+EDGES|ARGUMENT aliased_function_pointer#9 -> aliased_function_pointer#11
 EDGES|ARGUMENT apply#6 -> apply#7
 EDGES|ARGUMENT apply#7 -> apply#10
 EDGES|ARGUMENT apply#7 -> apply#9
@@ -2744,6 +3095,12 @@ EDGES|ARGUMENT memcmp#36 -> memcmp#37
 EDGES|ARGUMENT memcmp#38 -> memcmp#39
 EDGES|ARGUMENT order.c:<global>#37 -> order.c:<global>#38
 EDGES|ARGUMENT order.c:<global>#37 -> order.c:<global>#39
+EDGES|ARGUMENT out_parameter_alias#12 -> out_parameter_alias#13
+EDGES|ARGUMENT out_parameter_alias#5 -> out_parameter_alias#6
+EDGES|ARGUMENT out_parameter_alias#5 -> out_parameter_alias#7
+EDGES|ARGUMENT out_parameter_alias#8 -> out_parameter_alias#11
+EDGES|ARGUMENT out_parameter_alias#8 -> out_parameter_alias#9
+EDGES|ARGUMENT out_parameter_alias#9 -> out_parameter_alias#10
 EDGES|ARGUMENT pair.<clinit>:pair()#2 -> pair.<clinit>:pair()#3
 EDGES|ARGUMENT pick#13 -> pick#14
 EDGES|ARGUMENT pick#13 -> pick#15
@@ -2762,6 +3119,48 @@ EDGES|ARGUMENT pick#46 -> pick#47
 EDGES|ARGUMENT pick#48 -> pick#49
 EDGES|ARGUMENT pick#5 -> pick#6
 EDGES|ARGUMENT pick#5 -> pick#7
+EDGES|ARGUMENT pointer_field_alias#10 -> pointer_field_alias#11
+EDGES|ARGUMENT pointer_field_alias#10 -> pointer_field_alias#12
+EDGES|ARGUMENT pointer_field_alias#13 -> pointer_field_alias#14
+EDGES|ARGUMENT pointer_field_alias#15 -> pointer_field_alias#16
+EDGES|ARGUMENT pointer_field_alias#15 -> pointer_field_alias#20
+EDGES|ARGUMENT pointer_field_alias#16 -> pointer_field_alias#17
+EDGES|ARGUMENT pointer_field_alias#17 -> pointer_field_alias#18
+EDGES|ARGUMENT pointer_field_alias#17 -> pointer_field_alias#19
+EDGES|ARGUMENT pointer_field_alias#21 -> pointer_field_alias#22
+EDGES|ARGUMENT pointer_field_alias#5 -> pointer_field_alias#6
+EDGES|ARGUMENT pointer_field_alias#5 -> pointer_field_alias#7
+EDGES|ARGUMENT pointer_field_alias#9 -> pointer_field_alias#10
+EDGES|ARGUMENT pointer_field_alias#9 -> pointer_field_alias#13
+EDGES|ARGUMENT pointer_rebind#13 -> pointer_rebind#14
+EDGES|ARGUMENT pointer_rebind#13 -> pointer_rebind#15
+EDGES|ARGUMENT pointer_rebind#15 -> pointer_rebind#16
+EDGES|ARGUMENT pointer_rebind#17 -> pointer_rebind#18
+EDGES|ARGUMENT pointer_rebind#17 -> pointer_rebind#19
+EDGES|ARGUMENT pointer_rebind#19 -> pointer_rebind#20
+EDGES|ARGUMENT pointer_rebind#21 -> pointer_rebind#22
+EDGES|ARGUMENT pointer_rebind#21 -> pointer_rebind#24
+EDGES|ARGUMENT pointer_rebind#22 -> pointer_rebind#23
+EDGES|ARGUMENT pointer_rebind#25 -> pointer_rebind#26
+EDGES|ARGUMENT pointer_rebind#26 -> pointer_rebind#27
+EDGES|ARGUMENT pointer_rebind#26 -> pointer_rebind#28
+EDGES|ARGUMENT pointer_rebind#5 -> pointer_rebind#6
+EDGES|ARGUMENT pointer_rebind#5 -> pointer_rebind#7
+EDGES|ARGUMENT pointer_rebind#9 -> pointer_rebind#10
+EDGES|ARGUMENT pointer_rebind#9 -> pointer_rebind#11
+EDGES|ARGUMENT pointer_to_pointer#11 -> pointer_to_pointer#12
+EDGES|ARGUMENT pointer_to_pointer#14 -> pointer_to_pointer#15
+EDGES|ARGUMENT pointer_to_pointer#14 -> pointer_to_pointer#16
+EDGES|ARGUMENT pointer_to_pointer#16 -> pointer_to_pointer#17
+EDGES|ARGUMENT pointer_to_pointer#18 -> pointer_to_pointer#19
+EDGES|ARGUMENT pointer_to_pointer#18 -> pointer_to_pointer#22
+EDGES|ARGUMENT pointer_to_pointer#19 -> pointer_to_pointer#20
+EDGES|ARGUMENT pointer_to_pointer#20 -> pointer_to_pointer#21
+EDGES|ARGUMENT pointer_to_pointer#23 -> pointer_to_pointer#24
+EDGES|ARGUMENT pointer_to_pointer#5 -> pointer_to_pointer#6
+EDGES|ARGUMENT pointer_to_pointer#5 -> pointer_to_pointer#7
+EDGES|ARGUMENT pointer_to_pointer#9 -> pointer_to_pointer#10
+EDGES|ARGUMENT pointer_to_pointer#9 -> pointer_to_pointer#11
 EDGES|ARGUMENT preprocessor#7 -> preprocessor#8
 EDGES|ARGUMENT ptr#10 -> ptr#11
 EDGES|ARGUMENT ptr#10 -> ptr#12
@@ -2773,6 +3172,17 @@ EDGES|ARGUMENT ptr#16 -> ptr#17
 EDGES|ARGUMENT ptr#5 -> ptr#6
 EDGES|ARGUMENT ptr#5 -> ptr#7
 EDGES|ARGUMENT ptr#7 -> ptr#8
+EDGES|ARGUMENT return_alias#4 -> return_alias#5
+EDGES|ARGUMENT returned_alias#11 -> returned_alias#12
+EDGES|ARGUMENT returned_alias#12 -> returned_alias#13
+EDGES|ARGUMENT returned_alias#14 -> returned_alias#15
+EDGES|ARGUMENT returned_alias#14 -> returned_alias#17
+EDGES|ARGUMENT returned_alias#15 -> returned_alias#16
+EDGES|ARGUMENT returned_alias#18 -> returned_alias#19
+EDGES|ARGUMENT returned_alias#5 -> returned_alias#6
+EDGES|ARGUMENT returned_alias#5 -> returned_alias#7
+EDGES|ARGUMENT returned_alias#9 -> returned_alias#10
+EDGES|ARGUMENT returned_alias#9 -> returned_alias#11
 EDGES|ARGUMENT second#11 -> second#12
 EDGES|ARGUMENT second#4 -> second#5
 EDGES|ARGUMENT second#5 -> second#11
@@ -2781,6 +3191,9 @@ EDGES|ARGUMENT second#6 -> second#10
 EDGES|ARGUMENT second#6 -> second#7
 EDGES|ARGUMENT second#7 -> second#8
 EDGES|ARGUMENT second#7 -> second#9
+EDGES|ARGUMENT store_through_pointer#6 -> store_through_pointer#7
+EDGES|ARGUMENT store_through_pointer#6 -> store_through_pointer#9
+EDGES|ARGUMENT store_through_pointer#7 -> store_through_pointer#8
 EDGES|ARGUMENT strcmp#10 -> strcmp#11
 EDGES|ARGUMENT strcmp#12 -> strcmp#13
 EDGES|ARGUMENT strcmp#14 -> strcmp#15
@@ -2865,6 +3278,8 @@ EDGES|CALL agg#34 -> <operator>.assignment#0
 EDGES|CALL agg#38 -> helper#0
 EDGES|CALL agg#8 -> <operator>.assignment#0
 EDGES|CALL agg#9 -> <operator>.fieldAccess#0
+EDGES|CALL aliased_function_pointer#5 -> <operator>.assignment#0
+EDGES|CALL aliased_function_pointer#9 -> <operator>.assignment#0
 EDGES|CALL array_alias#11 -> <operator>.assignment#0
 EDGES|CALL array_alias#14 -> <operator>.assignment#0
 EDGES|CALL array_alias#15 -> <operator>.indirectIndexAccess#0
@@ -3008,6 +3423,9 @@ EDGES|CALL memcmp#35 -> <operator>.subtraction#0
 EDGES|CALL memcmp#36 -> <operator>.indirection#0
 EDGES|CALL memcmp#38 -> <operator>.indirection#0
 EDGES|CALL order.c:<global>#37 -> <operator>.assignment#0
+EDGES|CALL out_parameter_alias#5 -> <operator>.assignment#0
+EDGES|CALL out_parameter_alias#8 -> pointers.c:<global>#228
+EDGES|CALL out_parameter_alias#9 -> <operator>.addressOf#0
 EDGES|CALL pair.<clinit>:pair()#2 -> <operator>.arrayInitializer#0
 EDGES|CALL pick#13 -> <operator>.assignment#0
 EDGES|CALL pick#19 -> <operator>.assignment#0
@@ -3018,6 +3436,30 @@ EDGES|CALL pick#35 -> <operator>.equals#0
 EDGES|CALL pick#41 -> <operator>.equals#0
 EDGES|CALL pick#46 -> <operator>.postDecrement#0
 EDGES|CALL pick#5 -> <operator>.assignment#0
+EDGES|CALL pointer_field_alias#10 -> <operator>.fieldAccess#0
+EDGES|CALL pointer_field_alias#13 -> <operator>.addressOf#0
+EDGES|CALL pointer_field_alias#15 -> <operator>.assignment#0
+EDGES|CALL pointer_field_alias#16 -> <operator>.indirection#0
+EDGES|CALL pointer_field_alias#17 -> <operator>.fieldAccess#0
+EDGES|CALL pointer_field_alias#5 -> <operator>.assignment#0
+EDGES|CALL pointer_field_alias#9 -> <operator>.assignment#0
+EDGES|CALL pointer_rebind#13 -> <operator>.assignment#0
+EDGES|CALL pointer_rebind#15 -> <operator>.addressOf#0
+EDGES|CALL pointer_rebind#17 -> <operator>.assignment#0
+EDGES|CALL pointer_rebind#19 -> <operator>.addressOf#0
+EDGES|CALL pointer_rebind#21 -> <operator>.assignment#0
+EDGES|CALL pointer_rebind#22 -> <operator>.indirection#0
+EDGES|CALL pointer_rebind#26 -> <operator>.subtraction#0
+EDGES|CALL pointer_rebind#5 -> <operator>.assignment#0
+EDGES|CALL pointer_rebind#9 -> <operator>.assignment#0
+EDGES|CALL pointer_to_pointer#11 -> <operator>.addressOf#0
+EDGES|CALL pointer_to_pointer#14 -> <operator>.assignment#0
+EDGES|CALL pointer_to_pointer#16 -> <operator>.addressOf#0
+EDGES|CALL pointer_to_pointer#18 -> <operator>.assignment#0
+EDGES|CALL pointer_to_pointer#19 -> <operator>.indirection#0
+EDGES|CALL pointer_to_pointer#20 -> <operator>.indirection#0
+EDGES|CALL pointer_to_pointer#5 -> <operator>.assignment#0
+EDGES|CALL pointer_to_pointer#9 -> <operator>.assignment#0
 EDGES|CALL preprocessor#4 -> live_primary#0
 EDGES|CALL preprocessor#5 -> live_function_macro#0
 EDGES|CALL preprocessor#6 -> live_not_defined#0
@@ -3027,10 +3469,18 @@ EDGES|CALL ptr#15 -> <operator>.addition#0
 EDGES|CALL ptr#16 -> <operator>.indirection#0
 EDGES|CALL ptr#5 -> <operator>.assignment#0
 EDGES|CALL ptr#7 -> <operator>.indirection#0
+EDGES|CALL returned_alias#11 -> pointers.c:<global>#128
+EDGES|CALL returned_alias#12 -> <operator>.addressOf#0
+EDGES|CALL returned_alias#14 -> <operator>.assignment#0
+EDGES|CALL returned_alias#15 -> <operator>.indirection#0
+EDGES|CALL returned_alias#5 -> <operator>.assignment#0
+EDGES|CALL returned_alias#9 -> <operator>.assignment#0
 EDGES|CALL second#11 -> first#0
 EDGES|CALL second#5 -> <operator>.addition#0
 EDGES|CALL second#6 -> <operator>.indirectIndexAccess#0
 EDGES|CALL second#7 -> <operator>.fieldAccess#0
+EDGES|CALL store_through_pointer#6 -> <operator>.assignment#0
+EDGES|CALL store_through_pointer#7 -> <operator>.indirection#0
 EDGES|CALL strcmp#10 -> <operator>.indirection#0
 EDGES|CALL strcmp#12 -> <operator>.indirection#0
 EDGES|CALL strcmp#14 -> <operator>.indirection#0
@@ -3148,6 +3598,17 @@ EDGES|CFG agg#38 -> agg#37
 EDGES|CFG agg#39 -> agg#38
 EDGES|CFG agg#8 -> agg#17
 EDGES|CFG agg#9 -> agg#13
+EDGES|CFG aliased_function_pointer#0 -> aliased_function_pointer#6
+EDGES|CFG aliased_function_pointer#10 -> aliased_function_pointer#11
+EDGES|CFG aliased_function_pointer#11 -> aliased_function_pointer#9
+EDGES|CFG aliased_function_pointer#12 -> aliased_function_pointer#16
+EDGES|CFG aliased_function_pointer#13 -> aliased_function_pointer#12
+EDGES|CFG aliased_function_pointer#14 -> aliased_function_pointer#15
+EDGES|CFG aliased_function_pointer#15 -> aliased_function_pointer#13
+EDGES|CFG aliased_function_pointer#5 -> aliased_function_pointer#10
+EDGES|CFG aliased_function_pointer#6 -> aliased_function_pointer#7
+EDGES|CFG aliased_function_pointer#7 -> aliased_function_pointer#5
+EDGES|CFG aliased_function_pointer#9 -> aliased_function_pointer#14
 EDGES|CFG apply#0 -> apply#8
 EDGES|CFG apply#10 -> apply#7
 EDGES|CFG apply#6 -> apply#11
@@ -3639,6 +4100,16 @@ EDGES|CFG order.c:<global>#39 -> order.c:<global>#37
 EDGES|CFG order.c:<global>#40 -> order.c:<global>#41
 EDGES|CFG order.c:<global>#41 -> order.c:<global>#42
 EDGES|CFG order.c:<global>#42 -> order.c:<global>#43
+EDGES|CFG out_parameter_alias#0 -> out_parameter_alias#6
+EDGES|CFG out_parameter_alias#10 -> out_parameter_alias#9
+EDGES|CFG out_parameter_alias#11 -> out_parameter_alias#8
+EDGES|CFG out_parameter_alias#12 -> out_parameter_alias#14
+EDGES|CFG out_parameter_alias#13 -> out_parameter_alias#12
+EDGES|CFG out_parameter_alias#5 -> out_parameter_alias#10
+EDGES|CFG out_parameter_alias#6 -> out_parameter_alias#7
+EDGES|CFG out_parameter_alias#7 -> out_parameter_alias#5
+EDGES|CFG out_parameter_alias#8 -> out_parameter_alias#13
+EDGES|CFG out_parameter_alias#9 -> out_parameter_alias#11
 EDGES|CFG pair.<clinit>:pair()#2 -> pair.<clinit>:pair()#6
 EDGES|CFG pair.<clinit>:pair()#3 -> pair.<clinit>:pair()#2
 EDGES|CFG pick#0 -> pick#6
@@ -3684,12 +4155,84 @@ EDGES|CFG pick#7 -> pick#5
 EDGES|CFG pick#9 -> pick#11
 EDGES|CFG pick#9 -> pick#17
 EDGES|CFG pick#9 -> pick#23
-EDGES|CFG pointers.c:<global>#0 -> pointers.c:<global>#101
-EDGES|CFG pointers.c:<global>#101 -> pointers.c:<global>#102
-EDGES|CFG pointers.c:<global>#102 -> pointers.c:<global>#103
-EDGES|CFG pointers.c:<global>#103 -> pointers.c:<global>#104
-EDGES|CFG pointers.c:<global>#104 -> pointers.c:<global>#105
-EDGES|CFG pointers.c:<global>#105 -> pointers.c:<global>#106
+EDGES|CFG pointer_field_alias#0 -> pointer_field_alias#6
+EDGES|CFG pointer_field_alias#10 -> pointer_field_alias#14
+EDGES|CFG pointer_field_alias#11 -> pointer_field_alias#12
+EDGES|CFG pointer_field_alias#12 -> pointer_field_alias#10
+EDGES|CFG pointer_field_alias#13 -> pointer_field_alias#9
+EDGES|CFG pointer_field_alias#14 -> pointer_field_alias#13
+EDGES|CFG pointer_field_alias#15 -> pointer_field_alias#22
+EDGES|CFG pointer_field_alias#16 -> pointer_field_alias#20
+EDGES|CFG pointer_field_alias#17 -> pointer_field_alias#16
+EDGES|CFG pointer_field_alias#18 -> pointer_field_alias#19
+EDGES|CFG pointer_field_alias#19 -> pointer_field_alias#17
+EDGES|CFG pointer_field_alias#20 -> pointer_field_alias#15
+EDGES|CFG pointer_field_alias#21 -> pointer_field_alias#23
+EDGES|CFG pointer_field_alias#22 -> pointer_field_alias#21
+EDGES|CFG pointer_field_alias#5 -> pointer_field_alias#11
+EDGES|CFG pointer_field_alias#6 -> pointer_field_alias#7
+EDGES|CFG pointer_field_alias#7 -> pointer_field_alias#5
+EDGES|CFG pointer_field_alias#9 -> pointer_field_alias#18
+EDGES|CFG pointer_rebind#0 -> pointer_rebind#6
+EDGES|CFG pointer_rebind#10 -> pointer_rebind#11
+EDGES|CFG pointer_rebind#11 -> pointer_rebind#9
+EDGES|CFG pointer_rebind#13 -> pointer_rebind#18
+EDGES|CFG pointer_rebind#14 -> pointer_rebind#16
+EDGES|CFG pointer_rebind#15 -> pointer_rebind#13
+EDGES|CFG pointer_rebind#16 -> pointer_rebind#15
+EDGES|CFG pointer_rebind#17 -> pointer_rebind#23
+EDGES|CFG pointer_rebind#18 -> pointer_rebind#20
+EDGES|CFG pointer_rebind#19 -> pointer_rebind#17
+EDGES|CFG pointer_rebind#20 -> pointer_rebind#19
+EDGES|CFG pointer_rebind#21 -> pointer_rebind#27
+EDGES|CFG pointer_rebind#22 -> pointer_rebind#24
+EDGES|CFG pointer_rebind#23 -> pointer_rebind#22
+EDGES|CFG pointer_rebind#24 -> pointer_rebind#21
+EDGES|CFG pointer_rebind#25 -> pointer_rebind#29
+EDGES|CFG pointer_rebind#26 -> pointer_rebind#25
+EDGES|CFG pointer_rebind#27 -> pointer_rebind#28
+EDGES|CFG pointer_rebind#28 -> pointer_rebind#26
+EDGES|CFG pointer_rebind#5 -> pointer_rebind#10
+EDGES|CFG pointer_rebind#6 -> pointer_rebind#7
+EDGES|CFG pointer_rebind#7 -> pointer_rebind#5
+EDGES|CFG pointer_rebind#9 -> pointer_rebind#14
+EDGES|CFG pointer_to_pointer#0 -> pointer_to_pointer#6
+EDGES|CFG pointer_to_pointer#10 -> pointer_to_pointer#12
+EDGES|CFG pointer_to_pointer#11 -> pointer_to_pointer#9
+EDGES|CFG pointer_to_pointer#12 -> pointer_to_pointer#11
+EDGES|CFG pointer_to_pointer#14 -> pointer_to_pointer#21
+EDGES|CFG pointer_to_pointer#15 -> pointer_to_pointer#17
+EDGES|CFG pointer_to_pointer#16 -> pointer_to_pointer#14
+EDGES|CFG pointer_to_pointer#17 -> pointer_to_pointer#16
+EDGES|CFG pointer_to_pointer#18 -> pointer_to_pointer#24
+EDGES|CFG pointer_to_pointer#19 -> pointer_to_pointer#22
+EDGES|CFG pointer_to_pointer#20 -> pointer_to_pointer#19
+EDGES|CFG pointer_to_pointer#21 -> pointer_to_pointer#20
+EDGES|CFG pointer_to_pointer#22 -> pointer_to_pointer#18
+EDGES|CFG pointer_to_pointer#23 -> pointer_to_pointer#25
+EDGES|CFG pointer_to_pointer#24 -> pointer_to_pointer#23
+EDGES|CFG pointer_to_pointer#5 -> pointer_to_pointer#10
+EDGES|CFG pointer_to_pointer#6 -> pointer_to_pointer#7
+EDGES|CFG pointer_to_pointer#7 -> pointer_to_pointer#5
+EDGES|CFG pointer_to_pointer#9 -> pointer_to_pointer#15
+EDGES|CFG pointers.c:<global>#0 -> pointers.c:<global>#256
+EDGES|CFG pointers.c:<global>#128 -> return_alias#5
+EDGES|CFG pointers.c:<global>#136 -> returned_alias#6
+EDGES|CFG pointers.c:<global>#228 -> store_through_pointer#8
+EDGES|CFG pointers.c:<global>#256 -> pointers.c:<global>#257
+EDGES|CFG pointers.c:<global>#257 -> pointers.c:<global>#258
+EDGES|CFG pointers.c:<global>#258 -> pointers.c:<global>#259
+EDGES|CFG pointers.c:<global>#259 -> pointers.c:<global>#260
+EDGES|CFG pointers.c:<global>#260 -> pointers.c:<global>#261
+EDGES|CFG pointers.c:<global>#261 -> pointers.c:<global>#262
+EDGES|CFG pointers.c:<global>#262 -> pointers.c:<global>#263
+EDGES|CFG pointers.c:<global>#263 -> pointers.c:<global>#264
+EDGES|CFG pointers.c:<global>#264 -> pointers.c:<global>#265
+EDGES|CFG pointers.c:<global>#265 -> pointers.c:<global>#266
+EDGES|CFG pointers.c:<global>#266 -> pointers.c:<global>#267
+EDGES|CFG pointers.c:<global>#267 -> pointers.c:<global>#268
+EDGES|CFG pointers.c:<global>#268 -> pointers.c:<global>#269
+EDGES|CFG pointers.c:<global>#269 -> pointers.c:<global>#270
 EDGES|CFG preprocessor#0 -> preprocessor#4
 EDGES|CFG preprocessor#4 -> preprocessor#5
 EDGES|CFG preprocessor#5 -> preprocessor#6
@@ -3712,6 +4255,22 @@ EDGES|CFG ptr#5 -> ptr#11
 EDGES|CFG ptr#6 -> ptr#8
 EDGES|CFG ptr#7 -> ptr#5
 EDGES|CFG ptr#8 -> ptr#7
+EDGES|CFG return_alias#4 -> return_alias#7
+EDGES|CFG return_alias#5 -> return_alias#4
+EDGES|CFG returned_alias#10 -> returned_alias#13
+EDGES|CFG returned_alias#11 -> returned_alias#9
+EDGES|CFG returned_alias#12 -> returned_alias#11
+EDGES|CFG returned_alias#13 -> returned_alias#12
+EDGES|CFG returned_alias#14 -> returned_alias#19
+EDGES|CFG returned_alias#15 -> returned_alias#17
+EDGES|CFG returned_alias#16 -> returned_alias#15
+EDGES|CFG returned_alias#17 -> returned_alias#14
+EDGES|CFG returned_alias#18 -> returned_alias#20
+EDGES|CFG returned_alias#19 -> returned_alias#18
+EDGES|CFG returned_alias#5 -> returned_alias#10
+EDGES|CFG returned_alias#6 -> returned_alias#7
+EDGES|CFG returned_alias#7 -> returned_alias#5
+EDGES|CFG returned_alias#9 -> returned_alias#16
 EDGES|CFG second#10 -> second#6
 EDGES|CFG second#11 -> second#5
 EDGES|CFG second#12 -> second#11
@@ -3721,6 +4280,10 @@ EDGES|CFG second#6 -> second#12
 EDGES|CFG second#7 -> second#10
 EDGES|CFG second#8 -> second#9
 EDGES|CFG second#9 -> second#7
+EDGES|CFG store_through_pointer#6 -> store_through_pointer#11
+EDGES|CFG store_through_pointer#7 -> store_through_pointer#9
+EDGES|CFG store_through_pointer#8 -> store_through_pointer#7
+EDGES|CFG store_through_pointer#9 -> store_through_pointer#6
 EDGES|CFG strcmp#0 -> strcmp#11
 EDGES|CFG strcmp#10 -> strcmp#13
 EDGES|CFG strcmp#11 -> strcmp#10
@@ -3928,10 +4491,18 @@ EDGES|CONTAINS D:ops.c:<global> -> ops.c:<global>#0
 EDGES|CONTAINS D:order.c:<global> -> D:first
 EDGES|CONTAINS D:order.c:<global> -> D:second
 EDGES|CONTAINS D:order.c:<global> -> order.c:<global>#0
+EDGES|CONTAINS D:pointers.c:<global> -> D:aliased_function_pointer
 EDGES|CONTAINS D:pointers.c:<global> -> D:array_alias
 EDGES|CONTAINS D:pointers.c:<global> -> D:function_pointer
 EDGES|CONTAINS D:pointers.c:<global> -> D:heap_alias
 EDGES|CONTAINS D:pointers.c:<global> -> D:increment
+EDGES|CONTAINS D:pointers.c:<global> -> D:out_parameter_alias
+EDGES|CONTAINS D:pointers.c:<global> -> D:pointer_field_alias
+EDGES|CONTAINS D:pointers.c:<global> -> D:pointer_rebind
+EDGES|CONTAINS D:pointers.c:<global> -> D:pointer_to_pointer
+EDGES|CONTAINS D:pointers.c:<global> -> D:return_alias
+EDGES|CONTAINS D:pointers.c:<global> -> D:returned_alias
+EDGES|CONTAINS D:pointers.c:<global> -> D:store_through_pointer
 EDGES|CONTAINS D:pointers.c:<global> -> pointers.c:<global>#0
 EDGES|CONTAINS D:preprocessor.c:<global> -> D:preprocessor
 EDGES|CONTAINS D:preprocessor.c:<global> -> preprocessor.c:<global>#0
@@ -3957,6 +4528,7 @@ EDGES|CONTAINS F:<includes> -> D:float
 EDGES|CONTAINS F:<includes> -> D:int
 EDGES|CONTAINS F:<includes> -> D:int(*)(int)
 EDGES|CONTAINS F:<includes> -> D:int*
+EDGES|CONTAINS F:<includes> -> D:int**
 EDGES|CONTAINS F:<includes> -> D:int[2]
 EDGES|CONTAINS F:<includes> -> D:int[2][3]
 EDGES|CONTAINS F:<includes> -> D:int[4]
@@ -4041,6 +4613,17 @@ EDGES|CONTAINS agg#0 -> agg#39
 EDGES|CONTAINS agg#0 -> agg#5
 EDGES|CONTAINS agg#0 -> agg#8
 EDGES|CONTAINS agg#0 -> agg#9
+EDGES|CONTAINS aliased_function_pointer#0 -> aliased_function_pointer#10
+EDGES|CONTAINS aliased_function_pointer#0 -> aliased_function_pointer#11
+EDGES|CONTAINS aliased_function_pointer#0 -> aliased_function_pointer#12
+EDGES|CONTAINS aliased_function_pointer#0 -> aliased_function_pointer#13
+EDGES|CONTAINS aliased_function_pointer#0 -> aliased_function_pointer#14
+EDGES|CONTAINS aliased_function_pointer#0 -> aliased_function_pointer#15
+EDGES|CONTAINS aliased_function_pointer#0 -> aliased_function_pointer#3
+EDGES|CONTAINS aliased_function_pointer#0 -> aliased_function_pointer#5
+EDGES|CONTAINS aliased_function_pointer#0 -> aliased_function_pointer#6
+EDGES|CONTAINS aliased_function_pointer#0 -> aliased_function_pointer#7
+EDGES|CONTAINS aliased_function_pointer#0 -> aliased_function_pointer#9
 EDGES|CONTAINS apply#0 -> apply#10
 EDGES|CONTAINS apply#0 -> apply#5
 EDGES|CONTAINS apply#0 -> apply#6
@@ -4590,6 +5173,16 @@ EDGES|CONTAINS order.c:<global>#21 -> second#6
 EDGES|CONTAINS order.c:<global>#21 -> second#7
 EDGES|CONTAINS order.c:<global>#21 -> second#8
 EDGES|CONTAINS order.c:<global>#21 -> second#9
+EDGES|CONTAINS out_parameter_alias#0 -> out_parameter_alias#10
+EDGES|CONTAINS out_parameter_alias#0 -> out_parameter_alias#11
+EDGES|CONTAINS out_parameter_alias#0 -> out_parameter_alias#12
+EDGES|CONTAINS out_parameter_alias#0 -> out_parameter_alias#13
+EDGES|CONTAINS out_parameter_alias#0 -> out_parameter_alias#3
+EDGES|CONTAINS out_parameter_alias#0 -> out_parameter_alias#5
+EDGES|CONTAINS out_parameter_alias#0 -> out_parameter_alias#6
+EDGES|CONTAINS out_parameter_alias#0 -> out_parameter_alias#7
+EDGES|CONTAINS out_parameter_alias#0 -> out_parameter_alias#8
+EDGES|CONTAINS out_parameter_alias#0 -> out_parameter_alias#9
 EDGES|CONTAINS pick#0 -> pick#10
 EDGES|CONTAINS pick#0 -> pick#11
 EDGES|CONTAINS pick#0 -> pick#12
@@ -4636,17 +5229,118 @@ EDGES|CONTAINS pick#0 -> pick#6
 EDGES|CONTAINS pick#0 -> pick#7
 EDGES|CONTAINS pick#0 -> pick#8
 EDGES|CONTAINS pick#0 -> pick#9
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#10
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#11
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#12
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#13
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#14
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#15
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#16
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#17
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#18
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#19
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#20
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#21
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#22
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#3
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#5
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#6
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#7
+EDGES|CONTAINS pointer_field_alias#0 -> pointer_field_alias#9
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#10
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#11
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#13
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#14
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#15
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#16
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#17
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#18
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#19
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#20
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#21
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#22
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#23
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#24
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#25
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#26
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#27
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#28
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#3
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#5
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#6
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#7
+EDGES|CONTAINS pointer_rebind#0 -> pointer_rebind#9
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#10
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#11
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#12
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#14
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#15
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#16
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#17
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#18
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#19
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#20
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#21
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#22
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#23
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#24
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#3
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#5
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#6
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#7
+EDGES|CONTAINS pointer_to_pointer#0 -> pointer_to_pointer#9
+EDGES|CONTAINS pointers.c:<global>#0 -> aliased_function_pointer#0
 EDGES|CONTAINS pointers.c:<global>#0 -> array_alias#0
 EDGES|CONTAINS pointers.c:<global>#0 -> function_pointer#0
 EDGES|CONTAINS pointers.c:<global>#0 -> heap_alias#0
 EDGES|CONTAINS pointers.c:<global>#0 -> increment#0
+EDGES|CONTAINS pointers.c:<global>#0 -> out_parameter_alias#0
+EDGES|CONTAINS pointers.c:<global>#0 -> pointer_field_alias#0
+EDGES|CONTAINS pointers.c:<global>#0 -> pointer_rebind#0
+EDGES|CONTAINS pointers.c:<global>#0 -> pointer_to_pointer#0
 EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#1
-EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#100
-EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#101
-EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#102
-EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#103
-EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#104
-EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#105
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#128
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#136
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#228
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#255
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#256
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#257
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#258
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#259
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#260
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#261
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#262
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#263
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#264
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#265
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#266
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#267
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#268
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#269
+EDGES|CONTAINS pointers.c:<global>#0 -> pointers.c:<global>#4
+EDGES|CONTAINS pointers.c:<global>#128 -> return_alias#3
+EDGES|CONTAINS pointers.c:<global>#128 -> return_alias#4
+EDGES|CONTAINS pointers.c:<global>#128 -> return_alias#5
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#10
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#11
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#12
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#13
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#14
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#15
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#16
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#17
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#18
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#19
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#3
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#5
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#6
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#7
+EDGES|CONTAINS pointers.c:<global>#136 -> returned_alias#9
+EDGES|CONTAINS pointers.c:<global>#228 -> store_through_pointer#5
+EDGES|CONTAINS pointers.c:<global>#228 -> store_through_pointer#6
+EDGES|CONTAINS pointers.c:<global>#228 -> store_through_pointer#7
+EDGES|CONTAINS pointers.c:<global>#228 -> store_through_pointer#8
+EDGES|CONTAINS pointers.c:<global>#228 -> store_through_pointer#9
 EDGES|CONTAINS preprocessor#0 -> preprocessor#3
 EDGES|CONTAINS preprocessor#0 -> preprocessor#4
 EDGES|CONTAINS preprocessor#0 -> preprocessor#5
@@ -5034,6 +5728,21 @@ EDGES|EVAL_TYPE agg#6 -> T:int
 EDGES|EVAL_TYPE agg#7 -> T:point
 EDGES|EVAL_TYPE agg#8 -> T:ANY
 EDGES|EVAL_TYPE agg#9 -> T:ANY
+EDGES|EVAL_TYPE aliased_function_pointer#1 -> T:int
+EDGES|EVAL_TYPE aliased_function_pointer#10 -> T:int(*)(int)
+EDGES|EVAL_TYPE aliased_function_pointer#11 -> T:int(*)(int)
+EDGES|EVAL_TYPE aliased_function_pointer#13 -> T:int
+EDGES|EVAL_TYPE aliased_function_pointer#14 -> T:int(*)(int)
+EDGES|EVAL_TYPE aliased_function_pointer#15 -> T:int
+EDGES|EVAL_TYPE aliased_function_pointer#16 -> T:int
+EDGES|EVAL_TYPE aliased_function_pointer#2 -> T:int
+EDGES|EVAL_TYPE aliased_function_pointer#3 -> T:void
+EDGES|EVAL_TYPE aliased_function_pointer#4 -> T:int(*)(int)
+EDGES|EVAL_TYPE aliased_function_pointer#5 -> T:void
+EDGES|EVAL_TYPE aliased_function_pointer#6 -> T:int(*)(int)
+EDGES|EVAL_TYPE aliased_function_pointer#7 -> T:int
+EDGES|EVAL_TYPE aliased_function_pointer#8 -> T:int(*)(int)
+EDGES|EVAL_TYPE aliased_function_pointer#9 -> T:void
 EDGES|EVAL_TYPE apply#1 -> T:int
 EDGES|EVAL_TYPE apply#10 -> T:int
 EDGES|EVAL_TYPE apply#11 -> T:int
@@ -5638,6 +6347,19 @@ EDGES|EVAL_TYPE order.c:<global>#40 -> T:first
 EDGES|EVAL_TYPE order.c:<global>#41 -> T:pair
 EDGES|EVAL_TYPE order.c:<global>#42 -> T:second
 EDGES|EVAL_TYPE order.c:<global>#43 -> T:ANY
+EDGES|EVAL_TYPE out_parameter_alias#1 -> T:int
+EDGES|EVAL_TYPE out_parameter_alias#10 -> T:int
+EDGES|EVAL_TYPE out_parameter_alias#11 -> T:int
+EDGES|EVAL_TYPE out_parameter_alias#13 -> T:int
+EDGES|EVAL_TYPE out_parameter_alias#14 -> T:int
+EDGES|EVAL_TYPE out_parameter_alias#2 -> T:int
+EDGES|EVAL_TYPE out_parameter_alias#3 -> T:void
+EDGES|EVAL_TYPE out_parameter_alias#4 -> T:int
+EDGES|EVAL_TYPE out_parameter_alias#5 -> T:void
+EDGES|EVAL_TYPE out_parameter_alias#6 -> T:int
+EDGES|EVAL_TYPE out_parameter_alias#7 -> T:int
+EDGES|EVAL_TYPE out_parameter_alias#8 -> T:void
+EDGES|EVAL_TYPE out_parameter_alias#9 -> T:ANY
 EDGES|EVAL_TYPE pair.<clinit>:pair()#2 -> T:ANY
 EDGES|EVAL_TYPE pair.<clinit>:pair()#3 -> T:int
 EDGES|EVAL_TYPE pair.<clinit>:pair()#6 -> T:pair
@@ -5678,15 +6400,97 @@ EDGES|EVAL_TYPE pick#50 -> T:int
 EDGES|EVAL_TYPE pick#6 -> T:int
 EDGES|EVAL_TYPE pick#7 -> T:int
 EDGES|EVAL_TYPE pick#9 -> T:int
-EDGES|EVAL_TYPE pointers.c:<global>#100 -> T:ANY
-EDGES|EVAL_TYPE pointers.c:<global>#101 -> T:record
-EDGES|EVAL_TYPE pointers.c:<global>#102 -> T:increment
-EDGES|EVAL_TYPE pointers.c:<global>#103 -> T:function_pointer
-EDGES|EVAL_TYPE pointers.c:<global>#104 -> T:heap_alias
-EDGES|EVAL_TYPE pointers.c:<global>#105 -> T:array_alias
-EDGES|EVAL_TYPE pointers.c:<global>#106 -> T:ANY
+EDGES|EVAL_TYPE pointer_field_alias#1 -> T:int
+EDGES|EVAL_TYPE pointer_field_alias#10 -> T:ANY
+EDGES|EVAL_TYPE pointer_field_alias#11 -> T:pointer_box
+EDGES|EVAL_TYPE pointer_field_alias#13 -> T:ANY
+EDGES|EVAL_TYPE pointer_field_alias#14 -> T:int
+EDGES|EVAL_TYPE pointer_field_alias#15 -> T:ANY
+EDGES|EVAL_TYPE pointer_field_alias#16 -> T:ANY
+EDGES|EVAL_TYPE pointer_field_alias#17 -> T:ANY
+EDGES|EVAL_TYPE pointer_field_alias#18 -> T:pointer_box
+EDGES|EVAL_TYPE pointer_field_alias#2 -> T:int
+EDGES|EVAL_TYPE pointer_field_alias#20 -> T:int
+EDGES|EVAL_TYPE pointer_field_alias#22 -> T:int
+EDGES|EVAL_TYPE pointer_field_alias#23 -> T:int
+EDGES|EVAL_TYPE pointer_field_alias#3 -> T:void
+EDGES|EVAL_TYPE pointer_field_alias#4 -> T:int
+EDGES|EVAL_TYPE pointer_field_alias#5 -> T:void
+EDGES|EVAL_TYPE pointer_field_alias#6 -> T:int
+EDGES|EVAL_TYPE pointer_field_alias#7 -> T:int
+EDGES|EVAL_TYPE pointer_field_alias#8 -> T:pointer_box
+EDGES|EVAL_TYPE pointer_field_alias#9 -> T:ANY
+EDGES|EVAL_TYPE pointer_rebind#1 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#10 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#11 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#12 -> T:int*
+EDGES|EVAL_TYPE pointer_rebind#13 -> T:void
+EDGES|EVAL_TYPE pointer_rebind#14 -> T:int*
+EDGES|EVAL_TYPE pointer_rebind#15 -> T:ANY
+EDGES|EVAL_TYPE pointer_rebind#16 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#17 -> T:ANY
+EDGES|EVAL_TYPE pointer_rebind#18 -> T:int*
+EDGES|EVAL_TYPE pointer_rebind#19 -> T:ANY
+EDGES|EVAL_TYPE pointer_rebind#2 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#20 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#21 -> T:ANY
+EDGES|EVAL_TYPE pointer_rebind#22 -> T:ANY
+EDGES|EVAL_TYPE pointer_rebind#23 -> T:int*
+EDGES|EVAL_TYPE pointer_rebind#24 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#26 -> T:ANY
+EDGES|EVAL_TYPE pointer_rebind#27 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#28 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#29 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#3 -> T:void
+EDGES|EVAL_TYPE pointer_rebind#4 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#5 -> T:void
+EDGES|EVAL_TYPE pointer_rebind#6 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#7 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#8 -> T:int
+EDGES|EVAL_TYPE pointer_rebind#9 -> T:void
+EDGES|EVAL_TYPE pointer_to_pointer#1 -> T:int
+EDGES|EVAL_TYPE pointer_to_pointer#10 -> T:int*
+EDGES|EVAL_TYPE pointer_to_pointer#11 -> T:ANY
+EDGES|EVAL_TYPE pointer_to_pointer#12 -> T:int
+EDGES|EVAL_TYPE pointer_to_pointer#13 -> T:int**
+EDGES|EVAL_TYPE pointer_to_pointer#14 -> T:void
+EDGES|EVAL_TYPE pointer_to_pointer#15 -> T:int**
+EDGES|EVAL_TYPE pointer_to_pointer#16 -> T:ANY
+EDGES|EVAL_TYPE pointer_to_pointer#17 -> T:int*
+EDGES|EVAL_TYPE pointer_to_pointer#18 -> T:ANY
+EDGES|EVAL_TYPE pointer_to_pointer#19 -> T:ANY
+EDGES|EVAL_TYPE pointer_to_pointer#2 -> T:int
+EDGES|EVAL_TYPE pointer_to_pointer#20 -> T:ANY
+EDGES|EVAL_TYPE pointer_to_pointer#21 -> T:int**
+EDGES|EVAL_TYPE pointer_to_pointer#22 -> T:int
+EDGES|EVAL_TYPE pointer_to_pointer#24 -> T:int
+EDGES|EVAL_TYPE pointer_to_pointer#25 -> T:int
+EDGES|EVAL_TYPE pointer_to_pointer#3 -> T:void
+EDGES|EVAL_TYPE pointer_to_pointer#4 -> T:int
+EDGES|EVAL_TYPE pointer_to_pointer#5 -> T:void
+EDGES|EVAL_TYPE pointer_to_pointer#6 -> T:int
+EDGES|EVAL_TYPE pointer_to_pointer#7 -> T:int
+EDGES|EVAL_TYPE pointer_to_pointer#8 -> T:int*
+EDGES|EVAL_TYPE pointer_to_pointer#9 -> T:void
 EDGES|EVAL_TYPE pointers.c:<global>#2 -> T:int
+EDGES|EVAL_TYPE pointers.c:<global>#255 -> T:ANY
+EDGES|EVAL_TYPE pointers.c:<global>#256 -> T:record
+EDGES|EVAL_TYPE pointers.c:<global>#257 -> T:pointer_box
+EDGES|EVAL_TYPE pointers.c:<global>#258 -> T:increment
+EDGES|EVAL_TYPE pointers.c:<global>#259 -> T:function_pointer
+EDGES|EVAL_TYPE pointers.c:<global>#260 -> T:heap_alias
+EDGES|EVAL_TYPE pointers.c:<global>#261 -> T:array_alias
+EDGES|EVAL_TYPE pointers.c:<global>#262 -> T:pointer_to_pointer
+EDGES|EVAL_TYPE pointers.c:<global>#263 -> T:return_alias
+EDGES|EVAL_TYPE pointers.c:<global>#264 -> T:returned_alias
+EDGES|EVAL_TYPE pointers.c:<global>#265 -> T:pointer_field_alias
+EDGES|EVAL_TYPE pointers.c:<global>#266 -> T:pointer_rebind
+EDGES|EVAL_TYPE pointers.c:<global>#267 -> T:aliased_function_pointer
+EDGES|EVAL_TYPE pointers.c:<global>#268 -> T:store_through_pointer
+EDGES|EVAL_TYPE pointers.c:<global>#269 -> T:out_parameter_alias
+EDGES|EVAL_TYPE pointers.c:<global>#270 -> T:ANY
 EDGES|EVAL_TYPE pointers.c:<global>#3 -> T:int
+EDGES|EVAL_TYPE pointers.c:<global>#5 -> T:int*
 EDGES|EVAL_TYPE preprocessor#1 -> T:void
 EDGES|EVAL_TYPE preprocessor#2 -> T:void
 EDGES|EVAL_TYPE preprocessor#3 -> T:void
@@ -5716,6 +6520,30 @@ EDGES|EVAL_TYPE ptr#6 -> T:int
 EDGES|EVAL_TYPE ptr#7 -> T:ANY
 EDGES|EVAL_TYPE ptr#8 -> T:int*
 EDGES|EVAL_TYPE ptr#9 -> T:int*
+EDGES|EVAL_TYPE return_alias#1 -> T:int*
+EDGES|EVAL_TYPE return_alias#2 -> T:int*
+EDGES|EVAL_TYPE return_alias#3 -> T:void
+EDGES|EVAL_TYPE return_alias#5 -> T:int*
+EDGES|EVAL_TYPE return_alias#7 -> T:int*
+EDGES|EVAL_TYPE returned_alias#1 -> T:int
+EDGES|EVAL_TYPE returned_alias#10 -> T:int*
+EDGES|EVAL_TYPE returned_alias#11 -> T:int*
+EDGES|EVAL_TYPE returned_alias#12 -> T:ANY
+EDGES|EVAL_TYPE returned_alias#13 -> T:int
+EDGES|EVAL_TYPE returned_alias#14 -> T:ANY
+EDGES|EVAL_TYPE returned_alias#15 -> T:ANY
+EDGES|EVAL_TYPE returned_alias#16 -> T:int*
+EDGES|EVAL_TYPE returned_alias#17 -> T:int
+EDGES|EVAL_TYPE returned_alias#19 -> T:int
+EDGES|EVAL_TYPE returned_alias#2 -> T:int
+EDGES|EVAL_TYPE returned_alias#20 -> T:int
+EDGES|EVAL_TYPE returned_alias#3 -> T:void
+EDGES|EVAL_TYPE returned_alias#4 -> T:int
+EDGES|EVAL_TYPE returned_alias#5 -> T:void
+EDGES|EVAL_TYPE returned_alias#6 -> T:int
+EDGES|EVAL_TYPE returned_alias#7 -> T:int
+EDGES|EVAL_TYPE returned_alias#8 -> T:int*
+EDGES|EVAL_TYPE returned_alias#9 -> T:void
 EDGES|EVAL_TYPE second#1 -> T:pair
 EDGES|EVAL_TYPE second#10 -> T:int
 EDGES|EVAL_TYPE second#11 -> T:int
@@ -5727,6 +6555,16 @@ EDGES|EVAL_TYPE second#5 -> T:ANY
 EDGES|EVAL_TYPE second#6 -> T:ANY
 EDGES|EVAL_TYPE second#7 -> T:ANY
 EDGES|EVAL_TYPE second#8 -> T:pair
+EDGES|EVAL_TYPE store_through_pointer#1 -> T:int*
+EDGES|EVAL_TYPE store_through_pointer#11 -> T:void
+EDGES|EVAL_TYPE store_through_pointer#2 -> T:int*
+EDGES|EVAL_TYPE store_through_pointer#3 -> T:int
+EDGES|EVAL_TYPE store_through_pointer#4 -> T:int
+EDGES|EVAL_TYPE store_through_pointer#5 -> T:void
+EDGES|EVAL_TYPE store_through_pointer#6 -> T:ANY
+EDGES|EVAL_TYPE store_through_pointer#7 -> T:ANY
+EDGES|EVAL_TYPE store_through_pointer#8 -> T:int*
+EDGES|EVAL_TYPE store_through_pointer#9 -> T:int
 EDGES|EVAL_TYPE strcmp#1 -> T:char*
 EDGES|EVAL_TYPE strcmp#10 -> T:ANY
 EDGES|EVAL_TYPE strcmp#11 -> T:char*
@@ -5961,6 +6799,7 @@ EDGES|PARAMETER_LINK add#1 -> add#2
 EDGES|PARAMETER_LINK add#3 -> add#4
 EDGES|PARAMETER_LINK agg#1 -> agg#2
 EDGES|PARAMETER_LINK agg#3 -> agg#4
+EDGES|PARAMETER_LINK aliased_function_pointer#1 -> aliased_function_pointer#2
 EDGES|PARAMETER_LINK apply#1 -> apply#2
 EDGES|PARAMETER_LINK apply#3 -> apply#4
 EDGES|PARAMETER_LINK array_alias#1 -> array_alias#2
@@ -5998,10 +6837,18 @@ EDGES|PARAMETER_LINK malloc#1 -> malloc#3
 EDGES|PARAMETER_LINK memcmp#1 -> memcmp#2
 EDGES|PARAMETER_LINK memcmp#3 -> memcmp#4
 EDGES|PARAMETER_LINK memcmp#5 -> memcmp#6
+EDGES|PARAMETER_LINK out_parameter_alias#1 -> out_parameter_alias#2
 EDGES|PARAMETER_LINK pick#1 -> pick#2
+EDGES|PARAMETER_LINK pointer_field_alias#1 -> pointer_field_alias#2
+EDGES|PARAMETER_LINK pointer_rebind#1 -> pointer_rebind#2
+EDGES|PARAMETER_LINK pointer_to_pointer#1 -> pointer_to_pointer#2
 EDGES|PARAMETER_LINK preprocessor#1 -> preprocessor#2
 EDGES|PARAMETER_LINK ptr#1 -> ptr#2
+EDGES|PARAMETER_LINK return_alias#1 -> return_alias#2
+EDGES|PARAMETER_LINK returned_alias#1 -> returned_alias#2
 EDGES|PARAMETER_LINK second#1 -> second#2
+EDGES|PARAMETER_LINK store_through_pointer#1 -> store_through_pointer#2
+EDGES|PARAMETER_LINK store_through_pointer#3 -> store_through_pointer#4
 EDGES|PARAMETER_LINK strcmp#1 -> strcmp#2
 EDGES|PARAMETER_LINK strcmp#3 -> strcmp#4
 EDGES|PARAMETER_LINK sum#1 -> sum#2
@@ -6031,6 +6878,7 @@ EDGES|REF NB:unary.c:<global> -> NS:<global>
 EDGES|REF T:ANY -> D:ANY
 EDGES|REF T:add -> D:add
 EDGES|REF T:agg -> D:agg
+EDGES|REF T:aliased_function_pointer -> D:aliased_function_pointer
 EDGES|REF T:apply -> D:apply
 EDGES|REF T:array_alias -> D:array_alias
 EDGES|REF T:bsearch -> D:bsearch
@@ -6051,6 +6899,7 @@ EDGES|REF T:increment -> D:increment
 EDGES|REF T:int -> D:int
 EDGES|REF T:int(*)(int) -> D:int(*)(int)
 EDGES|REF T:int* -> D:int*
+EDGES|REF T:int** -> D:int**
 EDGES|REF T:int[2] -> D:int[2]
 EDGES|REF T:int[2][3] -> D:int[2][3]
 EDGES|REF T:int[4] -> D:int[4]
@@ -6062,16 +6911,24 @@ EDGES|REF T:macro_advanced -> D:macro_advanced
 EDGES|REF T:macros -> D:macros
 EDGES|REF T:main -> D:main
 EDGES|REF T:memcmp -> D:memcmp
+EDGES|REF T:out_parameter_alias -> D:out_parameter_alias
 EDGES|REF T:pair -> order.c:<global>#11
 EDGES|REF T:pick -> D:pick
 EDGES|REF T:point -> structs.c:<global>#1
 EDGES|REF T:point* -> D:point*
+EDGES|REF T:pointer_box -> pointers.c:<global>#4
+EDGES|REF T:pointer_field_alias -> D:pointer_field_alias
+EDGES|REF T:pointer_rebind -> D:pointer_rebind
+EDGES|REF T:pointer_to_pointer -> D:pointer_to_pointer
 EDGES|REF T:preprocessor -> D:preprocessor
 EDGES|REF T:ptr -> D:ptr
 EDGES|REF T:record -> pointers.c:<global>#1
 EDGES|REF T:record* -> D:record*
+EDGES|REF T:return_alias -> D:return_alias
+EDGES|REF T:returned_alias -> D:returned_alias
 EDGES|REF T:second -> D:second
 EDGES|REF T:size_t -> D:size_t
+EDGES|REF T:store_through_pointer -> D:store_through_pointer
 EDGES|REF T:strcmp -> D:strcmp
 EDGES|REF T:sum -> D:sum
 EDGES|REF T:uint_t -> types2.c:<global>#72
@@ -6103,6 +6960,12 @@ EDGES|REF agg#35 -> agg#6
 EDGES|REF agg#36 -> agg#22
 EDGES|REF agg#39 -> agg#22
 EDGES|REF agg#9 -> structs.c:<global>#2
+EDGES|REF aliased_function_pointer#10 -> aliased_function_pointer#8
+EDGES|REF aliased_function_pointer#11 -> aliased_function_pointer#4
+EDGES|REF aliased_function_pointer#14 -> aliased_function_pointer#8
+EDGES|REF aliased_function_pointer#15 -> aliased_function_pointer#1
+EDGES|REF aliased_function_pointer#6 -> aliased_function_pointer#4
+EDGES|REF aliased_function_pointer#7 -> increment#0
 EDGES|REF apply#10 -> apply#3
 EDGES|REF apply#8 -> apply#1
 EDGES|REF apply#9 -> apply#3
@@ -6273,6 +7136,10 @@ EDGES|REF ops.c:<global>#30 -> classify#0
 EDGES|REF order.c:<global>#38 -> order.c:<global>#36
 EDGES|REF order.c:<global>#40 -> first#0
 EDGES|REF order.c:<global>#42 -> order.c:<global>#21
+EDGES|REF out_parameter_alias#10 -> out_parameter_alias#4
+EDGES|REF out_parameter_alias#11 -> out_parameter_alias#1
+EDGES|REF out_parameter_alias#13 -> out_parameter_alias#4
+EDGES|REF out_parameter_alias#6 -> out_parameter_alias#4
 EDGES|REF pick#14 -> pick#4
 EDGES|REF pick#20 -> pick#4
 EDGES|REF pick#25 -> pick#4
@@ -6283,10 +7150,44 @@ EDGES|REF pick#47 -> pick#4
 EDGES|REF pick#49 -> pick#4
 EDGES|REF pick#6 -> pick#4
 EDGES|REF pick#9 -> pick#1
-EDGES|REF pointers.c:<global>#102 -> increment#0
-EDGES|REF pointers.c:<global>#103 -> function_pointer#0
-EDGES|REF pointers.c:<global>#104 -> heap_alias#0
-EDGES|REF pointers.c:<global>#105 -> array_alias#0
+EDGES|REF pointer_field_alias#10 -> pointers.c:<global>#5
+EDGES|REF pointer_field_alias#11 -> pointer_field_alias#8
+EDGES|REF pointer_field_alias#14 -> pointer_field_alias#4
+EDGES|REF pointer_field_alias#17 -> pointers.c:<global>#5
+EDGES|REF pointer_field_alias#18 -> pointer_field_alias#8
+EDGES|REF pointer_field_alias#20 -> pointer_field_alias#1
+EDGES|REF pointer_field_alias#22 -> pointer_field_alias#4
+EDGES|REF pointer_field_alias#6 -> pointer_field_alias#4
+EDGES|REF pointer_rebind#10 -> pointer_rebind#8
+EDGES|REF pointer_rebind#14 -> pointer_rebind#12
+EDGES|REF pointer_rebind#16 -> pointer_rebind#4
+EDGES|REF pointer_rebind#18 -> pointer_rebind#12
+EDGES|REF pointer_rebind#20 -> pointer_rebind#8
+EDGES|REF pointer_rebind#23 -> pointer_rebind#12
+EDGES|REF pointer_rebind#24 -> pointer_rebind#1
+EDGES|REF pointer_rebind#27 -> pointer_rebind#8
+EDGES|REF pointer_rebind#28 -> pointer_rebind#4
+EDGES|REF pointer_rebind#6 -> pointer_rebind#4
+EDGES|REF pointer_to_pointer#10 -> pointer_to_pointer#8
+EDGES|REF pointer_to_pointer#12 -> pointer_to_pointer#4
+EDGES|REF pointer_to_pointer#15 -> pointer_to_pointer#13
+EDGES|REF pointer_to_pointer#17 -> pointer_to_pointer#8
+EDGES|REF pointer_to_pointer#21 -> pointer_to_pointer#13
+EDGES|REF pointer_to_pointer#22 -> pointer_to_pointer#1
+EDGES|REF pointer_to_pointer#24 -> pointer_to_pointer#4
+EDGES|REF pointer_to_pointer#6 -> pointer_to_pointer#4
+EDGES|REF pointers.c:<global>#258 -> increment#0
+EDGES|REF pointers.c:<global>#259 -> function_pointer#0
+EDGES|REF pointers.c:<global>#260 -> heap_alias#0
+EDGES|REF pointers.c:<global>#261 -> array_alias#0
+EDGES|REF pointers.c:<global>#262 -> pointer_to_pointer#0
+EDGES|REF pointers.c:<global>#263 -> pointers.c:<global>#128
+EDGES|REF pointers.c:<global>#264 -> pointers.c:<global>#136
+EDGES|REF pointers.c:<global>#265 -> pointer_field_alias#0
+EDGES|REF pointers.c:<global>#266 -> pointer_rebind#0
+EDGES|REF pointers.c:<global>#267 -> aliased_function_pointer#0
+EDGES|REF pointers.c:<global>#268 -> pointers.c:<global>#228
+EDGES|REF pointers.c:<global>#269 -> out_parameter_alias#0
 EDGES|REF preprocessor.c:<global>#12 -> preprocessor#0
 EDGES|REF ptr#11 -> ptr#9
 EDGES|REF ptr#13 -> ptr#4
@@ -6294,8 +7195,17 @@ EDGES|REF ptr#17 -> ptr#9
 EDGES|REF ptr#18 -> ptr#4
 EDGES|REF ptr#6 -> ptr#4
 EDGES|REF ptr#8 -> ptr#1
+EDGES|REF return_alias#5 -> return_alias#1
+EDGES|REF returned_alias#10 -> returned_alias#8
+EDGES|REF returned_alias#13 -> returned_alias#4
+EDGES|REF returned_alias#16 -> returned_alias#8
+EDGES|REF returned_alias#17 -> returned_alias#1
+EDGES|REF returned_alias#19 -> returned_alias#4
+EDGES|REF returned_alias#6 -> returned_alias#4
 EDGES|REF second#7 -> order.c:<global>#13
 EDGES|REF second#8 -> second#1
+EDGES|REF store_through_pointer#8 -> store_through_pointer#1
+EDGES|REF store_through_pointer#9 -> store_through_pointer#3
 EDGES|REF strcmp#11 -> strcmp#1
 EDGES|REF strcmp#13 -> strcmp#3
 EDGES|REF strcmp#15 -> strcmp#1
@@ -6346,6 +7256,7 @@ EDGES|SOURCE_FILE D:ANY -> F:<includes>
 EDGES|SOURCE_FILE D:add -> F:add.c
 EDGES|SOURCE_FILE D:add.c:<global> -> F:add.c
 EDGES|SOURCE_FILE D:agg -> F:structs.c
+EDGES|SOURCE_FILE D:aliased_function_pointer -> F:pointers.c
 EDGES|SOURCE_FILE D:apply -> F:types2.c
 EDGES|SOURCE_FILE D:array_alias -> F:pointers.c
 EDGES|SOURCE_FILE D:bsearch -> F:bsearch.c
@@ -6369,6 +7280,7 @@ EDGES|SOURCE_FILE D:increment -> F:pointers.c
 EDGES|SOURCE_FILE D:int -> F:<includes>
 EDGES|SOURCE_FILE D:int(*)(int) -> F:<includes>
 EDGES|SOURCE_FILE D:int* -> F:<includes>
+EDGES|SOURCE_FILE D:int** -> F:<includes>
 EDGES|SOURCE_FILE D:int[2] -> F:<includes>
 EDGES|SOURCE_FILE D:int[2][3] -> F:<includes>
 EDGES|SOURCE_FILE D:int[4] -> F:<includes>
@@ -6387,15 +7299,22 @@ EDGES|SOURCE_FILE D:memcmp -> F:memcmp.c
 EDGES|SOURCE_FILE D:memcmp.c:<global> -> F:memcmp.c
 EDGES|SOURCE_FILE D:ops.c:<global> -> F:ops.c
 EDGES|SOURCE_FILE D:order.c:<global> -> F:order.c
+EDGES|SOURCE_FILE D:out_parameter_alias -> F:pointers.c
 EDGES|SOURCE_FILE D:pick -> F:switch.c
 EDGES|SOURCE_FILE D:point* -> F:<includes>
+EDGES|SOURCE_FILE D:pointer_field_alias -> F:pointers.c
+EDGES|SOURCE_FILE D:pointer_rebind -> F:pointers.c
+EDGES|SOURCE_FILE D:pointer_to_pointer -> F:pointers.c
 EDGES|SOURCE_FILE D:pointers.c:<global> -> F:pointers.c
 EDGES|SOURCE_FILE D:preprocessor -> F:preprocessor.c
 EDGES|SOURCE_FILE D:preprocessor.c:<global> -> F:preprocessor.c
 EDGES|SOURCE_FILE D:ptr -> F:unary.c
 EDGES|SOURCE_FILE D:record* -> F:<includes>
+EDGES|SOURCE_FILE D:return_alias -> F:pointers.c
+EDGES|SOURCE_FILE D:returned_alias -> F:pointers.c
 EDGES|SOURCE_FILE D:second -> F:order.c
 EDGES|SOURCE_FILE D:size_t -> F:<includes>
+EDGES|SOURCE_FILE D:store_through_pointer -> F:pointers.c
 EDGES|SOURCE_FILE D:strcmp -> F:strcmp.c
 EDGES|SOURCE_FILE D:strcmp.c:<global> -> F:strcmp.c
 EDGES|SOURCE_FILE D:structs.c:<global> -> F:structs.c
@@ -6437,6 +7356,7 @@ EDGES|SOURCE_FILE add#0 -> F:add.c
 EDGES|SOURCE_FILE add.c:<global>#0 -> F:add.c
 EDGES|SOURCE_FILE add.c:<global>#12 -> F:add.c
 EDGES|SOURCE_FILE agg#0 -> F:structs.c
+EDGES|SOURCE_FILE aliased_function_pointer#0 -> F:pointers.c
 EDGES|SOURCE_FILE apply#0 -> F:types2.c
 EDGES|SOURCE_FILE array_alias#0 -> F:pointers.c
 EDGES|SOURCE_FILE bsearch#0 -> F:bsearch.c
@@ -6475,9 +7395,17 @@ EDGES|SOURCE_FILE order.c:<global>#0 -> F:order.c
 EDGES|SOURCE_FILE order.c:<global>#11 -> F:order.c
 EDGES|SOURCE_FILE order.c:<global>#14 -> F:order.c
 EDGES|SOURCE_FILE order.c:<global>#21 -> F:order.c
+EDGES|SOURCE_FILE out_parameter_alias#0 -> F:pointers.c
 EDGES|SOURCE_FILE pick#0 -> F:switch.c
+EDGES|SOURCE_FILE pointer_field_alias#0 -> F:pointers.c
+EDGES|SOURCE_FILE pointer_rebind#0 -> F:pointers.c
+EDGES|SOURCE_FILE pointer_to_pointer#0 -> F:pointers.c
 EDGES|SOURCE_FILE pointers.c:<global>#0 -> F:pointers.c
 EDGES|SOURCE_FILE pointers.c:<global>#1 -> F:pointers.c
+EDGES|SOURCE_FILE pointers.c:<global>#128 -> F:pointers.c
+EDGES|SOURCE_FILE pointers.c:<global>#136 -> F:pointers.c
+EDGES|SOURCE_FILE pointers.c:<global>#228 -> F:pointers.c
+EDGES|SOURCE_FILE pointers.c:<global>#4 -> F:pointers.c
 EDGES|SOURCE_FILE preprocessor#0 -> F:preprocessor.c
 EDGES|SOURCE_FILE preprocessor.c:<global>#0 -> F:preprocessor.c
 EDGES|SOURCE_FILE ptr#0 -> F:unary.c
@@ -6514,12 +7442,39 @@ FLOWS|REACHING_DEF[!a] unary#12 -> unary#11
 FLOWS|REACHING_DEF[!a] unary#12 -> unary#25
 FLOWS|REACHING_DEF["hi"] exprs#59 -> exprs#57
 FLOWS|REACHING_DEF["hi"] exprs#59 -> exprs#58
+FLOWS|REACHING_DEF[&cursor] pointer_to_pointer#16 -> pointer_to_pointer#14
+FLOWS|REACHING_DEF[&cursor] pointer_to_pointer#16 -> pointer_to_pointer#15
+FLOWS|REACHING_DEF[&cursor] pointer_to_pointer#16 -> pointer_to_pointer#25
+FLOWS|REACHING_DEF[&first] pointer_rebind#15 -> pointer_rebind#13
+FLOWS|REACHING_DEF[&first] pointer_rebind#15 -> pointer_rebind#14
+FLOWS|REACHING_DEF[&first] pointer_rebind#15 -> pointer_rebind#28
+FLOWS|REACHING_DEF[&first] pointer_rebind#15 -> pointer_rebind#29
+FLOWS|REACHING_DEF[&result] out_parameter_alias#9 -> out_parameter_alias#13
+FLOWS|REACHING_DEF[&result] out_parameter_alias#9 -> out_parameter_alias#14
+FLOWS|REACHING_DEF[&result] out_parameter_alias#9 -> out_parameter_alias#8
+FLOWS|REACHING_DEF[&result] pointer_field_alias#13 -> pointer_field_alias#10
+FLOWS|REACHING_DEF[&result] pointer_field_alias#13 -> pointer_field_alias#22
+FLOWS|REACHING_DEF[&result] pointer_field_alias#13 -> pointer_field_alias#23
+FLOWS|REACHING_DEF[&result] pointer_field_alias#13 -> pointer_field_alias#9
+FLOWS|REACHING_DEF[&result] pointer_to_pointer#11 -> pointer_to_pointer#10
+FLOWS|REACHING_DEF[&result] pointer_to_pointer#11 -> pointer_to_pointer#24
+FLOWS|REACHING_DEF[&result] pointer_to_pointer#11 -> pointer_to_pointer#25
+FLOWS|REACHING_DEF[&result] pointer_to_pointer#11 -> pointer_to_pointer#9
+FLOWS|REACHING_DEF[&result] returned_alias#12 -> returned_alias#11
+FLOWS|REACHING_DEF[&result] returned_alias#12 -> returned_alias#19
+FLOWS|REACHING_DEF[&result] returned_alias#12 -> returned_alias#20
+FLOWS|REACHING_DEF[&second] pointer_rebind#19 -> pointer_rebind#17
+FLOWS|REACHING_DEF[&second] pointer_rebind#19 -> pointer_rebind#18
+FLOWS|REACHING_DEF[&second] pointer_rebind#19 -> pointer_rebind#27
+FLOWS|REACHING_DEF[&second] pointer_rebind#19 -> pointer_rebind#29
 FLOWS|REACHING_DEF[&v] ptr#12 -> ptr#10
 FLOWS|REACHING_DEF[&v] ptr#12 -> ptr#11
 FLOWS|REACHING_DEF[&v] ptr#12 -> ptr#18
 FLOWS|REACHING_DEF[&v] ptr#12 -> ptr#19
 FLOWS|REACHING_DEF['x'] exprs#55 -> exprs#53
 FLOWS|REACHING_DEF['x'] exprs#55 -> exprs#54
+FLOWS|REACHING_DEF[(*alias)(int) = callback] aliased_function_pointer#9 -> aliased_function_pointer#16
+FLOWS|REACHING_DEF[(*callback)(int) = increment] aliased_function_pointer#5 -> aliased_function_pointer#16
 FLOWS|REACHING_DEF[(*callback)(int) = increment] function_pointer#5 -> function_pointer#12
 FLOWS|REACHING_DEF[(char *)base + width*(nel/2)] bsearch#22 -> bsearch#20
 FLOWS|REACHING_DEF[(char *)base + width*(nel/2)] bsearch#22 -> bsearch#21
@@ -6547,8 +7502,24 @@ FLOWS|REACHING_DEF[*(unsigned char *)l] strcmp#23 -> strcmp#31
 FLOWS|REACHING_DEF[*(unsigned char *)r] strcmp#27 -> strcmp#22
 FLOWS|REACHING_DEF[*(unsigned char *)r] strcmp#27 -> strcmp#23
 FLOWS|REACHING_DEF[*(unsigned char *)r] strcmp#27 -> strcmp#31
+FLOWS|REACHING_DEF[**slot = &cursor] pointer_to_pointer#14 -> pointer_to_pointer#25
+FLOWS|REACHING_DEF[**slot = value] pointer_to_pointer#18 -> pointer_to_pointer#25
+FLOWS|REACHING_DEF[**slot] pointer_to_pointer#19 -> pointer_to_pointer#18
+FLOWS|REACHING_DEF[**slot] pointer_to_pointer#19 -> pointer_to_pointer#25
 FLOWS|REACHING_DEF[*alias = heap] heap_alias#12 -> heap_alias#39
+FLOWS|REACHING_DEF[*box.value = value] pointer_field_alias#15 -> pointer_field_alias#23
+FLOWS|REACHING_DEF[*box.value] pointer_field_alias#16 -> pointer_field_alias#15
+FLOWS|REACHING_DEF[*box.value] pointer_field_alias#16 -> pointer_field_alias#23
+FLOWS|REACHING_DEF[*cursor = &first] pointer_rebind#13 -> pointer_rebind#29
+FLOWS|REACHING_DEF[*cursor = &result] pointer_to_pointer#9 -> pointer_to_pointer#25
+FLOWS|REACHING_DEF[*cursor = return_alias(&result)] returned_alias#9 -> returned_alias#20
+FLOWS|REACHING_DEF[*cursor = value] pointer_rebind#21 -> pointer_rebind#29
+FLOWS|REACHING_DEF[*cursor = value] returned_alias#14 -> returned_alias#20
 FLOWS|REACHING_DEF[*cursor = values] array_alias#11 -> array_alias#32
+FLOWS|REACHING_DEF[*cursor] pointer_rebind#22 -> pointer_rebind#21
+FLOWS|REACHING_DEF[*cursor] pointer_rebind#22 -> pointer_rebind#29
+FLOWS|REACHING_DEF[*cursor] returned_alias#15 -> returned_alias#14
+FLOWS|REACHING_DEF[*cursor] returned_alias#15 -> returned_alias#20
 FLOWS|REACHING_DEF[*heap = malloc(sizeof(struct record))] heap_alias#6 -> heap_alias#39
 FLOWS|REACHING_DEF[*l == *r] memcmp#20 -> memcmp#18
 FLOWS|REACHING_DEF[*l == *r] memcmp#20 -> memcmp#19
@@ -6581,6 +7552,10 @@ FLOWS|REACHING_DEF[*l] strcmp#14 -> strcmp#31
 FLOWS|REACHING_DEF[*l] strcmp#14 -> strcmp#8
 FLOWS|REACHING_DEF[*l] strcmp#14 -> strcmp#9
 FLOWS|REACHING_DEF[*msg = "hi"] exprs#57 -> exprs#70
+FLOWS|REACHING_DEF[*output = value] store_through_pointer#6 -> store_through_pointer#11
+FLOWS|REACHING_DEF[*output] store_through_pointer#7 -> store_through_pointer#11
+FLOWS|REACHING_DEF[*output] store_through_pointer#7 -> store_through_pointer#2
+FLOWS|REACHING_DEF[*output] store_through_pointer#7 -> store_through_pointer#6
 FLOWS|REACHING_DEF[*p] ptr#7 -> ptr#19
 FLOWS|REACHING_DEF[*p] ptr#7 -> ptr#2
 FLOWS|REACHING_DEF[*p] ptr#7 -> ptr#5
@@ -6652,11 +7627,23 @@ FLOWS|REACHING_DEF[0] logic#9 -> logic#7
 FLOWS|REACHING_DEF[0] logic#9 -> logic#8
 FLOWS|REACHING_DEF[0] macros#26 -> macros#25
 FLOWS|REACHING_DEF[0] memcmp#40 -> memcmp#33
+FLOWS|REACHING_DEF[0] out_parameter_alias#7 -> out_parameter_alias#5
+FLOWS|REACHING_DEF[0] out_parameter_alias#7 -> out_parameter_alias#6
 FLOWS|REACHING_DEF[0] pick#32 -> pick#30
 FLOWS|REACHING_DEF[0] pick#32 -> pick#31
 FLOWS|REACHING_DEF[0] pick#7 -> pick#5
 FLOWS|REACHING_DEF[0] pick#7 -> pick#6
+FLOWS|REACHING_DEF[0] pointer_field_alias#7 -> pointer_field_alias#5
+FLOWS|REACHING_DEF[0] pointer_field_alias#7 -> pointer_field_alias#6
+FLOWS|REACHING_DEF[0] pointer_rebind#11 -> pointer_rebind#10
+FLOWS|REACHING_DEF[0] pointer_rebind#11 -> pointer_rebind#9
+FLOWS|REACHING_DEF[0] pointer_rebind#7 -> pointer_rebind#5
+FLOWS|REACHING_DEF[0] pointer_rebind#7 -> pointer_rebind#6
+FLOWS|REACHING_DEF[0] pointer_to_pointer#7 -> pointer_to_pointer#5
+FLOWS|REACHING_DEF[0] pointer_to_pointer#7 -> pointer_to_pointer#6
 FLOWS|REACHING_DEF[0] preprocessor#8 -> preprocessor#7
+FLOWS|REACHING_DEF[0] returned_alias#7 -> returned_alias#5
+FLOWS|REACHING_DEF[0] returned_alias#7 -> returned_alias#6
 FLOWS|REACHING_DEF[0] sum#11 -> sum#10
 FLOWS|REACHING_DEF[0] sum#11 -> sum#9
 FLOWS|REACHING_DEF[0] sum#7 -> sum#5
@@ -6736,6 +7723,7 @@ FLOWS|REACHING_DEF[7] pick#43 -> pick#41
 FLOWS|REACHING_DEF[7] pick#43 -> pick#42
 FLOWS|REACHING_DEF[<RET>] add#6 -> add#10
 FLOWS|REACHING_DEF[<RET>] agg#37 -> agg#40
+FLOWS|REACHING_DEF[<RET>] aliased_function_pointer#12 -> aliased_function_pointer#16
 FLOWS|REACHING_DEF[<RET>] apply#6 -> apply#11
 FLOWS|REACHING_DEF[<RET>] array_alias#28 -> array_alias#32
 FLOWS|REACHING_DEF[<RET>] bsearch#68 -> bsearch#72
@@ -6755,9 +7743,15 @@ FLOWS|REACHING_DEF[<RET>] macros#11 -> macros#27
 FLOWS|REACHING_DEF[<RET>] macros#25 -> macros#27
 FLOWS|REACHING_DEF[<RET>] main#8 -> main#10
 FLOWS|REACHING_DEF[<RET>] memcmp#32 -> memcmp#41
+FLOWS|REACHING_DEF[<RET>] out_parameter_alias#12 -> out_parameter_alias#14
 FLOWS|REACHING_DEF[<RET>] pick#48 -> pick#50
+FLOWS|REACHING_DEF[<RET>] pointer_field_alias#21 -> pointer_field_alias#23
+FLOWS|REACHING_DEF[<RET>] pointer_rebind#25 -> pointer_rebind#29
+FLOWS|REACHING_DEF[<RET>] pointer_to_pointer#23 -> pointer_to_pointer#25
 FLOWS|REACHING_DEF[<RET>] preprocessor#7 -> preprocessor#9
 FLOWS|REACHING_DEF[<RET>] ptr#14 -> ptr#19
+FLOWS|REACHING_DEF[<RET>] return_alias#4 -> return_alias#7
+FLOWS|REACHING_DEF[<RET>] returned_alias#18 -> returned_alias#20
 FLOWS|REACHING_DEF[<RET>] second#4 -> second#13
 FLOWS|REACHING_DEF[<RET>] strcmp#21 -> strcmp#31
 FLOWS|REACHING_DEF[<RET>] sum#27 -> sum#29
@@ -6884,6 +7878,15 @@ FLOWS|REACHING_DEF[] agg#0 -> agg#31
 FLOWS|REACHING_DEF[] agg#0 -> agg#33
 FLOWS|REACHING_DEF[] agg#0 -> agg#36
 FLOWS|REACHING_DEF[] agg#0 -> agg#39
+FLOWS|REACHING_DEF[] aliased_function_pointer#0 -> aliased_function_pointer#1
+FLOWS|REACHING_DEF[] aliased_function_pointer#0 -> aliased_function_pointer#11
+FLOWS|REACHING_DEF[] aliased_function_pointer#0 -> aliased_function_pointer#14
+FLOWS|REACHING_DEF[] aliased_function_pointer#0 -> aliased_function_pointer#15
+FLOWS|REACHING_DEF[] aliased_function_pointer#0 -> aliased_function_pointer#7
+FLOWS|REACHING_DEF[] aliased_function_pointer#10 -> aliased_function_pointer#16
+FLOWS|REACHING_DEF[] aliased_function_pointer#10 -> aliased_function_pointer#9
+FLOWS|REACHING_DEF[] aliased_function_pointer#6 -> aliased_function_pointer#11
+FLOWS|REACHING_DEF[] aliased_function_pointer#6 -> aliased_function_pointer#5
 FLOWS|REACHING_DEF[] apply#0 -> apply#1
 FLOWS|REACHING_DEF[] apply#0 -> apply#10
 FLOWS|REACHING_DEF[] apply#0 -> apply#3
@@ -7140,6 +8143,11 @@ FLOWS|REACHING_DEF[] order.c:<global>#21 -> second#1
 FLOWS|REACHING_DEF[] order.c:<global>#21 -> second#10
 FLOWS|REACHING_DEF[] order.c:<global>#21 -> second#12
 FLOWS|REACHING_DEF[] order.c:<global>#21 -> second#8
+FLOWS|REACHING_DEF[] out_parameter_alias#0 -> out_parameter_alias#1
+FLOWS|REACHING_DEF[] out_parameter_alias#0 -> out_parameter_alias#10
+FLOWS|REACHING_DEF[] out_parameter_alias#0 -> out_parameter_alias#11
+FLOWS|REACHING_DEF[] out_parameter_alias#0 -> out_parameter_alias#13
+FLOWS|REACHING_DEF[] out_parameter_alias#0 -> out_parameter_alias#7
 FLOWS|REACHING_DEF[] pick#0 -> pick#1
 FLOWS|REACHING_DEF[] pick#0 -> pick#12
 FLOWS|REACHING_DEF[] pick#0 -> pick#15
@@ -7156,11 +8164,55 @@ FLOWS|REACHING_DEF[] pick#0 -> pick#47
 FLOWS|REACHING_DEF[] pick#0 -> pick#49
 FLOWS|REACHING_DEF[] pick#0 -> pick#7
 FLOWS|REACHING_DEF[] pick#0 -> pick#9
-FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#101
-FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#102
-FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#103
-FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#104
-FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#105
+FLOWS|REACHING_DEF[] pointer_field_alias#0 -> pointer_field_alias#1
+FLOWS|REACHING_DEF[] pointer_field_alias#0 -> pointer_field_alias#11
+FLOWS|REACHING_DEF[] pointer_field_alias#0 -> pointer_field_alias#14
+FLOWS|REACHING_DEF[] pointer_field_alias#0 -> pointer_field_alias#18
+FLOWS|REACHING_DEF[] pointer_field_alias#0 -> pointer_field_alias#20
+FLOWS|REACHING_DEF[] pointer_field_alias#0 -> pointer_field_alias#22
+FLOWS|REACHING_DEF[] pointer_field_alias#0 -> pointer_field_alias#7
+FLOWS|REACHING_DEF[] pointer_rebind#0 -> pointer_rebind#1
+FLOWS|REACHING_DEF[] pointer_rebind#0 -> pointer_rebind#11
+FLOWS|REACHING_DEF[] pointer_rebind#0 -> pointer_rebind#16
+FLOWS|REACHING_DEF[] pointer_rebind#0 -> pointer_rebind#20
+FLOWS|REACHING_DEF[] pointer_rebind#0 -> pointer_rebind#23
+FLOWS|REACHING_DEF[] pointer_rebind#0 -> pointer_rebind#24
+FLOWS|REACHING_DEF[] pointer_rebind#0 -> pointer_rebind#27
+FLOWS|REACHING_DEF[] pointer_rebind#0 -> pointer_rebind#28
+FLOWS|REACHING_DEF[] pointer_rebind#0 -> pointer_rebind#7
+FLOWS|REACHING_DEF[] pointer_to_pointer#0 -> pointer_to_pointer#1
+FLOWS|REACHING_DEF[] pointer_to_pointer#0 -> pointer_to_pointer#12
+FLOWS|REACHING_DEF[] pointer_to_pointer#0 -> pointer_to_pointer#17
+FLOWS|REACHING_DEF[] pointer_to_pointer#0 -> pointer_to_pointer#21
+FLOWS|REACHING_DEF[] pointer_to_pointer#0 -> pointer_to_pointer#22
+FLOWS|REACHING_DEF[] pointer_to_pointer#0 -> pointer_to_pointer#24
+FLOWS|REACHING_DEF[] pointer_to_pointer#0 -> pointer_to_pointer#7
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#256
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#257
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#258
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#259
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#260
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#261
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#262
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#263
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#264
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#265
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#266
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#267
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#268
+FLOWS|REACHING_DEF[] pointers.c:<global>#0 -> pointers.c:<global>#269
+FLOWS|REACHING_DEF[] pointers.c:<global>#128 -> return_alias#1
+FLOWS|REACHING_DEF[] pointers.c:<global>#128 -> return_alias#5
+FLOWS|REACHING_DEF[] pointers.c:<global>#136 -> returned_alias#1
+FLOWS|REACHING_DEF[] pointers.c:<global>#136 -> returned_alias#13
+FLOWS|REACHING_DEF[] pointers.c:<global>#136 -> returned_alias#16
+FLOWS|REACHING_DEF[] pointers.c:<global>#136 -> returned_alias#17
+FLOWS|REACHING_DEF[] pointers.c:<global>#136 -> returned_alias#19
+FLOWS|REACHING_DEF[] pointers.c:<global>#136 -> returned_alias#7
+FLOWS|REACHING_DEF[] pointers.c:<global>#228 -> store_through_pointer#1
+FLOWS|REACHING_DEF[] pointers.c:<global>#228 -> store_through_pointer#3
+FLOWS|REACHING_DEF[] pointers.c:<global>#228 -> store_through_pointer#8
+FLOWS|REACHING_DEF[] pointers.c:<global>#228 -> store_through_pointer#9
 FLOWS|REACHING_DEF[] preprocessor#0 -> preprocessor#1
 FLOWS|REACHING_DEF[] preprocessor#0 -> preprocessor#4
 FLOWS|REACHING_DEF[] preprocessor#0 -> preprocessor#5
@@ -7313,6 +8365,8 @@ FLOWS|REACHING_DEF[a] unary#8 -> unary#7
 FLOWS|REACHING_DEF[add(1, 2)] main#5 -> main#10
 FLOWS|REACHING_DEF[add(1, 2)] main#5 -> main#3
 FLOWS|REACHING_DEF[add(1, 2)] main#5 -> main#4
+FLOWS|REACHING_DEF[alias(value)] aliased_function_pointer#13 -> aliased_function_pointer#12
+FLOWS|REACHING_DEF[alias(value)] aliased_function_pointer#13 -> aliased_function_pointer#16
 FLOWS|REACHING_DEF[alias->left + 1] heap_alias#24 -> heap_alias#20
 FLOWS|REACHING_DEF[alias->left + 1] heap_alias#24 -> heap_alias#21
 FLOWS|REACHING_DEF[alias->left + 1] heap_alias#24 -> heap_alias#39
@@ -7400,6 +8454,11 @@ FLOWS|REACHING_DEF[base] bsearch#25 -> bsearch#72
 FLOWS|REACHING_DEF[base] bsearch#3 -> bsearch#25
 FLOWS|REACHING_DEF[base] bsearch#3 -> bsearch#4
 FLOWS|REACHING_DEF[base] bsearch#53 -> bsearch#52
+FLOWS|REACHING_DEF[box.value = &result] pointer_field_alias#9 -> pointer_field_alias#23
+FLOWS|REACHING_DEF[box.value] pointer_field_alias#10 -> pointer_field_alias#17
+FLOWS|REACHING_DEF[box.value] pointer_field_alias#10 -> pointer_field_alias#18
+FLOWS|REACHING_DEF[box.value] pointer_field_alias#10 -> pointer_field_alias#23
+FLOWS|REACHING_DEF[box.value] pointer_field_alias#10 -> pointer_field_alias#9
 FLOWS|REACHING_DEF[c + v.i] use#36 -> use#35
 FLOWS|REACHING_DEF[c + v.i] use#36 -> use#41
 FLOWS|REACHING_DEF[c = !a] unary#10 -> unary#25
@@ -7415,6 +8474,9 @@ FLOWS|REACHING_DEF[c] use#37 -> use#36
 FLOWS|REACHING_DEF[c] use#37 -> use#41
 FLOWS|REACHING_DEF[callback(value)] function_pointer#9 -> function_pointer#12
 FLOWS|REACHING_DEF[callback(value)] function_pointer#9 -> function_pointer#8
+FLOWS|REACHING_DEF[callback] aliased_function_pointer#11 -> aliased_function_pointer#10
+FLOWS|REACHING_DEF[callback] aliased_function_pointer#11 -> aliased_function_pointer#16
+FLOWS|REACHING_DEF[callback] aliased_function_pointer#11 -> aliased_function_pointer#9
 FLOWS|REACHING_DEF[char *] bsearch#24 -> bsearch#23
 FLOWS|REACHING_DEF[char *] bsearch#56 -> bsearch#55
 FLOWS|REACHING_DEF[cmp(key, try)] bsearch#33 -> bsearch#31
@@ -7422,6 +8484,7 @@ FLOWS|REACHING_DEF[cmp(key, try)] bsearch#33 -> bsearch#32
 FLOWS|REACHING_DEF[cmp(key, try)] bsearch#33 -> bsearch#72
 FLOWS|REACHING_DEF[cmp] bsearch#9 -> bsearch#10
 FLOWS|REACHING_DEF[cmp] bsearch#9 -> bsearch#72
+FLOWS|REACHING_DEF[cursor = &second] pointer_rebind#17 -> pointer_rebind#29
 FLOWS|REACHING_DEF[cursor[0] + 1] array_alias#23 -> array_alias#19
 FLOWS|REACHING_DEF[cursor[0] + 1] array_alias#23 -> array_alias#20
 FLOWS|REACHING_DEF[cursor[0] + 1] array_alias#23 -> array_alias#32
@@ -7436,14 +8499,35 @@ FLOWS|REACHING_DEF[cursor] array_alias#12 -> array_alias#16
 FLOWS|REACHING_DEF[cursor] array_alias#12 -> array_alias#24
 FLOWS|REACHING_DEF[cursor] array_alias#12 -> array_alias#25
 FLOWS|REACHING_DEF[cursor] array_alias#12 -> array_alias#32
+FLOWS|REACHING_DEF[cursor] pointer_rebind#14 -> pointer_rebind#13
+FLOWS|REACHING_DEF[cursor] pointer_rebind#18 -> pointer_rebind#17
+FLOWS|REACHING_DEF[cursor] pointer_rebind#18 -> pointer_rebind#23
+FLOWS|REACHING_DEF[cursor] pointer_rebind#18 -> pointer_rebind#29
+FLOWS|REACHING_DEF[cursor] pointer_to_pointer#10 -> pointer_to_pointer#17
+FLOWS|REACHING_DEF[cursor] pointer_to_pointer#10 -> pointer_to_pointer#25
+FLOWS|REACHING_DEF[cursor] pointer_to_pointer#10 -> pointer_to_pointer#9
+FLOWS|REACHING_DEF[cursor] pointer_to_pointer#17 -> pointer_to_pointer#16
+FLOWS|REACHING_DEF[cursor] pointer_to_pointer#17 -> pointer_to_pointer#25
+FLOWS|REACHING_DEF[cursor] returned_alias#10 -> returned_alias#16
+FLOWS|REACHING_DEF[cursor] returned_alias#10 -> returned_alias#20
+FLOWS|REACHING_DEF[cursor] returned_alias#10 -> returned_alias#9
 FLOWS|REACHING_DEF[d = ~a] unary#15 -> unary#25
 FLOWS|REACHING_DEF[d] unary#16 -> unary#15
 FLOWS|REACHING_DEF[d] unary#16 -> unary#25
 FLOWS|REACHING_DEF[f = 1.5] exprs#49 -> exprs#70
 FLOWS|REACHING_DEF[f] exprs#50 -> exprs#49
 FLOWS|REACHING_DEF[f] exprs#50 -> exprs#70
+FLOWS|REACHING_DEF[first = 0] pointer_rebind#5 -> pointer_rebind#29
 FLOWS|REACHING_DEF[first(1)] second#11 -> second#13
 FLOWS|REACHING_DEF[first(1)] second#11 -> second#5
+FLOWS|REACHING_DEF[first] pointer_rebind#16 -> pointer_rebind#15
+FLOWS|REACHING_DEF[first] pointer_rebind#16 -> pointer_rebind#28
+FLOWS|REACHING_DEF[first] pointer_rebind#28 -> pointer_rebind#26
+FLOWS|REACHING_DEF[first] pointer_rebind#28 -> pointer_rebind#27
+FLOWS|REACHING_DEF[first] pointer_rebind#28 -> pointer_rebind#29
+FLOWS|REACHING_DEF[first] pointer_rebind#6 -> pointer_rebind#16
+FLOWS|REACHING_DEF[first] pointer_rebind#6 -> pointer_rebind#28
+FLOWS|REACHING_DEF[first] pointer_rebind#6 -> pointer_rebind#5
 FLOWS|REACHING_DEF[fn(x, x)] apply#7 -> apply#11
 FLOWS|REACHING_DEF[fn(x, x)] apply#7 -> apply#6
 FLOWS|REACHING_DEF[fn] apply#1 -> apply#11
@@ -7524,6 +8608,8 @@ FLOWS|REACHING_DEF[i] sum#21 -> sum#25
 FLOWS|REACHING_DEF[i] sum#23 -> sum#14
 FLOWS|REACHING_DEF[i] sum#23 -> sum#22
 FLOWS|REACHING_DEF[i] sum#25 -> sum#24
+FLOWS|REACHING_DEF[increment] aliased_function_pointer#7 -> aliased_function_pointer#5
+FLOWS|REACHING_DEF[increment] aliased_function_pointer#7 -> aliased_function_pointer#6
 FLOWS|REACHING_DEF[increment] function_pointer#7 -> function_pointer#5
 FLOWS|REACHING_DEF[increment] function_pointer#7 -> function_pointer#6
 FLOWS|REACHING_DEF[input] macro_advanced#1 -> macro_advanced#18
@@ -7715,6 +8801,9 @@ FLOWS|REACHING_DEF[nel] bsearch#5 -> bsearch#6
 FLOWS|REACHING_DEF[nel] bsearch#60 -> bsearch#59
 FLOWS|REACHING_DEF[nel] bsearch#63 -> bsearch#60
 FLOWS|REACHING_DEF[nel] bsearch#63 -> bsearch#62
+FLOWS|REACHING_DEF[output] store_through_pointer#1 -> store_through_pointer#11
+FLOWS|REACHING_DEF[output] store_through_pointer#1 -> store_through_pointer#2
+FLOWS|REACHING_DEF[output] store_through_pointer#1 -> store_through_pointer#8
 FLOWS|REACHING_DEF[p->y] agg#19 -> agg#15
 FLOWS|REACHING_DEF[p->y] agg#19 -> agg#16
 FLOWS|REACHING_DEF[p->y] agg#19 -> agg#2
@@ -8016,14 +9105,64 @@ FLOWS|REACHING_DEF[r] strcmp#3 -> strcmp#4
 FLOWS|REACHING_DEF[r] strcmp#30 -> strcmp#28
 FLOWS|REACHING_DEF[r] strcmp#30 -> strcmp#31
 FLOWS|REACHING_DEF[r] strcmp#30 -> strcmp#4
+FLOWS|REACHING_DEF[result = 0] out_parameter_alias#5 -> out_parameter_alias#14
+FLOWS|REACHING_DEF[result = 0] pointer_field_alias#5 -> pointer_field_alias#23
+FLOWS|REACHING_DEF[result = 0] pointer_to_pointer#5 -> pointer_to_pointer#25
+FLOWS|REACHING_DEF[result = 0] returned_alias#5 -> returned_alias#20
 FLOWS|REACHING_DEF[result = heap->right] heap_alias#30 -> heap_alias#39
 FLOWS|REACHING_DEF[result] heap_alias#31 -> heap_alias#30
 FLOWS|REACHING_DEF[result] heap_alias#31 -> heap_alias#38
 FLOWS|REACHING_DEF[result] heap_alias#31 -> heap_alias#39
 FLOWS|REACHING_DEF[result] heap_alias#38 -> heap_alias#37
+FLOWS|REACHING_DEF[result] out_parameter_alias#10 -> out_parameter_alias#13
+FLOWS|REACHING_DEF[result] out_parameter_alias#10 -> out_parameter_alias#14
+FLOWS|REACHING_DEF[result] out_parameter_alias#10 -> out_parameter_alias#9
+FLOWS|REACHING_DEF[result] out_parameter_alias#13 -> out_parameter_alias#12
+FLOWS|REACHING_DEF[result] out_parameter_alias#6 -> out_parameter_alias#10
+FLOWS|REACHING_DEF[result] out_parameter_alias#6 -> out_parameter_alias#13
+FLOWS|REACHING_DEF[result] out_parameter_alias#6 -> out_parameter_alias#14
+FLOWS|REACHING_DEF[result] out_parameter_alias#6 -> out_parameter_alias#5
+FLOWS|REACHING_DEF[result] pointer_field_alias#14 -> pointer_field_alias#13
+FLOWS|REACHING_DEF[result] pointer_field_alias#14 -> pointer_field_alias#22
+FLOWS|REACHING_DEF[result] pointer_field_alias#14 -> pointer_field_alias#23
+FLOWS|REACHING_DEF[result] pointer_field_alias#22 -> pointer_field_alias#21
+FLOWS|REACHING_DEF[result] pointer_field_alias#6 -> pointer_field_alias#14
+FLOWS|REACHING_DEF[result] pointer_field_alias#6 -> pointer_field_alias#22
+FLOWS|REACHING_DEF[result] pointer_field_alias#6 -> pointer_field_alias#23
+FLOWS|REACHING_DEF[result] pointer_field_alias#6 -> pointer_field_alias#5
+FLOWS|REACHING_DEF[result] pointer_to_pointer#12 -> pointer_to_pointer#11
+FLOWS|REACHING_DEF[result] pointer_to_pointer#12 -> pointer_to_pointer#24
+FLOWS|REACHING_DEF[result] pointer_to_pointer#12 -> pointer_to_pointer#25
+FLOWS|REACHING_DEF[result] pointer_to_pointer#24 -> pointer_to_pointer#23
+FLOWS|REACHING_DEF[result] pointer_to_pointer#6 -> pointer_to_pointer#12
+FLOWS|REACHING_DEF[result] pointer_to_pointer#6 -> pointer_to_pointer#24
+FLOWS|REACHING_DEF[result] pointer_to_pointer#6 -> pointer_to_pointer#25
+FLOWS|REACHING_DEF[result] pointer_to_pointer#6 -> pointer_to_pointer#5
+FLOWS|REACHING_DEF[result] returned_alias#13 -> returned_alias#12
+FLOWS|REACHING_DEF[result] returned_alias#13 -> returned_alias#19
+FLOWS|REACHING_DEF[result] returned_alias#13 -> returned_alias#20
+FLOWS|REACHING_DEF[result] returned_alias#19 -> returned_alias#18
+FLOWS|REACHING_DEF[result] returned_alias#6 -> returned_alias#13
+FLOWS|REACHING_DEF[result] returned_alias#6 -> returned_alias#19
+FLOWS|REACHING_DEF[result] returned_alias#6 -> returned_alias#20
+FLOWS|REACHING_DEF[result] returned_alias#6 -> returned_alias#5
+FLOWS|REACHING_DEF[return_alias(&result)] returned_alias#11 -> returned_alias#10
+FLOWS|REACHING_DEF[return_alias(&result)] returned_alias#11 -> returned_alias#20
+FLOWS|REACHING_DEF[return_alias(&result)] returned_alias#11 -> returned_alias#9
 FLOWS|REACHING_DEF[s = sizeof(int)] exprs#44 -> exprs#70
 FLOWS|REACHING_DEF[s] exprs#45 -> exprs#44
 FLOWS|REACHING_DEF[s] exprs#45 -> exprs#70
+FLOWS|REACHING_DEF[second - first] pointer_rebind#26 -> pointer_rebind#25
+FLOWS|REACHING_DEF[second - first] pointer_rebind#26 -> pointer_rebind#29
+FLOWS|REACHING_DEF[second = 0] pointer_rebind#9 -> pointer_rebind#29
+FLOWS|REACHING_DEF[second] pointer_rebind#10 -> pointer_rebind#20
+FLOWS|REACHING_DEF[second] pointer_rebind#10 -> pointer_rebind#27
+FLOWS|REACHING_DEF[second] pointer_rebind#10 -> pointer_rebind#9
+FLOWS|REACHING_DEF[second] pointer_rebind#20 -> pointer_rebind#19
+FLOWS|REACHING_DEF[second] pointer_rebind#20 -> pointer_rebind#27
+FLOWS|REACHING_DEF[second] pointer_rebind#27 -> pointer_rebind#26
+FLOWS|REACHING_DEF[second] pointer_rebind#27 -> pointer_rebind#28
+FLOWS|REACHING_DEF[second] pointer_rebind#27 -> pointer_rebind#29
 FLOWS|REACHING_DEF[sign < 0] bsearch#38 -> bsearch#72
 FLOWS|REACHING_DEF[sign = cmp(key, try)] bsearch#31 -> bsearch#72
 FLOWS|REACHING_DEF[sign > 0] bsearch#48 -> bsearch#72
@@ -8033,6 +9172,10 @@ FLOWS|REACHING_DEF[sign] bsearch#39 -> bsearch#38
 FLOWS|REACHING_DEF[sign] bsearch#39 -> bsearch#49
 FLOWS|REACHING_DEF[sign] bsearch#49 -> bsearch#48
 FLOWS|REACHING_DEF[sign] bsearch#49 -> bsearch#72
+FLOWS|REACHING_DEF[slot] pointer_to_pointer#15 -> pointer_to_pointer#14
+FLOWS|REACHING_DEF[slot] pointer_to_pointer#15 -> pointer_to_pointer#21
+FLOWS|REACHING_DEF[slot] pointer_to_pointer#15 -> pointer_to_pointer#25
+FLOWS|REACHING_DEF[store_through_pointer(&result, value)] out_parameter_alias#8 -> out_parameter_alias#14
 FLOWS|REACHING_DEF[t + i] count#21 -> count#19
 FLOWS|REACHING_DEF[t + i] count#21 -> count#20
 FLOWS|REACHING_DEF[t + i] count#21 -> count#42
@@ -8127,6 +9270,11 @@ FLOWS|REACHING_DEF[vals] agg#3 -> agg#4
 FLOWS|REACHING_DEF[vals] agg#3 -> agg#40
 FLOWS|REACHING_DEF[value + 1] increment#5 -> increment#4
 FLOWS|REACHING_DEF[value + 1] increment#5 -> increment#9
+FLOWS|REACHING_DEF[value] aliased_function_pointer#1 -> aliased_function_pointer#15
+FLOWS|REACHING_DEF[value] aliased_function_pointer#1 -> aliased_function_pointer#2
+FLOWS|REACHING_DEF[value] aliased_function_pointer#15 -> aliased_function_pointer#13
+FLOWS|REACHING_DEF[value] aliased_function_pointer#15 -> aliased_function_pointer#16
+FLOWS|REACHING_DEF[value] aliased_function_pointer#15 -> aliased_function_pointer#2
 FLOWS|REACHING_DEF[value] array_alias#1 -> array_alias#18
 FLOWS|REACHING_DEF[value] array_alias#1 -> array_alias#2
 FLOWS|REACHING_DEF[value] array_alias#18 -> array_alias#14
@@ -8149,6 +9297,45 @@ FLOWS|REACHING_DEF[value] increment#1 -> increment#6
 FLOWS|REACHING_DEF[value] increment#6 -> increment#2
 FLOWS|REACHING_DEF[value] increment#6 -> increment#5
 FLOWS|REACHING_DEF[value] increment#6 -> increment#9
+FLOWS|REACHING_DEF[value] out_parameter_alias#1 -> out_parameter_alias#11
+FLOWS|REACHING_DEF[value] out_parameter_alias#1 -> out_parameter_alias#2
+FLOWS|REACHING_DEF[value] out_parameter_alias#11 -> out_parameter_alias#14
+FLOWS|REACHING_DEF[value] out_parameter_alias#11 -> out_parameter_alias#2
+FLOWS|REACHING_DEF[value] out_parameter_alias#11 -> out_parameter_alias#8
+FLOWS|REACHING_DEF[value] pointer_field_alias#1 -> pointer_field_alias#2
+FLOWS|REACHING_DEF[value] pointer_field_alias#1 -> pointer_field_alias#20
+FLOWS|REACHING_DEF[value] pointer_field_alias#20 -> pointer_field_alias#15
+FLOWS|REACHING_DEF[value] pointer_field_alias#20 -> pointer_field_alias#16
+FLOWS|REACHING_DEF[value] pointer_field_alias#20 -> pointer_field_alias#2
+FLOWS|REACHING_DEF[value] pointer_field_alias#20 -> pointer_field_alias#23
+FLOWS|REACHING_DEF[value] pointer_rebind#1 -> pointer_rebind#2
+FLOWS|REACHING_DEF[value] pointer_rebind#1 -> pointer_rebind#24
+FLOWS|REACHING_DEF[value] pointer_rebind#24 -> pointer_rebind#2
+FLOWS|REACHING_DEF[value] pointer_rebind#24 -> pointer_rebind#21
+FLOWS|REACHING_DEF[value] pointer_rebind#24 -> pointer_rebind#22
+FLOWS|REACHING_DEF[value] pointer_rebind#24 -> pointer_rebind#29
+FLOWS|REACHING_DEF[value] pointer_to_pointer#1 -> pointer_to_pointer#2
+FLOWS|REACHING_DEF[value] pointer_to_pointer#1 -> pointer_to_pointer#22
+FLOWS|REACHING_DEF[value] pointer_to_pointer#22 -> pointer_to_pointer#18
+FLOWS|REACHING_DEF[value] pointer_to_pointer#22 -> pointer_to_pointer#19
+FLOWS|REACHING_DEF[value] pointer_to_pointer#22 -> pointer_to_pointer#2
+FLOWS|REACHING_DEF[value] pointer_to_pointer#22 -> pointer_to_pointer#25
+FLOWS|REACHING_DEF[value] return_alias#1 -> return_alias#2
+FLOWS|REACHING_DEF[value] return_alias#1 -> return_alias#5
+FLOWS|REACHING_DEF[value] return_alias#1 -> return_alias#7
+FLOWS|REACHING_DEF[value] return_alias#5 -> return_alias#4
+FLOWS|REACHING_DEF[value] returned_alias#1 -> returned_alias#17
+FLOWS|REACHING_DEF[value] returned_alias#1 -> returned_alias#2
+FLOWS|REACHING_DEF[value] returned_alias#17 -> returned_alias#14
+FLOWS|REACHING_DEF[value] returned_alias#17 -> returned_alias#15
+FLOWS|REACHING_DEF[value] returned_alias#17 -> returned_alias#2
+FLOWS|REACHING_DEF[value] returned_alias#17 -> returned_alias#20
+FLOWS|REACHING_DEF[value] store_through_pointer#3 -> store_through_pointer#4
+FLOWS|REACHING_DEF[value] store_through_pointer#3 -> store_through_pointer#9
+FLOWS|REACHING_DEF[value] store_through_pointer#9 -> store_through_pointer#11
+FLOWS|REACHING_DEF[value] store_through_pointer#9 -> store_through_pointer#4
+FLOWS|REACHING_DEF[value] store_through_pointer#9 -> store_through_pointer#6
+FLOWS|REACHING_DEF[value] store_through_pointer#9 -> store_through_pointer#7
 FLOWS|REACHING_DEF[values[1] = cursor[0] + 1] array_alias#19 -> array_alias#32
 FLOWS|REACHING_DEF[values[1]] array_alias#20 -> array_alias#19
 FLOWS|REACHING_DEF[values[1]] array_alias#20 -> array_alias#29
