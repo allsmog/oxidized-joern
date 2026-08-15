@@ -889,7 +889,8 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
         }
         // second loop: every arg use -> every gen member, gated by the call's
         // flow semantics (arg -> call output is always valid; arg -> sibling
-        // arg needs a (src,dst) mapping; pass-through when no semantics).
+        // arg needs a (src,dst) mapping). Operators without explicit mappings
+        // are pass-through. Named calls default to input -> return only.
         let sem = operator_semantics(v.name(c));
         for &u in v.args_of(c) {
             if !is_ddg(u) {
@@ -902,7 +903,7 @@ pub fn reaching_def_flows(cpg: &Cpg, method: NodeId) -> Vec<ReachingDefFlow> {
                 }
                 let valid = gnode == c
                     || match &sem {
-                        None => true,
+                        None => v.name(c).starts_with("<operator"),
                         Some(maps) => maps.contains(&(u_idx, v.arg_index(gnode))),
                     };
                 if valid {
@@ -1081,6 +1082,18 @@ mod tests {
         );
         assert!(!has_rd_edge(&cpg, y_lhs, x_rhs), "no lhs -> rhs flow");
         let _ = assign;
+    }
+
+    #[test]
+    fn named_call_arguments_do_not_flow_into_siblings() {
+        let cpg = build("void f(int left, int right) { consume(left, right); }");
+        let left = idents(&cpg, "left")[0];
+        let right = idents(&cpg, "right")[0];
+        let consume = call_named(&cpg, "consume");
+        assert!(has_rd_edge(&cpg, left, consume));
+        assert!(has_rd_edge(&cpg, right, consume));
+        assert!(!has_rd_edge(&cpg, left, right));
+        assert!(!has_rd_edge(&cpg, right, left));
     }
 
     #[test]

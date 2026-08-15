@@ -49,10 +49,11 @@ JOERN=/path/to/joern-cli ./check.sh   # regenerate oracle from Joern, then diff
 
 ## Status & honest scope
 
-Byte-identical to Joern on the `corpus/` programs (functions, params, locals,
-nested calls, 6 operators, if/else, while). This proves the **method**: the
-oracle is the spec, the diff is the gate. It is **not** yet a full c2cpg port —
-no pointers/structs/`indirectFieldAccess`, no preprocessor, no `<global>`/
-`<operator>` scaffolding methods, no CFG/REF/CALL graph edges (AST layer only),
-and type resolution is corpus-grade, not CDT-grade. Each is added the same way:
-extend the corpus, regenerate the oracle, drive the new diff to zero.
+The committed corpus is byte-identical to Joern v4.0.555 across 122 graph
+blocks and 1,961 ReachingDef facts. It covers methods and global scaffolding,
+preprocessing, compiler inputs, CFG/REF/CALL and schema edges, structs, arrays,
+heap objects, indirect fields, local and aliased function pointers,
+pointer-to-pointer writes, returned aliases, pointer fields, rebind/kill
+behavior, out-parameter calls, and deallocation semantics. Pinned zlib and Lua
+projects provide the real-code acceptance layer. New C constructs extend the
+same corpus and must drive the exact node/edge/flow diff back to zero.
