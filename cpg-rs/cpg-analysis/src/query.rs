@@ -1734,7 +1734,17 @@ impl<'a> QueryExecutor<'a> {
         };
         match self.cpg.passthrough_property_named(node, label) {
             Some(PropertyValue::Bools(values)) => values.clone(),
-            _ => Vec::new(),
+            _ => match (label, self.cpg.kind_of(node)) {
+                // These are mandatory Joern schema properties. Native graphs
+                // keep the common values implicit (the Flatgraph exporter
+                // materializes the same defaults), so CPGQL must expose them
+                // even before an export/import round trip.
+                ("IS_EXTERNAL", NodeKind::Method | NodeKind::TypeDecl)
+                | ("IS_VARIADIC", NodeKind::MethodParameterIn | NodeKind::MethodParameterOut) => {
+                    vec![false]
+                }
+                _ => Vec::new(),
+            },
         }
     }
 }
@@ -2055,12 +2065,25 @@ mod tests {
         );
         assert_eq!(
             execute(r#"cpg.method.isExternal(false).name"#),
-            QueryResult::Strings(vec!["main".to_string()])
+            QueryResult::Strings(vec!["main".to_string(), "strcpy".to_string()])
         );
         assert_eq!(
             execute(r#"cpg.call.columnNumberGte(7).columnNumber"#),
             QueryResult::Integers(vec![7])
         );
+    }
+
+    #[test]
+    fn native_nodes_expose_mandatory_false_schema_defaults() {
+        assert_eq!(
+            run(r#"cpg.method.isExternal(false).name"#),
+            QueryResult::Strings(vec!["main".to_string(), "strcpy".to_string()])
+        );
+        assert_eq!(
+            run(r#"cpg.parameter.isVariadic(false).name"#),
+            QueryResult::Strings(vec!["argc".to_string()])
+        );
+        assert!(run(r#"cpg.method.isExternal(true).name"#).is_empty());
     }
 
     #[test]

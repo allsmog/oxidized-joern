@@ -18,14 +18,14 @@ Status meanings:
 | Language | Build and query | Save/load | Flow and scan | Incremental update | Evidence | Status |
 |---|---|---|---|---|---|---|
 | C | Yes | Yes | Yes, including SARIF | Yes; correctness-first full-project rebuild | 114/114 Joern v4.0.555 graph blocks; 1,702/1,702 ReachingDef facts; canonical outcome suite; pinned zlib 1.3.1 and Lua 5.4.7 | **Production preview** |
-| C++ | Yes | Yes | Yes | Generic frontend | Shared schema, summary/taint, and persistence acceptance | Experimental |
-| Go | Yes | Yes | Yes | File-local incremental path | Shared acceptance plus cross-file edit/invalidation tests | Experimental |
-| Java | Yes | Yes | Yes | File-local incremental path | Shared acceptance plus cross-file edit/invalidation tests | Experimental |
-| JavaScript | Yes | Yes | Yes | Generic frontend | Shared schema, summary/taint, and persistence acceptance | Experimental |
-| TypeScript/TSX | Yes | Yes | Yes | Generic frontend | Shared schema, summary/taint, persistence, and dialect tests | Experimental |
-| Python | Yes | Yes | Yes | Generic frontend | Shared schema, summary/taint, and persistence acceptance | Experimental |
-| Ruby | Yes | Yes | Yes | Generic frontend | Shared schema, summary/taint, and persistence acceptance | Experimental |
-| Rust | Yes | Yes | Yes | Generic frontend | Shared schema, summary/taint, and persistence acceptance | Experimental |
+| C++ | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus shared acceptance | Experimental |
+| Go | Yes | Yes | Yes | File-local incremental path | 13/13 live Joern v4.0.555 semantic probes plus cross-file update tests | Experimental |
+| Java | Yes | Yes | Yes | File-local incremental path | 13/13 live Joern v4.0.555 semantic probes plus cross-file update tests | Experimental |
+| JavaScript | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus shared acceptance | Experimental |
+| TypeScript/TSX | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus dialect tests | Experimental |
+| Python | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus shared acceptance | Experimental |
+| Ruby | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus shared acceptance | Experimental |
+| Rust | Yes | Yes | Yes | Generic frontend | 13/13 live Joern v4.0.555 semantic probes plus shared acceptance | Experimental |
 | Scala | Yes | Yes | Yes | Generic frontend | Shared schema, summary/taint, and persistence acceptance | Experimental |
 
 Scala in this table means that the native Rust executable can parse and
@@ -42,7 +42,7 @@ The release contract covers these C operations:
   SARIF output;
 - canonical flow facts and final findings for branches, kills, loops, returns,
   globals, pointer/member access, sanitizers, cross-calls, and recursion;
-- a labeled 28-expectation default-rule corpus covering command injection,
+- a labeled 40-expectation default-rule corpus covering command injection,
   unbounded copies, uncontrolled format strings, `gets`, SQL injection, path
   traversal, and dynamic-library loading, including near-miss, fixed, and
   cross-file cases at 100% committed precision and recall;
@@ -62,15 +62,17 @@ fixture and implementation slice.
 The following are unsupported in `0.1.x`:
 
 - Joern's Scala console and full CPGQL source compatibility; `cpg query`
-  currently implements the 70-case native subset cataloged in
-  `acceptance/cpgql/catalog.json`, with 33 representative expressions at
+  currently implements the 108-case native subset cataloged in
+  `acceptance/cpgql/catalog.json`, with 65 representative expressions at
   zero diff against Joern v4.0.555;
 - JVM/Scala plugins and Maven-based extension workflows;
 - loading internal CPG2 files directly in Joern. The explicit
   `cpg export-joern` and `cpg import-joern` conversions use Joern v4's current
   Flatgraph format; C, Java, and Python pass bidirectional load probes and
   content-exact persisted round-trip digests;
-- a parity claim for non-C frontends;
+- production parity claims for non-C frontends; eight frontends have a pinned
+  13-probe source-semantic differential, but not the required real-project and
+  security-outcome corpora yet;
 - every rule from Joern querydb.
 
 Use the native CLI, JSON/SARIF outputs, stdio query server, or MCP interface as

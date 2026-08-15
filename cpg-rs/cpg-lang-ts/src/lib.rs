@@ -130,7 +130,7 @@ impl Frontend for TsFrontend {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use cpg_core::Query;
+    use cpg_core::{EdgeKind, NodeKind, Query};
 
     fn build(mut fe: TsFrontend, path: &str, code: &str) -> Cpg {
         let mut cpg = Cpg::new();
@@ -288,6 +288,47 @@ mod tests {
         );
         assert_eq!(cpg.method_named("add").len(), 1);
         assert_eq!(cpg.parameters_of(cpg.method_named("add")[0]).len(), 2);
+        let receiver = cpg
+            .out_kind(cpg.method_named("add")[0], EdgeKind::Ast)
+            .find(|&node| {
+                cpg.kind_of(node) == NodeKind::MethodParameterIn && cpg.argument_index_of(node) == 0
+            })
+            .expect("implicit receiver parameter");
+        assert_eq!(cpg.name_of(receiver), Some("this"));
         assert_eq!(cpg.calls_named("add").len(), 1);
+    }
+
+    #[test]
+    fn locals_are_declarations_not_reassignments() {
+        let python = build(
+            TsFrontend::python(),
+            "m.py",
+            "def f(x):\n    y = x\n    y = x\n    return y\n",
+        );
+        assert_eq!(
+            python
+                .nodes()
+                .filter(|&node| {
+                    python.kind_of(node) == NodeKind::Local && python.name_of(node) == Some("y")
+                })
+                .count(),
+            1,
+            "Python rebinding must reuse its declaration"
+        );
+
+        let javascript = build(
+            TsFrontend::javascript(),
+            "m.js",
+            "function f(x) { x = 1; let y = x; y = 2; return y; }",
+        );
+        assert_eq!(
+            javascript
+                .nodes()
+                .filter(|&node| javascript.kind_of(node) == NodeKind::Local)
+                .filter_map(|node| javascript.name_of(node))
+                .collect::<Vec<_>>(),
+            vec!["y"],
+            "JavaScript assignment must not manufacture a Local"
+        );
     }
 }

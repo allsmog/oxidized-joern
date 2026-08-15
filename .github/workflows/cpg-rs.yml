@@ -97,6 +97,9 @@ jobs:
       - name: Check committed Joern parity
         run: ./check.sh --committed-only
         working-directory: cpg-rs/joern-parity
+      - name: Check committed cross-language frontend parity
+        run: ./acceptance/languages/check.sh --committed-only
+        working-directory: cpg-rs
       - name: Check canonical C security outcomes
         run: cargo test -p cpg-analysis --test canonical_c_flow --locked
         working-directory: cpg-rs
@@ -139,6 +142,9 @@ jobs:
         working-directory: cpg-rs/joern-parity
       - name: Run native CPGQL differential
         run: ./acceptance/cpgql/check.sh
+        working-directory: cpg-rs
+      - name: Run cross-language frontend differential
+        run: ./acceptance/languages/check.sh
         working-directory: cpg-rs
       - name: Run C compiler-input differential
         run: ./acceptance/c-semantics/check.sh

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "oracle": "joern-v4.0.555",
+  "differentials": [
+    {"id": "cpp", "nativeLanguage": "cpp", "oracleLanguage": "newc", "fixture": "fixtures/cpp"},
+    {"id": "go", "nativeLanguage": "go", "oracleLanguage": "golang", "fixture": "fixtures/go"},
+    {"id": "java", "nativeLanguage": "java", "oracleLanguage": "javasrc", "fixture": "fixtures/java"},
+    {"id": "javascript", "nativeLanguage": "javascript", "oracleLanguage": "jssrc", "fixture": "fixtures/javascript"},
+    {"id": "typescript", "nativeLanguage": "typescript", "oracleLanguage": "jssrc", "fixture": "fixtures/typescript"},
+    {"id": "python", "nativeLanguage": "python", "oracleLanguage": "pythonsrc", "fixture": "fixtures/python"},
+    {"id": "ruby", "nativeLanguage": "ruby", "oracleLanguage": "rubysrc", "fixture": "fixtures/ruby"},
+    {"id": "rust", "nativeLanguage": "rust", "oracleLanguage": "rust", "fixture": "fixtures/rust"}
+  ],
+  "nativeOnly": [
+    {
+      "id": "scala",
+      "nativeLanguage": "scala",
+      "fixture": "fixtures/scala",
+      "reason": "Joern v4.0.555 does not ship a Scala source frontend"
+    }
+  ]
+}
