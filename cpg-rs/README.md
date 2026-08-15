@@ -7,15 +7,19 @@ SARIF, JSON, and MCP interfaces.
 
 ## Status
 
-The `0.1.x` release line is production-ready for its documented C workflows,
-but it is not a drop-in Joern replacement.
+The `0.1.x` release line is production-ready for its documented native
+workflows, but it is not a universal drop-in Joern replacement.
 
 The CLI accepts C, C++, Go, Java, JavaScript, TypeScript, Python, Ruby, Rust,
 and Scala. C's shipped build/analysis path is the same path guarded by 122/122
 exact Joern v4.0.555 corpus blocks, including 1,961/1,961 ReachingDef facts.
 Its deterministic build, persistence, export, flow, scan, SARIF, and update
 workflows are also gated on pinned zlib and Lua releases and labeled security
-outcomes. The other language frontends remain experimental.
+outcomes. C++, Go, Java, JavaScript, TypeScript, Python, Ruby, and Rust also
+carry production-preview contracts backed by live Joern semantic probes, two
+pinned real projects each, and labeled default-rule outcomes. Scala remains a
+native-only experimental frontend because Joern v4.0.555 has no Scala source
+frontend to serve as an oracle.
 
 [`COMPATIBILITY.md`](COMPATIBILITY.md) is the authoritative language/workflow
 matrix and states the exact production boundary. [`ROADMAP.md`](ROADMAP.md)
@@ -73,8 +77,8 @@ export, flow, vectors, workspace, and MCP commands.
 [`ARCHITECTURE.md`](ARCHITECTURE.md) describes storage, incrementality,
 summaries, and known simplifications. [`PROGRESS.md`](PROGRESS.md) records work
 against the pinned Joern oracle. Pull requests run the committed parity and
-semantic outcome gates; releases additionally run pinned zlib/Lua acceptance,
-archive tests, and container tests. The real-project suite also runs nightly.
+semantic outcome gates; releases additionally run pinned zlib/Lua and 16
+non-C real-project workflows, archive tests, and container tests.
 
 Treat benchmark results as measurements of their named fixtures. Run the
 examples in `cpg-incremental/examples` on your own corpus before making
