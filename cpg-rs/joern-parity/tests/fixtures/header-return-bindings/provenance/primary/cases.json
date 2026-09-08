@@ -1,0 +1,25 @@
+{
+  "header_parenthesized": {
+    "api.h": "long (f)(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "header_macro_parenthesized": {
+    "api.h": "#define API extern\nAPI long (f)(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "header_alias_parenthesized": {
+    "api.h": "typedef int I;\n#define API extern\nAPI I (f)(int x);\n",
+    "main.c": "#include \"api.h\"\nint g(int x){return f(x);}\n"
+  },
+  "header_plain_macro_alias": {
+    "api.h": "typedef int I;\n#define API extern\nAPI I f(int x);\n",
+    "main.c": "#include \"api.h\"\nint g(int x){return f(x);}\n"
+  },
+  "parenthesized_same_file": {
+    "main.c": "long (f)(int x);\nlong g(int x){return f(x);}\n"
+  },
+  "header_parenthesized_pointer": {
+    "api.h": "int *(f)(int x);\n",
+    "main.c": "#include \"api.h\"\nint *g(int x){return f(x);}\n"
+  }
+}

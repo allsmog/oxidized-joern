@@ -491,3 +491,10 @@ Implemented declaration-macro expansion in immutable source-position context, pl
 The new `declaration-macros` fixture family retains 36 complete fresh Joern4.0.555 projections (5,019 canonical lines; 4,872 nonempty records): accepted baseline6 exact, candidate29 exact, seven full diagnostics retained. Four production tests cover the exact graphs, caller-specific header types and source locations. Two unit checks preserve opaque preprocessing tokens and bound recursive/oversized declaration replacements. Local macro declarations/prototypes, replacement-boundary rescans, tagged/typedef pointer context and invalid extra-argument recovery remain explicit gaps. Whole Lua remains nonexact; `luaG_concaterror`'s void signature/CALL types and `luaS_newlstr` CALL types now match their live references, while the latter's definition return spelling remains a diagnostic.
 
 Validation receipts and frozen source/binary hashes are under `joern-parity/tests/fixtures/declaration-macros/measurement.json`; raw oracles, all inputs, complete before/after outputs and differences remain portable with the fixtures. This isolated commit is for parent integration; no push or full-port claim.
+
+### Sixth-batch header binding follow-up (isolated branch)
+
+- Resolved supplied-header CALL return bindings through preceding typedef targets, including caller state, alias chains, pointer/tag targets, and unknown/cyclic bindings. METHOD/parameter display types remain separate.
+- Replaced raw recovered callable-name fallback in included-header lookup with complete validated macro-expanded declarations, closing the `LUAI_FUNC lua_Unsigned luaH_getn(...)` phantom callable.
+- Retained 31 fresh complete Joern projects: 4→17 exact full projections, with all 14 residual diagnostics preserved. New production tests assert complete conformant graphs and explicit binding/recovery properties.
+- Unmodified Lua `getendpos` METHOD AST is exact again; prior `luaS_newlstr` and `luaG_concaterror` CALL type repairs remain. Whole-project acceptance depends on separately reviewed typedef-existence and predefined-macro integration; no whole-port claim.

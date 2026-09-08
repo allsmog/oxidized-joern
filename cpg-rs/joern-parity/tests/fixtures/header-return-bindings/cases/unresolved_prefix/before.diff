@@ -1,0 +1,114 @@
+--- joern
++++ final-before-v3
+@@ -18,14 +18,13 @@
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=api.h:<global> ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-    UNKNOWN CODE=API ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-
+-METHOD NAME=declared CODE=Unknown declared(int x); FULL_NAME=declared SIGNATURE=Unknown(int) ORDER=1
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
++
++METHOD NAME=declared CODE=API Unknown declared(int x); FULL_NAME=declared SIGNATURE=API(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=2
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Unknown ORDER=3
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=API ORDER=3
+ 
+ METHOD NAME=g CODE=int g(int x) { return (Unknown)(x) + declared(x); } FULL_NAME=g SIGNATURE=int(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+@@ -37,7 +36,7 @@
+         CALL NAME=<operator>.pointerCall CODE=(Unknown)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+           IDENTIFIER NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=1
+           IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+-        CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++        CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=API METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+           IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+@@ -52,7 +51,7 @@
+           CALL NAME=<operator>.pointerCall CODE=(Unknown)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+             IDENTIFIER NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=1
+             IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+-          CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++          CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=API METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+             IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+@@ -70,14 +69,14 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=Unknown FULL_NAME=Unknown CODE=Unknown IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=API FULL_NAME=API CODE=API IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+ NODES|TYPE_DECL NAME=g FULL_NAME=g CODE=g AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+-NODES|TYPE NAME=Unknown FULL_NAME=Unknown TYPE_DECL_FULL_NAME=Unknown
++NODES|TYPE NAME=API FULL_NAME=API TYPE_DECL_FULL_NAME=API
+ NODES|TYPE NAME=g FULL_NAME=g TYPE_DECL_FULL_NAME=g
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+@@ -92,7 +91,6 @@
+ EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+ EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+ EDGES|CFG api.h:<global>#0 -> api.h:<global>#2
+-EDGES|CFG api.h:<global>#2 -> api.h:<global>#3
+ EDGES|CFG declared#0 -> declared#4
+ EDGES|CFG g#0 -> g#8
+ EDGES|CFG g#10 -> g#6
+@@ -113,13 +111,12 @@
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+-EDGES|CONTAINS F:<includes> -> D:Unknown
++EDGES|CONTAINS F:<includes> -> D:API
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:api.h -> D:api.h:<global>
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+-EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#2
+ EDGES|CONTAINS declared#0 -> declared#3
+ EDGES|CONTAINS g#0 -> g#10
+ EDGES|CONTAINS g#0 -> g#11
+@@ -145,13 +142,13 @@
+ EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+ EDGES|EVAL_TYPE api.h:<global>#1 -> T:ANY
+-EDGES|EVAL_TYPE api.h:<global>#3 -> T:ANY
++EDGES|EVAL_TYPE api.h:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE declared#1 -> T:int
+ EDGES|EVAL_TYPE declared#2 -> T:int
+ EDGES|EVAL_TYPE declared#3 -> T:ANY
+-EDGES|EVAL_TYPE declared#4 -> T:Unknown
++EDGES|EVAL_TYPE declared#4 -> T:API
+ EDGES|EVAL_TYPE g#1 -> T:int
+-EDGES|EVAL_TYPE g#10 -> T:ANY
++EDGES|EVAL_TYPE g#10 -> T:API
+ EDGES|EVAL_TYPE g#11 -> T:int
+ EDGES|EVAL_TYPE g#12 -> T:int
+ EDGES|EVAL_TYPE g#2 -> T:int
+@@ -174,7 +171,7 @@
+ EDGES|REF NB:api.h:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
+-EDGES|REF T:Unknown -> D:Unknown
++EDGES|REF T:API -> D:API
+ EDGES|REF T:g -> D:g
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+@@ -184,7 +181,7 @@
+ EDGES|REF main.c:<global>#15 -> g#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+-EDGES|SOURCE_FILE D:Unknown -> F:<includes>
++EDGES|SOURCE_FILE D:API -> F:<includes>
+ EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+ EDGES|SOURCE_FILE D:g -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>

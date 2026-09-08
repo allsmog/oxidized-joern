@@ -1,0 +1,57 @@
+--- joern
++++ final-after-v3
+@@ -4,8 +4,7 @@
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=api.h:<global> ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-    TYPE_DECL NAME=I CODE=typedef struct I FULL_NAME=I ORDER=1
+-    TYPE_DECL NAME=I CODE=typedef struct I I; FULL_NAME=I<duplicate>0 ORDER=2
++    TYPE_DECL NAME=I CODE=typedef struct I I; FULL_NAME=I ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=f CODE=I *f(int x); FULL_NAME=f SIGNATURE=I*(int) ORDER=1
+@@ -47,9 +46,8 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=I FULL_NAME=I CODE=typedef struct I AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=api.h ORDER=1
++NODES|TYPE_DECL NAME=I FULL_NAME=I CODE=typedef struct I I; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=api.h ORDER=1
+ NODES|TYPE_DECL NAME=I* FULL_NAME=I* CODE=I* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=I FULL_NAME=I<duplicate>0 CODE=typedef struct I I; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=api.h ORDER=2
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+ NODES|TYPE_DECL NAME=g FULL_NAME=g CODE=g AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+@@ -67,7 +65,7 @@
+ EDGES|ARGUMENT g#5 -> g#6
+ EDGES|CALL g#5 -> f#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG api.h:<global>#0 -> api.h:<global>#4
++EDGES|CFG api.h:<global>#0 -> api.h:<global>#3
+ EDGES|CFG f#0 -> f#4
+ EDGES|CFG g#0 -> g#6
+ EDGES|CFG g#4 -> g#7
+@@ -90,7 +88,6 @@
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+ EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#2
+-EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#3
+ EDGES|CONTAINS f#0 -> f#3
+ EDGES|CONTAINS g#0 -> g#3
+ EDGES|CONTAINS g#0 -> g#4
+@@ -102,7 +99,7 @@
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE api.h:<global>#1 -> T:ANY
+-EDGES|EVAL_TYPE api.h:<global>#4 -> T:ANY
++EDGES|EVAL_TYPE api.h:<global>#3 -> T:ANY
+ EDGES|EVAL_TYPE f#1 -> T:int
+ EDGES|EVAL_TYPE f#2 -> T:int
+ EDGES|EVAL_TYPE f#3 -> T:ANY
+@@ -146,7 +143,6 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
+ EDGES|SOURCE_FILE api.h:<global>#2 -> F:api.h
+-EDGES|SOURCE_FILE api.h:<global>#3 -> F:api.h
+ EDGES|SOURCE_FILE f#0 -> F:api.h
+ EDGES|SOURCE_FILE g#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c

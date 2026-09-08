@@ -4437,6 +4437,7 @@ fn body_macro_context<'tree>(
         items: &mut Vec<Node<'tree>>,
         states: &mut HashMap<usize, MacroState>,
         header_declarations: &mut Vec<HeaderDeclaration>,
+        type_bindings: &mut HashMap<String, String>,
         capture: bool,
     ) {
         match node.kind() {
@@ -4483,6 +4484,7 @@ fn body_macro_context<'tree>(
                                 items,
                                 states,
                                 header_declarations,
+                                type_bindings,
                                 capture,
                             );
                         }
@@ -4499,6 +4501,7 @@ fn body_macro_context<'tree>(
                         items,
                         states,
                         header_declarations,
+                        type_bindings,
                         capture,
                     );
                 }
@@ -4518,17 +4521,14 @@ fn body_macro_context<'tree>(
                     }
                     items.push(node);
                 }
+                update_header_type_bindings(node, bytes, macros, type_bindings);
                 if !capture {
-                    for (declarator, _) in prototype_header_entries(node, bytes) {
-                        if let Some(resolved) =
-                            resolved_function_header(node, declarator, bytes, macros)
-                        {
-                            header_declarations.push(HeaderDeclaration {
-                                header: resolved.header,
-                                call_type: resolved.call_type,
-                            });
-                        }
-                    }
+                    header_declarations.extend(supplied_header_bindings(
+                        node,
+                        bytes,
+                        macros,
+                        type_bindings,
+                    ));
                 }
                 if let Some(include) = included_source_name(node, bytes, file) {
                     if !once.contains(&include) && visiting.insert(include.clone()) {
@@ -4552,6 +4552,7 @@ fn body_macro_context<'tree>(
                                     &mut header_items,
                                     &mut header_states,
                                     header_declarations,
+                                    type_bindings,
                                     false,
                                 );
                             }
@@ -4586,6 +4587,7 @@ fn body_macro_context<'tree>(
     let mut items = Vec::new();
     let mut states = HashMap::new();
     let mut header_declarations = Vec::new();
+    let mut type_bindings = HashMap::new();
     let mut once = HashSet::new();
     let mut visiting = HashSet::from([normalize_source_path(std::path::Path::new(file))]);
     for child in translation_unit_children(root, bytes) {
@@ -4600,6 +4602,7 @@ fn body_macro_context<'tree>(
             &mut items,
             &mut states,
             &mut header_declarations,
+            &mut type_bindings,
             true,
         );
     }
@@ -4888,6 +4891,172 @@ struct ResolvedFunctionHeader {
     header: FunctionHeader,
     call_type: String,
     expanded_code: Option<String>,
+}
+
+enum HeaderReturnBinding {
+    Known(String),
+    Alias(String, String),
+}
+
+impl HeaderReturnBinding {
+    fn resolve(self, bindings: &HashMap<String, String>) -> String {
+        match self {
+            Self::Known(ty) => ty,
+            Self::Alias(name, suffix) => match bindings.get(&name) {
+                Some(base) if base != "ANY" => format!("{base}{suffix}"),
+                _ => "ANY".into(),
+            },
+        }
+    }
+}
+
+fn header_return_binding(f: Node, decl: Node, bytes: &[u8]) -> HeaderReturnBinding {
+    let base = parenthesized_function_parts(decl)
+        .and_then(|(_, ret)| ret)
+        .or_else(|| macro_declaration_return(f))
+        .or_else(|| f.child_by_field_name("type"));
+    let call_type = function_return_type(f, decl, bytes, TypeRole::Expression);
+    if base.is_some_and(|base| {
+        primitive_type(text(base, bytes), TypeRole::Expression).is_some()
+            || matches!(
+                base.kind(),
+                "struct_specifier" | "union_specifier" | "enum_specifier"
+            )
+    }) {
+        return HeaderReturnBinding::Known(call_type);
+    }
+    let name = base
+        .map(|base| normalize_type(text(base, bytes)))
+        .unwrap_or_else(|| "ANY".into());
+    let suffix = call_type.strip_prefix(&name).unwrap_or("").to_string();
+    HeaderReturnBinding::Alias(name, suffix)
+}
+
+// The raw parser may recover `API T f(...)` as a function named T with an
+// ERROR containing f. Included-header lookup must use the complete expanded
+// declaration, never that recovery name or its fallback return spelling.
+fn supplied_header_bindings(
+    node: Node,
+    bytes: &[u8],
+    macros: &HashMap<String, MacroDef>,
+    bindings: &HashMap<String, String>,
+) -> Vec<HeaderDeclaration> {
+    if node.kind() != "declaration" {
+        return Vec::new();
+    }
+    let Some(source) =
+        expand_declaration_tokens(text(node, bytes), macros, &mut HashSet::new(), &mut 65_536)
+    else {
+        return Vec::new();
+    };
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let Some(tree) = parser.parse(&source, None) else {
+        return Vec::new();
+    };
+    let root = tree.root_node();
+    let declarations: Vec<_> = named_children(root)
+        .into_iter()
+        .filter(|node| node.kind() != "comment")
+        .collect();
+    if root.has_error() || declarations.len() != 1 || declarations[0].kind() != "declaration" {
+        return Vec::new();
+    }
+    let declaration = declarations[0];
+    prototype_header_entries(declaration, source.as_bytes())
+        .into_iter()
+        // This nested-function recovery represents an unexpanded type prefix,
+        // not a valid C function declarator after preprocessing.
+        .filter(|(decl, _)| {
+            !parenthesized_function_parts(*decl).is_some_and(|(_, ret)| ret.is_some())
+        })
+        .map(|(decl, header)| HeaderDeclaration {
+            call_type: header_return_binding(declaration, decl, source.as_bytes())
+                .resolve(bindings),
+            header,
+        })
+        .collect()
+}
+
+// Callable binding types follow typedef targets, whereas METHOD/PARAMETER
+// declaration spellings retain their aliases. A syntactically recognized
+// typedef may still have an unresolved underlying binding, which yields ANY.
+fn update_header_type_bindings(
+    node: Node,
+    bytes: &[u8],
+    macros: &HashMap<String, MacroDef>,
+    bindings: &mut HashMap<String, String>,
+) {
+    if node.kind() != "type_definition" {
+        return;
+    }
+    let Some(source) =
+        expand_declaration_tokens(text(node, bytes), macros, &mut HashSet::new(), &mut 65_536)
+    else {
+        return;
+    };
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let Some(tree) = parser.parse(&source, None) else {
+        return;
+    };
+    let Some(declaration) = named_children(tree.root_node())
+        .into_iter()
+        .find(|node| node.kind() == "type_definition" && !node.has_error())
+    else {
+        return;
+    };
+    let Some(base) = declaration.child_by_field_name("type") else {
+        return;
+    };
+    // CDT rejects a primitive modifier applied to a typedef/unknown name.
+    // Tree-sitter accepts this shape, but it must not replace an earlier
+    // valid binding (for example `typedef int T; typedef unsigned UNKNOWN T`).
+    if base.kind() == "sized_type_specifier"
+        && named_children(base)
+            .iter()
+            .any(|child| child.kind() == "type_identifier")
+    {
+        return;
+    }
+    let raw = text(base, source.as_bytes());
+    let base_type = if primitive_type(raw, TypeRole::Expression).is_some()
+        || matches!(
+            base.kind(),
+            "struct_specifier" | "union_specifier" | "enum_specifier"
+        ) {
+        declaration_type(declaration, source.as_bytes(), TypeRole::Expression)
+    } else {
+        bindings.get(raw).cloned().unwrap_or_else(|| "ANY".into())
+    };
+    let mut cursor = declaration.walk();
+    for declarator in declaration.children_by_field_name("declarator", &mut cursor) {
+        let mut leaf = declarator;
+        while let Some(inner) = leaf.child_by_field_name("declarator") {
+            leaf = inner;
+        }
+        let name = if matches!(leaf.kind(), "identifier" | "type_identifier") {
+            text(leaf, source.as_bytes()).to_string()
+        } else {
+            String::new()
+        };
+        if name.is_empty() {
+            continue;
+        }
+        let ty = if base_type == "ANY" || find_function_declarator(declarator).is_some() {
+            "ANY".to_string()
+        } else {
+            format!(
+                "{base_type}{}",
+                object_decl_suffix(declarator, source.as_bytes(), false)
+            )
+        };
+        bindings.insert(name, ty);
+    }
 }
 
 /// Expand declaration tokens without expression rendering. In particular a

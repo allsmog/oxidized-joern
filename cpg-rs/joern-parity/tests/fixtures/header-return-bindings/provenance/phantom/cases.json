@@ -1,0 +1,18 @@
+{
+  "prefix_unknown": {
+    "api.h": "#define API extern\nAPI Unknown declared(int x);\n",
+    "main.c": "#include \"api.h\"\nint g(int x) { return (Unknown)(x) + declared(x); }\n"
+  },
+  "prefix_primitive": {
+    "api.h": "#define API extern\nAPI unsigned long declared(int x);\n",
+    "main.c": "#include \"api.h\"\nunsigned long g(int x) { return declared(x); }\n"
+  },
+  "unresolved_prefix": {
+    "api.h": "API Unknown declared(int x);\n",
+    "main.c": "#include \"api.h\"\nint g(int x) { return (Unknown)(x) + declared(x); }\n"
+  },
+  "parenthesized_unknown": {
+    "api.h": "#define API extern\nAPI Unknown (declared)(int x);\n",
+    "main.c": "#include \"api.h\"\nint g(int x) { return (Unknown)(x) + declared(x); }\n"
+  }
+}

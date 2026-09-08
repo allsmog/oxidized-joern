@@ -1,0 +1,61 @@
+METHOD NAME=getendpos CODE=static size_t getendpos (lua_State *L, int arg, lua_Integer def,\n                         size_t len) {\n  lua_Integer pos = luaL_optinteger(L, arg, def);\n  if (pos > (lua_Integer)len)\n    return len;\n  else if (pos >= 0)\n    return (size_t)pos;\n  else if (pos < -(lua_Integer)len)\n    return 0;\n  else return len + (size_t)pos + 1;\n} FULL_NAME=getendpos SIGNATURE=size_t(lua_State*,int,lua_Integer,size_t) ORDER=1
+  METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+  METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+  METHOD_PARAMETER_IN NAME=arg CODE=int arg TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=arg CODE=int arg TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_IN NAME=def CODE=lua_Integer def TYPE_FULL_NAME=lua_Integer ORDER=3
+  METHOD_PARAMETER_OUT NAME=def CODE=lua_Integer def TYPE_FULL_NAME=lua_Integer ORDER=3
+  METHOD_PARAMETER_IN NAME=len CODE=size_t len TYPE_FULL_NAME=size_t ORDER=4
+  METHOD_PARAMETER_OUT NAME=len CODE=size_t len TYPE_FULL_NAME=size_t ORDER=4
+  BLOCK CODE={\n  lua_Integer pos = luaL_optinteger(L, arg, def);\n  if (pos > (lua_Integer)len)\n    return len;\n  else if (pos >= 0)\n    return (size_t)pos;\n  else if (pos < -(lua_Integer)len)\n    return 0;\n  else return len + (size_t)pos + 1;\n} TYPE_FULL_NAME=void ORDER=5
+    LOCAL NAME=pos CODE=lua_Integer pos TYPE_FULL_NAME=lua_Integer ORDER=1
+    CALL NAME=<operator>.assignment CODE=pos = luaL_optinteger(L, arg, def) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=pos CODE=pos TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=luaL_optinteger CODE=luaL_optinteger(L, arg, def) TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=luaL_optinteger ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=arg CODE=arg TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=def CODE=def TYPE_FULL_NAME=lua_Integer ORDER=3 ARGUMENT_INDEX=3
+    CONTROL_STRUCTURE CODE=if (pos > (lua_Integer)len)\n    return len;\n  else if (pos >= 0)\n    return (size_t)pos;\n  else if (pos < -(lua_Integer)len)\n    return 0;\n  else return len + (size_t)pos + 1; ORDER=3
+      CALL NAME=<operator>.greaterThan CODE=pos > (lua_Integer)len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=pos CODE=pos TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.cast CODE=(lua_Integer)len TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          TYPE_REF CODE=lua_Integer TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=size_t ORDER=2 ARGUMENT_INDEX=2
+      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+        RETURN CODE=return len; ORDER=1
+          IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=size_t ORDER=1
+      CONTROL_STRUCTURE CODE=else ORDER=3
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1
+          CONTROL_STRUCTURE CODE=if (pos >= 0)\n    return (size_t)pos;\n  else if (pos < -(lua_Integer)len)\n    return 0;\n  else return len + (size_t)pos + 1; ORDER=1
+            CALL NAME=<operator>.greaterEqualsThan CODE=pos >= 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterEqualsThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=pos CODE=pos TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+            BLOCK TYPE_FULL_NAME=ANY ORDER=2
+              RETURN CODE=return (size_t)pos; ORDER=1
+                CALL NAME=<operator>.cast CODE=(size_t)pos TYPE_FULL_NAME=size_t METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=size_t TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+                  IDENTIFIER NAME=pos CODE=pos TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
+            CONTROL_STRUCTURE CODE=else ORDER=3
+              BLOCK TYPE_FULL_NAME=ANY ORDER=1
+                CONTROL_STRUCTURE CODE=if (pos < -(lua_Integer)len)\n    return 0;\n  else return len + (size_t)pos + 1; ORDER=1
+                  CALL NAME=<operator>.lessThan CODE=pos < -(lua_Integer)len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=pos CODE=pos TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+                    CALL NAME=<operator>.minus CODE=-(lua_Integer)len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.cast CODE=(lua_Integer)len TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        TYPE_REF CODE=lua_Integer TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+                        IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=size_t ORDER=2 ARGUMENT_INDEX=2
+                  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+                    RETURN CODE=return 0; ORDER=1
+                      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+                  CONTROL_STRUCTURE CODE=else ORDER=3
+                    BLOCK TYPE_FULL_NAME=ANY ORDER=1
+                      RETURN CODE=return len + (size_t)pos + 1; ORDER=1
+                        CALL NAME=<operator>.addition CODE=len + (size_t)pos + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          CALL NAME=<operator>.addition CODE=len + (size_t)pos TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                            IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+                            CALL NAME=<operator>.cast CODE=(size_t)pos TYPE_FULL_NAME=size_t METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                              TYPE_REF CODE=size_t TYPE_FULL_NAME=size_t ORDER=1 ARGUMENT_INDEX=1
+                              IDENTIFIER NAME=pos CODE=pos TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
+                          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  MODIFIER ORDER=6
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=size_t ORDER=7
