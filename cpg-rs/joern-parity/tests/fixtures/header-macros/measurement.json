@@ -1,0 +1,1522 @@
+{
+  "date": "2026-09-08",
+  "fixtureValidationFinishedAtUtc": "2026-09-08T11:02:23.814963+00:00",
+  "kind": "fixture/test-only; implementation validated in a separate frozen source snapshot",
+  "baselineSourceCommit": "b8c2ae132edc2d0317df853673e5d94ac7ca40a5",
+  "baselineBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+    "sha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26"
+  },
+  "candidateBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+    "sha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef"
+  },
+  "candidateSource": {
+    "cpg-rs/cpg-lang-c/src/exact.rs": {
+      "frozen": "e001da70f21d86ad62e3bf93058d758e111f6e3bdf87edeaf3a64a568d63f989",
+      "snapshot": "e001da70f21d86ad62e3bf93058d758e111f6e3bdf87edeaf3a64a568d63f989"
+    },
+    "cpg-rs/cpg-lang-c/src/import.rs": {
+      "frozen": "473d97a6dc3ad5b45c5681aa7be5e8140a727198b559a1e03b4c8d4b4936f159",
+      "snapshot": "473d97a6dc3ad5b45c5681aa7be5e8140a727198b559a1e03b4c8d4b4936f159"
+    },
+    "cpg-rs/joern-parity/src/production.rs": {
+      "frozen": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb",
+      "snapshot": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb"
+    }
+  },
+  "candidateSourceBinding": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/source-binding.json",
+    "sha256": "811d86fcac0ae4c224a94fb53ad84afeae95fc5be797494f3f6001ae16972f3a"
+  },
+  "immutableReleaseProvenance": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/header-macros/frozen-e001da70/hashes.json",
+    "sha256": "825e552e878aaef3bc5cc793b61e4cb20f2fbd3bf0e61de79fea47f7e85bf371"
+  },
+  "joernVersion": "v4.0.555",
+  "jdkVersion": "21.0.12",
+  "joernArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "oracleScriptSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "counts": {
+    "allFreshProbes": 29,
+    "allInputFiles": 57,
+    "allSelectedRecordsIncludingEmptyAstSeparators": 6129,
+    "conformantProjects": 27,
+    "conformantSelectedRecords": 5685,
+    "baselineExactConformantProjects": 2,
+    "candidateExactConformantProjects": 27,
+    "nonconformantDiagnostics": 2,
+    "diagnosticSelectedRecords": 444
+  },
+  "productionTest": {
+    "source": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/header_macros.rs",
+      "sha256": "1fd9f1373c3f0d75fa16ef859b52b55959ee98dbc241cbc46bc64946f630dbc5"
+    },
+    "snapshotSourceSha256": "1fd9f1373c3f0d75fa16ef859b52b55959ee98dbc241cbc46bc64946f630dbc5",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/source/cpg-rs/Cargo.toml",
+      "--target-dir",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/target",
+      "-p",
+      "joern-parity",
+      "--test",
+      "header_macros"
+    ],
+    "exitCode": 0,
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 0,
+    "reportedTestSeconds": 0.38,
+    "log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/test.log",
+      "sha256": "b2658d6f5fd53fa30fdd939296ed9130becc653ab6275c83501a9dd45b32fef3"
+    },
+    "reportedCompileSeconds": 12.0
+  },
+  "clippy": {
+    "command": [
+      "cargo",
+      "clippy",
+      "--manifest-path",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/source/cpg-rs/Cargo.toml",
+      "--target-dir",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/target",
+      "-p",
+      "joern-parity",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exitCode": 0,
+    "log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/clippy.log",
+      "sha256": "8d4a38498318accf5a2c122049f27ea9ecae2d9c2bfe3ce0c43a13a9487de5a8"
+    },
+    "reportedSeconds": 3.01
+  },
+  "fmt": {
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--manifest-path",
+      "cpg-rs/Cargo.toml",
+      "--check"
+    ],
+    "exitCode": 0,
+    "log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "completeComparison": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/comparison.json",
+    "sha256": "4663cda549c846a3acb1428abb8d9a77029883ffa5774334adc83c3b3df136f6"
+  },
+  "measurementReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/measure.py",
+    "sha256": "6c53d12e2fb5b23100bf4451b8921ada28eb4620f9723313230deef856fa4d06"
+  },
+  "cases": {
+    "caller_object_define": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "d7238d4ef0ce8f57f1fb2712ad5cce7b1f3c773cfa74dda94e68cbeafa628336",
+      "referenceRecords": 201,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/caller_object_define/input",
+        "exitCode": 0,
+        "seconds": 0.2199869580072118,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "b6c5318a1dca8e896ec9d78a4db0b50285e148677ad1ff5c8917c5b8c899223a",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "604916d70f504c71c15414e316386fca6ee403fcb89e274b17d6dd5761611a6e",
+        "diffLines": 204
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/caller_object_define/input",
+        "exitCode": 0,
+        "seconds": 0.21058512500894722,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "d7238d4ef0ce8f57f1fb2712ad5cce7b1f3c773cfa74dda94e68cbeafa628336",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "cast_spaced": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "e3f2447ab37316835bc0d900176d9909078688c550a9a515c8b3ac07a17c18fd",
+      "referenceRecords": 233,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/cast_spaced/input",
+        "exitCode": 0,
+        "seconds": 0.004556250001769513,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "bda57b36ca5d284a86db884df3489e8c2b23ff911863fe20f39cd58fe043affa",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "59c7b7bca6451901f3a761db42f0809e7cd492b1319b96803a27d06795228543",
+        "diffLines": 249
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/cast_spaced/input",
+        "exitCode": 0,
+        "seconds": 0.0039194999990286306,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "e3f2447ab37316835bc0d900176d9909078688c550a9a515c8b3ac07a17c18fd",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "cast_unspaced": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "588d09e162de6d10ee89151aa0b1ad09251a11199bc41304e1e9051ea3c78555",
+      "referenceRecords": 233,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/cast_unspaced/input",
+        "exitCode": 0,
+        "seconds": 0.0039089580095605925,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "c795efba7c0c6a2f84e29b6c14193c109024749f33f1cba21da6139d10ce956a",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "2169ef8084ae46b93ae64dcf99852b0c1a1365cdcd35a7399d3b3cdd14276f66",
+        "diffLines": 249
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/cast_unspaced/input",
+        "exitCode": 0,
+        "seconds": 0.004884415990090929,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "588d09e162de6d10ee89151aa0b1ad09251a11199bc41304e1e9051ea3c78555",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "definition_after_function": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "b775d55719f38c6b125e01b45e59c64b052050b207c0b66aa5116352e1474167",
+      "referenceRecords": 276,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/definition_after_function/input",
+        "exitCode": 0,
+        "seconds": 0.004480250005144626,
+        "exact": true,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "b775d55719f38c6b125e01b45e59c64b052050b207c0b66aa5116352e1474167",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/definition_after_function/input",
+        "exitCode": 0,
+        "seconds": 0.0045984579919604585,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "b775d55719f38c6b125e01b45e59c64b052050b207c0b66aa5116352e1474167",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "header_object": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "7b11b651fef9b98f2d600e6e3f66cf1aa3119012d22533e44eba14ead9dbd773",
+      "referenceRecords": 139,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/header_object/input",
+        "exitCode": 0,
+        "seconds": 0.0034970830020029098,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "bc0597b2bbe6cb967d7c8920ca61fc8dfe65d33c8ebc0b99910d17643d3b5e28",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "5264a51da591c56326205822851492e4be61193d8bded699aab7c815493cc7a6",
+        "diffLines": 133
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/header_object/input",
+        "exitCode": 0,
+        "seconds": 0.003476041994872503,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "7b11b651fef9b98f2d600e6e3f66cf1aa3119012d22533e44eba14ead9dbd773",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "identity_add_spaced": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "60636057a854c7ca341c21321bb73ca8768b004c0305d74520dc59c490d4e627",
+      "referenceRecords": 206,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/identity_add_spaced/input",
+        "exitCode": 0,
+        "seconds": 0.004437333001988009,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "832082620c3ea3170f49ed9d2b97f2e20228e50bb31957ee0bb3b57ba1dd537f",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "7f8c873c1505dfe2f82dab7c0a114df16cc2fab683a982cd7d4283df2c4c7d09",
+        "diffLines": 221
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/identity_add_spaced/input",
+        "exitCode": 0,
+        "seconds": 0.00446291700063739,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "60636057a854c7ca341c21321bb73ca8768b004c0305d74520dc59c490d4e627",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "identity_add_unspaced": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "84c85597e2d62697ce86f10f85a47989caf3116169d62e10d170785bd0a82ecc",
+      "referenceRecords": 206,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/identity_add_unspaced/input",
+        "exitCode": 0,
+        "seconds": 0.0049422080046497285,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "491fd883008b529a8f00e039cef319209a6c6d85c7221546b2a5402228677ce2",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "7b752fd8e57d34d484dfd940b267d1b68eb1b56da70cbf2a2c3244614eea54d7",
+        "diffLines": 221
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/identity_add_unspaced/input",
+        "exitCode": 0,
+        "seconds": 0.004294166006729938,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "84c85597e2d62697ce86f10f85a47989caf3116169d62e10d170785bd0a82ecc",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "identity_call_spaced": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "3ccc8eace5f22f168bd1202f2d8469f8e616fd81d9680a9037bb64a164bb65ff",
+      "referenceRecords": 210,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/identity_call_spaced/input",
+        "exitCode": 0,
+        "seconds": 0.003685959003632888,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "12441f62c7a6386536f5643cb2914991e7ae01495f5d3eb101eb1fc5b670965f",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "6722370d1a23d0f8956baf7906f09536ad492a9df6271ab4251e09df7011543e",
+        "diffLines": 230
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/identity_call_spaced/input",
+        "exitCode": 0,
+        "seconds": 0.005772000004071742,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "3ccc8eace5f22f168bd1202f2d8469f8e616fd81d9680a9037bb64a164bb65ff",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "identity_call_unspaced": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "6e442c2e751f2812ac237a46a9a119410dc68873d8260933addea2659d5b4840",
+      "referenceRecords": 210,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/identity_call_unspaced/input",
+        "exitCode": 0,
+        "seconds": 0.0041339579911436886,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "a598f91767256edbb57ed748a2d8b31cc7b808bf439a1924015ebb50a05679f8",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "f0a59cc16fd11c8c2f9421afccae6ca3858e6e372956b494e544f45451e28b17",
+        "diffLines": 230
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/identity_call_unspaced/input",
+        "exitCode": 0,
+        "seconds": 0.00394179200520739,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "6e442c2e751f2812ac237a46a9a119410dc68873d8260933addea2659d5b4840",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "ignored_argument": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "848ec0b2f384dcea987063906e2fe9c522b7aaa6b8fb6bc3123381d79c4d03a2",
+      "referenceRecords": 198,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/ignored_argument/input",
+        "exitCode": 0,
+        "seconds": 0.003495291995932348,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "6e93be9b6bfbbceb34c7624b0143f115979ebb384b81e9e292b8ee9cafc476d2",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e7ee634c31d015b2d851e9943b4cbf88b4617f9a749879500763b516fd0af05c",
+        "diffLines": 205
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/ignored_argument/input",
+        "exitCode": 0,
+        "seconds": 0.003795583004830405,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "848ec0b2f384dcea987063906e2fe9c522b7aaa6b8fb6bc3123381d79c4d03a2",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "include_guard_twice": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "053b14c39f3993022ad4c1d5f2627f860e68dd868edb5e2654a41db50a3fae75",
+      "referenceRecords": 219,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/include_guard_twice/input",
+        "exitCode": 0,
+        "seconds": 0.003678041000966914,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "f795d6774f0709f60edf55ab518a7bceb9795266e2513d7217d709104a4b2665",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "c32518d0652bcece4aa3e59e9d862dcddad1ed479307057b0984dff6f28e39bc",
+        "diffLines": 216
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/include_guard_twice/input",
+        "exitCode": 0,
+        "seconds": 0.003948375000618398,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "053b14c39f3993022ad4c1d5f2627f860e68dd868edb5e2654a41db50a3fae75",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "indirect_recursive_object": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "a56f8f49c128cdee532bcee22f803dd92c61bb2dc100c4306ca7b156d09e8b6e",
+      "referenceRecords": 143,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/indirect_recursive_object/input",
+        "exitCode": 0,
+        "seconds": 0.004798542009666562,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "3463f9e07fb11640060ca7e5a89c743a5dcd8c55b28ec93b2352585d3759c6ae",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "792117dbe9175904a3bbfe0b248eb48e8fdf439fbfd173e4a709164753e89a5d",
+        "diffLines": 130
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/indirect_recursive_object/input",
+        "exitCode": 0,
+        "seconds": 0.0039702909998595715,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "a56f8f49c128cdee532bcee22f803dd92c61bb2dc100c4306ca7b156d09e8b6e",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "initializer_macro": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "52dadd2d718a894ca20d5ff1d67d3b45d58805cd1419c1a2f7d89b38435295ac",
+      "referenceRecords": 255,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/initializer_macro/input",
+        "exitCode": 0,
+        "seconds": 0.004501542003708892,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "fc7d5244e075fa46f1ba52c6cff61bd3d334d979927a339b7ee4b549f986ee51",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "ad4b0636510c46a01b9cadbc55e7ae8caaab2ecc388eb06062b4e2fb3e45c28c",
+        "diffLines": 264
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/initializer_macro/input",
+        "exitCode": 0,
+        "seconds": 0.004215082997689024,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "52dadd2d718a894ca20d5ff1d67d3b45d58805cd1419c1a2f7d89b38435295ac",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "missing_include": {
+      "area": "cases",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "referenceSha256": "f8d449bc9367da2e788ac1ea9ea6bbeff618b58f3eafd4d04a27609d223ee74c",
+      "referenceRecords": 127,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/missing_include/input",
+        "exitCode": 0,
+        "seconds": 0.003737125007319264,
+        "exact": true,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "f8d449bc9367da2e788ac1ea9ea6bbeff618b58f3eafd4d04a27609d223ee74c",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/missing_include/input",
+        "exitCode": 0,
+        "seconds": 0.003546916996128857,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "f8d449bc9367da2e788ac1ea9ea6bbeff618b58f3eafd4d04a27609d223ee74c",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "nested_call_wrapper": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "ecb121b159cedcfff5230166b166a9d3c7a769c2c7e0c0175caca3053faa6651",
+      "referenceRecords": 214,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/nested_call_wrapper/input",
+        "exitCode": 0,
+        "seconds": 0.004192874999716878,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "bbfe50088ce829bea0aa63cab081898104bdb55a4676d4b15e3a416d2595d648",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "67bec82e016f5c1b72191e10fec3b5f3c583aa924404a7b66203073a6f2966c4",
+        "diffLines": 208
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/nested_call_wrapper/input",
+        "exitCode": 0,
+        "seconds": 0.006357083999319002,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "ecb121b159cedcfff5230166b166a9d3c7a769c2c7e0c0175caca3053faa6651",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "nested_macros": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "7d62b7c09733688ee5ab752ca6b31782e4713e3b24a1ed9344d659fc5a978d20",
+      "referenceRecords": 201,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/nested_macros/input",
+        "exitCode": 0,
+        "seconds": 0.0037446249916683882,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "2f78155aca422acbe392b964a048437acd4f26a4821420d1a70b109eecfffe5b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "79377543139ae20cef131c4992f490d4d9275348f570fc43e366dbad21f6b3e3",
+        "diffLines": 205
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/nested_macros/input",
+        "exitCode": 0,
+        "seconds": 0.003981709000072442,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "7d62b7c09733688ee5ab752ca6b31782e4713e3b24a1ed9344d659fc5a978d20",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "nested_relative_headers": {
+      "area": "cases",
+      "sourceFiles": [
+        "main.c",
+        "sub/inner.h",
+        "sub/outer.h"
+      ],
+      "referenceSha256": "c0d964a4c0d22807fa95ad5e0d49ffd4d32cce5cd4291e1ab5c874f91f70a57e",
+      "referenceRecords": 219,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "main.c",
+          "sub/inner.h",
+          "sub/outer.h"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/nested_relative_headers/input",
+        "exitCode": 0,
+        "seconds": 0.0037850839871680364,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "42a15f3485c77277226373329d6875e0490b205dad691fdec7230a8eeb4f2a44",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "907f968a67d099d571c23050946f6f66b91bfb49b6a7568638f73adb5138c00e",
+        "diffLines": 284
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "main.c",
+          "sub/inner.h",
+          "sub/outer.h"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/nested_relative_headers/input",
+        "exitCode": 0,
+        "seconds": 0.004269875003956258,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "c0d964a4c0d22807fa95ad5e0d49ffd4d32cce5cd4291e1ab5c874f91f70a57e",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "offsetof_direct": {
+      "area": "diagnostics",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "referenceSha256": "2540d832a927686b60df0d3344ac79670cc1b1f540c62a6e6e5a80699a21c4ef",
+      "referenceRecords": 172,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/diagnostics/offsetof_direct/input",
+        "exitCode": 0,
+        "seconds": 0.007612832996528596,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "5364cd9f2faff96964727eff189a61f326cf6281170904cea2346e1a4b0188de",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "43164dab370c9cec92f3f2b846e4635358c45edafcdbc98fd8d0e12ccd8e016a",
+        "diffLines": 193
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/diagnostics/offsetof_direct/input",
+        "exitCode": 0,
+        "seconds": 0.004185750003671274,
+        "exact": false,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "f500f2d479692b6da52c9e8f3f9c5a73971f662742ca6382405b4451f97795bf",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "9dd1dcd92d335423f9320cacf80714c4aa5caa86fe8d8506acb5d7f12d843e76",
+        "diffLines": 206
+      }
+    },
+    "offsetof_macro_ternary": {
+      "area": "diagnostics",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "referenceSha256": "43f8df7076d37f1adf6ce341128be5220d1964325e641fd250558e3a21e08604",
+      "referenceRecords": 272,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/diagnostics/offsetof_macro_ternary/input",
+        "exitCode": -6,
+        "seconds": 0.014205250001396053,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "05b94e702f780753d58083b5d0e46dcf4018a94dfdf3f3eb940fed72bc9e1614",
+        "diffSha256": "680f946924abaa789668b53e939e375b572c3de16b1c9ef4b7d34aa21a828c84",
+        "diffLines": 275
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/diagnostics/offsetof_macro_ternary/input",
+        "exitCode": 0,
+        "seconds": 0.004494000007980503,
+        "exact": false,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "e6d0b8de91babfe9a54fbdaa71284c666b32d4cdd4175866e9ecb0a325f3592d",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "bfb94b1a24a4380be7ef681cf7b819c54e1af87674f52bd138a9bd86c0d3309f",
+        "diffLines": 300
+      }
+    },
+    "pragma_once_reinclude": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "eed18f6c9a4a345305b238b8e9ee2d9975df13f06d8cd874ab394421c2be26a2",
+      "referenceRecords": 199,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/pragma_once_reinclude/input",
+        "exitCode": 0,
+        "seconds": 0.004663415995310061,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "301168e9e7a65a184b5409867b49ea54445c7f5c5183915fb808482306736a4c",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "396de67ccde3a7bad7c3bcf9c32d6d20847ee749e5b3248d7df1f003f979273e",
+        "diffLines": 202
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/pragma_once_reinclude/input",
+        "exitCode": 0,
+        "seconds": 0.004249958001310006,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "eed18f6c9a4a345305b238b8e9ee2d9975df13f06d8cd874ab394421c2be26a2",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "redefinition": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "bc31218c14dbae117af8d7d5eb423306f012f8ab754a36f19de5031dcaaa03df",
+      "referenceRecords": 309,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/redefinition/input",
+        "exitCode": 0,
+        "seconds": 0.004423167003551498,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "274558b22b15b30cef5b726d01c7fe7d7ab6fb379b0597ce218050a13a00685c",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "8d9b601b23ed0832953e5e3069cbdf21cc83b2ea1ea7f6243ae2d30faeb54ae0",
+        "diffLines": 256
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/redefinition/input",
+        "exitCode": 0,
+        "seconds": 0.004182000004220754,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "bc31218c14dbae117af8d7d5eb423306f012f8ab754a36f19de5031dcaaa03df",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "reinclude_without_pragma": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "eb0aa9f52ddf64ad586a4615e87ceb788d49745c21f84ea4c44f95aa48f6138e",
+      "referenceRecords": 199,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/reinclude_without_pragma/input",
+        "exitCode": 0,
+        "seconds": 0.0037215829943306744,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "301168e9e7a65a184b5409867b49ea54445c7f5c5183915fb808482306736a4c",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "21703ab3875c8a222b98a23ea52c0531bffa4a296bb3eb875341856f0e0ce0cf",
+        "diffLines": 202
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/reinclude_without_pragma/input",
+        "exitCode": 0,
+        "seconds": 0.0038907080015633255,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "eb0aa9f52ddf64ad586a4615e87ceb788d49745c21f84ea4c44f95aa48f6138e",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "relative_subdirectory": {
+      "area": "cases",
+      "sourceFiles": [
+        "main.c",
+        "sub/defs.h"
+      ],
+      "referenceSha256": "224f185b2ebafd7d76ae9daacbaa3f2853e24cdcc3c56eaf5bccdf1a78850bf1",
+      "referenceRecords": 206,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "main.c",
+          "sub/defs.h"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/relative_subdirectory/input",
+        "exitCode": 0,
+        "seconds": 0.0038636250101262704,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "c111987f3c0aa33bf48b8065c097195f48259e4313d792cfb1d369f86b8eb30e",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "7806e657e3afc7eb924d7fbbd3c0fe70be3cd75f3dba155caf629c2f90adca96",
+        "diffLines": 250
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "main.c",
+          "sub/defs.h"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/relative_subdirectory/input",
+        "exitCode": 0,
+        "seconds": 0.004012042001704685,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "224f185b2ebafd7d76ae9daacbaa3f2853e24cdcc3c56eaf5bccdf1a78850bf1",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "return_macro": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "afecd0594cbafd82193945607b0ff0b5e66a5c8dd84bcf4de591e0b444a62b54",
+      "referenceRecords": 201,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/return_macro/input",
+        "exitCode": 0,
+        "seconds": 0.0037427079951157793,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "8928ff0dcdf5432077340ddcaf0752482747c7fcf0b0e64fe3899613cecda70d",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "314d3d5db9dbb65c064c254fd7f370179707f8c546191f557fd80f2685939ade",
+        "diffLines": 205
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/return_macro/input",
+        "exitCode": 0,
+        "seconds": 0.004930750001221895,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "afecd0594cbafd82193945607b0ff0b5e66a5c8dd84bcf4de591e0b444a62b54",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "second_argument_only": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "163a4e64a1b40e295d21100c84a2c7eecdba24c2fc459ec10a00498af193c13b",
+      "referenceRecords": 175,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/second_argument_only/input",
+        "exitCode": 0,
+        "seconds": 0.004175374997430481,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "9fd205edd0538a234a6e2b75268877c2b600589c49b3e53656bf0fe7c41c788a",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "20f1b7414fb0e2531e2dd4e7cf7cdb2f451f3abe772fbc706cc7f08576b38406",
+        "diffLines": 205
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/second_argument_only/input",
+        "exitCode": 0,
+        "seconds": 0.005857625001226552,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "163a4e64a1b40e295d21100c84a2c7eecdba24c2fc459ec10a00498af193c13b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "self_recursive_object": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "0cd114783e48d0e422042ac4efb7a4aff36cee612337ea39994e2d640e91386d",
+      "referenceRecords": 145,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/self_recursive_object/input",
+        "exitCode": 0,
+        "seconds": 0.0048434580094181,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "85666cb3e46a9d27a285174d25ffa245e5456c59c2e86c7fc0733ff263a183c1",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "73b1f49ef433c150f5abd6790ef249d4c69d51de0099dfda096a3bd1d439ecdd",
+        "diffLines": 132
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/self_recursive_object/input",
+        "exitCode": 0,
+        "seconds": 0.003645332995802164,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "0cd114783e48d0e422042ac4efb7a4aff36cee612337ea39994e2d640e91386d",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "statement_macro": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "1fdfe8f11258510970df4d7c5eefec7448d33f480d8487cebda57a4d514eef2b",
+      "referenceRecords": 177,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/statement_macro/input",
+        "exitCode": 0,
+        "seconds": 0.004019583007902838,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "c8f7f46069849e05e426cd8855cedcb55873219ffaea83571afe0be140c315ea",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "755eeaf81240ebb2d2c58f31bac2b724c4f53cc7bf4147866dc310d179cfcec1",
+        "diffLines": 180
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/statement_macro/input",
+        "exitCode": 0,
+        "seconds": 0.0037492499977815896,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "1fdfe8f11258510970df4d7c5eefec7448d33f480d8487cebda57a4d514eef2b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "two_translation_units": {
+      "area": "cases",
+      "sourceFiles": [
+        "a.c",
+        "b.c",
+        "defs.h"
+      ],
+      "referenceSha256": "45e12e2ef76507b7e633735c06341447c397ace3133e5c684792609c83464d9b",
+      "referenceRecords": 308,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "a.c",
+          "b.c",
+          "defs.h"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/two_translation_units/input",
+        "exitCode": 0,
+        "seconds": 0.004083499996340834,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "eb7e0dda3cb428de4254eb75af76c03fb0f844f83fbba87c6db1027a20093109",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "2bf02a72c5a3e74fa80000224ec65425448efa36681927ca7f5ab894300cae1f",
+        "diffLines": 311
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "a.c",
+          "b.c",
+          "defs.h"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/two_translation_units/input",
+        "exitCode": 0,
+        "seconds": 0.004549959005089477,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "45e12e2ef76507b7e633735c06341447c397ace3133e5c684792609c83464d9b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    },
+    "undefinition": {
+      "area": "cases",
+      "sourceFiles": [
+        "defs.h",
+        "main.c"
+      ],
+      "referenceSha256": "74c10f8d01d3b0b03df96e01880a0b403c8a952b83392665f268f1e3c56c5334",
+      "referenceRecords": 276,
+      "baseline": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/undefinition/input",
+        "exitCode": 0,
+        "seconds": 0.004551332996925339,
+        "exact": false,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+        "stdoutSha256": "7a6ce4d4bb9f46a7b1acca01995e3999c665cba0fa2f23f75ccffb58e1c12e15",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "09c3872f888c6d4c3c63b90acbede4ae97e6080857b5a685fa3144f5721c5716",
+        "diffLines": 235
+      },
+      "candidate": {
+        "command": [
+          "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+          "defs.h",
+          "main.c"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/cases/undefinition/input",
+        "exitCode": 0,
+        "seconds": 0.004860041997744702,
+        "exact": true,
+        "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+        "stdoutSha256": "74c10f8d01d3b0b03df96e01880a0b403c8a952b83392665f268f1e3c56c5334",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diffLines": 0
+      }
+    }
+  },
+  "knownDiagnostics": {
+    "offsetof_direct": "Successful baseline and candidate producers; complete graphs differ in typedef/anonymous-struct lowering, local nodes, type roles and resulting edges.",
+    "offsetof_macro_ternary": "Baseline aborts with signal6 (empty stdout retained); candidate exits0, retains conditional operands, but complete graph still differs in the broader typedef/anonymous-struct/local lowering."
+  },
+  "fixturesSha256": {
+    ".gitattributes": "03489a43d65f0caa0590d94c499fd7d9e56994549f68b371405dc98a98ed296f",
+    "README.md": "32b43f7c450c7cef3f2213a5cf90fdc6bc7e2a105bf7575ee7448336830510ca",
+    "cases/caller_object_define/expected.txt": "d7238d4ef0ce8f57f1fb2712ad5cce7b1f3c773cfa74dda94e68cbeafa628336",
+    "cases/caller_object_define/input/defs.h": "e77078740ffc677b9aafd027150ccd5d5d106f0a4b20890449671b4f82b01ec2",
+    "cases/caller_object_define/input/main.c": "5c727ea3a79b494909ef682cdd04110db2ac579560d42abde3de15f7867e6953",
+    "cases/cast_spaced/expected.txt": "e3f2447ab37316835bc0d900176d9909078688c550a9a515c8b3ac07a17c18fd",
+    "cases/cast_spaced/input/defs.h": "2dfcbbd2141a6c4156270a7827278e04d7350440ca1121e34d967706dd2dbc34",
+    "cases/cast_spaced/input/main.c": "0e1a6139d18663f5d2e38af3916930b8b8b005786e74464d675bc15f757d3584",
+    "cases/cast_unspaced/expected.txt": "588d09e162de6d10ee89151aa0b1ad09251a11199bc41304e1e9051ea3c78555",
+    "cases/cast_unspaced/input/defs.h": "2dfcbbd2141a6c4156270a7827278e04d7350440ca1121e34d967706dd2dbc34",
+    "cases/cast_unspaced/input/main.c": "d2422fd8f602e07c47aaf5bf2177c1cf906469023600a1de1d627dc7fac47536",
+    "cases/definition_after_function/expected.txt": "b775d55719f38c6b125e01b45e59c64b052050b207c0b66aa5116352e1474167",
+    "cases/definition_after_function/input/defs.h": "fca4fe4fddf2adea06f8e9ea881eb7b3b694d25e07e87d189a6a8da7ba0ec18d",
+    "cases/definition_after_function/input/main.c": "f5d7734b57dfdf5c1f4049ccbb68a6171a936536e8b54ae91093948758428d44",
+    "cases/header_object/expected.txt": "7b11b651fef9b98f2d600e6e3f66cf1aa3119012d22533e44eba14ead9dbd773",
+    "cases/header_object/input/defs.h": "22d51cee739df726813b6753f91d78ecdc8a4243ea8131943193d3845e738eae",
+    "cases/header_object/input/main.c": "58e3babb0f141dea143b1c90dd3d26d0da2439e6bb0e1c0850b2c9b45b04b622",
+    "cases/identity_add_spaced/expected.txt": "60636057a854c7ca341c21321bb73ca8768b004c0305d74520dc59c490d4e627",
+    "cases/identity_add_spaced/input/defs.h": "3f74133fafa2c418b8b0833fc8d048fe5c0b7e43921bd2d01bf513037b203218",
+    "cases/identity_add_spaced/input/main.c": "fa2bd1e825a8771499c701a7ee53ee39a6b3916fc3396929534ec27a2437a93e",
+    "cases/identity_add_unspaced/expected.txt": "84c85597e2d62697ce86f10f85a47989caf3116169d62e10d170785bd0a82ecc",
+    "cases/identity_add_unspaced/input/defs.h": "3f74133fafa2c418b8b0833fc8d048fe5c0b7e43921bd2d01bf513037b203218",
+    "cases/identity_add_unspaced/input/main.c": "55c0560036f3b7b5c8169b343756b73ce9e8ec660afb66bc8e75ac3d8d909bb2",
+    "cases/identity_call_spaced/expected.txt": "3ccc8eace5f22f168bd1202f2d8469f8e616fd81d9680a9037bb64a164bb65ff",
+    "cases/identity_call_spaced/input/defs.h": "3f74133fafa2c418b8b0833fc8d048fe5c0b7e43921bd2d01bf513037b203218",
+    "cases/identity_call_spaced/input/main.c": "35f06166255a16bee1219a422bc89a6523c5e5306417b81db3e5861e9f62fc23",
+    "cases/identity_call_unspaced/expected.txt": "6e442c2e751f2812ac237a46a9a119410dc68873d8260933addea2659d5b4840",
+    "cases/identity_call_unspaced/input/defs.h": "3f74133fafa2c418b8b0833fc8d048fe5c0b7e43921bd2d01bf513037b203218",
+    "cases/identity_call_unspaced/input/main.c": "003fd37483b5ad515f2ebd41cdbeb9e5bb6f7f035aee613dffbede5cac0a6a67",
+    "cases/ignored_argument/expected.txt": "848ec0b2f384dcea987063906e2fe9c522b7aaa6b8fb6bc3123381d79c4d03a2",
+    "cases/ignored_argument/input/defs.h": "7277ad805e1d6398389437adc08aa99ce9bbadcdfd80650a501443b3f7b6ee0d",
+    "cases/ignored_argument/input/main.c": "79b2c824c63fb08ce133c1caffa4bd6ba467477ba984f681f615fbbcaa4d24be",
+    "cases/include_guard_twice/expected.txt": "053b14c39f3993022ad4c1d5f2627f860e68dd868edb5e2654a41db50a3fae75",
+    "cases/include_guard_twice/input/defs.h": "d572ce52b378a67d3ed9fb0fea70abbd6de97bbaddbe4f16b829c4a926358fd5",
+    "cases/include_guard_twice/input/main.c": "67ea075170b485f2bf598cf4a0926fe5cedf882743f8ed2b91964e06c0af401d",
+    "cases/indirect_recursive_object/expected.txt": "a56f8f49c128cdee532bcee22f803dd92c61bb2dc100c4306ca7b156d09e8b6e",
+    "cases/indirect_recursive_object/input/defs.h": "9eabde2478a715c567834960f0fcf3209b267ff699cc48e1cc63ec6b03c869bb",
+    "cases/indirect_recursive_object/input/main.c": "e7578d60f41e13a08d1f483038776a9b7db9bf0249a39ec3b08acb8f7dc595bb",
+    "cases/initializer_macro/expected.txt": "52dadd2d718a894ca20d5ff1d67d3b45d58805cd1419c1a2f7d89b38435295ac",
+    "cases/initializer_macro/input/defs.h": "f9415835ac9aaee405ea52962377dd5b310ecfd9963bfc51c6d1a4b70d06a9e6",
+    "cases/initializer_macro/input/main.c": "183550e54002d58fc0badf194f4ef0f8417e22420e7e13dc7f24de92cfcaa7af",
+    "cases/missing_include/expected.txt": "f8d449bc9367da2e788ac1ea9ea6bbeff618b58f3eafd4d04a27609d223ee74c",
+    "cases/missing_include/input/main.c": "f9d11a0b6fc0cc1627a0fee35ecdf01acc633f85022112633e8e498b6671edbe",
+    "cases/nested_call_wrapper/expected.txt": "ecb121b159cedcfff5230166b166a9d3c7a769c2c7e0c0175caca3053faa6651",
+    "cases/nested_call_wrapper/input/defs.h": "cd9896e39a197370d2bdd9f99767c5932306d2734b36593803c97b7c1fd83c77",
+    "cases/nested_call_wrapper/input/main.c": "7f91a16cec600bb0526b0271db42f85646c2c784fcb307a371077f2b19263f8b",
+    "cases/nested_macros/expected.txt": "7d62b7c09733688ee5ab752ca6b31782e4713e3b24a1ed9344d659fc5a978d20",
+    "cases/nested_macros/input/defs.h": "e60abd7048f0bf1c9e83b6af5213cf009324757228d0148fa7d3e6cc7941e586",
+    "cases/nested_macros/input/main.c": "1125e13a318cd90b6c53081e47be8aff5b978ba3d020ab60662d8d25b051bb7f",
+    "cases/nested_relative_headers/expected.txt": "c0d964a4c0d22807fa95ad5e0d49ffd4d32cce5cd4291e1ab5c874f91f70a57e",
+    "cases/nested_relative_headers/input/main.c": "f54cb79eea9929b412c4008738fd71fb152c848dfe7998b849d9a485f5ca414a",
+    "cases/nested_relative_headers/input/sub/inner.h": "565dd39a3bd2c573f342a6ebcef06d3a0a193d205ca9c9d896aade1f7970fbc5",
+    "cases/nested_relative_headers/input/sub/outer.h": "33683e0c244c0601b136053474b34c0526588924d316b7b49dbfe2c7ee61d381",
+    "cases/pragma_once_reinclude/expected.txt": "eed18f6c9a4a345305b238b8e9ee2d9975df13f06d8cd874ab394421c2be26a2",
+    "cases/pragma_once_reinclude/input/defs.h": "60c4c3c686d1566f7029062236dd5aaa40e61124a6daf3d13507ee7151f36537",
+    "cases/pragma_once_reinclude/input/main.c": "97e7145615a4bd8a8691cd70349c66c29a11ee1214871fa382b6b38111ba2d65",
+    "cases/redefinition/expected.txt": "bc31218c14dbae117af8d7d5eb423306f012f8ab754a36f19de5031dcaaa03df",
+    "cases/redefinition/input/defs.h": "a02016657d530879d3fd3ddd0d86e052d9d14b18bdd8ca6100391585ac152e92",
+    "cases/redefinition/input/main.c": "fd4d2e3b641a3bbda727b00ba624982f3174d481a8d8419c077b0187ddc218b5",
+    "cases/reinclude_without_pragma/expected.txt": "eb0aa9f52ddf64ad586a4615e87ceb788d49745c21f84ea4c44f95aa48f6138e",
+    "cases/reinclude_without_pragma/input/defs.h": "2393366d7debd7b236d425e8a0d9d234d0cb5e8a82d21571847070b397a3786b",
+    "cases/reinclude_without_pragma/input/main.c": "97e7145615a4bd8a8691cd70349c66c29a11ee1214871fa382b6b38111ba2d65",
+    "cases/relative_subdirectory/expected.txt": "224f185b2ebafd7d76ae9daacbaa3f2853e24cdcc3c56eaf5bccdf1a78850bf1",
+    "cases/relative_subdirectory/input/main.c": "398fbdb7b1572f43d5853e14ee7da560e5ec757f85c8bfe684ad99433605a194",
+    "cases/relative_subdirectory/input/sub/defs.h": "ac748e285baf80c85d3e8e7b876bb9553cad8b1b7a97e78c03606479bebece69",
+    "cases/return_macro/expected.txt": "afecd0594cbafd82193945607b0ff0b5e66a5c8dd84bcf4de591e0b444a62b54",
+    "cases/return_macro/input/defs.h": "f9415835ac9aaee405ea52962377dd5b310ecfd9963bfc51c6d1a4b70d06a9e6",
+    "cases/return_macro/input/main.c": "74578fcc6aad9bba06eb0413462150f3a2d799a720dec9a824b13f523c6c7583",
+    "cases/second_argument_only/expected.txt": "163a4e64a1b40e295d21100c84a2c7eecdba24c2fc459ec10a00498af193c13b",
+    "cases/second_argument_only/input/defs.h": "3133b92f39851564fe31e0a2ab77199a9af3b209e8e98fd38a686519deb7513a",
+    "cases/second_argument_only/input/main.c": "5a10faf0ef4bd89399d7a9aaf3564452b2a01b975ab3b90dad5e9b69276cc251",
+    "cases/self_recursive_object/expected.txt": "0cd114783e48d0e422042ac4efb7a4aff36cee612337ea39994e2d640e91386d",
+    "cases/self_recursive_object/input/defs.h": "91590771166459f9deabf4a7725062c7f2467dc168eb41f24b6e49eeb0f44a67",
+    "cases/self_recursive_object/input/main.c": "c9f7eff86d3042abc2dd17a00067256a32e478bcd272fd9136e924eda9497f1c",
+    "cases/statement_macro/expected.txt": "1fdfe8f11258510970df4d7c5eefec7448d33f480d8487cebda57a4d514eef2b",
+    "cases/statement_macro/input/defs.h": "f9dad5af034998c9790413741c6bcd3cbc2de2547dbd9bf616ff3b95ea7af7c6",
+    "cases/statement_macro/input/main.c": "fbb6adc605a7a712d0fc19ffaa3595f0c5f20c011bf919ff489362d10534cf64",
+    "cases/two_translation_units/expected.txt": "45e12e2ef76507b7e633735c06341447c397ace3133e5c684792609c83464d9b",
+    "cases/two_translation_units/input/a.c": "cc357c4751e7890a7faac46aa0fbae5003f334411a4fc22eeedfedfe7dd9e785",
+    "cases/two_translation_units/input/b.c": "4ead22fabdea078fb2297e8c3d3ba9dea52ceec0256734e81bbafb23e171e549",
+    "cases/two_translation_units/input/defs.h": "794d4287a74c71974e6f1ab3cd336556a5af076ed925363d26c43633fde259bd",
+    "cases/undefinition/expected.txt": "74c10f8d01d3b0b03df96e01880a0b403c8a952b83392665f268f1e3c56c5334",
+    "cases/undefinition/input/defs.h": "a02016657d530879d3fd3ddd0d86e052d9d14b18bdd8ca6100391585ac152e92",
+    "cases/undefinition/input/main.c": "bbb5f23c9507dba4e019a540bb26fa1bd71a8c48c833cf512beecdb529728385",
+    "diagnostics/offsetof_direct/baseline.diff": "43164dab370c9cec92f3f2b846e4635358c45edafcdbc98fd8d0e12ccd8e016a",
+    "diagnostics/offsetof_direct/baseline.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "diagnostics/offsetof_direct/baseline.txt": "5364cd9f2faff96964727eff189a61f326cf6281170904cea2346e1a4b0188de",
+    "diagnostics/offsetof_direct/candidate.diff": "9dd1dcd92d335423f9320cacf80714c4aa5caa86fe8d8506acb5d7f12d843e76",
+    "diagnostics/offsetof_direct/candidate.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "diagnostics/offsetof_direct/candidate.txt": "f500f2d479692b6da52c9e8f3f9c5a73971f662742ca6382405b4451f97795bf",
+    "diagnostics/offsetof_direct/expected.txt": "2540d832a927686b60df0d3344ac79670cc1b1f540c62a6e6e5a80699a21c4ef",
+    "diagnostics/offsetof_direct/input/main.c": "4b27439980b20d2c01d92141f039045678c576030aa145b20089af068e9c7360",
+    "diagnostics/offsetof_direct/producer-status.json": "096327a4e079acc99f5d43f7f4966594aa51e5bcab517a33cbe9a0828b7e6f5e",
+    "diagnostics/offsetof_macro_ternary/baseline.diff": "680f946924abaa789668b53e939e375b572c3de16b1c9ef4b7d34aa21a828c84",
+    "diagnostics/offsetof_macro_ternary/baseline.stderr": "05b94e702f780753d58083b5d0e46dcf4018a94dfdf3f3eb940fed72bc9e1614",
+    "diagnostics/offsetof_macro_ternary/baseline.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "diagnostics/offsetof_macro_ternary/candidate.diff": "bfb94b1a24a4380be7ef681cf7b819c54e1af87674f52bd138a9bd86c0d3309f",
+    "diagnostics/offsetof_macro_ternary/candidate.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "diagnostics/offsetof_macro_ternary/candidate.txt": "e6d0b8de91babfe9a54fbdaa71284c666b32d4cdd4175866e9ecb0a325f3592d",
+    "diagnostics/offsetof_macro_ternary/expected.txt": "43f8df7076d37f1adf6ce341128be5220d1964325e641fd250558e3a21e08604",
+    "diagnostics/offsetof_macro_ternary/input/main.c": "f45e58d4b1bb4b92eeb928509e5e4b6e7de71d1bc96691ff07c2efa7036e9d21",
+    "diagnostics/offsetof_macro_ternary/producer-status.json": "e7ec8bf94a19d406aba4d02452a643faa52a4eca303d5a2df506835dd9134234",
+    "oracle/caller_object_define/oracle.stderr": "147f4ff6c4a27ebe1ffd907ee1eaa764cfade3c669b80c542f121d77f79be773",
+    "oracle/caller_object_define/oracle.stdout": "bd40a30e10b449bb058748f36adfe0531e0431f6b43012067a3dfa755600b335",
+    "oracle/caller_object_define/run.json": "3817d035d63bd729310def7349785884885c154c14e9d72a78393989eefd1214",
+    "oracle/cast_spaced/oracle.stderr": "eba941d5bc5f67d908bed7f8ecf93a0669f2f3ff48bbdbd3fdd4b7ac50c98385",
+    "oracle/cast_spaced/oracle.stdout": "7409acd1fab6a0efdb37d812f48473e905a8f5172f4c16ecb67bbdf79feed9e2",
+    "oracle/cast_spaced/run.json": "b4f4d3981d7eb1ddc1a7d4d8e178e82025ad973e5e4bfa8562ff0bf213e8fd18",
+    "oracle/cast_unspaced/oracle.stderr": "db0b0808d650976152f405b631315666f64c8c54c970ded9674fe77531cf15ae",
+    "oracle/cast_unspaced/oracle.stdout": "09b1c6b707758e84f3442bb8e7b0627b4bb6fab673483c373982c4c6824d1dc8",
+    "oracle/cast_unspaced/run.json": "77bc9b8a9c469d7b959a3c6e6efd90da42f89d514867084e85c4a2d9b574ff7d",
+    "oracle/definition_after_function/oracle.stderr": "8e0daba39606f79dc692ede2ceace5fe627800c90b724f8aa0eed3b238e41c83",
+    "oracle/definition_after_function/oracle.stdout": "4ecb082bb5ba221e126dbed404da22c8df4630f2b97a24a2b369c117eddfb257",
+    "oracle/definition_after_function/run.json": "b43e7e61e7e706b604c0bb8eb819b16756e957a98c5a7e0d5a8d91f71fe219d2",
+    "oracle/header_object/oracle.stderr": "7a5616b3f55c65a13de859136cb425426fa51aaa1f76e460dfae4dc34533ce2e",
+    "oracle/header_object/oracle.stdout": "57efb45d4040db129c1e6b59e5e53aff3d94beea08bd44b0ff113cdf6e0b23a4",
+    "oracle/header_object/run.json": "b589d6a966088e943c0aab01d5622093c039d8aa07732bb5fc3a2828cd793a55",
+    "oracle/identity_add_spaced/oracle.stderr": "88e6d381d59b76ea0c28d4e7edb36f1f26a34afcf283a07b32d04cdcbe903133",
+    "oracle/identity_add_spaced/oracle.stdout": "b9cd21562c3bf7d2cb4f6c4d9d24117b8843e05c3bdec4cabf0b5ffe66ddc9e6",
+    "oracle/identity_add_spaced/run.json": "6f2331d76d5d7b0a09dd2a7926b5e6efd2499aba63b6437b5083db92dd422c80",
+    "oracle/identity_add_unspaced/oracle.stderr": "957acd86e6c83ef74dd094f8ba32f585ea40e418894c086f58c472573476bf26",
+    "oracle/identity_add_unspaced/oracle.stdout": "29e2fb0fc180ae993815ff7b3705fdf4f3225c0a5d3734709c3c9746c891712b",
+    "oracle/identity_add_unspaced/run.json": "a87fc402ee430e1ad0dbcbe1b2c2d9e6a3a15a51acecc9b6c18bb8aceae7df9b",
+    "oracle/identity_call_spaced/oracle.stderr": "de95ae3345358bea6e40285661aaf2d8cb963bd01708c04abd879489f38d498b",
+    "oracle/identity_call_spaced/oracle.stdout": "f35412dcbb294b1b543645f8cbf1a00d50adb15f1461087858cec1cb021aab30",
+    "oracle/identity_call_spaced/run.json": "7b2d9e134cc613d49a47c999104f71699c44de318974a22cb1d3a2048f5cc1ca",
+    "oracle/identity_call_unspaced/oracle.stderr": "ebf76ed4ffc2d236559581d3107ec6eaba0e4024cb2e874a89c497437e7ee850",
+    "oracle/identity_call_unspaced/oracle.stdout": "85b802ce3ddf9c0c5b1813b1eb875c2fd6605754b32adecc9ebe7cb764cd153e",
+    "oracle/identity_call_unspaced/run.json": "b294eefc585e1791dbf80605b29daf03b7de3fe69a4f15c26b33e7a220efa951",
+    "oracle/ignored_argument/oracle.stderr": "fa0c7ef66add53bb0c2ed4232b96a8847d5768d697eba2973d9c0904fafb1b49",
+    "oracle/ignored_argument/oracle.stdout": "cd841f751ee202db1e9a73599685597738081cec741c34ece359ec7cf2891df2",
+    "oracle/ignored_argument/run.json": "b34a77f44a7f219a1a0b2b6dd53a7bf93a819407b93ee1de7943a47a4a96434d",
+    "oracle/include_guard_twice/oracle.stderr": "b6adcb0b7c2b773dd26682ab11229bf6abb325253cff588c63e30aee9d50a4eb",
+    "oracle/include_guard_twice/oracle.stdout": "f64b4ad99b4641a495664dabaa9fa5aad4d387a3bd8ef17b945201727fd55dcf",
+    "oracle/include_guard_twice/run.json": "606269e6a80bbff101d5452265c134b088f5ce7a66a9bf1464d7a86424c041d9",
+    "oracle/indirect_recursive_object/oracle.stderr": "5745a853d2e89872bc2477c646defd74db3e2fa01a7b1eab25a624ba87b3e423",
+    "oracle/indirect_recursive_object/oracle.stdout": "6a7a6ae0cf960d6f94470834def58dd1194bcd4819bb01a8962ffdf49e101206",
+    "oracle/indirect_recursive_object/run.json": "4b36103e97833a33a70ce4f7acf27517fdf52e0414cc8f7e5c05a9710635c85f",
+    "oracle/initializer_macro/oracle.stderr": "0c0b289ac694e5ccfb587e44302ac6579bf6f999aabbd5ead4ac0504f239b754",
+    "oracle/initializer_macro/oracle.stdout": "1e3006658ade7bf832805fe2d7e4ef471a3a5852f3d4fb34d3ce2a246f3fb3ec",
+    "oracle/initializer_macro/run.json": "e8f162ab18dc0c675741756650008a2fe0d610c2a847ffba28cd4449083a1904",
+    "oracle/missing_include/oracle.stderr": "1ab548946e882478545254668878dd8ecdcad0dd3962e0fe5614d506ed9a7b00",
+    "oracle/missing_include/oracle.stdout": "31e43e589b12d2ec36761b850ce7fc53c05e9470c1dafd2d49ce94973eef0167",
+    "oracle/missing_include/run.json": "0bc40858dbc3e8ac9276377947279eefd81714880fc0d963535216137bdd4567",
+    "oracle/nested_call_wrapper/oracle.stderr": "03e804c676bcb3934884a173c4c2677201ed5a30047eeff12f167d85708916e9",
+    "oracle/nested_call_wrapper/oracle.stdout": "bf53312c89a5f39f571337a28240a840e4d30ed6f5583f1d50c6d60d26be17f4",
+    "oracle/nested_call_wrapper/run.json": "14ecd8049d5e5cf946fcbf556071c3b4ead5d055097a191246f743c8db7edf43",
+    "oracle/nested_macros/oracle.stderr": "367ff603d8f0867af698fc7c88d0f9a90e16f158f1a5e80a36c90e8d41d0ef3d",
+    "oracle/nested_macros/oracle.stdout": "73069629f18726b753f8de6d6e3b7be59c69d367ac2d85db485a5bdbc43824d6",
+    "oracle/nested_macros/run.json": "cc5a71d68e35ddede1e064685f6b04d46bbdc99bc2153761c687d0e8bd84944d",
+    "oracle/nested_relative_headers/oracle.stderr": "f87695c027aa64aa58cdba11855a5d7a600c94374e9fdca85e7a3cf67dc2eaae",
+    "oracle/nested_relative_headers/oracle.stdout": "3171fee5904dd8784b8ac0d765a53c189e139a3eb86da7c45564572efdcea9a5",
+    "oracle/nested_relative_headers/run.json": "456ad5ac4e6965b2f842b63a5fee36f4cc09fc7db45d498ee3f6c3089d5ef3b6",
+    "oracle/offsetof_direct/oracle.stderr": "6df7a2432146af681de01b045738e29b254f33ec3c633c5de9647cdc1bbee7a1",
+    "oracle/offsetof_direct/oracle.stdout": "caf9818e25eb45aa935dd60b63b523f00a8e76d6c7cf4989e290d0144c62b5ea",
+    "oracle/offsetof_direct/run.json": "6dde684b12e5413de46774b46b4817847eb5564cf22f319d45682dd589dff477",
+    "oracle/offsetof_macro_ternary/oracle.stderr": "e37c0d62ab13f9ec38e7c5eab790bd1501b6b4105eb2e156b0dcb47bba385649",
+    "oracle/offsetof_macro_ternary/oracle.stdout": "418c3dca1620faf6d22c357ecb1dd66c3204f9c1d196de39e05a66499c71f162",
+    "oracle/offsetof_macro_ternary/run.json": "7256d2b8fff190868d539975e7d116dae1f456089a85b7f2221d758b90b7ef7c",
+    "oracle/pragma_once_reinclude/oracle.stderr": "afd9c90532667d93907e0759d90e4c4249c20ef6b7a580b48a3b9f0b001ad78e",
+    "oracle/pragma_once_reinclude/oracle.stdout": "3580b423713be70ffb825f2155ae25485690a87effe4caa53836785923293106",
+    "oracle/pragma_once_reinclude/run.json": "9639f7f22e54acaeb9f439cf0bf141e4faeab223eebca363c4b1ed84e24d000a",
+    "oracle/redefinition/oracle.stderr": "d88b654006e4a17644416e7b3c82104eb5a9624d85caf4b6873646cc48e52056",
+    "oracle/redefinition/oracle.stdout": "3ff8deb861a3cd770f3bb60bdf0d6e298dd8a2e81f2718eb214818682b9bb247",
+    "oracle/redefinition/run.json": "070a6c52c622d9e721d5bcc70cebead527d5632b45ca432b70fedbfd05297c2b",
+    "oracle/reinclude_without_pragma/oracle.stderr": "1828b3ec20c72ecccad70eca394554a05782cca8585cbf79c56c20241bb826e2",
+    "oracle/reinclude_without_pragma/oracle.stdout": "48ee61e3a0e1c1df8982779079cf4dab7b7c000664f76353d8618f190ca70b8e",
+    "oracle/reinclude_without_pragma/run.json": "e6e494801acaafefd7afcd6b8a21c402110f1ef4bd64ca4a81e42a6138f592bf",
+    "oracle/relative_subdirectory/oracle.stderr": "5af28ad178859f2e097f09fcefc41abc97df98b230c3aa6b306c907c49bc424e",
+    "oracle/relative_subdirectory/oracle.stdout": "442aa5b8a156d926df1d40f4862341af42fae0da8ee67486847c00e6456734d0",
+    "oracle/relative_subdirectory/run.json": "d99679d0e5f1ca15989e4c4672b9fe4594a101c1fb8c38a5060c1c49b55768e6",
+    "oracle/return_macro/oracle.stderr": "21981b52ace1d12656b8d7d69a44a73ba4fabe75a31a9a5c206d3151841010e2",
+    "oracle/return_macro/oracle.stdout": "459ca7c2db3205b8a4743ac253ba45273009d262d1caa9fbbdc1a0aea555530d",
+    "oracle/return_macro/run.json": "10012df14b06a388544949637c513d5cde2c36657b06632e19a9250551c3eee3",
+    "oracle/second_argument_only/oracle.stderr": "125310b9e1610970781a4813b7597382b6bd18dd59d7fe428c5032b6c8e2715a",
+    "oracle/second_argument_only/oracle.stdout": "7c44ae1339ce3b5e9b2d649061de9d810c8dc37df78d67f2cf760a7e4eb453b4",
+    "oracle/second_argument_only/run.json": "8d34213a7809ea6f2a03b93460ce0b816f2bf79eea907539e58ba8f8f2ae326e",
+    "oracle/self_recursive_object/oracle.stderr": "7e5dd022fcc085ee60852e89dd955c3b13ac6b338eca141f373c5a604c716c86",
+    "oracle/self_recursive_object/oracle.stdout": "8d5945fda3f809eb8485c52cf6a1ea8a73fb658a7e5d495a6447b98f0aebc315",
+    "oracle/self_recursive_object/run.json": "312cce136ca3894f294df15aa2130c02740e69170ff058087697a59975c897b7",
+    "oracle/statement_macro/oracle.stderr": "91adb4f12b1c95331893cb62bf5172d081443a08f8639ae3cee8a0c389390aba",
+    "oracle/statement_macro/oracle.stdout": "ca5b632f92d38ebce25e611227942c4ced0340e8dfd55dcd6fa51bb5f9a6108e",
+    "oracle/statement_macro/run.json": "99473c69db60906340e7b5ad269259a506c9440aba1ef7c03158f4c87893b57a",
+    "oracle/two_translation_units/oracle.stderr": "20943ec3b6f9abaec3dd6d0ea2976aec7b2004bf4bf75da70aaeba0965e6dcbd",
+    "oracle/two_translation_units/oracle.stdout": "fdb7ad506ee759dcc7b2381cb62f43d3d8cde664f2deae83d85f457ece80e10c",
+    "oracle/two_translation_units/run.json": "c2867e7629f29fe8698a705d18c1fce6f4076b9866400dcec98b19bfcad35cc2",
+    "oracle/undefinition/oracle.stderr": "99a7cd6159b02c0b038c80218faefa55faad3d0050a9da7e0fdade7eece325c5",
+    "oracle/undefinition/oracle.stdout": "d8c8d2ee8d6b465dd7e75d515e10a2b16a30cb5c0960d152a75648bfdfe7a9c9",
+    "oracle/undefinition/run.json": "c5e6c963461cc97d8433a03baeb9d2b9711503fd14513052ba34033f2f584880",
+    "oracle.sc": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+    "provenance/followup8-findings.md": "e30cd30759b9d87e2601ae4b17f9991a3eff00dbfc9b54fe7a1ee9c63682fe1e",
+    "provenance/followup8-input-manifest.json": "49b73316d57c6a7750b4569f8393b170318c5626f3425c5e05fdcbcc9985c7df",
+    "provenance/followup8-oracle-runs.json": "bdcea9079da00977a4166a9f1eab9af7f717fa9357fb5127d3a0ef83d675d4a8",
+    "provenance/followup8-verification.json": "82b88654c3664f830fe4bb886b9ed937ade53f122ca9179a9f7c1856e75bb9ba",
+    "provenance/original18-findings.md": "f4fda9895fe176f31ac27162509ab618eb07e6e51982e1f982aecb1701ad9346",
+    "provenance/original18-input-manifest.json": "932a08e918075c2678f7e0ae1dd4e458d05c4a7d8e5640a8059c598a41347c0c",
+    "provenance/original18-oracle-runs.json": "47751a2fdfab964d2f3340e2494a1e91bdbbd7f0acbb30155490eb6d4098d773",
+    "provenance/original18-verification.json": "77809c267f9f31f915cbeba6d6d3b0c4905640c6fc3f3a5af6549f8faaa43eba",
+    "provenance/recursive3-findings.md": "b7700544fe94fd475f7cc13f61e6e98b4cd92950238847f3f6f1ef21156b8137",
+    "provenance/recursive3-input-manifest.json": "9a60dc769f5b6ba285f3a827fcf2ba933a76e6692b6067e56256127feeff47a0",
+    "provenance/recursive3-oracle-runs.json": "cfd02bda695ab164ca90e0b01850d640aafb26eb076fc777cc53616b2d72b0ab",
+    "provenance/recursive3-verification.json": "97fb88b8495d4286daeef81b79be3e21b4efc9976fa57fe3fdf1a8fae34fa88c"
+  }
+}

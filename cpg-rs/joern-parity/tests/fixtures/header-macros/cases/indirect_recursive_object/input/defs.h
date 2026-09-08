@@ -1,0 +1,2 @@
+#define FIRST SECOND
+#define SECOND FIRST

@@ -1,0 +1,29 @@
+{
+  "verifiedAtUtc": "2026-09-08T10:48:11.905131+00:00",
+  "cases": 3,
+  "inputFiles": 6,
+  "allProducerExitCodesZero": true,
+  "allSourceHashesUnchanged": true,
+  "allCompleteReferencesReproduced": true,
+  "original18AndFollowup8ReceiptsUnchanged": true,
+  "selectedRecords": 463,
+  "sectionCounts": {
+    "AST": 123,
+    "NODES": 60,
+    "EDGES": 241,
+    "FLOWS": 39
+  },
+  "parallelWallSeconds": 9.292145750005147,
+  "inputManifest": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/input-manifest.json",
+    "sha256": "9a60dc769f5b6ba285f3a827fcf2ba933a76e6692b6067e56256127feeff47a0"
+  },
+  "oracleRuns": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/oracle-runs.json",
+    "sha256": "cfd02bda695ab164ca90e0b01850d640aafb26eb076fc777cc53616b2d72b0ab"
+  },
+  "oracleScript": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/oracle.sc",
+    "sha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab"
+  }
+}

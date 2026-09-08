@@ -1,0 +1,79 @@
+{
+  "joernVersion": "v4.0.555",
+  "joernArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "jdkVersion": "21.0.12",
+  "oracleScript": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/oracle.sc",
+  "oracleScriptSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "wallSeconds": 9.292145750005147,
+  "cases": {
+    "indirect_recursive_object": {
+      "command": [
+        "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+        "--script",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/oracle.sc",
+        "--param",
+        "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/cases/indirect_recursive_object/input"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/cases/indirect_recursive_object/oracle-workspace",
+      "exitCode": 0,
+      "seconds": 5.387365124988719,
+      "oracleScriptSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+      "rawStdoutSha256": "6a7a6ae0cf960d6f94470834def58dd1194bcd4819bb01a8962ffdf49e101206",
+      "rawStderrSha256": "5745a853d2e89872bc2477c646defd74db3e2fa01a7b1eab25a624ba87b3e423",
+      "referenceSha256": "a56f8f49c128cdee532bcee22f803dd92c61bb2dc100c4306ca7b156d09e8b6e",
+      "selectedRecords": 143,
+      "sections": {
+        "AST": 38,
+        "NODES": 20,
+        "EDGES": 76,
+        "FLOWS": 9
+      }
+    },
+    "second_argument_only": {
+      "command": [
+        "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+        "--script",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/oracle.sc",
+        "--param",
+        "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/cases/second_argument_only/input"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/cases/second_argument_only/oracle-workspace",
+      "exitCode": 0,
+      "seconds": 5.505581541990978,
+      "oracleScriptSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+      "rawStdoutSha256": "7c44ae1339ce3b5e9b2d649061de9d810c8dc37df78d67f2cf760a7e4eb453b4",
+      "rawStderrSha256": "125310b9e1610970781a4813b7597382b6bd18dd59d7fe428c5032b6c8e2715a",
+      "referenceSha256": "163a4e64a1b40e295d21100c84a2c7eecdba24c2fc459ec10a00498af193c13b",
+      "selectedRecords": 175,
+      "sections": {
+        "AST": 46,
+        "NODES": 20,
+        "EDGES": 88,
+        "FLOWS": 21
+      }
+    },
+    "self_recursive_object": {
+      "command": [
+        "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+        "--script",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/oracle.sc",
+        "--param",
+        "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/cases/self_recursive_object/input"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/cases/self_recursive_object/oracle-workspace",
+      "exitCode": 0,
+      "seconds": 3.9020848750078585,
+      "oracleScriptSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+      "rawStdoutSha256": "8d5945fda3f809eb8485c52cf6a1ea8a73fb658a7e5d495a6447b98f0aebc315",
+      "rawStderrSha256": "7e5dd022fcc085ee60852e89dd955c3b13ac6b338eca141f373c5a604c716c86",
+      "referenceSha256": "0cd114783e48d0e422042ac4efb7a4aff36cee612337ea39994e2d640e91386d",
+      "selectedRecords": 145,
+      "sections": {
+        "AST": 39,
+        "NODES": 20,
+        "EDGES": 77,
+        "FLOWS": 9
+      }
+    }
+  }
+}
