@@ -195,4 +195,39 @@ mod tests {
         ];
         assert_eq!(update_equivalence(&paths).unwrap(), 2);
     }
+
+    fn braceless_if_dump() -> String {
+        let sources = vec![(
+            "braceless_if.c".to_string(),
+            include_str!("../corpus/braceless_if.c").to_string(),
+        )];
+        dump_sources(&sources)
+    }
+
+    #[test]
+    fn production_preserves_braceless_if_call() {
+        assert!(braceless_if_dump().contains("CALL NAME=braceless_sink "));
+    }
+
+    #[test]
+    fn production_preserves_braceless_if_else_calls() {
+        let dump = braceless_if_dump();
+        for call in ["braceless_true", "braceless_false"] {
+            assert!(
+                dump.contains(&format!("CALL NAME={call} ")),
+                "missing conditional call {call}"
+            );
+        }
+    }
+
+    #[test]
+    fn production_preserves_braceless_if_return() {
+        let dump = braceless_if_dump();
+        let method = dump
+            .split("\n\n")
+            .find(|block| block.starts_with("METHOD NAME=braceless_if_return "))
+            .expect("braceless return method");
+        assert!(method.contains("RETURN CODE=return x; "));
+        assert!(method.contains("RETURN CODE=return 0; "));
+    }
 }

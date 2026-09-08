@@ -377,6 +377,156 @@ AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
 AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=3 ARGUMENT_INDEX=2
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
 AST|
+AST|METHOD NAME=braceless_false CODE=int braceless_false(int x) { return x; } FULL_NAME=braceless_false SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return x; ORDER=1
+AST|      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=braceless_if.c:<global> ORDER=1
+AST|  METHOD NAME=braceless_sink CODE=int braceless_sink(int x) { return x; } FULL_NAME=braceless_sink SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return x; ORDER=1
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=braceless_true CODE=int braceless_true(int x) { return x; } FULL_NAME=braceless_true SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return x; ORDER=1
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=braceless_false CODE=int braceless_false(int x) { return x; } FULL_NAME=braceless_false SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return x; ORDER=1
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=braceless_if_call CODE=int braceless_if_call(int x) {\n    if (x > 0)\n        braceless_sink(x);\n    return x;\n} FULL_NAME=braceless_if_call SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    if (x > 0)\n        braceless_sink(x);\n    return x;\n} TYPE_FULL_NAME=void ORDER=2
+AST|      CONTROL_STRUCTURE CODE=if (x > 0)\n        braceless_sink(x); ORDER=1
+AST|        CALL NAME=<operator>.greaterThan CODE=x > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|          CALL NAME=braceless_sink CODE=braceless_sink(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=braceless_sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      RETURN CODE=return x; ORDER=2
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=braceless_if_return CODE=int braceless_if_return(int x) {\n    if (x > 0)\n        return x;\n    return 0;\n} FULL_NAME=braceless_if_return SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    if (x > 0)\n        return x;\n    return 0;\n} TYPE_FULL_NAME=void ORDER=2
+AST|      CONTROL_STRUCTURE CODE=if (x > 0)\n        return x; ORDER=1
+AST|        CALL NAME=<operator>.greaterThan CODE=x > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|          RETURN CODE=return x; ORDER=1
+AST|            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|      RETURN CODE=return 0; ORDER=2
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=braceless_if_else CODE=int braceless_if_else(int x) {\n    if (x > 0)\n        braceless_true(x);\n    else\n        braceless_false(x);\n    return x;\n} FULL_NAME=braceless_if_else SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    if (x > 0)\n        braceless_true(x);\n    else\n        braceless_false(x);\n    return x;\n} TYPE_FULL_NAME=void ORDER=2
+AST|      CONTROL_STRUCTURE CODE=if (x > 0)\n        braceless_true(x);\n    else\n        braceless_false(x); ORDER=1
+AST|        CALL NAME=<operator>.greaterThan CODE=x > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|          CALL NAME=braceless_true CODE=braceless_true(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=braceless_true ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        CONTROL_STRUCTURE CODE=else ORDER=3
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|            CALL NAME=braceless_false CODE=braceless_false(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=braceless_false ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      RETURN CODE=return x; ORDER=2
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=braceless_sink TYPE_FULL_NAME=braceless_sink METHOD_FULL_NAME=braceless_sink ORDER=1
+AST|    METHOD_REF CODE=braceless_true TYPE_FULL_NAME=braceless_true METHOD_FULL_NAME=braceless_true ORDER=2
+AST|    METHOD_REF CODE=braceless_false TYPE_FULL_NAME=braceless_false METHOD_FULL_NAME=braceless_false ORDER=3
+AST|    METHOD_REF CODE=braceless_if_call TYPE_FULL_NAME=braceless_if_call METHOD_FULL_NAME=braceless_if_call ORDER=4
+AST|    METHOD_REF CODE=braceless_if_return TYPE_FULL_NAME=braceless_if_return METHOD_FULL_NAME=braceless_if_return ORDER=5
+AST|    METHOD_REF CODE=braceless_if_else TYPE_FULL_NAME=braceless_if_else METHOD_FULL_NAME=braceless_if_else ORDER=6
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=braceless_if_call CODE=int braceless_if_call(int x) {\n    if (x > 0)\n        braceless_sink(x);\n    return x;\n} FULL_NAME=braceless_if_call SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    if (x > 0)\n        braceless_sink(x);\n    return x;\n} TYPE_FULL_NAME=void ORDER=2
+AST|    CONTROL_STRUCTURE CODE=if (x > 0)\n        braceless_sink(x); ORDER=1
+AST|      CALL NAME=<operator>.greaterThan CODE=x > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|        CALL NAME=braceless_sink CODE=braceless_sink(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=braceless_sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    RETURN CODE=return x; ORDER=2
+AST|      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=braceless_if_else CODE=int braceless_if_else(int x) {\n    if (x > 0)\n        braceless_true(x);\n    else\n        braceless_false(x);\n    return x;\n} FULL_NAME=braceless_if_else SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    if (x > 0)\n        braceless_true(x);\n    else\n        braceless_false(x);\n    return x;\n} TYPE_FULL_NAME=void ORDER=2
+AST|    CONTROL_STRUCTURE CODE=if (x > 0)\n        braceless_true(x);\n    else\n        braceless_false(x); ORDER=1
+AST|      CALL NAME=<operator>.greaterThan CODE=x > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|        CALL NAME=braceless_true CODE=braceless_true(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=braceless_true ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      CONTROL_STRUCTURE CODE=else ORDER=3
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|          CALL NAME=braceless_false CODE=braceless_false(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=braceless_false ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    RETURN CODE=return x; ORDER=2
+AST|      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=braceless_if_return CODE=int braceless_if_return(int x) {\n    if (x > 0)\n        return x;\n    return 0;\n} FULL_NAME=braceless_if_return SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    if (x > 0)\n        return x;\n    return 0;\n} TYPE_FULL_NAME=void ORDER=2
+AST|    CONTROL_STRUCTURE CODE=if (x > 0)\n        return x; ORDER=1
+AST|      CALL NAME=<operator>.greaterThan CODE=x > 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|        RETURN CODE=return x; ORDER=1
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|    RETURN CODE=return 0; ORDER=2
+AST|      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=braceless_sink CODE=int braceless_sink(int x) { return x; } FULL_NAME=braceless_sink SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return x; ORDER=1
+AST|      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=braceless_true CODE=int braceless_true(int x) { return x; } FULL_NAME=braceless_true SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return x; ORDER=1
+AST|      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
 AST|METHOD NAME=bsearch CODE=void *bsearch(const void *key, const void *base, size_t nel, size_t width, int (*cmp)(const void *, const void *))\n{\n	void *try;\n	int sign;\n	while (nel > 0) {\n		try = (char *)base + width*(nel/2);\n		sign = cmp(key, try);\n		if (sign < 0) {\n			nel /= 2;\n		} else if (sign > 0) {\n			base = (char *)try + width;\n			nel -= nel/2+1;\n		} else {\n			return try;\n		}\n	}\n	return NULL;\n} FULL_NAME=bsearch SIGNATURE=void*(void*,void*,size_t,size_t,int) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=key CODE=const void *key TYPE_FULL_NAME=void* ORDER=1
 AST|  METHOD_PARAMETER_OUT NAME=key CODE=const void *key TYPE_FULL_NAME=void* ORDER=1
@@ -1900,6 +2050,7 @@ NODES|META_DATA LANGUAGE=NEWC
 NODES|FILE NAME=<includes> ORDER=1
 NODES|FILE NAME=<unknown> ORDER=0
 NODES|FILE NAME=add.c ORDER=0
+NODES|FILE NAME=braceless_if.c ORDER=0
 NODES|FILE NAME=bsearch.c ORDER=0
 NODES|FILE NAME=exprs.c ORDER=0
 NODES|FILE NAME=forloop.c ORDER=0
@@ -1918,6 +2069,7 @@ NODES|FILE NAME=unary.c ORDER=0
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=braceless_if.c:<global> FILENAME=braceless_if.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=bsearch.c:<global> FILENAME=bsearch.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=exprs.c:<global> FILENAME=exprs.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=forloop.c:<global> FILENAME=forloop.c ORDER=1
@@ -1939,6 +2091,13 @@ NODES|TYPE_DECL NAME=add FULL_NAME=add CODE=add AST_PARENT_TYPE=TYPE_DECL AST_PA
 NODES|TYPE_DECL NAME=<global> FULL_NAME=add.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
 NODES|TYPE_DECL NAME=agg FULL_NAME=agg CODE=agg AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=structs.c:<global> FILENAME=structs.c ORDER=1
 NODES|TYPE_DECL NAME=apply FULL_NAME=apply CODE=apply AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types2.c:<global> FILENAME=types2.c ORDER=1
+NODES|TYPE_DECL NAME=braceless_false FULL_NAME=braceless_false CODE=braceless_false AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=braceless_if.c:<global> FILENAME=braceless_if.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=braceless_if.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=braceless_if.c:<global> FILENAME=braceless_if.c ORDER=1
+NODES|TYPE_DECL NAME=braceless_if_call FULL_NAME=braceless_if_call CODE=braceless_if_call AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=braceless_if.c:<global> FILENAME=braceless_if.c ORDER=1
+NODES|TYPE_DECL NAME=braceless_if_else FULL_NAME=braceless_if_else CODE=braceless_if_else AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=braceless_if.c:<global> FILENAME=braceless_if.c ORDER=1
+NODES|TYPE_DECL NAME=braceless_if_return FULL_NAME=braceless_if_return CODE=braceless_if_return AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=braceless_if.c:<global> FILENAME=braceless_if.c ORDER=1
+NODES|TYPE_DECL NAME=braceless_sink FULL_NAME=braceless_sink CODE=braceless_sink AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=braceless_if.c:<global> FILENAME=braceless_if.c ORDER=1
+NODES|TYPE_DECL NAME=braceless_true FULL_NAME=braceless_true CODE=braceless_true AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=braceless_if.c:<global> FILENAME=braceless_if.c ORDER=1
 NODES|TYPE_DECL NAME=bsearch FULL_NAME=bsearch CODE=bsearch AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=bsearch.c:<global> FILENAME=bsearch.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=bsearch.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=bsearch.c:<global> FILENAME=bsearch.c ORDER=2
 NODES|TYPE_DECL NAME=char FULL_NAME=char CODE=char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
@@ -2001,6 +2160,12 @@ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
 NODES|TYPE NAME=add FULL_NAME=add TYPE_DECL_FULL_NAME=add
 NODES|TYPE NAME=agg FULL_NAME=agg TYPE_DECL_FULL_NAME=agg
 NODES|TYPE NAME=apply FULL_NAME=apply TYPE_DECL_FULL_NAME=apply
+NODES|TYPE NAME=braceless_false FULL_NAME=braceless_false TYPE_DECL_FULL_NAME=braceless_false
+NODES|TYPE NAME=braceless_if_call FULL_NAME=braceless_if_call TYPE_DECL_FULL_NAME=braceless_if_call
+NODES|TYPE NAME=braceless_if_else FULL_NAME=braceless_if_else TYPE_DECL_FULL_NAME=braceless_if_else
+NODES|TYPE NAME=braceless_if_return FULL_NAME=braceless_if_return TYPE_DECL_FULL_NAME=braceless_if_return
+NODES|TYPE NAME=braceless_sink FULL_NAME=braceless_sink TYPE_DECL_FULL_NAME=braceless_sink
+NODES|TYPE NAME=braceless_true FULL_NAME=braceless_true TYPE_DECL_FULL_NAME=braceless_true
 NODES|TYPE NAME=bsearch FULL_NAME=bsearch TYPE_DECL_FULL_NAME=bsearch
 NODES|TYPE NAME=char FULL_NAME=char TYPE_DECL_FULL_NAME=char
 NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
@@ -2074,6 +2239,22 @@ EDGES|ARGUMENT agg#9 -> agg#11
 EDGES|ARGUMENT apply#6 -> apply#7
 EDGES|ARGUMENT apply#7 -> apply#10
 EDGES|ARGUMENT apply#7 -> apply#9
+EDGES|ARGUMENT braceless_false#4 -> braceless_false#5
+EDGES|ARGUMENT braceless_if_call#11 -> braceless_if_call#12
+EDGES|ARGUMENT braceless_if_call#5 -> braceless_if_call#6
+EDGES|ARGUMENT braceless_if_call#5 -> braceless_if_call#7
+EDGES|ARGUMENT braceless_if_call#9 -> braceless_if_call#10
+EDGES|ARGUMENT braceless_if_else#13 -> braceless_if_else#14
+EDGES|ARGUMENT braceless_if_else#15 -> braceless_if_else#16
+EDGES|ARGUMENT braceless_if_else#5 -> braceless_if_else#6
+EDGES|ARGUMENT braceless_if_else#5 -> braceless_if_else#7
+EDGES|ARGUMENT braceless_if_else#9 -> braceless_if_else#10
+EDGES|ARGUMENT braceless_if_return#11 -> braceless_if_return#12
+EDGES|ARGUMENT braceless_if_return#5 -> braceless_if_return#6
+EDGES|ARGUMENT braceless_if_return#5 -> braceless_if_return#7
+EDGES|ARGUMENT braceless_if_return#9 -> braceless_if_return#10
+EDGES|ARGUMENT braceless_sink#4 -> braceless_sink#5
+EDGES|ARGUMENT braceless_true#4 -> braceless_true#5
 EDGES|ARGUMENT bsearch#16 -> bsearch#17
 EDGES|ARGUMENT bsearch#16 -> bsearch#18
 EDGES|ARGUMENT bsearch#20 -> bsearch#21
@@ -2410,6 +2591,12 @@ EDGES|CALL agg#34 -> <operator>.assignment#0
 EDGES|CALL agg#38 -> helper#0
 EDGES|CALL agg#8 -> <operator>.assignment#0
 EDGES|CALL agg#9 -> <operator>.fieldAccess#0
+EDGES|CALL braceless_if_call#5 -> <operator>.greaterThan#0
+EDGES|CALL braceless_if_call#9 -> braceless_if.c:<global>#1
+EDGES|CALL braceless_if_else#13 -> braceless_false#0
+EDGES|CALL braceless_if_else#5 -> <operator>.greaterThan#0
+EDGES|CALL braceless_if_else#9 -> braceless_if.c:<global>#8
+EDGES|CALL braceless_if_return#5 -> <operator>.greaterThan#0
 EDGES|CALL bsearch#16 -> <operator>.greaterThan#0
 EDGES|CALL bsearch#20 -> <operator>.assignment#0
 EDGES|CALL bsearch#22 -> <operator>.addition#0
@@ -2662,6 +2849,51 @@ EDGES|CFG apply#6 -> apply#11
 EDGES|CFG apply#7 -> apply#6
 EDGES|CFG apply#8 -> apply#9
 EDGES|CFG apply#9 -> apply#10
+EDGES|CFG braceless_false#0 -> braceless_false#5
+EDGES|CFG braceless_false#4 -> braceless_false#6
+EDGES|CFG braceless_false#5 -> braceless_false#4
+EDGES|CFG braceless_if.c:<global>#0 -> braceless_if.c:<global>#69
+EDGES|CFG braceless_if.c:<global>#1 -> braceless_sink#5
+EDGES|CFG braceless_if.c:<global>#22 -> braceless_if_call#6
+EDGES|CFG braceless_if.c:<global>#36 -> braceless_if_return#6
+EDGES|CFG braceless_if.c:<global>#50 -> braceless_if_else#6
+EDGES|CFG braceless_if.c:<global>#69 -> braceless_if.c:<global>#70
+EDGES|CFG braceless_if.c:<global>#70 -> braceless_if.c:<global>#71
+EDGES|CFG braceless_if.c:<global>#71 -> braceless_if.c:<global>#72
+EDGES|CFG braceless_if.c:<global>#72 -> braceless_if.c:<global>#73
+EDGES|CFG braceless_if.c:<global>#73 -> braceless_if.c:<global>#74
+EDGES|CFG braceless_if.c:<global>#74 -> braceless_if.c:<global>#75
+EDGES|CFG braceless_if.c:<global>#8 -> braceless_true#5
+EDGES|CFG braceless_if_call#10 -> braceless_if_call#9
+EDGES|CFG braceless_if_call#11 -> braceless_if_call#13
+EDGES|CFG braceless_if_call#12 -> braceless_if_call#11
+EDGES|CFG braceless_if_call#5 -> braceless_if_call#10
+EDGES|CFG braceless_if_call#5 -> braceless_if_call#12
+EDGES|CFG braceless_if_call#6 -> braceless_if_call#7
+EDGES|CFG braceless_if_call#7 -> braceless_if_call#5
+EDGES|CFG braceless_if_call#9 -> braceless_if_call#12
+EDGES|CFG braceless_if_else#10 -> braceless_if_else#9
+EDGES|CFG braceless_if_else#13 -> braceless_if_else#16
+EDGES|CFG braceless_if_else#14 -> braceless_if_else#13
+EDGES|CFG braceless_if_else#15 -> braceless_if_else#17
+EDGES|CFG braceless_if_else#16 -> braceless_if_else#15
+EDGES|CFG braceless_if_else#5 -> braceless_if_else#10
+EDGES|CFG braceless_if_else#5 -> braceless_if_else#14
+EDGES|CFG braceless_if_else#6 -> braceless_if_else#7
+EDGES|CFG braceless_if_else#7 -> braceless_if_else#5
+EDGES|CFG braceless_if_else#9 -> braceless_if_else#16
+EDGES|CFG braceless_if_return#10 -> braceless_if_return#9
+EDGES|CFG braceless_if_return#11 -> braceless_if_return#13
+EDGES|CFG braceless_if_return#12 -> braceless_if_return#11
+EDGES|CFG braceless_if_return#5 -> braceless_if_return#10
+EDGES|CFG braceless_if_return#5 -> braceless_if_return#12
+EDGES|CFG braceless_if_return#6 -> braceless_if_return#7
+EDGES|CFG braceless_if_return#7 -> braceless_if_return#5
+EDGES|CFG braceless_if_return#9 -> braceless_if_return#13
+EDGES|CFG braceless_sink#4 -> braceless_sink#6
+EDGES|CFG braceless_sink#5 -> braceless_sink#4
+EDGES|CFG braceless_true#4 -> braceless_true#6
+EDGES|CFG braceless_true#5 -> braceless_true#4
 EDGES|CFG bsearch#0 -> bsearch#17
 EDGES|CFG bsearch#16 -> bsearch#21
 EDGES|CFG bsearch#16 -> bsearch#71
@@ -3222,6 +3454,9 @@ EDGES|CFG use#6 -> use#13
 EDGES|CFG use#7 -> use#9
 EDGES|CFG use#8 -> use#6
 EDGES|CFG use#9 -> use#10
+EDGES|CONDITION braceless_if_call#4 -> braceless_if_call#5
+EDGES|CONDITION braceless_if_else#4 -> braceless_if_else#5
+EDGES|CONDITION braceless_if_return#4 -> braceless_if_return#5
 EDGES|CONDITION bsearch#15 -> bsearch#16
 EDGES|CONDITION bsearch#37 -> bsearch#38
 EDGES|CONDITION bsearch#47 -> bsearch#48
@@ -3285,6 +3520,13 @@ EDGES|CONTAINS <operators>.assignmentXor#0 -> <operators>.assignmentXor#2
 EDGES|CONTAINS D:add.c:<global> -> D:add
 EDGES|CONTAINS D:add.c:<global> -> D:main
 EDGES|CONTAINS D:add.c:<global> -> add.c:<global>#0
+EDGES|CONTAINS D:braceless_if.c:<global> -> D:braceless_false
+EDGES|CONTAINS D:braceless_if.c:<global> -> D:braceless_if_call
+EDGES|CONTAINS D:braceless_if.c:<global> -> D:braceless_if_else
+EDGES|CONTAINS D:braceless_if.c:<global> -> D:braceless_if_return
+EDGES|CONTAINS D:braceless_if.c:<global> -> D:braceless_sink
+EDGES|CONTAINS D:braceless_if.c:<global> -> D:braceless_true
+EDGES|CONTAINS D:braceless_if.c:<global> -> braceless_if.c:<global>#0
 EDGES|CONTAINS D:bsearch.c:<global> -> D:bsearch
 EDGES|CONTAINS D:bsearch.c:<global> -> bsearch.c:<global>#0
 EDGES|CONTAINS D:exprs.c:<global> -> D:exprs
@@ -3344,6 +3586,7 @@ EDGES|CONTAINS F:<includes> -> D:unsigned int
 EDGES|CONTAINS F:<includes> -> D:void
 EDGES|CONTAINS F:<includes> -> D:void*
 EDGES|CONTAINS F:add.c -> D:add.c:<global>
+EDGES|CONTAINS F:braceless_if.c -> D:braceless_if.c:<global>
 EDGES|CONTAINS F:bsearch.c -> D:bsearch.c:<global>
 EDGES|CONTAINS F:exprs.c -> D:exprs.c:<global>
 EDGES|CONTAINS F:forloop.c -> D:forloop.c:<global>
@@ -3414,6 +3657,62 @@ EDGES|CONTAINS apply#0 -> apply#6
 EDGES|CONTAINS apply#0 -> apply#7
 EDGES|CONTAINS apply#0 -> apply#8
 EDGES|CONTAINS apply#0 -> apply#9
+EDGES|CONTAINS braceless_false#0 -> braceless_false#3
+EDGES|CONTAINS braceless_false#0 -> braceless_false#4
+EDGES|CONTAINS braceless_false#0 -> braceless_false#5
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_false#0
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_if.c:<global>#1
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_if.c:<global>#22
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_if.c:<global>#36
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_if.c:<global>#50
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_if.c:<global>#68
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_if.c:<global>#69
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_if.c:<global>#70
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_if.c:<global>#71
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_if.c:<global>#72
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_if.c:<global>#73
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_if.c:<global>#74
+EDGES|CONTAINS braceless_if.c:<global>#0 -> braceless_if.c:<global>#8
+EDGES|CONTAINS braceless_if.c:<global>#1 -> braceless_sink#3
+EDGES|CONTAINS braceless_if.c:<global>#1 -> braceless_sink#4
+EDGES|CONTAINS braceless_if.c:<global>#1 -> braceless_sink#5
+EDGES|CONTAINS braceless_if.c:<global>#22 -> braceless_if_call#10
+EDGES|CONTAINS braceless_if.c:<global>#22 -> braceless_if_call#11
+EDGES|CONTAINS braceless_if.c:<global>#22 -> braceless_if_call#12
+EDGES|CONTAINS braceless_if.c:<global>#22 -> braceless_if_call#3
+EDGES|CONTAINS braceless_if.c:<global>#22 -> braceless_if_call#4
+EDGES|CONTAINS braceless_if.c:<global>#22 -> braceless_if_call#5
+EDGES|CONTAINS braceless_if.c:<global>#22 -> braceless_if_call#6
+EDGES|CONTAINS braceless_if.c:<global>#22 -> braceless_if_call#7
+EDGES|CONTAINS braceless_if.c:<global>#22 -> braceless_if_call#8
+EDGES|CONTAINS braceless_if.c:<global>#22 -> braceless_if_call#9
+EDGES|CONTAINS braceless_if.c:<global>#36 -> braceless_if_return#10
+EDGES|CONTAINS braceless_if.c:<global>#36 -> braceless_if_return#11
+EDGES|CONTAINS braceless_if.c:<global>#36 -> braceless_if_return#12
+EDGES|CONTAINS braceless_if.c:<global>#36 -> braceless_if_return#3
+EDGES|CONTAINS braceless_if.c:<global>#36 -> braceless_if_return#4
+EDGES|CONTAINS braceless_if.c:<global>#36 -> braceless_if_return#5
+EDGES|CONTAINS braceless_if.c:<global>#36 -> braceless_if_return#6
+EDGES|CONTAINS braceless_if.c:<global>#36 -> braceless_if_return#7
+EDGES|CONTAINS braceless_if.c:<global>#36 -> braceless_if_return#8
+EDGES|CONTAINS braceless_if.c:<global>#36 -> braceless_if_return#9
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#10
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#11
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#12
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#13
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#14
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#15
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#16
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#3
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#4
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#5
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#6
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#7
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#8
+EDGES|CONTAINS braceless_if.c:<global>#50 -> braceless_if_else#9
+EDGES|CONTAINS braceless_if.c:<global>#8 -> braceless_true#3
+EDGES|CONTAINS braceless_if.c:<global>#8 -> braceless_true#4
+EDGES|CONTAINS braceless_if.c:<global>#8 -> braceless_true#5
 EDGES|CONTAINS bsearch#0 -> bsearch#11
 EDGES|CONTAINS bsearch#0 -> bsearch#15
 EDGES|CONTAINS bsearch#0 -> bsearch#16
@@ -4282,6 +4581,64 @@ EDGES|EVAL_TYPE apply#5 -> T:void
 EDGES|EVAL_TYPE apply#7 -> T:int
 EDGES|EVAL_TYPE apply#8 -> T:int
 EDGES|EVAL_TYPE apply#9 -> T:int
+EDGES|EVAL_TYPE braceless_false#1 -> T:int
+EDGES|EVAL_TYPE braceless_false#2 -> T:int
+EDGES|EVAL_TYPE braceless_false#3 -> T:void
+EDGES|EVAL_TYPE braceless_false#5 -> T:int
+EDGES|EVAL_TYPE braceless_false#6 -> T:int
+EDGES|EVAL_TYPE braceless_if.c:<global>#68 -> T:ANY
+EDGES|EVAL_TYPE braceless_if.c:<global>#69 -> T:braceless_sink
+EDGES|EVAL_TYPE braceless_if.c:<global>#70 -> T:braceless_true
+EDGES|EVAL_TYPE braceless_if.c:<global>#71 -> T:braceless_false
+EDGES|EVAL_TYPE braceless_if.c:<global>#72 -> T:braceless_if_call
+EDGES|EVAL_TYPE braceless_if.c:<global>#73 -> T:braceless_if_return
+EDGES|EVAL_TYPE braceless_if.c:<global>#74 -> T:braceless_if_else
+EDGES|EVAL_TYPE braceless_if.c:<global>#75 -> T:ANY
+EDGES|EVAL_TYPE braceless_if_call#1 -> T:int
+EDGES|EVAL_TYPE braceless_if_call#10 -> T:int
+EDGES|EVAL_TYPE braceless_if_call#12 -> T:int
+EDGES|EVAL_TYPE braceless_if_call#13 -> T:int
+EDGES|EVAL_TYPE braceless_if_call#2 -> T:int
+EDGES|EVAL_TYPE braceless_if_call#3 -> T:void
+EDGES|EVAL_TYPE braceless_if_call#5 -> T:ANY
+EDGES|EVAL_TYPE braceless_if_call#6 -> T:int
+EDGES|EVAL_TYPE braceless_if_call#7 -> T:int
+EDGES|EVAL_TYPE braceless_if_call#8 -> T:ANY
+EDGES|EVAL_TYPE braceless_if_call#9 -> T:int
+EDGES|EVAL_TYPE braceless_if_else#1 -> T:int
+EDGES|EVAL_TYPE braceless_if_else#10 -> T:int
+EDGES|EVAL_TYPE braceless_if_else#12 -> T:ANY
+EDGES|EVAL_TYPE braceless_if_else#13 -> T:int
+EDGES|EVAL_TYPE braceless_if_else#14 -> T:int
+EDGES|EVAL_TYPE braceless_if_else#16 -> T:int
+EDGES|EVAL_TYPE braceless_if_else#17 -> T:int
+EDGES|EVAL_TYPE braceless_if_else#2 -> T:int
+EDGES|EVAL_TYPE braceless_if_else#3 -> T:void
+EDGES|EVAL_TYPE braceless_if_else#5 -> T:ANY
+EDGES|EVAL_TYPE braceless_if_else#6 -> T:int
+EDGES|EVAL_TYPE braceless_if_else#7 -> T:int
+EDGES|EVAL_TYPE braceless_if_else#8 -> T:ANY
+EDGES|EVAL_TYPE braceless_if_else#9 -> T:int
+EDGES|EVAL_TYPE braceless_if_return#1 -> T:int
+EDGES|EVAL_TYPE braceless_if_return#10 -> T:int
+EDGES|EVAL_TYPE braceless_if_return#12 -> T:int
+EDGES|EVAL_TYPE braceless_if_return#13 -> T:int
+EDGES|EVAL_TYPE braceless_if_return#2 -> T:int
+EDGES|EVAL_TYPE braceless_if_return#3 -> T:void
+EDGES|EVAL_TYPE braceless_if_return#5 -> T:ANY
+EDGES|EVAL_TYPE braceless_if_return#6 -> T:int
+EDGES|EVAL_TYPE braceless_if_return#7 -> T:int
+EDGES|EVAL_TYPE braceless_if_return#8 -> T:ANY
+EDGES|EVAL_TYPE braceless_sink#1 -> T:int
+EDGES|EVAL_TYPE braceless_sink#2 -> T:int
+EDGES|EVAL_TYPE braceless_sink#3 -> T:void
+EDGES|EVAL_TYPE braceless_sink#5 -> T:int
+EDGES|EVAL_TYPE braceless_sink#6 -> T:int
+EDGES|EVAL_TYPE braceless_true#1 -> T:int
+EDGES|EVAL_TYPE braceless_true#2 -> T:int
+EDGES|EVAL_TYPE braceless_true#3 -> T:void
+EDGES|EVAL_TYPE braceless_true#5 -> T:int
+EDGES|EVAL_TYPE braceless_true#6 -> T:int
 EDGES|EVAL_TYPE bsearch#1 -> T:void*
 EDGES|EVAL_TYPE bsearch#10 -> T:int
 EDGES|EVAL_TYPE bsearch#11 -> T:void
@@ -4938,6 +5295,7 @@ EDGES|EVAL_TYPE use#6 -> T:void
 EDGES|EVAL_TYPE use#7 -> T:uint_t
 EDGES|EVAL_TYPE use#8 -> T:uint_t
 EDGES|EVAL_TYPE use#9 -> T:uint_t
+EDGES|FALSE_BODY braceless_if_else#4 -> braceless_if_else#11
 EDGES|FALSE_BODY bsearch#37 -> bsearch#45
 EDGES|FALSE_BODY bsearch#47 -> bsearch#66
 EDGES|FALSE_BODY classify#8 -> classify#18
@@ -5026,6 +5384,12 @@ EDGES|PARAMETER_LINK agg#1 -> agg#2
 EDGES|PARAMETER_LINK agg#3 -> agg#4
 EDGES|PARAMETER_LINK apply#1 -> apply#2
 EDGES|PARAMETER_LINK apply#3 -> apply#4
+EDGES|PARAMETER_LINK braceless_false#1 -> braceless_false#2
+EDGES|PARAMETER_LINK braceless_if_call#1 -> braceless_if_call#2
+EDGES|PARAMETER_LINK braceless_if_else#1 -> braceless_if_else#2
+EDGES|PARAMETER_LINK braceless_if_return#1 -> braceless_if_return#2
+EDGES|PARAMETER_LINK braceless_sink#1 -> braceless_sink#2
+EDGES|PARAMETER_LINK braceless_true#1 -> braceless_true#2
 EDGES|PARAMETER_LINK bsearch#1 -> bsearch#2
 EDGES|PARAMETER_LINK bsearch#3 -> bsearch#4
 EDGES|PARAMETER_LINK bsearch#5 -> bsearch#6
@@ -5056,6 +5420,7 @@ EDGES|PARAMETER_LINK use#1 -> use#2
 EDGES|REF NB:<global> -> NS:<global>
 EDGES|REF NB:<includes>:<global> -> NS:<global>
 EDGES|REF NB:add.c:<global> -> NS:<global>
+EDGES|REF NB:braceless_if.c:<global> -> NS:<global>
 EDGES|REF NB:bsearch.c:<global> -> NS:<global>
 EDGES|REF NB:exprs.c:<global> -> NS:<global>
 EDGES|REF NB:forloop.c:<global> -> NS:<global>
@@ -5075,6 +5440,12 @@ EDGES|REF T:ANY -> D:ANY
 EDGES|REF T:add -> D:add
 EDGES|REF T:agg -> D:agg
 EDGES|REF T:apply -> D:apply
+EDGES|REF T:braceless_false -> D:braceless_false
+EDGES|REF T:braceless_if_call -> D:braceless_if_call
+EDGES|REF T:braceless_if_else -> D:braceless_if_else
+EDGES|REF T:braceless_if_return -> D:braceless_if_return
+EDGES|REF T:braceless_sink -> D:braceless_sink
+EDGES|REF T:braceless_true -> D:braceless_true
 EDGES|REF T:bsearch -> D:bsearch
 EDGES|REF T:char -> D:char
 EDGES|REF T:char* -> D:char*
@@ -5139,6 +5510,24 @@ EDGES|REF agg#9 -> structs.c:<global>#2
 EDGES|REF apply#10 -> apply#3
 EDGES|REF apply#8 -> apply#1
 EDGES|REF apply#9 -> apply#3
+EDGES|REF braceless_false#5 -> braceless_false#1
+EDGES|REF braceless_if.c:<global>#69 -> braceless_if.c:<global>#1
+EDGES|REF braceless_if.c:<global>#70 -> braceless_if.c:<global>#8
+EDGES|REF braceless_if.c:<global>#71 -> braceless_false#0
+EDGES|REF braceless_if.c:<global>#72 -> braceless_if.c:<global>#22
+EDGES|REF braceless_if.c:<global>#73 -> braceless_if.c:<global>#36
+EDGES|REF braceless_if.c:<global>#74 -> braceless_if.c:<global>#50
+EDGES|REF braceless_if_call#10 -> braceless_if_call#1
+EDGES|REF braceless_if_call#12 -> braceless_if_call#1
+EDGES|REF braceless_if_call#6 -> braceless_if_call#1
+EDGES|REF braceless_if_else#10 -> braceless_if_else#1
+EDGES|REF braceless_if_else#14 -> braceless_if_else#1
+EDGES|REF braceless_if_else#16 -> braceless_if_else#1
+EDGES|REF braceless_if_else#6 -> braceless_if_else#1
+EDGES|REF braceless_if_return#10 -> braceless_if_return#1
+EDGES|REF braceless_if_return#6 -> braceless_if_return#1
+EDGES|REF braceless_sink#5 -> braceless_sink#1
+EDGES|REF braceless_true#5 -> braceless_true#1
 EDGES|REF bsearch#17 -> bsearch#5
 EDGES|REF bsearch#21 -> bsearch#13
 EDGES|REF bsearch#25 -> bsearch#3
@@ -5344,6 +5733,13 @@ EDGES|SOURCE_FILE D:add -> F:add.c
 EDGES|SOURCE_FILE D:add.c:<global> -> F:add.c
 EDGES|SOURCE_FILE D:agg -> F:structs.c
 EDGES|SOURCE_FILE D:apply -> F:types2.c
+EDGES|SOURCE_FILE D:braceless_false -> F:braceless_if.c
+EDGES|SOURCE_FILE D:braceless_if.c:<global> -> F:braceless_if.c
+EDGES|SOURCE_FILE D:braceless_if_call -> F:braceless_if.c
+EDGES|SOURCE_FILE D:braceless_if_else -> F:braceless_if.c
+EDGES|SOURCE_FILE D:braceless_if_return -> F:braceless_if.c
+EDGES|SOURCE_FILE D:braceless_sink -> F:braceless_if.c
+EDGES|SOURCE_FILE D:braceless_true -> F:braceless_if.c
 EDGES|SOURCE_FILE D:bsearch -> F:bsearch.c
 EDGES|SOURCE_FILE D:bsearch.c:<global> -> F:bsearch.c
 EDGES|SOURCE_FILE D:char -> F:<includes>
@@ -5400,6 +5796,7 @@ EDGES|SOURCE_FILE D:void* -> F:<includes>
 EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
 EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
 EDGES|SOURCE_FILE NB:add.c:<global> -> F:add.c
+EDGES|SOURCE_FILE NB:braceless_if.c:<global> -> F:braceless_if.c
 EDGES|SOURCE_FILE NB:bsearch.c:<global> -> F:bsearch.c
 EDGES|SOURCE_FILE NB:exprs.c:<global> -> F:exprs.c
 EDGES|SOURCE_FILE NB:forloop.c:<global> -> F:forloop.c
@@ -5420,6 +5817,13 @@ EDGES|SOURCE_FILE add.c:<global>#0 -> F:add.c
 EDGES|SOURCE_FILE add.c:<global>#12 -> F:add.c
 EDGES|SOURCE_FILE agg#0 -> F:structs.c
 EDGES|SOURCE_FILE apply#0 -> F:types2.c
+EDGES|SOURCE_FILE braceless_false#0 -> F:braceless_if.c
+EDGES|SOURCE_FILE braceless_if.c:<global>#0 -> F:braceless_if.c
+EDGES|SOURCE_FILE braceless_if.c:<global>#1 -> F:braceless_if.c
+EDGES|SOURCE_FILE braceless_if.c:<global>#22 -> F:braceless_if.c
+EDGES|SOURCE_FILE braceless_if.c:<global>#36 -> F:braceless_if.c
+EDGES|SOURCE_FILE braceless_if.c:<global>#50 -> F:braceless_if.c
+EDGES|SOURCE_FILE braceless_if.c:<global>#8 -> F:braceless_if.c
 EDGES|SOURCE_FILE bsearch#0 -> F:bsearch.c
 EDGES|SOURCE_FILE bsearch.c:<global>#0 -> F:bsearch.c
 EDGES|SOURCE_FILE classify#0 -> F:ops.c
@@ -5461,6 +5865,9 @@ EDGES|SOURCE_FILE types2.c:<global>#29 -> F:types2.c
 EDGES|SOURCE_FILE types2.c:<global>#72 -> F:types2.c
 EDGES|SOURCE_FILE unary#0 -> F:unary.c
 EDGES|SOURCE_FILE unary.c:<global>#0 -> F:unary.c
+EDGES|TRUE_BODY braceless_if_call#4 -> braceless_if_call#8
+EDGES|TRUE_BODY braceless_if_else#4 -> braceless_if_else#8
+EDGES|TRUE_BODY braceless_if_return#4 -> braceless_if_return#8
 EDGES|TRUE_BODY bsearch#15 -> bsearch#19
 EDGES|TRUE_BODY bsearch#37 -> bsearch#41
 EDGES|TRUE_BODY bsearch#47 -> bsearch#51
@@ -5580,6 +5987,13 @@ FLOWS|REACHING_DEF[-1] pick#26 -> pick#50
 FLOWS|REACHING_DEF[-a] unary#7 -> unary#25
 FLOWS|REACHING_DEF[-a] unary#7 -> unary#5
 FLOWS|REACHING_DEF[-a] unary#7 -> unary#6
+FLOWS|REACHING_DEF[0] braceless_if_call#7 -> braceless_if_call#5
+FLOWS|REACHING_DEF[0] braceless_if_call#7 -> braceless_if_call#6
+FLOWS|REACHING_DEF[0] braceless_if_else#7 -> braceless_if_else#5
+FLOWS|REACHING_DEF[0] braceless_if_else#7 -> braceless_if_else#6
+FLOWS|REACHING_DEF[0] braceless_if_return#12 -> braceless_if_return#11
+FLOWS|REACHING_DEF[0] braceless_if_return#7 -> braceless_if_return#5
+FLOWS|REACHING_DEF[0] braceless_if_return#7 -> braceless_if_return#6
 FLOWS|REACHING_DEF[0] bsearch#18 -> bsearch#16
 FLOWS|REACHING_DEF[0] bsearch#18 -> bsearch#17
 FLOWS|REACHING_DEF[0] bsearch#40 -> bsearch#38
@@ -5691,6 +6105,13 @@ FLOWS|REACHING_DEF[7] pick#43 -> pick#42
 FLOWS|REACHING_DEF[<RET>] add#6 -> add#10
 FLOWS|REACHING_DEF[<RET>] agg#37 -> agg#40
 FLOWS|REACHING_DEF[<RET>] apply#6 -> apply#11
+FLOWS|REACHING_DEF[<RET>] braceless_false#4 -> braceless_false#6
+FLOWS|REACHING_DEF[<RET>] braceless_if_call#11 -> braceless_if_call#13
+FLOWS|REACHING_DEF[<RET>] braceless_if_else#15 -> braceless_if_else#17
+FLOWS|REACHING_DEF[<RET>] braceless_if_return#11 -> braceless_if_return#13
+FLOWS|REACHING_DEF[<RET>] braceless_if_return#9 -> braceless_if_return#13
+FLOWS|REACHING_DEF[<RET>] braceless_sink#4 -> braceless_sink#6
+FLOWS|REACHING_DEF[<RET>] braceless_true#4 -> braceless_true#6
 FLOWS|REACHING_DEF[<RET>] bsearch#68 -> bsearch#72
 FLOWS|REACHING_DEF[<RET>] bsearch#70 -> bsearch#72
 FLOWS|REACHING_DEF[<RET>] classify#25 -> classify#27
@@ -5824,6 +6245,35 @@ FLOWS|REACHING_DEF[] apply#0 -> apply#10
 FLOWS|REACHING_DEF[] apply#0 -> apply#3
 FLOWS|REACHING_DEF[] apply#0 -> apply#8
 FLOWS|REACHING_DEF[] apply#0 -> apply#9
+FLOWS|REACHING_DEF[] braceless_false#0 -> braceless_false#1
+FLOWS|REACHING_DEF[] braceless_false#0 -> braceless_false#5
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#0 -> braceless_if.c:<global>#69
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#0 -> braceless_if.c:<global>#70
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#0 -> braceless_if.c:<global>#71
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#0 -> braceless_if.c:<global>#72
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#0 -> braceless_if.c:<global>#73
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#0 -> braceless_if.c:<global>#74
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#1 -> braceless_sink#1
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#1 -> braceless_sink#5
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#22 -> braceless_if_call#1
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#22 -> braceless_if_call#10
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#22 -> braceless_if_call#12
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#22 -> braceless_if_call#6
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#22 -> braceless_if_call#7
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#36 -> braceless_if_return#1
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#36 -> braceless_if_return#10
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#36 -> braceless_if_return#11
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#36 -> braceless_if_return#12
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#36 -> braceless_if_return#6
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#36 -> braceless_if_return#7
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#50 -> braceless_if_else#1
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#50 -> braceless_if_else#10
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#50 -> braceless_if_else#14
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#50 -> braceless_if_else#16
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#50 -> braceless_if_else#6
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#50 -> braceless_if_else#7
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#8 -> braceless_true#1
+FLOWS|REACHING_DEF[] braceless_if.c:<global>#8 -> braceless_true#5
 FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#1
 FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#17
 FLOWS|REACHING_DEF[] bsearch#0 -> bsearch#18
@@ -6251,6 +6701,9 @@ FLOWS|REACHING_DEF[base] bsearch#25 -> bsearch#72
 FLOWS|REACHING_DEF[base] bsearch#3 -> bsearch#25
 FLOWS|REACHING_DEF[base] bsearch#3 -> bsearch#4
 FLOWS|REACHING_DEF[base] bsearch#53 -> bsearch#52
+FLOWS|REACHING_DEF[braceless_false(x)] braceless_if_else#13 -> braceless_if_else#17
+FLOWS|REACHING_DEF[braceless_sink(x)] braceless_if_call#9 -> braceless_if_call#13
+FLOWS|REACHING_DEF[braceless_true(x)] braceless_if_else#9 -> braceless_if_else#17
 FLOWS|REACHING_DEF[c + v.i] use#36 -> use#35
 FLOWS|REACHING_DEF[c + v.i] use#36 -> use#41
 FLOWS|REACHING_DEF[c = !a] unary#10 -> unary#25
@@ -6917,6 +7370,9 @@ FLOWS|REACHING_DEF[width] bsearch#58 -> bsearch#54
 FLOWS|REACHING_DEF[width] bsearch#7 -> bsearch#27
 FLOWS|REACHING_DEF[width] bsearch#7 -> bsearch#8
 FLOWS|REACHING_DEF[x = add(1, 2)] main#3 -> main#10
+FLOWS|REACHING_DEF[x > 0] braceless_if_call#5 -> braceless_if_call#13
+FLOWS|REACHING_DEF[x > 0] braceless_if_else#5 -> braceless_if_else#17
+FLOWS|REACHING_DEF[x > 0] braceless_if_return#5 -> braceless_if_return#13
 FLOWS|REACHING_DEF[x] apply#10 -> apply#11
 FLOWS|REACHING_DEF[x] apply#10 -> apply#4
 FLOWS|REACHING_DEF[x] apply#10 -> apply#7
@@ -6928,6 +7384,51 @@ FLOWS|REACHING_DEF[x] apply#9 -> apply#10
 FLOWS|REACHING_DEF[x] apply#9 -> apply#11
 FLOWS|REACHING_DEF[x] apply#9 -> apply#4
 FLOWS|REACHING_DEF[x] apply#9 -> apply#7
+FLOWS|REACHING_DEF[x] braceless_false#1 -> braceless_false#2
+FLOWS|REACHING_DEF[x] braceless_false#1 -> braceless_false#5
+FLOWS|REACHING_DEF[x] braceless_false#1 -> braceless_false#6
+FLOWS|REACHING_DEF[x] braceless_false#5 -> braceless_false#4
+FLOWS|REACHING_DEF[x] braceless_if_call#1 -> braceless_if_call#2
+FLOWS|REACHING_DEF[x] braceless_if_call#1 -> braceless_if_call#6
+FLOWS|REACHING_DEF[x] braceless_if_call#10 -> braceless_if_call#12
+FLOWS|REACHING_DEF[x] braceless_if_call#10 -> braceless_if_call#13
+FLOWS|REACHING_DEF[x] braceless_if_call#10 -> braceless_if_call#2
+FLOWS|REACHING_DEF[x] braceless_if_call#10 -> braceless_if_call#9
+FLOWS|REACHING_DEF[x] braceless_if_call#12 -> braceless_if_call#11
+FLOWS|REACHING_DEF[x] braceless_if_call#6 -> braceless_if_call#10
+FLOWS|REACHING_DEF[x] braceless_if_call#6 -> braceless_if_call#12
+FLOWS|REACHING_DEF[x] braceless_if_call#6 -> braceless_if_call#13
+FLOWS|REACHING_DEF[x] braceless_if_call#6 -> braceless_if_call#2
+FLOWS|REACHING_DEF[x] braceless_if_call#6 -> braceless_if_call#5
+FLOWS|REACHING_DEF[x] braceless_if_else#1 -> braceless_if_else#2
+FLOWS|REACHING_DEF[x] braceless_if_else#1 -> braceless_if_else#6
+FLOWS|REACHING_DEF[x] braceless_if_else#10 -> braceless_if_else#16
+FLOWS|REACHING_DEF[x] braceless_if_else#10 -> braceless_if_else#17
+FLOWS|REACHING_DEF[x] braceless_if_else#10 -> braceless_if_else#2
+FLOWS|REACHING_DEF[x] braceless_if_else#10 -> braceless_if_else#9
+FLOWS|REACHING_DEF[x] braceless_if_else#14 -> braceless_if_else#13
+FLOWS|REACHING_DEF[x] braceless_if_else#14 -> braceless_if_else#16
+FLOWS|REACHING_DEF[x] braceless_if_else#14 -> braceless_if_else#17
+FLOWS|REACHING_DEF[x] braceless_if_else#14 -> braceless_if_else#2
+FLOWS|REACHING_DEF[x] braceless_if_else#16 -> braceless_if_else#15
+FLOWS|REACHING_DEF[x] braceless_if_else#6 -> braceless_if_else#10
+FLOWS|REACHING_DEF[x] braceless_if_else#6 -> braceless_if_else#14
+FLOWS|REACHING_DEF[x] braceless_if_else#6 -> braceless_if_else#5
+FLOWS|REACHING_DEF[x] braceless_if_return#1 -> braceless_if_return#2
+FLOWS|REACHING_DEF[x] braceless_if_return#1 -> braceless_if_return#6
+FLOWS|REACHING_DEF[x] braceless_if_return#10 -> braceless_if_return#9
+FLOWS|REACHING_DEF[x] braceless_if_return#6 -> braceless_if_return#10
+FLOWS|REACHING_DEF[x] braceless_if_return#6 -> braceless_if_return#13
+FLOWS|REACHING_DEF[x] braceless_if_return#6 -> braceless_if_return#2
+FLOWS|REACHING_DEF[x] braceless_if_return#6 -> braceless_if_return#5
+FLOWS|REACHING_DEF[x] braceless_sink#1 -> braceless_sink#2
+FLOWS|REACHING_DEF[x] braceless_sink#1 -> braceless_sink#5
+FLOWS|REACHING_DEF[x] braceless_sink#1 -> braceless_sink#6
+FLOWS|REACHING_DEF[x] braceless_sink#5 -> braceless_sink#4
+FLOWS|REACHING_DEF[x] braceless_true#1 -> braceless_true#2
+FLOWS|REACHING_DEF[x] braceless_true#1 -> braceless_true#5
+FLOWS|REACHING_DEF[x] braceless_true#1 -> braceless_true#6
+FLOWS|REACHING_DEF[x] braceless_true#5 -> braceless_true#4
 FLOWS|REACHING_DEF[x] main#4 -> main#10
 FLOWS|REACHING_DEF[x] main#4 -> main#3
 FLOWS|REACHING_DEF[x] main#4 -> main#9

@@ -1947,11 +1947,25 @@ impl Ctx<'_> {
             self.edge("CONDITION", self.at(cs), self.at(ci));
         }
         if let Some(cons) = n.child_by_field_name("consequence") {
+            let bi = self.line_no;
             if cons.kind() == "compound_statement" {
-                let bi = self.line_no;
                 self.emit_block(cons, b, 2, depth + 1);
-                self.edge("TRUE_BODY", self.at(cs), self.at(bi));
+            } else {
+                // CDT wraps a braceless consequence in a synthetic, CODE-less
+                // block, just as it does for a braceless `else` body.
+                self.line(
+                    depth + 1,
+                    "BLOCK",
+                    P {
+                        tfn: Some("ANY".into()),
+                        order: Some(2),
+                        ..Default::default()
+                    },
+                );
+                let mut so = 1i64;
+                self.emit_stmt(cons, b, &mut so, depth + 2);
             }
+            self.edge("TRUE_BODY", self.at(cs), self.at(bi));
         }
         if let Some(alt) = n.child_by_field_name("alternative") {
             let ei = self.line_no;
