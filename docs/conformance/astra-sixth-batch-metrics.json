@@ -1,0 +1,872 @@
+{
+  "schemaVersion": 1,
+  "measuredAtUtc": "2026-09-08T16:39:28.318449+00:00",
+  "baselineRevision": "aba030923a2eb02a7d542875e4274c1b44271608",
+  "currentRevision": "e38bf19a044629e9ea6fc67248d249fb7b0321be",
+  "currentBinary": {
+    "path": ".local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+    "sha256": "abdc28f2f60033b8be3687f1d83f7a4a069e9b2407794b33d267fc73c19bbe29"
+  },
+  "baselineBinary": {
+    "path": ".local/astra-sprint/fifth-batch/final-real-differential-v2/bin/joern-parity",
+    "sha256": "3c1ab1cb3d6833086b06105355f908a86be573f230fdbedc1bdc87faea979e17"
+  },
+  "oracle": {
+    "version": "v4.0.555",
+    "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+    "reusedSavedLiveOutputs": false,
+    "freshRunReceipts": ".local/astra-sprint/sixth-batch/fresh-real-oracles/runs.json",
+    "transport": "Embedded physical LF in flow labels is escaped as literal backslash-n before sorting. This encoding is not injective or lossless. Both baseline and current are compared with fresh sixth-batch Joern outputs; all selected records were independently verified byte-identical to the fourth-batch references."
+  },
+  "scope": {
+    "astProperties": [
+      "NAME",
+      "CODE",
+      "TYPE_FULL_NAME",
+      "FULL_NAME",
+      "METHOD_FULL_NAME",
+      "SIGNATURE",
+      "ORDER",
+      "ARGUMENT_INDEX",
+      "DISPATCH_TYPE"
+    ],
+    "structuralEdgeKinds": [
+      "ARGUMENT",
+      "CALL",
+      "CFG",
+      "CONDITION",
+      "CONTAINS",
+      "DO_BODY",
+      "EVAL_TYPE",
+      "FALSE_BODY",
+      "FOR_BODY",
+      "FOR_INIT",
+      "FOR_UPDATE",
+      "PARAMETER_LINK",
+      "REF",
+      "SOURCE_FILE",
+      "TRUE_BODY"
+    ],
+    "flowKind": "REACHING_DEF",
+    "comparison": "Every emitted record in the existing canonical projection is compared without filtering; Counter intersections preserve duplicate records.",
+    "limitations": [
+      "This is the selected oracle.sc projection, not full Joern graph or product parity.",
+      "Method exactness measures complete projected AST blocks, including scaffold/operator/macro methods; it does not imply all incident graph edges are exact.",
+      "Edge addresses use AST line indices, so changes can amplify edge/flow differences. Counts are not parity percentages or distinct bug counts.",
+      "Default pinned Joern C interpretation; the selected upstream C and header files are unmodified, with no added compiler defines.",
+      "Timing is diagnostic from one run, not a benchmark."
+    ]
+  },
+  "projects": [
+    {
+      "case": "zlib-1.3.1-core-full",
+      "inputFiles": 26,
+      "sourceLines": 22732,
+      "inputManifest": {
+        "path": ".local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/inputs.json",
+        "sha256": "901a48450c8bd6473107ed59762a4b1389ea180a32ecde5a3e15afb0c2b59e55"
+      },
+      "oracleScript": {
+        "path": ".local/astra-sprint/fourth-batch/fresh-real-oracles/oracle.sc",
+        "sha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab"
+      },
+      "liveOutput": {
+        "path": ".local/astra-sprint/sixth-batch/fresh-real-oracles/zlib-1.3.1-core-full/joern.stdout",
+        "sha256": "2deeedc465c78e6e3ae0fde8ef7e54444e1d0f7f486a39d89f5c838eec816838"
+      },
+      "currentRun": {
+        "status": 0,
+        "seconds": 6.981,
+        "binarySha256": "abdc28f2f60033b8be3687f1d83f7a4a069e9b2407794b33d267fc73c19bbe29"
+      },
+      "baseline": {
+        "sections": {
+          "AST": {
+            "joern": 85865,
+            "rust": 86088,
+            "common": 41784,
+            "joernOnly": 44081,
+            "rustOnly": 44304
+          },
+          "NODES": {
+            "joern": 785,
+            "rust": 697,
+            "common": 562,
+            "joernOnly": 223,
+            "rustOnly": 135
+          },
+          "EDGES": {
+            "joern": 184740,
+            "rust": 259113,
+            "common": 44145,
+            "joernOnly": 140595,
+            "rustOnly": 214968
+          },
+          "FLOWS": {
+            "joern": 200374,
+            "rust": 154073,
+            "common": 11910,
+            "joernOnly": 188464,
+            "rustOnly": 142163
+          }
+        },
+        "methods": {
+          "joern": 410,
+          "rust": 348,
+          "identical": 127,
+          "changed": 199,
+          "joernOnly": 84,
+          "rustOnly": 22
+        }
+      },
+      "current": {
+        "sections": {
+          "AST": {
+            "joern": 85865,
+            "rust": 85885,
+            "common": 43418,
+            "joernOnly": 42447,
+            "rustOnly": 42467
+          },
+          "NODES": {
+            "joern": 785,
+            "rust": 691,
+            "common": 573,
+            "joernOnly": 212,
+            "rustOnly": 118
+          },
+          "EDGES": {
+            "joern": 184740,
+            "rust": 258918,
+            "common": 51714,
+            "joernOnly": 133026,
+            "rustOnly": 207204
+          },
+          "FLOWS": {
+            "joern": 200374,
+            "rust": 153636,
+            "common": 16721,
+            "joernOnly": 183653,
+            "rustOnly": 136915
+          }
+        },
+        "methods": {
+          "joern": 410,
+          "rust": 351,
+          "identical": 149,
+          "changed": 182,
+          "joernOnly": 79,
+          "rustOnly": 20
+        }
+      },
+      "completeProjectionExact": false,
+      "previouslyExactMethodsRegressed": [],
+      "newlyExactMethods": [
+        "_tr_flush_bits",
+        "_tr_init",
+        "adler32_combine_",
+        "bi_flush",
+        "bi_windup",
+        "byte_swap",
+        "crc32",
+        "gz_fetch",
+        "gz_intmax",
+        "gzdirect",
+        "gzprintf",
+        "gztell64",
+        "init_block",
+        "multmodp",
+        "pqdownheap",
+        "slide_hash",
+        "va_end",
+        "va_start",
+        "vsnprintf",
+        "zcalloc<duplicate>1",
+        "zcfree<duplicate>1",
+        "zutil.h:zmemzero:ANY(2)"
+      ],
+      "regressions": [],
+      "artifacts": {
+        "rawOutput": ".local/astra-sprint/sixth-batch/final-real-differential-v3/zlib-1.3.1-core-full/rust.stdout",
+        "stderr": ".local/astra-sprint/sixth-batch/final-real-differential-v3/zlib-1.3.1-core-full/rust.stderr",
+        "liveCanonical": ".local/astra-sprint/sixth-batch/final-real-differential-v3/zlib-1.3.1-core-full/live-canonical.txt",
+        "rustCanonical": ".local/astra-sprint/sixth-batch/final-real-differential-v3/zlib-1.3.1-core-full/rust-canonical.txt",
+        "completeDiff": ".local/astra-sprint/sixth-batch/final-real-differential-v3/zlib-1.3.1-core-full/complete.diff",
+        "methodComparison": ".local/astra-sprint/sixth-batch/final-real-differential-v3/zlib-1.3.1-core-full/method-comparison.json"
+      },
+      "hashes": {
+        "liveCanonicalSha256": "6ea62d4d79dac8d5c71782030c891e44b92c3212b995187582360dfc30fb40cd",
+        "currentCanonicalSha256": "7918b49c92db7c6ea61b6ab7e03c2b69611b8d384fac23f405cdccf4f908a63f",
+        "baselineCanonicalSha256": "a256c733c590b18a4d330ab9d65a3303ef7f9c2be25377de624b016a92c96d68"
+      },
+      "primarySourceMethods": {
+        "baseline": {
+          "sourceDefinitionCount": 141,
+          "matchedIdentityAndSourceCode": 93,
+          "completePrimaryMethodAstsExact": 14,
+          "primaryBlockAstsExact": 27,
+          "activeOraclePrimaryBlocks": 148,
+          "activePrimaryBlockAstsExact": 10,
+          "emptyOraclePrimaryBlockAstsExact": 17
+        },
+        "current": {
+          "sourceDefinitionCount": 141,
+          "matchedIdentityAndSourceCode": 93,
+          "completePrimaryMethodAstsExact": 32,
+          "primaryBlockAstsExact": 40,
+          "activeOraclePrimaryBlocks": 148,
+          "activePrimaryBlockAstsExact": 23,
+          "emptyOraclePrimaryBlockAstsExact": 17
+        }
+      },
+      "formerlyExactPrimaryMethodsLost": [],
+      "formerlyExactPrimaryBlocksLost": [],
+      "nonemptySelectedRecords": {
+        "baseline": {
+          "AST": {
+            "joern": 85455,
+            "rust": 85740,
+            "common": 41436,
+            "joernOnly": 44019,
+            "rustOnly": 44304
+          },
+          "NODES": {
+            "joern": 785,
+            "rust": 697,
+            "common": 562,
+            "joernOnly": 223,
+            "rustOnly": 135
+          },
+          "EDGES": {
+            "joern": 184740,
+            "rust": 259113,
+            "common": 44145,
+            "joernOnly": 140595,
+            "rustOnly": 214968
+          },
+          "FLOWS": {
+            "joern": 200374,
+            "rust": 154073,
+            "common": 11910,
+            "joernOnly": 188464,
+            "rustOnly": 142163
+          }
+        },
+        "current": {
+          "AST": {
+            "joern": 85455,
+            "rust": 85534,
+            "common": 43067,
+            "joernOnly": 42388,
+            "rustOnly": 42467
+          },
+          "NODES": {
+            "joern": 785,
+            "rust": 691,
+            "common": 573,
+            "joernOnly": 212,
+            "rustOnly": 118
+          },
+          "EDGES": {
+            "joern": 184740,
+            "rust": 258918,
+            "common": 51714,
+            "joernOnly": 133026,
+            "rustOnly": 207204
+          },
+          "FLOWS": {
+            "joern": 200374,
+            "rust": 153636,
+            "common": 16721,
+            "joernOnly": 183653,
+            "rustOnly": 136915
+          }
+        }
+      },
+      "totalNonemptySelectedRecords": {
+        "baseline": {
+          "joern": 471354,
+          "rust": 499623,
+          "common": 98053
+        },
+        "current": {
+          "joern": 471354,
+          "rust": 498779,
+          "common": 112075
+        }
+      }
+    },
+    {
+      "case": "lua-5.4.7-full",
+      "inputFiles": 61,
+      "sourceLines": 30098,
+      "inputManifest": {
+        "path": ".local/astra-sprint/live-real-differential/lua-5.4.7-full/inputs.json",
+        "sha256": "79fd8150d9449fa4fc2faf1f376d778d5fdaac9b175e302ad680ba369457675c"
+      },
+      "oracleScript": {
+        "path": ".local/astra-sprint/fourth-batch/fresh-real-oracles/oracle.sc",
+        "sha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab"
+      },
+      "liveOutput": {
+        "path": ".local/astra-sprint/sixth-batch/fresh-real-oracles/lua-5.4.7-full/joern.stdout",
+        "sha256": "36079a6db169b6e450b9d4d91dc0025beb076832e497e0eeb83c11047f8b643e"
+      },
+      "currentRun": {
+        "status": 0,
+        "seconds": 6.019,
+        "binarySha256": "abdc28f2f60033b8be3687f1d83f7a4a069e9b2407794b33d267fc73c19bbe29"
+      },
+      "baseline": {
+        "sections": {
+          "AST": {
+            "joern": 252489,
+            "rust": 222487,
+            "common": 198980,
+            "joernOnly": 53509,
+            "rustOnly": 23507
+          },
+          "NODES": {
+            "joern": 3229,
+            "rust": 3057,
+            "common": 2891,
+            "joernOnly": 338,
+            "rustOnly": 166
+          },
+          "EDGES": {
+            "joern": 504016,
+            "rust": 440337,
+            "common": 245091,
+            "joernOnly": 258925,
+            "rustOnly": 195246
+          },
+          "FLOWS": {
+            "joern": 207820,
+            "rust": 229094,
+            "common": 96818,
+            "joernOnly": 111002,
+            "rustOnly": 132276
+          }
+        },
+        "methods": {
+          "joern": 2274,
+          "rust": 2221,
+          "identical": 1132,
+          "changed": 1056,
+          "joernOnly": 86,
+          "rustOnly": 33
+        }
+      },
+      "current": {
+        "sections": {
+          "AST": {
+            "joern": 252489,
+            "rust": 222281,
+            "common": 206517,
+            "joernOnly": 45972,
+            "rustOnly": 15764
+          },
+          "NODES": {
+            "joern": 3229,
+            "rust": 3047,
+            "common": 2898,
+            "joernOnly": 331,
+            "rustOnly": 149
+          },
+          "EDGES": {
+            "joern": 504016,
+            "rust": 440449,
+            "common": 272233,
+            "joernOnly": 231783,
+            "rustOnly": 168216
+          },
+          "FLOWS": {
+            "joern": 207820,
+            "rust": 229225,
+            "common": 112592,
+            "joernOnly": 95228,
+            "rustOnly": 116633
+          }
+        },
+        "methods": {
+          "joern": 2274,
+          "rust": 2221,
+          "identical": 1431,
+          "changed": 760,
+          "joernOnly": 83,
+          "rustOnly": 30
+        }
+      },
+      "completeProjectionExact": false,
+      "previouslyExactMethodsRegressed": [],
+      "newlyExactMethods": [
+        "Int2I",
+        "addtoclib",
+        "arith",
+        "atomic2gen",
+        "aux_lines",
+        "auxresume",
+        "auxstatus",
+        "auxupvalue",
+        "b_str2int",
+        "breakstat",
+        "capture_to_close",
+        "check",
+        "checkSizes",
+        "check_capture",
+        "check_match",
+        "check_next1",
+        "checkclib",
+        "checkcontrol",
+        "checkfield",
+        "checkformat",
+        "checklimit",
+        "checkload",
+        "checkmode",
+        "checknext",
+        "checkoption",
+        "checkrepeated",
+        "checkstack",
+        "checktab",
+        "checkupval",
+        "classend",
+        "codeAsBx",
+        "codesJ",
+        "countint",
+        "createargtable",
+        "createmeta",
+        "createmetatable",
+        "createsearcherstable",
+        "db_getmetatable",
+        "db_getregistry",
+        "db_getuservalue",
+        "db_setcstacklimit",
+        "db_setlocal",
+        "db_setmetatable",
+        "db_setupvalue",
+        "db_setuservalue",
+        "db_traceback",
+        "db_upvalueid",
+        "db_upvaluejoin",
+        "dofile",
+        "dofilecont",
+        "dolibrary",
+        "dostring",
+        "dothecall",
+        "dumpByte",
+        "dumpCode",
+        "dumpDebug",
+        "dumpHeader",
+        "dumpInteger",
+        "dumpNumber",
+        "dumpString",
+        "error",
+        "error_expected",
+        "errorlimit",
+        "exp1",
+        "explist",
+        "f_call",
+        "f_gc",
+        "f_luaopen",
+        "f_tostring",
+        "fieldsel",
+        "findfile",
+        "finishpcall",
+        "fixforjump",
+        "formatvarinfo",
+        "fornum",
+        "freeCI",
+        "freereg",
+        "freestack",
+        "freeupval",
+        "funcinfo",
+        "funcstat",
+        "g_write",
+        "gctm",
+        "get_onecapture",
+        "getboolfield",
+        "getfield",
+        "getlocalattribute",
+        "getnumlimit",
+        "gmatch_aux",
+        "handle_script",
+        "inclinenumber",
+        "incomplete",
+        "init_registry",
+        "interror",
+        "io_close",
+        "io_fclose",
+        "io_noclose",
+        "io_type",
+        "ipairsaux",
+        "iter_codes",
+        "jumpscopeerror",
+        "l_print",
+        "lastlevel",
+        "lexerror",
+        "linkgclist_",
+        "ll_loadlib",
+        "ll_searchpath",
+        "loadBlock",
+        "loadByte",
+        "loadInteger",
+        "loadNumber",
+        "load_aux",
+        "lstop",
+        "lsys_load<duplicate>1",
+        "lsys_sym<duplicate>1",
+        "ltablib.c:RANLIMIT:unsigned int(0)",
+        "luaB_auxwrap",
+        "luaB_cocreate",
+        "luaB_coresume",
+        "luaB_corunning",
+        "luaB_cowrap",
+        "luaB_dofile",
+        "luaB_error",
+        "luaB_getmetatable",
+        "luaB_load",
+        "luaB_loadfile",
+        "luaB_next",
+        "luaB_pcall",
+        "luaB_rawequal",
+        "luaB_rawget",
+        "luaB_rawlen",
+        "luaB_rawset",
+        "luaB_select",
+        "luaB_setmetatable",
+        "luaB_tostring",
+        "luaB_type",
+        "luaB_warn",
+        "luaB_xpcall",
+        "luaB_yield",
+        "luaC_fix",
+        "luaC_step",
+        "luaD_call",
+        "luaD_callnoyield",
+        "luaD_poscall",
+        "luaD_seterrorobj",
+        "luaE_checkcstack",
+        "luaE_incCstack",
+        "luaE_resetthread",
+        "luaE_setdebt",
+        "luaE_shrinkCI",
+        "luaF_freeproto",
+        "luaF_initupvals",
+        "luaG_callerror",
+        "luaG_concaterror",
+        "luaG_forerror",
+        "luaG_opinterror",
+        "luaG_ordererror",
+        "luaG_typeerror",
+        "luaH_free",
+        "luaH_next",
+        "luaK_checkstack",
+        "luaK_codeABCk",
+        "luaK_codeABx",
+        "luaK_semerror",
+        "luaL_addgsub",
+        "luaL_addlstring",
+        "luaL_addstring",
+        "luaL_addvalue",
+        "luaL_argerror",
+        "luaL_buffinitsize",
+        "luaL_callmeta",
+        "luaL_checkany",
+        "luaL_checkinteger",
+        "luaL_checklstring",
+        "luaL_checknumber",
+        "luaL_checkoption",
+        "luaL_checkstack",
+        "luaL_checktype",
+        "luaL_checkudata",
+        "luaL_error",
+        "luaL_fileresult",
+        "luaL_getsubtable",
+        "luaL_gsub",
+        "luaL_loadbufferx",
+        "luaL_loadstring",
+        "luaL_newmetatable",
+        "luaL_openlibs",
+        "luaL_optlstring",
+        "luaL_prepbuffsize",
+        "luaL_pushresultsize",
+        "luaL_setfuncs",
+        "luaL_setmetatable",
+        "luaL_testudata",
+        "luaL_typeerror",
+        "luaL_unref",
+        "luaL_where",
+        "luaM_saferealloc_",
+        "luaM_toobig",
+        "luaS_hash",
+        "luaT_adjustvarargs",
+        "luaT_callTM",
+        "luaV_idiv",
+        "luaV_lessequal",
+        "luaV_lessthan",
+        "luaV_mod",
+        "luaV_shiftl",
+        "luaX_syntaxerror",
+        "lua_absindex",
+        "lua_gethook",
+        "lua_gethookcount",
+        "lua_gethookmask",
+        "lua_gettop",
+        "lua_iscfunction",
+        "lua_isinteger",
+        "lua_isnumber",
+        "lua_isstring",
+        "lua_isuserdata",
+        "lua_isyieldable",
+        "lua_rawequal",
+        "lua_rawset",
+        "lua_rawsetp",
+        "lua_resetthread",
+        "lua_setcstacklimit",
+        "lua_sethook",
+        "lua_status",
+        "lua_toboolean",
+        "lua_tonumberx",
+        "lua_touserdata",
+        "lua_version",
+        "luaopen_base",
+        "lutf8lib.c:MAXUNICODE:unsigned int(0)",
+        "lutf8lib.c:MAXUTF:unsigned int(0)",
+        "matchbalance",
+        "math_deg",
+        "math_max",
+        "math_min",
+        "math_rad",
+        "math_randomseed",
+        "math_toint",
+        "math_type",
+        "math_ult",
+        "msghandler",
+        "multiline",
+        "newbox",
+        "noenv",
+        "numusearray",
+        "open_func",
+        "os_clock",
+        "os_execute",
+        "os_exit",
+        "os_getenv",
+        "os_remove",
+        "os_rename",
+        "packint",
+        "poptbclist",
+        "push_captures",
+        "pusherrornotfound",
+        "pushmode",
+        "pushutfchar",
+        "read_chars",
+        "report",
+        "reverse",
+        "runargs",
+        "searcher_C",
+        "searcher_Croot",
+        "searcher_Lua",
+        "searcher_preload",
+        "set2",
+        "setboolfield",
+        "setlimittosize",
+        "setpause",
+        "setseed",
+        "settabsb",
+        "settabsi",
+        "settabss",
+        "solvegoto",
+        "sort_comp",
+        "start_capture",
+        "str_char",
+        "str_len",
+        "str_lower",
+        "str_reverse",
+        "str_upper",
+        "tag_error",
+        "test_eof",
+        "testnext",
+        "tmove",
+        "tonum",
+        "tpack",
+        "treatstackoption",
+        "trymt",
+        "tunpack",
+        "typeerror",
+        "undefgoto",
+        "unpackint",
+        "unroll",
+        "utfchar",
+        "whitelist",
+        "yindex"
+      ],
+      "regressions": [],
+      "artifacts": {
+        "rawOutput": ".local/astra-sprint/sixth-batch/final-real-differential-v3/lua-5.4.7-full/rust.stdout",
+        "stderr": ".local/astra-sprint/sixth-batch/final-real-differential-v3/lua-5.4.7-full/rust.stderr",
+        "liveCanonical": ".local/astra-sprint/sixth-batch/final-real-differential-v3/lua-5.4.7-full/live-canonical.txt",
+        "rustCanonical": ".local/astra-sprint/sixth-batch/final-real-differential-v3/lua-5.4.7-full/rust-canonical.txt",
+        "completeDiff": ".local/astra-sprint/sixth-batch/final-real-differential-v3/lua-5.4.7-full/complete.diff",
+        "methodComparison": ".local/astra-sprint/sixth-batch/final-real-differential-v3/lua-5.4.7-full/method-comparison.json"
+      },
+      "hashes": {
+        "liveCanonicalSha256": "aaaf1f5a82b683701881b2afa06c834690b86644e4322d93f9e6f5f1c0598b27",
+        "currentCanonicalSha256": "8601114388cb58f7c73395e3f3ca4b7de5b56b864c14706404b6c5a7e3e17d37",
+        "baselineCanonicalSha256": "a0099cafa56f8ff47e0ba4c8809b1bbd3c48a645540d463ec6bdf03cc85ecb76"
+      },
+      "primarySourceMethods": {
+        "baseline": {
+          "sourceDefinitionCount": 1130,
+          "matchedIdentityAndSourceCode": 1024,
+          "completePrimaryMethodAstsExact": 214,
+          "primaryBlockAstsExact": 249,
+          "activeOraclePrimaryBlocks": 1104,
+          "activePrimaryBlockAstsExact": 227,
+          "emptyOraclePrimaryBlockAstsExact": 22
+        },
+        "current": {
+          "sourceDefinitionCount": 1130,
+          "matchedIdentityAndSourceCode": 1024,
+          "completePrimaryMethodAstsExact": 510,
+          "primaryBlockAstsExact": 537,
+          "activeOraclePrimaryBlocks": 1104,
+          "activePrimaryBlockAstsExact": 515,
+          "emptyOraclePrimaryBlockAstsExact": 22
+        }
+      },
+      "formerlyExactPrimaryMethodsLost": [],
+      "formerlyExactPrimaryBlocksLost": [],
+      "nonemptySelectedRecords": {
+        "baseline": {
+          "AST": {
+            "joern": 250215,
+            "rust": 220266,
+            "common": 196759,
+            "joernOnly": 53456,
+            "rustOnly": 23507
+          },
+          "NODES": {
+            "joern": 3229,
+            "rust": 3057,
+            "common": 2891,
+            "joernOnly": 338,
+            "rustOnly": 166
+          },
+          "EDGES": {
+            "joern": 504016,
+            "rust": 440337,
+            "common": 245091,
+            "joernOnly": 258925,
+            "rustOnly": 195246
+          },
+          "FLOWS": {
+            "joern": 207820,
+            "rust": 229094,
+            "common": 96818,
+            "joernOnly": 111002,
+            "rustOnly": 132276
+          }
+        },
+        "current": {
+          "AST": {
+            "joern": 250215,
+            "rust": 220060,
+            "common": 204296,
+            "joernOnly": 45919,
+            "rustOnly": 15764
+          },
+          "NODES": {
+            "joern": 3229,
+            "rust": 3047,
+            "common": 2898,
+            "joernOnly": 331,
+            "rustOnly": 149
+          },
+          "EDGES": {
+            "joern": 504016,
+            "rust": 440449,
+            "common": 272233,
+            "joernOnly": 231783,
+            "rustOnly": 168216
+          },
+          "FLOWS": {
+            "joern": 207820,
+            "rust": 229225,
+            "common": 112592,
+            "joernOnly": 95228,
+            "rustOnly": 116633
+          }
+        }
+      },
+      "totalNonemptySelectedRecords": {
+        "baseline": {
+          "joern": 965280,
+          "rust": 892754,
+          "common": 541559
+        },
+        "current": {
+          "joern": 965280,
+          "rust": 892781,
+          "common": 592019
+        }
+      }
+    }
+  ],
+  "currentSourceSha256": "c79d93566b3ac603b5d2c40e68bc58b03f43db0ab91a7c4c8b4b6c0d2fd71c43",
+  "frozenBuild": {
+    "createdAtUtc": "2026-09-08T16:38:31.247708+00:00",
+    "parentRevision": "4b6a7ebb6531bd4371112efc27f8993d33f92670",
+    "workingChangesPresent": true,
+    "frozenBeforeFinalGates": true,
+    "sources": {
+      "cpg-rs/cpg-lang-c/src/exact.rs": "c79d93566b3ac603b5d2c40e68bc58b03f43db0ab91a7c4c8b4b6c0d2fd71c43",
+      "cpg-rs/cpg-lang-c/src/import.rs": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba",
+      "cpg-rs/joern-parity/src/production.rs": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb",
+      "cpg-rs/cpg-cli/src/workspace.rs": "78d02b54d43f30e7ef8397278870072620dd5c5671a6d81457d2edbbf0c535d1",
+      "cpg-rs/cpg-cli/src/rules.rs": "fc19394abdfe4c309d0e2e961516827d52c6da2e1b191593dab53c08276be2e5",
+      "cpg-rs/cpg-cli/src/export.rs": "49ed223d835380399bfca43c387f120ba2f22c88fbb7c8fe4d423463501fd057",
+      "cpg-rs/Cargo.toml": "0c095573bd24459caa83a975c4fdec291e8b11bef92745576f935f5fd17f0d29",
+      "cpg-rs/Cargo.lock": "fa7eab41e0c072e6b33205997fd241e7d87b511f9fd91ceee6ee1fdc9a099a63"
+    },
+    "binaries": {
+      "cpg": "4713ada13ff83b5260b9baaaaa6232441aca6f870fe66f363370d0cfa3493b1a",
+      "joern-parity": "abdc28f2f60033b8be3687f1d83f7a4a069e9b2407794b33d267fc73c19bbe29"
+    }
+  },
+  "currentPatchSha256": "85056ffa58ad46a874e3fe93f61c5c6a5b1d44536633cd3ea0c15b4471c042e8",
+  "buildParentRevision": "4b6a7ebb6531bd4371112efc27f8993d33f92670",
+  "acceptedSourceRevision": "e38bf19a044629e9ea6fc67248d249fb7b0321be",
+  "sourceCommitMatchesFrozenBuild": true,
+  "workingChangesAtBuild": true,
+  "reviewBindings": {
+    "wholeReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-whole-review/v3/final-review.json",
+      "sha256": "7482c7447d2bf2825c048ff07e35c8eb45a0dc107ed298b910d9173190643c3d"
+    },
+    "fixtureReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/sixth-family-replay/combined-v3-nine-review.json",
+      "sha256": "577ecffaff21fa2c80c9972bc46db73e9dba1a6fbaaa25752fa30409694cebcb"
+    },
+    "fixtureInventory": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/sixth-family-replay/inventory-v3-nine.json",
+      "sha256": "bf2515e5c7fa9dfd265ad465b9ed1460f8eaa2520629099280d34382b4355007"
+    },
+    "gateExtension": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/sixth-family-replay/gate-extension-review.json",
+      "sha256": "946110b9bc6791fffc6ff9579a73252b21ac004816cab0e7c1bedfee548c8262"
+    },
+    "manifestReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/sixth-manifest-review/final-v3-review.json",
+      "sha256": "1303767162b4ed858ca5cd8d44039e2eeabb37567f491b0588d3bbbfcc0da725"
+    },
+    "nextWork": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/spaced-method-names/next-step.json",
+      "sha256": "9636d7263071358ab15d53ae333b9a91be4b9418641a79c4782ff48703727dc8"
+    }
+  },
+  "primaryClassificationRules": {
+    "primary": "Same fifth helper: METHOD CODE contains {, does not start #, FULL_NAME excludes <global>; exact source CODE and identity required before comparing full METHOD or first immediate BLOCK AST. Counts are projection counts, not language/parser coverage or percentages.",
+    "nonempty": "Excludes only blank AST separators from numeric nonempty counters; preserves every record/separator in complete output and diffs. Raw Counter intersections preserve multiplicity.",
+    "limitation": "Method AST equality does not mean all incident edges/flows exact. Canonical selected-property transport is non-injective. Source and full body retained counts are not total port completeness."
+  }
+}

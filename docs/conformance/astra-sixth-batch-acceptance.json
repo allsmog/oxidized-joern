@@ -1,0 +1,618 @@
+{
+  "schemaVersion": 1,
+  "status": "accepted bounded C parity increment; full port remains incomplete",
+  "codeRevision": "e38bf19a044629e9ea6fc67248d249fb7b0321be",
+  "baselineCodeRevision": "aba030923a2eb02a7d542875e4274c1b44271608",
+  "integrationStartedAtUtc": "2026-09-08T14:57:08.343230+00:00",
+  "validationCompletedAtUtc": "2026-09-08T17:03:21.393601+00:00",
+  "integrationAcceptanceElapsedMinutes": 126.22,
+  "timingScope": "Wall time for this batch, including parallel implementation, oracle generation, rejected candidates, review and final validation; not a universal AI or human effort estimate.",
+  "oracle": {
+    "version": "v4.0.555",
+    "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+    "reusedSavedLiveOutputs": false,
+    "freshRunReceipts": ".local/astra-sprint/sixth-batch/fresh-real-oracles/runs.json",
+    "transport": "Embedded physical LF in flow labels is escaped as literal backslash-n before sorting. This encoding is not injective or lossless. Both baseline and current are compared with fresh sixth-batch Joern outputs; all selected records were independently verified byte-identical to the fourth-batch references."
+  },
+  "gates": {
+    "lockedWorkspaceTestsPassed": 454,
+    "failedIgnoredOrFilteredWorkspaceTests": 0,
+    "checkerTestsPassed": 17,
+    "formatting": "passed",
+    "strictWorkspaceAllTargetsClippy": "passed",
+    "dependencyAudit": "passed",
+    "lockedDependenciesAudited": 73,
+    "committedParity": "308/308",
+    "strictFreshLiveParity": "308/308",
+    "nativeRelease": "passed",
+    "nativeArchive": "passed",
+    "officialRealProjectAcceptance": "passed",
+    "containerAndOtherPlatforms": "not run in this batch"
+  },
+  "frozenBuild": {
+    "createdAtUtc": "2026-09-08T16:38:31.247708+00:00",
+    "parentRevision": "4b6a7ebb6531bd4371112efc27f8993d33f92670",
+    "workingChangesPresent": true,
+    "frozenBeforeFinalGates": true,
+    "sources": {
+      "cpg-rs/cpg-lang-c/src/exact.rs": "c79d93566b3ac603b5d2c40e68bc58b03f43db0ab91a7c4c8b4b6c0d2fd71c43",
+      "cpg-rs/cpg-lang-c/src/import.rs": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba",
+      "cpg-rs/joern-parity/src/production.rs": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb",
+      "cpg-rs/cpg-cli/src/workspace.rs": "78d02b54d43f30e7ef8397278870072620dd5c5671a6d81457d2edbbf0c535d1",
+      "cpg-rs/cpg-cli/src/rules.rs": "fc19394abdfe4c309d0e2e961516827d52c6da2e1b191593dab53c08276be2e5",
+      "cpg-rs/cpg-cli/src/export.rs": "49ed223d835380399bfca43c387f120ba2f22c88fbb7c8fe4d423463501fd057",
+      "cpg-rs/Cargo.toml": "0c095573bd24459caa83a975c4fdec291e8b11bef92745576f935f5fd17f0d29",
+      "cpg-rs/Cargo.lock": "fa7eab41e0c072e6b33205997fd241e7d87b511f9fd91ceee6ee1fdc9a099a63"
+    },
+    "binaries": {
+      "cpg": "4713ada13ff83b5260b9baaaaa6232441aca6f870fe66f363370d0cfa3493b1a",
+      "joern-parity": "abdc28f2f60033b8be3687f1d83f7a4a069e9b2407794b33d267fc73c19bbe29"
+    }
+  },
+  "sourceCommitMatchesAllFrozenSources": true,
+  "binaries": {
+    "cpg": {
+      "path": ".local/astra-sprint/sixth-batch/final-real-differential-v3/bin/cpg",
+      "sha256": "4713ada13ff83b5260b9baaaaa6232441aca6f870fe66f363370d0cfa3493b1a"
+    },
+    "joern-parity": {
+      "path": ".local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+      "sha256": "abdc28f2f60033b8be3687f1d83f7a4a069e9b2407794b33d267fc73c19bbe29"
+    }
+  },
+  "archive": {
+    "path": ".local/astra-sprint/sixth-batch/final-v3/dist/oxidized-joern-cpg-macos-arm64.tar.gz",
+    "sha256": "87b1d4811d2c4d6b92d81e1630246ae516dc6ad02ca128cd23bac112b2aa6801",
+    "platform": "macos-arm64",
+    "version": "0.1.1"
+  },
+  "realProjectMeasurements": {
+    "zlib-1.3.1-core": {
+      "expected": {
+        "sourceFiles": 26,
+        "nodes": 66123,
+        "graphSha256": "301fec3e923e4c13982c3c1dc9c864d46ff59d7862ff2d888dd2056ff1bbce6d",
+        "edgesSha256": "9e7a8e73e93ae902882c2e189b6621d6eda407bdf63ff079f46de873ea9bc0df",
+        "exportSha256": "df4e3a7b73a8343d052e47cd92aa3d386e2020cb1688abf17d3cf651538a62bb",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "findings": 0
+      },
+      "trials": [
+        {
+          "sourceFiles": 26,
+          "nodes": 66123,
+          "findings": 0,
+          "graphSha256": "301fec3e923e4c13982c3c1dc9c864d46ff59d7862ff2d888dd2056ff1bbce6d",
+          "edgesSha256": "9e7a8e73e93ae902882c2e189b6621d6eda407bdf63ff079f46de873ea9bc0df",
+          "exportSha256": "df4e3a7b73a8343d052e47cd92aa3d386e2020cb1688abf17d3cf651538a62bb",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 7.004849041986745,
+          "buildRssMiB": 481.09375,
+          "exportSeconds": 0.13579641599790193,
+          "exportRssMiB": 54.875,
+          "scanSeconds": 0.9044293750048382,
+          "scanRssMiB": 64.796875
+        },
+        {
+          "sourceFiles": 26,
+          "nodes": 66123,
+          "findings": 0,
+          "graphSha256": "301fec3e923e4c13982c3c1dc9c864d46ff59d7862ff2d888dd2056ff1bbce6d",
+          "edgesSha256": "9e7a8e73e93ae902882c2e189b6621d6eda407bdf63ff079f46de873ea9bc0df",
+          "exportSha256": "df4e3a7b73a8343d052e47cd92aa3d386e2020cb1688abf17d3cf651538a62bb",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 6.5563910829951055,
+          "buildRssMiB": 485.8125,
+          "exportSeconds": 0.13932441700308118,
+          "exportRssMiB": 54.71875,
+          "scanSeconds": 0.9033827090024715,
+          "scanRssMiB": 65.0625
+        }
+      ],
+      "update": {
+        "seconds": 30.26272704200528,
+        "rssMiB": 644.078125,
+        "output": "update-equivalent 26 files"
+      }
+    },
+    "lua-5.4.7": {
+      "expected": {
+        "sourceFiles": 61,
+        "nodes": 119088,
+        "graphSha256": "c95020e923eed15712d5e58629e3115fe0627fcea441ea75115c2f08bf42529e",
+        "edgesSha256": "19195bff687c50cd0632d2cd0be47a8905ec20ebb90cdb5a4a85307de7cfce08",
+        "exportSha256": "e708ca0ba07418b9f8eb30869a2b8bdf1668b1f7600b95b5cf10cba9552c8265",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "findings": 0
+      },
+      "trials": [
+        {
+          "sourceFiles": 61,
+          "nodes": 119088,
+          "findings": 0,
+          "graphSha256": "c95020e923eed15712d5e58629e3115fe0627fcea441ea75115c2f08bf42529e",
+          "edgesSha256": "19195bff687c50cd0632d2cd0be47a8905ec20ebb90cdb5a4a85307de7cfce08",
+          "exportSha256": "e708ca0ba07418b9f8eb30869a2b8bdf1668b1f7600b95b5cf10cba9552c8265",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 6.465490249989671,
+          "buildRssMiB": 463.484375,
+          "exportSeconds": 2.271874707992538,
+          "exportRssMiB": 76.3125,
+          "scanSeconds": 2.074950041991542,
+          "scanRssMiB": 108.78125
+        },
+        {
+          "sourceFiles": 61,
+          "nodes": 119088,
+          "findings": 0,
+          "graphSha256": "c95020e923eed15712d5e58629e3115fe0627fcea441ea75115c2f08bf42529e",
+          "edgesSha256": "19195bff687c50cd0632d2cd0be47a8905ec20ebb90cdb5a4a85307de7cfce08",
+          "exportSha256": "e708ca0ba07418b9f8eb30869a2b8bdf1668b1f7600b95b5cf10cba9552c8265",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 10.26545916601026,
+          "buildRssMiB": 462.546875,
+          "exportSeconds": 0.29676924999512266,
+          "exportRssMiB": 77.796875,
+          "scanSeconds": 2.4172133749962086,
+          "scanRssMiB": 109.21875
+        }
+      ],
+      "update": {
+        "seconds": 31.544416332995752,
+        "rssMiB": 682.796875,
+        "output": "update-equivalent 61 files"
+      }
+    }
+  },
+  "realProjectOfficialOutput": [
+    "PASS zlib-1.3.1-core: 26 files, 66123 nodes, build <= 20s, peak RSS 486.8 MiB, incremental equivalence 19.74s",
+    "PASS lua-5.4.7: 61 files, 119088 nodes, build <= 20s, peak RSS 641.3 MiB, incremental equivalence 22.10s"
+  ],
+  "realProjectMeasurementScope": "Two fresh builds per project plus one independent clean/update comparison. Build and update RSS are separate; update RSS is not compared to build ceilings. Fresh Project construction bypasses the workspace graph cache.",
+  "manifest": {
+    "path": "cpg-rs/acceptance/real-projects/manifest.json",
+    "sha256": "06417532670249e0dc3c75043b1340fbd8b66cce23dec0d9e2edb8392a72a709"
+  },
+  "manifestReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/sixth-manifest-review/final-v3-review.json",
+    "sha256": "1303767162b4ed858ca5cd8d44039e2eeabb37567f491b0588d3bbbfcc0da725"
+  },
+  "manifestChanges": [
+    {
+      "project": "zlib-1.3.1-core",
+      "field": "nodes",
+      "before": 66237,
+      "after": 66123
+    },
+    {
+      "project": "zlib-1.3.1-core",
+      "field": "graphSha256",
+      "before": "557bca5a8db74cf9c24118d4b88317b6389495452161cc20dfb6c52a5a84ad8f",
+      "after": "301fec3e923e4c13982c3c1dc9c864d46ff59d7862ff2d888dd2056ff1bbce6d"
+    },
+    {
+      "project": "zlib-1.3.1-core",
+      "field": "edgesSha256",
+      "before": "e95753bf2b8daf045f94c54d9485899619dee93889cd7e7fdf37d834be0bd428",
+      "after": "9e7a8e73e93ae902882c2e189b6621d6eda407bdf63ff079f46de873ea9bc0df"
+    },
+    {
+      "project": "zlib-1.3.1-core",
+      "field": "exportSha256",
+      "before": "2400960df7ddd063de0b3eedf4c5ef249793a2eeb2d53107b8c6e9764a398c72",
+      "after": "df4e3a7b73a8343d052e47cd92aa3d386e2020cb1688abf17d3cf651538a62bb"
+    },
+    {
+      "project": "lua-5.4.7",
+      "field": "nodes",
+      "before": 119201,
+      "after": 119088
+    },
+    {
+      "project": "lua-5.4.7",
+      "field": "graphSha256",
+      "before": "519c76efde2b16300d23af0b5b31b04eeff6fa4d7741794822a9452cc5193d3d",
+      "after": "c95020e923eed15712d5e58629e3115fe0627fcea441ea75115c2f08bf42529e"
+    },
+    {
+      "project": "lua-5.4.7",
+      "field": "edgesSha256",
+      "before": "1126b63b285c673a3e5d310a9f833076a60389f220a475783058cfd8b9079684",
+      "after": "19195bff687c50cd0632d2cd0be47a8905ec20ebb90cdb5a4a85307de7cfce08"
+    },
+    {
+      "project": "lua-5.4.7",
+      "field": "exportSha256",
+      "before": "85673156c8516b8e77caaf42a982ba930cfabd877c725ec87a417f5f27152b43",
+      "after": "e708ca0ba07418b9f8eb30869a2b8bdf1668b1f7600b95b5cf10cba9552c8265"
+    }
+  ],
+  "semanticReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-whole-review/v3/final-review.json",
+    "sha256": "7482c7447d2bf2825c048ff07e35c8eb45a0dc107ed298b910d9173190643c3d"
+  },
+  "fixtureInventory": {
+    "familyEntryTotals": {
+      "entries": 256,
+      "fifthExact": 45,
+      "currentExact": 184,
+      "gatedEntries": 180,
+      "gatedEntriesExact": 180
+    },
+    "uniqueProjectTotals": {
+      "projects": 252,
+      "fifthExact": 45,
+      "currentExact": 180,
+      "gatedProjects": 180,
+      "gainedSinceFifth": 135,
+      "lostSinceFifth": 0,
+      "currentNonexact": 72,
+      "newlyExactOutsideExistingGates": 0
+    },
+    "finalUniqueGatedProjects": 180,
+    "finalAdditionalIntegrationGates": 3,
+    "historicalFamilyGates": 177,
+    "families": {
+      "sizeof-expansion": {
+        "entries": 39,
+        "uniqueWithinFamily": 39,
+        "fifthExactEntries": 11,
+        "currentExactEntries": 23,
+        "gatedEntries": 23,
+        "gatedEntriesExact": 23,
+        "historicalGatedEntries": 23
+      },
+      "macro-cast-context": {
+        "entries": 46,
+        "uniqueWithinFamily": 46,
+        "fifthExactEntries": 6,
+        "currentExactEntries": 36,
+        "gatedEntries": 32,
+        "gatedEntriesExact": 32,
+        "historicalGatedEntries": 32
+      },
+      "declaration-macros": {
+        "entries": 36,
+        "uniqueWithinFamily": 36,
+        "fifthExactEntries": 6,
+        "currentExactEntries": 29,
+        "gatedEntries": 29,
+        "gatedEntriesExact": 29,
+        "historicalGatedEntries": 29
+      },
+      "sixth-context-interactions": {
+        "entries": 18,
+        "uniqueWithinFamily": 18,
+        "fifthExactEntries": 0,
+        "currentExactEntries": 14,
+        "gatedEntries": 14,
+        "gatedEntriesExact": 14,
+        "historicalGatedEntries": 13
+      },
+      "typedef-existence": {
+        "entries": 18,
+        "uniqueWithinFamily": 18,
+        "fifthExactEntries": 1,
+        "currentExactEntries": 7,
+        "gatedEntries": 7,
+        "gatedEntriesExact": 7,
+        "historicalGatedEntries": 7
+      },
+      "header-return-bindings": {
+        "entries": 31,
+        "uniqueWithinFamily": 31,
+        "fifthExactEntries": 6,
+        "currentExactEntries": 19,
+        "gatedEntries": 19,
+        "gatedEntriesExact": 19,
+        "historicalGatedEntries": 17
+      },
+      "predefined-c-macros": {
+        "entries": 25,
+        "uniqueWithinFamily": 25,
+        "fifthExactEntries": 11,
+        "currentExactEntries": 25,
+        "gatedEntries": 25,
+        "gatedEntriesExact": 25,
+        "historicalGatedEntries": 25
+      },
+      "numeric-macro-roots": {
+        "entries": 26,
+        "uniqueWithinFamily": 26,
+        "fifthExactEntries": 4,
+        "currentExactEntries": 20,
+        "gatedEntries": 20,
+        "gatedEntriesExact": 20,
+        "historicalGatedEntries": 20
+      },
+      "inactive-declaration-context": {
+        "entries": 17,
+        "uniqueWithinFamily": 17,
+        "fifthExactEntries": 0,
+        "currentExactEntries": 11,
+        "gatedEntries": 11,
+        "gatedEntriesExact": 11,
+        "historicalGatedEntries": 11
+      }
+    },
+    "duplicates": [
+      {
+        "projectId": "9e334309c7ae9235a26bab70b9d2161b77b3dbe919741091df1f3cc79b883168",
+        "sources": {
+          "main.c": "ba43533c16f082ad90d2ca9810fdab7060601026520024510e4e439ac2943108"
+        },
+        "expectedSha256": "7648e9ffc79ba8348c56940da9f259d0b43798069d3396e29d25fc44995b6df0",
+        "entries": [
+          "macro-cast-context/sizeof_minus",
+          "sixth-context-interactions/sizeof_minus"
+        ]
+      },
+      {
+        "projectId": "663831863b6fe71a97263c5848475093c1a10c0b1379a1a868140bf33b0808e3",
+        "sources": {
+          "main.c": "255f34a04fb81b24cfcd46593ef33384105f06cd7d476365f2a45c685c6b17dd"
+        },
+        "expectedSha256": "2522b3f7b2e90c76b5a58db99542e66f0b873b5f822bc057c94c525f7fdb6443",
+        "entries": [
+          "macro-cast-context/sizeof_shadow",
+          "sixth-context-interactions/sizeof_shadow"
+        ]
+      },
+      {
+        "projectId": "29b5de434c235874d2b0f9ecc30ef1215d16181a9fe189101fbdd64e15903fd2",
+        "sources": {
+          "main.c": "3992d8896ee3f09472fb25349add0fad8e221f8f67591fe81756465609fa65fc"
+        },
+        "expectedSha256": "ba6d8adfc0f27436cbd7c0fa8678e17c3bb4f6b2492a7b8d4d220a2b6133741b",
+        "entries": [
+          "macro-cast-context/sizeof_typedef",
+          "sixth-context-interactions/sizeof_typedef"
+        ]
+      },
+      {
+        "projectId": "2a1853bc4673f0796be7ba816a7a17690723e9b19323e8c5a5f0987368c7f668",
+        "sources": {
+          "main.c": "81d247d1e91933041fcb46621dd48a93315a453dfdfb8f9d3f58a18922a231f7"
+        },
+        "expectedSha256": "166a9bf4bf51e5b26f135ebb88dd652c6f56d13d73734fafa526d487911f50b9",
+        "entries": [
+          "macro-cast-context/sizeof_grouping",
+          "sixth-context-interactions/sizeof_grouping"
+        ]
+      }
+    ],
+    "diagnosticPromotions": [
+      {
+        "entry": "macro-cast-context/sizeof_minus",
+        "projectId": "9e334309c7ae9235a26bab70b9d2161b77b3dbe919741091df1f3cc79b883168",
+        "fifthExact": false,
+        "currentExact": true,
+        "referenceSha256": "7648e9ffc79ba8348c56940da9f259d0b43798069d3396e29d25fc44995b6df0",
+        "currentOutputSha256": "7648e9ffc79ba8348c56940da9f259d0b43798069d3396e29d25fc44995b6df0"
+      },
+      {
+        "entry": "macro-cast-context/sizeof_shadow",
+        "projectId": "663831863b6fe71a97263c5848475093c1a10c0b1379a1a868140bf33b0808e3",
+        "fifthExact": false,
+        "currentExact": true,
+        "referenceSha256": "2522b3f7b2e90c76b5a58db99542e66f0b873b5f822bc057c94c525f7fdb6443",
+        "currentOutputSha256": "2522b3f7b2e90c76b5a58db99542e66f0b873b5f822bc057c94c525f7fdb6443"
+      },
+      {
+        "entry": "macro-cast-context/sizeof_typedef",
+        "projectId": "29b5de434c235874d2b0f9ecc30ef1215d16181a9fe189101fbdd64e15903fd2",
+        "fifthExact": false,
+        "currentExact": true,
+        "referenceSha256": "ba6d8adfc0f27436cbd7c0fa8678e17c3bb4f6b2492a7b8d4d220a2b6133741b",
+        "currentOutputSha256": "ba6d8adfc0f27436cbd7c0fa8678e17c3bb4f6b2492a7b8d4d220a2b6133741b"
+      },
+      {
+        "entry": "macro-cast-context/sizeof_grouping",
+        "projectId": "2a1853bc4673f0796be7ba816a7a17690723e9b19323e8c5a5f0987368c7f668",
+        "fifthExact": false,
+        "currentExact": true,
+        "referenceSha256": "166a9bf4bf51e5b26f135ebb88dd652c6f56d13d73734fafa526d487911f50b9",
+        "currentOutputSha256": "166a9bf4bf51e5b26f135ebb88dd652c6f56d13d73734fafa526d487911f50b9"
+      },
+      {
+        "entry": "sixth-context-interactions/header_alias_return",
+        "projectId": "5452ee7e0e012e76afb606e2b185ae7dc2c85ba34f521015f08b114fa72f035c",
+        "fifthExact": false,
+        "currentExact": true,
+        "referenceSha256": "cef218c06e1fbe15afc049afca3fe90c930666c34f2b8ba88359e2d5f816ce3b",
+        "currentOutputSha256": "cef218c06e1fbe15afc049afca3fe90c930666c34f2b8ba88359e2d5f816ce3b"
+      },
+      {
+        "entry": "header-return-bindings/late_alias",
+        "projectId": "fb4d7b734bf2c64ce9d27b76c6aa01d7f25c4ef59e25653f23035b0689999953",
+        "fifthExact": false,
+        "currentExact": true,
+        "referenceSha256": "8391488e065b4e3ee55dbcbd259068b19d642e86f25b7c596c58b293e1944d26",
+        "currentOutputSha256": "8391488e065b4e3ee55dbcbd259068b19d642e86f25b7c596c58b293e1944d26"
+      },
+      {
+        "entry": "header-return-bindings/pointer_alias",
+        "projectId": "26f5b625d2febdd34d81548c0ee5b08538639369df687d42693925396345fdc3",
+        "fifthExact": false,
+        "currentExact": true,
+        "referenceSha256": "1d63953810276a61b4b13ec9ef6cf059e65806e2307aef9596bfafffe1541511",
+        "currentOutputSha256": "1d63953810276a61b4b13ec9ef6cf059e65806e2307aef9596bfafffe1541511"
+      }
+    ],
+    "review": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/sixth-family-replay/combined-v3-nine-review.json",
+      "sha256": "577ecffaff21fa2c80c9972bc46db73e9dba1a6fbaaa25752fa30409694cebcb"
+    },
+    "inventory": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/sixth-family-replay/inventory-v3-nine.json",
+      "sha256": "bf2515e5c7fa9dfd265ad465b9ed1460f8eaa2520629099280d34382b4355007"
+    },
+    "gateExtensionReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/sixth-family-replay/gate-extension-review.json",
+      "sha256": "946110b9bc6791fffc6ff9579a73252b21ac004816cab0e7c1bedfee548c8262"
+    },
+    "counting": "Deduplicate exact filename/source-byte mappings. Four cast/sizeof projects occur in two families. All 180 currently exact unique projects are gated; family metadata preserves its original standalone candidate/baseline."
+  },
+  "reviewBindings": {
+    "wholeReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-whole-review/v3/final-review.json",
+      "sha256": "7482c7447d2bf2825c048ff07e35c8eb45a0dc107ed298b910d9173190643c3d"
+    },
+    "fixtureReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/sixth-family-replay/combined-v3-nine-review.json",
+      "sha256": "577ecffaff21fa2c80c9972bc46db73e9dba1a6fbaaa25752fa30409694cebcb"
+    },
+    "fixtureInventory": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/sixth-family-replay/inventory-v3-nine.json",
+      "sha256": "bf2515e5c7fa9dfd265ad465b9ed1460f8eaa2520629099280d34382b4355007"
+    },
+    "gateExtension": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/sixth-family-replay/gate-extension-review.json",
+      "sha256": "946110b9bc6791fffc6ff9579a73252b21ac004816cab0e7c1bedfee548c8262"
+    },
+    "manifestReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/sixth-manifest-review/final-v3-review.json",
+      "sha256": "1303767162b4ed858ca5cd8d44039e2eeabb37567f491b0588d3bbbfcc0da725"
+    },
+    "nextWork": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/spaced-method-names/next-step.json",
+      "sha256": "9636d7263071358ab15d53ae333b9a91be4b9418641a79c4782ff48703727dc8"
+    }
+  },
+  "gateLogs": {
+    "fmt.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-v3/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "workspace-tests.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-v3/workspace-tests.log",
+      "sha256": "6b5a36a3d8dd8bef117f854b1e22a086bac5d9ba936d109dee0c3b2c681c738e"
+    },
+    "clippy.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-v3/clippy.log",
+      "sha256": "85d460ce86c30536981b75ad0717fe6c5da8e2cd6306579ec848e1ae27e5a6be"
+    },
+    "release-build.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-v3/release-build.log",
+      "sha256": "3997fc6790b8063b86c119e91f87ac7395ac6cf26135da637dcb229006bc32dc"
+    },
+    "committed-parity.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-v3/committed-parity.log",
+      "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+    },
+    "live-parity.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-v3/live-parity.log",
+      "sha256": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68"
+    },
+    "checker-tests.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-v3/checker-tests.log",
+      "sha256": "6a24d4dfec260c9a12ac1824ab8dcd71d73aac60da2aaee4e573a78c84c52c49"
+    },
+    "dependency-audit.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-v3/dependency-audit.log",
+      "sha256": "1b0c59f6e9760929ebaf2c065664b66ea0864df7f9fd87f90374d38f2e4fbc5a"
+    },
+    "native-release.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-v3/native-release.log",
+      "sha256": "b27deabd101e358d81247b2886e3a43f476afa776bb39d81c8e17fb8afc94914"
+    },
+    "native-archive.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-v3/native-archive.log",
+      "sha256": "12cf5b9e4bee7ecdb1a963bd01da7b0b1442495f964cf025011ff932a977b2b4"
+    },
+    "official-real-project-acceptance.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-v3/official-real-project-acceptance.log",
+      "sha256": "ca2cdf94effa14567b3436785fb25f363f92e2ff4f8572a78619e8da4ba8003c"
+    },
+    "integration-promotions.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-v3/integration-promotions.log",
+      "sha256": "9bbb9353b757b5240f8cca33d62bbe56448b27e85391dfd55749f2811d22e1f0"
+    }
+  },
+  "wholeProjectComparison": {
+    "path": "docs/conformance/astra-sixth-batch-metrics.json",
+    "sha256": "a706aca143540f9c1347c081c51e5da9d078d5dcfc79e18b38e391e957417ac8"
+  },
+  "freshWholeOracleRuns": {
+    "path": ".local/astra-sprint/sixth-batch/fresh-real-oracles/runs.json",
+    "sha256": "5206b07e34bbccd777ec58ea5eb4000f861422104ed6f369e49abdfbcd1657ab"
+  },
+  "freshWholeOracleRetainedProjection": {
+    "path": ".local/astra-sprint/sixth-batch/fresh-real-oracles/comparison.json",
+    "sha256": "250e9d7748658c71a483358f6ea3774cbd9a3b2b5b0350693e4d89611ebd9e13"
+  },
+  "measurementRun": {
+    "path": ".local/astra-sprint/sixth-batch/final-v3/measurement-run.json",
+    "sha256": "0ea450f2a9210277474fb79b8d830d08c299908024269927034a374f74ec7562"
+  },
+  "comparisonScript": {
+    "path": ".local/astra-sprint/sixth-batch/compare-final-v3.py",
+    "sha256": "297ec6ea2802c37a3ebf6e4a46f4736a777b594fa6a3bdd2a1fc741d94d18aa3"
+  },
+  "originalCheckout": {
+    "head": "6fcb30a25bbee3ca3c05b5b197cd3ce93ca4d11a",
+    "dirtyFileCount": 13,
+    "status": " M cpg-rs/ARCHITECTURE_GAPS.md\n M plans/README.md\n?? plans/001-fail-closed-filesystem-boundary.md\n?? plans/002-harden-cpg-persistence.md\n?? plans/003-content-correct-cache-and-reopen.md\n?? plans/004-enforce-release-acceptance-gates.md\n?? plans/006-complete-cpg-persistence-safety.md\n?? plans/007-bind-release-to-verified-contract.md\n?? plans/008-make-graph-language-metadata-explicit.md\n?? plans/009-refresh-architecture-and-product-docs.md\n?? plans/010-differential-gate-shared-reaching-def.md\n?? plans/011-migrate-summaries-to-canonical-value-flow.md\n?? plans/012-close-filesystem-boundary-residuals.md\n",
+    "hashes": {
+      "cpg-rs/ARCHITECTURE_GAPS.md": "1a106157606f81799b7fa70f0b7b0c7577a2c4279d731b3bab9409a9a65b70f4",
+      "plans/README.md": "620ad4469826655fb3c8a74cbdeef12d6319053e86e6370e3f156ebb97f2ba4b",
+      "plans/001-fail-closed-filesystem-boundary.md": "00cf7a9468a5f9f6b16b23c1c1e472a043e10687e53f161ee8aeaa8eb1897430",
+      "plans/002-harden-cpg-persistence.md": "b074d8136eddda21755c3afe084bcee619f2e5d0be207ce563e03c4dfb11b34a",
+      "plans/003-content-correct-cache-and-reopen.md": "1533c2d00dd11c4ca49645022542fcdb22bb4276fad75466deff8a85667508f9",
+      "plans/004-enforce-release-acceptance-gates.md": "f398c211f342598eb1d1572a0bb3018e01d5ceefb8ce9886939429855900ef87",
+      "plans/006-complete-cpg-persistence-safety.md": "79768aa08589d22cefbd30cbd670783d1d8ec917705ed8a534196230866794d6",
+      "plans/007-bind-release-to-verified-contract.md": "7265e6108e9fda4d864c0f0a0cfcabc152fd5cb233a3aa34b1536ead0153ddbd",
+      "plans/008-make-graph-language-metadata-explicit.md": "9a784d8db065ee7fedb47479bf6d8846d22d8501e5b8bcd4b665a0edf9134c40",
+      "plans/009-refresh-architecture-and-product-docs.md": "a33dd8d5c11d168c4c562228e7bb50643c85f6b637206a7adc9c7f481e547744",
+      "plans/010-differential-gate-shared-reaching-def.md": "5efb01ce175101b0eccdc8f92bb9a6a0370bb276a00224be90e248e00f032bb3",
+      "plans/011-migrate-summaries-to-canonical-value-flow.md": "77fef056be77c825db626b799870787f0a4f7b830206423abc04d2827d0f45ff",
+      "plans/012-close-filesystem-boundary-residuals.md": "3c91974a8f1cc26aa1deeeb7daf507f29c632b5960168a8a4695de612902e1cf"
+    },
+    "unchanged": true,
+    "checkedAtUtc": "2026-09-08T17:00:02.767443+00:00"
+  },
+  "retention": {
+    "priorOperandAndFlowRepairs": 49,
+    "earlierStubs": 3,
+    "restoredNewMacroStubs": 2,
+    "restoredMatchingMacroFacts": 10,
+    "remainingSnprintfMatchingFragments": 40,
+    "classification": "The 40 snprintf fragments were part of a wrong 23-argument stub synthesized from an inactive source call. Three actual Joern snprintf call sites are absent in both baseline and current output. Complete fragment and source-occurrence evidence is retained.",
+    "manualCountErratum": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-whole-review/v3/v2-count-erratum.json",
+      "sha256": "26e370a1370da6fb2ecb5c181ed4149891938788bf6b77ffd9faa917993feaa0",
+      "bytes": 3481
+    }
+  },
+  "sourceScope": {
+    "path": ".local/astra-sprint/sixth-batch/source-scope-final-review.json",
+    "sha256": "8257366e216e2a6b2e85dc306f819a83ff0dcd30ce6b8c0c1aed0e29022ac680"
+  },
+  "stagedByteReview": {
+    "path": ".local/astra-sprint/sixth-batch/staged-byte-review.json",
+    "sha256": "af6556002cc6bb0b12aa952353ffa46033602bec9d85d94831e53b138e933f37"
+  },
+  "integrationBranch": "codex/astra-parity-sprint",
+  "cacheShapeVersion": 17,
+  "pushed": false,
+  "merged": false,
+  "artifactAvailability": "Small fixture sources, full raw references, before/candidate graphs and diffs are committed. Large whole-project outputs, frozen binaries and command logs remain local under .local and peer worktrees; their exact paths/hashes are recorded. No published download is claimed.",
+  "earlierCandidates": [
+    {
+      "path": ".local/astra-sprint/sixth-batch/first-combined-candidate-not-accepted.json",
+      "sha256": "f4257d3c93b84e837ca846ad06d77ef4d67e90db3070bb7f0860250b7099d7ee"
+    },
+    {
+      "path": ".local/astra-sprint/sixth-batch/second-combined-candidate-not-accepted.json",
+      "sha256": "190519517360751272898637385e965870eeb73018bc810fcbe7bf9d73082a30"
+    }
+  ],
+  "comparisonScriptRepair": {
+    "path": ".local/astra-sprint/sixth-batch/comparison-v3-baseline-path-repair.json",
+    "sha256": "4cc17ca606e1f05dec752ac8cb4ea314d7c9624f64e57f66dd989abe7b6cb0fe"
+  },
+  "nextCWork": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/spaced-method-names/next-step.json",
+    "sha256": "9636d7263071358ab15d53ae333b9a91be4b9418641a79c4782ff48703727dc8"
+  }
+}
