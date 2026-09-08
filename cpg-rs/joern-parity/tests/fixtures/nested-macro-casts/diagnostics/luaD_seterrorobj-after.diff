@@ -1,0 +1,22 @@
+--- 
++++ 
+@@ -84,14 +84,14 @@
+               LOCAL NAME=x_ CODE=setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling")) TYPE_FULL_NAME=TString* ORDER=3
+               CALL NAME=<operator>.assignment CODE=TString * TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+                 IDENTIFIER NAME=x_ CODE=setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling")) TYPE_FULL_NAME=TString* ORDER=1 ARGUMENT_INDEX=1
+-                CALL NAME=luaS_newlstr CODE=luaS_newlstr(L, "error in error handling", (sizeof ("error in error handling") / sizeof (char)) - 1) TYPE_FULL_NAME=TString* METHOD_FULL_NAME=luaS_newlstr ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                CALL NAME=luaS_newlstr CODE=luaS_newlstr(L, "error in error handling", (sizeof("error in error handling") / sizeof(char)) - 1) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=luaS_newlstr ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                   IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+                   LITERAL CODE="error in error handling" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+-                  CALL NAME=<operator>.subtraction CODE=(sizeof ("error in error handling") / sizeof (char)) - 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+-                    CALL NAME=<operator>.division CODE=sizeof ("error in error handling") / sizeof (char) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.division ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                      CALL NAME=<operator>.sizeOf CODE=sizeof ("error in error handling") TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                  CALL NAME=<operator>.subtraction CODE=(sizeof("error in error handling") / sizeof(char)) - 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
++                    CALL NAME=<operator>.division CODE=sizeof("error in error handling") / sizeof(char) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.division ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                      CALL NAME=<operator>.sizeOf CODE=sizeof("error in error handling") TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                         LITERAL CODE="error in error handling" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+-                      CALL NAME=<operator>.sizeOf CODE=sizeof (char) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                      CALL NAME=<operator>.sizeOf CODE=sizeof(char) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                         IDENTIFIER NAME=char CODE=char TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+                     LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+               CALL NAME=<operator>.assignment CODE=((io)->value_).gc = (&(((GCUnion *)((x_)))->gc)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH

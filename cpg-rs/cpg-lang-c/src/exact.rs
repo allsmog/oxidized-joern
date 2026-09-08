@@ -3090,6 +3090,40 @@ impl Ctx<'_> {
         (self.line_no > initializer).then_some(initializer)
     }
 
+    // Macro expansion CODE uses CDT's rendered type descriptor, while type
+    // identity still comes from the original parsed cast (not its display text).
+    fn expression_code(&self, node: Node, bytes: &[u8]) -> String {
+        if self.macro_expansion_code.is_none() {
+            return esc(text(node, bytes));
+        }
+        let mut pending = vec![node];
+        let mut replacements = Vec::new();
+        while let Some(current) = pending.pop() {
+            let descriptor = (current.kind() == "cast_expression")
+                .then(|| current.child_by_field_name("type"))
+                .flatten();
+            if let Some(desc) = descriptor {
+                replacements.push((desc.byte_range(), expanded_cast_descriptor(desc, bytes)));
+            }
+            // A descriptor is rendered as a whole. Its array bounds can contain
+            // casts of their own, whose byte ranges must not be replaced twice.
+            pending.extend(
+                named_children(current)
+                    .into_iter()
+                    .filter(|child| Some(*child) != descriptor),
+            );
+        }
+        replacements.sort_by_key(|(range, _)| std::cmp::Reverse(range.start));
+        let mut code = text(node, bytes).to_string();
+        for (range, replacement) in replacements {
+            code.replace_range(
+                range.start - node.start_byte()..range.end - node.start_byte(),
+                &replacement,
+            );
+        }
+        esc(&code)
+    }
+
     /// Emit an expression node with the given ORDER and optional ARGUMENT_INDEX.
     fn emit_expr(&mut self, n: Node, b: &[u8], depth: usize, order: i64, arg: Option<i64>) {
         match n.kind() {
@@ -3102,7 +3136,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3132,7 +3166,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3157,7 +3191,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3189,7 +3223,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3209,7 +3243,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.conditional".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("<operator>.conditional".into()),
                         order: Some(order),
@@ -3258,7 +3292,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3290,7 +3324,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.indirectIndexAccess".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("<operator>.indirectIndexAccess".into()),
                         order: Some(order),
@@ -3315,7 +3349,7 @@ impl Ctx<'_> {
                 let argc = args.map(|a| named_children(a).len()).unwrap_or(0);
                 if self.macros.get(&name).is_some_and(|m| m.params.is_some()) {
                     let arg_nodes: Vec<Node> = args.map(|a| named_children(a)).unwrap_or_default();
-                    let code = esc(text(n, b));
+                    let code = self.expression_code(n, b);
                     self.emit_macro_call(&name, &code, &arg_nodes, n, b, depth, order, arg);
                     return;
                 }
@@ -3354,7 +3388,7 @@ impl Ctx<'_> {
                         "CALL",
                         P {
                             name: Some("<operator>.pointerCall".into()),
-                            code: Some(esc(text(n, b))),
+                            code: Some(self.expression_code(n, b)),
                             tfn: Some(ty),
                             mfn: Some("<operator>.pointerCall".into()),
                             order: Some(order),
@@ -3389,7 +3423,7 @@ impl Ctx<'_> {
                         "CALL",
                         P {
                             name: Some(name.clone()),
-                            code: Some(esc(text(n, b))),
+                            code: Some(self.expression_code(n, b)),
                             tfn: Some(ty),
                             mfn: Some(method_full_name),
                             order: Some(order),
@@ -3529,7 +3563,7 @@ impl Ctx<'_> {
                     depth,
                     "LITERAL",
                     P {
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("char*".into()),
                         order: Some(order),
                         arg,
@@ -3599,7 +3633,7 @@ impl Ctx<'_> {
                             "CALL",
                             P {
                                 name: Some("<operator>.assignment".into()),
-                                code: Some(esc(text(n, b))),
+                                code: Some(self.expression_code(n, b)),
                                 tfn: Some("void".into()),
                                 mfn: Some("<operator>.assignment".into()),
                                 order: Some(position),
@@ -3621,7 +3655,14 @@ impl Ctx<'_> {
                 let raw = desc.map(|t| text(t, b).to_string()).unwrap_or("ANY".into());
                 let ty = desc
                     .and_then(|t| t.child_by_field_name("type"))
-                    .map(|t| normalize_type(text(t, b)))
+                    .map(|t| {
+                        if self.macro_expansion_code.is_some() {
+                            primitive_type(text(t, b), TypeRole::Declaration)
+                                .unwrap_or_else(|| normalize_type(text(t, b)))
+                        } else {
+                            normalize_type(text(t, b))
+                        }
+                    })
                     .unwrap_or_else(|| normalize_type(&raw));
                 self.note_call("<operator>.cast", 2);
                 self.line(
@@ -3629,7 +3670,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.cast".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some(ty.clone()),
                         mfn: Some("<operator>.cast".into()),
                         order: Some(order),
@@ -3642,7 +3683,12 @@ impl Ctx<'_> {
                     depth + 1,
                     "TYPE_REF",
                     P {
-                        code: Some(esc(&raw)),
+                        code: Some(if self.macro_expansion_code.is_some() {
+                            desc.map(|desc| esc(&expanded_cast_descriptor(desc, b)))
+                                .unwrap_or_else(|| esc(&raw))
+                        } else {
+                            esc(&raw)
+                        }),
                         tfn: Some(ty),
                         order: Some(1),
                         arg: Some(1),
@@ -3662,7 +3708,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("offsetof".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("offsetof".into()),
                         order: Some(order),
@@ -3708,7 +3754,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.sizeOf".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("<operator>.sizeOf".into()),
                         order: Some(order),
@@ -4889,6 +4935,239 @@ fn substitute(body: &str, params: &[String], args: &[String]) -> String {
     out
 }
 
+fn expanded_cast_descriptor(desc: Node, bytes: &[u8]) -> String {
+    fn declarator_code(node: Node, bytes: &[u8]) -> String {
+        let inner = node.child_by_field_name("declarator");
+        match node.kind() {
+            "abstract_pointer_declarator" => {
+                let end = inner.map_or(node.end_byte(), |n| n.start_byte());
+                let prefix = std::str::from_utf8(&bytes[node.start_byte()..end])
+                    .unwrap_or("")
+                    .trim();
+                let qualifiers = prefix.strip_prefix('*').unwrap_or(prefix).trim();
+                let nested = inner.map(|n| declarator_code(n, bytes)).unwrap_or_default();
+                ["*", qualifiers, nested.as_str()]
+                    .into_iter()
+                    .filter(|part| !part.is_empty())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            }
+            "abstract_array_declarator" => {
+                let nested = inner.map(|n| declarator_code(n, bytes)).unwrap_or_default();
+                if nested.starts_with('(') {
+                    format!("[] {nested}")
+                } else {
+                    format!("[]{nested}")
+                }
+            }
+            "abstract_parenthesized_declarator" => {
+                let nested = inner.or_else(|| named_children(node).into_iter().next());
+                nested.map_or_else(
+                    || text(node, bytes).to_string(),
+                    |n| format!("({})", declarator_code(n, bytes)),
+                )
+            }
+            _ => text(node, bytes).to_string(),
+        }
+    }
+    let Some(base) = desc.child_by_field_name("type") else {
+        return text(desc, bytes).to_string();
+    };
+    let raw = text(base, bytes);
+    let rendered = ["struct ", "union ", "enum "]
+        .into_iter()
+        .find_map(|prefix| raw.strip_prefix(prefix))
+        .unwrap_or(raw);
+    let rendered = if rendered == "unsigned long" {
+        "long unsigned"
+    } else {
+        rendered
+    };
+    let suffix = desc.child_by_field_name("declarator").map_or_else(
+        || {
+            std::str::from_utf8(&bytes[base.end_byte()..desc.end_byte()])
+                .unwrap_or("")
+                .trim()
+                .to_string()
+        },
+        |node| declarator_code(node, bytes),
+    );
+    [
+        std::str::from_utf8(&bytes[desc.start_byte()..base.start_byte()])
+            .unwrap_or("")
+            .trim(),
+        rendered,
+        suffix.as_str(),
+    ]
+    .into_iter()
+    .filter(|part| !part.is_empty())
+    .collect::<Vec<_>>()
+    .join(" ")
+}
+
+/// Expand known function macros using preprocessing-token parentheses. Strings
+/// and comments are opaque; ordinary calls and type spellings remain untouched.
+fn expand_function_macro_tokens(
+    source: &str,
+    macros: &HashMap<String, MacroDef>,
+    disabled: &mut HashSet<String>,
+    budget: &mut usize,
+) -> String {
+    // Consume the complete token even when its spelling is outside the ASCII
+    // macro-name registry. Otherwise an ASCII suffix of an extended identifier
+    // could be mistaken for a separate macro invocation.
+    fn identifier_unit(bytes: &[u8], start: usize, first: bool) -> usize {
+        let b = bytes[start];
+        if b.is_ascii_alphabetic()
+            || matches!(b, b'_' | b'$')
+            || !b.is_ascii()
+            || (!first && b.is_ascii_digit())
+        {
+            return 1;
+        }
+        if b == b'\\' {
+            let digits = match bytes.get(start + 1) {
+                Some(b'u') => 4,
+                Some(b'U') => 8,
+                _ => return 0,
+            };
+            if bytes
+                .get(start + 2..start + 2 + digits)
+                .is_some_and(|value| value.iter().all(u8::is_ascii_hexdigit))
+            {
+                return 2 + digits;
+            }
+        }
+        0
+    }
+    fn opaque_end(bytes: &[u8], start: usize) -> Option<usize> {
+        if bytes[start..].starts_with(b"/*") {
+            return Some(
+                bytes[start + 2..]
+                    .windows(2)
+                    .position(|w| w == b"*/")
+                    .map_or(bytes.len(), |end| start + end + 4),
+            );
+        }
+        if bytes[start..].starts_with(b"//") {
+            return Some(
+                bytes[start..]
+                    .iter()
+                    .position(|&b| b == b'\n')
+                    .map_or(bytes.len(), |end| start + end),
+            );
+        }
+        let quote = bytes[start];
+        if !matches!(quote, b'\'' | b'"') {
+            return None;
+        }
+        let mut i = start + 1;
+        while i < bytes.len() {
+            if bytes[i] == b'\\' {
+                i = (i + 2).min(bytes.len());
+            } else if bytes[i] == quote {
+                return Some(i + 1);
+            } else {
+                i += 1;
+            }
+        }
+        Some(i)
+    }
+    let bytes = source.as_bytes();
+    let mut result = String::new();
+    let mut copied = 0;
+    let mut i = 0;
+    while i < bytes.len() && *budget > 0 {
+        if let Some(end) = opaque_end(bytes, i) {
+            i = end;
+            continue;
+        }
+        let first = identifier_unit(bytes, i, true);
+        if first == 0 {
+            i += 1;
+            continue;
+        }
+        let start = i;
+        i += first;
+        while i < bytes.len() {
+            let next = identifier_unit(bytes, i, false);
+            if next == 0 {
+                break;
+            }
+            i += next;
+        }
+        let name = &source[start..i];
+        let Some(definition) = macros.get(name).filter(|m| m.params.is_some()) else {
+            continue;
+        };
+        if disabled.contains(name) || disabled.len() >= 256 {
+            continue;
+        }
+        let mut open = i;
+        loop {
+            while open < bytes.len() && bytes[open].is_ascii_whitespace() {
+                open += 1;
+            }
+            if open < bytes.len()
+                && (bytes[open..].starts_with(b"/*") || bytes[open..].starts_with(b"//"))
+            {
+                open = opaque_end(bytes, open).unwrap();
+            } else {
+                break;
+            }
+        }
+        if bytes.get(open) != Some(&b'(') {
+            continue;
+        }
+        let mut args = Vec::new();
+        let mut argument = open + 1;
+        let mut end = argument;
+        let mut nesting = 1;
+        while end < bytes.len() {
+            if let Some(next) = opaque_end(bytes, end) {
+                end = next;
+                continue;
+            }
+            match bytes[end] {
+                b'(' => nesting += 1,
+                b')' => {
+                    nesting -= 1;
+                    if nesting == 0 {
+                        break;
+                    }
+                }
+                b',' if nesting == 1 => {
+                    args.push(source[argument..end].trim().to_string());
+                    argument = end + 1;
+                }
+                _ => {}
+            }
+            end += 1;
+        }
+        if nesting != 0 {
+            continue;
+        }
+        if argument != end || !args.is_empty() {
+            args.push(source[argument..end].trim().to_string());
+        }
+        *budget -= 1;
+        disabled.insert(name.to_string());
+        let replaced = substitute(
+            &definition.body,
+            definition.params.as_deref().unwrap(),
+            &args,
+        );
+        let expanded = expand_body_expression(&replaced, macros, disabled, budget);
+        disabled.remove(name);
+        result.push_str(&source[copied..start]);
+        result.push_str(&expanded);
+        copied = end + 1;
+        i = copied;
+    }
+    result.push_str(&source[copied..]);
+    result
+}
+
 /// Render CDT's expanded expression spelling. A shared work budget and
 /// disabled-macro set stop replacement cycles before the AST emitter runs.
 fn expand_body_expression(
@@ -4914,20 +5193,6 @@ fn expand_body_expression(
                 .get(raw)
                 .filter(|m| m.params.is_none())
                 .map(|m| (raw, m, Vec::new()))
-        } else if node.kind() == "call_expression" {
-            node.child_by_field_name("function").and_then(|function| {
-                let name = text(function, bytes);
-                macros.get(name).filter(|m| m.params.is_some()).map(|m| {
-                    let args = node
-                        .child_by_field_name("arguments")
-                        .map(named_children)
-                        .unwrap_or_default()
-                        .into_iter()
-                        .map(|a| text(a, bytes).to_string())
-                        .collect();
-                    (name, m, args)
-                })
-            })
         } else {
             None
         };
@@ -4977,7 +5242,10 @@ fn expand_body_expression(
                 let call = format!("{function}({args})");
                 // An object macro can supply the function macro name. Rescan
                 // that newly formed invocation with the same disabled set.
-                if disabled.len() < 256
+                if node
+                    .child_by_field_name("function")
+                    .is_some_and(|original| text(original, bytes) != function)
+                    && disabled.len() < 256
                     && !disabled.contains(&function)
                     && macros.get(&function).is_some_and(|m| m.params.is_some())
                 {
@@ -5004,6 +5272,10 @@ fn expand_body_expression(
             }
         }
     }
+    // A function macro accepts preprocessing tokens, including types that are
+    // not valid C call arguments. Expand those invocations before C parsing can
+    // recover them as casts or discard their arguments as ERROR nodes.
+    let source = expand_function_macro_tokens(source, macros, disabled, budget);
     let wrapped = format!("void __m() {{ {source}; }}");
     let mut parser = Parser::new();
     parser

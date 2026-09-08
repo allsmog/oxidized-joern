@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-unicode"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-unicode-oracle",
+  "exitCode": 0,
+  "wallSeconds": 9.61232604100951,
+  "sourceSha256": "e88c069592e61a68bafeb2edae652045045a3b948095b82696a1908c6140561d",
+  "oracleSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "beforeCandidateCommand": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/final-joern-parity",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-unicode/probe.c"
+  ],
+  "beforeCandidateExitCode": 0,
+  "beforeCandidateBinarySha256": "7a367c8f781b60e129361be559c3f11029b92386cdca2f7f4553b06915aea24d"
+}

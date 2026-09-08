@@ -1,0 +1,89 @@
+--- 
++++ 
+@@ -37,8 +37,7 @@
+               IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-    TYPE_DECL NAME=U CODE=union U FULL_NAME=U ORDER=1
+-    METHOD_REF CODE=composite TYPE_FULL_NAME=composite METHOD_FULL_NAME=composite ORDER=2
++    METHOD_REF CODE=composite TYPE_FULL_NAME=composite METHOD_FULL_NAME=composite ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=CAST CODE=#define CAST(p) ((int (*)[sizeof((union U*)p)])p) FULL_NAME=probe.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1
+@@ -56,14 +55,12 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=U FULL_NAME=U CODE=union U AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=probe.c ORDER=1
+ NODES|TYPE_DECL NAME=composite FULL_NAME=composite CODE=composite AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=probe.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+-NODES|TYPE NAME=U FULL_NAME=U TYPE_DECL_FULL_NAME=U
+ NODES|TYPE NAME=composite FULL_NAME=composite TYPE_DECL_FULL_NAME=composite
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+@@ -84,8 +81,8 @@
+ EDGES|CFG composite#6 -> composite#5
+ EDGES|CFG composite#8 -> composite#4
+ EDGES|CFG composite#9 -> composite#10
+-EDGES|CFG probe.c:<global>#0 -> probe.c:<global>#15
+-EDGES|CFG probe.c:<global>#15 -> probe.c:<global>#16
++EDGES|CFG probe.c:<global>#0 -> probe.c:<global>#14
++EDGES|CFG probe.c:<global>#14 -> probe.c:<global>#15
+ EDGES|CFG probe.c:CAST:ANY(1)#0 -> probe.c:CAST:ANY(1)#4
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+@@ -109,7 +106,6 @@
+ EDGES|CONTAINS probe.c:<global>#0 -> composite#0
+ EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#13
+ EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#14
+-EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#15
+ EDGES|CONTAINS probe.c:CAST:ANY(1)#0 -> probe.c:CAST:ANY(1)#3
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+@@ -130,8 +126,8 @@
+ EDGES|EVAL_TYPE composite#8 -> T:int
+ EDGES|EVAL_TYPE composite#9 -> T:int
+ EDGES|EVAL_TYPE probe.c:<global>#13 -> T:ANY
+-EDGES|EVAL_TYPE probe.c:<global>#15 -> T:composite
+-EDGES|EVAL_TYPE probe.c:<global>#16 -> T:ANY
++EDGES|EVAL_TYPE probe.c:<global>#14 -> T:composite
++EDGES|EVAL_TYPE probe.c:<global>#15 -> T:ANY
+ EDGES|EVAL_TYPE probe.c:CAST:ANY(1)#1 -> T:ANY
+ EDGES|EVAL_TYPE probe.c:CAST:ANY(1)#2 -> T:ANY
+ EDGES|EVAL_TYPE probe.c:CAST:ANY(1)#3 -> T:ANY
+@@ -144,13 +140,12 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:probe.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
+-EDGES|REF T:U -> probe.c:<global>#14
+ EDGES|REF T:composite -> D:composite
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+ EDGES|REF T:void* -> D:void*
+ EDGES|REF composite#10 -> composite#1
+-EDGES|REF probe.c:<global>#15 -> composite#0
++EDGES|REF probe.c:<global>#14 -> composite#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:composite -> F:probe.c
+@@ -163,7 +158,6 @@
+ EDGES|SOURCE_FILE NB:probe.c:<global> -> F:probe.c
+ EDGES|SOURCE_FILE composite#0 -> F:probe.c
+ EDGES|SOURCE_FILE probe.c:<global>#0 -> F:probe.c
+-EDGES|SOURCE_FILE probe.c:<global>#14 -> F:probe.c
+ EDGES|SOURCE_FILE probe.c:CAST:ANY(1)#0 -> F:probe.c
+ FLOWS|REACHING_DEF[(int [] (*))p] composite#8 -> composite#11
+ FLOWS|REACHING_DEF[<RET>] composite#4 -> composite#11
+@@ -175,7 +169,7 @@
+ FLOWS|REACHING_DEF[] composite#0 -> composite#10
+ FLOWS|REACHING_DEF[] composite#0 -> composite#6
+ FLOWS|REACHING_DEF[] composite#0 -> composite#9
+-FLOWS|REACHING_DEF[] probe.c:<global>#0 -> probe.c:<global>#15
++FLOWS|REACHING_DEF[] probe.c:<global>#0 -> probe.c:<global>#14
+ FLOWS|REACHING_DEF[] probe.c:CAST:ANY(1)#0 -> probe.c:CAST:ANY(1)#1
+ FLOWS|REACHING_DEF[int [] (*)] composite#9 -> composite#8
+ FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3

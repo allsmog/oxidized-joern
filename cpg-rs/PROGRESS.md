@@ -4,6 +4,21 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Isolated nested macro cast increment (2026-09-08 UTC).** Known function
+  macros now expand their preprocessing-token arguments before C expression
+  parsing, restoring nested union casts and rawtt tag tests. Expanded cast
+  display rendering preserves separate type identity and handles composite
+  descriptors without overlapping replacements. Five complete pinned graph
+  projects improve **1/5→5/5**, covering **24 source functions** and **3,090
+  nonempty selected records** (3,157 canonical lines including separators).
+  Independent review's Unicode suffix-expansion and descriptor-range panic
+  are repaired with retained failures and production regressions. All **417
+  workspace tests**, formatting, strict Clippy, and **308/308 committed/live**
+  main blocks pass. The original forward-tag diagnostics and remaining Lua
+  sizeof/declaration-return-context differences stay explicit. This isolated
+  increment has not run final combined whole-project acceptance. See the
+  [fixture evidence](joern-parity/tests/fixtures/nested-macro-casts/README.md).
+
 - **Fourth measured Astra batch (2026-09-08 UTC).** The main corpus remains
   **308/308** against committed and fresh Joern v4.0.555 references. Separate
   complete graph fixtures cover arrays, supplied quoted-header macro state,

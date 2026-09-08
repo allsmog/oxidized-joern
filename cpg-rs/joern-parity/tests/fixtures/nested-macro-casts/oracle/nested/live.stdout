@@ -1,0 +1,622 @@
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/input --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/final-oracle/workspace/proj/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/final-oracle/workspace/proj/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 10 ms (69% on mutations). 22 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 2 ms (48% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 1 ms (62% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 7 ms (20% on mutations). 36 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 1 ms (70% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 3 ms (38% on mutations). 45 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 2 ms (37% on mutations). 16 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 1 ms (55% on mutations). 59 + 0 changes committed from 25 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 1 ms (57% on mutations). 9 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (55% on mutations). 79 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 2 ms (51% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 10 ms (6% on mutations). 41 + 0 changes committed from 12 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 4 ms (16% on mutations). 76 + 0 changes committed from 12 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 2 ms (26% on mutations). 13 + 0 changes committed from 12 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (87% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 1 ms (49% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 1 ms (67% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Could not create edge. Destination lookup failed. edgeType=REF, srcNodeType=CALL, srcNodeId=30064771079, dstNodeType=MEMBER, dstFullName=void*.tt_
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 3 ms (16% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (87% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 1 ms (74% on mutations). 3 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 1 ms (67% on mutations). 8 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 1 ms (82% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (88% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: casts.c:cast_u:ANY(1) in casts.c
+[INFO ] Calculating reaching definitions for: <operator>.cast in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.indirectFieldAccess in <empty>
+[INFO ] Calculating reaching definitions for: tag_test in casts.c
+[INFO ] Calculating reaching definitions for: casts.c:<global> in casts.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: <operator>.and in <empty>
+[INFO ] Calculating reaching definitions for: casts.c:checktype:ANY(2) in casts.c
+[INFO ] Calculating reaching definitions for: <operator>.equals in <empty>
+[INFO ] Calculating reaching definitions for: casts.c:cast_p:ANY(1) in casts.c
+[INFO ] Number of definitions for casts.c:cast_u:ANY(1): 1
+[INFO ] Number of definitions for casts.c:cast_p:ANY(1): 1
+[INFO ] Number of definitions for <operator>.indirectFieldAccess: 2
+[INFO ] Number of definitions for <operator>.cast: 2
+[INFO ] Number of definitions for casts.c:<global>: 0
+[INFO ] Number of definitions for <operator>.equals: 2
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for casts.c:checktype:ANY(2): 2
+[INFO ] Number of definitions for <operator>.and: 2
+[INFO ] Number of definitions for tag_test: 7
+[INFO ] Calculating reaching definitions for: union_cast in casts.c
+[INFO ] Calculating reaching definitions for: primitive_cast in casts.c
+[INFO ] Number of definitions for union_cast: 5
+[INFO ] Number of definitions for primitive_cast: 5
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 21 ms (3% on mutations). 103 + 0 changes committed from 12 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (86% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.and FULL_NAME=<operator>.and ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.equals FULL_NAME=<operator>.equals ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectFieldAccess FULL_NAME=<operator>.indirectFieldAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=casts.c:<global> ORDER=1
+AST|  METHOD NAME=union_cast CODE=void *union_cast(void *o) { return cast_u(o); } FULL_NAME=union_cast SIGNATURE=void*(void*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+AST|    BLOCK CODE={ return cast_u(o); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return cast_u(o); ORDER=1
+AST|        CALL NAME=cast_u CODE=cast_u(o) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=casts.c:cast_u:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=<operator>.cast CODE=(GCUnion *)((o)) TYPE_FULL_NAME=unionGCUnion METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=GCUnion * TYPE_FULL_NAME=unionGCUnion ORDER=1 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+AST|  METHOD NAME=primitive_cast CODE=void *primitive_cast(void *o) { return cast_p(o); } FULL_NAME=primitive_cast SIGNATURE=void*(void*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+AST|    BLOCK CODE={ return cast_p(o); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return cast_p(o); ORDER=1
+AST|        CALL NAME=cast_p CODE=cast_p(o) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=casts.c:cast_p:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=<operator>.cast CODE=(long unsigned *)((o)) TYPE_FULL_NAME=longunsigned METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=long unsigned * TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+AST|  METHOD NAME=tag_test CODE=int tag_test(void *o) { return checktype(o, 3); } FULL_NAME=tag_test SIGNATURE=int(void*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+AST|    BLOCK CODE={ return checktype(o, 3); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return checktype(o, 3); ORDER=1
+AST|        CALL NAME=checktype CODE=checktype(o, 3) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=casts.c:checktype:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+AST|            CALL NAME=<operator>.equals CODE=((((o)->tt_)) & 0x0F) == (3) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              CALL NAME=<operator>.and CODE=(((o)->tt_)) & 0x0F TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                CALL NAME=<operator>.indirectFieldAccess CODE=(o)->tt_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|                  FIELD_IDENTIFIER CODE=tt_ ORDER=2 ARGUMENT_INDEX=2
+AST|                LITERAL CODE=0x0F TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|              LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=union_cast TYPE_FULL_NAME=union_cast METHOD_FULL_NAME=union_cast ORDER=1
+AST|    METHOD_REF CODE=primitive_cast TYPE_FULL_NAME=primitive_cast METHOD_FULL_NAME=primitive_cast ORDER=2
+AST|    METHOD_REF CODE=tag_test TYPE_FULL_NAME=tag_test METHOD_FULL_NAME=tag_test ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=cast_p CODE=#define cast_p(o) cast(unsigned long *, (o)) FULL_NAME=casts.c:cast_p:ANY(1) SIGNATURE=ANY(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+AST|
+AST|METHOD NAME=cast_u CODE=#define cast_u(o) cast(union GCUnion *, (o)) FULL_NAME=casts.c:cast_u:ANY(1) SIGNATURE=ANY(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+AST|
+AST|METHOD NAME=checktype CODE=#define checktype(o,t) (ttype(o) == (t)) FULL_NAME=casts.c:checktype:ANY(2) SIGNATURE=ANY(2) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=4
+AST|
+AST|METHOD NAME=primitive_cast CODE=void *primitive_cast(void *o) { return cast_p(o); } FULL_NAME=primitive_cast SIGNATURE=void*(void*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+AST|  BLOCK CODE={ return cast_p(o); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return cast_p(o); ORDER=1
+AST|      CALL NAME=cast_p CODE=cast_p(o) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=casts.c:cast_p:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=<operator>.cast CODE=(long unsigned *)((o)) TYPE_FULL_NAME=longunsigned METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            TYPE_REF CODE=long unsigned * TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+AST|            IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+AST|
+AST|METHOD NAME=tag_test CODE=int tag_test(void *o) { return checktype(o, 3); } FULL_NAME=tag_test SIGNATURE=int(void*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+AST|  BLOCK CODE={ return checktype(o, 3); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return checktype(o, 3); ORDER=1
+AST|      CALL NAME=checktype CODE=checktype(o, 3) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=casts.c:checktype:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+AST|          CALL NAME=<operator>.equals CODE=((((o)->tt_)) & 0x0F) == (3) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.and CODE=(((o)->tt_)) & 0x0F TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              CALL NAME=<operator>.indirectFieldAccess CODE=(o)->tt_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|                FIELD_IDENTIFIER CODE=tt_ ORDER=2 ARGUMENT_INDEX=2
+AST|              LITERAL CODE=0x0F TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|            LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=union_cast CODE=void *union_cast(void *o) { return cast_u(o); } FULL_NAME=union_cast SIGNATURE=void*(void*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+AST|  BLOCK CODE={ return cast_u(o); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return cast_u(o); ORDER=1
+AST|      CALL NAME=cast_u CODE=cast_u(o) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=casts.c:cast_u:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=<operator>.cast CODE=(GCUnion *)((o)) TYPE_FULL_NAME=unionGCUnion METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            TYPE_REF CODE=GCUnion * TYPE_FULL_NAME=unionGCUnion ORDER=1 ARGUMENT_INDEX=1
+AST|            IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=casts.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=casts.c:<global> FILENAME=casts.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=casts.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=casts.c:<global> FILENAME=casts.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=longunsigned FULL_NAME=longunsigned CODE=longunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=primitive_cast FULL_NAME=primitive_cast CODE=primitive_cast AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=casts.c:<global> FILENAME=casts.c ORDER=1
+NODES|TYPE_DECL NAME=tag_test FULL_NAME=tag_test CODE=tag_test AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=casts.c:<global> FILENAME=casts.c ORDER=1
+NODES|TYPE_DECL NAME=unionGCUnion FULL_NAME=unionGCUnion CODE=unionGCUnion IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=union_cast FULL_NAME=union_cast CODE=union_cast AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=casts.c:<global> FILENAME=casts.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
+NODES|TYPE NAME=primitive_cast FULL_NAME=primitive_cast TYPE_DECL_FULL_NAME=primitive_cast
+NODES|TYPE NAME=tag_test FULL_NAME=tag_test TYPE_DECL_FULL_NAME=tag_test
+NODES|TYPE NAME=unionGCUnion FULL_NAME=unionGCUnion TYPE_DECL_FULL_NAME=unionGCUnion
+NODES|TYPE NAME=union_cast FULL_NAME=union_cast TYPE_DECL_FULL_NAME=union_cast
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+EDGES|ARGUMENT primitive_cast#4 -> primitive_cast#5
+EDGES|ARGUMENT primitive_cast#5 -> primitive_cast#6
+EDGES|ARGUMENT primitive_cast#8 -> primitive_cast#10
+EDGES|ARGUMENT primitive_cast#8 -> primitive_cast#9
+EDGES|ARGUMENT tag_test#10 -> tag_test#11
+EDGES|ARGUMENT tag_test#10 -> tag_test#14
+EDGES|ARGUMENT tag_test#11 -> tag_test#12
+EDGES|ARGUMENT tag_test#11 -> tag_test#13
+EDGES|ARGUMENT tag_test#4 -> tag_test#5
+EDGES|ARGUMENT tag_test#5 -> tag_test#6
+EDGES|ARGUMENT tag_test#5 -> tag_test#7
+EDGES|ARGUMENT tag_test#9 -> tag_test#10
+EDGES|ARGUMENT tag_test#9 -> tag_test#15
+EDGES|ARGUMENT union_cast#4 -> union_cast#5
+EDGES|ARGUMENT union_cast#5 -> union_cast#6
+EDGES|ARGUMENT union_cast#8 -> union_cast#10
+EDGES|ARGUMENT union_cast#8 -> union_cast#9
+EDGES|CALL primitive_cast#5 -> casts.c:cast_p:ANY(1)#0
+EDGES|CALL primitive_cast#8 -> <operator>.cast#0
+EDGES|CALL tag_test#10 -> <operator>.and#0
+EDGES|CALL tag_test#11 -> <operator>.indirectFieldAccess#0
+EDGES|CALL tag_test#5 -> casts.c:checktype:ANY(2)#0
+EDGES|CALL tag_test#9 -> <operator>.equals#0
+EDGES|CALL union_cast#5 -> casts.c:cast_u:ANY(1)#0
+EDGES|CALL union_cast#8 -> <operator>.cast#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.and#0 -> <operator>.and#5
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG <operator>.equals#0 -> <operator>.equals#5
+EDGES|CFG <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#5
+EDGES|CFG casts.c:<global>#0 -> casts.c:<global>#43
+EDGES|CFG casts.c:<global>#1 -> union_cast#6
+EDGES|CFG casts.c:<global>#13 -> primitive_cast#6
+EDGES|CFG casts.c:<global>#25 -> tag_test#6
+EDGES|CFG casts.c:<global>#43 -> casts.c:<global>#44
+EDGES|CFG casts.c:<global>#44 -> casts.c:<global>#45
+EDGES|CFG casts.c:<global>#45 -> casts.c:<global>#46
+EDGES|CFG casts.c:cast_p:ANY(1)#0 -> casts.c:cast_p:ANY(1)#4
+EDGES|CFG casts.c:cast_u:ANY(1)#0 -> casts.c:cast_u:ANY(1)#4
+EDGES|CFG casts.c:checktype:ANY(2)#0 -> casts.c:checktype:ANY(2)#6
+EDGES|CFG primitive_cast#10 -> primitive_cast#8
+EDGES|CFG primitive_cast#4 -> primitive_cast#11
+EDGES|CFG primitive_cast#5 -> primitive_cast#4
+EDGES|CFG primitive_cast#5 -> primitive_cast#9
+EDGES|CFG primitive_cast#6 -> primitive_cast#5
+EDGES|CFG primitive_cast#8 -> primitive_cast#4
+EDGES|CFG primitive_cast#9 -> primitive_cast#10
+EDGES|CFG tag_test#10 -> tag_test#15
+EDGES|CFG tag_test#11 -> tag_test#14
+EDGES|CFG tag_test#12 -> tag_test#13
+EDGES|CFG tag_test#13 -> tag_test#11
+EDGES|CFG tag_test#14 -> tag_test#10
+EDGES|CFG tag_test#15 -> tag_test#9
+EDGES|CFG tag_test#4 -> tag_test#16
+EDGES|CFG tag_test#5 -> tag_test#12
+EDGES|CFG tag_test#5 -> tag_test#4
+EDGES|CFG tag_test#6 -> tag_test#7
+EDGES|CFG tag_test#7 -> tag_test#5
+EDGES|CFG tag_test#9 -> tag_test#4
+EDGES|CFG union_cast#10 -> union_cast#8
+EDGES|CFG union_cast#4 -> union_cast#11
+EDGES|CFG union_cast#5 -> union_cast#4
+EDGES|CFG union_cast#5 -> union_cast#9
+EDGES|CFG union_cast#6 -> union_cast#5
+EDGES|CFG union_cast#8 -> union_cast#4
+EDGES|CFG union_cast#9 -> union_cast#10
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.and#0 -> <operator>.and#2
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS <operator>.equals#0 -> <operator>.equals#2
+EDGES|CONTAINS <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#2
+EDGES|CONTAINS D:casts.c:<global> -> D:primitive_cast
+EDGES|CONTAINS D:casts.c:<global> -> D:tag_test
+EDGES|CONTAINS D:casts.c:<global> -> D:union_cast
+EDGES|CONTAINS D:casts.c:<global> -> casts.c:<global>#0
+EDGES|CONTAINS D:casts.c:<global> -> casts.c:cast_p:ANY(1)#0
+EDGES|CONTAINS D:casts.c:<global> -> casts.c:cast_u:ANY(1)#0
+EDGES|CONTAINS D:casts.c:<global> -> casts.c:checktype:ANY(2)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:longunsigned
+EDGES|CONTAINS F:<includes> -> D:unionGCUnion
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:void*
+EDGES|CONTAINS F:casts.c -> D:casts.c:<global>
+EDGES|CONTAINS casts.c:<global>#0 -> casts.c:<global>#1
+EDGES|CONTAINS casts.c:<global>#0 -> casts.c:<global>#13
+EDGES|CONTAINS casts.c:<global>#0 -> casts.c:<global>#25
+EDGES|CONTAINS casts.c:<global>#0 -> casts.c:<global>#42
+EDGES|CONTAINS casts.c:<global>#0 -> casts.c:<global>#43
+EDGES|CONTAINS casts.c:<global>#0 -> casts.c:<global>#44
+EDGES|CONTAINS casts.c:<global>#0 -> casts.c:<global>#45
+EDGES|CONTAINS casts.c:<global>#1 -> union_cast#10
+EDGES|CONTAINS casts.c:<global>#1 -> union_cast#3
+EDGES|CONTAINS casts.c:<global>#1 -> union_cast#4
+EDGES|CONTAINS casts.c:<global>#1 -> union_cast#5
+EDGES|CONTAINS casts.c:<global>#1 -> union_cast#6
+EDGES|CONTAINS casts.c:<global>#1 -> union_cast#7
+EDGES|CONTAINS casts.c:<global>#1 -> union_cast#8
+EDGES|CONTAINS casts.c:<global>#1 -> union_cast#9
+EDGES|CONTAINS casts.c:<global>#13 -> primitive_cast#10
+EDGES|CONTAINS casts.c:<global>#13 -> primitive_cast#3
+EDGES|CONTAINS casts.c:<global>#13 -> primitive_cast#4
+EDGES|CONTAINS casts.c:<global>#13 -> primitive_cast#5
+EDGES|CONTAINS casts.c:<global>#13 -> primitive_cast#6
+EDGES|CONTAINS casts.c:<global>#13 -> primitive_cast#7
+EDGES|CONTAINS casts.c:<global>#13 -> primitive_cast#8
+EDGES|CONTAINS casts.c:<global>#13 -> primitive_cast#9
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#10
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#11
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#12
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#13
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#14
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#15
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#3
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#4
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#5
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#6
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#7
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#8
+EDGES|CONTAINS casts.c:<global>#25 -> tag_test#9
+EDGES|CONTAINS casts.c:cast_p:ANY(1)#0 -> casts.c:cast_p:ANY(1)#3
+EDGES|CONTAINS casts.c:cast_u:ANY(1)#0 -> casts.c:cast_u:ANY(1)#3
+EDGES|CONTAINS casts.c:checktype:ANY(2)#0 -> casts.c:checktype:ANY(2)#5
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#6 -> T:ANY
+EDGES|EVAL_TYPE casts.c:<global>#42 -> T:ANY
+EDGES|EVAL_TYPE casts.c:<global>#43 -> T:union_cast
+EDGES|EVAL_TYPE casts.c:<global>#44 -> T:primitive_cast
+EDGES|EVAL_TYPE casts.c:<global>#45 -> T:tag_test
+EDGES|EVAL_TYPE casts.c:<global>#46 -> T:ANY
+EDGES|EVAL_TYPE casts.c:cast_p:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE casts.c:cast_p:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE casts.c:cast_p:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE casts.c:cast_p:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE casts.c:cast_u:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE casts.c:cast_u:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE casts.c:cast_u:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE casts.c:cast_u:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE casts.c:checktype:ANY(2)#1 -> T:ANY
+EDGES|EVAL_TYPE casts.c:checktype:ANY(2)#2 -> T:ANY
+EDGES|EVAL_TYPE casts.c:checktype:ANY(2)#3 -> T:ANY
+EDGES|EVAL_TYPE casts.c:checktype:ANY(2)#4 -> T:ANY
+EDGES|EVAL_TYPE casts.c:checktype:ANY(2)#5 -> T:ANY
+EDGES|EVAL_TYPE casts.c:checktype:ANY(2)#6 -> T:ANY
+EDGES|EVAL_TYPE primitive_cast#1 -> T:void*
+EDGES|EVAL_TYPE primitive_cast#10 -> T:void*
+EDGES|EVAL_TYPE primitive_cast#11 -> T:void*
+EDGES|EVAL_TYPE primitive_cast#2 -> T:void*
+EDGES|EVAL_TYPE primitive_cast#3 -> T:void
+EDGES|EVAL_TYPE primitive_cast#5 -> T:ANY
+EDGES|EVAL_TYPE primitive_cast#6 -> T:void*
+EDGES|EVAL_TYPE primitive_cast#7 -> T:ANY
+EDGES|EVAL_TYPE primitive_cast#8 -> T:longunsigned
+EDGES|EVAL_TYPE primitive_cast#9 -> T:longunsigned
+EDGES|EVAL_TYPE tag_test#1 -> T:void*
+EDGES|EVAL_TYPE tag_test#10 -> T:ANY
+EDGES|EVAL_TYPE tag_test#11 -> T:ANY
+EDGES|EVAL_TYPE tag_test#12 -> T:void*
+EDGES|EVAL_TYPE tag_test#14 -> T:int
+EDGES|EVAL_TYPE tag_test#15 -> T:int
+EDGES|EVAL_TYPE tag_test#16 -> T:int
+EDGES|EVAL_TYPE tag_test#2 -> T:void*
+EDGES|EVAL_TYPE tag_test#3 -> T:void
+EDGES|EVAL_TYPE tag_test#5 -> T:ANY
+EDGES|EVAL_TYPE tag_test#6 -> T:void*
+EDGES|EVAL_TYPE tag_test#7 -> T:int
+EDGES|EVAL_TYPE tag_test#8 -> T:ANY
+EDGES|EVAL_TYPE tag_test#9 -> T:ANY
+EDGES|EVAL_TYPE union_cast#1 -> T:void*
+EDGES|EVAL_TYPE union_cast#10 -> T:void*
+EDGES|EVAL_TYPE union_cast#11 -> T:void*
+EDGES|EVAL_TYPE union_cast#2 -> T:void*
+EDGES|EVAL_TYPE union_cast#3 -> T:void
+EDGES|EVAL_TYPE union_cast#5 -> T:ANY
+EDGES|EVAL_TYPE union_cast#6 -> T:void*
+EDGES|EVAL_TYPE union_cast#7 -> T:ANY
+EDGES|EVAL_TYPE union_cast#8 -> T:unionGCUnion
+EDGES|EVAL_TYPE union_cast#9 -> T:unionGCUnion
+EDGES|PARAMETER_LINK <operator>.and#1 -> <operator>.and#3
+EDGES|PARAMETER_LINK <operator>.and#4 -> <operator>.and#6
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK <operator>.equals#1 -> <operator>.equals#3
+EDGES|PARAMETER_LINK <operator>.equals#4 -> <operator>.equals#6
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+EDGES|PARAMETER_LINK casts.c:cast_p:ANY(1)#1 -> casts.c:cast_p:ANY(1)#2
+EDGES|PARAMETER_LINK casts.c:cast_u:ANY(1)#1 -> casts.c:cast_u:ANY(1)#2
+EDGES|PARAMETER_LINK casts.c:checktype:ANY(2)#1 -> casts.c:checktype:ANY(2)#2
+EDGES|PARAMETER_LINK casts.c:checktype:ANY(2)#3 -> casts.c:checktype:ANY(2)#4
+EDGES|PARAMETER_LINK primitive_cast#1 -> primitive_cast#2
+EDGES|PARAMETER_LINK tag_test#1 -> tag_test#2
+EDGES|PARAMETER_LINK union_cast#1 -> union_cast#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:casts.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:longunsigned -> D:longunsigned
+EDGES|REF T:primitive_cast -> D:primitive_cast
+EDGES|REF T:tag_test -> D:tag_test
+EDGES|REF T:unionGCUnion -> D:unionGCUnion
+EDGES|REF T:union_cast -> D:union_cast
+EDGES|REF T:void -> D:void
+EDGES|REF T:void* -> D:void*
+EDGES|REF casts.c:<global>#43 -> casts.c:<global>#1
+EDGES|REF casts.c:<global>#44 -> casts.c:<global>#13
+EDGES|REF casts.c:<global>#45 -> casts.c:<global>#25
+EDGES|REF primitive_cast#10 -> primitive_cast#1
+EDGES|REF tag_test#12 -> tag_test#1
+EDGES|REF union_cast#10 -> union_cast#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:casts.c:<global> -> F:casts.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:longunsigned -> F:<includes>
+EDGES|SOURCE_FILE D:primitive_cast -> F:casts.c
+EDGES|SOURCE_FILE D:tag_test -> F:casts.c
+EDGES|SOURCE_FILE D:unionGCUnion -> F:<includes>
+EDGES|SOURCE_FILE D:union_cast -> F:casts.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:void* -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:casts.c:<global> -> F:casts.c
+EDGES|SOURCE_FILE casts.c:<global>#0 -> F:casts.c
+EDGES|SOURCE_FILE casts.c:<global>#1 -> F:casts.c
+EDGES|SOURCE_FILE casts.c:<global>#13 -> F:casts.c
+EDGES|SOURCE_FILE casts.c:<global>#25 -> F:casts.c
+EDGES|SOURCE_FILE casts.c:cast_p:ANY(1)#0 -> F:casts.c
+EDGES|SOURCE_FILE casts.c:cast_u:ANY(1)#0 -> F:casts.c
+EDGES|SOURCE_FILE casts.c:checktype:ANY(2)#0 -> F:casts.c
+FLOWS|REACHING_DEF[((((o)->tt_)) & 0x0F) == (3)] tag_test#9 -> tag_test#16
+FLOWS|REACHING_DEF[(((o)->tt_)) & 0x0F] tag_test#10 -> tag_test#16
+FLOWS|REACHING_DEF[(((o)->tt_)) & 0x0F] tag_test#10 -> tag_test#9
+FLOWS|REACHING_DEF[(GCUnion *)((o))] union_cast#8 -> union_cast#11
+FLOWS|REACHING_DEF[(long unsigned *)((o))] primitive_cast#8 -> primitive_cast#11
+FLOWS|REACHING_DEF[(o)->tt_] tag_test#11 -> tag_test#10
+FLOWS|REACHING_DEF[(o)->tt_] tag_test#11 -> tag_test#16
+FLOWS|REACHING_DEF[(o)->tt_] tag_test#11 -> tag_test#2
+FLOWS|REACHING_DEF[0x0F] tag_test#14 -> tag_test#10
+FLOWS|REACHING_DEF[0x0F] tag_test#14 -> tag_test#11
+FLOWS|REACHING_DEF[3] tag_test#15 -> tag_test#10
+FLOWS|REACHING_DEF[3] tag_test#15 -> tag_test#9
+FLOWS|REACHING_DEF[3] tag_test#7 -> tag_test#5
+FLOWS|REACHING_DEF[3] tag_test#7 -> tag_test#6
+FLOWS|REACHING_DEF[<RET>] primitive_cast#4 -> primitive_cast#11
+FLOWS|REACHING_DEF[<RET>] tag_test#4 -> tag_test#16
+FLOWS|REACHING_DEF[<RET>] union_cast#4 -> union_cast#11
+FLOWS|REACHING_DEF[GCUnion *] union_cast#9 -> union_cast#8
+FLOWS|REACHING_DEF[] <operator>.and#0 -> <operator>.and#1
+FLOWS|REACHING_DEF[] <operator>.and#0 -> <operator>.and#4
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] <operator>.equals#0 -> <operator>.equals#1
+FLOWS|REACHING_DEF[] <operator>.equals#0 -> <operator>.equals#4
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#4
+FLOWS|REACHING_DEF[] casts.c:<global>#0 -> casts.c:<global>#43
+FLOWS|REACHING_DEF[] casts.c:<global>#0 -> casts.c:<global>#44
+FLOWS|REACHING_DEF[] casts.c:<global>#0 -> casts.c:<global>#45
+FLOWS|REACHING_DEF[] casts.c:<global>#1 -> union_cast#1
+FLOWS|REACHING_DEF[] casts.c:<global>#1 -> union_cast#10
+FLOWS|REACHING_DEF[] casts.c:<global>#1 -> union_cast#6
+FLOWS|REACHING_DEF[] casts.c:<global>#1 -> union_cast#9
+FLOWS|REACHING_DEF[] casts.c:<global>#13 -> primitive_cast#1
+FLOWS|REACHING_DEF[] casts.c:<global>#13 -> primitive_cast#10
+FLOWS|REACHING_DEF[] casts.c:<global>#13 -> primitive_cast#6
+FLOWS|REACHING_DEF[] casts.c:<global>#13 -> primitive_cast#9
+FLOWS|REACHING_DEF[] casts.c:<global>#25 -> tag_test#1
+FLOWS|REACHING_DEF[] casts.c:<global>#25 -> tag_test#12
+FLOWS|REACHING_DEF[] casts.c:<global>#25 -> tag_test#14
+FLOWS|REACHING_DEF[] casts.c:<global>#25 -> tag_test#15
+FLOWS|REACHING_DEF[] casts.c:<global>#25 -> tag_test#6
+FLOWS|REACHING_DEF[] casts.c:<global>#25 -> tag_test#7
+FLOWS|REACHING_DEF[] casts.c:cast_p:ANY(1)#0 -> casts.c:cast_p:ANY(1)#1
+FLOWS|REACHING_DEF[] casts.c:cast_u:ANY(1)#0 -> casts.c:cast_u:ANY(1)#1
+FLOWS|REACHING_DEF[] casts.c:checktype:ANY(2)#0 -> casts.c:checktype:ANY(2)#1
+FLOWS|REACHING_DEF[] casts.c:checktype:ANY(2)#0 -> casts.c:checktype:ANY(2)#3
+FLOWS|REACHING_DEF[cast_p(o)] primitive_cast#5 -> primitive_cast#11
+FLOWS|REACHING_DEF[cast_p(o)] primitive_cast#5 -> primitive_cast#4
+FLOWS|REACHING_DEF[cast_u(o)] union_cast#5 -> union_cast#11
+FLOWS|REACHING_DEF[cast_u(o)] union_cast#5 -> union_cast#4
+FLOWS|REACHING_DEF[checktype(o, 3)] tag_test#5 -> tag_test#16
+FLOWS|REACHING_DEF[checktype(o, 3)] tag_test#5 -> tag_test#4
+FLOWS|REACHING_DEF[long unsigned *] primitive_cast#9 -> primitive_cast#8
+FLOWS|REACHING_DEF[o] primitive_cast#1 -> primitive_cast#2
+FLOWS|REACHING_DEF[o] primitive_cast#1 -> primitive_cast#6
+FLOWS|REACHING_DEF[o] primitive_cast#10 -> primitive_cast#11
+FLOWS|REACHING_DEF[o] primitive_cast#10 -> primitive_cast#2
+FLOWS|REACHING_DEF[o] primitive_cast#10 -> primitive_cast#8
+FLOWS|REACHING_DEF[o] primitive_cast#6 -> primitive_cast#10
+FLOWS|REACHING_DEF[o] primitive_cast#6 -> primitive_cast#11
+FLOWS|REACHING_DEF[o] primitive_cast#6 -> primitive_cast#2
+FLOWS|REACHING_DEF[o] primitive_cast#6 -> primitive_cast#5
+FLOWS|REACHING_DEF[o] tag_test#1 -> tag_test#2
+FLOWS|REACHING_DEF[o] tag_test#1 -> tag_test#6
+FLOWS|REACHING_DEF[o] tag_test#6 -> tag_test#11
+FLOWS|REACHING_DEF[o] tag_test#6 -> tag_test#12
+FLOWS|REACHING_DEF[o] tag_test#6 -> tag_test#16
+FLOWS|REACHING_DEF[o] tag_test#6 -> tag_test#2
+FLOWS|REACHING_DEF[o] tag_test#6 -> tag_test#5
+FLOWS|REACHING_DEF[o] union_cast#1 -> union_cast#2
+FLOWS|REACHING_DEF[o] union_cast#1 -> union_cast#6
+FLOWS|REACHING_DEF[o] union_cast#10 -> union_cast#11
+FLOWS|REACHING_DEF[o] union_cast#10 -> union_cast#2
+FLOWS|REACHING_DEF[o] union_cast#10 -> union_cast#8
+FLOWS|REACHING_DEF[o] union_cast#6 -> union_cast#10
+FLOWS|REACHING_DEF[o] union_cast#6 -> union_cast#11
+FLOWS|REACHING_DEF[o] union_cast#6 -> union_cast#2
+FLOWS|REACHING_DEF[o] union_cast#6 -> union_cast#5
+FLOWS|REACHING_DEF[p1] <operator>.and#1 -> <operator>.and#3
+FLOWS|REACHING_DEF[p1] <operator>.and#1 -> <operator>.and#5
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] <operator>.equals#1 -> <operator>.equals#3
+FLOWS|REACHING_DEF[p1] <operator>.equals#1 -> <operator>.equals#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p1] casts.c:cast_p:ANY(1)#1 -> casts.c:cast_p:ANY(1)#2
+FLOWS|REACHING_DEF[p1] casts.c:cast_p:ANY(1)#1 -> casts.c:cast_p:ANY(1)#4
+FLOWS|REACHING_DEF[p1] casts.c:cast_u:ANY(1)#1 -> casts.c:cast_u:ANY(1)#2
+FLOWS|REACHING_DEF[p1] casts.c:cast_u:ANY(1)#1 -> casts.c:cast_u:ANY(1)#4
+FLOWS|REACHING_DEF[p1] casts.c:checktype:ANY(2)#1 -> casts.c:checktype:ANY(2)#2
+FLOWS|REACHING_DEF[p1] casts.c:checktype:ANY(2)#1 -> casts.c:checktype:ANY(2)#6
+FLOWS|REACHING_DEF[p2] <operator>.and#4 -> <operator>.and#5
+FLOWS|REACHING_DEF[p2] <operator>.and#4 -> <operator>.and#6
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p2] <operator>.equals#4 -> <operator>.equals#5
+FLOWS|REACHING_DEF[p2] <operator>.equals#4 -> <operator>.equals#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+FLOWS|REACHING_DEF[p2] casts.c:checktype:ANY(2)#3 -> casts.c:checktype:ANY(2)#4
+FLOWS|REACHING_DEF[p2] casts.c:checktype:ANY(2)#3 -> casts.c:checktype:ANY(2)#6
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/final-oracle/workspace/proj/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/final-oracle/workspace/proj/cpg.bin.tmp
