@@ -2665,7 +2665,7 @@ impl Ctx<'_> {
         // of a primitive object's type (`unsigned char c = 0` registers
         // `unsigned`, as pinned by memcmp.c). A declaration without an explicit
         // initializer, including an array's implicit allocation, does not take
-        // that path. Check each declarator so an initialized function pointer
+        // that path. Check each declarator so an initialized nested pointer declarator
         // cannot register the base of an uninitialized ordinary neighbor.
         // Keep nonprimitive registration: tags also register their base via
         // independent paths (`struct Packet *p` still needs a Packet TYPE).
@@ -2675,7 +2675,11 @@ impl Ctx<'_> {
             .unwrap_or("ANY");
         let primitive = primitive_type(raw_type, TypeRole::Declaration).is_some();
         if items.iter().any(|item| {
-            (!primitive || item.init.is_some()) && find_function_declarator(item.decl).is_none()
+            if primitive {
+                item.init.is_some() && !nested_declarator_name(item.decl)
+            } else {
+                find_function_declarator(item.decl).is_none()
+            }
         }) {
             let registered = if primitive {
                 // CDT's extra decl-specifier registration uses the first word
@@ -2706,7 +2710,108 @@ impl Ctx<'_> {
         let depth = depth + usize::from(grouped);
         let mut group_order = 1;
         let order = if grouped { &mut group_order } else { order };
-        // Pass 2: initialiser assignments / alloc lowerings, in order.
+        // Pass 2: emit all array dimension/alloc lowerings before initializers.
+        for it in &items {
+            let dimensions = array_dimensions(it.decl);
+            let sizes: Vec<_> = dimensions.iter().flatten().copied().collect();
+            // Sized local arrays allocate before their explicit initializer.
+            // File-scope arrays only emit dimensions when no initializer exists,
+            // including an empty arrayInitializer for an unsized declaration.
+            if (file_scope && it.init.is_none() && !dimensions.is_empty())
+                || (!file_scope && dimensions.first().is_some_and(Option::is_some))
+            {
+                let ao = *order;
+                *order += 1;
+                // File-scope array declarations retain their dimensions in
+                // an arrayInitializer. Only block-scope arrays synthesize
+                // assignment -> alloc(type, dimensions); treating globals
+                // as allocations also inflates the project-wide alloc stub.
+                if file_scope {
+                    self.note_call("<operator>.arrayInitializer", sizes.len());
+                    self.line(
+                        depth,
+                        "CALL",
+                        P {
+                            name: Some("<operator>.arrayInitializer".into()),
+                            code: Some(esc(text(it.outer, b))),
+                            tfn: Some("ANY".into()),
+                            mfn: Some("<operator>.arrayInitializer".into()),
+                            order: Some(ao),
+                            dispatch: Some("STATIC_DISPATCH".into()),
+                            ..Default::default()
+                        },
+                    );
+                    for (i, size) in sizes.into_iter().enumerate() {
+                        let k = (i + 1) as i64;
+                        self.emit_expr(size, b, depth + 1, k, Some(k));
+                    }
+                    continue;
+                }
+                self.note_call("<operator>.assignment", 2);
+                self.note_call("<operator>.alloc", sizes.len() + 1);
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.assignment".into()),
+                        code: Some(esc(text(it.outer, b))),
+                        tfn: Some("void".into()),
+                        mfn: Some("<operator>.assignment".into()),
+                        order: Some(ao),
+                        arg: if grouped { Some(ao) } else { assign_arg },
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 1,
+                    "IDENTIFIER",
+                    P {
+                        name: Some(it.name.clone()),
+                        code: Some(if nested_declarator_name(it.decl) {
+                            String::new()
+                        } else {
+                            it.name.clone()
+                        }),
+                        tfn: Some(it.full_ty.clone()),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 1,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.alloc".into()),
+                        code: Some(esc(text(it.outer, b))),
+                        tfn: Some(it.full_ty.clone()),
+                        mfn: Some("<operator>.alloc".into()),
+                        order: Some(2),
+                        arg: Some(2),
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 2,
+                    "IDENTIFIER",
+                    P {
+                        name: Some(it.full_ty.clone()),
+                        code: Some(it.full_ty.clone()),
+                        tfn: Some(it.full_ty.clone()),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    },
+                );
+                for (i, sz) in sizes.into_iter().enumerate() {
+                    let k = (i + 2) as i64;
+                    self.emit_expr(sz, b, depth + 2, k, Some(k));
+                }
+            }
+        }
+        // Pass 3: explicit initializers follow every declarator's allocation.
         for it in items {
             if let Some(v) = it.init {
                 let ao = *order;
@@ -2732,7 +2837,7 @@ impl Ctx<'_> {
                     "IDENTIFIER",
                     P {
                         name: Some(it.name.clone()),
-                        code: Some(if find_function_declarator(it.decl).is_some() {
+                        code: Some(if nested_declarator_name(it.decl) {
                             String::new()
                         } else {
                             it.name.clone()
@@ -2744,95 +2849,6 @@ impl Ctx<'_> {
                     },
                 );
                 self.emit_expr(v, b, depth + 1, 2, Some(2));
-                continue;
-            }
-            let sizes = array_sizes(it.decl);
-            if !sizes.is_empty() {
-                let ao = *order;
-                *order += 1;
-                // File-scope array declarations retain their dimensions in
-                // an arrayInitializer. Only block-scope arrays synthesize
-                // assignment -> alloc(type, dimensions); treating globals
-                // as allocations also inflates the project-wide alloc stub.
-                if file_scope {
-                    self.note_call("<operator>.arrayInitializer", sizes.len());
-                    self.line(
-                        depth,
-                        "CALL",
-                        P {
-                            name: Some("<operator>.arrayInitializer".into()),
-                            code: Some(esc(text(it.decl, b))),
-                            tfn: Some("ANY".into()),
-                            mfn: Some("<operator>.arrayInitializer".into()),
-                            order: Some(ao),
-                            dispatch: Some("STATIC_DISPATCH".into()),
-                            ..Default::default()
-                        },
-                    );
-                    for (i, size) in sizes.into_iter().enumerate() {
-                        let k = (i + 1) as i64;
-                        self.emit_expr(size, b, depth + 1, k, Some(k));
-                    }
-                    continue;
-                }
-                self.note_call("<operator>.assignment", 2);
-                self.note_call("<operator>.alloc", sizes.len() + 1);
-                self.line(
-                    depth,
-                    "CALL",
-                    P {
-                        name: Some("<operator>.assignment".into()),
-                        code: Some(esc(text(it.decl, b))),
-                        tfn: Some("void".into()),
-                        mfn: Some("<operator>.assignment".into()),
-                        order: Some(ao),
-                        arg: if grouped { Some(ao) } else { assign_arg },
-                        dispatch: Some("STATIC_DISPATCH".into()),
-                        ..Default::default()
-                    },
-                );
-                self.line(
-                    depth + 1,
-                    "IDENTIFIER",
-                    P {
-                        name: Some(it.name.clone()),
-                        code: Some(it.name),
-                        tfn: Some(it.full_ty.clone()),
-                        order: Some(1),
-                        arg: Some(1),
-                        ..Default::default()
-                    },
-                );
-                self.line(
-                    depth + 1,
-                    "CALL",
-                    P {
-                        name: Some("<operator>.alloc".into()),
-                        code: Some(esc(text(it.decl, b))),
-                        tfn: Some(it.full_ty.clone()),
-                        mfn: Some("<operator>.alloc".into()),
-                        order: Some(2),
-                        arg: Some(2),
-                        dispatch: Some("STATIC_DISPATCH".into()),
-                        ..Default::default()
-                    },
-                );
-                self.line(
-                    depth + 2,
-                    "IDENTIFIER",
-                    P {
-                        name: Some(it.full_ty.clone()),
-                        code: Some(it.full_ty.clone()),
-                        tfn: Some(it.full_ty),
-                        order: Some(1),
-                        arg: Some(1),
-                        ..Default::default()
-                    },
-                );
-                for (i, sz) in sizes.into_iter().enumerate() {
-                    let k = (i + 2) as i64;
-                    self.emit_expr(sz, b, depth + 2, k, Some(k));
-                }
             }
         }
         (self.line_no > initializer).then_some(initializer)
@@ -3285,7 +3301,80 @@ impl Ctx<'_> {
                     },
                 );
             }
-            "cast_expression" => {
+            "initializer_list" | "subscript_range_designator" => {
+                let elements: Vec<_> = named_children(n)
+                    .into_iter()
+                    .filter(|child| child.kind() != "comment")
+                    .collect();
+                self.note_call("<operator>.arrayInitializer", elements.len());
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.arrayInitializer".into()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some("<operator>.arrayInitializer".into()),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                for (index, element) in elements.into_iter().enumerate() {
+                    let position = (index + 1) as i64;
+                    self.emit_expr(element, b, depth + 1, position, Some(position));
+                }
+            }
+            "initializer_pair" => {
+                // CDT groups array designators in a synthetic block. Nested
+                // indices each assign the value independently in source order.
+                self.line(
+                    depth,
+                    "BLOCK",
+                    P {
+                        tfn: Some("ANY".into()),
+                        order: Some(order),
+                        arg,
+                        ..Default::default()
+                    },
+                );
+                let mut cursor = n.walk();
+                let designators: Vec<_> = n
+                    .children_by_field_name("designator", &mut cursor)
+                    .collect();
+                if let Some(value) = n.child_by_field_name("value") {
+                    for (index, designator) in designators.into_iter().enumerate() {
+                        let target = match designator.kind() {
+                            "subscript_designator" => designator.named_child(0),
+                            "subscript_range_designator" => Some(designator),
+                            _ => None,
+                        };
+                        let Some(target) = target else {
+                            continue;
+                        };
+                        let position = (index + 1) as i64;
+                        self.note_call("<operator>.assignment", 2);
+                        self.line(
+                            depth + 1,
+                            "CALL",
+                            P {
+                                name: Some("<operator>.assignment".into()),
+                                code: Some(esc(text(n, b))),
+                                tfn: Some("void".into()),
+                                mfn: Some("<operator>.assignment".into()),
+                                order: Some(position),
+                                arg: Some(position),
+                                dispatch: Some("STATIC_DISPATCH".into()),
+                                ..Default::default()
+                            },
+                        );
+                        self.emit_expr(target, b, depth + 2, 1, Some(1));
+                        self.emit_expr(value, b, depth + 2, 2, Some(2));
+                    }
+                }
+            }
+            "cast_expression" | "compound_literal_expression" => {
                 // `(T)e` → <operator>.cast. CDT quirk: the type is the BASE
                 // type only — `(char *)x` types as `char` — while the
                 // TYPE_REF CODE keeps the raw descriptor text (`char *`).
@@ -3672,7 +3761,7 @@ fn declared_object_type(declaration: Node, decl: Node, b: &[u8]) -> String {
             }
         }
     }
-    format!("{base}{}", decl_suffix(decl, b))
+    format!("{base}{}", object_decl_suffix(decl, b, false))
 }
 
 fn prototype_declarations<'a>(root: Node<'a>, b: &[u8]) -> Vec<Node<'a>> {
@@ -3874,15 +3963,60 @@ fn decl_suffix(n: Node, b: &[u8]) -> String {
     parts.concat()
 }
 
-/// Size expressions of a (possibly multi-dim) array declarator, source order.
-fn array_sizes<'t>(n: Node<'t>) -> Vec<Node<'t>> {
+/// Object declarators use CDT's binding spelling; parameter/member renderers
+/// retain their distinct suffix ordering. A nested declarator contributes its
+/// pointer shape but not inner array dimensions (`*(*p[3])[2]` -> `*(*)[2]`).
+fn object_decl_suffix(n: Node, b: &[u8], nested_name: bool) -> String {
+    let nested = || {
+        n.child_by_field_name("declarator")
+            .map(|d| object_decl_suffix(d, b, nested_name))
+            .unwrap_or_default()
+    };
+    match n.kind() {
+        "pointer_declarator" | "abstract_pointer_declarator" => format!("*{}", nested()),
+        "array_declarator" | "abstract_array_declarator" if !nested_name => {
+            let size = n
+                .child_by_field_name("size")
+                .map(|sz| text(sz, b))
+                .unwrap_or_default();
+            format!("{}[{size}]", nested())
+        }
+        "array_declarator" | "abstract_array_declarator" => nested(),
+        "parenthesized_declarator" | "abstract_parenthesized_declarator" => {
+            let inner = n
+                .named_child(0)
+                .map(|d| object_decl_suffix(d, b, true))
+                .unwrap_or_default();
+            if inner.is_empty() {
+                inner
+            } else {
+                format!("({inner})")
+            }
+        }
+        _ => String::new(),
+    }
+}
+
+/// CDT's nested declarator name has empty CODE on synthesized assignment LHSs.
+fn nested_declarator_name(mut n: Node) -> bool {
+    loop {
+        if n.kind() == "parenthesized_declarator" {
+            return true;
+        }
+        let Some(next) = n.child_by_field_name("declarator") else {
+            return false;
+        };
+        n = next;
+    }
+}
+
+/// Array dimensions in source order; an absent expression retains unsized [].
+fn array_dimensions<'t>(n: Node<'t>) -> Vec<Option<Node<'t>>> {
     let mut out = Vec::new();
     let mut cur = n;
     loop {
         if cur.kind() == "array_declarator" {
-            if let Some(sz) = cur.child_by_field_name("size") {
-                out.push(sz);
-            }
+            out.push(cur.child_by_field_name("size"));
         } else if cur.kind() != "pointer_declarator" {
             break;
         }

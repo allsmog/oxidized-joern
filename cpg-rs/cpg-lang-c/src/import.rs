@@ -826,11 +826,30 @@ fn assign_source_lines(cpg: &mut Cpg, sources: &[(String, String)]) {
         .unwrap();
     for (path, source) in sources {
         let file = cpg.file_id(path);
-        let tokens = source_tokens(source);
+        let mut tokens = source_tokens(source);
         if tokens.is_empty() {
             continue;
         }
         let tree = parser.parse(source, None).unwrap();
+        // Array allocations and explicit initializers can describe the same
+        // declarator, and all allocations precede all initializers in the AST.
+        // Mark parsed declaration spans so each view can find its actual source
+        // without matching an identically spelled expression inside a dimension.
+        let mut pending = vec![tree.root_node()];
+        while let Some(node) = pending.pop() {
+            let mut cursor = node.walk();
+            if node.kind() == "declaration" {
+                for declarator in node.children_by_field_name("declarator", &mut cursor) {
+                    let start =
+                        tokens.partition_point(|token| token.start < declarator.start_byte());
+                    let end = tokens.partition_point(|token| token.start < declarator.end_byte());
+                    if start < end {
+                        tokens[start].declarator_len = Some(end - start);
+                    }
+                }
+            }
+            pending.extend(node.named_children(&mut cursor));
+        }
         let function_nodes: Vec<_> = crate::exact::translation_unit_items(tree.root_node())
             .into_iter()
             .filter(|node| node.kind() == "function_definition")
@@ -927,6 +946,7 @@ struct SourceToken<'a> {
     text: std::borrow::Cow<'a, str>,
     start: usize,
     line: u32,
+    declarator_len: Option<usize>,
 }
 
 /// Lex only enough to recover source spans: comments are ignored, quoted
@@ -1009,6 +1029,7 @@ fn source_tokens(source: &str) -> Vec<SourceToken<'_>> {
                 },
                 start,
                 line: token_line,
+                declarator_len: None,
             });
         }
     }
@@ -1064,6 +1085,10 @@ fn locate_ast(
         matched.clone().unwrap_or_else(|| range.clone())
     };
     let mut next = child_range.start;
+    // Each declaration view advances independently: an alloc for a later
+    // declarator must not consume an earlier scalar/array initializer. The
+    // ordinary statement cursor still advances past both views.
+    let mut declaration_next = [child_range.start; 2];
     let mut children: Vec<_> = cpg.out_kind(node, EdgeKind::Ast).collect();
     children.sort_by_key(|&child| (cpg.order_of(child), child));
     for child in children {
@@ -1080,7 +1105,44 @@ fn locate_ast(
             cpg.set_line(child, line);
             continue;
         }
-        let end = locate_ast(cpg, child, tokens, next..child_range.end, line);
+        let declaration_span = if cpg.kind_of(child) == NodeKind::Call
+            && cpg.name_of(child) == Some("<operator>.assignment")
+            && cpg.type_full_name_of(child) == Some("void")
+        {
+            let role = usize::from(
+                cpg.out_kind(child, EdgeKind::Ast)
+                    .any(|argument| cpg.name_of(argument) == Some("<operator>.alloc")),
+            );
+            let needle = source_tokens(cpg.code_of(child).unwrap_or(""));
+            let span = (!needle.is_empty())
+                .then(|| {
+                    tokens[declaration_next[role]..child_range.end]
+                        .windows(needle.len())
+                        .position(|window| {
+                            window[0].declarator_len == Some(needle.len())
+                                && window.iter().zip(&needle).all(|(a, b)| a.text == b.text)
+                        })
+                        .map(|offset| {
+                            declaration_next[role] + offset
+                                ..declaration_next[role] + offset + needle.len()
+                        })
+                })
+                .flatten();
+            if let Some(span) = &span {
+                declaration_next[role] = span.end;
+            }
+            span
+        } else {
+            None
+        };
+        let is_declaration_view = declaration_span.is_some();
+        let end = locate_ast(
+            cpg,
+            child,
+            tokens,
+            declaration_span.unwrap_or(next..child_range.end),
+            line,
+        );
         // LOCAL and mirrored parameters describe overlapping source with the
         // assignment/parameter nodes that follow, and do not consume it.
         if !matches!(
@@ -1090,7 +1152,12 @@ fn locate_ast(
                 | NodeKind::MethodParameterOut
                 | NodeKind::JumpTarget
         ) {
-            next = end;
+            next = next.max(end);
+            if !is_declaration_view {
+                declaration_next
+                    .iter_mut()
+                    .for_each(|position| *position = (*position).max(next));
+            }
         }
     }
     matched.map_or(next, |span| span.end.max(next))
