@@ -1,0 +1,37 @@
+{
+  "oracleVersion": "4.0.555",
+  "baselineRevision": "c5ea712dbfd03d114af4450f79c89629a360b6a6",
+  "currentRevision": "ad1cee71db0dc1df930ca53d875ea0147bc315e0",
+  "comparison": "Complete AST, NODES, EDGES, FLOWS projection with only AST transport prefix removed.",
+  "cases": [
+    {
+      "name": "numeric-static",
+      "inputSha256": {
+        "mixed.c": "24d3fcc3bf364118671024ef1d272fcaf7c0be749f2a845ee0330f7e21f037e2"
+      },
+      "rawOracleSha256": "0c006b21b85e290c3c0aebb0bc743a54793d26bcb2cd69f15fbcc0f45d5a129e",
+      "referenceSha256": "97f6e9785bb0dc063036fc404835ce03c2b7efa1d24eac42461f34aec83fb120",
+      "records": 531,
+      "methodBlocks": 11,
+      "baselineCompleteExact": false,
+      "baselineDiffLines": 562,
+      "currentCompleteExact": true
+    },
+    {
+      "name": "static-parentheses",
+      "inputSha256": {
+        "a.c": "6d05bab632d6f96486f1c0ba7a51fac3b9967483cb3fba83998677667e741a90",
+        "b.c": "cf94fe0637b89bc1f09b79f93b45ab355c545a43327fac95ea71cca7e4fe352e"
+      },
+      "rawOracleSha256": "5dfd3d20a9192c3a85e8fbb84130202bf758767430aec253ef76750dc1187697",
+      "referenceSha256": "8ca49d992c3a0388a7d5b2041f56a0718e698c6c1d05268fe5d36fb56a0eacb3",
+      "records": 345,
+      "methodBlocks": 9,
+      "baselineCompleteExact": false,
+      "baselineDiffLines": 214,
+      "currentCompleteExact": true
+    }
+  ],
+  "currentBinarySha256": "6b69b0ca16f6bfdbdbc09f1df32b0be3e18299b3e2bdbc0108e044a61df10a78",
+  "baselineBinarySha256": "f8293e5a34811b908f3ee11dea5ed1a3ff9933ffb595bf057ed3a1e234f4ea93"
+}
