@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/sixth-interactions/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/sixth-interactions/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/sixth-interactions/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 11.64181791601004,
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "stdoutSha256": "7055af12fcd0041dc7f433d8c80bebeb189b2e6c6621fa0ef177e13023a86226",
+  "inputs": {
+    "block_macro_parameter_shadow/api.h": "52a3dd6d5ca29ae115720b12147621aeee5064dea6ee1725ef8cd448e163d1a7",
+    "block_macro_parameter_shadow/main.c": "1ff2634a86ecbe6c184b04b47012392f9fdfa860bc79b5e88ef67aab99fb090b",
+    "macro_parameter_shadow/api.h": "f31bcac5da7804b05bcd5782b6a5e6b911ca512037a9b09793e040c6b5916ea2",
+    "macro_parameter_shadow/main.c": "903370b3404dfe9faab4fe325cdf861ea0e642e44bae7821a50b283bcd1483a7",
+    "header_isolated_cast/api.h": "bba211cee74aa178504e3fa5bc41e956a978eb062d5d05e5c665bbd2f78bed63",
+    "header_isolated_cast/a.c": "c069871ff33878e9ee5e26e8b01a9885ad5eeb171a48f02a879d052a7e0fa7a7",
+    "header_isolated_cast/b.c": "3baa1cbf7341404b4e034e73921621db0f7888d3c04ee73d1a68211bd6c98293",
+    "header_alias_return/api.h": "15a50757368ab4301d7d0c300155874464a98274b744b9c0a90fac94656eada3",
+    "header_alias_return/main.c": "e4905ce6c72f9ea2df769c7f5e3d3e9598da54737c5a3f6dda019ee7d3b74945",
+    "header_cast_size_return/api.h": "5c5c6863e99585c76a4a205e611720bc468df2ed827b2cdffdef56b935b46ead",
+    "header_cast_size_return/main.c": "11ba3e906d463b548a2a0148cf489573dd300c11fca21b6e958e7e75f35aa702",
+    "header_order_cast/api.h": "bba211cee74aa178504e3fa5bc41e956a978eb062d5d05e5c665bbd2f78bed63",
+    "header_order_cast/main.c": "05a07eaca774e6f35955a3d8d19dcc9b8328887bb217bf9b1b9dcb7027bd1bea"
+  }
+}

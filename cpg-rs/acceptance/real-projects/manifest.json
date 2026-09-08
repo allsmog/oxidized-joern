@@ -10,18 +10,31 @@
       "sourceRoot": ".",
       "license": "Zlib",
       "licenseFile": "LICENSE",
-      "extensions": ["c", "h"],
-      "excludes": ["/contrib/", "/test/", "/examples/", "/amiga/", "/msdos/", "/win32/"],
+      "extensions": [
+        "c",
+        "h"
+      ],
+      "excludes": [
+        "/contrib/",
+        "/test/",
+        "/examples/",
+        "/amiga/",
+        "/msdos/",
+        "/win32/"
+      ],
       "expected": {
         "sourceFiles": 26,
-        "nodes": 66237,
-        "graphSha256": "557bca5a8db74cf9c24118d4b88317b6389495452161cc20dfb6c52a5a84ad8f",
-        "edgesSha256": "e95753bf2b8daf045f94c54d9485899619dee93889cd7e7fdf37d834be0bd428",
-        "exportSha256": "2400960df7ddd063de0b3eedf4c5ef249793a2eeb2d53107b8c6e9764a398c72",
+        "nodes": 66123,
+        "graphSha256": "301fec3e923e4c13982c3c1dc9c864d46ff59d7862ff2d888dd2056ff1bbce6d",
+        "edgesSha256": "9e7a8e73e93ae902882c2e189b6621d6eda407bdf63ff079f46de873ea9bc0df",
+        "exportSha256": "df4e3a7b73a8343d052e47cd92aa3d386e2020cb1688abf17d3cf651538a62bb",
         "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
         "findings": 0
       },
-      "budgets": {"buildSeconds": 20, "peakRssMiB": 512}
+      "budgets": {
+        "buildSeconds": 20,
+        "peakRssMiB": 512
+      }
     },
     {
       "id": "lua-5.4.7",
@@ -32,18 +45,24 @@
       "sourceRoot": "src",
       "license": "MIT",
       "licenseFile": "doc/readme.html",
-      "extensions": ["c", "h"],
+      "extensions": [
+        "c",
+        "h"
+      ],
       "excludes": [],
       "expected": {
         "sourceFiles": 61,
-        "nodes": 119201,
-        "graphSha256": "519c76efde2b16300d23af0b5b31b04eeff6fa4d7741794822a9452cc5193d3d",
-        "edgesSha256": "1126b63b285c673a3e5d310a9f833076a60389f220a475783058cfd8b9079684",
-        "exportSha256": "85673156c8516b8e77caaf42a982ba930cfabd877c725ec87a417f5f27152b43",
+        "nodes": 119088,
+        "graphSha256": "c95020e923eed15712d5e58629e3115fe0627fcea441ea75115c2f08bf42529e",
+        "edgesSha256": "19195bff687c50cd0632d2cd0be47a8905ec20ebb90cdb5a4a85307de7cfce08",
+        "exportSha256": "e708ca0ba07418b9f8eb30869a2b8bdf1668b1f7600b95b5cf10cba9552c8265",
         "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
         "findings": 0
       },
-      "budgets": {"buildSeconds": 20, "peakRssMiB": 1024}
+      "budgets": {
+        "buildSeconds": 20,
+        "peakRssMiB": 1024
+      }
     }
   ]
 }

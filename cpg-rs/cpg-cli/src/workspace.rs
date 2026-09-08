@@ -40,7 +40,7 @@ use std::time::{Duration, Instant};
 /// v14: C type roles, storage modifiers, blocks, and reaching definitions expanded.
 /// v15: C CFG/RD scheduling, array initializers, and supplied-header macros.
 /// v16: C field macros, nested cast tokens, typedef aggregates and recovery.
-pub const GRAPH_SHAPE_VERSION: u32 = 16;
+pub const GRAPH_SHAPE_VERSION: u32 = 17;
 
 const CACHE_MANIFEST_VERSION: u32 = 1;
 const CACHE_GRAPH_FORMAT: &str = "CPG2";

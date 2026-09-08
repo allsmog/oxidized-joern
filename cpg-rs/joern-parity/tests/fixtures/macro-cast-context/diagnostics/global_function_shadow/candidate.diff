@@ -1,0 +1,117 @@
+--- joern
++++ candidate
+@@ -9,6 +9,12 @@
+   METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
++
++METHOD NAME=T CODE=int T(int x); FULL_NAME=T SIGNATURE=int(int) ORDER=1
++  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
++  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
++  BLOCK TYPE_FULL_NAME=ANY ORDER=2
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+   METHOD NAME=value CODE=int value(int x){return (T)(x);} FULL_NAME=value SIGNATURE=int(int) ORDER=1
+@@ -22,8 +28,7 @@
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     TYPE_DECL NAME=T CODE=typedef int T; FULL_NAME=T ORDER=1
+-    UNKNOWN CODE=T(int x) ORDER=2
+-    METHOD_REF CODE=value TYPE_FULL_NAME=value METHOD_FULL_NAME=value ORDER=3
++    METHOD_REF CODE=value TYPE_FULL_NAME=value METHOD_FULL_NAME=value ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=value CODE=int value(int x){return (T)(x);} FULL_NAME=value SIGNATURE=int(int) ORDER=1
+@@ -61,10 +66,10 @@
+ EDGES|CALL value#5 -> <operator>.cast#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
++EDGES|CFG T#0 -> T#4
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#12
+ EDGES|CFG main.c:<global>#1 -> value#6
+ EDGES|CFG main.c:<global>#12 -> main.c:<global>#13
+-EDGES|CFG main.c:<global>#13 -> main.c:<global>#14
+ EDGES|CFG value#4 -> value#8
+ EDGES|CFG value#5 -> value#4
+ EDGES|CFG value#6 -> value#7
+@@ -72,17 +77,18 @@
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+ EDGES|CONTAINS D:main.c:<global> -> D:value
++EDGES|CONTAINS D:main.c:<global> -> T#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
++EDGES|CONTAINS T#0 -> T#3
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#12
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
+ EDGES|CONTAINS main.c:<global>#1 -> value#3
+ EDGES|CONTAINS main.c:<global>#1 -> value#4
+ EDGES|CONTAINS main.c:<global>#1 -> value#5
+@@ -96,9 +102,13 @@
+ EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
++EDGES|EVAL_TYPE T#1 -> T:int
++EDGES|EVAL_TYPE T#2 -> T:int
++EDGES|EVAL_TYPE T#3 -> T:ANY
++EDGES|EVAL_TYPE T#4 -> T:int
+ EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#13 -> T:value
+-EDGES|EVAL_TYPE main.c:<global>#14 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#12 -> T:value
++EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+ EDGES|EVAL_TYPE value#1 -> T:int
+ EDGES|EVAL_TYPE value#2 -> T:int
+ EDGES|EVAL_TYPE value#3 -> T:void
+@@ -108,6 +118,7 @@
+ EDGES|EVAL_TYPE value#8 -> T:int
+ EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+ EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
++EDGES|PARAMETER_LINK T#1 -> T#2
+ EDGES|PARAMETER_LINK value#1 -> value#2
+ EDGES|REF NB:<global> -> NS:<global>
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+@@ -117,7 +128,7 @@
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:value -> D:value
+ EDGES|REF T:void -> D:void
+-EDGES|REF main.c:<global>#13 -> main.c:<global>#1
++EDGES|REF main.c:<global>#12 -> main.c:<global>#1
+ EDGES|REF value#7 -> value#1
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+@@ -128,6 +139,7 @@
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
++EDGES|SOURCE_FILE T#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#11 -> F:main.c
+@@ -137,7 +149,8 @@
+ FLOWS|REACHING_DEF[T] value#6 -> value#5
+ FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+ FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#13
++FLOWS|REACHING_DEF[] T#0 -> T#1
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#12
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#1
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#6
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#7
+@@ -145,6 +158,8 @@
+ FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+ FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+ FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
++FLOWS|REACHING_DEF[x] T#1 -> T#2
++FLOWS|REACHING_DEF[x] T#1 -> T#4
+ FLOWS|REACHING_DEF[x] value#1 -> value#2
+ FLOWS|REACHING_DEF[x] value#1 -> value#7
+ FLOWS|REACHING_DEF[x] value#7 -> value#2

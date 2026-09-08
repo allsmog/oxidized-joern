@@ -1,0 +1,11 @@
+--- joern
++++ getendpos-before.diff
+@@ -11,7 +11,7 @@
+     LOCAL NAME=pos CODE=lua_Integer pos TYPE_FULL_NAME=lua_Integer ORDER=1
+     CALL NAME=<operator>.assignment CODE=pos = luaL_optinteger(L, arg, def) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=pos CODE=pos TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+-      CALL NAME=luaL_optinteger CODE=luaL_optinteger(L, arg, def) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=luaL_optinteger ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++      CALL NAME=luaL_optinteger CODE=luaL_optinteger(L, arg, def) TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=luaL_optinteger ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+         IDENTIFIER NAME=arg CODE=arg TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+         IDENTIFIER NAME=def CODE=def TYPE_FULL_NAME=lua_Integer ORDER=3 ARGUMENT_INDEX=3

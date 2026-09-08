@@ -1,0 +1,99 @@
+{
+  "inputs": {
+    "oracle": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/fresh-real-oracles/lua-5.4.7-full/joern.stdout",
+      "sha256": "36079a6db169b6e450b9d4d91dc0025beb076832e497e0eeb83c11047f8b643e"
+    },
+    "before": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential/lua-5.4.7-full/rust.stdout",
+      "sha256": "22a36fa4c4bb98de2f1136235654671ec62e587be053e615ce66d66537630f9b"
+    },
+    "candidate": {
+      "path": ".local/typedef-existence/lua.stdout",
+      "sha256": "2695f81be8c87e6cf87c5abc409453df96c6fa01e8f5673f7d086259f2d91f36"
+    }
+  },
+  "exactMethods": {
+    "before": 1394,
+    "candidate": 1394,
+    "lost": [],
+    "gained": []
+  },
+  "focus": {
+    "fitsC": {
+      "beforeExact": false,
+      "candidateExact": false,
+      "completeDiffLines": 20,
+      "pointerCalls": {
+        "oracle": 1,
+        "before": 0,
+        "candidate": 1
+      },
+      "casts": {
+        "oracle": 1,
+        "before": 2,
+        "candidate": 1
+      }
+    },
+    "isCint": {
+      "beforeExact": false,
+      "candidateExact": false,
+      "completeDiffLines": 32,
+      "pointerCalls": {
+        "oracle": 2,
+        "before": 0,
+        "candidate": 2
+      },
+      "casts": {
+        "oracle": 0,
+        "before": 2,
+        "candidate": 0
+      }
+    },
+    "intarith": {
+      "beforeExact": false,
+      "candidateExact": false,
+      "completeDiffLines": 59,
+      "pointerCalls": {
+        "oracle": 19,
+        "before": 0,
+        "candidate": 18
+      },
+      "casts": {
+        "oracle": 10,
+        "before": 28,
+        "candidate": 10
+      }
+    },
+    "luaV_shiftl": {
+      "beforeExact": false,
+      "candidateExact": false,
+      "completeDiffLines": 41,
+      "pointerCalls": {
+        "oracle": 4,
+        "before": 0,
+        "candidate": 4
+      },
+      "casts": {
+        "oracle": 4,
+        "before": 8,
+        "candidate": 4
+      }
+    },
+    "getendpos": {
+      "beforeExact": false,
+      "candidateExact": false,
+      "completeDiffLines": 11,
+      "pointerCalls": {
+        "oracle": 0,
+        "before": 0,
+        "candidate": 0
+      },
+      "casts": {
+        "oracle": 4,
+        "before": 4,
+        "candidate": 4
+      }
+    }
+  }
+}

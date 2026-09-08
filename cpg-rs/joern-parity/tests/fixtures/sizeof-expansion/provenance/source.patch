@@ -1,0 +1,46 @@
+diff --git a/cpg-rs/cpg-lang-c/src/exact.rs b/cpg-rs/cpg-lang-c/src/exact.rs
+index d990ece7b..698044887 100644
+--- a/cpg-rs/cpg-lang-c/src/exact.rs
++++ b/cpg-rs/cpg-lang-c/src/exact.rs
+@@ -6059,6 +6059,41 @@ fn expand_body_expression(
+                     call
+                 }
+             }
++            "sizeof_expression" => {
++                if node.child_by_field_name("type").is_some() {
++                    format!("sizeof ({})", child("type"))
++                } else if let Some(mut value) = node.child_by_field_name("value") {
++                    // CDT renders the operator token separately from its
++                    // operand, and removes trivia just inside parentheses.
++                    // Ordinary source CODE bypasses this expansion renderer.
++                    let mut parentheses = 0;
++                    while value.kind() == "parenthesized_expression" {
++                        let mut children = named_children(value)
++                            .into_iter()
++                            .filter(|n| n.kind() != "comment");
++                        let Some(inner) = children.next() else {
++                            break;
++                        };
++                        // Error recovery can retain multiple named children.
++                        // Keep that complete spelling instead of dropping a
++                        // sibling while removing only surrounding trivia.
++                        if children.next().is_some() {
++                            break;
++                        }
++                        parentheses += 1;
++                        value = inner;
++                    }
++                    let operand = render(value, bytes, macros, disabled, budget);
++                    format!(
++                        "sizeof {}{}{}",
++                        "(".repeat(parentheses),
++                        operand,
++                        ")".repeat(parentheses)
++                    )
++                } else {
++                    raw.to_string()
++                }
++            }
+             "offsetof_expression" => {
+                 let ty = child("type");
+                 let member = child("member");

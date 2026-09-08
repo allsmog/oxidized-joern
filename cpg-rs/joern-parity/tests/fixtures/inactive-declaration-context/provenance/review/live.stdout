@@ -1,0 +1,1051 @@
+CASE|active_undef
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/input/active_undef --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace/workspace/active_undef/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace/workspace/active_undef/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 16 ms (64% on mutations). 10 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 3 ms (52% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 3 ms (64% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 10 ms (17% on mutations). 9 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 2 ms (56% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 3 ms (26% on mutations). 6 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 3 ms (15% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 1 ms (31% on mutations). 15 + 0 changes committed from 10 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 1 ms (31% on mutations). 3 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (43% on mutations). 19 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 2 ms (36% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 16 ms (59% on mutations). 9 + 0 changes committed from 3 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 14 ms (54% on mutations). 18 + 0 changes committed from 3 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 3 ms (17% on mutations). 0 + 0 changes committed from 3 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 6 ms (97% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 2 ms (22% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 1 ms (34% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 2 ms (23% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 5 ms (82% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (47% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 3 ms (88% on mutations). 2 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 1 ms (47% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 7 ms (97% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: <operator>.assignment in <empty>
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for <operator>.assignment: 2
+[INFO ] Number of definitions for main.c:<global>: 6
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 74 ms (1% on mutations). 20 + 0 changes committed from 3 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (75% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    LOCAL NAME=N CODE=<unknown> N TYPE_FULL_NAME=ANY ORDER=0
+AST|    LOCAL NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=value = N TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      IDENTIFIER NAME=N CODE=<unknown> N TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|    LOCAL NAME=after CODE=int after TYPE_FULL_NAME=int ORDER=3
+AST|    CALL NAME=<operator>.assignment CODE=after = N TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=after CODE=after TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      IDENTIFIER NAME=N CODE=<unknown> N TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+LOC|main.c:<global>#1 BLOCK LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|<includes>:<global>#1 BLOCK 
+LOC|<operator>.assignment#2 BLOCK 
+LOC|main.c:<global>#4 CALL NAME=<operator>.assignment CODE=value = N LINE_NUMBER=5 COLUMN_NUMBER=5
+LOC|main.c:<global>#8 CALL NAME=<operator>.assignment CODE=after = N LINE_NUMBER=7 COLUMN_NUMBER=5
+LOC|F:main.c FILE NAME=main.c
+LOC|F:<includes> FILE NAME=<includes>
+LOC|F:<unknown> FILE NAME=<unknown>
+LOC|main.c:<global>#5 IDENTIFIER NAME=value CODE=value LINE_NUMBER=5 COLUMN_NUMBER=5
+LOC|main.c:<global>#6 IDENTIFIER NAME=N CODE=<unknown> N LINE_NUMBER=5 COLUMN_NUMBER=13
+LOC|main.c:<global>#9 IDENTIFIER NAME=after CODE=after LINE_NUMBER=7 COLUMN_NUMBER=5
+LOC|main.c:<global>#10 IDENTIFIER NAME=N CODE=<unknown> N LINE_NUMBER=7 COLUMN_NUMBER=13
+LOC|main.c:<global>#3 LOCAL NAME=value CODE=int value LINE_NUMBER=5 COLUMN_NUMBER=5
+LOC|main.c:<global>#7 LOCAL NAME=after CODE=int after LINE_NUMBER=7 COLUMN_NUMBER=5
+LOC|main.c:<global>#2 LOCAL NAME=N CODE=<unknown> N LINE_NUMBER=5 COLUMN_NUMBER=13
+LOC|main.c:<global>#0 METHOD NAME=<global> CODE=<global> LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|<includes>:<global>#0 METHOD NAME=<global> CODE=<global> LINE_NUMBER=1
+LOC|<operator>.assignment#0 METHOD NAME=<operator>.assignment
+LOC|<operator>.assignment#1 METHOD_PARAMETER_IN NAME=p1 CODE=p1
+LOC|<operator>.assignment#4 METHOD_PARAMETER_IN NAME=p2 CODE=p2
+LOC|<operator>.assignment#3 METHOD_PARAMETER_OUT NAME=p1 CODE=p1
+LOC|<operator>.assignment#6 METHOD_PARAMETER_OUT NAME=p2 CODE=p2
+LOC|main.c:<global>#11 METHOD_RETURN CODE=RET LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|<includes>:<global>#2 METHOD_RETURN CODE=RET LINE_NUMBER=1
+LOC|<operator>.assignment#5 METHOD_RETURN CODE=RET
+LOC|NS:<global> NAMESPACE NAME=<global>
+LOC|NB:<global> NAMESPACE_BLOCK NAME=<global>
+LOC|NB:main.c:<global> NAMESPACE_BLOCK NAME=<global>
+LOC|NB:<includes>:<global> NAMESPACE_BLOCK NAME=<global>
+LOC|D:main.c:<global> TYPE_DECL NAME=<global> CODE=<global> LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|D:ANY TYPE_DECL NAME=ANY CODE=ANY
+LOC|D:int TYPE_DECL NAME=int CODE=int
+LOC|D:void TYPE_DECL NAME=void CODE=void
+EDGES|ARGUMENT main.c:<global>#4 -> main.c:<global>#5
+EDGES|ARGUMENT main.c:<global>#4 -> main.c:<global>#6
+EDGES|ARGUMENT main.c:<global>#8 -> main.c:<global>#10
+EDGES|ARGUMENT main.c:<global>#8 -> main.c:<global>#9
+EDGES|CALL main.c:<global>#4 -> <operator>.assignment#0
+EDGES|CALL main.c:<global>#8 -> <operator>.assignment#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#5
+EDGES|CFG main.c:<global>#10 -> main.c:<global>#8
+EDGES|CFG main.c:<global>#4 -> main.c:<global>#9
+EDGES|CFG main.c:<global>#5 -> main.c:<global>#6
+EDGES|CFG main.c:<global>#6 -> main.c:<global>#4
+EDGES|CFG main.c:<global>#8 -> main.c:<global>#11
+EDGES|CFG main.c:<global>#9 -> main.c:<global>#10
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#4
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#5
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#6
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#8
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#9
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#3 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#4 -> T:void
+EDGES|EVAL_TYPE main.c:<global>#5 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#7 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#8 -> T:void
+EDGES|EVAL_TYPE main.c:<global>#9 -> T:int
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#10 -> main.c:<global>#2
+EDGES|REF main.c:<global>#5 -> main.c:<global>#3
+EDGES|REF main.c:<global>#6 -> main.c:<global>#2
+EDGES|REF main.c:<global>#9 -> main.c:<global>#7
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#10 -> main.c:<global>#11
+FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#10 -> main.c:<global>#8
+FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#10 -> main.c:<global>#9
+FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#6 -> main.c:<global>#10
+FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#6 -> main.c:<global>#4
+FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#6 -> main.c:<global>#5
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#10
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#6
+FLOWS|REACHING_DEF[after = N] main.c:<global>#8 -> main.c:<global>#11
+FLOWS|REACHING_DEF[after] main.c:<global>#9 -> main.c:<global>#11
+FLOWS|REACHING_DEF[after] main.c:<global>#9 -> main.c:<global>#8
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[value = N] main.c:<global>#4 -> main.c:<global>#11
+FLOWS|REACHING_DEF[value] main.c:<global>#5 -> main.c:<global>#11
+FLOWS|REACHING_DEF[value] main.c:<global>#5 -> main.c:<global>#4
+CASE|inactive_aggregate
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/input/inactive_aggregate --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace/workspace/inactive_aggregate/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace/workspace/inactive_aggregate/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 1 ms (70% on mutations). 19 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 1 ms (81% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 1 ms (65% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 1 ms (78% on mutations). 7 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (70% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 1 ms (85% on mutations). 6 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 1 ms (58% on mutations). 8 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 1 ms (42% on mutations). 37 + 0 changes committed from 19 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 1 ms (53% on mutations). 8 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (48% on mutations). 33 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (68% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 12 ms (9% on mutations). 22 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 1 ms (41% on mutations). 38 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 2 ms (19% on mutations). 3 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (76% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 1 ms (64% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (71% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (67% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (72% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (70% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 0 ms (49% on mutations). 5 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (75% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (75% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: <operator>.arrayInitializer in <empty>
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: Packet.<clinit>:Packet() in main.c
+[INFO ] Calculating reaching definitions for: Bag.<clinit>:Bag() in main.c
+[INFO ] Calculating reaching definitions for: use in main.c
+[INFO ] Calculating reaching definitions for: main.c:WIDTH:int(0) in main.c
+[INFO ] Number of definitions for main.c:WIDTH:int(0): 0
+[INFO ] Number of definitions for Packet.<clinit>:Packet(): 3
+[INFO ] Number of definitions for use: 2
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for Bag.<clinit>:Bag(): 3
+[INFO ] Number of definitions for <operator>.arrayInitializer: 1
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 5 ms (12% on mutations). 25 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (77% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Bag.<clinit>:Bag() ORDER=2
+AST|  BLOCK ORDER=1
+AST|    CALL NAME=<operator>.arrayInitializer CODE=bytes[WIDTH] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=WIDTH CODE=WIDTH TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:WIDTH:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+AST|  MODIFIER ORDER=2
+AST|  MODIFIER ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Bag ORDER=4
+AST|
+AST|METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Packet.<clinit>:Packet() ORDER=2
+AST|  BLOCK ORDER=1
+AST|    CALL NAME=<operator>.arrayInitializer CODE=bytes[WIDTH] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=WIDTH CODE=WIDTH TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:WIDTH:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+AST|  MODIFIER ORDER=2
+AST|  MODIFIER ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Packet ORDER=4
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  TYPE_DECL NAME=Packet CODE=struct Packet { char bytes[WIDTH]; } FULL_NAME=Packet ORDER=1
+AST|    MEMBER NAME=bytes CODE=bytes[WIDTH] TYPE_FULL_NAME=char[2] ORDER=1
+AST|    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Packet.<clinit>:Packet() ORDER=2
+AST|      BLOCK ORDER=1
+AST|        CALL NAME=<operator>.arrayInitializer CODE=bytes[WIDTH] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=WIDTH CODE=WIDTH TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:WIDTH:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+AST|      MODIFIER ORDER=2
+AST|      MODIFIER ORDER=3
+AST|      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Packet ORDER=4
+AST|  TYPE_DECL NAME=Bag CODE=typedef struct { char bytes[WIDTH]; } FULL_NAME=Bag ORDER=1
+AST|    MEMBER NAME=bytes CODE=bytes[WIDTH] TYPE_FULL_NAME=char[2] ORDER=1
+AST|    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Bag.<clinit>:Bag() ORDER=2
+AST|      BLOCK ORDER=1
+AST|        CALL NAME=<operator>.arrayInitializer CODE=bytes[WIDTH] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=WIDTH CODE=WIDTH TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:WIDTH:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+AST|      MODIFIER ORDER=2
+AST|      MODIFIER ORDER=3
+AST|      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Bag ORDER=4
+AST|  LOCAL NAME=Bag CODE=typedef struct { char bytes[WIDTH]; } Bag TYPE_FULL_NAME=struct ORDER=1
+AST|  METHOD NAME=use CODE=int use(void) { return WIDTH; } FULL_NAME=use SIGNATURE=int(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return WIDTH; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return WIDTH; ORDER=1
+AST|        CALL NAME=WIDTH CODE=WIDTH TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:WIDTH:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    TYPE_REF CODE=struct Packet { char bytes[WIDTH]; } TYPE_FULL_NAME=Packet ORDER=1
+AST|    TYPE_REF CODE=typedef struct { char bytes[WIDTH]; } TYPE_FULL_NAME=Bag ORDER=2
+AST|    METHOD_REF CODE=use TYPE_FULL_NAME=use METHOD_FULL_NAME=use ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=WIDTH CODE=#define WIDTH 2 FULL_NAME=main.c:WIDTH:int(0) SIGNATURE=int(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+AST|
+AST|METHOD NAME=use CODE=int use(void) { return WIDTH; } FULL_NAME=use SIGNATURE=int(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return WIDTH; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return WIDTH; ORDER=1
+AST|      CALL NAME=WIDTH CODE=WIDTH TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:WIDTH:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Bag FULL_NAME=Bag CODE=typedef struct { char bytes[WIDTH]; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=Packet FULL_NAME=Packet CODE=struct Packet { char bytes[WIDTH]; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=char[2] FULL_NAME=char[2] CODE=char[2] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=struct FULL_NAME=struct CODE=struct IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=use FULL_NAME=use CODE=use AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Bag FULL_NAME=Bag TYPE_DECL_FULL_NAME=Bag
+NODES|TYPE NAME=Packet FULL_NAME=Packet TYPE_DECL_FULL_NAME=Packet
+NODES|TYPE NAME=char[2] FULL_NAME=char[2] TYPE_DECL_FULL_NAME=char[2]
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=struct FULL_NAME=struct TYPE_DECL_FULL_NAME=struct
+NODES|TYPE NAME=use FULL_NAME=use TYPE_DECL_FULL_NAME=use
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+LOC|Packet.<clinit>:Packet()#1 BLOCK 
+LOC|Packet.<clinit>:Packet()#4 BLOCK LINE_NUMBER=3 COLUMN_NUMBER=28
+LOC|Bag.<clinit>:Bag()#1 BLOCK 
+LOC|Bag.<clinit>:Bag()#4 BLOCK LINE_NUMBER=4 COLUMN_NUMBER=29
+LOC|use#3 BLOCK CODE={ return WIDTH; } LINE_NUMBER=6 COLUMN_NUMBER=15
+LOC|use#6 BLOCK LINE_NUMBER=6 COLUMN_NUMBER=24
+LOC|main.c:<global>#33 BLOCK LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|<includes>:<global>#1 BLOCK 
+LOC|main.c:WIDTH:int(0)#1 BLOCK 
+LOC|<operator>.arrayInitializer#2 BLOCK 
+LOC|Packet.<clinit>:Packet()#2 CALL NAME=<operator>.arrayInitializer CODE=bytes[WIDTH] LINE_NUMBER=3 COLUMN_NUMBER=22
+LOC|Packet.<clinit>:Packet()#3 CALL NAME=WIDTH CODE=WIDTH LINE_NUMBER=3 COLUMN_NUMBER=28
+LOC|Bag.<clinit>:Bag()#2 CALL NAME=<operator>.arrayInitializer CODE=bytes[WIDTH] LINE_NUMBER=4 COLUMN_NUMBER=23
+LOC|Bag.<clinit>:Bag()#3 CALL NAME=WIDTH CODE=WIDTH LINE_NUMBER=4 COLUMN_NUMBER=29
+LOC|use#5 CALL NAME=WIDTH CODE=WIDTH LINE_NUMBER=6 COLUMN_NUMBER=24
+LOC|F:main.c FILE NAME=main.c
+LOC|F:<includes> FILE NAME=<includes>
+LOC|F:<unknown> FILE NAME=<unknown>
+LOC|Packet.<clinit>:Packet()#5 LITERAL CODE=2 LINE_NUMBER=3 COLUMN_NUMBER=28
+LOC|Bag.<clinit>:Bag()#5 LITERAL CODE=2 LINE_NUMBER=4 COLUMN_NUMBER=29
+LOC|use#7 LITERAL CODE=2 LINE_NUMBER=6 COLUMN_NUMBER=24
+LOC|main.c:<global>#23 LOCAL NAME=Bag CODE=typedef struct { char bytes[WIDTH]; } Bag LINE_NUMBER=4 COLUMN_NUMBER=39
+LOC|main.c:<global>#2 MEMBER NAME=bytes CODE=bytes[WIDTH] LINE_NUMBER=3 COLUMN_NUMBER=22
+LOC|main.c:<global>#13 MEMBER NAME=bytes CODE=bytes[WIDTH] LINE_NUMBER=4 COLUMN_NUMBER=23
+LOC|Packet.<clinit>:Packet()#0 METHOD NAME=<clinit> CODE=<clinit> LINE_NUMBER=3 COLUMN_NUMBER=1
+LOC|main.c:<global>#0 METHOD NAME=<global> CODE=<global> LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|Bag.<clinit>:Bag()#0 METHOD NAME=<clinit> CODE=<clinit> LINE_NUMBER=4 COLUMN_NUMBER=1
+LOC|main.c:<global>#24 METHOD NAME=use CODE=int use(void) { return WIDTH; } LINE_NUMBER=6 COLUMN_NUMBER=1
+LOC|<includes>:<global>#0 METHOD NAME=<global> CODE=<global> LINE_NUMBER=1
+LOC|main.c:WIDTH:int(0)#0 METHOD NAME=WIDTH CODE=#define WIDTH 2 LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|<operator>.arrayInitializer#0 METHOD NAME=<operator>.arrayInitializer
+LOC|use#1 METHOD_PARAMETER_IN NAME= CODE=void LINE_NUMBER=6 COLUMN_NUMBER=9
+LOC|<operator>.arrayInitializer#1 METHOD_PARAMETER_IN NAME=p1 CODE=p1
+LOC|use#2 METHOD_PARAMETER_OUT NAME= CODE=void LINE_NUMBER=6 COLUMN_NUMBER=9
+LOC|<operator>.arrayInitializer#3 METHOD_PARAMETER_OUT NAME=p1 CODE=p1
+LOC|main.c:<global>#36 METHOD_REF CODE=use LINE_NUMBER=6 COLUMN_NUMBER=1
+LOC|Packet.<clinit>:Packet()#8 METHOD_RETURN CODE=RET LINE_NUMBER=3 COLUMN_NUMBER=1
+LOC|Bag.<clinit>:Bag()#8 METHOD_RETURN CODE=RET LINE_NUMBER=4 COLUMN_NUMBER=1
+LOC|use#8 METHOD_RETURN CODE=RET LINE_NUMBER=6 COLUMN_NUMBER=1
+LOC|main.c:<global>#37 METHOD_RETURN CODE=RET LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|<includes>:<global>#2 METHOD_RETURN CODE=RET LINE_NUMBER=1
+LOC|main.c:WIDTH:int(0)#2 METHOD_RETURN CODE=RET LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|<operator>.arrayInitializer#4 METHOD_RETURN CODE=RET
+LOC|Packet.<clinit>:Packet()#6 MODIFIER 
+LOC|Packet.<clinit>:Packet()#7 MODIFIER 
+LOC|Bag.<clinit>:Bag()#6 MODIFIER 
+LOC|Bag.<clinit>:Bag()#7 MODIFIER 
+LOC|NS:<global> NAMESPACE NAME=<global>
+LOC|NB:<global> NAMESPACE_BLOCK NAME=<global>
+LOC|NB:main.c:<global> NAMESPACE_BLOCK NAME=<global>
+LOC|NB:<includes>:<global> NAMESPACE_BLOCK NAME=<global>
+LOC|use#4 RETURN CODE=return WIDTH; LINE_NUMBER=6 COLUMN_NUMBER=17
+LOC|D:main.c:<global> TYPE_DECL NAME=<global> CODE=<global> LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|main.c:<global>#1 TYPE_DECL NAME=Packet CODE=struct Packet { char bytes[WIDTH]; } LINE_NUMBER=3 COLUMN_NUMBER=1
+LOC|main.c:<global>#12 TYPE_DECL NAME=Bag CODE=typedef struct { char bytes[WIDTH]; } LINE_NUMBER=4 COLUMN_NUMBER=1
+LOC|D:use TYPE_DECL NAME=use CODE=use LINE_NUMBER=6 COLUMN_NUMBER=1
+LOC|D:ANY TYPE_DECL NAME=ANY CODE=ANY
+LOC|D:char[2] TYPE_DECL NAME=char[2] CODE=char[2]
+LOC|D:int TYPE_DECL NAME=int CODE=int
+LOC|D:struct TYPE_DECL NAME=struct CODE=struct
+LOC|D:void TYPE_DECL NAME=void CODE=void
+LOC|main.c:<global>#34 TYPE_REF CODE=struct Packet { char bytes[WIDTH]; } LINE_NUMBER=3 COLUMN_NUMBER=1
+LOC|main.c:<global>#35 TYPE_REF CODE=typedef struct { char bytes[WIDTH]; } LINE_NUMBER=4 COLUMN_NUMBER=1
+EDGES|ARGUMENT Bag.<clinit>:Bag()#2 -> Bag.<clinit>:Bag()#3
+EDGES|ARGUMENT Packet.<clinit>:Packet()#2 -> Packet.<clinit>:Packet()#3
+EDGES|ARGUMENT use#4 -> use#5
+EDGES|CALL Bag.<clinit>:Bag()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL Bag.<clinit>:Bag()#3 -> main.c:WIDTH:int(0)#0
+EDGES|CALL Packet.<clinit>:Packet()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL Packet.<clinit>:Packet()#3 -> main.c:WIDTH:int(0)#0
+EDGES|CALL use#5 -> main.c:WIDTH:int(0)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#3
+EDGES|CFG Bag.<clinit>:Bag()#2 -> Bag.<clinit>:Bag()#8
+EDGES|CFG Bag.<clinit>:Bag()#3 -> Bag.<clinit>:Bag()#2
+EDGES|CFG Bag.<clinit>:Bag()#3 -> Bag.<clinit>:Bag()#5
+EDGES|CFG Bag.<clinit>:Bag()#5 -> Bag.<clinit>:Bag()#2
+EDGES|CFG Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#3
+EDGES|CFG Packet.<clinit>:Packet()#2 -> Packet.<clinit>:Packet()#8
+EDGES|CFG Packet.<clinit>:Packet()#3 -> Packet.<clinit>:Packet()#2
+EDGES|CFG Packet.<clinit>:Packet()#3 -> Packet.<clinit>:Packet()#5
+EDGES|CFG Packet.<clinit>:Packet()#5 -> Packet.<clinit>:Packet()#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#34
+EDGES|CFG main.c:<global>#24 -> use#5
+EDGES|CFG main.c:<global>#34 -> main.c:<global>#35
+EDGES|CFG main.c:<global>#35 -> main.c:<global>#36
+EDGES|CFG main.c:<global>#36 -> main.c:<global>#37
+EDGES|CFG main.c:WIDTH:int(0)#0 -> main.c:WIDTH:int(0)#2
+EDGES|CFG use#4 -> use#8
+EDGES|CFG use#5 -> use#4
+EDGES|CFG use#5 -> use#7
+EDGES|CFG use#7 -> use#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#1
+EDGES|CONTAINS Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#2
+EDGES|CONTAINS Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#3
+EDGES|CONTAINS Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#4
+EDGES|CONTAINS Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#5
+EDGES|CONTAINS D:main.c:<global> -> D:use
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:WIDTH:int(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char[2]
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:struct
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#1
+EDGES|CONTAINS Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#2
+EDGES|CONTAINS Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#3
+EDGES|CONTAINS Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#4
+EDGES|CONTAINS Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#5
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#12
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#24
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#33
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#34
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#35
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#36
+EDGES|CONTAINS main.c:<global>#1 -> Packet.<clinit>:Packet()#0
+EDGES|CONTAINS main.c:<global>#12 -> Bag.<clinit>:Bag()#0
+EDGES|CONTAINS main.c:<global>#24 -> use#3
+EDGES|CONTAINS main.c:<global>#24 -> use#4
+EDGES|CONTAINS main.c:<global>#24 -> use#5
+EDGES|CONTAINS main.c:<global>#24 -> use#6
+EDGES|CONTAINS main.c:<global>#24 -> use#7
+EDGES|CONTAINS main.c:WIDTH:int(0)#0 -> main.c:WIDTH:int(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE Bag.<clinit>:Bag()#2 -> T:ANY
+EDGES|EVAL_TYPE Bag.<clinit>:Bag()#3 -> T:int
+EDGES|EVAL_TYPE Bag.<clinit>:Bag()#4 -> T:ANY
+EDGES|EVAL_TYPE Bag.<clinit>:Bag()#5 -> T:int
+EDGES|EVAL_TYPE Bag.<clinit>:Bag()#8 -> T:Bag
+EDGES|EVAL_TYPE Packet.<clinit>:Packet()#2 -> T:ANY
+EDGES|EVAL_TYPE Packet.<clinit>:Packet()#3 -> T:int
+EDGES|EVAL_TYPE Packet.<clinit>:Packet()#4 -> T:ANY
+EDGES|EVAL_TYPE Packet.<clinit>:Packet()#5 -> T:int
+EDGES|EVAL_TYPE Packet.<clinit>:Packet()#8 -> T:Packet
+EDGES|EVAL_TYPE main.c:<global>#13 -> T:char[2]
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:char[2]
+EDGES|EVAL_TYPE main.c:<global>#23 -> T:struct
+EDGES|EVAL_TYPE main.c:<global>#33 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#34 -> T:Packet
+EDGES|EVAL_TYPE main.c:<global>#35 -> T:Bag
+EDGES|EVAL_TYPE main.c:<global>#36 -> T:use
+EDGES|EVAL_TYPE main.c:<global>#37 -> T:ANY
+EDGES|EVAL_TYPE main.c:WIDTH:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:WIDTH:int(0)#2 -> T:int
+EDGES|EVAL_TYPE use#1 -> T:void
+EDGES|EVAL_TYPE use#2 -> T:void
+EDGES|EVAL_TYPE use#3 -> T:void
+EDGES|EVAL_TYPE use#5 -> T:int
+EDGES|EVAL_TYPE use#6 -> T:ANY
+EDGES|EVAL_TYPE use#7 -> T:int
+EDGES|EVAL_TYPE use#8 -> T:int
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK use#1 -> use#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Bag -> main.c:<global>#12
+EDGES|REF T:Packet -> main.c:<global>#1
+EDGES|REF T:char[2] -> D:char[2]
+EDGES|REF T:int -> D:int
+EDGES|REF T:struct -> D:struct
+EDGES|REF T:use -> D:use
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#36 -> main.c:<global>#24
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE Bag.<clinit>:Bag()#0 -> F:main.c
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:char[2] -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:struct -> F:<includes>
+EDGES|SOURCE_FILE D:use -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE Packet.<clinit>:Packet()#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#12 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#24 -> F:main.c
+EDGES|SOURCE_FILE main.c:WIDTH:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] use#4 -> use#8
+FLOWS|REACHING_DEF[WIDTH] Bag.<clinit>:Bag()#3 -> Bag.<clinit>:Bag()#2
+FLOWS|REACHING_DEF[WIDTH] Bag.<clinit>:Bag()#3 -> Bag.<clinit>:Bag()#8
+FLOWS|REACHING_DEF[WIDTH] Packet.<clinit>:Packet()#3 -> Packet.<clinit>:Packet()#2
+FLOWS|REACHING_DEF[WIDTH] Packet.<clinit>:Packet()#3 -> Packet.<clinit>:Packet()#8
+FLOWS|REACHING_DEF[WIDTH] use#5 -> use#4
+FLOWS|REACHING_DEF[WIDTH] use#5 -> use#8
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#3
+FLOWS|REACHING_DEF[] Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#5
+FLOWS|REACHING_DEF[] Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#3
+FLOWS|REACHING_DEF[] Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#5
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#34
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#35
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#36
+FLOWS|REACHING_DEF[] main.c:<global>#24 -> use#1
+FLOWS|REACHING_DEF[] main.c:<global>#24 -> use#5
+FLOWS|REACHING_DEF[] main.c:<global>#24 -> use#7
+FLOWS|REACHING_DEF[] use#1 -> use#2
+FLOWS|REACHING_DEF[] use#1 -> use#8
+FLOWS|REACHING_DEF[bytes[WIDTH]] Bag.<clinit>:Bag()#2 -> Bag.<clinit>:Bag()#8
+FLOWS|REACHING_DEF[bytes[WIDTH]] Packet.<clinit>:Packet()#2 -> Packet.<clinit>:Packet()#8
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+CASE|inactive_typedef_binding
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/input/inactive_typedef_binding --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace/workspace/inactive_typedef_binding/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace/workspace/inactive_typedef_binding/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 1 ms (90% on mutations). 16 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 0 ms (75% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (63% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 1 ms (73% on mutations). 25 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (77% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 1 ms (74% on mutations). 21 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 0 ms (53% on mutations). 9 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 1 ms (55% on mutations). 31 + 0 changes committed from 18 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 0 ms (52% on mutations). 7 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (37% on mutations). 40 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (74% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 1 ms (40% on mutations). 19 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 1 ms (39% on mutations). 36 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 1 ms (59% on mutations). 3 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (77% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 0 ms (64% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (71% on mutations). 2 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (68% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (76% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 1 ms (76% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 0 ms (64% on mutations). 3 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Unable to link dynamic CALL with METHOD_FULL_NAME <operator>.pointerCall and context: (U)(value) @ line Some(6)
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 3 ms (7% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (79% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: <operator>.cast in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.pointerCall in <empty>
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: main.c:CAST:ANY(1) in main.c
+[INFO ] Calculating reaching definitions for: <operator>.addition in <empty>
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Number of definitions for <operator>.cast: 2
+[INFO ] Calculating reaching definitions for: use in main.c
+[INFO ] Number of definitions for <operator>.addition: 2
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for <operator>.pointerCall: 1
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for main.c:CAST:ANY(1): 1
+[INFO ] Number of definitions for use: 10
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 8 ms (8% on mutations). 44 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (76% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  METHOD NAME=use CODE=int use(int value) { return CAST(value) + (U)(value); } FULL_NAME=use SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return CAST(value) + (U)(value); } TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=U CODE=<unknown> U TYPE_FULL_NAME=ANY ORDER=0
+AST|      RETURN CODE=return CAST(value) + (U)(value); ORDER=1
+AST|        CALL NAME=<operator>.addition CODE=CAST(value) + (U)(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=CAST CODE=CAST(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|              CALL NAME=<operator>.cast CODE=(T)(value) TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+AST|                IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=<operator>.pointerCall CODE=(U)(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+AST|            IDENTIFIER NAME=U CODE=<unknown> U TYPE_FULL_NAME=ANY ORDER=1
+AST|            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    TYPE_DECL NAME=T CODE=typedef int T; FULL_NAME=T ORDER=1
+AST|    TYPE_DECL NAME=U CODE=typedef long U; FULL_NAME=U ORDER=2
+AST|    METHOD_REF CODE=use TYPE_FULL_NAME=use METHOD_FULL_NAME=use ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=CAST CODE=#define CAST(x) ((T)(x)) FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+AST|
+AST|METHOD NAME=use CODE=int use(int value) { return CAST(value) + (U)(value); } FULL_NAME=use SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return CAST(value) + (U)(value); } TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=U CODE=<unknown> U TYPE_FULL_NAME=ANY ORDER=0
+AST|    RETURN CODE=return CAST(value) + (U)(value); ORDER=1
+AST|      CALL NAME=<operator>.addition CODE=CAST(value) + (U)(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=CAST CODE=CAST(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=<operator>.cast CODE=(T)(value) TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        CALL NAME=<operator>.pointerCall CODE=(U)(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+AST|          IDENTIFIER NAME=U CODE=<unknown> U TYPE_FULL_NAME=ANY ORDER=1
+AST|          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=T FULL_NAME=T CODE=typedef int T; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=U FULL_NAME=U CODE=typedef long U; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=longint FULL_NAME=longint CODE=longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=use FULL_NAME=use CODE=use AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=T FULL_NAME=T TYPE_DECL_FULL_NAME=T
+NODES|TYPE NAME=U FULL_NAME=U TYPE_DECL_FULL_NAME=U
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=longint FULL_NAME=longint TYPE_DECL_FULL_NAME=longint
+NODES|TYPE NAME=use FULL_NAME=use TYPE_DECL_FULL_NAME=use
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+LOC|use#3 BLOCK CODE={ return CAST(value) + (U)(value); } LINE_NUMBER=6 COLUMN_NUMBER=20
+LOC|use#9 BLOCK LINE_NUMBER=6 COLUMN_NUMBER=29
+LOC|main.c:<global>#18 BLOCK LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|<includes>:<global>#1 BLOCK 
+LOC|main.c:CAST:ANY(1)#3 BLOCK 
+LOC|<operator>.cast#2 BLOCK 
+LOC|<operator>.pointerCall#2 BLOCK 
+LOC|<operator>.addition#2 BLOCK 
+LOC|use#6 CALL NAME=<operator>.addition CODE=CAST(value) + (U)(value) LINE_NUMBER=6 COLUMN_NUMBER=29
+LOC|use#7 CALL NAME=CAST CODE=CAST(value) LINE_NUMBER=6 COLUMN_NUMBER=29
+LOC|use#10 CALL NAME=<operator>.cast CODE=(T)(value) LINE_NUMBER=6 COLUMN_NUMBER=29
+LOC|use#13 CALL NAME=<operator>.pointerCall CODE=(U)(value) LINE_NUMBER=6 COLUMN_NUMBER=43
+LOC|F:main.c FILE NAME=main.c
+LOC|F:<includes> FILE NAME=<includes>
+LOC|F:<unknown> FILE NAME=<unknown>
+LOC|use#8 IDENTIFIER NAME=value CODE=value LINE_NUMBER=6 COLUMN_NUMBER=29
+LOC|use#12 IDENTIFIER NAME=value CODE=value LINE_NUMBER=6 COLUMN_NUMBER=29
+LOC|use#14 IDENTIFIER NAME=U CODE=<unknown> U LINE_NUMBER=6 COLUMN_NUMBER=44
+LOC|use#15 IDENTIFIER NAME=value CODE=value LINE_NUMBER=6 COLUMN_NUMBER=47
+LOC|use#4 LOCAL NAME=U CODE=<unknown> U LINE_NUMBER=6 COLUMN_NUMBER=44
+LOC|main.c:<global>#1 METHOD NAME=use CODE=int use(int value) { return CAST(value) + (U)(value); } LINE_NUMBER=6 COLUMN_NUMBER=1
+LOC|main.c:<global>#0 METHOD NAME=<global> CODE=<global> LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|<includes>:<global>#0 METHOD NAME=<global> CODE=<global> LINE_NUMBER=1
+LOC|main.c:CAST:ANY(1)#0 METHOD NAME=CAST CODE=#define CAST(x) ((T)(x)) LINE_NUMBER=2 COLUMN_NUMBER=1
+LOC|<operator>.cast#0 METHOD NAME=<operator>.cast
+LOC|<operator>.pointerCall#0 METHOD NAME=<operator>.pointerCall
+LOC|<operator>.addition#0 METHOD NAME=<operator>.addition
+LOC|use#1 METHOD_PARAMETER_IN NAME=value CODE=int value LINE_NUMBER=6 COLUMN_NUMBER=9
+LOC|main.c:CAST:ANY(1)#1 METHOD_PARAMETER_IN NAME=p1 CODE=p1 LINE_NUMBER=2 COLUMN_NUMBER=1
+LOC|<operator>.cast#1 METHOD_PARAMETER_IN NAME=p1 CODE=p1
+LOC|<operator>.cast#4 METHOD_PARAMETER_IN NAME=p2 CODE=p2
+LOC|<operator>.pointerCall#1 METHOD_PARAMETER_IN NAME=p1 CODE=p1
+LOC|<operator>.addition#1 METHOD_PARAMETER_IN NAME=p1 CODE=p1
+LOC|<operator>.addition#4 METHOD_PARAMETER_IN NAME=p2 CODE=p2
+LOC|use#2 METHOD_PARAMETER_OUT NAME=value CODE=int value LINE_NUMBER=6 COLUMN_NUMBER=9
+LOC|main.c:CAST:ANY(1)#2 METHOD_PARAMETER_OUT NAME=p1 CODE=p1 LINE_NUMBER=2 COLUMN_NUMBER=1
+LOC|<operator>.cast#3 METHOD_PARAMETER_OUT NAME=p1 CODE=p1
+LOC|<operator>.cast#6 METHOD_PARAMETER_OUT NAME=p2 CODE=p2
+LOC|<operator>.pointerCall#3 METHOD_PARAMETER_OUT NAME=p1 CODE=p1
+LOC|<operator>.addition#3 METHOD_PARAMETER_OUT NAME=p1 CODE=p1
+LOC|<operator>.addition#6 METHOD_PARAMETER_OUT NAME=p2 CODE=p2
+LOC|main.c:<global>#21 METHOD_REF CODE=use LINE_NUMBER=6 COLUMN_NUMBER=1
+LOC|use#16 METHOD_RETURN CODE=RET LINE_NUMBER=6 COLUMN_NUMBER=1
+LOC|main.c:<global>#22 METHOD_RETURN CODE=RET LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|<includes>:<global>#2 METHOD_RETURN CODE=RET LINE_NUMBER=1
+LOC|main.c:CAST:ANY(1)#4 METHOD_RETURN CODE=RET LINE_NUMBER=2 COLUMN_NUMBER=1
+LOC|<operator>.cast#5 METHOD_RETURN CODE=RET
+LOC|<operator>.pointerCall#4 METHOD_RETURN CODE=RET
+LOC|<operator>.addition#5 METHOD_RETURN CODE=RET
+LOC|NS:<global> NAMESPACE NAME=<global>
+LOC|NB:<global> NAMESPACE_BLOCK NAME=<global>
+LOC|NB:main.c:<global> NAMESPACE_BLOCK NAME=<global>
+LOC|NB:<includes>:<global> NAMESPACE_BLOCK NAME=<global>
+LOC|use#5 RETURN CODE=return CAST(value) + (U)(value); LINE_NUMBER=6 COLUMN_NUMBER=22
+LOC|D:use TYPE_DECL NAME=use CODE=use LINE_NUMBER=6 COLUMN_NUMBER=1
+LOC|D:main.c:<global> TYPE_DECL NAME=<global> CODE=<global> LINE_NUMBER=1 COLUMN_NUMBER=1
+LOC|main.c:<global>#19 TYPE_DECL NAME=T CODE=typedef int T; LINE_NUMBER=1 COLUMN_NUMBER=13
+LOC|main.c:<global>#20 TYPE_DECL NAME=U CODE=typedef long U; LINE_NUMBER=4 COLUMN_NUMBER=14
+LOC|D:ANY TYPE_DECL NAME=ANY CODE=ANY
+LOC|D:int TYPE_DECL NAME=int CODE=int
+LOC|D:longint TYPE_DECL NAME=longint CODE=longint
+LOC|D:void TYPE_DECL NAME=void CODE=void
+LOC|use#11 TYPE_REF CODE=T LINE_NUMBER=6 COLUMN_NUMBER=29
+EDGES|ARGUMENT use#10 -> use#11
+EDGES|ARGUMENT use#10 -> use#12
+EDGES|ARGUMENT use#13 -> use#15
+EDGES|ARGUMENT use#5 -> use#6
+EDGES|ARGUMENT use#6 -> use#13
+EDGES|ARGUMENT use#6 -> use#7
+EDGES|ARGUMENT use#7 -> use#8
+EDGES|CALL use#10 -> <operator>.cast#0
+EDGES|CALL use#6 -> <operator>.addition#0
+EDGES|CALL use#7 -> main.c:CAST:ANY(1)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#21
+EDGES|CFG main.c:<global>#1 -> use#8
+EDGES|CFG main.c:<global>#21 -> main.c:<global>#22
+EDGES|CFG main.c:CAST:ANY(1)#0 -> main.c:CAST:ANY(1)#4
+EDGES|CFG use#10 -> use#14
+EDGES|CFG use#11 -> use#12
+EDGES|CFG use#12 -> use#10
+EDGES|CFG use#13 -> use#6
+EDGES|CFG use#14 -> use#15
+EDGES|CFG use#15 -> use#13
+EDGES|CFG use#5 -> use#16
+EDGES|CFG use#6 -> use#5
+EDGES|CFG use#7 -> use#11
+EDGES|CFG use#7 -> use#14
+EDGES|CFG use#8 -> use#7
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS D:main.c:<global> -> D:use
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:CAST:ANY(1)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:longint
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#18
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#19
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#20
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#21
+EDGES|CONTAINS main.c:<global>#1 -> use#10
+EDGES|CONTAINS main.c:<global>#1 -> use#11
+EDGES|CONTAINS main.c:<global>#1 -> use#12
+EDGES|CONTAINS main.c:<global>#1 -> use#13
+EDGES|CONTAINS main.c:<global>#1 -> use#14
+EDGES|CONTAINS main.c:<global>#1 -> use#15
+EDGES|CONTAINS main.c:<global>#1 -> use#3
+EDGES|CONTAINS main.c:<global>#1 -> use#5
+EDGES|CONTAINS main.c:<global>#1 -> use#6
+EDGES|CONTAINS main.c:<global>#1 -> use#7
+EDGES|CONTAINS main.c:<global>#1 -> use#8
+EDGES|CONTAINS main.c:<global>#1 -> use#9
+EDGES|CONTAINS main.c:CAST:ANY(1)#0 -> main.c:CAST:ANY(1)#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#18 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#21 -> T:use
+EDGES|EVAL_TYPE main.c:<global>#22 -> T:ANY
+EDGES|EVAL_TYPE main.c:CAST:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:CAST:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:CAST:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:CAST:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE use#1 -> T:int
+EDGES|EVAL_TYPE use#10 -> T:T
+EDGES|EVAL_TYPE use#11 -> T:T
+EDGES|EVAL_TYPE use#12 -> T:int
+EDGES|EVAL_TYPE use#13 -> T:ANY
+EDGES|EVAL_TYPE use#14 -> T:ANY
+EDGES|EVAL_TYPE use#15 -> T:int
+EDGES|EVAL_TYPE use#16 -> T:int
+EDGES|EVAL_TYPE use#2 -> T:int
+EDGES|EVAL_TYPE use#3 -> T:void
+EDGES|EVAL_TYPE use#4 -> T:ANY
+EDGES|EVAL_TYPE use#6 -> T:ANY
+EDGES|EVAL_TYPE use#7 -> T:ANY
+EDGES|EVAL_TYPE use#8 -> T:int
+EDGES|EVAL_TYPE use#9 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK main.c:CAST:ANY(1)#1 -> main.c:CAST:ANY(1)#2
+EDGES|PARAMETER_LINK use#1 -> use#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:T -> main.c:<global>#19
+EDGES|REF T:U -> main.c:<global>#20
+EDGES|REF T:int -> D:int
+EDGES|REF T:longint -> D:longint
+EDGES|REF T:use -> D:use
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#21 -> main.c:<global>#1
+EDGES|REF use#12 -> use#1
+EDGES|REF use#14 -> use#4
+EDGES|REF use#15 -> use#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:longint -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:use -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#19 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#20 -> F:main.c
+EDGES|SOURCE_FILE main.c:CAST:ANY(1)#0 -> F:main.c
+FLOWS|REACHING_DEF[(T)(value)] use#10 -> use#16
+FLOWS|REACHING_DEF[(U)(value)] use#13 -> use#16
+FLOWS|REACHING_DEF[(U)(value)] use#13 -> use#6
+FLOWS|REACHING_DEF[<RET>] use#5 -> use#16
+FLOWS|REACHING_DEF[CAST(value) + (U)(value)] use#6 -> use#16
+FLOWS|REACHING_DEF[CAST(value) + (U)(value)] use#6 -> use#5
+FLOWS|REACHING_DEF[CAST(value)] use#7 -> use#16
+FLOWS|REACHING_DEF[CAST(value)] use#7 -> use#6
+FLOWS|REACHING_DEF[T] use#11 -> use#10
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#21
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> use#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> use#11
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> use#12
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> use#14
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> use#15
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> use#8
+FLOWS|REACHING_DEF[] main.c:CAST:ANY(1)#0 -> main.c:CAST:ANY(1)#1
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p1] main.c:CAST:ANY(1)#1 -> main.c:CAST:ANY(1)#2
+FLOWS|REACHING_DEF[p1] main.c:CAST:ANY(1)#1 -> main.c:CAST:ANY(1)#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[value] use#1 -> use#2
+FLOWS|REACHING_DEF[value] use#1 -> use#8
+FLOWS|REACHING_DEF[value] use#12 -> use#10
+FLOWS|REACHING_DEF[value] use#12 -> use#15
+FLOWS|REACHING_DEF[value] use#15 -> use#13
+FLOWS|REACHING_DEF[value] use#15 -> use#16
+FLOWS|REACHING_DEF[value] use#15 -> use#2
+FLOWS|REACHING_DEF[value] use#8 -> use#12
+FLOWS|REACHING_DEF[value] use#8 -> use#15
+FLOWS|REACHING_DEF[value] use#8 -> use#7
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace/workspace/active_undef/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace/workspace/active_undef/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace/workspace/inactive_aggregate/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace/workspace/inactive_aggregate/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace/workspace/inactive_typedef_binding/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace/workspace/inactive_typedef_binding/cpg.bin.tmp

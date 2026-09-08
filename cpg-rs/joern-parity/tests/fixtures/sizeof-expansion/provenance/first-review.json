@@ -1,0 +1,73 @@
+{
+  "status": "REQUIRES_SINGLE_CHILD_GUARD",
+  "candidateSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/sizeof-expansion/first-candidate/exact.rs",
+    "sha256": "43c97518b208f0906cbf6eada56df02776838892dc25c05b92528581a2ab5bab"
+  },
+  "candidateBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/sizeof-expansion/first-candidate/joern-parity",
+    "sha256": "0942171b2f6e154634ce56e356a5e3c0f01bb7c2546f3b7100521b2c650ac1aa"
+  },
+  "providedFixtureReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/provided-review.json",
+    "sha256": "3caf52c3ba8af56c06ceee5f339f827dd6943110313781534aa43e502267ec49"
+  },
+  "independentNormalProbeReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/review-probes.json",
+    "sha256": "b3ad2c3612989a331613b48ff85fdc9ecbf6837c1a8400ff37a652f2999c766a"
+  },
+  "independentMalformedProbeReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/review-probes.json",
+    "sha256": "21d36168c19b936f3d21fcb72d02a9cdd8eb007fb1ab1ffd13ba6f63d691221d"
+  },
+  "finding": "Parenthesis peeling selects the first non-comment named child and discards other named children. Malformed source text other disappears in adjacent-identifier and semicolon sibling inputs; the semicolon case also changes expression children/CFG/flows. Both full graphs were already nonexact, which does not excuse introduced content loss.",
+  "requestedRepair": "Peel only when exactly one non-comment named child exists; otherwise preserve and render the whole parenthesized node.",
+  "cases": [
+    {
+      "case": "adjacent_identifiers",
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/adjacent_identifiers/main.c",
+        "sha256": "b4e466d6ad9fdccf37cde92c03ea7792c93faae4684b8108f50ecfb1bd698f44"
+      },
+      "oracle": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/adjacent_identifiers/expected.txt",
+        "sha256": "87fde3620107be9a8f8faa0b17a363154ce96e109a3ce7be41ab170618356949"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/adjacent_identifiers/before.txt",
+        "sha256": "a798f08de584218f907c3225cc0187292ce06594faba89af2456abf533c3468e"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/adjacent_identifiers/candidate.txt",
+        "sha256": "31b9d955074dfa74519b804233ce198ae95675691f5dcbe16d86abc9ef39d909"
+      },
+      "completeChange": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/adjacent_identifiers/change.diff",
+        "sha256": "5738f3520f19e4ef833bc7f728a4305941e36439f243183c30708ecd752dfd43"
+      }
+    },
+    {
+      "case": "semicolon_sibling",
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/semicolon_sibling/main.c",
+        "sha256": "43047ff86ec96641e02b8fb58a22c4e3cfa0f872a84f1e38ffddd94d6ca55e07"
+      },
+      "oracle": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/semicolon_sibling/expected.txt",
+        "sha256": "374750fb36ba2f5a65676fc3662e040c531b1ed6253b1862e3d683651e08e6ef"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/semicolon_sibling/before.txt",
+        "sha256": "d5e592460b39765d1425e3289edc4464a727b94fb3a1680a482cdc080e6e5f43"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/semicolon_sibling/candidate.txt",
+        "sha256": "576d97f372b714a908da012b5bb906ee39542c1312306d4068aa973634d040f2"
+      },
+      "completeChange": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/semicolon_sibling/change.diff",
+        "sha256": "df53e7cf53718ff530b1fccdfbbb4022040a6c9920c75a1b02b84c43d4f76de3"
+      }
+    }
+  ]
+}

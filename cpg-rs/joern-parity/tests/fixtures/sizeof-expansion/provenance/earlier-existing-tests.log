@@ -1,0 +1,222 @@
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.99s
+     Running unittests src/main.rs (cpg-rs/target/debug/deps/joern_parity-5ecdce53b68ca6e1)
+
+running 13 tests
+test production::tests::migration_report_is_stable_and_sectioned ... ok
+test production::tests::production_counts_imports_in_all_conditional_branches ... ok
+test production::tests::production_respects_macro_replacement_precedence_and_condition_expressions ... ok
+test production::tests::production_keeps_same_name_conditional_methods_distinct ... ok
+test production::tests::production_removes_comments_before_interpreting_directives ... ok
+test production::tests::production_dump_is_deterministic_and_uses_standard_layers ... ok
+test production::tests::production_preserves_macro_expansion_before_a_later_undef ... ok
+test production::tests::production_preserves_braceless_if_call ... ok
+test production::tests::production_preserves_braceless_if_else_calls ... ok
+test production::tests::production_preserves_braceless_if_return ... ok
+test production::tests::production_update_matches_a_clean_rebuild ... ok
+test production::tests::production_retains_all_conditional_declarations_and_only_active_bodies ... ok
+test production::tests::production_selects_conditions_in_source_order_without_losing_inactive_methods ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/array_declarations.rs (cpg-rs/target/debug/deps/array_declarations-5bbcc8af9652e977)
+
+running 2 tests
+test global_dimensions_do_not_expand_local_allocation_parameters ... ok
+test array_declarations_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/array_initializers.rs (cpg-rs/target/debug/deps/array_initializers-aaccc913d30595de)
+
+running 5 tests
+test ordinary_assignments_do_not_borrow_nested_declaration_locations ... ok
+test all_local_allocations_precede_explicit_initializers ... ok
+test array_initializers_preserve_source_lines_across_repeated_methods ... ok
+test allocation_views_do_not_consume_declaration_or_following_statement_locations ... ok
+test array_initializers_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running tests/combined_c_types.rs (cpg-rs/target/debug/deps/combined_c_types-da048c15e7463a23)
+
+running 2 tests
+test static_parenthesized_definitions_keep_translation_unit_identities ... ok
+test static_modifiers_primitive_roles_and_numeric_literals_compose ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/concatenated_strings.rs (cpg-rs/target/debug/deps/concatenated_strings-29c852979787ac8c)
+
+running 3 tests
+test lua_ternary_keeps_all_operands_and_cfg_branches ... ok
+test source_literals_and_following_calls_keep_their_lines ... ok
+test concatenated_strings_match_complete_live_graph ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/declaration_registration.rs (cpg-rs/target/debug/deps/declaration_registration-71bbca8988c663c4)
+
+running 4 tests
+test tags_keep_their_independent_base_type_registration ... ok
+test uninitialized_objects_keep_their_full_types_and_source_locations ... ok
+test only_an_ordinary_objects_own_initializer_adds_the_prefix_type ... ok
+test registration_matches_each_complete_isolated_live_graph ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/direct_field_macros.rs (cpg-rs/target/debug/deps/direct_field_macros-8a19ebb4df6926ac)
+
+running 2 tests
+test repeated_field_expansions_keep_their_own_access_and_following_call_lines ... ok
+test direct_field_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/direct_macro_arguments.rs (cpg-rs/target/debug/deps/direct_macro_arguments-c8d3bd7fd56d9530)
+
+running 2 tests
+test typedef_intop_preserves_operands_and_original_macro_argument_slots ... ok
+test token_arguments_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/external_functions.rs (cpg-rs/target/debug/deps/external_functions-04d1ed8c36cebc04)
+
+running 10 tests
+test direct_callees_have_no_phantom_locals_and_keep_declared_return_types ... ok
+test inactive_function_bodies_do_not_register_block_prototypes ... ok
+test block_prototype_shadows_a_pointer_parameter_only_within_that_block ... ok
+test unused_multiple_void_unnamed_and_variadic_prototypes_keep_typed_structure ... ok
+test leaving_a_block_restores_the_shadowed_parameter_ref_binding ... ok
+test block_pointer_shadow_does_not_change_later_direct_function_call ... ok
+test late_prototypes_preserve_duplicate_static_definition_identity ... ok
+test initialized_and_uninitialized_local_and_global_function_pointers_dispatch_dynamically ... ok
+test for_initializer_scope_restores_function_dispatch_and_parameter_binding ... ok
+test synthetic_for_condition_does_not_shift_real_call_locations ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/field_cast_interactions.rs (cpg-rs/target/debug/deps/field_cast_interactions-726d47efa415531c)
+
+running 1 test
+test field_cast_interactions_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/field_macros.rs (cpg-rs/target/debug/deps/field_macros-3db6291554d97eff)
+
+running 1 test
+test field_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/header_macro_locations.rs (cpg-rs/target/debug/deps/header_macro_locations-f2ecc78299aadb56)
+
+running 2 tests
+test macro_descendants_and_following_statements_match_live_lines ... ok
+test header_macro_location_fixtures_match_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/header_macros.rs (cpg-rs/target/debug/deps/header_macros-8137475a0d6964c6)
+
+running 2 tests
+test parity_cli_preserves_relative_header_paths ... ok
+test supplied_header_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/macro_definitions.rs (cpg-rs/target/debug/deps/macro_definitions-408965e93aa6e118)
+
+running 2 tests
+test logical_macro_definitions_match_complete_isolated_live_graphs ... ok
+test macro_wrapper_types_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/macro_recovery.rs (cpg-rs/target/debug/deps/macro_recovery-2dafd3b3208d8403)
+
+running 1 test
+test macro_recovery_matches_complete_isolated_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/nested_macro_casts.rs (cpg-rs/target/debug/deps/nested_macro_casts-c7513ad151bbaf19)
+
+running 5 tests
+test a_known_macro_suffix_does_not_expand_inside_a_unicode_identifier ... ok
+test nested_type_arguments_and_rawtt_match_complete_live_graph ... ok
+test ordinary_calls_literals_recursion_and_nested_arguments_remain_exact ... ok
+test composite_descriptors_render_once_and_preserve_nested_value_casts ... ok
+test expanded_cast_types_preserve_qualifiers_and_distinct_type_identity ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/numeric_literals.rs (cpg-rs/target/debug/deps/numeric_literals-f6d4bb344d04e9a8)
+
+running 2 tests
+test signed_children_keep_suffix_types_and_hex_digits_are_not_float_suffixes ... ok
+test numeric_literals_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/primitive_roles.rs (cpg-rs/target/debug/deps/primitive_roles-53ca22f846bceb5e)
+
+running 3 tests
+test definition_prototype_and_call_result_types_stay_distinct ... ok
+test function_pointer_parameters_keep_declaration_types_and_resolve_call_results ... ok
+test primitive_roles_match_each_complete_isolated_live_graph ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/rd_scheduling.rs (cpg-rs/target/debug/deps/rd_scheduling-2fbc551c03809435)
+
+running 6 tests
+test loop_tail_without_standalone_blocks_is_also_exact ... ok
+test ordered_control_composition_matches_the_complete_live_graph ... ok
+test former_standalone_block_loop_tail_differences_are_exact ... ok
+test an_unscheduled_call_can_define_exit_without_receiving_call_site_edges ... ok
+test scheduling_matches_all_sections_of_the_live_graph ... ok
+test broader_macro_ordering_diagnostic_is_now_exact ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/standalone_blocks.rs (cpg-rs/target/debug/deps/standalone_blocks-6a5450a77f73ff81)
+
+running 3 tests
+test standalone_block_is_a_cfg_node_after_its_statements ... ok
+test standalone_scope_restores_parameter_references_and_pointer_dispatch ... ok
+test standalone_blocks_match_complete_live_graph ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/statement_macros.rs (cpg-rs/target/debug/deps/statement_macros-4a43c49b84993f68)
+
+running 4 tests
+test macro_comments_do_not_create_file_scope_declarations ... ok
+test generated_statement_nodes_remain_at_their_own_invocation ... ok
+test statement_macro_findings_match_all_live_positive_and_negative_outcomes ... ok
+test statement_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/static_modifiers.rs (cpg-rs/target/debug/deps/static_modifiers-aae4e3fd78d158ae)
+
+running 2 tests
+test only_a_leading_static_token_adds_a_modifier_and_shifts_the_return ... ok
+test static_modifiers_match_the_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/typedef_aggregates.rs (cpg-rs/target/debug/deps/typedef_aggregates-aa70ae54e48e2d0d)
+
+running 5 tests
+test every_member_dimension_reaches_the_initializer ... ok
+test aggregate_pointer_and_array_aliases_keep_underlying_types_and_initializers ... ok
+test lua_typedef_body_and_initializer_survive_production_import ... ok
+test typedef_tags_aliases_and_source_order_remain_distinct ... ok
+test typedef_aggregates_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

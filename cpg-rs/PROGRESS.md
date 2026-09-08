@@ -4,6 +4,42 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Sixth measured Astra batch (2026-09-08 UTC).** The main **308/308**
+  comparisons remain exact against committed and fresh Joern v4.0.555 output.
+  **454 workspace tests**, 17 checker tests, formatting, strict Clippy,
+  dependency audit over 73 crates, native release/archive, and official
+  real-project gates pass. Cache shape is **17**. Nine new fixture families
+  retain **256 entries / 252 unique source projects**; the accepted fifth
+  binary matches **45**, and the final combined binary matches **180** unique
+  complete projections. All 180 now have full regression gates, including
+  three integrations that became exact beyond their standalone results.
+  Complete nonexact diagnostics remain. Source-position typedef context,
+  declaration macros, supplied-header callable bindings, sizeof rendering,
+  predefined C macros, numeric macro root types, and retained inactive
+  declarations have new coverage. Whole-project exact method ASTs improve
+  **127→149 on zlib / 1,132→1,431 on Lua**; strict primary methods improve
+  **14→32 / 214→510**, primary bodies **27→40 / 249→537**, and nonempty
+  primary bodies **10→23 / 227→515**. No formerly exact method or primary
+  body is lost. All **49 earlier repaired operand/flow facts** and three
+  earlier stubs remain at the reviewed source occurrences. Rejected combined
+  candidates exposed three Lua method regressions and two missing zlib macro
+  stubs; both causes are repaired before acceptance. The final two zlib stubs
+  and their **10** matching graph facts are restored. **40** matching snprintf
+  scaffold fragments disappear with an incorrect inactive call; the three
+  live snprintf call sites remain a documented preexisting parser gap.
+  Fresh whole-project Joern runs reproduce all earlier selected records;
+  neither complete project projection is exact. Final repeated builds peak
+  at **485.81 MiB zlib / 463.48 MiB Lua**, within unchanged **512/1,024 MiB**
+  ceilings, and clean/update equivalence passes for **26/61** files. Only
+  independently reviewed expected graph counts/hashes change in the manifest.
+  See the [sixth report](../docs/conformance/astra-sixth-batch-2026-09-08.md),
+  [complete counters](../docs/conformance/astra-sixth-batch-metrics.json), and
+  [acceptance receipt](../docs/conformance/astra-sixth-batch-acceptance.json).
+  No container or other-platform execution is claimed. Next: preserve spaces
+  in parsed METHOD FULL_NAME values; six existing and eight fresh complete
+  graphs expose 12 missing CFG edges and one method-origin ReachingDef edge.
+  Broader parsing, preprocessing/build context, schema and non-C parity remain.
+
 - **Fifth measured Astra batch (2026-09-08 UTC).** The main **308/308**
   comparisons remain exact against committed and fresh Joern v4.0.555 output.
   **432 workspace tests**, 17 checker tests, formatting, strict Clippy,

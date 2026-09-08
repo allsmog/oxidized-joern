@@ -1,0 +1,40 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 9.014266458994825,
+  "script": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/oracle.sc",
+    "sha256": "026c39b15177cd8cde094a871f5a64b4a20411003d9a81b21874283f7dc1dcb3"
+  },
+  "raw": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/live.stdout",
+    "sha256": "b21f78650ec63315b13c22b3023cd2e89eb47c3e1a991cd55fa38a299e0df423"
+  },
+  "sourceInputs": {
+    "active_undef": {
+      "main.c": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/input/active_undef/main.c",
+        "sha256": "c39442b0f3878bada1672a3c861814984c7d830190971f5accc3f9dad44a67de"
+      }
+    },
+    "inactive_typedef_binding": {
+      "main.c": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/input/inactive_typedef_binding/main.c",
+        "sha256": "52adca6dd9564cfde07fd2389b4c576d535001e7b699a7822e8c6d52b18d2b2f"
+      }
+    },
+    "inactive_aggregate": {
+      "main.c": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/input/inactive_aggregate/main.c",
+        "sha256": "ccdfa6aea660b28d68f976f43040d9400d8cd9275f4723fd2d83927d4ab719b2"
+      }
+    }
+  }
+}

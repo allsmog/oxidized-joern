@@ -1,0 +1,168 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=f CODE=extern I extern I  ()(int); FULL_NAME=<unresolvedNamespace>.f SIGNATURE=I(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=I ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=api.h:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_DECL NAME=I CODE=typedef int I; FULL_NAME=I ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=f FULL_NAME=f ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=g CODE=int g(int x){return f(x);} FULL_NAME=g SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={return f(x);} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return f(x); ORDER=1
+      CALL NAME=f CODE=f(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=f ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=g CODE=int g(int x){return f(x);} FULL_NAME=g SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={return f(x);} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return f(x); ORDER=1
+        CALL NAME=f CODE=f(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=f ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=g TYPE_FULL_NAME=g METHOD_FULL_NAME=g ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=api.h ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=I FULL_NAME=I CODE=typedef int I; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=api.h ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|TYPE_DECL NAME=g FULL_NAME=g CODE=g AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=I FULL_NAME=I TYPE_DECL_FULL_NAME=I
+NODES|TYPE NAME=g FULL_NAME=g TYPE_DECL_FULL_NAME=g
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT g#4 -> g#5
+EDGES|ARGUMENT g#5 -> g#6
+EDGES|CALL g#5 -> f#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <unresolvedNamespace>.f#0 -> <unresolvedNamespace>.f#4
+EDGES|CFG api.h:<global>#0 -> api.h:<global>#3
+EDGES|CFG f#0 -> f#4
+EDGES|CFG g#0 -> g#6
+EDGES|CFG g#4 -> g#7
+EDGES|CFG g#5 -> g#4
+EDGES|CFG g#6 -> g#5
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#10
+EDGES|CFG main.c:<global>#10 -> main.c:<global>#11
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <unresolvedNamespace>.f#0 -> <unresolvedNamespace>.f#3
+EDGES|CONTAINS D:api.h:<global> -> <unresolvedNamespace>.f#0
+EDGES|CONTAINS D:api.h:<global> -> api.h:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> D:g
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:api.h -> D:api.h:<global>
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#2
+EDGES|CONTAINS f#0 -> f#2
+EDGES|CONTAINS g#0 -> g#3
+EDGES|CONTAINS g#0 -> g#4
+EDGES|CONTAINS g#0 -> g#5
+EDGES|CONTAINS g#0 -> g#6
+EDGES|CONTAINS main.c:<global>#0 -> g#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#9
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <unresolvedNamespace>.f#1 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.f#2 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.f#3 -> T:ANY
+EDGES|EVAL_TYPE <unresolvedNamespace>.f#4 -> T:I
+EDGES|EVAL_TYPE api.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#3 -> T:ANY
+EDGES|EVAL_TYPE f#1 -> T:ANY
+EDGES|EVAL_TYPE f#2 -> T:ANY
+EDGES|EVAL_TYPE f#3 -> T:ANY
+EDGES|EVAL_TYPE f#4 -> T:ANY
+EDGES|EVAL_TYPE g#1 -> T:int
+EDGES|EVAL_TYPE g#2 -> T:int
+EDGES|EVAL_TYPE g#3 -> T:void
+EDGES|EVAL_TYPE g#5 -> T:int
+EDGES|EVAL_TYPE g#6 -> T:int
+EDGES|EVAL_TYPE g#7 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#10 -> T:g
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#9 -> T:ANY
+EDGES|PARAMETER_LINK <unresolvedNamespace>.f#1 -> <unresolvedNamespace>.f#2
+EDGES|PARAMETER_LINK f#1 -> f#3
+EDGES|PARAMETER_LINK g#1 -> g#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:api.h:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:I -> api.h:<global>#2
+EDGES|REF T:g -> D:g
+EDGES|REF T:int -> D:int
+EDGES|REF T:void -> D:void
+EDGES|REF g#6 -> g#1
+EDGES|REF main.c:<global>#10 -> g#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE <unresolvedNamespace>.f#0 -> F:api.h
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE D:g -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
+EDGES|SOURCE_FILE api.h:<global>#2 -> F:api.h
+EDGES|SOURCE_FILE g#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] g#4 -> g#7
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.f#0 -> <unresolvedNamespace>.f#1
+FLOWS|REACHING_DEF[] f#0 -> f#1
+FLOWS|REACHING_DEF[] g#0 -> g#1
+FLOWS|REACHING_DEF[] g#0 -> g#6
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#10
+FLOWS|REACHING_DEF[f(x)] g#5 -> g#4
+FLOWS|REACHING_DEF[f(x)] g#5 -> g#7
+FLOWS|REACHING_DEF[p1] f#1 -> f#3
+FLOWS|REACHING_DEF[p1] f#1 -> f#4
+FLOWS|REACHING_DEF[x] <unresolvedNamespace>.f#1 -> <unresolvedNamespace>.f#2
+FLOWS|REACHING_DEF[x] <unresolvedNamespace>.f#1 -> <unresolvedNamespace>.f#4
+FLOWS|REACHING_DEF[x] g#1 -> g#2
+FLOWS|REACHING_DEF[x] g#1 -> g#6
+FLOWS|REACHING_DEF[x] g#6 -> g#2
+FLOWS|REACHING_DEF[x] g#6 -> g#5
+FLOWS|REACHING_DEF[x] g#6 -> g#7

@@ -1,0 +1,7 @@
+    Checking cpg-core v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/cpg-rs/cpg-core)
+    Checking cpg-frontend v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/cpg-rs/cpg-frontend)
+    Checking cpg-analysis v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/cpg-rs/cpg-analysis)
+    Checking cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/cpg-rs/cpg-lang-c)
+    Checking cpg-incremental v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/cpg-rs/cpg-incremental)
+    Checking joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/cpg-rs/joern-parity)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.03s

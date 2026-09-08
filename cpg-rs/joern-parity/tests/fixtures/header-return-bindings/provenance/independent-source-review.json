@@ -1,0 +1,82 @@
+{
+  "status": "PASS_BOUNDED_HEADER_RETURN_AND_IDENTITY_REPAIR",
+  "sourceSha256": "1ea8380cfdf3dd5d60d841f315d77d33412dbfbaa2df1d5df98c552789d35249",
+  "binarySha256": "453402b825089bd8ea3a43f3ab087004afde5296dc29c0206ab11ad7a815ddfb",
+  "measurementSha256": "b15506f158177ad94b563380d3e4f911a7476bb1de2725c3e57fc90ac04038fc",
+  "packagePath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/cpg-rs/joern-parity/tests/fixtures/header-return-bindings",
+  "completeRawAndReplay": {
+    "projects": 31,
+    "beforeExact": 4,
+    "candidateExact": 17,
+    "diagnostics": 14,
+    "selectedNonemptyRecords": 5142,
+    "canonicalLinesIncludingSeparators": 5309,
+    "earlierFullBaselineReplays": 25,
+    "candidateReplays": 31,
+    "exactProductionInventory": 17,
+    "priorDataChecks": 413
+  },
+  "validation": {
+    "reportedAndLogCountedTests": 315,
+    "sourceReview": "No remaining blocker in narrowed1ea8 source",
+    "independentPackageReplays": "PASS",
+    "wholeGetendpos": "Full61lineAST matches pinnedreference",
+    "wholeOutputSha256": "6df997d5383d8a43905e932b004f864b5e306809a45332a5758fedf8ed9f5715",
+    "luaS_newlstrCalls": {
+      "canonicalCallRecords": 32,
+      "callTypes": {
+        "TString*": 32
+      },
+      "signature": "TString*(lua_State*,char*,size_t)"
+    },
+    "luaG_concaterrorCalls": {
+      "canonicalCallRecords": 2,
+      "callTypes": {
+        "void": 2
+      },
+      "signature": "void(lua_State*,TValue*,TValue*)"
+    }
+  },
+  "fixedReviewFinding": {
+    "example": "typedef int T; typedef unsigned UNKNOWN T; T get_value(void);",
+    "before2c1": "Known int binding overwritten with ANY",
+    "final1ea8": "Invalid sized type specifier does not replace earlier binding; live int retained",
+    "recoveryControls": "Both valid typedef-before-error and valid typedef-after-error retain live int/longint binding; complete nonexact outputs kept"
+  },
+  "typedefGuardInteraction": "Name existence and underlying type remain distinct maps. Plain unknown aliases exist as types but resolve to ANY for header calls. Both collectors reject the measured invalid sized-type-identifier shape without destroying earlier valid state. Temporary parse state restoration is unchanged.",
+  "integratedSourceReview": {
+    "sourceSha256": "58d287bf0986d86dd94e1e199b62007b2a1e88ba2b136b166b2ba6b71ad0df52",
+    "helperChecks": {
+      "enum HeaderReturnBinding": "BYTE_IDENTICAL_TO_1EA8380C",
+      "impl HeaderReturnBinding": "BYTE_IDENTICAL_TO_1EA8380C",
+      "fn header_return_binding(": "BYTE_IDENTICAL_TO_1EA8380C",
+      "fn supplied_header_bindings(": "BYTE_IDENTICAL_TO_1EA8380C",
+      "fn update_header_type_bindings(": "BYTE_IDENTICAL_TO_1EA8380C",
+      "fn valid_type_definition_names(": "BYTE_IDENTICAL_TO_76F0C8BC",
+      "fn type_binding_name(": "BYTE_IDENTICAL_TO_76F0C8BC",
+      "fn sole_parenthesized_child(": "BYTE_IDENTICAL_TO_76F0C8BC",
+      "fn collect_type_sites(": "BYTE_IDENTICAL_TO_76F0C8BC"
+    },
+    "bodyContextReview": [
+      "Each capture records preceding macro and typedef snapshots before mutation",
+      "Each conditional/include recursion threads typedefs, typedef_states and type_bindings together",
+      "Header underlying return bindings resolve at declaration position; typedef name validity remains independent",
+      "All three maps are initialized per translation-unit body context",
+      "No reviewed helper changed during merge; no source edits by reviewer"
+    ],
+    "status": "PASS_MERGE_PRESERVATION"
+  },
+  "limits": [
+    "Whole projects remain nonexact; callback aliases, declaration/scaffold recovery and documented14diagnostics retained",
+    "No general compiler semantic validity claim beyond pinned cases",
+    "This review did not run final integrated whole-project/resource gates; parent owns them"
+  ],
+  "evidence": {
+    "package-replay.json": "e4dc870da1b7fc0416a59def722b2b8a999c51f0c8ee9d7dd536d6b2a92625c3",
+    "baseline-replay.json": "1cbc79ad74bc0593bcd7cbade6f76e94989aa290a3c006c55ba8c7bcb5291654",
+    "whole-review.json": "1c30c2c3f136c3fd83a9497e941b2ec56136b456404580c1275d01717b47003f",
+    "v3/package-replay.json": "04814f1f6a4cab313603c80161137aa958663c995627556f471bba92b7034331",
+    "merged-source-review.json": "cc895e37d1e104337776ec6f018b513be0bc391849de5df4a6511730e260c582"
+  },
+  "reviewerActions": "Read-only source; frozen-binary replays and ignored evidence writes only; no builds or root edits"
+}

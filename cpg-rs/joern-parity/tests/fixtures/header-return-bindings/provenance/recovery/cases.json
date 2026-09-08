@@ -1,0 +1,10 @@
+{
+  "recovery_error_then_valid": {
+    "api.h": "#define DECL int broken = 0; typedef long T\ntypedef DECL;\nT f(int x);\n",
+    "main.c": "#include \"api.h\"\nint g(int x){return f(x);}\n"
+  },
+  "recovery_valid_then_error": {
+    "api.h": "#define DECL int T; int broken =\ntypedef DECL;\nT f(int x);\n",
+    "main.c": "#include \"api.h\"\nint g(int x){return f(x);}\n"
+  }
+}

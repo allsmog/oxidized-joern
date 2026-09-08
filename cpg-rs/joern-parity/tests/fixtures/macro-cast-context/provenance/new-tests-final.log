@@ -1,0 +1,10 @@
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.41s
+     Running tests/macro_cast_context.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/macro_cast_context-2da5d68276384c09)
+
+running 2 tests
+test sizeof_typedef_context_distinguishes_parameter_shadowing ... ok
+test known_typedef_cast_context_matches_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+

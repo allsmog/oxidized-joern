@@ -22,3 +22,22 @@ cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/**/*.diff -whitespace
 cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/provenance/*.log whitespace=-blank-at-eof
 cpg-rs/joern-parity/tests/fixtures/field-macros/evidence/focused-tests.log whitespace=-blank-at-eof
 cpg-rs/joern-parity/tests/fixtures/field-macros/evidence/relevant-tests.log whitespace=-blank-at-eof
+
+# Sixth-batch raw differential evidence retains original context whitespace.
+cpg-rs/joern-parity/tests/fixtures/sizeof-expansion/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/sizeof-expansion/provenance/*.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/macro-cast-context/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/macro-cast-context/provenance/*.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/macro-cast-context/provenance/source-only.patch -whitespace
+cpg-rs/joern-parity/tests/fixtures/declaration-macros/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/declaration-macros/provenance/*.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/sixth-context-interactions/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/typedef-existence/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/typedef-existence/validation/source.patch -whitespace
+cpg-rs/joern-parity/tests/fixtures/typedef-existence/validation/*.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/typedef-existence/diagnostics/lua_all_headers/*.h whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/typedef-existence/diagnostics/lua_type_headers/*.h whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/predefined-c-macros/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/predefined-c-macros/raw/**/live.stdout whitespace=-blank-at-eol
+cpg-rs/joern-parity/tests/fixtures/numeric-macro-roots/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/numeric-macro-roots/raw/live.stdout whitespace=-blank-at-eol

@@ -1,0 +1,48 @@
+{
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/frozen-candidate/exact.rs",
+    "sha256": "c79d93566b3ac603b5d2c40e68bc58b03f43db0ab91a7c4c8b4b6c0d2fd71c43"
+  },
+  "candidateBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/frozen-candidate/joern-parity",
+    "sha256": "281abd04c22880183d99ee6f83c0ac619566e089b3c0ce23ad1c1300addde655"
+  },
+  "baselineBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v2/bin/joern-parity",
+    "sha256": "9280342b38a2da5b57249180c11f4adcfe878d77f2114ba47c64dce847c6e68a"
+  },
+  "liveRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-inactive-declaration-review/live-run.json",
+    "sha256": "26472e9af0b2e9a6592856a3b9cd3c9c4d12981697cdd1032c9130f1acadfd29"
+  },
+  "cases": [
+    {
+      "case": "active_undef",
+      "records": 130,
+      "beforeExact": false,
+      "beforeDiffLines": 133,
+      "candidateExact": false,
+      "candidateDiffLines": 133,
+      "candidateEqualsBefore": true
+    },
+    {
+      "case": "inactive_aggregate",
+      "records": 264,
+      "beforeExact": false,
+      "beforeDiffLines": 259,
+      "candidateExact": true,
+      "candidateDiffLines": 0,
+      "candidateEqualsBefore": false
+    },
+    {
+      "case": "inactive_typedef_binding",
+      "records": 277,
+      "beforeExact": true,
+      "beforeDiffLines": 0,
+      "candidateExact": true,
+      "candidateDiffLines": 0,
+      "candidateEqualsBefore": true
+    }
+  ],
+  "formerlyExactLost": []
+}

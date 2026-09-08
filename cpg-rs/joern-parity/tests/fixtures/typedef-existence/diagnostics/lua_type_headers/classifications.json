@@ -1,0 +1,22 @@
+{
+  "direct": [
+    [
+      "<operator>.pointerCall",
+      "(lua_Unsigned)(i)"
+    ]
+  ],
+  "add": [
+    [
+      "<operator>.cast",
+      "(lua_Integer)(((lua_Unsigned)(i)) + ((lua_Unsigned)(j)))"
+    ],
+    [
+      "<operator>.pointerCall",
+      "(lua_Unsigned)(i)"
+    ],
+    [
+      "<operator>.pointerCall",
+      "(lua_Unsigned)(j)"
+    ]
+  ]
+}

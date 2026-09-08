@@ -1,0 +1,283 @@
+--- fresh-live
++++ candidate
+@@ -15,16 +15,19 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={ return STANDARD(x); } TYPE_FULL_NAME=void ORDER=2
++      LOCAL NAME=__STDC_HOSTED__ CODE=<unknown> __STDC_HOSTED__ TYPE_FULL_NAME=ANY ORDER=0
++      LOCAL NAME=__STDC_VERSION__ CODE=<unknown> __STDC_VERSION__ TYPE_FULL_NAME=ANY ORDER=0
++      LOCAL NAME=__STDC__ CODE=<unknown> __STDC__ TYPE_FULL_NAME=ANY ORDER=0
+       RETURN CODE=return STANDARD(x); ORDER=1
+         CALL NAME=STANDARD CODE=STANDARD(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:STANDARD:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+           BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.addition CODE=(1 + 199901L + 1) + (x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              CALL NAME=<operator>.addition CODE=1 + 199901L + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                CALL NAME=<operator>.addition CODE=1 + 199901L TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                  LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-                  LITERAL CODE=199901L TYPE_FULL_NAME=longint ORDER=2 ARGUMENT_INDEX=2
+-                LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=<operator>.addition CODE=(__STDC__ + __STDC_VERSION__ + __STDC_HOSTED__) + (x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.addition CODE=__STDC__ + __STDC_VERSION__ + __STDC_HOSTED__ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                CALL NAME=<operator>.addition CODE=__STDC__ + __STDC_VERSION__ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                  IDENTIFIER NAME=__STDC__ CODE=<unknown> __STDC__ TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++                  IDENTIFIER NAME=__STDC_VERSION__ CODE=<unknown> __STDC_VERSION__ TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
++                IDENTIFIER NAME=__STDC_HOSTED__ CODE=<unknown> __STDC_HOSTED__ TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+               IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=long ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+@@ -41,16 +44,19 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={ return STANDARD(x); } TYPE_FULL_NAME=void ORDER=2
++    LOCAL NAME=__STDC_HOSTED__ CODE=<unknown> __STDC_HOSTED__ TYPE_FULL_NAME=ANY ORDER=0
++    LOCAL NAME=__STDC_VERSION__ CODE=<unknown> __STDC_VERSION__ TYPE_FULL_NAME=ANY ORDER=0
++    LOCAL NAME=__STDC__ CODE=<unknown> __STDC__ TYPE_FULL_NAME=ANY ORDER=0
+     RETURN CODE=return STANDARD(x); ORDER=1
+       CALL NAME=STANDARD CODE=STANDARD(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:STANDARD:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+         BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=<operator>.addition CODE=(1 + 199901L + 1) + (x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            CALL NAME=<operator>.addition CODE=1 + 199901L + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              CALL NAME=<operator>.addition CODE=1 + 199901L TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-                LITERAL CODE=199901L TYPE_FULL_NAME=longint ORDER=2 ARGUMENT_INDEX=2
+-              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++          CALL NAME=<operator>.addition CODE=(__STDC__ + __STDC_VERSION__ + __STDC_HOSTED__) + (x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++            CALL NAME=<operator>.addition CODE=__STDC__ + __STDC_VERSION__ + __STDC_HOSTED__ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.addition CODE=__STDC__ + __STDC_VERSION__ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                IDENTIFIER NAME=__STDC__ CODE=<unknown> __STDC__ TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++                IDENTIFIER NAME=__STDC_VERSION__ CODE=<unknown> __STDC_VERSION__ TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
++              IDENTIFIER NAME=__STDC_HOSTED__ CODE=<unknown> __STDC_HOSTED__ TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+             IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=long ORDER=3
+ 
+@@ -65,45 +71,43 @@
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=long FULL_NAME=long CODE=long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=longint FULL_NAME=longint CODE=longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=value FULL_NAME=value CODE=value AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=long FULL_NAME=long TYPE_DECL_FULL_NAME=long
+-NODES|TYPE NAME=longint FULL_NAME=longint TYPE_DECL_FULL_NAME=longint
+ NODES|TYPE NAME=value FULL_NAME=value TYPE_DECL_FULL_NAME=value
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT value#10 -> value#11
+-EDGES|ARGUMENT value#10 -> value#12
+-EDGES|ARGUMENT value#4 -> value#5
+-EDGES|ARGUMENT value#5 -> value#6
+-EDGES|ARGUMENT value#8 -> value#14
++EDGES|ARGUMENT value#11 -> value#12
++EDGES|ARGUMENT value#11 -> value#17
++EDGES|ARGUMENT value#12 -> value#13
++EDGES|ARGUMENT value#12 -> value#16
++EDGES|ARGUMENT value#13 -> value#14
++EDGES|ARGUMENT value#13 -> value#15
++EDGES|ARGUMENT value#7 -> value#8
+ EDGES|ARGUMENT value#8 -> value#9
+-EDGES|ARGUMENT value#9 -> value#10
+-EDGES|ARGUMENT value#9 -> value#13
+-EDGES|CALL value#10 -> <operator>.addition#0
+-EDGES|CALL value#5 -> main.c:STANDARD:ANY(1)#0
+-EDGES|CALL value#8 -> <operator>.addition#0
+-EDGES|CALL value#9 -> <operator>.addition#0
++EDGES|CALL value#11 -> <operator>.addition#0
++EDGES|CALL value#12 -> <operator>.addition#0
++EDGES|CALL value#13 -> <operator>.addition#0
++EDGES|CALL value#8 -> main.c:STANDARD:ANY(1)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#18
+-EDGES|CFG main.c:<global>#1 -> value#6
+-EDGES|CFG main.c:<global>#18 -> main.c:<global>#19
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#21
++EDGES|CFG main.c:<global>#1 -> value#9
++EDGES|CFG main.c:<global>#21 -> main.c:<global>#22
+ EDGES|CFG main.c:STANDARD:ANY(1)#0 -> main.c:STANDARD:ANY(1)#4
+-EDGES|CFG value#10 -> value#13
+-EDGES|CFG value#11 -> value#12
+-EDGES|CFG value#12 -> value#10
+-EDGES|CFG value#13 -> value#9
+-EDGES|CFG value#14 -> value#8
+-EDGES|CFG value#4 -> value#15
+-EDGES|CFG value#5 -> value#11
+-EDGES|CFG value#5 -> value#4
+-EDGES|CFG value#6 -> value#5
+-EDGES|CFG value#8 -> value#4
+-EDGES|CFG value#9 -> value#14
++EDGES|CFG value#11 -> value#7
++EDGES|CFG value#12 -> value#17
++EDGES|CFG value#13 -> value#16
++EDGES|CFG value#14 -> value#15
++EDGES|CFG value#15 -> value#13
++EDGES|CFG value#16 -> value#12
++EDGES|CFG value#17 -> value#11
++EDGES|CFG value#7 -> value#18
++EDGES|CFG value#8 -> value#14
++EDGES|CFG value#8 -> value#7
++EDGES|CFG value#9 -> value#8
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+ EDGES|CONTAINS D:main.c:<global> -> D:value
+@@ -113,21 +117,20 @@
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:long
+-EDGES|CONTAINS F:<includes> -> D:longint
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#17
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#18
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#20
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#21
+ EDGES|CONTAINS main.c:<global>#1 -> value#10
+ EDGES|CONTAINS main.c:<global>#1 -> value#11
+ EDGES|CONTAINS main.c:<global>#1 -> value#12
+ EDGES|CONTAINS main.c:<global>#1 -> value#13
+ EDGES|CONTAINS main.c:<global>#1 -> value#14
++EDGES|CONTAINS main.c:<global>#1 -> value#15
++EDGES|CONTAINS main.c:<global>#1 -> value#16
++EDGES|CONTAINS main.c:<global>#1 -> value#17
+ EDGES|CONTAINS main.c:<global>#1 -> value#3
+-EDGES|CONTAINS main.c:<global>#1 -> value#4
+-EDGES|CONTAINS main.c:<global>#1 -> value#5
+-EDGES|CONTAINS main.c:<global>#1 -> value#6
+ EDGES|CONTAINS main.c:<global>#1 -> value#7
+ EDGES|CONTAINS main.c:<global>#1 -> value#8
+ EDGES|CONTAINS main.c:<global>#1 -> value#9
+@@ -140,27 +143,30 @@
+ EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#17 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#18 -> T:value
+-EDGES|EVAL_TYPE main.c:<global>#19 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#20 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#21 -> T:value
++EDGES|EVAL_TYPE main.c:<global>#22 -> T:ANY
+ EDGES|EVAL_TYPE main.c:STANDARD:ANY(1)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:STANDARD:ANY(1)#2 -> T:ANY
+ EDGES|EVAL_TYPE main.c:STANDARD:ANY(1)#3 -> T:ANY
+ EDGES|EVAL_TYPE main.c:STANDARD:ANY(1)#4 -> T:ANY
+ EDGES|EVAL_TYPE value#1 -> T:int
+ EDGES|EVAL_TYPE value#10 -> T:ANY
+-EDGES|EVAL_TYPE value#11 -> T:int
+-EDGES|EVAL_TYPE value#12 -> T:longint
+-EDGES|EVAL_TYPE value#13 -> T:int
+-EDGES|EVAL_TYPE value#14 -> T:int
+-EDGES|EVAL_TYPE value#15 -> T:long
++EDGES|EVAL_TYPE value#11 -> T:ANY
++EDGES|EVAL_TYPE value#12 -> T:ANY
++EDGES|EVAL_TYPE value#13 -> T:ANY
++EDGES|EVAL_TYPE value#14 -> T:ANY
++EDGES|EVAL_TYPE value#15 -> T:ANY
++EDGES|EVAL_TYPE value#16 -> T:ANY
++EDGES|EVAL_TYPE value#17 -> T:int
++EDGES|EVAL_TYPE value#18 -> T:long
+ EDGES|EVAL_TYPE value#2 -> T:int
+ EDGES|EVAL_TYPE value#3 -> T:void
++EDGES|EVAL_TYPE value#4 -> T:ANY
+ EDGES|EVAL_TYPE value#5 -> T:ANY
+-EDGES|EVAL_TYPE value#6 -> T:int
+-EDGES|EVAL_TYPE value#7 -> T:ANY
++EDGES|EVAL_TYPE value#6 -> T:ANY
+ EDGES|EVAL_TYPE value#8 -> T:ANY
+-EDGES|EVAL_TYPE value#9 -> T:ANY
++EDGES|EVAL_TYPE value#9 -> T:int
+ EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+ EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+ EDGES|PARAMETER_LINK main.c:STANDARD:ANY(1)#1 -> main.c:STANDARD:ANY(1)#2
+@@ -171,16 +177,17 @@
+ EDGES|REF T:ANY -> D:ANY
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:long -> D:long
+-EDGES|REF T:longint -> D:longint
+ EDGES|REF T:value -> D:value
+ EDGES|REF T:void -> D:void
+-EDGES|REF main.c:<global>#18 -> main.c:<global>#1
+-EDGES|REF value#14 -> value#1
++EDGES|REF main.c:<global>#21 -> main.c:<global>#1
++EDGES|REF value#14 -> value#6
++EDGES|REF value#15 -> value#5
++EDGES|REF value#16 -> value#4
++EDGES|REF value#17 -> value#1
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:long -> F:<includes>
+-EDGES|SOURCE_FILE D:longint -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE D:value -> F:main.c
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+@@ -190,27 +197,30 @@
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+ EDGES|SOURCE_FILE main.c:STANDARD:ANY(1)#0 -> F:main.c
+-FLOWS|REACHING_DEF[(1 + 199901L + 1) + (x)] value#8 -> value#15
+-FLOWS|REACHING_DEF[1 + 199901L + 1] value#9 -> value#15
+-FLOWS|REACHING_DEF[1 + 199901L + 1] value#9 -> value#8
+-FLOWS|REACHING_DEF[1 + 199901L] value#10 -> value#15
+-FLOWS|REACHING_DEF[1 + 199901L] value#10 -> value#9
+-FLOWS|REACHING_DEF[199901L] value#12 -> value#10
+-FLOWS|REACHING_DEF[1] value#11 -> value#10
+-FLOWS|REACHING_DEF[1] value#13 -> value#9
+-FLOWS|REACHING_DEF[<RET>] value#4 -> value#15
+-FLOWS|REACHING_DEF[STANDARD(x)] value#5 -> value#15
+-FLOWS|REACHING_DEF[STANDARD(x)] value#5 -> value#4
++FLOWS|REACHING_DEF[(__STDC__ + __STDC_VERSION__ + __STDC_HOSTED__) + (x)] value#11 -> value#18
++FLOWS|REACHING_DEF[<RET>] value#7 -> value#18
++FLOWS|REACHING_DEF[<unknown> __STDC_HOSTED__] value#16 -> value#12
++FLOWS|REACHING_DEF[<unknown> __STDC_HOSTED__] value#16 -> value#18
++FLOWS|REACHING_DEF[<unknown> __STDC_VERSION__] value#15 -> value#13
++FLOWS|REACHING_DEF[<unknown> __STDC_VERSION__] value#15 -> value#18
++FLOWS|REACHING_DEF[<unknown> __STDC__] value#14 -> value#13
++FLOWS|REACHING_DEF[<unknown> __STDC__] value#14 -> value#18
++FLOWS|REACHING_DEF[STANDARD(x)] value#8 -> value#18
++FLOWS|REACHING_DEF[STANDARD(x)] value#8 -> value#7
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#18
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#21
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#1
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#11
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#12
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#13
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#14
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#6
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#15
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#16
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#17
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#9
+ FLOWS|REACHING_DEF[] main.c:STANDARD:ANY(1)#0 -> main.c:STANDARD:ANY(1)#1
++FLOWS|REACHING_DEF[__STDC__ + __STDC_VERSION__ + __STDC_HOSTED__] value#12 -> value#11
++FLOWS|REACHING_DEF[__STDC__ + __STDC_VERSION__ + __STDC_HOSTED__] value#12 -> value#18
++FLOWS|REACHING_DEF[__STDC__ + __STDC_VERSION__] value#13 -> value#12
++FLOWS|REACHING_DEF[__STDC__ + __STDC_VERSION__] value#13 -> value#18
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+ FLOWS|REACHING_DEF[p1] main.c:STANDARD:ANY(1)#1 -> main.c:STANDARD:ANY(1)#2
+@@ -218,11 +228,11 @@
+ FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+ FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+ FLOWS|REACHING_DEF[x] value#1 -> value#2
+-FLOWS|REACHING_DEF[x] value#1 -> value#6
+-FLOWS|REACHING_DEF[x] value#14 -> value#15
+-FLOWS|REACHING_DEF[x] value#14 -> value#2
+-FLOWS|REACHING_DEF[x] value#14 -> value#8
+-FLOWS|REACHING_DEF[x] value#6 -> value#14
+-FLOWS|REACHING_DEF[x] value#6 -> value#15
+-FLOWS|REACHING_DEF[x] value#6 -> value#2
+-FLOWS|REACHING_DEF[x] value#6 -> value#5
++FLOWS|REACHING_DEF[x] value#1 -> value#9
++FLOWS|REACHING_DEF[x] value#17 -> value#11
++FLOWS|REACHING_DEF[x] value#17 -> value#18
++FLOWS|REACHING_DEF[x] value#17 -> value#2
++FLOWS|REACHING_DEF[x] value#9 -> value#17
++FLOWS|REACHING_DEF[x] value#9 -> value#18
++FLOWS|REACHING_DEF[x] value#9 -> value#2
++FLOWS|REACHING_DEF[x] value#9 -> value#8

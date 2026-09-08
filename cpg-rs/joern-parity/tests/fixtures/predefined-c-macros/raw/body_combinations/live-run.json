@@ -1,0 +1,46 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 12.48918970800878,
+  "script": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/oracle.sc",
+    "sha256": "026c39b15177cd8cde094a871f5a64b4a20411003d9a81b21874283f7dc1dcb3"
+  },
+  "raw": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/live.stdout",
+    "sha256": "ba48d4471bba45285185cd07c256442daa822e636dee6c6dd88eb133d7105516"
+  },
+  "sourceInputs": {
+    "combined": {
+      "main.c": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/combined/main.c",
+        "sha256": "45f28f43bc7c03b64cdde4ac437169525a39374bcf62796643e9bbc5edc0322b"
+      }
+    },
+    "user_macro": {
+      "main.c": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/user_macro/main.c",
+        "sha256": "7291dd75353411b44ab68e6fa6b623e2ed9e10147d1d99d9c3efd6b529db471d"
+      }
+    },
+    "undefined_direct": {
+      "main.c": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/undefined_direct/main.c",
+        "sha256": "283bd227e6e7761ca3826a3ddf39b5e24b033dca8423b015ff61cbc90e2cd476"
+      }
+    },
+    "redefined_combined": {
+      "main.c": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/redefined_combined/main.c",
+        "sha256": "fb480ff0eacfa185380db26afd4ded11ddc36ae6674ead516c6fd0b229ccf1d9"
+      }
+    }
+  }
+}

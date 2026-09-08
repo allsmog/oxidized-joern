@@ -1,0 +1,29 @@
+--- joern
++++ final-before-v3
+@@ -19,7 +19,7 @@
+     METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={ return get_value(value); } TYPE_FULL_NAME=void ORDER=2
+       RETURN CODE=return get_value(value); ORDER=1
+-        CALL NAME=get_value CODE=get_value(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=get_value ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++        CALL NAME=get_value CODE=get_value(value) TYPE_FULL_NAME=T METHOD_FULL_NAME=get_value ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+@@ -31,7 +31,7 @@
+   METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={ return get_value(value); } TYPE_FULL_NAME=void ORDER=2
+     RETURN CODE=return get_value(value); ORDER=1
+-      CALL NAME=get_value CODE=get_value(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=get_value ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++      CALL NAME=get_value CODE=get_value(value) TYPE_FULL_NAME=T METHOD_FULL_NAME=get_value ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+@@ -104,7 +104,7 @@
+ EDGES|EVAL_TYPE read_value#1 -> T:int
+ EDGES|EVAL_TYPE read_value#2 -> T:int
+ EDGES|EVAL_TYPE read_value#3 -> T:void
+-EDGES|EVAL_TYPE read_value#5 -> T:ANY
++EDGES|EVAL_TYPE read_value#5 -> T:T
+ EDGES|EVAL_TYPE read_value#6 -> T:int
+ EDGES|EVAL_TYPE read_value#7 -> T:int
+ EDGES|PARAMETER_LINK get_value#1 -> get_value#2

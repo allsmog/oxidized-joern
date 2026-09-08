@@ -1,0 +1,22 @@
+{
+  "direct": [
+    [
+      "<operator>.pointerCall",
+      "(U)(x)"
+    ]
+  ],
+  "add": [
+    [
+      "<operator>.pointerCall",
+      "(U)(((U)(x)) + ((U)(y)))"
+    ],
+    [
+      "<operator>.pointerCall",
+      "(U)(x)"
+    ],
+    [
+      "<operator>.pointerCall",
+      "(U)(y)"
+    ]
+  ]
+}

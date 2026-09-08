@@ -1,0 +1,27 @@
+{
+  "status": "BLOCKED_ON_REPRODUCED_COMBINED_PARAMETER_CONTEXT_DEFECT",
+  "reviewedSourceSha256": "fa8423c7e9cfb5a3875b403d1958e9bf5c66b5a221f003185bd16555c58888e9",
+  "earlyBinaryBindingsSha256": "63795d932c367106c8d64f0cd60d77b09d9206f268379bcc4427b767e087d5c2",
+  "earlyBinarySha256": "9605fb168ec86edc5e05f6bf81b7cede617e8e83ce7b69efe400d307fc0827af",
+  "sourceReview": {
+    "namedBodyMacroContext": "PASS: header declarations and source-position typedef snapshots share the original include walker; both initialized once per returned context and forwarded through each include/conditional recursion.",
+    "temporaryTreeContexts": "PASS: all four cast patch entry paths and matching restores survive merged source; no type-state map retained after a temporary tree is disposed.",
+    "declarationBinding": "FAIL: function visitor derives shadow names from raw fn_header while emitted parameters derive from resolved_function_header."
+  },
+  "reproduction": {
+    "oracle": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/sixth-interactions/live.stdout",
+      "sha256": "7055af12fcd0041dc7f433d8c80bebeb189b2e6c6621fa0ef177e13023a86226"
+    },
+    "liveRunSha256": "433c4d993bc15b2980b62d0c92b7c72f93b89293d7fb0a10820cc838b3803a3a",
+    "completeReplaySha256": "054eebffa30ba58e6a47cd62a2c7edeb0610744628e5eb2c59792a2fc055db2b",
+    "totalProjects": 6,
+    "exactProjects": 3,
+    "blockingCases": [
+      "macro_parameter_shadow",
+      "block_macro_parameter_shadow"
+    ],
+    "nonblockingDiagnostic": "header_alias_return: preexisting CALL underlying alias type resolution"
+  },
+  "recommendation": "Prefer resolved_function_header for parameter names in collect_type_sites, with fn_header fallback, using the same macros snapshot already passed to the visitor. Re-run every complete reference; do not modify expectations."
+}

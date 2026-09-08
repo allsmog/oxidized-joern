@@ -84,6 +84,20 @@ operand/flow losses at their original source occurrences. Typedef casts can
 still parse as pointer calls, and the source parser can truncate or omit
 unsupported macro invocations before argument binding runs.
 
+The [sixth batch](../docs/conformance/astra-sixth-batch-2026-09-08.md) extends
+source-position typedef casts, declaration macro expansion, supplied-header
+return bindings, macro sizeof rendering, pinned default C macros, numeric macro
+root types, and inactive declaration context. Inactive declarations retain
+visible expression macros while their directives and callable bindings remain
+inactive. Nine fixture families plus a combined regression test gate 180 exact
+isolated projections; all complete nonexact references remain available.
+Whole-project strict primary method matches improve to 32 on zlib and 510 on
+Lua. These counts describe the selected AST projection, not language coverage
+or complete graph equality. Full-name parsing at spaces still drops some CFG
+and method-origin ReachingDef edges; six numeric macro diagnostics and eight
+additional complete controls pin the next repair. No non-C frontend or Joern
+binary/console compatibility is promoted by this batch.
+
 Confirmed remaining C gaps include broader include/build-definition context,
 function-like macros in preprocessor conditions, block-level directives,
 variadics, stringification, token pasting, unbraced multi-statement replacements,

@@ -1,0 +1,70 @@
+--- joern
++++ final-after
+@@ -14,12 +14,12 @@
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-    LOCAL NAME=values CODE=int values[N] TYPE_FULL_NAME=int[3] ORDER=1
++    LOCAL NAME=values CODE=int values[N] TYPE_FULL_NAME=int[N] ORDER=1
+     CALL NAME=<operator>.arrayInitializer CODE=values[N] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+       CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+         BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+           LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+-    LOCAL NAME=after CODE=int after[N] TYPE_FULL_NAME=int[3] ORDER=3
++    LOCAL NAME=after CODE=int after[N] TYPE_FULL_NAME=int[N] ORDER=3
+     CALL NAME=<operator>.arrayInitializer CODE=after[N] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+       CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+         BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+@@ -43,11 +43,11 @@
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=int[3] FULL_NAME=int[3] CODE=int[3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=int[N] FULL_NAME=int[N] CODE=int[N] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+-NODES|TYPE NAME=int[3] FULL_NAME=int[3] TYPE_DECL_FULL_NAME=int[3]
++NODES|TYPE NAME=int[N] FULL_NAME=int[N] TYPE_DECL_FULL_NAME=int[N]
+ EDGES|ARGUMENT main.c:<global>#3 -> main.c:<global>#4
+ EDGES|ARGUMENT main.c:<global>#8 -> main.c:<global>#9
+ EDGES|CALL main.c:<global>#3 -> <operator>.arrayInitializer#0
+@@ -75,7 +75,7 @@
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:int
+-EDGES|CONTAINS F:<includes> -> D:int[3]
++EDGES|CONTAINS F:<includes> -> D:int[N]
+ EDGES|CONTAINS F:api.h -> D:api.h:<global>
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+@@ -101,12 +101,12 @@
+ EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#11 -> T:int
+ EDGES|EVAL_TYPE main.c:<global>#12 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#2 -> T:int[3]
++EDGES|EVAL_TYPE main.c:<global>#2 -> T:int[N]
+ EDGES|EVAL_TYPE main.c:<global>#3 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#4 -> T:int
+ EDGES|EVAL_TYPE main.c:<global>#5 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#6 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#7 -> T:int[3]
++EDGES|EVAL_TYPE main.c:<global>#7 -> T:int[N]
+ EDGES|EVAL_TYPE main.c:<global>#8 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#9 -> T:int
+ EDGES|EVAL_TYPE main.c:N:int(0)#1 -> T:ANY
+@@ -118,12 +118,12 @@
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
+ EDGES|REF T:int -> D:int
+-EDGES|REF T:int[3] -> D:int[3]
++EDGES|REF T:int[N] -> D:int[N]
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+-EDGES|SOURCE_FILE D:int[3] -> F:<includes>
++EDGES|SOURCE_FILE D:int[N] -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>

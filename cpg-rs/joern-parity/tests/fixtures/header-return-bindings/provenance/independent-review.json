@@ -1,0 +1,113 @@
+{
+  "status": "PASS_BOUNDED_HEADER_RETURN_BINDING_REVIEW",
+  "candidateSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/frozen-final-v3/exact.rs",
+    "sha256": "1ea8380cfdf3dd5d60d841f315d77d33412dbfbaa2df1d5df98c552789d35249",
+    "bytes": 359864
+  },
+  "candidateBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/frozen-final-v3/joern-parity",
+    "sha256": "453402b825089bd8ea3a43f3ab087004afde5296dc29c0206ab11ad7a815ddfb",
+    "bytes": 2420000
+  },
+  "unchangedImporter": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/cpg-rs/cpg-lang-c/src/import.rs",
+    "sha256": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba",
+    "bytes": 54010
+  },
+  "baselineCommit": "3737641c7f1d8083cfc90c6af4c116ddd5939ddb",
+  "baselineSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/declaration-macros/frozen-reviewed/exact.rs",
+    "sha256": "5c3edebbec63e5e5f16a66a8e0ad9e74e9a3c6913cb3a20c6f6c0253f86ae0f5",
+    "bytes": 353931
+  },
+  "baselineBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/declaration-macros/frozen-reviewed/joern-parity",
+    "sha256": "5007df5ed72accbbe204193286dbc70fde2d2dc2f730e96abd601e62e88f2140",
+    "bytes": 2402624
+  },
+  "sourceDelta": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/final-source.patch",
+    "sha256": "14262c472e81bef8abc3b24aef79eb976797c63c39c4e4df7f7c63eac5eb5662",
+    "bytes": 9212
+  },
+  "narrowGuardDelta": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/followup-2c1-final.patch",
+    "sha256": "45397fe56d6ee8fac5c2257ca3a64f017160182f1236bae64495bff46b19f585",
+    "bytes": 759
+  },
+  "packageMeasurement": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/cpg-rs/joern-parity/tests/fixtures/header-return-bindings/measurement.json",
+    "sha256": "b15506f158177ad94b563380d3e4f911a7476bb1de2725c3e57fc90ac04038fc",
+    "bytes": 42291
+  },
+  "packageREADME": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/cpg-rs/joern-parity/tests/fixtures/header-return-bindings/README.md",
+    "sha256": "75f8fdf48ac8bf9c9ec39873209854b9094ffc19e94ac3cac810b59613afa250",
+    "bytes": 4678
+  },
+  "productionTestSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/cpg-rs/joern-parity/tests/header_return_bindings.rs",
+    "sha256": "5ad1e7bbd9c26a3d3db213ed02f41e53c222d9af80a8b30ee0b9210d6d528c31",
+    "bytes": 5633
+  },
+  "independentlyExecutedTestBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/header_return_bindings-5eb4b98a693e02a1",
+    "sha256": "3372fc70b0959844902099c448293096b737da0df5268e5650511d7c346ed627",
+    "bytes": 11356040
+  },
+  "productionTestLog": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-header-binding-review/production-tests.log",
+    "sha256": "78f7a901c2139d21b7c9269fc10bdb77e550ad5c30e729af89d9af6ea9ef9d8c",
+    "bytes": 436
+  },
+  "independent31CompleteReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-header-binding-review/v3-provided-review.json",
+    "sha256": "7f4513f729d2bcbf96492f403ea17caebbc7f028ad8bf986a95e408aa5a58a3a",
+    "bytes": 20965
+  },
+  "fourFreshIndependentRaw": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-header-binding-review/live.stdout",
+    "sha256": "cdc1d4ce006be9455b579a02a4fc52a2ae57644ba829deb25d6361653f948845",
+    "bytes": 78564
+  },
+  "fourFreshIndependentRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-header-binding-review/live-run.json",
+    "sha256": "024fbdb06bfe77990ea473f6581054a067a770c47269c16e20004be9859830d0",
+    "bytes": 3524
+  },
+  "prior25Review": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-header-binding-review/provided-review.json",
+    "sha256": "601088feb3d5d4be8e3426ddecd97ab6de5205b93211980ace9e31c3414442cc",
+    "bytes": 16945
+  },
+  "rejectedWholeRootGuardEvidence": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-header-binding-review/v2-independent/review.json",
+    "sha256": "8117cd25d4a405f95bd883f79ac781d9b81c99455eb3e0cfa24db6533d6306ff",
+    "bytes": 3850
+  },
+  "counts": {
+    "isolatedProjects": 31,
+    "exactBefore": 4,
+    "exactAfter": 17,
+    "formerlyExactLost": 0,
+    "nonexactCompleteDiagnostics": 14,
+    "canonicalLinesIncludingSeparators": 5309,
+    "nonemptySelectedRecords": 5142,
+    "productionTestsPassed": 4
+  },
+  "verified": [
+    "All six raw producer groups independently extracted without dropping selected records; all31 input/reference/before/after/diff package hashes checked. Frozen before and final binaries independently replayed all31 complete projects.",
+    "Known primitive/tag aliases capture the underlying return type at declaration position. Forward/cyclic/unknown targets retain ANY. Declaration display types preserve alias spelling; parenthesized callable identity stays distinct.",
+    "Included callable lookup requires a complete error-free expanded declaration and has no raw erroneous function-name fallback. Neither function-pointer returns nor arbitrary unknown aliases are promoted to correct types.",
+    "An invalid sized typedef base cannot erase a prior valid binding. Individually valid typedef subtrees beside erroneous sibling expansion text still contribute, verified with both source orders.",
+    "Four independent new probes (anonymous/tagged alias, late alias, invalid redeclaration) plus two independent peer recovery probes are included once among31. Invalid and recovery targeted CALL types match while their complete nonexact graphs remain diagnostics.",
+    "No source edits or builds performed in this review. Executed existing compiled four-test production binary and bound its hash; froze final release output separately."
+  ],
+  "limitations": [
+    "Whole-project final combined acceptance remains root-owned. This receipt does not accept sixth-v1 whole outputs or assert that all formerly matching Lua facts are restored.",
+    "Function-pointer typedef return remains ANY rather than int(*)(int). Separate typedef/tag/display scaffold differences persist in14 complete diagnostics.",
+    "Predefined C macro defaults, malformed typedef cast-name existence, and broad source-location parity are separate changes.",
+    "The canonical projection preserves only selected properties; transport is non-injective. Passing small projections does not establish full Joern parity."
+  ]
+}

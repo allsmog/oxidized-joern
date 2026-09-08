@@ -1,0 +1,50 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 9.314358000003267,
+  "script": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/oracle.sc",
+    "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+  },
+  "raw": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/live.stdout",
+    "sha256": "383cb3e0c530d4531b042e69c6ed999a0a454b8ef08489b390f1adfcc9a1a576"
+  },
+  "sourceInputs": {
+    "adjacent_identifiers": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/adjacent_identifiers/main.c",
+      "sha256": "b4e466d6ad9fdccf37cde92c03ea7792c93faae4684b8108f50ecfb1bd698f44"
+    },
+    "literal_after": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/literal_after/main.c",
+      "sha256": "a8b08b0e82b4c0c90089e4c61b66239f7af79caa5b96a5236a70737bacce524d"
+    },
+    "leading_operator": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/leading_operator/main.c",
+      "sha256": "9357a536c2d7190dadb7f3f0e66b9e607634b86a471399d1c0a376330556771e"
+    },
+    "missing_right": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/missing_right/main.c",
+      "sha256": "961fa7295408d0d8315a870d6786f5fb4842034c85dc224608962fe4858680d4"
+    },
+    "semicolon_sibling": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/semicolon_sibling/main.c",
+      "sha256": "43047ff86ec96641e02b8fb58a22c4e3cfa0f872a84f1e38ffddd94d6ca55e07"
+    },
+    "comma_empty": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/comma_empty/main.c",
+      "sha256": "e492e4701a88293df002fe6658825ccadf1ab656844d83b0b20990d65eba474b"
+    },
+    "missing_expression": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/malformed/input/missing_expression/main.c",
+      "sha256": "d9ceea1079d5c447e775494d6dd16eab7b9b0fccf0ff50e75f6b4454fbc550cd"
+    }
+  }
+}

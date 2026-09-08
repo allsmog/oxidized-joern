@@ -1,0 +1,10 @@
+--- fresh-live
++++ candidate
+@@ -55,7 +55,6 @@
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#11
+ EDGES|CFG main.c:<global>#1 -> value#5
+ EDGES|CFG main.c:<global>#11 -> main.c:<global>#12
+-EDGES|CFG main.c:VALUE:unsigned longint(0)#0 -> main.c:VALUE:unsigned longint(0)#2
+ EDGES|CFG value#4 -> value#8
+ EDGES|CFG value#5 -> value#4
+ EDGES|CFG value#5 -> value#7

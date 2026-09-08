@@ -1,0 +1,502 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.sizeOf FULL_NAME=<operator>.sizeOf ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=a.c:<global> ORDER=1
+  METHOD NAME=first CODE=RET first(int x){return CAST(x)+sizeof(T)+declared(x);} FULL_NAME=first SIGNATURE=unsigned long(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={return CAST(x)+sizeof(T)+declared(x);} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=T CODE=T TYPE_FULL_NAME=T ORDER=0
+      RETURN CODE=return CAST(x)+sizeof(T)+declared(x); ORDER=1
+        CALL NAME=<operator>.addition CODE=CAST(x)+sizeof(T)+declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.addition CODE=CAST(x)+sizeof(T) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=a.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.cast CODE=(T)(x) TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+                  IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.sizeOf CODE=sizeof(T) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=T CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=first TYPE_FULL_NAME=first METHOD_FULL_NAME=first ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=CAST CODE=#define CAST(x) ((T)(x)) FULL_NAME=a.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=api.h:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_DECL NAME=T CODE=typedef int T; FULL_NAME=T ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=b.c:<global> ORDER=1
+  METHOD NAME=second CODE=int second(int x){return CAST(x)+declared(x);} FULL_NAME=second SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={return CAST(x)+declared(x);} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=0
+      RETURN CODE=return CAST(x)+declared(x); ORDER=1
+        CALL NAME=<operator>.addition CODE=CAST(x)+declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=b.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.pointerCall CODE=(T)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+                IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1
+                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+          CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=second TYPE_FULL_NAME=second METHOD_FULL_NAME=second ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=CAST CODE=#define CAST(x) ((T)(x)) FULL_NAME=b.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=declared CODE=long unsigned long unsigned (int); FULL_NAME=declared SIGNATURE=longunsigned(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=longunsigned ORDER=3
+
+METHOD NAME=first CODE=RET first(int x){return CAST(x)+sizeof(T)+declared(x);} FULL_NAME=first SIGNATURE=unsigned long(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={return CAST(x)+sizeof(T)+declared(x);} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=T CODE=T TYPE_FULL_NAME=T ORDER=0
+    RETURN CODE=return CAST(x)+sizeof(T)+declared(x); ORDER=1
+      CALL NAME=<operator>.addition CODE=CAST(x)+sizeof(T)+declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.addition CODE=CAST(x)+sizeof(T) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=a.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.cast CODE=(T)(x) TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.sizeOf CODE=sizeof(T) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=T CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+
+METHOD NAME=second CODE=int second(int x){return CAST(x)+declared(x);} FULL_NAME=second SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={return CAST(x)+declared(x);} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=0
+    RETURN CODE=return CAST(x)+declared(x); ORDER=1
+      CALL NAME=<operator>.addition CODE=CAST(x)+declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=b.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.pointerCall CODE=(T)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+              IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1
+              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+        CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=a.c ORDER=0
+NODES|FILE NAME=api.h ORDER=0
+NODES|FILE NAME=b.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=a.c:<global> FILENAME=a.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=b.c:<global> FILENAME=b.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=T FULL_NAME=T CODE=typedef int T; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=api.h ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=a.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=a.c:<global> FILENAME=a.c ORDER=2
+NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=b.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=b.c:<global> FILENAME=b.c ORDER=1
+NODES|TYPE_DECL NAME=first FULL_NAME=first CODE=first AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=a.c:<global> FILENAME=a.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=longunsigned FULL_NAME=longunsigned CODE=longunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=second FULL_NAME=second CODE=second AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=b.c:<global> FILENAME=b.c ORDER=1
+NODES|TYPE_DECL NAME=unsigned long FULL_NAME=unsigned long CODE=unsigned long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned longint FULL_NAME=unsigned longint CODE=unsigned longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=T FULL_NAME=T TYPE_DECL_FULL_NAME=T
+NODES|TYPE NAME=first FULL_NAME=first TYPE_DECL_FULL_NAME=first
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
+NODES|TYPE NAME=second FULL_NAME=second TYPE_DECL_FULL_NAME=second
+NODES|TYPE NAME=unsigned long FULL_NAME=unsigned long TYPE_DECL_FULL_NAME=unsigned long
+NODES|TYPE NAME=unsigned longint FULL_NAME=unsigned longint TYPE_DECL_FULL_NAME=unsigned longint
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT first#11 -> first#12
+EDGES|ARGUMENT first#11 -> first#13
+EDGES|ARGUMENT first#14 -> first#15
+EDGES|ARGUMENT first#16 -> first#17
+EDGES|ARGUMENT first#5 -> first#6
+EDGES|ARGUMENT first#6 -> first#16
+EDGES|ARGUMENT first#6 -> first#7
+EDGES|ARGUMENT first#7 -> first#14
+EDGES|ARGUMENT first#7 -> first#8
+EDGES|ARGUMENT first#8 -> first#9
+EDGES|ARGUMENT second#10 -> second#12
+EDGES|ARGUMENT second#13 -> second#14
+EDGES|ARGUMENT second#5 -> second#6
+EDGES|ARGUMENT second#6 -> second#13
+EDGES|ARGUMENT second#6 -> second#7
+EDGES|ARGUMENT second#7 -> second#8
+EDGES|CALL first#11 -> <operator>.cast#0
+EDGES|CALL first#14 -> <operator>.sizeOf#0
+EDGES|CALL first#16 -> declared#0
+EDGES|CALL first#6 -> <operator>.addition#0
+EDGES|CALL first#7 -> <operator>.addition#0
+EDGES|CALL first#8 -> a.c:CAST:ANY(1)#0
+EDGES|CALL second#13 -> declared#0
+EDGES|CALL second#6 -> <operator>.addition#0
+EDGES|CALL second#7 -> b.c:CAST:ANY(1)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG <operator>.sizeOf#0 -> <operator>.sizeOf#4
+EDGES|CFG a.c:<global>#0 -> a.c:<global>#21
+EDGES|CFG a.c:<global>#1 -> first#9
+EDGES|CFG a.c:<global>#21 -> a.c:<global>#22
+EDGES|CFG a.c:CAST:ANY(1)#0 -> a.c:CAST:ANY(1)#4
+EDGES|CFG api.h:<global>#0 -> api.h:<global>#3
+EDGES|CFG b.c:<global>#0 -> b.c:<global>#18
+EDGES|CFG b.c:<global>#1 -> second#8
+EDGES|CFG b.c:<global>#18 -> b.c:<global>#19
+EDGES|CFG b.c:CAST:ANY(1)#0 -> b.c:CAST:ANY(1)#4
+EDGES|CFG declared#0 -> declared#4
+EDGES|CFG first#11 -> first#15
+EDGES|CFG first#12 -> first#13
+EDGES|CFG first#13 -> first#11
+EDGES|CFG first#14 -> first#7
+EDGES|CFG first#15 -> first#14
+EDGES|CFG first#16 -> first#6
+EDGES|CFG first#17 -> first#16
+EDGES|CFG first#5 -> first#18
+EDGES|CFG first#6 -> first#5
+EDGES|CFG first#7 -> first#17
+EDGES|CFG first#8 -> first#12
+EDGES|CFG first#8 -> first#15
+EDGES|CFG first#9 -> first#8
+EDGES|CFG second#10 -> second#14
+EDGES|CFG second#11 -> second#12
+EDGES|CFG second#12 -> second#10
+EDGES|CFG second#13 -> second#6
+EDGES|CFG second#14 -> second#13
+EDGES|CFG second#5 -> second#15
+EDGES|CFG second#6 -> second#5
+EDGES|CFG second#7 -> second#11
+EDGES|CFG second#7 -> second#14
+EDGES|CFG second#8 -> second#7
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS <operator>.sizeOf#0 -> <operator>.sizeOf#2
+EDGES|CONTAINS D:a.c:<global> -> D:first
+EDGES|CONTAINS D:a.c:<global> -> a.c:<global>#0
+EDGES|CONTAINS D:a.c:<global> -> a.c:CAST:ANY(1)#0
+EDGES|CONTAINS D:api.h:<global> -> api.h:<global>#0
+EDGES|CONTAINS D:api.h:<global> -> declared#0
+EDGES|CONTAINS D:b.c:<global> -> D:second
+EDGES|CONTAINS D:b.c:<global> -> b.c:<global>#0
+EDGES|CONTAINS D:b.c:<global> -> b.c:CAST:ANY(1)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:longunsigned
+EDGES|CONTAINS F:<includes> -> D:unsigned long
+EDGES|CONTAINS F:<includes> -> D:unsigned longint
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:a.c -> D:a.c:<global>
+EDGES|CONTAINS F:api.h -> D:api.h:<global>
+EDGES|CONTAINS F:b.c -> D:b.c:<global>
+EDGES|CONTAINS a.c:<global>#0 -> a.c:<global>#1
+EDGES|CONTAINS a.c:<global>#0 -> a.c:<global>#20
+EDGES|CONTAINS a.c:<global>#0 -> a.c:<global>#21
+EDGES|CONTAINS a.c:<global>#1 -> first#10
+EDGES|CONTAINS a.c:<global>#1 -> first#11
+EDGES|CONTAINS a.c:<global>#1 -> first#12
+EDGES|CONTAINS a.c:<global>#1 -> first#13
+EDGES|CONTAINS a.c:<global>#1 -> first#14
+EDGES|CONTAINS a.c:<global>#1 -> first#15
+EDGES|CONTAINS a.c:<global>#1 -> first#16
+EDGES|CONTAINS a.c:<global>#1 -> first#17
+EDGES|CONTAINS a.c:<global>#1 -> first#3
+EDGES|CONTAINS a.c:<global>#1 -> first#5
+EDGES|CONTAINS a.c:<global>#1 -> first#6
+EDGES|CONTAINS a.c:<global>#1 -> first#7
+EDGES|CONTAINS a.c:<global>#1 -> first#8
+EDGES|CONTAINS a.c:<global>#1 -> first#9
+EDGES|CONTAINS a.c:CAST:ANY(1)#0 -> a.c:CAST:ANY(1)#3
+EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#2
+EDGES|CONTAINS b.c:<global>#0 -> b.c:<global>#1
+EDGES|CONTAINS b.c:<global>#0 -> b.c:<global>#17
+EDGES|CONTAINS b.c:<global>#0 -> b.c:<global>#18
+EDGES|CONTAINS b.c:<global>#1 -> second#10
+EDGES|CONTAINS b.c:<global>#1 -> second#11
+EDGES|CONTAINS b.c:<global>#1 -> second#12
+EDGES|CONTAINS b.c:<global>#1 -> second#13
+EDGES|CONTAINS b.c:<global>#1 -> second#14
+EDGES|CONTAINS b.c:<global>#1 -> second#3
+EDGES|CONTAINS b.c:<global>#1 -> second#5
+EDGES|CONTAINS b.c:<global>#1 -> second#6
+EDGES|CONTAINS b.c:<global>#1 -> second#7
+EDGES|CONTAINS b.c:<global>#1 -> second#8
+EDGES|CONTAINS b.c:<global>#1 -> second#9
+EDGES|CONTAINS b.c:CAST:ANY(1)#0 -> b.c:CAST:ANY(1)#3
+EDGES|CONTAINS declared#0 -> declared#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.sizeOf#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.sizeOf#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.sizeOf#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.sizeOf#4 -> T:ANY
+EDGES|EVAL_TYPE a.c:<global>#20 -> T:ANY
+EDGES|EVAL_TYPE a.c:<global>#21 -> T:first
+EDGES|EVAL_TYPE a.c:<global>#22 -> T:ANY
+EDGES|EVAL_TYPE a.c:CAST:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE a.c:CAST:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE a.c:CAST:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE a.c:CAST:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#3 -> T:ANY
+EDGES|EVAL_TYPE b.c:<global>#17 -> T:ANY
+EDGES|EVAL_TYPE b.c:<global>#18 -> T:second
+EDGES|EVAL_TYPE b.c:<global>#19 -> T:ANY
+EDGES|EVAL_TYPE b.c:CAST:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE b.c:CAST:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE b.c:CAST:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE b.c:CAST:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE declared#1 -> T:int
+EDGES|EVAL_TYPE declared#2 -> T:int
+EDGES|EVAL_TYPE declared#3 -> T:ANY
+EDGES|EVAL_TYPE declared#4 -> T:longunsigned
+EDGES|EVAL_TYPE first#1 -> T:int
+EDGES|EVAL_TYPE first#10 -> T:ANY
+EDGES|EVAL_TYPE first#11 -> T:T
+EDGES|EVAL_TYPE first#12 -> T:T
+EDGES|EVAL_TYPE first#13 -> T:int
+EDGES|EVAL_TYPE first#14 -> T:ANY
+EDGES|EVAL_TYPE first#15 -> T:T
+EDGES|EVAL_TYPE first#16 -> T:unsigned longint
+EDGES|EVAL_TYPE first#17 -> T:int
+EDGES|EVAL_TYPE first#18 -> T:unsigned long
+EDGES|EVAL_TYPE first#2 -> T:int
+EDGES|EVAL_TYPE first#3 -> T:void
+EDGES|EVAL_TYPE first#4 -> T:T
+EDGES|EVAL_TYPE first#6 -> T:ANY
+EDGES|EVAL_TYPE first#7 -> T:ANY
+EDGES|EVAL_TYPE first#8 -> T:ANY
+EDGES|EVAL_TYPE first#9 -> T:int
+EDGES|EVAL_TYPE second#1 -> T:int
+EDGES|EVAL_TYPE second#10 -> T:ANY
+EDGES|EVAL_TYPE second#11 -> T:ANY
+EDGES|EVAL_TYPE second#12 -> T:int
+EDGES|EVAL_TYPE second#13 -> T:ANY
+EDGES|EVAL_TYPE second#14 -> T:int
+EDGES|EVAL_TYPE second#15 -> T:int
+EDGES|EVAL_TYPE second#2 -> T:int
+EDGES|EVAL_TYPE second#3 -> T:void
+EDGES|EVAL_TYPE second#4 -> T:ANY
+EDGES|EVAL_TYPE second#6 -> T:ANY
+EDGES|EVAL_TYPE second#7 -> T:ANY
+EDGES|EVAL_TYPE second#8 -> T:int
+EDGES|EVAL_TYPE second#9 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK <operator>.sizeOf#1 -> <operator>.sizeOf#3
+EDGES|PARAMETER_LINK a.c:CAST:ANY(1)#1 -> a.c:CAST:ANY(1)#2
+EDGES|PARAMETER_LINK b.c:CAST:ANY(1)#1 -> b.c:CAST:ANY(1)#2
+EDGES|PARAMETER_LINK declared#1 -> declared#2
+EDGES|PARAMETER_LINK first#1 -> first#2
+EDGES|PARAMETER_LINK second#1 -> second#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:a.c:<global> -> NS:<global>
+EDGES|REF NB:api.h:<global> -> NS:<global>
+EDGES|REF NB:b.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:T -> api.h:<global>#2
+EDGES|REF T:first -> D:first
+EDGES|REF T:int -> D:int
+EDGES|REF T:longunsigned -> D:longunsigned
+EDGES|REF T:second -> D:second
+EDGES|REF T:unsigned long -> D:unsigned long
+EDGES|REF T:unsigned longint -> D:unsigned longint
+EDGES|REF T:void -> D:void
+EDGES|REF a.c:<global>#21 -> a.c:<global>#1
+EDGES|REF b.c:<global>#18 -> b.c:<global>#1
+EDGES|REF first#13 -> first#1
+EDGES|REF first#15 -> first#4
+EDGES|REF first#17 -> first#1
+EDGES|REF second#11 -> second#4
+EDGES|REF second#12 -> second#1
+EDGES|REF second#14 -> second#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:a.c:<global> -> F:a.c
+EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE D:b.c:<global> -> F:b.c
+EDGES|SOURCE_FILE D:first -> F:a.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:longunsigned -> F:<includes>
+EDGES|SOURCE_FILE D:second -> F:b.c
+EDGES|SOURCE_FILE D:unsigned long -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned longint -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:a.c:<global> -> F:a.c
+EDGES|SOURCE_FILE NB:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE NB:b.c:<global> -> F:b.c
+EDGES|SOURCE_FILE a.c:<global>#0 -> F:a.c
+EDGES|SOURCE_FILE a.c:<global>#1 -> F:a.c
+EDGES|SOURCE_FILE a.c:CAST:ANY(1)#0 -> F:a.c
+EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
+EDGES|SOURCE_FILE api.h:<global>#2 -> F:api.h
+EDGES|SOURCE_FILE b.c:<global>#0 -> F:b.c
+EDGES|SOURCE_FILE b.c:<global>#1 -> F:b.c
+EDGES|SOURCE_FILE b.c:CAST:ANY(1)#0 -> F:b.c
+EDGES|SOURCE_FILE declared#0 -> F:api.h
+FLOWS|REACHING_DEF[(T)(x)] first#11 -> first#18
+FLOWS|REACHING_DEF[(T)(x)] second#10 -> second#15
+FLOWS|REACHING_DEF[<RET>] first#5 -> first#18
+FLOWS|REACHING_DEF[<RET>] second#5 -> second#15
+FLOWS|REACHING_DEF[CAST(x)+declared(x)] second#6 -> second#15
+FLOWS|REACHING_DEF[CAST(x)+declared(x)] second#6 -> second#5
+FLOWS|REACHING_DEF[CAST(x)+sizeof(T)+declared(x)] first#6 -> first#18
+FLOWS|REACHING_DEF[CAST(x)+sizeof(T)+declared(x)] first#6 -> first#5
+FLOWS|REACHING_DEF[CAST(x)+sizeof(T)] first#7 -> first#18
+FLOWS|REACHING_DEF[CAST(x)+sizeof(T)] first#7 -> first#6
+FLOWS|REACHING_DEF[CAST(x)] first#8 -> first#18
+FLOWS|REACHING_DEF[CAST(x)] first#8 -> first#7
+FLOWS|REACHING_DEF[CAST(x)] second#7 -> second#15
+FLOWS|REACHING_DEF[CAST(x)] second#7 -> second#6
+FLOWS|REACHING_DEF[T] first#12 -> first#11
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] <operator>.sizeOf#0 -> <operator>.sizeOf#1
+FLOWS|REACHING_DEF[] a.c:<global>#0 -> a.c:<global>#21
+FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#1
+FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#12
+FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#13
+FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#17
+FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#9
+FLOWS|REACHING_DEF[] a.c:CAST:ANY(1)#0 -> a.c:CAST:ANY(1)#1
+FLOWS|REACHING_DEF[] b.c:<global>#0 -> b.c:<global>#18
+FLOWS|REACHING_DEF[] b.c:<global>#1 -> second#1
+FLOWS|REACHING_DEF[] b.c:<global>#1 -> second#11
+FLOWS|REACHING_DEF[] b.c:<global>#1 -> second#12
+FLOWS|REACHING_DEF[] b.c:<global>#1 -> second#14
+FLOWS|REACHING_DEF[] b.c:<global>#1 -> second#8
+FLOWS|REACHING_DEF[] b.c:CAST:ANY(1)#0 -> b.c:CAST:ANY(1)#1
+FLOWS|REACHING_DEF[] declared#0 -> declared#1
+FLOWS|REACHING_DEF[declared(x)] first#16 -> first#18
+FLOWS|REACHING_DEF[declared(x)] first#16 -> first#6
+FLOWS|REACHING_DEF[declared(x)] second#13 -> second#15
+FLOWS|REACHING_DEF[declared(x)] second#13 -> second#6
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p1] <operator>.sizeOf#1 -> <operator>.sizeOf#3
+FLOWS|REACHING_DEF[p1] <operator>.sizeOf#1 -> <operator>.sizeOf#4
+FLOWS|REACHING_DEF[p1] a.c:CAST:ANY(1)#1 -> a.c:CAST:ANY(1)#2
+FLOWS|REACHING_DEF[p1] a.c:CAST:ANY(1)#1 -> a.c:CAST:ANY(1)#4
+FLOWS|REACHING_DEF[p1] b.c:CAST:ANY(1)#1 -> b.c:CAST:ANY(1)#2
+FLOWS|REACHING_DEF[p1] b.c:CAST:ANY(1)#1 -> b.c:CAST:ANY(1)#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[x] declared#1 -> declared#2
+FLOWS|REACHING_DEF[x] declared#1 -> declared#4
+FLOWS|REACHING_DEF[x] first#1 -> first#2
+FLOWS|REACHING_DEF[x] first#1 -> first#9
+FLOWS|REACHING_DEF[x] first#13 -> first#11
+FLOWS|REACHING_DEF[x] first#13 -> first#17
+FLOWS|REACHING_DEF[x] first#17 -> first#16
+FLOWS|REACHING_DEF[x] first#17 -> first#18
+FLOWS|REACHING_DEF[x] first#17 -> first#2
+FLOWS|REACHING_DEF[x] first#9 -> first#13
+FLOWS|REACHING_DEF[x] first#9 -> first#17
+FLOWS|REACHING_DEF[x] first#9 -> first#8
+FLOWS|REACHING_DEF[x] second#1 -> second#2
+FLOWS|REACHING_DEF[x] second#1 -> second#8
+FLOWS|REACHING_DEF[x] second#12 -> second#10
+FLOWS|REACHING_DEF[x] second#12 -> second#14
+FLOWS|REACHING_DEF[x] second#14 -> second#13
+FLOWS|REACHING_DEF[x] second#14 -> second#15
+FLOWS|REACHING_DEF[x] second#14 -> second#2
+FLOWS|REACHING_DEF[x] second#8 -> second#12
+FLOWS|REACHING_DEF[x] second#8 -> second#14
+FLOWS|REACHING_DEF[x] second#8 -> second#7

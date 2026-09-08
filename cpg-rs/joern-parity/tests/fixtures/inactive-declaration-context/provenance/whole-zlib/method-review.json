@@ -1,0 +1,14 @@
+{
+  "liveMethods": 410,
+  "beforeMethods": 348,
+  "afterMethods": 351,
+  "beforeExact": 145,
+  "afterExact": 149,
+  "gained": [
+    "deflate.h:LENGTH_CODES:int(0)",
+    "zcalloc<duplicate>1",
+    "zcfree<duplicate>1",
+    "zutil.h:MAX_MATCH:int(0)"
+  ],
+  "lost": []
+}

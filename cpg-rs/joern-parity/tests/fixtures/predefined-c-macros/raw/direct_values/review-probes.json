@@ -1,0 +1,84 @@
+{
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential/bin/source/cpg-lang-c/src/exact.rs",
+    "sha256": "1603202779e066f2a9039f2fa3b075ab5722d9bb806be885e90f0b7c43a26d0d"
+  },
+  "candidateBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential/bin/joern-parity",
+    "sha256": "37b5da3ad2cf8e8d7178b69e092f128e378c1e485d0dacc726fee88001af2a51"
+  },
+  "baselineBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fifth-batch/final-real-differential-v2/bin/joern-parity",
+    "sha256": "3c1ab1cb3d6833086b06105355f908a86be573f230fdbedc1bdc87faea979e17"
+  },
+  "liveRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/live-run.json",
+    "sha256": "aceea92364a2b7283e66849b2f8c15347a7fab0d11688887cdffc4614cf5374c"
+  },
+  "cases": [
+    {
+      "case": "hosted_undef",
+      "records": 177,
+      "beforeExact": true,
+      "beforeDiffLines": 0,
+      "candidateExact": true,
+      "candidateDiffLines": 0,
+      "candidateEqualsBefore": true
+    },
+    {
+      "case": "hosted_redefined",
+      "records": 171,
+      "beforeExact": true,
+      "beforeDiffLines": 0,
+      "candidateExact": true,
+      "candidateDiffLines": 0,
+      "candidateEqualsBefore": true
+    },
+    {
+      "case": "hosted",
+      "records": 171,
+      "beforeExact": false,
+      "beforeDiffLines": 170,
+      "candidateExact": false,
+      "candidateDiffLines": 170,
+      "candidateEqualsBefore": true
+    },
+    {
+      "case": "stdc",
+      "records": 171,
+      "beforeExact": false,
+      "beforeDiffLines": 170,
+      "candidateExact": false,
+      "candidateDiffLines": 170,
+      "candidateEqualsBefore": true
+    },
+    {
+      "case": "version",
+      "records": 176,
+      "beforeExact": false,
+      "beforeDiffLines": 190,
+      "candidateExact": false,
+      "candidateDiffLines": 190,
+      "candidateEqualsBefore": true
+    },
+    {
+      "case": "version_undef",
+      "records": 177,
+      "beforeExact": true,
+      "beforeDiffLines": 0,
+      "candidateExact": true,
+      "candidateDiffLines": 0,
+      "candidateEqualsBefore": true
+    },
+    {
+      "case": "version_redefined",
+      "records": 171,
+      "beforeExact": true,
+      "beforeDiffLines": 0,
+      "candidateExact": true,
+      "candidateDiffLines": 0,
+      "candidateEqualsBefore": true
+    }
+  ],
+  "formerlyExactLost": []
+}

@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/header-return-review/trailing-errors/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/header-return-review/trailing-errors/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/header-return-review/trailing-errors/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 6.173659542007954,
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "stdoutSha256": "b3f778760c9fed36d2ed4c70e274bdb9375503dd1c71b4cd75f7d4b7878b365e",
+  "inputs": {
+    "error_then_valid/api.h": "432ef6ae9f0d273a8922270166728e07c1f78aa494cc70be6a1bf79162bd393e",
+    "error_then_valid/main.c": "1bd5ba0b963dd6b1fb51064ae441f4f9171db08da6a47b4225871fb145a5ec3a",
+    "valid_then_error/api.h": "a26c4ee591b04ad5f0b295de508adb93f91b7b3eab3cb7a725de0d84b5fd9597",
+    "valid_then_error/main.c": "1bd5ba0b963dd6b1fb51064ae441f4f9171db08da6a47b4225871fb145a5ec3a"
+  }
+}

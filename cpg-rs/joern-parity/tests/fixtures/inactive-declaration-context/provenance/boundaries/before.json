@@ -1,0 +1,110 @@
+{
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v2/bin/joern-parity",
+    "sha256": "9280342b38a2da5b57249180c11f4adcfe878d77f2114ba47c64dce847c6e68a"
+  },
+  "liveReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/boundaries/live-run.json",
+    "sha256": "efdd9e7d3e7f3e762eec5384dd02cbb9e407cb056f9b0802de8469813ce476ac"
+  },
+  "results": [
+    {
+      "case": "active_then_inactive",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v2/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/boundaries/input/active_then_inactive/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.00486704200739041,
+      "exact": false,
+      "completeDiffLines": 152,
+      "inputHashes": {
+        "main.c": "601cf540da532774bb2deddf6ac9d441a6957ac859588911c09ac695d3b9b208"
+      },
+      "expectedSha256": "150f6f7ace9a30ee27db9437d157cd356ccf858282b193ea9021a366b9464a70",
+      "actualSha256": "b342c0cdf2500ecb7604f092ea25bf19e0f5f93f736b2b843e5f4d0085f27395"
+    },
+    {
+      "case": "elif_context",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v2/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/boundaries/input/elif_context/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.003607083999668248,
+      "exact": false,
+      "completeDiffLines": 201,
+      "inputHashes": {
+        "main.c": "bbe17afcc06d20cfcf1b3c5ae7448f6b560709f43bd14d1f6dc6d3b5366fd1a7"
+      },
+      "expectedSha256": "2021b69a042fcd3adf7c5a01fa97a1282e9c7ca67486b6be71028d63f14a4287",
+      "actualSha256": "0b7e253aea496f96fca84e56338e9c0fefbae40bfd8af7fa461f578c9c6a7cb2"
+    },
+    {
+      "case": "inactive_header_prototype",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v2/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/boundaries/input/inactive_header_prototype/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/boundaries/input/inactive_header_prototype/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.0034744169970508665,
+      "exact": false,
+      "completeDiffLines": 75,
+      "inputHashes": {
+        "api.h": "08e1d2361f9bc8b41144f7775a6f489428b7f1374b11ee709dbd60d5d8aff13b",
+        "main.c": "d199ba84910a8f5a42455a818c49f9acf4234c94d9e0500e4e9e04b02996890c"
+      },
+      "expectedSha256": "7dc582d4fd97335e062ae8b8be677f3165de8de20bff8c5ce836e2320f8c01e1",
+      "actualSha256": "117c82addf61fcccde9bfe946265c3d4aa69583fddc9e691a0babb2009a90ae1"
+    },
+    {
+      "case": "initialized_scalar",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v2/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/boundaries/input/initialized_scalar/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.0028317919932305813,
+      "exact": false,
+      "completeDiffLines": 88,
+      "inputHashes": {
+        "main.c": "f7fc356a564f344e3377771ecc366c22570604245a54653d3b66aee321ef621c"
+      },
+      "expectedSha256": "077a878db40ae6a390db9f79f2102162722e4e4568621beff1396e5d6ba19e05",
+      "actualSha256": "73c6f6bc8b9a99ce4bd32683586e6a97289abce9808f4f55a635de72d3a8ab58"
+    },
+    {
+      "case": "late_type_macro",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v2/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/boundaries/input/late_type_macro/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.00296883299597539,
+      "exact": true,
+      "completeDiffLines": 0,
+      "inputHashes": {
+        "main.c": "6f4674a5f0d9c00b11cd14a1f5c454ff75f022bd6bbdf64f7c539448b20a4514"
+      },
+      "expectedSha256": "d30a126117b13b341d80dcdc1997faf9ddf5997bedd6564253724110e9d6c3d0",
+      "actualSha256": "d30a126117b13b341d80dcdc1997faf9ddf5997bedd6564253724110e9d6c3d0"
+    },
+    {
+      "case": "nested_inactive",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v2/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/boundaries/input/nested_inactive/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.0032376669987570494,
+      "exact": false,
+      "completeDiffLines": 193,
+      "inputHashes": {
+        "main.c": "43519aa04181ee8ce8d6d38b3632a40226324134ae223e0376949fc37e64e4d1"
+      },
+      "expectedSha256": "c4059096dcd674cb52accf96a7b8a2d7064bcd9b9be5b5dea31a6755f3618eab",
+      "actualSha256": "2d7c8bebb0d6e81d279b696d8a53ff17430adce4c0c428235f32cd5bb72c95bf"
+    }
+  ]
+}
