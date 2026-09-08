@@ -4,9 +4,16 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
-- **Production C convergence complete (2026-08-14).** The released
-  `CFrontend`/`Project`/`standard_pipeline` path is the 96/96 committed Joern
-  v4.0.555 oracle path, including 1,458/1,458 ReachingDef facts. Canonical
+- **Measured C parity expansion (2026-09-08 UTC).** The
+  `CFrontend`/`Project`/`standard_pipeline` path passes 103/103 committed and
+  live Joern v4.0.555 comparison blocks, including 1,552/1,552 ReachingDef
+  facts. Braceless `if` consequences now survive graph construction, and
+  canonical C return summaries and witnesses follow reaching definitions.
+  Five additional `reachableBy` outcomes agree with live Joern. The checker
+  now rejects failed producers, missing methods, and malformed output.
+  These are bounded corpus results, not whole-language parity. See the
+  [measured sprint report](../docs/conformance/astra-sprint-2026-09-08.md).
+  Canonical
   scanner outcomes cover branches, kills, loops, returns, globals,
   pointer/member access, sanitizers, cross-calls, recursion, persistence, and
   duplicate translation-unit-local identities. Pinned zlib 1.3.1 and Lua 5.4.7
@@ -93,7 +100,7 @@ Single source of truth across iterations. Update in the same commit as the work.
   add.c, ops.c, loop.c, unary.c, forloop.c, switch.c, exprs.c, structs.c,
   order.c
 
-## Next task (start here)
+## Historical task plan (see the current sprint report above)
 
 M2, in this order — one corpus file + diff-to-zero per line:
 

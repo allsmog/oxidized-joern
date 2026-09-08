@@ -14,3 +14,9 @@ The current cases cover method parameters, calls and arguments,
 intraprocedural call resolution, nested calls, calls inside branches, and
 multiple top-level methods. Add a fixture for every supported frontend before
 claiming conformance for that language.
+
+The [Astra sprint report, 2026-09-08](astra-sprint-2026-09-08.md) records a
+live Joern baseline, two C fixes, independent review findings, integrated
+validation, and the remaining limits of those measurements. The
+[C differential checker](../../cpg-rs/joern-parity/README.md) documents its
+selected graph projection and strict live-oracle mode.
