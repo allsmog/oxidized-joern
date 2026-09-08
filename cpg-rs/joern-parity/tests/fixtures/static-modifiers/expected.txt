@@ -1,0 +1,1161 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=after_const CODE=const static int after_const(int value) { return value; } FULL_NAME=after_const SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=after_inline_prototype CODE=inline static int after_inline_prototype(int value); FULL_NAME=after_inline_prototype SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=after_type CODE=int static after_type(int value) { return value; } FULL_NAME=after_type SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=after_type_prototype CODE=int static after_type_prototype(int value); FULL_NAME=after_type_prototype SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=before_const CODE=static const int before_const(int value) { return value; } FULL_NAME=before_const SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=dollar_type CODE=static$type dollar_type(int value) { return value; } FULL_NAME=dollar_type SIGNATURE=static$type(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=static$type ORDER=3
+
+METHOD NAME=external CODE=extern int external(int value) { return value; } FULL_NAME=external SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=external_inline CODE=extern inline int external_inline(int value) { return value; } FULL_NAME=external_inline SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=inactive_static CODE=static int inactive_static(int value) { return value; } FULL_NAME=inactive_static SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=inherited_static CODE=int inherited_static(int value) { return value; } FULL_NAME=inherited_static SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=inline_function CODE=inline int inline_function(int value) { return value; } FULL_NAME=inline_function SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=inline_local CODE=inline static int inline_local(int value) { return value; } FULL_NAME=inline_local SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=later_static CODE=static int later_static(int value) { return value; } FULL_NAME=later_static SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=leading_comment CODE=static int leading_comment(int value) { return value; } FULL_NAME=leading_comment SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=local_inline CODE=static inline int local_inline(int value) { return value; } FULL_NAME=local_inline SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=local_static CODE=static int local_static(int value) { return value; } FULL_NAME=local_static SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=plain CODE=int plain(int value) { return value; } FULL_NAME=plain SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=prefixed_type CODE=static_type prefixed_type(int value) { return value; } FULL_NAME=prefixed_type SIGNATURE=static_type(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=static_type ORDER=3
+
+METHOD NAME=spliced CODE=static\\n int spliced(int value) { return value; } FULL_NAME=spliced SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=spliced.c:<global> ORDER=1
+  METHOD NAME=spliced CODE=static\\n int spliced(int value) { return value; } FULL_NAME=spliced SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=spliced TYPE_FULL_NAME=spliced METHOD_FULL_NAME=spliced ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=spliced_prototype CODE=static\\n int spliced_prototype(int value); FULL_NAME=spliced_prototype SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=static.c:<global> ORDER=1
+  METHOD NAME=plain CODE=int plain(int value) { return value; } FULL_NAME=plain SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=local_static CODE=static int local_static(int value) { return value; } FULL_NAME=local_static SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=external CODE=extern int external(int value) { return value; } FULL_NAME=external SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=inline_function CODE=inline int inline_function(int value) { return value; } FULL_NAME=inline_function SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=local_inline CODE=static inline int local_inline(int value) { return value; } FULL_NAME=local_inline SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=inline_local CODE=inline static int inline_local(int value) { return value; } FULL_NAME=inline_local SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=external_inline CODE=extern inline int external_inline(int value) { return value; } FULL_NAME=external_inline SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=inherited_static CODE=int inherited_static(int value) { return value; } FULL_NAME=inherited_static SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=later_static CODE=static int later_static(int value) { return value; } FULL_NAME=later_static SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=inactive_static CODE=static int inactive_static(int value) { return value; } FULL_NAME=inactive_static SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=zero_params CODE=static void zero_params(void) {} FULL_NAME=zero_params SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={} TYPE_FULL_NAME=void ORDER=2
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=plain TYPE_FULL_NAME=plain METHOD_FULL_NAME=plain ORDER=1
+    METHOD_REF CODE=local_static TYPE_FULL_NAME=local_static METHOD_FULL_NAME=local_static ORDER=2
+    METHOD_REF CODE=external TYPE_FULL_NAME=external METHOD_FULL_NAME=external ORDER=3
+    METHOD_REF CODE=inline_function TYPE_FULL_NAME=inline_function METHOD_FULL_NAME=inline_function ORDER=4
+    METHOD_REF CODE=local_inline TYPE_FULL_NAME=local_inline METHOD_FULL_NAME=local_inline ORDER=5
+    METHOD_REF CODE=inline_local TYPE_FULL_NAME=inline_local METHOD_FULL_NAME=inline_local ORDER=6
+    METHOD_REF CODE=external_inline TYPE_FULL_NAME=external_inline METHOD_FULL_NAME=external_inline ORDER=7
+    METHOD_REF CODE=inherited_static TYPE_FULL_NAME=inherited_static METHOD_FULL_NAME=inherited_static ORDER=8
+    METHOD_REF CODE=later_static TYPE_FULL_NAME=later_static METHOD_FULL_NAME=later_static ORDER=9
+    METHOD_REF CODE=inactive_static TYPE_FULL_NAME=inactive_static METHOD_FULL_NAME=inactive_static ORDER=10
+    METHOD_REF CODE=zero_params TYPE_FULL_NAME=zero_params METHOD_FULL_NAME=zero_params ORDER=11
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=static_comment CODE=static /* comment */ int static_comment(int value) { return value; } FULL_NAME=static_comment SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=static_inline_prototype CODE=static inline int static_inline_prototype(int value); FULL_NAME=static_inline_prototype SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=static_newline CODE=static\nint static_newline(int value) { return value; } FULL_NAME=static_newline SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=static_prototype CODE=static int static_prototype(int value); FULL_NAME=static_prototype SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=storage.c:<global> ORDER=1
+  METHOD NAME=after_type CODE=int static after_type(int value) { return value; } FULL_NAME=after_type SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=after_const CODE=const static int after_const(int value) { return value; } FULL_NAME=after_const SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=before_const CODE=static const int before_const(int value) { return value; } FULL_NAME=before_const SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=static_newline CODE=static\nint static_newline(int value) { return value; } FULL_NAME=static_newline SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=static_comment CODE=static /* comment */ int static_comment(int value) { return value; } FULL_NAME=static_comment SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=leading_comment CODE=static int leading_comment(int value) { return value; } FULL_NAME=leading_comment SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=prefixed_type CODE=static_type prefixed_type(int value) { return value; } FULL_NAME=prefixed_type SIGNATURE=static_type(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=static_type ORDER=3
+  METHOD NAME=dollar_type CODE=static$type dollar_type(int value) { return value; } FULL_NAME=dollar_type SIGNATURE=static$type(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=static$type ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=after_type TYPE_FULL_NAME=after_type METHOD_FULL_NAME=after_type ORDER=1
+    METHOD_REF CODE=after_const TYPE_FULL_NAME=after_const METHOD_FULL_NAME=after_const ORDER=2
+    METHOD_REF CODE=before_const TYPE_FULL_NAME=before_const METHOD_FULL_NAME=before_const ORDER=3
+    METHOD_REF CODE=static_newline TYPE_FULL_NAME=static_newline METHOD_FULL_NAME=static_newline ORDER=4
+    METHOD_REF CODE=static_comment TYPE_FULL_NAME=static_comment METHOD_FULL_NAME=static_comment ORDER=5
+    METHOD_REF CODE=leading_comment TYPE_FULL_NAME=leading_comment METHOD_FULL_NAME=leading_comment ORDER=6
+    TYPE_DECL NAME=static_type CODE=typedef int static_type; FULL_NAME=static_type ORDER=7
+    METHOD_REF CODE=prefixed_type TYPE_FULL_NAME=prefixed_type METHOD_FULL_NAME=prefixed_type ORDER=8
+    TYPE_DECL NAME=static$type CODE=typedef int static$type; FULL_NAME=static$type ORDER=9
+    METHOD_REF CODE=dollar_type TYPE_FULL_NAME=dollar_type METHOD_FULL_NAME=dollar_type ORDER=10
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=zero_params CODE=static void zero_params(void) {} FULL_NAME=zero_params SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={} TYPE_FULL_NAME=void ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=spliced.c ORDER=0
+NODES|FILE NAME=static.c ORDER=0
+NODES|FILE NAME=storage.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=spliced.c:<global> FILENAME=spliced.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=storage.c:<global> FILENAME=storage.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=after_const FULL_NAME=after_const CODE=after_const AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=storage.c:<global> FILENAME=storage.c ORDER=1
+NODES|TYPE_DECL NAME=after_type FULL_NAME=after_type CODE=after_type AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=storage.c:<global> FILENAME=storage.c ORDER=1
+NODES|TYPE_DECL NAME=before_const FULL_NAME=before_const CODE=before_const AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=storage.c:<global> FILENAME=storage.c ORDER=1
+NODES|TYPE_DECL NAME=dollar_type FULL_NAME=dollar_type CODE=dollar_type AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=storage.c:<global> FILENAME=storage.c ORDER=1
+NODES|TYPE_DECL NAME=external FULL_NAME=external CODE=external AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|TYPE_DECL NAME=external_inline FULL_NAME=external_inline CODE=external_inline AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|TYPE_DECL NAME=inactive_static FULL_NAME=inactive_static CODE=inactive_static AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|TYPE_DECL NAME=inherited_static FULL_NAME=inherited_static CODE=inherited_static AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|TYPE_DECL NAME=inline_function FULL_NAME=inline_function CODE=inline_function AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|TYPE_DECL NAME=inline_local FULL_NAME=inline_local CODE=inline_local AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=later_static FULL_NAME=later_static CODE=later_static AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|TYPE_DECL NAME=leading_comment FULL_NAME=leading_comment CODE=leading_comment AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=storage.c:<global> FILENAME=storage.c ORDER=1
+NODES|TYPE_DECL NAME=local_inline FULL_NAME=local_inline CODE=local_inline AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|TYPE_DECL NAME=local_static FULL_NAME=local_static CODE=local_static AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|TYPE_DECL NAME=plain FULL_NAME=plain CODE=plain AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|TYPE_DECL NAME=prefixed_type FULL_NAME=prefixed_type CODE=prefixed_type AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=storage.c:<global> FILENAME=storage.c ORDER=1
+NODES|TYPE_DECL NAME=spliced FULL_NAME=spliced CODE=spliced AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=spliced.c:<global> FILENAME=spliced.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=spliced.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=spliced.c:<global> FILENAME=spliced.c ORDER=1
+NODES|TYPE_DECL NAME=static$type FULL_NAME=static$type CODE=typedef int static$type; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=storage.c ORDER=9
+NODES|TYPE_DECL NAME=<global> FULL_NAME=static.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|TYPE_DECL NAME=static_comment FULL_NAME=static_comment CODE=static_comment AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=storage.c:<global> FILENAME=storage.c ORDER=1
+NODES|TYPE_DECL NAME=static_newline FULL_NAME=static_newline CODE=static_newline AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=storage.c:<global> FILENAME=storage.c ORDER=1
+NODES|TYPE_DECL NAME=static_type FULL_NAME=static_type CODE=typedef int static_type; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=storage.c ORDER=7
+NODES|TYPE_DECL NAME=<global> FULL_NAME=storage.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=storage.c:<global> FILENAME=storage.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=zero_params FULL_NAME=zero_params CODE=zero_params AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=static.c:<global> FILENAME=static.c ORDER=1
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=after_const FULL_NAME=after_const TYPE_DECL_FULL_NAME=after_const
+NODES|TYPE NAME=after_type FULL_NAME=after_type TYPE_DECL_FULL_NAME=after_type
+NODES|TYPE NAME=before_const FULL_NAME=before_const TYPE_DECL_FULL_NAME=before_const
+NODES|TYPE NAME=dollar_type FULL_NAME=dollar_type TYPE_DECL_FULL_NAME=dollar_type
+NODES|TYPE NAME=external FULL_NAME=external TYPE_DECL_FULL_NAME=external
+NODES|TYPE NAME=external_inline FULL_NAME=external_inline TYPE_DECL_FULL_NAME=external_inline
+NODES|TYPE NAME=inactive_static FULL_NAME=inactive_static TYPE_DECL_FULL_NAME=inactive_static
+NODES|TYPE NAME=inherited_static FULL_NAME=inherited_static TYPE_DECL_FULL_NAME=inherited_static
+NODES|TYPE NAME=inline_function FULL_NAME=inline_function TYPE_DECL_FULL_NAME=inline_function
+NODES|TYPE NAME=inline_local FULL_NAME=inline_local TYPE_DECL_FULL_NAME=inline_local
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=later_static FULL_NAME=later_static TYPE_DECL_FULL_NAME=later_static
+NODES|TYPE NAME=leading_comment FULL_NAME=leading_comment TYPE_DECL_FULL_NAME=leading_comment
+NODES|TYPE NAME=local_inline FULL_NAME=local_inline TYPE_DECL_FULL_NAME=local_inline
+NODES|TYPE NAME=local_static FULL_NAME=local_static TYPE_DECL_FULL_NAME=local_static
+NODES|TYPE NAME=plain FULL_NAME=plain TYPE_DECL_FULL_NAME=plain
+NODES|TYPE NAME=prefixed_type FULL_NAME=prefixed_type TYPE_DECL_FULL_NAME=prefixed_type
+NODES|TYPE NAME=spliced FULL_NAME=spliced TYPE_DECL_FULL_NAME=spliced
+NODES|TYPE NAME=static$type FULL_NAME=static$type TYPE_DECL_FULL_NAME=static$type
+NODES|TYPE NAME=static_comment FULL_NAME=static_comment TYPE_DECL_FULL_NAME=static_comment
+NODES|TYPE NAME=static_newline FULL_NAME=static_newline TYPE_DECL_FULL_NAME=static_newline
+NODES|TYPE NAME=static_type FULL_NAME=static_type TYPE_DECL_FULL_NAME=static_type
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=zero_params FULL_NAME=zero_params TYPE_DECL_FULL_NAME=zero_params
+EDGES|ARGUMENT after_const#4 -> after_const#5
+EDGES|ARGUMENT after_type#4 -> after_type#5
+EDGES|ARGUMENT before_const#4 -> before_const#5
+EDGES|ARGUMENT dollar_type#4 -> dollar_type#5
+EDGES|ARGUMENT external#4 -> external#5
+EDGES|ARGUMENT external_inline#4 -> external_inline#5
+EDGES|ARGUMENT inherited_static#4 -> inherited_static#5
+EDGES|ARGUMENT inline_function#4 -> inline_function#5
+EDGES|ARGUMENT inline_local#4 -> inline_local#5
+EDGES|ARGUMENT later_static#4 -> later_static#5
+EDGES|ARGUMENT leading_comment#4 -> leading_comment#5
+EDGES|ARGUMENT local_inline#4 -> local_inline#5
+EDGES|ARGUMENT local_static#4 -> local_static#5
+EDGES|ARGUMENT plain#4 -> plain#5
+EDGES|ARGUMENT prefixed_type#4 -> prefixed_type#5
+EDGES|ARGUMENT spliced#4 -> spliced#5
+EDGES|ARGUMENT static_comment#4 -> static_comment#5
+EDGES|ARGUMENT static_newline#4 -> static_newline#5
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG after_const#0 -> after_const#5
+EDGES|CFG after_const#4 -> after_const#6
+EDGES|CFG after_const#5 -> after_const#4
+EDGES|CFG after_inline_prototype#0 -> after_inline_prototype#4
+EDGES|CFG after_type#0 -> after_type#5
+EDGES|CFG after_type#4 -> after_type#6
+EDGES|CFG after_type#5 -> after_type#4
+EDGES|CFG after_type_prototype#0 -> after_type_prototype#4
+EDGES|CFG before_const#0 -> before_const#5
+EDGES|CFG before_const#4 -> before_const#7
+EDGES|CFG before_const#5 -> before_const#4
+EDGES|CFG dollar_type#0 -> dollar_type#5
+EDGES|CFG dollar_type#4 -> dollar_type#6
+EDGES|CFG dollar_type#5 -> dollar_type#4
+EDGES|CFG external#0 -> external#5
+EDGES|CFG external#4 -> external#6
+EDGES|CFG external#5 -> external#4
+EDGES|CFG external_inline#0 -> external_inline#5
+EDGES|CFG external_inline#4 -> external_inline#6
+EDGES|CFG external_inline#5 -> external_inline#4
+EDGES|CFG inactive_static#0 -> inactive_static#5
+EDGES|CFG inherited_static#0 -> inherited_static#5
+EDGES|CFG inherited_static#4 -> inherited_static#6
+EDGES|CFG inherited_static#5 -> inherited_static#4
+EDGES|CFG inline_function#0 -> inline_function#5
+EDGES|CFG inline_function#4 -> inline_function#6
+EDGES|CFG inline_function#5 -> inline_function#4
+EDGES|CFG inline_local#0 -> inline_local#5
+EDGES|CFG inline_local#4 -> inline_local#6
+EDGES|CFG inline_local#5 -> inline_local#4
+EDGES|CFG later_static#0 -> later_static#5
+EDGES|CFG later_static#4 -> later_static#7
+EDGES|CFG later_static#5 -> later_static#4
+EDGES|CFG leading_comment#0 -> leading_comment#5
+EDGES|CFG leading_comment#4 -> leading_comment#7
+EDGES|CFG leading_comment#5 -> leading_comment#4
+EDGES|CFG local_inline#0 -> local_inline#5
+EDGES|CFG local_inline#4 -> local_inline#7
+EDGES|CFG local_inline#5 -> local_inline#4
+EDGES|CFG local_static#0 -> local_static#5
+EDGES|CFG local_static#4 -> local_static#7
+EDGES|CFG local_static#5 -> local_static#4
+EDGES|CFG plain#0 -> plain#5
+EDGES|CFG plain#4 -> plain#6
+EDGES|CFG plain#5 -> plain#4
+EDGES|CFG prefixed_type#0 -> prefixed_type#5
+EDGES|CFG prefixed_type#4 -> prefixed_type#6
+EDGES|CFG prefixed_type#5 -> prefixed_type#4
+EDGES|CFG spliced#0 -> spliced#5
+EDGES|CFG spliced#4 -> spliced#7
+EDGES|CFG spliced#5 -> spliced#4
+EDGES|CFG spliced.c:<global>#0 -> spliced.c:<global>#10
+EDGES|CFG spliced.c:<global>#10 -> spliced.c:<global>#11
+EDGES|CFG spliced_prototype#0 -> spliced_prototype#5
+EDGES|CFG static.c:<global>#0 -> static.c:<global>#80
+EDGES|CFG static.c:<global>#73 -> zero_params#5
+EDGES|CFG static.c:<global>#80 -> static.c:<global>#81
+EDGES|CFG static.c:<global>#81 -> static.c:<global>#82
+EDGES|CFG static.c:<global>#82 -> static.c:<global>#83
+EDGES|CFG static.c:<global>#83 -> static.c:<global>#84
+EDGES|CFG static.c:<global>#84 -> static.c:<global>#85
+EDGES|CFG static.c:<global>#85 -> static.c:<global>#86
+EDGES|CFG static.c:<global>#86 -> static.c:<global>#87
+EDGES|CFG static.c:<global>#87 -> static.c:<global>#88
+EDGES|CFG static.c:<global>#88 -> static.c:<global>#89
+EDGES|CFG static.c:<global>#89 -> static.c:<global>#90
+EDGES|CFG static.c:<global>#90 -> static.c:<global>#91
+EDGES|CFG static_comment#0 -> static_comment#5
+EDGES|CFG static_comment#4 -> static_comment#7
+EDGES|CFG static_comment#5 -> static_comment#4
+EDGES|CFG static_inline_prototype#0 -> static_inline_prototype#5
+EDGES|CFG static_newline#0 -> static_newline#5
+EDGES|CFG static_newline#4 -> static_newline#7
+EDGES|CFG static_newline#5 -> static_newline#4
+EDGES|CFG static_prototype#0 -> static_prototype#5
+EDGES|CFG storage.c:<global>#0 -> storage.c:<global>#62
+EDGES|CFG storage.c:<global>#62 -> storage.c:<global>#63
+EDGES|CFG storage.c:<global>#63 -> storage.c:<global>#64
+EDGES|CFG storage.c:<global>#64 -> storage.c:<global>#65
+EDGES|CFG storage.c:<global>#65 -> storage.c:<global>#66
+EDGES|CFG storage.c:<global>#66 -> storage.c:<global>#67
+EDGES|CFG storage.c:<global>#67 -> storage.c:<global>#69
+EDGES|CFG storage.c:<global>#69 -> storage.c:<global>#71
+EDGES|CFG storage.c:<global>#71 -> storage.c:<global>#72
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:spliced.c:<global> -> D:spliced
+EDGES|CONTAINS D:spliced.c:<global> -> spliced.c:<global>#0
+EDGES|CONTAINS D:spliced.c:<global> -> spliced_prototype#0
+EDGES|CONTAINS D:static.c:<global> -> D:external
+EDGES|CONTAINS D:static.c:<global> -> D:external_inline
+EDGES|CONTAINS D:static.c:<global> -> D:inactive_static
+EDGES|CONTAINS D:static.c:<global> -> D:inherited_static
+EDGES|CONTAINS D:static.c:<global> -> D:inline_function
+EDGES|CONTAINS D:static.c:<global> -> D:inline_local
+EDGES|CONTAINS D:static.c:<global> -> D:later_static
+EDGES|CONTAINS D:static.c:<global> -> D:local_inline
+EDGES|CONTAINS D:static.c:<global> -> D:local_static
+EDGES|CONTAINS D:static.c:<global> -> D:plain
+EDGES|CONTAINS D:static.c:<global> -> D:zero_params
+EDGES|CONTAINS D:static.c:<global> -> static.c:<global>#0
+EDGES|CONTAINS D:static.c:<global> -> static_inline_prototype#0
+EDGES|CONTAINS D:static.c:<global> -> static_prototype#0
+EDGES|CONTAINS D:storage.c:<global> -> D:after_const
+EDGES|CONTAINS D:storage.c:<global> -> D:after_type
+EDGES|CONTAINS D:storage.c:<global> -> D:before_const
+EDGES|CONTAINS D:storage.c:<global> -> D:dollar_type
+EDGES|CONTAINS D:storage.c:<global> -> D:leading_comment
+EDGES|CONTAINS D:storage.c:<global> -> D:prefixed_type
+EDGES|CONTAINS D:storage.c:<global> -> D:static_comment
+EDGES|CONTAINS D:storage.c:<global> -> D:static_newline
+EDGES|CONTAINS D:storage.c:<global> -> after_inline_prototype#0
+EDGES|CONTAINS D:storage.c:<global> -> after_type_prototype#0
+EDGES|CONTAINS D:storage.c:<global> -> storage.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:spliced.c -> D:spliced.c:<global>
+EDGES|CONTAINS F:static.c -> D:static.c:<global>
+EDGES|CONTAINS F:storage.c -> D:storage.c:<global>
+EDGES|CONTAINS after_const#0 -> after_const#3
+EDGES|CONTAINS after_const#0 -> after_const#4
+EDGES|CONTAINS after_const#0 -> after_const#5
+EDGES|CONTAINS after_inline_prototype#0 -> after_inline_prototype#3
+EDGES|CONTAINS after_type#0 -> after_type#3
+EDGES|CONTAINS after_type#0 -> after_type#4
+EDGES|CONTAINS after_type#0 -> after_type#5
+EDGES|CONTAINS after_type_prototype#0 -> after_type_prototype#3
+EDGES|CONTAINS before_const#0 -> before_const#3
+EDGES|CONTAINS before_const#0 -> before_const#4
+EDGES|CONTAINS before_const#0 -> before_const#5
+EDGES|CONTAINS dollar_type#0 -> dollar_type#3
+EDGES|CONTAINS dollar_type#0 -> dollar_type#4
+EDGES|CONTAINS dollar_type#0 -> dollar_type#5
+EDGES|CONTAINS external#0 -> external#3
+EDGES|CONTAINS external#0 -> external#4
+EDGES|CONTAINS external#0 -> external#5
+EDGES|CONTAINS external_inline#0 -> external_inline#3
+EDGES|CONTAINS external_inline#0 -> external_inline#4
+EDGES|CONTAINS external_inline#0 -> external_inline#5
+EDGES|CONTAINS inactive_static#0 -> inactive_static#3
+EDGES|CONTAINS inherited_static#0 -> inherited_static#3
+EDGES|CONTAINS inherited_static#0 -> inherited_static#4
+EDGES|CONTAINS inherited_static#0 -> inherited_static#5
+EDGES|CONTAINS inline_function#0 -> inline_function#3
+EDGES|CONTAINS inline_function#0 -> inline_function#4
+EDGES|CONTAINS inline_function#0 -> inline_function#5
+EDGES|CONTAINS inline_local#0 -> inline_local#3
+EDGES|CONTAINS inline_local#0 -> inline_local#4
+EDGES|CONTAINS inline_local#0 -> inline_local#5
+EDGES|CONTAINS later_static#0 -> later_static#3
+EDGES|CONTAINS later_static#0 -> later_static#4
+EDGES|CONTAINS later_static#0 -> later_static#5
+EDGES|CONTAINS leading_comment#0 -> leading_comment#3
+EDGES|CONTAINS leading_comment#0 -> leading_comment#4
+EDGES|CONTAINS leading_comment#0 -> leading_comment#5
+EDGES|CONTAINS local_inline#0 -> local_inline#3
+EDGES|CONTAINS local_inline#0 -> local_inline#4
+EDGES|CONTAINS local_inline#0 -> local_inline#5
+EDGES|CONTAINS local_static#0 -> local_static#3
+EDGES|CONTAINS local_static#0 -> local_static#4
+EDGES|CONTAINS local_static#0 -> local_static#5
+EDGES|CONTAINS plain#0 -> plain#3
+EDGES|CONTAINS plain#0 -> plain#4
+EDGES|CONTAINS plain#0 -> plain#5
+EDGES|CONTAINS prefixed_type#0 -> prefixed_type#3
+EDGES|CONTAINS prefixed_type#0 -> prefixed_type#4
+EDGES|CONTAINS prefixed_type#0 -> prefixed_type#5
+EDGES|CONTAINS spliced#0 -> spliced#3
+EDGES|CONTAINS spliced#0 -> spliced#4
+EDGES|CONTAINS spliced#0 -> spliced#5
+EDGES|CONTAINS spliced.c:<global>#0 -> spliced#0
+EDGES|CONTAINS spliced.c:<global>#0 -> spliced.c:<global>#10
+EDGES|CONTAINS spliced.c:<global>#0 -> spliced.c:<global>#9
+EDGES|CONTAINS spliced_prototype#0 -> spliced_prototype#3
+EDGES|CONTAINS static.c:<global>#0 -> external#0
+EDGES|CONTAINS static.c:<global>#0 -> external_inline#0
+EDGES|CONTAINS static.c:<global>#0 -> inactive_static#0
+EDGES|CONTAINS static.c:<global>#0 -> inherited_static#0
+EDGES|CONTAINS static.c:<global>#0 -> inline_function#0
+EDGES|CONTAINS static.c:<global>#0 -> inline_local#0
+EDGES|CONTAINS static.c:<global>#0 -> later_static#0
+EDGES|CONTAINS static.c:<global>#0 -> local_inline#0
+EDGES|CONTAINS static.c:<global>#0 -> local_static#0
+EDGES|CONTAINS static.c:<global>#0 -> plain#0
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#73
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#79
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#80
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#81
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#82
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#83
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#84
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#85
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#86
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#87
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#88
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#89
+EDGES|CONTAINS static.c:<global>#0 -> static.c:<global>#90
+EDGES|CONTAINS static.c:<global>#73 -> zero_params#3
+EDGES|CONTAINS static_comment#0 -> static_comment#3
+EDGES|CONTAINS static_comment#0 -> static_comment#4
+EDGES|CONTAINS static_comment#0 -> static_comment#5
+EDGES|CONTAINS static_inline_prototype#0 -> static_inline_prototype#3
+EDGES|CONTAINS static_newline#0 -> static_newline#3
+EDGES|CONTAINS static_newline#0 -> static_newline#4
+EDGES|CONTAINS static_newline#0 -> static_newline#5
+EDGES|CONTAINS static_prototype#0 -> static_prototype#3
+EDGES|CONTAINS storage.c:<global>#0 -> after_const#0
+EDGES|CONTAINS storage.c:<global>#0 -> after_type#0
+EDGES|CONTAINS storage.c:<global>#0 -> before_const#0
+EDGES|CONTAINS storage.c:<global>#0 -> dollar_type#0
+EDGES|CONTAINS storage.c:<global>#0 -> leading_comment#0
+EDGES|CONTAINS storage.c:<global>#0 -> prefixed_type#0
+EDGES|CONTAINS storage.c:<global>#0 -> static_comment#0
+EDGES|CONTAINS storage.c:<global>#0 -> static_newline#0
+EDGES|CONTAINS storage.c:<global>#0 -> storage.c:<global>#61
+EDGES|CONTAINS storage.c:<global>#0 -> storage.c:<global>#62
+EDGES|CONTAINS storage.c:<global>#0 -> storage.c:<global>#63
+EDGES|CONTAINS storage.c:<global>#0 -> storage.c:<global>#64
+EDGES|CONTAINS storage.c:<global>#0 -> storage.c:<global>#65
+EDGES|CONTAINS storage.c:<global>#0 -> storage.c:<global>#66
+EDGES|CONTAINS storage.c:<global>#0 -> storage.c:<global>#67
+EDGES|CONTAINS storage.c:<global>#0 -> storage.c:<global>#68
+EDGES|CONTAINS storage.c:<global>#0 -> storage.c:<global>#69
+EDGES|CONTAINS storage.c:<global>#0 -> storage.c:<global>#70
+EDGES|CONTAINS storage.c:<global>#0 -> storage.c:<global>#71
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE after_const#1 -> T:int
+EDGES|EVAL_TYPE after_const#2 -> T:int
+EDGES|EVAL_TYPE after_const#3 -> T:void
+EDGES|EVAL_TYPE after_const#5 -> T:int
+EDGES|EVAL_TYPE after_const#6 -> T:int
+EDGES|EVAL_TYPE after_inline_prototype#1 -> T:int
+EDGES|EVAL_TYPE after_inline_prototype#2 -> T:int
+EDGES|EVAL_TYPE after_inline_prototype#3 -> T:ANY
+EDGES|EVAL_TYPE after_inline_prototype#4 -> T:int
+EDGES|EVAL_TYPE after_type#1 -> T:int
+EDGES|EVAL_TYPE after_type#2 -> T:int
+EDGES|EVAL_TYPE after_type#3 -> T:void
+EDGES|EVAL_TYPE after_type#5 -> T:int
+EDGES|EVAL_TYPE after_type#6 -> T:int
+EDGES|EVAL_TYPE after_type_prototype#1 -> T:int
+EDGES|EVAL_TYPE after_type_prototype#2 -> T:int
+EDGES|EVAL_TYPE after_type_prototype#3 -> T:ANY
+EDGES|EVAL_TYPE after_type_prototype#4 -> T:int
+EDGES|EVAL_TYPE before_const#1 -> T:int
+EDGES|EVAL_TYPE before_const#2 -> T:int
+EDGES|EVAL_TYPE before_const#3 -> T:void
+EDGES|EVAL_TYPE before_const#5 -> T:int
+EDGES|EVAL_TYPE before_const#7 -> T:int
+EDGES|EVAL_TYPE dollar_type#1 -> T:int
+EDGES|EVAL_TYPE dollar_type#2 -> T:int
+EDGES|EVAL_TYPE dollar_type#3 -> T:void
+EDGES|EVAL_TYPE dollar_type#5 -> T:int
+EDGES|EVAL_TYPE dollar_type#6 -> T:static$type
+EDGES|EVAL_TYPE external#1 -> T:int
+EDGES|EVAL_TYPE external#2 -> T:int
+EDGES|EVAL_TYPE external#3 -> T:void
+EDGES|EVAL_TYPE external#5 -> T:int
+EDGES|EVAL_TYPE external#6 -> T:int
+EDGES|EVAL_TYPE external_inline#1 -> T:int
+EDGES|EVAL_TYPE external_inline#2 -> T:int
+EDGES|EVAL_TYPE external_inline#3 -> T:void
+EDGES|EVAL_TYPE external_inline#5 -> T:int
+EDGES|EVAL_TYPE external_inline#6 -> T:int
+EDGES|EVAL_TYPE inactive_static#1 -> T:int
+EDGES|EVAL_TYPE inactive_static#2 -> T:int
+EDGES|EVAL_TYPE inactive_static#3 -> T:void
+EDGES|EVAL_TYPE inactive_static#5 -> T:int
+EDGES|EVAL_TYPE inherited_static#1 -> T:int
+EDGES|EVAL_TYPE inherited_static#2 -> T:int
+EDGES|EVAL_TYPE inherited_static#3 -> T:void
+EDGES|EVAL_TYPE inherited_static#5 -> T:int
+EDGES|EVAL_TYPE inherited_static#6 -> T:int
+EDGES|EVAL_TYPE inline_function#1 -> T:int
+EDGES|EVAL_TYPE inline_function#2 -> T:int
+EDGES|EVAL_TYPE inline_function#3 -> T:void
+EDGES|EVAL_TYPE inline_function#5 -> T:int
+EDGES|EVAL_TYPE inline_function#6 -> T:int
+EDGES|EVAL_TYPE inline_local#1 -> T:int
+EDGES|EVAL_TYPE inline_local#2 -> T:int
+EDGES|EVAL_TYPE inline_local#3 -> T:void
+EDGES|EVAL_TYPE inline_local#5 -> T:int
+EDGES|EVAL_TYPE inline_local#6 -> T:int
+EDGES|EVAL_TYPE later_static#1 -> T:int
+EDGES|EVAL_TYPE later_static#2 -> T:int
+EDGES|EVAL_TYPE later_static#3 -> T:void
+EDGES|EVAL_TYPE later_static#5 -> T:int
+EDGES|EVAL_TYPE later_static#7 -> T:int
+EDGES|EVAL_TYPE leading_comment#1 -> T:int
+EDGES|EVAL_TYPE leading_comment#2 -> T:int
+EDGES|EVAL_TYPE leading_comment#3 -> T:void
+EDGES|EVAL_TYPE leading_comment#5 -> T:int
+EDGES|EVAL_TYPE leading_comment#7 -> T:int
+EDGES|EVAL_TYPE local_inline#1 -> T:int
+EDGES|EVAL_TYPE local_inline#2 -> T:int
+EDGES|EVAL_TYPE local_inline#3 -> T:void
+EDGES|EVAL_TYPE local_inline#5 -> T:int
+EDGES|EVAL_TYPE local_inline#7 -> T:int
+EDGES|EVAL_TYPE local_static#1 -> T:int
+EDGES|EVAL_TYPE local_static#2 -> T:int
+EDGES|EVAL_TYPE local_static#3 -> T:void
+EDGES|EVAL_TYPE local_static#5 -> T:int
+EDGES|EVAL_TYPE local_static#7 -> T:int
+EDGES|EVAL_TYPE plain#1 -> T:int
+EDGES|EVAL_TYPE plain#2 -> T:int
+EDGES|EVAL_TYPE plain#3 -> T:void
+EDGES|EVAL_TYPE plain#5 -> T:int
+EDGES|EVAL_TYPE plain#6 -> T:int
+EDGES|EVAL_TYPE prefixed_type#1 -> T:int
+EDGES|EVAL_TYPE prefixed_type#2 -> T:int
+EDGES|EVAL_TYPE prefixed_type#3 -> T:void
+EDGES|EVAL_TYPE prefixed_type#5 -> T:int
+EDGES|EVAL_TYPE prefixed_type#6 -> T:static_type
+EDGES|EVAL_TYPE spliced#1 -> T:int
+EDGES|EVAL_TYPE spliced#2 -> T:int
+EDGES|EVAL_TYPE spliced#3 -> T:void
+EDGES|EVAL_TYPE spliced#5 -> T:int
+EDGES|EVAL_TYPE spliced#7 -> T:int
+EDGES|EVAL_TYPE spliced.c:<global>#10 -> T:spliced
+EDGES|EVAL_TYPE spliced.c:<global>#11 -> T:ANY
+EDGES|EVAL_TYPE spliced.c:<global>#9 -> T:ANY
+EDGES|EVAL_TYPE spliced_prototype#1 -> T:int
+EDGES|EVAL_TYPE spliced_prototype#2 -> T:int
+EDGES|EVAL_TYPE spliced_prototype#3 -> T:ANY
+EDGES|EVAL_TYPE spliced_prototype#5 -> T:int
+EDGES|EVAL_TYPE static.c:<global>#79 -> T:ANY
+EDGES|EVAL_TYPE static.c:<global>#80 -> T:plain
+EDGES|EVAL_TYPE static.c:<global>#81 -> T:local_static
+EDGES|EVAL_TYPE static.c:<global>#82 -> T:external
+EDGES|EVAL_TYPE static.c:<global>#83 -> T:inline_function
+EDGES|EVAL_TYPE static.c:<global>#84 -> T:local_inline
+EDGES|EVAL_TYPE static.c:<global>#85 -> T:inline_local
+EDGES|EVAL_TYPE static.c:<global>#86 -> T:external_inline
+EDGES|EVAL_TYPE static.c:<global>#87 -> T:inherited_static
+EDGES|EVAL_TYPE static.c:<global>#88 -> T:later_static
+EDGES|EVAL_TYPE static.c:<global>#89 -> T:inactive_static
+EDGES|EVAL_TYPE static.c:<global>#90 -> T:zero_params
+EDGES|EVAL_TYPE static.c:<global>#91 -> T:ANY
+EDGES|EVAL_TYPE static_comment#1 -> T:int
+EDGES|EVAL_TYPE static_comment#2 -> T:int
+EDGES|EVAL_TYPE static_comment#3 -> T:void
+EDGES|EVAL_TYPE static_comment#5 -> T:int
+EDGES|EVAL_TYPE static_comment#7 -> T:int
+EDGES|EVAL_TYPE static_inline_prototype#1 -> T:int
+EDGES|EVAL_TYPE static_inline_prototype#2 -> T:int
+EDGES|EVAL_TYPE static_inline_prototype#3 -> T:ANY
+EDGES|EVAL_TYPE static_inline_prototype#5 -> T:int
+EDGES|EVAL_TYPE static_newline#1 -> T:int
+EDGES|EVAL_TYPE static_newline#2 -> T:int
+EDGES|EVAL_TYPE static_newline#3 -> T:void
+EDGES|EVAL_TYPE static_newline#5 -> T:int
+EDGES|EVAL_TYPE static_newline#7 -> T:int
+EDGES|EVAL_TYPE static_prototype#1 -> T:int
+EDGES|EVAL_TYPE static_prototype#2 -> T:int
+EDGES|EVAL_TYPE static_prototype#3 -> T:ANY
+EDGES|EVAL_TYPE static_prototype#5 -> T:int
+EDGES|EVAL_TYPE storage.c:<global>#61 -> T:ANY
+EDGES|EVAL_TYPE storage.c:<global>#62 -> T:after_type
+EDGES|EVAL_TYPE storage.c:<global>#63 -> T:after_const
+EDGES|EVAL_TYPE storage.c:<global>#64 -> T:before_const
+EDGES|EVAL_TYPE storage.c:<global>#65 -> T:static_newline
+EDGES|EVAL_TYPE storage.c:<global>#66 -> T:static_comment
+EDGES|EVAL_TYPE storage.c:<global>#67 -> T:leading_comment
+EDGES|EVAL_TYPE storage.c:<global>#69 -> T:prefixed_type
+EDGES|EVAL_TYPE storage.c:<global>#71 -> T:dollar_type
+EDGES|EVAL_TYPE storage.c:<global>#72 -> T:ANY
+EDGES|EVAL_TYPE zero_params#1 -> T:void
+EDGES|EVAL_TYPE zero_params#2 -> T:void
+EDGES|EVAL_TYPE zero_params#3 -> T:void
+EDGES|EVAL_TYPE zero_params#5 -> T:void
+EDGES|PARAMETER_LINK after_const#1 -> after_const#2
+EDGES|PARAMETER_LINK after_inline_prototype#1 -> after_inline_prototype#2
+EDGES|PARAMETER_LINK after_type#1 -> after_type#2
+EDGES|PARAMETER_LINK after_type_prototype#1 -> after_type_prototype#2
+EDGES|PARAMETER_LINK before_const#1 -> before_const#2
+EDGES|PARAMETER_LINK dollar_type#1 -> dollar_type#2
+EDGES|PARAMETER_LINK external#1 -> external#2
+EDGES|PARAMETER_LINK external_inline#1 -> external_inline#2
+EDGES|PARAMETER_LINK inactive_static#1 -> inactive_static#2
+EDGES|PARAMETER_LINK inherited_static#1 -> inherited_static#2
+EDGES|PARAMETER_LINK inline_function#1 -> inline_function#2
+EDGES|PARAMETER_LINK inline_local#1 -> inline_local#2
+EDGES|PARAMETER_LINK later_static#1 -> later_static#2
+EDGES|PARAMETER_LINK leading_comment#1 -> leading_comment#2
+EDGES|PARAMETER_LINK local_inline#1 -> local_inline#2
+EDGES|PARAMETER_LINK local_static#1 -> local_static#2
+EDGES|PARAMETER_LINK plain#1 -> plain#2
+EDGES|PARAMETER_LINK prefixed_type#1 -> prefixed_type#2
+EDGES|PARAMETER_LINK spliced#1 -> spliced#2
+EDGES|PARAMETER_LINK spliced_prototype#1 -> spliced_prototype#2
+EDGES|PARAMETER_LINK static_comment#1 -> static_comment#2
+EDGES|PARAMETER_LINK static_inline_prototype#1 -> static_inline_prototype#2
+EDGES|PARAMETER_LINK static_newline#1 -> static_newline#2
+EDGES|PARAMETER_LINK static_prototype#1 -> static_prototype#2
+EDGES|PARAMETER_LINK zero_params#1 -> zero_params#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:spliced.c:<global> -> NS:<global>
+EDGES|REF NB:static.c:<global> -> NS:<global>
+EDGES|REF NB:storage.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:after_const -> D:after_const
+EDGES|REF T:after_type -> D:after_type
+EDGES|REF T:before_const -> D:before_const
+EDGES|REF T:dollar_type -> D:dollar_type
+EDGES|REF T:external -> D:external
+EDGES|REF T:external_inline -> D:external_inline
+EDGES|REF T:inactive_static -> D:inactive_static
+EDGES|REF T:inherited_static -> D:inherited_static
+EDGES|REF T:inline_function -> D:inline_function
+EDGES|REF T:inline_local -> D:inline_local
+EDGES|REF T:int -> D:int
+EDGES|REF T:later_static -> D:later_static
+EDGES|REF T:leading_comment -> D:leading_comment
+EDGES|REF T:local_inline -> D:local_inline
+EDGES|REF T:local_static -> D:local_static
+EDGES|REF T:plain -> D:plain
+EDGES|REF T:prefixed_type -> D:prefixed_type
+EDGES|REF T:spliced -> D:spliced
+EDGES|REF T:static$type -> storage.c:<global>#70
+EDGES|REF T:static_comment -> D:static_comment
+EDGES|REF T:static_newline -> D:static_newline
+EDGES|REF T:static_type -> storage.c:<global>#68
+EDGES|REF T:void -> D:void
+EDGES|REF T:zero_params -> D:zero_params
+EDGES|REF after_const#5 -> after_const#1
+EDGES|REF after_type#5 -> after_type#1
+EDGES|REF before_const#5 -> before_const#1
+EDGES|REF dollar_type#5 -> dollar_type#1
+EDGES|REF external#5 -> external#1
+EDGES|REF external_inline#5 -> external_inline#1
+EDGES|REF inherited_static#5 -> inherited_static#1
+EDGES|REF inline_function#5 -> inline_function#1
+EDGES|REF inline_local#5 -> inline_local#1
+EDGES|REF later_static#5 -> later_static#1
+EDGES|REF leading_comment#5 -> leading_comment#1
+EDGES|REF local_inline#5 -> local_inline#1
+EDGES|REF local_static#5 -> local_static#1
+EDGES|REF plain#5 -> plain#1
+EDGES|REF prefixed_type#5 -> prefixed_type#1
+EDGES|REF spliced#5 -> spliced#1
+EDGES|REF spliced.c:<global>#10 -> spliced#0
+EDGES|REF static.c:<global>#80 -> plain#0
+EDGES|REF static.c:<global>#81 -> local_static#0
+EDGES|REF static.c:<global>#82 -> external#0
+EDGES|REF static.c:<global>#83 -> inline_function#0
+EDGES|REF static.c:<global>#84 -> local_inline#0
+EDGES|REF static.c:<global>#85 -> inline_local#0
+EDGES|REF static.c:<global>#86 -> external_inline#0
+EDGES|REF static.c:<global>#87 -> inherited_static#0
+EDGES|REF static.c:<global>#88 -> later_static#0
+EDGES|REF static.c:<global>#89 -> inactive_static#0
+EDGES|REF static.c:<global>#90 -> static.c:<global>#73
+EDGES|REF static_comment#5 -> static_comment#1
+EDGES|REF static_newline#5 -> static_newline#1
+EDGES|REF storage.c:<global>#62 -> after_type#0
+EDGES|REF storage.c:<global>#63 -> after_const#0
+EDGES|REF storage.c:<global>#64 -> before_const#0
+EDGES|REF storage.c:<global>#65 -> static_newline#0
+EDGES|REF storage.c:<global>#66 -> static_comment#0
+EDGES|REF storage.c:<global>#67 -> leading_comment#0
+EDGES|REF storage.c:<global>#69 -> prefixed_type#0
+EDGES|REF storage.c:<global>#71 -> dollar_type#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:after_const -> F:storage.c
+EDGES|SOURCE_FILE D:after_type -> F:storage.c
+EDGES|SOURCE_FILE D:before_const -> F:storage.c
+EDGES|SOURCE_FILE D:dollar_type -> F:storage.c
+EDGES|SOURCE_FILE D:external -> F:static.c
+EDGES|SOURCE_FILE D:external_inline -> F:static.c
+EDGES|SOURCE_FILE D:inactive_static -> F:static.c
+EDGES|SOURCE_FILE D:inherited_static -> F:static.c
+EDGES|SOURCE_FILE D:inline_function -> F:static.c
+EDGES|SOURCE_FILE D:inline_local -> F:static.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:later_static -> F:static.c
+EDGES|SOURCE_FILE D:leading_comment -> F:storage.c
+EDGES|SOURCE_FILE D:local_inline -> F:static.c
+EDGES|SOURCE_FILE D:local_static -> F:static.c
+EDGES|SOURCE_FILE D:plain -> F:static.c
+EDGES|SOURCE_FILE D:prefixed_type -> F:storage.c
+EDGES|SOURCE_FILE D:spliced -> F:spliced.c
+EDGES|SOURCE_FILE D:spliced.c:<global> -> F:spliced.c
+EDGES|SOURCE_FILE D:static.c:<global> -> F:static.c
+EDGES|SOURCE_FILE D:static_comment -> F:storage.c
+EDGES|SOURCE_FILE D:static_newline -> F:storage.c
+EDGES|SOURCE_FILE D:storage.c:<global> -> F:storage.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:zero_params -> F:static.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:spliced.c:<global> -> F:spliced.c
+EDGES|SOURCE_FILE NB:static.c:<global> -> F:static.c
+EDGES|SOURCE_FILE NB:storage.c:<global> -> F:storage.c
+EDGES|SOURCE_FILE after_const#0 -> F:storage.c
+EDGES|SOURCE_FILE after_inline_prototype#0 -> F:storage.c
+EDGES|SOURCE_FILE after_type#0 -> F:storage.c
+EDGES|SOURCE_FILE after_type_prototype#0 -> F:storage.c
+EDGES|SOURCE_FILE before_const#0 -> F:storage.c
+EDGES|SOURCE_FILE dollar_type#0 -> F:storage.c
+EDGES|SOURCE_FILE external#0 -> F:static.c
+EDGES|SOURCE_FILE external_inline#0 -> F:static.c
+EDGES|SOURCE_FILE inactive_static#0 -> F:static.c
+EDGES|SOURCE_FILE inherited_static#0 -> F:static.c
+EDGES|SOURCE_FILE inline_function#0 -> F:static.c
+EDGES|SOURCE_FILE inline_local#0 -> F:static.c
+EDGES|SOURCE_FILE later_static#0 -> F:static.c
+EDGES|SOURCE_FILE leading_comment#0 -> F:storage.c
+EDGES|SOURCE_FILE local_inline#0 -> F:static.c
+EDGES|SOURCE_FILE local_static#0 -> F:static.c
+EDGES|SOURCE_FILE plain#0 -> F:static.c
+EDGES|SOURCE_FILE prefixed_type#0 -> F:storage.c
+EDGES|SOURCE_FILE spliced#0 -> F:spliced.c
+EDGES|SOURCE_FILE spliced.c:<global>#0 -> F:spliced.c
+EDGES|SOURCE_FILE spliced_prototype#0 -> F:spliced.c
+EDGES|SOURCE_FILE static.c:<global>#0 -> F:static.c
+EDGES|SOURCE_FILE static.c:<global>#73 -> F:static.c
+EDGES|SOURCE_FILE static_comment#0 -> F:storage.c
+EDGES|SOURCE_FILE static_inline_prototype#0 -> F:static.c
+EDGES|SOURCE_FILE static_newline#0 -> F:storage.c
+EDGES|SOURCE_FILE static_prototype#0 -> F:static.c
+EDGES|SOURCE_FILE storage.c:<global>#0 -> F:storage.c
+EDGES|SOURCE_FILE storage.c:<global>#68 -> F:storage.c
+EDGES|SOURCE_FILE storage.c:<global>#70 -> F:storage.c
+FLOWS|REACHING_DEF[<RET>] after_const#4 -> after_const#6
+FLOWS|REACHING_DEF[<RET>] after_type#4 -> after_type#6
+FLOWS|REACHING_DEF[<RET>] before_const#4 -> before_const#7
+FLOWS|REACHING_DEF[<RET>] dollar_type#4 -> dollar_type#6
+FLOWS|REACHING_DEF[<RET>] external#4 -> external#6
+FLOWS|REACHING_DEF[<RET>] external_inline#4 -> external_inline#6
+FLOWS|REACHING_DEF[<RET>] inherited_static#4 -> inherited_static#6
+FLOWS|REACHING_DEF[<RET>] inline_function#4 -> inline_function#6
+FLOWS|REACHING_DEF[<RET>] inline_local#4 -> inline_local#6
+FLOWS|REACHING_DEF[<RET>] later_static#4 -> later_static#7
+FLOWS|REACHING_DEF[<RET>] leading_comment#4 -> leading_comment#7
+FLOWS|REACHING_DEF[<RET>] local_inline#4 -> local_inline#7
+FLOWS|REACHING_DEF[<RET>] local_static#4 -> local_static#7
+FLOWS|REACHING_DEF[<RET>] plain#4 -> plain#6
+FLOWS|REACHING_DEF[<RET>] prefixed_type#4 -> prefixed_type#6
+FLOWS|REACHING_DEF[<RET>] spliced#4 -> spliced#7
+FLOWS|REACHING_DEF[<RET>] static_comment#4 -> static_comment#7
+FLOWS|REACHING_DEF[<RET>] static_newline#4 -> static_newline#7
+FLOWS|REACHING_DEF[] after_const#0 -> after_const#1
+FLOWS|REACHING_DEF[] after_const#0 -> after_const#5
+FLOWS|REACHING_DEF[] after_inline_prototype#0 -> after_inline_prototype#1
+FLOWS|REACHING_DEF[] after_type#0 -> after_type#1
+FLOWS|REACHING_DEF[] after_type#0 -> after_type#5
+FLOWS|REACHING_DEF[] after_type_prototype#0 -> after_type_prototype#1
+FLOWS|REACHING_DEF[] before_const#0 -> before_const#1
+FLOWS|REACHING_DEF[] before_const#0 -> before_const#5
+FLOWS|REACHING_DEF[] dollar_type#0 -> dollar_type#1
+FLOWS|REACHING_DEF[] dollar_type#0 -> dollar_type#5
+FLOWS|REACHING_DEF[] external#0 -> external#1
+FLOWS|REACHING_DEF[] external#0 -> external#5
+FLOWS|REACHING_DEF[] external_inline#0 -> external_inline#1
+FLOWS|REACHING_DEF[] external_inline#0 -> external_inline#5
+FLOWS|REACHING_DEF[] inactive_static#0 -> inactive_static#1
+FLOWS|REACHING_DEF[] inherited_static#0 -> inherited_static#1
+FLOWS|REACHING_DEF[] inherited_static#0 -> inherited_static#5
+FLOWS|REACHING_DEF[] inline_function#0 -> inline_function#1
+FLOWS|REACHING_DEF[] inline_function#0 -> inline_function#5
+FLOWS|REACHING_DEF[] inline_local#0 -> inline_local#1
+FLOWS|REACHING_DEF[] inline_local#0 -> inline_local#5
+FLOWS|REACHING_DEF[] later_static#0 -> later_static#1
+FLOWS|REACHING_DEF[] later_static#0 -> later_static#5
+FLOWS|REACHING_DEF[] leading_comment#0 -> leading_comment#1
+FLOWS|REACHING_DEF[] leading_comment#0 -> leading_comment#5
+FLOWS|REACHING_DEF[] local_inline#0 -> local_inline#1
+FLOWS|REACHING_DEF[] local_inline#0 -> local_inline#5
+FLOWS|REACHING_DEF[] local_static#0 -> local_static#1
+FLOWS|REACHING_DEF[] local_static#0 -> local_static#5
+FLOWS|REACHING_DEF[] plain#0 -> plain#1
+FLOWS|REACHING_DEF[] plain#0 -> plain#5
+FLOWS|REACHING_DEF[] prefixed_type#0 -> prefixed_type#1
+FLOWS|REACHING_DEF[] prefixed_type#0 -> prefixed_type#5
+FLOWS|REACHING_DEF[] spliced#0 -> spliced#1
+FLOWS|REACHING_DEF[] spliced#0 -> spliced#5
+FLOWS|REACHING_DEF[] spliced.c:<global>#0 -> spliced.c:<global>#10
+FLOWS|REACHING_DEF[] spliced_prototype#0 -> spliced_prototype#1
+FLOWS|REACHING_DEF[] static.c:<global>#0 -> static.c:<global>#80
+FLOWS|REACHING_DEF[] static.c:<global>#0 -> static.c:<global>#81
+FLOWS|REACHING_DEF[] static.c:<global>#0 -> static.c:<global>#82
+FLOWS|REACHING_DEF[] static.c:<global>#0 -> static.c:<global>#83
+FLOWS|REACHING_DEF[] static.c:<global>#0 -> static.c:<global>#84
+FLOWS|REACHING_DEF[] static.c:<global>#0 -> static.c:<global>#85
+FLOWS|REACHING_DEF[] static.c:<global>#0 -> static.c:<global>#86
+FLOWS|REACHING_DEF[] static.c:<global>#0 -> static.c:<global>#87
+FLOWS|REACHING_DEF[] static.c:<global>#0 -> static.c:<global>#88
+FLOWS|REACHING_DEF[] static.c:<global>#0 -> static.c:<global>#89
+FLOWS|REACHING_DEF[] static.c:<global>#0 -> static.c:<global>#90
+FLOWS|REACHING_DEF[] static.c:<global>#73 -> zero_params#1
+FLOWS|REACHING_DEF[] static_comment#0 -> static_comment#1
+FLOWS|REACHING_DEF[] static_comment#0 -> static_comment#5
+FLOWS|REACHING_DEF[] static_inline_prototype#0 -> static_inline_prototype#1
+FLOWS|REACHING_DEF[] static_newline#0 -> static_newline#1
+FLOWS|REACHING_DEF[] static_newline#0 -> static_newline#5
+FLOWS|REACHING_DEF[] static_prototype#0 -> static_prototype#1
+FLOWS|REACHING_DEF[] storage.c:<global>#0 -> storage.c:<global>#62
+FLOWS|REACHING_DEF[] storage.c:<global>#0 -> storage.c:<global>#63
+FLOWS|REACHING_DEF[] storage.c:<global>#0 -> storage.c:<global>#64
+FLOWS|REACHING_DEF[] storage.c:<global>#0 -> storage.c:<global>#65
+FLOWS|REACHING_DEF[] storage.c:<global>#0 -> storage.c:<global>#66
+FLOWS|REACHING_DEF[] storage.c:<global>#0 -> storage.c:<global>#67
+FLOWS|REACHING_DEF[] storage.c:<global>#0 -> storage.c:<global>#69
+FLOWS|REACHING_DEF[] storage.c:<global>#0 -> storage.c:<global>#71
+FLOWS|REACHING_DEF[] zero_params#1 -> zero_params#2
+FLOWS|REACHING_DEF[] zero_params#1 -> zero_params#5
+FLOWS|REACHING_DEF[value] after_const#1 -> after_const#2
+FLOWS|REACHING_DEF[value] after_const#1 -> after_const#5
+FLOWS|REACHING_DEF[value] after_const#1 -> after_const#6
+FLOWS|REACHING_DEF[value] after_const#5 -> after_const#4
+FLOWS|REACHING_DEF[value] after_inline_prototype#1 -> after_inline_prototype#2
+FLOWS|REACHING_DEF[value] after_inline_prototype#1 -> after_inline_prototype#4
+FLOWS|REACHING_DEF[value] after_type#1 -> after_type#2
+FLOWS|REACHING_DEF[value] after_type#1 -> after_type#5
+FLOWS|REACHING_DEF[value] after_type#1 -> after_type#6
+FLOWS|REACHING_DEF[value] after_type#5 -> after_type#4
+FLOWS|REACHING_DEF[value] after_type_prototype#1 -> after_type_prototype#2
+FLOWS|REACHING_DEF[value] after_type_prototype#1 -> after_type_prototype#4
+FLOWS|REACHING_DEF[value] before_const#1 -> before_const#2
+FLOWS|REACHING_DEF[value] before_const#1 -> before_const#5
+FLOWS|REACHING_DEF[value] before_const#1 -> before_const#7
+FLOWS|REACHING_DEF[value] before_const#5 -> before_const#4
+FLOWS|REACHING_DEF[value] dollar_type#1 -> dollar_type#2
+FLOWS|REACHING_DEF[value] dollar_type#1 -> dollar_type#5
+FLOWS|REACHING_DEF[value] dollar_type#1 -> dollar_type#6
+FLOWS|REACHING_DEF[value] dollar_type#5 -> dollar_type#4
+FLOWS|REACHING_DEF[value] external#1 -> external#2
+FLOWS|REACHING_DEF[value] external#1 -> external#5
+FLOWS|REACHING_DEF[value] external#1 -> external#6
+FLOWS|REACHING_DEF[value] external#5 -> external#4
+FLOWS|REACHING_DEF[value] external_inline#1 -> external_inline#2
+FLOWS|REACHING_DEF[value] external_inline#1 -> external_inline#5
+FLOWS|REACHING_DEF[value] external_inline#1 -> external_inline#6
+FLOWS|REACHING_DEF[value] external_inline#5 -> external_inline#4
+FLOWS|REACHING_DEF[value] inactive_static#1 -> inactive_static#2
+FLOWS|REACHING_DEF[value] inactive_static#1 -> inactive_static#5
+FLOWS|REACHING_DEF[value] inherited_static#1 -> inherited_static#2
+FLOWS|REACHING_DEF[value] inherited_static#1 -> inherited_static#5
+FLOWS|REACHING_DEF[value] inherited_static#1 -> inherited_static#6
+FLOWS|REACHING_DEF[value] inherited_static#5 -> inherited_static#4
+FLOWS|REACHING_DEF[value] inline_function#1 -> inline_function#2
+FLOWS|REACHING_DEF[value] inline_function#1 -> inline_function#5
+FLOWS|REACHING_DEF[value] inline_function#1 -> inline_function#6
+FLOWS|REACHING_DEF[value] inline_function#5 -> inline_function#4
+FLOWS|REACHING_DEF[value] inline_local#1 -> inline_local#2
+FLOWS|REACHING_DEF[value] inline_local#1 -> inline_local#5
+FLOWS|REACHING_DEF[value] inline_local#1 -> inline_local#6
+FLOWS|REACHING_DEF[value] inline_local#5 -> inline_local#4
+FLOWS|REACHING_DEF[value] later_static#1 -> later_static#2
+FLOWS|REACHING_DEF[value] later_static#1 -> later_static#5
+FLOWS|REACHING_DEF[value] later_static#1 -> later_static#7
+FLOWS|REACHING_DEF[value] later_static#5 -> later_static#4
+FLOWS|REACHING_DEF[value] leading_comment#1 -> leading_comment#2
+FLOWS|REACHING_DEF[value] leading_comment#1 -> leading_comment#5
+FLOWS|REACHING_DEF[value] leading_comment#1 -> leading_comment#7
+FLOWS|REACHING_DEF[value] leading_comment#5 -> leading_comment#4
+FLOWS|REACHING_DEF[value] local_inline#1 -> local_inline#2
+FLOWS|REACHING_DEF[value] local_inline#1 -> local_inline#5
+FLOWS|REACHING_DEF[value] local_inline#1 -> local_inline#7
+FLOWS|REACHING_DEF[value] local_inline#5 -> local_inline#4
+FLOWS|REACHING_DEF[value] local_static#1 -> local_static#2
+FLOWS|REACHING_DEF[value] local_static#1 -> local_static#5
+FLOWS|REACHING_DEF[value] local_static#1 -> local_static#7
+FLOWS|REACHING_DEF[value] local_static#5 -> local_static#4
+FLOWS|REACHING_DEF[value] plain#1 -> plain#2
+FLOWS|REACHING_DEF[value] plain#1 -> plain#5
+FLOWS|REACHING_DEF[value] plain#1 -> plain#6
+FLOWS|REACHING_DEF[value] plain#5 -> plain#4
+FLOWS|REACHING_DEF[value] prefixed_type#1 -> prefixed_type#2
+FLOWS|REACHING_DEF[value] prefixed_type#1 -> prefixed_type#5
+FLOWS|REACHING_DEF[value] prefixed_type#1 -> prefixed_type#6
+FLOWS|REACHING_DEF[value] prefixed_type#5 -> prefixed_type#4
+FLOWS|REACHING_DEF[value] spliced#1 -> spliced#2
+FLOWS|REACHING_DEF[value] spliced#1 -> spliced#5
+FLOWS|REACHING_DEF[value] spliced#1 -> spliced#7
+FLOWS|REACHING_DEF[value] spliced#5 -> spliced#4
+FLOWS|REACHING_DEF[value] spliced_prototype#1 -> spliced_prototype#2
+FLOWS|REACHING_DEF[value] spliced_prototype#1 -> spliced_prototype#5
+FLOWS|REACHING_DEF[value] static_comment#1 -> static_comment#2
+FLOWS|REACHING_DEF[value] static_comment#1 -> static_comment#5
+FLOWS|REACHING_DEF[value] static_comment#1 -> static_comment#7
+FLOWS|REACHING_DEF[value] static_comment#5 -> static_comment#4
+FLOWS|REACHING_DEF[value] static_inline_prototype#1 -> static_inline_prototype#2
+FLOWS|REACHING_DEF[value] static_inline_prototype#1 -> static_inline_prototype#5
+FLOWS|REACHING_DEF[value] static_newline#1 -> static_newline#2
+FLOWS|REACHING_DEF[value] static_newline#1 -> static_newline#5
+FLOWS|REACHING_DEF[value] static_newline#1 -> static_newline#7
+FLOWS|REACHING_DEF[value] static_newline#5 -> static_newline#4
+FLOWS|REACHING_DEF[value] static_prototype#1 -> static_prototype#2
+FLOWS|REACHING_DEF[value] static_prototype#1 -> static_prototype#5

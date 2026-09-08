@@ -1,0 +1,18 @@
+{
+  "baselineRevision": "c5ea712db",
+  "oracleVersion": "4.0.555",
+  "referenceSha256": "81c25b5b3f14f0b579c15d4d0a3364b4a4256ec6a2d92eb66dfd6a7e796ca787",
+  "liveOutputSha256": "fcb229d8bebcc36a7eda36d03521921c9c6d70e0b530ac6385be86ed77cd5cd1",
+  "inputs": {
+    "static.c": "86b58026dfedeeb489994e9a2db69a59b8e9b3e4c21c1ca75528f2ea5990d3ec",
+    "storage.c": "8bfbf9bcbc85038a99905fd8a8e6c768ca7f783b9bf24c1892bf6d90813a0df7",
+    "spliced.c": "3ab3e68f1bb597b640079b835eabb8bff4ccbcd2e537eca3b23eb4f2f4706cfc"
+  },
+  "referenceRecords": 1161,
+  "methodBlocks": 29,
+  "baselineExactMethodBlocks": 13,
+  "baselineUnifiedDiffLines": 743,
+  "candidateCompleteProjectionExact": true,
+  "candidateUnifiedDiffLines": 0,
+  "scope": "Complete existing projection including all AST properties, nodes, structural edges, and ReachingDef facts; MODIFIER_TYPE is outside this projection."
+}

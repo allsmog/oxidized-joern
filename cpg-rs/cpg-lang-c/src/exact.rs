@@ -1075,13 +1075,24 @@ impl Ctx<'_> {
                 );
             }
         }
+        let is_static = has_leading_static(text(f, b));
+        if is_static {
+            self.line(
+                d + 1,
+                "MODIFIER",
+                P {
+                    order: Some((params.len() + 2) as i64),
+                    ..Default::default()
+                },
+            );
+        }
         self.line(
             d + 1,
             "METHOD_RETURN",
             P {
                 code: Some("RET".into()),
                 tfn: Some(ret),
-                order: Some((params.len() + 2) as i64),
+                order: Some((params.len() + 2 + usize::from(is_static)) as i64),
                 ..Default::default()
             },
         );
@@ -1208,13 +1219,24 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
+        let is_static = has_leading_static(code);
+        if is_static {
+            self.line(
+                1,
+                "MODIFIER",
+                P {
+                    order: Some((params.len() + 2) as i64),
+                    ..Default::default()
+                },
+            );
+        }
         self.line(
             1,
             "METHOD_RETURN",
             P {
                 code: Some("RET".into()),
                 tfn: Some(ret.into()),
-                order: Some((params.len() + 2) as i64),
+                order: Some((params.len() + 2 + usize::from(is_static)) as i64),
                 ..Default::default()
             },
         );
@@ -4071,6 +4093,32 @@ fn named_children(n: Node) -> Vec<Node> {
 }
 fn text<'a>(n: Node, b: &'a [u8]) -> &'a str {
     n.utf8_text(b).unwrap_or("")
+}
+/// The pinned frontend emits STATIC only for a leading storage-class token.
+/// `inline static` and a definition inheriting an earlier static declaration
+/// receive no modifier. Prototype CODE may already contain escaped newlines.
+fn has_leading_static(code: &str) -> bool {
+    code.trim_start()
+        .strip_prefix("static")
+        .is_some_and(|mut rest| {
+            // A physical line continuation can separate this token from the
+            // next one. Prototype CODE has escaped the newline already.
+            while let Some(tail) = rest
+                .strip_prefix("\\\r\n")
+                .or_else(|| rest.strip_prefix("\\\n"))
+                .or_else(|| rest.strip_prefix("\\\r\\n"))
+                .or_else(|| rest.strip_prefix("\\\\n"))
+            {
+                rest = tail;
+            }
+            // `$` is an accepted identifier extension. A universal-character
+            // escape also continues an identifier; `\\n` here can instead be
+            // the prototype CODE transport's escaped newline.
+            rest.starts_with("\\n")
+                || rest.chars().next().is_some_and(|next| {
+                    !next.is_alphanumeric() && !matches!(next, '_' | '$' | '\\')
+                })
+        })
 }
 fn esc(s: &str) -> String {
     s.replace('\n', "\\n").trim().to_string()
