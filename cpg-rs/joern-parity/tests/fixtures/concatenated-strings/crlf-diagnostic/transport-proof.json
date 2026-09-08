@@ -1,0 +1,32 @@
+{
+  "source": "input/boundaries.c",
+  "oracle_script": "oracle.sc",
+  "raw_log": "live.stdout",
+  "raw_log_sha256": "cd7f8baee11b04edd4f24f99897d9c3f1a00bb198c8dd5fffa0e0c22d5fdd1e3",
+  "codes": {
+    "spliced": {
+      "base64": "ImFcCmIiICJ0YWlsIg==",
+      "raw_hex": "22615c0a622220227461696c22",
+      "selected_text": "\"a\\\\nb\" \"tail\"",
+      "raw_code": "\"a\\\nb\" \"tail\""
+    },
+    "backslash_n": {
+      "base64": "ImFcXG5iIiAidGFpbCI=",
+      "raw_hex": "22615c5c6e622220227461696c22",
+      "selected_text": "\"a\\\\nb\" \"tail\"",
+      "raw_code": "\"a\\\\nb\" \"tail\""
+    }
+  },
+  "raw_distinct": true,
+  "selected_code_equal": true,
+  "scope": "Existing AST/CODE text escape is not injective; FLOWS now uses the same escape convention. No graph records discarded.",
+  "crlf": {
+    "source": "isolated-input/crlf/strings.c",
+    "source_cr_count": 6,
+    "oracle_projection_cr_count": 0,
+    "candidate_projection_cr_count": 22,
+    "full_diff": "crlf-candidate.diff"
+  },
+  "receiptOriginDirectory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-types/.local/string-review",
+  "pathScope": "Original reviewer-relative paths resolve under receiptOriginDirectory; the copied CRLF fixture/output files are retained beside this proof."
+}

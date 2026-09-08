@@ -1,0 +1,4 @@
+# Oracle diagnostics retain literal CR bytes; checkout must not normalize them.
+crlf-diagnostic/* -text -eol whitespace=cr-at-eol
+# Unified-diff blank context lines contain one space by definition.
+*-diagnostic/complete.diff -whitespace

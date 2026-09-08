@@ -1,0 +1,364 @@
+--- Joern
++++ Rust
+@@ -40,7 +40,7 @@
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={ CALL_JOIN; } TYPE_FULL_NAME=void ORDER=2
+-    CALL NAME=CALL_JOIN CODE=CALL_JOIN TYPE_FULL_NAME=ANY METHOD_FULL_NAME=strings.c:CALL_JOIN:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
++    CALL NAME=CALL_JOIN CODE=CALL_JOIN TYPE_FULL_NAME=void METHOD_FULL_NAME=strings.c:CALL_JOIN:void(0) SIGNATURE=void(0) ORDER=1 DISPATCH_TYPE=INLINED
+       BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+         CALL NAME=consume CODE=consume("leftright") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           LITERAL CODE="leftright" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+@@ -50,10 +50,9 @@
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={ return COMMENT_JOIN; } TYPE_FULL_NAME=void ORDER=2
++    LOCAL NAME=COMMENT_JOIN CODE=<unknown> COMMENT_JOIN TYPE_FULL_NAME=ANY ORDER=0
+     RETURN CODE=return COMMENT_JOIN; ORDER=1
+-      CALL NAME=COMMENT_JOIN CODE=COMMENT_JOIN TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:COMMENT_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+-        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-          LITERAL CODE="leftright" TYPE_FULL_NAME=char* ORDER=1
++      IDENTIFIER NAME=COMMENT_JOIN CODE=<unknown> COMMENT_JOIN TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+ 
+ METHOD NAME=commented CODE=char *commented(int condition) { return condition ? "first" /* join */ "second" : "safe"; } FULL_NAME=commented SIGNATURE=char*(int) ORDER=1
+@@ -397,10 +396,9 @@
+     METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={ return COMMENT_JOIN; } TYPE_FULL_NAME=void ORDER=2
++      LOCAL NAME=COMMENT_JOIN CODE=<unknown> COMMENT_JOIN TYPE_FULL_NAME=ANY ORDER=0
+       RETURN CODE=return COMMENT_JOIN; ORDER=1
+-        CALL NAME=COMMENT_JOIN CODE=COMMENT_JOIN TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:COMMENT_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+-          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-            LITERAL CODE="leftright" TYPE_FULL_NAME=char* ORDER=1
++        IDENTIFIER NAME=COMMENT_JOIN CODE=<unknown> COMMENT_JOIN TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+   METHOD NAME=parenthesized_macro CODE=char *parenthesized_macro(void) { return PAREN_JOIN; } FULL_NAME=parenthesized_macro SIGNATURE=char*(void) ORDER=1
+     METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+@@ -415,7 +413,7 @@
+     METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={ CALL_JOIN; } TYPE_FULL_NAME=void ORDER=2
+-      CALL NAME=CALL_JOIN CODE=CALL_JOIN TYPE_FULL_NAME=ANY METHOD_FULL_NAME=strings.c:CALL_JOIN:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
++      CALL NAME=CALL_JOIN CODE=CALL_JOIN TYPE_FULL_NAME=void METHOD_FULL_NAME=strings.c:CALL_JOIN:void(0) SIGNATURE=void(0) ORDER=1 DISPATCH_TYPE=INLINED
+         BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+           CALL NAME=consume CODE=consume("leftright") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+             LITERAL CODE="leftright" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+@@ -444,13 +442,9 @@
+     METHOD_REF CODE=call_macro TYPE_FULL_NAME=call_macro METHOD_FULL_NAME=call_macro ORDER=21
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=CALL_JOIN CODE=#define CALL_JOIN consume("left" "right") FULL_NAME=strings.c:CALL_JOIN:ANY(0) SIGNATURE=ANY(0) ORDER=1
++METHOD NAME=CALL_JOIN CODE=#define CALL_JOIN consume("left" "right") FULL_NAME=strings.c:CALL_JOIN:void(0) SIGNATURE=void(0) ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-
+-METHOD NAME=COMMENT_JOIN CODE=#define COMMENT_JOIN "left" /* separator */ "right" FULL_NAME=strings.c:COMMENT_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1
+-  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=2
+ 
+ METHOD NAME=ESCAPED_JOIN CODE=#define ESCAPED_JOIN "one\\" "two\"" "\nthree" FULL_NAME=strings.c:ESCAPED_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+@@ -597,7 +591,7 @@
+ NODES|TYPE NAME=wide_macro FULL_NAME=wide_macro TYPE_DECL_FULL_NAME=wide_macro
+ EDGES|ARGUMENT argument#4 -> argument#5
+ EDGES|ARGUMENT call_macro#6 -> call_macro#7
+-EDGES|ARGUMENT comment_macro#4 -> comment_macro#5
++EDGES|ARGUMENT comment_macro#5 -> comment_macro#6
+ EDGES|ARGUMENT commented#4 -> commented#5
+ EDGES|ARGUMENT commented#5 -> commented#6
+ EDGES|ARGUMENT commented#5 -> commented#7
+@@ -650,9 +644,8 @@
+ EDGES|ARGUMENT wide#5 -> wide#8
+ EDGES|ARGUMENT wide_macro#4 -> wide_macro#5
+ EDGES|CALL argument#4 -> consume#0
+-EDGES|CALL call_macro#4 -> strings.c:CALL_JOIN:ANY(0)#0
++EDGES|CALL call_macro#4 -> strings.c:CALL_JOIN:void(0)#0
+ EDGES|CALL call_macro#6 -> consume#0
+-EDGES|CALL comment_macro#5 -> strings.c:COMMENT_JOIN:char*(0)#0
+ EDGES|CALL commented#5 -> <operator>.conditional#0
+ EDGES|CALL escaped_macro#5 -> strings.c:ESCAPED_JOIN:char*(0)#0
+ EDGES|CALL function_replacement#5 -> strings.c:WRAPPED:char*(0)#0
+@@ -689,11 +682,9 @@
+ EDGES|CFG call_macro#4 -> call_macro#8
+ EDGES|CFG call_macro#6 -> call_macro#8
+ EDGES|CFG call_macro#7 -> call_macro#6
+-EDGES|CFG comment_macro#0 -> comment_macro#5
+-EDGES|CFG comment_macro#4 -> comment_macro#8
+-EDGES|CFG comment_macro#5 -> comment_macro#4
++EDGES|CFG comment_macro#0 -> comment_macro#6
+ EDGES|CFG comment_macro#5 -> comment_macro#7
+-EDGES|CFG comment_macro#7 -> comment_macro#4
++EDGES|CFG comment_macro#6 -> comment_macro#5
+ EDGES|CFG commented#0 -> commented#6
+ EDGES|CFG commented#4 -> commented#9
+ EDGES|CFG commented#5 -> commented#4
+@@ -780,8 +771,9 @@
+ EDGES|CFG plain#6 -> plain#8
+ EDGES|CFG plain#7 -> plain#5
+ EDGES|CFG plain#8 -> plain#5
+-EDGES|CFG strings.c:<global>#0 -> strings.c:<global>#211
++EDGES|CFG strings.c:<global>#0 -> strings.c:<global>#210
+ EDGES|CFG strings.c:<global>#156 -> wide_macro#5
++EDGES|CFG strings.c:<global>#210 -> strings.c:<global>#211
+ EDGES|CFG strings.c:<global>#211 -> strings.c:<global>#212
+ EDGES|CFG strings.c:<global>#212 -> strings.c:<global>#213
+ EDGES|CFG strings.c:<global>#213 -> strings.c:<global>#214
+@@ -802,13 +794,11 @@
+ EDGES|CFG strings.c:<global>#228 -> strings.c:<global>#229
+ EDGES|CFG strings.c:<global>#229 -> strings.c:<global>#230
+ EDGES|CFG strings.c:<global>#230 -> strings.c:<global>#231
+-EDGES|CFG strings.c:<global>#231 -> strings.c:<global>#232
+ EDGES|CFG strings.c:<global>#65 -> wide#6
+ EDGES|CFG strings.c:<global>#75 -> utf8#6
+ EDGES|CFG strings.c:<global>#85 -> utf16#6
+ EDGES|CFG strings.c:<global>#95 -> utf32#6
+-EDGES|CFG strings.c:CALL_JOIN:ANY(0)#0 -> strings.c:CALL_JOIN:ANY(0)#2
+-EDGES|CFG strings.c:COMMENT_JOIN:char*(0)#0 -> strings.c:COMMENT_JOIN:char*(0)#2
++EDGES|CFG strings.c:CALL_JOIN:void(0)#0 -> strings.c:CALL_JOIN:void(0)#2
+ EDGES|CFG strings.c:ESCAPED_JOIN:char*(0)#0 -> strings.c:ESCAPED_JOIN:char*(0)#2
+ EDGES|CFG strings.c:FORMAT:char*(0)#0 -> strings.c:FORMAT:char*(0)#2
+ EDGES|CFG strings.c:JOINED:char*(0)#0 -> strings.c:JOINED:char*(0)#2
+@@ -871,8 +861,7 @@
+ EDGES|CONTAINS D:strings.c:<global> -> D:wide_macro
+ EDGES|CONTAINS D:strings.c:<global> -> consume#0
+ EDGES|CONTAINS D:strings.c:<global> -> strings.c:<global>#0
+-EDGES|CONTAINS D:strings.c:<global> -> strings.c:CALL_JOIN:ANY(0)#0
+-EDGES|CONTAINS D:strings.c:<global> -> strings.c:COMMENT_JOIN:char*(0)#0
++EDGES|CONTAINS D:strings.c:<global> -> strings.c:CALL_JOIN:void(0)#0
+ EDGES|CONTAINS D:strings.c:<global> -> strings.c:ESCAPED_JOIN:char*(0)#0
+ EDGES|CONTAINS D:strings.c:<global> -> strings.c:FORMAT:char*(0)#0
+ EDGES|CONTAINS D:strings.c:<global> -> strings.c:JOINED:char*(0)#0
+@@ -896,10 +885,8 @@
+ EDGES|CONTAINS call_macro#0 -> call_macro#6
+ EDGES|CONTAINS call_macro#0 -> call_macro#7
+ EDGES|CONTAINS comment_macro#0 -> comment_macro#3
+-EDGES|CONTAINS comment_macro#0 -> comment_macro#4
+ EDGES|CONTAINS comment_macro#0 -> comment_macro#5
+ EDGES|CONTAINS comment_macro#0 -> comment_macro#6
+-EDGES|CONTAINS comment_macro#0 -> comment_macro#7
+ EDGES|CONTAINS commented#0 -> commented#3
+ EDGES|CONTAINS commented#0 -> commented#4
+ EDGES|CONTAINS commented#0 -> commented#5
+@@ -998,6 +985,7 @@
+ EDGES|CONTAINS strings.c:<global>#0 -> parenthesized_macro#0
+ EDGES|CONTAINS strings.c:<global>#0 -> plain#0
+ EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#156
++EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#209
+ EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#210
+ EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#211
+ EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#212
+@@ -1019,7 +1007,6 @@
+ EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#228
+ EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#229
+ EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#230
+-EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#231
+ EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#65
+ EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#75
+ EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#85
+@@ -1053,8 +1040,7 @@
+ EDGES|CONTAINS strings.c:<global>#95 -> utf32#6
+ EDGES|CONTAINS strings.c:<global>#95 -> utf32#7
+ EDGES|CONTAINS strings.c:<global>#95 -> utf32#8
+-EDGES|CONTAINS strings.c:CALL_JOIN:ANY(0)#0 -> strings.c:CALL_JOIN:ANY(0)#1
+-EDGES|CONTAINS strings.c:COMMENT_JOIN:char*(0)#0 -> strings.c:COMMENT_JOIN:char*(0)#1
++EDGES|CONTAINS strings.c:CALL_JOIN:void(0)#0 -> strings.c:CALL_JOIN:void(0)#1
+ EDGES|CONTAINS strings.c:ESCAPED_JOIN:char*(0)#0 -> strings.c:ESCAPED_JOIN:char*(0)#1
+ EDGES|CONTAINS strings.c:FORMAT:char*(0)#0 -> strings.c:FORMAT:char*(0)#1
+ EDGES|CONTAINS strings.c:JOINED:char*(0)#0 -> strings.c:JOINED:char*(0)#1
+@@ -1093,7 +1079,7 @@
+ EDGES|EVAL_TYPE call_macro#1 -> T:void
+ EDGES|EVAL_TYPE call_macro#2 -> T:void
+ EDGES|EVAL_TYPE call_macro#3 -> T:void
+-EDGES|EVAL_TYPE call_macro#4 -> T:ANY
++EDGES|EVAL_TYPE call_macro#4 -> T:void
+ EDGES|EVAL_TYPE call_macro#5 -> T:ANY
+ EDGES|EVAL_TYPE call_macro#6 -> T:void
+ EDGES|EVAL_TYPE call_macro#7 -> T:char*
+@@ -1101,10 +1087,9 @@
+ EDGES|EVAL_TYPE comment_macro#1 -> T:void
+ EDGES|EVAL_TYPE comment_macro#2 -> T:void
+ EDGES|EVAL_TYPE comment_macro#3 -> T:void
+-EDGES|EVAL_TYPE comment_macro#5 -> T:char*
++EDGES|EVAL_TYPE comment_macro#4 -> T:ANY
+ EDGES|EVAL_TYPE comment_macro#6 -> T:ANY
+ EDGES|EVAL_TYPE comment_macro#7 -> T:char*
+-EDGES|EVAL_TYPE comment_macro#8 -> T:char*
+ EDGES|EVAL_TYPE commented#1 -> T:int
+ EDGES|EVAL_TYPE commented#2 -> T:int
+ EDGES|EVAL_TYPE commented#3 -> T:void
+@@ -1220,33 +1205,31 @@
+ EDGES|EVAL_TYPE plain#7 -> T:char*
+ EDGES|EVAL_TYPE plain#8 -> T:char*
+ EDGES|EVAL_TYPE plain#9 -> T:char*
+-EDGES|EVAL_TYPE strings.c:<global>#210 -> T:ANY
+-EDGES|EVAL_TYPE strings.c:<global>#211 -> T:plain
+-EDGES|EVAL_TYPE strings.c:<global>#212 -> T:lua_literal
+-EDGES|EVAL_TYPE strings.c:<global>#213 -> T:literal_return
+-EDGES|EVAL_TYPE strings.c:<global>#214 -> T:commented
+-EDGES|EVAL_TYPE strings.c:<global>#215 -> T:argument
+-EDGES|EVAL_TYPE strings.c:<global>#216 -> T:parenthesized
+-EDGES|EVAL_TYPE strings.c:<global>#217 -> T:wide
+-EDGES|EVAL_TYPE strings.c:<global>#218 -> T:utf8
+-EDGES|EVAL_TYPE strings.c:<global>#219 -> T:utf16
+-EDGES|EVAL_TYPE strings.c:<global>#220 -> T:utf32
+-EDGES|EVAL_TYPE strings.c:<global>#221 -> T:mixed_prefix
+-EDGES|EVAL_TYPE strings.c:<global>#222 -> T:macro_replacement
+-EDGES|EVAL_TYPE strings.c:<global>#223 -> T:function_replacement
+-EDGES|EVAL_TYPE strings.c:<global>#224 -> T:macro_condition
+-EDGES|EVAL_TYPE strings.c:<global>#225 -> T:multiline
+-EDGES|EVAL_TYPE strings.c:<global>#226 -> T:wide_macro
+-EDGES|EVAL_TYPE strings.c:<global>#227 -> T:mixed_macro
+-EDGES|EVAL_TYPE strings.c:<global>#228 -> T:escaped_macro
+-EDGES|EVAL_TYPE strings.c:<global>#229 -> T:comment_macro
+-EDGES|EVAL_TYPE strings.c:<global>#230 -> T:parenthesized_macro
+-EDGES|EVAL_TYPE strings.c:<global>#231 -> T:call_macro
+-EDGES|EVAL_TYPE strings.c:<global>#232 -> T:ANY
+-EDGES|EVAL_TYPE strings.c:CALL_JOIN:ANY(0)#1 -> T:ANY
+-EDGES|EVAL_TYPE strings.c:CALL_JOIN:ANY(0)#2 -> T:ANY
+-EDGES|EVAL_TYPE strings.c:COMMENT_JOIN:char*(0)#1 -> T:ANY
+-EDGES|EVAL_TYPE strings.c:COMMENT_JOIN:char*(0)#2 -> T:char*
++EDGES|EVAL_TYPE strings.c:<global>#209 -> T:ANY
++EDGES|EVAL_TYPE strings.c:<global>#210 -> T:plain
++EDGES|EVAL_TYPE strings.c:<global>#211 -> T:lua_literal
++EDGES|EVAL_TYPE strings.c:<global>#212 -> T:literal_return
++EDGES|EVAL_TYPE strings.c:<global>#213 -> T:commented
++EDGES|EVAL_TYPE strings.c:<global>#214 -> T:argument
++EDGES|EVAL_TYPE strings.c:<global>#215 -> T:parenthesized
++EDGES|EVAL_TYPE strings.c:<global>#216 -> T:wide
++EDGES|EVAL_TYPE strings.c:<global>#217 -> T:utf8
++EDGES|EVAL_TYPE strings.c:<global>#218 -> T:utf16
++EDGES|EVAL_TYPE strings.c:<global>#219 -> T:utf32
++EDGES|EVAL_TYPE strings.c:<global>#220 -> T:mixed_prefix
++EDGES|EVAL_TYPE strings.c:<global>#221 -> T:macro_replacement
++EDGES|EVAL_TYPE strings.c:<global>#222 -> T:function_replacement
++EDGES|EVAL_TYPE strings.c:<global>#223 -> T:macro_condition
++EDGES|EVAL_TYPE strings.c:<global>#224 -> T:multiline
++EDGES|EVAL_TYPE strings.c:<global>#225 -> T:wide_macro
++EDGES|EVAL_TYPE strings.c:<global>#226 -> T:mixed_macro
++EDGES|EVAL_TYPE strings.c:<global>#227 -> T:escaped_macro
++EDGES|EVAL_TYPE strings.c:<global>#228 -> T:comment_macro
++EDGES|EVAL_TYPE strings.c:<global>#229 -> T:parenthesized_macro
++EDGES|EVAL_TYPE strings.c:<global>#230 -> T:call_macro
++EDGES|EVAL_TYPE strings.c:<global>#231 -> T:ANY
++EDGES|EVAL_TYPE strings.c:CALL_JOIN:void(0)#1 -> T:ANY
++EDGES|EVAL_TYPE strings.c:CALL_JOIN:void(0)#2 -> T:void
+ EDGES|EVAL_TYPE strings.c:ESCAPED_JOIN:char*(0)#1 -> T:ANY
+ EDGES|EVAL_TYPE strings.c:ESCAPED_JOIN:char*(0)#2 -> T:char*
+ EDGES|EVAL_TYPE strings.c:FORMAT:char*(0)#1 -> T:ANY
+@@ -1359,6 +1342,7 @@
+ EDGES|REF T:void -> D:void
+ EDGES|REF T:wide -> D:wide
+ EDGES|REF T:wide_macro -> D:wide_macro
++EDGES|REF comment_macro#6 -> comment_macro#4
+ EDGES|REF commented#6 -> commented#1
+ EDGES|REF lua_literal#12 -> lua_literal#1
+ EDGES|REF lua_literal#13 -> lua_literal#3
+@@ -1368,27 +1352,27 @@
+ EDGES|REF macro_condition#6 -> macro_condition#1
+ EDGES|REF mixed_prefix#6 -> mixed_prefix#1
+ EDGES|REF plain#6 -> plain#1
+-EDGES|REF strings.c:<global>#211 -> plain#0
+-EDGES|REF strings.c:<global>#212 -> lua_literal#0
+-EDGES|REF strings.c:<global>#213 -> literal_return#0
+-EDGES|REF strings.c:<global>#214 -> commented#0
+-EDGES|REF strings.c:<global>#215 -> argument#0
+-EDGES|REF strings.c:<global>#216 -> parenthesized#0
+-EDGES|REF strings.c:<global>#217 -> strings.c:<global>#65
+-EDGES|REF strings.c:<global>#218 -> strings.c:<global>#75
+-EDGES|REF strings.c:<global>#219 -> strings.c:<global>#85
+-EDGES|REF strings.c:<global>#220 -> strings.c:<global>#95
+-EDGES|REF strings.c:<global>#221 -> mixed_prefix#0
+-EDGES|REF strings.c:<global>#222 -> macro_replacement#0
+-EDGES|REF strings.c:<global>#223 -> function_replacement#0
+-EDGES|REF strings.c:<global>#224 -> macro_condition#0
+-EDGES|REF strings.c:<global>#225 -> multiline#0
+-EDGES|REF strings.c:<global>#226 -> strings.c:<global>#156
+-EDGES|REF strings.c:<global>#227 -> mixed_macro#0
+-EDGES|REF strings.c:<global>#228 -> escaped_macro#0
+-EDGES|REF strings.c:<global>#229 -> comment_macro#0
+-EDGES|REF strings.c:<global>#230 -> parenthesized_macro#0
+-EDGES|REF strings.c:<global>#231 -> call_macro#0
++EDGES|REF strings.c:<global>#210 -> plain#0
++EDGES|REF strings.c:<global>#211 -> lua_literal#0
++EDGES|REF strings.c:<global>#212 -> literal_return#0
++EDGES|REF strings.c:<global>#213 -> commented#0
++EDGES|REF strings.c:<global>#214 -> argument#0
++EDGES|REF strings.c:<global>#215 -> parenthesized#0
++EDGES|REF strings.c:<global>#216 -> strings.c:<global>#65
++EDGES|REF strings.c:<global>#217 -> strings.c:<global>#75
++EDGES|REF strings.c:<global>#218 -> strings.c:<global>#85
++EDGES|REF strings.c:<global>#219 -> strings.c:<global>#95
++EDGES|REF strings.c:<global>#220 -> mixed_prefix#0
++EDGES|REF strings.c:<global>#221 -> macro_replacement#0
++EDGES|REF strings.c:<global>#222 -> function_replacement#0
++EDGES|REF strings.c:<global>#223 -> macro_condition#0
++EDGES|REF strings.c:<global>#224 -> multiline#0
++EDGES|REF strings.c:<global>#225 -> strings.c:<global>#156
++EDGES|REF strings.c:<global>#226 -> mixed_macro#0
++EDGES|REF strings.c:<global>#227 -> escaped_macro#0
++EDGES|REF strings.c:<global>#228 -> comment_macro#0
++EDGES|REF strings.c:<global>#229 -> parenthesized_macro#0
++EDGES|REF strings.c:<global>#230 -> call_macro#0
+ EDGES|REF utf16#6 -> utf16#1
+ EDGES|REF utf32#6 -> utf32#1
+ EDGES|REF utf8#6 -> utf8#1
+@@ -1447,8 +1431,7 @@
+ EDGES|SOURCE_FILE strings.c:<global>#75 -> F:strings.c
+ EDGES|SOURCE_FILE strings.c:<global>#85 -> F:strings.c
+ EDGES|SOURCE_FILE strings.c:<global>#95 -> F:strings.c
+-EDGES|SOURCE_FILE strings.c:CALL_JOIN:ANY(0)#0 -> F:strings.c
+-EDGES|SOURCE_FILE strings.c:COMMENT_JOIN:char*(0)#0 -> F:strings.c
++EDGES|SOURCE_FILE strings.c:CALL_JOIN:void(0)#0 -> F:strings.c
+ EDGES|SOURCE_FILE strings.c:ESCAPED_JOIN:char*(0)#0 -> F:strings.c
+ EDGES|SOURCE_FILE strings.c:FORMAT:char*(0)#0 -> F:strings.c
+ EDGES|SOURCE_FILE strings.c:JOINED:char*(0)#0 -> F:strings.c
+@@ -1472,7 +1455,7 @@
+ FLOWS|REACHING_DEF[(n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT] lua_literal#10 -> lua_literal#8
+ FLOWS|REACHING_DEF[(n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT] lua_literal#10 -> lua_literal#9
+ FLOWS|REACHING_DEF[*format = (n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT] lua_literal#8 -> lua_literal#22
+-FLOWS|REACHING_DEF[<RET>] comment_macro#4 -> comment_macro#8
++FLOWS|REACHING_DEF[<RET>] comment_macro#5 -> comment_macro#7
+ FLOWS|REACHING_DEF[<RET>] commented#4 -> commented#9
+ FLOWS|REACHING_DEF[<RET>] escaped_macro#4 -> escaped_macro#8
+ FLOWS|REACHING_DEF[<RET>] function_replacement#4 -> function_replacement#8
+@@ -1489,9 +1472,8 @@
+ FLOWS|REACHING_DEF[<RET>] utf8#4 -> utf8#9
+ FLOWS|REACHING_DEF[<RET>] wide#4 -> wide#9
+ FLOWS|REACHING_DEF[<RET>] wide_macro#4 -> wide_macro#8
++FLOWS|REACHING_DEF[<unknown> COMMENT_JOIN] comment_macro#6 -> comment_macro#5
+ FLOWS|REACHING_DEF[CALL_JOIN] call_macro#4 -> call_macro#8
+-FLOWS|REACHING_DEF[COMMENT_JOIN] comment_macro#5 -> comment_macro#4
+-FLOWS|REACHING_DEF[COMMENT_JOIN] comment_macro#5 -> comment_macro#8
+ FLOWS|REACHING_DEF[ESCAPED_JOIN] escaped_macro#5 -> escaped_macro#4
+ FLOWS|REACHING_DEF[ESCAPED_JOIN] escaped_macro#5 -> escaped_macro#8
+ FLOWS|REACHING_DEF[FORMAT] lua_literal#15 -> lua_literal#10
+@@ -1533,9 +1515,9 @@
+ FLOWS|REACHING_DEF[] call_macro#1 -> call_macro#8
+ FLOWS|REACHING_DEF[] comment_macro#0 -> comment_macro#1
+ FLOWS|REACHING_DEF[] comment_macro#0 -> comment_macro#5
+-FLOWS|REACHING_DEF[] comment_macro#0 -> comment_macro#7
++FLOWS|REACHING_DEF[] comment_macro#0 -> comment_macro#6
+ FLOWS|REACHING_DEF[] comment_macro#1 -> comment_macro#2
+-FLOWS|REACHING_DEF[] comment_macro#1 -> comment_macro#8
++FLOWS|REACHING_DEF[] comment_macro#1 -> comment_macro#7
+ FLOWS|REACHING_DEF[] commented#0 -> commented#1
+ FLOWS|REACHING_DEF[] commented#0 -> commented#7
+ FLOWS|REACHING_DEF[] commented#0 -> commented#8
+@@ -1599,6 +1581,7 @@
+ FLOWS|REACHING_DEF[] plain#0 -> plain#1
+ FLOWS|REACHING_DEF[] plain#0 -> plain#7
+ FLOWS|REACHING_DEF[] plain#0 -> plain#8
++FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#210
+ FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#211
+ FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#212
+ FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#213
+@@ -1619,7 +1602,6 @@
+ FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#228
+ FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#229
+ FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#230
+-FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#231
+ FLOWS|REACHING_DEF[] strings.c:<global>#156 -> wide_macro#1
+ FLOWS|REACHING_DEF[] strings.c:<global>#156 -> wide_macro#5
+ FLOWS|REACHING_DEF[] strings.c:<global>#156 -> wide_macro#7
