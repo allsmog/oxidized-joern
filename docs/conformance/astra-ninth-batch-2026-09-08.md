@@ -1,0 +1,32 @@
+# Ninth measured C parity batch — 2026-09-08
+
+Source `00c37613b3074025d3d65aa632cbd79af95d0c46` extends source-order body macros and synthetic macro method metadata. It passes **462 workspace tests** and the unchanged **308/308 committed and fresh Joern v4.0.555 comparisons**. The port remains incomplete: neither full zlib nor Lua projection is exact. [Acceptance evidence](astra-ninth-batch-acceptance.json) binds the source, references, binaries, gates and reviews.
+
+Body emission, phantom/declaration discovery, type sites and local prototypes now share one source-order macro context. Macro definitions and undefinitions persist across C blocks, later functions and supplied includes, while lexical typedef scopes remain separate. Source-buffer and tree ownership, nonoverlapping body ranges and explicit recovery overrides keep original context out of temporary expansion trees.
+
+The pinned macro handler can attach an earlier expansion event's defining text and filename to a later synthetic macro method. The implementation now reproduces that ownership in the covered cases, including file-local offset ordering, first registration, literal opacity and object-callee argument ownership. Generated metadata changes target exact current-translation-unit fields and edges. Final token eligibility follows the existing recursive expansion's disabled-name state. A fallback remains when no eligible event is modeled; this is a bounded implementation of the observed behavior. Cache shape advances from 19 to 20.
+
+The new family retains **76 complete isolated references: 11→54 exact**, with no formerly exact project lost. All 54 exact selected projections have full production regression comparisons. Two further assertions compare complete ARG macro METHOD blocks within otherwise nonexact projects; they are not two additional exact graphs. All **22 complete diagnostics** remain, including the importer failure. Independent replay gains **555 matching selected records and loses zero**. The references contain 13,694 canonical lines including separators and 13,294 nonempty records. [Fixture sources, full differences and boundaries](../../cpg-rs/joern-parity/tests/fixtures/body-macro-state/README.md) retain every project and all 17 raw oracle batches.
+
+Earlier candidates were held for metadata regressions involving a previously correct definition, quoted literals and a disabled final function token. Their sources, build receipts, full outputs, differences and failed checks remain available. The first root validation passed all 462 tests but failed strict Clippy because a stale documentation comment remained above the wrong helper. Restoring that helper's original three-line documentation is the only change to `exact.rs` beyond the independently reviewed V8 candidate. The failed validation evidence remains; a fresh final build passes all gates and reproduces both first-run whole outputs byte for byte.
+
+On the unchanged 26-file zlib input, 12 function references in `deflate.c` now have type `block_state` instead of `local`, with 12 corresponding EVAL_TYPE corrections. Independent review maps all 12 occurrences through their complete AST ancestors to the original source and live Joern. Raw matching records gain 12 and lose none; the corrected edges use different oracle addresses, so they are not counted as additional raw matches. The larger initializer's existing ordering difference remains. Lua's complete output on all 61 files is byte-identical to the eighth build.
+
+| Complete projected AST measure | Zlib, unchanged | Lua, unchanged |
+|---|---:|---:|
+| Exact METHOD ASTs, including stubs |160 of 410|1,434 of 2,274|
+| Exact primary source METHOD ASTs |42|513|
+| Exact primary function bodies |42|540|
+| Exact nonempty primary bodies |23|518|
+
+No previously exact method or body is lost. All 61 tracked earlier repair facts, the reviewed stubs and three actual zlib `snprintf` calls remain. [Complete counters and independent findings](astra-ninth-batch-metrics.json) preserve all raw changes and source-occurrence checks. These are scoped AST and record counts, not port completion percentages. Whole-project Joern references explicitly reuse the sixth batch's pinned live outputs; the main 308-block comparison was regenerated live for this batch.
+
+All final gates pass: 462 workspace tests across 74 groups, with no failed, ignored or filtered tests; 17 checker tests; formatting; strict all-target Clippy; audit of 73 locked dependencies; committed/live 308 comparisons; native macOS ARM64 release and extracted archive checks; and official real-project acceptance. No container or other-platform run is claimed.
+
+Two repeated builds pass unchanged limits: zlib **6.88/6.79 s**, maximum **473.13 MiB**; Lua **6.09/6.06 s**, maximum **460.78 MiB**. Build ceilings remain 20 s and 512/1,024 MiB. Clean/update equivalence passes for 26/61 files; its separate peak-memory measurements are 640.98/724.03 MiB. All repeated graph/edge/JSON/SARIF hashes agree, with zero scanner findings. Unrelated host activity was observed but not controlled.
+
+Only two expected manifest fields change: zlib's stored graph and JSON export hashes. The export delta is exactly 12 EVAL_TYPE destinations; all exported node values and other edges remain unchanged. The CLI's narrower edge dump omits EVAL_TYPE and therefore retains its old hash. Node counts remain 65,856 zlib and 119,090 Lua. All Lua expectations, source bytes, licenses, exclusions, budgets and zero-finding SARIF contracts remain unchanged.
+
+This checkpoint follows source `26f4cef3775c0f77988187e04bc1693e8d43fc0d` and remains local on `codex/astra-parity-sprint`, with no push or merge. The original checkout's 13 dirty files retain their bytes. Small fixtures and complete references are committed; large validation artifacts remain local with bound paths and hashes.
+
+Next: declarations from active supplied body includes. The retained small probe applies header macro effects but omits an included LOCAL and gives the file-global declaration the wrong order. The proposed next unit uses a separate declaration view for each include instance, first pinned with scalar/array inline controls; its fresh control matrix has not run yet. Body includes in `fixedtables`, runtime chains crossing preprocessor directives, function-like condition evaluation, expression/type lowering, transport, schema, query and non-C gaps remain in the [compatibility boundaries](../../cpg-rs/COMPATIBILITY.md).

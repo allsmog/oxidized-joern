@@ -23,7 +23,7 @@ Single source of truth across iterations. Update in the same commit as the work.
   the 73-dependency audit, native release/archive and official real-project
   acceptance pass. Cache shape is **20**. A first root Clippy failure exposed
   a stale documentation comment; restoring the original helper documentation
-  is the sole source change beyond the reviewed worker candidate. The failed
+  is the sole change to `exact.rs` beyond the reviewed worker candidate. The failed
   run is retained and fresh final builds/gates pass.
   Whole zlib output changes 12 function-reference types from `local` to
   `block_state` and their 12 type edges; all correspond to live Joern source

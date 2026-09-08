@@ -1,0 +1,1126 @@
+{
+  "schemaVersion": 1,
+  "status": "accepted bounded C parity increment; full port remains incomplete",
+  "codeRevision": "00c37613b3074025d3d65aa632cbd79af95d0c46",
+  "baselineSourceRevision": "26f4cef3775c0f77988187e04bc1693e8d43fc0d",
+  "baselineDocumentationRevision": "1c30e722e788ed18c5adf1e9c79b3f43133645f3",
+  "cacheShapeVersion": 20,
+  "frozenBuild": {
+    "createdAtUtc": "2026-09-08T21:02:17.020632+00:00",
+    "buildStartedAtUtc": "2026-09-08T21:02:00.537385+00:00",
+    "parentRevision": "1c30e722e788ed18c5adf1e9c79b3f43133645f3",
+    "workingChangesPresent": true,
+    "frozenBeforeFinalGates": true,
+    "sources": {
+      "cpg-rs/cpg-lang-c/src/exact.rs": "ad686e57683383c05995cf49ecb76fecb04ccb09c3c207fb178127af9d81d15b",
+      "cpg-rs/cpg-lang-c/src/import.rs": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba",
+      "cpg-rs/joern-parity/src/production.rs": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb",
+      "cpg-rs/cpg-cli/src/workspace.rs": "1d61a20936c03430c58f15865802b3c84b4f2c42985f77b412eaee10f8595f8a",
+      "cpg-rs/cpg-cli/src/rules.rs": "fc19394abdfe4c309d0e2e961516827d52c6da2e1b191593dab53c08276be2e5",
+      "cpg-rs/cpg-cli/src/export.rs": "49ed223d835380399bfca43c387f120ba2f22c88fbb7c8fe4d423463501fd057",
+      "cpg-rs/Cargo.toml": "0c095573bd24459caa83a975c4fdec291e8b11bef92745576f935f5fd17f0d29",
+      "cpg-rs/Cargo.lock": "fa7eab41e0c072e6b33205997fd241e7d87b511f9fd91ceee6ee1fdc9a099a63"
+    },
+    "binaries": {
+      "cpg": "fdadb9c1a7dd0267ab879a49aaee6475924082fa5e0cb23e442dcd11a07bb0a8",
+      "joern-parity": "d9a7ebff8d4bc4a33f9d248fbc9b88409898e9ce12ec62eb37c37a73df65ae17"
+    },
+    "allRustAndCargoInputs": {
+      "cpg-rs/Cargo.lock": "fa7eab41e0c072e6b33205997fd241e7d87b511f9fd91ceee6ee1fdc9a099a63",
+      "cpg-rs/Cargo.toml": "0c095573bd24459caa83a975c4fdec291e8b11bef92745576f935f5fd17f0d29",
+      "cpg-rs/conformance/Cargo.toml": "a93fda024961e68424c351576cfa839f7b74cd6b83f4e935f8d1e20f973a2393",
+      "cpg-rs/conformance/src/lib.rs": "abd20e65d2d0d08eed12cffe269904f51fc1e883f18cdc782cc22dbae85b9703",
+      "cpg-rs/cpg-analysis/Cargo.toml": "39c875b394b9583cb82bd979381ab0add69a493d801f06857f9fd03a49183bdb",
+      "cpg-rs/cpg-analysis/src/authz.rs": "bb41e7f3d601a911679468894313b833872550db4f7a1905a00b86ed0fb29624",
+      "cpg-rs/cpg-analysis/src/callgraph.rs": "8ba8cbadf1c00ebce5923479cf73658446f510a05373d4a2950dc17561d227a9",
+      "cpg-rs/cpg-analysis/src/cfg.rs": "66d98e950cf0ad039846580fe67d5584a4f528914c07fe518cca691d9d8f70c2",
+      "cpg-rs/cpg-analysis/src/entries.rs": "a5ff9af37e90876fffe10f0c0fce8af5c4babd2e19f58b7a7a665de7a8bbee3a",
+      "cpg-rs/cpg-analysis/src/lib.rs": "060ed2715a88c5086ede5d6eae10405b17cf135d4476afce832d08070d6c88de",
+      "cpg-rs/cpg-analysis/src/middleware.rs": "056c92eabf6d0e816a7a521d3d90b5c3fcd77bba2156d5cfc717308222a80d44",
+      "cpg-rs/cpg-analysis/src/pass.rs": "c67d85a397c8d801ac0ebeec166547685901f7698921e6ca5149a9a87b83da68",
+      "cpg-rs/cpg-analysis/src/provenance.rs": "d083ee582d5df6b860df7de96156f0ac651a7631fa270c061c22fc09584f3a15",
+      "cpg-rs/cpg-analysis/src/query.rs": "b09682c0e03a3984d51c185d883e4fb2419f3ac9908ad3ca49fe93093c79aa3f",
+      "cpg-rs/cpg-analysis/src/reaching_def.rs": "17fc68b7683cb14026568e236b698273525183954be58c6376338f8b761298cf",
+      "cpg-rs/cpg-analysis/src/relations.rs": "30b04658431c96d7a228ae3703925c0991768bc9350748219172d8c200aeaa90",
+      "cpg-rs/cpg-analysis/src/return_flow.rs": "b5b25769fda1008bb6ac23b670a0e8b42bd2a2bd1ff4f32db01b804dff8e0146",
+      "cpg-rs/cpg-analysis/src/scan.rs": "3fcc17009551b044de8373f01aa45b444492d14ccfb04112c4d96bcf78ebce79",
+      "cpg-rs/cpg-analysis/src/structural.rs": "facb54734d0d6289671af9e4b4ffb36de05eef86adf740d10169292c3ba8c3fd",
+      "cpg-rs/cpg-analysis/src/summaries.rs": "0c1313a89a76827f57cf722013261805dbea59a6113501ea3744bcf544b0a8f3",
+      "cpg-rs/cpg-analysis/src/symbols.rs": "96ead310400fbd9a92425c63e1f648ef08d1c55711c72f50179915ae7d787b76",
+      "cpg-rs/cpg-analysis/src/taint.rs": "c57b6826d1a30e9a3cfe714f50f3080dee60dace000dac525501b79f6e5d0150",
+      "cpg-rs/cpg-analysis/src/value_flow.rs": "c16c1d682ca83f877f934100e1f58e46ec9798e837222eaf64bd184e9c3ce65a",
+      "cpg-rs/cpg-analysis/tests/canonical_c_array_initializers.rs": "66b8190b7c3dbf5a423b7faa250e1705cee0ef90d0f363e9a96b3eb8318e4389",
+      "cpg-rs/cpg-analysis/tests/canonical_c_braceless_if.rs": "ec27bee154a5f70acba4a176c940903e3088943eb60335f8280ea9258b650cc2",
+      "cpg-rs/cpg-analysis/tests/canonical_c_braceless_loops.rs": "a0eda2cd34f12318a7c8dda7fb3eefbaa760501f38ce3b9a12e4606ff939ecdd",
+      "cpg-rs/cpg-analysis/tests/canonical_c_flow.rs": "e306db53229e4e26f184b5756955e7a278806264e6201086c5324e9132ed75be",
+      "cpg-rs/cpg-analysis/tests/canonical_c_preprocessor.rs": "92d39fcd6bc4ff07bfd441cd01cf9d5164de4c84dfb71dafe1fe9f5e0ce2ee45",
+      "cpg-rs/cpg-analysis/tests/canonical_c_standalone_blocks.rs": "76889e736ee3561b93670285bab6109b1d6fc1dc651f79f5fe90c691256355e2",
+      "cpg-rs/cpg-analysis/tests/direct_c_flow.rs": "c2416c1038eaa5a53173cb893167282055efbeba5e2728d58bf787ff2fc34134",
+      "cpg-rs/cpg-analysis/tests/taint_sanitizers.rs": "0da0ccb9de576dc1d2ed683b85196b5470bb87034a8ae51c81e8a92540a8e2ef",
+      "cpg-rs/cpg-cli/Cargo.toml": "8bdba2d1c88e0f4adf5a4ffc0782a77d8d720ea29c8c878b46c61c453ff3d629",
+      "cpg-rs/cpg-cli/src/apis.rs": "6b5a5fcca1d8fae3588730e22b350f65e9fad321d17419ad4f4eee2f68734234",
+      "cpg-rs/cpg-cli/src/coverage.rs": "310a166d300386a45d2d25b8aac7588b4c86a778d05a32855c46d6e5d89e9fa9",
+      "cpg-rs/cpg-cli/src/export.rs": "49ed223d835380399bfca43c387f120ba2f22c88fbb7c8fe4d423463501fd057",
+      "cpg-rs/cpg-cli/src/lib.rs": "f5e3edf7e580c6e2fddd3bd3aafa6e569a103d80d78d6f7435edc5735aa24967",
+      "cpg-rs/cpg-cli/src/main.rs": "8a4d781c371d89d47abb4a6bf62771649cc0025290db9fbe0e80d12c179b689d",
+      "cpg-rs/cpg-cli/src/mcp.rs": "ee96214074f7b204b1c5ed2b85b555bf7858ba055cb0612b967187bd99fcb8ce",
+      "cpg-rs/cpg-cli/src/merge.rs": "12f72d936ed057d91222db28f916a205dc2b2ba879297427c22117e5a7cd9d27",
+      "cpg-rs/cpg-cli/src/play.rs": "f1a63f9c871d296d73939f97ab7c7eec95284ea56707083f59f3a64a0f4e9b34",
+      "cpg-rs/cpg-cli/src/rules.rs": "fc19394abdfe4c309d0e2e961516827d52c6da2e1b191593dab53c08276be2e5",
+      "cpg-rs/cpg-cli/src/sarif.rs": "4ea0f62f260f475f4b3275e8d8195938978a5795eae6f841c7777010e65ccbab",
+      "cpg-rs/cpg-cli/src/scan.rs": "5da6f1006995d1c5b1ae2658e1b455f5e4aec9c6c92770e88f9c40abdd329302",
+      "cpg-rs/cpg-cli/src/slice.rs": "3240d305c5e9791443447ffc6a76cf53df5ebed560c8e07305736ea3c3861281",
+      "cpg-rs/cpg-cli/src/thrift.rs": "6079db8ce9e381c2bb6ad239429f798adb9777a6cded2e4a88c6eaf418e84b2c",
+      "cpg-rs/cpg-cli/src/vectors.rs": "320a22fd4d3dd60b4e821d5ba457630617935461b11352860a1563addd1b8e56",
+      "cpg-rs/cpg-cli/src/workspace.rs": "1d61a20936c03430c58f15865802b3c84b4f2c42985f77b412eaee10f8595f8a",
+      "cpg-rs/cpg-cli/tests/c_format_positions.rs": "108fe1db6bcc2740438c6280469ead253a22a2e6e161937edaada5fce600ec26",
+      "cpg-rs/cpg-cli/tests/cli_metadata.rs": "41f203e8c9424ac719d4437c031e037366793a04e51d74f867384f161233d58f",
+      "cpg-rs/cpg-cli/tests/mcp_stdio.rs": "0be8b27b2738fa12d6a101c8799ecae8d1cf1ef52efd1df623622494d050c91a",
+      "cpg-rs/cpg-cli/tests/scan_sarif.rs": "ea66460e9e31a126d8b729c1bd3e0b27dbb4462366a0850eed178d8638e3df3e",
+      "cpg-rs/cpg-cli/tests/source_idents.rs": "9c4511c2f4e1cdaa3a9183a872bbefb791d3b5ee3d265aec3d8eaf633bf91377",
+      "cpg-rs/cpg-cli/tests/thrift_stitch.rs": "38530101e9cadbb4b1e082f7ae0717919959423aa2863081148cf48094e10a5d",
+      "cpg-rs/cpg-cli/tests/tools_parity.rs": "7f20ffec4170691f4c07fd6f65bc588a1aa63b75837ff9720e43816b552c0524",
+      "cpg-rs/cpg-core/Cargo.toml": "725cb1ada6023a709900f28837f75512934f096292ffaeb42ea284c80727b43a",
+      "cpg-rs/cpg-core/src/builder.rs": "e5ba81e20a81adccf898a3417617f0988d0480e009a28be65c1cfa64231672f9",
+      "cpg-rs/cpg-core/src/freeze.rs": "f37ca4516cb8f8b3d6213ac0cf2afeb44d9f639026441518d2a492c5032b2150",
+      "cpg-rs/cpg-core/src/graph.rs": "a17093aba5bb286044b3290ce3bca4b9f390acccb7a5103117beb105f35c7102",
+      "cpg-rs/cpg-core/src/intern.rs": "59c23351d066b78787199efd2df8ad939ab795a2faa7ade2da313617056736b2",
+      "cpg-rs/cpg-core/src/lib.rs": "f3db27ab18437181cb65433a6e59dfceadc3baf8724df66dd0851eabcde9b2df",
+      "cpg-rs/cpg-core/src/persist.rs": "166e21b78935ee8e1f520f96a4caaf157269f566c95b678937bbd6a057668ea3",
+      "cpg-rs/cpg-core/src/schema.rs": "0c9dca3b89c7b9755261798ed7abfb7828a2b4eed0f707b3f71debf4e6d15970",
+      "cpg-rs/cpg-core/src/segments.rs": "7bfed808dfce2f7e79ab5f06f87d4fbdf9497852539c88fd1c6d1e01f68ef282",
+      "cpg-rs/cpg-core/src/traversal.rs": "e277e7945c88481a3e823f8dd9aa5e28eb3efb4124209246263b0c3cde923d54",
+      "cpg-rs/cpg-frontend/Cargo.toml": "9f8da6e2462e42e44bb8ea943384a232cfc816103e669c070d187266e0d6a236",
+      "cpg-rs/cpg-frontend/src/lib.rs": "7ef680364d7e6c591b252621898c66294961b05cd2c09b474ffdce797e7e988c",
+      "cpg-rs/cpg-incremental/Cargo.toml": "7c9dafbe17e461081099947ee3ee920242c8303010142bac2eb6d3ba780cdd21",
+      "cpg-rs/cpg-incremental/examples/scale.rs": "03ab48acb82b07bfa09aafca57bb6455c9c140405344ef8fd035b3c4f26e9754",
+      "cpg-rs/cpg-incremental/src/lib.rs": "235dcec9187aae44a5079b039a9982f8b0b7b7eaa42cc41a3495099212f65bcb",
+      "cpg-rs/cpg-lang-c/Cargo.toml": "dc5908117b0110792cbab1be82ee14348df4714180481d91b1e19ea0417bfdf5",
+      "cpg-rs/cpg-lang-c/src/exact.rs": "ad686e57683383c05995cf49ecb76fecb04ccb09c3c207fb178127af9d81d15b",
+      "cpg-rs/cpg-lang-c/src/import.rs": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba",
+      "cpg-rs/cpg-lang-c/src/lib.rs": "7dfc597adff695eddc36574f99739e274e1abba14d64f850620e5d4e9019a005",
+      "cpg-rs/cpg-lang-c/tests/control_truth.rs": "bfadd9df09bdbc45e43b5bf9a4cea73a80b63012876b883551b549eb18e0b9e8",
+      "cpg-rs/cpg-lang-c/tests/declaration_shapes.rs": "fa06c867b06b7f50216658e989c11fc568f195eb5b3b088225b5a8bcdfca248e",
+      "cpg-rs/cpg-lang-c/tests/method_address_definitions.rs": "61c4bc300875c98f12706a2b38b3769a0fed2ab84dc92994f7fafa3e9178871c",
+      "cpg-rs/cpg-lang-python/Cargo.toml": "c81f5830cb2f03601d80090deb8b068468b0f65a76b30eed009a585f6cc5a1a7",
+      "cpg-rs/cpg-lang-python/src/lib.rs": "ea9e2baadaf2d9d693ff8b067dd00ea30c12892a0eb9defe883e95517d5a225d",
+      "cpg-rs/cpg-lang-ts/Cargo.toml": "7b2791b6f99335d3c83c09781ba0611e7d6dd00c2704a40305ab80910095f92a",
+      "cpg-rs/cpg-lang-ts/src/engine.rs": "62ab40bfa238d3867af361ee6e68fbac75a24bc562ada97ddca2c74aa5d4ae94",
+      "cpg-rs/cpg-lang-ts/src/lib.rs": "81db8f3a10abebaaed70afe29a93dc13ad79a212bc6f89debc3ca6c3211ec799",
+      "cpg-rs/cpg-lang-ts/src/spec.rs": "30337b33991f71d33c347f8155e0f16f9d18c461dd38d05f467cec78f414c130",
+      "cpg-rs/cpg-lang-ts/tests/robustness.rs": "306fd97ad17b8547c323285009ae3bf74f6f36ac3f9d57ee117ce928b94d5139",
+      "cpg-rs/joern-parity/Cargo.toml": "ed55fca3be7dc38a3e25a94532948e9d847a605170874c1dc9dca70a582e8edd",
+      "cpg-rs/joern-parity/src/main.rs": "f44d0a822a0f5319738a9c58a74817303bac0b0a7ebb9242ababdda8143b6d73",
+      "cpg-rs/joern-parity/src/production.rs": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb",
+      "cpg-rs/joern-parity/tests/array_declarations.rs": "9c8106d0256991925845be1b1236b0472ced56c19e4880045cb1c43a46e9533e",
+      "cpg-rs/joern-parity/tests/array_initializers.rs": "c831fc85ed9fd97a16620399c4f5bdef1c78e0c75a874228a0f54ce12bb0e4e2",
+      "cpg-rs/joern-parity/tests/body_macro_state.rs": "2b36d9d5ace7e8b7cde363bbffd247f00985ff8030c97db7a75ba6c4f8acd19c",
+      "cpg-rs/joern-parity/tests/body_preprocessor.rs": "ed5345653b0df501199d54e6279231154d483bc371875ba955339006507859e1",
+      "cpg-rs/joern-parity/tests/combined_c_types.rs": "05d66500aa2d0ce5cdef591ca4c7cab1eb1bee95c0c4cdf9173e874b453926c6",
+      "cpg-rs/joern-parity/tests/concatenated_strings.rs": "d9617278d9f73de208351bf105567f7e9d281b877f98ab14bfa1aa82fb844497",
+      "cpg-rs/joern-parity/tests/declaration_macros.rs": "ccf46995a0b6214318bce7180347eac027956fd20293aa05d5e7bf26efdd097c",
+      "cpg-rs/joern-parity/tests/declaration_registration.rs": "9807dde30d6b43e56daf1f8fa7877ace724b2d36c8c370693c2586d781de7362",
+      "cpg-rs/joern-parity/tests/direct_field_macros.rs": "7e220569f1b86c87f0551e0ae8cff0093e3f619c0eb0ad33749e2e4008b8eaa9",
+      "cpg-rs/joern-parity/tests/direct_macro_arguments.rs": "a0fbb05104500941af514a516ab6eec9f7faa34dd03364f6238eabd2cd2f398c",
+      "cpg-rs/joern-parity/tests/external_functions.rs": "c30f9ada8752f6b107dae322fd8b79018df6088dbf496e376d8690c0955abaa4",
+      "cpg-rs/joern-parity/tests/field_cast_interactions.rs": "ed293d576bf5e2b3d00cddf2b6798cb8930589573d8490249446f86603adc434",
+      "cpg-rs/joern-parity/tests/field_macros.rs": "8fad630302d89ae99edd9d8708da3a9a58989e187986af7f706800a48ee8c188",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/before-exact.rs": "8b132fab7d079a97e774b10d5b1f14c1a1df4f093ef8f437ebfcaadfdde33b3b",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v1/exact.rs": "6a35ffa8bd1f0320bc640bd2e0137878d343c3eb0efd1b4a1d6663f9a7ad8f35",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v2/exact.rs": "a660a1117dd523ee85a5b27fe14e0906631e58d559c083bcffd87c34447d90a9",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v3/exact.rs": "bcf4dc9106e5b0043a0d11604e277ed1be85a21a6a3fd025b2267b1aa1f1e443",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v4/exact.rs": "35dd9430be3309294dc84aa7e76796f9997c4ff0845a2f56013aa3e01513b096",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v5/exact.rs": "442a1c79241ca8cdbad9b379b86ff80333cdc2534d0651101fc94a0e9451bca9",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v6/exact.rs": "c6fbd18f35dc536fa8ba04ba15bea12fb185745fa6e72eb1025e178597383f62",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v7/exact.rs": "0ce51afd4699e7594c5e18f5f0f06fd10baf124b5fd7e7ec59f4668fc4ecc221",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v8/exact.rs": "f8dd06912d8acddeae363ee398df4b10c1502f4d0b47acd64cbe449c34789ec1",
+      "cpg-rs/joern-parity/tests/header_macro_locations.rs": "557459b2e72e48646d31e6a3eb60b88bf1b184765c86e138c1e522c36001f279",
+      "cpg-rs/joern-parity/tests/header_macros.rs": "1fd9f1373c3f0d75fa16ef859b52b55959ee98dbc241cbc46bc64946f630dbc5",
+      "cpg-rs/joern-parity/tests/header_return_bindings.rs": "5ad1e7bbd9c26a3d3db213ed02f41e53c222d9af80a8b30ee0b9210d6d528c31",
+      "cpg-rs/joern-parity/tests/inactive_declaration_context.rs": "18d964aff002e878a5b9a18170fa5d2b790d192a9b841d7a551f80f0ca1fe368",
+      "cpg-rs/joern-parity/tests/macro_cast_context.rs": "a3d1d95cdb2ea14012ac6d09e8ed431600b631cf450a175fc0f65628fb7f5d21",
+      "cpg-rs/joern-parity/tests/macro_definitions.rs": "ca46b3af53fd318553eedce91a60c9e4bb99f691412761b7843e5a96d3546087",
+      "cpg-rs/joern-parity/tests/macro_recovery.rs": "f98ef9534b6f00589ead6d2e2d04e82dbf8a4862bf7bfef91bbd1576c5927f69",
+      "cpg-rs/joern-parity/tests/nested_macro_casts.rs": "5f60b40ff7290c19ca37268274494c45d5e128e6e0fb413987b7766475a1f910",
+      "cpg-rs/joern-parity/tests/numeric_literals.rs": "e96391a2b2347f850a548a7da0d6d3dd8ac155af9fc533a54e6a614b982a70b8",
+      "cpg-rs/joern-parity/tests/numeric_macro_roots.rs": "062ed8cd5c513dc806bd1c96fad62f10b65335fc21a162c015df5dffb027ba30",
+      "cpg-rs/joern-parity/tests/predefined_c_macros.rs": "dff5c08372872daa7f36a7b0046724164750dc4b6aaab41cac8b7d586d5a1e92",
+      "cpg-rs/joern-parity/tests/primitive_roles.rs": "6161c7dc80df3522f95809646edf189482d4d03d6b6b2b6a6dd2174e4bec5665",
+      "cpg-rs/joern-parity/tests/rd_scheduling.rs": "f03c569cfb5dc81e9b21e004f7836f964b34ff23bd35ae5e6bf1d670e4b340f7",
+      "cpg-rs/joern-parity/tests/sixth_context_interactions.rs": "5e6edc3f111a2d73bea6885b0c3d20af4866f8c5d20c227996a6105f2c895c1b",
+      "cpg-rs/joern-parity/tests/sixth_integration_promotions.rs": "44c8e6c0177d977c32eaed2aa877b7d7f171117c1c8834ce87dd6cabacf4b1ec",
+      "cpg-rs/joern-parity/tests/sizeof_expansion.rs": "8006d05c77aff954d8c503428593230ffb903c7c529d351f5de6cb30726445cc",
+      "cpg-rs/joern-parity/tests/spaced_method_names.rs": "8759c60e101301908b28df22c60106132ca8323f95c07473c7c974453603f539",
+      "cpg-rs/joern-parity/tests/standalone_blocks.rs": "8ed5c25e72380a4418a1afaa66f247abfe89e8627aaffccbcc2a4f7f7fe142c4",
+      "cpg-rs/joern-parity/tests/statement_macros.rs": "0411f75f22d8b3f0ebd226abe7b3da7fe83a13ccb8329502088032afcd767ab1",
+      "cpg-rs/joern-parity/tests/static_modifiers.rs": "87605210de72194a9a2be21b9559022431c743d083cdb9e2141caf2d7a8db102",
+      "cpg-rs/joern-parity/tests/typedef_aggregates.rs": "3f3234f0ff17aab45caaf248083f0c4bf097420c2f81b32e8e5d4503596529b8",
+      "cpg-rs/joern-parity/tests/typedef_existence.rs": "c969289703fc9dba4a1554448a0710709c683c6874436d12ee77d8a453b06b17"
+    },
+    "allInputsUnchangedDuringBuild": true
+  },
+  "sourceCommitMatchesAllFrozenBuildInputs": true,
+  "binaries": {
+    "cpg": {
+      "path": ".local/astra-sprint/ninth-batch/reviewed-final-real-differential/bin/cpg",
+      "sha256": "fdadb9c1a7dd0267ab879a49aaee6475924082fa5e0cb23e442dcd11a07bb0a8"
+    },
+    "joern-parity": {
+      "path": ".local/astra-sprint/ninth-batch/reviewed-final-real-differential/bin/joern-parity",
+      "sha256": "d9a7ebff8d4bc4a33f9d248fbc9b88409898e9ce12ec62eb37c37a73df65ae17"
+    }
+  },
+  "fixtureMeasurement": {
+    "path": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/measurement.json",
+    "sha256": "c79f132b0c662c12d6afd1b39272cad1b962ba8817edde24d39ca0c9438ecb05"
+  },
+  "fixtureSourceReview": {
+    "status": "PASS_BOUNDED_V8_SOURCE_AND_76_PROJECT_PACKAGE",
+    "createdAtUtc": "2026-09-08T20:47:13.516253+00:00",
+    "scope": "Independent read-only review and frozen small producers only; not whole-project, resource, integration, release, or full-port acceptance.",
+    "baselineCommit": "26f4cef3775c0f77988187e04bc1693e8d43fc0d",
+    "baselineSource": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/before/exact.rs",
+      "sha256": "8b132fab7d079a97e774b10d5b1f14c1a1df4f093ef8f437ebfcaadfdde33b3b",
+      "bytes": 387069
+    },
+    "source": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/exact.rs",
+      "sha256": "f8dd06912d8acddeae363ee398df4b10c1502f4d0b47acd64cbe449c34789ec1",
+      "bytes": 399178
+    },
+    "binary": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/joern-parity",
+      "sha256": "cc3e84176ed1bc01fc0ad8a10e7f2f61fcedaa420e3e40ac277831143241289a",
+      "bytes": 11832064
+    },
+    "pairedBuild": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/bindings.json",
+      "sha256": "bae8c3456418fc6db2bbf98a79e00374504b81a4f8317ffd7c1ec00998353fae",
+      "bytes": 899
+    },
+    "packageManifest": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8/manifest.json",
+      "sha256": "27f9fb7958d042d77dc327809cb59ce85614990792706900299d57dcb0d823c5",
+      "bytes": 431693
+    },
+    "supplementalManifest": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8-supplemental/manifest.json",
+      "sha256": "2b921525e336a691cefda7cfa358bbb7443b8e6f2b8492d92c7c771bfe67922c",
+      "bytes": 2827
+    },
+    "measurement": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/fixtures/body-macro-state/measurement.json",
+      "sha256": "c79f132b0c662c12d6afd1b39272cad1b962ba8817edde24d39ca0c9438ecb05",
+      "bytes": 870860
+    },
+    "README": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/fixtures/body-macro-state/README.md",
+      "sha256": "75b945b68ef54d4ccf1f67d794f3df830dce31bb98456bdbf36ff1bcd3b32c89",
+      "bytes": 6518
+    },
+    "test": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/body_macro_state.rs",
+      "sha256": "2b36d9d5ace7e8b7cde363bbffd247f00985ff8030c97db7a75ba6c4f8acd19c",
+      "bytes": 4390
+    },
+    "QUIRKS": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/QUIRKS.md",
+      "sha256": "456c0e34112134fcc909b2175a03b9d4e608888d0c7e7941c36e783f3f9da9a7",
+      "bytes": 19738
+    },
+    "packageReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/package-review.json",
+      "sha256": "7238bbca310ee90053ce87d8bb737be97d04d982267b52581dbb4eb6bea95618",
+      "bytes": 955702
+    },
+    "rawReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/raw-reference-inventory.json",
+      "sha256": "bd4846df12b984348415478185d683c10e88c7c97e891a36679ebabdfaebb4ec",
+      "bytes": 78054
+    },
+    "independentReplay": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/replay.json",
+      "sha256": "42982832a5918713864b5a84491108356a7401b96e5042e785149a24d3bca9c0",
+      "bytes": 215684
+    },
+    "objectCalleeIndependentReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v8-independent/final-review.json",
+      "sha256": "6a3366df3d3f80a47379f71e6fa577f213ab7f4afeb07d9f7d01427315f62267",
+      "bytes": 37814
+    },
+    "sourcePatch": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8/final-source.patch",
+      "sha256": "a6064866b6d14d33f42b4bd65175ffdc1ddfa7cee0f6078d97c6958bc292d1a0",
+      "bytes": 52162
+    },
+    "sourcePatchReconstructsFrozenSource": true,
+    "immutablePackageFiles": 1870,
+    "liveWorkingFilesEqualImmutablePackage": 1867,
+    "supplementalHeldReplayFiles": 7,
+    "projectCount": 76,
+    "beforeExact": 11,
+    "currentExact": 54,
+    "previouslyExactLost": [],
+    "rawMatchingSelectedRecordGains": 555,
+    "rawMatchingSelectedRecordLosses": 0,
+    "canonicalLinesIncludingSeparators": 13694,
+    "nonemptySelectedRecords": 13294,
+    "diagnosticCount": 22,
+    "abortedCase": "duplicate_clinit_tag",
+    "abortInterpretation": "Baseline and V8 both fail importer duplicate identity. Complete live reference, empty stdout, stderr, and each actual exit status retained; not a successful baseline graph or new exact gate.",
+    "productionTests": {
+      "binary": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/body_macro_state-c0dc4c5f287440e0",
+        "sha256": "0b44aac29f611413d9ca35f68c7ab0609822755bccc4018174cf72c3b852c4d3",
+        "bytes": 11705472
+      },
+      "log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/production-tests.log",
+        "sha256": "2e0d2fbc366f250d0e3e69fd69a7ee0268652f9ebdba1794c636c355df613b77",
+        "bytes": 254
+      },
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "fullGraphCases": 54,
+      "completeMethodAssertions": 2,
+      "freshBuildRunByReviewer": false
+    },
+    "priorReviewChain": {
+      "initialSevenControls": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/challenge-review.json",
+        "sha256": "c409dab206f90bc3ce17e4714b794b5f4c16743b09ab9ed75722dac90c14a466",
+        "bytes": 13618
+      },
+      "definitionSelection": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/definition-selection-final.json",
+        "sha256": "7a1a6eb8216e1681ecb5fa29351abf90730b160130a728efda31338d3698f9b7",
+        "bytes": 17976
+      },
+      "heldV4": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/v4-review-held.json",
+        "sha256": "559d2ef7a74eb71eb73dae159b6b87f264d4e7d1b5d04a3082e8af38bca93311",
+        "bytes": 23231
+      },
+      "literalRegression": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/introduced-regression.json",
+        "sha256": "05bffe844c61b7ac2ceaeb8d48cd83e752b66ab1ae9786baa7a986c9533ef801",
+        "bytes": 10060
+      },
+      "heldV5": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v5-review/review-held.json",
+        "sha256": "4a16cae74e91cb2d2e970c93a76c5a2da23f8c03ae7d3682c35d0db19fe08aee",
+        "bytes": 10047
+      },
+      "deferredFieldProtection": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-deferred-field-review/review.json",
+        "sha256": "37a607c7970c83c8ecc72d3a92de7299e5e45dbaee8af329821136fb1bfbcca8",
+        "bytes": 22483
+      }
+    },
+    "v6ToV8ChangedOriginal71Graphs": [
+      "local_inactive_prototype",
+      "local_inactive_prototype_header"
+    ],
+    "sourceReview": {
+      "sourceSnapshots": "One original source buffer/tree, sparse Arc changes and nonoverlapping outer body ranges; temporary/recovery/copy contexts explicitly suppress automatic lookup. Type tree state and macro state restored around emission.",
+      "macroStateOrder": "Directive effects persist lexically through C blocks/runtime branches and later functions/includes; inactive body effects remain skipped, lexical typedef names remain separate.",
+      "metadataReplay": "Stable numeric-offset event order, immutable unique original invocation placement records, explicit TU dump ordinals/byte ranges/CALL-edge indices; first registration by complete resulting full name. Repeated method/global render copies do not independently consume events.",
+      "literalOpacity": "Quoted and character literal token trees excluded from event scanning; all four fresh literal regressions now complete exact.",
+      "prototypeRepair": "Body-local prototype traversal uses the shared selected-branch context; file-scope inactive declarations retain previous behavior. Both fresh prototype graphs now exact, only graph changes among original71 fromV6.",
+      "terminalEligibility": "Uses eligibility state from existing bounded recursive expander while disabled set is active; empty/trivia preserves last significant token, unavailable recursive token stays unavailable. Analysis independently validates String expansion unchanged and 17 full live controls.",
+      "protectedSourceSuffixesUnchanged": {
+        "fn parse_dump_block(": true,
+        "fn reaching_def_flows(": true,
+        "fn captured_identifier_flows(": true
+      }
+    },
+    "limitations": [
+      "The nine-property canonical projection cannot certify every raw Joern property or source column; CODE transport remains noninjective.",
+      "Function-like preprocessor conditions, body-include declarations, nested GNU functions and some object-callee/type-position expressions remain complete diagnostics.",
+      "If the modeled metadata queue yields no eligible event, Rust retains current metadata rather than reproducing upstream None/no-wrapper behavior.",
+      "No whole-project method/body or performance claim is made before root runs the combined frozen build."
+    ],
+    "requiredFixes": [],
+    "reviewerPreparationFailure": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/verify-package-first-attempt.txt",
+      "sha256": "9d102eb27c68de9cacfa3724c58fdea20f1b080c26b268c8d0791b69e1fc01ba",
+      "bytes": 163
+    }
+  },
+  "fixtureT8Review": {
+    "status": "PASS",
+    "skill": {
+      "path": "/Users/shayaunnejad/liminal-ops-workflow/plugins/liminal-flows/skills/verify-deliverable/SKILL.md",
+      "sha256": "6ba35c4dbdbcf0406ceac7ef1ef2182d189ad9a48d5741d58d8f07c7e0316aef"
+    },
+    "contract": "Inferred from parent bounded ninth body-macro repair: source reviewed against eighth, all complete live references unchanged, regression tests and trace provenance retained, diagnostics/failed candidates honest; this is not root whole/release acceptance.",
+    "targets": {
+      "README": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/fixtures/body-macro-state/README.md",
+        "sha256": "75b945b68ef54d4ccf1f67d794f3df830dce31bb98456bdbf36ff1bcd3b32c89",
+        "bytes": 6518
+      },
+      "measurement": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/fixtures/body-macro-state/measurement.json",
+        "sha256": "c79f132b0c662c12d6afd1b39272cad1b962ba8817edde24d39ca0c9438ecb05",
+        "bytes": 870860
+      },
+      "test": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/body_macro_state.rs",
+        "sha256": "2b36d9d5ace7e8b7cde363bbffd247f00985ff8030c97db7a75ba6c4f8acd19c",
+        "bytes": 4390
+      },
+      "QUIRKS": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/QUIRKS.md",
+        "sha256": "456c0e34112134fcc909b2175a03b9d4e608888d0c7e7941c36e783f3f9da9a7",
+        "bytes": 19738
+      },
+      "packageManifest": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8/manifest.json",
+        "sha256": "27f9fb7958d042d77dc327809cb59ce85614990792706900299d57dcb0d823c5",
+        "bytes": 431693
+      },
+      "supplementalManifest": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8-supplemental/manifest.json",
+        "sha256": "2b921525e336a691cefda7cfa358bbb7443b8e6f2b8492d92c7c771bfe67922c",
+        "bytes": 2827
+      }
+    },
+    "sourceReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/final-review.json",
+      "sha256": "3e71a36dab93c6d3941a2d1250ef9d6574c49e561e5b2b877758a662d91bb38d"
+    },
+    "scores": [
+      {
+        "criterion": "Grounding",
+        "score": 2,
+        "receipt": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/package-review.json",
+          "sha256": "7238bbca310ee90053ce87d8bb737be97d04d982267b52581dbb4eb6bea95618"
+        },
+        "reason": "Material counts, raw references, source/build ownership, held failures and worker checks are independently bound; five weakest claims verified below."
+      },
+      {
+        "criterion": "Contract",
+        "score": 2,
+        "receipt": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/final-review.json",
+          "sha256": "3e71a36dab93c6d3941a2d1250ef9d6574c49e561e5b2b877758a662d91bb38d"
+        },
+        "reason": "Meets inferred bounded source-repair contract: full76references,54production gates,2complete METHOD assertions, unchanged raw evidence and honest22diagnostics. Integration acceptance remains separate."
+      },
+      {
+        "criterion": "Register",
+        "score": 2,
+        "receipt": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/fixtures/body-macro-state/README.md",
+          "sha256": "75b945b68ef54d4ccf1f67d794f3df830dce31bb98456bdbf36ff1bcd3b32c89",
+          "bytes": 6518
+        },
+        "reason": "No banned vocabulary, PPA labels, unexplained business claims or status inflation found. Technical terms identify actual graph nodes, Rust state and evidence for a compiler/parity audience. No required copy edits."
+      },
+      {
+        "criterion": "Veracity",
+        "score": 2,
+        "receipt": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/production-tests.log",
+          "sha256": "2e0d2fbc366f250d0e3e69fd69a7ee0268652f9ebdba1794c636c355df613b77"
+        },
+        "reason": "Independent paired replay and direct2-test executable pass agree with present-tense claims. README does not claim root release/whole/resource completion and identifies upstream fallback difference."
+      },
+      {
+        "criterion": "Gates",
+        "score": 2,
+        "receipt": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8/manifest.json",
+          "sha256": "27f9fb7958d042d77dc327809cb59ce85614990792706900299d57dcb0d823c5",
+          "bytes": 431693
+        },
+        "reason": "Source-only isolated change, bounded test/QUIRKS package and immutable additive evidence. No root edits, source builds, oracle weakening or acceptance-manifest mutation performed by reviewer; main/RD parser suffix unchanged."
+      },
+      {
+        "criterion": "Usefulness",
+        "score": 2,
+        "receipt": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/fixtures/body-macro-state/README.md",
+          "sha256": "75b945b68ef54d4ccf1f67d794f3df830dce31bb98456bdbf36ff1bcd3b32c89",
+          "bytes": 6518
+        },
+        "reason": "Implementer/reviewer can reproduce each case via indexed bytes, distinguish54gates from22diagnostics and follow ownership findings. Root integration/release/whole/resource checks are expressly the next step."
+      }
+    ],
+    "fiveWeakestClaims": [
+      {
+        "claim": "54 match the candidate exactly, compared with 11 on accepted eighth source",
+        "line": 4,
+        "receipt": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/replay.json",
+          "sha256": "42982832a5918713864b5a84491108356a7401b96e5042e785149a24d3bca9c0"
+        },
+        "assessment": "Independently executed both frozen binaries on the identical76project inputs, preserving complete stdout/stderr and every diff. Recomputed11\u219254,555gains/0losses; not a full-port rate."
+      },
+      {
+        "claim": "The candidate uses one source-order macro context for body emission, phantom\nand declaration discovery, type sites, and local prototype discovery.",
+        "line": 14,
+        "receipt": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/final-review.json",
+          "sha256": "3e71a36dab93c6d3941a2d1250ef9d6574c49e561e5b2b877758a662d91bb38d"
+        },
+        "assessment": "Reviewed exact.rs source consumers plus original/temporary ownership and explicit empty recovery suppression; source-order and prototype controls complete-exact. The README separately discloses body include/nested-function limitations."
+      },
+      {
+        "claim": "The invocation's current expansion still determines type and actual\nargument count; METHOD source-file ownership remains the invoking translation\nunit.",
+        "line": 32,
+        "receipt": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/definition-selection-final.json",
+          "sha256": "7a1a6eb8216e1681ecb5fa29351abf90730b160130a728efda31338d3698f9b7",
+          "bytes": 17976
+        },
+        "assessment": "Pinned MacroHandler/AstCreationPass source and live arity/order/header/tie controls distinguish current type/arity, selected definition CODE/full-name prefix and invoking TU ownership."
+      },
+      {
+        "claim": "No reference rows, edge kinds or flow facts are\nfiltered.",
+        "line": 59,
+        "receipt": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/raw-reference-inventory.json",
+          "sha256": "bd4846df12b984348415478185d683c10e88c7c97e891a36679ebabdfaebb4ec"
+        },
+        "assessment": "Verified all17 complete raw CASE extractions against every76reference. Only AST| transport prefix removed as defined by the unchanged oracle format;13,694canonical lines/13,294nonempty selected records. Scope remains the selected projection."
+      },
+      {
+        "claim": "All earlier source snapshots, build/check receipts\nand available full failed outputs are retained;",
+        "line": 69,
+        "receipt": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/package-review.json",
+          "sha256": "7238bbca310ee90053ce87d8bb737be97d04d982267b52581dbb4eb6bea95618"
+        },
+        "assessment": "Verified every sealed1870file hash,1861copy/original bindings, held case outputs/diffs and all7 additional original replay receipts. Preserved literal and disabled-token failures and explicit duplicate-clinit abort; final335tests are separately bound."
+      }
+    ],
+    "registerHits": [],
+    "requiredFixes": [],
+    "strongestReceipt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/replay.json",
+      "sha256": "42982832a5918713864b5a84491108356a7401b96e5042e785149a24d3bca9c0"
+    }
+  },
+  "fixturePackageManifests": [
+    {
+      "path": ".local/astra-sprint/ninth-batch/package-v8-manifest.json",
+      "sha256": "27f9fb7958d042d77dc327809cb59ce85614990792706900299d57dcb0d823c5"
+    },
+    {
+      "path": ".local/astra-sprint/ninth-batch/package-v8-supplemental-manifest.json",
+      "sha256": "2b921525e336a691cefda7cfa358bbb7443b8e6f2b8492d92c7c771bfe67922c"
+    },
+    {
+      "path": ".local/astra-sprint/ninth-batch/package-v8-reviews-manifest.json",
+      "sha256": "8b710aab83fff734a6c4087a77c593d0bcf29a4cb6fa80fa9634a95b1c1793ad"
+    }
+  ],
+  "packagePreflight": {
+    "path": ".local/astra-sprint/ninth-batch/package-preflight-final-review.json",
+    "sha256": "3857190a8c2f5290a8cebc5aaaa29416b631cad430f5447aded7aba1fa815046"
+  },
+  "integratedScopeReview": {
+    "path": ".local/astra-sprint/ninth-batch/integrated-scope-review.json",
+    "sha256": "5660fa3755eeb35147b8e465400b6c33224b6dea0ba7c5bb3c60cbde3b198f44"
+  },
+  "rootDocumentationOnlyRepair": {
+    "createdAtUtc": "2026-09-08T21:01:22.258576+00:00",
+    "status": "held first root run: strict Clippy failed stale doc-comment attachment; no behavior defect observed",
+    "failedCommand": "bash .local/astra-sprint/ninth-batch/validate-final.sh",
+    "exitCode": 101,
+    "failedLogSha256": "b6128b113fa5993a1274e668943563119638fa2d57d25b016313c44037cdd270",
+    "sourceBeforeSha256": "f8dd06912d8acddeae363ee398df4b10c1502f4d0b47acd64cbe449c34789ec1",
+    "sourceAfterSha256": "ad686e57683383c05995cf49ecb76fecb04ccb09c3c207fb178127af9d81d15b",
+    "workspacePassed": 462,
+    "workspaceGroups": 74,
+    "semanticSourceChanges": false,
+    "documentationRepaired": true,
+    "oldArtifactsRetained": true,
+    "helpers": {
+      "build-and-freeze.py": {
+        "originalSha256": "4971554a267411db0bb62f31ca60807078a773f66165cd4eb6771021160ec71d",
+        "reviewedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-build-and-freeze.py",
+        "reviewedSha256": "5a27eb1cf753968ee54f96ba4ea91eec8a5fcd1bb037abd7ab0527178e5d2947"
+      },
+      "validate-final.sh": {
+        "originalSha256": "60ad14dcde53184766fbf8b9fb1738f93b7ee3c26cfe62412f64cfb54776ee87",
+        "reviewedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-validate-final.sh",
+        "reviewedSha256": "df55b6ab3e4135304ffefcfec3f8ce8937876a0068942fec8182058176949214"
+      },
+      "compare-final.py": {
+        "originalSha256": "1eee69ec131802167371d46a9a64715c380814fb369aa1bdc8f6afe6e78a6086",
+        "reviewedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-compare-final.py",
+        "reviewedSha256": "79005bcc683136bc9b3b508f171ffd97acdcf516aa1f95174dfd5174bafd7521"
+      },
+      "review-whole-deltas.py": {
+        "originalSha256": "7fd1df4a40b05e1857fcd873acff8078bcab7d885508912663ac6cc3521bb1d5",
+        "reviewedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-review-whole-deltas.py",
+        "reviewedSha256": "b929a5ab4c3e1be06399dfb48de1b6b3f5ae8ed589e6d707d3e4a5d6c0114376"
+      },
+      "run-auxiliary.py": {
+        "originalSha256": "ce54851a574b163ff89e0128c70e5f18947d2d20be7f7aa0d7c497bc807e229e",
+        "reviewedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-run-auxiliary.py",
+        "reviewedSha256": "30bb2b2430a4131ac3a9574a618db1a71f6775d94a6c56d0a175ec2e99f0e63d"
+      },
+      "collect-gates.py": {
+        "originalSha256": "2903d44e9ba2fb198fe85eacb6305ff99eda41a11847bbff5c32abcb420a40ad",
+        "reviewedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-collect-gates.py",
+        "reviewedSha256": "92f584650ee75fa136f4998250e7279e6cf64d9125ec8c7fc0e4939edad1b3e6"
+      }
+    }
+  },
+  "rootRepairPatch": {
+    "path": ".local/astra-sprint/ninth-batch/root-doc-comment-repair.patch",
+    "sha256": "782b07a03147eb7609c37c815cc5719841230dae688876e1470e13c3b57068dc"
+  },
+  "rootRepairReview": {
+    "path": ".local/astra-sprint/ninth-batch/reviewed-run-preflight.json",
+    "sha256": "d94e903939a9386bd7c8eec5efef496fb628493f795c5d5c0658afa451ab5852"
+  },
+  "firstAndFinalWholeOutputEquivalence": {
+    "status": "PASS: complete raw producer output unchanged after doc-only repair",
+    "projects": [
+      {
+        "case": "zlib-1.3.1-core-full",
+        "firstPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/final-real-differential/zlib-1.3.1-core-full/rust.stdout",
+        "reviewedFinalPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/zlib-1.3.1-core-full/rust.stdout",
+        "sameSha256": "3f23eb3e07057aaa5b7c93eae83c5f05d93d46a42a13ca5f98f7e1cdbb603d81"
+      },
+      {
+        "case": "lua-5.4.7-full",
+        "firstPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/final-real-differential/lua-5.4.7-full/rust.stdout",
+        "reviewedFinalPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/lua-5.4.7-full/rust.stdout",
+        "sameSha256": "0ccddab7079f879c38d08269a2934adf8dcf0033b54e3de670f5e7f1c77a6294"
+      }
+    ]
+  },
+  "wholeReview": {
+    "path": ".local/astra-sprint/ninth-batch/whole-final-review.json",
+    "sha256": "ee1e8235d443c0d4b4d585c3f1a8689b315be846aaa1ea93ce63acf99caec5f4"
+  },
+  "wholeProjectComparison": {
+    "path": "docs/conformance/astra-ninth-batch-metrics.json",
+    "sha256": "baeaac40af0518e55702c6258a43b2be98803857e99e1618f1bb3da773b617fb"
+  },
+  "oracle": {
+    "version": "v4.0.555",
+    "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+    "reusedSavedLiveOutputs": true,
+    "freshRunReceipts": ".local/astra-sprint/sixth-batch/fresh-real-oracles/runs.json",
+    "transport": "Embedded physical LF in flow labels is escaped as literal backslash-n before sorting. This encoding is not injective or lossless. Both baseline and current are compared with saved sixth-batch fresh Joern outputs; these selected records were independently verified byte-identical to the fourth-batch references. No new whole-project Joern execution is claimed for this increment."
+  },
+  "gates": {
+    "completedAtUtc": "2026-09-08T21:19:20.433820+00:00",
+    "workspaceTests": 462,
+    "workspaceResultGroups": 74,
+    "checkerTests": 17,
+    "auditedCrates": 73,
+    "committedBlocks": 308,
+    "freshLiveBlocks": 308,
+    "allFailedIgnoredFiltered": 0,
+    "formatting": "passed",
+    "strictClippy": "passed",
+    "nativeRelease": "passed",
+    "nativeArchive": "passed",
+    "officialRealProjectAcceptance": "passed",
+    "nativePlatform": "macos-arm64",
+    "containerOtherPlatformsRun": false,
+    "frozenBuildSha256": "ed1c4781798ce4be698539e1d0ddae1f0d5a5d14cb055a9cb7dfb050070435bf",
+    "allFrozenInputFilesUnchanged": 130,
+    "manifestSha256": "754503503e6a8e891a81bf05c3586cd7b391e57d810e1b67dcaaeef96d9fa1c4",
+    "logs": {
+      "fmt.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/fmt.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "workspace-tests.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/workspace-tests.log",
+        "sha256": "79e5110826e0cf1de8067035900d1fb8f743f835e8be18c946cfc8bc60e0b159"
+      },
+      "clippy.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/clippy.log",
+        "sha256": "fc208201a02bed5aea67a47344a5ae3cf0269f7b50064a56195e09deb856a0cf"
+      },
+      "release-build.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/release-build.log",
+        "sha256": "e43be0e903dc7e49e826e7118a02226d94f751b7fe1a2932921cb97a3ac81845"
+      },
+      "release-recheck.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/release-recheck.log",
+        "sha256": "3997fc6790b8063b86c119e91f87ac7395ac6cf26135da637dcb229006bc32dc"
+      },
+      "committed-parity.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/committed-parity.log",
+        "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+      },
+      "live-parity.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/live-parity.log",
+        "sha256": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68"
+      },
+      "checker-tests.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/checker-tests.log",
+        "sha256": "c0edd776ce57ea2655b1e94c506c09801fa430574b6f0b6902b0d4394f4ef8ce"
+      },
+      "dependency-audit.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/dependency-audit.log",
+        "sha256": "2a91a692bdd0f166d94bb45220a29b5f469072246f9ef0b5205b36dd0375393b"
+      },
+      "native-release.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/native-release.log",
+        "sha256": "111b1761dbc4be4e68a2543f619353fd1084f425421e297c2cd3dd53a7e0baf8"
+      },
+      "native-archive.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/native-archive.log",
+        "sha256": "5ea9b56c71a4b3b1debb440089d8c209c452d6c1a6a72e83e776e11598e769de"
+      },
+      "official-real-project-acceptance.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/official-real-project-acceptance.log",
+        "sha256": "74758b37f0134317265bfd5f772b9d10d9284067682a2696fee0f70d2db1a004"
+      }
+    }
+  },
+  "resourceMeasurements": {
+    "zlib-1.3.1-core": {
+      "expected": {
+        "sourceFiles": 26,
+        "nodes": 65856,
+        "graphSha256": "97d7dddbfab7389cdb7fc0515c1d321871509db446642075a8a83f1a9b41cc10",
+        "edgesSha256": "6f7699e460b8ce7b9d7ddbb4c2b6286d812dbec3dc329d992b5a1c086ee3ed46",
+        "exportSha256": "8209d74aef1aaa057029f63781202e863efd6e538f16138438d766ad756a93ab",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "findings": 0
+      },
+      "trials": [
+        {
+          "sourceFiles": 26,
+          "nodes": 65856,
+          "findings": 0,
+          "graphSha256": "97d7dddbfab7389cdb7fc0515c1d321871509db446642075a8a83f1a9b41cc10",
+          "edgesSha256": "6f7699e460b8ce7b9d7ddbb4c2b6286d812dbec3dc329d992b5a1c086ee3ed46",
+          "exportSha256": "8209d74aef1aaa057029f63781202e863efd6e538f16138438d766ad756a93ab",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 6.881360083003528,
+          "buildRssMiB": 473.125,
+          "exportSeconds": 0.2630924580153078,
+          "exportRssMiB": 54.015625,
+          "scanSeconds": 0.9489234590146225,
+          "scanRssMiB": 64.96875
+        },
+        {
+          "sourceFiles": 26,
+          "nodes": 65856,
+          "findings": 0,
+          "graphSha256": "97d7dddbfab7389cdb7fc0515c1d321871509db446642075a8a83f1a9b41cc10",
+          "edgesSha256": "6f7699e460b8ce7b9d7ddbb4c2b6286d812dbec3dc329d992b5a1c086ee3ed46",
+          "exportSha256": "8209d74aef1aaa057029f63781202e863efd6e538f16138438d766ad756a93ab",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 6.786113499983912,
+          "buildRssMiB": 471.5625,
+          "exportSeconds": 0.20646708298590966,
+          "exportRssMiB": 54.53125,
+          "scanSeconds": 0.945624082989525,
+          "scanRssMiB": 63.625
+        }
+      ],
+      "update": {
+        "seconds": 19.975741000002017,
+        "rssMiB": 640.984375,
+        "output": "update-equivalent 26 files"
+      }
+    },
+    "lua-5.4.7": {
+      "expected": {
+        "sourceFiles": 61,
+        "nodes": 119090,
+        "graphSha256": "d4294b8a8c3bceef14192e87d060bc08c118474a156ff000be006bf03b988b6d",
+        "edgesSha256": "6d7e6031506352e1ba71f7b918b9856ca1f01e2676b3a058ebb2ba476b65ef85",
+        "exportSha256": "16bc5d7a4cf11eda84903f6f2a6e629b23f24e89447f209104e0825e9b17c13a",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "findings": 0
+      },
+      "trials": [
+        {
+          "sourceFiles": 61,
+          "nodes": 119090,
+          "findings": 0,
+          "graphSha256": "d4294b8a8c3bceef14192e87d060bc08c118474a156ff000be006bf03b988b6d",
+          "edgesSha256": "6d7e6031506352e1ba71f7b918b9856ca1f01e2676b3a058ebb2ba476b65ef85",
+          "exportSha256": "16bc5d7a4cf11eda84903f6f2a6e629b23f24e89447f209104e0825e9b17c13a",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 6.0850725840136874,
+          "buildRssMiB": 460.78125,
+          "exportSeconds": 0.35332520797965117,
+          "exportRssMiB": 76.03125,
+          "scanSeconds": 1.3296238330076449,
+          "scanRssMiB": 109.21875
+        },
+        {
+          "sourceFiles": 61,
+          "nodes": 119090,
+          "findings": 0,
+          "graphSha256": "d4294b8a8c3bceef14192e87d060bc08c118474a156ff000be006bf03b988b6d",
+          "edgesSha256": "6d7e6031506352e1ba71f7b918b9856ca1f01e2676b3a058ebb2ba476b65ef85",
+          "exportSha256": "16bc5d7a4cf11eda84903f6f2a6e629b23f24e89447f209104e0825e9b17c13a",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 6.058444166992558,
+          "buildRssMiB": 459.65625,
+          "exportSeconds": 0.37288325000554323,
+          "exportRssMiB": 75.90625,
+          "scanSeconds": 1.346043750003446,
+          "scanRssMiB": 108.71875
+        }
+      ],
+      "update": {
+        "seconds": 18.326166750019183,
+        "rssMiB": 724.03125,
+        "output": "update-equivalent 61 files"
+      }
+    }
+  },
+  "measurementRun": {
+    "command": [
+      "python3",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/measure.py",
+      "ninth-final",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/bin/cpg",
+      "--repeat",
+      "2",
+      "--parity",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/bin/joern-parity"
+    ],
+    "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint",
+    "startedAtUtc": "2026-09-08T21:04:33.850597+00:00",
+    "completedAtUtc": "2026-09-08T21:05:43.982388+00:00",
+    "seconds": 70.14884445798816,
+    "exitCode": 0,
+    "binaries": {
+      "cpg": "fdadb9c1a7dd0267ab879a49aaee6475924082fa5e0cb23e442dcd11a07bb0a8",
+      "joern-parity": "d9a7ebff8d4bc4a33f9d248fbc9b88409898e9ce12ec62eb37c37a73df65ae17"
+    },
+    "manifestSha256": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+    "log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/resource-measurement.log",
+      "sha256": "dd936ac5ae3487e46b1caefe9cfeb2fcac5d8a74cbb9bad15f5305d1c5c7d20c"
+    },
+    "measurementHelper": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/measure.py",
+      "sha256": "b1b60bedadc297e54e087fbeebc79a019ac36ee9715030d0b39298572cca0533"
+    },
+    "result": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/ninth-final-measurements.json",
+      "sha256": "beec2c9a1902b13c986e53db9ceea2322ad55ae2c9b451586a62dbd798eefd32"
+    },
+    "postRunBinding": {
+      "unchanged": true
+    },
+    "validationInputsBefore": {
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/measure.py": "b1b60bedadc297e54e087fbeebc79a019ac36ee9715030d0b39298572cca0533",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-run-auxiliary.py": "30bb2b2430a4131ac3a9574a618db1a71f6775d94a6c56d0a175ec2e99f0e63d",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/package-release.py": "fda98db2920d7699f6ac4c25a6c812798a980b7bdbdb83fc18ca66c40d25bf5f",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/real-project-acceptance.py": "39327d2fd2b6a596ab392393d9a84c257665222619a4019589e49869a6bd1c1a",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/test-release.py": "f0a6a05046efc748a7d6227155747474d194eb3974a84d0f414cd579a336b853",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/test_check.py": "56422be68bf01305a1365895c8d8d910347cb682f6a582ea714e5a43ee7e23c7",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa"
+    },
+    "validationInputsAfter": {
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/measure.py": "b1b60bedadc297e54e087fbeebc79a019ac36ee9715030d0b39298572cca0533",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-run-auxiliary.py": "30bb2b2430a4131ac3a9574a618db1a71f6775d94a6c56d0a175ec2e99f0e63d",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/package-release.py": "fda98db2920d7699f6ac4c25a6c812798a980b7bdbdb83fc18ca66c40d25bf5f",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/real-project-acceptance.py": "39327d2fd2b6a596ab392393d9a84c257665222619a4019589e49869a6bd1c1a",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/test-release.py": "f0a6a05046efc748a7d6227155747474d194eb3974a84d0f414cd579a336b853",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/test_check.py": "56422be68bf01305a1365895c8d8d910347cb682f6a582ea714e5a43ee7e23c7",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa"
+    }
+  },
+  "resourceScope": "Two repeated build trials and updates pass unchanged limits. All known task producers completed before measurement; unrelated host activity was observed but not controlled. Update RSS is separate and is not compared with build ceilings.",
+  "processSamples": {
+    "path": ".local/astra-sprint/ninth-batch/resource-process-samples.jsonl",
+    "sha256": "0fb36152958ef0bbf86f87ba5e554c70b628f9683b8f48cb15437ba5ce865c88"
+  },
+  "manifest": {
+    "path": "cpg-rs/acceptance/real-projects/manifest.json",
+    "sha256": "754503503e6a8e891a81bf05c3586cd7b391e57d810e1b67dcaaeef96d9fa1c4"
+  },
+  "manifestProposal": {
+    "path": ".local/astra-sprint/ninth-batch/reviewed-final/manifest-proposal.json",
+    "sha256": "0b324c4e2af73d63f868489209d6a85bc766b37ecafeb64e23a17e2e737107d6"
+  },
+  "manifestReview": {
+    "path": ".local/astra-sprint/ninth-batch/reviewed-final/manifest-final-review.json",
+    "sha256": "e6b19be2d92f0275483ce54080e1b32342ff4e0ece1a2e5e6ec3ee99bba3a7d7"
+  },
+  "officialRealProjectOutput": [
+    "PASS zlib-1.3.1-core: 26 files, 65856 nodes, build <= 20s, peak RSS 473.4 MiB, incremental equivalence 19.41s",
+    "PASS lua-5.4.7: 61 files, 119090 nodes, build <= 20s, peak RSS 642.4 MiB, incremental equivalence 18.06s"
+  ],
+  "nativeRuns": [
+    {
+      "command": [
+        "python3",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/test-release.py",
+        "--binary",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/bin/cpg",
+        "--version",
+        "0.1.1"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint",
+      "startedAtUtc": "2026-09-08T21:02:59.705575+00:00",
+      "completedAtUtc": "2026-09-08T21:03:00.355494+00:00",
+      "seconds": 0.6499495829921216,
+      "exitCode": 0,
+      "binaries": {
+        "cpg": "fdadb9c1a7dd0267ab879a49aaee6475924082fa5e0cb23e442dcd11a07bb0a8",
+        "joern-parity": "d9a7ebff8d4bc4a33f9d248fbc9b88409898e9ce12ec62eb37c37a73df65ae17"
+      },
+      "manifestSha256": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+      "log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/native-release.log",
+        "sha256": "111b1761dbc4be4e68a2543f619353fd1084f425421e297c2cd3dd53a7e0baf8"
+      },
+      "postRunBinding": {
+        "unchanged": true
+      },
+      "validationInputsBefore": {
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/measure.py": "b1b60bedadc297e54e087fbeebc79a019ac36ee9715030d0b39298572cca0533",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-run-auxiliary.py": "30bb2b2430a4131ac3a9574a618db1a71f6775d94a6c56d0a175ec2e99f0e63d",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/package-release.py": "fda98db2920d7699f6ac4c25a6c812798a980b7bdbdb83fc18ca66c40d25bf5f",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/real-project-acceptance.py": "39327d2fd2b6a596ab392393d9a84c257665222619a4019589e49869a6bd1c1a",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/test-release.py": "f0a6a05046efc748a7d6227155747474d194eb3974a84d0f414cd579a336b853",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/test_check.py": "56422be68bf01305a1365895c8d8d910347cb682f6a582ea714e5a43ee7e23c7",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa"
+      },
+      "validationInputsAfter": {
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/measure.py": "b1b60bedadc297e54e087fbeebc79a019ac36ee9715030d0b39298572cca0533",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-run-auxiliary.py": "30bb2b2430a4131ac3a9574a618db1a71f6775d94a6c56d0a175ec2e99f0e63d",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/package-release.py": "fda98db2920d7699f6ac4c25a6c812798a980b7bdbdb83fc18ca66c40d25bf5f",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/real-project-acceptance.py": "39327d2fd2b6a596ab392393d9a84c257665222619a4019589e49869a6bd1c1a",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/test-release.py": "f0a6a05046efc748a7d6227155747474d194eb3974a84d0f414cd579a336b853",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/test_check.py": "56422be68bf01305a1365895c8d8d910347cb682f6a582ea714e5a43ee7e23c7",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/package-release.py",
+        "--binary",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/bin/cpg",
+        "--output",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/dist",
+        "--platform",
+        "macos-arm64",
+        "--version",
+        "0.1.1"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint",
+      "startedAtUtc": "2026-09-08T21:03:00.407402+00:00",
+      "completedAtUtc": "2026-09-08T21:03:02.237615+00:00",
+      "seconds": 1.8302430409821682,
+      "exitCode": 0,
+      "binaries": {
+        "cpg": "fdadb9c1a7dd0267ab879a49aaee6475924082fa5e0cb23e442dcd11a07bb0a8",
+        "joern-parity": "d9a7ebff8d4bc4a33f9d248fbc9b88409898e9ce12ec62eb37c37a73df65ae17"
+      },
+      "manifestSha256": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+      "log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/native-archive.log",
+        "sha256": "5ea9b56c71a4b3b1debb440089d8c209c452d6c1a6a72e83e776e11598e769de"
+      },
+      "postRunBinding": {
+        "unchanged": true
+      },
+      "validationInputsBefore": {
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/measure.py": "b1b60bedadc297e54e087fbeebc79a019ac36ee9715030d0b39298572cca0533",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-run-auxiliary.py": "30bb2b2430a4131ac3a9574a618db1a71f6775d94a6c56d0a175ec2e99f0e63d",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/package-release.py": "fda98db2920d7699f6ac4c25a6c812798a980b7bdbdb83fc18ca66c40d25bf5f",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/real-project-acceptance.py": "39327d2fd2b6a596ab392393d9a84c257665222619a4019589e49869a6bd1c1a",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/test-release.py": "f0a6a05046efc748a7d6227155747474d194eb3974a84d0f414cd579a336b853",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/test_check.py": "56422be68bf01305a1365895c8d8d910347cb682f6a582ea714e5a43ee7e23c7",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa"
+      },
+      "validationInputsAfter": {
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/measure.py": "b1b60bedadc297e54e087fbeebc79a019ac36ee9715030d0b39298572cca0533",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-run-auxiliary.py": "30bb2b2430a4131ac3a9574a618db1a71f6775d94a6c56d0a175ec2e99f0e63d",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/package-release.py": "fda98db2920d7699f6ac4c25a6c812798a980b7bdbdb83fc18ca66c40d25bf5f",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/real-project-acceptance.py": "39327d2fd2b6a596ab392393d9a84c257665222619a4019589e49869a6bd1c1a",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/test-release.py": "f0a6a05046efc748a7d6227155747474d194eb3974a84d0f414cd579a336b853",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/test_check.py": "56422be68bf01305a1365895c8d8d910347cb682f6a582ea714e5a43ee7e23c7",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa"
+      }
+    }
+  ],
+  "archive": {
+    "path": ".local/astra-sprint/ninth-batch/reviewed-final/dist/oxidized-joern-cpg-macos-arm64.tar.gz",
+    "sha256": "cb5c07df622f4634bd2e697c683f26fc27e0a1917af7c81edb3deaa9ba91f3d0"
+  },
+  "auxiliaryRuns": [
+    {
+      "command": [
+        "python3",
+        "joern-parity/test_check.py"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs",
+      "startedAtUtc": "2026-09-08T21:02:59.705175+00:00",
+      "completedAtUtc": "2026-09-08T21:03:10.955363+00:00",
+      "seconds": 11.250328916008584,
+      "exitCode": 0,
+      "binaries": {
+        "cpg": "fdadb9c1a7dd0267ab879a49aaee6475924082fa5e0cb23e442dcd11a07bb0a8",
+        "joern-parity": "d9a7ebff8d4bc4a33f9d248fbc9b88409898e9ce12ec62eb37c37a73df65ae17"
+      },
+      "manifestSha256": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+      "log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/checker-tests.log",
+        "sha256": "c0edd776ce57ea2655b1e94c506c09801fa430574b6f0b6902b0d4394f4ef8ce"
+      },
+      "postRunBinding": {
+        "unchanged": true
+      },
+      "validationInputsBefore": {
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/measure.py": "b1b60bedadc297e54e087fbeebc79a019ac36ee9715030d0b39298572cca0533",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-run-auxiliary.py": "30bb2b2430a4131ac3a9574a618db1a71f6775d94a6c56d0a175ec2e99f0e63d",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/package-release.py": "fda98db2920d7699f6ac4c25a6c812798a980b7bdbdb83fc18ca66c40d25bf5f",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/real-project-acceptance.py": "39327d2fd2b6a596ab392393d9a84c257665222619a4019589e49869a6bd1c1a",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/test-release.py": "f0a6a05046efc748a7d6227155747474d194eb3974a84d0f414cd579a336b853",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/test_check.py": "56422be68bf01305a1365895c8d8d910347cb682f6a582ea714e5a43ee7e23c7",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa"
+      },
+      "validationInputsAfter": {
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/measure.py": "b1b60bedadc297e54e087fbeebc79a019ac36ee9715030d0b39298572cca0533",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-run-auxiliary.py": "30bb2b2430a4131ac3a9574a618db1a71f6775d94a6c56d0a175ec2e99f0e63d",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/package-release.py": "fda98db2920d7699f6ac4c25a6c812798a980b7bdbdb83fc18ca66c40d25bf5f",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/real-project-acceptance.py": "39327d2fd2b6a596ab392393d9a84c257665222619a4019589e49869a6bd1c1a",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/test-release.py": "f0a6a05046efc748a7d6227155747474d194eb3974a84d0f414cd579a336b853",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/test_check.py": "56422be68bf01305a1365895c8d8d910347cb682f6a582ea714e5a43ee7e23c7",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa"
+      }
+    },
+    {
+      "command": [
+        "cargo",
+        "audit",
+        "--file",
+        "Cargo.lock"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs",
+      "startedAtUtc": "2026-09-08T21:03:11.010032+00:00",
+      "completedAtUtc": "2026-09-08T21:03:11.813826+00:00",
+      "seconds": 0.8038238750013988,
+      "exitCode": 0,
+      "binaries": {
+        "cpg": "fdadb9c1a7dd0267ab879a49aaee6475924082fa5e0cb23e442dcd11a07bb0a8",
+        "joern-parity": "d9a7ebff8d4bc4a33f9d248fbc9b88409898e9ce12ec62eb37c37a73df65ae17"
+      },
+      "manifestSha256": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+      "log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final/dependency-audit.log",
+        "sha256": "2a91a692bdd0f166d94bb45220a29b5f469072246f9ef0b5205b36dd0375393b"
+      },
+      "postRunBinding": {
+        "unchanged": true
+      },
+      "validationInputsBefore": {
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/measure.py": "b1b60bedadc297e54e087fbeebc79a019ac36ee9715030d0b39298572cca0533",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-run-auxiliary.py": "30bb2b2430a4131ac3a9574a618db1a71f6775d94a6c56d0a175ec2e99f0e63d",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/package-release.py": "fda98db2920d7699f6ac4c25a6c812798a980b7bdbdb83fc18ca66c40d25bf5f",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/real-project-acceptance.py": "39327d2fd2b6a596ab392393d9a84c257665222619a4019589e49869a6bd1c1a",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/test-release.py": "f0a6a05046efc748a7d6227155747474d194eb3974a84d0f414cd579a336b853",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/test_check.py": "56422be68bf01305a1365895c8d8d910347cb682f6a582ea714e5a43ee7e23c7",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa"
+      },
+      "validationInputsAfter": {
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json": "dac4fbd9a3e6b6103b00d388b750b9650b49b321d4db3507c43fe1d58787d292",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/measure.py": "b1b60bedadc297e54e087fbeebc79a019ac36ee9715030d0b39298572cca0533",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-run-auxiliary.py": "30bb2b2430a4131ac3a9574a618db1a71f6775d94a6c56d0a175ec2e99f0e63d",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/package-release.py": "fda98db2920d7699f6ac4c25a6c812798a980b7bdbdb83fc18ca66c40d25bf5f",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/real-project-acceptance.py": "39327d2fd2b6a596ab392393d9a84c257665222619a4019589e49869a6bd1c1a",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/scripts/test-release.py": "f0a6a05046efc748a7d6227155747474d194eb3974a84d0f414cd579a336b853",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/test_check.py": "56422be68bf01305a1365895c8d8d910347cb682f6a582ea714e5a43ee7e23c7",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa"
+      }
+    }
+  ],
+  "scriptPreflight": {
+    "path": ".local/astra-sprint/ninth-batch/script-preflight-review.json",
+    "sha256": "03340ea2718e344f51790e5e5dd080b1d5f51f4e3d6ab587c1f69a227b9c744c"
+  },
+  "collectorPreflight": {
+    "path": ".local/astra-sprint/ninth-batch/collect-gates-preflight-review.json",
+    "sha256": "176c382a7d735523dc589368169c637944e4cecd456f08fabfc33b4b0a4b1a54"
+  },
+  "sourceScope": {
+    "path": ".local/astra-sprint/ninth-batch/source-scope-final-review.json",
+    "sha256": "29ad2cded44c2454f20a1d605e405717b38f8801e47a9ed4ccbec2cca2322fe4"
+  },
+  "originalCheckout": {
+    "atUtc": "2026-09-08T21:20:03.596436+00:00",
+    "head": "6fcb30a25bbee3ca3c05b5b197cd3ce93ca4d11a",
+    "status": " M cpg-rs/ARCHITECTURE_GAPS.md\n M plans/README.md\n?? plans/001-fail-closed-filesystem-boundary.md\n?? plans/002-harden-cpg-persistence.md\n?? plans/003-content-correct-cache-and-reopen.md\n?? plans/004-enforce-release-acceptance-gates.md\n?? plans/006-complete-cpg-persistence-safety.md\n?? plans/007-bind-release-to-verified-contract.md\n?? plans/008-make-graph-language-metadata-explicit.md\n?? plans/009-refresh-architecture-and-product-docs.md\n?? plans/010-differential-gate-shared-reaching-def.md\n?? plans/011-migrate-summaries-to-canonical-value-flow.md\n?? plans/012-close-filesystem-boundary-residuals.md\n",
+    "hashes": {
+      "cpg-rs/ARCHITECTURE_GAPS.md": "1a106157606f81799b7fa70f0b7b0c7577a2c4279d731b3bab9409a9a65b70f4",
+      "plans/README.md": "620ad4469826655fb3c8a74cbdeef12d6319053e86e6370e3f156ebb97f2ba4b",
+      "plans/001-fail-closed-filesystem-boundary.md": "00cf7a9468a5f9f6b16b23c1c1e472a043e10687e53f161ee8aeaa8eb1897430",
+      "plans/002-harden-cpg-persistence.md": "b074d8136eddda21755c3afe084bcee619f2e5d0be207ce563e03c4dfb11b34a",
+      "plans/003-content-correct-cache-and-reopen.md": "1533c2d00dd11c4ca49645022542fcdb22bb4276fad75466deff8a85667508f9",
+      "plans/004-enforce-release-acceptance-gates.md": "f398c211f342598eb1d1572a0bb3018e01d5ceefb8ce9886939429855900ef87",
+      "plans/006-complete-cpg-persistence-safety.md": "79768aa08589d22cefbd30cbd670783d1d8ec917705ed8a534196230866794d6",
+      "plans/007-bind-release-to-verified-contract.md": "7265e6108e9fda4d864c0f0a0cfcabc152fd5cb233a3aa34b1536ead0153ddbd",
+      "plans/008-make-graph-language-metadata-explicit.md": "9a784d8db065ee7fedb47479bf6d8846d22d8501e5b8bcd4b665a0edf9134c40",
+      "plans/009-refresh-architecture-and-product-docs.md": "a33dd8d5c11d168c4c562228e7bb50643c85f6b637206a7adc9c7f481e547744",
+      "plans/010-differential-gate-shared-reaching-def.md": "5efb01ce175101b0eccdc8f92bb9a6a0370bb276a00224be90e248e00f032bb3",
+      "plans/011-migrate-summaries-to-canonical-value-flow.md": "77fef056be77c825db626b799870787f0a4f7b830206423abc04d2827d0f45ff",
+      "plans/012-close-filesystem-boundary-residuals.md": "3c91974a8f1cc26aa1deeeb7daf507f29c632b5960168a8a4695de612902e1cf"
+    },
+    "dirtyFileCount": 13,
+    "unchanged": true
+  },
+  "integrationBranch": "codex/astra-parity-sprint",
+  "pushed": false,
+  "merged": false,
+  "artifactAvailability": "Small fixture sources, complete raw references, before/current graphs and differences are committed. Large whole-project outputs, frozen binaries, resources and detailed logs remain local with recorded hashes. No published download is claimed.",
+  "nextWork": {
+    "proposal": {
+      "path": ".local/astra-sprint/ninth-batch/next-body-include-plan.md",
+      "sha256": "1696eab95fc9748a356d4388854be3dc17176e201af7d83898b08ac456d93cba"
+    },
+    "sourceEvidenceManifest": {
+      "path": ".local/astra-sprint/ninth-batch/next-body-include-plan-manifest.json",
+      "sha256": "565a5d8d926e4beddb2cc32e9e4949ce89fda17807d4b5237846ca2dbf1cee41"
+    },
+    "rootRelativeLinkCompanions": {
+      "path": ".local/astra-sprint/ninth-batch/next-body-include-plan-companions.json",
+      "sha256": "002f16853278e561b73d32eddb6083283fd923c6daad7e5fcbf9ff019fb38d14"
+    },
+    "freshControlMatrixExecuted": false
+  },
+  "limits": [
+    "Neither complete whole-project selected projection is exact; method AST equality is not full graph or language coverage.",
+    "Twenty-two complete new diagnostics remain, including one preexisting duplicate-class-initializer importer failure.",
+    "Macro metadata event fallback remains when no eligible event is modeled; this is not a complete upstream MacroHandler port.",
+    "Active supplied body includes still omit declarations; fixedtables and cross-directive runtime chains remain nonexact.",
+    "Function-like condition evaluation, object-callee/type-position lowering, GNU nested functions and unused local alias registration have retained diagnostics.",
+    "Selected text transport omits properties and is noninjective.",
+    "No container or other-platform execution in this increment.",
+    "Joern binary compatibility, Scala console/CPGQL, JVM plugins, full query library and proven non-C parity remain incomplete."
+  ],
+  "documentationCorrection": {
+    "path": ".local/astra-sprint/ninth-batch/documentation-scope-wording-correction.json",
+    "sha256": "b130d1e87f08f873741efffbe1f6aaf1d9ac62d7c1d3ebfbb2001dd49c80f917",
+    "correctedAfterCodeRevision": "00c37613b3074025d3d65aa632cbd79af95d0c46",
+    "PROGRESSCorrectionInDocumentationCommit": true
+  }
+}
