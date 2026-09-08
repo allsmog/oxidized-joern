@@ -290,6 +290,66 @@ AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
 AST|
+AST|METHOD NAME=api_named CODE=extern int extern int  ()(int); FULL_NAME=<unresolvedNamespace>.api_named SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=duplicate_paren_helper CODE=int (duplicate_paren_helper)(int value) { return value; } FULL_NAME=<unresolvedNamespace>.duplicate_paren_helper SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return value; ORDER=1
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=duplicate_paren_helper CODE=int (duplicate_paren_helper)(int value) { return value; } FULL_NAME=<unresolvedNamespace>.duplicate_paren_helper<duplicate>0 SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return value; ORDER=1
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=macro_paren CODE=extern int extern int  ()(int) extern int (int); FULL_NAME=<unresolvedNamespace>.macro_paren SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=paren_defined CODE=int (paren_defined)(int value) { return value; } FULL_NAME=<unresolvedNamespace>.paren_defined SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return value; ORDER=1
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=paren_first CODE=int (paren_first)(int value), ordinary_second(int value); FULL_NAME=<unresolvedNamespace>.paren_first SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=paren_second CODE=int ordinary_first(int value), (paren_second)(int value); FULL_NAME=<unresolvedNamespace>.paren_second SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=plain_named CODE=extern int (plain_named)(int x); FULL_NAME=<unresolvedNamespace>.plain_named SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=unknown_named CODE=int (unknown_named)(int x); FULL_NAME=<unresolvedNamespace>.unknown_named SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
 AST|METHOD NAME=active_block_prototype CODE=int active_block_prototype(int x) { extern int active_external(int); return active_external(x); } FULL_NAME=active_block_prototype SIGNATURE=int(int) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
 AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
@@ -433,6 +493,12 @@ AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
 AST|    RETURN CODE=return y; ORDER=2
 AST|      IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|
+AST|METHOD NAME=api_named FULL_NAME=api_named ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|
 AST|METHOD NAME=apply CODE=int apply(int (*fn)(int, int), int x) {\n    return fn(x, x);\n} FULL_NAME=apply SIGNATURE=int(int,int) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=fn CODE=int (*fn)(int, int) TYPE_FULL_NAME=int ORDER=1
@@ -2342,6 +2408,30 @@ AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
 AST|        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
 AST|
+AST|METHOD NAME=duplicate_paren_a CODE=int duplicate_paren_a(int value) { return duplicate_paren_helper(value); } FULL_NAME=duplicate_paren_a SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return duplicate_paren_helper(value); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return duplicate_paren_helper(value); ORDER=1
+AST|      CALL NAME=duplicate_paren_helper CODE=duplicate_paren_helper(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=duplicate_paren_helper ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=duplicate_paren_b CODE=int duplicate_paren_b(int value) { return duplicate_paren_helper(value); } FULL_NAME=duplicate_paren_b SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return duplicate_paren_helper(value); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return duplicate_paren_helper(value); ORDER=1
+AST|      CALL NAME=duplicate_paren_helper CODE=duplicate_paren_helper(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=duplicate_paren_helper ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=duplicate_paren_helper FULL_NAME=duplicate_paren_helper ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
 AST|METHOD NAME=empty_all_for CODE=int empty_all_for(int x) { for (;;); return x; } FULL_NAME=empty_all_for SIGNATURE=int(int) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
 AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
@@ -3431,6 +3521,18 @@ AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
 AST|  BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
 AST|
+AST|METHOD NAME=macro_ordinary CODE=extern int extern int  ()(int) extern int (int); FULL_NAME=macro_ordinary SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=macro_paren FULL_NAME=macro_paren ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
 AST|METHOD NAME=macros CODE=int macros(int n) {\n    if (n > LIMIT) {\n        return SQR(n);\n    }\n#ifdef UNUSED_FLAG\n    n = n + LIMIT;\n#endif\n#ifdef NOT_DEFINED\n    n = 999;\n#endif\n    return 0;\n} FULL_NAME=macros SIGNATURE=int(int) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
 AST|  METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
@@ -3603,6 +3705,58 @@ AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=3 ARGUMENT_INDEX=3
 AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=5
 AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
 AST|    METHOD_REF CODE=memcmp TYPE_FULL_NAME=memcmp METHOD_FULL_NAME=memcmp ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=mixed_prototype_caller CODE=int mixed_prototype_caller(int value) { return paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value) + macro_ordinary(value); } FULL_NAME=mixed_prototype_caller SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value) + macro_ordinary(value); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value) + macro_ordinary(value); ORDER=1
+AST|      CALL NAME=<operator>.addition CODE=paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value) + macro_ordinary(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.addition CODE=paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.addition CODE=paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.addition CODE=paren_first(value) + ordinary_second(value) + ordinary_first(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              CALL NAME=<operator>.addition CODE=paren_first(value) + ordinary_second(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                CALL NAME=paren_first CODE=paren_first(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=paren_first ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                CALL NAME=ordinary_second CODE=ordinary_second(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=ordinary_second ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|              CALL NAME=ordinary_first CODE=ordinary_first(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=ordinary_first ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            CALL NAME=paren_second CODE=paren_second(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=paren_second ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=macro_paren CODE=macro_paren(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=macro_paren ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=macro_ordinary CODE=macro_ordinary(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=macro_ordinary ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=mixed_prototypes.c:<global> ORDER=1
+AST|  METHOD NAME=mixed_prototype_caller CODE=int mixed_prototype_caller(int value) { return paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value) + macro_ordinary(value); } FULL_NAME=mixed_prototype_caller SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value) + macro_ordinary(value); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value) + macro_ordinary(value); ORDER=1
+AST|        CALL NAME=<operator>.addition CODE=paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value) + macro_ordinary(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.addition CODE=paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.addition CODE=paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              CALL NAME=<operator>.addition CODE=paren_first(value) + ordinary_second(value) + ordinary_first(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                CALL NAME=<operator>.addition CODE=paren_first(value) + ordinary_second(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  CALL NAME=paren_first CODE=paren_first(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=paren_first ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                    IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                  CALL NAME=ordinary_second CODE=ordinary_second(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=ordinary_second ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                    IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                CALL NAME=ordinary_first CODE=ordinary_first(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=ordinary_first ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|              CALL NAME=paren_second CODE=paren_second(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=paren_second ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            CALL NAME=macro_paren CODE=macro_paren(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=macro_paren ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=macro_ordinary CODE=macro_ordinary(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=macro_ordinary ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=mixed_prototype_caller TYPE_FULL_NAME=mixed_prototype_caller METHOD_FULL_NAME=mixed_prototype_caller ORDER=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|
 AST|METHOD NAME=multi_empty_for CODE=int multi_empty_for(int x) { for (int i,j;;) break; return x; } FULL_NAME=multi_empty_for SIGNATURE=int(int) ORDER=1
@@ -3856,6 +4010,18 @@ AST|    TYPE_REF CODE=struct pair {\n    int *ptr;\n    int arr[4];\n} TYPE_FULL
 AST|    METHOD_REF CODE=second TYPE_FULL_NAME=second METHOD_FULL_NAME=second ORDER=5
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|
+AST|METHOD NAME=ordinary_first CODE=int ordinary_first(int value), (paren_second)(int value); FULL_NAME=ordinary_first SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=ordinary_second CODE=int (paren_first)(int value), ordinary_second(int value); FULL_NAME=ordinary_second SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
 AST|METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=pair.<clinit>:pair() ORDER=3
 AST|  BLOCK ORDER=1
 AST|    CALL NAME=<operator>.arrayInitializer CODE=arr[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
@@ -3888,6 +4054,18 @@ AST|        IDENTIFIER NAME=callback CODE=callback TYPE_FULL_NAME=int ORDER=1
 AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
 AST|
+AST|METHOD NAME=paren_defined FULL_NAME=paren_defined ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=paren_first FULL_NAME=paren_first ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
 AST|METHOD NAME=paren_if CODE=int paren_if(int x) { if (((x))) return x; return 0; } FULL_NAME=paren_if SIGNATURE=int(int) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
 AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
@@ -3901,6 +4079,24 @@ AST|        RETURN CODE=return x; ORDER=1
 AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
 AST|    RETURN CODE=return 0; ORDER=2
 AST|      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=paren_second FULL_NAME=paren_second ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=parentheses_caller CODE=int parentheses_caller(int x) { return api_named(x) + plain_named(x); } FULL_NAME=parentheses_caller SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return api_named(x) + plain_named(x); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return api_named(x) + plain_named(x); ORDER=1
+AST|      CALL NAME=<operator>.addition CODE=api_named(x) + plain_named(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=api_named CODE=api_named(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=api_named ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=plain_named CODE=plain_named(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=plain_named ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
 AST|
 AST|METHOD NAME=parenthesized_callee CODE=int parenthesized_callee(int value) { return (unknown_paren)(value); } FULL_NAME=parenthesized_callee SIGNATURE=int(int) ORDER=1
@@ -3923,6 +4119,94 @@ AST|      CALL NAME=<operator>.pointerCall CODE=(concrete)(value) TYPE_FULL_NAME
 AST|        METHOD_REF CODE=concrete TYPE_FULL_NAME=int METHOD_FULL_NAME=concrete ORDER=1
 AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=parenthesized_definition_caller CODE=int parenthesized_definition_caller(int value) { return paren_defined(value); } FULL_NAME=parenthesized_definition_caller SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return paren_defined(value); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return paren_defined(value); ORDER=1
+AST|      CALL NAME=paren_defined CODE=paren_defined(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=paren_defined ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=parenthesized_definitions.c:<global> ORDER=1
+AST|  METHOD NAME=paren_defined CODE=int (paren_defined)(int value) { return value; } FULL_NAME=<unresolvedNamespace>.paren_defined SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return value; ORDER=1
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=parenthesized_definition_caller CODE=int parenthesized_definition_caller(int value) { return paren_defined(value); } FULL_NAME=parenthesized_definition_caller SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return paren_defined(value); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return paren_defined(value); ORDER=1
+AST|        CALL NAME=paren_defined CODE=paren_defined(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=paren_defined ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=paren_defined TYPE_FULL_NAME=<unresolvedNamespace>.paren_defined METHOD_FULL_NAME=<unresolvedNamespace>.paren_defined ORDER=1
+AST|    METHOD_REF CODE=parenthesized_definition_caller TYPE_FULL_NAME=parenthesized_definition_caller METHOD_FULL_NAME=parenthesized_definition_caller ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=parenthesized_duplicate_a.c:<global> ORDER=1
+AST|  METHOD NAME=duplicate_paren_helper CODE=int (duplicate_paren_helper)(int value) { return value; } FULL_NAME=<unresolvedNamespace>.duplicate_paren_helper SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return value; ORDER=1
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=duplicate_paren_a CODE=int duplicate_paren_a(int value) { return duplicate_paren_helper(value); } FULL_NAME=duplicate_paren_a SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return duplicate_paren_helper(value); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return duplicate_paren_helper(value); ORDER=1
+AST|        CALL NAME=duplicate_paren_helper CODE=duplicate_paren_helper(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=duplicate_paren_helper ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=duplicate_paren_helper TYPE_FULL_NAME=<unresolvedNamespace>.duplicate_paren_helper METHOD_FULL_NAME=<unresolvedNamespace>.duplicate_paren_helper ORDER=1
+AST|    METHOD_REF CODE=duplicate_paren_a TYPE_FULL_NAME=duplicate_paren_a METHOD_FULL_NAME=duplicate_paren_a ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=parenthesized_duplicate_b.c:<global> ORDER=1
+AST|  METHOD NAME=duplicate_paren_helper CODE=int (duplicate_paren_helper)(int value) { return value; } FULL_NAME=<unresolvedNamespace>.duplicate_paren_helper<duplicate>0 SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return value; ORDER=1
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=duplicate_paren_b CODE=int duplicate_paren_b(int value) { return duplicate_paren_helper(value); } FULL_NAME=duplicate_paren_b SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return duplicate_paren_helper(value); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return duplicate_paren_helper(value); ORDER=1
+AST|        CALL NAME=duplicate_paren_helper CODE=duplicate_paren_helper(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=duplicate_paren_helper ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=duplicate_paren_helper TYPE_FULL_NAME=<unresolvedNamespace>.duplicate_paren_helper METHOD_FULL_NAME=<unresolvedNamespace>.duplicate_paren_helper ORDER=1
+AST|    METHOD_REF CODE=duplicate_paren_b TYPE_FULL_NAME=duplicate_paren_b METHOD_FULL_NAME=duplicate_paren_b ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=parenthesized_prototypes.c:<global> ORDER=1
+AST|  METHOD NAME=parentheses_caller CODE=int parentheses_caller(int x) { return api_named(x) + plain_named(x); } FULL_NAME=parentheses_caller SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return api_named(x) + plain_named(x); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return api_named(x) + plain_named(x); ORDER=1
+AST|        CALL NAME=<operator>.addition CODE=api_named(x) + plain_named(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=api_named CODE=api_named(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=api_named ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=plain_named CODE=plain_named(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=plain_named ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=parentheses_caller TYPE_FULL_NAME=parentheses_caller METHOD_FULL_NAME=parentheses_caller ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|
 AST|METHOD NAME=pick CODE=int pick(int k) {\n    int r = 0;\n    switch (k) {\n        case 1:\n            r = 10;\n            break;\n        case 2:\n            r = 20;\n            break;\n        default:\n            r = -1;\n            break;\n    }\n    while (r > 0) {\n        if (r == 5) {\n            break;\n        }\n        if (r == 7) {\n            continue;\n        }\n        r--;\n    }\n    return r;\n} FULL_NAME=pick SIGNATURE=int(int) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=k CODE=int k TYPE_FULL_NAME=int ORDER=1
@@ -3975,6 +4259,12 @@ AST|          IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX
 AST|    RETURN CODE=return r; ORDER=5
 AST|      IDENTIFIER NAME=r CODE=r TYPE_FULL_NAME=int ORDER=1
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=plain_named FULL_NAME=plain_named ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|
 AST|METHOD NAME=pointer_compare CODE=int pointer_compare(int *p) { if (p != 0) return 1; if (!p) return 0; return 2; } FULL_NAME=pointer_compare SIGNATURE=int(int*) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME=p CODE=int *p TYPE_FULL_NAME=int* ORDER=1
@@ -4711,6 +5001,51 @@ AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
 AST|  BLOCK CODE={ return 0; } TYPE_FULL_NAME=void ORDER=2
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
 AST|
+AST|METHOD NAME=typedef_marker CODE=int typedef_marker(int value) { return value; } FULL_NAME=typedef_marker SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return value; ORDER=1
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=typedef_pointer.c:<global> ORDER=1
+AST|  METHOD NAME=typedef_marker CODE=int typedef_marker(int value) { return value; } FULL_NAME=typedef_marker SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return value; ORDER=1
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    TYPE_DECL NAME=PlainAlias CODE=typedef int PlainAlias; FULL_NAME=PlainAlias ORDER=1
+AST|    METHOD_REF CODE=typedef_marker TYPE_FULL_NAME=typedef_marker METHOD_FULL_NAME=typedef_marker ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=typedef_shapes.c:<global> ORDER=1
+AST|  METHOD NAME=typedef_shapes_marker CODE=int typedef_shapes_marker(int value) { return value; } FULL_NAME=typedef_shapes_marker SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return value; ORDER=1
+AST|        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    TYPE_DECL NAME=ScalarFirst CODE=typedef int ScalarFirst, (*CallbackSecond)(int); FULL_NAME=ScalarFirst ORDER=1
+AST|    TYPE_DECL NAME=ScalarSecond CODE=typedef int (*CallbackFirst)(int), ScalarSecond; FULL_NAME=ScalarSecond ORDER=2
+AST|    TYPE_DECL NAME=One CODE=typedef int One, Two; FULL_NAME=One ORDER=3
+AST|    TYPE_DECL NAME=Two CODE=typedef int One, Two; FULL_NAME=Two ORDER=4
+AST|    METHOD_REF CODE=typedef_shapes_marker TYPE_FULL_NAME=typedef_shapes_marker METHOD_FULL_NAME=typedef_shapes_marker ORDER=5
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=typedef_shapes_marker CODE=int typedef_shapes_marker(int value) { return value; } FULL_NAME=typedef_shapes_marker SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return value; ORDER=1
+AST|      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
 AST|METHOD NAME=<global> CODE=<global> FULL_NAME=types2.c:<global> ORDER=1
 AST|  TYPE_DECL NAME=color CODE=enum color { RED, GREEN = 5, BLUE } FULL_NAME=color ORDER=1
 AST|    MEMBER NAME=RED CODE=RED TYPE_FULL_NAME=ANY ORDER=1
@@ -4905,6 +5240,35 @@ AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
 AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
 AST|  BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
 AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=unknown_caller CODE=int unknown_caller(int x) { return unknown_named(x); } FULL_NAME=unknown_caller SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return unknown_named(x); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return unknown_named(x); ORDER=1
+AST|      CALL NAME=unknown_named CODE=unknown_named(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=unknown_named ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=unknown_macro_prototypes.c:<global> ORDER=1
+AST|  METHOD NAME=unknown_caller CODE=int unknown_caller(int x) { return unknown_named(x); } FULL_NAME=unknown_caller SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return unknown_named(x); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return unknown_named(x); ORDER=1
+AST|        CALL NAME=unknown_named CODE=unknown_named(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=unknown_named ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    UNKNOWN CODE=UNKNOWN_API ORDER=1
+AST|    METHOD_REF CODE=unknown_caller TYPE_FULL_NAME=unknown_caller METHOD_FULL_NAME=unknown_caller ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=unknown_named FULL_NAME=unknown_named ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
 AST|
 AST|METHOD NAME=unnamed_definition CODE=int unnamed_definition(int, char *) { return 0; } FULL_NAME=unnamed_definition SIGNATURE=int(int,char*) ORDER=1
 AST|  METHOD_PARAMETER_IN NAME= CODE=int TYPE_FULL_NAME=int ORDER=1
@@ -5127,15 +5491,23 @@ NODES|FILE NAME=logic.c ORDER=0
 NODES|FILE NAME=loop.c ORDER=0
 NODES|FILE NAME=macros.c ORDER=0
 NODES|FILE NAME=memcmp.c ORDER=0
+NODES|FILE NAME=mixed_prototypes.c ORDER=0
 NODES|FILE NAME=ops.c ORDER=0
 NODES|FILE NAME=order.c ORDER=0
+NODES|FILE NAME=parenthesized_definitions.c ORDER=0
+NODES|FILE NAME=parenthesized_duplicate_a.c ORDER=0
+NODES|FILE NAME=parenthesized_duplicate_b.c ORDER=0
+NODES|FILE NAME=parenthesized_prototypes.c ORDER=0
 NODES|FILE NAME=prototype_a.c ORDER=0
 NODES|FILE NAME=prototype_b.c ORDER=0
 NODES|FILE NAME=strcmp.c ORDER=0
 NODES|FILE NAME=structs.c ORDER=0
 NODES|FILE NAME=switch.c ORDER=0
+NODES|FILE NAME=typedef_pointer.c ORDER=0
+NODES|FILE NAME=typedef_shapes.c ORDER=0
 NODES|FILE NAME=types2.c ORDER=0
 NODES|FILE NAME=unary.c ORDER=0
+NODES|FILE NAME=unknown_macro_prototypes.c ORDER=0
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
@@ -5162,19 +5534,35 @@ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=logic.c:<global> FILENAME=logic.c 
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=loop.c:<global> FILENAME=loop.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=macros.c:<global> FILENAME=macros.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=memcmp.c:<global> FILENAME=memcmp.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=mixed_prototypes.c:<global> FILENAME=mixed_prototypes.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=ops.c:<global> FILENAME=ops.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=order.c:<global> FILENAME=order.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=parenthesized_definitions.c:<global> FILENAME=parenthesized_definitions.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=parenthesized_duplicate_a.c:<global> FILENAME=parenthesized_duplicate_a.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=parenthesized_duplicate_b.c:<global> FILENAME=parenthesized_duplicate_b.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=parenthesized_prototypes.c:<global> FILENAME=parenthesized_prototypes.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=prototype_a.c:<global> FILENAME=prototype_a.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=prototype_b.c:<global> FILENAME=prototype_b.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=strcmp.c:<global> FILENAME=strcmp.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=structs.c:<global> FILENAME=structs.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=switch.c:<global> FILENAME=switch.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=typedef_pointer.c:<global> FILENAME=typedef_pointer.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=typedef_shapes.c:<global> FILENAME=typedef_shapes.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=types2.c:<global> FILENAME=types2.c ORDER=1
 NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=unary.c:<global> FILENAME=unary.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=unknown_macro_prototypes.c:<global> FILENAME=unknown_macro_prototypes.c ORDER=1
 NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=duplicate_paren_helper FULL_NAME=<unresolvedNamespace>.duplicate_paren_helper CODE=<unresolvedNamespace>.duplicate_paren_helper AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=parenthesized_duplicate_a.c:<global> FILENAME=parenthesized_duplicate_a.c ORDER=1
+NODES|TYPE_DECL NAME=duplicate_paren_helper FULL_NAME=<unresolvedNamespace>.duplicate_paren_helper<duplicate>0 CODE=<unresolvedNamespace>.duplicate_paren_helper AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=parenthesized_duplicate_b.c:<global> FILENAME=parenthesized_duplicate_b.c ORDER=1
+NODES|TYPE_DECL NAME=paren_defined FULL_NAME=<unresolvedNamespace>.paren_defined CODE=<unresolvedNamespace>.paren_defined AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=parenthesized_definitions.c:<global> FILENAME=parenthesized_definitions.c ORDER=1
 NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=One FULL_NAME=One CODE=typedef int One, Two; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=typedef_shapes.c ORDER=3
+NODES|TYPE_DECL NAME=PlainAlias FULL_NAME=PlainAlias CODE=typedef int PlainAlias; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=typedef_pointer.c ORDER=1
 NODES|TYPE_DECL NAME=PpBox FULL_NAME=PpBox CODE=struct PpBox { int value; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=conditional_top_level.c ORDER=1
 NODES|TYPE_DECL NAME=PpInactiveBox FULL_NAME=PpInactiveBox CODE=struct PpInactiveBox { int value; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=conditional_top_level.c ORDER=1
+NODES|TYPE_DECL NAME=ScalarFirst FULL_NAME=ScalarFirst CODE=typedef int ScalarFirst, (*CallbackSecond)(int); AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=typedef_shapes.c ORDER=1
+NODES|TYPE_DECL NAME=ScalarSecond FULL_NAME=ScalarSecond CODE=typedef int (*CallbackFirst)(int), ScalarSecond; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=typedef_shapes.c ORDER=2
+NODES|TYPE_DECL NAME=Two FULL_NAME=Two CODE=typedef int One, Two; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=typedef_shapes.c ORDER=4
 NODES|TYPE_DECL NAME=_Bool FULL_NAME=_Bool CODE=_Bool IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=active_block_prototype FULL_NAME=active_block_prototype CODE=active_block_prototype AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=conditional_prototypes.c:<global> FILENAME=conditional_prototypes.c ORDER=1
 NODES|TYPE_DECL NAME=add FULL_NAME=add CODE=add AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
@@ -5236,6 +5624,8 @@ NODES|TYPE_DECL NAME=dereference_if FULL_NAME=dereference_if CODE=dereference_if
 NODES|TYPE_DECL NAME=double FULL_NAME=double CODE=double IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=duplicate FULL_NAME=duplicate CODE=duplicate AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=conditional_duplicate.c:<global> FILENAME=conditional_duplicate.c ORDER=1
 NODES|TYPE_DECL NAME=duplicate FULL_NAME=duplicate<duplicate>0 CODE=duplicate AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=conditional_duplicate.c:<global> FILENAME=conditional_duplicate.c ORDER=1
+NODES|TYPE_DECL NAME=duplicate_paren_a FULL_NAME=duplicate_paren_a CODE=duplicate_paren_a AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=parenthesized_duplicate_a.c:<global> FILENAME=parenthesized_duplicate_a.c ORDER=1
+NODES|TYPE_DECL NAME=duplicate_paren_b FULL_NAME=duplicate_paren_b CODE=duplicate_paren_b AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=parenthesized_duplicate_b.c:<global> FILENAME=parenthesized_duplicate_b.c ORDER=1
 NODES|TYPE_DECL NAME=empty_all_for FULL_NAME=empty_all_for CODE=empty_all_for AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=control_truth_loops.c:<global> FILENAME=control_truth_loops.c ORDER=1
 NODES|TYPE_DECL NAME=empty_do FULL_NAME=empty_do CODE=empty_do AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=control_truth_loops.c:<global> FILENAME=control_truth_loops.c ORDER=1
 NODES|TYPE_DECL NAME=empty_for FULL_NAME=empty_for CODE=empty_for AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=control_truth_loops.c:<global> FILENAME=control_truth_loops.c ORDER=1
@@ -5285,6 +5675,8 @@ NODES|TYPE_DECL NAME=<global> FULL_NAME=macros.c:<global> CODE=<global> AST_PARE
 NODES|TYPE_DECL NAME=main FULL_NAME=main CODE=main AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=add.c:<global> FILENAME=add.c ORDER=1
 NODES|TYPE_DECL NAME=memcmp FULL_NAME=memcmp CODE=memcmp AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=memcmp.c:<global> FILENAME=memcmp.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=memcmp.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=memcmp.c:<global> FILENAME=memcmp.c ORDER=2
+NODES|TYPE_DECL NAME=mixed_prototype_caller FULL_NAME=mixed_prototype_caller CODE=mixed_prototype_caller AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=mixed_prototypes.c:<global> FILENAME=mixed_prototypes.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=mixed_prototypes.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=mixed_prototypes.c:<global> FILENAME=mixed_prototypes.c ORDER=1
 NODES|TYPE_DECL NAME=multi_empty_for FULL_NAME=multi_empty_for CODE=multi_empty_for AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=control_truth_loops.c:<global> FILENAME=control_truth_loops.c ORDER=1
 NODES|TYPE_DECL NAME=multi_init_for FULL_NAME=multi_init_for CODE=multi_init_for AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=control_truth_loops.c:<global> FILENAME=control_truth_loops.c ORDER=1
 NODES|TYPE_DECL NAME=multiline_active FULL_NAME=multiline_active CODE=multiline_active AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=conditional_comments.c:<global> FILENAME=conditional_comments.c ORDER=1
@@ -5300,8 +5692,14 @@ NODES|TYPE_DECL NAME=<global> FULL_NAME=order.c:<global> CODE=<global> AST_PAREN
 NODES|TYPE_DECL NAME=pair FULL_NAME=pair CODE=struct pair {\n    int *ptr;\n    int arr[4];\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=order.c ORDER=1
 NODES|TYPE_DECL NAME=parameter_restore FULL_NAME=parameter_restore CODE=parameter_restore AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=callable_scope.c:<global> FILENAME=callable_scope.c ORDER=1
 NODES|TYPE_DECL NAME=paren_if FULL_NAME=paren_if CODE=paren_if AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=control_truth_loops.c:<global> FILENAME=control_truth_loops.c ORDER=1
+NODES|TYPE_DECL NAME=parentheses_caller FULL_NAME=parentheses_caller CODE=parentheses_caller AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=parenthesized_prototypes.c:<global> FILENAME=parenthesized_prototypes.c ORDER=1
 NODES|TYPE_DECL NAME=parenthesized_callee FULL_NAME=parenthesized_callee CODE=parenthesized_callee AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=external_declarations.c:<global> FILENAME=external_declarations.c ORDER=1
 NODES|TYPE_DECL NAME=parenthesized_defined FULL_NAME=parenthesized_defined CODE=parenthesized_defined AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=function_pointers.c:<global> FILENAME=function_pointers.c ORDER=1
+NODES|TYPE_DECL NAME=parenthesized_definition_caller FULL_NAME=parenthesized_definition_caller CODE=parenthesized_definition_caller AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=parenthesized_definitions.c:<global> FILENAME=parenthesized_definitions.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=parenthesized_definitions.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=parenthesized_definitions.c:<global> FILENAME=parenthesized_definitions.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=parenthesized_duplicate_a.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=parenthesized_duplicate_a.c:<global> FILENAME=parenthesized_duplicate_a.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=parenthesized_duplicate_b.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=parenthesized_duplicate_b.c:<global> FILENAME=parenthesized_duplicate_b.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=parenthesized_prototypes.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=parenthesized_prototypes.c:<global> FILENAME=parenthesized_prototypes.c ORDER=1
 NODES|TYPE_DECL NAME=pick FULL_NAME=pick CODE=pick AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=switch.c:<global> FILENAME=switch.c ORDER=1
 NODES|TYPE_DECL NAME=point FULL_NAME=point CODE=struct point {\n    int x;\n    int y;\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=structs.c ORDER=1
 NODES|TYPE_DECL NAME=point* FULL_NAME=point* CODE=point* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
@@ -5354,6 +5752,10 @@ NODES|TYPE_DECL NAME=sum FULL_NAME=sum CODE=sum AST_PARENT_TYPE=TYPE_DECL AST_PA
 NODES|TYPE_DECL NAME=<global> FULL_NAME=switch.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=switch.c:<global> FILENAME=switch.c ORDER=1
 NODES|TYPE_DECL NAME=ternary_active FULL_NAME=ternary_active CODE=ternary_active AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=conditional_evaluation.c:<global> FILENAME=conditional_evaluation.c ORDER=1
 NODES|TYPE_DECL NAME=ternary_wrong FULL_NAME=ternary_wrong CODE=ternary_wrong AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=conditional_evaluation.c:<global> FILENAME=conditional_evaluation.c ORDER=1
+NODES|TYPE_DECL NAME=typedef_marker FULL_NAME=typedef_marker CODE=typedef_marker AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=typedef_pointer.c:<global> FILENAME=typedef_pointer.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=typedef_pointer.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=typedef_pointer.c:<global> FILENAME=typedef_pointer.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=typedef_shapes.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=typedef_shapes.c:<global> FILENAME=typedef_shapes.c ORDER=1
+NODES|TYPE_DECL NAME=typedef_shapes_marker FULL_NAME=typedef_shapes_marker CODE=typedef_shapes_marker AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=typedef_shapes.c:<global> FILENAME=typedef_shapes.c ORDER=1
 NODES|TYPE_DECL NAME=<global> FULL_NAME=types2.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=types2.c:<global> FILENAME=types2.c ORDER=1
 NODES|TYPE_DECL NAME=uint_t FULL_NAME=uint_t CODE=typedef unsigned int uint_t; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=types2.c ORDER=1
 NODES|TYPE_DECL NAME=unary FULL_NAME=unary CODE=unary AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=unary.c:<global> FILENAME=unary.c ORDER=1
@@ -5361,6 +5763,8 @@ NODES|TYPE_DECL NAME=<global> FULL_NAME=unary.c:<global> CODE=<global> AST_PAREN
 NODES|TYPE_DECL NAME=undef_comment_active FULL_NAME=undef_comment_active CODE=undef_comment_active AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=conditional_splices.c:<global> FILENAME=conditional_splices.c ORDER=1
 NODES|TYPE_DECL NAME=undef_comment_wrong FULL_NAME=undef_comment_wrong CODE=undef_comment_wrong AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=conditional_splices.c:<global> FILENAME=conditional_splices.c ORDER=1
 NODES|TYPE_DECL NAME=unionvalue FULL_NAME=unionvalue CODE=unionvalue IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unknown_caller FULL_NAME=unknown_caller CODE=unknown_caller AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=unknown_macro_prototypes.c:<global> FILENAME=unknown_macro_prototypes.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=unknown_macro_prototypes.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=unknown_macro_prototypes.c:<global> FILENAME=unknown_macro_prototypes.c ORDER=1
 NODES|TYPE_DECL NAME=unnamed_definition FULL_NAME=unnamed_definition CODE=unnamed_definition AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=external_declarations.c:<global> FILENAME=external_declarations.c ORDER=1
 NODES|TYPE_DECL NAME=unselected_expression FULL_NAME=unselected_expression CODE=unselected_expression AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=conditional_configuration.c:<global> FILENAME=conditional_configuration.c ORDER=1
 NODES|TYPE_DECL NAME=unsigned FULL_NAME=unsigned CODE=unsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
@@ -5383,9 +5787,16 @@ NODES|TYPE_DECL NAME=value FULL_NAME=value CODE=union value {\n    int i;\n    f
 NODES|TYPE_DECL NAME=vararg_definition FULL_NAME=vararg_definition CODE=vararg_definition AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=external_declarations.c:<global> FILENAME=external_declarations.c ORDER=1
 NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
 NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=duplicate_paren_helper FULL_NAME=<unresolvedNamespace>.duplicate_paren_helper TYPE_DECL_FULL_NAME=<unresolvedNamespace>.duplicate_paren_helper
+NODES|TYPE NAME=paren_defined FULL_NAME=<unresolvedNamespace>.paren_defined TYPE_DECL_FULL_NAME=<unresolvedNamespace>.paren_defined
 NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=One FULL_NAME=One TYPE_DECL_FULL_NAME=One
+NODES|TYPE NAME=PlainAlias FULL_NAME=PlainAlias TYPE_DECL_FULL_NAME=PlainAlias
 NODES|TYPE NAME=PpBox FULL_NAME=PpBox TYPE_DECL_FULL_NAME=PpBox
 NODES|TYPE NAME=PpInactiveBox FULL_NAME=PpInactiveBox TYPE_DECL_FULL_NAME=PpInactiveBox
+NODES|TYPE NAME=ScalarFirst FULL_NAME=ScalarFirst TYPE_DECL_FULL_NAME=ScalarFirst
+NODES|TYPE NAME=ScalarSecond FULL_NAME=ScalarSecond TYPE_DECL_FULL_NAME=ScalarSecond
+NODES|TYPE NAME=Two FULL_NAME=Two TYPE_DECL_FULL_NAME=Two
 NODES|TYPE NAME=_Bool FULL_NAME=_Bool TYPE_DECL_FULL_NAME=_Bool
 NODES|TYPE NAME=active_block_prototype FULL_NAME=active_block_prototype TYPE_DECL_FULL_NAME=active_block_prototype
 NODES|TYPE NAME=add FULL_NAME=add TYPE_DECL_FULL_NAME=add
@@ -5432,6 +5843,8 @@ NODES|TYPE NAME=defined_space_wrong FULL_NAME=defined_space_wrong TYPE_DECL_FULL
 NODES|TYPE NAME=dereference_if FULL_NAME=dereference_if TYPE_DECL_FULL_NAME=dereference_if
 NODES|TYPE NAME=double FULL_NAME=double TYPE_DECL_FULL_NAME=double
 NODES|TYPE NAME=duplicate FULL_NAME=duplicate TYPE_DECL_FULL_NAME=duplicate
+NODES|TYPE NAME=duplicate_paren_a FULL_NAME=duplicate_paren_a TYPE_DECL_FULL_NAME=duplicate_paren_a
+NODES|TYPE NAME=duplicate_paren_b FULL_NAME=duplicate_paren_b TYPE_DECL_FULL_NAME=duplicate_paren_b
 NODES|TYPE NAME=empty_all_for FULL_NAME=empty_all_for TYPE_DECL_FULL_NAME=empty_all_for
 NODES|TYPE NAME=empty_do FULL_NAME=empty_do TYPE_DECL_FULL_NAME=empty_do
 NODES|TYPE NAME=empty_for FULL_NAME=empty_for TYPE_DECL_FULL_NAME=empty_for
@@ -5471,6 +5884,7 @@ NODES|TYPE NAME=macro_comment_wrong FULL_NAME=macro_comment_wrong TYPE_DECL_FULL
 NODES|TYPE NAME=macros FULL_NAME=macros TYPE_DECL_FULL_NAME=macros
 NODES|TYPE NAME=main FULL_NAME=main TYPE_DECL_FULL_NAME=main
 NODES|TYPE NAME=memcmp FULL_NAME=memcmp TYPE_DECL_FULL_NAME=memcmp
+NODES|TYPE NAME=mixed_prototype_caller FULL_NAME=mixed_prototype_caller TYPE_DECL_FULL_NAME=mixed_prototype_caller
 NODES|TYPE NAME=multi_empty_for FULL_NAME=multi_empty_for TYPE_DECL_FULL_NAME=multi_empty_for
 NODES|TYPE NAME=multi_init_for FULL_NAME=multi_init_for TYPE_DECL_FULL_NAME=multi_init_for
 NODES|TYPE NAME=multiline_active FULL_NAME=multiline_active TYPE_DECL_FULL_NAME=multiline_active
@@ -5484,8 +5898,10 @@ NODES|TYPE NAME=no_update_for FULL_NAME=no_update_for TYPE_DECL_FULL_NAME=no_upd
 NODES|TYPE NAME=pair FULL_NAME=pair TYPE_DECL_FULL_NAME=pair
 NODES|TYPE NAME=parameter_restore FULL_NAME=parameter_restore TYPE_DECL_FULL_NAME=parameter_restore
 NODES|TYPE NAME=paren_if FULL_NAME=paren_if TYPE_DECL_FULL_NAME=paren_if
+NODES|TYPE NAME=parentheses_caller FULL_NAME=parentheses_caller TYPE_DECL_FULL_NAME=parentheses_caller
 NODES|TYPE NAME=parenthesized_callee FULL_NAME=parenthesized_callee TYPE_DECL_FULL_NAME=parenthesized_callee
 NODES|TYPE NAME=parenthesized_defined FULL_NAME=parenthesized_defined TYPE_DECL_FULL_NAME=parenthesized_defined
+NODES|TYPE NAME=parenthesized_definition_caller FULL_NAME=parenthesized_definition_caller TYPE_DECL_FULL_NAME=parenthesized_definition_caller
 NODES|TYPE NAME=pick FULL_NAME=pick TYPE_DECL_FULL_NAME=pick
 NODES|TYPE NAME=point FULL_NAME=point TYPE_DECL_FULL_NAME=point
 NODES|TYPE NAME=point* FULL_NAME=point* TYPE_DECL_FULL_NAME=point*
@@ -5533,11 +5949,14 @@ NODES|TYPE NAME=strcmp FULL_NAME=strcmp TYPE_DECL_FULL_NAME=strcmp
 NODES|TYPE NAME=sum FULL_NAME=sum TYPE_DECL_FULL_NAME=sum
 NODES|TYPE NAME=ternary_active FULL_NAME=ternary_active TYPE_DECL_FULL_NAME=ternary_active
 NODES|TYPE NAME=ternary_wrong FULL_NAME=ternary_wrong TYPE_DECL_FULL_NAME=ternary_wrong
+NODES|TYPE NAME=typedef_marker FULL_NAME=typedef_marker TYPE_DECL_FULL_NAME=typedef_marker
+NODES|TYPE NAME=typedef_shapes_marker FULL_NAME=typedef_shapes_marker TYPE_DECL_FULL_NAME=typedef_shapes_marker
 NODES|TYPE NAME=uint_t FULL_NAME=uint_t TYPE_DECL_FULL_NAME=uint_t
 NODES|TYPE NAME=unary FULL_NAME=unary TYPE_DECL_FULL_NAME=unary
 NODES|TYPE NAME=undef_comment_active FULL_NAME=undef_comment_active TYPE_DECL_FULL_NAME=undef_comment_active
 NODES|TYPE NAME=undef_comment_wrong FULL_NAME=undef_comment_wrong TYPE_DECL_FULL_NAME=undef_comment_wrong
 NODES|TYPE NAME=unionvalue FULL_NAME=unionvalue TYPE_DECL_FULL_NAME=unionvalue
+NODES|TYPE NAME=unknown_caller FULL_NAME=unknown_caller TYPE_DECL_FULL_NAME=unknown_caller
 NODES|TYPE NAME=unnamed_definition FULL_NAME=unnamed_definition TYPE_DECL_FULL_NAME=unnamed_definition
 NODES|TYPE NAME=unselected_expression FULL_NAME=unselected_expression TYPE_DECL_FULL_NAME=unselected_expression
 NODES|TYPE NAME=unsigned FULL_NAME=unsigned TYPE_DECL_FULL_NAME=unsigned
@@ -5560,6 +5979,9 @@ NODES|TYPE NAME=value FULL_NAME=value TYPE_DECL_FULL_NAME=value
 NODES|TYPE NAME=vararg_definition FULL_NAME=vararg_definition TYPE_DECL_FULL_NAME=vararg_definition
 NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
 NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+EDGES|ARGUMENT <unresolvedNamespace>.duplicate_paren_helper#4 -> <unresolvedNamespace>.duplicate_paren_helper#5
+EDGES|ARGUMENT <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#4 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#5
+EDGES|ARGUMENT <unresolvedNamespace>.paren_defined#4 -> <unresolvedNamespace>.paren_defined#5
 EDGES|ARGUMENT active_block_prototype#4 -> active_block_prototype#5
 EDGES|ARGUMENT active_block_prototype#5 -> active_block_prototype#6
 EDGES|ARGUMENT add#6 -> add#7
@@ -5765,6 +6187,10 @@ EDGES|ARGUMENT dereference_if#9 -> dereference_if#10
 EDGES|ARGUMENT duplicate<duplicate>0#4 -> duplicate<duplicate>0#5
 EDGES|ARGUMENT duplicate<duplicate>0#5 -> duplicate<duplicate>0#6
 EDGES|ARGUMENT duplicate<duplicate>0#5 -> duplicate<duplicate>0#7
+EDGES|ARGUMENT duplicate_paren_a#4 -> duplicate_paren_a#5
+EDGES|ARGUMENT duplicate_paren_a#5 -> duplicate_paren_a#6
+EDGES|ARGUMENT duplicate_paren_b#4 -> duplicate_paren_b#5
+EDGES|ARGUMENT duplicate_paren_b#5 -> duplicate_paren_b#6
 EDGES|ARGUMENT empty_all_for#6 -> empty_all_for#7
 EDGES|ARGUMENT empty_do#5 -> empty_do#6
 EDGES|ARGUMENT empty_do#5 -> empty_do#7
@@ -5967,6 +6393,23 @@ EDGES|ARGUMENT memcmp#35 -> memcmp#36
 EDGES|ARGUMENT memcmp#35 -> memcmp#38
 EDGES|ARGUMENT memcmp#36 -> memcmp#37
 EDGES|ARGUMENT memcmp#38 -> memcmp#39
+EDGES|ARGUMENT mixed_prototype_caller#10 -> mixed_prototype_caller#11
+EDGES|ARGUMENT mixed_prototype_caller#12 -> mixed_prototype_caller#13
+EDGES|ARGUMENT mixed_prototype_caller#14 -> mixed_prototype_caller#15
+EDGES|ARGUMENT mixed_prototype_caller#16 -> mixed_prototype_caller#17
+EDGES|ARGUMENT mixed_prototype_caller#18 -> mixed_prototype_caller#19
+EDGES|ARGUMENT mixed_prototype_caller#20 -> mixed_prototype_caller#21
+EDGES|ARGUMENT mixed_prototype_caller#4 -> mixed_prototype_caller#5
+EDGES|ARGUMENT mixed_prototype_caller#5 -> mixed_prototype_caller#20
+EDGES|ARGUMENT mixed_prototype_caller#5 -> mixed_prototype_caller#6
+EDGES|ARGUMENT mixed_prototype_caller#6 -> mixed_prototype_caller#18
+EDGES|ARGUMENT mixed_prototype_caller#6 -> mixed_prototype_caller#7
+EDGES|ARGUMENT mixed_prototype_caller#7 -> mixed_prototype_caller#16
+EDGES|ARGUMENT mixed_prototype_caller#7 -> mixed_prototype_caller#8
+EDGES|ARGUMENT mixed_prototype_caller#8 -> mixed_prototype_caller#14
+EDGES|ARGUMENT mixed_prototype_caller#8 -> mixed_prototype_caller#9
+EDGES|ARGUMENT mixed_prototype_caller#9 -> mixed_prototype_caller#10
+EDGES|ARGUMENT mixed_prototype_caller#9 -> mixed_prototype_caller#12
 EDGES|ARGUMENT multi_empty_for#9 -> multi_empty_for#10
 EDGES|ARGUMENT multi_init_for#11 -> multi_init_for#12
 EDGES|ARGUMENT multi_init_for#11 -> multi_init_for#13
@@ -6022,10 +6465,17 @@ EDGES|ARGUMENT paren_if#11 -> paren_if#12
 EDGES|ARGUMENT paren_if#5 -> paren_if#6
 EDGES|ARGUMENT paren_if#5 -> paren_if#7
 EDGES|ARGUMENT paren_if#9 -> paren_if#10
+EDGES|ARGUMENT parentheses_caller#4 -> parentheses_caller#5
+EDGES|ARGUMENT parentheses_caller#5 -> parentheses_caller#6
+EDGES|ARGUMENT parentheses_caller#5 -> parentheses_caller#8
+EDGES|ARGUMENT parentheses_caller#6 -> parentheses_caller#7
+EDGES|ARGUMENT parentheses_caller#8 -> parentheses_caller#9
 EDGES|ARGUMENT parenthesized_callee#5 -> parenthesized_callee#6
 EDGES|ARGUMENT parenthesized_callee#6 -> parenthesized_callee#8
 EDGES|ARGUMENT parenthesized_defined#4 -> parenthesized_defined#5
 EDGES|ARGUMENT parenthesized_defined#5 -> parenthesized_defined#7
+EDGES|ARGUMENT parenthesized_definition_caller#4 -> parenthesized_definition_caller#5
+EDGES|ARGUMENT parenthesized_definition_caller#5 -> parenthesized_definition_caller#6
 EDGES|ARGUMENT pick#13 -> pick#14
 EDGES|ARGUMENT pick#13 -> pick#15
 EDGES|ARGUMENT pick#19 -> pick#20
@@ -6203,6 +6653,8 @@ EDGES|ARGUMENT sum#5 -> sum#7
 EDGES|ARGUMENT sum#9 -> sum#10
 EDGES|ARGUMENT sum#9 -> sum#11
 EDGES|ARGUMENT ternary_active#4 -> ternary_active#5
+EDGES|ARGUMENT typedef_marker#4 -> typedef_marker#5
+EDGES|ARGUMENT typedef_shapes_marker#4 -> typedef_shapes_marker#5
 EDGES|ARGUMENT unary#10 -> unary#11
 EDGES|ARGUMENT unary#10 -> unary#12
 EDGES|ARGUMENT unary#12 -> unary#13
@@ -6216,6 +6668,8 @@ EDGES|ARGUMENT unary#5 -> unary#6
 EDGES|ARGUMENT unary#5 -> unary#7
 EDGES|ARGUMENT unary#7 -> unary#8
 EDGES|ARGUMENT undef_comment_active#4 -> undef_comment_active#5
+EDGES|ARGUMENT unknown_caller#4 -> unknown_caller#5
+EDGES|ARGUMENT unknown_caller#5 -> unknown_caller#6
 EDGES|ARGUMENT unnamed_definition#6 -> unnamed_definition#7
 EDGES|ARGUMENT use#12 -> use#13
 EDGES|ARGUMENT use#12 -> use#14
@@ -6358,6 +6812,8 @@ EDGES|CALL declared_for#9 -> <operator>.notEquals#0
 EDGES|CALL dereference_if#5 -> <operator>.indirection#0
 EDGES|CALL dereference_if#9 -> <operator>.indirection#0
 EDGES|CALL duplicate<duplicate>0#5 -> <operator>.addition#0
+EDGES|CALL duplicate_paren_a#5 -> duplicate_paren_helper#0
+EDGES|CALL duplicate_paren_b#5 -> duplicate_paren_helper#0
 EDGES|CALL empty_do#5 -> <operator>.notEquals#0
 EDGES|CALL empty_while#5 -> <operator>.notEquals#0
 EDGES|CALL explicit_if#5 -> <operator>.notEquals#0
@@ -6454,6 +6910,17 @@ EDGES|CALL memcmp#33 -> <operator>.conditional#0
 EDGES|CALL memcmp#35 -> <operator>.subtraction#0
 EDGES|CALL memcmp#36 -> <operator>.indirection#0
 EDGES|CALL memcmp#38 -> <operator>.indirection#0
+EDGES|CALL mixed_prototype_caller#10 -> paren_first#0
+EDGES|CALL mixed_prototype_caller#12 -> ordinary_second#0
+EDGES|CALL mixed_prototype_caller#14 -> ordinary_first#0
+EDGES|CALL mixed_prototype_caller#16 -> paren_second#0
+EDGES|CALL mixed_prototype_caller#18 -> macro_paren#0
+EDGES|CALL mixed_prototype_caller#20 -> macro_ordinary#0
+EDGES|CALL mixed_prototype_caller#5 -> <operator>.addition#0
+EDGES|CALL mixed_prototype_caller#6 -> <operator>.addition#0
+EDGES|CALL mixed_prototype_caller#7 -> <operator>.addition#0
+EDGES|CALL mixed_prototype_caller#8 -> <operator>.addition#0
+EDGES|CALL mixed_prototype_caller#9 -> <operator>.addition#0
 EDGES|CALL multi_init_for#11 -> <operator>.assignment#0
 EDGES|CALL multi_init_for#14 -> <operator>.notEquals#0
 EDGES|CALL multi_init_for#17 -> <operator>.postDecrement#0
@@ -6479,6 +6946,10 @@ EDGES|CALL parameter_restore#12 -> <operator>.assignment#0
 EDGES|CALL parameter_restore#15 -> <operator>.assignment#0
 EDGES|CALL parameter_restore#7 -> <operator>.notEquals#0
 EDGES|CALL paren_if#5 -> <operator>.notEquals#0
+EDGES|CALL parentheses_caller#5 -> <operator>.addition#0
+EDGES|CALL parentheses_caller#6 -> api_named#0
+EDGES|CALL parentheses_caller#8 -> plain_named#0
+EDGES|CALL parenthesized_definition_caller#5 -> paren_defined#0
 EDGES|CALL pick#13 -> <operator>.assignment#0
 EDGES|CALL pick#19 -> <operator>.assignment#0
 EDGES|CALL pick#24 -> <operator>.assignment#0
@@ -6564,6 +7035,7 @@ EDGES|CALL unary#19 -> <operator>.postIncrement#0
 EDGES|CALL unary#21 -> <operator>.preDecrement#0
 EDGES|CALL unary#5 -> <operator>.assignment#0
 EDGES|CALL unary#7 -> <operator>.minus#0
+EDGES|CALL unknown_caller#5 -> unknown_named#0
 EDGES|CALL use#12 -> <operator>.assignment#0
 EDGES|CALL use#16 -> <operator>.assignment#0
 EDGES|CALL use#17 -> <operator>.fieldAccess#0
@@ -6625,6 +7097,21 @@ EDGES|CFG <operators>.assignmentModulo#0 -> <operators>.assignmentModulo#5
 EDGES|CFG <operators>.assignmentOr#0 -> <operators>.assignmentOr#5
 EDGES|CFG <operators>.assignmentShiftLeft#0 -> <operators>.assignmentShiftLeft#5
 EDGES|CFG <operators>.assignmentXor#0 -> <operators>.assignmentXor#5
+EDGES|CFG <unresolvedNamespace>.api_named#0 -> <unresolvedNamespace>.api_named#4
+EDGES|CFG <unresolvedNamespace>.duplicate_paren_helper#0 -> <unresolvedNamespace>.duplicate_paren_helper#5
+EDGES|CFG <unresolvedNamespace>.duplicate_paren_helper#4 -> <unresolvedNamespace>.duplicate_paren_helper#6
+EDGES|CFG <unresolvedNamespace>.duplicate_paren_helper#5 -> <unresolvedNamespace>.duplicate_paren_helper#4
+EDGES|CFG <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#0 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#5
+EDGES|CFG <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#4 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#6
+EDGES|CFG <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#5 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#4
+EDGES|CFG <unresolvedNamespace>.macro_paren#0 -> <unresolvedNamespace>.macro_paren#4
+EDGES|CFG <unresolvedNamespace>.paren_defined#0 -> <unresolvedNamespace>.paren_defined#5
+EDGES|CFG <unresolvedNamespace>.paren_defined#4 -> <unresolvedNamespace>.paren_defined#6
+EDGES|CFG <unresolvedNamespace>.paren_defined#5 -> <unresolvedNamespace>.paren_defined#4
+EDGES|CFG <unresolvedNamespace>.paren_first#0 -> <unresolvedNamespace>.paren_first#4
+EDGES|CFG <unresolvedNamespace>.paren_second#0 -> <unresolvedNamespace>.paren_second#4
+EDGES|CFG <unresolvedNamespace>.plain_named#0 -> <unresolvedNamespace>.plain_named#4
+EDGES|CFG <unresolvedNamespace>.unknown_named#0 -> <unresolvedNamespace>.unknown_named#4
 EDGES|CFG active_block_prototype#0 -> active_block_prototype#6
 EDGES|CFG active_block_prototype#4 -> active_block_prototype#7
 EDGES|CFG active_block_prototype#5 -> active_block_prototype#4
@@ -6690,6 +7177,7 @@ EDGES|CFG and_if#7 -> and_if#14
 EDGES|CFG and_if#8 -> and_if#7
 EDGES|CFG and_if#8 -> and_if#9
 EDGES|CFG and_if#9 -> and_if#7
+EDGES|CFG api_named#0 -> api_named#4
 EDGES|CFG apply#0 -> apply#8
 EDGES|CFG apply#10 -> apply#7
 EDGES|CFG apply#6 -> apply#11
@@ -7188,6 +7676,15 @@ EDGES|CFG duplicate<duplicate>0#4 -> duplicate<duplicate>0#8
 EDGES|CFG duplicate<duplicate>0#5 -> duplicate<duplicate>0#4
 EDGES|CFG duplicate<duplicate>0#6 -> duplicate<duplicate>0#7
 EDGES|CFG duplicate<duplicate>0#7 -> duplicate<duplicate>0#5
+EDGES|CFG duplicate_paren_a#0 -> duplicate_paren_a#6
+EDGES|CFG duplicate_paren_a#4 -> duplicate_paren_a#7
+EDGES|CFG duplicate_paren_a#5 -> duplicate_paren_a#4
+EDGES|CFG duplicate_paren_a#6 -> duplicate_paren_a#5
+EDGES|CFG duplicate_paren_b#0 -> duplicate_paren_b#6
+EDGES|CFG duplicate_paren_b#4 -> duplicate_paren_b#7
+EDGES|CFG duplicate_paren_b#5 -> duplicate_paren_b#4
+EDGES|CFG duplicate_paren_b#6 -> duplicate_paren_b#5
+EDGES|CFG duplicate_paren_helper#0 -> duplicate_paren_helper#4
 EDGES|CFG empty_all_for#6 -> empty_all_for#8
 EDGES|CFG empty_all_for#7 -> empty_all_for#6
 EDGES|CFG empty_do#5 -> empty_do#6
@@ -7545,6 +8042,8 @@ EDGES|CFG loop.c:<global>#1 -> sum#6
 EDGES|CFG loop.c:<global>#32 -> loop.c:<global>#33
 EDGES|CFG macro_comment_active#4 -> macro_comment_active#6
 EDGES|CFG macro_comment_active#5 -> macro_comment_active#4
+EDGES|CFG macro_ordinary#0 -> macro_ordinary#4
+EDGES|CFG macro_paren#0 -> macro_paren#4
 EDGES|CFG macros#0 -> macros#6
 EDGES|CFG macros#11 -> macros#27
 EDGES|CFG macros#12 -> macros#11
@@ -7613,6 +8112,27 @@ EDGES|CFG memcmp#39 -> memcmp#38
 EDGES|CFG memcmp#40 -> memcmp#33
 EDGES|CFG memcmp.c:<global>#0 -> memcmp.c:<global>#44
 EDGES|CFG memcmp.c:<global>#44 -> memcmp.c:<global>#45
+EDGES|CFG mixed_prototype_caller#0 -> mixed_prototype_caller#11
+EDGES|CFG mixed_prototype_caller#10 -> mixed_prototype_caller#13
+EDGES|CFG mixed_prototype_caller#11 -> mixed_prototype_caller#10
+EDGES|CFG mixed_prototype_caller#12 -> mixed_prototype_caller#9
+EDGES|CFG mixed_prototype_caller#13 -> mixed_prototype_caller#12
+EDGES|CFG mixed_prototype_caller#14 -> mixed_prototype_caller#8
+EDGES|CFG mixed_prototype_caller#15 -> mixed_prototype_caller#14
+EDGES|CFG mixed_prototype_caller#16 -> mixed_prototype_caller#7
+EDGES|CFG mixed_prototype_caller#17 -> mixed_prototype_caller#16
+EDGES|CFG mixed_prototype_caller#18 -> mixed_prototype_caller#6
+EDGES|CFG mixed_prototype_caller#19 -> mixed_prototype_caller#18
+EDGES|CFG mixed_prototype_caller#20 -> mixed_prototype_caller#5
+EDGES|CFG mixed_prototype_caller#21 -> mixed_prototype_caller#20
+EDGES|CFG mixed_prototype_caller#4 -> mixed_prototype_caller#22
+EDGES|CFG mixed_prototype_caller#5 -> mixed_prototype_caller#4
+EDGES|CFG mixed_prototype_caller#6 -> mixed_prototype_caller#21
+EDGES|CFG mixed_prototype_caller#7 -> mixed_prototype_caller#19
+EDGES|CFG mixed_prototype_caller#8 -> mixed_prototype_caller#17
+EDGES|CFG mixed_prototype_caller#9 -> mixed_prototype_caller#15
+EDGES|CFG mixed_prototypes.c:<global>#0 -> mixed_prototypes.c:<global>#25
+EDGES|CFG mixed_prototypes.c:<global>#25 -> mixed_prototypes.c:<global>#26
 EDGES|CFG multi_empty_for#10 -> multi_empty_for#9
 EDGES|CFG multi_empty_for#8 -> multi_empty_for#10
 EDGES|CFG multi_empty_for#9 -> multi_empty_for#11
@@ -7710,6 +8230,8 @@ EDGES|CFG order.c:<global>#39 -> order.c:<global>#37
 EDGES|CFG order.c:<global>#40 -> order.c:<global>#41
 EDGES|CFG order.c:<global>#41 -> order.c:<global>#42
 EDGES|CFG order.c:<global>#42 -> order.c:<global>#43
+EDGES|CFG ordinary_first#0 -> ordinary_first#4
+EDGES|CFG ordinary_second#0 -> ordinary_second#4
 EDGES|CFG pair.<clinit>:pair()#2 -> pair.<clinit>:pair()#6
 EDGES|CFG pair.<clinit>:pair()#3 -> pair.<clinit>:pair()#2
 EDGES|CFG parameter_restore#12 -> parameter_restore#16
@@ -7726,6 +8248,8 @@ EDGES|CFG parameter_restore#7 -> parameter_restore#13
 EDGES|CFG parameter_restore#7 -> parameter_restore#20
 EDGES|CFG parameter_restore#8 -> parameter_restore#9
 EDGES|CFG parameter_restore#9 -> parameter_restore#7
+EDGES|CFG paren_defined#0 -> paren_defined#4
+EDGES|CFG paren_first#0 -> paren_first#4
 EDGES|CFG paren_if#10 -> paren_if#9
 EDGES|CFG paren_if#11 -> paren_if#13
 EDGES|CFG paren_if#12 -> paren_if#11
@@ -7734,6 +8258,14 @@ EDGES|CFG paren_if#5 -> paren_if#12
 EDGES|CFG paren_if#6 -> paren_if#7
 EDGES|CFG paren_if#7 -> paren_if#5
 EDGES|CFG paren_if#9 -> paren_if#13
+EDGES|CFG paren_second#0 -> paren_second#4
+EDGES|CFG parentheses_caller#0 -> parentheses_caller#7
+EDGES|CFG parentheses_caller#4 -> parentheses_caller#10
+EDGES|CFG parentheses_caller#5 -> parentheses_caller#4
+EDGES|CFG parentheses_caller#6 -> parentheses_caller#9
+EDGES|CFG parentheses_caller#7 -> parentheses_caller#6
+EDGES|CFG parentheses_caller#8 -> parentheses_caller#5
+EDGES|CFG parentheses_caller#9 -> parentheses_caller#8
 EDGES|CFG parenthesized_callee#5 -> parenthesized_callee#9
 EDGES|CFG parenthesized_callee#6 -> parenthesized_callee#5
 EDGES|CFG parenthesized_callee#7 -> parenthesized_callee#8
@@ -7742,6 +8274,21 @@ EDGES|CFG parenthesized_defined#4 -> parenthesized_defined#8
 EDGES|CFG parenthesized_defined#5 -> parenthesized_defined#4
 EDGES|CFG parenthesized_defined#6 -> parenthesized_defined#7
 EDGES|CFG parenthesized_defined#7 -> parenthesized_defined#5
+EDGES|CFG parenthesized_definition_caller#0 -> parenthesized_definition_caller#6
+EDGES|CFG parenthesized_definition_caller#4 -> parenthesized_definition_caller#7
+EDGES|CFG parenthesized_definition_caller#5 -> parenthesized_definition_caller#4
+EDGES|CFG parenthesized_definition_caller#6 -> parenthesized_definition_caller#5
+EDGES|CFG parenthesized_definitions.c:<global>#0 -> parenthesized_definitions.c:<global>#17
+EDGES|CFG parenthesized_definitions.c:<global>#17 -> parenthesized_definitions.c:<global>#18
+EDGES|CFG parenthesized_definitions.c:<global>#18 -> parenthesized_definitions.c:<global>#19
+EDGES|CFG parenthesized_duplicate_a.c:<global>#0 -> parenthesized_duplicate_a.c:<global>#17
+EDGES|CFG parenthesized_duplicate_a.c:<global>#17 -> parenthesized_duplicate_a.c:<global>#18
+EDGES|CFG parenthesized_duplicate_a.c:<global>#18 -> parenthesized_duplicate_a.c:<global>#19
+EDGES|CFG parenthesized_duplicate_b.c:<global>#0 -> parenthesized_duplicate_b.c:<global>#17
+EDGES|CFG parenthesized_duplicate_b.c:<global>#17 -> parenthesized_duplicate_b.c:<global>#18
+EDGES|CFG parenthesized_duplicate_b.c:<global>#18 -> parenthesized_duplicate_b.c:<global>#19
+EDGES|CFG parenthesized_prototypes.c:<global>#0 -> parenthesized_prototypes.c:<global>#13
+EDGES|CFG parenthesized_prototypes.c:<global>#13 -> parenthesized_prototypes.c:<global>#14
 EDGES|CFG pick#0 -> pick#6
 EDGES|CFG pick#11 -> pick#12
 EDGES|CFG pick#12 -> pick#14
@@ -7785,6 +8332,7 @@ EDGES|CFG pick#7 -> pick#5
 EDGES|CFG pick#9 -> pick#11
 EDGES|CFG pick#9 -> pick#17
 EDGES|CFG pick#9 -> pick#23
+EDGES|CFG plain_named#0 -> plain_named#4
 EDGES|CFG pointer_compare#10 -> pointer_compare#9
 EDGES|CFG pointer_compare#12 -> pointer_compare#16
 EDGES|CFG pointer_compare#12 -> pointer_compare#18
@@ -8067,6 +8615,16 @@ EDGES|CFG switch.c:<global>#0 -> switch.c:<global>#53
 EDGES|CFG switch.c:<global>#53 -> switch.c:<global>#54
 EDGES|CFG ternary_active#4 -> ternary_active#6
 EDGES|CFG ternary_active#5 -> ternary_active#4
+EDGES|CFG typedef_marker#0 -> typedef_marker#5
+EDGES|CFG typedef_marker#4 -> typedef_marker#6
+EDGES|CFG typedef_marker#5 -> typedef_marker#4
+EDGES|CFG typedef_pointer.c:<global>#0 -> typedef_pointer.c:<global>#10
+EDGES|CFG typedef_pointer.c:<global>#10 -> typedef_pointer.c:<global>#11
+EDGES|CFG typedef_shapes.c:<global>#0 -> typedef_shapes.c:<global>#13
+EDGES|CFG typedef_shapes.c:<global>#1 -> typedef_shapes_marker#5
+EDGES|CFG typedef_shapes.c:<global>#13 -> typedef_shapes.c:<global>#14
+EDGES|CFG typedef_shapes_marker#4 -> typedef_shapes_marker#6
+EDGES|CFG typedef_shapes_marker#5 -> typedef_shapes_marker#4
 EDGES|CFG types2.c:<global>#0 -> types2.c:<global>#73
 EDGES|CFG types2.c:<global>#29 -> use#7
 EDGES|CFG types2.c:<global>#73 -> types2.c:<global>#74
@@ -8100,6 +8658,14 @@ EDGES|CFG undeclared_many#0 -> undeclared_many#5
 EDGES|CFG undeclared_zero#0 -> undeclared_zero#4
 EDGES|CFG undef_comment_active#4 -> undef_comment_active#6
 EDGES|CFG undef_comment_active#5 -> undef_comment_active#4
+EDGES|CFG unknown_caller#0 -> unknown_caller#6
+EDGES|CFG unknown_caller#4 -> unknown_caller#7
+EDGES|CFG unknown_caller#5 -> unknown_caller#4
+EDGES|CFG unknown_caller#6 -> unknown_caller#5
+EDGES|CFG unknown_macro_prototypes.c:<global>#0 -> unknown_macro_prototypes.c:<global>#10
+EDGES|CFG unknown_macro_prototypes.c:<global>#10 -> unknown_macro_prototypes.c:<global>#11
+EDGES|CFG unknown_macro_prototypes.c:<global>#11 -> unknown_macro_prototypes.c:<global>#12
+EDGES|CFG unknown_named#0 -> unknown_named#4
 EDGES|CFG unnamed_definition#6 -> unnamed_definition#8
 EDGES|CFG unnamed_definition#7 -> unnamed_definition#6
 EDGES|CFG unused_named#0 -> unused_named#4
@@ -8288,6 +8854,21 @@ EDGES|CONTAINS <operators>.assignmentModulo#0 -> <operators>.assignmentModulo#2
 EDGES|CONTAINS <operators>.assignmentOr#0 -> <operators>.assignmentOr#2
 EDGES|CONTAINS <operators>.assignmentShiftLeft#0 -> <operators>.assignmentShiftLeft#2
 EDGES|CONTAINS <operators>.assignmentXor#0 -> <operators>.assignmentXor#2
+EDGES|CONTAINS <unresolvedNamespace>.api_named#0 -> <unresolvedNamespace>.api_named#3
+EDGES|CONTAINS <unresolvedNamespace>.duplicate_paren_helper#0 -> <unresolvedNamespace>.duplicate_paren_helper#3
+EDGES|CONTAINS <unresolvedNamespace>.duplicate_paren_helper#0 -> <unresolvedNamespace>.duplicate_paren_helper#4
+EDGES|CONTAINS <unresolvedNamespace>.duplicate_paren_helper#0 -> <unresolvedNamespace>.duplicate_paren_helper#5
+EDGES|CONTAINS <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#0 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#3
+EDGES|CONTAINS <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#0 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#4
+EDGES|CONTAINS <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#0 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#5
+EDGES|CONTAINS <unresolvedNamespace>.macro_paren#0 -> <unresolvedNamespace>.macro_paren#3
+EDGES|CONTAINS <unresolvedNamespace>.paren_defined#0 -> <unresolvedNamespace>.paren_defined#3
+EDGES|CONTAINS <unresolvedNamespace>.paren_defined#0 -> <unresolvedNamespace>.paren_defined#4
+EDGES|CONTAINS <unresolvedNamespace>.paren_defined#0 -> <unresolvedNamespace>.paren_defined#5
+EDGES|CONTAINS <unresolvedNamespace>.paren_first#0 -> <unresolvedNamespace>.paren_first#3
+EDGES|CONTAINS <unresolvedNamespace>.paren_second#0 -> <unresolvedNamespace>.paren_second#3
+EDGES|CONTAINS <unresolvedNamespace>.plain_named#0 -> <unresolvedNamespace>.plain_named#3
+EDGES|CONTAINS <unresolvedNamespace>.unknown_named#0 -> <unresolvedNamespace>.unknown_named#3
 EDGES|CONTAINS D:add.c:<global> -> D:add
 EDGES|CONTAINS D:add.c:<global> -> D:main
 EDGES|CONTAINS D:add.c:<global> -> add.c:<global>#0
@@ -8464,11 +9045,32 @@ EDGES|CONTAINS D:macros.c:<global> -> macros.c:LIMIT:int(0)#0
 EDGES|CONTAINS D:macros.c:<global> -> macros.c:SQR:ANY(1)#0
 EDGES|CONTAINS D:memcmp.c:<global> -> D:memcmp
 EDGES|CONTAINS D:memcmp.c:<global> -> memcmp.c:<global>#0
+EDGES|CONTAINS D:mixed_prototypes.c:<global> -> <unresolvedNamespace>.macro_paren#0
+EDGES|CONTAINS D:mixed_prototypes.c:<global> -> <unresolvedNamespace>.paren_first#0
+EDGES|CONTAINS D:mixed_prototypes.c:<global> -> <unresolvedNamespace>.paren_second#0
+EDGES|CONTAINS D:mixed_prototypes.c:<global> -> D:mixed_prototype_caller
+EDGES|CONTAINS D:mixed_prototypes.c:<global> -> macro_ordinary#0
+EDGES|CONTAINS D:mixed_prototypes.c:<global> -> mixed_prototypes.c:<global>#0
+EDGES|CONTAINS D:mixed_prototypes.c:<global> -> ordinary_first#0
+EDGES|CONTAINS D:mixed_prototypes.c:<global> -> ordinary_second#0
 EDGES|CONTAINS D:ops.c:<global> -> D:classify
 EDGES|CONTAINS D:ops.c:<global> -> ops.c:<global>#0
 EDGES|CONTAINS D:order.c:<global> -> D:first
 EDGES|CONTAINS D:order.c:<global> -> D:second
 EDGES|CONTAINS D:order.c:<global> -> order.c:<global>#0
+EDGES|CONTAINS D:parenthesized_definitions.c:<global> -> D:<unresolvedNamespace>.paren_defined
+EDGES|CONTAINS D:parenthesized_definitions.c:<global> -> D:parenthesized_definition_caller
+EDGES|CONTAINS D:parenthesized_definitions.c:<global> -> parenthesized_definitions.c:<global>#0
+EDGES|CONTAINS D:parenthesized_duplicate_a.c:<global> -> D:<unresolvedNamespace>.duplicate_paren_helper
+EDGES|CONTAINS D:parenthesized_duplicate_a.c:<global> -> D:duplicate_paren_a
+EDGES|CONTAINS D:parenthesized_duplicate_a.c:<global> -> parenthesized_duplicate_a.c:<global>#0
+EDGES|CONTAINS D:parenthesized_duplicate_b.c:<global> -> D:<unresolvedNamespace>.duplicate_paren_helper<duplicate>0
+EDGES|CONTAINS D:parenthesized_duplicate_b.c:<global> -> D:duplicate_paren_b
+EDGES|CONTAINS D:parenthesized_duplicate_b.c:<global> -> parenthesized_duplicate_b.c:<global>#0
+EDGES|CONTAINS D:parenthesized_prototypes.c:<global> -> <unresolvedNamespace>.api_named#0
+EDGES|CONTAINS D:parenthesized_prototypes.c:<global> -> <unresolvedNamespace>.plain_named#0
+EDGES|CONTAINS D:parenthesized_prototypes.c:<global> -> D:parentheses_caller
+EDGES|CONTAINS D:parenthesized_prototypes.c:<global> -> parenthesized_prototypes.c:<global>#0
 EDGES|CONTAINS D:prototype_a.c:<global> -> D:use_a
 EDGES|CONTAINS D:prototype_a.c:<global> -> only_header#0
 EDGES|CONTAINS D:prototype_a.c:<global> -> prototype_a.c:<global>#0
@@ -8482,12 +9084,19 @@ EDGES|CONTAINS D:structs.c:<global> -> D:helper
 EDGES|CONTAINS D:structs.c:<global> -> structs.c:<global>#0
 EDGES|CONTAINS D:switch.c:<global> -> D:pick
 EDGES|CONTAINS D:switch.c:<global> -> switch.c:<global>#0
+EDGES|CONTAINS D:typedef_pointer.c:<global> -> D:typedef_marker
+EDGES|CONTAINS D:typedef_pointer.c:<global> -> typedef_pointer.c:<global>#0
+EDGES|CONTAINS D:typedef_shapes.c:<global> -> D:typedef_shapes_marker
+EDGES|CONTAINS D:typedef_shapes.c:<global> -> typedef_shapes.c:<global>#0
 EDGES|CONTAINS D:types2.c:<global> -> D:apply
 EDGES|CONTAINS D:types2.c:<global> -> D:use
 EDGES|CONTAINS D:types2.c:<global> -> types2.c:<global>#0
 EDGES|CONTAINS D:unary.c:<global> -> D:ptr
 EDGES|CONTAINS D:unary.c:<global> -> D:unary
 EDGES|CONTAINS D:unary.c:<global> -> unary.c:<global>#0
+EDGES|CONTAINS D:unknown_macro_prototypes.c:<global> -> <unresolvedNamespace>.unknown_named#0
+EDGES|CONTAINS D:unknown_macro_prototypes.c:<global> -> D:unknown_caller
+EDGES|CONTAINS D:unknown_macro_prototypes.c:<global> -> unknown_macro_prototypes.c:<global>#0
 EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
 EDGES|CONTAINS F:<includes> -> D:ANY
 EDGES|CONTAINS F:<includes> -> D:_Bool
@@ -8537,15 +9146,23 @@ EDGES|CONTAINS F:logic.c -> D:logic.c:<global>
 EDGES|CONTAINS F:loop.c -> D:loop.c:<global>
 EDGES|CONTAINS F:macros.c -> D:macros.c:<global>
 EDGES|CONTAINS F:memcmp.c -> D:memcmp.c:<global>
+EDGES|CONTAINS F:mixed_prototypes.c -> D:mixed_prototypes.c:<global>
 EDGES|CONTAINS F:ops.c -> D:ops.c:<global>
 EDGES|CONTAINS F:order.c -> D:order.c:<global>
+EDGES|CONTAINS F:parenthesized_definitions.c -> D:parenthesized_definitions.c:<global>
+EDGES|CONTAINS F:parenthesized_duplicate_a.c -> D:parenthesized_duplicate_a.c:<global>
+EDGES|CONTAINS F:parenthesized_duplicate_b.c -> D:parenthesized_duplicate_b.c:<global>
+EDGES|CONTAINS F:parenthesized_prototypes.c -> D:parenthesized_prototypes.c:<global>
 EDGES|CONTAINS F:prototype_a.c -> D:prototype_a.c:<global>
 EDGES|CONTAINS F:prototype_b.c -> D:prototype_b.c:<global>
 EDGES|CONTAINS F:strcmp.c -> D:strcmp.c:<global>
 EDGES|CONTAINS F:structs.c -> D:structs.c:<global>
 EDGES|CONTAINS F:switch.c -> D:switch.c:<global>
+EDGES|CONTAINS F:typedef_pointer.c -> D:typedef_pointer.c:<global>
+EDGES|CONTAINS F:typedef_shapes.c -> D:typedef_shapes.c:<global>
 EDGES|CONTAINS F:types2.c -> D:types2.c:<global>
 EDGES|CONTAINS F:unary.c -> D:unary.c:<global>
+EDGES|CONTAINS F:unknown_macro_prototypes.c -> D:unknown_macro_prototypes.c:<global>
 EDGES|CONTAINS active_block_prototype#0 -> active_block_prototype#3
 EDGES|CONTAINS active_block_prototype#0 -> active_block_prototype#4
 EDGES|CONTAINS active_block_prototype#0 -> active_block_prototype#5
@@ -8620,6 +9237,7 @@ EDGES|CONTAINS and_if#0 -> and_if#6
 EDGES|CONTAINS and_if#0 -> and_if#7
 EDGES|CONTAINS and_if#0 -> and_if#8
 EDGES|CONTAINS and_if#0 -> and_if#9
+EDGES|CONTAINS api_named#0 -> api_named#2
 EDGES|CONTAINS apply#0 -> apply#10
 EDGES|CONTAINS apply#0 -> apply#5
 EDGES|CONTAINS apply#0 -> apply#6
@@ -9666,6 +10284,15 @@ EDGES|CONTAINS count#0 -> count#5
 EDGES|CONTAINS count#0 -> count#6
 EDGES|CONTAINS count#0 -> count#7
 EDGES|CONTAINS count#0 -> count#8
+EDGES|CONTAINS duplicate_paren_a#0 -> duplicate_paren_a#3
+EDGES|CONTAINS duplicate_paren_a#0 -> duplicate_paren_a#4
+EDGES|CONTAINS duplicate_paren_a#0 -> duplicate_paren_a#5
+EDGES|CONTAINS duplicate_paren_a#0 -> duplicate_paren_a#6
+EDGES|CONTAINS duplicate_paren_b#0 -> duplicate_paren_b#3
+EDGES|CONTAINS duplicate_paren_b#0 -> duplicate_paren_b#4
+EDGES|CONTAINS duplicate_paren_b#0 -> duplicate_paren_b#5
+EDGES|CONTAINS duplicate_paren_b#0 -> duplicate_paren_b#6
+EDGES|CONTAINS duplicate_paren_helper#0 -> duplicate_paren_helper#2
 EDGES|CONTAINS exprs#0 -> exprs#10
 EDGES|CONTAINS exprs#0 -> exprs#11
 EDGES|CONTAINS exprs#0 -> exprs#12
@@ -10047,6 +10674,8 @@ EDGES|CONTAINS loop.c:<global>#1 -> sum#5
 EDGES|CONTAINS loop.c:<global>#1 -> sum#6
 EDGES|CONTAINS loop.c:<global>#1 -> sum#7
 EDGES|CONTAINS loop.c:<global>#1 -> sum#9
+EDGES|CONTAINS macro_ordinary#0 -> macro_ordinary#3
+EDGES|CONTAINS macro_paren#0 -> macro_paren#2
 EDGES|CONTAINS macros#0 -> macros#10
 EDGES|CONTAINS macros#0 -> macros#11
 EDGES|CONTAINS macros#0 -> macros#12
@@ -10111,6 +10740,28 @@ EDGES|CONTAINS memcmp#0 -> memcmp#7
 EDGES|CONTAINS memcmp.c:<global>#0 -> memcmp#0
 EDGES|CONTAINS memcmp.c:<global>#0 -> memcmp.c:<global>#43
 EDGES|CONTAINS memcmp.c:<global>#0 -> memcmp.c:<global>#44
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#10
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#11
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#12
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#13
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#14
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#15
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#16
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#17
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#18
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#19
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#20
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#21
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#3
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#4
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#5
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#6
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#7
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#8
+EDGES|CONTAINS mixed_prototype_caller#0 -> mixed_prototype_caller#9
+EDGES|CONTAINS mixed_prototypes.c:<global>#0 -> mixed_prototype_caller#0
+EDGES|CONTAINS mixed_prototypes.c:<global>#0 -> mixed_prototypes.c:<global>#24
+EDGES|CONTAINS mixed_prototypes.c:<global>#0 -> mixed_prototypes.c:<global>#25
 EDGES|CONTAINS only_header#0 -> only_header#3
 EDGES|CONTAINS ops.c:<global>#0 -> classify#0
 EDGES|CONTAINS ops.c:<global>#0 -> ops.c:<global>#29
@@ -10139,6 +10790,40 @@ EDGES|CONTAINS order.c:<global>#21 -> second#6
 EDGES|CONTAINS order.c:<global>#21 -> second#7
 EDGES|CONTAINS order.c:<global>#21 -> second#8
 EDGES|CONTAINS order.c:<global>#21 -> second#9
+EDGES|CONTAINS ordinary_first#0 -> ordinary_first#3
+EDGES|CONTAINS ordinary_second#0 -> ordinary_second#3
+EDGES|CONTAINS paren_defined#0 -> paren_defined#2
+EDGES|CONTAINS paren_first#0 -> paren_first#2
+EDGES|CONTAINS paren_second#0 -> paren_second#2
+EDGES|CONTAINS parentheses_caller#0 -> parentheses_caller#3
+EDGES|CONTAINS parentheses_caller#0 -> parentheses_caller#4
+EDGES|CONTAINS parentheses_caller#0 -> parentheses_caller#5
+EDGES|CONTAINS parentheses_caller#0 -> parentheses_caller#6
+EDGES|CONTAINS parentheses_caller#0 -> parentheses_caller#7
+EDGES|CONTAINS parentheses_caller#0 -> parentheses_caller#8
+EDGES|CONTAINS parentheses_caller#0 -> parentheses_caller#9
+EDGES|CONTAINS parenthesized_definition_caller#0 -> parenthesized_definition_caller#3
+EDGES|CONTAINS parenthesized_definition_caller#0 -> parenthesized_definition_caller#4
+EDGES|CONTAINS parenthesized_definition_caller#0 -> parenthesized_definition_caller#5
+EDGES|CONTAINS parenthesized_definition_caller#0 -> parenthesized_definition_caller#6
+EDGES|CONTAINS parenthesized_definitions.c:<global>#0 -> <unresolvedNamespace>.paren_defined#0
+EDGES|CONTAINS parenthesized_definitions.c:<global>#0 -> parenthesized_definition_caller#0
+EDGES|CONTAINS parenthesized_definitions.c:<global>#0 -> parenthesized_definitions.c:<global>#16
+EDGES|CONTAINS parenthesized_definitions.c:<global>#0 -> parenthesized_definitions.c:<global>#17
+EDGES|CONTAINS parenthesized_definitions.c:<global>#0 -> parenthesized_definitions.c:<global>#18
+EDGES|CONTAINS parenthesized_duplicate_a.c:<global>#0 -> <unresolvedNamespace>.duplicate_paren_helper#0
+EDGES|CONTAINS parenthesized_duplicate_a.c:<global>#0 -> duplicate_paren_a#0
+EDGES|CONTAINS parenthesized_duplicate_a.c:<global>#0 -> parenthesized_duplicate_a.c:<global>#16
+EDGES|CONTAINS parenthesized_duplicate_a.c:<global>#0 -> parenthesized_duplicate_a.c:<global>#17
+EDGES|CONTAINS parenthesized_duplicate_a.c:<global>#0 -> parenthesized_duplicate_a.c:<global>#18
+EDGES|CONTAINS parenthesized_duplicate_b.c:<global>#0 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#0
+EDGES|CONTAINS parenthesized_duplicate_b.c:<global>#0 -> duplicate_paren_b#0
+EDGES|CONTAINS parenthesized_duplicate_b.c:<global>#0 -> parenthesized_duplicate_b.c:<global>#16
+EDGES|CONTAINS parenthesized_duplicate_b.c:<global>#0 -> parenthesized_duplicate_b.c:<global>#17
+EDGES|CONTAINS parenthesized_duplicate_b.c:<global>#0 -> parenthesized_duplicate_b.c:<global>#18
+EDGES|CONTAINS parenthesized_prototypes.c:<global>#0 -> parentheses_caller#0
+EDGES|CONTAINS parenthesized_prototypes.c:<global>#0 -> parenthesized_prototypes.c:<global>#12
+EDGES|CONTAINS parenthesized_prototypes.c:<global>#0 -> parenthesized_prototypes.c:<global>#13
 EDGES|CONTAINS pick#0 -> pick#10
 EDGES|CONTAINS pick#0 -> pick#11
 EDGES|CONTAINS pick#0 -> pick#12
@@ -10185,6 +10870,7 @@ EDGES|CONTAINS pick#0 -> pick#6
 EDGES|CONTAINS pick#0 -> pick#7
 EDGES|CONTAINS pick#0 -> pick#8
 EDGES|CONTAINS pick#0 -> pick#9
+EDGES|CONTAINS plain_named#0 -> plain_named#2
 EDGES|CONTAINS prototype_a.c:<global>#0 -> prototype_a.c:<global>#1
 EDGES|CONTAINS prototype_a.c:<global>#0 -> prototype_a.c:<global>#10
 EDGES|CONTAINS prototype_a.c:<global>#0 -> prototype_a.c:<global>#9
@@ -10259,6 +10945,23 @@ EDGES|CONTAINS structs.c:<global>#0 -> structs.c:<global>#59
 EDGES|CONTAINS switch.c:<global>#0 -> pick#0
 EDGES|CONTAINS switch.c:<global>#0 -> switch.c:<global>#52
 EDGES|CONTAINS switch.c:<global>#0 -> switch.c:<global>#53
+EDGES|CONTAINS typedef_marker#0 -> typedef_marker#3
+EDGES|CONTAINS typedef_marker#0 -> typedef_marker#4
+EDGES|CONTAINS typedef_marker#0 -> typedef_marker#5
+EDGES|CONTAINS typedef_pointer.c:<global>#0 -> typedef_marker#0
+EDGES|CONTAINS typedef_pointer.c:<global>#0 -> typedef_pointer.c:<global>#10
+EDGES|CONTAINS typedef_pointer.c:<global>#0 -> typedef_pointer.c:<global>#8
+EDGES|CONTAINS typedef_pointer.c:<global>#0 -> typedef_pointer.c:<global>#9
+EDGES|CONTAINS typedef_shapes.c:<global>#0 -> typedef_shapes.c:<global>#1
+EDGES|CONTAINS typedef_shapes.c:<global>#0 -> typedef_shapes.c:<global>#10
+EDGES|CONTAINS typedef_shapes.c:<global>#0 -> typedef_shapes.c:<global>#11
+EDGES|CONTAINS typedef_shapes.c:<global>#0 -> typedef_shapes.c:<global>#12
+EDGES|CONTAINS typedef_shapes.c:<global>#0 -> typedef_shapes.c:<global>#13
+EDGES|CONTAINS typedef_shapes.c:<global>#0 -> typedef_shapes.c:<global>#8
+EDGES|CONTAINS typedef_shapes.c:<global>#0 -> typedef_shapes.c:<global>#9
+EDGES|CONTAINS typedef_shapes.c:<global>#1 -> typedef_shapes_marker#3
+EDGES|CONTAINS typedef_shapes.c:<global>#1 -> typedef_shapes_marker#4
+EDGES|CONTAINS typedef_shapes.c:<global>#1 -> typedef_shapes_marker#5
 EDGES|CONTAINS types2.c:<global>#0 -> apply#0
 EDGES|CONTAINS types2.c:<global>#0 -> types2.c:<global>#1
 EDGES|CONTAINS types2.c:<global>#0 -> types2.c:<global>#14
@@ -10330,6 +11033,15 @@ EDGES|CONTAINS unary.c:<global>#0 -> unary.c:<global>#49
 EDGES|CONTAINS undeclared#0 -> undeclared#2
 EDGES|CONTAINS undeclared_many#0 -> undeclared_many#2
 EDGES|CONTAINS undeclared_zero#0 -> undeclared_zero#3
+EDGES|CONTAINS unknown_caller#0 -> unknown_caller#3
+EDGES|CONTAINS unknown_caller#0 -> unknown_caller#4
+EDGES|CONTAINS unknown_caller#0 -> unknown_caller#5
+EDGES|CONTAINS unknown_caller#0 -> unknown_caller#6
+EDGES|CONTAINS unknown_macro_prototypes.c:<global>#0 -> unknown_caller#0
+EDGES|CONTAINS unknown_macro_prototypes.c:<global>#0 -> unknown_macro_prototypes.c:<global>#10
+EDGES|CONTAINS unknown_macro_prototypes.c:<global>#0 -> unknown_macro_prototypes.c:<global>#11
+EDGES|CONTAINS unknown_macro_prototypes.c:<global>#0 -> unknown_macro_prototypes.c:<global>#9
+EDGES|CONTAINS unknown_named#0 -> unknown_named#2
 EDGES|CONTAINS unused_named#0 -> unused_named#3
 EDGES|CONTAINS unused_unnamed#0 -> unused_unnamed#3
 EDGES|CONTAINS unused_void#0 -> unused_void#3
@@ -10553,6 +11265,45 @@ EDGES|EVAL_TYPE <operators>.assignmentXor#3 -> T:ANY
 EDGES|EVAL_TYPE <operators>.assignmentXor#4 -> T:ANY
 EDGES|EVAL_TYPE <operators>.assignmentXor#5 -> T:ANY
 EDGES|EVAL_TYPE <operators>.assignmentXor#6 -> T:ANY
+EDGES|EVAL_TYPE <unresolvedNamespace>.api_named#1 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.api_named#2 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.api_named#3 -> T:ANY
+EDGES|EVAL_TYPE <unresolvedNamespace>.api_named#4 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.duplicate_paren_helper#1 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.duplicate_paren_helper#2 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.duplicate_paren_helper#3 -> T:void
+EDGES|EVAL_TYPE <unresolvedNamespace>.duplicate_paren_helper#5 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.duplicate_paren_helper#6 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#1 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#2 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#3 -> T:void
+EDGES|EVAL_TYPE <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#5 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#6 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.macro_paren#1 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.macro_paren#2 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.macro_paren#3 -> T:ANY
+EDGES|EVAL_TYPE <unresolvedNamespace>.macro_paren#4 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_defined#1 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_defined#2 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_defined#3 -> T:void
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_defined#5 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_defined#6 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_first#1 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_first#2 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_first#3 -> T:ANY
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_first#4 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_second#1 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_second#2 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_second#3 -> T:ANY
+EDGES|EVAL_TYPE <unresolvedNamespace>.paren_second#4 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.plain_named#1 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.plain_named#2 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.plain_named#3 -> T:ANY
+EDGES|EVAL_TYPE <unresolvedNamespace>.plain_named#4 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.unknown_named#1 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.unknown_named#2 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.unknown_named#3 -> T:ANY
+EDGES|EVAL_TYPE <unresolvedNamespace>.unknown_named#4 -> T:int
 EDGES|EVAL_TYPE active_block_prototype#1 -> T:int
 EDGES|EVAL_TYPE active_block_prototype#2 -> T:int
 EDGES|EVAL_TYPE active_block_prototype#3 -> T:void
@@ -10643,6 +11394,10 @@ EDGES|EVAL_TYPE and_if#5 -> T:void
 EDGES|EVAL_TYPE and_if#7 -> T:ANY
 EDGES|EVAL_TYPE and_if#8 -> T:int
 EDGES|EVAL_TYPE and_if#9 -> T:int
+EDGES|EVAL_TYPE api_named#1 -> T:ANY
+EDGES|EVAL_TYPE api_named#2 -> T:ANY
+EDGES|EVAL_TYPE api_named#3 -> T:ANY
+EDGES|EVAL_TYPE api_named#4 -> T:ANY
 EDGES|EVAL_TYPE apply#1 -> T:int
 EDGES|EVAL_TYPE apply#10 -> T:int
 EDGES|EVAL_TYPE apply#11 -> T:int
@@ -11193,6 +11948,22 @@ EDGES|EVAL_TYPE duplicate<duplicate>0#5 -> T:ANY
 EDGES|EVAL_TYPE duplicate<duplicate>0#6 -> T:int
 EDGES|EVAL_TYPE duplicate<duplicate>0#7 -> T:int
 EDGES|EVAL_TYPE duplicate<duplicate>0#8 -> T:int
+EDGES|EVAL_TYPE duplicate_paren_a#1 -> T:int
+EDGES|EVAL_TYPE duplicate_paren_a#2 -> T:int
+EDGES|EVAL_TYPE duplicate_paren_a#3 -> T:void
+EDGES|EVAL_TYPE duplicate_paren_a#5 -> T:int
+EDGES|EVAL_TYPE duplicate_paren_a#6 -> T:int
+EDGES|EVAL_TYPE duplicate_paren_a#7 -> T:int
+EDGES|EVAL_TYPE duplicate_paren_b#1 -> T:int
+EDGES|EVAL_TYPE duplicate_paren_b#2 -> T:int
+EDGES|EVAL_TYPE duplicate_paren_b#3 -> T:void
+EDGES|EVAL_TYPE duplicate_paren_b#5 -> T:int
+EDGES|EVAL_TYPE duplicate_paren_b#6 -> T:int
+EDGES|EVAL_TYPE duplicate_paren_b#7 -> T:int
+EDGES|EVAL_TYPE duplicate_paren_helper#1 -> T:ANY
+EDGES|EVAL_TYPE duplicate_paren_helper#2 -> T:ANY
+EDGES|EVAL_TYPE duplicate_paren_helper#3 -> T:ANY
+EDGES|EVAL_TYPE duplicate_paren_helper#4 -> T:ANY
 EDGES|EVAL_TYPE empty_all_for#1 -> T:int
 EDGES|EVAL_TYPE empty_all_for#2 -> T:int
 EDGES|EVAL_TYPE empty_all_for#3 -> T:void
@@ -11657,6 +12428,14 @@ EDGES|EVAL_TYPE macro_comment_wrong#1 -> T:int
 EDGES|EVAL_TYPE macro_comment_wrong#2 -> T:int
 EDGES|EVAL_TYPE macro_comment_wrong#3 -> T:void
 EDGES|EVAL_TYPE macro_comment_wrong#4 -> T:int
+EDGES|EVAL_TYPE macro_ordinary#1 -> T:int
+EDGES|EVAL_TYPE macro_ordinary#2 -> T:int
+EDGES|EVAL_TYPE macro_ordinary#3 -> T:ANY
+EDGES|EVAL_TYPE macro_ordinary#4 -> T:int
+EDGES|EVAL_TYPE macro_paren#1 -> T:ANY
+EDGES|EVAL_TYPE macro_paren#2 -> T:ANY
+EDGES|EVAL_TYPE macro_paren#3 -> T:ANY
+EDGES|EVAL_TYPE macro_paren#4 -> T:ANY
 EDGES|EVAL_TYPE macros#1 -> T:int
 EDGES|EVAL_TYPE macros#10 -> T:void
 EDGES|EVAL_TYPE macros#12 -> T:ANY
@@ -11741,6 +12520,30 @@ EDGES|EVAL_TYPE memcmp#9 -> T:unsigned char*
 EDGES|EVAL_TYPE memcmp.c:<global>#43 -> T:ANY
 EDGES|EVAL_TYPE memcmp.c:<global>#44 -> T:memcmp
 EDGES|EVAL_TYPE memcmp.c:<global>#45 -> T:ANY
+EDGES|EVAL_TYPE mixed_prototype_caller#1 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#10 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#11 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#12 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#13 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#14 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#15 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#16 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#17 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#18 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#19 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#2 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#20 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#21 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#22 -> T:int
+EDGES|EVAL_TYPE mixed_prototype_caller#3 -> T:void
+EDGES|EVAL_TYPE mixed_prototype_caller#5 -> T:ANY
+EDGES|EVAL_TYPE mixed_prototype_caller#6 -> T:ANY
+EDGES|EVAL_TYPE mixed_prototype_caller#7 -> T:ANY
+EDGES|EVAL_TYPE mixed_prototype_caller#8 -> T:ANY
+EDGES|EVAL_TYPE mixed_prototype_caller#9 -> T:ANY
+EDGES|EVAL_TYPE mixed_prototypes.c:<global>#24 -> T:ANY
+EDGES|EVAL_TYPE mixed_prototypes.c:<global>#25 -> T:mixed_prototype_caller
+EDGES|EVAL_TYPE mixed_prototypes.c:<global>#26 -> T:ANY
 EDGES|EVAL_TYPE multi_empty_for#1 -> T:int
 EDGES|EVAL_TYPE multi_empty_for#10 -> T:int
 EDGES|EVAL_TYPE multi_empty_for#11 -> T:int
@@ -11873,6 +12676,14 @@ EDGES|EVAL_TYPE order.c:<global>#40 -> T:first
 EDGES|EVAL_TYPE order.c:<global>#41 -> T:pair
 EDGES|EVAL_TYPE order.c:<global>#42 -> T:second
 EDGES|EVAL_TYPE order.c:<global>#43 -> T:ANY
+EDGES|EVAL_TYPE ordinary_first#1 -> T:int
+EDGES|EVAL_TYPE ordinary_first#2 -> T:int
+EDGES|EVAL_TYPE ordinary_first#3 -> T:ANY
+EDGES|EVAL_TYPE ordinary_first#4 -> T:int
+EDGES|EVAL_TYPE ordinary_second#1 -> T:int
+EDGES|EVAL_TYPE ordinary_second#2 -> T:int
+EDGES|EVAL_TYPE ordinary_second#3 -> T:ANY
+EDGES|EVAL_TYPE ordinary_second#4 -> T:int
 EDGES|EVAL_TYPE pair.<clinit>:pair()#2 -> T:ANY
 EDGES|EVAL_TYPE pair.<clinit>:pair()#3 -> T:int
 EDGES|EVAL_TYPE pair.<clinit>:pair()#6 -> T:pair
@@ -11896,6 +12707,14 @@ EDGES|EVAL_TYPE parameter_restore#5 -> T:void
 EDGES|EVAL_TYPE parameter_restore#7 -> T:int
 EDGES|EVAL_TYPE parameter_restore#8 -> T:int
 EDGES|EVAL_TYPE parameter_restore#9 -> T:int
+EDGES|EVAL_TYPE paren_defined#1 -> T:ANY
+EDGES|EVAL_TYPE paren_defined#2 -> T:ANY
+EDGES|EVAL_TYPE paren_defined#3 -> T:ANY
+EDGES|EVAL_TYPE paren_defined#4 -> T:ANY
+EDGES|EVAL_TYPE paren_first#1 -> T:ANY
+EDGES|EVAL_TYPE paren_first#2 -> T:ANY
+EDGES|EVAL_TYPE paren_first#3 -> T:ANY
+EDGES|EVAL_TYPE paren_first#4 -> T:ANY
 EDGES|EVAL_TYPE paren_if#1 -> T:int
 EDGES|EVAL_TYPE paren_if#10 -> T:int
 EDGES|EVAL_TYPE paren_if#12 -> T:int
@@ -11906,6 +12725,19 @@ EDGES|EVAL_TYPE paren_if#5 -> T:int
 EDGES|EVAL_TYPE paren_if#6 -> T:int
 EDGES|EVAL_TYPE paren_if#7 -> T:int
 EDGES|EVAL_TYPE paren_if#8 -> T:ANY
+EDGES|EVAL_TYPE paren_second#1 -> T:ANY
+EDGES|EVAL_TYPE paren_second#2 -> T:ANY
+EDGES|EVAL_TYPE paren_second#3 -> T:ANY
+EDGES|EVAL_TYPE paren_second#4 -> T:ANY
+EDGES|EVAL_TYPE parentheses_caller#1 -> T:int
+EDGES|EVAL_TYPE parentheses_caller#10 -> T:int
+EDGES|EVAL_TYPE parentheses_caller#2 -> T:int
+EDGES|EVAL_TYPE parentheses_caller#3 -> T:void
+EDGES|EVAL_TYPE parentheses_caller#5 -> T:ANY
+EDGES|EVAL_TYPE parentheses_caller#6 -> T:int
+EDGES|EVAL_TYPE parentheses_caller#7 -> T:int
+EDGES|EVAL_TYPE parentheses_caller#8 -> T:int
+EDGES|EVAL_TYPE parentheses_caller#9 -> T:int
 EDGES|EVAL_TYPE parenthesized_callee#1 -> T:int
 EDGES|EVAL_TYPE parenthesized_callee#2 -> T:int
 EDGES|EVAL_TYPE parenthesized_callee#3 -> T:void
@@ -11921,6 +12753,27 @@ EDGES|EVAL_TYPE parenthesized_defined#5 -> T:int
 EDGES|EVAL_TYPE parenthesized_defined#6 -> T:int
 EDGES|EVAL_TYPE parenthesized_defined#7 -> T:int
 EDGES|EVAL_TYPE parenthesized_defined#8 -> T:int
+EDGES|EVAL_TYPE parenthesized_definition_caller#1 -> T:int
+EDGES|EVAL_TYPE parenthesized_definition_caller#2 -> T:int
+EDGES|EVAL_TYPE parenthesized_definition_caller#3 -> T:void
+EDGES|EVAL_TYPE parenthesized_definition_caller#5 -> T:int
+EDGES|EVAL_TYPE parenthesized_definition_caller#6 -> T:int
+EDGES|EVAL_TYPE parenthesized_definition_caller#7 -> T:int
+EDGES|EVAL_TYPE parenthesized_definitions.c:<global>#16 -> T:ANY
+EDGES|EVAL_TYPE parenthesized_definitions.c:<global>#17 -> T:<unresolvedNamespace>.paren_defined
+EDGES|EVAL_TYPE parenthesized_definitions.c:<global>#18 -> T:parenthesized_definition_caller
+EDGES|EVAL_TYPE parenthesized_definitions.c:<global>#19 -> T:ANY
+EDGES|EVAL_TYPE parenthesized_duplicate_a.c:<global>#16 -> T:ANY
+EDGES|EVAL_TYPE parenthesized_duplicate_a.c:<global>#17 -> T:<unresolvedNamespace>.duplicate_paren_helper
+EDGES|EVAL_TYPE parenthesized_duplicate_a.c:<global>#18 -> T:duplicate_paren_a
+EDGES|EVAL_TYPE parenthesized_duplicate_a.c:<global>#19 -> T:ANY
+EDGES|EVAL_TYPE parenthesized_duplicate_b.c:<global>#16 -> T:ANY
+EDGES|EVAL_TYPE parenthesized_duplicate_b.c:<global>#17 -> T:<unresolvedNamespace>.duplicate_paren_helper
+EDGES|EVAL_TYPE parenthesized_duplicate_b.c:<global>#18 -> T:duplicate_paren_b
+EDGES|EVAL_TYPE parenthesized_duplicate_b.c:<global>#19 -> T:ANY
+EDGES|EVAL_TYPE parenthesized_prototypes.c:<global>#12 -> T:ANY
+EDGES|EVAL_TYPE parenthesized_prototypes.c:<global>#13 -> T:parentheses_caller
+EDGES|EVAL_TYPE parenthesized_prototypes.c:<global>#14 -> T:ANY
 EDGES|EVAL_TYPE pick#1 -> T:int
 EDGES|EVAL_TYPE pick#10 -> T:void
 EDGES|EVAL_TYPE pick#12 -> T:int
@@ -11958,6 +12811,10 @@ EDGES|EVAL_TYPE pick#50 -> T:int
 EDGES|EVAL_TYPE pick#6 -> T:int
 EDGES|EVAL_TYPE pick#7 -> T:int
 EDGES|EVAL_TYPE pick#9 -> T:int
+EDGES|EVAL_TYPE plain_named#1 -> T:ANY
+EDGES|EVAL_TYPE plain_named#2 -> T:ANY
+EDGES|EVAL_TYPE plain_named#3 -> T:ANY
+EDGES|EVAL_TYPE plain_named#4 -> T:ANY
 EDGES|EVAL_TYPE pointer_compare#1 -> T:int*
 EDGES|EVAL_TYPE pointer_compare#10 -> T:int
 EDGES|EVAL_TYPE pointer_compare#12 -> T:ANY
@@ -12380,6 +13237,22 @@ EDGES|EVAL_TYPE ternary_wrong#1 -> T:void
 EDGES|EVAL_TYPE ternary_wrong#2 -> T:void
 EDGES|EVAL_TYPE ternary_wrong#3 -> T:void
 EDGES|EVAL_TYPE ternary_wrong#4 -> T:int
+EDGES|EVAL_TYPE typedef_marker#1 -> T:int
+EDGES|EVAL_TYPE typedef_marker#2 -> T:int
+EDGES|EVAL_TYPE typedef_marker#3 -> T:void
+EDGES|EVAL_TYPE typedef_marker#5 -> T:int
+EDGES|EVAL_TYPE typedef_marker#6 -> T:int
+EDGES|EVAL_TYPE typedef_pointer.c:<global>#10 -> T:typedef_marker
+EDGES|EVAL_TYPE typedef_pointer.c:<global>#11 -> T:ANY
+EDGES|EVAL_TYPE typedef_pointer.c:<global>#8 -> T:ANY
+EDGES|EVAL_TYPE typedef_shapes.c:<global>#13 -> T:typedef_shapes_marker
+EDGES|EVAL_TYPE typedef_shapes.c:<global>#14 -> T:ANY
+EDGES|EVAL_TYPE typedef_shapes.c:<global>#8 -> T:ANY
+EDGES|EVAL_TYPE typedef_shapes_marker#1 -> T:int
+EDGES|EVAL_TYPE typedef_shapes_marker#2 -> T:int
+EDGES|EVAL_TYPE typedef_shapes_marker#3 -> T:void
+EDGES|EVAL_TYPE typedef_shapes_marker#5 -> T:int
+EDGES|EVAL_TYPE typedef_shapes_marker#6 -> T:int
 EDGES|EVAL_TYPE types2.c:<global>#15 -> T:int
 EDGES|EVAL_TYPE types2.c:<global>#16 -> T:float
 EDGES|EVAL_TYPE types2.c:<global>#2 -> T:ANY
@@ -12445,6 +13318,19 @@ EDGES|EVAL_TYPE undef_comment_wrong#1 -> T:int
 EDGES|EVAL_TYPE undef_comment_wrong#2 -> T:int
 EDGES|EVAL_TYPE undef_comment_wrong#3 -> T:void
 EDGES|EVAL_TYPE undef_comment_wrong#4 -> T:int
+EDGES|EVAL_TYPE unknown_caller#1 -> T:int
+EDGES|EVAL_TYPE unknown_caller#2 -> T:int
+EDGES|EVAL_TYPE unknown_caller#3 -> T:void
+EDGES|EVAL_TYPE unknown_caller#5 -> T:int
+EDGES|EVAL_TYPE unknown_caller#6 -> T:int
+EDGES|EVAL_TYPE unknown_caller#7 -> T:int
+EDGES|EVAL_TYPE unknown_macro_prototypes.c:<global>#11 -> T:unknown_caller
+EDGES|EVAL_TYPE unknown_macro_prototypes.c:<global>#12 -> T:ANY
+EDGES|EVAL_TYPE unknown_macro_prototypes.c:<global>#9 -> T:ANY
+EDGES|EVAL_TYPE unknown_named#1 -> T:ANY
+EDGES|EVAL_TYPE unknown_named#2 -> T:ANY
+EDGES|EVAL_TYPE unknown_named#3 -> T:ANY
+EDGES|EVAL_TYPE unknown_named#4 -> T:ANY
 EDGES|EVAL_TYPE unnamed_definition#1 -> T:int
 EDGES|EVAL_TYPE unnamed_definition#2 -> T:int
 EDGES|EVAL_TYPE unnamed_definition#3 -> T:char*
@@ -12713,6 +13599,15 @@ EDGES|PARAMETER_LINK <operators>.assignmentShiftLeft#1 -> <operators>.assignment
 EDGES|PARAMETER_LINK <operators>.assignmentShiftLeft#4 -> <operators>.assignmentShiftLeft#6
 EDGES|PARAMETER_LINK <operators>.assignmentXor#1 -> <operators>.assignmentXor#3
 EDGES|PARAMETER_LINK <operators>.assignmentXor#4 -> <operators>.assignmentXor#6
+EDGES|PARAMETER_LINK <unresolvedNamespace>.api_named#1 -> <unresolvedNamespace>.api_named#2
+EDGES|PARAMETER_LINK <unresolvedNamespace>.duplicate_paren_helper#1 -> <unresolvedNamespace>.duplicate_paren_helper#2
+EDGES|PARAMETER_LINK <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#1 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#2
+EDGES|PARAMETER_LINK <unresolvedNamespace>.macro_paren#1 -> <unresolvedNamespace>.macro_paren#2
+EDGES|PARAMETER_LINK <unresolvedNamespace>.paren_defined#1 -> <unresolvedNamespace>.paren_defined#2
+EDGES|PARAMETER_LINK <unresolvedNamespace>.paren_first#1 -> <unresolvedNamespace>.paren_first#2
+EDGES|PARAMETER_LINK <unresolvedNamespace>.paren_second#1 -> <unresolvedNamespace>.paren_second#2
+EDGES|PARAMETER_LINK <unresolvedNamespace>.plain_named#1 -> <unresolvedNamespace>.plain_named#2
+EDGES|PARAMETER_LINK <unresolvedNamespace>.unknown_named#1 -> <unresolvedNamespace>.unknown_named#2
 EDGES|PARAMETER_LINK active_block_prototype#1 -> active_block_prototype#2
 EDGES|PARAMETER_LINK active_external#1 -> active_external#2
 EDGES|PARAMETER_LINK active_top_prototype#1 -> active_top_prototype#2
@@ -12725,6 +13620,7 @@ EDGES|PARAMETER_LINK agg#1 -> agg#2
 EDGES|PARAMETER_LINK agg#3 -> agg#4
 EDGES|PARAMETER_LINK and_if#1 -> and_if#2
 EDGES|PARAMETER_LINK and_if#3 -> and_if#4
+EDGES|PARAMETER_LINK api_named#1 -> api_named#3
 EDGES|PARAMETER_LINK apply#1 -> apply#2
 EDGES|PARAMETER_LINK apply#3 -> apply#4
 EDGES|PARAMETER_LINK arithmetic_if#1 -> arithmetic_if#2
@@ -12767,6 +13663,9 @@ EDGES|PARAMETER_LINK defined_space_wrong#1 -> defined_space_wrong#2
 EDGES|PARAMETER_LINK dereference_if#1 -> dereference_if#2
 EDGES|PARAMETER_LINK duplicate#1 -> duplicate#2
 EDGES|PARAMETER_LINK duplicate<duplicate>0#1 -> duplicate<duplicate>0#2
+EDGES|PARAMETER_LINK duplicate_paren_a#1 -> duplicate_paren_a#2
+EDGES|PARAMETER_LINK duplicate_paren_b#1 -> duplicate_paren_b#2
+EDGES|PARAMETER_LINK duplicate_paren_helper#1 -> duplicate_paren_helper#3
 EDGES|PARAMETER_LINK empty_all_for#1 -> empty_all_for#2
 EDGES|PARAMETER_LINK empty_do#1 -> empty_do#2
 EDGES|PARAMETER_LINK empty_for#1 -> empty_for#2
@@ -12809,11 +13708,14 @@ EDGES|PARAMETER_LINK logic#1 -> logic#2
 EDGES|PARAMETER_LINK logic#3 -> logic#4
 EDGES|PARAMETER_LINK macro_comment_active#1 -> macro_comment_active#2
 EDGES|PARAMETER_LINK macro_comment_wrong#1 -> macro_comment_wrong#2
+EDGES|PARAMETER_LINK macro_ordinary#1 -> macro_ordinary#2
+EDGES|PARAMETER_LINK macro_paren#1 -> macro_paren#3
 EDGES|PARAMETER_LINK macros#1 -> macros#2
 EDGES|PARAMETER_LINK macros.c:SQR:ANY(1)#1 -> macros.c:SQR:ANY(1)#2
 EDGES|PARAMETER_LINK memcmp#1 -> memcmp#2
 EDGES|PARAMETER_LINK memcmp#3 -> memcmp#4
 EDGES|PARAMETER_LINK memcmp#5 -> memcmp#6
+EDGES|PARAMETER_LINK mixed_prototype_caller#1 -> mixed_prototype_caller#2
 EDGES|PARAMETER_LINK multi_empty_for#1 -> multi_empty_for#2
 EDGES|PARAMETER_LINK multi_init_for#1 -> multi_init_for#2
 EDGES|PARAMETER_LINK multiline_active#1 -> multiline_active#2
@@ -12825,12 +13727,20 @@ EDGES|PARAMETER_LINK nested_while#1 -> nested_while#2
 EDGES|PARAMETER_LINK no_condition_for#1 -> no_condition_for#2
 EDGES|PARAMETER_LINK no_update_for#1 -> no_update_for#2
 EDGES|PARAMETER_LINK only_header#1 -> only_header#2
+EDGES|PARAMETER_LINK ordinary_first#1 -> ordinary_first#2
+EDGES|PARAMETER_LINK ordinary_second#1 -> ordinary_second#2
 EDGES|PARAMETER_LINK parameter_restore#1 -> parameter_restore#2
 EDGES|PARAMETER_LINK parameter_restore#3 -> parameter_restore#4
+EDGES|PARAMETER_LINK paren_defined#1 -> paren_defined#3
+EDGES|PARAMETER_LINK paren_first#1 -> paren_first#3
 EDGES|PARAMETER_LINK paren_if#1 -> paren_if#2
+EDGES|PARAMETER_LINK paren_second#1 -> paren_second#3
+EDGES|PARAMETER_LINK parentheses_caller#1 -> parentheses_caller#2
 EDGES|PARAMETER_LINK parenthesized_callee#1 -> parenthesized_callee#2
 EDGES|PARAMETER_LINK parenthesized_defined#1 -> parenthesized_defined#2
+EDGES|PARAMETER_LINK parenthesized_definition_caller#1 -> parenthesized_definition_caller#2
 EDGES|PARAMETER_LINK pick#1 -> pick#2
+EDGES|PARAMETER_LINK plain_named#1 -> plain_named#3
 EDGES|PARAMETER_LINK pointer_compare#1 -> pointer_compare#2
 EDGES|PARAMETER_LINK pointer_do#1 -> pointer_do#2
 EDGES|PARAMETER_LINK pointer_for#1 -> pointer_for#2
@@ -12877,6 +13787,8 @@ EDGES|PARAMETER_LINK strcmp#3 -> strcmp#4
 EDGES|PARAMETER_LINK sum#1 -> sum#2
 EDGES|PARAMETER_LINK ternary_active#1 -> ternary_active#2
 EDGES|PARAMETER_LINK ternary_wrong#1 -> ternary_wrong#2
+EDGES|PARAMETER_LINK typedef_marker#1 -> typedef_marker#2
+EDGES|PARAMETER_LINK typedef_shapes_marker#1 -> typedef_shapes_marker#2
 EDGES|PARAMETER_LINK unary#1 -> unary#2
 EDGES|PARAMETER_LINK undeclared#1 -> undeclared#3
 EDGES|PARAMETER_LINK undeclared_many#1 -> undeclared_many#3
@@ -12885,6 +13797,8 @@ EDGES|PARAMETER_LINK undeclared_many#7 -> undeclared_many#8
 EDGES|PARAMETER_LINK undeclared_zero#1 -> undeclared_zero#2
 EDGES|PARAMETER_LINK undef_comment_active#1 -> undef_comment_active#2
 EDGES|PARAMETER_LINK undef_comment_wrong#1 -> undef_comment_wrong#2
+EDGES|PARAMETER_LINK unknown_caller#1 -> unknown_caller#2
+EDGES|PARAMETER_LINK unknown_named#1 -> unknown_named#3
 EDGES|PARAMETER_LINK unnamed_definition#1 -> unnamed_definition#2
 EDGES|PARAMETER_LINK unnamed_definition#3 -> unnamed_definition#4
 EDGES|PARAMETER_LINK unselected_expression#1 -> unselected_expression#2
@@ -12906,6 +13820,9 @@ EDGES|PARAMETER_LINK uses_varargs#1 -> uses_varargs#2
 EDGES|PARAMETER_LINK uses_zero#1 -> uses_zero#2
 EDGES|PARAMETER_LINK vararg_definition#1 -> vararg_definition#2
 EDGES|PARAMETER_LINK vararg_definition#3 -> vararg_definition#4
+EDGES|REF <unresolvedNamespace>.duplicate_paren_helper#5 -> <unresolvedNamespace>.duplicate_paren_helper#1
+EDGES|REF <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#5 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#1
+EDGES|REF <unresolvedNamespace>.paren_defined#5 -> <unresolvedNamespace>.paren_defined#1
 EDGES|REF NB:<global> -> NS:<global>
 EDGES|REF NB:<includes>:<global> -> NS:<global>
 EDGES|REF NB:add.c:<global> -> NS:<global>
@@ -12932,18 +13849,33 @@ EDGES|REF NB:logic.c:<global> -> NS:<global>
 EDGES|REF NB:loop.c:<global> -> NS:<global>
 EDGES|REF NB:macros.c:<global> -> NS:<global>
 EDGES|REF NB:memcmp.c:<global> -> NS:<global>
+EDGES|REF NB:mixed_prototypes.c:<global> -> NS:<global>
 EDGES|REF NB:ops.c:<global> -> NS:<global>
 EDGES|REF NB:order.c:<global> -> NS:<global>
+EDGES|REF NB:parenthesized_definitions.c:<global> -> NS:<global>
+EDGES|REF NB:parenthesized_duplicate_a.c:<global> -> NS:<global>
+EDGES|REF NB:parenthesized_duplicate_b.c:<global> -> NS:<global>
+EDGES|REF NB:parenthesized_prototypes.c:<global> -> NS:<global>
 EDGES|REF NB:prototype_a.c:<global> -> NS:<global>
 EDGES|REF NB:prototype_b.c:<global> -> NS:<global>
 EDGES|REF NB:strcmp.c:<global> -> NS:<global>
 EDGES|REF NB:structs.c:<global> -> NS:<global>
 EDGES|REF NB:switch.c:<global> -> NS:<global>
+EDGES|REF NB:typedef_pointer.c:<global> -> NS:<global>
+EDGES|REF NB:typedef_shapes.c:<global> -> NS:<global>
 EDGES|REF NB:types2.c:<global> -> NS:<global>
 EDGES|REF NB:unary.c:<global> -> NS:<global>
+EDGES|REF NB:unknown_macro_prototypes.c:<global> -> NS:<global>
+EDGES|REF T:<unresolvedNamespace>.duplicate_paren_helper -> D:<unresolvedNamespace>.duplicate_paren_helper
+EDGES|REF T:<unresolvedNamespace>.paren_defined -> D:<unresolvedNamespace>.paren_defined
 EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:One -> typedef_shapes.c:<global>#11
+EDGES|REF T:PlainAlias -> typedef_pointer.c:<global>#9
 EDGES|REF T:PpBox -> conditional_top_level.c:<global>#1
 EDGES|REF T:PpInactiveBox -> conditional_top_level.c:<global>#10
+EDGES|REF T:ScalarFirst -> typedef_shapes.c:<global>#9
+EDGES|REF T:ScalarSecond -> typedef_shapes.c:<global>#10
+EDGES|REF T:Two -> typedef_shapes.c:<global>#12
 EDGES|REF T:_Bool -> D:_Bool
 EDGES|REF T:active_block_prototype -> D:active_block_prototype
 EDGES|REF T:add -> D:add
@@ -12990,6 +13922,8 @@ EDGES|REF T:defined_space_wrong -> D:defined_space_wrong
 EDGES|REF T:dereference_if -> D:dereference_if
 EDGES|REF T:double -> D:double
 EDGES|REF T:duplicate -> D:duplicate
+EDGES|REF T:duplicate_paren_a -> D:duplicate_paren_a
+EDGES|REF T:duplicate_paren_b -> D:duplicate_paren_b
 EDGES|REF T:empty_all_for -> D:empty_all_for
 EDGES|REF T:empty_do -> D:empty_do
 EDGES|REF T:empty_for -> D:empty_for
@@ -13029,6 +13963,7 @@ EDGES|REF T:macro_comment_wrong -> D:macro_comment_wrong
 EDGES|REF T:macros -> D:macros
 EDGES|REF T:main -> D:main
 EDGES|REF T:memcmp -> D:memcmp
+EDGES|REF T:mixed_prototype_caller -> D:mixed_prototype_caller
 EDGES|REF T:multi_empty_for -> D:multi_empty_for
 EDGES|REF T:multi_init_for -> D:multi_init_for
 EDGES|REF T:multiline_active -> D:multiline_active
@@ -13042,8 +13977,10 @@ EDGES|REF T:no_update_for -> D:no_update_for
 EDGES|REF T:pair -> order.c:<global>#11
 EDGES|REF T:parameter_restore -> D:parameter_restore
 EDGES|REF T:paren_if -> D:paren_if
+EDGES|REF T:parentheses_caller -> D:parentheses_caller
 EDGES|REF T:parenthesized_callee -> D:parenthesized_callee
 EDGES|REF T:parenthesized_defined -> D:parenthesized_defined
+EDGES|REF T:parenthesized_definition_caller -> D:parenthesized_definition_caller
 EDGES|REF T:pick -> D:pick
 EDGES|REF T:point -> structs.c:<global>#1
 EDGES|REF T:point* -> D:point*
@@ -13091,11 +14028,14 @@ EDGES|REF T:strcmp -> D:strcmp
 EDGES|REF T:sum -> D:sum
 EDGES|REF T:ternary_active -> D:ternary_active
 EDGES|REF T:ternary_wrong -> D:ternary_wrong
+EDGES|REF T:typedef_marker -> D:typedef_marker
+EDGES|REF T:typedef_shapes_marker -> D:typedef_shapes_marker
 EDGES|REF T:uint_t -> types2.c:<global>#72
 EDGES|REF T:unary -> D:unary
 EDGES|REF T:undef_comment_active -> D:undef_comment_active
 EDGES|REF T:undef_comment_wrong -> D:undef_comment_wrong
 EDGES|REF T:unionvalue -> D:unionvalue
+EDGES|REF T:unknown_caller -> D:unknown_caller
 EDGES|REF T:unnamed_definition -> D:unnamed_definition
 EDGES|REF T:unselected_expression -> D:unselected_expression
 EDGES|REF T:unsigned -> D:unsigned
@@ -13342,6 +14282,8 @@ EDGES|REF defined_space_active#5 -> defined_space_active#1
 EDGES|REF dereference_if#10 -> dereference_if#1
 EDGES|REF dereference_if#6 -> dereference_if#1
 EDGES|REF duplicate<duplicate>0#6 -> duplicate<duplicate>0#1
+EDGES|REF duplicate_paren_a#6 -> duplicate_paren_a#1
+EDGES|REF duplicate_paren_b#6 -> duplicate_paren_b#1
 EDGES|REF empty_all_for#7 -> empty_all_for#1
 EDGES|REF empty_do#6 -> empty_do#1
 EDGES|REF empty_do#9 -> empty_do#1
@@ -13499,6 +14441,13 @@ EDGES|REF memcmp#34 -> memcmp#5
 EDGES|REF memcmp#37 -> memcmp#8
 EDGES|REF memcmp#39 -> memcmp#9
 EDGES|REF memcmp.c:<global>#44 -> memcmp#0
+EDGES|REF mixed_prototype_caller#11 -> mixed_prototype_caller#1
+EDGES|REF mixed_prototype_caller#13 -> mixed_prototype_caller#1
+EDGES|REF mixed_prototype_caller#15 -> mixed_prototype_caller#1
+EDGES|REF mixed_prototype_caller#17 -> mixed_prototype_caller#1
+EDGES|REF mixed_prototype_caller#19 -> mixed_prototype_caller#1
+EDGES|REF mixed_prototype_caller#21 -> mixed_prototype_caller#1
+EDGES|REF mixed_prototypes.c:<global>#25 -> mixed_prototype_caller#0
 EDGES|REF multi_empty_for#10 -> multi_empty_for#1
 EDGES|REF multi_init_for#10 -> multi_init_for#1
 EDGES|REF multi_init_for#12 -> multi_init_for#6
@@ -13538,10 +14487,20 @@ EDGES|REF parameter_restore#21 -> parameter_restore#3
 EDGES|REF parameter_restore#8 -> parameter_restore#3
 EDGES|REF paren_if#10 -> paren_if#1
 EDGES|REF paren_if#6 -> paren_if#1
+EDGES|REF parentheses_caller#7 -> parentheses_caller#1
+EDGES|REF parentheses_caller#9 -> parentheses_caller#1
 EDGES|REF parenthesized_callee#7 -> parenthesized_callee#4
 EDGES|REF parenthesized_callee#8 -> parenthesized_callee#1
 EDGES|REF parenthesized_defined#6 -> concrete#0
 EDGES|REF parenthesized_defined#7 -> parenthesized_defined#1
+EDGES|REF parenthesized_definition_caller#6 -> parenthesized_definition_caller#1
+EDGES|REF parenthesized_definitions.c:<global>#17 -> <unresolvedNamespace>.paren_defined#0
+EDGES|REF parenthesized_definitions.c:<global>#18 -> parenthesized_definition_caller#0
+EDGES|REF parenthesized_duplicate_a.c:<global>#17 -> <unresolvedNamespace>.duplicate_paren_helper#0
+EDGES|REF parenthesized_duplicate_a.c:<global>#18 -> duplicate_paren_a#0
+EDGES|REF parenthesized_duplicate_b.c:<global>#17 -> <unresolvedNamespace>.duplicate_paren_helper#0
+EDGES|REF parenthesized_duplicate_b.c:<global>#18 -> duplicate_paren_b#0
+EDGES|REF parenthesized_prototypes.c:<global>#13 -> parentheses_caller#0
 EDGES|REF pick#14 -> pick#4
 EDGES|REF pick#20 -> pick#4
 EDGES|REF pick#25 -> pick#4
@@ -13642,6 +14601,10 @@ EDGES|REF sum#25 -> sum#8
 EDGES|REF sum#28 -> sum#4
 EDGES|REF sum#6 -> sum#4
 EDGES|REF switch.c:<global>#53 -> pick#0
+EDGES|REF typedef_marker#5 -> typedef_marker#1
+EDGES|REF typedef_pointer.c:<global>#10 -> typedef_marker#0
+EDGES|REF typedef_shapes.c:<global>#13 -> typedef_shapes.c:<global>#1
+EDGES|REF typedef_shapes_marker#5 -> typedef_shapes_marker#1
 EDGES|REF types2.c:<global>#76 -> apply#0
 EDGES|REF types2.c:<global>#77 -> types2.c:<global>#29
 EDGES|REF unary#11 -> unary#9
@@ -13656,6 +14619,8 @@ EDGES|REF unary#8 -> unary#1
 EDGES|REF unary.c:<global>#48 -> unary#0
 EDGES|REF unary.c:<global>#49 -> ptr#0
 EDGES|REF undef_comment_active#5 -> undef_comment_active#1
+EDGES|REF unknown_caller#6 -> unknown_caller#1
+EDGES|REF unknown_macro_prototypes.c:<global>#11 -> unknown_caller#0
 EDGES|REF use#10 -> use#1
 EDGES|REF use#13 -> use#11
 EDGES|REF use#14 -> use#4
@@ -13682,6 +14647,18 @@ EDGES|REF uses_unknown#6 -> uses_unknown#1
 EDGES|REF uses_varargs#6 -> uses_varargs#1
 EDGES|REF vararg_definition#7 -> vararg_definition#1
 EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE <unresolvedNamespace>.api_named#0 -> F:parenthesized_prototypes.c
+EDGES|SOURCE_FILE <unresolvedNamespace>.duplicate_paren_helper#0 -> F:parenthesized_duplicate_a.c
+EDGES|SOURCE_FILE <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#0 -> F:parenthesized_duplicate_b.c
+EDGES|SOURCE_FILE <unresolvedNamespace>.macro_paren#0 -> F:mixed_prototypes.c
+EDGES|SOURCE_FILE <unresolvedNamespace>.paren_defined#0 -> F:parenthesized_definitions.c
+EDGES|SOURCE_FILE <unresolvedNamespace>.paren_first#0 -> F:mixed_prototypes.c
+EDGES|SOURCE_FILE <unresolvedNamespace>.paren_second#0 -> F:mixed_prototypes.c
+EDGES|SOURCE_FILE <unresolvedNamespace>.plain_named#0 -> F:parenthesized_prototypes.c
+EDGES|SOURCE_FILE <unresolvedNamespace>.unknown_named#0 -> F:unknown_macro_prototypes.c
+EDGES|SOURCE_FILE D:<unresolvedNamespace>.duplicate_paren_helper -> F:parenthesized_duplicate_a.c
+EDGES|SOURCE_FILE D:<unresolvedNamespace>.duplicate_paren_helper<duplicate>0 -> F:parenthesized_duplicate_b.c
+EDGES|SOURCE_FILE D:<unresolvedNamespace>.paren_defined -> F:parenthesized_definitions.c
 EDGES|SOURCE_FILE D:ANY -> F:<includes>
 EDGES|SOURCE_FILE D:_Bool -> F:<includes>
 EDGES|SOURCE_FILE D:active_block_prototype -> F:conditional_prototypes.c
@@ -13743,6 +14720,8 @@ EDGES|SOURCE_FILE D:dereference_if -> F:control_truth_loops.c
 EDGES|SOURCE_FILE D:double -> F:<includes>
 EDGES|SOURCE_FILE D:duplicate -> F:conditional_duplicate.c
 EDGES|SOURCE_FILE D:duplicate<duplicate>0 -> F:conditional_duplicate.c
+EDGES|SOURCE_FILE D:duplicate_paren_a -> F:parenthesized_duplicate_a.c
+EDGES|SOURCE_FILE D:duplicate_paren_b -> F:parenthesized_duplicate_b.c
 EDGES|SOURCE_FILE D:empty_all_for -> F:control_truth_loops.c
 EDGES|SOURCE_FILE D:empty_do -> F:control_truth_loops.c
 EDGES|SOURCE_FILE D:empty_for -> F:control_truth_loops.c
@@ -13792,6 +14771,8 @@ EDGES|SOURCE_FILE D:macros.c:<global> -> F:macros.c
 EDGES|SOURCE_FILE D:main -> F:add.c
 EDGES|SOURCE_FILE D:memcmp -> F:memcmp.c
 EDGES|SOURCE_FILE D:memcmp.c:<global> -> F:memcmp.c
+EDGES|SOURCE_FILE D:mixed_prototype_caller -> F:mixed_prototypes.c
+EDGES|SOURCE_FILE D:mixed_prototypes.c:<global> -> F:mixed_prototypes.c
 EDGES|SOURCE_FILE D:multi_empty_for -> F:control_truth_loops.c
 EDGES|SOURCE_FILE D:multi_init_for -> F:control_truth_loops.c
 EDGES|SOURCE_FILE D:multiline_active -> F:conditional_comments.c
@@ -13806,8 +14787,14 @@ EDGES|SOURCE_FILE D:ops.c:<global> -> F:ops.c
 EDGES|SOURCE_FILE D:order.c:<global> -> F:order.c
 EDGES|SOURCE_FILE D:parameter_restore -> F:callable_scope.c
 EDGES|SOURCE_FILE D:paren_if -> F:control_truth_loops.c
+EDGES|SOURCE_FILE D:parentheses_caller -> F:parenthesized_prototypes.c
 EDGES|SOURCE_FILE D:parenthesized_callee -> F:external_declarations.c
 EDGES|SOURCE_FILE D:parenthesized_defined -> F:function_pointers.c
+EDGES|SOURCE_FILE D:parenthesized_definition_caller -> F:parenthesized_definitions.c
+EDGES|SOURCE_FILE D:parenthesized_definitions.c:<global> -> F:parenthesized_definitions.c
+EDGES|SOURCE_FILE D:parenthesized_duplicate_a.c:<global> -> F:parenthesized_duplicate_a.c
+EDGES|SOURCE_FILE D:parenthesized_duplicate_b.c:<global> -> F:parenthesized_duplicate_b.c
+EDGES|SOURCE_FILE D:parenthesized_prototypes.c:<global> -> F:parenthesized_prototypes.c
 EDGES|SOURCE_FILE D:pick -> F:switch.c
 EDGES|SOURCE_FILE D:point* -> F:<includes>
 EDGES|SOURCE_FILE D:pointer_compare -> F:control_truth_loops.c
@@ -13857,12 +14844,18 @@ EDGES|SOURCE_FILE D:sum -> F:loop.c
 EDGES|SOURCE_FILE D:switch.c:<global> -> F:switch.c
 EDGES|SOURCE_FILE D:ternary_active -> F:conditional_evaluation.c
 EDGES|SOURCE_FILE D:ternary_wrong -> F:conditional_evaluation.c
+EDGES|SOURCE_FILE D:typedef_marker -> F:typedef_pointer.c
+EDGES|SOURCE_FILE D:typedef_pointer.c:<global> -> F:typedef_pointer.c
+EDGES|SOURCE_FILE D:typedef_shapes.c:<global> -> F:typedef_shapes.c
+EDGES|SOURCE_FILE D:typedef_shapes_marker -> F:typedef_shapes.c
 EDGES|SOURCE_FILE D:types2.c:<global> -> F:types2.c
 EDGES|SOURCE_FILE D:unary -> F:unary.c
 EDGES|SOURCE_FILE D:unary.c:<global> -> F:unary.c
 EDGES|SOURCE_FILE D:undef_comment_active -> F:conditional_splices.c
 EDGES|SOURCE_FILE D:undef_comment_wrong -> F:conditional_splices.c
 EDGES|SOURCE_FILE D:unionvalue -> F:<includes>
+EDGES|SOURCE_FILE D:unknown_caller -> F:unknown_macro_prototypes.c
+EDGES|SOURCE_FILE D:unknown_macro_prototypes.c:<global> -> F:unknown_macro_prototypes.c
 EDGES|SOURCE_FILE D:unnamed_definition -> F:external_declarations.c
 EDGES|SOURCE_FILE D:unselected_expression -> F:conditional_configuration.c
 EDGES|SOURCE_FILE D:unsigned -> F:<includes>
@@ -13910,15 +14903,23 @@ EDGES|SOURCE_FILE NB:logic.c:<global> -> F:logic.c
 EDGES|SOURCE_FILE NB:loop.c:<global> -> F:loop.c
 EDGES|SOURCE_FILE NB:macros.c:<global> -> F:macros.c
 EDGES|SOURCE_FILE NB:memcmp.c:<global> -> F:memcmp.c
+EDGES|SOURCE_FILE NB:mixed_prototypes.c:<global> -> F:mixed_prototypes.c
 EDGES|SOURCE_FILE NB:ops.c:<global> -> F:ops.c
 EDGES|SOURCE_FILE NB:order.c:<global> -> F:order.c
+EDGES|SOURCE_FILE NB:parenthesized_definitions.c:<global> -> F:parenthesized_definitions.c
+EDGES|SOURCE_FILE NB:parenthesized_duplicate_a.c:<global> -> F:parenthesized_duplicate_a.c
+EDGES|SOURCE_FILE NB:parenthesized_duplicate_b.c:<global> -> F:parenthesized_duplicate_b.c
+EDGES|SOURCE_FILE NB:parenthesized_prototypes.c:<global> -> F:parenthesized_prototypes.c
 EDGES|SOURCE_FILE NB:prototype_a.c:<global> -> F:prototype_a.c
 EDGES|SOURCE_FILE NB:prototype_b.c:<global> -> F:prototype_b.c
 EDGES|SOURCE_FILE NB:strcmp.c:<global> -> F:strcmp.c
 EDGES|SOURCE_FILE NB:structs.c:<global> -> F:structs.c
 EDGES|SOURCE_FILE NB:switch.c:<global> -> F:switch.c
+EDGES|SOURCE_FILE NB:typedef_pointer.c:<global> -> F:typedef_pointer.c
+EDGES|SOURCE_FILE NB:typedef_shapes.c:<global> -> F:typedef_shapes.c
 EDGES|SOURCE_FILE NB:types2.c:<global> -> F:types2.c
 EDGES|SOURCE_FILE NB:unary.c:<global> -> F:unary.c
+EDGES|SOURCE_FILE NB:unknown_macro_prototypes.c:<global> -> F:unknown_macro_prototypes.c
 EDGES|SOURCE_FILE active_block_prototype#0 -> F:conditional_prototypes.c
 EDGES|SOURCE_FILE active_external#0 -> F:conditional_prototypes.c
 EDGES|SOURCE_FILE active_top_prototype#0 -> F:conditional_prototypes.c
@@ -14050,6 +15051,8 @@ EDGES|SOURCE_FILE control_truth_loops.c:<global>#77 -> F:control_truth_loops.c
 EDGES|SOURCE_FILE control_truth_loops.c:<global>#8 -> F:control_truth_loops.c
 EDGES|SOURCE_FILE control_truth_loops.c:<global>#93 -> F:control_truth_loops.c
 EDGES|SOURCE_FILE count#0 -> F:forloop.c
+EDGES|SOURCE_FILE duplicate_paren_a#0 -> F:parenthesized_duplicate_a.c
+EDGES|SOURCE_FILE duplicate_paren_b#0 -> F:parenthesized_duplicate_b.c
 EDGES|SOURCE_FILE exprs#0 -> F:exprs.c
 EDGES|SOURCE_FILE exprs.c:<global>#0 -> F:exprs.c
 EDGES|SOURCE_FILE external_declarations.c:<global>#0 -> F:external_declarations.c
@@ -14094,18 +15097,29 @@ EDGES|SOURCE_FILE logic#0 -> F:logic.c
 EDGES|SOURCE_FILE logic.c:<global>#0 -> F:logic.c
 EDGES|SOURCE_FILE loop.c:<global>#0 -> F:loop.c
 EDGES|SOURCE_FILE loop.c:<global>#1 -> F:loop.c
+EDGES|SOURCE_FILE macro_ordinary#0 -> F:mixed_prototypes.c
 EDGES|SOURCE_FILE macros#0 -> F:macros.c
 EDGES|SOURCE_FILE macros.c:<global>#0 -> F:macros.c
 EDGES|SOURCE_FILE macros.c:LIMIT:int(0)#0 -> F:macros.c
 EDGES|SOURCE_FILE macros.c:SQR:ANY(1)#0 -> F:macros.c
 EDGES|SOURCE_FILE memcmp#0 -> F:memcmp.c
 EDGES|SOURCE_FILE memcmp.c:<global>#0 -> F:memcmp.c
+EDGES|SOURCE_FILE mixed_prototype_caller#0 -> F:mixed_prototypes.c
+EDGES|SOURCE_FILE mixed_prototypes.c:<global>#0 -> F:mixed_prototypes.c
 EDGES|SOURCE_FILE only_header#0 -> F:prototype_a.c
 EDGES|SOURCE_FILE ops.c:<global>#0 -> F:ops.c
 EDGES|SOURCE_FILE order.c:<global>#0 -> F:order.c
 EDGES|SOURCE_FILE order.c:<global>#11 -> F:order.c
 EDGES|SOURCE_FILE order.c:<global>#14 -> F:order.c
 EDGES|SOURCE_FILE order.c:<global>#21 -> F:order.c
+EDGES|SOURCE_FILE ordinary_first#0 -> F:mixed_prototypes.c
+EDGES|SOURCE_FILE ordinary_second#0 -> F:mixed_prototypes.c
+EDGES|SOURCE_FILE parentheses_caller#0 -> F:parenthesized_prototypes.c
+EDGES|SOURCE_FILE parenthesized_definition_caller#0 -> F:parenthesized_definitions.c
+EDGES|SOURCE_FILE parenthesized_definitions.c:<global>#0 -> F:parenthesized_definitions.c
+EDGES|SOURCE_FILE parenthesized_duplicate_a.c:<global>#0 -> F:parenthesized_duplicate_a.c
+EDGES|SOURCE_FILE parenthesized_duplicate_b.c:<global>#0 -> F:parenthesized_duplicate_b.c
+EDGES|SOURCE_FILE parenthesized_prototypes.c:<global>#0 -> F:parenthesized_prototypes.c
 EDGES|SOURCE_FILE pick#0 -> F:switch.c
 EDGES|SOURCE_FILE prototype_a.c:<global>#0 -> F:prototype_a.c
 EDGES|SOURCE_FILE prototype_a.c:<global>#1 -> F:prototype_a.c
@@ -14120,6 +15134,15 @@ EDGES|SOURCE_FILE strcmp.c:<global>#0 -> F:strcmp.c
 EDGES|SOURCE_FILE structs.c:<global>#0 -> F:structs.c
 EDGES|SOURCE_FILE structs.c:<global>#1 -> F:structs.c
 EDGES|SOURCE_FILE switch.c:<global>#0 -> F:switch.c
+EDGES|SOURCE_FILE typedef_marker#0 -> F:typedef_pointer.c
+EDGES|SOURCE_FILE typedef_pointer.c:<global>#0 -> F:typedef_pointer.c
+EDGES|SOURCE_FILE typedef_pointer.c:<global>#9 -> F:typedef_pointer.c
+EDGES|SOURCE_FILE typedef_shapes.c:<global>#0 -> F:typedef_shapes.c
+EDGES|SOURCE_FILE typedef_shapes.c:<global>#1 -> F:typedef_shapes.c
+EDGES|SOURCE_FILE typedef_shapes.c:<global>#10 -> F:typedef_shapes.c
+EDGES|SOURCE_FILE typedef_shapes.c:<global>#11 -> F:typedef_shapes.c
+EDGES|SOURCE_FILE typedef_shapes.c:<global>#12 -> F:typedef_shapes.c
+EDGES|SOURCE_FILE typedef_shapes.c:<global>#9 -> F:typedef_shapes.c
 EDGES|SOURCE_FILE types2.c:<global>#0 -> F:types2.c
 EDGES|SOURCE_FILE types2.c:<global>#1 -> F:types2.c
 EDGES|SOURCE_FILE types2.c:<global>#14 -> F:types2.c
@@ -14127,6 +15150,8 @@ EDGES|SOURCE_FILE types2.c:<global>#29 -> F:types2.c
 EDGES|SOURCE_FILE types2.c:<global>#72 -> F:types2.c
 EDGES|SOURCE_FILE unary#0 -> F:unary.c
 EDGES|SOURCE_FILE unary.c:<global>#0 -> F:unary.c
+EDGES|SOURCE_FILE unknown_caller#0 -> F:unknown_macro_prototypes.c
+EDGES|SOURCE_FILE unknown_macro_prototypes.c:<global>#0 -> F:unknown_macro_prototypes.c
 EDGES|SOURCE_FILE unused_named#0 -> F:external_functions.c
 EDGES|SOURCE_FILE unused_unnamed#0 -> F:external_functions.c
 EDGES|SOURCE_FILE unused_void#0 -> F:external_functions.c
@@ -14563,6 +15588,9 @@ FLOWS|REACHING_DEF[7] precedence_active#5 -> precedence_active#4
 FLOWS|REACHING_DEF[8] pp_default#7 -> pp_default#5
 FLOWS|REACHING_DEF[9] conditional_top_level.c:<global>#86 -> conditional_top_level.c:<global>#84
 FLOWS|REACHING_DEF[9] conditional_top_level.c:<global>#86 -> conditional_top_level.c:<global>#85
+FLOWS|REACHING_DEF[<RET>] <unresolvedNamespace>.duplicate_paren_helper#4 -> <unresolvedNamespace>.duplicate_paren_helper#6
+FLOWS|REACHING_DEF[<RET>] <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#4 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#6
+FLOWS|REACHING_DEF[<RET>] <unresolvedNamespace>.paren_defined#4 -> <unresolvedNamespace>.paren_defined#6
 FLOWS|REACHING_DEF[<RET>] active_block_prototype#4 -> active_block_prototype#7
 FLOWS|REACHING_DEF[<RET>] add#6 -> add#10
 FLOWS|REACHING_DEF[<RET>] after_undef#4 -> after_undef#6
@@ -14608,6 +15636,8 @@ FLOWS|REACHING_DEF[<RET>] defined_space_active#4 -> defined_space_active#6
 FLOWS|REACHING_DEF[<RET>] dereference_if#11 -> dereference_if#13
 FLOWS|REACHING_DEF[<RET>] dereference_if#8 -> dereference_if#13
 FLOWS|REACHING_DEF[<RET>] duplicate<duplicate>0#4 -> duplicate<duplicate>0#8
+FLOWS|REACHING_DEF[<RET>] duplicate_paren_a#4 -> duplicate_paren_a#7
+FLOWS|REACHING_DEF[<RET>] duplicate_paren_b#4 -> duplicate_paren_b#7
 FLOWS|REACHING_DEF[<RET>] empty_all_for#6 -> empty_all_for#8
 FLOWS|REACHING_DEF[<RET>] empty_do#8 -> empty_do#10
 FLOWS|REACHING_DEF[<RET>] empty_for#7 -> empty_for#9
@@ -14637,6 +15667,7 @@ FLOWS|REACHING_DEF[<RET>] macros#11 -> macros#27
 FLOWS|REACHING_DEF[<RET>] macros#25 -> macros#27
 FLOWS|REACHING_DEF[<RET>] main#8 -> main#10
 FLOWS|REACHING_DEF[<RET>] memcmp#32 -> memcmp#41
+FLOWS|REACHING_DEF[<RET>] mixed_prototype_caller#4 -> mixed_prototype_caller#22
 FLOWS|REACHING_DEF[<RET>] multi_empty_for#9 -> multi_empty_for#11
 FLOWS|REACHING_DEF[<RET>] multi_init_for#21 -> multi_init_for#23
 FLOWS|REACHING_DEF[<RET>] multiline_active#4 -> multiline_active#6
@@ -14650,8 +15681,10 @@ FLOWS|REACHING_DEF[<RET>] no_update_for#11 -> no_update_for#13
 FLOWS|REACHING_DEF[<RET>] parameter_restore#18 -> parameter_restore#22
 FLOWS|REACHING_DEF[<RET>] paren_if#11 -> paren_if#13
 FLOWS|REACHING_DEF[<RET>] paren_if#9 -> paren_if#13
+FLOWS|REACHING_DEF[<RET>] parentheses_caller#4 -> parentheses_caller#10
 FLOWS|REACHING_DEF[<RET>] parenthesized_callee#5 -> parenthesized_callee#9
 FLOWS|REACHING_DEF[<RET>] parenthesized_defined#4 -> parenthesized_defined#8
+FLOWS|REACHING_DEF[<RET>] parenthesized_definition_caller#4 -> parenthesized_definition_caller#7
 FLOWS|REACHING_DEF[<RET>] pick#48 -> pick#50
 FLOWS|REACHING_DEF[<RET>] pointer_compare#15 -> pointer_compare#19
 FLOWS|REACHING_DEF[<RET>] pointer_compare#17 -> pointer_compare#19
@@ -14692,8 +15725,11 @@ FLOWS|REACHING_DEF[<RET>] spliced_macro_active#4 -> spliced_macro_active#6
 FLOWS|REACHING_DEF[<RET>] strcmp#21 -> strcmp#31
 FLOWS|REACHING_DEF[<RET>] sum#27 -> sum#29
 FLOWS|REACHING_DEF[<RET>] ternary_active#4 -> ternary_active#6
+FLOWS|REACHING_DEF[<RET>] typedef_marker#4 -> typedef_marker#6
+FLOWS|REACHING_DEF[<RET>] typedef_shapes_marker#4 -> typedef_shapes_marker#6
 FLOWS|REACHING_DEF[<RET>] unary#23 -> unary#25
 FLOWS|REACHING_DEF[<RET>] undef_comment_active#4 -> undef_comment_active#6
+FLOWS|REACHING_DEF[<RET>] unknown_caller#4 -> unknown_caller#7
 FLOWS|REACHING_DEF[<RET>] unnamed_definition#6 -> unnamed_definition#8
 FLOWS|REACHING_DEF[<RET>] use#35 -> use#41
 FLOWS|REACHING_DEF[<RET>] use_a#4 -> use_a#7
@@ -14820,6 +15856,18 @@ FLOWS|REACHING_DEF[] <operators>.assignmentShiftLeft#0 -> <operators>.assignment
 FLOWS|REACHING_DEF[] <operators>.assignmentShiftLeft#0 -> <operators>.assignmentShiftLeft#4
 FLOWS|REACHING_DEF[] <operators>.assignmentXor#0 -> <operators>.assignmentXor#1
 FLOWS|REACHING_DEF[] <operators>.assignmentXor#0 -> <operators>.assignmentXor#4
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.api_named#0 -> <unresolvedNamespace>.api_named#1
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.duplicate_paren_helper#0 -> <unresolvedNamespace>.duplicate_paren_helper#1
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.duplicate_paren_helper#0 -> <unresolvedNamespace>.duplicate_paren_helper#5
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#0 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#1
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#0 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#5
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.macro_paren#0 -> <unresolvedNamespace>.macro_paren#1
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.paren_defined#0 -> <unresolvedNamespace>.paren_defined#1
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.paren_defined#0 -> <unresolvedNamespace>.paren_defined#5
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.paren_first#0 -> <unresolvedNamespace>.paren_first#1
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.paren_second#0 -> <unresolvedNamespace>.paren_second#1
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.plain_named#0 -> <unresolvedNamespace>.plain_named#1
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.unknown_named#0 -> <unresolvedNamespace>.unknown_named#1
 FLOWS|REACHING_DEF[] active_block_prototype#0 -> active_block_prototype#1
 FLOWS|REACHING_DEF[] active_block_prototype#0 -> active_block_prototype#6
 FLOWS|REACHING_DEF[] active_external#0 -> active_external#1
@@ -14859,6 +15907,7 @@ FLOWS|REACHING_DEF[] and_if#0 -> and_if#14
 FLOWS|REACHING_DEF[] and_if#0 -> and_if#3
 FLOWS|REACHING_DEF[] and_if#0 -> and_if#8
 FLOWS|REACHING_DEF[] and_if#0 -> and_if#9
+FLOWS|REACHING_DEF[] api_named#0 -> api_named#1
 FLOWS|REACHING_DEF[] apply#0 -> apply#1
 FLOWS|REACHING_DEF[] apply#0 -> apply#10
 FLOWS|REACHING_DEF[] apply#0 -> apply#3
@@ -15406,6 +16455,11 @@ FLOWS|REACHING_DEF[] count#0 -> count#38
 FLOWS|REACHING_DEF[] count#0 -> count#39
 FLOWS|REACHING_DEF[] count#0 -> count#41
 FLOWS|REACHING_DEF[] count#0 -> count#7
+FLOWS|REACHING_DEF[] duplicate_paren_a#0 -> duplicate_paren_a#1
+FLOWS|REACHING_DEF[] duplicate_paren_a#0 -> duplicate_paren_a#6
+FLOWS|REACHING_DEF[] duplicate_paren_b#0 -> duplicate_paren_b#1
+FLOWS|REACHING_DEF[] duplicate_paren_b#0 -> duplicate_paren_b#6
+FLOWS|REACHING_DEF[] duplicate_paren_helper#0 -> duplicate_paren_helper#1
 FLOWS|REACHING_DEF[] exprs#0 -> exprs#1
 FLOWS|REACHING_DEF[] exprs#0 -> exprs#11
 FLOWS|REACHING_DEF[] exprs#0 -> exprs#12
@@ -15618,6 +16672,8 @@ FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#25
 FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#26
 FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#28
 FLOWS|REACHING_DEF[] loop.c:<global>#1 -> sum#7
+FLOWS|REACHING_DEF[] macro_ordinary#0 -> macro_ordinary#1
+FLOWS|REACHING_DEF[] macro_paren#0 -> macro_paren#1
 FLOWS|REACHING_DEF[] macros#0 -> macros#1
 FLOWS|REACHING_DEF[] macros#0 -> macros#13
 FLOWS|REACHING_DEF[] macros#0 -> macros#16
@@ -15647,6 +16703,14 @@ FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#39
 FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#40
 FLOWS|REACHING_DEF[] memcmp#0 -> memcmp#5
 FLOWS|REACHING_DEF[] memcmp.c:<global>#0 -> memcmp.c:<global>#44
+FLOWS|REACHING_DEF[] mixed_prototype_caller#0 -> mixed_prototype_caller#1
+FLOWS|REACHING_DEF[] mixed_prototype_caller#0 -> mixed_prototype_caller#11
+FLOWS|REACHING_DEF[] mixed_prototype_caller#0 -> mixed_prototype_caller#13
+FLOWS|REACHING_DEF[] mixed_prototype_caller#0 -> mixed_prototype_caller#15
+FLOWS|REACHING_DEF[] mixed_prototype_caller#0 -> mixed_prototype_caller#17
+FLOWS|REACHING_DEF[] mixed_prototype_caller#0 -> mixed_prototype_caller#19
+FLOWS|REACHING_DEF[] mixed_prototype_caller#0 -> mixed_prototype_caller#21
+FLOWS|REACHING_DEF[] mixed_prototypes.c:<global>#0 -> mixed_prototypes.c:<global>#25
 FLOWS|REACHING_DEF[] only_header#0 -> only_header#1
 FLOWS|REACHING_DEF[] only_header#1 -> only_header#2
 FLOWS|REACHING_DEF[] only_header#1 -> only_header#4
@@ -15660,6 +16724,23 @@ FLOWS|REACHING_DEF[] order.c:<global>#21 -> second#1
 FLOWS|REACHING_DEF[] order.c:<global>#21 -> second#10
 FLOWS|REACHING_DEF[] order.c:<global>#21 -> second#12
 FLOWS|REACHING_DEF[] order.c:<global>#21 -> second#8
+FLOWS|REACHING_DEF[] ordinary_first#0 -> ordinary_first#1
+FLOWS|REACHING_DEF[] ordinary_second#0 -> ordinary_second#1
+FLOWS|REACHING_DEF[] paren_defined#0 -> paren_defined#1
+FLOWS|REACHING_DEF[] paren_first#0 -> paren_first#1
+FLOWS|REACHING_DEF[] paren_second#0 -> paren_second#1
+FLOWS|REACHING_DEF[] parentheses_caller#0 -> parentheses_caller#1
+FLOWS|REACHING_DEF[] parentheses_caller#0 -> parentheses_caller#7
+FLOWS|REACHING_DEF[] parentheses_caller#0 -> parentheses_caller#9
+FLOWS|REACHING_DEF[] parenthesized_definition_caller#0 -> parenthesized_definition_caller#1
+FLOWS|REACHING_DEF[] parenthesized_definition_caller#0 -> parenthesized_definition_caller#6
+FLOWS|REACHING_DEF[] parenthesized_definitions.c:<global>#0 -> parenthesized_definitions.c:<global>#17
+FLOWS|REACHING_DEF[] parenthesized_definitions.c:<global>#0 -> parenthesized_definitions.c:<global>#18
+FLOWS|REACHING_DEF[] parenthesized_duplicate_a.c:<global>#0 -> parenthesized_duplicate_a.c:<global>#17
+FLOWS|REACHING_DEF[] parenthesized_duplicate_a.c:<global>#0 -> parenthesized_duplicate_a.c:<global>#18
+FLOWS|REACHING_DEF[] parenthesized_duplicate_b.c:<global>#0 -> parenthesized_duplicate_b.c:<global>#17
+FLOWS|REACHING_DEF[] parenthesized_duplicate_b.c:<global>#0 -> parenthesized_duplicate_b.c:<global>#18
+FLOWS|REACHING_DEF[] parenthesized_prototypes.c:<global>#0 -> parenthesized_prototypes.c:<global>#13
 FLOWS|REACHING_DEF[] pick#0 -> pick#1
 FLOWS|REACHING_DEF[] pick#0 -> pick#12
 FLOWS|REACHING_DEF[] pick#0 -> pick#15
@@ -15676,6 +16757,7 @@ FLOWS|REACHING_DEF[] pick#0 -> pick#47
 FLOWS|REACHING_DEF[] pick#0 -> pick#49
 FLOWS|REACHING_DEF[] pick#0 -> pick#7
 FLOWS|REACHING_DEF[] pick#0 -> pick#9
+FLOWS|REACHING_DEF[] plain_named#0 -> plain_named#1
 FLOWS|REACHING_DEF[] pointer_local#6 -> pointer_local#12
 FLOWS|REACHING_DEF[] pointer_local#6 -> pointer_local#5
 FLOWS|REACHING_DEF[] precedence_active#1 -> precedence_active#2
@@ -15724,6 +16806,12 @@ FLOWS|REACHING_DEF[] ternary_active#1 -> ternary_active#2
 FLOWS|REACHING_DEF[] ternary_active#1 -> ternary_active#6
 FLOWS|REACHING_DEF[] ternary_wrong#1 -> ternary_wrong#2
 FLOWS|REACHING_DEF[] ternary_wrong#1 -> ternary_wrong#4
+FLOWS|REACHING_DEF[] typedef_marker#0 -> typedef_marker#1
+FLOWS|REACHING_DEF[] typedef_marker#0 -> typedef_marker#5
+FLOWS|REACHING_DEF[] typedef_pointer.c:<global>#0 -> typedef_pointer.c:<global>#10
+FLOWS|REACHING_DEF[] typedef_shapes.c:<global>#0 -> typedef_shapes.c:<global>#13
+FLOWS|REACHING_DEF[] typedef_shapes.c:<global>#1 -> typedef_shapes_marker#1
+FLOWS|REACHING_DEF[] typedef_shapes.c:<global>#1 -> typedef_shapes_marker#5
 FLOWS|REACHING_DEF[] types2.c:<global>#0 -> types2.c:<global>#73
 FLOWS|REACHING_DEF[] types2.c:<global>#0 -> types2.c:<global>#74
 FLOWS|REACHING_DEF[] types2.c:<global>#0 -> types2.c:<global>#76
@@ -15757,6 +16845,10 @@ FLOWS|REACHING_DEF[] undeclared_many#0 -> undeclared_many#1
 FLOWS|REACHING_DEF[] undeclared_many#0 -> undeclared_many#4
 FLOWS|REACHING_DEF[] undeclared_many#0 -> undeclared_many#7
 FLOWS|REACHING_DEF[] undeclared_zero#0 -> undeclared_zero#1
+FLOWS|REACHING_DEF[] unknown_caller#0 -> unknown_caller#1
+FLOWS|REACHING_DEF[] unknown_caller#0 -> unknown_caller#6
+FLOWS|REACHING_DEF[] unknown_macro_prototypes.c:<global>#0 -> unknown_macro_prototypes.c:<global>#11
+FLOWS|REACHING_DEF[] unknown_named#0 -> unknown_named#1
 FLOWS|REACHING_DEF[] unnamed_definition#1 -> unnamed_definition#2
 FLOWS|REACHING_DEF[] unnamed_definition#1 -> unnamed_definition#4
 FLOWS|REACHING_DEF[] unnamed_definition#1 -> unnamed_definition#8
@@ -15870,6 +16962,10 @@ FLOWS|REACHING_DEF[active_external(x)] active_block_prototype#5 -> active_block_
 FLOWS|REACHING_DEF[add(1, 2)] main#5 -> main#10
 FLOWS|REACHING_DEF[add(1, 2)] main#5 -> main#3
 FLOWS|REACHING_DEF[add(1, 2)] main#5 -> main#4
+FLOWS|REACHING_DEF[api_named(x) + plain_named(x)] parentheses_caller#5 -> parentheses_caller#10
+FLOWS|REACHING_DEF[api_named(x) + plain_named(x)] parentheses_caller#5 -> parentheses_caller#4
+FLOWS|REACHING_DEF[api_named(x)] parentheses_caller#6 -> parentheses_caller#10
+FLOWS|REACHING_DEF[api_named(x)] parentheses_caller#6 -> parentheses_caller#5
 FLOWS|REACHING_DEF[arg] scoped#1 -> scoped#2
 FLOWS|REACHING_DEF[arg] scoped#1 -> scoped#4
 FLOWS|REACHING_DEF[arr[4]] pair.<clinit>:pair()#2 -> pair.<clinit>:pair()#6
@@ -16023,6 +17119,10 @@ FLOWS|REACHING_DEF[d] unary#16 -> unary#15
 FLOWS|REACHING_DEF[d] unary#16 -> unary#25
 FLOWS|REACHING_DEF[duplicate(x)] call_duplicate#5 -> call_duplicate#4
 FLOWS|REACHING_DEF[duplicate(x)] call_duplicate#5 -> call_duplicate#7
+FLOWS|REACHING_DEF[duplicate_paren_helper(value)] duplicate_paren_a#5 -> duplicate_paren_a#4
+FLOWS|REACHING_DEF[duplicate_paren_helper(value)] duplicate_paren_a#5 -> duplicate_paren_a#7
+FLOWS|REACHING_DEF[duplicate_paren_helper(value)] duplicate_paren_b#5 -> duplicate_paren_b#4
+FLOWS|REACHING_DEF[duplicate_paren_helper(value)] duplicate_paren_b#5 -> duplicate_paren_b#7
 FLOWS|REACHING_DEF[external_fn(value)] shadow_external#11 -> shadow_external#10
 FLOWS|REACHING_DEF[external_fn(value)] shadow_external#11 -> shadow_external#14
 FLOWS|REACHING_DEF[external_fn] local_external#7 -> local_external#5
@@ -16208,6 +17308,10 @@ FLOWS|REACHING_DEF[m] count#33 -> count#32
 FLOWS|REACHING_DEF[m] count#33 -> count#41
 FLOWS|REACHING_DEF[m] count#33 -> count#42
 FLOWS|REACHING_DEF[m] count#41 -> count#40
+FLOWS|REACHING_DEF[macro_ordinary(value)] mixed_prototype_caller#20 -> mixed_prototype_caller#22
+FLOWS|REACHING_DEF[macro_ordinary(value)] mixed_prototype_caller#20 -> mixed_prototype_caller#5
+FLOWS|REACHING_DEF[macro_paren(value)] mixed_prototype_caller#18 -> mixed_prototype_caller#22
+FLOWS|REACHING_DEF[macro_paren(value)] mixed_prototype_caller#18 -> mixed_prototype_caller#6
 FLOWS|REACHING_DEF[msg] exprs#58 -> exprs#57
 FLOWS|REACHING_DEF[msg] exprs#58 -> exprs#70
 FLOWS|REACHING_DEF[n && *l == *r] memcmp#18 -> memcmp#41
@@ -16325,6 +17429,10 @@ FLOWS|REACHING_DEF[nel] bsearch#5 -> bsearch#6
 FLOWS|REACHING_DEF[nel] bsearch#60 -> bsearch#59
 FLOWS|REACHING_DEF[nel] bsearch#63 -> bsearch#60
 FLOWS|REACHING_DEF[nel] bsearch#63 -> bsearch#62
+FLOWS|REACHING_DEF[ordinary_first(value)] mixed_prototype_caller#14 -> mixed_prototype_caller#22
+FLOWS|REACHING_DEF[ordinary_first(value)] mixed_prototype_caller#14 -> mixed_prototype_caller#8
+FLOWS|REACHING_DEF[ordinary_second(value)] mixed_prototype_caller#12 -> mixed_prototype_caller#22
+FLOWS|REACHING_DEF[ordinary_second(value)] mixed_prototype_caller#12 -> mixed_prototype_caller#9
 FLOWS|REACHING_DEF[p != 0] array_if#5 -> array_if#15
 FLOWS|REACHING_DEF[p != 0] pointer_compare#5 -> pointer_compare#19
 FLOWS|REACHING_DEF[p != NULL] pointer_do#8 -> pointer_do#13
@@ -16414,16 +17522,32 @@ FLOWS|REACHING_DEF[p1] <operators>.assignmentShiftLeft#1 -> <operators>.assignme
 FLOWS|REACHING_DEF[p1] <operators>.assignmentShiftLeft#1 -> <operators>.assignmentShiftLeft#5
 FLOWS|REACHING_DEF[p1] <operators>.assignmentXor#1 -> <operators>.assignmentXor#3
 FLOWS|REACHING_DEF[p1] <operators>.assignmentXor#1 -> <operators>.assignmentXor#5
+FLOWS|REACHING_DEF[p1] api_named#1 -> api_named#3
+FLOWS|REACHING_DEF[p1] api_named#1 -> api_named#4
 FLOWS|REACHING_DEF[p1] conditional_configuration.c:STEP:ANY(1)#1 -> conditional_configuration.c:STEP:ANY(1)#2
 FLOWS|REACHING_DEF[p1] conditional_configuration.c:STEP:ANY(1)#1 -> conditional_configuration.c:STEP:ANY(1)#4
 FLOWS|REACHING_DEF[p1] conditional_macro_order.c:ORDER_STEP:ANY(1)#1 -> conditional_macro_order.c:ORDER_STEP:ANY(1)#2
 FLOWS|REACHING_DEF[p1] conditional_macro_order.c:ORDER_STEP:ANY(1)#1 -> conditional_macro_order.c:ORDER_STEP:ANY(1)#4
+FLOWS|REACHING_DEF[p1] duplicate_paren_helper#1 -> duplicate_paren_helper#3
+FLOWS|REACHING_DEF[p1] duplicate_paren_helper#1 -> duplicate_paren_helper#4
+FLOWS|REACHING_DEF[p1] macro_paren#1 -> macro_paren#3
+FLOWS|REACHING_DEF[p1] macro_paren#1 -> macro_paren#4
 FLOWS|REACHING_DEF[p1] macros.c:SQR:ANY(1)#1 -> macros.c:SQR:ANY(1)#2
 FLOWS|REACHING_DEF[p1] macros.c:SQR:ANY(1)#1 -> macros.c:SQR:ANY(1)#4
+FLOWS|REACHING_DEF[p1] paren_defined#1 -> paren_defined#3
+FLOWS|REACHING_DEF[p1] paren_defined#1 -> paren_defined#4
+FLOWS|REACHING_DEF[p1] paren_first#1 -> paren_first#3
+FLOWS|REACHING_DEF[p1] paren_first#1 -> paren_first#4
+FLOWS|REACHING_DEF[p1] paren_second#1 -> paren_second#3
+FLOWS|REACHING_DEF[p1] paren_second#1 -> paren_second#4
+FLOWS|REACHING_DEF[p1] plain_named#1 -> plain_named#3
+FLOWS|REACHING_DEF[p1] plain_named#1 -> plain_named#4
 FLOWS|REACHING_DEF[p1] undeclared#1 -> undeclared#3
 FLOWS|REACHING_DEF[p1] undeclared#1 -> undeclared#4
 FLOWS|REACHING_DEF[p1] undeclared_many#1 -> undeclared_many#3
 FLOWS|REACHING_DEF[p1] undeclared_many#1 -> undeclared_many#5
+FLOWS|REACHING_DEF[p1] unknown_named#1 -> unknown_named#3
+FLOWS|REACHING_DEF[p1] unknown_named#1 -> unknown_named#4
 FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
 FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
 FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#5
@@ -16543,6 +17667,24 @@ FLOWS|REACHING_DEF[p] pointer_while#9 -> pointer_while#8
 FLOWS|REACHING_DEF[p] ptr#1 -> ptr#19
 FLOWS|REACHING_DEF[p] ptr#1 -> ptr#2
 FLOWS|REACHING_DEF[p] ptr#1 -> ptr#8
+FLOWS|REACHING_DEF[paren_defined(value)] parenthesized_definition_caller#5 -> parenthesized_definition_caller#4
+FLOWS|REACHING_DEF[paren_defined(value)] parenthesized_definition_caller#5 -> parenthesized_definition_caller#7
+FLOWS|REACHING_DEF[paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value) + macro_ordinary(value)] mixed_prototype_caller#5 -> mixed_prototype_caller#22
+FLOWS|REACHING_DEF[paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value) + macro_ordinary(value)] mixed_prototype_caller#5 -> mixed_prototype_caller#4
+FLOWS|REACHING_DEF[paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value)] mixed_prototype_caller#6 -> mixed_prototype_caller#22
+FLOWS|REACHING_DEF[paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value) + macro_paren(value)] mixed_prototype_caller#6 -> mixed_prototype_caller#5
+FLOWS|REACHING_DEF[paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value)] mixed_prototype_caller#7 -> mixed_prototype_caller#22
+FLOWS|REACHING_DEF[paren_first(value) + ordinary_second(value) + ordinary_first(value) + paren_second(value)] mixed_prototype_caller#7 -> mixed_prototype_caller#6
+FLOWS|REACHING_DEF[paren_first(value) + ordinary_second(value) + ordinary_first(value)] mixed_prototype_caller#8 -> mixed_prototype_caller#22
+FLOWS|REACHING_DEF[paren_first(value) + ordinary_second(value) + ordinary_first(value)] mixed_prototype_caller#8 -> mixed_prototype_caller#7
+FLOWS|REACHING_DEF[paren_first(value) + ordinary_second(value)] mixed_prototype_caller#9 -> mixed_prototype_caller#22
+FLOWS|REACHING_DEF[paren_first(value) + ordinary_second(value)] mixed_prototype_caller#9 -> mixed_prototype_caller#8
+FLOWS|REACHING_DEF[paren_first(value)] mixed_prototype_caller#10 -> mixed_prototype_caller#22
+FLOWS|REACHING_DEF[paren_first(value)] mixed_prototype_caller#10 -> mixed_prototype_caller#9
+FLOWS|REACHING_DEF[paren_second(value)] mixed_prototype_caller#16 -> mixed_prototype_caller#22
+FLOWS|REACHING_DEF[paren_second(value)] mixed_prototype_caller#16 -> mixed_prototype_caller#7
+FLOWS|REACHING_DEF[plain_named(x)] parentheses_caller#8 -> parentheses_caller#10
+FLOWS|REACHING_DEF[plain_named(x)] parentheses_caller#8 -> parentheses_caller#5
 FLOWS|REACHING_DEF[pp_global = 2] conditional_top_level.c:<global>#77 -> conditional_top_level.c:<global>#97
 FLOWS|REACHING_DEF[pp_global] conditional_top_level.c:<global>#78 -> conditional_top_level.c:<global>#77
 FLOWS|REACHING_DEF[pp_global] conditional_top_level.c:<global>#78 -> conditional_top_level.c:<global>#97
@@ -16768,6 +17910,8 @@ FLOWS|REACHING_DEF[undeclared_zero()] uses_zero#5 -> uses_zero#4
 FLOWS|REACHING_DEF[undeclared_zero()] uses_zero#5 -> uses_zero#6
 FLOWS|REACHING_DEF[uninitialized_callback(x)] global_uninitialized#6 -> global_uninitialized#5
 FLOWS|REACHING_DEF[uninitialized_callback(x)] global_uninitialized#6 -> global_uninitialized#9
+FLOWS|REACHING_DEF[unknown_named(x)] unknown_caller#5 -> unknown_caller#4
+FLOWS|REACHING_DEF[unknown_named(x)] unknown_caller#5 -> unknown_caller#7
 FLOWS|REACHING_DEF[unsigned char *] strcmp#25 -> strcmp#24
 FLOWS|REACHING_DEF[unsigned char *] strcmp#29 -> strcmp#28
 FLOWS|REACHING_DEF[v + gcounter] helper#6 -> helper#5
@@ -16799,6 +17943,24 @@ FLOWS|REACHING_DEF[vals] agg#3 -> agg#12
 FLOWS|REACHING_DEF[vals] agg#3 -> agg#13
 FLOWS|REACHING_DEF[vals] agg#3 -> agg#4
 FLOWS|REACHING_DEF[vals] agg#3 -> agg#40
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.duplicate_paren_helper#1 -> <unresolvedNamespace>.duplicate_paren_helper#2
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.duplicate_paren_helper#1 -> <unresolvedNamespace>.duplicate_paren_helper#5
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.duplicate_paren_helper#1 -> <unresolvedNamespace>.duplicate_paren_helper#6
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.duplicate_paren_helper#5 -> <unresolvedNamespace>.duplicate_paren_helper#4
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#1 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#2
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#1 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#5
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#1 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#6
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#5 -> <unresolvedNamespace>.duplicate_paren_helper<duplicate>0#4
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.macro_paren#1 -> <unresolvedNamespace>.macro_paren#2
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.macro_paren#1 -> <unresolvedNamespace>.macro_paren#4
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.paren_defined#1 -> <unresolvedNamespace>.paren_defined#2
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.paren_defined#1 -> <unresolvedNamespace>.paren_defined#5
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.paren_defined#1 -> <unresolvedNamespace>.paren_defined#6
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.paren_defined#5 -> <unresolvedNamespace>.paren_defined#4
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.paren_first#1 -> <unresolvedNamespace>.paren_first#2
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.paren_first#1 -> <unresolvedNamespace>.paren_first#4
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.paren_second#1 -> <unresolvedNamespace>.paren_second#2
+FLOWS|REACHING_DEF[value] <unresolvedNamespace>.paren_second#1 -> <unresolvedNamespace>.paren_second#4
 FLOWS|REACHING_DEF[value] after_undef#1 -> after_undef#2
 FLOWS|REACHING_DEF[value] after_undef#1 -> after_undef#5
 FLOWS|REACHING_DEF[value] after_undef#1 -> after_undef#6
@@ -16821,6 +17983,16 @@ FLOWS|REACHING_DEF[value] concrete#1 -> concrete#2
 FLOWS|REACHING_DEF[value] concrete#1 -> concrete#5
 FLOWS|REACHING_DEF[value] concrete#1 -> concrete#6
 FLOWS|REACHING_DEF[value] concrete#5 -> concrete#4
+FLOWS|REACHING_DEF[value] duplicate_paren_a#1 -> duplicate_paren_a#2
+FLOWS|REACHING_DEF[value] duplicate_paren_a#1 -> duplicate_paren_a#6
+FLOWS|REACHING_DEF[value] duplicate_paren_a#6 -> duplicate_paren_a#2
+FLOWS|REACHING_DEF[value] duplicate_paren_a#6 -> duplicate_paren_a#5
+FLOWS|REACHING_DEF[value] duplicate_paren_a#6 -> duplicate_paren_a#7
+FLOWS|REACHING_DEF[value] duplicate_paren_b#1 -> duplicate_paren_b#2
+FLOWS|REACHING_DEF[value] duplicate_paren_b#1 -> duplicate_paren_b#6
+FLOWS|REACHING_DEF[value] duplicate_paren_b#6 -> duplicate_paren_b#2
+FLOWS|REACHING_DEF[value] duplicate_paren_b#6 -> duplicate_paren_b#5
+FLOWS|REACHING_DEF[value] duplicate_paren_b#6 -> duplicate_paren_b#7
 FLOWS|REACHING_DEF[value] external_named#1 -> external_named#2
 FLOWS|REACHING_DEF[value] external_named#1 -> external_named#4
 FLOWS|REACHING_DEF[value] external_ptr#1 -> external_ptr#2
@@ -16851,6 +18023,27 @@ FLOWS|REACHING_DEF[value] local_prototype#1 -> local_prototype#6
 FLOWS|REACHING_DEF[value] local_prototype#6 -> local_prototype#2
 FLOWS|REACHING_DEF[value] local_prototype#6 -> local_prototype#5
 FLOWS|REACHING_DEF[value] local_prototype#6 -> local_prototype#7
+FLOWS|REACHING_DEF[value] macro_ordinary#1 -> macro_ordinary#2
+FLOWS|REACHING_DEF[value] macro_ordinary#1 -> macro_ordinary#4
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#1 -> mixed_prototype_caller#11
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#1 -> mixed_prototype_caller#2
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#11 -> mixed_prototype_caller#10
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#11 -> mixed_prototype_caller#13
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#13 -> mixed_prototype_caller#12
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#13 -> mixed_prototype_caller#15
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#15 -> mixed_prototype_caller#14
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#15 -> mixed_prototype_caller#17
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#17 -> mixed_prototype_caller#16
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#17 -> mixed_prototype_caller#19
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#19 -> mixed_prototype_caller#18
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#19 -> mixed_prototype_caller#21
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#21 -> mixed_prototype_caller#2
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#21 -> mixed_prototype_caller#20
+FLOWS|REACHING_DEF[value] mixed_prototype_caller#21 -> mixed_prototype_caller#22
+FLOWS|REACHING_DEF[value] ordinary_first#1 -> ordinary_first#2
+FLOWS|REACHING_DEF[value] ordinary_first#1 -> ordinary_first#4
+FLOWS|REACHING_DEF[value] ordinary_second#1 -> ordinary_second#2
+FLOWS|REACHING_DEF[value] ordinary_second#1 -> ordinary_second#4
 FLOWS|REACHING_DEF[value] parenthesized_callee#1 -> parenthesized_callee#2
 FLOWS|REACHING_DEF[value] parenthesized_callee#1 -> parenthesized_callee#8
 FLOWS|REACHING_DEF[value] parenthesized_callee#8 -> parenthesized_callee#2
@@ -16861,6 +18054,11 @@ FLOWS|REACHING_DEF[value] parenthesized_defined#1 -> parenthesized_defined#7
 FLOWS|REACHING_DEF[value] parenthesized_defined#7 -> parenthesized_defined#2
 FLOWS|REACHING_DEF[value] parenthesized_defined#7 -> parenthesized_defined#5
 FLOWS|REACHING_DEF[value] parenthesized_defined#7 -> parenthesized_defined#8
+FLOWS|REACHING_DEF[value] parenthesized_definition_caller#1 -> parenthesized_definition_caller#2
+FLOWS|REACHING_DEF[value] parenthesized_definition_caller#1 -> parenthesized_definition_caller#6
+FLOWS|REACHING_DEF[value] parenthesized_definition_caller#6 -> parenthesized_definition_caller#2
+FLOWS|REACHING_DEF[value] parenthesized_definition_caller#6 -> parenthesized_definition_caller#5
+FLOWS|REACHING_DEF[value] parenthesized_definition_caller#6 -> parenthesized_definition_caller#7
 FLOWS|REACHING_DEF[value] pointer_local#1 -> pointer_local#11
 FLOWS|REACHING_DEF[value] pointer_local#1 -> pointer_local#2
 FLOWS|REACHING_DEF[value] pointer_local#11 -> pointer_local#12
@@ -16875,6 +18073,14 @@ FLOWS|REACHING_DEF[value] shared#1 -> shared#2
 FLOWS|REACHING_DEF[value] shared#1 -> shared#5
 FLOWS|REACHING_DEF[value] shared#1 -> shared#6
 FLOWS|REACHING_DEF[value] shared#5 -> shared#4
+FLOWS|REACHING_DEF[value] typedef_marker#1 -> typedef_marker#2
+FLOWS|REACHING_DEF[value] typedef_marker#1 -> typedef_marker#5
+FLOWS|REACHING_DEF[value] typedef_marker#1 -> typedef_marker#6
+FLOWS|REACHING_DEF[value] typedef_marker#5 -> typedef_marker#4
+FLOWS|REACHING_DEF[value] typedef_shapes_marker#1 -> typedef_shapes_marker#2
+FLOWS|REACHING_DEF[value] typedef_shapes_marker#1 -> typedef_shapes_marker#5
+FLOWS|REACHING_DEF[value] typedef_shapes_marker#1 -> typedef_shapes_marker#6
+FLOWS|REACHING_DEF[value] typedef_shapes_marker#5 -> typedef_shapes_marker#4
 FLOWS|REACHING_DEF[value] unused_named#1 -> unused_named#2
 FLOWS|REACHING_DEF[value] unused_named#1 -> unused_named#4
 FLOWS|REACHING_DEF[value] uses_function_pointer#3 -> uses_function_pointer#4
@@ -17017,6 +18223,12 @@ FLOWS|REACHING_DEF[x--] explicit_loops#11 -> explicit_loops#27
 FLOWS|REACHING_DEF[x--] explicit_loops#21 -> explicit_loops#27
 FLOWS|REACHING_DEF[x--] for_scope#14 -> for_scope#23
 FLOWS|REACHING_DEF[x=2] comma_loop#10 -> comma_loop#31
+FLOWS|REACHING_DEF[x] <unresolvedNamespace>.api_named#1 -> <unresolvedNamespace>.api_named#2
+FLOWS|REACHING_DEF[x] <unresolvedNamespace>.api_named#1 -> <unresolvedNamespace>.api_named#4
+FLOWS|REACHING_DEF[x] <unresolvedNamespace>.plain_named#1 -> <unresolvedNamespace>.plain_named#2
+FLOWS|REACHING_DEF[x] <unresolvedNamespace>.plain_named#1 -> <unresolvedNamespace>.plain_named#4
+FLOWS|REACHING_DEF[x] <unresolvedNamespace>.unknown_named#1 -> <unresolvedNamespace>.unknown_named#2
+FLOWS|REACHING_DEF[x] <unresolvedNamespace>.unknown_named#1 -> <unresolvedNamespace>.unknown_named#4
 FLOWS|REACHING_DEF[x] active_block_prototype#1 -> active_block_prototype#2
 FLOWS|REACHING_DEF[x] active_block_prototype#1 -> active_block_prototype#6
 FLOWS|REACHING_DEF[x] active_block_prototype#6 -> active_block_prototype#2
@@ -17387,6 +18599,13 @@ FLOWS|REACHING_DEF[x] paren_if#6 -> paren_if#10
 FLOWS|REACHING_DEF[x] paren_if#6 -> paren_if#13
 FLOWS|REACHING_DEF[x] paren_if#6 -> paren_if#2
 FLOWS|REACHING_DEF[x] paren_if#6 -> paren_if#5
+FLOWS|REACHING_DEF[x] parentheses_caller#1 -> parentheses_caller#2
+FLOWS|REACHING_DEF[x] parentheses_caller#1 -> parentheses_caller#7
+FLOWS|REACHING_DEF[x] parentheses_caller#7 -> parentheses_caller#6
+FLOWS|REACHING_DEF[x] parentheses_caller#7 -> parentheses_caller#9
+FLOWS|REACHING_DEF[x] parentheses_caller#9 -> parentheses_caller#10
+FLOWS|REACHING_DEF[x] parentheses_caller#9 -> parentheses_caller#2
+FLOWS|REACHING_DEF[x] parentheses_caller#9 -> parentheses_caller#8
 FLOWS|REACHING_DEF[x] pp_default#1 -> pp_default#2
 FLOWS|REACHING_DEF[x] pp_default#1 -> pp_default#6
 FLOWS|REACHING_DEF[x] pp_default#6 -> pp_default#2
@@ -17523,6 +18742,11 @@ FLOWS|REACHING_DEF[x] undef_comment_active#1 -> undef_comment_active#6
 FLOWS|REACHING_DEF[x] undef_comment_active#5 -> undef_comment_active#4
 FLOWS|REACHING_DEF[x] undef_comment_wrong#1 -> undef_comment_wrong#2
 FLOWS|REACHING_DEF[x] undef_comment_wrong#1 -> undef_comment_wrong#4
+FLOWS|REACHING_DEF[x] unknown_caller#1 -> unknown_caller#2
+FLOWS|REACHING_DEF[x] unknown_caller#1 -> unknown_caller#6
+FLOWS|REACHING_DEF[x] unknown_caller#6 -> unknown_caller#2
+FLOWS|REACHING_DEF[x] unknown_caller#6 -> unknown_caller#5
+FLOWS|REACHING_DEF[x] unknown_caller#6 -> unknown_caller#7
 FLOWS|REACHING_DEF[x] unselected_expression#1 -> unselected_expression#2
 FLOWS|REACHING_DEF[x] unselected_expression#1 -> unselected_expression#4
 FLOWS|REACHING_DEF[x] use_a#1 -> use_a#2
