@@ -4324,7 +4324,15 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         // `i` is a node id, not just an arena index: it keys `own` too.
         #[allow(clippy::needless_range_loop)]
         for i in 0..n {
-            if own.contains(&i) && arena[i].label == "LOCAL" {
+            // Method.local traverses method-contained BLOCKs and their direct
+            // LOCAL children. A FOR initializer's LOCAL is attached to the
+            // CONTROL_STRUCTURE and is absent from this optimization's list.
+            if own.contains(&i)
+                && arena[i].label == "LOCAL"
+                && arena[i]
+                    .parent
+                    .is_some_and(|parent| arena[parent].label == "BLOCK")
+            {
                 name_excluded.insert(arena[i].name.clone());
             }
         }
