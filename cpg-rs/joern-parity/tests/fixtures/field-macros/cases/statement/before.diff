@@ -1,0 +1,41 @@
+--- joern
++++ baseline
+@@ -34,10 +34,10 @@
+         BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+           CONTROL_STRUCTURE CODE=SET(p, value); ORDER=1
+             BLOCK CODE=SET(p, value) TYPE_FULL_NAME=void ORDER=1
+-              CALL NAME=<operator>.assignment CODE=(p)->len = (value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                CALL NAME=<operator>.indirectFieldAccess CODE=(p)->len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.assignment CODE=(p)->Len = (value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++                CALL NAME=<operator>.indirectFieldAccess CODE=(p)->Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                   IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+-                  FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
++                  FIELD_IDENTIFIER CODE=Len ORDER=2 ARGUMENT_INDEX=2
+                 IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+             LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+@@ -66,10 +66,10 @@
+       BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+         CONTROL_STRUCTURE CODE=SET(p, value); ORDER=1
+           BLOCK CODE=SET(p, value) TYPE_FULL_NAME=void ORDER=1
+-            CALL NAME=<operator>.assignment CODE=(p)->len = (value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              CALL NAME=<operator>.indirectFieldAccess CODE=(p)->len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++            CALL NAME=<operator>.assignment CODE=(p)->Len = (value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.indirectFieldAccess CODE=(p)->Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                 IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+-                FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
++                FIELD_IDENTIFIER CODE=Len ORDER=2 ARGUMENT_INDEX=2
+               IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+           LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+@@ -232,8 +232,8 @@
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#4 -> F:main.c
+ EDGES|SOURCE_FILE main.c:SET:ANY(2)#0 -> F:main.c
+-FLOWS|REACHING_DEF[(p)->len] write#13 -> write#12
+-FLOWS|REACHING_DEF[(p)->len] write#13 -> write#14
++FLOWS|REACHING_DEF[(p)->Len] write#13 -> write#12
++FLOWS|REACHING_DEF[(p)->Len] write#13 -> write#14
+ FLOWS|REACHING_DEF[SET(p, value)] write#6 -> write#18
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4

@@ -7,3 +7,18 @@ cpg-rs/joern-parity/tests/fixtures/statement-macros/diagnostics/**/*.diff -white
 cpg-rs/joern-parity/tests/fixtures/macro-definitions/provenance/tests.log whitespace=-blank-at-eof
 cpg-rs/cpg-cli/tests/fixtures/c-format-positions/evidence/after-tests.log whitespace=-blank-at-eof
 cpg-rs/cpg-cli/tests/fixtures/c-format-positions/evidence/cli-tests.log whitespace=-blank-at-eof
+
+# Fifth-batch raw differential evidence retains original context whitespace.
+cpg-rs/joern-parity/tests/fixtures/field-macros/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/direct-field-macros/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/macro-recovery/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/field-cast-interactions/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/direct-field-macros/validation/focused-tests.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/direct-field-macros/validation/relevant-tests.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/direct-field-macros/validation/review-expanded-tests.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/provenance/*.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/field-macros/evidence/focused-tests.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/field-macros/evidence/relevant-tests.log whitespace=-blank-at-eof

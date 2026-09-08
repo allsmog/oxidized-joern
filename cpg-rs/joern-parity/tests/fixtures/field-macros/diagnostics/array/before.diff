@@ -1,0 +1,344 @@
+--- joern
++++ baseline
+@@ -44,21 +44,17 @@
+           IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+           IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+           BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+-            CALL NAME=<operator>.addition CODE=(p)[i].dl.len + (p)[i].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              CALL NAME=<operator>.fieldAccess CODE=(p)[i].dl.len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                CALL NAME=<operator>.fieldAccess CODE=(p)[i].dl TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                  CALL NAME=<operator>.indirectIndexAccess CODE=(p)[i] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                    IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+-                    IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-                  FIELD_IDENTIFIER CODE=dl ORDER=2 ARGUMENT_INDEX=2
+-                FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
+-              CALL NAME=<operator>.fieldAccess CODE=(p)[i].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                CALL NAME=<operator>.fieldAccess CODE=(p)[i].fc TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                  CALL NAME=<operator>.indirectIndexAccess CODE=(p)[i] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                    IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+-                    IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-                  FIELD_IDENTIFIER CODE=fc ORDER=2 ARGUMENT_INDEX=2
+-                FIELD_IDENTIFIER CODE=code ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=<operator>.addition CODE=(p)[i].Len + (p)[i].Code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.fieldAccess CODE=(p)[i].Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                CALL NAME=<operator>.indirectIndexAccess CODE=(p)[i] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                  IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
++                  IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++                FIELD_IDENTIFIER CODE=Len ORDER=2 ARGUMENT_INDEX=2
++              CALL NAME=<operator>.fieldAccess CODE=(p)[i].Code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                CALL NAME=<operator>.indirectIndexAccess CODE=(p)[i] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                  IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
++                  IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++                FIELD_IDENTIFIER CODE=Code ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     TYPE_REF CODE=struct Pair { int len; int code; } TYPE_FULL_NAME=Pair ORDER=1
+@@ -85,21 +81,17 @@
+         IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+         IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+         BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+-          CALL NAME=<operator>.addition CODE=(p)[i].dl.len + (p)[i].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            CALL NAME=<operator>.fieldAccess CODE=(p)[i].dl.len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              CALL NAME=<operator>.fieldAccess CODE=(p)[i].dl TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                CALL NAME=<operator>.indirectIndexAccess CODE=(p)[i] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                  IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+-                  IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-                FIELD_IDENTIFIER CODE=dl ORDER=2 ARGUMENT_INDEX=2
+-              FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.fieldAccess CODE=(p)[i].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-              CALL NAME=<operator>.fieldAccess CODE=(p)[i].fc TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                CALL NAME=<operator>.indirectIndexAccess CODE=(p)[i] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                  IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+-                  IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-                FIELD_IDENTIFIER CODE=fc ORDER=2 ARGUMENT_INDEX=2
+-              FIELD_IDENTIFIER CODE=code ORDER=2 ARGUMENT_INDEX=2
++          CALL NAME=<operator>.addition CODE=(p)[i].Len + (p)[i].Code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++            CALL NAME=<operator>.fieldAccess CODE=(p)[i].Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.indirectIndexAccess CODE=(p)[i] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
++                IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++              FIELD_IDENTIFIER CODE=Len ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=<operator>.fieldAccess CODE=(p)[i].Code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.indirectIndexAccess CODE=(p)[i] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
++                IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++              FIELD_IDENTIFIER CODE=Code ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+ 
+ NODES|META_DATA LANGUAGE=NEWC
+@@ -113,10 +105,7 @@
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=Item FULL_NAME=Item CODE=struct Item { struct Pair dl; struct Pair fc; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=Item* FULL_NAME=Item* CODE=Item* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=Pair FULL_NAME=Item.Pair CODE=Pair IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=Pair FULL_NAME=Pair CODE=struct Pair { int len; int code; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+-NODES|TYPE_DECL NAME=dl FULL_NAME=dl CODE=dl IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=fc FULL_NAME=fc CODE=fc IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=read FULL_NAME=read CODE=read AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+@@ -124,65 +113,52 @@
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=Item FULL_NAME=Item TYPE_DECL_FULL_NAME=Item
+ NODES|TYPE NAME=Item* FULL_NAME=Item* TYPE_DECL_FULL_NAME=Item*
+-NODES|TYPE NAME=Pair FULL_NAME=Item.Pair TYPE_DECL_FULL_NAME=Item.Pair
+ NODES|TYPE NAME=Pair FULL_NAME=Pair TYPE_DECL_FULL_NAME=Pair
+-NODES|TYPE NAME=dl FULL_NAME=dl TYPE_DECL_FULL_NAME=dl
+-NODES|TYPE NAME=fc FULL_NAME=fc TYPE_DECL_FULL_NAME=fc
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=read FULL_NAME=read TYPE_DECL_FULL_NAME=read
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT read#11 -> read#12
+-EDGES|ARGUMENT read#11 -> read#19
++EDGES|ARGUMENT read#11 -> read#17
+ EDGES|ARGUMENT read#12 -> read#13
+-EDGES|ARGUMENT read#12 -> read#18
++EDGES|ARGUMENT read#12 -> read#16
+ EDGES|ARGUMENT read#13 -> read#14
+-EDGES|ARGUMENT read#13 -> read#17
+-EDGES|ARGUMENT read#14 -> read#15
+-EDGES|ARGUMENT read#14 -> read#16
+-EDGES|ARGUMENT read#19 -> read#20
+-EDGES|ARGUMENT read#19 -> read#25
+-EDGES|ARGUMENT read#20 -> read#21
+-EDGES|ARGUMENT read#20 -> read#24
+-EDGES|ARGUMENT read#21 -> read#22
+-EDGES|ARGUMENT read#21 -> read#23
++EDGES|ARGUMENT read#13 -> read#15
++EDGES|ARGUMENT read#17 -> read#18
++EDGES|ARGUMENT read#17 -> read#21
++EDGES|ARGUMENT read#18 -> read#19
++EDGES|ARGUMENT read#18 -> read#20
+ EDGES|ARGUMENT read#6 -> read#7
+ EDGES|ARGUMENT read#7 -> read#8
+ EDGES|ARGUMENT read#7 -> read#9
+ EDGES|CALL read#11 -> <operator>.addition#0
+ EDGES|CALL read#12 -> <operator>.fieldAccess#0
+-EDGES|CALL read#13 -> <operator>.fieldAccess#0
+-EDGES|CALL read#14 -> <operator>.indirectIndexAccess#0
+-EDGES|CALL read#19 -> <operator>.fieldAccess#0
+-EDGES|CALL read#20 -> <operator>.fieldAccess#0
+-EDGES|CALL read#21 -> <operator>.indirectIndexAccess#0
++EDGES|CALL read#13 -> <operator>.indirectIndexAccess#0
++EDGES|CALL read#17 -> <operator>.fieldAccess#0
++EDGES|CALL read#18 -> <operator>.indirectIndexAccess#0
+ EDGES|CALL read#7 -> main.c:READ:ANY(2)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+ EDGES|CFG <operator>.fieldAccess#0 -> <operator>.fieldAccess#5
+ EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#35
+-EDGES|CFG main.c:<global>#35 -> main.c:<global>#36
+-EDGES|CFG main.c:<global>#36 -> main.c:<global>#37
+-EDGES|CFG main.c:<global>#37 -> main.c:<global>#38
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#31
++EDGES|CFG main.c:<global>#31 -> main.c:<global>#32
++EDGES|CFG main.c:<global>#32 -> main.c:<global>#33
++EDGES|CFG main.c:<global>#33 -> main.c:<global>#34
+ EDGES|CFG main.c:<global>#7 -> read#8
+ EDGES|CFG main.c:READ:ANY(2)#0 -> main.c:READ:ANY(2)#6
+ EDGES|CFG read#11 -> read#6
+-EDGES|CFG read#12 -> read#22
+-EDGES|CFG read#13 -> read#18
+-EDGES|CFG read#14 -> read#17
+-EDGES|CFG read#15 -> read#16
+-EDGES|CFG read#16 -> read#14
+-EDGES|CFG read#17 -> read#13
+-EDGES|CFG read#18 -> read#12
+-EDGES|CFG read#19 -> read#11
+-EDGES|CFG read#20 -> read#25
+-EDGES|CFG read#21 -> read#24
+-EDGES|CFG read#22 -> read#23
+-EDGES|CFG read#23 -> read#21
+-EDGES|CFG read#24 -> read#20
+-EDGES|CFG read#25 -> read#19
+-EDGES|CFG read#6 -> read#26
+-EDGES|CFG read#7 -> read#15
++EDGES|CFG read#12 -> read#19
++EDGES|CFG read#13 -> read#16
++EDGES|CFG read#14 -> read#15
++EDGES|CFG read#15 -> read#13
++EDGES|CFG read#16 -> read#12
++EDGES|CFG read#17 -> read#11
++EDGES|CFG read#18 -> read#21
++EDGES|CFG read#19 -> read#20
++EDGES|CFG read#20 -> read#18
++EDGES|CFG read#21 -> read#17
++EDGES|CFG read#6 -> read#22
++EDGES|CFG read#7 -> read#14
+ EDGES|CFG read#7 -> read#6
+ EDGES|CFG read#8 -> read#9
+ EDGES|CFG read#9 -> read#7
+@@ -196,17 +172,14 @@
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:Item*
+-EDGES|CONTAINS F:<includes> -> D:Item.Pair
+-EDGES|CONTAINS F:<includes> -> D:dl
+-EDGES|CONTAINS F:<includes> -> D:fc
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#34
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#35
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#36
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#37
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#30
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#31
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#32
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#33
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#4
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#7
+ EDGES|CONTAINS main.c:<global>#7 -> read#10
+@@ -221,10 +194,6 @@
+ EDGES|CONTAINS main.c:<global>#7 -> read#19
+ EDGES|CONTAINS main.c:<global>#7 -> read#20
+ EDGES|CONTAINS main.c:<global>#7 -> read#21
+-EDGES|CONTAINS main.c:<global>#7 -> read#22
+-EDGES|CONTAINS main.c:<global>#7 -> read#23
+-EDGES|CONTAINS main.c:<global>#7 -> read#24
+-EDGES|CONTAINS main.c:<global>#7 -> read#25
+ EDGES|CONTAINS main.c:<global>#7 -> read#5
+ EDGES|CONTAINS main.c:<global>#7 -> read#6
+ EDGES|CONTAINS main.c:<global>#7 -> read#7
+@@ -253,11 +222,11 @@
+ EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#2 -> T:int
+ EDGES|EVAL_TYPE main.c:<global>#3 -> T:int
++EDGES|EVAL_TYPE main.c:<global>#30 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#31 -> T:Pair
++EDGES|EVAL_TYPE main.c:<global>#32 -> T:Item
++EDGES|EVAL_TYPE main.c:<global>#33 -> T:read
+ EDGES|EVAL_TYPE main.c:<global>#34 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#35 -> T:Pair
+-EDGES|EVAL_TYPE main.c:<global>#36 -> T:Item
+-EDGES|EVAL_TYPE main.c:<global>#37 -> T:read
+-EDGES|EVAL_TYPE main.c:<global>#38 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#5 -> T:Pair
+ EDGES|EVAL_TYPE main.c:<global>#6 -> T:Pair
+ EDGES|EVAL_TYPE main.c:READ:ANY(2)#1 -> T:ANY
+@@ -271,16 +240,14 @@
+ EDGES|EVAL_TYPE read#11 -> T:ANY
+ EDGES|EVAL_TYPE read#12 -> T:ANY
+ EDGES|EVAL_TYPE read#13 -> T:ANY
+-EDGES|EVAL_TYPE read#14 -> T:ANY
+-EDGES|EVAL_TYPE read#15 -> T:Item*
+-EDGES|EVAL_TYPE read#16 -> T:int
+-EDGES|EVAL_TYPE read#19 -> T:ANY
++EDGES|EVAL_TYPE read#14 -> T:Item*
++EDGES|EVAL_TYPE read#15 -> T:int
++EDGES|EVAL_TYPE read#17 -> T:ANY
++EDGES|EVAL_TYPE read#18 -> T:ANY
++EDGES|EVAL_TYPE read#19 -> T:Item*
+ EDGES|EVAL_TYPE read#2 -> T:Item*
+-EDGES|EVAL_TYPE read#20 -> T:ANY
+-EDGES|EVAL_TYPE read#21 -> T:ANY
+-EDGES|EVAL_TYPE read#22 -> T:Item*
+-EDGES|EVAL_TYPE read#23 -> T:int
+-EDGES|EVAL_TYPE read#26 -> T:int
++EDGES|EVAL_TYPE read#20 -> T:int
++EDGES|EVAL_TYPE read#22 -> T:int
+ EDGES|EVAL_TYPE read#3 -> T:int
+ EDGES|EVAL_TYPE read#4 -> T:int
+ EDGES|EVAL_TYPE read#5 -> T:void
+@@ -303,24 +270,18 @@
+ EDGES|REF T:ANY -> D:ANY
+ EDGES|REF T:Item -> main.c:<global>#4
+ EDGES|REF T:Item* -> D:Item*
+-EDGES|REF T:Item.Pair -> D:Item.Pair
+ EDGES|REF T:Pair -> main.c:<global>#1
+-EDGES|REF T:dl -> D:dl
+-EDGES|REF T:fc -> D:fc
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:read -> D:read
+ EDGES|REF T:void -> D:void
+-EDGES|REF main.c:<global>#37 -> main.c:<global>#7
+-EDGES|REF read#15 -> read#1
+-EDGES|REF read#16 -> read#3
+-EDGES|REF read#22 -> read#1
+-EDGES|REF read#23 -> read#3
++EDGES|REF main.c:<global>#33 -> main.c:<global>#7
++EDGES|REF read#14 -> read#1
++EDGES|REF read#15 -> read#3
++EDGES|REF read#19 -> read#1
++EDGES|REF read#20 -> read#3
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:Item* -> F:<includes>
+-EDGES|SOURCE_FILE D:Item.Pair -> F:<includes>
+-EDGES|SOURCE_FILE D:dl -> F:<includes>
+-EDGES|SOURCE_FILE D:fc -> F:<includes>
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE D:read -> F:main.c
+@@ -333,13 +294,13 @@
+ EDGES|SOURCE_FILE main.c:<global>#4 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#7 -> F:main.c
+ EDGES|SOURCE_FILE main.c:READ:ANY(2)#0 -> F:main.c
+-FLOWS|REACHING_DEF[(p)[i].dl.len + (p)[i].fc.code] read#11 -> read#26
+-FLOWS|REACHING_DEF[(p)[i].dl.len] read#12 -> read#11
+-FLOWS|REACHING_DEF[(p)[i].dl.len] read#12 -> read#26
+-FLOWS|REACHING_DEF[(p)[i].fc.code] read#19 -> read#11
+-FLOWS|REACHING_DEF[(p)[i].fc.code] read#19 -> read#26
+-FLOWS|REACHING_DEF[<RET>] read#6 -> read#26
+-FLOWS|REACHING_DEF[READ(p, i)] read#7 -> read#26
++FLOWS|REACHING_DEF[(p)[i].Code] read#17 -> read#11
++FLOWS|REACHING_DEF[(p)[i].Code] read#17 -> read#22
++FLOWS|REACHING_DEF[(p)[i].Len + (p)[i].Code] read#11 -> read#22
++FLOWS|REACHING_DEF[(p)[i].Len] read#12 -> read#11
++FLOWS|REACHING_DEF[(p)[i].Len] read#12 -> read#22
++FLOWS|REACHING_DEF[<RET>] read#6 -> read#22
++FLOWS|REACHING_DEF[READ(p, i)] read#7 -> read#22
+ FLOWS|REACHING_DEF[READ(p, i)] read#7 -> read#6
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+@@ -347,14 +308,14 @@
+ FLOWS|REACHING_DEF[] <operator>.fieldAccess#0 -> <operator>.fieldAccess#4
+ FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+ FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#35
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#36
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#37
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#31
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#32
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#33
+ FLOWS|REACHING_DEF[] main.c:<global>#7 -> read#1
++FLOWS|REACHING_DEF[] main.c:<global>#7 -> read#14
+ FLOWS|REACHING_DEF[] main.c:<global>#7 -> read#15
+-FLOWS|REACHING_DEF[] main.c:<global>#7 -> read#16
+-FLOWS|REACHING_DEF[] main.c:<global>#7 -> read#22
+-FLOWS|REACHING_DEF[] main.c:<global>#7 -> read#23
++FLOWS|REACHING_DEF[] main.c:<global>#7 -> read#19
++FLOWS|REACHING_DEF[] main.c:<global>#7 -> read#20
+ FLOWS|REACHING_DEF[] main.c:<global>#7 -> read#3
+ FLOWS|REACHING_DEF[] main.c:<global>#7 -> read#8
+ FLOWS|REACHING_DEF[] main.c:<global>#7 -> read#9
+@@ -362,9 +323,9 @@
+ FLOWS|REACHING_DEF[] main.c:READ:ANY(2)#0 -> main.c:READ:ANY(2)#3
+ FLOWS|REACHING_DEF[i] read#3 -> read#4
+ FLOWS|REACHING_DEF[i] read#3 -> read#9
+-FLOWS|REACHING_DEF[i] read#9 -> read#16
+-FLOWS|REACHING_DEF[i] read#9 -> read#23
+-FLOWS|REACHING_DEF[i] read#9 -> read#26
++FLOWS|REACHING_DEF[i] read#9 -> read#15
++FLOWS|REACHING_DEF[i] read#9 -> read#20
++FLOWS|REACHING_DEF[i] read#9 -> read#22
+ FLOWS|REACHING_DEF[i] read#9 -> read#4
+ FLOWS|REACHING_DEF[i] read#9 -> read#7
+ FLOWS|REACHING_DEF[i] read#9 -> read#8
+@@ -386,11 +347,11 @@
+ FLOWS|REACHING_DEF[p2] main.c:READ:ANY(2)#3 -> main.c:READ:ANY(2)#6
+ FLOWS|REACHING_DEF[p] read#1 -> read#2
+ FLOWS|REACHING_DEF[p] read#1 -> read#8
++FLOWS|REACHING_DEF[p] read#8 -> read#13
+ FLOWS|REACHING_DEF[p] read#8 -> read#14
+-FLOWS|REACHING_DEF[p] read#8 -> read#15
++FLOWS|REACHING_DEF[p] read#8 -> read#18
++FLOWS|REACHING_DEF[p] read#8 -> read#19
+ FLOWS|REACHING_DEF[p] read#8 -> read#2
+-FLOWS|REACHING_DEF[p] read#8 -> read#21
+ FLOWS|REACHING_DEF[p] read#8 -> read#22
+-FLOWS|REACHING_DEF[p] read#8 -> read#26
+ FLOWS|REACHING_DEF[p] read#8 -> read#7
+ FLOWS|REACHING_DEF[p] read#8 -> read#9

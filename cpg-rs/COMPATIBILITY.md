@@ -73,6 +73,17 @@ reported separately from operator and macro stubs. JSON export preserves the
 tested output bytes with lower memory use; C format-string rules now check
 the intended argument positions. Whole-project graphs remain nonexact.
 
+The [fifth batch](../docs/conformance/astra-fifth-batch-2026-09-08.md) adds
+field-token macros, nested casts, typedef aggregate bodies and initializer
+methods, malformed macro recovery, pending-reference order, sizeof specifiers,
+and preprocessing-token argument binding. Seven additional fixture families
+retain 124 complete exact isolated projections and full nonexact diagnostics.
+Whole-project source-method and body matches improve; both full projects still
+differ from Joern. The final direct-argument repair restores the identified Lua
+operand/flow losses at their original source occurrences. Typedef casts can
+still parse as pointer calls, and the source parser can truncate or omit
+unsupported macro invocations before argument binding runs.
+
 Confirmed remaining C gaps include broader include/build-definition context,
 function-like macros in preprocessor conditions, block-level directives,
 variadics, stringification, token pasting, unbraced multi-statement replacements,

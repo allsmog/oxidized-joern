@@ -1,0 +1,341 @@
+{
+  "baseRevision": "862e54ee5a4cd6efaff156bb0f844090ebce5e89",
+  "baselineSourceSha256": "a119ea282666e7e969c4b4ad3a830f4ca4e57f8b19ead52f026a4dcba0dce5ec",
+  "candidateSource": {
+    "path": "cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "f29e6c9e7626053f82a1d9e2f5a060d8fd6300a2d91333708695ecb4de1708a0"
+  },
+  "sourcePatch": {
+    "path": ".local/field-macros/source.patch",
+    "sha256": "037a871d6da5b57606dc25d23b13306733f9655d6098b60145ddb8e61af42f5f"
+  },
+  "baselineBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/final-real-differential-v2/bin/joern-parity",
+    "sha256": "ed6b21d8341bc29241f06a8092bc057f71e6a574564c70f689b2bf1166cdf79b"
+  },
+  "candidateBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/field-macros/frozen-nested/joern-parity",
+    "sha256": "c1b538010db3fd48722ec3095c8ff83e4e1bc95e329ef92083cee6db5c1d8dcd"
+  },
+  "oracleVersion": "v4.0.555",
+  "oracleArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "javaVersion": "21.0.12",
+  "cases": {
+    "cases": {
+      "array_receiver": {
+        "files": {
+          "main.c": "95d34350ba0cc25dae1bb7cbeb2b6ef0406403fc99aa00deaea8905c0ac44283",
+          "expected.txt": "6613c5f071dbeca9cbed37d180735b9842b6ab88c82618e65faa4cab8b05761e",
+          "before.txt": "b5b74016b7e27e2b377f9caf3255c81c617f6c954fa01d95eeaccc2d475ad38e",
+          "before.diff": "11c60511993950d4bf5a0987cec72c93f83a34f832a5ee945242c12ffbc680d1",
+          "candidate.txt": "6613c5f071dbeca9cbed37d180735b9842b6ab88c82618e65faa4cab8b05761e",
+          "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "canonicalLines": 342,
+        "beforeExact": false,
+        "afterExact": true
+      },
+      "cycle": {
+        "files": {
+          "main.c": "f8739daeee9924cb169c6c1b880d25f1e4adf557ad4428736401a9182473292c",
+          "expected.txt": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13",
+          "before.txt": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13",
+          "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "candidate.txt": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13",
+          "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "canonicalLines": 195,
+        "beforeExact": true,
+        "afterExact": true
+      },
+      "field_alias": {
+        "files": {
+          "main.c": "09796defcf807a1276bdae82d72ba3efd9028a192824dee1baef84ab176bcbaa",
+          "expected.txt": "f314bf11ce3d87f25608e07be9322678921945e9b0f57634263e8518520b8561",
+          "before.txt": "d4b091e71fe99d307f3a49e4dec1d330f2ab9f15f6eb8a617b9180cbcd9d3ad2",
+          "before.diff": "fe8a38362235e047d94dd3757025563b412951249fd7597613e7eb2a3c46d302",
+          "candidate.txt": "f314bf11ce3d87f25608e07be9322678921945e9b0f57634263e8518520b8561",
+          "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "canonicalLines": 197,
+        "beforeExact": false,
+        "afterExact": true
+      },
+      "field_subscript": {
+        "files": {
+          "main.c": "6d6530d116f8f329f7685d6e2b30681364d3b27783df8461a48014c3124aec84",
+          "expected.txt": "1b2eb8b860085939a1d4e7f1272bf79cc6aa8fc2cd22ec35c900062a49ebaabe",
+          "before.txt": "04d9509e2d452b748e4615b6f3a3a069ff7caa3e4aded3befbf50a23d48ede50",
+          "before.diff": "076607c6eb94a734abd7a40ef6bab7ced55e5db39ab4f5519842d1155e572b1e",
+          "candidate.txt": "1b2eb8b860085939a1d4e7f1272bf79cc6aa8fc2cd22ec35c900062a49ebaabe",
+          "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "canonicalLines": 286,
+        "beforeExact": false,
+        "afterExact": true
+      },
+      "function_macro": {
+        "files": {
+          "main.c": "b0600cdccb853047f8b4a0aacd7c72944d176cea15789923f5b4208497f88d6f",
+          "expected.txt": "02849896d3411a1e67f4404d1609d9e8fa7ec1d0c1db3ee055524e94dd6686d1",
+          "before.txt": "1ada214f4237045c982ea15d7e633d8f367ac738343ccc7820a1190123229b22",
+          "before.diff": "fe8a38362235e047d94dd3757025563b412951249fd7597613e7eb2a3c46d302",
+          "candidate.txt": "02849896d3411a1e67f4404d1609d9e8fa7ec1d0c1db3ee055524e94dd6686d1",
+          "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "canonicalLines": 197,
+        "beforeExact": false,
+        "afterExact": true
+      },
+      "function_name": {
+        "files": {
+          "main.c": "9d9da7fee440a35f699c53e112367d258d2f40e7ed2bf63128c023272a90161e",
+          "expected.txt": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13",
+          "before.txt": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13",
+          "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "candidate.txt": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13",
+          "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "canonicalLines": 195,
+        "beforeExact": true,
+        "afterExact": true
+      },
+      "nonfield": {
+        "files": {
+          "main.c": "0c88c213cbed3c955e5ea4b041ad86c07a6472f65244e1ebd487e18986e5e548",
+          "expected.txt": "65626bd8596e687947ca71651de9705cb62ebaef3209a288a032f0babe58bec9",
+          "before.txt": "65626bd8596e687947ca71651de9705cb62ebaef3209a288a032f0babe58bec9",
+          "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "candidate.txt": "65626bd8596e687947ca71651de9705cb62ebaef3209a288a032f0babe58bec9",
+          "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "canonicalLines": 197,
+        "beforeExact": true,
+        "afterExact": true
+      },
+      "object_chain": {
+        "files": {
+          "main.c": "c093b4154606e496f7f53bed8d7d32b36f506e596803ab1a5308d582637579ca",
+          "expected.txt": "f314bf11ce3d87f25608e07be9322678921945e9b0f57634263e8518520b8561",
+          "before.txt": "d4b091e71fe99d307f3a49e4dec1d330f2ab9f15f6eb8a617b9180cbcd9d3ad2",
+          "before.diff": "fe8a38362235e047d94dd3757025563b412951249fd7597613e7eb2a3c46d302",
+          "candidate.txt": "f314bf11ce3d87f25608e07be9322678921945e9b0f57634263e8518520b8561",
+          "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "canonicalLines": 197,
+        "beforeExact": false,
+        "afterExact": true
+      },
+      "redefinition": {
+        "files": {
+          "main.c": "7b20fed9a654bdf2cc0cb397bb51423a64495f26d280eac3c800b86d7a13a6ab",
+          "expected.txt": "6883f1cc97672ae6945045492897ccabbadfd3ae83a7a8f334a84751c4b454c3",
+          "before.txt": "3e393f4525b563cd36ff326f35b604e9f3cfc337c98c9e20493993693f97d2fc",
+          "before.diff": "a6f56b716039eb281faba87a34ce9506546972bc0d0175f8213999ab7b963979",
+          "candidate.txt": "6883f1cc97672ae6945045492897ccabbadfd3ae83a7a8f334a84751c4b454c3",
+          "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "canonicalLines": 280,
+        "beforeExact": false,
+        "afterExact": true
+      },
+      "statement": {
+        "files": {
+          "main.c": "2756e709a1e5740c3233dda141c631a71a9311f6deb9f791a4a41f0b4d4fca4c",
+          "expected.txt": "e5e58cc0dfa8cec1d26a4ba5535f3c76a35f0ad83afb11d942c0843821708fc4",
+          "before.txt": "2d7537a8cbe4a701561801761f8bdf6dcd52d987fcaab31012e076e034d5ebb2",
+          "before.diff": "9d789c07dea51c8abe4b25439ee2af404614adae50404f94e03c241c81261487",
+          "candidate.txt": "e5e58cc0dfa8cec1d26a4ba5535f3c76a35f0ad83afb11d942c0843821708fc4",
+          "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "canonicalLines": 280,
+        "beforeExact": false,
+        "afterExact": true
+      }
+    },
+    "diagnostics": {
+      "alias": {
+        "files": {
+          "main.c": "7c7334fd8712292b24e424e204d338c5345f870f959225a814cef8fd29567618",
+          "expected.txt": "8f40d9f5d5fd13600d57b5974751af6aeeed3b131ddcbdb80ff59ded7a248e19",
+          "before.txt": "31998c5043e2af0a851fe89510ad8fe4bf8aacd1baf5357fd682266917d3a996",
+          "before.diff": "2b5c246ef9616eb04b8d18cbbf9495c477a1b1343862dd61401a9fe6573e947b",
+          "candidate.txt": "435281cbf2d0b240060cf50b0314b2e9de64a090de759c5a015abc5b59099ca3",
+          "candidate.diff": "d8856d341e47478b9fe19af3eb591bbff4c871a26398dc66b0f3d68c0e2d9d82"
+        },
+        "canonicalLines": 264,
+        "beforeExact": false,
+        "afterExact": false
+      },
+      "array": {
+        "files": {
+          "main.c": "5c02e60e15ae39a5b6260c61630c8d61ed6c1eedc7696961943f758962dd661f",
+          "expected.txt": "dd53c406854a7790e1b93ba6973120dd695a2fc44e333dc40052c3d88e2591c0",
+          "before.txt": "b1dfd96efd2f257e7119cc4d37fc37b033983c4a6338081164a8c514b6b3f022",
+          "before.diff": "00fcfd3a4ecc56bcb3de6f3c2621ab7b0f62ca35d8dd57e564939e71655930fb",
+          "candidate.txt": "c2995f671ca4b4bc6acdfc86a348327b826b74ad338510fda4f788aa6c58d559",
+          "candidate.diff": "86088f1bf9ea22b62416ac9cd94a9db9db6242acb86aa1338ac723237f37ef13"
+        },
+        "canonicalLines": 396,
+        "beforeExact": false,
+        "afterExact": false
+      },
+      "cycle": {
+        "files": {
+          "main.c": "f8739daeee9924cb169c6c1b880d25f1e4adf557ad4428736401a9182473292c",
+          "expected.txt": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13",
+          "before.txt": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13",
+          "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "candidate.txt": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13",
+          "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "canonicalLines": 195,
+        "beforeExact": true,
+        "afterExact": true
+      },
+      "direct_arrow": {
+        "files": {
+          "main.c": "dbdde5738328985af58c2b674de030691c06cc81e15397d02d190ce4da04b3b2",
+          "expected.txt": "55f5f92f0a29ffe971830aa4139c95f85c42ca99262569f64e0bfbfa18cf68f0",
+          "before.txt": "b7fbb2f6fdd9efd8d21bc9a5af0dd59d38075cde35d21c195043d326b7fa3728",
+          "before.diff": "d8776182fc3e224643ecde82e91cfee7f1f4e008529ebd4abcf2b0c53e9a2d9e",
+          "candidate.txt": "b7fbb2f6fdd9efd8d21bc9a5af0dd59d38075cde35d21c195043d326b7fa3728",
+          "candidate.diff": "6957f6029c647514efd3b5f568d51ef184bb60663828bf5ddb0f263dc9690c03"
+        },
+        "canonicalLines": 225,
+        "beforeExact": false,
+        "afterExact": false
+      },
+      "direct_dot": {
+        "files": {
+          "main.c": "b6a4b843645f5a613b6cb098d76e2ecb49e93aced1c0c87a9e0779a8dfa12262",
+          "expected.txt": "9af4d61633bf607c15e91aed03038caedf68d825393fcc0866908d226b604205",
+          "before.txt": "07943860ea7ede6fd5f623cd12462b8a753e985f8f151b189c78c93696037c26",
+          "before.diff": "f6e9714a04176cbbaf2dbc91a86c11107fbac1c34df15658f32690a90cb12458",
+          "candidate.txt": "07943860ea7ede6fd5f623cd12462b8a753e985f8f151b189c78c93696037c26",
+          "candidate.diff": "721f6ef8850a0e8ab52660d478229a9b22efb88091f563993aa2c880ff752db8"
+        },
+        "canonicalLines": 197,
+        "beforeExact": false,
+        "afterExact": false
+      },
+      "function_name": {
+        "files": {
+          "main.c": "9d9da7fee440a35f699c53e112367d258d2f40e7ed2bf63128c023272a90161e",
+          "expected.txt": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13",
+          "before.txt": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13",
+          "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "candidate.txt": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13",
+          "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "canonicalLines": 195,
+        "beforeExact": true,
+        "afterExact": true
+      },
+      "nested": {
+        "files": {
+          "main.c": "70405cc61b520a110e3c189c70e0c54d0835200288372443a5028fbdd9c51fb8",
+          "expected.txt": "8f40d9f5d5fd13600d57b5974751af6aeeed3b131ddcbdb80ff59ded7a248e19",
+          "before.txt": "31998c5043e2af0a851fe89510ad8fe4bf8aacd1baf5357fd682266917d3a996",
+          "before.diff": "2b5c246ef9616eb04b8d18cbbf9495c477a1b1343862dd61401a9fe6573e947b",
+          "candidate.txt": "435281cbf2d0b240060cf50b0314b2e9de64a090de759c5a015abc5b59099ca3",
+          "candidate.diff": "d8856d341e47478b9fe19af3eb591bbff4c871a26398dc66b0f3d68c0e2d9d82"
+        },
+        "canonicalLines": 264,
+        "beforeExact": false,
+        "afterExact": false
+      },
+      "nonfield": {
+        "files": {
+          "main.c": "a00508713f74ac8b18483a7e839e22e7312fd71ab8f3094667be69737f3eab54",
+          "expected.txt": "c9b880bf7ccaf33114e991b68257dc7b63de83d7ffcc7d76da5c247a2c389e56",
+          "before.txt": "94efa3442432d962af9ea8c850d16e262d767741e44b451aea073194197e8102",
+          "before.diff": "f7b9322d5f4c860f7ca88faf732ab1877ea80a92b229503c74a52daf24956ee7",
+          "candidate.txt": "94efa3442432d962af9ea8c850d16e262d767741e44b451aea073194197e8102",
+          "candidate.diff": "d8856d341e47478b9fe19af3eb591bbff4c871a26398dc66b0f3d68c0e2d9d82"
+        },
+        "canonicalLines": 264,
+        "beforeExact": false,
+        "afterExact": false
+      }
+    }
+  },
+  "oracleArtifacts": {
+    "oracle/nested-struct-diagnostics/live.stderr": "33974d64380acb96ee6ec0f4c7c6b424269f61090f27005e4653717dc416f232",
+    "oracle/nested-struct-diagnostics/live-run.json": "30bf7e83dcf0527637e897cf7d29c72c4077a1499ecd1b2b379f9e5ddf540abc",
+    "oracle/nested-struct-diagnostics/oracle.sc": "62d47f5835ef453a776178a5c75b88b7c8bf06d5dfe259f6bac353a2e52007f8",
+    "oracle/nested-struct-diagnostics/live.stdout": "2837d33c50f093395966771fff2775ab741e4717831f1a6f648b8d8079e850d9",
+    "oracle/focused/live.stderr": "aa6d5d9ee4e13e4b9d9ebf0b4baa1e23c6100a80aa3739d42770092349aa131d",
+    "oracle/focused/live-run.json": "4d134886afe3db7dd15c6192b22b0472d34939b8ec71d3cb1a901ba444e45eae",
+    "oracle/focused/oracle.sc": "62d47f5835ef453a776178a5c75b88b7c8bf06d5dfe259f6bac353a2e52007f8",
+    "oracle/focused/live.stdout": "3ab923078d76c6ba8276040802233110bcada154d950a22596483f7843bd43fb"
+  },
+  "wholeZlib": {
+    "inputManifest": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/inputs.json",
+      "sha256": "901a48450c8bd6473107ed59762a4b1389ea180a32ecde5a3e15afb0c2b59e55"
+    },
+    "oracle": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/final-real-differential-v2/zlib-1.3.1-core-full/live-canonical.txt",
+      "sha256": "6ea62d4d79dac8d5c71782030c891e44b92c3212b995187582360dfc30fb40cd"
+    },
+    "before": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/final-real-differential-v2/zlib-1.3.1-core-full/rust.stdout",
+      "sha256": "b86475a834fe8df704ca13dd1254ba8feb1dfee8d182d57d24134087c973962c"
+    },
+    "candidate": {
+      "path": ".local/field-macros/zlib-candidate.txt",
+      "sha256": "41847cd1953f40c24dc1b7056023d3f0672708a6a5cead007d132e643c99c420"
+    },
+    "completeMethodEvidence": {
+      "evidence/zlib-_tr_align-before.ast": "6b2c2da985feea562ab3625077c4a92a2424ef899b74fe7e670c6bd11ccb5b2f",
+      "evidence/zlib-_tr_align-oracle.ast": "54520c6fe36756d7d2391e1e9fc0ff2d662f1151962019ae06a647c692c236be",
+      "evidence/zlib-compress_block-remaining.diff": "05ccb9af3d7b523b6df86775ea46879d6149b0e263bdfa7a0c6f2ea4b5e852db",
+      "evidence/zlib-_tr_align-candidate.ast": "2ee754d76d3e3b044b8bb6e5e8560b7cae9caef4f434909a994c835c28c20a7e",
+      "evidence/zlib-compress_block-candidate.ast": "de5a062c913f96304208c9962d6574ee6de0bb1145d5a26e34d465a771acf330",
+      "evidence/zlib-compress_block-oracle.ast": "4ab41be2a77293e76444dd79f5ffa0ec750b3b828dbaae068e7ce2d7da3fd1fc",
+      "evidence/zlib-_tr_align-remaining.diff": "d79ed967c02ba0538d93f302ccf977efd9663543918bb911d71686ad5010074a",
+      "evidence/zlib-compress_block-before.ast": "9b3435120eb0bb68723b54f2dd88feb9221394fed7902f71b28d9ce3172ff4b7",
+      "evidence/zlib-review.json": "9a331bb00c247faa36145c440f620f066181f40601e373b2142c72ff354817fc"
+    }
+  },
+  "comparison": "Only AST| protocol prefix removed; every AST/NODES/EDGES/FLOWS record and blank method separator retained. Neither oracle script projection nor expected graphs were hand-edited. The multi-case oracle driver calls the unchanged shared projection once per isolated input directory, with distinct project names.",
+  "limits": [
+    "Direct p->Len/item.Len expansion is retained as a separate nonconformant path and will be pursued independently.",
+    "Named nested-struct TYPE scaffold differences predate this fix and remain in full diagnostic comparisons.",
+    "Whole zlib is nonexact; the cast/type residuals are independently owned.",
+    "This patch changes no RD solver, type/cast context, public schema, or non-C frontend."
+  ],
+  "validation": {
+    "focused-tests.log": {
+      "sha256": "91f02f4a7a0949962620856192a62b79531a240b2eceedfabd1b55ec1eb5893e",
+      "bytes": 474,
+      "passed": 1
+    },
+    "relevant-tests.log": {
+      "sha256": "f78e3102eb22dd2d53f0090c10fa4f5c3ac64bc69573acd82493bac300ea5f1f",
+      "bytes": 28401,
+      "passed": 286
+    },
+    "fmt.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "clippy.log": {
+      "sha256": "b3a33f890dce7fb8b828f6ad04b910155da88850d3767ea7f7e9a6dd40bfa536",
+      "bytes": 2855
+    },
+    "committed-parity.log": {
+      "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6",
+      "bytes": 7734
+    },
+    "live-parity.log": {
+      "sha256": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68",
+      "bytes": 7853
+    }
+  },
+  "frozenCandidate": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/field-macros/frozen-nested/bindings.json",
+    "sha256": "82f7b278ee887a0879e6aa660d750860a1eecce2de694a48f49dc811ff051c16"
+  }
+}

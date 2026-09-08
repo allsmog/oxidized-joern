@@ -1,0 +1,587 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.conditional FULL_NAME=<operator>.conditional ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=SAME FULL_NAME=SAME ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=boundaries.c:<global> ORDER=1
+  METHOD NAME=ordinary CODE=void *ordinary(void *o) { return cast_ordinary(o); } FULL_NAME=ordinary SIGNATURE=void*(void*) ORDER=1
+    METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+    METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+    BLOCK CODE={ return cast_ordinary(o); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return cast_ordinary(o); ORDER=1
+        CALL NAME=cast_ordinary CODE=cast_ordinary(o) TYPE_FULL_NAME=void* METHOD_FULL_NAME=cast_ordinary ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+  METHOD NAME=nested CODE=void *nested(void *o) { return CAST(ID(o)); } FULL_NAME=nested SIGNATURE=void*(void*) ORDER=1
+    METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+    METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+    BLOCK CODE={ return CAST(ID(o)); } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=cast CODE=<unknown> cast TYPE_FULL_NAME=ANY ORDER=0
+      RETURN CODE=return CAST(ID(o)); ORDER=1
+        CALL NAME=CAST CODE=CAST(ID(o)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=boundaries.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1
+              IDENTIFIER NAME=cast CODE=<unknown> cast TYPE_FULL_NAME=ANY ORDER=1
+              IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+  METHOD NAME=conditional CODE=void *conditional(void *o, int n) { return CAST(n ? o : 0); } FULL_NAME=conditional SIGNATURE=void*(void*,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+    METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+    METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={ return CAST(n ? o : 0); } TYPE_FULL_NAME=void ORDER=3
+      LOCAL NAME=cast CODE=<unknown> cast TYPE_FULL_NAME=ANY ORDER=0
+      RETURN CODE=return CAST(n ? o : 0); ORDER=1
+        CALL NAME=CAST CODE=CAST(n ? o : 0) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=boundaries.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1
+              IDENTIFIER NAME=cast CODE=<unknown> cast TYPE_FULL_NAME=ANY ORDER=1
+              CALL NAME=<operator>.conditional CODE=n ? o : 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+                LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=3 ARGUMENT_INDEX=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=4
+  METHOD NAME=recursive CODE=void *recursive(void *o) { return ID(SAME(o)); } FULL_NAME=recursive SIGNATURE=void*(void*) ORDER=1
+    METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+    METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+    BLOCK CODE={ return ID(SAME(o)); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return ID(SAME(o)); ORDER=1
+        CALL NAME=ID CODE=ID(SAME(o)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=boundaries.c:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+          CALL NAME=SAME CODE=SAME(o) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=SAME ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=3
+            CALL NAME=SAME CODE=SAME(o) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=SAME ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+  METHOD NAME=literal CODE=char *literal(void) { return TEXT(0); } FULL_NAME=literal SIGNATURE=char*(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return TEXT(0); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return TEXT(0); ORDER=1
+        CALL NAME=TEXT CODE=TEXT(0) TYPE_FULL_NAME=char* METHOD_FULL_NAME=boundaries.c:TEXT:char*(1) SIGNATURE=char*(1) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE="cast(union Thing *, o)" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=ordinary TYPE_FULL_NAME=ordinary METHOD_FULL_NAME=ordinary ORDER=1
+    METHOD_REF CODE=nested TYPE_FULL_NAME=nested METHOD_FULL_NAME=nested ORDER=2
+    METHOD_REF CODE=conditional TYPE_FULL_NAME=conditional METHOD_FULL_NAME=conditional ORDER=3
+    METHOD_REF CODE=recursive TYPE_FULL_NAME=recursive METHOD_FULL_NAME=recursive ORDER=4
+    METHOD_REF CODE=literal TYPE_FULL_NAME=literal METHOD_FULL_NAME=literal ORDER=5
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=CAST CODE=#define CAST(o) cast(union Thing *, (o)) FULL_NAME=boundaries.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=ID CODE=#define ID(o) (o) FULL_NAME=boundaries.c:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=TEXT CODE=#define TEXT(o) "cast(union Thing *, o)" FULL_NAME=boundaries.c:TEXT:char*(1) SIGNATURE=char*(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=cast_ordinary CODE=void *cast_ordinary(void *o); FULL_NAME=cast_ordinary SIGNATURE=void*(void*) ORDER=1
+  METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+  METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+
+METHOD NAME=conditional CODE=void *conditional(void *o, int n) { return CAST(n ? o : 0); } FULL_NAME=conditional SIGNATURE=void*(void*,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+  METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+  METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={ return CAST(n ? o : 0); } TYPE_FULL_NAME=void ORDER=3
+    LOCAL NAME=cast CODE=<unknown> cast TYPE_FULL_NAME=ANY ORDER=0
+    RETURN CODE=return CAST(n ? o : 0); ORDER=1
+      CALL NAME=CAST CODE=CAST(n ? o : 0) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=boundaries.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1
+            IDENTIFIER NAME=cast CODE=<unknown> cast TYPE_FULL_NAME=ANY ORDER=1
+            CALL NAME=<operator>.conditional CODE=n ? o : 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=3 ARGUMENT_INDEX=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=4
+
+METHOD NAME=literal CODE=char *literal(void) { return TEXT(0); } FULL_NAME=literal SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return TEXT(0); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return TEXT(0); ORDER=1
+      CALL NAME=TEXT CODE=TEXT(0) TYPE_FULL_NAME=char* METHOD_FULL_NAME=boundaries.c:TEXT:char*(1) SIGNATURE=char*(1) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="cast(union Thing *, o)" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=nested CODE=void *nested(void *o) { return CAST(ID(o)); } FULL_NAME=nested SIGNATURE=void*(void*) ORDER=1
+  METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+  METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+  BLOCK CODE={ return CAST(ID(o)); } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=cast CODE=<unknown> cast TYPE_FULL_NAME=ANY ORDER=0
+    RETURN CODE=return CAST(ID(o)); ORDER=1
+      CALL NAME=CAST CODE=CAST(ID(o)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=boundaries.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1
+            IDENTIFIER NAME=cast CODE=<unknown> cast TYPE_FULL_NAME=ANY ORDER=1
+            IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+
+METHOD NAME=ordinary CODE=void *ordinary(void *o) { return cast_ordinary(o); } FULL_NAME=ordinary SIGNATURE=void*(void*) ORDER=1
+  METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+  METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+  BLOCK CODE={ return cast_ordinary(o); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return cast_ordinary(o); ORDER=1
+      CALL NAME=cast_ordinary CODE=cast_ordinary(o) TYPE_FULL_NAME=void* METHOD_FULL_NAME=cast_ordinary ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+
+METHOD NAME=recursive CODE=void *recursive(void *o) { return ID(SAME(o)); } FULL_NAME=recursive SIGNATURE=void*(void*) ORDER=1
+  METHOD_PARAMETER_IN NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+  METHOD_PARAMETER_OUT NAME=o CODE=void *o TYPE_FULL_NAME=void* ORDER=1
+  BLOCK CODE={ return ID(SAME(o)); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return ID(SAME(o)); ORDER=1
+      CALL NAME=ID CODE=ID(SAME(o)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=boundaries.c:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        CALL NAME=SAME CODE=SAME(o) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=SAME ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=3
+          CALL NAME=SAME CODE=SAME(o) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=SAME ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=o CODE=o TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=boundaries.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=boundaries.c:<global> FILENAME=boundaries.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=boundaries.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=boundaries.c:<global> FILENAME=boundaries.c ORDER=1
+NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=conditional FULL_NAME=conditional CODE=conditional AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=boundaries.c:<global> FILENAME=boundaries.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=literal FULL_NAME=literal CODE=literal AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=boundaries.c:<global> FILENAME=boundaries.c ORDER=1
+NODES|TYPE_DECL NAME=nested FULL_NAME=nested CODE=nested AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=boundaries.c:<global> FILENAME=boundaries.c ORDER=1
+NODES|TYPE_DECL NAME=ordinary FULL_NAME=ordinary CODE=ordinary AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=boundaries.c:<global> FILENAME=boundaries.c ORDER=1
+NODES|TYPE_DECL NAME=recursive FULL_NAME=recursive CODE=recursive AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=boundaries.c:<global> FILENAME=boundaries.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
+NODES|TYPE NAME=conditional FULL_NAME=conditional TYPE_DECL_FULL_NAME=conditional
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=literal FULL_NAME=literal TYPE_DECL_FULL_NAME=literal
+NODES|TYPE NAME=nested FULL_NAME=nested TYPE_DECL_FULL_NAME=nested
+NODES|TYPE NAME=ordinary FULL_NAME=ordinary TYPE_DECL_FULL_NAME=ordinary
+NODES|TYPE NAME=recursive FULL_NAME=recursive TYPE_DECL_FULL_NAME=recursive
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+EDGES|ARGUMENT conditional#12 -> conditional#13
+EDGES|ARGUMENT conditional#12 -> conditional#14
+EDGES|ARGUMENT conditional#12 -> conditional#15
+EDGES|ARGUMENT conditional#7 -> conditional#8
+EDGES|ARGUMENT literal#4 -> literal#5
+EDGES|ARGUMENT nested#5 -> nested#6
+EDGES|ARGUMENT ordinary#4 -> ordinary#5
+EDGES|ARGUMENT ordinary#5 -> ordinary#6
+EDGES|ARGUMENT recursive#4 -> recursive#5
+EDGES|ARGUMENT recursive#5 -> recursive#6
+EDGES|ARGUMENT recursive#6 -> recursive#7
+EDGES|ARGUMENT recursive#9 -> recursive#10
+EDGES|CALL conditional#12 -> <operator>.conditional#0
+EDGES|CALL conditional#8 -> boundaries.c:CAST:ANY(1)#0
+EDGES|CALL literal#5 -> boundaries.c:TEXT:char*(1)#0
+EDGES|CALL nested#6 -> boundaries.c:CAST:ANY(1)#0
+EDGES|CALL ordinary#5 -> cast_ordinary#0
+EDGES|CALL recursive#5 -> boundaries.c:ID:ANY(1)#0
+EDGES|CALL recursive#6 -> SAME#0
+EDGES|CALL recursive#9 -> SAME#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.conditional#0 -> <operator>.conditional#5
+EDGES|CFG SAME#0 -> SAME#4
+EDGES|CFG boundaries.c:<global>#0 -> boundaries.c:<global>#60
+EDGES|CFG boundaries.c:<global>#1 -> ordinary#6
+EDGES|CFG boundaries.c:<global>#21 -> conditional#8
+EDGES|CFG boundaries.c:<global>#38 -> recursive#7
+EDGES|CFG boundaries.c:<global>#50 -> literal#5
+EDGES|CFG boundaries.c:<global>#60 -> boundaries.c:<global>#61
+EDGES|CFG boundaries.c:<global>#61 -> boundaries.c:<global>#62
+EDGES|CFG boundaries.c:<global>#62 -> boundaries.c:<global>#63
+EDGES|CFG boundaries.c:<global>#63 -> boundaries.c:<global>#64
+EDGES|CFG boundaries.c:<global>#64 -> boundaries.c:<global>#65
+EDGES|CFG boundaries.c:<global>#9 -> nested#6
+EDGES|CFG boundaries.c:CAST:ANY(1)#0 -> boundaries.c:CAST:ANY(1)#4
+EDGES|CFG boundaries.c:ID:ANY(1)#0 -> boundaries.c:ID:ANY(1)#4
+EDGES|CFG boundaries.c:TEXT:char*(1)#0 -> boundaries.c:TEXT:char*(1)#4
+EDGES|CFG cast_ordinary#0 -> cast_ordinary#4
+EDGES|CFG conditional#10 -> conditional#7
+EDGES|CFG conditional#11 -> conditional#13
+EDGES|CFG conditional#12 -> conditional#10
+EDGES|CFG conditional#13 -> conditional#14
+EDGES|CFG conditional#13 -> conditional#15
+EDGES|CFG conditional#14 -> conditional#12
+EDGES|CFG conditional#15 -> conditional#12
+EDGES|CFG conditional#7 -> conditional#16
+EDGES|CFG conditional#8 -> conditional#11
+EDGES|CFG conditional#8 -> conditional#7
+EDGES|CFG literal#4 -> literal#8
+EDGES|CFG literal#5 -> literal#4
+EDGES|CFG literal#5 -> literal#7
+EDGES|CFG literal#7 -> literal#4
+EDGES|CFG nested#10 -> nested#8
+EDGES|CFG nested#5 -> nested#11
+EDGES|CFG nested#6 -> nested#5
+EDGES|CFG nested#6 -> nested#9
+EDGES|CFG nested#8 -> nested#5
+EDGES|CFG nested#9 -> nested#10
+EDGES|CFG ordinary#4 -> ordinary#7
+EDGES|CFG ordinary#5 -> ordinary#4
+EDGES|CFG ordinary#6 -> ordinary#5
+EDGES|CFG recursive#10 -> recursive#9
+EDGES|CFG recursive#4 -> recursive#11
+EDGES|CFG recursive#5 -> recursive#10
+EDGES|CFG recursive#5 -> recursive#4
+EDGES|CFG recursive#6 -> recursive#5
+EDGES|CFG recursive#7 -> recursive#6
+EDGES|CFG recursive#9 -> recursive#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.conditional#0 -> <operator>.conditional#2
+EDGES|CONTAINS D:boundaries.c:<global> -> D:conditional
+EDGES|CONTAINS D:boundaries.c:<global> -> D:literal
+EDGES|CONTAINS D:boundaries.c:<global> -> D:nested
+EDGES|CONTAINS D:boundaries.c:<global> -> D:ordinary
+EDGES|CONTAINS D:boundaries.c:<global> -> D:recursive
+EDGES|CONTAINS D:boundaries.c:<global> -> boundaries.c:<global>#0
+EDGES|CONTAINS D:boundaries.c:<global> -> boundaries.c:CAST:ANY(1)#0
+EDGES|CONTAINS D:boundaries.c:<global> -> boundaries.c:ID:ANY(1)#0
+EDGES|CONTAINS D:boundaries.c:<global> -> boundaries.c:TEXT:char*(1)#0
+EDGES|CONTAINS D:boundaries.c:<global> -> cast_ordinary#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:void*
+EDGES|CONTAINS F:boundaries.c -> D:boundaries.c:<global>
+EDGES|CONTAINS SAME#0 -> SAME#2
+EDGES|CONTAINS boundaries.c:<global>#0 -> boundaries.c:<global>#1
+EDGES|CONTAINS boundaries.c:<global>#0 -> boundaries.c:<global>#21
+EDGES|CONTAINS boundaries.c:<global>#0 -> boundaries.c:<global>#38
+EDGES|CONTAINS boundaries.c:<global>#0 -> boundaries.c:<global>#50
+EDGES|CONTAINS boundaries.c:<global>#0 -> boundaries.c:<global>#59
+EDGES|CONTAINS boundaries.c:<global>#0 -> boundaries.c:<global>#60
+EDGES|CONTAINS boundaries.c:<global>#0 -> boundaries.c:<global>#61
+EDGES|CONTAINS boundaries.c:<global>#0 -> boundaries.c:<global>#62
+EDGES|CONTAINS boundaries.c:<global>#0 -> boundaries.c:<global>#63
+EDGES|CONTAINS boundaries.c:<global>#0 -> boundaries.c:<global>#64
+EDGES|CONTAINS boundaries.c:<global>#0 -> boundaries.c:<global>#9
+EDGES|CONTAINS boundaries.c:<global>#1 -> ordinary#3
+EDGES|CONTAINS boundaries.c:<global>#1 -> ordinary#4
+EDGES|CONTAINS boundaries.c:<global>#1 -> ordinary#5
+EDGES|CONTAINS boundaries.c:<global>#1 -> ordinary#6
+EDGES|CONTAINS boundaries.c:<global>#21 -> conditional#10
+EDGES|CONTAINS boundaries.c:<global>#21 -> conditional#11
+EDGES|CONTAINS boundaries.c:<global>#21 -> conditional#12
+EDGES|CONTAINS boundaries.c:<global>#21 -> conditional#13
+EDGES|CONTAINS boundaries.c:<global>#21 -> conditional#14
+EDGES|CONTAINS boundaries.c:<global>#21 -> conditional#15
+EDGES|CONTAINS boundaries.c:<global>#21 -> conditional#5
+EDGES|CONTAINS boundaries.c:<global>#21 -> conditional#7
+EDGES|CONTAINS boundaries.c:<global>#21 -> conditional#8
+EDGES|CONTAINS boundaries.c:<global>#21 -> conditional#9
+EDGES|CONTAINS boundaries.c:<global>#38 -> recursive#10
+EDGES|CONTAINS boundaries.c:<global>#38 -> recursive#3
+EDGES|CONTAINS boundaries.c:<global>#38 -> recursive#4
+EDGES|CONTAINS boundaries.c:<global>#38 -> recursive#5
+EDGES|CONTAINS boundaries.c:<global>#38 -> recursive#6
+EDGES|CONTAINS boundaries.c:<global>#38 -> recursive#7
+EDGES|CONTAINS boundaries.c:<global>#38 -> recursive#8
+EDGES|CONTAINS boundaries.c:<global>#38 -> recursive#9
+EDGES|CONTAINS boundaries.c:<global>#50 -> literal#3
+EDGES|CONTAINS boundaries.c:<global>#50 -> literal#4
+EDGES|CONTAINS boundaries.c:<global>#50 -> literal#5
+EDGES|CONTAINS boundaries.c:<global>#50 -> literal#6
+EDGES|CONTAINS boundaries.c:<global>#50 -> literal#7
+EDGES|CONTAINS boundaries.c:<global>#9 -> nested#10
+EDGES|CONTAINS boundaries.c:<global>#9 -> nested#3
+EDGES|CONTAINS boundaries.c:<global>#9 -> nested#5
+EDGES|CONTAINS boundaries.c:<global>#9 -> nested#6
+EDGES|CONTAINS boundaries.c:<global>#9 -> nested#7
+EDGES|CONTAINS boundaries.c:<global>#9 -> nested#8
+EDGES|CONTAINS boundaries.c:<global>#9 -> nested#9
+EDGES|CONTAINS boundaries.c:CAST:ANY(1)#0 -> boundaries.c:CAST:ANY(1)#3
+EDGES|CONTAINS boundaries.c:ID:ANY(1)#0 -> boundaries.c:ID:ANY(1)#3
+EDGES|CONTAINS boundaries.c:TEXT:char*(1)#0 -> boundaries.c:TEXT:char*(1)#3
+EDGES|CONTAINS cast_ordinary#0 -> cast_ordinary#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#7 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#8 -> T:ANY
+EDGES|EVAL_TYPE SAME#1 -> T:ANY
+EDGES|EVAL_TYPE SAME#2 -> T:ANY
+EDGES|EVAL_TYPE SAME#3 -> T:ANY
+EDGES|EVAL_TYPE SAME#4 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:<global>#59 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:<global>#60 -> T:ordinary
+EDGES|EVAL_TYPE boundaries.c:<global>#61 -> T:nested
+EDGES|EVAL_TYPE boundaries.c:<global>#62 -> T:conditional
+EDGES|EVAL_TYPE boundaries.c:<global>#63 -> T:recursive
+EDGES|EVAL_TYPE boundaries.c:<global>#64 -> T:literal
+EDGES|EVAL_TYPE boundaries.c:<global>#65 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:CAST:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:CAST:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:CAST:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:CAST:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:ID:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:ID:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:ID:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:ID:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:TEXT:char*(1)#1 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:TEXT:char*(1)#2 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:TEXT:char*(1)#3 -> T:ANY
+EDGES|EVAL_TYPE boundaries.c:TEXT:char*(1)#4 -> T:char*
+EDGES|EVAL_TYPE cast_ordinary#1 -> T:void*
+EDGES|EVAL_TYPE cast_ordinary#2 -> T:void*
+EDGES|EVAL_TYPE cast_ordinary#3 -> T:ANY
+EDGES|EVAL_TYPE cast_ordinary#4 -> T:void*
+EDGES|EVAL_TYPE conditional#1 -> T:void*
+EDGES|EVAL_TYPE conditional#10 -> T:ANY
+EDGES|EVAL_TYPE conditional#11 -> T:ANY
+EDGES|EVAL_TYPE conditional#12 -> T:ANY
+EDGES|EVAL_TYPE conditional#13 -> T:int
+EDGES|EVAL_TYPE conditional#14 -> T:void*
+EDGES|EVAL_TYPE conditional#15 -> T:int
+EDGES|EVAL_TYPE conditional#16 -> T:void*
+EDGES|EVAL_TYPE conditional#2 -> T:void*
+EDGES|EVAL_TYPE conditional#3 -> T:int
+EDGES|EVAL_TYPE conditional#4 -> T:int
+EDGES|EVAL_TYPE conditional#5 -> T:void
+EDGES|EVAL_TYPE conditional#6 -> T:ANY
+EDGES|EVAL_TYPE conditional#8 -> T:ANY
+EDGES|EVAL_TYPE conditional#9 -> T:ANY
+EDGES|EVAL_TYPE literal#1 -> T:void
+EDGES|EVAL_TYPE literal#2 -> T:void
+EDGES|EVAL_TYPE literal#3 -> T:void
+EDGES|EVAL_TYPE literal#5 -> T:char*
+EDGES|EVAL_TYPE literal#6 -> T:ANY
+EDGES|EVAL_TYPE literal#7 -> T:char*
+EDGES|EVAL_TYPE literal#8 -> T:char*
+EDGES|EVAL_TYPE nested#1 -> T:void*
+EDGES|EVAL_TYPE nested#10 -> T:void*
+EDGES|EVAL_TYPE nested#11 -> T:void*
+EDGES|EVAL_TYPE nested#2 -> T:void*
+EDGES|EVAL_TYPE nested#3 -> T:void
+EDGES|EVAL_TYPE nested#4 -> T:ANY
+EDGES|EVAL_TYPE nested#6 -> T:ANY
+EDGES|EVAL_TYPE nested#7 -> T:ANY
+EDGES|EVAL_TYPE nested#8 -> T:ANY
+EDGES|EVAL_TYPE nested#9 -> T:ANY
+EDGES|EVAL_TYPE ordinary#1 -> T:void*
+EDGES|EVAL_TYPE ordinary#2 -> T:void*
+EDGES|EVAL_TYPE ordinary#3 -> T:void
+EDGES|EVAL_TYPE ordinary#5 -> T:void*
+EDGES|EVAL_TYPE ordinary#6 -> T:void*
+EDGES|EVAL_TYPE ordinary#7 -> T:void*
+EDGES|EVAL_TYPE recursive#1 -> T:void*
+EDGES|EVAL_TYPE recursive#10 -> T:void*
+EDGES|EVAL_TYPE recursive#11 -> T:void*
+EDGES|EVAL_TYPE recursive#2 -> T:void*
+EDGES|EVAL_TYPE recursive#3 -> T:void
+EDGES|EVAL_TYPE recursive#5 -> T:ANY
+EDGES|EVAL_TYPE recursive#6 -> T:ANY
+EDGES|EVAL_TYPE recursive#7 -> T:void*
+EDGES|EVAL_TYPE recursive#8 -> T:ANY
+EDGES|EVAL_TYPE recursive#9 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.conditional#1 -> <operator>.conditional#3
+EDGES|PARAMETER_LINK <operator>.conditional#4 -> <operator>.conditional#6
+EDGES|PARAMETER_LINK <operator>.conditional#7 -> <operator>.conditional#8
+EDGES|PARAMETER_LINK SAME#1 -> SAME#3
+EDGES|PARAMETER_LINK boundaries.c:CAST:ANY(1)#1 -> boundaries.c:CAST:ANY(1)#2
+EDGES|PARAMETER_LINK boundaries.c:ID:ANY(1)#1 -> boundaries.c:ID:ANY(1)#2
+EDGES|PARAMETER_LINK boundaries.c:TEXT:char*(1)#1 -> boundaries.c:TEXT:char*(1)#2
+EDGES|PARAMETER_LINK cast_ordinary#1 -> cast_ordinary#2
+EDGES|PARAMETER_LINK conditional#1 -> conditional#2
+EDGES|PARAMETER_LINK conditional#3 -> conditional#4
+EDGES|PARAMETER_LINK literal#1 -> literal#2
+EDGES|PARAMETER_LINK nested#1 -> nested#2
+EDGES|PARAMETER_LINK ordinary#1 -> ordinary#2
+EDGES|PARAMETER_LINK recursive#1 -> recursive#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:boundaries.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:char* -> D:char*
+EDGES|REF T:conditional -> D:conditional
+EDGES|REF T:int -> D:int
+EDGES|REF T:literal -> D:literal
+EDGES|REF T:nested -> D:nested
+EDGES|REF T:ordinary -> D:ordinary
+EDGES|REF T:recursive -> D:recursive
+EDGES|REF T:void -> D:void
+EDGES|REF T:void* -> D:void*
+EDGES|REF boundaries.c:<global>#60 -> boundaries.c:<global>#1
+EDGES|REF boundaries.c:<global>#61 -> boundaries.c:<global>#9
+EDGES|REF boundaries.c:<global>#62 -> boundaries.c:<global>#21
+EDGES|REF boundaries.c:<global>#63 -> boundaries.c:<global>#38
+EDGES|REF boundaries.c:<global>#64 -> boundaries.c:<global>#50
+EDGES|REF conditional#11 -> conditional#6
+EDGES|REF conditional#13 -> conditional#3
+EDGES|REF conditional#14 -> conditional#1
+EDGES|REF nested#10 -> nested#1
+EDGES|REF nested#9 -> nested#4
+EDGES|REF ordinary#6 -> ordinary#1
+EDGES|REF recursive#10 -> recursive#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:boundaries.c:<global> -> F:boundaries.c
+EDGES|SOURCE_FILE D:char* -> F:<includes>
+EDGES|SOURCE_FILE D:conditional -> F:boundaries.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:literal -> F:boundaries.c
+EDGES|SOURCE_FILE D:nested -> F:boundaries.c
+EDGES|SOURCE_FILE D:ordinary -> F:boundaries.c
+EDGES|SOURCE_FILE D:recursive -> F:boundaries.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:void* -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:boundaries.c:<global> -> F:boundaries.c
+EDGES|SOURCE_FILE boundaries.c:<global>#0 -> F:boundaries.c
+EDGES|SOURCE_FILE boundaries.c:<global>#1 -> F:boundaries.c
+EDGES|SOURCE_FILE boundaries.c:<global>#21 -> F:boundaries.c
+EDGES|SOURCE_FILE boundaries.c:<global>#38 -> F:boundaries.c
+EDGES|SOURCE_FILE boundaries.c:<global>#50 -> F:boundaries.c
+EDGES|SOURCE_FILE boundaries.c:<global>#9 -> F:boundaries.c
+EDGES|SOURCE_FILE boundaries.c:CAST:ANY(1)#0 -> F:boundaries.c
+EDGES|SOURCE_FILE boundaries.c:ID:ANY(1)#0 -> F:boundaries.c
+EDGES|SOURCE_FILE boundaries.c:TEXT:char*(1)#0 -> F:boundaries.c
+EDGES|SOURCE_FILE cast_ordinary#0 -> F:boundaries.c
+FLOWS|REACHING_DEF[0] conditional#15 -> conditional#12
+FLOWS|REACHING_DEF[<RET>] conditional#7 -> conditional#16
+FLOWS|REACHING_DEF[<RET>] literal#4 -> literal#8
+FLOWS|REACHING_DEF[<RET>] nested#5 -> nested#11
+FLOWS|REACHING_DEF[<RET>] ordinary#4 -> ordinary#7
+FLOWS|REACHING_DEF[<RET>] recursive#4 -> recursive#11
+FLOWS|REACHING_DEF[CAST(ID(o))] nested#6 -> nested#11
+FLOWS|REACHING_DEF[CAST(ID(o))] nested#6 -> nested#5
+FLOWS|REACHING_DEF[CAST(n ? o : 0)] conditional#8 -> conditional#16
+FLOWS|REACHING_DEF[CAST(n ? o : 0)] conditional#8 -> conditional#7
+FLOWS|REACHING_DEF[ID(SAME(o))] recursive#5 -> recursive#11
+FLOWS|REACHING_DEF[ID(SAME(o))] recursive#5 -> recursive#4
+FLOWS|REACHING_DEF[SAME(o)] recursive#6 -> recursive#11
+FLOWS|REACHING_DEF[SAME(o)] recursive#6 -> recursive#5
+FLOWS|REACHING_DEF[SAME(o)] recursive#9 -> recursive#11
+FLOWS|REACHING_DEF[TEXT(0)] literal#5 -> literal#4
+FLOWS|REACHING_DEF[TEXT(0)] literal#5 -> literal#8
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#1
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#4
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#7
+FLOWS|REACHING_DEF[] SAME#0 -> SAME#1
+FLOWS|REACHING_DEF[] boundaries.c:<global>#0 -> boundaries.c:<global>#60
+FLOWS|REACHING_DEF[] boundaries.c:<global>#0 -> boundaries.c:<global>#61
+FLOWS|REACHING_DEF[] boundaries.c:<global>#0 -> boundaries.c:<global>#62
+FLOWS|REACHING_DEF[] boundaries.c:<global>#0 -> boundaries.c:<global>#63
+FLOWS|REACHING_DEF[] boundaries.c:<global>#0 -> boundaries.c:<global>#64
+FLOWS|REACHING_DEF[] boundaries.c:<global>#1 -> ordinary#1
+FLOWS|REACHING_DEF[] boundaries.c:<global>#1 -> ordinary#6
+FLOWS|REACHING_DEF[] boundaries.c:<global>#21 -> conditional#1
+FLOWS|REACHING_DEF[] boundaries.c:<global>#21 -> conditional#10
+FLOWS|REACHING_DEF[] boundaries.c:<global>#21 -> conditional#11
+FLOWS|REACHING_DEF[] boundaries.c:<global>#21 -> conditional#14
+FLOWS|REACHING_DEF[] boundaries.c:<global>#21 -> conditional#15
+FLOWS|REACHING_DEF[] boundaries.c:<global>#21 -> conditional#3
+FLOWS|REACHING_DEF[] boundaries.c:<global>#21 -> conditional#8
+FLOWS|REACHING_DEF[] boundaries.c:<global>#38 -> recursive#1
+FLOWS|REACHING_DEF[] boundaries.c:<global>#38 -> recursive#10
+FLOWS|REACHING_DEF[] boundaries.c:<global>#38 -> recursive#7
+FLOWS|REACHING_DEF[] boundaries.c:<global>#50 -> literal#1
+FLOWS|REACHING_DEF[] boundaries.c:<global>#50 -> literal#5
+FLOWS|REACHING_DEF[] boundaries.c:<global>#50 -> literal#7
+FLOWS|REACHING_DEF[] boundaries.c:<global>#9 -> nested#1
+FLOWS|REACHING_DEF[] boundaries.c:<global>#9 -> nested#10
+FLOWS|REACHING_DEF[] boundaries.c:<global>#9 -> nested#6
+FLOWS|REACHING_DEF[] boundaries.c:<global>#9 -> nested#8
+FLOWS|REACHING_DEF[] boundaries.c:<global>#9 -> nested#9
+FLOWS|REACHING_DEF[] boundaries.c:CAST:ANY(1)#0 -> boundaries.c:CAST:ANY(1)#1
+FLOWS|REACHING_DEF[] boundaries.c:ID:ANY(1)#0 -> boundaries.c:ID:ANY(1)#1
+FLOWS|REACHING_DEF[] boundaries.c:TEXT:char*(1)#0 -> boundaries.c:TEXT:char*(1)#1
+FLOWS|REACHING_DEF[] cast_ordinary#0 -> cast_ordinary#1
+FLOWS|REACHING_DEF[] literal#1 -> literal#2
+FLOWS|REACHING_DEF[] literal#1 -> literal#8
+FLOWS|REACHING_DEF[cast_ordinary(o)] ordinary#5 -> ordinary#4
+FLOWS|REACHING_DEF[cast_ordinary(o)] ordinary#5 -> ordinary#7
+FLOWS|REACHING_DEF[n ? o : 0] conditional#12 -> conditional#16
+FLOWS|REACHING_DEF[n] conditional#13 -> conditional#12
+FLOWS|REACHING_DEF[n] conditional#13 -> conditional#16
+FLOWS|REACHING_DEF[n] conditional#13 -> conditional#4
+FLOWS|REACHING_DEF[n] conditional#3 -> conditional#16
+FLOWS|REACHING_DEF[n] conditional#3 -> conditional#4
+FLOWS|REACHING_DEF[o] cast_ordinary#1 -> cast_ordinary#2
+FLOWS|REACHING_DEF[o] cast_ordinary#1 -> cast_ordinary#4
+FLOWS|REACHING_DEF[o] conditional#1 -> conditional#14
+FLOWS|REACHING_DEF[o] conditional#1 -> conditional#16
+FLOWS|REACHING_DEF[o] conditional#1 -> conditional#2
+FLOWS|REACHING_DEF[o] conditional#14 -> conditional#12
+FLOWS|REACHING_DEF[o] conditional#14 -> conditional#16
+FLOWS|REACHING_DEF[o] conditional#14 -> conditional#2
+FLOWS|REACHING_DEF[o] nested#1 -> nested#11
+FLOWS|REACHING_DEF[o] nested#1 -> nested#2
+FLOWS|REACHING_DEF[o] ordinary#1 -> ordinary#2
+FLOWS|REACHING_DEF[o] ordinary#1 -> ordinary#6
+FLOWS|REACHING_DEF[o] ordinary#6 -> ordinary#2
+FLOWS|REACHING_DEF[o] ordinary#6 -> ordinary#5
+FLOWS|REACHING_DEF[o] ordinary#6 -> ordinary#7
+FLOWS|REACHING_DEF[o] recursive#1 -> recursive#2
+FLOWS|REACHING_DEF[o] recursive#1 -> recursive#7
+FLOWS|REACHING_DEF[o] recursive#10 -> recursive#11
+FLOWS|REACHING_DEF[o] recursive#10 -> recursive#2
+FLOWS|REACHING_DEF[o] recursive#10 -> recursive#9
+FLOWS|REACHING_DEF[o] recursive#7 -> recursive#10
+FLOWS|REACHING_DEF[o] recursive#7 -> recursive#11
+FLOWS|REACHING_DEF[o] recursive#7 -> recursive#2
+FLOWS|REACHING_DEF[o] recursive#7 -> recursive#6
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#3
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p1] SAME#1 -> SAME#3
+FLOWS|REACHING_DEF[p1] SAME#1 -> SAME#4
+FLOWS|REACHING_DEF[p1] boundaries.c:CAST:ANY(1)#1 -> boundaries.c:CAST:ANY(1)#2
+FLOWS|REACHING_DEF[p1] boundaries.c:CAST:ANY(1)#1 -> boundaries.c:CAST:ANY(1)#4
+FLOWS|REACHING_DEF[p1] boundaries.c:ID:ANY(1)#1 -> boundaries.c:ID:ANY(1)#2
+FLOWS|REACHING_DEF[p1] boundaries.c:ID:ANY(1)#1 -> boundaries.c:ID:ANY(1)#4
+FLOWS|REACHING_DEF[p1] boundaries.c:TEXT:char*(1)#1 -> boundaries.c:TEXT:char*(1)#2
+FLOWS|REACHING_DEF[p1] boundaries.c:TEXT:char*(1)#1 -> boundaries.c:TEXT:char*(1)#4
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#6
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#8

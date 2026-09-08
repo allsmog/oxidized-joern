@@ -1,0 +1,10 @@
+--- Joern
++++ candidate
+@@ -252,7 +252,6 @@
+ EDGES|REF T:void -> D:void
+ EDGES|REF T:void* -> D:void*
+ EDGES|REF main.c:<global>#28 -> main.c:<global>#11
+-EDGES|REF read#6 -> main.c:<global>#2
+ EDGES|REF read#9 -> read#1
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>

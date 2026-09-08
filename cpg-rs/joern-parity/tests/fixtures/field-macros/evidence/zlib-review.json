@@ -1,0 +1,30 @@
+{
+  "_tr_align": {
+    "oracle": {
+      "records": 259,
+      "unexpandedLenCode": 0
+    },
+    "before": {
+      "records": 256,
+      "unexpandedLenCode": 3
+    },
+    "candidate": {
+      "records": 262,
+      "unexpandedLenCode": 0
+    }
+  },
+  "compress_block": {
+    "oracle": {
+      "records": 912,
+      "unexpandedLenCode": 0
+    },
+    "before": {
+      "records": 897,
+      "unexpandedLenCode": 12
+    },
+    "candidate": {
+      "records": 921,
+      "unexpandedLenCode": 0
+    }
+  }
+}

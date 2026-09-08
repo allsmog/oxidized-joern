@@ -14,10 +14,10 @@
       "excludes": ["/contrib/", "/test/", "/examples/", "/amiga/", "/msdos/", "/win32/"],
       "expected": {
         "sourceFiles": 26,
-        "nodes": 65902,
-        "graphSha256": "e6a217fbd4ef6aa0e4a61bbdcffcacfba265faeceff94beae40587cff2aa8346",
-        "edgesSha256": "eeec6ff44ea6ccd817309d2ea6295d35ae9e8f94654ef3ee28edbb51827a3a56",
-        "exportSha256": "d7421f742eb25e6cc525c00a54552554252c6767f93d70bbfa23cc12ee19cae8",
+        "nodes": 66237,
+        "graphSha256": "557bca5a8db74cf9c24118d4b88317b6389495452161cc20dfb6c52a5a84ad8f",
+        "edgesSha256": "e95753bf2b8daf045f94c54d9485899619dee93889cd7e7fdf37d834be0bd428",
+        "exportSha256": "2400960df7ddd063de0b3eedf4c5ef249793a2eeb2d53107b8c6e9764a398c72",
         "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
         "findings": 0
       },
@@ -36,10 +36,10 @@
       "excludes": [],
       "expected": {
         "sourceFiles": 61,
-        "nodes": 114922,
-        "graphSha256": "4e492abd98fc6199f9eb67ba2e0118fe4be69a355778e6370139aaab2ccb59a6",
-        "edgesSha256": "8f5e4a8cac9b7996a55d25402b5c2a4212db4042bd198f7dde9cd00d690128f9",
-        "exportSha256": "ce4ad095cff599746cb17e937b5984606c99855736c8aacbd7e507af3550ddc4",
+        "nodes": 119201,
+        "graphSha256": "519c76efde2b16300d23af0b5b31b04eeff6fa4d7741794822a9452cc5193d3d",
+        "edgesSha256": "1126b63b285c673a3e5d310a9f833076a60389f220a475783058cfd8b9079684",
+        "exportSha256": "85673156c8516b8e77caaf42a982ba930cfabd877c725ec87a417f5f27152b43",
         "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
         "findings": 0
       },

@@ -39,7 +39,8 @@ use std::time::{Duration, Instant};
 /// v13: C callable declarations, loop conditions, and preprocessing expanded.
 /// v14: C type roles, storage modifiers, blocks, and reaching definitions expanded.
 /// v15: C CFG/RD scheduling, array initializers, and supplied-header macros.
-pub const GRAPH_SHAPE_VERSION: u32 = 15;
+/// v16: C field macros, nested cast tokens, typedef aggregates and recovery.
+pub const GRAPH_SHAPE_VERSION: u32 = 16;
 
 const CACHE_MANIFEST_VERSION: u32 = 1;
 const CACHE_GRAPH_FORMAT: &str = "CPG2";

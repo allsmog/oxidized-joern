@@ -1,0 +1,268 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=nested CODE=int nested(int a,int b,int c) {return APPLY(+, (a,b), c); } FULL_NAME=nested SIGNATURE=int(int,int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_IN NAME=c CODE=int c TYPE_FULL_NAME=int ORDER=3
+    METHOD_PARAMETER_OUT NAME=c CODE=int c TYPE_FULL_NAME=int ORDER=3
+    BLOCK CODE={return APPLY(+, (a,b), c); } TYPE_FULL_NAME=void ORDER=4
+      RETURN CODE=return APPLY(+, (a,b), c); ORDER=1
+        CALL NAME=APPLY CODE=APPLY(+, (a,b), c) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=c CODE=c TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.addition CODE=(c) + (a,b)(b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=c CODE=c TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.pointerCall CODE=(a,b)(b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+                BLOCK TYPE_FULL_NAME=ANY ORDER=1
+                  IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+                  IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2
+                IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=5
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=nested TYPE_FULL_NAME=nested METHOD_FULL_NAME=nested ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=APPLY CODE=#define APPLY(op,a,b) ((a) op (b)) FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=4
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=5
+
+METHOD NAME=nested CODE=int nested(int a,int b,int c) {return APPLY(+, (a,b), c); } FULL_NAME=nested SIGNATURE=int(int,int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_IN NAME=c CODE=int c TYPE_FULL_NAME=int ORDER=3
+  METHOD_PARAMETER_OUT NAME=c CODE=int c TYPE_FULL_NAME=int ORDER=3
+  BLOCK CODE={return APPLY(+, (a,b), c); } TYPE_FULL_NAME=void ORDER=4
+    RETURN CODE=return APPLY(+, (a,b), c); ORDER=1
+      CALL NAME=APPLY CODE=APPLY(+, (a,b), c) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=c CODE=c TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.addition CODE=(c) + (a,b)(b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=c CODE=c TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.pointerCall CODE=(a,b)(b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+              BLOCK TYPE_FULL_NAME=ANY ORDER=1
+                IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+                IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2
+              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=5
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=nested FULL_NAME=nested CODE=nested AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=nested FULL_NAME=nested TYPE_DECL_FULL_NAME=nested
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT nested#12 -> nested#13
+EDGES|ARGUMENT nested#12 -> nested#14
+EDGES|ARGUMENT nested#14 -> nested#18
+EDGES|ARGUMENT nested#8 -> nested#9
+EDGES|ARGUMENT nested#9 -> nested#10
+EDGES|CALL nested#12 -> <operator>.addition#0
+EDGES|CALL nested#9 -> main.c:APPLY:ANY(3)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#22
+EDGES|CFG main.c:<global>#1 -> nested#10
+EDGES|CFG main.c:<global>#22 -> main.c:<global>#23
+EDGES|CFG main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#8
+EDGES|CFG nested#10 -> nested#9
+EDGES|CFG nested#12 -> nested#8
+EDGES|CFG nested#13 -> nested#16
+EDGES|CFG nested#14 -> nested#12
+EDGES|CFG nested#15 -> nested#18
+EDGES|CFG nested#16 -> nested#17
+EDGES|CFG nested#17 -> nested#15
+EDGES|CFG nested#18 -> nested#14
+EDGES|CFG nested#8 -> nested#19
+EDGES|CFG nested#9 -> nested#13
+EDGES|CFG nested#9 -> nested#8
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS D:main.c:<global> -> D:nested
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:APPLY:ANY(3)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#21
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#22
+EDGES|CONTAINS main.c:<global>#1 -> nested#10
+EDGES|CONTAINS main.c:<global>#1 -> nested#11
+EDGES|CONTAINS main.c:<global>#1 -> nested#12
+EDGES|CONTAINS main.c:<global>#1 -> nested#13
+EDGES|CONTAINS main.c:<global>#1 -> nested#14
+EDGES|CONTAINS main.c:<global>#1 -> nested#15
+EDGES|CONTAINS main.c:<global>#1 -> nested#16
+EDGES|CONTAINS main.c:<global>#1 -> nested#17
+EDGES|CONTAINS main.c:<global>#1 -> nested#18
+EDGES|CONTAINS main.c:<global>#1 -> nested#7
+EDGES|CONTAINS main.c:<global>#1 -> nested#8
+EDGES|CONTAINS main.c:<global>#1 -> nested#9
+EDGES|CONTAINS main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#7
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#21 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#22 -> T:nested
+EDGES|EVAL_TYPE main.c:<global>#23 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#5 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#7 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#8 -> T:ANY
+EDGES|EVAL_TYPE nested#1 -> T:int
+EDGES|EVAL_TYPE nested#10 -> T:int
+EDGES|EVAL_TYPE nested#11 -> T:ANY
+EDGES|EVAL_TYPE nested#12 -> T:ANY
+EDGES|EVAL_TYPE nested#13 -> T:int
+EDGES|EVAL_TYPE nested#14 -> T:ANY
+EDGES|EVAL_TYPE nested#15 -> T:ANY
+EDGES|EVAL_TYPE nested#16 -> T:int
+EDGES|EVAL_TYPE nested#17 -> T:int
+EDGES|EVAL_TYPE nested#18 -> T:int
+EDGES|EVAL_TYPE nested#19 -> T:int
+EDGES|EVAL_TYPE nested#2 -> T:int
+EDGES|EVAL_TYPE nested#3 -> T:int
+EDGES|EVAL_TYPE nested#4 -> T:int
+EDGES|EVAL_TYPE nested#5 -> T:int
+EDGES|EVAL_TYPE nested#6 -> T:int
+EDGES|EVAL_TYPE nested#7 -> T:void
+EDGES|EVAL_TYPE nested#9 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6
+EDGES|PARAMETER_LINK nested#1 -> nested#2
+EDGES|PARAMETER_LINK nested#3 -> nested#4
+EDGES|PARAMETER_LINK nested#5 -> nested#6
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:nested -> D:nested
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#22 -> main.c:<global>#1
+EDGES|REF nested#13 -> nested#5
+EDGES|REF nested#16 -> nested#1
+EDGES|REF nested#17 -> nested#3
+EDGES|REF nested#18 -> nested#3
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:nested -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:APPLY:ANY(3)#0 -> F:main.c
+FLOWS|REACHING_DEF[(a,b)(b)] nested#14 -> nested#12
+FLOWS|REACHING_DEF[(a,b)(b)] nested#14 -> nested#19
+FLOWS|REACHING_DEF[(c) + (a,b)(b)] nested#12 -> nested#19
+FLOWS|REACHING_DEF[<RET>] nested#8 -> nested#19
+FLOWS|REACHING_DEF[APPLY(+, (a,b), c)] nested#9 -> nested#19
+FLOWS|REACHING_DEF[APPLY(+, (a,b), c)] nested#9 -> nested#8
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#22
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> nested#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> nested#10
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> nested#13
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> nested#15
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> nested#16
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> nested#17
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> nested#18
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> nested#3
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> nested#5
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#1
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#3
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#5
+FLOWS|REACHING_DEF[a] nested#1 -> nested#19
+FLOWS|REACHING_DEF[a] nested#1 -> nested#2
+FLOWS|REACHING_DEF[b] nested#18 -> nested#14
+FLOWS|REACHING_DEF[b] nested#18 -> nested#19
+FLOWS|REACHING_DEF[b] nested#18 -> nested#4
+FLOWS|REACHING_DEF[b] nested#3 -> nested#18
+FLOWS|REACHING_DEF[b] nested#3 -> nested#19
+FLOWS|REACHING_DEF[b] nested#3 -> nested#4
+FLOWS|REACHING_DEF[c] nested#10 -> nested#13
+FLOWS|REACHING_DEF[c] nested#10 -> nested#19
+FLOWS|REACHING_DEF[c] nested#10 -> nested#6
+FLOWS|REACHING_DEF[c] nested#10 -> nested#9
+FLOWS|REACHING_DEF[c] nested#13 -> nested#12
+FLOWS|REACHING_DEF[c] nested#13 -> nested#19
+FLOWS|REACHING_DEF[c] nested#13 -> nested#6
+FLOWS|REACHING_DEF[c] nested#5 -> nested#10
+FLOWS|REACHING_DEF[c] nested#5 -> nested#6
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6
+FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#8

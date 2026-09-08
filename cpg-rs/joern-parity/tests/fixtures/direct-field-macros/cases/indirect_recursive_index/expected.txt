@@ -1,0 +1,278 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.indirectFieldAccess FULL_NAME=<operator>.indirectFieldAccess ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=4
+  BLOCK ORDER=1
+    CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  MODIFIER ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+
+METHOD NAME=f CODE=int f(struct Item *p) { return p->Len; } FULL_NAME=f SIGNATURE=int(Item*) ORDER=1
+  METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+  METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+  BLOCK CODE={ return p->Len; } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=Len CODE=<unknown> Len TYPE_FULL_NAME=ANY ORDER=0
+    RETURN CODE=return p->Len; ORDER=1
+      CALL NAME=<operator>.indirectIndexAccess CODE=p->Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectFieldAccess CODE=p->Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=Len CODE=Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:Len:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=Len CODE=<unknown> Len TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  TYPE_DECL NAME=Item CODE=struct Item { int len; int width; int values[4]; } FULL_NAME=Item ORDER=1
+    MEMBER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=1
+    MEMBER NAME=width CODE=width TYPE_FULL_NAME=int ORDER=2
+    MEMBER NAME=values CODE=values[4] TYPE_FULL_NAME=int[4] ORDER=3
+    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=4
+      BLOCK ORDER=1
+        CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      MODIFIER ORDER=2
+      MODIFIER ORDER=3
+      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+  METHOD NAME=f CODE=int f(struct Item *p) { return p->Len; } FULL_NAME=f SIGNATURE=int(Item*) ORDER=1
+    METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+    METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+    BLOCK CODE={ return p->Len; } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=Len CODE=<unknown> Len TYPE_FULL_NAME=ANY ORDER=0
+      RETURN CODE=return p->Len; ORDER=1
+        CALL NAME=<operator>.indirectIndexAccess CODE=p->Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.indirectFieldAccess CODE=p->Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=Len CODE=Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:Len:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              IDENTIFIER NAME=Len CODE=<unknown> Len TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_REF CODE=struct Item { int len; int width; int values[4]; } TYPE_FULL_NAME=Item ORDER=1
+    METHOD_REF CODE=f TYPE_FULL_NAME=f METHOD_FULL_NAME=f ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=Len CODE=#define Len values[Other] FULL_NAME=main.c:Len:ANY(0) SIGNATURE=ANY(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Item FULL_NAME=Item CODE=struct Item { int len; int width; int values[4]; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=Item* FULL_NAME=Item* CODE=Item* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=f FULL_NAME=f CODE=f AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[4] FULL_NAME=int[4] CODE=int[4] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Item FULL_NAME=Item TYPE_DECL_FULL_NAME=Item
+NODES|TYPE NAME=Item* FULL_NAME=Item* TYPE_DECL_FULL_NAME=Item*
+NODES|TYPE NAME=f FULL_NAME=f TYPE_DECL_FULL_NAME=f
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[4] FULL_NAME=int[4] TYPE_DECL_FULL_NAME=int[4]
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#3
+EDGES|ARGUMENT f#5 -> f#6
+EDGES|ARGUMENT f#6 -> f#10
+EDGES|ARGUMENT f#6 -> f#7
+EDGES|ARGUMENT f#7 -> f#8
+EDGES|ARGUMENT f#7 -> f#9
+EDGES|CALL Item.<clinit>:Item()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL f#10 -> main.c:Len:ANY(0)#0
+EDGES|CALL f#6 -> <operator>.indirectIndexAccess#0
+EDGES|CALL f#7 -> <operator>.indirectFieldAccess#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CFG Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+EDGES|CFG Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+EDGES|CFG f#0 -> f#8
+EDGES|CFG f#10 -> f#12
+EDGES|CFG f#10 -> f#6
+EDGES|CFG f#12 -> f#6
+EDGES|CFG f#5 -> f#13
+EDGES|CFG f#6 -> f#5
+EDGES|CFG f#7 -> f#10
+EDGES|CFG f#8 -> f#9
+EDGES|CFG f#9 -> f#7
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#27
+EDGES|CFG main.c:<global>#27 -> main.c:<global>#28
+EDGES|CFG main.c:<global>#28 -> main.c:<global>#29
+EDGES|CFG main.c:Len:ANY(0)#0 -> main.c:Len:ANY(0)#2
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS D:main.c:<global> -> D:f
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:Len:ANY(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:Item*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[4]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#1
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#2
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CONTAINS f#0 -> f#10
+EDGES|CONTAINS f#0 -> f#11
+EDGES|CONTAINS f#0 -> f#12
+EDGES|CONTAINS f#0 -> f#3
+EDGES|CONTAINS f#0 -> f#5
+EDGES|CONTAINS f#0 -> f#6
+EDGES|CONTAINS f#0 -> f#7
+EDGES|CONTAINS f#0 -> f#8
+EDGES|CONTAINS f#0 -> f#9
+EDGES|CONTAINS main.c:<global>#0 -> f#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#26
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#27
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#28
+EDGES|CONTAINS main.c:<global>#1 -> Item.<clinit>:Item()#0
+EDGES|CONTAINS main.c:Len:ANY(0)#0 -> main.c:Len:ANY(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#2 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#3 -> T:int
+EDGES|EVAL_TYPE Item.<clinit>:Item()#6 -> T:Item
+EDGES|EVAL_TYPE f#1 -> T:Item*
+EDGES|EVAL_TYPE f#10 -> T:ANY
+EDGES|EVAL_TYPE f#11 -> T:ANY
+EDGES|EVAL_TYPE f#12 -> T:ANY
+EDGES|EVAL_TYPE f#13 -> T:int
+EDGES|EVAL_TYPE f#2 -> T:Item*
+EDGES|EVAL_TYPE f#3 -> T:void
+EDGES|EVAL_TYPE f#4 -> T:ANY
+EDGES|EVAL_TYPE f#6 -> T:ANY
+EDGES|EVAL_TYPE f#7 -> T:ANY
+EDGES|EVAL_TYPE f#8 -> T:Item*
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#26 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#27 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#28 -> T:f
+EDGES|EVAL_TYPE main.c:<global>#29 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#3 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#4 -> T:int[4]
+EDGES|EVAL_TYPE main.c:Len:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:Len:ANY(0)#2 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK f#1 -> f#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Item -> main.c:<global>#1
+EDGES|REF T:Item* -> D:Item*
+EDGES|REF T:f -> D:f
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[4] -> D:int[4]
+EDGES|REF T:void -> D:void
+EDGES|REF f#12 -> f#4
+EDGES|REF f#8 -> f#1
+EDGES|REF main.c:<global>#28 -> f#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:Item* -> F:<includes>
+EDGES|SOURCE_FILE D:f -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[4] -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE Item.<clinit>:Item()#0 -> F:main.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE f#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:Len:ANY(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[4] Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+FLOWS|REACHING_DEF[<RET>] f#5 -> f#13
+FLOWS|REACHING_DEF[Len] f#10 -> f#13
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+FLOWS|REACHING_DEF[] f#0 -> f#1
+FLOWS|REACHING_DEF[] f#0 -> f#10
+FLOWS|REACHING_DEF[] f#0 -> f#12
+FLOWS|REACHING_DEF[] f#0 -> f#5
+FLOWS|REACHING_DEF[] f#0 -> f#8
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#27
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#28
+FLOWS|REACHING_DEF[p->Len] f#6 -> f#5
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[p] f#1 -> f#13
+FLOWS|REACHING_DEF[p] f#1 -> f#2
+FLOWS|REACHING_DEF[p] f#1 -> f#7
+FLOWS|REACHING_DEF[p] f#1 -> f#8
+FLOWS|REACHING_DEF[values[4]] Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6

@@ -1,0 +1,228 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.and FULL_NAME=<operator>.and ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=commented CODE=int commented(int a,int b) {return APPLY(/* left */ & /* right */, a, b); } FULL_NAME=commented SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={return APPLY(/* left */ & /* right */, a, b); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return APPLY(/* left */ & /* right */, a, b); ORDER=1
+      CALL NAME=APPLY CODE=APPLY(/* left */ & /* right */, a, b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+        BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+          CALL NAME=<operator>.and CODE=(a) & (b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=commented CODE=int commented(int a,int b) {return APPLY(/* left */ & /* right */, a, b); } FULL_NAME=commented SIGNATURE=int(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={return APPLY(/* left */ & /* right */, a, b); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return APPLY(/* left */ & /* right */, a, b); ORDER=1
+        CALL NAME=APPLY CODE=APPLY(/* left */ & /* right */, a, b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+          BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+            CALL NAME=<operator>.and CODE=(a) & (b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=commented TYPE_FULL_NAME=commented METHOD_FULL_NAME=commented ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=APPLY CODE=#define APPLY(op,a,b) ((a) op (b)) FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=4
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=5
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=commented FULL_NAME=commented CODE=commented AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=commented FULL_NAME=commented TYPE_DECL_FULL_NAME=commented
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT commented#11 -> commented#12
+EDGES|ARGUMENT commented#11 -> commented#13
+EDGES|ARGUMENT commented#6 -> commented#7
+EDGES|ARGUMENT commented#7 -> commented#8
+EDGES|ARGUMENT commented#7 -> commented#9
+EDGES|CALL commented#11 -> <operator>.and#0
+EDGES|CALL commented#7 -> main.c:APPLY:ANY(3)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.and#0 -> <operator>.and#5
+EDGES|CFG commented#0 -> commented#8
+EDGES|CFG commented#11 -> commented#6
+EDGES|CFG commented#12 -> commented#13
+EDGES|CFG commented#13 -> commented#11
+EDGES|CFG commented#6 -> commented#14
+EDGES|CFG commented#7 -> commented#12
+EDGES|CFG commented#7 -> commented#6
+EDGES|CFG commented#8 -> commented#9
+EDGES|CFG commented#9 -> commented#7
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#17
+EDGES|CFG main.c:<global>#17 -> main.c:<global>#18
+EDGES|CFG main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#8
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.and#0 -> <operator>.and#2
+EDGES|CONTAINS D:main.c:<global> -> D:commented
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:APPLY:ANY(3)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS commented#0 -> commented#10
+EDGES|CONTAINS commented#0 -> commented#11
+EDGES|CONTAINS commented#0 -> commented#12
+EDGES|CONTAINS commented#0 -> commented#13
+EDGES|CONTAINS commented#0 -> commented#5
+EDGES|CONTAINS commented#0 -> commented#6
+EDGES|CONTAINS commented#0 -> commented#7
+EDGES|CONTAINS commented#0 -> commented#8
+EDGES|CONTAINS commented#0 -> commented#9
+EDGES|CONTAINS main.c:<global>#0 -> commented#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#16
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#17
+EDGES|CONTAINS main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#7
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#6 -> T:ANY
+EDGES|EVAL_TYPE commented#1 -> T:int
+EDGES|EVAL_TYPE commented#10 -> T:ANY
+EDGES|EVAL_TYPE commented#11 -> T:ANY
+EDGES|EVAL_TYPE commented#12 -> T:int
+EDGES|EVAL_TYPE commented#13 -> T:int
+EDGES|EVAL_TYPE commented#14 -> T:int
+EDGES|EVAL_TYPE commented#2 -> T:int
+EDGES|EVAL_TYPE commented#3 -> T:int
+EDGES|EVAL_TYPE commented#4 -> T:int
+EDGES|EVAL_TYPE commented#5 -> T:void
+EDGES|EVAL_TYPE commented#7 -> T:ANY
+EDGES|EVAL_TYPE commented#8 -> T:int
+EDGES|EVAL_TYPE commented#9 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#17 -> T:commented
+EDGES|EVAL_TYPE main.c:<global>#18 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#5 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#7 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#8 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.and#1 -> <operator>.and#3
+EDGES|PARAMETER_LINK <operator>.and#4 -> <operator>.and#6
+EDGES|PARAMETER_LINK commented#1 -> commented#2
+EDGES|PARAMETER_LINK commented#3 -> commented#4
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:commented -> D:commented
+EDGES|REF T:int -> D:int
+EDGES|REF T:void -> D:void
+EDGES|REF commented#12 -> commented#1
+EDGES|REF commented#13 -> commented#3
+EDGES|REF main.c:<global>#17 -> commented#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:commented -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE commented#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:APPLY:ANY(3)#0 -> F:main.c
+FLOWS|REACHING_DEF[(a) & (b)] commented#11 -> commented#14
+FLOWS|REACHING_DEF[<RET>] commented#6 -> commented#14
+FLOWS|REACHING_DEF[APPLY(/* left */ & /* right */, a, b)] commented#7 -> commented#14
+FLOWS|REACHING_DEF[APPLY(/* left */ & /* right */, a, b)] commented#7 -> commented#6
+FLOWS|REACHING_DEF[] <operator>.and#0 -> <operator>.and#1
+FLOWS|REACHING_DEF[] <operator>.and#0 -> <operator>.and#4
+FLOWS|REACHING_DEF[] commented#0 -> commented#1
+FLOWS|REACHING_DEF[] commented#0 -> commented#12
+FLOWS|REACHING_DEF[] commented#0 -> commented#13
+FLOWS|REACHING_DEF[] commented#0 -> commented#3
+FLOWS|REACHING_DEF[] commented#0 -> commented#8
+FLOWS|REACHING_DEF[] commented#0 -> commented#9
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#17
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#1
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#3
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#5
+FLOWS|REACHING_DEF[a] commented#1 -> commented#2
+FLOWS|REACHING_DEF[a] commented#1 -> commented#8
+FLOWS|REACHING_DEF[a] commented#12 -> commented#11
+FLOWS|REACHING_DEF[a] commented#12 -> commented#13
+FLOWS|REACHING_DEF[a] commented#12 -> commented#14
+FLOWS|REACHING_DEF[a] commented#12 -> commented#2
+FLOWS|REACHING_DEF[a] commented#8 -> commented#12
+FLOWS|REACHING_DEF[a] commented#8 -> commented#14
+FLOWS|REACHING_DEF[a] commented#8 -> commented#2
+FLOWS|REACHING_DEF[a] commented#8 -> commented#7
+FLOWS|REACHING_DEF[a] commented#8 -> commented#9
+FLOWS|REACHING_DEF[b] commented#13 -> commented#11
+FLOWS|REACHING_DEF[b] commented#13 -> commented#12
+FLOWS|REACHING_DEF[b] commented#13 -> commented#14
+FLOWS|REACHING_DEF[b] commented#13 -> commented#4
+FLOWS|REACHING_DEF[b] commented#3 -> commented#4
+FLOWS|REACHING_DEF[b] commented#3 -> commented#9
+FLOWS|REACHING_DEF[b] commented#9 -> commented#13
+FLOWS|REACHING_DEF[b] commented#9 -> commented#14
+FLOWS|REACHING_DEF[b] commented#9 -> commented#4
+FLOWS|REACHING_DEF[b] commented#9 -> commented#7
+FLOWS|REACHING_DEF[b] commented#9 -> commented#8
+FLOWS|REACHING_DEF[p1] <operator>.and#1 -> <operator>.and#3
+FLOWS|REACHING_DEF[p1] <operator>.and#1 -> <operator>.and#5
+FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[p2] <operator>.and#4 -> <operator>.and#5
+FLOWS|REACHING_DEF[p2] <operator>.and#4 -> <operator>.and#6
+FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6
+FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#8

@@ -1,0 +1,184 @@
+--- 
++++ 
+@@ -18,8 +18,8 @@
+       CALL NAME=CAST CODE=CAST(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+         BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=<operator>.cast CODE=(int [] (*))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            TYPE_REF CODE=int [] (*) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++          CALL NAME=<operator>.cast CODE=(int (*)[sizeof((union U*)p)])p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++            TYPE_REF CODE=int (*)[sizeof((union U*)p)] TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+             IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+ 
+@@ -31,8 +31,8 @@
+       CALL NAME=DOUBLE CODE=DOUBLE(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:DOUBLE:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+         BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=<operator>.cast CODE=(int [] (* *))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            TYPE_REF CODE=int [] (* *) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++          CALL NAME=<operator>.cast CODE=(int (**)[sizeof((union U*)p)])p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++            TYPE_REF CODE=int (**)[sizeof((union U*)p)] TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+             IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+ 
+@@ -44,8 +44,8 @@
+       CALL NAME=MATRIX CODE=MATRIX(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:MATRIX:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+         BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=<operator>.cast CODE=(int [][] (*))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            TYPE_REF CODE=int [][] (*) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++          CALL NAME=<operator>.cast CODE=(int (*)[2][sizeof((union U*)p)])p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++            TYPE_REF CODE=int (*)[2][sizeof((union U*)p)] TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+             IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+ 
+@@ -57,8 +57,8 @@
+       CALL NAME=VALUE CODE=VALUE(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:VALUE:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+         BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=<operator>.cast CODE=(U *)(void *)p TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            TYPE_REF CODE=U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
++          CALL NAME=<operator>.cast CODE=(union U *)(void *)p TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++            TYPE_REF CODE=union U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+             CALL NAME=<operator>.cast CODE=(void *)p TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+               TYPE_REF CODE=void * TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+               IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+@@ -72,8 +72,8 @@
+       CALL NAME=POINTER CODE=POINTER(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:POINTER:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+         BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=<operator>.cast CODE=(U * *)p TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            TYPE_REF CODE=U * * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
++          CALL NAME=<operator>.cast CODE=(union U **)p TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++            TYPE_REF CODE=union U ** TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+             IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+ 
+@@ -86,8 +86,8 @@
+         CALL NAME=CAST CODE=CAST(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+           BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.cast CODE=(int [] (*))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=int [] (*) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++            CALL NAME=<operator>.cast CODE=(int (*)[sizeof((union U*)p)])p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              TYPE_REF CODE=int (*)[sizeof((union U*)p)] TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+               IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+   METHOD NAME=double_pointer CODE=void *double_pointer(void *p) { return DOUBLE(p); } FULL_NAME=double_pointer SIGNATURE=void*(void*) ORDER=1
+@@ -98,8 +98,8 @@
+         CALL NAME=DOUBLE CODE=DOUBLE(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:DOUBLE:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+           BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.cast CODE=(int [] (* *))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=int [] (* *) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++            CALL NAME=<operator>.cast CODE=(int (**)[sizeof((union U*)p)])p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              TYPE_REF CODE=int (**)[sizeof((union U*)p)] TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+               IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+   METHOD NAME=matrix CODE=void *matrix(void *p) { return MATRIX(p); } FULL_NAME=matrix SIGNATURE=void*(void*) ORDER=1
+@@ -110,8 +110,8 @@
+         CALL NAME=MATRIX CODE=MATRIX(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:MATRIX:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+           BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.cast CODE=(int [][] (*))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=int [][] (*) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++            CALL NAME=<operator>.cast CODE=(int (*)[2][sizeof((union U*)p)])p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              TYPE_REF CODE=int (*)[2][sizeof((union U*)p)] TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+               IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+   METHOD NAME=nested_value CODE=void *nested_value(void *p) { return VALUE(p); } FULL_NAME=nested_value SIGNATURE=void*(void*) ORDER=1
+@@ -122,8 +122,8 @@
+         CALL NAME=VALUE CODE=VALUE(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:VALUE:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+           BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.cast CODE=(U *)(void *)p TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
++            CALL NAME=<operator>.cast CODE=(union U *)(void *)p TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              TYPE_REF CODE=union U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+               CALL NAME=<operator>.cast CODE=(void *)p TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                 TYPE_REF CODE=void * TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+                 IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+@@ -136,8 +136,8 @@
+         CALL NAME=POINTER CODE=POINTER(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:POINTER:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+           BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.cast CODE=(U * *)p TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=U * * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
++            CALL NAME=<operator>.cast CODE=(union U **)p TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              TYPE_REF CODE=union U ** TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+               IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+   METHOD NAME=qualified CODE=void *qualified(void *p) { return QUALIFIED(p); } FULL_NAME=qualified SIGNATURE=void*(void*) ORDER=1
+@@ -148,8 +148,8 @@
+         CALL NAME=QUALIFIED CODE=QUALIFIED(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:QUALIFIED:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+           BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.cast CODE=(int [] (* const *))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=int [] (* const *) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++            CALL NAME=<operator>.cast CODE=(int (*const *)[sizeof((union U*)p)])p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              TYPE_REF CODE=int (*const *)[sizeof((union U*)p)] TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+               IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+@@ -205,8 +205,8 @@
+       CALL NAME=QUALIFIED CODE=QUALIFIED(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:QUALIFIED:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+         BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=<operator>.cast CODE=(int [] (* const *))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            TYPE_REF CODE=int [] (* const *) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++          CALL NAME=<operator>.cast CODE=(int (*const *)[sizeof((union U*)p)])p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++            TYPE_REF CODE=int (*const *)[sizeof((union U*)p)] TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+             IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+ 
+@@ -607,12 +607,12 @@
+ EDGES|SOURCE_FILE probe.c:POINTER:ANY(1)#0 -> F:probe.c
+ EDGES|SOURCE_FILE probe.c:QUALIFIED:ANY(1)#0 -> F:probe.c
+ EDGES|SOURCE_FILE probe.c:VALUE:ANY(1)#0 -> F:probe.c
+-FLOWS|REACHING_DEF[(U * *)p] pointer#8 -> pointer#11
+-FLOWS|REACHING_DEF[(U *)(void *)p] nested_value#8 -> nested_value#13
+-FLOWS|REACHING_DEF[(int [] (* *))p] double_pointer#8 -> double_pointer#11
+-FLOWS|REACHING_DEF[(int [] (* const *))p] qualified#8 -> qualified#11
+-FLOWS|REACHING_DEF[(int [] (*))p] composite#8 -> composite#11
+-FLOWS|REACHING_DEF[(int [][] (*))p] matrix#8 -> matrix#11
++FLOWS|REACHING_DEF[(int (*)[2][sizeof((union U*)p)])p] matrix#8 -> matrix#11
++FLOWS|REACHING_DEF[(int (*)[sizeof((union U*)p)])p] composite#8 -> composite#11
++FLOWS|REACHING_DEF[(int (**)[sizeof((union U*)p)])p] double_pointer#8 -> double_pointer#11
++FLOWS|REACHING_DEF[(int (*const *)[sizeof((union U*)p)])p] qualified#8 -> qualified#11
++FLOWS|REACHING_DEF[(union U *)(void *)p] nested_value#8 -> nested_value#13
++FLOWS|REACHING_DEF[(union U **)p] pointer#8 -> pointer#11
+ FLOWS|REACHING_DEF[(void *)p] nested_value#10 -> nested_value#13
+ FLOWS|REACHING_DEF[(void *)p] nested_value#10 -> nested_value#8
+ FLOWS|REACHING_DEF[<RET>] composite#4 -> composite#11
+@@ -631,8 +631,6 @@
+ FLOWS|REACHING_DEF[POINTER(p)] pointer#5 -> pointer#4
+ FLOWS|REACHING_DEF[QUALIFIED(p)] qualified#5 -> qualified#11
+ FLOWS|REACHING_DEF[QUALIFIED(p)] qualified#5 -> qualified#4
+-FLOWS|REACHING_DEF[U * *] pointer#9 -> pointer#8
+-FLOWS|REACHING_DEF[U *] nested_value#9 -> nested_value#8
+ FLOWS|REACHING_DEF[VALUE(p)] nested_value#5 -> nested_value#13
+ FLOWS|REACHING_DEF[VALUE(p)] nested_value#5 -> nested_value#4
+ FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+@@ -674,10 +672,10 @@
+ FLOWS|REACHING_DEF[] probe.c:POINTER:ANY(1)#0 -> probe.c:POINTER:ANY(1)#1
+ FLOWS|REACHING_DEF[] probe.c:QUALIFIED:ANY(1)#0 -> probe.c:QUALIFIED:ANY(1)#1
+ FLOWS|REACHING_DEF[] probe.c:VALUE:ANY(1)#0 -> probe.c:VALUE:ANY(1)#1
+-FLOWS|REACHING_DEF[int [] (* *)] double_pointer#9 -> double_pointer#8
+-FLOWS|REACHING_DEF[int [] (* const *)] qualified#9 -> qualified#8
+-FLOWS|REACHING_DEF[int [] (*)] composite#9 -> composite#8
+-FLOWS|REACHING_DEF[int [][] (*)] matrix#9 -> matrix#8
++FLOWS|REACHING_DEF[int (*)[2][sizeof((union U*)p)]] matrix#9 -> matrix#8
++FLOWS|REACHING_DEF[int (*)[sizeof((union U*)p)]] composite#9 -> composite#8
++FLOWS|REACHING_DEF[int (**)[sizeof((union U*)p)]] double_pointer#9 -> double_pointer#8
++FLOWS|REACHING_DEF[int (*const *)[sizeof((union U*)p)]] qualified#9 -> qualified#8
+ FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+ FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+ FLOWS|REACHING_DEF[p1] probe.c:CAST:ANY(1)#1 -> probe.c:CAST:ANY(1)#2
+@@ -748,4 +746,6 @@
+ FLOWS|REACHING_DEF[p] qualified#6 -> qualified#11
+ FLOWS|REACHING_DEF[p] qualified#6 -> qualified#2
+ FLOWS|REACHING_DEF[p] qualified#6 -> qualified#5
++FLOWS|REACHING_DEF[union U **] pointer#9 -> pointer#8
++FLOWS|REACHING_DEF[union U *] nested_value#9 -> nested_value#8
+ FLOWS|REACHING_DEF[void *] nested_value#11 -> nested_value#10

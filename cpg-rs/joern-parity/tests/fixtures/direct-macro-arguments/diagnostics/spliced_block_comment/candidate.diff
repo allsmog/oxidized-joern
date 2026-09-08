@@ -1,0 +1,186 @@
+--- joern
++++ candidate
+@@ -1,6 +1,14 @@
+ METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
++
++METHOD NAME=<operator>.multiplication FULL_NAME=<operator>.multiplication ORDER=0
++  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
++  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
++  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
++  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+   METHOD NAME=pick CODE=int pick(int a, int b) { return PICK(a /\\n* ignored , ) *\\n/, b); } FULL_NAME=pick SIGNATURE=int(int,int) ORDER=1
+@@ -10,10 +18,11 @@
+     METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+     BLOCK CODE={ return PICK(a /\\n* ignored , ) *\\n/, b); } TYPE_FULL_NAME=void ORDER=3
+       RETURN CODE=return PICK(a /\\n* ignored , ) *\\n/, b); ORDER=1
+-        CALL NAME=PICK CODE=PICK(a /\\n* ignored , ) *\\n/, b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:PICK:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+-          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+-          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1
++        CALL NAME=<operator>.multiplication CODE=PICK(a /\\n* ignored , ) *\\n/, b TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.multiplication ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++          CALL NAME=PICK CODE=PICK(a /\\n* ignored , ) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:PICK:ANY(2) SIGNATURE=ANY(2) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
++            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1
++          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=pick TYPE_FULL_NAME=pick METHOD_FULL_NAME=pick ORDER=1
+@@ -34,10 +43,11 @@
+   METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+   BLOCK CODE={ return PICK(a /\\n* ignored , ) *\\n/, b); } TYPE_FULL_NAME=void ORDER=3
+     RETURN CODE=return PICK(a /\\n* ignored , ) *\\n/, b); ORDER=1
+-      CALL NAME=PICK CODE=PICK(a /\\n* ignored , ) *\\n/, b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:PICK:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+-        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+-        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1
++      CALL NAME=<operator>.multiplication CODE=PICK(a /\\n* ignored , ) *\\n/, b TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.multiplication ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++        CALL NAME=PICK CODE=PICK(a /\\n* ignored , ) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:PICK:ANY(2) SIGNATURE=ANY(2) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
++          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1
++        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+ 
+ NODES|META_DATA LANGUAGE=NEWC
+@@ -58,19 +68,24 @@
+ NODES|TYPE NAME=pick FULL_NAME=pick TYPE_DECL_FULL_NAME=pick
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT pick#6 -> pick#7
++EDGES|ARGUMENT pick#7 -> pick#11
+ EDGES|ARGUMENT pick#7 -> pick#8
+-EDGES|CALL pick#7 -> main.c:PICK:ANY(2)#0
++EDGES|CALL pick#7 -> <operator>.multiplication#0
++EDGES|CALL pick#8 -> main.c:PICK:ANY(2)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#14
++EDGES|CFG <operator>.multiplication#0 -> <operator>.multiplication#5
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#15
+ EDGES|CFG main.c:<global>#1 -> pick#8
+-EDGES|CFG main.c:<global>#14 -> main.c:<global>#15
++EDGES|CFG main.c:<global>#15 -> main.c:<global>#16
+ EDGES|CFG main.c:PICK:ANY(2)#0 -> main.c:PICK:ANY(2)#6
+-EDGES|CFG pick#10 -> pick#6
+-EDGES|CFG pick#6 -> pick#11
+-EDGES|CFG pick#7 -> pick#10
++EDGES|CFG pick#10 -> pick#11
++EDGES|CFG pick#11 -> pick#7
++EDGES|CFG pick#6 -> pick#12
+ EDGES|CFG pick#7 -> pick#6
+-EDGES|CFG pick#8 -> pick#7
++EDGES|CFG pick#8 -> pick#10
++EDGES|CFG pick#8 -> pick#11
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
++EDGES|CONTAINS <operator>.multiplication#0 -> <operator>.multiplication#2
+ EDGES|CONTAINS D:main.c:<global> -> D:pick
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:PICK:ANY(2)#0
+@@ -80,9 +95,10 @@
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#14
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
+ EDGES|CONTAINS main.c:<global>#1 -> pick#10
++EDGES|CONTAINS main.c:<global>#1 -> pick#11
+ EDGES|CONTAINS main.c:<global>#1 -> pick#5
+ EDGES|CONTAINS main.c:<global>#1 -> pick#6
+ EDGES|CONTAINS main.c:<global>#1 -> pick#7
+@@ -91,9 +107,15 @@
+ EDGES|CONTAINS main.c:PICK:ANY(2)#0 -> main.c:PICK:ANY(2)#5
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#14 -> T:pick
+-EDGES|EVAL_TYPE main.c:<global>#15 -> T:ANY
++EDGES|EVAL_TYPE <operator>.multiplication#1 -> T:ANY
++EDGES|EVAL_TYPE <operator>.multiplication#2 -> T:ANY
++EDGES|EVAL_TYPE <operator>.multiplication#3 -> T:ANY
++EDGES|EVAL_TYPE <operator>.multiplication#4 -> T:ANY
++EDGES|EVAL_TYPE <operator>.multiplication#5 -> T:ANY
++EDGES|EVAL_TYPE <operator>.multiplication#6 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#14 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#15 -> T:pick
++EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+ EDGES|EVAL_TYPE main.c:PICK:ANY(2)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:PICK:ANY(2)#2 -> T:ANY
+ EDGES|EVAL_TYPE main.c:PICK:ANY(2)#3 -> T:ANY
+@@ -103,13 +125,16 @@
+ EDGES|EVAL_TYPE pick#1 -> T:int
+ EDGES|EVAL_TYPE pick#10 -> T:int
+ EDGES|EVAL_TYPE pick#11 -> T:int
++EDGES|EVAL_TYPE pick#12 -> T:int
+ EDGES|EVAL_TYPE pick#2 -> T:int
+ EDGES|EVAL_TYPE pick#3 -> T:int
+ EDGES|EVAL_TYPE pick#4 -> T:int
+ EDGES|EVAL_TYPE pick#5 -> T:void
+ EDGES|EVAL_TYPE pick#7 -> T:ANY
+-EDGES|EVAL_TYPE pick#8 -> T:int
++EDGES|EVAL_TYPE pick#8 -> T:ANY
+ EDGES|EVAL_TYPE pick#9 -> T:ANY
++EDGES|PARAMETER_LINK <operator>.multiplication#1 -> <operator>.multiplication#3
++EDGES|PARAMETER_LINK <operator>.multiplication#4 -> <operator>.multiplication#6
+ EDGES|PARAMETER_LINK main.c:PICK:ANY(2)#1 -> main.c:PICK:ANY(2)#2
+ EDGES|PARAMETER_LINK main.c:PICK:ANY(2)#3 -> main.c:PICK:ANY(2)#4
+ EDGES|PARAMETER_LINK pick#1 -> pick#2
+@@ -121,8 +146,9 @@
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:pick -> D:pick
+ EDGES|REF T:void -> D:void
+-EDGES|REF main.c:<global>#14 -> main.c:<global>#1
++EDGES|REF main.c:<global>#15 -> main.c:<global>#1
+ EDGES|REF pick#10 -> pick#3
++EDGES|REF pick#11 -> pick#3
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+@@ -135,24 +161,35 @@
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+ EDGES|SOURCE_FILE main.c:PICK:ANY(2)#0 -> F:main.c
+-FLOWS|REACHING_DEF[<RET>] pick#6 -> pick#11
+-FLOWS|REACHING_DEF[PICK(a /\\n* ignored , ) *\\n/, b)] pick#7 -> pick#11
+-FLOWS|REACHING_DEF[PICK(a /\\n* ignored , ) *\\n/, b)] pick#7 -> pick#6
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#14
++FLOWS|REACHING_DEF[<RET>] pick#6 -> pick#12
++FLOWS|REACHING_DEF[PICK(a /\\n* ignored , ) *\\n/, b] pick#7 -> pick#12
++FLOWS|REACHING_DEF[PICK(a /\\n* ignored , ) *\\n/, b] pick#7 -> pick#6
++FLOWS|REACHING_DEF[PICK(a /\\n* ignored , )] pick#8 -> pick#11
++FLOWS|REACHING_DEF[PICK(a /\\n* ignored , )] pick#8 -> pick#12
++FLOWS|REACHING_DEF[PICK(a /\\n* ignored , )] pick#8 -> pick#7
++FLOWS|REACHING_DEF[] <operator>.multiplication#0 -> <operator>.multiplication#1
++FLOWS|REACHING_DEF[] <operator>.multiplication#0 -> <operator>.multiplication#4
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#15
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> pick#1
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> pick#10
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> pick#11
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> pick#3
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> pick#8
+ FLOWS|REACHING_DEF[] main.c:PICK:ANY(2)#0 -> main.c:PICK:ANY(2)#1
+ FLOWS|REACHING_DEF[] main.c:PICK:ANY(2)#0 -> main.c:PICK:ANY(2)#3
+-FLOWS|REACHING_DEF[a] pick#1 -> pick#11
++FLOWS|REACHING_DEF[a] pick#1 -> pick#12
+ FLOWS|REACHING_DEF[a] pick#1 -> pick#2
++FLOWS|REACHING_DEF[b] pick#11 -> pick#12
++FLOWS|REACHING_DEF[b] pick#11 -> pick#4
++FLOWS|REACHING_DEF[b] pick#11 -> pick#7
++FLOWS|REACHING_DEF[b] pick#11 -> pick#8
++FLOWS|REACHING_DEF[b] pick#3 -> pick#11
+ FLOWS|REACHING_DEF[b] pick#3 -> pick#4
+-FLOWS|REACHING_DEF[b] pick#3 -> pick#8
+-FLOWS|REACHING_DEF[b] pick#8 -> pick#11
+-FLOWS|REACHING_DEF[b] pick#8 -> pick#4
+-FLOWS|REACHING_DEF[b] pick#8 -> pick#7
++FLOWS|REACHING_DEF[p1] <operator>.multiplication#1 -> <operator>.multiplication#3
++FLOWS|REACHING_DEF[p1] <operator>.multiplication#1 -> <operator>.multiplication#5
+ FLOWS|REACHING_DEF[p1] main.c:PICK:ANY(2)#1 -> main.c:PICK:ANY(2)#2
+ FLOWS|REACHING_DEF[p1] main.c:PICK:ANY(2)#1 -> main.c:PICK:ANY(2)#6
++FLOWS|REACHING_DEF[p2] <operator>.multiplication#4 -> <operator>.multiplication#5
++FLOWS|REACHING_DEF[p2] <operator>.multiplication#4 -> <operator>.multiplication#6
+ FLOWS|REACHING_DEF[p2] main.c:PICK:ANY(2)#3 -> main.c:PICK:ANY(2)#4
+ FLOWS|REACHING_DEF[p2] main.c:PICK:ANY(2)#3 -> main.c:PICK:ANY(2)#6

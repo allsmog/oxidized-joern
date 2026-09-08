@@ -1,0 +1,9 @@
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running tests/field_macros.rs (.local/target/debug/deps/field_macros-3db6291554d97eff)
+
+running 1 test
+test field_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+

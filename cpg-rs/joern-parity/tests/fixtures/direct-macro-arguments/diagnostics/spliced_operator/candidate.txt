@@ -1,0 +1,168 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.unknown FULL_NAME=<operator>.unknown ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=spliced CODE=int spliced(int a,int b) { return APPLY(>\\n>, a, b); } FULL_NAME=spliced SIGNATURE=int(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={ return APPLY(>\\n>, a, b); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return APPLY(>\\n>, a, b); ORDER=1
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1
+          CALL NAME=<operator>.unknown CODE=APPLY(>\\n>, a TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.unknown ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=APPLY CODE=<unknown> APPLY TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=spliced TYPE_FULL_NAME=spliced METHOD_FULL_NAME=spliced ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=spliced CODE=int spliced(int a,int b) { return APPLY(>\\n>, a, b); } FULL_NAME=spliced SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={ return APPLY(>\\n>, a, b); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return APPLY(>\\n>, a, b); ORDER=1
+      BLOCK TYPE_FULL_NAME=ANY ORDER=1
+        CALL NAME=<operator>.unknown CODE=APPLY(>\\n>, a TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.unknown ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=APPLY CODE=<unknown> APPLY TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=spliced FULL_NAME=spliced CODE=spliced AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=spliced FULL_NAME=spliced TYPE_DECL_FULL_NAME=spliced
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT spliced#6 -> spliced#7
+EDGES|ARGUMENT spliced#8 -> spliced#10
+EDGES|ARGUMENT spliced#8 -> spliced#9
+EDGES|CALL spliced#8 -> <operator>.unknown#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.unknown#0 -> <operator>.unknown#5
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#15
+EDGES|CFG main.c:<global>#1 -> spliced#9
+EDGES|CFG main.c:<global>#15 -> main.c:<global>#16
+EDGES|CFG spliced#10 -> spliced#8
+EDGES|CFG spliced#11 -> spliced#6
+EDGES|CFG spliced#6 -> spliced#12
+EDGES|CFG spliced#8 -> spliced#11
+EDGES|CFG spliced#9 -> spliced#10
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.unknown#0 -> <operator>.unknown#2
+EDGES|CONTAINS D:main.c:<global> -> D:spliced
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#14
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
+EDGES|CONTAINS main.c:<global>#1 -> spliced#10
+EDGES|CONTAINS main.c:<global>#1 -> spliced#11
+EDGES|CONTAINS main.c:<global>#1 -> spliced#5
+EDGES|CONTAINS main.c:<global>#1 -> spliced#6
+EDGES|CONTAINS main.c:<global>#1 -> spliced#7
+EDGES|CONTAINS main.c:<global>#1 -> spliced#8
+EDGES|CONTAINS main.c:<global>#1 -> spliced#9
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.unknown#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.unknown#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.unknown#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.unknown#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.unknown#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.unknown#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#14 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#15 -> T:spliced
+EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+EDGES|EVAL_TYPE spliced#1 -> T:int
+EDGES|EVAL_TYPE spliced#10 -> T:int
+EDGES|EVAL_TYPE spliced#11 -> T:int
+EDGES|EVAL_TYPE spliced#12 -> T:int
+EDGES|EVAL_TYPE spliced#2 -> T:int
+EDGES|EVAL_TYPE spliced#3 -> T:int
+EDGES|EVAL_TYPE spliced#4 -> T:int
+EDGES|EVAL_TYPE spliced#5 -> T:void
+EDGES|EVAL_TYPE spliced#7 -> T:ANY
+EDGES|EVAL_TYPE spliced#8 -> T:ANY
+EDGES|EVAL_TYPE spliced#9 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.unknown#1 -> <operator>.unknown#3
+EDGES|PARAMETER_LINK <operator>.unknown#4 -> <operator>.unknown#6
+EDGES|PARAMETER_LINK spliced#1 -> spliced#2
+EDGES|PARAMETER_LINK spliced#3 -> spliced#4
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:spliced -> D:spliced
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#15 -> main.c:<global>#1
+EDGES|REF spliced#10 -> spliced#1
+EDGES|REF spliced#11 -> spliced#3
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:spliced -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] spliced#6 -> spliced#12
+FLOWS|REACHING_DEF[<empty>] spliced#7 -> spliced#6
+FLOWS|REACHING_DEF[<unknown> APPLY] spliced#9 -> spliced#10
+FLOWS|REACHING_DEF[<unknown> APPLY] spliced#9 -> spliced#12
+FLOWS|REACHING_DEF[<unknown> APPLY] spliced#9 -> spliced#8
+FLOWS|REACHING_DEF[APPLY(>\\n>, a] spliced#8 -> spliced#12
+FLOWS|REACHING_DEF[] <operator>.unknown#0 -> <operator>.unknown#1
+FLOWS|REACHING_DEF[] <operator>.unknown#0 -> <operator>.unknown#4
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#15
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> spliced#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> spliced#10
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> spliced#11
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> spliced#3
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> spliced#6
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> spliced#9
+FLOWS|REACHING_DEF[a] spliced#1 -> spliced#10
+FLOWS|REACHING_DEF[a] spliced#1 -> spliced#2
+FLOWS|REACHING_DEF[a] spliced#10 -> spliced#12
+FLOWS|REACHING_DEF[a] spliced#10 -> spliced#2
+FLOWS|REACHING_DEF[a] spliced#10 -> spliced#8
+FLOWS|REACHING_DEF[a] spliced#10 -> spliced#9
+FLOWS|REACHING_DEF[b] spliced#3 -> spliced#12
+FLOWS|REACHING_DEF[b] spliced#3 -> spliced#4
+FLOWS|REACHING_DEF[p1] <operator>.unknown#1 -> <operator>.unknown#3
+FLOWS|REACHING_DEF[p1] <operator>.unknown#1 -> <operator>.unknown#5
+FLOWS|REACHING_DEF[p2] <operator>.unknown#4 -> <operator>.unknown#5
+FLOWS|REACHING_DEF[p2] <operator>.unknown#4 -> <operator>.unknown#6

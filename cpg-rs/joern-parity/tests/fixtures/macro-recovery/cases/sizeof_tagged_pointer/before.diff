@@ -1,0 +1,78 @@
+--- Joern
++++ before
+@@ -12,10 +12,10 @@
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={ return sizeof(struct Tag *); } TYPE_FULL_NAME=void ORDER=2
+-    LOCAL NAME=Tag CODE=struct Tag TYPE_FULL_NAME=Tag ORDER=0
++    LOCAL NAME=struct Tag * CODE=struct Tag * TYPE_FULL_NAME=struct Tag * ORDER=0
+     RETURN CODE=return sizeof(struct Tag *); ORDER=1
+       CALL NAME=<operator>.sizeOf CODE=sizeof(struct Tag *) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-        IDENTIFIER NAME=Tag CODE=struct Tag TYPE_FULL_NAME=Tag ORDER=1 ARGUMENT_INDEX=1
++        IDENTIFIER NAME=struct Tag * CODE=struct Tag * TYPE_FULL_NAME=struct Tag * ORDER=1 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -25,10 +25,10 @@
+     METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={ return sizeof(struct Tag *); } TYPE_FULL_NAME=void ORDER=2
+-      LOCAL NAME=Tag CODE=struct Tag TYPE_FULL_NAME=Tag ORDER=0
++      LOCAL NAME=struct Tag * CODE=struct Tag * TYPE_FULL_NAME=struct Tag * ORDER=0
+       RETURN CODE=return sizeof(struct Tag *); ORDER=1
+         CALL NAME=<operator>.sizeOf CODE=sizeof(struct Tag *) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-          IDENTIFIER NAME=Tag CODE=struct Tag TYPE_FULL_NAME=Tag ORDER=1 ARGUMENT_INDEX=1
++          IDENTIFIER NAME=struct Tag * CODE=struct Tag * TYPE_FULL_NAME=struct Tag * ORDER=1 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     TYPE_REF CODE=struct Tag { int field; } TYPE_FULL_NAME=Tag ORDER=1
+@@ -48,11 +48,13 @@
+ NODES|TYPE_DECL NAME=f FULL_NAME=f CODE=f AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
++NODES|TYPE_DECL NAME=struct Tag * FULL_NAME=struct Tag * CODE=struct Tag * IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=Tag FULL_NAME=Tag TYPE_DECL_FULL_NAME=Tag
+ NODES|TYPE NAME=f FULL_NAME=f TYPE_DECL_FULL_NAME=f
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
++NODES|TYPE NAME=struct Tag * FULL_NAME=struct Tag * TYPE_DECL_FULL_NAME=struct Tag *
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT f#5 -> f#6
+ EDGES|ARGUMENT f#6 -> f#7
+@@ -73,6 +75,7 @@
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:int
++EDGES|CONTAINS F:<includes> -> D:struct Tag *
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS f#0 -> f#3
+@@ -93,9 +96,9 @@
+ EDGES|EVAL_TYPE f#1 -> T:void
+ EDGES|EVAL_TYPE f#2 -> T:void
+ EDGES|EVAL_TYPE f#3 -> T:void
+-EDGES|EVAL_TYPE f#4 -> T:Tag
++EDGES|EVAL_TYPE f#4 -> T:struct Tag *
+ EDGES|EVAL_TYPE f#6 -> T:ANY
+-EDGES|EVAL_TYPE f#7 -> T:Tag
++EDGES|EVAL_TYPE f#7 -> T:struct Tag *
+ EDGES|EVAL_TYPE f#8 -> T:int
+ EDGES|EVAL_TYPE main.c:<global>#12 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#13 -> T:Tag
+@@ -111,6 +114,7 @@
+ EDGES|REF T:Tag -> main.c:<global>#1
+ EDGES|REF T:f -> D:f
+ EDGES|REF T:int -> D:int
++EDGES|REF T:struct Tag * -> D:struct Tag *
+ EDGES|REF T:void -> D:void
+ EDGES|REF f#7 -> f#4
+ EDGES|REF main.c:<global>#14 -> f#0
+@@ -119,6 +123,7 @@
+ EDGES|SOURCE_FILE D:f -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
++EDGES|SOURCE_FILE D:struct Tag * -> F:<includes>
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>

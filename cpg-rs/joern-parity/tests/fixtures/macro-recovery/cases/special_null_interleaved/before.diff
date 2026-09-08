@@ -1,0 +1,44 @@
+--- Joern
++++ before
+@@ -15,8 +15,8 @@
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={ return NULL + unknown + global + NULL; } TYPE_FULL_NAME=void ORDER=2
+     LOCAL NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=0
++    LOCAL NAME=unknown CODE=<unknown> unknown TYPE_FULL_NAME=ANY ORDER=0
+     LOCAL NAME=global CODE=<global> global TYPE_FULL_NAME=int ORDER=0
+-    LOCAL NAME=unknown CODE=<unknown> unknown TYPE_FULL_NAME=ANY ORDER=0
+     RETURN CODE=return NULL + unknown + global + NULL; ORDER=1
+       CALL NAME=<operator>.addition CODE=NULL + unknown + global + NULL TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+         CALL NAME=<operator>.addition CODE=NULL + unknown + global TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -33,8 +33,8 @@
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={ return NULL + unknown + global + NULL; } TYPE_FULL_NAME=void ORDER=2
+       LOCAL NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=0
++      LOCAL NAME=unknown CODE=<unknown> unknown TYPE_FULL_NAME=ANY ORDER=0
+       LOCAL NAME=global CODE=<global> global TYPE_FULL_NAME=int ORDER=0
+-      LOCAL NAME=unknown CODE=<unknown> unknown TYPE_FULL_NAME=ANY ORDER=0
+       RETURN CODE=return NULL + unknown + global + NULL; ORDER=1
+         CALL NAME=<operator>.addition CODE=NULL + unknown + global + NULL TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           CALL NAME=<operator>.addition CODE=NULL + unknown + global TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -128,8 +128,8 @@
+ EDGES|EVAL_TYPE f#2 -> T:void
+ EDGES|EVAL_TYPE f#3 -> T:void
+ EDGES|EVAL_TYPE f#4 -> T:ANY
+-EDGES|EVAL_TYPE f#5 -> T:int
+-EDGES|EVAL_TYPE f#6 -> T:ANY
++EDGES|EVAL_TYPE f#5 -> T:ANY
++EDGES|EVAL_TYPE f#6 -> T:int
+ EDGES|EVAL_TYPE f#8 -> T:ANY
+ EDGES|EVAL_TYPE f#9 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#17 -> T:ANY
+@@ -147,8 +147,8 @@
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+ EDGES|REF f#11 -> f#4
+-EDGES|REF f#12 -> f#6
+-EDGES|REF f#13 -> f#5
++EDGES|REF f#12 -> f#5
++EDGES|REF f#13 -> f#6
+ EDGES|REF f#14 -> f#4
+ EDGES|REF main.c:<global>#19 -> f#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>

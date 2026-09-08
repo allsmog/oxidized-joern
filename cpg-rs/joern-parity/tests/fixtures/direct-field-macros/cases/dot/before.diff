@@ -1,0 +1,28 @@
+--- joern
++++ baseline
+@@ -21,7 +21,7 @@
+       RETURN CODE=return item.Len; ORDER=1
+         CALL NAME=<operator>.fieldAccess CODE=item.Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           IDENTIFIER NAME=item CODE=item TYPE_FULL_NAME=Item ORDER=1 ARGUMENT_INDEX=1
+-          FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
++          FIELD_IDENTIFIER CODE=Len ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     TYPE_REF CODE=struct Item { int len; int code; } TYPE_FULL_NAME=Item ORDER=1
+@@ -35,7 +35,7 @@
+     RETURN CODE=return item.Len; ORDER=1
+       CALL NAME=<operator>.fieldAccess CODE=item.Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=item CODE=item TYPE_FULL_NAME=Item ORDER=1 ARGUMENT_INDEX=1
+-        FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
++        FIELD_IDENTIFIER CODE=Len ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ NODES|META_DATA LANGUAGE=NEWC
+@@ -122,7 +122,6 @@
+ EDGES|REF T:read -> D:read
+ EDGES|REF T:void -> D:void
+ EDGES|REF main.c:<global>#15 -> main.c:<global>#4
+-EDGES|REF read#5 -> main.c:<global>#2
+ EDGES|REF read#6 -> read#1
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>

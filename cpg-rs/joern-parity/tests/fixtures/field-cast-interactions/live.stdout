@@ -1,0 +1,2762 @@
+CASE|cast_index
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/input/cast_index --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/cast_index/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/cast_index/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 10 ms (70% on mutations). 20 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 2 ms (50% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 1 ms (67% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 6 ms (19% on mutations). 34 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 1 ms (66% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 3 ms (45% on mutations). 27 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 2 ms (36% on mutations). 14 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 2 ms (57% on mutations). 43 + 0 changes committed from 23 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 1 ms (49% on mutations). 10 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (45% on mutations). 53 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (32% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 10 ms (4% on mutations). 27 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 3 ms (10% on mutations). 52 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 2 ms (13% on mutations). 7 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (75% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 1 ms (28% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (42% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Could not create edge. Destination lookup failed. edgeType=REF, srcNodeType=CALL, srcNodeId=30064771074, dstNodeType=MEMBER, dstFullName=Item*.values
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 3 ms (7% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (75% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (55% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 6 ms (5% on mutations). 7 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (49% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (73% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: <operator>.indirectFieldAccess in <empty>
+[INFO ] Calculating reaching definitions for: read in main.c
+[INFO ] Calculating reaching definitions for: <operator>.indirectIndexAccess in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.arrayInitializer in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.cast in <empty>
+[INFO ] Calculating reaching definitions for: main.c:Index:ANY(0) in main.c
+[INFO ] Calculating reaching definitions for: Item.<clinit>:Item() in main.c
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Number of definitions for main.c:Index:ANY(0): 0
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for <operator>.indirectIndexAccess: 2
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for <operator>.arrayInitializer: 1
+[INFO ] Number of definitions for <operator>.cast: 2
+[INFO ] Number of definitions for <operator>.indirectFieldAccess: 2
+[INFO ] Number of definitions for Item.<clinit>:Item(): 1
+[INFO ] Number of definitions for read: 9
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 19 ms (2% on mutations). 58 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (72% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectFieldAccess FULL_NAME=<operator>.indirectFieldAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=3
+AST|  BLOCK ORDER=1
+AST|    CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  MODIFIER ORDER=2
+AST|  MODIFIER ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  TYPE_DECL NAME=Item CODE=struct Item { int values[4]; int len; } FULL_NAME=Item ORDER=1
+AST|    MEMBER NAME=values CODE=values[4] TYPE_FULL_NAME=int[4] ORDER=1
+AST|    MEMBER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2
+AST|    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=3
+AST|      BLOCK ORDER=1
+AST|        CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      MODIFIER ORDER=2
+AST|      MODIFIER ORDER=3
+AST|      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+AST|  METHOD NAME=read CODE=int read(struct Item *p, void *q) { return p->Index; } FULL_NAME=read SIGNATURE=int(Item*,void*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|    METHOD_PARAMETER_OUT NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|    BLOCK CODE={ return p->Index; } TYPE_FULL_NAME=void ORDER=3
+AST|      RETURN CODE=return p->Index; ORDER=1
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=p->Index TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.indirectFieldAccess CODE=p->Index TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+AST|            FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=Index CODE=Index TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:Index:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              CALL NAME=<operator>.cast CODE=(int)(long)((U *)q) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                TYPE_REF CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                CALL NAME=<operator>.cast CODE=(long)((U *)q) TYPE_FULL_NAME=long METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  TYPE_REF CODE=long TYPE_FULL_NAME=long ORDER=1 ARGUMENT_INDEX=1
+AST|                  CALL NAME=<operator>.cast CODE=(U *)q TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                    TYPE_REF CODE=U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+AST|                    IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    TYPE_REF CODE=struct Item { int values[4]; int len; } TYPE_FULL_NAME=Item ORDER=1
+AST|    METHOD_REF CODE=read TYPE_FULL_NAME=read METHOD_FULL_NAME=read ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=Index CODE=#define Index values[(int)(long)((union U *)q)] FULL_NAME=main.c:Index:ANY(0) SIGNATURE=ANY(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=read CODE=int read(struct Item *p, void *q) { return p->Index; } FULL_NAME=read SIGNATURE=int(Item*,void*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|  BLOCK CODE={ return p->Index; } TYPE_FULL_NAME=void ORDER=3
+AST|    RETURN CODE=return p->Index; ORDER=1
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=p->Index TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectFieldAccess CODE=p->Index TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+AST|          FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|        CALL NAME=Index CODE=Index TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:Index:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            CALL NAME=<operator>.cast CODE=(int)(long)((U *)q) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|              CALL NAME=<operator>.cast CODE=(long)((U *)q) TYPE_FULL_NAME=long METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                TYPE_REF CODE=long TYPE_FULL_NAME=long ORDER=1 ARGUMENT_INDEX=1
+AST|                CALL NAME=<operator>.cast CODE=(U *)q TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  TYPE_REF CODE=U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+AST|                  IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Item FULL_NAME=Item CODE=struct Item { int values[4]; int len; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=Item* FULL_NAME=Item* CODE=Item* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[4] FULL_NAME=int[4] CODE=int[4] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=long FULL_NAME=long CODE=long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=read FULL_NAME=read CODE=read AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=unionU FULL_NAME=unionU CODE=unionU IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Item FULL_NAME=Item TYPE_DECL_FULL_NAME=Item
+NODES|TYPE NAME=Item* FULL_NAME=Item* TYPE_DECL_FULL_NAME=Item*
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[4] FULL_NAME=int[4] TYPE_DECL_FULL_NAME=int[4]
+NODES|TYPE NAME=long FULL_NAME=long TYPE_DECL_FULL_NAME=long
+NODES|TYPE NAME=read FULL_NAME=read TYPE_DECL_FULL_NAME=read
+NODES|TYPE NAME=unionU FULL_NAME=unionU TYPE_DECL_FULL_NAME=unionU
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+EDGES|ARGUMENT Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#3
+EDGES|ARGUMENT read#13 -> read#14
+EDGES|ARGUMENT read#13 -> read#15
+EDGES|ARGUMENT read#15 -> read#16
+EDGES|ARGUMENT read#15 -> read#17
+EDGES|ARGUMENT read#17 -> read#18
+EDGES|ARGUMENT read#17 -> read#19
+EDGES|ARGUMENT read#6 -> read#7
+EDGES|ARGUMENT read#7 -> read#11
+EDGES|ARGUMENT read#7 -> read#8
+EDGES|ARGUMENT read#8 -> read#10
+EDGES|ARGUMENT read#8 -> read#9
+EDGES|CALL Item.<clinit>:Item()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL read#11 -> main.c:Index:ANY(0)#0
+EDGES|CALL read#13 -> <operator>.cast#0
+EDGES|CALL read#15 -> <operator>.cast#0
+EDGES|CALL read#17 -> <operator>.cast#0
+EDGES|CALL read#7 -> <operator>.indirectIndexAccess#0
+EDGES|CALL read#8 -> <operator>.indirectFieldAccess#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CFG Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+EDGES|CFG Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#33
+EDGES|CFG main.c:<global>#11 -> read#9
+EDGES|CFG main.c:<global>#33 -> main.c:<global>#34
+EDGES|CFG main.c:<global>#34 -> main.c:<global>#35
+EDGES|CFG main.c:Index:ANY(0)#0 -> main.c:Index:ANY(0)#2
+EDGES|CFG read#10 -> read#8
+EDGES|CFG read#11 -> read#14
+EDGES|CFG read#11 -> read#7
+EDGES|CFG read#13 -> read#7
+EDGES|CFG read#14 -> read#16
+EDGES|CFG read#15 -> read#13
+EDGES|CFG read#16 -> read#18
+EDGES|CFG read#17 -> read#15
+EDGES|CFG read#18 -> read#19
+EDGES|CFG read#19 -> read#17
+EDGES|CFG read#6 -> read#20
+EDGES|CFG read#7 -> read#6
+EDGES|CFG read#8 -> read#11
+EDGES|CFG read#9 -> read#10
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS D:main.c:<global> -> D:read
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:Index:ANY(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:Item*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[4]
+EDGES|CONTAINS F:<includes> -> D:long
+EDGES|CONTAINS F:<includes> -> D:unionU
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:void*
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#1
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#2
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#32
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#33
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#34
+EDGES|CONTAINS main.c:<global>#1 -> Item.<clinit>:Item()#0
+EDGES|CONTAINS main.c:<global>#11 -> read#10
+EDGES|CONTAINS main.c:<global>#11 -> read#11
+EDGES|CONTAINS main.c:<global>#11 -> read#12
+EDGES|CONTAINS main.c:<global>#11 -> read#13
+EDGES|CONTAINS main.c:<global>#11 -> read#14
+EDGES|CONTAINS main.c:<global>#11 -> read#15
+EDGES|CONTAINS main.c:<global>#11 -> read#16
+EDGES|CONTAINS main.c:<global>#11 -> read#17
+EDGES|CONTAINS main.c:<global>#11 -> read#18
+EDGES|CONTAINS main.c:<global>#11 -> read#19
+EDGES|CONTAINS main.c:<global>#11 -> read#5
+EDGES|CONTAINS main.c:<global>#11 -> read#6
+EDGES|CONTAINS main.c:<global>#11 -> read#7
+EDGES|CONTAINS main.c:<global>#11 -> read#8
+EDGES|CONTAINS main.c:<global>#11 -> read#9
+EDGES|CONTAINS main.c:Index:ANY(0)#0 -> main.c:Index:ANY(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#2 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#3 -> T:int
+EDGES|EVAL_TYPE Item.<clinit>:Item()#6 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:int[4]
+EDGES|EVAL_TYPE main.c:<global>#3 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#32 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#33 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#34 -> T:read
+EDGES|EVAL_TYPE main.c:<global>#35 -> T:ANY
+EDGES|EVAL_TYPE main.c:Index:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:Index:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE read#1 -> T:Item*
+EDGES|EVAL_TYPE read#11 -> T:ANY
+EDGES|EVAL_TYPE read#12 -> T:ANY
+EDGES|EVAL_TYPE read#13 -> T:int
+EDGES|EVAL_TYPE read#14 -> T:int
+EDGES|EVAL_TYPE read#15 -> T:long
+EDGES|EVAL_TYPE read#16 -> T:long
+EDGES|EVAL_TYPE read#17 -> T:unionU
+EDGES|EVAL_TYPE read#18 -> T:unionU
+EDGES|EVAL_TYPE read#19 -> T:void*
+EDGES|EVAL_TYPE read#2 -> T:Item*
+EDGES|EVAL_TYPE read#20 -> T:int
+EDGES|EVAL_TYPE read#3 -> T:void*
+EDGES|EVAL_TYPE read#4 -> T:void*
+EDGES|EVAL_TYPE read#5 -> T:void
+EDGES|EVAL_TYPE read#7 -> T:ANY
+EDGES|EVAL_TYPE read#8 -> T:ANY
+EDGES|EVAL_TYPE read#9 -> T:Item*
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK read#1 -> read#2
+EDGES|PARAMETER_LINK read#3 -> read#4
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Item -> main.c:<global>#1
+EDGES|REF T:Item* -> D:Item*
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[4] -> D:int[4]
+EDGES|REF T:long -> D:long
+EDGES|REF T:read -> D:read
+EDGES|REF T:unionU -> D:unionU
+EDGES|REF T:void -> D:void
+EDGES|REF T:void* -> D:void*
+EDGES|REF main.c:<global>#34 -> main.c:<global>#11
+EDGES|REF read#19 -> read#3
+EDGES|REF read#9 -> read#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:Item* -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[4] -> F:<includes>
+EDGES|SOURCE_FILE D:long -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:read -> F:main.c
+EDGES|SOURCE_FILE D:unionU -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:void* -> F:<includes>
+EDGES|SOURCE_FILE Item.<clinit>:Item()#0 -> F:main.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#11 -> F:main.c
+EDGES|SOURCE_FILE main.c:Index:ANY(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[(U *)q] read#17 -> read#15
+FLOWS|REACHING_DEF[(U *)q] read#17 -> read#20
+FLOWS|REACHING_DEF[(int)(long)((U *)q)] read#13 -> read#20
+FLOWS|REACHING_DEF[(long)((U *)q)] read#15 -> read#13
+FLOWS|REACHING_DEF[(long)((U *)q)] read#15 -> read#20
+FLOWS|REACHING_DEF[4] Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+FLOWS|REACHING_DEF[<RET>] read#6 -> read#20
+FLOWS|REACHING_DEF[Index] read#11 -> read#20
+FLOWS|REACHING_DEF[U *] read#18 -> read#17
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#33
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#34
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#1
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#11
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#14
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#16
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#18
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#19
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#3
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#6
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#9
+FLOWS|REACHING_DEF[int] read#14 -> read#13
+FLOWS|REACHING_DEF[long] read#16 -> read#15
+FLOWS|REACHING_DEF[p->Index] read#7 -> read#6
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[p] read#1 -> read#2
+FLOWS|REACHING_DEF[p] read#1 -> read#20
+FLOWS|REACHING_DEF[p] read#1 -> read#8
+FLOWS|REACHING_DEF[p] read#1 -> read#9
+FLOWS|REACHING_DEF[q] read#19 -> read#17
+FLOWS|REACHING_DEF[q] read#19 -> read#20
+FLOWS|REACHING_DEF[q] read#19 -> read#4
+FLOWS|REACHING_DEF[q] read#3 -> read#19
+FLOWS|REACHING_DEF[q] read#3 -> read#20
+FLOWS|REACHING_DEF[q] read#3 -> read#4
+FLOWS|REACHING_DEF[values[4]] Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+CASE|cast_receiver
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/input/cast_receiver --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/cast_receiver/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/cast_receiver/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 1 ms (76% on mutations). 17 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 0 ms (78% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (64% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 1 ms (63% on mutations). 34 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (70% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 0 ms (72% on mutations). 24 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 0 ms (54% on mutations). 11 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 1 ms (43% on mutations). 36 + 0 changes committed from 20 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 0 ms (57% on mutations). 7 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (46% on mutations). 47 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (77% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 1 ms (33% on mutations). 23 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 1 ms (37% on mutations). 44 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 0 ms (50% on mutations). 1 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (70% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 0 ms (70% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (72% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (50% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (79% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (71% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 0 ms (63% on mutations). 5 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (77% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (79% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: <operator>.indirectFieldAccess in <empty>
+[INFO ] Calculating reaching definitions for: Item.<clinit>:Item() in main.c
+[INFO ] Calculating reaching definitions for: read in main.c
+[INFO ] Calculating reaching definitions for: <operator>.indirectIndexAccess in <empty>
+[INFO ] Calculating reaching definitions for: main.c:Field:int(0) in main.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: <operator>.cast in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.arrayInitializer in <empty>
+[INFO ] Number of definitions for Item.<clinit>:Item(): 1
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for <operator>.arrayInitializer: 1
+[INFO ] Number of definitions for <operator>.indirectFieldAccess: 2
+[INFO ] Number of definitions for main.c:Field:int(0): 0
+[INFO ] Number of definitions for <operator>.indirectIndexAccess: 2
+[INFO ] Number of definitions for <operator>.cast: 2
+[INFO ] Number of definitions for read: 4
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 3 ms (9% on mutations). 42 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (76% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectFieldAccess FULL_NAME=<operator>.indirectFieldAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=3
+AST|  BLOCK ORDER=1
+AST|    CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  MODIFIER ORDER=2
+AST|  MODIFIER ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  TYPE_DECL NAME=Item CODE=struct Item { int values[4]; int len; } FULL_NAME=Item ORDER=1
+AST|    MEMBER NAME=values CODE=values[4] TYPE_FULL_NAME=int[4] ORDER=1
+AST|    MEMBER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2
+AST|    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=3
+AST|      BLOCK ORDER=1
+AST|        CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      MODIFIER ORDER=2
+AST|      MODIFIER ORDER=3
+AST|      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+AST|  METHOD NAME=read CODE=int read(void *p) { return ((struct Item *)p)->Field; } FULL_NAME=read SIGNATURE=int(void*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|    BLOCK CODE={ return ((struct Item *)p)->Field; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return ((struct Item *)p)->Field; ORDER=1
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=((struct Item *)p)->Field TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.indirectFieldAccess CODE=((struct Item *)p)->Field TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.cast CODE=(struct Item *)p TYPE_FULL_NAME=Item METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=struct Item * TYPE_FULL_NAME=Item ORDER=1 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|            FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=Field CODE=Field TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:Field:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    TYPE_REF CODE=struct Item { int values[4]; int len; } TYPE_FULL_NAME=Item ORDER=1
+AST|    METHOD_REF CODE=read TYPE_FULL_NAME=read METHOD_FULL_NAME=read ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=Field CODE=#define Field values[1] FULL_NAME=main.c:Field:int(0) SIGNATURE=int(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+AST|
+AST|METHOD NAME=read CODE=int read(void *p) { return ((struct Item *)p)->Field; } FULL_NAME=read SIGNATURE=int(void*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|  BLOCK CODE={ return ((struct Item *)p)->Field; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return ((struct Item *)p)->Field; ORDER=1
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=((struct Item *)p)->Field TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectFieldAccess CODE=((struct Item *)p)->Field TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.cast CODE=(struct Item *)p TYPE_FULL_NAME=Item METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            TYPE_REF CODE=struct Item * TYPE_FULL_NAME=Item ORDER=1 ARGUMENT_INDEX=1
+AST|            IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|          FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|        CALL NAME=Field CODE=Field TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:Field:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Item FULL_NAME=Item CODE=struct Item { int values[4]; int len; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[4] FULL_NAME=int[4] CODE=int[4] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=read FULL_NAME=read CODE=read AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Item FULL_NAME=Item TYPE_DECL_FULL_NAME=Item
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[4] FULL_NAME=int[4] TYPE_DECL_FULL_NAME=int[4]
+NODES|TYPE NAME=read FULL_NAME=read TYPE_DECL_FULL_NAME=read
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+EDGES|ARGUMENT Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#3
+EDGES|ARGUMENT read#4 -> read#5
+EDGES|ARGUMENT read#5 -> read#11
+EDGES|ARGUMENT read#5 -> read#6
+EDGES|ARGUMENT read#6 -> read#10
+EDGES|ARGUMENT read#6 -> read#7
+EDGES|ARGUMENT read#7 -> read#8
+EDGES|ARGUMENT read#7 -> read#9
+EDGES|CALL Item.<clinit>:Item()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL read#11 -> main.c:Field:int(0)#0
+EDGES|CALL read#5 -> <operator>.indirectIndexAccess#0
+EDGES|CALL read#6 -> <operator>.indirectFieldAccess#0
+EDGES|CALL read#7 -> <operator>.cast#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CFG Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+EDGES|CFG Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#27
+EDGES|CFG main.c:<global>#11 -> read#8
+EDGES|CFG main.c:<global>#27 -> main.c:<global>#28
+EDGES|CFG main.c:<global>#28 -> main.c:<global>#29
+EDGES|CFG main.c:Field:int(0)#0 -> main.c:Field:int(0)#2
+EDGES|CFG read#10 -> read#6
+EDGES|CFG read#11 -> read#13
+EDGES|CFG read#11 -> read#5
+EDGES|CFG read#13 -> read#5
+EDGES|CFG read#4 -> read#14
+EDGES|CFG read#5 -> read#4
+EDGES|CFG read#6 -> read#11
+EDGES|CFG read#7 -> read#10
+EDGES|CFG read#8 -> read#9
+EDGES|CFG read#9 -> read#7
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS D:main.c:<global> -> D:read
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:Field:int(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[4]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:void*
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#1
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#2
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#26
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#27
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#28
+EDGES|CONTAINS main.c:<global>#1 -> Item.<clinit>:Item()#0
+EDGES|CONTAINS main.c:<global>#11 -> read#10
+EDGES|CONTAINS main.c:<global>#11 -> read#11
+EDGES|CONTAINS main.c:<global>#11 -> read#12
+EDGES|CONTAINS main.c:<global>#11 -> read#13
+EDGES|CONTAINS main.c:<global>#11 -> read#3
+EDGES|CONTAINS main.c:<global>#11 -> read#4
+EDGES|CONTAINS main.c:<global>#11 -> read#5
+EDGES|CONTAINS main.c:<global>#11 -> read#6
+EDGES|CONTAINS main.c:<global>#11 -> read#7
+EDGES|CONTAINS main.c:<global>#11 -> read#8
+EDGES|CONTAINS main.c:<global>#11 -> read#9
+EDGES|CONTAINS main.c:Field:int(0)#0 -> main.c:Field:int(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#2 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#3 -> T:int
+EDGES|EVAL_TYPE Item.<clinit>:Item()#6 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:int[4]
+EDGES|EVAL_TYPE main.c:<global>#26 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#27 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#28 -> T:read
+EDGES|EVAL_TYPE main.c:<global>#29 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#3 -> T:int
+EDGES|EVAL_TYPE main.c:Field:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:Field:int(0)#2 -> T:int
+EDGES|EVAL_TYPE read#1 -> T:void*
+EDGES|EVAL_TYPE read#11 -> T:int
+EDGES|EVAL_TYPE read#12 -> T:ANY
+EDGES|EVAL_TYPE read#13 -> T:int
+EDGES|EVAL_TYPE read#14 -> T:int
+EDGES|EVAL_TYPE read#2 -> T:void*
+EDGES|EVAL_TYPE read#3 -> T:void
+EDGES|EVAL_TYPE read#5 -> T:ANY
+EDGES|EVAL_TYPE read#6 -> T:ANY
+EDGES|EVAL_TYPE read#7 -> T:Item
+EDGES|EVAL_TYPE read#8 -> T:Item
+EDGES|EVAL_TYPE read#9 -> T:void*
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK read#1 -> read#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Item -> main.c:<global>#1
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[4] -> D:int[4]
+EDGES|REF T:read -> D:read
+EDGES|REF T:void -> D:void
+EDGES|REF T:void* -> D:void*
+EDGES|REF main.c:<global>#28 -> main.c:<global>#11
+EDGES|REF read#6 -> main.c:<global>#2
+EDGES|REF read#9 -> read#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[4] -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:read -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:void* -> F:<includes>
+EDGES|SOURCE_FILE Item.<clinit>:Item()#0 -> F:main.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#11 -> F:main.c
+EDGES|SOURCE_FILE main.c:Field:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[((struct Item *)p)->Field] read#5 -> read#4
+FLOWS|REACHING_DEF[(struct Item *)p] read#7 -> read#14
+FLOWS|REACHING_DEF[4] Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+FLOWS|REACHING_DEF[<RET>] read#4 -> read#14
+FLOWS|REACHING_DEF[Field] read#11 -> read#14
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#27
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#28
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#1
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#11
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#13
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#4
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#8
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#9
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[p] read#1 -> read#2
+FLOWS|REACHING_DEF[p] read#1 -> read#9
+FLOWS|REACHING_DEF[p] read#9 -> read#14
+FLOWS|REACHING_DEF[p] read#9 -> read#2
+FLOWS|REACHING_DEF[p] read#9 -> read#7
+FLOWS|REACHING_DEF[struct Item *] read#8 -> read#7
+FLOWS|REACHING_DEF[values[4]] Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+CASE|composite_index
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/input/composite_index --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/composite_index/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/composite_index/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 0 ms (77% on mutations). 18 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 0 ms (74% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (69% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 1 ms (67% on mutations). 41 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (65% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 0 ms (77% on mutations). 30 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 0 ms (54% on mutations). 13 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 0 ms (46% on mutations). 39 + 0 changes committed from 22 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 0 ms (59% on mutations). 8 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 0 ms (45% on mutations). 54 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (75% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 1 ms (35% on mutations). 25 + 0 changes committed from 10 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 1 ms (36% on mutations). 48 + 0 changes committed from 10 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 0 ms (51% on mutations). 4 + 0 changes committed from 10 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (82% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 0 ms (75% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (76% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Could not create edge. Destination lookup failed. edgeType=REF, srcNodeType=CALL, srcNodeId=30064771074, dstNodeType=MEMBER, dstFullName=Item*.values
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (41% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (82% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (71% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 0 ms (66% on mutations). 6 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (82% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (81% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: <operator>.cast in <empty>
+[INFO ] Calculating reaching definitions for: read in main.c
+[INFO ] Calculating reaching definitions for: <operator>.sizeOf in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.arrayInitializer in <empty>
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: <operator>.indirectFieldAccess in <empty>
+[INFO ] Calculating reaching definitions for: Item.<clinit>:Item() in main.c
+[INFO ] Calculating reaching definitions for: <operator>.indirectIndexAccess in <empty>
+[INFO ] Calculating reaching definitions for: main.c:Index:ANY(0) in main.c
+[INFO ] Number of definitions for <operator>.cast: 2
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Number of definitions for <operator>.sizeOf: 1
+[INFO ] Number of definitions for main.c:Index:ANY(0): 0
+[INFO ] Number of definitions for <operator>.indirectFieldAccess: 2
+[INFO ] Number of definitions for Item.<clinit>:Item(): 1
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for <operator>.arrayInitializer: 1
+[INFO ] Number of definitions for <operator>.indirectIndexAccess: 2
+[INFO ] Number of definitions for read: 5
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 2 ms (11% on mutations). 51 + 0 changes committed from 10 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (85% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectFieldAccess FULL_NAME=<operator>.indirectFieldAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.sizeOf FULL_NAME=<operator>.sizeOf ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=3
+AST|  BLOCK ORDER=1
+AST|    CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  MODIFIER ORDER=2
+AST|  MODIFIER ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  TYPE_DECL NAME=Item CODE=struct Item { int values[4]; int len; } FULL_NAME=Item ORDER=1
+AST|    MEMBER NAME=values CODE=values[4] TYPE_FULL_NAME=int[4] ORDER=1
+AST|    MEMBER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2
+AST|    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=3
+AST|      BLOCK ORDER=1
+AST|        CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      MODIFIER ORDER=2
+AST|      MODIFIER ORDER=3
+AST|      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+AST|  METHOD NAME=read CODE=int read(struct Item *p, void *q) { return p->Index; } FULL_NAME=read SIGNATURE=int(Item*,void*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|    METHOD_PARAMETER_OUT NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|    BLOCK CODE={ return p->Index; } TYPE_FULL_NAME=void ORDER=3
+AST|      RETURN CODE=return p->Index; ORDER=1
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=p->Index TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.indirectFieldAccess CODE=p->Index TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+AST|            FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=Index CODE=Index TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:Index:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              CALL NAME=<operator>.sizeOf CODE=sizeof ((int [] (*))q) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                CALL NAME=<operator>.cast CODE=(int [] (*))q TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  TYPE_REF CODE=int [] (*) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                  IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    TYPE_REF CODE=struct Item { int values[4]; int len; } TYPE_FULL_NAME=Item ORDER=1
+AST|    METHOD_REF CODE=read TYPE_FULL_NAME=read METHOD_FULL_NAME=read ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=Index CODE=#define Index values[sizeof((int (*)[sizeof((union U *)q)])q)] FULL_NAME=main.c:Index:ANY(0) SIGNATURE=ANY(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=read CODE=int read(struct Item *p, void *q) { return p->Index; } FULL_NAME=read SIGNATURE=int(Item*,void*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|  BLOCK CODE={ return p->Index; } TYPE_FULL_NAME=void ORDER=3
+AST|    RETURN CODE=return p->Index; ORDER=1
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=p->Index TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectFieldAccess CODE=p->Index TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+AST|          FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|        CALL NAME=Index CODE=Index TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:Index:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            CALL NAME=<operator>.sizeOf CODE=sizeof ((int [] (*))q) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              CALL NAME=<operator>.cast CODE=(int [] (*))q TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                TYPE_REF CODE=int [] (*) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Item FULL_NAME=Item CODE=struct Item { int values[4]; int len; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=Item* FULL_NAME=Item* CODE=Item* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[4] FULL_NAME=int[4] CODE=int[4] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=read FULL_NAME=read CODE=read AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Item FULL_NAME=Item TYPE_DECL_FULL_NAME=Item
+NODES|TYPE NAME=Item* FULL_NAME=Item* TYPE_DECL_FULL_NAME=Item*
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[4] FULL_NAME=int[4] TYPE_DECL_FULL_NAME=int[4]
+NODES|TYPE NAME=read FULL_NAME=read TYPE_DECL_FULL_NAME=read
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+EDGES|ARGUMENT Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#3
+EDGES|ARGUMENT read#13 -> read#14
+EDGES|ARGUMENT read#14 -> read#15
+EDGES|ARGUMENT read#14 -> read#16
+EDGES|ARGUMENT read#6 -> read#7
+EDGES|ARGUMENT read#7 -> read#11
+EDGES|ARGUMENT read#7 -> read#8
+EDGES|ARGUMENT read#8 -> read#10
+EDGES|ARGUMENT read#8 -> read#9
+EDGES|CALL Item.<clinit>:Item()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL read#11 -> main.c:Index:ANY(0)#0
+EDGES|CALL read#13 -> <operator>.sizeOf#0
+EDGES|CALL read#14 -> <operator>.cast#0
+EDGES|CALL read#7 -> <operator>.indirectIndexAccess#0
+EDGES|CALL read#8 -> <operator>.indirectFieldAccess#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG <operator>.sizeOf#0 -> <operator>.sizeOf#4
+EDGES|CFG Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CFG Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+EDGES|CFG Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#30
+EDGES|CFG main.c:<global>#11 -> read#9
+EDGES|CFG main.c:<global>#30 -> main.c:<global>#31
+EDGES|CFG main.c:<global>#31 -> main.c:<global>#32
+EDGES|CFG main.c:Index:ANY(0)#0 -> main.c:Index:ANY(0)#2
+EDGES|CFG read#10 -> read#8
+EDGES|CFG read#11 -> read#15
+EDGES|CFG read#11 -> read#7
+EDGES|CFG read#13 -> read#7
+EDGES|CFG read#14 -> read#13
+EDGES|CFG read#15 -> read#16
+EDGES|CFG read#16 -> read#14
+EDGES|CFG read#6 -> read#17
+EDGES|CFG read#7 -> read#6
+EDGES|CFG read#8 -> read#11
+EDGES|CFG read#9 -> read#10
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS <operator>.sizeOf#0 -> <operator>.sizeOf#2
+EDGES|CONTAINS D:main.c:<global> -> D:read
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:Index:ANY(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:Item*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[4]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:void*
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#1
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#2
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#29
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#30
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#31
+EDGES|CONTAINS main.c:<global>#1 -> Item.<clinit>:Item()#0
+EDGES|CONTAINS main.c:<global>#11 -> read#10
+EDGES|CONTAINS main.c:<global>#11 -> read#11
+EDGES|CONTAINS main.c:<global>#11 -> read#12
+EDGES|CONTAINS main.c:<global>#11 -> read#13
+EDGES|CONTAINS main.c:<global>#11 -> read#14
+EDGES|CONTAINS main.c:<global>#11 -> read#15
+EDGES|CONTAINS main.c:<global>#11 -> read#16
+EDGES|CONTAINS main.c:<global>#11 -> read#5
+EDGES|CONTAINS main.c:<global>#11 -> read#6
+EDGES|CONTAINS main.c:<global>#11 -> read#7
+EDGES|CONTAINS main.c:<global>#11 -> read#8
+EDGES|CONTAINS main.c:<global>#11 -> read#9
+EDGES|CONTAINS main.c:Index:ANY(0)#0 -> main.c:Index:ANY(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.sizeOf#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.sizeOf#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.sizeOf#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.sizeOf#4 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#2 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#3 -> T:int
+EDGES|EVAL_TYPE Item.<clinit>:Item()#6 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:int[4]
+EDGES|EVAL_TYPE main.c:<global>#29 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#3 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#30 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#31 -> T:read
+EDGES|EVAL_TYPE main.c:<global>#32 -> T:ANY
+EDGES|EVAL_TYPE main.c:Index:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:Index:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE read#1 -> T:Item*
+EDGES|EVAL_TYPE read#11 -> T:ANY
+EDGES|EVAL_TYPE read#12 -> T:ANY
+EDGES|EVAL_TYPE read#13 -> T:ANY
+EDGES|EVAL_TYPE read#14 -> T:int
+EDGES|EVAL_TYPE read#15 -> T:int
+EDGES|EVAL_TYPE read#16 -> T:void*
+EDGES|EVAL_TYPE read#17 -> T:int
+EDGES|EVAL_TYPE read#2 -> T:Item*
+EDGES|EVAL_TYPE read#3 -> T:void*
+EDGES|EVAL_TYPE read#4 -> T:void*
+EDGES|EVAL_TYPE read#5 -> T:void
+EDGES|EVAL_TYPE read#7 -> T:ANY
+EDGES|EVAL_TYPE read#8 -> T:ANY
+EDGES|EVAL_TYPE read#9 -> T:Item*
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK <operator>.sizeOf#1 -> <operator>.sizeOf#3
+EDGES|PARAMETER_LINK read#1 -> read#2
+EDGES|PARAMETER_LINK read#3 -> read#4
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Item -> main.c:<global>#1
+EDGES|REF T:Item* -> D:Item*
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[4] -> D:int[4]
+EDGES|REF T:read -> D:read
+EDGES|REF T:void -> D:void
+EDGES|REF T:void* -> D:void*
+EDGES|REF main.c:<global>#31 -> main.c:<global>#11
+EDGES|REF read#16 -> read#3
+EDGES|REF read#9 -> read#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:Item* -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[4] -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:read -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:void* -> F:<includes>
+EDGES|SOURCE_FILE Item.<clinit>:Item()#0 -> F:main.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#11 -> F:main.c
+EDGES|SOURCE_FILE main.c:Index:ANY(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[(int [] (*))q] read#14 -> read#17
+FLOWS|REACHING_DEF[4] Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+FLOWS|REACHING_DEF[<RET>] read#6 -> read#17
+FLOWS|REACHING_DEF[Index] read#11 -> read#17
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] <operator>.sizeOf#0 -> <operator>.sizeOf#1
+FLOWS|REACHING_DEF[] Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#30
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#31
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#1
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#11
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#15
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#16
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#3
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#6
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#9
+FLOWS|REACHING_DEF[p->Index] read#7 -> read#6
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.sizeOf#1 -> <operator>.sizeOf#3
+FLOWS|REACHING_DEF[p1] <operator>.sizeOf#1 -> <operator>.sizeOf#4
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[p] read#1 -> read#17
+FLOWS|REACHING_DEF[p] read#1 -> read#2
+FLOWS|REACHING_DEF[p] read#1 -> read#8
+FLOWS|REACHING_DEF[p] read#1 -> read#9
+FLOWS|REACHING_DEF[q] read#16 -> read#17
+FLOWS|REACHING_DEF[q] read#16 -> read#4
+FLOWS|REACHING_DEF[q] read#3 -> read#16
+FLOWS|REACHING_DEF[q] read#3 -> read#17
+FLOWS|REACHING_DEF[q] read#3 -> read#4
+FLOWS|REACHING_DEF[values[4]] Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+CASE|outer_function
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/input/outer_function --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/outer_function/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/outer_function/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 0 ms (75% on mutations). 20 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 0 ms (84% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (69% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 1 ms (60% on mutations). 34 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (83% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 0 ms (72% on mutations). 30 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 0 ms (56% on mutations). 14 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 0 ms (49% on mutations). 44 + 0 changes committed from 23 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 0 ms (63% on mutations). 10 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 0 ms (47% on mutations). 56 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (80% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 1 ms (36% on mutations). 28 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 1 ms (56% on mutations). 54 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 0 ms (53% on mutations). 11 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (83% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 0 ms (71% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (80% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Could not create edge. Destination lookup failed. edgeType=REF, srcNodeType=CALL, srcNodeId=30064771075, dstNodeType=MEMBER, dstFullName=Item*.values
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (42% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (85% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (76% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 0 ms (69% on mutations). 7 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (85% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (86% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: <operator>.indirectFieldAccess in <empty>
+[INFO ] Calculating reaching definitions for: read in main.c
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: <operator>.cast in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.arrayInitializer in <empty>
+[INFO ] Calculating reaching definitions for: Item.<clinit>:Item() in main.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: <operator>.indirectIndexAccess in <empty>
+[INFO ] Calculating reaching definitions for: main.c:READ:ANY(1) in main.c
+[INFO ] Number of definitions for <operator>.indirectFieldAccess: 2
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for <operator>.cast: 2
+[INFO ] Number of definitions for main.c:READ:ANY(1): 1
+[INFO ] Number of definitions for Item.<clinit>:Item(): 1
+[INFO ] Number of definitions for <operator>.indirectIndexAccess: 2
+[INFO ] Number of definitions for <operator>.arrayInitializer: 1
+[INFO ] Number of definitions for read: 10
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 3 ms (18% on mutations). 62 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (83% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectFieldAccess FULL_NAME=<operator>.indirectFieldAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=3
+AST|  BLOCK ORDER=1
+AST|    CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  MODIFIER ORDER=2
+AST|  MODIFIER ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  TYPE_DECL NAME=Item CODE=struct Item { int values[4]; int len; } FULL_NAME=Item ORDER=1
+AST|    MEMBER NAME=values CODE=values[4] TYPE_FULL_NAME=int[4] ORDER=1
+AST|    MEMBER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2
+AST|    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=3
+AST|      BLOCK ORDER=1
+AST|        CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      MODIFIER ORDER=2
+AST|      MODIFIER ORDER=3
+AST|      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+AST|  METHOD NAME=read CODE=int read(struct Item *p, void *q) { return READ(p); } FULL_NAME=read SIGNATURE=int(Item*,void*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|    METHOD_PARAMETER_OUT NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|    BLOCK CODE={ return READ(p); } TYPE_FULL_NAME=void ORDER=3
+AST|      RETURN CODE=return READ(p); ORDER=1
+AST|        CALL NAME=READ CODE=READ(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:READ:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=<operator>.indirectIndexAccess CODE=(p)->values[(int)(long)((U *)(q))] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              CALL NAME=<operator>.indirectFieldAccess CODE=(p)->values TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+AST|                FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|              CALL NAME=<operator>.cast CODE=(int)(long)((U *)(q)) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                TYPE_REF CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                CALL NAME=<operator>.cast CODE=(long)((U *)(q)) TYPE_FULL_NAME=long METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  TYPE_REF CODE=long TYPE_FULL_NAME=long ORDER=1 ARGUMENT_INDEX=1
+AST|                  CALL NAME=<operator>.cast CODE=(U *)(q) TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                    TYPE_REF CODE=U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+AST|                    IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    TYPE_REF CODE=struct Item { int values[4]; int len; } TYPE_FULL_NAME=Item ORDER=1
+AST|    METHOD_REF CODE=read TYPE_FULL_NAME=read METHOD_FULL_NAME=read ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=READ CODE=#define READ(p) ((p)->Field) FULL_NAME=main.c:READ:ANY(1) SIGNATURE=ANY(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+AST|
+AST|METHOD NAME=read CODE=int read(struct Item *p, void *q) { return READ(p); } FULL_NAME=read SIGNATURE=int(Item*,void*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|  BLOCK CODE={ return READ(p); } TYPE_FULL_NAME=void ORDER=3
+AST|    RETURN CODE=return READ(p); ORDER=1
+AST|      CALL NAME=READ CODE=READ(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:READ:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=<operator>.indirectIndexAccess CODE=(p)->values[(int)(long)((U *)(q))] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.indirectFieldAccess CODE=(p)->values TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+AST|              FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=<operator>.cast CODE=(int)(long)((U *)(q)) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|              CALL NAME=<operator>.cast CODE=(long)((U *)(q)) TYPE_FULL_NAME=long METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                TYPE_REF CODE=long TYPE_FULL_NAME=long ORDER=1 ARGUMENT_INDEX=1
+AST|                CALL NAME=<operator>.cast CODE=(U *)(q) TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  TYPE_REF CODE=U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+AST|                  IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Item FULL_NAME=Item CODE=struct Item { int values[4]; int len; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=Item* FULL_NAME=Item* CODE=Item* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[4] FULL_NAME=int[4] CODE=int[4] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=long FULL_NAME=long CODE=long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=read FULL_NAME=read CODE=read AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=unionU FULL_NAME=unionU CODE=unionU IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Item FULL_NAME=Item TYPE_DECL_FULL_NAME=Item
+NODES|TYPE NAME=Item* FULL_NAME=Item* TYPE_DECL_FULL_NAME=Item*
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[4] FULL_NAME=int[4] TYPE_DECL_FULL_NAME=int[4]
+NODES|TYPE NAME=long FULL_NAME=long TYPE_DECL_FULL_NAME=long
+NODES|TYPE NAME=read FULL_NAME=read TYPE_DECL_FULL_NAME=read
+NODES|TYPE NAME=unionU FULL_NAME=unionU TYPE_DECL_FULL_NAME=unionU
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+EDGES|ARGUMENT Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#3
+EDGES|ARGUMENT read#10 -> read#11
+EDGES|ARGUMENT read#10 -> read#14
+EDGES|ARGUMENT read#11 -> read#12
+EDGES|ARGUMENT read#11 -> read#13
+EDGES|ARGUMENT read#14 -> read#15
+EDGES|ARGUMENT read#14 -> read#16
+EDGES|ARGUMENT read#16 -> read#17
+EDGES|ARGUMENT read#16 -> read#18
+EDGES|ARGUMENT read#18 -> read#19
+EDGES|ARGUMENT read#18 -> read#20
+EDGES|ARGUMENT read#6 -> read#7
+EDGES|ARGUMENT read#7 -> read#8
+EDGES|CALL Item.<clinit>:Item()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL read#10 -> <operator>.indirectIndexAccess#0
+EDGES|CALL read#11 -> <operator>.indirectFieldAccess#0
+EDGES|CALL read#14 -> <operator>.cast#0
+EDGES|CALL read#16 -> <operator>.cast#0
+EDGES|CALL read#18 -> <operator>.cast#0
+EDGES|CALL read#7 -> main.c:READ:ANY(1)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CFG Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+EDGES|CFG Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#34
+EDGES|CFG main.c:<global>#11 -> read#8
+EDGES|CFG main.c:<global>#34 -> main.c:<global>#35
+EDGES|CFG main.c:<global>#35 -> main.c:<global>#36
+EDGES|CFG main.c:READ:ANY(1)#0 -> main.c:READ:ANY(1)#4
+EDGES|CFG read#10 -> read#6
+EDGES|CFG read#11 -> read#15
+EDGES|CFG read#12 -> read#13
+EDGES|CFG read#13 -> read#11
+EDGES|CFG read#14 -> read#10
+EDGES|CFG read#15 -> read#17
+EDGES|CFG read#16 -> read#14
+EDGES|CFG read#17 -> read#19
+EDGES|CFG read#18 -> read#16
+EDGES|CFG read#19 -> read#20
+EDGES|CFG read#20 -> read#18
+EDGES|CFG read#6 -> read#21
+EDGES|CFG read#7 -> read#12
+EDGES|CFG read#7 -> read#6
+EDGES|CFG read#8 -> read#7
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS D:main.c:<global> -> D:read
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:READ:ANY(1)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:Item*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[4]
+EDGES|CONTAINS F:<includes> -> D:long
+EDGES|CONTAINS F:<includes> -> D:unionU
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:void*
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#1
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#2
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#33
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#34
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#35
+EDGES|CONTAINS main.c:<global>#1 -> Item.<clinit>:Item()#0
+EDGES|CONTAINS main.c:<global>#11 -> read#10
+EDGES|CONTAINS main.c:<global>#11 -> read#11
+EDGES|CONTAINS main.c:<global>#11 -> read#12
+EDGES|CONTAINS main.c:<global>#11 -> read#13
+EDGES|CONTAINS main.c:<global>#11 -> read#14
+EDGES|CONTAINS main.c:<global>#11 -> read#15
+EDGES|CONTAINS main.c:<global>#11 -> read#16
+EDGES|CONTAINS main.c:<global>#11 -> read#17
+EDGES|CONTAINS main.c:<global>#11 -> read#18
+EDGES|CONTAINS main.c:<global>#11 -> read#19
+EDGES|CONTAINS main.c:<global>#11 -> read#20
+EDGES|CONTAINS main.c:<global>#11 -> read#5
+EDGES|CONTAINS main.c:<global>#11 -> read#6
+EDGES|CONTAINS main.c:<global>#11 -> read#7
+EDGES|CONTAINS main.c:<global>#11 -> read#8
+EDGES|CONTAINS main.c:<global>#11 -> read#9
+EDGES|CONTAINS main.c:READ:ANY(1)#0 -> main.c:READ:ANY(1)#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#2 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#3 -> T:int
+EDGES|EVAL_TYPE Item.<clinit>:Item()#6 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:int[4]
+EDGES|EVAL_TYPE main.c:<global>#3 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#33 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#34 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#35 -> T:read
+EDGES|EVAL_TYPE main.c:<global>#36 -> T:ANY
+EDGES|EVAL_TYPE main.c:READ:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:READ:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:READ:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:READ:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE read#1 -> T:Item*
+EDGES|EVAL_TYPE read#10 -> T:ANY
+EDGES|EVAL_TYPE read#11 -> T:ANY
+EDGES|EVAL_TYPE read#12 -> T:Item*
+EDGES|EVAL_TYPE read#14 -> T:int
+EDGES|EVAL_TYPE read#15 -> T:int
+EDGES|EVAL_TYPE read#16 -> T:long
+EDGES|EVAL_TYPE read#17 -> T:long
+EDGES|EVAL_TYPE read#18 -> T:unionU
+EDGES|EVAL_TYPE read#19 -> T:unionU
+EDGES|EVAL_TYPE read#2 -> T:Item*
+EDGES|EVAL_TYPE read#20 -> T:void*
+EDGES|EVAL_TYPE read#21 -> T:int
+EDGES|EVAL_TYPE read#3 -> T:void*
+EDGES|EVAL_TYPE read#4 -> T:void*
+EDGES|EVAL_TYPE read#5 -> T:void
+EDGES|EVAL_TYPE read#7 -> T:ANY
+EDGES|EVAL_TYPE read#8 -> T:Item*
+EDGES|EVAL_TYPE read#9 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK main.c:READ:ANY(1)#1 -> main.c:READ:ANY(1)#2
+EDGES|PARAMETER_LINK read#1 -> read#2
+EDGES|PARAMETER_LINK read#3 -> read#4
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Item -> main.c:<global>#1
+EDGES|REF T:Item* -> D:Item*
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[4] -> D:int[4]
+EDGES|REF T:long -> D:long
+EDGES|REF T:read -> D:read
+EDGES|REF T:unionU -> D:unionU
+EDGES|REF T:void -> D:void
+EDGES|REF T:void* -> D:void*
+EDGES|REF main.c:<global>#35 -> main.c:<global>#11
+EDGES|REF read#12 -> read#1
+EDGES|REF read#20 -> read#3
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:Item* -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[4] -> F:<includes>
+EDGES|SOURCE_FILE D:long -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:read -> F:main.c
+EDGES|SOURCE_FILE D:unionU -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:void* -> F:<includes>
+EDGES|SOURCE_FILE Item.<clinit>:Item()#0 -> F:main.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#11 -> F:main.c
+EDGES|SOURCE_FILE main.c:READ:ANY(1)#0 -> F:main.c
+FLOWS|REACHING_DEF[(U *)(q)] read#18 -> read#16
+FLOWS|REACHING_DEF[(U *)(q)] read#18 -> read#21
+FLOWS|REACHING_DEF[(int)(long)((U *)(q))] read#14 -> read#21
+FLOWS|REACHING_DEF[(long)((U *)(q))] read#16 -> read#14
+FLOWS|REACHING_DEF[(long)((U *)(q))] read#16 -> read#21
+FLOWS|REACHING_DEF[4] Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+FLOWS|REACHING_DEF[<RET>] read#6 -> read#21
+FLOWS|REACHING_DEF[READ(p)] read#7 -> read#21
+FLOWS|REACHING_DEF[READ(p)] read#7 -> read#6
+FLOWS|REACHING_DEF[U *] read#19 -> read#18
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#34
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#35
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#1
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#12
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#15
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#17
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#19
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#20
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#3
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#8
+FLOWS|REACHING_DEF[] main.c:READ:ANY(1)#0 -> main.c:READ:ANY(1)#1
+FLOWS|REACHING_DEF[int] read#15 -> read#14
+FLOWS|REACHING_DEF[long] read#17 -> read#16
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p1] main.c:READ:ANY(1)#1 -> main.c:READ:ANY(1)#2
+FLOWS|REACHING_DEF[p1] main.c:READ:ANY(1)#1 -> main.c:READ:ANY(1)#4
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[p] read#1 -> read#2
+FLOWS|REACHING_DEF[p] read#1 -> read#8
+FLOWS|REACHING_DEF[p] read#8 -> read#11
+FLOWS|REACHING_DEF[p] read#8 -> read#12
+FLOWS|REACHING_DEF[p] read#8 -> read#2
+FLOWS|REACHING_DEF[p] read#8 -> read#21
+FLOWS|REACHING_DEF[p] read#8 -> read#7
+FLOWS|REACHING_DEF[q] read#20 -> read#18
+FLOWS|REACHING_DEF[q] read#20 -> read#21
+FLOWS|REACHING_DEF[q] read#20 -> read#4
+FLOWS|REACHING_DEF[q] read#3 -> read#20
+FLOWS|REACHING_DEF[q] read#3 -> read#21
+FLOWS|REACHING_DEF[q] read#3 -> read#4
+FLOWS|REACHING_DEF[values[4]] Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+CASE|sibling_cast_fields
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/input/sibling_cast_fields --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/sibling_cast_fields/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/sibling_cast_fields/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 0 ms (73% on mutations). 22 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 0 ms (82% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (70% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 1 ms (55% on mutations). 43 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (82% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 0 ms (74% on mutations). 33 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 0 ms (55% on mutations). 17 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 3 ms (93% on mutations). 61 + 0 changes committed from 26 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 0 ms (58% on mutations). 11 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 0 ms (49% on mutations). 74 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (79% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 1 ms (38% on mutations). 43 + 0 changes committed from 11 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 1 ms (27% on mutations). 82 + 0 changes committed from 11 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 0 ms (51% on mutations). 14 + 0 changes committed from 11 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (83% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 0 ms (69% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (75% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Could not create edge. Destination lookup failed. edgeType=REF, srcNodeType=CALL, srcNodeId=30064771075, dstNodeType=MEMBER, dstFullName=Item*.values
+[INFO ] Could not create edge. Destination lookup failed. edgeType=REF, srcNodeType=CALL, srcNodeId=30064771081, dstNodeType=MEMBER, dstFullName=Item*.values
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (30% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (81% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (75% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 0 ms (64% on mutations). 14 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (83% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (85% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: <operator>.indirectFieldAccess in <empty>
+[INFO ] Calculating reaching definitions for: read in main.c
+[INFO ] Calculating reaching definitions for: Item.<clinit>:Item() in main.c
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: <operator>.arrayInitializer in <empty>
+[INFO ] Calculating reaching definitions for: main.c:Left:ANY(0) in main.c
+[INFO ] Calculating reaching definitions for: main.c:Right:ANY(0) in main.c
+[INFO ] Calculating reaching definitions for: <operator>.addition in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.indirectIndexAccess in <empty>
+[INFO ] Number of definitions for main.c:Left:ANY(0): 0
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Number of definitions for Item.<clinit>:Item(): 1
+[INFO ] Number of definitions for <operator>.arrayInitializer: 1
+[INFO ] Number of definitions for main.c:Right:ANY(0): 0
+[INFO ] Number of definitions for <operator>.indirectFieldAccess: 2
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for <operator>.indirectIndexAccess: 2
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for <operator>.addition: 2
+[INFO ] Calculating reaching definitions for: <operator>.cast in <empty>
+[INFO ] Number of definitions for <operator>.cast: 2
+[INFO ] Number of definitions for read: 19
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 4 ms (5% on mutations). 90 + 0 changes committed from 11 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (80% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectFieldAccess FULL_NAME=<operator>.indirectFieldAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=3
+AST|  BLOCK ORDER=1
+AST|    CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  MODIFIER ORDER=2
+AST|  MODIFIER ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  TYPE_DECL NAME=Item CODE=struct Item { int values[4]; int len; } FULL_NAME=Item ORDER=1
+AST|    MEMBER NAME=values CODE=values[4] TYPE_FULL_NAME=int[4] ORDER=1
+AST|    MEMBER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2
+AST|    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=3
+AST|      BLOCK ORDER=1
+AST|        CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      MODIFIER ORDER=2
+AST|      MODIFIER ORDER=3
+AST|      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+AST|  METHOD NAME=read CODE=int read(struct Item *p, void *q) { return p->Left + p->Right; } FULL_NAME=read SIGNATURE=int(Item*,void*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|    METHOD_PARAMETER_OUT NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|    BLOCK CODE={ return p->Left + p->Right; } TYPE_FULL_NAME=void ORDER=3
+AST|      RETURN CODE=return p->Left + p->Right; ORDER=1
+AST|        CALL NAME=<operator>.addition CODE=p->Left + p->Right TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.indirectIndexAccess CODE=p->Left TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.indirectFieldAccess CODE=p->Left TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+AST|              FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=Left CODE=Left TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:Left:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|                CALL NAME=<operator>.cast CODE=(int)(long)((U *)q) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  TYPE_REF CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                  CALL NAME=<operator>.cast CODE=(long)((U *)q) TYPE_FULL_NAME=long METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                    TYPE_REF CODE=long TYPE_FULL_NAME=long ORDER=1 ARGUMENT_INDEX=1
+AST|                    CALL NAME=<operator>.cast CODE=(U *)q TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                      TYPE_REF CODE=U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+AST|                      IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=<operator>.indirectIndexAccess CODE=p->Right TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=<operator>.indirectFieldAccess CODE=p->Right TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+AST|              FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=Right CODE=Right TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:Right:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|                CALL NAME=<operator>.cast CODE=(int)(long)((V *)q) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  TYPE_REF CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                  CALL NAME=<operator>.cast CODE=(long)((V *)q) TYPE_FULL_NAME=long METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                    TYPE_REF CODE=long TYPE_FULL_NAME=long ORDER=1 ARGUMENT_INDEX=1
+AST|                    CALL NAME=<operator>.cast CODE=(V *)q TYPE_FULL_NAME=V METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                      TYPE_REF CODE=V * TYPE_FULL_NAME=V ORDER=1 ARGUMENT_INDEX=1
+AST|                      IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    TYPE_REF CODE=struct Item { int values[4]; int len; } TYPE_FULL_NAME=Item ORDER=1
+AST|    METHOD_REF CODE=read TYPE_FULL_NAME=read METHOD_FULL_NAME=read ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=Left CODE=#define Left values[(int)(long)((union U *)q)] FULL_NAME=main.c:Left:ANY(0) SIGNATURE=ANY(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=Right CODE=#define Right values[(int)(long)((struct V *)q)] FULL_NAME=main.c:Right:ANY(0) SIGNATURE=ANY(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=read CODE=int read(struct Item *p, void *q) { return p->Left + p->Right; } FULL_NAME=read SIGNATURE=int(Item*,void*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=q CODE=void *q TYPE_FULL_NAME=void* ORDER=2
+AST|  BLOCK CODE={ return p->Left + p->Right; } TYPE_FULL_NAME=void ORDER=3
+AST|    RETURN CODE=return p->Left + p->Right; ORDER=1
+AST|      CALL NAME=<operator>.addition CODE=p->Left + p->Right TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=p->Left TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.indirectFieldAccess CODE=p->Left TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+AST|            FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=Left CODE=Left TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:Left:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              CALL NAME=<operator>.cast CODE=(int)(long)((U *)q) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                TYPE_REF CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                CALL NAME=<operator>.cast CODE=(long)((U *)q) TYPE_FULL_NAME=long METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  TYPE_REF CODE=long TYPE_FULL_NAME=long ORDER=1 ARGUMENT_INDEX=1
+AST|                  CALL NAME=<operator>.cast CODE=(U *)q TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                    TYPE_REF CODE=U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+AST|                    IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=p->Right TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.indirectFieldAccess CODE=p->Right TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+AST|            FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=Right CODE=Right TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:Right:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              CALL NAME=<operator>.cast CODE=(int)(long)((V *)q) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                TYPE_REF CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|                CALL NAME=<operator>.cast CODE=(long)((V *)q) TYPE_FULL_NAME=long METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                  TYPE_REF CODE=long TYPE_FULL_NAME=long ORDER=1 ARGUMENT_INDEX=1
+AST|                  CALL NAME=<operator>.cast CODE=(V *)q TYPE_FULL_NAME=V METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                    TYPE_REF CODE=V * TYPE_FULL_NAME=V ORDER=1 ARGUMENT_INDEX=1
+AST|                    IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Item FULL_NAME=Item CODE=struct Item { int values[4]; int len; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=Item* FULL_NAME=Item* CODE=Item* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=V FULL_NAME=V CODE=V IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[4] FULL_NAME=int[4] CODE=int[4] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=long FULL_NAME=long CODE=long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=read FULL_NAME=read CODE=read AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=unionU FULL_NAME=unionU CODE=unionU IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Item FULL_NAME=Item TYPE_DECL_FULL_NAME=Item
+NODES|TYPE NAME=Item* FULL_NAME=Item* TYPE_DECL_FULL_NAME=Item*
+NODES|TYPE NAME=V FULL_NAME=V TYPE_DECL_FULL_NAME=V
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[4] FULL_NAME=int[4] TYPE_DECL_FULL_NAME=int[4]
+NODES|TYPE NAME=long FULL_NAME=long TYPE_DECL_FULL_NAME=long
+NODES|TYPE NAME=read FULL_NAME=read TYPE_DECL_FULL_NAME=read
+NODES|TYPE NAME=unionU FULL_NAME=unionU TYPE_DECL_FULL_NAME=unionU
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+EDGES|ARGUMENT Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#3
+EDGES|ARGUMENT read#14 -> read#15
+EDGES|ARGUMENT read#14 -> read#16
+EDGES|ARGUMENT read#16 -> read#17
+EDGES|ARGUMENT read#16 -> read#18
+EDGES|ARGUMENT read#18 -> read#19
+EDGES|ARGUMENT read#18 -> read#20
+EDGES|ARGUMENT read#21 -> read#22
+EDGES|ARGUMENT read#21 -> read#25
+EDGES|ARGUMENT read#22 -> read#23
+EDGES|ARGUMENT read#22 -> read#24
+EDGES|ARGUMENT read#27 -> read#28
+EDGES|ARGUMENT read#27 -> read#29
+EDGES|ARGUMENT read#29 -> read#30
+EDGES|ARGUMENT read#29 -> read#31
+EDGES|ARGUMENT read#31 -> read#32
+EDGES|ARGUMENT read#31 -> read#33
+EDGES|ARGUMENT read#6 -> read#7
+EDGES|ARGUMENT read#7 -> read#21
+EDGES|ARGUMENT read#7 -> read#8
+EDGES|ARGUMENT read#8 -> read#12
+EDGES|ARGUMENT read#8 -> read#9
+EDGES|ARGUMENT read#9 -> read#10
+EDGES|ARGUMENT read#9 -> read#11
+EDGES|CALL Item.<clinit>:Item()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL read#12 -> main.c:Left:ANY(0)#0
+EDGES|CALL read#14 -> <operator>.cast#0
+EDGES|CALL read#16 -> <operator>.cast#0
+EDGES|CALL read#18 -> <operator>.cast#0
+EDGES|CALL read#21 -> <operator>.indirectIndexAccess#0
+EDGES|CALL read#22 -> <operator>.indirectFieldAccess#0
+EDGES|CALL read#25 -> main.c:Right:ANY(0)#0
+EDGES|CALL read#27 -> <operator>.cast#0
+EDGES|CALL read#29 -> <operator>.cast#0
+EDGES|CALL read#31 -> <operator>.cast#0
+EDGES|CALL read#7 -> <operator>.addition#0
+EDGES|CALL read#8 -> <operator>.indirectIndexAccess#0
+EDGES|CALL read#9 -> <operator>.indirectFieldAccess#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CFG Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+EDGES|CFG Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#47
+EDGES|CFG main.c:<global>#11 -> read#10
+EDGES|CFG main.c:<global>#47 -> main.c:<global>#48
+EDGES|CFG main.c:<global>#48 -> main.c:<global>#49
+EDGES|CFG main.c:Left:ANY(0)#0 -> main.c:Left:ANY(0)#2
+EDGES|CFG main.c:Right:ANY(0)#0 -> main.c:Right:ANY(0)#2
+EDGES|CFG read#10 -> read#11
+EDGES|CFG read#11 -> read#9
+EDGES|CFG read#12 -> read#15
+EDGES|CFG read#12 -> read#8
+EDGES|CFG read#14 -> read#8
+EDGES|CFG read#15 -> read#17
+EDGES|CFG read#16 -> read#14
+EDGES|CFG read#17 -> read#19
+EDGES|CFG read#18 -> read#16
+EDGES|CFG read#19 -> read#20
+EDGES|CFG read#20 -> read#18
+EDGES|CFG read#21 -> read#7
+EDGES|CFG read#22 -> read#25
+EDGES|CFG read#23 -> read#24
+EDGES|CFG read#24 -> read#22
+EDGES|CFG read#25 -> read#21
+EDGES|CFG read#25 -> read#28
+EDGES|CFG read#27 -> read#21
+EDGES|CFG read#28 -> read#30
+EDGES|CFG read#29 -> read#27
+EDGES|CFG read#30 -> read#32
+EDGES|CFG read#31 -> read#29
+EDGES|CFG read#32 -> read#33
+EDGES|CFG read#33 -> read#31
+EDGES|CFG read#6 -> read#34
+EDGES|CFG read#7 -> read#6
+EDGES|CFG read#8 -> read#23
+EDGES|CFG read#9 -> read#12
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS D:main.c:<global> -> D:read
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:Left:ANY(0)#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:Right:ANY(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:Item*
+EDGES|CONTAINS F:<includes> -> D:V
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[4]
+EDGES|CONTAINS F:<includes> -> D:long
+EDGES|CONTAINS F:<includes> -> D:unionU
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:void*
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#1
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#2
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#46
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#47
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#48
+EDGES|CONTAINS main.c:<global>#1 -> Item.<clinit>:Item()#0
+EDGES|CONTAINS main.c:<global>#11 -> read#10
+EDGES|CONTAINS main.c:<global>#11 -> read#11
+EDGES|CONTAINS main.c:<global>#11 -> read#12
+EDGES|CONTAINS main.c:<global>#11 -> read#13
+EDGES|CONTAINS main.c:<global>#11 -> read#14
+EDGES|CONTAINS main.c:<global>#11 -> read#15
+EDGES|CONTAINS main.c:<global>#11 -> read#16
+EDGES|CONTAINS main.c:<global>#11 -> read#17
+EDGES|CONTAINS main.c:<global>#11 -> read#18
+EDGES|CONTAINS main.c:<global>#11 -> read#19
+EDGES|CONTAINS main.c:<global>#11 -> read#20
+EDGES|CONTAINS main.c:<global>#11 -> read#21
+EDGES|CONTAINS main.c:<global>#11 -> read#22
+EDGES|CONTAINS main.c:<global>#11 -> read#23
+EDGES|CONTAINS main.c:<global>#11 -> read#24
+EDGES|CONTAINS main.c:<global>#11 -> read#25
+EDGES|CONTAINS main.c:<global>#11 -> read#26
+EDGES|CONTAINS main.c:<global>#11 -> read#27
+EDGES|CONTAINS main.c:<global>#11 -> read#28
+EDGES|CONTAINS main.c:<global>#11 -> read#29
+EDGES|CONTAINS main.c:<global>#11 -> read#30
+EDGES|CONTAINS main.c:<global>#11 -> read#31
+EDGES|CONTAINS main.c:<global>#11 -> read#32
+EDGES|CONTAINS main.c:<global>#11 -> read#33
+EDGES|CONTAINS main.c:<global>#11 -> read#5
+EDGES|CONTAINS main.c:<global>#11 -> read#6
+EDGES|CONTAINS main.c:<global>#11 -> read#7
+EDGES|CONTAINS main.c:<global>#11 -> read#8
+EDGES|CONTAINS main.c:<global>#11 -> read#9
+EDGES|CONTAINS main.c:Left:ANY(0)#0 -> main.c:Left:ANY(0)#1
+EDGES|CONTAINS main.c:Right:ANY(0)#0 -> main.c:Right:ANY(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#2 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#3 -> T:int
+EDGES|EVAL_TYPE Item.<clinit>:Item()#6 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:int[4]
+EDGES|EVAL_TYPE main.c:<global>#3 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#46 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#47 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#48 -> T:read
+EDGES|EVAL_TYPE main.c:<global>#49 -> T:ANY
+EDGES|EVAL_TYPE main.c:Left:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:Left:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:Right:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:Right:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE read#1 -> T:Item*
+EDGES|EVAL_TYPE read#10 -> T:Item*
+EDGES|EVAL_TYPE read#12 -> T:ANY
+EDGES|EVAL_TYPE read#13 -> T:ANY
+EDGES|EVAL_TYPE read#14 -> T:int
+EDGES|EVAL_TYPE read#15 -> T:int
+EDGES|EVAL_TYPE read#16 -> T:long
+EDGES|EVAL_TYPE read#17 -> T:long
+EDGES|EVAL_TYPE read#18 -> T:unionU
+EDGES|EVAL_TYPE read#19 -> T:unionU
+EDGES|EVAL_TYPE read#2 -> T:Item*
+EDGES|EVAL_TYPE read#20 -> T:void*
+EDGES|EVAL_TYPE read#21 -> T:ANY
+EDGES|EVAL_TYPE read#22 -> T:ANY
+EDGES|EVAL_TYPE read#23 -> T:Item*
+EDGES|EVAL_TYPE read#25 -> T:ANY
+EDGES|EVAL_TYPE read#26 -> T:ANY
+EDGES|EVAL_TYPE read#27 -> T:int
+EDGES|EVAL_TYPE read#28 -> T:int
+EDGES|EVAL_TYPE read#29 -> T:long
+EDGES|EVAL_TYPE read#3 -> T:void*
+EDGES|EVAL_TYPE read#30 -> T:long
+EDGES|EVAL_TYPE read#31 -> T:V
+EDGES|EVAL_TYPE read#32 -> T:V
+EDGES|EVAL_TYPE read#33 -> T:void*
+EDGES|EVAL_TYPE read#34 -> T:int
+EDGES|EVAL_TYPE read#4 -> T:void*
+EDGES|EVAL_TYPE read#5 -> T:void
+EDGES|EVAL_TYPE read#7 -> T:ANY
+EDGES|EVAL_TYPE read#8 -> T:ANY
+EDGES|EVAL_TYPE read#9 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK read#1 -> read#2
+EDGES|PARAMETER_LINK read#3 -> read#4
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Item -> main.c:<global>#1
+EDGES|REF T:Item* -> D:Item*
+EDGES|REF T:V -> D:V
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[4] -> D:int[4]
+EDGES|REF T:long -> D:long
+EDGES|REF T:read -> D:read
+EDGES|REF T:unionU -> D:unionU
+EDGES|REF T:void -> D:void
+EDGES|REF T:void* -> D:void*
+EDGES|REF main.c:<global>#48 -> main.c:<global>#11
+EDGES|REF read#10 -> read#1
+EDGES|REF read#20 -> read#3
+EDGES|REF read#23 -> read#1
+EDGES|REF read#33 -> read#3
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:Item* -> F:<includes>
+EDGES|SOURCE_FILE D:V -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[4] -> F:<includes>
+EDGES|SOURCE_FILE D:long -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:read -> F:main.c
+EDGES|SOURCE_FILE D:unionU -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:void* -> F:<includes>
+EDGES|SOURCE_FILE Item.<clinit>:Item()#0 -> F:main.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#11 -> F:main.c
+EDGES|SOURCE_FILE main.c:Left:ANY(0)#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:Right:ANY(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[(U *)q] read#18 -> read#16
+FLOWS|REACHING_DEF[(U *)q] read#18 -> read#34
+FLOWS|REACHING_DEF[(V *)q] read#31 -> read#29
+FLOWS|REACHING_DEF[(V *)q] read#31 -> read#34
+FLOWS|REACHING_DEF[(int)(long)((U *)q)] read#14 -> read#34
+FLOWS|REACHING_DEF[(int)(long)((V *)q)] read#27 -> read#34
+FLOWS|REACHING_DEF[(long)((U *)q)] read#16 -> read#14
+FLOWS|REACHING_DEF[(long)((U *)q)] read#16 -> read#34
+FLOWS|REACHING_DEF[(long)((V *)q)] read#29 -> read#27
+FLOWS|REACHING_DEF[(long)((V *)q)] read#29 -> read#34
+FLOWS|REACHING_DEF[4] Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+FLOWS|REACHING_DEF[<RET>] read#6 -> read#34
+FLOWS|REACHING_DEF[Left] read#12 -> read#34
+FLOWS|REACHING_DEF[Right] read#25 -> read#34
+FLOWS|REACHING_DEF[U *] read#19 -> read#18
+FLOWS|REACHING_DEF[V *] read#32 -> read#31
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#47
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#48
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#1
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#10
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#12
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#15
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#17
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#19
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#20
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#23
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#25
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#28
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#3
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#30
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#32
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#33
+FLOWS|REACHING_DEF[int] read#15 -> read#14
+FLOWS|REACHING_DEF[int] read#28 -> read#27
+FLOWS|REACHING_DEF[long] read#17 -> read#16
+FLOWS|REACHING_DEF[long] read#30 -> read#29
+FLOWS|REACHING_DEF[p->Left + p->Right] read#7 -> read#34
+FLOWS|REACHING_DEF[p->Left + p->Right] read#7 -> read#6
+FLOWS|REACHING_DEF[p->Left] read#8 -> read#34
+FLOWS|REACHING_DEF[p->Left] read#8 -> read#7
+FLOWS|REACHING_DEF[p->Right] read#21 -> read#34
+FLOWS|REACHING_DEF[p->Right] read#21 -> read#7
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[p] read#1 -> read#10
+FLOWS|REACHING_DEF[p] read#1 -> read#2
+FLOWS|REACHING_DEF[p] read#1 -> read#22
+FLOWS|REACHING_DEF[p] read#1 -> read#23
+FLOWS|REACHING_DEF[p] read#1 -> read#34
+FLOWS|REACHING_DEF[p] read#1 -> read#9
+FLOWS|REACHING_DEF[q] read#20 -> read#18
+FLOWS|REACHING_DEF[q] read#20 -> read#33
+FLOWS|REACHING_DEF[q] read#20 -> read#34
+FLOWS|REACHING_DEF[q] read#20 -> read#4
+FLOWS|REACHING_DEF[q] read#3 -> read#20
+FLOWS|REACHING_DEF[q] read#3 -> read#33
+FLOWS|REACHING_DEF[q] read#3 -> read#34
+FLOWS|REACHING_DEF[q] read#3 -> read#4
+FLOWS|REACHING_DEF[q] read#33 -> read#31
+FLOWS|REACHING_DEF[q] read#33 -> read#34
+FLOWS|REACHING_DEF[q] read#33 -> read#4
+FLOWS|REACHING_DEF[values[4]] Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+CASE|unicode_receiver
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/input/unicode_receiver --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/unicode_receiver/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/unicode_receiver/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 0 ms (72% on mutations). 18 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 0 ms (65% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (67% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 1 ms (66% on mutations). 32 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (86% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 0 ms (80% on mutations). 21 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 0 ms (62% on mutations). 12 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 0 ms (48% on mutations). 36 + 0 changes committed from 21 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 0 ms (59% on mutations). 8 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 0 ms (46% on mutations). 45 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (81% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 0 ms (35% on mutations). 22 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 0 ms (41% on mutations). 42 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 0 ms (58% on mutations). 1 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (85% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 0 ms (78% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (79% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Could not create edge. Destination lookup failed. edgeType=REF, srcNodeType=CALL, srcNodeId=30064771074, dstNodeType=MEMBER, dstFullName=Item*.values
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (45% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (83% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (73% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 0 ms (71% on mutations). 5 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (87% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (86% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: éM in <empty>
+[INFO ] Calculating reaching definitions for: read in main.c
+[INFO ] Calculating reaching definitions for: <operator>.indirectFieldAccess in <empty>
+[INFO ] Calculating reaching definitions for: Item.<clinit>:Item() in main.c
+[INFO ] Calculating reaching definitions for: main.c:Field:int(0) in main.c
+[INFO ] Calculating reaching definitions for: <operator>.indirectIndexAccess in <empty>
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: <operator>.arrayInitializer in <empty>
+[INFO ] Number of definitions for éM: 1
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for <operator>.arrayInitializer: 1
+[INFO ] Number of definitions for <operator>.indirectIndexAccess: 2
+[INFO ] Number of definitions for <operator>.indirectFieldAccess: 2
+[INFO ] Number of definitions for read: 4
+[INFO ] Number of definitions for Item.<clinit>:Item(): 1
+[INFO ] Number of definitions for main.c:Field:int(0): 0
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 1 ms (12% on mutations). 37 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (85% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectFieldAccess FULL_NAME=<operator>.indirectFieldAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=3
+AST|  BLOCK ORDER=1
+AST|    CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  MODIFIER ORDER=2
+AST|  MODIFIER ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  TYPE_DECL NAME=Item CODE=struct Item { int values[4]; int len; } FULL_NAME=Item ORDER=1
+AST|    MEMBER NAME=values CODE=values[4] TYPE_FULL_NAME=int[4] ORDER=1
+AST|    MEMBER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2
+AST|    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Item.<clinit>:Item() ORDER=3
+AST|      BLOCK ORDER=1
+AST|        CALL NAME=<operator>.arrayInitializer CODE=values[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      MODIFIER ORDER=2
+AST|      MODIFIER ORDER=3
+AST|      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
+AST|  METHOD NAME=read CODE=int read(int n) { return éM(n)->Field; } FULL_NAME=read SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return éM(n)->Field; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return éM(n)->Field; ORDER=1
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=éM(n)->Field TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.indirectFieldAccess CODE=éM(n)->Field TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=éM CODE=éM(n) TYPE_FULL_NAME=Item* METHOD_FULL_NAME=éM ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=Field CODE=Field TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:Field:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    TYPE_REF CODE=struct Item { int values[4]; int len; } TYPE_FULL_NAME=Item ORDER=1
+AST|    LOCAL NAME=éM CODE=struct Item *éM(int n) TYPE_FULL_NAME=Item* ORDER=2
+AST|    METHOD_REF CODE=read TYPE_FULL_NAME=read METHOD_FULL_NAME=read ORDER=3
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=Field CODE=#define Field values[1] FULL_NAME=main.c:Field:int(0) SIGNATURE=int(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+AST|
+AST|METHOD NAME=read CODE=int read(int n) { return éM(n)->Field; } FULL_NAME=read SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return éM(n)->Field; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return éM(n)->Field; ORDER=1
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=éM(n)->Field TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectFieldAccess CODE=éM(n)->Field TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=éM CODE=éM(n) TYPE_FULL_NAME=Item* METHOD_FULL_NAME=éM ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          FIELD_IDENTIFIER CODE=values ORDER=2 ARGUMENT_INDEX=2
+AST|        CALL NAME=Field CODE=Field TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:Field:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=éM FULL_NAME=éM ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Item FULL_NAME=Item CODE=struct Item { int values[4]; int len; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=Item* FULL_NAME=Item* CODE=Item* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[4] FULL_NAME=int[4] CODE=int[4] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=read FULL_NAME=read CODE=read AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=éM FULL_NAME=éM CODE=éM IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Item FULL_NAME=Item TYPE_DECL_FULL_NAME=Item
+NODES|TYPE NAME=Item* FULL_NAME=Item* TYPE_DECL_FULL_NAME=Item*
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[4] FULL_NAME=int[4] TYPE_DECL_FULL_NAME=int[4]
+NODES|TYPE NAME=read FULL_NAME=read TYPE_DECL_FULL_NAME=read
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=éM FULL_NAME=éM TYPE_DECL_FULL_NAME=éM
+EDGES|ARGUMENT Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#3
+EDGES|ARGUMENT read#4 -> read#5
+EDGES|ARGUMENT read#5 -> read#10
+EDGES|ARGUMENT read#5 -> read#6
+EDGES|ARGUMENT read#6 -> read#7
+EDGES|ARGUMENT read#6 -> read#9
+EDGES|ARGUMENT read#7 -> read#8
+EDGES|CALL Item.<clinit>:Item()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL read#10 -> main.c:Field:int(0)#0
+EDGES|CALL read#5 -> <operator>.indirectIndexAccess#0
+EDGES|CALL read#6 -> <operator>.indirectFieldAccess#0
+EDGES|CALL read#7 -> éM#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CFG Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+EDGES|CFG Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#26
+EDGES|CFG main.c:<global>#11 -> read#8
+EDGES|CFG main.c:<global>#26 -> main.c:<global>#28
+EDGES|CFG main.c:<global>#28 -> main.c:<global>#29
+EDGES|CFG main.c:Field:int(0)#0 -> main.c:Field:int(0)#2
+EDGES|CFG read#10 -> read#12
+EDGES|CFG read#10 -> read#5
+EDGES|CFG read#12 -> read#5
+EDGES|CFG read#4 -> read#13
+EDGES|CFG read#5 -> read#4
+EDGES|CFG read#6 -> read#10
+EDGES|CFG read#7 -> read#9
+EDGES|CFG read#8 -> read#7
+EDGES|CFG read#9 -> read#6
+EDGES|CFG éM#0 -> éM#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS D:main.c:<global> -> D:read
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:Field:int(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:Item*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[4]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:éM
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#1
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#2
+EDGES|CONTAINS Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#25
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#26
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#28
+EDGES|CONTAINS main.c:<global>#1 -> Item.<clinit>:Item()#0
+EDGES|CONTAINS main.c:<global>#11 -> read#10
+EDGES|CONTAINS main.c:<global>#11 -> read#11
+EDGES|CONTAINS main.c:<global>#11 -> read#12
+EDGES|CONTAINS main.c:<global>#11 -> read#3
+EDGES|CONTAINS main.c:<global>#11 -> read#4
+EDGES|CONTAINS main.c:<global>#11 -> read#5
+EDGES|CONTAINS main.c:<global>#11 -> read#6
+EDGES|CONTAINS main.c:<global>#11 -> read#7
+EDGES|CONTAINS main.c:<global>#11 -> read#8
+EDGES|CONTAINS main.c:<global>#11 -> read#9
+EDGES|CONTAINS main.c:Field:int(0)#0 -> main.c:Field:int(0)#1
+EDGES|CONTAINS éM#0 -> éM#2
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#2 -> T:ANY
+EDGES|EVAL_TYPE Item.<clinit>:Item()#3 -> T:int
+EDGES|EVAL_TYPE Item.<clinit>:Item()#6 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:int[4]
+EDGES|EVAL_TYPE main.c:<global>#25 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#26 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#27 -> T:Item*
+EDGES|EVAL_TYPE main.c:<global>#28 -> T:read
+EDGES|EVAL_TYPE main.c:<global>#29 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#3 -> T:int
+EDGES|EVAL_TYPE main.c:Field:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:Field:int(0)#2 -> T:int
+EDGES|EVAL_TYPE read#1 -> T:int
+EDGES|EVAL_TYPE read#10 -> T:int
+EDGES|EVAL_TYPE read#11 -> T:ANY
+EDGES|EVAL_TYPE read#12 -> T:int
+EDGES|EVAL_TYPE read#13 -> T:int
+EDGES|EVAL_TYPE read#2 -> T:int
+EDGES|EVAL_TYPE read#3 -> T:void
+EDGES|EVAL_TYPE read#5 -> T:ANY
+EDGES|EVAL_TYPE read#6 -> T:ANY
+EDGES|EVAL_TYPE read#7 -> T:Item*
+EDGES|EVAL_TYPE read#8 -> T:int
+EDGES|EVAL_TYPE éM#1 -> T:ANY
+EDGES|EVAL_TYPE éM#2 -> T:ANY
+EDGES|EVAL_TYPE éM#3 -> T:ANY
+EDGES|EVAL_TYPE éM#4 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK read#1 -> read#2
+EDGES|PARAMETER_LINK éM#1 -> éM#3
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Item -> main.c:<global>#1
+EDGES|REF T:Item* -> D:Item*
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[4] -> D:int[4]
+EDGES|REF T:read -> D:read
+EDGES|REF T:void -> D:void
+EDGES|REF T:éM -> D:éM
+EDGES|REF main.c:<global>#28 -> main.c:<global>#11
+EDGES|REF read#8 -> read#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:Item* -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[4] -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:read -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:éM -> F:<includes>
+EDGES|SOURCE_FILE Item.<clinit>:Item()#0 -> F:main.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#11 -> F:main.c
+EDGES|SOURCE_FILE main.c:Field:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[4] Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+FLOWS|REACHING_DEF[<RET>] read#4 -> read#13
+FLOWS|REACHING_DEF[Field] read#10 -> read#13
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] Item.<clinit>:Item()#0 -> Item.<clinit>:Item()#3
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#26
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#28
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#1
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#10
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#12
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#4
+FLOWS|REACHING_DEF[] main.c:<global>#11 -> read#8
+FLOWS|REACHING_DEF[] éM#0 -> éM#1
+FLOWS|REACHING_DEF[n] read#1 -> read#2
+FLOWS|REACHING_DEF[n] read#1 -> read#8
+FLOWS|REACHING_DEF[n] read#8 -> read#13
+FLOWS|REACHING_DEF[n] read#8 -> read#2
+FLOWS|REACHING_DEF[n] read#8 -> read#7
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p1] éM#1 -> éM#3
+FLOWS|REACHING_DEF[p1] éM#1 -> éM#4
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[values[4]] Item.<clinit>:Item()#2 -> Item.<clinit>:Item()#6
+FLOWS|REACHING_DEF[éM(n)->Field] read#5 -> read#4
+FLOWS|REACHING_DEF[éM(n)] read#7 -> read#13
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/cast_index/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/cast_index/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/cast_receiver/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/cast_receiver/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/composite_index/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/composite_index/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/outer_function/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/outer_function/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/sibling_cast_fields/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/sibling_cast_fields/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/unicode_receiver/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace/workspace/unicode_receiver/cpg.bin.tmp

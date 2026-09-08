@@ -4,6 +4,36 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Fifth measured Astra batch (2026-09-08 UTC).** The main **308/308**
+  comparisons remain exact against committed and fresh Joern v4.0.555 output.
+  **432 workspace tests**, 17 checker tests, formatting, strict Clippy,
+  dependency audit over 73 crates, native release/archive, and official
+  real-project gates pass. Cache shape is **16**. Seven additional fixture
+  families pin **124 complete exact isolated graph projections**, with full
+  nonexact diagnostics retained. Field macros, nested casts, typedef aggregate
+  bodies, malformed macro recovery, pending-reference order, sizeof specifiers,
+  and preprocessing-token macro argument slots have new coverage.
+  Whole-project exact method ASTs remain **127 on zlib** and improve
+  **1,108→1,132 on Lua**; exact primary methods remain **14** and improve
+  **197→214**. Exact primary bodies improve **25→27** and **226→249**, with
+  nonempty bodies **8→10 / 204→227**. No previously exact method or primary
+  body is lost. All three fourth-batch lost stubs are restored at their correct
+  call sites, and the four earlier RD repairs remain. Complete review caught
+  an introduced direct macro operand omission despite the earlier passing
+  gates; token argument binding restores all **45 identified lost facts**
+  (26 structural / 19 flow) at the correct source occurrences before acceptance.
+  Whole-project Joern references are reused fourth-batch outputs; neither
+  complete project projection is exact. Repeated final builds peak at
+  **485.20 MiB zlib / 472.03 MiB Lua**, within unchanged **512/1,024 MiB**
+  ceilings; clean/update equivalence passes for **26/61** files. Only reviewed
+  expected graph counts/hashes change in the real-project manifest. See the
+  [fifth report](../docs/conformance/astra-fifth-batch-2026-09-08.md),
+  [complete counters](../docs/conformance/astra-fifth-batch-metrics.json), and
+  [acceptance receipt](../docs/conformance/astra-fifth-batch-acceptance.json).
+  No container or other-platform execution is claimed. Next: resolve remaining
+  typedef casts parsed as pointer calls in the retained Lua/zlib examples,
+  followed by source-parser, preprocessing-context and schema gaps.
+
 - **Fourth measured Astra batch (2026-09-08 UTC).** Source checkpoint
   `862e54ee5` retains the main **308/308** against committed and fresh Joern v4.0.555 references. Separate
   complete graph fixtures cover arrays, supplied quoted-header macro state,

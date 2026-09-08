@@ -1,0 +1,65 @@
+--- joern
++++ baseline
+@@ -41,17 +41,17 @@
+           IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+           IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+           BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+-            CALL NAME=<operator>.addition CODE=(p)[i].len + (p)[i].code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              CALL NAME=<operator>.fieldAccess CODE=(p)[i].len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++            CALL NAME=<operator>.addition CODE=(p)[i].Len + (p)[i].Code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.fieldAccess CODE=(p)[i].Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                 CALL NAME=<operator>.indirectIndexAccess CODE=(p)[i] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                   IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+                   IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-                FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
+-              CALL NAME=<operator>.fieldAccess CODE=(p)[i].code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                FIELD_IDENTIFIER CODE=Len ORDER=2 ARGUMENT_INDEX=2
++              CALL NAME=<operator>.fieldAccess CODE=(p)[i].Code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                 CALL NAME=<operator>.indirectIndexAccess CODE=(p)[i] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                   IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+                   IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-                FIELD_IDENTIFIER CODE=code ORDER=2 ARGUMENT_INDEX=2
++                FIELD_IDENTIFIER CODE=Code ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     TYPE_REF CODE=struct Item { int len; int code; } TYPE_FULL_NAME=Item ORDER=1
+@@ -77,17 +77,17 @@
+         IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+         IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+         BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+-          CALL NAME=<operator>.addition CODE=(p)[i].len + (p)[i].code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            CALL NAME=<operator>.fieldAccess CODE=(p)[i].len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++          CALL NAME=<operator>.addition CODE=(p)[i].Len + (p)[i].Code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++            CALL NAME=<operator>.fieldAccess CODE=(p)[i].Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+               CALL NAME=<operator>.indirectIndexAccess CODE=(p)[i] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                 IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+                 IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-              FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.fieldAccess CODE=(p)[i].code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++              FIELD_IDENTIFIER CODE=Len ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=<operator>.fieldAccess CODE=(p)[i].Code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+               CALL NAME=<operator>.indirectIndexAccess CODE=(p)[i] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                 IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+                 IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-              FIELD_IDENTIFIER CODE=code ORDER=2 ARGUMENT_INDEX=2
++              FIELD_IDENTIFIER CODE=Code ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+ 
+ NODES|META_DATA LANGUAGE=NEWC
+@@ -280,11 +280,11 @@
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#4 -> F:main.c
+ EDGES|SOURCE_FILE main.c:READ:ANY(2)#0 -> F:main.c
+-FLOWS|REACHING_DEF[(p)[i].code] read#17 -> read#11
+-FLOWS|REACHING_DEF[(p)[i].code] read#17 -> read#22
+-FLOWS|REACHING_DEF[(p)[i].len + (p)[i].code] read#11 -> read#22
+-FLOWS|REACHING_DEF[(p)[i].len] read#12 -> read#11
+-FLOWS|REACHING_DEF[(p)[i].len] read#12 -> read#22
++FLOWS|REACHING_DEF[(p)[i].Code] read#17 -> read#11
++FLOWS|REACHING_DEF[(p)[i].Code] read#17 -> read#22
++FLOWS|REACHING_DEF[(p)[i].Len + (p)[i].Code] read#11 -> read#22
++FLOWS|REACHING_DEF[(p)[i].Len] read#12 -> read#11
++FLOWS|REACHING_DEF[(p)[i].Len] read#12 -> read#22
+ FLOWS|REACHING_DEF[<RET>] read#6 -> read#22
+ FLOWS|REACHING_DEF[READ(p, i)] read#7 -> read#22
+ FLOWS|REACHING_DEF[READ(p, i)] read#7 -> read#6

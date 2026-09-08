@@ -1,0 +1,96 @@
+{
+  "createdAtUtc": "2026-09-08T14:08:11.870153+00:00",
+  "oracleVersion": "4.0.555",
+  "candidateSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fifth-batch/final-debug/exact.rs",
+    "sha256": "ff4fb5699c560b17a3fe838b8b3f93f328df4cbf4e561d968289bc99c387aad0"
+  },
+  "candidateBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fifth-batch/final-debug/joern-parity",
+    "sha256": "8653a2966f5e6f974d3a51368e946c7f105246eb8af0996f317acb6d68a654ed"
+  },
+  "independentReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/receipt.json",
+    "sha256": "fa0e3ac5b65450714c57d17c462658795b65718a3684705318f82fa34e1e625d"
+  },
+  "cases": {
+    "cast_index": {
+      "path": "cases/cast_index",
+      "exact": true,
+      "canonicalLines": 376,
+      "nonemptyRecords": 367,
+      "files": {
+        "candidate.txt": "c0837e55ba0d741bf97f567f0d3219db15146ac19d101e97684ce3d4d5185ad7",
+        "complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "c0837e55ba0d741bf97f567f0d3219db15146ac19d101e97684ce3d4d5185ad7",
+        "main.c": "d27eab79d3bf83b3378363ca2d11e07748e35637fbcb001c7ab7091c136fab43",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "cast_receiver": {
+      "path": "diagnostics/cast_receiver",
+      "exact": false,
+      "canonicalLines": 314,
+      "nonemptyRecords": 305,
+      "files": {
+        "candidate.txt": "21e1c3c917d93f7760a48451f03321b16f8c0a605acbffdb47fdf74049b072ba",
+        "complete.diff": "cc218674b1b02617a7be36603ca17da139779ca3b0b3b00a1c93752b1d1af2a8",
+        "expected.txt": "0c213c359e93087fdcfe693239ea0243d8d5fe25c53ed4c8efede58eb5e12c10",
+        "main.c": "4326f49cab8f0747d9abcd4ec195db95899239d4571126f702a6462e11d67dcc",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "composite_index": {
+      "path": "diagnostics/composite_index",
+      "exact": false,
+      "canonicalLines": 353,
+      "nonemptyRecords": 343,
+      "files": {
+        "candidate.txt": "4ef2d1579da3a2c1e6c5f321b1616c82dede03c4e98fbde5d1d475022d58406b",
+        "complete.diff": "9b4bc9302ce687d5c8b9092f8371fdf124d0f045ca4e993cca1f500144736215",
+        "expected.txt": "13e422f45e1024e603c1a0490406db3e44f6674102a4e38b4d55464521245de6",
+        "main.c": "c4c1e103189af6418f64fa9d56b174329b7ec46424f8a470e06cffd64e4084e0",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "outer_function": {
+      "path": "cases/outer_function",
+      "exact": true,
+      "canonicalLines": 392,
+      "nonemptyRecords": 383,
+      "files": {
+        "candidate.txt": "aab3a3364f0d586f0eb44c17cd4a8fb19d43339a3b34e170e595ddfec96b6cea",
+        "complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "aab3a3364f0d586f0eb44c17cd4a8fb19d43339a3b34e170e595ddfec96b6cea",
+        "main.c": "15b6704a51e1a9acc0218ae88bf908e2591e18d6056de2a52921b3a625caede6",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "sibling_cast_fields": {
+      "path": "cases/sibling_cast_fields",
+      "exact": true,
+      "canonicalLines": 531,
+      "nonemptyRecords": 520,
+      "files": {
+        "candidate.txt": "5478c16e8c5476c3e45b32ce2d23383832bdc80d917d09128790ea5cd1f44689",
+        "complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "5478c16e8c5476c3e45b32ce2d23383832bdc80d917d09128790ea5cd1f44689",
+        "main.c": "56e48b0cf24c0033081c8e4523d04c552f9c40499248b48548f1b62b9bf5119c",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "unicode_receiver": {
+      "path": "diagnostics/unicode_receiver",
+      "exact": false,
+      "canonicalLines": 304,
+      "nonemptyRecords": 295,
+      "files": {
+        "candidate.txt": "cc77a3ae0b026aec1d80aa277e03953878eb41d90e14af966fa718891ad134d9",
+        "complete.diff": "acfcbfcca8dd5fc26512138cabd2ba5e14f4ab52652f6fdb6def681c8406602f",
+        "expected.txt": "75d177458d1f16cf460f6d2d7325d93bb4e01aeaac1ff52ac3482afd5c9194f4",
+        "main.c": "54733d537b008f63ced717aacbcc4260d585de17f29a05f76f6e508f935304ed",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  }
+}

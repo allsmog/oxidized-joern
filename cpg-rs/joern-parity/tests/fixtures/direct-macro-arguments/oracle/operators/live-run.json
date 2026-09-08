@@ -1,0 +1,50 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-arguments/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-arguments/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-arguments/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 20.136766208990593,
+  "inputHashes": {
+    "operators": "612232397b3998174205c11d351c140bac6106444fcc52534664896590bf5c3c",
+    "nested_comma": "ae6cde5ebbad74eaed73fef936a3e46c6e423685508644390b7a3aa742f16f6e",
+    "comment_operator": "e29b6e8edc5ef08fd8889ce5a68cf20f9360e4de28874f135d6f861f842e9971",
+    "first_type": "39eef1e4d9d5e157027a7d02b31b9bc821f068db6e6218f999d1ccf88e65923b"
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "sharedOracleSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "projects": [
+    {
+      "case": "comment_operator",
+      "canonicalLinesIncludingSeparators": 228,
+      "nonemptySelectedRecords": 223,
+      "expectedSha256": "be2e52b0e4795f248f5836c508a38c51638928c3a26c43566ef146b013f5bc05"
+    },
+    {
+      "case": "first_type",
+      "canonicalLinesIncludingSeparators": 197,
+      "nonemptySelectedRecords": 192,
+      "expectedSha256": "f49bd15bcc54faaa2e06937ba7fb9c67bf582e69d2075d858745f0df4470e618"
+    },
+    {
+      "case": "nested_comma",
+      "canonicalLinesIncludingSeparators": 234,
+      "nonemptySelectedRecords": 229,
+      "expectedSha256": "1fdf03442a91531e528710d94f333f522d8ef5a26b01a3104ab2b1adf0e2e322"
+    },
+    {
+      "case": "operators",
+      "canonicalLinesIncludingSeparators": 510,
+      "nonemptySelectedRecords": 501,
+      "expectedSha256": "cf7e8eef0ff38312edbdae45f3147c7208b8309075c7448b03ef8a0466c81e25"
+    }
+  ],
+  "rawStdoutSha256": "7f69d2f66a87fd04e130c4cd3d217850a76f019acd800fb4ba00c6ae7fa233bd",
+  "rawStderrSha256": "29bc382afdaff1ae11f715eb9f3aaff9c6412086e95222804aaf15544bdd04da"
+}

@@ -1,0 +1,43 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-review/control/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-review/control/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-review/control/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 4.363936166992062,
+  "inputHashes": {
+    "wrapper_control": "2e021e28fb8c40c38d38caad74723d326b50f9c51c4bf1775bbfe1a62560a669"
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "rows": [
+    {
+      "case": "wrapper_control",
+      "canonicalLines": 178,
+      "before": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 94
+      },
+      "after": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 94
+      }
+    }
+  ],
+  "sourceSha256": "ca1b0c49524a2dc94915cb0709d592f03b7b5b3fe0a080dac6fc2e3f4ddf5369",
+  "binaries": {
+    "before": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/field-macros/frozen-nested/joern-parity",
+      "sha256": "c1b538010db3fd48722ec3095c8ff83e4e1bc95e329ef92083cee6db5c1d8dcd"
+    },
+    "after": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/field-macros/direct/frozen-candidate/joern-parity",
+      "sha256": "9d2004bcd35364748f6d252fb2d315aa7161f40de496f5b26403cbdfc3cf2709"
+    }
+  }
+}

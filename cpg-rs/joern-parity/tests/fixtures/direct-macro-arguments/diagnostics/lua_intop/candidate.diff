@@ -1,0 +1,1029 @@
+--- joern
++++ candidate
+@@ -18,15 +18,13 @@
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
++METHOD NAME=<operator>.minus FULL_NAME=<operator>.minus ORDER=0
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+   METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+-
+-METHOD NAME=<operator>.minus FULL_NAME=<operator>.minus ORDER=0
++
++METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+   METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+@@ -46,20 +44,22 @@
+   METHOD_PARAMETER_IN NAME=v2 CODE=lua_Integer v2 TYPE_FULL_NAME=lua_Integer ORDER=2
+   METHOD_PARAMETER_OUT NAME=v2 CODE=lua_Integer v2 TYPE_FULL_NAME=lua_Integer ORDER=2
+   BLOCK CODE={ return intop(+, v1, v2); } TYPE_FULL_NAME=void ORDER=3
++    LOCAL NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=0
++    LOCAL NAME=lua_Integer CODE=<unknown> lua_Integer TYPE_FULL_NAME=ANY ORDER=0
+     RETURN CODE=return intop(+, v1, v2); ORDER=1
+       CALL NAME=intop CODE=intop(+, v1, v2) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:intop:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=v1 CODE=v1 TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=2
+         IDENTIFIER NAME=v2 CODE=v2 TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=3
+         BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+-          CALL NAME=<operator>.cast CODE=(lua_Integer)(((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2))) TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            TYPE_REF CODE=lua_Integer TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+-            CALL NAME=<operator>.addition CODE=((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-              CALL NAME=<operator>.cast CODE=(lua_Unsigned)(v1) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
+-                IDENTIFIER NAME=v1 CODE=v1 TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
+-              CALL NAME=<operator>.cast CODE=(lua_Unsigned)(v2) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
+-                IDENTIFIER NAME=v2 CODE=v2 TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
++          CALL NAME=<operator>.pointerCall CODE=(lua_Integer)(((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2))) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++            IDENTIFIER NAME=lua_Integer CODE=<unknown> lua_Integer TYPE_FULL_NAME=ANY ORDER=1
++            CALL NAME=<operator>.addition CODE=((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(v1) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
++                IDENTIFIER NAME=v1 CODE=v1 TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
++              CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(v2) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
++                IDENTIFIER NAME=v2 CODE=v2 TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=lua_Integer ORDER=4
+ 
+ METHOD NAME=left CODE=lua_Integer left(lua_Integer x,lua_Integer y) { return intop(<<, x, y); } FULL_NAME=left SIGNATURE=lua_Integer(lua_Integer,lua_Integer) ORDER=1
+@@ -68,20 +68,22 @@
+   METHOD_PARAMETER_IN NAME=y CODE=lua_Integer y TYPE_FULL_NAME=lua_Integer ORDER=2
+   METHOD_PARAMETER_OUT NAME=y CODE=lua_Integer y TYPE_FULL_NAME=lua_Integer ORDER=2
+   BLOCK CODE={ return intop(<<, x, y); } TYPE_FULL_NAME=void ORDER=3
++    LOCAL NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=0
++    LOCAL NAME=lua_Integer CODE=<unknown> lua_Integer TYPE_FULL_NAME=ANY ORDER=0
+     RETURN CODE=return intop(<<, x, y); ORDER=1
+       CALL NAME=intop CODE=intop(<<, x, y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:intop:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=2
+         IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=3
+         BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+-          CALL NAME=<operator>.cast CODE=(lua_Integer)(((lua_Unsigned)(x)) << ((lua_Unsigned)(y))) TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            TYPE_REF CODE=lua_Integer TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+-            CALL NAME=<operator>.shiftLeft CODE=((lua_Unsigned)(x)) << ((lua_Unsigned)(y)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-              CALL NAME=<operator>.cast CODE=(lua_Unsigned)(x) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
+-                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
+-              CALL NAME=<operator>.cast CODE=(lua_Unsigned)(y) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
+-                IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
++          CALL NAME=<operator>.pointerCall CODE=(lua_Integer)(((lua_Unsigned)(x)) << ((lua_Unsigned)(y))) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++            IDENTIFIER NAME=lua_Integer CODE=<unknown> lua_Integer TYPE_FULL_NAME=ANY ORDER=1
++            CALL NAME=<operator>.shiftLeft CODE=((lua_Unsigned)(x)) << ((lua_Unsigned)(y)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
++                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
++              CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
++                IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=lua_Integer ORDER=4
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -91,20 +93,22 @@
+     METHOD_PARAMETER_IN NAME=v2 CODE=lua_Integer v2 TYPE_FULL_NAME=lua_Integer ORDER=2
+     METHOD_PARAMETER_OUT NAME=v2 CODE=lua_Integer v2 TYPE_FULL_NAME=lua_Integer ORDER=2
+     BLOCK CODE={ return intop(+, v1, v2); } TYPE_FULL_NAME=void ORDER=3
++      LOCAL NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=0
++      LOCAL NAME=lua_Integer CODE=<unknown> lua_Integer TYPE_FULL_NAME=ANY ORDER=0
+       RETURN CODE=return intop(+, v1, v2); ORDER=1
+         CALL NAME=intop CODE=intop(+, v1, v2) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:intop:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=v1 CODE=v1 TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=2
+           IDENTIFIER NAME=v2 CODE=v2 TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=3
+           BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+-            CALL NAME=<operator>.cast CODE=(lua_Integer)(((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2))) TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=lua_Integer TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+-              CALL NAME=<operator>.addition CODE=((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                CALL NAME=<operator>.cast CODE=(lua_Unsigned)(v1) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                  TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
+-                  IDENTIFIER NAME=v1 CODE=v1 TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
+-                CALL NAME=<operator>.cast CODE=(lua_Unsigned)(v2) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                  TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
+-                  IDENTIFIER NAME=v2 CODE=v2 TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=<operator>.pointerCall CODE=(lua_Integer)(((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2))) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++              IDENTIFIER NAME=lua_Integer CODE=<unknown> lua_Integer TYPE_FULL_NAME=ANY ORDER=1
++              CALL NAME=<operator>.addition CODE=((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(v1) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                  IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
++                  IDENTIFIER NAME=v1 CODE=v1 TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
++                CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(v2) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                  IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
++                  IDENTIFIER NAME=v2 CODE=v2 TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=lua_Integer ORDER=4
+   METHOD NAME=right CODE=lua_Integer right(lua_Integer x,lua_Integer y) { return intop(>>, x, -y); } FULL_NAME=right SIGNATURE=lua_Integer(lua_Integer,lua_Integer) ORDER=1
+     METHOD_PARAMETER_IN NAME=x CODE=lua_Integer x TYPE_FULL_NAME=lua_Integer ORDER=1
+@@ -112,21 +116,23 @@
+     METHOD_PARAMETER_IN NAME=y CODE=lua_Integer y TYPE_FULL_NAME=lua_Integer ORDER=2
+     METHOD_PARAMETER_OUT NAME=y CODE=lua_Integer y TYPE_FULL_NAME=lua_Integer ORDER=2
+     BLOCK CODE={ return intop(>>, x, -y); } TYPE_FULL_NAME=void ORDER=3
++      LOCAL NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=0
++      LOCAL NAME=lua_Integer CODE=<unknown> lua_Integer TYPE_FULL_NAME=ANY ORDER=0
+       RETURN CODE=return intop(>>, x, -y); ORDER=1
+         CALL NAME=intop CODE=intop(>>, x, -y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:intop:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=2
+           CALL NAME=<operator>.minus CODE=-y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+             IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+           BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=4
+-            CALL NAME=<operator>.cast CODE=(lua_Integer)(((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y))) TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=lua_Integer TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+-              CALL NAME=<operator>.arithmeticShiftRight CODE=((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                CALL NAME=<operator>.cast CODE=(lua_Unsigned)(x) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                  TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
+-                  IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
+-                CALL NAME=<operator>.cast CODE=(lua_Unsigned)(-y) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                  TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
+-                  CALL NAME=<operator>.minus CODE=-y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++            CALL NAME=<operator>.pointerCall CODE=(lua_Integer)(((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y))) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++              IDENTIFIER NAME=lua_Integer CODE=<unknown> lua_Integer TYPE_FULL_NAME=ANY ORDER=1
++              CALL NAME=<operator>.arithmeticShiftRight CODE=((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                  IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
++                  IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
++                CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(-y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                  IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
++                  CALL NAME=<operator>.minus CODE=-y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                     IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=lua_Integer ORDER=4
+   METHOD NAME=left CODE=lua_Integer left(lua_Integer x,lua_Integer y) { return intop(<<, x, y); } FULL_NAME=left SIGNATURE=lua_Integer(lua_Integer,lua_Integer) ORDER=1
+@@ -135,20 +141,22 @@
+     METHOD_PARAMETER_IN NAME=y CODE=lua_Integer y TYPE_FULL_NAME=lua_Integer ORDER=2
+     METHOD_PARAMETER_OUT NAME=y CODE=lua_Integer y TYPE_FULL_NAME=lua_Integer ORDER=2
+     BLOCK CODE={ return intop(<<, x, y); } TYPE_FULL_NAME=void ORDER=3
++      LOCAL NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=0
++      LOCAL NAME=lua_Integer CODE=<unknown> lua_Integer TYPE_FULL_NAME=ANY ORDER=0
+       RETURN CODE=return intop(<<, x, y); ORDER=1
+         CALL NAME=intop CODE=intop(<<, x, y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:intop:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=2
+           IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=3
+           BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+-            CALL NAME=<operator>.cast CODE=(lua_Integer)(((lua_Unsigned)(x)) << ((lua_Unsigned)(y))) TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=lua_Integer TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+-              CALL NAME=<operator>.shiftLeft CODE=((lua_Unsigned)(x)) << ((lua_Unsigned)(y)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                CALL NAME=<operator>.cast CODE=(lua_Unsigned)(x) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                  TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
+-                  IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
+-                CALL NAME=<operator>.cast CODE=(lua_Unsigned)(y) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                  TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
+-                  IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=<operator>.pointerCall CODE=(lua_Integer)(((lua_Unsigned)(x)) << ((lua_Unsigned)(y))) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++              IDENTIFIER NAME=lua_Integer CODE=<unknown> lua_Integer TYPE_FULL_NAME=ANY ORDER=1
++              CALL NAME=<operator>.shiftLeft CODE=((lua_Unsigned)(x)) << ((lua_Unsigned)(y)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                  IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
++                  IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
++                CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                  IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
++                  IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=lua_Integer ORDER=4
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     TYPE_DECL NAME=lua_Integer CODE=typedef long long lua_Integer; FULL_NAME=lua_Integer ORDER=1
+@@ -174,21 +182,23 @@
+   METHOD_PARAMETER_IN NAME=y CODE=lua_Integer y TYPE_FULL_NAME=lua_Integer ORDER=2
+   METHOD_PARAMETER_OUT NAME=y CODE=lua_Integer y TYPE_FULL_NAME=lua_Integer ORDER=2
+   BLOCK CODE={ return intop(>>, x, -y); } TYPE_FULL_NAME=void ORDER=3
++    LOCAL NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=0
++    LOCAL NAME=lua_Integer CODE=<unknown> lua_Integer TYPE_FULL_NAME=ANY ORDER=0
+     RETURN CODE=return intop(>>, x, -y); ORDER=1
+       CALL NAME=intop CODE=intop(>>, x, -y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:intop:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=2
+         CALL NAME=<operator>.minus CODE=-y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+           IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+         BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=4
+-          CALL NAME=<operator>.cast CODE=(lua_Integer)(((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y))) TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            TYPE_REF CODE=lua_Integer TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+-            CALL NAME=<operator>.arithmeticShiftRight CODE=((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-              CALL NAME=<operator>.cast CODE=(lua_Unsigned)(x) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
+-                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
+-              CALL NAME=<operator>.cast CODE=(lua_Unsigned)(-y) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
+-                CALL NAME=<operator>.minus CODE=-y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++          CALL NAME=<operator>.pointerCall CODE=(lua_Integer)(((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y))) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++            IDENTIFIER NAME=lua_Integer CODE=<unknown> lua_Integer TYPE_FULL_NAME=ANY ORDER=1
++            CALL NAME=<operator>.arithmeticShiftRight CODE=((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
++                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
++              CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(-y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
++                CALL NAME=<operator>.minus CODE=-y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                   IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=lua_Integer ORDER=4
+ 
+@@ -203,137 +213,119 @@
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=add FULL_NAME=add CODE=add AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=left FULL_NAME=left CODE=left AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+-NODES|TYPE_DECL NAME=longlongint FULL_NAME=longlongint CODE=longlongint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=long long FULL_NAME=long long CODE=long long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=lua_Integer FULL_NAME=lua_Integer CODE=typedef long long lua_Integer; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=lua_Unsigned FULL_NAME=lua_Unsigned CODE=typedef unsigned long long lua_Unsigned; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=2
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=right FULL_NAME=right CODE=right AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+-NODES|TYPE_DECL NAME=unsigned longlongint FULL_NAME=unsigned longlongint CODE=unsigned longlongint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=unsigned long long FULL_NAME=unsigned long long CODE=unsigned long long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=add FULL_NAME=add TYPE_DECL_FULL_NAME=add
+ NODES|TYPE NAME=left FULL_NAME=left TYPE_DECL_FULL_NAME=left
+-NODES|TYPE NAME=longlongint FULL_NAME=longlongint TYPE_DECL_FULL_NAME=longlongint
++NODES|TYPE NAME=long long FULL_NAME=long long TYPE_DECL_FULL_NAME=long long
+ NODES|TYPE NAME=lua_Integer FULL_NAME=lua_Integer TYPE_DECL_FULL_NAME=lua_Integer
+ NODES|TYPE NAME=lua_Unsigned FULL_NAME=lua_Unsigned TYPE_DECL_FULL_NAME=lua_Unsigned
+ NODES|TYPE NAME=right FULL_NAME=right TYPE_DECL_FULL_NAME=right
+-NODES|TYPE NAME=unsigned longlongint FULL_NAME=unsigned longlongint TYPE_DECL_FULL_NAME=unsigned longlongint
++NODES|TYPE NAME=unsigned long long FULL_NAME=unsigned long long TYPE_DECL_FULL_NAME=unsigned long long
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT add#11 -> add#12
+-EDGES|ARGUMENT add#11 -> add#13
+-EDGES|ARGUMENT add#13 -> add#14
+-EDGES|ARGUMENT add#13 -> add#17
+-EDGES|ARGUMENT add#14 -> add#15
+-EDGES|ARGUMENT add#14 -> add#16
+-EDGES|ARGUMENT add#17 -> add#18
+-EDGES|ARGUMENT add#17 -> add#19
+-EDGES|ARGUMENT add#6 -> add#7
+-EDGES|ARGUMENT add#7 -> add#8
+-EDGES|ARGUMENT add#7 -> add#9
+-EDGES|ARGUMENT left#11 -> left#12
+-EDGES|ARGUMENT left#11 -> left#13
+-EDGES|ARGUMENT left#13 -> left#14
+-EDGES|ARGUMENT left#13 -> left#17
+-EDGES|ARGUMENT left#14 -> left#15
+-EDGES|ARGUMENT left#14 -> left#16
+-EDGES|ARGUMENT left#17 -> left#18
+-EDGES|ARGUMENT left#17 -> left#19
+-EDGES|ARGUMENT left#6 -> left#7
+-EDGES|ARGUMENT left#7 -> left#8
+-EDGES|ARGUMENT left#7 -> left#9
+-EDGES|ARGUMENT right#12 -> right#13
+-EDGES|ARGUMENT right#12 -> right#14
+-EDGES|ARGUMENT right#14 -> right#15
+-EDGES|ARGUMENT right#14 -> right#18
+-EDGES|ARGUMENT right#15 -> right#16
+-EDGES|ARGUMENT right#15 -> right#17
+-EDGES|ARGUMENT right#18 -> right#19
+-EDGES|ARGUMENT right#18 -> right#20
+-EDGES|ARGUMENT right#20 -> right#21
+-EDGES|ARGUMENT right#6 -> right#7
+-EDGES|ARGUMENT right#7 -> right#8
+-EDGES|ARGUMENT right#7 -> right#9
++EDGES|ARGUMENT add#13 -> add#15
++EDGES|ARGUMENT add#15 -> add#16
++EDGES|ARGUMENT add#15 -> add#19
++EDGES|ARGUMENT add#16 -> add#18
++EDGES|ARGUMENT add#19 -> add#21
++EDGES|ARGUMENT add#8 -> add#9
++EDGES|ARGUMENT add#9 -> add#10
++EDGES|ARGUMENT add#9 -> add#11
++EDGES|ARGUMENT left#13 -> left#15
++EDGES|ARGUMENT left#15 -> left#16
++EDGES|ARGUMENT left#15 -> left#19
++EDGES|ARGUMENT left#16 -> left#18
++EDGES|ARGUMENT left#19 -> left#21
++EDGES|ARGUMENT left#8 -> left#9
++EDGES|ARGUMENT left#9 -> left#10
++EDGES|ARGUMENT left#9 -> left#11
++EDGES|ARGUMENT right#11 -> right#12
++EDGES|ARGUMENT right#14 -> right#16
++EDGES|ARGUMENT right#16 -> right#17
++EDGES|ARGUMENT right#16 -> right#20
++EDGES|ARGUMENT right#17 -> right#19
++EDGES|ARGUMENT right#20 -> right#22
++EDGES|ARGUMENT right#22 -> right#23
++EDGES|ARGUMENT right#8 -> right#9
+ EDGES|ARGUMENT right#9 -> right#10
+-EDGES|CALL add#11 -> <operator>.cast#0
+-EDGES|CALL add#13 -> <operator>.addition#0
+-EDGES|CALL add#14 -> <operator>.cast#0
+-EDGES|CALL add#17 -> <operator>.cast#0
+-EDGES|CALL add#7 -> main.c:intop:ANY(3)#0
+-EDGES|CALL left#11 -> <operator>.cast#0
+-EDGES|CALL left#13 -> <operator>.shiftLeft#0
+-EDGES|CALL left#14 -> <operator>.cast#0
+-EDGES|CALL left#17 -> <operator>.cast#0
+-EDGES|CALL left#7 -> main.c:intop:ANY(3)#0
+-EDGES|CALL right#12 -> <operator>.cast#0
+-EDGES|CALL right#14 -> <operator>.arithmeticShiftRight#0
+-EDGES|CALL right#15 -> <operator>.cast#0
+-EDGES|CALL right#18 -> <operator>.cast#0
+-EDGES|CALL right#20 -> <operator>.minus#0
+-EDGES|CALL right#7 -> main.c:intop:ANY(3)#0
+-EDGES|CALL right#9 -> <operator>.minus#0
++EDGES|ARGUMENT right#9 -> right#11
++EDGES|CALL add#15 -> <operator>.addition#0
++EDGES|CALL add#9 -> main.c:intop:ANY(3)#0
++EDGES|CALL left#15 -> <operator>.shiftLeft#0
++EDGES|CALL left#9 -> main.c:intop:ANY(3)#0
++EDGES|CALL right#11 -> <operator>.minus#0
++EDGES|CALL right#16 -> <operator>.arithmeticShiftRight#0
++EDGES|CALL right#22 -> <operator>.minus#0
++EDGES|CALL right#9 -> main.c:intop:ANY(3)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+ EDGES|CFG <operator>.arithmeticShiftRight#0 -> <operator>.arithmeticShiftRight#5
+-EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+ EDGES|CFG <operator>.minus#0 -> <operator>.minus#4
++EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+ EDGES|CFG <operator>.shiftLeft#0 -> <operator>.shiftLeft#5
+-EDGES|CFG add#0 -> add#8
+-EDGES|CFG add#11 -> add#6
+-EDGES|CFG add#12 -> add#15
+-EDGES|CFG add#13 -> add#11
+-EDGES|CFG add#14 -> add#18
+-EDGES|CFG add#15 -> add#16
+-EDGES|CFG add#16 -> add#14
+-EDGES|CFG add#17 -> add#13
+-EDGES|CFG add#18 -> add#19
+-EDGES|CFG add#19 -> add#17
+-EDGES|CFG add#6 -> add#20
+-EDGES|CFG add#7 -> add#12
+-EDGES|CFG add#7 -> add#6
+-EDGES|CFG add#8 -> add#9
+-EDGES|CFG add#9 -> add#7
+-EDGES|CFG left#0 -> left#8
+-EDGES|CFG left#11 -> left#6
+-EDGES|CFG left#12 -> left#15
+-EDGES|CFG left#13 -> left#11
+-EDGES|CFG left#14 -> left#18
+-EDGES|CFG left#15 -> left#16
+-EDGES|CFG left#16 -> left#14
+-EDGES|CFG left#17 -> left#13
+-EDGES|CFG left#18 -> left#19
+-EDGES|CFG left#19 -> left#17
+-EDGES|CFG left#6 -> left#20
+-EDGES|CFG left#7 -> left#12
+-EDGES|CFG left#7 -> left#6
+-EDGES|CFG left#8 -> left#9
+-EDGES|CFG left#9 -> left#7
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#69
+-EDGES|CFG main.c:<global>#22 -> right#8
+-EDGES|CFG main.c:<global>#69 -> main.c:<global>#70
+-EDGES|CFG main.c:<global>#70 -> main.c:<global>#71
+-EDGES|CFG main.c:<global>#71 -> main.c:<global>#72
++EDGES|CFG add#0 -> add#10
++EDGES|CFG add#10 -> add#11
++EDGES|CFG add#11 -> add#9
++EDGES|CFG add#13 -> add#8
++EDGES|CFG add#14 -> add#17
++EDGES|CFG add#15 -> add#13
++EDGES|CFG add#16 -> add#20
++EDGES|CFG add#17 -> add#18
++EDGES|CFG add#18 -> add#16
++EDGES|CFG add#19 -> add#15
++EDGES|CFG add#20 -> add#21
++EDGES|CFG add#21 -> add#19
++EDGES|CFG add#8 -> add#22
++EDGES|CFG add#9 -> add#14
++EDGES|CFG add#9 -> add#8
++EDGES|CFG left#0 -> left#10
++EDGES|CFG left#10 -> left#11
++EDGES|CFG left#11 -> left#9
++EDGES|CFG left#13 -> left#8
++EDGES|CFG left#14 -> left#17
++EDGES|CFG left#15 -> left#13
++EDGES|CFG left#16 -> left#20
++EDGES|CFG left#17 -> left#18
++EDGES|CFG left#18 -> left#16
++EDGES|CFG left#19 -> left#15
++EDGES|CFG left#20 -> left#21
++EDGES|CFG left#21 -> left#19
++EDGES|CFG left#8 -> left#22
++EDGES|CFG left#9 -> left#14
++EDGES|CFG left#9 -> left#8
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#75
++EDGES|CFG main.c:<global>#24 -> right#10
++EDGES|CFG main.c:<global>#75 -> main.c:<global>#76
++EDGES|CFG main.c:<global>#76 -> main.c:<global>#77
++EDGES|CFG main.c:<global>#77 -> main.c:<global>#78
+ EDGES|CFG main.c:intop:ANY(3)#0 -> main.c:intop:ANY(3)#8
+-EDGES|CFG right#10 -> right#9
+-EDGES|CFG right#12 -> right#6
+-EDGES|CFG right#13 -> right#16
+-EDGES|CFG right#14 -> right#12
+-EDGES|CFG right#15 -> right#19
+-EDGES|CFG right#16 -> right#17
+-EDGES|CFG right#17 -> right#15
+-EDGES|CFG right#18 -> right#14
+-EDGES|CFG right#19 -> right#21
+-EDGES|CFG right#20 -> right#18
+-EDGES|CFG right#21 -> right#20
+-EDGES|CFG right#6 -> right#22
+-EDGES|CFG right#7 -> right#13
+-EDGES|CFG right#7 -> right#6
+-EDGES|CFG right#8 -> right#10
+-EDGES|CFG right#9 -> right#7
++EDGES|CFG right#10 -> right#12
++EDGES|CFG right#11 -> right#9
++EDGES|CFG right#12 -> right#11
++EDGES|CFG right#14 -> right#8
++EDGES|CFG right#15 -> right#18
++EDGES|CFG right#16 -> right#14
++EDGES|CFG right#17 -> right#21
++EDGES|CFG right#18 -> right#19
++EDGES|CFG right#19 -> right#17
++EDGES|CFG right#20 -> right#16
++EDGES|CFG right#21 -> right#23
++EDGES|CFG right#22 -> right#20
++EDGES|CFG right#23 -> right#22
++EDGES|CFG right#8 -> right#24
++EDGES|CFG right#9 -> right#15
++EDGES|CFG right#9 -> right#8
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+ EDGES|CONTAINS <operator>.arithmeticShiftRight#0 -> <operator>.arithmeticShiftRight#2
+-EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+ EDGES|CONTAINS <operator>.minus#0 -> <operator>.minus#2
++EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+ EDGES|CONTAINS <operator>.shiftLeft#0 -> <operator>.shiftLeft#2
+ EDGES|CONTAINS D:main.c:<global> -> D:add
+ EDGES|CONTAINS D:main.c:<global> -> D:left
+@@ -342,8 +334,8 @@
+ EDGES|CONTAINS D:main.c:<global> -> main.c:intop:ANY(3)#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+-EDGES|CONTAINS F:<includes> -> D:longlongint
+-EDGES|CONTAINS F:<includes> -> D:unsigned longlongint
++EDGES|CONTAINS F:<includes> -> D:long long
++EDGES|CONTAINS F:<includes> -> D:unsigned long long
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS add#0 -> add#10
+@@ -356,9 +348,9 @@
+ EDGES|CONTAINS add#0 -> add#17
+ EDGES|CONTAINS add#0 -> add#18
+ EDGES|CONTAINS add#0 -> add#19
++EDGES|CONTAINS add#0 -> add#20
++EDGES|CONTAINS add#0 -> add#21
+ EDGES|CONTAINS add#0 -> add#5
+-EDGES|CONTAINS add#0 -> add#6
+-EDGES|CONTAINS add#0 -> add#7
+ EDGES|CONTAINS add#0 -> add#8
+ EDGES|CONTAINS add#0 -> add#9
+ EDGES|CONTAINS left#0 -> left#10
+@@ -371,37 +363,37 @@
+ EDGES|CONTAINS left#0 -> left#17
+ EDGES|CONTAINS left#0 -> left#18
+ EDGES|CONTAINS left#0 -> left#19
++EDGES|CONTAINS left#0 -> left#20
++EDGES|CONTAINS left#0 -> left#21
+ EDGES|CONTAINS left#0 -> left#5
+-EDGES|CONTAINS left#0 -> left#6
+-EDGES|CONTAINS left#0 -> left#7
+ EDGES|CONTAINS left#0 -> left#8
+ EDGES|CONTAINS left#0 -> left#9
+ EDGES|CONTAINS main.c:<global>#0 -> add#0
+ EDGES|CONTAINS main.c:<global>#0 -> left#0
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#22
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#66
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#67
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#68
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#69
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#70
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#71
+-EDGES|CONTAINS main.c:<global>#22 -> right#10
+-EDGES|CONTAINS main.c:<global>#22 -> right#11
+-EDGES|CONTAINS main.c:<global>#22 -> right#12
+-EDGES|CONTAINS main.c:<global>#22 -> right#13
+-EDGES|CONTAINS main.c:<global>#22 -> right#14
+-EDGES|CONTAINS main.c:<global>#22 -> right#15
+-EDGES|CONTAINS main.c:<global>#22 -> right#16
+-EDGES|CONTAINS main.c:<global>#22 -> right#17
+-EDGES|CONTAINS main.c:<global>#22 -> right#18
+-EDGES|CONTAINS main.c:<global>#22 -> right#19
+-EDGES|CONTAINS main.c:<global>#22 -> right#20
+-EDGES|CONTAINS main.c:<global>#22 -> right#21
+-EDGES|CONTAINS main.c:<global>#22 -> right#5
+-EDGES|CONTAINS main.c:<global>#22 -> right#6
+-EDGES|CONTAINS main.c:<global>#22 -> right#7
+-EDGES|CONTAINS main.c:<global>#22 -> right#8
+-EDGES|CONTAINS main.c:<global>#22 -> right#9
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#24
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#72
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#73
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#74
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#75
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#76
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#77
++EDGES|CONTAINS main.c:<global>#24 -> right#10
++EDGES|CONTAINS main.c:<global>#24 -> right#11
++EDGES|CONTAINS main.c:<global>#24 -> right#12
++EDGES|CONTAINS main.c:<global>#24 -> right#13
++EDGES|CONTAINS main.c:<global>#24 -> right#14
++EDGES|CONTAINS main.c:<global>#24 -> right#15
++EDGES|CONTAINS main.c:<global>#24 -> right#16
++EDGES|CONTAINS main.c:<global>#24 -> right#17
++EDGES|CONTAINS main.c:<global>#24 -> right#18
++EDGES|CONTAINS main.c:<global>#24 -> right#19
++EDGES|CONTAINS main.c:<global>#24 -> right#20
++EDGES|CONTAINS main.c:<global>#24 -> right#21
++EDGES|CONTAINS main.c:<global>#24 -> right#22
++EDGES|CONTAINS main.c:<global>#24 -> right#23
++EDGES|CONTAINS main.c:<global>#24 -> right#5
++EDGES|CONTAINS main.c:<global>#24 -> right#8
++EDGES|CONTAINS main.c:<global>#24 -> right#9
+ EDGES|CONTAINS main.c:intop:ANY(3)#0 -> main.c:intop:ANY(3)#7
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+@@ -417,16 +409,14 @@
+ EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#4 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#5 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#6 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.minus#1 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.minus#2 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.minus#3 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.minus#4 -> T:ANY
++EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
++EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
++EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
++EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.shiftLeft#1 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.shiftLeft#2 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.shiftLeft#3 -> T:ANY
+@@ -434,48 +424,52 @@
+ EDGES|EVAL_TYPE <operator>.shiftLeft#5 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.shiftLeft#6 -> T:ANY
+ EDGES|EVAL_TYPE add#1 -> T:lua_Integer
+-EDGES|EVAL_TYPE add#10 -> T:ANY
++EDGES|EVAL_TYPE add#10 -> T:lua_Integer
+ EDGES|EVAL_TYPE add#11 -> T:lua_Integer
+-EDGES|EVAL_TYPE add#12 -> T:lua_Integer
++EDGES|EVAL_TYPE add#12 -> T:ANY
+ EDGES|EVAL_TYPE add#13 -> T:ANY
+-EDGES|EVAL_TYPE add#14 -> T:lua_Unsigned
+-EDGES|EVAL_TYPE add#15 -> T:lua_Unsigned
+-EDGES|EVAL_TYPE add#16 -> T:lua_Integer
+-EDGES|EVAL_TYPE add#17 -> T:lua_Unsigned
+-EDGES|EVAL_TYPE add#18 -> T:lua_Unsigned
+-EDGES|EVAL_TYPE add#19 -> T:lua_Integer
++EDGES|EVAL_TYPE add#14 -> T:ANY
++EDGES|EVAL_TYPE add#15 -> T:ANY
++EDGES|EVAL_TYPE add#16 -> T:ANY
++EDGES|EVAL_TYPE add#17 -> T:ANY
++EDGES|EVAL_TYPE add#18 -> T:lua_Integer
++EDGES|EVAL_TYPE add#19 -> T:ANY
+ EDGES|EVAL_TYPE add#2 -> T:lua_Integer
+-EDGES|EVAL_TYPE add#20 -> T:lua_Integer
++EDGES|EVAL_TYPE add#20 -> T:ANY
++EDGES|EVAL_TYPE add#21 -> T:lua_Integer
++EDGES|EVAL_TYPE add#22 -> T:lua_Integer
+ EDGES|EVAL_TYPE add#3 -> T:lua_Integer
+ EDGES|EVAL_TYPE add#4 -> T:lua_Integer
+ EDGES|EVAL_TYPE add#5 -> T:void
++EDGES|EVAL_TYPE add#6 -> T:ANY
+ EDGES|EVAL_TYPE add#7 -> T:ANY
+-EDGES|EVAL_TYPE add#8 -> T:lua_Integer
+-EDGES|EVAL_TYPE add#9 -> T:lua_Integer
++EDGES|EVAL_TYPE add#9 -> T:ANY
+ EDGES|EVAL_TYPE left#1 -> T:lua_Integer
+-EDGES|EVAL_TYPE left#10 -> T:ANY
++EDGES|EVAL_TYPE left#10 -> T:lua_Integer
+ EDGES|EVAL_TYPE left#11 -> T:lua_Integer
+-EDGES|EVAL_TYPE left#12 -> T:lua_Integer
++EDGES|EVAL_TYPE left#12 -> T:ANY
+ EDGES|EVAL_TYPE left#13 -> T:ANY
+-EDGES|EVAL_TYPE left#14 -> T:lua_Unsigned
+-EDGES|EVAL_TYPE left#15 -> T:lua_Unsigned
+-EDGES|EVAL_TYPE left#16 -> T:lua_Integer
+-EDGES|EVAL_TYPE left#17 -> T:lua_Unsigned
+-EDGES|EVAL_TYPE left#18 -> T:lua_Unsigned
+-EDGES|EVAL_TYPE left#19 -> T:lua_Integer
++EDGES|EVAL_TYPE left#14 -> T:ANY
++EDGES|EVAL_TYPE left#15 -> T:ANY
++EDGES|EVAL_TYPE left#16 -> T:ANY
++EDGES|EVAL_TYPE left#17 -> T:ANY
++EDGES|EVAL_TYPE left#18 -> T:lua_Integer
++EDGES|EVAL_TYPE left#19 -> T:ANY
+ EDGES|EVAL_TYPE left#2 -> T:lua_Integer
+-EDGES|EVAL_TYPE left#20 -> T:lua_Integer
++EDGES|EVAL_TYPE left#20 -> T:ANY
++EDGES|EVAL_TYPE left#21 -> T:lua_Integer
++EDGES|EVAL_TYPE left#22 -> T:lua_Integer
+ EDGES|EVAL_TYPE left#3 -> T:lua_Integer
+ EDGES|EVAL_TYPE left#4 -> T:lua_Integer
+ EDGES|EVAL_TYPE left#5 -> T:void
++EDGES|EVAL_TYPE left#6 -> T:ANY
+ EDGES|EVAL_TYPE left#7 -> T:ANY
+-EDGES|EVAL_TYPE left#8 -> T:lua_Integer
+-EDGES|EVAL_TYPE left#9 -> T:lua_Integer
+-EDGES|EVAL_TYPE main.c:<global>#66 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#69 -> T:add
+-EDGES|EVAL_TYPE main.c:<global>#70 -> T:right
+-EDGES|EVAL_TYPE main.c:<global>#71 -> T:left
++EDGES|EVAL_TYPE left#9 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#72 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#75 -> T:add
++EDGES|EVAL_TYPE main.c:<global>#76 -> T:right
++EDGES|EVAL_TYPE main.c:<global>#77 -> T:left
++EDGES|EVAL_TYPE main.c:<global>#78 -> T:ANY
+ EDGES|EVAL_TYPE main.c:intop:ANY(3)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:intop:ANY(3)#2 -> T:ANY
+ EDGES|EVAL_TYPE main.c:intop:ANY(3)#3 -> T:ANY
+@@ -488,30 +482,31 @@
+ EDGES|EVAL_TYPE right#10 -> T:lua_Integer
+ EDGES|EVAL_TYPE right#11 -> T:ANY
+ EDGES|EVAL_TYPE right#12 -> T:lua_Integer
+-EDGES|EVAL_TYPE right#13 -> T:lua_Integer
++EDGES|EVAL_TYPE right#13 -> T:ANY
+ EDGES|EVAL_TYPE right#14 -> T:ANY
+-EDGES|EVAL_TYPE right#15 -> T:lua_Unsigned
+-EDGES|EVAL_TYPE right#16 -> T:lua_Unsigned
+-EDGES|EVAL_TYPE right#17 -> T:lua_Integer
+-EDGES|EVAL_TYPE right#18 -> T:lua_Unsigned
+-EDGES|EVAL_TYPE right#19 -> T:lua_Unsigned
++EDGES|EVAL_TYPE right#15 -> T:ANY
++EDGES|EVAL_TYPE right#16 -> T:ANY
++EDGES|EVAL_TYPE right#17 -> T:ANY
++EDGES|EVAL_TYPE right#18 -> T:ANY
++EDGES|EVAL_TYPE right#19 -> T:lua_Integer
+ EDGES|EVAL_TYPE right#2 -> T:lua_Integer
+ EDGES|EVAL_TYPE right#20 -> T:ANY
+-EDGES|EVAL_TYPE right#21 -> T:lua_Integer
+-EDGES|EVAL_TYPE right#22 -> T:lua_Integer
++EDGES|EVAL_TYPE right#21 -> T:ANY
++EDGES|EVAL_TYPE right#22 -> T:ANY
++EDGES|EVAL_TYPE right#23 -> T:lua_Integer
++EDGES|EVAL_TYPE right#24 -> T:lua_Integer
+ EDGES|EVAL_TYPE right#3 -> T:lua_Integer
+ EDGES|EVAL_TYPE right#4 -> T:lua_Integer
+ EDGES|EVAL_TYPE right#5 -> T:void
++EDGES|EVAL_TYPE right#6 -> T:ANY
+ EDGES|EVAL_TYPE right#7 -> T:ANY
+-EDGES|EVAL_TYPE right#8 -> T:lua_Integer
+ EDGES|EVAL_TYPE right#9 -> T:ANY
+ EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+ EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+ EDGES|PARAMETER_LINK <operator>.arithmeticShiftRight#1 -> <operator>.arithmeticShiftRight#3
+ EDGES|PARAMETER_LINK <operator>.arithmeticShiftRight#4 -> <operator>.arithmeticShiftRight#6
+-EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+-EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+ EDGES|PARAMETER_LINK <operator>.minus#1 -> <operator>.minus#3
++EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+ EDGES|PARAMETER_LINK <operator>.shiftLeft#1 -> <operator>.shiftLeft#3
+ EDGES|PARAMETER_LINK <operator>.shiftLeft#4 -> <operator>.shiftLeft#6
+ EDGES|PARAMETER_LINK add#1 -> add#2
+@@ -529,29 +524,38 @@
+ EDGES|REF T:ANY -> D:ANY
+ EDGES|REF T:add -> D:add
+ EDGES|REF T:left -> D:left
+-EDGES|REF T:longlongint -> D:longlongint
+-EDGES|REF T:lua_Integer -> main.c:<global>#67
+-EDGES|REF T:lua_Unsigned -> main.c:<global>#68
++EDGES|REF T:long long -> D:long long
++EDGES|REF T:lua_Integer -> main.c:<global>#73
++EDGES|REF T:lua_Unsigned -> main.c:<global>#74
+ EDGES|REF T:right -> D:right
+-EDGES|REF T:unsigned longlongint -> D:unsigned longlongint
++EDGES|REF T:unsigned long long -> D:unsigned long long
+ EDGES|REF T:void -> D:void
+-EDGES|REF add#16 -> add#1
+-EDGES|REF add#19 -> add#3
+-EDGES|REF left#16 -> left#1
+-EDGES|REF left#19 -> left#3
+-EDGES|REF main.c:<global>#69 -> add#0
+-EDGES|REF main.c:<global>#70 -> main.c:<global>#22
+-EDGES|REF main.c:<global>#71 -> left#0
+-EDGES|REF right#17 -> right#1
+-EDGES|REF right#21 -> right#3
++EDGES|REF add#14 -> add#7
++EDGES|REF add#17 -> add#6
++EDGES|REF add#18 -> add#1
++EDGES|REF add#20 -> add#6
++EDGES|REF add#21 -> add#3
++EDGES|REF left#14 -> left#7
++EDGES|REF left#17 -> left#6
++EDGES|REF left#18 -> left#1
++EDGES|REF left#20 -> left#6
++EDGES|REF left#21 -> left#3
++EDGES|REF main.c:<global>#75 -> add#0
++EDGES|REF main.c:<global>#76 -> main.c:<global>#24
++EDGES|REF main.c:<global>#77 -> left#0
++EDGES|REF right#15 -> right#7
++EDGES|REF right#18 -> right#6
++EDGES|REF right#19 -> right#1
++EDGES|REF right#21 -> right#6
++EDGES|REF right#23 -> right#3
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:add -> F:main.c
+ EDGES|SOURCE_FILE D:left -> F:main.c
+-EDGES|SOURCE_FILE D:longlongint -> F:<includes>
++EDGES|SOURCE_FILE D:long long -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE D:right -> F:main.c
+-EDGES|SOURCE_FILE D:unsigned longlongint -> F:<includes>
++EDGES|SOURCE_FILE D:unsigned long long -> F:<includes>
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+@@ -559,108 +563,98 @@
+ EDGES|SOURCE_FILE add#0 -> F:main.c
+ EDGES|SOURCE_FILE left#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-EDGES|SOURCE_FILE main.c:<global>#22 -> F:main.c
+-EDGES|SOURCE_FILE main.c:<global>#67 -> F:main.c
+-EDGES|SOURCE_FILE main.c:<global>#68 -> F:main.c
++EDGES|SOURCE_FILE main.c:<global>#24 -> F:main.c
++EDGES|SOURCE_FILE main.c:<global>#73 -> F:main.c
++EDGES|SOURCE_FILE main.c:<global>#74 -> F:main.c
+ EDGES|SOURCE_FILE main.c:intop:ANY(3)#0 -> F:main.c
+-FLOWS|REACHING_DEF[((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2))] add#13 -> add#11
+-FLOWS|REACHING_DEF[((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2))] add#13 -> add#20
+-FLOWS|REACHING_DEF[((lua_Unsigned)(x)) << ((lua_Unsigned)(y))] left#13 -> left#11
+-FLOWS|REACHING_DEF[((lua_Unsigned)(x)) << ((lua_Unsigned)(y))] left#13 -> left#20
+-FLOWS|REACHING_DEF[((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y))] right#14 -> right#12
+-FLOWS|REACHING_DEF[((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y))] right#14 -> right#22
+-FLOWS|REACHING_DEF[(lua_Integer)(((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2)))] add#11 -> add#20
+-FLOWS|REACHING_DEF[(lua_Integer)(((lua_Unsigned)(x)) << ((lua_Unsigned)(y)))] left#11 -> left#20
+-FLOWS|REACHING_DEF[(lua_Integer)(((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y)))] right#12 -> right#22
+-FLOWS|REACHING_DEF[(lua_Unsigned)(-y)] right#18 -> right#14
+-FLOWS|REACHING_DEF[(lua_Unsigned)(-y)] right#18 -> right#15
+-FLOWS|REACHING_DEF[(lua_Unsigned)(-y)] right#18 -> right#22
+-FLOWS|REACHING_DEF[(lua_Unsigned)(v1)] add#14 -> add#13
+-FLOWS|REACHING_DEF[(lua_Unsigned)(v1)] add#14 -> add#20
+-FLOWS|REACHING_DEF[(lua_Unsigned)(v2)] add#17 -> add#13
+-FLOWS|REACHING_DEF[(lua_Unsigned)(v2)] add#17 -> add#20
+-FLOWS|REACHING_DEF[(lua_Unsigned)(x)] left#14 -> left#13
+-FLOWS|REACHING_DEF[(lua_Unsigned)(x)] left#14 -> left#17
+-FLOWS|REACHING_DEF[(lua_Unsigned)(x)] left#14 -> left#20
+-FLOWS|REACHING_DEF[(lua_Unsigned)(x)] right#15 -> right#14
+-FLOWS|REACHING_DEF[(lua_Unsigned)(x)] right#15 -> right#18
+-FLOWS|REACHING_DEF[(lua_Unsigned)(x)] right#15 -> right#22
+-FLOWS|REACHING_DEF[(lua_Unsigned)(y)] left#17 -> left#13
+-FLOWS|REACHING_DEF[(lua_Unsigned)(y)] left#17 -> left#14
+-FLOWS|REACHING_DEF[(lua_Unsigned)(y)] left#17 -> left#20
+-FLOWS|REACHING_DEF[-y] right#20 -> right#18
+-FLOWS|REACHING_DEF[-y] right#20 -> right#22
+-FLOWS|REACHING_DEF[-y] right#9 -> right#22
+-FLOWS|REACHING_DEF[-y] right#9 -> right#7
+-FLOWS|REACHING_DEF[-y] right#9 -> right#8
+-FLOWS|REACHING_DEF[<RET>] add#6 -> add#20
+-FLOWS|REACHING_DEF[<RET>] left#6 -> left#20
+-FLOWS|REACHING_DEF[<RET>] right#6 -> right#22
++FLOWS|REACHING_DEF[((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2))] add#15 -> add#13
++FLOWS|REACHING_DEF[((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2))] add#15 -> add#22
++FLOWS|REACHING_DEF[((lua_Unsigned)(x)) << ((lua_Unsigned)(y))] left#15 -> left#13
++FLOWS|REACHING_DEF[((lua_Unsigned)(x)) << ((lua_Unsigned)(y))] left#15 -> left#22
++FLOWS|REACHING_DEF[((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y))] right#16 -> right#14
++FLOWS|REACHING_DEF[((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y))] right#16 -> right#24
++FLOWS|REACHING_DEF[(lua_Integer)(((lua_Unsigned)(v1)) + ((lua_Unsigned)(v2)))] add#13 -> add#22
++FLOWS|REACHING_DEF[(lua_Integer)(((lua_Unsigned)(x)) << ((lua_Unsigned)(y)))] left#13 -> left#22
++FLOWS|REACHING_DEF[(lua_Integer)(((lua_Unsigned)(x)) >> ((lua_Unsigned)(-y)))] right#14 -> right#24
++FLOWS|REACHING_DEF[(lua_Unsigned)(-y)] right#20 -> right#16
++FLOWS|REACHING_DEF[(lua_Unsigned)(-y)] right#20 -> right#17
++FLOWS|REACHING_DEF[(lua_Unsigned)(-y)] right#20 -> right#24
++FLOWS|REACHING_DEF[(lua_Unsigned)(v1)] add#16 -> add#15
++FLOWS|REACHING_DEF[(lua_Unsigned)(v1)] add#16 -> add#22
++FLOWS|REACHING_DEF[(lua_Unsigned)(v2)] add#19 -> add#15
++FLOWS|REACHING_DEF[(lua_Unsigned)(v2)] add#19 -> add#22
++FLOWS|REACHING_DEF[(lua_Unsigned)(x)] left#16 -> left#15
++FLOWS|REACHING_DEF[(lua_Unsigned)(x)] left#16 -> left#19
++FLOWS|REACHING_DEF[(lua_Unsigned)(x)] left#16 -> left#22
++FLOWS|REACHING_DEF[(lua_Unsigned)(x)] right#17 -> right#16
++FLOWS|REACHING_DEF[(lua_Unsigned)(x)] right#17 -> right#20
++FLOWS|REACHING_DEF[(lua_Unsigned)(x)] right#17 -> right#24
++FLOWS|REACHING_DEF[(lua_Unsigned)(y)] left#19 -> left#15
++FLOWS|REACHING_DEF[(lua_Unsigned)(y)] left#19 -> left#16
++FLOWS|REACHING_DEF[(lua_Unsigned)(y)] left#19 -> left#22
++FLOWS|REACHING_DEF[-y] right#11 -> right#10
++FLOWS|REACHING_DEF[-y] right#11 -> right#24
++FLOWS|REACHING_DEF[-y] right#11 -> right#9
++FLOWS|REACHING_DEF[-y] right#22 -> right#20
++FLOWS|REACHING_DEF[-y] right#22 -> right#24
++FLOWS|REACHING_DEF[<RET>] add#8 -> add#22
++FLOWS|REACHING_DEF[<RET>] left#8 -> left#22
++FLOWS|REACHING_DEF[<RET>] right#8 -> right#24
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+ FLOWS|REACHING_DEF[] <operator>.arithmeticShiftRight#0 -> <operator>.arithmeticShiftRight#1
+ FLOWS|REACHING_DEF[] <operator>.arithmeticShiftRight#0 -> <operator>.arithmeticShiftRight#4
+-FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+-FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+ FLOWS|REACHING_DEF[] <operator>.minus#0 -> <operator>.minus#1
++FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+ FLOWS|REACHING_DEF[] <operator>.shiftLeft#0 -> <operator>.shiftLeft#1
+ FLOWS|REACHING_DEF[] <operator>.shiftLeft#0 -> <operator>.shiftLeft#4
+ FLOWS|REACHING_DEF[] add#0 -> add#1
+-FLOWS|REACHING_DEF[] add#0 -> add#12
+-FLOWS|REACHING_DEF[] add#0 -> add#15
+-FLOWS|REACHING_DEF[] add#0 -> add#16
++FLOWS|REACHING_DEF[] add#0 -> add#10
++FLOWS|REACHING_DEF[] add#0 -> add#11
++FLOWS|REACHING_DEF[] add#0 -> add#14
++FLOWS|REACHING_DEF[] add#0 -> add#17
+ FLOWS|REACHING_DEF[] add#0 -> add#18
+-FLOWS|REACHING_DEF[] add#0 -> add#19
++FLOWS|REACHING_DEF[] add#0 -> add#20
++FLOWS|REACHING_DEF[] add#0 -> add#21
+ FLOWS|REACHING_DEF[] add#0 -> add#3
+-FLOWS|REACHING_DEF[] add#0 -> add#8
+-FLOWS|REACHING_DEF[] add#0 -> add#9
+ FLOWS|REACHING_DEF[] left#0 -> left#1
+-FLOWS|REACHING_DEF[] left#0 -> left#12
+-FLOWS|REACHING_DEF[] left#0 -> left#15
+-FLOWS|REACHING_DEF[] left#0 -> left#16
++FLOWS|REACHING_DEF[] left#0 -> left#10
++FLOWS|REACHING_DEF[] left#0 -> left#11
++FLOWS|REACHING_DEF[] left#0 -> left#14
++FLOWS|REACHING_DEF[] left#0 -> left#17
+ FLOWS|REACHING_DEF[] left#0 -> left#18
+-FLOWS|REACHING_DEF[] left#0 -> left#19
++FLOWS|REACHING_DEF[] left#0 -> left#20
++FLOWS|REACHING_DEF[] left#0 -> left#21
+ FLOWS|REACHING_DEF[] left#0 -> left#3
+-FLOWS|REACHING_DEF[] left#0 -> left#8
+-FLOWS|REACHING_DEF[] left#0 -> left#9
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#69
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#70
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#71
+-FLOWS|REACHING_DEF[] main.c:<global>#22 -> right#1
+-FLOWS|REACHING_DEF[] main.c:<global>#22 -> right#10
+-FLOWS|REACHING_DEF[] main.c:<global>#22 -> right#13
+-FLOWS|REACHING_DEF[] main.c:<global>#22 -> right#16
+-FLOWS|REACHING_DEF[] main.c:<global>#22 -> right#17
+-FLOWS|REACHING_DEF[] main.c:<global>#22 -> right#19
+-FLOWS|REACHING_DEF[] main.c:<global>#22 -> right#21
+-FLOWS|REACHING_DEF[] main.c:<global>#22 -> right#3
+-FLOWS|REACHING_DEF[] main.c:<global>#22 -> right#8
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#75
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#76
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#77
++FLOWS|REACHING_DEF[] main.c:<global>#24 -> right#1
++FLOWS|REACHING_DEF[] main.c:<global>#24 -> right#10
++FLOWS|REACHING_DEF[] main.c:<global>#24 -> right#12
++FLOWS|REACHING_DEF[] main.c:<global>#24 -> right#15
++FLOWS|REACHING_DEF[] main.c:<global>#24 -> right#18
++FLOWS|REACHING_DEF[] main.c:<global>#24 -> right#19
++FLOWS|REACHING_DEF[] main.c:<global>#24 -> right#21
++FLOWS|REACHING_DEF[] main.c:<global>#24 -> right#23
++FLOWS|REACHING_DEF[] main.c:<global>#24 -> right#3
+ FLOWS|REACHING_DEF[] main.c:intop:ANY(3)#0 -> main.c:intop:ANY(3)#1
+ FLOWS|REACHING_DEF[] main.c:intop:ANY(3)#0 -> main.c:intop:ANY(3)#3
+ FLOWS|REACHING_DEF[] main.c:intop:ANY(3)#0 -> main.c:intop:ANY(3)#5
+-FLOWS|REACHING_DEF[intop(+, v1, v2)] add#7 -> add#20
+-FLOWS|REACHING_DEF[intop(+, v1, v2)] add#7 -> add#6
+-FLOWS|REACHING_DEF[intop(<<, x, y)] left#7 -> left#20
+-FLOWS|REACHING_DEF[intop(<<, x, y)] left#7 -> left#6
+-FLOWS|REACHING_DEF[intop(>>, x, -y)] right#7 -> right#22
+-FLOWS|REACHING_DEF[intop(>>, x, -y)] right#7 -> right#6
+-FLOWS|REACHING_DEF[lua_Integer] add#12 -> add#11
+-FLOWS|REACHING_DEF[lua_Integer] left#12 -> left#11
+-FLOWS|REACHING_DEF[lua_Integer] right#13 -> right#12
+-FLOWS|REACHING_DEF[lua_Unsigned] add#15 -> add#14
+-FLOWS|REACHING_DEF[lua_Unsigned] add#18 -> add#17
+-FLOWS|REACHING_DEF[lua_Unsigned] left#15 -> left#14
+-FLOWS|REACHING_DEF[lua_Unsigned] left#18 -> left#17
+-FLOWS|REACHING_DEF[lua_Unsigned] right#16 -> right#15
+-FLOWS|REACHING_DEF[lua_Unsigned] right#19 -> right#18
++FLOWS|REACHING_DEF[intop(+, v1, v2)] add#9 -> add#22
++FLOWS|REACHING_DEF[intop(+, v1, v2)] add#9 -> add#8
++FLOWS|REACHING_DEF[intop(<<, x, y)] left#9 -> left#22
++FLOWS|REACHING_DEF[intop(<<, x, y)] left#9 -> left#8
++FLOWS|REACHING_DEF[intop(>>, x, -y)] right#9 -> right#24
++FLOWS|REACHING_DEF[intop(>>, x, -y)] right#9 -> right#8
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+ FLOWS|REACHING_DEF[p1] <operator>.arithmeticShiftRight#1 -> <operator>.arithmeticShiftRight#3
+ FLOWS|REACHING_DEF[p1] <operator>.arithmeticShiftRight#1 -> <operator>.arithmeticShiftRight#5
+-FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+-FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+ FLOWS|REACHING_DEF[p1] <operator>.minus#1 -> <operator>.minus#3
+ FLOWS|REACHING_DEF[p1] <operator>.minus#1 -> <operator>.minus#4
++FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
++FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+ FLOWS|REACHING_DEF[p1] <operator>.shiftLeft#1 -> <operator>.shiftLeft#3
+ FLOWS|REACHING_DEF[p1] <operator>.shiftLeft#1 -> <operator>.shiftLeft#5
+ FLOWS|REACHING_DEF[p1] main.c:intop:ANY(3)#1 -> main.c:intop:ANY(3)#2
+@@ -669,70 +663,68 @@
+ FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+ FLOWS|REACHING_DEF[p2] <operator>.arithmeticShiftRight#4 -> <operator>.arithmeticShiftRight#5
+ FLOWS|REACHING_DEF[p2] <operator>.arithmeticShiftRight#4 -> <operator>.arithmeticShiftRight#6
+-FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+-FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+ FLOWS|REACHING_DEF[p2] <operator>.shiftLeft#4 -> <operator>.shiftLeft#5
+ FLOWS|REACHING_DEF[p2] <operator>.shiftLeft#4 -> <operator>.shiftLeft#6
+ FLOWS|REACHING_DEF[p2] main.c:intop:ANY(3)#3 -> main.c:intop:ANY(3)#4
+ FLOWS|REACHING_DEF[p2] main.c:intop:ANY(3)#3 -> main.c:intop:ANY(3)#8
+ FLOWS|REACHING_DEF[p3] main.c:intop:ANY(3)#5 -> main.c:intop:ANY(3)#6
+ FLOWS|REACHING_DEF[p3] main.c:intop:ANY(3)#5 -> main.c:intop:ANY(3)#8
++FLOWS|REACHING_DEF[v1] add#1 -> add#10
+ FLOWS|REACHING_DEF[v1] add#1 -> add#2
+-FLOWS|REACHING_DEF[v1] add#1 -> add#8
+-FLOWS|REACHING_DEF[v1] add#16 -> add#14
+-FLOWS|REACHING_DEF[v1] add#16 -> add#2
+-FLOWS|REACHING_DEF[v1] add#16 -> add#20
+-FLOWS|REACHING_DEF[v1] add#8 -> add#16
+-FLOWS|REACHING_DEF[v1] add#8 -> add#2
+-FLOWS|REACHING_DEF[v1] add#8 -> add#20
+-FLOWS|REACHING_DEF[v1] add#8 -> add#7
+-FLOWS|REACHING_DEF[v1] add#8 -> add#9
+-FLOWS|REACHING_DEF[v2] add#19 -> add#17
+-FLOWS|REACHING_DEF[v2] add#19 -> add#20
+-FLOWS|REACHING_DEF[v2] add#19 -> add#4
++FLOWS|REACHING_DEF[v1] add#10 -> add#11
++FLOWS|REACHING_DEF[v1] add#10 -> add#18
++FLOWS|REACHING_DEF[v1] add#10 -> add#2
++FLOWS|REACHING_DEF[v1] add#10 -> add#22
++FLOWS|REACHING_DEF[v1] add#10 -> add#9
++FLOWS|REACHING_DEF[v1] add#18 -> add#16
++FLOWS|REACHING_DEF[v1] add#18 -> add#2
++FLOWS|REACHING_DEF[v1] add#18 -> add#22
++FLOWS|REACHING_DEF[v2] add#11 -> add#10
++FLOWS|REACHING_DEF[v2] add#11 -> add#21
++FLOWS|REACHING_DEF[v2] add#11 -> add#22
++FLOWS|REACHING_DEF[v2] add#11 -> add#4
++FLOWS|REACHING_DEF[v2] add#11 -> add#9
++FLOWS|REACHING_DEF[v2] add#21 -> add#19
++FLOWS|REACHING_DEF[v2] add#21 -> add#22
++FLOWS|REACHING_DEF[v2] add#21 -> add#4
++FLOWS|REACHING_DEF[v2] add#3 -> add#11
+ FLOWS|REACHING_DEF[v2] add#3 -> add#4
+-FLOWS|REACHING_DEF[v2] add#3 -> add#9
+-FLOWS|REACHING_DEF[v2] add#9 -> add#19
+-FLOWS|REACHING_DEF[v2] add#9 -> add#20
+-FLOWS|REACHING_DEF[v2] add#9 -> add#4
+-FLOWS|REACHING_DEF[v2] add#9 -> add#7
+-FLOWS|REACHING_DEF[v2] add#9 -> add#8
++FLOWS|REACHING_DEF[x] left#1 -> left#10
+ FLOWS|REACHING_DEF[x] left#1 -> left#2
+-FLOWS|REACHING_DEF[x] left#1 -> left#8
+-FLOWS|REACHING_DEF[x] left#16 -> left#14
+-FLOWS|REACHING_DEF[x] left#16 -> left#2
+-FLOWS|REACHING_DEF[x] left#16 -> left#20
+-FLOWS|REACHING_DEF[x] left#8 -> left#16
+-FLOWS|REACHING_DEF[x] left#8 -> left#2
+-FLOWS|REACHING_DEF[x] left#8 -> left#20
+-FLOWS|REACHING_DEF[x] left#8 -> left#7
+-FLOWS|REACHING_DEF[x] left#8 -> left#9
++FLOWS|REACHING_DEF[x] left#10 -> left#11
++FLOWS|REACHING_DEF[x] left#10 -> left#18
++FLOWS|REACHING_DEF[x] left#10 -> left#2
++FLOWS|REACHING_DEF[x] left#10 -> left#22
++FLOWS|REACHING_DEF[x] left#10 -> left#9
++FLOWS|REACHING_DEF[x] left#18 -> left#16
++FLOWS|REACHING_DEF[x] left#18 -> left#2
++FLOWS|REACHING_DEF[x] left#18 -> left#22
++FLOWS|REACHING_DEF[x] right#1 -> right#10
+ FLOWS|REACHING_DEF[x] right#1 -> right#2
+-FLOWS|REACHING_DEF[x] right#1 -> right#8
+-FLOWS|REACHING_DEF[x] right#17 -> right#15
+-FLOWS|REACHING_DEF[x] right#17 -> right#2
+-FLOWS|REACHING_DEF[x] right#17 -> right#22
+-FLOWS|REACHING_DEF[x] right#8 -> right#17
+-FLOWS|REACHING_DEF[x] right#8 -> right#2
+-FLOWS|REACHING_DEF[x] right#8 -> right#22
+-FLOWS|REACHING_DEF[x] right#8 -> right#7
+-FLOWS|REACHING_DEF[x] right#8 -> right#9
+-FLOWS|REACHING_DEF[y] left#19 -> left#17
+-FLOWS|REACHING_DEF[y] left#19 -> left#20
+-FLOWS|REACHING_DEF[y] left#19 -> left#4
++FLOWS|REACHING_DEF[x] right#10 -> right#11
++FLOWS|REACHING_DEF[x] right#10 -> right#19
++FLOWS|REACHING_DEF[x] right#10 -> right#2
++FLOWS|REACHING_DEF[x] right#10 -> right#24
++FLOWS|REACHING_DEF[x] right#10 -> right#9
++FLOWS|REACHING_DEF[x] right#19 -> right#17
++FLOWS|REACHING_DEF[x] right#19 -> right#2
++FLOWS|REACHING_DEF[x] right#19 -> right#24
++FLOWS|REACHING_DEF[y] left#11 -> left#10
++FLOWS|REACHING_DEF[y] left#11 -> left#21
++FLOWS|REACHING_DEF[y] left#11 -> left#22
++FLOWS|REACHING_DEF[y] left#11 -> left#4
++FLOWS|REACHING_DEF[y] left#11 -> left#9
++FLOWS|REACHING_DEF[y] left#21 -> left#19
++FLOWS|REACHING_DEF[y] left#21 -> left#22
++FLOWS|REACHING_DEF[y] left#21 -> left#4
++FLOWS|REACHING_DEF[y] left#3 -> left#11
+ FLOWS|REACHING_DEF[y] left#3 -> left#4
+-FLOWS|REACHING_DEF[y] left#3 -> left#9
+-FLOWS|REACHING_DEF[y] left#9 -> left#19
+-FLOWS|REACHING_DEF[y] left#9 -> left#20
+-FLOWS|REACHING_DEF[y] left#9 -> left#4
+-FLOWS|REACHING_DEF[y] left#9 -> left#7
+-FLOWS|REACHING_DEF[y] left#9 -> left#8
+-FLOWS|REACHING_DEF[y] right#10 -> right#21
+-FLOWS|REACHING_DEF[y] right#10 -> right#22
+-FLOWS|REACHING_DEF[y] right#10 -> right#4
+-FLOWS|REACHING_DEF[y] right#10 -> right#9
+-FLOWS|REACHING_DEF[y] right#21 -> right#20
+-FLOWS|REACHING_DEF[y] right#21 -> right#22
+-FLOWS|REACHING_DEF[y] right#21 -> right#4
+-FLOWS|REACHING_DEF[y] right#3 -> right#10
++FLOWS|REACHING_DEF[y] right#12 -> right#11
++FLOWS|REACHING_DEF[y] right#12 -> right#23
++FLOWS|REACHING_DEF[y] right#12 -> right#24
++FLOWS|REACHING_DEF[y] right#12 -> right#4
++FLOWS|REACHING_DEF[y] right#23 -> right#22
++FLOWS|REACHING_DEF[y] right#23 -> right#24
++FLOWS|REACHING_DEF[y] right#23 -> right#4
++FLOWS|REACHING_DEF[y] right#3 -> right#12
+ FLOWS|REACHING_DEF[y] right#3 -> right#4

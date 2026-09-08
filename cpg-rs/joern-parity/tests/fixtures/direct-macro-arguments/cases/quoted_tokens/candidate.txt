@@ -1,0 +1,198 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=consume CODE=int consume(const char *a,int b); FULL_NAME=consume SIGNATURE=int(char*,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=a CODE=const char *a TYPE_FULL_NAME=char* ORDER=1
+  METHOD_PARAMETER_OUT NAME=a CODE=const char *a TYPE_FULL_NAME=char* ORDER=1
+  METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  BLOCK TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=quoted CODE=int quoted(void) { return CALL("comma,) /* // \\\"", ')'); } FULL_NAME=quoted SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return CALL("comma,) /* // \\\"", ')'); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return CALL("comma,) /* // \\\"", ')'); ORDER=1
+        CALL NAME=CALL CODE=CALL("comma,) /* // \\\"", ')') TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CALL:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+          LITERAL CODE=')' TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=2
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=consume CODE=consume("comma,) /* // \\\"", ')') TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              LITERAL CODE="comma,) /* // \\\"" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=')' TYPE_FULL_NAME=char ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=quoted TYPE_FULL_NAME=quoted METHOD_FULL_NAME=quoted ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=CALL CODE=#define CALL(a,b) consume(a,b) FULL_NAME=main.c:CALL:ANY(2) SIGNATURE=ANY(2) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  BLOCK TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=4
+
+METHOD NAME=quoted CODE=int quoted(void) { return CALL("comma,) /* // \\\"", ')'); } FULL_NAME=quoted SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return CALL("comma,) /* // \\\"", ')'); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return CALL("comma,) /* // \\\"", ')'); ORDER=1
+      CALL NAME=CALL CODE=CALL("comma,) /* // \\\"", ')') TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CALL:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+        LITERAL CODE=')' TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=2
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=consume CODE=consume("comma,) /* // \\\"", ')') TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            LITERAL CODE="comma,) /* // \\\"" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=')' TYPE_FULL_NAME=char ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char FULL_NAME=char CODE=char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=quoted FULL_NAME=quoted CODE=quoted AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=char FULL_NAME=char TYPE_DECL_FULL_NAME=char
+NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=quoted FULL_NAME=quoted TYPE_DECL_FULL_NAME=quoted
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT quoted#4 -> quoted#5
+EDGES|ARGUMENT quoted#5 -> quoted#6
+EDGES|ARGUMENT quoted#8 -> quoted#10
+EDGES|ARGUMENT quoted#8 -> quoted#9
+EDGES|CALL quoted#5 -> main.c:CALL:ANY(2)#0
+EDGES|CALL quoted#8 -> consume#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG consume#0 -> consume#6
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#14
+EDGES|CFG main.c:<global>#1 -> quoted#6
+EDGES|CFG main.c:<global>#14 -> main.c:<global>#15
+EDGES|CFG main.c:CALL:ANY(2)#0 -> main.c:CALL:ANY(2)#6
+EDGES|CFG quoted#10 -> quoted#8
+EDGES|CFG quoted#4 -> quoted#11
+EDGES|CFG quoted#5 -> quoted#4
+EDGES|CFG quoted#5 -> quoted#9
+EDGES|CFG quoted#6 -> quoted#5
+EDGES|CFG quoted#8 -> quoted#4
+EDGES|CFG quoted#9 -> quoted#10
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:main.c:<global> -> D:quoted
+EDGES|CONTAINS D:main.c:<global> -> consume#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:CALL:ANY(2)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char
+EDGES|CONTAINS F:<includes> -> D:char*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS consume#0 -> consume#5
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#14
+EDGES|CONTAINS main.c:<global>#1 -> quoted#10
+EDGES|CONTAINS main.c:<global>#1 -> quoted#3
+EDGES|CONTAINS main.c:<global>#1 -> quoted#4
+EDGES|CONTAINS main.c:<global>#1 -> quoted#5
+EDGES|CONTAINS main.c:<global>#1 -> quoted#6
+EDGES|CONTAINS main.c:<global>#1 -> quoted#7
+EDGES|CONTAINS main.c:<global>#1 -> quoted#8
+EDGES|CONTAINS main.c:<global>#1 -> quoted#9
+EDGES|CONTAINS main.c:CALL:ANY(2)#0 -> main.c:CALL:ANY(2)#5
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE consume#1 -> T:char*
+EDGES|EVAL_TYPE consume#2 -> T:char*
+EDGES|EVAL_TYPE consume#3 -> T:int
+EDGES|EVAL_TYPE consume#4 -> T:int
+EDGES|EVAL_TYPE consume#5 -> T:ANY
+EDGES|EVAL_TYPE consume#6 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#14 -> T:quoted
+EDGES|EVAL_TYPE main.c:<global>#15 -> T:ANY
+EDGES|EVAL_TYPE main.c:CALL:ANY(2)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:CALL:ANY(2)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:CALL:ANY(2)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:CALL:ANY(2)#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:CALL:ANY(2)#5 -> T:ANY
+EDGES|EVAL_TYPE main.c:CALL:ANY(2)#6 -> T:ANY
+EDGES|EVAL_TYPE quoted#1 -> T:void
+EDGES|EVAL_TYPE quoted#10 -> T:char
+EDGES|EVAL_TYPE quoted#11 -> T:int
+EDGES|EVAL_TYPE quoted#2 -> T:void
+EDGES|EVAL_TYPE quoted#3 -> T:void
+EDGES|EVAL_TYPE quoted#5 -> T:ANY
+EDGES|EVAL_TYPE quoted#6 -> T:char
+EDGES|EVAL_TYPE quoted#7 -> T:ANY
+EDGES|EVAL_TYPE quoted#8 -> T:int
+EDGES|EVAL_TYPE quoted#9 -> T:char*
+EDGES|PARAMETER_LINK consume#1 -> consume#2
+EDGES|PARAMETER_LINK consume#3 -> consume#4
+EDGES|PARAMETER_LINK main.c:CALL:ANY(2)#1 -> main.c:CALL:ANY(2)#2
+EDGES|PARAMETER_LINK main.c:CALL:ANY(2)#3 -> main.c:CALL:ANY(2)#4
+EDGES|PARAMETER_LINK quoted#1 -> quoted#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:char -> D:char
+EDGES|REF T:char* -> D:char*
+EDGES|REF T:int -> D:int
+EDGES|REF T:quoted -> D:quoted
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#14 -> main.c:<global>#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:char -> F:<includes>
+EDGES|SOURCE_FILE D:char* -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:quoted -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE consume#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:CALL:ANY(2)#0 -> F:main.c
+FLOWS|REACHING_DEF["comma,) /* // \\\""] quoted#9 -> quoted#8
+FLOWS|REACHING_DEF[')'] quoted#10 -> quoted#8
+FLOWS|REACHING_DEF[')'] quoted#6 -> quoted#5
+FLOWS|REACHING_DEF[<RET>] quoted#4 -> quoted#11
+FLOWS|REACHING_DEF[CALL("comma,) /* // \\\"", ')')] quoted#5 -> quoted#11
+FLOWS|REACHING_DEF[CALL("comma,) /* // \\\"", ')')] quoted#5 -> quoted#4
+FLOWS|REACHING_DEF[] consume#0 -> consume#1
+FLOWS|REACHING_DEF[] consume#0 -> consume#3
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#14
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> quoted#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> quoted#10
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> quoted#6
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> quoted#9
+FLOWS|REACHING_DEF[] main.c:CALL:ANY(2)#0 -> main.c:CALL:ANY(2)#1
+FLOWS|REACHING_DEF[] main.c:CALL:ANY(2)#0 -> main.c:CALL:ANY(2)#3
+FLOWS|REACHING_DEF[] quoted#1 -> quoted#11
+FLOWS|REACHING_DEF[] quoted#1 -> quoted#2
+FLOWS|REACHING_DEF[a] consume#1 -> consume#2
+FLOWS|REACHING_DEF[a] consume#1 -> consume#6
+FLOWS|REACHING_DEF[b] consume#3 -> consume#4
+FLOWS|REACHING_DEF[b] consume#3 -> consume#6
+FLOWS|REACHING_DEF[consume("comma,) /* // \\\"", ')')] quoted#8 -> quoted#11
+FLOWS|REACHING_DEF[p1] main.c:CALL:ANY(2)#1 -> main.c:CALL:ANY(2)#2
+FLOWS|REACHING_DEF[p1] main.c:CALL:ANY(2)#1 -> main.c:CALL:ANY(2)#6
+FLOWS|REACHING_DEF[p2] main.c:CALL:ANY(2)#3 -> main.c:CALL:ANY(2)#4
+FLOWS|REACHING_DEF[p2] main.c:CALL:ANY(2)#3 -> main.c:CALL:ANY(2)#6

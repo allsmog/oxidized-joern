@@ -1,0 +1,332 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.not FULL_NAME=<operator>.not ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=slots CODE=int slots(int a,int b) { return APPLY(a,|,b) + UNARY(~,a); } FULL_NAME=slots SIGNATURE=int(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={ return APPLY(a,|,b) + UNARY(~,a); } TYPE_FULL_NAME=void ORDER=3
+      LOCAL NAME=x CODE=<unknown> x TYPE_FULL_NAME=ANY ORDER=0
+      RETURN CODE=return APPLY(a,|,b) + UNARY(~,a); ORDER=1
+        CALL NAME=<operator>.addition CODE=APPLY(a,|,b) + UNARY(~,a) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=APPLY CODE=APPLY(a,|,b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+            IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+            BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+              BLOCK TYPE_FULL_NAME=ANY ORDER=1
+                IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+                IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2
+          CALL NAME=UNARY CODE=UNARY(~,a) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:UNARY:ANY(2) SIGNATURE=ANY(2) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.not CODE=~,a(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.not ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.pointerCall CODE=a(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+                  IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+                  IDENTIFIER NAME=x CODE=<unknown> x TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=slots TYPE_FULL_NAME=slots METHOD_FULL_NAME=slots ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=APPLY CODE=#define APPLY(a,op,b) ((a) op (b)) FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=4
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=5
+
+METHOD NAME=UNARY CODE=#define UNARY(op,x) (op (x)) FULL_NAME=main.c:UNARY:ANY(2) SIGNATURE=ANY(2) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  BLOCK TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=4
+
+METHOD NAME=slots CODE=int slots(int a,int b) { return APPLY(a,|,b) + UNARY(~,a); } FULL_NAME=slots SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={ return APPLY(a,|,b) + UNARY(~,a); } TYPE_FULL_NAME=void ORDER=3
+    LOCAL NAME=x CODE=<unknown> x TYPE_FULL_NAME=ANY ORDER=0
+    RETURN CODE=return APPLY(a,|,b) + UNARY(~,a); ORDER=1
+      CALL NAME=<operator>.addition CODE=APPLY(a,|,b) + UNARY(~,a) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=APPLY CODE=APPLY(a,|,b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+          BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1
+              IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2
+        CALL NAME=UNARY CODE=UNARY(~,a) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:UNARY:ANY(2) SIGNATURE=ANY(2) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.not CODE=~,a(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.not ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.pointerCall CODE=a(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+                IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+                IDENTIFIER NAME=x CODE=<unknown> x TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=slots FULL_NAME=slots CODE=slots AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=slots FULL_NAME=slots TYPE_DECL_FULL_NAME=slots
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT slots#18 -> slots#19
+EDGES|ARGUMENT slots#19 -> slots#21
+EDGES|ARGUMENT slots#7 -> slots#8
+EDGES|ARGUMENT slots#8 -> slots#16
+EDGES|ARGUMENT slots#8 -> slots#9
+EDGES|ARGUMENT slots#9 -> slots#10
+EDGES|ARGUMENT slots#9 -> slots#11
+EDGES|CALL slots#16 -> main.c:UNARY:ANY(2)#0
+EDGES|CALL slots#18 -> <operator>.not#0
+EDGES|CALL slots#8 -> <operator>.addition#0
+EDGES|CALL slots#9 -> main.c:APPLY:ANY(3)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.not#0 -> <operator>.not#4
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#25
+EDGES|CFG main.c:<global>#1 -> slots#10
+EDGES|CFG main.c:<global>#25 -> main.c:<global>#26
+EDGES|CFG main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#8
+EDGES|CFG main.c:UNARY:ANY(2)#0 -> main.c:UNARY:ANY(2)#6
+EDGES|CFG slots#10 -> slots#11
+EDGES|CFG slots#11 -> slots#9
+EDGES|CFG slots#13 -> slots#16
+EDGES|CFG slots#14 -> slots#15
+EDGES|CFG slots#15 -> slots#13
+EDGES|CFG slots#16 -> slots#20
+EDGES|CFG slots#16 -> slots#8
+EDGES|CFG slots#18 -> slots#8
+EDGES|CFG slots#19 -> slots#18
+EDGES|CFG slots#20 -> slots#21
+EDGES|CFG slots#21 -> slots#19
+EDGES|CFG slots#7 -> slots#22
+EDGES|CFG slots#8 -> slots#7
+EDGES|CFG slots#9 -> slots#14
+EDGES|CFG slots#9 -> slots#16
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.not#0 -> <operator>.not#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS D:main.c:<global> -> D:slots
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:APPLY:ANY(3)#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:UNARY:ANY(2)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#24
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#25
+EDGES|CONTAINS main.c:<global>#1 -> slots#10
+EDGES|CONTAINS main.c:<global>#1 -> slots#11
+EDGES|CONTAINS main.c:<global>#1 -> slots#12
+EDGES|CONTAINS main.c:<global>#1 -> slots#13
+EDGES|CONTAINS main.c:<global>#1 -> slots#14
+EDGES|CONTAINS main.c:<global>#1 -> slots#15
+EDGES|CONTAINS main.c:<global>#1 -> slots#16
+EDGES|CONTAINS main.c:<global>#1 -> slots#17
+EDGES|CONTAINS main.c:<global>#1 -> slots#18
+EDGES|CONTAINS main.c:<global>#1 -> slots#19
+EDGES|CONTAINS main.c:<global>#1 -> slots#20
+EDGES|CONTAINS main.c:<global>#1 -> slots#21
+EDGES|CONTAINS main.c:<global>#1 -> slots#5
+EDGES|CONTAINS main.c:<global>#1 -> slots#7
+EDGES|CONTAINS main.c:<global>#1 -> slots#8
+EDGES|CONTAINS main.c:<global>#1 -> slots#9
+EDGES|CONTAINS main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#7
+EDGES|CONTAINS main.c:UNARY:ANY(2)#0 -> main.c:UNARY:ANY(2)#5
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.not#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.not#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.not#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.not#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#24 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#25 -> T:slots
+EDGES|EVAL_TYPE main.c:<global>#26 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#5 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#7 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#8 -> T:ANY
+EDGES|EVAL_TYPE main.c:UNARY:ANY(2)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:UNARY:ANY(2)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:UNARY:ANY(2)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:UNARY:ANY(2)#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:UNARY:ANY(2)#5 -> T:ANY
+EDGES|EVAL_TYPE main.c:UNARY:ANY(2)#6 -> T:ANY
+EDGES|EVAL_TYPE slots#1 -> T:int
+EDGES|EVAL_TYPE slots#10 -> T:int
+EDGES|EVAL_TYPE slots#11 -> T:int
+EDGES|EVAL_TYPE slots#12 -> T:ANY
+EDGES|EVAL_TYPE slots#13 -> T:ANY
+EDGES|EVAL_TYPE slots#14 -> T:int
+EDGES|EVAL_TYPE slots#15 -> T:int
+EDGES|EVAL_TYPE slots#16 -> T:ANY
+EDGES|EVAL_TYPE slots#17 -> T:ANY
+EDGES|EVAL_TYPE slots#18 -> T:ANY
+EDGES|EVAL_TYPE slots#19 -> T:int
+EDGES|EVAL_TYPE slots#2 -> T:int
+EDGES|EVAL_TYPE slots#20 -> T:int
+EDGES|EVAL_TYPE slots#21 -> T:ANY
+EDGES|EVAL_TYPE slots#22 -> T:int
+EDGES|EVAL_TYPE slots#3 -> T:int
+EDGES|EVAL_TYPE slots#4 -> T:int
+EDGES|EVAL_TYPE slots#5 -> T:void
+EDGES|EVAL_TYPE slots#6 -> T:ANY
+EDGES|EVAL_TYPE slots#8 -> T:ANY
+EDGES|EVAL_TYPE slots#9 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.not#1 -> <operator>.not#3
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6
+EDGES|PARAMETER_LINK main.c:UNARY:ANY(2)#1 -> main.c:UNARY:ANY(2)#2
+EDGES|PARAMETER_LINK main.c:UNARY:ANY(2)#3 -> main.c:UNARY:ANY(2)#4
+EDGES|PARAMETER_LINK slots#1 -> slots#2
+EDGES|PARAMETER_LINK slots#3 -> slots#4
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:slots -> D:slots
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#25 -> main.c:<global>#1
+EDGES|REF slots#14 -> slots#1
+EDGES|REF slots#15 -> slots#3
+EDGES|REF slots#20 -> slots#1
+EDGES|REF slots#21 -> slots#6
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:slots -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:APPLY:ANY(3)#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:UNARY:ANY(2)#0 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] slots#7 -> slots#22
+FLOWS|REACHING_DEF[<unknown> x] slots#21 -> slots#19
+FLOWS|REACHING_DEF[<unknown> x] slots#21 -> slots#22
+FLOWS|REACHING_DEF[APPLY(a,|,b) + UNARY(~,a)] slots#8 -> slots#22
+FLOWS|REACHING_DEF[APPLY(a,|,b) + UNARY(~,a)] slots#8 -> slots#7
+FLOWS|REACHING_DEF[APPLY(a,|,b)] slots#9 -> slots#22
+FLOWS|REACHING_DEF[APPLY(a,|,b)] slots#9 -> slots#8
+FLOWS|REACHING_DEF[UNARY(~,a)] slots#16 -> slots#22
+FLOWS|REACHING_DEF[UNARY(~,a)] slots#16 -> slots#8
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.not#0 -> <operator>.not#1
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#25
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> slots#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> slots#10
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> slots#11
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> slots#13
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> slots#14
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> slots#15
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> slots#16
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> slots#20
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> slots#21
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> slots#3
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#1
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#3
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#5
+FLOWS|REACHING_DEF[] main.c:UNARY:ANY(2)#0 -> main.c:UNARY:ANY(2)#1
+FLOWS|REACHING_DEF[] main.c:UNARY:ANY(2)#0 -> main.c:UNARY:ANY(2)#3
+FLOWS|REACHING_DEF[a(x)] slots#19 -> slots#18
+FLOWS|REACHING_DEF[a(x)] slots#19 -> slots#22
+FLOWS|REACHING_DEF[a] slots#1 -> slots#10
+FLOWS|REACHING_DEF[a] slots#1 -> slots#2
+FLOWS|REACHING_DEF[a] slots#10 -> slots#11
+FLOWS|REACHING_DEF[a] slots#10 -> slots#2
+FLOWS|REACHING_DEF[a] slots#10 -> slots#22
+FLOWS|REACHING_DEF[a] slots#10 -> slots#9
+FLOWS|REACHING_DEF[b] slots#11 -> slots#10
+FLOWS|REACHING_DEF[b] slots#11 -> slots#22
+FLOWS|REACHING_DEF[b] slots#11 -> slots#4
+FLOWS|REACHING_DEF[b] slots#11 -> slots#9
+FLOWS|REACHING_DEF[b] slots#3 -> slots#11
+FLOWS|REACHING_DEF[b] slots#3 -> slots#4
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.not#1 -> <operator>.not#3
+FLOWS|REACHING_DEF[p1] <operator>.not#1 -> <operator>.not#4
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[p1] main.c:UNARY:ANY(2)#1 -> main.c:UNARY:ANY(2)#2
+FLOWS|REACHING_DEF[p1] main.c:UNARY:ANY(2)#1 -> main.c:UNARY:ANY(2)#6
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[p2] main.c:UNARY:ANY(2)#3 -> main.c:UNARY:ANY(2)#4
+FLOWS|REACHING_DEF[p2] main.c:UNARY:ANY(2)#3 -> main.c:UNARY:ANY(2)#6
+FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6
+FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[~,a(x)] slots#18 -> slots#22
