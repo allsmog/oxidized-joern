@@ -1,0 +1,12 @@
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.70s
+     Running tests/declaration_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/declaration_macros-55c28d9b973576aa)
+
+running 4 tests
+test empty_declaration_prefix_retains_method_and_call_locations ... ok
+test header_call_types_follow_each_importing_translation_unit ... ok
+test multiline_empty_prefix_and_conditional_duplicates_keep_separate_source_ranges ... ok
+test declaration_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

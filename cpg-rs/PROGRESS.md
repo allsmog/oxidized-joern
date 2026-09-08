@@ -483,3 +483,11 @@ Next, in preference order:
   escaped as `\n`; methods sorted by FULL_NAME; blank line between methods.
 - M6 will fold this onto `cpg-core`'s graph schema — until then the dumper is
   deliberately standalone to keep the parity loop fast.
+
+### Sixth batch — declaration macros and supplied-header callable types
+
+Implemented declaration-macro expansion in immutable source-position context, plus supplied-header callable return metadata using the caller's existing include environment. Definition, declaration, and CALL type roles remain distinct. Generated prototype CODE is pinned for leading macros, attributes, pointers/arrays and comments; empty leading object macros retain source-verified method/parameter/return/statement locations, including conditional duplicate definitions.
+
+The new `declaration-macros` fixture family retains 36 complete fresh Joern4.0.555 projections (5,019 canonical lines; 4,872 nonempty records): accepted baseline6 exact, candidate29 exact, seven full diagnostics retained. Four production tests cover the exact graphs, caller-specific header types and source locations. Two unit checks preserve opaque preprocessing tokens and bound recursive/oversized declaration replacements. Local macro declarations/prototypes, replacement-boundary rescans, tagged/typedef pointer context and invalid extra-argument recovery remain explicit gaps. Whole Lua remains nonexact; `luaG_concaterror`'s void signature/CALL types and `luaS_newlstr` CALL types now match their live references, while the latter's definition return spelling remains a diagnostic.
+
+Validation receipts and frozen source/binary hashes are under `joern-parity/tests/fixtures/declaration-macros/measurement.json`; raw oracles, all inputs, complete before/after outputs and differences remain portable with the fixtures. This isolated commit is for parent integration; no push or full-port claim.

@@ -1,0 +1,1 @@
+long f(int x);

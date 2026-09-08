@@ -201,6 +201,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let macro_tables = source_macro_tables(sources);
     let mut unknown_declaration_prefixes = HashMap::new();
     for u in &units {
+        let context = body_macro_context(u.tree.root_node(), u.src.as_bytes(), &u.file, &units);
         let root = u.tree.root_node();
         let bytes = u.src.as_bytes();
         let active_items = active_translation_unit_items(root, bytes);
@@ -224,7 +225,18 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                 );
                 directive_index += 1;
             }
-            for (declarator, header) in prototype_header_entries(declaration, bytes) {
+            let macros = context
+                .macro_states
+                .get(&declaration.id())
+                .cloned()
+                .unwrap_or_default();
+            for (declarator, _) in prototype_header_entries(declaration, bytes) {
+                let Some(resolved) =
+                    resolved_function_header(declaration, declarator, bytes, &macros)
+                else {
+                    continue;
+                };
+                let header = resolved.header;
                 let parenthesized = parenthesized_function_parts(declarator);
                 let full = if parenthesized.is_some() {
                     format!("<unresolvedNamespace>.{}", header.0)
@@ -232,7 +244,9 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                     header.0.clone()
                 };
                 if !defined.contains(&full) {
-                    let mut code = esc(text(declaration, bytes));
+                    let mut code = resolved
+                        .expanded_code
+                        .unwrap_or_else(|| esc(text(declaration, bytes)));
                     if macro_declaration_return(declaration).is_some() {
                         let prefix = declaration
                             .child_by_field_name("type")
@@ -315,9 +329,15 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         .collect();
 
     for u in &units {
+        let context = body_macro_context(u.tree.root_node(), u.src.as_bytes(), &u.file, &units);
         let b = u.src.as_bytes();
         let root = u.tree.root_node();
-        let (active_items, macros, macro_states) = body_macro_context(root, b, &u.file, &units);
+        let BodyMacroContext {
+            items: active_items,
+            macros,
+            macro_states,
+            header_declarations,
+        } = &context;
         let active_methods: HashSet<usize> = active_items
             .iter()
             .filter(|node| node.kind() == "function_definition")
@@ -346,28 +366,31 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         for f in translation_unit_items(root, b) {
             match f.kind() {
                 "function_definition" => {
-                    if let Some((name, ret, _)) = fn_header(f, b) {
+                    let macros = macro_states.get(&f.id()).cloned().unwrap_or_default();
+                    if let Some(resolved) = f
+                        .child_by_field_name("declarator")
+                        .and_then(|decl| resolved_function_header(f, decl, b, &macros))
+                    {
+                        let (name, ret, _) = resolved.header;
                         function_full_names.insert(name.clone(), method_full(&name, &u.file));
-                        function_call_types.insert(
-                            name.clone(),
-                            function_return_type(
-                                f,
-                                f.child_by_field_name("declarator").unwrap(),
-                                b,
-                                TypeRole::Expression,
-                            ),
-                        );
+                        function_call_types.insert(name.clone(), resolved.call_type);
                         functions.insert(name, ret);
                     }
                 }
                 "declaration" => {
-                    for (declarator, (name, ret, _)) in prototype_header_entries(f, b) {
+                    let macros = macro_states.get(&f.id()).cloned().unwrap_or_default();
+                    for (declarator, _) in prototype_header_entries(f, b) {
+                        let Some(resolved) = resolved_function_header(f, declarator, b, &macros)
+                        else {
+                            continue;
+                        };
+                        let (name, ret, _) = resolved.header;
                         function_full_names
                             .entry(name.clone())
                             .or_insert_with(|| name.clone());
-                        function_call_types.entry(name.clone()).or_insert_with(|| {
-                            function_return_type(f, declarator, b, TypeRole::Expression)
-                        });
+                        function_call_types
+                            .entry(name.clone())
+                            .or_insert(resolved.call_type);
                         functions.entry(name).or_insert(ret);
                     }
 
@@ -399,6 +422,17 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             }
         }
 
+        for declaration in header_declarations {
+            let (name, ret, _) = &declaration.header;
+            function_full_names
+                .entry(name.clone())
+                .or_insert_with(|| name.clone());
+            functions.entry(name.clone()).or_insert_with(|| ret.clone());
+            function_call_types
+                .entry(name.clone())
+                .or_insert_with(|| declaration.call_type.clone());
+        }
+
         let mut ctx = Ctx {
             functions: &functions,
             function_call_types: &function_call_types,
@@ -408,7 +442,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             globals: &globals,
             enumerators: &enumerators,
             macros: macros.clone(),
-            macro_states: &macro_states,
+            macro_states,
             unknown_declaration_prefixes: &unknown_declaration_prefixes,
             file: u.file.clone(),
             copying_macro_argument: false,
@@ -1156,7 +1190,14 @@ impl Ctx<'_> {
         self.symbol_call_types.clear();
         self.method_functions.clear();
         self.method_call_types.clear();
-        let (name, ret, params) = fn_header(f, b).expect("function header");
+        let resolved = resolved_function_header(
+            f,
+            f.child_by_field_name("declarator").unwrap(),
+            b,
+            &self.macros,
+        )
+        .expect("function header");
+        let (name, ret, params) = resolved.header;
         let full = self
             .definition_full_names
             .get(&f.id())
@@ -1176,7 +1217,7 @@ impl Ctx<'_> {
             "METHOD",
             P {
                 name: Some(name.clone()),
-                code: Some(esc(text(f, b))),
+                code: Some(resolved.expanded_code.unwrap_or_else(|| esc(text(f, b)))),
                 full: Some(full),
                 sig: Some(sig),
                 order: Some(1),
@@ -4366,12 +4407,24 @@ fn prototype_header_entries<'tree>(
 /// Execute available quoted headers in the importing translation unit's macro
 /// environment. Include guards and undef/redefinitions are evaluated at each
 /// inclusion; declarations retain immutable snapshots of the preceding state.
+struct BodyMacroContext<'tree> {
+    items: Vec<Node<'tree>>,
+    macros: MacroState,
+    macro_states: HashMap<usize, MacroState>,
+    header_declarations: Vec<HeaderDeclaration>,
+}
+
+struct HeaderDeclaration {
+    header: FunctionHeader,
+    call_type: String,
+}
+
 fn body_macro_context<'tree>(
     root: Node<'tree>,
     bytes: &[u8],
     file: &str,
     units: &[SourceUnit],
-) -> (Vec<Node<'tree>>, MacroState, HashMap<usize, MacroState>) {
+) -> BodyMacroContext<'tree> {
     #[allow(clippy::too_many_arguments)]
     fn collect<'tree>(
         node: Node<'tree>,
@@ -4383,6 +4436,7 @@ fn body_macro_context<'tree>(
         macros: &mut MacroState,
         items: &mut Vec<Node<'tree>>,
         states: &mut HashMap<usize, MacroState>,
+        header_declarations: &mut Vec<HeaderDeclaration>,
         capture: bool,
     ) {
         match node.kind() {
@@ -4419,7 +4473,16 @@ fn body_macro_context<'tree>(
                             && Some(child) != alternative
                         {
                             collect(
-                                child, bytes, file, units, visiting, once, macros, items, states,
+                                child,
+                                bytes,
+                                file,
+                                units,
+                                visiting,
+                                once,
+                                macros,
+                                items,
+                                states,
+                                header_declarations,
                                 capture,
                             );
                         }
@@ -4435,6 +4498,7 @@ fn body_macro_context<'tree>(
                         macros,
                         items,
                         states,
+                        header_declarations,
                         capture,
                     );
                 }
@@ -4453,6 +4517,18 @@ fn body_macro_context<'tree>(
                         states.insert(node.id(), macros.clone());
                     }
                     items.push(node);
+                }
+                if !capture {
+                    for (declarator, _) in prototype_header_entries(node, bytes) {
+                        if let Some(resolved) =
+                            resolved_function_header(node, declarator, bytes, macros)
+                        {
+                            header_declarations.push(HeaderDeclaration {
+                                header: resolved.header,
+                                call_type: resolved.call_type,
+                            });
+                        }
+                    }
                 }
                 if let Some(include) = included_source_name(node, bytes, file) {
                     if !once.contains(&include) && visiting.insert(include.clone()) {
@@ -4475,6 +4551,7 @@ fn body_macro_context<'tree>(
                                     macros,
                                     &mut header_items,
                                     &mut header_states,
+                                    header_declarations,
                                     false,
                                 );
                             }
@@ -4508,6 +4585,7 @@ fn body_macro_context<'tree>(
     let mut macros = Arc::new(HashMap::new());
     let mut items = Vec::new();
     let mut states = HashMap::new();
+    let mut header_declarations = Vec::new();
     let mut once = HashSet::new();
     let mut visiting = HashSet::from([normalize_source_path(std::path::Path::new(file))]);
     for child in translation_unit_children(root, bytes) {
@@ -4521,10 +4599,16 @@ fn body_macro_context<'tree>(
             &mut macros,
             &mut items,
             &mut states,
+            &mut header_declarations,
             true,
         );
     }
-    (items, macros, states)
+    BodyMacroContext {
+        items,
+        macros,
+        macro_states: states,
+        header_declarations,
+    }
 }
 
 /// Object macros from available source headers are needed to distinguish a
@@ -4798,6 +4882,373 @@ fn prototype_declarations<'a>(root: Node<'a>, b: &[u8]) -> Vec<Node<'a>> {
 /// (name, return type, params) for a function_definition.
 pub(crate) fn function_name(f: Node, b: &[u8]) -> Option<String> {
     fn_header(f, b).map(|(name, _, _)| name)
+}
+
+struct ResolvedFunctionHeader {
+    header: FunctionHeader,
+    call_type: String,
+    expanded_code: Option<String>,
+}
+
+/// Expand declaration tokens without expression rendering. In particular a
+/// type-valued replacement must not first be interpreted as a C call/cast.
+fn expand_declaration_tokens(
+    source: &str,
+    macros: &HashMap<String, MacroDef>,
+    disabled: &mut HashSet<String>,
+    budget: &mut usize,
+) -> Option<String> {
+    let bytes = source.as_bytes();
+    let mut out = String::new();
+    let mut i = 0;
+    while i < bytes.len() {
+        if *budget == 0 {
+            return None;
+        }
+        let start = i;
+        if let Some(end) = macro_opaque_end(bytes, i) {
+            i = end;
+        } else if bytes[i].is_ascii_digit()
+            || (bytes[i] == b'.' && bytes.get(i + 1).is_some_and(u8::is_ascii_digit))
+        {
+            i += 1;
+            while i < bytes.len() {
+                if bytes[i] == b'.'
+                    || (matches!(bytes[i], b'+' | b'-')
+                        && matches!(bytes[i - 1], b'e' | b'E' | b'p' | b'P'))
+                {
+                    i += 1;
+                } else {
+                    let next = macro_identifier_unit(bytes, i, false);
+                    if next == 0 {
+                        break;
+                    }
+                    i += next;
+                }
+            }
+        } else if macro_identifier_unit(bytes, i, true) != 0 {
+            i += macro_identifier_unit(bytes, i, true);
+            while i < bytes.len() {
+                let next = macro_identifier_unit(bytes, i, false);
+                if next == 0 {
+                    break;
+                }
+                i += next;
+            }
+            let name = &source[start..i];
+            if disabled.len() < 64 && !disabled.contains(name) {
+                if let Some(definition) = macros.get(name) {
+                    let replacement = if let Some(params) = &definition.params {
+                        let mut open = i;
+                        while open < bytes.len() {
+                            if bytes[open].is_ascii_whitespace() {
+                                open += 1;
+                            } else if bytes[open..].starts_with(b"/*")
+                                || bytes[open..].starts_with(b"//")
+                            {
+                                open = macro_opaque_end(bytes, open)?;
+                            } else {
+                                break;
+                            }
+                        }
+                        if bytes.get(open) != Some(&b'(') {
+                            None
+                        } else if let Some((args, end)) = macro_arguments(source, open) {
+                            i = end + 1;
+                            Some(substitute(&definition.body, params, &args))
+                        } else {
+                            None
+                        }
+                    } else {
+                        Some(definition.body.clone())
+                    };
+                    if let Some(replacement) = replacement {
+                        *budget -= 1;
+                        disabled.insert(name.to_string());
+                        let replacement =
+                            expand_declaration_tokens(&replacement, macros, disabled, budget);
+                        disabled.remove(name);
+                        out.push_str(&replacement?);
+                        continue;
+                    }
+                }
+            }
+        } else {
+            i += source[i..].chars().next()?.len_utf8();
+        }
+        let token = &source[start..i];
+        *budget = budget.checked_sub(token.len())?;
+        out.push_str(token);
+    }
+    Some(out)
+}
+
+fn expanded_declaration_specifier(node: Node, bytes: &[u8]) -> String {
+    let Some(base) = node.child_by_field_name("type") else {
+        return String::new();
+    };
+    let raw = text(base, bytes);
+    let base_code = if raw == "unsigned long" {
+        "long unsigned"
+    } else {
+        raw
+    };
+    let prefix = named_children(node)
+        .into_iter()
+        .filter(|child| {
+            child.end_byte() <= base.start_byte()
+                && matches!(child.kind(), "storage_class_specifier" | "type_qualifier")
+        })
+        .map(|child| text(child, bytes))
+        .collect::<Vec<_>>()
+        .join(" ");
+    format!("{prefix} {base_code}")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn expanded_declaration_declarator(node: Node, bytes: &[u8]) -> Option<String> {
+    let inner = || {
+        node.child_by_field_name("declarator")
+            .map(|child| expanded_declaration_declarator(child, bytes))
+            .unwrap_or_else(|| Some(String::new()))
+    };
+    match node.kind() {
+        "identifier" => Some(String::new()),
+        "pointer_declarator" | "abstract_pointer_declarator" => {
+            let qualifiers = named_children(node)
+                .into_iter()
+                .filter(|child| child.kind() == "type_qualifier")
+                .map(|child| text(child, bytes))
+                .collect::<Vec<_>>()
+                .join(" ");
+            let nested = inner()?;
+            Some(if qualifiers.is_empty() {
+                format!("*{nested}")
+            } else {
+                format!("* {qualifiers}{nested}")
+            })
+        }
+        "array_declarator" | "abstract_array_declarator" => Some(format!("{}[]", inner()?)),
+        "function_declarator" => {
+            let nested = inner()?;
+            let parameters = node.child_by_field_name("parameters")?;
+            let parameters = named_children(parameters)
+                .into_iter()
+                .filter(|param| {
+                    matches!(param.kind(), "parameter_declaration" | "variadic_parameter")
+                })
+                .map(|param| {
+                    if param.kind() == "variadic_parameter" {
+                        return Some("...".to_string());
+                    }
+                    let code = expanded_declaration_specifier(param, bytes);
+                    let suffix = param
+                        .child_by_field_name("declarator")
+                        .map(|decl| expanded_declaration_declarator(decl, bytes))
+                        .unwrap_or_else(|| Some(String::new()))?;
+                    Some(if suffix.is_empty() {
+                        code
+                    } else {
+                        format!("{code} {suffix}")
+                    })
+                })
+                .collect::<Option<Vec<_>>>()?
+                .join(", ");
+            Some(format!("{nested}({parameters})"))
+        }
+        _ => None,
+    }
+}
+
+fn expanded_prototype_code(node: Node, bytes: &[u8]) -> Option<String> {
+    let specifier = expanded_declaration_specifier(node, bytes);
+    let mut cursor = node.walk();
+    let declarations = node
+        .children_by_field_name("declarator", &mut cursor)
+        .map(|decl| {
+            expanded_declaration_declarator(decl, bytes)
+                .map(|declarator| format!("{specifier} {declarator}"))
+        })
+        .collect::<Option<Vec<_>>>()?;
+    Some(esc(&format!("{specifier} {};", declarations.join(" "))))
+}
+
+// CDT source ranges start after an empty leading specifier macro. A nonempty
+// leading macro instead gives declarations a synthesized specifier/declarator
+// spelling; a macro after an ordinary leading qualifier retains raw CODE.
+fn declaration_code_start(source: &str, macros: &HashMap<String, MacroDef>) -> usize {
+    let bytes = source.as_bytes();
+    let mut start = 0;
+    loop {
+        let mut end = start;
+        while end < bytes.len() {
+            let size = macro_identifier_unit(bytes, end, end == start);
+            if size == 0 {
+                break;
+            }
+            end += size;
+        }
+        if end == start || !macros.contains_key(&source[start..end]) {
+            return start;
+        }
+        if !expand_declaration_tokens(
+            &source[start..end],
+            macros,
+            &mut HashSet::new(),
+            &mut 65_536,
+        )
+        .is_some_and(|expanded| expanded.trim().is_empty())
+        {
+            return start;
+        }
+        start = end;
+        while start < bytes.len() && bytes[start].is_ascii_whitespace() {
+            start += 1;
+        }
+    }
+}
+
+pub(crate) struct EmptyMacroMethodSpan {
+    pub code: String,
+    pub start: usize,
+}
+
+/// Used lazily by location recovery only when a METHOD's CODE differs from its
+/// parsed source. Verify omitted prefixes in the same include-aware, immutable
+/// macro environment as lowering; ordinary suffix text is not an anchor.
+pub(crate) fn empty_macro_method_spans(
+    sources: &[(String, String)],
+) -> HashMap<(String, usize), EmptyMacroMethodSpan> {
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let units: Vec<_> = sources
+        .iter()
+        .map(|(file, src)| SourceUnit {
+            file: file.clone(),
+            src: src.clone(),
+            tree: parser.parse(src, None).unwrap(),
+        })
+        .collect();
+    let mut spans = HashMap::new();
+    for unit in &units {
+        let bytes = unit.src.as_bytes();
+        let context = body_macro_context(unit.tree.root_node(), bytes, &unit.file, &units);
+        for node in translation_unit_items(unit.tree.root_node(), bytes) {
+            if node.kind() != "function_definition" {
+                continue;
+            }
+            let Some(macros) = context.macro_states.get(&node.id()) else {
+                continue;
+            };
+            let source = text(node, bytes);
+            let offset = declaration_code_start(source, macros);
+            if offset > 0 {
+                spans.insert(
+                    (unit.file.clone(), node.start_byte()),
+                    EmptyMacroMethodSpan {
+                        code: source[offset..].replace("\\n", "\n").trim().to_string(),
+                        start: node.start_byte() + offset,
+                    },
+                );
+            }
+        }
+    }
+    spans
+}
+
+fn resolved_function_header(
+    f: Node,
+    decl: Node,
+    bytes: &[u8],
+    macros: &HashMap<String, MacroDef>,
+) -> Option<ResolvedFunctionHeader> {
+    let original = fn_header_declarator(f, decl, bytes)?;
+    let fallback = || ResolvedFunctionHeader {
+        header: fn_header_declarator(f, decl, bytes).expect("original header"),
+        call_type: function_return_type(f, decl, bytes, TypeRole::Expression),
+        expanded_code: None,
+    };
+    let end = f
+        .child_by_field_name("body")
+        .map_or(f.end_byte(), |body| body.start_byte());
+    let raw = std::str::from_utf8(&bytes[f.start_byte()..end]).ok()?;
+    let Some(expanded) = expand_declaration_tokens(raw, macros, &mut HashSet::new(), &mut 65_536)
+    else {
+        return Some(fallback());
+    };
+    if expanded == raw {
+        return Some(fallback());
+    }
+    let source = if f.kind() == "function_definition" {
+        format!("{expanded}{{}}")
+    } else {
+        expanded
+    };
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let tree = parser.parse(&source, None)?;
+    let node = named_children(tree.root_node())
+        .into_iter()
+        .find(|node| node.kind() == f.kind());
+    let Some(node) = node.filter(|node| !node.has_error()) else {
+        return Some(fallback());
+    };
+    let candidates = if node.kind() == "function_definition" {
+        node.child_by_field_name("declarator")
+            .into_iter()
+            .collect::<Vec<_>>()
+    } else {
+        let mut cursor = node.walk();
+        node.children_by_field_name("declarator", &mut cursor)
+            .collect()
+    };
+    let Some((expanded_decl, mut header)) = candidates
+        .into_iter()
+        .filter_map(|decl| {
+            fn_header_declarator(node, decl, source.as_bytes()).map(|header| (decl, header))
+        })
+        .find(|(_, header)| header.0 == original.0)
+    else {
+        return Some(fallback());
+    };
+    if header.2.len() != original.2.len() {
+        return Some(fallback());
+    }
+    for (parameter, original) in header.2.iter_mut().zip(original.2) {
+        parameter.code = original.code;
+    }
+    let call_type =
+        function_return_type(node, expanded_decl, source.as_bytes(), TypeRole::Expression);
+    let code = text(f, bytes);
+    let code_start = declaration_code_start(code, macros);
+    let leading = &code[code_start..];
+    let mut token_end = 0;
+    while token_end < leading.len() {
+        let size = macro_identifier_unit(leading.as_bytes(), token_end, token_end == 0);
+        if size == 0 {
+            break;
+        }
+        token_end += size;
+    }
+    let leading_macro = macros.contains_key(&leading[..token_end]);
+    let expanded_code = if node.kind() == "declaration" && leading_macro {
+        expanded_prototype_code(node, source.as_bytes())
+    } else if code_start > 0 {
+        Some(esc(leading))
+    } else {
+        None
+    };
+    Some(ResolvedFunctionHeader {
+        header,
+        call_type,
+        expanded_code,
+    })
 }
 
 fn fn_header(f: Node, b: &[u8]) -> Option<FunctionHeader> {
@@ -5770,6 +6221,34 @@ fn macro_argument_text(source: &str) -> String {
     out.trim().to_string()
 }
 
+// Consume the complete token even when its spelling is outside the ASCII
+// macro-name registry. Otherwise an ASCII suffix of an extended identifier
+// could be mistaken for a separate macro invocation.
+fn macro_identifier_unit(bytes: &[u8], start: usize, first: bool) -> usize {
+    let b = bytes[start];
+    if b.is_ascii_alphabetic()
+        || matches!(b, b'_' | b'$')
+        || !b.is_ascii()
+        || (!first && b.is_ascii_digit())
+    {
+        return 1;
+    }
+    if b == b'\\' {
+        let digits = match bytes.get(start + 1) {
+            Some(b'u') => 4,
+            Some(b'U') => 8,
+            _ => return 0,
+        };
+        if bytes
+            .get(start + 2..start + 2 + digits)
+            .is_some_and(|value| value.iter().all(u8::is_ascii_hexdigit))
+        {
+            return 2 + digits;
+        }
+    }
+    0
+}
+
 /// Expand known function macros using preprocessing-token parentheses. Strings
 /// and comments are opaque; ordinary calls and type spellings remain untouched.
 fn expand_function_macro_tokens(
@@ -5778,33 +6257,6 @@ fn expand_function_macro_tokens(
     disabled: &mut HashSet<String>,
     budget: &mut usize,
 ) -> String {
-    // Consume the complete token even when its spelling is outside the ASCII
-    // macro-name registry. Otherwise an ASCII suffix of an extended identifier
-    // could be mistaken for a separate macro invocation.
-    fn identifier_unit(bytes: &[u8], start: usize, first: bool) -> usize {
-        let b = bytes[start];
-        if b.is_ascii_alphabetic()
-            || matches!(b, b'_' | b'$')
-            || !b.is_ascii()
-            || (!first && b.is_ascii_digit())
-        {
-            return 1;
-        }
-        if b == b'\\' {
-            let digits = match bytes.get(start + 1) {
-                Some(b'u') => 4,
-                Some(b'U') => 8,
-                _ => return 0,
-            };
-            if bytes
-                .get(start + 2..start + 2 + digits)
-                .is_some_and(|value| value.iter().all(u8::is_ascii_hexdigit))
-            {
-                return 2 + digits;
-            }
-        }
-        0
-    }
     let bytes = source.as_bytes();
     let mut result = String::new();
     let mut copied = 0;
@@ -5828,7 +6280,7 @@ fn expand_function_macro_tokens(
                 {
                     i += 1;
                 } else {
-                    let next = identifier_unit(bytes, i, false);
+                    let next = macro_identifier_unit(bytes, i, false);
                     if next == 0 {
                         break;
                     }
@@ -5837,7 +6289,7 @@ fn expand_function_macro_tokens(
             }
             continue;
         }
-        let first = identifier_unit(bytes, i, true);
+        let first = macro_identifier_unit(bytes, i, true);
         if first == 0 {
             i += 1;
             continue;
@@ -5845,7 +6297,7 @@ fn expand_function_macro_tokens(
         let start = i;
         i += first;
         while i < bytes.len() {
-            let next = identifier_unit(bytes, i, false);
+            let next = macro_identifier_unit(bytes, i, false);
             if next == 0 {
                 break;
             }
@@ -5898,6 +6350,64 @@ fn expand_function_macro_tokens(
 #[cfg(test)]
 mod macro_token_tests {
     use super::*;
+
+    #[test]
+    fn declaration_expansion_preserves_opaque_preprocessing_tokens() {
+        let macros = HashMap::from([(
+            "M".to_string(),
+            MacroDef {
+                params: None,
+                body: "int".to_string(),
+                file: "test.c".to_string(),
+                directive: String::new(),
+            },
+        )]);
+        let source = r#"M éM \u00e9M 1M 0xM 1e+M "M" 'M' /* M */"#;
+        assert_eq!(
+            expand_declaration_tokens(source, &macros, &mut HashSet::new(), &mut 65_536),
+            Some(r#"int éM \u00e9M 1M 0xM 1e+M "M" 'M' /* M */"#.to_string())
+        );
+    }
+
+    #[test]
+    fn declaration_expansion_bounds_recursive_and_oversized_replacements() {
+        let macros = HashMap::from([
+            (
+                "A".to_string(),
+                MacroDef {
+                    params: None,
+                    body: "B".to_string(),
+                    file: "test.c".to_string(),
+                    directive: String::new(),
+                },
+            ),
+            (
+                "B".to_string(),
+                MacroDef {
+                    params: None,
+                    body: "A".to_string(),
+                    file: "test.c".to_string(),
+                    directive: String::new(),
+                },
+            ),
+            (
+                "BIG".to_string(),
+                MacroDef {
+                    params: None,
+                    body: "x".repeat(65_536),
+                    file: "test.c".to_string(),
+                    directive: String::new(),
+                },
+            ),
+        ]);
+        assert_eq!(
+            expand_declaration_tokens("A f(A x)", &macros, &mut HashSet::new(), &mut 65_536),
+            Some("A f(A x)".to_string())
+        );
+        assert!(
+            expand_declaration_tokens("BIG", &macros, &mut HashSet::new(), &mut 65_536).is_none()
+        );
+    }
 
     #[test]
     fn argument_slots_follow_preprocessing_tokens() {
