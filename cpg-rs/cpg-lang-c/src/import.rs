@@ -1031,6 +1031,9 @@ fn locate_ast(
     let line = matched
         .as_ref()
         .map_or(inherited_line, |span| tokens[span.start].line);
+    let synthetic_truth_test = matched.is_none()
+        && cpg.name_of(node) == Some("<operator>.notEquals")
+        && cpg.in_kind(node, EdgeKind::Condition).next().is_some();
     // Synthesized or transformed nodes use the closest located AST ancestor;
     // they cannot redirect later source searches or escape the owning method.
     cpg.set_line(node, line);
@@ -1052,6 +1055,16 @@ fn locate_ast(
     children.sort_by_key(|&child| (cpg.order_of(child), child));
     for child in children {
         if cpg.kind_of(child) == NodeKind::Method {
+            continue;
+        }
+        // A normalized identifier condition introduces a zero/NULL literal
+        // absent from the source. Searching for it can consume a later loop
+        // update or body and move every following statement's location.
+        if synthetic_truth_test
+            && cpg.kind_of(child) == NodeKind::Literal
+            && cpg.argument_index_of(child) == 2
+        {
+            cpg.set_line(child, line);
             continue;
         }
         let end = locate_ast(cpg, child, tokens, next..child_range.end, line);
