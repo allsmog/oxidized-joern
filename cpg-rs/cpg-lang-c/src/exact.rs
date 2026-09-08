@@ -276,6 +276,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
 
         // Per-file tables (c2cpg resolves within the translation unit).
         let mut functions: HashMap<String, String> = HashMap::new();
+        let mut function_call_types: HashMap<String, String> = HashMap::new();
         let mut function_full_names: HashMap<String, String> = HashMap::new();
         let mut globals: HashMap<String, String> = HashMap::new();
         let mut macros: Arc<HashMap<String, MacroDef>> = Arc::new(HashMap::new());
@@ -364,21 +365,29 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                 "function_definition" => {
                     if let Some((name, ret, _)) = fn_header(f, b) {
                         function_full_names.insert(name.clone(), method_full(&name, &u.file));
+                        function_call_types.insert(
+                            name.clone(),
+                            function_return_type(
+                                f,
+                                f.child_by_field_name("declarator").unwrap(),
+                                b,
+                                TypeRole::Expression,
+                            ),
+                        );
                         functions.insert(name, ret);
                     }
                 }
                 "declaration" => {
-                    for (name, ret, _) in prototype_headers(f, b) {
+                    for (declarator, (name, ret, _)) in prototype_header_entries(f, b) {
                         function_full_names
                             .entry(name.clone())
                             .or_insert_with(|| name.clone());
+                        function_call_types.entry(name.clone()).or_insert_with(|| {
+                            function_return_type(f, declarator, b, TypeRole::Expression)
+                        });
                         functions.entry(name).or_insert(ret);
                     }
-                    let base = normalize_type(
-                        &f.child_by_field_name("type")
-                            .map(|t| text(t, b).to_string())
-                            .unwrap_or("ANY".into()),
-                    );
+
                     for d in named_children(f) {
                         let decl = if d.kind() == "init_declarator" {
                             d.child_by_field_name("declarator")
@@ -397,7 +406,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                             if !is_function_declaration(decl) {
                                 let name = innermost_id(decl, b);
                                 if !name.is_empty() {
-                                    globals.insert(name, declared_object_type(&base, decl, b));
+                                    globals.insert(name, declared_object_type(f, decl, b));
                                 }
                             }
                         }
@@ -409,6 +418,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
 
         let mut ctx = Ctx {
             functions: &functions,
+            function_call_types: &function_call_types,
             function_full_names: &function_full_names,
             definition_full_names: &definition_full_names,
             ambiguous_functions: &ambiguous_functions,
@@ -420,7 +430,9 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             file: u.file.clone(),
             used_macros: &mut used_macros,
             symbols: HashMap::new(),
+            symbol_call_types: HashMap::new(),
             method_functions: HashMap::new(),
+            method_call_types: HashMap::new(),
             phantoms: Vec::new(),
             stubs: &mut stub_uses,
             types: &mut used_types,
@@ -488,6 +500,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let empty_macro_states = HashMap::new();
     let mut sctx = Ctx {
         functions: &empty_fns,
+        function_call_types: &empty_fns,
         function_full_names: &empty_full_names,
         definition_full_names: &definition_full_names,
         ambiguous_functions: &empty_ambiguous,
@@ -499,7 +512,9 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         file: String::new(),
         used_macros: &mut used_macros,
         symbols: HashMap::new(),
+        symbol_call_types: HashMap::new(),
         method_functions: HashMap::new(),
+        method_call_types: HashMap::new(),
         phantoms: Vec::new(),
         stubs: &mut stub_uses2,
         types: &mut used_types,
@@ -848,6 +863,7 @@ struct MacroDef {
 /// Per-function emission context.
 struct Ctx<'a> {
     functions: &'a HashMap<String, String>,
+    function_call_types: &'a HashMap<String, String>,
     /// Translation-unit-local method identities. Duplicate C names are valid
     /// for `static` helpers across files; qualify those identities by file so
     /// they remain distinct and local calls resolve deterministically.
@@ -866,8 +882,10 @@ struct Ctx<'a> {
     file: String,
     // used macros: full_name -> (name, directive, nparams, ret type)
     used_macros: &'a mut std::collections::BTreeMap<String, (String, String, usize, String)>,
-    symbols: HashMap<String, String>, // local/param name -> type
-    method_functions: HashMap<String, String>, // block-scoped prototypes
+    symbols: HashMap<String, String>, // local/param name -> declaration type
+    symbol_call_types: HashMap<String, String>, // callable parameter -> result type
+    method_functions: HashMap<String, String>, // block-scoped prototype reference types
+    method_call_types: HashMap<String, String>, // independently rendered call result types
     // Joern's local-creation pass materialises a LOCAL at ORDER=0 atop the
     // method body BLOCK for each referenced global (CODE `<global> name`)
     // and each type name used as a sizeof(T) argument.
@@ -1102,7 +1120,9 @@ impl Ctx<'_> {
     fn emit_method(&mut self, f: Node, b: &[u8], d: usize, active: bool) {
         self.macros = self.macro_states.get(&f.id()).cloned().unwrap_or_default();
         self.symbols.clear();
+        self.symbol_call_types.clear();
         self.method_functions.clear();
+        self.method_call_types.clear();
         let (name, ret, params) = fn_header(f, b).expect("function header");
         let full = self
             .definition_full_names
@@ -1139,6 +1159,10 @@ impl Ctx<'_> {
         // Parameters: a METHOD_PARAMETER_IN and a mirrored _OUT, sharing ORDER.
         for (i, p) in params.iter().enumerate() {
             self.symbols.insert(p.name.clone(), p.ty.clone());
+            if let Some(call_type) = &p.call_type {
+                self.symbol_call_types
+                    .insert(p.name.clone(), call_type.clone());
+            }
             let order = (i + 1) as i64;
             for label in ["METHOD_PARAMETER_IN", "METHOD_PARAMETER_OUT"] {
                 self.line(
@@ -1414,7 +1438,9 @@ impl Ctx<'_> {
             }
         }
         self.symbols.clear();
+        self.symbol_call_types.clear();
         self.method_functions.clear();
+        self.method_call_types.clear();
         self.line(
             1,
             "BLOCK",
@@ -2031,7 +2057,9 @@ impl Ctx<'_> {
     /// Emit a BLOCK node and its statements, with a fresh child ORDER sequence.
     fn emit_block(&mut self, body: Node, b: &[u8], order: i64, depth: usize) {
         let outer_symbols = self.symbols.clone();
+        let outer_symbol_calls = self.symbol_call_types.clone();
         let outer_functions = self.method_functions.clone();
+        let outer_call_types = self.method_call_types.clone();
         let outer_bindings = self.sym_line.clone();
         self.line(
             depth,
@@ -2061,7 +2089,9 @@ impl Ctx<'_> {
             self.emit_stmt(s, b, &mut so, depth + 1);
         }
         self.symbols = outer_symbols;
+        self.symbol_call_types = outer_symbol_calls;
         self.method_functions = outer_functions;
+        self.method_call_types = outer_call_types;
         self.sym_line = outer_bindings;
     }
 
@@ -2375,7 +2405,9 @@ impl Ctx<'_> {
     /// update, and body carry none).
     fn emit_for(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
         let outer_symbols = self.symbols.clone();
+        let outer_symbol_calls = self.symbol_call_types.clone();
         let outer_functions = self.method_functions.clone();
+        let outer_call_types = self.method_call_types.clone();
         let outer_bindings = self.sym_line.clone();
         let init = n.child_by_field_name("initializer");
         let cond = n.child_by_field_name("condition");
@@ -2451,7 +2483,9 @@ impl Ctx<'_> {
             self.emit_loop_body(body, b, depth + 1, co, cs, "FOR_BODY");
         }
         self.symbols = outer_symbols;
+        self.symbol_call_types = outer_symbol_calls;
         self.method_functions = outer_functions;
+        self.method_call_types = outer_call_types;
         self.sym_line = outer_bindings;
     }
 
@@ -2533,15 +2567,16 @@ impl Ctx<'_> {
         assign_arg: Option<i64>,
         file_scope: bool,
     ) -> Option<usize> {
-        for (name, ret, _) in prototype_headers(n, b) {
+        for (declarator, (name, ret, _)) in prototype_header_entries(n, b) {
             self.symbols.remove(&name);
+            self.symbol_call_types.remove(&name);
+            self.method_call_types.insert(
+                name.clone(),
+                function_return_type(n, declarator, b, TypeRole::Expression),
+            );
             self.method_functions.insert(name, ret);
         }
-        let ty = normalize_type(
-            &n.child_by_field_name("type")
-                .map(|t| text(t, b).to_string())
-                .unwrap_or("ANY".into()),
-        );
+        let ty = declaration_type(n, b, TypeRole::Declaration);
         // CDT registers the decl-SPECIFIER type separately from the declared
         // type: `unsigned char c` also registers bare `unsigned` (pinned by
         // musl memcmp.c); a pointer decl registers its base.
@@ -2583,9 +2618,11 @@ impl Ctx<'_> {
                 continue;
             }
             let name = innermost_id(decl, b);
-            let full_ty = declared_object_type(&ty, decl, b);
+            let full_ty = declared_object_type(n, decl, b);
             let function_pointer = find_function_declarator(decl).is_some();
             self.method_functions.remove(&name);
+            self.method_call_types.remove(&name);
+            self.symbol_call_types.remove(&name);
             self.symbols.insert(name.clone(), full_ty.clone());
             let lo = *order;
             *order += 1;
@@ -2612,8 +2649,22 @@ impl Ctx<'_> {
                 full_ty,
             });
         }
-        if !items.is_empty() {
-            self.types.insert(specifier_type(&ty));
+        if items
+            .iter()
+            .any(|item| find_function_declarator(item.decl).is_none())
+        {
+            let raw_type = n
+                .child_by_field_name("type")
+                .map(|node| text(node, b))
+                .unwrap_or("ANY");
+            let registered = if primitive_type(raw_type, TypeRole::Declaration).is_some() {
+                // CDT's extra decl-specifier registration uses the first word
+                // of the declared spelling (`short unsigned int` -> `short`).
+                ty.split_whitespace().next().unwrap_or(&ty)
+            } else {
+                &ty
+            };
+            self.types.insert(registered.to_string());
         }
         // A for declaration contributes one initializer slot after its LOCALs.
         // Multiple declarators share a synthetic block, including an empty one
@@ -3004,16 +3055,26 @@ impl Ctx<'_> {
                     // DYNAMIC_DISPATCH, receiver at ORDER=1 with no
                     // ARGUMENT_INDEX, args shifted to ORDER=2.. / INDEX=1..
                     self.note_call("<operator>.pointerCall", argc);
-                    let receiver_name = callee
-                        .map(unwrap_paren)
+                    let receiver = callee.map(unwrap_paren);
+                    let dereferenced = receiver.is_some_and(|node| node.kind() != "identifier");
+                    let receiver_name = receiver
+                        .and_then(|node| callable_identifier(node, b))
                         .map(|node| text(node, b))
                         .unwrap_or(&name);
                     let ty = self
-                        .symbols
+                        .symbol_call_types
                         .get(receiver_name)
-                        .or_else(|| self.globals.get(receiver_name))
-                        .or_else(|| self.method_functions.get(receiver_name))
-                        .or_else(|| self.functions.get(receiver_name))
+                        .or_else(|| {
+                            self.symbols
+                                .get(receiver_name)
+                                .or_else(|| self.globals.get(receiver_name))
+                                // Unwrapping `*` is valid for known function
+                                // pointers; it must not infer a callable type
+                                // from an arbitrary object or arithmetic node.
+                                .filter(|ty| !dereferenced || ty.contains('('))
+                        })
+                        .or_else(|| self.method_call_types.get(receiver_name))
+                        .or_else(|| self.function_call_types.get(receiver_name))
                         .map(|ty| ty.split('(').next().unwrap_or(ty).to_string())
                         .unwrap_or_else(|| "ANY".into());
                     self.line(
@@ -3040,9 +3101,9 @@ impl Ctx<'_> {
                     }
                 } else {
                     let ty = self
-                        .method_functions
+                        .method_call_types
                         .get(&name)
-                        .or_else(|| self.functions.get(&name))
+                        .or_else(|| self.function_call_types.get(&name))
                         .cloned()
                         .unwrap_or("ANY".into());
                     let method_full_name = self
@@ -3330,6 +3391,9 @@ struct Param {
     ty: String,
     code: String,
     variadic: bool,
+    // Function-pointer parameters have a declaration type that omits the
+    // pointer signature, but indirect calls still use the resolved return type.
+    call_type: Option<String>,
 }
 
 type FunctionHeader = (String, String, Vec<Param>);
@@ -3544,7 +3608,8 @@ fn is_function_declaration(decl: Node) -> bool {
             .is_some_and(|name| name.kind() == "identifier")
 }
 
-fn declared_object_type(base: &str, decl: Node, b: &[u8]) -> String {
+fn declared_object_type(declaration: Node, decl: Node, b: &[u8]) -> String {
+    let base = declaration_type(declaration, b, TypeRole::Declaration);
     if let Some(fd) = find_function_declarator(decl) {
         if let Some(pointer) = fd.child_by_field_name("declarator") {
             if pointer.kind() == "parenthesized_declarator" {
@@ -3566,10 +3631,7 @@ fn declared_object_type(base: &str, decl: Node, b: &[u8]) -> String {
                                 if param.kind() != "parameter_declaration" {
                                     return None;
                                 }
-                                let base = param
-                                    .child_by_field_name("type")
-                                    .map(|ty| normalize_type(text(ty, b)))
-                                    .unwrap_or_else(|| "ANY".into());
+                                let base = declaration_type(param, b, TypeRole::Expression);
                                 Some(format!(
                                     "{base}{}",
                                     param
@@ -3580,8 +3642,10 @@ fn declared_object_type(base: &str, decl: Node, b: &[u8]) -> String {
                             })
                             .collect::<Vec<_>>()
                             .join(",")
+                            .replace(' ', "")
                     })
                     .unwrap_or_default();
+                let base = declaration_type(declaration, b, TypeRole::Expression);
                 return format!("{base}{shape}({params})");
             }
         }
@@ -3608,14 +3672,12 @@ fn fn_header(f: Node, b: &[u8]) -> Option<FunctionHeader> {
     fn_header_declarator(f, f.child_by_field_name("declarator")?, b)
 }
 
-fn fn_header_declarator(f: Node, decl: Node, b: &[u8]) -> Option<FunctionHeader> {
-    let parenthesized = parenthesized_function_parts(decl);
-    let base = parenthesized
+fn function_return_type(f: Node, decl: Node, b: &[u8], role: TypeRole) -> String {
+    let base_node = parenthesized_function_parts(decl)
         .and_then(|(_, ret)| ret)
         .or_else(|| macro_declaration_return(f))
-        .or_else(|| f.child_by_field_name("type"))
-        .map(|t| text(t, b).to_string())
-        .unwrap_or("ANY".into());
+        .or_else(|| f.child_by_field_name("type"));
+    let base = specifier_type_for_role(f, base_node, b, role);
     // `void *bsearch(...)`: pointer levels wrap the function declarator.
     let mut stars = 0;
     let mut cur = decl;
@@ -3626,7 +3688,17 @@ fn fn_header_declarator(f: Node, decl: Node, b: &[u8]) -> Option<FunctionHeader>
             None => break,
         }
     }
-    let ret = format!("{}{}", normalize_type(&base), "*".repeat(stars));
+    format!("{base}{}", "*".repeat(stars))
+}
+
+fn fn_header_declarator(f: Node, decl: Node, b: &[u8]) -> Option<FunctionHeader> {
+    let role = if f.kind() == "function_definition" {
+        TypeRole::DefinitionReturn
+    } else {
+        TypeRole::Declaration
+    };
+    let ret = function_return_type(f, decl, b, role);
+    let parenthesized = parenthesized_function_parts(decl);
     let fd = find_function_declarator(decl)?;
     let name = if let Some((name, _)) = parenthesized {
         text(name, b).to_string()
@@ -3638,11 +3710,7 @@ fn fn_header_declarator(f: Node, decl: Node, b: &[u8]) -> Option<FunctionHeader>
     if let Some(pl) = fd.child_by_field_name("parameters") {
         for p in named_children(pl) {
             if p.kind() == "parameter_declaration" {
-                let base = normalize_type(
-                    &p.child_by_field_name("type")
-                        .map(|t| text(t, b).to_string())
-                        .unwrap_or("ANY".into()),
-                );
+                let base = declaration_type(p, b, TypeRole::Declaration);
                 let decl = p.child_by_field_name("declarator");
                 let ty = format!(
                     "{base}{}",
@@ -3654,6 +3722,9 @@ fn fn_header_declarator(f: Node, decl: Node, b: &[u8]) -> Option<FunctionHeader>
                     ty,
                     code: text(p, b).to_string(),
                     variadic: false,
+                    call_type: decl
+                        .filter(|decl| find_function_declarator(*decl).is_some())
+                        .map(|decl| function_return_type(p, decl, b, TypeRole::Expression)),
                 });
             } else if p.kind() == "variadic_parameter" {
                 // CDT uses the previous parameter's type for the synthetic
@@ -3668,6 +3739,7 @@ fn fn_header_declarator(f: Node, decl: Node, b: &[u8]) -> Option<FunctionHeader>
                     code: format!("<param>{index}..."),
                     ty,
                     variadic: true,
+                    call_type: None,
                 });
             }
         }
@@ -3682,6 +3754,22 @@ fn find_function_declarator(n: Node) -> Option<Node> {
     named_children(n)
         .into_iter()
         .find_map(find_function_declarator)
+}
+
+/// Parentheses and function-pointer dereference retain the callable binding.
+/// Field/index/arithmetic receivers still require independent type resolution.
+fn callable_identifier<'tree>(n: Node<'tree>, b: &[u8]) -> Option<Node<'tree>> {
+    let n = unwrap_paren(n);
+    if n.kind() == "identifier" {
+        Some(n)
+    } else if n.kind() == "pointer_expression"
+        && n.child_by_field_name("operator")
+            .is_some_and(|op| text(op, b) == "*")
+    {
+        callable_identifier(n.child_by_field_name("argument")?, b)
+    } else {
+        None
+    }
 }
 
 fn unwrap_paren(n: Node) -> Node {
@@ -3805,16 +3893,175 @@ fn assignment_name(op: &str) -> String {
     }
 }
 
-/// CDT renders multi-keyword primitive types reordered and unspaced
-/// (`unsigned long` → `longunsigned`, pinned by corpus/exprs.c). Extend this
-/// table only with oracle-pinned combinations.
-/// CDT's typeForDeclSpecifier rendering, where it diverges from the declared
-/// type: `unsigned char` -> `unsigned`. Extend only with oracle pins.
-fn specifier_type(normalized: &str) -> String {
-    match normalized {
-        "unsigned char" => "unsigned".into(),
-        t => t.into(),
+/// CDT uses distinct primitive spellings for declaration specifiers, definition
+/// returns and resolved expression results. Keep these roles separate: for
+/// `unsigned long`, they are `longunsigned`, `unsigned long` and
+/// `unsigned longint`, respectively (all pinned by primitive-roles fixtures).
+#[derive(Clone, Copy)]
+enum TypeRole {
+    Declaration,
+    DefinitionReturn,
+    Expression,
+}
+
+fn declaration_type(declaration: Node, b: &[u8], role: TypeRole) -> String {
+    specifier_type_for_role(
+        declaration,
+        declaration.child_by_field_name("type"),
+        b,
+        role,
+    )
+}
+
+fn specifier_type_for_role(
+    declaration: Node,
+    type_node: Option<Node>,
+    b: &[u8],
+    role: TypeRole,
+) -> String {
+    let raw = type_node.map(|node| text(node, b)).unwrap_or("ANY");
+    let Some(primitive) = primitive_type(raw, role) else {
+        // Typedef names, tagged types and other specifiers retain their existing
+        // handling. In particular this does not change cast type rendering.
+        return normalize_type(raw);
+    };
+    // Qualifiers are siblings of the type node, not part of its source range.
+    // CDT keeps base `volatile`, drops `const`, and ignores qualifiers nested
+    // in pointer declarators for these selected declaration/return properties.
+    let volatile = named_children(declaration)
+        .iter()
+        .any(|node| node.kind() == "type_qualifier" && text(*node, b) == "volatile");
+    if volatile {
+        format!("volatile {primitive}")
+    } else {
+        primitive
     }
+}
+
+fn primitive_type(raw: &str, role: TypeRole) -> Option<String> {
+    let words: Vec<_> = raw.split_whitespace().collect();
+    if words.is_empty()
+        || words.iter().any(|word| {
+            !matches!(
+                *word,
+                "void"
+                    | "char"
+                    | "short"
+                    | "int"
+                    | "long"
+                    | "signed"
+                    | "unsigned"
+                    | "float"
+                    | "double"
+                    | "_Bool"
+            )
+        })
+    {
+        return None;
+    }
+    let count = |word: &str| words.iter().filter(|&&w| w == word).count();
+    if words
+        .iter()
+        .any(|word| count(word) > if *word == "long" { 2 } else { 1 })
+        || (count("signed") > 0 && count("unsigned") > 0)
+        || (count("short") > 0 && count("long") > 0)
+    {
+        return None;
+    }
+    let signed = count("signed") > 0;
+    let unsigned = count("unsigned") > 0;
+    let explicit_int = count("int") > 0;
+    let width = if count("short") > 0 {
+        "short"
+    } else {
+        match count("long") {
+            0 => "",
+            1 => "long",
+            _ => "longlong",
+        }
+    };
+    for atom in ["void", "char", "float", "double", "_Bool"] {
+        if count(atom) == 0 {
+            continue;
+        }
+        let allowed = match atom {
+            "char" => {
+                width.is_empty()
+                    && !explicit_int
+                    && words.len() == 1 + usize::from(signed || unsigned)
+            }
+            "double" => {
+                !signed
+                    && !unsigned
+                    && !explicit_int
+                    && matches!(width, "" | "long")
+                    && words.len() == 1 + usize::from(width == "long")
+            }
+            _ => words.len() == 1,
+        };
+        if !allowed {
+            return None;
+        }
+        return Some(match atom {
+            "char" if signed => "signedchar".into(),
+            "char" if unsigned => "unsigned char".into(),
+            "double" if width == "long" => "longdouble".into(),
+            "_Bool" if matches!(role, TypeRole::DefinitionReturn) => "bool".into(),
+            _ => atom.into(),
+        });
+    }
+    let ty = match role {
+        TypeRole::Expression => format!("{}{width}int", if unsigned { "unsigned " } else { "" }),
+        TypeRole::DefinitionReturn => format!(
+            "{}{width}{}",
+            if unsigned {
+                if width.is_empty() && !explicit_int {
+                    "unsigned"
+                } else {
+                    "unsigned "
+                }
+            } else if signed {
+                "signed"
+            } else {
+                ""
+            },
+            if explicit_int { "int" } else { "" },
+        ),
+        TypeRole::Declaration if !width.is_empty() => format!(
+            "{width}{}",
+            if unsigned {
+                if explicit_int {
+                    " unsigned int"
+                } else {
+                    "unsigned"
+                }
+            } else if signed {
+                if explicit_int {
+                    "signedint"
+                } else {
+                    "signed"
+                }
+            } else {
+                ""
+            },
+        ),
+        TypeRole::Declaration => format!(
+            "{}{}",
+            if unsigned {
+                if explicit_int {
+                    "unsigned "
+                } else {
+                    "unsigned"
+                }
+            } else if signed {
+                "signed"
+            } else {
+                ""
+            },
+            if explicit_int { "int" } else { "" },
+        ),
+    };
+    Some(ty)
 }
 
 fn normalize_type(base: &str) -> String {
