@@ -36,7 +36,9 @@ use std::time::{Duration, Instant};
 /// stubs) are KEPT at collection time (`go_generated_registers_routes`) —
 /// file-set change, same staleness hazard as a shape change.
 /// v12: C braceless `if` consequences are present in canonical AST/CFG/DDG.
-pub const GRAPH_SHAPE_VERSION: u32 = 13;
+/// v13: C callable declarations, loop conditions, and preprocessing expanded.
+/// v14: C type roles, storage modifiers, blocks, and reaching definitions expanded.
+pub const GRAPH_SHAPE_VERSION: u32 = 14;
 
 const CACHE_MANIFEST_VERSION: u32 = 1;
 const CACHE_GRAPH_FORMAT: &str = "CPG2";
