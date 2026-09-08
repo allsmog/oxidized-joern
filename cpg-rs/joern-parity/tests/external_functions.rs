@@ -386,3 +386,25 @@ fn synthetic_for_condition_does_not_shift_real_call_locations() {
         );
     }
 }
+
+#[test]
+fn inactive_function_bodies_do_not_register_block_prototypes() {
+    let cpg = build(&[(
+        "conditional_prototypes.c",
+        include_str!("../corpus/conditional_prototypes.c"),
+    )]);
+    assert!(cpg.method_named("inactive_external").is_empty());
+    for name in [
+        "active_external",
+        "active_top_prototype",
+        "inactive_top_prototype",
+    ] {
+        assert_eq!(cpg.method_named(name).len(), 1, "{name}");
+    }
+    let inactive = method(&cpg, "inactive_block_prototype");
+    assert!(!cpg_analysis::pass::ast_descendants(&cpg, inactive)
+        .into_iter()
+        .any(|node| cpg.kind_of(node) == NodeKind::Call));
+    let call = calls_in(&cpg, "active_block_prototype", "active_external(x)")[0];
+    assert_direct(&cpg, call, "active_external");
+}

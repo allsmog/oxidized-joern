@@ -9,6 +9,7 @@
 //! the output diffs cleanly against the oracle.
 
 use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 use tree_sitter::{Node, Parser};
 
 pub fn canonical_dump_paths(paths: &[String]) -> String {
@@ -54,17 +55,17 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     // Project-wide registries: defined functions (calls to these never become
     // stubs; each also gets a method TYPE_DECL) and struct definitions.
     let mut defined: Vec<String> = Vec::new();
-    let mut raw_fn_decls: Vec<(String, String)> = Vec::new(); // (name, file)
+    let mut raw_fn_decls: Vec<(String, String, usize)> = Vec::new(); // (name, file, node id)
     let mut struct_decls: Vec<(String, String, String)> = Vec::new(); // (tag, code, file)
     let mut used_types: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     for u in &units {
         let b = u.src.as_bytes();
-        for f in named_children(u.tree.root_node()) {
+        for f in translation_unit_items(u.tree.root_node()) {
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(f, b) {
                         defined.push(name.clone());
-                        raw_fn_decls.push((name, u.file.clone()));
+                        raw_fn_decls.push((name, u.file.clone(), f.id()));
                     }
                 }
                 "struct_specifier" | "union_specifier" | "enum_specifier"
@@ -81,6 +82,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                         .child_by_field_name("declarator")
                         .map(|x| text(x, b).to_string())
                         .unwrap_or_default();
+                    used_types.insert(tag.clone());
                     struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
                     // The typedef's underlying type registers as a used type,
                     // with its RAW source spelling (`unsigned int` is not
@@ -93,13 +95,16 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             }
         }
     }
-    let mut definition_counts: HashMap<String, usize> = HashMap::new();
-    for (name, _) in &raw_fn_decls {
-        *definition_counts.entry(name.clone()).or_default() += 1;
+    let mut definition_files: HashMap<String, HashSet<String>> = HashMap::new();
+    for (name, file, _) in &raw_fn_decls {
+        definition_files
+            .entry(name.clone())
+            .or_default()
+            .insert(file.clone());
     }
-    let ambiguous_functions: HashSet<String> = definition_counts
+    let ambiguous_functions: HashSet<String> = definition_files
         .iter()
-        .filter_map(|(name, &count)| (count > 1).then_some(name.clone()))
+        .filter_map(|(name, files)| (files.len() > 1).then_some(name.clone()))
         .collect();
     let method_full = |name: &str, file: &str| {
         if ambiguous_functions.contains(name) {
@@ -108,16 +113,39 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             name.to_string()
         }
     };
+    let mut definition_full_names = HashMap::new();
+    let mut occurrences: HashMap<String, usize> = HashMap::new();
     let fn_decls: Vec<(String, String)> = raw_fn_decls
         .iter()
-        .map(|(name, file)| (method_full(name, file), file.clone()))
+        .map(|(name, file, id)| {
+            let base = method_full(name, file);
+            let occurrence = occurrences.entry(base.clone()).or_default();
+            let full = if *occurrence == 0 {
+                base
+            } else {
+                format!("{base}<duplicate>{}", *occurrence - 1)
+            };
+            *occurrence += 1;
+            definition_full_names.insert(*id, full.clone());
+            (full, file.clone())
+        })
         .collect();
 
     // Function declarations remain external METHODs even when never called.
     // A definition wins over its declarations; repeated prototypes coalesce.
     let mut prototypes = std::collections::BTreeMap::new();
     for u in &units {
-        for declaration in prototype_declarations(u.tree.root_node(), u.src.as_bytes()) {
+        let root = u.tree.root_node();
+        let bytes = u.src.as_bytes();
+        let active: HashSet<_> = active_translation_unit_items(root, bytes)
+            .into_iter()
+            .map(|node| node.id())
+            .collect();
+        let declarations = translation_unit_items(root)
+            .into_iter()
+            .filter(|node| node.kind() != "function_definition" || active.contains(&node.id()))
+            .flat_map(|node| prototype_declarations(node, bytes));
+        for declaration in declarations {
             for header in prototype_headers(declaration, u.src.as_bytes()) {
                 if !defined.contains(&header.0) {
                     prototypes.entry(header.0.clone()).or_insert_with(|| {
@@ -145,7 +173,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let include_counts: HashMap<String, usize> = units
         .iter()
         .map(|u| {
-            let n = named_children(u.tree.root_node())
+            let n = translation_unit_items(u.tree.root_node())
                 .iter()
                 .filter(|f| f.kind() == "preproc_include")
                 .count();
@@ -156,24 +184,42 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     for u in &units {
         let b = u.src.as_bytes();
         let root = u.tree.root_node();
+        let active_items = active_translation_unit_items(root, b);
+        let active_ids: HashSet<usize> = active_items.iter().map(Node::id).collect();
+        let active_methods: HashSet<usize> = active_items
+            .iter()
+            .filter(|node| node.kind() == "function_definition")
+            .map(Node::id)
+            .collect();
 
         // Per-file tables (c2cpg resolves within the translation unit).
         let mut functions: HashMap<String, String> = HashMap::new();
         let mut function_full_names: HashMap<String, String> = HashMap::new();
         let mut globals: HashMap<String, String> = HashMap::new();
-        let mut macros: HashMap<String, MacroDef> = HashMap::new();
-        for f in named_children(root) {
+        let mut macros: Arc<HashMap<String, MacroDef>> = Arc::new(HashMap::new());
+        let mut macro_states: HashMap<usize, Arc<HashMap<String, MacroDef>>> = HashMap::new();
+        for f in translation_unit_items(root) {
+            if matches!(
+                f.kind(),
+                "function_definition"
+                    | "declaration"
+                    | "struct_specifier"
+                    | "union_specifier"
+                    | "enum_specifier"
+            ) {
+                macro_states.insert(f.id(), macros.clone());
+            }
+            if !active_ids.contains(&f.id()) {
+                continue;
+            }
             match f.kind() {
                 "preproc_def" => {
                     let name = f
                         .child_by_field_name("name")
                         .map(|x| text(x, b).to_string())
                         .unwrap_or_default();
-                    let body = f
-                        .child_by_field_name("value")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    macros.insert(
+                    let body = preproc_macro_body(f, b);
+                    Arc::make_mut(&mut macros).insert(
                         name,
                         MacroDef {
                             params: None,
@@ -196,11 +242,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                                 .collect()
                         })
                         .unwrap_or_default();
-                    let body = f
-                        .child_by_field_name("value")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    macros.insert(
+                    let body = preproc_macro_body(f, b);
+                    Arc::make_mut(&mut macros).insert(
                         name,
                         MacroDef {
                             params: Some(params),
@@ -209,11 +252,19 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                         },
                     );
                 }
+                "preproc_call"
+                    if f.child_by_field_name("directive")
+                        .is_some_and(|directive| text(directive, b).trim() == "#undef") =>
+                {
+                    if let Some(name) = f.child_by_field_name("argument") {
+                        Arc::make_mut(&mut macros).remove(text(name, b).trim());
+                    }
+                }
                 _ => {}
             }
         }
         let mut enumerators: Vec<String> = Vec::new();
-        for f in named_children(root) {
+        for f in translation_unit_items(root) {
             if f.kind() == "enum_specifier" {
                 if let Some(body) = f.child_by_field_name("body") {
                     for e in named_children(body) {
@@ -226,7 +277,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                 }
             }
         }
-        for f in named_children(root) {
+        for f in translation_unit_items(root) {
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, ret, _)) = fn_header(f, b) {
@@ -277,10 +328,12 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         let mut ctx = Ctx {
             functions: &functions,
             function_full_names: &function_full_names,
+            definition_full_names: &definition_full_names,
             ambiguous_functions: &ambiguous_functions,
             globals: &globals,
             enumerators: &enumerators,
-            macros: &macros,
+            macros: macros.clone(),
+            macro_states: &macro_states,
             file: u.file.clone(),
             used_macros: &mut used_macros,
             symbols: HashMap::new(),
@@ -301,17 +354,18 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         };
 
         // Standalone dump per user method, plus one per struct <clinit>.
-        for f in named_children(root) {
+        for f in translation_unit_items(root) {
+            ctx.macros = macro_states.get(&f.id()).cloned().unwrap_or_default();
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(f, b) {
                         let full = ctx
-                            .function_full_names
-                            .get(&name)
+                            .definition_full_names
+                            .get(&f.id())
                             .cloned()
                             .unwrap_or_else(|| name.clone());
                         ctx.begin_block(&full);
-                        ctx.emit_method(f, b, 0);
+                        ctx.emit_method(f, b, 0, active_methods.contains(&f.id()));
                         ctx.edge("SOURCE_FILE", format!("M:{full}"), format!("F:{}", u.file));
                         dumps.push((full, std::mem::take(&mut ctx.out)));
                     }
@@ -335,7 +389,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         // The per-file `<global>` wrapper method.
         let gkey = format!("{}:<global>", u.file);
         ctx.begin_block(&gkey);
-        ctx.emit_file_global(root, b, &u.file);
+        ctx.emit_file_global(root, b, &u.file, &active_methods);
         ctx.edge("SOURCE_FILE", format!("M:{gkey}"), format!("F:{}", u.file));
         dumps.push((gkey, std::mem::take(&mut ctx.out)));
     }
@@ -348,14 +402,16 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let empty_globals: HashMap<String, String> = HashMap::new();
     let mut stub_uses2: HashMap<String, usize> = HashMap::new();
     let empty_enums: Vec<String> = Vec::new();
-    let empty_macros: HashMap<String, MacroDef> = HashMap::new();
+    let empty_macro_states = HashMap::new();
     let mut sctx = Ctx {
         functions: &empty_fns,
         function_full_names: &empty_full_names,
+        definition_full_names: &definition_full_names,
         ambiguous_functions: &empty_ambiguous,
         globals: &empty_globals,
         enumerators: &empty_enums,
-        macros: &empty_macros,
+        macros: Arc::new(HashMap::new()),
+        macro_states: &empty_macro_states,
         file: String::new(),
         used_macros: &mut used_macros,
         symbols: HashMap::new(),
@@ -454,8 +510,9 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         )));
     }
     for (name, file) in &fn_decls {
+        let display_name = name.split("<duplicate>").next().unwrap_or(name);
         tds.push((name.clone(), format!(
-            "NODES|TYPE_DECL NAME={name} FULL_NAME={name} CODE={name} AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME={file}:<global> FILENAME={file} ORDER=1\n"
+            "NODES|TYPE_DECL NAME={display_name} FULL_NAME={name} CODE={display_name} AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME={file}:<global> FILENAME={file} ORDER=1\n"
         )));
     }
     for f in &files {
@@ -681,6 +738,7 @@ fn count_members(n: Node) -> i64 {
 
 /// An in-file #define. CDT expands these; invocations become INLINED calls
 /// and each *used* macro also gets a METHOD whose CODE is the directive.
+#[derive(Clone)]
 struct MacroDef {
     params: Option<Vec<String>>, // None = object-like
     body: String,
@@ -694,12 +752,16 @@ struct Ctx<'a> {
     /// for `static` helpers across files; qualify those identities by file so
     /// they remain distinct and local calls resolve deterministically.
     function_full_names: &'a HashMap<String, String>,
+    /// Distinct declaration identities for same-name preprocessor alternatives.
+    /// Calls and METHOD_REFs continue to use the first declaration's identity.
+    definition_full_names: &'a HashMap<usize, String>,
     /// Project-wide duplicate definition names. A call without a local target
     /// stays unresolved instead of acquiring an arbitrary first candidate.
     ambiguous_functions: &'a HashSet<String>,
     globals: &'a HashMap<String, String>,
     enumerators: &'a Vec<String>,
-    macros: &'a HashMap<String, MacroDef>,
+    macros: Arc<HashMap<String, MacroDef>>,
+    macro_states: &'a HashMap<usize, Arc<HashMap<String, MacroDef>>>,
     file: String,
     // used macros: full_name -> (name, directive, nparams, ret type)
     used_macros: &'a mut std::collections::BTreeMap<String, (String, String, usize, String)>,
@@ -936,13 +998,14 @@ impl Ctx<'_> {
         }
     }
 
-    fn emit_method(&mut self, f: Node, b: &[u8], d: usize) {
+    fn emit_method(&mut self, f: Node, b: &[u8], d: usize, active: bool) {
+        self.macros = self.macro_states.get(&f.id()).cloned().unwrap_or_default();
         self.symbols.clear();
         self.method_functions.clear();
         let (name, ret, params) = fn_header(f, b).expect("function header");
         let full = self
-            .function_full_names
-            .get(&name)
+            .definition_full_names
+            .get(&f.id())
             .cloned()
             .unwrap_or_else(|| name.clone());
         let nested = d > 0;
@@ -994,8 +1057,23 @@ impl Ctx<'_> {
         // Body block, then the synthetic method return.
         let block_order = (params.len() + 1) as i64;
         if let Some(body) = f.child_by_field_name("body") {
-            self.collect_phantoms(body, b);
-            self.emit_block(body, b, block_order, d + 1);
+            if active {
+                self.collect_phantoms(body, b);
+                self.emit_block(body, b, block_order, d + 1);
+            } else {
+                // CDT retains inactive function declarations, but their body
+                // blocks contain no executable children or phantom locals.
+                self.line(
+                    d + 1,
+                    "BLOCK",
+                    P {
+                        code: Some(esc(text(body, b))),
+                        tfn: Some("void".into()),
+                        order: Some(block_order),
+                        ..Default::default()
+                    },
+                );
+            }
         }
         self.line(
             d + 1,
@@ -1180,7 +1258,13 @@ impl Ctx<'_> {
     /// top-level construct in source order — TYPE_REF for a struct def, LOCAL
     /// per global object declarator, METHOD_REF per function definition;
     /// prototypes consume no slot — then METHOD_RETURN.
-    fn emit_file_global(&mut self, root: Node, b: &[u8], file: &str) {
+    fn emit_file_global(
+        &mut self,
+        root: Node,
+        b: &[u8],
+        file: &str,
+        active_methods: &HashSet<usize>,
+    ) {
         self.line(
             0,
             "METHOD",
@@ -1192,14 +1276,17 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
-        for n in named_children(root) {
+        for n in translation_unit_items(root) {
+            self.macros = self.macro_states.get(&n.id()).cloned().unwrap_or_default();
             match n.kind() {
                 "struct_specifier" | "union_specifier" | "enum_specifier"
                     if n.child_by_field_name("body").is_some() =>
                 {
                     self.emit_type_decl(n, b, 1);
                 }
-                "function_definition" => self.emit_method(n, b, 1),
+                "function_definition" => {
+                    self.emit_method(n, b, 1, active_methods.contains(&n.id()));
+                }
                 _ => {}
             }
         }
@@ -1215,7 +1302,8 @@ impl Ctx<'_> {
             },
         );
         let mut slot = 1i64;
-        for n in named_children(root) {
+        for n in translation_unit_items(root) {
+            self.macros = self.macro_states.get(&n.id()).cloned().unwrap_or_default();
             match n.kind() {
                 "struct_specifier" | "union_specifier" | "enum_specifier"
                     if n.child_by_field_name("body").is_some() =>
@@ -3173,6 +3261,10 @@ fn prototype_declarations<'a>(root: Node<'a>, b: &[u8]) -> Vec<Node<'a>> {
 }
 
 /// (name, return type, params) for a function_definition.
+pub(crate) fn function_name(f: Node, b: &[u8]) -> Option<String> {
+    fn_header(f, b).map(|(name, _, _)| name)
+}
+
 fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
     fn_header_declarator(f, f.child_by_field_name("declarator")?, b)
 }
@@ -3526,6 +3618,425 @@ fn collect_decl_names(n: Node, b: &[u8], out: &mut Vec<String>) {
 }
 
 // --- tree helpers ---
+/// Joern retains declarations from every translation-unit preprocessor branch,
+/// including inactive `#if 0` and `#else` branches. Flatten only those wrappers;
+/// function bodies and macro-definition selection have their own semantics.
+pub(crate) fn translation_unit_items(root: Node) -> Vec<Node> {
+    fn collect<'tree>(node: Node<'tree>, items: &mut Vec<Node<'tree>>) {
+        if matches!(
+            node.kind(),
+            "preproc_if" | "preproc_ifdef" | "preproc_else" | "preproc_elif" | "preproc_elifdef"
+        ) {
+            let condition = node.child_by_field_name("condition");
+            let name = node.child_by_field_name("name");
+            for child in named_children(node) {
+                if Some(child) != condition && Some(child) != name {
+                    collect(child, items);
+                }
+            }
+        } else {
+            items.push(node);
+        }
+    }
+
+    let mut items = Vec::new();
+    for child in named_children(root) {
+        collect(child, &mut items);
+    }
+    items
+}
+
+/// The active configuration controls macro definitions and function bodies,
+/// while `translation_unit_items` independently retains all declarations.
+/// Process definitions in source order so later defines do not activate an
+/// earlier branch and definitions in an inactive branch cannot leak out.
+fn active_translation_unit_items<'tree>(root: Node<'tree>, b: &[u8]) -> Vec<Node<'tree>> {
+    fn collect<'tree>(
+        node: Node<'tree>,
+        b: &[u8],
+        definitions: &mut HashMap<String, String>,
+        items: &mut Vec<Node<'tree>>,
+    ) {
+        match node.kind() {
+            "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
+            | "preproc_else" => {
+                let take = if matches!(node.kind(), "preproc_if" | "preproc_elif") {
+                    preproc_condition(node, b, definitions)
+                } else if let Some(name) = node.child_by_field_name("name") {
+                    let negated = node.child(0).is_some_and(|directive| {
+                        matches!(directive.kind(), "#ifndef" | "#elifndef")
+                    });
+                    definitions.contains_key(text(name, b)) != negated
+                } else {
+                    true
+                };
+                let alternative = node.child_by_field_name("alternative");
+                if take {
+                    let condition = node.child_by_field_name("condition");
+                    let name = node.child_by_field_name("name");
+                    for child in named_children(node) {
+                        if Some(child) != condition
+                            && Some(child) != name
+                            && Some(child) != alternative
+                        {
+                            collect(child, b, definitions, items);
+                        }
+                    }
+                } else if let Some(alternative) = alternative {
+                    collect(alternative, b, definitions, items);
+                }
+            }
+            "preproc_def" | "preproc_function_def" => {
+                if let Some(name) = node.child_by_field_name("name") {
+                    let value = preproc_macro_body(node, b);
+                    let name = text(name, b).to_string();
+                    // Function-like macros are defined, but a bare name does
+                    // not expand. Calls in conditions remain unsupported.
+                    let value = if node.kind() == "preproc_function_def" {
+                        name.clone()
+                    } else {
+                        value
+                    };
+                    definitions.insert(name, value);
+                }
+                items.push(node);
+            }
+            "preproc_call" => {
+                if node
+                    .child_by_field_name("directive")
+                    .is_some_and(|directive| text(directive, b).trim() == "#undef")
+                {
+                    if let Some(name) = node.child_by_field_name("argument") {
+                        definitions.remove(text(name, b).trim());
+                    }
+                }
+                items.push(node);
+            }
+            _ => items.push(node),
+        }
+    }
+    let mut items = Vec::new();
+    let mut definitions = HashMap::new();
+    for child in named_children(root) {
+        collect(child, b, &mut definitions, &mut items);
+    }
+    items
+}
+
+/// C preprocessing removes comments and splices escaped newlines before
+/// interpreting a directive. Read from the original bytes because the parser
+/// may expose only a prefix of a condition or replacement containing comments.
+fn preproc_logical_line(node: Node, b: &[u8]) -> String {
+    let source = std::str::from_utf8(&b[node.start_byte()..]).unwrap_or("");
+    let bytes = source.as_bytes();
+    let mut out = String::new();
+    let mut i = 0;
+    let mut block_comment = false;
+    let mut quote = None;
+    while i < bytes.len() {
+        if bytes[i..].starts_with(b"\\\n") {
+            i += 2;
+            continue;
+        }
+        if bytes[i..].starts_with(b"\\\r\n") {
+            i += 3;
+            continue;
+        }
+        if block_comment {
+            if bytes[i..].starts_with(b"*/") {
+                block_comment = false;
+                i += 2;
+            } else {
+                i += 1;
+            }
+            continue;
+        }
+        if let Some(delimiter) = quote {
+            if bytes[i] == b'\\' && i + 1 < bytes.len() {
+                let end = i + 1 + source[i + 1..].chars().next().unwrap().len_utf8();
+                out.push_str(&source[i..end]);
+                i = end;
+                continue;
+            }
+            if bytes[i] == delimiter {
+                quote = None;
+            }
+        } else if bytes[i..].starts_with(b"/*") {
+            block_comment = true;
+            out.push(' ');
+            i += 2;
+            continue;
+        } else if bytes[i..].starts_with(b"//") || matches!(bytes[i], b'\n' | b'\r') {
+            break;
+        } else if matches!(bytes[i], b'\'' | b'"') {
+            quote = Some(bytes[i]);
+        }
+        let end = i + source[i..].chars().next().unwrap().len_utf8();
+        out.push_str(&source[i..end]);
+        i = end;
+    }
+    out
+}
+
+fn preproc_payload(line: &str) -> &str {
+    let line = line
+        .trim_start()
+        .strip_prefix('#')
+        .unwrap_or(line)
+        .trim_start();
+    line.trim_start_matches(|c: char| c.is_ascii_alphabetic())
+        .trim_start()
+}
+
+fn preproc_macro_body(node: Node, b: &[u8]) -> String {
+    let line = preproc_logical_line(node, b);
+    let name = node
+        .child_by_field_name("name")
+        .map(|name| text(name, b))
+        .unwrap_or("");
+    let rest = preproc_payload(&line).strip_prefix(name).unwrap_or("");
+    let body = if node.kind() == "preproc_function_def" {
+        rest.split_once(')').map(|(_, body)| body).unwrap_or("")
+    } else {
+        rest
+    };
+    body.trim().to_string()
+}
+
+/// Expand object macro replacement tokens before parsing the condition. In
+/// particular, replacing VALUE with `1 + 2` must not implicitly parenthesize
+/// it in `VALUE * 3`. The normal C expression grammar also accepts ternaries,
+/// which tree-sitter's preprocessor-condition grammar does not represent.
+fn preproc_condition(node: Node, b: &[u8], definitions: &HashMap<String, String>) -> bool {
+    let line = preproc_logical_line(node, b);
+    let condition = preproc_payload(&line);
+    let mut budget = 65_536usize;
+    let expanded = expand_preproc_objects(condition, definitions, &mut HashSet::new(), &mut budget);
+    let source = format!("int __condition(void) {{ return {expanded}; }}");
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let tree = parser.parse(&source, None).unwrap();
+    tree.root_node()
+        .named_child(0)
+        .and_then(|function| function.child_by_field_name("body"))
+        .and_then(|body| body.named_child(0))
+        .and_then(|returned| returned.named_child(0))
+        .is_some_and(|expression| preproc_value(expression, source.as_bytes(), 0) != 0)
+}
+
+/// Preserve literal tokens and `defined` operands while expanding object
+/// macros. A shared byte budget and cycle guard bound recursive expansion.
+fn expand_preproc_objects(
+    source: &str,
+    definitions: &HashMap<String, String>,
+    expanding: &mut HashSet<String>,
+    budget: &mut usize,
+) -> String {
+    let bytes = source.as_bytes();
+    let mut out = String::new();
+    let mut i = 0;
+    while i < bytes.len() && *budget > 0 {
+        let start = i;
+        if matches!(bytes[i], b'\'' | b'"') {
+            let quote = bytes[i];
+            i += 1;
+            while i < bytes.len() {
+                if bytes[i] == b'\\' {
+                    i = (i + 2).min(bytes.len());
+                } else if bytes[i] == quote {
+                    i += 1;
+                    break;
+                } else {
+                    i += 1;
+                }
+            }
+        } else if bytes[i].is_ascii_digit() {
+            i += 1;
+            while i < bytes.len()
+                && (bytes[i].is_ascii_alphanumeric() || matches!(bytes[i], b'_' | b'.' | b'\''))
+            {
+                i += 1;
+            }
+        } else if bytes[i].is_ascii_alphabetic() || bytes[i] == b'_' {
+            i += 1;
+            while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_') {
+                i += 1;
+            }
+            let name = &source[start..i];
+            if name == "defined" {
+                while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+                    i += 1;
+                }
+                let parentheses = bytes.get(i) == Some(&b'(');
+                if parentheses {
+                    i += 1;
+                }
+                while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+                    i += 1;
+                }
+                let operand = i;
+                while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_') {
+                    i += 1;
+                }
+                let defined = definitions.contains_key(&source[operand..i]);
+                if parentheses {
+                    while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+                        i += 1;
+                    }
+                    if bytes.get(i) == Some(&b')') {
+                        i += 1;
+                    }
+                }
+                out.push(if defined { '1' } else { '0' });
+                *budget -= 1;
+                continue;
+            }
+            if expanding.len() < 64 && !expanding.contains(name) {
+                if let Some(replacement) = definitions.get(name) {
+                    *budget -= 1;
+                    expanding.insert(name.to_string());
+                    out.push_str(&expand_preproc_objects(
+                        replacement,
+                        definitions,
+                        expanding,
+                        budget,
+                    ));
+                    expanding.remove(name);
+                    continue;
+                }
+            }
+        } else if bytes[i..].starts_with(b"//") {
+            break;
+        } else if bytes[i..].starts_with(b"/*") {
+            i += 2;
+            while i < bytes.len() && !bytes[i..].starts_with(b"*/") {
+                i += 1;
+            }
+            i = (i + 2).min(bytes.len());
+            out.push(' ');
+            *budget -= 1;
+            continue;
+        } else {
+            i += source[i..].chars().next().unwrap().len_utf8();
+        }
+        let token = &source[start..i];
+        if token.len() > *budget {
+            break;
+        }
+        out.push_str(token);
+        *budget -= token.len();
+    }
+    out
+}
+
+fn preproc_character(literal: &str) -> i64 {
+    let Some((_, contents)) = literal.split_once('\'') else {
+        return 0;
+    };
+    let contents = contents.strip_suffix('\'').unwrap_or(contents);
+    if let Some(escaped) = contents.strip_prefix('\\') {
+        if let Some(hex) = escaped.strip_prefix('x') {
+            return i64::from_str_radix(hex, 16).unwrap_or(0);
+        }
+        if escaped.starts_with(|c: char| matches!(c, '0'..='7')) {
+            return i64::from_str_radix(escaped, 8).unwrap_or(0);
+        }
+        return match escaped {
+            "n" => 10,
+            "r" => 13,
+            "t" => 9,
+            "v" => 11,
+            "a" => 7,
+            "b" => 8,
+            "f" => 12,
+            _ => escaped.bytes().next().unwrap_or(0) as i64,
+        };
+    }
+    contents
+        .bytes()
+        .fold(0i64, |value, byte| value.wrapping_shl(8) | byte as i64)
+}
+
+fn preproc_value(node: Node, b: &[u8], depth: usize) -> i64 {
+    if depth >= 256 {
+        return 0;
+    }
+    let value = |child| preproc_value(child, b, depth + 1);
+    match node.kind() {
+        "number_literal" => {
+            let literal = text(node, b).trim_end_matches(['u', 'U', 'l', 'L']);
+            let (digits, radix) = if let Some(digits) = literal
+                .strip_prefix("0x")
+                .or_else(|| literal.strip_prefix("0X"))
+            {
+                (digits, 16)
+            } else if let Some(digits) = literal
+                .strip_prefix("0b")
+                .or_else(|| literal.strip_prefix("0B"))
+            {
+                (digits, 2)
+            } else if literal.len() > 1 && literal.starts_with('0') {
+                (&literal[1..], 8)
+            } else {
+                (literal, 10)
+            };
+            u64::from_str_radix(digits, radix).unwrap_or(0) as i64
+        }
+        "parenthesized_expression" => node.named_child(0).map(value).unwrap_or(0),
+        "unary_expression" => {
+            let argument = node.child_by_field_name("argument").map(value).unwrap_or(0);
+            match node.child_by_field_name("operator").map(|op| text(op, b)) {
+                Some("!") => (argument == 0) as i64,
+                Some("~") => !argument,
+                Some("-") => argument.wrapping_neg(),
+                Some("+") => argument,
+                _ => 0,
+            }
+        }
+        "binary_expression" => {
+            let left = node.child_by_field_name("left").map(value).unwrap_or(0);
+            let right = node.child_by_field_name("right").map(value).unwrap_or(0);
+            match node.child_by_field_name("operator").map(|op| text(op, b)) {
+                Some("||") => (left != 0 || right != 0) as i64,
+                Some("&&") => (left != 0 && right != 0) as i64,
+                Some("|") => left | right,
+                Some("&") => left & right,
+                Some("^") => left ^ right,
+                Some("==") => (left == right) as i64,
+                Some("!=") => (left != right) as i64,
+                Some("<") => (left < right) as i64,
+                Some("<=") => (left <= right) as i64,
+                Some(">") => (left > right) as i64,
+                Some(">=") => (left >= right) as i64,
+                Some("<<") => left.checked_shl(right as u32).unwrap_or(0),
+                Some(">>") => left.checked_shr(right as u32).unwrap_or(0),
+                Some("+") => left.wrapping_add(right),
+                Some("-") => left.wrapping_sub(right),
+                Some("*") => left.wrapping_mul(right),
+                Some("/") => left.checked_div(right).unwrap_or(0),
+                Some("%") => left.checked_rem(right).unwrap_or(0),
+                _ => 0,
+            }
+        }
+        "conditional_expression" => {
+            let condition = node
+                .child_by_field_name("condition")
+                .map(value)
+                .unwrap_or(0);
+            let branch = if condition != 0 {
+                "consequence"
+            } else {
+                "alternative"
+            };
+            node.child_by_field_name(branch).map(value).unwrap_or(0)
+        }
+        "char_literal" => preproc_character(text(node, b)),
+        _ => 0,
+    }
+}
+
 fn named_children(n: Node) -> Vec<Node> {
     let mut cur = n.walk();
     n.named_children(&mut cur).collect()
@@ -4992,4 +5503,36 @@ fn rd_valid_edge(arena: &[DNode], child: usize, parent: usize) -> bool {
         return rd_is_used(arena, child);
     }
     !rd_is_call_retval(arena, parent)
+}
+
+#[cfg(test)]
+mod preproc_tests {
+    use super::*;
+
+    #[test]
+    fn macro_expansion_bounds_empty_doubling_chains_and_cycles() {
+        let mut definitions = HashMap::from([("EMPTY0".to_string(), String::new())]);
+        for index in 1..40 {
+            definitions.insert(
+                format!("EMPTY{index}"),
+                format!("EMPTY{} EMPTY{}", index - 1, index - 1),
+            );
+        }
+        let mut budget = 128;
+        let expansion =
+            expand_preproc_objects("EMPTY39", &definitions, &mut HashSet::new(), &mut budget);
+        assert_eq!(budget, 0);
+        assert!(expansion.len() <= 128);
+
+        let cycle = HashMap::from([
+            ("A".to_string(), "B".to_string()),
+            ("B".to_string(), "A".to_string()),
+        ]);
+        let mut budget = 128;
+        assert_eq!(
+            expand_preproc_objects("A", &cycle, &mut HashSet::new(), &mut budget),
+            "A"
+        );
+        assert!(budget > 0);
+    }
 }

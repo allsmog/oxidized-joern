@@ -230,4 +230,184 @@ mod tests {
         assert!(method.contains("RETURN CODE=return x; "));
         assert!(method.contains("RETURN CODE=return 0; "));
     }
+
+    fn conditional_dump(file: &str, source: &str) -> String {
+        dump_sources(&[(file.to_string(), source.to_string())])
+    }
+
+    #[test]
+    fn production_retains_all_conditional_declarations_and_only_active_bodies() {
+        let dump = conditional_dump(
+            "conditional_top_level.c",
+            include_str!("../corpus/conditional_top_level.c"),
+        );
+        for (name, active) in [
+            ("pp_if", true),
+            ("pp_nested_false", false),
+            ("pp_nested_elif", true),
+            ("pp_nested_else", false),
+            ("pp_elif", false),
+            ("pp_else", false),
+            ("pp_ifndef", true),
+            ("pp_false", false),
+            ("pp_default", true),
+            ("pp_defined", true),
+        ] {
+            let method = dump
+                .split("\n\n")
+                .find(|block| block.starts_with(&format!("METHOD NAME={name} ")))
+                .unwrap_or_else(|| panic!("missing conditional method {name}"));
+            assert!(method.contains("METHOD_PARAMETER_IN NAME=x "));
+            assert!(method.contains("BLOCK CODE="));
+            assert_eq!(method.contains("RETURN CODE=return"), active, "{name}");
+        }
+        for declaration in [
+            "TYPE_DECL NAME=pp_word ",
+            "TYPE_DECL NAME=pp_inactive_word ",
+            "LOCAL NAME=pp_global ",
+            "LOCAL NAME=pp_inactive_global ",
+            "TYPE_DECL NAME=PpBox ",
+            "TYPE_DECL NAME=PpInactiveBox ",
+        ] {
+            assert!(dump.contains(declaration), "missing {declaration}");
+        }
+        assert!(dump.contains("CALL NAME=<operator>.assignment CODE=pp_inactive_global = 9 "));
+        assert!(dump.contains("NODES|TYPE NAME=pp_inactive_word "));
+    }
+
+    #[test]
+    fn production_selects_conditions_in_source_order_without_losing_inactive_methods() {
+        let dump = conditional_dump(
+            "conditional_configuration.c",
+            include_str!("../corpus/conditional_configuration.c"),
+        );
+        for (name, active) in [
+            ("selected_expression", true),
+            ("unselected_expression", false),
+            ("after_undef_bad", false),
+            ("after_undef_good", true),
+            ("before_define_bad", false),
+            ("before_define_good", true),
+            ("inactive_define_bad", false),
+            ("inactive_define_good", true),
+        ] {
+            let method = dump
+                .split("\n\n")
+                .find(|block| block.starts_with(&format!("METHOD NAME={name} ")))
+                .unwrap_or_else(|| panic!("missing conditional method {name}"));
+            assert_eq!(method.contains("RETURN CODE=return"), active, "{name}");
+        }
+        assert!(dump.contains("CALL NAME=STEP CODE=STEP(x)"));
+        assert!(dump.contains("DISPATCH_TYPE=INLINED"));
+        assert!(dump.contains("CODE=#define STEP(x) ((x) + 1)"));
+        assert!(!dump.contains("CODE=#define STEP(x) ((x) + 2)"));
+    }
+
+    #[test]
+    fn production_keeps_same_name_conditional_methods_distinct() {
+        let dump = conditional_dump(
+            "conditional_duplicate.c",
+            include_str!("../corpus/conditional_duplicate.c"),
+        );
+        let methods: Vec<_> = dump
+            .split("\n\n")
+            .filter(|block| block.starts_with("METHOD NAME=duplicate "))
+            .collect();
+        assert_eq!(methods.len(), 2);
+        assert!(methods[0].contains("FULL_NAME=duplicate SIGNATURE="));
+        assert!(!methods[0].contains("RETURN CODE=return"));
+        assert!(methods[1].contains("FULL_NAME=duplicate<duplicate>0 SIGNATURE="));
+        assert!(methods[1].contains("RETURN CODE=return x + 2;"));
+        assert!(dump.contains(
+            "CALL NAME=duplicate CODE=duplicate(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=duplicate "
+        ));
+        assert!(dump.contains("NODES|TYPE_DECL NAME=duplicate FULL_NAME=duplicate<duplicate>0 "));
+    }
+
+    #[test]
+    fn production_respects_macro_replacement_precedence_and_condition_expressions() {
+        let dump = conditional_dump(
+            "conditional_evaluation.c",
+            include_str!("../corpus/conditional_evaluation.c"),
+        );
+        for (name, active) in [
+            ("precedence_active", true),
+            ("precedence_wrong", false),
+            ("ternary_active", true),
+            ("ternary_wrong", false),
+            ("character_active", true),
+            ("character_wrong", false),
+        ] {
+            let method = dump
+                .split("\n\n")
+                .find(|block| block.starts_with(&format!("METHOD NAME={name} ")))
+                .unwrap();
+            assert_eq!(method.contains("RETURN CODE=return"), active, "{name}");
+        }
+    }
+
+    #[test]
+    fn production_preserves_macro_expansion_before_a_later_undef() {
+        let dump = conditional_dump(
+            "conditional_macro_order.c",
+            include_str!("../corpus/conditional_macro_order.c"),
+        );
+        for name in ["before_undef", "<global>"] {
+            let method = dump
+                .split("\n\n")
+                .find(|block| {
+                    block.starts_with(&format!("METHOD NAME={name} "))
+                        && block
+                            .lines()
+                            .next()
+                            .unwrap()
+                            .contains("conditional_macro_order.c")
+                            == (name == "<global>")
+                })
+                .unwrap();
+            assert!(method.contains("CALL NAME=ORDER_STEP "), "{name}");
+            assert!(method.contains("DISPATCH_TYPE=INLINED"), "{name}");
+        }
+        assert!(!dump.contains("METHOD NAME=ORDER_STEP FULL_NAME=ORDER_STEP"));
+    }
+
+    #[test]
+    fn production_counts_imports_in_all_conditional_branches() {
+        let dump = conditional_dump(
+            "conditional_includes.c",
+            include_str!("../corpus/conditional_includes.c"),
+        );
+        let global_type = dump
+            .lines()
+            .find(|line| {
+                line.starts_with(
+                    "NODES|TYPE_DECL NAME=<global> FULL_NAME=conditional_includes.c:<global> ",
+                )
+            })
+            .unwrap();
+        assert!(global_type.ends_with("ORDER=3"));
+    }
+
+    #[test]
+    fn production_removes_comments_before_interpreting_directives() {
+        let dump = conditional_dump(
+            "conditional_comments.c",
+            include_str!("../corpus/conditional_comments.c"),
+        );
+        for prefix in [
+            "defined_comment",
+            "defined_space",
+            "multiline",
+            "macro_comment",
+        ] {
+            for (suffix, active) in [("active", true), ("wrong", false)] {
+                let name = format!("{prefix}_{suffix}");
+                let method = dump
+                    .split("\n\n")
+                    .find(|block| block.starts_with(&format!("METHOD NAME={name} ")))
+                    .unwrap();
+                assert_eq!(method.contains("RETURN CODE=return"), active, "{name}");
+            }
+        }
+    }
 }

@@ -830,21 +830,24 @@ fn assign_source_lines(cpg: &mut Cpg, sources: &[(String, String)]) {
             continue;
         }
         let tree = parser.parse(source, None).unwrap();
-        let mut cursor = tree.root_node().walk();
-        let function_nodes: Vec<_> = tree
-            .root_node()
-            .named_children(&mut cursor)
+        let function_nodes: Vec<_> = crate::exact::translation_unit_items(tree.root_node())
+            .into_iter()
             .filter(|node| node.kind() == "function_definition")
             .collect();
+        let mut occurrences: HashMap<String, usize> = HashMap::new();
         let functions: HashMap<_, _> = function_nodes
             .iter()
-            .map(|node| {
+            .filter_map(|node| {
+                let name = crate::exact::function_name(*node, source.as_bytes())?;
+                let occurrence = occurrences.entry(name.clone()).or_default();
+                let identity = (name, *occurrence);
+                *occurrence += 1;
                 // The canonical transport decodes both escaped newlines and
                 // source newlines; apply the same decoding to the anchor.
                 let code = source[node.byte_range()].replace("\\n", "\n");
                 let start = tokens.partition_point(|token| token.start < node.start_byte());
                 let end = tokens.partition_point(|token| token.start < node.end_byte());
-                (code.trim().to_owned(), start..end)
+                Some((identity, (code.trim().to_owned(), start..end)))
             })
             .collect();
         let methods: Vec<_> = cpg
@@ -854,13 +857,22 @@ fn assign_source_lines(cpg: &mut Cpg, sources: &[(String, String)]) {
             .filter(|&node| cpg.kind_of(node) == NodeKind::Method)
             .collect();
         for &method in &methods {
-            let Some(range) = cpg
-                .code_of(method)
-                .and_then(|code| functions.get(code.trim()))
-                .cloned()
-            else {
+            let Some(name) = cpg.name_of(method) else {
                 continue;
             };
+            // Same-name preprocessor alternatives can have identical CODE.
+            // Their canonical duplicate suffix preserves declaration order.
+            let occurrence = cpg
+                .full_name_of(method)
+                .and_then(|full| full.rsplit_once("<duplicate>"))
+                .and_then(|(_, suffix)| suffix.parse::<usize>().ok())
+                .map_or(0, |index| index + 1);
+            let Some((code, range)) = functions.get(&(name.to_owned(), occurrence)) else {
+                continue;
+            };
+            if cpg.code_of(method).map(str::trim) != Some(code.as_str()) {
+                continue;
+            }
             locate_ast(
                 cpg,
                 method,
@@ -1283,6 +1295,29 @@ int alpha(int x) { return x; }
             })
             .unwrap();
         assert_eq!(cpg.line_of(method_ref), Some(2));
+    }
+
+    #[test]
+    fn source_lines_anchor_conditional_and_identical_duplicate_definitions() {
+        let source = "#if 0\nint repeated(int x) { return x; }\n#else\nint repeated(int x) { return x; }\n#endif\n#if 1\nint target(void) {\n  int after = 2;\n  return after;\n}\n#endif\nint after = 2;\n";
+        let cpg = import_source(source);
+        for (full, line) in [("repeated", 2), ("repeated<duplicate>0", 4), ("target", 7)] {
+            let method = cpg
+                .nodes()
+                .find(|&node| {
+                    cpg.kind_of(node) == NodeKind::Method && cpg.full_name_of(node) == Some(full)
+                })
+                .unwrap();
+            assert_eq!(cpg.line_of(method), Some(line), "{full}");
+        }
+        let assignments: Vec<_> = method_nodes(&cpg, "<global>")
+            .into_iter()
+            .filter(|&node| {
+                cpg.kind_of(node) == NodeKind::Call && cpg.code_of(node) == Some("after = 2")
+            })
+            .collect();
+        assert_eq!(assignments.len(), 1);
+        assert_eq!(cpg.line_of(assignments[0]), Some(12));
     }
 
     #[test]
