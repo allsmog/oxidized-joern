@@ -1,0 +1,287 @@
+{
+  "measuredAtUtc": "2026-09-08T11:37:42.883600+00:00",
+  "wallSeconds": 3.8241478749987436,
+  "platform": "macOS: wait4 ru_maxrss is bytes; per-process resource measurement, not cumulative RUSAGE_CHILDREN",
+  "worktree": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export",
+  "baseCommit": "06c3a5524628e6d9da8e311f272fb9ffd0856fba",
+  "sourceSha256": "49ed223d835380399bfca43c387f120ba2f22c88fbb7c8fe4d423463501fd057",
+  "beforeExporterSourceSha256": "23b992423405cba331c2b080428ae61a81b63a2a0055f57e5652b6a75e9eed19",
+  "baselineBinaryPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/before-cpg",
+  "baselineBinarySha256": "885dc1153750d52b07f506c487324fc8980acdd2aaa2243b390cbd8d2e83ffe5",
+  "candidateBinaryPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/after-cpg",
+  "candidateBinarySha256": "004e5e292d42934a9ca060f37d0f5d2bdb3651ca7bec0ea1e50c512ffec8e372",
+  "commandScript": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/measure.py",
+  "commandScriptSha256": "aafcf4a81c17c2af6db1feb8cb47f34f0bff30ec4ca018a252a1136fa45701ca",
+  "projects": {
+    "zlib-1.3.1-core": {
+      "graphPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/zlib-1.3.1-core/fourth-preview-a14-1/graph.cpg",
+      "graphSha256": "13500adc05aa0a9adbf14a72e5cbf442a2704288a02d92deb5c026f19bdd5285",
+      "existingExportPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/zlib-1.3.1-core/fourth-preview-a14-1/export/export.json",
+      "existingExportSha256": "093405bf52fb752d3c3c52fa80d7bd74d5add099e00e131446a14498c230bfae",
+      "runs": [
+        {
+          "variant": "before",
+          "repeat": 1,
+          "command": [
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/before-cpg",
+            "export",
+            "--load",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/zlib-1.3.1-core/fourth-preview-a14-1/graph.cpg",
+            "--lang",
+            "c",
+            "--repr",
+            "all",
+            "--format",
+            "json",
+            "-o",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/measurements/zlib-1.3.1-core/before-1/export"
+          ],
+          "exitCode": 0,
+          "seconds": 0.6128730830096174,
+          "peakRssBytes": 862584832,
+          "peakRssMiB": 822.625,
+          "outputSha256": "093405bf52fb752d3c3c52fa80d7bd74d5add099e00e131446a14498c230bfae",
+          "outputBytes": 45488869,
+          "matchesPriorBytes": true
+        },
+        {
+          "variant": "before",
+          "repeat": 2,
+          "command": [
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/before-cpg",
+            "export",
+            "--load",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/zlib-1.3.1-core/fourth-preview-a14-1/graph.cpg",
+            "--lang",
+            "c",
+            "--repr",
+            "all",
+            "--format",
+            "json",
+            "-o",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/measurements/zlib-1.3.1-core/before-2/export"
+          ],
+          "exitCode": 0,
+          "seconds": 0.32699562500056345,
+          "peakRssBytes": 863371264,
+          "peakRssMiB": 823.375,
+          "outputSha256": "093405bf52fb752d3c3c52fa80d7bd74d5add099e00e131446a14498c230bfae",
+          "outputBytes": 45488869,
+          "matchesPriorBytes": true
+        },
+        {
+          "variant": "after",
+          "repeat": 1,
+          "command": [
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/after-cpg",
+            "export",
+            "--load",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/zlib-1.3.1-core/fourth-preview-a14-1/graph.cpg",
+            "--lang",
+            "c",
+            "--repr",
+            "all",
+            "--format",
+            "json",
+            "-o",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/measurements/zlib-1.3.1-core/after-1/export"
+          ],
+          "exitCode": 0,
+          "seconds": 0.5263059999997495,
+          "peakRssBytes": 50642944,
+          "peakRssMiB": 48.296875,
+          "outputSha256": "093405bf52fb752d3c3c52fa80d7bd74d5add099e00e131446a14498c230bfae",
+          "outputBytes": 45488869,
+          "matchesPriorBytes": true
+        },
+        {
+          "variant": "after",
+          "repeat": 2,
+          "command": [
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/after-cpg",
+            "export",
+            "--load",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/zlib-1.3.1-core/fourth-preview-a14-1/graph.cpg",
+            "--lang",
+            "c",
+            "--repr",
+            "all",
+            "--format",
+            "json",
+            "-o",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/measurements/zlib-1.3.1-core/after-2/export"
+          ],
+          "exitCode": 0,
+          "seconds": 0.10278633299458306,
+          "peakRssBytes": 50790400,
+          "peakRssMiB": 48.4375,
+          "outputSha256": "093405bf52fb752d3c3c52fa80d7bd74d5add099e00e131446a14498c230bfae",
+          "outputBytes": 45488869,
+          "matchesPriorBytes": true
+        }
+      ],
+      "stats": {
+        "nodes": 61974,
+        "edges": 435477,
+        "files": 1,
+        "stderrPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/measurements/zlib-1.3.1-core/after-1/stderr",
+        "stderrSha256": "d3e27e28cac4a243dc1979f7dffa76c4adf6677175fe039e7ef317f50a97bc62"
+      }
+    },
+    "lua-5.4.7": {
+      "graphPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/lua-5.4.7/fourth-preview-a14-1/graph.cpg",
+      "graphSha256": "6af4314a293e02a5953cfd2619a039f15322c505e5e4212b7b460fc7b1e72b92",
+      "existingExportPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/lua-5.4.7/fourth-preview-a14-1/export/export.json",
+      "existingExportSha256": "13a7ee34d11eb5c110a773fdee3f27cda10eaf83b6f069d283d25bc8ea176a34",
+      "runs": [
+        {
+          "variant": "before",
+          "repeat": 1,
+          "command": [
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/before-cpg",
+            "export",
+            "--load",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/lua-5.4.7/fourth-preview-a14-1/graph.cpg",
+            "--lang",
+            "c",
+            "--repr",
+            "all",
+            "--format",
+            "json",
+            "-o",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/measurements/lua-5.4.7/before-1/export"
+          ],
+          "exitCode": 0,
+          "seconds": 0.6651997079898138,
+          "peakRssBytes": 1399193600,
+          "peakRssMiB": 1334.375,
+          "outputSha256": "13a7ee34d11eb5c110a773fdee3f27cda10eaf83b6f069d283d25bc8ea176a34",
+          "outputBytes": 73247250,
+          "matchesPriorBytes": true
+        },
+        {
+          "variant": "before",
+          "repeat": 2,
+          "command": [
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/before-cpg",
+            "export",
+            "--load",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/lua-5.4.7/fourth-preview-a14-1/graph.cpg",
+            "--lang",
+            "c",
+            "--repr",
+            "all",
+            "--format",
+            "json",
+            "-o",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/measurements/lua-5.4.7/before-2/export"
+          ],
+          "exitCode": 0,
+          "seconds": 0.6667194170004223,
+          "peakRssBytes": 1397604352,
+          "peakRssMiB": 1332.859375,
+          "outputSha256": "13a7ee34d11eb5c110a773fdee3f27cda10eaf83b6f069d283d25bc8ea176a34",
+          "outputBytes": 73247250,
+          "matchesPriorBytes": true
+        },
+        {
+          "variant": "after",
+          "repeat": 1,
+          "command": [
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/after-cpg",
+            "export",
+            "--load",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/lua-5.4.7/fourth-preview-a14-1/graph.cpg",
+            "--lang",
+            "c",
+            "--repr",
+            "all",
+            "--format",
+            "json",
+            "-o",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/measurements/lua-5.4.7/after-1/export"
+          ],
+          "exitCode": 0,
+          "seconds": 0.2265419579925947,
+          "peakRssBytes": 73220096,
+          "peakRssMiB": 69.828125,
+          "outputSha256": "13a7ee34d11eb5c110a773fdee3f27cda10eaf83b6f069d283d25bc8ea176a34",
+          "outputBytes": 73247250,
+          "matchesPriorBytes": true
+        },
+        {
+          "variant": "after",
+          "repeat": 2,
+          "command": [
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/after-cpg",
+            "export",
+            "--load",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/lua-5.4.7/fourth-preview-a14-1/graph.cpg",
+            "--lang",
+            "c",
+            "--repr",
+            "all",
+            "--format",
+            "json",
+            "-o",
+            "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/measurements/lua-5.4.7/after-2/export"
+          ],
+          "exitCode": 0,
+          "seconds": 0.22039554199727718,
+          "peakRssBytes": 73318400,
+          "peakRssMiB": 69.921875,
+          "outputSha256": "13a7ee34d11eb5c110a773fdee3f27cda10eaf83b6f069d283d25bc8ea176a34",
+          "outputBytes": 73247250,
+          "matchesPriorBytes": true
+        }
+      ],
+      "stats": {
+        "nodes": 108247,
+        "edges": 705135,
+        "files": 1,
+        "stderrPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final/measurements/lua-5.4.7/after-1/stderr",
+        "stderrSha256": "73ed44b68e5e0070022a9428765bb2d940f2470dab7902d6701a6afb4f7cb11e"
+      }
+    }
+  },
+  "validation": {
+    "cliTests": {
+      "passed": 72,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    "newTests": 4,
+    "strictClippy": "PASS",
+    "format": "PASS",
+    "releaseBuildSeconds": 12.79,
+    "logs": {
+      "final-tests.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final-tests.log",
+        "sha256": "2d46a6bdc47ab22a31531ac3392cf011e0129e263f6dff731d0b644574880fc4"
+      },
+      "final-clippy.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final-clippy.log",
+        "sha256": "16239938bb48df02fbbe3213a18d4402c8ca4b58d41a9e5446afed8d9cdbde0f"
+      },
+      "final-build.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-stream-export/.local/stream-export/final-build.log",
+        "sha256": "f268eedcadc1baba74f8ac4d136243567fbee84a342fe0e70f62e23489afb017"
+      }
+    }
+  },
+  "notes": [
+    "Only cpg-cli/src/export.rs implementation and its unit tests changed; saved graph hashes remain unchanged.",
+    "Baseline is immutable frozen-a14; candidate uses accepted06c3 plus this exporter repair and loads the same saved graphs.",
+    "The reviewer reproduced a lost final tail/error in the first streaming draft because BufWriter drop ignored a late write failure. The final writer explicitly flushes before reporting success or incrementing export statistics; a production-dispatch regression covers the buffered-tail failure.",
+    "Peak RSS is measured for individual wait4 child processes on macOS, not cumulative RUSAGE_CHILDREN.",
+    "The initial pre-fix benchmark omitted --lang c; both tools rejected it. That invalid startup attempt is retained separately and excluded here."
+  ],
+  "independentReview": {
+    "verdict": "PASS",
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/export-error-review/review.json",
+    "sha256": "754e958bca6d9f3fee03677ea7065ffbf54353f862b7562d1e43b909541f412f",
+    "quotaProbe": "Old and final export report StorageFull; initial streaming draft incorrectly returned success.",
+    "moduleTests": 6
+  }
+}
