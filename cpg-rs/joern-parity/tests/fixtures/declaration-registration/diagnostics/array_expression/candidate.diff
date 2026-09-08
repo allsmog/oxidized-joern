@@ -1,0 +1,187 @@
+--- live
++++ candidate
+@@ -1,14 +1,6 @@
+ METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-
+-METHOD NAME=<operator>.alloc FULL_NAME=<operator>.alloc ORDER=0
+-  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+@@ -25,11 +17,6 @@
+     LOCAL NAME=value CODE=unsigned char value[2] TYPE_FULL_NAME=unsigned char[2] ORDER=1
+     CALL NAME=<operator>.assignment CODE=value[2] = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=unsigned char[2] ORDER=1 ARGUMENT_INDEX=1
+-      CALL NAME=<operator>.alloc CODE=value[2] = 0 TYPE_FULL_NAME=unsigned char[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-        IDENTIFIER NAME=unsigned char[2] CODE=unsigned char[2] TYPE_FULL_NAME=unsigned char[2] ORDER=1 ARGUMENT_INDEX=1
+-        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-    CALL NAME=<operator>.assignment CODE=value[2] = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+-      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=unsigned char[2] ORDER=1 ARGUMENT_INDEX=1
+       LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+ 
+@@ -40,11 +27,6 @@
+     BLOCK CODE={ unsigned char value[2] = 0; } TYPE_FULL_NAME=void ORDER=2
+       LOCAL NAME=value CODE=unsigned char value[2] TYPE_FULL_NAME=unsigned char[2] ORDER=1
+       CALL NAME=<operator>.assignment CODE=value[2] = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+-        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=unsigned char[2] ORDER=1 ARGUMENT_INDEX=1
+-        CALL NAME=<operator>.alloc CODE=value[2] = 0 TYPE_FULL_NAME=unsigned char[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-          IDENTIFIER NAME=unsigned char[2] CODE=unsigned char[2] TYPE_FULL_NAME=unsigned char[2] ORDER=1 ARGUMENT_INDEX=1
+-          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-      CALL NAME=<operator>.assignment CODE=value[2] = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=unsigned char[2] ORDER=1 ARGUMENT_INDEX=1
+         LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+@@ -73,31 +55,18 @@
+ NODES|TYPE NAME=unsigned FULL_NAME=unsigned TYPE_DECL_FULL_NAME=unsigned
+ NODES|TYPE NAME=unsigned char[2] FULL_NAME=unsigned char[2] TYPE_DECL_FULL_NAME=unsigned char[2]
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT registration#10 -> registration#11
+-EDGES|ARGUMENT registration#10 -> registration#12
+ EDGES|ARGUMENT registration#5 -> registration#6
+ EDGES|ARGUMENT registration#5 -> registration#7
+-EDGES|ARGUMENT registration#7 -> registration#8
+-EDGES|ARGUMENT registration#7 -> registration#9
+-EDGES|CALL registration#10 -> <operator>.assignment#0
+ EDGES|CALL registration#5 -> <operator>.assignment#0
+-EDGES|CALL registration#7 -> <operator>.alloc#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG <operator>.alloc#0 -> <operator>.alloc#5
+ EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+ EDGES|CFG registration#0 -> registration#6
+-EDGES|CFG registration#10 -> registration#13
+-EDGES|CFG registration#11 -> registration#12
+-EDGES|CFG registration#12 -> registration#10
+-EDGES|CFG registration#5 -> registration#11
+-EDGES|CFG registration#6 -> registration#8
++EDGES|CFG registration#5 -> registration#8
++EDGES|CFG registration#6 -> registration#7
+ EDGES|CFG registration#7 -> registration#5
+-EDGES|CFG registration#8 -> registration#9
+-EDGES|CFG registration#9 -> registration#7
+-EDGES|CFG registration.c:<global>#0 -> registration.c:<global>#16
+-EDGES|CFG registration.c:<global>#16 -> registration.c:<global>#17
++EDGES|CFG registration.c:<global>#0 -> registration.c:<global>#11
++EDGES|CFG registration.c:<global>#11 -> registration.c:<global>#12
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+-EDGES|CONTAINS <operator>.alloc#0 -> <operator>.alloc#2
+ EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+ EDGES|CONTAINS D:registration.c:<global> -> D:registration
+ EDGES|CONTAINS D:registration.c:<global> -> registration.c:<global>#0
+@@ -108,26 +77,15 @@
+ EDGES|CONTAINS F:<includes> -> D:unsigned char[2]
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:registration.c -> D:registration.c:<global>
+-EDGES|CONTAINS registration#0 -> registration#10
+-EDGES|CONTAINS registration#0 -> registration#11
+-EDGES|CONTAINS registration#0 -> registration#12
+ EDGES|CONTAINS registration#0 -> registration#3
+ EDGES|CONTAINS registration#0 -> registration#5
+ EDGES|CONTAINS registration#0 -> registration#6
+ EDGES|CONTAINS registration#0 -> registration#7
+-EDGES|CONTAINS registration#0 -> registration#8
+-EDGES|CONTAINS registration#0 -> registration#9
+ EDGES|CONTAINS registration.c:<global>#0 -> registration#0
+-EDGES|CONTAINS registration.c:<global>#0 -> registration.c:<global>#15
+-EDGES|CONTAINS registration.c:<global>#0 -> registration.c:<global>#16
++EDGES|CONTAINS registration.c:<global>#0 -> registration.c:<global>#10
++EDGES|CONTAINS registration.c:<global>#0 -> registration.c:<global>#11
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.alloc#1 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.alloc#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.alloc#3 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.alloc#4 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.alloc#5 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.alloc#6 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+@@ -135,23 +93,16 @@
+ EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+ EDGES|EVAL_TYPE registration#1 -> T:void
+-EDGES|EVAL_TYPE registration#10 -> T:void
+-EDGES|EVAL_TYPE registration#11 -> T:unsigned char[2]
+-EDGES|EVAL_TYPE registration#12 -> T:int
+-EDGES|EVAL_TYPE registration#13 -> T:void
+ EDGES|EVAL_TYPE registration#2 -> T:void
+ EDGES|EVAL_TYPE registration#3 -> T:void
+ EDGES|EVAL_TYPE registration#4 -> T:unsigned char[2]
+ EDGES|EVAL_TYPE registration#5 -> T:void
+ EDGES|EVAL_TYPE registration#6 -> T:unsigned char[2]
+-EDGES|EVAL_TYPE registration#7 -> T:unsigned char[2]
+-EDGES|EVAL_TYPE registration#8 -> T:unsigned char[2]
+-EDGES|EVAL_TYPE registration#9 -> T:int
+-EDGES|EVAL_TYPE registration.c:<global>#15 -> T:ANY
+-EDGES|EVAL_TYPE registration.c:<global>#16 -> T:registration
+-EDGES|EVAL_TYPE registration.c:<global>#17 -> T:ANY
+-EDGES|PARAMETER_LINK <operator>.alloc#1 -> <operator>.alloc#3
+-EDGES|PARAMETER_LINK <operator>.alloc#4 -> <operator>.alloc#6
++EDGES|EVAL_TYPE registration#7 -> T:int
++EDGES|EVAL_TYPE registration#8 -> T:void
++EDGES|EVAL_TYPE registration.c:<global>#10 -> T:ANY
++EDGES|EVAL_TYPE registration.c:<global>#11 -> T:registration
++EDGES|EVAL_TYPE registration.c:<global>#12 -> T:ANY
+ EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+ EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+ EDGES|PARAMETER_LINK registration#1 -> registration#2
+@@ -164,9 +115,8 @@
+ EDGES|REF T:unsigned -> D:unsigned
+ EDGES|REF T:unsigned char[2] -> D:unsigned char[2]
+ EDGES|REF T:void -> D:void
+-EDGES|REF registration#11 -> registration#4
+ EDGES|REF registration#6 -> registration#4
+-EDGES|REF registration.c:<global>#16 -> registration#0
++EDGES|REF registration.c:<global>#11 -> registration#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+@@ -180,33 +130,19 @@
+ EDGES|SOURCE_FILE NB:registration.c:<global> -> F:registration.c
+ EDGES|SOURCE_FILE registration#0 -> F:registration.c
+ EDGES|SOURCE_FILE registration.c:<global>#0 -> F:registration.c
+-FLOWS|REACHING_DEF[0] registration#12 -> registration#10
+-FLOWS|REACHING_DEF[0] registration#12 -> registration#11
+-FLOWS|REACHING_DEF[2] registration#9 -> registration#7
+-FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#1
+-FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#4
++FLOWS|REACHING_DEF[0] registration#7 -> registration#5
++FLOWS|REACHING_DEF[0] registration#7 -> registration#6
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+ FLOWS|REACHING_DEF[] registration#0 -> registration#1
+-FLOWS|REACHING_DEF[] registration#0 -> registration#12
+-FLOWS|REACHING_DEF[] registration#0 -> registration#8
+-FLOWS|REACHING_DEF[] registration#0 -> registration#9
+-FLOWS|REACHING_DEF[] registration#1 -> registration#13
++FLOWS|REACHING_DEF[] registration#0 -> registration#7
+ FLOWS|REACHING_DEF[] registration#1 -> registration#2
+-FLOWS|REACHING_DEF[] registration.c:<global>#0 -> registration.c:<global>#16
+-FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#3
+-FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#5
++FLOWS|REACHING_DEF[] registration#1 -> registration#8
++FLOWS|REACHING_DEF[] registration.c:<global>#0 -> registration.c:<global>#11
+ FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+ FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+-FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#5
+-FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#6
+ FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+ FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+-FLOWS|REACHING_DEF[unsigned char[2]] registration#8 -> registration#13
+-FLOWS|REACHING_DEF[unsigned char[2]] registration#8 -> registration#7
+-FLOWS|REACHING_DEF[value[2] = 0] registration#10 -> registration#13
+-FLOWS|REACHING_DEF[value[2] = 0] registration#7 -> registration#5
+-FLOWS|REACHING_DEF[value[2] = 0] registration#7 -> registration#6
+-FLOWS|REACHING_DEF[value] registration#11 -> registration#10
+-FLOWS|REACHING_DEF[value] registration#11 -> registration#13
++FLOWS|REACHING_DEF[value[2] = 0] registration#5 -> registration#8
+ FLOWS|REACHING_DEF[value] registration#6 -> registration#5
++FLOWS|REACHING_DEF[value] registration#6 -> registration#8

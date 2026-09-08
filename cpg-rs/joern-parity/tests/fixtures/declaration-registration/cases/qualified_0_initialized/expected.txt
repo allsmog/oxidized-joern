@@ -1,0 +1,148 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=registration CODE=void registration(void) { volatile unsigned char *value = 0; } FULL_NAME=registration SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ volatile unsigned char *value = 0; } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=value CODE=volatile unsigned char *value TYPE_FULL_NAME=volatile unsigned char* ORDER=1
+    CALL NAME=<operator>.assignment CODE=*value = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=volatile unsigned char* ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=registration.c:<global> ORDER=1
+  METHOD NAME=registration CODE=void registration(void) { volatile unsigned char *value = 0; } FULL_NAME=registration SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ volatile unsigned char *value = 0; } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=value CODE=volatile unsigned char *value TYPE_FULL_NAME=volatile unsigned char* ORDER=1
+      CALL NAME=<operator>.assignment CODE=*value = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=volatile unsigned char* ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=registration TYPE_FULL_NAME=registration METHOD_FULL_NAME=registration ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=registration.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=registration.c:<global> FILENAME=registration.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=registration FULL_NAME=registration CODE=registration AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=registration.c:<global> FILENAME=registration.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=registration.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=registration.c:<global> FILENAME=registration.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=volatile FULL_NAME=volatile CODE=volatile IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=volatile unsigned char* FULL_NAME=volatile unsigned char* CODE=volatile unsigned char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=registration FULL_NAME=registration TYPE_DECL_FULL_NAME=registration
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=volatile FULL_NAME=volatile TYPE_DECL_FULL_NAME=volatile
+NODES|TYPE NAME=volatile unsigned char* FULL_NAME=volatile unsigned char* TYPE_DECL_FULL_NAME=volatile unsigned char*
+EDGES|ARGUMENT registration#5 -> registration#6
+EDGES|ARGUMENT registration#5 -> registration#7
+EDGES|CALL registration#5 -> <operator>.assignment#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG registration#0 -> registration#6
+EDGES|CFG registration#5 -> registration#8
+EDGES|CFG registration#6 -> registration#7
+EDGES|CFG registration#7 -> registration#5
+EDGES|CFG registration.c:<global>#0 -> registration.c:<global>#11
+EDGES|CFG registration.c:<global>#11 -> registration.c:<global>#12
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS D:registration.c:<global> -> D:registration
+EDGES|CONTAINS D:registration.c:<global> -> registration.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:volatile
+EDGES|CONTAINS F:<includes> -> D:volatile unsigned char*
+EDGES|CONTAINS F:registration.c -> D:registration.c:<global>
+EDGES|CONTAINS registration#0 -> registration#3
+EDGES|CONTAINS registration#0 -> registration#5
+EDGES|CONTAINS registration#0 -> registration#6
+EDGES|CONTAINS registration#0 -> registration#7
+EDGES|CONTAINS registration.c:<global>#0 -> registration#0
+EDGES|CONTAINS registration.c:<global>#0 -> registration.c:<global>#10
+EDGES|CONTAINS registration.c:<global>#0 -> registration.c:<global>#11
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE registration#1 -> T:void
+EDGES|EVAL_TYPE registration#2 -> T:void
+EDGES|EVAL_TYPE registration#3 -> T:void
+EDGES|EVAL_TYPE registration#4 -> T:volatile unsigned char*
+EDGES|EVAL_TYPE registration#5 -> T:void
+EDGES|EVAL_TYPE registration#6 -> T:volatile unsigned char*
+EDGES|EVAL_TYPE registration#7 -> T:int
+EDGES|EVAL_TYPE registration#8 -> T:void
+EDGES|EVAL_TYPE registration.c:<global>#10 -> T:ANY
+EDGES|EVAL_TYPE registration.c:<global>#11 -> T:registration
+EDGES|EVAL_TYPE registration.c:<global>#12 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK registration#1 -> registration#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:registration.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:registration -> D:registration
+EDGES|REF T:void -> D:void
+EDGES|REF T:volatile -> D:volatile
+EDGES|REF T:volatile unsigned char* -> D:volatile unsigned char*
+EDGES|REF registration#6 -> registration#4
+EDGES|REF registration.c:<global>#11 -> registration#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:registration -> F:registration.c
+EDGES|SOURCE_FILE D:registration.c:<global> -> F:registration.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:volatile -> F:<includes>
+EDGES|SOURCE_FILE D:volatile unsigned char* -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:registration.c:<global> -> F:registration.c
+EDGES|SOURCE_FILE registration#0 -> F:registration.c
+EDGES|SOURCE_FILE registration.c:<global>#0 -> F:registration.c
+FLOWS|REACHING_DEF[*value = 0] registration#5 -> registration#8
+FLOWS|REACHING_DEF[0] registration#7 -> registration#5
+FLOWS|REACHING_DEF[0] registration#7 -> registration#6
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] registration#0 -> registration#1
+FLOWS|REACHING_DEF[] registration#0 -> registration#7
+FLOWS|REACHING_DEF[] registration#1 -> registration#2
+FLOWS|REACHING_DEF[] registration#1 -> registration#8
+FLOWS|REACHING_DEF[] registration.c:<global>#0 -> registration.c:<global>#11
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[value] registration#6 -> registration#5
+FLOWS|REACHING_DEF[value] registration#6 -> registration#8

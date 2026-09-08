@@ -58,14 +58,14 @@ remove only the leading `AST|`, then compare the result with its `expected.txt`.
 
 This does not establish full C type parity. Typedef expansion, aggregate and
 cast type rendering, literal typing, header resolution and macro-wrapper
-inference remain outside this change. The existing extra decl-specifier TYPE
-registration for an uninitialized `unsigned char` local or global also
-remains: `void f(void) { unsigned char value; }` adds a Rust `unsigned` TYPE
-that is absent from Joern. Initialized declarations in this suite separately
-pin the registration Joern actually emits for those expressions.
+inference remain outside this change. The extra decl-specifier TYPE
+registration for an uninitialized `unsigned char` local or global is repaired
+separately by the [declaration-registration fixtures](../declaration-registration/README.md).
+Initialized declarations in this suite continue to pin the additional
+registration Joern emits for those expressions.
 
-A separate diagnostic using function-pointer initializers from method
-references has correct type properties after this change, but retains a
-preexisting two-edge reaching-definition mismatch at method exit. Its full
-live output and diff are retained with the sprint's scratch receipts; it is
-not counted among the conformant fixtures above.
+The two missing method-exit reaching-definition edges originally observed
+with function-pointer initializers from method references are also repaired
+separately. Definition kills now distinguish symbol NAME from the CODE used
+in flow labels; [method_address_definitions.rs](../../../../cpg-lang-c/tests/method_address_definitions.rs)
+pins method references, unrelated definitions and subsequent overwrites.
