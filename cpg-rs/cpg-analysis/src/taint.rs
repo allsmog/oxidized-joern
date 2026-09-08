@@ -3201,6 +3201,10 @@ fn callee_chain(
     let Some(&pnode) = params.get(param_idx) else {
         return Some(Vec::new()); // signature mismatch: summary-only hop
     };
+    if crate::return_flow::is_authoritative(cpg, method) {
+        let graph = crate::return_flow::ReturnFlowGraph::new(cpg, method, ctx.summaries);
+        return canonical_return_chain(ctx, &graph, pnode, depth, visiting);
+    }
     let pname = cpg.name_of(pnode)?.to_string();
 
     // var name -> witness chain from the parameter to that var.
@@ -3274,6 +3278,75 @@ fn callee_chain(
         }
     }
     found // None = no sanitizer-free param -> return path found
+}
+
+/// Reconstruct C return witnesses from the same dependencies as its summary.
+/// Re-running the old source-order walk here would discard a valid may-flow
+/// as soon as an assignment on only one branch overwrote the variable.
+fn canonical_return_chain(
+    ctx: &Ctx,
+    graph: &crate::return_flow::ReturnFlowGraph,
+    start: NodeId,
+    depth: u32,
+    visiting: &mut HashSet<String>,
+) -> Option<Vec<Step>> {
+    let cpg = ctx.cpg;
+    let blocked = |node| {
+        cpg.kind_of(node) == NodeKind::Call
+            && cpg.name_of(node).is_some_and(|name| ctx.is_sanitizer(name))
+    };
+    if blocked(start) {
+        return None;
+    }
+    let mut expansions = HashMap::new();
+    let path = graph.path_to_return(start, |index, edge| {
+        if edge.via.is_some() || blocked(edge.to) {
+            return false;
+        }
+        if let Some(hop) = &edge.hop {
+            let name = cpg.name_of(hop.call).unwrap_or("");
+            let Some(expansion) = lift_nested(
+                ctx,
+                name,
+                &hop.fqn,
+                hop.origin,
+                hop.parameter,
+                depth,
+                visiting,
+            ) else {
+                return false;
+            };
+            expansions.insert(index, expansion);
+        }
+        true
+    })?;
+    let mut steps = vec![Step::intra(
+        cpg.code_of(start)
+            .or_else(|| cpg.name_of(start))
+            .unwrap_or(""),
+        cpg.line_of(start),
+        depth,
+    )];
+    for index in path {
+        let node = graph.edges[index].to;
+        let provenance = if let Some((inner, provenance)) = expansions.remove(&index) {
+            steps.extend(inner);
+            provenance
+        } else {
+            Provenance::IntraProc
+        };
+        steps.push(Step {
+            code: cpg
+                .code_of(node)
+                .or_else(|| cpg.name_of(node))
+                .unwrap_or("")
+                .to_string(),
+            line: cpg.line_of(node),
+            provenance,
+            depth,
+        });
+    }
+    Some(steps)
 }
 
 /// The witness chain carrying the tracked parameter into `node`, if any.
@@ -3518,6 +3591,33 @@ fn source_chain(
         return Some(Vec::new()); // too deep: keep the hop, drop the expansion
     }
     let cpg = ctx.cpg;
+
+    if crate::return_flow::is_authoritative(cpg, method) {
+        let graph = crate::return_flow::ReturnFlowGraph::new(cpg, method, ctx.summaries);
+        let mut starts: Vec<_> = graph
+            .call_origins
+            .iter()
+            .filter(|(_, origins)| {
+                origins
+                    .iter()
+                    .any(|origin| origin.call == src && origin.via.is_none())
+            })
+            .map(|(&node, _)| node)
+            .collect();
+        starts.sort();
+        for start in starts {
+            let Some(mut origin) = source_expr(ctx, start, src, depth, visiting) else {
+                continue;
+            };
+            if let Some(path) = canonical_return_chain(ctx, &graph, start, depth, visiting) {
+                // source_expr already includes the starting call and any
+                // nested source-producing wrapper's witness.
+                origin.extend(path.into_iter().skip(1));
+                return Some(origin);
+            }
+        }
+        return None;
+    }
 
     // var name -> witness chain from the source call to that var.
     let mut chains: HashMap<String, Vec<Step>> = HashMap::new();
