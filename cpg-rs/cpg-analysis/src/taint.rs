@@ -33,7 +33,7 @@ use crate::summaries::{is_operator, is_plain_assignment, lhs_name, SummaryOrigin
 use crate::SparseValueFlow;
 use cpg_core::{Cpg, EdgeKind, Layer, NodeId, NodeKind, Query};
 use serde::Serialize;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 /// Taint keys paired with a count — distinct enclosing methods for a stored
 /// key, or read sites for a persisted one. Partitioned into kept/dropped
@@ -1663,6 +1663,9 @@ fn contains_word(hay: &str, word: &str) -> bool {
 fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
     let cpg = ctx.cpg;
     let method_name = cpg.full_name_of(method).unwrap_or("<anon>").to_string();
+    let canonical = crate::return_flow::is_authoritative(cpg, method)
+        .then(|| CanonicalPaths::from_sources(ctx, method))
+        .flatten();
 
     // Tainted variable names, each carrying the provenance that tainted it.
     let visible_globals: HashSet<String> = method_global_names(cpg, method).collect();
@@ -2008,7 +2011,159 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
             }
         }
         // Any call (including the assignment's rhs) may be a sink.
-        check_sinks(ctx, n, &taint, &method_name, out);
+        check_sinks(ctx, n, &taint, canonical.as_ref(), &method_name, out);
+    }
+}
+
+/// Query-specific paths over the canonical method's reaching definitions.
+/// Unlike the policy name map, this walk preserves joins, loop-carried values
+/// and definite assignment kills. Keep one predecessor per reached node and
+/// materialize a witness only when a sink needs it.
+struct CanonicalPaths {
+    graph: crate::return_flow::ReturnFlowGraph,
+    seeds: HashMap<NodeId, Trace>,
+    previous: HashMap<NodeId, usize>,
+    expansions: HashMap<usize, (Vec<Step>, Provenance)>,
+    depth: u32,
+}
+
+impl CanonicalPaths {
+    fn from_sources(ctx: &Ctx, method: NodeId) -> Option<Self> {
+        if ctx.spec.sources.is_empty() {
+            return None;
+        }
+        let empty = HashMap::new();
+        // Reuse the source-shape and returned-source summary policy, including
+        // recursive witness validation, without consulting mutable local names.
+        let seeds: HashMap<_, _> = crate::pass::ast_descendants(ctx.cpg, method)
+            .into_iter()
+            .filter(|&node| {
+                ctx.cpg.kind_of(node) == NodeKind::Call
+                    && ctx.cpg.name_of(node).is_some_and(|name| !is_operator(name))
+            })
+            .filter_map(|call| expr_taint(ctx, call, &empty).map(|trace| (call, trace)))
+            .collect();
+        // Most methods have no source for a given query. Avoid building their
+        // dependency view unless a source or returned-source summary seeds it.
+        if seeds.is_empty() {
+            return None;
+        }
+        let graph = crate::return_flow::ReturnFlowGraph::new(ctx.cpg, method, ctx.summaries);
+        Some(Self::new(ctx, graph, seeds, 0, &mut HashSet::new()))
+    }
+
+    fn from_parameter(
+        ctx: &Ctx,
+        method: NodeId,
+        parameter: NodeId,
+        depth: u32,
+        visiting: &mut HashSet<String>,
+    ) -> Self {
+        let cpg = ctx.cpg;
+        let name = cpg.name_of(parameter).unwrap_or("");
+        let seeds = HashMap::from([(
+            parameter,
+            Trace {
+                origin: name.to_string(),
+                steps: vec![Step::intra(
+                    cpg.code_of(parameter).unwrap_or(name),
+                    cpg.line_of(parameter),
+                    depth,
+                )],
+            },
+        )]);
+        Self::new(
+            ctx,
+            crate::return_flow::ReturnFlowGraph::new(cpg, method, ctx.summaries),
+            seeds,
+            depth,
+            visiting,
+        )
+    }
+
+    fn new(
+        ctx: &Ctx,
+        graph: crate::return_flow::ReturnFlowGraph,
+        seeds: HashMap<NodeId, Trace>,
+        depth: u32,
+        visiting: &mut HashSet<String>,
+    ) -> Self {
+        let mut starts: Vec<_> = seeds.keys().copied().collect();
+        starts.sort();
+        let mut seen: HashSet<_> = starts.iter().copied().collect();
+        let mut queue = VecDeque::from(starts);
+        let mut previous = HashMap::new();
+        let mut expansions = HashMap::new();
+        while let Some(node) = queue.pop_front() {
+            for (index, edge) in graph.outgoing(node) {
+                if seen.contains(&edge.to)
+                    || edge.via.is_some()
+                    || (ctx.cpg.kind_of(edge.to) == NodeKind::Call
+                        && ctx
+                            .cpg
+                            .name_of(edge.to)
+                            .is_some_and(|name| ctx.is_sanitizer(name)))
+                {
+                    continue;
+                }
+                if let Some(hop) = &edge.hop {
+                    let name = ctx.cpg.name_of(hop.call).unwrap_or("");
+                    let Some(expansion) = lift_nested(
+                        ctx,
+                        name,
+                        &hop.fqn,
+                        hop.origin,
+                        hop.parameter,
+                        depth,
+                        visiting,
+                    ) else {
+                        continue;
+                    };
+                    expansions.insert(index, expansion);
+                }
+                seen.insert(edge.to);
+                previous.insert(edge.to, index);
+                queue.push_back(edge.to);
+            }
+        }
+        Self {
+            graph,
+            seeds,
+            previous,
+            expansions,
+            depth,
+        }
+    }
+
+    fn trace(&self, cpg: &Cpg, node: NodeId) -> Option<Trace> {
+        let mut current = node;
+        let mut path = Vec::new();
+        while !self.seeds.contains_key(&current) {
+            let &index = self.previous.get(&current)?;
+            path.push(index);
+            current = self.graph.edges[index].from;
+        }
+        let mut trace = self.seeds[&current].clone();
+        for index in path.into_iter().rev() {
+            let node = self.graph.edges[index].to;
+            let provenance = if let Some((inner, provenance)) = self.expansions.get(&index) {
+                trace.steps.extend(inner.iter().cloned());
+                provenance.clone()
+            } else {
+                Provenance::IntraProc
+            };
+            trace.steps.push(Step {
+                code: cpg
+                    .code_of(node)
+                    .or_else(|| cpg.name_of(node))
+                    .unwrap_or("")
+                    .to_string(),
+                line: cpg.line_of(node),
+                provenance,
+                depth: self.depth,
+            });
+        }
+        Some(trace)
     }
 }
 
@@ -2261,10 +2416,18 @@ fn check_sinks(
     ctx: &Ctx,
     node: NodeId,
     taint: &HashMap<String, Trace>,
+    canonical: Option<&CanonicalPaths>,
     method_name: &str,
     out: &mut Vec<Finding>,
 ) {
     let cpg = ctx.cpg;
+    // The graph supplies ordinary C value flow. The existing name map still
+    // supplies scanner policies such as globals, out-parameters and copies.
+    let taint_of = |arg| {
+        canonical
+            .and_then(|paths| paths.trace(cpg, arg))
+            .or_else(|| expr_taint(ctx, arg, taint))
+    };
     if cpg.kind_of(node) != NodeKind::Call {
         return;
     }
@@ -2284,7 +2447,7 @@ fn check_sinks(
             if !ctx.spec.sink_arg_matches(name, k) && !shell_payload.is_some_and(|s| k >= s) {
                 continue;
             }
-            if let Some(trace) = expr_taint(ctx, arg, taint) {
+            if let Some(trace) = taint_of(arg) {
                 let path = trace
                     .extend(
                         cpg.code_of(node).unwrap_or(name),
@@ -2318,7 +2481,7 @@ fn check_sinks(
     if !fired && ctx.spec.sinks.contains("<shellform>") && !is_plain_assignment(name) {
         if let Some(start) = shell_payload {
             for &arg in args_all.iter().skip(start) {
-                if let Some(trace) = expr_taint(ctx, arg, taint) {
+                if let Some(trace) = taint_of(arg) {
                     let path = trace
                         .extend(
                             cpg.code_of(node).unwrap_or(name),
@@ -2355,7 +2518,7 @@ fn check_sinks(
         // handlers, and the sink may live in any of them. First hit wins.
         'callees: for callee in cpg.call_targets(node) {
             for (k, arg) in args_to_params(cpg, callee, &args_all) {
-                if let Some(trace) = expr_taint(ctx, arg, taint) {
+                if let Some(trace) = taint_of(arg) {
                     let mut visiting = HashSet::new();
                     if let Some(hit) = param_to_sink(ctx, callee, k, 1, &mut visiting) {
                         let callee_fqn = cpg.full_name_of(callee).unwrap_or(name).to_string();
@@ -2397,6 +2560,67 @@ struct SinkHit {
     steps: Vec<Step>,
 }
 
+fn canonical_param_to_sink(
+    ctx: &Ctx,
+    method: NodeId,
+    parameter: NodeId,
+    depth: u32,
+    visiting: &mut HashSet<String>,
+) -> Option<SinkHit> {
+    let cpg = ctx.cpg;
+    let paths = CanonicalPaths::from_parameter(ctx, method, parameter, depth, visiting);
+    let mut calls: Vec<_> = crate::pass::ast_descendants(cpg, method)
+        .into_iter()
+        .filter(|&node| cpg.kind_of(node) == NodeKind::Call)
+        .collect();
+    calls.sort_by_key(|&node| (cpg.line_of(node), node));
+    for call in calls {
+        let name = cpg.name_of(call).unwrap_or("");
+        let code = cpg.code_of(call).unwrap_or(name);
+        let args = cpg.arguments_of(call);
+        let is_sink = ctx.spec.sinks.contains(name) && ctx.spec.sink_shape_matches(name, code);
+        if is_sink {
+            let shell_payload = shellform_payload_start(cpg, &args);
+            for (index, &arg) in args.iter().enumerate() {
+                if !ctx.spec.sink_arg_matches(name, index)
+                    && !shell_payload.is_some_and(|start| index >= start)
+                {
+                    continue;
+                }
+                if let Some(trace) = paths.trace(cpg, arg) {
+                    return Some(SinkHit {
+                        sink: name.to_string(),
+                        line: cpg.line_of(call),
+                        file: cpg.path_of(cpg.file_of(call)).map(str::to_string),
+                        steps: trace
+                            .extend(code, cpg.line_of(call), Provenance::IntraProc, depth)
+                            .steps,
+                    });
+                }
+            }
+        } else if !ctx.is_sanitizer(name) && !is_operator(name) && is_invoked(cpg, call, name) {
+            for callee in cpg.call_targets(call) {
+                for (index, arg) in args_to_params(cpg, callee, &args) {
+                    let Some(trace) = paths.trace(cpg, arg) else {
+                        continue;
+                    };
+                    if let Some(mut hit) = param_to_sink(ctx, callee, index, depth + 1, visiting) {
+                        let provenance = Provenance::SummaryFlow {
+                            callee_fqn: cpg.full_name_of(callee).unwrap_or(name).to_string(),
+                        };
+                        hit.steps = trace
+                            .extend(code, cpg.line_of(call), provenance, depth)
+                            .splice(hit.steps)
+                            .steps;
+                        return Some(hit);
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
 /// Does `method`'s parameter `param_idx` reach a sink inside `method` (or
 /// transitively inside one of its resolved callees) along a sanitizer-free
 /// path? Mirrors `callee_chain`'s propagation rules, but the target is a
@@ -2420,6 +2644,9 @@ fn param_to_sink(
         let params = cpg.parameters_of(method);
         let &pnode = params.get(param_idx)?;
         let pname = cpg.name_of(pnode)?.to_string();
+        let canonical_hit = crate::return_flow::is_authoritative(cpg, method)
+            .then(|| canonical_param_to_sink(ctx, method, pnode, depth, visiting))
+            .flatten();
 
         let mut chains: HashMap<String, Vec<Step>> = HashMap::new();
         chains.insert(
@@ -2461,7 +2688,7 @@ fn param_to_sink(
         // the first hit — two rule packs with different sinks used to
         // harvest different key sets from the same module because each
         // pack's first hit truncated the walk at a different statement.
-        let mut first_hit: Option<SinkHit> = None;
+        let mut first_hit: Option<SinkHit> = canonical_hit;
         for n in stmts {
             let name = cpg.name_of(n).unwrap_or("");
             // Out-parameter sources fire in callees too (mirrors analyse_method).
