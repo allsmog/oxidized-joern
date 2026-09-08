@@ -26,3 +26,10 @@ declarations, loops and conditions, preprocessing, direct findings, and
 whole-project comparisons with the same pinned Joern. Its
 [metrics](astra-second-batch-metrics.json) retain complete projection counts,
 input and binary provenance, and any regressions in previously exact methods.
+
+The [third Astra batch](astra-third-batch-2026-09-08.md) records primitive and
+literal types, static modifiers, standalone blocks, definition identities,
+and concatenated strings. Its [metrics](astra-third-batch-metrics.json)
+compare both the previous checkpoint and the combined build with fresh Joern
+outputs; the [acceptance receipt](astra-third-batch-acceptance.json) binds
+validation logs, binaries, fixture measurements, and real-project workflows.

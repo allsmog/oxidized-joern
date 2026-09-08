@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "measuredAtUtc": "2026-09-08T09:35:08.291438+00:00",
+  "baselineRevision": "c5ea712dbfd03d114af4450f79c89629a360b6a6",
+  "currentRevision": "b8c2ae132edc2d0317df853673e5d94ac7ca40a5",
+  "currentBinary": {
+    "path": ".local/astra-sprint/third-batch/final-real-differential/bin/joern-parity",
+    "sha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26"
+  },
+  "baselineBinary": {
+    "path": ".local/astra-sprint/second-batch/final-real-differential/bin/joern-parity",
+    "sha256": "f8293e5a34811b908f3ee11dea5ed1a3ff9933ffb595bf057ed3a1e234f4ea93"
+  },
+  "oracle": {
+    "version": "v4.0.555",
+    "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+    "reusedSavedLiveOutputs": false,
+    "freshRunReceipts": ".local/astra-sprint/third-batch/fresh-real-oracles/runs.json",
+    "transport": "Embedded newline characters in flow labels are escaped before sorting; both baseline and current are compared against the fresh corrected transport."
+  },
+  "scope": {
+    "astProperties": [
+      "NAME",
+      "CODE",
+      "TYPE_FULL_NAME",
+      "FULL_NAME",
+      "METHOD_FULL_NAME",
+      "SIGNATURE",
+      "ORDER",
+      "ARGUMENT_INDEX",
+      "DISPATCH_TYPE"
+    ],
+    "structuralEdgeKinds": [
+      "ARGUMENT",
+      "CALL",
+      "CFG",
+      "CONDITION",
+      "CONTAINS",
+      "DO_BODY",
+      "EVAL_TYPE",
+      "FALSE_BODY",
+      "FOR_BODY",
+      "FOR_INIT",
+      "FOR_UPDATE",
+      "PARAMETER_LINK",
+      "REF",
+      "SOURCE_FILE",
+      "TRUE_BODY"
+    ],
+    "flowKind": "REACHING_DEF",
+    "comparison": "Every emitted record in the existing canonical projection is compared without filtering; Counter intersections preserve duplicate records.",
+    "limitations": [
+      "This is the selected oracle.sc projection, not full Joern graph or product parity.",
+      "Method exactness measures complete projected AST blocks, including scaffold/operator/macro methods; it does not imply all incident graph edges are exact.",
+      "Edge addresses use AST line indices, so changes can amplify edge/flow differences. Counts are not parity percentages or distinct bug counts.",
+      "Default pinned Joern C interpretation; the selected upstream C and header files are unmodified, with no added compiler defines.",
+      "Timing is diagnostic from one run, not a benchmark.",
+      "Escaping physical LF as literal backslash-n is not injective; selected text projection equality does not establish byte-exact source-property equality."
+    ]
+  },
+  "projects": [
+    {
+      "case": "zlib-1.3.1-core-full",
+      "inputFiles": 26,
+      "sourceLines": 22732,
+      "inputManifest": {
+        "path": ".local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/inputs.json",
+        "sha256": "901a48450c8bd6473107ed59762a4b1389ea180a32ecde5a3e15afb0c2b59e55"
+      },
+      "oracleScript": {
+        "path": ".local/astra-sprint/third-batch/fresh-real-oracles/oracle.sc",
+        "sha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab"
+      },
+      "liveOutput": {
+        "path": ".local/astra-sprint/third-batch/fresh-real-oracles/zlib-1.3.1-core-full/joern.stdout",
+        "sha256": "513ae6eccdc3a9025b42453ad9b794057ad32f7f66eead6b469388bd9e02d716"
+      },
+      "currentRun": {
+        "status": 0,
+        "seconds": 6.299,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26"
+      },
+      "baseline": {
+        "sections": {
+          "AST": {
+            "joern": 85865,
+            "rust": 33664,
+            "common": 27431,
+            "joernOnly": 58434,
+            "rustOnly": 6233
+          },
+          "NODES": {
+            "joern": 785,
+            "rust": 673,
+            "common": 521,
+            "joernOnly": 264,
+            "rustOnly": 152
+          },
+          "EDGES": {
+            "joern": 184740,
+            "rust": 66957,
+            "common": 20187,
+            "joernOnly": 164553,
+            "rustOnly": 46770
+          },
+          "FLOWS": {
+            "joern": 200374,
+            "rust": 47511,
+            "common": 3618,
+            "joernOnly": 196756,
+            "rustOnly": 43893
+          }
+        },
+        "methods": {
+          "joern": 410,
+          "rust": 313,
+          "identical": 93,
+          "changed": 186,
+          "joernOnly": 131,
+          "rustOnly": 34
+        }
+      },
+      "current": {
+        "sections": {
+          "AST": {
+            "joern": 85865,
+            "rust": 33664,
+            "common": 27610,
+            "joernOnly": 58255,
+            "rustOnly": 6054
+          },
+          "NODES": {
+            "joern": 785,
+            "rust": 681,
+            "common": 537,
+            "joernOnly": 248,
+            "rustOnly": 144
+          },
+          "EDGES": {
+            "joern": 184740,
+            "rust": 66980,
+            "common": 20224,
+            "joernOnly": 164516,
+            "rustOnly": 46756
+          },
+          "FLOWS": {
+            "joern": 200374,
+            "rust": 47521,
+            "common": 3624,
+            "joernOnly": 196750,
+            "rustOnly": 43897
+          }
+        },
+        "methods": {
+          "joern": 410,
+          "rust": 313,
+          "identical": 93,
+          "changed": 186,
+          "joernOnly": 131,
+          "rustOnly": 34
+        }
+      },
+      "completeProjectionExact": false,
+      "previouslyExactMethodsRegressed": [],
+      "newlyExactMethods": [],
+      "regressions": [],
+      "artifacts": {
+        "rawOutput": ".local/astra-sprint/third-batch/final-real-differential/zlib-1.3.1-core-full/rust.stdout",
+        "stderr": ".local/astra-sprint/third-batch/final-real-differential/zlib-1.3.1-core-full/rust.stderr",
+        "liveCanonical": ".local/astra-sprint/third-batch/final-real-differential/zlib-1.3.1-core-full/live-canonical.txt",
+        "rustCanonical": ".local/astra-sprint/third-batch/final-real-differential/zlib-1.3.1-core-full/rust-canonical.txt",
+        "completeDiff": ".local/astra-sprint/third-batch/final-real-differential/zlib-1.3.1-core-full/complete.diff",
+        "methodComparison": ".local/astra-sprint/third-batch/final-real-differential/zlib-1.3.1-core-full/method-comparison.json"
+      },
+      "hashes": {
+        "liveCanonicalSha256": "6ea62d4d79dac8d5c71782030c891e44b92c3212b995187582360dfc30fb40cd",
+        "currentCanonicalSha256": "15d8012f97c676afa4d468906705f765837c34f3005d2492ab2674c7bac96dd6",
+        "baselineCanonicalSha256": "ec7da06209f2882dfbae1be5baf32cd4dfb3e8d48fb87674e29908dcf37e09bc"
+      }
+    },
+    {
+      "case": "lua-5.4.7-full",
+      "inputFiles": 61,
+      "sourceLines": 30098,
+      "inputManifest": {
+        "path": ".local/astra-sprint/live-real-differential/lua-5.4.7-full/inputs.json",
+        "sha256": "79fd8150d9449fa4fc2faf1f376d778d5fdaac9b175e302ad680ba369457675c"
+      },
+      "oracleScript": {
+        "path": ".local/astra-sprint/third-batch/fresh-real-oracles/oracle.sc",
+        "sha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab"
+      },
+      "liveOutput": {
+        "path": ".local/astra-sprint/third-batch/fresh-real-oracles/lua-5.4.7-full/joern.stdout",
+        "sha256": "5472b510a415f47acab8e660d12216880ece73e476c5efef8f7a72a8d206fad8"
+      },
+      "currentRun": {
+        "status": 0,
+        "seconds": 3.548,
+        "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26"
+      },
+      "baseline": {
+        "sections": {
+          "AST": {
+            "joern": 252489,
+            "rust": 141421,
+            "common": 113123,
+            "joernOnly": 139366,
+            "rustOnly": 28298
+          },
+          "NODES": {
+            "joern": 3229,
+            "rust": 2966,
+            "common": 2759,
+            "joernOnly": 470,
+            "rustOnly": 207
+          },
+          "EDGES": {
+            "joern": 504016,
+            "rust": 268365,
+            "common": 98685,
+            "joernOnly": 405331,
+            "rustOnly": 169680
+          },
+          "FLOWS": {
+            "joern": 207820,
+            "rust": 140024,
+            "common": 26380,
+            "joernOnly": 181440,
+            "rustOnly": 113644
+          }
+        },
+        "methods": {
+          "joern": 2274,
+          "rust": 2024,
+          "identical": 417,
+          "changed": 1209,
+          "joernOnly": 648,
+          "rustOnly": 398
+        }
+      },
+      "current": {
+        "sections": {
+          "AST": {
+            "joern": 252489,
+            "rust": 155212,
+            "common": 126099,
+            "joernOnly": 126390,
+            "rustOnly": 29113
+          },
+          "NODES": {
+            "joern": 3229,
+            "rust": 2974,
+            "common": 2767,
+            "joernOnly": 462,
+            "rustOnly": 207
+          },
+          "EDGES": {
+            "joern": 504016,
+            "rust": 293512,
+            "common": 105613,
+            "joernOnly": 398403,
+            "rustOnly": 187899
+          },
+          "FLOWS": {
+            "joern": 207820,
+            "rust": 157081,
+            "common": 29776,
+            "joernOnly": 178044,
+            "rustOnly": 127305
+          }
+        },
+        "methods": {
+          "joern": 2274,
+          "rust": 2039,
+          "identical": 516,
+          "changed": 1120,
+          "joernOnly": 638,
+          "rustOnly": 403
+        }
+      },
+      "completeProjectionExact": false,
+      "previouslyExactMethodsRegressed": [],
+      "newlyExactMethods": [
+        "I2d",
+        "I2d<duplicate>1",
+        "Ixor",
+        "PrintFunction",
+        "addlenmod",
+        "addnum2buff",
+        "adjustlocalvars",
+        "block",
+        "boxgc",
+        "checkpointer",
+        "clearbuff",
+        "cleargraylists",
+        "codeABRK",
+        "codebinNoK",
+        "codename",
+        "condjump",
+        "correctgraylists",
+        "correctpointers",
+        "db_getupvalue",
+        "deletelist",
+        "digit",
+        "dumpFunction",
+        "dumpInt",
+        "dumpProtos",
+        "dumpUpvalues",
+        "exchangehashpart",
+        "exp2RK",
+        "expr",
+        "filterpc",
+        "firsttry",
+        "freeregs",
+        "funcname",
+        "getF",
+        "getS",
+        "getendpos",
+        "isSCint",
+        "isneg",
+        "iter_auxlax",
+        "iter_auxstrict",
+        "l_alloc",
+        "l_checkmode",
+        "lbaselib.c:checkvalres:ANY(1)",
+        "lcorolib.c:COS_NORM:int(0)",
+        "lgc.c:GCFINALIZECOST:int(0)",
+        "lgc.c:GCFINMAX:int(0)",
+        "lgc.c:set2black:ANY(1)",
+        "listfield",
+        "lmemfind",
+        "localfunc",
+        "lstrlib.c:L_FMTFLAGSC:char*(0)",
+        "lsys_load",
+        "lsys_load<duplicate>0",
+        "lsys_sym",
+        "lsys_sym<duplicate>0",
+        "lsys_unloadlib",
+        "lsys_unloadlib<duplicate>0",
+        "lsys_unloadlib<duplicate>1",
+        "ltable.c:hashpointer:ANY(2)",
+        "marktobeclosed",
+        "markupval",
+        "math_cosh",
+        "math_frexp",
+        "math_ldexp",
+        "math_log10",
+        "math_pow",
+        "math_sinh",
+        "math_tanh",
+        "max_expand",
+        "min_expand",
+        "movegotosout",
+        "newgotoentry",
+        "nextrand",
+        "nextrand<duplicate>0",
+        "nospecials",
+        "packI",
+        "pairscont",
+        "posrelatI",
+        "prepstate",
+        "pusherror",
+        "randseed",
+        "readable",
+        "readdigits",
+        "removelastinstruction",
+        "removevars",
+        "rname",
+        "rotl",
+        "setallfields",
+        "setsignal",
+        "skipcomment",
+        "sprintf",
+        "str_find",
+        "str_match",
+        "swapexps",
+        "sweepstep",
+        "test2",
+        "times5",
+        "times9",
+        "u_posrelat",
+        "warnfoff"
+      ],
+      "regressions": [],
+      "artifacts": {
+        "rawOutput": ".local/astra-sprint/third-batch/final-real-differential/lua-5.4.7-full/rust.stdout",
+        "stderr": ".local/astra-sprint/third-batch/final-real-differential/lua-5.4.7-full/rust.stderr",
+        "liveCanonical": ".local/astra-sprint/third-batch/final-real-differential/lua-5.4.7-full/live-canonical.txt",
+        "rustCanonical": ".local/astra-sprint/third-batch/final-real-differential/lua-5.4.7-full/rust-canonical.txt",
+        "completeDiff": ".local/astra-sprint/third-batch/final-real-differential/lua-5.4.7-full/complete.diff",
+        "methodComparison": ".local/astra-sprint/third-batch/final-real-differential/lua-5.4.7-full/method-comparison.json"
+      },
+      "hashes": {
+        "liveCanonicalSha256": "aaaf1f5a82b683701881b2afa06c834690b86644e4322d93f9e6f5f1c0598b27",
+        "currentCanonicalSha256": "eac0818c7154f50dc6cfaec3ff38960127ac1eecf20eda3a97fe61065bdb251c",
+        "baselineCanonicalSha256": "98c2b3cddf61f9570342476afc3fdfa65d99276ff5beb05a41f42261a081138e"
+      }
+    }
+  ],
+  "status": "comparison producers passed; no previously exact method AST regressions; neither complete projection is exact"
+}

@@ -15,8 +15,8 @@ The `0.1.x` line has a bounded production-preview contract for its documented
 C workflows. Full Joern compatibility remains incomplete.
 
 The CLI accepts C, C++, Go, Java, JavaScript, TypeScript, Python, Ruby, Rust,
-and Scala source. C's production graph path is guarded by 297/297 exact Joern
-v4.0.555 corpus blocks, including 3,587/3,587 ReachingDef facts, plus pinned
+and Scala source. C's production graph path is guarded by 308/308 exact Joern
+v4.0.555 corpus blocks, including 3,685/3,685 ReachingDef facts, plus pinned
 zlib and Lua workflow gates and labeled scanner outcomes. Other language
 frontends remain experimental and have their own shared acceptance gate, not a
 Joern-parity claim.

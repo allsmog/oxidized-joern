@@ -4,6 +4,24 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Third measured Astra batch (2026-09-08 UTC).** At `b8c2ae132`, the main C
+  corpus passes **308/308** committed and fresh Joern v4.0.555 comparisons,
+  including **3,685 ReachingDef facts**. Primitive type roles/registration,
+  numeric literals, static modifiers, standalone blocks, definition identities,
+  and concatenated strings have complete fixture comparisons. The block
+  scanner suite improves from **3/14 to 14/14**, retaining four negatives;
+  five loop-tail RD differences remain in a separate diagnostic. All **381
+  workspace tests**, 17 checker tests, formatting, strict Clippy, dependency
+  audit, native release/archive, and official real-project gates pass. Cache
+  shape is **14**. Fresh whole-project Joern comparisons retain **93 exact
+  zlib method ASTs** and improve Lua from **417 to 516**, with zero previously
+  exact AST regressions. Neither whole-project projection is exact. Both
+  production graphs pass repeatability, independent export retention review,
+  and incremental equivalence under unchanged inputs and budgets. See the
+  [third batch report](../docs/conformance/astra-third-batch-2026-09-08.md),
+  [complete counters](../docs/conformance/astra-third-batch-metrics.json), and
+  [acceptance receipt](../docs/conformance/astra-third-batch-acceptance.json).
+
 - **Second measured Astra batch (2026-09-08 UTC).** The expanded C corpus
   passes **297/297** committed and fresh live Joern v4.0.555 comparisons,
   including **3,587 ReachingDef facts**, at `c5ea712db`. Direct findings match
