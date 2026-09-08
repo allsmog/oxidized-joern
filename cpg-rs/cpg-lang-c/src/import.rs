@@ -814,46 +814,463 @@ fn apply_properties(cpg: &mut Cpg, node: NodeId, raw: &RawNode) {
     }
 }
 
-/// Recover source locations for the analysis-facing graph. The exact oracle
-/// intentionally omits location properties, so match canonical code back to
-/// the owning source in stable source order. Ambiguous repeated snippets use
-/// the first occurrence at or after the previous matched line.
+/// Recover locations without coupling unrelated methods to graph insertion
+/// order. Method CODE preserves the parsed function text; anchor it first, then
+/// match complete tokens inside that source range. Children may overlap their
+/// parent's expression, while ordinary siblings consume source monotonically.
 fn assign_source_lines(cpg: &mut Cpg, sources: &[(String, String)]) {
+    let mut parser = tree_sitter::Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
     for (path, source) in sources {
         let file = cpg.file_id(path);
-        let lines: Vec<&str> = source.lines().collect();
-        let nodes = cpg.nodes_in_file(file).to_vec();
-        let mut cursor = 0usize;
-        for node in nodes {
-            let needle = cpg
-                .code_of(node)
-                .or_else(|| cpg.name_of(node))
-                .unwrap_or("")
-                .trim();
-            if needle.is_empty() || needle.starts_with('<') {
+        let tokens = source_tokens(source);
+        if tokens.is_empty() {
+            continue;
+        }
+        let tree = parser.parse(source, None).unwrap();
+        let mut cursor = tree.root_node().walk();
+        let function_nodes: Vec<_> = tree
+            .root_node()
+            .named_children(&mut cursor)
+            .filter(|node| node.kind() == "function_definition")
+            .collect();
+        let functions: HashMap<_, _> = function_nodes
+            .iter()
+            .map(|node| {
+                // The canonical transport decodes both escaped newlines and
+                // source newlines; apply the same decoding to the anchor.
+                let code = source[node.byte_range()].replace("\\n", "\n");
+                let start = tokens.partition_point(|token| token.start < node.start_byte());
+                let end = tokens.partition_point(|token| token.start < node.end_byte());
+                (code.trim().to_owned(), start..end)
+            })
+            .collect();
+        let methods: Vec<_> = cpg
+            .nodes_in_file(file)
+            .iter()
+            .copied()
+            .filter(|&node| cpg.kind_of(node) == NodeKind::Method)
+            .collect();
+        for &method in &methods {
+            let Some(range) = cpg
+                .code_of(method)
+                .and_then(|code| functions.get(code.trim()))
+                .cloned()
+            else {
                 continue;
+            };
+            locate_ast(
+                cpg,
+                method,
+                &tokens,
+                range.clone(),
+                tokens[range.start].line,
+            );
+        }
+        // Global declarations have their own source stream. Excluding function
+        // definitions prevents a repeated initializer from matching a local one.
+        let global_tokens: Vec<_> = tokens
+            .into_iter()
+            .filter(|token| {
+                let index = function_nodes.partition_point(|node| node.end_byte() <= token.start);
+                !function_nodes
+                    .get(index)
+                    .is_some_and(|node| node.start_byte() <= token.start)
+            })
+            .collect();
+        if !global_tokens.is_empty() {
+            for &method in &methods {
+                if cpg.name_of(method) == Some("<global>") {
+                    locate_ast(cpg, method, &global_tokens, 0..global_tokens.len(), 1);
+                }
             }
-            let first = needle.lines().next().unwrap_or(needle).trim();
-            if let Some(offset) = lines[cursor..]
-                .iter()
-                .position(|line| line.contains(first))
-                .or_else(|| lines.iter().position(|line| line.contains(first)))
+        }
+        let method_lines: HashMap<_, _> = methods
+            .iter()
+            .filter_map(|&method| {
+                Some((cpg.full_name_of(method)?.to_owned(), cpg.line_of(method)?))
+            })
+            .collect();
+        let refs: Vec<_> = cpg
+            .nodes_in_file(file)
+            .iter()
+            .copied()
+            .filter(|&node| cpg.kind_of(node) == NodeKind::MethodRef)
+            .collect();
+        for node in refs {
+            if let Some(&line) = cpg
+                .type_full_name_of(node)
+                .and_then(|full| method_lines.get(full))
             {
-                let line = if lines[cursor..].iter().any(|line| line.contains(first)) {
-                    cursor + offset
-                } else {
-                    offset
-                };
-                cpg.set_line(node, line as u32 + 1);
-                cursor = line;
+                cpg.set_line(node, line);
             }
         }
     }
 }
 
+struct SourceToken<'a> {
+    text: std::borrow::Cow<'a, str>,
+    start: usize,
+    line: u32,
+}
+
+/// Lex only enough to recover source spans: comments are ignored, quoted
+/// literals are indivisible, and identifiers never match inside other names.
+/// Compound C operators remain indivisible; spacing between tokens is ignored.
+fn source_tokens(source: &str) -> Vec<SourceToken<'_>> {
+    let bytes = source.as_bytes();
+    let mut tokens = Vec::new();
+    let mut i = 0;
+    let mut line = 1;
+    while i < bytes.len() {
+        let start = i;
+        let token_line = line;
+        let mut comment = false;
+        match bytes[i] {
+            b' ' | b'\t' | b'\r' | b'\n' | 0x0b | 0x0c => {
+                line += u32::from(bytes[i] == b'\n');
+                i += 1;
+                continue;
+            }
+            b'/' if bytes.get(i + 1) == Some(&b'/') => {
+                comment = true;
+                i += 2;
+                while i < bytes.len() && bytes[i] != b'\n' {
+                    i += 1;
+                }
+            }
+            b'/' if bytes.get(i + 1) == Some(&b'*') => {
+                comment = true;
+                i += 2;
+                while i < bytes.len() && !bytes[i..].starts_with(b"*/") {
+                    i += 1;
+                }
+                i = (i + 2).min(bytes.len());
+            }
+            quote @ (b'\'' | b'"') => {
+                i += 1;
+                while i < bytes.len() {
+                    if bytes[i] == b'\\' {
+                        i = (i + 2).min(bytes.len());
+                    } else if bytes[i] == quote {
+                        i += 1;
+                        break;
+                    } else {
+                        i += 1;
+                    }
+                }
+            }
+            b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' | 0x80..=0xff => {
+                i += 1;
+                while i < bytes.len()
+                    && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_' || bytes[i] >= 0x80)
+                {
+                    i += 1;
+                }
+            }
+            _ => {
+                const OPERATORS: &[&[u8]] = &[
+                    b"<<=", b">>=", b"...", b"->", b"++", b"--", b"<<", b">>", b"<=", b">=", b"==",
+                    b"!=", b"&&", b"||", b"*=", b"/=", b"%=", b"+=", b"-=", b"&=", b"^=", b"|=",
+                    b"##",
+                ];
+                i += OPERATORS
+                    .iter()
+                    .find(|operator| bytes[i..].starts_with(operator))
+                    .map_or(1, |operator| operator.len());
+            }
+        }
+        line += bytes[start..i]
+            .iter()
+            .filter(|&&byte| byte == b'\n')
+            .count() as u32;
+        if !comment {
+            let text = &source[start..i];
+            tokens.push(SourceToken {
+                text: if text.contains("\\n") {
+                    text.replace("\\n", "\n").into()
+                } else {
+                    text.into()
+                },
+                start,
+                line: token_line,
+            });
+        }
+    }
+    tokens
+}
+
+fn locate_ast(
+    cpg: &mut Cpg,
+    node: NodeId,
+    tokens: &[SourceToken<'_>],
+    range: std::ops::Range<usize>,
+    inherited_line: u32,
+) -> usize {
+    let kind = cpg.kind_of(node);
+    let code = cpg.code_of(node).unwrap_or("");
+    let keyword_only = kind == NodeKind::ControlStructure && code == "else";
+    let header_only = kind == NodeKind::ControlStructure
+        && (code.starts_with("while ") || code.starts_with("for ("));
+    let needle = source_tokens(code);
+    let matched = if needle.is_empty() || kind == NodeKind::MethodReturn {
+        None
+    } else {
+        tokens[range.clone()]
+            .windows(needle.len())
+            .position(|window| {
+                window
+                    .iter()
+                    .zip(&needle)
+                    .all(|(left, right)| left.text == right.text)
+            })
+            .map(|offset| range.start + offset..range.start + offset + needle.len())
+    };
+    let line = matched
+        .as_ref()
+        .map_or(inherited_line, |span| tokens[span.start].line);
+    // Synthesized or transformed nodes use the closest located AST ancestor;
+    // they cannot redirect later source searches or escape the owning method.
+    cpg.set_line(node, line);
+    // `else` has only keyword CODE, but its children occupy the following
+    // statement. A CODE-less synthetic block likewise borrows its parent range.
+    let child_range = if keyword_only {
+        matched
+            .as_ref()
+            .map_or(range.clone(), |span| span.end..range.end)
+    } else if header_only {
+        matched
+            .as_ref()
+            .map_or(range.clone(), |span| span.start..range.end)
+    } else {
+        matched.clone().unwrap_or_else(|| range.clone())
+    };
+    let mut next = child_range.start;
+    let mut children: Vec<_> = cpg.out_kind(node, EdgeKind::Ast).collect();
+    children.sort_by_key(|&child| (cpg.order_of(child), child));
+    for child in children {
+        if cpg.kind_of(child) == NodeKind::Method {
+            continue;
+        }
+        let end = locate_ast(cpg, child, tokens, next..child_range.end, line);
+        // LOCAL and mirrored parameters describe overlapping source with the
+        // assignment/parameter nodes that follow, and do not consume it.
+        if !matches!(
+            cpg.kind_of(child),
+            NodeKind::Local
+                | NodeKind::MethodParameterIn
+                | NodeKind::MethodParameterOut
+                | NodeKind::JumpTarget
+        ) {
+            next = end;
+        }
+    }
+    matched.map_or(next, |span| span.end.max(next))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn import_source(source: &str) -> Cpg {
+        let sources = vec![("locations.c".into(), source.into())];
+        graph_from_canonical_dump(&crate::exact::canonical_dump_sources(&sources), &sources)
+    }
+
+    fn method_nodes(cpg: &Cpg, name: &str) -> Vec<NodeId> {
+        let method = cpg
+            .nodes()
+            .find(|&n| {
+                cpg.kind_of(n) == NodeKind::Method
+                    && cpg.name_of(n) == Some(name)
+                    && cpg
+                        .out_kind(n, EdgeKind::SourceFile)
+                        .next()
+                        .is_some_and(|file| cpg.name_of(file) == Some("locations.c"))
+            })
+            .unwrap();
+        let mut nodes = vec![method];
+        let mut index = 0;
+        while index < nodes.len() {
+            nodes.extend(
+                cpg.out_kind(nodes[index], EdgeKind::Ast)
+                    .filter(|&node| cpg.kind_of(node) != NodeKind::Method),
+            );
+            index += 1;
+        }
+        nodes
+    }
+
+    #[test]
+    fn source_lines_keep_lua_sweep2old_in_its_own_method() {
+        // Reduced from Lua 5.4.7 lgc.c: the final assignment jumped back to
+        // sweeplist after a braceless branch added nodes to the graph.
+        let source = r#"#define maskcolors (bitmask(BLACKBIT) | WHITEBITS)
+#define set2gray(x) resetbits(x->marked, maskcolors)
+static void sweeplist(GCObject **p, GCObject *curr) {
+  if (curr) { }
+  else {
+    p = &curr->next;
+  }
+}
+static void separatetobefnz(GCObject **p, GCObject *curr, int all) {
+  if (!all)
+    p = &curr->next;
+}
+static void sweep2old (lua_State *L, GCObject **p) {
+  GCObject *curr;
+  global_State *g = G(L);
+  while ((curr = *p) != NULL) {
+    if (iswhite(curr)) {
+      lua_assert(isdead(g, curr));
+      *p = curr->next;
+      freeobj(L, curr);
+    }
+    else {
+      setage(curr, G_OLD);
+      if (curr->tt == LUA_VTHREAD) {
+        lua_State *th = gco2th(curr);
+        linkgclist(th, g->grayagain);
+      }
+      else if (curr->tt == LUA_VUPVAL && upisopen(gco2upv(curr)))
+        set2gray(curr);
+      else
+        nw2black(curr);
+      p = &curr->next;  /* sweep2old target */
+    }
+  }
+}
+"#;
+        let cpg = import_source(source);
+        let assignment = method_nodes(&cpg, "sweep2old")
+            .into_iter()
+            .find(|&n| {
+                cpg.kind_of(n) == NodeKind::Call && cpg.code_of(n) == Some("p = &curr->next")
+            })
+            .unwrap();
+        let expected = source
+            .lines()
+            .position(|line| line.contains("sweep2old target"))
+            .unwrap() as u32
+            + 1;
+        assert_eq!(cpg.line_of(assignment), Some(expected));
+        for name in ["sweeplist", "separatetobefnz", "sweep2old"] {
+            let start = source
+                .lines()
+                .position(|line| line.starts_with(&format!("static void {name}")))
+                .unwrap() as u32
+                + 1;
+            for node in method_nodes(&cpg, name) {
+                assert!(
+                    cpg.line_of(node).is_none_or(|line| line >= start),
+                    "{name}: {:?} {:?} {:?}",
+                    cpg.kind_of(node),
+                    cpg.code_of(node),
+                    cpg.line_of(node)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn source_lines_match_tokens_and_repeated_statements_monotonically() {
+        let source = r#"int target(int x) {
+  /* x = x + 1; */
+  const char *text = "x = x + 1;";
+  int prefix_x = 0;
+  x = x + 1;
+  x = x + 1;
+  return x;
+}
+int alpha(int x) { return x; }
+"#;
+        let cpg = import_source(source);
+        let mut assignments: Vec<_> = method_nodes(&cpg, "target")
+            .into_iter()
+            .filter(|&n| cpg.kind_of(n) == NodeKind::Call && cpg.code_of(n) == Some("x = x + 1"))
+            .map(|n| cpg.line_of(n))
+            .collect();
+        assignments.sort();
+        assert_eq!(assignments, vec![Some(5), Some(6)]);
+        for node in method_nodes(&cpg, "target") {
+            if cpg.kind_of(node) == NodeKind::Identifier && cpg.code_of(node) == Some("x") {
+                assert!(
+                    matches!(cpg.line_of(node), Some(5..=7)),
+                    "identifier at {:?}",
+                    cpg.line_of(node)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn source_lines_preserve_overlapping_parameters_declarations_and_children() {
+        let cpg = import_source("int target(int x) {\n  int value = x;\n  return value;\n}\n");
+        for node in method_nodes(&cpg, "target") {
+            if matches!(
+                cpg.kind_of(node),
+                NodeKind::MethodParameterIn | NodeKind::MethodParameterOut
+            ) {
+                assert_eq!(cpg.line_of(node), Some(1));
+            }
+            if cpg.kind_of(node) == NodeKind::Call && cpg.code_of(node) == Some("value = x") {
+                assert_eq!(cpg.line_of(node), Some(2));
+                for child in cpg.out_kind(node, EdgeKind::Ast) {
+                    assert_eq!(cpg.line_of(child), Some(2));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn source_lines_unmatched_nodes_inherit_without_consuming_siblings() {
+        let source = "int target(int x) {\n  if (x > 0)\n    unknown(x);\n  return x;\n}\n";
+        let cpg = import_source(source);
+        let nodes = method_nodes(&cpg, "target");
+        let synthetic_block = nodes
+            .iter()
+            .copied()
+            .find(|&node| cpg.kind_of(node) == NodeKind::Block && cpg.code_of(node).is_none())
+            .unwrap();
+        assert_eq!(cpg.line_of(synthetic_block), Some(2));
+        let returned = nodes
+            .iter()
+            .copied()
+            .find(|&node| cpg.kind_of(node) == NodeKind::Return)
+            .unwrap();
+        assert_eq!(cpg.line_of(returned), Some(4));
+        let call = nodes
+            .iter()
+            .copied()
+            .find(|&node| {
+                cpg.kind_of(node) == NodeKind::Call && cpg.code_of(node) == Some("unknown(x)")
+            })
+            .unwrap();
+        assert_eq!(cpg.line_of(call), Some(3));
+    }
+
+    #[test]
+    fn source_lines_keep_global_declarations_outside_function_bodies() {
+        let source = "int before = 1;\nint target(void) {\n  int after = 2;\n  return after;\n}\nint after = 2;\n";
+        let cpg = import_source(source);
+        let assignments: Vec<_> = method_nodes(&cpg, "<global>")
+            .into_iter()
+            .filter(|&node| {
+                cpg.kind_of(node) == NodeKind::Call && cpg.code_of(node) == Some("after = 2")
+            })
+            .collect();
+        assert_eq!(assignments.len(), 1);
+        assert_eq!(cpg.line_of(assignments[0]), Some(6));
+        let method_ref = cpg
+            .nodes()
+            .find(|&node| {
+                cpg.kind_of(node) == NodeKind::MethodRef && cpg.code_of(node) == Some("target")
+            })
+            .unwrap();
+        assert_eq!(cpg.line_of(method_ref), Some(2));
+    }
 
     #[test]
     fn imports_every_exact_schema_kind_and_edge_without_loss() {
