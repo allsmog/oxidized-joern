@@ -1,0 +1,228 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arithmeticShiftRight FULL_NAME=<operator>.arithmeticShiftRight ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=spliced CODE=int spliced(int a,int b) { return APPLY(>\\n>, a, b); } FULL_NAME=spliced SIGNATURE=int(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={ return APPLY(>\\n>, a, b); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return APPLY(>\\n>, a, b); ORDER=1
+        CALL NAME=APPLY CODE=APPLY(>\\n>, a, b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+          BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+            CALL NAME=<operator>.arithmeticShiftRight CODE=(a) >> (b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=spliced TYPE_FULL_NAME=spliced METHOD_FULL_NAME=spliced ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=APPLY CODE=#define APPLY(op,a,b) ((a) op (b)) FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=4
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=5
+
+METHOD NAME=spliced CODE=int spliced(int a,int b) { return APPLY(>\\n>, a, b); } FULL_NAME=spliced SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={ return APPLY(>\\n>, a, b); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return APPLY(>\\n>, a, b); ORDER=1
+      CALL NAME=APPLY CODE=APPLY(>\\n>, a, b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+        BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+          CALL NAME=<operator>.arithmeticShiftRight CODE=(a) >> (b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=spliced FULL_NAME=spliced CODE=spliced AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=spliced FULL_NAME=spliced TYPE_DECL_FULL_NAME=spliced
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT spliced#11 -> spliced#12
+EDGES|ARGUMENT spliced#11 -> spliced#13
+EDGES|ARGUMENT spliced#6 -> spliced#7
+EDGES|ARGUMENT spliced#7 -> spliced#8
+EDGES|ARGUMENT spliced#7 -> spliced#9
+EDGES|CALL spliced#11 -> <operator>.arithmeticShiftRight#0
+EDGES|CALL spliced#7 -> main.c:APPLY:ANY(3)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arithmeticShiftRight#0 -> <operator>.arithmeticShiftRight#5
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#17
+EDGES|CFG main.c:<global>#1 -> spliced#8
+EDGES|CFG main.c:<global>#17 -> main.c:<global>#18
+EDGES|CFG main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#8
+EDGES|CFG spliced#11 -> spliced#6
+EDGES|CFG spliced#12 -> spliced#13
+EDGES|CFG spliced#13 -> spliced#11
+EDGES|CFG spliced#6 -> spliced#14
+EDGES|CFG spliced#7 -> spliced#12
+EDGES|CFG spliced#7 -> spliced#6
+EDGES|CFG spliced#8 -> spliced#9
+EDGES|CFG spliced#9 -> spliced#7
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arithmeticShiftRight#0 -> <operator>.arithmeticShiftRight#2
+EDGES|CONTAINS D:main.c:<global> -> D:spliced
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:APPLY:ANY(3)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#16
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#17
+EDGES|CONTAINS main.c:<global>#1 -> spliced#10
+EDGES|CONTAINS main.c:<global>#1 -> spliced#11
+EDGES|CONTAINS main.c:<global>#1 -> spliced#12
+EDGES|CONTAINS main.c:<global>#1 -> spliced#13
+EDGES|CONTAINS main.c:<global>#1 -> spliced#5
+EDGES|CONTAINS main.c:<global>#1 -> spliced#6
+EDGES|CONTAINS main.c:<global>#1 -> spliced#7
+EDGES|CONTAINS main.c:<global>#1 -> spliced#8
+EDGES|CONTAINS main.c:<global>#1 -> spliced#9
+EDGES|CONTAINS main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#7
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#17 -> T:spliced
+EDGES|EVAL_TYPE main.c:<global>#18 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#5 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#7 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#8 -> T:ANY
+EDGES|EVAL_TYPE spliced#1 -> T:int
+EDGES|EVAL_TYPE spliced#10 -> T:ANY
+EDGES|EVAL_TYPE spliced#11 -> T:ANY
+EDGES|EVAL_TYPE spliced#12 -> T:int
+EDGES|EVAL_TYPE spliced#13 -> T:int
+EDGES|EVAL_TYPE spliced#14 -> T:int
+EDGES|EVAL_TYPE spliced#2 -> T:int
+EDGES|EVAL_TYPE spliced#3 -> T:int
+EDGES|EVAL_TYPE spliced#4 -> T:int
+EDGES|EVAL_TYPE spliced#5 -> T:void
+EDGES|EVAL_TYPE spliced#7 -> T:ANY
+EDGES|EVAL_TYPE spliced#8 -> T:int
+EDGES|EVAL_TYPE spliced#9 -> T:int
+EDGES|PARAMETER_LINK <operator>.arithmeticShiftRight#1 -> <operator>.arithmeticShiftRight#3
+EDGES|PARAMETER_LINK <operator>.arithmeticShiftRight#4 -> <operator>.arithmeticShiftRight#6
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6
+EDGES|PARAMETER_LINK spliced#1 -> spliced#2
+EDGES|PARAMETER_LINK spliced#3 -> spliced#4
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:spliced -> D:spliced
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#17 -> main.c:<global>#1
+EDGES|REF spliced#12 -> spliced#1
+EDGES|REF spliced#13 -> spliced#3
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:spliced -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:APPLY:ANY(3)#0 -> F:main.c
+FLOWS|REACHING_DEF[(a) >> (b)] spliced#11 -> spliced#14
+FLOWS|REACHING_DEF[<RET>] spliced#6 -> spliced#14
+FLOWS|REACHING_DEF[APPLY(>\\n>, a, b)] spliced#7 -> spliced#14
+FLOWS|REACHING_DEF[APPLY(>\\n>, a, b)] spliced#7 -> spliced#6
+FLOWS|REACHING_DEF[] <operator>.arithmeticShiftRight#0 -> <operator>.arithmeticShiftRight#1
+FLOWS|REACHING_DEF[] <operator>.arithmeticShiftRight#0 -> <operator>.arithmeticShiftRight#4
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#17
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> spliced#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> spliced#12
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> spliced#13
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> spliced#3
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> spliced#8
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> spliced#9
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#1
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#3
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#5
+FLOWS|REACHING_DEF[a] spliced#1 -> spliced#2
+FLOWS|REACHING_DEF[a] spliced#1 -> spliced#8
+FLOWS|REACHING_DEF[a] spliced#12 -> spliced#11
+FLOWS|REACHING_DEF[a] spliced#12 -> spliced#13
+FLOWS|REACHING_DEF[a] spliced#12 -> spliced#14
+FLOWS|REACHING_DEF[a] spliced#12 -> spliced#2
+FLOWS|REACHING_DEF[a] spliced#8 -> spliced#12
+FLOWS|REACHING_DEF[a] spliced#8 -> spliced#14
+FLOWS|REACHING_DEF[a] spliced#8 -> spliced#2
+FLOWS|REACHING_DEF[a] spliced#8 -> spliced#7
+FLOWS|REACHING_DEF[a] spliced#8 -> spliced#9
+FLOWS|REACHING_DEF[b] spliced#13 -> spliced#11
+FLOWS|REACHING_DEF[b] spliced#13 -> spliced#12
+FLOWS|REACHING_DEF[b] spliced#13 -> spliced#14
+FLOWS|REACHING_DEF[b] spliced#13 -> spliced#4
+FLOWS|REACHING_DEF[b] spliced#3 -> spliced#4
+FLOWS|REACHING_DEF[b] spliced#3 -> spliced#9
+FLOWS|REACHING_DEF[b] spliced#9 -> spliced#13
+FLOWS|REACHING_DEF[b] spliced#9 -> spliced#14
+FLOWS|REACHING_DEF[b] spliced#9 -> spliced#4
+FLOWS|REACHING_DEF[b] spliced#9 -> spliced#7
+FLOWS|REACHING_DEF[b] spliced#9 -> spliced#8
+FLOWS|REACHING_DEF[p1] <operator>.arithmeticShiftRight#1 -> <operator>.arithmeticShiftRight#3
+FLOWS|REACHING_DEF[p1] <operator>.arithmeticShiftRight#1 -> <operator>.arithmeticShiftRight#5
+FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[p2] <operator>.arithmeticShiftRight#4 -> <operator>.arithmeticShiftRight#5
+FLOWS|REACHING_DEF[p2] <operator>.arithmeticShiftRight#4 -> <operator>.arithmeticShiftRight#6
+FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6
+FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#8

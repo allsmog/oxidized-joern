@@ -1,0 +1,404 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arithmeticShiftRight FULL_NAME=<operator>.arithmeticShiftRight ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.minus FULL_NAME=<operator>.minus ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.shiftLeft FULL_NAME=<operator>.shiftLeft ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=left CODE=int left(int x,int y) { return APPLY(<<,x,y); } FULL_NAME=left SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={ return APPLY(<<,x,y); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return APPLY(<<,x,y); ORDER=1
+      CALL NAME=APPLY CODE=APPLY(<<,x,y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+        BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+          CALL NAME=<operator>.shiftLeft CODE=(x) << (y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=right CODE=int right(int x,int y) { return APPLY(>>,x,-y); } FULL_NAME=right SIGNATURE=int(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={ return APPLY(>>,x,-y); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return APPLY(>>,x,-y); ORDER=1
+        CALL NAME=APPLY CODE=APPLY(>>,x,-y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.minus CODE=-y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=4
+            CALL NAME=<operator>.arithmeticShiftRight CODE=(x) >> (-y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.minus CODE=-y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=left CODE=int left(int x,int y) { return APPLY(<<,x,y); } FULL_NAME=left SIGNATURE=int(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={ return APPLY(<<,x,y); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return APPLY(<<,x,y); ORDER=1
+        CALL NAME=APPLY CODE=APPLY(<<,x,y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+          IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+          BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+            CALL NAME=<operator>.shiftLeft CODE=(x) << (y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=right TYPE_FULL_NAME=right METHOD_FULL_NAME=right ORDER=1
+    METHOD_REF CODE=left TYPE_FULL_NAME=left METHOD_FULL_NAME=left ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=APPLY CODE=#define APPLY(op,a,b) ((a) op (b)) FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=4
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=5
+
+METHOD NAME=right CODE=int right(int x,int y) { return APPLY(>>,x,-y); } FULL_NAME=right SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={ return APPLY(>>,x,-y); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return APPLY(>>,x,-y); ORDER=1
+      CALL NAME=APPLY CODE=APPLY(>>,x,-y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.minus CODE=-y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=4
+          CALL NAME=<operator>.arithmeticShiftRight CODE=(x) >> (-y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.minus CODE=-y TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=left FULL_NAME=left CODE=left AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=right FULL_NAME=right CODE=right AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=left FULL_NAME=left TYPE_DECL_FULL_NAME=left
+NODES|TYPE NAME=right FULL_NAME=right TYPE_DECL_FULL_NAME=right
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT left#11 -> left#12
+EDGES|ARGUMENT left#11 -> left#13
+EDGES|ARGUMENT left#6 -> left#7
+EDGES|ARGUMENT left#7 -> left#8
+EDGES|ARGUMENT left#7 -> left#9
+EDGES|ARGUMENT right#12 -> right#13
+EDGES|ARGUMENT right#12 -> right#14
+EDGES|ARGUMENT right#14 -> right#15
+EDGES|ARGUMENT right#6 -> right#7
+EDGES|ARGUMENT right#7 -> right#8
+EDGES|ARGUMENT right#7 -> right#9
+EDGES|ARGUMENT right#9 -> right#10
+EDGES|CALL left#11 -> <operator>.shiftLeft#0
+EDGES|CALL left#7 -> main.c:APPLY:ANY(3)#0
+EDGES|CALL right#12 -> <operator>.arithmeticShiftRight#0
+EDGES|CALL right#14 -> <operator>.minus#0
+EDGES|CALL right#7 -> main.c:APPLY:ANY(3)#0
+EDGES|CALL right#9 -> <operator>.minus#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arithmeticShiftRight#0 -> <operator>.arithmeticShiftRight#5
+EDGES|CFG <operator>.minus#0 -> <operator>.minus#4
+EDGES|CFG <operator>.shiftLeft#0 -> <operator>.shiftLeft#5
+EDGES|CFG left#0 -> left#8
+EDGES|CFG left#11 -> left#6
+EDGES|CFG left#12 -> left#13
+EDGES|CFG left#13 -> left#11
+EDGES|CFG left#6 -> left#14
+EDGES|CFG left#7 -> left#12
+EDGES|CFG left#7 -> left#6
+EDGES|CFG left#8 -> left#9
+EDGES|CFG left#9 -> left#7
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#34
+EDGES|CFG main.c:<global>#1 -> right#8
+EDGES|CFG main.c:<global>#34 -> main.c:<global>#35
+EDGES|CFG main.c:<global>#35 -> main.c:<global>#36
+EDGES|CFG main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#8
+EDGES|CFG right#10 -> right#9
+EDGES|CFG right#12 -> right#6
+EDGES|CFG right#13 -> right#15
+EDGES|CFG right#14 -> right#12
+EDGES|CFG right#15 -> right#14
+EDGES|CFG right#6 -> right#16
+EDGES|CFG right#7 -> right#13
+EDGES|CFG right#7 -> right#6
+EDGES|CFG right#8 -> right#10
+EDGES|CFG right#9 -> right#7
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arithmeticShiftRight#0 -> <operator>.arithmeticShiftRight#2
+EDGES|CONTAINS <operator>.minus#0 -> <operator>.minus#2
+EDGES|CONTAINS <operator>.shiftLeft#0 -> <operator>.shiftLeft#2
+EDGES|CONTAINS D:main.c:<global> -> D:left
+EDGES|CONTAINS D:main.c:<global> -> D:right
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:APPLY:ANY(3)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS left#0 -> left#10
+EDGES|CONTAINS left#0 -> left#11
+EDGES|CONTAINS left#0 -> left#12
+EDGES|CONTAINS left#0 -> left#13
+EDGES|CONTAINS left#0 -> left#5
+EDGES|CONTAINS left#0 -> left#6
+EDGES|CONTAINS left#0 -> left#7
+EDGES|CONTAINS left#0 -> left#8
+EDGES|CONTAINS left#0 -> left#9
+EDGES|CONTAINS main.c:<global>#0 -> left#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#33
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#34
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#35
+EDGES|CONTAINS main.c:<global>#1 -> right#10
+EDGES|CONTAINS main.c:<global>#1 -> right#11
+EDGES|CONTAINS main.c:<global>#1 -> right#12
+EDGES|CONTAINS main.c:<global>#1 -> right#13
+EDGES|CONTAINS main.c:<global>#1 -> right#14
+EDGES|CONTAINS main.c:<global>#1 -> right#15
+EDGES|CONTAINS main.c:<global>#1 -> right#5
+EDGES|CONTAINS main.c:<global>#1 -> right#6
+EDGES|CONTAINS main.c:<global>#1 -> right#7
+EDGES|CONTAINS main.c:<global>#1 -> right#8
+EDGES|CONTAINS main.c:<global>#1 -> right#9
+EDGES|CONTAINS main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#7
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arithmeticShiftRight#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.minus#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.minus#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.minus#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.minus#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.shiftLeft#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.shiftLeft#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.shiftLeft#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.shiftLeft#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.shiftLeft#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.shiftLeft#6 -> T:ANY
+EDGES|EVAL_TYPE left#1 -> T:int
+EDGES|EVAL_TYPE left#10 -> T:ANY
+EDGES|EVAL_TYPE left#11 -> T:ANY
+EDGES|EVAL_TYPE left#12 -> T:int
+EDGES|EVAL_TYPE left#13 -> T:int
+EDGES|EVAL_TYPE left#14 -> T:int
+EDGES|EVAL_TYPE left#2 -> T:int
+EDGES|EVAL_TYPE left#3 -> T:int
+EDGES|EVAL_TYPE left#4 -> T:int
+EDGES|EVAL_TYPE left#5 -> T:void
+EDGES|EVAL_TYPE left#7 -> T:ANY
+EDGES|EVAL_TYPE left#8 -> T:int
+EDGES|EVAL_TYPE left#9 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#33 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#34 -> T:right
+EDGES|EVAL_TYPE main.c:<global>#35 -> T:left
+EDGES|EVAL_TYPE main.c:<global>#36 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#5 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#7 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#8 -> T:ANY
+EDGES|EVAL_TYPE right#1 -> T:int
+EDGES|EVAL_TYPE right#10 -> T:int
+EDGES|EVAL_TYPE right#11 -> T:ANY
+EDGES|EVAL_TYPE right#12 -> T:ANY
+EDGES|EVAL_TYPE right#13 -> T:int
+EDGES|EVAL_TYPE right#14 -> T:ANY
+EDGES|EVAL_TYPE right#15 -> T:int
+EDGES|EVAL_TYPE right#16 -> T:int
+EDGES|EVAL_TYPE right#2 -> T:int
+EDGES|EVAL_TYPE right#3 -> T:int
+EDGES|EVAL_TYPE right#4 -> T:int
+EDGES|EVAL_TYPE right#5 -> T:void
+EDGES|EVAL_TYPE right#7 -> T:ANY
+EDGES|EVAL_TYPE right#8 -> T:int
+EDGES|EVAL_TYPE right#9 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.arithmeticShiftRight#1 -> <operator>.arithmeticShiftRight#3
+EDGES|PARAMETER_LINK <operator>.arithmeticShiftRight#4 -> <operator>.arithmeticShiftRight#6
+EDGES|PARAMETER_LINK <operator>.minus#1 -> <operator>.minus#3
+EDGES|PARAMETER_LINK <operator>.shiftLeft#1 -> <operator>.shiftLeft#3
+EDGES|PARAMETER_LINK <operator>.shiftLeft#4 -> <operator>.shiftLeft#6
+EDGES|PARAMETER_LINK left#1 -> left#2
+EDGES|PARAMETER_LINK left#3 -> left#4
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6
+EDGES|PARAMETER_LINK right#1 -> right#2
+EDGES|PARAMETER_LINK right#3 -> right#4
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:left -> D:left
+EDGES|REF T:right -> D:right
+EDGES|REF T:void -> D:void
+EDGES|REF left#12 -> left#1
+EDGES|REF left#13 -> left#3
+EDGES|REF main.c:<global>#34 -> main.c:<global>#1
+EDGES|REF main.c:<global>#35 -> left#0
+EDGES|REF right#13 -> right#1
+EDGES|REF right#15 -> right#3
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:left -> F:main.c
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:right -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE left#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:APPLY:ANY(3)#0 -> F:main.c
+FLOWS|REACHING_DEF[(x) << (y)] left#11 -> left#14
+FLOWS|REACHING_DEF[(x) >> (-y)] right#12 -> right#16
+FLOWS|REACHING_DEF[-y] right#14 -> right#12
+FLOWS|REACHING_DEF[-y] right#14 -> right#13
+FLOWS|REACHING_DEF[-y] right#14 -> right#16
+FLOWS|REACHING_DEF[-y] right#9 -> right#16
+FLOWS|REACHING_DEF[-y] right#9 -> right#7
+FLOWS|REACHING_DEF[-y] right#9 -> right#8
+FLOWS|REACHING_DEF[<RET>] left#6 -> left#14
+FLOWS|REACHING_DEF[<RET>] right#6 -> right#16
+FLOWS|REACHING_DEF[APPLY(<<,x,y)] left#7 -> left#14
+FLOWS|REACHING_DEF[APPLY(<<,x,y)] left#7 -> left#6
+FLOWS|REACHING_DEF[APPLY(>>,x,-y)] right#7 -> right#16
+FLOWS|REACHING_DEF[APPLY(>>,x,-y)] right#7 -> right#6
+FLOWS|REACHING_DEF[] <operator>.arithmeticShiftRight#0 -> <operator>.arithmeticShiftRight#1
+FLOWS|REACHING_DEF[] <operator>.arithmeticShiftRight#0 -> <operator>.arithmeticShiftRight#4
+FLOWS|REACHING_DEF[] <operator>.minus#0 -> <operator>.minus#1
+FLOWS|REACHING_DEF[] <operator>.shiftLeft#0 -> <operator>.shiftLeft#1
+FLOWS|REACHING_DEF[] <operator>.shiftLeft#0 -> <operator>.shiftLeft#4
+FLOWS|REACHING_DEF[] left#0 -> left#1
+FLOWS|REACHING_DEF[] left#0 -> left#12
+FLOWS|REACHING_DEF[] left#0 -> left#13
+FLOWS|REACHING_DEF[] left#0 -> left#3
+FLOWS|REACHING_DEF[] left#0 -> left#8
+FLOWS|REACHING_DEF[] left#0 -> left#9
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#34
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#35
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> right#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> right#10
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> right#13
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> right#15
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> right#3
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> right#8
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#1
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#3
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#5
+FLOWS|REACHING_DEF[p1] <operator>.arithmeticShiftRight#1 -> <operator>.arithmeticShiftRight#3
+FLOWS|REACHING_DEF[p1] <operator>.arithmeticShiftRight#1 -> <operator>.arithmeticShiftRight#5
+FLOWS|REACHING_DEF[p1] <operator>.minus#1 -> <operator>.minus#3
+FLOWS|REACHING_DEF[p1] <operator>.minus#1 -> <operator>.minus#4
+FLOWS|REACHING_DEF[p1] <operator>.shiftLeft#1 -> <operator>.shiftLeft#3
+FLOWS|REACHING_DEF[p1] <operator>.shiftLeft#1 -> <operator>.shiftLeft#5
+FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[p2] <operator>.arithmeticShiftRight#4 -> <operator>.arithmeticShiftRight#5
+FLOWS|REACHING_DEF[p2] <operator>.arithmeticShiftRight#4 -> <operator>.arithmeticShiftRight#6
+FLOWS|REACHING_DEF[p2] <operator>.shiftLeft#4 -> <operator>.shiftLeft#5
+FLOWS|REACHING_DEF[p2] <operator>.shiftLeft#4 -> <operator>.shiftLeft#6
+FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6
+FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[x] left#1 -> left#2
+FLOWS|REACHING_DEF[x] left#1 -> left#8
+FLOWS|REACHING_DEF[x] left#12 -> left#11
+FLOWS|REACHING_DEF[x] left#12 -> left#13
+FLOWS|REACHING_DEF[x] left#12 -> left#14
+FLOWS|REACHING_DEF[x] left#12 -> left#2
+FLOWS|REACHING_DEF[x] left#8 -> left#12
+FLOWS|REACHING_DEF[x] left#8 -> left#14
+FLOWS|REACHING_DEF[x] left#8 -> left#2
+FLOWS|REACHING_DEF[x] left#8 -> left#7
+FLOWS|REACHING_DEF[x] left#8 -> left#9
+FLOWS|REACHING_DEF[x] right#1 -> right#2
+FLOWS|REACHING_DEF[x] right#1 -> right#8
+FLOWS|REACHING_DEF[x] right#13 -> right#12
+FLOWS|REACHING_DEF[x] right#13 -> right#14
+FLOWS|REACHING_DEF[x] right#13 -> right#16
+FLOWS|REACHING_DEF[x] right#13 -> right#2
+FLOWS|REACHING_DEF[x] right#8 -> right#13
+FLOWS|REACHING_DEF[x] right#8 -> right#16
+FLOWS|REACHING_DEF[x] right#8 -> right#2
+FLOWS|REACHING_DEF[x] right#8 -> right#7
+FLOWS|REACHING_DEF[x] right#8 -> right#9
+FLOWS|REACHING_DEF[y] left#13 -> left#11
+FLOWS|REACHING_DEF[y] left#13 -> left#12
+FLOWS|REACHING_DEF[y] left#13 -> left#14
+FLOWS|REACHING_DEF[y] left#13 -> left#4
+FLOWS|REACHING_DEF[y] left#3 -> left#4
+FLOWS|REACHING_DEF[y] left#3 -> left#9
+FLOWS|REACHING_DEF[y] left#9 -> left#13
+FLOWS|REACHING_DEF[y] left#9 -> left#14
+FLOWS|REACHING_DEF[y] left#9 -> left#4
+FLOWS|REACHING_DEF[y] left#9 -> left#7
+FLOWS|REACHING_DEF[y] left#9 -> left#8
+FLOWS|REACHING_DEF[y] right#10 -> right#15
+FLOWS|REACHING_DEF[y] right#10 -> right#16
+FLOWS|REACHING_DEF[y] right#10 -> right#4
+FLOWS|REACHING_DEF[y] right#10 -> right#9
+FLOWS|REACHING_DEF[y] right#15 -> right#14
+FLOWS|REACHING_DEF[y] right#15 -> right#16
+FLOWS|REACHING_DEF[y] right#15 -> right#4
+FLOWS|REACHING_DEF[y] right#3 -> right#10
+FLOWS|REACHING_DEF[y] right#3 -> right#4

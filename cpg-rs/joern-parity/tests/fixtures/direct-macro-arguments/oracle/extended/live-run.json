@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 13.474474750008085,
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "stdoutSha256": "375bf5520cadce78fb5c2357e4e282f4ecaa5128b3c85fe27304d4b4435a4ec3",
+  "inputs": {
+    "spliced_operator": "3498cda46ec83c610fd62de86a8fded19f10a283773c148a6eb74081afc8c2a3",
+    "lua_intop": "8f162f7fd6daa119f40fbd74b8011972c8c5d3e2426a67b9ef2e49db4aaa178f",
+    "nested_operator": "ef63ad182e4b39569ff825d49c164859f55e90e945e757b77eb9f3ecfdc9b829",
+    "unknown_operand": "28e9ccb9093fb0e1eb08b08448c8fe73e3fed23b331a8aebac736af4043a5de5",
+    "continued_comment": "91a50d454a1ccfc1a53dd5f900bc269c91d3cc462c3952cd031d5fdb2bbf5708",
+    "empty_slots": "f4ce15ab7479a9d75c7a829cfd27f5d2fcec63085f1d452d13d76f8ee416bf4e",
+    "quoted_tokens": "df5e3c02d6508f2f8aa99c9fa7a0d607efec760e2ee50145bbc7aaf27739577e",
+    "operator_slots": "33266a9d81a0444a22c716881df25a0029d6de2e9ea6c6ebd3e00e052fb80ede",
+    "shifts": "0120b86766500984cdb30da79713dc47e9df8f8ee5e37254afbeff76f15919ea"
+  }
+}

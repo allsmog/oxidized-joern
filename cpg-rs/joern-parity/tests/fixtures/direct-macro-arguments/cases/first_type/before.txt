@@ -1,0 +1,189 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=typed CODE=void *typed(void *p) {return cast(union U *, p); } FULL_NAME=typed SIGNATURE=void*(void*) ORDER=1
+    METHOD_PARAMETER_IN NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+    METHOD_PARAMETER_OUT NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+    BLOCK CODE={return cast(union U *, p); } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=x CODE=<unknown> x TYPE_FULL_NAME=ANY ORDER=0
+      RETURN CODE=return cast(union U *, p); ORDER=1
+        CALL NAME=cast CODE=cast(union U *, p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:cast:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.cast CODE=(U *, p)(x) TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              TYPE_REF CODE=U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+              IDENTIFIER NAME=x CODE=<unknown> x TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=typed TYPE_FULL_NAME=typed METHOD_FULL_NAME=typed ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=cast CODE=#define cast(t,x) ((t)(x)) FULL_NAME=main.c:cast:ANY(2) SIGNATURE=ANY(2) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  BLOCK TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=4
+
+METHOD NAME=typed CODE=void *typed(void *p) {return cast(union U *, p); } FULL_NAME=typed SIGNATURE=void*(void*) ORDER=1
+  METHOD_PARAMETER_IN NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+  METHOD_PARAMETER_OUT NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+  BLOCK CODE={return cast(union U *, p); } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=x CODE=<unknown> x TYPE_FULL_NAME=ANY ORDER=0
+    RETURN CODE=return cast(union U *, p); ORDER=1
+      CALL NAME=cast CODE=cast(union U *, p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:cast:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.cast CODE=(U *, p)(x) TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            TYPE_REF CODE=U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=x CODE=<unknown> x TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=typed FULL_NAME=typed CODE=typed AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=unionU FULL_NAME=unionU CODE=unionU IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=typed FULL_NAME=typed TYPE_DECL_FULL_NAME=typed
+NODES|TYPE NAME=unionU FULL_NAME=unionU TYPE_DECL_FULL_NAME=unionU
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+EDGES|ARGUMENT typed#5 -> typed#6
+EDGES|ARGUMENT typed#8 -> typed#10
+EDGES|ARGUMENT typed#8 -> typed#9
+EDGES|CALL typed#6 -> main.c:cast:ANY(2)#0
+EDGES|CALL typed#8 -> <operator>.cast#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#14
+EDGES|CFG main.c:<global>#1 -> typed#6
+EDGES|CFG main.c:<global>#14 -> main.c:<global>#15
+EDGES|CFG main.c:cast:ANY(2)#0 -> main.c:cast:ANY(2)#6
+EDGES|CFG typed#10 -> typed#8
+EDGES|CFG typed#5 -> typed#11
+EDGES|CFG typed#6 -> typed#5
+EDGES|CFG typed#6 -> typed#9
+EDGES|CFG typed#8 -> typed#5
+EDGES|CFG typed#9 -> typed#10
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS D:main.c:<global> -> D:typed
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:cast:ANY(2)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:unionU
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:void*
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#14
+EDGES|CONTAINS main.c:<global>#1 -> typed#10
+EDGES|CONTAINS main.c:<global>#1 -> typed#3
+EDGES|CONTAINS main.c:<global>#1 -> typed#5
+EDGES|CONTAINS main.c:<global>#1 -> typed#6
+EDGES|CONTAINS main.c:<global>#1 -> typed#7
+EDGES|CONTAINS main.c:<global>#1 -> typed#8
+EDGES|CONTAINS main.c:<global>#1 -> typed#9
+EDGES|CONTAINS main.c:cast:ANY(2)#0 -> main.c:cast:ANY(2)#5
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#14 -> T:typed
+EDGES|EVAL_TYPE main.c:<global>#15 -> T:ANY
+EDGES|EVAL_TYPE main.c:cast:ANY(2)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:cast:ANY(2)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:cast:ANY(2)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:cast:ANY(2)#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:cast:ANY(2)#5 -> T:ANY
+EDGES|EVAL_TYPE main.c:cast:ANY(2)#6 -> T:ANY
+EDGES|EVAL_TYPE typed#1 -> T:void*
+EDGES|EVAL_TYPE typed#10 -> T:ANY
+EDGES|EVAL_TYPE typed#11 -> T:void*
+EDGES|EVAL_TYPE typed#2 -> T:void*
+EDGES|EVAL_TYPE typed#3 -> T:void
+EDGES|EVAL_TYPE typed#4 -> T:ANY
+EDGES|EVAL_TYPE typed#6 -> T:ANY
+EDGES|EVAL_TYPE typed#7 -> T:ANY
+EDGES|EVAL_TYPE typed#8 -> T:unionU
+EDGES|EVAL_TYPE typed#9 -> T:unionU
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK main.c:cast:ANY(2)#1 -> main.c:cast:ANY(2)#2
+EDGES|PARAMETER_LINK main.c:cast:ANY(2)#3 -> main.c:cast:ANY(2)#4
+EDGES|PARAMETER_LINK typed#1 -> typed#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:typed -> D:typed
+EDGES|REF T:unionU -> D:unionU
+EDGES|REF T:void -> D:void
+EDGES|REF T:void* -> D:void*
+EDGES|REF main.c:<global>#14 -> main.c:<global>#1
+EDGES|REF typed#10 -> typed#4
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:typed -> F:main.c
+EDGES|SOURCE_FILE D:unionU -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:void* -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:cast:ANY(2)#0 -> F:main.c
+FLOWS|REACHING_DEF[(U *, p)(x)] typed#8 -> typed#11
+FLOWS|REACHING_DEF[<RET>] typed#5 -> typed#11
+FLOWS|REACHING_DEF[<unknown> x] typed#10 -> typed#11
+FLOWS|REACHING_DEF[<unknown> x] typed#10 -> typed#8
+FLOWS|REACHING_DEF[U *] typed#9 -> typed#8
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#14
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> typed#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> typed#10
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> typed#6
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> typed#9
+FLOWS|REACHING_DEF[] main.c:cast:ANY(2)#0 -> main.c:cast:ANY(2)#1
+FLOWS|REACHING_DEF[] main.c:cast:ANY(2)#0 -> main.c:cast:ANY(2)#3
+FLOWS|REACHING_DEF[cast(union U *, p)] typed#6 -> typed#11
+FLOWS|REACHING_DEF[cast(union U *, p)] typed#6 -> typed#5
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] main.c:cast:ANY(2)#1 -> main.c:cast:ANY(2)#2
+FLOWS|REACHING_DEF[p1] main.c:cast:ANY(2)#1 -> main.c:cast:ANY(2)#6
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p2] main.c:cast:ANY(2)#3 -> main.c:cast:ANY(2)#4
+FLOWS|REACHING_DEF[p2] main.c:cast:ANY(2)#3 -> main.c:cast:ANY(2)#6
+FLOWS|REACHING_DEF[p] typed#1 -> typed#11
+FLOWS|REACHING_DEF[p] typed#1 -> typed#2

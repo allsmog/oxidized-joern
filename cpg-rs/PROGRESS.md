@@ -453,3 +453,11 @@ Next, in preference order:
   escaped as `\n`; methods sorted by FULL_NAME; blank line between methods.
 - M6 will fold this onto `cpg-core`'s graph schema — until then the dumper is
   deliberately standalone to keep the parity loop fast.
+
+## 2026-09-08 — direct preprocessing-token macro arguments
+
+On the isolated `codex/astra-macro-arguments` branch, the shared token argument reader now preserves operator-only and type actuals in direct macro expansion and phantom collection. Copied macro arguments retain their original indices. Physical splices precede comment/argument recognition; expanded comma and unary spelling follows the new pinned references. No solver change is included.
+
+Sixteen complete isolated live Joern v4.0.555 projects improve from 4 to 12 exact graphs (4,531 canonical lines total). Every raw reference is retained. Four full diagnostics document trailing-empty/physically spliced outer parser ranges and existing typedef-cast handling. The unchanged 61-file Lua replay restores the ADD-branch operands and missing `v2` output fact, plus both shift right operands; full Lua parity is not claimed. Fixtures, hashes and validation logs are in `cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/measurement.json`.
+
+The existing 308-block committed gate, 415 prior workspace tests, two new production tests and strict targeted Clippy pass. Independent tokenizer review passes for frozen source `41c3d86167b4fdcc0ae3e035fe24417968730e93f2d47181dae98f1666e3873c`. Parent integration owns the final combined live/workspace/real-project acceptance and memory gates. No push or merge is performed here.

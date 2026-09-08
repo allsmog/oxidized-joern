@@ -1909,9 +1909,8 @@ impl Ctx<'_> {
         &mut self,
         name: &str,
         code: &str,
-        arg_nodes: &[Node],
+        arg_texts: &[String],
         site: Node,
-        b: &[u8],
         depth: usize,
         order: i64,
         arg: Option<i64>,
@@ -1926,10 +1925,9 @@ impl Ctx<'_> {
                 m.file.clone(),
             )
         };
-        let arg_texts: Vec<String> = arg_nodes.iter().map(|a| text(*a, b).to_string()).collect();
         let replacement = replacement_override
             .map(str::to_string)
-            .unwrap_or_else(|| substitute(&body, &params, &arg_texts));
+            .unwrap_or_else(|| substitute(&body, &params, arg_texts));
         let expansion = expand_body_expression(
             &replacement,
             &self.macros,
@@ -1985,8 +1983,8 @@ impl Ctx<'_> {
         }
         let before_args = self.argument_count;
         let mut emitted_args = 0;
-        for (i, a) in arg_nodes.iter().enumerate() {
-            let normalized = macro_argument_match_code(*a, b);
+        for (i, a) in arg_texts.iter().enumerate() {
+            let normalized = macro_argument_match_code(a);
             let found = expression_nodes.iter().find(|node| {
                 let raw = text(**node, expansion_source.as_bytes());
                 if node.kind() == "identifier" {
@@ -2313,11 +2311,9 @@ impl Ctx<'_> {
                                 text(f, b).to_string(),
                                 m.clone(),
                                 n.child_by_field_name("arguments")
-                                    .map(named_children)
-                                    .unwrap_or_default()
-                                    .into_iter()
-                                    .map(|arg| text(arg, b).to_string())
-                                    .collect(),
+                                    .and_then(|args| macro_arguments(text(args, b), 0))
+                                    .map(|(args, _)| args)
+                                    .unwrap_or_default(),
                             )
                         })
                 })
@@ -3580,7 +3576,7 @@ impl Ctx<'_> {
             .is_some_and(|(node, _)| *node == n.id())
         {
             let (_, name) = self.field_macro_piece.take().unwrap();
-            self.emit_macro_call(&name, &name, &[], n, b, depth, order, arg, Some(text(n, b)));
+            self.emit_macro_call(&name, &name, &[], n, depth, order, arg, Some(text(n, b)));
             return;
         }
         if n.kind() == "field_expression" && self.emit_direct_field_macro(n, b, depth, order, arg) {
@@ -3808,9 +3804,12 @@ impl Ctx<'_> {
                 let args = n.child_by_field_name("arguments");
                 let argc = args.map(|a| named_children(a).len()).unwrap_or(0);
                 if self.macros.get(&name).is_some_and(|m| m.params.is_some()) {
-                    let arg_nodes: Vec<Node> = args.map(|a| named_children(a)).unwrap_or_default();
+                    let arg_texts = args
+                        .and_then(|args| macro_arguments(text(args, b), 0))
+                        .map(|(args, _)| args)
+                        .unwrap_or_default();
                     let code = self.expression_code(n, b);
-                    self.emit_macro_call(&name, &code, &arg_nodes, n, b, depth, order, arg, None);
+                    self.emit_macro_call(&name, &code, &arg_texts, n, depth, order, arg, None);
                     return;
                 }
                 if callee.is_some_and(|callee| callee.kind() != "identifier")
@@ -3906,7 +3905,7 @@ impl Ctx<'_> {
             "identifier" => {
                 let name = text(n, b).to_string();
                 if self.macros.get(&name).is_some_and(|m| m.params.is_none()) {
-                    self.emit_macro_call(&name, &name, &[], n, b, depth, order, arg, None);
+                    self.emit_macro_call(&name, &name, &[], n, depth, order, arg, None);
                     return;
                 }
                 if !self.recovering_expression
@@ -5501,22 +5500,24 @@ fn needs_clinit(n: Node, _b: &[u8]) -> bool {
 /// removes ASCII spaces from its lookup key. Newlines, tabs and comments
 /// between tokens therefore never participate in matching. Only this lookup
 /// key is normalized; copied nodes retain their original literal spelling.
-fn macro_argument_match_code(node: Node, bytes: &[u8]) -> String {
-    fn append(node: Node, bytes: &[u8], out: &mut String) {
-        if node.kind() == "comment" {
-            return;
-        }
-        if node.child_count() == 0 || matches!(node.kind(), "string_literal" | "char_literal") {
-            out.extend(text(node, bytes).chars().filter(|&c| c != ' '));
-        } else {
-            let mut cursor = node.walk();
-            for child in node.children(&mut cursor) {
-                append(child, bytes, out);
+fn macro_argument_match_code(source: &str) -> String {
+    let bytes = source.as_bytes();
+    let mut out = String::new();
+    let mut i = 0;
+    while i < bytes.len() {
+        if let Some(end) = macro_opaque_end(bytes, i) {
+            if !bytes[i..].starts_with(b"/*") && !bytes[i..].starts_with(b"//") {
+                out.extend(source[i..end].chars().filter(|&c| c != ' '));
             }
+            i = end;
+        } else {
+            let c = source[i..].chars().next().unwrap();
+            if !c.is_ascii_whitespace() {
+                out.push(c);
+            }
+            i += c.len_utf8();
         }
     }
-    let mut out = String::new();
-    append(node, bytes, &mut out);
     out
 }
 
@@ -5630,6 +5631,145 @@ fn expanded_cast_descriptor(desc: Node, bytes: &[u8]) -> String {
     .join(" ")
 }
 
+fn macro_opaque_end(bytes: &[u8], start: usize) -> Option<usize> {
+    if bytes[start..].starts_with(b"/*") {
+        return Some(
+            bytes[start + 2..]
+                .windows(2)
+                .position(|w| w == b"*/")
+                .map_or(bytes.len(), |end| start + end + 4),
+        );
+    }
+    if bytes[start..].starts_with(b"//") {
+        let mut i = start + 2;
+        while i < bytes.len() {
+            if bytes[i..].starts_with(b"\\\r\n") {
+                i += 3;
+            } else if bytes[i..].starts_with(b"\\\n") {
+                i += 2;
+            } else if bytes[i] == b'\n' {
+                return Some(i);
+            } else {
+                i += 1;
+            }
+        }
+        return Some(i);
+    }
+    let quote = bytes[start];
+    if !matches!(quote, b'\'' | b'"') {
+        return None;
+    }
+    let mut i = start + 1;
+    while i < bytes.len() {
+        if bytes[i] == b'\\' {
+            i = (i + 2).min(bytes.len());
+        } else if bytes[i] == quote {
+            return Some(i + 1);
+        } else {
+            i += 1;
+        }
+    }
+    Some(i)
+}
+
+/// Scan one macro argument list as preprocessing tokens, before C expression
+/// parsing. Operator-only and type arguments occupy slots even when they have
+/// no named syntax node. Only parentheses nest arguments; quoted tokens and
+/// comments are opaque to commas and parentheses.
+fn macro_arguments(source: &str, open: usize) -> Option<(Vec<String>, usize)> {
+    let bytes = source.as_bytes();
+    if bytes.get(open) != Some(&b'(') {
+        return None;
+    }
+    // Translation phase 2 precedes comment and argument recognition. Keep
+    // offsets into the original invocation so a splice forming `/*` or `//`
+    // cannot expose a comma or close parenthesis inside the logical comment.
+    let mut spliced = String::new();
+    let mut removed = Vec::new();
+    let mut copied = open;
+    let mut i = open;
+    while i < bytes.len() {
+        let count = if bytes[i..].starts_with(b"\\\r\n") {
+            3
+        } else if bytes[i..].starts_with(b"\\\n") {
+            2
+        } else {
+            i += 1;
+            continue;
+        };
+        spliced.push_str(&source[copied..i]);
+        removed.push((spliced.len(), count));
+        i += count;
+        copied = i;
+    }
+    if !removed.is_empty() {
+        spliced.push_str(&source[copied..]);
+        let (args, end) = macro_arguments(&spliced, 0)?;
+        let removed_before_end: usize = removed
+            .iter()
+            .filter(|(at, _)| *at <= end)
+            .map(|(_, count)| count)
+            .sum();
+        return Some((args, open + end + removed_before_end));
+    }
+    let mut args = Vec::new();
+    let mut argument = open + 1;
+    let mut end = argument;
+    let mut nesting = 1;
+    while end < bytes.len() {
+        if let Some(next) = macro_opaque_end(bytes, end) {
+            end = next;
+            continue;
+        }
+        match bytes[end] {
+            b'(' => nesting += 1,
+            b')' => {
+                nesting -= 1;
+                if nesting == 0 {
+                    break;
+                }
+            }
+            b',' if nesting == 1 => {
+                args.push(macro_argument_text(&source[argument..end]));
+                argument = end + 1;
+            }
+            _ => {}
+        }
+        end += 1;
+    }
+    if nesting != 0 {
+        return None;
+    }
+    if argument != end || !args.is_empty() {
+        args.push(macro_argument_text(&source[argument..end]));
+    }
+    Some((args, end))
+}
+
+/// Comments become whitespace before substitution. Splices disappear even in
+/// quoted tokens, while escaped quotes and literal comma/parenthesis bytes stay.
+fn macro_argument_text(source: &str) -> String {
+    let spliced = source.replace("\\\r\n", "").replace("\\\n", "");
+    let bytes = spliced.as_bytes();
+    let mut out = String::new();
+    let mut copied = 0;
+    let mut i = 0;
+    while i < bytes.len() {
+        if let Some(end) = macro_opaque_end(bytes, i) {
+            if bytes[i..].starts_with(b"/*") || bytes[i..].starts_with(b"//") {
+                out.push_str(&spliced[copied..i]);
+                out.push(' ');
+                copied = end;
+            }
+            i = end;
+        } else {
+            i += 1;
+        }
+    }
+    out.push_str(&spliced[copied..]);
+    out.trim().to_string()
+}
+
 /// Expand known function macros using preprocessing-token parentheses. Strings
 /// and comments are opaque; ordinary calls and type spellings remain untouched.
 fn expand_function_macro_tokens(
@@ -5665,45 +5805,12 @@ fn expand_function_macro_tokens(
         }
         0
     }
-    fn opaque_end(bytes: &[u8], start: usize) -> Option<usize> {
-        if bytes[start..].starts_with(b"/*") {
-            return Some(
-                bytes[start + 2..]
-                    .windows(2)
-                    .position(|w| w == b"*/")
-                    .map_or(bytes.len(), |end| start + end + 4),
-            );
-        }
-        if bytes[start..].starts_with(b"//") {
-            return Some(
-                bytes[start..]
-                    .iter()
-                    .position(|&b| b == b'\n')
-                    .map_or(bytes.len(), |end| start + end),
-            );
-        }
-        let quote = bytes[start];
-        if !matches!(quote, b'\'' | b'"') {
-            return None;
-        }
-        let mut i = start + 1;
-        while i < bytes.len() {
-            if bytes[i] == b'\\' {
-                i = (i + 2).min(bytes.len());
-            } else if bytes[i] == quote {
-                return Some(i + 1);
-            } else {
-                i += 1;
-            }
-        }
-        Some(i)
-    }
     let bytes = source.as_bytes();
     let mut result = String::new();
     let mut copied = 0;
     let mut i = 0;
     while i < bytes.len() && *budget > 0 {
-        if let Some(end) = opaque_end(bytes, i) {
+        if let Some(end) = macro_opaque_end(bytes, i) {
             i = end;
             continue;
         }
@@ -5759,7 +5866,7 @@ fn expand_function_macro_tokens(
             if open < bytes.len()
                 && (bytes[open..].starts_with(b"/*") || bytes[open..].starts_with(b"//"))
             {
-                open = opaque_end(bytes, open).unwrap();
+                open = macro_opaque_end(bytes, open).unwrap();
             } else {
                 break;
             }
@@ -5767,37 +5874,9 @@ fn expand_function_macro_tokens(
         if bytes.get(open) != Some(&b'(') {
             continue;
         }
-        let mut args = Vec::new();
-        let mut argument = open + 1;
-        let mut end = argument;
-        let mut nesting = 1;
-        while end < bytes.len() {
-            if let Some(next) = opaque_end(bytes, end) {
-                end = next;
-                continue;
-            }
-            match bytes[end] {
-                b'(' => nesting += 1,
-                b')' => {
-                    nesting -= 1;
-                    if nesting == 0 {
-                        break;
-                    }
-                }
-                b',' if nesting == 1 => {
-                    args.push(source[argument..end].trim().to_string());
-                    argument = end + 1;
-                }
-                _ => {}
-            }
-            end += 1;
-        }
-        if nesting != 0 {
+        let Some((args, end)) = macro_arguments(source, open) else {
             continue;
-        }
-        if argument != end || !args.is_empty() {
-            args.push(source[argument..end].trim().to_string());
-        }
+        };
         *budget -= 1;
         disabled.insert(name.to_string());
         let replaced = substitute(
@@ -5819,6 +5898,39 @@ fn expand_function_macro_tokens(
 #[cfg(test)]
 mod macro_token_tests {
     use super::*;
+
+    #[test]
+    fn argument_slots_follow_preprocessing_tokens() {
+        let source = r#"(+, (a,b), union U *, "comma,) /* // \\\"", ')',, value,) tail"#;
+        let (args, end) = macro_arguments(source, 0).unwrap();
+        assert_eq!(
+            args,
+            [
+                "+",
+                "(a,b)",
+                "union U *",
+                r#""comma,) /* // \\\"""#,
+                "')'",
+                "",
+                "value",
+                ""
+            ]
+        );
+        assert_eq!(&source[end..], ") tail");
+        assert!(macro_arguments("(a, (b)", 0).is_none());
+    }
+
+    #[test]
+    fn argument_splices_precede_comment_recognition() {
+        for newline in ["\n", "\r\n"] {
+            let source = format!(
+                "prefix(/\\{newline}* ignored , ) */ +, // ignored \\{newline}, )\n a, b) tail"
+            );
+            let (args, end) = macro_arguments(&source, 6).unwrap();
+            assert_eq!(args, ["+", "a", "b"]);
+            assert_eq!(&source[end..], ") tail");
+        }
+    }
 
     #[test]
     fn function_macro_names_inside_preprocessing_numbers_remain_opaque() {
@@ -5902,6 +6014,19 @@ fn expand_body_expression(
                     .unwrap_or("");
                 let right = child("right");
                 format!("{left} {op} {right}")
+            }
+            "unary_expression" => {
+                let op = node
+                    .child_by_field_name("operator")
+                    .map(|n| text(n, bytes))
+                    .unwrap_or("");
+                let argument = child("argument");
+                format!("{op}{argument}")
+            }
+            "comma_expression" => {
+                let left = child("left");
+                let right = child("right");
+                format!("{left}, {right}")
             }
             "conditional_expression" => {
                 let a = child("condition");
