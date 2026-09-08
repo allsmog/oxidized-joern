@@ -1,0 +1,117 @@
+{
+  "baselineRevision": "486ba017a",
+  "baselineCodeRevision": "c5ea712dbfd03d114af4450f79c89629a360b6a6",
+  "firstTimedCheckUtc": "2026-09-08T08:40:01Z",
+  "oracle": {
+    "version": "v4.0.555",
+    "jdk": "21.0.12",
+    "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e"
+  },
+  "productionSourceSha256": "bd6369b6d821162f71f46ac94c56d8e687b40d53fecb4f886cae86c43c2f70ba",
+  "exactGraph": {
+    "fixture": "blocks.c",
+    "canonicalLines": 1708,
+    "allProjectedSectionsExact": true,
+    "baselineUnifiedDiffLines": 1723,
+    "candidateUnifiedDiffLines": 0,
+    "graphOracleRaw": ".local/astra-blocks/graph-final-oracle/live.log"
+  },
+  "scanner": {
+    "fixture": "loop-tail-diagnostic/blocks.c",
+    "outcomes": 14,
+    "negativeOutcomes": 4,
+    "baselineMatches": 3,
+    "candidateMatches": 14,
+    "baselineFalseNegatives": [
+      "bare_entry",
+      "empty_entry",
+      "labeled_entry",
+      "loop_block_entry",
+      "nested_entry",
+      "return_entry",
+      "switch_entry"
+    ],
+    "baselineFalsePositives": [
+      "kill_entry",
+      "source_before_break_entry",
+      "source_before_continue_entry",
+      "source_before_return_entry"
+    ],
+    "oracleRaw": ".local/astra-blocks/flow-expanded-oracle/live.log",
+    "nativeBaselineBinarySha256": "54d379e2265984d2f71ed6e20c991213d456752b14ed9ea30081e0726ab458ce",
+    "nativeCandidateBinarySha256": "be96ab14abb5f7fcc2ebf4a610a837685d433b7ef40971308dc9a5472262ce08",
+    "nativeBaselineResultSha256": "75f64323f61424ca1ec6a2463597c3123c69ddfe5bc642fc1e37fcf14e9534c4",
+    "nativeCandidateResultSha256": "e0413568c753c5d6e6e14247c8f3a6f78f3541e4b257f196ea5fdc2bcd1c9ba0",
+    "nativeCandidateResult": ".local/astra-blocks/fresh-candidate-flow.json",
+    "nativeCandidateBinary": ".local/target/release/cpg"
+  },
+  "diagnostic": {
+    "fixture": "loop-tail-diagnostic/blocks.c",
+    "canonicalLines": 2042,
+    "allProjectedSectionsExact": false,
+    "matchingSections": [
+      "AST",
+      "NODES",
+      "EDGES"
+    ],
+    "reachingDefMissing": 4,
+    "reachingDefExtra": 1,
+    "completeDiff": "loop-tail-diagnostic/complete.diff",
+    "unchangedBaselineCounterexample": "loop-tail-diagnostic/preexisting.c",
+    "baselineAndCandidateCounterexampleByteIdentical": true,
+    "solverProbe": ".local/astra-blocks/rd-oracle-final/probe.sc",
+    "solverOutput": ".local/astra-blocks/rd-oracle-final/live.log"
+  },
+  "validation": {
+    "freshWorkspaceTests": 362,
+    "freshAllTargetsClippy": "passed",
+    "formatting": "passed",
+    "mainCommittedComparison": "297/297",
+    "mainCorpusAndOracleUnchanged": true,
+    "independentReview": "passed, including dedicated target rerun and a separate 453-line full live goto/do/nested-empty probe",
+    "reviewReceiptWorktree": "joern-oxidized-astra-types",
+    "reviewReceipt": ".local/block-review/review.json",
+    "nativeRelease": "passed"
+  },
+  "limitations": [
+    "All graph equality refers to the selected oracle.sc projection, not every Joern property.",
+    "The larger 14-outcome graph retains five preexisting RD fact differences; expected facts are not filtered.",
+    "Reported reachableBy findings need not be executable paths.",
+    "No generic frontend or analysis implementation changed."
+  ],
+  "fixtures": {
+    "README.md": "2593ebed14347bb8a6ce2c863019b7134d745346cfa72b7c7a6f3b5f12174e1c",
+    "blocks.c": "29cfcbc63ded2f9b589ed9f69492a285327dd7d9a6d348979898e942997a78c1",
+    "expected.txt": "6cb76a9265eb0ee8e5ff29a0584e6e4e303a57048aff101b94612f227f8f4bda",
+    "loop-tail-diagnostic/actual-rust.txt": "b8da9b3b672d5094842bc3f8bc5710baa4f9323c04bed567564a8a409a711753",
+    "loop-tail-diagnostic/baseline-outcomes.txt": "fdf678132e6136bd1f78381e0ae1a8b49441ea7b94f4115f355dbcf9e5eeff44",
+    "loop-tail-diagnostic/blocks.c": "0a2dc7b310ffdb7d259155263c605ba023fabcc779d503dcd24051feb016a4fe",
+    "loop-tail-diagnostic/complete.diff": "ff606de66e2f9ee31ae418a3f8048a98d1dd437f30f25c7a6f46b1449d8ece61",
+    "loop-tail-diagnostic/expected-joern.txt": "5c6f2f042739eccf610fa64195511af54041ea3b8aa362fd63aa5ad7fc34f14a",
+    "loop-tail-diagnostic/outcomes.txt": "040f8d56275671197350b2c0cdf87198e2edb9fb75d60a54bac7e7ad643534e3",
+    "loop-tail-diagnostic/preexisting.c": "138b7074f12d38dd5e5497080341d4f626a9466078fbf5f2586ae78e93aa48e1",
+    "loop-tail-diagnostic/without-blocks-joern.txt": "ec321e9a4c1a2199ff31639044347bec326ae0ddad2dea68380760b79a663820",
+    "loop-tail-diagnostic/without-blocks-rust.txt": "cc4cf74d20620755d05586a6d31e57fc80f6b45d88f598e349bc2894f81c7d2a",
+    "loop-tail-diagnostic/without-blocks.diff": "d53b300321dafd5e2599c65776323fa88f13b2f4968397d469e5c616ebf5b75b",
+    "outcomes.sc": "c653ced8fd5e2fbd25f7a1a3701a1e45607bc3f00fbc12e4948dd7f2f1d7a450",
+    "outcomes.txt": "0c3443f341c59189cd052c6b438f8fb43c46d1568e803330011511997984a058"
+  },
+  "rawReceipts": {
+    ".local/astra-blocks/graph-final-oracle/live.log": "eba43865496044acfe2f264754e5c547399d39f421b727ab95bf9b6699180fa8",
+    ".local/astra-blocks/flow-expanded-oracle/live.log": "5d355ee2a86ea1e5a689837df67f1dfb4f9f1bb4eefd01f7ea1db405e82151e7",
+    ".local/astra-blocks/before-tests.log": "5efdb77bf3b4cc78633344e891d647fa5f5f268872c650bc3f1310fd4b4cf2a2",
+    ".local/astra-blocks/before-final.diff": "07c4c3461405e2bc3127550cba9d1ea126eeea5afba2cf4d7c472ff6aa3b5c43",
+    ".local/astra-blocks/after-final.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    ".local/astra-blocks/preexisting-before.txt": "cc4cf74d20620755d05586a6d31e57fc80f6b45d88f598e349bc2894f81c7d2a",
+    ".local/astra-blocks/preexisting-after.txt": "cc4cf74d20620755d05586a6d31e57fc80f6b45d88f598e349bc2894f81c7d2a",
+    ".local/astra-blocks/preexisting-oracle/live.log": "9ca328c100105255ccb07fefb14ceb14b73b02b63c57a3ef84ed981f1aa5640d",
+    ".local/astra-blocks/rd-oracle-final/live.log": "6d69e022f7f0a5ee2aa9a67c7dee4ecabc9a6486936ed05f9f9c0938e1968648",
+    ".local/astra-blocks/fresh-workspace-tests.log": "a7f635ef06578175c603574eec00435a27a2a98e30a541a36e2057a838817c69",
+    ".local/astra-blocks/fresh-clippy.log": "70de7cd741076f5091898e5c1a49666a7901ac3723a0c1614db07b42232bcb70",
+    ".local/astra-blocks/fresh-committed-gate.log": "30229d2678a43919307930c8b3e66f51ef1ce43c04d200d10a0db682ec0daf13",
+    ".local/astra-blocks/fresh-release-build.log": "1c80120ca5380a7198a04c8185ba488bca315a62b1ece9010c1186a0460dc167",
+    ".local/astra-blocks/native-release.log": "88ef8fe220f0b241b051a8f8e2ed9fe65245748d827b16f7aaa517cf62630026",
+    ".local/astra-blocks/fresh-candidate-flow.json": "e0413568c753c5d6e6e14247c8f3a6f78f3541e4b257f196ea5fdc2bcd1c9ba0"
+  },
+  "verifiedAtUtc": "2026-09-08T09:03:26.154151+00:00"
+}

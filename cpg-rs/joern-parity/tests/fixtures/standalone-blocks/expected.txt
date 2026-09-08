@@ -1,0 +1,1708 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.notEquals FULL_NAME=<operator>.notEquals ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.postDecrement FULL_NAME=<operator>.postDecrement ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=after_return_entry CODE=void after_return_entry(void) {\n    { return; }\n    sink(source());\n} FULL_NAME=after_return_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    { return; }\n    sink(source());\n} TYPE_FULL_NAME=void ORDER=2
+    BLOCK CODE={ return; } TYPE_FULL_NAME=void ORDER=1
+      RETURN CODE=return; ORDER=1
+    CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=bare_entry CODE=void bare_entry(void) {\n    { sink(source()); }\n} FULL_NAME=bare_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    { sink(source()); }\n} TYPE_FULL_NAME=void ORDER=2
+    BLOCK CODE={ sink(source()); } TYPE_FULL_NAME=void ORDER=1
+      CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=block_local_scope CODE=int block_local_scope(int value) {\n    { int value = 1; value = value + 1; }\n    return value;\n} FULL_NAME=block_local_scope SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n    { int value = 1; value = value + 1; }\n    return value;\n} TYPE_FULL_NAME=void ORDER=2
+    BLOCK CODE={ int value = 1; value = value + 1; } TYPE_FULL_NAME=void ORDER=1
+      LOCAL NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+      CALL NAME=<operator>.assignment CODE=value = 1 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=value = value + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.addition CODE=value + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return value; ORDER=2
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=block_pointer_scope CODE=int block_pointer_scope(int value) {\n    int (*callable)(int) = callback;\n    {\n        int callable(int value);\n        callable(value);\n    }\n    return callable(value);\n} FULL_NAME=block_pointer_scope SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n    int (*callable)(int) = callback;\n    {\n        int callable(int value);\n        callable(value);\n    }\n    return callable(value);\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=callable CODE=int (*callable)(int) = callback; TYPE_FULL_NAME=int(*)(int) ORDER=1
+    CALL NAME=<operator>.assignment CODE=(*callable)(int) = callback TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=callable CODE= TYPE_FULL_NAME=int(*)(int) ORDER=1 ARGUMENT_INDEX=1
+      METHOD_REF CODE=callback TYPE_FULL_NAME=int METHOD_FULL_NAME=callback ORDER=2 ARGUMENT_INDEX=2
+    BLOCK CODE={\n        int callable(int value);\n        callable(value);\n    } TYPE_FULL_NAME=void ORDER=3
+      CALL NAME=callable CODE=callable(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=callable ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    RETURN CODE=return callable(value); ORDER=4
+      CALL NAME=<operator>.pointerCall CODE=callable(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+        IDENTIFIER NAME=callable CODE=callable TYPE_FULL_NAME=int(*)(int) ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=block_prototypes CODE=int block_prototypes(int value) {\n    {\n        int shadowed(int value);\n        shadowed(value);\n        (shadowed)(value);\n    }\n    return shadowed(value) + (shadowed)(value);\n} FULL_NAME=block_prototypes SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n    {\n        int shadowed(int value);\n        shadowed(value);\n        (shadowed)(value);\n    }\n    return shadowed(value) + (shadowed)(value);\n} TYPE_FULL_NAME=void ORDER=2
+    BLOCK CODE={\n        int shadowed(int value);\n        shadowed(value);\n        (shadowed)(value);\n    } TYPE_FULL_NAME=void ORDER=1
+      CALL NAME=shadowed CODE=shadowed(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=shadowed ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.pointerCall CODE=(shadowed)(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+        METHOD_REF CODE=shadowed TYPE_FULL_NAME=int METHOD_FULL_NAME=shadowed ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+    RETURN CODE=return shadowed(value) + (shadowed)(value); ORDER=2
+      CALL NAME=<operator>.addition CODE=shadowed(value) + (shadowed)(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=shadowed CODE=shadowed(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=shadowed ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.pointerCall CODE=(shadowed)(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+          METHOD_REF CODE=shadowed TYPE_FULL_NAME=int METHOD_FULL_NAME=shadowed ORDER=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=block_return CODE=char *block_return(char *value) {\n    { return value; }\n    return "safe";\n} FULL_NAME=block_return SIGNATURE=char*(char*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+  BLOCK CODE={\n    { return value; }\n    return "safe";\n} TYPE_FULL_NAME=void ORDER=2
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=1
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1
+    RETURN CODE=return "safe"; ORDER=2
+      LITERAL CODE="safe" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=blocks.c:<global> ORDER=1
+  METHOD NAME=bare_entry CODE=void bare_entry(void) {\n    { sink(source()); }\n} FULL_NAME=bare_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    { sink(source()); }\n} TYPE_FULL_NAME=void ORDER=2
+      BLOCK CODE={ sink(source()); } TYPE_FULL_NAME=void ORDER=1
+        CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=nested_entry CODE=void nested_entry(void) {\n    char *value = "safe";\n    { { value = source(); } }\n    sink(value);\n} FULL_NAME=nested_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    char *value = "safe";\n    { { value = source(); } }\n    sink(value);\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+      CALL NAME=<operator>.assignment CODE=*value = "safe" TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE="safe" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={ { value = source(); } } TYPE_FULL_NAME=void ORDER=3
+        BLOCK CODE={ value = source(); } TYPE_FULL_NAME=void ORDER=1
+          CALL NAME=<operator>.assignment CODE=value = source() TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=kill_entry CODE=void kill_entry(void) {\n    char *value = source();\n    { value = "safe"; }\n    sink(value);\n} FULL_NAME=kill_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    char *value = source();\n    { value = "safe"; }\n    sink(value);\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+      CALL NAME=<operator>.assignment CODE=*value = source() TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+      BLOCK CODE={ value = "safe"; } TYPE_FULL_NAME=void ORDER=3
+        CALL NAME=<operator>.assignment CODE=value = "safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="safe" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=labeled_entry CODE=void labeled_entry(void) {\n    goto target;\ntarget: { sink(source()); }\n} FULL_NAME=labeled_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    goto target;\ntarget: { sink(source()); }\n} TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=goto target; ORDER=1
+      JUMP_TARGET NAME=target CODE=target: { sink(source()); } ORDER=2
+      BLOCK CODE={ sink(source()); } TYPE_FULL_NAME=void ORDER=3
+        CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=switch_entry CODE=void switch_entry(int condition) {\n    switch (condition) {\n    case 1: { sink(source()); break; }\n    default: { break; }\n    }\n} FULL_NAME=switch_entry SIGNATURE=void(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n    switch (condition) {\n    case 1: { sink(source()); break; }\n    default: { break; }\n    }\n} TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=switch (condition) {\n    case 1: { sink(source()); break; }\n    default: { break; }\n    } ORDER=1
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1
+        BLOCK CODE={\n    case 1: { sink(source()); break; }\n    default: { break; }\n    } TYPE_FULL_NAME=void ORDER=2
+          JUMP_TARGET NAME=case CODE=case 1: ORDER=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2
+          BLOCK CODE={ sink(source()); break; } TYPE_FULL_NAME=void ORDER=3
+            CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CONTROL_STRUCTURE CODE=break; ORDER=2
+          JUMP_TARGET NAME=default CODE=default: ORDER=4
+          BLOCK CODE={ break; } TYPE_FULL_NAME=void ORDER=5
+            CONTROL_STRUCTURE CODE=break; ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=loop_block_entry CODE=void loop_block_entry(int condition) {\n    while (condition) {\n        { sink(source()); }\n        condition = 0;\n    }\n} FULL_NAME=loop_block_entry SIGNATURE=void(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n    while (condition) {\n        { sink(source()); }\n        condition = 0;\n    }\n} TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=while (condition) ORDER=1
+        CALL NAME=<operator>.notEquals CODE=condition != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        BLOCK CODE={\n        { sink(source()); }\n        condition = 0;\n    } TYPE_FULL_NAME=void ORDER=2
+          BLOCK CODE={ sink(source()); } TYPE_FULL_NAME=void ORDER=1
+            CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.assignment CODE=condition = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=empty_entry CODE=void empty_entry(void) {\n    { }\n    { sink(source()); }\n    { }\n} FULL_NAME=empty_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    { }\n    { sink(source()); }\n    { }\n} TYPE_FULL_NAME=void ORDER=2
+      BLOCK CODE={ } TYPE_FULL_NAME=void ORDER=1
+      BLOCK CODE={ sink(source()); } TYPE_FULL_NAME=void ORDER=2
+        CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+      BLOCK CODE={ } TYPE_FULL_NAME=void ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=block_prototypes CODE=int block_prototypes(int value) {\n    {\n        int shadowed(int value);\n        shadowed(value);\n        (shadowed)(value);\n    }\n    return shadowed(value) + (shadowed)(value);\n} FULL_NAME=block_prototypes SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n    {\n        int shadowed(int value);\n        shadowed(value);\n        (shadowed)(value);\n    }\n    return shadowed(value) + (shadowed)(value);\n} TYPE_FULL_NAME=void ORDER=2
+      BLOCK CODE={\n        int shadowed(int value);\n        shadowed(value);\n        (shadowed)(value);\n    } TYPE_FULL_NAME=void ORDER=1
+        CALL NAME=shadowed CODE=shadowed(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=shadowed ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.pointerCall CODE=(shadowed)(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+          METHOD_REF CODE=shadowed TYPE_FULL_NAME=int METHOD_FULL_NAME=shadowed ORDER=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+      RETURN CODE=return shadowed(value) + (shadowed)(value); ORDER=2
+        CALL NAME=<operator>.addition CODE=shadowed(value) + (shadowed)(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=shadowed CODE=shadowed(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=shadowed ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.pointerCall CODE=(shadowed)(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+            METHOD_REF CODE=shadowed TYPE_FULL_NAME=int METHOD_FULL_NAME=shadowed ORDER=1
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=callback CODE=int callback(int value) { return value; } FULL_NAME=callback SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=block_pointer_scope CODE=int block_pointer_scope(int value) {\n    int (*callable)(int) = callback;\n    {\n        int callable(int value);\n        callable(value);\n    }\n    return callable(value);\n} FULL_NAME=block_pointer_scope SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n    int (*callable)(int) = callback;\n    {\n        int callable(int value);\n        callable(value);\n    }\n    return callable(value);\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=callable CODE=int (*callable)(int) = callback; TYPE_FULL_NAME=int(*)(int) ORDER=1
+      CALL NAME=<operator>.assignment CODE=(*callable)(int) = callback TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=callable CODE= TYPE_FULL_NAME=int(*)(int) ORDER=1 ARGUMENT_INDEX=1
+        METHOD_REF CODE=callback TYPE_FULL_NAME=int METHOD_FULL_NAME=callback ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={\n        int callable(int value);\n        callable(value);\n    } TYPE_FULL_NAME=void ORDER=3
+        CALL NAME=callable CODE=callable(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=callable ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      RETURN CODE=return callable(value); ORDER=4
+        CALL NAME=<operator>.pointerCall CODE=callable(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+          IDENTIFIER NAME=callable CODE=callable TYPE_FULL_NAME=int(*)(int) ORDER=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=block_local_scope CODE=int block_local_scope(int value) {\n    { int value = 1; value = value + 1; }\n    return value;\n} FULL_NAME=block_local_scope SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n    { int value = 1; value = value + 1; }\n    return value;\n} TYPE_FULL_NAME=void ORDER=2
+      BLOCK CODE={ int value = 1; value = value + 1; } TYPE_FULL_NAME=void ORDER=1
+        LOCAL NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+        CALL NAME=<operator>.assignment CODE=value = 1 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.assignment CODE=value = value + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.addition CODE=value + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      RETURN CODE=return value; ORDER=2
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=block_return CODE=char *block_return(char *value) {\n    { return value; }\n    return "safe";\n} FULL_NAME=block_return SIGNATURE=char*(char*) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+    BLOCK CODE={\n    { return value; }\n    return "safe";\n} TYPE_FULL_NAME=void ORDER=2
+      BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=1
+        RETURN CODE=return value; ORDER=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1
+      RETURN CODE=return "safe"; ORDER=2
+        LITERAL CODE="safe" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=return_entry CODE=void return_entry(void) {\n    sink(block_return(source()));\n} FULL_NAME=return_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    sink(block_return(source()));\n} TYPE_FULL_NAME=void ORDER=2
+      CALL NAME=sink CODE=sink(block_return(source())) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=block_return CODE=block_return(source()) TYPE_FULL_NAME=char* METHOD_FULL_NAME=block_return ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=after_return_entry CODE=void after_return_entry(void) {\n    { return; }\n    sink(source());\n} FULL_NAME=after_return_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    { return; }\n    sink(source());\n} TYPE_FULL_NAME=void ORDER=2
+      BLOCK CODE={ return; } TYPE_FULL_NAME=void ORDER=1
+        RETURN CODE=return; ORDER=1
+      CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=continue_entry CODE=void continue_entry(int count) {\n    while (count) {\n        { count--; continue; }\n        sink(source());\n    }\n} FULL_NAME=continue_entry SIGNATURE=void(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=count CODE=int count TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=count CODE=int count TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n    while (count) {\n        { count--; continue; }\n        sink(source());\n    }\n} TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=while (count) ORDER=1
+        CALL NAME=<operator>.notEquals CODE=count != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        BLOCK CODE={\n        { count--; continue; }\n        sink(source());\n    } TYPE_FULL_NAME=void ORDER=2
+          BLOCK CODE={ count--; continue; } TYPE_FULL_NAME=void ORDER=1
+            CALL NAME=<operator>.postDecrement CODE=count-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            CONTROL_STRUCTURE CODE=continue; ORDER=2
+          CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=break_block_entry CODE=void break_block_entry(void) {\n    while (1) {\n        { break; }\n        sink(source());\n    }\n} FULL_NAME=break_block_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    while (1) {\n        { break; }\n        sink(source());\n    }\n} TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=while (1) ORDER=1
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+        BLOCK CODE={\n        { break; }\n        sink(source());\n    } TYPE_FULL_NAME=void ORDER=2
+          BLOCK CODE={ break; } TYPE_FULL_NAME=void ORDER=1
+            CONTROL_STRUCTURE CODE=break; ORDER=1
+          CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=empty_only CODE=void empty_only(void) { { } } FULL_NAME=empty_only SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ { } } TYPE_FULL_NAME=void ORDER=2
+      BLOCK CODE={ } TYPE_FULL_NAME=void ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=bare_entry TYPE_FULL_NAME=bare_entry METHOD_FULL_NAME=bare_entry ORDER=1
+    METHOD_REF CODE=nested_entry TYPE_FULL_NAME=nested_entry METHOD_FULL_NAME=nested_entry ORDER=2
+    METHOD_REF CODE=kill_entry TYPE_FULL_NAME=kill_entry METHOD_FULL_NAME=kill_entry ORDER=3
+    METHOD_REF CODE=labeled_entry TYPE_FULL_NAME=labeled_entry METHOD_FULL_NAME=labeled_entry ORDER=4
+    METHOD_REF CODE=switch_entry TYPE_FULL_NAME=switch_entry METHOD_FULL_NAME=switch_entry ORDER=5
+    METHOD_REF CODE=loop_block_entry TYPE_FULL_NAME=loop_block_entry METHOD_FULL_NAME=loop_block_entry ORDER=6
+    METHOD_REF CODE=empty_entry TYPE_FULL_NAME=empty_entry METHOD_FULL_NAME=empty_entry ORDER=7
+    METHOD_REF CODE=block_prototypes TYPE_FULL_NAME=block_prototypes METHOD_FULL_NAME=block_prototypes ORDER=8
+    METHOD_REF CODE=callback TYPE_FULL_NAME=callback METHOD_FULL_NAME=callback ORDER=9
+    METHOD_REF CODE=block_pointer_scope TYPE_FULL_NAME=block_pointer_scope METHOD_FULL_NAME=block_pointer_scope ORDER=10
+    METHOD_REF CODE=block_local_scope TYPE_FULL_NAME=block_local_scope METHOD_FULL_NAME=block_local_scope ORDER=11
+    METHOD_REF CODE=block_return TYPE_FULL_NAME=block_return METHOD_FULL_NAME=block_return ORDER=12
+    METHOD_REF CODE=return_entry TYPE_FULL_NAME=return_entry METHOD_FULL_NAME=return_entry ORDER=13
+    METHOD_REF CODE=after_return_entry TYPE_FULL_NAME=after_return_entry METHOD_FULL_NAME=after_return_entry ORDER=14
+    METHOD_REF CODE=continue_entry TYPE_FULL_NAME=continue_entry METHOD_FULL_NAME=continue_entry ORDER=15
+    METHOD_REF CODE=break_block_entry TYPE_FULL_NAME=break_block_entry METHOD_FULL_NAME=break_block_entry ORDER=16
+    METHOD_REF CODE=empty_only TYPE_FULL_NAME=empty_only METHOD_FULL_NAME=empty_only ORDER=17
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=break_block_entry CODE=void break_block_entry(void) {\n    while (1) {\n        { break; }\n        sink(source());\n    }\n} FULL_NAME=break_block_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    while (1) {\n        { break; }\n        sink(source());\n    }\n} TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=while (1) ORDER=1
+      LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+      BLOCK CODE={\n        { break; }\n        sink(source());\n    } TYPE_FULL_NAME=void ORDER=2
+        BLOCK CODE={ break; } TYPE_FULL_NAME=void ORDER=1
+          CONTROL_STRUCTURE CODE=break; ORDER=1
+        CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=callable CODE=int callable(int value); FULL_NAME=callable SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=callback CODE=int callback(int value) { return value; } FULL_NAME=callback SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=continue_entry CODE=void continue_entry(int count) {\n    while (count) {\n        { count--; continue; }\n        sink(source());\n    }\n} FULL_NAME=continue_entry SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=count CODE=int count TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=count CODE=int count TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n    while (count) {\n        { count--; continue; }\n        sink(source());\n    }\n} TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=while (count) ORDER=1
+      CALL NAME=<operator>.notEquals CODE=count != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={\n        { count--; continue; }\n        sink(source());\n    } TYPE_FULL_NAME=void ORDER=2
+        BLOCK CODE={ count--; continue; } TYPE_FULL_NAME=void ORDER=1
+          CALL NAME=<operator>.postDecrement CODE=count-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CONTROL_STRUCTURE CODE=continue; ORDER=2
+        CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=empty_entry CODE=void empty_entry(void) {\n    { }\n    { sink(source()); }\n    { }\n} FULL_NAME=empty_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    { }\n    { sink(source()); }\n    { }\n} TYPE_FULL_NAME=void ORDER=2
+    BLOCK CODE={ } TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ sink(source()); } TYPE_FULL_NAME=void ORDER=2
+      CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+    BLOCK CODE={ } TYPE_FULL_NAME=void ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=empty_only CODE=void empty_only(void) { { } } FULL_NAME=empty_only SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ { } } TYPE_FULL_NAME=void ORDER=2
+    BLOCK CODE={ } TYPE_FULL_NAME=void ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=kill_entry CODE=void kill_entry(void) {\n    char *value = source();\n    { value = "safe"; }\n    sink(value);\n} FULL_NAME=kill_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    char *value = source();\n    { value = "safe"; }\n    sink(value);\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+    CALL NAME=<operator>.assignment CODE=*value = source() TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+    BLOCK CODE={ value = "safe"; } TYPE_FULL_NAME=void ORDER=3
+      CALL NAME=<operator>.assignment CODE=value = "safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE="safe" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=labeled_entry CODE=void labeled_entry(void) {\n    goto target;\ntarget: { sink(source()); }\n} FULL_NAME=labeled_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    goto target;\ntarget: { sink(source()); }\n} TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=goto target; ORDER=1
+    JUMP_TARGET NAME=target CODE=target: { sink(source()); } ORDER=2
+    BLOCK CODE={ sink(source()); } TYPE_FULL_NAME=void ORDER=3
+      CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=loop_block_entry CODE=void loop_block_entry(int condition) {\n    while (condition) {\n        { sink(source()); }\n        condition = 0;\n    }\n} FULL_NAME=loop_block_entry SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n    while (condition) {\n        { sink(source()); }\n        condition = 0;\n    }\n} TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=while (condition) ORDER=1
+      CALL NAME=<operator>.notEquals CODE=condition != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={\n        { sink(source()); }\n        condition = 0;\n    } TYPE_FULL_NAME=void ORDER=2
+        BLOCK CODE={ sink(source()); } TYPE_FULL_NAME=void ORDER=1
+          CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.assignment CODE=condition = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=nested_entry CODE=void nested_entry(void) {\n    char *value = "safe";\n    { { value = source(); } }\n    sink(value);\n} FULL_NAME=nested_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    char *value = "safe";\n    { { value = source(); } }\n    sink(value);\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+    CALL NAME=<operator>.assignment CODE=*value = "safe" TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE="safe" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+    BLOCK CODE={ { value = source(); } } TYPE_FULL_NAME=void ORDER=3
+      BLOCK CODE={ value = source(); } TYPE_FULL_NAME=void ORDER=1
+        CALL NAME=<operator>.assignment CODE=value = source() TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+    CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=return_entry CODE=void return_entry(void) {\n    sink(block_return(source()));\n} FULL_NAME=return_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    sink(block_return(source()));\n} TYPE_FULL_NAME=void ORDER=2
+    CALL NAME=sink CODE=sink(block_return(source())) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=block_return CODE=block_return(source()) TYPE_FULL_NAME=char* METHOD_FULL_NAME=block_return ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=shadowed CODE=int shadowed(int value); FULL_NAME=shadowed SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=sink CODE=void sink(char *value); FULL_NAME=sink SIGNATURE=void(char*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=source CODE=char *source(void); FULL_NAME=source SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=switch_entry CODE=void switch_entry(int condition) {\n    switch (condition) {\n    case 1: { sink(source()); break; }\n    default: { break; }\n    }\n} FULL_NAME=switch_entry SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n    switch (condition) {\n    case 1: { sink(source()); break; }\n    default: { break; }\n    }\n} TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=switch (condition) {\n    case 1: { sink(source()); break; }\n    default: { break; }\n    } ORDER=1
+      IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1
+      BLOCK CODE={\n    case 1: { sink(source()); break; }\n    default: { break; }\n    } TYPE_FULL_NAME=void ORDER=2
+        JUMP_TARGET NAME=case CODE=case 1: ORDER=1
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2
+        BLOCK CODE={ sink(source()); break; } TYPE_FULL_NAME=void ORDER=3
+          CALL NAME=sink CODE=sink(source()) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CONTROL_STRUCTURE CODE=break; ORDER=2
+        JUMP_TARGET NAME=default CODE=default: ORDER=4
+        BLOCK CODE={ break; } TYPE_FULL_NAME=void ORDER=5
+          CONTROL_STRUCTURE CODE=break; ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=blocks.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=after_return_entry FULL_NAME=after_return_entry CODE=after_return_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=bare_entry FULL_NAME=bare_entry CODE=bare_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=block_local_scope FULL_NAME=block_local_scope CODE=block_local_scope AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=block_pointer_scope FULL_NAME=block_pointer_scope CODE=block_pointer_scope AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=block_prototypes FULL_NAME=block_prototypes CODE=block_prototypes AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=block_return FULL_NAME=block_return CODE=block_return AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=blocks.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=break_block_entry FULL_NAME=break_block_entry CODE=break_block_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=callback FULL_NAME=callback CODE=callback AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=char FULL_NAME=char CODE=char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=continue_entry FULL_NAME=continue_entry CODE=continue_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=empty_entry FULL_NAME=empty_entry CODE=empty_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=empty_only FULL_NAME=empty_only CODE=empty_only AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int(*)(int) FULL_NAME=int(*)(int) CODE=int(*)(int) IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=kill_entry FULL_NAME=kill_entry CODE=kill_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=labeled_entry FULL_NAME=labeled_entry CODE=labeled_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=loop_block_entry FULL_NAME=loop_block_entry CODE=loop_block_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=nested_entry FULL_NAME=nested_entry CODE=nested_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=return_entry FULL_NAME=return_entry CODE=return_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=switch_entry FULL_NAME=switch_entry CODE=switch_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=blocks.c:<global> FILENAME=blocks.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=after_return_entry FULL_NAME=after_return_entry TYPE_DECL_FULL_NAME=after_return_entry
+NODES|TYPE NAME=bare_entry FULL_NAME=bare_entry TYPE_DECL_FULL_NAME=bare_entry
+NODES|TYPE NAME=block_local_scope FULL_NAME=block_local_scope TYPE_DECL_FULL_NAME=block_local_scope
+NODES|TYPE NAME=block_pointer_scope FULL_NAME=block_pointer_scope TYPE_DECL_FULL_NAME=block_pointer_scope
+NODES|TYPE NAME=block_prototypes FULL_NAME=block_prototypes TYPE_DECL_FULL_NAME=block_prototypes
+NODES|TYPE NAME=block_return FULL_NAME=block_return TYPE_DECL_FULL_NAME=block_return
+NODES|TYPE NAME=break_block_entry FULL_NAME=break_block_entry TYPE_DECL_FULL_NAME=break_block_entry
+NODES|TYPE NAME=callback FULL_NAME=callback TYPE_DECL_FULL_NAME=callback
+NODES|TYPE NAME=char FULL_NAME=char TYPE_DECL_FULL_NAME=char
+NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
+NODES|TYPE NAME=continue_entry FULL_NAME=continue_entry TYPE_DECL_FULL_NAME=continue_entry
+NODES|TYPE NAME=empty_entry FULL_NAME=empty_entry TYPE_DECL_FULL_NAME=empty_entry
+NODES|TYPE NAME=empty_only FULL_NAME=empty_only TYPE_DECL_FULL_NAME=empty_only
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int(*)(int) FULL_NAME=int(*)(int) TYPE_DECL_FULL_NAME=int(*)(int)
+NODES|TYPE NAME=kill_entry FULL_NAME=kill_entry TYPE_DECL_FULL_NAME=kill_entry
+NODES|TYPE NAME=labeled_entry FULL_NAME=labeled_entry TYPE_DECL_FULL_NAME=labeled_entry
+NODES|TYPE NAME=loop_block_entry FULL_NAME=loop_block_entry TYPE_DECL_FULL_NAME=loop_block_entry
+NODES|TYPE NAME=nested_entry FULL_NAME=nested_entry TYPE_DECL_FULL_NAME=nested_entry
+NODES|TYPE NAME=return_entry FULL_NAME=return_entry TYPE_DECL_FULL_NAME=return_entry
+NODES|TYPE NAME=switch_entry FULL_NAME=switch_entry TYPE_DECL_FULL_NAME=switch_entry
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT after_return_entry#6 -> after_return_entry#7
+EDGES|ARGUMENT bare_entry#5 -> bare_entry#6
+EDGES|ARGUMENT block_local_scope#11 -> block_local_scope#12
+EDGES|ARGUMENT block_local_scope#11 -> block_local_scope#13
+EDGES|ARGUMENT block_local_scope#14 -> block_local_scope#15
+EDGES|ARGUMENT block_local_scope#6 -> block_local_scope#7
+EDGES|ARGUMENT block_local_scope#6 -> block_local_scope#8
+EDGES|ARGUMENT block_local_scope#9 -> block_local_scope#10
+EDGES|ARGUMENT block_local_scope#9 -> block_local_scope#11
+EDGES|ARGUMENT block_pointer_scope#11 -> block_pointer_scope#12
+EDGES|ARGUMENT block_pointer_scope#12 -> block_pointer_scope#14
+EDGES|ARGUMENT block_pointer_scope#5 -> block_pointer_scope#6
+EDGES|ARGUMENT block_pointer_scope#5 -> block_pointer_scope#7
+EDGES|ARGUMENT block_pointer_scope#9 -> block_pointer_scope#10
+EDGES|ARGUMENT block_prototypes#10 -> block_prototypes#11
+EDGES|ARGUMENT block_prototypes#11 -> block_prototypes#12
+EDGES|ARGUMENT block_prototypes#11 -> block_prototypes#14
+EDGES|ARGUMENT block_prototypes#12 -> block_prototypes#13
+EDGES|ARGUMENT block_prototypes#14 -> block_prototypes#16
+EDGES|ARGUMENT block_prototypes#5 -> block_prototypes#6
+EDGES|ARGUMENT block_prototypes#7 -> block_prototypes#9
+EDGES|ARGUMENT block_return#5 -> block_return#6
+EDGES|ARGUMENT block_return#7 -> block_return#8
+EDGES|ARGUMENT break_block_entry#9 -> break_block_entry#10
+EDGES|ARGUMENT callback#4 -> callback#5
+EDGES|ARGUMENT continue_entry#10 -> continue_entry#11
+EDGES|ARGUMENT continue_entry#13 -> continue_entry#14
+EDGES|ARGUMENT continue_entry#5 -> continue_entry#6
+EDGES|ARGUMENT continue_entry#5 -> continue_entry#7
+EDGES|ARGUMENT empty_entry#6 -> empty_entry#7
+EDGES|ARGUMENT kill_entry#12 -> kill_entry#13
+EDGES|ARGUMENT kill_entry#5 -> kill_entry#6
+EDGES|ARGUMENT kill_entry#5 -> kill_entry#7
+EDGES|ARGUMENT kill_entry#9 -> kill_entry#10
+EDGES|ARGUMENT kill_entry#9 -> kill_entry#11
+EDGES|ARGUMENT labeled_entry#7 -> labeled_entry#8
+EDGES|ARGUMENT loop_block_entry#10 -> loop_block_entry#11
+EDGES|ARGUMENT loop_block_entry#12 -> loop_block_entry#13
+EDGES|ARGUMENT loop_block_entry#12 -> loop_block_entry#14
+EDGES|ARGUMENT loop_block_entry#5 -> loop_block_entry#6
+EDGES|ARGUMENT loop_block_entry#5 -> loop_block_entry#7
+EDGES|ARGUMENT nested_entry#10 -> nested_entry#11
+EDGES|ARGUMENT nested_entry#10 -> nested_entry#12
+EDGES|ARGUMENT nested_entry#13 -> nested_entry#14
+EDGES|ARGUMENT nested_entry#5 -> nested_entry#6
+EDGES|ARGUMENT nested_entry#5 -> nested_entry#7
+EDGES|ARGUMENT return_entry#4 -> return_entry#5
+EDGES|ARGUMENT return_entry#5 -> return_entry#6
+EDGES|ARGUMENT switch_entry#10 -> switch_entry#11
+EDGES|CALL after_return_entry#6 -> sink#0
+EDGES|CALL after_return_entry#7 -> source#0
+EDGES|CALL bare_entry#5 -> sink#0
+EDGES|CALL bare_entry#6 -> source#0
+EDGES|CALL block_local_scope#11 -> <operator>.addition#0
+EDGES|CALL block_local_scope#6 -> <operator>.assignment#0
+EDGES|CALL block_local_scope#9 -> <operator>.assignment#0
+EDGES|CALL block_pointer_scope#5 -> <operator>.assignment#0
+EDGES|CALL block_pointer_scope#9 -> callable#0
+EDGES|CALL block_prototypes#11 -> <operator>.addition#0
+EDGES|CALL block_prototypes#12 -> shadowed#0
+EDGES|CALL block_prototypes#5 -> shadowed#0
+EDGES|CALL break_block_entry#10 -> source#0
+EDGES|CALL break_block_entry#9 -> sink#0
+EDGES|CALL continue_entry#10 -> <operator>.postDecrement#0
+EDGES|CALL continue_entry#13 -> sink#0
+EDGES|CALL continue_entry#14 -> source#0
+EDGES|CALL continue_entry#5 -> <operator>.notEquals#0
+EDGES|CALL empty_entry#6 -> sink#0
+EDGES|CALL empty_entry#7 -> source#0
+EDGES|CALL kill_entry#12 -> sink#0
+EDGES|CALL kill_entry#5 -> <operator>.assignment#0
+EDGES|CALL kill_entry#7 -> source#0
+EDGES|CALL kill_entry#9 -> <operator>.assignment#0
+EDGES|CALL labeled_entry#7 -> sink#0
+EDGES|CALL labeled_entry#8 -> source#0
+EDGES|CALL loop_block_entry#10 -> sink#0
+EDGES|CALL loop_block_entry#11 -> source#0
+EDGES|CALL loop_block_entry#12 -> <operator>.assignment#0
+EDGES|CALL loop_block_entry#5 -> <operator>.notEquals#0
+EDGES|CALL nested_entry#10 -> <operator>.assignment#0
+EDGES|CALL nested_entry#12 -> source#0
+EDGES|CALL nested_entry#13 -> sink#0
+EDGES|CALL nested_entry#5 -> <operator>.assignment#0
+EDGES|CALL return_entry#4 -> sink#0
+EDGES|CALL return_entry#5 -> block_return#0
+EDGES|CALL return_entry#6 -> source#0
+EDGES|CALL switch_entry#10 -> sink#0
+EDGES|CALL switch_entry#11 -> source#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.notEquals#0 -> <operator>.notEquals#5
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG <operator>.postDecrement#0 -> <operator>.postDecrement#4
+EDGES|CFG after_return_entry#0 -> after_return_entry#5
+EDGES|CFG after_return_entry#4 -> after_return_entry#7
+EDGES|CFG after_return_entry#5 -> after_return_entry#8
+EDGES|CFG after_return_entry#6 -> after_return_entry#8
+EDGES|CFG after_return_entry#7 -> after_return_entry#6
+EDGES|CFG bare_entry#0 -> bare_entry#6
+EDGES|CFG bare_entry#4 -> bare_entry#7
+EDGES|CFG bare_entry#5 -> bare_entry#4
+EDGES|CFG bare_entry#6 -> bare_entry#5
+EDGES|CFG block_local_scope#0 -> block_local_scope#7
+EDGES|CFG block_local_scope#10 -> block_local_scope#12
+EDGES|CFG block_local_scope#11 -> block_local_scope#9
+EDGES|CFG block_local_scope#12 -> block_local_scope#13
+EDGES|CFG block_local_scope#13 -> block_local_scope#11
+EDGES|CFG block_local_scope#14 -> block_local_scope#16
+EDGES|CFG block_local_scope#15 -> block_local_scope#14
+EDGES|CFG block_local_scope#4 -> block_local_scope#15
+EDGES|CFG block_local_scope#6 -> block_local_scope#10
+EDGES|CFG block_local_scope#7 -> block_local_scope#8
+EDGES|CFG block_local_scope#8 -> block_local_scope#6
+EDGES|CFG block_local_scope#9 -> block_local_scope#4
+EDGES|CFG block_pointer_scope#0 -> block_pointer_scope#6
+EDGES|CFG block_pointer_scope#10 -> block_pointer_scope#9
+EDGES|CFG block_pointer_scope#11 -> block_pointer_scope#15
+EDGES|CFG block_pointer_scope#12 -> block_pointer_scope#11
+EDGES|CFG block_pointer_scope#13 -> block_pointer_scope#14
+EDGES|CFG block_pointer_scope#14 -> block_pointer_scope#12
+EDGES|CFG block_pointer_scope#5 -> block_pointer_scope#10
+EDGES|CFG block_pointer_scope#6 -> block_pointer_scope#7
+EDGES|CFG block_pointer_scope#7 -> block_pointer_scope#5
+EDGES|CFG block_pointer_scope#8 -> block_pointer_scope#13
+EDGES|CFG block_pointer_scope#9 -> block_pointer_scope#8
+EDGES|CFG block_prototypes#0 -> block_prototypes#6
+EDGES|CFG block_prototypes#10 -> block_prototypes#17
+EDGES|CFG block_prototypes#11 -> block_prototypes#10
+EDGES|CFG block_prototypes#12 -> block_prototypes#15
+EDGES|CFG block_prototypes#13 -> block_prototypes#12
+EDGES|CFG block_prototypes#14 -> block_prototypes#11
+EDGES|CFG block_prototypes#15 -> block_prototypes#16
+EDGES|CFG block_prototypes#16 -> block_prototypes#14
+EDGES|CFG block_prototypes#4 -> block_prototypes#13
+EDGES|CFG block_prototypes#5 -> block_prototypes#8
+EDGES|CFG block_prototypes#6 -> block_prototypes#5
+EDGES|CFG block_prototypes#7 -> block_prototypes#4
+EDGES|CFG block_prototypes#8 -> block_prototypes#9
+EDGES|CFG block_prototypes#9 -> block_prototypes#7
+EDGES|CFG block_return#0 -> block_return#6
+EDGES|CFG block_return#4 -> block_return#8
+EDGES|CFG block_return#5 -> block_return#9
+EDGES|CFG block_return#6 -> block_return#5
+EDGES|CFG block_return#7 -> block_return#9
+EDGES|CFG block_return#8 -> block_return#7
+EDGES|CFG blocks.c:<global>#0 -> blocks.c:<global>#213
+EDGES|CFG blocks.c:<global>#111 -> callback#5
+EDGES|CFG blocks.c:<global>#161 -> return_entry#6
+EDGES|CFG blocks.c:<global>#178 -> continue_entry#6
+EDGES|CFG blocks.c:<global>#194 -> break_block_entry#5
+EDGES|CFG blocks.c:<global>#206 -> empty_only#4
+EDGES|CFG blocks.c:<global>#213 -> blocks.c:<global>#214
+EDGES|CFG blocks.c:<global>#214 -> blocks.c:<global>#215
+EDGES|CFG blocks.c:<global>#215 -> blocks.c:<global>#216
+EDGES|CFG blocks.c:<global>#216 -> blocks.c:<global>#217
+EDGES|CFG blocks.c:<global>#217 -> blocks.c:<global>#218
+EDGES|CFG blocks.c:<global>#218 -> blocks.c:<global>#219
+EDGES|CFG blocks.c:<global>#219 -> blocks.c:<global>#220
+EDGES|CFG blocks.c:<global>#220 -> blocks.c:<global>#221
+EDGES|CFG blocks.c:<global>#221 -> blocks.c:<global>#222
+EDGES|CFG blocks.c:<global>#222 -> blocks.c:<global>#223
+EDGES|CFG blocks.c:<global>#223 -> blocks.c:<global>#224
+EDGES|CFG blocks.c:<global>#224 -> blocks.c:<global>#225
+EDGES|CFG blocks.c:<global>#225 -> blocks.c:<global>#226
+EDGES|CFG blocks.c:<global>#226 -> blocks.c:<global>#227
+EDGES|CFG blocks.c:<global>#227 -> blocks.c:<global>#228
+EDGES|CFG blocks.c:<global>#228 -> blocks.c:<global>#229
+EDGES|CFG blocks.c:<global>#229 -> blocks.c:<global>#230
+EDGES|CFG blocks.c:<global>#25 -> kill_entry#6
+EDGES|CFG blocks.c:<global>#40 -> labeled_entry#4
+EDGES|CFG blocks.c:<global>#50 -> switch_entry#5
+EDGES|CFG blocks.c:<global>#67 -> loop_block_entry#6
+EDGES|CFG blocks.c:<global>#83 -> empty_entry#4
+EDGES|CFG blocks.c:<global>#9 -> nested_entry#6
+EDGES|CFG break_block_entry#10 -> break_block_entry#9
+EDGES|CFG break_block_entry#5 -> break_block_entry#11
+EDGES|CFG break_block_entry#5 -> break_block_entry#8
+EDGES|CFG break_block_entry#7 -> break_block_entry#10
+EDGES|CFG break_block_entry#8 -> break_block_entry#11
+EDGES|CFG break_block_entry#9 -> break_block_entry#5
+EDGES|CFG callable#0 -> callable#4
+EDGES|CFG callback#4 -> callback#6
+EDGES|CFG callback#5 -> callback#4
+EDGES|CFG continue_entry#10 -> continue_entry#12
+EDGES|CFG continue_entry#11 -> continue_entry#10
+EDGES|CFG continue_entry#12 -> continue_entry#6
+EDGES|CFG continue_entry#13 -> continue_entry#6
+EDGES|CFG continue_entry#14 -> continue_entry#13
+EDGES|CFG continue_entry#5 -> continue_entry#11
+EDGES|CFG continue_entry#5 -> continue_entry#15
+EDGES|CFG continue_entry#6 -> continue_entry#7
+EDGES|CFG continue_entry#7 -> continue_entry#5
+EDGES|CFG continue_entry#9 -> continue_entry#14
+EDGES|CFG empty_entry#4 -> empty_entry#7
+EDGES|CFG empty_entry#5 -> empty_entry#8
+EDGES|CFG empty_entry#6 -> empty_entry#5
+EDGES|CFG empty_entry#7 -> empty_entry#6
+EDGES|CFG empty_entry#8 -> empty_entry#9
+EDGES|CFG empty_only#4 -> empty_only#5
+EDGES|CFG kill_entry#10 -> kill_entry#11
+EDGES|CFG kill_entry#11 -> kill_entry#9
+EDGES|CFG kill_entry#12 -> kill_entry#14
+EDGES|CFG kill_entry#13 -> kill_entry#12
+EDGES|CFG kill_entry#5 -> kill_entry#10
+EDGES|CFG kill_entry#6 -> kill_entry#7
+EDGES|CFG kill_entry#7 -> kill_entry#5
+EDGES|CFG kill_entry#8 -> kill_entry#13
+EDGES|CFG kill_entry#9 -> kill_entry#8
+EDGES|CFG labeled_entry#4 -> labeled_entry#5
+EDGES|CFG labeled_entry#5 -> labeled_entry#8
+EDGES|CFG labeled_entry#6 -> labeled_entry#9
+EDGES|CFG labeled_entry#7 -> labeled_entry#6
+EDGES|CFG labeled_entry#8 -> labeled_entry#7
+EDGES|CFG loop_block_entry#10 -> loop_block_entry#9
+EDGES|CFG loop_block_entry#11 -> loop_block_entry#10
+EDGES|CFG loop_block_entry#12 -> loop_block_entry#6
+EDGES|CFG loop_block_entry#13 -> loop_block_entry#14
+EDGES|CFG loop_block_entry#14 -> loop_block_entry#12
+EDGES|CFG loop_block_entry#5 -> loop_block_entry#11
+EDGES|CFG loop_block_entry#5 -> loop_block_entry#15
+EDGES|CFG loop_block_entry#6 -> loop_block_entry#7
+EDGES|CFG loop_block_entry#7 -> loop_block_entry#5
+EDGES|CFG loop_block_entry#9 -> loop_block_entry#13
+EDGES|CFG nested_entry#10 -> nested_entry#9
+EDGES|CFG nested_entry#11 -> nested_entry#12
+EDGES|CFG nested_entry#12 -> nested_entry#10
+EDGES|CFG nested_entry#13 -> nested_entry#15
+EDGES|CFG nested_entry#14 -> nested_entry#13
+EDGES|CFG nested_entry#5 -> nested_entry#11
+EDGES|CFG nested_entry#6 -> nested_entry#7
+EDGES|CFG nested_entry#7 -> nested_entry#5
+EDGES|CFG nested_entry#8 -> nested_entry#14
+EDGES|CFG nested_entry#9 -> nested_entry#8
+EDGES|CFG return_entry#4 -> return_entry#7
+EDGES|CFG return_entry#5 -> return_entry#4
+EDGES|CFG return_entry#6 -> return_entry#5
+EDGES|CFG shadowed#0 -> shadowed#4
+EDGES|CFG sink#0 -> sink#4
+EDGES|CFG source#0 -> source#4
+EDGES|CFG switch_entry#10 -> switch_entry#12
+EDGES|CFG switch_entry#11 -> switch_entry#10
+EDGES|CFG switch_entry#12 -> switch_entry#16
+EDGES|CFG switch_entry#13 -> switch_entry#15
+EDGES|CFG switch_entry#14 -> switch_entry#16
+EDGES|CFG switch_entry#15 -> switch_entry#16
+EDGES|CFG switch_entry#5 -> switch_entry#13
+EDGES|CFG switch_entry#5 -> switch_entry#7
+EDGES|CFG switch_entry#7 -> switch_entry#8
+EDGES|CFG switch_entry#8 -> switch_entry#11
+EDGES|CFG switch_entry#9 -> switch_entry#13
+EDGES|CONDITION break_block_entry#4 -> break_block_entry#5
+EDGES|CONDITION continue_entry#4 -> continue_entry#5
+EDGES|CONDITION loop_block_entry#4 -> loop_block_entry#5
+EDGES|CONDITION switch_entry#4 -> switch_entry#5
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.notEquals#0 -> <operator>.notEquals#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS <operator>.postDecrement#0 -> <operator>.postDecrement#2
+EDGES|CONTAINS D:blocks.c:<global> -> D:after_return_entry
+EDGES|CONTAINS D:blocks.c:<global> -> D:bare_entry
+EDGES|CONTAINS D:blocks.c:<global> -> D:block_local_scope
+EDGES|CONTAINS D:blocks.c:<global> -> D:block_pointer_scope
+EDGES|CONTAINS D:blocks.c:<global> -> D:block_prototypes
+EDGES|CONTAINS D:blocks.c:<global> -> D:block_return
+EDGES|CONTAINS D:blocks.c:<global> -> D:break_block_entry
+EDGES|CONTAINS D:blocks.c:<global> -> D:callback
+EDGES|CONTAINS D:blocks.c:<global> -> D:continue_entry
+EDGES|CONTAINS D:blocks.c:<global> -> D:empty_entry
+EDGES|CONTAINS D:blocks.c:<global> -> D:empty_only
+EDGES|CONTAINS D:blocks.c:<global> -> D:kill_entry
+EDGES|CONTAINS D:blocks.c:<global> -> D:labeled_entry
+EDGES|CONTAINS D:blocks.c:<global> -> D:loop_block_entry
+EDGES|CONTAINS D:blocks.c:<global> -> D:nested_entry
+EDGES|CONTAINS D:blocks.c:<global> -> D:return_entry
+EDGES|CONTAINS D:blocks.c:<global> -> D:switch_entry
+EDGES|CONTAINS D:blocks.c:<global> -> blocks.c:<global>#0
+EDGES|CONTAINS D:blocks.c:<global> -> callable#0
+EDGES|CONTAINS D:blocks.c:<global> -> shadowed#0
+EDGES|CONTAINS D:blocks.c:<global> -> sink#0
+EDGES|CONTAINS D:blocks.c:<global> -> source#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char
+EDGES|CONTAINS F:<includes> -> D:char*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int(*)(int)
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:blocks.c -> D:blocks.c:<global>
+EDGES|CONTAINS after_return_entry#0 -> after_return_entry#3
+EDGES|CONTAINS after_return_entry#0 -> after_return_entry#4
+EDGES|CONTAINS after_return_entry#0 -> after_return_entry#5
+EDGES|CONTAINS after_return_entry#0 -> after_return_entry#6
+EDGES|CONTAINS after_return_entry#0 -> after_return_entry#7
+EDGES|CONTAINS bare_entry#0 -> bare_entry#3
+EDGES|CONTAINS bare_entry#0 -> bare_entry#4
+EDGES|CONTAINS bare_entry#0 -> bare_entry#5
+EDGES|CONTAINS bare_entry#0 -> bare_entry#6
+EDGES|CONTAINS block_local_scope#0 -> block_local_scope#10
+EDGES|CONTAINS block_local_scope#0 -> block_local_scope#11
+EDGES|CONTAINS block_local_scope#0 -> block_local_scope#12
+EDGES|CONTAINS block_local_scope#0 -> block_local_scope#13
+EDGES|CONTAINS block_local_scope#0 -> block_local_scope#14
+EDGES|CONTAINS block_local_scope#0 -> block_local_scope#15
+EDGES|CONTAINS block_local_scope#0 -> block_local_scope#3
+EDGES|CONTAINS block_local_scope#0 -> block_local_scope#4
+EDGES|CONTAINS block_local_scope#0 -> block_local_scope#6
+EDGES|CONTAINS block_local_scope#0 -> block_local_scope#7
+EDGES|CONTAINS block_local_scope#0 -> block_local_scope#8
+EDGES|CONTAINS block_local_scope#0 -> block_local_scope#9
+EDGES|CONTAINS block_pointer_scope#0 -> block_pointer_scope#10
+EDGES|CONTAINS block_pointer_scope#0 -> block_pointer_scope#11
+EDGES|CONTAINS block_pointer_scope#0 -> block_pointer_scope#12
+EDGES|CONTAINS block_pointer_scope#0 -> block_pointer_scope#13
+EDGES|CONTAINS block_pointer_scope#0 -> block_pointer_scope#14
+EDGES|CONTAINS block_pointer_scope#0 -> block_pointer_scope#3
+EDGES|CONTAINS block_pointer_scope#0 -> block_pointer_scope#5
+EDGES|CONTAINS block_pointer_scope#0 -> block_pointer_scope#6
+EDGES|CONTAINS block_pointer_scope#0 -> block_pointer_scope#7
+EDGES|CONTAINS block_pointer_scope#0 -> block_pointer_scope#8
+EDGES|CONTAINS block_pointer_scope#0 -> block_pointer_scope#9
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#10
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#11
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#12
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#13
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#14
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#15
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#16
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#3
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#4
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#5
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#6
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#7
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#8
+EDGES|CONTAINS block_prototypes#0 -> block_prototypes#9
+EDGES|CONTAINS block_return#0 -> block_return#3
+EDGES|CONTAINS block_return#0 -> block_return#4
+EDGES|CONTAINS block_return#0 -> block_return#5
+EDGES|CONTAINS block_return#0 -> block_return#6
+EDGES|CONTAINS block_return#0 -> block_return#7
+EDGES|CONTAINS block_return#0 -> block_return#8
+EDGES|CONTAINS blocks.c:<global>#0 -> after_return_entry#0
+EDGES|CONTAINS blocks.c:<global>#0 -> bare_entry#0
+EDGES|CONTAINS blocks.c:<global>#0 -> block_local_scope#0
+EDGES|CONTAINS blocks.c:<global>#0 -> block_pointer_scope#0
+EDGES|CONTAINS blocks.c:<global>#0 -> block_prototypes#0
+EDGES|CONTAINS blocks.c:<global>#0 -> block_return#0
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#111
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#161
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#178
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#194
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#206
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#212
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#213
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#214
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#215
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#216
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#217
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#218
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#219
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#220
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#221
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#222
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#223
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#224
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#225
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#226
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#227
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#228
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#229
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#25
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#40
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#50
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#67
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#83
+EDGES|CONTAINS blocks.c:<global>#0 -> blocks.c:<global>#9
+EDGES|CONTAINS blocks.c:<global>#111 -> callback#3
+EDGES|CONTAINS blocks.c:<global>#111 -> callback#4
+EDGES|CONTAINS blocks.c:<global>#111 -> callback#5
+EDGES|CONTAINS blocks.c:<global>#161 -> return_entry#3
+EDGES|CONTAINS blocks.c:<global>#161 -> return_entry#4
+EDGES|CONTAINS blocks.c:<global>#161 -> return_entry#5
+EDGES|CONTAINS blocks.c:<global>#161 -> return_entry#6
+EDGES|CONTAINS blocks.c:<global>#178 -> continue_entry#10
+EDGES|CONTAINS blocks.c:<global>#178 -> continue_entry#11
+EDGES|CONTAINS blocks.c:<global>#178 -> continue_entry#12
+EDGES|CONTAINS blocks.c:<global>#178 -> continue_entry#13
+EDGES|CONTAINS blocks.c:<global>#178 -> continue_entry#14
+EDGES|CONTAINS blocks.c:<global>#178 -> continue_entry#3
+EDGES|CONTAINS blocks.c:<global>#178 -> continue_entry#4
+EDGES|CONTAINS blocks.c:<global>#178 -> continue_entry#5
+EDGES|CONTAINS blocks.c:<global>#178 -> continue_entry#6
+EDGES|CONTAINS blocks.c:<global>#178 -> continue_entry#7
+EDGES|CONTAINS blocks.c:<global>#178 -> continue_entry#8
+EDGES|CONTAINS blocks.c:<global>#178 -> continue_entry#9
+EDGES|CONTAINS blocks.c:<global>#194 -> break_block_entry#10
+EDGES|CONTAINS blocks.c:<global>#194 -> break_block_entry#3
+EDGES|CONTAINS blocks.c:<global>#194 -> break_block_entry#4
+EDGES|CONTAINS blocks.c:<global>#194 -> break_block_entry#5
+EDGES|CONTAINS blocks.c:<global>#194 -> break_block_entry#6
+EDGES|CONTAINS blocks.c:<global>#194 -> break_block_entry#7
+EDGES|CONTAINS blocks.c:<global>#194 -> break_block_entry#8
+EDGES|CONTAINS blocks.c:<global>#194 -> break_block_entry#9
+EDGES|CONTAINS blocks.c:<global>#206 -> empty_only#3
+EDGES|CONTAINS blocks.c:<global>#206 -> empty_only#4
+EDGES|CONTAINS blocks.c:<global>#25 -> kill_entry#10
+EDGES|CONTAINS blocks.c:<global>#25 -> kill_entry#11
+EDGES|CONTAINS blocks.c:<global>#25 -> kill_entry#12
+EDGES|CONTAINS blocks.c:<global>#25 -> kill_entry#13
+EDGES|CONTAINS blocks.c:<global>#25 -> kill_entry#3
+EDGES|CONTAINS blocks.c:<global>#25 -> kill_entry#5
+EDGES|CONTAINS blocks.c:<global>#25 -> kill_entry#6
+EDGES|CONTAINS blocks.c:<global>#25 -> kill_entry#7
+EDGES|CONTAINS blocks.c:<global>#25 -> kill_entry#8
+EDGES|CONTAINS blocks.c:<global>#25 -> kill_entry#9
+EDGES|CONTAINS blocks.c:<global>#40 -> labeled_entry#3
+EDGES|CONTAINS blocks.c:<global>#40 -> labeled_entry#4
+EDGES|CONTAINS blocks.c:<global>#40 -> labeled_entry#5
+EDGES|CONTAINS blocks.c:<global>#40 -> labeled_entry#6
+EDGES|CONTAINS blocks.c:<global>#40 -> labeled_entry#7
+EDGES|CONTAINS blocks.c:<global>#40 -> labeled_entry#8
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#10
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#11
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#12
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#13
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#14
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#15
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#3
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#4
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#5
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#6
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#7
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#8
+EDGES|CONTAINS blocks.c:<global>#50 -> switch_entry#9
+EDGES|CONTAINS blocks.c:<global>#67 -> loop_block_entry#10
+EDGES|CONTAINS blocks.c:<global>#67 -> loop_block_entry#11
+EDGES|CONTAINS blocks.c:<global>#67 -> loop_block_entry#12
+EDGES|CONTAINS blocks.c:<global>#67 -> loop_block_entry#13
+EDGES|CONTAINS blocks.c:<global>#67 -> loop_block_entry#14
+EDGES|CONTAINS blocks.c:<global>#67 -> loop_block_entry#3
+EDGES|CONTAINS blocks.c:<global>#67 -> loop_block_entry#4
+EDGES|CONTAINS blocks.c:<global>#67 -> loop_block_entry#5
+EDGES|CONTAINS blocks.c:<global>#67 -> loop_block_entry#6
+EDGES|CONTAINS blocks.c:<global>#67 -> loop_block_entry#7
+EDGES|CONTAINS blocks.c:<global>#67 -> loop_block_entry#8
+EDGES|CONTAINS blocks.c:<global>#67 -> loop_block_entry#9
+EDGES|CONTAINS blocks.c:<global>#83 -> empty_entry#3
+EDGES|CONTAINS blocks.c:<global>#83 -> empty_entry#4
+EDGES|CONTAINS blocks.c:<global>#83 -> empty_entry#5
+EDGES|CONTAINS blocks.c:<global>#83 -> empty_entry#6
+EDGES|CONTAINS blocks.c:<global>#83 -> empty_entry#7
+EDGES|CONTAINS blocks.c:<global>#83 -> empty_entry#8
+EDGES|CONTAINS blocks.c:<global>#9 -> nested_entry#10
+EDGES|CONTAINS blocks.c:<global>#9 -> nested_entry#11
+EDGES|CONTAINS blocks.c:<global>#9 -> nested_entry#12
+EDGES|CONTAINS blocks.c:<global>#9 -> nested_entry#13
+EDGES|CONTAINS blocks.c:<global>#9 -> nested_entry#14
+EDGES|CONTAINS blocks.c:<global>#9 -> nested_entry#3
+EDGES|CONTAINS blocks.c:<global>#9 -> nested_entry#5
+EDGES|CONTAINS blocks.c:<global>#9 -> nested_entry#6
+EDGES|CONTAINS blocks.c:<global>#9 -> nested_entry#7
+EDGES|CONTAINS blocks.c:<global>#9 -> nested_entry#8
+EDGES|CONTAINS blocks.c:<global>#9 -> nested_entry#9
+EDGES|CONTAINS callable#0 -> callable#3
+EDGES|CONTAINS shadowed#0 -> shadowed#3
+EDGES|CONTAINS sink#0 -> sink#3
+EDGES|CONTAINS source#0 -> source#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.postDecrement#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.postDecrement#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.postDecrement#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.postDecrement#4 -> T:ANY
+EDGES|EVAL_TYPE after_return_entry#1 -> T:void
+EDGES|EVAL_TYPE after_return_entry#2 -> T:void
+EDGES|EVAL_TYPE after_return_entry#3 -> T:void
+EDGES|EVAL_TYPE after_return_entry#4 -> T:void
+EDGES|EVAL_TYPE after_return_entry#6 -> T:void
+EDGES|EVAL_TYPE after_return_entry#7 -> T:char*
+EDGES|EVAL_TYPE after_return_entry#8 -> T:void
+EDGES|EVAL_TYPE bare_entry#1 -> T:void
+EDGES|EVAL_TYPE bare_entry#2 -> T:void
+EDGES|EVAL_TYPE bare_entry#3 -> T:void
+EDGES|EVAL_TYPE bare_entry#4 -> T:void
+EDGES|EVAL_TYPE bare_entry#5 -> T:void
+EDGES|EVAL_TYPE bare_entry#6 -> T:char*
+EDGES|EVAL_TYPE bare_entry#7 -> T:void
+EDGES|EVAL_TYPE block_local_scope#1 -> T:int
+EDGES|EVAL_TYPE block_local_scope#10 -> T:int
+EDGES|EVAL_TYPE block_local_scope#11 -> T:ANY
+EDGES|EVAL_TYPE block_local_scope#12 -> T:int
+EDGES|EVAL_TYPE block_local_scope#13 -> T:int
+EDGES|EVAL_TYPE block_local_scope#15 -> T:int
+EDGES|EVAL_TYPE block_local_scope#16 -> T:int
+EDGES|EVAL_TYPE block_local_scope#2 -> T:int
+EDGES|EVAL_TYPE block_local_scope#3 -> T:void
+EDGES|EVAL_TYPE block_local_scope#4 -> T:void
+EDGES|EVAL_TYPE block_local_scope#5 -> T:int
+EDGES|EVAL_TYPE block_local_scope#6 -> T:void
+EDGES|EVAL_TYPE block_local_scope#7 -> T:int
+EDGES|EVAL_TYPE block_local_scope#8 -> T:int
+EDGES|EVAL_TYPE block_local_scope#9 -> T:ANY
+EDGES|EVAL_TYPE block_pointer_scope#1 -> T:int
+EDGES|EVAL_TYPE block_pointer_scope#10 -> T:int
+EDGES|EVAL_TYPE block_pointer_scope#12 -> T:int
+EDGES|EVAL_TYPE block_pointer_scope#13 -> T:int(*)(int)
+EDGES|EVAL_TYPE block_pointer_scope#14 -> T:int
+EDGES|EVAL_TYPE block_pointer_scope#15 -> T:int
+EDGES|EVAL_TYPE block_pointer_scope#2 -> T:int
+EDGES|EVAL_TYPE block_pointer_scope#3 -> T:void
+EDGES|EVAL_TYPE block_pointer_scope#4 -> T:int(*)(int)
+EDGES|EVAL_TYPE block_pointer_scope#5 -> T:void
+EDGES|EVAL_TYPE block_pointer_scope#6 -> T:int(*)(int)
+EDGES|EVAL_TYPE block_pointer_scope#7 -> T:int
+EDGES|EVAL_TYPE block_pointer_scope#8 -> T:void
+EDGES|EVAL_TYPE block_pointer_scope#9 -> T:int
+EDGES|EVAL_TYPE block_prototypes#1 -> T:int
+EDGES|EVAL_TYPE block_prototypes#11 -> T:ANY
+EDGES|EVAL_TYPE block_prototypes#12 -> T:int
+EDGES|EVAL_TYPE block_prototypes#13 -> T:int
+EDGES|EVAL_TYPE block_prototypes#14 -> T:int
+EDGES|EVAL_TYPE block_prototypes#15 -> T:int
+EDGES|EVAL_TYPE block_prototypes#16 -> T:int
+EDGES|EVAL_TYPE block_prototypes#17 -> T:int
+EDGES|EVAL_TYPE block_prototypes#2 -> T:int
+EDGES|EVAL_TYPE block_prototypes#3 -> T:void
+EDGES|EVAL_TYPE block_prototypes#4 -> T:void
+EDGES|EVAL_TYPE block_prototypes#5 -> T:int
+EDGES|EVAL_TYPE block_prototypes#6 -> T:int
+EDGES|EVAL_TYPE block_prototypes#7 -> T:int
+EDGES|EVAL_TYPE block_prototypes#8 -> T:int
+EDGES|EVAL_TYPE block_prototypes#9 -> T:int
+EDGES|EVAL_TYPE block_return#1 -> T:char*
+EDGES|EVAL_TYPE block_return#2 -> T:char*
+EDGES|EVAL_TYPE block_return#3 -> T:void
+EDGES|EVAL_TYPE block_return#4 -> T:void
+EDGES|EVAL_TYPE block_return#6 -> T:char*
+EDGES|EVAL_TYPE block_return#8 -> T:char*
+EDGES|EVAL_TYPE block_return#9 -> T:char*
+EDGES|EVAL_TYPE blocks.c:<global>#212 -> T:ANY
+EDGES|EVAL_TYPE blocks.c:<global>#213 -> T:bare_entry
+EDGES|EVAL_TYPE blocks.c:<global>#214 -> T:nested_entry
+EDGES|EVAL_TYPE blocks.c:<global>#215 -> T:kill_entry
+EDGES|EVAL_TYPE blocks.c:<global>#216 -> T:labeled_entry
+EDGES|EVAL_TYPE blocks.c:<global>#217 -> T:switch_entry
+EDGES|EVAL_TYPE blocks.c:<global>#218 -> T:loop_block_entry
+EDGES|EVAL_TYPE blocks.c:<global>#219 -> T:empty_entry
+EDGES|EVAL_TYPE blocks.c:<global>#220 -> T:block_prototypes
+EDGES|EVAL_TYPE blocks.c:<global>#221 -> T:callback
+EDGES|EVAL_TYPE blocks.c:<global>#222 -> T:block_pointer_scope
+EDGES|EVAL_TYPE blocks.c:<global>#223 -> T:block_local_scope
+EDGES|EVAL_TYPE blocks.c:<global>#224 -> T:block_return
+EDGES|EVAL_TYPE blocks.c:<global>#225 -> T:return_entry
+EDGES|EVAL_TYPE blocks.c:<global>#226 -> T:after_return_entry
+EDGES|EVAL_TYPE blocks.c:<global>#227 -> T:continue_entry
+EDGES|EVAL_TYPE blocks.c:<global>#228 -> T:break_block_entry
+EDGES|EVAL_TYPE blocks.c:<global>#229 -> T:empty_only
+EDGES|EVAL_TYPE blocks.c:<global>#230 -> T:ANY
+EDGES|EVAL_TYPE break_block_entry#1 -> T:void
+EDGES|EVAL_TYPE break_block_entry#10 -> T:char*
+EDGES|EVAL_TYPE break_block_entry#11 -> T:void
+EDGES|EVAL_TYPE break_block_entry#2 -> T:void
+EDGES|EVAL_TYPE break_block_entry#3 -> T:void
+EDGES|EVAL_TYPE break_block_entry#5 -> T:int
+EDGES|EVAL_TYPE break_block_entry#6 -> T:void
+EDGES|EVAL_TYPE break_block_entry#7 -> T:void
+EDGES|EVAL_TYPE break_block_entry#9 -> T:void
+EDGES|EVAL_TYPE callable#1 -> T:int
+EDGES|EVAL_TYPE callable#2 -> T:int
+EDGES|EVAL_TYPE callable#3 -> T:ANY
+EDGES|EVAL_TYPE callable#4 -> T:int
+EDGES|EVAL_TYPE callback#1 -> T:int
+EDGES|EVAL_TYPE callback#2 -> T:int
+EDGES|EVAL_TYPE callback#3 -> T:void
+EDGES|EVAL_TYPE callback#5 -> T:int
+EDGES|EVAL_TYPE callback#6 -> T:int
+EDGES|EVAL_TYPE continue_entry#1 -> T:int
+EDGES|EVAL_TYPE continue_entry#10 -> T:ANY
+EDGES|EVAL_TYPE continue_entry#11 -> T:int
+EDGES|EVAL_TYPE continue_entry#13 -> T:void
+EDGES|EVAL_TYPE continue_entry#14 -> T:char*
+EDGES|EVAL_TYPE continue_entry#15 -> T:void
+EDGES|EVAL_TYPE continue_entry#2 -> T:int
+EDGES|EVAL_TYPE continue_entry#3 -> T:void
+EDGES|EVAL_TYPE continue_entry#5 -> T:int
+EDGES|EVAL_TYPE continue_entry#6 -> T:int
+EDGES|EVAL_TYPE continue_entry#7 -> T:int
+EDGES|EVAL_TYPE continue_entry#8 -> T:void
+EDGES|EVAL_TYPE continue_entry#9 -> T:void
+EDGES|EVAL_TYPE empty_entry#1 -> T:void
+EDGES|EVAL_TYPE empty_entry#2 -> T:void
+EDGES|EVAL_TYPE empty_entry#3 -> T:void
+EDGES|EVAL_TYPE empty_entry#4 -> T:void
+EDGES|EVAL_TYPE empty_entry#5 -> T:void
+EDGES|EVAL_TYPE empty_entry#6 -> T:void
+EDGES|EVAL_TYPE empty_entry#7 -> T:char*
+EDGES|EVAL_TYPE empty_entry#8 -> T:void
+EDGES|EVAL_TYPE empty_entry#9 -> T:void
+EDGES|EVAL_TYPE empty_only#1 -> T:void
+EDGES|EVAL_TYPE empty_only#2 -> T:void
+EDGES|EVAL_TYPE empty_only#3 -> T:void
+EDGES|EVAL_TYPE empty_only#4 -> T:void
+EDGES|EVAL_TYPE empty_only#5 -> T:void
+EDGES|EVAL_TYPE kill_entry#1 -> T:void
+EDGES|EVAL_TYPE kill_entry#10 -> T:char*
+EDGES|EVAL_TYPE kill_entry#11 -> T:char*
+EDGES|EVAL_TYPE kill_entry#12 -> T:void
+EDGES|EVAL_TYPE kill_entry#13 -> T:char*
+EDGES|EVAL_TYPE kill_entry#14 -> T:void
+EDGES|EVAL_TYPE kill_entry#2 -> T:void
+EDGES|EVAL_TYPE kill_entry#3 -> T:void
+EDGES|EVAL_TYPE kill_entry#4 -> T:char*
+EDGES|EVAL_TYPE kill_entry#5 -> T:void
+EDGES|EVAL_TYPE kill_entry#6 -> T:char*
+EDGES|EVAL_TYPE kill_entry#7 -> T:char*
+EDGES|EVAL_TYPE kill_entry#8 -> T:void
+EDGES|EVAL_TYPE kill_entry#9 -> T:ANY
+EDGES|EVAL_TYPE labeled_entry#1 -> T:void
+EDGES|EVAL_TYPE labeled_entry#2 -> T:void
+EDGES|EVAL_TYPE labeled_entry#3 -> T:void
+EDGES|EVAL_TYPE labeled_entry#6 -> T:void
+EDGES|EVAL_TYPE labeled_entry#7 -> T:void
+EDGES|EVAL_TYPE labeled_entry#8 -> T:char*
+EDGES|EVAL_TYPE labeled_entry#9 -> T:void
+EDGES|EVAL_TYPE loop_block_entry#1 -> T:int
+EDGES|EVAL_TYPE loop_block_entry#10 -> T:void
+EDGES|EVAL_TYPE loop_block_entry#11 -> T:char*
+EDGES|EVAL_TYPE loop_block_entry#12 -> T:ANY
+EDGES|EVAL_TYPE loop_block_entry#13 -> T:int
+EDGES|EVAL_TYPE loop_block_entry#14 -> T:int
+EDGES|EVAL_TYPE loop_block_entry#15 -> T:void
+EDGES|EVAL_TYPE loop_block_entry#2 -> T:int
+EDGES|EVAL_TYPE loop_block_entry#3 -> T:void
+EDGES|EVAL_TYPE loop_block_entry#5 -> T:int
+EDGES|EVAL_TYPE loop_block_entry#6 -> T:int
+EDGES|EVAL_TYPE loop_block_entry#7 -> T:int
+EDGES|EVAL_TYPE loop_block_entry#8 -> T:void
+EDGES|EVAL_TYPE loop_block_entry#9 -> T:void
+EDGES|EVAL_TYPE nested_entry#1 -> T:void
+EDGES|EVAL_TYPE nested_entry#10 -> T:ANY
+EDGES|EVAL_TYPE nested_entry#11 -> T:char*
+EDGES|EVAL_TYPE nested_entry#12 -> T:char*
+EDGES|EVAL_TYPE nested_entry#13 -> T:void
+EDGES|EVAL_TYPE nested_entry#14 -> T:char*
+EDGES|EVAL_TYPE nested_entry#15 -> T:void
+EDGES|EVAL_TYPE nested_entry#2 -> T:void
+EDGES|EVAL_TYPE nested_entry#3 -> T:void
+EDGES|EVAL_TYPE nested_entry#4 -> T:char*
+EDGES|EVAL_TYPE nested_entry#5 -> T:void
+EDGES|EVAL_TYPE nested_entry#6 -> T:char*
+EDGES|EVAL_TYPE nested_entry#7 -> T:char*
+EDGES|EVAL_TYPE nested_entry#8 -> T:void
+EDGES|EVAL_TYPE nested_entry#9 -> T:void
+EDGES|EVAL_TYPE return_entry#1 -> T:void
+EDGES|EVAL_TYPE return_entry#2 -> T:void
+EDGES|EVAL_TYPE return_entry#3 -> T:void
+EDGES|EVAL_TYPE return_entry#4 -> T:void
+EDGES|EVAL_TYPE return_entry#5 -> T:char*
+EDGES|EVAL_TYPE return_entry#6 -> T:char*
+EDGES|EVAL_TYPE return_entry#7 -> T:void
+EDGES|EVAL_TYPE shadowed#1 -> T:int
+EDGES|EVAL_TYPE shadowed#2 -> T:int
+EDGES|EVAL_TYPE shadowed#3 -> T:ANY
+EDGES|EVAL_TYPE shadowed#4 -> T:int
+EDGES|EVAL_TYPE sink#1 -> T:char*
+EDGES|EVAL_TYPE sink#2 -> T:char*
+EDGES|EVAL_TYPE sink#3 -> T:ANY
+EDGES|EVAL_TYPE sink#4 -> T:void
+EDGES|EVAL_TYPE source#1 -> T:void
+EDGES|EVAL_TYPE source#2 -> T:void
+EDGES|EVAL_TYPE source#3 -> T:ANY
+EDGES|EVAL_TYPE source#4 -> T:char*
+EDGES|EVAL_TYPE switch_entry#1 -> T:int
+EDGES|EVAL_TYPE switch_entry#10 -> T:void
+EDGES|EVAL_TYPE switch_entry#11 -> T:char*
+EDGES|EVAL_TYPE switch_entry#14 -> T:void
+EDGES|EVAL_TYPE switch_entry#16 -> T:void
+EDGES|EVAL_TYPE switch_entry#2 -> T:int
+EDGES|EVAL_TYPE switch_entry#3 -> T:void
+EDGES|EVAL_TYPE switch_entry#5 -> T:int
+EDGES|EVAL_TYPE switch_entry#6 -> T:void
+EDGES|EVAL_TYPE switch_entry#8 -> T:int
+EDGES|EVAL_TYPE switch_entry#9 -> T:void
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.notEquals#1 -> <operator>.notEquals#3
+EDGES|PARAMETER_LINK <operator>.notEquals#4 -> <operator>.notEquals#6
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK <operator>.postDecrement#1 -> <operator>.postDecrement#3
+EDGES|PARAMETER_LINK after_return_entry#1 -> after_return_entry#2
+EDGES|PARAMETER_LINK bare_entry#1 -> bare_entry#2
+EDGES|PARAMETER_LINK block_local_scope#1 -> block_local_scope#2
+EDGES|PARAMETER_LINK block_pointer_scope#1 -> block_pointer_scope#2
+EDGES|PARAMETER_LINK block_prototypes#1 -> block_prototypes#2
+EDGES|PARAMETER_LINK block_return#1 -> block_return#2
+EDGES|PARAMETER_LINK break_block_entry#1 -> break_block_entry#2
+EDGES|PARAMETER_LINK callable#1 -> callable#2
+EDGES|PARAMETER_LINK callback#1 -> callback#2
+EDGES|PARAMETER_LINK continue_entry#1 -> continue_entry#2
+EDGES|PARAMETER_LINK empty_entry#1 -> empty_entry#2
+EDGES|PARAMETER_LINK empty_only#1 -> empty_only#2
+EDGES|PARAMETER_LINK kill_entry#1 -> kill_entry#2
+EDGES|PARAMETER_LINK labeled_entry#1 -> labeled_entry#2
+EDGES|PARAMETER_LINK loop_block_entry#1 -> loop_block_entry#2
+EDGES|PARAMETER_LINK nested_entry#1 -> nested_entry#2
+EDGES|PARAMETER_LINK return_entry#1 -> return_entry#2
+EDGES|PARAMETER_LINK shadowed#1 -> shadowed#2
+EDGES|PARAMETER_LINK sink#1 -> sink#2
+EDGES|PARAMETER_LINK source#1 -> source#2
+EDGES|PARAMETER_LINK switch_entry#1 -> switch_entry#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:blocks.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:after_return_entry -> D:after_return_entry
+EDGES|REF T:bare_entry -> D:bare_entry
+EDGES|REF T:block_local_scope -> D:block_local_scope
+EDGES|REF T:block_pointer_scope -> D:block_pointer_scope
+EDGES|REF T:block_prototypes -> D:block_prototypes
+EDGES|REF T:block_return -> D:block_return
+EDGES|REF T:break_block_entry -> D:break_block_entry
+EDGES|REF T:callback -> D:callback
+EDGES|REF T:char -> D:char
+EDGES|REF T:char* -> D:char*
+EDGES|REF T:continue_entry -> D:continue_entry
+EDGES|REF T:empty_entry -> D:empty_entry
+EDGES|REF T:empty_only -> D:empty_only
+EDGES|REF T:int -> D:int
+EDGES|REF T:int(*)(int) -> D:int(*)(int)
+EDGES|REF T:kill_entry -> D:kill_entry
+EDGES|REF T:labeled_entry -> D:labeled_entry
+EDGES|REF T:loop_block_entry -> D:loop_block_entry
+EDGES|REF T:nested_entry -> D:nested_entry
+EDGES|REF T:return_entry -> D:return_entry
+EDGES|REF T:switch_entry -> D:switch_entry
+EDGES|REF T:void -> D:void
+EDGES|REF block_local_scope#10 -> block_local_scope#5
+EDGES|REF block_local_scope#12 -> block_local_scope#5
+EDGES|REF block_local_scope#15 -> block_local_scope#1
+EDGES|REF block_local_scope#7 -> block_local_scope#5
+EDGES|REF block_pointer_scope#10 -> block_pointer_scope#1
+EDGES|REF block_pointer_scope#13 -> block_pointer_scope#4
+EDGES|REF block_pointer_scope#14 -> block_pointer_scope#1
+EDGES|REF block_pointer_scope#6 -> block_pointer_scope#4
+EDGES|REF block_pointer_scope#7 -> blocks.c:<global>#111
+EDGES|REF block_prototypes#13 -> block_prototypes#1
+EDGES|REF block_prototypes#15 -> shadowed#0
+EDGES|REF block_prototypes#16 -> block_prototypes#1
+EDGES|REF block_prototypes#6 -> block_prototypes#1
+EDGES|REF block_prototypes#8 -> shadowed#0
+EDGES|REF block_prototypes#9 -> block_prototypes#1
+EDGES|REF block_return#6 -> block_return#1
+EDGES|REF blocks.c:<global>#213 -> bare_entry#0
+EDGES|REF blocks.c:<global>#214 -> blocks.c:<global>#9
+EDGES|REF blocks.c:<global>#215 -> blocks.c:<global>#25
+EDGES|REF blocks.c:<global>#216 -> blocks.c:<global>#40
+EDGES|REF blocks.c:<global>#217 -> blocks.c:<global>#50
+EDGES|REF blocks.c:<global>#218 -> blocks.c:<global>#67
+EDGES|REF blocks.c:<global>#219 -> blocks.c:<global>#83
+EDGES|REF blocks.c:<global>#220 -> block_prototypes#0
+EDGES|REF blocks.c:<global>#221 -> blocks.c:<global>#111
+EDGES|REF blocks.c:<global>#222 -> block_pointer_scope#0
+EDGES|REF blocks.c:<global>#223 -> block_local_scope#0
+EDGES|REF blocks.c:<global>#224 -> block_return#0
+EDGES|REF blocks.c:<global>#225 -> blocks.c:<global>#161
+EDGES|REF blocks.c:<global>#226 -> after_return_entry#0
+EDGES|REF blocks.c:<global>#227 -> blocks.c:<global>#178
+EDGES|REF blocks.c:<global>#228 -> blocks.c:<global>#194
+EDGES|REF blocks.c:<global>#229 -> blocks.c:<global>#206
+EDGES|REF callback#5 -> callback#1
+EDGES|REF continue_entry#11 -> continue_entry#1
+EDGES|REF continue_entry#6 -> continue_entry#1
+EDGES|REF kill_entry#10 -> kill_entry#4
+EDGES|REF kill_entry#13 -> kill_entry#4
+EDGES|REF kill_entry#6 -> kill_entry#4
+EDGES|REF loop_block_entry#13 -> loop_block_entry#1
+EDGES|REF loop_block_entry#6 -> loop_block_entry#1
+EDGES|REF nested_entry#11 -> nested_entry#4
+EDGES|REF nested_entry#14 -> nested_entry#4
+EDGES|REF nested_entry#6 -> nested_entry#4
+EDGES|REF switch_entry#5 -> switch_entry#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:after_return_entry -> F:blocks.c
+EDGES|SOURCE_FILE D:bare_entry -> F:blocks.c
+EDGES|SOURCE_FILE D:block_local_scope -> F:blocks.c
+EDGES|SOURCE_FILE D:block_pointer_scope -> F:blocks.c
+EDGES|SOURCE_FILE D:block_prototypes -> F:blocks.c
+EDGES|SOURCE_FILE D:block_return -> F:blocks.c
+EDGES|SOURCE_FILE D:blocks.c:<global> -> F:blocks.c
+EDGES|SOURCE_FILE D:break_block_entry -> F:blocks.c
+EDGES|SOURCE_FILE D:callback -> F:blocks.c
+EDGES|SOURCE_FILE D:char -> F:<includes>
+EDGES|SOURCE_FILE D:char* -> F:<includes>
+EDGES|SOURCE_FILE D:continue_entry -> F:blocks.c
+EDGES|SOURCE_FILE D:empty_entry -> F:blocks.c
+EDGES|SOURCE_FILE D:empty_only -> F:blocks.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int(*)(int) -> F:<includes>
+EDGES|SOURCE_FILE D:kill_entry -> F:blocks.c
+EDGES|SOURCE_FILE D:labeled_entry -> F:blocks.c
+EDGES|SOURCE_FILE D:loop_block_entry -> F:blocks.c
+EDGES|SOURCE_FILE D:nested_entry -> F:blocks.c
+EDGES|SOURCE_FILE D:return_entry -> F:blocks.c
+EDGES|SOURCE_FILE D:switch_entry -> F:blocks.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:blocks.c:<global> -> F:blocks.c
+EDGES|SOURCE_FILE after_return_entry#0 -> F:blocks.c
+EDGES|SOURCE_FILE bare_entry#0 -> F:blocks.c
+EDGES|SOURCE_FILE block_local_scope#0 -> F:blocks.c
+EDGES|SOURCE_FILE block_pointer_scope#0 -> F:blocks.c
+EDGES|SOURCE_FILE block_prototypes#0 -> F:blocks.c
+EDGES|SOURCE_FILE block_return#0 -> F:blocks.c
+EDGES|SOURCE_FILE blocks.c:<global>#0 -> F:blocks.c
+EDGES|SOURCE_FILE blocks.c:<global>#111 -> F:blocks.c
+EDGES|SOURCE_FILE blocks.c:<global>#161 -> F:blocks.c
+EDGES|SOURCE_FILE blocks.c:<global>#178 -> F:blocks.c
+EDGES|SOURCE_FILE blocks.c:<global>#194 -> F:blocks.c
+EDGES|SOURCE_FILE blocks.c:<global>#206 -> F:blocks.c
+EDGES|SOURCE_FILE blocks.c:<global>#25 -> F:blocks.c
+EDGES|SOURCE_FILE blocks.c:<global>#40 -> F:blocks.c
+EDGES|SOURCE_FILE blocks.c:<global>#50 -> F:blocks.c
+EDGES|SOURCE_FILE blocks.c:<global>#67 -> F:blocks.c
+EDGES|SOURCE_FILE blocks.c:<global>#83 -> F:blocks.c
+EDGES|SOURCE_FILE blocks.c:<global>#9 -> F:blocks.c
+EDGES|SOURCE_FILE callable#0 -> F:blocks.c
+EDGES|SOURCE_FILE shadowed#0 -> F:blocks.c
+EDGES|SOURCE_FILE sink#0 -> F:blocks.c
+EDGES|SOURCE_FILE source#0 -> F:blocks.c
+EDGES|TRUE_BODY break_block_entry#4 -> break_block_entry#6
+EDGES|TRUE_BODY continue_entry#4 -> continue_entry#8
+EDGES|TRUE_BODY loop_block_entry#4 -> loop_block_entry#8
+EDGES|TRUE_BODY switch_entry#4 -> switch_entry#6
+FLOWS|REACHING_DEF["safe"] kill_entry#11 -> kill_entry#10
+FLOWS|REACHING_DEF["safe"] kill_entry#11 -> kill_entry#9
+FLOWS|REACHING_DEF["safe"] nested_entry#7 -> nested_entry#5
+FLOWS|REACHING_DEF["safe"] nested_entry#7 -> nested_entry#6
+FLOWS|REACHING_DEF[(*callable)(int) = callback] block_pointer_scope#5 -> block_pointer_scope#15
+FLOWS|REACHING_DEF[(shadowed)(value)] block_prototypes#14 -> block_prototypes#11
+FLOWS|REACHING_DEF[(shadowed)(value)] block_prototypes#14 -> block_prototypes#17
+FLOWS|REACHING_DEF[*value = "safe"] nested_entry#5 -> nested_entry#15
+FLOWS|REACHING_DEF[*value = source()] kill_entry#5 -> kill_entry#14
+FLOWS|REACHING_DEF[0] continue_entry#7 -> continue_entry#5
+FLOWS|REACHING_DEF[0] continue_entry#7 -> continue_entry#6
+FLOWS|REACHING_DEF[0] loop_block_entry#14 -> loop_block_entry#12
+FLOWS|REACHING_DEF[0] loop_block_entry#14 -> loop_block_entry#13
+FLOWS|REACHING_DEF[0] loop_block_entry#7 -> loop_block_entry#5
+FLOWS|REACHING_DEF[0] loop_block_entry#7 -> loop_block_entry#6
+FLOWS|REACHING_DEF[1] block_local_scope#13 -> block_local_scope#11
+FLOWS|REACHING_DEF[1] block_local_scope#8 -> block_local_scope#6
+FLOWS|REACHING_DEF[1] block_local_scope#8 -> block_local_scope#7
+FLOWS|REACHING_DEF[<RET>] after_return_entry#5 -> after_return_entry#8
+FLOWS|REACHING_DEF[<RET>] block_local_scope#14 -> block_local_scope#16
+FLOWS|REACHING_DEF[<RET>] block_pointer_scope#11 -> block_pointer_scope#15
+FLOWS|REACHING_DEF[<RET>] block_prototypes#10 -> block_prototypes#17
+FLOWS|REACHING_DEF[<RET>] block_return#5 -> block_return#9
+FLOWS|REACHING_DEF[<RET>] callback#4 -> callback#6
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.notEquals#0 -> <operator>.notEquals#1
+FLOWS|REACHING_DEF[] <operator>.notEquals#0 -> <operator>.notEquals#4
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] <operator>.postDecrement#0 -> <operator>.postDecrement#1
+FLOWS|REACHING_DEF[] after_return_entry#0 -> after_return_entry#1
+FLOWS|REACHING_DEF[] after_return_entry#0 -> after_return_entry#5
+FLOWS|REACHING_DEF[] after_return_entry#1 -> after_return_entry#2
+FLOWS|REACHING_DEF[] after_return_entry#1 -> after_return_entry#8
+FLOWS|REACHING_DEF[] bare_entry#0 -> bare_entry#1
+FLOWS|REACHING_DEF[] bare_entry#0 -> bare_entry#4
+FLOWS|REACHING_DEF[] bare_entry#0 -> bare_entry#6
+FLOWS|REACHING_DEF[] bare_entry#1 -> bare_entry#2
+FLOWS|REACHING_DEF[] bare_entry#1 -> bare_entry#7
+FLOWS|REACHING_DEF[] block_local_scope#0 -> block_local_scope#1
+FLOWS|REACHING_DEF[] block_local_scope#0 -> block_local_scope#12
+FLOWS|REACHING_DEF[] block_local_scope#0 -> block_local_scope#13
+FLOWS|REACHING_DEF[] block_local_scope#0 -> block_local_scope#15
+FLOWS|REACHING_DEF[] block_local_scope#0 -> block_local_scope#4
+FLOWS|REACHING_DEF[] block_local_scope#0 -> block_local_scope#8
+FLOWS|REACHING_DEF[] block_pointer_scope#0 -> block_pointer_scope#1
+FLOWS|REACHING_DEF[] block_pointer_scope#0 -> block_pointer_scope#10
+FLOWS|REACHING_DEF[] block_pointer_scope#0 -> block_pointer_scope#13
+FLOWS|REACHING_DEF[] block_pointer_scope#0 -> block_pointer_scope#14
+FLOWS|REACHING_DEF[] block_pointer_scope#0 -> block_pointer_scope#7
+FLOWS|REACHING_DEF[] block_pointer_scope#0 -> block_pointer_scope#8
+FLOWS|REACHING_DEF[] block_pointer_scope#6 -> block_pointer_scope#15
+FLOWS|REACHING_DEF[] block_pointer_scope#6 -> block_pointer_scope#5
+FLOWS|REACHING_DEF[] block_prototypes#0 -> block_prototypes#1
+FLOWS|REACHING_DEF[] block_prototypes#0 -> block_prototypes#13
+FLOWS|REACHING_DEF[] block_prototypes#0 -> block_prototypes#15
+FLOWS|REACHING_DEF[] block_prototypes#0 -> block_prototypes#16
+FLOWS|REACHING_DEF[] block_prototypes#0 -> block_prototypes#4
+FLOWS|REACHING_DEF[] block_prototypes#0 -> block_prototypes#6
+FLOWS|REACHING_DEF[] block_prototypes#0 -> block_prototypes#8
+FLOWS|REACHING_DEF[] block_prototypes#0 -> block_prototypes#9
+FLOWS|REACHING_DEF[] block_return#0 -> block_return#1
+FLOWS|REACHING_DEF[] block_return#0 -> block_return#6
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#213
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#214
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#215
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#216
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#217
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#218
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#219
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#220
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#221
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#222
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#223
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#224
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#225
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#226
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#227
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#228
+FLOWS|REACHING_DEF[] blocks.c:<global>#0 -> blocks.c:<global>#229
+FLOWS|REACHING_DEF[] blocks.c:<global>#111 -> callback#1
+FLOWS|REACHING_DEF[] blocks.c:<global>#111 -> callback#5
+FLOWS|REACHING_DEF[] blocks.c:<global>#161 -> return_entry#1
+FLOWS|REACHING_DEF[] blocks.c:<global>#161 -> return_entry#6
+FLOWS|REACHING_DEF[] blocks.c:<global>#178 -> continue_entry#1
+FLOWS|REACHING_DEF[] blocks.c:<global>#178 -> continue_entry#11
+FLOWS|REACHING_DEF[] blocks.c:<global>#178 -> continue_entry#6
+FLOWS|REACHING_DEF[] blocks.c:<global>#178 -> continue_entry#7
+FLOWS|REACHING_DEF[] blocks.c:<global>#194 -> break_block_entry#1
+FLOWS|REACHING_DEF[] blocks.c:<global>#194 -> break_block_entry#5
+FLOWS|REACHING_DEF[] blocks.c:<global>#206 -> empty_only#1
+FLOWS|REACHING_DEF[] blocks.c:<global>#206 -> empty_only#4
+FLOWS|REACHING_DEF[] blocks.c:<global>#25 -> kill_entry#1
+FLOWS|REACHING_DEF[] blocks.c:<global>#25 -> kill_entry#11
+FLOWS|REACHING_DEF[] blocks.c:<global>#25 -> kill_entry#13
+FLOWS|REACHING_DEF[] blocks.c:<global>#25 -> kill_entry#7
+FLOWS|REACHING_DEF[] blocks.c:<global>#25 -> kill_entry#8
+FLOWS|REACHING_DEF[] blocks.c:<global>#40 -> labeled_entry#1
+FLOWS|REACHING_DEF[] blocks.c:<global>#40 -> labeled_entry#6
+FLOWS|REACHING_DEF[] blocks.c:<global>#40 -> labeled_entry#8
+FLOWS|REACHING_DEF[] blocks.c:<global>#50 -> switch_entry#1
+FLOWS|REACHING_DEF[] blocks.c:<global>#50 -> switch_entry#11
+FLOWS|REACHING_DEF[] blocks.c:<global>#50 -> switch_entry#5
+FLOWS|REACHING_DEF[] blocks.c:<global>#50 -> switch_entry#8
+FLOWS|REACHING_DEF[] blocks.c:<global>#67 -> loop_block_entry#1
+FLOWS|REACHING_DEF[] blocks.c:<global>#67 -> loop_block_entry#11
+FLOWS|REACHING_DEF[] blocks.c:<global>#67 -> loop_block_entry#14
+FLOWS|REACHING_DEF[] blocks.c:<global>#67 -> loop_block_entry#6
+FLOWS|REACHING_DEF[] blocks.c:<global>#67 -> loop_block_entry#7
+FLOWS|REACHING_DEF[] blocks.c:<global>#67 -> loop_block_entry#9
+FLOWS|REACHING_DEF[] blocks.c:<global>#83 -> empty_entry#1
+FLOWS|REACHING_DEF[] blocks.c:<global>#83 -> empty_entry#4
+FLOWS|REACHING_DEF[] blocks.c:<global>#83 -> empty_entry#5
+FLOWS|REACHING_DEF[] blocks.c:<global>#83 -> empty_entry#7
+FLOWS|REACHING_DEF[] blocks.c:<global>#83 -> empty_entry#8
+FLOWS|REACHING_DEF[] blocks.c:<global>#9 -> nested_entry#1
+FLOWS|REACHING_DEF[] blocks.c:<global>#9 -> nested_entry#12
+FLOWS|REACHING_DEF[] blocks.c:<global>#9 -> nested_entry#14
+FLOWS|REACHING_DEF[] blocks.c:<global>#9 -> nested_entry#7
+FLOWS|REACHING_DEF[] blocks.c:<global>#9 -> nested_entry#8
+FLOWS|REACHING_DEF[] blocks.c:<global>#9 -> nested_entry#9
+FLOWS|REACHING_DEF[] break_block_entry#1 -> break_block_entry#11
+FLOWS|REACHING_DEF[] break_block_entry#1 -> break_block_entry#2
+FLOWS|REACHING_DEF[] callable#0 -> callable#1
+FLOWS|REACHING_DEF[] empty_entry#1 -> empty_entry#2
+FLOWS|REACHING_DEF[] empty_entry#1 -> empty_entry#9
+FLOWS|REACHING_DEF[] empty_only#1 -> empty_only#2
+FLOWS|REACHING_DEF[] empty_only#1 -> empty_only#5
+FLOWS|REACHING_DEF[] kill_entry#1 -> kill_entry#14
+FLOWS|REACHING_DEF[] kill_entry#1 -> kill_entry#2
+FLOWS|REACHING_DEF[] labeled_entry#1 -> labeled_entry#2
+FLOWS|REACHING_DEF[] labeled_entry#1 -> labeled_entry#9
+FLOWS|REACHING_DEF[] nested_entry#1 -> nested_entry#15
+FLOWS|REACHING_DEF[] nested_entry#1 -> nested_entry#2
+FLOWS|REACHING_DEF[] return_entry#1 -> return_entry#2
+FLOWS|REACHING_DEF[] return_entry#1 -> return_entry#7
+FLOWS|REACHING_DEF[] shadowed#0 -> shadowed#1
+FLOWS|REACHING_DEF[] sink#0 -> sink#1
+FLOWS|REACHING_DEF[] source#0 -> source#1
+FLOWS|REACHING_DEF[] source#1 -> source#2
+FLOWS|REACHING_DEF[] source#1 -> source#4
+FLOWS|REACHING_DEF[block_return(source())] return_entry#5 -> return_entry#4
+FLOWS|REACHING_DEF[block_return(source())] return_entry#5 -> return_entry#7
+FLOWS|REACHING_DEF[callable(value)] block_pointer_scope#12 -> block_pointer_scope#11
+FLOWS|REACHING_DEF[callable(value)] block_pointer_scope#12 -> block_pointer_scope#15
+FLOWS|REACHING_DEF[callback] block_pointer_scope#7 -> block_pointer_scope#5
+FLOWS|REACHING_DEF[callback] block_pointer_scope#7 -> block_pointer_scope#6
+FLOWS|REACHING_DEF[condition != 0] loop_block_entry#5 -> loop_block_entry#15
+FLOWS|REACHING_DEF[condition] loop_block_entry#1 -> loop_block_entry#2
+FLOWS|REACHING_DEF[condition] loop_block_entry#1 -> loop_block_entry#6
+FLOWS|REACHING_DEF[condition] loop_block_entry#13 -> loop_block_entry#12
+FLOWS|REACHING_DEF[condition] loop_block_entry#6 -> loop_block_entry#15
+FLOWS|REACHING_DEF[condition] loop_block_entry#6 -> loop_block_entry#2
+FLOWS|REACHING_DEF[condition] loop_block_entry#6 -> loop_block_entry#5
+FLOWS|REACHING_DEF[condition] switch_entry#1 -> switch_entry#16
+FLOWS|REACHING_DEF[condition] switch_entry#1 -> switch_entry#2
+FLOWS|REACHING_DEF[count != 0] continue_entry#5 -> continue_entry#15
+FLOWS|REACHING_DEF[count] continue_entry#1 -> continue_entry#2
+FLOWS|REACHING_DEF[count] continue_entry#1 -> continue_entry#6
+FLOWS|REACHING_DEF[count] continue_entry#11 -> continue_entry#10
+FLOWS|REACHING_DEF[count] continue_entry#6 -> continue_entry#11
+FLOWS|REACHING_DEF[count] continue_entry#6 -> continue_entry#15
+FLOWS|REACHING_DEF[count] continue_entry#6 -> continue_entry#2
+FLOWS|REACHING_DEF[count] continue_entry#6 -> continue_entry#5
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.notEquals#1 -> <operator>.notEquals#3
+FLOWS|REACHING_DEF[p1] <operator>.notEquals#1 -> <operator>.notEquals#5
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p1] <operator>.postDecrement#1 -> <operator>.postDecrement#3
+FLOWS|REACHING_DEF[p1] <operator>.postDecrement#1 -> <operator>.postDecrement#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.notEquals#4 -> <operator>.notEquals#5
+FLOWS|REACHING_DEF[p2] <operator>.notEquals#4 -> <operator>.notEquals#6
+FLOWS|REACHING_DEF[shadowed(value) + (shadowed)(value)] block_prototypes#11 -> block_prototypes#10
+FLOWS|REACHING_DEF[shadowed(value) + (shadowed)(value)] block_prototypes#11 -> block_prototypes#17
+FLOWS|REACHING_DEF[shadowed(value)] block_prototypes#12 -> block_prototypes#11
+FLOWS|REACHING_DEF[shadowed(value)] block_prototypes#12 -> block_prototypes#17
+FLOWS|REACHING_DEF[sink(block_return(source()))] return_entry#4 -> return_entry#7
+FLOWS|REACHING_DEF[sink(source())] bare_entry#5 -> bare_entry#7
+FLOWS|REACHING_DEF[sink(source())] empty_entry#6 -> empty_entry#9
+FLOWS|REACHING_DEF[sink(source())] labeled_entry#7 -> labeled_entry#9
+FLOWS|REACHING_DEF[sink(source())] switch_entry#10 -> switch_entry#16
+FLOWS|REACHING_DEF[sink(value)] kill_entry#12 -> kill_entry#14
+FLOWS|REACHING_DEF[sink(value)] nested_entry#13 -> nested_entry#15
+FLOWS|REACHING_DEF[source()] bare_entry#6 -> bare_entry#5
+FLOWS|REACHING_DEF[source()] bare_entry#6 -> bare_entry#7
+FLOWS|REACHING_DEF[source()] empty_entry#7 -> empty_entry#6
+FLOWS|REACHING_DEF[source()] empty_entry#7 -> empty_entry#9
+FLOWS|REACHING_DEF[source()] kill_entry#7 -> kill_entry#14
+FLOWS|REACHING_DEF[source()] kill_entry#7 -> kill_entry#5
+FLOWS|REACHING_DEF[source()] kill_entry#7 -> kill_entry#6
+FLOWS|REACHING_DEF[source()] labeled_entry#8 -> labeled_entry#7
+FLOWS|REACHING_DEF[source()] labeled_entry#8 -> labeled_entry#9
+FLOWS|REACHING_DEF[source()] loop_block_entry#11 -> loop_block_entry#10
+FLOWS|REACHING_DEF[source()] nested_entry#12 -> nested_entry#10
+FLOWS|REACHING_DEF[source()] nested_entry#12 -> nested_entry#11
+FLOWS|REACHING_DEF[source()] nested_entry#12 -> nested_entry#15
+FLOWS|REACHING_DEF[source()] return_entry#6 -> return_entry#5
+FLOWS|REACHING_DEF[source()] return_entry#6 -> return_entry#7
+FLOWS|REACHING_DEF[source()] switch_entry#11 -> switch_entry#10
+FLOWS|REACHING_DEF[source()] switch_entry#11 -> switch_entry#16
+FLOWS|REACHING_DEF[value + 1] block_local_scope#11 -> block_local_scope#10
+FLOWS|REACHING_DEF[value + 1] block_local_scope#11 -> block_local_scope#16
+FLOWS|REACHING_DEF[value + 1] block_local_scope#11 -> block_local_scope#9
+FLOWS|REACHING_DEF[value = "safe"] kill_entry#9 -> kill_entry#14
+FLOWS|REACHING_DEF[value = 1] block_local_scope#6 -> block_local_scope#16
+FLOWS|REACHING_DEF[value = source()] nested_entry#10 -> nested_entry#15
+FLOWS|REACHING_DEF[value = value + 1] block_local_scope#9 -> block_local_scope#16
+FLOWS|REACHING_DEF[value] block_local_scope#1 -> block_local_scope#2
+FLOWS|REACHING_DEF[value] block_local_scope#10 -> block_local_scope#15
+FLOWS|REACHING_DEF[value] block_local_scope#10 -> block_local_scope#16
+FLOWS|REACHING_DEF[value] block_local_scope#10 -> block_local_scope#2
+FLOWS|REACHING_DEF[value] block_local_scope#10 -> block_local_scope#9
+FLOWS|REACHING_DEF[value] block_local_scope#12 -> block_local_scope#11
+FLOWS|REACHING_DEF[value] block_local_scope#15 -> block_local_scope#14
+FLOWS|REACHING_DEF[value] block_local_scope#7 -> block_local_scope#12
+FLOWS|REACHING_DEF[value] block_local_scope#7 -> block_local_scope#6
+FLOWS|REACHING_DEF[value] block_pointer_scope#1 -> block_pointer_scope#10
+FLOWS|REACHING_DEF[value] block_pointer_scope#1 -> block_pointer_scope#2
+FLOWS|REACHING_DEF[value] block_pointer_scope#10 -> block_pointer_scope#14
+FLOWS|REACHING_DEF[value] block_pointer_scope#10 -> block_pointer_scope#9
+FLOWS|REACHING_DEF[value] block_pointer_scope#14 -> block_pointer_scope#12
+FLOWS|REACHING_DEF[value] block_pointer_scope#14 -> block_pointer_scope#15
+FLOWS|REACHING_DEF[value] block_pointer_scope#14 -> block_pointer_scope#2
+FLOWS|REACHING_DEF[value] block_prototypes#1 -> block_prototypes#2
+FLOWS|REACHING_DEF[value] block_prototypes#1 -> block_prototypes#6
+FLOWS|REACHING_DEF[value] block_prototypes#13 -> block_prototypes#12
+FLOWS|REACHING_DEF[value] block_prototypes#13 -> block_prototypes#16
+FLOWS|REACHING_DEF[value] block_prototypes#16 -> block_prototypes#14
+FLOWS|REACHING_DEF[value] block_prototypes#16 -> block_prototypes#17
+FLOWS|REACHING_DEF[value] block_prototypes#16 -> block_prototypes#2
+FLOWS|REACHING_DEF[value] block_prototypes#6 -> block_prototypes#5
+FLOWS|REACHING_DEF[value] block_prototypes#6 -> block_prototypes#9
+FLOWS|REACHING_DEF[value] block_prototypes#9 -> block_prototypes#13
+FLOWS|REACHING_DEF[value] block_prototypes#9 -> block_prototypes#7
+FLOWS|REACHING_DEF[value] block_return#1 -> block_return#2
+FLOWS|REACHING_DEF[value] block_return#1 -> block_return#6
+FLOWS|REACHING_DEF[value] block_return#1 -> block_return#9
+FLOWS|REACHING_DEF[value] block_return#6 -> block_return#5
+FLOWS|REACHING_DEF[value] callable#1 -> callable#2
+FLOWS|REACHING_DEF[value] callable#1 -> callable#4
+FLOWS|REACHING_DEF[value] callback#1 -> callback#2
+FLOWS|REACHING_DEF[value] callback#1 -> callback#5
+FLOWS|REACHING_DEF[value] callback#1 -> callback#6
+FLOWS|REACHING_DEF[value] callback#5 -> callback#4
+FLOWS|REACHING_DEF[value] kill_entry#10 -> kill_entry#13
+FLOWS|REACHING_DEF[value] kill_entry#10 -> kill_entry#9
+FLOWS|REACHING_DEF[value] kill_entry#13 -> kill_entry#12
+FLOWS|REACHING_DEF[value] kill_entry#13 -> kill_entry#14
+FLOWS|REACHING_DEF[value] kill_entry#6 -> kill_entry#5
+FLOWS|REACHING_DEF[value] nested_entry#11 -> nested_entry#10
+FLOWS|REACHING_DEF[value] nested_entry#11 -> nested_entry#14
+FLOWS|REACHING_DEF[value] nested_entry#14 -> nested_entry#13
+FLOWS|REACHING_DEF[value] nested_entry#14 -> nested_entry#15
+FLOWS|REACHING_DEF[value] nested_entry#6 -> nested_entry#5
+FLOWS|REACHING_DEF[value] shadowed#1 -> shadowed#2
+FLOWS|REACHING_DEF[value] shadowed#1 -> shadowed#4
+FLOWS|REACHING_DEF[value] sink#1 -> sink#2
+FLOWS|REACHING_DEF[value] sink#1 -> sink#4

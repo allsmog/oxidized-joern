@@ -2098,6 +2098,10 @@ impl Ctx<'_> {
     /// A block-level statement. `order` is the running 1-based child position.
     fn emit_stmt(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
         match n.kind() {
+            "compound_statement" => {
+                self.emit_block(n, b, *order, depth);
+                *order += 1;
+            }
             "declaration" => {
                 self.emit_declaration(n, b, order, depth, None, false);
             }
@@ -4934,12 +4938,15 @@ impl CfgBuilder<'_> {
                 }
             },
             "BLOCK" => {
-                // An expression block (comma operator) is a child of a CALL;
-                // statement blocks (incl. stub bodies, which carry a spurious
-                // ARGUMENT_INDEX) are transparent.
-                let is_expr = n.parent.is_some_and(|p| self.arena[p].label == "CALL");
+                // Expression blocks and standalone compound statements are
+                // CFG nodes after their children, including empty blocks.
+                // Method/control bodies remain transparent (stub bodies also
+                // carry a spurious ARGUMENT_INDEX, so that is not a predicate).
+                let is_cfg_block = n
+                    .parent
+                    .is_some_and(|p| matches!(self.arena[p].label.as_str(), "CALL" | "BLOCK"));
                 let (entry, outs) = self.seq(&kids);
-                if is_expr {
+                if is_cfg_block {
                     self.connect(&outs, &me);
                     (entry.or(Some(me.clone())), vec![me])
                 } else {
@@ -5653,9 +5660,9 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
 
     // isDdgNode: everything EXCEPT Method, ControlStructure, FieldIdentifier,
     // JumpTarget, MethodReturn. A BLOCK is a ddg node only when it is itself a
-    // CFG node — i.e. an EXPRESSION block used as a call argument (the
-    // comma-operator `(b++, b+1)`); statement blocks (method/loop bodies) are
-    // not in the CFG and never get def-use edges.
+    // CFG node: an expression block used as a call argument (the comma
+    // operator `(b++, b+1)`) or a standalone compound statement. Method and
+    // control-body blocks are not CFG nodes and never get def-use edges.
     let is_ddg = |i: usize| match arena[i].label.as_str() {
         "CALL"
         | "IDENTIFIER"

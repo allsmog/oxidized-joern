@@ -1,0 +1,30 @@
+--- Joern
++++ after
+@@ -1904,6 +1904,7 @@
+ FLOWS|REACHING_DEF[condition] switch_entry#1 -> switch_entry#2
+ FLOWS|REACHING_DEF[count != 0] continue_entry#5 -> continue_entry#15
+ FLOWS|REACHING_DEF[count != 0] source_before_continue_entry#9 -> source_before_continue_entry#19
++FLOWS|REACHING_DEF[count--] source_before_continue_entry#14 -> source_before_continue_entry#19
+ FLOWS|REACHING_DEF[count] continue_entry#1 -> continue_entry#2
+ FLOWS|REACHING_DEF[count] continue_entry#1 -> continue_entry#6
+ FLOWS|REACHING_DEF[count] continue_entry#11 -> continue_entry#10
+@@ -1946,8 +1947,6 @@
+ FLOWS|REACHING_DEF[sink(source())] switch_entry#10 -> switch_entry#16
+ FLOWS|REACHING_DEF[sink(value)] kill_entry#12 -> kill_entry#14
+ FLOWS|REACHING_DEF[sink(value)] nested_entry#13 -> nested_entry#15
+-FLOWS|REACHING_DEF[sink(value)] source_before_break_entry#13 -> source_before_break_entry#15
+-FLOWS|REACHING_DEF[sink(value)] source_before_continue_entry#17 -> source_before_continue_entry#19
+ FLOWS|REACHING_DEF[source()] bare_entry#6 -> bare_entry#5
+ FLOWS|REACHING_DEF[source()] bare_entry#6 -> bare_entry#7
+ FLOWS|REACHING_DEF[source()] empty_entry#7 -> empty_entry#6
+@@ -2032,10 +2031,8 @@
+ FLOWS|REACHING_DEF[value] shadowed#1 -> shadowed#4
+ FLOWS|REACHING_DEF[value] sink#1 -> sink#2
+ FLOWS|REACHING_DEF[value] sink#1 -> sink#4
+-FLOWS|REACHING_DEF[value] source_before_break_entry#14 -> source_before_break_entry#15
+ FLOWS|REACHING_DEF[value] source_before_break_entry#6 -> source_before_break_entry#15
+ FLOWS|REACHING_DEF[value] source_before_break_entry#6 -> source_before_break_entry#5
+-FLOWS|REACHING_DEF[value] source_before_continue_entry#18 -> source_before_continue_entry#19
+ FLOWS|REACHING_DEF[value] source_before_continue_entry#6 -> source_before_continue_entry#19
+ FLOWS|REACHING_DEF[value] source_before_continue_entry#6 -> source_before_continue_entry#5
+ FLOWS|REACHING_DEF[value] source_before_return_entry#6 -> source_before_return_entry#12
