@@ -82,7 +82,8 @@ import scala.collection.mutable
         val v = Option(e.property).map(_.toString).getOrElse("")
         for (s <- address(e.src.asInstanceOf[StoredNode]);
              d <- address(e.dst.asInstanceOf[StoredNode]))
-          flows += s"REACHING_DEF[$v] $s -> $d"
+          // Match the AST/CODE and Rust transport: one record per line.
+          flows += s"REACHING_DEF[${v.replace("\n", "\\n")}] $s -> $d"
       }
     }
   }

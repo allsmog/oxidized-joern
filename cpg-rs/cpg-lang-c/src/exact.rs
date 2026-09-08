@@ -1868,6 +1868,17 @@ impl Ctx<'_> {
         let Some(expr) = expansion_expr_node(tree.root_node()) else {
             return;
         };
+        // CDT prints expanded adjacent strings as a single token, including
+        // inside a larger expansion expression. Ordinary source expressions
+        // retain their original token spelling in emit_expr.
+        if let Some(joined) = join_expansion_strings(tree.root_node(), b) {
+            if let Some(joined_tree) = parser.parse(&joined, None) {
+                if let Some(joined_expr) = expansion_expr_node(joined_tree.root_node()) {
+                    self.emit_expr(joined_expr, joined.as_bytes(), depth, 1, None);
+                    return;
+                }
+            }
+        }
         self.emit_expr(expr, b, depth, 1, None);
     }
 
@@ -3254,7 +3265,9 @@ impl Ctx<'_> {
                     },
                 );
             }
-            "string_literal" => {
+            // CDT represents adjacent string tokens as one literal, retaining
+            // the original spelling (including intervening comments/macros).
+            "string_literal" | "concatenated_string" => {
                 self.line(
                     depth,
                     "LITERAL",
@@ -4171,6 +4184,57 @@ fn substitute(body: &str, params: &[String], args: &[String]) -> String {
     out
 }
 
+/// Collapse adjacent string tokens only in generated macro expansion text.
+/// Keep escape spellings intact, discard inter-token comments, and retain the
+/// nonempty encoding prefix (CDT still assigns every string type `char*`).
+fn join_expansion_strings(root: Node, source: &[u8]) -> Option<String> {
+    let mut replacements = Vec::new();
+    let mut pending = vec![root];
+    while let Some(node) = pending.pop() {
+        if node.kind() != "concatenated_string" {
+            pending.extend(named_children(node));
+            continue;
+        }
+        let mut prefix = "";
+        let mut contents = String::new();
+        let mut valid = true;
+        for token in named_children(node) {
+            if token.kind() == "comment" {
+                continue;
+            }
+            if token.kind() != "string_literal" {
+                valid = false;
+                break;
+            }
+            let spelling = text(token, source);
+            let Some(quote) = spelling.find('"') else {
+                valid = false;
+                break;
+            };
+            let Some(content) = spelling[quote + 1..].strip_suffix('"') else {
+                valid = false;
+                break;
+            };
+            if prefix.is_empty() {
+                prefix = &spelling[..quote];
+            }
+            contents.push_str(content);
+        }
+        if valid {
+            replacements.push((node.byte_range(), format!("{prefix}\"{contents}\"")));
+        }
+    }
+    if replacements.is_empty() {
+        return None;
+    }
+    replacements.sort_by_key(|(range, _)| std::cmp::Reverse(range.start));
+    let mut result = String::from_utf8_lossy(source).into_owned();
+    for (range, replacement) in replacements {
+        result.replace_range(range, &replacement);
+    }
+    Some(result)
+}
+
 /// The expression node of a parsed expansion (`void __m() { <exp>; }`).
 fn expansion_expr_node(root: Node) -> Option<Node> {
     let f = named_children(root)
@@ -4216,6 +4280,10 @@ fn expansion_type(
         }
         "char_literal" => "char".into(),
         "string_literal" => "char*".into(),
+        // A parenthesized replacement is an expression wrapper in CDT; its
+        // newly supported concatenation child does not type that wrapper.
+        "concatenated_string" if expansion_expr_node(tree.root_node()) == Some(e) => "char*".into(),
+        "concatenated_string" => "ANY".into(),
         "identifier" => symbols.get(text(e, b)).cloned().unwrap_or("ANY".into()),
         "call_expression" => {
             let name = e

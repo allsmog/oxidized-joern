@@ -37,7 +37,9 @@ fn standalone_block_findings_match_live_joern_outcomes() {
         .collect();
     assert_eq!(
         actual,
-        include_str!("../../joern-parity/tests/fixtures/standalone-blocks/loop-tail-diagnostic/outcomes.txt")
+        include_str!(
+            "../../joern-parity/tests/fixtures/standalone-blocks/loop-tail-diagnostic/outcomes.txt"
+        )
     );
     let bare = findings
         .iter()

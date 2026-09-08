@@ -49,6 +49,17 @@ edge kind, one scaffolding block, and one reaching-definition block. The
 reported count is **comparison blocks**, not languages, programs, or a feature
 completion percentage.
 
+Each selected record occupies one physical output line. Embedded LF in
+AST/CODE values and reaching-definition VARIABLE labels is represented by
+literal `\n`, matching the Rust text projection. This is an encoding boundary,
+not a lossless or injective serialization of source properties: a physical LF
+and a literal backslash followed by `n` can share the same spelling, and CR is
+not escaped. Preserve bytes when extracting outputs; newline-normalizing text
+readers can conceal CRLF differences. The FLOW-label transport correction
+leaves the committed `oracle_all.txt` unchanged. See the
+[concatenated-string fixture](tests/fixtures/concatenated-strings/README.md)
+for complete live comparisons and retained encoding diagnostics.
+
 This is a bounded C graph comparison. It does not establish equivalence of all
 Joern schema properties, arbitrary C programs, final `reachableBy` results,
 scanner rules, other frontends, CPGQL, plugins, or binary graph formats.
