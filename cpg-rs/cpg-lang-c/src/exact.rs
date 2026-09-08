@@ -5430,8 +5430,17 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     let is_gen_arg = |k: usize| matches!(arena[k].label.as_str(), "CALL" | "IDENTIFIER");
 
     // --- GEN / KILL ---
-    // def id == node index. Each def carries a variable.
-    let mut def_var: HashMap<usize, String> = HashMap::new();
+    // Definition identity is separate from the edge label: identifier and
+    // parameter definitions use NAME, while call definitions use CODE. A C
+    // function-pointer initializer has an empty-code LHS, so using node_var
+    // here would conflate different pointers and an unnamed void parameter.
+    // Keep calls in their own namespace, as ReachingDefTransferFunction's
+    // killsForGens looks them up in allCalls rather than allIdentifiers.
+    let definition_key = |i: usize| match arena[i].label.as_str() {
+        "METHOD_PARAMETER_IN" | "IDENTIFIER" => ("symbol", arena[i].name.as_str()),
+        _ => ("call", arena[i].fullcode.as_str()),
+    };
+    let mut def_var: HashMap<usize, (&str, &str)> = HashMap::new();
     let mut gen: HashMap<usize, Vec<usize>> = HashMap::new(); // node -> defs generated
                                                               // parameters
     let params: Vec<usize> = arena[0]
@@ -5442,7 +5451,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         .collect();
     let mut entry_gen: Vec<usize> = Vec::new();
     for &p in &params {
-        def_var.insert(p, node_var(&arena[p]));
+        def_var.insert(p, definition_key(p));
         entry_gen.push(p);
     }
     // calls
@@ -5465,10 +5474,10 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         // arg exclusion; indirection etc. are already filtered out of gen_calls
         // by the broad isFieldAccess above.)
         let mut g = vec![c];
-        def_var.insert(c, node_var(&arena[c]));
+        def_var.insert(c, definition_key(c));
         for a in args_of(c) {
             if is_gen_arg(a) {
-                def_var.insert(a, node_var(&arena[a]));
+                def_var.insert(a, definition_key(a));
                 g.push(a);
             }
         }
@@ -5540,7 +5549,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         if is_generic_member_access(&arena[c].name) {
             continue;
         }
-        let vars: HashSet<String> = gen[&c].iter().map(|&d| def_var[&d].clone()).collect();
+        let vars: HashSet<(&str, &str)> = gen[&c].iter().map(|d| def_var[d]).collect();
         let g: HashSet<usize> = gen[&c].iter().copied().collect();
         let k: Vec<usize> = def_var
             .iter()
