@@ -12,11 +12,13 @@ Single source of truth across iterations. Update in the same commit as the work.
   projects improve **1/5→5/5**, covering **24 source functions** and **3,090
   nonempty selected records** (3,157 canonical lines including separators).
   Independent review's Unicode suffix-expansion and descriptor-range panic
-  are repaired with retained failures and production regressions. All **417
+  are repaired with retained failures and production regressions. All **418
   workspace tests**, formatting, strict Clippy, and **308/308 committed/live**
   main blocks pass. The original forward-tag diagnostics and remaining Lua
   sizeof/declaration-return-context differences stay explicit. This isolated
-  increment has not run final combined whole-project acceptance. See the
+  increment has not run final combined whole-project acceptance. A follow-up
+  token guard prevents suffix macros inside preprocessing numbers; three
+  full invalid-C parser-recovery diagnostics remain nonexact. See the
   [fixture evidence](joern-parity/tests/fixtures/nested-macro-casts/README.md).
 
 - **Fourth measured Astra batch (2026-09-08 UTC).** The main corpus remains

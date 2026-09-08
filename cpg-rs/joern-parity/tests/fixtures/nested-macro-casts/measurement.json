@@ -606,5 +606,9 @@
   "tests": {
     "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/nested_macro_casts.rs",
     "sha256": "5f60b40ff7290c19ca37268274494c45d5e128e6e0fb413987b7766475a1f910"
+  },
+  "ppNumberReviewFollowup": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/ppnumbers/measurement.json",
+    "sha256": "170d07c348e2095c87b3a05d434bc6b80b801bc323b6fba59842fd3cb680cad0"
   }
 }

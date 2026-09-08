@@ -53,8 +53,19 @@ still differs in sizeof spacing and luaS_newlstr's return type;
 `luaG_concaterror` retains l_noret return-type differences. Full Lua or full
 Joern parity is not claimed.
 
-Final validation passes 417 workspace tests, including all five production
+Validation of the descriptor/Unicode snapshot passes 417 workspace tests, including all five production
 Project.build comparisons, formatting, strict workspace/all-targets Clippy,
 and 308/308 committed plus fresh live main-corpus blocks. Run the focused
 production checks from `cpg-rs` with
 `cargo test --locked -p joern-parity --test nested_macro_casts`.
+
+A subsequent lexical review also pinned `1M(x)`, `0xM(x)` and `1e+M(x)` as
+single preprocessing-number receivers in Joern's recovery graph. The decimal
+case had introduced a false expansion of its `M` suffix; the scanner now skips
+complete preprocessing numbers, including exponent signs. A focused token test
+covers those boundaries and a real adjacent macro call. All 418 workspace tests,
+formatting, strict Clippy and both 308-block gates pass after this follow-up.
+The three full invalid-C graphs remain nonexact because downstream C parsing
+still differs from CDT; their raw oracles, accepted/intermediate/fixed outputs
+and full differences are retained in `diagnostics/ppnumbers/`. Its measurement
+binds the final follow-up source/binary separately from the earlier snapshots.

@@ -5082,6 +5082,29 @@ fn expand_function_macro_tokens(
             i = end;
             continue;
         }
+        if bytes[i].is_ascii_digit()
+            || (bytes[i] == b'.' && bytes.get(i + 1).is_some_and(u8::is_ascii_digit))
+        {
+            // A preprocessing number includes identifier suffixes and signs
+            // after e/E/p/P, even when the resulting C literal is invalid.
+            // Do not turn its suffix into a function-macro invocation.
+            i += 1;
+            while i < bytes.len() {
+                if matches!(bytes[i], b'+' | b'-')
+                    && matches!(bytes[i - 1], b'e' | b'E' | b'p' | b'P')
+                    || bytes[i] == b'.'
+                {
+                    i += 1;
+                } else {
+                    let next = identifier_unit(bytes, i, false);
+                    if next == 0 {
+                        break;
+                    }
+                    i += next;
+                }
+            }
+            continue;
+        }
         let first = identifier_unit(bytes, i, true);
         if first == 0 {
             i += 1;
@@ -5166,6 +5189,34 @@ fn expand_function_macro_tokens(
     }
     result.push_str(&source[copied..]);
     result
+}
+
+#[cfg(test)]
+mod macro_token_tests {
+    use super::*;
+
+    #[test]
+    fn function_macro_names_inside_preprocessing_numbers_remain_opaque() {
+        let macros = HashMap::from([(
+            "M".to_string(),
+            MacroDef {
+                params: Some(vec!["x".to_string()]),
+                body: "7".to_string(),
+                directive: "#define M(x) 7".to_string(),
+                file: "main.c".to_string(),
+            },
+        )]);
+        for source in ["1M(2)", "0xM(2)", "1e+M(2)", "0x1p-M(2)", ".1M(2)"] {
+            assert_eq!(
+                expand_function_macro_tokens(source, &macros, &mut HashSet::new(), &mut 65_536),
+                source,
+            );
+        }
+        assert_eq!(
+            expand_function_macro_tokens("1 + M(2)", &macros, &mut HashSet::new(), &mut 65_536),
+            "1 + 7",
+        );
+    }
 }
 
 /// Render CDT's expanded expression spelling. A shared work budget and
