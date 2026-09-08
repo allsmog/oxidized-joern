@@ -110,6 +110,30 @@ class ParityGateTests(unittest.TestCase):
         )
         self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_dot_prefixed_unexpected_method_fails(self):
+        result = self.run_gate(
+            actual=rust_dump(ORACLE) + "METHOD NAME=extra FULL_NAME=.extra\n\n"
+        )
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_orphan_ast_node_cannot_be_ignored(self):
+        result = self.run_gate(actual=rust_dump(ORACLE) + "\nCALL NAME=unexpected\n")
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_duplicate_method_identity_fails(self):
+        result = self.run_gate(
+            actual=rust_dump(ORACLE) + "METHOD NAME=first FULL_NAME=first\n\n"
+        )
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_filename_normalization_cannot_merge_distinct_methods(self):
+        oracle = ORACLE + (
+            "AST|METHOD NAME=extra FULL_NAME=a/b\nAST|\n"
+            "AST|METHOD NAME=extra FULL_NAME=a_b\nAST|\n"
+        )
+        result = self.run_gate(oracle=oracle, actual=rust_dump(oracle))
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_failed_rust_command_cannot_pass(self):
         result = self.run_gate(cargo_exit=1)
         self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)

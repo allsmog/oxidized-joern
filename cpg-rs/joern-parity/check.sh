@@ -96,10 +96,18 @@ sed -n 's/^FLOWS|//p' "$MINE" > "$MFLOWS"
 # every file has a <global> method).
 split_methods() { # $1 = file, $2 = outdir
   awk -v out="$2" '
-    /^METHOD / { match($0, /FULL_NAME=[^ ]+/);
-                 name=substr($0, RSTART+10, RLENGTH-10);
+    /^METHOD / { if (!match($0, /FULL_NAME=[^ ]+/)) {
+                   print "method block has no FULL_NAME" > "/dev/stderr"; exit 1;
+                 }
+                 full_name=substr($0, RSTART+10, RLENGTH-10);
+                 name=full_name;
                  gsub(/\//, "_", name);
-                 file=out "/" name; }
+                 file=out "/" name;
+                 if (file in names) {
+                   print "duplicate or colliding method block: " full_name > "/dev/stderr"; exit 1;
+                 }
+                 names[file]=full_name; }
+    NF>0 && !file { print "AST text outside a method block" > "/dev/stderr"; exit 1; }
     NF>0 && file { print > file }
     /^$/ { file="" }
   ' "$1"
@@ -145,7 +153,7 @@ else
   fail=$((fail+1))
 fi
 
-shopt -s nullglob
+shopt -s nullglob dotglob
 for m in "$OD"/*; do
   name=${m##*/}
   if [ ! -f "$MD/$name" ]; then
