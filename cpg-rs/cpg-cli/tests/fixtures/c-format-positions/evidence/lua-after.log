@@ -1,0 +1,6 @@
+using built-in c rule pack (3 rules)
+loaded 108247 nodes from /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/lua-5.4.7/fourth-preview-a14-1/graph.cpg
+coverage: 8354 named calls, 0 unresolved (0%) — unresolved calls cross into summaries/stubs, not spliced bodies
+coverage: sources with zero call sites: gets, read, recv, scanf
+coverage: sinks with zero call sites: execl, execlp, execv, execve, execvp, popen, strcat, syslog, vsprintf
+3 rules, 0 findings -> /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/lua-after.sarif
