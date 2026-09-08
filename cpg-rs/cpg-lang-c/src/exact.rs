@@ -113,6 +113,25 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         .map(|(name, file)| (method_full(name, file), file.clone()))
         .collect();
 
+    // Function declarations remain external METHODs even when never called.
+    // A definition wins over its declarations; repeated prototypes coalesce.
+    let mut prototypes = std::collections::BTreeMap::new();
+    for u in &units {
+        for declaration in prototype_declarations(u.tree.root_node(), u.src.as_bytes()) {
+            for header in prototype_headers(declaration, u.src.as_bytes()) {
+                if !defined.contains(&header.0) {
+                    prototypes.entry(header.0.clone()).or_insert_with(|| {
+                        (
+                            u.file.clone(),
+                            esc(text(declaration, u.src.as_bytes())),
+                            header,
+                        )
+                    });
+                }
+            }
+        }
+    }
+
     // Each dump is one method subtree keyed by FULL_NAME; Joern's oracle sorts
     // all methods (user, <global> wrappers, <operator> stubs) by fullName.
     let mut dumps: Vec<(String, String)> = Vec::new();
@@ -216,6 +235,12 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                     }
                 }
                 "declaration" => {
+                    for (name, ret, _) in prototype_headers(f, b) {
+                        function_full_names
+                            .entry(name.clone())
+                            .or_insert_with(|| name.clone());
+                        functions.entry(name).or_insert(ret);
+                    }
                     let base = normalize_type(
                         &f.child_by_field_name("type")
                             .map(|t| text(t, b).to_string())
@@ -226,17 +251,20 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                             d.child_by_field_name("declarator")
                         } else if matches!(
                             d.kind(),
-                            "identifier" | "pointer_declarator" | "array_declarator"
+                            "identifier"
+                                | "pointer_declarator"
+                                | "array_declarator"
+                                | "function_declarator"
                         ) {
                             Some(d)
                         } else {
                             None
                         };
                         if let Some(decl) = decl {
-                            if find_function_declarator(decl).is_none() {
+                            if !is_function_declaration(decl) {
                                 let name = innermost_id(decl, b);
                                 if !name.is_empty() {
-                                    globals.insert(name, format!("{base}{}", decl_suffix(decl, b)));
+                                    globals.insert(name, declared_object_type(&base, decl, b));
                                 }
                             }
                         }
@@ -256,6 +284,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             file: u.file.clone(),
             used_macros: &mut used_macros,
             symbols: HashMap::new(),
+            method_functions: HashMap::new(),
             phantoms: Vec::new(),
             stubs: &mut stub_uses,
             types: &mut used_types,
@@ -330,6 +359,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         file: String::new(),
         used_macros: &mut used_macros,
         symbols: HashMap::new(),
+        method_functions: HashMap::new(),
         phantoms: Vec::new(),
         stubs: &mut stub_uses2,
         types: &mut used_types,
@@ -346,13 +376,24 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     };
     let mut stub_list: Vec<(String, usize)> = stub_uses
         .into_iter()
-        .filter(|(n, _)| !defined.contains(n))
+        .filter(|(n, _)| !defined.contains(n) && !prototypes.contains_key(n))
         .collect();
     stub_list.sort();
     for (name, arity) in stub_list {
         sctx.begin_block(&name);
         sctx.emit_stub(&name, arity);
         dumps.push((name, std::mem::take(&mut sctx.out)));
+    }
+    for (name, (file, code, (_, ret, params))) in &prototypes {
+        sctx.begin_block(name);
+        sctx.emit_prototype(name, code, ret, params);
+        sctx.edge("SOURCE_FILE", format!("M:{name}"), format!("F:{file}"));
+        sctx.edge(
+            "CONTAINS",
+            format!("D:{file}:<global>"),
+            format!("M:{name}"),
+        );
+        dumps.push((name.clone(), std::mem::take(&mut sctx.out)));
     }
     let macro_methods: Vec<(String, (String, String, usize, String))> = sctx
         .used_macros
@@ -663,6 +704,7 @@ struct Ctx<'a> {
     // used macros: full_name -> (name, directive, nparams, ret type)
     used_macros: &'a mut std::collections::BTreeMap<String, (String, String, usize, String)>,
     symbols: HashMap<String, String>, // local/param name -> type
+    method_functions: HashMap<String, String>, // block-scoped prototypes
     // Joern's local-creation pass materialises a LOCAL at ORDER=0 atop the
     // method body BLOCK for each referenced global (CODE `<global> name`)
     // and each type name used as a sizeof(T) argument.
@@ -896,6 +938,7 @@ impl Ctx<'_> {
 
     fn emit_method(&mut self, f: Node, b: &[u8], d: usize) {
         self.symbols.clear();
+        self.method_functions.clear();
         let (name, ret, params) = fn_header(f, b).expect("function header");
         let full = self
             .function_full_names
@@ -907,7 +950,7 @@ impl Ctx<'_> {
             "{ret}({})",
             params
                 .iter()
-                .map(|p| p.ty.clone())
+                .map(|p| p.signature_type().to_string())
                 .collect::<Vec<_>>()
                 .join(",")
         );
@@ -986,6 +1029,32 @@ impl Ctx<'_> {
             order: Some(k as i64),
             ..Default::default()
         };
+        if arity == 0 {
+            // Joern represents an unresolved zero-argument call with p0.
+            self.line(1, "METHOD_PARAMETER_IN", pin(0));
+            self.line(1, "METHOD_PARAMETER_OUT", pin(0));
+            self.line(
+                1,
+                "BLOCK",
+                P {
+                    tfn: Some("ANY".into()),
+                    order: Some(1),
+                    arg: Some(1),
+                    ..Default::default()
+                },
+            );
+            self.line(
+                1,
+                "METHOD_RETURN",
+                P {
+                    code: Some("RET".into()),
+                    tfn: Some("ANY".into()),
+                    order: Some(2),
+                    ..Default::default()
+                },
+            );
+            return;
+        }
         self.line(1, "METHOD_PARAMETER_IN", pin(1));
         self.line(
             1,
@@ -1015,6 +1084,62 @@ impl Ctx<'_> {
         } else {
             self.line(1, "METHOD_RETURN", ret);
         }
+    }
+
+    fn emit_prototype(&mut self, name: &str, code: &str, ret: &str, params: &[Param]) {
+        self.line(
+            0,
+            "METHOD",
+            P {
+                name: Some(name.into()),
+                code: Some(code.into()),
+                full: Some(name.into()),
+                sig: Some(format!(
+                    "{ret}({})",
+                    params
+                        .iter()
+                        .map(Param::signature_type)
+                        .collect::<Vec<_>>()
+                        .join(",")
+                )),
+                order: Some(1),
+                ..Default::default()
+            },
+        );
+        for (i, param) in params.iter().enumerate() {
+            for label in ["METHOD_PARAMETER_IN", "METHOD_PARAMETER_OUT"] {
+                self.line(
+                    1,
+                    label,
+                    P {
+                        name: Some(param.name.clone()),
+                        code: Some(esc(&param.code)),
+                        tfn: Some(param.ty.clone()),
+                        order: Some((i + 1) as i64),
+                        ..Default::default()
+                    },
+                );
+            }
+        }
+        self.line(
+            1,
+            "BLOCK",
+            P {
+                tfn: Some("ANY".into()),
+                order: Some((params.len() + 1) as i64),
+                ..Default::default()
+            },
+        );
+        self.line(
+            1,
+            "METHOD_RETURN",
+            P {
+                code: Some("RET".into()),
+                tfn: Some(ret.into()),
+                order: Some((params.len() + 2) as i64),
+                ..Default::default()
+            },
+        );
     }
 
     fn emit_includes_global(&mut self) {
@@ -1078,6 +1203,8 @@ impl Ctx<'_> {
                 _ => {}
             }
         }
+        self.symbols.clear();
+        self.method_functions.clear();
         self.line(
             1,
             "BLOCK",
@@ -1133,12 +1260,6 @@ impl Ctx<'_> {
                     // Same lowering as in a method body: LOCAL per declarator,
                     // plus an assignment CALL when initialised (`int g = 5;`).
                     // Prototypes contribute nothing and consume no slot.
-                    if named_children(n)
-                        .iter()
-                        .any(|d| find_function_declarator(*d).is_some())
-                    {
-                        continue;
-                    }
                     self.emit_declaration(n, b, &mut slot, 2, None);
                 }
                 "function_definition" => {
@@ -1572,9 +1693,19 @@ impl Ctx<'_> {
         let mut seen: Vec<String> = Vec::new();
         let mut stack = vec![body];
         while let Some(n) = stack.pop() {
+            if !prototype_headers(n, b).is_empty() {
+                continue;
+            }
             match n.kind() {
                 "identifier" => {
                     let name = text(n, b).to_string();
+                    // A direct call target is a callable name, not an
+                    // unresolved variable. Pointer-valued callees still use
+                    // their declared local/global symbol below.
+                    let direct_callee = n.parent().is_some_and(|parent| {
+                        parent.kind() == "call_expression"
+                            && parent.child_by_field_name("function") == Some(n)
+                    });
                     if !shadowed.contains(&name) && !seen.contains(&name) {
                         if let Some(ty) = self.globals.get(&name) {
                             seen.push(name.clone());
@@ -1594,6 +1725,8 @@ impl Ctx<'_> {
                             });
                         } else if !self.macros.contains_key(&name)
                             && !self.functions.contains_key(&name)
+                            && !self.method_functions.contains_key(&name)
+                            && !direct_callee
                         {
                             // Fully unresolved identifier: phantom LOCAL with
                             // CODE `<unknown> name` (e.g. NULL).
@@ -1671,6 +1804,9 @@ impl Ctx<'_> {
 
     /// Emit a BLOCK node and its statements, with a fresh child ORDER sequence.
     fn emit_block(&mut self, body: Node, b: &[u8], order: i64, depth: usize) {
+        let outer_symbols = self.symbols.clone();
+        let outer_functions = self.method_functions.clone();
+        let outer_bindings = self.sym_line.clone();
         self.line(
             depth,
             "BLOCK",
@@ -1698,6 +1834,9 @@ impl Ctx<'_> {
         for s in named_children(body) {
             self.emit_stmt(s, b, &mut so, depth + 1);
         }
+        self.symbols = outer_symbols;
+        self.method_functions = outer_functions;
+        self.sym_line = outer_bindings;
     }
 
     /// A block-level statement. `order` is the running 1-based child position.
@@ -2008,6 +2147,9 @@ impl Ctx<'_> {
     /// its assignment carrying ARGUMENT_INDEX=1 (another quirk; the condition,
     /// update, and body carry none).
     fn emit_for(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
+        let outer_symbols = self.symbols.clone();
+        let outer_functions = self.method_functions.clone();
+        let outer_bindings = self.sym_line.clone();
         let init = n.child_by_field_name("initializer");
         let cond = n.child_by_field_name("condition");
         let update = n.child_by_field_name("update");
@@ -2083,6 +2225,9 @@ impl Ctx<'_> {
                 self.edge("FOR_BODY", self.at(cs), self.at(bi));
             }
         }
+        self.symbols = outer_symbols;
+        self.method_functions = outer_functions;
+        self.sym_line = outer_bindings;
     }
 
     /// A C declaration `T x = init;` → a LOCAL plus, if initialised, an
@@ -2095,6 +2240,10 @@ impl Ctx<'_> {
         depth: usize,
         assign_arg: Option<i64>,
     ) {
+        for (name, ret, _) in prototype_headers(n, b) {
+            self.symbols.remove(&name);
+            self.method_functions.insert(name, ret);
+        }
         let ty = normalize_type(
             &n.child_by_field_name("type")
                 .map(|t| text(t, b).to_string())
@@ -2103,7 +2252,6 @@ impl Ctx<'_> {
         // CDT registers the decl-SPECIFIER type separately from the declared
         // type: `unsigned char c` also registers bare `unsigned` (pinned by
         // musl memcmp.c); a pointer decl registers its base.
-        self.types.insert(specifier_type(&ty));
         // LOCAL CODE is rebuilt per declarator: the decl-specifier source text
         // (keeps `const`/`struct`/`unsigned ...` spellings the type drops)
         // plus that declarator alone — so `int a, b = 1;` yields `int a`,`int b`.
@@ -2131,12 +2279,20 @@ impl Ctx<'_> {
                     d.child_by_field_name("declarator"),
                     d.child_by_field_name("value"),
                 ),
-                "identifier" | "pointer_declarator" | "array_declarator" => (Some(d), None),
+                "identifier"
+                | "pointer_declarator"
+                | "array_declarator"
+                | "function_declarator" => (Some(d), None),
                 _ => (None, None),
             };
             let Some(decl) = decl else { continue };
+            if is_function_declaration(decl) {
+                continue;
+            }
             let name = innermost_id(decl, b);
-            let full_ty = format!("{ty}{}", decl_suffix(decl, b));
+            let full_ty = declared_object_type(&ty, decl, b);
+            let function_pointer = find_function_declarator(decl).is_some();
+            self.method_functions.remove(&name);
             self.symbols.insert(name.clone(), full_ty.clone());
             let lo = *order;
             *order += 1;
@@ -2145,7 +2301,11 @@ impl Ctx<'_> {
                 "LOCAL",
                 P {
                     name: Some(name.clone()),
-                    code: Some(decl_code(decl)),
+                    code: Some(if function_pointer {
+                        esc(text(n, b))
+                    } else {
+                        decl_code(decl)
+                    }),
                     tfn: Some(full_ty.clone()),
                     order: Some(lo),
                     ..Default::default()
@@ -2158,6 +2318,9 @@ impl Ctx<'_> {
                 name,
                 full_ty,
             });
+        }
+        if !items.is_empty() {
+            self.types.insert(specifier_type(&ty));
         }
         // Pass 2: initialiser assignments / alloc lowerings, in order.
         for it in items {
@@ -2185,7 +2348,11 @@ impl Ctx<'_> {
                     "IDENTIFIER",
                     P {
                         name: Some(it.name.clone()),
-                        code: Some(it.name.clone()),
+                        code: Some(if find_function_declarator(it.decl).is_some() {
+                            String::new()
+                        } else {
+                            it.name.clone()
+                        }),
                         tfn: Some(it.full_ty.clone()),
                         order: Some(1),
                         arg: Some(1),
@@ -2490,25 +2657,33 @@ impl Ctx<'_> {
                     self.emit_macro_call(&name, &code, &arg_nodes, n, b, depth, order, arg);
                     return;
                 }
-                if !self.functions.contains_key(&name)
-                    && (self.symbols.contains_key(&name) || self.globals.contains_key(&name))
+                if callee.is_some_and(|callee| callee.kind() != "identifier")
+                    || self.symbols.contains_key(&name)
+                    || self.globals.contains_key(&name)
                 {
                     // Call through a pointer-valued symbol: <operator>.pointerCall,
                     // DYNAMIC_DISPATCH, receiver at ORDER=1 with no
                     // ARGUMENT_INDEX, args shifted to ORDER=2.. / INDEX=1..
                     self.note_call("<operator>.pointerCall", argc);
+                    let receiver_name = callee
+                        .map(unwrap_paren)
+                        .map(|node| text(node, b))
+                        .unwrap_or(&name);
                     let ty = self
                         .symbols
-                        .get(&name)
-                        .or_else(|| self.globals.get(&name))
-                        .cloned();
+                        .get(receiver_name)
+                        .or_else(|| self.globals.get(receiver_name))
+                        .or_else(|| self.method_functions.get(receiver_name))
+                        .or_else(|| self.functions.get(receiver_name))
+                        .map(|ty| ty.split('(').next().unwrap_or(ty).to_string())
+                        .unwrap_or_else(|| "ANY".into());
                     self.line(
                         depth,
                         "CALL",
                         P {
                             name: Some("<operator>.pointerCall".into()),
                             code: Some(esc(text(n, b))),
-                            tfn: ty,
+                            tfn: Some(ty),
                             mfn: Some("<operator>.pointerCall".into()),
                             order: Some(order),
                             arg,
@@ -2525,7 +2700,12 @@ impl Ctx<'_> {
                         }
                     }
                 } else {
-                    let ty = self.functions.get(&name).cloned().unwrap_or("ANY".into());
+                    let ty = self
+                        .method_functions
+                        .get(&name)
+                        .or_else(|| self.functions.get(&name))
+                        .cloned()
+                        .unwrap_or("ANY".into());
                     let method_full_name = self
                         .function_full_names
                         .get(&name)
@@ -2559,6 +2739,33 @@ impl Ctx<'_> {
                 if self.macros.get(&name).is_some_and(|m| m.params.is_none()) {
                     self.emit_macro_call(&name, &name, &[], n, b, depth, order, arg);
                     return;
+                }
+                if !self.symbols.contains_key(&name) && !self.globals.contains_key(&name) {
+                    if let Some(ret) = self
+                        .method_functions
+                        .get(&name)
+                        .or_else(|| self.functions.get(&name))
+                        .cloned()
+                    {
+                        let full = self
+                            .function_full_names
+                            .get(&name)
+                            .cloned()
+                            .unwrap_or_else(|| name.clone());
+                        self.line(
+                            depth,
+                            "METHOD_REF",
+                            P {
+                                code: Some(name),
+                                tfn: Some(ret),
+                                mfn: Some(full),
+                                order: Some(order),
+                                arg,
+                                ..Default::default()
+                            },
+                        );
+                        return;
+                    }
                 }
                 let (code, ty) = if let Some(t) = self.symbols.get(&name) {
                     (name.clone(), t.clone())
@@ -2791,15 +2998,104 @@ struct Param {
     name: String,
     ty: String,
     code: String,
+    variadic: bool,
+}
+
+impl Param {
+    fn signature_type(&self) -> &str {
+        if self.variadic {
+            "..."
+        } else {
+            &self.ty
+        }
+    }
+}
+
+fn prototype_headers(declaration: Node, b: &[u8]) -> Vec<(String, String, Vec<Param>)> {
+    if declaration.kind() != "declaration" {
+        return Vec::new();
+    }
+    let mut cursor = declaration.walk();
+    declaration
+        .children_by_field_name("declarator", &mut cursor)
+        .filter(|&decl| is_function_declaration(decl))
+        .filter_map(|decl| fn_header_declarator(declaration, decl, b))
+        .collect()
+}
+
+fn is_function_declaration(decl: Node) -> bool {
+    // `int (*callback)(int)` declares an object, whereas
+    // `int *function(int)` declares a pointer-returning function.
+    find_function_declarator(decl)
+        .and_then(|fd| fd.child_by_field_name("declarator"))
+        .is_some_and(|name| name.kind() == "identifier")
+}
+
+fn declared_object_type(base: &str, decl: Node, b: &[u8]) -> String {
+    if let Some(fd) = find_function_declarator(decl) {
+        if let Some(pointer) = fd.child_by_field_name("declarator") {
+            if pointer.kind() == "parenthesized_declarator" {
+                let name = innermost_id(pointer, b);
+                let shape: String = text(pointer, b)
+                    .replacen(&name, "", 1)
+                    .chars()
+                    .filter(|ch| !ch.is_whitespace())
+                    .collect();
+                let params = fd
+                    .child_by_field_name("parameters")
+                    .map(|params| {
+                        named_children(params)
+                            .into_iter()
+                            .filter_map(|param| {
+                                if param.kind() == "variadic_parameter" {
+                                    return Some("...".to_string());
+                                }
+                                if param.kind() != "parameter_declaration" {
+                                    return None;
+                                }
+                                let base = param
+                                    .child_by_field_name("type")
+                                    .map(|ty| normalize_type(text(ty, b)))
+                                    .unwrap_or_else(|| "ANY".into());
+                                Some(format!(
+                                    "{base}{}",
+                                    param
+                                        .child_by_field_name("declarator")
+                                        .map(|d| decl_suffix(d, b))
+                                        .unwrap_or_default()
+                                ))
+                            })
+                            .collect::<Vec<_>>()
+                            .join(",")
+                    })
+                    .unwrap_or_default();
+                return format!("{base}{shape}({params})");
+            }
+        }
+    }
+    format!("{base}{}", decl_suffix(decl, b))
+}
+
+fn prototype_declarations<'a>(root: Node<'a>, b: &[u8]) -> Vec<Node<'a>> {
+    if !prototype_headers(root, b).is_empty() {
+        return vec![root];
+    }
+    named_children(root)
+        .into_iter()
+        .flat_map(|child| prototype_declarations(child, b))
+        .collect()
 }
 
 /// (name, return type, params) for a function_definition.
 fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
+    fn_header_declarator(f, f.child_by_field_name("declarator")?, b)
+}
+
+fn fn_header_declarator(f: Node, decl: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
     let base = f
         .child_by_field_name("type")
         .map(|t| text(t, b).to_string())
         .unwrap_or("ANY".into());
-    let decl = f.child_by_field_name("declarator")?;
     // `void *bsearch(...)`: pointer levels wrap the function declarator.
     let mut stars = 0;
     let mut cur = decl;
@@ -2830,13 +3126,26 @@ fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
                     decl.map(|d| decl_suffix(d, b)).unwrap_or_default()
                 );
                 let name = decl.map(|d| innermost_id(d, b)).unwrap_or_default();
-                if !name.is_empty() {
-                    params.push(Param {
-                        name,
-                        ty,
-                        code: text(p, b).to_string(),
-                    });
-                }
+                params.push(Param {
+                    name,
+                    ty,
+                    code: text(p, b).to_string(),
+                    variadic: false,
+                });
+            } else if p.kind() == "variadic_parameter" {
+                // CDT uses the previous parameter's type for the synthetic
+                // variadic node, while its signature component remains `...`.
+                let index = params.len() + 1;
+                let ty = params
+                    .last()
+                    .map(|param| param.ty.clone())
+                    .unwrap_or_else(|| "ANY".into());
+                params.push(Param {
+                    name: format!("<param>{index}"),
+                    code: format!("<param>{index}..."),
+                    ty,
+                    variadic: true,
+                });
             }
         }
     }
@@ -2882,8 +3191,8 @@ fn decl_suffix(n: Node, b: &[u8]) -> String {
     let mut cur = n;
     loop {
         match cur.kind() {
-            "pointer_declarator" => parts.push("*".into()),
-            "array_declarator" => {
+            "pointer_declarator" | "abstract_pointer_declarator" => parts.push("*".into()),
+            "array_declarator" | "abstract_array_declarator" => {
                 // CDT keeps the size: `int grid[2][3]` types as `int[2][3]`
                 // (declarator nesting is outermost-last, so reverse).
                 let size = cur
@@ -4094,8 +4403,8 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // 1. addEdgesFromEntryNode: a ddg node whose usedIncomingDefs are all empty
     // (no reaching def is actually used) gets method -> node, var "". This
     // includes `return 0` (literal, no reaching def) but not `return SQR(n)`
-    // (the call is a reaching def). Non-INLINED calls (function calls,
-    // operators) never get an entry edge; INLINED macro calls do (when their
+    // (the call is a reaching def). Non-INLINED calls with arguments do not
+    // get an entry edge; zero-argument calls and INLINED macro calls do (when their
     // args carry no reaching def). isValidEdge in push drops write-only targets.
     // `i` is a node id, not just an arena index: it keys `own`, `assign_lhs`,
     // `is_ddg` and `used_incoming` as well.
@@ -4104,7 +4413,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         if i == 0 || !own.contains(&i) || !is_ddg(i) || assign_lhs.contains(&i) {
             continue;
         }
-        if arena[i].label == "CALL" && !arena[i].inlined {
+        if arena[i].label == "CALL" && !arena[i].inlined && !args_of(i).is_empty() {
             continue;
         }
         if used_incoming(i).iter().all(|(_, ds)| ds.is_empty()) {
@@ -4219,9 +4528,29 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         if arena[i].label != "METHOD_PARAMETER_OUT" || !own.contains(&i) {
             continue;
         }
-        // paramIn -> paramOut, name
-        if let Some(&pin) = params.iter().find(|&&p| arena[p].name == arena[i].name) {
+        // External declarations bind mirrored parameters positionally; two
+        // unnamed parameters are distinct even though both names are empty.
+        let declaration_only = arena[0].fullcode.trim_end().ends_with(';')
+            && arena[0]
+                .children
+                .iter()
+                .any(|&child| arena[child].label == "BLOCK" && arena[child].fullcode.is_empty());
+        let parameter_index = arena[0]
+            .children
+            .iter()
+            .copied()
+            .filter(|&child| arena[child].label == "METHOD_PARAMETER_OUT")
+            .position(|child| child == i);
+        let pin = if declaration_only {
+            parameter_index.and_then(|index| params.get(index))
+        } else {
+            params.iter().find(|&&p| arena[p].name == arena[i].name)
+        };
+        if let Some(&pin) = pin {
             push(arena[pin].name.clone(), pin, i, &mut flows);
+        }
+        if declaration_only {
+            continue;
         }
         // addEdgesToMethodParameterOut: usedIncomingDefs(paramOut) — the defs
         // live at method exit (param-out chain) that the paramOut isUsing. The
@@ -4292,6 +4621,15 @@ fn captured_identifier_flows(dumps: &[(String, String)]) -> Vec<(String, String,
             .iter()
             .filter(|&&i| arena[i].label == "METHOD_REF")
             .map(|&i| arena[i].fullcode.clone())
+            // Merely taking a function's address does not capture the
+            // caller's locals. The referenced method must be lexically nested
+            // in this AST (as definitions are in the file-global wrapper).
+            .filter(|full| {
+                arena
+                    .iter()
+                    .skip(1)
+                    .any(|node| node.label == "METHOD" && node.full == *full)
+            })
             .collect();
         if refs.is_empty() {
             continue;
