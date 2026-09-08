@@ -213,3 +213,35 @@ pins it, so a regression shows up as a diff.
   `longunsigned`), and a declaration ALSO registers its decl-specifier type
   — `unsigned char c` registers bare `unsigned`, `const char *p` registers
   `char` (CDT's typeForDeclSpecifier path).
+
+- **Identifier truth tests and loop bodies** (`corpus/control_truth_loops.c`):
+  scalar identifiers become integer `!= 0` calls; plain pointer identifiers
+  use `!= NULL`. Explicit comparisons, calls, arithmetic, and negation keep
+  their existing expression shape. Braceless loop bodies are direct children
+  of the control structure. Missing FOR clauses reserve ORDER slots, and
+  multiple initializer declarators share one initializer BLOCK after their
+  LOCALs. A `do` body ending in unconditional return leaves the condition and
+  subsequent tail disconnected; those nodes have no reaching-definition facts.
+- **External declarations** (`corpus/external_functions.c`,
+  `corpus/external_declarations.c`, `corpus/prototype_a.c`,
+  `corpus/prototype_b.c`): unused prototypes remain external METHOD scaffolds;
+  repeated declarations coalesce and a definition supersedes its prototype.
+  Unnamed parameters keep empty names and pair IN/OUT by position. A `(void)`
+  declaration retains a void parameter. Variadic signatures contain `...`,
+  while the synthetic `<param>N` parameter takes the preceding parameter's
+  type. Unresolved zero-argument calls create a stub with `p0` at ORDER=0.
+- **Callable values and lexical scope** (`corpus/function_pointers.c`,
+  `corpus/callable_scope.c`): function-pointer object types retain declarator
+  shape (`int(*)(int)`), their LOCAL CODE includes the full declaration, and
+  their initializer's LHS IDENTIFIER has empty CODE. Address-valued references
+  to known functions are METHOD_REF nodes. A block or FOR initializer can
+  shadow a function or parameter; leaving that scope restores the previous
+  binding. Parenthesized callees use pointerCall even when naming a function.
+- **FOR locals in the lone-identifier optimization**
+  (`corpus/callable_scope.c`): Joern's Method.local traverses contained BLOCKs
+  and their direct LOCAL children. A LOCAL directly under a FOR control
+  structure is absent from that list. Thus an otherwise lone initializer
+  identifier can be removed from its assignment GEN set, even though the
+  declaration exists in the AST. Verified against the pinned runtime's
+  MethodMethods and OptimizedReachingDefTransferFunction bytecode and live
+  reaching-definition output.

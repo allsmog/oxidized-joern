@@ -4,6 +4,21 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Second Astra batch in integration (2026-09-08 UTC).** The combined
+  prototype, function-pointer, lexical-scope, and loop corpus passes a fresh
+  strict live check: **201/201 blocks**, including **2,992 ReachingDef facts**.
+  Canonical direct finding generation follows method-local dependency paths;
+  its committed 26-outcome live-Joern fixture improves from 12 baseline
+  matches to 26 matches, with the negative cases retained. Nine public graph
+  tests cover callable declarations, scope restoration, and source lines.
+  Synthetic condition literals no longer consume later source tokens.
+  The current workspace passes 334 tests and strict Clippy; cache shape is13.
+  Work remains in progress: the new direct scanner path exposed a Lua scan
+  performance regression (baseline same-graph scan ~0.52s, candidate >120s),
+  now under repair. Conditional compilation is being implemented and reviewed
+  separately. Real-project hashes have not yet been refreshed for this batch;
+  do not treat the integrated changes as release-validated yet.
+
 - **Measured C parity expansion (2026-09-08 UTC).** The
   `CFrontend`/`Project`/`standard_pipeline` path passes 103/103 committed and
   live Joern v4.0.555 comparison blocks, including 1,552/1,552 ReachingDef
