@@ -25,9 +25,9 @@
       "expected": {
         "sourceFiles": 26,
         "nodes": 65856,
-        "graphSha256": "d86826fd3e0605f36ac0d9869539eb6a110c748ac462c19d330500b4ab0154fb",
+        "graphSha256": "97d7dddbfab7389cdb7fc0515c1d321871509db446642075a8a83f1a9b41cc10",
         "edgesSha256": "6f7699e460b8ce7b9d7ddbb4c2b6286d812dbec3dc329d992b5a1c086ee3ed46",
-        "exportSha256": "154decb53313861471addd1f2364c41cfc0f569124ff79126a27a45b791737db",
+        "exportSha256": "8209d74aef1aaa057029f63781202e863efd6e538f16138438d766ad756a93ab",
         "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
         "findings": 0
       },

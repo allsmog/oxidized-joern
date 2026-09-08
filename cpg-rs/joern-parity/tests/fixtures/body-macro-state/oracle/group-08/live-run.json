@@ -1,0 +1,53 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/oracle-workspace",
+  "javaHome": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "inputHashes": {
+    "header_event_tie_after": {
+      "main.c": "3c2f20484db3efcee95ff5bc4891b151e3f8cd33b350cc8a3949f233ee06eafa",
+      "api.h": "131c651f587e33d4865092b51b15078d561460ae2546252da319e47003dc7314"
+    },
+    "header_event_tie_before": {
+      "main.c": "d7e2bdc5330fcd657fc95455f74bb3fbb8aab5f6a3719156dd3d0aac9fceeccd",
+      "api.h": "9b6045f27b4cc4035e512fcc4c89caf312b15f35abb163f260fd5528888b3f8f"
+    },
+    "mixed_global_method_order": {
+      "main.c": "ea98f5d983935e31a28e4fd53a9211f45802f3e0b643c816a93c3014174350e5"
+    }
+  },
+  "joernVersion": "4.0.555",
+  "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "timeoutSeconds": 180,
+  "pid": 30190,
+  "exitCode": 0,
+  "wallSeconds": 6.04973292350769,
+  "rawStdoutSha256": "44933bed5425e8d085c8ae780988a50027c6883dd2fd3e2a8688d2678ce03344",
+  "rawStderrSha256": "c735b86e573197d5432c20f82a0a4f603ce47e053cd67ed26a4555e3a860deb8",
+  "projects": [
+    {
+      "case": "header_event_tie_after",
+      "canonicalLinesIncludingSeparators": 307,
+      "nonemptySelectedRecords": 297,
+      "expectedSha256": "9fc92774be54ab173650a4ecefaf16fb796028b29bf765e4775e0f054c40ba52"
+    },
+    {
+      "case": "header_event_tie_before",
+      "canonicalLinesIncludingSeparators": 139,
+      "nonemptySelectedRecords": 134,
+      "expectedSha256": "475475af54d05ceaff4865ed463b59978e1564d83039d649b68375be34356ffe"
+    },
+    {
+      "case": "mixed_global_method_order",
+      "canonicalLinesIncludingSeparators": 281,
+      "nonemptySelectedRecords": 273,
+      "expectedSha256": "5d190ba9d3236ea4da83d8940e62da44021b9c850d050896c18fd46ec622254b"
+    }
+  ]
+}

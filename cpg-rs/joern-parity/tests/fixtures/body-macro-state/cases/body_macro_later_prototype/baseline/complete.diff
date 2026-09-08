@@ -1,0 +1,108 @@
+--- Joern4.0.555
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity
+@@ -7,7 +7,7 @@
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={ return target(x); } TYPE_FULL_NAME=void ORDER=2
+     RETURN CODE=return target(x); ORDER=1
+-      CALL NAME=target CODE=target(x) TYPE_FULL_NAME=longint METHOD_FULL_NAME=target ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++      CALL NAME=target CODE=target(x) TYPE_FULL_NAME=RET METHOD_FULL_NAME=target ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+@@ -22,7 +22,7 @@
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={ return target(x); } TYPE_FULL_NAME=void ORDER=2
+       RETURN CODE=return target(x); ORDER=1
+-        CALL NAME=target CODE=target(x) TYPE_FULL_NAME=longint METHOD_FULL_NAME=target ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++        CALL NAME=target CODE=target(x) TYPE_FULL_NAME=RET METHOD_FULL_NAME=target ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+@@ -36,11 +36,11 @@
+   BLOCK CODE={\n#define RET long\n} TYPE_FULL_NAME=void ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+ 
+-METHOD NAME=target CODE=long long (int); FULL_NAME=target SIGNATURE=long(int) ORDER=1
++METHOD NAME=target CODE=RET target(int); FULL_NAME=target SIGNATURE=RET(int) ORDER=1
+   METHOD_PARAMETER_IN NAME= CODE=int TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=int TYPE_FULL_NAME=int ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=2
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=long ORDER=3
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+ 
+ NODES|META_DATA LANGUAGE=NEWC
+ NODES|FILE NAME=<includes> ORDER=1
+@@ -51,18 +51,16 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=RET FULL_NAME=RET CODE=RET IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=choose FULL_NAME=choose CODE=choose AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=long FULL_NAME=long CODE=long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=longint FULL_NAME=longint CODE=longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=setup FULL_NAME=setup CODE=setup AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
++NODES|TYPE NAME=RET FULL_NAME=RET TYPE_DECL_FULL_NAME=RET
+ NODES|TYPE NAME=choose FULL_NAME=choose TYPE_DECL_FULL_NAME=choose
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+-NODES|TYPE NAME=long FULL_NAME=long TYPE_DECL_FULL_NAME=long
+-NODES|TYPE NAME=longint FULL_NAME=longint TYPE_DECL_FULL_NAME=longint
+ NODES|TYPE NAME=setup FULL_NAME=setup TYPE_DECL_FULL_NAME=setup
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT choose#4 -> choose#5
+@@ -85,9 +83,8 @@
+ EDGES|CONTAINS D:main.c:<global> -> target#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
++EDGES|CONTAINS F:<includes> -> D:RET
+ EDGES|CONTAINS F:<includes> -> D:int
+-EDGES|CONTAINS F:<includes> -> D:long
+-EDGES|CONTAINS F:<includes> -> D:longint
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS choose#0 -> choose#3
+@@ -106,7 +103,7 @@
+ EDGES|EVAL_TYPE choose#1 -> T:int
+ EDGES|EVAL_TYPE choose#2 -> T:int
+ EDGES|EVAL_TYPE choose#3 -> T:void
+-EDGES|EVAL_TYPE choose#5 -> T:longint
++EDGES|EVAL_TYPE choose#5 -> T:RET
+ EDGES|EVAL_TYPE choose#6 -> T:int
+ EDGES|EVAL_TYPE choose#7 -> T:int
+ EDGES|EVAL_TYPE main.c:<global>#14 -> T:ANY
+@@ -120,7 +117,7 @@
+ EDGES|EVAL_TYPE target#1 -> T:int
+ EDGES|EVAL_TYPE target#2 -> T:int
+ EDGES|EVAL_TYPE target#3 -> T:ANY
+-EDGES|EVAL_TYPE target#4 -> T:long
++EDGES|EVAL_TYPE target#4 -> T:RET
+ EDGES|PARAMETER_LINK choose#1 -> choose#2
+ EDGES|PARAMETER_LINK setup#1 -> setup#2
+ EDGES|PARAMETER_LINK target#1 -> target#2
+@@ -128,10 +125,9 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
++EDGES|REF T:RET -> D:RET
+ EDGES|REF T:choose -> D:choose
+ EDGES|REF T:int -> D:int
+-EDGES|REF T:long -> D:long
+-EDGES|REF T:longint -> D:longint
+ EDGES|REF T:setup -> D:setup
+ EDGES|REF T:void -> D:void
+ EDGES|REF choose#6 -> choose#1
+@@ -139,10 +135,9 @@
+ EDGES|REF main.c:<global>#16 -> choose#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
++EDGES|SOURCE_FILE D:RET -> F:<includes>
+ EDGES|SOURCE_FILE D:choose -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+-EDGES|SOURCE_FILE D:long -> F:<includes>
+-EDGES|SOURCE_FILE D:longint -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE D:setup -> F:main.c
+ EDGES|SOURCE_FILE D:void -> F:<includes>

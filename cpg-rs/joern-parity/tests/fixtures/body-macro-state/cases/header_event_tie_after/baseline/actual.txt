@@ -1,0 +1,307 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=after CODE=int after(void) { return RESULT + MODE; } FULL_NAME=after SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return RESULT + MODE; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return RESULT + MODE; ORDER=1
+      CALL NAME=<operator>.addition CODE=RESULT + MODE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=RESULT CODE=RESULT TYPE_FULL_NAME=int METHOD_FULL_NAME=api.h:RESULT:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+        CALL NAME=MODE CODE=MODE TYPE_FULL_NAME=int METHOD_FULL_NAME=api.h:MODE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=8 TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=api.h:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=MODE CODE=#define MODE 8 FULL_NAME=api.h:MODE:int(0) SIGNATURE=int(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+
+METHOD NAME=RESULT CODE=#define RESULT 1 FULL_NAME=api.h:RESULT:int(0) SIGNATURE=int(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+
+METHOD NAME=before CODE=int before(void) { return MODE; } FULL_NAME=before SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return MODE; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return MODE; ORDER=1
+      CALL NAME=MODE CODE=MODE TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:MODE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=before CODE=int before(void) { return MODE; } FULL_NAME=before SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return MODE; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return MODE; ORDER=1
+        CALL NAME=MODE CODE=MODE TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:MODE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=prepare CODE=void prepare(void) {\n#undef MODE\n#define MODE 3\n} FULL_NAME=prepare SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n#undef MODE\n#define MODE 3\n} TYPE_FULL_NAME=void ORDER=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=after CODE=int after(void) { return RESULT + MODE; } FULL_NAME=after SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return RESULT + MODE; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return RESULT + MODE; ORDER=1
+        CALL NAME=<operator>.addition CODE=RESULT + MODE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=RESULT CODE=RESULT TYPE_FULL_NAME=int METHOD_FULL_NAME=api.h:RESULT:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+          CALL NAME=MODE CODE=MODE TYPE_FULL_NAME=int METHOD_FULL_NAME=api.h:MODE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=8 TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=before TYPE_FULL_NAME=before METHOD_FULL_NAME=before ORDER=1
+    METHOD_REF CODE=prepare TYPE_FULL_NAME=prepare METHOD_FULL_NAME=prepare ORDER=2
+    METHOD_REF CODE=after TYPE_FULL_NAME=after METHOD_FULL_NAME=after ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=MODE CODE=#define MODE 1 FULL_NAME=main.c:MODE:int(0) SIGNATURE=int(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+
+METHOD NAME=prepare CODE=void prepare(void) {\n#undef MODE\n#define MODE 3\n} FULL_NAME=prepare SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n#undef MODE\n#define MODE 3\n} TYPE_FULL_NAME=void ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=api.h ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=after FULL_NAME=after CODE=after AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|TYPE_DECL NAME=before FULL_NAME=before CODE=before AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=prepare FULL_NAME=prepare CODE=prepare AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=after FULL_NAME=after TYPE_DECL_FULL_NAME=after
+NODES|TYPE NAME=before FULL_NAME=before TYPE_DECL_FULL_NAME=before
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=prepare FULL_NAME=prepare TYPE_DECL_FULL_NAME=prepare
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT after#4 -> after#5
+EDGES|ARGUMENT after#5 -> after#6
+EDGES|ARGUMENT after#5 -> after#9
+EDGES|ARGUMENT before#4 -> before#5
+EDGES|CALL after#5 -> <operator>.addition#0
+EDGES|CALL after#6 -> api.h:RESULT:int(0)#0
+EDGES|CALL after#9 -> api.h:MODE:int(0)#0
+EDGES|CALL before#5 -> main.c:MODE:int(0)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG after#0 -> after#6
+EDGES|CFG after#11 -> after#5
+EDGES|CFG after#4 -> after#12
+EDGES|CFG after#5 -> after#4
+EDGES|CFG after#6 -> after#8
+EDGES|CFG after#6 -> after#9
+EDGES|CFG after#8 -> after#9
+EDGES|CFG after#9 -> after#11
+EDGES|CFG after#9 -> after#5
+EDGES|CFG api.h:<global>#0 -> api.h:<global>#2
+EDGES|CFG api.h:MODE:int(0)#0 -> api.h:MODE:int(0)#2
+EDGES|CFG api.h:RESULT:int(0)#0 -> api.h:RESULT:int(0)#2
+EDGES|CFG before#0 -> before#5
+EDGES|CFG before#4 -> before#8
+EDGES|CFG before#5 -> before#4
+EDGES|CFG before#5 -> before#7
+EDGES|CFG before#7 -> before#4
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#29
+EDGES|CFG main.c:<global>#10 -> prepare#4
+EDGES|CFG main.c:<global>#29 -> main.c:<global>#30
+EDGES|CFG main.c:<global>#30 -> main.c:<global>#31
+EDGES|CFG main.c:<global>#31 -> main.c:<global>#32
+EDGES|CFG main.c:MODE:int(0)#0 -> main.c:MODE:int(0)#2
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS D:api.h:<global> -> api.h:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> D:after
+EDGES|CONTAINS D:main.c:<global> -> D:before
+EDGES|CONTAINS D:main.c:<global> -> D:prepare
+EDGES|CONTAINS D:main.c:<global> -> api.h:MODE:int(0)#0
+EDGES|CONTAINS D:main.c:<global> -> api.h:RESULT:int(0)#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:MODE:int(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:api.h -> D:api.h:<global>
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS after#0 -> after#10
+EDGES|CONTAINS after#0 -> after#11
+EDGES|CONTAINS after#0 -> after#3
+EDGES|CONTAINS after#0 -> after#4
+EDGES|CONTAINS after#0 -> after#5
+EDGES|CONTAINS after#0 -> after#6
+EDGES|CONTAINS after#0 -> after#7
+EDGES|CONTAINS after#0 -> after#8
+EDGES|CONTAINS after#0 -> after#9
+EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+EDGES|CONTAINS api.h:MODE:int(0)#0 -> api.h:MODE:int(0)#1
+EDGES|CONTAINS api.h:RESULT:int(0)#0 -> api.h:RESULT:int(0)#1
+EDGES|CONTAINS before#0 -> before#3
+EDGES|CONTAINS before#0 -> before#4
+EDGES|CONTAINS before#0 -> before#5
+EDGES|CONTAINS before#0 -> before#6
+EDGES|CONTAINS before#0 -> before#7
+EDGES|CONTAINS main.c:<global>#0 -> after#0
+EDGES|CONTAINS main.c:<global>#0 -> before#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#28
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#29
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#30
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#31
+EDGES|CONTAINS main.c:<global>#10 -> prepare#3
+EDGES|CONTAINS main.c:MODE:int(0)#0 -> main.c:MODE:int(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE after#1 -> T:void
+EDGES|EVAL_TYPE after#10 -> T:ANY
+EDGES|EVAL_TYPE after#11 -> T:int
+EDGES|EVAL_TYPE after#12 -> T:int
+EDGES|EVAL_TYPE after#2 -> T:void
+EDGES|EVAL_TYPE after#3 -> T:void
+EDGES|EVAL_TYPE after#5 -> T:ANY
+EDGES|EVAL_TYPE after#6 -> T:int
+EDGES|EVAL_TYPE after#7 -> T:ANY
+EDGES|EVAL_TYPE after#8 -> T:int
+EDGES|EVAL_TYPE after#9 -> T:int
+EDGES|EVAL_TYPE api.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE api.h:MODE:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE api.h:MODE:int(0)#2 -> T:int
+EDGES|EVAL_TYPE api.h:RESULT:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE api.h:RESULT:int(0)#2 -> T:int
+EDGES|EVAL_TYPE before#1 -> T:void
+EDGES|EVAL_TYPE before#2 -> T:void
+EDGES|EVAL_TYPE before#3 -> T:void
+EDGES|EVAL_TYPE before#5 -> T:int
+EDGES|EVAL_TYPE before#6 -> T:ANY
+EDGES|EVAL_TYPE before#7 -> T:int
+EDGES|EVAL_TYPE before#8 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#28 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#29 -> T:before
+EDGES|EVAL_TYPE main.c:<global>#30 -> T:prepare
+EDGES|EVAL_TYPE main.c:<global>#31 -> T:after
+EDGES|EVAL_TYPE main.c:<global>#32 -> T:ANY
+EDGES|EVAL_TYPE main.c:MODE:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:MODE:int(0)#2 -> T:int
+EDGES|EVAL_TYPE prepare#1 -> T:void
+EDGES|EVAL_TYPE prepare#2 -> T:void
+EDGES|EVAL_TYPE prepare#3 -> T:void
+EDGES|EVAL_TYPE prepare#4 -> T:void
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK after#1 -> after#2
+EDGES|PARAMETER_LINK before#1 -> before#2
+EDGES|PARAMETER_LINK prepare#1 -> prepare#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:api.h:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:after -> D:after
+EDGES|REF T:before -> D:before
+EDGES|REF T:int -> D:int
+EDGES|REF T:prepare -> D:prepare
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#29 -> before#0
+EDGES|REF main.c:<global>#30 -> main.c:<global>#10
+EDGES|REF main.c:<global>#31 -> after#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:after -> F:main.c
+EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE D:before -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:prepare -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE after#0 -> F:main.c
+EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
+EDGES|SOURCE_FILE api.h:MODE:int(0)#0 -> F:main.c
+EDGES|SOURCE_FILE api.h:RESULT:int(0)#0 -> F:main.c
+EDGES|SOURCE_FILE before#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#10 -> F:main.c
+EDGES|SOURCE_FILE main.c:MODE:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] after#4 -> after#12
+FLOWS|REACHING_DEF[<RET>] before#4 -> before#8
+FLOWS|REACHING_DEF[MODE] after#9 -> after#12
+FLOWS|REACHING_DEF[MODE] after#9 -> after#5
+FLOWS|REACHING_DEF[MODE] before#5 -> before#4
+FLOWS|REACHING_DEF[MODE] before#5 -> before#8
+FLOWS|REACHING_DEF[RESULT + MODE] after#5 -> after#12
+FLOWS|REACHING_DEF[RESULT + MODE] after#5 -> after#4
+FLOWS|REACHING_DEF[RESULT] after#6 -> after#12
+FLOWS|REACHING_DEF[RESULT] after#6 -> after#5
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] after#0 -> after#1
+FLOWS|REACHING_DEF[] after#0 -> after#11
+FLOWS|REACHING_DEF[] after#0 -> after#6
+FLOWS|REACHING_DEF[] after#0 -> after#8
+FLOWS|REACHING_DEF[] after#0 -> after#9
+FLOWS|REACHING_DEF[] after#1 -> after#12
+FLOWS|REACHING_DEF[] after#1 -> after#2
+FLOWS|REACHING_DEF[] before#0 -> before#1
+FLOWS|REACHING_DEF[] before#0 -> before#5
+FLOWS|REACHING_DEF[] before#0 -> before#7
+FLOWS|REACHING_DEF[] before#1 -> before#2
+FLOWS|REACHING_DEF[] before#1 -> before#8
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#29
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#30
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#31
+FLOWS|REACHING_DEF[] main.c:<global>#10 -> prepare#1
+FLOWS|REACHING_DEF[] prepare#1 -> prepare#2
+FLOWS|REACHING_DEF[] prepare#1 -> prepare#4
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6

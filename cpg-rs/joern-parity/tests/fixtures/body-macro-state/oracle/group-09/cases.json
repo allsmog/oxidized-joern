@@ -1,0 +1,10 @@
+{
+  "deferred_full_name_literal": {
+    "main.c": "#define PICK 1\n#if PICK == 1\n#include \"api.h\"\n#endif\nint consume(const char *value);\nint choose(void) {\n /* Preserve ordinary source text: api.h:PICK:int(0). */\n consume(\"api.h:PICK:int(0)\");\n return PICK;\n}\n",
+    "api.h": "#undef PICK\n#define PICK 2\n"
+  },
+  "deferred_full_name_spaces": {
+    "main.c": "#define PICK 1\n#if PICK == 1\n#include \"api header.h\"\n#endif\nint consume(const char *value);\nint choose(void) {\n /* Preserve ordinary source text: api header.h:PICK:int(0). */\n consume(\"api header.h:PICK:int(0)\");\n return PICK;\n}\n",
+    "api header.h": "#undef PICK\n#define PICK 2\n"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "status": "PASS: worker focused validation only",
+  "sourceSha256": "f8dd06912d8acddeae363ee398df4b10c1502f4d0b47acd64cbe449c34789ec1",
+  "binarySha256": "cc3e84176ed1bc01fc0ad8a10e7f2f61fcedaa420e3e40ac277831143241289a",
+  "testSha256": "2b36d9d5ace7e8b7cde363bbffd247f00985ff8030c97db7a75ba6c4f8acd19c",
+  "focusedRustTestsPassed": 335,
+  "focusedRustFailed": 0,
+  "focusedRustIgnored": 0,
+  "fullGraphProductionGates": 54,
+  "completeMethodAssertions": 2,
+  "mainCommittedComparisonBlocksExact": 308,
+  "fmt": "PASS",
+  "gitDiffCheck": "PASS",
+  "sourceStableAcrossFinalChecks": true,
+  "logs": [
+    {
+      "path": "provenance/final-validation/tests-final.log",
+      "sha256": "8e86f6e3a364d8a5620a72e521ec33da537e886d8683f06a6940be22965bc016",
+      "exitCode": 0
+    },
+    {
+      "path": "provenance/final-validation/main-final.log",
+      "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6",
+      "exitCode": 0
+    },
+    {
+      "path": "provenance/final-validation/fmt-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exitCode": 0
+    },
+    {
+      "path": "provenance/final-validation/diff-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exitCode": 0
+    }
+  ],
+  "rootOwnsRemainingIntegrationGates": [
+    "workspace tests",
+    "strict Clippy",
+    "fresh live main308",
+    "release binaries",
+    "whole-project retention",
+    "resource and native archive acceptance"
+  ]
+}

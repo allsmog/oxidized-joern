@@ -1,0 +1,108 @@
+--- Joern4.0.555
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v4/joern-parity
+@@ -11,8 +11,7 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={\n#include "api.h"\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-    LOCAL NAME=included CODE=int included TYPE_FULL_NAME=int ORDER=1
+-    RETURN CODE=return x; ORDER=2
++    RETURN CODE=return x; ORDER=1
+       IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+@@ -21,8 +20,7 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={\n#include "api.h"\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-      LOCAL NAME=included CODE=int included TYPE_FULL_NAME=int ORDER=1
+-      RETURN CODE=return x; ORDER=2
++      RETURN CODE=return x; ORDER=1
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+@@ -43,20 +41,20 @@
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+ NODES|TYPE_DECL NAME=choose FULL_NAME=choose CODE=choose AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
++NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=choose FULL_NAME=choose TYPE_DECL_FULL_NAME=choose
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT choose#5 -> choose#6
++EDGES|ARGUMENT choose#4 -> choose#5
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG api.h:<global>#0 -> api.h:<global>#3
+-EDGES|CFG choose#0 -> choose#6
+-EDGES|CFG choose#5 -> choose#7
+-EDGES|CFG choose#6 -> choose#5
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#10
+-EDGES|CFG main.c:<global>#10 -> main.c:<global>#11
++EDGES|CFG choose#0 -> choose#5
++EDGES|CFG choose#4 -> choose#6
++EDGES|CFG choose#5 -> choose#4
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#9
++EDGES|CFG main.c:<global>#9 -> main.c:<global>#10
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS D:api.h:<global> -> api.h:<global>#0
+ EDGES|CONTAINS D:main.c:<global> -> D:choose
+@@ -69,10 +67,10 @@
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+ EDGES|CONTAINS choose#0 -> choose#3
++EDGES|CONTAINS choose#0 -> choose#4
+ EDGES|CONTAINS choose#0 -> choose#5
+-EDGES|CONTAINS choose#0 -> choose#6
+ EDGES|CONTAINS main.c:<global>#0 -> choose#0
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#8
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#9
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+@@ -82,12 +80,11 @@
+ EDGES|EVAL_TYPE choose#1 -> T:int
+ EDGES|EVAL_TYPE choose#2 -> T:int
+ EDGES|EVAL_TYPE choose#3 -> T:void
+-EDGES|EVAL_TYPE choose#4 -> T:int
++EDGES|EVAL_TYPE choose#5 -> T:int
+ EDGES|EVAL_TYPE choose#6 -> T:int
+-EDGES|EVAL_TYPE choose#7 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#10 -> T:choose
+-EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#9 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#8 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#9 -> T:choose
+ EDGES|PARAMETER_LINK choose#1 -> choose#2
+ EDGES|REF NB:<global> -> NS:<global>
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+@@ -97,8 +94,8 @@
+ EDGES|REF T:choose -> D:choose
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+-EDGES|REF choose#6 -> choose#1
+-EDGES|REF main.c:<global>#10 -> choose#0
++EDGES|REF choose#5 -> choose#1
++EDGES|REF main.c:<global>#9 -> choose#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+@@ -113,11 +110,11 @@
+ EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
+ EDGES|SOURCE_FILE choose#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-FLOWS|REACHING_DEF[<RET>] choose#5 -> choose#7
++FLOWS|REACHING_DEF[<RET>] choose#4 -> choose#6
+ FLOWS|REACHING_DEF[] choose#0 -> choose#1
+-FLOWS|REACHING_DEF[] choose#0 -> choose#6
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#10
++FLOWS|REACHING_DEF[] choose#0 -> choose#5
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#9
+ FLOWS|REACHING_DEF[x] choose#1 -> choose#2
++FLOWS|REACHING_DEF[x] choose#1 -> choose#5
+ FLOWS|REACHING_DEF[x] choose#1 -> choose#6
+-FLOWS|REACHING_DEF[x] choose#1 -> choose#7
+-FLOWS|REACHING_DEF[x] choose#6 -> choose#5
++FLOWS|REACHING_DEF[x] choose#5 -> choose#4

@@ -1,0 +1,1 @@
+Preparation attempt failed before compiler/process launch: IndexError from reading command classpath at index4 instead of3. No live output was produced or replaced. Corrected below.

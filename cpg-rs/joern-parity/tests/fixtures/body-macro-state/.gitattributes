@@ -1,0 +1,7 @@
+# Preserve complete raw references, diagnostics, source snapshots and input bytes.
+* -text
+*.txt -whitespace
+*.diff -whitespace
+*.stdout -whitespace
+*.stderr -whitespace
+*.log -whitespace

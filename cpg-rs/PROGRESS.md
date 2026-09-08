@@ -4,6 +4,53 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Ninth measured Astra batch (2026-09-08 UTC).** One source-order macro
+  context now feeds active-body emission, phantom/declaration discovery,
+  type sites and local prototypes. Macro effects persist across C scopes,
+  later functions and supplied includes; lexical typedef scope and explicit
+  recovery contexts remain separate. Synthetic macro metadata follows the
+  pinned expansion-event ownership in the covered cases, with generated-field
+  edits restricted to exact current-translation-unit properties and edges.
+  The new family retains **76 complete references: 11→54 exact**, all 54
+  fully gated, plus two complete macro-METHOD assertions in otherwise nonexact
+  projects. All **22 complete diagnostics** remain, including an importer
+  failure. Independent replay gains **555 matching records and loses none**.
+  Held definition, literal and object-callee metadata regressions remain in
+  the evidence. The final token-eligibility repair restores both challenged
+  ARG method blocks without changing the declaration expansion contract.
+  All **462 workspace tests /74 groups**, **308/308** committed and fresh
+  Joern v4.0.555 comparisons, 17 checker tests, formatting, strict Clippy,
+  the 73-dependency audit, native release/archive and official real-project
+  acceptance pass. Cache shape is **20**. A first root Clippy failure exposed
+  a stale documentation comment; restoring the original helper documentation
+  is the sole source change beyond the reviewed worker candidate. The failed
+  run is retained and fresh final builds/gates pass.
+  Whole zlib output changes 12 function-reference types from `local` to
+  `block_state` and their 12 type edges; all correspond to live Joern source
+  occurrences. Raw matching records gain **12 and lose zero**. Lua's entire
+  output is byte-identical to the eighth build. Exact method ASTs remain
+  **160/410 zlib /1,434/2,274 Lua**; strict primary methods **42/513**, bodies
+  **42/540**, and nonempty bodies **23/518**, with no previous exact loss.
+  The 61 tracked earlier repair facts, stubs and three actual zlib snprintf
+  calls remain. Whole-project references explicitly reuse the sixth batch's
+  pinned live outputs; neither complete project projection is exact.
+  Two repeated builds pass at **6.88/6.79 seconds zlib /6.09/6.06 seconds Lua**,
+  with peak build RSS **473.13/460.78 MiB** under unchanged ceilings.
+  Clean/update equivalence passes for **26/61** files; separate update RSS
+  is **640.98/724.03 MiB**. Only two expected manifest fields change: zlib's
+  stored graph and JSON export hashes. Node counts, edge hashes, all Lua
+  expectations, inputs, licenses, exclusions, budgets and zero-finding SARIF
+  remain unchanged. See the [ninth report](../docs/conformance/astra-ninth-batch-2026-09-08.md),
+  [complete counters](../docs/conformance/astra-ninth-batch-metrics.json), and
+  [acceptance receipt](../docs/conformance/astra-ninth-batch-acceptance.json).
+  Full project/product parity remains incomplete. Next: pin declarations
+  from active supplied body includes, using scalar/array inline controls and
+  a separate view per include instance. The retained probe lacks an included
+  LOCAL and has wrong file-global ordering although macro effects work.
+  The fixedtables, guarded runtime-chain, condition-evaluation, expression,
+  source-transport, schema, query and non-C boundaries remain explicit.
+
+
 - **Eighth measured Astra batch (2026-09-08 UTC).** Shared kept-branch
   traversal now covers function-body statement emission, phantom discovery,
   declaration shadows and typedef context. Existing `undef` readers accept

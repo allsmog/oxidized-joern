@@ -1,0 +1,56 @@
+--- /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v6/exact.rs	2026-09-08 13:24:10
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v7/exact.rs	2026-09-08 13:31:42
+@@ -205,7 +205,7 @@
+         let declarations = translation_unit_items(root, bytes)
+             .into_iter()
+             .filter(|node| node.kind() != "function_definition" || active.contains(&node.id()))
+-            .flat_map(|node| prototype_declarations(node, bytes));
++            .flat_map(|node| prototype_declarations(node, bytes, &context.body_macro_sites));
+         for declaration in declarations {
+             let macros = context
+                 .macro_states
+@@ -5864,13 +5864,30 @@
+     format!("{base}{}", object_decl_suffix(decl, b, false))
+ }
+ 
+-fn prototype_declarations<'a>(root: Node<'a>, b: &[u8]) -> Vec<Node<'a>> {
++fn prototype_declarations<'a>(
++    root: Node<'a>,
++    b: &[u8],
++    macro_sites: &BodyMacroSites,
++) -> Vec<Node<'a>> {
+     if !prototype_headers(root, b).is_empty() {
+         return vec![root];
+     }
+-    named_children(root)
++    // File-scope inactive declarations remain in the pinned graph. Within an
++    // active body, prototypes follow the same selected branch as statements.
++    let children = if matches!(
++        root.kind(),
++        "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef" | "preproc_else"
++    ) {
++        macro_sites
++            .at(root, b)
++            .map(|macros| kept_preproc_children(root, b, macros))
++            .unwrap_or_else(|| named_children(root))
++    } else {
++        named_children(root)
++    };
++    children
+         .into_iter()
+-        .flat_map(|child| prototype_declarations(child, b))
++        .flat_map(|child| prototype_declarations(child, b, macro_sites))
+         .collect()
+ }
+ 
+@@ -8111,8 +8128,8 @@
+ }
+ 
+ /// Statements and name discovery share the same selected body branch. The
+-/// method's immutable macro snapshot already includes preceding source/header
+-/// definitions; body-local directives are a separate, unsupported state update.
++/// source-position snapshot includes preceding file, header, and body directives;
++/// conditions themselves do not become statement or phantom children.
+ fn kept_preproc_children<'tree>(
+     node: Node<'tree>,
+     bytes: &[u8],

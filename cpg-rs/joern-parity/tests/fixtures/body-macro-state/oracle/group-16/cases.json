@@ -1,0 +1,9 @@
+{
+  "local_inactive_prototype": {
+    "main.c": "int choose(int x) {\n#define ENABLE 0\n#if ENABLE\n int target(int);\n#else\n long target(int);\n#endif\n return target(x);\n}\n"
+  },
+  "local_inactive_prototype_header": {
+    "api.h": "#define ENABLE 0\n",
+    "main.c": "#include \"api.h\"\nint choose(int x) {\n#if ENABLE\n int target(int);\n#else\n long target(int);\n#endif\n return target(x);\n}\n"
+  }
+}

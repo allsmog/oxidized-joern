@@ -1,0 +1,887 @@
+{
+  "status": "PASS_PACKAGE_PREINTEGRATION",
+  "audit": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-package-review/audit.json",
+    "sha256": "cb368eeb5d6bc3844123f2485e157bb856d3d5fc1f2e28dd40e640ca06a363e3",
+    "bytes": 976580
+  },
+  "oracleProvenanceCheckCount": 205,
+  "oracleProvenanceChecks": [
+    {
+      "name": "pinned version group-01",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-01",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-01",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-01",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-01",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-01",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-01",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding body_state_then_include",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding conditional_local_typedef",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding cross_function_state",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding elif_definition",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding header_then_local_undef",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding inactive_effects",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding inactive_function_effects",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding inactive_typedef_shadow",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding local_definition",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding local_function_macro",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding local_redefinition",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding local_type_macro",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding local_undef",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding nested_block_persistence",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding no_backwards_leak",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding runtime_if_directive",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding selected_arm_definition",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-01",
+      "pass": true
+    },
+    {
+      "name": "pinned version group-02",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-02",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-02",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-02",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-02",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-02",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-02",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding block_macro_typedef_separation",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding branch_condition_entry_state",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding header_after_body_undef",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding nested_copied_arguments",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding recovery_after_redefinition",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding recovery_entry_macros",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding runtime_arms_lexical_order",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-02",
+      "pass": true
+    },
+    {
+      "name": "pinned version group-03",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-03",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-03",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-03",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-03",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-03",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-03",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding body_include_macro_only",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding body_macro_later_prototype",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding body_typedef_does_not_escape",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding header_entry_before_body",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding include_multiple_effects",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding local_conditional_prototype",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding local_macro_prototype",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding spaced_inactive_typedef_shadow",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-03",
+      "pass": true
+    },
+    {
+      "name": "pinned version group-04",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-04",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-04",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-04",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-04",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-04",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-04",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding conditional_before_redefine",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding defined_before_redefine",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding earlier_function_condition",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding intervening_nonmatching",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding ordinary_references_redefined",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-04",
+      "pass": true
+    },
+    {
+      "name": "pinned version group-05",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-05",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-05",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-05",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-05",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-05",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-05",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding file_level_condition",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding formal_list_redefined",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding header_redefined",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-05",
+      "pass": true
+    },
+    {
+      "name": "pinned version group-06",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-06",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-06",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-06",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-06",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-06",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-06",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding condition_function_and_defined",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding inactive_and_shortcircuit",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding outer_nested_body_argument",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-06",
+      "pass": true
+    },
+    {
+      "name": "pinned version group-07",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-07",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-07",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-07",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-07",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-07",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-07",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding global_before_function",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding object_to_function",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-07",
+      "pass": true
+    },
+    {
+      "name": "pinned version group-08",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-08",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-08",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-08",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-08",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-08",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-08",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding header_event_tie_after",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding header_event_tie_before",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding mixed_global_method_order",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-08",
+      "pass": true
+    },
+    {
+      "name": "pinned version group-09",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-09",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-09",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-09",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-09",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-09",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-09",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding deferred_full_name_literal",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding deferred_full_name_spaces",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-09",
+      "pass": true
+    },
+    {
+      "name": "pinned version group-10",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-10",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-10",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-10",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-10",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-10",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-10",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding nested_function_control",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding nested_function_macro_persistence",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-10",
+      "pass": true
+    },
+    {
+      "name": "pinned version group-11",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-11",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-11",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-11",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-11",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-11",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-11",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding character_literal",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding prefixed_quoted",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding quoted_body",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding quoted_global",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-11",
+      "pass": true
+    },
+    {
+      "name": "pinned version group-12",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-12",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-12",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-12",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-12",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-12",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-12",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding duplicate_clinit_tag",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-12",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-13",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-13",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-13",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-13",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-13",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding function_wrap_redefinition",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding object_call",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding object_function_alias",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding object_nested_argument",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding object_redefinition",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding ordinary_control",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-13",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-14",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-14",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-14",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-14",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-14",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding cast_type",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding sizeof_array",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding sizeof_array_plain",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding sizeof_type",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-14",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-15",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-15",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-15",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-15",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-15",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding comma_tail",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding parenthesized_tail",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-15",
+      "pass": true
+    },
+    {
+      "name": "pinned version group-16",
+      "pass": true
+    },
+    {
+      "name": "pinned archive group-16",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-16",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-16",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-16",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-16",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-16",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding local_inactive_prototype",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding local_inactive_prototype_header",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-16",
+      "pass": true
+    },
+    {
+      "name": "successful original oracle group-17",
+      "pass": true
+    },
+    {
+      "name": "oracle script hash group-17",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stdout hash group-17",
+      "pass": true
+    },
+    {
+      "name": "oracle raw stderr hash group-17",
+      "pass": true
+    },
+    {
+      "name": "bound script invocation group-17",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding disabled_function_tail",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding object_cycle",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding trailing_comment",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding transitive_function",
+      "pass": true
+    },
+    {
+      "name": "original oracle input byte binding transitive_ordinary",
+      "pass": true
+    },
+    {
+      "name": "original invoked script retained unchanged group-17",
+      "pass": true
+    },
+    {
+      "name": "base audit PASS",
+      "pass": true
+    }
+  ],
+  "reviewHelperCorrection": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-package-review/first-attempt.json",
+    "sha256": "8a2efd8ccaa48b4812f6e6fac650a4c67ff69a1e78dfa90fd0ef3fc62c72e626",
+    "bytes": 425
+  },
+  "package": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8/manifest.json",
+    "sha256": "27f9fb7958d042d77dc327809cb59ce85614990792706900299d57dcb0d823c5",
+    "bytes": 431693
+  },
+  "supplementalPackage": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8-supplemental/manifest.json",
+    "sha256": "2b921525e336a691cefda7cfa358bbb7443b8e6f2b8492d92c7c771bfe67922c",
+    "bytes": 2827
+  },
+  "sourcePatch": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8/final-source.patch",
+    "sha256": "a6064866b6d14d33f42b4bd65175ffdc1ddfa7cee0f6078d97c6958bc292d1a0",
+    "bytes": 52162
+  },
+  "sourceSha256": "f8dd06912d8acddeae363ee398df4b10c1502f4d0b47acd64cbe449c34789ec1",
+  "workspaceCountProposal": {
+    "rustTestFunctions": 2,
+    "testResultGroups": 1,
+    "expectedWorkspaceTests": 462,
+    "expectedWorkspaceGroups": 74,
+    "basis": "Accepted eighth460tests/73groups + one new integration test file with2#[test] functions. Source unit-test count unchanged. Root must verify actual final counts."
+  },
+  "claimsReview": {
+    "README": "Bounded76projects/54exact/22diagnostics;13,694canonical/13,294nonempty;555gains/0losses recomputed from complete raw reference/output Counters. Explicitly distinguishes held versions, focused worker checks, root remaining acceptance, noninjective transport and unsupported paths.",
+    "QUIRKS": "Append preserves preexisting text and describes pinned offset/event ownership with fallback/no-full-parity limit.",
+    "completeProductionGates": "54 unique exact case names exactly equal the complete canonical Project::build test inventory. The2 additional whole-METHOD assertions use full unchanged diagnostic references and are not counted as exact projects.",
+    "failure": "duplicate_clinit_tag remains nonzero on accepted binary(-6) and candidate(101), with unchanged complete expected graph plus both stderr/output/diff receipts. It is ungated and explicitly a diagnostic.",
+    "historicalReceipts": "329 held version/case full outputs/statuses verified against seven original replay receipts and immutable binary hashes; all frozen source snapshots/logs are retained. Absolute paths remain provenance, with portable copiedEvidence mappings.",
+    "copyScope": "Only the reviewed source patch, new test+fixture paths and QUIRKS append. Source patch reconstructs frozenf8dd from accepted26f; no main oracle/driver/cache/manifest/PROGRESS edits."
+  },
+  "totals": {
+    "checks": 8373,
+    "projects": 76,
+    "uniqueSourceMappings": 76,
+    "fullExactGates": 54,
+    "completeDiagnostics": 22,
+    "newRustTests": 2,
+    "newTestGroups": 1,
+    "expectedFinalWorkspaceTests": 462,
+    "expectedFinalWorkspaceGroups": 74,
+    "baseDeclaredFiles": 1870,
+    "supplementalDeclaredFiles": 7,
+    "copyPathsIncludingQUIRKS": 1874,
+    "sourcePatchAppliedSeparately": true
+  },
+  "noProductionEditsOrBuilds": true,
+  "limitations": [
+    "Independent source semantics and full frozen replay belong to parity reviewer; this package audit does not replace final root full-source/whole-project/resource acceptance.",
+    "Expected workspace counts are derived from unchanged source test inventory plus the two new integration tests; root must bind actual final outputs."
+  ]
+}

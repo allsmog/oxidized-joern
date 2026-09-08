@@ -1,0 +1,6 @@
+
+thread 'main' (12912442) panicked at cpg-lang-c/src/import.rs:119:13:
+assertion `left == right` failed: duplicate method node properties drift
+  left: {"CODE": "N", "DISPATCH_TYPE": "INLINED", "ORDER": "1", "METHOD_FULL_NAME": "a.c:N:int(0)", "NAME": "N", "SIGNATURE": "int(0)", "ARGUMENT_INDEX": "1", "TYPE_FULL_NAME": "int"}
+ right: {"NAME": "N", "ARGUMENT_INDEX": "1", "DISPATCH_TYPE": "INLINED", "METHOD_FULL_NAME": "b.c:N:int(0)", "ORDER": "1", "CODE": "N", "SIGNATURE": "int(0)", "TYPE_FULL_NAME": "int"}
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

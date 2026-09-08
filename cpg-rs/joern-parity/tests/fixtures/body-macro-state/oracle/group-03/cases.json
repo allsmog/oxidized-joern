@@ -1,0 +1,28 @@
+{
+  "spaced_inactive_typedef_shadow": {
+    "main.c": "typedef int T;\nint choose(int x) {\n#define DISABLED 0\n#if DISABLED\n int T = 0;\n#endif\n return (T)(x);\n}\n"
+  },
+  "header_entry_before_body": {
+    "main.c": "#define RET int\nRET before(int x) {\n#undef RET\n#define RET long\n return x;\n}\nRET after(int x) { return x; }\n"
+  },
+  "local_macro_prototype": {
+    "main.c": "int choose(int x) {\n#define RET long\n RET target(int);\n return target(x);\n}\n"
+  },
+  "body_macro_later_prototype": {
+    "main.c": "void setup(void) {\n#define RET long\n}\nRET target(int);\nint choose(int x) { return target(x); }\n"
+  },
+  "local_conditional_prototype": {
+    "main.c": "int choose(int x) {\n#define ENABLE 1\n#if ENABLE\n int target(int);\n#else\n long target(int);\n#endif\n return target(x);\n}\n"
+  },
+  "include_multiple_effects": {
+    "api.h": "#undef VALUE\n#define VALUE 2\n#undef VALUE\n#define VALUE 3\n#define FLAG 1\n",
+    "main.c": "void setup(void) {\n#define VALUE 1\n}\n#include \"api.h\"\nint choose(int x) {\n#if FLAG && VALUE == 3\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "body_typedef_does_not_escape": {
+    "main.c": "void setup(void) {\n#define BASE int\n typedef BASE T;\n}\nint choose(int x) { return (T)(x); }\n"
+  },
+  "body_include_macro_only": {
+    "api.h": "#define FLAG 1\nint included;\n",
+    "main.c": "int choose(int x) {\n#include \"api.h\"\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n}\n"
+  }
+}

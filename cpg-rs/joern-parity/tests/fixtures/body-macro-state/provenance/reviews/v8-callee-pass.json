@@ -1,0 +1,1403 @@
+{
+  "status": "PASS_BOUNDED_OBJECT_CALLEE_AND_DISABLED_TERMINAL_REPAIR",
+  "createdAtUtc": "2026-09-08T20:39:13.835118+00:00",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/exact.rs",
+    "sha256": "f8dd06912d8acddeae363ee398df4b10c1502f4d0b47acd64cbe449c34789ec1",
+    "bytes": 399178
+  },
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/joern-parity",
+    "sha256": "cc3e84176ed1bc01fc0ad8a10e7f2f61fcedaa420e3e40ac277831143241289a",
+    "bytes": 11832064
+  },
+  "ownerPair": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/bindings.json",
+    "sha256": "bae8c3456418fc6db2bbf98a79e00374504b81a4f8317ffd7c1ec00998353fae",
+    "bytes": 899
+  },
+  "buildLog": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/build-v8.log",
+    "sha256": "38bffeb6115c5ddb58825f7c8f31327a675a8c6b81029f73da36c7d975eb18fe",
+    "bytes": 348
+  },
+  "deltaV7ToV8": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/v7-to-v8.patch",
+    "sha256": "247b22a9739b2afd7c0240230657b97c3da7e80bbd52addeae03b7219e2c8e22",
+    "bytes": 4841
+  },
+  "checkCount": 282,
+  "checks": [
+    {
+      "name": "successful source-stable paired build",
+      "pass": true
+    },
+    {
+      "name": "exact.rs frozen hash",
+      "pass": true
+    },
+    {
+      "name": "joern-parity frozen hash",
+      "pass": true
+    },
+    {
+      "name": "buildLog frozen hash",
+      "pass": true
+    },
+    {
+      "name": "successful dev compilation",
+      "pass": true
+    },
+    {
+      "name": "valid patch hunk 0",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 977",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 978",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 979",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 980",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 981",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 982",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 983",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 984",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 985",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 986",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 987",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 988",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 989",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 990",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 991",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 992",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 993",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 994",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 995",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 996",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 997",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 998",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 999",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1000",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1001",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1002",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1003",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1004",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1005",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1006",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1007",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1008",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1009",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1010",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1011",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1012",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1013",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1014",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1015",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1016",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1017",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1018",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1019",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1020",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1021",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1022",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1023",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1024",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1025",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1026",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1027",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1028",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1029",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1030",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1031",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1032",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1033",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1034",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1035",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1036",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1037",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1038",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1039",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1040",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1041",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1042",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 1043",
+      "pass": true
+    },
+    {
+      "name": "valid patch hunk 75",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6071",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6072",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6073",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6074",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6075",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6076",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6077",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6078",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6079",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6080",
+      "pass": true
+    },
+    {
+      "name": "valid patch hunk 99",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6143",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6144",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6145",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6146",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6147",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6148",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6149",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6150",
+      "pass": true
+    },
+    {
+      "name": "valid patch hunk 115",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6156",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6157",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6158",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6159",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6160",
+      "pass": true
+    },
+    {
+      "name": "exact patch original line 6161",
+      "pass": true
+    },
+    {
+      "name": "exact V7 to V8 patch result",
+      "pass": true
+    },
+    {
+      "name": "precise auxiliary eligibility block",
+      "pass": true
+    },
+    {
+      "name": "all existing String/budget/disabled operations unchanged",
+      "pass": true
+    },
+    {
+      "name": "old entry point remains String wrapper",
+      "pass": true
+    },
+    {
+      "name": "disabled scope covers recursive tail update",
+      "pass": true
+    },
+    {
+      "name": "no tail reset at recursion entry",
+      "pass": true
+    },
+    {
+      "name": "trivia does not replace eligibility",
+      "pass": true
+    },
+    {
+      "name": "normal tokens replace eligibility in disabled scope",
+      "pass": true
+    },
+    {
+      "name": "17 unique replayed inputs",
+      "pass": true
+    },
+    {
+      "name": "producer exit primary/function_wrap_redefinition",
+      "pass": true
+    },
+    {
+      "name": "bound primary/function_wrap_redefinition/input",
+      "pass": true
+    },
+    {
+      "name": "bound primary/function_wrap_redefinition/reference",
+      "pass": true
+    },
+    {
+      "name": "bound primary/function_wrap_redefinition/actual",
+      "pass": true
+    },
+    {
+      "name": "bound primary/function_wrap_redefinition/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound primary/function_wrap_redefinition/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status primary/function_wrap_redefinition",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss primary/function_wrap_redefinition",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss primary/function_wrap_redefinition",
+      "pass": true
+    },
+    {
+      "name": "producer exit primary/object_call",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_call/input",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_call/reference",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_call/actual",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_call/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_call/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status primary/object_call",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss primary/object_call",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss primary/object_call",
+      "pass": true
+    },
+    {
+      "name": "producer exit primary/object_function_alias",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_function_alias/input",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_function_alias/reference",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_function_alias/actual",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_function_alias/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_function_alias/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status primary/object_function_alias",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss primary/object_function_alias",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss primary/object_function_alias",
+      "pass": true
+    },
+    {
+      "name": "producer exit primary/object_nested_argument",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_nested_argument/input",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_nested_argument/reference",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_nested_argument/actual",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_nested_argument/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_nested_argument/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status primary/object_nested_argument",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss primary/object_nested_argument",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss primary/object_nested_argument",
+      "pass": true
+    },
+    {
+      "name": "producer exit primary/object_redefinition",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_redefinition/input",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_redefinition/reference",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_redefinition/actual",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_redefinition/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound primary/object_redefinition/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status primary/object_redefinition",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss primary/object_redefinition",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss primary/object_redefinition",
+      "pass": true
+    },
+    {
+      "name": "producer exit primary/ordinary_control",
+      "pass": true
+    },
+    {
+      "name": "bound primary/ordinary_control/input",
+      "pass": true
+    },
+    {
+      "name": "bound primary/ordinary_control/reference",
+      "pass": true
+    },
+    {
+      "name": "bound primary/ordinary_control/actual",
+      "pass": true
+    },
+    {
+      "name": "bound primary/ordinary_control/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound primary/ordinary_control/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status primary/ordinary_control",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss primary/ordinary_control",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss primary/ordinary_control",
+      "pass": true
+    },
+    {
+      "name": "producer exit type-position/cast_type",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/cast_type/input",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/cast_type/reference",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/cast_type/actual",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/cast_type/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/cast_type/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status type-position/cast_type",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss type-position/cast_type",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss type-position/cast_type",
+      "pass": true
+    },
+    {
+      "name": "producer exit type-position/sizeof_array",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_array/input",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_array/reference",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_array/actual",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_array/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_array/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status type-position/sizeof_array",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss type-position/sizeof_array",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss type-position/sizeof_array",
+      "pass": true
+    },
+    {
+      "name": "producer exit type-position/sizeof_array_plain",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_array_plain/input",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_array_plain/reference",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_array_plain/actual",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_array_plain/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_array_plain/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status type-position/sizeof_array_plain",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss type-position/sizeof_array_plain",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss type-position/sizeof_array_plain",
+      "pass": true
+    },
+    {
+      "name": "producer exit type-position/sizeof_type",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_type/input",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_type/reference",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_type/actual",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_type/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound type-position/sizeof_type/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status type-position/sizeof_type",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss type-position/sizeof_type",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss type-position/sizeof_type",
+      "pass": true
+    },
+    {
+      "name": "producer exit callee-rescan/comma_tail",
+      "pass": true
+    },
+    {
+      "name": "bound callee-rescan/comma_tail/input",
+      "pass": true
+    },
+    {
+      "name": "bound callee-rescan/comma_tail/reference",
+      "pass": true
+    },
+    {
+      "name": "bound callee-rescan/comma_tail/actual",
+      "pass": true
+    },
+    {
+      "name": "bound callee-rescan/comma_tail/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound callee-rescan/comma_tail/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status callee-rescan/comma_tail",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss callee-rescan/comma_tail",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss callee-rescan/comma_tail",
+      "pass": true
+    },
+    {
+      "name": "producer exit callee-rescan/parenthesized_tail",
+      "pass": true
+    },
+    {
+      "name": "bound callee-rescan/parenthesized_tail/input",
+      "pass": true
+    },
+    {
+      "name": "bound callee-rescan/parenthesized_tail/reference",
+      "pass": true
+    },
+    {
+      "name": "bound callee-rescan/parenthesized_tail/actual",
+      "pass": true
+    },
+    {
+      "name": "bound callee-rescan/parenthesized_tail/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound callee-rescan/parenthesized_tail/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status callee-rescan/parenthesized_tail",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss callee-rescan/parenthesized_tail",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss callee-rescan/parenthesized_tail",
+      "pass": true
+    },
+    {
+      "name": "producer exit v6-ownership/disabled_function_tail",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/disabled_function_tail/input",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/disabled_function_tail/reference",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/disabled_function_tail/actual",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/disabled_function_tail/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/disabled_function_tail/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status v6-ownership/disabled_function_tail",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss v6-ownership/disabled_function_tail",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss v6-ownership/disabled_function_tail",
+      "pass": true
+    },
+    {
+      "name": "producer exit v6-ownership/object_cycle",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/object_cycle/input",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/object_cycle/reference",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/object_cycle/actual",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/object_cycle/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/object_cycle/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status v6-ownership/object_cycle",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss v6-ownership/object_cycle",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss v6-ownership/object_cycle",
+      "pass": true
+    },
+    {
+      "name": "producer exit v6-ownership/trailing_comment",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/trailing_comment/input",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/trailing_comment/reference",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/trailing_comment/actual",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/trailing_comment/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/trailing_comment/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status v6-ownership/trailing_comment",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss v6-ownership/trailing_comment",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss v6-ownership/trailing_comment",
+      "pass": true
+    },
+    {
+      "name": "producer exit v6-ownership/transitive_function",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/transitive_function/input",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/transitive_function/reference",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/transitive_function/actual",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/transitive_function/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/transitive_function/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status v6-ownership/transitive_function",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss v6-ownership/transitive_function",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss v6-ownership/transitive_function",
+      "pass": true
+    },
+    {
+      "name": "producer exit v6-ownership/transitive_ordinary",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/transitive_ordinary/input",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/transitive_ordinary/reference",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/transitive_ordinary/actual",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/transitive_ordinary/stderr",
+      "pass": true
+    },
+    {
+      "name": "bound v6-ownership/transitive_ordinary/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "exact status v6-ownership/transitive_ordinary",
+      "pass": true
+    },
+    {
+      "name": "no accepted exact macro METHOD loss v6-ownership/transitive_ordinary",
+      "pass": true
+    },
+    {
+      "name": "no V6 exact macro METHOD loss v6-ownership/transitive_ordinary",
+      "pass": true
+    },
+    {
+      "name": "closed complete blocker type-position/sizeof_array",
+      "pass": true
+    },
+    {
+      "name": "closed complete blocker v6-ownership/disabled_function_tail",
+      "pass": true
+    },
+    {
+      "name": "three whole-exact controls preserved",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction ninth-object-callee-review/function_wrap_redefinition",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction ninth-object-callee-review/object_call",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction ninth-object-callee-review/object_function_alias",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction ninth-object-callee-review/object_nested_argument",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction ninth-object-callee-review/object_redefinition",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction ninth-object-callee-review/ordinary_control",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction type-position/cast_type",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction type-position/sizeof_array",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction type-position/sizeof_array_plain",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction type-position/sizeof_type",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction callee-rescan/comma_tail",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction callee-rescan/parenthesized_tail",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction v6-ownership/disabled_function_tail",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction v6-ownership/object_cycle",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction v6-ownership/trailing_comment",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction v6-ownership/transitive_function",
+      "pass": true
+    },
+    {
+      "name": "unchanged complete oracle extraction v6-ownership/transitive_ordinary",
+      "pass": true
+    }
+  ],
+  "replay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v8-independent/replay.json",
+    "sha256": "aff26e42737231c597608b22acd002f0df582ea2d7046fb4c776e699d8b94ad1",
+    "bytes": 40233
+  },
+  "originalV4Review": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/final-review.json",
+    "sha256": "7654102e71405d516bf45c92ae2ee08b7fbea0a1061588ebbef9f1054edd8cfb",
+    "bytes": 95342
+  },
+  "heldV6Review": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-independent/final-review.json",
+    "sha256": "48462de034ea8db4cd7882049c528b39b47667928acd3b4f237127066c7b6ed5",
+    "bytes": 37265
+  },
+  "macroMetadataRetention": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v8-independent/macro-metadata-retention.json",
+    "sha256": "553b3735b879baf02b63211507d7fad187559534ad7915a0a15fd47a43517ef4",
+    "bytes": 26992
+  },
+  "stringOutputProof": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v8-independent/string-output-proof.json",
+    "sha256": "666fbba88301bce8eb00034283cd7935cb7920856eb8176a077d11f958c2c872",
+    "bytes": 1127
+  },
+  "rawReferenceGroups": [
+    {
+      "group": "ninth-object-callee-review",
+      "oracleRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/oracle-workspace/run.json",
+        "sha256": "e52d275876c915c9ae41b51b7436383096efe4d16bd5498af2867c8ad9a5b8ca",
+        "bytes": 1193
+      },
+      "rawOracle": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/oracle-workspace/stdout",
+        "sha256": "a6d32f27638b2865dc4cb6ff41b60a85db8f07233518e62beb1dcfb3390b39a1",
+        "bytes": 103769
+      },
+      "traceRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/trace/run.json",
+        "sha256": "6d338f07ee8bbf26d554447b96dd5fbe58b8da919b54aa53e11fe8acfd895c3d",
+        "bytes": 26329
+      },
+      "rawTrace": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/trace/stdout",
+        "sha256": "262b8025f75a672c39695b3e5f41427a12fe0e5e2bd78c969b3ffd5b73ed450a",
+        "bytes": 26391
+      }
+    },
+    {
+      "group": "type-position",
+      "oracleRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/oracle-workspace/run.json",
+        "sha256": "9aca421658e643fe7ca635793db7ea98473880e82ede0f99ab0f5eed8829fee1",
+        "bytes": 1262
+      },
+      "rawOracle": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/oracle-workspace/stdout",
+        "sha256": "1c0753bcc621e8603acdc2d5b2645ba45cf8334e7da314f5b042d37bcd2087b8",
+        "bytes": 77273
+      },
+      "traceRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/trace/run.json",
+        "sha256": "4648f63c685a08c279f4751fb036126b01c1f5e090dbfae16da790b7828e59a6",
+        "bytes": 26386
+      },
+      "rawTrace": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/trace/stdout",
+        "sha256": "2e16f86c91cbafce6db1b0370be0f2d56b40f419e9b49d4b7e7cf336185a9317",
+        "bytes": 23833
+      }
+    },
+    {
+      "group": "callee-rescan",
+      "oracleRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/oracle-workspace/run.json",
+        "sha256": "e6264de5897a3cf22079587f1e4f98d7d30c4c32642b3c9c957e74b6b9d4df7c",
+        "bytes": 1261
+      },
+      "rawOracle": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/oracle-workspace/stdout",
+        "sha256": "fd66a66033eafc9ef4db0ea8c0cb32cc10f6d6b1a3015e7874fa61cb68fbf3bf",
+        "bytes": 33215
+      },
+      "traceRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/trace/run.json",
+        "sha256": "877f68938eb0e815892538b25a9c31823ba8cb0a0efb75f0ac4a74132b3bc134",
+        "bytes": 26386
+      },
+      "rawTrace": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/trace/stdout",
+        "sha256": "528ab18d53fa332d36ac3d5d0b17e08829f4f211a4f91af458165b302640a2b7",
+        "bytes": 15373
+      }
+    },
+    {
+      "group": "v6-ownership",
+      "oracleRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/oracle-workspace/run.json",
+        "sha256": "bcb8bdbf9cab312738ebdb78689ba73c7567ddacd97ef7295a796a96bab2fbdd",
+        "bytes": 1256
+      },
+      "rawOracle": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/oracle-workspace/stdout",
+        "sha256": "eea63ba26e779b509e874d10390021f6b6920d0fd37660449490b5148d54d71d",
+        "bytes": 98091
+      },
+      "traceRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/trace/run.json",
+        "sha256": "9ab9c93ecdfe9bdaebcd0cd61de8de8b5279a10c71892b6b3256c28a1b8dcf85",
+        "bytes": 26382
+      },
+      "rawTrace": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/trace/stdout",
+        "sha256": "fa36b8233e29a744c940fb1a35468befc87ded684cea0c9a67b785cde0a031f5",
+        "bytes": 29606
+      }
+    }
+  ],
+  "inventory": [
+    {
+      "group": "primary",
+      "case": "function_wrap_redefinition",
+      "exact": true
+    },
+    {
+      "group": "primary",
+      "case": "object_call",
+      "exact": false
+    },
+    {
+      "group": "primary",
+      "case": "object_function_alias",
+      "exact": false
+    },
+    {
+      "group": "primary",
+      "case": "object_nested_argument",
+      "exact": false
+    },
+    {
+      "group": "primary",
+      "case": "object_redefinition",
+      "exact": false
+    },
+    {
+      "group": "primary",
+      "case": "ordinary_control",
+      "exact": true
+    },
+    {
+      "group": "type-position",
+      "case": "cast_type",
+      "exact": false
+    },
+    {
+      "group": "type-position",
+      "case": "sizeof_array",
+      "exact": false
+    },
+    {
+      "group": "type-position",
+      "case": "sizeof_array_plain",
+      "exact": true
+    },
+    {
+      "group": "type-position",
+      "case": "sizeof_type",
+      "exact": false
+    },
+    {
+      "group": "callee-rescan",
+      "case": "comma_tail",
+      "exact": false
+    },
+    {
+      "group": "callee-rescan",
+      "case": "parenthesized_tail",
+      "exact": false
+    },
+    {
+      "group": "v6-ownership",
+      "case": "disabled_function_tail",
+      "exact": false
+    },
+    {
+      "group": "v6-ownership",
+      "case": "object_cycle",
+      "exact": false
+    },
+    {
+      "group": "v6-ownership",
+      "case": "trailing_comment",
+      "exact": false
+    },
+    {
+      "group": "v6-ownership",
+      "case": "transitive_function",
+      "exact": false
+    },
+    {
+      "group": "v6-ownership",
+      "case": "transitive_ordinary",
+      "exact": false
+    }
+  ],
+  "totals": {
+    "completeProjects": 17,
+    "completeExact": 3,
+    "completeDiagnostics": 14,
+    "acceptedExactMacroMethods": 11,
+    "v6ExactMacroMethods": 14,
+    "v8ExactMacroMethods": 15,
+    "lostAcceptedOrV6ExactMacroMethods": 0
+  },
+  "findings": [],
+  "closedBlockers": [
+    {
+      "case": "sizeof_array",
+      "fullName": "main.c:ARG:int(0)",
+      "header": "METHOD NAME=ARG CODE=#define ARG 1 FULL_NAME=main.c:ARG:int(0) SIGNATURE=int(0) ORDER=1",
+      "fullMethodExactlyMatchesPinnedJoern": true
+    },
+    {
+      "case": "disabled_function_tail",
+      "fullName": "main.c:ARG:int(0)",
+      "header": "METHOD NAME=ARG CODE=#define ARG 1 FULL_NAME=main.c:ARG:int(0) SIGNATURE=int(0) ORDER=1",
+      "fullMethodExactlyMatchesPinnedJoern": true
+    }
+  ],
+  "sourceReview": [
+    "Eligibility updates at the final emitted preprocessing token while its expansion disabled set is still active; recursive updates occur before disabled.remove(name).",
+    "Empty replacement emits no token and preserves prior eligibility. Whitespace and comment tokens also preserve it; literal, punctuation and numeric tokens replace it with false through exact token lookup.",
+    "Existing declaration callers retain the original String API through a wrapper; erasing auxiliary tail state from the new core yields the old expander operations exactly modulo formatting.",
+    "Direct function macro, transitive object alias, trailing available function token, parenthesized alias, comments and disabled function/object cycles are covered by retained full references and pinned CDT event traces.",
+    "No separate evaluator or macro-name exception was added. Existing expansion depth/output budgets are unchanged."
+  ],
+  "limitations": [
+    "No final source/package/whole-project/resource acceptance is granted here.",
+    "Fourteen complete graphs retain broader preexisting invocation/type/scaffold gaps, with all references, raw outputs and diffs preserved.",
+    "No new compiler oracle runs during V8 closure; replay uses the 17 unchanged fresh references collected earlier in this review.",
+    "No production/root edits or builds were performed."
+  ]
+}

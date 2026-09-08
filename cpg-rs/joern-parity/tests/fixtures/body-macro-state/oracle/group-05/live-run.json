@@ -1,0 +1,52 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/oracle-workspace",
+  "javaHome": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "inputHashes": {
+    "file_level_condition": {
+      "main.c": "03d946c2a14a8503b54d594720ce273cec82fe33cdc56a131c9c08932b06559b"
+    },
+    "header_redefined": {
+      "main.c": "ab95184ab8d1acda54f313e09a82deef305d035c19e72c3d27e7d9aae87e27fe",
+      "api.h": "9313885ae7f29e87c31882a352bfe60f303796aedbb0a3b40ef6dc64037c8dc3"
+    },
+    "formal_list_redefined": {
+      "main.c": "4caee4b582d5655504d78e9028080324fb3cc42961a5f71288ac02fc1608f2ca"
+    }
+  },
+  "joernVersion": "4.0.555",
+  "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "timeoutSeconds": 180,
+  "pid": 74449,
+  "exitCode": 0,
+  "wallSeconds": 9.133848905563354,
+  "rawStdoutSha256": "ff9879f95eaf881f5a538e7a196696b87a6c175636eba8461353aa04f9df618a",
+  "rawStderrSha256": "d6b67026b5db9b110bfc5e1da3c263486c53a54112ccd75eaf79a7eb1ffb633d",
+  "projects": [
+    {
+      "case": "file_level_condition",
+      "canonicalLinesIncludingSeparators": 122,
+      "nonemptySelectedRecords": 118,
+      "expectedSha256": "b465f24684bda7cc39bb63fe50ec819014fa6c018efc044751c881aea4b9bba0"
+    },
+    {
+      "case": "formal_list_redefined",
+      "canonicalLinesIncludingSeparators": 201,
+      "nonemptySelectedRecords": 196,
+      "expectedSha256": "97240d96ac9bf156a6af5d99adb89f479546e6d5bdd261fa4c66ac26fa33f273"
+    },
+    {
+      "case": "header_redefined",
+      "canonicalLinesIncludingSeparators": 139,
+      "nonemptySelectedRecords": 134,
+      "expectedSha256": "4bb2816e3084d19794a21910406539088b23ece3031ee369623b9f77af0b4685"
+    }
+  ]
+}

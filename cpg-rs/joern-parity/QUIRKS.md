@@ -272,3 +272,16 @@ pins it, so a regression shows up as a diff.
   alias node. Supplied quoted relative headers contribute ordered macro
   definitions and removals for declaration spelling. These cached header
   effects do not implement caller-conditioned header preprocessing.
+
+- **Macro metadata can precede its current replacement**
+  ([complete body macro state fixtures](tests/fixtures/body-macro-state/README.md)):
+  c2cpg's macro expansion-event queue is stably sorted by file-local offsets,
+  including condition and supplied-header events. An earlier matching event can
+  supply synthetic METHOD CODE and its defining-file full-name prefix; first
+  registration by full name wins. Current actual arguments and expansion type
+  determine arity/type, while source-file ownership stays with the invoking TU.
+  Quoted text and `defined` operands do not expand. Object callees retain separate
+  argument events unless a still-eligible function macro consumes the following
+  parentheses; disabled recursive tokens remain ineligible. This bounded port
+  retains a current-metadata fallback when no event matches and documents the
+  remaining complete diagnostics; it does not claim full MacroHandler parity.

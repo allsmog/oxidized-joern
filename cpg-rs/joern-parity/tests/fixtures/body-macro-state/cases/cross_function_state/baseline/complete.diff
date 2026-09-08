@@ -1,0 +1,50 @@
+--- Joern4.0.555
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity
+@@ -6,8 +6,8 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={\n#if AFTER\n return x;\n#else\n return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-    RETURN CODE=return x; ORDER=1
+-      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
++    RETURN CODE=return 0; ORDER=1
++      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -20,8 +20,8 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={\n#if AFTER\n return x;\n#else\n return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-      RETURN CODE=return x; ORDER=1
+-        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
++      RETURN CODE=return 0; ORDER=1
++        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=setup TYPE_FULL_NAME=setup METHOD_FULL_NAME=setup ORDER=1
+@@ -105,7 +105,6 @@
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:setup -> D:setup
+ EDGES|REF T:void -> D:void
+-EDGES|REF choose#5 -> choose#1
+ EDGES|REF main.c:<global>#14 -> main.c:<global>#1
+ EDGES|REF main.c:<global>#15 -> choose#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+@@ -121,8 +120,10 @@
+ EDGES|SOURCE_FILE choose#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
++FLOWS|REACHING_DEF[0] choose#5 -> choose#4
+ FLOWS|REACHING_DEF[<RET>] choose#4 -> choose#6
+ FLOWS|REACHING_DEF[] choose#0 -> choose#1
++FLOWS|REACHING_DEF[] choose#0 -> choose#4
+ FLOWS|REACHING_DEF[] choose#0 -> choose#5
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#14
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#15
+@@ -130,6 +131,4 @@
+ FLOWS|REACHING_DEF[] setup#1 -> setup#2
+ FLOWS|REACHING_DEF[] setup#1 -> setup#4
+ FLOWS|REACHING_DEF[x] choose#1 -> choose#2
+-FLOWS|REACHING_DEF[x] choose#1 -> choose#5
+ FLOWS|REACHING_DEF[x] choose#1 -> choose#6
+-FLOWS|REACHING_DEF[x] choose#5 -> choose#4

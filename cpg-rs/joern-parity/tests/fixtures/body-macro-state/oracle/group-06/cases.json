@@ -1,0 +1,11 @@
+{
+  "outer_nested_body_argument": {
+    "main.c": "#define INNER 7\n#define ARG 3\n#define WRAP(x) ((x)+INNER)\nint choose(void) { return WRAP(ARG); }\n"
+  },
+  "condition_function_and_defined": {
+    "main.c": "#define PICK(x) (x)\n#define FLAG 1\n#if defined(FLAG) && PICK(FLAG)\n#undef PICK\n#define PICK(x) ((x)+2)\n#endif\nint choose(void) { return PICK(3); }\n"
+  },
+  "inactive_and_shortcircuit": {
+    "main.c": "#define FLAG 1\n#if 0\n#if FLAG\n#endif\n#endif\n#if 0 && FLAG\n#endif\n#undef FLAG\n#define FLAG 2\nint choose(void) { return FLAG; }\n"
+  }
+}

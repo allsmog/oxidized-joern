@@ -1,0 +1,76 @@
+executing /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/trace.sc with params=Map(inputPath -> /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input)
+[31m[31m-- [E008] Not Found Error: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc:1:16 [0m[0m
+[31m  1 |[0m[33mimport[0m io.joern.c2cpg.Config
+[31m[31m    |[0m       ^^^^^^^^^^^^^^[0m
+[31m    |[0m   value c2cpg is not a member of io.joern - did you mean joern.x2cpg?
+[31m[31m-- Error: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc:1:16 [0m[0m
+[31m  1 |[0m[33mimport[0m io.joern.c2cpg.Config
+[31m[31m    |[0m       ^^^^^^^^^^^^^^[0m
+[31m    |[0m<error value c2cpg is not a member of io.joern - did you mean joern.x2cpg?> is not a legal path
+[31m    |[0msince it is not a concrete type
+[31m[31m-- [E008] Not Found Error: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc:2:16 [0m[0m
+[31m  2 |[0m[33mimport[0m io.joern.c2cpg.parser.{CdtParser,HeaderFileFinder}
+[31m[31m    |[0m       ^^^^^^^^^^^^^^[0m
+[31m    |[0m   value c2cpg is not a member of io.joern - did you mean joern.x2cpg?
+[31m[31m-- Error: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc:2:22 [0m[0m
+[31m  2 |[0m[33mimport[0m io.joern.c2cpg.parser.{CdtParser,HeaderFileFinder}
+[31m[31m    |[0m       ^^^^^^^^^^^^^^^^^^^^^[0m
+[31m    |[0m(<error value c2cpg is not a member of io.joern - did you mean joern.x2cpg?>#
+[31m    |[0m  parser :
+[31m    |[0m  <error value c2cpg is not a member of io.joern - did you mean joern.x2cpg?>) is not a legal path
+[31m    |[0msince it is not a concrete type
+[31m[31m-- [E008] Not Found Error: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc:3:16 [0m[0m
+[31m  3 |[0m[33mimport[0m io.joern.c2cpg.passes.AstCreationPass
+[31m[31m    |[0m       ^^^^^^^^^^^^^^[0m
+[31m    |[0m   value c2cpg is not a member of io.joern - did you mean joern.x2cpg?
+[31m[31m-- Error: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc:3:22 [0m[0m
+[31m  3 |[0m[33mimport[0m io.joern.c2cpg.passes.AstCreationPass
+[31m[31m    |[0m       ^^^^^^^^^^^^^^^^^^^^^[0m
+[31m    |[0m(<error value c2cpg is not a member of io.joern - did you mean joern.x2cpg?>#
+[31m    |[0m  passes :
+[31m    |[0m  <error value c2cpg is not a member of io.joern - did you mean joern.x2cpg?>) is not a legal path
+[31m    |[0msince it is not a concrete type
+[31m[31m-- [E008] Not Found Error: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc:4:11 [0m[0m
+[31m  4 |[0m[33mimport[0m org.eclipse.cdt.core.dom.ast.{IASTNode,IASTMacroExpansionLocation}
+[31m[31m    |[0m       ^^^^^^^^^^^[0m
+[31m    |[0m       value eclipse is not a member of org
+[31m[31m-- Error: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc:4:32 [0m[0m
+[31m  4 |[0m[33mimport[0m org.eclipse.cdt.core.dom.ast.{IASTNode,IASTMacroExpansionLocation}
+[31m[31m    |[0m       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[31m    |[0m   (<error value eclipse is not a member of org>#cdt.core.dom.ast :
+[31m    |[0m     <error value eclipse is not a member of org>) is not a legal path
+[31m    |[0m   since it is not a concrete type
+[31m[31m-- [E008] Not Found Error: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc:5:11 [0m[0m
+[31m  5 |[0m[33mimport[0m org.eclipse.cdt.core.dom.ast.gnu.c.GCCLanguage
+[31m[31m    |[0m       ^^^^^^^^^^^[0m
+[31m    |[0m       value eclipse is not a member of org
+[31m[31m-- Error: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc:5:40 [0m[0m
+[31m  5 |[0m[33mimport[0m org.eclipse.cdt.core.dom.ast.gnu.c.GCCLanguage
+[31m[31m    |[0m       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[31m    |[0m(<error value eclipse is not a member of org>#cdt.core.dom.ast.gnu.c :
+[31m    |[0m  <error value eclipse is not a member of org>) is not a legal path
+[31m    |[0msince it is not a concrete type
+[31m[31m-- [E007] Type Mismatch Error: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc:24:82 [0m[0m
+[31m 24 |[0m   [33mif[0m(ex.nonEmpty) println([31m"NODE|"[0m+depth+[31m"|"[0m+n.getClass.getSimpleName+[31m"|"[0m+loc.map(_.getNodeOffset).getOrElse(-[31m1[0m)+[31m"|"[0m+loc.map(_.getFileName).getOrElse([31m""[0m)+[31m"|"[0m+esc(n.getRawSignature)+[31m"|"[0m+ex.map([36me[0m=>esc(e.getExpansion.getMacroDefinition.getRawSignature)).mkString([31m";;"[0m))
+[31m[31m    |[0m                                                                                  ^[0m
+[31m    |[0mFound:    (_$4 : Nothing)
+[31m    |[0mRequired: ?{ getNodeOffset: ? }
+[31m    |[0mNote that implicit conversions were not tried because the result of an implicit conversion
+[31m    |[0mmust be more specific than ?{ getNodeOffset: B }
+[31m    |[0m
+[31m    |[0m longer explanation available when compiling with `-explain`
+[31m[31m-- [E007] Type Mismatch Error: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc:24:125 [0m[0m
+[31m 24 |[0m   [33mif[0m(ex.nonEmpty) println([31m"NODE|"[0m+depth+[31m"|"[0m+n.getClass.getSimpleName+[31m"|"[0m+loc.map(_.getNodeOffset).getOrElse(-[31m1[0m)+[31m"|"[0m+loc.map(_.getFileName).getOrElse([31m""[0m)+[31m"|"[0m+esc(n.getRawSignature)+[31m"|"[0m+ex.map([36me[0m=>esc(e.getExpansion.getMacroDefinition.getRawSignature)).mkString([31m";;"[0m))
+[31m[31m    |[0m                                                                                                                             ^[0m
+[31m    |[0mFound:    (_$5 : Nothing)
+[31m    |[0mRequired: ?{ getFileName: ? }
+[31m    |[0mNote that implicit conversions were not tried because the result of an implicit conversion
+[31m    |[0mmust be more specific than ?{ getFileName: B }
+[31m    |[0m
+[31m    |[0m longer explanation available when compiling with `-explain`
+12 errors found
+Exception in thread "main" replpp.scripting.NonForkingScriptRunner$$anon$1: error during script execution: Error during compilation: Errors encountered during compilation - try `--verbose` for more output
+Please check error output above!
+For given input files: /var/folders/p2/jh9w3cr118v7sn24vp1mx4440000gn/T/wrapped-script6891476168087178405.sc
+Re-run with `--verbose` for more details
+

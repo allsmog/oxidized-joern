@@ -1,0 +1,20 @@
+--- Joern4.0.555
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity
+@@ -17,7 +17,7 @@
+     RETURN CODE=return PICK; ORDER=1
+       CALL NAME=PICK CODE=PICK TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+         BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
++          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -35,7 +35,7 @@
+       RETURN CODE=return PICK; ORDER=1
+         CALL NAME=PICK CODE=PICK TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+           BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-            LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
++            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=earlier TYPE_FULL_NAME=earlier METHOD_FULL_NAME=earlier ORDER=1

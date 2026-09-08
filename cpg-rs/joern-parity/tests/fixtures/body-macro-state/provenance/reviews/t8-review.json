@@ -1,0 +1,157 @@
+{
+  "status": "PASS",
+  "skill": {
+    "path": "/Users/shayaunnejad/liminal-ops-workflow/plugins/liminal-flows/skills/verify-deliverable/SKILL.md",
+    "sha256": "6ba35c4dbdbcf0406ceac7ef1ef2182d189ad9a48d5741d58d8f07c7e0316aef"
+  },
+  "contract": "Inferred from parent bounded ninth body-macro repair: source reviewed against eighth, all complete live references unchanged, regression tests and trace provenance retained, diagnostics/failed candidates honest; this is not root whole/release acceptance.",
+  "targets": {
+    "README": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/fixtures/body-macro-state/README.md",
+      "sha256": "75b945b68ef54d4ccf1f67d794f3df830dce31bb98456bdbf36ff1bcd3b32c89",
+      "bytes": 6518
+    },
+    "measurement": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/fixtures/body-macro-state/measurement.json",
+      "sha256": "c79f132b0c662c12d6afd1b39272cad1b962ba8817edde24d39ca0c9438ecb05",
+      "bytes": 870860
+    },
+    "test": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/body_macro_state.rs",
+      "sha256": "2b36d9d5ace7e8b7cde363bbffd247f00985ff8030c97db7a75ba6c4f8acd19c",
+      "bytes": 4390
+    },
+    "QUIRKS": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/QUIRKS.md",
+      "sha256": "456c0e34112134fcc909b2175a03b9d4e608888d0c7e7941c36e783f3f9da9a7",
+      "bytes": 19738
+    },
+    "packageManifest": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8/manifest.json",
+      "sha256": "27f9fb7958d042d77dc327809cb59ce85614990792706900299d57dcb0d823c5",
+      "bytes": 431693
+    },
+    "supplementalManifest": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8-supplemental/manifest.json",
+      "sha256": "2b921525e336a691cefda7cfa358bbb7443b8e6f2b8492d92c7c771bfe67922c",
+      "bytes": 2827
+    }
+  },
+  "sourceReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/final-review.json",
+    "sha256": "3e71a36dab93c6d3941a2d1250ef9d6574c49e561e5b2b877758a662d91bb38d"
+  },
+  "scores": [
+    {
+      "criterion": "Grounding",
+      "score": 2,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/package-review.json",
+        "sha256": "7238bbca310ee90053ce87d8bb737be97d04d982267b52581dbb4eb6bea95618"
+      },
+      "reason": "Material counts, raw references, source/build ownership, held failures and worker checks are independently bound; five weakest claims verified below."
+    },
+    {
+      "criterion": "Contract",
+      "score": 2,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/final-review.json",
+        "sha256": "3e71a36dab93c6d3941a2d1250ef9d6574c49e561e5b2b877758a662d91bb38d"
+      },
+      "reason": "Meets inferred bounded source-repair contract: full76references,54production gates,2complete METHOD assertions, unchanged raw evidence and honest22diagnostics. Integration acceptance remains separate."
+    },
+    {
+      "criterion": "Register",
+      "score": 2,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/fixtures/body-macro-state/README.md",
+        "sha256": "75b945b68ef54d4ccf1f67d794f3df830dce31bb98456bdbf36ff1bcd3b32c89",
+        "bytes": 6518
+      },
+      "reason": "No banned vocabulary, PPA labels, unexplained business claims or status inflation found. Technical terms identify actual graph nodes, Rust state and evidence for a compiler/parity audience. No required copy edits."
+    },
+    {
+      "criterion": "Veracity",
+      "score": 2,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/production-tests.log",
+        "sha256": "2e0d2fbc366f250d0e3e69fd69a7ee0268652f9ebdba1794c636c355df613b77"
+      },
+      "reason": "Independent paired replay and direct2-test executable pass agree with present-tense claims. README does not claim root release/whole/resource completion and identifies upstream fallback difference."
+    },
+    {
+      "criterion": "Gates",
+      "score": 2,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8/manifest.json",
+        "sha256": "27f9fb7958d042d77dc327809cb59ce85614990792706900299d57dcb0d823c5",
+        "bytes": 431693
+      },
+      "reason": "Source-only isolated change, bounded test/QUIRKS package and immutable additive evidence. No root edits, source builds, oracle weakening or acceptance-manifest mutation performed by reviewer; main/RD parser suffix unchanged."
+    },
+    {
+      "criterion": "Usefulness",
+      "score": 2,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/fixtures/body-macro-state/README.md",
+        "sha256": "75b945b68ef54d4ccf1f67d794f3df830dce31bb98456bdbf36ff1bcd3b32c89",
+        "bytes": 6518
+      },
+      "reason": "Implementer/reviewer can reproduce each case via indexed bytes, distinguish54gates from22diagnostics and follow ownership findings. Root integration/release/whole/resource checks are expressly the next step."
+    }
+  ],
+  "fiveWeakestClaims": [
+    {
+      "claim": "54 match the candidate exactly, compared with 11 on accepted eighth source",
+      "line": 4,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/replay.json",
+        "sha256": "42982832a5918713864b5a84491108356a7401b96e5042e785149a24d3bca9c0"
+      },
+      "assessment": "Independently executed both frozen binaries on the identical76project inputs, preserving complete stdout/stderr and every diff. Recomputed11\u219254,555gains/0losses; not a full-port rate."
+    },
+    {
+      "claim": "The candidate uses one source-order macro context for body emission, phantom\nand declaration discovery, type sites, and local prototype discovery.",
+      "line": 14,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/final-review.json",
+        "sha256": "3e71a36dab93c6d3941a2d1250ef9d6574c49e561e5b2b877758a662d91bb38d"
+      },
+      "assessment": "Reviewed exact.rs source consumers plus original/temporary ownership and explicit empty recovery suppression; source-order and prototype controls complete-exact. The README separately discloses body include/nested-function limitations."
+    },
+    {
+      "claim": "The invocation's current expansion still determines type and actual\nargument count; METHOD source-file ownership remains the invoking translation\nunit.",
+      "line": 32,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/definition-selection-final.json",
+        "sha256": "7a1a6eb8216e1681ecb5fa29351abf90730b160130a728efda31338d3698f9b7",
+        "bytes": 17976
+      },
+      "assessment": "Pinned MacroHandler/AstCreationPass source and live arity/order/header/tie controls distinguish current type/arity, selected definition CODE/full-name prefix and invoking TU ownership."
+    },
+    {
+      "claim": "No reference rows, edge kinds or flow facts are\nfiltered.",
+      "line": 59,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/raw-reference-inventory.json",
+        "sha256": "bd4846df12b984348415478185d683c10e88c7c97e891a36679ebabdfaebb4ec"
+      },
+      "assessment": "Verified all17 complete raw CASE extractions against every76reference. Only AST| transport prefix removed as defined by the unchanged oracle format;13,694canonical lines/13,294nonempty selected records. Scope remains the selected projection."
+    },
+    {
+      "claim": "All earlier source snapshots, build/check receipts\nand available full failed outputs are retained;",
+      "line": 69,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/package-review.json",
+        "sha256": "7238bbca310ee90053ce87d8bb737be97d04d982267b52581dbb4eb6bea95618"
+      },
+      "assessment": "Verified every sealed1870file hash,1861copy/original bindings, held case outputs/diffs and all7 additional original replay receipts. Preserved literal and disabled-token failures and explicit duplicate-clinit abort; final335tests are separately bound."
+    }
+  ],
+  "registerHits": [],
+  "requiredFixes": [],
+  "strongestReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/replay.json",
+    "sha256": "42982832a5918713864b5a84491108356a7401b96e5042e785149a24d3bca9c0"
+  }
+}

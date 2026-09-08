@@ -1,0 +1,14 @@
+{
+  "quoted_body": {
+    "main.c": "#define PICK 1\nconst char *prefix(void) { return \"PICK\"; }\n#undef PICK\n#define PICK 2\nint choose(void) { return PICK; }\n"
+  },
+  "quoted_global": {
+    "main.c": "#define PICK 1\nconst char *saved = \"PICK\";\n#undef PICK\n#define PICK 2\nint choose(void) { return PICK; }\n"
+  },
+  "prefixed_quoted": {
+    "main.c": "#define PICK 1\nvoid prefix(void) { L\"PICK\"; u8\"PICK\"; }\n#undef PICK\n#define PICK 2\nint choose(void) { return PICK; }\n"
+  },
+  "character_literal": {
+    "main.c": "#define PICK 1\nint prefix(void) { return 'PICK'; }\n#undef PICK\n#define PICK 2\nint choose(void) { return PICK; }\n"
+  }
+}

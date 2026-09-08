@@ -1,0 +1,21 @@
+{
+  "source": "c6fbd18f35dc536fa8ba04ba15bea12fb185745fa6e72eb1025e178597383f62",
+  "binary": "22d651f3daef5ce60908a34ec991d022dad009492c0c6e63e4cba1a23acd98e7",
+  "tests": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/tests-v6.log",
+    "sha256": "fc86d4a0b2840764d10acb26fe4c52c72c7c15b43a9f355ad5b86acf53f953c9",
+    "exitCode": 0,
+    "passed": 333
+  },
+  "main": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/main-v6.log",
+    "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6",
+    "exitCode": 0,
+    "comparisonBlocksExact": 308
+  },
+  "replay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/replay-v6/replay.json",
+    "sha256": "4ce4f0714ef6097d3634e46e3115d6265304351ac679ce475d64187aedb4d9ab"
+  },
+  "sourceUnchangedThroughAllChecks": true
+}

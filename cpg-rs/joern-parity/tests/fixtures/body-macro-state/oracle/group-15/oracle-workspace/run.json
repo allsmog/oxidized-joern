@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/oracle-workspace",
+  "exitCode": 0,
+  "seconds": 6.737159499985864,
+  "stdout": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/oracle-workspace/stdout",
+    "sha256": "fd66a66033eafc9ef4db0ea8c0cb32cc10f6d6b1a3015e7874fa61cb68fbf3bf",
+    "bytes": 33215
+  },
+  "stderr": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/oracle-workspace/stderr",
+    "sha256": "81669ecec7fa03eba0acbc6b81d38b953804e3c8c21aacf48d6c130080167331",
+    "bytes": 2452
+  }
+}

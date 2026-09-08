@@ -1,0 +1,954 @@
+{
+  "status": "ORIGINAL_BLOCKER_CLOSED_RELATED_DISABLED_TERMINAL_METADATA_BLOCKER_REMAINS",
+  "createdAtUtc": "2026-09-08T20:34:04.729906+00:00",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v6/exact.rs",
+    "sha256": "c6fbd18f35dc536fa8ba04ba15bea12fb185745fa6e72eb1025e178597383f62",
+    "bytes": 399038
+  },
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v6/joern-parity",
+    "sha256": "22d651f3daef5ce60908a34ec991d022dad009492c0c6e63e4cba1a23acd98e7",
+    "bytes": 11828144
+  },
+  "ownerPair": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v6/bindings.json",
+    "sha256": "0cd22b11b6e82c6109b75dfde1a6f3a7030135653c5355a55abd6c72f712747f",
+    "bytes": 980
+  },
+  "buildLog": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/build-v6.log",
+    "sha256": "78a568e72108b61a6d34b7f39236482d0670ce2e40290b2ed15780d0d2b928a7",
+    "bytes": 348
+  },
+  "v5Baseline": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v5/exact.rs",
+    "sha256": "442a1c79241ca8cdbad9b379b86ff80333cdc2534d0651101fc94a0e9451bca9",
+    "bytes": 396698
+  },
+  "eventOnlyDelta": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v6/v5-to-v6.patch",
+    "sha256": "699dd18bf1c03f36fe71855240e411e38622110d75df7d7ffd9d36e8cc67b660",
+    "bytes": 3805
+  },
+  "checkCount": 136,
+  "checks": [
+    {
+      "name": "reported successful stable build",
+      "pass": true
+    },
+    {
+      "name": "exact.rs hash binding",
+      "pass": true
+    },
+    {
+      "name": "joern-parity hash binding",
+      "pass": true
+    },
+    {
+      "name": "buildLog hash binding",
+      "pass": true
+    },
+    {
+      "name": "build log completion",
+      "pass": true
+    },
+    {
+      "name": "frozen delta exactly matches V5 to V6",
+      "pass": true
+    },
+    {
+      "name": "12 unique primary references replayed",
+      "pass": true
+    },
+    {
+      "name": "12 replay status primary/function_wrap_redefinition",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/function_wrap_redefinition/input",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/function_wrap_redefinition/reference",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/function_wrap_redefinition/actual",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/function_wrap_redefinition/stderr",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/function_wrap_redefinition/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "12 truthful exact function_wrap_redefinition",
+      "pass": true
+    },
+    {
+      "name": "12 replay status primary/object_call",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_call/input",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_call/reference",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_call/actual",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_call/stderr",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_call/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "12 truthful exact object_call",
+      "pass": true
+    },
+    {
+      "name": "12 replay status primary/object_function_alias",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_function_alias/input",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_function_alias/reference",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_function_alias/actual",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_function_alias/stderr",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_function_alias/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "12 truthful exact object_function_alias",
+      "pass": true
+    },
+    {
+      "name": "12 replay status primary/object_nested_argument",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_nested_argument/input",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_nested_argument/reference",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_nested_argument/actual",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_nested_argument/stderr",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_nested_argument/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "12 truthful exact object_nested_argument",
+      "pass": true
+    },
+    {
+      "name": "12 replay status primary/object_redefinition",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_redefinition/input",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_redefinition/reference",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_redefinition/actual",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_redefinition/stderr",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/object_redefinition/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "12 truthful exact object_redefinition",
+      "pass": true
+    },
+    {
+      "name": "12 replay status primary/ordinary_control",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/ordinary_control/input",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/ordinary_control/reference",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/ordinary_control/actual",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/ordinary_control/stderr",
+      "pass": true
+    },
+    {
+      "name": "12 hash primary/ordinary_control/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "12 truthful exact ordinary_control",
+      "pass": true
+    },
+    {
+      "name": "12 replay status type-position/cast_type",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/cast_type/input",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/cast_type/reference",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/cast_type/actual",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/cast_type/stderr",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/cast_type/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "12 truthful exact cast_type",
+      "pass": true
+    },
+    {
+      "name": "12 replay status type-position/sizeof_array",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_array/input",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_array/reference",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_array/actual",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_array/stderr",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_array/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "12 truthful exact sizeof_array",
+      "pass": true
+    },
+    {
+      "name": "12 replay status type-position/sizeof_array_plain",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_array_plain/input",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_array_plain/reference",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_array_plain/actual",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_array_plain/stderr",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_array_plain/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "12 truthful exact sizeof_array_plain",
+      "pass": true
+    },
+    {
+      "name": "12 replay status type-position/sizeof_type",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_type/input",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_type/reference",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_type/actual",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_type/stderr",
+      "pass": true
+    },
+    {
+      "name": "12 hash type-position/sizeof_type/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "12 truthful exact sizeof_type",
+      "pass": true
+    },
+    {
+      "name": "12 replay status callee-rescan/comma_tail",
+      "pass": true
+    },
+    {
+      "name": "12 hash callee-rescan/comma_tail/input",
+      "pass": true
+    },
+    {
+      "name": "12 hash callee-rescan/comma_tail/reference",
+      "pass": true
+    },
+    {
+      "name": "12 hash callee-rescan/comma_tail/actual",
+      "pass": true
+    },
+    {
+      "name": "12 hash callee-rescan/comma_tail/stderr",
+      "pass": true
+    },
+    {
+      "name": "12 hash callee-rescan/comma_tail/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "12 truthful exact comma_tail",
+      "pass": true
+    },
+    {
+      "name": "12 replay status callee-rescan/parenthesized_tail",
+      "pass": true
+    },
+    {
+      "name": "12 hash callee-rescan/parenthesized_tail/input",
+      "pass": true
+    },
+    {
+      "name": "12 hash callee-rescan/parenthesized_tail/reference",
+      "pass": true
+    },
+    {
+      "name": "12 hash callee-rescan/parenthesized_tail/actual",
+      "pass": true
+    },
+    {
+      "name": "12 hash callee-rescan/parenthesized_tail/stderr",
+      "pass": true
+    },
+    {
+      "name": "12 hash callee-rescan/parenthesized_tail/completeDiff",
+      "pass": true
+    },
+    {
+      "name": "12 truthful exact parenthesized_tail",
+      "pass": true
+    },
+    {
+      "name": "all three exact V4 controls preserved",
+      "pass": true
+    },
+    {
+      "name": "five extra complete cases",
+      "pass": true
+    },
+    {
+      "name": "full oracle extraction disabled_function_tail",
+      "pass": true
+    },
+    {
+      "name": "extra successful accepted-eighth/disabled_function_tail",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash accepted-eighth/disabled_function_tail/stdout",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash accepted-eighth/disabled_function_tail/stderr",
+      "pass": true
+    },
+    {
+      "name": "extra successful candidate-v6/disabled_function_tail",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash candidate-v6/disabled_function_tail/stdout",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash candidate-v6/disabled_function_tail/stderr",
+      "pass": true
+    },
+    {
+      "name": "full oracle extraction object_cycle",
+      "pass": true
+    },
+    {
+      "name": "extra successful accepted-eighth/object_cycle",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash accepted-eighth/object_cycle/stdout",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash accepted-eighth/object_cycle/stderr",
+      "pass": true
+    },
+    {
+      "name": "extra successful candidate-v6/object_cycle",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash candidate-v6/object_cycle/stdout",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash candidate-v6/object_cycle/stderr",
+      "pass": true
+    },
+    {
+      "name": "full oracle extraction trailing_comment",
+      "pass": true
+    },
+    {
+      "name": "extra successful accepted-eighth/trailing_comment",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash accepted-eighth/trailing_comment/stdout",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash accepted-eighth/trailing_comment/stderr",
+      "pass": true
+    },
+    {
+      "name": "extra successful candidate-v6/trailing_comment",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash candidate-v6/trailing_comment/stdout",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash candidate-v6/trailing_comment/stderr",
+      "pass": true
+    },
+    {
+      "name": "full oracle extraction transitive_function",
+      "pass": true
+    },
+    {
+      "name": "extra successful accepted-eighth/transitive_function",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash accepted-eighth/transitive_function/stdout",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash accepted-eighth/transitive_function/stderr",
+      "pass": true
+    },
+    {
+      "name": "extra successful candidate-v6/transitive_function",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash candidate-v6/transitive_function/stdout",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash candidate-v6/transitive_function/stderr",
+      "pass": true
+    },
+    {
+      "name": "full oracle extraction transitive_ordinary",
+      "pass": true
+    },
+    {
+      "name": "extra successful accepted-eighth/transitive_ordinary",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash accepted-eighth/transitive_ordinary/stdout",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash accepted-eighth/transitive_ordinary/stderr",
+      "pass": true
+    },
+    {
+      "name": "extra successful candidate-v6/transitive_ordinary",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash candidate-v6/transitive_ordinary/stdout",
+      "pass": true
+    },
+    {
+      "name": "extra raw hash candidate-v6/transitive_ordinary/stderr",
+      "pass": true
+    },
+    {
+      "name": "original complete ARG METHOD restored",
+      "pass": true
+    },
+    {
+      "name": "disabled-tail complete METHOD previously exact",
+      "pass": true
+    },
+    {
+      "name": "disabled-tail new CODE-only loss",
+      "pass": true
+    },
+    {
+      "name": "adjacent ARG method exact object_cycle",
+      "pass": true
+    },
+    {
+      "name": "adjacent ARG method exact trailing_comment",
+      "pass": true
+    },
+    {
+      "name": "adjacent ARG method exact transitive_function",
+      "pass": true
+    },
+    {
+      "name": "adjacent ARG method exact transitive_ordinary",
+      "pass": true
+    },
+    {
+      "name": "disabled-function CDT events",
+      "pass": true
+    }
+  ],
+  "twelveReferenceReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-independent/replay.json",
+    "sha256": "149586e8ea6391de6dd21e349da2e0e5a6b5b2c5ef93cc4fc992f25f5d1f1ab9",
+    "bytes": 28574
+  },
+  "originalBlocker": {
+    "closed": true,
+    "fullMethod": "main.c:ARG:int(0)",
+    "input": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/input/sizeof_array/main.c",
+      "sha256": "4e7fd438bb6af8395892d56d0b0a3f9ff65932c882b816cf087de9e4db00dd56",
+      "bytes": 151
+    },
+    "reference": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/input/sizeof_array/expected.txt",
+      "sha256": "6541eeee773acf76b1986fef95eb1a6d7d01df4c0e592e920e3342287aef1f19",
+      "bytes": 11693
+    },
+    "v6Output": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-independent/type-position/sizeof_array/stdout",
+      "sha256": "d55230c88ef4e7076d893f07cb8ecd66f6032f63785cb244382557297e7488ae",
+      "bytes": 10955
+    },
+    "fullMethodByteIdentical": true
+  },
+  "extraFiveProjects": [
+    {
+      "case": "disabled_function_tail",
+      "input": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/disabled_function_tail/main.c",
+        "sha256": "8a239d6a8f9a4a22afd24b85d7f641bf0f3b9a845b19cd1a1620dace312afa95",
+        "bytes": 157
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/disabled_function_tail/expected.txt",
+        "sha256": "d10bb267477933e70f757867058fb1b6659ed01d63fd95558d1eb739e664a109",
+        "bytes": 11516
+      },
+      "canonicalLines": 208,
+      "nonemptyRecords": 201,
+      "variants": {
+        "accepted-eighth": {
+          "exact": false,
+          "output": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/disabled_function_tail/stdout",
+            "sha256": "2e4f5fceb5feb9e9d785ac81eb78b9ff564a3a8a5f77d7ef0e9ae365283a81aa",
+            "bytes": 10829
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/disabled_function_tail/run.json",
+            "sha256": "9086792dcb6dd8e764b93b8a95b83eda063b73827e63f223c842cd0be540b8b8",
+            "bytes": 1214
+          },
+          "completeDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/disabled_function_tail/complete-lf.diff",
+            "sha256": "35fc505fd71c1ada6db2249664442e8dc89d179ea13ea50c727066dfe228c0c9",
+            "bytes": 11616
+          }
+        },
+        "candidate-v6": {
+          "exact": false,
+          "output": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/disabled_function_tail/stdout",
+            "sha256": "91cb605c56227e48b4973250cc57668aa5b15002df6e0cd52f5301e42f5912ce",
+            "bytes": 10829
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/disabled_function_tail/run.json",
+            "sha256": "65162e3f4b776aa03c46d744bc6a3f07ddf1b1b80db6206e32c6ce9e85bdd2c7",
+            "bytes": 1191
+          },
+          "completeDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/disabled_function_tail/complete-lf.diff",
+            "sha256": "b55192891657153298648b8c8614a47ca0a9d303f0c113691c4aafab631f5c1b",
+            "bytes": 11363
+          }
+        }
+      }
+    },
+    {
+      "case": "object_cycle",
+      "input": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/object_cycle/main.c",
+        "sha256": "b205c59503d4b3f40ac4b04f97143d66b14a77fc12373ca0cc0f7b43f6addec8",
+        "bytes": 163
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/object_cycle/expected.txt",
+        "sha256": "e288d0b92509da1572a02b4b3763ce14add6520af671a8dc3b110f198f82927a",
+        "bytes": 11603
+      },
+      "canonicalLines": 208,
+      "nonemptyRecords": 201,
+      "variants": {
+        "accepted-eighth": {
+          "exact": false,
+          "output": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/object_cycle/stdout",
+            "sha256": "a3cb0bac937c5ece63aee7cc09208e01835424b9cae42e995eb09a45f15623eb",
+            "bytes": 10273
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/object_cycle/run.json",
+            "sha256": "e78abd25e116c7102e2218be6618ed2eb7f457f68b217453369074c997a67203",
+            "bytes": 1174
+          },
+          "completeDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/object_cycle/complete-lf.diff",
+            "sha256": "9077713b9d7993f3177597af4be4a1bf6cb78694e7b296b7da674e392dec048f",
+            "bytes": 10325
+          }
+        },
+        "candidate-v6": {
+          "exact": false,
+          "output": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/object_cycle/stdout",
+            "sha256": "2a19dca8a3b050ca1372ba5abc20fa591ba224fcabec7582ed04e330307d4f26",
+            "bytes": 10273
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/object_cycle/run.json",
+            "sha256": "142219e26f0f58d8cb4eb7446cc0b55860c48f1c39c7b297414404622ca82078",
+            "bytes": 1151
+          },
+          "completeDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/object_cycle/complete-lf.diff",
+            "sha256": "ff074ceb6ed13f780e386f2ad8e962bdc867b6dfa65408ce8ccbcb3844380f7a",
+            "bytes": 9846
+          }
+        }
+      }
+    },
+    {
+      "case": "trailing_comment",
+      "input": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/trailing_comment/main.c",
+        "sha256": "054f937fdd8e1d294b0eeea28f1c2f05467cb7441d713d11443cfe73d978fc26",
+        "bytes": 198
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/trailing_comment/expected.txt",
+        "sha256": "2a52c78744c824653edab56505aae02ead75c2293f14a080f9fd89bd4a81f698",
+        "bytes": 11688
+      },
+      "canonicalLines": 208,
+      "nonemptyRecords": 201,
+      "variants": {
+        "accepted-eighth": {
+          "exact": false,
+          "output": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/trailing_comment/stdout",
+            "sha256": "8ed9c85b06c5d494c77ec263902440fd77a79ff86372280405ddc5be6848fe22",
+            "bytes": 11135
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/trailing_comment/run.json",
+            "sha256": "9d1e3235674b56f3229cbdb465206b2aeacc9ade154fdac746ad1107ef380cd4",
+            "bytes": 1190
+          },
+          "completeDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/trailing_comment/complete-lf.diff",
+            "sha256": "4cafd0ec1cd48869ef2b2f71d9dd8b65ad6250d15f17f5a3f158fd4515bb88a7",
+            "bytes": 12237
+          }
+        },
+        "candidate-v6": {
+          "exact": false,
+          "output": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/trailing_comment/stdout",
+            "sha256": "c53165ec278b461e649437f8f2ebeaf0211d01b338140f49fe688072e11e4086",
+            "bytes": 11135
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/trailing_comment/run.json",
+            "sha256": "fb572d0c1f3894596dc96c05efd9c70e51d2d5f959050a3f395f608fd5808f76",
+            "bytes": 1167
+          },
+          "completeDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/trailing_comment/complete-lf.diff",
+            "sha256": "67988e1b7932ca2106ab54cfa6347e7edf71c959740c29d4fcee022af45c01db",
+            "bytes": 11546
+          }
+        }
+      }
+    },
+    {
+      "case": "transitive_function",
+      "input": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/transitive_function/main.c",
+        "sha256": "44593da3edc55a1af963dfc9ad0f6fcd2f04883952c393bbb51619822743c932",
+        "bytes": 193
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/transitive_function/expected.txt",
+        "sha256": "9ad2f0342daaa8a4c441b80fedc58a3d0abdd6bed82613ac2157ef058ba73cb3",
+        "bytes": 11688
+      },
+      "canonicalLines": 208,
+      "nonemptyRecords": 201,
+      "variants": {
+        "accepted-eighth": {
+          "exact": false,
+          "output": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/transitive_function/stdout",
+            "sha256": "8ed9c85b06c5d494c77ec263902440fd77a79ff86372280405ddc5be6848fe22",
+            "bytes": 11135
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/transitive_function/run.json",
+            "sha256": "4fa3ee1523a0c6e18173a0895171d120c208aeb8c189ca102877cbb761557313",
+            "bytes": 1202
+          },
+          "completeDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/transitive_function/complete-lf.diff",
+            "sha256": "e9cc965608b3013b9f6dc2609fdd0c19f3ff0097d8d3cf524ad8d5704a1516d3",
+            "bytes": 12237
+          }
+        },
+        "candidate-v6": {
+          "exact": false,
+          "output": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/transitive_function/stdout",
+            "sha256": "c53165ec278b461e649437f8f2ebeaf0211d01b338140f49fe688072e11e4086",
+            "bytes": 11135
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/transitive_function/run.json",
+            "sha256": "c4902e637bc006e61bcdebb8be6aad37623e1d9a0dfb762411ecbf8c7d69fe44",
+            "bytes": 1179
+          },
+          "completeDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/transitive_function/complete-lf.diff",
+            "sha256": "79a9f597afa22c982b19ed8dbacddd8312ef525aeb14361dac127fd1e50363ff",
+            "bytes": 11546
+          }
+        }
+      }
+    },
+    {
+      "case": "transitive_ordinary",
+      "input": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/transitive_ordinary/main.c",
+        "sha256": "2978cc02f2a1cdf1fc5970c6c5d9a89f09c884f659193d0251fd241c2cec71d7",
+        "bytes": 169
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/transitive_ordinary/expected.txt",
+        "sha256": "f616f9dfdd6a9040ec1bd12bc4bf6bb429d90d7fe210425af91731f2eceff15f",
+        "bytes": 11690
+      },
+      "canonicalLines": 208,
+      "nonemptyRecords": 201,
+      "variants": {
+        "accepted-eighth": {
+          "exact": false,
+          "output": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/transitive_ordinary/stdout",
+            "sha256": "a933c09a981031d5b6a383dc73390424b2e7e2017d6c68c42596424f6051ddda",
+            "bytes": 10955
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/transitive_ordinary/run.json",
+            "sha256": "4d07c7ce5bf942a64a446b8a3765071048546a9114d17e942c388b7913a5f0b7",
+            "bytes": 1202
+          },
+          "completeDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/accepted-eighth/transitive_ordinary/complete-lf.diff",
+            "sha256": "35701902493cd5bbf1a806da1f11797e326349bd2c802f9ea12ace5ed82b0187",
+            "bytes": 11765
+          }
+        },
+        "candidate-v6": {
+          "exact": false,
+          "output": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/transitive_ordinary/stdout",
+            "sha256": "d55230c88ef4e7076d893f07cb8ecd66f6032f63785cb244382557297e7488ae",
+            "bytes": 10955
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/transitive_ordinary/run.json",
+            "sha256": "1e8ba2d86ccb401d2d0d4ebd82f085f5683531893bf245d90609f1d843477cdd",
+            "bytes": 1179
+          },
+          "completeDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/candidate-v6/transitive_ordinary/complete-lf.diff",
+            "sha256": "72f7f206fc6b381854a9f83d58cb83eebfbe718d5f516f739e32ad62c91a9644",
+            "bytes": 11197
+          }
+        }
+      }
+    }
+  ],
+  "extraOracleRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/oracle-workspace/run.json",
+    "sha256": "bcb8bdbf9cab312738ebdb78689ba73c7567ddacd97ef7295a796a96bab2fbdd",
+    "bytes": 1256
+  },
+  "extraRawOracle": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/oracle-workspace/stdout",
+    "sha256": "eea63ba26e779b509e874d10390021f6b6920d0fd37660449490b5148d54d71d",
+    "bytes": 98091
+  },
+  "extraTraceRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/trace/run.json",
+    "sha256": "9ab9c93ecdfe9bdaebcd0cd61de8de8b5279a10c71892b6b3256c28a1b8dcf85",
+    "bytes": 26382
+  },
+  "extraRawTrace": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/trace/stdout",
+    "sha256": "fa36b8233e29a744c940fb1a35468befc87ded684cea0c9a67b785cde0a031f5",
+    "bytes": 29606
+  },
+  "remainingFinding": {
+    "sourceLocation": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v6/exact.rs",
+      "line": 1038
+    },
+    "producerLocation": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v6/exact.rs",
+      "line": 980
+    },
+    "input": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/disabled_function_tail/main.c",
+      "sha256": "8a239d6a8f9a4a22afd24b85d7f641bf0f3b9a845b19cd1a1620dace312afa95",
+      "bytes": 157
+    },
+    "triggerLine": 5,
+    "laterUseLine": 8,
+    "cdtPairs": [
+      "PAIR|94|/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/disabled_function_tail/main.c|#define CALL F(0)",
+      "PAIR|110|/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/disabled_function_tail/main.c|#define ARG 1",
+      "PAIR|150|/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-ownership/input/disabled_function_tail/main.c|#define ARG 2"
+    ],
+    "oracleHeader": "METHOD NAME=ARG CODE=#define ARG 1 FULL_NAME=main.c:ARG:int(0) SIGNATURE=int(0) ORDER=1",
+    "acceptedEighthHeader": "METHOD NAME=ARG CODE=#define ARG 1 FULL_NAME=main.c:ARG:int(0) SIGNATURE=int(0) ORDER=1",
+    "v6Header": "METHOD NAME=ARG CODE=#define ARG 2 FULL_NAME=main.c:ARG:int(0) SIGNATURE=int(0) ORDER=1",
+    "completeMethodEvidence": [
+      {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-independent/disabled-terminal-regression/oracle.ast",
+        "sha256": "c6a3bdf892d048b6258af968985eec858baf5a408b508ff58f44f7ca75c5cc44",
+        "bytes": 175
+      },
+      {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-independent/disabled-terminal-regression/accepted-eighth.ast",
+        "sha256": "c6a3bdf892d048b6258af968985eec858baf5a408b508ff58f44f7ca75c5cc44",
+        "bytes": 175
+      },
+      {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-independent/disabled-terminal-regression/candidate-v6.ast",
+        "sha256": "057d375cfc0914b3625ba7d31f7ae9f94e6c9a9ff87c332de50f090230b32114",
+        "bytes": 175
+      }
+    ],
+    "methodDiff": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v6-independent/disabled-terminal-regression/method.diff",
+      "sha256": "e099be43c85e0399f369892f8dd2daff33302c8b3c14001e11eb63c9f8335d9c",
+      "bytes": 316
+    },
+    "cause": "expand_declaration_tokens returns plain text F after expanding F(0) while F is disabled; macro_consumes_arguments then tests only the final spelling in macros and marks F available. Pinned CDT keeps that F unavailable, so the original parenthesized arguments remain separate expansion events. The omitted old ARG event causes later METHOD CODE to select the new definition.",
+    "recommendation": "Carry terminal-token expansion eligibility/provenance through the existing bounded rescanner, so a function macro disabled by its own expansion cannot consume the original arguments. Preserve the now-passing direct/transitive/comment/parenthesized controls; avoid a second evaluator or macro-name exception."
+  },
+  "sourceReview": {
+    "scope": "Only one new ownership helper and two call-site predicate changes versus V5. No expansion emission, CFG, RD, scanner, declaration rendering or oracle changes in this delta.",
+    "bounds": "Uses existing 64-level disabled-name bound and 65,536 output budget. Ordinary object cycles terminate and their complete ARG metadata matches; no stress/performance claim.",
+    "commentsAndTokens": "Full fresh trailing-comment and transitive aliases select correct ARG METHOD metadata. Existing final-token controls prove trailing WRAP consumes args; parenthesized WRAP does not.",
+    "unresolved": "Disabled function terminal availability remains a confirmed compatibility defect."
+  },
+  "limits": [
+    "All17 complete selected graphs and every divergence retained; three complete exact controls remain exact, fourteen are full diagnostics.",
+    "The disabled-tail whole graph was already nonexact; the complete ARG:int(0) METHOD was exact before and loses only CODE.",
+    "This review closes the original simple case but does not approve V6 or replace whole-project/resource acceptance.",
+    "No production/root source edits or builds; only frozen CLI replays and two bounded compiler-oracle/trace runs for the requested ownership controls."
+  ]
+}

@@ -1,0 +1,149 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=consume CODE=int consume(int value); FULL_NAME=consume SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=sample CODE=int sample(void) { return CALL(ARG); } FULL_NAME=sample SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return CALL(ARG); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return CALL(ARG); ORDER=1
+        CALL NAME=consume CODE=consume(1) TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=ARG CODE=ARG TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:ARG:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=sample TYPE_FULL_NAME=sample METHOD_FULL_NAME=sample ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=ARG CODE=#define ARG 1 FULL_NAME=main.c:ARG:int(0) SIGNATURE=int(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+
+METHOD NAME=sample CODE=int sample(void) { return CALL(ARG); } FULL_NAME=sample SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return CALL(ARG); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return CALL(ARG); ORDER=1
+      CALL NAME=consume CODE=consume(1) TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=ARG CODE=ARG TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:ARG:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=sample FULL_NAME=sample CODE=sample AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=sample FULL_NAME=sample TYPE_DECL_FULL_NAME=sample
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT sample#4 -> sample#5
+EDGES|ARGUMENT sample#5 -> sample#6
+EDGES|CALL sample#5 -> consume#0
+EDGES|CALL sample#6 -> main.c:ARG:int(0)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG consume#0 -> consume#4
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#12
+EDGES|CFG main.c:<global>#1 -> sample#6
+EDGES|CFG main.c:<global>#12 -> main.c:<global>#13
+EDGES|CFG main.c:ARG:int(0)#0 -> main.c:ARG:int(0)#2
+EDGES|CFG sample#4 -> sample#9
+EDGES|CFG sample#5 -> sample#4
+EDGES|CFG sample#6 -> sample#5
+EDGES|CFG sample#6 -> sample#8
+EDGES|CFG sample#8 -> sample#5
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:main.c:<global> -> D:sample
+EDGES|CONTAINS D:main.c:<global> -> consume#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:ARG:int(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS consume#0 -> consume#3
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#12
+EDGES|CONTAINS main.c:<global>#1 -> sample#3
+EDGES|CONTAINS main.c:<global>#1 -> sample#4
+EDGES|CONTAINS main.c:<global>#1 -> sample#5
+EDGES|CONTAINS main.c:<global>#1 -> sample#6
+EDGES|CONTAINS main.c:<global>#1 -> sample#7
+EDGES|CONTAINS main.c:<global>#1 -> sample#8
+EDGES|CONTAINS main.c:ARG:int(0)#0 -> main.c:ARG:int(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE consume#1 -> T:int
+EDGES|EVAL_TYPE consume#2 -> T:int
+EDGES|EVAL_TYPE consume#3 -> T:ANY
+EDGES|EVAL_TYPE consume#4 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#12 -> T:sample
+EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+EDGES|EVAL_TYPE main.c:ARG:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:ARG:int(0)#2 -> T:int
+EDGES|EVAL_TYPE sample#1 -> T:void
+EDGES|EVAL_TYPE sample#2 -> T:void
+EDGES|EVAL_TYPE sample#3 -> T:void
+EDGES|EVAL_TYPE sample#5 -> T:int
+EDGES|EVAL_TYPE sample#6 -> T:int
+EDGES|EVAL_TYPE sample#7 -> T:ANY
+EDGES|EVAL_TYPE sample#8 -> T:int
+EDGES|EVAL_TYPE sample#9 -> T:int
+EDGES|PARAMETER_LINK consume#1 -> consume#2
+EDGES|PARAMETER_LINK sample#1 -> sample#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:sample -> D:sample
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#12 -> main.c:<global>#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:sample -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE consume#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:ARG:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] sample#4 -> sample#9
+FLOWS|REACHING_DEF[ARG] sample#6 -> sample#5
+FLOWS|REACHING_DEF[ARG] sample#6 -> sample#9
+FLOWS|REACHING_DEF[] consume#0 -> consume#1
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#12
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> sample#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> sample#6
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> sample#8
+FLOWS|REACHING_DEF[] sample#1 -> sample#2
+FLOWS|REACHING_DEF[] sample#1 -> sample#9
+FLOWS|REACHING_DEF[consume(1)] sample#5 -> sample#4
+FLOWS|REACHING_DEF[consume(1)] sample#5 -> sample#9
+FLOWS|REACHING_DEF[value] consume#1 -> consume#2
+FLOWS|REACHING_DEF[value] consume#1 -> consume#4

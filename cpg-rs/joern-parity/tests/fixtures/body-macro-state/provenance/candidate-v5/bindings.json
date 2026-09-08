@@ -1,0 +1,14 @@
+{
+  "exact.rs": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v5/exact.rs",
+    "sha256": "442a1c79241ca8cdbad9b379b86ff80333cdc2534d0651101fc94a0e9451bca9"
+  },
+  "joern-parity": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v5/joern-parity",
+    "sha256": "fcc18e5e33c7c1e22b7b512958e3e345e98d73765e20f1441ab8c666442e6a64"
+  },
+  "buildLog": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/build-v5-final.log",
+    "sha256": "19eca60bad3d97a85f9db1b529babfa11d33ab122902629115541d7a9683c9fb"
+  }
+}

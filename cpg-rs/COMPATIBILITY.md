@@ -122,14 +122,29 @@ Supplied body includes remain incompletely lowered; the `fixedtables` array
 and identifier type/CODE gaps predate this batch. Both full project graphs
 still differ from Joern.
 
+The [ninth batch](../docs/conformance/astra-ninth-batch-2026-09-08.md) shares
+source-order body macro context across emission and discovery consumers,
+while preserving lexical typedef scope and explicit recovery contexts.
+Synthetic macro metadata uses the pinned expansion-event ownership in the
+covered cases, including literal opacity and object-callee token eligibility.
+Of 76 complete new projects, 54 are exact and fully gated; all 22 diagnostics
+remain, including one importer failure. Two additional complete macro-METHOD
+assertions do not make their enclosing projects exact. Whole zlib output
+repairs 12 function-reference types and their corresponding type edges;
+Lua output is unchanged, with no formerly matching record lost in either
+project. Neither complete project projection is exact. When the modeled
+metadata queue has no eligible event, a compatibility fallback remains;
+this is not a complete port of upstream macro handling.
+
+
 Confirmed remaining C gaps include broader include/build-definition context,
-function-like macros in preprocessor conditions, body-local macro updates,
+function-like macros in preprocessor conditions,
 body includes and runtime control chains split by preprocessor directives,
 variadics, stringification, token pasting, unbraced multi-statement replacements,
 unpinned initializer and field-designator forms, tagged and alias type
 resolution, nested macro expansion and recovery-context behavior, and further
-reaching-definition boundaries. Declaration-specifier macro lookup still uses
-standalone header state in some paths. Complete whole-project differences and
+reaching-definition boundaries. Unused local alias registration and GNU
+nested-function lowering retain complete nonexact diagnostics. Complete whole-project differences and
 retained nonexact diagnostics record these limits. Expansion work/depth bounds
 do not guarantee complete parsing; unsupported syntax can yield partial graphs.
 Some CRLF source rendering differs, and some transformed nodes use approximate

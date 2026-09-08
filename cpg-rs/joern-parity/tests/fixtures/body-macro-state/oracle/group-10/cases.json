@@ -1,0 +1,8 @@
+{
+  "nested_function_macro_persistence": {
+    "main.c": "int choose(int x) {\n int inner(int y) {\n#define FLAG 1\n return y;\n }\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "nested_function_control": {
+    "main.c": "#define FLAG 1\nint choose(int x) {\n int inner(int y) { return y; }\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n}\n"
+  }
+}

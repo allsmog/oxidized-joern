@@ -1,0 +1,99 @@
+{
+  "status": "RETAINED_DUPLICATE_CLINIT_IMPORTER_DIAGNOSTIC_BOTH_RUST_PRODUCERS_ABORT",
+  "createdAtUtc": "2026-09-08T20:17:40.835615+00:00",
+  "canonicalLinesIncludingSeparators": 323,
+  "nonemptySelectedRecords": 313,
+  "runs": {
+    "baseline-eighth": {
+      "receipt": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/translation-unit-metadata-control/baseline-eighth/duplicate_clinit_tag/run.json",
+      "sha256": "1e9c3bbd8a3a967445179c4ee973255945ce596e4ae697c99997b47bacf12810",
+      "exitCode": -6,
+      "actualGraphComplete": false
+    },
+    "candidate-v4": {
+      "receipt": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/translation-unit-metadata-control/candidate-v4/duplicate_clinit_tag/run.json",
+      "sha256": "5362d561527a01e79881f00a9239d743759cf684a84a1a0fa94bc84a5c97d8ae",
+      "exitCode": 101,
+      "actualGraphComplete": false
+    }
+  },
+  "interpretation": "Both old and v4 abort in importer duplicate method property drift, so this is not evidence of lost facts from a successful baseline graph. The first differing property changes from generated method full name to literal value. Independent source inspection shows metadata updates can visit an earlier TU dump/edge with the same textual block/address. Explicit per-generated-dump and edge identities are being added separately. No duplicate-clinit importer fix is claimed.",
+  "files": {
+    "baseline-eighth/duplicate_clinit_tag/actual.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "baseline-eighth/duplicate_clinit_tag/complete.diff": {
+      "bytes": 18677,
+      "sha256": "d7a55ab1a5bcd3af26937c97835aa6c97678bb58bf02df064c93a55f9b337d40"
+    },
+    "baseline-eighth/duplicate_clinit_tag/run.json": {
+      "bytes": 1725,
+      "sha256": "1e9c3bbd8a3a967445179c4ee973255945ce596e4ae697c99997b47bacf12810"
+    },
+    "baseline-eighth/duplicate_clinit_tag/stderr.txt": {
+      "bytes": 590,
+      "sha256": "b57c0892f70e6e055c64e45d020f9a8000165a989fdc43f1e95c53a81fda19e4"
+    },
+    "candidate-v4/duplicate_clinit_tag/actual.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "candidate-v4/duplicate_clinit_tag/complete.diff": {
+      "bytes": 18674,
+      "sha256": "c12c696bbf6a2730af68301662798420bc0a64691645ee90e37930dfe0b09220"
+    },
+    "candidate-v4/duplicate_clinit_tag/run.json": {
+      "bytes": 1712,
+      "sha256": "5362d561527a01e79881f00a9239d743759cf684a84a1a0fa94bc84a5c97d8ae"
+    },
+    "candidate-v4/duplicate_clinit_tag/stderr.txt": {
+      "bytes": 344,
+      "sha256": "40581154abcf6a98e8d48197c7289100fc4833c4a656a6d1cb15e02589f6c2b0"
+    },
+    "cases.json": {
+      "bytes": 210,
+      "sha256": "c589301067d76a67e44ef7b7c4ee6ee5676b65884747e40b53ac9c922cc93817"
+    },
+    "input/duplicate_clinit_tag/a.c": {
+      "bytes": 69,
+      "sha256": "2d336c1f8f11a904ebf5ff1581816548619a326835a89ea349687fca626445ab"
+    },
+    "input/duplicate_clinit_tag/b.c": {
+      "bytes": 70,
+      "sha256": "c406b50515fe961b3fe270eff57c6904c0669d5b804c049760f787240f8a2af2"
+    },
+    "input/duplicate_clinit_tag/expected.txt": {
+      "bytes": 18306,
+      "sha256": "79bc96282d7e9711dc1bfa8dd96044b3e1eb7e17f4f6cd0074c0ea990990b5b4"
+    },
+    "live-run.json": {
+      "bytes": 1672,
+      "sha256": "878a3799c3960a7369cf8799a8f22936b7725465d7f03532c549b369f4a9de79"
+    },
+    "live.stderr": {
+      "bytes": 1440,
+      "sha256": "58c51e9350e3e7d1cacc8cf754e1a04222029e1b80294686db011c735ca4bc5b"
+    },
+    "live.stdout": {
+      "bytes": 26896,
+      "sha256": "eae4dab4458400723ecd94059bf0fc3245de0ef72bb54e8617959044c93dfa9e"
+    },
+    "oracle-started.json": {
+      "bytes": 3,
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    "oracle.sc": {
+      "bytes": 4709,
+      "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+    },
+    "replay.py": {
+      "bytes": 3002,
+      "sha256": "2ac54d8445d268a3aeb83d231d52f7540cf4a92f8934f41ea07ad90c22bccfa2"
+    },
+    "run_oracle.py": {
+      "bytes": 2607,
+      "sha256": "f49e1f86d12cf09c669f3ba9f6b22a2a6793ceb1a8bfaee8846935ace10b02cd"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+--- Joern4.0.555
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity
+@@ -9,8 +9,8 @@
+     CONTROL_STRUCTURE CODE=if (0) {\n#define FLAG 1\n } ORDER=1
+       LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+       BLOCK CODE={\n#define FLAG 1\n } TYPE_FULL_NAME=void ORDER=2
+-    RETURN CODE=return x; ORDER=2
+-      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
++    RETURN CODE=return 0; ORDER=2
++      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -21,8 +21,8 @@
+       CONTROL_STRUCTURE CODE=if (0) {\n#define FLAG 1\n } ORDER=1
+         LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+         BLOCK CODE={\n#define FLAG 1\n } TYPE_FULL_NAME=void ORDER=2
+-      RETURN CODE=return x; ORDER=2
+-        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
++      RETURN CODE=return 0; ORDER=2
++        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=choose TYPE_FULL_NAME=choose METHOD_FULL_NAME=choose ORDER=1
+@@ -91,7 +91,6 @@
+ EDGES|REF T:choose -> D:choose
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+-EDGES|REF choose#8 -> choose#1
+ EDGES|REF main.c:<global>#12 -> choose#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+@@ -105,12 +104,12 @@
+ EDGES|SOURCE_FILE choose#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|TRUE_BODY choose#4 -> choose#6
++FLOWS|REACHING_DEF[0] choose#8 -> choose#7
+ FLOWS|REACHING_DEF[<RET>] choose#7 -> choose#9
+ FLOWS|REACHING_DEF[] choose#0 -> choose#1
+ FLOWS|REACHING_DEF[] choose#0 -> choose#5
++FLOWS|REACHING_DEF[] choose#0 -> choose#7
+ FLOWS|REACHING_DEF[] choose#0 -> choose#8
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#12
+ FLOWS|REACHING_DEF[x] choose#1 -> choose#2
+-FLOWS|REACHING_DEF[x] choose#1 -> choose#8
+ FLOWS|REACHING_DEF[x] choose#1 -> choose#9
+-FLOWS|REACHING_DEF[x] choose#8 -> choose#7

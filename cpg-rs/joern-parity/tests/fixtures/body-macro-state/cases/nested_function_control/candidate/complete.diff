@@ -1,0 +1,178 @@
+--- Joern4.0.555
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/joern-parity
+@@ -6,24 +6,10 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={\n int inner(int y) { return y; }\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-    METHOD NAME=inner CODE=int inner(int y) { return y; } FULL_NAME=inner SIGNATURE=int(int) ORDER=1
+-      METHOD_PARAMETER_IN NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=1
+-      METHOD_PARAMETER_OUT NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=1
+-      BLOCK CODE={ return y; } TYPE_FULL_NAME=void ORDER=2
+-        RETURN CODE=return y; ORDER=1
+-          IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=1
+-      METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+-    METHOD_REF CODE=inner TYPE_FULL_NAME=inner METHOD_FULL_NAME=inner ORDER=1
+-    RETURN CODE=return x; ORDER=2
++    LOCAL NAME=y CODE=<unknown> y TYPE_FULL_NAME=ANY ORDER=0
++    LOCAL NAME=inner CODE=<unknown> inner TYPE_FULL_NAME=ANY ORDER=0
++    RETURN CODE=return x; ORDER=1
+       IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+-
+-METHOD NAME=inner CODE=int inner(int y) { return y; } FULL_NAME=inner SIGNATURE=int(int) ORDER=1
+-  METHOD_PARAMETER_IN NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=1
+-  METHOD_PARAMETER_OUT NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=1
+-  BLOCK CODE={ return y; } TYPE_FULL_NAME=void ORDER=2
+-    RETURN CODE=return y; ORDER=1
+-      IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -31,15 +17,9 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={\n int inner(int y) { return y; }\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-      METHOD NAME=inner CODE=int inner(int y) { return y; } FULL_NAME=inner SIGNATURE=int(int) ORDER=1
+-        METHOD_PARAMETER_IN NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=1
+-        METHOD_PARAMETER_OUT NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=1
+-        BLOCK CODE={ return y; } TYPE_FULL_NAME=void ORDER=2
+-          RETURN CODE=return y; ORDER=1
+-            IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=1
+-        METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+-      METHOD_REF CODE=inner TYPE_FULL_NAME=inner METHOD_FULL_NAME=inner ORDER=1
+-      RETURN CODE=return x; ORDER=2
++      LOCAL NAME=y CODE=<unknown> y TYPE_FULL_NAME=ANY ORDER=0
++      LOCAL NAME=inner CODE=<unknown> inner TYPE_FULL_NAME=ANY ORDER=0
++      RETURN CODE=return x; ORDER=1
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+@@ -56,81 +36,59 @@
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=choose FULL_NAME=choose CODE=choose AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+-NODES|TYPE_DECL NAME=inner FULL_NAME=inner CODE=inner AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=choose FULL_NAME=choose TYPE_DECL_FULL_NAME=choose
+-NODES|TYPE NAME=inner FULL_NAME=inner TYPE_DECL_FULL_NAME=inner
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT choose#12 -> choose#13
+-EDGES|ARGUMENT inner#4 -> inner#5
++EDGES|ARGUMENT choose#6 -> choose#7
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG choose#0 -> choose#11
+-EDGES|CFG choose#11 -> choose#13
+-EDGES|CFG choose#12 -> choose#14
+-EDGES|CFG choose#13 -> choose#12
+-EDGES|CFG choose#4 -> inner#5
+-EDGES|CFG inner#4 -> inner#6
+-EDGES|CFG inner#5 -> inner#4
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#17
+-EDGES|CFG main.c:<global>#17 -> main.c:<global>#18
++EDGES|CFG choose#0 -> choose#7
++EDGES|CFG choose#6 -> choose#8
++EDGES|CFG choose#7 -> choose#6
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#11
++EDGES|CFG main.c:<global>#11 -> main.c:<global>#12
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS D:main.c:<global> -> D:choose
+-EDGES|CONTAINS D:main.c:<global> -> D:inner
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+-EDGES|CONTAINS choose#0 -> choose#11
+-EDGES|CONTAINS choose#0 -> choose#12
+-EDGES|CONTAINS choose#0 -> choose#13
+ EDGES|CONTAINS choose#0 -> choose#3
+-EDGES|CONTAINS choose#0 -> choose#4
+-EDGES|CONTAINS choose#4 -> inner#3
+-EDGES|CONTAINS choose#4 -> inner#4
+-EDGES|CONTAINS choose#4 -> inner#5
++EDGES|CONTAINS choose#0 -> choose#6
++EDGES|CONTAINS choose#0 -> choose#7
+ EDGES|CONTAINS main.c:<global>#0 -> choose#0
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#16
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#17
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE choose#1 -> T:int
+-EDGES|EVAL_TYPE choose#11 -> T:inner
+-EDGES|EVAL_TYPE choose#13 -> T:int
+-EDGES|EVAL_TYPE choose#14 -> T:int
+ EDGES|EVAL_TYPE choose#2 -> T:int
+ EDGES|EVAL_TYPE choose#3 -> T:void
+-EDGES|EVAL_TYPE inner#1 -> T:int
+-EDGES|EVAL_TYPE inner#2 -> T:int
+-EDGES|EVAL_TYPE inner#3 -> T:void
+-EDGES|EVAL_TYPE inner#5 -> T:int
+-EDGES|EVAL_TYPE inner#6 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#17 -> T:choose
+-EDGES|EVAL_TYPE main.c:<global>#18 -> T:ANY
++EDGES|EVAL_TYPE choose#4 -> T:ANY
++EDGES|EVAL_TYPE choose#5 -> T:ANY
++EDGES|EVAL_TYPE choose#7 -> T:int
++EDGES|EVAL_TYPE choose#8 -> T:int
++EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#11 -> T:choose
++EDGES|EVAL_TYPE main.c:<global>#12 -> T:ANY
+ EDGES|PARAMETER_LINK choose#1 -> choose#2
+-EDGES|PARAMETER_LINK inner#1 -> inner#2
+ EDGES|REF NB:<global> -> NS:<global>
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
+ EDGES|REF T:choose -> D:choose
+-EDGES|REF T:inner -> D:inner
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+-EDGES|REF choose#11 -> choose#4
+-EDGES|REF choose#13 -> choose#1
+-EDGES|REF inner#5 -> inner#1
+-EDGES|REF main.c:<global>#17 -> choose#0
++EDGES|REF choose#7 -> choose#1
++EDGES|REF main.c:<global>#11 -> choose#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:choose -> F:main.c
+-EDGES|SOURCE_FILE D:inner -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+@@ -138,21 +96,12 @@
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE choose#0 -> F:main.c
+-EDGES|SOURCE_FILE choose#4 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-FLOWS|REACHING_DEF[<RET>] choose#12 -> choose#14
+-FLOWS|REACHING_DEF[<RET>] inner#4 -> inner#6
++FLOWS|REACHING_DEF[<RET>] choose#6 -> choose#8
+ FLOWS|REACHING_DEF[] choose#0 -> choose#1
+-FLOWS|REACHING_DEF[] choose#0 -> choose#11
+-FLOWS|REACHING_DEF[] choose#0 -> choose#13
+-FLOWS|REACHING_DEF[] choose#4 -> inner#1
+-FLOWS|REACHING_DEF[] choose#4 -> inner#5
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#17
+-FLOWS|REACHING_DEF[x] choose#1 -> choose#13
+-FLOWS|REACHING_DEF[x] choose#1 -> choose#14
++FLOWS|REACHING_DEF[] choose#0 -> choose#7
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#11
+ FLOWS|REACHING_DEF[x] choose#1 -> choose#2
+-FLOWS|REACHING_DEF[x] choose#13 -> choose#12
+-FLOWS|REACHING_DEF[y] inner#1 -> inner#2
+-FLOWS|REACHING_DEF[y] inner#1 -> inner#5
+-FLOWS|REACHING_DEF[y] inner#1 -> inner#6
+-FLOWS|REACHING_DEF[y] inner#5 -> inner#4
++FLOWS|REACHING_DEF[x] choose#1 -> choose#7
++FLOWS|REACHING_DEF[x] choose#1 -> choose#8
++FLOWS|REACHING_DEF[x] choose#7 -> choose#6

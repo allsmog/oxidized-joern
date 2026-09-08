@@ -1,0 +1,172 @@
+{
+  "status": "BOUNDED_V4_TO_V5_REPAIRS_VERIFIED_V5_HELD_FOR_OBJECT_CALLEE_REGRESSION",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v5/exact.rs",
+    "sha256": "442a1c79241ca8cdbad9b379b86ff80333cdc2534d0651101fc94a0e9451bca9"
+  },
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v5/joern-parity",
+    "sha256": "fcc18e5e33c7c1e22b7b512958e3e345e98d73765e20f1441ab8c666442e6a64"
+  },
+  "bindings": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v5/bindings.json",
+    "sha256": "ecf32c59cf8caaa5bdd6b4b5e218407b371db7146f2b7675f9c24d63cf5669b4"
+  },
+  "sourceOnlyDelta": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v5-review/v4-v5.diff",
+    "sha256": "d61203850be82504a8ecafb75f9564ca8bfb75dad30e98aff3638537e937ca54"
+  },
+  "focusedReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v5-review/focused-replay.json",
+    "sha256": "76e4d60d736718c0cd9153ac39b1dae466ffd992dabd8e9c8eef288beac1baef"
+  },
+  "literalReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/candidate-v5/replay.json",
+    "sha256": "22f1732fcf35873852dcf107cb49560d12c6320b56ce4dcceb1d29d097aafb34"
+  },
+  "originalLiteralFailure": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/introduced-regression.json",
+    "sha256": "05bffe844c61b7ac2ceaeb8d48cd83e752b66ab1ae9786baa7a986c9533ef801"
+  },
+  "literalControls": {
+    "eighthExact": 4,
+    "v4Exact": 1,
+    "v5Exact": 4,
+    "allCompleteReferencesUnchanged": true
+  },
+  "existing50": "All 50 saved v5 output hashes equal independently reproduced v4 bytes. Full independent v5 family replay deferred to repaired final freeze.",
+  "sourceFindings": [
+    {
+      "area": "Literal opacity",
+      "verdict": "PASS_BOUNDED",
+      "evidence": "collect_macro_expansions rejects entire string_literal/char_literal token trees; body collector also avoids descending those trees/comments. Plain global/body and L/u8 strings now retain CODE2; character control stays exact."
+    },
+    {
+      "area": "Original body ranges",
+      "verdict": "PASS_BOUNDED",
+      "evidence": "Only top-level original function bodies are registered; nested GNU body macro effects still enter shared snapshots through traversal. Top-level containing range no longer loses lookup eligibility after a nested function ends."
+    },
+    {
+      "area": "Generated field identity",
+      "verdict": "PASS_BOUNDED",
+      "evidence": "Each Ctx counts begin_block calls that correspond one-for-one with its pushed dumps, and resolves only dumps[first_dump..]. Recorded METHOD_FULL_NAME ranges index explicit per-TU dump ordinal; replacements remain descending by byte offset. CALL target updates use the exact append-only edge Vec index captured by line(), never a possibly colliding string address."
+    },
+    {
+      "area": "Embedded method copies",
+      "verdict": "PASS_BOUNDED",
+      "evidence": "line() clears last_call_edge before each emitted node; suppressed nested method copies record field spans without an edge index, so both textual copies update without inventing duplicate CALL edges."
+    }
+  ],
+  "rawExtractions": [
+    {
+      "case": "nested_function_control",
+      "inputFiles": {
+        "main.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/nested-ranges/input/nested_function_control/main.c",
+          "sha256": "87ebcce1a37fffd2bcc1f96cc0c9afec8bad635b91be2a0938eaede0ac4e9566"
+        }
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/nested-ranges/input/nested_function_control/expected.txt",
+        "sha256": "4640958862a6930d7944ced87480b658e3d85434a65e4042fcc136ee175597cb"
+      },
+      "raw": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/nested-ranges/live.stdout",
+        "sha256": "f1f8e1bd4388af93c288289ccf9d7366b2b38f5131095e205bdff7d2b9e41111"
+      },
+      "liveRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/nested-ranges/live-run.json",
+        "sha256": "e99f851077dee8a870487c66f6d088a36cef7165e115fd3307e1ba3cde5710e0"
+      },
+      "sourceAndRawExtractExact": true
+    },
+    {
+      "case": "nested_function_macro_persistence",
+      "inputFiles": {
+        "main.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/nested-ranges/input/nested_function_macro_persistence/main.c",
+          "sha256": "eba946bb8b43f1ec811fc74aca8998017ad53e55a0579085bfabc388df31b8e3"
+        }
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/nested-ranges/input/nested_function_macro_persistence/expected.txt",
+        "sha256": "8dbb4d90a52512d55b38c9cf318d4fadb4120aa69159d7dc486f94b5107bc673"
+      },
+      "raw": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/nested-ranges/live.stdout",
+        "sha256": "f1f8e1bd4388af93c288289ccf9d7366b2b38f5131095e205bdff7d2b9e41111"
+      },
+      "liveRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/nested-ranges/live-run.json",
+        "sha256": "e99f851077dee8a870487c66f6d088a36cef7165e115fd3307e1ba3cde5710e0"
+      },
+      "sourceAndRawExtractExact": true
+    },
+    {
+      "case": "duplicate_clinit_tag",
+      "inputFiles": {
+        "a.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/translation-unit-metadata-control/input/duplicate_clinit_tag/a.c",
+          "sha256": "2d336c1f8f11a904ebf5ff1581816548619a326835a89ea349687fca626445ab"
+        },
+        "b.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/translation-unit-metadata-control/input/duplicate_clinit_tag/b.c",
+          "sha256": "c406b50515fe961b3fe270eff57c6904c0669d5b804c049760f787240f8a2af2"
+        }
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/translation-unit-metadata-control/input/duplicate_clinit_tag/expected.txt",
+        "sha256": "79bc96282d7e9711dc1bfa8dd96044b3e1eb7e17f4f6cd0074c0ea990990b5b4"
+      },
+      "raw": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/translation-unit-metadata-control/live.stdout",
+        "sha256": "eae4dab4458400723ecd94059bf0fc3245de0ef72bb54e8617959044c93dfa9e"
+      },
+      "liveRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/translation-unit-metadata-control/live-run.json",
+        "sha256": "878a3799c3960a7369cf8799a8f22936b7725465d7f03532c549b369f4a9de79"
+      },
+      "sourceAndRawExtractExact": true
+    }
+  ],
+  "ordinaryDeferredFieldControls": [
+    {
+      "case": "deferred_full_name_literal",
+      "correctOrdinaryRecordInstances": 9,
+      "output": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v5-review/replay/deferred_full_name_literal/v5.stdout",
+        "sha256": "c25f09289b059a979adddcaba94719f3a84678184a1e9a4be9d3804dc826fdd8"
+      }
+    },
+    {
+      "case": "deferred_full_name_spaces",
+      "correctOrdinaryRecordInstances": 9,
+      "output": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v5-review/replay/deferred_full_name_spaces/v5.stdout",
+        "sha256": "369f74ebb48c924503fd81c8edd2dadfa6196c40ccd201345d15894f23bd9592"
+      }
+    }
+  ],
+  "nestedDiagnostics": [
+    {
+      "case": "nested_function_control",
+      "classification": "PREEXISTING_NONEXACT",
+      "evidence": "v4/v5 output bytes identical; nested function body is still not fully lowered."
+    },
+    {
+      "case": "nested_function_macro_persistence",
+      "classification": "NEWLY_EXPOSED_PARTIAL_WITH_CORRECTED_BRANCH",
+      "evidence": "v5 changes return0/literal0 to live returnx/identifierx after nested macro definition. Inner function lowering and phantom locals remain preexisting diagnostics; no claim of complete graph parity."
+    },
+    {
+      "case": "duplicate_clinit_tag",
+      "classification": "PREEXISTING_IMPORTER_FAILURE",
+      "evidence": "Independent frozen eighth exits -6; v4/v5 exit101. All fail at import.rs119 duplicate method node properties drift, a.c:N:int(0) vs b.c:N:int(0). Empty outputs are not successful old graphs and establish no previously-exact graph loss."
+    }
+  ],
+  "remainingHold": "analysis_scope has independently confirmed a different object-like callee/sizeof argument macro event regression; V5 must not be accepted until repaired and replayed in a new freeze. Current-metadata fallback remains a bounded divergence from pinned None behavior.",
+  "limits": [
+    "No root/source edits or Cargo/whole-project runs.",
+    "Only these source deltas and focused immutable replays are approved by this review; not V5 overall acceptance."
+  ]
+}
