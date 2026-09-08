@@ -62,6 +62,9 @@ jobs:
         with:
           workspaces: cpg-rs
           key: linux-release-parity
+      - name: Test parity gate failure handling
+        working-directory: cpg-rs/joern-parity
+        run: python3 test_check.py
       - name: Check the committed Joern parity contract
         working-directory: cpg-rs/joern-parity
         run: ./check.sh --committed-only

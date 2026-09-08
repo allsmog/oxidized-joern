@@ -81,6 +81,9 @@ jobs:
         run: cargo install cargo-audit --version 0.22.2 --locked
       - name: Audit the released dependency graph
         run: cargo audit --deny warnings --file cpg-rs/Cargo.lock
+      - name: Test parity gate failure handling
+        working-directory: cpg-rs/joern-parity
+        run: python3 test_check.py
       - name: Check the committed Joern parity contract
         working-directory: cpg-rs/joern-parity
         run: ./check.sh --committed-only
