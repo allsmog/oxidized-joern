@@ -128,6 +128,13 @@ else
 fi
 
 # Edge parity, one block per edge kind.
+# Check the full section first so malformed lines cannot disappear during
+# per-kind selection (for example, a trailing "EDGES|CFG" with no endpoints).
+if ! diff -q "$OEDGES" "$MEDGES" >/dev/null; then
+  echo "FAIL  (complete structural edge section)"
+  diff "$OEDGES" "$MEDGES" | sed 's/^/      /' | head -40 || true
+  exit 1
+fi
 for kind in $( (cut -d' ' -f1 "$OEDGES"; cut -d' ' -f1 "$MEDGES") | sort -u); do
   total=$((total+1))
   OK="$TEMP_ROOT/oracle-kind"; MK="$TEMP_ROOT/mine-kind"

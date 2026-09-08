@@ -110,6 +110,14 @@ class ParityGateTests(unittest.TestCase):
         )
         self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_malformed_structural_edge_cannot_be_ignored(self):
+        result = self.run_gate(actual=rust_dump(ORACLE) + "EDGES|CFG\n")
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_unknown_structural_edge_cannot_be_ignored(self):
+        result = self.run_gate(actual=rust_dump(ORACLE) + "EDGES|[BAD first#0 -> first#1\n")
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_dot_prefixed_unexpected_method_fails(self):
         result = self.run_gate(
             actual=rust_dump(ORACLE) + "METHOD NAME=extra FULL_NAME=.extra\n\n"
