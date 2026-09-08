@@ -2581,9 +2581,6 @@ impl Ctx<'_> {
             self.method_functions.insert(name, ret);
         }
         let ty = declaration_type(n, b, TypeRole::Declaration);
-        // CDT registers the decl-SPECIFIER type separately from the declared
-        // type: `unsigned char c` also registers bare `unsigned` (pinned by
-        // musl memcmp.c); a pointer decl registers its base.
         // LOCAL CODE is rebuilt per declarator: the decl-specifier source text
         // (keeps `const`/`struct`/`unsigned ...` spellings the type drops)
         // plus that declarator alone — so `int a, b = 1;` yields `int a`,`int b`.
@@ -2653,15 +2650,23 @@ impl Ctx<'_> {
                 full_ty,
             });
         }
-        if items
-            .iter()
-            .any(|item| find_function_declarator(item.decl).is_none())
-        {
-            let raw_type = n
-                .child_by_field_name("type")
-                .map(|node| text(node, b))
-                .unwrap_or("ANY");
-            let registered = if primitive_type(raw_type, TypeRole::Declaration).is_some() {
+        // CDT's astForInitializer additionally registers the first component
+        // of a primitive object's type (`unsigned char c = 0` registers
+        // `unsigned`, as pinned by memcmp.c). A declaration without an explicit
+        // initializer, including an array's implicit allocation, does not take
+        // that path. Check each declarator so an initialized function pointer
+        // cannot register the base of an uninitialized ordinary neighbor.
+        // Keep nonprimitive registration: tags also register their base via
+        // independent paths (`struct Packet *p` still needs a Packet TYPE).
+        let raw_type = n
+            .child_by_field_name("type")
+            .map(|node| text(node, b))
+            .unwrap_or("ANY");
+        let primitive = primitive_type(raw_type, TypeRole::Declaration).is_some();
+        if items.iter().any(|item| {
+            (!primitive || item.init.is_some()) && find_function_declarator(item.decl).is_none()
+        }) {
+            let registered = if primitive {
                 // CDT's extra decl-specifier registration uses the first word
                 // of the declared spelling (`short unsigned int` -> `short`).
                 ty.split_whitespace().next().unwrap_or(&ty)

@@ -1,0 +1,37 @@
+--- live
++++ candidate
+@@ -22,13 +22,11 @@
+ NODES|TYPE_DECL NAME=Packet FULL_NAME=Packet CODE=struct Packet { int value; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=registration.c ORDER=1
+ NODES|TYPE_DECL NAME=Packet* FULL_NAME=Packet* CODE=Packet* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=packet FULL_NAME=packet CODE=packet IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=registration.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=registration.c:<global> FILENAME=registration.c ORDER=1
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=Packet FULL_NAME=Packet TYPE_DECL_FULL_NAME=Packet
+ NODES|TYPE NAME=Packet* FULL_NAME=Packet* TYPE_DECL_FULL_NAME=Packet*
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+-NODES|TYPE NAME=packet FULL_NAME=packet TYPE_DECL_FULL_NAME=packet
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG registration.c:<global>#0 -> registration.c:<global>#4
+ EDGES|CFG registration.c:<global>#4 -> registration.c:<global>#6
+@@ -38,7 +36,6 @@
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:Packet*
+ EDGES|CONTAINS F:<includes> -> D:int
+-EDGES|CONTAINS F:<includes> -> D:packet
+ EDGES|CONTAINS F:registration.c -> D:registration.c:<global>
+ EDGES|CONTAINS registration.c:<global>#0 -> registration.c:<global>#1
+ EDGES|CONTAINS registration.c:<global>#0 -> registration.c:<global>#3
+@@ -57,12 +54,10 @@
+ EDGES|REF T:Packet -> registration.c:<global>#1
+ EDGES|REF T:Packet* -> D:Packet*
+ EDGES|REF T:int -> D:int
+-EDGES|REF T:packet -> D:packet
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:Packet* -> F:<includes>
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+-EDGES|SOURCE_FILE D:packet -> F:<includes>
+ EDGES|SOURCE_FILE D:registration.c:<global> -> F:registration.c
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>

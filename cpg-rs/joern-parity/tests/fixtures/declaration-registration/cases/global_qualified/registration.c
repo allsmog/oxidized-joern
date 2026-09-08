@@ -1,0 +1,1 @@
+volatile unsigned short *pointer;
