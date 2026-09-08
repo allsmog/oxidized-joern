@@ -3133,22 +3133,14 @@ impl Ctx<'_> {
                         "LITERAL",
                         P {
                             code: Some(rest.to_string()),
-                            tfn: Some("int".into()),
+                            tfn: Some(numeric_literal_type(rest).into()),
                             order: Some(1),
                             arg: Some(1),
                             ..Default::default()
                         },
                     );
                 } else {
-                    let tfn = if t.starts_with("0x") || t.starts_with("0X") {
-                        "int"
-                    } else if t.ends_with('f') || t.ends_with('F') {
-                        "float"
-                    } else if t.contains('.') || t.contains('e') || t.contains('E') {
-                        "double"
-                    } else {
-                        "int"
-                    };
+                    let tfn = numeric_literal_type(&t);
                     self.line(
                         depth,
                         "LITERAL",
@@ -3691,6 +3683,35 @@ fn unary_name(op: &str) -> String {
         _ => "unknown",
     };
     format!("<operator>.{n}")
+}
+
+/// Literal-node types from the pinned CDT frontend. Integer types follow the
+/// suffix, even when an unsuffixed value exceeds the range of C's `int`.
+/// Declaration normalization and macro-wrapper inference have separate rules.
+fn numeric_literal_type(literal: &str) -> &'static str {
+    let hexadecimal = literal.starts_with("0x") || literal.starts_with("0X");
+    let floating = if hexadecimal {
+        // Hexadecimal e/E/f/F characters are digits, not floating markers.
+        literal.contains(['p', 'P'])
+    } else {
+        literal.contains(['.', 'e', 'E'])
+    };
+    if floating {
+        return match literal.as_bytes().last() {
+            Some(b'f' | b'F') => "float",
+            Some(b'l' | b'L') => "longdouble",
+            _ => "double",
+        };
+    }
+    let digits = literal.trim_end_matches(['u', 'U', 'l', 'L']);
+    match literal[digits.len()..].to_ascii_lowercase().as_str() {
+        "u" => "unsigned int",
+        "l" => "longint",
+        "ll" => "longlongint",
+        "ul" | "lu" => "unsigned longint",
+        "ull" | "llu" => "unsigned longlongint",
+        _ => "int",
+    }
 }
 
 /// Type suffix from declarator nesting: `*` per pointer level, `[]` per array
