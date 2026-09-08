@@ -34,6 +34,7 @@ use crate::SparseValueFlow;
 use cpg_core::{Cpg, EdgeKind, Layer, NodeId, NodeKind, Query};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet, VecDeque};
+use std::rc::Rc;
 
 /// Taint keys paired with a count — distinct enclosing methods for a stored
 /// key, or read sites for a persisted one. Partitioned into kept/dropped
@@ -816,6 +817,14 @@ struct Ctx<'a> {
     spec: &'a TaintSpec,
     /// name -> defining method nodes, for locating callee bodies to splice.
     methods_by_name: HashMap<String, Vec<NodeId>>,
+    /// A method's dependency graph is immutable for this query. Source paths,
+    /// parameter paths and witness splicing reuse it; sanitizer/recursion cuts
+    /// remain traversal-specific and are never cached in this view.
+    return_graphs: std::cell::RefCell<HashMap<NodeId, Rc<crate::return_flow::ReturnFlowGraph>>>,
+    /// Fully explored parameter queries, including their recursion context.
+    /// Store harvesting is monotonic within this Ctx: a cached visit has
+    /// already contributed its sites, even when its sink result is None.
+    param_sinks: std::cell::RefCell<HashMap<ParamSinkKey, Option<SinkHit>>>,
     /// Persistence phase-1 harvest: key -> distinct store call sites where a
     /// `set<Key>` / member-store / named-arg store received tainted data.
     /// With CPG_PERSIST set, phase 2 re-runs the analysis treating the
@@ -834,6 +843,21 @@ struct Ctx<'a> {
 }
 
 impl Ctx<'_> {
+    fn return_graph(&self, method: NodeId) -> Rc<crate::return_flow::ReturnFlowGraph> {
+        if let Some(graph) = self.return_graphs.borrow().get(&method).cloned() {
+            return graph;
+        }
+        let graph = Rc::new(crate::return_flow::ReturnFlowGraph::new(
+            self.cpg,
+            method,
+            self.summaries,
+        ));
+        self.return_graphs
+            .borrow_mut()
+            .insert(method, graph.clone());
+        graph
+    }
+
     /// Query-time sanitizers = the spec's plus whatever the summary store was
     /// computed with (so both walkers agree on what neutralises taint).
     fn is_sanitizer(&self, name: &str) -> bool {
@@ -908,6 +932,8 @@ pub fn find_flows(cpg: &Cpg, summaries: &SummaryStore, spec: &TaintSpec) -> Vec<
         summaries,
         spec,
         methods_by_name: method_name_index(cpg),
+        return_graphs: Default::default(),
+        param_sinks: Default::default(),
         stored: Default::default(),
         global_taint: Default::default(),
     };
@@ -1080,6 +1106,8 @@ pub fn find_flows(cpg: &Cpg, summaries: &SummaryStore, spec: &TaintSpec) -> Vec<
                 summaries,
                 spec: &spec2,
                 methods_by_name: method_name_index(cpg),
+                return_graphs: Default::default(),
+                param_sinks: Default::default(),
                 stored: Default::default(),
                 global_taint: Default::default(),
             };
@@ -2020,7 +2048,7 @@ fn analyse_method(ctx: &Ctx, method: NodeId, out: &mut Vec<Finding>) {
 /// and definite assignment kills. Keep one predecessor per reached node and
 /// materialize a witness only when a sink needs it.
 struct CanonicalPaths {
-    graph: crate::return_flow::ReturnFlowGraph,
+    graph: Rc<crate::return_flow::ReturnFlowGraph>,
     seeds: HashMap<NodeId, Trace>,
     previous: HashMap<NodeId, usize>,
     expansions: HashMap<usize, (Vec<Step>, Provenance)>,
@@ -2048,7 +2076,7 @@ impl CanonicalPaths {
         if seeds.is_empty() {
             return None;
         }
-        let graph = crate::return_flow::ReturnFlowGraph::new(ctx.cpg, method, ctx.summaries);
+        let graph = ctx.return_graph(method);
         Some(Self::new(ctx, graph, seeds, 0, &mut HashSet::new()))
     }
 
@@ -2072,18 +2100,12 @@ impl CanonicalPaths {
                 )],
             },
         )]);
-        Self::new(
-            ctx,
-            crate::return_flow::ReturnFlowGraph::new(cpg, method, ctx.summaries),
-            seeds,
-            depth,
-            visiting,
-        )
+        Self::new(ctx, ctx.return_graph(method), seeds, depth, visiting)
     }
 
     fn new(
         ctx: &Ctx,
-        graph: crate::return_flow::ReturnFlowGraph,
+        graph: Rc<crate::return_flow::ReturnFlowGraph>,
         seeds: HashMap<NodeId, Trace>,
         depth: u32,
         visiting: &mut HashSet<String>,
@@ -2552,7 +2574,19 @@ fn check_sinks(
     // COMMON case: the attribute sink is always an argument of its element).
 }
 
+/// Ancestors affect recursion cuts and depth affects both cuts and witness
+/// steps. Keeping both in the key avoids reusing a pruned result in a less
+/// constrained call context. The spec and summaries are fixed by the Ctx.
+#[derive(Hash, Eq, PartialEq)]
+struct ParamSinkKey {
+    method: NodeId,
+    param_idx: usize,
+    depth: u32,
+    ancestors: Vec<String>,
+}
+
 /// A sink reached from a callee's parameter, with the internal witness steps.
+#[derive(Clone)]
 struct SinkHit {
     sink: String,
     line: Option<u32>,
@@ -2639,6 +2673,18 @@ fn param_to_sink(
     let fqn = cpg.full_name_of(method).unwrap_or("<anon>").to_string();
     if !visiting.insert(fqn.clone()) {
         return None; // recursion
+    }
+    let mut ancestors: Vec<_> = visiting.iter().cloned().collect();
+    ancestors.sort();
+    let key = ParamSinkKey {
+        method,
+        param_idx,
+        depth,
+        ancestors,
+    };
+    if let Some(result) = ctx.param_sinks.borrow().get(&key).cloned() {
+        visiting.remove(&fqn);
+        return result;
     }
     let result = (|| {
         let params = cpg.parameters_of(method);
@@ -2999,6 +3045,7 @@ fn param_to_sink(
         first_hit
     })();
     visiting.remove(&fqn);
+    ctx.param_sinks.borrow_mut().insert(key, result.clone());
     result
 }
 
@@ -3429,7 +3476,7 @@ fn callee_chain(
         return Some(Vec::new()); // signature mismatch: summary-only hop
     };
     if crate::return_flow::is_authoritative(cpg, method) {
-        let graph = crate::return_flow::ReturnFlowGraph::new(cpg, method, ctx.summaries);
+        let graph = ctx.return_graph(method);
         return canonical_return_chain(ctx, &graph, pnode, depth, visiting);
     }
     let pname = cpg.name_of(pnode)?.to_string();
@@ -3820,7 +3867,7 @@ fn source_chain(
     let cpg = ctx.cpg;
 
     if crate::return_flow::is_authoritative(cpg, method) {
-        let graph = crate::return_flow::ReturnFlowGraph::new(cpg, method, ctx.summaries);
+        let graph = ctx.return_graph(method);
         let mut starts: Vec<_> = graph
             .call_origins
             .iter()

@@ -176,3 +176,115 @@ fn merging_c_keeps_generic_finding_generation_unchanged() {
     summaries.compute_all(&merged);
     assert_eq!(find_flows(&merged, &summaries, &spec), before);
 }
+
+#[test]
+fn recursive_entry_queries_keep_distinct_ancestor_contexts() {
+    let (cpg, summaries) = build(
+        r#"
+void sink(char *value);
+void left_entry(char *value) { left(value); }
+void right_entry(char *value) { right(value); }
+void left(char *value) { common(value); sink(value); }
+void right(char *value) { common(value); }
+void common(char *value) { left(value); }
+"#,
+    );
+    let mut spec = TaintSpec::new(&[], &["sink"]);
+    spec.source_methods = ["left_entry", "right_entry"]
+        .into_iter()
+        .map(str::to_string)
+        .collect();
+    let findings = find_flows(&cpg, &summaries, &spec);
+    let mut methods: Vec<_> = findings
+        .iter()
+        .map(|finding| finding.method.as_str())
+        .collect();
+    methods.sort();
+    assert_eq!(methods, ["left_entry", "right_entry"], "{findings:?}");
+    // Both visits to common have depth 2. Under left_entry, left is already
+    // an ancestor so common cannot revisit it. Under right_entry it can,
+    // and that newly available path must not reuse the earlier negative.
+    let right = findings
+        .iter()
+        .find(|finding| finding.method == "right_entry")
+        .unwrap();
+    assert_eq!(right.path.last().unwrap().code, "sink(value)");
+    assert_eq!(right.path.last().unwrap().depth, 3);
+    assert_eq!(find_flows(&cpg, &summaries, &spec), findings);
+}
+
+#[test]
+fn repeated_handoffs_keep_witnesses_and_definite_kills() {
+    let mut source = String::from("char *source(void);\nvoid sink(char *value);\n");
+    source.push_str("void level7(char *value) { sink(value); }\n");
+    for level in (0..7).rev() {
+        source.push_str(&format!("void level{level}(char *value) {{\n"));
+        for _ in 0..4 {
+            source.push_str(&format!("level{}(value);\n", level + 1));
+        }
+        source.push_str("}\n");
+    }
+    source.push_str("void entry(void) { level0(source()); }\n");
+    source.push_str("void killed(void) { char *value=source(); value=\"safe\"; level0(value); }\n");
+    let (cpg, summaries) = build(&source);
+    let spec = TaintSpec::new(&["source"], &["sink"]);
+    let findings = find_flows(&cpg, &summaries, &spec);
+    assert_eq!(findings.len(), 1, "{findings:?}");
+    assert_eq!(findings[0].method, "entry");
+    assert_eq!(findings[0].path.last().unwrap().code, "sink(value)");
+    assert_eq!(findings[0].path.last().unwrap().depth, 8);
+    assert_eq!(find_flows(&cpg, &summaries, &spec), findings);
+}
+
+#[test]
+fn parameter_path_keeps_priority_over_unrelated_policy_source() {
+    let (cpg, summaries) = build(
+        r#"
+char *source(void);
+void read_value(char **value);
+void first_sink(char *value);
+void second_sink(char *value);
+void receive(char *value) {
+    char *other;
+    read_value(&other);
+    first_sink(other);
+    second_sink(value);
+}
+void entry(void) { receive(source()); }
+"#,
+    );
+    let mut spec = TaintSpec::new(&["source"], &["first_sink", "second_sink"]);
+    spec.out_param_sources.insert("read_value".into(), 0);
+    let findings = find_flows(&cpg, &summaries, &spec);
+    let mut hits: Vec<_> = findings
+        .iter()
+        .map(|finding| (finding.method.as_str(), finding.sink.as_str()))
+        .collect();
+    hits.sort();
+    assert_eq!(
+        hits,
+        [("entry", "second_sink"), ("receive", "first_sink")],
+        "{findings:?}"
+    );
+}
+
+#[test]
+fn repeated_queries_do_not_reuse_sanitizer_cuts() {
+    let (cpg, summaries) = build(
+        r#"
+char *source(void);
+void sink(char *value);
+char *identity(char *value) { return value; }
+void receive(char *value) { sink(identity(value)); }
+void entry(void) { receive(source()); }
+"#,
+    );
+    let clean = TaintSpec::with_sanitizers(&["source"], &["sink"], &["identity"]);
+    let raw = TaintSpec::new(&["source"], &["sink"]);
+    assert!(find_flows(&cpg, &summaries, &clean).is_empty());
+    let findings = find_flows(&cpg, &summaries, &raw);
+    assert_eq!(findings.len(), 1, "{findings:?}");
+    assert_eq!(findings[0].method, "entry");
+    assert!(find_flows(&cpg, &summaries, &clean).is_empty());
+    assert_eq!(find_flows(&cpg, &summaries, &raw), findings);
+}
