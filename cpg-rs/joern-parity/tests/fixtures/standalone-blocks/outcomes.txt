@@ -1,0 +1,11 @@
+RESULT|after_return_entry|true
+RESULT|bare_entry|true
+RESULT|break_block_entry|true
+RESULT|continue_entry|true
+RESULT|empty_entry|true
+RESULT|kill_entry|false
+RESULT|labeled_entry|true
+RESULT|loop_block_entry|true
+RESULT|nested_entry|true
+RESULT|return_entry|true
+RESULT|switch_entry|true

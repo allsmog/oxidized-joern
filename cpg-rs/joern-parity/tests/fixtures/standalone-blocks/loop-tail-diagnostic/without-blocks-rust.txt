@@ -1,0 +1,395 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.notEquals FULL_NAME=<operator>.notEquals ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.postDecrement FULL_NAME=<operator>.postDecrement ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=preexisting.c:<global> ORDER=1
+  METHOD NAME=source_before_break_entry CODE=void source_before_break_entry(void) {\n    char *value = source();\n    while (1) {\n        break;\n        sink(value);\n    }\n} FULL_NAME=source_before_break_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    char *value = source();\n    while (1) {\n        break;\n        sink(value);\n    }\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+      CALL NAME=<operator>.assignment CODE=*value = source() TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+      CONTROL_STRUCTURE CODE=while (1) ORDER=3
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+        BLOCK CODE={\n        break;\n        sink(value);\n    } TYPE_FULL_NAME=void ORDER=2
+          CONTROL_STRUCTURE CODE=break; ORDER=1
+          CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=source_before_continue_entry CODE=void source_before_continue_entry(int count) {\n    char *value = source();\n    while (count) {\n        count--;\n        continue;\n        sink(value);\n    }\n} FULL_NAME=source_before_continue_entry SIGNATURE=void(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=count CODE=int count TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=count CODE=int count TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n    char *value = source();\n    while (count) {\n        count--;\n        continue;\n        sink(value);\n    }\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+      CALL NAME=<operator>.assignment CODE=*value = source() TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+      CONTROL_STRUCTURE CODE=while (count) ORDER=3
+        CALL NAME=<operator>.notEquals CODE=count != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        BLOCK CODE={\n        count--;\n        continue;\n        sink(value);\n    } TYPE_FULL_NAME=void ORDER=2
+          CALL NAME=<operator>.postDecrement CODE=count-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CONTROL_STRUCTURE CODE=continue; ORDER=2
+          CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=source_before_break_entry TYPE_FULL_NAME=source_before_break_entry METHOD_FULL_NAME=source_before_break_entry ORDER=1
+    METHOD_REF CODE=source_before_continue_entry TYPE_FULL_NAME=source_before_continue_entry METHOD_FULL_NAME=source_before_continue_entry ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=sink CODE=void sink(char *value); FULL_NAME=sink SIGNATURE=void(char*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=source CODE=char *source(void); FULL_NAME=source SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=source_before_break_entry CODE=void source_before_break_entry(void) {\n    char *value = source();\n    while (1) {\n        break;\n        sink(value);\n    }\n} FULL_NAME=source_before_break_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    char *value = source();\n    while (1) {\n        break;\n        sink(value);\n    }\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+    CALL NAME=<operator>.assignment CODE=*value = source() TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+    CONTROL_STRUCTURE CODE=while (1) ORDER=3
+      LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+      BLOCK CODE={\n        break;\n        sink(value);\n    } TYPE_FULL_NAME=void ORDER=2
+        CONTROL_STRUCTURE CODE=break; ORDER=1
+        CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=source_before_continue_entry CODE=void source_before_continue_entry(int count) {\n    char *value = source();\n    while (count) {\n        count--;\n        continue;\n        sink(value);\n    }\n} FULL_NAME=source_before_continue_entry SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=count CODE=int count TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=count CODE=int count TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n    char *value = source();\n    while (count) {\n        count--;\n        continue;\n        sink(value);\n    }\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+    CALL NAME=<operator>.assignment CODE=*value = source() TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=source CODE=source() TYPE_FULL_NAME=char* METHOD_FULL_NAME=source ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+    CONTROL_STRUCTURE CODE=while (count) ORDER=3
+      CALL NAME=<operator>.notEquals CODE=count != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={\n        count--;\n        continue;\n        sink(value);\n    } TYPE_FULL_NAME=void ORDER=2
+        CALL NAME=<operator>.postDecrement CODE=count-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CONTROL_STRUCTURE CODE=continue; ORDER=2
+        CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=preexisting.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=preexisting.c:<global> FILENAME=preexisting.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char FULL_NAME=char CODE=char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=preexisting.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=preexisting.c:<global> FILENAME=preexisting.c ORDER=1
+NODES|TYPE_DECL NAME=source_before_break_entry FULL_NAME=source_before_break_entry CODE=source_before_break_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=preexisting.c:<global> FILENAME=preexisting.c ORDER=1
+NODES|TYPE_DECL NAME=source_before_continue_entry FULL_NAME=source_before_continue_entry CODE=source_before_continue_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=preexisting.c:<global> FILENAME=preexisting.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=char FULL_NAME=char TYPE_DECL_FULL_NAME=char
+NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=source_before_break_entry FULL_NAME=source_before_break_entry TYPE_DECL_FULL_NAME=source_before_break_entry
+NODES|TYPE NAME=source_before_continue_entry FULL_NAME=source_before_continue_entry TYPE_DECL_FULL_NAME=source_before_continue_entry
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT source_before_break_entry#12 -> source_before_break_entry#13
+EDGES|ARGUMENT source_before_break_entry#5 -> source_before_break_entry#6
+EDGES|ARGUMENT source_before_break_entry#5 -> source_before_break_entry#7
+EDGES|ARGUMENT source_before_continue_entry#13 -> source_before_continue_entry#14
+EDGES|ARGUMENT source_before_continue_entry#16 -> source_before_continue_entry#17
+EDGES|ARGUMENT source_before_continue_entry#5 -> source_before_continue_entry#6
+EDGES|ARGUMENT source_before_continue_entry#5 -> source_before_continue_entry#7
+EDGES|ARGUMENT source_before_continue_entry#9 -> source_before_continue_entry#10
+EDGES|ARGUMENT source_before_continue_entry#9 -> source_before_continue_entry#11
+EDGES|CALL source_before_break_entry#12 -> sink#0
+EDGES|CALL source_before_break_entry#5 -> <operator>.assignment#0
+EDGES|CALL source_before_break_entry#7 -> source#0
+EDGES|CALL source_before_continue_entry#13 -> <operator>.postDecrement#0
+EDGES|CALL source_before_continue_entry#16 -> sink#0
+EDGES|CALL source_before_continue_entry#5 -> <operator>.assignment#0
+EDGES|CALL source_before_continue_entry#7 -> source#0
+EDGES|CALL source_before_continue_entry#9 -> <operator>.notEquals#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.notEquals#0 -> <operator>.notEquals#5
+EDGES|CFG <operator>.postDecrement#0 -> <operator>.postDecrement#4
+EDGES|CFG preexisting.c:<global>#0 -> preexisting.c:<global>#36
+EDGES|CFG preexisting.c:<global>#1 -> source_before_break_entry#6
+EDGES|CFG preexisting.c:<global>#16 -> source_before_continue_entry#6
+EDGES|CFG preexisting.c:<global>#36 -> preexisting.c:<global>#37
+EDGES|CFG preexisting.c:<global>#37 -> preexisting.c:<global>#38
+EDGES|CFG sink#0 -> sink#4
+EDGES|CFG source#0 -> source#4
+EDGES|CFG source_before_break_entry#11 -> source_before_break_entry#14
+EDGES|CFG source_before_break_entry#12 -> source_before_break_entry#9
+EDGES|CFG source_before_break_entry#13 -> source_before_break_entry#12
+EDGES|CFG source_before_break_entry#5 -> source_before_break_entry#9
+EDGES|CFG source_before_break_entry#6 -> source_before_break_entry#7
+EDGES|CFG source_before_break_entry#7 -> source_before_break_entry#5
+EDGES|CFG source_before_break_entry#9 -> source_before_break_entry#11
+EDGES|CFG source_before_break_entry#9 -> source_before_break_entry#14
+EDGES|CFG source_before_continue_entry#10 -> source_before_continue_entry#11
+EDGES|CFG source_before_continue_entry#11 -> source_before_continue_entry#9
+EDGES|CFG source_before_continue_entry#13 -> source_before_continue_entry#15
+EDGES|CFG source_before_continue_entry#14 -> source_before_continue_entry#13
+EDGES|CFG source_before_continue_entry#15 -> source_before_continue_entry#10
+EDGES|CFG source_before_continue_entry#16 -> source_before_continue_entry#10
+EDGES|CFG source_before_continue_entry#17 -> source_before_continue_entry#16
+EDGES|CFG source_before_continue_entry#5 -> source_before_continue_entry#10
+EDGES|CFG source_before_continue_entry#6 -> source_before_continue_entry#7
+EDGES|CFG source_before_continue_entry#7 -> source_before_continue_entry#5
+EDGES|CFG source_before_continue_entry#9 -> source_before_continue_entry#14
+EDGES|CFG source_before_continue_entry#9 -> source_before_continue_entry#18
+EDGES|CONDITION source_before_break_entry#8 -> source_before_break_entry#9
+EDGES|CONDITION source_before_continue_entry#8 -> source_before_continue_entry#9
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.notEquals#0 -> <operator>.notEquals#2
+EDGES|CONTAINS <operator>.postDecrement#0 -> <operator>.postDecrement#2
+EDGES|CONTAINS D:preexisting.c:<global> -> D:source_before_break_entry
+EDGES|CONTAINS D:preexisting.c:<global> -> D:source_before_continue_entry
+EDGES|CONTAINS D:preexisting.c:<global> -> preexisting.c:<global>#0
+EDGES|CONTAINS D:preexisting.c:<global> -> sink#0
+EDGES|CONTAINS D:preexisting.c:<global> -> source#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char
+EDGES|CONTAINS F:<includes> -> D:char*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:preexisting.c -> D:preexisting.c:<global>
+EDGES|CONTAINS preexisting.c:<global>#0 -> preexisting.c:<global>#1
+EDGES|CONTAINS preexisting.c:<global>#0 -> preexisting.c:<global>#16
+EDGES|CONTAINS preexisting.c:<global>#0 -> preexisting.c:<global>#35
+EDGES|CONTAINS preexisting.c:<global>#0 -> preexisting.c:<global>#36
+EDGES|CONTAINS preexisting.c:<global>#0 -> preexisting.c:<global>#37
+EDGES|CONTAINS preexisting.c:<global>#1 -> source_before_break_entry#10
+EDGES|CONTAINS preexisting.c:<global>#1 -> source_before_break_entry#11
+EDGES|CONTAINS preexisting.c:<global>#1 -> source_before_break_entry#12
+EDGES|CONTAINS preexisting.c:<global>#1 -> source_before_break_entry#13
+EDGES|CONTAINS preexisting.c:<global>#1 -> source_before_break_entry#3
+EDGES|CONTAINS preexisting.c:<global>#1 -> source_before_break_entry#5
+EDGES|CONTAINS preexisting.c:<global>#1 -> source_before_break_entry#6
+EDGES|CONTAINS preexisting.c:<global>#1 -> source_before_break_entry#7
+EDGES|CONTAINS preexisting.c:<global>#1 -> source_before_break_entry#8
+EDGES|CONTAINS preexisting.c:<global>#1 -> source_before_break_entry#9
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#10
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#11
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#12
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#13
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#14
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#15
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#16
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#17
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#3
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#5
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#6
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#7
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#8
+EDGES|CONTAINS preexisting.c:<global>#16 -> source_before_continue_entry#9
+EDGES|CONTAINS sink#0 -> sink#3
+EDGES|CONTAINS source#0 -> source#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.postDecrement#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.postDecrement#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.postDecrement#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.postDecrement#4 -> T:ANY
+EDGES|EVAL_TYPE preexisting.c:<global>#35 -> T:ANY
+EDGES|EVAL_TYPE preexisting.c:<global>#36 -> T:source_before_break_entry
+EDGES|EVAL_TYPE preexisting.c:<global>#37 -> T:source_before_continue_entry
+EDGES|EVAL_TYPE preexisting.c:<global>#38 -> T:ANY
+EDGES|EVAL_TYPE sink#1 -> T:char*
+EDGES|EVAL_TYPE sink#2 -> T:char*
+EDGES|EVAL_TYPE sink#3 -> T:ANY
+EDGES|EVAL_TYPE sink#4 -> T:void
+EDGES|EVAL_TYPE source#1 -> T:void
+EDGES|EVAL_TYPE source#2 -> T:void
+EDGES|EVAL_TYPE source#3 -> T:ANY
+EDGES|EVAL_TYPE source#4 -> T:char*
+EDGES|EVAL_TYPE source_before_break_entry#1 -> T:void
+EDGES|EVAL_TYPE source_before_break_entry#10 -> T:void
+EDGES|EVAL_TYPE source_before_break_entry#12 -> T:void
+EDGES|EVAL_TYPE source_before_break_entry#13 -> T:char*
+EDGES|EVAL_TYPE source_before_break_entry#14 -> T:void
+EDGES|EVAL_TYPE source_before_break_entry#2 -> T:void
+EDGES|EVAL_TYPE source_before_break_entry#3 -> T:void
+EDGES|EVAL_TYPE source_before_break_entry#4 -> T:char*
+EDGES|EVAL_TYPE source_before_break_entry#5 -> T:void
+EDGES|EVAL_TYPE source_before_break_entry#6 -> T:char*
+EDGES|EVAL_TYPE source_before_break_entry#7 -> T:char*
+EDGES|EVAL_TYPE source_before_break_entry#9 -> T:int
+EDGES|EVAL_TYPE source_before_continue_entry#1 -> T:int
+EDGES|EVAL_TYPE source_before_continue_entry#10 -> T:int
+EDGES|EVAL_TYPE source_before_continue_entry#11 -> T:int
+EDGES|EVAL_TYPE source_before_continue_entry#12 -> T:void
+EDGES|EVAL_TYPE source_before_continue_entry#13 -> T:ANY
+EDGES|EVAL_TYPE source_before_continue_entry#14 -> T:int
+EDGES|EVAL_TYPE source_before_continue_entry#16 -> T:void
+EDGES|EVAL_TYPE source_before_continue_entry#17 -> T:char*
+EDGES|EVAL_TYPE source_before_continue_entry#18 -> T:void
+EDGES|EVAL_TYPE source_before_continue_entry#2 -> T:int
+EDGES|EVAL_TYPE source_before_continue_entry#3 -> T:void
+EDGES|EVAL_TYPE source_before_continue_entry#4 -> T:char*
+EDGES|EVAL_TYPE source_before_continue_entry#5 -> T:void
+EDGES|EVAL_TYPE source_before_continue_entry#6 -> T:char*
+EDGES|EVAL_TYPE source_before_continue_entry#7 -> T:char*
+EDGES|EVAL_TYPE source_before_continue_entry#9 -> T:int
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.notEquals#1 -> <operator>.notEquals#3
+EDGES|PARAMETER_LINK <operator>.notEquals#4 -> <operator>.notEquals#6
+EDGES|PARAMETER_LINK <operator>.postDecrement#1 -> <operator>.postDecrement#3
+EDGES|PARAMETER_LINK sink#1 -> sink#2
+EDGES|PARAMETER_LINK source#1 -> source#2
+EDGES|PARAMETER_LINK source_before_break_entry#1 -> source_before_break_entry#2
+EDGES|PARAMETER_LINK source_before_continue_entry#1 -> source_before_continue_entry#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:preexisting.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:char -> D:char
+EDGES|REF T:char* -> D:char*
+EDGES|REF T:int -> D:int
+EDGES|REF T:source_before_break_entry -> D:source_before_break_entry
+EDGES|REF T:source_before_continue_entry -> D:source_before_continue_entry
+EDGES|REF T:void -> D:void
+EDGES|REF preexisting.c:<global>#36 -> preexisting.c:<global>#1
+EDGES|REF preexisting.c:<global>#37 -> preexisting.c:<global>#16
+EDGES|REF source_before_break_entry#13 -> source_before_break_entry#4
+EDGES|REF source_before_break_entry#6 -> source_before_break_entry#4
+EDGES|REF source_before_continue_entry#10 -> source_before_continue_entry#1
+EDGES|REF source_before_continue_entry#14 -> source_before_continue_entry#1
+EDGES|REF source_before_continue_entry#17 -> source_before_continue_entry#4
+EDGES|REF source_before_continue_entry#6 -> source_before_continue_entry#4
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:char -> F:<includes>
+EDGES|SOURCE_FILE D:char* -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:preexisting.c:<global> -> F:preexisting.c
+EDGES|SOURCE_FILE D:source_before_break_entry -> F:preexisting.c
+EDGES|SOURCE_FILE D:source_before_continue_entry -> F:preexisting.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:preexisting.c:<global> -> F:preexisting.c
+EDGES|SOURCE_FILE preexisting.c:<global>#0 -> F:preexisting.c
+EDGES|SOURCE_FILE preexisting.c:<global>#1 -> F:preexisting.c
+EDGES|SOURCE_FILE preexisting.c:<global>#16 -> F:preexisting.c
+EDGES|SOURCE_FILE sink#0 -> F:preexisting.c
+EDGES|SOURCE_FILE source#0 -> F:preexisting.c
+EDGES|TRUE_BODY source_before_break_entry#8 -> source_before_break_entry#10
+EDGES|TRUE_BODY source_before_continue_entry#8 -> source_before_continue_entry#12
+FLOWS|REACHING_DEF[*value = source()] source_before_break_entry#5 -> source_before_break_entry#14
+FLOWS|REACHING_DEF[*value = source()] source_before_continue_entry#5 -> source_before_continue_entry#18
+FLOWS|REACHING_DEF[0] source_before_continue_entry#11 -> source_before_continue_entry#10
+FLOWS|REACHING_DEF[0] source_before_continue_entry#11 -> source_before_continue_entry#9
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.notEquals#0 -> <operator>.notEquals#1
+FLOWS|REACHING_DEF[] <operator>.notEquals#0 -> <operator>.notEquals#4
+FLOWS|REACHING_DEF[] <operator>.postDecrement#0 -> <operator>.postDecrement#1
+FLOWS|REACHING_DEF[] preexisting.c:<global>#0 -> preexisting.c:<global>#36
+FLOWS|REACHING_DEF[] preexisting.c:<global>#0 -> preexisting.c:<global>#37
+FLOWS|REACHING_DEF[] preexisting.c:<global>#1 -> source_before_break_entry#1
+FLOWS|REACHING_DEF[] preexisting.c:<global>#1 -> source_before_break_entry#7
+FLOWS|REACHING_DEF[] preexisting.c:<global>#1 -> source_before_break_entry#9
+FLOWS|REACHING_DEF[] preexisting.c:<global>#16 -> source_before_continue_entry#1
+FLOWS|REACHING_DEF[] preexisting.c:<global>#16 -> source_before_continue_entry#10
+FLOWS|REACHING_DEF[] preexisting.c:<global>#16 -> source_before_continue_entry#11
+FLOWS|REACHING_DEF[] preexisting.c:<global>#16 -> source_before_continue_entry#14
+FLOWS|REACHING_DEF[] preexisting.c:<global>#16 -> source_before_continue_entry#7
+FLOWS|REACHING_DEF[] sink#0 -> sink#1
+FLOWS|REACHING_DEF[] source#0 -> source#1
+FLOWS|REACHING_DEF[] source#1 -> source#2
+FLOWS|REACHING_DEF[] source#1 -> source#4
+FLOWS|REACHING_DEF[] source_before_break_entry#1 -> source_before_break_entry#14
+FLOWS|REACHING_DEF[] source_before_break_entry#1 -> source_before_break_entry#2
+FLOWS|REACHING_DEF[count != 0] source_before_continue_entry#9 -> source_before_continue_entry#18
+FLOWS|REACHING_DEF[count--] source_before_continue_entry#13 -> source_before_continue_entry#18
+FLOWS|REACHING_DEF[count] source_before_continue_entry#1 -> source_before_continue_entry#10
+FLOWS|REACHING_DEF[count] source_before_continue_entry#1 -> source_before_continue_entry#2
+FLOWS|REACHING_DEF[count] source_before_continue_entry#10 -> source_before_continue_entry#14
+FLOWS|REACHING_DEF[count] source_before_continue_entry#10 -> source_before_continue_entry#18
+FLOWS|REACHING_DEF[count] source_before_continue_entry#10 -> source_before_continue_entry#2
+FLOWS|REACHING_DEF[count] source_before_continue_entry#10 -> source_before_continue_entry#9
+FLOWS|REACHING_DEF[count] source_before_continue_entry#14 -> source_before_continue_entry#10
+FLOWS|REACHING_DEF[count] source_before_continue_entry#14 -> source_before_continue_entry#13
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.notEquals#1 -> <operator>.notEquals#3
+FLOWS|REACHING_DEF[p1] <operator>.notEquals#1 -> <operator>.notEquals#5
+FLOWS|REACHING_DEF[p1] <operator>.postDecrement#1 -> <operator>.postDecrement#3
+FLOWS|REACHING_DEF[p1] <operator>.postDecrement#1 -> <operator>.postDecrement#4
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.notEquals#4 -> <operator>.notEquals#5
+FLOWS|REACHING_DEF[p2] <operator>.notEquals#4 -> <operator>.notEquals#6
+FLOWS|REACHING_DEF[source()] source_before_break_entry#7 -> source_before_break_entry#14
+FLOWS|REACHING_DEF[source()] source_before_break_entry#7 -> source_before_break_entry#5
+FLOWS|REACHING_DEF[source()] source_before_break_entry#7 -> source_before_break_entry#6
+FLOWS|REACHING_DEF[source()] source_before_continue_entry#7 -> source_before_continue_entry#18
+FLOWS|REACHING_DEF[source()] source_before_continue_entry#7 -> source_before_continue_entry#5
+FLOWS|REACHING_DEF[source()] source_before_continue_entry#7 -> source_before_continue_entry#6
+FLOWS|REACHING_DEF[value] sink#1 -> sink#2
+FLOWS|REACHING_DEF[value] sink#1 -> sink#4
+FLOWS|REACHING_DEF[value] source_before_break_entry#6 -> source_before_break_entry#14
+FLOWS|REACHING_DEF[value] source_before_break_entry#6 -> source_before_break_entry#5
+FLOWS|REACHING_DEF[value] source_before_continue_entry#6 -> source_before_continue_entry#18
+FLOWS|REACHING_DEF[value] source_before_continue_entry#6 -> source_before_continue_entry#5

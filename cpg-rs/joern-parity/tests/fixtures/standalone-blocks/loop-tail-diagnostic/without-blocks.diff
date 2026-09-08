@@ -1,0 +1,29 @@
+--- Joern
++++ unchanged-rust
+@@ -362,6 +362,7 @@
+ FLOWS|REACHING_DEF[] source_before_break_entry#1 -> source_before_break_entry#14
+ FLOWS|REACHING_DEF[] source_before_break_entry#1 -> source_before_break_entry#2
+ FLOWS|REACHING_DEF[count != 0] source_before_continue_entry#9 -> source_before_continue_entry#18
++FLOWS|REACHING_DEF[count--] source_before_continue_entry#13 -> source_before_continue_entry#18
+ FLOWS|REACHING_DEF[count] source_before_continue_entry#1 -> source_before_continue_entry#10
+ FLOWS|REACHING_DEF[count] source_before_continue_entry#1 -> source_before_continue_entry#2
+ FLOWS|REACHING_DEF[count] source_before_continue_entry#10 -> source_before_continue_entry#14
+@@ -380,8 +381,6 @@
+ FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+ FLOWS|REACHING_DEF[p2] <operator>.notEquals#4 -> <operator>.notEquals#5
+ FLOWS|REACHING_DEF[p2] <operator>.notEquals#4 -> <operator>.notEquals#6
+-FLOWS|REACHING_DEF[sink(value)] source_before_break_entry#12 -> source_before_break_entry#14
+-FLOWS|REACHING_DEF[sink(value)] source_before_continue_entry#16 -> source_before_continue_entry#18
+ FLOWS|REACHING_DEF[source()] source_before_break_entry#7 -> source_before_break_entry#14
+ FLOWS|REACHING_DEF[source()] source_before_break_entry#7 -> source_before_break_entry#5
+ FLOWS|REACHING_DEF[source()] source_before_break_entry#7 -> source_before_break_entry#6
+@@ -390,9 +389,7 @@
+ FLOWS|REACHING_DEF[source()] source_before_continue_entry#7 -> source_before_continue_entry#6
+ FLOWS|REACHING_DEF[value] sink#1 -> sink#2
+ FLOWS|REACHING_DEF[value] sink#1 -> sink#4
+-FLOWS|REACHING_DEF[value] source_before_break_entry#13 -> source_before_break_entry#14
+ FLOWS|REACHING_DEF[value] source_before_break_entry#6 -> source_before_break_entry#14
+ FLOWS|REACHING_DEF[value] source_before_break_entry#6 -> source_before_break_entry#5
+-FLOWS|REACHING_DEF[value] source_before_continue_entry#17 -> source_before_continue_entry#18
+ FLOWS|REACHING_DEF[value] source_before_continue_entry#6 -> source_before_continue_entry#18
+ FLOWS|REACHING_DEF[value] source_before_continue_entry#6 -> source_before_continue_entry#5
