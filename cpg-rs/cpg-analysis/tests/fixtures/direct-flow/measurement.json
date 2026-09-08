@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "26b5456b2",
+  "oracle_version": "v4.0.555",
+  "oracle_archive_sha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "java_version": "21.0.12",
+  "outcomes": 26,
+  "baseline_matches": 12,
+  "baseline_false_negatives": [
+    "alternative_entry",
+    "array_entry",
+    "early_return_entry",
+    "for_entry",
+    "handoff_entry",
+    "join_copy_entry",
+    "loop_carried_entry",
+    "loop_entry",
+    "member_optional_entry",
+    "nested_entry",
+    "optional_entry",
+    "pointer_entry",
+    "short_circuit_entry",
+    "switch_entry"
+  ],
+  "baseline_false_positives": []
+}

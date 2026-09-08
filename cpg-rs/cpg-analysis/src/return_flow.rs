@@ -142,6 +142,14 @@ impl ReturnFlowGraph {
         self.outgoing.entry(from).or_default().push(index);
     }
 
+    pub fn outgoing(&self, node: NodeId) -> impl Iterator<Item = (usize, &ReturnEdge)> {
+        self.outgoing
+            .get(&node)
+            .into_iter()
+            .flatten()
+            .map(|&index| (index, &self.edges[index]))
+    }
+
     pub fn summary(&self, cpg: &Cpg, method: NodeId) -> FunctionSummary {
         let parameters: HashMap<NodeId, usize> = cpg
             .parameters_of(method)
