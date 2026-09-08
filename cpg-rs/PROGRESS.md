@@ -4,8 +4,8 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
-- **Fourth measured Astra batch (2026-09-08 UTC).** The main corpus remains
-  **308/308** against committed and fresh Joern v4.0.555 references. Separate
+- **Fourth measured Astra batch (2026-09-08 UTC).** Source checkpoint
+  `862e54ee5` retains the main **308/308** against committed and fresh Joern v4.0.555 references. Separate
   complete graph fixtures cover arrays, supplied quoted-header macro state,
   logical directives, expression and statement macros, source locations, and
   reaching-definition scheduling. All **412 workspace tests**, 17 checker
