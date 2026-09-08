@@ -1345,10 +1345,11 @@ impl Ctx<'_> {
                     slot += 1;
                 }
                 "declaration" => {
-                    // Same lowering as in a method body: LOCAL per declarator,
-                    // plus an assignment CALL when initialised (`int g = 5;`).
+                    // LOCAL per object, then an assignment when initialised.
+                    // Uninitialised file-scope arrays retain their dimensions
+                    // without the allocation synthesized inside methods.
                     // Prototypes contribute nothing and consume no slot.
-                    self.emit_declaration(n, b, &mut slot, 2, None);
+                    self.emit_declaration(n, b, &mut slot, 2, None, true);
                 }
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(n, b) {
@@ -1931,7 +1932,7 @@ impl Ctx<'_> {
     fn emit_stmt(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
         match n.kind() {
             "declaration" => {
-                self.emit_declaration(n, b, order, depth, None);
+                self.emit_declaration(n, b, order, depth, None, false);
             }
             "if_statement" => self.emit_if(n, b, order, depth),
             "for_statement" => self.emit_for(n, b, order, depth),
@@ -2282,7 +2283,8 @@ impl Ctx<'_> {
         }
         if let Some(i) = init {
             if i.kind() == "declaration" {
-                if let Some(initializer) = self.emit_declaration(i, b, &mut co, depth + 1, Some(1))
+                if let Some(initializer) =
+                    self.emit_declaration(i, b, &mut co, depth + 1, Some(1), false)
                 {
                     self.edge("FOR_INIT", self.at(cs), self.at(initializer));
                 } else {
@@ -2392,6 +2394,7 @@ impl Ctx<'_> {
         order: &mut i64,
         depth: usize,
         assign_arg: Option<i64>,
+        file_scope: bool,
     ) -> Option<usize> {
         for (name, ret, _) in prototype_headers(n, b) {
             self.symbols.remove(&name);
@@ -2539,6 +2542,31 @@ impl Ctx<'_> {
             if !sizes.is_empty() {
                 let ao = *order;
                 *order += 1;
+                // File-scope array declarations retain their dimensions in
+                // an arrayInitializer. Only block-scope arrays synthesize
+                // assignment -> alloc(type, dimensions); treating globals
+                // as allocations also inflates the project-wide alloc stub.
+                if file_scope {
+                    self.note_call("<operator>.arrayInitializer", sizes.len());
+                    self.line(
+                        depth,
+                        "CALL",
+                        P {
+                            name: Some("<operator>.arrayInitializer".into()),
+                            code: Some(esc(text(it.decl, b))),
+                            tfn: Some("ANY".into()),
+                            mfn: Some("<operator>.arrayInitializer".into()),
+                            order: Some(ao),
+                            dispatch: Some("STATIC_DISPATCH".into()),
+                            ..Default::default()
+                        },
+                    );
+                    for (i, size) in sizes.into_iter().enumerate() {
+                        let k = (i + 1) as i64;
+                        self.emit_expr(size, b, depth + 1, k, Some(k));
+                    }
+                    continue;
+                }
                 self.note_call("<operator>.assignment", 2);
                 self.note_call("<operator>.alloc", sizes.len() + 1);
                 self.line(
