@@ -1842,7 +1842,9 @@ impl Ctx<'_> {
     /// A block-level statement. `order` is the running 1-based child position.
     fn emit_stmt(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
         match n.kind() {
-            "declaration" => self.emit_declaration(n, b, order, depth, None),
+            "declaration" => {
+                self.emit_declaration(n, b, order, depth, None);
+            }
             "if_statement" => self.emit_if(n, b, order, depth),
             "for_statement" => self.emit_for(n, b, order, depth),
             "preproc_ifdef" => {
@@ -1992,16 +1994,19 @@ impl Ctx<'_> {
                     },
                 );
                 let cs = self.line_no - 1;
+                let body_start = self.line_no;
                 if let Some(body) = n.child_by_field_name("body") {
-                    if body.kind() == "compound_statement" {
-                        let bi = self.line_no;
-                        self.emit_block(body, b, 1, depth + 1);
-                        self.edge("DO_BODY", self.at(cs), self.at(bi));
-                    }
+                    self.emit_loop_body(body, b, depth + 1, 1, cs, "DO_BODY");
                 }
+                let condition_order = if self.line_no > body_start { 2 } else { 1 };
                 if let Some(cond) = n.child_by_field_name("condition") {
                     let ci = self.line_no;
-                    self.emit_expr(unwrap_paren(cond), b, depth + 1, 2, None);
+                    self.emit_condition(
+                        cond.named_child(0).unwrap_or(cond),
+                        b,
+                        depth + 1,
+                        condition_order,
+                    );
                     self.edge("CONDITION", self.at(cs), self.at(ci));
                 }
             }
@@ -2025,15 +2030,11 @@ impl Ctx<'_> {
                 );
                 if let Some(c) = cond {
                     let ci = self.line_no;
-                    self.emit_expr(unwrap_paren(c), b, depth + 1, 1, None);
+                    self.emit_condition(c.named_child(0).unwrap_or(c), b, depth + 1, 1);
                     self.edge("CONDITION", self.at(cs), self.at(ci));
                 }
                 if let Some(body) = n.child_by_field_name("body") {
-                    if body.kind() == "compound_statement" {
-                        let bi = self.line_no;
-                        self.emit_block(body, b, 2, depth + 1);
-                        self.edge("TRUE_BODY", self.at(cs), self.at(bi));
-                    }
+                    self.emit_loop_body(body, b, depth + 1, 2, cs, "TRUE_BODY");
                 }
             }
             "return_statement" => {
@@ -2082,7 +2083,7 @@ impl Ctx<'_> {
         );
         if let Some(cond) = n.child_by_field_name("condition") {
             let ci = self.line_no;
-            self.emit_expr(unwrap_paren(cond), b, depth + 1, 1, None);
+            self.emit_condition(cond.named_child(0).unwrap_or(cond), b, depth + 1, 1);
             self.edge("CONDITION", self.at(cs), self.at(ci));
         }
         if let Some(cons) = n.child_by_field_name("consequence") {
@@ -2193,11 +2194,12 @@ impl Ctx<'_> {
         }
         if let Some(i) = init {
             if i.kind() == "declaration" {
-                let before = self.line_no;
-                self.emit_declaration(i, b, &mut co, depth + 1, Some(1));
-                // FOR_INIT targets the init assignment CALL, not the LOCAL.
-                if self.line_no > before + 1 {
-                    self.edge("FOR_INIT", self.at(cs), self.at(before + 1));
+                if let Some(initializer) = self.emit_declaration(i, b, &mut co, depth + 1, Some(1))
+                {
+                    self.edge("FOR_INIT", self.at(cs), self.at(initializer));
+                } else {
+                    // CDT reserves a single declaration's absent initializer.
+                    co += 1;
                 }
             } else {
                 let ii = self.line_no;
@@ -2208,26 +2210,89 @@ impl Ctx<'_> {
         }
         if let Some(c) = cond {
             let ci = self.line_no;
-            self.emit_expr(c, b, depth + 1, co, None);
+            self.emit_condition(c, b, depth + 1, co);
             self.edge("CONDITION", self.at(cs), self.at(ci));
-            co += 1;
         }
+        co += 1;
         if let Some(u) = update {
             let ui = self.line_no;
             self.emit_expr(u, b, depth + 1, co, None);
             self.edge("FOR_UPDATE", self.at(cs), self.at(ui));
-            co += 1;
         }
+        co += 1;
         if let Some(body) = n.child_by_field_name("body") {
-            if body.kind() == "compound_statement" {
-                let bi = self.line_no;
-                self.emit_block(body, b, co, depth + 1);
-                self.edge("FOR_BODY", self.at(cs), self.at(bi));
-            }
+            self.emit_loop_body(body, b, depth + 1, co, cs, "FOR_BODY");
         }
         self.symbols = outer_symbols;
         self.method_functions = outer_functions;
         self.sym_line = outer_bindings;
+    }
+
+    /// Loop bodies retain their actual statement shape, including a direct
+    /// CALL/RETURN/control node when braces are absent. An empty statement has
+    /// no AST node and consequently no body edge.
+    fn emit_loop_body(
+        &mut self,
+        body: Node,
+        b: &[u8],
+        depth: usize,
+        mut order: i64,
+        control: usize,
+        role: &str,
+    ) {
+        let body_index = self.line_no;
+        if body.kind() == "compound_statement" {
+            self.emit_block(body, b, order, depth);
+        } else {
+            self.emit_stmt(body, b, &mut order, depth);
+        }
+        if self.line_no > body_index {
+            self.edge(role, self.at(control), self.at(body_index));
+        }
+    }
+
+    /// CDT normalizes a bare identifier truth test, but leaves comparisons,
+    /// calls, arithmetic and logical operators as their existing expressions.
+    fn emit_condition(&mut self, expression: Node, b: &[u8], depth: usize, order: i64) {
+        let identifier = unwrap_paren(expression);
+        let name = text(identifier, b);
+        if identifier.kind() != "identifier" || self.macros.contains_key(name) {
+            self.emit_expr(expression, b, depth, order, None);
+            return;
+        }
+        let pointer = self
+            .symbols
+            .get(name)
+            .or_else(|| self.globals.get(name))
+            .is_some_and(|ty| ty.ends_with('*'));
+        let zero = if pointer { "NULL" } else { "0" };
+        self.types.insert("int".into());
+        self.note_call("<operator>.notEquals", 2);
+        self.line(
+            depth,
+            "CALL",
+            P {
+                name: Some("<operator>.notEquals".into()),
+                code: Some(esc(&format!("{} != {zero}", text(expression, b)))),
+                tfn: Some("int".into()),
+                mfn: Some("<operator>.notEquals".into()),
+                order: Some(order),
+                dispatch: Some("STATIC_DISPATCH".into()),
+                ..Default::default()
+            },
+        );
+        self.emit_expr(identifier, b, depth + 1, 1, Some(1));
+        self.line(
+            depth + 1,
+            "LITERAL",
+            P {
+                code: Some(zero.into()),
+                tfn: Some(if pointer { "ANY" } else { "int" }.into()),
+                order: Some(2),
+                arg: Some(2),
+                ..Default::default()
+            },
+        );
     }
 
     /// A C declaration `T x = init;` → a LOCAL plus, if initialised, an
@@ -2239,7 +2304,7 @@ impl Ctx<'_> {
         order: &mut i64,
         depth: usize,
         assign_arg: Option<i64>,
-    ) {
+    ) -> Option<usize> {
         for (name, ret, _) in prototype_headers(n, b) {
             self.symbols.remove(&name);
             self.method_functions.insert(name, ret);
@@ -2322,6 +2387,26 @@ impl Ctx<'_> {
         if !items.is_empty() {
             self.types.insert(specifier_type(&ty));
         }
+        // A for declaration contributes one initializer slot after its LOCALs.
+        // Multiple declarators share a synthetic block, including an empty one
+        // when none has an initializer. Ordinary declarations stay flattened.
+        let initializer = self.line_no;
+        let grouped = assign_arg.is_some() && items.len() > 1;
+        if grouped {
+            self.line(
+                depth,
+                "BLOCK",
+                P {
+                    tfn: Some("ANY".into()),
+                    order: Some(*order),
+                    ..Default::default()
+                },
+            );
+            *order += 1;
+        }
+        let depth = depth + usize::from(grouped);
+        let mut group_order = 1;
+        let order = if grouped { &mut group_order } else { order };
         // Pass 2: initialiser assignments / alloc lowerings, in order.
         for it in items {
             if let Some(v) = it.init {
@@ -2338,7 +2423,7 @@ impl Ctx<'_> {
                         tfn: Some("void".into()),
                         mfn: Some("<operator>.assignment".into()),
                         order: Some(ao),
-                        arg: assign_arg,
+                        arg: if grouped { Some(ao) } else { assign_arg },
                         dispatch: Some("STATIC_DISPATCH".into()),
                         ..Default::default()
                     },
@@ -2377,7 +2462,7 @@ impl Ctx<'_> {
                         tfn: Some("void".into()),
                         mfn: Some("<operator>.assignment".into()),
                         order: Some(ao),
-                        arg: assign_arg,
+                        arg: if grouped { Some(ao) } else { assign_arg },
                         dispatch: Some("STATIC_DISPATCH".into()),
                         ..Default::default()
                     },
@@ -2426,6 +2511,7 @@ impl Ctx<'_> {
                 }
             }
         }
+        (self.line_no > initializer).then_some(initializer)
     }
 
     /// Emit an expression node with the given ORDER and optional ARGUMENT_INDEX.
@@ -3491,6 +3577,7 @@ struct DNode {
     full: String,
     has_arg: bool,
     arg_index: i64,
+    order: i64,
     inlined: bool,
     code2: String,
     children: Vec<usize>,
@@ -3574,6 +3661,7 @@ fn parse_dump_block(text: &str) -> Vec<DNode> {
             full: grab(" FULL_NAME="),
             has_arg: rest.contains(" ARGUMENT_INDEX="),
             arg_index,
+            order: grab(" ORDER=").parse().unwrap_or(0),
             inlined: rest.contains(" DISPATCH_TYPE=INLINED"),
             code2,
             children: Vec::new(),
@@ -3762,7 +3850,10 @@ impl CfgBuilder<'_> {
                 self.breaks.push(Vec::new());
                 self.continues.push(Vec::new());
                 let (ce, co) = self.build(kids[0]);
-                let body = block_child(self);
+                let body = kids
+                    .iter()
+                    .copied()
+                    .find(|&child| self.arena[child].order == 2);
                 if let Some(b) = body {
                     let (be, bo) = self.build(b);
                     if let Some(be) = &be {
@@ -3784,18 +3875,15 @@ impl CfgBuilder<'_> {
             "do" => {
                 self.breaks.push(Vec::new());
                 self.continues.push(Vec::new());
-                let body = block_child(self);
-                let cond = kids
-                    .iter()
-                    .copied()
-                    .find(|&c| self.arena[c].label != "BLOCK");
+                let body = (kids.len() > 1).then(|| kids[0]);
+                let cond = kids.last().copied();
                 let (be, bo) = body.map(|b| self.build(b)).unwrap_or((None, vec![]));
                 let (ce, co) = cond.map(|c| self.build(c)).unwrap_or((None, vec![]));
                 if let Some(ce) = &ce {
                     self.connect(&bo, ce);
                 }
-                if let Some(be) = &be {
-                    self.connect(&co, be);
+                if let Some(target) = be.as_ref().or(ce.as_ref()) {
+                    self.connect(&co, target);
                 }
                 let brs = self.breaks.pop().unwrap();
                 let conts = self.continues.pop().unwrap();
@@ -3809,43 +3897,55 @@ impl CfgBuilder<'_> {
             "for" => {
                 self.breaks.push(Vec::new());
                 self.continues.push(Vec::new());
-                // Positional after skipping LOCALs: [init, cond, update,
-                // body?] — empty clauses are placeholder BLOCKs, and a comma
-                // update is itself a BLOCK, so positions are the only truth.
-                let rest: Vec<usize> = kids
+                // Missing clauses leave gaps in ORDER. Initializer declarations
+                // may contribute LOCALs plus assignments before those slots.
+                let leading_locals = kids
+                    .iter()
+                    .take_while(|&&child| self.arena[child].label == "LOCAL")
+                    .count();
+                let initializer_order = leading_locals as i64 + 1;
+                let init_children: Vec<_> = kids
                     .iter()
                     .copied()
-                    .filter(|&c| self.arena[c].label != "LOCAL")
+                    .filter(|&child| self.arena[child].order <= initializer_order)
                     .collect();
-                let init = rest.first().copied();
-                let cond = rest.get(1).copied();
-                let update = rest.get(2).copied();
-                let body = rest.get(3).copied();
-                let (ie, io) = init.map(|i| self.build(i)).unwrap_or((None, vec![]));
+                let condition_order = initializer_order + 1;
+                let cond = kids
+                    .iter()
+                    .copied()
+                    .find(|&child| self.arena[child].order == condition_order);
+                let update = kids
+                    .iter()
+                    .copied()
+                    .find(|&child| self.arena[child].order == condition_order + 1);
+                let body = kids
+                    .iter()
+                    .copied()
+                    .find(|&child| self.arena[child].order == condition_order + 2);
+                let (ie, io) = self.seq(&init_children);
                 let (ce, co) = cond.map(|c| self.build(c)).unwrap_or((None, vec![]));
                 let (ue, uo) = update.map(|u| self.build(u)).unwrap_or((None, vec![]));
                 let (be, bo) = body.map(|b| self.build(b)).unwrap_or((None, vec![]));
-                if let Some(ce) = &ce {
-                    self.connect(&io, ce);
-                    self.connect(&uo, ce);
+                let loop_entry = ce.as_ref().or(be.as_ref()).or(ue.as_ref()).cloned();
+                let after_body = ue.as_ref().or(loop_entry.as_ref()).cloned();
+                if let Some(entry) = &loop_entry {
+                    self.connect(&io, entry);
+                    self.connect(&uo, entry);
                 }
-                // True branch: body if present, else straight to the update
-                // (musl `for (...);` empty-body loops), else the cond itself.
-                if let Some(t) = be.as_ref().or(ue.as_ref()).or(ce.as_ref()) {
-                    let t = t.clone();
-                    self.connect(&co, &t);
+                if let Some(target) = be.as_ref().or(after_body.as_ref()) {
+                    self.connect(&co, target);
                 }
-                if let Some(ue) = &ue {
-                    self.connect(&bo, ue);
+                if let Some(target) = &after_body {
+                    self.connect(&bo, target);
                 }
                 let brs = self.breaks.pop().unwrap();
                 let conts = self.continues.pop().unwrap();
-                if let Some(ue) = &ue {
-                    self.connect(&conts, ue);
+                if let Some(target) = &after_body {
+                    self.connect(&conts, target);
                 }
                 let mut outs = co;
                 outs.extend(brs);
-                (ie.or(ce), outs)
+                (ie.or(loop_entry), outs)
             }
             "switch" => {
                 self.breaks.push(Vec::new());
@@ -4105,6 +4205,18 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     if n == 0 || arena[0].label != "METHOD" {
         return Vec::new();
     }
+    let cfg = cfg_index_edges(block, text, n);
+    let mut successors = vec![Vec::new(); n];
+    for &(source, target) in &cfg {
+        successors[source].push(target);
+    }
+    let mut reachable = HashSet::new();
+    let mut pending = vec![0];
+    while let Some(node) = pending.pop() {
+        if reachable.insert(node) {
+            pending.extend(successors[node].iter().copied());
+        }
+    }
     let method_addr = format!("M:{}", arena[0].full);
     let addr = |i: usize| -> String {
         if i == 0 {
@@ -4172,13 +4284,13 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         entry_gen.push(p);
     }
     // calls
-    // All call nodes are processed by the call-site routines (Joern runs
-    // addEdgesToCallSite for every Call). But GEN excludes field-access calls
+    // Reachable calls are processed by the call-site routines. ReachingDef's
+    // flow graph excludes disconnected CFG tails. GEN excludes field-access calls
     // (Joern's defsForCalls.filterNot(isFieldAccess)): such a call defines no
     // value of its own — it only becomes a def when it is itself an argument
     // of a non-field-access parent (handled by the parent's gen below).
     let calls: Vec<usize> = (0..n)
-        .filter(|&i| own.contains(&i) && arena[i].label == "CALL")
+        .filter(|&i| own.contains(&i) && reachable.contains(&i) && arena[i].label == "CALL")
         .collect();
     let gen_calls: Vec<usize> = calls
         .iter()
@@ -4269,14 +4381,15 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     }
 
     // --- dataflow fixpoint over the CFG ---
-    let cfg = cfg_index_edges(block, text, n);
     // Nodes that are part of this method's CFG (the reaching-def flow graph's
     // node set). Used to tell an EXPRESSION block (comma operator — in the CFG)
     // from a statement / INLINED-macro / stub body block (not in the CFG).
     let cfg_nodes: HashSet<usize> = cfg.iter().flat_map(|&(s, d)| [s, d]).collect();
     let mut preds: Vec<Vec<usize>> = vec![Vec::new(); n];
     for &(s, d) in &cfg {
-        preds[d].push(s);
+        if reachable.contains(&s) {
+            preds[d].push(s);
+        }
     }
     // ReachingDefFlowGraph quirk (decompiled initPred): the FIRST body node's
     // predecessor is the param-chain entry (method), REPLACING its CFG preds.
@@ -4344,7 +4457,14 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // Gate every candidate edge addEdge(from=s, to=d) through
     // isValidEdge(child=d, parent=s), exactly as DdgGenerator.addEdge does.
     let push = |var: String, s: usize, d: usize, flows: &mut Vec<(String, String, String)>| {
-        if rd_valid_edge(&arena, d, s) {
+        let in_flow_graph = |node| {
+            reachable.contains(&node)
+                || matches!(
+                    arena[node].label.as_str(),
+                    "METHOD_PARAMETER_IN" | "METHOD_PARAMETER_OUT" | "METHOD_RETURN"
+                )
+        };
+        if in_flow_graph(s) && in_flow_graph(d) && rd_valid_edge(&arena, d, s) {
             flows.push((var, addr(s), addr(d)));
         }
     };
