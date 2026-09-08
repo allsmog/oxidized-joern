@@ -1,0 +1,114 @@
+--- Joern
++++ after
+@@ -50,10 +50,6 @@
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=5
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+-  TYPE_DECL NAME=Value CODE=typedef struct Value { int value; int tag; } FULL_NAME=Value ORDER=1
+-    MEMBER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+-    MEMBER NAME=tag CODE=tag TYPE_FULL_NAME=int ORDER=2
+-  TYPE_DECL NAME=Value CODE=typedef struct Value { int value; int tag; } Value; FULL_NAME=Value<duplicate>0 ORDER=1
+   METHOD NAME=f CODE=void f(int L, Value *p, int v) { SET(L,p,v); } FULL_NAME=f SIGNATURE=void(int,Value*,int) ORDER=1
+     METHOD_PARAMETER_IN NAME=L CODE=int L TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=L CODE=int L TYPE_FULL_NAME=int ORDER=1
+@@ -85,7 +81,7 @@
+             IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=5
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-    TYPE_REF CODE=typedef struct Value { int value; int tag; } TYPE_FULL_NAME=Value ORDER=1
++    TYPE_DECL NAME=Value CODE=typedef struct Value { int value; int tag; } Value; FULL_NAME=Value ORDER=1
+     METHOD_REF CODE=f TYPE_FULL_NAME=f METHOD_FULL_NAME=f ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+@@ -114,9 +110,8 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=Value FULL_NAME=Value CODE=typedef struct Value { int value; int tag; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
++NODES|TYPE_DECL NAME=Value FULL_NAME=Value CODE=typedef struct Value { int value; int tag; } Value; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=Value* FULL_NAME=Value* CODE=Value* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=Value FULL_NAME=Value<duplicate>0 CODE=typedef struct Value { int value; int tag; } Value; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=f FULL_NAME=f CODE=f AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+@@ -172,9 +167,8 @@
+ EDGES|CFG f#8 -> f#15
+ EDGES|CFG f#8 -> f#29
+ EDGES|CFG f#9 -> f#10
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#36
+-EDGES|CFG main.c:<global>#36 -> main.c:<global>#37
+-EDGES|CFG main.c:<global>#37 -> main.c:<global>#38
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#33
++EDGES|CFG main.c:<global>#33 -> main.c:<global>#34
+ EDGES|CFG main.c:SET:ANY(3)#0 -> main.c:SET:ANY(3)#8
+ EDGES|CFG use#0 -> use#4
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+@@ -212,11 +206,9 @@
+ EDGES|CONTAINS f#0 -> f#8
+ EDGES|CONTAINS f#0 -> f#9
+ EDGES|CONTAINS main.c:<global>#0 -> f#0
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#35
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#36
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#37
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#4
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#31
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#32
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#33
+ EDGES|CONTAINS main.c:SET:ANY(3)#0 -> main.c:SET:ANY(3)#7
+ EDGES|CONTAINS use#0 -> use#3
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+@@ -260,12 +252,9 @@
+ EDGES|EVAL_TYPE f#7 -> T:void
+ EDGES|EVAL_TYPE f#8 -> T:ANY
+ EDGES|EVAL_TYPE f#9 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#2 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#3 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#35 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#36 -> T:Value
+-EDGES|EVAL_TYPE main.c:<global>#37 -> T:f
+-EDGES|EVAL_TYPE main.c:<global>#38 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#31 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#33 -> T:f
++EDGES|EVAL_TYPE main.c:<global>#34 -> T:ANY
+ EDGES|EVAL_TYPE main.c:SET:ANY(3)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:SET:ANY(3)#2 -> T:ANY
+ EDGES|EVAL_TYPE main.c:SET:ANY(3)#3 -> T:ANY
+@@ -293,7 +282,7 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
+-EDGES|REF T:Value -> main.c:<global>#1
++EDGES|REF T:Value -> main.c:<global>#32
+ EDGES|REF T:Value* -> D:Value*
+ EDGES|REF T:f -> D:f
+ EDGES|REF T:int -> D:int
+@@ -304,7 +293,7 @@
+ EDGES|REF f#21 -> f#5
+ EDGES|REF f#24 -> f#13
+ EDGES|REF f#28 -> f#1
+-EDGES|REF main.c:<global>#37 -> f#0
++EDGES|REF main.c:<global>#33 -> f#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:Value* -> F:<includes>
+@@ -317,8 +306,7 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE f#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+-EDGES|SOURCE_FILE main.c:<global>#4 -> F:main.c
++EDGES|SOURCE_FILE main.c:<global>#32 -> F:main.c
+ EDGES|SOURCE_FILE main.c:SET:ANY(3)#0 -> F:main.c
+ EDGES|SOURCE_FILE use#0 -> F:main.c
+ FLOWS|REACHING_DEF[1] f#26 -> f#22
+@@ -352,8 +340,7 @@
+ FLOWS|REACHING_DEF[] f#0 -> f#3
+ FLOWS|REACHING_DEF[] f#0 -> f#5
+ FLOWS|REACHING_DEF[] f#0 -> f#9
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#36
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#37
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#33
+ FLOWS|REACHING_DEF[] main.c:SET:ANY(3)#0 -> main.c:SET:ANY(3)#1
+ FLOWS|REACHING_DEF[] main.c:SET:ANY(3)#0 -> main.c:SET:ANY(3)#3
+ FLOWS|REACHING_DEF[] main.c:SET:ANY(3)#0 -> main.c:SET:ANY(3)#5
