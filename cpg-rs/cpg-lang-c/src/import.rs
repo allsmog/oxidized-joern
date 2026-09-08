@@ -446,7 +446,7 @@ fn render_type_decl(cpg: &Cpg, node: NodeId, out: &mut String) {
     } else if name == "<global>" {
         out.push_str(" AST_PARENT_TYPE=NAMESPACE_BLOCK");
         out.push_str(&format!(" AST_PARENT_FULL_NAME={full}"));
-    } else if code == name {
+    } else if code == name || code.strip_prefix("<unresolvedNamespace>.") == Some(name) {
         out.push_str(" AST_PARENT_TYPE=TYPE_DECL");
         out.push_str(&format!(" AST_PARENT_FULL_NAME={file}:<global>"));
     } else {
@@ -515,6 +515,7 @@ fn graph_external_address(cpg: &Cpg, node: NodeId) -> Option<String> {
             if cpg.path_of(cpg.file_of(node)) != Some("<includes>")
                 && cpg.name_of(node) != Some("<global>")
                 && code != cpg.name_of(node).unwrap_or("")
+                && code.strip_prefix("<unresolvedNamespace>.") != cpg.name_of(node)
             {
                 Some(format!("TD:{identity}"))
             } else {
