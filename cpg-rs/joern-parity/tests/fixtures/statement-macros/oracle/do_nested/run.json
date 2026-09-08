@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/cpg-rs/joern-parity/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/boundaries/cases/do_nested/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/boundaries/cases/do_nested/oracle-workspace",
+  "exitCode": 0,
+  "seconds": 5.056612874992425,
+  "oracleScriptSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "rawStdoutSha256": "fdce6c51e489575046491bcf775f395f7cd3d60da6aa8337f41d9921bbcc54b6",
+  "rawStderrSha256": "c973713133d360b084602f2f5149a480ad74474e86a115a036b417f36fc92033",
+  "referenceSha256": "a0ad741b4181dedbde1e05df231a5222964a69dedd7f201210455f701aee020e",
+  "selectedRecords": 303,
+  "sections": {
+    "AST": 84,
+    "NODES": 19,
+    "EDGES": 150,
+    "FLOWS": 50
+  }
+}

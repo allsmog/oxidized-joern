@@ -1,0 +1,326 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.alloc FULL_NAME=<operator>.alloc ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=f CODE=void f(int v) { SET(v); } FULL_NAME=f SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=v CODE=int v TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=v CODE=int v TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ SET(v); } TYPE_FULL_NAME=void ORDER=2
+    CALL NAME=SET CODE=SET(v) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:SET:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+      IDENTIFIER NAME=v CODE=v TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      BLOCK CODE=SET(v) TYPE_FULL_NAME=void ORDER=2 ARGUMENT_INDEX=2
+        LOCAL NAME=a CODE=SET(v) TYPE_FULL_NAME=int[2] ORDER=1
+        CALL NAME=<operator>.assignment CODE=int [] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=a CODE=SET(v) TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.alloc CODE=int [] TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.assignment CODE=int [] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=a CODE=SET(v) TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.arrayInitializer CODE=SET(v) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=v CODE=v TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=use CODE=use(a) TYPE_FULL_NAME=void METHOD_FULL_NAME=use ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=f CODE=void f(int v) { SET(v); } FULL_NAME=f SIGNATURE=void(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=v CODE=int v TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=v CODE=int v TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ SET(v); } TYPE_FULL_NAME=void ORDER=2
+      CALL NAME=SET CODE=SET(v) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:SET:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=v CODE=v TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        BLOCK CODE=SET(v) TYPE_FULL_NAME=void ORDER=2 ARGUMENT_INDEX=2
+          LOCAL NAME=a CODE=SET(v) TYPE_FULL_NAME=int[2] ORDER=1
+          CALL NAME=<operator>.assignment CODE=int [] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=a CODE=SET(v) TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.alloc CODE=int [] TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.assignment CODE=int [] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=a CODE=SET(v) TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.arrayInitializer CODE=SET(v) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=v CODE=v TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=use CODE=use(a) TYPE_FULL_NAME=void METHOD_FULL_NAME=use ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=f TYPE_FULL_NAME=f METHOD_FULL_NAME=f ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=SET CODE=#define SET(v) { int a[2]={(v),1}; use(a); } FULL_NAME=main.c:SET:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=use CODE=void use(int *a); FULL_NAME=use SIGNATURE=void(int*) ORDER=1
+  METHOD_PARAMETER_IN NAME=a CODE=int *a TYPE_FULL_NAME=int* ORDER=1
+  METHOD_PARAMETER_OUT NAME=a CODE=int *a TYPE_FULL_NAME=int* ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=f FULL_NAME=f CODE=f AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int* FULL_NAME=int* CODE=int* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[2] FULL_NAME=int[2] CODE=int[2] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=f FULL_NAME=f TYPE_DECL_FULL_NAME=f
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int* FULL_NAME=int* TYPE_DECL_FULL_NAME=int*
+NODES|TYPE NAME=int[2] FULL_NAME=int[2] TYPE_DECL_FULL_NAME=int[2]
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT f#10 -> f#11
+EDGES|ARGUMENT f#10 -> f#12
+EDGES|ARGUMENT f#13 -> f#14
+EDGES|ARGUMENT f#13 -> f#15
+EDGES|ARGUMENT f#15 -> f#16
+EDGES|ARGUMENT f#15 -> f#17
+EDGES|ARGUMENT f#18 -> f#19
+EDGES|ARGUMENT f#4 -> f#5
+EDGES|ARGUMENT f#8 -> f#10
+EDGES|ARGUMENT f#8 -> f#9
+EDGES|CALL f#10 -> <operator>.alloc#0
+EDGES|CALL f#13 -> <operator>.assignment#0
+EDGES|CALL f#15 -> <operator>.arrayInitializer#0
+EDGES|CALL f#18 -> use#0
+EDGES|CALL f#4 -> main.c:SET:ANY(1)#0
+EDGES|CALL f#8 -> <operator>.assignment#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.alloc#0 -> <operator>.alloc#5
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#5
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG f#0 -> f#5
+EDGES|CFG f#10 -> f#8
+EDGES|CFG f#11 -> f#12
+EDGES|CFG f#12 -> f#10
+EDGES|CFG f#13 -> f#19
+EDGES|CFG f#14 -> f#16
+EDGES|CFG f#15 -> f#13
+EDGES|CFG f#16 -> f#17
+EDGES|CFG f#17 -> f#15
+EDGES|CFG f#18 -> f#20
+EDGES|CFG f#19 -> f#18
+EDGES|CFG f#4 -> f#20
+EDGES|CFG f#4 -> f#9
+EDGES|CFG f#5 -> f#4
+EDGES|CFG f#8 -> f#14
+EDGES|CFG f#9 -> f#11
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#23
+EDGES|CFG main.c:<global>#23 -> main.c:<global>#24
+EDGES|CFG main.c:SET:ANY(1)#0 -> main.c:SET:ANY(1)#4
+EDGES|CFG use#0 -> use#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.alloc#0 -> <operator>.alloc#2
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS D:main.c:<global> -> D:f
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:SET:ANY(1)#0
+EDGES|CONTAINS D:main.c:<global> -> use#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int*
+EDGES|CONTAINS F:<includes> -> D:int[2]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS f#0 -> f#10
+EDGES|CONTAINS f#0 -> f#11
+EDGES|CONTAINS f#0 -> f#12
+EDGES|CONTAINS f#0 -> f#13
+EDGES|CONTAINS f#0 -> f#14
+EDGES|CONTAINS f#0 -> f#15
+EDGES|CONTAINS f#0 -> f#16
+EDGES|CONTAINS f#0 -> f#17
+EDGES|CONTAINS f#0 -> f#18
+EDGES|CONTAINS f#0 -> f#19
+EDGES|CONTAINS f#0 -> f#3
+EDGES|CONTAINS f#0 -> f#4
+EDGES|CONTAINS f#0 -> f#5
+EDGES|CONTAINS f#0 -> f#6
+EDGES|CONTAINS f#0 -> f#8
+EDGES|CONTAINS f#0 -> f#9
+EDGES|CONTAINS main.c:<global>#0 -> f#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#22
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#23
+EDGES|CONTAINS main.c:SET:ANY(1)#0 -> main.c:SET:ANY(1)#3
+EDGES|CONTAINS use#0 -> use#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE f#1 -> T:int
+EDGES|EVAL_TYPE f#10 -> T:int[2]
+EDGES|EVAL_TYPE f#11 -> T:int[2]
+EDGES|EVAL_TYPE f#12 -> T:int
+EDGES|EVAL_TYPE f#13 -> T:void
+EDGES|EVAL_TYPE f#14 -> T:int[2]
+EDGES|EVAL_TYPE f#15 -> T:ANY
+EDGES|EVAL_TYPE f#16 -> T:int
+EDGES|EVAL_TYPE f#17 -> T:int
+EDGES|EVAL_TYPE f#18 -> T:void
+EDGES|EVAL_TYPE f#19 -> T:int[2]
+EDGES|EVAL_TYPE f#2 -> T:int
+EDGES|EVAL_TYPE f#20 -> T:void
+EDGES|EVAL_TYPE f#3 -> T:void
+EDGES|EVAL_TYPE f#4 -> T:ANY
+EDGES|EVAL_TYPE f#5 -> T:int
+EDGES|EVAL_TYPE f#6 -> T:void
+EDGES|EVAL_TYPE f#7 -> T:int[2]
+EDGES|EVAL_TYPE f#8 -> T:void
+EDGES|EVAL_TYPE f#9 -> T:int[2]
+EDGES|EVAL_TYPE main.c:<global>#22 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#23 -> T:f
+EDGES|EVAL_TYPE main.c:<global>#24 -> T:ANY
+EDGES|EVAL_TYPE main.c:SET:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:SET:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:SET:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:SET:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE use#1 -> T:int*
+EDGES|EVAL_TYPE use#2 -> T:int*
+EDGES|EVAL_TYPE use#3 -> T:ANY
+EDGES|EVAL_TYPE use#4 -> T:void
+EDGES|PARAMETER_LINK <operator>.alloc#1 -> <operator>.alloc#3
+EDGES|PARAMETER_LINK <operator>.alloc#4 -> <operator>.alloc#6
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#4 -> <operator>.arrayInitializer#6
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK f#1 -> f#2
+EDGES|PARAMETER_LINK main.c:SET:ANY(1)#1 -> main.c:SET:ANY(1)#2
+EDGES|PARAMETER_LINK use#1 -> use#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:f -> D:f
+EDGES|REF T:int -> D:int
+EDGES|REF T:int* -> D:int*
+EDGES|REF T:int[2] -> D:int[2]
+EDGES|REF T:void -> D:void
+EDGES|REF f#14 -> f#7
+EDGES|REF f#16 -> f#1
+EDGES|REF f#19 -> f#7
+EDGES|REF f#9 -> f#7
+EDGES|REF main.c:<global>#23 -> f#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:f -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int* -> F:<includes>
+EDGES|SOURCE_FILE D:int[2] -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE f#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:SET:ANY(1)#0 -> F:main.c
+EDGES|SOURCE_FILE use#0 -> F:main.c
+FLOWS|REACHING_DEF[1] f#17 -> f#15
+FLOWS|REACHING_DEF[2] f#12 -> f#10
+FLOWS|REACHING_DEF[SET(v)] f#14 -> f#13
+FLOWS|REACHING_DEF[SET(v)] f#14 -> f#19
+FLOWS|REACHING_DEF[SET(v)] f#15 -> f#13
+FLOWS|REACHING_DEF[SET(v)] f#15 -> f#14
+FLOWS|REACHING_DEF[SET(v)] f#4 -> f#20
+FLOWS|REACHING_DEF[SET(v)] f#9 -> f#8
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#1
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#4
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] f#0 -> f#1
+FLOWS|REACHING_DEF[] f#0 -> f#11
+FLOWS|REACHING_DEF[] f#0 -> f#12
+FLOWS|REACHING_DEF[] f#0 -> f#16
+FLOWS|REACHING_DEF[] f#0 -> f#17
+FLOWS|REACHING_DEF[] f#0 -> f#19
+FLOWS|REACHING_DEF[] f#0 -> f#5
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#23
+FLOWS|REACHING_DEF[] main.c:SET:ANY(1)#0 -> main.c:SET:ANY(1)#1
+FLOWS|REACHING_DEF[] use#0 -> use#1
+FLOWS|REACHING_DEF[a] f#19 -> f#18
+FLOWS|REACHING_DEF[a] use#1 -> use#2
+FLOWS|REACHING_DEF[a] use#1 -> use#4
+FLOWS|REACHING_DEF[int []] f#10 -> f#8
+FLOWS|REACHING_DEF[int []] f#10 -> f#9
+FLOWS|REACHING_DEF[int[2]] f#11 -> f#10
+FLOWS|REACHING_DEF[int[2]] f#11 -> f#20
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#3
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#5
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] main.c:SET:ANY(1)#1 -> main.c:SET:ANY(1)#2
+FLOWS|REACHING_DEF[p1] main.c:SET:ANY(1)#1 -> main.c:SET:ANY(1)#4
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#6
+FLOWS|REACHING_DEF[p2] <operator>.arrayInitializer#4 -> <operator>.arrayInitializer#5
+FLOWS|REACHING_DEF[p2] <operator>.arrayInitializer#4 -> <operator>.arrayInitializer#6
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[v] f#1 -> f#2
+FLOWS|REACHING_DEF[v] f#1 -> f#5
+FLOWS|REACHING_DEF[v] f#16 -> f#15
+FLOWS|REACHING_DEF[v] f#5 -> f#16
+FLOWS|REACHING_DEF[v] f#5 -> f#2
+FLOWS|REACHING_DEF[v] f#5 -> f#20
+FLOWS|REACHING_DEF[v] f#5 -> f#4

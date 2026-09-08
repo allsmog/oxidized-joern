@@ -1,0 +1,41 @@
+{
+  "startedAtUtc": "2026-09-08T10:46:36.060435+00:00",
+  "cases": {
+    "self_recursive_object": {
+      "defs.h": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/cases/self_recursive_object/input/defs.h",
+        "sha256": "91590771166459f9deabf4a7725062c7f2467dc168eb41f24b6e49eeb0f44a67",
+        "bytes": 20
+      },
+      "main.c": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/cases/self_recursive_object/input/main.c",
+        "sha256": "c9f7eff86d3042abc2dd17a00067256a32e478bcd272fd9136e924eda9497f1c",
+        "bytes": 70
+      }
+    },
+    "indirect_recursive_object": {
+      "defs.h": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/cases/indirect_recursive_object/input/defs.h",
+        "sha256": "9eabde2478a715c567834960f0fcf3209b267ff699cc48e1cc63ec6b03c869bb",
+        "bytes": 42
+      },
+      "main.c": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/cases/indirect_recursive_object/input/main.c",
+        "sha256": "e7578d60f41e13a08d1f483038776a9b7db9bf0249a39ec3b08acb8f7dc595bb",
+        "bytes": 52
+      }
+    },
+    "second_argument_only": {
+      "defs.h": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/cases/second_argument_only/input/defs.h",
+        "sha256": "3133b92f39851564fe31e0a2ab77199a9af3b209e8e98fd38a686519deb7513a",
+        "bytes": 22
+      },
+      "main.c": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/recursive/cases/second_argument_only/input/main.c",
+        "sha256": "5a10faf0ef4bd89399d7a9aaf3564452b2a01b975ab3b90dad5e9b69276cc251",
+        "bytes": 66
+      }
+    }
+  }
+}

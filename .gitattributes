@@ -1,1 +1,9 @@
 * text=auto eol=lf
+
+# Preserve byte-bound oracle diffs and command logs as captured evidence.
+cpg-rs/joern-parity/tests/fixtures/macro-definitions/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/rd-scheduling/macro-diagnostic/complete.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/statement-macros/diagnostics/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/macro-definitions/provenance/tests.log whitespace=-blank-at-eof
+cpg-rs/cpg-cli/tests/fixtures/c-format-positions/evidence/after-tests.log whitespace=-blank-at-eof
+cpg-rs/cpg-cli/tests/fixtures/c-format-positions/evidence/cli-tests.log whitespace=-blank-at-eof

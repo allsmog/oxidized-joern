@@ -33,3 +33,11 @@ and concatenated strings. Its [metrics](astra-third-batch-metrics.json)
 compare both the previous checkpoint and the combined build with fresh Joern
 outputs; the [acceptance receipt](astra-third-batch-acceptance.json) binds
 validation logs, binaries, fixture measurements, and real-project workflows.
+
+The [fourth Astra batch](astra-fourth-batch-2026-09-08.md) records array
+initializers, supplied-header and statement macros, reaching-definition
+scheduling, source locations, format-string sink positions, and allocation
+repairs. Its [metrics](astra-fourth-batch-metrics.json) distinguish exact
+primary methods and bodies from stub growth and retain three Lua stub
+regressions. The [acceptance receipt](astra-fourth-batch-acceptance.json) binds
+the final source, repeated measurements, unchanged budgets, and gate outputs.

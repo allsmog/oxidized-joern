@@ -64,13 +64,28 @@ modifiers, standalone blocks, distinct reaching-definition identities, and
 concatenated strings. Separate complete fixtures and scanner outcomes cover
 these changes; retained nonexact diagnostics mark their boundaries.
 
-Confirmed remaining C gaps include header/build-definition context,
-function-like macros in preprocessor conditions, array initializers, tagged
-and alias type resolution, macro expansion-wrapper types, and loop-tail
-reaching-definition scheduling. CRLF source rendering also differs in retained
-cases. Condition expansion has explicit work/depth bounds. Source locations
-use approximate enclosing locations for some transformed nodes. The measured
-reports distinguish tested behavior from these remaining limits.
+The [fourth batch](../docs/conformance/astra-fourth-batch-2026-09-08.md) extends
+supported array initializer forms, supplied quoted-header macro context,
+logical directive recovery, expression and statement macro expansion, source
+locations, and reaching-definition scheduling. Separate complete fixtures and
+scanner outcomes establish those cases. Primary function-body matches are
+reported separately from operator and macro stubs. JSON export preserves the
+tested output bytes with lower memory use; C format-string rules now check
+the intended argument positions. Whole-project graphs remain nonexact.
+
+Confirmed remaining C gaps include broader include/build-definition context,
+function-like macros in preprocessor conditions, block-level directives,
+variadics, stringification, token pasting, unbraced multi-statement replacements,
+unpinned initializer and field-designator forms, tagged and alias type
+resolution, nested macro expansion and recovery-context behavior, and further
+reaching-definition boundaries. Declaration-specifier macro lookup still uses
+standalone header state in some paths. Complete whole-project differences and
+retained nonexact diagnostics record these limits. Expansion work/depth bounds
+do not guarantee complete parsing; unsupported syntax can yield partial graphs.
+Some CRLF source rendering differs, and some transformed nodes use approximate
+enclosing locations. The selected graph projection omits column numbers and
+some control metadata. Its newline-escaped text transport is not injective or
+lossless. The measured reports distinguish repaired cases from remaining gaps.
 
 ## Deliberate incompatibilities
 

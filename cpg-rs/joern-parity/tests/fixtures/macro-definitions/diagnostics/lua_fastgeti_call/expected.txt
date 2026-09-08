@@ -1,0 +1,955 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addressOf FULL_NAME=<operator>.addressOf ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.conditional FULL_NAME=<operator>.conditional ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=<operator>.indirectFieldAccess FULL_NAME=<operator>.indirectFieldAccess ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.lessThan FULL_NAME=<operator>.lessThan ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.logicalNot FULL_NAME=<operator>.logicalNot ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.subtraction FULL_NAME=<operator>.subtraction ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=defs.h:<global> ORDER=1
+  TYPE_DECL NAME=Table CODE=typedef struct Table { unsigned int alimit; int *array; } FULL_NAME=Table ORDER=1
+    MEMBER NAME=alimit CODE=alimit TYPE_FULL_NAME=unsigned int ORDER=1
+    MEMBER NAME=array CODE=*array TYPE_FULL_NAME=int* ORDER=2
+  TYPE_DECL NAME=Table CODE=typedef struct Table { unsigned int alimit; int *array; } Table; FULL_NAME=Table<duplicate>0 ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_REF CODE=typedef struct Table { unsigned int alimit; int *array; } TYPE_FULL_NAME=Table ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=luaV_fastgeti CODE=#define luaV_fastgeti(L,t,k,slot) \\n  (!ttistable(t)  \\n   ? (slot = NULL, 0)  /* not a table; 'slot' is NULL and result is 0 */  \\n   : (slot = (l_castS2U(k) - 1u < hvalue(t)->alimit) \\n              ? &hvalue(t)->array[k - 1] : luaH_getint(hvalue(t), k), \\n      !isempty(slot))) FULL_NAME=defs.h:luaV_fastgeti:ANY(4) SIGNATURE=ANY(4) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_IN NAME=p4 CODE=p4 TYPE_FULL_NAME=ANY ORDER=4
+  METHOD_PARAMETER_OUT NAME=p4 CODE=p4 TYPE_FULL_NAME=ANY ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=5
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=6
+
+METHOD NAME=hvalue CODE=Table *hvalue(Table *table); FULL_NAME=hvalue SIGNATURE=Table*(Table*) ORDER=1
+  METHOD_PARAMETER_IN NAME=table CODE=Table *table TYPE_FULL_NAME=Table* ORDER=1
+  METHOD_PARAMETER_OUT NAME=table CODE=Table *table TYPE_FULL_NAME=Table* ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Table* ORDER=3
+
+METHOD NAME=invoke CODE=int invoke(Table *table, int key) { int *slot; return luaV_fastgeti(0, table, key, slot); } FULL_NAME=invoke SIGNATURE=int(Table*,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=table CODE=Table *table TYPE_FULL_NAME=Table* ORDER=1
+  METHOD_PARAMETER_OUT NAME=table CODE=Table *table TYPE_FULL_NAME=Table* ORDER=1
+  METHOD_PARAMETER_IN NAME=key CODE=int key TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=key CODE=int key TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={ int *slot; return luaV_fastgeti(0, table, key, slot); } TYPE_FULL_NAME=void ORDER=3
+    LOCAL NAME=slot CODE=int *slot TYPE_FULL_NAME=int* ORDER=1
+    RETURN CODE=return luaV_fastgeti(0, table, key, slot); ORDER=2
+      CALL NAME=luaV_fastgeti CODE=luaV_fastgeti(0, table, key, slot) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=defs.h:luaV_fastgeti:ANY(4) SIGNATURE=ANY(4) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=table CODE=table TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=key CODE=key TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+        IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int* ORDER=3 ARGUMENT_INDEX=4
+        BLOCK TYPE_FULL_NAME=ANY ORDER=4 ARGUMENT_INDEX=4
+          CALL NAME=<operator>.conditional CODE=!ttistable(table) ? (slot = ((void *)0), 0) : (slot = (l_castS2U(key) - 1u < hvalue(table)->alimit) ? &hvalue(table)->array[key - 1] : luaH_getint(hvalue(table), key), !isempty(slot)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.logicalNot CODE=!ttistable(table) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalNot ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=ttistable CODE=ttistable(table) TYPE_FULL_NAME=int METHOD_FULL_NAME=ttistable ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=table CODE=table TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+            BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.assignment CODE=slot = ((void *)0) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+                CALL NAME=<operator>.cast CODE=(void *)0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=void * TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+                  LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2
+            BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+              CALL NAME=<operator>.assignment CODE=slot = (l_castS2U(key) - 1u < hvalue(table)->alimit) ? &hvalue(table)->array[key - 1] : luaH_getint(hvalue(table), key) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+                CALL NAME=<operator>.conditional CODE=(l_castS2U(key) - 1u < hvalue(table)->alimit) ? &hvalue(table)->array[key - 1] : luaH_getint(hvalue(table), key) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.lessThan CODE=l_castS2U(key) - 1u < hvalue(table)->alimit TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.subtraction CODE=l_castS2U(key) - 1u TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=l_castS2U CODE=l_castS2U(key) TYPE_FULL_NAME=unsigned int METHOD_FULL_NAME=l_castS2U ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        IDENTIFIER NAME=key CODE=key TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                      LITERAL CODE=1u TYPE_FULL_NAME=unsigned int ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=<operator>.indirectFieldAccess CODE=hvalue(table)->alimit TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=hvalue CODE=hvalue(table) TYPE_FULL_NAME=Table* METHOD_FULL_NAME=hvalue ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        IDENTIFIER NAME=table CODE=table TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=alimit ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=<operator>.addressOf CODE=&hvalue(table)->array[key - 1] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectIndexAccess CODE=hvalue(table)->array[key - 1] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.indirectFieldAccess CODE=hvalue(table)->array TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        CALL NAME=hvalue CODE=hvalue(table) TYPE_FULL_NAME=Table* METHOD_FULL_NAME=hvalue ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          IDENTIFIER NAME=table CODE=table TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+                        FIELD_IDENTIFIER CODE=array ORDER=2 ARGUMENT_INDEX=2
+                      CALL NAME=<operator>.subtraction CODE=key - 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                        IDENTIFIER NAME=key CODE=key TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=luaH_getint CODE=luaH_getint(hvalue(table), key) TYPE_FULL_NAME=int* METHOD_FULL_NAME=luaH_getint ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=hvalue CODE=hvalue(table) TYPE_FULL_NAME=Table* METHOD_FULL_NAME=hvalue ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=table CODE=table TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+                    IDENTIFIER NAME=key CODE=key TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.logicalNot CODE=!isempty(slot) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalNot ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=isempty CODE=isempty(slot) TYPE_FULL_NAME=int METHOD_FULL_NAME=isempty ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=isempty CODE=int isempty(int *slot); FULL_NAME=isempty SIGNATURE=int(int*) ORDER=1
+  METHOD_PARAMETER_IN NAME=slot CODE=int *slot TYPE_FULL_NAME=int* ORDER=1
+  METHOD_PARAMETER_OUT NAME=slot CODE=int *slot TYPE_FULL_NAME=int* ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=l_castS2U CODE=unsigned int l_castS2U(int key); FULL_NAME=l_castS2U SIGNATURE=unsigned int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=key CODE=int key TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=key CODE=int key TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned int ORDER=3
+
+METHOD NAME=luaH_getint CODE=int *luaH_getint(Table *table, int key); FULL_NAME=luaH_getint SIGNATURE=int*(Table*,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=table CODE=Table *table TYPE_FULL_NAME=Table* ORDER=1
+  METHOD_PARAMETER_OUT NAME=table CODE=Table *table TYPE_FULL_NAME=Table* ORDER=1
+  METHOD_PARAMETER_IN NAME=key CODE=int key TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=key CODE=int key TYPE_FULL_NAME=int ORDER=2
+  BLOCK TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int* ORDER=4
+
+METHOD NAME=probe CODE=int probe(int slot) { return slot; } FULL_NAME=probe SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=slot CODE=int slot TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=slot CODE=int slot TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return slot; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return slot; ORDER=1
+      IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=probe.c:<global> ORDER=1
+  METHOD NAME=probe CODE=int probe(int slot) { return slot; } FULL_NAME=probe SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=slot CODE=int slot TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=slot CODE=int slot TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return slot; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return slot; ORDER=1
+        IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=invoke CODE=int invoke(Table *table, int key) { int *slot; return luaV_fastgeti(0, table, key, slot); } FULL_NAME=invoke SIGNATURE=int(Table*,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=table CODE=Table *table TYPE_FULL_NAME=Table* ORDER=1
+    METHOD_PARAMETER_OUT NAME=table CODE=Table *table TYPE_FULL_NAME=Table* ORDER=1
+    METHOD_PARAMETER_IN NAME=key CODE=int key TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=key CODE=int key TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={ int *slot; return luaV_fastgeti(0, table, key, slot); } TYPE_FULL_NAME=void ORDER=3
+      LOCAL NAME=slot CODE=int *slot TYPE_FULL_NAME=int* ORDER=1
+      RETURN CODE=return luaV_fastgeti(0, table, key, slot); ORDER=2
+        CALL NAME=luaV_fastgeti CODE=luaV_fastgeti(0, table, key, slot) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=defs.h:luaV_fastgeti:ANY(4) SIGNATURE=ANY(4) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=table CODE=table TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=2
+          IDENTIFIER NAME=key CODE=key TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+          IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int* ORDER=3 ARGUMENT_INDEX=4
+          BLOCK TYPE_FULL_NAME=ANY ORDER=4 ARGUMENT_INDEX=4
+            CALL NAME=<operator>.conditional CODE=!ttistable(table) ? (slot = ((void *)0), 0) : (slot = (l_castS2U(key) - 1u < hvalue(table)->alimit) ? &hvalue(table)->array[key - 1] : luaH_getint(hvalue(table), key), !isempty(slot)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.logicalNot CODE=!ttistable(table) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalNot ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=ttistable CODE=ttistable(table) TYPE_FULL_NAME=int METHOD_FULL_NAME=ttistable ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=table CODE=table TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+              BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.assignment CODE=slot = ((void *)0) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+                  CALL NAME=<operator>.cast CODE=(void *)0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    TYPE_REF CODE=void * TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+                    LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2
+              BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+                CALL NAME=<operator>.assignment CODE=slot = (l_castS2U(key) - 1u < hvalue(table)->alimit) ? &hvalue(table)->array[key - 1] : luaH_getint(hvalue(table), key) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+                  CALL NAME=<operator>.conditional CODE=(l_castS2U(key) - 1u < hvalue(table)->alimit) ? &hvalue(table)->array[key - 1] : luaH_getint(hvalue(table), key) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.lessThan CODE=l_castS2U(key) - 1u < hvalue(table)->alimit TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.subtraction CODE=l_castS2U(key) - 1u TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        CALL NAME=l_castS2U CODE=l_castS2U(key) TYPE_FULL_NAME=unsigned int METHOD_FULL_NAME=l_castS2U ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          IDENTIFIER NAME=key CODE=key TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                        LITERAL CODE=1u TYPE_FULL_NAME=unsigned int ORDER=2 ARGUMENT_INDEX=2
+                      CALL NAME=<operator>.indirectFieldAccess CODE=hvalue(table)->alimit TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                        CALL NAME=hvalue CODE=hvalue(table) TYPE_FULL_NAME=Table* METHOD_FULL_NAME=hvalue ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          IDENTIFIER NAME=table CODE=table TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+                        FIELD_IDENTIFIER CODE=alimit ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=<operator>.addressOf CODE=&hvalue(table)->array[key - 1] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.indirectIndexAccess CODE=hvalue(table)->array[key - 1] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        CALL NAME=<operator>.indirectFieldAccess CODE=hvalue(table)->array TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          CALL NAME=hvalue CODE=hvalue(table) TYPE_FULL_NAME=Table* METHOD_FULL_NAME=hvalue ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                            IDENTIFIER NAME=table CODE=table TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+                          FIELD_IDENTIFIER CODE=array ORDER=2 ARGUMENT_INDEX=2
+                        CALL NAME=<operator>.subtraction CODE=key - 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                          IDENTIFIER NAME=key CODE=key TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=luaH_getint CODE=luaH_getint(hvalue(table), key) TYPE_FULL_NAME=int* METHOD_FULL_NAME=luaH_getint ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=hvalue CODE=hvalue(table) TYPE_FULL_NAME=Table* METHOD_FULL_NAME=hvalue ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        IDENTIFIER NAME=table CODE=table TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+                      IDENTIFIER NAME=key CODE=key TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.logicalNot CODE=!isempty(slot) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalNot ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=isempty CODE=isempty(slot) TYPE_FULL_NAME=int METHOD_FULL_NAME=isempty ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=probe TYPE_FULL_NAME=probe METHOD_FULL_NAME=probe ORDER=1
+    METHOD_REF CODE=invoke TYPE_FULL_NAME=invoke METHOD_FULL_NAME=invoke ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=ttistable CODE=int ttistable(Table *table); FULL_NAME=ttistable SIGNATURE=int(Table*) ORDER=1
+  METHOD_PARAMETER_IN NAME=table CODE=Table *table TYPE_FULL_NAME=Table* ORDER=1
+  METHOD_PARAMETER_OUT NAME=table CODE=Table *table TYPE_FULL_NAME=Table* ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=defs.h ORDER=0
+NODES|FILE NAME=probe.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=defs.h:<global> FILENAME=defs.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Table FULL_NAME=Table CODE=typedef struct Table { unsigned int alimit; int *array; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=defs.h ORDER=1
+NODES|TYPE_DECL NAME=Table* FULL_NAME=Table* CODE=Table* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Table FULL_NAME=Table<duplicate>0 CODE=typedef struct Table { unsigned int alimit; int *array; } Table; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=defs.h ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=defs.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=defs.h:<global> FILENAME=defs.h ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int* FULL_NAME=int* CODE=int* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=invoke FULL_NAME=invoke CODE=invoke AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+NODES|TYPE_DECL NAME=probe FULL_NAME=probe CODE=probe AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=probe.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=2
+NODES|TYPE_DECL NAME=unsigned int FULL_NAME=unsigned int CODE=unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Table FULL_NAME=Table TYPE_DECL_FULL_NAME=Table
+NODES|TYPE NAME=Table* FULL_NAME=Table* TYPE_DECL_FULL_NAME=Table*
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int* FULL_NAME=int* TYPE_DECL_FULL_NAME=int*
+NODES|TYPE NAME=invoke FULL_NAME=invoke TYPE_DECL_FULL_NAME=invoke
+NODES|TYPE NAME=probe FULL_NAME=probe TYPE_DECL_FULL_NAME=probe
+NODES|TYPE NAME=unsigned int FULL_NAME=unsigned int TYPE_DECL_FULL_NAME=unsigned int
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT invoke#13 -> invoke#14
+EDGES|ARGUMENT invoke#13 -> invoke#17
+EDGES|ARGUMENT invoke#13 -> invoke#24
+EDGES|ARGUMENT invoke#14 -> invoke#15
+EDGES|ARGUMENT invoke#15 -> invoke#16
+EDGES|ARGUMENT invoke#18 -> invoke#19
+EDGES|ARGUMENT invoke#18 -> invoke#20
+EDGES|ARGUMENT invoke#20 -> invoke#21
+EDGES|ARGUMENT invoke#20 -> invoke#22
+EDGES|ARGUMENT invoke#25 -> invoke#26
+EDGES|ARGUMENT invoke#25 -> invoke#27
+EDGES|ARGUMENT invoke#27 -> invoke#28
+EDGES|ARGUMENT invoke#27 -> invoke#37
+EDGES|ARGUMENT invoke#27 -> invoke#46
+EDGES|ARGUMENT invoke#28 -> invoke#29
+EDGES|ARGUMENT invoke#28 -> invoke#33
+EDGES|ARGUMENT invoke#29 -> invoke#30
+EDGES|ARGUMENT invoke#29 -> invoke#32
+EDGES|ARGUMENT invoke#30 -> invoke#31
+EDGES|ARGUMENT invoke#33 -> invoke#34
+EDGES|ARGUMENT invoke#33 -> invoke#36
+EDGES|ARGUMENT invoke#34 -> invoke#35
+EDGES|ARGUMENT invoke#37 -> invoke#38
+EDGES|ARGUMENT invoke#38 -> invoke#39
+EDGES|ARGUMENT invoke#38 -> invoke#43
+EDGES|ARGUMENT invoke#39 -> invoke#40
+EDGES|ARGUMENT invoke#39 -> invoke#42
+EDGES|ARGUMENT invoke#40 -> invoke#41
+EDGES|ARGUMENT invoke#43 -> invoke#44
+EDGES|ARGUMENT invoke#43 -> invoke#45
+EDGES|ARGUMENT invoke#46 -> invoke#47
+EDGES|ARGUMENT invoke#46 -> invoke#49
+EDGES|ARGUMENT invoke#47 -> invoke#48
+EDGES|ARGUMENT invoke#50 -> invoke#51
+EDGES|ARGUMENT invoke#51 -> invoke#52
+EDGES|ARGUMENT invoke#7 -> invoke#8
+EDGES|ARGUMENT invoke#8 -> invoke#10
+EDGES|ARGUMENT invoke#8 -> invoke#11
+EDGES|ARGUMENT invoke#8 -> invoke#9
+EDGES|ARGUMENT probe#4 -> probe#5
+EDGES|CALL invoke#13 -> <operator>.conditional#0
+EDGES|CALL invoke#14 -> <operator>.logicalNot#0
+EDGES|CALL invoke#15 -> ttistable#0
+EDGES|CALL invoke#18 -> <operator>.assignment#0
+EDGES|CALL invoke#20 -> <operator>.cast#0
+EDGES|CALL invoke#25 -> <operator>.assignment#0
+EDGES|CALL invoke#27 -> <operator>.conditional#0
+EDGES|CALL invoke#28 -> <operator>.lessThan#0
+EDGES|CALL invoke#29 -> <operator>.subtraction#0
+EDGES|CALL invoke#30 -> l_castS2U#0
+EDGES|CALL invoke#33 -> <operator>.indirectFieldAccess#0
+EDGES|CALL invoke#34 -> hvalue#0
+EDGES|CALL invoke#37 -> <operator>.addressOf#0
+EDGES|CALL invoke#38 -> <operator>.indirectIndexAccess#0
+EDGES|CALL invoke#39 -> <operator>.indirectFieldAccess#0
+EDGES|CALL invoke#40 -> hvalue#0
+EDGES|CALL invoke#43 -> <operator>.subtraction#0
+EDGES|CALL invoke#46 -> luaH_getint#0
+EDGES|CALL invoke#47 -> hvalue#0
+EDGES|CALL invoke#50 -> <operator>.logicalNot#0
+EDGES|CALL invoke#51 -> isempty#0
+EDGES|CALL invoke#8 -> defs.h:luaV_fastgeti:ANY(4)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addressOf#0 -> <operator>.addressOf#4
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG <operator>.conditional#0 -> <operator>.conditional#5
+EDGES|CFG <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG <operator>.lessThan#0 -> <operator>.lessThan#5
+EDGES|CFG <operator>.logicalNot#0 -> <operator>.logicalNot#4
+EDGES|CFG <operator>.subtraction#0 -> <operator>.subtraction#5
+EDGES|CFG defs.h:<global>#0 -> defs.h:<global>#6
+EDGES|CFG defs.h:<global>#6 -> defs.h:<global>#7
+EDGES|CFG defs.h:luaV_fastgeti:ANY(4)#0 -> defs.h:luaV_fastgeti:ANY(4)#10
+EDGES|CFG hvalue#0 -> hvalue#4
+EDGES|CFG invoke#0 -> invoke#9
+EDGES|CFG invoke#10 -> invoke#11
+EDGES|CFG invoke#11 -> invoke#8
+EDGES|CFG invoke#13 -> invoke#7
+EDGES|CFG invoke#14 -> invoke#19
+EDGES|CFG invoke#14 -> invoke#26
+EDGES|CFG invoke#15 -> invoke#14
+EDGES|CFG invoke#16 -> invoke#15
+EDGES|CFG invoke#18 -> invoke#23
+EDGES|CFG invoke#19 -> invoke#21
+EDGES|CFG invoke#20 -> invoke#18
+EDGES|CFG invoke#21 -> invoke#22
+EDGES|CFG invoke#22 -> invoke#20
+EDGES|CFG invoke#23 -> invoke#13
+EDGES|CFG invoke#25 -> invoke#52
+EDGES|CFG invoke#26 -> invoke#31
+EDGES|CFG invoke#27 -> invoke#25
+EDGES|CFG invoke#28 -> invoke#41
+EDGES|CFG invoke#28 -> invoke#48
+EDGES|CFG invoke#29 -> invoke#35
+EDGES|CFG invoke#30 -> invoke#32
+EDGES|CFG invoke#31 -> invoke#30
+EDGES|CFG invoke#32 -> invoke#29
+EDGES|CFG invoke#33 -> invoke#28
+EDGES|CFG invoke#34 -> invoke#36
+EDGES|CFG invoke#35 -> invoke#34
+EDGES|CFG invoke#36 -> invoke#33
+EDGES|CFG invoke#37 -> invoke#27
+EDGES|CFG invoke#38 -> invoke#37
+EDGES|CFG invoke#39 -> invoke#44
+EDGES|CFG invoke#40 -> invoke#42
+EDGES|CFG invoke#41 -> invoke#40
+EDGES|CFG invoke#42 -> invoke#39
+EDGES|CFG invoke#43 -> invoke#38
+EDGES|CFG invoke#44 -> invoke#45
+EDGES|CFG invoke#45 -> invoke#43
+EDGES|CFG invoke#46 -> invoke#27
+EDGES|CFG invoke#47 -> invoke#49
+EDGES|CFG invoke#48 -> invoke#47
+EDGES|CFG invoke#49 -> invoke#46
+EDGES|CFG invoke#50 -> invoke#13
+EDGES|CFG invoke#51 -> invoke#50
+EDGES|CFG invoke#52 -> invoke#51
+EDGES|CFG invoke#7 -> invoke#53
+EDGES|CFG invoke#8 -> invoke#16
+EDGES|CFG invoke#8 -> invoke#7
+EDGES|CFG invoke#9 -> invoke#10
+EDGES|CFG isempty#0 -> isempty#4
+EDGES|CFG l_castS2U#0 -> l_castS2U#4
+EDGES|CFG luaH_getint#0 -> luaH_getint#6
+EDGES|CFG probe#0 -> probe#5
+EDGES|CFG probe#4 -> probe#6
+EDGES|CFG probe#5 -> probe#4
+EDGES|CFG probe.c:<global>#0 -> probe.c:<global>#63
+EDGES|CFG probe.c:<global>#63 -> probe.c:<global>#64
+EDGES|CFG probe.c:<global>#64 -> probe.c:<global>#65
+EDGES|CFG ttistable#0 -> ttistable#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addressOf#0 -> <operator>.addressOf#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS <operator>.conditional#0 -> <operator>.conditional#2
+EDGES|CONTAINS <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS <operator>.lessThan#0 -> <operator>.lessThan#2
+EDGES|CONTAINS <operator>.logicalNot#0 -> <operator>.logicalNot#2
+EDGES|CONTAINS <operator>.subtraction#0 -> <operator>.subtraction#2
+EDGES|CONTAINS D:defs.h:<global> -> defs.h:<global>#0
+EDGES|CONTAINS D:defs.h:<global> -> hvalue#0
+EDGES|CONTAINS D:defs.h:<global> -> isempty#0
+EDGES|CONTAINS D:defs.h:<global> -> l_castS2U#0
+EDGES|CONTAINS D:defs.h:<global> -> luaH_getint#0
+EDGES|CONTAINS D:defs.h:<global> -> ttistable#0
+EDGES|CONTAINS D:probe.c:<global> -> D:invoke
+EDGES|CONTAINS D:probe.c:<global> -> D:probe
+EDGES|CONTAINS D:probe.c:<global> -> defs.h:luaV_fastgeti:ANY(4)#0
+EDGES|CONTAINS D:probe.c:<global> -> probe.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:Table*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int*
+EDGES|CONTAINS F:<includes> -> D:unsigned int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:defs.h -> D:defs.h:<global>
+EDGES|CONTAINS F:probe.c -> D:probe.c:<global>
+EDGES|CONTAINS defs.h:<global>#0 -> defs.h:<global>#1
+EDGES|CONTAINS defs.h:<global>#0 -> defs.h:<global>#4
+EDGES|CONTAINS defs.h:<global>#0 -> defs.h:<global>#5
+EDGES|CONTAINS defs.h:<global>#0 -> defs.h:<global>#6
+EDGES|CONTAINS defs.h:luaV_fastgeti:ANY(4)#0 -> defs.h:luaV_fastgeti:ANY(4)#9
+EDGES|CONTAINS hvalue#0 -> hvalue#3
+EDGES|CONTAINS invoke#0 -> invoke#10
+EDGES|CONTAINS invoke#0 -> invoke#11
+EDGES|CONTAINS invoke#0 -> invoke#12
+EDGES|CONTAINS invoke#0 -> invoke#13
+EDGES|CONTAINS invoke#0 -> invoke#14
+EDGES|CONTAINS invoke#0 -> invoke#15
+EDGES|CONTAINS invoke#0 -> invoke#16
+EDGES|CONTAINS invoke#0 -> invoke#17
+EDGES|CONTAINS invoke#0 -> invoke#18
+EDGES|CONTAINS invoke#0 -> invoke#19
+EDGES|CONTAINS invoke#0 -> invoke#20
+EDGES|CONTAINS invoke#0 -> invoke#21
+EDGES|CONTAINS invoke#0 -> invoke#22
+EDGES|CONTAINS invoke#0 -> invoke#23
+EDGES|CONTAINS invoke#0 -> invoke#24
+EDGES|CONTAINS invoke#0 -> invoke#25
+EDGES|CONTAINS invoke#0 -> invoke#26
+EDGES|CONTAINS invoke#0 -> invoke#27
+EDGES|CONTAINS invoke#0 -> invoke#28
+EDGES|CONTAINS invoke#0 -> invoke#29
+EDGES|CONTAINS invoke#0 -> invoke#30
+EDGES|CONTAINS invoke#0 -> invoke#31
+EDGES|CONTAINS invoke#0 -> invoke#32
+EDGES|CONTAINS invoke#0 -> invoke#33
+EDGES|CONTAINS invoke#0 -> invoke#34
+EDGES|CONTAINS invoke#0 -> invoke#35
+EDGES|CONTAINS invoke#0 -> invoke#36
+EDGES|CONTAINS invoke#0 -> invoke#37
+EDGES|CONTAINS invoke#0 -> invoke#38
+EDGES|CONTAINS invoke#0 -> invoke#39
+EDGES|CONTAINS invoke#0 -> invoke#40
+EDGES|CONTAINS invoke#0 -> invoke#41
+EDGES|CONTAINS invoke#0 -> invoke#42
+EDGES|CONTAINS invoke#0 -> invoke#43
+EDGES|CONTAINS invoke#0 -> invoke#44
+EDGES|CONTAINS invoke#0 -> invoke#45
+EDGES|CONTAINS invoke#0 -> invoke#46
+EDGES|CONTAINS invoke#0 -> invoke#47
+EDGES|CONTAINS invoke#0 -> invoke#48
+EDGES|CONTAINS invoke#0 -> invoke#49
+EDGES|CONTAINS invoke#0 -> invoke#5
+EDGES|CONTAINS invoke#0 -> invoke#50
+EDGES|CONTAINS invoke#0 -> invoke#51
+EDGES|CONTAINS invoke#0 -> invoke#52
+EDGES|CONTAINS invoke#0 -> invoke#7
+EDGES|CONTAINS invoke#0 -> invoke#8
+EDGES|CONTAINS invoke#0 -> invoke#9
+EDGES|CONTAINS isempty#0 -> isempty#3
+EDGES|CONTAINS l_castS2U#0 -> l_castS2U#3
+EDGES|CONTAINS luaH_getint#0 -> luaH_getint#5
+EDGES|CONTAINS probe#0 -> probe#3
+EDGES|CONTAINS probe#0 -> probe#4
+EDGES|CONTAINS probe#0 -> probe#5
+EDGES|CONTAINS probe.c:<global>#0 -> invoke#0
+EDGES|CONTAINS probe.c:<global>#0 -> probe#0
+EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#62
+EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#63
+EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#64
+EDGES|CONTAINS ttistable#0 -> ttistable#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addressOf#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addressOf#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addressOf#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addressOf#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#7 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#8 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.lessThan#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.lessThan#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.lessThan#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.lessThan#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.lessThan#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.lessThan#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalNot#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalNot#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalNot#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalNot#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.subtraction#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.subtraction#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.subtraction#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.subtraction#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.subtraction#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.subtraction#6 -> T:ANY
+EDGES|EVAL_TYPE defs.h:<global>#2 -> T:unsigned int
+EDGES|EVAL_TYPE defs.h:<global>#3 -> T:int*
+EDGES|EVAL_TYPE defs.h:<global>#5 -> T:ANY
+EDGES|EVAL_TYPE defs.h:<global>#6 -> T:Table
+EDGES|EVAL_TYPE defs.h:<global>#7 -> T:ANY
+EDGES|EVAL_TYPE defs.h:luaV_fastgeti:ANY(4)#1 -> T:ANY
+EDGES|EVAL_TYPE defs.h:luaV_fastgeti:ANY(4)#10 -> T:ANY
+EDGES|EVAL_TYPE defs.h:luaV_fastgeti:ANY(4)#2 -> T:ANY
+EDGES|EVAL_TYPE defs.h:luaV_fastgeti:ANY(4)#3 -> T:ANY
+EDGES|EVAL_TYPE defs.h:luaV_fastgeti:ANY(4)#4 -> T:ANY
+EDGES|EVAL_TYPE defs.h:luaV_fastgeti:ANY(4)#5 -> T:ANY
+EDGES|EVAL_TYPE defs.h:luaV_fastgeti:ANY(4)#6 -> T:ANY
+EDGES|EVAL_TYPE defs.h:luaV_fastgeti:ANY(4)#7 -> T:ANY
+EDGES|EVAL_TYPE defs.h:luaV_fastgeti:ANY(4)#8 -> T:ANY
+EDGES|EVAL_TYPE defs.h:luaV_fastgeti:ANY(4)#9 -> T:ANY
+EDGES|EVAL_TYPE hvalue#1 -> T:Table*
+EDGES|EVAL_TYPE hvalue#2 -> T:Table*
+EDGES|EVAL_TYPE hvalue#3 -> T:ANY
+EDGES|EVAL_TYPE hvalue#4 -> T:Table*
+EDGES|EVAL_TYPE invoke#1 -> T:Table*
+EDGES|EVAL_TYPE invoke#10 -> T:int
+EDGES|EVAL_TYPE invoke#11 -> T:int*
+EDGES|EVAL_TYPE invoke#12 -> T:ANY
+EDGES|EVAL_TYPE invoke#13 -> T:ANY
+EDGES|EVAL_TYPE invoke#14 -> T:ANY
+EDGES|EVAL_TYPE invoke#15 -> T:int
+EDGES|EVAL_TYPE invoke#16 -> T:Table*
+EDGES|EVAL_TYPE invoke#17 -> T:ANY
+EDGES|EVAL_TYPE invoke#18 -> T:ANY
+EDGES|EVAL_TYPE invoke#19 -> T:int*
+EDGES|EVAL_TYPE invoke#2 -> T:Table*
+EDGES|EVAL_TYPE invoke#20 -> T:void
+EDGES|EVAL_TYPE invoke#21 -> T:void
+EDGES|EVAL_TYPE invoke#22 -> T:int
+EDGES|EVAL_TYPE invoke#23 -> T:int
+EDGES|EVAL_TYPE invoke#24 -> T:ANY
+EDGES|EVAL_TYPE invoke#25 -> T:ANY
+EDGES|EVAL_TYPE invoke#26 -> T:int*
+EDGES|EVAL_TYPE invoke#27 -> T:ANY
+EDGES|EVAL_TYPE invoke#28 -> T:ANY
+EDGES|EVAL_TYPE invoke#29 -> T:ANY
+EDGES|EVAL_TYPE invoke#3 -> T:int
+EDGES|EVAL_TYPE invoke#30 -> T:unsigned int
+EDGES|EVAL_TYPE invoke#31 -> T:int
+EDGES|EVAL_TYPE invoke#32 -> T:unsigned int
+EDGES|EVAL_TYPE invoke#33 -> T:ANY
+EDGES|EVAL_TYPE invoke#34 -> T:Table*
+EDGES|EVAL_TYPE invoke#35 -> T:Table*
+EDGES|EVAL_TYPE invoke#37 -> T:ANY
+EDGES|EVAL_TYPE invoke#38 -> T:ANY
+EDGES|EVAL_TYPE invoke#39 -> T:ANY
+EDGES|EVAL_TYPE invoke#4 -> T:int
+EDGES|EVAL_TYPE invoke#40 -> T:Table*
+EDGES|EVAL_TYPE invoke#41 -> T:Table*
+EDGES|EVAL_TYPE invoke#43 -> T:ANY
+EDGES|EVAL_TYPE invoke#44 -> T:int
+EDGES|EVAL_TYPE invoke#45 -> T:int
+EDGES|EVAL_TYPE invoke#46 -> T:int*
+EDGES|EVAL_TYPE invoke#47 -> T:Table*
+EDGES|EVAL_TYPE invoke#48 -> T:Table*
+EDGES|EVAL_TYPE invoke#49 -> T:int
+EDGES|EVAL_TYPE invoke#5 -> T:void
+EDGES|EVAL_TYPE invoke#50 -> T:ANY
+EDGES|EVAL_TYPE invoke#51 -> T:int
+EDGES|EVAL_TYPE invoke#52 -> T:int*
+EDGES|EVAL_TYPE invoke#53 -> T:int
+EDGES|EVAL_TYPE invoke#6 -> T:int*
+EDGES|EVAL_TYPE invoke#8 -> T:ANY
+EDGES|EVAL_TYPE invoke#9 -> T:Table*
+EDGES|EVAL_TYPE isempty#1 -> T:int*
+EDGES|EVAL_TYPE isempty#2 -> T:int*
+EDGES|EVAL_TYPE isempty#3 -> T:ANY
+EDGES|EVAL_TYPE isempty#4 -> T:int
+EDGES|EVAL_TYPE l_castS2U#1 -> T:int
+EDGES|EVAL_TYPE l_castS2U#2 -> T:int
+EDGES|EVAL_TYPE l_castS2U#3 -> T:ANY
+EDGES|EVAL_TYPE l_castS2U#4 -> T:unsigned int
+EDGES|EVAL_TYPE luaH_getint#1 -> T:Table*
+EDGES|EVAL_TYPE luaH_getint#2 -> T:Table*
+EDGES|EVAL_TYPE luaH_getint#3 -> T:int
+EDGES|EVAL_TYPE luaH_getint#4 -> T:int
+EDGES|EVAL_TYPE luaH_getint#5 -> T:ANY
+EDGES|EVAL_TYPE luaH_getint#6 -> T:int*
+EDGES|EVAL_TYPE probe#1 -> T:int
+EDGES|EVAL_TYPE probe#2 -> T:int
+EDGES|EVAL_TYPE probe#3 -> T:void
+EDGES|EVAL_TYPE probe#5 -> T:int
+EDGES|EVAL_TYPE probe#6 -> T:int
+EDGES|EVAL_TYPE probe.c:<global>#62 -> T:ANY
+EDGES|EVAL_TYPE probe.c:<global>#63 -> T:probe
+EDGES|EVAL_TYPE probe.c:<global>#64 -> T:invoke
+EDGES|EVAL_TYPE probe.c:<global>#65 -> T:ANY
+EDGES|EVAL_TYPE ttistable#1 -> T:Table*
+EDGES|EVAL_TYPE ttistable#2 -> T:Table*
+EDGES|EVAL_TYPE ttistable#3 -> T:ANY
+EDGES|EVAL_TYPE ttistable#4 -> T:int
+EDGES|PARAMETER_LINK <operator>.addressOf#1 -> <operator>.addressOf#3
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK <operator>.conditional#1 -> <operator>.conditional#3
+EDGES|PARAMETER_LINK <operator>.conditional#4 -> <operator>.conditional#6
+EDGES|PARAMETER_LINK <operator>.conditional#7 -> <operator>.conditional#8
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK <operator>.lessThan#1 -> <operator>.lessThan#3
+EDGES|PARAMETER_LINK <operator>.lessThan#4 -> <operator>.lessThan#6
+EDGES|PARAMETER_LINK <operator>.logicalNot#1 -> <operator>.logicalNot#3
+EDGES|PARAMETER_LINK <operator>.subtraction#1 -> <operator>.subtraction#3
+EDGES|PARAMETER_LINK <operator>.subtraction#4 -> <operator>.subtraction#6
+EDGES|PARAMETER_LINK defs.h:luaV_fastgeti:ANY(4)#1 -> defs.h:luaV_fastgeti:ANY(4)#2
+EDGES|PARAMETER_LINK defs.h:luaV_fastgeti:ANY(4)#3 -> defs.h:luaV_fastgeti:ANY(4)#4
+EDGES|PARAMETER_LINK defs.h:luaV_fastgeti:ANY(4)#5 -> defs.h:luaV_fastgeti:ANY(4)#6
+EDGES|PARAMETER_LINK defs.h:luaV_fastgeti:ANY(4)#7 -> defs.h:luaV_fastgeti:ANY(4)#8
+EDGES|PARAMETER_LINK hvalue#1 -> hvalue#2
+EDGES|PARAMETER_LINK invoke#1 -> invoke#2
+EDGES|PARAMETER_LINK invoke#3 -> invoke#4
+EDGES|PARAMETER_LINK isempty#1 -> isempty#2
+EDGES|PARAMETER_LINK l_castS2U#1 -> l_castS2U#2
+EDGES|PARAMETER_LINK luaH_getint#1 -> luaH_getint#2
+EDGES|PARAMETER_LINK luaH_getint#3 -> luaH_getint#4
+EDGES|PARAMETER_LINK probe#1 -> probe#2
+EDGES|PARAMETER_LINK ttistable#1 -> ttistable#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:defs.h:<global> -> NS:<global>
+EDGES|REF NB:probe.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Table -> defs.h:<global>#1
+EDGES|REF T:Table* -> D:Table*
+EDGES|REF T:int -> D:int
+EDGES|REF T:int* -> D:int*
+EDGES|REF T:invoke -> D:invoke
+EDGES|REF T:probe -> D:probe
+EDGES|REF T:unsigned int -> D:unsigned int
+EDGES|REF T:void -> D:void
+EDGES|REF invoke#16 -> invoke#1
+EDGES|REF invoke#19 -> invoke#6
+EDGES|REF invoke#26 -> invoke#6
+EDGES|REF invoke#31 -> invoke#3
+EDGES|REF invoke#35 -> invoke#1
+EDGES|REF invoke#41 -> invoke#1
+EDGES|REF invoke#44 -> invoke#3
+EDGES|REF invoke#48 -> invoke#1
+EDGES|REF invoke#49 -> invoke#3
+EDGES|REF invoke#52 -> invoke#6
+EDGES|REF probe#5 -> probe#1
+EDGES|REF probe.c:<global>#63 -> probe#0
+EDGES|REF probe.c:<global>#64 -> invoke#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:Table* -> F:<includes>
+EDGES|SOURCE_FILE D:defs.h:<global> -> F:defs.h
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int* -> F:<includes>
+EDGES|SOURCE_FILE D:invoke -> F:probe.c
+EDGES|SOURCE_FILE D:probe -> F:probe.c
+EDGES|SOURCE_FILE D:probe.c:<global> -> F:probe.c
+EDGES|SOURCE_FILE D:unsigned int -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:defs.h:<global> -> F:defs.h
+EDGES|SOURCE_FILE NB:probe.c:<global> -> F:probe.c
+EDGES|SOURCE_FILE defs.h:<global>#0 -> F:defs.h
+EDGES|SOURCE_FILE defs.h:<global>#1 -> F:defs.h
+EDGES|SOURCE_FILE defs.h:<global>#4 -> F:defs.h
+EDGES|SOURCE_FILE defs.h:luaV_fastgeti:ANY(4)#0 -> F:probe.c
+EDGES|SOURCE_FILE hvalue#0 -> F:defs.h
+EDGES|SOURCE_FILE invoke#0 -> F:probe.c
+EDGES|SOURCE_FILE isempty#0 -> F:defs.h
+EDGES|SOURCE_FILE l_castS2U#0 -> F:defs.h
+EDGES|SOURCE_FILE luaH_getint#0 -> F:defs.h
+EDGES|SOURCE_FILE probe#0 -> F:probe.c
+EDGES|SOURCE_FILE probe.c:<global>#0 -> F:probe.c
+EDGES|SOURCE_FILE ttistable#0 -> F:defs.h
+FLOWS|REACHING_DEF[!isempty(slot)] invoke#50 -> invoke#24
+FLOWS|REACHING_DEF[!isempty(slot)] invoke#50 -> invoke#53
+FLOWS|REACHING_DEF[!ttistable(table) ? (slot = ((void *)0), 0) : (slot = (l_castS2U(key) - 1u < hvalue(table)->alimit) ? &hvalue(table)->array[key - 1] : luaH_getint(hvalue(table), key), !isempty(slot))] invoke#13 -> invoke#53
+FLOWS|REACHING_DEF[!ttistable(table)] invoke#14 -> invoke#13
+FLOWS|REACHING_DEF[!ttistable(table)] invoke#14 -> invoke#53
+FLOWS|REACHING_DEF[&hvalue(table)->array[key - 1]] invoke#37 -> invoke#27
+FLOWS|REACHING_DEF[&hvalue(table)->array[key - 1]] invoke#37 -> invoke#53
+FLOWS|REACHING_DEF[(l_castS2U(key) - 1u < hvalue(table)->alimit) ? &hvalue(table)->array[key - 1] : luaH_getint(hvalue(table), key)] invoke#27 -> invoke#25
+FLOWS|REACHING_DEF[(l_castS2U(key) - 1u < hvalue(table)->alimit) ? &hvalue(table)->array[key - 1] : luaH_getint(hvalue(table), key)] invoke#27 -> invoke#26
+FLOWS|REACHING_DEF[(l_castS2U(key) - 1u < hvalue(table)->alimit) ? &hvalue(table)->array[key - 1] : luaH_getint(hvalue(table), key)] invoke#27 -> invoke#53
+FLOWS|REACHING_DEF[(void *)0] invoke#20 -> invoke#18
+FLOWS|REACHING_DEF[(void *)0] invoke#20 -> invoke#19
+FLOWS|REACHING_DEF[(void *)0] invoke#20 -> invoke#53
+FLOWS|REACHING_DEF[0] invoke#22 -> invoke#20
+FLOWS|REACHING_DEF[1] invoke#45 -> invoke#43
+FLOWS|REACHING_DEF[1] invoke#45 -> invoke#44
+FLOWS|REACHING_DEF[1u] invoke#32 -> invoke#29
+FLOWS|REACHING_DEF[1u] invoke#32 -> invoke#30
+FLOWS|REACHING_DEF[<RET>] invoke#7 -> invoke#53
+FLOWS|REACHING_DEF[<RET>] probe#4 -> probe#6
+FLOWS|REACHING_DEF[<empty>] invoke#17 -> invoke#13
+FLOWS|REACHING_DEF[<empty>] invoke#24 -> invoke#13
+FLOWS|REACHING_DEF[] <operator>.addressOf#0 -> <operator>.addressOf#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#1
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#4
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#7
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] <operator>.lessThan#0 -> <operator>.lessThan#1
+FLOWS|REACHING_DEF[] <operator>.lessThan#0 -> <operator>.lessThan#4
+FLOWS|REACHING_DEF[] <operator>.logicalNot#0 -> <operator>.logicalNot#1
+FLOWS|REACHING_DEF[] <operator>.subtraction#0 -> <operator>.subtraction#1
+FLOWS|REACHING_DEF[] <operator>.subtraction#0 -> <operator>.subtraction#4
+FLOWS|REACHING_DEF[] defs.h:<global>#0 -> defs.h:<global>#6
+FLOWS|REACHING_DEF[] defs.h:luaV_fastgeti:ANY(4)#0 -> defs.h:luaV_fastgeti:ANY(4)#1
+FLOWS|REACHING_DEF[] defs.h:luaV_fastgeti:ANY(4)#0 -> defs.h:luaV_fastgeti:ANY(4)#3
+FLOWS|REACHING_DEF[] defs.h:luaV_fastgeti:ANY(4)#0 -> defs.h:luaV_fastgeti:ANY(4)#5
+FLOWS|REACHING_DEF[] defs.h:luaV_fastgeti:ANY(4)#0 -> defs.h:luaV_fastgeti:ANY(4)#7
+FLOWS|REACHING_DEF[] hvalue#0 -> hvalue#1
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#1
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#10
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#11
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#16
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#21
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#22
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#23
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#3
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#31
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#32
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#35
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#41
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#44
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#45
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#48
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#49
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#52
+FLOWS|REACHING_DEF[] invoke#0 -> invoke#9
+FLOWS|REACHING_DEF[] invoke#24 -> invoke#13
+FLOWS|REACHING_DEF[] isempty#0 -> isempty#1
+FLOWS|REACHING_DEF[] l_castS2U#0 -> l_castS2U#1
+FLOWS|REACHING_DEF[] luaH_getint#0 -> luaH_getint#1
+FLOWS|REACHING_DEF[] luaH_getint#0 -> luaH_getint#3
+FLOWS|REACHING_DEF[] probe#0 -> probe#1
+FLOWS|REACHING_DEF[] probe#0 -> probe#5
+FLOWS|REACHING_DEF[] probe.c:<global>#0 -> probe.c:<global>#63
+FLOWS|REACHING_DEF[] probe.c:<global>#0 -> probe.c:<global>#64
+FLOWS|REACHING_DEF[] ttistable#0 -> ttistable#1
+FLOWS|REACHING_DEF[hvalue(table)->alimit] invoke#33 -> invoke#29
+FLOWS|REACHING_DEF[hvalue(table)->alimit] invoke#33 -> invoke#40
+FLOWS|REACHING_DEF[hvalue(table)->alimit] invoke#33 -> invoke#47
+FLOWS|REACHING_DEF[hvalue(table)->alimit] invoke#33 -> invoke#53
+FLOWS|REACHING_DEF[hvalue(table)->array[key - 1]] invoke#38 -> invoke#37
+FLOWS|REACHING_DEF[hvalue(table)->array[key - 1]] invoke#38 -> invoke#53
+FLOWS|REACHING_DEF[hvalue(table)] invoke#40 -> invoke#53
+FLOWS|REACHING_DEF[hvalue(table)] invoke#47 -> invoke#46
+FLOWS|REACHING_DEF[hvalue(table)] invoke#47 -> invoke#49
+FLOWS|REACHING_DEF[hvalue(table)] invoke#47 -> invoke#53
+FLOWS|REACHING_DEF[isempty(slot)] invoke#51 -> invoke#50
+FLOWS|REACHING_DEF[isempty(slot)] invoke#51 -> invoke#53
+FLOWS|REACHING_DEF[key - 1] invoke#43 -> invoke#53
+FLOWS|REACHING_DEF[key] invoke#10 -> invoke#11
+FLOWS|REACHING_DEF[key] invoke#10 -> invoke#31
+FLOWS|REACHING_DEF[key] invoke#10 -> invoke#4
+FLOWS|REACHING_DEF[key] invoke#10 -> invoke#53
+FLOWS|REACHING_DEF[key] invoke#10 -> invoke#8
+FLOWS|REACHING_DEF[key] invoke#10 -> invoke#9
+FLOWS|REACHING_DEF[key] invoke#3 -> invoke#10
+FLOWS|REACHING_DEF[key] invoke#3 -> invoke#4
+FLOWS|REACHING_DEF[key] invoke#31 -> invoke#30
+FLOWS|REACHING_DEF[key] invoke#31 -> invoke#44
+FLOWS|REACHING_DEF[key] invoke#31 -> invoke#49
+FLOWS|REACHING_DEF[key] invoke#44 -> invoke#4
+FLOWS|REACHING_DEF[key] invoke#44 -> invoke#43
+FLOWS|REACHING_DEF[key] invoke#44 -> invoke#53
+FLOWS|REACHING_DEF[key] invoke#49 -> invoke#4
+FLOWS|REACHING_DEF[key] invoke#49 -> invoke#46
+FLOWS|REACHING_DEF[key] invoke#49 -> invoke#47
+FLOWS|REACHING_DEF[key] invoke#49 -> invoke#53
+FLOWS|REACHING_DEF[key] l_castS2U#1 -> l_castS2U#2
+FLOWS|REACHING_DEF[key] l_castS2U#1 -> l_castS2U#4
+FLOWS|REACHING_DEF[key] luaH_getint#3 -> luaH_getint#4
+FLOWS|REACHING_DEF[key] luaH_getint#3 -> luaH_getint#6
+FLOWS|REACHING_DEF[l_castS2U(key) - 1u < hvalue(table)->alimit] invoke#28 -> invoke#27
+FLOWS|REACHING_DEF[l_castS2U(key) - 1u < hvalue(table)->alimit] invoke#28 -> invoke#53
+FLOWS|REACHING_DEF[l_castS2U(key) - 1u] invoke#29 -> invoke#33
+FLOWS|REACHING_DEF[l_castS2U(key) - 1u] invoke#29 -> invoke#53
+FLOWS|REACHING_DEF[l_castS2U(key)] invoke#30 -> invoke#29
+FLOWS|REACHING_DEF[l_castS2U(key)] invoke#30 -> invoke#53
+FLOWS|REACHING_DEF[luaH_getint(hvalue(table), key)] invoke#46 -> invoke#27
+FLOWS|REACHING_DEF[luaH_getint(hvalue(table), key)] invoke#46 -> invoke#53
+FLOWS|REACHING_DEF[luaV_fastgeti(0, table, key, slot)] invoke#8 -> invoke#53
+FLOWS|REACHING_DEF[luaV_fastgeti(0, table, key, slot)] invoke#8 -> invoke#7
+FLOWS|REACHING_DEF[p1] <operator>.addressOf#1 -> <operator>.addressOf#3
+FLOWS|REACHING_DEF[p1] <operator>.addressOf#1 -> <operator>.addressOf#4
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#3
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.lessThan#1 -> <operator>.lessThan#3
+FLOWS|REACHING_DEF[p1] <operator>.lessThan#1 -> <operator>.lessThan#5
+FLOWS|REACHING_DEF[p1] <operator>.logicalNot#1 -> <operator>.logicalNot#3
+FLOWS|REACHING_DEF[p1] <operator>.logicalNot#1 -> <operator>.logicalNot#4
+FLOWS|REACHING_DEF[p1] <operator>.subtraction#1 -> <operator>.subtraction#3
+FLOWS|REACHING_DEF[p1] <operator>.subtraction#1 -> <operator>.subtraction#5
+FLOWS|REACHING_DEF[p1] defs.h:luaV_fastgeti:ANY(4)#1 -> defs.h:luaV_fastgeti:ANY(4)#10
+FLOWS|REACHING_DEF[p1] defs.h:luaV_fastgeti:ANY(4)#1 -> defs.h:luaV_fastgeti:ANY(4)#2
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[p2] <operator>.lessThan#4 -> <operator>.lessThan#5
+FLOWS|REACHING_DEF[p2] <operator>.lessThan#4 -> <operator>.lessThan#6
+FLOWS|REACHING_DEF[p2] <operator>.subtraction#4 -> <operator>.subtraction#5
+FLOWS|REACHING_DEF[p2] <operator>.subtraction#4 -> <operator>.subtraction#6
+FLOWS|REACHING_DEF[p2] defs.h:luaV_fastgeti:ANY(4)#3 -> defs.h:luaV_fastgeti:ANY(4)#10
+FLOWS|REACHING_DEF[p2] defs.h:luaV_fastgeti:ANY(4)#3 -> defs.h:luaV_fastgeti:ANY(4)#4
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#8
+FLOWS|REACHING_DEF[p3] defs.h:luaV_fastgeti:ANY(4)#5 -> defs.h:luaV_fastgeti:ANY(4)#10
+FLOWS|REACHING_DEF[p3] defs.h:luaV_fastgeti:ANY(4)#5 -> defs.h:luaV_fastgeti:ANY(4)#6
+FLOWS|REACHING_DEF[p4] defs.h:luaV_fastgeti:ANY(4)#7 -> defs.h:luaV_fastgeti:ANY(4)#10
+FLOWS|REACHING_DEF[p4] defs.h:luaV_fastgeti:ANY(4)#7 -> defs.h:luaV_fastgeti:ANY(4)#8
+FLOWS|REACHING_DEF[slot = ((void *)0)] invoke#18 -> invoke#53
+FLOWS|REACHING_DEF[slot = (l_castS2U(key) - 1u < hvalue(table)->alimit) ? &hvalue(table)->array[key - 1] : luaH_getint(hvalue(table), key)] invoke#25 -> invoke#53
+FLOWS|REACHING_DEF[slot] invoke#11 -> invoke#10
+FLOWS|REACHING_DEF[slot] invoke#11 -> invoke#53
+FLOWS|REACHING_DEF[slot] invoke#11 -> invoke#8
+FLOWS|REACHING_DEF[slot] invoke#11 -> invoke#9
+FLOWS|REACHING_DEF[slot] invoke#19 -> invoke#18
+FLOWS|REACHING_DEF[slot] invoke#19 -> invoke#53
+FLOWS|REACHING_DEF[slot] invoke#26 -> invoke#25
+FLOWS|REACHING_DEF[slot] invoke#26 -> invoke#52
+FLOWS|REACHING_DEF[slot] invoke#52 -> invoke#51
+FLOWS|REACHING_DEF[slot] invoke#52 -> invoke#53
+FLOWS|REACHING_DEF[slot] isempty#1 -> isempty#2
+FLOWS|REACHING_DEF[slot] isempty#1 -> isempty#4
+FLOWS|REACHING_DEF[slot] probe#1 -> probe#2
+FLOWS|REACHING_DEF[slot] probe#1 -> probe#5
+FLOWS|REACHING_DEF[slot] probe#1 -> probe#6
+FLOWS|REACHING_DEF[slot] probe#5 -> probe#4
+FLOWS|REACHING_DEF[table] hvalue#1 -> hvalue#2
+FLOWS|REACHING_DEF[table] hvalue#1 -> hvalue#4
+FLOWS|REACHING_DEF[table] invoke#1 -> invoke#2
+FLOWS|REACHING_DEF[table] invoke#1 -> invoke#9
+FLOWS|REACHING_DEF[table] invoke#16 -> invoke#15
+FLOWS|REACHING_DEF[table] invoke#16 -> invoke#2
+FLOWS|REACHING_DEF[table] invoke#16 -> invoke#35
+FLOWS|REACHING_DEF[table] invoke#16 -> invoke#53
+FLOWS|REACHING_DEF[table] invoke#35 -> invoke#34
+FLOWS|REACHING_DEF[table] invoke#35 -> invoke#41
+FLOWS|REACHING_DEF[table] invoke#35 -> invoke#48
+FLOWS|REACHING_DEF[table] invoke#41 -> invoke#2
+FLOWS|REACHING_DEF[table] invoke#41 -> invoke#40
+FLOWS|REACHING_DEF[table] invoke#41 -> invoke#53
+FLOWS|REACHING_DEF[table] invoke#48 -> invoke#2
+FLOWS|REACHING_DEF[table] invoke#48 -> invoke#47
+FLOWS|REACHING_DEF[table] invoke#48 -> invoke#53
+FLOWS|REACHING_DEF[table] invoke#9 -> invoke#10
+FLOWS|REACHING_DEF[table] invoke#9 -> invoke#11
+FLOWS|REACHING_DEF[table] invoke#9 -> invoke#16
+FLOWS|REACHING_DEF[table] invoke#9 -> invoke#2
+FLOWS|REACHING_DEF[table] invoke#9 -> invoke#53
+FLOWS|REACHING_DEF[table] invoke#9 -> invoke#8
+FLOWS|REACHING_DEF[table] luaH_getint#1 -> luaH_getint#2
+FLOWS|REACHING_DEF[table] luaH_getint#1 -> luaH_getint#6
+FLOWS|REACHING_DEF[table] ttistable#1 -> ttistable#2
+FLOWS|REACHING_DEF[table] ttistable#1 -> ttistable#4
+FLOWS|REACHING_DEF[ttistable(table)] invoke#15 -> invoke#53
+FLOWS|REACHING_DEF[void *] invoke#21 -> invoke#20

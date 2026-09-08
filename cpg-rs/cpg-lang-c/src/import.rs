@@ -18,10 +18,10 @@ struct RawNode {
 }
 
 #[derive(Debug)]
-struct RawEdge {
+struct RawEdge<'a> {
     kind: EdgeKind,
-    source: String,
-    target: String,
+    source: &'a str,
+    target: &'a str,
 }
 
 pub fn graph_from_canonical_dump(dump: &str, sources: &[(String, String)]) -> Cpg {
@@ -167,6 +167,12 @@ pub fn graph_from_canonical_dump(dump: &str, sources: &[(String, String)]) -> Cp
         ast_stack.push((depth, raw));
     }
 
+    // Parsing-only tables do not need to overlap the allocated graph.
+    drop(methods_by_full);
+    drop(type_decls_by_full);
+    drop(reuse);
+    drop(ast_stack);
+
     // SOURCE_FILE edges determine the incrementality partition of method ASTs.
     let source_files: HashMap<&str, &str> = raw_edges
         .iter()
@@ -174,7 +180,7 @@ pub fn graph_from_canonical_dump(dump: &str, sources: &[(String, String)]) -> Cp
         .filter_map(|edge| {
             edge.target
                 .strip_prefix("F:")
-                .map(|file| (edge.source.as_str(), file))
+                .map(|file| (edge.source, file))
         })
         .collect();
 
@@ -194,15 +200,23 @@ pub fn graph_from_canonical_dump(dump: &str, sources: &[(String, String)]) -> Cp
         raw_to_node.push(node);
     }
 
+    // All raw properties and file ownership have now been copied into the graph.
+    drop(raw_nodes);
+    drop(source_files);
+
     for (parent, child) in raw_ast_edges {
         cpg.add_edge(raw_to_node[parent], raw_to_node[child], EdgeKind::Ast);
     }
 
     for edge in raw_edges {
-        let source = resolve_address(&address_to_raw, &edge.source);
-        let target = resolve_address(&address_to_raw, &edge.target);
+        let source = resolve_address(&address_to_raw, edge.source);
+        let target = resolve_address(&address_to_raw, edge.target);
         cpg.add_edge(raw_to_node[source], raw_to_node[target], edge.kind);
     }
+
+    // Source location matching only needs the graph and original sources.
+    drop(address_to_raw);
+    drop(raw_to_node);
 
     for layer in [Layer::SymbolRef, Layer::CallGraph, Layer::Cfg, Layer::Ddg] {
         cpg.mark_layer_authoritative(layer);
@@ -647,7 +661,7 @@ fn parse_properties(rest: &str) -> HashMap<String, String> {
     props
 }
 
-fn parse_edge(line: &str) -> RawEdge {
+fn parse_edge(line: &str) -> RawEdge<'_> {
     let (kind, rest) = line
         .split_once(' ')
         .unwrap_or_else(|| panic!("malformed exact edge: {line}"));
@@ -656,12 +670,12 @@ fn parse_edge(line: &str) -> RawEdge {
         .unwrap_or_else(|| panic!("malformed exact edge endpoints: {line}"));
     RawEdge {
         kind: edge_kind(kind),
-        source: source.to_string(),
-        target: target.to_string(),
+        source,
+        target,
     }
 }
 
-fn parse_flow(line: &str) -> RawEdge {
+fn parse_flow(line: &str) -> RawEdge<'_> {
     let split = line
         .rfind("] ")
         .unwrap_or_else(|| panic!("malformed exact flow: {line}"));
@@ -671,8 +685,8 @@ fn parse_flow(line: &str) -> RawEdge {
         .unwrap_or_else(|| panic!("malformed exact flow endpoints: {line}"));
     RawEdge {
         kind: EdgeKind::ReachingDef,
-        source: source.to_string(),
-        target: target.to_string(),
+        source,
+        target,
     }
 }
 
@@ -826,15 +840,35 @@ fn assign_source_lines(cpg: &mut Cpg, sources: &[(String, String)]) {
         .unwrap();
     for (path, source) in sources {
         let file = cpg.file_id(path);
-        let tokens = source_tokens(source);
+        let mut tokens = source_tokens(source);
         if tokens.is_empty() {
             continue;
         }
         let tree = parser.parse(source, None).unwrap();
-        let function_nodes: Vec<_> = crate::exact::translation_unit_items(tree.root_node())
-            .into_iter()
-            .filter(|node| node.kind() == "function_definition")
-            .collect();
+        // Array allocations and explicit initializers can describe the same
+        // declarator, and all allocations precede all initializers in the AST.
+        // Mark parsed declaration spans so each view can find its actual source
+        // without matching an identically spelled expression inside a dimension.
+        let mut pending = vec![tree.root_node()];
+        while let Some(node) = pending.pop() {
+            let mut cursor = node.walk();
+            if node.kind() == "declaration" {
+                for declarator in node.children_by_field_name("declarator", &mut cursor) {
+                    let start =
+                        tokens.partition_point(|token| token.start < declarator.start_byte());
+                    let end = tokens.partition_point(|token| token.start < declarator.end_byte());
+                    if start < end {
+                        tokens[start].declarator_len = Some(end - start);
+                    }
+                }
+            }
+            pending.extend(node.named_children(&mut cursor));
+        }
+        let function_nodes: Vec<_> =
+            crate::exact::translation_unit_items(tree.root_node(), source.as_bytes())
+                .into_iter()
+                .filter(|node| node.kind() == "function_definition")
+                .collect();
         let mut occurrences: HashMap<String, usize> = HashMap::new();
         let functions: HashMap<_, _> = function_nodes
             .iter()
@@ -927,6 +961,7 @@ struct SourceToken<'a> {
     text: std::borrow::Cow<'a, str>,
     start: usize,
     line: u32,
+    declarator_len: Option<usize>,
 }
 
 /// Lex only enough to recover source spans: comments are ignored, quoted
@@ -1009,6 +1044,7 @@ fn source_tokens(source: &str) -> Vec<SourceToken<'_>> {
                 },
                 start,
                 line: token_line,
+                declarator_len: None,
             });
         }
     }
@@ -1050,6 +1086,22 @@ fn locate_ast(
     // Synthesized or transformed nodes use the closest located AST ancestor;
     // they cannot redirect later source searches or escape the owning method.
     cpg.set_line(node, line);
+    if kind == NodeKind::Call && dispatch_type(cpg, node) == "INLINED" {
+        // CDT locates both copied arguments and expansion nodes at the macro
+        // invocation. Searching their generated CODE in the argument source
+        // would give multiline arguments different locations from their copies.
+        let mut descendants: Vec<_> = cpg.out_kind(node, EdgeKind::Ast).collect();
+        while let Some(descendant) = descendants.pop() {
+            if cpg.kind_of(descendant) == NodeKind::Method {
+                continue;
+            }
+            cpg.set_line(descendant, line);
+            descendants.extend(cpg.out_kind(descendant, EdgeKind::Ast));
+        }
+        // Only the invocation consumes source; expansion text cannot advance
+        // the cursor into an identically spelled following statement.
+        return matched.map_or(range.start, |span| span.end);
+    }
     // `else` has only keyword CODE, but its children occupy the following
     // statement. A CODE-less synthetic block likewise borrows its parent range.
     let child_range = if keyword_only {
@@ -1064,6 +1116,10 @@ fn locate_ast(
         matched.clone().unwrap_or_else(|| range.clone())
     };
     let mut next = child_range.start;
+    // Each declaration view advances independently: an alloc for a later
+    // declarator must not consume an earlier scalar/array initializer. The
+    // ordinary statement cursor still advances past both views.
+    let mut declaration_next = [child_range.start; 2];
     let mut children: Vec<_> = cpg.out_kind(node, EdgeKind::Ast).collect();
     children.sort_by_key(|&child| (cpg.order_of(child), child));
     for child in children {
@@ -1080,7 +1136,44 @@ fn locate_ast(
             cpg.set_line(child, line);
             continue;
         }
-        let end = locate_ast(cpg, child, tokens, next..child_range.end, line);
+        let declaration_span = if cpg.kind_of(child) == NodeKind::Call
+            && cpg.name_of(child) == Some("<operator>.assignment")
+            && cpg.type_full_name_of(child) == Some("void")
+        {
+            let role = usize::from(
+                cpg.out_kind(child, EdgeKind::Ast)
+                    .any(|argument| cpg.name_of(argument) == Some("<operator>.alloc")),
+            );
+            let needle = source_tokens(cpg.code_of(child).unwrap_or(""));
+            let span = (!needle.is_empty())
+                .then(|| {
+                    tokens[declaration_next[role]..child_range.end]
+                        .windows(needle.len())
+                        .position(|window| {
+                            window[0].declarator_len == Some(needle.len())
+                                && window.iter().zip(&needle).all(|(a, b)| a.text == b.text)
+                        })
+                        .map(|offset| {
+                            declaration_next[role] + offset
+                                ..declaration_next[role] + offset + needle.len()
+                        })
+                })
+                .flatten();
+            if let Some(span) = &span {
+                declaration_next[role] = span.end;
+            }
+            span
+        } else {
+            None
+        };
+        let is_declaration_view = declaration_span.is_some();
+        let end = locate_ast(
+            cpg,
+            child,
+            tokens,
+            declaration_span.unwrap_or(next..child_range.end),
+            line,
+        );
         // LOCAL and mirrored parameters describe overlapping source with the
         // assignment/parameter nodes that follow, and do not consume it.
         if !matches!(
@@ -1090,7 +1183,12 @@ fn locate_ast(
                 | NodeKind::MethodParameterOut
                 | NodeKind::JumpTarget
         ) {
-            next = end;
+            next = next.max(end);
+            if !is_declaration_view {
+                declaration_next
+                    .iter_mut()
+                    .for_each(|position| *position = (*position).max(next));
+            }
         }
     }
     matched.map_or(next, |span| span.end.max(next))

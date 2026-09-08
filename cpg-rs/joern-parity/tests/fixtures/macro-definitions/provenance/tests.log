@@ -1,0 +1,56 @@
+   Compiling libc v0.2.189
+   Compiling memchr v2.8.1
+   Compiling zmij v1.0.21
+   Compiling cfg-if v1.0.4
+   Compiling getrandom v0.4.3
+   Compiling proc-macro2 v1.0.106
+   Compiling itoa v1.0.18
+   Compiling shlex v2.0.1
+   Compiling crossbeam-utils v0.8.21
+   Compiling find-msvc-tools v0.1.9
+   Compiling rustix v1.1.4
+   Compiling cc v1.2.63
+   Compiling unicode-ident v1.0.24
+   Compiling serde_core v1.0.229
+   Compiling tree-sitter-language v0.1.7
+   Compiling crossbeam-epoch v0.9.20
+   Compiling crc32fast v1.5.0
+   Compiling bitflags v2.13.1
+   Compiling quote v1.0.45
+   Compiling equivalent v1.0.2
+   Compiling hashbrown v0.17.1
+   Compiling fastrand v2.5.0
+   Compiling once_cell v1.21.4
+   Compiling serde_json v1.0.151
+   Compiling indexmap v2.14.0
+   Compiling rayon-core v1.13.0
+   Compiling errno v0.3.14
+   Compiling crossbeam-deque v0.8.6
+   Compiling aho-corasick v1.1.4
+   Compiling regex-syntax v0.8.11
+   Compiling serde v1.0.229
+   Compiling syn v3.0.3
+   Compiling tempfile v3.27.0
+   Compiling cpg-core v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace/cpg-core)
+   Compiling tree-sitter-c v0.24.2
+   Compiling either v1.16.0
+   Compiling streaming-iterator v0.1.9
+   Compiling rayon v1.12.0
+   Compiling regex-automata v0.4.14
+   Compiling cpg-frontend v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace/cpg-frontend)
+   Compiling serde_derive v1.0.229
+   Compiling tree-sitter v0.26.12
+   Compiling regex v1.12.4
+   Compiling cpg-analysis v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace/cpg-analysis)
+   Compiling cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace/cpg-lang-c)
+   Compiling cpg-incremental v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace/cpg-incremental)
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.78s
+     Running tests/macro_definitions.rs (.local/macro-tests/target/debug/deps/macro_definitions-408965e93aa6e118)
+
+running 2 tests
+test logical_macro_definitions_match_complete_isolated_live_graphs ... ok
+test macro_wrapper_types_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+

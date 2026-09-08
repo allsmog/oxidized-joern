@@ -1,0 +1,74 @@
+<includes>:<global>	0	METHOD	<global>	<global>	1	<absent>	1	<absent>
+<includes>:<global>	1	BLOCK	<absent>	<absent>	1	<absent>	<absent>	<absent>
+<includes>:<global>	2	METHOD_RETURN	<absent>	RET	2	<absent>	1	<absent>
+<operator>.assignment	0	METHOD	<operator>.assignment	<absent>	0	<absent>	<absent>	<absent>
+<operator>.assignment	1	METHOD_PARAMETER_IN	p1	p1	1	<absent>	<absent>	<absent>
+<operator>.assignment	2	BLOCK	<absent>	<absent>	1	1	<absent>	<absent>
+<operator>.assignment	3	METHOD_PARAMETER_OUT	p1	p1	1	<absent>	<absent>	<absent>
+<operator>.assignment	4	METHOD_PARAMETER_IN	p2	p2	2	<absent>	<absent>	<absent>
+<operator>.assignment	5	METHOD_RETURN	<absent>	RET	2	<absent>	<absent>	<absent>
+<operator>.assignment	6	METHOD_PARAMETER_OUT	p2	p2	2	<absent>	<absent>	<absent>
+defs.h:<global>	0	METHOD	<global>	<global>	1	<absent>	1	1
+defs.h:<global>	1	BLOCK	<absent>	<absent>	1	<absent>	1	1
+defs.h:<global>	2	METHOD_RETURN	<absent>	RET	2	<absent>	1	1
+defs.h:ID:ANY(1)	0	METHOD	ID	#define ID(x) ((x))	1	<absent>	1	1
+defs.h:ID:ANY(1)	1	METHOD_PARAMETER_IN	p1	p1	1	<absent>	1	1
+defs.h:ID:ANY(1)	2	METHOD_PARAMETER_OUT	p1	p1	1	<absent>	1	1
+defs.h:ID:ANY(1)	3	BLOCK	<absent>	<absent>	2	<absent>	<absent>	<absent>
+defs.h:ID:ANY(1)	4	METHOD_RETURN	<absent>	RET	3	<absent>	1	1
+locations.c:<global>	0	METHOD	<global>	<global>	1	<absent>	1	1
+locations.c:<global>	1	METHOD	probe	void probe(int value) {\n  value = ID(\n      source(\n          value\n      )\n  );\n  sink(value);\n  value = source(value);\n  sink(value);\n}	1	<absent>	4	1
+locations.c:<global>	2	METHOD_PARAMETER_IN	value	int value	1	<absent>	4	12
+locations.c:<global>	3	METHOD_PARAMETER_OUT	value	int value	1	<absent>	4	12
+locations.c:<global>	4	BLOCK	<absent>	{\n  value = ID(\n      source(\n          value\n      )\n  );\n  sink(value);\n  value = source(value);\n  sink(value);\n}	2	<absent>	4	23
+locations.c:<global>	5	CALL	<operator>.assignment	value = ID(\n      source(\n          value\n      )\n  )	1	<absent>	5	3
+locations.c:<global>	6	IDENTIFIER	value	value	1	1	5	3
+locations.c:<global>	7	CALL	ID	ID(\n      source(\n          value\n      )\n  )	2	2	5	11
+locations.c:<global>	8	CALL	source	source(value)	1	1	5	11
+locations.c:<global>	9	IDENTIFIER	value	value	1	1	5	11
+locations.c:<global>	10	BLOCK	<absent>	<absent>	2	3	5	11
+locations.c:<global>	11	CALL	source	source(value)	1	<absent>	5	11
+locations.c:<global>	12	IDENTIFIER	value	value	1	1	5	11
+locations.c:<global>	13	CALL	sink	sink(value)	2	<absent>	10	3
+locations.c:<global>	14	IDENTIFIER	value	value	1	1	10	8
+locations.c:<global>	15	CALL	<operator>.assignment	value = source(value)	3	<absent>	11	3
+locations.c:<global>	16	IDENTIFIER	value	value	1	1	11	3
+locations.c:<global>	17	CALL	source	source(value)	2	2	11	11
+locations.c:<global>	18	IDENTIFIER	value	value	1	1	11	18
+locations.c:<global>	19	CALL	sink	sink(value)	4	<absent>	12	3
+locations.c:<global>	20	IDENTIFIER	value	value	1	1	12	8
+locations.c:<global>	21	METHOD_RETURN	<absent>	RET	3	<absent>	4	1
+locations.c:<global>	22	BLOCK	<absent>	<absent>	1	<absent>	1	1
+locations.c:<global>	23	METHOD_REF	<absent>	probe	1	<absent>	4	1
+locations.c:<global>	24	METHOD_RETURN	<absent>	RET	2	<absent>	1	1
+probe	0	METHOD	probe	void probe(int value) {\n  value = ID(\n      source(\n          value\n      )\n  );\n  sink(value);\n  value = source(value);\n  sink(value);\n}	1	<absent>	4	1
+probe	1	METHOD_PARAMETER_IN	value	int value	1	<absent>	4	12
+probe	2	METHOD_PARAMETER_OUT	value	int value	1	<absent>	4	12
+probe	3	BLOCK	<absent>	{\n  value = ID(\n      source(\n          value\n      )\n  );\n  sink(value);\n  value = source(value);\n  sink(value);\n}	2	<absent>	4	23
+probe	4	CALL	<operator>.assignment	value = ID(\n      source(\n          value\n      )\n  )	1	<absent>	5	3
+probe	5	IDENTIFIER	value	value	1	1	5	3
+probe	6	CALL	ID	ID(\n      source(\n          value\n      )\n  )	2	2	5	11
+probe	7	CALL	source	source(value)	1	1	5	11
+probe	8	IDENTIFIER	value	value	1	1	5	11
+probe	9	BLOCK	<absent>	<absent>	2	3	5	11
+probe	10	CALL	source	source(value)	1	<absent>	5	11
+probe	11	IDENTIFIER	value	value	1	1	5	11
+probe	12	CALL	sink	sink(value)	2	<absent>	10	3
+probe	13	IDENTIFIER	value	value	1	1	10	8
+probe	14	CALL	<operator>.assignment	value = source(value)	3	<absent>	11	3
+probe	15	IDENTIFIER	value	value	1	1	11	3
+probe	16	CALL	source	source(value)	2	2	11	11
+probe	17	IDENTIFIER	value	value	1	1	11	18
+probe	18	CALL	sink	sink(value)	4	<absent>	12	3
+probe	19	IDENTIFIER	value	value	1	1	12	8
+probe	20	METHOD_RETURN	<absent>	RET	3	<absent>	4	1
+sink	0	METHOD	sink	void sink(int value);	1	<absent>	3	6
+sink	1	METHOD_PARAMETER_IN	value	int value	1	<absent>	3	11
+sink	2	METHOD_PARAMETER_OUT	value	int value	1	<absent>	3	11
+sink	3	BLOCK	<absent>	<absent>	2	<absent>	<absent>	<absent>
+sink	4	METHOD_RETURN	<absent>	RET	3	<absent>	3	6
+source	0	METHOD	source	int source(int value);	1	<absent>	2	5
+source	1	METHOD_PARAMETER_IN	value	int value	1	<absent>	2	12
+source	2	METHOD_PARAMETER_OUT	value	int value	1	<absent>	2	12
+source	3	BLOCK	<absent>	<absent>	2	<absent>	<absent>	<absent>
+source	4	METHOD_RETURN	<absent>	RET	3	<absent>	2	5

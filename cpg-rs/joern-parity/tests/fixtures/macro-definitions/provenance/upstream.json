@@ -1,0 +1,21 @@
+{
+  "ASTTypeUtil.javap.txt": {
+    "sha256": "d3f5bc248b27c70b33d3fd5352059b3f0d062abbfe5dcd013747f598ce3a6c48",
+    "originalReceiptDirectory": "integration/.local/astra-sprint/fourth-batch/header-macros/pi-type-review"
+  },
+  "MacroHandler.scala": {
+    "sha256": "73cdeb7c41d9356cc6ba2fe2f276bb198a1a26b77d67e13fb1830491289f0ab6",
+    "originalReceiptDirectory": "integration/.local/astra-sprint/fourth-batch/header-macros/upstream",
+    "url": "https://raw.githubusercontent.com/joernio/joern/v4.0.555/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/astcreation/MacroHandler.scala"
+  },
+  "TypeNameProvider.scala": {
+    "sha256": "cb1e8b8ecdb6e7455e30c04b7a49e4db871ab148363c811d3f95afcd79e6748b",
+    "originalReceiptDirectory": "integration/.local/astra-sprint/fourth-batch/header-macros/pi-type-review",
+    "url": "https://raw.githubusercontent.com/joernio/joern/v4.0.555/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/astcreation/TypeNameProvider.scala"
+  },
+  "AstCreatorHelper.scala": {
+    "sha256": "1c3514cb3e006b8c8bf1bb6b5cee072969416a8c94353d185a5ebacbe00e92f2",
+    "originalReceiptDirectory": "integration/.local/astra-sprint/fourth-batch/header-macros/pi-type-review",
+    "url": "https://raw.githubusercontent.com/joernio/joern/v4.0.555/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/astcreation/AstCreatorHelper.scala"
+  }
+}

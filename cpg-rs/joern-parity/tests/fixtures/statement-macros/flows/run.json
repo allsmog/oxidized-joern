@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/cpg-rs/joern-parity/tests/fixtures/array-initializers/flow-oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/final/cases/macro_flows/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/flow-oracle",
+  "exitCode": 0,
+  "seconds": 4.029244749995996,
+  "scriptSha256": "00fef7363fa4b85cf5c4a5c1eaec70ce0b69430362ec22fb7c11aeb1d55a9d5d",
+  "rawSha256": "09dc289f8d3d95511f5e107817418f478a7fcdc3cfe22e240c51c21c4cb8edc6"
+}

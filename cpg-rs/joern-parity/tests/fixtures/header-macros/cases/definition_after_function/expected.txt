@@ -1,0 +1,276 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=PICK FULL_NAME=PICK ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=after CODE=int after(int value) { return PICK(value); } FULL_NAME=after SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return PICK(value); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return PICK(value); ORDER=1
+      CALL NAME=PICK CODE=PICK(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:PICK:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.addition CODE=(value) + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=before CODE=int before(int value) { return PICK(value); } FULL_NAME=before SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return PICK(value); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return PICK(value); ORDER=1
+      CALL NAME=PICK CODE=PICK(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=PICK ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=defs.h:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=before CODE=int before(int value) { return PICK(value); } FULL_NAME=before SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return PICK(value); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return PICK(value); ORDER=1
+        CALL NAME=PICK CODE=PICK(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=PICK ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=after CODE=int after(int value) { return PICK(value); } FULL_NAME=after SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return PICK(value); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return PICK(value); ORDER=1
+        CALL NAME=PICK CODE=PICK(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:PICK:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.addition CODE=(value) + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=before TYPE_FULL_NAME=before METHOD_FULL_NAME=before ORDER=1
+    METHOD_REF CODE=after TYPE_FULL_NAME=after METHOD_FULL_NAME=after ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=PICK CODE=#define PICK(value) ((value) + 1) FULL_NAME=main.c:PICK:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=defs.h ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=defs.h:<global> FILENAME=defs.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=after FULL_NAME=after CODE=after AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=before FULL_NAME=before CODE=before AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=defs.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=defs.h:<global> FILENAME=defs.h ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=after FULL_NAME=after TYPE_DECL_FULL_NAME=after
+NODES|TYPE NAME=before FULL_NAME=before TYPE_DECL_FULL_NAME=before
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT after#4 -> after#5
+EDGES|ARGUMENT after#5 -> after#6
+EDGES|ARGUMENT after#8 -> after#10
+EDGES|ARGUMENT after#8 -> after#9
+EDGES|ARGUMENT before#4 -> before#5
+EDGES|ARGUMENT before#5 -> before#6
+EDGES|CALL after#5 -> main.c:PICK:ANY(1)#0
+EDGES|CALL after#8 -> <operator>.addition#0
+EDGES|CALL before#5 -> PICK#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG PICK#0 -> PICK#4
+EDGES|CFG after#0 -> after#6
+EDGES|CFG after#10 -> after#8
+EDGES|CFG after#4 -> after#11
+EDGES|CFG after#5 -> after#4
+EDGES|CFG after#5 -> after#9
+EDGES|CFG after#6 -> after#5
+EDGES|CFG after#8 -> after#4
+EDGES|CFG after#9 -> after#10
+EDGES|CFG before#0 -> before#6
+EDGES|CFG before#4 -> before#7
+EDGES|CFG before#5 -> before#4
+EDGES|CFG before#6 -> before#5
+EDGES|CFG defs.h:<global>#0 -> defs.h:<global>#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#22
+EDGES|CFG main.c:<global>#22 -> main.c:<global>#23
+EDGES|CFG main.c:<global>#23 -> main.c:<global>#24
+EDGES|CFG main.c:PICK:ANY(1)#0 -> main.c:PICK:ANY(1)#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS D:defs.h:<global> -> defs.h:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> D:after
+EDGES|CONTAINS D:main.c:<global> -> D:before
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:PICK:ANY(1)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:defs.h -> D:defs.h:<global>
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS PICK#0 -> PICK#2
+EDGES|CONTAINS after#0 -> after#10
+EDGES|CONTAINS after#0 -> after#3
+EDGES|CONTAINS after#0 -> after#4
+EDGES|CONTAINS after#0 -> after#5
+EDGES|CONTAINS after#0 -> after#6
+EDGES|CONTAINS after#0 -> after#7
+EDGES|CONTAINS after#0 -> after#8
+EDGES|CONTAINS after#0 -> after#9
+EDGES|CONTAINS before#0 -> before#3
+EDGES|CONTAINS before#0 -> before#4
+EDGES|CONTAINS before#0 -> before#5
+EDGES|CONTAINS before#0 -> before#6
+EDGES|CONTAINS defs.h:<global>#0 -> defs.h:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> after#0
+EDGES|CONTAINS main.c:<global>#0 -> before#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#21
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#22
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#23
+EDGES|CONTAINS main.c:PICK:ANY(1)#0 -> main.c:PICK:ANY(1)#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE PICK#1 -> T:ANY
+EDGES|EVAL_TYPE PICK#2 -> T:ANY
+EDGES|EVAL_TYPE PICK#3 -> T:ANY
+EDGES|EVAL_TYPE PICK#4 -> T:ANY
+EDGES|EVAL_TYPE after#1 -> T:int
+EDGES|EVAL_TYPE after#10 -> T:int
+EDGES|EVAL_TYPE after#11 -> T:int
+EDGES|EVAL_TYPE after#2 -> T:int
+EDGES|EVAL_TYPE after#3 -> T:void
+EDGES|EVAL_TYPE after#5 -> T:ANY
+EDGES|EVAL_TYPE after#6 -> T:int
+EDGES|EVAL_TYPE after#7 -> T:ANY
+EDGES|EVAL_TYPE after#8 -> T:ANY
+EDGES|EVAL_TYPE after#9 -> T:int
+EDGES|EVAL_TYPE before#1 -> T:int
+EDGES|EVAL_TYPE before#2 -> T:int
+EDGES|EVAL_TYPE before#3 -> T:void
+EDGES|EVAL_TYPE before#5 -> T:ANY
+EDGES|EVAL_TYPE before#6 -> T:int
+EDGES|EVAL_TYPE before#7 -> T:int
+EDGES|EVAL_TYPE defs.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE defs.h:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#21 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#22 -> T:before
+EDGES|EVAL_TYPE main.c:<global>#23 -> T:after
+EDGES|EVAL_TYPE main.c:<global>#24 -> T:ANY
+EDGES|EVAL_TYPE main.c:PICK:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:PICK:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:PICK:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:PICK:ANY(1)#4 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK PICK#1 -> PICK#3
+EDGES|PARAMETER_LINK after#1 -> after#2
+EDGES|PARAMETER_LINK before#1 -> before#2
+EDGES|PARAMETER_LINK main.c:PICK:ANY(1)#1 -> main.c:PICK:ANY(1)#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:defs.h:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:after -> D:after
+EDGES|REF T:before -> D:before
+EDGES|REF T:int -> D:int
+EDGES|REF T:void -> D:void
+EDGES|REF after#9 -> after#1
+EDGES|REF before#6 -> before#1
+EDGES|REF main.c:<global>#22 -> before#0
+EDGES|REF main.c:<global>#23 -> after#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:after -> F:main.c
+EDGES|SOURCE_FILE D:before -> F:main.c
+EDGES|SOURCE_FILE D:defs.h:<global> -> F:defs.h
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:defs.h:<global> -> F:defs.h
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE after#0 -> F:main.c
+EDGES|SOURCE_FILE before#0 -> F:main.c
+EDGES|SOURCE_FILE defs.h:<global>#0 -> F:defs.h
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:PICK:ANY(1)#0 -> F:main.c
+FLOWS|REACHING_DEF[(value) + 1] after#8 -> after#11
+FLOWS|REACHING_DEF[1] after#10 -> after#8
+FLOWS|REACHING_DEF[<RET>] after#4 -> after#11
+FLOWS|REACHING_DEF[<RET>] before#4 -> before#7
+FLOWS|REACHING_DEF[PICK(value)] after#5 -> after#11
+FLOWS|REACHING_DEF[PICK(value)] after#5 -> after#4
+FLOWS|REACHING_DEF[PICK(value)] before#5 -> before#4
+FLOWS|REACHING_DEF[PICK(value)] before#5 -> before#7
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] PICK#0 -> PICK#1
+FLOWS|REACHING_DEF[] after#0 -> after#1
+FLOWS|REACHING_DEF[] after#0 -> after#10
+FLOWS|REACHING_DEF[] after#0 -> after#6
+FLOWS|REACHING_DEF[] after#0 -> after#9
+FLOWS|REACHING_DEF[] before#0 -> before#1
+FLOWS|REACHING_DEF[] before#0 -> before#6
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#22
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#23
+FLOWS|REACHING_DEF[] main.c:PICK:ANY(1)#0 -> main.c:PICK:ANY(1)#1
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] PICK#1 -> PICK#3
+FLOWS|REACHING_DEF[p1] PICK#1 -> PICK#4
+FLOWS|REACHING_DEF[p1] main.c:PICK:ANY(1)#1 -> main.c:PICK:ANY(1)#2
+FLOWS|REACHING_DEF[p1] main.c:PICK:ANY(1)#1 -> main.c:PICK:ANY(1)#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[value] after#1 -> after#2
+FLOWS|REACHING_DEF[value] after#1 -> after#6
+FLOWS|REACHING_DEF[value] after#6 -> after#11
+FLOWS|REACHING_DEF[value] after#6 -> after#2
+FLOWS|REACHING_DEF[value] after#6 -> after#5
+FLOWS|REACHING_DEF[value] after#6 -> after#9
+FLOWS|REACHING_DEF[value] after#9 -> after#11
+FLOWS|REACHING_DEF[value] after#9 -> after#2
+FLOWS|REACHING_DEF[value] after#9 -> after#8
+FLOWS|REACHING_DEF[value] before#1 -> before#2
+FLOWS|REACHING_DEF[value] before#1 -> before#6
+FLOWS|REACHING_DEF[value] before#6 -> before#2
+FLOWS|REACHING_DEF[value] before#6 -> before#5
+FLOWS|REACHING_DEF[value] before#6 -> before#7

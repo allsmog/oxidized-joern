@@ -4,6 +4,35 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Fourth measured Astra batch (2026-09-08 UTC).** The main corpus remains
+  **308/308** against committed and fresh Joern v4.0.555 references. Separate
+  complete graph fixtures cover arrays, supplied quoted-header macro state,
+  logical directives, expression and statement macros, source locations, and
+  reaching-definition scheduling. All **412 workspace tests**, 17 checker
+  tests, formatting, strict Clippy, dependency audit over 73 crates, native
+  release/archive, and official real-project gates pass. Cache shape is **15**.
+  Exact whole-project method ASTs, including stubs, improve **93→127 on zlib**
+  and **516→1,108 on Lua**. Exact primary source-method ASTs improve **11→14**
+  and **104→197**, with no formerly exact primary method lost. Three previously
+  exact Lua stubs are lost through documented declaration/recovery-context
+  gaps; neither whole-project projection is exact. Four prior genuine Lua RD
+  losses are restored. Array and statement scanner outcomes pass, and format
+  sink positions retain four positive and seven negative cases. Streaming
+  JSON, definition bitsets, consumed canonical buffers, and borrowed importer
+  edge addresses reduce memory without changing the tested graph bytes.
+  Final repeat builds peak at **484.0 MiB zlib / 460.58 MiB Lua**, below the
+  unchanged **512/1,024 MiB** build ceilings. Update equivalence passes for
+  **26/61** files; its separately measured RSS is outside those build ceilings.
+  The earlier failed zlib memory run remains recorded. Source inputs,
+  exclusions, licenses, scan expectations, and budgets remain unchanged; only
+  independently reviewed expected graph counts/hashes are refreshed. See the
+  [fourth report](../docs/conformance/astra-fourth-batch-2026-09-08.md),
+  [complete counters](../docs/conformance/astra-fourth-batch-metrics.json), and
+  [acceptance receipt](../docs/conformance/astra-fourth-batch-acceptance.json).
+  No container or other-platform execution is claimed for this batch.
+  Next: pin the nested typedef-cast and field-macro differences in `_tr_align`,
+  `luaD_seterrorobj`, and `luaG_concaterror`, retaining full graph comparisons.
+
 - **Third measured Astra batch (2026-09-08 UTC).** At `b8c2ae132`, the main C
   corpus passes **308/308** committed and fresh Joern v4.0.555 comparisons,
   including **3,685 ReachingDef facts**. Primitive type roles/registration,

@@ -1,0 +1,13 @@
+{
+  "rootBaseCommit": "06c3a5524628e6d9da8e311f272fb9ffd0856fba",
+  "immutablePair": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/header-macros/frozen-a14d21b4",
+  "snapshot": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace",
+  "hashes": {
+    "cpg-rs/cpg-lang-c/src/exact.rs": "a14d21b4b49580f1bd825ed11d3c89ec3f323cb6a99a6ec4ee772b40a51d472b",
+    "cpg-rs/cpg-lang-c/src/import.rs": "473d97a6dc3ad5b45c5681aa7be5e8140a727198b559a1e03b4c8d4b4936f159",
+    "cpg-rs/joern-parity/src/production.rs": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb",
+    "joern-parity": "7f37283f13d2f818d786cf3da833774771a01fba5f2524806bafe8a57951c61e",
+    "cpg": "885dc1153750d52b07f506c487324fc8980acdd2aaa2243b390cbd8d2e83ffe5"
+  },
+  "capturedUtc": "2026-09-08T11:11:44Z"
+}
