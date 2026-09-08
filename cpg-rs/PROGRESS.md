@@ -4,6 +4,17 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Direct field-macro increment (2026-09-08 UTC).** Twenty complete isolated
+  Joern v4.0.555 graphs pass, up from two at the nested-field checkpoint.
+  Direct `p->Len` and `item.Len` expand with original source CODE retained;
+  replacement subscripts/arithmetic preserve Joern's macro-wrapper ownership.
+  Global/parameter index operands and repeated source locations are pinned.
+  All 288 relevant tests, formatting, strict Clippy, and the unchanged
+  308-block committed/fresh-live gates pass. Six complete diagnostics retain
+  member declaration macro metadata, preexisting macro ownership/type boundaries,
+  and sizeof CODE spacing, including controls without a field macro. See
+  [direct field evidence](joern-parity/tests/fixtures/direct-field-macros/README.md).
+
 - **Nested field-macro increment (2026-09-08 UTC).** Object macros used as
   field tokens inside generated macro bodies now use the existing bounded
   expansion rules. Ten complete isolated Joern v4.0.555 graphs pass, improving

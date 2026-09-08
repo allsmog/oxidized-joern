@@ -1,0 +1,96 @@
+--- joern
++++ after
+@@ -45,7 +45,7 @@
+         CALL NAME=<operator>.indirectFieldAccess CODE=p->Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+           IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+           FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
+-        CALL NAME=Len CODE=Len TYPE_FULL_NAME=Item* METHOD_FULL_NAME=main.c:Len:Item*(0) SIGNATURE=Item*(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
++        CALL NAME=Len CODE=Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:Len:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+           BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+             CALL NAME=<operator>.indirectFieldAccess CODE=p->width TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+               IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+@@ -76,7 +76,7 @@
+           CALL NAME=<operator>.indirectFieldAccess CODE=p->Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+             IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+             FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=Len CODE=Len TYPE_FULL_NAME=Item* METHOD_FULL_NAME=main.c:Len:Item*(0) SIGNATURE=Item*(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
++          CALL NAME=Len CODE=Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:Len:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+             BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+               CALL NAME=<operator>.indirectFieldAccess CODE=p->width TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                 IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+@@ -88,9 +88,9 @@
+     METHOD_REF CODE=f TYPE_FULL_NAME=f METHOD_FULL_NAME=f ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=Len CODE=#define Len len ? p->Width : index FULL_NAME=main.c:Len:Item*(0) SIGNATURE=Item*(0) ORDER=1
++METHOD NAME=Len CODE=#define Len len ? p->Width : index FULL_NAME=main.c:Len:ANY(0) SIGNATURE=ANY(0) ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item* ORDER=2
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+ NODES|META_DATA LANGUAGE=NEWC
+ NODES|FILE NAME=<includes> ORDER=1
+@@ -125,7 +125,7 @@
+ EDGES|ARGUMENT f#8 -> f#10
+ EDGES|ARGUMENT f#8 -> f#9
+ EDGES|CALL Item.<clinit>:Item()#2 -> <operator>.arrayInitializer#0
+-EDGES|CALL f#11 -> main.c:Len:Item*(0)#0
++EDGES|CALL f#11 -> main.c:Len:ANY(0)#0
+ EDGES|CALL f#13 -> <operator>.indirectFieldAccess#0
+ EDGES|CALL f#7 -> <operator>.conditional#0
+ EDGES|CALL f#8 -> <operator>.indirectFieldAccess#0
+@@ -152,14 +152,14 @@
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#31
+ EDGES|CFG main.c:<global>#31 -> main.c:<global>#32
+ EDGES|CFG main.c:<global>#32 -> main.c:<global>#33
+-EDGES|CFG main.c:Len:Item*(0)#0 -> main.c:Len:Item*(0)#2
++EDGES|CFG main.c:Len:ANY(0)#0 -> main.c:Len:ANY(0)#2
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+ EDGES|CONTAINS <operator>.conditional#0 -> <operator>.conditional#2
+ EDGES|CONTAINS <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#2
+ EDGES|CONTAINS D:main.c:<global> -> D:f
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+-EDGES|CONTAINS D:main.c:<global> -> main.c:Len:Item*(0)#0
++EDGES|CONTAINS D:main.c:<global> -> main.c:Len:ANY(0)#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:Item*
+@@ -188,7 +188,7 @@
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#31
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#32
+ EDGES|CONTAINS main.c:<global>#1 -> Item.<clinit>:Item()#0
+-EDGES|CONTAINS main.c:Len:Item*(0)#0 -> main.c:Len:Item*(0)#1
++EDGES|CONTAINS main.c:Len:ANY(0)#0 -> main.c:Len:ANY(0)#1
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+@@ -213,7 +213,7 @@
+ EDGES|EVAL_TYPE Item.<clinit>:Item()#3 -> T:int
+ EDGES|EVAL_TYPE Item.<clinit>:Item()#6 -> T:Item
+ EDGES|EVAL_TYPE f#1 -> T:Item*
+-EDGES|EVAL_TYPE f#11 -> T:Item*
++EDGES|EVAL_TYPE f#11 -> T:ANY
+ EDGES|EVAL_TYPE f#12 -> T:ANY
+ EDGES|EVAL_TYPE f#13 -> T:ANY
+ EDGES|EVAL_TYPE f#14 -> T:Item*
+@@ -233,8 +233,8 @@
+ EDGES|EVAL_TYPE main.c:<global>#32 -> T:f
+ EDGES|EVAL_TYPE main.c:<global>#33 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#4 -> T:int[4]
+-EDGES|EVAL_TYPE main.c:Len:Item*(0)#1 -> T:ANY
+-EDGES|EVAL_TYPE main.c:Len:Item*(0)#2 -> T:Item*
++EDGES|EVAL_TYPE main.c:Len:ANY(0)#1 -> T:ANY
++EDGES|EVAL_TYPE main.c:Len:ANY(0)#2 -> T:ANY
+ EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+ EDGES|PARAMETER_LINK <operator>.conditional#1 -> <operator>.conditional#3
+ EDGES|PARAMETER_LINK <operator>.conditional#4 -> <operator>.conditional#6
+@@ -272,7 +272,7 @@
+ EDGES|SOURCE_FILE f#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+-EDGES|SOURCE_FILE main.c:Len:Item*(0)#0 -> F:main.c
++EDGES|SOURCE_FILE main.c:Len:ANY(0)#0 -> F:main.c
+ FLOWS|REACHING_DEF[4] Item.<clinit>:Item()#3 -> Item.<clinit>:Item()#2
+ FLOWS|REACHING_DEF[<RET>] f#6 -> f#17
+ FLOWS|REACHING_DEF[Len] f#11 -> f#17

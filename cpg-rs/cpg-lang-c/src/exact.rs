@@ -387,6 +387,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             copying_macro_argument: false,
             macro_expansion_code: None,
             macro_expansion_root: None,
+            field_macro_codes: HashMap::new(),
+            field_macro_piece: None,
             expansion_control_kinds: &mut expansion_control_kinds,
             macro_method_files: &mut macro_method_files,
             used_macros: &mut used_macros,
@@ -475,6 +477,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         copying_macro_argument: false,
         macro_expansion_code: None,
         macro_expansion_root: None,
+        field_macro_codes: HashMap::new(),
+        field_macro_piece: None,
         expansion_control_kinds: &mut expansion_control_kinds,
         macro_method_files: &mut macro_method_files,
         used_macros: &mut used_macros,
@@ -854,6 +858,10 @@ struct Ctx<'a> {
     copying_macro_argument: bool,
     macro_expansion_code: Option<String>,
     macro_expansion_root: Option<usize>,
+    /// Original source spelling for expressions introduced by a field-token macro.
+    field_macro_codes: HashMap<usize, String>,
+    /// First pure replacement expression can own the macro wrapper in CDT.
+    field_macro_piece: Option<(usize, String)>,
     expansion_control_kinds: &'a mut HashMap<String, String>,
     macro_method_files: &'a mut HashMap<String, String>,
     // used macros: full_name -> (name, directive, nparams, ret type)
@@ -1781,6 +1789,7 @@ impl Ctx<'_> {
         depth: usize,
         order: i64,
         arg: Option<i64>,
+        replacement_override: Option<&str>,
     ) {
         let (params, body, directive, defining_file) = {
             let m = &self.macros[name];
@@ -1792,7 +1801,9 @@ impl Ctx<'_> {
             )
         };
         let arg_texts: Vec<String> = arg_nodes.iter().map(|a| text(*a, b).to_string()).collect();
-        let replacement = substitute(&body, &params, &arg_texts);
+        let replacement = replacement_override
+            .map(str::to_string)
+            .unwrap_or_else(|| substitute(&body, &params, &arg_texts));
         let expansion = expand_body_expression(
             &replacement,
             &self.macros,
@@ -2068,6 +2079,23 @@ impl Ctx<'_> {
                                     .map(|arg| text(arg, b).to_string())
                                     .collect(),
                             )
+                        })
+                })
+            } else if n.kind() == "field_expression" {
+                n.child_by_field_name("field").and_then(|field| {
+                    let name = text(field, b);
+                    self.macros
+                        .get(name)
+                        .filter(|m| m.params.is_none())
+                        .map(|m| {
+                            // Preserve the receiver so member names are not mistaken
+                            // for globals while collecting introduced index operands.
+                            let raw = text(n, b);
+                            let start = field.start_byte() - n.start_byte();
+                            let end = field.end_byte() - n.start_byte();
+                            let mut definition = m.clone();
+                            definition.body = format!("{}{}{}", &raw[..start], m.body, &raw[end..]);
+                            (name.to_string(), definition, Vec::new())
                         })
                 })
             } else {
@@ -3090,8 +3118,116 @@ impl Ctx<'_> {
         (self.line_no > initializer).then_some(initializer)
     }
 
+    /// A field-token replacement changes the expression shape. CDT attributes
+    /// generated access operators to the original access (p->Len), while field
+    /// identifiers use expanded names. A pure replacement subexpression can own
+    /// the INLINED wrapper instead of the whole access.
+    fn emit_direct_field_macro(
+        &mut self,
+        n: Node,
+        b: &[u8],
+        depth: usize,
+        order: i64,
+        arg: Option<i64>,
+    ) -> bool {
+        if self.field_macro_codes.contains_key(&n.id()) {
+            // This region was already rescanned with the disabled-macro set.
+            return false;
+        }
+        let Some(field) = n.child_by_field_name("field") else {
+            return false;
+        };
+        let name = text(field, b);
+        let Some(definition) = self.macros.get(name).filter(|m| m.params.is_none()) else {
+            return false;
+        };
+        let replacement = expand_body_expression(
+            &definition.body,
+            &self.macros,
+            &mut HashSet::from([name.to_string()]),
+            &mut 65_536,
+        );
+        if replacement == name {
+            return false;
+        }
+        let original = text(n, b);
+        let start = field.start_byte() - n.start_byte();
+        let end = field.end_byte() - n.start_byte();
+        let expression = format!("{}{}{}", &original[..start], replacement, &original[end..]);
+        let prefix = "void __m() { ";
+        let source = format!("{prefix}{expression}; }}");
+        let mut parser = Parser::new();
+        parser
+            .set_language(&tree_sitter_c::LANGUAGE.into())
+            .unwrap();
+        let tree = parser.parse(&source, None).unwrap();
+        if tree.root_node().has_error() {
+            return false;
+        }
+        let Some(root) = expansion_expr_node(tree.root_node()) else {
+            return false;
+        };
+        let mut codes = HashMap::new();
+        let mut piece = None;
+        let mut pending = vec![root];
+        while let Some(node) = pending.pop() {
+            if node.named_child_count() > 0 && node.end_byte() > prefix.len() + start {
+                codes.insert(node.id(), original.to_string());
+            }
+            if piece.is_none()
+                && node.start_byte() >= prefix.len() + start
+                && matches!(
+                    node.kind(),
+                    "identifier"
+                        | "number_literal"
+                        | "string_literal"
+                        | "char_literal"
+                        | "call_expression"
+                        | "binary_expression"
+                        | "unary_expression"
+                        | "pointer_expression"
+                        | "update_expression"
+                        | "cast_expression"
+                        | "subscript_expression"
+                        | "field_expression"
+                        | "conditional_expression"
+                        | "sizeof_expression"
+                )
+            {
+                piece = Some((node.id(), name.to_string()));
+            }
+            pending.extend(named_children(node).into_iter().rev());
+        }
+        let previous = std::mem::replace(&mut self.field_macro_codes, codes);
+        let previous_piece = std::mem::replace(&mut self.field_macro_piece, piece);
+        self.emit_expr(root, source.as_bytes(), depth, order, arg);
+        self.field_macro_codes = previous;
+        self.field_macro_piece = previous_piece;
+        true
+    }
+
+    fn expression_code(&self, node: Node, source: &[u8]) -> String {
+        esc(self
+            .field_macro_codes
+            .get(&node.id())
+            .map(String::as_str)
+            .unwrap_or_else(|| text(node, source)))
+    }
+
     /// Emit an expression node with the given ORDER and optional ARGUMENT_INDEX.
     fn emit_expr(&mut self, n: Node, b: &[u8], depth: usize, order: i64, arg: Option<i64>) {
+        if self
+            .field_macro_piece
+            .as_ref()
+            .is_some_and(|(node, _)| *node == n.id())
+        {
+            let (_, name) = self.field_macro_piece.take().unwrap();
+            self.emit_macro_call(&name, &name, &[], n, b, depth, order, arg, Some(text(n, b)));
+            return;
+        }
+        if n.kind() == "field_expression" && self.emit_direct_field_macro(n, b, depth, order, arg) {
+            return;
+        }
         match n.kind() {
             "binary_expression" => {
                 let op = n.child(1).map(|o| text(o, b)).unwrap_or("?");
@@ -3102,7 +3238,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3132,7 +3268,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3157,7 +3293,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3189,7 +3325,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3209,7 +3345,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.conditional".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("<operator>.conditional".into()),
                         order: Some(order),
@@ -3258,7 +3394,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3290,7 +3426,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.indirectIndexAccess".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("<operator>.indirectIndexAccess".into()),
                         order: Some(order),
@@ -3315,8 +3451,8 @@ impl Ctx<'_> {
                 let argc = args.map(|a| named_children(a).len()).unwrap_or(0);
                 if self.macros.get(&name).is_some_and(|m| m.params.is_some()) {
                     let arg_nodes: Vec<Node> = args.map(|a| named_children(a)).unwrap_or_default();
-                    let code = esc(text(n, b));
-                    self.emit_macro_call(&name, &code, &arg_nodes, n, b, depth, order, arg);
+                    let code = self.expression_code(n, b);
+                    self.emit_macro_call(&name, &code, &arg_nodes, n, b, depth, order, arg, None);
                     return;
                 }
                 if callee.is_some_and(|callee| callee.kind() != "identifier")
@@ -3354,7 +3490,7 @@ impl Ctx<'_> {
                         "CALL",
                         P {
                             name: Some("<operator>.pointerCall".into()),
-                            code: Some(esc(text(n, b))),
+                            code: Some(self.expression_code(n, b)),
                             tfn: Some(ty),
                             mfn: Some("<operator>.pointerCall".into()),
                             order: Some(order),
@@ -3389,7 +3525,7 @@ impl Ctx<'_> {
                         "CALL",
                         P {
                             name: Some(name.clone()),
-                            code: Some(esc(text(n, b))),
+                            code: Some(self.expression_code(n, b)),
                             tfn: Some(ty),
                             mfn: Some(method_full_name),
                             order: Some(order),
@@ -3409,7 +3545,7 @@ impl Ctx<'_> {
             "identifier" => {
                 let name = text(n, b).to_string();
                 if self.macros.get(&name).is_some_and(|m| m.params.is_none()) {
-                    self.emit_macro_call(&name, &name, &[], n, b, depth, order, arg);
+                    self.emit_macro_call(&name, &name, &[], n, b, depth, order, arg, None);
                     return;
                 }
                 if !self.symbols.contains_key(&name) && !self.globals.contains_key(&name) {
@@ -3529,7 +3665,7 @@ impl Ctx<'_> {
                     depth,
                     "LITERAL",
                     P {
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("char*".into()),
                         order: Some(order),
                         arg,
@@ -3599,7 +3735,7 @@ impl Ctx<'_> {
                             "CALL",
                             P {
                                 name: Some("<operator>.assignment".into()),
-                                code: Some(esc(text(n, b))),
+                                code: Some(self.expression_code(n, b)),
                                 tfn: Some("void".into()),
                                 mfn: Some("<operator>.assignment".into()),
                                 order: Some(position),
@@ -3629,7 +3765,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.cast".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some(ty.clone()),
                         mfn: Some("<operator>.cast".into()),
                         order: Some(order),
@@ -3662,7 +3798,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("offsetof".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("offsetof".into()),
                         order: Some(order),
@@ -3708,7 +3844,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.sizeOf".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("<operator>.sizeOf".into()),
                         order: Some(order),

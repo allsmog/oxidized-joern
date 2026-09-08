@@ -1,0 +1,10 @@
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.70s
+     Running tests/direct_field_macros.rs (.local/target/debug/deps/direct_field_macros-8a19ebb4df6926ac)
+
+running 2 tests
+test repeated_field_expansions_keep_their_own_access_and_following_call_lines ... ok
+test direct_field_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

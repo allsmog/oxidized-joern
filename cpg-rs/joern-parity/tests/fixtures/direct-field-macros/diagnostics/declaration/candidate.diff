@@ -1,0 +1,11 @@
+--- joern
++++ candidate
+@@ -12,7 +12,7 @@
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+   TYPE_DECL NAME=Item CODE=struct Item { int Len; } FULL_NAME=Item ORDER=1
+-    MEMBER NAME=len CODE=int TYPE_FULL_NAME=int ORDER=1
++    MEMBER NAME=Len CODE=Len TYPE_FULL_NAME=int ORDER=1
+   METHOD NAME=read CODE=int read(struct Item *p) { return p->Len; } FULL_NAME=read SIGNATURE=int(Item*) ORDER=1
+     METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+     METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1

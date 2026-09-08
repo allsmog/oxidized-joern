@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/field-macros/direct-boundaries/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/field-macros/direct-boundaries/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/field-macros/direct-boundaries/oracle-workspace",
+  "exit": 0,
+  "seconds": 10.75127187500766,
+  "inputHashes": {
+    "parameter_index": "4232dc0b7d47c6107947d3e52e85fd47a31f385c56a0c94fed572d64c09ab166",
+    "global_index": "a24bcd63c9ad0cfc87224ea1faee86d5717b059a72adb91c9ed595f0ed86d013",
+    "multiple_literals": "519b1bd036064f1fa115d148ac90656630b014890e635cd2c85d7a4ab1c42b82",
+    "expression_index": "0f16de284e5e12faf53c7d389cd1616f95c942de8bacc5265403a69304a39365",
+    "receiver_control": "449ed05e50ee829c49dddef90543810457ff91eef70efdddeef2e8414693a8c0",
+    "multiline": "098bce070eda4f23e4d1960b5640bc143c4ce1399652ca0de5584a2cd47958fd",
+    "field_then_index": "7759004bb45968cd888b9ed0daf854e65c7cb8e862ef7540980d82756759c2e8",
+    "object_macro_index": "70af6c614aeca7e1a8dba111ca121cf9703ca3dca0df95d9c6f729af614586c8"
+  },
+  "scriptHash": "62d47f5835ef453a776178a5c75b88b7c8bf06d5dfe259f6bac353a2e52007f8"
+}
