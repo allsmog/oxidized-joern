@@ -8150,6 +8150,27 @@ fn extract_code(rest: &str) -> String {
     tail[..i].to_string()
 }
 
+/// FULL_NAME may contain spaces in a filename or a macro return signature.
+/// Stop at a following property emitted by `Ctx::line`, rather than a word.
+fn extract_full_name(rest: &str) -> String {
+    // CODE precedes FULL_NAME and can itself contain property-like text.
+    let Some((_, tail)) = rest.rsplit_once(" FULL_NAME=") else {
+        return String::new();
+    };
+    let end = [
+        " METHOD_FULL_NAME=",
+        " SIGNATURE=",
+        " ORDER=",
+        " ARGUMENT_INDEX=",
+        " DISPATCH_TYPE=",
+    ]
+    .iter()
+    .filter_map(|key| tail.find(key))
+    .min()
+    .unwrap_or(tail.len());
+    tail[..end].to_string()
+}
+
 fn parse_dump_block(text: &str) -> Vec<DNode> {
     let mut arena: Vec<DNode> = Vec::new();
     let mut stack: Vec<(usize, usize)> = Vec::new(); // (depth, arena id)
@@ -8198,7 +8219,7 @@ fn parse_dump_block(text: &str) -> Vec<DNode> {
             code1: grab(" CODE="),
             fullcode: extract_code(rest),
             has_code: rest.contains(" CODE="),
-            full: grab(" FULL_NAME="),
+            full: extract_full_name(rest),
             has_arg: rest.contains(" ARGUMENT_INDEX="),
             arg_index,
             order: grab(" ORDER=").parse().unwrap_or(0),
@@ -9758,6 +9779,49 @@ mod preproc_tests {
             "A"
         );
         assert!(budget > 0);
+    }
+}
+
+#[cfg(test)]
+mod dump_property_tests {
+    use super::parse_dump_block;
+
+    #[test]
+    fn full_names_end_at_properties_or_end_of_line() {
+        for (line, expected) in [
+            (
+                "METHOD NAME=VALUE CODE=#define VALUE 2U FULL_NAME=a b.h:VALUE:unsigned int(0) SIGNATURE=unsigned int(0) ORDER=1",
+                "a b.h:VALUE:unsigned int(0)",
+            ),
+            (
+                "TYPE_DECL NAME=<global> FULL_NAME=a b.h:<global> ORDER=1",
+                "a b.h:<global>",
+            ),
+            (
+                "METHOD NAME=VALUE FULL_NAME=a X=b.h:VALUE:unsigned longint(1)",
+                "a X=b.h:VALUE:unsigned longint(1)",
+            ),
+            ("METHOD NAME=ordinary FULL_NAME=ordinary ORDER=1", "ordinary"),
+            (
+                "METHOD CODE=int invoke(int x){ /* FULL_NAME=invoke */ return x; } FULL_NAME=invoke SIGNATURE=int(int) ORDER=1",
+                "invoke",
+            ),
+            ("METHOD FULL_NAME= ORDER=1", ""),
+            ("CALL METHOD_FULL_NAME=other", ""),
+            ("BLOCK ORDER=1", ""),
+        ] {
+            assert_eq!(parse_dump_block(line)[0].full, expected, "{line}");
+        }
+        for property in [
+            "METHOD_FULL_NAME=next",
+            "SIGNATURE=unsigned int(1)",
+            "ORDER=1",
+            "ARGUMENT_INDEX=2",
+            "DISPATCH_TYPE=STATIC_DISPATCH",
+        ] {
+            let line = format!("METHOD FULL_NAME=é space x=value {property}");
+            assert_eq!(parse_dump_block(&line)[0].full, "é space x=value");
+        }
     }
 }
 

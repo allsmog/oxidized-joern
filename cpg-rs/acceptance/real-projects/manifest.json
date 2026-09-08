@@ -25,9 +25,9 @@
       "expected": {
         "sourceFiles": 26,
         "nodes": 66123,
-        "graphSha256": "301fec3e923e4c13982c3c1dc9c864d46ff59d7862ff2d888dd2056ff1bbce6d",
-        "edgesSha256": "9e7a8e73e93ae902882c2e189b6621d6eda407bdf63ff079f46de873ea9bc0df",
-        "exportSha256": "df4e3a7b73a8343d052e47cd92aa3d386e2020cb1688abf17d3cf651538a62bb",
+        "graphSha256": "2fa5f795a1bd629080935dd2778c3288c64afe824b12df911151c16241b5d6a9",
+        "edgesSha256": "53afc5a2d8cb7f5036aade084ee073cf1edd9c4af84b3a66b9c9ef184c4d7218",
+        "exportSha256": "f57f55723681999760188bfc37865fbf3aa147324a463410e71d2db53d560bfa",
         "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
         "findings": 0
       },
@@ -53,9 +53,9 @@
       "expected": {
         "sourceFiles": 61,
         "nodes": 119088,
-        "graphSha256": "c95020e923eed15712d5e58629e3115fe0627fcea441ea75115c2f08bf42529e",
-        "edgesSha256": "19195bff687c50cd0632d2cd0be47a8905ec20ebb90cdb5a4a85307de7cfce08",
-        "exportSha256": "e708ca0ba07418b9f8eb30869a2b8bdf1668b1f7600b95b5cf10cba9552c8265",
+        "graphSha256": "206137109a70a42042f014114c20447a5bf696182ca685065c2e8b7cad20837e",
+        "edgesSha256": "f04a38e7ff4274364a7af1ba6f0880d1e32b9ff58b2832accb6efd3a6c392004",
+        "exportSha256": "2b03bb19dbabf5b0e360947138b0204d6b726dce88a8ebf01044cd5bd044840e",
         "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
         "findings": 0
       },

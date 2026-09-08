@@ -1,0 +1,250 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=address CODE=void address(void){int global=7; int (*pointer)(void)=read_global;} FULL_NAME=address SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={int global=7; int (*pointer)(void)=read_global;} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=global CODE=int global TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=global=7 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=global CODE=global TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    LOCAL NAME=pointer CODE=int (*pointer)(void)=read_global; TYPE_FULL_NAME=int(*)(void) ORDER=3
+    CALL NAME=<operator>.assignment CODE=(*pointer)(void)=read_global TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=pointer CODE= TYPE_FULL_NAME=int(*)(void) ORDER=1 ARGUMENT_INDEX=1
+      METHOD_REF CODE=read_global TYPE_FULL_NAME=int METHOD_FULL_NAME=read_global ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=address space.c:<global> ORDER=1
+  METHOD NAME=read_global CODE=int read_global(void){return global;} FULL_NAME=read_global SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={return global;} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=global CODE=<global> global TYPE_FULL_NAME=int ORDER=0
+      RETURN CODE=return global; ORDER=1
+        IDENTIFIER NAME=global CODE=<global> global TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=address CODE=void address(void){int global=7; int (*pointer)(void)=read_global;} FULL_NAME=address SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={int global=7; int (*pointer)(void)=read_global;} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=global CODE=int global TYPE_FULL_NAME=int ORDER=1
+      CALL NAME=<operator>.assignment CODE=global=7 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=global CODE=global TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      LOCAL NAME=pointer CODE=int (*pointer)(void)=read_global; TYPE_FULL_NAME=int(*)(void) ORDER=3
+      CALL NAME=<operator>.assignment CODE=(*pointer)(void)=read_global TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=pointer CODE= TYPE_FULL_NAME=int(*)(void) ORDER=1 ARGUMENT_INDEX=1
+        METHOD_REF CODE=read_global TYPE_FULL_NAME=int METHOD_FULL_NAME=read_global ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    LOCAL NAME=global CODE=int global TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=global=5 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=global CODE=global TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=5 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_REF CODE=read_global TYPE_FULL_NAME=read_global METHOD_FULL_NAME=read_global ORDER=3
+    METHOD_REF CODE=address TYPE_FULL_NAME=address METHOD_FULL_NAME=address ORDER=4
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=read_global CODE=int read_global(void){return global;} FULL_NAME=read_global SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={return global;} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=global CODE=<global> global TYPE_FULL_NAME=int ORDER=0
+    RETURN CODE=return global; ORDER=1
+      IDENTIFIER NAME=global CODE=<global> global TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=address space.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=address space.c:<global> FILENAME=address space.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=address FULL_NAME=address CODE=address AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=address space.c:<global> FILENAME=address space.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=address space.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=address space.c:<global> FILENAME=address space.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int(*)(void) FULL_NAME=int(*)(void) CODE=int(*)(void) IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=read_global FULL_NAME=read_global CODE=read_global AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=address space.c:<global> FILENAME=address space.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=address FULL_NAME=address TYPE_DECL_FULL_NAME=address
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int(*)(void) FULL_NAME=int(*)(void) TYPE_DECL_FULL_NAME=int(*)(void)
+NODES|TYPE NAME=read_global FULL_NAME=read_global TYPE_DECL_FULL_NAME=read_global
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT address space.c:<global>#24 -> address space.c:<global>#25
+EDGES|ARGUMENT address space.c:<global>#24 -> address space.c:<global>#26
+EDGES|ARGUMENT address#5 -> address#6
+EDGES|ARGUMENT address#5 -> address#7
+EDGES|ARGUMENT address#9 -> address#10
+EDGES|ARGUMENT address#9 -> address#11
+EDGES|ARGUMENT read_global#5 -> read_global#6
+EDGES|CALL address space.c:<global>#24 -> <operator>.assignment#0
+EDGES|CALL address#5 -> <operator>.assignment#0
+EDGES|CALL address#9 -> <operator>.assignment#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG address space.c:<global>#0 -> address space.c:<global>#25
+EDGES|CFG address space.c:<global>#1 -> read_global#6
+EDGES|CFG address space.c:<global>#24 -> address space.c:<global>#27
+EDGES|CFG address space.c:<global>#25 -> address space.c:<global>#26
+EDGES|CFG address space.c:<global>#26 -> address space.c:<global>#24
+EDGES|CFG address space.c:<global>#27 -> address space.c:<global>#28
+EDGES|CFG address space.c:<global>#28 -> address space.c:<global>#29
+EDGES|CFG address#0 -> address#6
+EDGES|CFG address#10 -> address#11
+EDGES|CFG address#11 -> address#9
+EDGES|CFG address#5 -> address#10
+EDGES|CFG address#6 -> address#7
+EDGES|CFG address#7 -> address#5
+EDGES|CFG address#9 -> address#12
+EDGES|CFG read_global#5 -> read_global#7
+EDGES|CFG read_global#6 -> read_global#5
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS D:address space.c:<global> -> D:address
+EDGES|CONTAINS D:address space.c:<global> -> D:read_global
+EDGES|CONTAINS D:address space.c:<global> -> address space.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int(*)(void)
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:address space.c -> D:address space.c:<global>
+EDGES|CONTAINS address space.c:<global>#0 -> address space.c:<global>#1
+EDGES|CONTAINS address space.c:<global>#0 -> address space.c:<global>#22
+EDGES|CONTAINS address space.c:<global>#0 -> address space.c:<global>#24
+EDGES|CONTAINS address space.c:<global>#0 -> address space.c:<global>#25
+EDGES|CONTAINS address space.c:<global>#0 -> address space.c:<global>#26
+EDGES|CONTAINS address space.c:<global>#0 -> address space.c:<global>#27
+EDGES|CONTAINS address space.c:<global>#0 -> address space.c:<global>#28
+EDGES|CONTAINS address space.c:<global>#0 -> address#0
+EDGES|CONTAINS address space.c:<global>#1 -> read_global#3
+EDGES|CONTAINS address space.c:<global>#1 -> read_global#5
+EDGES|CONTAINS address space.c:<global>#1 -> read_global#6
+EDGES|CONTAINS address#0 -> address#10
+EDGES|CONTAINS address#0 -> address#11
+EDGES|CONTAINS address#0 -> address#3
+EDGES|CONTAINS address#0 -> address#5
+EDGES|CONTAINS address#0 -> address#6
+EDGES|CONTAINS address#0 -> address#7
+EDGES|CONTAINS address#0 -> address#9
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE address space.c:<global>#22 -> T:ANY
+EDGES|EVAL_TYPE address space.c:<global>#23 -> T:int
+EDGES|EVAL_TYPE address space.c:<global>#24 -> T:void
+EDGES|EVAL_TYPE address space.c:<global>#25 -> T:int
+EDGES|EVAL_TYPE address space.c:<global>#26 -> T:int
+EDGES|EVAL_TYPE address space.c:<global>#27 -> T:read_global
+EDGES|EVAL_TYPE address space.c:<global>#28 -> T:address
+EDGES|EVAL_TYPE address space.c:<global>#29 -> T:ANY
+EDGES|EVAL_TYPE address#1 -> T:void
+EDGES|EVAL_TYPE address#10 -> T:int(*)(void)
+EDGES|EVAL_TYPE address#11 -> T:int
+EDGES|EVAL_TYPE address#12 -> T:void
+EDGES|EVAL_TYPE address#2 -> T:void
+EDGES|EVAL_TYPE address#3 -> T:void
+EDGES|EVAL_TYPE address#4 -> T:int
+EDGES|EVAL_TYPE address#5 -> T:void
+EDGES|EVAL_TYPE address#6 -> T:int
+EDGES|EVAL_TYPE address#7 -> T:int
+EDGES|EVAL_TYPE address#8 -> T:int(*)(void)
+EDGES|EVAL_TYPE address#9 -> T:void
+EDGES|EVAL_TYPE read_global#1 -> T:void
+EDGES|EVAL_TYPE read_global#2 -> T:void
+EDGES|EVAL_TYPE read_global#3 -> T:void
+EDGES|EVAL_TYPE read_global#4 -> T:int
+EDGES|EVAL_TYPE read_global#6 -> T:int
+EDGES|EVAL_TYPE read_global#7 -> T:int
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK address#1 -> address#2
+EDGES|PARAMETER_LINK read_global#1 -> read_global#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:address space.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:address -> D:address
+EDGES|REF T:int -> D:int
+EDGES|REF T:int(*)(void) -> D:int(*)(void)
+EDGES|REF T:read_global -> D:read_global
+EDGES|REF T:void -> D:void
+EDGES|REF address space.c:<global>#25 -> address space.c:<global>#23
+EDGES|REF address space.c:<global>#27 -> address space.c:<global>#1
+EDGES|REF address space.c:<global>#28 -> address#0
+EDGES|REF address#10 -> address#8
+EDGES|REF address#11 -> address space.c:<global>#1
+EDGES|REF address#6 -> address#4
+EDGES|REF read_global#6 -> read_global#4
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:address -> F:address space.c
+EDGES|SOURCE_FILE D:address space.c:<global> -> F:address space.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int(*)(void) -> F:<includes>
+EDGES|SOURCE_FILE D:read_global -> F:address space.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:address space.c:<global> -> F:address space.c
+EDGES|SOURCE_FILE address space.c:<global>#0 -> F:address space.c
+EDGES|SOURCE_FILE address space.c:<global>#1 -> F:address space.c
+EDGES|SOURCE_FILE address#0 -> F:address space.c
+FLOWS|REACHING_DEF[(*pointer)(void)=read_global] address#9 -> address#12
+FLOWS|REACHING_DEF[5] address space.c:<global>#26 -> address space.c:<global>#24
+FLOWS|REACHING_DEF[5] address space.c:<global>#26 -> address space.c:<global>#25
+FLOWS|REACHING_DEF[7] address#7 -> address#5
+FLOWS|REACHING_DEF[7] address#7 -> address#6
+FLOWS|REACHING_DEF[<RET>] read_global#5 -> read_global#7
+FLOWS|REACHING_DEF[<global> global] read_global#6 -> read_global#5
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] address space.c:<global>#0 -> address space.c:<global>#26
+FLOWS|REACHING_DEF[] address space.c:<global>#0 -> address space.c:<global>#27
+FLOWS|REACHING_DEF[] address space.c:<global>#0 -> address space.c:<global>#28
+FLOWS|REACHING_DEF[] address space.c:<global>#1 -> read_global#1
+FLOWS|REACHING_DEF[] address space.c:<global>#1 -> read_global#5
+FLOWS|REACHING_DEF[] address space.c:<global>#1 -> read_global#6
+FLOWS|REACHING_DEF[] address#0 -> address#1
+FLOWS|REACHING_DEF[] address#0 -> address#11
+FLOWS|REACHING_DEF[] address#0 -> address#7
+FLOWS|REACHING_DEF[] address#1 -> address#12
+FLOWS|REACHING_DEF[] address#1 -> address#2
+FLOWS|REACHING_DEF[] address#10 -> address#12
+FLOWS|REACHING_DEF[] address#10 -> address#9
+FLOWS|REACHING_DEF[] read_global#1 -> read_global#2
+FLOWS|REACHING_DEF[] read_global#1 -> read_global#7
+FLOWS|REACHING_DEF[global=5] address space.c:<global>#24 -> address space.c:<global>#29
+FLOWS|REACHING_DEF[global=7] address#5 -> address#12
+FLOWS|REACHING_DEF[global] address space.c:<global>#25 -> address space.c:<global>#24
+FLOWS|REACHING_DEF[global] address space.c:<global>#25 -> address space.c:<global>#29
+FLOWS|REACHING_DEF[global] address space.c:<global>#25 -> address#6
+FLOWS|REACHING_DEF[global] address space.c:<global>#25 -> read_global#6
+FLOWS|REACHING_DEF[global] address#6 -> address#12
+FLOWS|REACHING_DEF[global] address#6 -> address#5
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[read_global] address#11 -> address#10
+FLOWS|REACHING_DEF[read_global] address#11 -> address#9

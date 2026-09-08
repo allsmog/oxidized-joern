@@ -4,6 +4,38 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Seventh measured Astra batch (2026-09-08 UTC).** Complete METHOD
+  FULL_NAME values retain spaces in macro signatures and supplied filenames.
+  Prefix collisions no longer attach CFG/ReachingDef origins to unrelated
+  methods. The unchanged main **308/308** committed and fresh Joern v4.0.555
+  comparisons pass, together with **458 workspace tests**, 17 checker tests,
+  formatting, strict Clippy, the 73-dependency audit, native release/archive,
+  and official real-project acceptance. Cache shape is **18**. The new family
+  retains **31 complete references: 3→17 exact**, with all 17 exact projects
+  fully gated and all 14 nonexact diagnostics retained. Independent replay
+  gains **23 matching structural / 20 reaching-definition records**, losing
+  none. Five preexisting property-marker filename cases still abort in the
+  importer. A rejected first candidate lost ten matching facts on valid CODE
+  comments/strings; final-property selection repairs that introduced loss.
+  Whole-project output gains only **four matching CFG edges**, with no removed
+  records or AST/NODES/FLOWS changes. Exact method ASTs remain **149/410 zlib /
+  1,431/2,274 Lua**, including stubs; strict primary methods remain **32/510**,
+  bodies **40/537**, and nonempty bodies **23/515**. Earlier repairs remain.
+  A first zlib resource trial failed the 20-second limit at 21.15 seconds;
+  the retained retry uses identical binaries and unchanged limits and passes
+  repeated builds at **6.55/6.60 seconds zlib / 5.85/5.83 seconds Lua**, with
+  peak build RSS **485.19/462.06 MiB**. Clean/update equivalence passes for
+  **26/61** files. Only six reviewed graph/edge/export expectations change;
+  input bytes, node counts, licenses, exclusions, SARIF and budgets stay fixed.
+  See the [seventh report](../docs/conformance/astra-seventh-batch-2026-09-08.md),
+  [complete counters](../docs/conformance/astra-seventh-batch-metrics.json), and
+  [acceptance receipt](../docs/conformance/astra-seventh-batch-acceptance.json).
+  Full project and product parity remain incomplete. Next: block-level
+  `#if/#elif` selection and phantom-variable traversal. Ten fresh graphs
+  isolate six dispatch failures, three exact controls and one separate local
+  macro-state diagnostic; the dispatch defect drops three live zlib snprintf
+  calls, distinct from the previously removed inactive 23-argument stub.
+
 - **Sixth measured Astra batch (2026-09-08 UTC).** The main **308/308**
   comparisons remain exact against committed and fresh Joern v4.0.555 output.
   **454 workspace tests**, 17 checker tests, formatting, strict Clippy,

@@ -1,0 +1,11 @@
+{
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/spaced-method-names/rejected-first-candidate/exact.rs",
+    "sha256": "cc6253248f3f9799f79fc5c961f51b5edfe16d031a41c967de4ec955c9ceb08f"
+  },
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/spaced-method-names/rejected-first-candidate/joern-parity",
+    "sha256": "08ec18056ed41be9048447596dea0b0bbf0418cf6d54733f8583df5d25048eb6"
+  },
+  "note": "Rejected first-marker selection; initial review receipt had a path-hash timing error, transparently corrected in introduced-regression-corrected.json. The retained failed graphs and source/binary are unchanged."
+}

@@ -1,0 +1,27 @@
+{
+  "ordinary_unsigned_returns": {
+    "main.c": "unsigned int ui(void) { return 1U; }\nunsigned long ul(void) { return 1UL; }\nunsigned long long ull(void) { return 1ULL; }\n"
+  },
+  "object_unsigned_lower": {
+    "main.c": "#define VALUE 2u\nunsigned int f(void) { return VALUE; }\n"
+  },
+  "function_unsigned_arg": {
+    "main.c": "#define VALUE(x) 2U\nunsigned int f(int x) { return VALUE(x); }\n"
+  },
+  "object_unsigned_long_lower": {
+    "main.c": "#define VALUE 2ul\nunsigned long f(void) { return VALUE; }\n"
+  },
+  "function_unsigned_long_long_mixed": {
+    "main.c": "#define VALUE() 2uLl\nunsigned long long f(void) { return VALUE(); }\n"
+  },
+  "object_long_double_control": {
+    "main.c": "#define VALUE 1.0L\nlong double f(void) { return VALUE; }\n"
+  },
+  "negative_unsigned_control": {
+    "main.c": "#define VALUE -1UL\nunsigned long f(void) { return VALUE; }\n"
+  },
+  "spaced_header": {
+    "a b.h": "#define VALUE 3\n",
+    "main.c": "#include \"a b.h\"\nint f(void) { return VALUE; }\n"
+  }
+}

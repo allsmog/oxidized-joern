@@ -1,0 +1,6 @@
+
+thread 'main' (11542297) panicked at cpg-lang-c/src/import.rs:115:13:
+assertion `left == right` failed: duplicate method node kind drift
+  left: MethodParameterIn
+ right: Block
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

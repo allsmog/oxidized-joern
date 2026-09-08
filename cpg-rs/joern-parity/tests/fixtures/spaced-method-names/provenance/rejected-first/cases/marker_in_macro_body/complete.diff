@@ -1,0 +1,27 @@
+--- joern
++++ actual
+@@ -48,7 +48,7 @@
+     METHOD_REF CODE=invoke TYPE_FULL_NAME=invoke METHOD_FULL_NAME=invoke ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=VALUE CODE=#define VALUE(x) ((x)+1) FULL_NAME=main.c:VALUE:ANY(1) SIGNATURE=ANY(1) ORDER=1
++METHOD NAME=VALUE CODE=#define VALUE(x) ((x)+1) /* FULL_NAME=main.c:VALUE:ANY(1) SIGNATURE=ANY(1) ORDER=1
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=2
+@@ -102,7 +102,6 @@
+ EDGES|CFG main.c:<global>#1 -> other#5
+ EDGES|CFG main.c:<global>#21 -> main.c:<global>#22
+ EDGES|CFG main.c:<global>#22 -> main.c:<global>#23
+-EDGES|CFG main.c:VALUE:ANY(1)#0 -> main.c:VALUE:ANY(1)#4
+ EDGES|CFG other#4 -> other#6
+ EDGES|CFG other#5 -> other#4
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+@@ -211,7 +210,6 @@
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#22
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> other#1
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> other#5
+-FLOWS|REACHING_DEF[] main.c:VALUE:ANY(1)#0 -> main.c:VALUE:ANY(1)#1
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+ FLOWS|REACHING_DEF[p1] main.c:VALUE:ANY(1)#1 -> main.c:VALUE:ANY(1)#2

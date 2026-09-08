@@ -1,0 +1,7 @@
+# Preserve the exact whitespace in complete oracle graphs and raw transcripts.
+*.txt -whitespace
+*.diff -whitespace
+*.stdout -whitespace
+*.stderr -whitespace
+*.log -whitespace
+*.patch -whitespace

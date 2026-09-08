@@ -93,10 +93,19 @@ inactive. Nine fixture families plus a combined regression test gate 180 exact
 isolated projections; all complete nonexact references remain available.
 Whole-project strict primary method matches improve to 32 on zlib and 510 on
 Lua. These counts describe the selected AST projection, not language coverage
-or complete graph equality. Full-name parsing at spaces still drops some CFG
-and method-origin ReachingDef edges; six numeric macro diagnostics and eight
-additional complete controls pin the next repair. No non-C frontend or Joern
+or complete graph equality. Full-name parsing at spaces remained open at this
+checkpoint; six numeric macro diagnostics and eight additional complete controls
+pinned the next repair. No non-C frontend or Joern
 binary/console compatibility is promoted by this batch.
+
+The [seventh batch](../docs/conformance/astra-seventh-batch-2026-09-08.md)
+preserves spaces in parsed METHOD FULL_NAME values and prevents truncated names
+from attaching CFG and ReachingDef edges to an unrelated method. Of 31 complete
+fixture projects, 17 are exact and fully gated; all 14 nonexact diagnostics
+remain available. The whole-project change restores four CFG edges without
+changing AST, node or flow records. Property-like text in CODE and filenames
+still exposes separate transport limitations, including five retained importer
+abort cases. Neither complete real-project projection is exact.
 
 Confirmed remaining C gaps include broader include/build-definition context,
 function-like macros in preprocessor conditions, block-level directives,

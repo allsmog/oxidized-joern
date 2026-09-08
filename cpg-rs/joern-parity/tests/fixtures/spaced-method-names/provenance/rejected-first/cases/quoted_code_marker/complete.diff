@@ -1,0 +1,70 @@
+--- joern
++++ actual
+@@ -2,12 +2,12 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=invoke CODE=const char *invoke(void){return " FULL_NAME=other SIGNATURE=void ORDER=1";} FULL_NAME=invoke SIGNATURE=char*(void) ORDER=1
++METHOD NAME=invoke CODE=const char *invoke(void){return " FULL_NAME=invoke SIGNATURE=char*(void) ORDER=1
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+-  BLOCK CODE={return " FULL_NAME=other SIGNATURE=void ORDER=1";} TYPE_FULL_NAME=void ORDER=2
+-    RETURN CODE=return " FULL_NAME=other SIGNATURE=void ORDER=1"; ORDER=1
+-      LITERAL CODE=" FULL_NAME=other SIGNATURE=void ORDER=1" TYPE_FULL_NAME=char* ORDER=1
++  BLOCK CODE={return " TYPE_FULL_NAME=void FULL_NAME=other SIGNATURE=void ORDER=2
++    RETURN CODE=return " FULL_NAME=other SIGNATURE=void ORDER=1
++      LITERAL CODE=" TYPE_FULL_NAME=char* FULL_NAME=other SIGNATURE=void ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -18,12 +18,12 @@
+       RETURN CODE=return "x"; ORDER=1
+         LITERAL CODE="x" TYPE_FULL_NAME=char* ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+-  METHOD NAME=invoke CODE=const char *invoke(void){return " FULL_NAME=other SIGNATURE=void ORDER=1";} FULL_NAME=invoke SIGNATURE=char*(void) ORDER=1
++  METHOD NAME=invoke CODE=const char *invoke(void){return " FULL_NAME=invoke SIGNATURE=char*(void) ORDER=1
+     METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+-    BLOCK CODE={return " FULL_NAME=other SIGNATURE=void ORDER=1";} TYPE_FULL_NAME=void ORDER=2
+-      RETURN CODE=return " FULL_NAME=other SIGNATURE=void ORDER=1"; ORDER=1
+-        LITERAL CODE=" FULL_NAME=other SIGNATURE=void ORDER=1" TYPE_FULL_NAME=char* ORDER=1
++    BLOCK CODE={return " TYPE_FULL_NAME=void FULL_NAME=other SIGNATURE=void ORDER=2
++      RETURN CODE=return " FULL_NAME=other SIGNATURE=void ORDER=1
++        LITERAL CODE=" TYPE_FULL_NAME=char* FULL_NAME=other SIGNATURE=void ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=other TYPE_FULL_NAME=other METHOD_FULL_NAME=other ORDER=1
+@@ -60,10 +60,10 @@
+ EDGES|ARGUMENT invoke#4 -> invoke#5
+ EDGES|ARGUMENT other#4 -> other#5
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG invoke#0 -> invoke#5
+ EDGES|CFG invoke#4 -> invoke#6
+ EDGES|CFG invoke#5 -> invoke#4
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#16
++EDGES|CFG main.c:<global>#1 -> invoke#5
+ EDGES|CFG main.c:<global>#1 -> other#5
+ EDGES|CFG main.c:<global>#16 -> main.c:<global>#17
+ EDGES|CFG main.c:<global>#17 -> main.c:<global>#18
+@@ -130,17 +130,17 @@
+ EDGES|SOURCE_FILE invoke#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+-FLOWS|REACHING_DEF[" FULL_NAME=other SIGNATURE=void ORDER=1"] invoke#5 -> invoke#4
++FLOWS|REACHING_DEF["] invoke#5 -> invoke#4
+ FLOWS|REACHING_DEF["x"] other#5 -> other#4
+ FLOWS|REACHING_DEF[<RET>] invoke#4 -> invoke#6
+ FLOWS|REACHING_DEF[<RET>] other#4 -> other#6
+-FLOWS|REACHING_DEF[] invoke#0 -> invoke#1
+-FLOWS|REACHING_DEF[] invoke#0 -> invoke#4
+-FLOWS|REACHING_DEF[] invoke#0 -> invoke#5
+ FLOWS|REACHING_DEF[] invoke#1 -> invoke#2
+ FLOWS|REACHING_DEF[] invoke#1 -> invoke#6
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#16
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#17
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> invoke#1
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> invoke#4
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> invoke#5
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> other#1
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> other#4
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> other#5
