@@ -4,6 +4,18 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Nested field-macro increment (2026-09-08 UTC).** Object macros used as
+  field tokens inside generated macro bodies now use the existing bounded
+  expansion rules. Ten complete isolated Joern v4.0.555 graphs pass, improving
+  from three; seven former failures cover aliases, nested invocations, array
+  receivers, field subscripts, statement assignments and redefinition. The
+  original 308-block gate remains unchanged. Complete zlib replay removes the
+  three unexpanded `Len`/`Code` fields in `_tr_align` and twelve in
+  `compress_block`; separate cast/type differences remain. Direct `p->Len`
+  and `item.Len` are retained as complete diagnostics for the next increment,
+  alongside preexisting nested-struct TYPE scaffold differences. See
+  [field-macro evidence](joern-parity/tests/fixtures/field-macros/README.md).
+
 - **Fourth measured Astra batch (2026-09-08 UTC).** The main corpus remains
   **308/308** against committed and fresh Joern v4.0.555 references. Separate
   complete graph fixtures cover arrays, supplied quoted-header macro state,

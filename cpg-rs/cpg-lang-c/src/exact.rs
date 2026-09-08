@@ -4909,7 +4909,11 @@ fn expand_body_expression(
             return raw.to_string();
         }
         *budget -= 1;
-        let invoked = if matches!(node.kind(), "identifier" | "type_identifier") {
+        // Object-like macros are preprocessing tokens even after . or ->.
+        let invoked = if matches!(
+            node.kind(),
+            "identifier" | "type_identifier" | "field_identifier"
+        ) {
             macros
                 .get(raw)
                 .filter(|m| m.params.is_none())
