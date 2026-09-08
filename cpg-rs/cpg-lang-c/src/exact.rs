@@ -109,6 +109,33 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                     struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
                 }
                 "type_definition" => {
+                    if let Some(aggregate) = typedef_aggregate(f) {
+                        let name = aggregate_name(aggregate, b);
+                        used_types.insert(name.clone());
+                        struct_decls.push((
+                            name.clone(),
+                            aggregate_code(aggregate, b),
+                            u.file.clone(),
+                        ));
+                        if aggregate.child_by_field_name("name").is_some() {
+                            for alias in typedef_declarators(f) {
+                                used_types.insert(typedef_alias_name(alias, b));
+                                let suffix = decl_suffix(alias, b);
+                                let prefix = if array_dimensions(alias).is_empty() {
+                                    ""
+                                } else {
+                                    "typedef"
+                                };
+                                used_types.insert(format!("{prefix}{name}{suffix}"));
+                                struct_decls.push((
+                                    aggregate_alias_full_name(aggregate, alias, b),
+                                    esc(text(f, b)),
+                                    u.file.clone(),
+                                ));
+                            }
+                        }
+                        continue;
+                    }
                     let aliases = typedef_declarators(f);
                     for alias in &aliases {
                         let tag = text(*alias, b).to_string();
@@ -387,6 +414,11 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             copying_macro_argument: false,
             macro_expansion_code: None,
             macro_expansion_root: None,
+            recovering_expression: false,
+            recovered_bindings: HashSet::new(),
+            recovery_candidates: HashMap::new(),
+            field_macro_codes: HashMap::new(),
+            field_macro_piece: None,
             expansion_control_kinds: &mut expansion_control_kinds,
             macro_method_files: &mut macro_method_files,
             used_macros: &mut used_macros,
@@ -413,6 +445,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         // Standalone dump per user method, plus one per struct <clinit>.
         for f in translation_unit_items(root, b) {
             ctx.macros = macro_states.get(&f.id()).cloned().unwrap_or_default();
+            let aggregate = typedef_aggregate(f).unwrap_or(f);
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(f, b) {
@@ -427,15 +460,14 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                         dumps.push((full, std::mem::take(&mut ctx.out)));
                     }
                 }
-                "struct_specifier" | "union_specifier" | "enum_specifier" if needs_clinit(f, b) => {
-                    let tag = f
-                        .child_by_field_name("name")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    let members = count_members(f);
+                "struct_specifier" | "union_specifier" | "enum_specifier" | "type_definition"
+                    if needs_clinit(aggregate, b) =>
+                {
+                    let tag = aggregate_name(aggregate, b);
+                    let members = count_members(aggregate);
                     let key = format!("{tag}.<clinit>:{tag}()");
                     ctx.begin_block(&key);
-                    ctx.emit_clinit(f, b, 0, members + 1);
+                    ctx.emit_clinit(aggregate, b, 0, members + 1);
                     ctx.edge("SOURCE_FILE", format!("M:{key}"), format!("F:{}", u.file));
                     dumps.push((key, std::mem::take(&mut ctx.out)));
                 }
@@ -475,6 +507,11 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         copying_macro_argument: false,
         macro_expansion_code: None,
         macro_expansion_root: None,
+        recovering_expression: false,
+        recovered_bindings: HashSet::new(),
+        recovery_candidates: HashMap::new(),
+        field_macro_codes: HashMap::new(),
+        field_macro_piece: None,
         expansion_control_kinds: &mut expansion_control_kinds,
         macro_method_files: &mut macro_method_files,
         used_macros: &mut used_macros,
@@ -584,8 +621,9 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             .and_then(|line| line.rsplit_once(" ORDER="))
             .and_then(|(_, order)| order.split_whitespace().next())
             .unwrap_or("1");
+        let name = tag.split("<duplicate>").next().unwrap_or(tag);
         tds.push((tag.clone(), format!(
-            "NODES|TYPE_DECL NAME={tag} FULL_NAME={tag} CODE={code} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME={file} ORDER={order}\n"
+            "NODES|TYPE_DECL NAME={name} FULL_NAME={tag} CODE={code} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME={file} ORDER={order}\n"
         )));
     }
     for (name, file) in &fn_decls {
@@ -854,6 +892,13 @@ struct Ctx<'a> {
     copying_macro_argument: bool,
     macro_expansion_code: Option<String>,
     macro_expansion_root: Option<usize>,
+    recovering_expression: bool,
+    recovered_bindings: HashSet<String>,
+    recovery_candidates: HashMap<usize, bool>,
+    /// Original source spelling for expressions introduced by a field-token macro.
+    field_macro_codes: HashMap<usize, String>,
+    /// First pure replacement expression can own the macro wrapper in CDT.
+    field_macro_piece: Option<(usize, String)>,
     expansion_control_kinds: &'a mut HashMap<String, String>,
     macro_method_files: &'a mut HashMap<String, String>,
     // used macros: full_name -> (name, directive, nparams, ret type)
@@ -935,6 +980,9 @@ impl Ctx<'_> {
         self.parent_stack.clear();
         self.sym_line.clear();
         self.param_in_line.clear();
+        self.recovering_expression = false;
+        self.recovered_bindings.clear();
+        self.recovery_candidates.clear();
     }
 
     fn at(&self, idx: usize) -> String {
@@ -1104,6 +1152,7 @@ impl Ctx<'_> {
     fn emit_method(&mut self, f: Node, b: &[u8], d: usize, active: bool) {
         self.macros = self.macro_states.get(&f.id()).cloned().unwrap_or_default();
         self.symbols.clear();
+        self.recovered_bindings.clear();
         self.symbol_call_types.clear();
         self.method_functions.clear();
         self.method_call_types.clear();
@@ -1415,6 +1464,52 @@ impl Ctx<'_> {
                 {
                     self.emit_type_decl(n, b, 1);
                 }
+                "type_definition" if typedef_aggregate(n).is_some() => {
+                    let aggregate = typedef_aggregate(n).unwrap();
+                    self.emit_type_decl(aggregate, b, 1);
+                    for alias in typedef_declarators(n) {
+                        let name = typedef_alias_name(alias, b);
+                        if aggregate.child_by_field_name("name").is_some() {
+                            self.line(
+                                1,
+                                "TYPE_DECL",
+                                P {
+                                    name: Some(name.clone()),
+                                    code: Some(esc(text(n, b))),
+                                    full: Some(aggregate_alias_full_name(aggregate, alias, b)),
+                                    order: Some(1),
+                                    ..Default::default()
+                                },
+                            );
+                        } else {
+                            let keyword = if !array_dimensions(alias).is_empty() {
+                                "typedef"
+                            } else if aggregate.kind() == "union_specifier" {
+                                "union"
+                            } else {
+                                "struct"
+                            };
+                            self.line(
+                                1,
+                                "LOCAL",
+                                P {
+                                    name: Some(name),
+                                    code: Some(format!(
+                                        "{} {}",
+                                        text(n, b)[..aggregate.end_byte() - n.start_byte()]
+                                            .split_whitespace()
+                                            .collect::<Vec<_>>()
+                                            .join(" "),
+                                        esc(text(alias, b))
+                                    )),
+                                    tfn: Some(format!("{keyword}{}", decl_suffix(alias, b))),
+                                    order: Some(1),
+                                    ..Default::default()
+                                },
+                            );
+                        }
+                    }
+                }
                 "function_definition" => {
                     self.emit_method(n, b, 1, active_methods.contains(&n.id()));
                 }
@@ -1422,6 +1517,7 @@ impl Ctx<'_> {
             }
         }
         self.symbols.clear();
+        self.recovered_bindings.clear();
         self.symbol_call_types.clear();
         self.method_functions.clear();
         self.method_call_types.clear();
@@ -1456,6 +1552,46 @@ impl Ctx<'_> {
                         },
                     );
                     slot += 1;
+                }
+                "type_definition" if typedef_aggregate(n).is_some() => {
+                    let aggregate = typedef_aggregate(n).unwrap();
+                    self.line(
+                        2,
+                        "TYPE_REF",
+                        P {
+                            code: Some(aggregate_code(aggregate, b)),
+                            tfn: Some(aggregate_name(aggregate, b)),
+                            order: Some(slot),
+                            ..Default::default()
+                        },
+                    );
+                    slot += 1;
+                    for alias in typedef_declarators(n) {
+                        let dimensions = array_dimensions(alias);
+                        if dimensions.is_empty() {
+                            continue;
+                        }
+                        let sizes: Vec<_> = dimensions.into_iter().flatten().collect();
+                        self.note_call("<operator>.arrayInitializer", sizes.len());
+                        self.line(
+                            2,
+                            "CALL",
+                            P {
+                                name: Some("<operator>.arrayInitializer".into()),
+                                code: Some(esc(text(alias, b))),
+                                tfn: Some("ANY".into()),
+                                mfn: Some("<operator>.arrayInitializer".into()),
+                                order: Some(slot),
+                                dispatch: Some("STATIC_DISPATCH".into()),
+                                ..Default::default()
+                            },
+                        );
+                        for (i, size) in sizes.into_iter().enumerate() {
+                            let index = (i + 1) as i64;
+                            self.emit_expr(size, b, 3, index, Some(index));
+                        }
+                        slot += 1;
+                    }
                 }
                 "type_definition" => {
                     // Each ordinary alias keeps the complete statement CODE.
@@ -1539,16 +1675,13 @@ impl Ctx<'_> {
     /// sized array, a `<clinit>` method follows the members to host the
     /// `<operator>.arrayInitializer` calls.
     fn emit_type_decl(&mut self, n: Node, b: &[u8], depth: usize) {
-        let name = n
-            .child_by_field_name("name")
-            .map(|x| text(x, b).to_string())
-            .unwrap_or_default();
+        let name = aggregate_name(n, b);
         self.line(
             depth,
             "TYPE_DECL",
             P {
                 name: Some(name.clone()),
-                code: Some(esc(text(n, b))),
+                code: Some(aggregate_code(n, b)),
                 full: Some(name.clone()),
                 order: Some(1),
                 ..Default::default()
@@ -1604,7 +1737,7 @@ impl Ctx<'_> {
                         P {
                             name: Some(mname),
                             code: Some(text(d, b).to_string()),
-                            tfn: Some(format!("{ty}{}", decl_suffix(d, b))),
+                            tfn: Some(format!("{ty}{}", member_decl_suffix(d, b, &self.macros))),
                             order: Some(order),
                             ..Default::default()
                         },
@@ -1623,10 +1756,7 @@ impl Ctx<'_> {
     /// `<operator>.arrayInitializer` call per sized array, two bare MODIFIERs,
     /// and a METHOD_RETURN typed as the struct.
     fn emit_clinit(&mut self, n: Node, b: &[u8], depth: usize, order: i64) {
-        let tag = n
-            .child_by_field_name("name")
-            .map(|x| text(x, b).to_string())
-            .unwrap_or_default();
+        let tag = aggregate_name(n, b);
         self.line(
             depth,
             "METHOD",
@@ -1716,8 +1846,9 @@ impl Ctx<'_> {
                 }
                 for d in named_children(f) {
                     if d.kind() == "array_declarator" {
-                        if let Some(sz) = d.child_by_field_name("size") {
-                            self.note_call("<operator>.arrayInitializer", 1);
+                        let sizes: Vec<_> = array_dimensions(d).into_iter().flatten().collect();
+                        if !sizes.is_empty() {
+                            self.note_call("<operator>.arrayInitializer", sizes.len());
                             self.line(
                                 depth + 2,
                                 "CALL",
@@ -1731,7 +1862,10 @@ impl Ctx<'_> {
                                     ..Default::default()
                                 },
                             );
-                            self.emit_expr(sz, b, depth + 3, 1, Some(1));
+                            for (i, size) in sizes.into_iter().enumerate() {
+                                let index = (i + 1) as i64;
+                                self.emit_expr(size, b, depth + 3, index, Some(index));
+                            }
                             co += 1;
                         }
                     }
@@ -1781,6 +1915,7 @@ impl Ctx<'_> {
         depth: usize,
         order: i64,
         arg: Option<i64>,
+        replacement_override: Option<&str>,
     ) {
         let (params, body, directive, defining_file) = {
             let m = &self.macros[name];
@@ -1792,7 +1927,9 @@ impl Ctx<'_> {
             )
         };
         let arg_texts: Vec<String> = arg_nodes.iter().map(|a| text(*a, b).to_string()).collect();
-        let replacement = substitute(&body, &params, &arg_texts);
+        let replacement = replacement_override
+            .map(str::to_string)
+            .unwrap_or_else(|| substitute(&body, &params, &arg_texts));
         let expansion = expand_body_expression(
             &replacement,
             &self.macros,
@@ -1861,6 +1998,10 @@ impl Ctx<'_> {
                     }
                     if self.globals.contains_key(raw) {
                         format!("<global> {raw}") == normalized
+                    } else if self.symbols.contains_key(raw)
+                        && self.recovered_bindings.contains(raw)
+                    {
+                        format!("<unknown> {raw}") == normalized
                     } else if self.symbols.contains_key(raw)
                         || self.enumerators.iter().any(|name| name == raw)
                     {
@@ -2042,11 +2183,121 @@ impl Ctx<'_> {
         collect_decl_names(body, b, &mut shadowed);
         let mut seen = Vec::new();
         self.walk_phantoms(body, b, &shadowed, &mut seen);
+        // VariableScopeManager prepends pending references. Its first resolved
+        // reference therefore determines each synthetic local's CODE and the
+        // reverse-last-use order of all synthetic locals.
+        let positions: HashMap<_, _> = seen
+            .into_iter()
+            .enumerate()
+            .map(|(i, name)| (name, i))
+            .collect();
+        self.phantoms
+            .sort_by_key(|phantom| std::cmp::Reverse(positions[&phantom.name]));
+    }
+
+    /// An unresolved token between string literals invalidates CDT's expanded
+    /// expression. Declaration initializers are recovered from their original
+    /// source without the preprocessor context; ordinary returns stay UNKNOWN.
+    fn needs_macro_recovery(&mut self, node: Node, bytes: &[u8]) -> bool {
+        if self.macros.is_empty() || self.macro_expansion_code.is_some() {
+            return false;
+        }
+        if let Some(&recovery) = self.recovery_candidates.get(&node.id()) {
+            return recovery;
+        }
+        let mut pending = vec![node];
+        let mut has_macro = false;
+        while let Some(n) = pending.pop() {
+            if matches!(n.kind(), "identifier" | "field_identifier")
+                && self.macros.contains_key(text(n, bytes))
+            {
+                has_macro = true;
+                break;
+            }
+            pending.extend(named_children(n));
+        }
+        let recovery = if has_macro {
+            let expanded = expand_body_expression(
+                text(node, bytes),
+                &self.macros,
+                &mut HashSet::new(),
+                &mut 65_536,
+            );
+            let source = format!("void __recovery() {{ {expanded}; }}");
+            let mut parser = Parser::new();
+            parser
+                .set_language(&tree_sitter_c::LANGUAGE.into())
+                .unwrap();
+            let tree = parser.parse(&source, None).unwrap();
+            let mut pending = vec![tree.root_node()];
+            let mut invalid = false;
+            while let Some(n) = pending.pop() {
+                if n.kind() == "concatenated_string"
+                    && named_children(n).iter().any(|c| c.kind() == "identifier")
+                {
+                    // CDT recovers an enclosing call as a failed expression.
+                    // A bare string initializer has a different token-level
+                    // recovery shape, outside this path.
+                    let mut parent = n.parent();
+                    while let Some(ancestor) = parent {
+                        if ancestor.kind() == "argument_list" {
+                            invalid = true;
+                            break;
+                        }
+                        parent = ancestor.parent();
+                    }
+                    if invalid {
+                        break;
+                    }
+                }
+                pending.extend(named_children(n));
+            }
+            invalid
+        } else {
+            false
+        };
+        self.recovery_candidates.insert(node.id(), recovery);
+        recovery
+    }
+
+    fn declaration_needs_macro_recovery(&mut self, node: Node, bytes: &[u8]) -> bool {
+        // A failed for initializer is recovered as statement fragments by CDT,
+        // rather than the original declaration used for block declarations.
+        !node
+            .parent()
+            .is_some_and(|parent| parent.kind() == "for_statement")
+            && named_children(node).into_iter().any(|declarator| {
+                declarator
+                    .child_by_field_name("value")
+                    .is_some_and(|value| self.needs_macro_recovery(value, bytes))
+            })
     }
 
     fn walk_phantoms(&mut self, body: Node, b: &[u8], shadowed: &[String], seen: &mut Vec<String>) {
         let mut stack = vec![body];
         while let Some(n) = stack.pop() {
+            if n.kind() == "declaration" && self.declaration_needs_macro_recovery(n, b) {
+                let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
+                let recovering = std::mem::replace(&mut self.recovering_expression, true);
+                self.walk_phantoms(n, b, shadowed, seen);
+                self.recovering_expression = recovering;
+                self.macros = macros;
+                continue;
+            }
+            if matches!(n.kind(), "return_statement" | "expression_statement")
+                && self.needs_macro_recovery(n, b)
+            {
+                continue;
+            }
+            if n.parent().is_some_and(|parent| {
+                matches!(
+                    parent.kind(),
+                    "if_statement" | "while_statement" | "do_statement"
+                ) && parent.child_by_field_name("condition") == Some(n)
+            }) && self.needs_macro_recovery(n, b)
+            {
+                continue;
+            }
             let invocation = if n.kind() == "identifier" {
                 self.macros
                     .get(text(n, b))
@@ -2068,6 +2319,23 @@ impl Ctx<'_> {
                                     .map(|arg| text(arg, b).to_string())
                                     .collect(),
                             )
+                        })
+                })
+            } else if n.kind() == "field_expression" {
+                n.child_by_field_name("field").and_then(|field| {
+                    let name = text(field, b);
+                    self.macros
+                        .get(name)
+                        .filter(|m| m.params.is_none())
+                        .map(|m| {
+                            // Preserve the receiver so member names are not mistaken
+                            // for globals while collecting introduced index operands.
+                            let raw = text(n, b);
+                            let start = field.start_byte() - n.start_byte();
+                            let end = field.end_byte() - n.start_byte();
+                            let mut definition = m.clone();
+                            definition.body = format!("{}{}{}", &raw[..start], m.body, &raw[end..]);
+                            (name.to_string(), definition, Vec::new())
                         })
                 })
             } else {
@@ -2114,11 +2382,44 @@ impl Ctx<'_> {
                         parent.kind() == "call_expression"
                             && parent.child_by_field_name("function") == Some(n)
                     });
-                    if !shadowed.contains(&name) && !seen.contains(&name) {
+                    let variable_reference = self.globals.contains_key(&name)
+                        || self.enumerators.contains(&name)
+                        || (!self.macros.contains_key(&name)
+                            && (self.recovering_expression
+                                || (!self.functions.contains_key(&name)
+                                    && !self.method_functions.contains_key(&name)))
+                            && !direct_callee);
+                    if !shadowed.contains(&name) && variable_reference {
+                        if let Some(position) = seen.iter().position(|prior| prior == &name) {
+                            seen.remove(position);
+                            seen.push(name.clone());
+                            if self.globals.contains_key(&name) {
+                                if let Some(phantom) =
+                                    self.phantoms.iter_mut().find(|p| p.name == name)
+                                {
+                                    phantom.code = format!(
+                                        "{} {name}",
+                                        if self.recovering_expression {
+                                            "<unknown>"
+                                        } else {
+                                            "<global>"
+                                        }
+                                    );
+                                }
+                            }
+                            continue;
+                        }
                         if let Some(ty) = self.globals.get(&name) {
                             seen.push(name.clone());
                             self.phantoms.push(Phantom {
-                                code: format!("<global> {name}"),
+                                code: format!(
+                                    "{} {name}",
+                                    if self.recovering_expression {
+                                        "<unknown>"
+                                    } else {
+                                        "<global>"
+                                    }
+                                ),
                                 ty: ty.clone(),
                                 name,
                             });
@@ -2132,8 +2433,9 @@ impl Ctx<'_> {
                                 name,
                             });
                         } else if !self.macros.contains_key(&name)
-                            && !self.functions.contains_key(&name)
-                            && !self.method_functions.contains_key(&name)
+                            && (self.recovering_expression
+                                || (!self.functions.contains_key(&name)
+                                    && !self.method_functions.contains_key(&name)))
                             && !direct_callee
                         {
                             // Fully unresolved identifier: phantom LOCAL with
@@ -2148,7 +2450,10 @@ impl Ctx<'_> {
                     }
                 }
                 "null" => {
-                    if !seen.contains(&"NULL".to_string()) {
+                    if let Some(position) = seen.iter().position(|name| name == "NULL") {
+                        seen.remove(position);
+                        seen.push("NULL".into());
+                    } else {
                         seen.push("NULL".into());
                         self.phantoms.push(Phantom {
                             name: "NULL".into(),
@@ -2159,14 +2464,18 @@ impl Ctx<'_> {
                 }
                 "sizeof_expression" => {
                     if let Some(t) = n.child_by_field_name("type") {
-                        let ts = text(t, b).to_string();
-                        if !seen.contains(&ts) {
-                            seen.push(ts.clone());
-                            self.phantoms.push(Phantom {
-                                name: ts.clone(),
-                                code: ts.clone(),
-                                ty: ts,
-                            });
+                        let phantom = sizeof_type_identifier(t, b);
+                        if let Some(position) = seen.iter().position(|name| name == &phantom.name) {
+                            seen.remove(position);
+                            seen.push(phantom.name.clone());
+                            if let Some(previous) =
+                                self.phantoms.iter_mut().find(|p| p.name == phantom.name)
+                            {
+                                *previous = phantom;
+                            }
+                        } else {
+                            seen.push(phantom.name.clone());
+                            self.phantoms.push(phantom);
                         }
                     }
                 }
@@ -2230,6 +2539,7 @@ impl Ctx<'_> {
 
     fn emit_block_contents(&mut self, body: Node, b: &[u8], depth: usize) {
         let outer_symbols = self.symbols.clone();
+        let outer_recovered = self.recovered_bindings.clone();
         let outer_symbol_calls = self.symbol_call_types.clone();
         let outer_functions = self.method_functions.clone();
         let outer_call_types = self.method_call_types.clone();
@@ -2252,6 +2562,7 @@ impl Ctx<'_> {
             self.emit_stmt(s, b, &mut so, depth);
         }
         self.symbols = outer_symbols;
+        self.recovered_bindings = outer_recovered;
         self.symbol_call_types = outer_symbol_calls;
         self.method_functions = outer_functions;
         self.method_call_types = outer_call_types;
@@ -2260,6 +2571,22 @@ impl Ctx<'_> {
 
     /// A block-level statement. `order` is the running 1-based child position.
     fn emit_stmt(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
+        if n.kind() == "return_statement" && self.needs_macro_recovery(n, b) {
+            self.line(
+                depth,
+                "UNKNOWN",
+                P {
+                    code: Some(esc(text(n, b))),
+                    order: Some(*order),
+                    ..Default::default()
+                },
+            );
+            *order += 1;
+            return;
+        }
+        if n.kind() == "expression_statement" && self.needs_macro_recovery(n, b) {
+            return;
+        }
         // Expanded controls can carry the invocation as CODE (notably a
         // do-while). Preserve their parsed kind independently for CFG lowering.
         if self.macro_expansion_code.is_some()
@@ -2624,6 +2951,7 @@ impl Ctx<'_> {
     /// update, and body carry none).
     fn emit_for(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
         let outer_symbols = self.symbols.clone();
+        let outer_recovered = self.recovered_bindings.clone();
         let outer_symbol_calls = self.symbol_call_types.clone();
         let outer_functions = self.method_functions.clone();
         let outer_call_types = self.method_call_types.clone();
@@ -2710,6 +3038,7 @@ impl Ctx<'_> {
             self.emit_loop_body(body, b, depth + 1, co, cs, "FOR_BODY");
         }
         self.symbols = outer_symbols;
+        self.recovered_bindings = outer_recovered;
         self.symbol_call_types = outer_symbol_calls;
         self.method_functions = outer_functions;
         self.method_call_types = outer_call_types;
@@ -2744,15 +3073,17 @@ impl Ctx<'_> {
     fn emit_condition(&mut self, expression: Node, b: &[u8], depth: usize, order: i64) {
         let identifier = unwrap_paren(expression);
         let name = text(identifier, b);
-        if identifier.kind() != "identifier" || self.macros.contains_key(name) {
+        let recovery = self.needs_macro_recovery(expression, b);
+        if !recovery && (identifier.kind() != "identifier" || self.macros.contains_key(name)) {
             self.emit_expr(expression, b, depth, order, None);
             return;
         }
-        let pointer = self
-            .symbols
-            .get(name)
-            .or_else(|| self.globals.get(name))
-            .is_some_and(|ty| ty.ends_with('*'));
+        let pointer = !recovery
+            && self
+                .symbols
+                .get(name)
+                .or_else(|| self.globals.get(name))
+                .is_some_and(|ty| ty.ends_with('*'));
         let zero = if pointer { "NULL" } else { "0" };
         self.types.insert("int".into());
         self.note_call("<operator>.notEquals", 2);
@@ -2769,7 +3100,20 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
-        self.emit_expr(identifier, b, depth + 1, 1, Some(1));
+        if recovery {
+            self.line(
+                depth + 1,
+                "UNKNOWN",
+                P {
+                    code: Some(esc(text(expression, b))),
+                    order: Some(1),
+                    arg: Some(1),
+                    ..Default::default()
+                },
+            );
+        } else {
+            self.emit_expr(identifier, b, depth + 1, 1, Some(1));
+        }
         self.line(
             depth + 1,
             "LITERAL",
@@ -2848,6 +3192,7 @@ impl Ctx<'_> {
             self.method_call_types.remove(&name);
             self.symbol_call_types.remove(&name);
             self.symbols.insert(name.clone(), full_ty.clone());
+            self.recovered_bindings.remove(&name);
             let lo = *order;
             *order += 1;
             self.line(
@@ -3039,6 +3384,9 @@ impl Ctx<'_> {
                 }
             }
         }
+        // CDT recovers the whole declaration, including valid sibling
+        // initializers, without macro expansion or expression name resolution.
+        let recovery = self.declaration_needs_macro_recovery(n, b);
         // Pass 3: explicit initializers follow every declarator's allocation.
         for it in items {
             if let Some(v) = it.init {
@@ -3084,14 +3432,160 @@ impl Ctx<'_> {
                         ..Default::default()
                     },
                 );
-                self.emit_expr(v, b, depth + 1, 2, Some(2));
+                if recovery {
+                    let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
+                    let recovering = std::mem::replace(&mut self.recovering_expression, true);
+                    self.emit_expr(v, b, depth + 1, 2, Some(2));
+                    self.recovering_expression = recovering;
+                    self.macros = macros;
+                    self.recovered_bindings.insert(it.name.clone());
+                } else {
+                    self.emit_expr(v, b, depth + 1, 2, Some(2));
+                }
             }
         }
         (self.line_no > initializer).then_some(initializer)
     }
 
+    /// A field-token replacement changes the expression shape. CDT attributes
+    /// generated access operators to the original access (p->Len), while field
+    /// identifiers use expanded names. A pure replacement subexpression can own
+    /// the INLINED wrapper instead of the whole access.
+    fn emit_direct_field_macro(
+        &mut self,
+        n: Node,
+        b: &[u8],
+        depth: usize,
+        order: i64,
+        arg: Option<i64>,
+    ) -> bool {
+        if self.field_macro_codes.contains_key(&n.id()) {
+            // This region was already rescanned with the disabled-macro set.
+            return false;
+        }
+        let Some(field) = n.child_by_field_name("field") else {
+            return false;
+        };
+        let name = text(field, b);
+        let Some(definition) = self.macros.get(name).filter(|m| m.params.is_none()) else {
+            return false;
+        };
+        let replacement = expand_body_expression(
+            &definition.body,
+            &self.macros,
+            &mut HashSet::from([name.to_string()]),
+            &mut 65_536,
+        );
+        if replacement == name {
+            return false;
+        }
+        let original = text(n, b);
+        let start = field.start_byte() - n.start_byte();
+        let end = field.end_byte() - n.start_byte();
+        let expression = format!("{}{}{}", &original[..start], replacement, &original[end..]);
+        let prefix = "void __m() { ";
+        let source = format!("{prefix}{expression}; }}");
+        let mut parser = Parser::new();
+        parser
+            .set_language(&tree_sitter_c::LANGUAGE.into())
+            .unwrap();
+        let tree = parser.parse(&source, None).unwrap();
+        if tree.root_node().has_error() {
+            return false;
+        }
+        let Some(root) = expansion_expr_node(tree.root_node()) else {
+            return false;
+        };
+        let mut codes = HashMap::new();
+        let mut piece = None;
+        let mut pending = vec![root];
+        while let Some(node) = pending.pop() {
+            if node.named_child_count() > 0 && node.end_byte() > prefix.len() + start {
+                codes.insert(node.id(), original.to_string());
+            }
+            if piece.is_none()
+                && node.start_byte() >= prefix.len() + start
+                && matches!(
+                    node.kind(),
+                    "identifier"
+                        | "number_literal"
+                        | "string_literal"
+                        | "char_literal"
+                        | "call_expression"
+                        | "binary_expression"
+                        | "unary_expression"
+                        | "pointer_expression"
+                        | "update_expression"
+                        | "cast_expression"
+                        | "subscript_expression"
+                        | "field_expression"
+                        | "conditional_expression"
+                        | "sizeof_expression"
+                )
+            {
+                piece = Some((node.id(), name.to_string()));
+            }
+            pending.extend(named_children(node).into_iter().rev());
+        }
+        let previous = std::mem::replace(&mut self.field_macro_codes, codes);
+        let previous_piece = std::mem::replace(&mut self.field_macro_piece, piece);
+        self.emit_expr(root, source.as_bytes(), depth, order, arg);
+        self.field_macro_codes = previous;
+        self.field_macro_piece = previous_piece;
+        true
+    }
+
+    // Macro expansion CODE uses CDT's rendered type descriptor, while type
+    // identity still comes from the original parsed cast (not its display text).
+    fn expression_code(&self, node: Node, bytes: &[u8]) -> String {
+        if let Some(code) = self.field_macro_codes.get(&node.id()) {
+            return esc(code);
+        }
+        if self.macro_expansion_code.is_none() {
+            return esc(text(node, bytes));
+        }
+        let mut pending = vec![node];
+        let mut replacements = Vec::new();
+        while let Some(current) = pending.pop() {
+            let descriptor = (current.kind() == "cast_expression")
+                .then(|| current.child_by_field_name("type"))
+                .flatten();
+            if let Some(desc) = descriptor {
+                replacements.push((desc.byte_range(), expanded_cast_descriptor(desc, bytes)));
+            }
+            // A descriptor is rendered as a whole. Its array bounds can contain
+            // casts of their own, whose byte ranges must not be replaced twice.
+            pending.extend(
+                named_children(current)
+                    .into_iter()
+                    .filter(|child| Some(*child) != descriptor),
+            );
+        }
+        replacements.sort_by_key(|(range, _)| std::cmp::Reverse(range.start));
+        let mut code = text(node, bytes).to_string();
+        for (range, replacement) in replacements {
+            code.replace_range(
+                range.start - node.start_byte()..range.end - node.start_byte(),
+                &replacement,
+            );
+        }
+        esc(&code)
+    }
+
     /// Emit an expression node with the given ORDER and optional ARGUMENT_INDEX.
     fn emit_expr(&mut self, n: Node, b: &[u8], depth: usize, order: i64, arg: Option<i64>) {
+        if self
+            .field_macro_piece
+            .as_ref()
+            .is_some_and(|(node, _)| *node == n.id())
+        {
+            let (_, name) = self.field_macro_piece.take().unwrap();
+            self.emit_macro_call(&name, &name, &[], n, b, depth, order, arg, Some(text(n, b)));
+            return;
+        }
+        if n.kind() == "field_expression" && self.emit_direct_field_macro(n, b, depth, order, arg) {
+            return;
+        }
         match n.kind() {
             "binary_expression" => {
                 let op = n.child(1).map(|o| text(o, b)).unwrap_or("?");
@@ -3102,7 +3596,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3132,7 +3626,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3157,7 +3651,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3189,7 +3683,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3209,7 +3703,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.conditional".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("<operator>.conditional".into()),
                         order: Some(order),
@@ -3258,7 +3752,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3290,7 +3784,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.indirectIndexAccess".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("<operator>.indirectIndexAccess".into()),
                         order: Some(order),
@@ -3315,13 +3809,13 @@ impl Ctx<'_> {
                 let argc = args.map(|a| named_children(a).len()).unwrap_or(0);
                 if self.macros.get(&name).is_some_and(|m| m.params.is_some()) {
                     let arg_nodes: Vec<Node> = args.map(|a| named_children(a)).unwrap_or_default();
-                    let code = esc(text(n, b));
-                    self.emit_macro_call(&name, &code, &arg_nodes, n, b, depth, order, arg);
+                    let code = self.expression_code(n, b);
+                    self.emit_macro_call(&name, &code, &arg_nodes, n, b, depth, order, arg, None);
                     return;
                 }
                 if callee.is_some_and(|callee| callee.kind() != "identifier")
-                    || self.symbols.contains_key(&name)
-                    || self.globals.contains_key(&name)
+                    || (!self.recovering_expression
+                        && (self.symbols.contains_key(&name) || self.globals.contains_key(&name)))
                 {
                     // Call through a pointer-valued symbol: <operator>.pointerCall,
                     // DYNAMIC_DISPATCH, receiver at ORDER=1 with no
@@ -3354,7 +3848,7 @@ impl Ctx<'_> {
                         "CALL",
                         P {
                             name: Some("<operator>.pointerCall".into()),
-                            code: Some(esc(text(n, b))),
+                            code: Some(self.expression_code(n, b)),
                             tfn: Some(ty),
                             mfn: Some("<operator>.pointerCall".into()),
                             order: Some(order),
@@ -3372,12 +3866,15 @@ impl Ctx<'_> {
                         }
                     }
                 } else {
-                    let ty = self
-                        .method_call_types
-                        .get(&name)
-                        .or_else(|| self.function_call_types.get(&name))
-                        .cloned()
-                        .unwrap_or("ANY".into());
+                    let ty = if self.recovering_expression {
+                        "ANY".into()
+                    } else {
+                        self.method_call_types
+                            .get(&name)
+                            .or_else(|| self.function_call_types.get(&name))
+                            .cloned()
+                            .unwrap_or("ANY".into())
+                    };
                     let method_full_name = self
                         .function_full_names
                         .get(&name)
@@ -3389,7 +3886,7 @@ impl Ctx<'_> {
                         "CALL",
                         P {
                             name: Some(name.clone()),
-                            code: Some(esc(text(n, b))),
+                            code: Some(self.expression_code(n, b)),
                             tfn: Some(ty),
                             mfn: Some(method_full_name),
                             order: Some(order),
@@ -3409,10 +3906,13 @@ impl Ctx<'_> {
             "identifier" => {
                 let name = text(n, b).to_string();
                 if self.macros.get(&name).is_some_and(|m| m.params.is_none()) {
-                    self.emit_macro_call(&name, &name, &[], n, b, depth, order, arg);
+                    self.emit_macro_call(&name, &name, &[], n, b, depth, order, arg, None);
                     return;
                 }
-                if !self.symbols.contains_key(&name) && !self.globals.contains_key(&name) {
+                if !self.recovering_expression
+                    && !self.symbols.contains_key(&name)
+                    && !self.globals.contains_key(&name)
+                {
                     if let Some(ret) = self
                         .method_functions
                         .get(&name)
@@ -3440,9 +3940,25 @@ impl Ctx<'_> {
                     }
                 }
                 let (code, ty) = if let Some(t) = self.symbols.get(&name) {
-                    (name.clone(), t.clone())
+                    let code =
+                        if self.recovering_expression || self.recovered_bindings.contains(&name) {
+                            format!("<unknown> {name}")
+                        } else {
+                            name.clone()
+                        };
+                    (code, t.clone())
                 } else if let Some(t) = self.globals.get(&name) {
-                    (format!("<global> {name}"), t.clone())
+                    (
+                        format!(
+                            "{} {name}",
+                            if self.recovering_expression {
+                                "<unknown>"
+                            } else {
+                                "<global>"
+                            }
+                        ),
+                        t.clone(),
+                    )
                 } else if self.enumerators.contains(&name) {
                     (name.clone(), "ANY".to_string())
                 } else {
@@ -3529,7 +4045,7 @@ impl Ctx<'_> {
                     depth,
                     "LITERAL",
                     P {
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("char*".into()),
                         order: Some(order),
                         arg,
@@ -3599,7 +4115,7 @@ impl Ctx<'_> {
                             "CALL",
                             P {
                                 name: Some("<operator>.assignment".into()),
-                                code: Some(esc(text(n, b))),
+                                code: Some(self.expression_code(n, b)),
                                 tfn: Some("void".into()),
                                 mfn: Some("<operator>.assignment".into()),
                                 order: Some(position),
@@ -3621,7 +4137,14 @@ impl Ctx<'_> {
                 let raw = desc.map(|t| text(t, b).to_string()).unwrap_or("ANY".into());
                 let ty = desc
                     .and_then(|t| t.child_by_field_name("type"))
-                    .map(|t| normalize_type(text(t, b)))
+                    .map(|t| {
+                        if self.macro_expansion_code.is_some() {
+                            primitive_type(text(t, b), TypeRole::Declaration)
+                                .unwrap_or_else(|| normalize_type(text(t, b)))
+                        } else {
+                            normalize_type(text(t, b))
+                        }
+                    })
                     .unwrap_or_else(|| normalize_type(&raw));
                 self.note_call("<operator>.cast", 2);
                 self.line(
@@ -3629,7 +4152,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.cast".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some(ty.clone()),
                         mfn: Some("<operator>.cast".into()),
                         order: Some(order),
@@ -3642,7 +4165,12 @@ impl Ctx<'_> {
                     depth + 1,
                     "TYPE_REF",
                     P {
-                        code: Some(esc(&raw)),
+                        code: Some(if self.macro_expansion_code.is_some() {
+                            desc.map(|desc| esc(&expanded_cast_descriptor(desc, b)))
+                                .unwrap_or_else(|| esc(&raw))
+                        } else {
+                            esc(&raw)
+                        }),
                         tfn: Some(ty),
                         order: Some(1),
                         arg: Some(1),
@@ -3662,7 +4190,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("offsetof".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("offsetof".into()),
                         order: Some(order),
@@ -3708,7 +4236,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.sizeOf".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("<operator>.sizeOf".into()),
                         order: Some(order),
@@ -3720,14 +4248,14 @@ impl Ctx<'_> {
                 if let Some(t) = n.child_by_field_name("type") {
                     // sizeof(T): the type name appears as an IDENTIFIER typed
                     // as itself (and spawns the ORDER=0 phantom LOCAL).
-                    let ts = text(t, b).to_string();
+                    let identifier = sizeof_type_identifier(t, b);
                     self.line(
                         depth + 1,
                         "IDENTIFIER",
                         P {
-                            name: Some(ts.clone()),
-                            code: Some(ts.clone()),
-                            tfn: Some(ts),
+                            name: Some(identifier.name),
+                            code: Some(identifier.code),
+                            tfn: Some(identifier.ty),
                             order: Some(1),
                             arg: Some(1),
                             ..Default::default()
@@ -3918,6 +4446,7 @@ fn body_macro_context<'tree>(
                         node.kind(),
                         "function_definition"
                             | "declaration"
+                            | "type_definition"
                             | "struct_specifier"
                             | "union_specifier"
                             | "enum_specifier"
@@ -4456,6 +4985,59 @@ fn decl_suffix(n: Node, b: &[u8]) -> String {
     parts.concat()
 }
 
+/// Array members use TypeNameProvider's nodeSignature dimension spelling:
+/// an entire macro invocation expands, while a surrounding source expression
+/// retains its spelling. cleanType then removes whitespace, including within
+/// comments. The macro snapshot belongs to the aggregate's source position.
+fn member_decl_suffix(n: Node, b: &[u8], macros: &HashMap<String, MacroDef>) -> String {
+    let mut parts = Vec::new();
+    let mut cur = n;
+    loop {
+        match cur.kind() {
+            "pointer_declarator" | "abstract_pointer_declarator" => parts.push("*".into()),
+            "array_declarator" | "abstract_array_declarator" => {
+                let size = cur
+                    .child_by_field_name("size")
+                    .map(|size| {
+                        let whole_macro = match size.kind() {
+                            "identifier" => macros
+                                .get(text(size, b))
+                                .is_some_and(|m| m.params.is_none()),
+                            "call_expression" => size
+                                .child_by_field_name("function")
+                                .and_then(|function| macros.get(text(function, b)))
+                                .is_some_and(|m| m.params.is_some()),
+                            _ => false,
+                        };
+                        let spelling = if whole_macro {
+                            expand_body_expression(
+                                text(size, b),
+                                macros,
+                                &mut HashSet::new(),
+                                &mut 65_536,
+                            )
+                        } else {
+                            text(size, b).to_string()
+                        };
+                        spelling
+                            .chars()
+                            .filter(|c| !c.is_whitespace())
+                            .collect::<String>()
+                    })
+                    .unwrap_or_default();
+                parts.push(format!("[{size}]"));
+            }
+            _ => break,
+        }
+        match cur.child_by_field_name("declarator") {
+            Some(child) => cur = child,
+            None => break,
+        }
+    }
+    parts.reverse();
+    parts.concat()
+}
+
 /// Object declarators use CDT's binding spelling; parameter/member renderers
 /// retain their distinct suffix ordering. A nested declarator contributes its
 /// pointer shape but not inner array dimensions (`*(*p[3])[2]` -> `*(*)[2]`).
@@ -4551,6 +5133,38 @@ enum TypeRole {
     Declaration,
     DefinitionReturn,
     Expression,
+}
+
+/// C2 AstForExpressionsCreator passes only sizeof's declaration specifier to
+/// astForIdentifier. Pointer, array and function declarators do not participate;
+/// named/tagged specifiers use a short NAME while primitive CODE keeps qualifiers.
+fn sizeof_type_identifier(descriptor: Node, bytes: &[u8]) -> Phantom {
+    let base = descriptor.child_by_field_name("type").unwrap_or(descriptor);
+    let specifier_end = descriptor
+        .child_by_field_name("declarator")
+        .map_or(descriptor.end_byte(), |declarator| declarator.start_byte());
+    let code = esc(
+        std::str::from_utf8(&bytes[descriptor.start_byte()..specifier_end])
+            .unwrap_or("")
+            .trim(),
+    );
+    let name = if matches!(
+        base.kind(),
+        "struct_specifier" | "union_specifier" | "enum_specifier"
+    ) {
+        base.child_by_field_name("name")
+            .map(|name| text(name, bytes).to_string())
+            .unwrap_or_else(|| code.clone())
+    } else if base.kind() == "type_identifier" {
+        text(base, bytes).to_string()
+    } else {
+        code.clone()
+    };
+    Phantom {
+        name,
+        code,
+        ty: declaration_type(descriptor, bytes, TypeRole::Declaration),
+    }
 }
 
 fn declaration_type(declaration: Node, b: &[u8], role: TypeRole) -> String {
@@ -4813,15 +5427,72 @@ fn flatten_comma<'t>(n: Node<'t>, out: &mut Vec<Node<'t>>) {
     }
 }
 
+// A typedef aggregate owns one body; its tag (or first anonymous alias)
+// names that body independently of the alias declarations which follow it.
+fn typedef_aggregate(node: Node) -> Option<Node> {
+    if node.kind() != "type_definition" {
+        return None;
+    }
+    node.child_by_field_name("type").filter(|n| {
+        matches!(n.kind(), "struct_specifier" | "union_specifier")
+            && n.child_by_field_name("body").is_some()
+    })
+}
+
+fn typedef_alias_name(node: Node, bytes: &[u8]) -> String {
+    if matches!(node.kind(), "identifier" | "type_identifier") {
+        text(node, bytes).to_string()
+    } else {
+        node.child_by_field_name("declarator")
+            .map(|child| typedef_alias_name(child, bytes))
+            .unwrap_or_default()
+    }
+}
+
+fn aggregate_name(node: Node, bytes: &[u8]) -> String {
+    node.child_by_field_name("name")
+        .map(|name| text(name, bytes).to_string())
+        .or_else(|| {
+            node.parent()
+                .filter(|parent| typedef_aggregate(*parent) == Some(node))
+                .and_then(|parent| typedef_declarators(parent).first().copied())
+                .map(|alias| typedef_alias_name(alias, bytes))
+        })
+        .unwrap_or_default()
+}
+
+// A named body and its same-spelled typedef alias are distinct TYPE_DECLs.
+// Joern's duplicate suffix belongs to the alias, while TYPE references retain
+// the original aggregate name.
+fn aggregate_alias_full_name(aggregate: Node, alias: Node, bytes: &[u8]) -> String {
+    let name = typedef_alias_name(alias, bytes);
+    if aggregate
+        .child_by_field_name("name")
+        .is_some_and(|tag| text(tag, bytes) == name)
+    {
+        format!("{name}<duplicate>0")
+    } else {
+        name
+    }
+}
+
+fn aggregate_code(node: Node, bytes: &[u8]) -> String {
+    let start = node
+        .parent()
+        .filter(|parent| typedef_aggregate(*parent) == Some(node))
+        .map_or(node.start_byte(), |parent| parent.start_byte());
+    esc(std::str::from_utf8(&bytes[start..node.end_byte()]).unwrap_or(""))
+}
+
 fn needs_clinit(n: Node, _b: &[u8]) -> bool {
     let Some(body) = n.child_by_field_name("body") else {
         return false;
     };
     named_children(body).iter().any(|f| {
         (f.kind() == "field_declaration"
-            && named_children(*f)
-                .iter()
-                .any(|d| d.kind() == "array_declarator" && d.child_by_field_name("size").is_some()))
+            && named_children(*f).iter().any(|d| {
+                d.kind() == "array_declarator" && array_dimensions(*d).iter().any(Option::is_some)
+            }))
             || (f.kind() == "enumerator" && f.child_by_field_name("value").is_some())
     })
 }
@@ -4889,6 +5560,290 @@ fn substitute(body: &str, params: &[String], args: &[String]) -> String {
     out
 }
 
+fn expanded_cast_descriptor(desc: Node, bytes: &[u8]) -> String {
+    fn declarator_code(node: Node, bytes: &[u8]) -> String {
+        let inner = node.child_by_field_name("declarator");
+        match node.kind() {
+            "abstract_pointer_declarator" => {
+                let end = inner.map_or(node.end_byte(), |n| n.start_byte());
+                let prefix = std::str::from_utf8(&bytes[node.start_byte()..end])
+                    .unwrap_or("")
+                    .trim();
+                let qualifiers = prefix.strip_prefix('*').unwrap_or(prefix).trim();
+                let nested = inner.map(|n| declarator_code(n, bytes)).unwrap_or_default();
+                ["*", qualifiers, nested.as_str()]
+                    .into_iter()
+                    .filter(|part| !part.is_empty())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            }
+            "abstract_array_declarator" => {
+                let nested = inner.map(|n| declarator_code(n, bytes)).unwrap_or_default();
+                if nested.starts_with('(') {
+                    format!("[] {nested}")
+                } else {
+                    format!("[]{nested}")
+                }
+            }
+            "abstract_parenthesized_declarator" => {
+                let nested = inner.or_else(|| named_children(node).into_iter().next());
+                nested.map_or_else(
+                    || text(node, bytes).to_string(),
+                    |n| format!("({})", declarator_code(n, bytes)),
+                )
+            }
+            _ => text(node, bytes).to_string(),
+        }
+    }
+    let Some(base) = desc.child_by_field_name("type") else {
+        return text(desc, bytes).to_string();
+    };
+    let raw = text(base, bytes);
+    let rendered = ["struct ", "union ", "enum "]
+        .into_iter()
+        .find_map(|prefix| raw.strip_prefix(prefix))
+        .unwrap_or(raw);
+    let rendered = if rendered == "unsigned long" {
+        "long unsigned"
+    } else {
+        rendered
+    };
+    let suffix = desc.child_by_field_name("declarator").map_or_else(
+        || {
+            std::str::from_utf8(&bytes[base.end_byte()..desc.end_byte()])
+                .unwrap_or("")
+                .trim()
+                .to_string()
+        },
+        |node| declarator_code(node, bytes),
+    );
+    [
+        std::str::from_utf8(&bytes[desc.start_byte()..base.start_byte()])
+            .unwrap_or("")
+            .trim(),
+        rendered,
+        suffix.as_str(),
+    ]
+    .into_iter()
+    .filter(|part| !part.is_empty())
+    .collect::<Vec<_>>()
+    .join(" ")
+}
+
+/// Expand known function macros using preprocessing-token parentheses. Strings
+/// and comments are opaque; ordinary calls and type spellings remain untouched.
+fn expand_function_macro_tokens(
+    source: &str,
+    macros: &HashMap<String, MacroDef>,
+    disabled: &mut HashSet<String>,
+    budget: &mut usize,
+) -> String {
+    // Consume the complete token even when its spelling is outside the ASCII
+    // macro-name registry. Otherwise an ASCII suffix of an extended identifier
+    // could be mistaken for a separate macro invocation.
+    fn identifier_unit(bytes: &[u8], start: usize, first: bool) -> usize {
+        let b = bytes[start];
+        if b.is_ascii_alphabetic()
+            || matches!(b, b'_' | b'$')
+            || !b.is_ascii()
+            || (!first && b.is_ascii_digit())
+        {
+            return 1;
+        }
+        if b == b'\\' {
+            let digits = match bytes.get(start + 1) {
+                Some(b'u') => 4,
+                Some(b'U') => 8,
+                _ => return 0,
+            };
+            if bytes
+                .get(start + 2..start + 2 + digits)
+                .is_some_and(|value| value.iter().all(u8::is_ascii_hexdigit))
+            {
+                return 2 + digits;
+            }
+        }
+        0
+    }
+    fn opaque_end(bytes: &[u8], start: usize) -> Option<usize> {
+        if bytes[start..].starts_with(b"/*") {
+            return Some(
+                bytes[start + 2..]
+                    .windows(2)
+                    .position(|w| w == b"*/")
+                    .map_or(bytes.len(), |end| start + end + 4),
+            );
+        }
+        if bytes[start..].starts_with(b"//") {
+            return Some(
+                bytes[start..]
+                    .iter()
+                    .position(|&b| b == b'\n')
+                    .map_or(bytes.len(), |end| start + end),
+            );
+        }
+        let quote = bytes[start];
+        if !matches!(quote, b'\'' | b'"') {
+            return None;
+        }
+        let mut i = start + 1;
+        while i < bytes.len() {
+            if bytes[i] == b'\\' {
+                i = (i + 2).min(bytes.len());
+            } else if bytes[i] == quote {
+                return Some(i + 1);
+            } else {
+                i += 1;
+            }
+        }
+        Some(i)
+    }
+    let bytes = source.as_bytes();
+    let mut result = String::new();
+    let mut copied = 0;
+    let mut i = 0;
+    while i < bytes.len() && *budget > 0 {
+        if let Some(end) = opaque_end(bytes, i) {
+            i = end;
+            continue;
+        }
+        if bytes[i].is_ascii_digit()
+            || (bytes[i] == b'.' && bytes.get(i + 1).is_some_and(u8::is_ascii_digit))
+        {
+            // A preprocessing number includes identifier suffixes and signs
+            // after e/E/p/P, even when the resulting C literal is invalid.
+            // Do not turn its suffix into a function-macro invocation.
+            i += 1;
+            while i < bytes.len() {
+                if matches!(bytes[i], b'+' | b'-')
+                    && matches!(bytes[i - 1], b'e' | b'E' | b'p' | b'P')
+                    || bytes[i] == b'.'
+                {
+                    i += 1;
+                } else {
+                    let next = identifier_unit(bytes, i, false);
+                    if next == 0 {
+                        break;
+                    }
+                    i += next;
+                }
+            }
+            continue;
+        }
+        let first = identifier_unit(bytes, i, true);
+        if first == 0 {
+            i += 1;
+            continue;
+        }
+        let start = i;
+        i += first;
+        while i < bytes.len() {
+            let next = identifier_unit(bytes, i, false);
+            if next == 0 {
+                break;
+            }
+            i += next;
+        }
+        let name = &source[start..i];
+        let Some(definition) = macros.get(name).filter(|m| m.params.is_some()) else {
+            continue;
+        };
+        if disabled.contains(name) || disabled.len() >= 256 {
+            continue;
+        }
+        let mut open = i;
+        loop {
+            while open < bytes.len() && bytes[open].is_ascii_whitespace() {
+                open += 1;
+            }
+            if open < bytes.len()
+                && (bytes[open..].starts_with(b"/*") || bytes[open..].starts_with(b"//"))
+            {
+                open = opaque_end(bytes, open).unwrap();
+            } else {
+                break;
+            }
+        }
+        if bytes.get(open) != Some(&b'(') {
+            continue;
+        }
+        let mut args = Vec::new();
+        let mut argument = open + 1;
+        let mut end = argument;
+        let mut nesting = 1;
+        while end < bytes.len() {
+            if let Some(next) = opaque_end(bytes, end) {
+                end = next;
+                continue;
+            }
+            match bytes[end] {
+                b'(' => nesting += 1,
+                b')' => {
+                    nesting -= 1;
+                    if nesting == 0 {
+                        break;
+                    }
+                }
+                b',' if nesting == 1 => {
+                    args.push(source[argument..end].trim().to_string());
+                    argument = end + 1;
+                }
+                _ => {}
+            }
+            end += 1;
+        }
+        if nesting != 0 {
+            continue;
+        }
+        if argument != end || !args.is_empty() {
+            args.push(source[argument..end].trim().to_string());
+        }
+        *budget -= 1;
+        disabled.insert(name.to_string());
+        let replaced = substitute(
+            &definition.body,
+            definition.params.as_deref().unwrap(),
+            &args,
+        );
+        let expanded = expand_body_expression(&replaced, macros, disabled, budget);
+        disabled.remove(name);
+        result.push_str(&source[copied..start]);
+        result.push_str(&expanded);
+        copied = end + 1;
+        i = copied;
+    }
+    result.push_str(&source[copied..]);
+    result
+}
+
+#[cfg(test)]
+mod macro_token_tests {
+    use super::*;
+
+    #[test]
+    fn function_macro_names_inside_preprocessing_numbers_remain_opaque() {
+        let macros = HashMap::from([(
+            "M".to_string(),
+            MacroDef {
+                params: Some(vec!["x".to_string()]),
+                body: "7".to_string(),
+                directive: "#define M(x) 7".to_string(),
+                file: "main.c".to_string(),
+            },
+        )]);
+        for source in ["1M(2)", "0xM(2)", "1e+M(2)", "0x1p-M(2)", ".1M(2)"] {
+            assert_eq!(
+                expand_function_macro_tokens(source, &macros, &mut HashSet::new(), &mut 65_536),
+                source,
+            );
+        }
+        assert_eq!(
+            expand_function_macro_tokens("1 + M(2)", &macros, &mut HashSet::new(), &mut 65_536),
+            "1 + 7",
+        );
+    }
+}
+
 /// Render CDT's expanded expression spelling. A shared work budget and
 /// disabled-macro set stop replacement cycles before the AST emitter runs.
 fn expand_body_expression(
@@ -4909,25 +5864,15 @@ fn expand_body_expression(
             return raw.to_string();
         }
         *budget -= 1;
-        let invoked = if matches!(node.kind(), "identifier" | "type_identifier") {
+        // Object-like macros are preprocessing tokens even after . or ->.
+        let invoked = if matches!(
+            node.kind(),
+            "identifier" | "type_identifier" | "field_identifier"
+        ) {
             macros
                 .get(raw)
                 .filter(|m| m.params.is_none())
                 .map(|m| (raw, m, Vec::new()))
-        } else if node.kind() == "call_expression" {
-            node.child_by_field_name("function").and_then(|function| {
-                let name = text(function, bytes);
-                macros.get(name).filter(|m| m.params.is_some()).map(|m| {
-                    let args = node
-                        .child_by_field_name("arguments")
-                        .map(named_children)
-                        .unwrap_or_default()
-                        .into_iter()
-                        .map(|a| text(a, bytes).to_string())
-                        .collect();
-                    (name, m, args)
-                })
-            })
         } else {
             None
         };
@@ -4977,7 +5922,10 @@ fn expand_body_expression(
                 let call = format!("{function}({args})");
                 // An object macro can supply the function macro name. Rescan
                 // that newly formed invocation with the same disabled set.
-                if disabled.len() < 256
+                if node
+                    .child_by_field_name("function")
+                    .is_some_and(|original| text(original, bytes) != function)
+                    && disabled.len() < 256
                     && !disabled.contains(&function)
                     && macros.get(&function).is_some_and(|m| m.params.is_some())
                 {
@@ -5004,6 +5952,10 @@ fn expand_body_expression(
             }
         }
     }
+    // A function macro accepts preprocessing tokens, including types that are
+    // not valid C call arguments. Expand those invocations before C parsing can
+    // recover them as casts or discard their arguments as ERROR nodes.
+    let source = expand_function_macro_tokens(source, macros, disabled, budget);
     let wrapped = format!("void __m() {{ {source}; }}");
     let mut parser = Parser::new();
     parser
